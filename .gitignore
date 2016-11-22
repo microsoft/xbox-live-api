@@ -1,0 +1,111 @@
+.gitconfig
+.git-credentials
+
+# Ignore OpenSSL and Boost build files for iOS
+
+.gitk
+.config/git/gitk
+
+**/.vs/
+
+Casablanca*/Build_iOS/OpenSSL-for-iPhone/
+Casablanca*/Build_iOS/boostoniphone/
+Casablanca*/Build_iOS/openssl/
+Casablanca*/Build_iOS/boost.framework/
+Casablanca*/Build_iOS/build.ios/
+Casablanca*/Build_iOS/ios-cmake/
+
+#nuget packages
+External/Packages/*
+
+# Xcode
+
+xcuserdata
+
+# Mac
+
+.DS_Store
+
+# VS temp files
+**/*.sln.ide/
+**/*.opensdf
+**/*.sdf
+**/*.suo
+**/*.opendb
+**/*.VC.db
+**/*.user
+**/ipch/
+**/Generated Files/
+**/AppPackages/*
+**/*.orig
+**/pingme.txt
+**/*.cache
+**/dlldata.c
+**/*_i.c
+**/*_p.c
+**/*.metaproj
+**/*.metaproj.tmp
+**/*.opendb
+**/*.coveragexml
+
+**/Durango/
+**/XboxOne.x64/
+Samples/**/bin/
+Samples/**/Debug/
+Samples/**/Release/
+Samples/**/Profile/
+Samples/**/Lib/
+Samples/**/.workspace/
+Source/**/bin/
+Source/**/gen/
+Source/**/Debug/
+Source/**/Release/
+Archive/**/Debug/
+Archive/**/Release/
+Archive/**/Durango/
+Archive/**/Lib/
+Archive/**/*.winmd
+Build/**/Debug/
+Build/**/Release/
+External/**/lib/
+External/**/bin/
+External/**/Debug/
+External/**/Release/
+tests/**/bin/
+tests/**/Debug/
+tests/**/Release/
+Tools/**/bin/
+Tools/**/obj/
+**/*.classpath
+
+**/local.properties
+
+**/.workspace/
+
+#Doxygen temp files
+Docs/xblsdk_cpp/
+Docs/xblsdk_winrt/
+Docs/External/
+Docs/xim_cpp/
+
+# Unit Test
+FakesAssemblies/
+TestResults/
+
+# Build objects
+
+Casablanca/Intermediate/
+Obj/
+Binaries/
+Win32/
+Debug/
+Release/
+ARM/
+
+# Allow files in our /Build folder
+!/Build
+!/Casablanca
+
+!TAEF/**
+
+**/.vs/
