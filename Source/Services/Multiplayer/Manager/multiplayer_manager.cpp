@@ -221,7 +221,7 @@ multiplayer_manager::invite_party_to_game()
 }
 #endif
 
-#if !XSAPI_U
+#if !XSAPI_U && !XSAPI_SIDECAR
 xbox_live_result<void>
 multiplayer_manager::join_lobby(
     _In_ Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs^ eventArgs,

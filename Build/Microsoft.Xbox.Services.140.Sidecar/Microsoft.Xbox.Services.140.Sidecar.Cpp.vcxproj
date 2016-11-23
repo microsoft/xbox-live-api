@@ -62,30 +62,30 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XSAPI_SIDECAR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;XSAPI_SIDECAR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalOptions>/bigobj /Zm300 %(AdditionalOptions)</AdditionalOptions>
       <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories> 
-       $(ProjectDir);
-       $(ProjectDir)\..\..\Source\Services;
-       $(ProjectDir)\..\..\Source\Services\Common;
-       $(ProjectDir)\..\..\Source\Services\Common\Desktop;
-       $(ProjectDir)\..\..\Source\Services\Social;
-       $(ProjectDir)\..\..\Source\Services\Multiplayer;
-       $(ProjectDir)\..\..\Source\Services\Presence;
-       $(ProjectDir)\..\..\Source\Services\Misc;
-       $(ProjectDir)\..\..\Source\Services\Social\Manager;
-       $(ProjectDir)\..\..\Source\Services\RealTimeActivity;
-       $(ProjectDir)\..\..\Source\Shared;
-       $(ProjectDir)\..\..\Source\Shared\WinRT;
-       $(ProjectDir)\..\..\Include;
-       ..\..\External\cpprestsdk\Release\include;
-       $(ProjectDir)\..\..\Source\System\WinRT;
-       $(ProjectDir)\..\..\Source\System;
-       %(AdditionalIncludeDirectories)
+      <AdditionalIncludeDirectories>
+        $(ProjectDir);
+        $(ProjectDir)\..\..\Source\Services;
+        $(ProjectDir)\..\..\Source\Services\Common;
+        $(ProjectDir)\..\..\Source\Services\Common\Desktop;
+        $(ProjectDir)\..\..\Source\Services\Social;
+        $(ProjectDir)\..\..\Source\Services\Multiplayer;
+        $(ProjectDir)\..\..\Source\Services\Presence;
+        $(ProjectDir)\..\..\Source\Services\Misc;
+        $(ProjectDir)\..\..\Source\Services\Social\Manager;
+        $(ProjectDir)\..\..\Source\Services\RealTimeActivity;
+        $(ProjectDir)\..\..\Source\Shared;
+        $(ProjectDir)\..\..\Source\Shared\WinRT;
+        $(ProjectDir)\..\..\Include;
+        ..\..\Casablanca\Release\include;
+        $(ProjectDir)\..\..\Source\System\WinRT;
+        $(ProjectDir)\..\..\Source\System;
+        %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
       <CompileAsWinRT>true</CompileAsWinRT>
     </ClCompile>
@@ -299,7 +299,14 @@
     <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_blob_result.cpp" />
     <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_quota.cpp" />
     <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournaments_result.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_game.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_reference.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_stage.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_team.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_teams.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_team_result.cpp" />
     <ClCompile Include="..\..\Source\Shared\errors.cpp" />
     <ClCompile Include="..\..\Source\Shared\http_call_request_message.cpp" />
@@ -327,8 +334,9 @@
     <ClCompile Include="..\..\Source\Shared\xbox_live_services_settings.cpp" />
     <ClCompile Include="..\..\Source\Shared\xbox_system_factory.cpp" />
     <ClCompile Include="..\..\Source\System\auth_config.cpp" />
+    <ClCompile Include="..\..\Source\System\Sidecar\app_service_client.cpp" />
     <ClCompile Include="..\..\Source\System\Sidecar\app_service_messages.cpp" />
-    <ClCompile Include="..\..\Source\System\Sidecar\app_service_provider.cpp" />
+    <ClCompile Include="..\..\Source\System\Sidecar\user_impl_sidecar.cpp" />
     <ClCompile Include="..\..\Source\System\user_impl_idp.cpp" />
     <ClCompile Include="..\..\Source\System\xbox_live_mutex.cpp" />
   </ItemGroup>
@@ -399,13 +407,14 @@
     <ClInclude Include="..\..\Source\Shared\WinRT\Event_WinRT.h" />
     <ClInclude Include="..\..\Source\Shared\xbox_system_factory.h" />
     <ClInclude Include="..\..\Source\System\auth_config.h" />
+    <ClInclude Include="..\..\Source\System\Sidecar\app_service_client.h" />
     <ClInclude Include="..\..\Source\System\Sidecar\app_service_messages.h" />
-    <ClInclude Include="..\..\Source\System\Sidecar\app_service_provider.h" />
+    <ClInclude Include="..\..\Source\System\Sidecar\user_impl_sidecar.h" />
     <ClInclude Include="..\..\Source\System\ppltasks_extra.h" />
     <ClInclude Include="..\..\Source\System\system_internal.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.static.vcxproj">
+    <ProjectReference Include="..\..\Casablanca\Release\src\build\vs14.uwp\cpprestsdk140.uwp.static.vcxproj">
       <Project>{9AD285A2-301E-47A0-A299-14AD5D4F2758}</Project>
     </ProjectReference>
   </ItemGroup>
