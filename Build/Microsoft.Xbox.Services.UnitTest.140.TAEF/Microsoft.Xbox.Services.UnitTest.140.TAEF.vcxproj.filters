@@ -1,0 +1,204 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{d0c65fcc-4e8f-4806-a1f5-8c3bff619c60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Shared">
+      <UniqueIdentifier>{427f65f2-ea07-4751-8bfa-e3e8d7c2371b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Services">
+      <UniqueIdentifier>{c195dd2d-462b-4f92-99ec-7222b823e3e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Support">
+      <UniqueIdentifier>{7c1fb704-9ae9-44a6-99c2-60d96058f419}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Support\TAEF">
+      <UniqueIdentifier>{46185992-46f0-4ba5-a9a1-a9b38287821f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Support\Mocks">
+      <UniqueIdentifier>{08277cd5-2226-46d9-872a-a61b46f724fe}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Tests\UnitTests\Support\iso8601.cpp">
+      <Filter>Tests\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Support\unittest_output.cpp">
+      <Filter>Tests\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Support\TAEF\UnitTestBase.cpp">
+      <Filter>Tests\Support\TAEF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Support\TAEF\UnitTestBase_winrt.cpp">
+      <Filter>Tests\Support\TAEF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\AchievementsTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\ContextualSearchTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\EntertainmentProfileTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\ErrorTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\GameServerPlatformTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\LeaderboardTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\MarketplaceTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\MatchmakingTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\MultiplayerManagerTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\MultiplayerTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\PeoplehubTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\PresenceTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\PrivacyTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\ProfileTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\RealTimeActivityTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\ReputationTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\RtaTestHelper.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\SocialManagerTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\SocialTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\StatsTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\StringVerifyTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\TitleStorageTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Shared\EventTests_WinRT.cpp">
+      <Filter>Tests\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Shared\HttpCallResponseTests.cpp">
+      <Filter>Tests\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Shared\HttpCallSettingsTests.cpp">
+      <Filter>Tests\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Shared\HttpCallSettingsTests_WinRT.cpp">
+      <Filter>Tests\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Shared\LogTests.cpp">
+      <Filter>Tests\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Shared\ServiceCallLoggerTests.cpp">
+      <Filter>Tests\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Shared\WebsocketTests.cpp">
+      <Filter>Tests\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Shared\XboxLiveContextTests.cpp">
+      <Filter>Tests\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Mocks\MockHttpCall.cpp">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Mocks\MockHttpClient.cpp">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Mocks\MockLocalConfig.cpp">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Mocks\MockUser.cpp">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Mocks\MockXboxSystemFactory.cpp">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Mocks\StockMocks.cpp">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Mocks\MockSocialManager.cpp">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Mocks\MockMultiplayer.cpp">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Tests\UnitTests\Support\DefineTestMacros.h">
+      <Filter>Tests\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Support\iso8601.h">
+      <Filter>Tests\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Support\unittest_output.h">
+      <Filter>Tests\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Support\UnitTestIncludes.h">
+      <Filter>Tests\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Support\TAEF\UnitTestIncludes_TAEF.h">
+      <Filter>Tests\Support\TAEF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Support\TAEF\UnitTestBase.h">
+      <Filter>Tests\Support\TAEF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Support\TAEF\UnitTestBase_winrt.h">
+      <Filter>Tests\Support\TAEF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Tests\Services\RtaTestHelper.h">
+      <Filter>Tests\Services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Mocks\MockHttpCall.h">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Mocks\MockHttpClient.h">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Mocks\MockLocalConfig.h">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Mocks\MockUser.h">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Mocks\MockXboxSystemFactory.h">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Mocks\StockMocks.h">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Mocks\MockSocialManager.h">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Tests\Services\SocialManagerHelper.h">
+      <Filter>Tests\Services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Mocks\MockMultiplayer.h">
+      <Filter>Tests\Support\Mocks</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

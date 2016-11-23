@@ -1,0 +1,1393 @@
+{
+    "emptyJson" : {
+    },
+    "getSessionsWithUsersJson" : { 
+        "xuids": [
+            "12345",
+            "67890"
+        ]
+    },
+    "rtaConnectionIdJson" : { 
+        "ConnectionId": "d01a8c1b-2f83-4e03-9278-3048b480928f"
+    },
+    "serversJson" : { 
+        "servers": {
+            "server": 100
+        }
+    },
+    "defaultMultiplayerResponse" : {
+        "branch": "b65ae271-a117-4359-b963-27ff55d3ab92",
+        "changeNumber": 1,
+        "contractVersion": 105,
+        "correlationId": "06365b64-3067-8039-ecee-3608af3d02fc",
+        "startTime": "2013-02-01T00:00:00Z",
+        "nextTimer": "2013-02-01T00:00:00Z",
+        "initializing": {
+            "stage": "Measuring",
+            "stageStartTime": "2013-02-01T00:00:00Z",
+            "episode": 0
+        },
+        "hostCandidates": [
+            "ab90a362",
+            "99582e67"
+        ],
+        "membersInfo": {
+            "first": 0,
+            "next": 1,
+            "count": 2,
+            "accepted": 1,
+            "active": 1
+        },
+        "roleTypes": {
+            "lfg": {
+                "ownerManaged": true,
+                "mutableRoleSettings":["max", "target"],
+                "roles": {
+                    "friend":{
+                        "count": 2,
+                        "target": 3,
+                        "max": 5,
+                        "memberXuids" : ["1234", "5678"]
+                    },
+                    "other":{
+                        "count": 3,
+                        "target": 3,
+                        "max": 5,
+                        "memberXuids" : ["1234", "5678"]
+                    }
+                }
+            }
+        },
+        "constants": {
+            "system": {
+                "capabilities": {
+                    "clientMatchmaking": true,
+                    "connectivity": true,
+                    "suppressPresenceActivityCheck": true,
+                    "gameplay": true,
+                    "large": false,
+                    "userAuthorizationStyle": true,
+                    "crossplay": true,
+                    "searchable": true,
+                    "connectionRequiredForActiveMembers": true
+                },
+                "version": 1,
+                "maxMembersCount": 100,
+                "visibility": "Open",
+                "initiators": [
+                    "3456"
+                ],
+                "inviteProtocol": "party",
+                "reservedRemovalTimeout": 30000,
+                "inactiveRemovalTimeout": 7200000,
+                "readyRemovalTimeout": 180000,
+                "sessionEmptyTimeout": 0,
+                "metrics": {
+                    "latency": true,
+                    "bandwidthDown": true,
+                    "bandwidthUp": true,
+                    "custom": true
+                },
+                "memberInitialization": {
+                    "joinTimeout": 4000,
+                    "measurementTimeout": 5000,
+                    "evaluationTimeout": 5000,
+                    "externalEvaluation": false,
+                    "membersNeededToStart": 2
+                },
+                "peerToPeerRequirements": {
+                    "latencyMaximum": 250,
+                    "bandwidthMinimum": 10000
+                },
+                "peerToHostRequirements": {
+                    "latencyMaximum": 250,
+                    "bandwidthDownMinimum": 100000,
+                    "bandwidthUpMinimum": 1000,
+                    "hostSelectionMetric": "bandwidthUp"
+                },
+                "measurementServerAddresses": {
+                    "east.azure.com": {
+                        "secureDeviceAddress": "r5Y="
+                    },
+                    "west.azure.com": {
+                        "secureDeviceAddress": "rwY="
+                    }
+                }
+            },
+            "custom": {}
+        },
+        "properties": {
+            "system": {
+                "closed": true,
+                "keywords": [
+                    "hello"
+                ],
+                "turn": [
+                    0
+                ],
+                "owners": [0],
+                "host": "99e4c701",
+                "initializationSucceeded": true,
+                "joinRestriction": "None",
+                "readRestriction": "None",
+                "serverConnectionStringCandidates": [
+                    "west.azure.com",
+                    "east.azure.com"
+                ],
+                "matchmaking": {
+                    "clientResult": {
+                        "status": "Searching",
+                        "statusDetails": "Description",
+                        "typicalWait": 30,
+                        "targetSessionRef": {
+                            "scid": "1ECFDB89-36EB-4E59-8901-11F7393689AE",
+                            "templateName": "capture-the-flag",
+                            "name": "2D58F65F-0E3C-4F1F-8277-2BC9873FDB23"
+                        }
+                    },
+                    "targetSessionConstants": {},
+                    "serverConnectionString": "west.azure.com"
+                },
+                "matchmakingResubmit": true
+            },
+            "custom": {}
+        },
+        "servers": {
+            "matchmaking": {
+                "properties": {
+                    "system": {
+                        "status": "searching",
+                        "statusDetails": "test",
+                        "typicalWait": 10000,
+                        "targetSessionRef": {
+                            "scid": "1ECFDB89-36EB-4E59-8901-11F7393689AE",
+                            "templateName": "capture-the-flag",
+                            "name": "2D58F65F-0E3C-4F1F-8277-2BC9873FDB23"
+                        }
+                    }
+                }
+            }
+        },
+        "members": {
+            "0": {
+                "roles": {
+                    "lfg": "friend",
+                    "admin": "super"
+                },
+                "constants": {
+                    "system": {
+                        "index": 0,
+                        "xuid": "TestXboxUserId",
+                        "initialize": true,
+                        "matchmakingResult": {
+                            "serverMeasurements": {
+                                "east.azure.com": {
+                                    "latency": 233
+                                }
+                            }
+                        }
+                    },
+                    "custom": "Hello"
+                },
+                "properties": {
+                    "system": {
+                        "subscription": {
+                            "changeTypes": [
+                                "everything",
+                                "host"
+                            ]
+                        },
+                        "ready": true,
+                        "active": false,
+                        "secureDeviceAddress": "ryY=",
+                        "initializationGroup": [
+                            5
+                        ],
+                        "measurements": {
+                            "e6Kv5zY=": {
+                                "latency": 5953,
+                                "bandwidthDown": 19342,
+                                "bandwidthUp": 944,
+                                "custom": {}
+                            }
+                        },
+                        "serverMeasurements": {
+                            "east.azure.com": {
+                                "latency": 233
+                            }
+                        }
+                    },
+                    "custom": {}
+                },
+                "gamertag": "stacy",
+                "deviceToken": "9f4032ba7",
+                "nat": "Strict",
+                "reserved": true,
+                "activeTitleId": "8397267",
+                "joinTime": "2013-02-01T00:00:00Z",
+                "turn": true,
+                "initializationFailure": "Latency",
+                "initializationEpisode": 0,
+                "next": 1
+            },
+            "1": {
+                "constants": {
+                    "system": {
+                        "index": 1,
+                        "xuid": "1234",
+                        "initialize": true,
+                        "matchmakingResult": {
+                            "serverMeasurements": {
+                                "east.azure.com": {
+                                    "latency": 233
+                                }
+                            }
+                        }
+                    },
+                    "custom": {}
+                },
+                "properties": {
+                    "system": {
+                        "subscription": {
+                            "changeTypes": [
+                                "everything",
+                                "host"
+                            ]
+                        },
+                        "ready": true,
+                        "active": false,
+                        "secureDeviceAddress": "ryY=",
+                        "initializationGroup": [
+                            5
+                        ],
+                        "measurements": {
+                            "e6Kv5zY=": {
+                                "latency": 5953,
+                                "bandwidthDown": 19342,
+                                "bandwidthUp": 944,
+                                "custom": {}
+                            }
+                        },
+                        "serverMeasurements": {
+                            "east.azure.com": {
+                                "latency": 233
+                            }
+                        }
+                    },
+                    "custom": {}
+                },
+                "gamertag": "stacy",
+                "deviceToken": "9f4032ba7",
+                "nat": "Strict",
+                "reserved": true,
+                "activeTitleId": "8397267",
+                "joinTime": "2013-02-01T00:00:00Z",
+                "turn": true,
+                "initializationFailure": "Latency",
+                "initializationEpisode": 0,
+                "next": 4
+            }
+        }
+    },
+    "rtaSessionUpdateJson" : {
+        "ncid": "508e6b30-e694-42ad-a396-5ff48612463f",
+        "shoulderTaps": [
+            {
+                "timestamp": "2014-10-10T20:32:46.7127383Z",
+                "subscription": "c35aa3c2-0169-492b-8ae2-0939c7089f38",
+                "resourceType": "mpsd/session",
+                "resource": "03f90100-a67f-4125-84af-a59b4ac02697~gamesession10~fba5ff99-ceaf-440a-bb96-4512706f16a2",
+                "branch": "b65ae271-a117-4359-b963-27ff55d3ab92",
+                "changeNumber": 2
+            }
+        ]
+    },
+    "defaultJsonWrite" : {
+        "constants": {
+            "custom":{},
+            "system": {
+                "maxMembersCount": 10,
+                "version": 1,
+                "visibility":"private"
+            }
+        },
+        "members": {
+            "me": {
+                "roles": {
+                    "lfg": "friend",
+                    "admin": "super"
+                },
+                "constants": {
+                    "custom": "Hello",
+                    "system": {
+                        "xuid": "TestXboxUserId",
+                        "initialize": true
+                    }
+                },
+                "properties": {
+                    "system": {
+                        "active": true,
+                        "groups": [
+                            "team-buzz",
+                            "posse.99"
+                        ],
+                        "encounters": [
+                            "CoffeeShop-757093D8-E41F-49D0-BB13-17A49B20C6B9"
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "sessionCapabilitiesJson" : {
+        "constants": {
+            "custom":{},
+            "system": {
+                "capabilities": {
+                    "connectivity": true,
+                    "gameplay": true,
+                    "large": true,
+                    "suppressPresenceActivityCheck": true,
+                    "connectionRequiredForActiveMembers": true,
+                    "userAuthorizationStyle": true,
+                    "crossplay": true,
+                    "searchable": true,
+                    "hasOwners": true
+                },
+                "version": 1
+            }
+        }
+    },
+    "writeAddMemberJson" : {
+        "members": {
+            "reserve_0": {
+                "constants": {
+                    "system": {
+                        "xuid": "1234",
+                        "initialize": true
+                    },
+                    "custom": {
+                        "skill": 100
+                    }
+                }
+            },
+            "reserve_1": {
+                "constants": {
+                    "system": {
+                        "xuid": "4567"
+                    },
+                    "custom": {
+                        "down": true
+                    }
+                }
+            }
+        }
+    },
+    "writeCustomPropertyJson" : {
+        "properties": {
+            "custom": {
+                "PropA": "ValueA",
+                "PropB": {
+                    "ValueB": 5
+                },
+                "boolTrue": true,
+                "boolFalse": false,
+                "stringTrue": "true",
+                "stringFalse": "false",
+                "number42": 42,
+                "objectA": {
+                    "name": "A"
+                },
+                "arrayA": [
+                    1,
+                    2,
+                    3,
+                    4
+                ]
+            }
+        }
+    },
+    "deleteCustomPropertyJson" : {
+        "properties": {
+            "custom": {
+                "PropA": null,
+                "PropB": null,
+                "boolTrue": null,
+                "boolFalse": null,
+                "stringTrue": null,
+                "stringFalse": null,
+                "number42": null,
+                "objectA": null,
+                "arrayA": null
+            }
+        }
+    },
+    "memberStatusInactiveJson" : {
+        "members": {
+            "me": {
+                "constants": {
+                    "system": {
+                        "xuid": "TestXboxUserId"
+                    }
+                },
+                "properties": {
+                    "system": {
+                        "active": false,
+                        "ready": false
+                    }
+                }
+            }
+        }
+    },
+    "memberStatusActiveJson" : {
+        "members": {
+            "me": {
+                "constants": {
+                    "system": {
+                        "xuid": "TestXboxUserId"
+                    }
+                },
+                "properties": {
+                    "system": {
+                        "active": true
+                    }
+                }
+            }
+        }
+    },
+    "matchmakingPropertiesJson" : {
+        "properties": {
+            "system": {
+                "matchmaking": {
+                    "targetSessionConstants": {
+                        "foo": "test1002"
+                    }
+                }
+            }
+        }
+    },
+    "matchmakingSessionConstantsJson" : {
+        "properties": {
+            "system": {
+                "matchmaking": {
+                    "targetSessionConstants": {
+                        "foo": "test1002"
+                    }
+                }
+            }
+        }
+    },
+    "memberCustomJson" : {
+        "members": {
+            "me": {
+                "constants": {
+                    "system": {
+                        "initialize": false,
+                        "xuid": "TestXboxUserId"
+                    }
+                },
+                "properties": {
+                    "custom": {
+                        "arrayA": [
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "boolFalse": false,
+                        "boolTrue": true,
+                        "health": 4567,
+                        "number42": 42,
+                        "objectA": {
+                            "name": "A"
+                        },
+                        "stringFalse": "false",
+                        "stringTrue": "true"
+                    },
+                    "system": {
+                        "active": true
+                    }
+                }
+            }
+        }
+    },
+    "deleteMemberCustomJson" : {
+        "members": {
+            "me": {
+                "constants": {
+                    "system": {
+                        "initialize": false,
+                        "xuid": "TestXboxUserId"
+                    }
+                },
+                "properties": {
+                    "custom": {
+                        "arrayA": null,
+                        "boolFalse": null,
+                        "boolTrue": null,
+                        "health": null,
+                        "number42": null,
+                        "objectA": null,
+                        "stringFalse": null,
+                        "stringTrue": null
+                    },
+                    "system": {
+                        "active": true
+                    }
+                }
+            }
+        }
+    },
+    "leaveJson" : {
+        "members": {
+            "me": null
+        }
+    },
+    "secureDeviceJson" : {
+        "members": {
+            "me": {
+                "constants": {
+                    "system": {
+                        "xuid": "TestXboxUserId",
+                        "initialize": false
+                    }
+                },
+                "properties": {
+                    "system": {
+                        "active": true,
+                        "secureDeviceAddress": "1234"
+                    }
+                }
+            }
+        }
+    },
+    "turnJson" : {
+        "properties": {
+            "system": {
+                "turn": [
+                    0
+                ]
+            }
+        }
+    },
+    "keywordsJson" : {
+        "properties": {
+            "system": {
+                "keywords": [
+                    "apple"
+                ]
+            }
+        }
+    },
+    "joinRestrictionJson" : {
+        "properties": {
+            "system": {
+                "joinRestriction": "followed"
+            }
+        }
+    },
+    "readRestrictionJson" : {
+        "properties": {
+            "system": {
+                "readRestriction": "followed"
+            }
+        }
+    },
+    "timeoutsJson" : {
+        "constants": {
+            "custom":{},
+            "system": {
+                "inactiveRemovalTimeout": 3002000,
+                "readyRemovalTimeout": 3003000,
+                "reservedRemovalTimeout": 3001000,
+                "sessionEmptyTimeout": 3004000,
+                "version": 1
+            }
+        }
+    },
+    "arbitrationTimeoutsJson" : {
+        "constants": {
+            "custom":{},
+            "system": {
+                "arbitration": {
+                    "arbitrationTimeout": 3001000,
+                    "forfeitTimeout": 3002000
+                },
+                "version": 1
+            }
+        }
+    },
+    "qosMetricsJson" : {
+        "constants": {
+            "custom":{},
+            "system": {
+                "metrics": {
+                    "latency": true,
+                    "bandwidthDown": true,
+                    "bandwidthUp": true,
+                    "custom": true
+                },
+                "version": 1
+            }
+        }
+    },
+    "measurementServerAddressJson" : {
+        "constants": {
+            "custom":{},
+            "system": {
+                "measurementServerAddresses": {
+                    "test1_target": {
+                        "secureDeviceAddress": "test1_sda"
+                    },
+                    "test2_target": {
+                        "secureDeviceAddress": "test2_sda"
+                    }
+                },
+                "version": 1
+            }
+        }
+    },
+    "managedInitializationJson" : {
+        "constants": {
+            "custom":{},
+            "system": {
+                "memberInitialization": {
+                    "joinTimeout": 4001000,
+                    "measurementTimeout": 4002000,
+                    "evaluationTimeout": 4003000,
+                    "externalEvaluation": true,
+                    "membersNeededToStart": 4004
+                },
+                "version": 1
+            }
+        }
+    },
+    "memberInitializationJson" : {
+        "constants": {
+            "custom":{},
+            "system": {
+                "memberInitialization": {
+                    "joinTimeout": 4001000,
+                    "measurementTimeout": 4002000,
+                    "evaluationTimeout": 4003000,
+                    "externalEvaluation": true,
+                    "membersNeededToStart": 4004
+                },
+                "version": 1
+            }
+        }
+    },
+    "peerToPeerJson" : {
+        "constants": {
+            "custom":{},
+            "system": {
+                "peerToPeerRequirements": {
+                    "latencyMaximum": 5001,
+                    "bandwidthMinimum": 5002
+                },
+                "version": 1
+            }
+        }
+    },
+    "peerToHostJson" : {
+        "constants": {
+            "custom":{},
+            "system": {
+                "peerToHostRequirements": {
+                    "latencyMaximum": 6001,
+                    "bandwidthDownMinimum": 6002,
+                    "bandwidthUpMinimum": 6003,
+                    "hostSelectionMetric": "bandwidth"
+                },
+                "version": 1
+            }
+        }
+    },
+    "initializationStatusJson" : {
+        "properties": {
+            "system": {
+                "initializationSucceeded": true
+            }
+        }
+    },
+    "hostDeviceTokenJson" : {
+        "properties": {
+            "system": {
+                "host": "1234"
+            }
+        }
+    },
+    "serverConnectionPathJson" : {
+        "properties": {
+            "system": {
+                "matchmaking": {
+                    "serverConnectionString": "8001"
+                }
+            }
+        }
+    },
+    "matchmakingResubmitJson" : {
+        "properties": {
+            "system": {
+                "matchmakingResubmit": true
+            }
+        }
+    },
+    "serverConnectionStringCandidatesJson" : {
+        "properties": {
+            "system": {
+                "serverConnectionStringCandidates": [
+                    "9001",
+                    "9002",
+                    "9003"
+                ]
+            }
+        }
+    },
+    "membersInGroupJson" : {
+        "members": {
+            "me": {
+                "constants": {
+                    "system": {
+                        "initialize": false,
+                        "xuid": "TestXboxUserId"
+                    }
+                },
+                "properties": {
+                    "system": {
+                        "active": true,
+                        "initializationGroup": [
+                            0
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "qosMeasurementsJson" : {
+        "members": {
+            "me": {
+                "constants": {
+                    "system": {
+                        "xuid": "TestXboxUserId"
+                    }
+                },
+                "properties": {
+                    "system": {
+                        "measurements": {
+                            "test1_deviceToken": {
+                                "bandwidthDown": 1002,
+                                "bandwidthUp": 1003,
+                                "custom": {
+                                    "foo": 1004
+                                },
+                                "latency": 1001
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "qosMeasurementsFromJsonJson" : {
+        "members": {
+            "me": {
+                "constants": {
+                    "system": {
+                        "initialize": false,
+                        "xuid": "TestXboxUserId"
+                    }
+                },
+                "properties": {
+                    "system": {
+                        "active": true,
+                        "serverMeasurements": {
+                            "measurement": 1004
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "closedJsonTrue" : {
+        "properties": {
+            "system": {
+                "closed": true
+            }
+        }
+    },
+    "closedJsonFalse" : {
+        "properties": {
+            "system": {
+                "closed": false
+            }
+        }
+    },
+    "activityJson" : {
+        "type": "activity",
+        "sessionRef": {
+            "scid": "MockScid",
+            "templateName": "MockSessionTemplateName",
+            "name": "XWIN_7ce12e85-594a-4b3b-9dc3-33b9a4ea57ce"
+        },
+        "version": 1
+    },
+    "transferHandleJson" : {
+        "type": "transfer",
+        "sessionRef": {
+            "scid": "MockScid",
+            "templateName": "MockSessionTemplateName",
+            "name": "XWIN_7ce12e85-594a-4b3b-9dc3-33b9a4ea57ce"
+        },
+        "originSessionRef": {
+            "scid": "MockScid",
+            "templateName": "samplelobbytemplate107",
+            "name": "bd6c41c3-01c3-468a-a3b5-3e0fe8133862"
+        },
+        "version": 1
+    },
+    "transferHandleResponseJson" : {
+        "type": "transfer",
+        "id": "81a3c56e-543c-44c2-ad53-c8a9088fbef8",
+        "sessionRef": {
+            "scid": "MockScid",
+            "templateName": "MockSessionTemplateName",
+            "name": "XWIN_7ce12e85-594a-4b3b-9dc3-33b9a4ea57ce"
+        },
+        "originSessionRef": {
+            "scid": "MockScid",
+            "templateName": "samplelobbytemplate107",
+            "name": "bd6c41c3-01c3-468a-a3b5-3e0fe8133862"
+        },
+        "version": 1
+    },
+    "searchHandleJson" : {
+        "type": "search",
+        "sessionRef": {
+            "scid": "MockScid",
+            "templateName": "GlobalLFGSessionTemplateName",
+            "name": "LFGSession"
+        },
+        "searchAttributes":
+        {    
+            "tags": [
+                "micsrequired",
+                "girlsonly"
+            ],
+            "strings":
+            {
+                "Class":"A"
+            },
+            "numbers":
+            {
+                "Skill_D":10.145,
+                "Skill_I":14
+            }
+        },
+        "version": 1
+    },
+    "searchHandlesRequestJson" : {
+        "type": "search",
+        "scid": "MockScid",
+        "templateName":"GlobalLFGTemplate",
+        "orderBy": "OrderBy asc",
+        "filter": "SearchQuery",
+        "global": true
+    },
+    "searchHandlesWithSocialGroupRequestJson" : {
+        "type": "search",
+        "scid": "MockScid",
+        "templateName":"GlobalLFGTemplate",
+        "orderBy": "OrderBy asc",
+        "filter": "SearchQuery",
+        "sessionMembers": {
+           "people": {
+              "moniker": "favorites",
+              "monikerXuid": "TestXboxUserId"
+           }
+        },
+        "global": true
+    },
+    "searchHandlesResponseJson" : {
+        "results": [
+            {
+                "type": "search",
+                "sessionRef": {
+                    "scid": "MockScid",
+                    "templateName": "GlobalLFGSessionTemplateName",
+                    "name": "LFGSession_A"
+                },
+                "searchAttributes":
+                {    
+                    "tags": [
+                            "micsrequired",
+                            "girlsonly"
+                    ],
+                    "strings":
+                    {
+                        "Class":"A"
+                    },
+                    "numbers":
+                    {
+                        "Skill_D":10.145,
+                        "Skill_I":14
+                    }
+                },
+                "version": 1,
+                "id": "7a4d0a99-4e23-4eba-9894-5173cf123fb4",
+                "createTime": "2013-02-01T00:00:00Z",
+                "relatedInfo": {
+                    "joinRestriction": "None",
+                    "closed": false,
+                    "maxMembersCount": 10,
+                    "membersCount": 1,
+                    "visibility": "open",
+                    "sessionOwners": ["xuid1", "xuid2"]
+                },
+                "roleInfo":{
+                    "roleTypes":{
+                        "lfg": {
+                            "roles": {
+                                "friend":{
+                                    "count": 2,
+                                    "max": 5,
+                                    "target": 3,
+                                    "memberXuids" : ["1234", "5678"]
+                                },
+                                "other":{
+                                    "count": 3,
+                                    "max": 5,
+                                    "target": 3,
+                                    "memberXuids" : ["1234", "5678"]
+                                }
+                            }
+                        },
+                        "squad": {
+                            "roles": {
+                                "friend":{
+                                    "count": 2,
+                                    "max": 5,
+                                    "target": 3,
+                                    "memberXuids" : ["1234", "5678"]
+                                },
+                                "other":{
+                                    "count": 3,
+                                    "max": 5,
+                                    "target": 3,
+                                    "memberXuids" : ["1234", "5678"]
+                                }
+                            }
+                        }
+                    }
+                 }
+            }
+        ]
+    },
+    "inviteRequestJson" : {
+        "type": "invite",
+        "sessionRef": {
+            "scid": "MockScid",
+            "templateName": "MockSessionTemplateName",
+            "name": "XWIN_7ce12e85-594a-4b3b-9dc3-33b9a4ea57ce"
+        },
+        "version": 1,
+        "invitedXuid": "5678",
+        "inviteAttributes": {
+            "titleId": "1018096776"
+        }
+    },
+    "inviteResponseJson" : {
+        "type": "invite",
+        "sessionRef": {
+            "scid": "MockScid",
+            "templateName": "MockSessionTemplateName",
+            "name": "XWIN_7ce12e85-594a-4b3b-9dc3-33b9a4ea57ce"
+        },
+        "version": 1,
+        "inviteAttributes": {
+            "titleId": "1018096776"
+        },
+        "expiration": "2014-08-28T23:15:34.8852308Z",
+        "id": "81a3c56e-543c-44c2-ad53-c8a9088fbef8",
+        "invitedXuid": "5678",
+        "senderXuid": "2814679796296491"
+    },
+    "activitiesForUserRequestJson" : {
+        "type": "activity",
+        "scid": "MockScid",
+        "owners": {
+            "xuids": [
+                "TestXboxUserId"
+            ]
+        }
+    },
+    "activitiesForUserResponseJson" : {
+        "results": [
+            {
+                "type": "activity",
+                "sessionRef": {
+                    "scid": "MockScid",
+                    "templateName": "MockSessionTemplateName",
+                    "name": "XWIN_7ce12e85-594a-4b3b-9dc3-33b9a4ea57ce"
+                },
+                "version": 1,
+                "titleId": "171127034",
+                "ownerXuid": "2814679796296491",
+                "id": "7a4d0a99-4e23-4eba-9894-5173cf123fb4",
+                "relatedInfo": {
+                    "joinRestriction": "None",
+                    "closed": false,
+                    "maxMembersCount": 10,
+                    "membersCount": 1,
+                    "visibility": "private"
+                }
+            }
+        ]
+    },
+    "activitiesForSocialGroupRequestJson" : {
+        "type": "activity",
+        "scid": "MockScid",
+        "owners": {
+            "people": {
+                "moniker": "friends",
+                "monikerXuid": "TestXboxUserId"
+            }
+        }
+    },
+    "activitiesForSocialGroupResponseJson" : {
+        "results": []
+    },
+    "setSessionChangeTypesJson" : {
+        "members": {
+            "me": {
+                "constants": {
+                    "system": {
+                        "xuid": "TestXboxUserId"
+                    }
+                },
+                "properties": {
+                    "system": {
+                        "subscription": {
+                            "changeTypes": [
+                                "host",
+                                "initialization",
+                                "matchmakingStatus",
+                                "membersList",
+                                "membersStatus",
+                                "joinability",
+                                "customProperty",
+                                "membersCustomProperty"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "largeMultiplayerResponse" : {
+        "membersInfo": {
+            "first": 0,
+            "next": 1,
+            "count": 2,
+            "accepted": 1,
+            "active": 1
+        },
+        "constants": {
+            "system": {
+                "capabilities": {
+                    "clientMatchmaking": true,
+                    "connectivity": true,
+                    "suppressPresenceActivityCheck": true,
+                    "gameplay": true,
+                    "large": true
+                }
+            },
+            "custom": {}
+        },
+        "properties": {
+            "system": {
+                "keywords": [
+                    "hello"
+                ],
+                "turn": [
+                    0
+                ],
+                "host": "99e4c701",
+                "initializationSucceeded": true,
+                "joinRestriction": "None",
+                "serverConnectionStringCandidates": [
+                    "west.azure.com",
+                    "east.azure.com"
+                ]
+            },
+            "custom": {}
+        },
+        "servers": {},
+        "members": {
+            "me": {
+                "constants": {
+                    "system": {
+                        "index": 0,
+                        "xuid": "TestXboxUserId",
+                        "initialize": true,
+                        "matchmakingResult": {
+                            "serverMeasurements": {
+                                "east.azure.com": {
+                                    "latency": 233
+                                }
+                            }
+                        }
+                    },
+                    "custom": {}
+                },
+                "properties": {
+                    "system": {
+                        "ready": true,
+                        "active": false,
+                        "secureDeviceAddress": "ryY=",
+                        "initializationGroup": [
+                            5
+                        ],
+                        "measurements": {
+                            "e6Kv5zY=": {
+                                "latency": 5953,
+                                "bandwidthDown": 19342,
+                                "bandwidthUp": 944,
+                                "custom": {}
+                            }
+                        },
+                        "serverMeasurements": {
+                            "east.azure.com": {
+                                "latency": 233
+                            }
+                        }
+                    },
+                    "custom": {}
+                },
+                "gamertag": "stacy",
+                "deviceToken": "9f4032ba7",
+                "nat": "Strict",
+                "reserved": true,
+                "activeTitleId": "8397267",
+                "joinTime": "2013-02-01T00:00:00Z",
+                "turn": true,
+                "initializationFailure": "Latency",
+                "initializationEpisode": 0,
+                "next": 4
+            },
+            "contractVersion": 105,
+            "branch": "334afeb9-dad2-4ee7-b786-1d9c6a816b4c",
+            "changeNumber": 1
+        }
+    },
+    "defaultMultiplayerStatesResponse" : {
+        "results": [
+            {
+                "xuid": "9876",
+                "startTime": "2013-02-01T00:00:00Z",
+                "sessionRef": {
+                    "scid": "foo",
+                    "templateName": "bar",
+                    "name": "session-seven"
+                },
+                "accepted": 4,
+                "status": "Active",
+                "visibility": "Open",
+                "joinRestriction": "Local",
+                "myTurn": true,
+                "keywords": [
+                    "one",
+                    "two"
+                ]
+            }
+        ]
+    },
+    "defaultTournamentSessionResponse" : {
+        "membersInfo": {
+            "first": 0,
+            "count": 1,
+            "accepted": 1,
+            "active": 1
+        },
+        "constants":{
+            "system":{
+                "capabilities":{
+                    "team":true
+                },
+                "arbitration":{
+                    "forfeitTimeout":100,
+                    "arbitrationTimeout":100
+                }
+            }
+        },
+        "properties":{
+            "system":{
+            }
+        },
+        "servers":{
+            "tournaments":{
+                "constants":{
+                    "system":{
+                        "tournamentRef":"TestTournaments~12345",
+                        "teams": {
+                            "team1": {
+                                "teamSessionRef": {
+                                    "name": "TestName",
+                                    "scid": "TestScid",
+                                    "templateName": "TournamentGameSessionTest"
+                                }
+                            },
+                            "team2": {
+                                "teamSessionRef": {
+                                    "name": "TestName",
+                                    "scid": "TestScid",
+                                    "templateName": "TournamentGameSessionTest"
+                                }
+                            }
+                        }
+                    }
+                },
+                "properties":{
+                    "system":{
+                        "registration":{
+                            "state":"registered",
+                            "reason":"placeholder"
+                        },
+                        "rendezvous":{
+                            "startTime":"2015-08-04T01:08:06.8687378Z",
+                            "gameSessionRef":{
+                                "scid":"foo",
+                                "templateName":"bar",
+                                "name":"session-seven"
+                            }
+                        },
+                        "lastGame":{
+                            "endTime":"2015-08-04T01:11:28.2767768Z",
+                            "result":{
+                                "state":"win",
+                                "source":"arbitration"
+                            }
+                        }
+                    }
+                }
+            },
+            "arbitration":{
+                "properties":{
+                    "system":{
+                        "startTime":100,
+                        "resultState":"partialresults",
+                        "resultConfidenceLevel":95,
+                        "resultSource":"adjusted",
+                        "results":{
+                            "team1":{
+                                "outcome":"rank",
+                                "ranking":3
+                                },
+                            "team2":{
+                                "outcome":"rank",
+                                "ranking":2
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "properties":{
+            "custom":{
+                "teamName":"HelloWorldTeam",
+                "teamColor":"blue"
+            }
+        },
+        "members":{
+            "0":{
+                "constants":{
+                    "system":{
+                        "team":"team1",
+                        "arbitrationStatus":"playing"
+                    }
+                },
+                "properties":{
+                    "system":{
+                        "registration":{
+                            "state":"registered",
+                            "reason":"placeholder"
+                        },
+                        "arbitration":{
+                            "results":{
+                                "team1":{
+                                    "outcome":"rank",
+                                    "ranking":3
+                                },
+                                "team2":{
+                                    "outcome":"rank",
+                                    "ranking":2
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "arbitrationResultJson" : {
+       "members":{
+          "me":{
+             "properties":{
+                "system":{
+                   "arbitration":{
+                      "results":{
+                         "team1":{
+                            "outcome":"loss"
+                         }
+                      }
+                   }
+                }
+             }
+          }
+       }
+    },
+    "arbitrationResultRankJson" : {
+        "members": {
+            "me": {
+                "properties": {
+                    "system": {
+                        "arbitration":{
+                            "results":{
+                                "team1":{
+                                    "outcome":"rank",
+                                    "ranking":3
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "roleTypesRequestJson" : {
+       "roleTypes": {
+            "lfg": {
+                "roles": {
+                    "friend":{
+                        "max": 5,
+                        "target": 3
+                    },
+                    "other":{
+                        "max": 5
+                    }
+                }
+            },
+            "squad": {
+                "roles": {
+                    "friend":{
+                        "max": 5,
+                        "target": 3
+                    },
+                    "other":{
+                        "max": 5
+                    }
+                }
+            }
+        }
+    }
+}

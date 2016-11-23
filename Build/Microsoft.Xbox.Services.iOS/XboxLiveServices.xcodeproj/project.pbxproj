@@ -1,0 +1,2046 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		251DBDD71CE6DE41003AF56B /* utils_locales_ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = 251DBDD61CE6DE41003AF56B /* utils_locales_ios.mm */; };
+		255A36C31CD8353B00D3AD8E /* find_match_completed_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36A61CD8353B00D3AD8E /* find_match_completed_event_args.cpp */; };
+		255A36C41CD8353B00D3AD8E /* host_changed_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36A71CD8353B00D3AD8E /* host_changed_event_args.cpp */; };
+		255A36C51CD8353B00D3AD8E /* join_lobby_completed_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36A81CD8353B00D3AD8E /* join_lobby_completed_event_args.cpp */; };
+		255A36C71CD8353B00D3AD8E /* member_joined_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36AA1CD8353B00D3AD8E /* member_joined_event_args.cpp */; };
+		255A36C81CD8353B00D3AD8E /* member_left_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36AB1CD8353B00D3AD8E /* member_left_event_args.cpp */; };
+		255A36C91CD8353B00D3AD8E /* member_property_changed_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36AC1CD8353B00D3AD8E /* member_property_changed_event_args.cpp */; };
+		255A36CA1CD8353B00D3AD8E /* multiplayer_client_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36AD1CD8353B00D3AD8E /* multiplayer_client_manager.cpp */; };
+		255A36CB1CD8353B00D3AD8E /* multiplayer_client_pending_reader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36AE1CD8353B00D3AD8E /* multiplayer_client_pending_reader.cpp */; };
+		255A36CC1CD8353B00D3AD8E /* multiplayer_client_pending_request.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36AF1CD8353B00D3AD8E /* multiplayer_client_pending_request.cpp */; };
+		255A36CD1CD8353B00D3AD8E /* multiplayer_event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36B01CD8353B00D3AD8E /* multiplayer_event.cpp */; };
+		255A36CE1CD8353B00D3AD8E /* multiplayer_game_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36B11CD8353B00D3AD8E /* multiplayer_game_client.cpp */; };
+		255A36CF1CD8353B00D3AD8E /* multiplayer_game_session.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36B21CD8353B00D3AD8E /* multiplayer_game_session.cpp */; };
+		255A36D01CD8353B00D3AD8E /* multiplayer_lobby_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36B31CD8353B00D3AD8E /* multiplayer_lobby_client.cpp */; };
+		255A36D11CD8353B00D3AD8E /* multiplayer_lobby_session.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36B41CD8353B00D3AD8E /* multiplayer_lobby_session.cpp */; };
+		255A36D21CD8353B00D3AD8E /* multiplayer_local_user_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36B51CD8353B00D3AD8E /* multiplayer_local_user_manager.cpp */; };
+		255A36D31CD8353B00D3AD8E /* multiplayer_local_user.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36B61CD8353B00D3AD8E /* multiplayer_local_user.cpp */; };
+		255A36D41CD8353B00D3AD8E /* multiplayer_manager_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36B81CD8353B00D3AD8E /* multiplayer_manager_utils.cpp */; };
+		255A36D51CD8353B00D3AD8E /* multiplayer_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36B91CD8353B00D3AD8E /* multiplayer_manager.cpp */; };
+		255A36D61CD8353B00D3AD8E /* multiplayer_member.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36BA1CD8353B00D3AD8E /* multiplayer_member.cpp */; };
+		255A36D71CD8353B00D3AD8E /* multiplayer_session_writer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36BB1CD8353B00D3AD8E /* multiplayer_session_writer.cpp */; };
+		255A36D81CD8353B00D3AD8E /* perform_qos_measurements_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36BC1CD8353B00D3AD8E /* perform_qos_measurements_event_args.cpp */; };
+		255A36D91CD8353B00D3AD8E /* session_property_changed_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36BD1CD8353B00D3AD8E /* session_property_changed_event_args.cpp */; };
+		255A36DA1CD8353B00D3AD8E /* tournament_game_session_ready_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36BE1CD8353B00D3AD8E /* tournament_game_session_ready_event_args.cpp */; };
+		255A36DB1CD8353B00D3AD8E /* tournament_registration_state_changed_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36BF1CD8353B00D3AD8E /* tournament_registration_state_changed_event_args.cpp */; };
+		255A36DC1CD8353B00D3AD8E /* user_added_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36C01CD8353B00D3AD8E /* user_added_event_args.cpp */; };
+		255A36DD1CD8353B00D3AD8E /* user_removed_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255A36C11CD8353B00D3AD8E /* user_removed_event_args.cpp */; };
+		255A36DE1CD8353B00D3AD8E /* WinRT in Resources */ = {isa = PBXBuildFile; fileRef = 255A36C21CD8353B00D3AD8E /* WinRT */; };
+		32F5FBBF1CE7DB1D008A5E09 /* title_callable_ui.mm in Sources */ = {isa = PBXBuildFile; fileRef = 32F5FBBE1CE7DB1D008A5E09 /* title_callable_ui.mm */; };
+		670AA2F61C7657D300B3FB9A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 670AA2F51C7657D300B3FB9A /* SystemConfiguration.framework */; };
+		6718D8B01C865AD0007FD4F6 /* XboxProviderBridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6718D8AE1C865AD0007FD4F6 /* XboxProviderBridge.cpp */; };
+		6718D8B71C86605E007FD4F6 /* XBLSignInHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6718D8B61C86605E007FD4F6 /* XBLSignInHandler.mm */; };
+		6718D9161C9F69CA007FD4F6 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6718D9151C9F69CA007FD4F6 /* CoreText.framework */; };
+		6718F1C11CB76BF50000BF6E /* XBLServiceManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6718F1C01CB76BF50000BF6E /* XBLServiceManager.mm */; };
+		6718F1E51CB77FEB0000BF6E /* XBLDictionaryToJSON.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6718F1E41CB77FEB0000BF6E /* XBLDictionaryToJSON.mm */; };
+		671F66DB1CD43A0000119106 /* multiplayer.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BF11AE61C17ABA400D111C9 /* multiplayer.h */; };
+		67210E721C6479E20008FFDB /* NSError+XSAPIExtensions.mm in Sources */ = {isa = PBXBuildFile; fileRef = 67210E251C6479E20008FFDB /* NSError+XSAPIExtensions.mm */; };
+		67210E731C6479E20008FFDB /* XboxProvider.mm in Sources */ = {isa = PBXBuildFile; fileRef = 67210E271C6479E20008FFDB /* XboxProvider.mm */; };
+		677B9FCD1CD90F2900A28F96 /* XBLiOSGlobalState.mm in Sources */ = {isa = PBXBuildFile; fileRef = 677B9FCC1CD90F2900A28F96 /* XBLiOSGlobalState.mm */; };
+		67F503A41CD98D8E00198DEA /* xbox_live_app_config_ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = 67F503A31CD98D8E00198DEA /* xbox_live_app_config_ios.mm */; };
+		9B118A951D4BFF070068B268 /* multiplayer_role_info.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B118A921D4BFF070068B268 /* multiplayer_role_info.cpp */; };
+		9B118A961D4BFF070068B268 /* multiplayer_role_type.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B118A931D4BFF070068B268 /* multiplayer_role_type.cpp */; };
+		9B118A971D4BFF070068B268 /* multiplayer_session_role_types.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B118A941D4BFF070068B268 /* multiplayer_session_role_types.cpp */; };
+		9B118AC21D6D0B460068B268 /* debug_output_ios.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B118AC11D6D0B460068B268 /* debug_output_ios.cpp */; };
+		9B118ADB1D885FA80068B268 /* user_auth_ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B118ADA1D885FA80068B268 /* user_auth_ios.mm */; };
+		9B118AE11D8B35230068B268 /* user_impl_ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B118AE01D8B35230068B268 /* user_impl_ios.mm */; };
+		9B2956121CE244CD0026A41C /* xbox_cll.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B2956101CE244CD0026A41C /* xbox_cll.mm */; };
+		9B2956151CE247490026A41C /* events_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B2956141CE247490026A41C /* events_service.cpp */; };
+		9B46ED461BED41D600076704 /* ecdsa_unix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B46ED441BED41D600076704 /* ecdsa_unix.cpp */; };
+		9B46ED471BED41D600076704 /* ip_address_unix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B46ED451BED41D600076704 /* ip_address_unix.cpp */; };
+		9B46ED511BF105A000076704 /* xbox_system_factory_ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B46ED501BF105A000076704 /* xbox_system_factory_ios.mm */; };
+		9B46ED551BF14AFA00076704 /* user_ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B46ED541BF14AFA00076704 /* user_ios.mm */; };
+		9B4933FA1CE8F29E00E7CE0B /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B4933F91CE8F29E00E7CE0B /* WebKit.framework */; };
+		9B4934791CEE1C1800E7CE0B /* notification_helper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B4934781CEE1C1800E7CE0B /* notification_helper.mm */; };
+		9B4B44A11D2F22C30060F1C5 /* real_time_activity_service_factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B44A01D2F22C30060F1C5 /* real_time_activity_service_factory.cpp */; };
+		9B4B44AF1D2F2D4C0060F1C5 /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B44A91D2F2D4C0060F1C5 /* log.cpp */; };
+		9B4B44B01D2F2D4C0060F1C5 /* log_entry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B44AB1D2F2D4C0060F1C5 /* log_entry.cpp */; };
+		9B4B44B11D2F2D4C0060F1C5 /* log_output.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B44AC1D2F2D4C0060F1C5 /* log_output.cpp */; };
+		9B5A0FD61BFA603A00BE12FD /* achievement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FB61BFA603A00BE12FD /* achievement.cpp */; };
+		9B5A0FD71BFA603A00BE12FD /* achievement_media_asset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FB71BFA603A00BE12FD /* achievement_media_asset.cpp */; };
+		9B5A0FD81BFA603A00BE12FD /* achievement_progression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FB81BFA603A00BE12FD /* achievement_progression.cpp */; };
+		9B5A0FD91BFA603A00BE12FD /* achievement_requirement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FB91BFA603A00BE12FD /* achievement_requirement.cpp */; };
+		9B5A0FDA1BFA603A00BE12FD /* achievement_reward.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FBA1BFA603A00BE12FD /* achievement_reward.cpp */; };
+		9B5A0FDB1BFA603A00BE12FD /* achievement_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FBB1BFA603A00BE12FD /* achievement_service.cpp */; };
+		9B5A0FDC1BFA603A00BE12FD /* achievement_time_window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FBC1BFA603A00BE12FD /* achievement_time_window.cpp */; };
+		9B5A0FDD1BFA603A00BE12FD /* achievement_title_association.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FBD1BFA603A00BE12FD /* achievement_title_association.cpp */; };
+		9B5A0FDE1BFA603A00BE12FD /* achievements_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FBE1BFA603A00BE12FD /* achievements_result.cpp */; };
+		9B5A11C11BFA60E100BE12FD /* entertainment_profile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FE81BFA60E000BE12FD /* entertainment_profile.cpp */; };
+		9B5A11C21BFA60E100BE12FD /* entertainment_profile_list_contains_item_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FE91BFA60E000BE12FD /* entertainment_profile_list_contains_item_result.cpp */; };
+		9B5A11C31BFA60E100BE12FD /* entertainment_profile_list_xbox_one_pins.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FEA1BFA60E000BE12FD /* entertainment_profile_list_xbox_one_pins.cpp */; };
+		9B5A11C41BFA60E100BE12FD /* EntertainmentProfileListContainsItemResult_WinRT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FEC1BFA60E000BE12FD /* EntertainmentProfileListContainsItemResult_WinRT.cpp */; };
+		9B5A11C51BFA60E100BE12FD /* EntertainmentProfileListService_WinRT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FEE1BFA60E000BE12FD /* EntertainmentProfileListService_WinRT.cpp */; };
+		9B5A11C61BFA60E100BE12FD /* EntertainmentProfileListVideoQueue_WinRT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FF01BFA60E000BE12FD /* EntertainmentProfileListVideoQueue_WinRT.cpp */; };
+		9B5A11C91BFA60E100BE12FD /* allocation_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FF81BFA60E000BE12FD /* allocation_result.cpp */; };
+		9B5A11CA1BFA60E100BE12FD /* cluster_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FF91BFA60E000BE12FD /* cluster_result.cpp */; };
+		9B5A11CB1BFA60E100BE12FD /* game_server_image_set.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FFA1BFA60E000BE12FD /* game_server_image_set.cpp */; };
+		9B5A11CC1BFA60E100BE12FD /* game_server_metadata_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FFB1BFA60E000BE12FD /* game_server_metadata_result.cpp */; };
+		9B5A11CD1BFA60E100BE12FD /* game_server_platform_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FFC1BFA60E000BE12FD /* game_server_platform_service.cpp */; };
+		9B5A11CE1BFA60E100BE12FD /* game_server_port_mapping.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FFD1BFA60E000BE12FD /* game_server_port_mapping.cpp */; };
+		9B5A11CF1BFA60E100BE12FD /* game_server_ticket_status.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FFE1BFA60E000BE12FD /* game_server_ticket_status.cpp */; };
+		9B5A11D01BFA60E100BE12FD /* game_variant.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A0FFF1BFA60E000BE12FD /* game_variant.cpp */; };
+		9B5A11D11BFA60E100BE12FD /* game_variant_schema.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10001BFA60E000BE12FD /* game_variant_schema.cpp */; };
+		9B5A11D21BFA60E100BE12FD /* quality_of_service_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10011BFA60E000BE12FD /* quality_of_service_server.cpp */; };
+		9B5A11DD1BFA60E100BE12FD /* leaderboard_column.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A101A1BFA60E000BE12FD /* leaderboard_column.cpp */; };
+		9B5A11DE1BFA60E100BE12FD /* leaderboard_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A101C1BFA60E000BE12FD /* leaderboard_result.cpp */; };
+		9B5A11DF1BFA60E100BE12FD /* leaderboard_row.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A101D1BFA60E000BE12FD /* leaderboard_row.cpp */; };
+		9B5A11E01BFA60E100BE12FD /* leaderboard_serializers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A101E1BFA60E000BE12FD /* leaderboard_serializers.cpp */; };
+		9B5A11E11BFA60E100BE12FD /* leaderboard_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10201BFA60E000BE12FD /* leaderboard_service.cpp */; };
+		9B5A11FD1BFA60E100BE12FD /* create_match_ticket_response.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10541BFA60E000BE12FD /* create_match_ticket_response.cpp */; };
+		9B5A11FE1BFA60E100BE12FD /* hopper_statistics_response.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10551BFA60E000BE12FD /* hopper_statistics_response.cpp */; };
+		9B5A11FF1BFA60E100BE12FD /* match_ticket_details_response.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10561BFA60E000BE12FD /* match_ticket_details_response.cpp */; };
+		9B5A12001BFA60E100BE12FD /* matchmaking_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10571BFA60E000BE12FD /* matchmaking_service.cpp */; };
+		9B5A12031BFA60E100BE12FD /* contextual_config_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10621BFA60E000BE12FD /* contextual_config_result.cpp */; };
+		9B5A12041BFA60E100BE12FD /* contextual_search_broadcast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10641BFA60E000BE12FD /* contextual_search_broadcast.cpp */; };
+		9B5A12051BFA60E100BE12FD /* contextual_search_configured_stat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10651BFA60E000BE12FD /* contextual_search_configured_stat.cpp */; };
+		9B5A12061BFA60E100BE12FD /* contextual_search_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10661BFA60E000BE12FD /* contextual_search_service.cpp */; };
+		9B5A12081BFA60E100BE12FD /* string_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10691BFA60E000BE12FD /* string_service.cpp */; };
+		9B5A120A1BFA60E100BE12FD /* verify_string_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A106B1BFA60E000BE12FD /* verify_string_result.cpp */; };
+		9B5A12391BFA60E100BE12FD /* multiplayer_activity_details.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10BE1BFA60E000BE12FD /* multiplayer_activity_details.cpp */; };
+		9B5A123A1BFA60E100BE12FD /* multiplayer_activity_handle_post_request.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10BF1BFA60E000BE12FD /* multiplayer_activity_handle_post_request.cpp */; };
+		9B5A123B1BFA60E100BE12FD /* multiplayer_activity_query_post_request.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10C01BFA60E000BE12FD /* multiplayer_activity_query_post_request.cpp */; };
+		9B5A123C1BFA60E100BE12FD /* multiplayer_get_sessions_request.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10C11BFA60E000BE12FD /* multiplayer_get_sessions_request.cpp */; };
+		9B5A123D1BFA60E100BE12FD /* multiplayer_invite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10C31BFA60E000BE12FD /* multiplayer_invite.cpp */; };
+		9B5A123E1BFA60E100BE12FD /* multiplayer_invite_handle_post_request.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10C41BFA60E000BE12FD /* multiplayer_invite_handle_post_request.cpp */; };
+		9B5A123F1BFA60E100BE12FD /* multiplayer_managed_initialization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10C51BFA60E000BE12FD /* multiplayer_managed_initialization.cpp */; };
+		9B5A12401BFA60E100BE12FD /* multiplayer_peer_to_host_requirements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10C61BFA60E000BE12FD /* multiplayer_peer_to_host_requirements.cpp */; };
+		9B5A12411BFA60E100BE12FD /* multiplayer_peer_to_peer_requirements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10C71BFA60E000BE12FD /* multiplayer_peer_to_peer_requirements.cpp */; };
+		9B5A12421BFA60E100BE12FD /* multiplayer_quality_of_service_measurement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10C81BFA60E000BE12FD /* multiplayer_quality_of_service_measurement.cpp */; };
+		9B5A12431BFA60E100BE12FD /* multiplayer_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10C91BFA60E000BE12FD /* multiplayer_service.cpp */; };
+		9B5A12441BFA60E100BE12FD /* multiplayer_service_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10CA1BFA60E000BE12FD /* multiplayer_service_impl.cpp */; };
+		9B5A12451BFA60E100BE12FD /* multiplayer_session.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10CB1BFA60E000BE12FD /* multiplayer_session.cpp */; };
+		9B5A12461BFA60E100BE12FD /* multiplayer_session_capabilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10CC1BFA60E000BE12FD /* multiplayer_session_capabilities.cpp */; };
+		9B5A12471BFA60E100BE12FD /* multiplayer_session_change_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10CD1BFA60E000BE12FD /* multiplayer_session_change_event_args.cpp */; };
+		9B5A12481BFA60E100BE12FD /* multiplayer_session_constants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10CE1BFA60E000BE12FD /* multiplayer_session_constants.cpp */; };
+		9B5A12491BFA60E100BE12FD /* multiplayer_session_matchmaking_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10CF1BFA60E000BE12FD /* multiplayer_session_matchmaking_server.cpp */; };
+		9B5A124A1BFA60E100BE12FD /* multiplayer_session_member.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10D01BFA60E000BE12FD /* multiplayer_session_member.cpp */; };
+		9B5A124B1BFA60E100BE12FD /* multiplayer_session_member_request.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10D11BFA60E000BE12FD /* multiplayer_session_member_request.cpp */; };
+		9B5A124C1BFA60E100BE12FD /* multiplayer_session_properties.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10D21BFA60E000BE12FD /* multiplayer_session_properties.cpp */; };
+		9B5A124D1BFA60E100BE12FD /* multiplayer_session_reference.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10D31BFA60E000BE12FD /* multiplayer_session_reference.cpp */; };
+		9B5A124E1BFA60E100BE12FD /* multiplayer_session_request.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10D41BFA60E000BE12FD /* multiplayer_session_request.cpp */; };
+		9B5A124F1BFA60E100BE12FD /* multiplayer_session_states.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10D51BFA60E000BE12FD /* multiplayer_session_states.cpp */; };
+		9B5A12501BFA60E100BE12FD /* multiplayer_subscription.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10D61BFA60E000BE12FD /* multiplayer_subscription.cpp */; };
+		9B5A12511BFA60E100BE12FD /* multiplayer_transfer_handle_post_request.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A10D71BFA60E000BE12FD /* multiplayer_transfer_handle_post_request.cpp */; };
+		9B5A12641BFA60E100BE12FD /* device_presence_change_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A110A1BFA60E000BE12FD /* device_presence_change_event_args.cpp */; };
+		9B5A12651BFA60E100BE12FD /* device_presence_change_subscription.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A110B1BFA60E000BE12FD /* device_presence_change_subscription.cpp */; };
+		9B5A12661BFA60E100BE12FD /* media_presence_data.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A110C1BFA60E000BE12FD /* media_presence_data.cpp */; };
+		9B5A12671BFA60E100BE12FD /* presence_activity_data.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A110D1BFA60E000BE12FD /* presence_activity_data.cpp */; };
+		9B5A12681BFA60E100BE12FD /* presence_broadcast_record.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A110E1BFA60E000BE12FD /* presence_broadcast_record.cpp */; };
+		9B5A12691BFA60E100BE12FD /* presence_data.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A110F1BFA60E000BE12FD /* presence_data.cpp */; };
+		9B5A126A1BFA60E100BE12FD /* presence_device_record.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11101BFA60E000BE12FD /* presence_device_record.cpp */; };
+		9B5A126B1BFA60E100BE12FD /* presence_media_record.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11121BFA60E000BE12FD /* presence_media_record.cpp */; };
+		9B5A126C1BFA60E100BE12FD /* presence_record.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11131BFA60E000BE12FD /* presence_record.cpp */; };
+		9B5A126D1BFA60E100BE12FD /* presence_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11141BFA60E000BE12FD /* presence_service.cpp */; };
+		9B5A126E1BFA60E100BE12FD /* presence_service_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11151BFA60E000BE12FD /* presence_service_impl.cpp */; };
+		9B5A126F1BFA60E100BE12FD /* presence_title_record.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11161BFA60E000BE12FD /* presence_title_record.cpp */; };
+		9B5A12701BFA60E100BE12FD /* presence_title_request.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11171BFA60E000BE12FD /* presence_title_request.cpp */; };
+		9B5A12711BFA60E100BE12FD /* presence_user_batch_request.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11181BFA60E000BE12FD /* presence_user_batch_request.cpp */; };
+		9B5A12721BFA60E100BE12FD /* presence_writer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11191BFA60E000BE12FD /* presence_writer.cpp */; };
+		9B5A12731BFA60E100BE12FD /* title_presence_change_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A111A1BFA60E000BE12FD /* title_presence_change_event_args.cpp */; };
+		9B5A12741BFA60E100BE12FD /* title_presence_change_subscription.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A111B1BFA60E000BE12FD /* title_presence_change_subscription.cpp */; };
+		9B5A12801BFA60E100BE12FD /* multiple_permissions_check_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A113A1BFA60E000BE12FD /* multiple_permissions_check_result.cpp */; };
+		9B5A12811BFA60E100BE12FD /* permission_check_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A113B1BFA60E000BE12FD /* permission_check_result.cpp */; };
+		9B5A12821BFA60E100BE12FD /* permission_deny_reason.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A113C1BFA60E000BE12FD /* permission_deny_reason.cpp */; };
+		9B5A12831BFA60E100BE12FD /* privacy_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A113D1BFA60E000BE12FD /* privacy_service.cpp */; };
+		9B5A12891BFA60E100BE12FD /* real_time_activity_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A114A1BFA60E000BE12FD /* real_time_activity_service.cpp */; };
+		9B5A128A1BFA60E100BE12FD /* real_time_activity_subscription.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A114B1BFA60E000BE12FD /* real_time_activity_subscription.cpp */; };
+		9B5A128B1BFA60E100BE12FD /* real_time_activity_subscription_error_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A114C1BFA60E000BE12FD /* real_time_activity_subscription_error_event_args.cpp */; };
+		9B5A129D1BFA60E100BE12FD /* profile_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11711BFA60E000BE12FD /* profile_service.cpp */; };
+		9B5A129E1BFA60E100BE12FD /* reputation_feedback_request.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11721BFA60E000BE12FD /* reputation_feedback_request.cpp */; };
+		9B5A129F1BFA60E100BE12FD /* reputation_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11731BFA60E000BE12FD /* reputation_service.cpp */; };
+		9B5A12A01BFA60E100BE12FD /* social_relationship_change_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11751BFA60E000BE12FD /* social_relationship_change_event_args.cpp */; };
+		9B5A12A11BFA60E100BE12FD /* social_relationship_change_subscription.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11761BFA60E000BE12FD /* social_relationship_change_subscription.cpp */; };
+		9B5A12A21BFA60E100BE12FD /* social_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11771BFA60E000BE12FD /* social_service.cpp */; };
+		9B5A12A31BFA60E100BE12FD /* social_service_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11781BFA60E000BE12FD /* social_service_impl.cpp */; };
+		9B5A12AC1BFA60E100BE12FD /* xbox_social_relationship.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11911BFA60E000BE12FD /* xbox_social_relationship.cpp */; };
+		9B5A12AD1BFA60E100BE12FD /* xbox_social_relationship_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11921BFA60E000BE12FD /* xbox_social_relationship_result.cpp */; };
+		9B5A12AE1BFA60E100BE12FD /* xbox_user_profile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11931BFA60E000BE12FD /* xbox_user_profile.cpp */; };
+		9B5A12AF1BFA60E100BE12FD /* requested_statistics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11951BFA60E000BE12FD /* requested_statistics.cpp */; };
+		9B5A12B01BFA60E100BE12FD /* service_configuration_statistic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11961BFA60E000BE12FD /* service_configuration_statistic.cpp */; };
+		9B5A12B11BFA60E100BE12FD /* statistic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11971BFA60E100BE12FD /* statistic.cpp */; };
+		9B5A12B21BFA60E100BE12FD /* statistic_change_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11981BFA60E100BE12FD /* statistic_change_event_args.cpp */; };
+		9B5A12B31BFA60E100BE12FD /* statistic_change_subscription.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11991BFA60E100BE12FD /* statistic_change_subscription.cpp */; };
+		9B5A12B41BFA60E100BE12FD /* user_statistics_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A119B1BFA60E100BE12FD /* user_statistics_result.cpp */; };
+		9B5A12B51BFA60E100BE12FD /* user_statistics_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A119C1BFA60E100BE12FD /* user_statistics_service.cpp */; };
+		9B5A12B61BFA60E100BE12FD /* user_statistics_service_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A119D1BFA60E100BE12FD /* user_statistics_service_impl.cpp */; };
+		9B5A12BE1BFA60E100BE12FD /* title_storage_blob_metadata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11AE1BFA60E100BE12FD /* title_storage_blob_metadata.cpp */; };
+		9B5A12BF1BFA60E100BE12FD /* title_storage_blob_metadata_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11AF1BFA60E100BE12FD /* title_storage_blob_metadata_result.cpp */; };
+		9B5A12C01BFA60E100BE12FD /* title_storage_blob_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11B01BFA60E100BE12FD /* title_storage_blob_result.cpp */; };
+		9B5A12C11BFA60E100BE12FD /* title_storage_quota.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11B11BFA60E100BE12FD /* title_storage_quota.cpp */; };
+		9B5A12C21BFA60E100BE12FD /* title_storage_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A11B21BFA60E100BE12FD /* title_storage_service.cpp */; };
+		9B5A12CB1BFBF63600BE12FD /* pch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A12C91BFBF63600BE12FD /* pch.cpp */; };
+		9B5A12F51BFD2BF200BE12FD /* tournament_team_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A12D31BFD2BF200BE12FD /* tournament_team_result.cpp */; };
+		9B82502E1C1A40DF002C8F30 /* multiplayer_session_arbitration_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B82502C1C1A397F002C8F30 /* multiplayer_session_arbitration_server.cpp */; };
+		9B8250321C1A4A8F002C8F30 /* multiplayer_session_tournaments_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B8250311C1A4A8F002C8F30 /* multiplayer_session_tournaments_server.cpp */; };
+		9B8250341C1A4B34002C8F30 /* tournament_reference.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B8250331C1A4B34002C8F30 /* tournament_reference.cpp */; };
+		9B847EB31CDD2823004E04B0 /* notification_service_i.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B847EB11CDD2823004E04B0 /* notification_service_i.mm */; };
+		9B847EB61CDD6928004E04B0 /* notification_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B847EB51CDD6928004E04B0 /* notification_service.cpp */; };
+		9B8A00B11BF2778B000337EA /* sign_in_delegate_ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B8A00B01BF2778B000337EA /* sign_in_delegate_ios.mm */; };
+		9B9615E51BEA86FE00E79527 /* XboxLiveContext_Desktop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9615E21BEA86FE00E79527 /* XboxLiveContext_Desktop.cpp */; };
+		9B97B7301BE1981B00CF1E29 /* errors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5971BE1981900CF1E29 /* errors.cpp */; };
+		9B97B7311BE1981B00CF1E29 /* http_call_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5981BE1981900CF1E29 /* http_call_impl.cpp */; };
+		9B97B7321BE1981B00CF1E29 /* http_call_request_message.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B59A1BE1981900CF1E29 /* http_call_request_message.cpp */; };
+		9B97B7331BE1981B00CF1E29 /* http_call_response.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B59B1BE1981900CF1E29 /* http_call_response.cpp */; };
+		9B97B7341BE1981B00CF1E29 /* http_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B59D1BE1981900CF1E29 /* http_client.cpp */; };
+		9B97B7351BE1981B00CF1E29 /* local_config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B59F1BE1981900CF1E29 /* local_config.cpp */; };
+		9B97B7361BE1981B00CF1E29 /* service_call_logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5A11BE1981900CF1E29 /* service_call_logger.cpp */; };
+		9B97B7371BE1981B00CF1E29 /* service_call_logger_data.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5A31BE1981900CF1E29 /* service_call_logger_data.cpp */; };
+		9B97B7391BE1981B00CF1E29 /* service_call_logging_config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5A71BE1981900CF1E29 /* service_call_logging_config.cpp */; };
+		9B97B73A1BE1981B00CF1E29 /* telemetry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5A91BE1981900CF1E29 /* telemetry.cpp */; };
+		9B97B73B1BE1981B00CF1E29 /* user_context.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5AB1BE1981900CF1E29 /* user_context.cpp */; };
+		9B97B73C1BE1981B00CF1E29 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5AD1BE1981900CF1E29 /* utils.cpp */; };
+		9B97B73D1BE1981B00CF1E29 /* utils_locales.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5AF1BE1981900CF1E29 /* utils_locales.cpp */; };
+		9B97B73E1BE1981B00CF1E29 /* web_socket_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5B01BE1981900CF1E29 /* web_socket_client.cpp */; };
+		9B97B73F1BE1981B00CF1E29 /* web_socket_connection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5B21BE1981900CF1E29 /* web_socket_connection.cpp */; };
+		9B97B7481BE1981B00CF1E29 /* xbox_live_app_config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5C81BE1981900CF1E29 /* xbox_live_app_config.cpp */; };
+		9B97B7491BE1981B00CF1E29 /* xbox_live_context_settings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5C91BE1981900CF1E29 /* xbox_live_context_settings.cpp */; };
+		9B97B74A1BE1981B00CF1E29 /* xbox_service_call_routed_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5CA1BE1981900CF1E29 /* xbox_service_call_routed_event_args.cpp */; };
+		9B97B74B1BE1981B00CF1E29 /* xbox_system_factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5CB1BE1981900CF1E29 /* xbox_system_factory.cpp */; };
+		9B97B74C1BE1981B00CF1E29 /* auth_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5CF1BE1981900CF1E29 /* auth_manager.cpp */; };
+		9B97B74D1BE1981B00CF1E29 /* cidr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5D11BE1981900CF1E29 /* cidr.cpp */; };
+		9B97B7531BE1981B00CF1E29 /* ip_address.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5DC1BE1981900CF1E29 /* ip_address.cpp */; };
+		9B97B7541BE1981B00CF1E29 /* json_web_key.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5DE1BE1981900CF1E29 /* json_web_key.cpp */; };
+		9B97B7551BE1981B00CF1E29 /* nsal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5E01BE1981900CF1E29 /* nsal.cpp */; };
+		9B97B7561BE1981B00CF1E29 /* nsal_endpoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5E21BE1981900CF1E29 /* nsal_endpoint.cpp */; };
+		9B97B7571BE1981B00CF1E29 /* request_signer_helpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5E51BE1981900CF1E29 /* request_signer_helpers.cpp */; };
+		9B97B7591BE1981B00CF1E29 /* signature_policy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5E91BE1981900CF1E29 /* signature_policy.cpp */; };
+		9B97B75A1BE1981B00CF1E29 /* title_token_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5EB1BE1981900CF1E29 /* title_token_service.cpp */; };
+		9B97B75B1BE1981B00CF1E29 /* token_error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5ED1BE1981900CF1E29 /* token_error.cpp */; };
+		9B97B75C1BE1981B00CF1E29 /* token_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5EF1BE1981900CF1E29 /* token_manager.cpp */; };
+		9B97B75D1BE1981B00CF1E29 /* token_request.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5F11BE1981900CF1E29 /* token_request.cpp */; };
+		9B97B75E1BE1981B00CF1E29 /* token_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5F31BE1981900CF1E29 /* token_result.cpp */; };
+		9B97B75F1BE1981B00CF1E29 /* trie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5F51BE1981900CF1E29 /* trie.cpp */; };
+		9B97B7601BE1981C00CF1E29 /* user_token_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5F71BE1981900CF1E29 /* user_token_service.cpp */; };
+		9B97B7631BE1981C00CF1E29 /* xsts_token_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5FC1BE1981900CF1E29 /* xsts_token_service.cpp */; };
+		9B97B7641BE1981C00CF1E29 /* xtitle_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B5FE1BE1981900CF1E29 /* xtitle_service.cpp */; };
+		9B97B7651BE1981C00CF1E29 /* auth_config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B6001BE1981900CF1E29 /* auth_config.cpp */; };
+		9B97B7661BE1981C00CF1E29 /* token_and_signature_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B6031BE1981900CF1E29 /* token_and_signature_result.cpp */; };
+		9B97B7671BE1981C00CF1E29 /* user.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B6041BE1981900CF1E29 /* user.cpp */; };
+		9B97B7681BE1981C00CF1E29 /* user_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B6051BE1981900CF1E29 /* user_impl.cpp */; };
+		9B97B76D1BE1981C00CF1E29 /* xbox_live_mutex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B6101BE1981900CF1E29 /* xbox_live_mutex.cpp */; };
+		9B97B9AD1BE19DFD00CF1E29 /* xbox_live_context_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97B7BB1BE19DFC00CF1E29 /* xbox_live_context_impl.cpp */; };
+		9BAEFDE91D3019A300ABBA82 /* multiplayer_match_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BAEFDE81D3019A300ABBA82 /* multiplayer_match_client.cpp */; };
+		9BAEFDEC1D3019B300ABBA82 /* multiplayer_search_handle_details.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BAEFDEA1D3019B300ABBA82 /* multiplayer_search_handle_details.cpp */; };
+		9BAEFDED1D3019B300ABBA82 /* multiplayer_search_handle_request.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BAEFDEB1D3019B300ABBA82 /* multiplayer_search_handle_request.cpp */; };
+		9BAEFDF01D30263F00ABBA82 /* initiator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BAEFDEE1D30263F00ABBA82 /* initiator.cpp */; };
+		9BBAB7781CBDE09000A75EDF /* local_config_u.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BBAB7771CBDE09000A75EDF /* local_config_u.cpp */; };
+		9BBAB79D1CC0408200A75EDF /* local_config_i.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BBAB79C1CC0408200A75EDF /* local_config_i.mm */; };
+		9BEB14FA1DCD01BF001E5DD5 /* multiplayer_member_initialization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BEB14F91DCD01BF001E5DD5 /* multiplayer_member_initialization.cpp */; };
+		9BF11AD11C12076E00D111C9 /* big_num.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BF11ACC1C12076E00D111C9 /* big_num.cpp */; };
+		9BF11AD21C12076E00D111C9 /* request_signer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BF11ACE1C12076E00D111C9 /* request_signer.cpp */; };
+		9BF11AD31C12076E00D111C9 /* sha256.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BF11ACF1C12076E00D111C9 /* sha256.cpp */; };
+		9BF11ADF1C120C2900D111C9 /* ip_address_desktop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BF11AD91C120C2900D111C9 /* ip_address_desktop.cpp */; };
+		9BF132431C3C48230048204E /* device_token_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BF132411C3C48230048204E /* device_token_service.cpp */; };
+		9BF639381D492C3300BDF02B /* contextual_search_game_clip_stat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BF639331D492C3300BDF02B /* contextual_search_game_clip_stat.cpp */; };
+		9BF639391D492C3300BDF02B /* contextual_search_game_clip_thumbnail.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BF639341D492C3300BDF02B /* contextual_search_game_clip_thumbnail.cpp */; };
+		9BF6393A1D492C3300BDF02B /* contextual_search_game_clip_uri_info.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BF639351D492C3300BDF02B /* contextual_search_game_clip_uri_info.cpp */; };
+		9BF6393B1D492C3300BDF02B /* contextual_search_game_clip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BF639361D492C3300BDF02B /* contextual_search_game_clip.cpp */; };
+		9BF6393C1D492C3300BDF02B /* contextual_search_game_clips_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BF639371D492C3300BDF02B /* contextual_search_game_clips_result.cpp */; };
+		9C063B121D774C28009C3E3C /* mem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C063B111D774C28009C3E3C /* mem.cpp */; };
+		9CB56C061DA359BB00C92F44 /* multiplayer_query_search_handle_request.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CB56C051DA359BB00C92F44 /* multiplayer_query_search_handle_request.cpp */; };
+		9CB56C081DA35A4500C92F44 /* xbox_live_services_settings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CB56C071DA35A4500C92F44 /* xbox_live_services_settings.cpp */; };
+		9CB56C0B1DA35AA800C92F44 /* custom_output.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CB56C091DA35AA800C92F44 /* custom_output.cpp */; };
+		9CC36FE31DB6DE89007142EE /* xbox_user_id_container.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CC36FE21DB6DE89007142EE /* xbox_user_id_container.cpp */; };
+		9CDF0D361DA2E8860046C721 /* internal_social_event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CDF0D291DA2E8860046C721 /* internal_social_event.cpp */; };
+		9CDF0D371DA2E8860046C721 /* peoplehub_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CDF0D2A1DA2E8860046C721 /* peoplehub_service.cpp */; };
+		9CDF0D381DA2E8860046C721 /* preferred_color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CDF0D2B1DA2E8860046C721 /* preferred_color.cpp */; };
+		9CDF0D391DA2E8860046C721 /* social_event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CDF0D2C1DA2E8860046C721 /* social_event.cpp */; };
+		9CDF0D3A1DA2E8860046C721 /* social_graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CDF0D2D1DA2E8860046C721 /* social_graph.cpp */; };
+		9CDF0D3B1DA2E8860046C721 /* social_manager_presence_record.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CDF0D2F1DA2E8860046C721 /* social_manager_presence_record.cpp */; };
+		9CDF0D3C1DA2E8860046C721 /* social_manager_presence_title_record.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CDF0D301DA2E8860046C721 /* social_manager_presence_title_record.cpp */; };
+		9CDF0D3D1DA2E8860046C721 /* social_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CDF0D311DA2E8860046C721 /* social_manager.cpp */; };
+		9CDF0D3E1DA2E8860046C721 /* social_user_group_loaded_event_args.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CDF0D321DA2E8860046C721 /* social_user_group_loaded_event_args.cpp */; };
+		9CDF0D3F1DA2E8860046C721 /* title_history.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CDF0D331DA2E8860046C721 /* title_history.cpp */; };
+		9CDF0D401DA2E8860046C721 /* xbox_social_user_group.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CDF0D341DA2E8860046C721 /* xbox_social_user_group.cpp */; };
+		9CDF0D411DA2E8860046C721 /* xbox_social_user.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CDF0D351DA2E8860046C721 /* xbox_social_user.cpp */; };
+		B71305821CC7477A00A4E71E /* XLSCll.mm in Sources */ = {isa = PBXBuildFile; fileRef = B71305811CC7477A00A4E71E /* XLSCll.mm */; };
+		B7E5C76D1CEED3E5003B2B08 /* UTCIDPNames.mm in Sources */ = {isa = PBXBuildFile; fileRef = B7E5C76C1CEED3E5003B2B08 /* UTCIDPNames.mm */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		671121B61CBD960100F49259 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6718F1881CB731EF0000BF6E /* XSAPITCUI.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 6718F1741CB730BD0000BF6E;
+			remoteInfo = XSAPITCUI;
+		};
+		6781BDB21CBC702100264EAF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6718F1881CB731EF0000BF6E /* XSAPITCUI.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 6718F1751CB730BD0000BF6E;
+			remoteInfo = XSAPITCUI;
+		};
+		9B66D2D01BE85B5C00E53086 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9B66D2CC1BE85B5C00E53086 /* Casablanca.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 9B97BAE11BE29EAF00CF1E29;
+			remoteInfo = Casablanca;
+		};
+		9B82502F1C1A46B7002C8F30 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9B66D2CC1BE85B5C00E53086 /* Casablanca.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 9B97BAE01BE29EAF00CF1E29;
+			remoteInfo = Casablanca;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		9B97B3591BE18B2600CF1E29 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = include/$PRODUCT_NAME;
+			dstSubfolderSpec = 16;
+			files = (
+				671F66DB1CD43A0000119106 /* multiplayer.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		251DBDD61CE6DE41003AF56B /* utils_locales_ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = utils_locales_ios.mm; path = i/utils_locales_ios.mm; sourceTree = "<group>"; };
+		255A36A61CD8353B00D3AD8E /* find_match_completed_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = find_match_completed_event_args.cpp; path = Manager/find_match_completed_event_args.cpp; sourceTree = "<group>"; };
+		255A36A71CD8353B00D3AD8E /* host_changed_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = host_changed_event_args.cpp; path = Manager/host_changed_event_args.cpp; sourceTree = "<group>"; };
+		255A36A81CD8353B00D3AD8E /* join_lobby_completed_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = join_lobby_completed_event_args.cpp; path = Manager/join_lobby_completed_event_args.cpp; sourceTree = "<group>"; };
+		255A36AA1CD8353B00D3AD8E /* member_joined_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = member_joined_event_args.cpp; path = Manager/member_joined_event_args.cpp; sourceTree = "<group>"; };
+		255A36AB1CD8353B00D3AD8E /* member_left_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = member_left_event_args.cpp; path = Manager/member_left_event_args.cpp; sourceTree = "<group>"; };
+		255A36AC1CD8353B00D3AD8E /* member_property_changed_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = member_property_changed_event_args.cpp; path = Manager/member_property_changed_event_args.cpp; sourceTree = "<group>"; };
+		255A36AD1CD8353B00D3AD8E /* multiplayer_client_manager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multiplayer_client_manager.cpp; path = Manager/multiplayer_client_manager.cpp; sourceTree = "<group>"; };
+		255A36AE1CD8353B00D3AD8E /* multiplayer_client_pending_reader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multiplayer_client_pending_reader.cpp; path = Manager/multiplayer_client_pending_reader.cpp; sourceTree = "<group>"; };
+		255A36AF1CD8353B00D3AD8E /* multiplayer_client_pending_request.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multiplayer_client_pending_request.cpp; path = Manager/multiplayer_client_pending_request.cpp; sourceTree = "<group>"; };
+		255A36B01CD8353B00D3AD8E /* multiplayer_event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multiplayer_event.cpp; path = Manager/multiplayer_event.cpp; sourceTree = "<group>"; };
+		255A36B11CD8353B00D3AD8E /* multiplayer_game_client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multiplayer_game_client.cpp; path = Manager/multiplayer_game_client.cpp; sourceTree = "<group>"; };
+		255A36B21CD8353B00D3AD8E /* multiplayer_game_session.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multiplayer_game_session.cpp; path = Manager/multiplayer_game_session.cpp; sourceTree = "<group>"; };
+		255A36B31CD8353B00D3AD8E /* multiplayer_lobby_client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multiplayer_lobby_client.cpp; path = Manager/multiplayer_lobby_client.cpp; sourceTree = "<group>"; };
+		255A36B41CD8353B00D3AD8E /* multiplayer_lobby_session.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multiplayer_lobby_session.cpp; path = Manager/multiplayer_lobby_session.cpp; sourceTree = "<group>"; };
+		255A36B51CD8353B00D3AD8E /* multiplayer_local_user_manager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multiplayer_local_user_manager.cpp; path = Manager/multiplayer_local_user_manager.cpp; sourceTree = "<group>"; };
+		255A36B61CD8353B00D3AD8E /* multiplayer_local_user.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multiplayer_local_user.cpp; path = Manager/multiplayer_local_user.cpp; sourceTree = "<group>"; };
+		255A36B71CD8353B00D3AD8E /* multiplayer_manager_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = multiplayer_manager_internal.h; path = Manager/multiplayer_manager_internal.h; sourceTree = "<group>"; };
+		255A36B81CD8353B00D3AD8E /* multiplayer_manager_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multiplayer_manager_utils.cpp; path = Manager/multiplayer_manager_utils.cpp; sourceTree = "<group>"; };
+		255A36B91CD8353B00D3AD8E /* multiplayer_manager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multiplayer_manager.cpp; path = Manager/multiplayer_manager.cpp; sourceTree = "<group>"; };
+		255A36BA1CD8353B00D3AD8E /* multiplayer_member.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multiplayer_member.cpp; path = Manager/multiplayer_member.cpp; sourceTree = "<group>"; };
+		255A36BB1CD8353B00D3AD8E /* multiplayer_session_writer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multiplayer_session_writer.cpp; path = Manager/multiplayer_session_writer.cpp; sourceTree = "<group>"; };
+		255A36BC1CD8353B00D3AD8E /* perform_qos_measurements_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = perform_qos_measurements_event_args.cpp; path = Manager/perform_qos_measurements_event_args.cpp; sourceTree = "<group>"; };
+		255A36BD1CD8353B00D3AD8E /* session_property_changed_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = session_property_changed_event_args.cpp; path = Manager/session_property_changed_event_args.cpp; sourceTree = "<group>"; };
+		255A36BE1CD8353B00D3AD8E /* tournament_game_session_ready_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tournament_game_session_ready_event_args.cpp; path = Manager/tournament_game_session_ready_event_args.cpp; sourceTree = "<group>"; };
+		255A36BF1CD8353B00D3AD8E /* tournament_registration_state_changed_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tournament_registration_state_changed_event_args.cpp; path = Manager/tournament_registration_state_changed_event_args.cpp; sourceTree = "<group>"; };
+		255A36C01CD8353B00D3AD8E /* user_added_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = user_added_event_args.cpp; path = Manager/user_added_event_args.cpp; sourceTree = "<group>"; };
+		255A36C11CD8353B00D3AD8E /* user_removed_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = user_removed_event_args.cpp; path = Manager/user_removed_event_args.cpp; sourceTree = "<group>"; };
+		255A36C21CD8353B00D3AD8E /* WinRT */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WinRT; path = Manager/WinRT; sourceTree = "<group>"; };
+		32F5FBBE1CE7DB1D008A5E09 /* title_callable_ui.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = title_callable_ui.mm; path = iOS/title_callable_ui.mm; sourceTree = "<group>"; };
+		670AA2F51C7657D300B3FB9A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		6718D8AE1C865AD0007FD4F6 /* XboxProviderBridge.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XboxProviderBridge.cpp; sourceTree = "<group>"; };
+		6718D8AF1C865AD0007FD4F6 /* XboxProviderBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XboxProviderBridge.h; sourceTree = "<group>"; };
+		6718D8B51C86605E007FD4F6 /* XBLSignInHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XBLSignInHandler.h; sourceTree = "<group>"; };
+		6718D8B61C86605E007FD4F6 /* XBLSignInHandler.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = XBLSignInHandler.mm; sourceTree = "<group>"; };
+		6718D9151C9F69CA007FD4F6 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
+		6718F1881CB731EF0000BF6E /* XSAPITCUI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = XSAPITCUI.xcodeproj; path = ../../External/TCUI/iOS/XSAPITCUI.xcodeproj; sourceTree = "<group>"; };
+		6718F1BF1CB76BF50000BF6E /* XBLServiceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XBLServiceManager.h; sourceTree = "<group>"; };
+		6718F1C01CB76BF50000BF6E /* XBLServiceManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = XBLServiceManager.mm; sourceTree = "<group>"; };
+		6718F1E31CB77FEB0000BF6E /* XBLDictionaryToJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XBLDictionaryToJSON.h; sourceTree = "<group>"; };
+		6718F1E41CB77FEB0000BF6E /* XBLDictionaryToJSON.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = XBLDictionaryToJSON.mm; sourceTree = "<group>"; };
+		671F66D21CD439BC00119106 /* marketplace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = marketplace.h; sourceTree = "<group>"; };
+		671F66D41CD439BC00119106 /* social_manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = social_manager.h; sourceTree = "<group>"; };
+		671F66D51CD439BC00119106 /* xbox_live_app_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xbox_live_app_config.h; sourceTree = "<group>"; };
+		67210E241C6479E20008FFDB /* NSError+XSAPIExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSError+XSAPIExtensions.h"; sourceTree = "<group>"; };
+		67210E251C6479E20008FFDB /* NSError+XSAPIExtensions.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "NSError+XSAPIExtensions.mm"; sourceTree = "<group>"; };
+		67210E261C6479E20008FFDB /* XboxProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XboxProvider.h; sourceTree = "<group>"; };
+		67210E271C6479E20008FFDB /* XboxProvider.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = XboxProvider.mm; sourceTree = "<group>"; };
+		677B9FCB1CD90F2900A28F96 /* XBLiOSGlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XBLiOSGlobalState.h; sourceTree = "<group>"; };
+		677B9FCC1CD90F2900A28F96 /* XBLiOSGlobalState.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = XBLiOSGlobalState.mm; sourceTree = "<group>"; };
+		67A963871C5FE4250066184E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		67F503A31CD98D8E00198DEA /* xbox_live_app_config_ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = xbox_live_app_config_ios.mm; sourceTree = "<group>"; };
+		9B118A921D4BFF070068B268 /* multiplayer_role_info.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_role_info.cpp; sourceTree = "<group>"; };
+		9B118A931D4BFF070068B268 /* multiplayer_role_type.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_role_type.cpp; sourceTree = "<group>"; };
+		9B118A941D4BFF070068B268 /* multiplayer_session_role_types.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_session_role_types.cpp; sourceTree = "<group>"; };
+		9B118ABC1D6BC12E0068B268 /* log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = log.h; sourceTree = "<group>"; };
+		9B118ABD1D6D0AFF0068B268 /* debug_output.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = debug_output.h; sourceTree = "<group>"; };
+		9B118AC11D6D0B460068B268 /* debug_output_ios.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = debug_output_ios.cpp; path = iOS/debug_output_ios.cpp; sourceTree = "<group>"; };
+		9B118AD91D885FA80068B268 /* user_auth_ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = user_auth_ios.h; path = auth/user_auth_ios.h; sourceTree = "<group>"; };
+		9B118ADA1D885FA80068B268 /* user_auth_ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = user_auth_ios.mm; path = auth/user_auth_ios.mm; sourceTree = "<group>"; };
+		9B118ADF1D8B35230068B268 /* user_impl_ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = user_impl_ios.h; sourceTree = "<group>"; };
+		9B118AE01D8B35230068B268 /* user_impl_ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = user_impl_ios.mm; sourceTree = "<group>"; };
+		9B2956101CE244CD0026A41C /* xbox_cll.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = xbox_cll.mm; sourceTree = "<group>"; };
+		9B2956111CE244CD0026A41C /* xbox_cll.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xbox_cll.h; sourceTree = "<group>"; };
+		9B2956141CE247490026A41C /* events_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = events_service.cpp; sourceTree = "<group>"; };
+		9B46ED441BED41D600076704 /* ecdsa_unix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ecdsa_unix.cpp; sourceTree = "<group>"; };
+		9B46ED451BED41D600076704 /* ip_address_unix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ip_address_unix.cpp; sourceTree = "<group>"; };
+		9B46ED4D1BED720E00076704 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		9B46ED501BF105A000076704 /* xbox_system_factory_ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = xbox_system_factory_ios.mm; sourceTree = "<group>"; };
+		9B46ED541BF14AFA00076704 /* user_ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = user_ios.mm; sourceTree = "<group>"; };
+		9B4933F91CE8F29E00E7CE0B /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		9B4934761CEE1C0A00E7CE0B /* notification_helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = notification_helper.h; sourceTree = "<group>"; };
+		9B4934781CEE1C1800E7CE0B /* notification_helper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = notification_helper.mm; path = iOS/notification_helper.mm; sourceTree = "<group>"; };
+		9B4B449F1D2F22C30060F1C5 /* real_time_activity_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = real_time_activity_internal.h; sourceTree = "<group>"; };
+		9B4B44A01D2F22C30060F1C5 /* real_time_activity_service_factory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = real_time_activity_service_factory.cpp; sourceTree = "<group>"; };
+		9B4B44A91D2F2D4C0060F1C5 /* log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = log.cpp; sourceTree = "<group>"; };
+		9B4B44AB1D2F2D4C0060F1C5 /* log_entry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = log_entry.cpp; sourceTree = "<group>"; };
+		9B4B44AC1D2F2D4C0060F1C5 /* log_output.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = log_output.cpp; sourceTree = "<group>"; };
+		9B4B44D11D2FFE850060F1C5 /* multiplayer_manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = multiplayer_manager.h; sourceTree = "<group>"; };
+		9B5A0FB61BFA603A00BE12FD /* achievement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = achievement.cpp; sourceTree = "<group>"; };
+		9B5A0FB71BFA603A00BE12FD /* achievement_media_asset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = achievement_media_asset.cpp; sourceTree = "<group>"; };
+		9B5A0FB81BFA603A00BE12FD /* achievement_progression.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = achievement_progression.cpp; sourceTree = "<group>"; };
+		9B5A0FB91BFA603A00BE12FD /* achievement_requirement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = achievement_requirement.cpp; sourceTree = "<group>"; };
+		9B5A0FBA1BFA603A00BE12FD /* achievement_reward.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = achievement_reward.cpp; sourceTree = "<group>"; };
+		9B5A0FBB1BFA603A00BE12FD /* achievement_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = achievement_service.cpp; sourceTree = "<group>"; };
+		9B5A0FBC1BFA603A00BE12FD /* achievement_time_window.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = achievement_time_window.cpp; sourceTree = "<group>"; };
+		9B5A0FBD1BFA603A00BE12FD /* achievement_title_association.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = achievement_title_association.cpp; sourceTree = "<group>"; };
+		9B5A0FBE1BFA603A00BE12FD /* achievements_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = achievements_result.cpp; sourceTree = "<group>"; };
+		9B5A0FE81BFA60E000BE12FD /* entertainment_profile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = entertainment_profile.cpp; sourceTree = "<group>"; };
+		9B5A0FE91BFA60E000BE12FD /* entertainment_profile_list_contains_item_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = entertainment_profile_list_contains_item_result.cpp; sourceTree = "<group>"; };
+		9B5A0FEA1BFA60E000BE12FD /* entertainment_profile_list_xbox_one_pins.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = entertainment_profile_list_xbox_one_pins.cpp; sourceTree = "<group>"; };
+		9B5A0FEC1BFA60E000BE12FD /* EntertainmentProfileListContainsItemResult_WinRT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EntertainmentProfileListContainsItemResult_WinRT.cpp; sourceTree = "<group>"; };
+		9B5A0FED1BFA60E000BE12FD /* EntertainmentProfileListContainsItemResult_WinRT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EntertainmentProfileListContainsItemResult_WinRT.h; sourceTree = "<group>"; };
+		9B5A0FEE1BFA60E000BE12FD /* EntertainmentProfileListService_WinRT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EntertainmentProfileListService_WinRT.cpp; sourceTree = "<group>"; };
+		9B5A0FEF1BFA60E000BE12FD /* EntertainmentProfileListService_WinRT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EntertainmentProfileListService_WinRT.h; sourceTree = "<group>"; };
+		9B5A0FF01BFA60E000BE12FD /* EntertainmentProfileListVideoQueue_WinRT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EntertainmentProfileListVideoQueue_WinRT.cpp; sourceTree = "<group>"; };
+		9B5A0FF11BFA60E000BE12FD /* EntertainmentProfileListVideoQueue_WinRT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EntertainmentProfileListVideoQueue_WinRT.h; sourceTree = "<group>"; };
+		9B5A0FF81BFA60E000BE12FD /* allocation_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = allocation_result.cpp; sourceTree = "<group>"; };
+		9B5A0FF91BFA60E000BE12FD /* cluster_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cluster_result.cpp; sourceTree = "<group>"; };
+		9B5A0FFA1BFA60E000BE12FD /* game_server_image_set.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = game_server_image_set.cpp; sourceTree = "<group>"; };
+		9B5A0FFB1BFA60E000BE12FD /* game_server_metadata_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = game_server_metadata_result.cpp; sourceTree = "<group>"; };
+		9B5A0FFC1BFA60E000BE12FD /* game_server_platform_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = game_server_platform_service.cpp; sourceTree = "<group>"; };
+		9B5A0FFD1BFA60E000BE12FD /* game_server_port_mapping.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = game_server_port_mapping.cpp; sourceTree = "<group>"; };
+		9B5A0FFE1BFA60E000BE12FD /* game_server_ticket_status.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = game_server_ticket_status.cpp; sourceTree = "<group>"; };
+		9B5A0FFF1BFA60E000BE12FD /* game_variant.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = game_variant.cpp; sourceTree = "<group>"; };
+		9B5A10001BFA60E000BE12FD /* game_variant_schema.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = game_variant_schema.cpp; sourceTree = "<group>"; };
+		9B5A10011BFA60E000BE12FD /* quality_of_service_server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = quality_of_service_server.cpp; sourceTree = "<group>"; };
+		9B5A101A1BFA60E000BE12FD /* leaderboard_column.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = leaderboard_column.cpp; sourceTree = "<group>"; };
+		9B5A101B1BFA60E000BE12FD /* leaderboard_query.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = leaderboard_query.h; sourceTree = "<group>"; };
+		9B5A101C1BFA60E000BE12FD /* leaderboard_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = leaderboard_result.cpp; sourceTree = "<group>"; };
+		9B5A101D1BFA60E000BE12FD /* leaderboard_row.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = leaderboard_row.cpp; sourceTree = "<group>"; };
+		9B5A101E1BFA60E000BE12FD /* leaderboard_serializers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = leaderboard_serializers.cpp; sourceTree = "<group>"; };
+		9B5A101F1BFA60E000BE12FD /* leaderboard_serializers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = leaderboard_serializers.h; sourceTree = "<group>"; };
+		9B5A10201BFA60E000BE12FD /* leaderboard_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = leaderboard_service.cpp; sourceTree = "<group>"; };
+		9B5A10541BFA60E000BE12FD /* create_match_ticket_response.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = create_match_ticket_response.cpp; sourceTree = "<group>"; };
+		9B5A10551BFA60E000BE12FD /* hopper_statistics_response.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hopper_statistics_response.cpp; sourceTree = "<group>"; };
+		9B5A10561BFA60E000BE12FD /* match_ticket_details_response.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = match_ticket_details_response.cpp; sourceTree = "<group>"; };
+		9B5A10571BFA60E000BE12FD /* matchmaking_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = matchmaking_service.cpp; sourceTree = "<group>"; };
+		9B5A10621BFA60E000BE12FD /* contextual_config_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contextual_config_result.cpp; sourceTree = "<group>"; };
+		9B5A10631BFA60E000BE12FD /* contextual_config_result.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = contextual_config_result.h; sourceTree = "<group>"; };
+		9B5A10641BFA60E000BE12FD /* contextual_search_broadcast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contextual_search_broadcast.cpp; sourceTree = "<group>"; };
+		9B5A10651BFA60E000BE12FD /* contextual_search_configured_stat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contextual_search_configured_stat.cpp; sourceTree = "<group>"; };
+		9B5A10661BFA60E000BE12FD /* contextual_search_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contextual_search_service.cpp; sourceTree = "<group>"; };
+		9B5A10691BFA60E000BE12FD /* string_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = string_service.cpp; sourceTree = "<group>"; };
+		9B5A106B1BFA60E000BE12FD /* verify_string_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = verify_string_result.cpp; sourceTree = "<group>"; };
+		9B5A10BE1BFA60E000BE12FD /* multiplayer_activity_details.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_activity_details.cpp; sourceTree = "<group>"; };
+		9B5A10BF1BFA60E000BE12FD /* multiplayer_activity_handle_post_request.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_activity_handle_post_request.cpp; sourceTree = "<group>"; };
+		9B5A10C01BFA60E000BE12FD /* multiplayer_activity_query_post_request.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_activity_query_post_request.cpp; sourceTree = "<group>"; };
+		9B5A10C11BFA60E000BE12FD /* multiplayer_get_sessions_request.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_get_sessions_request.cpp; sourceTree = "<group>"; };
+		9B5A10C21BFA60E000BE12FD /* multiplayer_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = multiplayer_internal.h; sourceTree = "<group>"; };
+		9B5A10C31BFA60E000BE12FD /* multiplayer_invite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_invite.cpp; sourceTree = "<group>"; };
+		9B5A10C41BFA60E000BE12FD /* multiplayer_invite_handle_post_request.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_invite_handle_post_request.cpp; sourceTree = "<group>"; };
+		9B5A10C51BFA60E000BE12FD /* multiplayer_managed_initialization.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_managed_initialization.cpp; sourceTree = "<group>"; };
+		9B5A10C61BFA60E000BE12FD /* multiplayer_peer_to_host_requirements.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_peer_to_host_requirements.cpp; sourceTree = "<group>"; };
+		9B5A10C71BFA60E000BE12FD /* multiplayer_peer_to_peer_requirements.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_peer_to_peer_requirements.cpp; sourceTree = "<group>"; };
+		9B5A10C81BFA60E000BE12FD /* multiplayer_quality_of_service_measurement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_quality_of_service_measurement.cpp; sourceTree = "<group>"; };
+		9B5A10C91BFA60E000BE12FD /* multiplayer_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_service.cpp; sourceTree = "<group>"; };
+		9B5A10CA1BFA60E000BE12FD /* multiplayer_service_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_service_impl.cpp; sourceTree = "<group>"; };
+		9B5A10CB1BFA60E000BE12FD /* multiplayer_session.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_session.cpp; sourceTree = "<group>"; };
+		9B5A10CC1BFA60E000BE12FD /* multiplayer_session_capabilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_session_capabilities.cpp; sourceTree = "<group>"; };
+		9B5A10CD1BFA60E000BE12FD /* multiplayer_session_change_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_session_change_event_args.cpp; sourceTree = "<group>"; };
+		9B5A10CE1BFA60E000BE12FD /* multiplayer_session_constants.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_session_constants.cpp; sourceTree = "<group>"; };
+		9B5A10CF1BFA60E000BE12FD /* multiplayer_session_matchmaking_server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_session_matchmaking_server.cpp; sourceTree = "<group>"; };
+		9B5A10D01BFA60E000BE12FD /* multiplayer_session_member.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_session_member.cpp; sourceTree = "<group>"; };
+		9B5A10D11BFA60E000BE12FD /* multiplayer_session_member_request.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_session_member_request.cpp; sourceTree = "<group>"; };
+		9B5A10D21BFA60E000BE12FD /* multiplayer_session_properties.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_session_properties.cpp; sourceTree = "<group>"; };
+		9B5A10D31BFA60E000BE12FD /* multiplayer_session_reference.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_session_reference.cpp; sourceTree = "<group>"; };
+		9B5A10D41BFA60E000BE12FD /* multiplayer_session_request.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_session_request.cpp; sourceTree = "<group>"; };
+		9B5A10D51BFA60E000BE12FD /* multiplayer_session_states.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_session_states.cpp; sourceTree = "<group>"; };
+		9B5A10D61BFA60E000BE12FD /* multiplayer_subscription.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_subscription.cpp; sourceTree = "<group>"; };
+		9B5A10D71BFA60E000BE12FD /* multiplayer_transfer_handle_post_request.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_transfer_handle_post_request.cpp; sourceTree = "<group>"; };
+		9B5A110A1BFA60E000BE12FD /* device_presence_change_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = device_presence_change_event_args.cpp; sourceTree = "<group>"; };
+		9B5A110B1BFA60E000BE12FD /* device_presence_change_subscription.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = device_presence_change_subscription.cpp; sourceTree = "<group>"; };
+		9B5A110C1BFA60E000BE12FD /* media_presence_data.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = media_presence_data.cpp; sourceTree = "<group>"; };
+		9B5A110D1BFA60E000BE12FD /* presence_activity_data.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = presence_activity_data.cpp; sourceTree = "<group>"; };
+		9B5A110E1BFA60E000BE12FD /* presence_broadcast_record.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = presence_broadcast_record.cpp; sourceTree = "<group>"; };
+		9B5A110F1BFA60E000BE12FD /* presence_data.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = presence_data.cpp; sourceTree = "<group>"; };
+		9B5A11101BFA60E000BE12FD /* presence_device_record.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = presence_device_record.cpp; sourceTree = "<group>"; };
+		9B5A11111BFA60E000BE12FD /* presence_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = presence_internal.h; sourceTree = "<group>"; };
+		9B5A11121BFA60E000BE12FD /* presence_media_record.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = presence_media_record.cpp; sourceTree = "<group>"; };
+		9B5A11131BFA60E000BE12FD /* presence_record.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = presence_record.cpp; sourceTree = "<group>"; };
+		9B5A11141BFA60E000BE12FD /* presence_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = presence_service.cpp; sourceTree = "<group>"; };
+		9B5A11151BFA60E000BE12FD /* presence_service_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = presence_service_impl.cpp; sourceTree = "<group>"; };
+		9B5A11161BFA60E000BE12FD /* presence_title_record.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = presence_title_record.cpp; sourceTree = "<group>"; };
+		9B5A11171BFA60E000BE12FD /* presence_title_request.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = presence_title_request.cpp; sourceTree = "<group>"; };
+		9B5A11181BFA60E000BE12FD /* presence_user_batch_request.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = presence_user_batch_request.cpp; sourceTree = "<group>"; };
+		9B5A11191BFA60E000BE12FD /* presence_writer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = presence_writer.cpp; sourceTree = "<group>"; };
+		9B5A111A1BFA60E000BE12FD /* title_presence_change_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = title_presence_change_event_args.cpp; sourceTree = "<group>"; };
+		9B5A111B1BFA60E000BE12FD /* title_presence_change_subscription.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = title_presence_change_subscription.cpp; sourceTree = "<group>"; };
+		9B5A113A1BFA60E000BE12FD /* multiple_permissions_check_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiple_permissions_check_result.cpp; sourceTree = "<group>"; };
+		9B5A113B1BFA60E000BE12FD /* permission_check_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = permission_check_result.cpp; sourceTree = "<group>"; };
+		9B5A113C1BFA60E000BE12FD /* permission_deny_reason.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = permission_deny_reason.cpp; sourceTree = "<group>"; };
+		9B5A113D1BFA60E000BE12FD /* privacy_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = privacy_service.cpp; sourceTree = "<group>"; };
+		9B5A114A1BFA60E000BE12FD /* real_time_activity_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = real_time_activity_service.cpp; sourceTree = "<group>"; };
+		9B5A114B1BFA60E000BE12FD /* real_time_activity_subscription.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = real_time_activity_subscription.cpp; sourceTree = "<group>"; };
+		9B5A114C1BFA60E000BE12FD /* real_time_activity_subscription_error_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = real_time_activity_subscription_error_event_args.cpp; sourceTree = "<group>"; };
+		9B5A11711BFA60E000BE12FD /* profile_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = profile_service.cpp; sourceTree = "<group>"; };
+		9B5A11721BFA60E000BE12FD /* reputation_feedback_request.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = reputation_feedback_request.cpp; sourceTree = "<group>"; };
+		9B5A11731BFA60E000BE12FD /* reputation_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = reputation_service.cpp; sourceTree = "<group>"; };
+		9B5A11741BFA60E000BE12FD /* social_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = social_internal.h; sourceTree = "<group>"; };
+		9B5A11751BFA60E000BE12FD /* social_relationship_change_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = social_relationship_change_event_args.cpp; sourceTree = "<group>"; };
+		9B5A11761BFA60E000BE12FD /* social_relationship_change_subscription.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = social_relationship_change_subscription.cpp; sourceTree = "<group>"; };
+		9B5A11771BFA60E000BE12FD /* social_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = social_service.cpp; sourceTree = "<group>"; };
+		9B5A11781BFA60E000BE12FD /* social_service_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = social_service_impl.cpp; sourceTree = "<group>"; };
+		9B5A11911BFA60E000BE12FD /* xbox_social_relationship.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = xbox_social_relationship.cpp; sourceTree = "<group>"; };
+		9B5A11921BFA60E000BE12FD /* xbox_social_relationship_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = xbox_social_relationship_result.cpp; sourceTree = "<group>"; };
+		9B5A11931BFA60E000BE12FD /* xbox_user_profile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = xbox_user_profile.cpp; sourceTree = "<group>"; };
+		9B5A11951BFA60E000BE12FD /* requested_statistics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = requested_statistics.cpp; sourceTree = "<group>"; };
+		9B5A11961BFA60E000BE12FD /* service_configuration_statistic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = service_configuration_statistic.cpp; sourceTree = "<group>"; };
+		9B5A11971BFA60E100BE12FD /* statistic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = statistic.cpp; sourceTree = "<group>"; };
+		9B5A11981BFA60E100BE12FD /* statistic_change_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = statistic_change_event_args.cpp; sourceTree = "<group>"; };
+		9B5A11991BFA60E100BE12FD /* statistic_change_subscription.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = statistic_change_subscription.cpp; sourceTree = "<group>"; };
+		9B5A119A1BFA60E100BE12FD /* user_statistics_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = user_statistics_internal.h; sourceTree = "<group>"; };
+		9B5A119B1BFA60E100BE12FD /* user_statistics_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = user_statistics_result.cpp; sourceTree = "<group>"; };
+		9B5A119C1BFA60E100BE12FD /* user_statistics_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = user_statistics_service.cpp; sourceTree = "<group>"; };
+		9B5A119D1BFA60E100BE12FD /* user_statistics_service_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = user_statistics_service_impl.cpp; sourceTree = "<group>"; };
+		9B5A11AE1BFA60E100BE12FD /* title_storage_blob_metadata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = title_storage_blob_metadata.cpp; sourceTree = "<group>"; };
+		9B5A11AF1BFA60E100BE12FD /* title_storage_blob_metadata_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = title_storage_blob_metadata_result.cpp; sourceTree = "<group>"; };
+		9B5A11B01BFA60E100BE12FD /* title_storage_blob_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = title_storage_blob_result.cpp; sourceTree = "<group>"; };
+		9B5A11B11BFA60E100BE12FD /* title_storage_quota.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = title_storage_quota.cpp; sourceTree = "<group>"; };
+		9B5A11B21BFA60E100BE12FD /* title_storage_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = title_storage_service.cpp; sourceTree = "<group>"; };
+		9B5A12C91BFBF63600BE12FD /* pch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pch.cpp; sourceTree = "<group>"; };
+		9B5A12CA1BFBF63600BE12FD /* pch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pch.h; sourceTree = "<group>"; };
+		9B5A12D31BFD2BF200BE12FD /* tournament_team_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tournament_team_result.cpp; sourceTree = "<group>"; };
+		9B66D2CC1BE85B5C00E53086 /* Casablanca.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Casablanca.xcodeproj; path = ../../Casablanca/Build_iOS/Casablanca.xcodeproj; sourceTree = "<group>"; };
+		9B82502C1C1A397F002C8F30 /* multiplayer_session_arbitration_server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_session_arbitration_server.cpp; sourceTree = "<group>"; };
+		9B8250311C1A4A8F002C8F30 /* multiplayer_session_tournaments_server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_session_tournaments_server.cpp; sourceTree = "<group>"; };
+		9B8250331C1A4B34002C8F30 /* tournament_reference.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tournament_reference.cpp; sourceTree = "<group>"; };
+		9B847EAD1CDD27A1004E04B0 /* notification_service.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = notification_service.h; sourceTree = "<group>"; };
+		9B847EB11CDD2823004E04B0 /* notification_service_i.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = notification_service_i.mm; sourceTree = "<group>"; };
+		9B847EB51CDD6928004E04B0 /* notification_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = notification_service.cpp; sourceTree = "<group>"; };
+		9B8A00AF1BF2778B000337EA /* sign_in_delegate_ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sign_in_delegate_ios.h; sourceTree = "<group>"; };
+		9B8A00B01BF2778B000337EA /* sign_in_delegate_ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = sign_in_delegate_ios.mm; sourceTree = "<group>"; };
+		9B9615E21BEA86FE00E79527 /* XboxLiveContext_Desktop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XboxLiveContext_Desktop.cpp; sourceTree = "<group>"; };
+		9B9615E91BEA962600E79527 /* pch_unix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pch_unix.h; sourceTree = "<group>"; };
+		9B97B35B1BE18B2600CF1E29 /* libXboxLiveServices.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libXboxLiveServices.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		9B97B5941BE1981900CF1E29 /* build_version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = build_version.h; sourceTree = "<group>"; };
+		9B97B5971BE1981900CF1E29 /* errors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = errors.cpp; sourceTree = "<group>"; };
+		9B97B5981BE1981900CF1E29 /* http_call_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = http_call_impl.cpp; sourceTree = "<group>"; };
+		9B97B5991BE1981900CF1E29 /* http_call_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = http_call_impl.h; sourceTree = "<group>"; };
+		9B97B59A1BE1981900CF1E29 /* http_call_request_message.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = http_call_request_message.cpp; sourceTree = "<group>"; };
+		9B97B59B1BE1981900CF1E29 /* http_call_response.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = http_call_response.cpp; sourceTree = "<group>"; };
+		9B97B59C1BE1981900CF1E29 /* http_call_response.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = http_call_response.h; sourceTree = "<group>"; };
+		9B97B59D1BE1981900CF1E29 /* http_client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = http_client.cpp; sourceTree = "<group>"; };
+		9B97B59E1BE1981900CF1E29 /* http_client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = http_client.h; sourceTree = "<group>"; };
+		9B97B59F1BE1981900CF1E29 /* local_config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = local_config.cpp; sourceTree = "<group>"; };
+		9B97B5A01BE1981900CF1E29 /* local_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = local_config.h; sourceTree = "<group>"; };
+		9B97B5A11BE1981900CF1E29 /* service_call_logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = service_call_logger.cpp; sourceTree = "<group>"; };
+		9B97B5A21BE1981900CF1E29 /* service_call_logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = service_call_logger.h; sourceTree = "<group>"; };
+		9B97B5A31BE1981900CF1E29 /* service_call_logger_data.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = service_call_logger_data.cpp; sourceTree = "<group>"; };
+		9B97B5A41BE1981900CF1E29 /* service_call_logger_data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = service_call_logger_data.h; sourceTree = "<group>"; };
+		9B97B5A71BE1981900CF1E29 /* service_call_logging_config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = service_call_logging_config.cpp; sourceTree = "<group>"; };
+		9B97B5A81BE1981900CF1E29 /* shared_macros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared_macros.h; sourceTree = "<group>"; };
+		9B97B5A91BE1981900CF1E29 /* telemetry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = telemetry.cpp; sourceTree = "<group>"; };
+		9B97B5AA1BE1981900CF1E29 /* telemetry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = telemetry.h; sourceTree = "<group>"; };
+		9B97B5AB1BE1981900CF1E29 /* user_context.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = user_context.cpp; sourceTree = "<group>"; };
+		9B97B5AC1BE1981900CF1E29 /* user_context.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = user_context.h; sourceTree = "<group>"; };
+		9B97B5AD1BE1981900CF1E29 /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cpp; sourceTree = "<group>"; };
+		9B97B5AE1BE1981900CF1E29 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
+		9B97B5AF1BE1981900CF1E29 /* utils_locales.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = utils_locales.cpp; sourceTree = "<group>"; };
+		9B97B5B01BE1981900CF1E29 /* web_socket_client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = web_socket_client.cpp; sourceTree = "<group>"; };
+		9B97B5B11BE1981900CF1E29 /* web_socket_client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = web_socket_client.h; sourceTree = "<group>"; };
+		9B97B5B21BE1981900CF1E29 /* web_socket_connection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = web_socket_connection.cpp; sourceTree = "<group>"; };
+		9B97B5B31BE1981900CF1E29 /* web_socket_connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = web_socket_connection.h; sourceTree = "<group>"; };
+		9B97B5B41BE1981900CF1E29 /* web_socket_connection_state.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = web_socket_connection_state.h; sourceTree = "<group>"; };
+		9B97B5C81BE1981900CF1E29 /* xbox_live_app_config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = xbox_live_app_config.cpp; sourceTree = "<group>"; };
+		9B97B5C91BE1981900CF1E29 /* xbox_live_context_settings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = xbox_live_context_settings.cpp; sourceTree = "<group>"; };
+		9B97B5CA1BE1981900CF1E29 /* xbox_service_call_routed_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = xbox_service_call_routed_event_args.cpp; sourceTree = "<group>"; };
+		9B97B5CB1BE1981900CF1E29 /* xbox_system_factory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = xbox_system_factory.cpp; sourceTree = "<group>"; };
+		9B97B5CC1BE1981900CF1E29 /* xbox_system_factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xbox_system_factory.h; sourceTree = "<group>"; };
+		9B97B5CF1BE1981900CF1E29 /* auth_manager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = auth_manager.cpp; sourceTree = "<group>"; };
+		9B97B5D01BE1981900CF1E29 /* auth_manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = auth_manager.h; sourceTree = "<group>"; };
+		9B97B5D11BE1981900CF1E29 /* cidr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cidr.cpp; sourceTree = "<group>"; };
+		9B97B5D21BE1981900CF1E29 /* cidr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cidr.h; sourceTree = "<group>"; };
+		9B97B5DB1BE1981900CF1E29 /* ecdsa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ecdsa.h; sourceTree = "<group>"; };
+		9B97B5DC1BE1981900CF1E29 /* ip_address.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ip_address.cpp; sourceTree = "<group>"; };
+		9B97B5DD1BE1981900CF1E29 /* ip_address.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ip_address.h; sourceTree = "<group>"; };
+		9B97B5DE1BE1981900CF1E29 /* json_web_key.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = json_web_key.cpp; sourceTree = "<group>"; };
+		9B97B5DF1BE1981900CF1E29 /* json_web_key.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = json_web_key.h; sourceTree = "<group>"; };
+		9B97B5E01BE1981900CF1E29 /* nsal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nsal.cpp; sourceTree = "<group>"; };
+		9B97B5E11BE1981900CF1E29 /* nsal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nsal.h; sourceTree = "<group>"; };
+		9B97B5E21BE1981900CF1E29 /* nsal_endpoint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nsal_endpoint.cpp; sourceTree = "<group>"; };
+		9B97B5E31BE1981900CF1E29 /* nsal_endpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nsal_endpoint.h; sourceTree = "<group>"; };
+		9B97B5E41BE1981900CF1E29 /* request_signer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = request_signer.h; sourceTree = "<group>"; };
+		9B97B5E51BE1981900CF1E29 /* request_signer_helpers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = request_signer_helpers.cpp; sourceTree = "<group>"; };
+		9B97B5E61BE1981900CF1E29 /* request_signer_helpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = request_signer_helpers.h; sourceTree = "<group>"; };
+		9B97B5E91BE1981900CF1E29 /* signature_policy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = signature_policy.cpp; sourceTree = "<group>"; };
+		9B97B5EA1BE1981900CF1E29 /* signature_policy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = signature_policy.h; sourceTree = "<group>"; };
+		9B97B5EB1BE1981900CF1E29 /* title_token_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = title_token_service.cpp; sourceTree = "<group>"; };
+		9B97B5EC1BE1981900CF1E29 /* title_token_service.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = title_token_service.h; sourceTree = "<group>"; };
+		9B97B5ED1BE1981900CF1E29 /* token_error.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = token_error.cpp; sourceTree = "<group>"; };
+		9B97B5EE1BE1981900CF1E29 /* token_error.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = token_error.h; sourceTree = "<group>"; };
+		9B97B5EF1BE1981900CF1E29 /* token_manager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = token_manager.cpp; sourceTree = "<group>"; };
+		9B97B5F01BE1981900CF1E29 /* token_manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = token_manager.h; sourceTree = "<group>"; };
+		9B97B5F11BE1981900CF1E29 /* token_request.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = token_request.cpp; sourceTree = "<group>"; };
+		9B97B5F21BE1981900CF1E29 /* token_request.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = token_request.h; sourceTree = "<group>"; };
+		9B97B5F31BE1981900CF1E29 /* token_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = token_result.cpp; sourceTree = "<group>"; };
+		9B97B5F41BE1981900CF1E29 /* token_result.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = token_result.h; sourceTree = "<group>"; };
+		9B97B5F51BE1981900CF1E29 /* trie.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = trie.cpp; sourceTree = "<group>"; };
+		9B97B5F61BE1981900CF1E29 /* trie.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trie.h; sourceTree = "<group>"; };
+		9B97B5F71BE1981900CF1E29 /* user_token_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = user_token_service.cpp; sourceTree = "<group>"; };
+		9B97B5F81BE1981900CF1E29 /* user_token_service.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = user_token_service.h; sourceTree = "<group>"; };
+		9B97B5FC1BE1981900CF1E29 /* xsts_token_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = xsts_token_service.cpp; sourceTree = "<group>"; };
+		9B97B5FD1BE1981900CF1E29 /* xsts_token_service.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xsts_token_service.h; sourceTree = "<group>"; };
+		9B97B5FE1BE1981900CF1E29 /* xtitle_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = xtitle_service.cpp; sourceTree = "<group>"; };
+		9B97B5FF1BE1981900CF1E29 /* xtitle_service.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xtitle_service.h; sourceTree = "<group>"; };
+		9B97B6001BE1981900CF1E29 /* auth_config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = auth_config.cpp; sourceTree = "<group>"; };
+		9B97B6011BE1981900CF1E29 /* auth_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = auth_config.h; sourceTree = "<group>"; };
+		9B97B6021BE1981900CF1E29 /* system_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = system_internal.h; sourceTree = "<group>"; };
+		9B97B6031BE1981900CF1E29 /* token_and_signature_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = token_and_signature_result.cpp; sourceTree = "<group>"; };
+		9B97B6041BE1981900CF1E29 /* user.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = user.cpp; sourceTree = "<group>"; };
+		9B97B6051BE1981900CF1E29 /* user_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = user_impl.cpp; sourceTree = "<group>"; };
+		9B97B6061BE1981900CF1E29 /* user_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = user_impl.h; sourceTree = "<group>"; };
+		9B97B6101BE1981900CF1E29 /* xbox_live_mutex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = xbox_live_mutex.cpp; sourceTree = "<group>"; };
+		9B97B7B21BE19DFC00CF1E29 /* pch_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pch_common.h; sourceTree = "<group>"; };
+		9B97B7BB1BE19DFC00CF1E29 /* xbox_live_context_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = xbox_live_context_impl.cpp; sourceTree = "<group>"; };
+		9B97B7BC1BE19DFC00CF1E29 /* xbox_live_context_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xbox_live_context_impl.h; sourceTree = "<group>"; };
+		9B97BABA1BE1A1B000CF1E29 /* achievements.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = achievements.h; sourceTree = "<group>"; };
+		9B97BABB1BE1A1B000CF1E29 /* contextual_search_service.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = contextual_search_service.h; sourceTree = "<group>"; };
+		9B97BABC1BE1A1B000CF1E29 /* entertainment_profile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = entertainment_profile.h; sourceTree = "<group>"; };
+		9B97BABD1BE1A1B000CF1E29 /* errors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = errors.h; sourceTree = "<group>"; };
+		9B97BABE1BE1A1B000CF1E29 /* events.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = events.h; sourceTree = "<group>"; };
+		9B97BABF1BE1A1B000CF1E29 /* game_server_platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = game_server_platform.h; sourceTree = "<group>"; };
+		9B97BAC01BE1A1B000CF1E29 /* http_call.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = http_call.h; sourceTree = "<group>"; };
+		9B97BAC11BE1A1B000CF1E29 /* http_call_request_message.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = http_call_request_message.h; sourceTree = "<group>"; };
+		9B97BAC21BE1A1B000CF1E29 /* leaderboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = leaderboard.h; sourceTree = "<group>"; };
+		9B97BAC41BE1A1B000CF1E29 /* matchmaking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = matchmaking.h; sourceTree = "<group>"; };
+		9B97BAC71BE1A1B000CF1E29 /* presence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = presence.h; sourceTree = "<group>"; };
+		9B97BAC81BE1A1B000CF1E29 /* privacy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = privacy.h; sourceTree = "<group>"; };
+		9B97BAC91BE1A1B000CF1E29 /* profile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = profile.h; sourceTree = "<group>"; };
+		9B97BACA1BE1A1B000CF1E29 /* real_time_activity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = real_time_activity.h; sourceTree = "<group>"; };
+		9B97BACB1BE1A1B000CF1E29 /* service_call_logging_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = service_call_logging_config.h; sourceTree = "<group>"; };
+		9B97BACC1BE1A1B000CF1E29 /* services.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services.h; sourceTree = "<group>"; };
+		9B97BACD1BE1A1B000CF1E29 /* social.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = social.h; sourceTree = "<group>"; };
+		9B97BACF1BE1A1B000CF1E29 /* system.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = system.h; sourceTree = "<group>"; };
+		9B97BAD01BE1A1B000CF1E29 /* title_callable_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = title_callable_ui.h; sourceTree = "<group>"; };
+		9B97BAD11BE1A1B000CF1E29 /* title_storage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = title_storage.h; sourceTree = "<group>"; };
+		9B97BAD21BE1A1B000CF1E29 /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
+		9B97BAD31BE1A1B000CF1E29 /* user_statistics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = user_statistics.h; sourceTree = "<group>"; };
+		9B97BAD51BE1A1B000CF1E29 /* xbox_live_context.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xbox_live_context.h; sourceTree = "<group>"; };
+		9B97BAD61BE1A1B000CF1E29 /* xbox_live_context_settings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xbox_live_context_settings.h; sourceTree = "<group>"; };
+		9B97BAD71BE1A1B000CF1E29 /* xbox_service_call_routed_event_args.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xbox_service_call_routed_event_args.h; sourceTree = "<group>"; };
+		9BA63DBD1BE43C8900BFC445 /* presence_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = presence_internal.h; path = ../../Source/Services/Presence/presence_internal.h; sourceTree = "<group>"; };
+		9BAEFDE81D3019A300ABBA82 /* multiplayer_match_client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multiplayer_match_client.cpp; path = Manager/multiplayer_match_client.cpp; sourceTree = "<group>"; };
+		9BAEFDEA1D3019B300ABBA82 /* multiplayer_search_handle_details.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_search_handle_details.cpp; sourceTree = "<group>"; };
+		9BAEFDEB1D3019B300ABBA82 /* multiplayer_search_handle_request.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_search_handle_request.cpp; sourceTree = "<group>"; };
+		9BAEFDEE1D30263F00ABBA82 /* initiator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = initiator.cpp; sourceTree = "<group>"; };
+		9BAEFDEF1D30263F00ABBA82 /* initiator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = initiator.h; sourceTree = "<group>"; };
+		9BBAB7771CBDE09000A75EDF /* local_config_u.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = local_config_u.cpp; path = u/local_config_u.cpp; sourceTree = "<group>"; };
+		9BBAB79C1CC0408200A75EDF /* local_config_i.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = local_config_i.mm; path = i/local_config_i.mm; sourceTree = "<group>"; };
+		9BEB14F91DCD01BF001E5DD5 /* multiplayer_member_initialization.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_member_initialization.cpp; sourceTree = "<group>"; };
+		9BF11ACC1C12076E00D111C9 /* big_num.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = big_num.cpp; sourceTree = "<group>"; };
+		9BF11ACD1C12076E00D111C9 /* big_num.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = big_num.h; sourceTree = "<group>"; };
+		9BF11ACE1C12076E00D111C9 /* request_signer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = request_signer.cpp; sourceTree = "<group>"; };
+		9BF11ACF1C12076E00D111C9 /* sha256.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sha256.cpp; sourceTree = "<group>"; };
+		9BF11AD01C12076E00D111C9 /* sha256.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sha256.h; sourceTree = "<group>"; };
+		9BF11AD91C120C2900D111C9 /* ip_address_desktop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ip_address_desktop.cpp; sourceTree = "<group>"; };
+		9BF11AE61C17ABA400D111C9 /* multiplayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = multiplayer.h; sourceTree = "<group>"; };
+		9BF132411C3C48230048204E /* device_token_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = device_token_service.cpp; sourceTree = "<group>"; };
+		9BF132421C3C48230048204E /* device_token_service.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = device_token_service.h; sourceTree = "<group>"; };
+		9BF639331D492C3300BDF02B /* contextual_search_game_clip_stat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contextual_search_game_clip_stat.cpp; sourceTree = "<group>"; };
+		9BF639341D492C3300BDF02B /* contextual_search_game_clip_thumbnail.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contextual_search_game_clip_thumbnail.cpp; sourceTree = "<group>"; };
+		9BF639351D492C3300BDF02B /* contextual_search_game_clip_uri_info.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contextual_search_game_clip_uri_info.cpp; sourceTree = "<group>"; };
+		9BF639361D492C3300BDF02B /* contextual_search_game_clip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contextual_search_game_clip.cpp; sourceTree = "<group>"; };
+		9BF639371D492C3300BDF02B /* contextual_search_game_clips_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contextual_search_game_clips_result.cpp; sourceTree = "<group>"; };
+		9C063B111D774C28009C3E3C /* mem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mem.cpp; sourceTree = "<group>"; };
+		9C063B131D774FD7009C3E3C /* mem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mem.h; sourceTree = "<group>"; };
+		9C4DF1B01DA32E6A00224A7C /* ppltasks_extra_unix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ppltasks_extra_unix.h; sourceTree = "<group>"; };
+		9CB56C051DA359BB00C92F44 /* multiplayer_query_search_handle_request.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiplayer_query_search_handle_request.cpp; sourceTree = "<group>"; };
+		9CB56C071DA35A4500C92F44 /* xbox_live_services_settings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = xbox_live_services_settings.cpp; sourceTree = "<group>"; };
+		9CB56C091DA35AA800C92F44 /* custom_output.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = custom_output.cpp; sourceTree = "<group>"; };
+		9CB56C0A1DA35AA800C92F44 /* custom_output.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = custom_output.h; sourceTree = "<group>"; };
+		9CC36FE21DB6DE89007142EE /* xbox_user_id_container.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xbox_user_id_container.cpp; path = Manager/xbox_user_id_container.cpp; sourceTree = "<group>"; };
+		9CDF0D291DA2E8860046C721 /* internal_social_event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = internal_social_event.cpp; path = Manager/internal_social_event.cpp; sourceTree = "<group>"; };
+		9CDF0D2A1DA2E8860046C721 /* peoplehub_service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = peoplehub_service.cpp; path = Manager/peoplehub_service.cpp; sourceTree = "<group>"; };
+		9CDF0D2B1DA2E8860046C721 /* preferred_color.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = preferred_color.cpp; path = Manager/preferred_color.cpp; sourceTree = "<group>"; };
+		9CDF0D2C1DA2E8860046C721 /* social_event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = social_event.cpp; path = Manager/social_event.cpp; sourceTree = "<group>"; };
+		9CDF0D2D1DA2E8860046C721 /* social_graph.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = social_graph.cpp; path = Manager/social_graph.cpp; sourceTree = "<group>"; };
+		9CDF0D2E1DA2E8860046C721 /* social_manager_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = social_manager_internal.h; path = Manager/social_manager_internal.h; sourceTree = "<group>"; };
+		9CDF0D2F1DA2E8860046C721 /* social_manager_presence_record.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = social_manager_presence_record.cpp; path = Manager/social_manager_presence_record.cpp; sourceTree = "<group>"; };
+		9CDF0D301DA2E8860046C721 /* social_manager_presence_title_record.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = social_manager_presence_title_record.cpp; path = Manager/social_manager_presence_title_record.cpp; sourceTree = "<group>"; };
+		9CDF0D311DA2E8860046C721 /* social_manager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = social_manager.cpp; path = Manager/social_manager.cpp; sourceTree = "<group>"; };
+		9CDF0D321DA2E8860046C721 /* social_user_group_loaded_event_args.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = social_user_group_loaded_event_args.cpp; path = Manager/social_user_group_loaded_event_args.cpp; sourceTree = "<group>"; };
+		9CDF0D331DA2E8860046C721 /* title_history.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = title_history.cpp; path = Manager/title_history.cpp; sourceTree = "<group>"; };
+		9CDF0D341DA2E8860046C721 /* xbox_social_user_group.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xbox_social_user_group.cpp; path = Manager/xbox_social_user_group.cpp; sourceTree = "<group>"; };
+		9CDF0D351DA2E8860046C721 /* xbox_social_user.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xbox_social_user.cpp; path = Manager/xbox_social_user.cpp; sourceTree = "<group>"; };
+		B71305811CC7477A00A4E71E /* XLSCll.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = XLSCll.mm; path = ../XboxTelemetry/XLSCll.mm; sourceTree = "<group>"; };
+		B71305831CC747AD00A4E71E /* XLSCll.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XLSCll.h; path = ../XboxTelemetry/XLSCll.h; sourceTree = "<group>"; };
+		B7E5C76B1CEED3E5003B2B08 /* UTCIDPNames.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UTCIDPNames.h; path = ../XboxTelemetry/UTCIDPNames.h; sourceTree = "<group>"; };
+		B7E5C76C1CEED3E5003B2B08 /* UTCIDPNames.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = UTCIDPNames.mm; path = ../XboxTelemetry/UTCIDPNames.mm; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9B97B3581BE18B2600CF1E29 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9B4933FA1CE8F29E00E7CE0B /* WebKit.framework in Frameworks */,
+				6718D9161C9F69CA007FD4F6 /* CoreText.framework in Frameworks */,
+				670AA2F61C7657D300B3FB9A /* SystemConfiguration.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		255A36A21CD834F400D3AD8E /* Manager */ = {
+			isa = PBXGroup;
+			children = (
+				9BAEFDE81D3019A300ABBA82 /* multiplayer_match_client.cpp */,
+				255A36A61CD8353B00D3AD8E /* find_match_completed_event_args.cpp */,
+				255A36A71CD8353B00D3AD8E /* host_changed_event_args.cpp */,
+				255A36A81CD8353B00D3AD8E /* join_lobby_completed_event_args.cpp */,
+				255A36AA1CD8353B00D3AD8E /* member_joined_event_args.cpp */,
+				255A36AB1CD8353B00D3AD8E /* member_left_event_args.cpp */,
+				255A36AC1CD8353B00D3AD8E /* member_property_changed_event_args.cpp */,
+				255A36AD1CD8353B00D3AD8E /* multiplayer_client_manager.cpp */,
+				255A36AE1CD8353B00D3AD8E /* multiplayer_client_pending_reader.cpp */,
+				255A36AF1CD8353B00D3AD8E /* multiplayer_client_pending_request.cpp */,
+				255A36B01CD8353B00D3AD8E /* multiplayer_event.cpp */,
+				255A36B11CD8353B00D3AD8E /* multiplayer_game_client.cpp */,
+				255A36B21CD8353B00D3AD8E /* multiplayer_game_session.cpp */,
+				255A36B31CD8353B00D3AD8E /* multiplayer_lobby_client.cpp */,
+				255A36B41CD8353B00D3AD8E /* multiplayer_lobby_session.cpp */,
+				255A36B51CD8353B00D3AD8E /* multiplayer_local_user_manager.cpp */,
+				255A36B61CD8353B00D3AD8E /* multiplayer_local_user.cpp */,
+				255A36B71CD8353B00D3AD8E /* multiplayer_manager_internal.h */,
+				255A36B81CD8353B00D3AD8E /* multiplayer_manager_utils.cpp */,
+				255A36B91CD8353B00D3AD8E /* multiplayer_manager.cpp */,
+				255A36BA1CD8353B00D3AD8E /* multiplayer_member.cpp */,
+				255A36BB1CD8353B00D3AD8E /* multiplayer_session_writer.cpp */,
+				255A36BC1CD8353B00D3AD8E /* perform_qos_measurements_event_args.cpp */,
+				255A36BD1CD8353B00D3AD8E /* session_property_changed_event_args.cpp */,
+				255A36BE1CD8353B00D3AD8E /* tournament_game_session_ready_event_args.cpp */,
+				255A36BF1CD8353B00D3AD8E /* tournament_registration_state_changed_event_args.cpp */,
+				255A36C01CD8353B00D3AD8E /* user_added_event_args.cpp */,
+				255A36C11CD8353B00D3AD8E /* user_removed_event_args.cpp */,
+				255A36C21CD8353B00D3AD8E /* WinRT */,
+			);
+			name = Manager;
+			sourceTree = "<group>";
+		};
+		32F5FBBD1CE7DB0F008A5E09 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				9B4934781CEE1C1800E7CE0B /* notification_helper.mm */,
+				32F5FBBE1CE7DB1D008A5E09 /* title_callable_ui.mm */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		6718D8B11C865E23007FD4F6 /* Xbox UI Delegates */ = {
+			isa = PBXGroup;
+			children = (
+				9B8A00AF1BF2778B000337EA /* sign_in_delegate_ios.h */,
+				9B8A00B01BF2778B000337EA /* sign_in_delegate_ios.mm */,
+				6718D8B51C86605E007FD4F6 /* XBLSignInHandler.h */,
+				6718D8B61C86605E007FD4F6 /* XBLSignInHandler.mm */,
+			);
+			name = "Xbox UI Delegates";
+			path = XboxUIDelegates;
+			sourceTree = "<group>";
+		};
+		67210E181C6479E20008FFDB /* Xbox Sign In UI */ = {
+			isa = PBXGroup;
+			children = (
+				67210E211C6479E20008FFDB /* Bridge */,
+			);
+			name = "Xbox Sign In UI";
+			path = XboxSignInUI;
+			sourceTree = "<group>";
+		};
+		67210E211C6479E20008FFDB /* Bridge */ = {
+			isa = PBXGroup;
+			children = (
+				67210E241C6479E20008FFDB /* NSError+XSAPIExtensions.h */,
+				67210E251C6479E20008FFDB /* NSError+XSAPIExtensions.mm */,
+				67210E261C6479E20008FFDB /* XboxProvider.h */,
+				67210E271C6479E20008FFDB /* XboxProvider.mm */,
+				6718D8AF1C865AD0007FD4F6 /* XboxProviderBridge.h */,
+				6718D8AE1C865AD0007FD4F6 /* XboxProviderBridge.cpp */,
+			);
+			path = Bridge;
+			sourceTree = "<group>";
+		};
+		6781BDAE1CBC702100264EAF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6781BDB31CBC702100264EAF /* XSAPITCUI.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		67A963861C5FE4250066184E /* XboxLiveServicesResources */ = {
+			isa = PBXGroup;
+			children = (
+				67A963871C5FE4250066184E /* Info.plist */,
+			);
+			path = XboxLiveServicesResources;
+			sourceTree = "<group>";
+		};
+		9B118AC01D6D0B3A0068B268 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				9B118AC11D6D0B460068B268 /* debug_output_ios.cpp */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		9B118AD81D885F960068B268 /* auth */ = {
+			isa = PBXGroup;
+			children = (
+				9B118AD91D885FA80068B268 /* user_auth_ios.h */,
+				9B118ADA1D885FA80068B268 /* user_auth_ios.mm */,
+			);
+			name = auth;
+			sourceTree = "<group>";
+		};
+		9B46ED431BED41D600076704 /* Unix */ = {
+			isa = PBXGroup;
+			children = (
+				9BF11ACC1C12076E00D111C9 /* big_num.cpp */,
+				9BF11ACD1C12076E00D111C9 /* big_num.h */,
+				9BF11ACE1C12076E00D111C9 /* request_signer.cpp */,
+				9BF11ACF1C12076E00D111C9 /* sha256.cpp */,
+				9BF11AD01C12076E00D111C9 /* sha256.h */,
+				9B46ED441BED41D600076704 /* ecdsa_unix.cpp */,
+				9B46ED451BED41D600076704 /* ip_address_unix.cpp */,
+			);
+			path = Unix;
+			sourceTree = "<group>";
+		};
+		9B4B44A41D2F2D4C0060F1C5 /* Logger */ = {
+			isa = PBXGroup;
+			children = (
+				9CB56C091DA35AA800C92F44 /* custom_output.cpp */,
+				9CB56C0A1DA35AA800C92F44 /* custom_output.h */,
+				9B118AC01D6D0B3A0068B268 /* iOS */,
+				9B118ABD1D6D0AFF0068B268 /* debug_output.h */,
+				9B118ABC1D6BC12E0068B268 /* log.h */,
+				9B4B44A91D2F2D4C0060F1C5 /* log.cpp */,
+				9B4B44AB1D2F2D4C0060F1C5 /* log_entry.cpp */,
+				9B4B44AC1D2F2D4C0060F1C5 /* log_output.cpp */,
+			);
+			path = Logger;
+			sourceTree = "<group>";
+		};
+		9B5A0FB51BFA603A00BE12FD /* Achievements */ = {
+			isa = PBXGroup;
+			children = (
+				9B5A0FB61BFA603A00BE12FD /* achievement.cpp */,
+				9B5A0FB71BFA603A00BE12FD /* achievement_media_asset.cpp */,
+				9B5A0FB81BFA603A00BE12FD /* achievement_progression.cpp */,
+				9B5A0FB91BFA603A00BE12FD /* achievement_requirement.cpp */,
+				9B5A0FBA1BFA603A00BE12FD /* achievement_reward.cpp */,
+				9B5A0FBB1BFA603A00BE12FD /* achievement_service.cpp */,
+				9B5A0FBC1BFA603A00BE12FD /* achievement_time_window.cpp */,
+				9B5A0FBD1BFA603A00BE12FD /* achievement_title_association.cpp */,
+				9B5A0FBE1BFA603A00BE12FD /* achievements_result.cpp */,
+			);
+			path = Achievements;
+			sourceTree = "<group>";
+		};
+		9B5A0FE71BFA60E000BE12FD /* EntertainmentProfile */ = {
+			isa = PBXGroup;
+			children = (
+				9B5A0FE81BFA60E000BE12FD /* entertainment_profile.cpp */,
+				9B5A0FE91BFA60E000BE12FD /* entertainment_profile_list_contains_item_result.cpp */,
+				9B5A0FEA1BFA60E000BE12FD /* entertainment_profile_list_xbox_one_pins.cpp */,
+				9B5A0FEB1BFA60E000BE12FD /* WinRT */,
+			);
+			path = EntertainmentProfile;
+			sourceTree = "<group>";
+		};
+		9B5A0FEB1BFA60E000BE12FD /* WinRT */ = {
+			isa = PBXGroup;
+			children = (
+				9B5A0FEC1BFA60E000BE12FD /* EntertainmentProfileListContainsItemResult_WinRT.cpp */,
+				9B5A0FED1BFA60E000BE12FD /* EntertainmentProfileListContainsItemResult_WinRT.h */,
+				9B5A0FEE1BFA60E000BE12FD /* EntertainmentProfileListService_WinRT.cpp */,
+				9B5A0FEF1BFA60E000BE12FD /* EntertainmentProfileListService_WinRT.h */,
+				9B5A0FF01BFA60E000BE12FD /* EntertainmentProfileListVideoQueue_WinRT.cpp */,
+				9B5A0FF11BFA60E000BE12FD /* EntertainmentProfileListVideoQueue_WinRT.h */,
+			);
+			path = WinRT;
+			sourceTree = "<group>";
+		};
+		9B5A0FF21BFA60E000BE12FD /* Events */ = {
+			isa = PBXGroup;
+			children = (
+				9B2956141CE247490026A41C /* events_service.cpp */,
+			);
+			path = Events;
+			sourceTree = "<group>";
+		};
+		9B5A0FF71BFA60E000BE12FD /* GameServerPlatform */ = {
+			isa = PBXGroup;
+			children = (
+				9B5A0FF81BFA60E000BE12FD /* allocation_result.cpp */,
+				9B5A0FF91BFA60E000BE12FD /* cluster_result.cpp */,
+				9B5A0FFA1BFA60E000BE12FD /* game_server_image_set.cpp */,
+				9B5A0FFB1BFA60E000BE12FD /* game_server_metadata_result.cpp */,
+				9B5A0FFC1BFA60E000BE12FD /* game_server_platform_service.cpp */,
+				9B5A0FFD1BFA60E000BE12FD /* game_server_port_mapping.cpp */,
+				9B5A0FFE1BFA60E000BE12FD /* game_server_ticket_status.cpp */,
+				9B5A0FFF1BFA60E000BE12FD /* game_variant.cpp */,
+				9B5A10001BFA60E000BE12FD /* game_variant_schema.cpp */,
+				9B5A10011BFA60E000BE12FD /* quality_of_service_server.cpp */,
+			);
+			path = GameServerPlatform;
+			sourceTree = "<group>";
+		};
+		9B5A10191BFA60E000BE12FD /* Leaderboard */ = {
+			isa = PBXGroup;
+			children = (
+				9B5A101A1BFA60E000BE12FD /* leaderboard_column.cpp */,
+				9B5A101B1BFA60E000BE12FD /* leaderboard_query.h */,
+				9B5A101C1BFA60E000BE12FD /* leaderboard_result.cpp */,
+				9B5A101D1BFA60E000BE12FD /* leaderboard_row.cpp */,
+				9B5A101E1BFA60E000BE12FD /* leaderboard_serializers.cpp */,
+				9B5A101F1BFA60E000BE12FD /* leaderboard_serializers.h */,
+				9B5A10201BFA60E000BE12FD /* leaderboard_service.cpp */,
+			);
+			path = Leaderboard;
+			sourceTree = "<group>";
+		};
+		9B5A10531BFA60E000BE12FD /* Matchmaking */ = {
+			isa = PBXGroup;
+			children = (
+				9B5A10541BFA60E000BE12FD /* create_match_ticket_response.cpp */,
+				9B5A10551BFA60E000BE12FD /* hopper_statistics_response.cpp */,
+				9B5A10561BFA60E000BE12FD /* match_ticket_details_response.cpp */,
+				9B5A10571BFA60E000BE12FD /* matchmaking_service.cpp */,
+			);
+			path = Matchmaking;
+			sourceTree = "<group>";
+		};
+		9B5A10611BFA60E000BE12FD /* Misc */ = {
+			isa = PBXGroup;
+			children = (
+				9BF639331D492C3300BDF02B /* contextual_search_game_clip_stat.cpp */,
+				9BF639341D492C3300BDF02B /* contextual_search_game_clip_thumbnail.cpp */,
+				9BF639351D492C3300BDF02B /* contextual_search_game_clip_uri_info.cpp */,
+				9BF639361D492C3300BDF02B /* contextual_search_game_clip.cpp */,
+				9BF639371D492C3300BDF02B /* contextual_search_game_clips_result.cpp */,
+				32F5FBBD1CE7DB0F008A5E09 /* iOS */,
+				9B847EB51CDD6928004E04B0 /* notification_service.cpp */,
+				9B847EAD1CDD27A1004E04B0 /* notification_service.h */,
+				9B847EAF1CDD2823004E04B0 /* Unix */,
+				9B5A10621BFA60E000BE12FD /* contextual_config_result.cpp */,
+				9B5A10631BFA60E000BE12FD /* contextual_config_result.h */,
+				9B5A10641BFA60E000BE12FD /* contextual_search_broadcast.cpp */,
+				9B5A10651BFA60E000BE12FD /* contextual_search_configured_stat.cpp */,
+				9B5A10661BFA60E000BE12FD /* contextual_search_service.cpp */,
+				9B5A10691BFA60E000BE12FD /* string_service.cpp */,
+				9B5A106B1BFA60E000BE12FD /* verify_string_result.cpp */,
+			);
+			path = Misc;
+			sourceTree = "<group>";
+		};
+		9B5A107E1BFA60E000BE12FD /* Multiplayer */ = {
+			isa = PBXGroup;
+			children = (
+				9BEB14F91DCD01BF001E5DD5 /* multiplayer_member_initialization.cpp */,
+				9CB56C051DA359BB00C92F44 /* multiplayer_query_search_handle_request.cpp */,
+				9B118A921D4BFF070068B268 /* multiplayer_role_info.cpp */,
+				9B118A931D4BFF070068B268 /* multiplayer_role_type.cpp */,
+				9B118A941D4BFF070068B268 /* multiplayer_session_role_types.cpp */,
+				9BAEFDEA1D3019B300ABBA82 /* multiplayer_search_handle_details.cpp */,
+				9BAEFDEB1D3019B300ABBA82 /* multiplayer_search_handle_request.cpp */,
+				255A36A21CD834F400D3AD8E /* Manager */,
+				9B8250311C1A4A8F002C8F30 /* multiplayer_session_tournaments_server.cpp */,
+				9B82502C1C1A397F002C8F30 /* multiplayer_session_arbitration_server.cpp */,
+				9B5A10BE1BFA60E000BE12FD /* multiplayer_activity_details.cpp */,
+				9B5A10BF1BFA60E000BE12FD /* multiplayer_activity_handle_post_request.cpp */,
+				9B5A10C01BFA60E000BE12FD /* multiplayer_activity_query_post_request.cpp */,
+				9B5A10C11BFA60E000BE12FD /* multiplayer_get_sessions_request.cpp */,
+				9B5A10C21BFA60E000BE12FD /* multiplayer_internal.h */,
+				9B5A10C31BFA60E000BE12FD /* multiplayer_invite.cpp */,
+				9B5A10C41BFA60E000BE12FD /* multiplayer_invite_handle_post_request.cpp */,
+				9B5A10C51BFA60E000BE12FD /* multiplayer_managed_initialization.cpp */,
+				9B5A10C61BFA60E000BE12FD /* multiplayer_peer_to_host_requirements.cpp */,
+				9B5A10C71BFA60E000BE12FD /* multiplayer_peer_to_peer_requirements.cpp */,
+				9B5A10C81BFA60E000BE12FD /* multiplayer_quality_of_service_measurement.cpp */,
+				9B5A10C91BFA60E000BE12FD /* multiplayer_service.cpp */,
+				9B5A10CA1BFA60E000BE12FD /* multiplayer_service_impl.cpp */,
+				9B5A10CB1BFA60E000BE12FD /* multiplayer_session.cpp */,
+				9B5A10CC1BFA60E000BE12FD /* multiplayer_session_capabilities.cpp */,
+				9B5A10CD1BFA60E000BE12FD /* multiplayer_session_change_event_args.cpp */,
+				9B5A10CE1BFA60E000BE12FD /* multiplayer_session_constants.cpp */,
+				9B5A10CF1BFA60E000BE12FD /* multiplayer_session_matchmaking_server.cpp */,
+				9B5A10D01BFA60E000BE12FD /* multiplayer_session_member.cpp */,
+				9B5A10D11BFA60E000BE12FD /* multiplayer_session_member_request.cpp */,
+				9B5A10D21BFA60E000BE12FD /* multiplayer_session_properties.cpp */,
+				9B5A10D31BFA60E000BE12FD /* multiplayer_session_reference.cpp */,
+				9B5A10D41BFA60E000BE12FD /* multiplayer_session_request.cpp */,
+				9B5A10D51BFA60E000BE12FD /* multiplayer_session_states.cpp */,
+				9B5A10D61BFA60E000BE12FD /* multiplayer_subscription.cpp */,
+				9B5A10D71BFA60E000BE12FD /* multiplayer_transfer_handle_post_request.cpp */,
+			);
+			path = Multiplayer;
+			sourceTree = "<group>";
+		};
+		9B5A11091BFA60E000BE12FD /* Presence */ = {
+			isa = PBXGroup;
+			children = (
+				9B5A110A1BFA60E000BE12FD /* device_presence_change_event_args.cpp */,
+				9B5A110B1BFA60E000BE12FD /* device_presence_change_subscription.cpp */,
+				9B5A110C1BFA60E000BE12FD /* media_presence_data.cpp */,
+				9B5A110D1BFA60E000BE12FD /* presence_activity_data.cpp */,
+				9B5A110E1BFA60E000BE12FD /* presence_broadcast_record.cpp */,
+				9B5A110F1BFA60E000BE12FD /* presence_data.cpp */,
+				9B5A11101BFA60E000BE12FD /* presence_device_record.cpp */,
+				9B5A11111BFA60E000BE12FD /* presence_internal.h */,
+				9B5A11121BFA60E000BE12FD /* presence_media_record.cpp */,
+				9B5A11131BFA60E000BE12FD /* presence_record.cpp */,
+				9B5A11141BFA60E000BE12FD /* presence_service.cpp */,
+				9B5A11151BFA60E000BE12FD /* presence_service_impl.cpp */,
+				9B5A11161BFA60E000BE12FD /* presence_title_record.cpp */,
+				9B5A11171BFA60E000BE12FD /* presence_title_request.cpp */,
+				9B5A11181BFA60E000BE12FD /* presence_user_batch_request.cpp */,
+				9B5A11191BFA60E000BE12FD /* presence_writer.cpp */,
+				9B5A111A1BFA60E000BE12FD /* title_presence_change_event_args.cpp */,
+				9B5A111B1BFA60E000BE12FD /* title_presence_change_subscription.cpp */,
+			);
+			path = Presence;
+			sourceTree = "<group>";
+		};
+		9B5A11391BFA60E000BE12FD /* Privacy */ = {
+			isa = PBXGroup;
+			children = (
+				9B5A113A1BFA60E000BE12FD /* multiple_permissions_check_result.cpp */,
+				9B5A113B1BFA60E000BE12FD /* permission_check_result.cpp */,
+				9B5A113C1BFA60E000BE12FD /* permission_deny_reason.cpp */,
+				9B5A113D1BFA60E000BE12FD /* privacy_service.cpp */,
+			);
+			path = Privacy;
+			sourceTree = "<group>";
+		};
+		9B5A11491BFA60E000BE12FD /* RealTimeActivity */ = {
+			isa = PBXGroup;
+			children = (
+				9B4B449F1D2F22C30060F1C5 /* real_time_activity_internal.h */,
+				9B4B44A01D2F22C30060F1C5 /* real_time_activity_service_factory.cpp */,
+				9B5A114A1BFA60E000BE12FD /* real_time_activity_service.cpp */,
+				9B5A114B1BFA60E000BE12FD /* real_time_activity_subscription.cpp */,
+				9B5A114C1BFA60E000BE12FD /* real_time_activity_subscription_error_event_args.cpp */,
+			);
+			path = RealTimeActivity;
+			sourceTree = "<group>";
+		};
+		9B5A11571BFA60E000BE12FD /* Social */ = {
+			isa = PBXGroup;
+			children = (
+				9CDF0D281DA2E85B0046C721 /* Manager */,
+				9B5A11711BFA60E000BE12FD /* profile_service.cpp */,
+				9B5A11721BFA60E000BE12FD /* reputation_feedback_request.cpp */,
+				9B5A11731BFA60E000BE12FD /* reputation_service.cpp */,
+				9B5A11741BFA60E000BE12FD /* social_internal.h */,
+				9B5A11751BFA60E000BE12FD /* social_relationship_change_event_args.cpp */,
+				9B5A11761BFA60E000BE12FD /* social_relationship_change_subscription.cpp */,
+				9B5A11771BFA60E000BE12FD /* social_service.cpp */,
+				9B5A11781BFA60E000BE12FD /* social_service_impl.cpp */,
+				9B5A11911BFA60E000BE12FD /* xbox_social_relationship.cpp */,
+				9B5A11921BFA60E000BE12FD /* xbox_social_relationship_result.cpp */,
+				9B5A11931BFA60E000BE12FD /* xbox_user_profile.cpp */,
+			);
+			path = Social;
+			sourceTree = "<group>";
+		};
+		9B5A11941BFA60E000BE12FD /* Stats */ = {
+			isa = PBXGroup;
+			children = (
+				9B5A11951BFA60E000BE12FD /* requested_statistics.cpp */,
+				9B5A11961BFA60E000BE12FD /* service_configuration_statistic.cpp */,
+				9B5A11971BFA60E100BE12FD /* statistic.cpp */,
+				9B5A11981BFA60E100BE12FD /* statistic_change_event_args.cpp */,
+				9B5A11991BFA60E100BE12FD /* statistic_change_subscription.cpp */,
+				9B5A119A1BFA60E100BE12FD /* user_statistics_internal.h */,
+				9B5A119B1BFA60E100BE12FD /* user_statistics_result.cpp */,
+				9B5A119C1BFA60E100BE12FD /* user_statistics_service.cpp */,
+				9B5A119D1BFA60E100BE12FD /* user_statistics_service_impl.cpp */,
+			);
+			path = Stats;
+			sourceTree = "<group>";
+		};
+		9B5A11AD1BFA60E100BE12FD /* TitleStorage */ = {
+			isa = PBXGroup;
+			children = (
+				9B5A11AE1BFA60E100BE12FD /* title_storage_blob_metadata.cpp */,
+				9B5A11AF1BFA60E100BE12FD /* title_storage_blob_metadata_result.cpp */,
+				9B5A11B01BFA60E100BE12FD /* title_storage_blob_result.cpp */,
+				9B5A11B11BFA60E100BE12FD /* title_storage_quota.cpp */,
+				9B5A11B21BFA60E100BE12FD /* title_storage_service.cpp */,
+			);
+			path = TitleStorage;
+			sourceTree = "<group>";
+		};
+		9B5A12C81BFBF63600BE12FD /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				9B5A12C91BFBF63600BE12FD /* pch.cpp */,
+				9B5A12CA1BFBF63600BE12FD /* pch.h */,
+			);
+			path = iOS;
+			sourceTree = "<group>";
+		};
+		9B5A12CD1BFD2BF200BE12FD /* Tournaments */ = {
+			isa = PBXGroup;
+			children = (
+				9B8250331C1A4B34002C8F30 /* tournament_reference.cpp */,
+				9B5A12D31BFD2BF200BE12FD /* tournament_team_result.cpp */,
+			);
+			path = Tournaments;
+			sourceTree = "<group>";
+		};
+		9B66D2CD1BE85B5C00E53086 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9B66D2D11BE85B5C00E53086 /* libCasablanca.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9B847EAF1CDD2823004E04B0 /* Unix */ = {
+			isa = PBXGroup;
+			children = (
+				9B847EB11CDD2823004E04B0 /* notification_service_i.mm */,
+			);
+			path = Unix;
+			sourceTree = "<group>";
+		};
+		9B8A00AE1BF2778B000337EA /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				9B118AD81D885F960068B268 /* auth */,
+				9B2956101CE244CD0026A41C /* xbox_cll.mm */,
+				B71305621CC7465D00A4E71E /* XboxTelemetry */,
+				6718D8B11C865E23007FD4F6 /* Xbox UI Delegates */,
+				67210E181C6479E20008FFDB /* Xbox Sign In UI */,
+				6718F1BF1CB76BF50000BF6E /* XBLServiceManager.h */,
+				6718F1C01CB76BF50000BF6E /* XBLServiceManager.mm */,
+				6718F1E31CB77FEB0000BF6E /* XBLDictionaryToJSON.h */,
+				6718F1E41CB77FEB0000BF6E /* XBLDictionaryToJSON.mm */,
+				677B9FCB1CD90F2900A28F96 /* XBLiOSGlobalState.h */,
+				677B9FCC1CD90F2900A28F96 /* XBLiOSGlobalState.mm */,
+				67F503A31CD98D8E00198DEA /* xbox_live_app_config_ios.mm */,
+			);
+			path = iOS;
+			sourceTree = "<group>";
+		};
+		9B9615DE1BEA86FE00E79527 /* Desktop */ = {
+			isa = PBXGroup;
+			children = (
+				9B9615E21BEA86FE00E79527 /* XboxLiveContext_Desktop.cpp */,
+			);
+			path = Desktop;
+			sourceTree = "<group>";
+		};
+		9B9615E71BEA962600E79527 /* Unix */ = {
+			isa = PBXGroup;
+			children = (
+				9B9615E91BEA962600E79527 /* pch_unix.h */,
+			);
+			path = Unix;
+			sourceTree = "<group>";
+		};
+		9B97B3521BE18B2500CF1E29 = {
+			isa = PBXGroup;
+			children = (
+				9B4933F91CE8F29E00E7CE0B /* WebKit.framework */,
+				6718D9151C9F69CA007FD4F6 /* CoreText.framework */,
+				670AA2F51C7657D300B3FB9A /* SystemConfiguration.framework */,
+				9B46ED4D1BED720E00076704 /* UIKit.framework */,
+				6718F1881CB731EF0000BF6E /* XSAPITCUI.xcodeproj */,
+				9B66D2CC1BE85B5C00E53086 /* Casablanca.xcodeproj */,
+				9B97BAB91BE1A1B000CF1E29 /* xsapi */,
+				9B97B3831BE1981800CF1E29 /* Source */,
+				67A963861C5FE4250066184E /* XboxLiveServicesResources */,
+				9B97B35C1BE18B2600CF1E29 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		9B97B35C1BE18B2600CF1E29 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9B97B35B1BE18B2600CF1E29 /* libXboxLiveServices.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9B97B3831BE1981800CF1E29 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				9B97B7881BE19DFC00CF1E29 /* Services */,
+				9B97B5931BE1981900CF1E29 /* Shared */,
+				9B97B5CD1BE1981900CF1E29 /* System */,
+			);
+			name = Source;
+			path = ../../Source;
+			sourceTree = "<group>";
+		};
+		9B97B5931BE1981900CF1E29 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				9CB56C071DA35A4500C92F44 /* xbox_live_services_settings.cpp */,
+				9C063B111D774C28009C3E3C /* mem.cpp */,
+				9BAEFDEE1D30263F00ABBA82 /* initiator.cpp */,
+				9BAEFDEF1D30263F00ABBA82 /* initiator.h */,
+				9B4B44A41D2F2D4C0060F1C5 /* Logger */,
+				9BBAB79B1CC0405100A75EDF /* i */,
+				9BBAB7761CBDE08500A75EDF /* u */,
+				9B46ED501BF105A000076704 /* xbox_system_factory_ios.mm */,
+				9B97B5941BE1981900CF1E29 /* build_version.h */,
+				9B97B5971BE1981900CF1E29 /* errors.cpp */,
+				9B97B5981BE1981900CF1E29 /* http_call_impl.cpp */,
+				9B97B5991BE1981900CF1E29 /* http_call_impl.h */,
+				9B97B59A1BE1981900CF1E29 /* http_call_request_message.cpp */,
+				9B97B59B1BE1981900CF1E29 /* http_call_response.cpp */,
+				9B97B59C1BE1981900CF1E29 /* http_call_response.h */,
+				9B97B59D1BE1981900CF1E29 /* http_client.cpp */,
+				9B97B59E1BE1981900CF1E29 /* http_client.h */,
+				9B97B59F1BE1981900CF1E29 /* local_config.cpp */,
+				9B97B5A01BE1981900CF1E29 /* local_config.h */,
+				9B97B5A11BE1981900CF1E29 /* service_call_logger.cpp */,
+				9B97B5A21BE1981900CF1E29 /* service_call_logger.h */,
+				9B97B5A31BE1981900CF1E29 /* service_call_logger_data.cpp */,
+				9B97B5A41BE1981900CF1E29 /* service_call_logger_data.h */,
+				9B97B5A71BE1981900CF1E29 /* service_call_logging_config.cpp */,
+				9B97B5A81BE1981900CF1E29 /* shared_macros.h */,
+				9B97B5A91BE1981900CF1E29 /* telemetry.cpp */,
+				9B97B5AA1BE1981900CF1E29 /* telemetry.h */,
+				9B97B5AB1BE1981900CF1E29 /* user_context.cpp */,
+				9B97B5AC1BE1981900CF1E29 /* user_context.h */,
+				9B97B5AD1BE1981900CF1E29 /* utils.cpp */,
+				9B97B5AE1BE1981900CF1E29 /* utils.h */,
+				9B97B5AF1BE1981900CF1E29 /* utils_locales.cpp */,
+				9B97B5B01BE1981900CF1E29 /* web_socket_client.cpp */,
+				9B97B5B11BE1981900CF1E29 /* web_socket_client.h */,
+				9B97B5B21BE1981900CF1E29 /* web_socket_connection.cpp */,
+				9B97B5B31BE1981900CF1E29 /* web_socket_connection.h */,
+				9B97B5B41BE1981900CF1E29 /* web_socket_connection_state.h */,
+				9B97B5C81BE1981900CF1E29 /* xbox_live_app_config.cpp */,
+				9B97B5C91BE1981900CF1E29 /* xbox_live_context_settings.cpp */,
+				9B97B5CA1BE1981900CF1E29 /* xbox_service_call_routed_event_args.cpp */,
+				9B97B5CB1BE1981900CF1E29 /* xbox_system_factory.cpp */,
+				9B97B5CC1BE1981900CF1E29 /* xbox_system_factory.h */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		9B97B5CD1BE1981900CF1E29 /* System */ = {
+			isa = PBXGroup;
+			children = (
+				9C4DF1B01DA32E6A00224A7C /* ppltasks_extra_unix.h */,
+				9B118ADF1D8B35230068B268 /* user_impl_ios.h */,
+				9B118AE01D8B35230068B268 /* user_impl_ios.mm */,
+				9B8A00AE1BF2778B000337EA /* iOS */,
+				9B46ED541BF14AFA00076704 /* user_ios.mm */,
+				9B97B5CE1BE1981900CF1E29 /* auth */,
+				9B97B6001BE1981900CF1E29 /* auth_config.cpp */,
+				9B97B6011BE1981900CF1E29 /* auth_config.h */,
+				9B97B6021BE1981900CF1E29 /* system_internal.h */,
+				9B97B6031BE1981900CF1E29 /* token_and_signature_result.cpp */,
+				9B97B6041BE1981900CF1E29 /* user.cpp */,
+				9B97B6051BE1981900CF1E29 /* user_impl.cpp */,
+				9B97B6061BE1981900CF1E29 /* user_impl.h */,
+				9B97B6101BE1981900CF1E29 /* xbox_live_mutex.cpp */,
+			);
+			path = System;
+			sourceTree = "<group>";
+		};
+		9B97B5CE1BE1981900CF1E29 /* auth */ = {
+			isa = PBXGroup;
+			children = (
+				9BF132411C3C48230048204E /* device_token_service.cpp */,
+				9BF132421C3C48230048204E /* device_token_service.h */,
+				9BF11AD51C120C2900D111C9 /* Desktop */,
+				9B46ED431BED41D600076704 /* Unix */,
+				9B97B5CF1BE1981900CF1E29 /* auth_manager.cpp */,
+				9B97B5D01BE1981900CF1E29 /* auth_manager.h */,
+				9B97B5D11BE1981900CF1E29 /* cidr.cpp */,
+				9B97B5D21BE1981900CF1E29 /* cidr.h */,
+				9B97B5DB1BE1981900CF1E29 /* ecdsa.h */,
+				9B97B5DC1BE1981900CF1E29 /* ip_address.cpp */,
+				9B97B5DD1BE1981900CF1E29 /* ip_address.h */,
+				9B97B5DE1BE1981900CF1E29 /* json_web_key.cpp */,
+				9B97B5DF1BE1981900CF1E29 /* json_web_key.h */,
+				9B97B5E01BE1981900CF1E29 /* nsal.cpp */,
+				9B97B5E11BE1981900CF1E29 /* nsal.h */,
+				9B97B5E21BE1981900CF1E29 /* nsal_endpoint.cpp */,
+				9B97B5E31BE1981900CF1E29 /* nsal_endpoint.h */,
+				9B97B5E41BE1981900CF1E29 /* request_signer.h */,
+				9B97B5E51BE1981900CF1E29 /* request_signer_helpers.cpp */,
+				9B97B5E61BE1981900CF1E29 /* request_signer_helpers.h */,
+				9B97B5E91BE1981900CF1E29 /* signature_policy.cpp */,
+				9B97B5EA1BE1981900CF1E29 /* signature_policy.h */,
+				9B97B5EB1BE1981900CF1E29 /* title_token_service.cpp */,
+				9B97B5EC1BE1981900CF1E29 /* title_token_service.h */,
+				9B97B5ED1BE1981900CF1E29 /* token_error.cpp */,
+				9B97B5EE1BE1981900CF1E29 /* token_error.h */,
+				9B97B5EF1BE1981900CF1E29 /* token_manager.cpp */,
+				9B97B5F01BE1981900CF1E29 /* token_manager.h */,
+				9B97B5F11BE1981900CF1E29 /* token_request.cpp */,
+				9B97B5F21BE1981900CF1E29 /* token_request.h */,
+				9B97B5F31BE1981900CF1E29 /* token_result.cpp */,
+				9B97B5F41BE1981900CF1E29 /* token_result.h */,
+				9B97B5F51BE1981900CF1E29 /* trie.cpp */,
+				9B97B5F61BE1981900CF1E29 /* trie.h */,
+				9B97B5F71BE1981900CF1E29 /* user_token_service.cpp */,
+				9B97B5F81BE1981900CF1E29 /* user_token_service.h */,
+				9B97B5FC1BE1981900CF1E29 /* xsts_token_service.cpp */,
+				9B97B5FD1BE1981900CF1E29 /* xsts_token_service.h */,
+				9B97B5FE1BE1981900CF1E29 /* xtitle_service.cpp */,
+				9B97B5FF1BE1981900CF1E29 /* xtitle_service.h */,
+			);
+			path = auth;
+			sourceTree = "<group>";
+		};
+		9B97B7881BE19DFC00CF1E29 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				9B5A12CD1BFD2BF200BE12FD /* Tournaments */,
+				9B5A0FE71BFA60E000BE12FD /* EntertainmentProfile */,
+				9B5A0FF21BFA60E000BE12FD /* Events */,
+				9B5A0FF71BFA60E000BE12FD /* GameServerPlatform */,
+				9B5A10191BFA60E000BE12FD /* Leaderboard */,
+				9B5A10531BFA60E000BE12FD /* Matchmaking */,
+				9B5A10611BFA60E000BE12FD /* Misc */,
+				9B5A107E1BFA60E000BE12FD /* Multiplayer */,
+				9B5A11091BFA60E000BE12FD /* Presence */,
+				9B5A11391BFA60E000BE12FD /* Privacy */,
+				9B5A11491BFA60E000BE12FD /* RealTimeActivity */,
+				9B5A11571BFA60E000BE12FD /* Social */,
+				9B5A11941BFA60E000BE12FD /* Stats */,
+				9B5A11AD1BFA60E100BE12FD /* TitleStorage */,
+				9B5A0FB51BFA603A00BE12FD /* Achievements */,
+				9B97B7AA1BE19DFC00CF1E29 /* Common */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		9B97B7AA1BE19DFC00CF1E29 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				9B5A12C81BFBF63600BE12FD /* iOS */,
+				9B9615E71BEA962600E79527 /* Unix */,
+				9B9615DE1BEA86FE00E79527 /* Desktop */,
+				9B97B7B21BE19DFC00CF1E29 /* pch_common.h */,
+				9B97B7BB1BE19DFC00CF1E29 /* xbox_live_context_impl.cpp */,
+				9B97B7BC1BE19DFC00CF1E29 /* xbox_live_context_impl.h */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		9B97BAB91BE1A1B000CF1E29 /* xsapi */ = {
+			isa = PBXGroup;
+			children = (
+				9C063B131D774FD7009C3E3C /* mem.h */,
+				9B4B44D11D2FFE850060F1C5 /* multiplayer_manager.h */,
+				9B4934761CEE1C0A00E7CE0B /* notification_helper.h */,
+				9BA103321CB72BEA0012374B /* i */,
+				9BF11AE61C17ABA400D111C9 /* multiplayer.h */,
+				9BA63DBD1BE43C8900BFC445 /* presence_internal.h */,
+				9B97BABA1BE1A1B000CF1E29 /* achievements.h */,
+				9B97BABB1BE1A1B000CF1E29 /* contextual_search_service.h */,
+				9B97BABC1BE1A1B000CF1E29 /* entertainment_profile.h */,
+				9B97BABD1BE1A1B000CF1E29 /* errors.h */,
+				9B97BABE1BE1A1B000CF1E29 /* events.h */,
+				9B97BABF1BE1A1B000CF1E29 /* game_server_platform.h */,
+				9B97BAC01BE1A1B000CF1E29 /* http_call.h */,
+				9B97BAC11BE1A1B000CF1E29 /* http_call_request_message.h */,
+				9B97BAC21BE1A1B000CF1E29 /* leaderboard.h */,
+				9B97BAC41BE1A1B000CF1E29 /* matchmaking.h */,
+				9B97BAC71BE1A1B000CF1E29 /* presence.h */,
+				9B97BAC81BE1A1B000CF1E29 /* privacy.h */,
+				9B97BAC91BE1A1B000CF1E29 /* profile.h */,
+				9B97BACA1BE1A1B000CF1E29 /* real_time_activity.h */,
+				9B97BACB1BE1A1B000CF1E29 /* service_call_logging_config.h */,
+				9B97BACC1BE1A1B000CF1E29 /* services.h */,
+				9B97BACD1BE1A1B000CF1E29 /* social.h */,
+				9B97BACF1BE1A1B000CF1E29 /* system.h */,
+				9B97BAD01BE1A1B000CF1E29 /* title_callable_ui.h */,
+				9B97BAD11BE1A1B000CF1E29 /* title_storage.h */,
+				9B97BAD21BE1A1B000CF1E29 /* types.h */,
+				9B97BAD31BE1A1B000CF1E29 /* user_statistics.h */,
+				671F66D51CD439BC00119106 /* xbox_live_app_config.h */,
+				9B97BAD51BE1A1B000CF1E29 /* xbox_live_context.h */,
+				9B97BAD61BE1A1B000CF1E29 /* xbox_live_context_settings.h */,
+				9B97BAD71BE1A1B000CF1E29 /* xbox_service_call_routed_event_args.h */,
+				671F66D21CD439BC00119106 /* marketplace.h */,
+				671F66D41CD439BC00119106 /* social_manager.h */,
+				9B2956111CE244CD0026A41C /* xbox_cll.h */,
+			);
+			name = xsapi;
+			path = ../../Include/xsapi;
+			sourceTree = "<group>";
+		};
+		9BA103321CB72BEA0012374B /* i */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = i;
+			sourceTree = "<group>";
+		};
+		9BBAB7761CBDE08500A75EDF /* u */ = {
+			isa = PBXGroup;
+			children = (
+				9BBAB7771CBDE09000A75EDF /* local_config_u.cpp */,
+			);
+			name = u;
+			sourceTree = "<group>";
+		};
+		9BBAB79B1CC0405100A75EDF /* i */ = {
+			isa = PBXGroup;
+			children = (
+				9BBAB79C1CC0408200A75EDF /* local_config_i.mm */,
+				251DBDD61CE6DE41003AF56B /* utils_locales_ios.mm */,
+			);
+			name = i;
+			sourceTree = "<group>";
+		};
+		9BF11AD51C120C2900D111C9 /* Desktop */ = {
+			isa = PBXGroup;
+			children = (
+				9BF11AD91C120C2900D111C9 /* ip_address_desktop.cpp */,
+			);
+			path = Desktop;
+			sourceTree = "<group>";
+		};
+		9CDF0D281DA2E85B0046C721 /* Manager */ = {
+			isa = PBXGroup;
+			children = (
+				9CC36FE21DB6DE89007142EE /* xbox_user_id_container.cpp */,
+				9CDF0D291DA2E8860046C721 /* internal_social_event.cpp */,
+				9CDF0D2A1DA2E8860046C721 /* peoplehub_service.cpp */,
+				9CDF0D2B1DA2E8860046C721 /* preferred_color.cpp */,
+				9CDF0D2C1DA2E8860046C721 /* social_event.cpp */,
+				9CDF0D2D1DA2E8860046C721 /* social_graph.cpp */,
+				9CDF0D2E1DA2E8860046C721 /* social_manager_internal.h */,
+				9CDF0D2F1DA2E8860046C721 /* social_manager_presence_record.cpp */,
+				9CDF0D301DA2E8860046C721 /* social_manager_presence_title_record.cpp */,
+				9CDF0D311DA2E8860046C721 /* social_manager.cpp */,
+				9CDF0D321DA2E8860046C721 /* social_user_group_loaded_event_args.cpp */,
+				9CDF0D331DA2E8860046C721 /* title_history.cpp */,
+				9CDF0D341DA2E8860046C721 /* xbox_social_user_group.cpp */,
+				9CDF0D351DA2E8860046C721 /* xbox_social_user.cpp */,
+			);
+			name = Manager;
+			sourceTree = "<group>";
+		};
+		B71305621CC7465D00A4E71E /* XboxTelemetry */ = {
+			isa = PBXGroup;
+			children = (
+				B7E5C76B1CEED3E5003B2B08 /* UTCIDPNames.h */,
+				B7E5C76C1CEED3E5003B2B08 /* UTCIDPNames.mm */,
+				B71305831CC747AD00A4E71E /* XLSCll.h */,
+				B71305811CC7477A00A4E71E /* XLSCll.mm */,
+			);
+			name = XboxTelemetry;
+			path = XboxSignInUI;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9B97B35A1BE18B2600CF1E29 /* XboxLiveServices */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9B97B3641BE18B2600CF1E29 /* Build configuration list for PBXNativeTarget "XboxLiveServices" */;
+			buildPhases = (
+				9B97B3571BE18B2600CF1E29 /* Sources */,
+				9B97B3581BE18B2600CF1E29 /* Frameworks */,
+				9B97B3591BE18B2600CF1E29 /* CopyFiles */,
+				6715CBF21C5BD28800F00C03 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				671121B71CBD960100F49259 /* PBXTargetDependency */,
+				9B8250301C1A46B7002C8F30 /* PBXTargetDependency */,
+			);
+			name = XboxLiveServices;
+			productName = XboxLiveServices;
+			productReference = 9B97B35B1BE18B2600CF1E29 /* libXboxLiveServices.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9B97B3531BE18B2500CF1E29 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0710;
+				ORGANIZATIONNAME = "Microsoft Corporation";
+				TargetAttributes = {
+					9B97B35A1BE18B2600CF1E29 = {
+						CreatedOnToolsVersion = 7.1;
+					};
+				};
+			};
+			buildConfigurationList = 9B97B3561BE18B2500CF1E29 /* Build configuration list for PBXProject "XboxLiveServices" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 9B97B3521BE18B2500CF1E29;
+			productRefGroup = 9B97B35C1BE18B2600CF1E29 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 9B66D2CD1BE85B5C00E53086 /* Products */;
+					ProjectRef = 9B66D2CC1BE85B5C00E53086 /* Casablanca.xcodeproj */;
+				},
+				{
+					ProductGroup = 6781BDAE1CBC702100264EAF /* Products */;
+					ProjectRef = 6718F1881CB731EF0000BF6E /* XSAPITCUI.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				9B97B35A1BE18B2600CF1E29 /* XboxLiveServices */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		6781BDB31CBC702100264EAF /* XSAPITCUI.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = XSAPITCUI.framework;
+			remoteRef = 6781BDB21CBC702100264EAF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9B66D2D11BE85B5C00E53086 /* libCasablanca.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libCasablanca.a;
+			remoteRef = 9B66D2D01BE85B5C00E53086 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6715CBF21C5BD28800F00C03 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				255A36DE1CD8353B00D3AD8E /* WinRT in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9B97B3571BE18B2600CF1E29 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9B82502E1C1A40DF002C8F30 /* multiplayer_session_arbitration_server.cpp in Sources */,
+				9B97B75B1BE1981B00CF1E29 /* token_error.cpp in Sources */,
+				9B5A12BF1BFA60E100BE12FD /* title_storage_blob_metadata_result.cpp in Sources */,
+				9B97B7571BE1981B00CF1E29 /* request_signer_helpers.cpp in Sources */,
+				9B97B7331BE1981B00CF1E29 /* http_call_response.cpp in Sources */,
+				9B97B7541BE1981B00CF1E29 /* json_web_key.cpp in Sources */,
+				9B5A12421BFA60E100BE12FD /* multiplayer_quality_of_service_measurement.cpp in Sources */,
+				9B5A12821BFA60E100BE12FD /* permission_deny_reason.cpp in Sources */,
+				255A36DD1CD8353B00D3AD8E /* user_removed_event_args.cpp in Sources */,
+				9B97B73D1BE1981B00CF1E29 /* utils_locales.cpp in Sources */,
+				9B97B7641BE1981C00CF1E29 /* xtitle_service.cpp in Sources */,
+				255A36D31CD8353B00D3AD8E /* multiplayer_local_user.cpp in Sources */,
+				9B97B74D1BE1981B00CF1E29 /* cidr.cpp in Sources */,
+				255A36CA1CD8353B00D3AD8E /* multiplayer_client_manager.cpp in Sources */,
+				9B8250321C1A4A8F002C8F30 /* multiplayer_session_tournaments_server.cpp in Sources */,
+				9B5A12F11BFD2BF200BE12FD /* tournament_game.cpp in Sources */,
+				9B5A12CB1BFBF63600BE12FD /* pch.cpp in Sources */,
+				255A36D41CD8353B00D3AD8E /* multiplayer_manager_utils.cpp in Sources */,
+				9BAEFDED1D3019B300ABBA82 /* multiplayer_search_handle_request.cpp in Sources */,
+				9B5A12C11BFA60E100BE12FD /* title_storage_quota.cpp in Sources */,
+				9B97B9AD1BE19DFD00CF1E29 /* xbox_live_context_impl.cpp in Sources */,
+				9B5A12A31BFA60E100BE12FD /* social_service_impl.cpp in Sources */,
+				9BAEFDEC1D3019B300ABBA82 /* multiplayer_search_handle_details.cpp in Sources */,
+				9B5A126F1BFA60E100BE12FD /* presence_title_record.cpp in Sources */,
+				9B2956151CE247490026A41C /* events_service.cpp in Sources */,
+				255A36C51CD8353B00D3AD8E /* join_lobby_completed_event_args.cpp in Sources */,
+				9B97B7531BE1981B00CF1E29 /* ip_address.cpp in Sources */,
+				9B5A129E1BFA60E100BE12FD /* reputation_feedback_request.cpp in Sources */,
+				9BEB14FA1DCD01BF001E5DD5 /* multiplayer_member_initialization.cpp in Sources */,
+				9B5A12A21BFA60E100BE12FD /* social_service.cpp in Sources */,
+				9B5A0FDB1BFA603A00BE12FD /* achievement_service.cpp in Sources */,
+				9CDF0D3E1DA2E8860046C721 /* social_user_group_loaded_event_args.cpp in Sources */,
+				9B5A12671BFA60E100BE12FD /* presence_activity_data.cpp in Sources */,
+				9B5A0FDE1BFA603A00BE12FD /* achievements_result.cpp in Sources */,
+				9B97B73A1BE1981B00CF1E29 /* telemetry.cpp in Sources */,
+				9B118AC21D6D0B460068B268 /* debug_output_ios.cpp in Sources */,
+				9B5A12051BFA60E100BE12FD /* contextual_search_configured_stat.cpp in Sources */,
+				9BF639391D492C3300BDF02B /* contextual_search_game_clip_thumbnail.cpp in Sources */,
+				9B5A0FDD1BFA603A00BE12FD /* achievement_title_association.cpp in Sources */,
+				9B97B7321BE1981B00CF1E29 /* http_call_request_message.cpp in Sources */,
+				9B4934791CEE1C1800E7CE0B /* notification_helper.mm in Sources */,
+				9CC36FE31DB6DE89007142EE /* xbox_user_id_container.cpp in Sources */,
+				9B97B7361BE1981B00CF1E29 /* service_call_logger.cpp in Sources */,
+				9CDF0D411DA2E8860046C721 /* xbox_social_user.cpp in Sources */,
+				9B5A123B1BFA60E100BE12FD /* multiplayer_activity_query_post_request.cpp in Sources */,
+				9CDF0D361DA2E8860046C721 /* internal_social_event.cpp in Sources */,
+				9B5A12641BFA60E100BE12FD /* device_presence_change_event_args.cpp in Sources */,
+				9B97B7481BE1981B00CF1E29 /* xbox_live_app_config.cpp in Sources */,
+				9B5A11D01BFA60E100BE12FD /* game_variant.cpp in Sources */,
+				9B5A12001BFA60E100BE12FD /* matchmaking_service.cpp in Sources */,
+				9B97B73E1BE1981B00CF1E29 /* web_socket_client.cpp in Sources */,
+				9B5A12661BFA60E100BE12FD /* media_presence_data.cpp in Sources */,
+				9B5A123F1BFA60E100BE12FD /* multiplayer_managed_initialization.cpp in Sources */,
+				9CDF0D3B1DA2E8860046C721 /* social_manager_presence_record.cpp in Sources */,
+				9B8250341C1A4B34002C8F30 /* tournament_reference.cpp in Sources */,
+				9B5A12501BFA60E100BE12FD /* multiplayer_subscription.cpp in Sources */,
+				9B5A0FD61BFA603A00BE12FD /* achievement.cpp in Sources */,
+				9CDF0D391DA2E8860046C721 /* social_event.cpp in Sources */,
+				9B97B7661BE1981C00CF1E29 /* token_and_signature_result.cpp in Sources */,
+				9B5A123A1BFA60E100BE12FD /* multiplayer_activity_handle_post_request.cpp in Sources */,
+				9B5A12B11BFA60E100BE12FD /* statistic.cpp in Sources */,
+				6718F1C11CB76BF50000BF6E /* XBLServiceManager.mm in Sources */,
+				9B4B44B01D2F2D4C0060F1C5 /* log_entry.cpp in Sources */,
+				9B2956121CE244CD0026A41C /* xbox_cll.mm in Sources */,
+				9B5A12AE1BFA60E100BE12FD /* xbox_user_profile.cpp in Sources */,
+				9BAEFDF01D30263F00ABBA82 /* initiator.cpp in Sources */,
+				9B118ADB1D885FA80068B268 /* user_auth_ios.mm in Sources */,
+				9B5A12F61BFD2BF200BE12FD /* tournament_teams.cpp in Sources */,
+				6718D8B01C865AD0007FD4F6 /* XboxProviderBridge.cpp in Sources */,
+				9B5A12A11BFA60E100BE12FD /* social_relationship_change_subscription.cpp in Sources */,
+				255A36C71CD8353B00D3AD8E /* member_joined_event_args.cpp in Sources */,
+				9B118A971D4BFF070068B268 /* multiplayer_session_role_types.cpp in Sources */,
+				9B5A12F31BFD2BF200BE12FD /* tournament_stage.cpp in Sources */,
+				9B97B75E1BE1981B00CF1E29 /* token_result.cpp in Sources */,
+				9B5A12041BFA60E100BE12FD /* contextual_search_broadcast.cpp in Sources */,
+				67F503A41CD98D8E00198DEA /* xbox_live_app_config_ios.mm in Sources */,
+				9B4B44AF1D2F2D4C0060F1C5 /* log.cpp in Sources */,
+				9BF639381D492C3300BDF02B /* contextual_search_game_clip_stat.cpp in Sources */,
+				9B5A12711BFA60E100BE12FD /* presence_user_batch_request.cpp in Sources */,
+				9B5A11D21BFA60E100BE12FD /* quality_of_service_server.cpp in Sources */,
+				9B97B7301BE1981B00CF1E29 /* errors.cpp in Sources */,
+				9B5A12891BFA60E100BE12FD /* real_time_activity_service.cpp in Sources */,
+				9CB56C0B1DA35AA800C92F44 /* custom_output.cpp in Sources */,
+				9B5A126D1BFA60E100BE12FD /* presence_service.cpp in Sources */,
+				255A36CD1CD8353B00D3AD8E /* multiplayer_event.cpp in Sources */,
+				9B5A11DE1BFA60E100BE12FD /* leaderboard_result.cpp in Sources */,
+				9B5A124A1BFA60E100BE12FD /* multiplayer_session_member.cpp in Sources */,
+				9BBAB79D1CC0408200A75EDF /* local_config_i.mm in Sources */,
+				9B4B44A11D2F22C30060F1C5 /* real_time_activity_service_factory.cpp in Sources */,
+				9BF11AD11C12076E00D111C9 /* big_num.cpp in Sources */,
+				9B5A12411BFA60E100BE12FD /* multiplayer_peer_to_peer_requirements.cpp in Sources */,
+				9B5A12B61BFA60E100BE12FD /* user_statistics_service_impl.cpp in Sources */,
+				9B5A12481BFA60E100BE12FD /* multiplayer_session_constants.cpp in Sources */,
+				9B5A12031BFA60E100BE12FD /* contextual_config_result.cpp in Sources */,
+				9B8A00B11BF2778B000337EA /* sign_in_delegate_ios.mm in Sources */,
+				9B5A12691BFA60E100BE12FD /* presence_data.cpp in Sources */,
+				9B5A12801BFA60E100BE12FD /* multiple_permissions_check_result.cpp in Sources */,
+				255A36C41CD8353B00D3AD8E /* host_changed_event_args.cpp in Sources */,
+				9B4B44B11D2F2D4C0060F1C5 /* log_output.cpp in Sources */,
+				255A36D21CD8353B00D3AD8E /* multiplayer_local_user_manager.cpp in Sources */,
+				9B97B73B1BE1981B00CF1E29 /* user_context.cpp in Sources */,
+				9B5A126A1BFA60E100BE12FD /* presence_device_record.cpp in Sources */,
+				9B5A12431BFA60E100BE12FD /* multiplayer_service.cpp in Sources */,
+				9B5A11FF1BFA60E100BE12FD /* match_ticket_details_response.cpp in Sources */,
+				9B5A12C01BFA60E100BE12FD /* title_storage_blob_result.cpp in Sources */,
+				9B5A12B21BFA60E100BE12FD /* statistic_change_event_args.cpp in Sources */,
+				9B97B75F1BE1981B00CF1E29 /* trie.cpp in Sources */,
+				9B5A123E1BFA60E100BE12FD /* multiplayer_invite_handle_post_request.cpp in Sources */,
+				9B97B73F1BE1981B00CF1E29 /* web_socket_connection.cpp in Sources */,
+				9B5A12681BFA60E100BE12FD /* presence_broadcast_record.cpp in Sources */,
+				9B5A0FD71BFA603A00BE12FD /* achievement_media_asset.cpp in Sources */,
+				9B5A0FDC1BFA603A00BE12FD /* achievement_time_window.cpp in Sources */,
+				9B5A12F41BFD2BF200BE12FD /* tournament_team.cpp in Sources */,
+				9B5A12A01BFA60E100BE12FD /* social_relationship_change_event_args.cpp in Sources */,
+				9B5A12461BFA60E100BE12FD /* multiplayer_session_capabilities.cpp in Sources */,
+				9CDF0D381DA2E8860046C721 /* preferred_color.cpp in Sources */,
+				9B5A123D1BFA60E100BE12FD /* multiplayer_invite.cpp in Sources */,
+				9B5A12491BFA60E100BE12FD /* multiplayer_session_matchmaking_server.cpp in Sources */,
+				255A36D91CD8353B00D3AD8E /* session_property_changed_event_args.cpp in Sources */,
+				9B5A11D11BFA60E100BE12FD /* game_variant_schema.cpp in Sources */,
+				9B5A12B01BFA60E100BE12FD /* service_configuration_statistic.cpp in Sources */,
+				9B5A12B31BFA60E100BE12FD /* statistic_change_subscription.cpp in Sources */,
+				9B97B7561BE1981B00CF1E29 /* nsal_endpoint.cpp in Sources */,
+				9B46ED471BED41D600076704 /* ip_address_unix.cpp in Sources */,
+				255A36C81CD8353B00D3AD8E /* member_left_event_args.cpp in Sources */,
+				9B97B73C1BE1981B00CF1E29 /* utils.cpp in Sources */,
+				9B5A11C61BFA60E100BE12FD /* EntertainmentProfileListVideoQueue_WinRT.cpp in Sources */,
+				255A36D51CD8353B00D3AD8E /* multiplayer_manager.cpp in Sources */,
+				9B5A11DF1BFA60E100BE12FD /* leaderboard_row.cpp in Sources */,
+				9CB56C081DA35A4500C92F44 /* xbox_live_services_settings.cpp in Sources */,
+				9B5A11CC1BFA60E100BE12FD /* game_server_metadata_result.cpp in Sources */,
+				9B5A129F1BFA60E100BE12FD /* reputation_service.cpp in Sources */,
+				9B5A12B51BFA60E100BE12FD /* user_statistics_service.cpp in Sources */,
+				9B46ED511BF105A000076704 /* xbox_system_factory_ios.mm in Sources */,
+				9B97B76D1BE1981C00CF1E29 /* xbox_live_mutex.cpp in Sources */,
+				255A36DB1CD8353B00D3AD8E /* tournament_registration_state_changed_event_args.cpp in Sources */,
+				9B5A128A1BFA60E100BE12FD /* real_time_activity_subscription.cpp in Sources */,
+				9B5A12441BFA60E100BE12FD /* multiplayer_service_impl.cpp in Sources */,
+				9CDF0D3A1DA2E8860046C721 /* social_graph.cpp in Sources */,
+				9B5A129D1BFA60E100BE12FD /* profile_service.cpp in Sources */,
+				9BF6393B1D492C3300BDF02B /* contextual_search_game_clip.cpp in Sources */,
+				9B5A12701BFA60E100BE12FD /* presence_title_request.cpp in Sources */,
+				9B118A961D4BFF070068B268 /* multiplayer_role_type.cpp in Sources */,
+				9B97B7671BE1981C00CF1E29 /* user.cpp in Sources */,
+				9B97B7491BE1981B00CF1E29 /* xbox_live_context_settings.cpp in Sources */,
+				255A36D61CD8353B00D3AD8E /* multiplayer_member.cpp in Sources */,
+				9B5A12731BFA60E100BE12FD /* title_presence_change_event_args.cpp in Sources */,
+				9BF6393A1D492C3300BDF02B /* contextual_search_game_clip_uri_info.cpp in Sources */,
+				9B5A0FD81BFA603A00BE12FD /* achievement_progression.cpp in Sources */,
+				9B9615E51BEA86FE00E79527 /* XboxLiveContext_Desktop.cpp in Sources */,
+				9B5A12811BFA60E100BE12FD /* permission_check_result.cpp in Sources */,
+				9B97B7631BE1981C00CF1E29 /* xsts_token_service.cpp in Sources */,
+				B71305821CC7477A00A4E71E /* XLSCll.mm in Sources */,
+				9B5A12B41BFA60E100BE12FD /* user_statistics_result.cpp in Sources */,
+				9B5A128B1BFA60E100BE12FD /* real_time_activity_subscription_error_event_args.cpp in Sources */,
+				9B847EB61CDD6928004E04B0 /* notification_service.cpp in Sources */,
+				9B5A124E1BFA60E100BE12FD /* multiplayer_session_request.cpp in Sources */,
+				6718F1E51CB77FEB0000BF6E /* XBLDictionaryToJSON.mm in Sources */,
+				9B5A11CD1BFA60E100BE12FD /* game_server_platform_service.cpp in Sources */,
+				9B5A12BE1BFA60E100BE12FD /* title_storage_blob_metadata.cpp in Sources */,
+				255A36D11CD8353B00D3AD8E /* multiplayer_lobby_session.cpp in Sources */,
+				9B5A12391BFA60E100BE12FD /* multiplayer_activity_details.cpp in Sources */,
+				9BAEFDE91D3019A300ABBA82 /* multiplayer_match_client.cpp in Sources */,
+				9CDF0D371DA2E8860046C721 /* peoplehub_service.cpp in Sources */,
+				9C063B121D774C28009C3E3C /* mem.cpp in Sources */,
+				9B5A12651BFA60E100BE12FD /* device_presence_change_subscription.cpp in Sources */,
+				9B847EB31CDD2823004E04B0 /* notification_service_i.mm in Sources */,
+				9B5A11CE1BFA60E100BE12FD /* game_server_port_mapping.cpp in Sources */,
+				9B5A124B1BFA60E100BE12FD /* multiplayer_session_member_request.cpp in Sources */,
+				9B5A0FD91BFA603A00BE12FD /* achievement_requirement.cpp in Sources */,
+				9B5A120A1BFA60E100BE12FD /* verify_string_result.cpp in Sources */,
+				255A36DC1CD8353B00D3AD8E /* user_added_event_args.cpp in Sources */,
+				9BF132431C3C48230048204E /* device_token_service.cpp in Sources */,
+				9B5A11C91BFA60E100BE12FD /* allocation_result.cpp in Sources */,
+				9B5A0FDA1BFA603A00BE12FD /* achievement_reward.cpp in Sources */,
+				9BF11ADF1C120C2900D111C9 /* ip_address_desktop.cpp in Sources */,
+				251DBDD71CE6DE41003AF56B /* utils_locales_ios.mm in Sources */,
+				9B5A11C51BFA60E100BE12FD /* EntertainmentProfileListService_WinRT.cpp in Sources */,
+				B7E5C76D1CEED3E5003B2B08 /* UTCIDPNames.mm in Sources */,
+				9B5A126B1BFA60E100BE12FD /* presence_media_record.cpp in Sources */,
+				9B5A12C21BFA60E100BE12FD /* title_storage_service.cpp in Sources */,
+				9B5A12F21BFD2BF200BE12FD /* tournament_service.cpp in Sources */,
+				9B5A12471BFA60E100BE12FD /* multiplayer_session_change_event_args.cpp in Sources */,
+				255A36CF1CD8353B00D3AD8E /* multiplayer_game_session.cpp in Sources */,
+				9B97B7371BE1981B00CF1E29 /* service_call_logger_data.cpp in Sources */,
+				255A36DA1CD8353B00D3AD8E /* tournament_game_session_ready_event_args.cpp in Sources */,
+				9B5A12741BFA60E100BE12FD /* title_presence_change_subscription.cpp in Sources */,
+				9B5A11C31BFA60E100BE12FD /* entertainment_profile_list_xbox_one_pins.cpp in Sources */,
+				255A36C31CD8353B00D3AD8E /* find_match_completed_event_args.cpp in Sources */,
+				9BF11AD31C12076E00D111C9 /* sha256.cpp in Sources */,
+				9B5A126E1BFA60E100BE12FD /* presence_service_impl.cpp in Sources */,
+				9B5A12061BFA60E100BE12FD /* contextual_search_service.cpp in Sources */,
+				9B5A11CA1BFA60E100BE12FD /* cluster_result.cpp in Sources */,
+				9B118AE11D8B35230068B268 /* user_impl_ios.mm in Sources */,
+				9B5A12F51BFD2BF200BE12FD /* tournament_team_result.cpp in Sources */,
+				9B5A12AD1BFA60E100BE12FD /* xbox_social_relationship_result.cpp in Sources */,
+				255A36D71CD8353B00D3AD8E /* multiplayer_session_writer.cpp in Sources */,
+				9B97B74C1BE1981B00CF1E29 /* auth_manager.cpp in Sources */,
+				9B5A11FE1BFA60E100BE12FD /* hopper_statistics_response.cpp in Sources */,
+				9B5A12F71BFD2BF200BE12FD /* tournaments_result.cpp in Sources */,
+				255A36D81CD8353B00D3AD8E /* perform_qos_measurements_event_args.cpp in Sources */,
+				9B5A11E01BFA60E100BE12FD /* leaderboard_serializers.cpp in Sources */,
+				9B5A11CF1BFA60E100BE12FD /* game_server_ticket_status.cpp in Sources */,
+				9B97B75D1BE1981B00CF1E29 /* token_request.cpp in Sources */,
+				9B5A12511BFA60E100BE12FD /* multiplayer_transfer_handle_post_request.cpp in Sources */,
+				9B5A12721BFA60E100BE12FD /* presence_writer.cpp in Sources */,
+				9B97B7391BE1981B00CF1E29 /* service_call_logging_config.cpp in Sources */,
+				9B5A11C41BFA60E100BE12FD /* EntertainmentProfileListContainsItemResult_WinRT.cpp in Sources */,
+				9B97B75A1BE1981B00CF1E29 /* title_token_service.cpp in Sources */,
+				9B97B7311BE1981B00CF1E29 /* http_call_impl.cpp in Sources */,
+				9B46ED461BED41D600076704 /* ecdsa_unix.cpp in Sources */,
+				255A36CC1CD8353B00D3AD8E /* multiplayer_client_pending_request.cpp in Sources */,
+				9CDF0D3D1DA2E8860046C721 /* social_manager.cpp in Sources */,
+				9B97B7341BE1981B00CF1E29 /* http_client.cpp in Sources */,
+				9B5A12F01BFD2BF200BE12FD /* tournament.cpp in Sources */,
+				9B5A124C1BFA60E100BE12FD /* multiplayer_session_properties.cpp in Sources */,
+				9B5A12AC1BFA60E100BE12FD /* xbox_social_relationship.cpp in Sources */,
+				9B97B7651BE1981C00CF1E29 /* auth_config.cpp in Sources */,
+				9B5A11FD1BFA60E100BE12FD /* create_match_ticket_response.cpp in Sources */,
+				9B5A124D1BFA60E100BE12FD /* multiplayer_session_reference.cpp in Sources */,
+				255A36CB1CD8353B00D3AD8E /* multiplayer_client_pending_reader.cpp in Sources */,
+				9B5A12451BFA60E100BE12FD /* multiplayer_session.cpp in Sources */,
+				9B5A11E11BFA60E100BE12FD /* leaderboard_service.cpp in Sources */,
+				9B5A11C21BFA60E100BE12FD /* entertainment_profile_list_contains_item_result.cpp in Sources */,
+				255A36CE1CD8353B00D3AD8E /* multiplayer_game_client.cpp in Sources */,
+				9B5A12081BFA60E100BE12FD /* string_service.cpp in Sources */,
+				9BBAB7781CBDE09000A75EDF /* local_config_u.cpp in Sources */,
+				9BF11AD21C12076E00D111C9 /* request_signer.cpp in Sources */,
+				677B9FCD1CD90F2900A28F96 /* XBLiOSGlobalState.mm in Sources */,
+				9B5A124F1BFA60E100BE12FD /* multiplayer_session_states.cpp in Sources */,
+				9B5A12AF1BFA60E100BE12FD /* requested_statistics.cpp in Sources */,
+				6718D8B71C86605E007FD4F6 /* XBLSignInHandler.mm in Sources */,
+				9B5A12401BFA60E100BE12FD /* multiplayer_peer_to_host_requirements.cpp in Sources */,
+				9B97B7551BE1981B00CF1E29 /* nsal.cpp in Sources */,
+				32F5FBBF1CE7DB1D008A5E09 /* title_callable_ui.mm in Sources */,
+				9B5A126C1BFA60E100BE12FD /* presence_record.cpp in Sources */,
+				9B97B7351BE1981B00CF1E29 /* local_config.cpp in Sources */,
+				9B97B7601BE1981C00CF1E29 /* user_token_service.cpp in Sources */,
+				9B97B7681BE1981C00CF1E29 /* user_impl.cpp in Sources */,
+				9B118A951D4BFF070068B268 /* multiplayer_role_info.cpp in Sources */,
+				9B5A123C1BFA60E100BE12FD /* multiplayer_get_sessions_request.cpp in Sources */,
+				9B46ED551BF14AFA00076704 /* user_ios.mm in Sources */,
+				9BF6393C1D492C3300BDF02B /* contextual_search_game_clips_result.cpp in Sources */,
+				9CB56C061DA359BB00C92F44 /* multiplayer_query_search_handle_request.cpp in Sources */,
+				9B5A11DD1BFA60E100BE12FD /* leaderboard_column.cpp in Sources */,
+				9B97B74B1BE1981B00CF1E29 /* xbox_system_factory.cpp in Sources */,
+				9B5A11C11BFA60E100BE12FD /* entertainment_profile.cpp in Sources */,
+				9B5A12831BFA60E100BE12FD /* privacy_service.cpp in Sources */,
+				9B97B75C1BE1981B00CF1E29 /* token_manager.cpp in Sources */,
+				255A36D01CD8353B00D3AD8E /* multiplayer_lobby_client.cpp in Sources */,
+				67210E731C6479E20008FFDB /* XboxProvider.mm in Sources */,
+				9B5A11CB1BFA60E100BE12FD /* game_server_image_set.cpp in Sources */,
+				9B97B74A1BE1981B00CF1E29 /* xbox_service_call_routed_event_args.cpp in Sources */,
+				255A36C91CD8353B00D3AD8E /* member_property_changed_event_args.cpp in Sources */,
+				9CDF0D401DA2E8860046C721 /* xbox_social_user_group.cpp in Sources */,
+				67210E721C6479E20008FFDB /* NSError+XSAPIExtensions.mm in Sources */,
+				9CDF0D3F1DA2E8860046C721 /* title_history.cpp in Sources */,
+				9CDF0D3C1DA2E8860046C721 /* social_manager_presence_title_record.cpp in Sources */,
+				9B97B7591BE1981B00CF1E29 /* signature_policy.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		671121B71CBD960100F49259 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = XSAPITCUI;
+			targetProxy = 671121B61CBD960100F49259 /* PBXContainerItemProxy */;
+		};
+		9B8250301C1A46B7002C8F30 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Casablanca;
+			targetProxy = 9B82502F1C1A46B7002C8F30 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		9B97B3621BE18B2600CF1E29 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		9B97B3631BE18B2600CF1E29 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		9B97B3651BE18B2600CF1E29 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = NO;
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = ../../Source/Services/Common/iOS/pch.cpp;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"XSAPI_U=1",
+					"XSAPI_CPP=1",
+					"XSAPI_I=1",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../External/OpenSSL/include/",
+					"$(SRCROOT)/../../Include/",
+					"$(SRCROOT)/../../Casablanca/Release/include/",
+					"$(SRCROOT)/../../External/MSAAuthentication/iOS/include/",
+					"$(SRCROOT)/XboxSignInUI/**",
+					"$(SRCROOT)/../../External/Boost/include/",
+					"$(SRCROOT)/../../External/CLL/iOS/include/",
+					"$(SRCROOT)/../../External/CLL/iOS/include/cll",
+					"$(SRCROOT)/../../External/CLL/iOS/include/bond_schema_inc",
+					"$(SRCROOT)/../../External/CLL/iOS/include/cll_schema_inc",
+					"$(SRCROOT)/../../External/CLL/iOS/include/onlineID_schema_inc",
+					"$(SRCROOT)/../../Source/Shared/",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/MSAAuthentication",
+					"$(PROJECT_DIR)",
+					"$(SRCROOT)/../../External/Boost/iOS/lib",
+					"$(SRCROOT)/../../External/MSAAuthentication/iOS/lib",
+					"$(SRCROOT)/../../External/OpenSSL/iOS/lib",
+					"$(SRCROOT)/../../Samples/Social/iOS",
+					"$(SRCROOT)/../../TAEF/Library/Debug/arm",
+					"$(SRCROOT)/../../TAEF/Library/Debug/x64",
+					"$(SRCROOT)/../../TAEF/Library/Debug/x86",
+					"$(SRCROOT)/../../TAEF/Library/Release/arm",
+					"$(SRCROOT)/../../TAEF/Library/Release/x64",
+					"$(SRCROOT)/../../TAEF/Library/Release/x86",
+					"$(SRCROOT)/../../External/CLL/iOS/lib",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VALID_ARCHS = "arm64 armv7 armv7s";
+			};
+			name = Debug;
+		};
+		9B97B3661BE18B2600CF1E29 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = NO;
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = ../../Source/Services/Common/iOS/pch.cpp;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"XSAPI_U=1",
+					"XSAPI_CPP=1",
+					"XSAPI_I=1",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../External/OpenSSL/include/",
+					"$(SRCROOT)/../../Include/",
+					"$(SRCROOT)/../../Casablanca/Release/include/",
+					"$(SRCROOT)/../../External/MSAAuthentication/iOS/include/",
+					"$(SRCROOT)/XboxSignInUI/**",
+					"$(SRCROOT)/../../External/Boost/include/",
+					"$(SRCROOT)/../../External/CLL/iOS/include/",
+					"$(SRCROOT)/../../External/CLL/iOS/include/cll",
+					"$(SRCROOT)/../../External/CLL/iOS/include/bond_schema_inc",
+					"$(SRCROOT)/../../External/CLL/iOS/include/cll_schema_inc",
+					"$(SRCROOT)/../../External/CLL/iOS/include/onlineID_schema_inc",
+					"$(SRCROOT)/../../Source/Shared/",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/MSAAuthentication",
+					"$(PROJECT_DIR)",
+					"$(SRCROOT)/../../External/Boost/iOS/lib",
+					"$(SRCROOT)/../../External/MSAAuthentication/iOS/lib",
+					"$(SRCROOT)/../../External/OpenSSL/iOS/lib",
+					"$(SRCROOT)/../../Samples/Social/iOS",
+					"$(SRCROOT)/../../TAEF/Library/Debug/arm",
+					"$(SRCROOT)/../../TAEF/Library/Debug/x64",
+					"$(SRCROOT)/../../TAEF/Library/Debug/x86",
+					"$(SRCROOT)/../../TAEF/Library/Release/arm",
+					"$(SRCROOT)/../../TAEF/Library/Release/x64",
+					"$(SRCROOT)/../../TAEF/Library/Release/x86",
+					"$(SRCROOT)/../../External/CLL/iOS/lib",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VALID_ARCHS = "arm64 armv7 armv7s";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9B97B3561BE18B2500CF1E29 /* Build configuration list for PBXProject "XboxLiveServices" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B97B3621BE18B2600CF1E29 /* Debug */,
+				9B97B3631BE18B2600CF1E29 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9B97B3641BE18B2600CF1E29 /* Build configuration list for PBXNativeTarget "XboxLiveServices" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B97B3651BE18B2600CF1E29 /* Debug */,
+				9B97B3661BE18B2600CF1E29 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9B97B3531BE18B2500CF1E29 /* Project object */;
+}

@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "casablanca110.xbox", "Release\src\build\vs11.xbox\casablanca110.Xbox.vcxproj", "{E621C269-D177-4C1B-80EA-C0A274B7A151}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{FA8460FB-E9D5-40D1-BB9D-38E6B816D4F7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Durango = Debug|Durango
+		Release|Durango = Release|Durango
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E621C269-D177-4C1B-80EA-C0A274B7A151}.Debug|Durango.ActiveCfg = Debug|Durango
+		{E621C269-D177-4C1B-80EA-C0A274B7A151}.Debug|Durango.Build.0 = Debug|Durango
+		{E621C269-D177-4C1B-80EA-C0A274B7A151}.Release|Durango.ActiveCfg = Release|Durango
+		{E621C269-D177-4C1B-80EA-C0A274B7A151}.Release|Durango.Build.0 = Release|Durango
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

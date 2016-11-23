@@ -1,0 +1,41 @@
+{
+    "defaultMatchTicketResponse" : {
+        "ticketStatus":"Found",
+        "waitTime":60,
+        "preserveSession": "never",
+        "ticketSessionRef":
+        {
+            "scid": "FEEDFACE-0000-0000-0000-000000000001",
+            "templateName": "TestTemplate",
+            "name": "5E55104-0000-0000-0000-000000000001"
+        },
+        "ticketAttributes":
+        {
+            "desiredMap":"Hang 'em high",
+            "desiredGameType":"Crazy King"
+        },
+        "players":
+        [{
+            "xuid":"123412345123",
+            "playerAttributes":
+            {
+                "skill": "5",
+                "ageRange": "teenager"
+            }
+        },
+        {
+            "xuid":"123412345124",
+            "playerAttributes":
+            {
+                "skill": "15",
+                "ageRange": "twenty-something"
+            }
+        }],
+        "targetSessionRef":
+        {
+            "scid": "FEEDFACE-0000-0000-0000-000000000001",
+            "templateName": "TestTemplate",
+            "name": "5E55104-0000-0000-0000-000000000002"
+        }
+    }
+}

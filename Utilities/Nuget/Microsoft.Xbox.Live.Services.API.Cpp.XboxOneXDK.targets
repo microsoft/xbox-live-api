@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Debug" Condition="'$(Configuration.ToLower())' == 'debug'">
+    <NugetConfiguration>Debug</NugetConfiguration>
+  </PropertyGroup>
+  <PropertyGroup Label="Non_Debug" Condition="'$(Configuration.ToLower())' != 'debug'">
+    <NugetConfiguration>Release</NugetConfiguration>
+  </PropertyGroup>
+  
+  <PropertyGroup Label="v110" Condition="'$(PlatformToolset.ToLower())' == 'v110'">
+    <NugetPlatformToolset>110</NugetPlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="v140" Condition="'$(PlatformToolset.ToLower())' == 'v140'">
+    <NugetPlatformToolset>140</NugetPlatformToolset>
+  </PropertyGroup>
+  
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>XSAPI_CPP=1;_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="Durango and (v110 or v140)" Condition="'$(Platform.ToLower())' == 'durango'">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\Durango\$(PlatformToolset)\$(NugetConfiguration)\casablanca$(NugetPlatformToolset).xbox.lib;$(MSBuildThisFileDirectory)lib\Durango\$(PlatformToolset)\$(NugetConfiguration)\Microsoft.Xbox.Services.$(NugetPlatformToolset).XDK.Ship.Cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>

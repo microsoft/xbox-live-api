@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <XsapiRoot>$(MSBuildThisFileDirectory)</XsapiRoot>
+    <XsapiInclde>$(XsapiRoot)include\</XsapiInclde>
+    <CasablancaInclde>$(XsapiRoot)casablanca\release\include\</CasablancaInclde>
+    <PackagesRoot>$(XsapiRoot)External\Packages\</PackagesRoot>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>XSAPI_CPP=1;_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(XsapiInclde);$(CasablancaInclde);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies Condition="'$(Platform)'!='Durango'">crypt32.lib;Winhttp.lib;Bcrypt.lib;pathcch.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>

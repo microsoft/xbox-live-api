@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>62B344A9-4EF5-4C0B-B7D2-C92B7CDCF957</string>
+	<key>IDESourceControlProjectName</key>
+	<string>XboxLiveServices</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>BC0693BF3F01AB9B235592905A8C3EF052D5ECC4</key>
+		<string>https://microsoft.visualstudio.com/defaultcollection/OS/_git/xbox.services.xboxlivesdk</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Build/Microsoft.Xbox.Services.iOS/XboxLiveServices.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>BC0693BF3F01AB9B235592905A8C3EF052D5ECC4</key>
+		<string>../../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://microsoft.visualstudio.com/defaultcollection/OS/_git/xbox.services.xboxlivesdk</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>BC0693BF3F01AB9B235592905A8C3EF052D5ECC4</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>BC0693BF3F01AB9B235592905A8C3EF052D5ECC4</string>
+			<key>IDESourceControlWCCName</key>
+			<string>xbox.services.xboxlivesdk</string>
+		</dict>
+	</array>
+</dict>
+</plist>

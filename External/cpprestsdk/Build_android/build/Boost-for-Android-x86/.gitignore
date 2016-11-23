@@ -1,0 +1,7 @@
+boost_*
+build
+*~
+logs
+build.log
+*.swp
+*.vim

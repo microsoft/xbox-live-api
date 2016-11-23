@@ -1,0 +1,150 @@
+////*********************************************************
+////
+//// Copyright (c) Microsoft. All rights reserved.
+//// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+//// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+//// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+//// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+////
+////*********************************************************
+
+#include "pch.h"
+#include "MultiplayerGameSession_WinRT.h"
+#include "Utils_WinRT.h"
+
+using namespace xbox::services;
+using namespace xbox::services::multiplayer;
+using namespace Microsoft::Xbox::Services;
+using namespace Microsoft::Xbox::Services::System;
+using namespace Microsoft::Xbox::Services::Multiplayer;
+using namespace Microsoft::Xbox::Services::Tournaments;
+using namespace Windows::Foundation;
+using namespace Windows::Foundation::Collections;
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_BEGIN
+
+MultiplayerGameSession::MultiplayerGameSession(
+    _In_ std::shared_ptr<xbox::services::multiplayer::manager::multiplayer_game_session> cppObj
+    ) :
+    m_cppObj(cppObj)
+{
+    XSAPI_ASSERT(cppObj != nullptr);
+    UpdateCppObj(cppObj);
+}
+
+MultiplayerSessionReference^
+MultiplayerGameSession::SessionReference::get()
+{
+    return m_sessionReference;
+}
+
+MultiplayerMember^
+MultiplayerGameSession::Host::get()
+{
+    if (m_cppObj->host() == nullptr)
+    {
+        return nullptr;
+    }
+
+    return ref new MultiplayerMember(m_cppObj->host());
+}
+
+IVectorView<MultiplayerMember^>^
+MultiplayerGameSession::Members::get()
+{
+    return m_members->GetView();
+
+}
+
+MultiplayerSessionConstants^
+MultiplayerGameSession::SessionConstants::get()
+{
+    return m_sessionConstants;
+}
+
+Windows::Foundation::Collections::IMapView<Platform::String^, MultiplayerSessionReference^>^
+MultiplayerGameSession::TournamentTeams::get()
+{
+    return m_teams->GetView();
+}
+
+Windows::Foundation::Collections::IMapView<Platform::String^, TournamentTeamResult^>^
+MultiplayerGameSession::TournamentTeamResults::get()
+{
+    return m_tournamentTeamResults->GetView();
+}
+
+std::shared_ptr<xbox::services::multiplayer::manager::multiplayer_game_session>
+MultiplayerGameSession::GetCppObj() const
+{
+    return m_cppObj;
+}
+
+void
+MultiplayerGameSession::UpdateCppObj(
+    _In_ std::shared_ptr<xbox::services::multiplayer::manager::multiplayer_game_session> cppObj
+    )
+{
+    m_cppObj = cppObj;
+    m_sessionReference = ref new MultiplayerSessionReference(m_cppObj->session_reference());
+    m_sessionConstants = ref new MultiplayerSessionConstants(m_cppObj->session_constants());
+    m_teams = UtilsWinRT::CreatePlatformMapObjectWithStringKeyFromStdMapObj<MultiplayerSessionReference>(m_cppObj->tournament_teams());
+    m_tournamentTeamResults = UtilsWinRT::CreatePlatformMapObjectWithStringKeyFromStdMapObj<TournamentTeamResult>(m_cppObj->tournament_team_results());
+    m_members = UtilsWinRT::CreatePlatformVectorFromStdVectorObj<MultiplayerMember>(m_cppObj->members());
+}
+
+bool
+MultiplayerGameSession::IsHost( 
+    _In_ Platform::String^ xboxUserId
+    )
+{
+    return m_cppObj->is_host(STRING_T_FROM_PLATFORM_STRING(xboxUserId));
+}
+
+void
+MultiplayerGameSession::SetProperties( 
+    _In_ Platform::String^ name,
+    _In_ Platform::String^ valueJson,
+    _In_opt_ context_t context
+    )
+{
+    auto valueJsonString = UtilsWinRT::JsonValueFromPlatformString(valueJson);
+    auto result = m_cppObj->set_properties(
+        STRING_T_FROM_PLATFORM_STRING(name),
+        valueJsonString,
+        context
+    );
+
+    THROW_IF_ERR(result);
+}
+
+void
+MultiplayerGameSession::SetSynchronizedProperties( 
+    _In_ Platform::String^ name,
+    _In_opt_ Platform::String^ valueJson,
+    _In_opt_ context_t context
+    )
+{
+    auto valueJsonString = UtilsWinRT::JsonValueFromPlatformString(valueJson);
+    auto result = m_cppObj->set_synchronized_properties(
+        STRING_T_FROM_PLATFORM_STRING(name),
+        valueJsonString,
+        context
+    );
+
+    THROW_IF_ERR(result);
+}
+
+void
+MultiplayerGameSession::SetSynchronizedHost( 
+    _In_ MultiplayerMember^ gameHost,
+    _In_opt_ context_t context
+    )
+{
+    THROW_INVALIDARGUMENT_IF_NULL(gameHost);
+
+    auto result = m_cppObj->set_synchronized_host(gameHost->GetCppObj(), context);
+    THROW_IF_ERR(result);
+}
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_END

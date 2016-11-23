@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>XSAPI_CPP=1;_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="Debug" Condition="'$(Configuration)' == 'Debug'">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(Platform)\v140\$(Configuration)\cpprest140d_uwp_2_8.lib;$(MSBuildThisFileDirectory)lib\$(Platform)\v140\$(Configuration)\Microsoft.Xbox.Services.140.UWP.Ship.Cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="Non_Debug" Condition="'$(Configuration)' != 'Debug'">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(Platform)\v140\Release\cpprest140_uwp_2_8.lib;$(MSBuildThisFileDirectory)lib\$(Platform)\v140\Release\Microsoft.Xbox.Services.140.UWP.Ship.Cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>

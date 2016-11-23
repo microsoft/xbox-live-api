@@ -1,0 +1,501 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x86">
+      <Configuration>Debug</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x86">
+      <Configuration>Release</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{5fa18992-3e85-4090-b21e-6ef7fb613a44}</ProjectGuid>
+    <Keyword>Android</Keyword>
+    <RootNamespace>Microsoft_Xbox_Services_Android</RootNamespace>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <ApplicationType>Android</ApplicationType>
+    <ApplicationTypeRevision>2.0</ApplicationTypeRevision>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_3_8</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_3_8</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_3_8</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_3_8</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="..\..\External\Boost\Android\boost.1.59.0\build\native\boost.targets" Condition="Exists('..\..\External\Boost\Android\boost.1.59.0\build\native\boost.targets')" />
+    <Import Project="..\..\External\Boost\Android\boost_atomic-android.1.59.0\build\native\boost_atomic-android.targets" Condition="Exists('..\..\External\Boost\Android\boost_atomic-android.1.59.0\build\native\boost_atomic-android.targets')" />
+    <Import Project="..\..\External\Boost\Android\boost_chrono-android.1.59.0\build\native\boost_chrono-android.targets" Condition="Exists('..\..\External\Boost\Android\boost_chrono-android.1.59.0\build\native\boost_chrono-android.targets')" />
+    <Import Project="..\..\External\Boost\Android\boost_date_time-android.1.59.0\build\native\boost_date_time-android.targets" Condition="Exists('..\..\External\Boost\Android\boost_date_time-android.1.59.0\build\native\boost_date_time-android.targets')" />
+    <Import Project="..\..\External\Boost\Android\boost_filesystem-android.1.59.0\build\native\boost_filesystem-android.targets" Condition="Exists('..\..\External\Boost\Android\boost_filesystem-android.1.59.0\build\native\boost_filesystem-android.targets')" />
+    <Import Project="..\..\External\Boost\Android\boost_system-android.1.59.0\build\native\boost_system-android.targets" Condition="Exists('..\..\External\Boost\Android\boost_system-android.1.59.0\build\native\boost_system-android.targets')" />
+    <Import Project="..\..\External\Boost\Android\boost_thread-android.1.59.0\build\native\boost_thread-android.targets" Condition="Exists('..\..\External\Boost\Android\boost_thread-android.1.59.0\build\native\boost_thread-android.targets')" />
+    <Import Project="..\..\External\OpenSSL\Android\openssl-android.targets" Condition="Exists('..\..\External\OpenSSL\Android\openssl-android.targets')" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\..\..\lib\boost\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\lib\openssl\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <IncludePath>..\..\External\cpprestsdk\Release\include\;$(IncludePath)</IncludePath>
+    <UseMultiToolTask>true</UseMultiToolTask>
+    <OutDir>$(ProjectDir)..\..\Binaries\$(Configuration)\$(Platform)\$(ProjectName)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <IncludePath>..\..\External\cpprestsdk\Release\include\;$(IncludePath)</IncludePath>
+    <UseMultiToolTask>true</UseMultiToolTask>
+    <OutDir>$(ProjectDir)..\..\Binaries\$(Configuration)\$(Platform)\$(ProjectName)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <IncludePath>..\..\External\cpprestsdk\Release\include\;$(IncludePath)</IncludePath>
+    <UseMultiToolTask>true</UseMultiToolTask>
+    <OutDir>$(ProjectDir)..\..\Binaries\$(Configuration)\$(Platform)\$(ProjectName)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <IncludePath>..\..\External\cpprestsdk\Release\include\;$(IncludePath)</IncludePath>
+    <UseMultiToolTask>true</UseMultiToolTask>
+    <OutDir>$(ProjectDir)..\..\Binaries\$(Configuration)\$(Platform)\$(ProjectName)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Unix\pch.h</PrecompiledHeaderFile>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <AdditionalIncludeDirectories>$(ProjectDir).;
+      $(ProjectDir)\..\..\Source\Services;
+      $(ProjectDir)\..\..\Source\Services\Common;
+      $(ProjectDir)\..\..\Source\Services\Common\Unix;
+      $(ProjectDir)\..\..\Source\Services\Social\Manager;
+      $(ProjectDir)\..\..\Source\Services\Social;
+      $(ProjectDir)\..\..\Source\Services\Multiplayer;
+      $(ProjectDir)\..\..\Source\Services\Presence;
+      $(ProjectDir)\..\..\Source\Services\RealTimeActivity;
+      $(ProjectDir)\..\..\Source\Shared;
+      $(ProjectDir)\..\..\Source\Shared\Desktop;
+      $(ProjectDir)\..\..\Include;
+      ..\..\External\cpprestsdk\Release\include;
+      $(ProjectDir)\..\..\Source\System\Desktop;
+      $(ProjectDir)\..\..\Source\System;
+      $(ProjectDir)\..\..\Source\System\auth\Desktop;
+      $(ProjectDir)\..\..\Source\System\auth;
+      $(ProjectDir)\..\..\Source\Services\Misc;
+      %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">-std=c++11 -stdlib=libc++ %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">-std=c++11 -stdlib=libc++ %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">-std=c++11 -stdlib=libc++ %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x86'">-std=c++11 -stdlib=libc++ %(AdditionalOptions)</AdditionalOptions>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">Enabled</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">Enabled</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">Enabled</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Release|x86'">Enabled</ExceptionHandling>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x86'">TurnOffAllWarnings</WarningLevel>
+      <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</RuntimeTypeInfo>
+      <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</RuntimeTypeInfo>
+      <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">true</RuntimeTypeInfo>
+      <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Release|x86'">true</RuntimeTypeInfo>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">XSAPI_A=1;XSAPI_U=1;XSAPI_CPP=1;__STDC_WANT_LIB_EXT1__=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">XSAPI_A=1;XSAPI_U=1;XSAPI_CPP=1;__STDC_WANT_LIB_EXT1__=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">XSAPI_A=1;XSAPI_U=1;XSAPI_CPP=1;__STDC_WANT_LIB_EXT1__=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x86'">XSAPI_A=1;XSAPI_U=1;XSAPI_CPP=1;__STDC_WANT_LIB_EXT1__=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_result.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_media_asset.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_progression.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_requirement.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_reward.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\achievements\achievement_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_time_window.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_title_association.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_column.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_result.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_row.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_serializers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\create_match_ticket_response.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\hopper_statistics_response.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\matchmaking_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\match_ticket_details_response.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_activity_details.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_activity_handle_post_request.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_activity_query_post_request.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_invite.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_invite_handle_post_request.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_managed_initialization.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_member_initialization.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_peer_to_host_requirements.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_peer_to_peer_requirements.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_quality_of_service_measurement.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_search_handle_details.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_search_handle_request.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_query_search_handle_request.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_role_types.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_role_info.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_role_type.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_capabilities.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_constants.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_member.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_member_request.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_properties.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_reference.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_request.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_states.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_arbitration_server.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_tournaments_server.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_reference.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_team_result.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\multiple_permissions_check_result.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\permission_check_result.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\permission_deny_reason.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\privacy_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_feedback_request.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_social_relationship.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_social_relationship_result.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_user_profile.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\requested_statistics.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\service_configuration_statistic.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\statistic.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\user_statistics_result.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\user_statistics_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_impl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_context_settings.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_client.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_service_call_routed_event_args.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\auth_config.cpp" />
+    <ClCompile Include="..\..\Source\Services\Common\Desktop\XboxLiveContext_Desktop.cpp" />
+    <ClCompile Include="..\..\Source\Services\Common\Unix\pch.cpp" />
+    <ClCompile Include="..\..\Source\Services\Common\Unix\pch_unix.cpp" />
+    <ClCompile Include="..\..\Source\Services\Common\xbox_live_context_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\Events\events_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\GameServerPlatform\allocation_result.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\Android\title_callable_ui_static_glue.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\Android\title_callable_ui_android.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\contextual_config_result.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\contextual_search_broadcast.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\contextual_search_configured_stat.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\contextual_search_game_clip.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\contextual_search_game_clips_result.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\contextual_search_game_clip_stat.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\contextual_search_game_clip_thumbnail.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\contextual_search_game_clip_uri_info.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\contextual_search_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\notification_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\string_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\Unix\notification_service_android.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\verify_string_result.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\find_match_completed_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\host_changed_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\join_lobby_completed_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\member_joined_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\member_left_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\member_property_changed_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_client_manager.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_client_pending_reader.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_client_pending_request.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_event.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_game_client.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_game_session.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_lobby_client.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_lobby_session.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_local_user.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_local_user_manager.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_manager.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_manager_utils.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_match_client.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_member.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_session_writer.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\perform_qos_measurements_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\session_property_changed_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\tournament_game_session_ready_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\tournament_registration_state_changed_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\user_added_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\user_removed_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\multiplayer_get_sessions_request.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\multiplayer_service_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\multiplayer_session_change_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\multiplayer_session_matchmaking_server.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\multiplayer_transfer_handle_post_request.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\device_presence_change_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\device_presence_change_subscription.cpp" />
+    <ClCompile Include="..\..\Source\Services\GameServerPlatform\cluster_result.cpp" />
+    <ClCompile Include="..\..\Source\Services\GameServerPlatform\game_server_image_set.cpp" />
+    <ClCompile Include="..\..\Source\Services\GameServerPlatform\game_server_metadata_result.cpp" />
+    <ClCompile Include="..\..\Source\Services\GameServerPlatform\game_server_platform_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\GameServerPlatform\game_server_port_mapping.cpp" />
+    <ClCompile Include="..\..\Source\Services\GameServerPlatform\game_server_ticket_status.cpp" />
+    <ClCompile Include="..\..\Source\Services\GameServerPlatform\game_variant.cpp" />
+    <ClCompile Include="..\..\Source\Services\GameServerPlatform\game_variant_schema.cpp" />
+    <ClCompile Include="..\..\Source\Services\GameServerPlatform\quality_of_service_server.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\media_presence_data.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\presence_activity_data.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\presence_broadcast_record.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\presence_data.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\presence_device_record.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\presence_media_record.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\presence_record.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\presence_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\presence_service_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\presence_title_record.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\presence_title_request.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\presence_user_batch_request.cpp" />
+    <ClCompile Include="..\..\Source\Services\Multiplayer\multiplayer_subscription.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\presence_writer.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\title_presence_change_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Presence\title_presence_change_subscription.cpp" />
+    <ClCompile Include="..\..\Source\Services\RealTimeActivity\real_time_activity_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\RealTimeActivity\real_time_activity_service_factory.cpp" />
+    <ClCompile Include="..\..\Source\Services\RealTimeActivity\real_time_activity_subscription.cpp" />
+    <ClCompile Include="..\..\Source\Services\RealTimeActivity\real_time_activity_subscription_error_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\Manager\internal_social_event.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\Manager\peoplehub_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\Manager\preferred_color.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\Manager\social_event.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\Manager\social_graph.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\Manager\social_manager.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\Manager\social_manager_presence_record.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\Manager\social_manager_presence_title_record.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\Manager\social_user_group_loaded_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\Manager\title_history.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\Manager\xbox_social_user.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\Manager\xbox_social_user_group.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\Manager\xbox_user_id_container.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\social_relationship_change_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\social_relationship_change_subscription.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\social_service_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\statistic_change_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\statistic_change_subscription.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\user_statistics_service_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_blob_metadata.cpp" />
+    <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_blob_metadata_result.cpp" />
+    <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_blob_result.cpp" />
+    <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_quota.cpp" />
+    <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_service.cpp" />
+    <ClCompile Include="..\..\Source\Shared\a\http_call_jni.cpp" />
+    <ClCompile Include="..\..\Source\Shared\a\http_call_static_glue.cpp" />
+    <ClCompile Include="..\..\Source\Shared\a\interop_jni.cpp" />
+    <ClCompile Include="..\..\Source\Shared\a\local_config_a.cpp" />
+    <ClCompile Include="..\..\Source\Shared\a\local_config_jni.cpp" />
+    <ClCompile Include="..\..\Source\Shared\a\local_config_static_glue.cpp" />
+    <ClCompile Include="..\..\Source\Shared\a\utils_a.cpp" />
+    <ClCompile Include="..\..\Source\Shared\a\xbox_live_app_config_android.cpp" />
+    <ClCompile Include="..\..\Source\Shared\a\xbox_live_app_config_jni.cpp" />
+    <ClCompile Include="..\..\Source\Shared\errors.cpp" />
+    <ClCompile Include="..\..\Source\Shared\http_call_request_message.cpp" />
+    <ClCompile Include="..\..\Source\Shared\initiator.cpp" />
+    <ClCompile Include="..\..\Source\Shared\local_config.cpp" />
+    <ClCompile Include="..\..\Source\Shared\Logger\android\logcat_output.cpp" />
+    <ClCompile Include="..\..\Source\Shared\Logger\custom_output.cpp" />
+    <ClCompile Include="..\..\Source\Shared\Logger\log.cpp" />
+    <ClCompile Include="..\..\Source\Shared\Logger\log_entry.cpp" />
+    <ClCompile Include="..\..\Source\Shared\Logger\log_output.cpp" />
+    <ClCompile Include="..\..\Source\Shared\mem.cpp" />
+    <ClCompile Include="..\..\Source\Shared\service_call_logger.cpp" />
+    <ClCompile Include="..\..\Source\Shared\service_call_logger_data.cpp" />
+    <ClCompile Include="..\..\Source\Shared\service_call_logging_config.cpp" />
+    <ClCompile Include="..\..\Source\Shared\utils_locales.cpp" />
+    <ClCompile Include="..\..\Source\Shared\u\local_config_u.cpp" />
+    <ClCompile Include="..\..\Source\Shared\web_socket_client.cpp" />
+    <ClCompile Include="..\..\Source\Shared\web_socket_connection.cpp" />
+    <ClCompile Include="..\..\Source\Shared\xbox_live_app_config.cpp" />
+    <ClCompile Include="..\..\Source\Shared\xbox_live_services_settings.cpp" />
+    <ClCompile Include="..\..\Source\Shared\xbox_system_factory.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\auth_manager.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\cidr.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\device_token_service.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\ip_address.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\json_web_key.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\nsal.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\nsal_endpoint.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\request_signer_helpers.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\signature_policy.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\title_token_service.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\Unix\big_num.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\Unix\ecdsa_unix.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\Unix\ip_address_unix.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\Unix\request_signer.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\Unix\sha256.cpp" />
+    <ClCompile Include="..\..\Source\System\a\auth_flow_result_jni.cpp" />
+    <ClCompile Include="..\..\Source\System\a\auth_flow_result_static_glue.cpp" />
+    <ClCompile Include="..\..\Source\System\a\java_interop.cpp" />
+    <ClCompile Include="..\..\Source\System\a\user_android.cpp" />
+    <ClCompile Include="..\..\Source\System\a\user_auth_android.cpp" />
+    <ClCompile Include="..\..\Source\System\a\user_impl_android.cpp" />
+    <ClCompile Include="..\..\Source\System\a\user_impl_delegated_android.cpp" />
+    <ClCompile Include="..\..\Source\System\token_and_signature_result.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\token_error.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\token_manager.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\token_request.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\token_result.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\trie.cpp" />
+    <ClCompile Include="..\..\Source\System\user.cpp" />
+    <ClCompile Include="..\..\Source\System\user_impl.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\user_token_service.cpp" />
+    <ClCompile Include="..\..\Source\System\xbox_live_mutex.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\xsts_token_service.cpp" />
+    <ClCompile Include="..\..\Source\System\auth\xtitle_service.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\achievements.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_context_settings.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\leaderboard.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\matchmaking.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\multiplayer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\privacy.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\profile.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\services.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\social.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\system.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\types.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\user_statistics.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_context.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_service_call_routed_event_args.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_query.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_serializers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_impl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_client.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\local_config.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\shared_macros.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.h" />
+    <ClInclude Include="..\..\Include\xsapi\errors.h" />
+    <ClInclude Include="..\..\Include\xsapi\events.h" />
+    <ClInclude Include="..\..\Include\xsapi\http_call.h" />
+    <ClInclude Include="..\..\Include\xsapi\http_call_request_message.h" />
+    <ClInclude Include="..\..\Include\xsapi\game_server_platform.h" />
+    <ClInclude Include="..\..\Include\xsapi\marketplace.h" />
+    <ClInclude Include="..\..\Include\xsapi\multiplayer_manager.h" />
+    <ClInclude Include="..\..\Include\xsapi\presence.h" />
+    <ClInclude Include="..\..\Include\xsapi\real_time_activity.h" />
+    <ClInclude Include="..\..\Include\xsapi\social_manager.h" />
+    <ClInclude Include="..\..\Include\xsapi\title_callable_ui.h" />
+    <ClInclude Include="..\..\Include\xsapi\title_storage.h" />
+    <ClInclude Include="..\..\Include\xsapi\xbox_live_app_config.h" />
+    <ClInclude Include="..\..\Source\Services\Common\pch_common.h" />
+    <ClInclude Include="..\..\Source\Services\Common\Unix\pch.h" />
+    <ClInclude Include="..\..\Source\Services\Common\Unix\pch_unix.h" />
+    <ClInclude Include="..\..\Source\Services\Common\xbox_live_context_impl.h" />
+    <ClInclude Include="..\..\Source\Services\Misc\Android\title_callable_static_glue.h" />
+    <ClInclude Include="..\..\Source\Services\Misc\Android\title_callable_ui_jni.h" />
+    <ClInclude Include="..\..\Source\Services\Misc\contextual_config_result.h" />
+    <ClInclude Include="..\..\Source\Services\Misc\notification_service.h" />
+    <ClInclude Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_manager_internal.h" />
+    <ClInclude Include="..\..\Source\Services\Multiplayer\multiplayer_internal.h" />
+    <ClInclude Include="..\..\Source\Services\RealTimeActivity\real_time_activity_internal.h" />
+    <ClInclude Include="..\..\Source\Services\Social\Manager\social_manager_internal.h" />
+    <ClInclude Include="..\..\Source\Shared\a\http_call_jni.h" />
+    <ClInclude Include="..\..\Source\Shared\a\http_call_static_glue.h" />
+    <ClInclude Include="..\..\Source\Shared\a\interop_jni.h" />
+    <ClInclude Include="..\..\Source\Shared\a\jni_utils.h" />
+    <ClInclude Include="..\..\Source\Services\Presence\presence_internal.h" />
+    <ClInclude Include="..\..\Source\Services\Social\social_internal.h" />
+    <ClInclude Include="..\..\Source\Services\Stats\user_statistics_internal.h" />
+    <ClInclude Include="..\..\Source\Shared\a\local_config_jni.h" />
+    <ClInclude Include="..\..\Source\Shared\a\local_config_static_glue.h" />
+    <ClInclude Include="..\..\Source\Shared\a\utils_a.h" />
+    <ClInclude Include="..\..\Source\Shared\a\xbox_live_app_config_static_glue.h" />
+    <ClInclude Include="..\..\Source\Shared\initiator.h" />
+    <ClInclude Include="..\..\Source\Shared\Logger\android\logcat_output.h" />
+    <ClInclude Include="..\..\Source\Shared\Logger\custom_output.h" />
+    <ClInclude Include="..\..\Source\Shared\Logger\log.h" />
+    <ClInclude Include="..\..\Source\Shared\mem.h" />
+    <ClInclude Include="..\..\Source\Shared\service_call_logger.h" />
+    <ClInclude Include="..\..\Source\Shared\service_call_logger_data.h" />
+    <ClInclude Include="..\..\Source\Shared\web_socket_client.h" />
+    <ClInclude Include="..\..\Source\Shared\web_socket_connection.h" />
+    <ClInclude Include="..\..\Source\Shared\web_socket_connection_state.h" />
+    <ClInclude Include="..\..\Source\Shared\xbox_system_factory.h" />
+    <ClInclude Include="..\..\Source\System\auth\auth_manager.h" />
+    <ClInclude Include="..\..\Source\System\auth\cidr.h" />
+    <ClInclude Include="..\..\Source\System\auth\device_token_service.h" />
+    <ClInclude Include="..\..\Source\System\auth\ecdsa.h" />
+    <ClInclude Include="..\..\Source\System\auth\ip_address.h" />
+    <ClInclude Include="..\..\Source\System\auth\json_web_key.h" />
+    <ClInclude Include="..\..\Source\System\auth\nsal.h" />
+    <ClInclude Include="..\..\Source\System\auth\nsal_endpoint.h" />
+    <ClInclude Include="..\..\Source\System\auth\request_signer.h" />
+    <ClInclude Include="..\..\Source\System\auth\request_signer_helpers.h" />
+    <ClInclude Include="..\..\Source\System\auth\signature_policy.h" />
+    <ClInclude Include="..\..\Source\System\auth\title_token_service.h" />
+    <ClInclude Include="..\..\Source\System\auth\token_error.h" />
+    <ClInclude Include="..\..\Source\System\auth\token_manager.h" />
+    <ClInclude Include="..\..\Source\System\auth\token_request.h" />
+    <ClInclude Include="..\..\Source\System\auth\token_result.h" />
+    <ClInclude Include="..\..\Source\System\auth\trie.h" />
+    <ClInclude Include="..\..\Source\System\auth\Unix\big_num.h" />
+    <ClInclude Include="..\..\Source\System\auth\Unix\sha256.h" />
+    <ClInclude Include="..\..\Source\System\auth_config.h" />
+    <ClInclude Include="..\..\Source\System\a\auth_flow_result_jni.h" />
+    <ClInclude Include="..\..\Source\System\a\auth_flow_result_static_glue.h" />
+    <ClInclude Include="..\..\Source\System\a\java_interop.h" />
+    <ClInclude Include="..\..\Source\System\a\user_auth_android.h" />
+    <ClInclude Include="..\..\Source\System\a\user_impl_a.h" />
+    <ClInclude Include="..\..\Source\System\ppltasks_extra_unix.h" />
+    <ClInclude Include="..\..\Source\System\user_impl.h" />
+    <ClInclude Include="..\..\Source\System\auth\user_token_service.h" />
+    <ClInclude Include="..\..\Source\System\auth\xsts_token_service.h" />
+    <ClInclude Include="..\..\Source\System\auth\xtitle_service.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.android\casablanca140.android.vcxproj">
+      <Project>{afb49019-965b-4c10-baff-c86c16d58010}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\External\Boost\Android\boost.1.59.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\External\Boost\Android\boost.1.59.0\build\native\boost.targets'))" />
+    <Error Condition="!Exists('..\..\External\Boost\Android\boost_atomic-android.1.59.0\build\native\boost_atomic-android.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\External\Boost\Android\boost_atomic-android.1.59.0\build\native\boost_atomic-android.targets'))" />
+    <Error Condition="!Exists('..\..\External\Boost\Android\boost_chrono-android.1.59.0\build\native\boost_chrono-android.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\External\Boost\Android\boost_chrono-android.1.59.0\build\native\boost_chrono-android.targets'))" />
+    <Error Condition="!Exists('..\..\External\Boost\Android\boost_date_time-android.1.59.0\build\native\boost_date_time-android.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\External\Boost\Android\boost_date_time-android.1.59.0\build\native\boost_date_time-android.targets'))" />
+    <Error Condition="!Exists('..\..\External\Boost\Android\boost_filesystem-android.1.59.0\build\native\boost_filesystem-android.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\External\Boost\Android\boost_filesystem-android.1.59.0\build\native\boost_filesystem-android.targets'))" />
+    <Error Condition="!Exists('..\..\External\Boost\Android\boost_system-android.1.59.0\build\native\boost_system-android.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\External\Boost\Android\boost_system-android.1.59.0\build\native\boost_system-android.targets'))" />
+    <Error Condition="!Exists('..\..\External\Boost\Android\boost_thread-android.1.59.0\build\native\boost_thread-android.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\External\Boost\Android\boost_thread-android.1.59.0\build\native\boost_thread-android.targets'))" />
+  </Target>
+</Project>

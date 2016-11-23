@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.Services.UnitTest.140.TAEF", "Microsoft.Xbox.Services.UnitTest.140.TE.vcxproj", "{3092CCC9-DB6E-4199-95CC-4959950B95FA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.System.140.UnitTest.Shared", "..\Microsoft.Xbox.Services.UnitTest.140.Shared\Microsoft.Xbox.Services.UnitTest.140.Shared.vcxitems", "{E73D47A1-2CF5-4ADA-B9E7-F2619F666162}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpprestsdk140.static", "..\..\External\cpprestsdk\Release\src\build\vs14\casablanca140.static.vcxproj", "{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\Microsoft.Xbox.Services.UnitTest.140.Shared\Microsoft.Xbox.Services.UnitTest.140.Shared.vcxitems*{3092ccc9-db6e-4199-95cc-4959950b95fa}*SharedItemsImports = 4
+		..\..\External\cpprestsdk\Release\src\build\win32.vcxitems*{04d42f35-e5d5-4d95-980e-1bd7e900f2dd}*SharedItemsImports = 4
+		..\..\External\cpprestsdk\Release\src\build\common.vcxitems*{04d42f35-e5d5-4d95-980e-1bd7e900f2dd}*SharedItemsImports = 4
+		..\Microsoft.Xbox.Services.UnitTest.140.Shared\Microsoft.Xbox.Services.UnitTest.140.Shared.vcxitems*{e73d47a1-2cf5-4ada-b9e7-f2619f666162}*SharedItemsImports = 9
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|ARM = Release|ARM
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3092CCC9-DB6E-4199-95CC-4959950B95FA}.Debug|ARM.ActiveCfg = Debug|Win32
+		{3092CCC9-DB6E-4199-95CC-4959950B95FA}.Debug|x64.ActiveCfg = Debug|x64
+		{3092CCC9-DB6E-4199-95CC-4959950B95FA}.Debug|x64.Build.0 = Debug|x64
+		{3092CCC9-DB6E-4199-95CC-4959950B95FA}.Debug|x86.ActiveCfg = Debug|Win32
+		{3092CCC9-DB6E-4199-95CC-4959950B95FA}.Debug|x86.Build.0 = Debug|Win32
+		{3092CCC9-DB6E-4199-95CC-4959950B95FA}.Release|ARM.ActiveCfg = Release|Win32
+		{3092CCC9-DB6E-4199-95CC-4959950B95FA}.Release|x64.ActiveCfg = Release|x64
+		{3092CCC9-DB6E-4199-95CC-4959950B95FA}.Release|x64.Build.0 = Release|x64
+		{3092CCC9-DB6E-4199-95CC-4959950B95FA}.Release|x86.ActiveCfg = Release|Win32
+		{3092CCC9-DB6E-4199-95CC-4959950B95FA}.Release|x86.Build.0 = Release|Win32
+		{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}.Debug|ARM.ActiveCfg = Debug|ARM
+		{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}.Debug|ARM.Build.0 = Debug|ARM
+		{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}.Debug|x64.ActiveCfg = Debug|x64
+		{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}.Debug|x64.Build.0 = Debug|x64
+		{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}.Debug|x86.ActiveCfg = Debug|Win32
+		{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}.Debug|x86.Build.0 = Debug|Win32
+		{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}.Release|ARM.ActiveCfg = Release|ARM
+		{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}.Release|ARM.Build.0 = Release|ARM
+		{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}.Release|x64.ActiveCfg = Release|x64
+		{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}.Release|x64.Build.0 = Release|x64
+		{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}.Release|x86.ActiveCfg = Release|Win32
+		{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
