@@ -302,6 +302,43 @@ public:
         return result;
     }
 
+    template<typename T, typename U, typename F>
+    static std::vector<T, U> extract_json_internal_vector(
+        _In_ F deserialize,
+        _In_ const web::json::value& json,
+        _In_ const string_t& name,
+        _Inout_ std::error_code& errc,
+        _In_ bool required
+    )
+    {
+        web::json::value field(extract_json_field(json, name, errc, required));
+        std::vector<T, U> result;
+
+        if ((!field.is_array()) || errc)
+        {
+            if (required)
+            {
+                errc = xbox_live_error_code::json_error;
+            }
+
+            return result;
+        }
+
+        const web::json::array& arr(field.as_array());
+        for (auto it = arr.begin(); it != arr.end(); ++it)
+        {
+            auto obj = deserialize(*it);
+            if (obj.err())
+            {
+                errc = obj.err();
+                // break here?
+            }
+            result.push_back(obj.payload());
+        }
+
+        return result;
+    }
+
     template<typename T, typename F>
     static xbox_live_result<std::vector<T>> extract_xbox_live_result_json_vector(
         _In_ F deserialize,

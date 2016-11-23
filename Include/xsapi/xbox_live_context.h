@@ -208,7 +208,7 @@ public:
     /// </summary>
     _XSAPIIMP contextual_search::contextual_search_service& contextual_search_service();
 
-#if UWP_API || XSAPI_U
+#if UWP_API || XSAPI_U || XSAPI_CENTENNIAL
     /// <summary>
     /// A service used to write in game events.
     /// </summary>

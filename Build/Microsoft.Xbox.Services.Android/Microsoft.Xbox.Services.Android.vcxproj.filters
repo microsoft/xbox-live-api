@@ -85,6 +85,12 @@
     <Filter Include="C++ Source\Social\Manager">
       <UniqueIdentifier>{25a7f18e-58fd-4c25-8ca2-dbd220fc9464}</UniqueIdentifier>
     </Filter>
+    <Filter Include="C++ Source\Stats">
+      <UniqueIdentifier>{b5e76af5-8dc2-4ed9-afd7-e9aa1047d7a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Stats\Manager">
+      <UniqueIdentifier>{150f7e00-5b09-4b0f-8853-7a53f3766dfb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.cpp">
@@ -819,6 +825,24 @@
     <ClCompile Include="..\..\Source\System\a\user_auth_android.cpp">
       <Filter>C++ Source\System\a</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\simplified_stats_service.cpp">
+      <Filter>C++ Source\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_context.cpp">
+      <Filter>C++ Source\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_value.cpp">
+      <Filter>C++ Source\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_value_document.cpp">
+      <Filter>C++ Source\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\simplified_stats_manager.cpp">
+      <Filter>C++ Source\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\simplified_stats_manager_impl.cpp">
+      <Filter>C++ Source\Stats\Manager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.h">
@@ -1120,6 +1144,12 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\System\a\user_auth_android.h">
       <Filter>C++ Source\System\a</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\simple_stats.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\simplified_stats_internal.h">
+      <Filter>C++ Source\Stats\Manager</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

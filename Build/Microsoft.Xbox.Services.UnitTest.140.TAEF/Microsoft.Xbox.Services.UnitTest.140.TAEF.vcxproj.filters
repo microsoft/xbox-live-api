@@ -147,6 +147,9 @@
     <ClCompile Include="..\..\Tests\UnitTests\Mocks\MockMultiplayer.cpp">
       <Filter>Tests\Support\Mocks</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\SimplifiedStatServiceTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Tests\UnitTests\Support\DefineTestMacros.h">

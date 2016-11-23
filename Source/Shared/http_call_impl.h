@@ -71,6 +71,7 @@ enum class xbox_live_api
     get_single_user_statistics,
     get_social_graph,
     get_social_relationships,
+    get_stats_value_document,
     get_ticket_status,
     get_tournament_instance_teams,
     get_tournament_instances,
@@ -87,6 +88,7 @@ enum class xbox_live_api
     submit_reputation_feedback,
     subscribe_to_notifications,
     update_achievement,
+    update_stats_value_document,
     upload_blob,
     verify_strings,
     write_session_using_subpath,
@@ -115,7 +117,7 @@ struct http_call_data
         httpCallResponseBodyType(http_call_response_body_type::json_body),
         longHttpCall(false),
         httpTimeout(std::chrono::seconds(DEFAULT_HTTP_TIMEOUT_SECONDS)),
-        contentTypeHeaderValue(_T("application/json; charset=utf-8")),
+        contentTypeHeaderValue(_T("application/json;")),
         xboxContractVersionHeaderValue(_T("1")),
         addDefaultHeaders(true)
     {

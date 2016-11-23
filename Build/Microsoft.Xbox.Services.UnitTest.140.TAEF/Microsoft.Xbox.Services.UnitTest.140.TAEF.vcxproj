@@ -195,6 +195,7 @@
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\RealTimeActivityTests.cpp" />
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\ReputationTests.cpp" />
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\RtaTestHelper.cpp" />
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\SimplifiedStatServiceTests.cpp" />
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\SocialManagerTests.cpp" />
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\SocialTests.cpp" />
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\StatsTests.cpp" />

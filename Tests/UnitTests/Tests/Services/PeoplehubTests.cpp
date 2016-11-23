@@ -92,7 +92,7 @@ public:
 
     DEFINE_TEST_CASE(PeopleHubTestGetSocialGraph)
     {
-        DEFINE_TEST_CASE_PROPERTIES(GetSocialGraph);
+        DEFINE_TEST_CASE_PROPERTIES(PeopleHubTestGetSocialGraph);
         std::vector<string_t> xuids;
         xuids.push_back(_T("1"));
 

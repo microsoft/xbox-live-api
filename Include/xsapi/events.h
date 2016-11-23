@@ -9,7 +9,7 @@
 //*********************************************************
 #pragma once
 
-#if UWP_API || XSAPI_U
+#if UWP_API || XSAPI_U || XSAPI_CENTENNIAL
 namespace xbox { namespace services { 
     /// <summary>
     /// Contains classes that let you send an in-game event.

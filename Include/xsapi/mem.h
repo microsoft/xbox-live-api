@@ -136,10 +136,10 @@ bool operator!=(const xsapi_stl_allocator<T1>&, const xsapi_stl_allocator<T2>&)
     return false;
 }
 
+#define xsapi_internal_string std::basic_string<char_t, std::char_traits<char_t>, xsapi_stl_allocator<char_t> >
+
 #define xsapi_internal_vector(T) std::vector<T, xsapi_stl_allocator<T> >
 
 #define xsapi_internal_unordered_map(Key, T) std::unordered_map<Key, T, std::hash<Key>, std::equal_to<Key>, xsapi_stl_allocator< std::pair< const Key, T > > >
-
-#define xsapi_internal_string std::basic_string<char_t, std::char_traits<char_t>, xsapi_stl_allocator<char_t> >
 
 #define xsapi_internal_dequeue(T) std::deque<T, xsapi_stl_allocator<T> >
