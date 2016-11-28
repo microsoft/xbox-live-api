@@ -618,6 +618,27 @@
     <ClCompile Include="..\..\Source\Services\Multiplayer\multiplayer_session_tournaments_server.cpp">
       <Filter>C++ Source\Multiplayer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_service.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournaments_result.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_game.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_team.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_teams.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_stage.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_team_result.cpp">
       <Filter>C++ Source\Tournaments</Filter>
     </ClCompile>
@@ -669,6 +690,9 @@
     <ClCompile Include="..\..\Source\Services\Misc\contextual_search_game_clips_result.cpp">
       <Filter>C++ Source\Misc</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\System\Sidecar\user_impl_sidecar.cpp">
+      <Filter>C++ Source\System</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Social\Manager\social_manager_presence_record.cpp">
       <Filter>C++ Source\Social\Manager</Filter>
     </ClCompile>
@@ -686,6 +710,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Shared\mem.cpp">
       <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\System\Sidecar\app_service_client.cpp">
+      <Filter>C++ Source\System</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Services\RealTimeActivity\real_time_activity_service_factory.cpp">
       <Filter>C++ Source\RTA</Filter>
@@ -907,6 +934,15 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Shared\initiator.h">
       <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\System\Sidecar\user_impl_sidecar.h">
+      <Filter>C++ Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\System\Sidecar\app_service_messages.h">
+      <Filter>C++ Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\System\Sidecar\app_service_client.h">
+      <Filter>C++ Source\System</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\xsapi\mem.h">
       <Filter>C++ Public Includes</Filter>
