@@ -413,8 +413,8 @@
     <ClInclude Include="..\..\Source\System\system_internal.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.static.vcxproj">
-      <Project>{9AD285A2-301E-47A0-A299-14AD5D4F2758}</Project>
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.staticlib.vcxproj">
+      <Project>{47a5cfdc-c244-45a6-9830-38cb303cb495}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
