@@ -42,12 +42,6 @@ stat_value::compare_type() const
     return m_statCompareType;
 }
 
-const xbox_live_user_t&
-stat_value::local_user_owner() const
-{
-    return m_localUserOwner;
-}
-
 void
 stat_value::set_stat(
     _In_ double value

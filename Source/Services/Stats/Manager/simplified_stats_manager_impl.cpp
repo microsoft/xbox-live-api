@@ -56,12 +56,13 @@ stats_manager_impl::add_local_user(
         {
             auto xuid = user->xbox_user_id().c_str();
             pThis->m_users[xuid] = stats_user_context(statsValueDocResult.payload(), xboxLiveContextImpl, simplifiedStatsService);
-            // log complete
         }
         else
         {
             // log error, add local user failed event
         }
+
+        pThis->m_statEventList.push_back(stat_event(stat_event_type::local_user_added, user, xbox_live_result<void>(statsValueDocResult.err(), statsValueDocResult.err_message())));
     });
 
     return xbox_live_result<void>();
@@ -104,7 +105,10 @@ stats_manager_impl::remove_local_user(
             }
         });
     }
-
+    else
+    {
+        m_statEventList.push_back(stat_event(stat_event_type::local_user_removed, user, xbox_live_result<void>()));
+    }
     return xbox_live_result<void>();
 }
 
@@ -152,7 +156,10 @@ stats_manager_impl::request_flush_to_service(
 std::vector<stat_event>
 stats_manager_impl::do_work()
 {
-    return std::vector<stat_event>();
+    std::lock_guard<std::mutex> guard(m_statsServiceMutex);
+    auto copyList = m_statEventList;
+    m_statEventList.clear();
+    return copyList;
 }
 
 xbox_live_result<void>
@@ -192,7 +199,7 @@ stats_manager_impl::set_stat(
     return userIter->second.statValueDocument.set_stat(name.c_str(), value);
 }
 
-xbox_live_result<stat_value>
+xbox_live_result<std::shared_ptr<stat_value>>
 stats_manager_impl::get_stat(
     _In_ const xbox_live_user_t& user,
     _In_ const string_t& name
@@ -203,7 +210,7 @@ stats_manager_impl::get_stat(
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
-        return xbox_live_result<stat_value>(xbox_live_error_code::invalid_argument, "User not found in local map");
+        return xbox_live_result<std::shared_ptr<stat_value>>(xbox_live_error_code::invalid_argument, "User not found in local map");
     }
 
     return userIter->second.statValueDocument.get_stat(name.c_str());

@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.Services.Uni
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.System.140.UnitTest.Shared", "..\Microsoft.Xbox.Services.UnitTest.140.Shared\Microsoft.Xbox.Services.UnitTest.140.Shared.vcxitems", "{E73D47A1-2CF5-4ADA-B9E7-F2619F666162}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpprestsdk140.static", "..\..\External\cpprestsdk\Release\src\build\vs14\casablanca140.static.vcxproj", "{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpprestsdk140.static", "..\..\External\cpprestsdk\Release\src\build\vs14.static\casablanca140.static.vcxproj", "{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution

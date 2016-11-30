@@ -255,6 +255,13 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxSocialRelationship_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxUserProfile_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\simplified_stats_internal.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticCompareType_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticContext_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticDataType_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticEventType_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticEvent_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticManager_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticValue_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\user_statistics_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\RequestedStatistics_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\ServiceConfigurationStatistic_WinRT.h" />
@@ -632,7 +639,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_value_document.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stat_context.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\simplified_stats_manager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stat_event.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stat_value.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticContext_WinRT.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticEvent_WinRT.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticManager_WinRT.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticValue_WinRT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\requested_statistics.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\service_configuration_statistic.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\statistic.cpp" />

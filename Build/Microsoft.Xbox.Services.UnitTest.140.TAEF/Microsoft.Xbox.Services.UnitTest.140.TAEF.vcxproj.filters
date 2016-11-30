@@ -150,6 +150,9 @@
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\SimplifiedStatServiceTests.cpp">
       <Filter>Tests\Services</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\StatsManagerTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Tests\UnitTests\Support\DefineTestMacros.h">
@@ -202,6 +205,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Tests\UnitTests\Mocks\MockMultiplayer.h">
       <Filter>Tests\Support\Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Tests\Services\StatsManagerHelper.h">
+      <Filter>Tests\Services</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

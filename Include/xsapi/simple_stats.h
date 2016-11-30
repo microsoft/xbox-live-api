@@ -65,9 +65,7 @@ enum class stat_event_type
     leaderboard_load_complete,
     user_statistic_view_load_complete,
     leaderboard_updated,
-    user_statistic_view_updated,
-    achievement_update_complete,
-    achievement_load_complete
+    user_statistic_view_updated
 };
 
 
@@ -127,12 +125,6 @@ public:
     /// </summary>
     /// <returns>The compare type</returns>
     stat_compare_type compare_type() const;
-
-    /// <summary> 
-    /// Local user owner
-    /// </summary>
-    /// <returns>The local user object</returns>
-    const xbox_live_user_t& local_user_owner() const;
 
     /// Internal function
     static xbox_live_result<stat_value> _Deserialize(_In_ const web::json::value& data);
@@ -217,7 +209,11 @@ public:
     const xbox_live_user_t& local_user() const;
 
     /// Internal function
-    stat_event(stat_event_type eventType);
+    stat_event(
+        stat_event_type eventType,
+        xbox_live_user_t user,
+        xbox_live_result<void> errorInfo
+        );
 
 private:
     stat_event_type m_eventType;
@@ -231,7 +227,7 @@ private:
 class leaderboard_query
 {
 public:
-	leaderboard_query() : m_shouldSkipToXuid(false), m_maxItems(0), m_skipToRank(0), m_sortOrder(sort_order::ascending) {}
+    leaderboard_query() : m_shouldSkipToXuid(false), m_maxItems(0), m_skipToRank(0), m_sortOrder(sort_order::ascending) {}
 
 private:
     bool m_shouldSkipToXuid;
@@ -331,7 +327,7 @@ public:
     /// <param name="user">The local user whose stats to access</param>
     /// <param name="name">The name of the statistic to modify</param>
     /// <param name="value">Value to replace the stat by</param>
-    /// <param name="stat_compare_type">
+    /// <param name="statisticReplaceCompareType">
     /// Will override the compare type. Stat will only be updated if follows the stat compares rule
     /// *Note* This is not recommended to be modified after release of the title
     /// </param>
@@ -373,7 +369,7 @@ public:
     /// <param name="user">The local user whose stats to access</param>
     /// <param name="name">The name of the statistic to modify</param>
     /// <return>Whether or not the setting was successful along with updated stat</return>
-    xbox_live_result<stat_value> get_stat(
+    xbox_live_result<std::shared_ptr<stat_value>> get_stat(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& name
         );
@@ -474,101 +470,6 @@ public:
         _In_ const std::vector<string_t>& statName,
         _In_ const std::vector<string_t>& xboxUserIds,
         _In_ const stat_context& statContext = stat_context()
-        );
-
-    /// <summary>
-    /// Allow achievement progress to be updated and achievements to be unlocked.
-    /// This API will work even when offline. On PC and Xbox One, updates will be 
-    /// posted by the system when connection is re-established even if the title isn't running.
-    /// </summary>
-    /// <param name="xboxUserId">The Xbox User ID of the player.</param>
-    /// <param name="achievementId">The achievement ID as defined by XDP or Dev Center.</param>
-    /// <param name="percentComplete">The completion percentage of the achievement to indicate progress.
-    /// Valid values are from 1 to 100. Set to 100 to unlock the achievement.
-    /// Progress will be set by the server to the highest value sent</param>
-    /// <remarks>
-    /// Event achievement_update_complete shows up through do_work when complete
-    ///
-    /// This method calls V2 POST /users/xuid({xuid})/achievements/{scid}/update
-    /// </remarks>
-    xbox::services::xbox_live_result<void> update_achievement(
-        _In_ const string_t& xboxUserId,
-        _In_ const string_t& achievementId,
-        _In_ uint32_t percentComplete
-        );
-
-    /// <summary>
-    /// Allow achievement progress to be updated and achievements to be unlocked.
-    /// This API will work even when offline. On PC and Xbox One, updates will be 
-    /// posted by the system when connection is re-established even if the title isn't running.
-    /// </summary>
-    /// <param name="xboxUserId">The Xbox User ID of the player.</param>
-    /// <param name="titleId">The title ID.</param>
-    /// <param name="serviceConfigurationId">The service configuration ID (SCID) for the title.</param>
-    /// <param name="achievementId">The achievement ID as defined by XDP or Dev Center.</param>
-    /// <param name="percentComplete">The completion percentage of the achievement to indicate progress.
-    /// Valid values are from 1 to 100. Set to 100 to unlock the achievement.
-    /// Progress will be set by the server to the highest value sent</param>
-    /// <remarks>
-    /// Event achievement_update_complete shows up through do_work when complete
-    ///
-    /// This method calls V2 POST /users/xuid({xuid})/achievements/{scid}/update
-    /// </remarks>
-    xbox::services::xbox_live_result<void> update_achievement(
-        _In_ const string_t& xboxUserId,
-        _In_ uint32_t titleId,
-        _In_ const string_t& serviceConfigurationId,
-        _In_ const string_t& achievementId,
-        _In_ uint32_t percentComplete
-        );
-
-    /// <summary>
-    /// Returns an achievements_result object containing the first page of achievements
-    /// for a player of the specified title.
-    /// </summary>
-    /// <param name="xboxUserId">The Xbox User ID of the player.</param>
-    /// <param name="titleId">The title ID.</param>
-    /// <param name="type">The achievement type to retrieve.</param>
-    /// <param name="unlockedOnly">Indicates whether to return unlocked achievements only.</param>
-    /// <param name="orderby">Controls how the list of achievements is ordered.</param>
-    /// <param name="skipItems">The number of achievements to skip.</param>
-    /// <param name="maxItems">The maximum number of achievements the result can contain.  Pass 0 to attempt
-    /// to retrieve all items.</param>
-    /// <returns>An AchievementsResult object that contains a list of Achievement objects.</returns>
-    /// <remarks>
-    /// Returns a task&lt;T&gt; object that represents the state of the asynchronous operation.
-    ///
-    /// Event achievement_update_complete shows up through do_work when complete
-    ///
-    /// This method calls V2 GET /users/xuid({xuid})/achievements
-    /// </remarks>
-    xbox::services::xbox_live_result<std::shared_ptr<achievements_view>> get_achievements_for_title_id(
-        _In_ const string_t& xboxUserId,
-        _In_ uint32_t titleId,
-        _In_ xbox::services::achievements::achievement_type type,
-        _In_ bool unlockedOnly,
-        _In_ xbox::services::achievements::achievement_order_by orderBy,
-        _In_ uint32_t skipItems,
-        _In_ uint32_t maxItems
-        );
-
-    /// <summary>
-    /// Returns a specific achievement object for a specified player.
-    /// </summary>
-    /// <param name="xboxUserId">The Xbox User ID of the player.</param>
-    /// <param name="serviceConfigurationId">The service configuration ID (SCID) for the title.</param>
-    /// <param name="achievementId">The unique identifier of the Achievement as defined by XDP or Dev Center.</param>
-    /// <returns>The requested achievement object if it exists.
-    /// If the achievement does not exist, the method returns xbox_live_error_code::runtime_error .</returns>
-    /// <remarks>
-    /// Returns a task&lt;T&gt; object that represents the state of the asynchronous operation.
-    ///
-    /// This method calls V2 GET /users/xuid({xuid})/achievements/{scid}/{achievementId}.
-    /// </remarks>
-    xbox::services::xbox_live_result<std::shared_ptr<achievements_view>> get_achievement(
-        _In_ const string_t& xboxUserId,
-        _In_ const string_t& serviceConfigurationId,
-        _In_ const string_t& achievementId
         );
 
     stats_manager();

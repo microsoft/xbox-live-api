@@ -102,6 +102,7 @@
       $(ProjectDir)..\..\Source\Services\Tournaments\WinRT;
       $(ProjectDir)..\..\Source\Services\Events;
       $(ProjectDir)..\..\Source\Services\Events\WinRT;
+      $(ProjectDir)..\..\Source\Services\Stats\Manager\WinRT;
       $(ProjectDir)..\..\Include;
       $(ProjectDir)..\..\Tests\UnitTests;
       $(ProjectDir)..\..\Tests\UnitTests\Mocks;
@@ -198,6 +199,7 @@
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\SimplifiedStatServiceTests.cpp" />
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\SocialManagerTests.cpp" />
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\SocialTests.cpp" />
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\StatsManagerTests.cpp" />
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\StatsTests.cpp" />
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\StringVerifyTests.cpp" />
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\TitleStorageTests.cpp" />
@@ -226,9 +228,10 @@
     <ClInclude Include="..\..\Tests\UnitTests\Support\unittest_output.h" />
     <ClInclude Include="..\..\Tests\UnitTests\Tests\Services\RtaTestHelper.h" />
     <ClInclude Include="..\..\Tests\UnitTests\Tests\Services\SocialManagerHelper.h" />
+    <ClInclude Include="..\..\Tests\UnitTests\Tests\Services\StatsManagerHelper.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14\casablanca140.static.vcxproj">
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.static\casablanca140.static.vcxproj">
       <Project>{04d42f35-e5d5-4d95-980e-1bd7e900f2dd}</Project>
     </ProjectReference>
   </ItemGroup>

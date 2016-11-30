@@ -14,28 +14,10 @@
 #include "xsapi/simple_stats.h"
 #include "Stats/Manager/simplified_stats_internal.h"
 #include "xbox_live_context_impl.h"
+#include "StatsManagerHelper.h"
 
 using namespace xbox::services;
 using namespace xbox::services::experimental::stats::manager;
-
-const std::wstring statValueDocumentResponse = LR"({
-    "ver": 1, 
-    "envelope": {
-        "serverVersion": 1,
-        "clientVersion": 1,
-        "clientId": "feb26f16-2348-48f1-8161-fb5723bffdce"
-    },
-    "timestamp": "2016-10-07T23:04:08Z",
-    "stats": {
-        "contextualKeys": { "race": "human", "class": "wizard" },
-        "title": {
-            "headshots": { "value": 7, "op": "add" },
-            "fastestRound": { "value": 7, "op": "min" },
-            "longestJump": { "value": 9.5, "op": "max" },
-            "strangeStat": { "value": "foo", "op": "replace" }
-        }
-    }
-})";
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
@@ -98,7 +80,7 @@ public:
         }
     }
 
-    stats_value_document GetStatValueDocument(simplified_stats_service& simplifiedStatService, const std::shared_ptr<MockHttpCall>& httpCall)
+    stats_value_document GetStatValueDocument(simplified_stats_service& simplifiedStatService, const std::shared_ptr<MockHttpCall>& httpCall, const string_t& jsonValue)
     {
         httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(statValueDocumentResponse));
         auto statValueDocumentResult = simplifiedStatService.get_stats_value_document().get();
@@ -112,7 +94,7 @@ public:
         auto simplifiedStatService = GetSimplifiedStatsService();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
 
-        auto statValueDocument = GetStatValueDocument(simplifiedStatService, httpCall);
+        auto statValueDocument = GetStatValueDocument(simplifiedStatService, httpCall, statValueDocumentResponse);
         auto statJSON = web::json::value::parse(statValueDocumentResponse);
 
         auto versionNumCompare = statJSON[L"ver"].as_integer();
@@ -132,7 +114,7 @@ public:
         {
             auto& statValueResult = statValueDocument.get_stat(statName.c_str());
             VERIFY_IS_TRUE(!statValueResult.err());
-            VerifyStatAreEqual(statName, statValueResult.payload(), titleStatsList);
+            VerifyStatAreEqual(statName, *statValueResult.payload(), titleStatsList);
         }
 
         VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
@@ -161,7 +143,7 @@ public:
         auto simplifiedStatService = GetSimplifiedStatsService();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
 
-        auto statsValueDoc = GetStatValueDocument(simplifiedStatService, httpCall);
+        auto statsValueDoc = GetStatValueDocument(simplifiedStatService, httpCall, statValueDocumentResponseWithContext);
         statsValueDoc.set_stat(L"headshots", 8.f);
         statsValueDoc.do_work();
         auto updateStatResult = simplifiedStatService.update_stats_value_document(statsValueDoc).get();

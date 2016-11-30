@@ -31,7 +31,7 @@ struct stat_pending_state
 class stats_value_document
 {
 public:
-    xbox_live_result<stat_value> get_stat(
+    xbox_live_result<std::shared_ptr<stat_value>> get_stat(
         _In_ const char_t* name
         );
 
@@ -85,7 +85,7 @@ private:
     xsapi_internal_vector(stat_pending_state) m_statPendingState;
     xsapi_internal_string m_clientId;
     xsapi_internal_vector(stat_context) m_currentStatContexts;
-    xsapi_internal_unordered_map(string_t, stat_value) m_statisticDocument;
+    xsapi_internal_unordered_map(string_t, std::shared_ptr<stat_value>) m_statisticDocument;
     xbox::services::system::xbox_live_mutex m_svdMutex;
 };
 
@@ -175,7 +175,7 @@ public:
         _Inout_ std::vector<string_t>& statNameList
         );
 
-    xbox_live_result<stat_value> get_stat(
+    xbox_live_result<std::shared_ptr<stat_value>> get_stat(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& name
         );
@@ -228,6 +228,7 @@ public:
 private:
     std::mutex m_statsServiceMutex;
 
+    std::vector<stat_event> m_statEventList;
     // TODO: change back to xsapi_internal_string
     xsapi_internal_unordered_map(string_t, stats_user_context) m_users;
 };

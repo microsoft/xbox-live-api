@@ -15,7 +15,7 @@ using namespace xbox::services;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
 
-xbox_live_result<stat_value>
+xbox_live_result<std::shared_ptr<stat_value>>
 stats_value_document::get_stat(
     _In_ const char_t* statName
     )
@@ -24,7 +24,7 @@ stats_value_document::get_stat(
     auto statLocIter = m_statisticDocument.find(statName);
     if (statLocIter == m_statisticDocument.end())
     {
-        return xbox_live_result<stat_value>(xbox_live_error_code::invalid_argument, "Stat not found in document");
+        return xbox_live_result<std::shared_ptr<stat_value>>(xbox_live_error_code::invalid_argument, "Stat not found in document");
     }
 
     return statLocIter->second;
@@ -152,10 +152,10 @@ stats_value_document::do_work()
         switch (pendingStat.statDataType)
         {
             case stat_data_type::number:
-                m_statisticDocument[pendingStat.statPendingName].set_stat(pendingStat.statPendingData.numberType);
+                m_statisticDocument[pendingStat.statPendingName]->set_stat(pendingStat.statPendingData.numberType);
                 break;
             case stat_data_type::string:
-                m_statisticDocument[pendingStat.statPendingName].set_stat(pendingStat.statPendingData.stringType);
+                m_statisticDocument[pendingStat.statPendingName]->set_stat(pendingStat.statPendingData.stringType);
                 break;
         }
     }
@@ -185,7 +185,7 @@ stats_value_document::serialize()
     titleField = web::json::value::object();
     for (auto& stat : m_statisticDocument)
     {
-        titleField[stat.first.c_str()] = stat.second.serialize();
+        titleField[stat.first.c_str()] = stat.second->serialize();
     }
 
     m_isDirty = false;
@@ -221,7 +221,7 @@ stats_value_document::_Deserialize(
     auto statsArray = titleField.as_object();
     for (auto& stat : statsArray)
     {
-        returnObject.m_statisticDocument[stat.first.c_str()] = stat_value::_Deserialize(stat.second).payload();
+        returnObject.m_statisticDocument[stat.first.c_str()] = std::make_shared<stat_value>(stat_value::_Deserialize(stat.second).payload());
     }
 
     return returnObject;
