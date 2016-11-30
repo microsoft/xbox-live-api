@@ -8,6 +8,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpprestsdk140.uwp.staticlib", "..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.staticlib.vcxproj", "{47A5CFDC-C244-45A6-9830-38CB303CB495}"
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\..\External\cpprestsdk\Release\src\build\common.vcxitems*{47a5cfdc-c244-45a6-9830-38cb303cb495}*SharedItemsImports = 4
+		..\..\External\cpprestsdk\Release\src\build\winrt.vcxitems*{47a5cfdc-c244-45a6-9830-38cb303cb495}*SharedItemsImports = 4
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
 		Debug|x64 = Debug|x64

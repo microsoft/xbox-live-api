@@ -228,7 +228,7 @@
     <ClInclude Include="..\..\Tests\UnitTests\Tests\Services\SocialManagerHelper.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Casablanca\Release\src\build\vs14\casablanca140.static.vcxproj">
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14\casablanca140.static.vcxproj">
       <Project>{04d42f35-e5d5-4d95-980e-1bd7e900f2dd}</Project>
     </ProjectReference>
   </ItemGroup>
