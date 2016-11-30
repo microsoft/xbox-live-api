@@ -114,26 +114,30 @@ void xbox_live_context_impl::init()
     init_real_time_activity_service_instance();
 
 #if TV_API || UWP_API
-    auto mainView = Windows::ApplicationModel::Core::CoreApplication::MainView;
-    if (mainView != nullptr)
+    auto dispatcher = xbox_live_context_settings::_s_dispatcher;
+    if (dispatcher == nullptr)
     {
-        auto coreWindow = mainView->CoreWindow;
-        if (coreWindow != nullptr)
+        auto mainView = Windows::ApplicationModel::Core::CoreApplication::MainView;
+        if (mainView != nullptr)
         {
-            auto dispatcher = coreWindow->Dispatcher;
-            if (dispatcher != nullptr)
+            auto coreWindow = mainView->CoreWindow;
+            if (coreWindow != nullptr)
             {
-                dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal,
-                    ref new Windows::UI::Core::DispatchedHandler([]()
-                {
-                    xbox::services::service_call_logging_config::get_singleton_instance()->_Register_for_protocol_activation();
-                }));
+                dispatcher = coreWindow->Dispatcher;
             }
+        }
+
+        if (dispatcher != nullptr)
+        {
+            dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal,
+                ref new Windows::UI::Core::DispatchedHandler([]()
+            {
+                xbox::services::service_call_logging_config::get_singleton_instance()->_Register_for_protocol_activation();
+            }));
         }
     }
 
     xbox::services::service_call_logging_config::get_singleton_instance()->_ReadLocalConfig();
-        
 #endif
 
     std::weak_ptr<xbox_live_context_impl> thisWeakPtr = shared_from_this();
