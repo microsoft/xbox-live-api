@@ -1,0 +1,127 @@
+//*********************************************************
+//
+// Copyright (c) Microsoft. All rights reserved.
+// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+//
+//*********************************************************
+#include "pch.h"
+#include "xsapi/simple_stats.h"
+#include "simplified_stats_internal.h"
+#include "http_call_impl.h"
+#include "user_context.h"
+#include "xbox_system_factory.h"
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
+
+simplified_stats_service::simplified_stats_service()
+{
+}
+
+simplified_stats_service::simplified_stats_service(
+    _In_ std::shared_ptr<xbox::services::user_context> userContext,
+    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
+    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+    ) : 
+    m_userContext(std::move(userContext)),
+    m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
+    m_appConfig(std::move(appConfig))
+{
+}
+
+pplx::task<xbox_live_result<void>>
+simplified_stats_service::update_stats_value_document(
+    _In_ stats_value_document& statValuePostDocument
+    )
+{
+    string_t pathAndQuery = pathandquery_simplified_stats_subpath(
+        m_userContext->xbox_user_id(),
+        m_appConfig->scid(),
+        false
+        );
+
+    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+        m_xboxLiveContextSettings,
+        _T("POST"),
+        utils::create_xboxlive_endpoint(_T("statswrite.dnet"), m_appConfig),
+        pathAndQuery,
+        xbox_live_api::update_stats_value_document
+        );
+
+    httpCall->set_request_body(statValuePostDocument.serialize());
+
+    auto task = httpCall->get_response(http_call_response_body_type::json_body)
+    .then([&statValuePostDocument](std::shared_ptr<http_call_response> response)
+    {
+        if (!response->err_code())
+        {
+            statValuePostDocument.increment_client_version_number();
+        }
+
+        return xbox_live_result<void>(response->err_code(), response->err_message());
+    });
+
+    return utils::create_exception_free_task<void>(
+        task
+        );
+}
+
+pplx::task<xbox_live_result<stats_value_document>>
+simplified_stats_service::get_stats_value_document()
+{
+    string_t pathAndQuery = pathandquery_simplified_stats_subpath(
+        m_userContext->xbox_user_id(),
+        m_appConfig->scid(),
+        false
+        );
+
+    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+        m_xboxLiveContextSettings,
+        _T("GET"),
+        utils::create_xboxlive_endpoint(_T("statsread.dnet"), m_appConfig),
+        pathAndQuery,
+        xbox_live_api::get_stats_value_document
+        );
+
+    auto task = httpCall->get_response(http_call_response_body_type::json_body)
+    .then([](std::shared_ptr<http_call_response> response)
+    {
+        auto result = stats_value_document::_Deserialize(response->response_body_json());
+        return utils::generate_xbox_live_result<stats_value_document>(
+            result,
+            response
+            );
+    });
+
+    return utils::create_exception_free_task<stats_value_document>(
+        task
+        );
+}
+
+string_t
+simplified_stats_service::pathandquery_simplified_stats_subpath(
+    const string_t& xboxUserId,
+    const string_t& serviceConfigurationId,
+    bool useXuidTag
+    ) const
+{
+    stringstream_t source;
+    source << _T("/stats/users/");
+    if (useXuidTag)
+    {
+        source << _T("xuid(");
+    }
+    source << xboxUserId;
+    if (useXuidTag)
+    {
+        source << _T(")");
+    }
+    source << _T("/scids/");
+    source << serviceConfigurationId;
+
+    return source.str();
+}
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_END
