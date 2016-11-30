@@ -117,14 +117,21 @@ void xbox_live_context_impl::init()
     auto dispatcher = xbox_live_context_settings::_s_dispatcher;
     if (dispatcher == nullptr)
     {
-        auto mainView = Windows::ApplicationModel::Core::CoreApplication::MainView;
-        if (mainView != nullptr)
+        try
         {
-            auto coreWindow = mainView->CoreWindow;
-            if (coreWindow != nullptr)
+            auto mainView = Windows::ApplicationModel::Core::CoreApplication::MainView;
+            if (mainView != nullptr)
             {
-                dispatcher = coreWindow->Dispatcher;
+                auto coreWindow = mainView->CoreWindow;
+                if (coreWindow != nullptr)
+                {
+                    dispatcher = coreWindow->Dispatcher;
+                }
             }
+        }
+        catch (...)
+        {
+            LOG_ERROR("Protocol activation failed due to inability to acquire a CoreWindow");
         }
 
         if (dispatcher != nullptr)
