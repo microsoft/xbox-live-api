@@ -87,13 +87,13 @@ xbox_live_result<void>
 stats_manager::set_stat(
     _In_ const xbox_live_user_t& user,
     _In_ const string_t& name,
-    _In_ const char_t* value
+    _In_ const string_t& value
 )
 {
     return m_statsManagerImpl->set_stat(
         user,
         name,
-        value
+        value.c_str()
         );
 }
 

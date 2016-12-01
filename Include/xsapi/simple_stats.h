@@ -22,6 +22,7 @@ namespace xbox { namespace services { namespace experimental { namespace stats {
 #endif
 
 class stats_manager_impl;
+static const uint8_t STAT_PRESENCE_CHARS_NUM = 64;
 
 /// <summary> 
 /// Represents data for stat
@@ -30,7 +31,7 @@ class stats_manager_impl;
 union stat_data
 {
     double numberType;
-    char_t stringType[64];
+    char_t stringType[STAT_PRESENCE_CHARS_NUM];
 };
 
 /// <summary> 
@@ -98,7 +99,7 @@ public:
     /// Name of the statistic
     /// </summary>
     /// <returns>A stat container that has the stat name string</returns>
-    const char_t* name() const;
+    const string_t name() const;
 
     /// <summary> 
     /// Return data as numerical type
@@ -112,7 +113,7 @@ public:
     /// </summary>
     /// <returns>data as char_t*</returns>
     /// <remarks>Will debug assert if data is not type requested</returns>
-    const char_t* as_string() const;
+    const string_t as_string() const;
 
     /// <summary> 
     /// Return type of data the data object is
@@ -137,7 +138,7 @@ private:
     stat_data_type m_dataType;
     stat_compare_type m_statCompareType;
     xbox_live_user_t m_localUserOwner;
-    char_t m_name[64];
+    char_t m_name[STAT_PRESENCE_CHARS_NUM];
     stat_data m_statData;
     std::function<void(stat_value)> m_callbackFunc;
     friend class stats_value_document;
@@ -155,21 +156,21 @@ public:
     /// <param name="name">Name for stat_context</param>
     /// <param name="value">Value for stat_context</param>
     stat_context(
-        _In_ const char_t* name,
-        _In_ const char_t* value
+        _In_ const string_t& name,
+        _In_ const string_t& value
         );
 
     /// <summary> 
     /// Represents the name for the stat_context
     /// </summary>
     /// <return>Returns the name of the stat_context</return>
-    const char_t* name() const;
+    const string_t name() const;
 
     /// <summary> 
     /// Represents the key name for the stat_context
     /// </summary>
     /// <return>Returns the value of the stat_context</return>
-    const char_t* value() const;
+    const string_t value() const;
 
     /// internal function
     stat_context();
@@ -180,8 +181,8 @@ public:
         );
 
 private:
-    char_t m_name[64];
-    char_t m_value[64];
+    char_t m_name[STAT_PRESENCE_CHARS_NUM];
+    char_t m_value[STAT_PRESENCE_CHARS_NUM];
 };
 
 /// <summary> 
@@ -340,7 +341,7 @@ public:
         );
 
     /// <summary> 
-    /// Replaces the string stat by the value.
+    /// Reaplces a string stat with the given value.
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
     /// <param name="name">The name of the statistic to modify</param>
@@ -349,7 +350,7 @@ public:
     xbox_live_result<void> set_stat(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& name,
-        _In_ const char_t* value
+        _In_ const string_t& value
         );
 
     /// <summary> 
@@ -390,7 +391,7 @@ public:
     /// </summary>
     /// <param name="user">The local user whose keys to modify</param>
     /// <param name="statisticContextList">The list of contextual keys to set</param>
-    /// <return>Whether or not getting the keys was successful</return>
+    /// <return>Whether or not setting the keys was successful</return>
     xbox_live_result<void> set_stat_contexts(
         _In_ const xbox_live_user_t& user,
         _In_ const std::vector<stat_context>& statContextList

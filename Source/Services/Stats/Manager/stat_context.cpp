@@ -19,26 +19,25 @@ stat_context::stat_context()
 }
 
 stat_context::stat_context(
-    _In_ const char_t* name,
-    _In_ const char_t* value
+    _In_ const string_t& name,
+    _In_ const string_t& value
     )
 {
-    utils::char_t_copy(m_name, ARRAYSIZE(m_name), name);
-    utils::char_t_copy(m_value, ARRAYSIZE(m_value), value);
+    utils::char_t_copy(m_name, ARRAYSIZE(m_name), name.c_str());
+    utils::char_t_copy(m_value, ARRAYSIZE(m_value), value.c_str());
 }
 
-const char_t*
+const string_t
 stat_context::name() const
 {
     return m_name;
 }
 
-const char_t*
+const string_t
 stat_context::value() const
 {
     return m_value;
 }
-
 
 xbox_live_result<stat_context>
 stat_context::_Deserialize(

@@ -107,12 +107,19 @@ public:
         auto user = mockXblContext->User;
         InitializeStatsManager(statsManager, user);
 
-        auto stat = statsManager->GetStatistic(user, L"headshots");
+        Platform::String^ statName = L"headshots";
+        auto stat = statsManager->GetStatistic(user, statName);
         VERIFY_IS_TRUE(stat->DataType == StatisticDataType::Number);
         VERIFY_IS_TRUE(stat->AsNumber == 7);
         VERIFY_IS_TRUE(stat->CompareType == StatisticCompareType::Always);
 
-        //statsManager->SetStatisticNumberData(user, )
+        statsManager->SetStatisticNumberData(user, statName, 20.f);
+        stat = statsManager->GetStatistic(user, statName);
+        VERIFY_IS_TRUE(stat->DataType == StatisticDataType::Number);
+        VERIFY_IS_TRUE(stat->AsNumber == 7);
+        VERIFY_IS_TRUE(stat->CompareType == StatisticCompareType::Always);
+        statsManager->DoWork();
+        //statsManager->
     }
 };
 

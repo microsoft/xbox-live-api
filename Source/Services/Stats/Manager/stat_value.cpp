@@ -12,7 +12,7 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
 
-const char_t*
+const string_t
 stat_value::name() const
 {
     return m_name;
@@ -24,7 +24,7 @@ stat_value::as_number() const
     return m_statData.numberType;
 }
 
-const char_t*
+const string_t
 stat_value::as_string() const
 {
     return m_statData.stringType;

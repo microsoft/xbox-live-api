@@ -21,7 +21,7 @@ public:
     /// Name of the statistic
     /// </summary>
     /// <returns>A stat container that has the stat name string</returns>
-    DEFINE_PTR_PROP_GET_STR_OBJ_FROM_WCHAR_PTR(Name, name);
+    DEFINE_PTR_PROP_GET_STR_OBJ(Name, name);
 
     /// <summary> 
     /// Return data as numerical type
@@ -35,7 +35,7 @@ public:
     /// </summary>
     /// <returns>data as char_t*</returns>
     /// <remarks>Will debug assert if data is not type requested</returns>
-    DEFINE_PTR_PROP_GET_STR_OBJ_FROM_WCHAR_PTR(AsString, as_string);
+    DEFINE_PTR_PROP_GET_STR_OBJ(AsString, as_string);
 
     /// <summary> 
     /// Return type of data the data object is

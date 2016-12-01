@@ -188,7 +188,6 @@ stats_value_document::serialize()
         titleField[stat.first.c_str()] = stat.second->serialize();
     }
 
-    m_isDirty = false;
     return requestJSON;
 }
 

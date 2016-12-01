@@ -25,7 +25,7 @@ stats_manager_impl::add_local_user(
 )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr(user->xbox_user_id().c_str());
+    string_t userStr = user->xbox_user_id();
     auto userIter = m_users.find(userStr);
     if (userIter != m_users.end())
     {
@@ -43,7 +43,7 @@ stats_manager_impl::add_local_user(
 
     std::weak_ptr<stats_manager_impl> thisWeak = shared_from_this();
     simplifiedStatsService.get_stats_value_document()
-    .then([thisWeak, user, xboxLiveContextImpl, simplifiedStatsService](xbox_live_result<stats_value_document> statsValueDocResult)
+    .then([thisWeak, user, xboxLiveContextImpl, simplifiedStatsService, userStr](xbox_live_result<stats_value_document> statsValueDocResult)
     {
         std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
         if (pThis == nullptr)
@@ -54,8 +54,7 @@ stats_manager_impl::add_local_user(
         std::lock_guard<std::mutex> guard(pThis->m_statsServiceMutex);
         if (!statsValueDocResult.err())
         {
-            auto xuid = user->xbox_user_id().c_str();
-            pThis->m_users[xuid] = stats_user_context(statsValueDocResult.payload(), xboxLiveContextImpl, simplifiedStatsService);
+            pThis->m_users[userStr] = stats_user_context(statsValueDocResult.payload(), xboxLiveContextImpl, simplifiedStatsService);
         }
         else
         {
@@ -74,7 +73,7 @@ stats_manager_impl::remove_local_user(
 )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr(user->xbox_user_id().c_str());
+    string_t userStr = user->xbox_user_id();
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -97,7 +96,7 @@ stats_manager_impl::remove_local_user(
 
             if (updateSVDResult.err())
             {
-                // write doc offline
+                // write doc offline on network error or offline
             }
             else
             {
@@ -119,7 +118,7 @@ stats_manager_impl::request_flush_to_service(
     )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr(user->xbox_user_id().c_str());
+    string_t userStr = user->xbox_user_id();
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -171,7 +170,7 @@ stats_manager_impl::set_stat(
 )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr(user->xbox_user_id().c_str());
+    string_t userStr = user->xbox_user_id();
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -189,7 +188,7 @@ stats_manager_impl::set_stat(
 )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr(user->xbox_user_id().c_str());
+    string_t userStr = user->xbox_user_id();
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -206,7 +205,7 @@ stats_manager_impl::get_stat(
     )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr(user->xbox_user_id().c_str());
+    string_t userStr = user->xbox_user_id();
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -223,7 +222,7 @@ stats_manager_impl::get_stat_contexts(
     )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr(user->xbox_user_id().c_str());
+    string_t userStr = user->xbox_user_id();
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -242,7 +241,7 @@ stats_manager_impl::get_stat_names(
     )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr(user->xbox_user_id().c_str());
+    string_t userStr = user->xbox_user_id();
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -261,7 +260,7 @@ stats_manager_impl::set_stat_contexts(
 )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr(user->xbox_user_id().c_str());
+    string_t userStr = user->xbox_user_id();
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -281,7 +280,7 @@ stats_manager_impl::clear_stat_contexts(
 )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr(user->xbox_user_id().c_str());
+    string_t userStr = user->xbox_user_id();
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
