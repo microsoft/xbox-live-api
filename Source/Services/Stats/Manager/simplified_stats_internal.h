@@ -19,11 +19,41 @@
 
 namespace xbox { namespace services { namespace experimental { namespace stats { namespace manager { 
 
+enum class svd_event_type
+{
+    unknown,
+    stat_change,
+    stat_context_change
+};
+
 struct stat_pending_state
 {
+    stat_pending_state() :
+        statDataType(stat_data_type::undefined)
+    {
+        initialize_char_arr(statPendingName);
+    }
+
     stat_data_type statDataType;
-    char_t statPendingName[64];
+    char_t statPendingName[STAT_PRESENCE_CHARS_NUM];
     stat_data statPendingData;
+};
+
+// stat value document event
+class svd_event
+{
+public:
+    svd_event(_In_ stat_pending_state statPendingState);
+    svd_event(_In_ xsapi_internal_vector(stat_context) statPendingState);
+
+    svd_event_type event_type() const;
+    const stat_pending_state& stat_info() const;
+    const xsapi_internal_vector(stat_context)& context_list() const;
+
+private:
+    svd_event_type m_svdEventType;
+    stat_pending_state m_statPendingState;
+    xsapi_internal_vector(stat_context) m_statContextList;
 };
 
 /// internal class
@@ -31,6 +61,10 @@ struct stat_pending_state
 class stats_value_document
 {
 public:
+    void set_flush_function(
+        _In_ const std::function<void()> flushFunction
+        );
+
     xbox_live_result<std::shared_ptr<stat_value>> get_stat(
         _In_ const char_t* name
         );
@@ -61,7 +95,9 @@ public:
 
     void increment_client_version_number();
 
-    web::json::value serialize();
+    web::json::value serialize(
+        _In_ bool shouldOverrideLock = false
+        );
 
     uint32_t client_version();
     uint32_t server_version();
@@ -71,6 +107,8 @@ public:
 
     bool is_dirty();
 
+    void clear_dirty_state();
+
     void do_work();
 
     static xbox_live_result<stats_value_document> _Deserialize(
@@ -78,12 +116,15 @@ public:
         );
 
 private:
+    web::json::value serialize_impl() const;
+
     bool m_isDirty;
     uint32_t m_version;
     uint32_t m_clientVersion;
     uint32_t m_serverVersion;
-    xsapi_internal_vector(stat_pending_state) m_statPendingState;
+    std::function<void()> m_fRequestFlush;
     xsapi_internal_string m_clientId;
+    xsapi_internal_vector(svd_event) m_svdEventList;
     xsapi_internal_vector(stat_context) m_currentStatContexts;
     xsapi_internal_unordered_map(string_t, std::shared_ptr<stat_value>) m_statisticDocument;
     xbox::services::system::xbox_live_mutex m_svdMutex;
@@ -142,6 +183,8 @@ struct stats_user_context
 class stats_manager_impl : public std::enable_shared_from_this<stats_manager_impl>
 {
 public:
+    stats_manager_impl();
+
     xbox_live_result<void> add_local_user(
         _In_ const xbox_live_user_t& user
         );
@@ -225,12 +268,28 @@ public:
         _In_ const stat_context& statContext = stat_context()
         );
 
-private:
-    std::mutex m_statsServiceMutex;
+    void write_offline();
 
+private:
+    static inline bool should_write_offline(xbox_live_result<void>& postResult)
+    {
+        return postResult.err() == xbox_live_error_condition::network || postResult.err() == xbox_live_error_condition::http_429_too_many_requests 
+            || postResult.err() == xbox_live_error_code::http_status_500_internal_server_error || postResult.err() == xbox_live_error_code::http_status_502_bad_gateway
+            || postResult.err() == xbox_live_error_code::http_status_503_service_unavailable || postResult.err() == xbox_live_error_code::http_status_504_gateway_timeout;
+    }
+
+    void flush_to_service(
+        _In_ stats_user_context& statsUserContext,
+        _In_ stats_value_document& userSVD,
+        _In_ const xbox_live_user_t user
+        );
+
+
+    bool m_isOffline;
     std::vector<stat_event> m_statEventList;
     // TODO: change back to xsapi_internal_string
     xsapi_internal_unordered_map(string_t, stats_user_context) m_users;
+    std::mutex m_statsServiceMutex;
 };
 
 }}}}}

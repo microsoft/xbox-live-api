@@ -19,6 +19,11 @@ using namespace xbox::services::system;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
 
+stats_manager_impl::stats_manager_impl()
+    : m_isOffline(false)
+{
+}
+
 xbox_live_result<void>
 stats_manager_impl::add_local_user(
     _In_ const xbox_live_user_t& user
@@ -52,13 +57,35 @@ stats_manager_impl::add_local_user(
         }
 
         std::lock_guard<std::mutex> guard(pThis->m_statsServiceMutex);
-        if (!statsValueDocResult.err())
+
+        if (user->is_signed_in())
         {
-            pThis->m_users[userStr] = stats_user_context(statsValueDocResult.payload(), xboxLiveContextImpl, simplifiedStatsService);
+            if (statsValueDocResult.err())  // if there was an error, but the user is signed in, we assume offline sign in
+            {
+                pThis->m_isOffline = true;
+            }
+
+            auto& svd = statsValueDocResult.payload();
+            pThis->m_users[userStr] = stats_user_context(svd, xboxLiveContextImpl, simplifiedStatsService);
+            auto& statUserContext = pThis->m_users[userStr];
+            svd.set_flush_function([thisWeak, &statUserContext, user, &svd]()
+            {
+                std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
+                if (pThis == nullptr)
+                {
+                    return;
+                }
+
+                pThis->flush_to_service(
+                    statUserContext,
+                    svd,
+                    user
+                    );
+            });
         }
-        else
+        else    // not offline signed in
         {
-            // log error, add local user failed event
+            LOG_DEBUG("Could not successfully get SVD for user and user is offline");
         }
 
         pThis->m_statEventList.push_back(stat_event(stat_event_type::local_user_added, user, xbox_live_result<void>(statsValueDocResult.err(), statsValueDocResult.err_message())));
@@ -86,7 +113,7 @@ stats_manager_impl::remove_local_user(
     {
         std::weak_ptr<stats_manager_impl> thisWeak = shared_from_this();
         userIter->second.simplifiedStatsService.update_stats_value_document(userSVD)
-        .then([thisWeak, userSVD](xbox_live_result<void> updateSVDResult)
+        .then([thisWeak, userSVD, user](xbox_live_result<void> updateSVDResult)
         {
             std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
             if (pThis == nullptr)
@@ -94,14 +121,12 @@ stats_manager_impl::remove_local_user(
                 return;
             }
 
-            if (updateSVDResult.err())
+            if(should_write_offline(updateSVDResult))
             {
                 // write doc offline on network error or offline
             }
-            else
-            {
-                // write remove local user event
-            }
+
+            pThis->m_statEventList.push_back(stat_event(stat_event_type::local_user_removed, user, updateSVDResult));
         });
     }
     else
@@ -125,31 +150,49 @@ stats_manager_impl::request_flush_to_service(
         return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "User not found in local map");
     }
 
+    // TODO: guard this with a delayed task..
     auto& userSVD = userIter->second.statValueDocument;
+
     if (userSVD.is_dirty())
     {
-        std::weak_ptr<stats_manager_impl> thisWeak = shared_from_this();
-        userIter->second.simplifiedStatsService.update_stats_value_document(userSVD)
-        .then([thisWeak, userSVD](xbox_live_result<void> updateSVDResult)
-        {
-            std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
-            if (pThis == nullptr)
-            {
-                return;
-            }
-
-            if (updateSVDResult.err())
-            {
-                // TODO: write doc offline
-            }
-            else
-            {
-                // log
-            }
-        });
+        userSVD.clear_dirty_state();
+        flush_to_service(
+            userIter->second,
+            userSVD,
+            user
+            );
     }
 
     return xbox_live_result<void>();
+}
+
+void
+stats_manager_impl::flush_to_service(
+    _In_ stats_user_context& statsUserContext,
+    _In_ stats_value_document& userSVD,
+    _In_ const xbox_live_user_t user
+    )
+{
+    std::weak_ptr<stats_manager_impl> thisWeak = shared_from_this();
+    statsUserContext.simplifiedStatsService.update_stats_value_document(userSVD)
+    .then([thisWeak, userSVD, user](xbox_live_result<void> updateSVDResult)
+    {
+        std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
+        if (pThis == nullptr)
+        {
+            return;
+        }
+
+        if (should_write_offline(updateSVDResult))
+        {
+            // TODO: write doc offline
+        }
+        else
+        {
+            LOG_ERROR("Stats manager could not write stats value document");
+            pThis->m_statEventList.push_back(stat_event(stat_event_type::stat_update_complete, user, updateSVDResult));
+        }
+    });
 }
 
 std::vector<stat_event>
@@ -288,7 +331,6 @@ stats_manager_impl::clear_stat_contexts(
     }
 
     userIter->second.statValueDocument.clear_stat_contexts();
-
     return xbox_live_result<void>();
 }
 
