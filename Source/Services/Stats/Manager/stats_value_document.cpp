@@ -98,7 +98,7 @@ void
 stats_value_document::clear_stat_contexts()
 {
     std::lock_guard<std::mutex> lock(m_svdMutex.get());
-    m_currentStatContexts.clear();
+    m_svdEventList.push_back(svd_event(xsapi_internal_vector(stat_context)()));
 }
 
 uint32_t

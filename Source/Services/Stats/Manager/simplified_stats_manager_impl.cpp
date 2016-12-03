@@ -46,6 +46,7 @@ stats_manager_impl::add_local_user(
         xboxLiveContextImpl->application_config()
         );
 
+    m_users[userStr] = stats_user_context();
     std::weak_ptr<stats_manager_impl> thisWeak = shared_from_this();
     simplifiedStatsService.get_stats_value_document()
     .then([thisWeak, user, xboxLiveContextImpl, simplifiedStatsService, userStr](xbox_live_result<stats_value_document> statsValueDocResult)
@@ -66,22 +67,25 @@ stats_manager_impl::add_local_user(
             }
 
             auto& svd = statsValueDocResult.payload();
-            pThis->m_users[userStr] = stats_user_context(svd, xboxLiveContextImpl, simplifiedStatsService);
-            auto& statUserContext = pThis->m_users[userStr];
-            svd.set_flush_function([thisWeak, &statUserContext, user, &svd]()
+            auto& userStatContext = pThis->m_users.find(userStr);
+            if (userStatContext != pThis->m_users.end())    // user could be removed by the time this completes
             {
-                std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
-                if (pThis == nullptr)
+                pThis->m_users[userStr] = stats_user_context(svd, xboxLiveContextImpl, simplifiedStatsService);
+                auto& statUserContext = pThis->m_users[userStr];
+                statUserContext.statValueDocument.set_flush_function([thisWeak, &statUserContext, user]()
                 {
-                    return;
-                }
+                    std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
+                    if (pThis == nullptr)
+                    {
+                        return;
+                    }
 
-                pThis->flush_to_service(
-                    statUserContext,
-                    svd,
-                    user
-                    );
-            });
+                    pThis->flush_to_service(
+                        statUserContext,
+                        user
+                        );
+                });
+            }
         }
         else    // not offline signed in
         {
@@ -111,6 +115,7 @@ stats_manager_impl::remove_local_user(
     m_users.erase(userIter);
     if (userSVD.is_dirty())
     {
+        userSVD.do_work();  // before removing the user apply all users
         std::weak_ptr<stats_manager_impl> thisWeak = shared_from_this();
         userIter->second.simplifiedStatsService.update_stats_value_document(userSVD)
         .then([thisWeak, userSVD, user](xbox_live_result<void> updateSVDResult)
@@ -158,7 +163,6 @@ stats_manager_impl::request_flush_to_service(
         userSVD.clear_dirty_state();
         flush_to_service(
             userIter->second,
-            userSVD,
             user
             );
     }
@@ -169,13 +173,13 @@ stats_manager_impl::request_flush_to_service(
 void
 stats_manager_impl::flush_to_service(
     _In_ stats_user_context& statsUserContext,
-    _In_ stats_value_document& userSVD,
     _In_ const xbox_live_user_t user
     )
 {
     std::weak_ptr<stats_manager_impl> thisWeak = shared_from_this();
-    statsUserContext.simplifiedStatsService.update_stats_value_document(userSVD)
-    .then([thisWeak, userSVD, user](xbox_live_result<void> updateSVDResult)
+    stats_value_document svdCopy = statsUserContext.statValueDocument;
+    statsUserContext.simplifiedStatsService.update_stats_value_document(svdCopy)
+    .then([thisWeak, user](xbox_live_result<void> updateSVDResult)
     {
         std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
         if (pThis == nullptr)
@@ -200,6 +204,10 @@ stats_manager_impl::do_work()
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
     auto copyList = m_statEventList;
+    for (auto& statUserContext : m_users)
+    {
+        statUserContext.second.statValueDocument.do_work();
+    }
     m_statEventList.clear();
     return copyList;
 }

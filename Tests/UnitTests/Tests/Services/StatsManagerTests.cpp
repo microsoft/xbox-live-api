@@ -119,7 +119,32 @@ public:
         VERIFY_IS_TRUE(stat->AsNumber == 7);
         VERIFY_IS_TRUE(stat->CompareType == StatisticCompareType::Always);
         statsManager->DoWork();
-        //statsManager->
+        VERIFY_IS_TRUE(stat->DataType == StatisticDataType::Number);
+        VERIFY_IS_TRUE(stat->AsNumber == 20.f);
+        VERIFY_IS_TRUE(stat->CompareType == StatisticCompareType::Always);
+
+        Platform::Collections::Vector<StatisticContext^>^ vec = ref new Platform::Collections::Vector<StatisticContext ^>();
+        vec->Append(ref new StatisticContext(L"what", L"up"));
+        statsManager->SetStatisticContexts(user, vec->GetView());
+
+        auto statContexts = statsManager->GetStatisticContexts(user);
+        VERIFY_IS_TRUE(statContexts->Size == 0);
+        statsManager->DoWork();
+        statContexts = statsManager->GetStatisticContexts(user);
+        VERIFY_IS_TRUE(statContexts->Size == 1);
+        auto statContext = statContexts->GetAt(0);
+        VERIFY_IS_TRUE(statContext->Name == L"what");
+        VERIFY_IS_TRUE(statContext->Value == L"up");
+
+        statsManager->ClearStatisticContexts(user);
+        VERIFY_IS_TRUE(statContexts->Size == 1);
+        statsManager->DoWork();
+        statContexts = statsManager->GetStatisticContexts(user);
+        VERIFY_IS_TRUE(statContexts->Size == 0);
+
+        VERIFY_IS_TRUE(stat->DataType == StatisticDataType::Number);
+        VERIFY_IS_TRUE(stat->AsNumber == 20.f);
+        VERIFY_IS_TRUE(stat->CompareType == StatisticCompareType::Always);
     }
 };
 

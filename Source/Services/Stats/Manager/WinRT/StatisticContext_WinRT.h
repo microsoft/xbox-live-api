@@ -14,6 +14,13 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 public ref class StatisticContext sealed
 {
 public:
+    StatisticContext(
+        _In_ Platform::String^ name,
+        _In_ Platform::String^ value
+        );
+
+    DEFINE_PROP_GET_STR_OBJ(Name, name);
+    DEFINE_PROP_GET_STR_OBJ(Value, value);
 
 internal:
     StatisticContext(

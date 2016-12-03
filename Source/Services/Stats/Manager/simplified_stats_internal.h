@@ -280,7 +280,6 @@ private:
 
     void flush_to_service(
         _In_ stats_user_context& statsUserContext,
-        _In_ stats_value_document& userSVD,
         _In_ const xbox_live_user_t user
         );
 

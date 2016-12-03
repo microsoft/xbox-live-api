@@ -211,7 +211,7 @@ StatisticManager::SetStatisticContexts(
     THROW_INVALIDARGUMENT_IF_NULL(user);
     THROW_INVALIDARGUMENT_IF_NULL(statisticContextList);
 
-    auto result = m_cppObj.get_stat_contexts(
+    auto result = m_cppObj.set_stat_contexts(
         user_context::user_convert(user),
         UtilsWinRT::CreateStdVectorObjectFromPlatformVectorObj<stat_context>(statisticContextList)
         );
