@@ -187,15 +187,19 @@ stats_manager_impl::flush_to_service(
             return;
         }
 
-        if (should_write_offline(updateSVDResult))
+        if (updateSVDResult.err())
         {
-            // TODO: write doc offline
+            if (should_write_offline(updateSVDResult))
+            {
+                // TODO: write doc offline
+            }
+            else
+            {
+                LOG_ERROR("Stats manager could not write stats value document");
+            }
         }
-        else
-        {
-            LOG_ERROR("Stats manager could not write stats value document");
-            pThis->m_statEventList.push_back(stat_event(stat_event_type::stat_update_complete, user, updateSVDResult));
-        }
+
+        pThis->m_statEventList.push_back(stat_event(stat_event_type::stat_update_complete, user, updateSVDResult));
     });
 }
 
