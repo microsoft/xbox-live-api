@@ -199,7 +199,10 @@ stats_manager_impl::flush_to_service(
             }
         }
 
-        pThis->m_statEventList.push_back(stat_event(stat_event_type::stat_update_complete, user, updateSVDResult));
+        {
+            std::lock_guard<std::mutex> guard(pThis->m_statsServiceMutex);
+            pThis->m_statEventList.push_back(stat_event(stat_event_type::stat_update_complete, user, updateSVDResult));
+        }
     });
 }
 
