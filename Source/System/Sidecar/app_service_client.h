@@ -25,7 +25,8 @@ namespace app_service
 		pplx::task<xbox_live_result<sign_in_result_message>>
 			sign_in(
 				_In_ bool showUI,
-				_In_ bool forceRefresh
+				_In_ bool forceRefresh,
+                _In_ std::shared_ptr<local_config> config
 			);
 
     pplx::task<xbox::services::xbox_live_result<token_and_signature_result_message> >
@@ -36,15 +37,17 @@ namespace app_service
         _In_ const string_t& headers,
         _In_ const std::vector<unsigned char>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
-        _In_ bool forceRefresh
+        _In_ bool forceRefresh,
+        _In_ std::shared_ptr<local_config> config
     );
 
     pplx::task<xbox::services::xbox_live_result<achievements_ui_result_message>>
     show_title_achievements_ui(
-        _In_ uint32_t titleId
+        _In_ uint32_t titleId,
+        _In_ std::shared_ptr<local_config> config
     );
 
-		void set_hwnd(_In_ HWND hWnd);
+	void set_hwnd(_In_ HWND hWnd);
 	}
 }
 
