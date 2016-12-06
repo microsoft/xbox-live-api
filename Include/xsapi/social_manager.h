@@ -600,10 +600,12 @@ public:
     );
 
 #if defined(XSAPI_CPPWINRT)
+#if TV_API
     _XSAPIIMP const winrt::Windows::Xbox::System::User& user_cppwinrt()
     {
         return convert_user_to_cppwinrt(user());
     }
+#endif
 #endif
 
 private:
@@ -697,10 +699,12 @@ public:
         );
 
 #if defined(XSAPI_CPPWINRT)
+#if TV_API
     _XSAPIIMP const winrt::Windows::Xbox::System::User& local_user_cppwinrt()
     {
         return convert_user_to_cppwinrt(local_user());
     }
+#endif
 #endif
 private:
     void destroy();
@@ -870,6 +874,7 @@ public:
     void _Log_state();
 
 #if defined(XSAPI_CPPWINRT)
+#if TV_API
     _XSAPIIMP virtual xbox_live_result<void> add_local_user(
         _In_ const winrt::Windows::Xbox::System::User& user,
         _In_ social_manager_extra_detail_level extraDetailLevel
@@ -906,7 +911,7 @@ public:
     {
         return convert_user_vector_to_cppwinrt(local_users());
     }
-
+#endif
 #endif
 
 protected:
