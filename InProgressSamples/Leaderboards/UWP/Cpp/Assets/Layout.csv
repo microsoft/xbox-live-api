@@ -1,0 +1,9 @@
+#ITEM,ID,X,Y,DX,DY,PARAMETERS
+OVERLAY,2000,0,0,1280,720
+CHECKBOX,2200,82,325,400,40,Multi-column,TRANSPARENT;CHECKED
+BUTTON,2101,82,375,400,40,Write Event for Ach progress,,SMALL
+BUTTON,2102,82,425,400,40,Get leaderboard,,SMALL
+BUTTON,2103,82,475,400,40,Get leaderboard skip to self,,SMALL
+BUTTON,2104,82,525,400,40,Get leaderboard skip to rank,,SMALL
+BUTTON,2105,82,570,400,40,Get leaderboard for social group,,SMALL
+BUTTON,2106,82,625,400,40,Get & sort leaderboard for social grp,,SMALL

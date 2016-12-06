@@ -71,17 +71,21 @@ stats_manager_impl::add_local_user(
             if (userStatContext != pThis->m_users.end())    // user could be removed by the time this completes
             {
                 pThis->m_users[userStr] = stats_user_context(svd, xboxLiveContextImpl, simplifiedStatsService);
-                auto& statUserContext = pThis->m_users[userStr];
-                statUserContext.statValueDocument.set_flush_function([thisWeak, &statUserContext, user]()
+                pThis->m_users[userStr].statValueDocument.set_flush_function([thisWeak, user]()
                 {
                     std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
                     if (pThis == nullptr)
                     {
                         return;
                     }
+                    auto& statContextIter = pThis->m_users.find(user->xbox_user_id());
+                    if (statContextIter == pThis->m_users.end())
+                    {
+                        return;
+                    }
 
                     pThis->flush_to_service(
-                        statUserContext,
+                        statContextIter->second,
                         user
                         );
                 });
@@ -112,7 +116,6 @@ stats_manager_impl::remove_local_user(
     }
 
     auto userSVD = userIter->second.statValueDocument;
-    m_users.erase(userIter);
     if (userSVD.is_dirty())
     {
         userSVD.do_work();  // before removing the user apply all users
@@ -138,6 +141,8 @@ stats_manager_impl::remove_local_user(
     {
         m_statEventList.push_back(stat_event(stat_event_type::local_user_removed, user, xbox_live_result<void>()));
     }
+
+    m_users.erase(userIter);
     return xbox_live_result<void>();
 }
 
@@ -177,8 +182,7 @@ stats_manager_impl::flush_to_service(
     )
 {
     std::weak_ptr<stats_manager_impl> thisWeak = shared_from_this();
-    stats_value_document svdCopy = statsUserContext.statValueDocument;
-    statsUserContext.simplifiedStatsService.update_stats_value_document(svdCopy)
+    statsUserContext.simplifiedStatsService.update_stats_value_document(statsUserContext.statValueDocument)
     .then([thisWeak, user](xbox_live_result<void> updateSVDResult)
     {
         std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());

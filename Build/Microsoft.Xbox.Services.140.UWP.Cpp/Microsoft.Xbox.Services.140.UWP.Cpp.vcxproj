@@ -296,6 +296,7 @@
     <ClCompile Include="..\..\Source\Services\Stats\Manager\simplified_stats_service.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_value_document.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_context.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_event.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_value.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\statistic_change_event_args.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\statistic_change_subscription.cpp" />

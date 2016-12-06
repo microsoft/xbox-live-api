@@ -729,6 +729,9 @@
     <ClCompile Include="..\..\Source\System\Sidecar\app_service_messages.cpp">
       <Filter>C++ Source\System</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_event.cpp">
+      <Filter>C++ Source\SimplifiedStats</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.h">

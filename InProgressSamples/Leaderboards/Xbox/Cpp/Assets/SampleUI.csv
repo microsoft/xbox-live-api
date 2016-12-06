@@ -1,0 +1,10 @@
+#ITEM,ID,X,Y,DX,DY,PARAMETERS
+OVERLAY,2000,0,0,1920,1080
+LEGEND,2001,82,325,525,500,Use the[DPad]to select a scenario|Press[A]to run the scenario
+CHECKBOX,2200,82,425,360,40,Multi-column,TRANSPARENT;CHECKED
+BUTTON,2101,82,500,525,50,Write event with achievement progress
+BUTTON,2102,82,575,525,50,Get leaderboard
+BUTTON,2103,82,650,525,50,Get leaderboard skip to self
+BUTTON,2104,82,725,525,50,Get leaderboard skip to rank
+BUTTON,2105,82,800,525,50,Get leaderboard for social group
+BUTTON,2106,82,875,525,50,Get & sort leaderboard for social grp

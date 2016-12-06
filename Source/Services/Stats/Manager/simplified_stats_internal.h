@@ -67,7 +67,7 @@ public:
 
     xbox_live_result<std::shared_ptr<stat_value>> get_stat(
         _In_ const char_t* name
-        );
+        ) const;
 
     xbox_live_result<void> set_stat(
         _In_ const char_t* statName,
@@ -81,11 +81,11 @@ public:
 
     void get_stat_names(
         _Inout_ std::vector<string_t>& statNameList
-        );
+        ) const;
 
     void get_stat_contexts(
         _Inout_ std::vector<stat_context>& statisticContextList
-        );
+        ) const;
 
     void set_stat_contexts(
         _In_ const std::vector<stat_context>& statContextList
@@ -95,17 +95,15 @@ public:
 
     void increment_client_version_number();
 
-    web::json::value serialize(
-        _In_ bool shouldOverrideLock = false
-        );
+    web::json::value serialize() const;
 
-    uint32_t client_version();
-    uint32_t server_version();
-    const xsapi_internal_string& client_id();
+    uint32_t client_version() const;
+    uint32_t server_version() const;
+    const xsapi_internal_string& client_id() const;
 
-    uint32_t version();
+    uint32_t version() const;
 
-    bool is_dirty();
+    bool is_dirty() const;
 
     void clear_dirty_state();
 
@@ -116,8 +114,6 @@ public:
         );
 
 private:
-    web::json::value serialize_impl() const;
-
     bool m_isDirty;
     uint32_t m_version;
     uint32_t m_clientVersion;
@@ -127,7 +123,6 @@ private:
     xsapi_internal_vector(svd_event) m_svdEventList;
     xsapi_internal_vector(stat_context) m_currentStatContexts;
     xsapi_internal_unordered_map(string_t, std::shared_ptr<stat_value>) m_statisticDocument;
-    xbox::services::system::xbox_live_mutex m_svdMutex;
 };
 
 /// internal class

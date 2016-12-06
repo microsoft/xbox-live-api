@@ -113,3 +113,4 @@ ARM/
 TAEF
 xbox-live-samples/
 Tests/StressUnitTest/
+*.pdb

@@ -18,9 +18,8 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
 xbox_live_result<std::shared_ptr<stat_value>>
 stats_value_document::get_stat(
     _In_ const char_t* statName
-    )
+    ) const
 {
-    std::lock_guard<std::mutex> lock(m_svdMutex.get());
     auto statLocIter = m_statisticDocument.find(statName);
     if (statLocIter == m_statisticDocument.end())
     {
@@ -36,7 +35,6 @@ stats_value_document::set_stat(
     _In_ double statValue
     )
 {
-    std::lock_guard<std::mutex> lock(m_svdMutex.get());
     m_isDirty = true;
     stat_pending_state statPendingState;
     utils::char_t_copy(statPendingState.statPendingName, ARRAYSIZE(statPendingState.statPendingName), statName);
@@ -52,7 +50,6 @@ stats_value_document::set_stat(
     _In_ const char_t* statValue
     )
 {
-    std::lock_guard<std::mutex> lock(m_svdMutex.get());
     m_isDirty = true;
     stat_pending_state statPendingState;
     utils::char_t_copy(statPendingState.statPendingName, ARRAYSIZE(statPendingState.statPendingName), statName);
@@ -65,9 +62,8 @@ stats_value_document::set_stat(
 void
 stats_value_document::get_stat_names(
     _Inout_ std::vector<string_t>& statNameList
-    )
+    ) const
 {
-    std::lock_guard<std::mutex> lock(m_svdMutex.get());
     statNameList.clear();
     for (auto& stat : m_statisticDocument)
     {
@@ -78,9 +74,8 @@ stats_value_document::get_stat_names(
 void
 stats_value_document::get_stat_contexts(
     _Inout_ std::vector<stat_context>& statisticContextList
-    )
+    ) const
 {
-    std::lock_guard<std::mutex> lock(m_svdMutex.get());
     statisticContextList.clear();
     statisticContextList.insert(statisticContextList.end(), m_currentStatContexts.begin(), m_currentStatContexts.end());
 }
@@ -90,68 +85,58 @@ stats_value_document::set_stat_contexts(
     _In_ const std::vector<stat_context>& statContextList
     )
 {
-    std::lock_guard<std::mutex> lock(m_svdMutex.get());
     m_svdEventList.push_back(svd_event(utils::std_vector_to_xsapi_vector<stat_context>(statContextList)));
 }
 
 void
 stats_value_document::clear_stat_contexts()
 {
-    std::lock_guard<std::mutex> lock(m_svdMutex.get());
     m_svdEventList.push_back(svd_event(xsapi_internal_vector(stat_context)()));
 }
 
 uint32_t
-stats_value_document::client_version()
+stats_value_document::client_version() const
 {
-    std::lock_guard<std::mutex> lock(m_svdMutex.get());
     return m_clientVersion;
 }
 
 uint32_t
-stats_value_document::server_version()
+stats_value_document::server_version() const
 {
-    std::lock_guard<std::mutex> lock(m_svdMutex.get());
     return m_serverVersion;
 }
 
 const xsapi_internal_string&
-stats_value_document::client_id()
+stats_value_document::client_id() const
 {
-    std::lock_guard<std::mutex> lock(m_svdMutex.get());
     return m_clientId;
 }
 
 uint32_t
-stats_value_document::version()
+stats_value_document::version() const
 {
-    std::lock_guard<std::mutex> lock(m_svdMutex.get());
     return m_version;
 }
 
 void
 stats_value_document::increment_client_version_number()
 {
-    std::lock_guard<std::mutex> lock(m_svdMutex.get());
     ++m_clientVersion;
 }
 
-bool stats_value_document::is_dirty()
+bool stats_value_document::is_dirty() const
 {
-    std::lock_guard<std::mutex> lock(m_svdMutex.get());
     return m_isDirty;
 }
 
 void stats_value_document::clear_dirty_state()
 {
-    std::lock_guard<std::mutex> lock(m_svdMutex.get());
     m_isDirty = false;
 }
 
 void
 stats_value_document::do_work()
 {
-    std::lock_guard<std::mutex> lock(m_svdMutex.get());
     for (auto& svdEvent : m_svdEventList)
     {
         switch (svdEvent.event_type())
@@ -187,6 +172,8 @@ stats_value_document::do_work()
             }
         }
     }
+
+    m_svdEventList.clear();
 }
 
 void
@@ -198,21 +185,7 @@ stats_value_document::set_flush_function(
 }
 
 web::json::value
-stats_value_document::serialize(
-    _In_ bool shouldOverrideLock
-    )
-{
-    if (!shouldOverrideLock)
-    {
-        std::lock_guard<std::mutex> lock(m_svdMutex.get());
-        return serialize_impl();
-    }
-
-    return serialize_impl();
-}
-
-web::json::value
-stats_value_document::serialize_impl() const
+stats_value_document::serialize() const
 {
     web::json::value requestJSON;
     requestJSON[_T("ver")] = web::json::value::number(m_version);
