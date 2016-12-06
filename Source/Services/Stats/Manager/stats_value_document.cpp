@@ -148,7 +148,7 @@ stats_value_document::do_work()
 
                 if (statIter == m_statisticDocument.end())
                 {
-                    m_statisticDocument[pendingStat.statPendingName] = std::make_shared<stat_value>();
+                    m_statisticDocument[pendingStat.statPendingName] = std::make_shared<stat_value>();  // this will need changed to be more like social manager
                 }
 
                 switch (pendingStat.statDataType)
