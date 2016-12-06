@@ -721,7 +721,7 @@ public:
     void _Set_host(_In_ std::shared_ptr<multiplayer_member> hostMember);
 
 #if defined(XSAPI_CPPWINRT)
-
+#if TV_API
     _XSAPIIMP xbox_live_result<void> add_local_user(
         _In_ winrt::Windows::Xbox::System::User user
         )
@@ -806,6 +806,7 @@ public:
             customActivationContext
             );
     }
+#endif
 #endif
 
 private:
@@ -1590,8 +1591,8 @@ public:
     void _Shutdown();
 #endif
 
-#if TV_API | XBOX_UWP
 #if defined(XSAPI_CPPWINRT)
+#if TV_API | XBOX_UWP
     _XSAPIIMP xbox_live_result<void> join_lobby(
         _In_ const string_t& handleId,
         _In_ std::vector<winrt::Windows::Xbox::System::User> users
@@ -1599,7 +1600,9 @@ public:
     {
         return join_lobby(handleId, convert_user_vector_to_cppcx(users));
     }
+#endif
 
+#if XBOX_UWP
     _XSAPIIMP xbox_live_result<void> join_lobby(
         _In_ winrt::Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs eventArgs,
         _In_ std::vector<winrt::Windows::Xbox::System::User> users
