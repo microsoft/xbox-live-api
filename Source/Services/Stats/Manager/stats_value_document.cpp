@@ -144,6 +144,13 @@ stats_value_document::do_work()
             case svd_event_type::stat_change:
             {
                 auto& pendingStat = svdEvent.stat_info();
+                auto statIter = m_statisticDocument.find(pendingStat.statPendingName);
+
+                if (statIter == m_statisticDocument.end())
+                {
+                    m_statisticDocument[pendingStat.statPendingName] = std::make_shared<stat_value>();
+                }
+
                 switch (pendingStat.statDataType)
                 {
                     case stat_data_type::number:

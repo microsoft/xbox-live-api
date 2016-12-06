@@ -108,20 +108,30 @@ public:
         InitializeStatsManager(statsManager, user);
 
         Platform::String^ statName = L"headshots";
-        auto stat = statsManager->GetStatistic(user, statName);
-        VERIFY_IS_TRUE(stat->DataType == StatisticDataType::Number);
-        VERIFY_IS_TRUE(stat->AsNumber == 7);
-        VERIFY_IS_TRUE(stat->CompareType == StatisticCompareType::Always);
+        auto numericStat = statsManager->GetStatistic(user, statName);
+        VERIFY_IS_TRUE(numericStat->DataType == StatisticDataType::Number);
+        VERIFY_IS_TRUE(numericStat->AsNumber == 7);
+        VERIFY_IS_TRUE(numericStat->CompareType == StatisticCompareType::Always);
 
         statsManager->SetStatisticNumberData(user, statName, 20.f);
-        stat = statsManager->GetStatistic(user, statName);
-        VERIFY_IS_TRUE(stat->DataType == StatisticDataType::Number);
-        VERIFY_IS_TRUE(stat->AsNumber == 7);
-        VERIFY_IS_TRUE(stat->CompareType == StatisticCompareType::Always);
+        numericStat = statsManager->GetStatistic(user, statName);
+        VERIFY_IS_TRUE(numericStat->DataType == StatisticDataType::Number);
+        VERIFY_IS_TRUE(numericStat->AsNumber == 7);
+        VERIFY_IS_TRUE(numericStat->CompareType == StatisticCompareType::Always);
+
+        statsManager->SetStatisticStringData(user, L"hello", L"goodbye");
+        VERIFY_THROWS_HR_CX(statsManager->GetStatistic(user, L"hello"), E_INVALIDARG);
+
         statsManager->DoWork();
-        VERIFY_IS_TRUE(stat->DataType == StatisticDataType::Number);
-        VERIFY_IS_TRUE(stat->AsNumber == 20.f);
-        VERIFY_IS_TRUE(stat->CompareType == StatisticCompareType::Always);
+
+        VERIFY_IS_TRUE(numericStat->DataType == StatisticDataType::Number);
+        VERIFY_IS_TRUE(numericStat->AsNumber == 20.f);
+        VERIFY_IS_TRUE(numericStat->CompareType == StatisticCompareType::Always);
+
+        auto stringStat = statsManager->GetStatistic(user, L"hello");
+        VERIFY_IS_TRUE(stringStat->DataType == StatisticDataType::String);
+        VERIFY_IS_TRUE(stringStat->AsString == L"goodbye");
+        VERIFY_IS_TRUE(stringStat->CompareType == StatisticCompareType::Always);
 
         Platform::Collections::Vector<StatisticContext^>^ vec = ref new Platform::Collections::Vector<StatisticContext ^>();
         vec->Append(ref new StatisticContext(L"what", L"up"));
@@ -142,9 +152,9 @@ public:
         statContexts = statsManager->GetStatisticContexts(user);
         VERIFY_IS_TRUE(statContexts->Size == 0);
 
-        VERIFY_IS_TRUE(stat->DataType == StatisticDataType::Number);
-        VERIFY_IS_TRUE(stat->AsNumber == 20.f);
-        VERIFY_IS_TRUE(stat->CompareType == StatisticCompareType::Always);
+        VERIFY_IS_TRUE(numericStat->DataType == StatisticDataType::Number);
+        VERIFY_IS_TRUE(numericStat->AsNumber == 20.f);
+        VERIFY_IS_TRUE(numericStat->CompareType == StatisticCompareType::Always);
 
         Cleanup(statsManager, user);
     }
