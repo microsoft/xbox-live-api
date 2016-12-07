@@ -43,7 +43,7 @@ Game::AddUserToSocialManager(
         source << _T(" to SocialManager");
         Log(source.str());
 
-        m_socialManager->add_local_user(user, social_manager_extra_detail_level::no_extra_detail);
+        m_socialManager->add_local_user(cppWinrtUser, social_manager_extra_detail_level::no_extra_detail);
     }
 
     CreateSocialGroupsBasedOnUI(user);
