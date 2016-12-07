@@ -31,6 +31,9 @@ Game::AddUserToSocialManager(
     _In_ Windows::Xbox::System::User^ user
     )
 {
+    winrt::Windows::Xbox::System::User cppWinrtUser = winrt::Windows::Xbox::System::User::Users().GetAt(0);
+    std::shared_ptr<xbox::services::xbox_live_context> xboxLiveContext = std::make_shared<xbox::services::xbox_live_context>(cppWinrtUser);
+
     {
         std::lock_guard<std::mutex> guard(m_socialManagerLock);
 
