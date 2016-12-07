@@ -3,7 +3,7 @@
   <PropertyGroup>
     <XsapiRoot>$(MSBuildThisFileDirectory)</XsapiRoot>
     <XsapiInclde>$(XsapiRoot)include\</XsapiInclde>
-    <CasablancaInclde>$(XsapiRoot)casablanca\release\include\</CasablancaInclde>
+    <CasablancaInclde>$(XsapiRoot)External\cpprestsdk\release\include\</CasablancaInclde>
     <PackagesRoot>$(XsapiRoot)External\Packages\</PackagesRoot>
   </PropertyGroup>
   <ItemDefinitionGroup>
