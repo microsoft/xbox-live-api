@@ -18,9 +18,11 @@
 #endif
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-#if UWP_API || UNIT_TEST_SERVICES
+#if TV_API || UWP_API || UNIT_TEST_SERVICES
 Windows::UI::Core::CoreDispatcher^ xbox_live_context_settings::_s_dispatcher;
+#endif
 
+#if UWP_API || UNIT_TEST_SERVICES
 void
 xbox_live_context_settings::_Set_dispatcher(
     _In_opt_ Platform::Object^ coreDispatcherObj

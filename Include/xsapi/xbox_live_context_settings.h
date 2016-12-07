@@ -289,7 +289,8 @@ public:
     /// Sets the CoreDispatcher 
     /// </summary>
     static void _Set_dispatcher(_In_opt_ Platform::Object^ coreDispatcherObj);
-
+#endif
+#if TV_API || UWP_API || UNIT_TEST_SERVICES
     static Windows::UI::Core::CoreDispatcher^ _s_dispatcher;
 #endif
 
