@@ -198,7 +198,7 @@ public:
         VERIFY_IS_TRUE(fastestRoundStat->DataType == StatisticDataType::Number);
         VERIFY_IS_TRUE(fastestRoundStat->CompareType == StatisticCompareType::Min);
 
-        statsManager->
+        //statsManager->
         Cleanup(statsManager, user);
     }
 };
