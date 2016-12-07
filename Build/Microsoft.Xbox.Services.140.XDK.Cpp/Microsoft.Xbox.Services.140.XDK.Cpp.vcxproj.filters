@@ -905,6 +905,9 @@
     <ClInclude Include="..\..\Source\Shared\Logger\ERA_ETW.h">
       <Filter>Shared\Logger</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\player_state_writer.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Shared\Logger\ERA_ETW.man">
