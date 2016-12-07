@@ -158,6 +158,49 @@ public:
 
         Cleanup(statsManager, user);
     }
+
+    DEFINE_TEST_CASE(StatisticManagerRequestFlushToService)
+    {
+        DEFINE_TEST_CASE_PROPERTIES(StatisticManagerRequestFlushToService);
+        auto statsManager = StatisticManager::SingletonInstance;
+        auto mockXblContext = GetMockXboxLiveContext_WinRT();
+        auto user = mockXblContext->User;
+        InitializeStatsManager(statsManager, user);
+        auto fastestRoundStat = statsManager->GetStatistic(user, L"fastestRound");
+        VERIFY_IS_TRUE(fastestRoundStat->AsInteger == 7);
+        VERIFY_IS_TRUE(fastestRoundStat->DataType == StatisticDataType::Number);
+        VERIFY_IS_TRUE(fastestRoundStat->CompareType == StatisticCompareType::Min);
+
+        statsManager->SetStatisticIntegerData(user, L"fastestRound", 3);
+        statsManager->RequestFlushToService(user);
+        VERIFY_IS_TRUE(fastestRoundStat->AsInteger == 3);
+        VERIFY_IS_TRUE(fastestRoundStat->DataType == StatisticDataType::Number);
+        VERIFY_IS_TRUE(fastestRoundStat->CompareType == StatisticCompareType::Min);
+
+        Cleanup(statsManager, user);
+    }
+
+    DEFINE_TEST_CASE(StatisticManagerStatisticCompareTypes)
+    {
+        DEFINE_TEST_CASE_PROPERTIES(StatisticManagerStatisticCompareTypes);
+        auto statsManager = StatisticManager::SingletonInstance;
+        auto mockXblContext = GetMockXboxLiveContext_WinRT();
+        auto user = mockXblContext->User;
+        InitializeStatsManager(statsManager, user);
+        auto fastestRoundStat = statsManager->GetStatistic(user, L"fastestRound");
+        VERIFY_IS_TRUE(fastestRoundStat->AsInteger == 7);
+        VERIFY_IS_TRUE(fastestRoundStat->DataType == StatisticDataType::Number);
+        VERIFY_IS_TRUE(fastestRoundStat->CompareType == StatisticCompareType::Min);
+
+        statsManager->SetStatisticIntegerData(user, L"fastestRound", 16);
+        statsManager->RequestFlushToService(user);
+        VERIFY_IS_TRUE(fastestRoundStat->AsInteger == 7);
+        VERIFY_IS_TRUE(fastestRoundStat->DataType == StatisticDataType::Number);
+        VERIFY_IS_TRUE(fastestRoundStat->CompareType == StatisticCompareType::Min);
+
+        statsManager->
+        Cleanup(statsManager, user);
+    }
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

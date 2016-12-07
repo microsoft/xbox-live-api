@@ -165,6 +165,7 @@ stats_manager_impl::request_flush_to_service(
 
     if (userSVD.is_dirty())
     {
+        userSVD.do_work();
         userSVD.clear_dirty_state();
         flush_to_service(
             userIter->second,
@@ -239,7 +240,7 @@ stats_manager_impl::set_stat(
         return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "User not found in local map");
     }
 
-    return userIter->second.statValueDocument.set_stat(name.c_str(), value);
+    return userIter->second.statValueDocument.set_stat(name.c_str(), value, statisticReplaceCompareType);
 }
 
 xbox_live_result<void>

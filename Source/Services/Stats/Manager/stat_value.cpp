@@ -24,6 +24,12 @@ stat_value::as_number() const
     return m_statData.numberType;
 }
 
+int64_t
+stat_value::as_integer() const
+{
+    return static_cast<int64_t>(as_number());
+}
+
 const string_t
 stat_value::as_string() const
 {
@@ -44,12 +50,27 @@ stat_value::compare_type() const
 
 void
 stat_value::set_stat(
-    _In_ double value
+    _In_ double value,
+    _In_ bool storeStatContextData,
+    _In_ stat_compare_type statCompareType
     )
 {
-    m_dataType = stat_data_type::number;
-    m_statData.numberType = value;
+    if (m_dataType == stat_data_type::undefined || m_dataType == stat_data_type::string)
+    {
+        m_statData.numberType = value;
+    }
+    else
+    {
+        if (statCompareType == stat_compare_type::always || 
+            (statCompareType == stat_compare_type::min && value < m_statData.numberType) || 
+            (statCompareType == stat_compare_type::max && value > m_statData.numberType))
+        {
+            m_statData.numberType = value;
+        }
+    }
 
+    m_statContextData.numberType = value;
+    m_dataType = stat_data_type::number;
 }
 void
 stat_value::set_stat(
@@ -61,12 +82,21 @@ stat_value::set_stat(
 }
 
 web::json::value
-stat_value::serialize() const
+stat_value::serialize(
+    _In_ bool useContextData
+    ) const
 {
     web::json::value returnJSON;
     if (m_dataType == stat_data_type::number)
     {
-        returnJSON[_T("value")] = web::json::value(m_statData.numberType);
+        if (!useContextData)
+        {
+            returnJSON[_T("value")] = web::json::value(m_statData.numberType);
+        }
+        else
+        {
+            returnJSON[_T("value")] = web::json::value(m_statContextData.numberType);
+        }
     }
     else if(m_dataType == stat_data_type::string)
     {

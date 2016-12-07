@@ -31,6 +31,13 @@ public:
     DEFINE_PTR_PROP_GET_OBJ(AsNumber, as_number, double);
 
     /// <summary> 
+    /// Return data as integer type
+    /// </summary>
+    /// <returns>Integer data for statistic</returns>
+    /// <remarks>Will debug assert if data is not type requested</returns>
+    DEFINE_PTR_PROP_GET_OBJ(AsInteger, as_integer, int64_t);
+
+    /// <summary> 
     /// Return data as string type
     /// </summary>
     /// <returns>data as char_t*</returns>

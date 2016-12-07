@@ -32,7 +32,8 @@ stats_value_document::get_stat(
 xbox_live_result<void>
 stats_value_document::set_stat(
     _In_ const char_t* statName,
-    _In_ double statValue
+    _In_ double statValue,
+    _In_ stat_compare_type statCompareType
     )
 {
     m_isDirty = true;
@@ -40,6 +41,8 @@ stats_value_document::set_stat(
     utils::char_t_copy(statPendingState.statPendingName, ARRAYSIZE(statPendingState.statPendingName), statName);
     statPendingState.statDataType = stat_data_type::number;
     statPendingState.statPendingData.numberType = statValue;
+    statPendingState.statCompareType = statCompareType;
+
     m_svdEventList.push_back(svd_event(statPendingState));
     return xbox_live_result<void>();
 }
@@ -154,8 +157,13 @@ stats_value_document::do_work()
                 switch (pendingStat.statDataType)
                 {
                     case stat_data_type::number:
-                        m_statisticDocument[pendingStat.statPendingName]->set_stat(pendingStat.statPendingData.numberType);
+                        m_statisticDocument[pendingStat.statPendingName]->set_stat(
+                            pendingStat.statPendingData.numberType,
+                            !m_currentStatContexts.empty(),
+                            pendingStat.statCompareType
+                            );
                         break;
+
                     case stat_data_type::string:
                         m_statisticDocument[pendingStat.statPendingName]->set_stat(pendingStat.statPendingData.stringType);
                         break;
@@ -214,7 +222,7 @@ stats_value_document::serialize() const
     titleField = web::json::value::object();
     for (auto& stat : m_statisticDocument)
     {
-        titleField[stat.first.c_str()] = stat.second->serialize();
+        titleField[stat.first.c_str()] = stat.second->serialize(!m_currentStatContexts.empty());
     }
 
     return requestJSON;

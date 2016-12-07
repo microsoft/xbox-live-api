@@ -109,6 +109,13 @@ public:
     double as_number() const;
 
     /// <summary> 
+    /// Return data as integer type
+    /// </summary>
+    /// <returns>Float data for statistic</returns>
+    /// <remarks>Will debug assert if data is not type requested</returns>
+    int64_t as_integer() const;
+
+    /// <summary> 
     /// Return data as string type
     /// </summary>
     /// <returns>data as char_t*</returns>
@@ -131,15 +138,21 @@ public:
     static xbox_live_result<stat_value> _Deserialize(_In_ const web::json::value& data);
 
 private:
-    void set_stat(_In_ double value);
+    void set_stat(
+        _In_ double value,
+        _In_ bool storeStatContextData,
+        _In_ stat_compare_type statCompareType = stat_compare_type::always
+        );
+
     void set_stat(_In_ const char_t* value);
-    web::json::value serialize() const;
+    web::json::value serialize(_In_ bool useContextData) const;
 
     stat_data_type m_dataType;
     stat_compare_type m_statCompareType;
     xbox_live_user_t m_localUserOwner;
     char_t m_name[STAT_PRESENCE_CHARS_NUM];
     stat_data m_statData;
+    stat_data m_statContextData;
     std::function<void(stat_value)> m_callbackFunc;
     friend class stats_value_document;
 };
@@ -333,10 +346,28 @@ public:
     /// *Note* This is not recommended to be modified after release of the title
     /// </param>
     /// <return>Whether or not the setting was successful. Can fail if stat is not of numerical type. Will return updated stat</return>
-    xbox_live_result<void> set_stat(
+    xbox_live_result<void> set_stat_as_number(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& name,
         _In_ double value,
+        _In_ stat_compare_type statisticReplaceCompareType = stat_compare_type::always
+        );
+
+    /// <summary> 
+    /// Replaces the numerical stat by the value. Can be positive or negative
+    /// </summary>
+    /// <param name="user">The local user whose stats to access</param>
+    /// <param name="name">The name of the statistic to modify</param>
+    /// <param name="value">Value to replace the stat by</param>
+    /// <param name="statisticReplaceCompareType">
+    /// Will override the compare type. Stat will only be updated if follows the stat compares rule
+    /// *Note* This is not recommended to be modified after release of the title
+    /// </param>
+    /// <return>Whether or not the setting was successful. Can fail if stat is not of numerical type. Will return updated stat</return>
+    xbox_live_result<void> set_stat_as_integer(
+        _In_ const xbox_live_user_t& user,
+        _In_ const string_t& name,
+        _In_ int64_t value,
         _In_ stat_compare_type statisticReplaceCompareType = stat_compare_type::always
         );
 
@@ -347,7 +378,7 @@ public:
     /// <param name="name">The name of the statistic to modify</param>
     /// <param name="value">Value to replace the stat by</param>
     /// <return>Whether or not the setting was successful. Can fail if stat is not of string type. Will return updated stat</return>
-    xbox_live_result<void> set_stat(
+    xbox_live_result<void> set_stat_as_string(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& name,
         _In_ const string_t& value

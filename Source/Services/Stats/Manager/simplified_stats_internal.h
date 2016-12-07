@@ -29,12 +29,14 @@ enum class svd_event_type
 struct stat_pending_state
 {
     stat_pending_state() :
-        statDataType(stat_data_type::undefined)
+        statDataType(stat_data_type::undefined),
+        statCompareType(stat_compare_type::always)
     {
         initialize_char_arr(statPendingName);
     }
 
     stat_data_type statDataType;
+    stat_compare_type statCompareType;
     char_t statPendingName[STAT_PRESENCE_CHARS_NUM];
     stat_data statPendingData;
 };
@@ -71,7 +73,8 @@ public:
 
     xbox_live_result<void> set_stat(
         _In_ const char_t* statName,
-        _In_ double statValue
+        _In_ double statValue,
+        _In_ stat_compare_type statCompareType = stat_compare_type::always
         );
 
     xbox_live_result<void> set_stat(

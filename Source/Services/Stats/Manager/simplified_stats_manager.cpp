@@ -68,7 +68,23 @@ stats_manager::do_work()
 }
 
 xbox_live_result<void>
-stats_manager::set_stat(
+stats_manager::set_stat_as_integer(
+    _In_ const xbox_live_user_t& user,
+    _In_ const string_t& name,
+    _In_ int64_t value,
+    _In_ stat_compare_type statisticReplaceCompareType
+    )
+{
+    return m_statsManagerImpl->set_stat(
+        user,
+        name,
+        static_cast<double>(value),
+        statisticReplaceCompareType
+        );
+}
+
+xbox_live_result<void>
+stats_manager::set_stat_as_number(
     _In_ const xbox_live_user_t& user,
     _In_ const string_t& name,
     _In_ double value,
@@ -84,7 +100,7 @@ stats_manager::set_stat(
 }
 
 xbox_live_result<void>
-stats_manager::set_stat(
+stats_manager::set_stat_as_string(
     _In_ const xbox_live_user_t& user,
     _In_ const string_t& name,
     _In_ const string_t& value
