@@ -688,6 +688,14 @@ public:
         );
 
     /// <summary>
+    /// Sets presence info using information from player state writer.
+    /// </summary>
+    /// <param name="presenceStringId">Presence string id.</param>
+    _XSAPIIMP pplx::task<xbox_live_result<void>> set_presence_using_player_state(
+        _In_ const string_t& presenceStringId
+        );
+
+    /// <summary>
     /// Sets presence info for the current user context.
     /// </summary>
     /// <param name="isUserActiveInTitle">Indicates if the current user context is currently active or inactive in the title.
