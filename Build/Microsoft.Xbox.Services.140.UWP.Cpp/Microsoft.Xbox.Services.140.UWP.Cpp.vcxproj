@@ -370,6 +370,7 @@
     <ClInclude Include="..\..\Include\xsapi\http_call_request_message.h" />
     <ClInclude Include="..\..\Include\xsapi\game_server_platform.h" />
     <ClInclude Include="..\..\Include\xsapi\mem.h" />
+    <ClInclude Include="..\..\Include\xsapi\player_state_writer.h" />
     <ClInclude Include="..\..\Include\xsapi\simple_stats.h" />
     <ClInclude Include="..\..\Include\xsapi\social_manager.h" />
     <ClInclude Include="..\..\Include\xsapi\service_call_logging_config.h" />

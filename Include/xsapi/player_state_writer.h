@@ -15,33 +15,24 @@ enum class player_state_event_type
 /// Represents a player state
 /// Player state is a set
 /// </summary>
-class player_state
+class player_state_value
 {
 public:
-    player_state(
-        _In_ const string_t& name,
+    player_state_value(
         _In_ const string_t& value
         );
 
-    player_state(
-        _In_ const string_t& name,
+    player_state_value(
         _In_ double value
         );
 
-    player_state(
-        _In_ const string_t& name,
+    player_state_value(
         _In_ int64_t value
         );
 
-    player_state(
-        _In_ const string_t& name,
+    player_state_value(
         _In_ bool value
         );
-
-    /// <summary> 
-    /// Name of player state set
-    /// </summary>
-    const string_t& name() const;
 
     /// <summary> 
     /// Gets the value as a string
@@ -109,45 +100,20 @@ public:
     static player_state_writer get_singleton_instance();
 
     /// <summary> 
-    /// Adds a local user to the player state writer
-    /// Returns a local_user_added event from do_work
-    /// </summary>
-    /// <param name="user">The user to add to the player state writer</param>
-    xbox_live_result<void> add_local_user(_In_ const xbox_live_user_t& user);
-
-    /// <summary> 
-    /// Removes a local user from the player state writer
-    /// Returns a local_user_removed event from do_work
-    /// </summary>
-    /// <param name="user">The user to be removed from the player state writer</param>
-    xbox_live_result<void> remove_local_user(_In_ const xbox_live_user_t& user);
-
-    /// <summary> 
-    /// Returns any events that have been processed
+    /// Sets player state. Immediately applies.
     /// </summary>
     /// <return>A list of events that have happened since previous do_work</return>
-    std::vector<player_state_event> do_work();
-
-    /// <summary> 
-    /// Sets player state. On do_work, player state is set
-    /// </summary>
-    /// <return>A list of events that have happened since previous do_work</return>
-    xbox_live_result<void> set_player_state(_In_ const player_state& playerState);
+    xbox_live_result<void> set_player_state(_In_ xbox_live_user_t user, const std::unordered_map<string_t, player_state_value>& playerStateList);
 
     /// <summary> 
     /// Removes a player state object from the internal list
     /// </summary>
-    xbox_live_result<void> remove_player_state(_In_ const string_t& name);
-
-    /// <summary> 
-    /// Removes a player state object from the internal list
-    /// </summary>
-    xbox_live_result<void> remove_player_state(_In_ const player_state& name);
+    xbox_live_result<void> clear_player_state(_In_ xbox_live_user_t user, _In_ const string_t& name);
 
     /// <summary> 
     /// Gets the player state list
     /// </summary>
-    xbox_live_result<void> get_player_states(_Inout_ std::vector<player_state>& playerStateList);
+    xbox_live_result<void> get_player_states(_In_ xbox_live_user_t user, _Inout_ std::unordered_map<string_t, player_state_value>& playerStateList);
 };
     
 }}}
