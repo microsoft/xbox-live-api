@@ -312,7 +312,7 @@ game_server_platform_service::allocate_session_host(
     std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         _T("POST"),
-        utils::create_xboxlive_endpoint(_T("gameserverds"), m_appConfig),
+        utils::create_xboxlive_endpoint(_T("gameserverms"), m_appConfig),
         pathAndQuery,
         xbox_live_api::allocate_session_host
         );
@@ -376,7 +376,7 @@ game_server_platform_service::get_session_host_allocation_status(
     std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         _T("POST"),
-        utils::create_xboxlive_endpoint(_T("gameserverds"), m_appConfig),
+        utils::create_xboxlive_endpoint(_T("gameserverms"), m_appConfig),
         pathAndQuery,
         xbox_live_api::get_session_host_allocation_status
         );
