@@ -21,72 +21,108 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_BEGIN
 XboxLiveServicesSettings^
 XboxLiveServicesSettings::SingletonInstance::get()
 {
-    static XboxLiveServicesSettings^ xboxLiveServicesSettingsManager = ref new XboxLiveServicesSettings();
+    static XboxLiveServicesSettings^ xboxLiveServicesSettingsManager = ref new XboxLiveServicesSettings(
+        xbox_live_services_settings::get_singleton_instance()
+    );
     return xboxLiveServicesSettingsManager;
 }
 
-XboxLiveServicesSettings::XboxLiveServicesSettings()
+XboxLiveServicesSettingsEventBind::~XboxLiveServicesSettingsEventBind()
 {
-    m_xboxLiveServicesSettingsEventBind = make_shared<XboxLiveLoggingEventBind>();
-    m_xboxLiveServicesSettingsEventBind->AddXboxLiveLoggingEvent();
+    m_cppObj->remove_logging_handler(m_loggingHandlerContext);
+    m_cppObj->remove_wns_handler(m_wnsHandlerContext);
 }
 
-XboxLiveServicesSettings::~XboxLiveServicesSettings()
+XboxLiveServicesSettingsEventBind::XboxLiveServicesSettingsEventBind(
+    _In_ Platform::WeakReference setting,
+    _In_ std::shared_ptr<xbox::services::system::xbox_live_services_settings> cppObj
+    ):
+    m_setting(setting),
+    m_cppObj(std::move(cppObj)),
+    m_loggingHandlerContext(0),
+    m_wnsHandlerContext(0)
 {
-    m_xboxLiveServicesSettingsEventBind->RemoveXboxLiveLoggingEvent();
 }
 
-XboxLiveLoggingEventBind::XboxLiveLoggingEventBind()
+void XboxLiveServicesSettingsEventBind::AddEventBinding()
 {
+    std::weak_ptr<XboxLiveServicesSettingsEventBind> thisWeakPtr = shared_from_this();
+
+    m_loggingHandlerContext = m_cppObj->add_logging_handler([thisWeakPtr](_In_ xbox::services::xbox_services_diagnostics_trace_level level, _In_ const std::string& category, _In_ const std::string& message)
+    {
+        std::shared_ptr<XboxLiveServicesSettingsEventBind> pThis(thisWeakPtr.lock());
+        if (pThis != nullptr)
+        {
+            pThis->XboxLiveLoggingRouter(level, category, message);
+        }
+    });
+
+    m_wnsHandlerContext = m_cppObj->add_wns_handler([thisWeakPtr](_In_ const xbox::services::system::xbox_live_wns_event_args& args)
+    {
+        std::shared_ptr<XboxLiveServicesSettingsEventBind> pThis(thisWeakPtr.lock());
+        if (pThis != nullptr)
+        {
+            pThis->XboxLiveWnsRouter(args);
+        }
+    });
 }
 
-void
-XboxLiveLoggingEventBind::RemoveXboxLiveLoggingEvent()
-{
-    xbox_live_services_settings::get_singleton_instance()->remove_logging_handler(m_loggingHandlerContext);
-}
-
-void XboxLiveLoggingEventBind::XboxLiveLoggingHandler(
+void XboxLiveServicesSettingsEventBind::XboxLiveLoggingRouter(
     _In_ xbox::services::xbox_services_diagnostics_trace_level level, 
     _In_ const std::string& category, 
     _In_ const std::string& message
     )
 {
-    XboxLiveServicesSettings^ setting = XboxLiveServicesSettings::SingletonInstance;
-    if (setting != nullptr)
+    XboxLiveServicesSettings^ serviceSetting = m_setting.Resolve<XboxLiveServicesSettings>();
+
+    if (serviceSetting != nullptr)
     {
-        setting->RaiseLogCallRouted(ref new XboxLiveLogCallEventArgs(level, category, message));
+        serviceSetting->RaiseLogCallRouted(ref new XboxLiveLogCallEventArgs(level, category, message));
     }
 }
 
-void XboxLiveLoggingEventBind::AddXboxLiveLoggingEvent()
+void XboxLiveServicesSettingsEventBind::XboxLiveWnsRouter(
+    _In_ const xbox::services::system::xbox_live_wns_event_args& args
+    )
 {
-    std::weak_ptr<XboxLiveLoggingEventBind> thisWeakPtr = shared_from_this();
-    m_loggingHandlerContext = xbox_live_services_settings::get_singleton_instance()->add_logging_handler([thisWeakPtr](_In_ xbox::services::xbox_services_diagnostics_trace_level level, _In_ const std::string& category, _In_ const std::string& message)
+    XboxLiveServicesSettings^ serviceSetting = m_setting.Resolve<XboxLiveServicesSettings>();
+
+    if (serviceSetting != nullptr)
     {
-        std::shared_ptr<XboxLiveLoggingEventBind> pThis(thisWeakPtr.lock());
-        if (pThis != nullptr)
-        {
-            pThis->XboxLiveLoggingHandler(level, category, message);
-        }
-    });
+        serviceSetting->RaiseWns(ref new XboxLiveWnsEventArgs(args));
+    }
 }
+
+XboxLiveServicesSettings::XboxLiveServicesSettings(
+    std::shared_ptr<xbox::services::system::xbox_live_services_settings> cppObj
+    ):
+    m_cppObj(std::move(cppObj))
+{
+    m_xboxLiveServicesSettingsEventBind = make_shared<XboxLiveServicesSettingsEventBind>(Platform::WeakReference(this), m_cppObj);
+    m_xboxLiveServicesSettingsEventBind->AddEventBinding();
+}
+
 
 void XboxLiveServicesSettings::RaiseLogCallRouted(_In_ XboxLiveLogCallEventArgs^ args)
 {
     LogCallRouted(this, args);
 }
 
+void XboxLiveServicesSettings::RaiseWns(_In_ Microsoft::Xbox::Services::XboxLiveWnsEventArgs^ args)
+{
+    WnsEventRecevied(this, args);
+}
+
 XboxServicesDiagnosticsTraceLevel
 XboxLiveServicesSettings::DiagnosticsTraceLevel::get()
 {
-    return static_cast<XboxServicesDiagnosticsTraceLevel>(xbox_live_services_settings::get_singleton_instance()->diagnostics_trace_level());
+    return static_cast<XboxServicesDiagnosticsTraceLevel>(m_cppObj->diagnostics_trace_level());
 }
 
 void
 XboxLiveServicesSettings::DiagnosticsTraceLevel::set(_In_ XboxServicesDiagnosticsTraceLevel value)
 {
-    xbox_live_services_settings::get_singleton_instance()->set_diagnostics_trace_level(static_cast<xbox::services::xbox_services_diagnostics_trace_level>(value));
+    m_cppObj->set_diagnostics_trace_level(static_cast<xbox::services::xbox_services_diagnostics_trace_level>(value));
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_END

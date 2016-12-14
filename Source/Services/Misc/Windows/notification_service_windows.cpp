@@ -131,23 +131,16 @@ notification_service_windows::on_push_notification_recieved(
         auto notificationTypeString = utils::extract_json_string(xboxLiveNotificationJson, _T("notificationType"), errc);
         auto xuid = utils::extract_json_string(xboxLiveNotificationJson, _T("userXuid"), errc);
 
+        LOGS_INFO << "Received WNS notification, type: " << notificationTypeString << ", xuid: " << xuid;
+        get_xsapi_singleton()->s_xboxServiceSettingsSingleton->_Raise_wns_event(xuid, notificationTypeString);
+
         if (!errc && utils::str_icmp(notificationTypeString, _T("spop")) == 0)
         {
+            
             auto contextItor = m_userContexts.find(xuid);
             if (contextItor != m_userContexts.end() && contextItor->second != nullptr && contextItor->second->user() != nullptr)
             {
-                auto user = contextItor->second->user();
-#if XSAPI_CPP
-                user->_User_impl()->sign_in_impl(
-                    false,
-                    true
-                );
-#else
-                user->GetUserImpl()->sign_in_impl(
-                    false,
-                    true
-                );
-#endif
+                contextItor->second->refresh_token();
             }
         }
     }
