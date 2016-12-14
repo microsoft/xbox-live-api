@@ -32,7 +32,10 @@ std::shared_ptr<xbox_live_services_settings> xbox_live_services_settings::get_si
 
 xbox_live_services_settings::xbox_live_services_settings() :
     m_pMemAllocHook(nullptr),
-    m_pMemFreeHook(nullptr)
+    m_pMemFreeHook(nullptr),
+    m_loggingHandlersCounter(0),
+    m_wnsHandlersCounter(0),
+    m_traceLevel(xbox_services_diagnostics_trace_level::off)
 {
 }
 
@@ -71,6 +74,25 @@ void xbox_live_services_settings::remove_logging_handler(_In_ function_context c
     m_loggingHandlers.erase(context);
 }
 
+function_context xbox_live_services_settings::add_wns_handler(_In_ const std::function<void(const xbox_live_wns_event_args&)>& handler)
+{
+
+    function_context context = -1;
+    if (handler != nullptr)
+    {
+        context = ++m_wnsHandlersCounter;
+        m_wnsHandlers[m_wnsHandlersCounter] = handler;
+    }
+
+    return context;
+}
+
+void xbox_live_services_settings::remove_wns_handler(_In_ function_context context)
+{
+    std::lock_guard<std::mutex> lock(m_wnsEventLock);
+    m_wnsHandlers.erase(context);
+}
+
 xbox_services_diagnostics_trace_level xbox_live_services_settings::diagnostics_trace_level() const
 {
     return m_traceLevel;
@@ -97,7 +119,29 @@ void xbox_live_services_settings::_Raise_logging_event(_In_ xbox_services_diagno
             }
             catch (...)
             {
-                LOG_ERROR("raise_logging_routed_event failed.");
+                LOG_ERROR("xbox_live_services_settings::raise_logging_event failed.");
+            }
+        }
+    }
+}
+
+void xbox_live_services_settings::_Raise_wns_event(_In_ const string_t& xbox_user_id, _In_ const string_t& notification_type)
+{
+    std::lock_guard<std::mutex> lock(m_wnsEventLock);
+
+    xbox_live_wns_event_args arg(xbox_user_id, notification_type);
+    for (auto& handler : m_wnsHandlers)
+    {
+        XSAPI_ASSERT(handler.second != nullptr);
+        if (handler.second != nullptr)
+        {
+            try
+            {
+                handler.second(arg);
+            }
+            catch (...)
+            {
+                LOG_ERROR("xbox_live_services_settings::raise_wns_event failed.");
             }
         }
     }

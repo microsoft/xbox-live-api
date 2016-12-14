@@ -97,20 +97,7 @@ presence_writer::start_writer(
             LOG_INFO("Add new presence service into writer");
             m_presenceServices.insert(std::make_pair(id, presenceServiceImpl));
 
-            try
-            {
-                // For the first presence wirte.
-                presenceServiceImpl->set_presence(true);
-            }
-            catch (...)
-            {
-                LOGS_WARN << "Failed setting presence for: " << presenceServiceImpl->m_userContext->xbox_user_id();
-                if (m_writerInProgress)
-                {
-                    m_writerInProgress = false;
-                    startWriter = false;
-                }
-            }
+            // Skip the first presence write, as we already did it as a part of sign in.
         }
         else
         {
