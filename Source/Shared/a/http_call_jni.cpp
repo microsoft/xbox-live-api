@@ -175,6 +175,17 @@ JNIEXPORT void JNICALL Java_com_microsoft_xbox_idp_util_HttpCall_setRetryAllowed
 
 /*
 * Class:     com_microsoft_xbox_idp_util_HttpCall
+* Method:    setLongHttpCall
+* Signature: (Z)V
+*/
+JNIEXPORT void JNICALL Java_com_microsoft_xbox_idp_util_HttpCall_setLongHttpCall(
+    JNIEnv * env, jobject httpCall, jboolean value)
+{
+    getHttpCall(env, httpCall)->set_long_http_call(value);
+}
+
+/*
+* Class:     com_microsoft_xbox_idp_util_HttpCall
 * Method:    setContentTypeHeaderValue
 * Signature: (Ljava/lang/String;)V
 */
