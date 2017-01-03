@@ -71,6 +71,7 @@ stat_value::set_stat(
 
     m_statContextData.numberType = value;
     m_dataType = stat_data_type::number;
+    m_statCompareType = statCompareType;
 }
 void
 stat_value::set_stat(

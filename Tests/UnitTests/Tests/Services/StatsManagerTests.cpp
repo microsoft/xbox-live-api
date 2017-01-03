@@ -171,7 +171,7 @@ public:
         VERIFY_IS_TRUE(fastestRoundStat->DataType == StatisticDataType::Number);
         VERIFY_IS_TRUE(fastestRoundStat->CompareType == StatisticCompareType::Min);
 
-        statsManager->SetStatisticIntegerData(user, L"fastestRound", 3);
+        statsManager->SetStatisticIntegerData(user, L"fastestRound", 3, StatisticCompareType::Min);
         statsManager->RequestFlushToService(user);
         VERIFY_IS_TRUE(fastestRoundStat->AsInteger == 3);
         VERIFY_IS_TRUE(fastestRoundStat->DataType == StatisticDataType::Number);
@@ -192,13 +192,30 @@ public:
         VERIFY_IS_TRUE(fastestRoundStat->DataType == StatisticDataType::Number);
         VERIFY_IS_TRUE(fastestRoundStat->CompareType == StatisticCompareType::Min);
 
-        statsManager->SetStatisticIntegerData(user, L"fastestRound", 16);
+        statsManager->SetStatisticIntegerData(user, L"fastestRound", 16, StatisticCompareType::Min);
         statsManager->RequestFlushToService(user);
         VERIFY_IS_TRUE(fastestRoundStat->AsInteger == 7);
         VERIFY_IS_TRUE(fastestRoundStat->DataType == StatisticDataType::Number);
         VERIFY_IS_TRUE(fastestRoundStat->CompareType == StatisticCompareType::Min);
 
-        //statsManager->
+        statsManager->SetStatisticIntegerData(user, L"fastestRound", 6, StatisticCompareType::Min);
+        statsManager->RequestFlushToService(user);
+        VERIFY_IS_TRUE(fastestRoundStat->AsInteger == 6);
+        VERIFY_IS_TRUE(fastestRoundStat->DataType == StatisticDataType::Number);
+        VERIFY_IS_TRUE(fastestRoundStat->CompareType == StatisticCompareType::Min);
+
+        statsManager->SetStatisticIntegerData(user, L"fastestRound", 4, StatisticCompareType::Max);
+        statsManager->RequestFlushToService(user);
+        VERIFY_IS_TRUE(fastestRoundStat->AsInteger == 6);
+        VERIFY_IS_TRUE(fastestRoundStat->DataType == StatisticDataType::Number);
+        VERIFY_IS_TRUE(fastestRoundStat->CompareType == StatisticCompareType::Max);
+
+        statsManager->SetStatisticIntegerData(user, L"fastestRound", 8, StatisticCompareType::Max);
+        statsManager->RequestFlushToService(user);
+        VERIFY_IS_TRUE(fastestRoundStat->AsInteger == 8);
+        VERIFY_IS_TRUE(fastestRoundStat->DataType == StatisticDataType::Number);
+        VERIFY_IS_TRUE(fastestRoundStat->CompareType == StatisticCompareType::Max);
+
         Cleanup(statsManager, user);
     }
 };
