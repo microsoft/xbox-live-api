@@ -1188,12 +1188,14 @@
     <ClCompile Include="..\..\Source\Shared\Logger\custom_output.cpp">
       <Filter>C++ Source\Shared\Logger</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Shared\logger\etw_output.cpp" />
     <ClCompile Include="..\..\Source\Shared\WinRT\XboxLiveLogCallEventArgs_WinRT.cpp">
       <Filter>C++ Source\Shared\WinRT Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Shared\WinRT\XboxLiveServicesSettings_WinRT.cpp">
       <Filter>C++ Source\Shared\WinRT Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Shared\logger\etw_output.cpp">
+      <Filter>C++ Source\Shared\Logger</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2052,11 +2054,16 @@
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialManagerUtils_WinRT.h">
       <Filter>C++ Source\Social\Manager\WinRT</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Shared\logger\etw_output.h" />
     <ClInclude Include="..\..\Source\Shared\WinRT\XboxLiveLogCallEventArgs_WinRT.h">
       <Filter>C++ Source\Shared\WinRT Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Shared\WinRT\XboxLiveServicesSettings_WinRT.h">
+      <Filter>C++ Source\Shared\WinRT Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\logger\etw_output.h">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\WinRT\XboxLiveWnsEventArgs_WinRT.h">
       <Filter>C++ Source\Shared\WinRT Source</Filter>
     </ClInclude>
   </ItemGroup>
