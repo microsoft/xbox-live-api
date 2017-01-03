@@ -750,6 +750,7 @@
     <ClInclude Include="..\..\Source\Shared\WinRT\XboxLiveContextSettings_WinRT.h" />
     <ClInclude Include="..\..\Source\Shared\WinRT\XboxLiveLogCallEventArgs_WinRT.h" />
     <ClInclude Include="..\..\Source\Shared\WinRT\XboxLiveServicesSettings_WinRT.h" />
+    <ClInclude Include="..\..\Source\Shared\WinRT\XboxLiveWnsEventArgs_WinRT.h" />
     <ClInclude Include="..\..\Source\Shared\WinRT\XboxServicesDiagnosticsTraceLevel_WinRT.h" />
     <ClInclude Include="..\..\Source\Shared\WinRT\Event_WinRT.h" />
     <ClInclude Include="..\..\Source\Shared\WinRT\Macros_WinRT.h" />
