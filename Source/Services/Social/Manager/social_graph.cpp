@@ -53,7 +53,9 @@ social_graph::social_graph(
     m_perfTester(_T("social_graph")),
     m_wasDisconnected(false),
     m_numEventsThisFrame(0),
-    m_userAddedContext(0)
+    m_userAddedContext(0),
+    m_shouldCancel(utility::details::make_unique<bool>(false)),
+    m_isPollingRichPresence(false)
 {
     m_xboxLiveContextImpl->user_context()->set_caller_context_type(caller_context_type::social_manager);
     m_xboxLiveContextImpl->init();
@@ -70,8 +72,9 @@ social_graph::~social_graph()
 {
     std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
     std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
-    m_perfTester.start_timer(_T("~social_graph"));
     m_xboxLiveContextImpl->real_time_activity_service()->deactivate();
+
+    m_perfTester.start_timer(_T("~social_graph"));
     try
     {
         if (m_graphDestructionCompleteCallback != nullptr)
@@ -86,7 +89,6 @@ social_graph::~social_graph()
 
     LOG_DEBUG("social_graph destroyed");
 
-
     m_perfTester.stop_timer(_T("~social_graph"));
 }
 
@@ -97,6 +99,18 @@ social_graph::initialize()
     setup_rta();
 
     m_presenceRefreshTimer = std::make_shared<rta_trigger_timer>(
+    [thisWeakPtr](std::vector<string_t> eventArgs, const fire_timer_completion_context&)
+    {
+        std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
+        if (pThis)
+        {
+            pThis->presence_timer_callback(
+                eventArgs
+            );
+        }
+    });
+
+    m_presencePollingTimer = std::make_shared<rta_trigger_timer>(
     [thisWeakPtr](std::vector<string_t> eventArgs, const fire_timer_completion_context&)
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
@@ -142,22 +156,30 @@ social_graph::initialize()
             pThis->social_graph_refresh_callback();
         }
     });
-    
+
     pplx::create_task([thisWeakPtr]()
     {
         try
         {
+            static const std::chrono::milliseconds sleepTime(30);
             while (true)
             {
-                std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
-                if (pThis)
+                bool hasRemainingEvent = false;
                 {
-                    pThis->do_event_work();
+                    std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
+                    if (pThis)
+                    {
+                        hasRemainingEvent = pThis->do_event_work();
+                    }
+                    else
+                    {
+                        LOG_DEBUG("exiting event processing loop");
+                        return;
+                    }
                 }
-                else
+                if (!hasRemainingEvent)
                 {
-                    LOG_DEBUG("exiting event processing loop");
-                    return;
+                    std::this_thread::sleep_for(sleepTime);
                 }
             }
         }
@@ -245,57 +267,56 @@ social_graph::active_buffer_social_graph()
     return &m_userBuffer.active_buffer()->socialUserGraph;
 }
 
-void
+bool
 social_graph::do_event_work()
 {
-    static const std::chrono::milliseconds sleepTime(30);
     bool hasRemainingEvent = false;
     bool hasCachedEvents = false;
     {
-        std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
-        std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
-        set_state(social_graph_state::event_processing);
+        std::lock_guard<std::recursive_mutex> socialGraphStateLock(m_socialGraphStateMutex);
+        {
+            std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
+            std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
+            set_state(social_graph_state::event_processing);
 
-        m_perfTester.start_timer(_T("do_event_work: event_processing"));
-        m_perfTester.start_timer(_T("do_event_work: has_cached_events"));
-        hasCachedEvents = m_isInitialized && m_userBuffer.inactive_buffer() && !m_userBuffer.inactive_buffer()->socialUserEventQueue.empty(true);
-        m_perfTester.stop_timer(_T("do_event_work: has_cached_events"));
+            m_perfTester.start_timer(_T("do_event_work: event_processing"));
+            m_perfTester.start_timer(_T("do_event_work: has_cached_events"));
+            hasCachedEvents = m_isInitialized && m_userBuffer.inactive_buffer() && !m_userBuffer.inactive_buffer()->socialUserEventQueue.empty(true);
+            m_perfTester.stop_timer(_T("do_event_work: has_cached_events"));
+            if (hasCachedEvents)
+            {
+                m_perfTester.start_timer(_T("do_event_work: set_state"));
+                LOG_INFO("set state: event_processing");
+                m_perfTester.stop_timer(_T("do_event_work: set_state"));
+            }
+            m_perfTester.stop_timer(_T("do_event_work: event_processing"));
+        }
         if (hasCachedEvents)
         {
-            m_perfTester.start_timer(_T("do_event_work: set_state"));
-            LOG_INFO("set state: event_processing");
-            m_perfTester.stop_timer(_T("do_event_work: set_state"));
+            process_cached_events();
+            hasRemainingEvent = true;
         }
-        m_perfTester.stop_timer(_T("do_event_work: event_processing"));
-    }
-    if (hasCachedEvents)
-    {
-        process_cached_events();
-        hasRemainingEvent = true;
-    }
-    else if(m_isInitialized)
-    {
-        std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
-        std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
-        m_perfTester.start_timer(_T("do_event_work: process_events"));
-        set_state(social_graph_state::normal);
-        hasRemainingEvent = process_events(); //effectively a coroutine here so that each event yields when it is done processing
-        m_perfTester.stop_timer(_T("do_event_work: process_events"));
-    }
-    else
-    {
-        std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
-        std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
+        else if (m_isInitialized)
+        {
+            std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
+            std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
+            m_perfTester.start_timer(_T("do_event_work: process_events"));
+            set_state(social_graph_state::normal);
+            hasRemainingEvent = process_events(); //effectively a coroutine here so that each event yields when it is done processing
+            m_perfTester.stop_timer(_T("do_event_work: process_events"));
+        }
+        else
+        {
+            std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
+            std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
 
-        m_perfTester.start_timer(_T("set_state: normal"));
-        set_state(social_graph_state::normal);
-        m_perfTester.stop_timer(_T("set_state: normal"));
+            m_perfTester.start_timer(_T("set_state: normal"));
+            set_state(social_graph_state::normal);
+            m_perfTester.stop_timer(_T("set_state: normal"));
+        }
     }
 
-    if (!hasRemainingEvent)
-    {
-        std::this_thread::sleep_for(sleepTime);
-    }
+    return hasRemainingEvent;
 }
 
 void social_graph::initialize_social_buffers(
@@ -686,7 +707,7 @@ void social_graph::apply_presence_changed_event(
         }
     }
 
-    if (isFreshEvent)
+    if (isFreshEvent && !userAddedVec.empty())
     {
         internal_social_event internalPresenceChangedEvent(internal_social_event_type::presence_changed, userAddedVec);
         m_socialEventQueue.push(internalPresenceChangedEvent, m_user, social_event_type::presence_changed);
@@ -926,6 +947,7 @@ social_graph::refresh_graph()
 {
     std::vector<uint64_t> userRefreshList;
     {
+        std::lock_guard<std::recursive_mutex> socialGraphStateLock(m_socialGraphStateMutex);
         {
             std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
             std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
@@ -993,6 +1015,7 @@ social_graph::perform_diff(
     _In_ const xsapi_internal_unordered_map(uint64_t, xbox_social_user)& xboxSocialUsers
     )
 {
+    std::lock_guard<std::recursive_mutex> socialGraphStateLock(m_socialGraphStateMutex);
     {
         std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
         std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
@@ -1341,8 +1364,8 @@ social_graph::presence_timer_callback(
     {
         return;
     }
-
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
+
     m_xboxLiveContextImpl->presence_service().get_presence_for_multiple_users(
         users,
         std::vector<presence_device_type>(),
@@ -1358,6 +1381,15 @@ social_graph::presence_timer_callback(
         {
             if (!presenceRecordsResult.err())
             {
+                std::lock_guard<std::recursive_mutex> socialGraphStateLock(pThis->m_socialGraphStateMutex);
+                {
+                    std::lock_guard<std::recursive_mutex> lock(pThis->m_socialGraphMutex);
+                    std::lock_guard<std::recursive_mutex> priorityLock(pThis->m_socialGraphPriorityMutex);
+                    pThis->m_perfTester.start_timer(_T("social graph refresh state set"));
+                    pThis->set_state(social_graph_state::refresh);
+                    pThis->m_perfTester.start_timer(_T("social graph refresh state set"));
+                }
+
                 auto presenceRecordReturnVec = presenceRecordsResult.payload();
                 xsapi_internal_vector(social_manager_presence_record) socialManagerPresenceVec;
                 socialManagerPresenceVec.reserve(presenceRecordReturnVec.size());
@@ -1366,10 +1398,38 @@ social_graph::presence_timer_callback(
                     socialManagerPresenceVec.push_back(social_manager_presence_record(presenceRecord));
                 }
 
+                std::vector<social_manager_presence_record> presenceRecordChanges;
+                for (auto& record : socialManagerPresenceVec)
+                {
+                    auto previousRecordIter = pThis->m_userBuffer.inactive_buffer()->socialUserGraph.find(record._Xbox_user_id());
+                    if (previousRecordIter == pThis->m_userBuffer.inactive_buffer()->socialUserGraph.end())
+                    {
+                        continue;
+                    }
+
+                    if (previousRecordIter->second.socialUser == nullptr)
+                    {
+                        continue;
+                    }
+                    auto& previousRecord = previousRecordIter->second.socialUser->presence_record();
+                    if (previousRecord._Compare(record))
+                    {
+                        presenceRecordChanges.push_back(record);
+                    }
+                }
+
                 pThis->m_internalEventQueue.push(
                     internal_social_event_type::presence_changed,
                     socialManagerPresenceVec
                     );
+
+                {
+                    std::lock_guard<std::recursive_mutex> lock(pThis->m_socialGraphMutex);
+                    std::lock_guard<std::recursive_mutex> priorityLock(pThis->m_socialGraphPriorityMutex);
+                    pThis->m_perfTester.start_timer(_T("social graph refresh state set normal"));
+                    pThis->set_state(social_graph_state::normal);
+                    pThis->m_perfTester.stop_timer(_T("social graph refresh state set normal"));
+                }
             }
             else
             {
@@ -1378,7 +1438,6 @@ social_graph::presence_timer_callback(
         }
     });
 }
-
 
 bool
 social_graph::are_events_empty()
@@ -1406,6 +1465,93 @@ social_graph::remove_users(
     )
 {
     m_internalEventQueue.push(internal_social_event_type::users_removed, utils::std_vector_to_xsapi_vector(users));
+}
+
+void
+social_graph::presence_refresh_callback()
+{
+    std::vector<string_t> userList;
+    {
+        std::lock_guard<std::recursive_mutex> socialGraphStateLock(m_socialGraphStateMutex);
+
+        if (m_userBuffer.inactive_buffer() != nullptr)
+        {
+            {
+                std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
+                std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
+                m_perfTester.start_timer(_T("presence refresh state set"));
+                set_state(social_graph_state::refresh);
+                m_perfTester.stop_timer(_T("presence refresh state set"));
+            }
+            userList.reserve(m_userBuffer.inactive_buffer()->socialUserGraph.size());
+            for (auto& user : m_userBuffer.inactive_buffer()->socialUserGraph)
+            {
+                if (user.second.socialUser != nullptr)
+                {
+                    userList.push_back(user.second.socialUser->xbox_user_id());
+                }
+            }
+
+            m_presencePollingTimer->fire(userList);
+
+            {
+                std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
+                std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
+                m_perfTester.start_timer(_T("presence refresh fire"));
+                set_state(social_graph_state::normal);
+                m_perfTester.stop_timer(_T("presence refresh fire"));
+            }
+        }
+    }
+
+    std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
+    create_delayed_task(
+        rta_trigger_timer::TIME_PER_CALL_MS,
+        [thisWeakPtr]()
+    {
+        std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
+
+        if (pThis)
+        {
+            {
+                std::lock_guard<std::recursive_mutex> socialGraphStateLock(pThis->m_socialGraphStateMutex);
+                if (*pThis->m_shouldCancel)
+                {
+                    return;
+                }
+            }
+
+            pThis->presence_refresh_callback();
+        }
+    });
+}
+
+void
+social_graph::enable_rich_presence_polling(
+    _In_ bool shouldEnablePolling
+    )
+{
+    bool isPollingRichPresence;
+    {
+        std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
+        std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
+        isPollingRichPresence = m_isPollingRichPresence;
+        m_isPollingRichPresence = shouldEnablePolling;
+    }
+
+    if (shouldEnablePolling && !isPollingRichPresence)
+    {
+        {
+            std::lock_guard<std::recursive_mutex> socialGraphStateLock(m_socialGraphStateMutex);
+            *m_shouldCancel = false;
+        }
+        presence_refresh_callback();
+    }
+    else if(!shouldEnablePolling)
+    {
+        std::lock_guard<std::recursive_mutex> socialGraphStateLock(m_socialGraphStateMutex);
+        *m_shouldCancel = true;
+    }
 }
 
 void social_graph::clear_debug_counters()
@@ -1439,22 +1585,39 @@ rta_trigger_timer::fire(
     _In_ const fire_timer_completion_context& usersAddedStruct
     )
 {
+    std::lock_guard<std::mutex> lock(m_timerLock);
+
     if (xboxUserIds.empty())
     {
         return;
     }
 
-    std::lock_guard<std::mutex> lock(m_timerLock.get());
-
+    if (m_usersToCall.capacity() < m_usersToCall.size() + xboxUserIds.size())
+    {
+        m_usersToCall.reserve((m_usersToCall.size() + xboxUserIds.size()) - m_usersToCall.capacity());
+    }
     for (auto& xboxUserId : xboxUserIds)
     {
-        if (std::find(m_usersToCall.begin(), m_usersToCall.end(), xboxUserId) == m_usersToCall.end())
+        if (m_usersToCallMap.find(xboxUserId) == m_usersToCallMap.end())
         {
             m_usersToCall.push_back(xboxUserId);
+            m_usersToCallMap[xboxUserId] = true;
         }
     }
 
-    fire_helper(usersAddedStruct);
+    std::weak_ptr<rta_trigger_timer> thisWeak = shared_from_this();
+
+    pplx::create_task([thisWeak, usersAddedStruct]()
+    {
+        std::shared_ptr<rta_trigger_timer> pThis(thisWeak.lock());
+        if (pThis == nullptr)
+        {
+            return;
+        }
+
+        std::lock_guard<std::mutex> lock(pThis->m_timerLock);
+        pThis->fire_helper(usersAddedStruct);
+    });
 }
 
 void
@@ -1466,8 +1629,7 @@ rta_trigger_timer::fire_helper(
     {
         std::chrono::milliseconds timeDiff = TIME_PER_CALL_MS - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_previousTime);
         std::chrono::milliseconds timeRemaining = std::max<std::chrono::milliseconds>(std::chrono::milliseconds::zero(), timeDiff);
-        auto usersToCall = m_usersToCall;
-        m_usersToCall.clear();
+        auto& usersToCall = m_usersToCall;
 
         std::weak_ptr<rta_trigger_timer> thisWeakPtr = shared_from_this();
         m_isTaskInProgress = true;
@@ -1479,7 +1641,7 @@ rta_trigger_timer::fire_helper(
             std::shared_ptr<rta_trigger_timer> pThis(thisWeakPtr.lock());
             if (pThis != nullptr)
             {
-                std::lock_guard<std::mutex> lock(pThis->m_timerLock.get());
+                std::lock_guard<std::mutex> lock(pThis->m_timerLock);
                 pThis->m_isTaskInProgress = false;
                 pThis->m_fCallback(usersToCall, usersAddedStruct);
 
@@ -1490,6 +1652,9 @@ rta_trigger_timer::fire_helper(
                 }
             }
         });
+
+        m_usersToCall.clear();
+        m_usersToCallMap.clear();
     }
     else
     {

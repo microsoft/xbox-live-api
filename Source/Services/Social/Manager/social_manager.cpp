@@ -365,8 +365,8 @@ social_manager::remove_local_user(
     std::lock_guard<std::mutex> lock(m_socialMangerLock);
 
     auto xboxUserId = user_context::get_user_id(user);
-
-    if (m_localGraphs.find(xboxUserId) == m_localGraphs.end())
+    auto graphIter = m_localGraphs.find(xboxUserId);
+    if (graphIter == m_localGraphs.end())
     {
         return xbox_live_result<void>(xbox_live_error_code::logic_error, "User not found in graph");
     }
@@ -494,6 +494,23 @@ xbox_live_result<void> social_manager::update_social_user_group(
         }
     });
 
+    return xbox_live_result<void>();
+}
+
+xbox_live_result<void>
+social_manager::set_rich_presence_polling_status(
+    _In_ xbox_live_user_t user,
+    _In_ bool shouldEnablePolling
+    )
+{
+    std::lock_guard<std::mutex> lock(m_socialMangerLock);
+    auto localGraphIter = m_localGraphs.find(user_context::get_user_id(user));
+    if (localGraphIter == m_localGraphs.end())
+    {
+        return xbox_live_result<void>(xbox_live_error_code::logic_error, "User not found in graph");
+    }
+
+    localGraphIter->second->enable_rich_presence_polling(shouldEnablePolling);
     return xbox_live_result<void>();
 }
 

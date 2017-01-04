@@ -160,6 +160,19 @@ void SocialManager::UpdateSocialUserGroup(
     THROW_IF_ERR(result);
 }
 
+void SocialManager::SetRichPresencePollingState(
+    _In_ XboxLiveUser_t user,
+    _In_ bool shouldEnablePolling
+    )
+{
+    THROW_INVALIDARGUMENT_IF_NULL(user);
+    auto result = m_cppObj->set_rich_presence_polling_status(
+        user_context::user_convert(user),
+        shouldEnablePolling
+        );
+
+    THROW_IF_ERR(result);
+}
 
 void SocialManager::LogState()
 {
