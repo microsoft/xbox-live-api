@@ -107,6 +107,17 @@ public:
         _In_ Windows::Foundation::Collections::IVectorView<Platform::String^>^ users
         );
 
+    /// <summary>
+    /// Whether to enable social manager to poll every 30 seconds from the presence service 
+    /// </summary>
+    /// <param name="user">Xbox Live User</param>
+    /// <param name="shouldEnablePolling">Whether or not polling should enabled</param>
+    /// <returns>An xbox_live_result representing the success enabling polling</returns>
+    void SetRichPresencePollingState(
+        _In_ XboxLiveUser_t user,
+        _In_ bool shouldEnablePolling
+        );
+
 internal:
     SocialManager();
     std::shared_ptr<xbox::services::social::manager::social_manager> GetCppObj() const;

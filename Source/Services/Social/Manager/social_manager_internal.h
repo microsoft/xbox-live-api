@@ -150,8 +150,8 @@ public:
     void fire();
     void fire(_In_ const std::vector<string_t>& xboxUserIds, _In_ const fire_timer_completion_context& usersAddedStruct = fire_timer_completion_context());
 
-private:
     static const std::chrono::milliseconds TIME_PER_CALL_MS;
+private:
 
     void fire_helper(_In_ const fire_timer_completion_context& usersAddedStruct = fire_timer_completion_context());
 
@@ -163,8 +163,9 @@ private:
     std::chrono::time_point<std::chrono::steady_clock> m_previousTime;
 #endif
     std::vector<string_t> m_usersToCall;
+    std::unordered_map<string_t, bool> m_usersToCallMap;    // duplicating data to make lookup faster. SHould be a better way to do this
     std::function<void(const std::vector<string_t>&, const fire_timer_completion_context&)> m_fCallback;
-    xbox::services::system::xbox_live_mutex m_timerLock;
+    std::mutex m_timerLock;
 };
 
 struct xbox_social_user_context
@@ -433,6 +434,8 @@ public:
     void clear_debug_counters();
 
     void print_debug_info();
+    
+    void enable_rich_presence_polling(_In_ bool shouldEnablePolling);
 
     const xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)* active_buffer_social_graph();
 
@@ -455,7 +458,9 @@ protected:
 
     void social_graph_refresh_callback();
 
-    void do_event_work();
+    void presence_refresh_callback();
+
+    bool do_event_work();
 
     void presence_timer_callback(
         _In_ const std::vector<string_t>& users
@@ -530,6 +535,7 @@ protected:
 
     bool m_isInitialized;
     bool m_wasDisconnected;
+    bool m_isPollingRichPresence;
 
     //rta function contexts
     function_context m_devicePresenceContext;
@@ -546,8 +552,10 @@ protected:
     social_graph_state m_socialGraphState;
 
     xbox_live_user_t m_user;
+    std::unique_ptr<bool> m_shouldCancel;
     std::shared_ptr<xbox_live_context_impl> m_xboxLiveContextImpl;
     std::shared_ptr<rta_trigger_timer> m_presenceRefreshTimer;
+    std::shared_ptr<rta_trigger_timer> m_presencePollingTimer;
     std::shared_ptr<rta_trigger_timer> m_socialGraphRefreshTimer;
     std::shared_ptr<rta_trigger_timer> m_resyncRefreshTimer;
     std::shared_ptr<xbox::services::social::social_relationship_change_subscription> m_socialRelationshipChangeSubscription;
@@ -557,6 +565,7 @@ protected:
     xsapi_internal_unordered_map(uint64_t, xbox_social_user_subscriptions) m_socialUserSubscriptions;
     std::recursive_mutex m_socialGraphMutex;
     std::recursive_mutex m_socialGraphPriorityMutex;
+    std::recursive_mutex m_socialGraphStateMutex;
     xbox::services::perf_tester m_perfTester;
     event_queue m_socialEventQueue;
     internal_event_queue m_internalEventQueue;

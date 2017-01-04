@@ -500,6 +500,7 @@ public:
             {
                 if (evt->EventType == SocialEventType::PresenceChanged)
                 {
+                    assert(evt->UsersAffected->Size != 0);
                     totalSize += evt->UsersAffected->Size;
                     ++numEvents;
                 }
@@ -543,7 +544,7 @@ public:
             }
 
         } while (shouldLoop);
-
+        Sleep(100);
         VERIFY_IS_TRUE(xblContext->real_time_activity_service()->_Subscription_Count() == 0);
     }
 
@@ -1214,8 +1215,9 @@ public:
         pplx::task_completion_event<void> tce;
 
         std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-
-        auto presenceResponse = StockMocks::CreateMockHttpCallResponse(devicePresenceResponse);
+        auto devicePresenceResponseCopy = devicePresenceResponse;
+        devicePresenceResponseCopy[0][L"state"] = web::json::value::string(L"Offline");
+        auto presenceResponse = StockMocks::CreateMockHttpCallResponse(devicePresenceResponseCopy);
         auto presenceResponseStruct = std::make_shared<HttpResponseStruct>();
         presenceResponseStruct->responseList = { presenceResponse };
 
@@ -1601,7 +1603,6 @@ public:
 
         auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
 
-        socialManagerInitializationStruct.socialManager->DoWork();
         auto group = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
             xboxLiveContext->user(),
             PresenceFilter::All,
@@ -1627,8 +1628,11 @@ public:
         m_mockXboxSystemFactory->add_http_state_response(responses);
 
         m_mockXboxSystemFactory->GetMockWebSocketClient()->recieve_message(rtaResyncMessage);
+        VERIFY_IS_TRUE(group->Users->GetAt(0)->PresenceRecord->PresenceTitleRecords->GetAt(0)->PresenceText == L"Home");
 
         bool shouldLoop = true;
+        bool foundProfileChange = false;
+        bool foundPresenceChange = false;
         do
         {
             auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
@@ -1639,8 +1643,17 @@ public:
             {
                 if (evt->EventType == SocialEventType::ProfilesChanged)
                 {
+                    foundProfileChange = true;
+                }
+                else if (evt->EventType == SocialEventType::PresenceChanged)
+                {
+                    foundPresenceChange = true;
+                    VERIFY_IS_TRUE(group->Users->GetAt(0)->PresenceRecord->PresenceTitleRecords->GetAt(0)->PresenceText->IsEmpty());
+                }
+
+                if (foundProfileChange && foundPresenceChange)
+                {
                     shouldLoop = false;
-                    break;
                 }
             }
         } while (shouldLoop);
@@ -2499,6 +2512,65 @@ public:
         Platform::Collections::Vector<Platform::String^>^ vec = ref new Platform::Collections::Vector<Platform::String^>({ _T("1"), _T("2"), _T("3") });
         auto users = socialUserGroupAll->GetUsersFromXboxUserIds(vec->GetView());
         VERIFY_IS_TRUE(vec->Size == users->Size);
+
+        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
+    }
+
+    DEFINE_TEST_CASE(TestSocialManagerRichPresencePolling)
+    {
+        DEFINE_TEST_CASE_PROPERTIES_FOCUS(TestSocialManagerRichPresencePolling);
+        m_mockXboxSystemFactory->reinit();
+        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
+        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
+        auto socialUserGroupAll = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
+            xboxLiveContext->user(),
+            PresenceFilter::All,
+            RelationshipFilter::Friends
+        );
+
+        auto presenceJSON = GenerateInitialPresenceJSON(false);
+        auto presenceResponse = StockMocks::CreateMockHttpCallResponse(presenceJSON);
+        std::shared_ptr<HttpResponseStruct> presenceResponseStruct = std::make_shared<HttpResponseStruct>();
+        presenceResponseStruct->responseList = { presenceResponse };
+        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
+        // set up http response set
+        responses[_T("https://userpresence.mockenv.xboxlive.com")] = presenceResponseStruct;
+
+        m_mockXboxSystemFactory->add_http_state_response(responses);
+        VERIFY_IS_TRUE(socialUserGroupAll->Users->GetAt(0)->PresenceRecord->UserState == UserPresenceState::Online);
+
+        socialManagerInitializationStruct.socialManager->SetRichPresencePollingState(xboxLiveContext->user(), true);
+        while (true)
+        {
+            auto userCount = 0;
+            AppendToPendingEvents(socialManagerInitializationStruct.socialManager->DoWork(), socialManagerInitializationStruct);
+            for (auto evt : socialManagerInitializationStruct.socialEvents)
+            {
+                if (evt->EventType == SocialEventType::PresenceChanged)
+                {
+                    userCount += evt->UsersAffected->Size;
+                }
+            }
+
+            if (userCount == USER_LIST.size())
+            {
+                break;
+            }
+        }
+
+        VERIFY_IS_TRUE(socialUserGroupAll->Users->GetAt(0)->PresenceRecord->UserState == UserPresenceState::Offline);
+
+        socialManagerInitializationStruct.socialManager->SetRichPresencePollingState(xboxLiveContext->user(), false);
+
+        presenceJSON = GenerateInitialPresenceJSON(true);
+        presenceResponse = StockMocks::CreateMockHttpCallResponse(presenceJSON);
+        presenceResponseStruct = std::make_shared<HttpResponseStruct>();
+        presenceResponseStruct->responseList = { presenceResponse };
+        // set up http response set
+        responses[_T("https://userpresence.mockenv.xboxlive.com")] = presenceResponseStruct;
+
+        socialManagerInitializationStruct.socialManager->DoWork();
+        VERIFY_IS_TRUE(socialUserGroupAll->Users->GetAt(0)->PresenceRecord->UserState == UserPresenceState::Offline);
 
         Cleanup(socialManagerInitializationStruct, xboxLiveContext);
     }

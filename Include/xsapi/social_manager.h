@@ -369,7 +369,7 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    bool _Compare(_In_ const social_manager_presence_record& presenceRecord);
+    bool _Compare(_In_ const social_manager_presence_record& presenceRecord) const;
 
     /// <summary>
     /// Internal function
@@ -866,6 +866,17 @@ public:
     _XSAPIIMP xbox_live_result<void> update_social_user_group(
         _In_ const std::shared_ptr<xbox_social_user_group>& group,
         _In_ const std::vector<string_t>& users
+        );
+    
+    /// <summary>
+    /// Whether to enable social manager to poll every 30 seconds from the presence service 
+    /// </summary>
+    /// <param name="user">Xbox Live User</param>
+    /// <param name="shouldEnablePolling">Whether or not polling should enabled</param>
+    /// <returns>An xbox_live_result representing the success enabling polling</returns>
+    _XSAPIIMP xbox_live_result<void> set_rich_presence_polling_status(
+        _In_ xbox_live_user_t user,
+        _In_ bool shouldEnablePolling
         );
 
     /// <summary>
