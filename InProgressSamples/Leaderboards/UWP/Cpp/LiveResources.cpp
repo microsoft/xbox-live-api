@@ -163,6 +163,7 @@ void ATG::LiveResources::UpdateCurrentUser()
         m_switchAccount->SetVisible(true);
         m_signInErrorLabel->SetVisible(false);
         xbox::services::experimental::stats::manager::stats_manager::get_singleton_instance().add_local_user(m_user);
+        xbox::services::player_state_writer::player_state_writer::get_singleton_instance().add_local_user(m_user);
         pplx::create_task([]()
         {
             while (true)

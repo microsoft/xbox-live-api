@@ -260,6 +260,7 @@
     <ClInclude Include="..\..\Include\xsapi\contextual_search_service.h" />
     <ClInclude Include="..\..\Include\xsapi\entertainment_profile.h" />
     <ClInclude Include="..\..\Include\xsapi\mem.h" />
+    <ClInclude Include="..\..\Include\xsapi\player_state_writer.h" />
     <ClInclude Include="..\..\Include\xsapi\service_call_logging_config.h" />
     <ClInclude Include="..\..\Include\xsapi\social_manager.h" />
     <ClInclude Include="..\..\Include\xsapi\xbox_live_app_config.h" />

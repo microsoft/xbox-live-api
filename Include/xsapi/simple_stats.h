@@ -80,16 +80,6 @@ enum class sort_order
 };
 
 /// <summary> 
-/// The type of preconfigured leaderboard to display
-/// </summary>
-enum class preconfigured_leaderboard_type
-{
-    daily,
-    monthly,
-    yearly
-};
-
-/// <summary> 
 /// Represents a simplified stat
 /// </summary>
 class stat_value
@@ -157,50 +147,6 @@ private:
     friend class stats_value_document;
 };
 
-/// <summary> 
-/// Represents a contextual key object used for filtering stats
-/// </summary>
-class stat_context
-{
-public:
-    /// <summary> 
-    /// Represents a stat_context object used for filtering stats
-    /// </summary>
-    /// <param name="name">Name for stat_context</param>
-    /// <param name="value">Value for stat_context</param>
-    stat_context(
-        _In_ const string_t& name,
-        _In_ const string_t& value
-        );
-
-    /// <summary> 
-    /// Represents the name for the stat_context
-    /// </summary>
-    /// <return>Returns the name of the stat_context</return>
-    const string_t name() const;
-
-    /// <summary> 
-    /// Represents the key name for the stat_context
-    /// </summary>
-    /// <return>Returns the value of the stat_context</return>
-    const string_t value() const;
-
-    /// internal function
-    stat_context();
-
-    /// internal function
-    static xbox_live_result<stat_context> _Deserialize(
-        _In_ const web::json::value& data
-        );
-
-private:
-    char_t m_name[STAT_PRESENCE_CHARS_NUM];
-    char_t m_value[STAT_PRESENCE_CHARS_NUM];
-};
-
-/// <summary> 
-/// Represents a contextual key object used for filtering stats
-/// </summary>
 class stat_event
 {
 public:
@@ -291,7 +237,7 @@ private:
 };
 
 /// <summary> 
-/// Simplified Stats does REST requests to update stats
+/// Stats 2017 does REST requests to update stats
 /// </summary>
 class stats_manager
 {
@@ -404,37 +350,6 @@ public:
     xbox_live_result<std::shared_ptr<stat_value>> get_stat(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& name
-        );
-
-    /// <summary> 
-    /// Gets the current set contextual keys
-    /// </summary>
-    /// <param name="user">The local user whose keys to modify</param>
-    /// <param name="statisticContextList">The list of currently active contextual keys</param>
-    /// <return>Whether or not getting the keys was successful</return>
-    xbox_live_result<void> get_stat_contexts(
-        _In_ const xbox_live_user_t& user,
-        _Inout_ std::vector<stat_context>& statisticContextList
-        );
-
-    /// <summary> 
-    /// Sets the contextual keys
-    /// </summary>
-    /// <param name="user">The local user whose keys to modify</param>
-    /// <param name="statisticContextList">The list of contextual keys to set</param>
-    /// <return>Whether or not setting the keys was successful</return>
-    xbox_live_result<void> set_stat_contexts(
-        _In_ const xbox_live_user_t& user,
-        _In_ const std::vector<stat_context>& statContextList
-        );
-
-    /// <summary> 
-    /// Clears the contextual keys for a user
-    /// </summary>
-    /// <param name="user">The local user whose keys to modify</param>
-    /// <return>Whether or not clearing the keys was successful</return>
-    xbox_live_result<void> clear_stat_contexts(
-        _In_ const xbox_live_user_t& user
         );
 
     /// <summary> 

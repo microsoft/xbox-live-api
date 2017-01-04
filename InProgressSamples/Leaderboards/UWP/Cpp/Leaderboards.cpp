@@ -74,25 +74,34 @@ void Sample::Initialize(IUnknown* window, int width, int height, DXGI_MODE_ROTAT
 
 void Sample::WriteEvent()
 {
-    stats_manager::get_singleton_instance().set_stat_as_string(m_liveResources->GetUser(), L"MultiplayerCorrelationId", L"multiplayer correlation id");
-    stats_manager::get_singleton_instance().set_stat_as_string(m_liveResources->GetUser(), L"GameplayModeId", L"multiplayer correlation id");
     stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"DifficultyLevelId", 100);
     stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"RoundId", 1);
     stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"PlayerRoleId", 1);
     stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"PlayerWeaponId", 2);
     stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"EnemyRoleId", 3);
     stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"KillTypeId", 4);
+    stats_manager::get_singleton_instance().set_stat_as_number(m_liveResources->GetUser(), L"Laptime", 25.6);
+    stats_manager::get_singleton_instance().set_stat_as_string(m_liveResources->GetUser(), L"ilikestrings", L"stringringingngg");
+    
+    // map and difficulty are configured for the stats service
+    std::unordered_map<string_t, player_state_value> playerStateMap;
+    playerStateMap[L"map"] = player_state_value(L"Verdun");
+    playerStateMap[L"difficulty"] = player_state_value(L"Hard");
 
-    // Write an event with data fields
-    web::json::value properties = web::json::value::object();
-    properties[L"MultiplayerCorrelationId"] = web::json::value(L"multiplayer correlation id");
-    properties[L"GameplayModeId"] = web::json::value(L"gameplay mode id");
-    properties[L"DifficultyLevelId"] = 100;
-    properties[L"RoundId"] = 1;
-    properties[L"PlayerRoleId"] = 1;
-    properties[L"PlayerWeaponId"] = 2;
-    properties[L"EnemyRoleId"] = 3;
-    properties[L"KillTypeId"] = 4;
+    stats_manager::get_singleton_instance().do_work();
+    player_state_writer::get_singleton_instance().set_player_state(m_liveResources->GetUser(), playerStateMap); // immediately changes player state and causes SVD change
+}
+
+void Sample::SetPresence()
+{
+
+    // presence string is:
+    // "on map %map% with difficult %difficulty%. %health% remaining"
+    std::unordered_map<string_t, player_state_value> playerStateMap;
+    playerStateMap[L"health"] = player_state_value(100);
+
+    player_state_writer::get_singleton_instance().set_player_state(m_liveResources->GetUser(), playerStateMap);
+    m_liveResources->GetLiveContext()->presence_service().set_presence_using_player_state(L"mapstr").then([]() {});
 }
 
 void Sample::GetLeaderboard()
