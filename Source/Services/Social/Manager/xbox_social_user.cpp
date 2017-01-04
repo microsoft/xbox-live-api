@@ -159,6 +159,11 @@ change_list_enum xbox_social_user::_Compare(
         changeResult = static_cast<change_list_enum>(changeResult | change_list_enum::social_relationship_change);
     }
 
+    if (previous.m_presenceRecord._Compare(current.m_presenceRecord))
+    {
+        changeResult = static_cast<change_list_enum>(changeResult | change_list_enum::presence_change);
+    }
+
     return changeResult;
 }
 

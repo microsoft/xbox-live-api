@@ -258,6 +258,10 @@ xbox_social_user_group::filter_list(
         }
 
         auto user = userPair->second.socialUser;
+        if (user == nullptr)
+        {
+            continue;
+        }
         if ((m_relationshipFilter == relationship_filter::favorite && user->is_favorite()) ||
             (m_relationshipFilter == relationship_filter::friends && user->is_followed_by_caller())
             )

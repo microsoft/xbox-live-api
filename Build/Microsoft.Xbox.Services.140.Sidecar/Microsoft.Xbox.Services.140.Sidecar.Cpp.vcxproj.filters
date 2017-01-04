@@ -618,27 +618,6 @@
     <ClCompile Include="..\..\Source\Services\Multiplayer\multiplayer_session_tournaments_server.cpp">
       <Filter>C++ Source\Multiplayer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Tournaments\tournament.cpp">
-      <Filter>C++ Source\Tournaments</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_service.cpp">
-      <Filter>C++ Source\Tournaments</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Tournaments\tournaments_result.cpp">
-      <Filter>C++ Source\Tournaments</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_game.cpp">
-      <Filter>C++ Source\Tournaments</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_team.cpp">
-      <Filter>C++ Source\Tournaments</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_teams.cpp">
-      <Filter>C++ Source\Tournaments</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_stage.cpp">
-      <Filter>C++ Source\Tournaments</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_team_result.cpp">
       <Filter>C++ Source\Tournaments</Filter>
     </ClCompile>
@@ -728,9 +707,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Services\Social\Manager\xbox_user_id_container.cpp">
       <Filter>C++ Source\Social\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\System\Sidecar\app_service_provider.cpp">
-      <Filter>C++ Source\System</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\System\Sidecar\app_service_messages.cpp">
       <Filter>C++ Source\System</Filter>
@@ -954,9 +930,6 @@
       <Filter>C++ Source\Shared\Logger</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\System\Sidecar\app_service_messages.h">
-      <Filter>C++ Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\System\Sidecar\app_service_provider.h">
       <Filter>C++ Source\System</Filter>
     </ClInclude>
   </ItemGroup>

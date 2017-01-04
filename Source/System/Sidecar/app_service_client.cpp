@@ -127,6 +127,8 @@ namespace app_service {
 			std::mutex m_pendingRequestsLock;
 			pplx::event m_connectionReady;
 			HWND m_hWnd = NULL;
+            Platform::String^ m_pfn = _T("");
+            Platform::String^ m_appChannelName = _T("");
 
 			pplx::task<AppServiceConnection^> ensure_connection();
 			void on_service_closed(_In_ AppServiceConnection ^sender, _In_ AppServiceClosedEventArgs ^args);
@@ -148,9 +150,9 @@ namespace app_service {
 
 				m_connectionReady.reset();
 				m_connection = ref new AppServiceConnection();
-                //TODO cuwaters: remove the hardcoded app identity information
-				m_connection->AppServiceName = "xblsidecar-33535007";
-				m_connection->PackageFamilyName = "38133JasonSandlin.8845AE5E9DE2_txz1v18ddy4v6";//Windows::ApplicationModel::Package::Current->Id->FamilyName;
+                m_connection->AppServiceName = m_appChannelName;
+                m_connection->PackageFamilyName = m_pfn;
+
 				return create_task(m_connection->OpenAsync())
 					.then([](pplx::task<AppServiceConnectionStatus> statusTask)
 				{
@@ -231,9 +233,8 @@ namespace app_service {
 				}
 
                 REQUEST message = { requestTracker->request_id(), params... };
-                //TODO: cuwaters remove hard-coded app identity bits
 				auto createWindowTask = uiMode == ui_mode::allowed ?
-					concurrency::create_task(Windows::System::Launcher::LaunchUriAsync(ref new Windows::Foundation::Uri("xblsidecar-33535007://"))) :
+					concurrency::create_task(Windows::System::Launcher::LaunchUriAsync(ref new Windows::Foundation::Uri(m_appChannelName))) :
 					task_from_result(true);
 
 				return createWindowTask
@@ -271,11 +272,15 @@ namespace app_service {
 			}
 		} // anonymous namespace
 
-		pplx::task<xbox_live_result<sign_in_result_message>> sign_in(
-			_In_ bool showUI,
-			_In_ bool forceRefresh
+        pplx::task<xbox_live_result<sign_in_result_message>> sign_in(
+            _In_ bool showUI,
+            _In_ bool forceRefresh,
+            _In_ std::shared_ptr<local_config> config
 		)
-		{
+        {
+            m_pfn = ref new Platform::String(config->sidecar_pfn().c_str());
+            m_appChannelName = ref new Platform::String(config->sidecar_appchannel().c_str());
+
 			auto task = send_app_service_request_and_wait_for_response<sign_in_request_message>(
 				showUI ? ui_mode::allowed : ui_mode::not_allowed,
 				showUI,
@@ -291,9 +296,13 @@ namespace app_service {
 			_In_ const string_t& headers,
 			_In_ const std::vector<unsigned char>& bytes,
 			_In_ bool promptForCredentialsIfNeeded,
-			_In_ bool forceRefresh
+            _In_ bool forceRefresh,
+            _In_ std::shared_ptr<local_config> config
 		)
-		{
+        {
+            m_pfn = ref new Platform::String(config->sidecar_pfn().c_str());
+            m_appChannelName = ref new Platform::String(config->sidecar_appchannel().c_str());
+
 			auto task = send_app_service_request_and_wait_for_response<token_and_signature_request_message>(
 				promptForCredentialsIfNeeded ? ui_mode::allowed : ui_mode::not_allowed,
 				httpMethod,
@@ -308,9 +317,13 @@ namespace app_service {
 		}
 
 		pplx::task<xbox_live_result<achievements_ui_result_message>> show_title_achievements_ui(
-			_In_ uint32_t titleId
+            _In_ uint32_t titleId,
+            _In_ std::shared_ptr<local_config> config
 		)
-		{
+        {
+            m_pfn = ref new Platform::String(config->sidecar_pfn().c_str());
+            m_appChannelName = ref new Platform::String(config->sidecar_appchannel().c_str());
+
 			auto task = send_app_service_request_and_wait_for_response<achievements_ui_request_message>(
 				ui_mode::allowed,
 				titleId);

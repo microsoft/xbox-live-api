@@ -316,19 +316,21 @@ pplx::task<xbox_live_result<void>> user_context::refresh_token()
     }
 #endif
 
-    return m_user->_User_impl()->sign_in_impl(false, true)
-    .then([](xbox_live_result<sign_in_result> result)
+    auto authConfig = m_user->_User_impl()->get_auth_config();
+
+    return m_user->_User_impl()->internal_get_token_and_signature(
+        _T("GET"),
+        authConfig->xbox_live_endpoint(),
+        string_t(),
+        string_t(),
+        std::vector<unsigned char>(),
+        false,
+        true)
+    .then([](xbox_live_result<token_and_signature_result> result)
     {
         if (!result.err())
         {
-            if (result.payload().status() == sign_in_status::success)
-            {
-                return xbox_live_result<void>();
-            }
-            else
-            {
-                return xbox_live_result<void>(xbox_live_error_code::auth_unknown_error, "Refresh token failed.");
-            }
+            return xbox_live_result<void>();
         }
         else
         {
@@ -450,19 +452,21 @@ pplx::task<xbox_live_result<user_context_auth_result>> user_context::get_auth_re
 
 pplx::task<xbox_live_result<void>> user_context::refresh_token()
 {
-    return m_user->GetUserImpl()->sign_in_impl(false, true)
-    .then([](xbox_live_result<sign_in_result> result)
+    auto authConfig = m_user->GetUserImpl()->get_auth_config();
+
+    return m_user->GetUserImpl()->internal_get_token_and_signature(
+        _T("GET"),
+        authConfig->xbox_live_endpoint(),
+        string_t(),
+        string_t(),
+        std::vector<unsigned char>(),
+        false,
+        true)
+        .then([](xbox_live_result<token_and_signature_result> result)
     {
         if (!result.err())
         {
-            if (result.payload().status() == sign_in_status::success)
-            {
-                return xbox_live_result<void>();
-            }
-            else
-            {
-                return xbox_live_result<void>(xbox_live_error_code::auth_unknown_error, "Refresh token failed.");
-            }
+            return xbox_live_result<void>();
         }
         else
         {

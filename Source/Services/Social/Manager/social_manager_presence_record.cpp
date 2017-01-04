@@ -136,7 +136,7 @@ social_manager_presence_record::presence_title_records() const
 bool
 social_manager_presence_record::_Compare(
     _In_ const social_manager_presence_record& presenceRecord
-    )
+    ) const
 {
     if (presenceRecord.m_userState != m_userState)
     {

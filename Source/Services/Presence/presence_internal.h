@@ -223,12 +223,11 @@ public:
     // test hook 
     static void set_presence_set_finished_handler(const std::function<void(int heartBeatDelayInMins)>& onSetPresenceFinish) { s_onSetPresenceFinish = onSetPresenceFinish; }
 
-
-private:
-    string_t set_presence_sub_path(
+    static string_t set_presence_sub_path(
         _In_ const string_t& xboxUserId
         );
 
+private:
     string_t get_presence_sub_path(
         _In_ const string_t& xboxUserId
         );

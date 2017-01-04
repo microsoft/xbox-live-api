@@ -30,7 +30,7 @@ pplx::task<xbox_live_result<sign_in_result>> user_impl_sidecar::sign_in_impl(
 )
 {
 	std::weak_ptr<user_impl_sidecar> thisWeakPtr = std::dynamic_pointer_cast<user_impl_sidecar>(shared_from_this());
-	auto task = app_service::client::sign_in(showUI, forceRefresh)
+	auto task = app_service::client::sign_in(showUI, forceRefresh, m_localConfig)
 	.then([thisWeakPtr](xbox_live_result<app_service::sign_in_result_message> result)
 	{
 		std::shared_ptr<user_impl_sidecar> pThis(thisWeakPtr.lock());
@@ -77,7 +77,8 @@ user_impl_sidecar::internal_get_token_and_signature(
 		headers,
 		bytes,
 		promptForCredentialsIfNeeded,
-		forceRefresh
+		forceRefresh,
+        m_localConfig
 	)
 	.then([thisWeakPtr](xbox_live_result<app_service::token_and_signature_result_message> result)
 	{

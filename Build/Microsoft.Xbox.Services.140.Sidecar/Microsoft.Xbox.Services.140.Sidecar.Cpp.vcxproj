@@ -68,24 +68,24 @@
       <AdditionalOptions>/bigobj /Zm300 %(AdditionalOptions)</AdditionalOptions>
       <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>
-        $(ProjectDir);
-        $(ProjectDir)\..\..\Source\Services;
-        $(ProjectDir)\..\..\Source\Services\Common;
-        $(ProjectDir)\..\..\Source\Services\Common\Desktop;
-        $(ProjectDir)\..\..\Source\Services\Social;
-        $(ProjectDir)\..\..\Source\Services\Multiplayer;
-        $(ProjectDir)\..\..\Source\Services\Presence;
-        $(ProjectDir)\..\..\Source\Services\Misc;
-        $(ProjectDir)\..\..\Source\Services\Social\Manager;
-        $(ProjectDir)\..\..\Source\Services\RealTimeActivity;
-        $(ProjectDir)\..\..\Source\Shared;
-        $(ProjectDir)\..\..\Source\Shared\WinRT;
-        $(ProjectDir)\..\..\Include;
-        ..\..\Casablanca\Release\include;
-        $(ProjectDir)\..\..\Source\System\WinRT;
-        $(ProjectDir)\..\..\Source\System;
-        %(AdditionalIncludeDirectories)
+      <AdditionalIncludeDirectories> 
+       $(ProjectDir);
+       $(ProjectDir)\..\..\Source\Services;
+       $(ProjectDir)\..\..\Source\Services\Common;
+       $(ProjectDir)\..\..\Source\Services\Common\Desktop;
+       $(ProjectDir)\..\..\Source\Services\Social;
+       $(ProjectDir)\..\..\Source\Services\Multiplayer;
+       $(ProjectDir)\..\..\Source\Services\Presence;
+       $(ProjectDir)\..\..\Source\Services\Misc;
+       $(ProjectDir)\..\..\Source\Services\Social\Manager;
+       $(ProjectDir)\..\..\Source\Services\RealTimeActivity;
+       $(ProjectDir)\..\..\Source\Shared;
+       $(ProjectDir)\..\..\Source\Shared\WinRT;
+       $(ProjectDir)\..\..\Include;
+       ..\..\External\cpprestsdk\Release\include;
+       $(ProjectDir)\..\..\Source\System\WinRT;
+       $(ProjectDir)\..\..\Source\System;
+       %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
       <CompileAsWinRT>true</CompileAsWinRT>
     </ClCompile>
@@ -299,14 +299,7 @@
     <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_blob_result.cpp" />
     <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_quota.cpp" />
     <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_service.cpp" />
-    <ClCompile Include="..\..\Source\Services\Tournaments\tournament.cpp" />
-    <ClCompile Include="..\..\Source\Services\Tournaments\tournaments_result.cpp" />
-    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_game.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_reference.cpp" />
-    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_service.cpp" />
-    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_stage.cpp" />
-    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_team.cpp" />
-    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_teams.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_team_result.cpp" />
     <ClCompile Include="..\..\Source\Shared\errors.cpp" />
     <ClCompile Include="..\..\Source\Shared\http_call_request_message.cpp" />
@@ -414,8 +407,8 @@
     <ClInclude Include="..\..\Source\System\system_internal.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Casablanca\Release\src\build\vs14.uwp\cpprestsdk140.uwp.static.vcxproj">
-      <Project>{9AD285A2-301E-47A0-A299-14AD5D4F2758}</Project>
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.static.vcxproj">
+      <Project>{9ad285a2-301e-47a0-a299-14ad5d4f2758}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
