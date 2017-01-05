@@ -916,9 +916,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticCompareType_WinRT.h">
       <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticContext_WinRT.h">
-      <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticDataType_WinRT.h">
       <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
     </ClInclude>
@@ -936,6 +933,12 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\simplified_stats_internal.h">
       <Filter>XSAPI\Services\Stats\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\call_buffer_timer.h">
+      <Filter>XSAPI\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\player_state_writer.h">
+      <Filter>XSAPI\Include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2228,9 +2231,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\Windows\notification_service_windows.cpp">
       <Filter>XSAPI\Services\Misc</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticContext_WinRT.cpp">
-      <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticEvent_WinRT.cpp">
       <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
     </ClCompile>
@@ -2241,9 +2241,6 @@
       <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stat_value.cpp">
-      <Filter>XSAPI\Services\Stats\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stat_context.cpp">
       <Filter>XSAPI\Services\Stats\Manager</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stat_event.cpp">
@@ -2257,6 +2254,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\simplified_stats_manager_impl.cpp">
       <Filter>XSAPI\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\call_buffer_timer.cpp">
+      <Filter>XSAPI\Shared</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -14,9 +14,6 @@
 #include "xsapi/presence.h"
 #include "xbox_live_context_impl.h"
 #include "system_internal.h"
-#if !XSAPI_U
-#include "ppltasks_extra.h"
-#endif
 #include "xbox_system_factory.h"
 
 using namespace xbox::services;
@@ -28,11 +25,11 @@ using namespace Concurrency::extras;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
 
-const std::chrono::milliseconds rta_trigger_timer::TIME_PER_CALL_MS =
+const std::chrono::seconds social_graph::TIME_PER_CALL_SEC =
 #if UNIT_TEST_SERVICES
-std::chrono::milliseconds(0);
+std::chrono::seconds::zero();
 #else
-std::chrono::milliseconds(30 * 1000);
+std::chrono::seconds(30);
 #endif
 
 const std::chrono::minutes social_graph::REFRESH_TIME_MIN = std::chrono::minutes(20);
@@ -98,8 +95,8 @@ social_graph::initialize()
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
     setup_rta();
 
-    m_presenceRefreshTimer = std::make_shared<rta_trigger_timer>(
-    [thisWeakPtr](std::vector<string_t> eventArgs, const fire_timer_completion_context&)
+    m_presenceRefreshTimer = std::make_shared<call_buffer_timer>(
+    [thisWeakPtr](std::vector<string_t> eventArgs, const call_buffer_timer_completion_context&)
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
         if (pThis)
@@ -108,10 +105,12 @@ social_graph::initialize()
                 eventArgs
             );
         }
-    });
+    },
+        TIME_PER_CALL_SEC
+        );
 
-    m_presencePollingTimer = std::make_shared<rta_trigger_timer>(
-    [thisWeakPtr](std::vector<string_t> eventArgs, const fire_timer_completion_context&)
+    m_presencePollingTimer = std::make_shared<call_buffer_timer>(
+    [thisWeakPtr](std::vector<string_t> eventArgs, const call_buffer_timer_completion_context&)
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
         if (pThis)
@@ -120,10 +119,12 @@ social_graph::initialize()
                 eventArgs
             );
         }
-    });
+    },
+        TIME_PER_CALL_SEC
+        );
 
-    m_socialGraphRefreshTimer = std::make_shared<rta_trigger_timer>(
-    [thisWeakPtr](std::vector<string_t> eventArgs, const fire_timer_completion_context& completionContext)
+    m_socialGraphRefreshTimer = std::make_shared<call_buffer_timer>(
+    [thisWeakPtr](std::vector<string_t> eventArgs, const call_buffer_timer_completion_context& completionContext)
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
         if (pThis)
@@ -133,10 +134,12 @@ social_graph::initialize()
                 completionContext
                 );
         }
-    });
+    },
+        TIME_PER_CALL_SEC
+        );
 
-    m_resyncRefreshTimer = std::make_shared<rta_trigger_timer>(
-    [thisWeakPtr](std::vector<string_t> eventArgs, const fire_timer_completion_context&)
+    m_resyncRefreshTimer = std::make_shared<call_buffer_timer>(
+    [thisWeakPtr](std::vector<string_t> eventArgs, const call_buffer_timer_completion_context&)
     {
         UNREFERENCED_PARAMETER(eventArgs);
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
@@ -144,7 +147,9 @@ social_graph::initialize()
         {
             pThis->refresh_graph();
         }
-    });
+    },
+        TIME_PER_CALL_SEC
+        );
 
     create_delayed_task(
         REFRESH_TIME_MIN,
@@ -486,7 +491,7 @@ void social_graph::apply_users_added_event(
     }
     else
     {
-        fire_timer_completion_context usersAddedStruct;
+        call_buffer_timer_completion_context usersAddedStruct;
 
         usersAddedStruct.isNull = false;
         usersAddedStruct.context = ++m_userAddedContext;
@@ -1150,7 +1155,7 @@ social_graph::do_work(
 pplx::task<xbox_live_result<std::vector<xbox_social_user>>>
 social_graph::social_graph_timer_callback(
     _In_ const std::vector<string_t>& users,
-    _In_ const fire_timer_completion_context& completionContext
+    _In_ const call_buffer_timer_completion_context& completionContext
     )
 {
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
@@ -1506,7 +1511,7 @@ social_graph::presence_refresh_callback()
 
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
     create_delayed_task(
-        rta_trigger_timer::TIME_PER_CALL_MS,
+        TIME_PER_CALL_SEC,
         [thisWeakPtr]()
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
@@ -1560,106 +1565,6 @@ void social_graph::clear_debug_counters()
 
 void social_graph::print_debug_info()
 {
-}
-
-// RTA Trigger Timer
-rta_trigger_timer::rta_trigger_timer(
-    std::function<void(const std::vector<string_t>&, const fire_timer_completion_context&)> callback
-    ) :
-    m_fCallback(std::move(callback)),
-    m_previousTime(std::chrono::steady_clock::duration::zero()),
-    m_isTaskInProgress(false),
-    m_queuedTask(false)
-{
-}
-
-void
-rta_trigger_timer::fire()
-{
-    fire_helper();
-}
-
-void
-rta_trigger_timer::fire(
-    _In_ const std::vector<string_t>& xboxUserIds,
-    _In_ const fire_timer_completion_context& usersAddedStruct
-    )
-{
-    std::lock_guard<std::mutex> lock(m_timerLock);
-
-    if (xboxUserIds.empty())
-    {
-        return;
-    }
-
-    if (m_usersToCall.capacity() < m_usersToCall.size() + xboxUserIds.size())
-    {
-        m_usersToCall.reserve((m_usersToCall.size() + xboxUserIds.size()) - m_usersToCall.capacity());
-    }
-    for (auto& xboxUserId : xboxUserIds)
-    {
-        if (m_usersToCallMap.find(xboxUserId) == m_usersToCallMap.end())
-        {
-            m_usersToCall.push_back(xboxUserId);
-            m_usersToCallMap[xboxUserId] = true;
-        }
-    }
-
-    std::weak_ptr<rta_trigger_timer> thisWeak = shared_from_this();
-
-    pplx::create_task([thisWeak, usersAddedStruct]()
-    {
-        std::shared_ptr<rta_trigger_timer> pThis(thisWeak.lock());
-        if (pThis == nullptr)
-        {
-            return;
-        }
-
-        std::lock_guard<std::mutex> lock(pThis->m_timerLock);
-        pThis->fire_helper(usersAddedStruct);
-    });
-}
-
-void
-rta_trigger_timer::fire_helper(
-    _In_ const fire_timer_completion_context& usersAddedStruct
-    )
-{
-    if (!m_isTaskInProgress)
-    {
-        std::chrono::milliseconds timeDiff = TIME_PER_CALL_MS - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_previousTime);
-        std::chrono::milliseconds timeRemaining = std::max<std::chrono::milliseconds>(std::chrono::milliseconds::zero(), timeDiff);
-        auto& usersToCall = m_usersToCall;
-
-        std::weak_ptr<rta_trigger_timer> thisWeakPtr = shared_from_this();
-        m_isTaskInProgress = true;
-        m_previousTime = std::chrono::high_resolution_clock::now();
-        create_delayed_task(
-            timeRemaining,
-            [thisWeakPtr, usersToCall, usersAddedStruct]()
-        {
-            std::shared_ptr<rta_trigger_timer> pThis(thisWeakPtr.lock());
-            if (pThis != nullptr)
-            {
-                std::lock_guard<std::mutex> lock(pThis->m_timerLock);
-                pThis->m_isTaskInProgress = false;
-                pThis->m_fCallback(usersToCall, usersAddedStruct);
-
-                if (pThis->m_queuedTask)
-                {
-                    pThis->m_queuedTask = false;
-                    pThis->fire_helper();
-                }
-            }
-        });
-
-        m_usersToCall.clear();
-        m_usersToCallMap.clear();
-    }
-    else
-    {
-        m_queuedTask = true;
-    }
 }
 
 const uint32_t user_buffers_holder::EXTRA_USER_FREE_SPACE = 5;

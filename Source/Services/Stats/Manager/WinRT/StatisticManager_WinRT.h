@@ -12,7 +12,6 @@
 #include "StatisticEvent_WinRT.h"
 #include "StatisticValue_WinRT.h"
 #include "StatisticCompareType_WinRT.h"
-#include "StatisticContext_WinRT.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 
@@ -157,35 +156,6 @@ public:
     StatisticValue^ GetStatistic(
         _In_ XboxLiveUser_t user,
         _In_ Platform::String^ name
-        );
-
-    /// <summary> 
-    /// Gets the current statistic contexts
-    /// </summary>
-    /// <param name="user">The local user whose keys to get</param>
-    /// <return>The list of currently active statistic contexts</return>
-    Windows::Foundation::Collections::IVectorView<StatisticContext^>^ GetStatisticContexts(
-        _In_ XboxLiveUser_t user
-        );
-
-    /// <summary> 
-    /// Sets the contextual keys
-    /// </summary>
-    /// <param name="user">The local user whose keys to modify</param>
-    /// <param name="statisticContextList">The list of contextual keys to set</param>
-    /// <return>Whether or not getting the keys was successful</return>
-    void SetStatisticContexts(
-        _In_ XboxLiveUser_t user,
-        _In_ Windows::Foundation::Collections::IVectorView<StatisticContext^>^ statisticContextList
-        );
-
-    /// <summary> 
-    /// Clears the contextual keys for a user
-    /// </summary>
-    /// <param name="user">The local user whose keys to modify</param>
-    /// <return>Whether or not clearing the keys was successful</return>
-    void ClearStatisticContexts(
-        _In_ XboxLiveUser_t user
         );
 
 internal:

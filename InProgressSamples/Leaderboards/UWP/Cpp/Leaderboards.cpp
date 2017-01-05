@@ -14,6 +14,7 @@ using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 using namespace xbox::services;
 using namespace xbox::services::leaderboard;
+using namespace xbox::services::player_state;
 using namespace xbox::services::experimental::stats::manager;
 
 namespace
@@ -89,19 +90,7 @@ void Sample::WriteEvent()
     playerStateMap[L"difficulty"] = player_state_value(L"Hard");
 
     stats_manager::get_singleton_instance().do_work();
-    player_state_writer::get_singleton_instance().set_player_state(m_liveResources->GetUser(), playerStateMap); // immediately changes player state and causes SVD change
-}
-
-void Sample::SetPresence()
-{
-
-    // presence string is:
-    // "on map %map% with difficult %difficulty%. %health% remaining"
-    std::unordered_map<string_t, player_state_value> playerStateMap;
-    playerStateMap[L"health"] = player_state_value(100);
-
-    player_state_writer::get_singleton_instance().set_player_state(m_liveResources->GetUser(), playerStateMap);
-    m_liveResources->GetLiveContext()->presence_service().set_presence_using_player_state(L"mapstr").then([]() {});
+    player_state_writer::get_singleton_instance()->set_player_state(m_liveResources->GetUser(), playerStateMap); // immediately changes player state and causes SVD change
 }
 
 void Sample::GetLeaderboard()

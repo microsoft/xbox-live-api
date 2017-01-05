@@ -215,7 +215,7 @@ stats_value_document::serialize() const
     contextualKeyField = web::json::value::object();
     for (auto& context : m_currentStatContexts)
     {
-        contextualKeyField[context.name()] = web::json::value::string(context.value());
+        contextualKeyField[context.playerStateName] = web::json::value::string(context.playerStateValue.as_string());
     }
 
     auto& titleField = statsField[_T("title")];
@@ -249,7 +249,9 @@ stats_value_document::_Deserialize(
     auto currentContextArray = utils::extract_json_field(statsField, _T("contextualKeys"), errc, false).as_object();
     for (auto& context : currentContextArray)
     {
-        stat_context statContext(context.first.c_str(), context.second.as_string().c_str());
+        stat_context statContext;
+        statContext.playerStateName = context.first.c_str();
+        statContext.playerStateValue = player_state::player_state_value(context.second.as_string());
         returnObject.m_currentStatContexts.push_back(statContext);
     }
 

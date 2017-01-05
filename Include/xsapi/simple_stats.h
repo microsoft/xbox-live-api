@@ -12,6 +12,7 @@
 #include "xsapi/social.h"
 #include "xsapi/user_statistics.h"
 #include "xsapi/achievements.h"
+#include "xsapi/player_state_writer.h"
 
 namespace xbox { namespace services { namespace experimental { namespace stats { namespace manager { 
 
@@ -352,7 +353,8 @@ public:
         _In_ const string_t& name
         );
 
-    /// <summary> 
+    // TODO: implement
+    /*/// <summary> 
     /// Gets a social leaderboard for a user. 
     /// leaderboard_load_complete event triggers when leaderboard load is complete
     /// </summary>
@@ -417,7 +419,7 @@ public:
         _In_ const std::vector<string_t>& statName,
         _In_ const std::vector<string_t>& xboxUserIds,
         _In_ const stat_context& statContext = stat_context()
-        );
+        );*/
 
     stats_manager();
 

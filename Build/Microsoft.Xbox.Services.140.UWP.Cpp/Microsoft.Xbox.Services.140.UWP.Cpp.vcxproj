@@ -206,6 +206,8 @@
     <ClCompile Include="..\..\Source\Services\Misc\contextual_search_game_clip_uri_info.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\contextual_search_service.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\notification_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\player_state_value.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\player_state_writer.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\string_service.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\UWP\title_callable_ui.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\verify_string_result.cpp" />
@@ -295,7 +297,6 @@
     <ClCompile Include="..\..\Source\Services\Stats\Manager\simplified_stats_manager_impl.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\simplified_stats_service.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_value_document.cpp" />
-    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_context.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_event.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_value.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\statistic_change_event_args.cpp" />

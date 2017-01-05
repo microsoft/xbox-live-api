@@ -711,9 +711,6 @@
     <ClCompile Include="..\..\Source\Services\Stats\Manager\simplified_stats_service.cpp">
       <Filter>C++ Source\Stats</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_context.cpp">
-      <Filter>C++ Source\Stats</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_value.cpp">
       <Filter>C++ Source\Stats</Filter>
     </ClCompile>
@@ -731,6 +728,12 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_event.cpp">
       <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Misc\player_state_writer.cpp">
+      <Filter>C++ Source\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Misc\player_state_value.cpp">
+      <Filter>C++ Source\Misc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -126,18 +126,6 @@ stats_manager::get_stat(
 }
 
 xbox_live_result<void>
-stats_manager::get_stat_contexts(
-    _In_ const xbox_live_user_t& user,
-    _Inout_ std::vector<stat_context>& statisticContextList
-    )
-{
-    return m_statsManagerImpl->get_stat_contexts(
-        user,
-        statisticContextList
-        );
-}
-
-xbox_live_result<void>
 stats_manager::get_stat_names(
     _In_ const xbox_live_user_t& user,
     _Inout_ std::vector<string_t>& statNameList
@@ -146,28 +134,6 @@ stats_manager::get_stat_names(
     return m_statsManagerImpl->get_stat_names(
         user,
         statNameList
-        );
-}
-
-xbox_live_result<void>
-stats_manager::set_stat_contexts(
-    _In_ const xbox_live_user_t& user,
-    _In_ const std::vector<stat_context>& statContextList
-)
-{
-    return m_statsManagerImpl->set_stat_contexts(
-        user,
-        statContextList
-        );
-}
-
-xbox_live_result<void>
-stats_manager::clear_stat_contexts(
-    _In_ const xbox_live_user_t& user
-)
-{
-    return m_statsManagerImpl->clear_stat_contexts(
-        user
         );
 }
 

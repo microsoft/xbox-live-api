@@ -41,6 +41,14 @@ struct stat_pending_state
     stat_data statPendingData;
 };
 
+struct stat_context
+{
+    stat_context() { };
+
+    string_t playerStateName;
+    xbox::services::player_state::player_state_value playerStateValue;
+};
+
 // stat value document event
 class svd_event
 {

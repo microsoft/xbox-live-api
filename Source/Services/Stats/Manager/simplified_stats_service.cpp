@@ -45,7 +45,7 @@ simplified_stats_service::update_stats_value_document(
     std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         _T("POST"),
-        utils::create_xboxlive_endpoint(_T("statswrite.dnet"), m_appConfig),
+        utils::create_xboxlive_endpoint(_T("statswrite"), m_appConfig),
         pathAndQuery,
         xbox_live_api::update_stats_value_document
         );
@@ -80,7 +80,7 @@ simplified_stats_service::get_stats_value_document()
     std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         _T("GET"),
-        utils::create_xboxlive_endpoint(_T("statsread.dnet"), m_appConfig),
+        utils::create_xboxlive_endpoint(_T("statsread"), m_appConfig),
         pathAndQuery,
         xbox_live_api::get_stats_value_document
         );

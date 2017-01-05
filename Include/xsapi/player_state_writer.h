@@ -1,14 +1,18 @@
 #pragma once
 
-namespace xbox { namespace services { namespace player_state_writer {
+namespace xbox { namespace services { namespace player_state {
 
-/// <summary> 
-/// Event type
-/// </summary>
-enum class player_state_event_type
+#if TV_API | XBOX_UWP
+    typedef  Windows::Xbox::System::User^ xbox_live_user_t;
+#else
+    typedef std::shared_ptr<xbox::services::system::xbox_live_user> xbox_live_user_t;
+#endif
+
+union player_state_value_union
 {
-    local_user_added,
-    local_user_removed
+    bool boolType;
+    double numberType;
+    int64_t integerType;
 };
 
 /// <summary> 
@@ -18,8 +22,10 @@ enum class player_state_event_type
 class player_state_value
 {
 public:
+    player_state_value();
+
     player_state_value(
-        _In_ const string_t& value
+        _In_ string_t value
         );
 
     player_state_value(
@@ -53,38 +59,10 @@ public:
     /// Gets the value as a boolean
     /// </summary>
     int64_t as_integer() const;
-};
 
-/// <summary> 
-/// Player state event
-/// </summary>
-class player_state_event
-{
-public:
-    /// <summary> 
-    /// Represents error code and error message
-    /// </summary>
-    /// <return>The returned xbox live result</return>
-    const xbox_live_result<void>& error_info() const;
-
-    /// <summary> 
-    /// The type of event the statistic is
-    /// </summary>
-    /// <return>The event type</return>
-    player_state_event_type event_type() const;
-
-    /// <summary> 
-    /// Local user the event is for
-    /// </summary>
-    /// <return>The returned user</return>
-    const xbox_live_user_t& local_user() const;
-
-    /// Internal function
-    player_state_event(
-        player_state_event_type eventType,
-        xbox_live_user_t user,
-        xbox_live_result<void> errorInfo
-        );
+private:
+    string_t m_stringData;
+    player_state_value_union m_nonStringData;
 };
 
 /// <summary> 
@@ -97,23 +75,21 @@ public:
     /// <summary> 
     /// Instantiates and returns an instance of the player state writer
     /// </summary>
-    static player_state_writer get_singleton_instance();
+    static std::shared_ptr<player_state_writer> get_singleton_instance();
 
     /// <summary> 
     /// Sets player state. Immediately applies.
     /// </summary>
     /// <return>A list of events that have happened since previous do_work</return>
-    xbox_live_result<void> set_player_state(_In_ xbox_live_user_t user, const std::unordered_map<string_t, player_state_value>& playerStateList);
-
-    /// <summary> 
-    /// Removes a player state object from the internal list
-    /// </summary>
-    xbox_live_result<void> clear_player_state(_In_ xbox_live_user_t user, _In_ const string_t& name);
+    xbox_live_result<void> set_player_state(_In_ xbox_live_user_t user, _In_ const std::unordered_map<string_t, player_state_value>& playerStateList);
 
     /// <summary> 
     /// Gets the player state list
     /// </summary>
     xbox_live_result<void> get_player_states(_In_ xbox_live_user_t user, _Inout_ std::unordered_map<string_t, player_state_value>& playerStateList);
+
+private:
+    std::unordered_map<string_t, std::unordered_map<string_t, player_state_value>> m_currentState;
 };
     
 }}}
