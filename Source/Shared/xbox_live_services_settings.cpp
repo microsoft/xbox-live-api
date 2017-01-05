@@ -16,7 +16,11 @@
 #endif
 #include "Logger/custom_output.h"
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
 
 std::shared_ptr<xbox_live_services_settings> xbox_live_services_settings::get_singleton_instance()
 {
@@ -138,4 +142,8 @@ void xbox_live_services_settings::set_log_level_from_diagnostics_trace_level()
     logger::get_logger()->set_log_level(logLevel);
 }
 
+#ifdef BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif

@@ -20,6 +20,9 @@
 #endif
 
 namespace xbox { namespace services {
+#if BEAM_API
+namespace beam {
+#endif
 
 class xbox_live_context_impl : public std::enable_shared_from_this < xbox_live_context_impl >
 {
@@ -218,5 +221,6 @@ private:
 };
 
 }}
-
-
+#if BEAM_API
+}
+#endif

@@ -10,7 +10,11 @@
 
 #pragma once
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#endif
 
 // Static class for global initialization and uninitalization.
 class initiator
@@ -21,4 +25,8 @@ public:
     ~initiator();
 };
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+#endif

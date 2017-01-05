@@ -11,7 +11,11 @@
 
 #include "service_call_logger_data.h"
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#endif
 
 //
 // service_call_logger_data
@@ -267,4 +271,8 @@ string_t service_call_logger_data::get_csv_header()
     return result.str();
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+#endif

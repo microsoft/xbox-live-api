@@ -9,8 +9,12 @@
 //*********************************************************
 #pragma once
 
-namespace xbox { namespace services { 
-    class xbox_live_context_impl;
+namespace xbox { namespace services {
+#if BEAM_API
+namespace beam {
+#endif
+
+	class xbox_live_context_impl;
 
 class service_call_logging_config
 {
@@ -53,3 +57,6 @@ private:
 };
 
 }}
+#if BEAM_API
+}
+#endif

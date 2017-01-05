@@ -16,8 +16,11 @@
 #if !TV_API && !UNIT_TEST_SERVICES && !XSAPI_SERVER && !XSAPI_U
 #include "Misc/notification_service.h"
 #endif
-
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#endif
 
 #if TV_API | XBOX_UWP
 
@@ -33,6 +36,23 @@ Windows::Xbox::System::User^
 xbox_live_context::user()
 {
     return m_xboxLiveContextImpl->user();
+}
+
+#elif BEAM_API
+
+xbox_live_context::xbox_live_context(
+	_In_ std::shared_ptr<beam::system::xbox_live_user> user
+)
+{
+	user->_User_impl()->set_user_pointer(user);
+	m_xboxLiveContextImpl = std::make_shared<xbox_live_context_impl>(user);
+	m_xboxLiveContextImpl->init();
+}
+
+std::shared_ptr<beam::system::xbox_live_user>
+xbox_live_context::user()
+{
+	return m_xboxLiveContextImpl->user();
 }
 
 #elif XSAPI_CPP
@@ -203,4 +223,8 @@ xbox_live_context::application_config()
     return m_xboxLiveContextImpl->application_config();
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+#endif

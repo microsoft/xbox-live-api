@@ -10,8 +10,11 @@
 #pragma once
 #include "system_internal.h"
 
-
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#endif
 
 class service_call_logger_protocol : public std::enable_shared_from_this<service_call_logger_protocol>
 {
@@ -37,4 +40,8 @@ private:
     void operator=(const service_call_logger_protocol&);
 };
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+#endif

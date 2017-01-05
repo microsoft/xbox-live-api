@@ -13,7 +13,11 @@
 #include "local_config.h"
 #include "xbox_system_factory.h"
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#endif
 
 
 static std::mutex g_appConfigSingletonLock;
@@ -203,4 +207,8 @@ xbox_live_app_config::title_telemetry_device_id() const
     return m_titleTelemetryDeviceId;
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+#endif

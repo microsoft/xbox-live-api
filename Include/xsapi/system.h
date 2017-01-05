@@ -9,6 +9,7 @@
 //*********************************************************
 #pragma once
 
+#include "pch.h" // TODO: is this the right way to pull in BEAM_API build def?
 #include "types.h"
 #include "errors.h"
 #include "xbox_live_context_settings.h"
@@ -22,7 +23,20 @@
 #include "pplx/pplxtasks.h"
 #endif
 
-namespace xbox { namespace services { 
+// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
+#ifdef XBOX_LIVE_NAMESPACE
+#undef XBOX_LIVE_NAMESPACE
+#endif
+#if BEAM_API
+#define XBOX_LIVE_NAMESPACE xbox::services::beam
+#else
+#define XBOX_LIVE_NAMESPACE xbox::services
+#endif
+
+namespace xbox { namespace services {
+#if BEAM_API
+namespace beam {
+#endif
     class http_call_impl;
     class xbox_live_context_impl;
 
@@ -33,13 +47,21 @@ namespace xbox { namespace services {
         class events_service;
     }
 
+#ifndef BEAM_API
     namespace multiplayer { namespace manager {
         class multiplayer_client_manager;
         class multiplayer_local_user;
     }}
-} }
+#endif
+}}
+#if BEAM_API
+}
+#endif
 
 namespace xbox { namespace services { 
+#ifdef BEAM_API
+	namespace beam {
+#endif
     /// <summary>
     /// Configuration information for Xbox Live service objects. 
     /// </summary>
@@ -82,7 +104,7 @@ public:
         );
 
     /// <summary>
-    /// Registers to recieve logging messages for levels that are enabled.  Event handlers will receive the level, category, and content of the message.
+    /// Registers to receive logging messages for levels that are enabled.  Event handlers will receive the level, category, and content of the message.
     /// </summary>
     /// <param name="handler">The event handler function to call.</param>
     /// <returns>
@@ -91,7 +113,7 @@ public:
     _XSAPIIMP function_context add_logging_handler(_In_ std::function<void(xbox_services_diagnostics_trace_level, const std::string&, const std::string&)> handler);
 
     /// <summary>
-    /// Unregisters from recieving logging messages.
+    /// Unregisters from receiving logging messages.
     /// </summary>
     /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
     _XSAPIIMP void remove_logging_handler(_In_ function_context context);
@@ -509,7 +531,7 @@ public:
     /// An interface for tracking the progress of the asynchronous call. The result is an object
     /// indicating the token and the digital signature of the entire request, including the token.
     /// </returns>
-    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
+    _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
     get_token_and_signature(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -528,7 +550,7 @@ public:
     /// An interface for tracking the progress of the asynchronous call. The result is an object
     /// indicating the token and the digital signature of the entire request, including the token.
     /// </returns>
-    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
+    _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
     get_token_and_signature(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -548,7 +570,7 @@ public:
     /// An interface for tracking the progress of the asynchronous call. The result is an object
     /// indicating the token and the digital signature of the entire request, including the token.
     /// </returns>
-    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
+    _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
     get_token_and_signature_array(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -705,14 +727,17 @@ public:
     /// Internal function
     /// </summary>
     string_service(
-        _In_ std::shared_ptr<xbox::services::user_context> userContext,
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> userContext,
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> xboxLiveContextSettings,
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_app_config> appConfig
         );
 
 private:
-    std::shared_ptr<xbox::services::user_context> m_userContext;
-    std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
-    std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
+    std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> m_userContext;
+    std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> m_xboxLiveContextSettings;
+    std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_app_config> m_appConfig;
 };
 }}}
+#ifdef BEAM_API
+}
+#endif

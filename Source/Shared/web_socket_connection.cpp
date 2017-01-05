@@ -16,9 +16,17 @@
 #include "utils.h"
 
 using namespace web::websockets::client;
+#if BEAM_API
+using namespace xbox::services::beam::system;
+#else
 using namespace xbox::services::system;
+#endif
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#endif
 
 web_socket_connection::web_socket_connection(
     _In_ std::shared_ptr<user_context> userContext,
@@ -262,4 +270,8 @@ web_socket_connection::convert_web_socket_connection_state_to_string(_In_ web_so
     }
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+#endif

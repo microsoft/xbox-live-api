@@ -12,7 +12,11 @@
 
 #include <cpprest/json.h>
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#endif
 
 class service_call_logger_data
 {
@@ -90,4 +94,8 @@ private:
     static const uint32_t s_invalidId = (uint32_t)-1;
 };
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+#endif

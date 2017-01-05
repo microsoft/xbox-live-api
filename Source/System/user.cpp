@@ -16,7 +16,11 @@ using namespace concurrency;
 using namespace std;
 using namespace pplx;
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
 
 sign_out_completed_event_args::sign_out_completed_event_args(
     _In_ std::weak_ptr<system::xbox_live_user> weakUser,
@@ -196,4 +200,8 @@ xbox_live_user::remove_sign_out_completed_handler(_In_ function_context context)
 }
 
 
+#ifdef BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif

@@ -21,14 +21,30 @@
 
 // Forward
 namespace xbox {
-    namespace services {
-        namespace system {
-            class xbox_live_services_settings;
-        }
-    }
+	namespace services {
+#ifdef BEAM_API
+		namespace beam {
+#endif
+		namespace system {
+			class xbox_live_services_settings;
+		}
+#ifdef BEAM_API
+		}
+#endif
+	}
 }
 
+namespace test {
+	class testClass;
+}
+#ifdef BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#endif
+
+
+
 
 
 #if !TV_API && !XSAPI_SERVER
@@ -56,10 +72,15 @@ struct xsapi_singleton
     std::unordered_map<string_t, uint32_t> s_rtaActiveManagersByUser;
 
     std::mutex s_singletonLock;
-    std::shared_ptr<xbox::services::system::xbox_live_services_settings> s_xboxServiceSettingsSingleton;
-    std::shared_ptr<xbox::services::local_config> s_localConfigSingleton;
+#if BEAM_API
+	std::shared_ptr<xbox::services::beam::system::xbox_live_services_settings> s_xboxServiceSettingsSingleton;
+	std::shared_ptr<xbox::services::beam::local_config> s_localConfigSingleton;
+#else
+	std::shared_ptr<xbox::services::system::xbox_live_services_settings> s_xboxServiceSettingsSingleton;
+	std::shared_ptr<xbox::services::local_config> s_localConfigSingleton;
+#endif
 
-#if !TV_API && !XSAPI_SERVER
+#if !TV_API && !XSAPI_SERVER && !BEAM_API
     std::shared_ptr<xbox::services::presence::presence_writer> s_presenceWriterSingleton;
 #endif
 };
@@ -483,8 +504,11 @@ public:
         _In_ const string_t& string,
         _In_ string_t::value_type seperator
     );
-
-    static xbox::services::xbox_live_error_code convert_exception_to_xbox_live_error_code();
+#if BEAM_API
+	static xbox::services::beam::xbox_live_error_code convert_exception_to_xbox_live_error_code();
+#else
+	static xbox::services::xbox_live_error_code convert_exception_to_xbox_live_error_code();
+#endif
 
 #ifdef _WIN32
     static void convert_unix_time_to_filetime(
@@ -528,10 +552,17 @@ public:
 
     static void set_locales(_In_ const string_t& locale);
     template<typename T>
+#if BEAM_API
+	static xbox::services::beam::xbox_live_result<T> generate_xbox_live_result(
+		_Inout_ xbox::services::beam::xbox_live_result<T> deserializationResult,
+		_In_ const std::shared_ptr<xbox::services::beam::http_call_response>& response
+	)
+#else
     static xbox::services::xbox_live_result<T> generate_xbox_live_result(
         _Inout_ xbox::services::xbox_live_result<T> deserializationResult,
         _In_ const std::shared_ptr<xbox::services::http_call_response>& response
     )
+#endif
     {
         if (deserializationResult.err())
         {
@@ -549,9 +580,15 @@ public:
     }
 
     template<typename T>
+#if BEAM_API
+	static pplx::task <xbox::services::beam::xbox_live_result<T>> create_exception_free_task(
+		_In_ const pplx::task <xbox::services::beam::xbox_live_result<T>>& t
+	)
+#else
     static pplx::task <xbox::services::xbox_live_result<T>> create_exception_free_task(
         _In_ const pplx::task <xbox::services::xbox_live_result<T>>& t
     )
+#endif
     {
         return t.then([](pplx::task <xbox::services::xbox_live_result<T>> result)
         {
@@ -725,4 +762,8 @@ private:
 
 };
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+#endif

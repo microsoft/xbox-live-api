@@ -12,7 +12,22 @@
 #include <stddef.h>
 #include "xsapi/system.h"
 
-namespace xbox { namespace services { namespace system {
+// TODO: double check that this is correct
+#ifdef BEAM_API
+#ifndef NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#define NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN namespace xbox { namespace services { namespace beam { nanespace system {
+#endif
+#else
+#ifndef NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#define NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN namespace xbox { namespace services { namespace system {
+#endif
+#endif
+
+#ifdef BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
 
 class xsapi_memory
 {
@@ -56,6 +71,10 @@ private:
 
 }}}
 
+#ifdef BEAM_API
+}
+#endif
+
 template<typename T>
 class xsapi_stl_allocator
 {
@@ -79,8 +98,12 @@ public:
     typedef T           value_type;
 
     pointer allocate(size_type n, const void * = 0)
-    {
-        pointer p = reinterpret_cast<pointer>(xbox::services::system::xsapi_memory::mem_alloc(n * sizeof(T)));
+	{
+#ifdef BEAM_API
+		pointer p = reinterpret_cast<pointer>(xbox::services::beam::system::xsapi_memory::mem_alloc(n * sizeof(T)));
+#else
+		pointer p = reinterpret_cast<pointer>(xbox::services::system::xsapi_memory::mem_alloc(n * sizeof(T)));
+#endif
         if (p == NULL)
         {
             throw std::bad_alloc();
@@ -90,12 +113,20 @@ public:
 
     void deallocate(_In_opt_ void* p, size_type)
     {
+#ifdef BEAM_API
+		xbox::services::beam::system::xsapi_memory::mem_free(p);
+#else
         xbox::services::system::xsapi_memory::mem_free(p);
+#endif
     }
 
     char* _Charalloc(size_type n)
-    {
-        char* p = reinterpret_cast<char*>(xbox::services::system::xsapi_memory::mem_alloc(n));
+	{
+#ifdef BEAM_API
+		char* p = reinterpret_cast<char*>(xbox::services::beam::system::xsapi_memory::mem_alloc(n));
+#else
+		char* p = reinterpret_cast<char*>(xbox::services::system::xsapi_memory::mem_alloc(n));
+#endif
         if (p == NULL)
         {
             throw std::bad_alloc();

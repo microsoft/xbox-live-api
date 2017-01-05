@@ -11,7 +11,11 @@
 #include "Logger/Log.h"
 #include <iomanip>
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#endif
 
 log_output::log_output(log_output_level_setting setting, log_level level):
     m_levelSetting(setting),
@@ -56,4 +60,8 @@ log_output::format_log(_In_ const log_entry& entry)
 
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+#endif

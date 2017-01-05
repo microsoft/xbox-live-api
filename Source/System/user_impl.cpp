@@ -21,18 +21,33 @@
 using namespace std;
 using namespace pplx;
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
+
+// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
+#ifdef XBOX_LIVE_NAMESPACE
+#undef XBOX_LIVE_NAMESPACE
+#endif
+#if BEAM_API
+#define XBOX_LIVE_NAMESPACE xbox::services::beam
+#else
+#define XBOX_LIVE_NAMESPACE xbox::services
+#endif
 
 std::unordered_map<function_context, std::function<void(const sign_out_completed_event_args&)>> user_impl::s_signOutCompletedHandlers;
 std::unordered_map<function_context, std::function<void(const string_t&)>> user_impl::s_signInCompletedHandlers;
 function_context user_impl::s_signOutCompletedHandlerIndexer = 0;
 function_context user_impl::s_signInCompletedHandlerIndexer = 0;
-xbox::services::system::xbox_live_mutex user_impl::s_trackingUsersLock;
+
+XBOX_LIVE_NAMESPACE::xbox_live_mutex user_impl::s_trackingUsersLock;
 
 std::shared_ptr<user_impl>
 user_factory::create_user_impl(user_creation_context userCreationContext)
 {
-    return xbox::services::system::xbox_system_factory::get_factory()->create_user_impl(userCreationContext);
+	return XBOX_LIVE_NAMESPACE::xbox_system_factory::get_factory()->create_user_impl(userCreationContext);
 }
 
 user_impl::user_impl(
@@ -60,7 +75,7 @@ user_impl::user_impl(
 #endif
 }
 
-pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>>
 user_impl::get_token_and_signature(
     _In_ const string_t& httpMethod,
     _In_ const string_t& url,
@@ -78,7 +93,7 @@ user_impl::get_token_and_signature(
         );
 }
 
-pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
 user_impl::get_token_and_signature(
     _In_ const string_t& httpMethod,
     _In_ const string_t& url,
@@ -99,7 +114,7 @@ user_impl::get_token_and_signature(
         );
 }
 
-pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
 user_impl::get_token_and_signature_array(
     _In_ const string_t& httpMethod,
     _In_ const string_t& url,
@@ -275,4 +290,8 @@ const string_t& user_impl::title_telemetry_session_id()
     return m_titleTelemetrySessionId;
 }
 
+#ifdef BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif

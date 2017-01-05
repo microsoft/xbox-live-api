@@ -15,6 +15,9 @@
 #endif
 
 namespace xbox { namespace services {
+#if BEAM_API
+namespace beam {
+#endif
 
     namespace system {
         class user_impl_idp;
@@ -317,5 +320,7 @@ private:
 #endif
 };
 
-
 }}
+#if BEAM_API
+}
+#endif

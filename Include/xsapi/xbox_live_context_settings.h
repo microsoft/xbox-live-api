@@ -8,13 +8,27 @@
 //
 //*********************************************************
 #pragma once
+#include "pch.h" // TODO: is this the right way to pull in BEAM_API build def?
 #include <chrono>
 #include <functional>
 #include <mutex>
 #include <unordered_map>
 #include "xsapi/xbox_service_call_routed_event_args.h"
 
-namespace xbox { namespace services { 
+// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
+#ifdef XBOX_LIVE_NAMESPACE
+#undef XBOX_LIVE_NAMESPACE
+#endif
+#if BEAM_API
+#define XBOX_LIVE_NAMESPACE xbox::services::beam
+#else
+#define XBOX_LIVE_NAMESPACE xbox::services
+#endif
+
+namespace xbox { namespace services {
+#if BEAM_API
+namespace beam {
+#endif
 
 #define DEFAULT_HTTP_TIMEOUT_SECONDS (30)
 #if UNIT_TEST_SERVICES
@@ -106,7 +120,7 @@ public:
     /// <returns>
     /// A function_context object that can be used to unregister the event handler.
     /// </returns>
-    _XSAPIIMP function_context add_service_call_routed_handler(_In_ std::function<void(const xbox::services::xbox_service_call_routed_event_args&)> handler);
+    _XSAPIIMP function_context add_service_call_routed_handler(_In_ std::function<void(const XBOX_LIVE_NAMESPACE::xbox_service_call_routed_event_args&)> handler);
 
     /// <summary>
     /// Unregisters from all service call notifications.
@@ -303,7 +317,7 @@ public:
     static cert_context _s_certContext;
 #endif
 
-    void _Raise_service_call_routed_event(_In_ const xbox::services::xbox_service_call_routed_event_args& result);
+    void _Raise_service_call_routed_event(_In_ const XBOX_LIVE_NAMESPACE::xbox_service_call_routed_event_args& result);
     bool _Is_disable_asserts_for_xbox_live_throttling_in_dev_sandboxes();
     bool _Is_disable_asserts_for_max_number_of_websockets_activated();
 
@@ -316,7 +330,7 @@ private:
     std::chrono::seconds m_httpTimeoutWindow;
 
     std::mutex m_writeLock;
-    std::unordered_map<function_context, std::function<void(xbox::services::xbox_service_call_routed_event_args)>> m_serviceCallRoutedHandlers;
+    std::unordered_map<function_context, std::function<void(XBOX_LIVE_NAMESPACE::xbox_service_call_routed_event_args)>> m_serviceCallRoutedHandlers;
     function_context m_serviceCallRoutedHandlersCounter;
     
     std::chrono::seconds m_websocketTimeoutWindow;
@@ -327,3 +341,6 @@ private:
 
 
 }}
+#if BEAM_API
+}
+#endif

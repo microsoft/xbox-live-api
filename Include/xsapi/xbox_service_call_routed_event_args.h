@@ -8,9 +8,13 @@
 //
 //*********************************************************
 #pragma once
+#include "pch.h" // TODO: is this the right way to pull in BEAM_API build def?
 #include "xsapi/http_call_request_message.h"
 
 namespace xbox { namespace services {
+#if BEAM_API
+namespace beam {
+#endif
 
 /// <summary>
 /// Contains information about a service call.
@@ -139,3 +143,6 @@ private:
 
 
 }}
+#if BEAM_API
+}
+#endif

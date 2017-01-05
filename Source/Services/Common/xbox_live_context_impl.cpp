@@ -17,10 +17,16 @@
 #if !TV_API && !UNIT_TEST_SERVICES && !XSAPI_SERVER
 #include "notification_service.h"
 #endif
+#if BEAM_API
 #include "presence_internal.h"
 #include "real_time_activity_internal.h"
+#endif
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#endif
 
 #if TV_API | XBOX_UWP
 
@@ -394,4 +400,8 @@ xbox_live_context_impl::application_config()
     return m_appConfig;
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+#endif

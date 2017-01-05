@@ -26,9 +26,15 @@
 #include "http_call_response.h"
 #include "xsapi/presence.h"
 #include "xsapi/system.h"
+#if !BEAM_API
 #include "presence_internal.h"
+#endif
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#endif
 
 #define MAKE_HTTP_HRESULT(code) MAKE_HRESULT(1, 0x019, code)
 #if UNIT_TEST_SERVICES
@@ -42,7 +48,7 @@ static std::mutex g_xsapiSingletonLock;
 static std::shared_ptr<xsapi_singleton> g_xsapiSingleton;
 
 xsapi_singleton::xsapi_singleton() 
-#if !TV_API && !XSAPI_SERVER
+#if !TV_API && !XSAPI_SERVER && !BEAM_API
     : s_presenceWriterSingleton(std::shared_ptr<xbox::services::presence::presence_writer>(new xbox::services::presence::presence_writer()))
 #endif
 {
@@ -1553,4 +1559,8 @@ utils::read_test_response_file(_In_ const string_t& filePath)
 }
 #endif
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+#endif

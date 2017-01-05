@@ -11,9 +11,14 @@
 #include "custom_output.h"
 #include "xsapi/system.h"
 
-using namespace xbox::services::system;
 
+#if BEAM_API
+using namespace xbox::services::beam::system;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
+#else
+using namespace xbox::services::system;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#endif
 
 void custom_output::add_log(_In_ const log_entry& entry)
 {
@@ -30,4 +35,8 @@ void custom_output::add_log(_In_ const log_entry& entry)
     xbox_live_services_settings::get_singleton_instance()->_Raise_logging_event(logLevel, entry.category(), entry.msg_stream().str());
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+#endif

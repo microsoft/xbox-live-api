@@ -12,7 +12,21 @@
 #include "token_manager.h"
 #include "xsapi/system.h"
 
+#ifdef BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
+
+// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
+#ifdef XBOX_LIVE_NAMESPACE
+#undef XBOX_LIVE_NAMESPACE
+#endif
+#if BEAM_API
+#define XBOX_LIVE_NAMESPACE xbox::services::beam
+#else
+#define XBOX_LIVE_NAMESPACE xbox::services
+#endif
 
 class xtitle_service;
 class auth_manager;
@@ -27,12 +41,12 @@ public:
 
     static std::shared_ptr<auth_manager> get_auth_manager_instance();
     void set_rps_ticket(const string_t& rpsTicket);
-    pplx::task<xbox::services::xbox_live_result<void>> initialize_default_nsal();
+    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<void>> initialize_default_nsal();
     pplx::task<xbox_live_result<void>> initialize_title_nsal(
         _In_ const string_t& titleId
         );
 
-    pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
+    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>>
     internal_get_token_and_signature(
         _In_ string_t httpMethod,
         _In_ const string_t& url,
@@ -62,4 +76,8 @@ private:
     static std::shared_ptr<auth_manager> s_authManager;
 };
 
+#ifdef BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif

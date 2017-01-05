@@ -15,7 +15,21 @@
 #include "auth_config.h"
 #include "auth/auth_manager.h"
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
+
+// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
+#ifdef XBOX_LIVE_NAMESPACE
+#undef XBOX_LIVE_NAMESPACE
+#endif
+#if BEAM_API
+#define XBOX_LIVE_NAMESPACE xbox::services::beam
+#else
+#define XBOX_LIVE_NAMESPACE xbox::services
+#endif
 
 class user_impl : public std::enable_shared_from_this<user_impl>
 {
@@ -30,9 +44,9 @@ public:
 #endif
     
 #if XSAPI_U
-    virtual pplx::task<xbox::services::xbox_live_result<void>> signout() = 0;
+    virtual pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<void>> signout() = 0;
 #endif
-    virtual pplx::task<xbox::services::xbox_live_result<sign_in_result>> switch_account() { return pplx::task_from_exception<xbox::services::xbox_live_result<sign_in_result>>(std::exception()); }
+    virtual pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<sign_in_result>> switch_account() { return pplx::task_from_exception<XBOX_LIVE_NAMESPACE::xbox_live_result<sign_in_result>>(std::exception()); }
 
     virtual pplx::task<xbox_live_result<void>> sign_in_impl(
         _In_ const string_t& userDelegationTicket,
@@ -41,7 +55,7 @@ public:
     { 
         UNREFERENCED_PARAMETER(userDelegationTicket);
         UNREFERENCED_PARAMETER(forceRefresh);
-        return pplx::task_from_exception<xbox::services::xbox_live_result<void>>(std::exception()); 
+        return pplx::task_from_exception<XBOX_LIVE_NAMESPACE::xbox_live_result<void>>(std::exception());
     }
 
     // IUser
@@ -57,14 +71,14 @@ public:
     void _Set_xbox_user_id(const string_t& xboxUserId) { m_xboxUserId = xboxUserId; }
 #endif
 
-    pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
+    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
     get_token_and_signature(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
         _In_ const string_t& headers
         );
 
-    pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
+    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
     get_token_and_signature(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -72,7 +86,7 @@ public:
         _In_ const string_t& requestBodyString
         );
 
-    pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
+    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
     get_token_and_signature_array(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -85,7 +99,7 @@ public:
     void set_title_telemetry_session_id(_In_ const string_t& sessionId);
     const string_t& title_telemetry_session_id();
 
-    virtual pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
+    virtual pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
     internal_get_token_and_signature(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -131,30 +145,30 @@ protected:
     static std::unordered_map<function_context, std::function<void(const sign_out_completed_event_args&)>> s_signOutCompletedHandlers;
     static function_context s_signInCompletedHandlerIndexer;
     static function_context s_signOutCompletedHandlerIndexer;
-    static xbox::services::system::xbox_live_mutex s_trackingUsersLock;
-    xbox::services::system::xbox_live_mutex m_lock;
+    static XBOX_LIVE_NAMESPACE::system::xbox_live_mutex s_trackingUsersLock;
+	XBOX_LIVE_NAMESPACE::system::xbox_live_mutex m_lock;
 };
 
 #if UWP_API
 class user_impl_idp : public user_impl
 {
 public:
-    pplx::task<xbox::services::xbox_live_result<sign_in_result>> sign_in_impl(
+    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<sign_in_result>> sign_in_impl(
         _In_ bool showUI,
         _In_ bool forceRefresh
         ) override;
 
-    pplx::task<xbox::services::xbox_live_result<sign_in_result>> switch_account() override;
+    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<sign_in_result>> switch_account() override;
 
     // Not supported for user_impl_idp
-    pplx::task<xbox::services::xbox_live_result<void>> sign_in_impl(
+    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<void>> sign_in_impl(
         _In_ const string_t& userDelegationTicket,
         _In_ bool forceRefresh
         ) override;
 
     user_impl_idp(Windows::System::User^ systemUser);
 
-    pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
+    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>>
     internal_get_token_and_signature(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -181,7 +195,7 @@ private:
     pplx::task<void> initialize_provider();
 
     // sync version of get internal_get_token_and_signature
-    xbox::services::xbox_live_result<token_and_signature_result>
+	XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>
     internal_get_token_and_signature_helper(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -272,4 +286,8 @@ public:
 };
 #endif
 
+#ifdef BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif

@@ -12,7 +12,11 @@
 #include "shared_macros.h"
 #include "xsapi/system.h"
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
 
 token_and_signature_result::token_and_signature_result(
     _In_ string_t token,
@@ -127,4 +131,8 @@ token_and_signature_result::token_request_result() const
 #endif
 
 
+#ifdef BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif

@@ -25,7 +25,7 @@
 #endif
 
 #ifndef UWP_API
-#define UWP_API (WINAPI_FAMILY == WINAPI_FAMILY_APP && _WIN32_WINNT >= _WIN32_WINNT_WIN10 )
+#define UWP_API (WINAPI_FAMILY == WINAPI_FAMILY_APP && _WIN32_WINNT >= _WIN32_WINNT_WIN10)
 #endif
 
 #endif //#ifdef _WIN32
@@ -105,11 +105,17 @@ typedef std::chrono::steady_clock chrono_clock_t;
 #endif
 
 // Forward declarations
-namespace xbox { namespace services { 
+namespace xbox { namespace services {
+#if BEAM_API
+namespace beam {
+#endif
     class user_context;
     class xbox_live_context_settings;
     class local_config;
 }}
+#if BEAM_API
+}
+#endif
 
 #if !TV_API
 // SSL client certificate context

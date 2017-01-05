@@ -20,7 +20,11 @@ namespace xbox {
     /// <summary>
     /// Contains classes, enumerations, and namespaces used to indicate error conditions for Xbox Live service components.
     /// </summary>
-    namespace services {
+	namespace services {
+
+#if BEAM_API
+	namespace beam {
+#endif
 
         /// <summary>
         /// Enumeration values that define the Xbox Live API error conditions.
@@ -1215,6 +1219,10 @@ namespace xbox {
     }
 };
 
+#if BEAM_API
+}
+#endif
+
 #if XSAPI_U
 namespace xbox {
     namespace services {
@@ -1231,26 +1239,39 @@ namespace xbox {
 }
 #endif
 
+// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
+#ifdef XBOX_LIVE_NAMESPACE
+#undef XBOX_LIVE_NAMESPACE
+#endif
+#if BEAM_API
+#define XBOX_LIVE_NAMESPACE xbox::services::beam
+#else
+#define XBOX_LIVE_NAMESPACE xbox::services
+#endif
+
 namespace std
 {
-    inline std::error_code make_error_code(xbox::services::xbox_live_error_code e)
+    inline std::error_code make_error_code(XBOX_LIVE_NAMESPACE::xbox_live_error_code e)
     {
-        return std::error_code(static_cast<int>(e), xbox::services::xbox_services_error_code_category());
+        return std::error_code(static_cast<int>(e), XBOX_LIVE_NAMESPACE::xbox_services_error_code_category());
     }
 
-    inline std::error_condition make_error_condition(xbox::services::xbox_live_error_condition e)
+    inline std::error_condition make_error_condition(XBOX_LIVE_NAMESPACE::xbox_live_error_condition e)
     {
-        return std::error_condition(static_cast<int>(e), xbox::services::xbox_services_error_condition_category());
+        return std::error_condition(static_cast<int>(e), XBOX_LIVE_NAMESPACE::xbox_services_error_condition_category());
     }
 
     template <>
-    struct is_error_code_enum<xbox::services::xbox_live_error_code> : public true_type{};
+    struct is_error_code_enum<XBOX_LIVE_NAMESPACE::xbox_live_error_code> : public true_type{};
 
     template <>
-    struct is_error_condition_enum<xbox::services::xbox_live_error_condition> : public true_type{};
+    struct is_error_condition_enum<XBOX_LIVE_NAMESPACE::xbox_live_error_condition> : public true_type{};
 }
 
 namespace xbox { namespace services {
+#if BEAM_API
+namespace beam {
+#endif
 
 template<typename T>
 class xbox_live_result
@@ -1520,4 +1541,7 @@ xbox_live_result<T>& xbox_live_result<T>::operator=(_In_ xbox_live_result&& othe
 }
 
 }}
+#if BEAM_API
+}
+#endif
 

@@ -9,7 +9,20 @@
 //*********************************************************
 #pragma once
 
+// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
+#ifdef XBOX_LIVE_NAMESPACE
+#undef XBOX_LIVE_NAMESPACE
+#endif
+#if BEAM_API
+#define XBOX_LIVE_NAMESPACE xbox::services::beam
+#else
+#define XBOX_LIVE_NAMESPACE xbox::services
+#endif
+
 namespace xbox { namespace services {
+#if BEAM_API
+namespace beam {
+#endif
 
 /// <summary>
 /// Enumerates the type of structured data contained in the http response body.
@@ -238,7 +251,7 @@ public:
     /// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.
     /// </summary>
     virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
-        _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
+        _In_ const std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
         _In_ bool allUsersAuthRequired = false
         ) = 0;
@@ -248,7 +261,7 @@ public:
         ) = 0;
 
     virtual pplx::task<std::shared_ptr<http_call_response>> _Internal_get_response_with_auth(
-        _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
+        _In_ const std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
         _In_ bool allUsersAuthRequired = false
         ) = 0;
@@ -359,4 +372,6 @@ _XSAPIIMP std::shared_ptr<http_call> create_xbox_live_http_call(
 
 } }
 
-
+#if BEAM_API
+}
+#endif

@@ -20,7 +20,22 @@
 
 #include "xsapi/http_call.h"
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#endif
+
+// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
+#ifdef XBOX_LIVE_NAMESPACE
+#undef XBOX_LIVE_NAMESPACE
+#endif
+#if BEAM_API
+#define XBOX_LIVE_NAMESPACE xbox::services::beam
+#else
+#define XBOX_LIVE_NAMESPACE xbox::services
+#endif
+
 
 enum class xbox_live_api
 {
@@ -219,7 +234,7 @@ public:
         );
 
 private:
-    xbox::services::system::xbox_live_mutex m_lock;
+	XBOX_LIVE_NAMESPACE::system::xbox_live_mutex m_lock;
     std::unordered_map<uint32_t, http_retry_after_api_state> m_apiStateMap;
 };
 
@@ -254,7 +269,7 @@ public:
         ) override;
 
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
-        _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
+        _In_ const std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired = false
         ) override;
@@ -340,7 +355,7 @@ private:
         _In_ const web::http::http_response& response
         );
 
-    static xbox::services::xbox_live_error_code get_xbox_live_error_code_from_http_status(
+    static XBOX_LIVE_NAMESPACE::xbox_live_error_code get_xbox_live_error_code_from_http_status(
         _In_ const web::http::status_code& statusCode
         );
 
@@ -377,4 +392,8 @@ private:
         );
 };
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+#endif

@@ -20,7 +20,11 @@ typedef ULONG64 TRACEHANDLE, *PTRACEHANDLE;
 #include "etw_output.h"
 #include "ERA_ETW.h"
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#endif
 
 etw_output::etw_output():
     log_output(log_output_level_setting::use_own_setting, log_level::debug)
@@ -67,4 +71,8 @@ void etw_output::add_log(_In_ const log_entry& entry)
 
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+#endif
