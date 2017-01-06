@@ -18,6 +18,9 @@ Casablanca*/Build_iOS/ios-cmake/
 #nuget packages
 External/Packages/*
 
+#mobile
+External/sdk.mobile
+
 # Xcode
 
 xcuserdata

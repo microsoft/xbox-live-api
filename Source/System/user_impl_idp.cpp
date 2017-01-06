@@ -18,6 +18,8 @@
 #include "XboxLiveContextSettings_WinRT.h"
 #endif
 #include "Event_WinRT.h"
+#include "xsapi\presence.h"
+#include "presence_internal.h"
 
 using namespace pplx;
 using namespace Platform;
@@ -41,9 +43,10 @@ Windows::System::UserWatcher^ user_impl_idp::s_userWatcher = nullptr;
 pplx::task<xbox_live_result<sign_in_result>>
 user_impl_idp::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
 {
+    UNREFERENCED_PARAMETER(forceRefresh);
 
     std::weak_ptr<user_impl_idp> thisWeakPtr = std::dynamic_pointer_cast<user_impl_idp>(shared_from_this());
-
+    
     //Initiate user watcher
     if (is_multi_user_application())
     {
@@ -57,7 +60,7 @@ user_impl_idp::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
     }
 
     auto task = initialize_provider()
-    .then([thisWeakPtr, showUI, forceRefresh](void)
+    .then([thisWeakPtr, showUI](void)
     {
         std::shared_ptr<user_impl_idp> pThis(thisWeakPtr.lock());
         if (pThis == nullptr)
@@ -71,7 +74,7 @@ user_impl_idp::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
             string_t(),
             std::vector<unsigned char>(),
             showUI,
-            forceRefresh
+            false
             );
 
         if (result.err())
@@ -81,8 +84,56 @@ user_impl_idp::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
         else
         {
             const auto& payload = result.payload();
+
             if (!payload.xbox_user_id().empty())
             {
+                // Hit presence service to validate the token.
+                if (!payload.token().empty())
+                {
+                    const string_t& xboxUserId = payload.xbox_user_id();
+                    string_t pathAndQuery = presence_service_impl::set_presence_sub_path(xboxUserId);
+
+                    std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
+                        std::make_shared<xbox_live_context_settings>(),
+                        _T("POST"),
+                        utils::create_xboxlive_endpoint(_T("userpresence"), xbox_live_app_config::get_app_config_singleton()),
+                        pathAndQuery,
+                        xbox_live_api::set_presence_helper
+                    );
+
+                    presence_title_request request(true,presence_data());
+
+                    httpCall->set_retry_allowed(false);
+                    httpCall->set_request_body(request.serialize().serialize());
+                    httpCall->set_xbox_contract_version_header_value(_T("3"));
+                    httpCall->set_custom_header(AUTH_HEADER, payload.token());
+                    if (!payload.signature().empty())
+                    {
+                        httpCall->set_custom_header(SIG_HEADER, payload.signature());
+                    }
+
+                    auto response = httpCall->get_response(http_call_response_body_type::json_body).get();
+
+                    // If gettig 401, try to refresh token. If we succeeded or failed or any other reason, ignore the result and move on.
+                    if (response->err_code().value() == (int)xbox_live_error_code::http_status_401_unauthorized)
+                    {
+                        auto refreshResult = pThis->internal_get_token_and_signature_helper(
+                            _T("GET"),
+                            pThis->m_authConfig->xbox_live_endpoint(),
+                            string_t(),
+                            std::vector<unsigned char>(),
+                            showUI,
+                            true
+                        );
+
+                        // if refresh fails, return the error.
+                        if (refreshResult.err())
+                        {
+                            return xbox_live_result<sign_in_result>(refreshResult.err(), refreshResult.err_message());
+                        }
+                    }
+                }
+
                 pThis->user_signed_in(payload.xbox_user_id(), payload.gamertag(), payload.age_group(), payload.privileges(), payload.web_account_id());
 
                 return xbox_live_result<sign_in_result>(sign_in_status::success);
@@ -244,14 +295,21 @@ user_impl_idp::internal_get_token_and_signature(
             forceRefresh
             );
 
-        // If it's not asking for xboxlive.com's token, we threat UserInteractionRequired as an error
-        if (!result.err()
-            && url != pThis->get_auth_config()->xbox_live_endpoint() 
-            && result.payload().token_request_result() != nullptr
+        // Handle UserInteractionRequired
+        if (result.payload().token_request_result() != nullptr
             && result.payload().token_request_result()->ResponseStatus == WebTokenRequestStatus::UserInteractionRequired)
         {
-            std::string errorMsg = "Failed to get token for endpoint: " + utility::conversions::to_utf8string(url);
-            return xbox_live_result<token_and_signature_result>(xbox_live_error_code::runtime_error, errorMsg);
+            // Failed to get 'xboxlive.com' token, sign out if already sign in (SPOP or user banned).
+            // But for sign in path, it's expected.
+            if (url == pThis->get_auth_config()->xbox_live_endpoint() && pThis->is_signed_in())
+            {
+                pThis->user_signed_out();
+            }
+            else if (url != pThis->get_auth_config()->xbox_live_endpoint()) // If it's not asking for xboxlive.com's token, we treat UserInteractionRequired as an error
+            {
+                std::string errorMsg = "Failed to get token for endpoint: " + utility::conversions::to_utf8string(url);
+                return xbox_live_result<token_and_signature_result>(xbox_live_error_code::runtime_error, errorMsg);
+            }
         }
 
         return result;
@@ -464,6 +522,7 @@ user_impl_idp::convert_web_token_request_result(
     else
     {
         LOGS_ERROR << "Get token from IDP failed with ResponseStatus:" << (int)tokenResult->ResponseStatus;
+
         return xbox_live_result<token_and_signature_result>(tokenResult);
     }
 

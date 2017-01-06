@@ -65,6 +65,35 @@ class user_factory;
 class xbox_live_server_impl;
 class auth_config;
 
+class xbox_live_wns_event_args
+{
+public:
+    /// <summary>
+    /// Returns the xbox user id for the WNS event
+    /// </summary>
+    const string_t& xbox_user_id() const { return m_xbox_user_id; }
+
+    /// <summary>
+    /// Returns the notification type
+    /// </summary>
+    const string_t& notification_type() const { return m_notification_type; }
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    xbox_live_wns_event_args(
+        _In_ string_t xbox_user_id,
+        _In_ string_t notification_type
+    ) :
+    m_xbox_user_id(std::move(xbox_user_id)),
+    m_notification_type(std::move(notification_type))
+    {}
+
+private:
+    string_t m_xbox_user_id;
+    string_t m_notification_type;
+};
+
 class xbox_live_services_settings : public std::enable_shared_from_this<xbox_live_services_settings>
 {
 public:
@@ -120,9 +149,29 @@ public:
     _XSAPIIMP void set_diagnostics_trace_level(_In_ xbox_services_diagnostics_trace_level value);
 
     /// <summary>
+    /// Registers to recieve Windows Push Nofication Service(WNS) events.  Event handlers will receive the xbox user id and notification type.
+    /// </summary>
+    /// <param name="handler">The event handler function to call.</param>
+    /// <returns>
+    /// A function_context object that can be used to unregister the event handler.
+    /// </returns>
+    _XSAPIIMP function_context add_wns_handler(_In_ const std::function<void(const xbox_live_wns_event_args&)>& handler);
+
+    /// <summary>
+    /// Unregisters from recieving Windows Push Nofication Service(WNS) events.
+    /// </summary>
+    /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
+    _XSAPIIMP void remove_wns_handler(_In_ function_context context);
+
+    /// <summary>
     /// Internal function
     /// </summary>
     void _Raise_logging_event(_In_ xbox_services_diagnostics_trace_level level, _In_ const std::string& category, _In_ const std::string& message);
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    void _Raise_wns_event(_In_ const string_t& xbox_user_id, _In_ const string_t& nofitication_type);
 
     /// <summary>
     /// Internal function
@@ -141,6 +190,10 @@ private:
     std::mutex m_loggingWriteLock;
     std::unordered_map<function_context, std::function<void(xbox_services_diagnostics_trace_level, const std::string&, const std::string&)>> m_loggingHandlers;
     function_context m_loggingHandlersCounter;
+
+    std::mutex m_wnsEventLock;
+    std::unordered_map<function_context, std::function<void(const xbox_live_wns_event_args&)>> m_wnsHandlers;
+    function_context m_wnsHandlersCounter;
 
     friend class xsapi_memory;
 };
@@ -594,13 +647,17 @@ protected:
 
 };
 
+
 /// <summary>
 /// Arguments for the SignOutCompleted event. 
 /// </summary>
 class sign_out_completed_event_args
 {
 public:
-    sign_out_completed_event_args(_In_ std::weak_ptr<system::xbox_live_user> weakUser, _In_ std::shared_ptr<user_impl> user_impl);
+    sign_out_completed_event_args(
+        _In_ std::weak_ptr<system::xbox_live_user> weakUser, 
+        _In_ std::shared_ptr<user_impl> user_impl
+    );
 
     /// <summary>
     /// The user that completed signing out.

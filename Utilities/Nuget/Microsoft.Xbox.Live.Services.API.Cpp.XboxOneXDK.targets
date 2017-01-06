@@ -23,6 +23,7 @@
   <ItemDefinitionGroup Label="Durango and (v110 or v140)" Condition="'$(Platform.ToLower())' == 'durango'">
     <Link>
       <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\Durango\$(PlatformToolset)\$(NugetConfiguration)\casablanca$(NugetPlatformToolset).xbox.lib;$(MSBuildThisFileDirectory)lib\Durango\$(PlatformToolset)\$(NugetConfiguration)\Microsoft.Xbox.Services.$(NugetPlatformToolset).XDK.Ship.Cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <XboxExtensionsDependencies>$(MSBuildThisFileDirectory)lib\Durango\$(PlatformToolset)\$(NugetConfiguration)\casablanca$(NugetPlatformToolset).xbox.lib;$(MSBuildThisFileDirectory)lib\Durango\$(PlatformToolset)\$(NugetConfiguration)\Microsoft.Xbox.Services.$(NugetPlatformToolset).XDK.Ship.Cpp.lib;%(XboxExtensionsDependencies)</XboxExtensionsDependencies>
     </Link>
   </ItemDefinitionGroup>
 </Project>

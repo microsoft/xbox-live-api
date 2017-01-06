@@ -509,7 +509,7 @@ void http_call_impl::set_xbox_contract_version_header_value(
     _In_ const string_t& value
     )
 {
-    m_httpCallData->xboxContractVersionHeaderValue = std::move(value);
+    m_httpCallData->xboxContractVersionHeaderValue = value;
 }
 
 void http_call_impl::set_custom_header(
@@ -517,7 +517,7 @@ void http_call_impl::set_custom_header(
     _In_ const string_t& headerValue
     )
 {
-    m_httpCallData->customHeaderMap[std::move(headerName)] = std::move(headerValue);
+    m_httpCallData->customHeaderMap[headerName] = headerValue;
 }
 
 void
@@ -591,7 +591,8 @@ http_call_impl::should_retry(
 {
     auto httpStatus = httpCallResponse->http_status();
 
-    if (!httpCallData->retryAllowed && httpStatus != web::http::status_codes::Unauthorized)
+    if (!httpCallData->retryAllowed
+        && !(httpStatus == web::http::status_codes::Unauthorized && httpCallData->userContext != nullptr))
     {
         return false;
     }

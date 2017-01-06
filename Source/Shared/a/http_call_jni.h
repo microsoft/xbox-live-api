@@ -41,6 +41,14 @@ extern "C" {
 
     /*
     * Class:     com_microsoft_xbox_idp_util_HttpCall
+    * Method:    setLongHttpCall
+    * Signature: (Z)V
+    */
+    JNIEXPORT void JNICALL Java_com_microsoft_xbox_idp_util_HttpCall_setLongHttpCall
+    (JNIEnv *, jobject, jboolean);
+
+    /*
+    * Class:     com_microsoft_xbox_idp_util_HttpCall
     * Method:    setContentTypeHeaderValue
     * Signature: (Ljava/lang/String;)V
     */
