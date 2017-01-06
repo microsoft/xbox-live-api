@@ -107,15 +107,12 @@
       $(ProjectDir)..\..\Tests\UnitTests\Mocks;
       $(ProjectDir)..\..\Tests\UnitTests\Support;
       ..\..\External\cpprestsdk\Release\include;
-      ..\..\TAEF\Include;
-      ..\..\MorroMock;
+      c:\Program Files (x86)\Windows Kits\10\Testing\Development\inc;
       %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories Condition="'$(Platform)'=='x64'">
-        ..\..\TAEF\Library\Release\x64;%(AdditionalLibraryDirectories)
-      </AdditionalLibraryDirectories>
-      <AdditionalLibraryDirectories Condition="'$(Platform)'=='Win32'">$(ProjectDir)..\..\TAEF\Library\Release\x86\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories Condition="'$(Platform)'=='x64'">C:\Program Files (x86)\Windows Kits\10\Testing\Development\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories Condition="'$(Platform)'=='Win32'">C:\Program Files (x86)\Windows Kits\10\Testing\Development\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup>
@@ -227,7 +224,7 @@
     <ClInclude Include="..\..\Tests\UnitTests\Tests\Services\SocialManagerHelper.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14\casablanca140.static.vcxproj">
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.static\casablanca140.static.vcxproj">
       <Project>{04d42f35-e5d5-4d95-980e-1bd7e900f2dd}</Project>
     </ProjectReference>
   </ItemGroup>
