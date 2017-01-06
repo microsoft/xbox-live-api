@@ -9,15 +9,6 @@
 //*********************************************************
 #pragma once
 
-// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
-#ifdef XBOX_LIVE_NAMESPACE
-#undef XBOX_LIVE_NAMESPACE
-#endif
-#if BEAM_API
-#define XBOX_LIVE_NAMESPACE xbox::services::beam
-#else
-#define XBOX_LIVE_NAMESPACE xbox::services
-#endif
 
 #if UWP_API || XSAPI_U || XSAPI_CENTENNIAL
 namespace xbox { namespace services {

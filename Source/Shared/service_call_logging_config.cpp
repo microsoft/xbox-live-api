@@ -16,15 +16,9 @@
 #include "service_call_logger_protocol.h"
 #endif
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-
-static xbox::services::beam::system::xbox_live_mutex g_serviceLoggingConfigSingletonLock;
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-static xbox::services::system::xbox_live_mutex g_serviceLoggingConfigSingletonLock;
-#endif
+static XBOX_LIVE_NAMESPACE::system::xbox_live_mutex g_serviceLoggingConfigSingletonLock;
 
 static std::shared_ptr<service_call_logging_config> g_serviceLoggingConfigSingleton;
 
@@ -69,8 +63,4 @@ void service_call_logging_config::_ReadLocalConfig()
 #endif
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

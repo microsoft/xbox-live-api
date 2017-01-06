@@ -9,15 +9,7 @@
 //*********************************************************
 #pragma once
 
-// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
-#ifdef XBOX_LIVE_NAMESPACE
-#undef XBOX_LIVE_NAMESPACE
-#endif
-#if BEAM_API
-#define XBOX_LIVE_NAMESPACE xbox::services::beam
-#else
-#define XBOX_LIVE_NAMESPACE xbox::services
-#endif
+ 
 
 #define DEFAULT_LOGGER XBOX_LIVE_NAMESPACE::logger::get_logger()
 #define IF_LOGGER_ENABLED(logger) if(logger != nullptr)
@@ -51,11 +43,7 @@ const char defaultCategory[] = "";
 #define LOGS_DEBUG LOGS(DEFAULT_LOGGER, XBOX_LIVE_NAMESPACE::log_level::debug, defaultCategory)
 #define LOGS_DEBUG_IF(boolean_expression) if(boolean_expression) LOGS_DEBUG
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 enum class log_level
 {
@@ -175,8 +163,4 @@ private:
     log_level m_logLevel;
 };
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

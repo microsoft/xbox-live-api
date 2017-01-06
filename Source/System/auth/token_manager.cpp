@@ -12,11 +12,7 @@
 #include "token_manager.h"
 #include "xbox_system_factory.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#endif
 
 token_manager::token_info::token_info() : 
     IsRefreshInProgress(false)
@@ -526,8 +522,4 @@ token_manager::get_event_token_from_xuid(const string_t& xuid)
     }
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
-#endif

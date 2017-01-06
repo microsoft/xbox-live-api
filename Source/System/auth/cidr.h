@@ -14,11 +14,7 @@
 #include "shared_macros.h"
 #include "ip_address.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#endif
 
 
 /// <summary>
@@ -55,8 +51,4 @@ private:
     int m_prefix;
 };
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
-#endif

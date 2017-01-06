@@ -12,22 +12,7 @@
 #include <stddef.h>
 #include "xsapi/system.h"
 
-// TODO: double check that this is correct
-#ifdef BEAM_API
-#ifndef NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
-#define NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN namespace xbox { namespace services { namespace beam { nanespace system {
-#endif
-#else
-#ifndef NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#define NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN namespace xbox { namespace services { namespace system {
-#endif
-#endif
-
-#ifdef BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#endif
 
 class xsapi_memory
 {
@@ -69,11 +54,8 @@ private:
     void* m_pBuffer;
 };
 
-}}}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
 
-#ifdef BEAM_API
-}
-#endif
 
 template<typename T>
 class xsapi_stl_allocator

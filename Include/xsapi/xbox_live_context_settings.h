@@ -8,22 +8,12 @@
 //
 //*********************************************************
 #pragma once
-#include "pch.h" // TODO: is this the right way to pull in BEAM_API build def?
+#include "pch.h"
 #include <chrono>
 #include <functional>
 #include <mutex>
 #include <unordered_map>
 #include "xsapi/xbox_service_call_routed_event_args.h"
-
-// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
-#ifdef XBOX_LIVE_NAMESPACE
-#undef XBOX_LIVE_NAMESPACE
-#endif
-#if BEAM_API
-#define XBOX_LIVE_NAMESPACE xbox::services::beam
-#else
-#define XBOX_LIVE_NAMESPACE xbox::services
-#endif
 
 namespace xbox { namespace services {
 #if BEAM_API

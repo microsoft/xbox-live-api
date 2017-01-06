@@ -10,11 +10,7 @@
 #pragma once
 #include "log.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 class debug_output : public log_output
 {
@@ -24,8 +20,4 @@ public:
     void write(_In_ const std::string& msg) override;
 };
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

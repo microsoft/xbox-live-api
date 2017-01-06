@@ -11,11 +11,7 @@
 #include "pch.h"
 #include "request_signer_helpers.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#endif
 
 // inserts version into buffer in network byte order
 void request_signer_helpers::insert_version(
@@ -48,8 +44,4 @@ string_t request_signer_helpers::get_header_or_empty_string(
     return it == headers.end() ? _T("") : it->second;
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
-#endif

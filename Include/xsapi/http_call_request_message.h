@@ -8,7 +8,7 @@
 //
 //*********************************************************
 #pragma once
-#include "pch.h" // TODO: is this the right way to pull in BEAM_API build def?
+#include "pch.h"
 
 namespace xbox { namespace services {
 #if BEAM_API

@@ -19,21 +19,9 @@
 #include "local_config.h"
 #include "auth_config.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#endif
 
-// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
-#ifdef XBOX_LIVE_NAMESPACE
-#undef XBOX_LIVE_NAMESPACE
-#endif
-#if BEAM_API
-#define XBOX_LIVE_NAMESPACE xbox::services::beam
-#else
-#define XBOX_LIVE_NAMESPACE xbox::services
-#endif
+ 
 
 class token_manager
 {
@@ -172,8 +160,4 @@ private:
         );
 };
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
-#endif

@@ -25,17 +25,15 @@ using namespace Windows::Security::Authentication::Web::Core;
 using namespace Windows::Security::Credentials;
 using namespace Windows::System::Threading;
 using namespace xbox::services;
-using namespace Microsoft::Xbox::Services;
-
 #if BEAM_API
+using namespace Microsoft::Xbox::Services::Beam;
 using namespace Microsoft::Xbox::Services::Beam::System;
-
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
 #else
+using namespace Microsoft::Xbox::Services;
 using namespace Microsoft::Xbox::Services::System;
+#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#endif
 
 std::unordered_map<string_t, std::shared_ptr<user_impl_idp>> user_impl_idp::s_trackingUsers = std::unordered_map<string_t, std::shared_ptr<user_impl_idp>>();
 Windows::System::UserWatcher^ user_impl_idp::s_userWatcher = nullptr;
@@ -653,12 +651,7 @@ bool user_impl_idp::is_multi_user_application()
 #endif
     return isSupported == 1;
 }
-
-#ifdef BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
-#endif
 
 #endif
 

@@ -16,11 +16,7 @@
 #include "utils.h"
 #include "xtitle_service.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#endif
 
 pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<nsal>>
 xtitle_service_impl::get_default_nsal(
@@ -102,9 +98,5 @@ xtitle_service_impl::get_title_nsal(
     });
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
-#endif
 

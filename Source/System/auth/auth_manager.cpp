@@ -15,11 +15,7 @@
 
 using namespace XBOX_LIVE_NAMESPACE;
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#endif
 
 std::shared_ptr<auth_manager> auth_manager::s_authManager;
 
@@ -231,8 +227,4 @@ std::shared_ptr<auth_config> auth_manager::get_auth_config()
     return m_authConfig;
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
-#endif

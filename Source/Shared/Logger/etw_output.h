@@ -12,11 +12,7 @@
 #include <evntrace.h>
 #include "telemetry.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 class etw_output : public log_output
 {
@@ -42,8 +38,4 @@ private:
     }
 };
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

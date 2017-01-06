@@ -15,11 +15,7 @@
 #include "a/jni_utils.h"
 #endif
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 static string_t s_locales = _T("en-US");
 
@@ -272,8 +268,4 @@ void utils::set_locales(
     s_custom_locale_override = true;
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

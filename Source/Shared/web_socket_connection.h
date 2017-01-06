@@ -11,11 +11,7 @@
 #include "web_socket_client.h"
 #include "web_socket_connection_state.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 class web_socket_connection : public std::enable_shared_from_this<web_socket_connection>
 {
@@ -77,8 +73,4 @@ private:
     bool m_closeRequested;
 };
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

@@ -29,26 +29,18 @@ typedef Microsoft::Xbox::Services::System::XboxLiveUser^ XboxLiveUser_t;
 #endif
 
 #if TV_API | XBOX_UWP
-#if BEAM_API
-typedef  Windows::Xbox::Beam::System::User^ xbox_live_user_t;
-#else
 typedef  Windows::Xbox::System::User^ xbox_live_user_t;
-#endif
 #else
 typedef std::shared_ptr<XBOX_LIVE_NAMESPACE::system::xbox_live_user> xbox_live_user_t;
 #endif
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 enum class caller_context_type
 {
-	title,
-	multiplayer_manager,
-	social_manager
+    title,
+    multiplayer_manager,
+    social_manager
 };
 
 class user_context_auth_result
@@ -168,8 +160,4 @@ private:
     XBOX_LIVE_NAMESPACE::caller_context_type m_callerContextType;
 };
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

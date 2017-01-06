@@ -32,11 +32,7 @@
 #include "presence_internal.h"
 #endif
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 #define MAKE_HTTP_HRESULT(code) MAKE_HRESULT(1, 0x019, code)
 #if UNIT_TEST_SERVICES
@@ -1561,8 +1557,4 @@ utils::read_test_response_file(_In_ const string_t& filePath)
 }
 #endif
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

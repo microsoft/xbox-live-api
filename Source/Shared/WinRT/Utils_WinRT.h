@@ -11,11 +11,7 @@
 #include "shared_macros.h"
 #include "utils.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_BEGIN
-#endif
 
 typedef std::chrono::duration<long long, std::ratio<1, 10000000>> timeSpanTicks;
 
@@ -237,8 +233,4 @@ public:
 
 };
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_END
-#endif

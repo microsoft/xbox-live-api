@@ -32,22 +32,13 @@ using namespace web;                        // Common features like URIs.
 using namespace web::http;                  // Common HTTP functionality
 using namespace web::http::client;          // HTTP client features
 
-#if BEAM_API
 using namespace XBOX_LIVE_NAMESPACE;
 using namespace XBOX_LIVE_NAMESPACE::system;
-#else
-using namespace XBOX_LIVE_NAMESPACE;
-using namespace XBOX_LIVE_NAMESPACE::system;
-#endif
 
 const int MIN_DELAY_FOR_HTTP_INTERNAL_ERROR_IN_SEC = 10;
 const double MAX_DELAY_TIME_IN_SEC = 60.0;
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 std::shared_ptr<http_call> create_xbox_live_http_call(
     _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
@@ -984,8 +975,4 @@ http_retry_after_api_state http_retry_after_manager::get_state(
     return http_retry_after_api_state();
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

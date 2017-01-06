@@ -20,11 +20,7 @@
 #endif
 #include "http_call_impl.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 volatile long http_call_response::s_responseCount = 0;
 const int RETRY_AFTER_CAP = 15;
@@ -337,8 +333,4 @@ std::string http_call_response::get_throttling_error_message() const
     return "";
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

@@ -112,10 +112,10 @@ namespace beam {
     class user_context;
     class xbox_live_context_settings;
     class local_config;
-}}
 #if BEAM_API
 }
 #endif
+}}
 
 #if !TV_API
 // SSL client certificate context

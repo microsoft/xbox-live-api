@@ -16,22 +16,18 @@
 using namespace Platform;
 using namespace Windows::Foundation::Collections;
 #if !XSAPI_CPP
+#if BEAM_API
+using namespace Microsoft::Xbox::Services::Beam::System;
+#else
 using namespace Microsoft::Xbox::Services::System;
 #endif
 #endif
-
-#if BEAM_API
-using namespace xbox::services::beam::system;
-#else
-using namespace xbox::services::system;
 #endif
 
+using namespace XBOX_LIVE_NAMESPACE::system;
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 // XDK's Windows.* user object
 #if XSAPI_SERVER
@@ -536,8 +532,4 @@ const string_t& user_context_auth_result::signature() const
     return m_signature;
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

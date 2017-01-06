@@ -12,11 +12,7 @@
 #include "xbox_system_factory.h"
 #include "token_request.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#endif
 
 
 pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>>
@@ -77,8 +73,4 @@ xsts_token_service_impl::get_x_token_from_service(
     });
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
-#endif

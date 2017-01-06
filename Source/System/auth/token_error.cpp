@@ -16,11 +16,7 @@
 #include <vector>
 #include <cstdint>
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#endif
 
 token_error::token_error() :
     m_xerr(0)
@@ -86,8 +82,4 @@ token_error::deserialize(
         utils::extract_json_string(json, _T("Redirect")));
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
-#endif

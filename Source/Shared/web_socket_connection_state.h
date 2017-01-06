@@ -9,11 +9,7 @@
 //*********************************************************
 #pragma once
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 enum class web_socket_connection_state : int32_t
 {
@@ -23,8 +19,4 @@ enum class web_socket_connection_state : int32_t
     connected,
 };
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

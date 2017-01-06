@@ -9,14 +9,6 @@
 //*********************************************************
 #pragma once
 
-// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
-// TODO: I've defined this in many files now, maybe move to pch.h..? need to make sure it's shared between the two projects, though
-#if BEAM_API
-#define XBOX_LIVE_NAMESPACE xbox::services::beam
-#else
-#define XBOX_LIVE_NAMESPACE xbox::services
-#endif
-
 namespace xbox {
 	namespace services {
 #if BEAM_API
@@ -201,8 +193,8 @@ namespace xbox {
 
 
 			}
-		}
-	}
 #if BEAM_API
-}
+		}
 #endif
+	}
+}

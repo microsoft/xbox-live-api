@@ -12,15 +12,9 @@
 
 #include "user_impl.h"
 
-#if BEAM_API
 using namespace pplx;
-using namespace xbox::services::beam;
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
-#else
-using namespace pplx;
-using namespace xbox::services;
+using XBOX_LIVE_NAMESPACE;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#endif
 
 pplx::task<xbox_live_result<sign_in_result>>
 user_impl_server::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
@@ -121,8 +115,4 @@ user_impl_server::sign_in_impl(
     });
 }
 
-#ifdef BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
-#endif

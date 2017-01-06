@@ -42,11 +42,7 @@
 #include <mutex>
 #include "initiator.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#endif
 
 
 class xbox_system_factory
@@ -99,7 +95,7 @@ public:
 
     virtual std::shared_ptr<xbox_web_socket_client> create_web_socket_client();
 
-#ifndef BEAM_API
+#if !BEAM_API
     virtual std::shared_ptr<multiplayer::multiplayer_subscription> create_multiplayer_subscription(
         _In_ const std::function<void(const multiplayer::multiplayer_session_change_event_args&)>& multiplayerSessionChangeHandler,
         _In_ const std::function<void()>& multiplayerSubscriptionLostHandler,
@@ -115,8 +111,4 @@ private:
     static std::shared_ptr<xbox_system_factory> m_factoryInstance;
 };
 
-#ifdef BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
-#endif

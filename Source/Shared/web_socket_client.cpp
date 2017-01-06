@@ -15,11 +15,7 @@
 
 using namespace web::websockets::client;
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
  
 xbox_web_socket_client::xbox_web_socket_client()
 {
@@ -164,8 +160,4 @@ xbox_web_socket_client::set_closed_handler(
     m_closeHandler = handler;
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

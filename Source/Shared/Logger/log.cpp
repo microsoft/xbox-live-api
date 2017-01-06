@@ -10,11 +10,7 @@
 #include "pch.h"
 #include "log.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 std::shared_ptr<logger> logger::s_logger = nullptr;
 
@@ -56,8 +52,4 @@ void logger::operator+=(const log_entry& logEntry)
     add_log(logEntry);
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

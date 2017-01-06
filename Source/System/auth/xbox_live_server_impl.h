@@ -12,11 +12,7 @@
 #include "xbox_system_factory.h"
 #include "shared_macros.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#endif
 
 
 class xbox_live_server_impl : public std::enable_shared_from_this<xbox_live_server_impl>
@@ -71,8 +67,4 @@ private:
     std::shared_ptr<auth_manager> m_authManager;
 };
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
-#endif

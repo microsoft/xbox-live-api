@@ -1226,6 +1226,9 @@ namespace xbox {
 #if XSAPI_U
 namespace xbox {
     namespace services {
+#if BEAM_API
+    namespace beam {
+#endif
         inline std::error_code make_error_code(XBOX_LIVE_NAMESPACE::xbox_live_error_code e)
         {
             return std::error_code(static_cast<int>(e), XBOX_LIVE_NAMESPACE::xbox_services_error_code_category());
@@ -1235,19 +1238,13 @@ namespace xbox {
         {
             return std::error_condition(static_cast<int>(e), XBOX_LIVE_NAMESPACE::xbox_services_error_condition_category());
         }
+#if BEAM_API
+    }
+#endif
     }
 }
 #endif
 
-// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
-#ifdef XBOX_LIVE_NAMESPACE
-#undef XBOX_LIVE_NAMESPACE
-#endif
-#if BEAM_API
-#define XBOX_LIVE_NAMESPACE xbox::services::beam
-#else
-#define XBOX_LIVE_NAMESPACE xbox::services
-#endif
 
 namespace std
 {

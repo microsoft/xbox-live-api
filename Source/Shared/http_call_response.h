@@ -12,18 +12,11 @@
 #include "xsapi/http_call.h"
 #include "shared_macros.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 template<typename T>
-#if BEAM_API
-xbox::services::beam::xbox_live_result<T>
-#else
-xbox::services::xbox_live_result<T>
-#endif
+XBOX_LIVE_NAMESPACE::xbox_live_result<T>
+
 get_xbl_result_from_response(_In_ std::shared_ptr<http_call_response> response, _In_ std::function<T(_In_ const web::json::value&)> deserializeFn)
 {
     if (response->response_body_json().size() != 0)
@@ -36,8 +29,4 @@ get_xbl_result_from_response(_In_ std::shared_ptr<http_call_response> response, 
     }
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

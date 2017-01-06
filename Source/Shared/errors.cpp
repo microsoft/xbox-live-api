@@ -10,11 +10,7 @@
 #include "pch.h"
 #include "xsapi/errors.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 static xbox_services_error_code_category_impl s_error_code_category_instance;
 
@@ -399,8 +395,4 @@ bool xbox_services_error_condition_category_impl::equivalent(
     }
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

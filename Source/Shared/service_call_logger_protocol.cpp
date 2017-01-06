@@ -21,17 +21,9 @@ using namespace Windows::ApplicationModel::Core;
 using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::Foundation;
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
-#if BEAM_API
-static xbox::services::beam::system::xbox_live_mutex g_serviceLoggerProtocolSingletonLock;
-#else
-static xbox::services::system::xbox_live_mutex g_serviceLoggerProtocolSingletonLock;
-#endif
+static XBOX_LIVE_NAMESPACE::system::xbox_live_mutex g_serviceLoggerProtocolSingletonLock;
 static std::shared_ptr<service_call_logger_protocol> g_serviceLoggerProtocolSingleton;
 
 std::shared_ptr<service_call_logger_protocol> service_call_logger_protocol::get_singleton_instance()
@@ -160,8 +152,4 @@ void service_call_logger_protocol::set_state_bread_crumb(_In_ bool isTracking)
     }
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

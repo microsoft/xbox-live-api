@@ -9,7 +9,7 @@
 //*********************************************************
 #pragma once
 
-#include "pch.h" // TODO: is this the right way to pull in BEAM_API build def?
+#include "pch.h"
 #include "types.h"
 #include "errors.h"
 #include "xbox_live_context_settings.h"
@@ -23,15 +23,6 @@
 #include "pplx/pplxtasks.h"
 #endif
 
-// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
-#ifdef XBOX_LIVE_NAMESPACE
-#undef XBOX_LIVE_NAMESPACE
-#endif
-#if BEAM_API
-#define XBOX_LIVE_NAMESPACE xbox::services::beam
-#else
-#define XBOX_LIVE_NAMESPACE xbox::services
-#endif
 
 namespace xbox { namespace services {
 #if BEAM_API
@@ -47,7 +38,7 @@ namespace beam {
         class events_service;
     }
 
-#ifndef BEAM_API
+#if !BEAM_API
     namespace multiplayer { namespace manager {
         class multiplayer_client_manager;
         class multiplayer_local_user;
@@ -59,8 +50,8 @@ namespace beam {
 #endif
 
 namespace xbox { namespace services { 
-#ifdef BEAM_API
-	namespace beam {
+#if BEAM_API
+    namespace beam {
 #endif
     /// <summary>
     /// Configuration information for Xbox Live service objects. 
@@ -738,6 +729,6 @@ private:
     std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_app_config> m_appConfig;
 };
 }}}
-#ifdef BEAM_API
+#if BEAM_API
 }
 #endif

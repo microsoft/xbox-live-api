@@ -15,11 +15,7 @@
 #include <string>
 #include <stdint.h>
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#endif
 
 class json_web_key
 {
@@ -27,9 +23,5 @@ public:
     static web::json::value serialize_json_web_key(_In_ std::shared_ptr<ecdsa> eccKey);
 };
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
-#endif
 

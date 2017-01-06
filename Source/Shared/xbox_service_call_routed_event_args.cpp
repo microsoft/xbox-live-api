@@ -11,11 +11,7 @@
 #include "xsapi/xbox_service_call_routed_event_args.h"
 #include "utils.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 xbox_service_call_routed_event_args::xbox_service_call_routed_event_args(
     _In_ string_t xboxUserId,
@@ -133,8 +129,4 @@ const string_t xbox_service_call_routed_event_args::full_response_formatted() co
     return response.str();
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

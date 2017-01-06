@@ -15,11 +15,7 @@ using namespace web;                        // Common features like URIs.
 using namespace web::http;                  // Common HTTP functionality
 using namespace web::http::client;          // HTTP client features
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
  
 xbox_http_client_impl::xbox_http_client_impl(
     _In_ web::http::uri base_uri,
@@ -38,8 +34,4 @@ xbox_http_client_impl::get_request(
     return m_client->request(std::move(request), std::move(token));
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

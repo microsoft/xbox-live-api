@@ -16,11 +16,7 @@
 #else
 #include "Logger/debug_output.h"
 #endif
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 #if TV_API || UWP_API || UNIT_TEST_SERVICES
 Windows::UI::Core::CoreDispatcher^ xbox_live_context_settings::_s_dispatcher;
@@ -248,8 +244,4 @@ bool xbox_live_context_settings::_Is_disable_asserts_for_max_number_of_websocket
     return m_disableAssertsForMaxNumberOfWebsocketsActivated;
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

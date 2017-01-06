@@ -10,11 +10,7 @@
 #pragma once
 #include <cpprest/ws_client.h>
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 class xbox_web_socket_client : public std::enable_shared_from_this<xbox_web_socket_client>
 {
@@ -47,8 +43,4 @@ private:
     std::function<void(uint16_t closeStatus, string_t closeReason)> m_closeHandler;
 };
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif

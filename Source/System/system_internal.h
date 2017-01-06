@@ -8,11 +8,11 @@
 //
 //*********************************************************
 #pragma once
-namespace xbox { namespace services { 
+namespace xbox { namespace services {
 #if BEAM_API
 namespace beam {
 #endif
-	namespace system{ 
+    namespace system{
 
 class xbox_live_mutex
 {

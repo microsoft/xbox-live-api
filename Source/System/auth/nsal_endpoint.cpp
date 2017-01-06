@@ -15,11 +15,7 @@
 #include "nsal_endpoint.h"
 #include "utils.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-#endif
 
 nsal_endpoint_info::nsal_endpoint_info()
 {
@@ -254,8 +250,4 @@ bool cidr_nsal_endpoint::is_same(
     return nsal_endpoint::is_match(protocol, port) && m_cidr == cidr(hostName);
 }
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
-#endif

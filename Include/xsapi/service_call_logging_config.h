@@ -14,7 +14,7 @@ namespace xbox { namespace services {
 namespace beam {
 #endif
 
-	class xbox_live_context_impl;
+    class xbox_live_context_impl;
 
 class service_call_logging_config
 {

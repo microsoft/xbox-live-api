@@ -11,11 +11,7 @@
 #pragma once
 #include "system_internal.h"
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-#endif
 
 class service_call_logger
 {
@@ -61,15 +57,8 @@ private:
     bool m_isEnabled;
     bool m_firstWrite;
 
-#if BEAM_API
-	xbox::services::beam::system::xbox_live_mutex m_writeLock;
-#else
-    xbox::services::system::xbox_live_mutex m_writeLock;
-#endif
+    XBOX_LIVE_NAMESPACE::system::xbox_live_mutex m_writeLock;
+
 };
 
-#if BEAM_API
-NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
-#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif
