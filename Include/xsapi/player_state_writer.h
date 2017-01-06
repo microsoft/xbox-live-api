@@ -22,24 +22,6 @@ union player_state_value_union
 class player_state_value
 {
 public:
-    player_state_value();
-
-    player_state_value(
-        _In_ string_t value
-        );
-
-    player_state_value(
-        _In_ double value
-        );
-
-    player_state_value(
-        _In_ int64_t value
-        );
-
-    player_state_value(
-        _In_ bool value
-        );
-
     /// <summary> 
     /// Gets the value as a string
     /// </summary>
@@ -59,6 +41,29 @@ public:
     /// Gets the value as a boolean
     /// </summary>
     int64_t as_integer() const;
+
+    /// Internal
+    player_state_value();
+
+    /// Internal
+    player_state_value(
+        _In_ string_t value
+        );
+
+    /// Internal
+    player_state_value(
+        _In_ double value
+        );
+
+    /// Internal
+    player_state_value(
+        _In_ int64_t value
+        );
+
+    /// Internal
+    player_state_value(
+        _In_ bool value
+        );
 
 private:
     string_t m_stringData;
@@ -86,7 +91,7 @@ public:
     /// <summary> 
     /// Gets the player state list
     /// </summary>
-    xbox_live_result<void> get_player_states(_In_ xbox_live_user_t user, _Inout_ std::unordered_map<string_t, player_state_value>& playerStateList);
+    xbox_live_result<void> get_player_state(_In_ xbox_live_user_t user, _Inout_ std::unordered_map<string_t, player_state_value>& playerStateList);
 
 private:
     std::unordered_map<string_t, std::unordered_map<string_t, player_state_value>> m_currentState;

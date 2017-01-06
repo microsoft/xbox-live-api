@@ -940,6 +940,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\player_state_writer.h">
       <Filter>XSAPI\Include</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\PlayerStateValue_WinRT.h">
+      <Filter>XSAPI\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\PlayerStateWriter_WinRT.h">
+      <Filter>XSAPI\Services\Misc\WinRT</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="XSAPI">
@@ -2257,6 +2263,18 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\call_buffer_timer.cpp">
       <Filter>XSAPI\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\player_state_value.cpp">
+      <Filter>XSAPI\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\player_state_writer.cpp">
+      <Filter>XSAPI\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\PlayerStateValue_WinRT.cpp">
+      <Filter>XSAPI\Services\Misc\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\PlayerStateWriter_WinRT.cpp">
+      <Filter>XSAPI\Services\Misc\WinRT</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

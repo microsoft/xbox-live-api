@@ -35,7 +35,7 @@ player_state_writer::set_player_state(
 }
 
 xbox_live_result<void>
-player_state_writer::get_player_states(
+player_state_writer::get_player_state(
     _In_ xbox_live_user_t user,
     _Inout_ std::unordered_map<string_t, player_state_value>& playerStateList
     )
