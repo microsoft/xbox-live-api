@@ -14,7 +14,11 @@
 #include <sstream>
 #include <vector>
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
 
 ip_address_type get_host_name_type(
     _In_ const string_t& ipStr
@@ -154,4 +158,8 @@ bool ip_address::operator==(_In_ const ip_address& rhs) const
         m_bytes == rhs.m_bytes;
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif

@@ -16,7 +16,12 @@
 #include <string>
 #include <stdint.h>
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
+
 
 token_result::token_result() :
     m_expiration(0),
@@ -191,5 +196,9 @@ token_result token_result::deserialize(
     return token_result(token, d.to_interval(), userHash, userGamertag, userXuid, titleId, ageGroup, privileges);
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif
 

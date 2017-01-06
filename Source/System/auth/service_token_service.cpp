@@ -11,7 +11,11 @@
 #include "token_request.h"
 #include "xbox_system_factory.h"
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
 
 pplx::task<xbox_live_result<token_result> >
 service_token_service_impl::get_s_token_from_service(
@@ -23,7 +27,7 @@ service_token_service_impl::get_s_token_from_service(
     string_t titleId;
     if (!authenticationConfiguration->use_win10_auth())
     {
-        auto appConfig = xbox::services::xbox_live_app_config::get_app_config_singleton();
+        auto appConfig = XBOX_LIVE_NAMESPACE::xbox_live_app_config::get_app_config_singleton();
         uint32_t titleIdNum = appConfig->title_id();
         stringstream_t msg;
         msg << std::hex << titleIdNum;
@@ -51,4 +55,8 @@ service_token_service_impl::get_s_token_from_service(
     });
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif

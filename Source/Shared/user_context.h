@@ -28,15 +28,6 @@ typedef Microsoft::Xbox::Services::System::XboxLiveUser^ XboxLiveUser_t;
 #endif
 #endif
 
-#ifdef XBOX_LIVE_NAMESPACE
-#undef XBOX_LIVE_NAMESPACE
-#endif
-#if BEAM_API
-#define XBOX_LIVE_NAMESPACE xbox::services::beam
-#else
-#define XBOX_LIVE_NAMESPACE xbox::services
-#endif
-
 #if TV_API | XBOX_UWP
 #if BEAM_API
 typedef  Windows::Xbox::Beam::System::User^ xbox_live_user_t;
@@ -44,11 +35,7 @@ typedef  Windows::Xbox::Beam::System::User^ xbox_live_user_t;
 typedef  Windows::Xbox::System::User^ xbox_live_user_t;
 #endif
 #else
-#if BEAM_API
-typedef std::shared_ptr<xbox::services::beam::system::xbox_live_user> xbox_live_user_t;
-#else
-typedef std::shared_ptr<xbox::services::system::xbox_live_user> xbox_live_user_t;
-#endif
+typedef std::shared_ptr<XBOX_LIVE_NAMESPACE::system::xbox_live_user> xbox_live_user_t;
 #endif
 
 #if BEAM_API
@@ -59,9 +46,9 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 enum class caller_context_type
 {
-    title,
-    multiplayer_manager,
-    social_manager
+	title,
+	multiplayer_manager,
+	social_manager
 };
 
 class user_context_auth_result
@@ -90,7 +77,7 @@ public:
 
     const string_t& caller_context() const;
     caller_context_type caller_context_type() const;
-    void set_caller_context_type(caller_context_type context); // TODO: the issue here seems to be that the xbox_live_result/system.h BEAM_API issues cause intellisense/build to get confused - commenting them all out fixes the error here
+    void set_caller_context_type(XBOX_LIVE_NAMESPACE::caller_context_type context);
 
     pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<user_context_auth_result>> get_auth_result(
         _In_ const string_t& httpMethod,

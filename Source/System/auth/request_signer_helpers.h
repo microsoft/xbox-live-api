@@ -13,7 +13,11 @@
 
 #include <string>
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
 
 /// <summary>
 /// Platform agnostic helpers for request signing.
@@ -34,4 +38,8 @@ public:
         _In_ int64_t timestamp);
 };
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif

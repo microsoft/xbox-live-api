@@ -262,16 +262,16 @@ class xbox_live_server
 public:
     _XSAPIIMP xbox_live_server();
 
-    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<void>> signin(_In_ cert_context cert);
+    _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<void>> signin(_In_ cert_context cert);
 
-    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
+    _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>>
         get_token_and_signature(
             _In_ const string_t& httpMethod,
             _In_ const string_t& url,
             _In_ const string_t& headers
             );
 
-    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
+    _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>>
         get_token_and_signature(
             _In_ const string_t& httpMethod,
             _In_ const string_t& url,
@@ -279,7 +279,7 @@ public:
             _In_ const string_t& requestBodyString
             );
 
-    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
+    _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>>
         get_token_and_signature_array(
             _In_ const string_t& httpMethod,
             _In_ const string_t& url,
@@ -292,7 +292,7 @@ public:
 private:
     std::shared_ptr<xbox_live_server_impl> m_server_impl;
 
-    friend xbox::services::user_context;
+    friend XBOX_LIVE_NAMESPACE::user_context;
 };
 
 #endif //#if XSAPI_SERVER

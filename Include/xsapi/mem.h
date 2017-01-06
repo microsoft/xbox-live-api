@@ -99,11 +99,8 @@ public:
 
     pointer allocate(size_type n, const void * = 0)
 	{
-#ifdef BEAM_API
-		pointer p = reinterpret_cast<pointer>(xbox::services::beam::system::xsapi_memory::mem_alloc(n * sizeof(T)));
-#else
-		pointer p = reinterpret_cast<pointer>(xbox::services::system::xsapi_memory::mem_alloc(n * sizeof(T)));
-#endif
+		pointer p = reinterpret_cast<pointer>(XBOX_LIVE_NAMESPACE::system::xsapi_memory::mem_alloc(n * sizeof(T)));
+
         if (p == NULL)
         {
             throw std::bad_alloc();
@@ -113,20 +110,13 @@ public:
 
     void deallocate(_In_opt_ void* p, size_type)
     {
-#ifdef BEAM_API
-		xbox::services::beam::system::xsapi_memory::mem_free(p);
-#else
-        xbox::services::system::xsapi_memory::mem_free(p);
-#endif
+		XBOX_LIVE_NAMESPACE::system::xsapi_memory::mem_free(p);
     }
 
     char* _Charalloc(size_type n)
 	{
-#ifdef BEAM_API
-		char* p = reinterpret_cast<char*>(xbox::services::beam::system::xsapi_memory::mem_alloc(n));
-#else
-		char* p = reinterpret_cast<char*>(xbox::services::system::xsapi_memory::mem_alloc(n));
-#endif
+		char* p = reinterpret_cast<char*>(XBOX_LIVE_NAMESPACE::system::xsapi_memory::mem_alloc(n));
+
         if (p == NULL)
         {
             throw std::bad_alloc();

@@ -18,7 +18,11 @@
 #include <vector>
 #include <stdint.h>
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
 
 web::json::value json_web_key::serialize_json_web_key(_In_ std::shared_ptr<ecdsa> eccKey)
 {
@@ -51,5 +55,9 @@ web::json::value json_web_key::serialize_json_web_key(_In_ std::shared_ptr<ecdsa
     return jwk;
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif
 

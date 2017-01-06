@@ -60,7 +60,7 @@ xbox_live_context_settings::_Set_dispatcher(
             Windows::UI::Core::CoreDispatcherPriority::Normal,
             ref new Windows::UI::Core::DispatchedHandler([]()
         {
-            xbox::services::utils::generate_locales();
+            XBOX_LIVE_NAMESPACE::utils::generate_locales();
         }));
     }
 }
@@ -96,7 +96,7 @@ xbox_live_context_settings::xbox_live_context_settings() :
 {
 }
 
-function_context xbox_live_context_settings::add_service_call_routed_handler(_In_ std::function<void(const xbox::services::xbox_service_call_routed_event_args&)> handler)
+function_context xbox_live_context_settings::add_service_call_routed_handler(_In_ std::function<void(const XBOX_LIVE_NAMESPACE::xbox_service_call_routed_event_args&)> handler)
 {
     std::lock_guard<std::mutex> lock(m_writeLock);
 
@@ -131,7 +131,7 @@ void xbox_live_context_settings::set_diagnostics_trace_level(_In_ xbox_services_
     system::xbox_live_services_settings::get_singleton_instance()->set_diagnostics_trace_level(value);
 }
 
-void xbox_live_context_settings::_Raise_service_call_routed_event(_In_ const xbox::services::xbox_service_call_routed_event_args& result)
+void xbox_live_context_settings::_Raise_service_call_routed_event(_In_ const XBOX_LIVE_NAMESPACE::xbox_service_call_routed_event_args& result)
 {
     std::lock_guard<std::mutex> lock(m_writeLock);
 

@@ -9,36 +9,46 @@
 //*********************************************************
 #pragma once
 
-#define DEFAULT_LOGGER xbox::services::logger::get_logger()
+// TODO: dealing with inline "xbox::services" on many of the signatures here, is this safe/the right move?
+#ifdef XBOX_LIVE_NAMESPACE
+#undef XBOX_LIVE_NAMESPACE
+#endif
+#if BEAM_API
+#define XBOX_LIVE_NAMESPACE xbox::services::beam
+#else
+#define XBOX_LIVE_NAMESPACE xbox::services
+#endif
+
+#define DEFAULT_LOGGER XBOX_LIVE_NAMESPACE::logger::get_logger()
 #define IF_LOGGER_ENABLED(logger) if(logger != nullptr)
 
-#define LOG(logger, level, category, msg) IF_LOGGER_ENABLED(logger) logger->add_log(xbox::services::log_entry(level, category, msg))
-#define LOGS(logger, level, category) IF_LOGGER_ENABLED(logger) *logger += xbox::services::log_entry(level, category)
+#define LOG(logger, level, category, msg) IF_LOGGER_ENABLED(logger) logger->add_log(XBOX_LIVE_NAMESPACE::log_entry(level, category, msg))
+#define LOGS(logger, level, category) IF_LOGGER_ENABLED(logger) *logger += XBOX_LIVE_NAMESPACE::log_entry(level, category)
 
 // default logging macro
 const char defaultCategory[] = "";
-#define IF_LOG_ERROR() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, xbox::services::log_level::error)
-#define LOG_ERROR(msg) LOG(DEFAULT_LOGGER, xbox::services::log_level::error, defaultCategory, msg)
+#define IF_LOG_ERROR() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, XBOX_LIVE_NAMESPACE::log_level::error)
+#define LOG_ERROR(msg) LOG(DEFAULT_LOGGER, XBOX_LIVE_NAMESPACE::log_level::error, defaultCategory, msg)
 #define LOG_ERROR_IF(boolean_expression, msg) if(boolean_expression) LOG_ERROR(msg)
-#define LOGS_ERROR LOGS(DEFAULT_LOGGER, xbox::services::log_level::error, defaultCategory)
+#define LOGS_ERROR LOGS(DEFAULT_LOGGER, XBOX_LIVE_NAMESPACE::log_level::error, defaultCategory)
 #define LOGS_ERROR_IF(boolean_expression) if(boolean_expression) LOGS_ERROR
 
-#define IF_LOG_WARN() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, xbox::services::log_level::warn)
-#define LOG_WARN(msg) LOG(DEFAULT_LOGGER, xbox::services::log_level::warn, defaultCategory, msg)
+#define IF_LOG_WARN() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, XBOX_LIVE_NAMESPACE::log_level::warn)
+#define LOG_WARN(msg) LOG(DEFAULT_LOGGER, XBOX_LIVE_NAMESPACE::log_level::warn, defaultCategory, msg)
 #define LOG_WARN_IF(boolean_expression, msg) if(boolean_expression) LOG_WARN(msg)
-#define LOGS_WARN LOGS(DEFAULT_LOGGER, xbox::services::log_level::warn, defaultCategory)
+#define LOGS_WARN LOGS(DEFAULT_LOGGER, XBOX_LIVE_NAMESPACE::log_level::warn, defaultCategory)
 #define LOGS_WARN_IF(boolean_expression) if(boolean_expression) LOGS_WARN
 
-#define IF_LOG_INFO() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, xbox::services::log_level::info)
-#define LOG_INFO(msg) LOG(DEFAULT_LOGGER, xbox::services::log_level::info, defaultCategory, msg)
+#define IF_LOG_INFO() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, XBOX_LIVE_NAMESPACE::log_level::info)
+#define LOG_INFO(msg) LOG(DEFAULT_LOGGER, XBOX_LIVE_NAMESPACE::log_level::info, defaultCategory, msg)
 #define LOG_INFO_IF(boolean_expression, msg) if(boolean_expression) LOG_INFO(msg)
-#define LOGS_INFO LOGS(DEFAULT_LOGGER, xbox::services::log_level::info, defaultCategory)
+#define LOGS_INFO LOGS(DEFAULT_LOGGER, XBOX_LIVE_NAMESPACE::log_level::info, defaultCategory)
 #define LOGS_INFO_IF(boolean_expression) if(boolean_expression) LOGS_INFO
 
-#define IF_LOG_DEBUG() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, xbox::services::log_level::debug)
-#define LOG_DEBUG(msg) LOG(DEFAULT_LOGGER, xbox::services::log_level::debug, defaultCategory, msg)
+#define IF_LOG_DEBUG() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, XBOX_LIVE_NAMESPACE::log_level::debug)
+#define LOG_DEBUG(msg) LOG(DEFAULT_LOGGER, XBOX_LIVE_NAMESPACE::log_level::debug, defaultCategory, msg)
 #define LOG_DEBUG_IF(boolean_expression, msg) if(boolean_expression) LOG_DEBUG(msg)
-#define LOGS_DEBUG LOGS(DEFAULT_LOGGER, xbox::services::log_level::debug, defaultCategory)
+#define LOGS_DEBUG LOGS(DEFAULT_LOGGER, XBOX_LIVE_NAMESPACE::log_level::debug, defaultCategory)
 #define LOGS_DEBUG_IF(boolean_expression) if(boolean_expression) LOGS_DEBUG
 
 #if BEAM_API

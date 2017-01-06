@@ -13,9 +13,14 @@
 #include "request_signer.h"
 #include <WinHttp.h>
 
-using namespace xbox::services;
+using namespace XBOX_LIVE_NAMESPACE;
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
+
 
 xbox_live_server_impl::xbox_live_server_impl()
     :m_isSignedIn(false)
@@ -84,7 +89,7 @@ xbox_live_server_impl::signin(
     });
 }
 
-pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
 xbox_live_server_impl::get_token_and_signature(
     _In_ string_t httpMethod,
     _In_ string_t url,
@@ -102,7 +107,7 @@ xbox_live_server_impl::get_token_and_signature(
         );
 }
 
-pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
 xbox_live_server_impl::get_token_and_signature(
     _In_ string_t httpMethod,
     _In_ string_t url,
@@ -123,7 +128,7 @@ xbox_live_server_impl::get_token_and_signature(
         );
 }
 
-pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
 xbox_live_server_impl::get_token_and_signature_array(
     _In_ string_t httpMethod,
     _In_ string_t url,
@@ -142,7 +147,7 @@ xbox_live_server_impl::get_token_and_signature_array(
         );
 }
 
-pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
 xbox_live_server_impl::internal_get_token_and_signature(
     _In_ string_t httpMethod,
     _In_ const string_t& url,
@@ -170,4 +175,8 @@ xbox_live_server_impl::is_signed_in() const
     return m_isSignedIn;
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif

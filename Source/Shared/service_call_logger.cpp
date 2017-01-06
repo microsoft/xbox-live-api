@@ -12,9 +12,13 @@
 #include "service_call_logger.h"
 #include "service_call_logger_data.h"
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#endif
 
-static xbox::services::system::xbox_live_mutex g_serviceLoggerSingletonLock;
+static XBOX_LIVE_NAMESPACE::system::xbox_live_mutex g_serviceLoggerSingletonLock;
 static std::shared_ptr<service_call_logger> g_serviceLoggerSingleton;
 
 std::shared_ptr<service_call_logger> service_call_logger::get_singleton_instance()
@@ -145,4 +149,8 @@ void service_call_logger::add_data_to_file(_In_ const string_t& data)
     }
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+#endif

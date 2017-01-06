@@ -24,7 +24,9 @@
 #include <objbase.h>
 #endif
 #include "http_call_response.h"
+#if !BEAM_API
 #include "xsapi/presence.h"
+#endif
 #include "xsapi/system.h"
 #if !BEAM_API
 #include "presence_internal.h"
@@ -49,7 +51,7 @@ static std::shared_ptr<xsapi_singleton> g_xsapiSingleton;
 
 xsapi_singleton::xsapi_singleton() 
 #if !TV_API && !XSAPI_SERVER && !BEAM_API
-    : s_presenceWriterSingleton(std::shared_ptr<xbox::services::presence::presence_writer>(new xbox::services::presence::presence_writer()))
+    : s_presenceWriterSingleton(std::shared_ptr<XBOX_LIVE_NAMESPACE::presence::presence_writer>(new XBOX_LIVE_NAMESPACE::presence::presence_writer()))
 #endif
 {
 }
@@ -861,7 +863,7 @@ utils::convert_xbox_live_error_code_to_hresult(
 
 long utils::convert_http_status_to_hresult(_In_ uint32_t httpStatusCode)
 {
-    xbox::services::xbox_live_error_code errCode = static_cast<xbox::services::xbox_live_error_code>(httpStatusCode);
+    XBOX_LIVE_NAMESPACE::xbox_live_error_code errCode = static_cast<XBOX_LIVE_NAMESPACE::xbox_live_error_code>(httpStatusCode);
     long hr = HTTP_E_STATUS_UNEXPECTED;
 
     // 2xx are http success codes
@@ -1098,11 +1100,11 @@ string_t utils::convert_hresult_to_error_name(_In_ long hr)
 }
 #endif
 
-xbox::services::xbox_live_error_code
+XBOX_LIVE_NAMESPACE::xbox_live_error_code
 utils::convert_exception_to_xbox_live_error_code()
 {
     // Default value, if there is no exception appears, return no_error
-    xbox::services::xbox_live_error_code errCode = xbox_live_error_code::no_error;
+    XBOX_LIVE_NAMESPACE::xbox_live_error_code errCode = xbox_live_error_code::no_error;
 
     try
     {
@@ -1496,10 +1498,10 @@ string_t utils::datetime_to_string(
 uint32_t
 utils::try_get_master_title_id()
 {
-    auto titleId = xbox::services::xbox_live_app_config::get_app_config_singleton()->_Override_title_id_for_multiplayer();
+    auto titleId = XBOX_LIVE_NAMESPACE::xbox_live_app_config::get_app_config_singleton()->_Override_title_id_for_multiplayer();
     if (titleId == 0)
     {
-        titleId = xbox::services::xbox_live_app_config::get_app_config_singleton()->title_id();
+        titleId = XBOX_LIVE_NAMESPACE::xbox_live_app_config::get_app_config_singleton()->title_id();
     }
     return titleId;
 }
@@ -1507,10 +1509,10 @@ utils::try_get_master_title_id()
 string_t
 utils::try_get_override_scid()
 {
-    auto scid = xbox::services::xbox_live_app_config::get_app_config_singleton()->_Override_scid_for_multiplayer();
+    auto scid = XBOX_LIVE_NAMESPACE::xbox_live_app_config::get_app_config_singleton()->_Override_scid_for_multiplayer();
     if (scid.empty())
     {
-        scid = xbox::services::xbox_live_app_config::get_app_config_singleton()->scid();
+        scid = XBOX_LIVE_NAMESPACE::xbox_live_app_config::get_app_config_singleton()->scid();
     }
     return scid;
 }

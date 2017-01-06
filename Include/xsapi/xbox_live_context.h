@@ -65,7 +65,7 @@ public:
 
 private:
 
-    std::shared_ptr<xbox::services::xbox_live_context_server_impl> m_xboxLiveContextImpl;
+    std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_server_impl> m_xboxLiveContextImpl;
 };
 
 #endif
@@ -272,11 +272,7 @@ public:
 
 private:
 
-#if BEAM_API
-	std::shared_ptr<xbox::services::beam::xbox_live_context_impl> m_xboxLiveContextImpl;
-#else
-    std::shared_ptr<xbox::services::xbox_live_context_impl> m_xboxLiveContextImpl;
-#endif
+	std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_impl> m_xboxLiveContextImpl;
 };
 
 }}

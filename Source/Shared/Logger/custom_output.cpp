@@ -11,7 +11,6 @@
 #include "custom_output.h"
 #include "xsapi/system.h"
 
-
 #if BEAM_API
 using namespace xbox::services::beam::system;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_CPP_BEGIN

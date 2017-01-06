@@ -19,7 +19,11 @@
 #define PROPERTIES_FIELD _T("Properties")
 #define PROOFKEY_PROPERTY _T("ProofKey")
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
 
 const signature_policy token_request::auth_signature_policy(1, INT32_MAX, std::vector<string_t>());
 
@@ -166,4 +170,8 @@ web::json::value token_request::create_xtoken_request(
     return request;
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif

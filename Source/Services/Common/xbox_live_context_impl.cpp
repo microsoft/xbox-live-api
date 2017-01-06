@@ -14,10 +14,10 @@
 #include "xbox_system_factory.h"
 #include "xsapi/system.h"
 #include "xbox_live_context_impl.h"
+#if !BEAM_API
 #if !TV_API && !UNIT_TEST_SERVICES && !XSAPI_SERVER
 #include "notification_service.h"
 #endif
-#if BEAM_API
 #include "presence_internal.h"
 #include "real_time_activity_internal.h"
 #endif
@@ -36,7 +36,7 @@ xbox_live_context_impl::xbox_live_context_impl(
     m_signInContext(0),
     m_signOutContext(0)
 {
-    m_userContext = std::make_shared<xbox::services::user_context>(user);
+    m_userContext = std::make_shared<XBOX_LIVE_NAMESPACE::user_context>(user);
 }
 
 Windows::Xbox::System::User^
@@ -54,7 +54,7 @@ xbox_live_context_impl::xbox_live_context_impl(
     m_signOutContext(0)
 {
     user->_User_impl()->set_user_pointer(user);
-    m_userContext = std::make_shared<xbox::services::user_context>(user);
+    m_userContext = std::make_shared<XBOX_LIVE_NAMESPACE::user_context>(user);
 }
 
 #if XSAPI_CPP
@@ -71,7 +71,7 @@ xbox_live_context_impl::xbox_live_context_impl(
     m_signInContext(0),
     m_signOutContext(0)
 {
-    m_userContext = std::make_shared<xbox::services::user_context>(user);
+    m_userContext = std::make_shared<XBOX_LIVE_NAMESPACE::user_context>(user);
 }
 
 Microsoft::Xbox::Services::System::XboxLiveUser^
@@ -107,7 +107,9 @@ xbox_live_context_impl::~xbox_live_context_impl()
 #endif
     }
 
+#if !BEAM_API
     real_time_activity::real_time_activity_service_factory::get_singleton_instance()->remove_user_from_rta_map(m_userContext);
+#endif
 }
 
 
@@ -116,8 +118,10 @@ void xbox_live_context_impl::init()
     xbox_live_result<void> servicesConfigFileReadResult;
 
     m_appConfig = xbox_live_app_config::get_app_config_singleton();
-    m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_settings>();
+	m_xboxLiveContextSettings = std::make_shared<XBOX_LIVE_NAMESPACE::xbox_live_context_settings>();
+#if !BEAM_API
     init_real_time_activity_service_instance();
+#endif
 
 #if TV_API || UWP_API
     auto dispatcher = xbox_live_context_settings::_s_dispatcher;
@@ -145,30 +149,32 @@ void xbox_live_context_impl::init()
             dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal,
                 ref new Windows::UI::Core::DispatchedHandler([]()
             {
-                xbox::services::service_call_logging_config::get_singleton_instance()->_Register_for_protocol_activation();
+                XBOX_LIVE_NAMESPACE::service_call_logging_config::get_singleton_instance()->_Register_for_protocol_activation();
             }));
         }
     }
 
-    xbox::services::service_call_logging_config::get_singleton_instance()->_ReadLocalConfig();
+    XBOX_LIVE_NAMESPACE::service_call_logging_config::get_singleton_instance()->_ReadLocalConfig();
 #endif
 
     std::weak_ptr<xbox_live_context_impl> thisWeakPtr = shared_from_this();
 
-    m_profileService = xbox::services::social::profile_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-    m_reputationService = xbox::services::social::reputation_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-    m_leaderboardService = xbox::services::leaderboard::leaderboard_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-    m_achievementService = xbox::services::achievements::achievement_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, thisWeakPtr);
-    m_matchmakingService = xbox::services::matchmaking::matchmaking_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-    m_gameServerPlatformService = xbox::services::game_server_platform::game_server_platform_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-    m_titleStorageService = xbox::services::title_storage::title_storage_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-    m_privacyService = xbox::services::privacy::privacy_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-    m_presenceService = xbox::services::presence::presence_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
-    m_userStatisticsService = xbox::services::user_statistics::user_statistics_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
-    m_multiplayerService = xbox::services::multiplayer::multiplayer_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
-    m_socialService = xbox::services::social::social_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
-    m_stringService = xbox::services::system::string_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-    m_contextualSearchService = xbox::services::contextual_search::contextual_search_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
+#if !BEAM_API
+    m_profileService = XBOX_LIVE_NAMESPACE::social::profile_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
+    m_reputationService = XBOX_LIVE_NAMESPACE::social::reputation_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
+    m_leaderboardService = XBOX_LIVE_NAMESPACE::leaderboard::leaderboard_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
+    m_achievementService = XBOX_LIVE_NAMESPACE::achievements::achievement_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, thisWeakPtr);
+    m_matchmakingService = XBOX_LIVE_NAMESPACE::matchmaking::matchmaking_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
+    m_gameServerPlatformService = XBOX_LIVE_NAMESPACE::game_server_platform::game_server_platform_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
+    m_titleStorageService = XBOX_LIVE_NAMESPACE::title_storage::title_storage_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
+    m_privacyService = XBOX_LIVE_NAMESPACE::privacy::privacy_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
+    m_presenceService = XBOX_LIVE_NAMESPACE::presence::presence_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
+    m_userStatisticsService = XBOX_LIVE_NAMESPACE::user_statistics::user_statistics_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
+    m_multiplayerService = XBOX_LIVE_NAMESPACE::multiplayer::multiplayer_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
+	m_socialService = XBOX_LIVE_NAMESPACE::social::social_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
+	m_contextualSearchService = XBOX_LIVE_NAMESPACE::contextual_search::contextual_search_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
+#endif
+    m_stringService = XBOX_LIVE_NAMESPACE::system::string_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
 
 #if !XSAPI_SERVER
 
@@ -185,6 +191,7 @@ void xbox_live_context_impl::init()
 
 #if !XBOX_UWP
 
+#if !BEAM_API
     // Only start the presence writer on UAP
     presence::presence_writer::get_presence_writer_singleton()->start_writer(m_presenceService._Impl());
 
@@ -242,7 +249,8 @@ void xbox_live_context_impl::init()
             }
         });
 #endif
-    }
+	}
+#endif //!BEAM_API
 #endif
 #endif
 #endif
@@ -258,6 +266,7 @@ const string_t& xbox_live_context_impl::xbox_live_user_id()
     return m_userContext->xbox_user_id();
 }
 
+#if !BEAM_API
 social::profile_service&
 xbox_live_context_impl::profile_service()
 {
@@ -311,7 +320,7 @@ xbox_live_context_impl::init_real_time_activity_service_instance()
 {
     if (m_userContext->caller_context_type() == caller_context_type::title)
     {
-        m_realTimeActivityService = std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service>(new xbox::services::real_time_activity::real_time_activity_service(m_userContext, m_xboxLiveContextSettings, m_appConfig));
+        m_realTimeActivityService = std::shared_ptr<XBOX_LIVE_NAMESPACE::real_time_activity::real_time_activity_service>(new XBOX_LIVE_NAMESPACE::real_time_activity::real_time_activity_service(m_userContext, m_xboxLiveContextSettings, m_appConfig));
     }
     else
     {
@@ -349,16 +358,17 @@ xbox_live_context_impl::privacy_service()
     return m_privacyService;
 }
 
-system::string_service&
-xbox_live_context_impl::string_service()
-{
-    return m_stringService;
-}
-
 contextual_search::contextual_search_service&
 xbox_live_context_impl::contextual_search_service()
 {
     return m_contextualSearchService;
+}
+#endif
+
+system::string_service&
+xbox_live_context_impl::string_service()
+{
+	return m_stringService;
 }
 
 #if UWP_API || XSAPI_U

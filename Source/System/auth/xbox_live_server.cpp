@@ -11,9 +11,14 @@
 #include "xsapi/system.h"
 #include "xbox_live_server_impl.h"
 
-using namespace xbox::services;
+using namespace XBOX_LIVE_NAMESPACE;
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
+
 
 xbox_live_server::xbox_live_server()
 {
@@ -64,4 +69,8 @@ xbox_live_server::is_signed_in() const
     return m_server_impl->is_signed_in();
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif

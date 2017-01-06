@@ -208,8 +208,8 @@ public:
     /// Sign the request and get the response. Used for auth services.
     /// </summary>
     virtual pplx::task<std::shared_ptr<http_call_response>> get_response(
-        _In_ std::shared_ptr<xbox::services::system::ecdsa> proofKey,
-        _In_ const xbox::services::system::signature_policy& signaturePolicy,
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::system::ecdsa> proofKey,
+        _In_ const XBOX_LIVE_NAMESPACE::system::signature_policy& signaturePolicy,
         _In_ http_call_response_body_type httpCallResponseBodyType
         ) = 0;
 #endif
@@ -253,8 +253,8 @@ public:
 
 #if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
     pplx::task<std::shared_ptr<http_call_response>> get_response(
-        _In_ std::shared_ptr<xbox::services::system::ecdsa> proofKey,
-        _In_ const xbox::services::system::signature_policy& signaturePolicy,
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::system::ecdsa> proofKey,
+        _In_ const XBOX_LIVE_NAMESPACE::system::signature_policy& signaturePolicy,
         _In_ http_call_response_body_type httpCallResponseBodyType
          ) override;
 #endif

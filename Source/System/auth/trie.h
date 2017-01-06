@@ -16,7 +16,11 @@
 
 #include "shared_macros.h"
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
 
 std::vector<string_t> GetSegments(string_t path);
 
@@ -226,4 +230,9 @@ bool trie<T>::get_exact(_In_ string_t path, _Out_ T& result) const
     return false;
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif
+

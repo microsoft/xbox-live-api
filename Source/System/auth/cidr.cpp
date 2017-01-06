@@ -14,7 +14,11 @@
 #include "ip_address.h"
 #include "cidr.h"
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_BEGIN
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+#endif
 
 bool parse_helper(_In_ const string_t& cidrStr, _Out_ ip_address& addr, _Out_ int& prefix)
 {
@@ -115,4 +119,8 @@ bool cidr::operator==(_In_ const cidr& rhs) const
     return m_addr == rhs.m_addr && m_prefix == rhs.m_prefix;
 }
 
+#if BEAM_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEAM_SYSTEM_CPP_END
+#else
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif
