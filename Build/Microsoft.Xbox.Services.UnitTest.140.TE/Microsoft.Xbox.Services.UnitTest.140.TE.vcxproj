@@ -314,6 +314,11 @@
     <ClInclude Include="..\..\Tests\UnitTests\Mocks\StockMocks.h" />
     <ClInclude Include="..\..\Tests\UnitTests\Support\iso8601.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14\casablanca140.static.vcxproj">
+      <Project>{04d42f35-e5d5-4d95-980e-1bd7e900f2dd}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\..\External\Packages\boost.1.58.0.0\build\native\boost.targets" Condition="Exists('..\..\External\Packages\boost.1.58.0.0\build\native\boost.targets')" />
     <Import Project="..\..\External\Packages\boost_system-vc140.1.58.0-vs140rc\build\native\boost_system-vc140.targets" Condition="Exists('..\..\External\Packages\boost_system-vc140.1.58.0-vs140rc\build\native\boost_system-vc140.targets')" />
@@ -323,11 +328,6 @@
     <Import Project="..\..\External\Packages\boost_date_time-vc140.1.58.0-vs140rc\build\native\boost_date_time-vc140.targets" Condition="Exists('..\..\External\Packages\boost_date_time-vc140.1.58.0-vs140rc\build\native\boost_date_time-vc140.targets')" />
     <Import Project="..\..\External\Packages\boost_regex-vc140.1.58.0-vs140rc\build\native\boost_regex-vc140.targets" Condition="Exists('..\..\External\Packages\boost_regex-vc140.1.58.0-vs140rc\build\native\boost_regex-vc140.targets')" />
   </ImportGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Casablanca\Release\src\build\vs14\casablanca140.static.vcxproj">
-      <Project>{04d42f35-e5d5-4d95-980e-1bd7e900f2dd}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup>
     <ProjectFolder>Microsoft.Xbox.System.UnitTestNew</ProjectFolder>
     <OutDir>$(ProjectDir)..\..\Binaries\$(Configuration)\$(Platform)\$(ProjectName)\</OutDir>
