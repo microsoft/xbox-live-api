@@ -241,7 +241,7 @@
     <ProjectFolder>Microsoft.Xbox.System.UnitTest</ProjectFolder>
     <OutDir>$(ProjectDir)..\..\Binaries\$(Configuration)\$(Platform)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
-    <LocalDebuggerCommand>$(ProjectDir)..\..\TAEF\Binaries\Release\$(PlatformTarget)\TestExecution\TE.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>C:\Program Files (x86)\Windows Kits\10\Testing\Runtimes\TAEF\x64\TE.exe</LocalDebuggerCommand>
     <LocalDebuggerCommandArguments>$(TargetPath) /inproc</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
