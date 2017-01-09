@@ -233,8 +233,12 @@ namespace app_service {
 				}
 
                 REQUEST message = { requestTracker->request_id(), params... };
+
+                Platform::String^ protocolUrl = m_appChannelName + "://";
+                Windows::Foundation::Uri^ uri = ref new Windows::Foundation::Uri(protocolUrl);
+
 				auto createWindowTask = uiMode == ui_mode::allowed ?
-					concurrency::create_task(Windows::System::Launcher::LaunchUriAsync(ref new Windows::Foundation::Uri(m_appChannelName))) :
+					concurrency::create_task(Windows::System::Launcher::LaunchUriAsync(uri)) :
 					task_from_result(true);
 
 				return createWindowTask
