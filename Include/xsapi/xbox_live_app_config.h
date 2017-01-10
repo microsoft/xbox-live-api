@@ -14,10 +14,7 @@
 #import <UIKit/UIKit.h>
 #endif
 
-namespace xbox { namespace services {
-#if BEAM_API
-namespace beam {
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
     namespace system {
         class user_impl_idp;
@@ -320,7 +317,4 @@ private:
 #endif
 };
 
-}}
-#if BEAM_API
-}
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

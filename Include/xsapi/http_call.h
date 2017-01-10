@@ -10,11 +10,7 @@
 #pragma once
 
  
-
-namespace xbox { namespace services {
-#if BEAM_API
-namespace beam {
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 /// <summary>
 /// Enumerates the type of structured data contained in the http response body.
@@ -348,7 +344,7 @@ public:
     virtual void set_add_default_headers(_In_ bool value) = 0;
     
     /// <summary>
-    /// Returns a flag inidicating if default headers should be added or not.
+    /// Returns a flag indicating if default headers should be added or not.
     /// </summary>
     virtual bool add_default_headers() const = 0;
 
@@ -362,8 +358,4 @@ _XSAPIIMP std::shared_ptr<http_call> create_xbox_live_http_call(
     _In_ const web::uri& pathQueryFragment
     );
 
-} }
-
-#if BEAM_API
-}
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

@@ -11,10 +11,7 @@
 
 
 #if UWP_API || XSAPI_U || XSAPI_CENTENNIAL
-namespace xbox { namespace services {
-#if BEAM_API
-namespace beam {
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
     /// <summary>
     /// Contains classes that let you send an in-game event.
     /// </summary>
@@ -99,9 +96,7 @@ private:
 #endif
 };
 
-}}}
-#if BEAM_API
-}
-#endif
+} // namespace events
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
 
 #endif

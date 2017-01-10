@@ -10,10 +10,7 @@
 #pragma once
 #include "pch.h"
 
-namespace xbox { namespace services {
-#if BEAM_API
-namespace beam {
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 /// <summary>
 /// Enumerates the type of data contained in the http request body.
@@ -78,7 +75,4 @@ private:
     http_request_message_type m_httpRequestMessageType;
 };
 
-}}
-#if BEAM_API
-}
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

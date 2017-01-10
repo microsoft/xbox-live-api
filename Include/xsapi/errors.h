@@ -17,13 +17,14 @@
 #endif
 
 namespace xbox { 
+
     /// <summary>
     /// Contains classes, enumerations, and namespaces used to indicate error conditions for Xbox Live service components.
     /// </summary>
-	namespace services {
-
 #if BEAM_API
-	namespace beam {
+    namespace beam {
+#else
+    namespace services {
 #endif
 
         /// <summary>
@@ -1219,30 +1220,18 @@ namespace xbox {
     }
 };
 
-#if BEAM_API
-}
-#endif
-
 #if XSAPI_U
-namespace xbox {
-    namespace services {
-#if BEAM_API
-    namespace beam {
-#endif
-        inline std::error_code make_error_code(XBOX_LIVE_NAMESPACE::xbox_live_error_code e)
-        {
-            return std::error_code(static_cast<int>(e), XBOX_LIVE_NAMESPACE::xbox_services_error_code_category());
-        }
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+	inline std::error_code make_error_code(XBOX_LIVE_NAMESPACE::xbox_live_error_code e)
+	{
+		return std::error_code(static_cast<int>(e), XBOX_LIVE_NAMESPACE::xbox_services_error_code_category());
+	}
 
-        inline std::error_condition make_error_condition(XBOX_LIVE_NAMESPACE::xbox_live_error_condition e)
-        {
-            return std::error_condition(static_cast<int>(e), XBOX_LIVE_NAMESPACE::xbox_services_error_condition_category());
-        }
-#if BEAM_API
-    }
-#endif
-    }
-}
+	inline std::error_condition make_error_condition(XBOX_LIVE_NAMESPACE::xbox_live_error_condition e)
+	{
+		return std::error_condition(static_cast<int>(e), XBOX_LIVE_NAMESPACE::xbox_services_error_condition_category());
+	}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
 #endif
 
 
@@ -1265,10 +1254,7 @@ namespace std
     struct is_error_condition_enum<XBOX_LIVE_NAMESPACE::xbox_live_error_condition> : public true_type{};
 }
 
-namespace xbox { namespace services {
-#if BEAM_API
-namespace beam {
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 template<typename T>
 class xbox_live_result
@@ -1537,8 +1523,5 @@ xbox_live_result<T>& xbox_live_result<T>::operator=(_In_ xbox_live_result&& othe
     return *this;
 }
 
-}}
-#if BEAM_API
-}
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
 

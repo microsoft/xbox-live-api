@@ -9,12 +9,9 @@
 //*********************************************************
 #pragma once
 
-namespace xbox { namespace services {
-#if BEAM_API
-namespace beam {
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-    class xbox_live_context_impl;
+class xbox_live_context_impl;
 
 class service_call_logging_config
 {
@@ -56,7 +53,4 @@ private:
     friend xbox_live_context_impl;
 };
 
-}}
-#if BEAM_API
-}
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

@@ -27,10 +27,7 @@
 #include "xsapi/multiplayer.h"
 #endif
 
-namespace xbox { namespace services {
-#if BEAM_API
-namespace beam {
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 class xbox_live_context_server_impl;
 
 #if XSAPI_SERVER
@@ -121,17 +118,17 @@ public:
     /// </summary>
     _XSAPIIMP Microsoft::Xbox::Services::Beam::System::XboxLiveUser^ user();
 #else
-	/// <summary>
-	/// Creates an xbox_live_context from a Microsoft::Xbox::Services::System::XboxLiveUser^
-	/// </summary>
-	_XSAPIIMP xbox_live_context(
-		_In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user
-	);
+    /// <summary>
+    /// Creates an xbox_live_context from a Microsoft::Xbox::Services::System::XboxLiveUser^
+    /// </summary>
+    _XSAPIIMP xbox_live_context(
+    	_In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user
+    );
 
-	/// <summary>
-	/// Returns the associated system XboxLiveUser.
-	/// </summary>
-	_XSAPIIMP Microsoft::Xbox::Services::System::XboxLiveUser^ user();
+    /// <summary>
+    /// Returns the associated system XboxLiveUser.
+    /// </summary>
+    _XSAPIIMP Microsoft::Xbox::Services::System::XboxLiveUser^ user();
 #endif
 #endif
 
@@ -183,40 +180,40 @@ public:
     /// </summary>
     _XSAPIIMP matchmaking::matchmaking_service& matchmaking_service();
 
-	/// <summary>
-	/// A service for managing real-time activity.
-	/// </summary>
-	_XSAPIIMP const std::shared_ptr<real_time_activity::real_time_activity_service>& real_time_activity_service();
+    /// <summary>
+    /// A service for managing real-time activity.
+    /// </summary>
+    _XSAPIIMP const std::shared_ptr<real_time_activity::real_time_activity_service>& real_time_activity_service();
 
-	/// <summary>
-	/// A service for using the Game Server Platform.
-	/// </summary>
-	_XSAPIIMP game_server_platform::game_server_platform_service& game_server_platform_service();
+    /// <summary>
+    /// A service for using the Game Server Platform.
+    /// </summary>
+    _XSAPIIMP game_server_platform::game_server_platform_service& game_server_platform_service();
 
-	/// <summary>
-	/// A service for managing Rich Presence.
-	/// </summary>
-	_XSAPIIMP presence::presence_service& presence_service();
+    /// <summary>
+    /// A service for managing Rich Presence.
+    /// </summary>
+    _XSAPIIMP presence::presence_service& presence_service();
 
-	/// <summary>
-	/// A service for storing data in the cloud.
-	/// </summary>
-	_XSAPIIMP title_storage::title_storage_service& title_storage_service();
+    /// <summary>
+    /// A service for storing data in the cloud.
+    /// </summary>
+    _XSAPIIMP title_storage::title_storage_service& title_storage_service();
 
-	/// <summary>
-	/// A service for managing privacy settings.
-	/// </summary>
-	_XSAPIIMP privacy::privacy_service& privacy_service();
+    /// <summary>
+    /// A service for managing privacy settings.
+    /// </summary>
+    _XSAPIIMP privacy::privacy_service& privacy_service();
 
-	/// <summary>
-	/// A service used to check for offensive strings.
-	/// </summary>
-	_XSAPIIMP system::string_service& string_service();
+    /// <summary>
+    /// A service used to check for offensive strings.
+    /// </summary>
+    _XSAPIIMP system::string_service& string_service();
 
-	/// <summary>
-	/// A service for contextual search.
-	/// </summary>
-	_XSAPIIMP contextual_search::contextual_search_service& contextual_search_service();
+    /// <summary>
+    /// A service for contextual search.
+    /// </summary>
+    _XSAPIIMP contextual_search::contextual_search_service& contextual_search_service();
 #endif
 
     /// <summary>
@@ -272,10 +269,7 @@ public:
 
 private:
 
-	std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_impl> m_xboxLiveContextImpl;
+    std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_impl> m_xboxLiveContextImpl;
 };
 
 }}
-#if BEAM_API
-}
-#endif

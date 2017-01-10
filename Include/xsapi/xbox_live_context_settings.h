@@ -15,10 +15,7 @@
 #include <unordered_map>
 #include "xsapi/xbox_service_call_routed_event_args.h"
 
-namespace xbox { namespace services {
-#if BEAM_API
-namespace beam {
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 #define DEFAULT_HTTP_TIMEOUT_SECONDS (30)
 #if UNIT_TEST_SERVICES
@@ -330,7 +327,4 @@ private:
 };
 
 
-}}
-#if BEAM_API
-}
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

@@ -20,23 +20,10 @@
 #include "xsapi/mem.h"
 
 // Forward
-namespace xbox {
-    namespace services {
-#if BEAM_API
-        namespace beam {
-#endif
-        namespace system {
-            class xbox_live_services_settings;
-        }
-#if BEAM_API
-        }
-#endif
-    }
-}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+    class xbox_live_services_settings;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
 
-namespace test {
-	class testClass;
-}
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -559,17 +546,11 @@ public:
     }
 
     template<typename T>
-#if BEAM_API
-	static pplx::task <xbox::services::beam::xbox_live_result<T>> create_exception_free_task(
-		_In_ const pplx::task <xbox::services::beam::xbox_live_result<T>>& t
+	static pplx::task <XBOX_LIVE_NAMESPACE::xbox_live_result<T>> create_exception_free_task(
+		_In_ const pplx::task <XBOX_LIVE_NAMESPACE::xbox_live_result<T>>& t
 	)
-#else
-    static pplx::task <xbox::services::xbox_live_result<T>> create_exception_free_task(
-        _In_ const pplx::task <xbox::services::xbox_live_result<T>>& t
-    )
-#endif
     {
-        return t.then([](pplx::task <xbox::services::xbox_live_result<T>> result)
+        return t.then([](pplx::task <XBOX_LIVE_NAMESPACE::xbox_live_result<T>> result)
         {
             try
             {
@@ -577,7 +558,7 @@ public:
             }
             catch (const std::exception& e)
             {
-                xbox_live_error_code err = xbox::services::utils::convert_exception_to_xbox_live_error_code();
+                xbox_live_error_code err = XBOX_LIVE_NAMESPACE::utils::convert_exception_to_xbox_live_error_code();
                 return xbox_live_result<T>(err, e.what());
             }
 #ifdef __cplusplus_winrt

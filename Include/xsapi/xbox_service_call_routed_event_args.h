@@ -11,10 +11,7 @@
 #include "pch.h"
 #include "xsapi/http_call_request_message.h"
 
-namespace xbox { namespace services {
-#if BEAM_API
-namespace beam {
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 /// <summary>
 /// Contains information about a service call.
@@ -142,7 +139,4 @@ private:
 };
 
 
-}}
-#if BEAM_API
-}
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

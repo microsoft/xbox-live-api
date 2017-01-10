@@ -19,10 +19,7 @@
 
 #endif
 
-namespace xbox { namespace services {
-#if BEAM_API
-namespace beam {
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 class xbox_live_context_impl : public std::enable_shared_from_this < xbox_live_context_impl >
 {
@@ -206,8 +203,8 @@ private:
     presence::presence_service m_presenceService;
     game_server_platform::game_server_platform_service m_gameServerPlatformService;
     title_storage::title_storage_service m_titleStorageService;
-	privacy::privacy_service m_privacyService;
-	contextual_search::contextual_search_service m_contextualSearchService;
+    privacy::privacy_service m_privacyService;
+    contextual_search::contextual_search_service m_contextualSearchService;
 #endif
     system::string_service m_stringService;
 
@@ -226,7 +223,4 @@ private:
     friend class xbox_live_context;
 };
 
-}}
-#if BEAM_API
-}
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

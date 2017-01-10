@@ -24,10 +24,7 @@
 #endif
 
 
-namespace xbox { namespace services {
-#if BEAM_API
-namespace beam {
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
     class http_call_impl;
     class xbox_live_context_impl;
 
@@ -44,15 +41,9 @@ namespace beam {
         class multiplayer_local_user;
     }}
 #endif
-}}
-#if BEAM_API
-}
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
 
-namespace xbox { namespace services { 
-#if BEAM_API
-    namespace beam {
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
     /// <summary>
     /// Configuration information for Xbox Live service objects. 
     /// </summary>
@@ -785,7 +776,5 @@ private:
     std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> m_xboxLiveContextSettings;
     std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_app_config> m_appConfig;
 };
-}}}
-#if BEAM_API
-}
-#endif
+} // namespace system
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
