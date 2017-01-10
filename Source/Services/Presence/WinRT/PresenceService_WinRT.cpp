@@ -15,9 +15,9 @@
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Platform;
-using namespace xbox::services::presence;
+using namespace XBOX_LIVE_NAMESPACE::presence;
 using namespace Microsoft::Xbox::Services::System;
-using namespace xbox::services;
+using namespace XBOX_LIVE_NAMESPACE;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_BEGIN
 

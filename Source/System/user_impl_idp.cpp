@@ -26,9 +26,14 @@ using namespace Platform;
 using namespace Windows::Security::Authentication::Web::Core;
 using namespace Windows::Security::Credentials;
 using namespace Windows::System::Threading;
-using namespace xbox::services;
+using namespace XBOX_LIVE_NAMESPACE;
+#if BEAM_API
+using namespace Microsoft::Xbox::Beam;
+using namespace Microsoft::Xbox::Beam::System;
+#else
 using namespace Microsoft::Xbox::Services;
 using namespace Microsoft::Xbox::Services::System;
+#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 

@@ -11,12 +11,14 @@
 #include "xsapi/real_time_activity.h"
 
 #if !XSAPI_U
-namespace xbox { namespace services { namespace experimental { namespace social { namespace manager {
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+namespace experimental { namespace social { namespace manager {
     enum class change_list_enum;
-} } } } }
+} } }
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
 #endif
 
-namespace xbox { namespace services {
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
     class xbox_live_context_impl;
     /// <summary>
     /// Contains classes and enumerations that let you retrieve
@@ -855,10 +857,10 @@ private:
     presence_service();
 
     presence_service(
-        _In_ std::shared_ptr<xbox::services::user_context> userContext,
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
-        _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> realTimeActivityService
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> userContext,
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> xboxLiveContextSettings,
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_app_config> appConfig,
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::real_time_activity::real_time_activity_service> realTimeActivityService
         );
 
     static string_t set_presence_sub_path(_In_ const string_t& xboxUserId);
@@ -873,4 +875,5 @@ private:
     friend xbox_live_context_impl;
 };
 
-}}}
+} // namespace presence
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

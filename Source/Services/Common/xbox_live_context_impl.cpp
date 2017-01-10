@@ -114,7 +114,7 @@ void xbox_live_context_impl::init()
     xbox_live_result<void> servicesConfigFileReadResult;
 
     m_appConfig = xbox_live_app_config::get_app_config_singleton();
-	m_xboxLiveContextSettings = std::make_shared<XBOX_LIVE_NAMESPACE::xbox_live_context_settings>();
+m_xboxLiveContextSettings = std::make_shared<XBOX_LIVE_NAMESPACE::xbox_live_context_settings>();
 #if !BEAM_API
     init_real_time_activity_service_instance();
 #endif
@@ -167,8 +167,8 @@ void xbox_live_context_impl::init()
     m_presenceService = XBOX_LIVE_NAMESPACE::presence::presence_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
     m_userStatisticsService = XBOX_LIVE_NAMESPACE::user_statistics::user_statistics_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
     m_multiplayerService = XBOX_LIVE_NAMESPACE::multiplayer::multiplayer_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
-	m_socialService = XBOX_LIVE_NAMESPACE::social::social_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
-	m_contextualSearchService = XBOX_LIVE_NAMESPACE::contextual_search::contextual_search_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
+    m_socialService = XBOX_LIVE_NAMESPACE::social::social_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
+    m_contextualSearchService = XBOX_LIVE_NAMESPACE::contextual_search::contextual_search_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
 #endif
     m_stringService = XBOX_LIVE_NAMESPACE::system::string_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
 
