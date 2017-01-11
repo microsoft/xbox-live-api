@@ -245,7 +245,7 @@ m_xboxLiveContextSettings = std::make_shared<XBOX_LIVE_NAMESPACE::xbox_live_cont
             }
         });
 #endif
-	}
+    }
 #endif //!BEAM_API
 #endif
 #endif

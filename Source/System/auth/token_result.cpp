@@ -18,7 +18,6 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-
 token_result::token_result() :
     m_expiration(0),
     m_httpStatusCode(0)

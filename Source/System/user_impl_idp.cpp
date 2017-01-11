@@ -28,8 +28,8 @@ using namespace Windows::Security::Credentials;
 using namespace Windows::System::Threading;
 using namespace XBOX_LIVE_NAMESPACE;
 #if BEAM_API
-using namespace Microsoft::Xbox::Beam;
-using namespace Microsoft::Xbox::Beam::System;
+using namespace Microsoft::Xbox::Services::Beam;
+using namespace Microsoft::Xbox::Services::Beam::System;
 #else
 using namespace Microsoft::Xbox::Services;
 using namespace Microsoft::Xbox::Services::System;

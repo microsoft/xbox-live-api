@@ -16,16 +16,10 @@
 using namespace Platform;
 using namespace Windows::Foundation::Collections;
 #if !XSAPI_CPP
-#if BEAM_API
-using namespace Microsoft::Xbox::Beam::System;
-#else
 using namespace Microsoft::Xbox::Services::System;
 #endif
 #endif
-#endif
-
-using namespace XBOX_LIVE_NAMESPACE::system;
-
+using namespace xbox::services::system;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 

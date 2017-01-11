@@ -16,17 +16,14 @@
 #endif
 #endif
 
-namespace xbox { 
-
+namespace xbox {
     /// <summary>
     /// Contains classes, enumerations, and namespaces used to indicate error conditions for Xbox Live service components.
     /// </summary>
+    namespace services {
 #if BEAM_API
     namespace beam {
-#else
-    namespace services {
 #endif
-
         /// <summary>
         /// Enumeration values that define the Xbox Live API error conditions.
         /// </summary>
@@ -1524,4 +1521,3 @@ xbox_live_result<T>& xbox_live_result<T>::operator=(_In_ xbox_live_result&& othe
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-

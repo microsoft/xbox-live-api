@@ -34,24 +34,7 @@ xbox_live_context::user()
     return m_xboxLiveContextImpl->user();
 }
 
-#elif BEAM_API
-
-xbox_live_context::xbox_live_context(
-    _In_ std::shared_ptr<beam::system::xbox_live_user> user
-)
-{
-    user->_User_impl()->set_user_pointer(user);
-    m_xboxLiveContextImpl = std::make_shared<xbox_live_context_impl>(user);
-    m_xboxLiveContextImpl->init();
-}
-
-std::shared_ptr<beam::system::xbox_live_user>
-xbox_live_context::user()
-{
-    return m_xboxLiveContextImpl->user();
-}
-
-#elif XSAPI_CPP
+#elif BEAM_API || XSAPI_CPP
 
 xbox_live_context::xbox_live_context(
     _In_ std::shared_ptr<system::xbox_live_user> user

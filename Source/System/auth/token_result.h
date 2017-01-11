@@ -128,5 +128,5 @@ private:
     uint32_t m_httpStatusCode;
 };
 
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+

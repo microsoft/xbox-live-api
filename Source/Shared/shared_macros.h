@@ -44,12 +44,12 @@
 #define THROW_CPP_RUNTIME_IF(x,y) if ( x ) { throw std::runtime_error(y); }
 
 #if BEAM_API
-#define XBOX_LIVE_NAMESPACE xbox::beam
+#define XBOX_LIVE_NAMESPACE xbox::services::beam
 
-#define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN                     namespace xbox { namespace beam {
-#define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END                       }}
-#define NAMESPACE_MICROSOFT_XBOX_SERVICES_BEGIN                         namespace Microsoft { namespace Xbox { namespace Beam {
-#define NAMESPACE_MICROSOFT_XBOX_SERVICES_END                           }}}
+#define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN                     namespace xbox { namespace services { namespace beam {
+#define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END                       }}}
+#define NAMESPACE_MICROSOFT_XBOX_SERVICES_BEGIN                         namespace Microsoft { namespace Xbox { namespace Services { namespace Beam {
+#define NAMESPACE_MICROSOFT_XBOX_SERVICES_END                           }}}}
 #else
 #define XBOX_LIVE_NAMESPACE xbox::services
 

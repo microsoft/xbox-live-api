@@ -132,7 +132,7 @@ protected:
     static function_context s_signInCompletedHandlerIndexer;
     static function_context s_signOutCompletedHandlerIndexer;
     static XBOX_LIVE_NAMESPACE::system::xbox_live_mutex s_trackingUsersLock;
-	XBOX_LIVE_NAMESPACE::system::xbox_live_mutex m_lock;
+    XBOX_LIVE_NAMESPACE::system::xbox_live_mutex m_lock;
 };
 
 #if UWP_API

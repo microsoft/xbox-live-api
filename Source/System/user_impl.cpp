@@ -21,14 +21,12 @@
 using namespace std;
 using namespace pplx;
 
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
 std::unordered_map<function_context, std::function<void(const sign_out_completed_event_args&)>> user_impl::s_signOutCompletedHandlers;
 std::unordered_map<function_context, std::function<void(const string_t&)>> user_impl::s_signInCompletedHandlers;
 function_context user_impl::s_signOutCompletedHandlerIndexer = 0;
 function_context user_impl::s_signInCompletedHandlerIndexer = 0;
-
 XBOX_LIVE_NAMESPACE::system::xbox_live_mutex user_impl::s_trackingUsersLock;
 
 std::shared_ptr<user_impl>

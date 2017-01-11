@@ -11,7 +11,6 @@
 #include "system_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-
 namespace presence {
 
 /// <summary>

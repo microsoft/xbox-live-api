@@ -22,9 +22,6 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
- 
-
-
 enum class xbox_live_api
 {
     unspecified,
