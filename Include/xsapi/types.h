@@ -107,17 +107,17 @@ typedef std::chrono::steady_clock chrono_clock_t;
 // Forward declarations
 // Forward declarations
 namespace xbox {
-	namespace services {
+    namespace services {
 #if BEAM_API
-		namespace beam {
+        namespace beam {
 #endif
-			class user_context;
-			class xbox_live_context_settings;
-			class local_config;
+            class user_context;
+            class xbox_live_context_settings;
+            class local_config;
 #if BEAM_API
-		}
+        }
 #endif
-	}
+    }
 }
 
 

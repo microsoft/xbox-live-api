@@ -108,48 +108,48 @@ public:
     /// <summary>
     /// A service for managing matchmaking sessions.
     /// </summary>
-	matchmaking::matchmaking_service& matchmaking_service();
+    matchmaking::matchmaking_service& matchmaking_service();
 
-	/// <summary>
-	/// A service for managing real-time activity.
-	/// </summary>
-	const std::shared_ptr<real_time_activity::real_time_activity_service>& real_time_activity_service();
+    /// <summary>
+    /// A service for managing real-time activity.
+    /// </summary>
+    const std::shared_ptr<real_time_activity::real_time_activity_service>& real_time_activity_service();
 
-	/// <summary>
-	/// A service for using the Game Server Platform.
-	/// </summary>
-	game_server_platform::game_server_platform_service& game_server_platform_service();
+    /// <summary>
+    /// A service for using the Game Server Platform.
+    /// </summary>
+    game_server_platform::game_server_platform_service& game_server_platform_service();
 
-	/// <summary>
-	/// A service for managing Rich Presence.
-	/// </summary>
-	presence::presence_service& presence_service();
+    /// <summary>
+    /// A service for managing Rich Presence.
+    /// </summary>
+    presence::presence_service& presence_service();
 
-	/// <summary>
-	/// A service for storing data in the cloud.
-	/// </summary>
-	title_storage::title_storage_service& title_storage_service();
+    /// <summary>
+    /// A service for storing data in the cloud.
+    /// </summary>
+    title_storage::title_storage_service& title_storage_service();
 
-	/// <summary>
-	/// A service for managing privacy settings.
-	/// </summary>
-	privacy::privacy_service& privacy_service();
+    /// <summary>
+    /// A service for managing privacy settings.
+    /// </summary>
+    privacy::privacy_service& privacy_service();
 
-	/// <summary>
-	/// A service for contextual search.
-	/// </summary>
-	contextual_search::contextual_search_service& contextual_search_service();
+    /// <summary>
+    /// A service for contextual search.
+    /// </summary>
+    contextual_search::contextual_search_service& contextual_search_service();
 #endif
 
-	/// <summary>
-	/// Returns an object containing Xbox Live app config such as title ID
-	/// </summary>
-	std::shared_ptr<xbox_live_app_config> application_config();
+    /// <summary>
+    /// Returns an object containing Xbox Live app config such as title ID
+    /// </summary>
+    std::shared_ptr<xbox_live_app_config> application_config();
 
-	/// <summary>
-	/// Returns an object containing settings that apply to all REST calls made such as retry and diagnostic settings.
-	/// </summary>
-	std::shared_ptr<xbox_live_context_settings> settings();
+    /// <summary>
+    /// Returns an object containing settings that apply to all REST calls made such as retry and diagnostic settings.
+    /// </summary>
+    std::shared_ptr<xbox_live_context_settings> settings();
 
     /// <summary>
     /// A service used to check for offensive strings.

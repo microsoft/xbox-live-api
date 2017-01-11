@@ -272,4 +272,4 @@ private:
     std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_impl> m_xboxLiveContextImpl;
 };
 
-}}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

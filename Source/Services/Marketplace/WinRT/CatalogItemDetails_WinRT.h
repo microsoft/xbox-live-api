@@ -172,7 +172,5 @@ private:
     Windows::Foundation::Collections::IVectorView<CatalogItemAvailability^>^ m_availabilities;
 };
 
-} // namespace Marketplace
-} // namespace Services
-} // namespace Xbox
-} // namespace Microsoft
+NAMESPACE_MICROSOFT_XBOX_SERVICES_MARKETPLACE_END
+
