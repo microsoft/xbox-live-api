@@ -108,15 +108,12 @@
       $(ProjectDir)..\..\Tests\UnitTests\Mocks;
       $(ProjectDir)..\..\Tests\UnitTests\Support;
       ..\..\External\cpprestsdk\Release\include;
-      ..\..\TAEF\Include;
-      ..\..\MorroMock;
+      c:\Program Files (x86)\Windows Kits\10\Testing\Development\inc;
       %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories Condition="'$(Platform)'=='x64'">
-        ..\..\TAEF\Library\Release\x64;%(AdditionalLibraryDirectories)
-      </AdditionalLibraryDirectories>
-      <AdditionalLibraryDirectories Condition="'$(Platform)'=='Win32'">$(ProjectDir)..\..\TAEF\Library\Release\x86\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories Condition="'$(Platform)'=='x64'">C:\Program Files (x86)\Windows Kits\10\Testing\Development\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories Condition="'$(Platform)'=='Win32'">C:\Program Files (x86)\Windows Kits\10\Testing\Development\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup>
@@ -248,7 +245,7 @@
     <ProjectFolder>Microsoft.Xbox.System.UnitTest</ProjectFolder>
     <OutDir>$(ProjectDir)..\..\Binaries\$(Configuration)\$(Platform)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
-    <LocalDebuggerCommand>$(ProjectDir)..\..\TAEF\Binaries\Release\$(PlatformTarget)\TestExecution\TE.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>C:\Program Files (x86)\Windows Kits\10\Testing\Runtimes\TAEF\x64\TE.exe</LocalDebuggerCommand>
     <LocalDebuggerCommandArguments>$(TargetPath) /inproc</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>

@@ -410,6 +410,7 @@ multiplayer_client_pending_reader::process_match_events()
                 if (matchStatus == match_status::completed)
                 {
                     m_gameClient->update_game_session(matchSession);
+                    m_gameClient->update_objects(matchSession, m_lobbyClient->session());
                     m_lobbyClient->advertise_game_session();
                 }
 
