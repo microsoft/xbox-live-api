@@ -546,9 +546,9 @@ public:
     }
 
     template<typename T>
-	static pplx::task <XBOX_LIVE_NAMESPACE::xbox_live_result<T>> create_exception_free_task(
-		_In_ const pplx::task <XBOX_LIVE_NAMESPACE::xbox_live_result<T>>& t
-	)
+    static pplx::task <XBOX_LIVE_NAMESPACE::xbox_live_result<T>> create_exception_free_task(
+        _In_ const pplx::task <XBOX_LIVE_NAMESPACE::xbox_live_result<T>>& t
+    )
     {
         return t.then([](pplx::task <XBOX_LIVE_NAMESPACE::xbox_live_result<T>> result)
         {
