@@ -10,7 +10,10 @@
 #pragma once
 
 // forward declarations
-namespace Microsoft { namespace Xbox { namespace Services { class Utils; } } }
+NAMESPACE_MICROSOFT_XBOX_SERVICES_BEGIN
+class Utils;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_END;
+
 
 // preprocessor workaround
 // to work with L##__FUNCTION__ and L##__FILE__ statements.

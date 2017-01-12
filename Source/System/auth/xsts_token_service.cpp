@@ -14,7 +14,8 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-pplx::task<xbox::services::xbox_live_result<token_result>>
+
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>>
 xsts_token_service_impl::get_x_token_from_service(
     _In_ std::shared_ptr<ecdsa> proofKey,
     _In_ string_t deviceToken,
@@ -64,7 +65,7 @@ xsts_token_service_impl::get_x_token_from_service(
         str << "Http status: ";
         str << response->http_status();
 
-        xbox::services::xbox_live_result<token_result> result = get_xbl_result_from_response<token_result>(response, token_result::deserialize);
+        XBOX_LIVE_NAMESPACE::xbox_live_result<token_result> result = get_xbl_result_from_response<token_result>(response, token_result::deserialize);
         result.payload().set_title_id(titleId);
         result.payload().set_http_status_code(response->http_status());
 

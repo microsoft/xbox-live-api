@@ -193,8 +193,8 @@ public:
     /// Sign the request and get the response. Used for auth services.
     /// </summary>
     virtual pplx::task<std::shared_ptr<http_call_response>> get_response(
-        _In_ std::shared_ptr<xbox::services::system::ecdsa> proofKey,
-        _In_ const xbox::services::system::signature_policy& signaturePolicy,
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::system::ecdsa> proofKey,
+        _In_ const XBOX_LIVE_NAMESPACE::system::signature_policy& signaturePolicy,
         _In_ http_call_response_body_type httpCallResponseBodyType
         ) = 0;
 #endif
@@ -219,7 +219,7 @@ public:
         );
 
 private:
-    xbox::services::system::xbox_live_mutex m_lock;
+	XBOX_LIVE_NAMESPACE::system::xbox_live_mutex m_lock;
     std::unordered_map<uint32_t, http_retry_after_api_state> m_apiStateMap;
 };
 
@@ -238,8 +238,8 @@ public:
 
 #if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
     pplx::task<std::shared_ptr<http_call_response>> get_response(
-        _In_ std::shared_ptr<xbox::services::system::ecdsa> proofKey,
-        _In_ const xbox::services::system::signature_policy& signaturePolicy,
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::system::ecdsa> proofKey,
+        _In_ const XBOX_LIVE_NAMESPACE::system::signature_policy& signaturePolicy,
         _In_ http_call_response_body_type httpCallResponseBodyType
          ) override;
 #endif
@@ -254,7 +254,7 @@ public:
         ) override;
 
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
-        _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
+        _In_ const std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired = false
         ) override;
@@ -340,7 +340,7 @@ private:
         _In_ const web::http::http_response& response
         );
 
-    static xbox::services::xbox_live_error_code get_xbox_live_error_code_from_http_status(
+    static XBOX_LIVE_NAMESPACE::xbox_live_error_code get_xbox_live_error_code_from_http_status(
         _In_ const web::http::status_code& statusCode
         );
 

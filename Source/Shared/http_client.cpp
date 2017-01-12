@@ -16,7 +16,7 @@ using namespace web::http;                  // Common HTTP functionality
 using namespace web::http::client;          // HTTP client features
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
- 
+
 xbox_http_client_impl::xbox_http_client_impl(
     _In_ web::http::uri base_uri,
     _In_ web::http::client::http_client_config client_config

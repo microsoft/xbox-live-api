@@ -16,7 +16,7 @@
 #include "utils.h"
 
 using namespace web::websockets::client;
-using namespace xbox::services::system;
+using namespace XBOX_LIVE_NAMESPACE::system;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 

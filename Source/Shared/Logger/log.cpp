@@ -10,7 +10,6 @@
 #include "pch.h"
 #include "log.h"
 
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 std::shared_ptr<logger> logger::s_logger = nullptr;

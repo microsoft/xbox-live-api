@@ -27,12 +27,12 @@ std::unordered_map<function_context, std::function<void(const sign_out_completed
 std::unordered_map<function_context, std::function<void(const string_t&)>> user_impl::s_signInCompletedHandlers;
 function_context user_impl::s_signOutCompletedHandlerIndexer = 0;
 function_context user_impl::s_signInCompletedHandlerIndexer = 0;
-xbox::services::system::xbox_live_mutex user_impl::s_trackingUsersLock;
+XBOX_LIVE_NAMESPACE::system::xbox_live_mutex user_impl::s_trackingUsersLock;
 
 std::shared_ptr<user_impl>
 user_factory::create_user_impl(user_creation_context userCreationContext)
 {
-    return xbox::services::system::xbox_system_factory::get_factory()->create_user_impl(userCreationContext);
+	return XBOX_LIVE_NAMESPACE::system::xbox_system_factory::get_factory()->create_user_impl(userCreationContext);
 }
 
 user_impl::user_impl(
@@ -60,7 +60,7 @@ user_impl::user_impl(
 #endif
 }
 
-pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>>
 user_impl::get_token_and_signature(
     _In_ const string_t& httpMethod,
     _In_ const string_t& url,
@@ -78,7 +78,7 @@ user_impl::get_token_and_signature(
         );
 }
 
-pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
 user_impl::get_token_and_signature(
     _In_ const string_t& httpMethod,
     _In_ const string_t& url,
@@ -99,7 +99,7 @@ user_impl::get_token_and_signature(
         );
 }
 
-pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
 user_impl::get_token_and_signature_array(
     _In_ const string_t& httpMethod,
     _In_ const string_t& url,

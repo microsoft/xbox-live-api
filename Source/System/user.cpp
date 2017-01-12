@@ -195,5 +195,4 @@ xbox_live_user::remove_sign_out_completed_handler(_In_ function_context context)
     return user_impl::remove_sign_out_completed_handler(context);
 }
 
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

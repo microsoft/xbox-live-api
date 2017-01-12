@@ -12,7 +12,7 @@
 #include <stddef.h>
 #include "xsapi/system.h"
 
-namespace xbox { namespace services { namespace system {
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
 class xsapi_memory
 {
@@ -54,7 +54,8 @@ private:
     void* m_pBuffer;
 };
 
-}}}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+
 
 template<typename T>
 class xsapi_stl_allocator
@@ -79,8 +80,9 @@ public:
     typedef T           value_type;
 
     pointer allocate(size_type n, const void * = 0)
-    {
-        pointer p = reinterpret_cast<pointer>(xbox::services::system::xsapi_memory::mem_alloc(n * sizeof(T)));
+	{
+		pointer p = reinterpret_cast<pointer>(XBOX_LIVE_NAMESPACE::system::xsapi_memory::mem_alloc(n * sizeof(T)));
+
         if (p == NULL)
         {
             throw std::bad_alloc();
@@ -90,12 +92,13 @@ public:
 
     void deallocate(_In_opt_ void* p, size_type)
     {
-        xbox::services::system::xsapi_memory::mem_free(p);
+		XBOX_LIVE_NAMESPACE::system::xsapi_memory::mem_free(p);
     }
 
     char* _Charalloc(size_type n)
-    {
-        char* p = reinterpret_cast<char*>(xbox::services::system::xsapi_memory::mem_alloc(n));
+	{
+		char* p = reinterpret_cast<char*>(XBOX_LIVE_NAMESPACE::system::xsapi_memory::mem_alloc(n));
+
         if (p == NULL)
         {
             throw std::bad_alloc();

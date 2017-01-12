@@ -33,7 +33,9 @@
 #endif
 
 #include "web_socket_client.h"
+#if !BEAM_API
 #include "multiplayer_internal.h"
+#endif
 #include "local_config.h"
 
 #include "http_call_impl.h"
@@ -41,6 +43,7 @@
 #include "initiator.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+
 
 class xbox_system_factory
 {
@@ -92,11 +95,13 @@ public:
 
     virtual std::shared_ptr<xbox_web_socket_client> create_web_socket_client();
 
+#if !BEAM_API
     virtual std::shared_ptr<multiplayer::multiplayer_subscription> create_multiplayer_subscription(
         _In_ const std::function<void(const multiplayer::multiplayer_session_change_event_args&)>& multiplayerSessionChangeHandler,
         _In_ const std::function<void()>& multiplayerSubscriptionLostHandler,
-        _In_ const std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)>& subscriptionErrorHandler
+        _In_ const std::function<void(const XBOX_LIVE_NAMESPACE::real_time_activity::real_time_activity_subscription_error_event_args&)>& subscriptionErrorHandler
         );
+#endif
 
     static std::shared_ptr<xbox_system_factory> get_factory();
     static void set_factory(_In_ std::shared_ptr<xbox_system_factory> factory);

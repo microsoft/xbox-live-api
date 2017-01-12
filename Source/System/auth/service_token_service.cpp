@@ -23,7 +23,7 @@ service_token_service_impl::get_s_token_from_service(
     string_t titleId;
     if (!authenticationConfiguration->use_win10_auth())
     {
-        auto appConfig = xbox::services::xbox_live_app_config::get_app_config_singleton();
+        auto appConfig = XBOX_LIVE_NAMESPACE::xbox_live_app_config::get_app_config_singleton();
         uint32_t titleIdNum = appConfig->title_id();
         stringstream_t msg;
         msg << std::hex << titleIdNum;

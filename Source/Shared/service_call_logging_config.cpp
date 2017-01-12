@@ -16,10 +16,9 @@
 #include "service_call_logger_protocol.h"
 #endif
 
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-static xbox::services::system::xbox_live_mutex g_serviceLoggingConfigSingletonLock;
+static XBOX_LIVE_NAMESPACE::system::xbox_live_mutex g_serviceLoggingConfigSingletonLock;
 static std::shared_ptr<service_call_logging_config> g_serviceLoggingConfigSingleton;
 
 std::shared_ptr<service_call_logging_config> service_call_logging_config::get_singleton_instance()
