@@ -11,9 +11,10 @@
 #include "xsapi/system.h"
 #include "xbox_live_server_impl.h"
 
-using namespace xbox::services;
+using namespace XBOX_LIVE_NAMESPACE;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+
 
 xbox_live_server::xbox_live_server()
 {

@@ -34,7 +34,7 @@ xbox_web_socket_client::connect(
 
     string_t callerContext = userContext->caller_context();
     return userContext->get_auth_result(_T("GET"), uri.to_string(), string_t(), string_t())
-    .then([uri, subProtocol, callerContext, thisWeakPtr](xbox::services::xbox_live_result<user_context_auth_result> xblResult)
+    .then([uri, subProtocol, callerContext, thisWeakPtr](XBOX_LIVE_NAMESPACE::xbox_live_result<user_context_auth_result> xblResult)
     {
         std::shared_ptr<xbox_web_socket_client> pThis(thisWeakPtr.lock());
         if (pThis == nullptr)

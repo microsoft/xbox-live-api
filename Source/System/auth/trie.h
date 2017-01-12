@@ -227,3 +227,4 @@ bool trie<T>::get_exact(_In_ string_t path, _Out_ T& result) const
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+

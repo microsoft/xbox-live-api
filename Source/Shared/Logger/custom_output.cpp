@@ -11,8 +11,7 @@
 #include "custom_output.h"
 #include "xsapi/system.h"
 
-using namespace xbox::services::system;
-
+using namespace XBOX_LIVE_NAMESPACE::system;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 void custom_output::add_log(_In_ const log_entry& entry)

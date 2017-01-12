@@ -18,7 +18,7 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-pplx::task<xbox::services::xbox_live_result<nsal>>
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<nsal>>
 xtitle_service_impl::get_default_nsal(
     _In_ std::shared_ptr<xbox_live_context_settings> xboxLiveContextSettings,
     _In_ std::shared_ptr<auth_config> authConfig
@@ -48,11 +48,11 @@ string_t create_title_nsal_path(_In_ const string_t& titleId)
     return ss.str();
 }
 
-pplx::task<xbox::services::xbox_live_result<nsal>>
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<nsal>>
 xtitle_service_impl::get_title_nsal(
     _In_ std::shared_ptr<auth_manager> authMan,
     _In_ const string_t& titleId,
-    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
+    _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> xboxLiveContextSettings,
     _In_ std::shared_ptr<auth_config> authConfig
     )
 {
@@ -77,7 +77,7 @@ xtitle_service_impl::get_title_nsal(
         false,
         false
         )
-    .then([httpCall, httpRequest](xbox::services::xbox_live_result<token_and_signature_result> xblResult) mutable -> pplx::task<std::shared_ptr<http_call_response>>
+    .then([httpCall, httpRequest](XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> xblResult) mutable -> pplx::task<std::shared_ptr<http_call_response>>
     {
         token_and_signature_result authResult = xblResult.payload(); // Auth failures will be handled later inside get_response()
         if (!authResult.token().empty())

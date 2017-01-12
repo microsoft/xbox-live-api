@@ -9,7 +9,7 @@
 //*********************************************************
 #pragma once
 
-namespace xbox { namespace services {
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 /// <summary>
 /// Enumerates the type of structured data contained in the http response body.
@@ -238,7 +238,7 @@ public:
     /// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.
     /// </summary>
     virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
-        _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
+        _In_ const std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
         _In_ bool allUsersAuthRequired = false
         ) = 0;
@@ -248,7 +248,7 @@ public:
         ) = 0;
 
     virtual pplx::task<std::shared_ptr<http_call_response>> _Internal_get_response_with_auth(
-        _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
+        _In_ const std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
         _In_ bool allUsersAuthRequired = false
         ) = 0;
@@ -343,7 +343,7 @@ public:
     virtual void set_add_default_headers(_In_ bool value) = 0;
     
     /// <summary>
-    /// Returns a flag inidicating if default headers should be added or not.
+    /// Returns a flag indicating if default headers should be added or not.
     /// </summary>
     virtual bool add_default_headers() const = 0;
 
@@ -357,6 +357,4 @@ _XSAPIIMP std::shared_ptr<http_call> create_xbox_live_http_call(
     _In_ const web::uri& pathQueryFragment
     );
 
-} }
-
-
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

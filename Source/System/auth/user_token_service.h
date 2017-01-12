@@ -15,10 +15,11 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
+
 class user_token_service
 {
 public:
-    virtual pplx::task<xbox::services::xbox_live_result<token_result>>
+    virtual pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>>
     get_u_token_from_service(
         _In_ const string_t& rpsTicket,
         _In_ std::shared_ptr<ecdsa> proofKey,
@@ -34,7 +35,7 @@ public:
     /// Returns a user token obtained from XASU
     /// </summary>
     /// <param name="rpsTicket">A valid (non-expired) RPS ticket.</param>
-    virtual pplx::task<xbox::services::xbox_live_result<token_result>>
+    virtual pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>>
     get_u_token_from_service(
         _In_ const string_t& rpsTicket,
         _In_ std::shared_ptr<ecdsa> proofKey,

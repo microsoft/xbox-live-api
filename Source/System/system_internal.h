@@ -8,7 +8,8 @@
 //
 //*********************************************************
 #pragma once
-namespace xbox { namespace services { namespace system {
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
 class xbox_live_mutex
 {
@@ -21,4 +22,5 @@ private:
     std::mutex m_xboxLiveMutex;
 };
 
-}}}
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

@@ -10,7 +10,6 @@
 #pragma once
 #include "system_internal.h"
 
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 class service_call_logger_protocol : public std::enable_shared_from_this<service_call_logger_protocol>

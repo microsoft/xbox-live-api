@@ -8,8 +8,9 @@
 //
 //*********************************************************
 #pragma once
+#include "pch.h"
 
-namespace xbox { namespace services {
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 /// <summary>
 /// Enumerates the type of data contained in the http request body.
@@ -74,4 +75,4 @@ private:
     http_request_message_type m_httpRequestMessageType;
 };
 
-}}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

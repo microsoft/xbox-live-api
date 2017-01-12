@@ -57,7 +57,8 @@ private:
     bool m_isEnabled;
     bool m_firstWrite;
 
-    xbox::services::system::xbox_live_mutex m_writeLock;
+    XBOX_LIVE_NAMESPACE::system::xbox_live_mutex m_writeLock;
+
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
