@@ -12,11 +12,9 @@
 #include "auth_flow_result_jni.h"
 #include <jni.h>
 
-namespace xbox {
-    namespace services {
-        class java_interop;
-    }
-}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+    class java_interop;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 

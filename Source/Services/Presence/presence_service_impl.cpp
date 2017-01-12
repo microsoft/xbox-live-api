@@ -15,7 +15,7 @@
 #include "xbox_system_factory.h"
 
 using namespace pplx;
-using namespace xbox::services::system;
+using namespace XBOX_LIVE_NAMESPACE::system;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
 
@@ -632,7 +632,5 @@ presence_service_impl::get_presence_for_social_group_subpath(
 
     return subpath.str();
 }
-
-
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_END

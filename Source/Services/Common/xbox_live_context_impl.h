@@ -19,7 +19,7 @@
 
 #endif
 
-namespace xbox { namespace services {
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 class xbox_live_context_impl : public std::enable_shared_from_this < xbox_live_context_impl >
 {
@@ -69,6 +69,7 @@ public:
     /// </summary>
     const string_t& xbox_live_user_id();
 
+#if !BEAM_API
     /// <summary>
     /// A service for managing user profiles.
     /// </summary>
@@ -110,16 +111,6 @@ public:
     matchmaking::matchmaking_service& matchmaking_service();
 
     /// <summary>
-    /// Returns an object containing settings that apply to all REST calls made such as retry and diagnostic settings.
-    /// </summary>
-    std::shared_ptr<xbox_live_context_settings> settings();
-
-    /// <summary>
-    /// Returns an object containing Xbox Live app config such as title ID
-    /// </summary>
-    std::shared_ptr<xbox_live_app_config> application_config();
-
-    /// <summary>
     /// A service for managing real-time activity.
     /// </summary>
     const std::shared_ptr<real_time_activity::real_time_activity_service>& real_time_activity_service();
@@ -145,14 +136,25 @@ public:
     privacy::privacy_service& privacy_service();
 
     /// <summary>
-    /// A service used to check for offensive strings.
-    /// </summary>
-    system::string_service& string_service();
-
-    /// <summary>
     /// A service for contextual search.
     /// </summary>
     contextual_search::contextual_search_service& contextual_search_service();
+#endif
+
+    /// <summary>
+    /// Returns an object containing Xbox Live app config such as title ID
+    /// </summary>
+    std::shared_ptr<xbox_live_app_config> application_config();
+
+    /// <summary>
+    /// Returns an object containing settings that apply to all REST calls made such as retry and diagnostic settings.
+    /// </summary>
+    std::shared_ptr<xbox_live_context_settings> settings();
+
+    /// <summary>
+    /// A service used to check for offensive strings.
+    /// </summary>
+    system::string_service& string_service();
 
 #if UWP_API || XSAPI_U
     /// <summary>
@@ -179,13 +181,16 @@ public:
 #endif
 
     void init();
+#if !BEAM_API
     void init_real_time_activity_service_instance();
+#endif
 
 private:
-    std::shared_ptr<xbox::services::user_context> m_userContext;
-    std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
+    std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> m_userContext;
+    std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> m_xboxLiveContextSettings;
     std::shared_ptr<xbox_live_app_config> m_appConfig;
 
+#if !BEAM_API
     social::profile_service m_profileService;
     social::social_service m_socialService;
     social::reputation_service m_reputationService;
@@ -199,8 +204,9 @@ private:
     game_server_platform::game_server_platform_service m_gameServerPlatformService;
     title_storage::title_storage_service m_titleStorageService;
     privacy::privacy_service m_privacyService;
-    system::string_service m_stringService;
     contextual_search::contextual_search_service m_contextualSearchService;
+#endif
+    system::string_service m_stringService;
 
 #if UWP_API || XSAPI_U
     events::events_service m_eventsService;
@@ -217,6 +223,4 @@ private:
     friend class xbox_live_context;
 };
 
-}}
-
-
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

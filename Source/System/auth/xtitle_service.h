@@ -19,17 +19,17 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 class xtitle_service
 {
 public:
-    virtual pplx::task<xbox::services::xbox_live_result<nsal>>
+    virtual pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<nsal>>
     get_default_nsal(
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> xboxLiveContextSettings,
         _In_ std::shared_ptr<auth_config> authConfig
         ) = 0;
 
-    virtual pplx::task<xbox::services::xbox_live_result<nsal>>
+    virtual pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<nsal>>
     get_title_nsal(
         _In_ std::shared_ptr<auth_manager> authMan,
         _In_ const string_t& titleId,
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> xboxLiveContextSettings,
         _In_ std::shared_ptr<auth_config> authConfig
         ) = 0;
 };
@@ -37,17 +37,17 @@ public:
 class xtitle_service_impl : public xtitle_service
 {
 public:
-    virtual pplx::task<xbox::services::xbox_live_result<nsal>>
+    virtual pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<nsal>>
     get_default_nsal(
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> xboxLiveContextSettings,
         _In_ std::shared_ptr<auth_config> authConfig
         ) override;
 
-    virtual pplx::task<xbox::services::xbox_live_result<nsal>>
+    virtual pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<nsal>>
     get_title_nsal(
         _In_ std::shared_ptr<auth_manager> authMan,
         _In_ const string_t& titleId,
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> xboxLiveContextSettings,
         _In_ std::shared_ptr<auth_config> authConfig
         ) override;
 

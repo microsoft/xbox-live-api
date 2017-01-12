@@ -14,7 +14,10 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
+#if !BEAM_API
 class xtitle_service;
+#endif
+
 class auth_manager;
 
 class auth_manager : public std::enable_shared_from_this<auth_manager>
@@ -27,12 +30,12 @@ public:
 
     static std::shared_ptr<auth_manager> get_auth_manager_instance();
     void set_rps_ticket(const string_t& rpsTicket);
-    pplx::task<xbox::services::xbox_live_result<void>> initialize_default_nsal();
+    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<void>> initialize_default_nsal();
     pplx::task<xbox_live_result<void>> initialize_title_nsal(
         _In_ const string_t& titleId
         );
 
-    pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
+    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>>
     internal_get_token_and_signature(
         _In_ string_t httpMethod,
         _In_ const string_t& url,
@@ -52,7 +55,9 @@ private:
 
     std::shared_ptr<auth_config> m_authConfig;
     std::shared_ptr<xbox_live_context_settings> m_xboxLiveContextSettings;
+#if !BEAM_API
     std::shared_ptr<xtitle_service> m_xtitle_service;
+#endif
 
     nsal m_defaultNsal;
     nsal m_titleNsal;

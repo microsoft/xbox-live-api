@@ -19,13 +19,15 @@
 
 #endif
 
+#if !BEAM_API
 #include "xsapi/contextual_search_service.h"
 #if TV_API || UNIT_TEST_SERVICES
 #include "xsapi/entertainment_profile.h"
 #endif
 #include "xsapi/multiplayer.h"
+#endif
 
-namespace xbox { namespace services {
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 class xbox_live_context_server_impl;
 
 #if XSAPI_SERVER
@@ -60,7 +62,7 @@ public:
 
 private:
 
-    std::shared_ptr<xbox::services::xbox_live_context_server_impl> m_xboxLiveContextImpl;
+    std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_server_impl> m_xboxLiveContextImpl;
 };
 
 #endif
@@ -103,17 +105,31 @@ public:
     _XSAPIIMP std::shared_ptr<system::xbox_live_user> user();
 
 #else
+#if BEAM_API
     /// <summary>
-    /// Creates an xbox_live_context from a Microsoft::Xbox::Services::System::XboxLiveUser^
+    /// Creates an xbox_live_context from a Microsoft::Xbox::Services::Beam::System::XboxLiveUser^
     /// </summary>
     _XSAPIIMP xbox_live_context(
-        _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user
+        _In_ Microsoft::Xbox::Services::Beam::System::XboxLiveUser^ user
         );
 
     /// <summary>
     /// Returns the associated system XboxLiveUser.
     /// </summary>
+    _XSAPIIMP Microsoft::Xbox::Services::Beam::System::XboxLiveUser^ user();
+#else
+    /// <summary>
+    /// Creates an xbox_live_context from a Microsoft::Xbox::Services::System::XboxLiveUser^
+    /// </summary>
+    _XSAPIIMP xbox_live_context(
+    	_In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user
+    );
+
+    /// <summary>
+    /// Returns the associated system XboxLiveUser.
+    /// </summary>
     _XSAPIIMP Microsoft::Xbox::Services::System::XboxLiveUser^ user();
+#endif
 #endif
 
 #endif
@@ -123,6 +139,7 @@ public:
     /// </summary>
     _XSAPIIMP const string_t& xbox_live_user_id();
 
+#if !BEAM_API
     /// <summary>
     /// A service for managing user profiles.
     /// </summary>
@@ -164,16 +181,6 @@ public:
     _XSAPIIMP matchmaking::matchmaking_service& matchmaking_service();
 
     /// <summary>
-    /// Returns an object containing settings that apply to all REST calls made such as retry and diagnostic settings.
-    /// </summary>
-    _XSAPIIMP std::shared_ptr<xbox_live_context_settings> settings();
-
-    /// <summary>
-    /// Returns an object containing Xbox Live app config such as title ID
-    /// </summary>
-    _XSAPIIMP std::shared_ptr<xbox_live_app_config> application_config();
-
-    /// <summary>
     /// A service for managing real-time activity.
     /// </summary>
     _XSAPIIMP const std::shared_ptr<real_time_activity::real_time_activity_service>& real_time_activity_service();
@@ -207,6 +214,17 @@ public:
     /// A service for contextual search.
     /// </summary>
     _XSAPIIMP contextual_search::contextual_search_service& contextual_search_service();
+#endif
+
+    /// <summary>
+    /// Returns an object containing settings that apply to all REST calls made such as retry and diagnostic settings.
+    /// </summary>
+    _XSAPIIMP std::shared_ptr<xbox_live_context_settings> settings();
+
+    /// <summary>
+    /// Returns an object containing Xbox Live app config such as title ID
+    /// </summary>
+    _XSAPIIMP std::shared_ptr<xbox_live_app_config> application_config();
 
 #if UWP_API || XSAPI_U || XSAPI_CENTENNIAL
     /// <summary>
@@ -251,8 +269,7 @@ public:
 
 private:
 
-    std::shared_ptr<xbox::services::xbox_live_context_impl> m_xboxLiveContextImpl;
+    std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_impl> m_xboxLiveContextImpl;
 };
 
-
-}}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

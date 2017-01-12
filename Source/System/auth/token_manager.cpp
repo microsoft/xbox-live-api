@@ -49,7 +49,7 @@ token_manager::token_manager(
 {
 }
 
-pplx::task<xbox::services::xbox_live_result<token_result>> token_manager::get_xtoken(
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>> token_manager::get_xtoken(
     _In_ const string_t& relyingParty,
     _In_ const string_t& subRelyingParty,
     _In_ const string_t tokenType,
@@ -67,7 +67,7 @@ pplx::task<xbox::services::xbox_live_result<token_result>> token_manager::get_xt
         );
 }
 
-pplx::task<xbox::services::xbox_live_result<token_result>> token_manager::get_token_from_cache_or_service(
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>> token_manager::get_token_from_cache_or_service(
     _In_ std::shared_ptr<token_state> state,
     _In_ const string_t& relyingParty,
     _In_ const string_t& subRelyingParty,
@@ -99,7 +99,7 @@ pplx::task<xbox::services::xbox_live_result<token_result>> token_manager::get_to
             {
                 // Only kick off to get a new token if not doing so already
                 tokenInfo->IsRefreshInProgress = true;
-                tokenInfo->RefreshEvent = pplx::task_completion_event<xbox::services::xbox_live_result<token_result>>();
+                tokenInfo->RefreshEvent = pplx::task_completion_event<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>>();
             }
         }
         if (!isRefreshInProgress)
@@ -134,7 +134,7 @@ pplx::task<xbox::services::xbox_live_result<token_result>> token_manager::get_to
     }
     else
     {
-        xbox::services::xbox_live_result<token_result> xblResult(tokenResult);
+        XBOX_LIVE_NAMESPACE::xbox_live_result<token_result> xblResult(tokenResult);
         return pplx::task_from_result(xblResult);
     }
 }
@@ -211,7 +211,7 @@ token_manager::refresh_x_token(
         
         string_t utoken, stoken, ttoken, dtoken;
         
-        std::vector<pplx::task<xbox::services::xbox_live_result<token_result>>> tokenTasks;
+        std::vector<pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>>> tokenTasks;
         std::condition_variable preTokenCondition;
         std::mutex tokenMutex;
         uint32_t prereqTokensFetched = 0;
@@ -262,7 +262,7 @@ token_manager::refresh_x_token(
                     break;
                 case token_identity_type::d_token:
                 {
-                    pplx::task<xbox::services::xbox_live_result<token_result>> dTokenTask =
+                    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>> dTokenTask =
                         get_token_from_cache_or_service(
                             state,
                             xTokenInfo->RelyingParty,
@@ -292,7 +292,7 @@ token_manager::refresh_x_token(
                     break;
                 case token_identity_type::u_token:
                 {
-                    pplx::task<xbox::services::xbox_live_result<token_result>> uTokenTask =
+                    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>> uTokenTask =
                         get_token_from_cache_or_service(
                             state,
                             xTokenInfo->RelyingParty,
@@ -318,7 +318,7 @@ token_manager::refresh_x_token(
                     break;
                 case token_identity_type::s_token:
                 {
-                    pplx::task<xbox::services::xbox_live_result<token_result>> sTokenTask =
+                    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>> sTokenTask =
                         get_token_from_cache_or_service(
                             state,
                             xTokenInfo->RelyingParty,
@@ -385,7 +385,7 @@ token_manager::refresh_x_token(
     });
 }
 
-pplx::task<xbox::services::xbox_live_result<token_result>> 
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>> 
 token_manager::refresh_t_token(
     _In_ std::shared_ptr<token_state> state,
     _In_ std::shared_ptr<token_info> tokenInfo
@@ -412,14 +412,14 @@ token_manager::refresh_t_token(
         state->XboxLiveContextSettings,
         dTokenInfo->Token.token()
         )
-    .then([tokenInfo](xbox::services::xbox_live_result<token_result> xblResult)
+    .then([tokenInfo](XBOX_LIVE_NAMESPACE::xbox_live_result<token_result> xblResult)
     {
         tokenInfo->set_token_result(xblResult.payload());
         return xblResult;
     });
 }
 
-pplx::task<xbox::services::xbox_live_result<token_result>>
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>>
 token_manager::refresh_d_token(
     _In_ std::shared_ptr<token_state> state,
     _In_ std::shared_ptr<token_info> tokenInfo
@@ -437,14 +437,14 @@ token_manager::refresh_d_token(
         state->AuthConfig,
         state->XboxLiveContextSettings
         )
-        .then([tokenInfo](xbox::services::xbox_live_result<token_result> xblResult)
+        .then([tokenInfo](XBOX_LIVE_NAMESPACE::xbox_live_result<token_result> xblResult)
     {
         tokenInfo->set_token_result(xblResult.payload());
         return xblResult;
     });
 }
 
-pplx::task<xbox::services::xbox_live_result<token_result>> 
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>> 
 token_manager::refresh_u_token(
     _In_ std::shared_ptr<token_state> state,
     _In_ std::shared_ptr<token_info> tokenInfo
@@ -461,7 +461,7 @@ token_manager::refresh_u_token(
         state->ProofKey,
         state->AuthConfig,
         state->XboxLiveContextSettings)
-        .then([tokenInfo](xbox::services::xbox_live_result<token_result> xblResult)
+        .then([tokenInfo](XBOX_LIVE_NAMESPACE::xbox_live_result<token_result> xblResult)
     {
         tokenInfo->set_token_result(xblResult.payload());
         return xblResult;
@@ -469,7 +469,7 @@ token_manager::refresh_u_token(
 }
 
 #if XSAPI_SERVER
-pplx::task<xbox::services::xbox_live_result<token_result>>
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>>
 token_manager::refresh_s_token(
     _In_ std::shared_ptr<token_state> state,
     _In_ std::shared_ptr<token_info> tokenInfo
@@ -479,7 +479,7 @@ token_manager::refresh_s_token(
         state->ProofKey,
         state->AuthConfig,
         state->XboxLiveContextSettings)
-        .then([tokenInfo](xbox::services::xbox_live_result<token_result> xblResult)
+        .then([tokenInfo](XBOX_LIVE_NAMESPACE::xbox_live_result<token_result> xblResult)
     {
         tokenInfo->set_token_result(xblResult.payload());
         return xblResult;

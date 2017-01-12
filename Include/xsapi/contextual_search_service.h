@@ -9,7 +9,8 @@
 //*********************************************************
 #pragma once
 
-namespace xbox { namespace services {
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+
     class xbox_live_context_impl;
     /// <summary>
     /// Contains classes and enumerations that perform contextual search on Xbox Live.
@@ -797,4 +798,6 @@ private:
 };
 
 
-}}}
+}
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

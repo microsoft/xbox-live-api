@@ -15,7 +15,7 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-pplx::task<xbox::services::xbox_live_result<token_result>>
+pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>>
 device_token_service_impl::get_d_token_from_service(
     _In_ const string_t& rpsTicket,
     _In_ std::shared_ptr<ecdsa> proofKey,

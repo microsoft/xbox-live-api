@@ -13,7 +13,7 @@
 #include "request_signer.h"
 #include "auth_manager.h"
 
-using namespace xbox::services;
+using namespace XBOX_LIVE_NAMESPACE;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 

@@ -23,7 +23,7 @@ using namespace Windows::Foundation;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-static xbox::services::system::xbox_live_mutex g_serviceLoggerProtocolSingletonLock;
+static XBOX_LIVE_NAMESPACE::system::xbox_live_mutex g_serviceLoggerProtocolSingletonLock;
 static std::shared_ptr<service_call_logger_protocol> g_serviceLoggerProtocolSingleton;
 
 std::shared_ptr<service_call_logger_protocol> service_call_logger_protocol::get_singleton_instance()

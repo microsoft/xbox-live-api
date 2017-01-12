@@ -10,7 +10,8 @@
 #pragma once
 #include "system_internal.h"
 
-namespace xbox { namespace services { namespace presence {
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+namespace presence {
 
 /// <summary>
 /// Represents media supporting Rich Presence features.
@@ -303,4 +304,5 @@ private:
 };
 #endif
 
-}}}
+} // namespace presence
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

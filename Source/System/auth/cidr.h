@@ -16,6 +16,7 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
+
 /// <summary>
 /// This represents an IP address and it's routing prefix in CIDR notation.
 /// It is used in the NSAL for specifying IP ranges.
