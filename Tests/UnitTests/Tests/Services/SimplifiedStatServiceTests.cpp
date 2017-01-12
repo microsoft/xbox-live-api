@@ -118,7 +118,7 @@ public:
         }
 
         VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://statsread.dnet.mockenv.xboxlive.com", httpCall->ServerName);
+        VERIFY_ARE_EQUAL_STR(L"https://statsread.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(
             L"/stats/users/TestXboxUserId/scids/MockScid",
             httpCall->PathQueryFragment.to_string()
@@ -204,7 +204,7 @@ public:
         }
 
         VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://statswrite.dnet.mockenv.xboxlive.com", httpCall->ServerName);
+        VERIFY_ARE_EQUAL_STR(L"https://statswrite.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(
             L"/stats/users/TestXboxUserId/scids/MockScid",
             httpCall->PathQueryFragment.to_string()

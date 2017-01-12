@@ -27,7 +27,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
 
 const std::chrono::seconds social_graph::TIME_PER_CALL_SEC =
 #if UNIT_TEST_SERVICES
-std::chrono::seconds::zer;
+std::chrono::seconds::zero();
 #else
 std::chrono::seconds(30);
 #endif

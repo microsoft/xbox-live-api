@@ -103,7 +103,7 @@ public:
 
     DEFINE_TEST_CASE(StatisticManagerSetStat)
     {
-        DEFINE_TEST_CASE_PROPERTIES(StatisticManagerSetStat);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(StatisticManagerSetStat);
         auto statsManager = StatisticManager::SingletonInstance;
         auto mockXblContext = GetMockXboxLiveContext_WinRT();
         auto user = mockXblContext->User;
@@ -166,7 +166,7 @@ public:
 
     DEFINE_TEST_CASE(StatisticManagerRequestFlushToService)
     {
-        DEFINE_TEST_CASE_PROPERTIES(StatisticManagerRequestFlushToService);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(StatisticManagerRequestFlushToService);
         auto statsManager = StatisticManager::SingletonInstance;
         auto mockXblContext = GetMockXboxLiveContext_WinRT();
         auto user = mockXblContext->User;
@@ -187,7 +187,7 @@ public:
 
     DEFINE_TEST_CASE(StatisticManagerStatisticCompareTypes)
     {
-        DEFINE_TEST_CASE_PROPERTIES(StatisticManagerStatisticCompareTypes);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(StatisticManagerStatisticCompareTypes);
         auto statsManager = StatisticManager::SingletonInstance;
         auto mockXblContext = GetMockXboxLiveContext_WinRT();
         auto user = mockXblContext->User;
