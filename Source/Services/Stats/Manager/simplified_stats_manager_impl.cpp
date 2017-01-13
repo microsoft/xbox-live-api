@@ -228,9 +228,8 @@ xbox_live_result<void>
 stats_manager_impl::set_stat(
     _In_ const xbox_live_user_t& user,
     _In_ const string_t& name,
-    _In_ double value,
-    _In_ stat_compare_type statisticReplaceCompareType
-)
+    _In_ double value
+    )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
     string_t userStr = user->xbox_user_id();
@@ -240,7 +239,7 @@ stats_manager_impl::set_stat(
         return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "User not found in local map");
     }
 
-    return userIter->second.statValueDocument.set_stat(name.c_str(), value, statisticReplaceCompareType);
+    return userIter->second.statValueDocument.set_stat(name.c_str(), value);
 }
 
 xbox_live_result<void>
@@ -279,25 +278,6 @@ stats_manager_impl::get_stat(
 }
 
 xbox_live_result<void>
-stats_manager_impl::get_stat_contexts(
-    _In_ const xbox_live_user_t& user,
-    _Inout_ std::vector<stat_context>& statisticContextList
-    )
-{
-    std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user->xbox_user_id();
-    auto userIter = m_users.find(userStr);
-    if (userIter == m_users.end())
-    {
-        return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "User not found in local map");
-    }
-
-    userIter->second.statValueDocument.get_stat_contexts(statisticContextList);
-
-    return xbox_live_result<void>();
-}
-
-xbox_live_result<void>
 stats_manager_impl::get_stat_names(
     _In_ const xbox_live_user_t& user,
     _Inout_ std::vector<string_t>& statNameList
@@ -313,44 +293,6 @@ stats_manager_impl::get_stat_names(
 
     userIter->second.statValueDocument.get_stat_names(statNameList);
 
-    return xbox_live_result<void>();
-}
-
-xbox_live_result<void>
-stats_manager_impl::set_stat_contexts(
-    _In_ const xbox_live_user_t& user,
-    _In_ const std::vector<stat_context>& statContextList
-)
-{
-    std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user->xbox_user_id();
-    auto userIter = m_users.find(userStr);
-    if (userIter == m_users.end())
-    {
-        return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "User not found in local map");
-    }
-
-    userIter->second.statValueDocument.set_stat_contexts(
-        statContextList
-        );
-
-    return xbox_live_result<void>();
-}
-
-xbox_live_result<void>
-stats_manager_impl::clear_stat_contexts(
-    _In_ const xbox_live_user_t& user
-)
-{
-    std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user->xbox_user_id();
-    auto userIter = m_users.find(userStr);
-    if (userIter == m_users.end())
-    {
-        return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "User not found in local map");
-    }
-
-    userIter->second.statValueDocument.clear_stat_contexts();
     return xbox_live_result<void>();
 }
 

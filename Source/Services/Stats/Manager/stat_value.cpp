@@ -42,36 +42,13 @@ stat_value::data_type() const
     return m_dataType;
 }
 
-stat_compare_type
-stat_value::compare_type() const
-{
-    return m_statCompareType;
-}
-
 void
 stat_value::set_stat(
-    _In_ double value,
-    _In_ bool storeStatContextData,
-    _In_ stat_compare_type statCompareType
+    _In_ double value
     )
 {
-    if (m_dataType == stat_data_type::undefined || m_dataType == stat_data_type::string)
-    {
-        m_statData.numberType = value;
-    }
-    else
-    {
-        if (statCompareType == stat_compare_type::always || 
-            (statCompareType == stat_compare_type::min && value < m_statData.numberType) || 
-            (statCompareType == stat_compare_type::max && value > m_statData.numberType))
-        {
-            m_statData.numberType = value;
-        }
-    }
-
-    m_statContextData.numberType = value;
+    m_statData.numberType = value;
     m_dataType = stat_data_type::number;
-    m_statCompareType = statCompareType;
 }
 void
 stat_value::set_stat(
@@ -83,38 +60,19 @@ stat_value::set_stat(
 }
 
 web::json::value
-stat_value::serialize(
-    _In_ bool useContextData
-    ) const
+stat_value::serialize() const
 {
     web::json::value returnJSON;
     if (m_dataType == stat_data_type::number)
     {
-        if (!useContextData)
-        {
-            returnJSON[_T("value")] = web::json::value(m_statData.numberType);
-        }
-        else
-        {
-            returnJSON[_T("value")] = web::json::value(m_statContextData.numberType);
-        }
+        returnJSON[_T("value")] = web::json::value::number(m_statData.numberType);
     }
     else if(m_dataType == stat_data_type::string)
     {
         returnJSON[_T("value")] = web::json::value::string(m_statData.stringType);
     }
-    switch (m_statCompareType)
-    {
-        case stat_compare_type::always:
-            returnJSON[_T("op")] = web::json::value::string(_T("add"));
-            break;
-        case stat_compare_type::max:
-            returnJSON[_T("op")] = web::json::value::string(_T("max"));
-            break;
-        case stat_compare_type::min:
-            returnJSON[_T("op")] = web::json::value::string(_T("min"));
-            break;
-    }
+
+    returnJSON[_T("op")] = web::json::value::string(_T("replace"));
 
     return returnJSON;
 }
@@ -136,15 +94,6 @@ stat_value::_Deserialize(
         case web::json::value::value_type::Number:
             statValue.m_statData.numberType = value.as_double();
             statValue.m_dataType = stat_data_type::number;
-
-            if (utils::str_icmp(statOp, _T("min")) == 0)
-            {
-                statValue.m_statCompareType = stat_compare_type::min;
-            }
-            else if(utils::str_icmp(statOp, _T("max")) == 0)
-            {
-                statValue.m_statCompareType = stat_compare_type::max;
-            }
             break;
         case web::json::value::value_type::String:
             utils::char_t_copy(statValue.m_statData.stringType, ARRAYSIZE(statValue.m_statData.stringType), value.as_string().c_str());

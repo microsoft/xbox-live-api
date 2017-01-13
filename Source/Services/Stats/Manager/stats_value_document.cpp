@@ -32,8 +32,7 @@ stats_value_document::get_stat(
 xbox_live_result<void>
 stats_value_document::set_stat(
     _In_ const char_t* statName,
-    _In_ double statValue,
-    _In_ stat_compare_type statCompareType
+    _In_ double statValue
     )
 {
     m_isDirty = true;
@@ -41,7 +40,6 @@ stats_value_document::set_stat(
     utils::char_t_copy(statPendingState.statPendingName, ARRAYSIZE(statPendingState.statPendingName), statName);
     statPendingState.statDataType = stat_data_type::number;
     statPendingState.statPendingData.numberType = statValue;
-    statPendingState.statCompareType = statCompareType;
 
     m_svdEventList.push_back(svd_event(statPendingState));
     return xbox_live_result<void>();
@@ -72,29 +70,6 @@ stats_value_document::get_stat_names(
     {
         statNameList.push_back(stat.first.c_str());
     }
-}
-
-void
-stats_value_document::get_stat_contexts(
-    _Inout_ std::vector<stat_context>& statisticContextList
-    ) const
-{
-    statisticContextList.clear();
-    statisticContextList.insert(statisticContextList.end(), m_currentStatContexts.begin(), m_currentStatContexts.end());
-}
-
-void
-stats_value_document::set_stat_contexts(
-    _In_ const std::vector<stat_context>& statContextList
-    )
-{
-    m_svdEventList.push_back(svd_event(utils::std_vector_to_xsapi_vector<stat_context>(statContextList)));
-}
-
-void
-stats_value_document::clear_stat_contexts()
-{
-    m_svdEventList.push_back(svd_event(xsapi_internal_vector(stat_context)()));
 }
 
 uint32_t
@@ -158,30 +133,13 @@ stats_value_document::do_work()
                 {
                     case stat_data_type::number:
                         m_statisticDocument[pendingStat.statPendingName]->set_stat(
-                            pendingStat.statPendingData.numberType,
-                            !m_currentStatContexts.empty(),
-                            pendingStat.statCompareType
+                            pendingStat.statPendingData.numberType
                             );
                         break;
 
                     case stat_data_type::string:
                         m_statisticDocument[pendingStat.statPendingName]->set_stat(pendingStat.statPendingData.stringType);
                         break;
-                }
-                break;
-            }
-            case svd_event_type::stat_context_change:
-            {
-                auto& contextList = svdEvent.context_list();
-                m_currentStatContexts.clear();
-                if (!contextList.empty())
-                {
-                    m_currentStatContexts.insert(m_currentStatContexts.end(), contextList.begin(), contextList.end());
-                }
-
-                if (m_fRequestFlush != nullptr)
-                {
-                    m_fRequestFlush();
                 }
                 break;
             }
@@ -213,16 +171,12 @@ stats_value_document::serialize() const
 
     auto& contextualKeyField = statsField[_T("contextualKeys")];
     contextualKeyField = web::json::value::object();
-    for (auto& context : m_currentStatContexts)
-    {
-        contextualKeyField[context.playerStateName] = web::json::value::string(context.playerStateValue.as_string());
-    }
 
     auto& titleField = statsField[_T("title")];
     titleField = web::json::value::object();
     for (auto& stat : m_statisticDocument)
     {
-        titleField[stat.first.c_str()] = stat.second->serialize(!m_currentStatContexts.empty());
+        titleField[stat.first.c_str()] = stat.second->serialize();
     }
 
     return requestJSON;
@@ -246,15 +200,6 @@ stats_value_document::_Deserialize(
     returnObject.m_clientId = utils::extract_json_string(envelopeField, _T("clientId"), errc).c_str();
 
     auto statsField = utils::extract_json_field(data, _T("stats"), errc, false);
-    auto currentContextArray = utils::extract_json_field(statsField, _T("contextualKeys"), errc, false).as_object();
-    for (auto& context : currentContextArray)
-    {
-        stat_context statContext;
-        statContext.playerStateName = context.first.c_str();
-        statContext.playerStateValue = player_state::player_state_value(context.second.as_string());
-        returnObject.m_currentStatContexts.push_back(statContext);
-    }
-
     auto titleField = utils::extract_json_field(statsField, _T("title"), errc, false);
     auto statsArray = titleField.as_object();
     for (auto& stat : statsArray)
@@ -276,8 +221,7 @@ svd_event::svd_event(
 svd_event::svd_event(
     _In_ xsapi_internal_vector(stat_context) statContextList
     ) :
-    m_statContextList(std::move(statContextList)),
-    m_svdEventType(svd_event_type::stat_context_change)
+    m_statContextList(std::move(statContextList))
 {
 }
 

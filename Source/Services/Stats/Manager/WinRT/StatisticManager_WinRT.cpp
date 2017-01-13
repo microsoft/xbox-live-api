@@ -109,27 +109,6 @@ StatisticManager::SetStatisticNumberData(
 }
 
 void
-StatisticManager::SetStatisticNumberData(
-    _In_ XboxLiveUser_t user,
-    _In_ Platform::String^ name,
-    _In_ double value,
-    _In_ StatisticCompareType statisticReplaceCompareType
-    )
-{
-    THROW_INVALIDARGUMENT_IF_NULL(user);
-    THROW_INVALIDARGUMENT_IF_NULL(name);
-
-    auto result = m_cppObj.set_stat_as_number(
-        user_context::user_convert(user),
-        STRING_T_FROM_PLATFORM_STRING(name),
-        value,
-        static_cast<stat_compare_type>(statisticReplaceCompareType)
-        );
-
-    THROW_IF_ERR(result);
-}
-
-void
 StatisticManager::SetStatisticIntegerData(
     _In_ XboxLiveUser_t user,
     _In_ Platform::String^ name,
@@ -143,27 +122,6 @@ StatisticManager::SetStatisticIntegerData(
         user_context::user_convert(user),
         STRING_T_FROM_PLATFORM_STRING(name),
         value
-        );
-
-    THROW_IF_ERR(result);
-}
-
-void
-StatisticManager::SetStatisticIntegerData(
-    _In_ XboxLiveUser_t user,
-    _In_ Platform::String^ name,
-    _In_ int64_t value,
-    _In_ StatisticCompareType statisticReplaceCompareType
-    )
-{
-    THROW_INVALIDARGUMENT_IF_NULL(user);
-    THROW_INVALIDARGUMENT_IF_NULL(name);
-
-    auto result = m_cppObj.set_stat_as_integer(
-        user_context::user_convert(user),
-        STRING_T_FROM_PLATFORM_STRING(name),
-        value,
-        static_cast<stat_compare_type>(statisticReplaceCompareType)
         );
 
     THROW_IF_ERR(result);

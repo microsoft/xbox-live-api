@@ -913,9 +913,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\simple_stats.h">
       <Filter>XSAPI\Include</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticCompareType_WinRT.h">
-      <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticDataType_WinRT.h">
       <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
     </ClInclude>

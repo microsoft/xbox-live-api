@@ -11,7 +11,6 @@
 #include "xsapi/simple_stats.h"
 #include "StatisticEvent_WinRT.h"
 #include "StatisticValue_WinRT.h"
-#include "StatisticCompareType_WinRT.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 
@@ -76,24 +75,6 @@ public:
         _In_ double value
         );
 
-    /// <summary> 
-    /// Replaces the numerical stat by the value. Can be positive or negative
-    /// </summary>
-    /// <param name="user">The local user whose stats to access</param>
-    /// <param name="name">The name of the statistic to modify</param>
-    /// <param name="value">Value to replace the stat by</param>
-    /// <param name="statisticReplaceCompareType">
-    /// Will override the compare type. Stat will only be updated if follows the stat compares rule
-    /// *Note* This is not recommended to be modified after release of the title
-    /// </param>
-    /// <return>Whether or not the setting was successful. Can fail if stat is not of numerical type. Will return updated stat</return>
-    void SetStatisticNumberData(
-        _In_ XboxLiveUser_t user,
-        _In_ Platform::String^ name,
-        _In_ double value,
-        _In_ StatisticCompareType statisticReplaceCompareType
-        );
-
         /// <summary> 
     /// Replaces the numerical stat by the value. Can be positive or negative
     /// </summary>
@@ -107,23 +88,6 @@ public:
         _In_ int64_t value
         );
 
-    /// <summary> 
-    /// Replaces the numerical stat by the value. Can be positive or negative
-    /// </summary>
-    /// <param name="user">The local user whose stats to access</param>
-    /// <param name="name">The name of the statistic to modify</param>
-    /// <param name="value">Value to replace the stat by</param>
-    /// <param name="statisticReplaceCompareType">
-    /// Will override the compare type. Stat will only be updated if follows the stat compares rule
-    /// *Note* This is not recommended to be modified after release of the title
-    /// </param>
-    /// <return>Whether or not the setting was successful. Can fail if stat is not of numerical type. Will return updated stat</return>
-    void SetStatisticIntegerData(
-        _In_ XboxLiveUser_t user,
-        _In_ Platform::String^ name,
-        _In_ int64_t value,
-        _In_ StatisticCompareType statisticReplaceCompareType
-        );
 
     /// <summary> 
     /// Replaces the string stat by the value.

@@ -22,21 +22,18 @@ namespace xbox { namespace services { namespace experimental { namespace stats {
 enum class svd_event_type
 {
     unknown,
-    stat_change,
-    stat_context_change
+    stat_change
 };
 
 struct stat_pending_state
 {
     stat_pending_state() :
-        statDataType(stat_data_type::undefined),
-        statCompareType(stat_compare_type::always)
+        statDataType(stat_data_type::undefined)
     {
         initialize_char_arr(statPendingName);
     }
 
     stat_data_type statDataType;
-    stat_compare_type statCompareType;
     char_t statPendingName[STAT_PRESENCE_CHARS_NUM];
     stat_data statPendingData;
 };
@@ -81,8 +78,12 @@ public:
 
     xbox_live_result<void> set_stat(
         _In_ const char_t* statName,
-        _In_ double statValue,
-        _In_ stat_compare_type statCompareType = stat_compare_type::always
+        _In_ double statValue
+        );
+
+    xbox_live_result<void> set_stat(
+        _In_ const char_t* statName,
+        _In_ int64_t statValue
         );
 
     xbox_live_result<void> set_stat(
@@ -93,16 +94,6 @@ public:
     void get_stat_names(
         _Inout_ std::vector<string_t>& statNameList
         ) const;
-
-    void get_stat_contexts(
-        _Inout_ std::vector<stat_context>& statisticContextList
-        ) const;
-
-    void set_stat_contexts(
-        _In_ const std::vector<stat_context>& statContextList
-        );
-
-    void clear_stat_contexts();
 
     void increment_client_version_number();
 
@@ -132,7 +123,6 @@ private:
     std::function<void()> m_fRequestFlush;
     xsapi_internal_string m_clientId;
     xsapi_internal_vector(svd_event) m_svdEventList;
-    xsapi_internal_vector(stat_context) m_currentStatContexts;
     xsapi_internal_unordered_map(string_t, std::shared_ptr<stat_value>) m_statisticDocument;
 };
 
@@ -174,7 +164,7 @@ struct stats_user_context
         _In_ stats_value_document _statValueDoc,
         _In_ std::shared_ptr<xbox_live_context_impl> _xboxLiveContextImpl,
         _In_ simplified_stats_service _simplifiedStatsService
-        ) :
+    ) :
         statValueDocument(std::move(_statValueDoc)),
         xboxLiveContextImpl(std::move(_xboxLiveContextImpl)),
         simplifiedStatsService(std::move(_simplifiedStatsService))
@@ -209,8 +199,13 @@ public:
     xbox_live_result<void> set_stat(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& name,
-        _In_ double value,
-        _In_ stat_compare_type statisticReplaceCompareType = stat_compare_type::always
+        _In_ int64_t value
+        );
+
+    xbox_live_result<void> set_stat(
+        _In_ const xbox_live_user_t& user,
+        _In_ const string_t& name,
+        _In_ double value
         );
 
     xbox_live_result<void> set_stat(
@@ -227,51 +222,6 @@ public:
     xbox_live_result<std::shared_ptr<stat_value>> get_stat(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& name
-        );
-
-    xbox_live_result<void> get_stat_contexts(
-        _In_ const xbox_live_user_t& user,
-        _Inout_ std::vector<stat_context>& statisticContextList
-        );
-
-    xbox_live_result<void> set_stat_contexts(
-        _In_ const xbox_live_user_t& user,
-        _In_ const std::vector<stat_context>& statContextList
-        );
-
-    xbox_live_result<void> clear_stat_contexts(
-        _In_ const xbox_live_user_t& user
-        );
-
-    xbox_live_result<std::shared_ptr<xbox::services::leaderboard::leaderboard_result>> get_social_leaderboard(
-        _In_ const xbox_live_user_t& user,
-        _In_ const string_t& leaderboardOrStatName,
-        _In_ const stat_context& statContext = stat_context(),
-        _In_ const string_t& socialGroup = xbox::services::social::social_group_constants::people(),
-        _In_ const leaderboard_query& leaderboardQuery = leaderboard_query(),
-        _In_ bool isRealTime = false
-        );
-
-    xbox_live_result<std::shared_ptr<xbox::services::leaderboard::leaderboard_result>> get_global_leaderboard(
-        _In_ const xbox_live_user_t& user,
-        _In_ const string_t& leaderboardName,
-        _In_ const stat_context& statContext = stat_context(),
-        _In_ const leaderboard_query& leaderboardQuery = leaderboard_query(),
-        _In_ bool shouldAutoRefresh = false
-        );
-
-    xbox_live_result<std::shared_ptr<user_statistic_view>> get_statistics_table(
-        _In_ const xbox_live_user_t& user,
-        _In_ const string_t& statName,
-        _In_ const std::vector<string_t>& xboxUserIds,
-        _In_ const stat_context& statContext = stat_context()
-        );
-
-    xbox_live_result<std::shared_ptr<user_statistic_view>> get_multiple_statistics_table(
-        _In_ const xbox_live_user_t& user,
-        _In_ const std::vector<string_t>& statName,
-        _In_ const std::vector<string_t>& xboxUserIds,
-        _In_ const stat_context& statContext = stat_context()
         );
 
     void write_offline();
@@ -292,8 +242,8 @@ private:
 
     bool m_isOffline;
     std::vector<stat_event> m_statEventList;
+    std::unordered_map<string_t, stats_user_context> m_users;
     // TODO: change back to xsapi_internal_string
-    xsapi_internal_unordered_map(string_t, stats_user_context) m_users;
     std::mutex m_statsServiceMutex;
 };
 

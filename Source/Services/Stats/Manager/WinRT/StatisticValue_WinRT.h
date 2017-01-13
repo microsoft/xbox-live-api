@@ -10,7 +10,6 @@
 #pragma once
 #include "xsapi/simple_stats.h"
 #include "StatisticDataType_WinRT.h"
-#include "StatisticCompareType_WinRT.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 
@@ -49,12 +48,6 @@ public:
     /// </summary>
     /// <returns>Stat data type</returns>
     DEFINE_PTR_PROP_GET_ENUM_OBJ(DataType, data_type, StatisticDataType);
-
-    /// <summary> 
-    /// Enum of logic of how to handle statistic
-    /// </summary>
-    /// <returns>The compare type</returns>
-    DEFINE_PTR_PROP_GET_ENUM_OBJ(CompareType, compare_type, StatisticCompareType);
 
 internal:
     StatisticValue(

@@ -36,16 +36,6 @@ union stat_data
 };
 
 /// <summary> 
-/// Type for how to replace a numerical stat
-/// </summary>
-enum class stat_compare_type
-{
-    always,
-    min,
-    max
-};
-
-/// <summary> 
 /// Type of data the stat is
 /// </summary>
 enum class stat_data_type
@@ -62,12 +52,7 @@ enum class stat_event_type
 {
     local_user_added,
     local_user_removed,
-    stat_update_complete,
-    stat_sync_complete,
-    leaderboard_load_complete,
-    user_statistic_view_load_complete,
-    leaderboard_updated,
-    user_statistic_view_updated
+    stat_update_complete
 };
 
 
@@ -119,31 +104,24 @@ public:
     /// <returns>Stat data type</returns>
     stat_data_type data_type() const;
 
-    /// <summary> 
-    /// Enum of logic of how to handle statistic
-    /// </summary>
-    /// <returns>The compare type</returns>
-    stat_compare_type compare_type() const;
-
     /// Internal function
     static xbox_live_result<stat_value> _Deserialize(_In_ const web::json::value& data);
 
 private:
     void set_stat(
-        _In_ double value,
-        _In_ bool storeStatContextData,
-        _In_ stat_compare_type statCompareType = stat_compare_type::always
+        _In_ double value
         );
 
-    void set_stat(_In_ const char_t* value);
-    web::json::value serialize(_In_ bool useContextData) const;
+    void set_stat(
+        _In_ const char_t* value
+        );
+
+    web::json::value serialize() const;
 
     stat_data_type m_dataType;
-    stat_compare_type m_statCompareType;
     xbox_live_user_t m_localUserOwner;
     char_t m_name[STAT_PRESENCE_CHARS_NUM];
     stat_data m_statData;
-    stat_data m_statContextData;
     std::function<void(stat_value)> m_callbackFunc;
     friend class stats_value_document;
 };
@@ -180,61 +158,6 @@ private:
     stat_event_type m_eventType;
     xbox_live_user_t m_localUser;
     xbox_live_result<void> m_errorInfo;
-};
-
-/// <summary> 
-/// Information for querying a leaderboard object
-/// </summary>
-class leaderboard_query
-{
-public:
-    leaderboard_query() : m_shouldSkipToXuid(false), m_maxItems(0), m_skipToRank(0), m_sortOrder(sort_order::ascending) {}
-
-private:
-    bool m_shouldSkipToXuid;
-    uint32_t m_maxItems;
-    uint32_t m_skipToRank;
-    sort_order m_sortOrder;
-    string_t m_xuidToSkipTo;
-    std::vector<string_t> m_additionalColumnNames;
-};
-
-/// <summary> 
-/// Wrapper object for holding user statistic result
-/// This object will update on do_work when async task is complete or when object is updated if real time
-/// </summary>
-class user_statistic_view
-{
-public:
-    const std::vector<xbox::services::user_statistics::user_statistics_result>& user_statistic_results() const;
-
-private:
-    uint32_t m_id;
-    std::vector<xbox::services::user_statistics::user_statistics_result> m_userStatisticResults;
-};
-
-/// <summary> 
-/// Wrapper object for holding leaderboard result
-/// This object will update on do_work when async task is complete or when object is updated if real time
-/// </summary>
-class leaderboard_view
-{
-public:
-    const std::vector<xbox::services::user_statistics::user_statistics_result>& user_statistic_results() const;
-
-private:
-    uint32_t m_id;
-    std::vector<xbox::services::user_statistics::user_statistics_result> m_userStatisticResults;
-};
-
-class achievements_view
-{
-public:
-    const xbox::services::achievements::achievements_result& achievement_results() const;
-
-private:
-    uint32_t m_id;
-    xbox::services::achievements::achievements_result m_achievementResults;
 };
 
 /// <summary> 
@@ -296,8 +219,7 @@ public:
     xbox_live_result<void> set_stat_as_number(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& name,
-        _In_ double value,
-        _In_ stat_compare_type statisticReplaceCompareType = stat_compare_type::always
+        _In_ double value
         );
 
     /// <summary> 
@@ -314,12 +236,11 @@ public:
     xbox_live_result<void> set_stat_as_integer(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& name,
-        _In_ int64_t value,
-        _In_ stat_compare_type statisticReplaceCompareType = stat_compare_type::always
+        _In_ int64_t value
         );
 
     /// <summary> 
-    /// Reaplces a string stat with the given value.
+    /// Replaces a string stat with the given value.
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
     /// <param name="name">The name of the statistic to modify</param>
@@ -352,74 +273,6 @@ public:
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& name
         );
-
-    // TODO: implement
-    /*/// <summary> 
-    /// Gets a social leaderboard for a user. 
-    /// leaderboard_load_complete event triggers when leaderboard load is complete
-    /// </summary>
-    /// <param name="user">The local user to get the leaderboard for</param>
-    /// <param name="leaderboardName">Either the name of the leaderboard to query by or the leaderboard to generate if a statName is passed in</param>
-    /// <param name="statContext">Stat context that the stat is for</param>
-    /// <param name="socialGroup">Social group parameter to filter list by</param>
-    /// <param name="leaderboardQuery">Object that defines the leaderboard query information</param>
-    /// <param name="isRealTime">Whether the leaderboard should update based on RTA shoulder taps</param>
-    /// <return>Object that contains leaderboard_result that will update when complete</return>
-    xbox_live_result<std::shared_ptr<xbox::services::leaderboard::leaderboard_result>> get_social_leaderboard(
-        _In_ const xbox_live_user_t& user,
-        _In_ const string_t& leaderboardOrStatName,
-        _In_ const stat_context& statContext = stat_context(),
-        _In_ const string_t& socialGroup = xbox::services::social::social_group_constants::people(),
-        _In_ const leaderboard_query& leaderboardQuery = leaderboard_query(),
-        _In_ bool isRealTime = false
-        );
-
-    /// <summary> 
-    /// Gets a global leaderboard for a user.
-    /// </summary>
-    /// <param name="user">The local user to get the leaderboard for</param>
-    /// <param name="leaderboardName">The leaderboard name to query by</param>
-    /// <param name="statContext">The stat context to view the leaderboard with. This must be preconfigured in XDP</param>
-    /// <param name="leaderboardQuery">Object that defines the leaderboard query information</param>
-    /// <param name="shouldAutoRefresh">Whether the leaderboard should auto refresh at various intervals</param>
-    /// <return>Object that contains leaderboard_result that will update when complete</return>
-    xbox_live_result<std::shared_ptr<xbox::services::leaderboard::leaderboard_result>> get_global_leaderboard(
-        _In_ const xbox_live_user_t& user,
-        _In_ const string_t& leaderboardName,
-        _In_ const stat_context& statContext = stat_context(),
-        _In_ const leaderboard_query& leaderboardQuery = leaderboard_query(),
-        _In_ bool shouldAutoRefresh = false
-        );
-
-    /// <summary> 
-    /// Gets a statistic table for users
-    /// </summary>
-    /// <param name="user">The local user to get the statistic table for</param>
-    /// <param name="statName">The name of the stat to get</param>
-    /// <param name="xboxUserIds">The list of users to get the stats for</param>
-    /// <param name="statContext">The stat context for the users</param>
-    /// <return>Object that contains user_statistic_view that will update when complete</return>
-    xbox_live_result<std::shared_ptr<user_statistic_view>> get_statistics_table(
-        _In_ const xbox_live_user_t& user,
-        _In_ const string_t& statName,
-        _In_ const std::vector<string_t>& xboxUserIds,
-        _In_ const stat_context& statContext = stat_context()
-        );
-
-    /// <summary> 
-    /// Gets a multiple statistics table for users
-    /// </summary>
-    /// <param name="user">The local user to get the statistic table for</param>
-    /// <param name="statName">The name of the stat to get</param>
-    /// <param name="xboxUserIds">The list of users to get the stats for</param>
-    /// <param name="statContext">The stat context for the users</param>
-    /// <return>Object that contains user_statistic_view that will update when complete</return>
-    xbox_live_result<std::shared_ptr<user_statistic_view>> get_multiple_statistics_table(
-        _In_ const xbox_live_user_t& user,
-        _In_ const std::vector<string_t>& statName,
-        _In_ const std::vector<string_t>& xboxUserIds,
-        _In_ const stat_context& statContext = stat_context()
-        );*/
 
     stats_manager();
 

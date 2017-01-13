@@ -59,25 +59,7 @@ public:
         }
 
         auto titleOp = titleStat[L"op"].as_string();
-        switch (stat.compare_type())
-        {
-            case stat_compare_type::always:
-                if (stat.data_type() == stat_data_type::number)
-                {
-                    VERIFY_IS_TRUE(titleOp == L"add");
-                }
-                else
-                {
-                    VERIFY_IS_TRUE(titleOp == L"replace");
-                }
-                break;
-            case stat_compare_type::max:
-                VERIFY_IS_TRUE(titleOp == L"max");
-                break;
-            case stat_compare_type::min:
-                VERIFY_IS_TRUE(titleOp == L"min");
-                break;
-        }
+        VERIFY_IS_TRUE(titleOp == L"replace");
     }
 
     stats_value_document GetStatValueDocument(simplified_stats_service& simplifiedStatService, const std::shared_ptr<MockHttpCall>& httpCall, const string_t& jsonValue)

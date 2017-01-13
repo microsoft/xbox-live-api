@@ -71,15 +71,13 @@ xbox_live_result<void>
 stats_manager::set_stat_as_integer(
     _In_ const xbox_live_user_t& user,
     _In_ const string_t& name,
-    _In_ int64_t value,
-    _In_ stat_compare_type statisticReplaceCompareType
+    _In_ int64_t value
     )
 {
     return m_statsManagerImpl->set_stat(
         user,
         name,
-        static_cast<double>(value),
-        statisticReplaceCompareType
+        static_cast<double>(value)
         );
 }
 
@@ -87,15 +85,13 @@ xbox_live_result<void>
 stats_manager::set_stat_as_number(
     _In_ const xbox_live_user_t& user,
     _In_ const string_t& name,
-    _In_ double value,
-    _In_ stat_compare_type statisticReplaceCompareType
+    _In_ double value
 )
 {
     return m_statsManagerImpl->set_stat(
         user,
         name,
-        value,
-        statisticReplaceCompareType
+        value
         );
 }
 
