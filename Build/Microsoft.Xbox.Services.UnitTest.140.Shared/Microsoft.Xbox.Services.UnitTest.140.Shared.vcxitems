@@ -39,7 +39,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\real_time_activity.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\services.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\service_call_logging_config.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\simple_stats.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\stats_manager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\social.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\social_manager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\system.h" />
@@ -257,7 +257,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxSocialRelationshipResult_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxSocialRelationship_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxUserProfile_WinRT.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\simplified_stats_internal.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_manager_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticDataType_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticEventType_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticEvent_WinRT.h" />
@@ -640,10 +640,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_social_relationship.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_social_relationship_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_user_profile.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\simplified_stats_manager_impl.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\simplified_stats_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_manager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_manager_impl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_service.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_value_document.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\simplified_stats_manager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stat_event.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stat_value.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticEvent_WinRT.cpp" />

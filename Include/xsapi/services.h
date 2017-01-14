@@ -39,7 +39,7 @@
 #include "xsapi/multiplayer_manager.h"
 #include "xsapi/service_call_logging_config.h"
 #include "xsapi/entertainment_profile.h"
-#include "xsapi/simple_stats.h"
+#include "xsapi/stats_manager.h"
 
 #ifdef U 
     #undef U // clean up cpprest's global define in case it's used by app

@@ -8,7 +8,7 @@
 //
 //*********************************************************
 #pragma once
-#include "xsapi/simple_stats.h"
+#include "xsapi/stats_manager.h"
 #include "StatisticEvent_WinRT.h"
 #include "StatisticValue_WinRT.h"
 

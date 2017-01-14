@@ -293,9 +293,9 @@
     <ClCompile Include="..\..\Source\Services\Social\social_relationship_change_event_args.cpp" />
     <ClCompile Include="..\..\Source\Services\Social\social_relationship_change_subscription.cpp" />
     <ClCompile Include="..\..\Source\Services\Social\social_service_impl.cpp" />
-    <ClCompile Include="..\..\Source\Services\Stats\Manager\simplified_stats_manager.cpp" />
-    <ClCompile Include="..\..\Source\Services\Stats\Manager\simplified_stats_manager_impl.cpp" />
-    <ClCompile Include="..\..\Source\Services\Stats\Manager\simplified_stats_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_service.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_value_document.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_event.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_value.cpp" />
@@ -372,9 +372,9 @@
     <ClInclude Include="..\..\Include\xsapi\game_server_platform.h" />
     <ClInclude Include="..\..\Include\xsapi\mem.h" />
     <ClInclude Include="..\..\Include\xsapi\player_state_writer.h" />
-    <ClInclude Include="..\..\Include\xsapi\simple_stats.h" />
     <ClInclude Include="..\..\Include\xsapi\social_manager.h" />
     <ClInclude Include="..\..\Include\xsapi\service_call_logging_config.h" />
+    <ClInclude Include="..\..\Include\xsapi\stats_manager.h" />
     <ClInclude Include="..\..\Include\xsapi\title_callable_ui.h" />
     <ClInclude Include="..\..\Include\xsapi\multiplayer_manager.h" />
     <ClInclude Include="..\..\Include\xsapi\presence.h" />
@@ -393,7 +393,7 @@
     <ClInclude Include="..\..\Source\Services\RealTimeActivity\real_time_activity_internal.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\social_manager_internal.h" />
     <ClInclude Include="..\..\Source\Services\Social\social_internal.h" />
-    <ClInclude Include="..\..\Source\Services\Stats\Manager\simplified_stats_internal.h" />
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\stats_manager_internal.h" />
     <ClInclude Include="..\..\Source\Services\Stats\user_statistics_internal.h" />
     <ClInclude Include="..\..\Source\Shared\initiator.h" />
     <ClInclude Include="..\..\Source\Shared\Logger\custom_output.h" />
@@ -416,8 +416,8 @@
     <ClInclude Include="..\..\Source\System\system_internal.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.staticlib.vcxproj">
-      <Project>{47a5cfdc-c244-45a6-9830-38cb303cb495}</Project>
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.static.vcxproj">
+      <Project>{9ad285a2-301e-47a0-a299-14ad5d4f2758}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

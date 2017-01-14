@@ -705,19 +705,10 @@
     <ClCompile Include="..\..\Source\Services\Social\Manager\xbox_user_id_container.cpp">
       <Filter>C++ Source\Social\Manager</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Stats\Manager\simplified_stats_manager.cpp">
-      <Filter>C++ Source\Stats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Stats\Manager\simplified_stats_service.cpp">
-      <Filter>C++ Source\Stats</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_value.cpp">
       <Filter>C++ Source\Stats</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_value_document.cpp">
-      <Filter>C++ Source\Stats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Stats\Manager\simplified_stats_manager_impl.cpp">
       <Filter>C++ Source\Stats</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\System\Sidecar\app_service_provider.cpp">
@@ -734,6 +725,15 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Services\Misc\player_state_value.cpp">
       <Filter>C++ Source\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager_impl.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_service.cpp">
+      <Filter>C++ Source\Stats</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -944,12 +944,6 @@
     <ClInclude Include="..\..\Source\Shared\logger\etw_output.h">
       <Filter>C++ Source\Shared\Logger</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\xsapi\simple_stats.h">
-      <Filter>C++ Public Includes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Services\Stats\Manager\simplified_stats_internal.h">
-      <Filter>C++ Source\Stats</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\System\Sidecar\app_service_messages.h">
       <Filter>C++ Source\System</Filter>
     </ClInclude>
@@ -958,6 +952,12 @@
     </ClInclude>
     <ClInclude Include="..\..\Include\xsapi\player_state_writer.h">
       <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\stats_manager.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\stats_manager_internal.h">
+      <Filter>C++ Source\Stats</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

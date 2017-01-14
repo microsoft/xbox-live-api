@@ -8,7 +8,7 @@
 //
 //*********************************************************
 #pragma once
-#include "xsapi/simple_stats.h"
+#include "xsapi/stats_manager.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 

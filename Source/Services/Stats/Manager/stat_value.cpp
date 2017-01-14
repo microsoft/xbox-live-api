@@ -8,7 +8,7 @@
 //
 //*********************************************************
 #include "pch.h"
-#include "xsapi/simple_stats.h"
+#include "xsapi/stats_manager.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
 

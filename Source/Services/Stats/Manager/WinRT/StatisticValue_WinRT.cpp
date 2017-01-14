@@ -8,7 +8,7 @@
 //
 //*********************************************************
 #include "pch.h"
-#include "xsapi/simple_stats.h"
+#include "xsapi/stats_manager.h"
 #include "user_context.h"
 #include "StatisticValue_WinRT.h"
 

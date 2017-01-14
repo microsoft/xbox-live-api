@@ -8,8 +8,8 @@
 //
 //*********************************************************
 #include "pch.h"
-#include "xsapi/simple_stats.h"
-#include "simplified_stats_internal.h"
+#include "xsapi/stats_manager.h"
+#include "stats_manager_internal.h"
 #include "http_call_impl.h"
 #include "user_context.h"
 #include "xbox_system_factory.h"

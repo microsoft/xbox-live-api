@@ -8,7 +8,7 @@
 //
 //*********************************************************
 #pragma once
-#include "xsapi/simple_stats.h"
+#include "xsapi/stats_manager.h"
 #include "xsapi/system.h"
 #include "system_internal.h"
 #include "user_context.h"
@@ -16,6 +16,7 @@
 #include <sstream>
 #include <iostream>
 #include "xsapi/mem.h"
+#include "call_buffer_timer.h"
 
 namespace xbox { namespace services { namespace experimental { namespace stats { namespace manager { 
 
@@ -163,16 +164,19 @@ struct stats_user_context
     stats_user_context(
         _In_ stats_value_document _statValueDoc,
         _In_ std::shared_ptr<xbox_live_context_impl> _xboxLiveContextImpl,
-        _In_ simplified_stats_service _simplifiedStatsService
+        _In_ simplified_stats_service _simplifiedStatsService,
+        _In_ xbox_live_user_t  _xboxLiveUser
     ) :
         statValueDocument(std::move(_statValueDoc)),
         xboxLiveContextImpl(std::move(_xboxLiveContextImpl)),
-        simplifiedStatsService(std::move(_simplifiedStatsService))
+        simplifiedStatsService(std::move(_simplifiedStatsService)),
+        xboxLiveUser(std::move(_xboxLiveUser))
     {
     }
 
     stats_value_document statValueDocument;
     std::shared_ptr<xbox_live_context_impl> xboxLiveContextImpl;
+    xbox_live_user_t xboxLiveUser;
     simplified_stats_service simplifiedStatsService;
 };
 
@@ -226,6 +230,8 @@ public:
 
     void write_offline();
 
+    void initialize();
+
 private:
     static inline bool should_write_offline(xbox_live_result<void>& postResult)
     {
@@ -235,14 +241,18 @@ private:
     }
 
     void flush_to_service(
-        _In_ stats_user_context& statsUserContext,
-        _In_ const xbox_live_user_t user
+        _In_ stats_user_context& statsUserContext
         );
 
+    void flush_to_service_callback(_In_ const string_t& userXuid);
+
+    static const std::chrono::seconds TIME_PER_CALL_SEC;
 
     bool m_isOffline;
     std::vector<stat_event> m_statEventList;
     std::unordered_map<string_t, stats_user_context> m_users;
+    std::shared_ptr<xbox::services::call_buffer_timer> m_statTimer;
+    std::shared_ptr<xbox::services::call_buffer_timer> m_statPriorityTimer;
     // TODO: change back to xsapi_internal_string
     std::mutex m_statsServiceMutex;
 };

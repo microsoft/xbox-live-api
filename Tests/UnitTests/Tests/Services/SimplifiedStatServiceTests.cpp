@@ -11,8 +11,8 @@
 #define TEST_CLASS_OWNER L"blgross"
 #define TEST_CLASS_AREA L"SimplfiedStatService"
 #include "UnitTestIncludes.h"
-#include "xsapi/simple_stats.h"
-#include "Stats/Manager/simplified_stats_internal.h"
+#include "xsapi/stats_manager.h"
+#include "Stats/Manager/stats_manager_internal.h"
 #include "xbox_live_context_impl.h"
 #include "StatsManagerHelper.h"
 

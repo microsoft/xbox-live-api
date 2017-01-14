@@ -8,8 +8,8 @@
 //
 //*********************************************************
 #include "pch.h"
-#include "xsapi/simple_stats.h"
-#include "simplified_stats_internal.h"
+#include "xsapi/stats_manager.h"
+#include "stats_manager_internal.h"
 #include "xsapi/services.h"
 #include "xsapi/system.h"
 #include "xbox_live_context_impl.h"
@@ -31,6 +31,7 @@ stats_manager::get_singleton_instance()
 stats_manager::stats_manager()
 {
     m_statsManagerImpl = std::make_shared<stats_manager_impl>();
+    m_statsManagerImpl->initialize();
 }
 
 xbox_live_result<void>

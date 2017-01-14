@@ -8,8 +8,8 @@
 //
 //*********************************************************
 #include "pch.h"
-#include "xsapi/simple_stats.h"
-#include "simplified_stats_internal.h"
+#include "xsapi/stats_manager.h"
+#include "stats_manager_internal.h"
 
 using namespace xbox::services;
 

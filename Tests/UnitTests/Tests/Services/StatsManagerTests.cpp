@@ -11,7 +11,7 @@
 #define TEST_CLASS_OWNER L"blgross"
 #define TEST_CLASS_AREA L"SimplfiedStatService"
 #include "UnitTestIncludes.h"
-#include "xsapi/simple_stats.h"
+#include "xsapi/stats_manager.h"
 #include "xbox_live_context_impl.h"
 #include "StatisticManager_WinRT.h"
 #include "StatsManagerHelper.h"
@@ -143,6 +143,8 @@ public:
 
         statsManager->SetStatisticIntegerData(user, L"fastestRound", 3);
         statsManager->RequestFlushToService(user);
+        auto eventList = statsManager->DoWork();
+        Sleep(500); // fix
         VERIFY_IS_TRUE(fastestRoundStat->AsInteger == 3);
         VERIFY_IS_TRUE(fastestRoundStat->DataType == StatisticDataType::Number);
 
