@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
-        <id>Microsoft.Xbox.Live.Services.API.Cpp.XboxOneXDK</id>
+        <id>Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK</id>
         <version>1.0.0.0</version>
-        <title>Microsoft Xbox Live SDK: C++ API for Xbox One XDK</title>
+        <title>Microsoft Xbox Live C++ API for Xbox One XDK</title>
         <authors>Microsoft</authors>
         <owners>Microsoft</owners>
         <licenseUrl>https://aka.ms/xblsdklicense</licenseUrl>
@@ -12,13 +12,13 @@
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
         <description>The Microsoft Xbox Live Service API (XSAPI) enables game developers to access Xbox Live. To get access to the Xbox Live service, please apply to the ID@Xbox program at http://www.xbox.com/en-us/Developers/id</description>
         <summary>Xbox Live enables games on all platforms to access Xbox Live and deliver great experiences to gamers.</summary>
-        <releaseNotes>Microsoft Xbox Live SDK: C++ API for Xbox One XDK.</releaseNotes>
+        <releaseNotes>Microsoft Xbox Live C++ API for Xbox One XDK.</releaseNotes>
         <copyright>© Microsoft Corporation. All rights reserved.</copyright>
         <tags>Microsoft Xbox Live Service XSAPI Cpp XboxOneXDK XboxOne Xbox One C++ One XDK</tags>
     </metadata>
     <files>
         <!-- v110 -->
-        <file src="\Nuget\Microsoft.Xbox.Live.Services.API.Cpp.XboxOneXDK.targets" target="build\native\Microsoft.Xbox.Live.Services.API.Cpp.XboxOneXDK.targets" />
+        <file src="\Nuget\Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK.targets" target="build\native\Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK.targets" />
         <file src="\include\" target="build\native\include\" />
         <file src="\Debug\x64\casablanca110.Xbox\casablanca110.xbox.lib" target="build\native\lib\Durango\v110\Debug\casablanca110.xbox.lib" />
         <file src="\Debug\x64\casablanca110.Xbox\casablanca110.xbox.pdb" target="build\native\lib\Durango\v110\Debug\casablanca110.xbox.pdb" />
