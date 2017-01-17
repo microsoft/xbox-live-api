@@ -15,7 +15,7 @@
     <ApplicationEnvironment>title</ApplicationEnvironment>
     <ProjectGuid>{9BF96BF1-7E60-49B7-A137-E6C961A28336}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>Microsoft.Xbox.Services.140.XDK.WinRT</ProjectName>
+    <ProjectName>Microsoft.Xbox.Services</ProjectName>
     <RootNamespace>Microsoft.Xbox.Services</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
