@@ -21,16 +21,18 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
+ 
+
 class token_manager
 {
 public:
     token_manager(
-        _In_ std::shared_ptr<ecdsa> proofKey,
-        _In_ std::shared_ptr<auth_config> authConfig,
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::system::ecdsa> proofKey,
+        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::system::auth_config> authConfig,
         _In_ std::shared_ptr<xbox_live_context_settings> xboxLiveContextSettings
         );
 
-    pplx::task<xbox::services::xbox_live_result<token_result>> get_xtoken(
+    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>> get_xtoken(
         _In_ const string_t& relyingParty,
         _In_ const string_t& subRelyingParty,
         _In_ const string_t tokenType,
@@ -72,21 +74,21 @@ private:
         std::mutex Lock; // Lock for synchronizing access to non-const fields
         token_result Token;
         bool IsRefreshInProgress;
-        pplx::task_completion_event<xbox::services::xbox_live_result<token_result>> RefreshEvent;
+        pplx::task_completion_event<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>> RefreshEvent;
     };
 
     struct token_state
     {
         token_state(
             _In_ std::shared_ptr<ecdsa> proofKey,
-            _In_ std::shared_ptr<auth_config> authConfig,
+            _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::system::auth_config> authConfig,
             _In_ std::shared_ptr<xbox_live_context_settings> xboxLiveContextSettings);
 
         std::map<string_t, std::shared_ptr<token_info>> Cache;
         string_t RpsTicket;
         std::mutex DataLock;
         const std::shared_ptr<ecdsa> ProofKey;
-        const std::shared_ptr<auth_config> AuthConfig;
+        const std::shared_ptr<XBOX_LIVE_NAMESPACE::system::auth_config> AuthConfig;
         const std::shared_ptr<xbox_live_context_settings> XboxLiveContextSettings;
     };
 
@@ -104,7 +106,7 @@ private:
         _In_ const string_t& relyingParty,
         _In_ const string_t& subRelyingParty,
         _In_ const string_t& tokenType,
-        _In_ token_identity_type tokenIdentityType);
+        _In_ XBOX_LIVE_NAMESPACE::system::token_identity_type tokenIdentityType);
 
     // Gets a token from state->Cache in a thread safe manner.
     static std::shared_ptr<token_info> get_token_from_cache(
@@ -112,16 +114,16 @@ private:
         _In_ const string_t& relyingParty,
         _In_ const string_t& subRelyingParty,
         _In_ const string_t& tokenType,
-        _In_ token_identity_type tokenIdentityType,
+        _In_ XBOX_LIVE_NAMESPACE::system::token_identity_type tokenIdentityType,
         _In_ bool forceRefresh = false);
 
-    static pplx::task<xbox::services::xbox_live_result<token_result>> get_token_from_cache_or_service(
+    static pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>> get_token_from_cache_or_service(
         _In_ std::shared_ptr<token_state> state,
         _In_ const string_t& relyingParty,
         _In_ const string_t& subRelyingParty,
         _In_ const string_t tokenType,
         _In_ bool promptForCreds,
-        _In_ token_identity_type tokenIdentityType,
+        _In_ XBOX_LIVE_NAMESPACE::system::token_identity_type tokenIdentityType,
         _In_ bool forceRefresh = false
         );
 
@@ -131,28 +133,28 @@ private:
     // the token type and RP are the same) does not start multiple
     // threads. If an existing thread exists, the call is given
     // a task that finishes when that thread finishes.
-    static pplx::task<xbox::services::xbox_live_result<token_result>> refresh_x_token(
+    static pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>> refresh_x_token(
         _In_ std::shared_ptr<token_state> state,
         _In_ std::shared_ptr<token_info> tokenInfo,
         _In_ bool promptForCreds
         );
 
-    static pplx::task<xbox::services::xbox_live_result<token_result>> refresh_t_token(
+    static pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>> refresh_t_token(
         _In_ std::shared_ptr<token_state> state,
         _In_ std::shared_ptr<token_info> tokenInfo
         );
 
-    static pplx::task<xbox::services::xbox_live_result<token_result>> refresh_u_token(
+    static pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>> refresh_u_token(
         _In_ std::shared_ptr<token_state> state,
         _In_ std::shared_ptr<token_info> tokenInfo
         );
 
-    static pplx::task<xbox::services::xbox_live_result<token_result>> refresh_d_token(
+    static pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>> refresh_d_token(
         _In_ std::shared_ptr<token_state> state,
         _In_ std::shared_ptr<token_info> tokenInfo
         );
 
-    static pplx::task<xbox::services::xbox_live_result<token_result>> refresh_s_token(
+    static pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_result>> refresh_s_token(
         _In_ std::shared_ptr<token_state> state,
         _In_ std::shared_ptr<token_info> tokenInfo
         );

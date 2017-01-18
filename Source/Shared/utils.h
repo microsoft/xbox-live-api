@@ -20,13 +20,10 @@
 #include "xsapi/mem.h"
 
 // Forward
-namespace xbox {
-    namespace services {
-        namespace system {
-            class xbox_live_services_settings;
-        }
-    }
-}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+    class xbox_live_services_settings;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -56,11 +53,11 @@ struct xsapi_singleton
     std::unordered_map<string_t, uint32_t> s_rtaActiveManagersByUser;
 
     std::mutex s_singletonLock;
-    std::shared_ptr<xbox::services::system::xbox_live_services_settings> s_xboxServiceSettingsSingleton;
-    std::shared_ptr<xbox::services::local_config> s_localConfigSingleton;
+    std::shared_ptr<XBOX_LIVE_NAMESPACE::system::xbox_live_services_settings> s_xboxServiceSettingsSingleton;
+    std::shared_ptr<XBOX_LIVE_NAMESPACE::local_config> s_localConfigSingleton;
 
-#if !TV_API && !XSAPI_SERVER
-    std::shared_ptr<xbox::services::presence::presence_writer> s_presenceWriterSingleton;
+#if !TV_API && !XSAPI_SERVER && !BEAM_API
+    std::shared_ptr<XBOX_LIVE_NAMESPACE::presence::presence_writer> s_presenceWriterSingleton;
 #endif
 };
 
@@ -521,7 +518,7 @@ public:
         _In_ string_t::value_type seperator
     );
 
-    static xbox::services::xbox_live_error_code convert_exception_to_xbox_live_error_code();
+	static XBOX_LIVE_NAMESPACE::xbox_live_error_code convert_exception_to_xbox_live_error_code();
 
 #ifdef _WIN32
     static void convert_unix_time_to_filetime(
@@ -565,10 +562,10 @@ public:
 
     static void set_locales(_In_ const string_t& locale);
     template<typename T>
-    static xbox::services::xbox_live_result<T> generate_xbox_live_result(
-        _Inout_ xbox::services::xbox_live_result<T> deserializationResult,
-        _In_ const std::shared_ptr<xbox::services::http_call_response>& response
-    )
+	static XBOX_LIVE_NAMESPACE::xbox_live_result<T> generate_xbox_live_result(
+		_Inout_ XBOX_LIVE_NAMESPACE::xbox_live_result<T> deserializationResult,
+		_In_ const std::shared_ptr<XBOX_LIVE_NAMESPACE::http_call_response>& response
+	)
     {
         if (deserializationResult.err())
         {
@@ -586,11 +583,11 @@ public:
     }
 
     template<typename T>
-    static pplx::task <xbox::services::xbox_live_result<T>> create_exception_free_task(
-        _In_ const pplx::task <xbox::services::xbox_live_result<T>>& t
+    static pplx::task <XBOX_LIVE_NAMESPACE::xbox_live_result<T>> create_exception_free_task(
+        _In_ const pplx::task <XBOX_LIVE_NAMESPACE::xbox_live_result<T>>& t
     )
     {
-        return t.then([](pplx::task <xbox::services::xbox_live_result<T>> result)
+        return t.then([](pplx::task <XBOX_LIVE_NAMESPACE::xbox_live_result<T>> result)
         {
             try
             {
@@ -598,7 +595,7 @@ public:
             }
             catch (const std::exception& e)
             {
-                xbox_live_error_code err = xbox::services::utils::convert_exception_to_xbox_live_error_code();
+                xbox_live_error_code err = XBOX_LIVE_NAMESPACE::utils::convert_exception_to_xbox_live_error_code();
                 return xbox_live_result<T>(err, e.what());
             }
 #ifdef __cplusplus_winrt

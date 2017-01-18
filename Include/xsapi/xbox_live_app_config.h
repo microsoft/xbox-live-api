@@ -14,7 +14,7 @@
 #import <UIKit/UIKit.h>
 #endif
 
-namespace xbox { namespace services {
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
     namespace system {
         class user_impl_idp;
@@ -317,5 +317,4 @@ private:
 #endif
 };
 
-
-}}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

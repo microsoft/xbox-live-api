@@ -8,6 +8,7 @@
 //
 //*********************************************************
 #pragma once
+#include "pch.h"
 #include "build_version.h"
 
 #ifndef UNIT_TEST_SERVICES
@@ -42,10 +43,21 @@
 #define THROW_CPP_INVALID_JSON_STRING_IF_STRING_EMPTY(x) { auto y = x; if ( y.empty() ) { throw web::json::json_exception(); } }
 #define THROW_CPP_RUNTIME_IF(x,y) if ( x ) { throw std::runtime_error(y); }
 
+#if BEAM_API
+#define XBOX_LIVE_NAMESPACE xbox::services::beam
+
+#define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN                     namespace xbox { namespace services { namespace beam {
+#define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END                       }}}
+#define NAMESPACE_MICROSOFT_XBOX_SERVICES_BEGIN                         namespace Microsoft { namespace Xbox { namespace Services { namespace Beam {
+#define NAMESPACE_MICROSOFT_XBOX_SERVICES_END                           }}}}
+#else
+#define XBOX_LIVE_NAMESPACE xbox::services
+
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN                     namespace xbox { namespace services {
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END                       }}
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_BEGIN                         namespace Microsoft { namespace Xbox { namespace Services { 
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_END                           }}}
+#endif
 
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN              NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN namespace system {
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END                NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END }

@@ -24,6 +24,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseXboxServices>false</UseXboxServices>
     <GenerateManifest>false</GenerateManifest>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
     <PlatformToolset>v140</PlatformToolset>

@@ -8,9 +8,10 @@
 //
 //*********************************************************
 #pragma once
+#include "pch.h"
 #include "xsapi/http_call_request_message.h"
 
-namespace xbox { namespace services {
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 /// <summary>
 /// Contains information about a service call.
@@ -138,4 +139,4 @@ private:
 };
 
 
-}}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
