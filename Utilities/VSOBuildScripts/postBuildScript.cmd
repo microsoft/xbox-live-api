@@ -1,4 +1,5 @@
 if "%1" == "local" goto testlocal
+goto start
 :testlocal
 set TFS_DropLocation=c:\test
 mkdir %TFS_DropLocation%
@@ -8,6 +9,7 @@ set TFS_VersionNumber=1701.10000
 set TFS_SourcesDirectory=%CD%\..\..
 goto serializeForPostbuild
 
+:start
 if "%XES_SERIALPOSTBUILDREADY%" == "True" goto serializeForPostbuild
 goto done
 :serializeForPostbuild
