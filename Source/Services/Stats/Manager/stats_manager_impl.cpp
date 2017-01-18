@@ -66,7 +66,7 @@ stats_manager_impl::add_local_user(
     )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user->xbox_user_id();
+    string_t userStr = user_context::get_user_id(user);
     auto userIter = m_users.find(userStr);
     if (userIter != m_users.end())
     {
@@ -95,7 +95,14 @@ stats_manager_impl::add_local_user(
 
         std::lock_guard<std::mutex> guard(pThis->m_statsServiceMutex);
 
-        if (user->is_signed_in())
+        bool isSignedIn = false;
+#if TV_API
+        isSignedIn = user->IsSignedIn;
+#else
+        isSignedIn = user->is_signed_in();
+#endif
+
+        if (isSignedIn)
         {
             if (statsValueDocResult.err())  // if there was an error, but the user is signed in, we assume offline sign in
             {
@@ -103,18 +110,18 @@ stats_manager_impl::add_local_user(
             }
 
             auto& svd = statsValueDocResult.payload();
-            auto& userStatContext = pThis->m_users.find(userStr);
+            auto userStatContext = pThis->m_users.find(userStr);
             if (userStatContext != pThis->m_users.end())    // user could be removed by the time this completes
             {
                 pThis->m_users[userStr] = stats_user_context(svd, xboxLiveContextImpl, simplifiedStatsService, user);
-                pThis->m_users[userStr].statValueDocument.set_flush_function([thisWeak, user]()
+                pThis->m_users[userStr].statValueDocument.set_flush_function([thisWeak, userStr, user]()
                 {
                     std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
                     if (pThis == nullptr)
                     {
                         return;
                     }
-                    auto& statContextIter = pThis->m_users.find(user->xbox_user_id());
+                    auto statContextIter = pThis->m_users.find(userStr);
                     if (statContextIter == pThis->m_users.end())
                     {
                         return;
@@ -143,7 +150,7 @@ stats_manager_impl::remove_local_user(
 )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user->xbox_user_id();
+    string_t userStr = user_context::get_user_id(user);
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -188,7 +195,7 @@ stats_manager_impl::request_flush_to_service(
     )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user->xbox_user_id();
+    string_t userStr = user_context::get_user_id(user);
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -250,7 +257,7 @@ stats_manager_impl::flush_to_service_callback(
     _In_ const string_t& userXuid
     )
 {
-    auto& userIter = m_users.find(userXuid);
+    auto userIter = m_users.find(userXuid);
     if (userIter != m_users.end())
     {
         auto& userSVD = userIter->second.statValueDocument;
@@ -287,7 +294,7 @@ stats_manager_impl::set_stat(
     )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user->xbox_user_id();
+    string_t userStr = user_context::get_user_id(user);
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -305,7 +312,7 @@ stats_manager_impl::set_stat(
 )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user->xbox_user_id();
+    string_t userStr = user_context::get_user_id(user);
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -322,7 +329,7 @@ stats_manager_impl::get_stat(
     )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user->xbox_user_id();
+    string_t userStr = user_context::get_user_id(user);
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -339,7 +346,7 @@ stats_manager_impl::get_stat_names(
     )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user->xbox_user_id();
+    string_t userStr = user_context::get_user_id(user);
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {

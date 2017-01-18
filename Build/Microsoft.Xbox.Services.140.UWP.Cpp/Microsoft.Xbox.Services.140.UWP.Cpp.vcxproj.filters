@@ -735,6 +735,9 @@
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_service.cpp">
       <Filter>C++ Source\Stats</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Shared\call_buffer_timer.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.h">
@@ -958,6 +961,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Services\Stats\Manager\stats_manager_internal.h">
       <Filter>C++ Source\Stats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\call_buffer_timer.h">
+      <Filter>C++ Source\Shared</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

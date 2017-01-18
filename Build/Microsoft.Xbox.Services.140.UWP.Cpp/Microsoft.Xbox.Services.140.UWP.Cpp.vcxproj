@@ -309,6 +309,7 @@
     <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_service.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_reference.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_team_result.cpp" />
+    <ClCompile Include="..\..\Source\Shared\call_buffer_timer.cpp" />
     <ClCompile Include="..\..\Source\Shared\errors.cpp" />
     <ClCompile Include="..\..\Source\Shared\http_call_request_message.cpp" />
     <ClCompile Include="..\..\Source\Shared\initiator.cpp" />
@@ -395,6 +396,7 @@
     <ClInclude Include="..\..\Source\Services\Social\social_internal.h" />
     <ClInclude Include="..\..\Source\Services\Stats\Manager\stats_manager_internal.h" />
     <ClInclude Include="..\..\Source\Services\Stats\user_statistics_internal.h" />
+    <ClInclude Include="..\..\Source\Shared\call_buffer_timer.h" />
     <ClInclude Include="..\..\Source\Shared\initiator.h" />
     <ClInclude Include="..\..\Source\Shared\Logger\custom_output.h" />
     <ClInclude Include="..\..\Source\Shared\Logger\debug_output.h" />

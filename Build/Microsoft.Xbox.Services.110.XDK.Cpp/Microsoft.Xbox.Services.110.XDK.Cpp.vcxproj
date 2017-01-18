@@ -210,6 +210,12 @@
     <ClCompile Include="..\..\Source\Services\Social\xbox_social_relationship.cpp" />
     <ClCompile Include="..\..\Source\Services\Social\xbox_social_relationship_result.cpp" />
     <ClCompile Include="..\..\Source\Services\Social\xbox_user_profile.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_value_document.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_event.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_value.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\requested_statistics.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\service_configuration_statistic.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\statistic.cpp" />
@@ -225,6 +231,7 @@
     <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_service.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_reference.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_team_result.cpp" />
+    <ClCompile Include="..\..\Source\Shared\call_buffer_timer.cpp" />
     <ClCompile Include="..\..\Source\Shared\initiator.cpp" />
     <ClCompile Include="..\..\Source\Shared\local_config.cpp" />
     <ClCompile Include="..\..\Source\Shared\Logger\custom_output.cpp" />
@@ -262,6 +269,7 @@
     <ClInclude Include="..\..\Include\xsapi\mem.h" />
     <ClInclude Include="..\..\Include\xsapi\service_call_logging_config.h" />
     <ClInclude Include="..\..\Include\xsapi\social_manager.h" />
+    <ClInclude Include="..\..\Include\xsapi\stats_manager.h" />
     <ClInclude Include="..\..\Include\xsapi\xbox_live_app_config.h" />
     <ClInclude Include="..\..\Include\xsapi\errors.h" />
     <ClInclude Include="..\..\Include\xsapi\game_server_platform.h" />
@@ -297,7 +305,9 @@
     <ClInclude Include="..\..\Source\Services\RealTimeActivity\real_time_activity_internal.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\social_manager_internal.h" />
     <ClInclude Include="..\..\Source\Services\Social\social_internal.h" />
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\stats_manager_internal.h" />
     <ClInclude Include="..\..\Source\Services\Stats\user_statistics_internal.h" />
+    <ClInclude Include="..\..\Source\Shared\call_buffer_timer.h" />
     <ClInclude Include="..\..\Source\Shared\http_call_impl.h" />
     <ClInclude Include="..\..\Source\Shared\http_call_response.h" />
     <ClInclude Include="..\..\Source\Shared\http_client.h" />

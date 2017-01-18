@@ -85,7 +85,7 @@ StatisticManager::RequestFlushToService(
 Windows::Foundation::Collections::IVectorView<StatisticEvent^>^
 StatisticManager::DoWork()
 {
-    auto& eventList = m_cppObj.do_work();
+    auto eventList = m_cppObj.do_work();
     return UtilsWinRT::CreatePlatformVectorFromStdVectorObj<StatisticEvent>(eventList)->GetView();
 }
 

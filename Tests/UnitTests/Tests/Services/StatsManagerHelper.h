@@ -15,9 +15,9 @@ const std::wstring statValueDocumentResponse = LR"({
     "stats": {
         "contextualKeys": {},
         "title": {
-            "headshots": { "value": 7, "op": "add" },
-            "fastestRound": { "value": 7, "op": "min" },
-            "longestJump": { "value": 9.5, "op": "max" },
+            "headshots": { "value": 7, "op": "replace" },
+            "fastestRound": { "value": 7, "op": "replace" },
+            "longestJump": { "value": 9.5, "op": "replace" },
             "strangeStat": { "value": "foo", "op": "replace" }
         }
     }
@@ -34,9 +34,9 @@ const std::wstring statValueDocumentResponseWithContext = LR"({
     "stats": {
         "contextualKeys": { "race": "human", "class": "wizard" },
         "title": {
-            "headshots": { "value": 7, "op": "add" },
-            "fastestRound": { "value": 7, "op": "min" },
-            "longestJump": { "value": 9.5, "op": "max" },
+            "headshots": { "value": 7, "op": "replace" },
+            "fastestRound": { "value": 7, "op": "replace" },
+            "longestJump": { "value": 9.5, "op": "replace" },
             "strangeStat": { "value": "foo", "op": "replace" }
         }
     }

@@ -52,7 +52,7 @@ simplified_stats_service::update_stats_value_document(
 
     httpCall->set_request_body(statValuePostDocument.serialize());
 
-    auto task = httpCall->get_response(http_call_response_body_type::json_body)
+    auto task = httpCall->get_response_with_auth(m_userContext, http_call_response_body_type::json_body)
     .then([&statValuePostDocument](std::shared_ptr<http_call_response> response)
     {
         if (!response->err_code())
@@ -85,7 +85,7 @@ simplified_stats_service::get_stats_value_document()
         xbox_live_api::get_stats_value_document
         );
 
-    auto task = httpCall->get_response(http_call_response_body_type::json_body)
+    auto task = httpCall->get_response_with_auth(m_userContext, http_call_response_body_type::json_body)
     .then([](std::shared_ptr<http_call_response> response)
     {
         auto result = stats_value_document::_Deserialize(response->response_body_json());
