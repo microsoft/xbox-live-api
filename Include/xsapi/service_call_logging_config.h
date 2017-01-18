@@ -11,7 +11,7 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-class xbox_live_context_impl;
+    class xbox_live_context_impl;
 
 class service_call_logging_config
 {

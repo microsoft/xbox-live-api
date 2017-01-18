@@ -8,7 +8,6 @@
 //
 //*********************************************************
 #pragma once
-#include "pch.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
