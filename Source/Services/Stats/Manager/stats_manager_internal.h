@@ -240,6 +240,11 @@ private:
             || postResult.err() == xbox_live_error_code::http_status_503_service_unavailable || postResult.err() == xbox_live_error_code::http_status_504_gateway_timeout;
     }
 
+    void write_offline(
+        _In_ const stats_user_context& userContext,
+        _In_ const web::json::value& serializedSVD
+        );
+
     void flush_to_service(
         _In_ stats_user_context& statsUserContext
         );

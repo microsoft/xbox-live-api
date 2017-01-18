@@ -157,13 +157,15 @@ stats_manager_impl::remove_local_user(
         return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "User not found in local map");
     }
 
-    auto userSVD = userIter->second.statValueDocument;
+    auto statsUserContext = userIter->second;
+    auto userSVD = statsUserContext.statValueDocument;
     if (userSVD.is_dirty())
     {
         userSVD.do_work();  // before removing the user apply all users
+        auto serializedSVD = statsUserContext.statValueDocument.serialize();
         std::weak_ptr<stats_manager_impl> thisWeak = shared_from_this();
         userIter->second.simplifiedStatsService.update_stats_value_document(userSVD)
-        .then([thisWeak, userSVD, user](xbox_live_result<void> updateSVDResult)
+        .then([thisWeak, userSVD, user, statsUserContext, serializedSVD](xbox_live_result<void> updateSVDResult)
         {
             std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
             if (pThis == nullptr)
@@ -173,7 +175,7 @@ stats_manager_impl::remove_local_user(
 
             if(should_write_offline(updateSVDResult))
             {
-                // write doc offline on network error or offline
+                pThis->write_offline(statsUserContext, serializedSVD);
             }
 
             pThis->m_statEventList.push_back(stat_event(stat_event_type::local_user_removed, user, updateSVDResult));
@@ -224,8 +226,9 @@ stats_manager_impl::flush_to_service(
 {
     std::weak_ptr<stats_manager_impl> thisWeak = shared_from_this();
     xbox_live_user_t user = statsUserContext.xboxLiveUser;
+    auto serializedSVD = statsUserContext.statValueDocument.serialize();
     statsUserContext.simplifiedStatsService.update_stats_value_document(statsUserContext.statValueDocument)
-    .then([thisWeak, user](xbox_live_result<void> updateSVDResult)
+    .then([thisWeak, user, serializedSVD, statsUserContext](xbox_live_result<void> updateSVDResult)
     {
         std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
         if (pThis == nullptr)
@@ -237,7 +240,7 @@ stats_manager_impl::flush_to_service(
         {
             if (should_write_offline(updateSVDResult))
             {
-                // TODO: write doc offline
+                pThis->write_offline(statsUserContext, serializedSVD);
             }
             else
             {
@@ -357,5 +360,32 @@ stats_manager_impl::get_stat_names(
 
     return xbox_live_result<void>();
 }
+
+#if TV_API
+void
+stats_manager_impl::write_offline(
+    _In_ const stats_user_context& userContext,
+    _In_ const string_t& serializedSVD
+    )
+{
+    // TODO: implement
+}
+
+#else
+void
+stats_manager_impl::write_offline(
+    _In_ const stats_user_context& userContext,
+    _In_ const web::json::value& serializedSVD
+    )
+{
+    web::json::value evtJson;
+    evtJson[_T("svd")] = serializedSVD;
+    auto result = userContext.xboxLiveContextImpl->events_service().write_in_game_event(_T("StatEvent"), evtJson, web::json::value());
+    if (result.err())
+    {
+        LOG_ERROR("Offline write for stats failed");
+    }
+}
+#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_END

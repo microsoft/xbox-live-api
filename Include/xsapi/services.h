@@ -12,6 +12,7 @@
 #pragma warning(disable: 4266)
 #pragma warning(disable: 4062)
 
+#include <cpprest/http_msg.h>
 #include "xsapi/types.h"
 #include "xsapi/errors.h"
 #include "xsapi/xbox_live_context_settings.h"
@@ -21,7 +22,6 @@
 #include "xsapi/http_call.h"
 #include "xsapi/service_call_logging_config.h"
 #if !BEAM_API
-#include <cpprest/http_msg.h>
 #include "xsapi/social.h"
 #include "xsapi/achievements.h"
 #include "xsapi/leaderboard.h"

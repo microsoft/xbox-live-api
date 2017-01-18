@@ -161,10 +161,10 @@ namespace social {
         profile_service() {};
 
         profile_service(
-        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> userContext,
-        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_app_config> appConfig
-        );
+            _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> userContext,
+            _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> xboxLiveContextSettings,
+            _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_app_config> appConfig
+            );
 
         static const string_t settings_query();
 
