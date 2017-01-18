@@ -104,8 +104,7 @@ public:
     /// </summary>
     _XSAPIIMP std::shared_ptr<system::xbox_live_user> user();
 
-#else
-#if BEAM_API
+#elif BEAM_API
     /// <summary>
     /// Creates an xbox_live_context from a Microsoft::Xbox::Services::Beam::System::XboxLiveUser^
     /// </summary>
@@ -129,7 +128,6 @@ public:
     /// Returns the associated system XboxLiveUser.
     /// </summary>
     _XSAPIIMP Microsoft::Xbox::Services::System::XboxLiveUser^ user();
-#endif
 #endif
 
 #endif
