@@ -9,12 +9,12 @@
   
   <ItemDefinitionGroup Label="Debug" Condition="'$(Configuration)' == 'Debug'">
     <Link>
-      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\$(Configuration)\cpprest140d_uwp_2_8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\$(Configuration)\cpprest140d_uwp_2_9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Label="Non_Debug" Condition="'$(Configuration)' != 'Debug'">
     <Link>
-      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\Release\cpprest140_uwp_2_8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\Release\cpprest140_uwp_2_9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   
@@ -25,7 +25,7 @@
   </ItemGroup>
   
   <ItemGroup Label="Debug" Condition="'$(Configuration)' == 'Debug'">
-    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\$(Configuration)\cpprest140d_uwp_2_8.dll" />
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\$(Configuration)\cpprest140d_uwp_2_9.dll" />
     <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\$(Configuration)\Microsoft.Xbox.Services.dll" />
     <Reference Include="Microsoft.Xbox.Services.winmd">
       <HintPath>$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\$(Configuration)\Microsoft.Xbox.Services.winmd</HintPath>
@@ -37,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Non_Debug" Condition="'$(Configuration)' != 'Debug'">
-    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\Release\cpprest140_uwp_2_8.dll" />
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\Release\cpprest140_uwp_2_9.dll" />
     <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\Release\Microsoft.Xbox.Services.dll" />
     <Reference Include="Microsoft.Xbox.Services.winmd">
       <HintPath>$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\Release\Microsoft.Xbox.Services.winmd</HintPath>
