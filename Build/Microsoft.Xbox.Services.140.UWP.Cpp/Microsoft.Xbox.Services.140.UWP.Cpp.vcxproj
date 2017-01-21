@@ -407,5 +407,10 @@
     <ClInclude Include="..\..\Source\System\ppltasks_extra.h" />
     <ClInclude Include="..\..\Source\System\system_internal.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.staticlib.vcxproj">
+      <Project>{47a5cfdc-c244-45a6-9830-38cb303cb495}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
