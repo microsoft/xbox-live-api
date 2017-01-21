@@ -3,7 +3,6 @@ goto start
 :testlocal
 set TFS_DropLocation=c:\test
 mkdir %TFS_DropLocation%
-rmdir /s /q %TFS_DropLocation%\SDK
 mkdir %TFS_DropLocation%
 set TFS_VersionNumber=1701.10000
 set TFS_SourcesDirectory=%CD%\..\..
@@ -58,7 +57,6 @@ set UWP_BIN_BUILD_SHARE_DEBUG=%UWP_BUILD_SHARE%\Debug\x64
 mkdir %XDK_BINARIES_DROP%
 
 rem copy NuGetPackages to build output folder
-mkdir %TFS_DropLocation%\SDK\Binaries
 
 rem copy includes to build output folder
 robocopy /NJS /NJH /MT:16 /S /NP %UWP_BUILD_SHARE%\Include %XDK_BINARIES_DROP%\cpp\include
@@ -130,7 +128,6 @@ rmdir /s /q %XDK_OUTPUT_DEST%
 
 mkdir %TFS_DropLocation%\NuGetBinaries
 move %TFS_DropLocation%\*.nupkg %TFS_DropLocation%\NuGetBinaries
-copy %XDK_BUILD_SHARE%\NuGetBinaries\*.nupkg %TFS_DropLocation%\SDK\Binaries
 
 :finalize
 if "%1" == "local" goto skipEmail
