@@ -634,7 +634,7 @@ public:
 
     DEFINE_TEST_CASE(TestPresenceWriter)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestPresenceWriter);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestPresenceWriter);
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
         httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(L"");
@@ -642,32 +642,32 @@ public:
 
         pplx::event writeFinishEvent;
         int writeDelay = 0;
-        //xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay](int delay)
-        //{
-        //    writeDelay = delay;
-        //    writeFinishEvent.set();
-        //});
+        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay](int delay)
+        {
+            writeDelay = delay;
+            writeFinishEvent.set();
+        });
 
-        //auto presenceWriter = xbox::services::presence::presence_writer::get_presence_writer_singleton();
-        //presenceWriter->start_writer(
-        //    xboxLiveContext->presence_service()._Impl()
-        //);
+        auto presenceWriter = xbox::services::presence::presence_writer::get_presence_writer_singleton();
+        presenceWriter->start_writer(
+            xboxLiveContext->presence_service()._Impl()
+        );
 
-        //writeFinishEvent.wait();
-        //writeFinishEvent.reset();
+        writeFinishEvent.wait();
+        writeFinishEvent.reset();
 
 
-        //VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        //VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
-        //VERIFY_ARE_EQUAL_STR(
-        //    L"/users/xuid(TestXboxUserId)/devices/current/titles/current",
-        //    httpCall->PathQueryFragment.to_string()
-        //    );
+        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
+        VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
+        VERIFY_ARE_EQUAL_STR(
+            L"/users/xuid(TestXboxUserId)/devices/current/titles/current",
+            httpCall->PathQueryFragment.to_string()
+            );
 
         VERIFY_IS_TRUE(writeDelay == 1);
         VERIFY_IS_TRUE(httpCall->CallCounter == 1);
 
-        //presenceWriter->stop_writer(xboxLiveContext->user()->XboxUserId->Data());
+        presenceWriter->stop_writer(xboxLiveContext->user()->XboxUserId->Data());
         writeFinishEvent.wait();
         xbox::services::presence::presence_service_impl::set_presence_set_finished_handler(nullptr);
 
@@ -675,162 +675,158 @@ public:
 
     DEFINE_TEST_CASE(TestPresenceWriterNoHeartbeatAfter)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestPresenceWriterNoHeartbeatAfter);
-        VERIFY_IS_TRUE(false);
-        //pplx::event writeFinishEvent;
-        //int writeDelay = 0;
-        //xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay](int delay)
-        //{
-        //    writeDelay = delay;
-        //    writeFinishEvent.set();
-        //});
-        // 
-        //auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        //auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        //httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(L"");
-        //auto presenceWriter = xbox::services::presence::presence_writer::get_presence_writer_singleton();
-        //presenceWriter->start_writer(
-        //    xboxLiveContext->presence_service()._Impl()
-        //    );
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestPresenceWriterNoHeartbeatAfter);
+        pplx::event writeFinishEvent;
+        int writeDelay = 0;
+        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay](int delay)
+        {
+            writeDelay = delay;
+            writeFinishEvent.set();
+        });
+         
+        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
+        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
+        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(L"");
+        auto presenceWriter = xbox::services::presence::presence_writer::get_presence_writer_singleton();
+        presenceWriter->start_writer(
+            xboxLiveContext->presence_service()._Impl()
+            );
 
-        //writeFinishEvent.wait();
+        writeFinishEvent.wait();
 
-        //VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        //VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
-        //VERIFY_ARE_EQUAL_STR(
-        //    L"/users/xuid(TestXboxUserId)/devices/current/titles/current",
-        //    httpCall->PathQueryFragment.to_string()
-        //    );
+        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
+        VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
+        VERIFY_ARE_EQUAL_STR(
+            L"/users/xuid(TestXboxUserId)/devices/current/titles/current",
+            httpCall->PathQueryFragment.to_string()
+            );
 
-        //VERIFY_IS_TRUE(writeDelay == presenceWriter->s_defaultHeartBeatDelayInMins);
-        //VERIFY_IS_TRUE(httpCall->CallCounter == 1);
+        VERIFY_IS_TRUE(writeDelay == presenceWriter->s_defaultHeartBeatDelayInMins);
+        VERIFY_IS_TRUE(httpCall->CallCounter == 1);
 
-        //writeFinishEvent.reset();
+        writeFinishEvent.reset();
 
-        //presenceWriter->stop_writer(xboxLiveContext->user()->XboxUserId->Data());
-        //writeFinishEvent.wait();
-        //xbox::services::presence::presence_service_impl::set_presence_set_finished_handler(nullptr);
-
+        presenceWriter->stop_writer(xboxLiveContext->user()->XboxUserId->Data());
+        writeFinishEvent.wait();
+        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler(nullptr);
     }
 
 
     DEFINE_TEST_CASE(TestMultiUserPresenceWriter)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestMultiUserPresenceWriter);
-        VERIFY_IS_TRUE(false);
-        //pplx::event writeFinishEvent;
-        //int writeDelay = 0;
-        //int eventExpecting = 2;
-        //xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay, &eventExpecting](int delay)
-        //{
-        //    writeDelay = delay;
-        //    if (!--eventExpecting)
-        //    {
-        //        writeFinishEvent.set();
-        //    }
-        //});
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestMultiUserPresenceWriter);
+        pplx::event writeFinishEvent;
+        int writeDelay = 0;
+        int eventExpecting = 2;
+        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay, &eventExpecting](int delay)
+        {
+            writeDelay = delay;
+            if (!--eventExpecting)
+            {
+                writeFinishEvent.set();
+            }
+        });
 
-        //auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        //auto xboxLiveContext1 = GetMockXboxLiveContext_Cpp(L"TestUser1");
+        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
+        auto xboxLiveContext1 = GetMockXboxLiveContext_Cpp(L"TestUser1");
 
-        //auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        //httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(L"");
-        //httpCall->set_custom_header(L"X-Heartbeat-After", L"60");
-        //auto presenceWriter = xbox::services::presence::presence_writer::get_presence_writer_singleton();
-        //presenceWriter->start_writer(
-        //    xboxLiveContext->presence_service()._Impl()
-        //);
+        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
+        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(L"");
+        httpCall->set_custom_header(L"X-Heartbeat-After", L"60");
+        auto presenceWriter = xbox::services::presence::presence_writer::get_presence_writer_singleton();
+        presenceWriter->start_writer(
+            xboxLiveContext->presence_service()._Impl()
+        );
 
-        //presenceWriter->start_writer(
-        //    xboxLiveContext1->presence_service()._Impl()
-        //);
+        presenceWriter->start_writer(
+            xboxLiveContext1->presence_service()._Impl()
+        );
 
-        //writeFinishEvent.wait();
+        writeFinishEvent.wait();
 
-        //VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        //VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
+        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
+        VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
 
-        //VERIFY_IS_TRUE(writeDelay == 1);
-        //VERIFY_ARE_EQUAL_UINT(2, httpCall->CallCounter);
-        //VERIFY_ARE_EQUAL_UINT(2, presenceWriter->tracking_count()); 
+        VERIFY_IS_TRUE(writeDelay == 1);
+        VERIFY_ARE_EQUAL_UINT(2, httpCall->CallCounter);
+        VERIFY_ARE_EQUAL_UINT(2, presenceWriter->tracking_count()); 
 
-        //writeFinishEvent.reset();
-        //eventExpecting = 2;
+        writeFinishEvent.reset();
+        eventExpecting = 2;
 
-        //presenceWriter->stop_writer(xboxLiveContext->user()->XboxUserId->Data());
-        //presenceWriter->stop_writer(xboxLiveContext1->user()->XboxUserId->Data());
-        //writeFinishEvent.wait();
-        //xbox::services::presence::presence_service_impl::set_presence_set_finished_handler(nullptr);
+        presenceWriter->stop_writer(xboxLiveContext->user()->XboxUserId->Data());
+        presenceWriter->stop_writer(xboxLiveContext1->user()->XboxUserId->Data());
+        writeFinishEvent.wait();
+        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler(nullptr);
     }
 
     DEFINE_TEST_CASE(TestMultiUserMultiContextPresenceWriter)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestPresenceWriter);
-        VERIFY_IS_TRUE(false);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestMultiUserMultiContextPresenceWriter);
 
-        //pplx::event writeFinishEvent;
-        //int writeDelay = 0;
-        //int eventExpecting = 2;
-        //xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay, &eventExpecting](int delay)
-        //{
-        //    writeDelay = delay;
-        //    if (!--eventExpecting)
-        //    {
-        //        writeFinishEvent.set();
-        //    }
-        //});
+        pplx::event writeFinishEvent;
+        int writeDelay = 0;
+        int eventExpecting = 2;
+        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay, &eventExpecting](int delay)
+        {
+            writeDelay = delay;
+            if (!--eventExpecting)
+            {
+                writeFinishEvent.set();
+            }
+        });
 
-        //auto xboxLiveContext1_User1 = GetMockXboxLiveContext_WinRT();
-        //auto xboxLiveContext2_User1 = ref new Microsoft::Xbox::Services::XboxLiveContext(xboxLiveContext1_User1->User);
+        auto xboxLiveContext1_User1 = GetMockXboxLiveContext_WinRT();
+        auto xboxLiveContext2_User1 = ref new Microsoft::Xbox::Services::XboxLiveContext(xboxLiveContext1_User1->User);
 
-        //auto xboxLiveContext1_User2 = GetMockXboxLiveContext_WinRT(L"TestUser1");
-        //auto xboxLiveContext2_User2 = ref new Microsoft::Xbox::Services::XboxLiveContext(xboxLiveContext1_User1->User);
+        auto xboxLiveContext1_User2 = GetMockXboxLiveContext_WinRT(L"TestUser1");
+        auto xboxLiveContext2_User2 = ref new Microsoft::Xbox::Services::XboxLiveContext(xboxLiveContext1_User1->User);
 
-        //auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        //httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(L"");
-        //httpCall->set_custom_header(L"X-Heartbeat-After", L"60");
-        //auto presenceWriter = xbox::services::presence::presence_writer::get_presence_writer_singleton();
-        //presenceWriter->start_writer(
-        //    xboxLiveContext1_User1->PresenceService->GetCppObj()._Impl()
-        //);
+        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
+        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(L"");
+        httpCall->set_custom_header(L"X-Heartbeat-After", L"60");
+        auto presenceWriter = xbox::services::presence::presence_writer::get_presence_writer_singleton();
+        presenceWriter->start_writer(
+            xboxLiveContext1_User1->PresenceService->GetCppObj()._Impl()
+        );
 
-        //presenceWriter->start_writer(
-        //    xboxLiveContext2_User1->PresenceService->GetCppObj()._Impl()
-        //);
-        //VERIFY_ARE_EQUAL_UINT(1, presenceWriter->tracking_count());
+        presenceWriter->start_writer(
+            xboxLiveContext2_User1->PresenceService->GetCppObj()._Impl()
+        );
+        VERIFY_ARE_EQUAL_UINT(1, presenceWriter->tracking_count());
 
-        //presenceWriter->start_writer(
-        //    xboxLiveContext1_User2->PresenceService->GetCppObj()._Impl()
-        //);
-        //presenceWriter->start_writer(
-        //    xboxLiveContext2_User2->PresenceService->GetCppObj()._Impl()
-        //);
-        //VERIFY_ARE_EQUAL_UINT(2, presenceWriter->tracking_count());
+        presenceWriter->start_writer(
+            xboxLiveContext1_User2->PresenceService->GetCppObj()._Impl()
+        );
+        presenceWriter->start_writer(
+            xboxLiveContext2_User2->PresenceService->GetCppObj()._Impl()
+        );
+        VERIFY_ARE_EQUAL_UINT(2, presenceWriter->tracking_count());
 
-        //writeFinishEvent.wait();
+        writeFinishEvent.wait();
 
-        //VERIFY_ARE_EQUAL_UINT(2, presenceWriter->tracking_count());
+        VERIFY_ARE_EQUAL_UINT(2, presenceWriter->tracking_count());
 
-        //VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        //VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
+        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
+        VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
 
-        //VERIFY_IS_TRUE(writeDelay == 1);
-        //VERIFY_IS_TRUE(httpCall->CallCounter == 2);
+        VERIFY_IS_TRUE(writeDelay == 1);
+        VERIFY_IS_TRUE(httpCall->CallCounter == 2);
 
-        //writeFinishEvent.reset();
-        //eventExpecting = 2;
+        writeFinishEvent.reset();
+        eventExpecting = 2;
 
-        //presenceWriter->stop_writer(xboxLiveContext1_User1->User->XboxUserId->Data());
-        //VERIFY_ARE_EQUAL_UINT(1, presenceWriter->tracking_count());
-        //presenceWriter->stop_writer(xboxLiveContext2_User1->User->XboxUserId->Data());
-        //VERIFY_ARE_EQUAL_UINT(1, presenceWriter->tracking_count());
-        //presenceWriter->stop_writer(xboxLiveContext1_User2->User->XboxUserId->Data());
-        //VERIFY_ARE_EQUAL_UINT(0, presenceWriter->tracking_count());
-        //presenceWriter->stop_writer(xboxLiveContext2_User2->User->XboxUserId->Data());
-        //VERIFY_ARE_EQUAL_UINT(0, presenceWriter->tracking_count());
+        presenceWriter->stop_writer(xboxLiveContext1_User1->User->XboxUserId->Data());
+        VERIFY_ARE_EQUAL_UINT(1, presenceWriter->tracking_count());
+        presenceWriter->stop_writer(xboxLiveContext2_User1->User->XboxUserId->Data());
+        VERIFY_ARE_EQUAL_UINT(1, presenceWriter->tracking_count());
+        presenceWriter->stop_writer(xboxLiveContext1_User2->User->XboxUserId->Data());
+        VERIFY_ARE_EQUAL_UINT(0, presenceWriter->tracking_count());
+        presenceWriter->stop_writer(xboxLiveContext2_User2->User->XboxUserId->Data());
+        VERIFY_ARE_EQUAL_UINT(0, presenceWriter->tracking_count());
 
-        //writeFinishEvent.wait();
-        //xbox::services::presence::presence_service_impl::set_presence_set_finished_handler(nullptr);
+        writeFinishEvent.wait();
+        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler(nullptr);
     }
 
     DEFINE_TEST_CASE(TestPresenceInvalidArgs)
