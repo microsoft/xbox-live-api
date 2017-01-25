@@ -82,15 +82,8 @@ void Sample::WriteEvent()
     stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"EnemyRoleId", 3);
     stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"KillTypeId", 4);
     stats_manager::get_singleton_instance().set_stat_as_number(m_liveResources->GetUser(), L"Laptime", 25.6);
-    stats_manager::get_singleton_instance().set_stat_as_string(m_liveResources->GetUser(), L"ilikestrings", L"stringringingngg");
-    
-    // map and difficulty are configured for the stats service
-    std::unordered_map<string_t, player_state_value> playerStateMap;
-    playerStateMap[L"map"] = player_state_value(L"Verdun");
-    playerStateMap[L"difficulty"] = player_state_value(L"Hard");
 
-    stats_manager::get_singleton_instance().do_work();
-    player_state_writer::get_singleton_instance()->set_player_state(m_liveResources->GetUser(), playerStateMap); // immediately changes player state and causes SVD change
+    stats_manager::get_singleton_instance().request_flush_to_service(m_liveResources->GetUser());
 }
 
 void Sample::GetLeaderboard()

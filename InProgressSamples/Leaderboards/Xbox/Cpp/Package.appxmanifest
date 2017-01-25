@@ -3,9 +3,7 @@
          xmlns:mx="http://schemas.microsoft.com/appx/2013/xbox/manifest"
          IgnorableNamespaces="mx">
   
-  <Identity Name="Leaderboards"
-            Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
-            Version="1.0.0.0" />
+  <Identity Name="BUILD.1cebe3a0-0c10-4653-85a7-450b362a69ac" Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" Version="1.1.0.0" />
   
   <Properties>
     <DisplayName>Xbox LIVE SDK Sample - Leaderboard</DisplayName>
@@ -42,7 +40,7 @@
             <mx:XboxSystemResources />
           </mx:Extension>
           <mx:Extension Category="xbox.live">
-            <mx:XboxLive TitleId="0301D082" PrimaryServiceConfigId="94730100-2018-46b8-900b-a41a0301d082" />
+            <mx:XboxLive TitleId="3DFCB63C" PrimaryServiceConfigId="50e561a5-f289-4611-8f4c-ddbe863aaef2" />
           </mx:Extension>
         </Extensions>
     </Application>

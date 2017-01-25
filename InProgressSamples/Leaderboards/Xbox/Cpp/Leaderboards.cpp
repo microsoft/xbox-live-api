@@ -14,6 +14,7 @@ using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 using namespace xbox::services;
 using namespace xbox::services::leaderboard;
+using namespace xbox::services::experimental::stats::manager;
 
 namespace
 {
@@ -72,30 +73,10 @@ void Sample::Initialize(IUnknown* window)
 
 void Sample::WriteEvent()
 {
-    GUID playerSessionId = {};
-    GUID roundId = {};
+    auto result = stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"test", 5);
+    stats_manager::get_singleton_instance().request_flush_to_service(m_liveResources->GetUser());
 
-    // We use GameplayModeId & DifficultyLevelId for multi-columns
-
-    auto result = EventWriteEnemyDefeated(
-        m_liveResources->GetUser()->XboxUserId->Data(), // UserId
-        1,                      // SectionId
-        &playerSessionId,       // PlayerSessionId
-        L"0",                   // MultiplayerSessionId
-        rand() % 5,             // GameplayModeId
-        rand() % 100,           // DifficultyLevelId
-        &roundId,               // RoundId
-        1,                      // PlayerRoleId
-        1,                      // PlayerWeaponTypeId
-        1,                      // EnemyRoleId
-        1,                      // KillTypeId
-        1,                      // LocationX
-        1,                      // LocationY
-        1,                      // LocationZ
-        1                       // EnemyWeaponId
-    );
-
-    if (result == ERROR_SUCCESS)
+    if (!result.err())
     {
         m_console->WriteLine(L"EnemyDefeated event was fired");
     }

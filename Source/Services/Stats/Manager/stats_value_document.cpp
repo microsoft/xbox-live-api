@@ -162,14 +162,18 @@ stats_value_document::serialize() const
 {
     web::json::value requestJSON;
     requestJSON[_T("ver")] = web::json::value::number(m_version);
-    requestJSON[_T("timestamp")] = web::json::value(utility::datetime::utc_now().to_string(utility::datetime::date_format::ISO_8601));
+#if TV_API
+    requestJSON[_T("timestamp")] = web::json::value(utils::datetime_to_string(utility::datetime::utc_now()));
+#else
+    requestJSON[_T("timestamp")] = web::json::value(utility::datetime::utc_now().to_string(utility::datetime::ISO_8601));
+#endif
     auto& envelopeField = requestJSON[_T("envelope")];
     envelopeField[_T("serverVersion")] = web::json::value::number(m_serverVersion);
     envelopeField[_T("clientVersion")] = web::json::value::number(m_clientVersion);
     envelopeField[_T("clientId")] = web::json::value::string(m_clientId.c_str());
     auto& statsField = requestJSON[_T("stats")];
 
-    auto& contextualKeyField = statsField[_T("contextualKeys")];
+    auto& contextualKeyField = statsField[_T("contexts")];
     contextualKeyField = web::json::value::object();
 
     auto& titleField = statsField[_T("title")];

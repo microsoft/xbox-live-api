@@ -138,6 +138,7 @@ void ATG::LiveResources::SetCurrentUser(Windows::Xbox::System::User^ user)
 
     m_user = user;
     m_xboxLiveContext = std::make_shared<xbox::services::xbox_live_context>(m_user);
+    xbox::services::experimental::stats::manager::stats_manager::get_singleton_instance().add_local_user(m_user);
     m_gamertag->SetText(m_user->DisplayInfo->GameDisplayName->Data());
 
     m_userXUID = m_user->XboxUserId->Data();

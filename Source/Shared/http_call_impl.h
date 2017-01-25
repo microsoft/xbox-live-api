@@ -117,7 +117,8 @@ struct http_call_data
         httpCallResponseBodyType(http_call_response_body_type::json_body),
         longHttpCall(false),
         httpTimeout(std::chrono::seconds(DEFAULT_HTTP_TIMEOUT_SECONDS)),
-        contentTypeHeaderValue(_T("application/json;")),
+        //contentTypeHeaderValue(_T("application/json; charset=utf-8")),
+        contentTypeHeaderValue(_T("application/json")),
         xboxContractVersionHeaderValue(_T("1")),
         addDefaultHeaders(true)
     {

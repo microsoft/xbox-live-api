@@ -365,7 +365,7 @@ stats_manager_impl::get_stat_names(
 void
 stats_manager_impl::write_offline(
     _In_ const stats_user_context& userContext,
-    _In_ const string_t& serializedSVD
+    _In_ const web::json::value& serializedSVD
     )
 {
     // TODO: implement

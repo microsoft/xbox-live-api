@@ -1322,6 +1322,7 @@ string_t utils::create_xboxlive_endpoint(
         source << appConfig->environment(); // eg. "" or ".dnet"
     }
 #else    
+    source << _T(".dnet");
     UNREFERENCED_PARAMETER(appConfig);    
 #endif
     source << _T(".xboxlive.com");
