@@ -702,12 +702,6 @@
     <ClCompile Include="..\..\Source\Services\Social\Manager\xbox_user_id_container.cpp">
       <Filter>C++ Source\Social\Manager</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\System\Sidecar\app_service_provider.cpp">
-      <Filter>C++ Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\System\Sidecar\app_service_messages.cpp">
-      <Filter>C++ Source\System</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.h">
@@ -916,12 +910,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Shared\logger\etw_output.h">
       <Filter>C++ Source\Shared\Logger</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\System\Sidecar\app_service_messages.h">
-      <Filter>C++ Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\System\Sidecar\app_service_provider.h">
-      <Filter>C++ Source\System</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

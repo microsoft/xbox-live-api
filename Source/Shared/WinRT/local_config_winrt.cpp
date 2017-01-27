@@ -30,14 +30,9 @@ xbox_live_result<void> local_config::read()
         return xbox_live_result<void>();
     }
 
-#if XSAPI_SIDECAR
-    string_t configPath = _T("xboxservices.config");
-#else
     Windows::ApplicationModel::Package^ package = Windows::ApplicationModel::Package::Current;
     Windows::Storage::StorageFolder^ installedLocation = package->InstalledLocation;
     string_t configPath = string_t(installedLocation->Path->Data()) + _T("\\xboxservices.config");
-#endif
-
 
     string_t fileData = utils::read_file_to_string(configPath);
     if( !fileData.empty() )
