@@ -663,9 +663,6 @@
     <ClCompile Include="..\..\Source\Services\Misc\contextual_search_game_clip_thumbnail.cpp">
       <Filter>C++ Source\Misc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Misc\UWP\title_callable_ui.cpp">
-      <Filter>C++ Source\Misc</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Misc\contextual_search_game_clip_uri_info.cpp">
       <Filter>C++ Source\Misc</Filter>
     </ClCompile>
@@ -837,9 +834,6 @@
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\xsapi\http_call.h">
-      <Filter>C++ Public Includes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Include\xsapi\title_callable_ui.h">
       <Filter>C++ Public Includes</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Shared\telemetry.h">

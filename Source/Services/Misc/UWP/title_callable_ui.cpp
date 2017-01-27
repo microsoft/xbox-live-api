@@ -9,9 +9,9 @@
 //*********************************************************
 #include "pch.h"
 #if !UNIT_TEST_SERVICES
-#define _APISET_TARGET_VERSION _APISET_TARGET_VERSION_WIN10_RS1
+#define _APISET_TARGET_VERSION _APISET_TARGET_VERSION_WIN10_TH2
 
-#include <gamingtcui.h>
+//#include <gamingtcui.h>
 #include <windows.system.h>
 #include "xbox_system_factory.h"
 #include "xsapi/title_callable_ui.h"
@@ -24,6 +24,8 @@
 #define XBOX_DEEPLINK_CUSTOMIZE_PROFILE _T("xbox-profile:customize")
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+
+EXTERN_C 
 
 class tcui_context
 {
@@ -181,38 +183,38 @@ title_callable_ui::show_player_picker_ui(
             if (user != nullptr)
             {
                 ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
-                hr = ShowPlayerPickerUIForUser(
-                    userAbi,
-                    reinterpret_cast<HSTRING>(strPromptDisplayText),
-                    &hXboxUserIds[0],
-                    hXboxUserIds.size(),
-                    hPreselectedXboxUserIds.empty() ? nullptr : &hPreselectedXboxUserIds[0],
-                    hPreselectedXboxUserIds.size(),
-                    minSelectionCount,
-                    maxSelectionCount,
-                    UIPlayerPickerUICompletionRoutine,
-                    static_cast<void*>(&context)
-                    );
+                //hr = ShowPlayerPickerUIForUser(
+                //    userAbi,
+                //    reinterpret_cast<HSTRING>(strPromptDisplayText),
+                //    &hXboxUserIds[0],
+                //    hXboxUserIds.size(),
+                //    hPreselectedXboxUserIds.empty() ? nullptr : &hPreselectedXboxUserIds[0],
+                //    hPreselectedXboxUserIds.size(),
+                //    minSelectionCount,
+                //    maxSelectionCount,
+                //    UIPlayerPickerUICompletionRoutine,
+                //    static_cast<void*>(&context)
+                //    );
             }
             else
 #endif
             {
-                hr = ShowPlayerPickerUI(
-                    reinterpret_cast<HSTRING>(strPromptDisplayText),
-                    &hXboxUserIds[0],
-                    hXboxUserIds.size(),
-                    hPreselectedXboxUserIds.empty() ? nullptr : &hPreselectedXboxUserIds[0],
-                    hPreselectedXboxUserIds.size(),
-                    minSelectionCount,
-                    maxSelectionCount,
-                    UIPlayerPickerUICompletionRoutine,
-                    static_cast<void*>(&context)
-                    );
+                //hr = ShowPlayerPickerUI(
+                //    reinterpret_cast<HSTRING>(strPromptDisplayText),
+                //    &hXboxUserIds[0],
+                //    hXboxUserIds.size(),
+                //    hPreselectedXboxUserIds.empty() ? nullptr : &hPreselectedXboxUserIds[0],
+                //    hPreselectedXboxUserIds.size(),
+                //    minSelectionCount,
+                //    maxSelectionCount,
+                //    UIPlayerPickerUICompletionRoutine,
+                //    static_cast<void*>(&context)
+                //    );
             }
         }
         if (SUCCEEDED(hr) || hr == E_PENDING)
         {
-            hr = ProcessPendingGameUI(true);
+            //hr = ProcessPendingGameUI(true);
             if (SUCCEEDED(hr))
             {
                 hr = context.wait();
@@ -247,52 +249,53 @@ title_callable_ui::show_game_invite_ui(
 #endif
         ]()
     {
-        tcui_context context;
-
-        Platform::String^ serviceConfigurationId = ref new Platform::String(sessionReference.service_configuration_id().c_str());
-        Platform::String^ sessionTemplateName = ref new Platform::String(sessionReference.session_template_name().c_str());
-        Platform::String^ sessionName = ref new Platform::String(sessionReference.session_name().c_str());
-        Platform::String^ invitation = ref new Platform::String(contextStringId.c_str());
-
-        HRESULT hr = S_OK;
-#if UWP_API
-        if (user != nullptr)
-        {
-            ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
-            hr = ShowGameInviteUIForUser(
-                userAbi,
-                reinterpret_cast<HSTRING>(serviceConfigurationId),
-                reinterpret_cast<HSTRING>(sessionTemplateName),
-                reinterpret_cast<HSTRING>(sessionName),
-                reinterpret_cast<HSTRING>(invitation),
-                UICompletionRoutine,
-                static_cast<void*>(&context)
-                );
-        }
-        else
-#endif
-        {
-            hr = ShowGameInviteUI(
-                reinterpret_cast<HSTRING>(serviceConfigurationId),
-                reinterpret_cast<HSTRING>(sessionTemplateName),
-                reinterpret_cast<HSTRING>(sessionName),
-                reinterpret_cast<HSTRING>(invitation),
-                UICompletionRoutine,
-                static_cast<void*>(&context)
-                );
-        }
-
-        if (SUCCEEDED(hr) || hr == E_PENDING)
-        {
-            hr = ProcessPendingGameUI(true);
-            if (SUCCEEDED(hr))
-            {
-                hr = context.wait();
-            }
-        }
-
-        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
-        return xbox_live_result<void>(errcode);
+//        tcui_context context;
+//
+//        Platform::String^ serviceConfigurationId = ref new Platform::String(sessionReference.service_configuration_id().c_str());
+//        Platform::String^ sessionTemplateName = ref new Platform::String(sessionReference.session_template_name().c_str());
+//        Platform::String^ sessionName = ref new Platform::String(sessionReference.session_name().c_str());
+//        Platform::String^ invitation = ref new Platform::String(contextStringId.c_str());
+//
+//        HRESULT hr = S_OK;
+//#if UWP_API
+//        if (user != nullptr)
+//        {
+//            ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
+//            hr = ShowGameInviteUIForUser(
+//                userAbi,
+//                reinterpret_cast<HSTRING>(serviceConfigurationId),
+//                reinterpret_cast<HSTRING>(sessionTemplateName),
+//                reinterpret_cast<HSTRING>(sessionName),
+//                reinterpret_cast<HSTRING>(invitation),
+//                UICompletionRoutine,
+//                static_cast<void*>(&context)
+//                );
+//        }
+//        else
+//#endif
+//        {
+//            hr = ShowGameInviteUI(
+//                reinterpret_cast<HSTRING>(serviceConfigurationId),
+//                reinterpret_cast<HSTRING>(sessionTemplateName),
+//                reinterpret_cast<HSTRING>(sessionName),
+//                reinterpret_cast<HSTRING>(invitation),
+//                UICompletionRoutine,
+//                static_cast<void*>(&context)
+//                );
+//        }
+//
+//        if (SUCCEEDED(hr) || hr == E_PENDING)
+//        {
+//            hr = ProcessPendingGameUI(true);
+//            if (SUCCEEDED(hr))
+//            {
+//                hr = context.wait();
+//            }
+//        }
+//
+//        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+//        return xbox_live_result<void>(errcode);
+        return xbox_live_result<void>();
     });
 
     return utils::create_exception_free_task<void>(
@@ -314,7 +317,7 @@ title_callable_ui::show_profile_card_ui(
 #endif
         ]()
     {
-        tcui_context context;
+        /*tcui_context context;
         Platform::String^ strTargetXboxUserId = ref new Platform::String(targetXboxUserId.c_str());
 
         HRESULT hr = S_OK;
@@ -349,7 +352,8 @@ title_callable_ui::show_profile_card_ui(
         }
 
         std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
-        return xbox_live_result<void>(errcode);
+        return xbox_live_result<void>(errcode);*/
+        return xbox_live_result<void>();
     });
 
     return utils::create_exception_free_task<void>(
@@ -371,7 +375,7 @@ title_callable_ui::show_change_friend_relationship_ui(
 #endif
         ]()
     {
-        tcui_context context;
+        /*tcui_context context;
         Platform::String^ strTargetXboxUserId = ref new Platform::String(targetXboxUserId.c_str());
 
         HRESULT hr = S_OK;
@@ -406,7 +410,8 @@ title_callable_ui::show_change_friend_relationship_ui(
         }
 
         std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
-        return xbox_live_result<void>(errcode);
+        return xbox_live_result<void>(errcode);*/
+        return xbox_live_result<void>();
     });
 
     return utils::create_exception_free_task<void>(
@@ -428,7 +433,7 @@ title_callable_ui::show_title_achievements_ui(
 #endif
         ]()
     {
-        tcui_context context;
+        /*tcui_context context;
 
         HRESULT hr = S_OK;
 #if UWP_API
@@ -462,7 +467,8 @@ title_callable_ui::show_title_achievements_ui(
         }
 
         std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
-        return xbox_live_result<void>(errcode);
+        return xbox_live_result<void>(errcode);*/
+        return xbox_live_result<void>();
     });
 
     return utils::create_exception_free_task<void>(
@@ -496,7 +502,7 @@ title_callable_ui::check_gaming_privilege_silently(
 #endif
     )
 {
-    Platform::String^ scope;
+    /*Platform::String^ scope;
     Platform::String^ policy;
     _Get_gaming_privilege_scope_policy(scope, policy);
 
@@ -527,7 +533,8 @@ title_callable_ui::check_gaming_privilege_silently(
     }
 
     std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
-    return xbox_live_result<bool>(hasPrivilege == TRUE, errcode);
+    return xbox_live_result<bool>(hasPrivilege == TRUE, errcode);*/
+    return xbox_live_result<bool>();
 }
 
 pplx::task<xbox::services::xbox_live_result<bool>>
@@ -545,7 +552,7 @@ title_callable_ui::check_gaming_privilege_with_ui(
 #endif
     ]()
     {
-        tcui_context context;
+        /*tcui_context context;
 
         Platform::String^ scope;
         Platform::String^ policy;
@@ -599,7 +606,8 @@ title_callable_ui::check_gaming_privilege_with_ui(
         }
 
         std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
-        return xbox_live_result<bool>(hasPrivilege == TRUE, errcode);
+        return xbox_live_result<bool>(hasPrivilege == TRUE, errcode);*/
+        return xbox_live_result<bool>();
     });
 
     return utils::create_exception_free_task<bool>(

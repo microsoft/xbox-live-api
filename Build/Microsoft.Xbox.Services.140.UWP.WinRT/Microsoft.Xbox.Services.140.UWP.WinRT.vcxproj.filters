@@ -957,9 +957,6 @@
     <ClCompile Include="..\..\Source\Services\Social\social_service_impl.cpp">
       <Filter>C++ Source\Social</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Misc\WinRT\TitleCallableUI_WinRT.cpp">
-      <Filter>C++ Source\Misc\WinRT</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\System\xbox_live_mutex.cpp">
       <Filter>C++ Source\System</Filter>
     </ClCompile>
@@ -1113,9 +1110,6 @@
     <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\WinRT\TournamentGameSessionReadyEventArgs_WinRT.cpp">
       <Filter>C++ Source\Multiplayer\Manager\WinRT Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Misc\UWP\title_callable_ui.cpp">
-      <Filter>C++ Source\Misc</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Social\Manager\WinRT\SocialUserGroupLoadedEventArgs_WinRT.cpp">
       <Filter>C++ Source\Social\Manager\WinRT</Filter>
     </ClCompile>
@@ -1232,6 +1226,12 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticValue_WinRT.cpp">
       <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Misc\WinRT\TitleCallableUI_WinRT.cpp">
+      <Filter>C++ Source\Misc\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Misc\UWP\title_callable_ui.cpp">
+      <Filter>C++ Source\Misc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1733,9 +1733,6 @@
     <ClInclude Include="..\..\Source\Services\Misc\WinRT\VerifyStringResult_WinRT.h">
       <Filter>C++ Source\Misc\WinRT</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\xsapi\title_callable_ui.h">
-      <Filter>C++ Public Includes</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Services\Misc\WinRT\XboxLiveHttpCall_WinRT.h">
       <Filter>C++ Source\Misc\WinRT</Filter>
     </ClInclude>
@@ -1776,9 +1773,6 @@
       <Filter>C++ Source\Social\WinRT Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Services\Misc\WinRT\VerifyStringResultCode_WinRT.h">
-      <Filter>C++ Source\Misc\WinRT</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Services\Misc\WinRT\TitleCallableUI_WinRT.h">
       <Filter>C++ Source\Misc\WinRT</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionRestriction_WinRT.h">
@@ -2125,6 +2119,12 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticValue_WinRT.h">
       <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\title_callable_ui.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Misc\WinRT\TitleCallableUI_WinRT.h">
+      <Filter>C++ Source\Misc\WinRT</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -212,7 +212,6 @@
     <ClCompile Include="..\..\Source\Services\Misc\player_state_value.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\player_state_writer.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\string_service.cpp" />
-    <ClCompile Include="..\..\Source\Services\Misc\UWP\title_callable_ui.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\verify_string_result.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\Windows\notification_service_windows.cpp" />
     <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\find_match_completed_event_args.cpp" />
@@ -379,7 +378,6 @@
     <ClInclude Include="..\..\Include\xsapi\social_manager.h" />
     <ClInclude Include="..\..\Include\xsapi\service_call_logging_config.h" />
     <ClInclude Include="..\..\Include\xsapi\stats_manager.h" />
-    <ClInclude Include="..\..\Include\xsapi\title_callable_ui.h" />
     <ClInclude Include="..\..\Include\xsapi\multiplayer_manager.h" />
     <ClInclude Include="..\..\Include\xsapi\presence.h" />
     <ClInclude Include="..\..\Include\xsapi\real_time_activity.h" />

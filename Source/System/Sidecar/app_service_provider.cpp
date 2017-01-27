@@ -14,7 +14,7 @@
 
 #include "app_service_messages.h"
 #include "app_service_provider.h"
-#include "xsapi/title_callable_ui.h"
+//#include "xsapi/title_callable_ui.h"
 
 using namespace pplx;
 
@@ -173,12 +173,12 @@ namespace app_service {
 		{
 			auto uiTask = [=]()
 			{
-				xbox::services::system::title_callable_ui::show_title_achievements_ui(message.title_id())
-					.then([message](xbox_live_result<void> result)
-				{
-					achievements_ui_result_message response(message.request_id());
-					send_xbl_result(xbox_live_result<achievements_ui_result_message>(response, result.err(), result.err_message()));
-				});
+				//xbox::services::system::title_callable_ui::show_title_achievements_ui(message.title_id())
+				//	.then([message](xbox_live_result<void> result)
+				//{
+				//	achievements_ui_result_message response(message.request_id());
+				//	send_xbl_result(xbox_live_result<achievements_ui_result_message>(response, result.err(), result.err_message()));
+				//});
 			};
 
 			auto dispatcherHandler = ref new Windows::UI::Core::DispatchedHandler(uiTask);

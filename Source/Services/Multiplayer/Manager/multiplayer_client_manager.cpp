@@ -520,20 +520,20 @@ multiplayer_client_manager::invite_friends(
 #if !XBOX_UWP
 #if !UNIT_TEST_SERVICES
 
-    auto asyncOp = xbox::services::system::title_callable_ui::show_game_invite_ui(
-        latest_pending_read()->lobby_client()->session()->session_reference(),
-        contextStringId
-        );
+    //auto asyncOp = xbox::services::system::title_callable_ui::show_game_invite_ui(
+    //    latest_pending_read()->lobby_client()->session()->session_reference(),
+    //    contextStringId
+    //);
 
-    pplx::create_task(asyncOp)
-    .then([thisWeakPtr](xbox_live_result<void> result)
-    {
-        std::shared_ptr<multiplayer_client_manager> pThis(thisWeakPtr.lock());
-        if (pThis != nullptr)
-        {
-            pThis->add_multiplayer_event(multiplayer_event_type::invite_sent, multiplayer_session_type::lobby_session, result.err(), result.err_message());
-        }
-    });
+    //pplx::create_task(asyncOp)
+    //    .then([thisWeakPtr](xbox_live_result<void> result)
+    //{
+    //    std::shared_ptr<multiplayer_client_manager> pThis(thisWeakPtr.lock());
+    //    if (pThis != nullptr)
+    //    {
+    //        pThis->add_multiplayer_event(multiplayer_event_type::invite_sent, multiplayer_session_type::lobby_session, result.err(), result.err_message());
+    //    }
+    //});
 #endif
 #endif
 #endif
