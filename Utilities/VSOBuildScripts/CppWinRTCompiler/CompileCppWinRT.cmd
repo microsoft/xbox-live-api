@@ -1,6 +1,9 @@
 @echo on
 echo.
 
+set XDKVER=160801
+set SDKSRC=%1
+
 if "%1" == "local" goto testlocal
 goto start
 :testlocal
@@ -13,8 +16,6 @@ goto serializeForPostbuild
 
 :start
 if "%XES_SERIALPOSTBUILDREADY%" == "True" goto serializeForPostbuild
-set XDKVER=160801
-set SDKSRC=%1
 goto done
 
 :serializeForPostbuild

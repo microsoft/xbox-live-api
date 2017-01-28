@@ -1,5 +1,6 @@
 if "%1" == "local" goto testlocal
 goto start
+
 :testlocal
 set TFS_DropLocation=c:\test
 mkdir %TFS_DropLocation%
@@ -98,6 +99,16 @@ copy %UWP_BIN_BUILD_SHARE_RELEA%\casablanca140.Xbox\casablanca140.xbox.lib %XDK_
 copy %UWP_BIN_BUILD_SHARE_DEBUG%\casablanca140.Xbox\casablanca140.xbox.lib %XDK_BINARIES_DROP%\cpp\binaries\debug\v140\casablanca140.xbox.lib.remove
 copy %UWP_BIN_BUILD_SHARE_RELEA%\casablanca140.Xbox\casablanca140.xbox.pdb %XDK_BINARIES_DROP%\cpp\binaries\release\v140\casablanca140.xbox.pdb
 copy %UWP_BIN_BUILD_SHARE_DEBUG%\casablanca140.Xbox\casablanca140.xbox.pdb %XDK_BINARIES_DROP%\cpp\binaries\debug\v140\casablanca140.xbox.pdb
+
+robocopy /NJS /NJH /MT:16 /S /NP %TFS_DropLocation%\ABI\include %XDK_BINARIES_DROP%\winrt\include\abi
+robocopy /NJS /NJH /MT:16 /S /NP %UWP_BUILD_SHARE%\SDK\SourceAndSamples %XDK_BINARIES_DROP%\source
+rmdir /s /q %XDK_BINARIES_DROP%\source\InProgressSamples
+rmdir /s /q %XDK_BINARIES_DROP%\source\Tests
+rmdir /s /q %XDK_BINARIES_DROP%\source\Utilities
+rmdir /s /q %XDK_BINARIES_DROP%\source\External\cppwinrt
+del %XDK_BINARIES_DROP%\source\*.md
+\\scratch2\scratch\jasonsa\tools\vZip.exe /FOLDER:%XDK_BINARIES_DROP%\source /OUTPUTNAME:%XDK_BINARIES_DROP%\SourceDist\Xbox.Services.zip
+rmdir /s /q %XDK_BINARIES_DROP%\source
 
 if "%skipNuget%" == "1" goto :finalize
 rem :skipCopy
