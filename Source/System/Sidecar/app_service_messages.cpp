@@ -78,7 +78,12 @@ inline typename std::enable_if<std::is_same<T, string_t>::value, T>::type deseri
 #define APP_SERVICE_MESSAGE(type) \
 	_Use_decl_annotations_ xbox_live_result<type> type::from_service_message(Windows::Foundation::Collections::ValueSet ^message) \
 	{ \
-		Platform::String ^messageType = safe_cast<Platform::String^>(message->Lookup(L"message_type")); \
+		Platform::String ^messageType = L""; \
+        if (message->HasKey(L"message_type")) \
+        { \
+            messageType = safe_cast<Platform::String^>(message->Lookup(L"message_type")); \
+        } \
+        \
 		if (message->HasKey(L"err")) \
 		{ \
 			return xbox_live_result<type>( \
