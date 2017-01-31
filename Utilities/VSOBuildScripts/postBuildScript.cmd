@@ -135,6 +135,7 @@ rmdir /s /q %TFS_DropLocation%\include\cppwinrt
 rem create WinRT.XDK nuget package
 rmdir /s /q %TFS_DropLocation%\include\winrt
 rmdir /s /q %TFS_DropLocation%\include\cppwinrt
+robocopy /NJS /NJH /MT:16 /S /NP %TFS_DropLocation%\ABI\include %XDK_BINARIES_DROP%\include\winrt
 set XDK_OUTPUT_SRC=%TFS_DropLocation%\CppWinRT\XSAPI_XDK_Headers\winrt
 set XDK_OUTPUT_DEST=%TFS_DropLocation%\include\cppwinrt\winrt
 robocopy /NJS /NJH /MT:16 /S /NP %XDK_OUTPUT_SRC% %XDK_OUTPUT_DEST%
