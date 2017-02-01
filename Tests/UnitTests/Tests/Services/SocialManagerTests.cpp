@@ -2080,6 +2080,55 @@ public:
         VerifyUserBuffer(userBufferHolder.user_buffer_b(), userGroupSize);
     }
 
+    DEFINE_TEST_CASE(TestSocialManagerUserBufferAddUsersWithNoInit)
+    {
+        DEFINE_TEST_CASE_PROPERTIES_FOCUS(TestSocialManagerUserBufferAddUsersWithNoInit);
+        auto peopleHubService = SocialManagerHelper::GetPeoplehubService();
+        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
+        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubResponse));
+
+        user_buffers_holder userBufferHolder;
+
+        std::vector<string_t> xuids;
+        xuids.push_back(_T("1"));
+        auto userGroup = peopleHubService.get_social_graph(_T("TestXboxUserId"), social_manager_extra_detail_level::preferred_color_level, xuids).get();
+        VERIFY_IS_TRUE(!userGroup.err());
+
+        userBufferHolder.initialize(std::vector<xbox_social_user>());
+        userBufferHolder.add_users_to_buffer(userGroup.payload(), *userBufferHolder.inactive_buffer());
+        userBufferHolder.add_users_to_buffer(userGroup.payload(), *userBufferHolder.active_buffer());
+        size_t userGroupSize = userGroup.payload().size();
+
+        VERIFY_IS_TRUE(&userBufferHolder.user_buffer_a() == userBufferHolder.active_buffer());
+        VERIFY_IS_TRUE(&userBufferHolder.user_buffer_b() == userBufferHolder.inactive_buffer());
+
+        VerifyUserBuffer(userBufferHolder.user_buffer_a(), userGroupSize);
+        VerifyUserBuffer(userBufferHolder.user_buffer_b(), userGroupSize);
+    }
+
+    DEFINE_TEST_CASE(TestSocialManagerUserBufferAddUsersNoData)
+    {
+        DEFINE_TEST_CASE_PROPERTIES_FOCUS(TestSocialManagerUserBufferAddUsersNoData);
+        auto peopleHubService = SocialManagerHelper::GetPeoplehubService();
+        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
+        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubResponse));
+
+        user_buffers_holder userBufferHolder;
+
+        userBufferHolder.initialize(std::vector<xbox_social_user>());
+        userBufferHolder.add_users_to_buffer(std::vector<xbox_social_user>(), *userBufferHolder.inactive_buffer());
+        userBufferHolder.add_users_to_buffer(std::vector<xbox_social_user>(), *userBufferHolder.active_buffer());
+
+        VERIFY_IS_TRUE(&userBufferHolder.user_buffer_a() == userBufferHolder.active_buffer());
+        VERIFY_IS_TRUE(&userBufferHolder.user_buffer_b() == userBufferHolder.inactive_buffer());
+
+        VERIFY_IS_TRUE(userBufferHolder.user_buffer_a().socialUserGraph.size() == 0);
+        VERIFY_IS_TRUE(userBufferHolder.user_buffer_b().socialUserGraph.size() == 0);
+
+        VERIFY_IS_TRUE(userBufferHolder.user_buffer_a().freeData.size() == 0);
+        VERIFY_IS_TRUE(userBufferHolder.user_buffer_b().freeData.size() == 0);
+    }
+
     // Verifies that get_user_copy API (C++ only) works properly in copying the data
     DEFINE_TEST_CASE(TestSocialManagerUserGroupCopy)
     {
