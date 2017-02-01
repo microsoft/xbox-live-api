@@ -375,6 +375,12 @@ social_graph::apply_event(
     )
 {
     const auto& inactiveBuffer = m_userBuffer.inactive_buffer();
+    if (inactiveBuffer == nullptr)
+    {
+        LOG_ERROR("In active buffer null in event processing");
+        return;
+    }
+
     social_event_type eventType = social_event_type::unknown;
     switch (evt.event_type())
     {
@@ -792,6 +798,11 @@ social_graph::setup_rta_subscriptions(
 
     if (shouldReinitialize)
     {
+        if (m_userBuffer.inactive_buffer() == nullptr)
+        {
+            LOG_ERROR("Failed to reinitialize rta subs");
+            return;
+        }
         std::vector<uint64_t> users;
         for (auto& userPair : m_userBuffer.inactive_buffer()->socialUserGraph)
         {
@@ -1020,6 +1031,11 @@ social_graph::perform_diff(
         std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
         std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
         m_perfTester.start_timer(_T("set_state"));
+        if (m_userBuffer.inactive_buffer() == nullptr)
+        {
+            LOG_ERROR("Diff cannot happening with null buffer");
+            return;
+        }
         set_state(social_graph_state::diff);
         m_perfTester.stop_timer(_T("set_state"));
     }
@@ -1386,6 +1402,11 @@ social_graph::presence_timer_callback(
                     std::lock_guard<std::recursive_mutex> lock(pThis->m_socialGraphMutex);
                     std::lock_guard<std::recursive_mutex> priorityLock(pThis->m_socialGraphPriorityMutex);
                     pThis->m_perfTester.start_timer(_T("social graph refresh state set"));
+                    if (pThis->m_userBuffer.inactive_buffer() == nullptr)
+                    {
+                        LOG_ERROR("Cannot update presence when user buffer is null");
+                        return;
+                    }
                     pThis->set_state(social_graph_state::refresh);
                     pThis->m_perfTester.start_timer(_T("social graph refresh state set"));
                 }
@@ -1759,7 +1780,7 @@ user_buffers_holder::buffer_alloc(
     _In_ size_t freeSpaceRequired
     )
 {
-    if (numUsers == 0)
+    if (numUsers == 0 && freeSpaceRequired == 0)
     {
         return nullptr;
     }
@@ -1820,12 +1841,16 @@ user_buffers_holder::add_users_to_buffer(
                 ++size;
             }
         }
+
         std::vector<xbox_social_user> socialVec(size);
+        if (size > 0)
+        {
 #if _WIN32
-        memcpy_s(&socialVec[0], socialVec.size() * sizeof(xbox_social_user), &userBufferInactive.buffer[0], size * sizeof(xbox_social_user));
+            memcpy_s(&socialVec[0], socialVec.size() * sizeof(xbox_social_user), &userBufferInactive.buffer[0], size * sizeof(xbox_social_user));
 #else
-        memcpy(&socialVec[0], &userBufferInactive.buffer[0], size * sizeof(xbox_social_user));
+            memcpy(&socialVec[0], &userBufferInactive.buffer[0], size * sizeof(xbox_social_user));
 #endif
+        }
         xsapi_memory::mem_free(userBufferInactive.buffer);
         initialize_buffer(userBufferInactive, socialVec, totalSizeNeeded);
     }

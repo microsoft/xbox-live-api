@@ -234,7 +234,7 @@ user_impl_idp::initialize_provider()
     }
 
     pplx::task<WebAccountProvider^> findProviderTask;
-    if (m_creationContext == nullptr)
+    if (m_creationContext == nullptr || !is_multi_user_application())
     {
         findProviderTask = create_task(WebAuthenticationCoreManager::FindAccountProviderAsync("https://xsts.auth.xboxlive.com"));
     }

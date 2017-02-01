@@ -67,6 +67,23 @@ private:
 #endif
 };
 
+// Detect if app is MUA and API is supported
+bool IsMultiUserAPISupported()
+{
+    // Save the result in memory, as we only need to check once;
+    static int isSupported = -1;
+
+    // Only RS1 sdk will have this check.
+#ifdef NTDDI_WIN10_RS1
+    if (isSupported == -1)
+    {
+        // all RS1 based TCUI calls are based around multi-user
+        isSupported = Windows::Foundation::Metadata::ApiInformation::IsMethodPresent("Windows.System.UserPicker", "IsSupported");
+    }
+#endif
+    return isSupported == 1;
+}
+
 void WINAPI UICompletionRoutine(
     _In_ HRESULT returnCode,
     _In_ void* context
@@ -178,7 +195,7 @@ title_callable_ui::show_player_picker_ui(
         else
         {
 #if UWP_API
-            if (user != nullptr)
+            if (user != nullptr && IsMultiUserAPISupported())
             {
                 ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
                 hr = ShowPlayerPickerUIForUser(
@@ -256,7 +273,7 @@ title_callable_ui::show_game_invite_ui(
 
         HRESULT hr = S_OK;
 #if UWP_API
-        if (user != nullptr)
+        if (user != nullptr && IsMultiUserAPISupported())
         {
             ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
             hr = ShowGameInviteUIForUser(
@@ -319,7 +336,7 @@ title_callable_ui::show_profile_card_ui(
 
         HRESULT hr = S_OK;
 #if UWP_API
-        if (user != nullptr)
+        if (user != nullptr && IsMultiUserAPISupported())
         {
             ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
             hr = ShowProfileCardUIForUser(
@@ -376,7 +393,7 @@ title_callable_ui::show_change_friend_relationship_ui(
 
         HRESULT hr = S_OK;
 #if UWP_API
-        if (user != nullptr)
+        if (user != nullptr && IsMultiUserAPISupported())
         {
             ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
             hr = ShowChangeFriendRelationshipUIForUser(
@@ -432,7 +449,7 @@ title_callable_ui::show_title_achievements_ui(
 
         HRESULT hr = S_OK;
 #if UWP_API
-        if (user != nullptr)
+        if (user != nullptr && IsMultiUserAPISupported())
         {
             ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
             hr = ShowTitleAchievementsUIForUser(
@@ -504,7 +521,7 @@ title_callable_ui::check_gaming_privilege_silently(
 
     HRESULT hr = S_OK;
 #if UWP_API
-    if (user != nullptr)
+    if (user != nullptr && IsMultiUserAPISupported())
     {
         ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
         hr = CheckGamingPrivilegeSilentlyForUser(
@@ -555,7 +572,7 @@ title_callable_ui::check_gaming_privilege_with_ui(
         BOOL hasPrivilege = FALSE;
         HRESULT hr = S_OK;
 #if UWP_API
-        if (user != nullptr)
+        if (user != nullptr && IsMultiUserAPISupported())
         {
             ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
             hr = CheckGamingPrivilegeWithUIForUser(
