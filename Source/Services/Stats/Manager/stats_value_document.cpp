@@ -173,7 +173,7 @@ stats_value_document::serialize() const
     envelopeField[_T("clientId")] = web::json::value::string(m_clientId.c_str());
     auto& statsField = requestJSON[_T("stats")];
 
-    auto& contextualKeyField = statsField[_T("contexts")];
+    auto& contextualKeyField = statsField[_T("tags")];
     contextualKeyField = web::json::value::object();
 
     auto& titleField = statsField[_T("title")];
@@ -200,6 +200,7 @@ stats_value_document::_Deserialize(
 
     auto envelopeField = utils::extract_json_field(data, _T("envelope"), errc, false);
     returnObject.m_clientVersion = utils::extract_json_int(envelopeField, _T("clientVersion"), errc);
+    ++returnObject.m_clientVersion; // increment the version so first write is always new version
     returnObject.m_serverVersion = utils::extract_json_int(envelopeField, _T("serverVersion"), errc);
     returnObject.m_clientId = utils::extract_json_string(envelopeField, _T("clientId"), errc).c_str();
 

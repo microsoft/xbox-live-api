@@ -23,7 +23,7 @@ const std::chrono::seconds stats_manager_impl::TIME_PER_CALL_SEC =
 #if UNIT_TEST_SERVICES
 std::chrono::seconds::zero();
 #else
-std::chrono::seconds(60);
+std::chrono::seconds(5);
 #endif
 
 stats_manager_impl::stats_manager_impl()

@@ -75,13 +75,11 @@ void Sample::Initialize(IUnknown* window, int width, int height, DXGI_MODE_ROTAT
 
 void Sample::WriteEvent()
 {
-    stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"DifficultyLevelId", 100);
-    stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"RoundId", 1);
-    stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"PlayerRoleId", 1);
-    stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"PlayerWeaponId", 2);
-    stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"EnemyRoleId", 3);
-    stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"KillTypeId", 4);
-    stats_manager::get_singleton_instance().set_stat_as_number(m_liveResources->GetUser(), L"Laptime", 25.6);
+    int64_t newStatVal = 0;
+    
+    auto newStat = stats_manager::get_singleton_instance().get_stat(m_liveResources->GetUser(), L"NumKills");
+    if (!newStat.err()) newStatVal = newStat.payload()->as_integer();
+    stats_manager::get_singleton_instance().set_stat_as_integer(m_liveResources->GetUser(), L"NumKills", ++newStatVal);
 
     stats_manager::get_singleton_instance().request_flush_to_service(m_liveResources->GetUser());
 }
