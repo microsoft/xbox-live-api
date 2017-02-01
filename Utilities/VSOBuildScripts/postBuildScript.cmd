@@ -101,14 +101,17 @@ copy %UWP_BIN_BUILD_SHARE_RELEA%\casablanca140.Xbox\casablanca140.xbox.pdb %XDK_
 copy %UWP_BIN_BUILD_SHARE_DEBUG%\casablanca140.Xbox\casablanca140.xbox.pdb %XDK_BINARIES_DROP%\cpp\binaries\debug\v140\casablanca140.xbox.pdb
 
 robocopy /NJS /NJH /MT:16 /S /NP %TFS_DropLocation%\ABI\include %XDK_BINARIES_DROP%\winrt\include\abi
-robocopy /NJS /NJH /MT:16 /S /NP %UWP_BUILD_SHARE%\SDK\SourceAndSamples %XDK_BINARIES_DROP%\source
+robocopy /NJS /NJH /MT:16 /S /NP %TFS_SourcesDirectory% %XDK_BINARIES_DROP%\source /XD .git
+rmdir /s /q %XDK_BINARIES_DROP%\source\.git
+rmdir /s /q %XDK_BINARIES_DROP%\source\External\cpprestsdk\Intermediate
 rmdir /s /q %XDK_BINARIES_DROP%\source\InProgressSamples
 rmdir /s /q %XDK_BINARIES_DROP%\source\Tests
 rmdir /s /q %XDK_BINARIES_DROP%\source\Utilities
 rmdir /s /q %XDK_BINARIES_DROP%\source\External\cppwinrt
 del %XDK_BINARIES_DROP%\source\*.md
+mkdir %XDK_BINARIES_DROP%\SourceDist
 \\scratch2\scratch\jasonsa\tools\vZip.exe /FOLDER:%XDK_BINARIES_DROP%\source /OUTPUTNAME:%XDK_BINARIES_DROP%\SourceDist\Xbox.Services.zip
-rmdir /s /q %XDK_BINARIES_DROP%\source
+
 
 if "%skipNuget%" == "1" goto :finalize
 rem :skipCopy

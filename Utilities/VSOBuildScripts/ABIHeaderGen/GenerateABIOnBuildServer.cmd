@@ -71,6 +71,10 @@ REM suppress warnings from winmdidl tool, only check exit code
 echo ERRORLEVEL=%ERRORLEVEL%
 if NOT %ERRORLEVEL% EQU 0 goto errorarg
 
+cd idl
+for /f %%A IN ('dir /b *.idl') do %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\FindAndReplace.exe %%~fA "\[deprecated.*deprecate, 0x00000000\)\]" ""
+cd ..
+
 for /f %%A IN ('dir /b .\idl\*.idl') do "%SDK_ROOT_FOLDER%\midlrt" /Zp8 /char unsigned /enum_class /ns_prefix /no_warn /no_settings_comment /nologo /winrt /metadata_dir %SDK_METADATA_FOLDER% /I %SDK_INC_FOLDER% /I %SDK_INC_FOLDER% /I %SDK_INC_ABI_FOLDER% /I .\idl /h .\include\%%~nA.h .\idl\%%~nA.idl
 echo ERRORLEVEL=%ERRORLEVEL%
 
