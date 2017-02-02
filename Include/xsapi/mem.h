@@ -80,8 +80,8 @@ public:
     typedef T           value_type;
 
     pointer allocate(size_type n, const void * = 0)
-    {
-        pointer p = reinterpret_cast<pointer>(XBOX_LIVE_NAMESPACE::system::xsapi_memory::mem_alloc(n * sizeof(T)));
+	{
+		pointer p = reinterpret_cast<pointer>(XBOX_LIVE_NAMESPACE::system::xsapi_memory::mem_alloc(n * sizeof(T)));
 
         if (p == NULL)
         {
@@ -92,12 +92,12 @@ public:
 
     void deallocate(_In_opt_ void* p, size_type)
     {
-        XBOX_LIVE_NAMESPACE::system::xsapi_memory::mem_free(p);
+		XBOX_LIVE_NAMESPACE::system::xsapi_memory::mem_free(p);
     }
 
     char* _Charalloc(size_type n)
-    {
-        char* p = reinterpret_cast<char*>(XBOX_LIVE_NAMESPACE::system::xsapi_memory::mem_alloc(n));
+	{
+		char* p = reinterpret_cast<char*>(XBOX_LIVE_NAMESPACE::system::xsapi_memory::mem_alloc(n));
 
         if (p == NULL)
         {
@@ -139,10 +139,10 @@ bool operator!=(const xsapi_stl_allocator<T1>&, const xsapi_stl_allocator<T2>&)
     return false;
 }
 
-#define xsapi_internal_string std::basic_string<char_t, std::char_traits<char_t>, xsapi_stl_allocator<char_t> >
-
 #define xsapi_internal_vector(T) std::vector<T, xsapi_stl_allocator<T> >
 
 #define xsapi_internal_unordered_map(Key, T) std::unordered_map<Key, T, std::hash<Key>, std::equal_to<Key>, xsapi_stl_allocator< std::pair< const Key, T > > >
+
+#define xsapi_internal_string std::basic_string<char_t, std::char_traits<char_t>, xsapi_stl_allocator<char_t> >
 
 #define xsapi_internal_dequeue(T) std::deque<T, xsapi_stl_allocator<T> >

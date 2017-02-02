@@ -14,7 +14,7 @@
 #include "xsapi/achievements.h"
 #include "xsapi/player_state_writer.h"
 
-namespace xbox { namespace services { namespace experimental { namespace stats { namespace manager { 
+namespace xbox { namespace services { namespace stats { namespace manager { 
 
 #if TV_API | XBOX_UWP
     typedef  Windows::Xbox::System::User^ xbox_live_user_t;
@@ -161,18 +161,18 @@ private:
 };
 
 /// <summary> 
-/// Stats 2017 does REST requests to update stats
+/// Stats Manager handles and writes to the service a local users stats
 /// </summary>
 class stats_manager
 {
 public:
     /// <summary> 
-    /// Instantiates and returns an instance of simplified stats
+    /// Instantiates and returns an instance of stats manager
     /// </summary>
     static stats_manager& get_singleton_instance();
 
     /// <summary> 
-    /// Adds a local user to the simplified stats manager
+    /// Adds a local user to the stats manager
     /// Returns a local_user_added event from do_work
     /// </summary>
     /// <param name="user">The user to add to the statistic manager</param>
@@ -181,7 +181,7 @@ public:
         );
 
     /// <summary> 
-    /// Removes a local user from the simplified stats manager
+    /// Removes a local user from the stats manager
     /// Returns a local_user_removed event from do_work
     /// </summary>
     /// <param name="user">The user to be removed from the statistic manager</param>
@@ -190,7 +190,7 @@ public:
         );
 
     /// <summary> 
-    /// Force the current stat values to be uploaded to the service
+    /// Requests the current stat values to be uploaded to the service
     /// This will send immediately instead of automatically during a 30 second window
     /// </summary>
     /// <remarks>This can be throttled if called too often</remarks>
@@ -213,7 +213,6 @@ public:
     /// <param name="value">Value to replace the stat by</param>
     /// <param name="statisticReplaceCompareType">
     /// Will override the compare type. Stat will only be updated if follows the stat compares rule
-    /// *Note* This is not recommended to be modified after release of the title
     /// </param>
     /// <return>Whether or not the setting was successful. Can fail if stat is not of numerical type. Will return updated stat</return>
     xbox_live_result<void> set_stat_as_number(
@@ -280,4 +279,4 @@ private:
     std::shared_ptr<stats_manager_impl> m_statsManagerImpl;
 };
 
-} } } } }
+} } } }

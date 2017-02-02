@@ -37,7 +37,7 @@ stats_manager::stats_manager()
 xbox_live_result<void>
 stats_manager::add_local_user(
     _In_ const xbox_live_user_t& user
-)
+    )
 {
     return m_statsManagerImpl->add_local_user(user);
 }
@@ -45,7 +45,7 @@ stats_manager::add_local_user(
 xbox_live_result<void>
 stats_manager::remove_local_user(
     _In_ const xbox_live_user_t& user
-)
+    )
 {
     return m_statsManagerImpl->remove_local_user(user);
 }
@@ -87,7 +87,7 @@ stats_manager::set_stat_as_number(
     _In_ const xbox_live_user_t& user,
     _In_ const string_t& name,
     _In_ double value
-)
+    )
 {
     return m_statsManagerImpl->set_stat(
         user,
@@ -101,7 +101,7 @@ stats_manager::set_stat_as_string(
     _In_ const xbox_live_user_t& user,
     _In_ const string_t& name,
     _In_ const string_t& value
-)
+    )
 {
     return m_statsManagerImpl->set_stat(
         user,

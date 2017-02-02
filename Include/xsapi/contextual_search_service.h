@@ -744,9 +744,6 @@ public:
         );
 
 private:
-    // TODO- impl
-    // pplx::task<void> set_contextual_search_information(_In_ std::vector<xbox::services::player_writer::player_stat> playerStateList);
-
     contextual_search_service() {}
 
     pplx::task<xbox_live_result<contextual_search_game_clips_result>> get_game_clips_internal(

@@ -18,7 +18,7 @@
 #include "xsapi/mem.h"
 #include "call_buffer_timer.h"
 
-namespace xbox { namespace services { namespace experimental { namespace stats { namespace manager { 
+namespace xbox { namespace services { namespace stats { namespace manager { 
 
 enum class svd_event_type
 {
@@ -262,4 +262,4 @@ private:
     std::mutex m_statsServiceMutex;
 };
 
-}}}}}
+}}}}

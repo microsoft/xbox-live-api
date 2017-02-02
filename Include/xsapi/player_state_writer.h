@@ -71,7 +71,7 @@ private:
 };
 
 /// <summary> 
-/// The player state writer expects information for various player state information
+/// The player state writer receives information about the player state
 /// This information is used for various services like stats_manager, contextual search information, and presence
 /// </summary>
 class player_state_writer
@@ -85,7 +85,6 @@ public:
     /// <summary> 
     /// Sets player state. Immediately applies.
     /// </summary>
-    /// <return>A list of events that have happened since previous do_work</return>
     xbox_live_result<void> set_player_state(_In_ xbox_live_user_t user, _In_ const std::unordered_map<string_t, player_state_value>& playerStateList);
 
     /// <summary> 
