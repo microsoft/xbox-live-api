@@ -161,16 +161,6 @@ bool local_config::use_first_party_token()
     return get_bool_from_config(_T("FirstParty"), false, false);
 }
 
-string_t local_config::sidecar_pfn()
-{
-    return get_value_from_config(_T("SidecarPFN"), false, _T(""));
-}
-
-string_t local_config::sidecar_appchannel()
-{
-    return get_value_from_config(_T("SidecarAppChannel"), false, _T(""));
-}
-
 #if XSAPI_I
 string_t local_config::apns_environment()
 {

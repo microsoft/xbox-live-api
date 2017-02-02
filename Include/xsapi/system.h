@@ -9,7 +9,6 @@
 //*********************************************************
 #pragma once
 
-#include "pch.h"
 #include "types.h"
 #include "errors.h"
 #include "xbox_live_context_settings.h"

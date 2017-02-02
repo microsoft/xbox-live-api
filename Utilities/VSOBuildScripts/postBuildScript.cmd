@@ -1,13 +1,14 @@
 if "%1" == "local" goto testlocal
+goto start
+
 :testlocal
 set TFS_DropLocation=c:\test
-mkdir %TFS_DropLocation%
-rmdir /s /q %TFS_DropLocation%\SDK
 mkdir %TFS_DropLocation%
 set TFS_VersionNumber=1701.10000
 set TFS_SourcesDirectory=%CD%\..\..
 goto serializeForPostbuild
 
+:start
 if "%XES_SERIALPOSTBUILDREADY%" == "True" goto serializeForPostbuild
 goto done
 :serializeForPostbuild
@@ -56,7 +57,6 @@ set UWP_BIN_BUILD_SHARE_DEBUG=%UWP_BUILD_SHARE%\Debug\x64
 mkdir %XDK_BINARIES_DROP%
 
 rem copy NuGetPackages to build output folder
-mkdir %TFS_DropLocation%\SDK\Binaries
 
 rem copy includes to build output folder
 robocopy /NJS /NJH /MT:16 /S /NP %UWP_BUILD_SHARE%\Include %XDK_BINARIES_DROP%\cpp\include
@@ -100,35 +100,53 @@ copy %UWP_BIN_BUILD_SHARE_DEBUG%\casablanca140.Xbox\casablanca140.xbox.lib %XDK_
 copy %UWP_BIN_BUILD_SHARE_RELEA%\casablanca140.Xbox\casablanca140.xbox.pdb %XDK_BINARIES_DROP%\cpp\binaries\release\v140\casablanca140.xbox.pdb
 copy %UWP_BIN_BUILD_SHARE_DEBUG%\casablanca140.Xbox\casablanca140.xbox.pdb %XDK_BINARIES_DROP%\cpp\binaries\debug\v140\casablanca140.xbox.pdb
 
+robocopy /NJS /NJH /MT:16 /S /NP %TFS_DropLocation%\ABI\include %XDK_BINARIES_DROP%\winrt\include\abi
+robocopy /NJS /NJH /MT:16 /S /NP %TFS_SourcesDirectory% %XDK_BINARIES_DROP%\source /XD .git
+rmdir /s /q %XDK_BINARIES_DROP%\source\.git
+rmdir /s /q %XDK_BINARIES_DROP%\source\External\cpprestsdk\Intermediate
+rmdir /s /q %XDK_BINARIES_DROP%\source\InProgressSamples
+rmdir /s /q %XDK_BINARIES_DROP%\source\Tests
+rmdir /s /q %XDK_BINARIES_DROP%\source\Utilities
+rmdir /s /q %XDK_BINARIES_DROP%\source\External\cppwinrt
+del %XDK_BINARIES_DROP%\source\*.md
+mkdir %XDK_BINARIES_DROP%\SourceDist
+\\scratch2\scratch\jasonsa\tools\vZip.exe /FOLDER:%XDK_BINARIES_DROP%\source /OUTPUTNAME:%XDK_BINARIES_DROP%\SourceDist\Xbox.Services.zip
+
+
 if "%skipNuget%" == "1" goto :finalize
 rem :skipCopy
 
-rem create UWP XBL nuget packages
+rem create Cpp.UWP nuget package
+rmdir /s /q %TFS_DropLocation%\include\winrt
+rmdir /s /q %TFS_DropLocation%\include\cppwinrt
 \\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
 
-rem setup the C++/WinRT headers for nuget
+rem create WinRT.UWP nuget package
+rmdir /s /q %TFS_DropLocation%\include\winrt
+rmdir /s /q %TFS_DropLocation%\include\cppwinrt
 set WINSDK_OUTPUT_SRC=%TFS_DropLocation%\CppWinRT\XSAPI_WinSDK_Headers\winrt
 set WINSDK_OUTPUT_DEST=%TFS_DropLocation%\include\cppwinrt\winrt
-rmdir /s /q %WINSDK_OUTPUT_DEST%
 robocopy /NJS /NJH /MT:16 /S /NP %WINSDK_OUTPUT_SRC% %WINSDK_OUTPUT_DEST%
-
 \\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
 rmdir /s /q %WINSDK_OUTPUT_DEST%
 
-rem create Xbox One XBL nuget packages
+rem create Cpp.XDK nuget package
+rmdir /s /q %TFS_DropLocation%\include\winrt
+rmdir /s /q %TFS_DropLocation%\include\cppwinrt
 \\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
 
-rem setup the C++/WinRT headers for nuget
+rem create WinRT.XDK nuget package
+rmdir /s /q %TFS_DropLocation%\include\winrt
+rmdir /s /q %TFS_DropLocation%\include\cppwinrt
+robocopy /NJS /NJH /MT:16 /S /NP %TFS_DropLocation%\ABI\include %XDK_BINARIES_DROP%\include\winrt
 set XDK_OUTPUT_SRC=%TFS_DropLocation%\CppWinRT\XSAPI_XDK_Headers\winrt
 set XDK_OUTPUT_DEST=%TFS_DropLocation%\include\cppwinrt\winrt
-rmdir /s /q %XDK_OUTPUT_DEST%
 robocopy /NJS /NJH /MT:16 /S /NP %XDK_OUTPUT_SRC% %XDK_OUTPUT_DEST%
 \\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.WinRT.XboxOneXDK.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
 rmdir /s /q %XDK_OUTPUT_DEST%
 
 mkdir %TFS_DropLocation%\NuGetBinaries
 move %TFS_DropLocation%\*.nupkg %TFS_DropLocation%\NuGetBinaries
-copy %XDK_BUILD_SHARE%\NuGetBinaries\*.nupkg %TFS_DropLocation%\SDK\Binaries
 
 :finalize
 if "%1" == "local" goto skipEmail

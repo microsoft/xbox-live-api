@@ -338,8 +338,6 @@
     <ClCompile Include="..\..\Source\Shared\xbox_live_services_settings.cpp" />
     <ClCompile Include="..\..\Source\Shared\xbox_system_factory.cpp" />
     <ClCompile Include="..\..\Source\System\auth_config.cpp" />
-    <ClCompile Include="..\..\Source\System\Sidecar\app_service_messages.cpp" />
-    <ClCompile Include="..\..\Source\System\Sidecar\app_service_provider.cpp" />
     <ClCompile Include="..\..\Source\System\user_impl_idp.cpp" />
     <ClCompile Include="..\..\Source\System\xbox_live_mutex.cpp" />
   </ItemGroup>
@@ -413,8 +411,6 @@
     <ClInclude Include="..\..\Source\Shared\WinRT\Event_WinRT.h" />
     <ClInclude Include="..\..\Source\Shared\xbox_system_factory.h" />
     <ClInclude Include="..\..\Source\System\auth_config.h" />
-    <ClInclude Include="..\..\Source\System\Sidecar\app_service_messages.h" />
-    <ClInclude Include="..\..\Source\System\Sidecar\app_service_provider.h" />
     <ClInclude Include="..\..\Source\System\ppltasks_extra.h" />
     <ClInclude Include="..\..\Source\System\system_internal.h" />
   </ItemGroup>

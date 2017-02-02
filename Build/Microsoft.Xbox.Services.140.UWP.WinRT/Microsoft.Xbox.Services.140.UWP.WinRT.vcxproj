@@ -115,6 +115,10 @@
       <AdditionalDependencies>windowsapp.lib;msxml6.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+	  <DelayLoadDLLs>
+        api-ms-win-gaming-tcui-l1-1-2.dll;
+        %(DelayLoadDLLs)
+      </DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">

@@ -8,7 +8,6 @@
 //
 //*********************************************************
 #pragma once
-#include "pch.h"
 #include "xsapi/http_call_request_message.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN

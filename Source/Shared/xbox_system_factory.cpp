@@ -16,9 +16,6 @@
 #if XSAPI_A
 #include "a/user_impl_a.h"
 #endif
-#if XSAPI_SIDECAR
-#include "Sidecar/user_impl_sidecar.h"
-#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
@@ -141,9 +138,7 @@ xbox_system_factory::create_local_config()
 std::shared_ptr<user_impl>
 xbox_system_factory::create_user_impl(user_creation_context userCreationContext)
 {
-#if XSAPI_SIDECAR
-    return std::make_shared<user_impl_sidecar>(userCreationContext);
-#elif UWP_API
+#if UWP_API
     return std::make_shared<user_impl_idp>(userCreationContext);
 #elif XSAPI_SERVER
     return std::make_shared<user_impl_server>(userCreationContext);

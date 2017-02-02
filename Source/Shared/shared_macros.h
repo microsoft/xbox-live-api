@@ -8,7 +8,6 @@
 //
 //*********************************************************
 #pragma once
-#include "pch.h"
 #include "build_version.h"
 
 #ifndef UNIT_TEST_SERVICES
