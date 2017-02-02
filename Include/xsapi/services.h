@@ -38,8 +38,6 @@
 #include "xsapi/title_callable_ui.h"
 #include "xsapi/social_manager.h"
 #include "xsapi/multiplayer_manager.h"
-#include "xsapi/service_call_logging_config.h"
-#include "xsapi/entertainment_profile.h"
 #include "xsapi/stats_manager.h"
 #include "xsapi/entertainment_profile.h"
 #endif
