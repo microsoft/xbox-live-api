@@ -162,12 +162,12 @@ void ATG::LiveResources::UpdateCurrentUser()
         m_gamertag->SetText(m_user->gamertag().c_str());
         m_switchAccount->SetVisible(true);
         m_signInErrorLabel->SetVisible(false);
-        xbox::services::experimental::stats::manager::stats_manager::get_singleton_instance().add_local_user(m_user);
+        xbox::services::stats::manager::stats_manager::get_singleton_instance().add_local_user(m_user);
         pplx::create_task([]()
         {
             while (true)
             {
-                xbox::services::experimental::stats::manager::stats_manager::get_singleton_instance().do_work();
+                xbox::services::stats::manager::stats_manager::get_singleton_instance().do_work();
                 Sleep(30);
             }
         });

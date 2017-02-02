@@ -15,7 +15,7 @@ using Microsoft::WRL::ComPtr;
 using namespace xbox::services;
 using namespace xbox::services::leaderboard;
 using namespace xbox::services::player_state;
-using namespace xbox::services::experimental::stats::manager;
+using namespace xbox::services::stats::manager;
 
 namespace
 {
