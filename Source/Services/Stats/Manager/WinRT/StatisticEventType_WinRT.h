@@ -14,9 +14,9 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 
 public enum class StatisticEventType
 {
-    LocalUserAdded = xbox::services::experimental::stats::manager::stat_event_type::local_user_added,
-    LocalUserRemoved = xbox::services::experimental::stats::manager::stat_event_type::local_user_removed,
-    StatisticUpdateComplete = xbox::services::experimental::stats::manager::stat_event_type::stat_update_complete
+    LocalUserAdded = xbox::services::stats::manager::stat_event_type::local_user_added,
+    LocalUserRemoved = xbox::services::stats::manager::stat_event_type::local_user_removed,
+    StatisticUpdateComplete = xbox::services::stats::manager::stat_event_type::stat_update_complete
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_END

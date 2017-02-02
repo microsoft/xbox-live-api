@@ -45,11 +45,11 @@ public:
     };
 
 internal:
-    StatisticEvent(_In_ xbox::services::experimental::stats::manager::stat_event cppObj);
+    StatisticEvent(_In_ xbox::services::stats::manager::stat_event cppObj);
 
 private:
     XboxLiveUser_t m_user;
-    xbox::services::experimental::stats::manager::stat_event m_cppObj;
+    xbox::services::stats::manager::stat_event m_cppObj;
     Platform::Exception^ m_errorCode;
     Platform::String^ m_errorMessage;
 };

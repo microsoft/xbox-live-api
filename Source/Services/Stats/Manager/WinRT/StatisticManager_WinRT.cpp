@@ -12,7 +12,7 @@
 #include "StatisticManager_WinRT.h"
 
 using namespace xbox::services;
-using namespace xbox::services::experimental::stats::manager;
+using namespace xbox::services::stats::manager;
 using namespace Microsoft::Xbox::Services::System;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN

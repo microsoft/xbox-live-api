@@ -16,7 +16,7 @@ using namespace xbox::services;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 
 StatisticEvent::StatisticEvent(
-    _In_ xbox::services::experimental::stats::manager::stat_event cppObj
+    _In_ xbox::services::stats::manager::stat_event cppObj
     ) :
     m_cppObj(std::move(cppObj))
 {

@@ -51,11 +51,11 @@ public:
 
 internal:
     StatisticValue(
-        _In_ std::shared_ptr<xbox::services::experimental::stats::manager::stat_value> cppObj
+        _In_ std::shared_ptr<xbox::services::stats::manager::stat_value> cppObj
         );
 
 private:
-    std::shared_ptr<xbox::services::experimental::stats::manager::stat_value> m_cppObj;
+    std::shared_ptr<xbox::services::stats::manager::stat_value> m_cppObj;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_END

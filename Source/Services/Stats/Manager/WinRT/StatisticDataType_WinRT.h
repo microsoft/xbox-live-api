@@ -14,9 +14,9 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 
 public enum class StatisticDataType
 {
-    Undefined = xbox::services::experimental::stats::manager::stat_data_type::undefined,
-    Number = xbox::services::experimental::stats::manager::stat_data_type::number,
-    String = xbox::services::experimental::stats::manager::stat_data_type::string
+    Undefined = xbox::services::stats::manager::stat_data_type::undefined,
+    Number = xbox::services::stats::manager::stat_data_type::number,
+    String = xbox::services::stats::manager::stat_data_type::string
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_END
