@@ -98,13 +98,19 @@ uint32_t local_config::title_id()
 {
     uint64_t titleId = get_uint64_from_config(_T("TitleId"), false, 0);
 
-    // Also support title id in string from
+    // Also support title id in string dec form or string hex form 
     if (titleId == 0)
     {
         string_t titleIdString = get_value_from_config(_T("TitleId"), false, _T(""));
         if (!titleIdString.empty())
         {
             titleId = utils::string_t_to_uint64(titleIdString);
+            if (titleId == 0)
+            {
+                stringstream_t ss;
+                ss << std::hex << titleIdString;
+                ss >> titleId;
+            }
         }
     }
 
