@@ -910,6 +910,30 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerMemberInitialization_WinRT.h">
       <Filter>XSAPI\Services\Multiplayer\WinRT</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticDataType_WinRT.h">
+      <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticEvent_WinRT.h">
+      <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticEventType_WinRT.h">
+      <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticManager_WinRT.h">
+      <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticValue_WinRT.h">
+      <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\call_buffer_timer.h">
+      <Filter>XSAPI\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\stats_manager.h">
+      <Filter>XSAPI\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_manager_internal.h">
+      <Filter>XSAPI\Services\Stats\Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="XSAPI">
@@ -1052,6 +1076,12 @@
     </Filter>
     <Filter Include="XSAPI\Services\Matchmaking\WinRT">
       <UniqueIdentifier>{c81f709b-04e9-4eda-bbbf-9f0dfada975b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XSAPI\Services\Stats\Manager">
+      <UniqueIdentifier>{26b3c255-47a4-4d6f-bcca-18e8883fe451}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XSAPI\Services\Stats\Manager\WinRT">
+      <UniqueIdentifier>{5f984f28-7f93-47df-ae9b-e3802c9af409}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -2188,6 +2218,39 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerMemberInitialization_WinRT.cpp">
       <Filter>XSAPI\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_value_document.cpp">
+      <Filter>XSAPI\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\Windows\notification_service_windows.cpp">
+      <Filter>XSAPI\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticEvent_WinRT.cpp">
+      <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticManager_WinRT.cpp">
+      <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticValue_WinRT.cpp">
+      <Filter>XSAPI\Services\Stats\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stat_value.cpp">
+      <Filter>XSAPI\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stat_event.cpp">
+      <Filter>XSAPI\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\call_buffer_timer.cpp">
+      <Filter>XSAPI\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_manager.cpp">
+      <Filter>XSAPI\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_manager_impl.cpp">
+      <Filter>XSAPI\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_service.cpp">
+      <Filter>XSAPI\Services\Stats\Manager</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

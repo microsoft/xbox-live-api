@@ -139,6 +139,12 @@
     <Filter Include="C++ Source\Shared\Logger">
       <UniqueIdentifier>{0cf444ab-723f-4e1f-bff0-09144910eae5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="C++ Source\Stats">
+      <UniqueIdentifier>{e88ff49d-e3d7-4536-80b6-5842b4be4b53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Stats\WinRT">
+      <UniqueIdentifier>{ae73b9a9-8db5-47f0-a7b6-08e1b66d8bf5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Services\Social\WinRT\ProfileService_WinRT.cpp">
@@ -951,9 +957,6 @@
     <ClCompile Include="..\..\Source\Services\Social\social_service_impl.cpp">
       <Filter>C++ Source\Social</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Misc\WinRT\TitleCallableUI_WinRT.cpp">
-      <Filter>C++ Source\Misc\WinRT</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\System\xbox_live_mutex.cpp">
       <Filter>C++ Source\System</Filter>
     </ClCompile>
@@ -1107,9 +1110,6 @@
     <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\WinRT\TournamentGameSessionReadyEventArgs_WinRT.cpp">
       <Filter>C++ Source\Multiplayer\Manager\WinRT Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Misc\UWP\title_callable_ui.cpp">
-      <Filter>C++ Source\Misc</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Social\Manager\WinRT\SocialUserGroupLoadedEventArgs_WinRT.cpp">
       <Filter>C++ Source\Social\Manager\WinRT</Filter>
     </ClCompile>
@@ -1196,6 +1196,42 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Shared\logger\etw_output.cpp">
       <Filter>C++ Source\Shared\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_event.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_value.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager_impl.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_service.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_value_document.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Shared\call_buffer_timer.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticEvent_WinRT.cpp">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticManager_WinRT.cpp">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticValue_WinRT.cpp">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Misc\WinRT\TitleCallableUI_WinRT.cpp">
+      <Filter>C++ Source\Misc\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Misc\UWP\title_callable_ui.cpp">
+      <Filter>C++ Source\Misc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1697,9 +1733,6 @@
     <ClInclude Include="..\..\Source\Services\Misc\WinRT\VerifyStringResult_WinRT.h">
       <Filter>C++ Source\Misc\WinRT</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\xsapi\title_callable_ui.h">
-      <Filter>C++ Public Includes</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Services\Misc\WinRT\XboxLiveHttpCall_WinRT.h">
       <Filter>C++ Source\Misc\WinRT</Filter>
     </ClInclude>
@@ -1740,9 +1773,6 @@
       <Filter>C++ Source\Social\WinRT Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Services\Misc\WinRT\VerifyStringResultCode_WinRT.h">
-      <Filter>C++ Source\Misc\WinRT</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Services\Misc\WinRT\TitleCallableUI_WinRT.h">
       <Filter>C++ Source\Misc\WinRT</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionRestriction_WinRT.h">
@@ -2065,6 +2095,36 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Shared\WinRT\XboxLiveWnsEventArgs_WinRT.h">
       <Filter>C++ Source\Shared\WinRT Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\stats_manager.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\stats_manager_internal.h">
+      <Filter>C++ Source\Stats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\call_buffer_timer.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticDataType_WinRT.h">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticEvent_WinRT.h">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticEventType_WinRT.h">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticManager_WinRT.h">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticValue_WinRT.h">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\title_callable_ui.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Misc\WinRT\TitleCallableUI_WinRT.h">
+      <Filter>C++ Source\Misc\WinRT</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
