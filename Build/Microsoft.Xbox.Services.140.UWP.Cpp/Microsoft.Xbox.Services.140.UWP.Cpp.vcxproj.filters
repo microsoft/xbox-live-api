@@ -76,6 +76,9 @@
     <Filter Include="C++ Source\Shared\Logger">
       <UniqueIdentifier>{afd7a8d3-c708-4e19-85b4-bdb3a28fbfe8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="C++ Source\Stats">
+      <UniqueIdentifier>{2e1b049e-c702-4bc1-a813-2cff68af6c5b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.cpp">
@@ -660,9 +663,6 @@
     <ClCompile Include="..\..\Source\Services\Misc\contextual_search_game_clip_thumbnail.cpp">
       <Filter>C++ Source\Misc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Misc\UWP\title_callable_ui.cpp">
-      <Filter>C++ Source\Misc</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Misc\contextual_search_game_clip_uri_info.cpp">
       <Filter>C++ Source\Misc</Filter>
     </ClCompile>
@@ -701,6 +701,39 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Services\Social\Manager\xbox_user_id_container.cpp">
       <Filter>C++ Source\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_value.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_value_document.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\System\Sidecar\app_service_provider.cpp">
+      <Filter>C++ Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\System\Sidecar\app_service_messages.cpp">
+      <Filter>C++ Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_event.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Misc\player_state_writer.cpp">
+      <Filter>C++ Source\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Misc\player_state_value.cpp">
+      <Filter>C++ Source\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager_impl.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_service.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Shared\call_buffer_timer.cpp">
+      <Filter>C++ Source\Shared</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -801,9 +834,6 @@
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\xsapi\http_call.h">
-      <Filter>C++ Public Includes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Include\xsapi\title_callable_ui.h">
       <Filter>C++ Public Includes</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Shared\telemetry.h">
@@ -910,6 +940,24 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Shared\logger\etw_output.h">
       <Filter>C++ Source\Shared\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\System\Sidecar\app_service_messages.h">
+      <Filter>C++ Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\System\Sidecar\app_service_provider.h">
+      <Filter>C++ Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\player_state_writer.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\stats_manager.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\stats_manager_internal.h">
+      <Filter>C++ Source\Stats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\call_buffer_timer.h">
+      <Filter>C++ Source\Shared</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

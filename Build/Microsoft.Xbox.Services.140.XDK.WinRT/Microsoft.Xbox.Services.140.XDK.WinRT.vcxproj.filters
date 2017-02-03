@@ -130,6 +130,12 @@
     <Filter Include="Shared\logger">
       <UniqueIdentifier>{36ec36fe-4a3a-43bf-b992-048aa268c42b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="C++ Source\Stats">
+      <UniqueIdentifier>{c8fe2e6e-f0d3-45f9-8864-fad3b7ad94c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Stats\WinRT">
+      <UniqueIdentifier>{78fd1c04-c645-4534-b367-fbd6c326a085}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Services\Social\WinRT\ProfileService_WinRT.cpp">
@@ -1230,6 +1236,36 @@
     <ClCompile Include="..\..\Source\Shared\WinRT\XboxLiveServicesSettings_WinRT.cpp">
       <Filter>Shared\WinRT Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_event.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_value.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager_impl.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_service.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_value_document.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticEvent_WinRT.cpp">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticManager_WinRT.cpp">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticValue_WinRT.cpp">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Shared\call_buffer_timer.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Shared\WinRT\Macros_WinRT.h">
@@ -2101,6 +2137,30 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Shared\WinRT\XboxLiveServicesSettings_WinRT.h">
       <Filter>Shared\WinRT Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\stats_manager.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\stats_manager_internal.h">
+      <Filter>C++ Source\Stats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticDataType_WinRT.h">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticEvent_WinRT.h">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticEventType_WinRT.h">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticManager_WinRT.h">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\WinRT\StatisticValue_WinRT.h">
+      <Filter>C++ Source\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\call_buffer_timer.h">
+      <Filter>Shared</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

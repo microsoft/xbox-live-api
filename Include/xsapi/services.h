@@ -38,6 +38,7 @@
 #include "xsapi/title_callable_ui.h"
 #include "xsapi/social_manager.h"
 #include "xsapi/multiplayer_manager.h"
+#include "xsapi/stats_manager.h"
 #include "xsapi/entertainment_profile.h"
 #endif
 #include "xsapi/xbox_live_context.h"

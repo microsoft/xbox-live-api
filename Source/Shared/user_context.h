@@ -40,7 +40,8 @@ enum class caller_context_type
 {
     title,
     multiplayer_manager,
-    social_manager
+    social_manager,
+    stats_manager
 };
 
 class user_context_auth_result

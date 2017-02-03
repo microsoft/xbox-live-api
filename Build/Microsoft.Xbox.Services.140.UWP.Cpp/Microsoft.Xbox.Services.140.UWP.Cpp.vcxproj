@@ -209,8 +209,9 @@
     <ClCompile Include="..\..\Source\Services\Misc\contextual_search_game_clip_uri_info.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\contextual_search_service.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\notification_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\player_state_value.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\player_state_writer.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\string_service.cpp" />
-    <ClCompile Include="..\..\Source\Services\Misc\UWP\title_callable_ui.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\verify_string_result.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\Windows\notification_service_windows.cpp" />
     <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\find_match_completed_event_args.cpp" />
@@ -294,6 +295,12 @@
     <ClCompile Include="..\..\Source\Services\Social\social_relationship_change_event_args.cpp" />
     <ClCompile Include="..\..\Source\Services\Social\social_relationship_change_subscription.cpp" />
     <ClCompile Include="..\..\Source\Services\Social\social_service_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_value_document.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_event.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_value.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\statistic_change_event_args.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\statistic_change_subscription.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\user_statistics_service_impl.cpp" />
@@ -304,6 +311,7 @@
     <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_service.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_reference.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_team_result.cpp" />
+    <ClCompile Include="..\..\Source\Shared\call_buffer_timer.cpp" />
     <ClCompile Include="..\..\Source\Shared\errors.cpp" />
     <ClCompile Include="..\..\Source\Shared\http_call_request_message.cpp" />
     <ClCompile Include="..\..\Source\Shared\initiator.cpp" />
@@ -364,9 +372,10 @@
     <ClInclude Include="..\..\Include\xsapi\http_call_request_message.h" />
     <ClInclude Include="..\..\Include\xsapi\game_server_platform.h" />
     <ClInclude Include="..\..\Include\xsapi\mem.h" />
+    <ClInclude Include="..\..\Include\xsapi\player_state_writer.h" />
     <ClInclude Include="..\..\Include\xsapi\social_manager.h" />
     <ClInclude Include="..\..\Include\xsapi\service_call_logging_config.h" />
-    <ClInclude Include="..\..\Include\xsapi\title_callable_ui.h" />
+    <ClInclude Include="..\..\Include\xsapi\stats_manager.h" />
     <ClInclude Include="..\..\Include\xsapi\multiplayer_manager.h" />
     <ClInclude Include="..\..\Include\xsapi\presence.h" />
     <ClInclude Include="..\..\Include\xsapi\real_time_activity.h" />
@@ -384,7 +393,9 @@
     <ClInclude Include="..\..\Source\Services\RealTimeActivity\real_time_activity_internal.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\social_manager_internal.h" />
     <ClInclude Include="..\..\Source\Services\Social\social_internal.h" />
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\stats_manager_internal.h" />
     <ClInclude Include="..\..\Source\Services\Stats\user_statistics_internal.h" />
+    <ClInclude Include="..\..\Source\Shared\call_buffer_timer.h" />
     <ClInclude Include="..\..\Source\Shared\initiator.h" />
     <ClInclude Include="..\..\Source\Shared\Logger\custom_output.h" />
     <ClInclude Include="..\..\Source\Shared\Logger\debug_output.h" />

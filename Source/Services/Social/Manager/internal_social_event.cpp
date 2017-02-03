@@ -168,7 +168,7 @@ internal_social_event::error() const
     return m_error;
 }
 
-const fire_timer_completion_context&
+const call_buffer_timer_completion_context&
 internal_social_event::completion_context() const
 {
     return m_completionContext;
@@ -176,7 +176,7 @@ internal_social_event::completion_context() const
 
 void
 internal_social_event::set_completion_context(
-    _In_ const fire_timer_completion_context& compleitionContext
+    _In_ const call_buffer_timer_completion_context& compleitionContext
     )
 {
     m_completionContext = compleitionContext;
