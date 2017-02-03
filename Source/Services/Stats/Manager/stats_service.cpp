@@ -57,7 +57,7 @@ simplified_stats_service::update_stats_value_document(
     {
         if (!response->err_code())
         {
-            statValuePostDocument.increment_client_version_number();
+            statValuePostDocument.increment_revision();
         }
 
         return xbox_live_result<void>(response->err_code(), response->err_message());

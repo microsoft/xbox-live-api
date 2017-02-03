@@ -85,15 +85,11 @@ public:
         _Inout_ std::vector<string_t>& statNameList
         ) const;
 
-    void increment_client_version_number();
+    void increment_revision();
 
     web::json::value serialize() const;
 
-    uint32_t client_version() const;
-    uint32_t server_version() const;
-    const xsapi_internal_string& client_id() const;
-
-    uint32_t version() const;
+    uint32_t revision() const;
 
     bool is_dirty() const;
 
@@ -109,9 +105,7 @@ public:
 
 private:
     bool m_isDirty;
-    uint32_t m_version;
-    uint32_t m_clientVersion;
-    uint32_t m_serverVersion;
+    uint32_t m_revision;
     std::function<void()> m_fRequestFlush;
     xsapi_internal_string m_clientId;
     xsapi_internal_vector(svd_event) m_svdEventList;

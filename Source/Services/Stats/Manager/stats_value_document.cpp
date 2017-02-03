@@ -18,9 +18,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
 
 stats_value_document::stats_value_document() :
     m_isDirty(false),
-    m_version(0),
-    m_clientVersion(0),
-    m_serverVersion(0)
+    m_revision(0)
 {
 }
 
@@ -82,33 +80,15 @@ stats_value_document::get_stat_names(
 }
 
 uint32_t
-stats_value_document::client_version() const
+stats_value_document::revision() const
 {
-    return m_clientVersion;
-}
-
-uint32_t
-stats_value_document::server_version() const
-{
-    return m_serverVersion;
-}
-
-const xsapi_internal_string&
-stats_value_document::client_id() const
-{
-    return m_clientId;
-}
-
-uint32_t
-stats_value_document::version() const
-{
-    return m_version;
+    return m_revision;
 }
 
 void
-stats_value_document::increment_client_version_number()
+stats_value_document::increment_revision()
 {
-    ++m_clientVersion;
+    ++m_revision;
 }
 
 bool stats_value_document::is_dirty() const
@@ -170,20 +150,14 @@ web::json::value
 stats_value_document::serialize() const
 {
     web::json::value requestJSON;
-    requestJSON[_T("ver")] = web::json::value::number(m_version);
+    requestJSON[_T("$schema")] = web::json::value::string(_T("http://stats.xboxlive.com/2017-1/schema#"));
+    requestJSON[_T("revision")] = web::json::value::number(m_revision);
 #if TV_API
     requestJSON[_T("timestamp")] = web::json::value(utils::datetime_to_string(utility::datetime::utc_now()));
 #else
     requestJSON[_T("timestamp")] = web::json::value(utility::datetime::utc_now().to_string(utility::datetime::ISO_8601));
 #endif
-    auto& envelopeField = requestJSON[_T("envelope")];
-    envelopeField[_T("serverVersion")] = web::json::value::number(m_serverVersion);
-    envelopeField[_T("clientVersion")] = web::json::value::number(m_clientVersion);
-    envelopeField[_T("clientId")] = web::json::value::string(m_clientId.c_str());
     auto& statsField = requestJSON[_T("stats")];
-
-    auto& contextualKeyField = statsField[_T("tags")];
-    contextualKeyField = web::json::value::object();
 
     auto& titleField = statsField[_T("title")];
     titleField = web::json::value::object();
@@ -205,13 +179,8 @@ stats_value_document::_Deserialize(
 
     std::error_code errc;
 
-    returnObject.m_version = utils::extract_json_int(data, _T("ver"), errc, false);
-
-    auto envelopeField = utils::extract_json_field(data, _T("envelope"), errc, false);
-    returnObject.m_clientVersion = utils::extract_json_int(envelopeField, _T("clientVersion"), errc);
-    ++returnObject.m_clientVersion; // increment the version so first write is always new version
-    returnObject.m_serverVersion = utils::extract_json_int(envelopeField, _T("serverVersion"), errc);
-    returnObject.m_clientId = utils::extract_json_string(envelopeField, _T("clientId"), errc).c_str();
+    returnObject.m_revision = utils::extract_json_int(data, _T("revision"), errc, false);
+    ++returnObject.m_revision; // increment the revision so first write is always new version
 
     auto statsField = utils::extract_json_field(data, _T("stats"), errc, false);
     auto titleField = utils::extract_json_field(statsField, _T("title"), errc, false);
