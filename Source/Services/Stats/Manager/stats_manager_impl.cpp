@@ -372,7 +372,6 @@ stats_manager_impl::write_offline(
     UNREFERENCED_PARAMETER(serializedSVD);
     // TODO: implement
 }
-}
 
 #else
 void
