@@ -12,7 +12,6 @@
 #include "xsapi/social.h"
 #include "xsapi/user_statistics.h"
 #include "xsapi/achievements.h"
-#include "xsapi/player_state_writer.h"
 
 namespace xbox { namespace services { namespace stats { namespace manager { 
 

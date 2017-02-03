@@ -232,13 +232,6 @@ svd_event::svd_event(
 {
 }
 
-svd_event::svd_event(
-    _In_ xsapi_internal_vector(stat_context) statContextList
-    ) :
-    m_statContextList(std::move(statContextList))
-{
-}
-
 svd_event_type
 svd_event::event_type() const
 {
@@ -249,12 +242,6 @@ const stat_pending_state&
 svd_event::stat_info() const
 {
     return m_statPendingState;
-}
-
-const xsapi_internal_vector(stat_context)&
-svd_event::context_list() const
-{
-    return m_statContextList;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_END

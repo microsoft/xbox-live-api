@@ -39,29 +39,18 @@ struct stat_pending_state
     stat_data statPendingData;
 };
 
-struct stat_context
-{
-    stat_context() { };
-
-    string_t playerStateName;
-    xbox::services::player_state::player_state_value playerStateValue;
-};
-
 // stat value document event
 class svd_event
 {
 public:
     svd_event(_In_ stat_pending_state statPendingState);
-    svd_event(_In_ xsapi_internal_vector(stat_context) statPendingState);
 
     svd_event_type event_type() const;
     const stat_pending_state& stat_info() const;
-    const xsapi_internal_vector(stat_context)& context_list() const;
 
 private:
     svd_event_type m_svdEventType;
     stat_pending_state m_statPendingState;
-    xsapi_internal_vector(stat_context) m_statContextList;
 };
 
 /// internal class
