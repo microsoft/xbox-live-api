@@ -20,6 +20,7 @@
 #include "user_context.h"
 #include "xsapi/mem.h"
 #include "perf_tester.h"
+#include "call_buffer_timer.h"
 
 typedef unsigned char byte;
 
@@ -78,15 +79,6 @@ inline change_list_enum operator&(change_list_enum lhs, change_list_enum rhs)
     return static_cast<change_list_enum>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
 }
 
-struct fire_timer_completion_context
-{
-    fire_timer_completion_context() : isNull(true), context(0), numObjects(0) {}
-    bool isNull;
-    uint32_t context;
-    size_t numObjects;
-    pplx::task_completion_event<xbox_live_result<void>> tce;
-};
-
 class internal_social_event
 {
 public:
@@ -113,8 +105,8 @@ public:
         _In_ xsapi_internal_vector(xsapi_internal_string) userAddList
         );
 
-    const fire_timer_completion_context& completion_context() const;
-    void set_completion_context(_In_ const fire_timer_completion_context& compleitionContext);
+    const call_buffer_timer_completion_context& completion_context() const;
+    void set_completion_context(_In_ const call_buffer_timer_completion_context& compleitionContext);
     const xsapi_internal_vector(xbox_social_user)& users_affected() const;
     const xsapi_internal_vector(uint64_t)& users_to_remove() const;
     const xsapi_internal_vector(social_manager_presence_record)& presence_records() const;
@@ -127,7 +119,7 @@ public:
 
 private:
     internal_social_event_type m_socialEventType;
-    fire_timer_completion_context m_completionContext;
+    call_buffer_timer_completion_context m_completionContext;
     xsapi_internal_vector(social_manager_presence_record) m_presenceRecords;
     xsapi_internal_vector(xbox_social_user) m_usersAffected;
     xsapi_internal_vector(xsapi_internal_string) m_usersAffectedAsStringVec;
@@ -136,36 +128,6 @@ private:
     xbox::services::presence::device_presence_change_event_args m_devicePresenceArgs;
     xbox::services::presence::title_presence_change_event_args m_titlePresenceArgs;
     xbox_live_result<void> m_error;
-};
-
-class rta_trigger_timer : public std::enable_shared_from_this<rta_trigger_timer>
-{
-public:
-    rta_trigger_timer() {};
-
-    rta_trigger_timer(
-        std::function<void(const std::vector<string_t>&, const fire_timer_completion_context&)> callback
-        );
-
-    void fire();
-    void fire(_In_ const std::vector<string_t>& xboxUserIds, _In_ const fire_timer_completion_context& usersAddedStruct = fire_timer_completion_context());
-
-    static const std::chrono::milliseconds TIME_PER_CALL_MS;
-private:
-
-    void fire_helper(_In_ const fire_timer_completion_context& usersAddedStruct = fire_timer_completion_context());
-
-    bool m_isTaskInProgress;
-    bool m_queuedTask;
-#if _MSC_VER <= 1800 && !defined XSAPI_I
-    std::chrono::system_clock::time_point m_previousTime;
-#else
-    std::chrono::time_point<std::chrono::steady_clock> m_previousTime;
-#endif
-    std::vector<string_t> m_usersToCall;
-    std::unordered_map<string_t, bool> m_usersToCallMap;    // duplicating data to make lookup faster. SHould be a better way to do this
-    std::function<void(const std::vector<string_t>&, const fire_timer_completion_context&)> m_fCallback;
-    std::mutex m_timerLock;
 };
 
 struct xbox_social_user_context
@@ -189,7 +151,7 @@ class internal_event_queue
 {
 public:
     template<typename T, typename U>
-    void push(_In_ internal_social_event_type socialEventType, _In_ const std::vector<T, U> userList, _In_ const fire_timer_completion_context& completionContext = fire_timer_completion_context())
+    void push(_In_ internal_social_event_type socialEventType, _In_ const std::vector<T, U> userList, _In_ const call_buffer_timer_completion_context& completionContext = call_buffer_timer_completion_context())
     {
         std::lock_guard<std::mutex> lock(m_eventMutex.get());
         std::lock_guard<std::mutex> priorityLock(m_eventPriorityMutex.get());
@@ -444,6 +406,8 @@ protected:
 
     static const uint32_t NUM_EVENTS_PER_FRAME;
 
+    static const std::chrono::seconds TIME_PER_CALL_SEC;
+
     void setup_rta();
 
     void setup_rta_subscriptions(
@@ -468,7 +432,7 @@ protected:
 
     pplx::task<xbox_live_result<std::vector<xbox_social_user>>> social_graph_timer_callback(
         _In_ const std::vector<string_t>& users,
-        _In_ const fire_timer_completion_context& completionContext
+        _In_ const call_buffer_timer_completion_context& completionContext
         );
 
     void update_graph(
@@ -554,10 +518,10 @@ protected:
     xbox_live_user_t m_user;
     std::unique_ptr<bool> m_shouldCancel;
     std::shared_ptr<xbox_live_context_impl> m_xboxLiveContextImpl;
-    std::shared_ptr<rta_trigger_timer> m_presenceRefreshTimer;
-    std::shared_ptr<rta_trigger_timer> m_presencePollingTimer;
-    std::shared_ptr<rta_trigger_timer> m_socialGraphRefreshTimer;
-    std::shared_ptr<rta_trigger_timer> m_resyncRefreshTimer;
+    std::shared_ptr<call_buffer_timer> m_presenceRefreshTimer;
+    std::shared_ptr<call_buffer_timer> m_presencePollingTimer;
+    std::shared_ptr<call_buffer_timer> m_socialGraphRefreshTimer;
+    std::shared_ptr<call_buffer_timer> m_resyncRefreshTimer;
     std::shared_ptr<xbox::services::social::social_relationship_change_subscription> m_socialRelationshipChangeSubscription;
     peoplehub_service m_peoplehubService;
     std::function<void()> m_graphDestructionCompleteCallback;

@@ -76,6 +76,9 @@
     <Filter Include="Shared\logger">
       <UniqueIdentifier>{bca879e6-bf06-4f96-814e-a0c35d1a0e0a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="C++ Source\Stats">
+      <UniqueIdentifier>{d6baf434-8c27-4986-a6c2-98201656c3a9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Shared\http_call_response.cpp">
@@ -705,6 +708,27 @@
     <ClCompile Include="..\..\Source\Shared\xbox_live_services_settings.cpp">
       <Filter>Shared</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Shared\call_buffer_timer.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_event.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_value.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager_impl.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_service.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_value_document.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Include\xsapi\services.h">
@@ -898,6 +922,15 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Shared\logger\etw_output.h">
       <Filter>Shared\logger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\call_buffer_timer.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\stats_manager_internal.h">
+      <Filter>C++ Source\Stats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\stats_manager.h">
+      <Filter>C++ Public Includes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -113,3 +113,8 @@ ARM/
 !TAEF/**
 
 **/.vs/
+
+TAEF
+xbox-live-samples/
+Tests/StressUnitTest/
+*.pdb

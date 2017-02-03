@@ -268,7 +268,7 @@ xbox_live_result<string_t> create_leaderboard_url(
 
     if (metadata)
     {
-    builder.append_query(_T("include"), _T("valuemetadata"));
+        builder.append_query(_T("include"), _T("valuemetadata"));
     }
 
     if (!xuid.empty())
