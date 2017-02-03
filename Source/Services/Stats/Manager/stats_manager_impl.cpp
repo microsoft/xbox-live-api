@@ -368,7 +368,10 @@ stats_manager_impl::write_offline(
     _In_ const web::json::value& serializedSVD
     )
 {
+    UNREFERENCED_PARAMETER(userContext);
+    UNREFERENCED_PARAMETER(serializedSVD);
     // TODO: implement
+}
 }
 
 #else
