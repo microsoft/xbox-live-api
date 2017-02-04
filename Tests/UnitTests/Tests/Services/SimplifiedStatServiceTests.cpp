@@ -17,19 +17,19 @@
 #include "StatsManagerHelper.h"
 
 using namespace xbox::services;
-using namespace xbox::services::experimental::stats::manager;
+using namespace xbox::services::stats::manager;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-using namespace xbox::services::experimental::stats::manager;
+using namespace xbox::services::stats::manager;
 
-static xbox::services::experimental::stats::manager::simplified_stats_service GetSimplifiedStatsService()
+static xbox::services::stats::manager::simplified_stats_service GetSimplifiedStatsService()
 {
     auto xblContext = GetMockXboxLiveContext_WinRT();
     auto xblContextImpl = std::make_shared<xbox::services::xbox_live_context_impl>(xblContext->User);
     xblContextImpl->init();
 
-    return xbox::services::experimental::stats::manager::simplified_stats_service(
+    return xbox::services::stats::manager::simplified_stats_service(
         xblContextImpl->user_context(),
         xblContextImpl->settings(),
         xblContextImpl->application_config()
@@ -57,9 +57,6 @@ public:
                 VERIFY_IS_TRUE(titleStat[L"value"].as_string() == stat.as_string());
                 break;
         }
-
-        auto titleOp = titleStat[L"op"].as_string();
-        VERIFY_IS_TRUE(titleOp == L"replace");
     }
 
     stats_value_document GetStatValueDocument(simplified_stats_service& simplifiedStatService, const std::shared_ptr<MockHttpCall>& httpCall, const string_t& jsonValue)
@@ -79,13 +76,9 @@ public:
         auto statValueDocument = GetStatValueDocument(simplifiedStatService, httpCall, statValueDocumentResponse);
         auto statJSON = web::json::value::parse(statValueDocumentResponse);
 
-        auto versionNumCompare = statJSON[L"ver"].as_integer();
-        VERIFY_ARE_EQUAL_INT(statValueDocument.version(), versionNumCompare);
+        auto revisionNum = statJSON[L"revision"].as_integer();
+        VERIFY_ARE_EQUAL_INT(statValueDocument.revision(), revisionNum + 1);
 
-        auto statEnvelopedField = statJSON[L"envelope"];
-        VERIFY_ARE_EQUAL_INT(statValueDocument.client_version(), statEnvelopedField[L"clientVersion"].as_integer());
-        VERIFY_ARE_EQUAL_INT(statValueDocument.server_version(), statEnvelopedField[L"serverVersion"].as_integer());
-        VERIFY_ARE_EQUAL_STR(statValueDocument.client_id().c_str(), statEnvelopedField[L"clientId"].as_string());
         auto statField = statJSON[L"stats"];
         auto titleStatsList = statField[L"title"].as_object();
 
@@ -114,7 +107,6 @@ public:
     {
         bool result = true;
         result &= compareA[L"value"].serialize() == compareB[L"value"].serialize();
-        result &= compareB[L"op"].as_string() == compareB[L"op"].as_string();
 
         return result;
     }
@@ -133,37 +125,15 @@ public:
         auto& serializedRequest = web::json::value::parse(httpCall->request_body().request_message_string());
         auto& compareValue = web::json::value::parse(statValueDocumentResponse);
         
-        auto& versionField = serializedRequest[_T("ver")];
-        auto& compareVersion = compareValue[_T("ver")];
+        auto& versionField = serializedRequest[_T("revision")];
+        auto& compareVersion = compareValue[_T("revision")];
 
-        VERIFY_IS_TRUE(versionField.as_integer() == compareVersion.as_integer());
+        VERIFY_IS_TRUE(versionField.as_integer() == (compareVersion.as_integer() + 1));
 
         VERIFY_IS_TRUE(serializedRequest.has_field(_T("timestamp")));
-        auto& envelopeField = serializedRequest[_T("envelope")];
-        auto& envelopeFieldCompare = compareValue[_T("envelope")];
-
-        VERIFY_IS_TRUE(envelopeField[L"serverVersion"].as_integer() == envelopeFieldCompare[L"serverVersion"].as_integer());
-        VERIFY_IS_TRUE(envelopeField[L"clientVersion"].as_integer() == envelopeFieldCompare[L"clientVersion"].as_integer());
-        VERIFY_IS_TRUE(envelopeField[L"clientId"].as_string() == envelopeFieldCompare[L"clientId"].as_string());
 
         auto& statsField = serializedRequest[L"stats"];
         auto& statsFieldCompare = compareValue[L"stats"];
-        auto& contextualKeysField = statsField[L"contextualKeys"].as_object();
-        auto& contextualKeysFieldCompare = statsFieldCompare[L"contextualKeys"].as_object();
-        for (auto& contextualKey : contextualKeysField)
-        {
-            bool isValid = false;
-            for (auto& contextualKeyCompare : contextualKeysFieldCompare)
-            {
-                if (contextualKey.first == contextualKeyCompare.first && contextualKey.second.as_string() == contextualKeyCompare.second.as_string())
-                {
-                    isValid = true;
-                    break;
-                }
-            }
-
-            VERIFY_IS_TRUE(isValid);
-        }
 
         auto& titleField = statsField[L"title"].as_object();
         auto& titleFieldCompare = statsFieldCompare[L"title"].as_object();

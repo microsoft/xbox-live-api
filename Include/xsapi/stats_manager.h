@@ -106,6 +106,9 @@ public:
     /// Internal function
     static xbox_live_result<stat_value> _Deserialize(_In_ const web::json::value& data);
 
+    /// Internal function
+    stat_value();
+
 private:
     void set_stat(
         _In_ double value
@@ -114,6 +117,10 @@ private:
     void set_stat(
         _In_ const char_t* value
         );
+
+    void set_name(
+    _In_ const string_t& name
+    );
 
     web::json::value serialize() const;
 

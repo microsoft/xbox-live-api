@@ -188,6 +188,7 @@ stats_value_document::_Deserialize(
     for (auto& stat : statsArray)
     {
         returnObject.m_statisticDocument[stat.first.c_str()] = std::make_shared<stat_value>(stat_value::_Deserialize(stat.second).payload());
+        returnObject.m_statisticDocument[stat.first.c_str()]->set_name(stat.first);
     }
 
     return returnObject;

@@ -12,11 +12,25 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
 
+stat_value::stat_value() :
+    m_dataType(stat_data_type::undefined)
+{
+}
+
 const string_t
 stat_value::name() const
 {
     return m_name;
 }
+
+void
+stat_value::set_name(
+    _In_ const string_t& name
+    )
+{
+    utils::char_t_copy(m_name, ARRAYSIZE(m_name), name.c_str());
+}
+
 
 double
 stat_value::as_number() const

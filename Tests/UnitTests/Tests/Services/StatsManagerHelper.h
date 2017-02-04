@@ -5,34 +5,22 @@
 ////////////////////////////////////////////////////////////////////////////////
 #pragma once
 const std::wstring statValueDocumentResponse = LR"({
-    "ver": 1, 
-    "envelope": {
-        "serverVersion": 1,
-        "clientVersion": 1,
-        "clientId": "feb26f16-2348-48f1-8161-fb5723bffdce"
-    },
+    "revision": 1,
     "timestamp": "2016-10-07T23:04:08Z",
     "stats": {
-        "contextualKeys": {},
         "title": {
-            "headshots": { "value": 7, "op": "replace" },
-            "fastestRound": { "value": 7, "op": "replace" },
-            "longestJump": { "value": 9.5, "op": "replace" },
-            "strangeStat": { "value": "foo", "op": "replace" }
+            "headshots": { "value": 7 },
+            "fastestRound": { "value": 7 },
+            "longestJump": { "value": 9.5 },
+            "strangeStat": { "value": "foo" }
         }
     }
 })";
 
 const std::wstring statValueDocumentResponseWithContext = LR"({
-    "ver": 1, 
-    "envelope": {
-        "serverVersion": 1,
-        "clientVersion": 1,
-        "clientId": "feb26f16-2348-48f1-8161-fb5723bffdce"
-    },
+    "revision": 1,
     "timestamp": "2016-10-07T23:04:08Z",
     "stats": {
-        "contextualKeys": { "race": "human", "class": "wizard" },
         "title": {
             "headshots": { "value": 7, "op": "replace" },
             "fastestRound": { "value": 7, "op": "replace" },
