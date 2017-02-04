@@ -373,7 +373,7 @@ stats_manager_impl::write_offline(
     // TODO: implement
 }
 
-#else
+#elif !UNIT_TEST_SERVICES
 void
 stats_manager_impl::write_offline(
     _In_ const stats_user_context& userContext,
@@ -387,6 +387,16 @@ stats_manager_impl::write_offline(
     {
         LOG_ERROR("Offline write for stats failed");
     }
+}
+#else
+void
+stats_manager_impl::write_offline(
+    _In_ const stats_user_context& userContext,
+    _In_ const web::json::value& serializedSVD
+)
+{
+    UNREFERENCED_PARAMETER(userContext);
+    UNREFERENCED_PARAMETER(serializedSVD);
 }
 #endif
 

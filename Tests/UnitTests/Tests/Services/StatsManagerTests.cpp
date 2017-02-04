@@ -15,10 +15,8 @@
 #include "xbox_live_context_impl.h"
 #include "StatisticManager_WinRT.h"
 #include "StatsManagerHelper.h"
-#include "PlayerStateWriter_WinRT.h"
 
-using namespace Microsoft::Xbox::Services::Experimental::Statistics::Manager;
-using namespace Microsoft::Xbox::Services::PlayerState;
+using namespace Microsoft::Xbox::Services::Statistics::Manager;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 

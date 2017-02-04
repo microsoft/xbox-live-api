@@ -12,11 +12,25 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
 
+stat_value::stat_value() :
+    m_dataType(stat_data_type::undefined)
+{
+}
+
 const string_t
 stat_value::name() const
 {
     return m_name;
 }
+
+void
+stat_value::set_name(
+    _In_ const string_t& name
+    )
+{
+    utils::char_t_copy(m_name, ARRAYSIZE(m_name), name.c_str());
+}
+
 
 double
 stat_value::as_number() const
@@ -65,14 +79,12 @@ stat_value::serialize() const
     web::json::value returnJSON;
     if (m_dataType == stat_data_type::number)
     {
-        returnJSON[_T("globalValue")] = web::json::value::number(m_statData.numberType);
+        returnJSON[_T("value")] = web::json::value::number(m_statData.numberType);
     }
     else if(m_dataType == stat_data_type::string)
     {
-        returnJSON[_T("globalValue")] = web::json::value::string(m_statData.stringType);
+        returnJSON[_T("value")] = web::json::value::string(m_statData.stringType);
     }
-
-    returnJSON[_T("op")] = web::json::value::string(_T("replace"));
 
     return returnJSON;
 }
@@ -85,9 +97,8 @@ stat_value::_Deserialize(
     stat_value statValue;
     if (data.is_null()) { return statValue; }
 
-    auto value = data.at(_T("globalValue"));
+    auto value = data.at(_T("value"));
     auto valueType = value.type();
-    auto statOp = utils::extract_json_string(data, _T("op"), false);
 
     switch (valueType)
     {
