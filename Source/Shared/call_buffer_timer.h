@@ -25,7 +25,7 @@ struct call_buffer_timer_completion_context
 class call_buffer_timer : public std::enable_shared_from_this<call_buffer_timer>
 {
 public:
-    call_buffer_timer() {};
+    call_buffer_timer();
 
     call_buffer_timer(
         std::function<void(const std::vector<string_t>&, const call_buffer_timer_completion_context&)> callback,

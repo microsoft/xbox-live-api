@@ -11,11 +11,21 @@
 #include "call_buffer_timer.h"
 #if !XSAPI_U
 #include "ppltasks_extra.h"
+#else
+#include "ppltasks_extra_unix.h"
 #endif
 
 using namespace Concurrency::extras;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+
+call_buffer_timer::call_buffer_timer() :
+m_bufferTimePerCall(30),
+m_previousTime(std::chrono::steady_clock::duration::zero()),
+m_isTaskInProgress(false),
+m_queuedTask(false)
+{
+}
 
 call_buffer_timer::call_buffer_timer(
     _In_ std::function<void(const std::vector<string_t>&, const call_buffer_timer_completion_context&)> callback,
