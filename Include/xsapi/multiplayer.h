@@ -1661,6 +1661,11 @@ public:
     multiplayer_session_arbitration_server();
 
     /// <summary>
+    /// The start time for the match. This is also when the arbitration time starts.
+    /// </summary>
+    _XSAPIIMP utility::datetime arbitration_start_time() const;
+
+    /// <summary>
     /// The state of the result
     /// </summary>
     _XSAPIIMP xbox::services::tournaments::tournament_arbitration_state result_state() const;
@@ -1701,6 +1706,7 @@ public:
     static xbox_live_result<multiplayer_session_arbitration_server> _Deserialize(_In_ const web::json::value& json);
 
 private:
+    utility::datetime m_arbitrationStartTime;
     xbox::services::tournaments::tournament_arbitration_state m_resultState;
     uint32_t m_resultConfidenceLevel;
     xbox::services::tournaments::tournament_game_result_source m_resultSource;

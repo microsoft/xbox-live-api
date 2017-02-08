@@ -3467,6 +3467,7 @@ public:
         auto arbitrationServer = currentSession->ArbitrationServer;
         VERIFY_IS_NOT_NULL(arbitrationServer);
 
+        VERIFY_IS_TRUE(arbitrationServer->ArbitrationStartTime.UniversalTime != 0);
         VERIFY_IS_TRUE(arbitrationServer->ResultState == TournamentArbitrationState::PartialResults);
         VERIFY_IS_TRUE(arbitrationServer->ResultSource == TournamentGameResultSource::Adjusted);
         VERIFY_IS_TRUE(arbitrationServer->ResultConfidenceLevel == 95);

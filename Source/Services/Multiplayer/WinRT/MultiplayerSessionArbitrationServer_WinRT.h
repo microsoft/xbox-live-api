@@ -24,6 +24,11 @@ public ref class MultiplayerSessionArbitrationServer sealed
 {
 public:
     /// <summary>
+    /// The start time for the match. This is also when the arbitration time starts.
+    /// </summary>
+    DEFINE_PROP_GET_DATETIME_OBJ(ArbitrationStartTime, arbitration_start_time);
+
+    /// <summary>
     /// The state of the result
     /// </summary>
     DEFINE_PROP_GET_ENUM_OBJ(ResultState, result_state, Microsoft::Xbox::Services::Tournaments::TournamentArbitrationState);
