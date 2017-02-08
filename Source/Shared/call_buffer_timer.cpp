@@ -20,10 +20,10 @@ using namespace Concurrency::extras;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 call_buffer_timer::call_buffer_timer() :
-m_bufferTimePerCall(30),
-m_previousTime(std::chrono::steady_clock::duration::zero()),
-m_isTaskInProgress(false),
-m_queuedTask(false)
+    m_bufferTimePerCall(30),
+    m_previousTime(std::chrono::steady_clock::duration::zero()),
+    m_isTaskInProgress(false),
+    m_queuedTask(false)
 {
 }
 
