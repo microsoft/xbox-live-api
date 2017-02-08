@@ -1272,6 +1272,11 @@
                 }
             },
             "arbitration":{
+                "constants":{
+                        "system":{
+                            "startTime": "2009-06-15T13:45:30.0900000Z"
+                        }
+                },
                 "properties":{
                     "system":{
                         "startTime":100,

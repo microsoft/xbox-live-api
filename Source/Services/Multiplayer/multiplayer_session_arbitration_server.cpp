@@ -22,6 +22,12 @@ multiplayer_session_arbitration_server::multiplayer_session_arbitration_server()
 {
 }
 
+utility::datetime
+multiplayer_session_arbitration_server::arbitration_start_time() const
+{
+    return m_arbitrationStartTime;
+}
+
 tournament_arbitration_state multiplayer_session_arbitration_server::result_state() const
 {
     return m_resultState;
@@ -104,6 +110,10 @@ multiplayer_session_arbitration_server::_Deserialize(
     if (json.is_null()) return xbox_live_result<multiplayer_session_arbitration_server>(returnObject);
 
     std::error_code errc = xbox_live_error_code::no_error;
+
+    auto constantsJson = utils::extract_json_field(json, _T("constants"), errc, true);
+    auto systemConstantsJson = utils::extract_json_field(constantsJson, _T("system"), errc, true);
+    returnObject.m_arbitrationStartTime = utils::extract_json_time(json, _T("startTime"), errc);
 
     auto propertiesJson = utils::extract_json_field(json, _T("properties"), errc, true);
     auto systemPropertiesJson = utils::extract_json_field(propertiesJson, _T("system"), errc, true);
