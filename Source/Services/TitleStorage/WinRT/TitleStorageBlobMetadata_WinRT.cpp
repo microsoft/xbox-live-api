@@ -100,6 +100,7 @@ TitleStorageBlobMetadata::CreateTitleStorageBlobMetadataForSessionStorage(
     )
 {
     title_storage_blob_metadata cppObj;
+#pragma warning(suppress: 4996)
     CONVERT_STD_EXCEPTION(
         cppObj = title_storage_blob_metadata::create_title_storage_blob_metadata_for_session_storage(
             STRING_T_FROM_PLATFORM_STRING(serviceConfigurationId),

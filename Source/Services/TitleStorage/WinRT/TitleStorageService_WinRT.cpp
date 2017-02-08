@@ -48,6 +48,7 @@ TitleStorageService::GetQuotaForSessionStorageAsync(
     _In_ Platform::String^ multiplayerSessionName
     )
 {
+#pragma warning(suppress: 4996)
     auto task = m_cppObj.get_quota_for_session_storage(
         STRING_T_FROM_PLATFORM_STRING(serviceConfigurationId),
         STRING_T_FROM_PLATFORM_STRING(multiplayerSessionTemplateName),
@@ -99,6 +100,7 @@ TitleStorageService::GetBlobMetadataForSessionStorageAsync(
     _In_ uint32 maxItems
     )
 {
+#pragma warning(suppress: 4996)
     auto task = m_cppObj.get_blob_metadata_for_session_storage(
         STRING_T_FROM_PLATFORM_STRING(serviceConfigurationId),
         STRING_T_FROM_PLATFORM_STRING(blobPath),

@@ -283,6 +283,7 @@ public:
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
         httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(queryJson);
+#pragma warning(suppress: 4973)
         auto result = create_task(xboxLiveContext->TitleStorageService->GetQuotaForSessionStorageAsync(
             _T("123456789"),
             _T("TestTemplate"),
@@ -312,6 +313,7 @@ public:
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
         httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(blobMetadataJson);
+#pragma warning(suppress: 4973)        
         auto result = create_task(xboxLiveContext->TitleStorageService->GetBlobMetadataForSessionStorageAsync(
             _T("123456789"),
             _T("blobPath"),
@@ -685,7 +687,7 @@ public:
             E_INVALIDARG
             );
 
-#pragma warning(suppress: 6387)
+#pragma warning(suppress: 6387 4973)
         VERIFY_THROWS_HR_CX(
             create_task(xboxLiveContext->TitleStorageService->GetBlobMetadataForSessionStorageAsync(
                 nullptr,
@@ -698,7 +700,7 @@ public:
             E_INVALIDARG
             );
 
-#pragma warning(suppress: 6387)
+#pragma warning(suppress: 6387 4973)
         VERIFY_THROWS_HR_CX(
             create_task(xboxLiveContext->TitleStorageService->GetBlobMetadataForSessionStorageAsync(
                 _T("1234567"),
@@ -711,7 +713,7 @@ public:
             E_INVALIDARG
             );
 
-#pragma warning(suppress: 6387)
+#pragma warning(suppress: 6387 4973)
         VERIFY_THROWS_HR_CX(
             create_task(xboxLiveContext->TitleStorageService->GetBlobMetadataForSessionStorageAsync(
                 _T("1234567"),
@@ -741,7 +743,7 @@ public:
             E_INVALIDARG
             );
 
-#pragma warning(suppress: 6387)
+#pragma warning(suppress: 6387 4973)
         VERIFY_THROWS_HR_CX(
             create_task(xboxLiveContext->TitleStorageService->GetQuotaForSessionStorageAsync(
                 nullptr, 
@@ -751,7 +753,7 @@ public:
             E_INVALIDARG
             );
  
-#pragma warning(suppress: 6387)
+#pragma warning(suppress: 6387 4973)
         VERIFY_THROWS_HR_CX(
             create_task(xboxLiveContext->TitleStorageService->GetQuotaForSessionStorageAsync(
                 _T("1234567"), 
@@ -761,7 +763,7 @@ public:
             E_INVALIDARG
             );
 
-#pragma warning(suppress: 6387)
+#pragma warning(suppress: 6387 4973)
         VERIFY_THROWS_HR_CX(
             create_task(xboxLiveContext->TitleStorageService->GetQuotaForSessionStorageAsync(
                 _T("1234567"), 
