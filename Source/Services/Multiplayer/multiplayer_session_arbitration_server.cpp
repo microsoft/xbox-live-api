@@ -113,7 +113,7 @@ multiplayer_session_arbitration_server::_Deserialize(
 
     auto constantsJson = utils::extract_json_field(json, _T("constants"), errc, true);
     auto systemConstantsJson = utils::extract_json_field(constantsJson, _T("system"), errc, true);
-    returnObject.m_arbitrationStartTime = utils::extract_json_time(json, _T("startTime"), errc);
+    returnObject.m_arbitrationStartTime = utils::extract_json_time(systemConstantsJson, _T("startTime"), errc);
 
     auto propertiesJson = utils::extract_json_field(json, _T("properties"), errc, true);
     auto systemPropertiesJson = utils::extract_json_field(propertiesJson, _T("system"), errc, true);

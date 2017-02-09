@@ -22,6 +22,7 @@
 #include "QualityOfServiceServer_WinRT.h"
 #include "MultiplayerServiceMatchmakingServer_WinRT.h"
 #include "WriteSessionStatus_WinRT.h"
+#include "TournamentArbitrationStatus_WinRT.h"
 #include "MultiplayerSessionTournamentsServer_WinRT.h"
 #include "MultiplayerSessionArbitrationServer_WinRT.h"
 #include "MultiplayerSessionRoleTypes_WinRT.h"
@@ -460,6 +461,11 @@ public:
     /// A unique search handle ID to the session.
     /// </summary>
     DEFINE_PTR_PROP_GET_STR_OBJ(SearchHandleId, search_handle_id);
+
+    /// <summary>
+    /// Arbitration Status of a tournament
+    /// </summary>
+    DEFINE_PTR_PROP_GET_ENUM_OBJ(ArbitrationStatus, arbitration_status, Microsoft::Xbox::Services::Tournaments::TournamentArbitrationStatus);
 
     /// <summary>
     /// The date and time that the session began.

@@ -60,6 +60,11 @@ enum class tournament_game_result_state
 enum class tournament_arbitration_state
 {
     /// <summary>
+    /// No arbitration state set.
+    /// </summary>
+    none,
+
+    /// <summary>
     /// Results were fully uploaded and complete
     /// </summary>
     completed,
@@ -2492,11 +2497,6 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    static xbox::services::tournaments::tournament_arbitration_status _Convert_string_to_arbitration_status(_In_ const string_t& value);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
     static xbox_live_result<multiplayer_session_member> _Deserialize(_In_ const web::json::value& json);
 
 private:
@@ -2803,6 +2803,11 @@ public:
     /// A unique search handle ID to the session.
     /// </summary>
     _XSAPIIMP const string_t& search_handle_id() const;
+
+    /// <summary>
+    /// Arbitration status of a tournament
+    /// </summary>
+    _XSAPIIMP xbox::services::tournaments::tournament_arbitration_status arbitration_status() const;
     
     /// <summary>
     /// The time that the session began.
@@ -3495,6 +3500,7 @@ private:
 
     string_t m_xboxUserId;
     multiplayer_session_reference m_sessionReference;
+    xbox::services::tournaments::tournament_arbitration_status m_arbitrationStatus;
     std::shared_ptr<multiplayer_session_constants> m_sessionConstants;
     std::shared_ptr<multiplayer_session_properties> m_multiplayerSessionProperties;
     std::shared_ptr<multiplayer_session_role_types> m_sessionRoleTypes;
@@ -4197,6 +4203,11 @@ public:
     /// Internal function
     /// </summary>
     static string_t _Convert_game_result_state_to_string(_In_ tournaments::tournament_game_result_state value);
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    static xbox::services::tournaments::tournament_arbitration_status _Convert_string_to_arbitration_status(_In_ const string_t& value);
 
 private:
     multiplayer_service();

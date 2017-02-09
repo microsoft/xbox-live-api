@@ -154,6 +154,7 @@ void multiplayer_session::deep_copy_from(
     m_xboxUserId = other.m_xboxUserId;
     m_sessionReference = other.m_sessionReference;
     m_sessionConstants = other.m_sessionConstants;
+    m_arbitrationStatus = other.m_arbitrationStatus;
     m_sessionRoleTypes = other.m_sessionRoleTypes;
     m_servers = other.m_servers;
     m_membersAccepted = other.m_membersAccepted;
@@ -301,6 +302,12 @@ const string_t&
 multiplayer_session::search_handle_id() const
 {
     return m_searchHandleId;
+}
+
+tournament_arbitration_status
+multiplayer_session::arbitration_status() const
+{
+    return m_arbitrationStatus;
 }
 
 utility::datetime
@@ -1505,6 +1512,12 @@ multiplayer_session::_Deserialize(
     returnResult.m_correlationId = utils::extract_json_string(json, _T("correlationId"), errc);
     returnResult.m_searchHandleId = utils::extract_json_string(json, _T("searchHandle"), errc, false);
     returnResult.m_startTime = utils::extract_json_time(json, _T("startTime"), errc);
+
+    auto arbitrationJson = utils::extract_json_field(json, _T("arbitration"), errc, false);
+    if (!arbitrationJson.is_null())
+    {
+        returnResult.m_arbitrationStatus = multiplayer_service::_Convert_string_to_arbitration_status(utils::extract_json_string(arbitrationJson, _T("status"), errc, false));
+    }
 
     returnResult.m_branch = utils::extract_json_string(json, _T("branch"), errc);
     returnResult.m_changeNumber = utils::extract_json_int(json, _T("changeNumber"), errc, false, ULONG_MAX);

@@ -1203,4 +1203,29 @@ multiplayer_service::_Convert_string_to_game_result_source(_In_ const string_t& 
     return tournament_game_result_source::none;
 }
 
+tournament_arbitration_status
+multiplayer_service::_Convert_string_to_arbitration_status(
+    _In_ const string_t& value
+)
+{
+    if (utils::str_icmp(value, _T("waiting")) == 0)
+    {
+        return tournament_arbitration_status::waiting;
+    }
+    else if (utils::str_icmp(value, _T("inprogress")) == 0)
+    {
+        return tournament_arbitration_status::in_progress;
+    }
+    else if (utils::str_icmp(value, _T("complete")) == 0)
+    {
+        return tournament_arbitration_status::complete;
+    }
+    else if (utils::str_icmp(value, _T("playing")) == 0)
+    {
+        return tournament_arbitration_status::playing;
+    }
+
+    return tournament_arbitration_status::incomplete;
+}
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_END
