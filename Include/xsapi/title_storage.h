@@ -126,7 +126,7 @@ public:
     _XSAPIIMP const string_t& xbox_user_id() const;
 
     /// <summary>
-	/// DEPRECATED
+    /// DEPRECATED
     /// Title Storage for sessions has been deprecated. Use universal instead.
     /// The multiplayer session template name associated with the quota if StorageType is SessionStorage, otherwise null.
     /// </summary>
@@ -137,7 +137,7 @@ public:
 #endif
 
     /// <summary>
-	/// DEPRECATED
+    /// DEPRECATED
     /// Title Storage for sessions has been deprecated. Use universal instead.
     /// The multiplayer session name associated with the quota if StorageType is SessionStorage, otherwise null.
     /// </summary>
@@ -282,7 +282,7 @@ public:
         );
 
     /// <summary>
-	/// DEPRECATED
+    /// DEPRECATED
     /// Title Storage for sessions has been deprecated. Use universal instead.
     /// Initializes a new instance of the title_storage_blob_metadata class for SessionStorage including support for all optional properties except ClientTimestamp.
     /// ClientTimestamp.UniversalTime will be initialized to 0. Length is initialized to 0.
@@ -357,7 +357,7 @@ public:
     _XSAPIIMP const string_t& xbox_user_id() const;
 
     /// <summary>
-	/// DEPRECATED
+    /// DEPRECATED
     /// Title Storage for sessions has been deprecated. Use universal instead.
     /// The multiplayer session template name this file belongs to if StorageType is SessionStorage, otherwise null.
     /// </summary>
@@ -368,7 +368,7 @@ public:
 #endif
 
     /// <summary>
-	/// DEPRECATED
+    /// DEPRECATED
     /// Title Storage for sessions has been deprecated. Use universal instead.
     /// The multiplayer session name this file belongs to if StorageType is SessionStorage, otherwise null.
     /// </summary>
@@ -549,7 +549,7 @@ public:
         );
 
     /// <summary>
-	/// DEPRECATED
+    /// DEPRECATED
     /// Title Storage for sessions has been deprecated. Use universal instead.
     /// Gets title storage quota information for the SessionStorage associated with the specified multiplayer session.
     /// </summary>
@@ -591,7 +591,7 @@ public:
         );
 
     /// <summary>
-	/// DEPRECATED
+    /// DEPRECATED
     /// Title Storage for sessions has been deprecated. Use universal instead.
     /// Gets a list of blob metadata objects in SessionStorage under a given path for the specified multiplayer session.
     /// </summary>
