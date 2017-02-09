@@ -31,7 +31,8 @@ enum class title_storage_type
     trusted_platform_storage,
 
     /// <summary>
-    /// JSON storage has been deprecated.  Use universal instead
+    /// DEPRECATED
+    /// JSON storage has been deprecated.  Use universal instead.
     ///
     /// Per-user JSON data storage such as game state, game settings, and user generated content for any platforms
     /// Data type is restricted to TitleStorageBlobType::Json
@@ -46,7 +47,8 @@ enum class title_storage_type
     global_storage,
 
     /// <summary>
-    /// Session storage has been deprecated
+    /// DEPRECATED
+    /// Title Storage for sessions has been deprecated. Use universal instead.
     ///
     /// Per-session data storage for multiplayer game sessions.  This storage type is only writable to users joined
     /// to the session.  Read access is configurable to public or session-joined only in the service configuration.
@@ -124,14 +126,26 @@ public:
     _XSAPIIMP const string_t& xbox_user_id() const;
 
     /// <summary>
+    /// DEPRECATED
+    /// Title Storage for sessions has been deprecated. Use universal instead.
     /// The multiplayer session template name associated with the quota if StorageType is SessionStorage, otherwise null.
     /// </summary>
+#if XSAPI_CPP
+    _XSAPIIMP_DEPRECATED const string_t& multiplayer_session_template_name() const;
+#else
     _XSAPIIMP const string_t& multiplayer_session_template_name() const;
+#endif
 
     /// <summary>
+    /// DEPRECATED
+    /// Title Storage for sessions has been deprecated. Use universal instead.
     /// The multiplayer session name associated with the quota if StorageType is SessionStorage, otherwise null.
     /// </summary>
+#if XSAPI_CPP
+    _XSAPIIMP_DEPRECATED const string_t& multiplayer_session_name() const;
+#else
     _XSAPIIMP const string_t& multiplayer_session_name() const;
+#endif
 
     /// <summary>
     /// Number of bytes used in title storage of type StorageType.
@@ -268,6 +282,8 @@ public:
         );
 
     /// <summary>
+    /// DEPRECATED
+    /// Title Storage for sessions has been deprecated. Use universal instead.
     /// Initializes a new instance of the title_storage_blob_metadata class for SessionStorage including support for all optional properties except ClientTimestamp.
     /// ClientTimestamp.UniversalTime will be initialized to 0. Length is initialized to 0.
     /// title_storage_blob_metadata objects retrieved using TitleStorageService::GetBlobMetadataAsync will have current Length and ETag values.
@@ -279,7 +295,7 @@ public:
     /// <param name="multiplayerSessionName">The multiplayer session name associated with this object.</param>
     /// <param name="displayName">A display name suitable for displaying to the user. (Optional)</param>
     /// <param name="eTag">An ETag value to be associated with this instance.  It is used for upload, download and delete operations. (Optional)</param>
-    _XSAPIIMP static title_storage_blob_metadata create_title_storage_blob_metadata_for_session_storage(
+    _XSAPIIMP_DEPRECATED static title_storage_blob_metadata create_title_storage_blob_metadata_for_session_storage(
         _In_ string_t serviceConfigurationId,
         _In_ string_t blobPath,
         _In_ title_storage_blob_type blobType,
@@ -341,14 +357,26 @@ public:
     _XSAPIIMP const string_t& xbox_user_id() const;
 
     /// <summary>
+    /// DEPRECATED
+    /// Title Storage for sessions has been deprecated. Use universal instead.
     /// The multiplayer session template name this file belongs to if StorageType is SessionStorage, otherwise null.
     /// </summary>
+#if XSAPI_CPP
+    _XSAPIIMP_DEPRECATED const string_t& multiplayer_session_template_name() const;
+#else
     _XSAPIIMP const string_t& multiplayer_session_template_name() const;
+#endif
 
     /// <summary>
+    /// DEPRECATED
+    /// Title Storage for sessions has been deprecated. Use universal instead.
     /// The multiplayer session name this file belongs to if StorageType is SessionStorage, otherwise null.
     /// </summary>
+#if XSAPI_CPP
+    _XSAPIIMP_DEPRECATED const string_t& multiplayer_session_name() const;
+#else
     _XSAPIIMP const string_t& multiplayer_session_name() const;
+#endif
 
     /// <summary>
     /// Internal function
@@ -521,6 +549,8 @@ public:
         );
 
     /// <summary>
+    /// DEPRECATED
+    /// Title Storage for sessions has been deprecated. Use universal instead.
     /// Gets title storage quota information for the SessionStorage associated with the specified multiplayer session.
     /// </summary>
     /// <param name="serviceConfigurationId">The service configuration ID (SCID) of the title</param>
@@ -530,7 +560,7 @@ public:
     /// <remarks>Calls
     /// V1 GET sessions/{sessionId}/scids/{scid}
     /// </remarks>
-    _XSAPIIMP pplx::task<xbox_live_result<title_storage_quota>> get_quota_for_session_storage(
+    _XSAPIIMP_DEPRECATED pplx::task<xbox_live_result<title_storage_quota>> get_quota_for_session_storage(
         _In_ const string_t& serviceConfigurationId,
         _In_ const string_t& multiplayerSessionTemplateName,
         _In_ const string_t& multiplayerSessionName
@@ -561,6 +591,8 @@ public:
         );
 
     /// <summary>
+    /// DEPRECATED
+    /// Title Storage for sessions has been deprecated. Use universal instead.
     /// Gets a list of blob metadata objects in SessionStorage under a given path for the specified multiplayer session.
     /// </summary>
     /// <param name="serviceConfigurationId">The service configuration ID (SCID) of the title</param>
@@ -573,7 +605,7 @@ public:
     /// <remarks>Calls
     /// V1 GET sessions/{sessionId}/scids/{scid}/data/{path}?maxItems={maxItems}[skipItems={skipItems}]
     /// </remarks>
-    _XSAPIIMP pplx::task<xbox_live_result<title_storage_blob_metadata_result>> get_blob_metadata_for_session_storage(
+    _XSAPIIMP_DEPRECATED pplx::task<xbox_live_result<title_storage_blob_metadata_result>> get_blob_metadata_for_session_storage(
         _In_ string_t serviceConfigurationId,
         _In_ string_t blobPath,
         _In_ string_t multiplayerSessionTemplateName,

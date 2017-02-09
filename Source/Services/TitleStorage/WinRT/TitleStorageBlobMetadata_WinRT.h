@@ -109,6 +109,9 @@ public:
     /// ClientTimestamp.UniversalTime is initialized to 0. Length is initialized to 0.
     /// TitleStorageBlobMetadata objects retrieved using TitleStorageService::GetBlobMetadataAsync will have current Length and ETag values.
     /// </remarks>
+#if _MSC_VER >= 1800
+    [Windows::Foundation::Metadata::Deprecated("Title Storage for sessions has been deprecated. Use universal instead.", Windows::Foundation::Metadata::DeprecationType::Deprecate, 0x0)]
+#endif
     static TitleStorageBlobMetadata^ CreateTitleStorageBlobMetadataForSessionStorage(
         _In_ Platform::String^ serviceConfigurationId,
         _In_ Platform::String^ blobPath,
@@ -169,11 +172,17 @@ public:
     /// <summary>
     /// The multiplayer session template name this file belongs to if the StorageType is SessionStorage, otherwise null.
     /// </summary>
+#if _MSC_VER >= 1800
+    [Windows::Foundation::Metadata::Deprecated("Title Storage for sessions has been deprecated. Use universal instead.", Windows::Foundation::Metadata::DeprecationType::Deprecate, 0x0)]
+#endif
     DEFINE_PROP_GET_STR_OBJ(MultiplayerSessionTemplateName, multiplayer_session_template_name);
 
     /// <summary>
     /// The multiplayer session name this file belongs to if the StorageType is SessionStorage, otherwise null.
     /// </summary>
+#if _MSC_VER >= 1800
+    [Windows::Foundation::Metadata::Deprecated("Title Storage for sessions has been deprecated. Use universal instead.", Windows::Foundation::Metadata::DeprecationType::Deprecate, 0x0)]
+#endif
     DEFINE_PROP_GET_STR_OBJ(MultiplayerSessionName, multiplayer_session_name);
 
 internal:

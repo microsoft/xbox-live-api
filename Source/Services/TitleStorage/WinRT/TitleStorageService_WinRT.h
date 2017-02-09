@@ -57,6 +57,9 @@ public:
     /// <remarks>Calls
     /// V1 GET sessions/{sessionId}/scids/{scid}
     /// </remarks>
+#if _MSC_VER >= 1800
+    [Windows::Foundation::Metadata::Deprecated("Title Storage for sessions has been deprecated. Use universal instead.", Windows::Foundation::Metadata::DeprecationType::Deprecate, 0x0)]
+#endif
     Windows::Foundation::IAsyncOperation<TitleStorageQuota^>^ GetQuotaForSessionStorageAsync(
         _In_ Platform::String^ serviceConfigurationId,
         _In_ Platform::String^ multiplayerSessionTemplateName,
@@ -106,6 +109,9 @@ public:
     /// <remarks>Calls
     /// V1 GET sessions/{sessionId}/scids/{scid}/data/{path}?maxItems={maxItems}[skipItems={skipItems}]
     /// </remarks>
+#if _MSC_VER >= 1800
+    [Windows::Foundation::Metadata::Deprecated("Title Storage for sessions has been deprecated. Use universal instead.", Windows::Foundation::Metadata::DeprecationType::Deprecate, 0x0)]
+#endif
     Windows::Foundation::IAsyncOperation<TitleStorageBlobMetadataResult^>^ GetBlobMetadataForSessionStorageAsync(
         _In_ Platform::String^ serviceConfigurationId,
         _In_opt_ Platform::String^ blobPath,

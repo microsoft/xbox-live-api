@@ -858,8 +858,10 @@ title_storage_service::title_storage_download_blob_subpath(
             }
 
             path << _T("/sessions/");
+#pragma warning(suppress: 4996)
             path << blobMetadata.multiplayer_session_template_name();
             path << _T("~");
+#pragma warning(suppress: 4996)
             path << blobMetadata.multiplayer_session_name();
             path << _T("/scids/");
             path << blobMetadata.service_configuration_id();

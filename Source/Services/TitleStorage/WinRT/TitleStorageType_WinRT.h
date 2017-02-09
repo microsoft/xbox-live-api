@@ -20,7 +20,10 @@ public enum class TitleStorageType
     /// </summary>
     TrustedPlatformStorage = xbox::services::title_storage::title_storage_type::trusted_platform_storage,
 
-    /// <summary>Per-user JSON data storage such as game state, game settings, and user generated content for any platform.
+    /// <summary>
+    /// JSON storage has been deprecated.  Use universal instead.
+    ///
+    /// Per-user JSON data storage such as game state, game settings, and user generated content for any platform.
     /// The data type is restricted to TitleStorageBlobType::Json.
     /// The service configuration for the game specifies if the storage is public or restricted to the owner only.
     /// </summary>
@@ -33,6 +36,9 @@ public enum class TitleStorageType
     GlobalStorage = xbox::services::title_storage::title_storage_type::global_storage,
 
     /// <summary>
+    /// DEPRECATED
+    /// Title Storage for sessions has been deprecated. Use universal instead.
+    ///
     /// Per-session data storage for multiplayer game sessions.  This storage type is only writable to users joined
     /// to the session.  Read access is configurable to public or session-joined only in the service configuration.
     ///</summary>
