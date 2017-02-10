@@ -17,6 +17,11 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_BEGIN
 public enum class TournamentArbitrationState
 {
     /// <summary>
+    /// No arbitration state set.
+    /// </summary>
+    None = xbox::services::tournaments::tournament_arbitration_state::none,
+
+    /// <summary>
     /// Results were fully uploaded and complete
     /// </summary>
     Completed = xbox::services::tournaments::tournament_arbitration_state::completed,

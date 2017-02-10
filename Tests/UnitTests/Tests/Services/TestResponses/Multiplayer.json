@@ -1209,6 +1209,9 @@
             "accepted": 1,
             "active": 1
         },
+        "arbitration": {
+            "status": "inprogress"
+        },
         "constants":{
             "system":{
                 "capabilities":{
@@ -1251,7 +1254,7 @@
                     "system":{
                         "registration":{
                             "state":"registered",
-                            "reason":"placeholder"
+                            "reason":"TournamentCompleted"
                         },
                         "rendezvous":{
                             "startTime":"2015-08-04T01:08:06.8687378Z",

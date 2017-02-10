@@ -3452,13 +3452,12 @@ public:
         DEFINE_TEST_CASE_PROPERTIES(TestTournamentSession);
         const string_t defaultTournamentSessionResponse = testResponseJsonFromFile[L"defaultTournamentSessionResponse"].serialize();
         auto currentSession = GetCurrentSessionAsyncHelper(defaultTournamentSessionResponse);
+        VERIFY_IS_TRUE(currentSession->ArbitrationStatus == TournamentArbitrationStatus::InProgress);
+
         auto tournamentServer = currentSession->TournamentsServer;
         VERIFY_IS_NOT_NULL(tournamentServer);
-
         VERIFY_IS_TRUE(tournamentServer->RegistrationState == TournamentRegistrationState::Registered);
-        // TODO: remove?
-        //VERIFY_IS_TRUE(tournamentServer->RegistrationReason == TournamentRegistrationReason::Placeholder);
-        //VERIFY_IS_TRUE(tournamentServer->LastGameResultState == TournamentGameResultState::Win);
+        VERIFY_IS_TRUE(tournamentServer->RegistrationReason == TournamentRegistrationReason::TournamentCompleted);
         VERIFY_IS_TRUE(tournamentServer->LastGameResultSource == TournamentGameResultSource::Arbitration);
 
         VERIFY_IS_TRUE(tournamentServer->LastGameEndTime.UniversalTime != 0);

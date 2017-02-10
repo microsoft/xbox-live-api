@@ -695,31 +695,6 @@ multiplayer_session_member::_Convert_string_vector_to_change_types(
 
 }
 
-tournament_arbitration_status
-multiplayer_session_member::_Convert_string_to_arbitration_status(
-    _In_ const string_t& value
-)
-{
-    if (utils::str_icmp(value, _T("waiting")) == 0)
-    {
-        return tournament_arbitration_status::waiting;
-    }
-    else if (utils::str_icmp(value, _T("inprogress")) == 0)
-    {
-        return tournament_arbitration_status::in_progress;
-    }
-    else if (utils::str_icmp(value, _T("complete")) == 0)
-    {
-        return tournament_arbitration_status::complete;
-    }
-    else if (utils::str_icmp(value, _T("playing")) == 0)
-    {
-        return tournament_arbitration_status::playing;
-    }
-
-    return tournament_arbitration_status::incomplete;
-}
-
 xbox_live_result<multiplayer_session_member>
 multiplayer_session_member::_Deserialize(
     _In_ const web::json::value& json
@@ -744,7 +719,7 @@ multiplayer_session_member::_Deserialize(
     returnResult.m_customPropertiesJson = utils::extract_json_field(propertiesJson, _T("custom"), errc, false);
     returnResult.m_customConstantsJson = utils::extract_json_field(constantsJson, _T("custom"), errc, false);
     returnResult.m_teamId = utils::extract_json_string(constantsSystemJson, _T("team"), errc);
-    returnResult.m_arbitrationStatus = _Convert_string_to_arbitration_status(utils::extract_json_string(constantsSystemJson, _T("arbitrationStatus"), errc));
+    returnResult.m_arbitrationStatus = multiplayer_service::_Convert_string_to_arbitration_status(utils::extract_json_string(constantsSystemJson, _T("arbitrationStatus"), errc));
     returnResult.m_gamertag = utils::extract_json_string(json, _T("gamertag"), errc);
     returnResult.m_deviceToken = utils::extract_json_string(json, _T("deviceToken"), errc);
     returnResult.m_nat = _Convert_string_to_multiplayer_nat_setting(utils::extract_json_string(json, _T("nat"), errc));
