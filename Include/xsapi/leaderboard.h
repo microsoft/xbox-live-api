@@ -423,8 +423,8 @@ public:
     /// <param name="xuid">The Xbox user ID of the requesting user.</param>
     /// <param name="scid">The service configuration ID (SCID) of the title</param>
     /// <param name="statName">The name of the statistic to get a leaderboard for.</param>
-    /// <param name="socialGroup">The name of the group of users to get get leaderboard results for.
-    /// See Microsoft::Xbox::Services::Social::SocialGroupConstants for the latest options.</param>
+    /// <param name="socialGroup">The name of the group of users to get get leaderboard results for.  
+    /// You can pass either "Favorites" or "People"</param>
     /// <param name="maxItems">The maximum number of items to retrieve. If this value is 0, the server defaults to 10. (Optional)</param>
     /// <returns>
     /// A LeaderboardResult object containing a collection of the leaderboard columns and rows.
@@ -449,8 +449,8 @@ public:
     /// <param name="xuid">The Xbox user ID of the requesting user.</param>
     /// <param name="scid">The service configuration ID (SCID) of the title</param>
     /// <param name="statName">The name of the statistic to get a leaderboard for.</param>
-    /// <param name="socialGroup">The name of the group of users to get get leaderboard results for.
-    /// See Microsoft::Xbox::Services::Social::SocialGroupConstants for the latest options.</param>
+    /// <param name="socialGroup">The name of the group of users to get get leaderboard results for.  
+    /// You can pass either "Favorites" or "People"</param>
     /// <param name="sortOrder">A value indicating the sort order for the returned leaderboard result.
     /// The possible values are 'ascending' or 'descending', without quotes.</param>
     /// <param name="maxItems">The maximum number of items to retrieve. If this value is 0, the server defaults to 10. (Optional)</param>

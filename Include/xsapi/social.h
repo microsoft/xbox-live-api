@@ -650,4 +650,5 @@ private:
     friend xbox_live_context_impl;
 };
 
+
 }}}

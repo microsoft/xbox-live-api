@@ -36,9 +36,6 @@
 #include <string>
 #include <ppltasks.h>
 
-#include "winrt/Windows.Xbox.Services.h"
-#include "winrt/Windows.Xbox.System.h"
-
 #include "xsapi\services.h"
 
 namespace DX
