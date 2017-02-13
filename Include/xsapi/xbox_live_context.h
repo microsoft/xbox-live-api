@@ -69,9 +69,13 @@ private:
 
 
 /// <summary>
-/// Defines pointers to objects that access Xbox Live to create features for player interactions.
+/// Defines pointers to objects that access Xbox Live to create features for player 
+/// interactions.
 ///
-/// Note: the XboxLiveContext is unique per instance. Changing state on one instance for a user does not affect a second instance of the context for the same user. Using multiple instances can therefore result in unexpected behavior. Titles should ensure to only use one instance of the XboxLiveContext per user.
+/// Note: the XboxLiveContext is unique per instance. Changing state on one instance for a 
+/// user does not affect a second instance of the context for the same user. Using multiple
+/// instances can therefore result in unexpected behavior. Titles should ensure to only use 
+/// one instance of the XboxLiveContext per user.
 /// </summary>
 class xbox_live_context
 {
@@ -89,9 +93,7 @@ public:
     /// </summary>
     _XSAPIIMP Windows::Xbox::System::User^ user();
 
-#else
-
-#if XSAPI_CPP
+#elif XSAPI_CPP
     /// <summary>
     /// Creates an xbox_live_context from a xbox_live_user
     /// </summary>
@@ -116,13 +118,14 @@ public:
     /// Returns the associated system XboxLiveUser.
     /// </summary>
     _XSAPIIMP Microsoft::Xbox::Services::Beam::System::XboxLiveUser^ user();
+
 #else
     /// <summary>
     /// Creates an xbox_live_context from a Microsoft::Xbox::Services::System::XboxLiveUser^
     /// </summary>
     _XSAPIIMP xbox_live_context(
     	_In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user
-    );
+        );
 
     /// <summary>
     /// Returns the associated system XboxLiveUser.
@@ -130,12 +133,20 @@ public:
     _XSAPIIMP Microsoft::Xbox::Services::System::XboxLiveUser^ user();
 #endif
 
-#endif
-
     /// <summary>
     /// Returns the current user's Xbox Live User ID.
     /// </summary>
     _XSAPIIMP const string_t& xbox_live_user_id();
+
+    /// <summary>
+    /// Returns an object containing settings that apply to all REST calls made such as retry and diagnostic settings.
+    /// </summary>
+    _XSAPIIMP std::shared_ptr<xbox_live_context_settings> settings();
+
+    /// <summary>
+    /// Returns an object containing Xbox Live app config such as title ID
+    /// </summary>
+    _XSAPIIMP std::shared_ptr<xbox_live_app_config> application_config();
 
 #if !BEAM_API
     /// <summary>
@@ -143,6 +154,18 @@ public:
     /// </summary>
     _XSAPIIMP social::profile_service& profile_service();
 
+    /// <summary>
+    /// A service for managing leaderboards.
+    /// </summary>
+    _XSAPIIMP leaderboard::leaderboard_service& leaderboard_service();
+
+    /// <summary>
+    /// A service for storing data in the cloud.
+    /// </summary>
+    _XSAPIIMP title_storage::title_storage_service& title_storage_service();
+#endif // !BEAM_API
+
+#if !BEAM_API && !defined(XBOX_LIVE_CREATORS_SDK)
     /// <summary>
     /// A service for managing social networking links.
     /// </summary>
@@ -154,9 +177,9 @@ public:
     _XSAPIIMP social::reputation_service& reputation_service();
 
     /// <summary>
-    /// A service for managing leaderboards.
+    /// A service for managing privacy settings.
     /// </summary>
-    _XSAPIIMP leaderboard::leaderboard_service& leaderboard_service();
+    _XSAPIIMP privacy::privacy_service& privacy_service();
 
     /// <summary>
     /// A service for managing achievements.
@@ -189,19 +212,9 @@ public:
     _XSAPIIMP game_server_platform::game_server_platform_service& game_server_platform_service();
 
     /// <summary>
-    /// A service for managing Rich Presence.
+    /// A service for contextual search.
     /// </summary>
-    _XSAPIIMP presence::presence_service& presence_service();
-
-    /// <summary>
-    /// A service for storing data in the cloud.
-    /// </summary>
-    _XSAPIIMP title_storage::title_storage_service& title_storage_service();
-
-    /// <summary>
-    /// A service for managing privacy settings.
-    /// </summary>
-    _XSAPIIMP privacy::privacy_service& privacy_service();
+    _XSAPIIMP contextual_search::contextual_search_service& contextual_search_service();
 
     /// <summary>
     /// A service used to check for offensive strings.
@@ -209,27 +222,16 @@ public:
     _XSAPIIMP system::string_service& string_service();
 
     /// <summary>
-    /// A service for contextual search.
+    /// A service for managing Rich Presence.
     /// </summary>
-    _XSAPIIMP contextual_search::contextual_search_service& contextual_search_service();
-#endif
-
-    /// <summary>
-    /// Returns an object containing settings that apply to all REST calls made such as retry and diagnostic settings.
-    /// </summary>
-    _XSAPIIMP std::shared_ptr<xbox_live_context_settings> settings();
-
-    /// <summary>
-    /// Returns an object containing Xbox Live app config such as title ID
-    /// </summary>
-    _XSAPIIMP std::shared_ptr<xbox_live_app_config> application_config();
+    _XSAPIIMP presence::presence_service& presence_service();
 
 #if UWP_API || XSAPI_U || XSAPI_CENTENNIAL
     /// <summary>
     /// A service used to write in game events.
     /// </summary>
     _XSAPIIMP events::events_service& events_service();
-#endif
+#endif // UWP_API || XSAPI_U || XSAPI_CENTENNIAL
 
 #if TV_API || UNIT_TEST_SERVICES
     /// <summary>
@@ -246,10 +248,11 @@ public:
     /// A service for the entertainment profile.
     /// </summary>
     _XSAPIIMP entertainment_profile::entertainment_profile_list_service& entertainment_profile_list_service();
-#endif
+#endif // TV_API || UNIT_TEST_SERVICES
 
-#if TV_API | XBOX_UWP
-#if defined(XSAPI_CPPWINRT)
+#endif // !BEAM_API && !XBOX_LIVE_CREATORS_SDK
+
+#if (TV_API | XBOX_UWP) && defined(XSAPI_CPPWINRT)
     _XSAPIIMP xbox_live_context(
         _In_ winrt::Windows::Xbox::System::User user
         ) : xbox_live_context(convert_user_to_cppcx(user))
@@ -262,11 +265,9 @@ public:
         winrt::copy_from(cppWinrtUser, reinterpret_cast<winrt::ABI::Windows::Xbox::System::IUser*>(user()));
         return cppWinrtUser;
     }
-#endif
-#endif
+#endif // (TV_API | XBOX_UWP) && defined(XSAPI_CPPWINRT)
 
 private:
-
     std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_impl> m_xboxLiveContextImpl;
 };
 
