@@ -18,7 +18,6 @@
 
         <Grid Margin="57,46,0,0" Height="52" VerticalAlignment="Top" HorizontalAlignment="Left" Width="411" >
             <Button x:Name="SignInButton" Content="Sign In" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Click="SignInButton_Click" Margin="-3,0,302,0" Height="38"/>
-            <Button x:Name="SwitchAccountButton" Content="Switch Account" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Click="SwitchAccountButton_Click" Margin="115,0,163,0" Height="38"/>
         </Grid>
 
         <StackPanel Margin="57,111,0,0" Height="196" VerticalAlignment="Top" HorizontalAlignment="Left" Width="411" >

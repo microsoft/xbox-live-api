@@ -34,7 +34,6 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 void Game::RegisterInputKeys()
 {
     m_input->RegisterKey(Windows::System::VirtualKey::S, ButtonPress::SignIn);
-    m_input->RegisterKey(Windows::System::VirtualKey::X, ButtonPress::SwitchAccount);
     m_input->RegisterKey(Windows::System::VirtualKey::Number1, ButtonPress::ToggleSocialGroup1);
     m_input->RegisterKey(Windows::System::VirtualKey::Number2, ButtonPress::ToggleSocialGroup2);
     m_input->RegisterKey(Windows::System::VirtualKey::Number3, ButtonPress::ToggleSocialGroup3);
@@ -182,11 +181,6 @@ void Game::OnGameUpdate()
             if (m_input->IsKeyDown(ButtonPress::SignIn))
             {
                 SignIn();
-            }
-
-            if (m_input->IsKeyDown(ButtonPress::SwitchAccount))
-            {
-                SwitchAccount();
             }
         }
     }
@@ -632,32 +626,6 @@ void Game::SignInSilently()
     }, task_continuation_context::use_current());
 }
 
-
-void Game::SwitchAccount()
-{
-    std::weak_ptr<Game> thisWeakPtr = shared_from_this();
-
-    auto asyncOp = m_user->switch_account(nullptr);
-    create_task(asyncOp)
-    .then([thisWeakPtr](xbox::services::xbox_live_result<xbox::services::system::sign_in_result> t)
-    {
-        std::shared_ptr<Game> pThis(thisWeakPtr.lock());
-        if (pThis == nullptr)
-        {
-            return;
-        }
-
-        if (!t.err())
-        {
-            auto result = t.payload();
-            pThis->HandleSignInResult(result);
-        }
-        else
-        {
-            pThis->Log(L"Failed switching account");
-        }
-    }, task_continuation_context::use_current());
-}
 
 void Game::HandleSignout(_In_ std::shared_ptr<xbox::services::system::xbox_live_user> user)
 {

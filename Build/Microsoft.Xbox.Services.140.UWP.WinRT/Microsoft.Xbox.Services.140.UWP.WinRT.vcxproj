@@ -476,7 +476,6 @@
     <ClCompile Include="..\..\Source\Shared\WinRT\HttpCallRequestMessage_WinRT.cpp" />
     <ClCompile Include="..\..\Source\Shared\WinRT\local_config_winrt.cpp" />
     <ClCompile Include="..\..\Source\Shared\WinRT\ServiceCallLoggingConfig_WinRT.cpp" />
-    <ClCompile Include="..\..\Source\Shared\WinRT\SignInUISettings_WinRT.cpp" />
     <ClCompile Include="..\..\Source\Shared\WinRT\Utils_WinRT.cpp" />
     <ClCompile Include="..\..\Source\Shared\WinRT\XboxLiveContextSettings_WinRT.cpp" />
     <ClCompile Include="..\..\Source\Shared\WinRT\XboxLiveLogCallEventArgs_WinRT.cpp" />
@@ -767,9 +766,6 @@
     <ClInclude Include="..\..\Source\Shared\WinRT\HttpRequestMessageType_WinRT.h" />
     <ClInclude Include="..\..\Source\Shared\WinRT\HttpCallRequestMessage_WinRT.h" />
     <ClInclude Include="..\..\Source\Shared\WinRT\ServiceCallLoggingConfig_WinRT.h" />
-    <ClInclude Include="..\..\Source\Shared\WinRT\SignInUIEmphasisFeature_WinRT.h" />
-    <ClInclude Include="..\..\Source\Shared\WinRT\SignInUIGameCategory_WinRT.h" />
-    <ClInclude Include="..\..\Source\Shared\WinRT\SignInUISettings_WinRT.h" />
     <ClInclude Include="..\..\Source\Shared\WinRT\XboxLiveContextSettings_WinRT.h" />
     <ClInclude Include="..\..\Source\Shared\WinRT\XboxLiveLogCallEventArgs_WinRT.h" />
     <ClInclude Include="..\..\Source\Shared\WinRT\XboxLiveServicesSettings_WinRT.h" />

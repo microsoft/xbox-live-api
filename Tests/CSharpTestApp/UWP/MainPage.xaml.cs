@@ -61,12 +61,6 @@ namespace Social
             bool APIExist = Windows.Foundation.Metadata.ApiInformation.IsMethodPresent("Windows.System.UserPicker", "IsSupported");
             m_isMultiUserApplication = APIExist && Windows.System.UserPicker.IsSupported();
 
-            // Hide switch user button as it is not supported on multi-user application
-            if (m_isMultiUserApplication)
-            {
-                SwitchAccountButton.Visibility = Visibility.Collapsed;
-            }
-
             // Only show the file picker for PC
             var deviceFamily = Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily;
             if (deviceFamily != "Windows.Desktop")
@@ -134,11 +128,6 @@ namespace Social
         private void SignInButton_Click(object sender, RoutedEventArgs e)
         {
             SignIn();
-        }
-
-        private void SwitchAccountButton_Click(object sender, RoutedEventArgs e)
-        {
-            SwitchAccount();
         }
 
         void ClearLogs()
@@ -216,26 +205,6 @@ namespace Social
                     Log("SignInSilentlyAsync failed.  Exception: " + e.ToString());
                 }
             });
-        }
-
-        async void SwitchAccount()
-        {
-            UserInfoLabel.Text = "Trying to Switch Account...";
-            Log(UserInfoLabel.Text);
-
-            // SwtichAccount only support Single User Application, so there will be only one user
-            
-            try
-            {
-                var userToSwitch = m_xboxliveContexts.First().Value.User;
-
-                var signInResult = await userToSwitch.SwitchAccountAsync(Windows.UI.Xaml.Window.Current.CoreWindow.Dispatcher);
-                HandleSignInResult(signInResult, userToSwitch);
-            }
-            catch (Exception e)
-            {
-                Log("SwitchAccountAsync failed.  Exception: " + e.ToString());
-            }
         }
 
         public async void LogEvent(String str)

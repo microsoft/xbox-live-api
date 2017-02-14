@@ -24,11 +24,6 @@ public:
         _In_ bool forceRefresh
         ) override;
 
-    virtual pplx::task<xbox::services::xbox_live_result<sign_in_result>> switch_account() override
-    {
-        return pplx::task_from_result(xbox::services::xbox_live_result<sign_in_result>());
-    } 
-
     virtual pplx::task<xbox_live_result<void>> sign_in_impl(
         _In_ const string_t& userDelegationTicket,
         _In_ bool forceRefresh

@@ -35,8 +35,6 @@ namespace Sample
         void OnOrientationChanged(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
         void OnDisplayContentsInvalidated(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
 
-        void SignInUISetup();
-
     private:
         std::shared_ptr<DX::DeviceResources> m_deviceResources;
         std::shared_ptr<Game> m_main;

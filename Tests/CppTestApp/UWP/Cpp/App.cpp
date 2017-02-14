@@ -81,8 +81,6 @@ void App::SetWindow(CoreWindow^ window)
 
     Platform::Agile<Windows::UI::Core::CoreWindow> agileWindow(window);
     m_agileWindow = agileWindow;
-
-    SignInUISetup();
 }
 
 // Initializes scene resources, or loads a previously saved app state.
@@ -203,29 +201,3 @@ void App::OnDisplayContentsInvalidated(DisplayInformation^ sender, Object^ args)
     m_deviceResources->ValidateDevice();
 }
 
-void App::SignInUISetup()
-{
-    auto& uiSettings = xbox::services::xbox_live_app_config::get_app_config_singleton()->app_signin_ui_settings();
-    uiSettings.set_background_hex_color(L"0F2C55");
-    uiSettings.set_game_category(xbox::services::signin_ui_settings::game_category::casual);
-    uiSettings.add_emphasis_feature(xbox::services::signin_ui_settings::emphasis_feature::achievements);
-    uiSettings.add_emphasis_feature(xbox::services::signin_ui_settings::emphasis_feature::connected_storage);
-    uiSettings.add_emphasis_feature(xbox::services::signin_ui_settings::emphasis_feature::find_players);
-
-    Windows::ApplicationModel::Package^ package = Windows::ApplicationModel::Package::Current;
-    Windows::Storage::StorageFolder^ installedLocation = package->InstalledLocation;
-    auto imagePath = installedLocation->Path + _T("\\Assets\\background.jpg");
-
-    std::ifstream in(imagePath->Data(), std::ios::in | std::ios::binary);
-    if (in)
-    {
-        std::vector<unsigned char> fileData;
-        in.seekg(0, std::ios::end);
-        size_t fileSizeInBytes = static_cast<size_t>(in.tellg());
-        fileData.resize(fileSizeInBytes);
-
-        in.seekg(0, std::ios::beg);
-        in.read(reinterpret_cast<char*>(&fileData[0]), fileData.size());
-        uiSettings.set_background_image(fileData);
-    }
-}

@@ -127,23 +127,6 @@ XboxLiveUser::SignInSilentlyAsync(
     return ASYNC_FROM_TASK(task);
 }
 
-IAsyncOperation<SignInResult^>^
-XboxLiveUser::SwitchAccountAsync(
-    _In_opt_ Platform::Object^ coreDispatcher
-    )
-{
-    xbox_live_context_settings::_Set_dispatcher(coreDispatcher);
-
-    auto task = GetUserImpl()->switch_account()
-     .then([](xbox_live_result<sign_in_result> t)
-    {
-        THROW_IF_ERR(t);
-        return ref new SignInResult(t.payload());
-    });
-
-    return ASYNC_FROM_TASK(task);
-}
-
 IAsyncOperation<GetTokenAndSignatureResult^>^
 wrap_result(_In_ pplx::task<xbox::services::xbox_live_result<token_and_signature_result>> inner)
 {
