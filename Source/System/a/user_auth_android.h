@@ -29,8 +29,7 @@ enum class xbox_shell_sign_in_status
 {
     success = sign_in_status::success,
     user_interaction_required = sign_in_status::user_interaction_required,
-    user_cancel = sign_in_status::user_cancel,
-    switch_account
+    user_cancel = sign_in_status::user_cancel
 };
 
 struct sign_in_and_auth_result

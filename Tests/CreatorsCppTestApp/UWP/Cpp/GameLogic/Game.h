@@ -18,7 +18,6 @@
 enum ButtonPress
 {
     SignIn,
-    SwitchAccount,
     ToggleSocialGroup1,
     ToggleSocialGroup2,
     ToggleSocialGroup3,
@@ -55,7 +54,6 @@ namespace Sample
 
         void SignIn();
         void SignInSilently();
-        void SwitchAccount();
 
         void HandleSignInResult(_In_ const xbox::services::system::sign_in_result &result);
 

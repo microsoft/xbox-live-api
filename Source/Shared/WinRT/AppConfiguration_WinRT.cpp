@@ -9,9 +9,6 @@
 //*********************************************************
 #include "pch.h"
 #include "AppConfiguration_WinRT.h"
-#if UWP_API || UNIT_TEST_SERVICES
-#include "SignInUISettings_WinRT.h"
-#endif
 
 using namespace Concurrency;
 using namespace Platform;
@@ -31,12 +28,5 @@ XboxLiveAppConfiguration::XboxLiveAppConfiguration(
 {
 }
 
-#if UWP_API || UNIT_TEST_SERVICES
-SignInUISettings^ 
-XboxLiveAppConfiguration::AppSignInUISettings::get()
-{
-    return ref new SignInUISettings(m_cppObj);
-}
-#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_END

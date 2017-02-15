@@ -109,22 +109,6 @@ public:
         );
 
     /// <summary>
-    /// Display UI allowing a user to switch to another Xbox Live account.
-    /// </summary>
-    /// <param name="coreDispatcher">The Windows Runtime core event message dispatcher.</param>
-    /// <returns>
-    /// An interface for tracking the progress of the asynchronous call.
-    /// </returns>
-    /// <remarks>
-    /// This is cast as Platform::Object^ instead of Windows::UI::Core::CoreDispatcher^ to avoid the
-    /// [Windows::Foundation::Metadata::WebHostHidden] requirement.
-    /// </remarks>
-    Windows::Foundation::IAsyncOperation<SignInResult^>^
-    SwitchAccountAsync(
-        _In_opt_ Platform::Object^ coreDispatcher
-        );
-
-    /// <summary>
     /// Retrieves an authorization token and digital signature for an HTTP request by this user,
     /// with no request body.
     /// </summary>

@@ -22,13 +22,6 @@ user_impl_server::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
     throw std::exception("not supported.");
 }
 
-pplx::task<xbox_live_result<sign_in_result>>
-user_impl_server::switch_account()
-{
-    throw std::exception("not supported.");
-}
-
-
 user_impl_server::user_impl_server(void *) :
     user_impl()
 {

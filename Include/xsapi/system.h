@@ -492,24 +492,6 @@ public:
     /// If you're calling this API from non-UI thread, parameter coreDispatcherObj is requried, so that app locale can be generated.
     /// </remarks>
     _XSAPIIMP pplx::task<xbox_live_result<sign_in_result>> signin_silently(_In_opt_ Platform::Object^ coreDispatcherObj);
-
-    /// <summary>
-    /// Attempt to silently sign a player into their Xbox Live account.
-    /// </summary>
-    /// <param name="coreDispatcherObj">The Windows Runtime core event message dispatcher.</param>
-    /// <returns>
-    /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
-    /// If silent sign-in is not successfull, result.err() indicates the error.
-    /// </returns>
-    /// <remarks>
-    /// You should only call this method if silent sign-in indicates that user interaction is required.
-    /// If you're calling this API from non-UI thread, parameter coreDispatcherObj is requried, so that app UI
-    /// can be rendered and locale can be generated.
-    /// </remarks>
-    _XSAPIIMP pplx::task<xbox_live_result<sign_in_result>> switch_account(_In_opt_ Platform::Object^ coreDispatcherObj);
-
-#else
-    _XSAPIIMP pplx::task<xbox_live_result<sign_in_result>> switch_account();
 #endif 
 
     /// <summary>

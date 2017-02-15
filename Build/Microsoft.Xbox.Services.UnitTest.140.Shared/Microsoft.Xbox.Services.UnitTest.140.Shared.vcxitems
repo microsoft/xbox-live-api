@@ -311,9 +311,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\HttpRequestMessageType_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\Macros_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\ServiceCallLoggingConfig_WinRT.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\SignInUIEmphasisFeature_WinRT.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\SignInUIGameCategory_WinRT.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\SignInUISettings_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\Utils_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxLiveContextSettings_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxLiveLogCallEventArgs_WinRT.h" />
@@ -702,7 +699,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\HttpCallRequestMessage_WinRT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\local_config_winrt.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\ServiceCallLoggingConfig_WinRT.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\SignInUISettings_WinRT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\Utils_WinRT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxLiveContextSettings_WinRT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxLiveLogCallEventArgs_WinRT.cpp" />

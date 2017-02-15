@@ -133,15 +133,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\ServiceCallLoggingConfig_WinRT.h">
       <Filter>XSAPI\Shared\WinRT</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\SignInUIEmphasisFeature_WinRT.h">
-      <Filter>XSAPI\Shared\WinRT</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\SignInUIGameCategory_WinRT.h">
-      <Filter>XSAPI\Shared\WinRT</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\SignInUISettings_WinRT.h">
-      <Filter>XSAPI\Shared\WinRT</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\Utils_WinRT.h">
       <Filter>XSAPI\Shared\WinRT</Filter>
     </ClInclude>
@@ -1122,9 +1113,6 @@
       <Filter>XSAPI\Shared\WinRT</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\ServiceCallLoggingConfig_WinRT.cpp">
-      <Filter>XSAPI\Shared\WinRT</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\SignInUISettings_WinRT.cpp">
       <Filter>XSAPI\Shared\WinRT</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\Utils_WinRT.cpp">

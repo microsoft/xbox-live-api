@@ -19,54 +19,6 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 static std::mutex g_appConfigSingletonLock;
 static std::shared_ptr<xbox_live_app_config> g_appConfigSingleton;
 
-#if UWP_API || UNIT_TEST_SERVICES
-void signin_ui_settings::set_background_image(const std::vector<unsigned char>& image)
-{
-    m_backgroundImageBase64Encoded = utility::conversions::to_base64(image);
-}
-
-bool signin_ui_settings::_Enabled()
-{
-    // If any of these settings are being set, enable UI customization 
-    return !m_backgroundColor.empty() ||
-        !m_backgroundImageBase64Encoded.empty() ||
-        m_features.size() > 0 ||
-        m_gameCategory != signin_ui_settings::game_category::standard;
-}
-
-string_t signin_ui_settings::_Feature_to_string(emphasis_feature feature)
-{
-    switch (feature)
-    {
-    case signin_ui_settings::emphasis_feature::achievements:
-        return _T("Achievements");
-    case signin_ui_settings::emphasis_feature::connected_storage:
-        return _T("ConnectedStorage");
-    case signin_ui_settings::emphasis_feature::find_players:
-        return _T("FindPlayers");
-    case signin_ui_settings::emphasis_feature::game_bar:
-        return _T("Gamebar");
-    case signin_ui_settings::emphasis_feature::game_dvr:
-        return _T("GameDVR");
-    case signin_ui_settings::emphasis_feature::leaderboards:
-        return _T("Leaderboards");
-    case signin_ui_settings::emphasis_feature::multiplayer:
-        return _T("Multiplayer");
-    case signin_ui_settings::emphasis_feature::purchase:
-        return _T("Purchase");
-    case signin_ui_settings::emphasis_feature::shared_content:
-        return _T("SharedContent");
-    case signin_ui_settings::emphasis_feature::social:
-        return _T("Social");
-    case signin_ui_settings::emphasis_feature::tournaments:
-        return _T("Tournaments");
-    default:
-        return _T("");
-    }
-}
-
-#endif
-
 std::shared_ptr<xbox_live_app_config> 
 xbox_live_app_config::get_app_config_singleton()
 {

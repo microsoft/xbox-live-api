@@ -1116,9 +1116,6 @@
     <ClCompile Include="..\..\Source\Services\Social\Manager\social_user_group_loaded_event_args.cpp">
       <Filter>C++ Source\Social\Manager</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Shared\WinRT\SignInUISettings_WinRT.cpp">
-      <Filter>C++ Source\Shared\WinRT Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Shared\initiator.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
@@ -2032,9 +2029,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialUserGroupLoadedEventArgs_WinRT.h">
       <Filter>C++ Source\Social\Manager\WinRT</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Shared\WinRT\SignInUISettings_WinRT.h">
-      <Filter>C++ Source\Shared\WinRT Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Shared\WinRT\SignInUIGameCategory_WinRT.h">
       <Filter>C++ Source\Shared\WinRT Source</Filter>

@@ -149,70 +149,6 @@ user_impl_idp::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
     return utils::create_exception_free_task<sign_in_result>(task);
 }
 
-pplx::task<xbox_live_result<sign_in_result>>
-user_impl_idp::switch_account()
-{
-    // Switch account only supported for SUA, for MUA, caller need to create a new xbox live user object for switching
-    if (!is_multi_user_application())
-    {
-        std::weak_ptr<user_impl_idp> thisWeakPtr = std::dynamic_pointer_cast<user_impl_idp>(shared_from_this());
-        auto task = initialize_provider()
-        .then([thisWeakPtr]()
-        {
-            return create_task([thisWeakPtr]()
-            {
-                std::shared_ptr<user_impl_idp> pThis(thisWeakPtr.lock());
-                if (pThis == nullptr)
-                {
-                    throw std::runtime_error("user_impl shutting down");
-                }
-
-                auto request = ref new WebTokenRequest(pThis->m_provider);
-                request->Properties->Insert("SwitchAccount", "");
-                request->Properties->Insert("Url", PLATFORM_STRING_FROM_STRING_T(pThis->m_authConfig->xbox_live_endpoint()));
-                request->Properties->Insert("Target", PLATFORM_STRING_FROM_STRING_T(pThis->m_authConfig->rps_ticket_service()));
-                request->Properties->Insert("Policy", PLATFORM_STRING_FROM_STRING_T(pThis->m_authConfig->rps_ticket_policy()));
-
-                pThis->user_signed_out();
-
-                WebTokenRequestResult^ tokenResult = pThis->request_token_from_idp(
-                    xbox_live_context_settings::_s_dispatcher,
-                    true,
-                    request
-                );
-
-                xbox_live_result<token_and_signature_result> result = pThis->convert_web_token_request_result(tokenResult);
-
-                if (result.err())
-                {
-                    return xbox_live_result<sign_in_result>(result.err(), result.err_message());
-                }
-                else
-                {
-                    auto& payload = result.payload();
-                    if (payload.token_request_result() == nullptr)
-                    {
-                        pThis->user_signed_in(payload.xbox_user_id(), payload.gamertag(), payload.age_group(), payload.privileges(), payload.web_account_id());
-
-                        return xbox_live_result<sign_in_result>(sign_in_status::success);
-                    }
-                    else
-                    {
-                        return xbox_live_result<sign_in_result>(convert_web_token_request_status(payload.token_request_result()));
-                    }
-                }
-            });
-        }, pplx::task_continuation_context::use_arbitrary());
-
-        return utils::create_exception_free_task<sign_in_result>(task);
-    }
-    else
-    {
-        return pplx::task_from_result(xbox_live_result<sign_in_result>(xbox_live_error_code::unsupported, "Switching account is not supported for multi-user application, please create new xbox live user object."));
-    }
-}
-
-
 
 pplx::task<void>
 user_impl_idp::initialize_provider()
@@ -356,42 +292,8 @@ user_impl_idp::internal_get_token_and_signature_helper(
     if (promptForCredentialsIfNeeded)
     {
         // Sign in UI settings
-        auto& uiSettings = xbox_live_app_config::get_app_config_singleton()->app_signin_ui_settings();
-
         String^ pfn = Windows::ApplicationModel::Package::Current->Id->FamilyName;
         request->Properties->Insert("PackageFamilyName", pfn);
-
-        if (uiSettings._Enabled())
-        {
-            if (!uiSettings.background_hex_color().empty())
-            {
-                request->Properties->Insert("PreferredColor", PLATFORM_STRING_FROM_STRING_T(uiSettings.background_hex_color()));
-            }
-
-            if (uiSettings.title_category() == signin_ui_settings::game_category::casual)
-            {
-                request->Properties->Insert("CasualGame", "");
-            }
-
-            if (!uiSettings._Background_image_base64_encoded().empty())
-            {
-                request->Properties->Insert("TitleUpsellImage", PLATFORM_STRING_FROM_STRING_T(uiSettings._Background_image_base64_encoded()));
-            }
-
-            auto featureCount = uiSettings.emphasis_features().size();
-            if (featureCount > 0)
-            {
-                featureCount = __min(3, featureCount);
-                string_t bullets;
-                auto iter = uiSettings.emphasis_features().begin();
-                for (size_t i = 0; i < featureCount; i++,iter++)
-                {
-                    bullets += signin_ui_settings::_Feature_to_string(*iter) + _T(",");
-                }
-
-                request->Properties->Insert("TitleUpsellFeatures", PLATFORM_STRING_FROM_STRING_T(bullets));
-            }
-        }
     }
 
     WebTokenRequestResult^ tokenResult = request_token_from_idp(

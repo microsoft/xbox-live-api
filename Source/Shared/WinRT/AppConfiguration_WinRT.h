@@ -16,10 +16,6 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_BEGIN
 
-#if UWP_API || UNIT_TEST_SERVICES
-ref class SignInUISettings;
-#endif
-
 /// <summary>
 /// Represents the configuration of an Xbox Live application.
 /// </summary>
@@ -53,13 +49,6 @@ public:
     /// Returns the sandbox such as "XDKS.1".
     /// </summary>
     DEFINE_PTR_PROP_GET_STR_OBJ(Sandbox, sandbox);
-
-#if UWP_API || UNIT_TEST_SERVICES
-    property SignInUISettings^ AppSignInUISettings
-    {
-        SignInUISettings^ get();
-    }
-#endif
 
 internal:
     XboxLiveAppConfiguration(
