@@ -69,8 +69,6 @@ namespace Social
                 ImportSocialGroup_List.Visibility = Visibility.Collapsed;
             }
 
-            SetupSignInUI();
-
             m_socialManagerUI.Init(this);
             CompositionTarget.Rendering += CompositionTarget_Rendering;
 
@@ -78,24 +76,6 @@ namespace Social
             SignInSilently();
 
             ReadLastCsv();
-        }
-
-        private void SetupSignInUI()
-        {
-            var uiSettings = Microsoft.Xbox.Services.XboxLiveAppConfiguration.SingletonInstance.AppSignInUISettings;
-            uiSettings.TitleCategory = Microsoft.Xbox.Services.SignInUIGameCategory.Casual;
-            uiSettings.BackgroundHexColor = "0F2C55";
-            uiSettings.AddEmphasisFeature(Microsoft.Xbox.Services.SignInUIEmphasisFeature.Achievements);
-            uiSettings.AddEmphasisFeature(Microsoft.Xbox.Services.SignInUIEmphasisFeature.ConnectedStorage);
-            uiSettings.AddEmphasisFeature(Microsoft.Xbox.Services.SignInUIEmphasisFeature.FindPlayers);
-
-            var installDir = Windows.ApplicationModel.Package.Current.InstalledLocation;
-            using (FileStream fs = File.OpenRead(installDir.Path + "\\Assets\\background.jpg"))
-            {
-                byte[] image = new byte[fs.Length];
-                fs.Read(image, 0, (int)fs.Length);
-                uiSettings.SetBackgroundImage(image);
-            }
         }
 
         private async void ReadLastCsv()
