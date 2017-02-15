@@ -73,12 +73,12 @@ mkdir %XDK_BINARIES_DROP%\cpp\binaries\debug\v110
 mkdir %XDK_BINARIES_DROP%\cpp\binaries\release\v140
 mkdir %XDK_BINARIES_DROP%\cpp\binaries\debug\v140
 
-copy %XDK_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.140.XDK.WinRT\Microsoft.Xbox.Services.dll %XDK_BINARIES_DROP%\winrt\binaries\CommonConfiguration\Microsoft.Xbox.Services.dll
-copy %XDK_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.140.XDK.WinRT\Microsoft.Xbox.Services.dll %XDK_BINARIES_DROP%\winrt\binaries\Debug\Microsoft.Xbox.Services.dll
-copy %XDK_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.140.XDK.WinRT\Microsoft.Xbox.Services.winmd %XDK_BINARIES_DROP%\winrt\binaries\CommonConfiguration\
-copy %XDK_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.140.XDK.WinRT\Microsoft.Xbox.Services.winmd %XDK_BINARIES_DROP%\winrt\binaries\Debug\
-copy %XDK_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.140.XDK.WinRT\Microsoft.Xbox.Services.pdb %XDK_BINARIES_DROP%\winrt\binaries\Debug\Microsoft.Xbox.Services.pdb
-copy %XDK_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.140.XDK.WinRT\Microsoft.Xbox.Services.pdb %XDK_BINARIES_DROP%\winrt\binaries\CommonConfiguration\Microsoft.Xbox.Services.pdb
+copy %XDK_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.dll %XDK_BINARIES_DROP%\winrt\binaries\CommonConfiguration\Microsoft.Xbox.Services.dll
+copy %XDK_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.dll %XDK_BINARIES_DROP%\winrt\binaries\Debug\Microsoft.Xbox.Services.dll
+copy %XDK_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.winmd %XDK_BINARIES_DROP%\winrt\binaries\CommonConfiguration\
+copy %XDK_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.winmd %XDK_BINARIES_DROP%\winrt\binaries\Debug\
+copy %XDK_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.pdb %XDK_BINARIES_DROP%\winrt\binaries\Debug\Microsoft.Xbox.Services.pdb
+copy %XDK_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.pdb %XDK_BINARIES_DROP%\winrt\binaries\CommonConfiguration\Microsoft.Xbox.Services.pdb
 
 copy %XDK_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.110.XDK.Ship.Cpp\Microsoft.Xbox.Services.110.XDK.Ship.Cpp.lib %XDK_BINARIES_DROP%\cpp\binaries\release\v110\Microsoft.Xbox.Services.110.XDK.Ship.Cpp.lib.remove
 copy %XDK_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.110.XDK.Ship.Cpp\Microsoft.Xbox.Services.110.XDK.Ship.Cpp.lib %XDK_BINARIES_DROP%\cpp\binaries\debug\v110\Microsoft.Xbox.Services.110.XDK.Ship.Cpp.lib.remove
