@@ -13,7 +13,10 @@
 #include "shared_macros.h"
 #include "system_internal.h"
 #include "auth_config.h"
+#if defined(XSAPI_SERVER)
 #include "auth/auth_manager.h"
+#endif
+
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
