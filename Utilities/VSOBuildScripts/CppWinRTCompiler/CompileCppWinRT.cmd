@@ -19,13 +19,13 @@ if "%XES_SERIALPOSTBUILDREADY%" == "True" goto serializeForPostbuild
 goto done
 
 :serializeForPostbuild
-set REMOTE_COMPILER_FOLDER=\\redmond\osg\Threshold\Tools\CORE\DEP\DART\CppForWinRT\1.0.161012.5
+set REMOTE_COMPILER_FOLDER=\\scratch2\scratch\jasonsa\tools\cppwinrt
 set WINSDKVER=160801
 set OUTFOLDER=%2
 
 if "%1" EQU "" set SDKSRC=%TFS_SourcesDirectory%
 if "%2" EQU "" set OUTFOLDER=%TFS_DropLocation%\CppWinRT
-set REMOTE_COMPILER=%REMOTE_COMPILER_FOLDER%\x64\release\compiler
+set REMOTE_COMPILER=%REMOTE_COMPILER_FOLDER%
 set LOCAL_COMPILER=%OUTFOLDER%\bin
 set LOCAL_COMPILER_1=%LOCAL_COMPILER%\cppwinrt1.exe
 set LOCAL_COMPILER_2=%LOCAL_COMPILER%\cppwinrt2.exe
