@@ -10,9 +10,6 @@
 #pragma once
 #include "pch.h"
 #include "xbox_system_factory.h"
-#include "MockUserTokenService.h"
-#include "MockXstsTokenService.h"
-#include "MockXTitleService.h"
 #include "MockUser.h"
 #include "MockHttpCall.h"
 #include "MockHttpClient.h"
@@ -103,12 +100,7 @@ public:
         _In_ const std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)>& subscriptionErrorHandler
     ) override;
 
-    std::shared_ptr<MockXstsTokenService> GetMockXstsTokenService() { return m_mockXstsToken; }
-    std::shared_ptr<MockUserTokenService> GetMockUserTokenService() { return m_mockUserToken; }
-    std::shared_ptr<MockTitleTokenService> GetMockTitleTokenService() { return m_mockTitleToken; }
-    std::shared_ptr<MockServiceTokenService> GetMockServiceTokenService() { return m_mockServiceToken; }
     std::shared_ptr<MockUser> GetMockUser() { return m_mockUser; }
-    std::shared_ptr<MockXTitleService> GetMockXTitleService() { return m_mockXTitle; }
     std::shared_ptr<MockHttpCall> GetMockHttpCall() { return m_mockHttpCall; }
     std::shared_ptr<MockHttpClient> GetMockHttpClient() { return m_mockHttpClient; }
     std::shared_ptr<MockWebSocketClient> GetMockWebSocketClient();
@@ -131,12 +123,7 @@ private:
 
     bool m_setupMockForHttpClient;
     uint32_t m_webSocketClientCounter;
-    std::shared_ptr<MockXstsTokenService> m_mockXstsToken;
-    std::shared_ptr<MockUserTokenService> m_mockUserToken;
-    std::shared_ptr<MockTitleTokenService> m_mockTitleToken;
-    std::shared_ptr<MockServiceTokenService> m_mockServiceToken;
     std::shared_ptr<MockUser> m_mockUser;
-    std::shared_ptr<MockXTitleService> m_mockXTitle;
     std::shared_ptr<MockHttpCall> m_mockHttpCall;
     std::shared_ptr<MockHttpClient> m_mockHttpClient;
     std::vector<std::shared_ptr<MockWebSocketClient>> m_mockWebSocketClients;
