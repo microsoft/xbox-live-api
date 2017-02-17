@@ -47,7 +47,7 @@ set WINSDK_LOCAL_OUT_BASE=%SDKSRC%\Utilities\VSOBuildScripts\CppWinRTCompiler\Wi
 set WINSDK_LOCAL_OUT=%SDKSRC%\Utilities\VSOBuildScripts\CppWinRTCompiler\WinSDK_Headers
 set WINSDK_LOCAL_OUT_XSAPI=%OUTFOLDER%\XSAPI_WinSDK_Headers
 set WINSDK_XSAPI_WINRT=
-if EXIST %TFS_DropLocation%\Release\x64\Microsoft.Xbox.Services.110.UWP.WinRT\Microsoft.Xbox.Services.winmd set WINSDK_XSAPI_WINRT=%TFS_DropLocation%\Release\x64\Microsoft.Xbox.Services.110.UWP.WinRT\Microsoft.Xbox.Services.winmd
+if EXIST %TFS_DropLocation%\Release\x64\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.winmd set WINSDK_XSAPI_WINRT=%TFS_DropLocation%\Release\x64\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.winmd
 
 robocopy /NJS /NJH /MT:16 /S /NP %REMOTE_COMPILER% %LOCAL_COMPILER%
 echo ERRORLEVEL %ERRORLEVEL%
