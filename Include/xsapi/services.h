@@ -25,10 +25,10 @@
 #include "xsapi/leaderboard.h"
 #include "xsapi/title_storage.h"
 #include "xsapi/privacy.h"
-#include "xsapi/profile.h"
 #include "xsapi/social_manager.h"
 
 #if !defined(XBOX_LIVE_CREATORS_SDK)
+#include "xsapi/profile.h"
 #include "xsapi/social.h"
 #include "xsapi/achievements.h"
 #include "xsapi/user_statistics.h"
