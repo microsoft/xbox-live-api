@@ -158,9 +158,7 @@ public:
     /// A service for storing data in the cloud.
     /// </summary>
     _XSAPIIMP title_storage::title_storage_service& title_storage_service();
-#endif // !BEAM_API
 
-#if !BEAM_API && !defined(XBOX_LIVE_CREATORS_SDK)
     /// <summary>
     /// A service for managing user profiles.
     /// </summary>
@@ -250,7 +248,7 @@ public:
     _XSAPIIMP entertainment_profile::entertainment_profile_list_service& entertainment_profile_list_service();
 #endif // TV_API || UNIT_TEST_SERVICES
 
-#endif // !BEAM_API && !XBOX_LIVE_CREATORS_SDK
+#endif // !BEAM_API 
 
 #if (TV_API | XBOX_UWP) && defined(XSAPI_CPPWINRT)
     _XSAPIIMP xbox_live_context(
@@ -272,3 +270,4 @@ private:
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+
