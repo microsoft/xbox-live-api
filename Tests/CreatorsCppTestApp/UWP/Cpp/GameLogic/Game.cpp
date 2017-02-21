@@ -486,9 +486,9 @@ void Game::UpdateSocialGroupForAllUsers(
     _In_ relationship_filter relationshipFilter
     )
 {
-    if (m_xboxLiveContext != nullptr)
+    if (GetUser() != nullptr)
     {
-        UpdateSocialGroup(m_xboxLiveContext->user(), toggle, presenceFilter, relationshipFilter);
+        UpdateSocialGroup(GetUser(), toggle, presenceFilter, relationshipFilter);
     }
 }
 
@@ -499,26 +499,24 @@ void Game::UpdateSocialGroup(
     _In_ relationship_filter relationshipFilter
     )
 {
-    std::shared_ptr<xbox::services::xbox_live_context> xboxLiveContext = m_xboxLiveContext;
-
-    if (xboxLiveContext != nullptr)
+    if (GetUser() != nullptr)
     {
         if (toggle)
         {
-            CreateSocialGroupFromFilters(xboxLiveContext->user(), presenceFilter, relationshipFilter);
+            CreateSocialGroupFromFilters(GetUser(), presenceFilter, relationshipFilter);
         }
         else
         {
-            DestroySocialGroup(xboxLiveContext->user(), presenceFilter, relationshipFilter);
+            DestroySocialGroup(GetUser(), presenceFilter, relationshipFilter);
         }
     }
 }
 
 void Game::UpdateSocialGroupOfListForAllUsers(_In_ bool toggle)
 {
-    if (m_xboxLiveContext != nullptr)
+    if (GetUser() != nullptr)
     {
-        return UpdateSocialGroupOfList(m_xboxLiveContext->user(), toggle);
+        return UpdateSocialGroupOfList(GetUser(), toggle);
     }
 }
 
@@ -527,17 +525,15 @@ void Game::UpdateSocialGroupOfList(
     _In_ bool toggle
     )
 {
-    std::shared_ptr<xbox::services::xbox_live_context> xboxLiveContext = m_xboxLiveContext;
-
-    if (xboxLiveContext != nullptr)
+    if (GetUser() != nullptr)
     {
         if (toggle)
         {
-            CreateOrUpdateSocialGroupFromList(xboxLiveContext->user(), m_xuidList);
+            CreateOrUpdateSocialGroupFromList(GetUser(), m_xuidList);
         }
         else
         {
-            DestorySocialGroupFromList(xboxLiveContext->user());
+            DestorySocialGroupFromList(GetUser());
         }
     }
 }
@@ -549,7 +545,6 @@ void Game::HandleSignInResult(
     switch (result.status())
     {
         case xbox::services::system::sign_in_status::success:
-            m_xboxLiveContext = std::make_shared< xbox::services::xbox_live_context >(m_user);
             AddUserToSocialManager(m_user);
             Log(L"Sign in succeeded");
             break;
@@ -629,9 +624,6 @@ void Game::SignInSilently()
 
 void Game::HandleSignout(_In_ std::shared_ptr<xbox::services::system::xbox_live_user> user)
 {
-    std::shared_ptr<xbox::services::xbox_live_context> xblContext = GetXboxLiveContext();
-    m_xboxLiveContext = nullptr;
-
     WCHAR text[1024];
     swprintf_s(text, ARRAYSIZE(text), L"User %s signed out", user->gamertag().c_str());
     Log(text);

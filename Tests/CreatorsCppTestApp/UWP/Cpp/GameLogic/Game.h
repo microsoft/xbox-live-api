@@ -69,14 +69,14 @@ namespace Sample
 
         void Log(string_t log);
 
-        int GetNumberOfUserInGraph() { return (m_xboxLiveContext == nullptr) ? 0 : 1; }
+        int GetNumberOfUserInGraph() { return (m_user == nullptr) ? 0 : 1; }
         bool GetAllFriends() { return m_allFriends; }
         bool GetOnlineFriends() { return m_onlineFriends; }
         bool GetAllFavs() { return m_allFavs; }
         bool GetOnlineInTitle() { return m_onlineInTitle; }
         bool GetCustomList() { return m_customList; }
 
-        std::shared_ptr<xbox::services::xbox_live_context> GetXboxLiveContext() { return m_xboxLiveContext; }
+        std::shared_ptr<xbox::services::system::xbox_live_user> GetUser() { return m_user; }
         std::vector<std::shared_ptr<xbox::services::social::manager::xbox_social_user_group>> GetSocialGroups();
 
         static std::mutex m_socialManagerLock;
@@ -102,7 +102,6 @@ namespace Sample
         Input^ m_input;
 
         Concurrency::critical_section m_stateLock;
-        std::shared_ptr<xbox::services::xbox_live_context> m_xboxLiveContext;
         std::shared_ptr<xbox::services::system::xbox_live_user> m_user;
         function_context m_signOutContext;
 
