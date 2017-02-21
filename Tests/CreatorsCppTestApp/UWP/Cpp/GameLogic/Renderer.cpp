@@ -177,7 +177,7 @@ void Renderer::RenderMenuOptions(
         L"Press 5 to toggle social group for custom list (%s).\n"
         L"Press C to import custom list.\n",
         g_sampleInstance->GetNumberOfUserInGraph(),
-        g_sampleInstance->GetXboxLiveContext() == nullptr ? L"n/a" : g_sampleInstance->GetXboxLiveContext()->user()->gamertag().c_str(),
+        g_sampleInstance->GetUser() == nullptr ? L"n/a" : g_sampleInstance->GetUser()->gamertag().c_str(),
         g_sampleInstance->GetAllFriends() ? L"On" : L"Off",
         g_sampleInstance->GetOnlineFriends() ? L"On" : L"Off",
         g_sampleInstance->GetAllFavs() ? L"On" : L"Off",
