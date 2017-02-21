@@ -2,7 +2,7 @@ rem See https://microsoft.sharepoint.com/teams/osg_xboxtv/xengsrv/SitePages/Exte
 rem if '%TFS_IsFirstBuild%' NEQ 'True' goto done
 echo Running preCompileScript.cmd
 
-call %TFS_SourcesDirectory%\setBuildVersion.cmd
+call %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\setBuildVersion.cmd
 
 for /f "tokens=2 delims==" %%G in ('wmic os get localdatetime /value') do set datetime=%%G
 

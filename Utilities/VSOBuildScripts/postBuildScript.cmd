@@ -108,6 +108,17 @@ rmdir /s /q %XDK_BINARIES_DROP%\source\InProgressSamples
 rmdir /s /q %XDK_BINARIES_DROP%\source\Tests
 rmdir /s /q %XDK_BINARIES_DROP%\source\Utilities
 rmdir /s /q %XDK_BINARIES_DROP%\source\External\cppwinrt
+rmdir /s /q %XDK_BINARIES_DROP%\source\External\Packages
+rmdir /s /q %XDK_BINARIES_DROP%\source\External\cpprestsdk\Release\samples
+rmdir /s /q %XDK_BINARIES_DROP%\source\External\cpprestsdk\Release\tests
+rmdir /s /q %XDK_BINARIES_DROP%\source\External\cpprestsdk\Release\libs
+rmdir /s /q %XDK_BINARIES_DROP%\source\Binaries
+rmdir /s /q %XDK_BINARIES_DROP%\source\Build\Microsoft.Xbox.Services.UnitTest.140.Shared
+rmdir /s /q %XDK_BINARIES_DROP%\source\Build\Microsoft.Xbox.Services.UnitTest.140.TAEF
+rmdir /s /q %XDK_BINARIES_DROP%\source\Build\Microsoft.Xbox.Services.UnitTest.140.TE
+rmdir /s /q %XDK_BINARIES_DROP%\source\Build\Microsoft.Xbox.Services.140.UWP.Cpp
+rmdir /s /q %XDK_BINARIES_DROP%\source\Build\Microsoft.Xbox.Services.140.UWP.WinRT
+del /s %XDK_BINARIES_DROP%\source\*.log
 del %XDK_BINARIES_DROP%\source\*.md
 mkdir %XDK_BINARIES_DROP%\SourceDist
 \\scratch2\scratch\jasonsa\tools\vZip.exe /FOLDER:%XDK_BINARIES_DROP%\source /OUTPUTNAME:%XDK_BINARIES_DROP%\SourceDist\Xbox.Services.zip
