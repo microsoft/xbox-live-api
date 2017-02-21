@@ -150,11 +150,6 @@ public:
 
 #if !BEAM_API
     /// <summary>
-    /// A service for managing user profiles.
-    /// </summary>
-    _XSAPIIMP social::profile_service& profile_service();
-
-    /// <summary>
     /// A service for managing leaderboards.
     /// </summary>
     _XSAPIIMP leaderboard::leaderboard_service& leaderboard_service();
@@ -166,6 +161,11 @@ public:
 #endif // !BEAM_API
 
 #if !BEAM_API && !defined(XBOX_LIVE_CREATORS_SDK)
+    /// <summary>
+    /// A service for managing user profiles.
+    /// </summary>
+    _XSAPIIMP social::profile_service& profile_service();
+
     /// <summary>
     /// A service for managing social networking links.
     /// </summary>

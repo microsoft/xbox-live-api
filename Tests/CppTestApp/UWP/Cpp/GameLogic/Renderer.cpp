@@ -170,7 +170,6 @@ void Renderer::RenderMenuOptions(
 
     swprintf_s(text, ARRAYSIZE(text),
         L"Press S to sign-in (%d user signed in: %s).\n"
-        L"Press X to switch account.\n"
         L"Press 1 to toggle social group for all friends (%s).\n"
         L"Press 2 to toggle social group for online friends (%s).\n"
         L"Press 3 to toggle social group for all favorites (%s).\n"
