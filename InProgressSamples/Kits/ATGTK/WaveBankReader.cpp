@@ -1,18 +1,9 @@
-//--------------------------------------------------------------------------------------
-// File: WaveBankReader.cpp
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 //
 // Functions for loading audio data from Wave Banks
 //
-// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
-// Copyright (c) Microsoft Corporation. All rights reserved.
-//
-// http://go.microsoft.com/fwlink/?LinkId=248929
-//-------------------------------------------------------------------------------------
-
 #include "pch.h"
 #include "WaveBankReader.h"
 
