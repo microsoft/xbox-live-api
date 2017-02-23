@@ -1,12 +1,7 @@
-//*********************************************************
-//
-// Copyright (c) Microsoft. All rights reserved.
-// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-//
-//*********************************************************
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+
 #define DEFINE_TEST_CASE_TAEF(TestCaseMethodName)  \
     BEGIN_TEST_METHOD(TestCaseMethodName) \
         TEST_METHOD_PROPERTY(L"Owner", TEST_CLASS_OWNER) \

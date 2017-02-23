@@ -1,8 +1,6 @@
-/////////////////////////////////////////////////////////////////////////////////
-//
-// Copyright (C) Microsoft Corporation. All rights reserved.
-//
-////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 #pragma once
 const std::wstring statValueDocumentResponse = LR"({
     "revision": 1,

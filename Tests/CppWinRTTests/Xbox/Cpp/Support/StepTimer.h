@@ -1,4 +1,7 @@
-﻿//
+﻿// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+//
 // StepTimer.h - A simple timer that provides elapsed time information
 //
 
