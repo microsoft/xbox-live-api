@@ -133,7 +133,7 @@ public:
     /// Represents error code and error message
     /// </summary>
     /// <return>The returned xbox live result</return>
-    const xbox_live_result<void>& error_info() const;
+    xbox_live_result<void>& error_info();
 
     /// <summary> 
     /// The type of event the statistic is
@@ -169,7 +169,7 @@ public:
     /// <summary> 
     /// Instantiates and returns an instance of stats manager
     /// </summary>
-    static stats_manager& get_singleton_instance();
+    static std::shared_ptr<stats_manager> get_singleton_instance();
 
     /// <summary> 
     /// Adds a local user to the stats manager
@@ -268,7 +268,18 @@ public:
     /// <param name="user">The local user whose stats to access</param>
     /// <param name="name">The name of the statistic to modify</param>
     /// <return>Whether or not the setting was successful along with updated stat</return>
-    xbox_live_result<std::shared_ptr<stat_value>> get_stat(
+    xbox_live_result<stat_value> get_stat(
+        _In_ const xbox_live_user_t& user,
+        _In_ const string_t& name
+        );
+
+    /// <summary> 
+    /// Deletes a stat. Will clear stat from service and social leaderboard information
+    /// </summary>
+    /// <param name="user">The local user whose stats to access</param>
+    /// <param name="name">The name of the statistic to delete</param>
+    /// <return>Whether or not the stat deletion was successful</return>
+    xbox_live_result<void> delete_stat(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& name
         );

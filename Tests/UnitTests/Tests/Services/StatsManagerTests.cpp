@@ -112,6 +112,7 @@ public:
 
         statsManager->DoWork();
 
+        numericStat = statsManager->GetStatistic(user, statName);
         VERIFY_IS_TRUE(numericStat->DataType == StatisticDataType::Number);
         VERIFY_IS_TRUE(numericStat->AsNumber == 20.f);
 
@@ -137,8 +138,23 @@ public:
         statsManager->RequestFlushToService(user);
         auto eventList = statsManager->DoWork();
         Sleep(500); // fix
+        fastestRoundStat = statsManager->GetStatistic(user, L"fastestRound");
         VERIFY_IS_TRUE(fastestRoundStat->AsInteger == 3);
         VERIFY_IS_TRUE(fastestRoundStat->DataType == StatisticDataType::Number);
+
+        Cleanup(statsManager, user);
+    }
+
+    DEFINE_TEST_CASE(StatisticManagerDeleteStat)
+    {
+        DEFINE_TEST_CASE_PROPERTIES(StatisticManagerRequestFlushToService);
+        auto statsManager = StatisticManager::SingletonInstance;
+        auto mockXblContext = GetMockXboxLiveContext_WinRT();
+        auto user = mockXblContext->User;
+        InitializeStatsManager(statsManager, user);
+        statsManager->DeleteStatistic(user, L"fastestRound");
+        auto eventList = statsManager->DoWork();
+        VERIFY_THROWS_HR_CX(statsManager->GetStatistic(user, L"fastestRound"), E_INVALIDARG);
 
         Cleanup(statsManager, user);
     }

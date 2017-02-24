@@ -13,12 +13,12 @@ using namespace xbox::services::system;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
 
-stats_manager&
+std::shared_ptr<stats_manager>
 stats_manager::get_singleton_instance()
 {
     static std::mutex s_singletonLock;
     std::lock_guard<std::mutex> guard(s_singletonLock);
-    static stats_manager instance;
+    static std::shared_ptr<stats_manager> instance = std::make_shared<stats_manager>();
     return instance;
 }
 
@@ -104,7 +104,7 @@ stats_manager::set_stat_as_string(
         );
 }
 
-xbox_live_result<std::shared_ptr<stat_value>>
+xbox_live_result<stat_value>
 stats_manager::get_stat(
     _In_ const xbox_live_user_t& user,
     _In_ const string_t& name
@@ -125,6 +125,18 @@ stats_manager::get_stat_names(
     return m_statsManagerImpl->get_stat_names(
         user,
         statNameList
+        );
+}
+
+xbox_live_result<void>
+stats_manager::delete_stat(
+    _In_ const xbox_live_user_t& user,
+    _In_ const string_t& name
+    )
+{
+    return m_statsManagerImpl->delete_stat(
+        user,
+        name
         );
 }
 

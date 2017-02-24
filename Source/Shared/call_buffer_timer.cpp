@@ -36,6 +36,7 @@ call_buffer_timer::call_buffer_timer(
 void
 call_buffer_timer::fire()
 {
+    std::lock_guard<std::mutex> lock(m_timerLock);
     fire_helper();
 }
 
@@ -101,14 +102,21 @@ call_buffer_timer::fire_helper(
             std::shared_ptr<call_buffer_timer> pThis(thisWeakPtr.lock());
             if (pThis != nullptr)
             {
-                std::lock_guard<std::mutex> lock(pThis->m_timerLock);
-                pThis->m_isTaskInProgress = false;
+                {
+                    std::lock_guard<std::mutex> lock(pThis->m_timerLock);
+                    pThis->m_isTaskInProgress = false;
+                }
+
+                // no lock around this since it is never set after construction and can cause deadlock
                 pThis->m_fCallback(usersToCall, usersAddedStruct);
 
-                if (pThis->m_queuedTask)
                 {
-                    pThis->m_queuedTask = false;
-                    pThis->fire_helper();
+                    std::lock_guard<std::mutex> lock(pThis->m_timerLock);
+                    if (pThis->m_queuedTask)
+                    {
+                        pThis->m_queuedTask = false;
+                        pThis->fire_helper();
+                    }
                 }
             }
         });

@@ -30,6 +30,8 @@ simplified_stats_service::update_stats_value_document(
     _In_ stats_value_document& statValuePostDocument
     )
 {
+    statValuePostDocument.increment_revision();
+
     string_t pathAndQuery = pathandquery_simplified_stats_subpath(
         m_userContext->xbox_user_id(),
         m_appConfig->scid(),
@@ -47,13 +49,8 @@ simplified_stats_service::update_stats_value_document(
     httpCall->set_request_body(statValuePostDocument.serialize());
 
     auto task = httpCall->get_response_with_auth(m_userContext, http_call_response_body_type::json_body)
-    .then([&statValuePostDocument](std::shared_ptr<http_call_response> response)
+    .then([](std::shared_ptr<http_call_response> response)
     {
-        if (!response->err_code())
-        {
-            statValuePostDocument.increment_revision();
-        }
-
         return xbox_live_result<void>(response->err_code(), response->err_message());
     });
 

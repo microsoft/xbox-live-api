@@ -13,7 +13,7 @@ using namespace Microsoft::Xbox::Services::System;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 
 StatisticValue::StatisticValue(
-    _In_ std::shared_ptr<stat_value> cppObj
+    _In_ stat_value cppObj
     ) :
     m_cppObj(std::move(cppObj))
 {
