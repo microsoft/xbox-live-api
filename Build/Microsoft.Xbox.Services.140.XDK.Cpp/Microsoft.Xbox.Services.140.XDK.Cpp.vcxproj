@@ -333,15 +333,15 @@
     <ClInclude Include="..\..\Source\System\system_internal.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.xbox\casablanca140.Xbox.vcxproj">
-      <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\..\Source\Shared\Logger\ERA_ETW.man" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\Source\Shared\Logger\ERA_ETW.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.xbox\casablanca140.Xbox.vcxproj">
+      <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <ProjectFolder>$(MSBuildProjectName)</ProjectFolder>

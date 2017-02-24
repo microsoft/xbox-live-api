@@ -40,11 +40,18 @@ public:
     /// Force the current stat values to be uploaded to the service
     /// This will send immediately instead of automatically during a 30 second window
     /// </summary>
+    /// <param name="user">The user to flush the stat for</param>
     /// <remarks>This can be throttled if called too often</remarks>
     void RequestFlushToService(
         _In_ XboxLiveUser_t user
         );
 
+    /// <summary> 
+    /// Force the current stat values to be uploaded to the service
+    /// This will send immediately instead of automatically during a 30 second window
+    /// </summary>
+    /// <param name="user">The user to flush the stat for</param>
+    /// <remarks>This can be throttled if called too often</remarks>
     void RequestFlushToService(
         _In_ XboxLiveUser_t user,
         _In_ bool isHighPriority
@@ -110,8 +117,18 @@ public:
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
     /// <param name="name">The name of the statistic to modify</param>
-    /// <return>Whether or not the setting was successful along with updated stat</return>
+    /// <return>The updated stat</return>
     StatisticValue^ GetStatistic(
+        _In_ XboxLiveUser_t user,
+        _In_ Platform::String^ name
+        );
+
+    /// <summary> 
+    /// Deletes a stat value
+    /// </summary>
+    /// <param name="user">The local user whose stats to access</param>
+    /// <param name="name">The name of the statistic to modify</param>
+    void DeleteStatistic(
         _In_ XboxLiveUser_t user,
         _In_ Platform::String^ name
         );
@@ -120,7 +137,7 @@ internal:
     StatisticManager();
 
 private:
-    xbox::services::stats::manager::stats_manager m_cppObj;
+   std::shared_ptr<xbox::services::stats::manager::stats_manager> m_cppObj;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_END

@@ -7,6 +7,7 @@
 #include "xsapi/services.h"
 #include "xsapi/system.h"
 #include "xbox_live_context_impl.h"
+#include "ppltasks_extra.h"
 
 using namespace xbox::services;
 using namespace xbox::services::system;
@@ -20,8 +21,9 @@ std::chrono::seconds::zero();
 std::chrono::seconds(60);
 #endif
 
+const std::chrono::milliseconds stats_manager_impl::STATS_POLL_TIME_MS = std::chrono::minutes(5);
+
 stats_manager_impl::stats_manager_impl()
-    : m_isOffline(false)
 {
 }
 
@@ -35,7 +37,7 @@ stats_manager_impl::initialize()
         std::shared_ptr<stats_manager_impl> pThis(thisWeakPtr.lock());
         if (pThis != nullptr && !eventArgs.empty())
         {
-            pThis->flush_to_service_callback(eventArgs[0]);
+            pThis->request_flush_to_service_callback(eventArgs[0]);
         }
     },
     TIME_PER_CALL_SEC
@@ -47,11 +49,37 @@ stats_manager_impl::initialize()
         std::shared_ptr<stats_manager_impl> pThis(thisWeakPtr.lock());
         if (pThis != nullptr && !eventArgs.empty())
         {
-            pThis->flush_to_service_callback(eventArgs[0]);
+            pThis->request_flush_to_service_callback(eventArgs[0]);
         }
     },
     TIME_PER_CALL_SEC
     );
+
+    run_flush_timer();
+}
+
+void
+stats_manager_impl::run_flush_timer()
+{
+    std::weak_ptr<stats_manager_impl> thisWeakPtr = shared_from_this();
+    pplx::extras::create_delayed_task(
+        STATS_POLL_TIME_MS,
+        [thisWeakPtr]()
+    {
+        std::shared_ptr<stats_manager_impl> pThis(thisWeakPtr.lock());
+        if (pThis != nullptr)
+        {
+            std::lock_guard<std::mutex> guard(pThis->m_statsServiceMutex);
+            for (auto& user : pThis->m_users)
+            {
+                if (user.second.statValueDocument.is_dirty())
+                {
+                    pThis->flush_to_service(user.second);
+                }
+            }
+            pThis->run_flush_timer();
+        }
+    });
 }
 
 xbox_live_result<void>
@@ -76,7 +104,7 @@ stats_manager_impl::add_local_user(
         xboxLiveContextImpl->application_config()
         );
 
-    m_users[userStr] = stats_user_context();
+    m_users[userStr] = stats_user_context(stats_value_document(), xboxLiveContextImpl, simplifiedStatsService, user);
     std::weak_ptr<stats_manager_impl> thisWeak = shared_from_this();
     simplifiedStatsService.get_stats_value_document()
     .then([thisWeak, user, xboxLiveContextImpl, simplifiedStatsService, userStr](xbox_live_result<stats_value_document> statsValueDocResult)
@@ -88,7 +116,6 @@ stats_manager_impl::add_local_user(
         }
 
         std::lock_guard<std::mutex> guard(pThis->m_statsServiceMutex);
-
         bool isSignedIn = false;
 #if TV_API
         isSignedIn = user->IsSignedIn;
@@ -98,34 +125,39 @@ stats_manager_impl::add_local_user(
 
         if (isSignedIn)
         {
-            if (statsValueDocResult.err())  // if there was an error, but the user is signed in, we assume offline sign in
-            {
-                pThis->m_isOffline = true;
-            }
-
             auto& svd = statsValueDocResult.payload();
             auto userStatContext = pThis->m_users.find(userStr);
             if (userStatContext != pThis->m_users.end())    // user could be removed by the time this completes
             {
-                pThis->m_users[userStr] = stats_user_context(svd, xboxLiveContextImpl, simplifiedStatsService, user);
-                pThis->m_users[userStr].statValueDocument.set_flush_function([thisWeak, userStr, user]()
+                if (statsValueDocResult.err())  // if there was an error, but the user is signed in, we assume offline sign in
                 {
-                    std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
-                    if (pThis == nullptr)
-                    {
-                        return;
-                    }
-                    auto statContextIter = pThis->m_users.find(userStr);
-                    if (statContextIter == pThis->m_users.end())
-                    {
-                        return;
-                    }
-
-                    pThis->flush_to_service(
-                        statContextIter->second
-                        );
-                });
+                    userStatContext->second.statValueDocument.set_state(svd_state::offline_not_loaded);
+                }
+                else
+                {
+                    userStatContext->second.statValueDocument.merge_stat_value_documents(svd);
+                }
             }
+
+            userStatContext->second.statValueDocument.set_flush_function([thisWeak, userStr, user]()
+            {
+                std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
+                if (pThis == nullptr)
+                {
+                    return;
+                }
+
+                std::lock_guard<std::mutex> guard(pThis->m_statsServiceMutex);
+                auto statContextIter = pThis->m_users.find(userStr);
+                if (statContextIter == pThis->m_users.end())
+                {
+                    return;
+                }
+
+                pThis->flush_to_service(
+                    statContextIter->second
+                    );
+            });
         }
         else    // not offline signed in
         {
@@ -134,7 +166,6 @@ stats_manager_impl::add_local_user(
 
         pThis->m_statEventList.push_back(stat_event(stat_event_type::local_user_added, user, xbox_live_result<void>(statsValueDocResult.err(), statsValueDocResult.err_message())));
     });
-
     return xbox_live_result<void>();
 }
 
@@ -153,13 +184,12 @@ stats_manager_impl::remove_local_user(
 
     auto statsUserContext = userIter->second;
     auto userSVD = statsUserContext.statValueDocument;
+    userSVD.do_work();  // before removing the user apply all users
     if (userSVD.is_dirty())
     {
-        userSVD.do_work();  // before removing the user apply all users
-        auto serializedSVD = statsUserContext.statValueDocument.serialize();
         std::weak_ptr<stats_manager_impl> thisWeak = shared_from_this();
         userIter->second.simplifiedStatsService.update_stats_value_document(userSVD)
-        .then([thisWeak, userSVD, user, statsUserContext, serializedSVD](xbox_live_result<void> updateSVDResult)
+        .then([thisWeak, userSVD, user, userStr](xbox_live_result<void> updateSVDResult)
         {
             std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
             if (pThis == nullptr)
@@ -167,20 +197,28 @@ stats_manager_impl::remove_local_user(
                 return;
             }
 
+            std::lock_guard<std::mutex> guard(pThis->m_statsServiceMutex);
+            auto statsUserContextIter = pThis->m_users.find(userStr);
+            if (statsUserContextIter == pThis->m_users.end())
+            {
+                return;
+            }
+
             if(should_write_offline(updateSVDResult))
             {
-                pThis->write_offline(statsUserContext, serializedSVD);
+                pThis->write_offline(statsUserContextIter->second);
             }
 
             pThis->m_statEventList.push_back(stat_event(stat_event_type::local_user_removed, user, updateSVDResult));
+            pThis->m_users.erase(userStr);
         });
     }
     else
     {
         m_statEventList.push_back(stat_event(stat_event_type::local_user_removed, user, xbox_live_result<void>()));
+        m_users.erase(userIter);
     }
 
-    m_users.erase(userIter);
     return xbox_live_result<void>();
 }
 
@@ -197,6 +235,8 @@ stats_manager_impl::request_flush_to_service(
     {
         return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "User not found in local map");
     }
+
+    auto& userSVD = userIter->second.statValueDocument;
 
     std::vector<string_t> userVec;
     userVec.push_back(userStr);
@@ -216,13 +256,64 @@ stats_manager_impl::request_flush_to_service(
 void
 stats_manager_impl::flush_to_service(
     _In_ stats_user_context& statsUserContext
-    )
+)
+{
+    std::weak_ptr<stats_manager_impl> thisWeak = shared_from_this();
+    if (statsUserContext.xboxLiveUser == nullptr)
+    {
+        LOG_DEBUG("flush_to_service: user is null");
+        return;
+    }
+    auto userStr = user_context::get_user_id(statsUserContext.xboxLiveUser);
+    auto& svd = statsUserContext.statValueDocument;
+    svd.clear_dirty_state();
+    if (svd.state() != svd_state::loaded)   // if not loaded, try and get the SVD from the service
+    {
+        statsUserContext.simplifiedStatsService.get_stats_value_document().then([thisWeak, userStr](xbox_live_result<stats_value_document> svdResult)
+        {
+            std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
+            if (pThis == nullptr)
+            {
+                return;
+            }
+
+            std::lock_guard<std::mutex> guard(pThis->m_statsServiceMutex);
+
+            auto userIter = pThis->m_users.find(userStr);
+            if (userIter == pThis->m_users.end())
+            {
+                LOG_DEBUG("User not found in flush_to_service lambda");
+                return;
+            }
+
+            if (!svdResult.err())
+            {
+                userIter->second.statValueDocument.merge_stat_value_documents(svdResult.payload());
+                pThis->update_stats_value_document(userIter->second);
+            }
+        });
+    }
+    else
+    {
+        update_stats_value_document(statsUserContext);
+    }
+
+}
+void
+stats_manager_impl::update_stats_value_document(_In_ stats_user_context& statsUserContext)
 {
     std::weak_ptr<stats_manager_impl> thisWeak = shared_from_this();
     xbox_live_user_t user = statsUserContext.xboxLiveUser;
-    auto serializedSVD = statsUserContext.statValueDocument.serialize();
+    if (user == nullptr)
+    {
+        LOG_WARN("User disappeared");
+        return;
+    }
+
+    auto userStr = user_context::get_user_id(user);
+
     statsUserContext.simplifiedStatsService.update_stats_value_document(statsUserContext.statValueDocument)
-    .then([thisWeak, user, serializedSVD, statsUserContext](xbox_live_result<void> updateSVDResult)
+    .then([thisWeak, user, userStr](xbox_live_result<void> updateSVDResult)
     {
         std::shared_ptr<stats_manager_impl> pThis(thisWeak.lock());
         if (pThis == nullptr)
@@ -230,11 +321,24 @@ stats_manager_impl::flush_to_service(
             return;
         }
 
+        std::lock_guard<std::mutex> guard(pThis->m_statsServiceMutex);
+        auto statsUserContextIter = pThis->m_users.find(userStr);
+        if (statsUserContextIter == pThis->m_users.end())
+        {
+            return;
+        }
+
+        auto& statsUserContext = statsUserContextIter->second;
         if (updateSVDResult.err())
         {
             if (should_write_offline(updateSVDResult))
             {
-                pThis->write_offline(statsUserContext, serializedSVD);
+                if (statsUserContext.statValueDocument.state() == svd_state::loaded)
+                {
+                    statsUserContext.statValueDocument.set_state(svd_state::offline_loaded);
+                }
+
+                pThis->write_offline(statsUserContext);
             }
             else
             {
@@ -242,31 +346,23 @@ stats_manager_impl::flush_to_service(
             }
         }
 
-        {
-            std::lock_guard<std::mutex> guard(pThis->m_statsServiceMutex);
-            pThis->m_statEventList.push_back(stat_event(stat_event_type::stat_update_complete, user, updateSVDResult));
-        }
+        pThis->m_statEventList.push_back(stat_event(stat_event_type::stat_update_complete, user, updateSVDResult));
     });
 }
 
 void
-stats_manager_impl::flush_to_service_callback(
+stats_manager_impl::request_flush_to_service_callback(
     _In_ const string_t& userXuid
     )
 {
+    std::lock_guard<std::mutex> guard(m_statsServiceMutex);
     auto userIter = m_users.find(userXuid);
     if (userIter != m_users.end())
     {
-        auto& userSVD = userIter->second.statValueDocument;
-
-        if (userSVD.is_dirty())
-        {
-            userSVD.do_work();
-            userSVD.clear_dirty_state();
-            flush_to_service(
-                userIter->second
-                );
-        }
+        userIter->second.statValueDocument.do_work();
+        flush_to_service(
+            userIter->second
+            );
     }
 }
 
@@ -280,6 +376,7 @@ stats_manager_impl::do_work()
         statUserContext.second.statValueDocument.do_work();
     }
     m_statEventList.clear();
+
     return copyList;
 }
 
@@ -297,8 +394,8 @@ stats_manager_impl::set_stat(
     {
         return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "User not found in local map");
     }
-
-    return userIter->second.statValueDocument.set_stat(name.c_str(), value);
+    auto result = userIter->second.statValueDocument.set_stat(name.c_str(), value);
+    return result;
 }
 
 xbox_live_result<void>
@@ -316,10 +413,11 @@ stats_manager_impl::set_stat(
         return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "User not found in local map");
     }
 
-    return userIter->second.statValueDocument.set_stat(name.c_str(), value);
+    auto result = userIter->second.statValueDocument.set_stat(name.c_str(), value);
+    return result;
 }
 
-xbox_live_result<std::shared_ptr<stat_value>>
+xbox_live_result<stat_value>
 stats_manager_impl::get_stat(
     _In_ const xbox_live_user_t& user,
     _In_ const string_t& name
@@ -330,7 +428,7 @@ stats_manager_impl::get_stat(
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
-        return xbox_live_result<std::shared_ptr<stat_value>>(xbox_live_error_code::invalid_argument, "User not found in local map");
+        return xbox_live_result<stat_value>(xbox_live_error_code::invalid_argument, "User not found in local map");
     }
 
     return userIter->second.statValueDocument.get_stat(name.c_str());
@@ -355,27 +453,41 @@ stats_manager_impl::get_stat_names(
     return xbox_live_result<void>();
 }
 
+xbox_live_result<void>
+stats_manager_impl::delete_stat(
+    _In_ const xbox_live_user_t& user,
+    _In_ const string_t& name
+    )
+{
+    std::lock_guard<std::mutex> guard(m_statsServiceMutex);
+    string_t userStr = user_context::get_user_id(user);
+    auto userIter = m_users.find(userStr);
+    if (userIter == m_users.end())
+    {
+        return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "User not found in local map");
+    }
+
+    return userIter->second.statValueDocument.delete_stat(name.c_str());
+}
+
 #if TV_API
 void
 stats_manager_impl::write_offline(
-    _In_ const stats_user_context& userContext,
-    _In_ const web::json::value& serializedSVD
+    _In_ stats_user_context& userContext
     )
 {
     UNREFERENCED_PARAMETER(userContext);
-    UNREFERENCED_PARAMETER(serializedSVD);
     // TODO: implement
 }
 
 #elif !UNIT_TEST_SERVICES
 void
 stats_manager_impl::write_offline(
-    _In_ const stats_user_context& userContext,
-    _In_ const web::json::value& serializedSVD
+    _In_ stats_user_context& userContext
     )
 {
     web::json::value evtJson;
-    evtJson[_T("svd")] = serializedSVD;
+    evtJson[_T("svd")] = userContext.statValueDocument.serialize();
     auto result = userContext.xboxLiveContextImpl->events_service().write_in_game_event(_T("StatEvent"), evtJson, web::json::value());
     if (result.err())
     {
@@ -385,12 +497,10 @@ stats_manager_impl::write_offline(
 #else
 void
 stats_manager_impl::write_offline(
-    _In_ const stats_user_context& userContext,
-    _In_ const web::json::value& serializedSVD
+    _In_ stats_user_context& userContext
 )
 {
     UNREFERENCED_PARAMETER(userContext);
-    UNREFERENCED_PARAMETER(serializedSVD);
 }
 #endif
 

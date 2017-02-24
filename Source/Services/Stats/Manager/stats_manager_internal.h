@@ -17,7 +17,16 @@ namespace xbox { namespace services { namespace stats { namespace manager {
 enum class svd_event_type
 {
     unknown,
-    stat_change
+    stat_change,
+    stat_delete
+};
+
+enum class svd_state
+{
+    not_loaded,
+    loaded,
+    offline_not_loaded,
+    offline_loaded,
 };
 
 struct stat_pending_state
@@ -37,7 +46,7 @@ struct stat_pending_state
 class svd_event
 {
 public:
-    svd_event(_In_ stat_pending_state statPendingState);
+    svd_event(_In_ stat_pending_state statPendingState, _In_ svd_event_type eventType = svd_event_type::stat_change);
 
     svd_event_type event_type() const;
     const stat_pending_state& stat_info() const;
@@ -56,18 +65,13 @@ public:
         _In_ const std::function<void()> flushFunction
         );
 
-    xbox_live_result<std::shared_ptr<stat_value>> get_stat(
+    xbox_live_result<stat_value> get_stat(
         _In_ const char_t* name
         ) const;
 
     xbox_live_result<void> set_stat(
         _In_ const char_t* statName,
         _In_ double statValue
-        );
-
-    xbox_live_result<void> set_stat(
-        _In_ const char_t* statName,
-        _In_ int64_t statValue
         );
 
     xbox_live_result<void> set_stat(
@@ -79,17 +83,27 @@ public:
         _Inout_ std::vector<string_t>& statNameList
         ) const;
 
+    xbox_live_result<void> delete_stat(
+        _In_ const char_t* name
+        );
+
     void increment_revision();
 
-    web::json::value serialize() const;
+    web::json::value serialize();
 
-    uint32_t revision() const;
+    uint64_t revision() const;
 
     bool is_dirty() const;
 
     void clear_dirty_state();
 
     void do_work();
+
+    void set_state(_In_ svd_state svdState);
+
+    void merge_stat_value_documents(_In_ const stats_value_document& mergeSVD);
+
+    svd_state state() const;
 
     stats_value_document();
 
@@ -99,11 +113,12 @@ public:
 
 private:
     bool m_isDirty;
-    uint32_t m_revision;
+    svd_state m_state;
+    uint64_t m_revision;
     std::function<void()> m_fRequestFlush;
     xsapi_internal_string m_clientId;
     xsapi_internal_vector(svd_event) m_svdEventList;
-    xsapi_internal_unordered_map(string_t, std::shared_ptr<stat_value>) m_statisticDocument;
+    xsapi_internal_unordered_map(string_t, stat_value) m_statisticDocument;
 };
 
 /// internal class
@@ -182,12 +197,6 @@ public:
     xbox_live_result<void> set_stat(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& name,
-        _In_ int64_t value
-        );
-
-    xbox_live_result<void> set_stat(
-        _In_ const xbox_live_user_t& user,
-        _In_ const string_t& name,
         _In_ double value
         );
 
@@ -202,12 +211,15 @@ public:
         _Inout_ std::vector<string_t>& statNameList
         );
 
-    xbox_live_result<std::shared_ptr<stat_value>> get_stat(
+    xbox_live_result<stat_value> get_stat(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& name
         );
 
-    void write_offline();
+    xbox_live_result<void> delete_stat(
+        _In_ const xbox_live_user_t& user,
+        _In_ const string_t& name
+        );
 
     void initialize();
 
@@ -220,19 +232,22 @@ private:
     }
 
     void write_offline(
-        _In_ const stats_user_context& userContext,
-        _In_ const web::json::value& serializedSVD
+        _In_ stats_user_context& userContext
         );
 
     void flush_to_service(
         _In_ stats_user_context& statsUserContext
         );
 
-    void flush_to_service_callback(_In_ const string_t& userXuid);
+    void update_stats_value_document(_In_ stats_user_context& statsUserContext);
+
+    void request_flush_to_service_callback(_In_ const string_t& userXuid);
+
+    void run_flush_timer();
 
     static const std::chrono::seconds TIME_PER_CALL_SEC;
+    static const std::chrono::milliseconds STATS_POLL_TIME_MS;
 
-    bool m_isOffline;
     std::vector<stat_event> m_statEventList;
     std::unordered_map<string_t, stats_user_context> m_users;
     std::shared_ptr<xbox::services::call_buffer_timer> m_statTimer;

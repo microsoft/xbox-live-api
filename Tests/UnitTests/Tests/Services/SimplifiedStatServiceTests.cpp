@@ -71,7 +71,7 @@ public:
         auto statJSON = web::json::value::parse(statValueDocumentResponse);
 
         auto revisionNum = statJSON[L"revision"].as_integer();
-        VERIFY_ARE_EQUAL_INT(statValueDocument.revision(), revisionNum + 1);
+        VERIFY_ARE_EQUAL_INT(statValueDocument.revision(), revisionNum);
 
         auto statField = statJSON[L"stats"];
         auto titleStatsList = statField[L"title"].as_object();
@@ -83,7 +83,7 @@ public:
         {
             auto& statValueResult = statValueDocument.get_stat(statName.c_str());
             VERIFY_IS_TRUE(!statValueResult.err());
-            VerifyStatAreEqual(statName, *statValueResult.payload(), titleStatsList);
+            VerifyStatAreEqual(statName, statValueResult.payload(), titleStatsList);
         }
 
         VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);

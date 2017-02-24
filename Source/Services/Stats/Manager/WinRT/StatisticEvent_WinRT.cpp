@@ -14,15 +14,14 @@ StatisticEvent::StatisticEvent(
     ) :
     m_cppObj(std::move(cppObj))
 {
-    // todo: uncomment when cpp level is ready
+    m_user = user_context::user_convert(m_cppObj.local_user());
+    if (m_cppObj.error_info().err())
+    {
+        m_errorCode = ref new Platform::Exception(xbox::services::utils::convert_xbox_live_error_code_to_hresult(m_cppObj.error_info().err()));
+    }
 
-    //m_user = user_context::user_convert(m_cppObj.local_user());
-    //if (m_cppObj.err())
-    //{
-    //    m_errorCode = ref new Platform::Exception(xbox::services::utils::convert_xbox_live_error_code_to_hresult(m_cppObj.err()));
-    //}
-
-    //m_errorMessage = ref new Platform::String(utility::conversions::utf8_to_utf16(m_cppObj.err_message()).c_str());
+    auto message = m_cppObj.error_info().err_message();
+    m_errorMessage = ref new Platform::String(utility::conversions::utf8_to_utf16(message).c_str());
 }
 
 XboxLiveUser_t
