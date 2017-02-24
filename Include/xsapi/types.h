@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
+#ifndef TYPES_H
+#define TYPES_H
 
 #include <string>
 #include <regex>
@@ -140,6 +142,22 @@ typedef void* user_creation_context;
 #if TV_API | XBOX_UWP
 typedef  Windows::Xbox::System::User^ xbox_live_user_t;
 #endif
+
+
+#if UWP_API
+    // The same binary is shared with and without XBOX_LIVE_CREATORS_SDK defined
+    __declspec(noinline) bool xbox_live_creators_sdk();
+    __declspec(noinline) bool xbox_live_full_sdk();
+    inline bool is_xbox_live_creators_sdk()
+    {
+        #if defined(XBOX_LIVE_CREATORS_SDK)
+            return xbox_live_creators_sdk();
+        #else
+            return xbox_live_full_sdk();
+        #endif
+    }
+#endif
+
 
 #if defined(XSAPI_CPPWINRT)
 #if TV_API
@@ -321,3 +339,6 @@ inline std::vector<winrt::Windows::Xbox::System::User> convert_user_vector_to_cp
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_PLAYER_STATE_CPP_END     NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END }
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_PLAYER_STATE_BEGIN       NAMESPACE_MICROSOFT_XBOX_SERVICES_BEGIN namespace PlayerState {
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_PLAYER_STATE_END         NAMESPACE_MICROSOFT_XBOX_SERVICES_END }
+
+
+#endif // TYPES_H

@@ -23,6 +23,18 @@ function_context user_impl::s_signOutCompletedHandlerIndexer = 0;
 function_context user_impl::s_signInCompletedHandlerIndexer = 0;
 XBOX_LIVE_NAMESPACE::system::xbox_live_mutex user_impl::s_trackingUsersLock;
 
+#if UWP_API
+__declspec(noinline) bool xbox_live_creators_sdk()
+{
+    return true;
+}
+
+__declspec(noinline) bool xbox_live_full_sdk()
+{
+    return false;
+}
+#endif
+
 std::shared_ptr<user_impl>
 user_factory::create_user_impl(user_creation_context userCreationContext)
 {
@@ -49,7 +61,8 @@ user_impl::user_impl(
         m_localConfig->sandbox(),
         m_localConfig->environment_prefix(),
         m_localConfig->environment(),
-        m_localConfig->use_first_party_token()
+        m_localConfig->use_first_party_token(),
+        is_xbox_live_creators_sdk()
         );
 #endif
 }
