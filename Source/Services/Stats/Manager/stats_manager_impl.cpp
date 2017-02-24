@@ -11,6 +11,7 @@
 
 using namespace xbox::services;
 using namespace xbox::services::system;
+using namespace Concurrency::extras;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
 
@@ -62,7 +63,7 @@ void
 stats_manager_impl::run_flush_timer()
 {
     std::weak_ptr<stats_manager_impl> thisWeakPtr = shared_from_this();
-    pplx::extras::create_delayed_task(
+    create_delayed_task(
         STATS_POLL_TIME_MS,
         [thisWeakPtr]()
     {
@@ -235,8 +236,6 @@ stats_manager_impl::request_flush_to_service(
     {
         return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "User not found in local map");
     }
-
-    auto& userSVD = userIter->second.statValueDocument;
 
     std::vector<string_t> userVec;
     userVec.push_back(userStr);
