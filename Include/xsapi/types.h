@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
-#ifndef TYPES_H
-#define TYPES_H
 
 #include <string>
 #include <regex>
@@ -145,17 +143,20 @@ typedef  Windows::Xbox::System::User^ xbox_live_user_t;
 
 
 #if UWP_API
-    // The same binary is shared with and without XBOX_LIVE_CREATORS_SDK defined
-    __declspec(noinline) bool xbox_live_creators_sdk();
-    __declspec(noinline) bool xbox_live_full_sdk();
-    inline bool is_xbox_live_creators_sdk()
-    {
-        #if defined(XBOX_LIVE_CREATORS_SDK)
-            return xbox_live_creators_sdk();
-        #else
-            return xbox_live_full_sdk();
+    #if defined(XSAPI_CPPWINRT)
+        bool g_is_xbox_live_creators_sdk = false;
+    #else
+        // The same C++ binary is shared to titles with and without XBOX_LIVE_CREATORS_SDK defined
+        // XSAPI uses an external bool that will be defined at the time of when the title includes this header
+        extern bool g_is_xbox_live_creators_sdk;
+        #if !defined(XSAPI_BUILD)
+            #if defined(XBOX_LIVE_CREATORS_SDK)
+                bool g_is_xbox_live_creators_sdk = false;
+            #else
+                bool g_is_xbox_live_creators_sdk = true;
+            #endif
         #endif
-    }
+    #endif
 #endif
 
 
@@ -340,5 +341,3 @@ inline std::vector<winrt::Windows::Xbox::System::User> convert_user_vector_to_cp
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_PLAYER_STATE_BEGIN       NAMESPACE_MICROSOFT_XBOX_SERVICES_BEGIN namespace PlayerState {
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_PLAYER_STATE_END         NAMESPACE_MICROSOFT_XBOX_SERVICES_END }
 
-
-#endif // TYPES_H
