@@ -67,9 +67,6 @@
     <Filter Include="C++ Source\Social\Manager">
       <UniqueIdentifier>{f5c7d6bd-2bf5-4adb-ab7a-e5c1a1a77b73}</UniqueIdentifier>
     </Filter>
-    <Filter Include="C++ Source\EntertainmentProfile">
-      <UniqueIdentifier>{abf9b438-2d5f-4eeb-a1da-5afe2f282511}</UniqueIdentifier>
-    </Filter>
     <Filter Include="C++ Source\Tournaments">
       <UniqueIdentifier>{dbe50f14-df74-4c7f-ad72-b5b0307db128}</UniqueIdentifier>
     </Filter>
@@ -928,12 +925,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Shared\logger\etw_output.h">
       <Filter>C++ Source\Shared\Logger</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\System\Sidecar\app_service_messages.h">
-      <Filter>C++ Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\System\Sidecar\app_service_provider.h">
-      <Filter>C++ Source\System</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\xsapi\stats_manager.h">
       <Filter>C++ Public Includes</Filter>

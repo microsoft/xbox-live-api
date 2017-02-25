@@ -29,7 +29,8 @@ public:
         _In_ string_t sandbox,
         _In_ string_t environmentPrefix,
         _In_ string_t environment,
-        _In_ bool useCompactTicket
+        _In_ bool useCompactTicket,
+        _In_ bool isCreatorsSDK
         );
 
     const string_t& xbox_live_endpoint() const;
