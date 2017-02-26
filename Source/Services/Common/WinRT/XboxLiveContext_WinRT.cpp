@@ -21,6 +21,10 @@
 using namespace Platform;
 using namespace Windows::Foundation::Collections;
 
+#if !XSAPI_CPP
+bool g_is_xbox_live_creators_sdk = false;
+#endif
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_BEGIN
 
 #if TV_API | XBOX_UWP
