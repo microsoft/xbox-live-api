@@ -11,6 +11,9 @@
 #include "auth/auth_manager.h"
 #endif
 
+#if UNIT_TEST_SERVICES
+extern bool g_is_xbox_live_creators_sdk;
+#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
