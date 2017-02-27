@@ -82,7 +82,7 @@ MockUser::internal_get_token_and_signature(
 
 std::shared_ptr<xbox::services::system::auth_config> MockUser::auth_config()
 {
-    return std::make_shared<xbox::services::system::auth_config>(_T("MockSandbox"), _T("MockPrefix-"), _T("MockEnv"), false);
+    return std::make_shared<xbox::services::system::auth_config>(_T("MockSandbox"), _T("MockPrefix-"), _T("MockEnv"), false, false);
 }
 
 std::shared_ptr<xbox::services::xbox_live_context_settings> MockUser::xbox_live_context_settings()

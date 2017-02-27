@@ -12,6 +12,10 @@
 #endif
 #endif
 
+#if UNIT_TEST_SERVICES
+bool g_is_xbox_live_creators_sdk = false;
+#endif
+
 using namespace std;
 using namespace pplx;
 
