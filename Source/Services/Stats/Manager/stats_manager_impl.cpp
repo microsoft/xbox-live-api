@@ -527,7 +527,7 @@ xbox_live_result<void> stats_manager_impl::get_leaderboard(const xbox_live_user_
         user_context::get_user_id(user),
         _T(""),
         query.max_items(),
-        query.continuation_token(),
+        query._Continuation_token(),
         std::vector<string_t>(),
         _T("2017"),
         query
@@ -582,7 +582,7 @@ xbox_live_result<void> stats_manager_impl::get_social_leaderboard(const xbox_liv
         xuid,
         order,
         query.max_items(),
-        query.continuation_token(),
+        query._Continuation_token(),
         _T("2017"),
         query
     ).then([weakThisPtr, user](xbox::services::xbox_live_result<xbox::services::leaderboard::leaderboard_result> result)

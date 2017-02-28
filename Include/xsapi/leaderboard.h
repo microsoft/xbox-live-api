@@ -224,10 +224,14 @@ public:
     const string_t& social_group() const;
 
     /// <summary>
-    /// Gets the continuation token is there is one. If it is empty then 
-    /// that means that there is no more data to get from a previous query or there is no previous query.
+    /// True if there is more data in the leaderboard
     /// </summary>
-    const string_t& continuation_token() const;
+    bool has_next() const;
+
+    /// <summary>
+    /// Internal Function
+    /// </summary>
+    const string_t& _Continuation_token() const;
 
     /// <summary>
     /// Internal Function

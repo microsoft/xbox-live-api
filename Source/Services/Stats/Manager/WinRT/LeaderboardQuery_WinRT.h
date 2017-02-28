@@ -59,7 +59,7 @@ public:
     /// Gets the continuation token is there is one. If it is empty then 
     /// that means that there is no more data to get from a previous query or there is no previous query.
     /// </summary>
-    DEFINE_PROP_GET_STR_OBJ(ContinuationToken, continuation_token);
+    DEFINE_PROP_GET_OBJ(HasNext, has_next, bool);
 
 internal:
     LeaderboardQuery(

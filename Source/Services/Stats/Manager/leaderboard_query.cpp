@@ -60,7 +60,7 @@ sort_order leaderboard_query::order() const
     return m_order;
 }
 
-const string_t& leaderboard_query::continuation_token() const
+const string_t& leaderboard_query::_Continuation_token() const
 {
     return m_continuationToken;
 }
@@ -88,6 +88,11 @@ const string_t& leaderboard_query::stat_name() const
 const string_t& leaderboard_query::social_group() const
 {
     return m_socialGroup;
+}
+
+bool leaderboard_query::has_next() const
+{
+    return !m_continuationToken.empty();
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_LEADERBOARD_CPP_END

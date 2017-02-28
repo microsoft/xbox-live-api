@@ -245,8 +245,8 @@ public:
     /// Replaces the numerical stat by the value. Can be positive or negative
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
-    /// <param name="name">The name of the statistic to modify</param>
-    /// <param name="value">Value to replace the stat by</param>
+    /// <param name="statName">The name of the statistic to modify</param>
+    /// <param name="statValue">Value to replace the stat by</param>
     /// <return>Whether or not the setting was successful. Can fail if stat is not of numerical type. Will return updated stat</return>
     _XSAPIIMP xbox_live_result<void> set_stat_as_number(
         _In_ const xbox_live_user_t& user,
@@ -258,8 +258,8 @@ public:
     /// Replaces the numerical stat by the value. Can be positive or negative
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
-    /// <param name="name">The name of the statistic to modify</param>
-    /// <param name="value">Value to replace the stat by</param>
+    /// <param name="statName">The name of the statistic to modify</param>
+    /// <param name="statValue">Value to replace the stat by</param>
     /// <return>Whether or not the setting was successful. Can fail if stat is not of numerical type. Will return updated stat</return>
     _XSAPIIMP xbox_live_result<void> set_stat_as_integer(
         _In_ const xbox_live_user_t& user,
@@ -271,8 +271,8 @@ public:
     /// Replaces a string stat with the given value.
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
-    /// <param name="name">The name of the statistic to modify</param>
-    /// <param name="value">Value to replace the stat by</param>
+    /// <param name="statName">The name of the statistic to modify</param>
+    /// <param name="statValue">Value to replace the stat by</param>
     /// <return>Whether or not the setting was successful. Can fail if stat is not of string type. Will return updated stat</return>
     _XSAPIIMP xbox_live_result<void> set_stat_as_string(
         _In_ const xbox_live_user_t& user,
@@ -295,7 +295,7 @@ public:
     /// Gets a stat value
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
-    /// <param name="name">The name of the statistic to modify</param>
+    /// <param name="statName">The name of the statistic to modify</param>
     /// <return>Whether or not the setting was successful along with updated stat</return>
     _XSAPIIMP xbox_live_result<stat_value> get_stat(
         _In_ const xbox_live_user_t& user,
@@ -306,7 +306,7 @@ public:
     /// Deletes a stat. Will clear stat from service and social leaderboard information
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
-    /// <param name="name">The name of the statistic to delete</param>
+    /// <param name="statName">The name of the statistic to delete</param>
     /// <return>Whether or not the stat deletion was successful</return>
     _XSAPIIMP xbox_live_result<void> delete_stat(
         _In_ const xbox_live_user_t& user,
