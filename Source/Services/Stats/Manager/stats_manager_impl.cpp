@@ -515,7 +515,7 @@ xbox_live_result<void> stats_manager_impl::get_leaderboard(const xbox_live_user_
     string_t xuid;
     if (query.skip_result_to_me())
     {
-        xuid = user->xbox_user_id();
+        xuid = user_context::get_user_id(user);
     }
     std::weak_ptr<stats_manager_impl> weakThisPtr = shared_from_this();
     auto context = userIter->second.xboxLiveContextImpl;
@@ -524,7 +524,7 @@ xbox_live_result<void> stats_manager_impl::get_leaderboard(const xbox_live_user_
         statName,
         query.skip_result_to_rank(),
         xuid,
-        user->xbox_user_id(),
+        user_context::get_user_id(user),
         _T(""),
         query.max_items(),
         query.continuation_token(),
@@ -559,7 +559,7 @@ xbox_live_result<void> stats_manager_impl::get_social_leaderboard(const xbox_liv
     string_t xuid;
     if (query.skip_result_to_me())
     {
-        xuid = user->xbox_user_id();
+        xuid = user_context::get_user_id(user);
     }
     string_t order;
     if (query.order() == leaderboard::sort_order::ascending)
@@ -574,7 +574,7 @@ xbox_live_result<void> stats_manager_impl::get_social_leaderboard(const xbox_liv
     std::weak_ptr<stats_manager_impl> weakThisPtr = shared_from_this();
     auto context = userIter->second.xboxLiveContextImpl;
     context->leaderboard_service().get_leaderboard_for_social_group_internal(
-        user->xbox_user_id(),
+        user_context::get_user_id(user),
         context->application_config()->scid(),
         statName,
         socialGroup,
