@@ -5,6 +5,7 @@
 #include "xsapi/stats_manager.h"
 #include "StatisticEvent_WinRT.h"
 #include "StatisticValue_WinRT.h"
+#include "LeaderboardQuery_WinRT.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 
@@ -131,6 +132,36 @@ public:
     void DeleteStatistic(
         _In_ XboxLiveUser_t user,
         _In_ Platform::String^ name
+        );
+		
+    /// <summary> 
+    /// Starts a request for a global leaderboard. You can retrieve the resulting data by checking
+    /// the events returned from do_work for an event of type get_leaderboard_complete
+    /// </summary>
+    /// <param name="user">The local user whose stats to access</param>
+    /// <param name="statName">The name of the statistic to get the leaderboard of</param>
+    /// <param name="query">The query parameters of the leaderboard request</param>
+    /// <return>Whether or not the leaderboard request was started correctly</return>
+    void GetLeaderboard(
+        _In_ XboxLiveUser_t user,
+        _In_ Platform::String^ statName,
+        _In_ Leaderboard::LeaderboardQuery^ query
+        );
+
+    /// <summary> 
+    /// Starts a request for a social leaderboard. You can retrieve the resulting data by checking
+    /// the events returned from do_work for an event of type get_leaderboard_complete
+    /// </summary>
+    /// <param name="user">The local user whose stats to access</param>
+    /// <param name="statName">The name of the statistic to get the leaderboard of</param>
+    /// <param name="socialGroup">The name of the social group</param>
+    /// <param name="query">The query parameters of the leaderboard request</param>
+    /// <return>Whether or not the leaderboard request was started correctly</return>
+    void GetSocialLeaderboard(
+        _In_ XboxLiveUser_t user,
+        _In_ Platform::String^ statName,
+        _In_ Platform::String^ socialGroup,
+        _In_ Leaderboard::LeaderboardQuery^ query
         );
 
 internal:

@@ -58,4 +58,12 @@ LeaderboardResult::GetNextAsync(_In_ uint32 maxItems)
     return ASYNC_FROM_TASK(task);
 }
 
+LeaderboardQuery^ LeaderboardResult::GetNextQuery()
+{
+    auto result = m_cppObj.get_next_query();
+
+    THROW_IF_ERR(result);
+    return ref new LeaderboardQuery(result.payload());
+}
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_LEADERBOARD_END

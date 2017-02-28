@@ -503,4 +503,126 @@ stats_manager_impl::write_offline(
 }
 #endif
 
+xbox_live_result<void> stats_manager_impl::get_leaderboard(const xbox_live_user_t& user, const string_t& statName, leaderboard::leaderboard_query query)
+{
+    std::lock_guard<std::mutex> guard(m_statsServiceMutex);
+    string_t userStr = user_context::get_user_id(user);
+    auto userIter = m_users.find(userStr);
+    if (userIter == m_users.end())
+    {
+        return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "User not found in local map");
+    }
+    string_t xuid;
+    if (query.skip_result_to_me())
+    {
+        xuid = user_context::get_user_id(user);
+    }
+    std::weak_ptr<stats_manager_impl> weakThisPtr = shared_from_this();
+    auto context = userIter->second.xboxLiveContextImpl;
+    context->leaderboard_service().get_leaderboard_internal(
+        context->application_config()->scid(),
+        statName,
+        query.skip_result_to_rank(),
+        xuid,
+        user_context::get_user_id(user),
+        _T(""),
+        query.max_items(),
+        query._Continuation_token(),
+        std::vector<string_t>(),
+        _T("2017"),
+        query
+        ).then([weakThisPtr, user](xbox::services::xbox_live_result<xbox::services::leaderboard::leaderboard_result> result)
+    {
+        auto pShared = weakThisPtr.lock();
+        if (pShared.get() == nullptr)
+        {
+            LOG_DEBUG("Could not successfully get stats_manager while retrieving a leaderboard");
+        }
+        else
+        {
+            pShared->add_leaderboard_result(user, result);
+        }
+    });
+
+    return xbox_live_result<void>();
+}
+
+xbox_live_result<void> stats_manager_impl::get_social_leaderboard(const xbox_live_user_t& user, const string_t& statName, const string_t& socialGroup, leaderboard::leaderboard_query query)
+{
+    std::lock_guard<std::mutex> guard(m_statsServiceMutex);
+    string_t userStr = user_context::get_user_id(user);
+    auto userIter = m_users.find(userStr);
+    if (userIter == m_users.end())
+    {
+        return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "User not found in local map");
+    }
+    string_t xuid;
+    if (query.skip_result_to_me())
+    {
+        xuid = user_context::get_user_id(user);
+    }
+    string_t order;
+    if (query.order() == leaderboard::sort_order::ascending)
+    {
+        order = _T("ascending");
+    }
+    else
+    {
+        order = _T("descending");
+    }
+
+    std::weak_ptr<stats_manager_impl> weakThisPtr = shared_from_this();
+    auto context = userIter->second.xboxLiveContextImpl;
+    context->leaderboard_service().get_leaderboard_for_social_group_internal(
+        user_context::get_user_id(user),
+        context->application_config()->scid(),
+        statName,
+        socialGroup,
+        query.skip_result_to_rank(),
+        xuid,
+        order,
+        query.max_items(),
+        query._Continuation_token(),
+        _T("2017"),
+        query
+    ).then([weakThisPtr, user](xbox::services::xbox_live_result<xbox::services::leaderboard::leaderboard_result> result)
+    {
+        auto pShared = weakThisPtr.lock();
+        if (pShared.get() == nullptr)
+        {
+            LOG_DEBUG("Could not successfully get stats_manager while retrieving a leaderboard");
+        }
+        else
+        {
+            pShared->add_leaderboard_result(user, result);
+        }
+    });
+
+    return xbox_live_result<void>();
+
+}
+
+void stats_manager_impl::add_leaderboard_result(
+    _In_ const xbox_live_user_t& user,
+    _In_ const xbox_live_result<leaderboard::leaderboard_result>& result
+)
+{
+    std::lock_guard<std::mutex> guard(m_statsServiceMutex);
+    string_t userStr = user_context::get_user_id(user);
+    auto userIter = m_users.find(userStr);
+    if (userIter == m_users.end())
+    {
+        LOG_DEBUG("stats_manager_impl User not found in local map");
+        return;
+    }
+    stat_event statEvent(
+        stat_event_type::get_leaderboard_complete,
+        userIter->second.xboxLiveUser,
+        xbox_live_result<void>(),
+        std::make_shared<leaderboard_result_event_args>(result)
+        );
+
+    m_statEventList.push_back(statEvent);
+}
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_END

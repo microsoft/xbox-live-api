@@ -293,6 +293,8 @@
     <ClCompile Include="..\..\Source\Services\Social\social_relationship_change_event_args.cpp" />
     <ClCompile Include="..\..\Source\Services\Social\social_relationship_change_subscription.cpp" />
     <ClCompile Include="..\..\Source\Services\Social\social_service_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\leaderboard_query.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\leaderboard_result_event_args.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager_impl.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_service.cpp" />

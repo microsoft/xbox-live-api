@@ -556,10 +556,10 @@ public:
 
     static void set_locales(_In_ const string_t& locale);
     template<typename T>
-	static XBOX_LIVE_NAMESPACE::xbox_live_result<T> generate_xbox_live_result(
-		_Inout_ XBOX_LIVE_NAMESPACE::xbox_live_result<T> deserializationResult,
-		_In_ const std::shared_ptr<XBOX_LIVE_NAMESPACE::http_call_response>& response
-	)
+    static XBOX_LIVE_NAMESPACE::xbox_live_result<T> generate_xbox_live_result(
+        _Inout_ XBOX_LIVE_NAMESPACE::xbox_live_result<T> deserializationResult,
+        _In_ const std::shared_ptr<XBOX_LIVE_NAMESPACE::http_call_response>& response
+    )
     {
         if (deserializationResult.err())
         {

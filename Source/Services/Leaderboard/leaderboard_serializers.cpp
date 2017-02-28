@@ -78,7 +78,9 @@ deserialize_result(
     _In_ const web::json::value& json,
     _In_ std::shared_ptr<xbox::services::user_context> userContext,
     _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
+    _In_ const string_t& version,
+    _In_ leaderboard_query query
     )
 {
     std::error_code errc;
@@ -113,13 +115,19 @@ deserialize_result(
     auto result = leaderboard_result(
         string_t(),
         totalCount,
-        std::move(continuationToken),
+        continuationToken,
         std::move(columns),
         std::move(rows),
         userContext, 
         xboxLiveContextSettings,
         appConfig
         );
+
+    if (version == _T("2017"))
+    {
+        query._Set_continuation_token(continuationToken);
+        result._Set_next_query(query);
+    }
 
     return xbox_live_result<leaderboard_result>(result, errc);
 }

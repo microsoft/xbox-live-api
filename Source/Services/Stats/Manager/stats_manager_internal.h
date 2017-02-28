@@ -223,6 +223,24 @@ public:
 
     void initialize();
 
+    xbox_live_result<void> get_leaderboard(
+        _In_ const xbox_live_user_t& user,
+        _In_ const string_t& statName,
+        _In_ leaderboard::leaderboard_query query
+    );
+
+    xbox_live_result<void> get_social_leaderboard(
+        _In_ const xbox_live_user_t& user,
+        _In_ const string_t& statName,
+        _In_ const string_t& socialGroup,
+        _In_ leaderboard::leaderboard_query query
+    );
+
+    void add_leaderboard_result(
+        _In_ const xbox_live_user_t& user,
+        _In_ const xbox_live_result<leaderboard::leaderboard_result>& result
+    );
+
 private:
     static inline bool should_write_offline(xbox_live_result<void>& postResult)
     {
@@ -249,6 +267,7 @@ private:
     static const std::chrono::milliseconds STATS_POLL_TIME_MS;
 
     std::vector<stat_event> m_statEventList;
+    std::vector<xbox::services::xbox_live_result<leaderboard::leaderboard_result>> m_leaderboardResults;
     std::unordered_map<string_t, stats_user_context> m_users;
     std::shared_ptr<xbox::services::call_buffer_timer> m_statTimer;
     std::shared_ptr<xbox::services::call_buffer_timer> m_statPriorityTimer;

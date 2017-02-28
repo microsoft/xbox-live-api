@@ -4,6 +4,7 @@
 #pragma once
 #include "xsapi/stats_manager.h"
 #include "StatisticEventType_WinRT.h"
+#include "StatisticEventArgs_WinRT.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 
@@ -19,7 +20,7 @@ public:
     /// The type of event the statistic is
     /// </summary>
     /// <return>The event type</return>
-    DEFINE_PROP_GET_ENUM_OBJ(EventType, event_type, StatisticEventType);    // TODO: uncomment
+    DEFINE_PROP_GET_ENUM_OBJ(EventType, event_type, StatisticEventType);
 
     /// <summary>
     /// The error code indicating the result of the operation.
@@ -36,6 +37,14 @@ public:
     property Platform::String^ ErrorMessage
     {
         Platform::String^ get();
+    };
+
+    /// <summary> 
+    /// The data of event from stats manager
+    /// </summary>
+    property StatisticEventArgs^ EventArgs
+    {
+        StatisticEventArgs^ get();
     };
 
 internal:

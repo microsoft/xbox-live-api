@@ -711,6 +711,12 @@
     <ClCompile Include="..\..\Source\Services\Social\Manager\xbox_user_id_container.cpp">
       <Filter>C++ Source\Social\Manager</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\leaderboard_query.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\leaderboard_result_event_args.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_event.cpp">
       <Filter>C++ Source\Stats</Filter>
     </ClCompile>

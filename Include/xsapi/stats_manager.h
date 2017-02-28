@@ -43,19 +43,25 @@ enum class stat_data_type
 /// </summary>
 enum class stat_event_type
 {
+    /// <summary> 
+    /// A local user has been added
+    /// </summary>
     local_user_added,
+
+    /// <summary> 
+    /// A local user has been removed
+    /// </summary>
     local_user_removed,
-    stat_update_complete
-};
 
+    /// <summary> 
+    /// stat has been updated
+    /// </summary>
+    stat_update_complete,
 
-/// <summary> 
-/// The order to sort the leaderboard in
-/// </summary>
-enum class sort_order
-{
-    ascending,
-    descending
+    /// <summary> 
+    /// cast event args to leaderboard_result_event_args
+    /// </summary>
+    get_leaderboard_complete 
 };
 
 /// <summary> 
@@ -68,34 +74,34 @@ public:
     /// Name of the statistic
     /// </summary>
     /// <returns>A stat container that has the stat name string</returns>
-    const string_t name() const;
+    _XSAPIIMP const string_t name() const;
 
     /// <summary> 
     /// Return data as numerical type
     /// </summary>
     /// <returns>Float data for statistic</returns>
     /// <remarks>Will debug assert if data is not type requested</returns>
-    double as_number() const;
+    _XSAPIIMP double as_number() const;
 
     /// <summary> 
     /// Return data as integer type
     /// </summary>
     /// <returns>Float data for statistic</returns>
     /// <remarks>Will debug assert if data is not type requested</returns>
-    int64_t as_integer() const;
+    _XSAPIIMP int64_t as_integer() const;
 
     /// <summary> 
     /// Return data as string type
     /// </summary>
     /// <returns>data as char_t*</returns>
     /// <remarks>Will debug assert if data is not type requested</returns>
-    const string_t as_string() const;
+    _XSAPIIMP const string_t as_string() const;
 
     /// <summary> 
     /// Return type of data the data object is
     /// </summary>
     /// <returns>Stat data type</returns>
-    stat_data_type data_type() const;
+    _XSAPIIMP stat_data_type data_type() const;
 
     /// Internal function
     static xbox_live_result<stat_value> _Deserialize(_In_ const web::json::value& data);
@@ -126,6 +132,28 @@ private:
     friend class stats_value_document;
 };
 
+struct stat_event_args 
+{
+    virtual ~stat_event_args() {}
+};
+
+class leaderboard_result_event_args : public stat_event_args
+{
+public:
+    /// <summary> 
+    /// Gets the leaderboard result from a leaderboard request
+    /// </summary>
+    _XSAPIIMP const xbox_live_result<leaderboard::leaderboard_result>& result();
+
+    /// <summary> 
+    /// Internal function
+    /// </summary>
+    leaderboard_result_event_args(const xbox_live_result<leaderboard::leaderboard_result>& result);
+
+private:
+    xbox_live_result<leaderboard::leaderboard_result> m_result;
+};
+
 class stat_event
 {
 public:
@@ -133,29 +161,37 @@ public:
     /// Represents error code and error message
     /// </summary>
     /// <return>The returned xbox live result</return>
-    xbox_live_result<void>& error_info();
+    _XSAPIIMP xbox_live_result<void>& error_info();
 
     /// <summary> 
     /// The type of event the statistic is
     /// </summary>
     /// <return>The event type</return>
-    stat_event_type event_type() const;
+    _XSAPIIMP stat_event_type event_type() const;
+
+    /// <summary> 
+    /// The data of event from stats manager
+    /// You need to cast this to one of the event arg classes to retrieve the data for that particular event
+    /// </summary>
+    _XSAPIIMP std::shared_ptr<stat_event_args> event_args() const;
 
     /// <summary> 
     /// Local user the event is for
     /// </summary>
     /// <return>The returned user</return>
-    const xbox_live_user_t& local_user() const;
+    _XSAPIIMP const xbox_live_user_t& local_user() const;
 
     /// Internal function
     stat_event(
         stat_event_type eventType,
         xbox_live_user_t user,
-        xbox_live_result<void> errorInfo
+        xbox_live_result<void> errorInfo,
+        std::shared_ptr<stat_event_args> args = nullptr
         );
 
 private:
     stat_event_type m_eventType;
+    std::shared_ptr<stat_event_args> m_eventArgs;
     xbox_live_user_t m_localUser;
     xbox_live_result<void> m_errorInfo;
 };
@@ -169,14 +205,14 @@ public:
     /// <summary> 
     /// Instantiates and returns an instance of stats manager
     /// </summary>
-    static std::shared_ptr<stats_manager> get_singleton_instance();
+    _XSAPIIMP static std::shared_ptr<stats_manager> get_singleton_instance();
 
     /// <summary> 
     /// Adds a local user to the stats manager
     /// Returns a local_user_added event from do_work
     /// </summary>
     /// <param name="user">The user to add to the statistic manager</param>
-    xbox_live_result<void> add_local_user(
+    _XSAPIIMP xbox_live_result<void> add_local_user(
         _In_ const xbox_live_user_t& user
         );
 
@@ -185,7 +221,7 @@ public:
     /// Returns a local_user_removed event from do_work
     /// </summary>
     /// <param name="user">The user to be removed from the statistic manager</param>
-    xbox_live_result<void> remove_local_user(
+    _XSAPIIMP xbox_live_result<void> remove_local_user(
         _In_ const xbox_live_user_t& user
         );
 
@@ -193,8 +229,8 @@ public:
     /// Requests the current stat values to be uploaded to the service
     /// This will send immediately instead of automatically during a 30 second window
     /// </summary>
-    /// <remarks>This can be throttled if called too often</remarks>
-    xbox_live_result<void> request_flush_to_service(
+    /// <remarks>This will be throttled if called too often</remarks>
+    _XSAPIIMP xbox_live_result<void> request_flush_to_service(
         _In_ const xbox_live_user_t& user,
         _In_ bool isHighPriority = false
         );
@@ -203,52 +239,45 @@ public:
     /// Returns any events that have been processed
     /// </summary>
     /// <return>A list of events that have happened since previous do_work</return>
-    std::vector<stat_event> do_work();
+    _XSAPIIMP std::vector<stat_event> do_work();
 
     /// <summary> 
     /// Replaces the numerical stat by the value. Can be positive or negative
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
-    /// <param name="name">The name of the statistic to modify</param>
-    /// <param name="value">Value to replace the stat by</param>
-    /// <param name="statisticReplaceCompareType">
-    /// Will override the compare type. Stat will only be updated if follows the stat compares rule
-    /// </param>
+    /// <param name="statName">The name of the statistic to modify</param>
+    /// <param name="statValue">Value to replace the stat by</param>
     /// <return>Whether or not the setting was successful. Can fail if stat is not of numerical type. Will return updated stat</return>
-    xbox_live_result<void> set_stat_as_number(
+    _XSAPIIMP xbox_live_result<void> set_stat_as_number(
         _In_ const xbox_live_user_t& user,
-        _In_ const string_t& name,
-        _In_ double value
+        _In_ const string_t& statName,
+        _In_ double statValue
         );
 
     /// <summary> 
     /// Replaces the numerical stat by the value. Can be positive or negative
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
-    /// <param name="name">The name of the statistic to modify</param>
-    /// <param name="value">Value to replace the stat by</param>
-    /// <param name="statisticReplaceCompareType">
-    /// Will override the compare type. Stat will only be updated if follows the stat compares rule
-    /// *Note* This is not recommended to be modified after release of the title
-    /// </param>
+    /// <param name="statName">The name of the statistic to modify</param>
+    /// <param name="statValue">Value to replace the stat by</param>
     /// <return>Whether or not the setting was successful. Can fail if stat is not of numerical type. Will return updated stat</return>
-    xbox_live_result<void> set_stat_as_integer(
+    _XSAPIIMP xbox_live_result<void> set_stat_as_integer(
         _In_ const xbox_live_user_t& user,
-        _In_ const string_t& name,
-        _In_ int64_t value
+        _In_ const string_t& statName,
+        _In_ int64_t statValue
         );
 
     /// <summary> 
     /// Replaces a string stat with the given value.
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
-    /// <param name="name">The name of the statistic to modify</param>
-    /// <param name="value">Value to replace the stat by</param>
+    /// <param name="statName">The name of the statistic to modify</param>
+    /// <param name="statValue">Value to replace the stat by</param>
     /// <return>Whether or not the setting was successful. Can fail if stat is not of string type. Will return updated stat</return>
-    xbox_live_result<void> set_stat_as_string(
+    _XSAPIIMP xbox_live_result<void> set_stat_as_string(
         _In_ const xbox_live_user_t& user,
-        _In_ const string_t& name,
-        _In_ const string_t& value
+        _In_ const string_t& statName,
+        _In_ const string_t& statValue
         );
 
     /// <summary> 
@@ -257,7 +286,7 @@ public:
     /// <param name="user">The local user whose stats to access</param>
     /// <param name="statNameList">The list to fill with stat names</param>
     /// <return>Whether or not the setting was successful.</return>
-    xbox_live_result<void> get_stat_names(
+    _XSAPIIMP xbox_live_result<void> get_stat_names(
         _In_ const xbox_live_user_t& user,
         _Inout_ std::vector<string_t>& statNameList
         );
@@ -266,25 +295,57 @@ public:
     /// Gets a stat value
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
-    /// <param name="name">The name of the statistic to modify</param>
+    /// <param name="statName">The name of the statistic to modify</param>
     /// <return>Whether or not the setting was successful along with updated stat</return>
-    xbox_live_result<stat_value> get_stat(
+    _XSAPIIMP xbox_live_result<stat_value> get_stat(
         _In_ const xbox_live_user_t& user,
-        _In_ const string_t& name
+        _In_ const string_t& statName
         );
 
     /// <summary> 
     /// Deletes a stat. Will clear stat from service and social leaderboard information
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
-    /// <param name="name">The name of the statistic to delete</param>
+    /// <param name="statName">The name of the statistic to delete</param>
     /// <return>Whether or not the stat deletion was successful</return>
-    xbox_live_result<void> delete_stat(
+    _XSAPIIMP xbox_live_result<void> delete_stat(
         _In_ const xbox_live_user_t& user,
-        _In_ const string_t& name
+        _In_ const string_t& statName
         );
 
-    stats_manager();
+    _XSAPIIMP stats_manager();
+
+    /// <summary> 
+    /// Starts a request for a global leaderboard. You can retrieve the resulting data by checking
+    /// the events returned from do_work for an event of type get_leaderboard_complete
+    /// Use leaderboard_query::get_next_query() to retrieve more data about this leaderboard.
+    /// </summary>
+    /// <param name="user">The local user whose stats to access</param>
+    /// <param name="statName">The name of the statistic to get the leaderboard of</param>
+    /// <param name="query">The query parameters of the leaderboard request</param>
+    /// <return>Whether or not the leaderboard request was started correctly</return>
+    _XSAPIIMP xbox_live_result<void> get_leaderboard(
+        _In_ const xbox_live_user_t& user, 
+        _In_ const string_t& statName, 
+        _In_ leaderboard::leaderboard_query query
+        );
+
+    /// <summary> 
+    /// Starts a request for a social leaderboard. You can retrieve the resulting data by checking
+    /// the events returned from do_work for an event of type get_leaderboard_complete
+    /// Use leaderboard_query::get_next_query() to retrieve more data about this leaderboard.
+    /// </summary>
+    /// <param name="user">The local user whose stats to access</param>
+    /// <param name="statName">The name of the statistic to get the leaderboard of</param>
+    /// <param name="socialGroup">The name of the social group</param>
+    /// <param name="query">The query parameters of the leaderboard request</param>
+    /// <return>Whether or not the leaderboard request was started correctly</return>
+    _XSAPIIMP xbox_live_result<void> get_social_leaderboard(
+        _In_ const xbox_live_user_t& user, 
+        _In_ const string_t& statName, 
+        _In_ const string_t& socialGroup, 
+        _In_ leaderboard::leaderboard_query query
+        );
 
 private:
     std::shared_ptr<stats_manager_impl> m_statsManagerImpl;

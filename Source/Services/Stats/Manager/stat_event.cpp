@@ -9,11 +9,13 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
 stat_event::stat_event(
     stat_event_type eventType,
     xbox_live_user_t user,
-    xbox_live_result<void> errorInfo
+    xbox_live_result<void> errorInfo,
+    std::shared_ptr<stat_event_args> args
     ) :
     m_eventType(eventType),
     m_localUser(std::move(user)),
-    m_errorInfo(std::move(errorInfo))
+    m_errorInfo(std::move(errorInfo)),
+    m_eventArgs(args)
 {
 }
 
@@ -27,6 +29,11 @@ stat_event_type
 stat_event::event_type() const
 {
     return m_eventType;
+}
+
+std::shared_ptr<stat_event_args> stat_event::event_args() const
+{
+    return m_eventArgs;
 }
 
 const xbox_live_user_t&
