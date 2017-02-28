@@ -13,6 +13,7 @@
 #include "xsapi/service_call_logging_config.h"
 
 #if !BEAM_API
+#include "xsapi/leaderboard.h"
 #include "xsapi/social_manager.h"
 #include "xsapi/stats_manager.h"
 
@@ -20,7 +21,6 @@
 #include "xsapi/http_call.h"
 #include "xsapi/xbox_live_context_settings.h"
 #include "xsapi/events.h"
-#include "xsapi/leaderboard.h"
 #include "xsapi/title_storage.h"
 #include "xsapi/privacy.h"
 #include "xsapi/profile.h"

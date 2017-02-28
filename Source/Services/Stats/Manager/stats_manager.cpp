@@ -140,4 +140,23 @@ stats_manager::delete_stat(
         );
 }
 
+xbox_live_result<void> stats_manager::get_leaderboard(const xbox_live_user_t& user, const string_t& statName, leaderboard::leaderboard_query query)
+{
+    return m_statsManagerImpl->get_leaderboard(
+        user,
+        statName,
+        query
+        );
+}
+
+xbox_live_result<void> stats_manager::get_social_leaderboard(const xbox_live_user_t& user, const string_t& statName, const string_t& socialGroup, leaderboard::leaderboard_query query)
+{
+    return m_statsManagerImpl->get_social_leaderboard(
+        user,
+        statName,
+        socialGroup,
+        query
+    );
+}
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_END

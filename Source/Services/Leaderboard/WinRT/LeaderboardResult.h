@@ -7,6 +7,7 @@
 #include "Macros_WinRT.h"
 #include "LeaderboardColumn.h"
 #include "LeaderboardRow.h"
+#include "../../Stats/Manager/WinRT/LeaderboardQuery_WinRT.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_LEADERBOARD_BEGIN
 
@@ -67,6 +68,13 @@ public:
     ///  [continuationToken={token}]
     /// </remarks>
     Windows::Foundation::IAsyncOperation<LeaderboardResult^>^ GetNextAsync(_In_ uint32 maxItems);
+
+    /// <summary>
+    /// Gets a query to be used to retrieve more data about a leaderboard. 
+    /// This query is only to be used to retrieve a leaderboard with stats 2017.
+    /// </summary>
+    LeaderboardQuery^ GetNextQuery();
+
 
 internal:
     LeaderboardResult(

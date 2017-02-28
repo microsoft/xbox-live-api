@@ -13,6 +13,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_LEADERBOARD_CPP_BEGIN
 
 const string_t c_leaderboard_social_stat_name_contract_version = _T("1");
 const string_t c_leaderboard_with_metadata_contract_version = _T("3");
+const string_t c_leaderboard_with_stats_2017_version = _T("4");
 
 leaderboard_service::leaderboard_service(
     _In_ std::shared_ptr<xbox::services::user_context> userContext,
@@ -243,7 +244,8 @@ xbox_live_result<string_t> create_leaderboard_url(
     _In_ const string_t& continuationToken,
     _In_ bool metadata,
     _In_ const string_t& xuid = string_t(),
-    _In_ const string_t& socialGroup = string_t()
+    _In_ const string_t& socialGroup = string_t(),
+    _In_ const string_t& version = string_t()
     )
 {
     if (scid.empty())
@@ -256,9 +258,19 @@ xbox_live_result<string_t> create_leaderboard_url(
     stringstream_t path;
     path << _T("/scids/");
     path << web::uri::encode_uri(scid, web::uri::components::path);
-    path << _T("/leaderboards/");
-    path << web::uri::encode_uri(name, web::uri::components::path);
-    builder.set_path(path.str());
+    if (version == _T("2017"))
+    {
+        path << _T("/leaderboards/stat(");
+        path << web::uri::encode_uri(name, web::uri::components::path);
+        path << _T(")");
+        builder.set_path(path.str());
+    }
+    else
+    {
+        path << _T("/leaderboards/");
+        path << web::uri::encode_uri(name, web::uri::components::path);
+        builder.set_path(path.str());
+    }
 
     if (metadata)
     {
@@ -314,7 +326,9 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
     _In_ const string_t& socialGroup,
     _In_ uint32_t maxItems,
     _In_ const string_t& continuationToken,
-    _In_ const std::vector<string_t>& additionalColumnNames
+    _In_ const std::vector<string_t>& additionalColumnNames,
+    _In_ const string_t& version,
+    _In_ leaderboard_query lbQuery
     )
 {
     xbox_live_result<string_t> url = create_leaderboard_url(
@@ -326,7 +340,8 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
         continuationToken,
         additionalColumnNames.size() != 0,
         xuid,
-        socialGroup
+        socialGroup,
+        version
         );
 
     RETURN_TASK_CPP_IF_ERR(url, leaderboard_result);
@@ -345,22 +360,31 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
         url.payload(),
         xbox_live_api::get_leaderboard_internal
         );
-
-    http_call->set_xbox_contract_version_header_value(c_leaderboard_with_metadata_contract_version);
+    if (version == _T("2017"))
+    {
+        http_call->set_xbox_contract_version_header_value(c_leaderboard_with_stats_2017_version);
+        lbQuery._set_stat_name(name);
+    }
+    else
+    {
+        http_call->set_xbox_contract_version_header_value(c_leaderboard_with_metadata_contract_version);
+    }
 
     auto userContext = m_userContext;
     auto xboxLiveContextSettings = m_xboxLiveContextSettings;
     auto appConfig = m_appConfig;
 
     auto task = http_call->get_response_with_auth(m_userContext)
-    .then([userContext, xboxLiveContextSettings, appConfig, additionalColumnNames](std::shared_ptr<http_call_response> response)
+    .then([userContext, xboxLiveContextSettings, appConfig, additionalColumnNames, version, lbQuery](std::shared_ptr<http_call_response> response)
     {
         return utils::generate_xbox_live_result<leaderboard_result>(
             serializers::deserialize_result(
                 response->response_body_json(),
                 userContext,
                 xboxLiveContextSettings,
-                appConfig
+                appConfig,
+                version,
+                lbQuery
                 ),
             response
             );
@@ -452,7 +476,9 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
     _In_ const string_t& skipToXuid,
     _In_ const string_t& sortOrder,
     _In_ uint32_t maxItems,
-    _In_ const string_t& continuationToken
+    _In_ const string_t& continuationToken,
+    _In_ const string_t& version,
+    _In_ leaderboard_query lbQuery
     )
 {
     // To align with People moniker support, we are mapping "People" to "all" until the
@@ -492,15 +518,23 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
         url.payload(),
         xbox_live_api::get_leaderboard_for_social_group_internal
         );
-
-    http_call->set_xbox_contract_version_header_value(c_leaderboard_social_stat_name_contract_version);
+    if (version == _T("2017"))
+    {
+        http_call->set_xbox_contract_version_header_value(c_leaderboard_with_stats_2017_version);
+        lbQuery._set_stat_name(statName);
+        lbQuery._set_social_group(socialGroup);
+    }
+    else
+    {
+        http_call->set_xbox_contract_version_header_value(c_leaderboard_social_stat_name_contract_version);
+    }
 
     auto userContext = m_userContext;
     auto xboxLiveContextSettings = m_xboxLiveContextSettings;
     auto appConfig = m_appConfig;
 
     auto task = http_call->get_response_with_auth(m_userContext)
-    .then([userContext, xboxLiveContextSettings, appConfig](std::shared_ptr<http_call_response> response)
+    .then([userContext, xboxLiveContextSettings, appConfig, version, lbQuery](std::shared_ptr<http_call_response> response)
     {
 
         return utils::generate_xbox_live_result<leaderboard_result>( 
@@ -508,7 +542,9 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
                 response->response_body_json(),
                 userContext,
                 xboxLiveContextSettings,
-                appConfig
+                appConfig,
+                version,
+                lbQuery
                 ),
             response
             );

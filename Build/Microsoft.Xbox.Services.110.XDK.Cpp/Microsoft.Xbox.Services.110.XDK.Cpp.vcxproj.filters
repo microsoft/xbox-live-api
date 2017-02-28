@@ -711,6 +711,12 @@
     <ClCompile Include="..\..\Source\Shared\call_buffer_timer.cpp">
       <Filter>Shared</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\leaderboard_query.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\leaderboard_result_event_args.cpp">
+      <Filter>C++ Source\Stats</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_event.cpp">
       <Filter>C++ Source\Stats</Filter>
     </ClCompile>

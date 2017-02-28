@@ -45,17 +45,8 @@ enum class stat_event_type
 {
     local_user_added,
     local_user_removed,
-    stat_update_complete
-};
-
-
-/// <summary> 
-/// The order to sort the leaderboard in
-/// </summary>
-enum class sort_order
-{
-    ascending,
-    descending
+    stat_update_complete,
+    get_leaderboard_complete // cast event args to leaderboard_result_event_args
 };
 
 /// <summary> 
@@ -126,6 +117,28 @@ private:
     friend class stats_value_document;
 };
 
+struct stat_event_args 
+{
+    virtual ~stat_event_args() {}
+};
+
+class leaderboard_result_event_args : public stat_event_args
+{
+public:
+    /// <summary> 
+    /// Gets the leaderboard result from a leaderboard request
+    /// </summary>
+    const xbox_live_result<leaderboard::leaderboard_result>& result();
+
+    /// <summary> 
+    /// Internal function
+    /// </summary>
+    leaderboard_result_event_args(const xbox_live_result<leaderboard::leaderboard_result>& result);
+
+private:
+    xbox_live_result<leaderboard::leaderboard_result> m_result;
+};
+
 class stat_event
 {
 public:
@@ -142,6 +155,11 @@ public:
     stat_event_type event_type() const;
 
     /// <summary> 
+    /// The data of event from stats manager
+    /// </summary>
+    std::shared_ptr<stat_event_args> event_args() const;
+
+    /// <summary> 
     /// Local user the event is for
     /// </summary>
     /// <return>The returned user</return>
@@ -151,11 +169,13 @@ public:
     stat_event(
         stat_event_type eventType,
         xbox_live_user_t user,
-        xbox_live_result<void> errorInfo
+        xbox_live_result<void> errorInfo,
+        std::shared_ptr<stat_event_args> args = nullptr
         );
 
 private:
     stat_event_type m_eventType;
+    std::shared_ptr<stat_event_args> m_eventArgs;
     xbox_live_user_t m_localUser;
     xbox_live_result<void> m_errorInfo;
 };
@@ -193,7 +213,7 @@ public:
     /// Requests the current stat values to be uploaded to the service
     /// This will send immediately instead of automatically during a 30 second window
     /// </summary>
-    /// <remarks>This can be throttled if called too often</remarks>
+    /// <remarks>This will be throttled if called too often</remarks>
     xbox_live_result<void> request_flush_to_service(
         _In_ const xbox_live_user_t& user,
         _In_ bool isHighPriority = false
@@ -211,9 +231,6 @@ public:
     /// <param name="user">The local user whose stats to access</param>
     /// <param name="name">The name of the statistic to modify</param>
     /// <param name="value">Value to replace the stat by</param>
-    /// <param name="statisticReplaceCompareType">
-    /// Will override the compare type. Stat will only be updated if follows the stat compares rule
-    /// </param>
     /// <return>Whether or not the setting was successful. Can fail if stat is not of numerical type. Will return updated stat</return>
     xbox_live_result<void> set_stat_as_number(
         _In_ const xbox_live_user_t& user,
@@ -227,10 +244,6 @@ public:
     /// <param name="user">The local user whose stats to access</param>
     /// <param name="name">The name of the statistic to modify</param>
     /// <param name="value">Value to replace the stat by</param>
-    /// <param name="statisticReplaceCompareType">
-    /// Will override the compare type. Stat will only be updated if follows the stat compares rule
-    /// *Note* This is not recommended to be modified after release of the title
-    /// </param>
     /// <return>Whether or not the setting was successful. Can fail if stat is not of numerical type. Will return updated stat</return>
     xbox_live_result<void> set_stat_as_integer(
         _In_ const xbox_live_user_t& user,
@@ -285,6 +298,36 @@ public:
         );
 
     stats_manager();
+
+    /// <summary> 
+    /// Starts a request for a global leaderboard. You can retrieve the resulting data by checking
+    /// the events returned from do_work for an event of type get_leaderboard_complete
+    /// </summary>
+    /// <param name="user">The local user whose stats to access</param>
+    /// <param name="statName">The name of the statistic to get the leaderboard of</param>
+    /// <param name="query">The query parameters of the leaderboard request</param>
+    /// <return>Whether or not the leaderboard request was started correctly</return>
+    xbox_live_result<void> get_leaderboard(
+        _In_ const xbox_live_user_t& user, 
+        _In_ const string_t& statName, 
+        _In_ leaderboard::leaderboard_query query
+        );
+
+    /// <summary> 
+    /// Starts a request for a social leaderboard. You can retrieve the resulting data by checking
+    /// the events returned from do_work for an event of type get_leaderboard_complete
+    /// </summary>
+    /// <param name="user">The local user whose stats to access</param>
+    /// <param name="statName">The name of the statistic to get the leaderboard of</param>
+    /// <param name="socialGroup">The name of the social group</param>
+    /// <param name="query">The query parameters of the leaderboard request</param>
+    /// <return>Whether or not the leaderboard request was started correctly</return>
+    xbox_live_result<void> get_social_leaderboard(
+        _In_ const xbox_live_user_t& user, 
+        _In_ const string_t& statName, 
+        _In_ const string_t& socialGroup, 
+        _In_ leaderboard::leaderboard_query query
+        );
 
 private:
     std::shared_ptr<stats_manager_impl> m_statsManagerImpl;

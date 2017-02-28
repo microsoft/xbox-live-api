@@ -194,4 +194,34 @@ StatisticManager::DeleteStatistic(
     THROW_IF_ERR(result);
 }
 
+void StatisticManager::GetLeaderboard(
+    _In_ XboxLiveUser_t user,
+    _In_ Platform::String^ statName,
+    _In_ Leaderboard::LeaderboardQuery^ query
+    )
+{
+    auto result = m_cppObj->get_leaderboard(
+        user_context::user_convert(user),
+        STRING_T_FROM_PLATFORM_STRING(statName),
+        query->GetCppObj()
+    );
+    THROW_IF_ERR(result);
+}
+
+void StatisticManager::GetSocialLeaderboard(
+    _In_ XboxLiveUser_t user,
+    _In_ Platform::String^ statName,
+    _In_ Platform::String^ socialGroup,
+    _In_ Leaderboard::LeaderboardQuery^ query
+    )
+{
+    auto result = m_cppObj->get_social_leaderboard(
+        user_context::user_convert(user),
+        STRING_T_FROM_PLATFORM_STRING(statName),
+        STRING_T_FROM_PLATFORM_STRING(socialGroup),
+        query->GetCppObj()
+    );
+    THROW_IF_ERR(result);
+}
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_END

@@ -64,6 +64,12 @@ void leaderboard_result::_Set_next_query(std::shared_ptr<leaderboard_social_quer
     m_socialQuery = std::move(query);
 }
 
+void leaderboard_result::_Set_next_query(const leaderboard_query& query)
+{
+    m_version = _T("2017");
+    m_nextQuery = std::move(query);
+}
+
 void leaderboard_result::_Parse_additional_columns(const std::vector<string_t>& additionalColumnNames)
 {
     std::vector<leaderboard_column> columns;
@@ -127,6 +133,11 @@ bool leaderboard_result::has_next() const
 
 pplx::task<xbox_live_result<leaderboard_result>> leaderboard_result::get_next(_In_ uint32_t maxItems) const
 {
+    if (m_version == _T("2017"))
+    {
+        return pplx::task_from_result(xbox_live_result<leaderboard_result>(xbox_live_error_code::unsupported, "This API is NOT supported for using leaderboards that are configured with stats 2017."));
+    }
+
     if (m_continuationToken.empty())
     {
         return pplx::task_from_result(xbox_live_result<leaderboard_result>(xbox_live_error_code::out_of_range, "leadboard_result does not have a next page"));
@@ -168,6 +179,18 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_result::get_next(_I
 
     // This should never happen
     return pplx::task_from_result(xbox_live_result<leaderboard_result>(xbox_live_error_code::runtime_error, "no query found to continue"));
+}
+
+xbox_live_result<leaderboard_query> leaderboard_result::get_next_query() const
+{
+    if (m_version == _T("2017"))
+    {
+        return xbox_live_result<leaderboard_query>(m_nextQuery);
+    }
+    else
+    {
+        return xbox_live_result<leaderboard_query>(xbox_live_error_code::unsupported, "This API is only supported for using leaderboards that are configured with stats 2017.");
+    }
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_LEADERBOARD_CPP_END

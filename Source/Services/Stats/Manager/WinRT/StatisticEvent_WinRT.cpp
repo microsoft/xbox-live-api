@@ -4,6 +4,7 @@
 #include "pch.h"
 #include "user_context.h"
 #include "StatisticEvent_WinRT.h"
+#include "LeaderboardResultEventArgs_WinRT.h"
 
 using namespace xbox::services;
 
@@ -45,6 +46,20 @@ Platform::String^
 StatisticEvent::ErrorMessage::get()
 {
     return m_errorMessage;
+}
+
+StatisticEventArgs^
+StatisticEvent::EventArgs::get()
+{
+    switch (m_cppObj.event_type())
+    {
+    case stats::manager::stat_event_type::get_leaderboard_complete:
+        return ref new LeaderboardResultEventArgs(std::dynamic_pointer_cast<stats::manager::leaderboard_result_event_args>(m_cppObj.event_args()));
+    default:
+        return nullptr;
+
+    }
+
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_END

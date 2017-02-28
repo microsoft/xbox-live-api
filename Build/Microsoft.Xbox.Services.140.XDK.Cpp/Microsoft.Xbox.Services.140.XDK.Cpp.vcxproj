@@ -211,6 +211,8 @@
     <ClCompile Include="..\..\Source\Services\Social\xbox_social_relationship.cpp" />
     <ClCompile Include="..\..\Source\Services\Social\xbox_social_relationship_result.cpp" />
     <ClCompile Include="..\..\Source\Services\Social\xbox_user_profile.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\leaderboard_query.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\leaderboard_result_event_args.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager_impl.cpp" />
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_service.cpp" />

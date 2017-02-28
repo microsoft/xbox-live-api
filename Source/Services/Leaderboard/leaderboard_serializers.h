@@ -18,7 +18,9 @@ xbox_live_result<leaderboard_result> deserialize_result(
     _In_ const web::json::value& json,
     _In_ std::shared_ptr<xbox::services::user_context> userContext,
     _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
+    _In_ const string_t& version = string_t(),
+    _In_ leaderboard_query query = leaderboard_query()
     );
 
 }
