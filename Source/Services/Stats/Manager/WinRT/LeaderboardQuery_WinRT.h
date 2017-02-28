@@ -56,8 +56,8 @@ public:
     DEFINE_PROP_GET_STR_OBJ(SocialGroup, social_group);
 
     /// <summary>
-    /// Gets the continuation token is there is one. If it is empty then 
-    /// that means that there is no more data to get from a previous query or there is no previous query.
+    /// True if there is more data in the leaderboard
+    /// If this is true then you can pass this object into the GetLeaderboard call
     /// </summary>
     DEFINE_PROP_GET_OBJ(HasNext, has_next, bool);
 

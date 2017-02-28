@@ -225,6 +225,7 @@ public:
 
     /// <summary>
     /// True if there is more data in the leaderboard
+    /// If this is true then you can pass this object into the get_leaderboard call
     /// </summary>
     bool has_next() const;
 
