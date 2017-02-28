@@ -64,7 +64,14 @@ enum class leaderboard_stat_type
 /// </summary>
 enum class sort_order
 {
+    /// <summary> 
+    /// Sorting the Leaderboard lowest to highest
+    /// </summary>
     ascending,
+
+    /// <summary> 
+    /// Sorting the Leaderboard highest to lowest
+    /// </summary>
     descending
 };
 
@@ -166,76 +173,76 @@ public:
     /// Set whether or not the resulting leaderboard will start with the 
     /// user that requested the leaderboard.
     /// </summary>
-    void set_skip_result_to_me(bool skipResultToMe);
+    void set_skip_result_to_me(_In_ bool skipResultToMe);
 
     /// <summary>
     /// Set Which rank the resulting leaderboard will start at
     /// </summary>
-    void set_skip_result_to_rank(uint32_t skipResultToRank);
+    void set_skip_result_to_rank(_In_ uint32_t skipResultToRank);
 
     /// <summary>
     /// Set maximum items that the resulting leaderboard will contain
     /// </summary>
-    void set_max_items(uint32_t maxItems);
+    void set_max_items(_In_ uint32_t maxItems);
 
     /// <summary>
     /// Set sort order for the resulting leaderboard
     /// </summary>
-    void set_order(sort_order order);
+    void set_order(_In_ sort_order order);
 
     /// <summary>
     /// Gets whether or not the resulting leaderboard will start with the 
     /// user that requested the leaderboard.
     /// </summary>
-    bool skip_result_to_me();
+    bool skip_result_to_me() const;
 
     /// <summary>
     /// Gets Which rank the resulting leaderboard will start at
     /// </summary>
-    uint32_t skip_result_to_rank();
+    uint32_t skip_result_to_rank() const;
 
     /// <summary>
     /// Gets maximum items that the resulting leaderboard will contain
     /// </summary>
-    uint32_t max_items();
+    uint32_t max_items() const;
 
     /// <summary>
     /// Gets sort order for the resulting leaderboard
     /// </summary>
-    sort_order order();
+    sort_order order() const;
 
     /// <summary>
     /// Gets the stat name of the previous query. This property will only be set if its a query 
     /// gotten from get_next_query
     /// </summary>
-    const string_t& stat_name();
+    const string_t& stat_name() const;
 
     /// <summary>
     /// Gets the social group of the previous query. This property will only be set if its a query 
     /// gotten from get_next_query and the previous query was a social query
     /// </summary>
-    const string_t& social_group();
+    const string_t& social_group() const;
 
     /// <summary>
     /// Gets the continuation token is there is one. If it is empty then 
     /// that means that there is no more data to get from a previous query or there is no previous query.
     /// </summary>
-    const string_t& continuation_token();
+    const string_t& continuation_token() const;
 
     /// <summary>
     /// Internal Function
     /// </summary>
-    void _set_continuation_token(const string_t& continuationToken);
+    void _Set_continuation_token(_In_ const string_t& continuationToken);
 
     /// <summary>
     /// Internal Function
     /// </summary>
-    void _set_stat_name(const string_t& statName);
+    void _Set_stat_name(_In_ const string_t& statName);
 
     /// <summary>
     /// Internal Function
     /// </summary>
-    void _set_social_group(const string_t& socialGroup);
+    void _Set_social_group(_In_ const string_t& socialGroup);
 
 private:
     bool m_skipResultToMe;
@@ -306,6 +313,7 @@ public:
     /// <param name="maxItems">The maximum number of items to return.</param>
     /// <returns>A leaderboard_results object that contains the next set of results.</returns>
     /// <remarks>
+    /// This query is only to be used to retrieve a leaderboard in a pre stats 2017 system
     /// Returns a concurrency::task&lt;T&gt; object that represents the state of the asynchronous operation.
     ///
     /// Calls V1 GET /scids/{scid}/leaderboards/{leaderboardname}?

@@ -125,7 +125,7 @@ deserialize_result(
 
     if (version == _T("2017"))
     {
-        query._set_continuation_token(continuationToken);
+        query._Set_continuation_token(continuationToken);
         result._Set_next_query(query);
     }
 

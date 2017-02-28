@@ -363,7 +363,7 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
     if (version == _T("2017"))
     {
         http_call->set_xbox_contract_version_header_value(c_leaderboard_with_stats_2017_version);
-        lbQuery._set_stat_name(name);
+        lbQuery._Set_stat_name(name);
     }
     else
     {
@@ -521,8 +521,8 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
     if (version == _T("2017"))
     {
         http_call->set_xbox_contract_version_header_value(c_leaderboard_with_stats_2017_version);
-        lbQuery._set_stat_name(statName);
-        lbQuery._set_social_group(socialGroup);
+        lbQuery._Set_stat_name(statName);
+        lbQuery._Set_social_group(socialGroup);
     }
     else
     {

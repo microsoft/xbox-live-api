@@ -26,7 +26,7 @@ LeaderboardResultEventArgs::LeaderboardResultEventArgs(
     m_cppObj(std::move(cppObj)
     )
 {
-    auto result = cppObj->result();
+    auto result = m_cppObj->result();
     THROW_IF_ERR(result);
     m_result = ref new Leaderboard::LeaderboardResult(result.payload());
 }

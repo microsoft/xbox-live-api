@@ -20,72 +20,72 @@ leaderboard_query::leaderboard_query() :
 {
 }
 
-void leaderboard_query::set_skip_result_to_me(bool skipResultToMe)
+void leaderboard_query::set_skip_result_to_me(_In_ bool skipResultToMe)
 {
     m_skipResultToMe = skipResultToMe;
 }
 
-void leaderboard_query::set_skip_result_to_rank(uint32_t skipResultToRank)
+void leaderboard_query::set_skip_result_to_rank(_In_ uint32_t skipResultToRank)
 {
     m_skipResultToRank = skipResultToRank;
 }
 
-void leaderboard_query::set_max_items(uint32_t maxItems)
+void leaderboard_query::set_max_items(_In_ uint32_t maxItems)
 {
     m_maxItems = maxItems;
 }
 
-void leaderboard_query::set_order(sort_order order)
+void leaderboard_query::set_order(_In_ sort_order order)
 {
     m_order = order;
 }
 
-bool leaderboard_query::skip_result_to_me()
+bool leaderboard_query::skip_result_to_me() const
 {
     return m_skipResultToMe;
 }
 
-uint32_t leaderboard_query::skip_result_to_rank()
+uint32_t leaderboard_query::skip_result_to_rank() const
 {
     return m_skipResultToRank;
 }
 
-uint32_t leaderboard_query::max_items()
+uint32_t leaderboard_query::max_items() const
 {
     return m_maxItems;
 }
 
-sort_order leaderboard_query::order()
+sort_order leaderboard_query::order() const
 {
     return m_order;
 }
 
-const string_t& leaderboard_query::continuation_token()
+const string_t& leaderboard_query::continuation_token() const
 {
     return m_continuationToken;
 }
 
-void leaderboard_query::_set_continuation_token(const string_t& continuationToken)
+void leaderboard_query::_Set_continuation_token(_In_ const string_t& continuationToken)
 {
     m_continuationToken = continuationToken;
 }
 
-void leaderboard_query::_set_stat_name(const string_t& statName)
+void leaderboard_query::_Set_stat_name(_In_ const string_t& statName)
 {
     m_statName = statName;
 }
 
-void leaderboard_query::_set_social_group(const string_t& socialGroup)
+void leaderboard_query::_Set_social_group(_In_ const string_t& socialGroup)
 {
     m_socialGroup = socialGroup;
 }
 
-const string_t& leaderboard_query::stat_name()
+const string_t& leaderboard_query::stat_name() const
 {
     return m_statName;
 }
 
-const string_t& leaderboard_query::social_group()
+const string_t& leaderboard_query::social_group() const
 {
     return m_socialGroup;
 }

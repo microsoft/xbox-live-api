@@ -135,7 +135,7 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_result::get_next(_I
 {
     if (m_version == _T("2017"))
     {
-        return pplx::task_from_result(xbox_live_result<leaderboard_result>(xbox_live_error_code::unsupported, "This API is NOT supported for using leaderboards that are configured with stats 2017."));
+        return pplx::task_from_result(xbox_live_result<leaderboard_result>(xbox_live_error_code::unsupported, "This API is NOT supported for using leaderboards that are configured with stats 2017. Use get_next_query() instead."));
     }
 
     if (m_continuationToken.empty())
@@ -189,7 +189,7 @@ xbox_live_result<leaderboard_query> leaderboard_result::get_next_query() const
     }
     else
     {
-        return xbox_live_result<leaderboard_query>(xbox_live_error_code::unsupported, "This API is only supported for using leaderboards that are configured with stats 2017.");
+        return xbox_live_result<leaderboard_query>(xbox_live_error_code::unsupported, "This API is only supported for using leaderboards that are configured with stats 2017. Use get_next() instead");
     }
 }
 
