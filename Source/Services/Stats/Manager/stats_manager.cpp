@@ -65,54 +65,54 @@ stats_manager::do_work()
 xbox_live_result<void>
 stats_manager::set_stat_as_integer(
     _In_ const xbox_live_user_t& user,
-    _In_ const string_t& name,
-    _In_ int64_t value
+    _In_ const string_t& statName,
+    _In_ int64_t statValue
     )
 {
     return m_statsManagerImpl->set_stat(
         user,
-        name,
-        static_cast<double>(value)
+        statName,
+        static_cast<double>(statValue)
         );
 }
 
 xbox_live_result<void>
 stats_manager::set_stat_as_number(
     _In_ const xbox_live_user_t& user,
-    _In_ const string_t& name,
-    _In_ double value
+    _In_ const string_t& statName,
+    _In_ double statValue
     )
 {
     return m_statsManagerImpl->set_stat(
         user,
-        name,
-        value
+        statName,
+        statValue
         );
 }
 
 xbox_live_result<void>
 stats_manager::set_stat_as_string(
     _In_ const xbox_live_user_t& user,
-    _In_ const string_t& name,
-    _In_ const string_t& value
+    _In_ const string_t& statName,
+    _In_ const string_t& statValue
     )
 {
     return m_statsManagerImpl->set_stat(
         user,
-        name,
-        value.c_str()
+        statName,
+        statValue.c_str()
         );
 }
 
 xbox_live_result<stat_value>
 stats_manager::get_stat(
     _In_ const xbox_live_user_t& user,
-    _In_ const string_t& name
+    _In_ const string_t& statName
     )
 {
     return m_statsManagerImpl->get_stat(
         user,
-        name
+        statName
         );
 }
 
@@ -131,16 +131,20 @@ stats_manager::get_stat_names(
 xbox_live_result<void>
 stats_manager::delete_stat(
     _In_ const xbox_live_user_t& user,
-    _In_ const string_t& name
+    _In_ const string_t& statName
     )
 {
     return m_statsManagerImpl->delete_stat(
         user,
-        name
+        statName
         );
 }
 
-xbox_live_result<void> stats_manager::get_leaderboard(const xbox_live_user_t& user, const string_t& statName, leaderboard::leaderboard_query query)
+xbox_live_result<void> stats_manager::get_leaderboard(
+    const xbox_live_user_t& user, 
+    const string_t& statName, 
+    leaderboard::leaderboard_query query
+    )
 {
     return m_statsManagerImpl->get_leaderboard(
         user,
@@ -149,7 +153,12 @@ xbox_live_result<void> stats_manager::get_leaderboard(const xbox_live_user_t& us
         );
 }
 
-xbox_live_result<void> stats_manager::get_social_leaderboard(const xbox_live_user_t& user, const string_t& statName, const string_t& socialGroup, leaderboard::leaderboard_query query)
+xbox_live_result<void> stats_manager::get_social_leaderboard(
+    const xbox_live_user_t& user, 
+    const string_t& statName, 
+    const string_t& socialGroup, 
+    leaderboard::leaderboard_query query
+    )
 {
     return m_statsManagerImpl->get_social_leaderboard(
         user,

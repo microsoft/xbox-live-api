@@ -250,8 +250,8 @@ public:
     /// <return>Whether or not the setting was successful. Can fail if stat is not of numerical type. Will return updated stat</return>
     _XSAPIIMP xbox_live_result<void> set_stat_as_number(
         _In_ const xbox_live_user_t& user,
-        _In_ const string_t& name,
-        _In_ double value
+        _In_ const string_t& statName,
+        _In_ double statValue
         );
 
     /// <summary> 
@@ -263,8 +263,8 @@ public:
     /// <return>Whether or not the setting was successful. Can fail if stat is not of numerical type. Will return updated stat</return>
     _XSAPIIMP xbox_live_result<void> set_stat_as_integer(
         _In_ const xbox_live_user_t& user,
-        _In_ const string_t& name,
-        _In_ int64_t value
+        _In_ const string_t& statName,
+        _In_ int64_t statValue
         );
 
     /// <summary> 
@@ -276,8 +276,8 @@ public:
     /// <return>Whether or not the setting was successful. Can fail if stat is not of string type. Will return updated stat</return>
     _XSAPIIMP xbox_live_result<void> set_stat_as_string(
         _In_ const xbox_live_user_t& user,
-        _In_ const string_t& name,
-        _In_ const string_t& value
+        _In_ const string_t& statName,
+        _In_ const string_t& statValue
         );
 
     /// <summary> 
@@ -299,7 +299,7 @@ public:
     /// <return>Whether or not the setting was successful along with updated stat</return>
     _XSAPIIMP xbox_live_result<stat_value> get_stat(
         _In_ const xbox_live_user_t& user,
-        _In_ const string_t& name
+        _In_ const string_t& statName
         );
 
     /// <summary> 
@@ -310,7 +310,7 @@ public:
     /// <return>Whether or not the stat deletion was successful</return>
     _XSAPIIMP xbox_live_result<void> delete_stat(
         _In_ const xbox_live_user_t& user,
-        _In_ const string_t& name
+        _In_ const string_t& statName
         );
 
     _XSAPIIMP stats_manager();
