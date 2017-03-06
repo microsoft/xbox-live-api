@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<!-- Sitemap 1.0 -->
+</HEAD>
+  <ul>
+		<li> <object type="text/sitemap">
+			<param name="name" value="Xbox Live SDK">
+			<param name="local" value="Base/TitlePage.htm">
+		</object>
+        <!-- Begin programming guide TOC -->
+        <!-- End programming guide TOC -->
+      </li>
+		<ul>
+			<li> <object type="text/sitemap">
+				<param name="name" value="Xbox Live services for WinRT">
+				<param name="local" value="Base/WinRTRefpage.htm">
+			</object> </li>
+			<li> <object type="text/sitemap">
+				<param name="name" value="Xbox Live services for C++">
+				<param name="local" value="Base/CppRefpage.htm">
+			</object> </li>
+		</ul>
+	</ul>
+<BODY>
+<OBJECT type="text/site properties">
+	<param name="ImageType" value="Folder">
+</OBJECT>
+<UL>
+</UL>
+</BODY></HTML>
