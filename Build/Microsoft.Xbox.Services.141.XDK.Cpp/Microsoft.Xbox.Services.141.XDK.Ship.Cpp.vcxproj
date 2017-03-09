@@ -15,7 +15,7 @@
     <ApplicationEnvironment>title</ApplicationEnvironment>
     <ProjectGuid>{20E87245-DA60-40E5-9938-ABB445E78467}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>Microsoft.Xbox.Services.140.XDK.Ship.Cpp</ProjectName>
+    <ProjectName>Microsoft.Xbox.Services.141.XDK.Ship.Cpp</ProjectName>
     <RootNamespace>Microsoft.Xbox.Services</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
@@ -101,7 +101,7 @@
     <ClInclude Include="..\..\Source\Services\Social\Manager\social_manager_internal.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.xbox\casablanca140.Xbox.vcxproj">
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs15.xbox\casablanca141.Xbox.vcxproj">
       <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
     </ProjectReference>
   </ItemGroup>

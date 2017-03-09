@@ -15,7 +15,7 @@
     <ApplicationEnvironment>title</ApplicationEnvironment>
     <ProjectGuid>{8A112040-CDA1-4490-B518-62DFCC451FA7}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>Microsoft.Xbox.Services.140.XDK.Cpp</ProjectName>
+    <ProjectName>Microsoft.Xbox.Services.141.XDK.Cpp</ProjectName>
     <RootNamespace>Microsoft.Xbox.Services</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
@@ -341,7 +341,7 @@
     <ResourceCompile Include="..\..\Source\Shared\Logger\ERA_ETW.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.xbox\casablanca140.Xbox.vcxproj">
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs15.xbox\casablanca141.Xbox.vcxproj">
       <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
     </ProjectReference>
   </ItemGroup>
