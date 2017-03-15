@@ -1,0 +1,163 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{47FF466B-C455-48C0-8D89-37E3FC0897F8}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <ApplicationType>Windows Store</ApplicationType>
+    <ApplicationTypeRevision>10.0</ApplicationTypeRevision>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <AppContainerApplication>true</AppContainerApplication>
+    <GenerateManifest>false</GenerateManifest>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformMinVersion>10.0.10240.0</WindowsTargetPlatformMinVersion>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <WindowsAppContainer>true</WindowsAppContainer>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XSAPI_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalOptions>/bigobj /Zm250 %(AdditionalOptions)</AdditionalOptions>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories> 
+       $(ProjectDir);
+       $(ProjectDir)\..\..\Source\Services;
+       $(ProjectDir)\..\..\Source\Services\Common;
+       $(ProjectDir)\..\..\Source\Services\Common\Desktop;
+       $(ProjectDir)\..\..\Source\Services\Social;
+       $(ProjectDir)\..\..\Source\Services\Social\Manager;
+       $(ProjectDir)\..\..\Source\Services\Multiplayer;
+       $(ProjectDir)\..\..\Source\Services\Presence;
+       $(ProjectDir)\..\..\Source\Services\Misc;
+       $(ProjectDir)\..\..\Source\Services\RealTimeActivity;
+       $(ProjectDir)\..\..\Source\Shared;
+       $(ProjectDir)\..\..\Source\Shared\WinRT;
+       $(ProjectDir)\..\..\Include;
+       ..\..\External\cpprestsdk\Release\include;
+       $(ProjectDir)\..\..\Source\System\WinRT;
+       $(ProjectDir)\..\..\Source\System;
+       %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <CompileAsWinRT>true</CompileAsWinRT>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Bcrypt.lib;Pathcch.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+    </Link>
+    <Lib>
+      <AdditionalOptions>/ignore:4099 /ignore:4264</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WholeProgramOptimization Condition="'$(Configuration)'=='Release'">false</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <PropertyGroup>
+    <ProjectFolder>$(MSBuildProjectName)</ProjectFolder>
+    <OutDir>$(ProjectDir)..\..\Binaries\$(Configuration)\$(Platform)\$(ProjectFolder)\</OutDir>
+    <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectFolder)\</IntDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\achievements.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\http_call_settings.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\leaderboard.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\matchmaking.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\multiplayer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\privacy.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\profile.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\services.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\social.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\system.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\types.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\user_statistics.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_context.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_service_call_routed_event_args.h" />
+    <ClInclude Include="..\..\Include\xsapi\social_manager.h" />
+    <ClInclude Include="..\..\Include\xsapi\errors.h" />
+    <ClInclude Include="..\..\Include\xsapi\events.h" />
+    <ClInclude Include="..\..\Include\xsapi\http_call.h" />
+    <ClInclude Include="..\..\Include\xsapi\http_call_request_message.h" />
+    <ClInclude Include="..\..\Include\xsapi\game_server_platform.h" />
+    <ClInclude Include="..\..\Include\xsapi\title_callable_ui.h" />
+    <ClInclude Include="..\..\Include\xsapi\multiplayer_manager.h" />
+    <ClInclude Include="..\..\Include\xsapi\presence.h" />
+    <ClInclude Include="..\..\Include\xsapi\real_time_activity.h" />
+    <ClInclude Include="..\..\Include\xsapi\title_storage.h" />
+    <ClInclude Include="..\..\Include\xsapi\xbox_live_app_config.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs15.uwp\cpprestsdk141.uwp.static.vcxproj">
+      <Project>{9AD285A2-301E-47A0-A299-14AD5D4F2758}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Source\Services\Common\Desktop\pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\build.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>
