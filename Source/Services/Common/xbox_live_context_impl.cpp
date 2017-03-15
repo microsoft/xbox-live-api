@@ -161,6 +161,7 @@ m_xboxLiveContextSettings = std::make_shared<XBOX_LIVE_NAMESPACE::xbox_live_cont
     m_presenceService = XBOX_LIVE_NAMESPACE::presence::presence_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
     m_userStatisticsService = XBOX_LIVE_NAMESPACE::user_statistics::user_statistics_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
     m_multiplayerService = XBOX_LIVE_NAMESPACE::multiplayer::multiplayer_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
+    m_tournamentService = XBOX_LIVE_NAMESPACE::tournaments::tournament_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_socialService = XBOX_LIVE_NAMESPACE::social::social_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
     m_contextualSearchService = XBOX_LIVE_NAMESPACE::contextual_search::contextual_search_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
 #endif
@@ -297,6 +298,12 @@ matchmaking::matchmaking_service&
 xbox_live_context_impl::matchmaking_service()
 {
     return m_matchmakingService;
+}
+
+tournaments::tournament_service&
+xbox_live_context_impl::tournament_service()
+{
+    return m_tournamentService;
 }
 
 user_statistics::user_statistics_service&

@@ -126,6 +126,12 @@ xbox_live_context::matchmaking_service()
     return m_xboxLiveContextImpl->matchmaking_service();
 }
 
+tournaments::tournament_service&
+xbox_live_context::tournament_service()
+{
+    return m_xboxLiveContextImpl->tournament_service();
+}
+
 user_statistics::user_statistics_service&
 xbox_live_context::user_statistics_service()
 {

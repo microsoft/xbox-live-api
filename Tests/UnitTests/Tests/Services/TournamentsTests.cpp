@@ -1,210 +1,154 @@
-// Copyright (c) Microsoft Corporation
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
+//*********************************************************
+//
+// Copyright (c) Microsoft. All rights reserved.
+// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+//
+//*********************************************************
 #include "pch.h"
 #define TEST_CLASS_OWNER L"adityat"
 #define TEST_CLASS_AREA L"Tournaments"
 #include "UnitTestIncludes.h"
 
+#include "Utils_WinRT.h"
+#include "xsapi/tournaments.h"
+#include "XboxLiveContext_WinRT.h"
+
+using namespace xbox::services;
+using namespace xbox::services::tournaments;
+
 using namespace Microsoft::Xbox::Services;
-using namespace Platform;
+using namespace Microsoft::Xbox::Services::System;
+using namespace Microsoft::Xbox::Services::Multiplayer;
+using namespace Microsoft::Xbox::Services::Tournaments;
 using namespace Platform::Collections;
 using namespace Windows::Foundation::Collections;
-using namespace Microsoft::Xbox::Services::System;
-using namespace xbox::services::system;
 
-NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_BEGIN
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
 DEFINE_TEST_CLASS(TournamentsTests)
 {
 public:
     DEFINE_TEST_CLASS_PROPS(TournamentsTests)
 
-const string_t defaultGetTournamentInstancesResponse =
-LR"(
-{
-   "instances":[
-    {
-        "id":"aea18a61-d0e6-492b-8c57-5e87f97ed834",
-        "definitionName":"TestMaxOne",
-        "status":"Registering",
-        "start":"2016-04-22T16:26:18.5455046Z",
-        "properties":{
-            "displayName":"TESTMAXONE_NAME",
-            "description":"TESTMAXONE_DESCRIPTION",
-            "organizer":{
-                "name":"XboxLive"
-            }
-        },
-        "configuration":{
-            "registration":{
-                "start":"2015-06-16T19:02:10.8765706Z",
-                "end":"2016-04-22T16:31:18.5455046Z",
-                "maxTeams":8,
-                "minTeams":2
-            },
-            "teams":{
-                "sessionTemplate":"TeamSessionMaxOne",
-                "minMembers":1,
-                "maxMembers":1
-            },
-            "stages":[
-            {
-                "start":"2016-04-22T16:31:18.5455046Z",
-                "minDuration":"00:01:00",
-                "mode":{
-                    "style":"SingleElimination"
-                },
-                "sessionTemplate":"TournamentGameSessionMaxTwo",
-                "rounds":{
-                    "minLength":"00:01:00",
-                    "runInParallel":false
-                }
-            }]
-        }
-    }]
-}
-)";
-
-const string_t defaultGetTournamentProgressResponse =
-LR"({
-    "progress":{
-    "stages":[{
-        "rounds":[{
-        "start":"2015-06-16T19:00:00.0000000Z",
-        "end":"2015-06-16T19:17:45.0500949Z",
-        "games":[{
-            "id":"4fa96370-3d2a-407e-ad74-125d7e098f6d",
-            "start":"2015-06-16T19:02:10.8765706Z",
-            "end":"2015-06-16T19:17:45.0500949Z",
-            "state":"inprogress",
-            "teams":[{
-            "id":"8cb05010-4ca1-4f15-abf3-d686e7ac1588",
-            "result":{
-                "state":"draw",
-                "source":"adjusted"
-            }
-            }]
-        },{
-            "id":"7f918194-882b-44ae-8ab7-249f5400b4be",
-            "start":"2015-06-16T19:01:57.4314319Z",
-            "end":"2015-06-16T19:12:04.4346712Z",
-            "state":"completed",
-            "teams":[{
-            "id":"75c4e11d-dd99-4e00-8b90-93f20286146d",
-            "result":{
-                "state":"win",
-                "source":"arbitration"
-            }},{
-            "id":"b53aaad7-7c0b-4ec2-8ff7-830dc551955a",
-            "result":{
-                "state":"loss",
-                "source":"server"
-            }
-            }]
-        }]
-        }]
-    }]
-    }
-})";
+    const string_t filePath = _T("\\TestResponses\\Tournaments.json");
+    web::json::value testResponseJsonFromFile = utils::read_test_response_file(filePath);
 
     void VerifyTournament(Tournaments::Tournament^ tournament, web::json::value tournamentToVerify)
     {
-        VERIFY_ARE_EQUAL(tournamentToVerify[L"id"].as_string(), tournament->Id->Data());
-        VERIFY_ARE_EQUAL(tournamentToVerify[L"definitionName"].as_string(), tournament->Definition->Data());
-        VERIFY_ARE_EQUAL(tournamentToVerify[L"properties"][L"displayName"].as_string(), tournament->DisplayName->Data());
-        VERIFY_ARE_EQUAL(tournamentToVerify[L"properties"][L"description"].as_string(), tournament->Description->Data());
-        VERIFY_ARE_EQUAL_STR_IGNORE_CASE(tournamentToVerify[L"status"].as_string().c_str(), tournament->Status.ToString()->Data());
+        web::json::value tournamentJson = tournamentToVerify[L"tournament"];
+        web::json::value teamJson = tournamentToVerify[L"team"];
 
-        //dates
-        VERIFY_ARE_EQUAL(DateTimeToString(tournament->StartDate).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str(),
-            tournamentToVerify[L"start"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
-        if (tournamentToVerify.has_field(L"end"))
+        VERIFY_ARE_EQUAL(tournament->Id->Data(), tournamentJson[L"id"].as_string());
+        VERIFY_ARE_EQUAL(tournament->OrganizerId->Data(), tournamentJson[L"organizerId"].as_string());
+        VERIFY_ARE_EQUAL(tournament->Name->Data(), tournamentJson[L"name"].as_string());
+        VERIFY_ARE_EQUAL(tournament->Description->Data(), tournamentJson[L"description"].as_string());
+        VERIFY_ARE_EQUAL(tournament->GameMode->Data(), tournamentJson[L"gameMode"].as_string());
+        VERIFY_ARE_EQUAL(tournament->TournamentStyle->Data(), tournamentJson[L"tournamentStyle"].as_string());
+        VERIFY_ARE_EQUAL(tournament->IsRegistrationOpen, tournamentJson[L"isRegistrationOpen"].as_bool());
+        VERIFY_ARE_EQUAL(tournament->IsCheckinOpen, tournamentJson[L"isCheckinOpen"].as_bool());
+        VERIFY_ARE_EQUAL(tournament->IsPlayingOpen, tournamentJson[L"isPlayingOpen"].as_bool());
+        VERIFY_ARE_EQUAL(tournament->HasPrize, tournamentJson[L"hasPrize"].as_bool());
+        VERIFY_ARE_EQUAL(tournament->IsPaused, tournamentJson[L"paused"].as_bool());
+
+        VERIFY_ARE_EQUAL_INT(tournament->MinTeamSize, tournamentJson[L"minTeamSize"].as_integer());
+        VERIFY_ARE_EQUAL_INT(tournament->MaxTeamSize, tournamentJson[L"maxTeamSize"].as_integer());
+        VERIFY_ARE_EQUAL_INT(tournament->TeamsRegisteredCount, tournamentJson[L"numTeamsRegistered"].as_integer());
+        VERIFY_ARE_EQUAL_INT(tournament->MinTeamsRegistered, tournamentJson[L"minRegistrationCount"].as_integer());
+        VERIFY_ARE_EQUAL_INT(tournament->MaxTeamsRegistered, tournamentJson[L"maxRegistrationCount"].as_integer());
+        VERIFY_ARE_EQUAL_STR_IGNORE_CASE(tournament->TournamentState.ToString()->Data(), tournamentJson[L"state"].as_string().c_str());
+        if (!tournamentJson[L"endTime"].is_null())
         {
-            VERIFY_ARE_EQUAL(DateTimeToString(tournament->EndDate).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str(),
-                tournamentToVerify[L"end"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
+            VERIFY_ARE_EQUAL(DateTimeToString(
+                tournament->EndTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str(),
+                tournamentJson[L"endTime"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
+        }
+
+        web::json::value scheduleJson = tournamentJson[L"schedule"];
+        VERIFY_ARE_EQUAL(DateTimeToString(
+            tournament->RegistrationStartTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str(),
+            scheduleJson[L"registrationStart"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
+        VERIFY_ARE_EQUAL(DateTimeToString(
+            tournament->RegistrationEndTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str(),
+            scheduleJson[L"registrationEnd"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
+        VERIFY_ARE_EQUAL(DateTimeToString(
+            tournament->CheckinStartTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str(),
+            scheduleJson[L"checkinStart"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
+        VERIFY_ARE_EQUAL(DateTimeToString(
+            tournament->CheckinEndTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str(),
+            scheduleJson[L"checkinEnd"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
+        VERIFY_ARE_EQUAL(DateTimeToString(
+            tournament->PlayingStartTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str(),
+            scheduleJson[L"playingStart"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
+        VERIFY_ARE_EQUAL(DateTimeToString(
+            tournament->PlayingEndTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str(),
+            scheduleJson[L"playingEnd"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
+
+        // Team Info
+        if (!teamJson.is_null())
+        {
+            VERIFY_ARE_EQUAL(tournament->TeamId->Data(), teamJson[L"id"].as_string());
+            VERIFY_ARE_EQUAL_STR_IGNORE_CASE(tournament->TeamState.ToString()->Data(), teamJson[L"state"].as_string().c_str());
+            VERIFY_ARE_EQUAL_UINT(tournament->TeamRanking, teamJson[L"ranking"].as_number().to_uint64());
         }
     }
 
-    DEFINE_TEST_CASE(TestGetTournamentInstancesAsync)
+    DEFINE_TEST_CASE(TestGetTournamentsAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetTournamentInstancesAsync);
-        auto responseJson = web::json::value::parse(defaultGetTournamentInstancesResponse);
+        DEFINE_TEST_CASE_PROPERTIES(TestGetTournamentsAsync);
+
+        const string_t defaultGetTournamentsResponse = testResponseJsonFromFile[L"defaultGetTournamentsResponse"].serialize();
+        auto responseJson = web::json::value::parse(defaultGetTournamentsResponse);
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
         httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto task = create_task(xboxLiveContext->TournamentService->GetTournamentInstancesAsync(
-            _T("ServiceConfigurationId"),
-            DateTime(),
-            DateTime(),
-            _T("0")));
+        TournamentRequest^ request = ref new TournamentRequest(true);
+        auto task = create_task(xboxLiveContext->TournamentService->GetTournamentsAsync(request));
         VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://tournaments.mockenv.xboxlive.com", httpCall->ServerName);
+        VERIFY_ARE_EQUAL_STR(L"https://tournamentshub.mockenv.xboxlive.com", httpCall->ServerName);
+        VERIFY_ARE_EQUAL_STR(L"/tournaments/?titleId=1234&teamForMember=TestXboxUserId&memberId=TestXboxUserId", httpCall->PathQueryFragment.to_string());
 
-        Tournaments::TournamentInstances^ result = task.get();
-        VERIFY_ARE_EQUAL_INT(result->Items->Size, responseJson.as_object()[L"instances"].as_array().size());
+        TournamentRequestResult^ result = task.get();
+        VERIFY_ARE_EQUAL_INT(result->Items->Size, responseJson.as_object()[L"value"].as_array().size());
 
         for (uint32_t i = 0; i < result->Items->Size; i++)
         {
-            VerifyTournament(result->Items->GetAt(i), responseJson.as_object()[L"instances"].as_array()[i]);
+            VerifyTournament(result->Items->GetAt(i), responseJson.as_object()[L"value"].as_array()[i]);
         }
     }
 
-    DEFINE_TEST_CASE(TestGetTournamentProgressAsync)
+    DEFINE_TEST_CASE(TestGetTournamentsAsync2)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetTournamentProgressAsync);
-        auto responseJson = web::json::value::parse(defaultGetTournamentProgressResponse);
+        DEFINE_TEST_CASE_PROPERTIES(TestGetTournamentsAsync2);
+
+        const string_t defaultGetTournamentsResponse = testResponseJsonFromFile[L"defaultGetTournamentsResponse"].serialize();
+        auto responseJson = web::json::value::parse(defaultGetTournamentsResponse);
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
         httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto task = create_task(xboxLiveContext->TournamentService->GetTournamentProgressAsync(
-            _T("ServiceConfigurationId"),
-            _T("TournamentId")));
+        TournamentRequest^ request = ref new TournamentRequest(false);
+        Platform::Collections::Vector<TournamentState>^ states = ref new Platform::Collections::Vector<TournamentState>();
+        states->Append(TournamentState::Active);
+        states->Append(TournamentState::Completed);
+        request->StateFilter = states->GetView();
+
+        auto task = create_task(xboxLiveContext->TournamentService->GetTournamentsAsync(request));
         VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://tournaments.mockenv.xboxlive.com", httpCall->ServerName);
+        VERIFY_ARE_EQUAL_STR(L"https://tournamentshub.mockenv.xboxlive.com", httpCall->ServerName);
+        VERIFY_ARE_EQUAL_STR_IGNORE_CASE(L"/tournaments/?titleId=1234&teamForMember=TestXboxUserId&state=%5B%22active%22,%22completed%22%5D", httpCall->PathQueryFragment.to_string().c_str());
 
-        auto stages = task.get();
-        VERIFY_ARE_EQUAL_INT(1, stages->Size);
+        TournamentRequestResult^ result = task.get();
+        VERIFY_ARE_EQUAL_INT(result->Items->Size, responseJson.as_object()[L"value"].as_array().size());
 
-        auto rounds = stages->GetAt(0)->Rounds;
-        VERIFY_ARE_EQUAL_INT(1, rounds->Size);
-
-        auto round1 = rounds->GetAt(0);
-        VERIFY_IS_TRUE(round1->StartTime.UniversalTime != 0);
-        VERIFY_IS_TRUE(round1->EndTime.UniversalTime != 0);
-
-        auto games = round1->Games;
-        VERIFY_ARE_EQUAL_INT(2, games->Size);
-
-        auto game1 = games->GetAt(0);
-        VERIFY_ARE_EQUAL_STR(game1->Id->Data(), L"4fa96370-3d2a-407e-ad74-125d7e098f6d");
-        VERIFY_IS_TRUE(game1->StartTime.UniversalTime != 0);
-        VERIFY_IS_TRUE(game1->EndTime.UniversalTime != 0);
-        VERIFY_IS_TRUE(game1->State == TournamentGameState::InProgress);
-
-        auto results1 = game1->Results;
-        VERIFY_ARE_EQUAL_INT(1, results1->Size);
-        auto result11 = results1->GetAt(0);
-        VERIFY_IS_TRUE(result11->State == TournamentGameResultState::Draw);
-        VERIFY_IS_TRUE(result11->Source == TournamentGameResultSource::Adjusted);
-
-        auto game2 = games->GetAt(1);
-        VERIFY_IS_TRUE(game2->State == TournamentGameState::Completed);
-
-        auto results2 = game2->Results;
-        VERIFY_ARE_EQUAL_INT(2, results2->Size);
-
-        auto result21 = results2->GetAt(0);
-        VERIFY_ARE_EQUAL_STR(result21->TeamId->Data(), L"75c4e11d-dd99-4e00-8b90-93f20286146d");
-        VERIFY_IS_TRUE(result21->State == TournamentGameResultState::Win);
-        VERIFY_IS_TRUE(result21->Source == TournamentGameResultSource::Arbitration);
-
-        auto result22 = results2->GetAt(1);
-        VERIFY_IS_TRUE(result22->State == TournamentGameResultState::Loss);
-        VERIFY_IS_TRUE(result22->Source == TournamentGameResultSource::Server);
+        for (uint32_t i = 0; i < result->Items->Size; i++)
+        {
+            VerifyTournament(result->Items->GetAt(i), responseJson.as_object()[L"value"].as_array()[i]);
+        }
     }
 };
 
-NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_END
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

@@ -153,6 +153,9 @@
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\StatsManagerTests.cpp">
       <Filter>Tests\Services</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\TournamentsTests.cpp">
+      <Filter>Tests\Services</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Tests\UnitTests\Support\DefineTestMacros.h">

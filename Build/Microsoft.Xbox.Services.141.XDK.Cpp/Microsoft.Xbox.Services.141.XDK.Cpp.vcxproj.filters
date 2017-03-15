@@ -651,6 +651,18 @@
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_team_result.cpp">
       <Filter>C++ Source\Tournaments</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_service.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_request.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_request_result.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Social\Manager\social_user_group_loaded_event_args.cpp">
       <Filter>C++ Source\Social\Manager</Filter>
     </ClCompile>
@@ -810,6 +822,9 @@
       <Filter>C++ Public Includes</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\xsapi\title_storage.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\tournaments.h">
       <Filter>C++ Public Includes</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\xsapi\http_call_request_message.h">

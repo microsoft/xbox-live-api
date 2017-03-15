@@ -309,7 +309,11 @@
     <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_blob_result.cpp" />
     <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_quota.cpp" />
     <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_reference.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_request.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_request_result.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_service.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_team_result.cpp" />
     <ClCompile Include="..\..\Source\Shared\call_buffer_timer.cpp" />
     <ClCompile Include="..\..\Source\Shared\errors.cpp" />
@@ -379,6 +383,7 @@
     <ClInclude Include="..\..\Include\xsapi\presence.h" />
     <ClInclude Include="..\..\Include\xsapi\real_time_activity.h" />
     <ClInclude Include="..\..\Include\xsapi\title_storage.h" />
+    <ClInclude Include="..\..\Include\xsapi\tournaments.h" />
     <ClInclude Include="..\..\Include\xsapi\xbox_live_app_config.h" />
     <ClInclude Include="..\..\Include\xsapi\xbox_live_context_settings.h" />
     <ClInclude Include="..\..\Source\Services\Common\Desktop\pch.h" />

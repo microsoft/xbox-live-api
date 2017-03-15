@@ -94,6 +94,10 @@ XboxLiveContext::Initialize()
         m_cppObj->multiplayer_service()
         );
 
+    m_tournamentService = ref new Tournaments::TournamentService(
+        m_cppObj->tournament_service()
+        );
+
     m_userStatisticsService = ref new UserStatistics::UserStatisticsService(
         m_cppObj->user_statistics_service()
         );
@@ -196,6 +200,12 @@ Matchmaking::MatchmakingService^
 XboxLiveContext::MatchmakingService::get()
 {
     return m_matchmakingService;
+}
+
+Tournaments::TournamentService^
+XboxLiveContext::TournamentService::get()
+{
+    return m_tournamentService;
 }
 
 RealTimeActivity::RealTimeActivityService^
