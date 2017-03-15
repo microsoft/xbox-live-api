@@ -107,6 +107,7 @@ public:
 
     void destroy(_In_ pointer p)
     {
+        p; // Needed to avoid unreferenced param on VS2012
         p->~T();
     }
 
