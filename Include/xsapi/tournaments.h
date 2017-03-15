@@ -54,7 +54,6 @@ enum class tournament_order_by
 
     /// <summary>
     /// The only valid sort order for start_time is tournament_sort_order::ascending. 
-    /// TODO: clarify what this is used for
     /// </summary>
     start_time,
 
@@ -97,32 +96,33 @@ enum class team_state
     unknown,
 
     /// <summary>
-    ///
+    /// The team is registered.
     /// </summary>
     registered,
 
     /// <summary>
-    ///
+    /// The team is currently on the wait list.
     /// </summary>
     waitlisted,
 
     /// <summary>
-    ///
+    /// The team is on stand by.
     /// </summary>
     stand_by,
 
     /// <summary>
-    ///
+    /// The team is checked in.
     /// </summary>
     checked_in,
 
     /// <summary>
-    ///
+    /// The team is playing.
     /// </summary>
     playing,
 
     /// <summary>
-    ////
+    /// The team is done with the tournament.
+    /// Check the team_completed_reason state for more details.
     /// </summary>
     completed
 };
@@ -133,27 +133,27 @@ enum class team_state
 enum class team_completed_reason
 {
     /// <summary>
-    /// The team state is unknown.
+    /// The team completed reason is unknown.
     /// </summary>
     unknown,
 
     /// <summary>
-    ///
+    /// The team was rejected.
     /// </summary>
     rejected,
 
     /// <summary>
-    ///
+    /// The team was eliminated.
     /// </summary>
     eliminated,
 
     /// <summary>
-    ///
+    /// The team was evicted.
     /// </summary>
     evicted,
 
     /// <summary>
-    ///
+    /// The team has successfully completed the tournament.
     /// </summary>
     completed
 };
@@ -169,12 +169,12 @@ enum class team_order_by
     none,
 
     /// <summary>
-    ///
+    /// Order by name.
     /// </summary>
     name,
 
     /// <summary>
-    /// 
+    /// Order by ranking.
     /// </summary>
     ranking,
 };
@@ -388,12 +388,12 @@ public:
     _XSAPIIMP uint64_t ranking() const;
 
     /// <summary>
-    /// 
+    /// Information about the team's current or upcoming match. Absent if the team does not have an current or upcoming match.
     /// </summary>
     _XSAPIIMP const xbox::services::tournaments::current_match_metadata& current_match_metadata() const;
 
     /// <summary>
-    /// 
+    /// Information about the previously played match. Absent if the player has not played any matches.
     /// </summary>
     _XSAPIIMP const xbox::services::tournaments::previous_match_metadata& previous_match_metadata() const;
 
@@ -443,7 +443,7 @@ public:
     /// <summary>
     /// Returns an team_request_result object that contains the next page of teams.
     /// </summary>
-    /// <returns>An achievements_result object that contains a list of achievement objects.</returns>
+    /// <returns>An team_request_result object that contains a list of team_info objects.</returns>
     /// <remarks>
     /// Returns a concurrency::task<T> object that represents the state of the asynchronous operation.
     /// </remarks>
@@ -484,7 +484,6 @@ private:
 class tournament_request
 {
 public:
-    // TODO: support getting tournament for TitleID, member separately.
 
     /// <summary>Creates a tournament_request object.</summary>
     /// <param name="filterResultsForUser">Filter results to only tournaments where this user is participating.</param>
