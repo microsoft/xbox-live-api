@@ -201,6 +201,7 @@
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\StatsTests.cpp" />
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\StringVerifyTests.cpp" />
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\TitleStorageTests.cpp" />
+    <ClCompile Include="..\..\Tests\UnitTests\Tests\Services\TournamentsTests.cpp" />
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Shared\EventTests_WinRT.cpp" />
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Shared\HttpCallResponseTests.cpp" />
     <ClCompile Include="..\..\Tests\UnitTests\Tests\Shared\HttpCallSettingsTests.cpp" />

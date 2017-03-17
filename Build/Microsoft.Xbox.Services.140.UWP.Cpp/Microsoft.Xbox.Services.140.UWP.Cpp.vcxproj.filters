@@ -726,6 +726,18 @@
     <ClCompile Include="..\..\Source\Services\Stats\Manager\leaderboard_result_event_args.cpp">
       <Filter>C++ Source\Stats</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_service.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_request.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_request_result.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.h">
@@ -940,6 +952,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Shared\call_buffer_timer.h">
       <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\tournaments.h">
+      <Filter>C++ Public Includes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

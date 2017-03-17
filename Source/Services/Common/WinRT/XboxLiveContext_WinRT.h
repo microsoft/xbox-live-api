@@ -14,6 +14,7 @@
 #include "UserStatisticsService_WinRT.h"
 #include "MultiplayerService_WinRT.h"
 #include "MatchmakingService_WinRT.h"
+#include "TournamentService_WinRT.h"
 #include "XboxLiveContextSettings_WinRT.h"
 #include "RealTimeActivityService_WinRT.h"
 #include "PresenceService_WinRT.h"
@@ -102,6 +103,11 @@ public:
     property Multiplayer::MultiplayerService^ MultiplayerService { Multiplayer::MultiplayerService^ get(); }
 
     /// <summary>
+    /// Returns object containing access methods to the Xbox Tournament service.
+    /// </summary>
+    property Tournaments::TournamentService^ TournamentService { Tournaments::TournamentService^ get(); }
+
+    /// <summary>
     /// Returns object containing access methods to the Xbox Real Time Activity service.
     /// </summary>
     property RealTimeActivity::RealTimeActivityService^ RealTimeActivityService { RealTimeActivity::RealTimeActivityService^ get(); }
@@ -187,6 +193,7 @@ private:
     UserStatistics::UserStatisticsService^ m_userStatisticsService;
     Multiplayer::MultiplayerService^ m_multiplayerService;
     Matchmaking::MatchmakingService^ m_matchmakingService;
+    Tournaments::TournamentService^ m_tournamentService;
     RealTimeActivity::RealTimeActivityService^ m_realTimeActivityService;
     Presence::PresenceService^ m_presenceService;
     GameServerPlatform::GameServerPlatformService^ m_gameServerPlatformService;

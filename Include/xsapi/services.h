@@ -29,6 +29,7 @@
 #include "xsapi/user_statistics.h"
 #include "xsapi/multiplayer.h"
 #include "xsapi/matchmaking.h"
+#include "xsapi/tournaments.h"
 #include "xsapi/real_time_activity.h"
 #include "xsapi/presence.h"
 #include "xsapi/game_server_platform.h"

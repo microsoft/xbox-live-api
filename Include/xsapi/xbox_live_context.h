@@ -19,6 +19,7 @@
 #include "xsapi/entertainment_profile.h"
 #endif
 #include "xsapi/multiplayer.h"
+#include "xsapi/tournaments.h"
 #endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
@@ -192,6 +193,11 @@ public:
     /// A service for managing matchmaking sessions.
     /// </summary>
     _XSAPIIMP matchmaking::matchmaking_service& matchmaking_service();
+
+    /// <summary>
+    /// A service for managing tournaments.
+    /// </summary>
+    _XSAPIIMP tournaments::tournament_service& tournament_service();
 
     /// <summary>
     /// A service for managing real-time activity.

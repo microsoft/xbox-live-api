@@ -67,7 +67,7 @@ enum class xbox_live_api
     get_social_relationships,
     get_stats_value_document,
     get_ticket_status,
-    get_tournament_instance_teams,
+    get_tournaments,
     get_tournament_instances,
     get_tournament_progress,
     get_user_profiles,
