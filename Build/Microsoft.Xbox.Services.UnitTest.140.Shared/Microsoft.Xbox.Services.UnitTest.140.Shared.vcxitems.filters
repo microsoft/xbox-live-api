@@ -964,6 +964,30 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentState_WinRT.h">
       <Filter>XSAPI\Services\Touraments\WinRT</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\MatchMetadata_WinRT.h">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\CurrentMatchMetadata_WinRT.h">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\PreviousMatchMetadata_WinRT.h">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamCompletedReason_WinRT.h">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamOrderBy_WinRT.h">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamRequest_WinRT.h">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamRequestResult_WinRT.h">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamInfo_WinRT.h">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="XSAPI">
@@ -2303,6 +2327,24 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_service.cpp">
       <Filter>XSAPI\Services\Touraments</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\team_info.cpp">
+      <Filter>XSAPI\Services\Touraments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\team_request.cpp">
+      <Filter>XSAPI\Services\Touraments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\team_request_result.cpp">
+      <Filter>XSAPI\Services\Touraments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\match_metadata.cpp">
+      <Filter>XSAPI\Services\Touraments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\current_match_metadata.cpp">
+      <Filter>XSAPI\Services\Touraments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\previous_match_metadata.cpp">
+      <Filter>XSAPI\Services\Touraments</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\Tournament_WinRT.cpp">
       <Filter>XSAPI\Services\Touraments\WinRT</Filter>
     </ClCompile>
@@ -2313,6 +2355,24 @@
       <Filter>XSAPI\Services\Touraments\WinRT</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentService_WinRT.cpp">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\MatchMetadata_WinRT.cpp">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\CurrentMatchMetadata_WinRT.cpp">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\PreviousMatchMetadata_WinRT.cpp">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamRequest_WinRT.cpp">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamRequestResult_WinRT.cpp">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamInfo_WinRT.cpp">
       <Filter>XSAPI\Services\Touraments\WinRT</Filter>
     </ClCompile>
   </ItemGroup>

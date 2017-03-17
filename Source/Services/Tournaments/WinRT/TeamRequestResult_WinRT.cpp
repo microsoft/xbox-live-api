@@ -8,7 +8,7 @@
 //
 //*********************************************************
 #include "pch.h"
-#include "TournamentRequestResult_WinRT.h"
+#include "TeamRequestResult_WinRT.h"
 
 using namespace concurrency;
 using namespace Windows::Foundation;
@@ -19,34 +19,34 @@ using namespace Microsoft::Xbox::Services::System;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_BEGIN
 
-TournamentRequestResult::TournamentRequestResult(
-    _In_ xbox::services::tournaments::tournament_request_result cppObj
+TeamRequestResult::TeamRequestResult(
+    _In_ xbox::services::tournaments::team_request_result cppObj
     ) :
     m_cppObj(std::move(cppObj))
 {
-    m_tournaments = UtilsWinRT::CreatePlatformVectorFromStdVectorObj<Tournament, tournament>(m_cppObj.tournaments())->GetView();
+    m_teams = UtilsWinRT::CreatePlatformVectorFromStdVectorObj<TeamInfo, team_info>(m_cppObj.teams())->GetView();
 }
 
-const xbox::services::tournaments::tournament_request_result&
-TournamentRequestResult::GetCppObj() const
+const xbox::services::tournaments::team_request_result&
+TeamRequestResult::GetCppObj() const
 {
     return m_cppObj;
 }
 
-IVectorView<Tournament^>^
-TournamentRequestResult::Tournaments::get()
+IVectorView<TeamInfo^>^
+TeamRequestResult::Teams::get()
 {
-    return m_tournaments;
+    return m_teams;
 }
 
-IAsyncOperation<TournamentRequestResult^>^
-TournamentRequestResult::GetNextAsync()
+IAsyncOperation<TeamRequestResult^>^
+TeamRequestResult::GetNextAsync()
 {
     auto task = m_cppObj.get_next()
-    .then([](xbox_live_result<tournament_request_result> cppResult)
+    .then([](xbox_live_result<team_request_result> cppResult)
     {
         THROW_IF_ERR(cppResult);
-        return ref new TournamentRequestResult(cppResult.payload());
+        return ref new TeamRequestResult(cppResult.payload());
     });
 
     return ASYNC_FROM_TASK(task);

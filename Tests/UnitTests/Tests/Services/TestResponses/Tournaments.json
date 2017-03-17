@@ -34,12 +34,12 @@
                 "minTeamSize": 1,
                 "maxTeamSize": 4,
                 "schedule": {
-                    "registrationStart": "2017-01-26T06:53:19",
-                    "registrationEnd": "2017-01-27T06:53:19",
-                    "checkinStart": "2017-01-28T06:53:19",
-                    "checkinEnd": "2017-01-29T06:53:19",
-                    "playingStart": "2017-01-30T06:53:19",
-                    "playingEnd": "2017-05-01T06:53:19"
+                    "registrationStart": "2017-02-17T20:06:10.1949991Z",
+                    "registrationEnd": "2017-02-18T20:06:10.1949991Z",
+                    "checkinStart": "2017-02-17T20:06:10.1949991Z",
+                    "checkinEnd": "2017-02-18T20:06:10.1949991Z",
+                    "playingStart": "2017-02-17T20:06:10.1949991Z",
+                    "playingEnd": "2017-02-18T20:06:10.1949991Z"
                 }
             },
             "team": {
@@ -88,6 +88,114 @@
                     "playingEnd": "2017-02-18T20:06:10.1949991Z"
                 }
             }
+        }]
+    },
+    "defaultGetTeamsResponse": {
+        "value": [{
+            "rtaSubscription": "https://tournamentshub.xboxlive.com/tournaments/manualtest/00004/teams/0003",
+            "continuationUri": {
+                "uwp_xboxone": {
+                    "continuationUri": "xbox-arena://tournamentdetails?organizerId=manualtest&tournamentId=00004",
+                    "pfn": "Xbox.Social_8wekyb3d8bbwe"
+                },
+                "uwp_desktop": {
+                    "continuationUri": "xbox-arena://tournamentdetails?organizerId=manualtest&tournamentId=00004",
+                    "pfn": "Microsoft.XboxApp_8wekyb3d8bbwe"
+                }
+            },
+            "id": "0003",
+            "name": "teamname",
+            "registrationDate": "2017-02-17T20:06:10.1949991Z",
+            "state": "Registered",
+            "completedReason": "Completed",
+            "standing": "4W - 2L",
+            "ranking": 5,
+            "currentMatch": {
+                "gameSessionRef": {
+                    "scid": "42c6562b-6841-4b21-8729-4dd643af374b",
+                    "templateName": "templatename",
+                    "name": "sessionname"
+                },
+                "label" : {
+                    "formatMoniker": "{0}W - {1}L",
+                    "params": ["6", "1"]
+                },
+                "startTime": "2017-02-17T20:06:10.1949991Z",
+                "bye": false,
+                "opposingTeamIds": ["0001", "0002"]
+            },
+            "previousMatch": {
+                "endTime": "2017-02-17T20:06:10.1949991Z",
+                "result": {
+                    "outcome": "Win"
+                },
+                "label" : {
+                    "formatMoniker": "{0}W - {1}L",
+                    "params": ["6", "1"]
+                },
+                "startTime": "2017-02-17T20:06:10.1949991Z",
+                "bye": false,
+                "opposingTeamIds": ["a0a15919-b490-4368-bf95-22280e4412cc", "3a6e314e-ee6c-477f-bc33-50dfc268407a"]
+            },
+            "members": [{
+                "id": "2533274815757150"
+            },
+            {
+                "id": "2533274815757150"
+            },
+            {
+                "id": "2533274815757150"
+            }]
+        },
+        {
+            "rtaSubscription": "https://tournamentshub.xboxlive.com/tournaments/manualtest/00004/teams/20170221045135",
+            "continuationUri": {
+                "uwp_xboxone": {
+                    "continuationUri": "xbox-arena://tournamentdetails?organizerId=manualtest&tournamentId=00004",
+                    "pfn": "Xbox.Social_8wekyb3d8bbwe"
+                },
+                "uwp_desktop": {
+                    "continuationUri": "xbox-arena://tournamentdetails?organizerId=manualtest&tournamentId=00004",
+                    "pfn": "Microsoft.XboxApp_8wekyb3d8bbwe"
+                }
+            },
+            "id": "20170221045135",
+            "name": "20170221045135",
+            "registrationDate": "2017-02-21T16:51:35.2138655Z",
+            "state": "Registered",
+            "completedReason": "Completed",
+            "standing": "4W - 2L",
+            "ranking": 5,
+            "currentMatch": {
+                "gameSessionRef": {
+                    "scid": "42c6562b-6841-4b21-8729-4dd643af374b",
+                    "templateName": "templatename",
+                    "name": "sessionname"
+                },
+                "label" : {
+                    "formatMoniker": "{0}W - {1}L",
+                    "params": ["6", "1"]
+                },
+                "startTime": "2017-02-17T20:06:10.1949991Z",
+                "bye": false,
+                "opposingTeamIds": ["eb947ba2-a3dd-412a-8872-4a895d59ac2a", "42bbde1c-dee3-4e23-85dc-6bd4642277ed"]
+            },
+            "previousMatch": {
+                "endTime": "2017-02-17T20:06:10.1949991Z",
+                "result": {
+                    "outcome": "Win"
+                },
+                "label" : {
+                    "formatMoniker": "{0}W - {1}L",
+                    "params": ["6", "1"]
+                },
+                "startTime": "2017-02-17T20:06:10.1949991Z",
+                "bye": false,
+                "opposingTeamIds": ["a0a15919-b490-4368-bf95-22280e4412cc", "3a6e314e-ee6c-477f-bc33-50dfc268407a"]
+            },
+            "members": [{
+                "id": "2533274815757150"
+            }]
         }]
     }
 }

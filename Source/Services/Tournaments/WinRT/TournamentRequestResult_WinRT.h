@@ -14,7 +14,7 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_BEGIN
 
 /// <summary>
-/// Represents a collection of tournament class objects returned by a request.
+/// Represents a collection of Tournament class objects returned by a request.
 /// </summary>
 public ref class TournamentRequestResult sealed
 {
@@ -23,7 +23,7 @@ public:
     /// <summary>
     /// The collection of tournament objects returned by a request.
     /// </summary>
-    property Windows::Foundation::Collections::IVectorView<Tournament^>^ Items
+    property Windows::Foundation::Collections::IVectorView<Tournament^>^ Tournaments
     { 
         Windows::Foundation::Collections::IVectorView<Tournament^>^ get();
     }
@@ -51,7 +51,7 @@ internal:
     const xbox::services::tournaments::tournament_request_result& GetCppObj() const;
 private:
     xbox::services::tournaments::tournament_request_result m_cppObj;
-    Windows::Foundation::Collections::IVectorView<Tournament^>^ m_items;
+    Windows::Foundation::Collections::IVectorView<Tournament^>^ m_tournaments;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_END

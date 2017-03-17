@@ -12,6 +12,9 @@
 #include "Tournament_WinRT.h"
 #include "TournamentRequest_WinRT.h"
 #include "TournamentRequestResult_WinRT.h"
+#include "TeamInfo_WinRT.h"
+#include "TeamRequest_WinRT.h"
+#include "TeamRequestResult_WinRT.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_BEGIN
 
@@ -59,9 +62,9 @@ public:
     /// Returns a concurrency::task<T> object that represents the state of the asynchronous operation.
     /// This method calls GET /tournaments/{organizer}/{id}/teams
     /// </remarks>
-    /*Windows::Foundation::IAsyncOperation<TeamResult^>^> GetTeams(
+    Windows::Foundation::IAsyncOperation<TeamRequestResult^>^ GetTeamsAsync(
         _In_ TeamRequest^ request
-        );*/
+        );
 
     /// <summary>
     /// Returns a specific tournament object.
@@ -75,11 +78,11 @@ public:
     /// Returns a concurrency::task<T> object that represents the state of the asynchronous operation.
     /// This method calls GET /tournaments/{organizer}/{id}/teams/{teamId}
     /// </remarks>
-    /*Windows::Foundation::IAsyncOperation<TeamDetails^>^ GetTeamDetails(
+    Windows::Foundation::IAsyncOperation<TeamInfo^>^ GetTeamDetailsAsync(
         _In_ Platform::String^ organizerId,
         _In_ Platform::String^ tournamentId,
         _In_ Platform::String^ teamId
-        );*/
+        );
 
 internal:
     TournamentService(
