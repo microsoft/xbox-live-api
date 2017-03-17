@@ -107,11 +107,8 @@ public:
 
     void destroy(_In_ pointer p)
     {
-#if _WIN32
-        std::_Destroy(p);
-#else
+        p; // Needed to avoid unreferenced param on VS2012
         p->~T();
-#endif
     }
 
     size_t max_size() const
