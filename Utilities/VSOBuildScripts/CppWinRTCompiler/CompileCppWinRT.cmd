@@ -1,13 +1,12 @@
 @echo on
 echo.
 
-set XDKVER=160801
+call %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\setBuildVersion.cmd
 set SDKSRC=%1
 
 if "%1" == "local" goto testlocal
 goto start
 :testlocal
-set XDKVER=161000
 set TFS_DropLocation=c:\test
 mkdir %TFS_DropLocation%
 set TFS_SourcesDirectory=%CD%\..\..\..
@@ -20,7 +19,6 @@ goto done
 
 :serializeForPostbuild
 set REMOTE_COMPILER_FOLDER=\\scratch2\scratch\jasonsa\tools\cppwinrt
-set WINSDKVER=160801
 set OUTFOLDER=%2
 
 if "%1" EQU "" set SDKSRC=%TFS_SourcesDirectory%
