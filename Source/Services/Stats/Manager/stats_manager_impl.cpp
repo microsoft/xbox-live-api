@@ -19,7 +19,7 @@ const std::chrono::seconds stats_manager_impl::TIME_PER_CALL_SEC =
 #if UNIT_TEST_SERVICES
 std::chrono::seconds::zero();
 #else
-std::chrono::seconds(60);
+std::chrono::seconds(30);
 #endif
 
 const std::chrono::milliseconds stats_manager_impl::STATS_POLL_TIME_MS = std::chrono::minutes(5);
