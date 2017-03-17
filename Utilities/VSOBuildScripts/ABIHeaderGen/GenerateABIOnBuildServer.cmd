@@ -1,4 +1,6 @@
-set LOCALXDK=Durango.160801
+call %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\setBuildVersion.cmd
+
+set LOCALXDK=Durango.%XDKVER%
 
 if "%1" == "local" goto testlocal
 goto start
@@ -7,7 +9,6 @@ goto start
 set TFS_DropLocation=c:\test
 mkdir %TFS_DropLocation%
 set TFS_SourcesDirectory=%CD%\..\..\..
-set LOCALXDK=Durango.161000
 goto serializeForPostbuild
 
 :start
