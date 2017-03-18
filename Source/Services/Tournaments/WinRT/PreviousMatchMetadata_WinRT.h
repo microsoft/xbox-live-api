@@ -1,12 +1,6 @@
-//*********************************************************
-//
-// Copyright (c) Microsoft. All rights reserved.
-// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-//
-//*********************************************************
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 #pragma once
 #include "xsapi/tournaments.h"
 #include "MatchMetadata_WinRT.h"
@@ -22,7 +16,7 @@ public ref class PreviousMatchMetadata sealed
 public:
 
     /// <summary>
-    /// The last game's result for the tournament.
+    /// Previous game's result for the tournament.
     /// </summary>
     property Microsoft::Xbox::Services::Tournaments::TournamentTeamResult^ Result
     {
@@ -35,7 +29,7 @@ public:
     DEFINE_PROP_GET_DATETIME_OBJ(MatchEndTime, match_end_time);
 
     /// <summary>
-    /// 
+    /// Metadata associated with the team's previously played match.
     /// </summary>
     property MatchMetadata^ MatchDetails { MatchMetadata^ get(); }
 

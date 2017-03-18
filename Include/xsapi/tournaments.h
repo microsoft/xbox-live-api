@@ -1,12 +1,6 @@
-//*********************************************************
-//
-// Copyright (c) Microsoft. All rights reserved.
-// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-//
-//*********************************************************
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 #pragma once
 #include "xsapi/multiplayer.h"
 
@@ -159,7 +153,7 @@ enum class team_completed_reason
 };
 
 /// <summary>
-///
+/// The property used to order results by for retrieving a list of teams.
 /// </summary>
 enum class team_order_by
 {
@@ -233,7 +227,7 @@ public:
     _XSAPIIMP const xbox::services::multiplayer::multiplayer_session_reference& game_session_reference() const;
 
     /// <summary>
-    /// 
+    /// Metadata associated with the team's current or upcoming match.
     /// </summary>
     _XSAPIIMP const match_metadata& match_details() const;
 
@@ -260,7 +254,7 @@ class previous_match_metadata
 public:
 
     /// <summary>
-    /// The last game's result for the tournament.
+    /// Previous game's result for the tournament.
     /// </summary>
     _XSAPIIMP xbox::services::tournaments::tournament_team_result result() const;
 
@@ -270,7 +264,7 @@ public:
     _XSAPIIMP const utility::datetime& match_end_time() const;
 
     /// <summary>
-    /// 
+    /// Metadata associated with the team's previously played match.
     /// </summary>
     _XSAPIIMP const match_metadata& match_details() const;
 

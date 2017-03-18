@@ -1,12 +1,6 @@
-//*********************************************************
-//
-// Copyright (c) Microsoft. All rights reserved.
-// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-//
-//*********************************************************
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 #pragma once 
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_BEGIN
@@ -17,22 +11,22 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_BEGIN
 public enum class TeamCompletedReason
 {
     /// <summary>
-    ///
+    /// The team was rejected.
     /// </summary>
     Rejected = xbox::services::tournaments::team_completed_reason::rejected,
 
     /// <summary>
-    ///
+    /// The team was eliminated.
     /// </summary>
     Eliminated = xbox::services::tournaments::team_completed_reason::eliminated,
 
     /// <summary>
-    ///
+    /// The team was evicted.
     /// </summary>
     Evicted = xbox::services::tournaments::team_completed_reason::evicted,
 
     /// <summary>
-    ///
+    /// The team has successfully completed the tournament.
     /// </summary>
     Completed = xbox::services::tournaments::team_completed_reason::completed
 
