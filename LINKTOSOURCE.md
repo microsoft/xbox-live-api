@@ -4,6 +4,12 @@ You might want to link against the XSAPI source if you want to debug an issue, o
 
 If you are using Visual Studio 2017, the steps are the same but use 141 instead of 140 for all project paths and project names below.
 
+Jump to the guide that matches the platform and API type you are using:
+- [How to link against the C++ UWP source](LINKTOSOURCE.md#how-to-link-against-the-xsapi-c-uwp-source)
+- [How to link against the WinRT UWP source](LINKTOSOURCE.md#how-to-link-against-the-xsapi-winrt-uwp-source)
+- [How to link against the C++ XDK source](LINKTOSOURCE.md#how-to-link-against-the-xsapi-c-xdk-source)
+- [How to link against the WinRT XDK source](LINKTOSOURCE.md#how-to-link-against-the-xsapi-winrt-xdk-source)
+
 ### How to link against the XSAPI C++ UWP source
 
 - If your project references the pre-built NuGet package, you need to remove the reference. In Visual Studio 2015, right click on project and choose "Manage NuGet Packages...", and if Microsoft.Xbox.Live.SDK.Cpp.UWP is installed, click "Uninstall" and click "OK" and wait until its removed.
