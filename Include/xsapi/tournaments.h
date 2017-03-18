@@ -1,12 +1,6 @@
-//*********************************************************
-//
-// Copyright (c) Microsoft. All rights reserved.
-// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-//
-//*********************************************************
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 #pragma once
 #include "xsapi/multiplayer.h"
 
@@ -159,7 +153,7 @@ enum class team_completed_reason
 };
 
 /// <summary>
-///
+/// The property used to order results by for retrieving a list of teams.
 /// </summary>
 enum class team_order_by
 {
@@ -233,7 +227,7 @@ public:
     _XSAPIIMP const xbox::services::multiplayer::multiplayer_session_reference& game_session_reference() const;
 
     /// <summary>
-    /// 
+    /// Metadata associated with the team's current or upcoming match.
     /// </summary>
     _XSAPIIMP const match_metadata& match_details() const;
 
@@ -260,7 +254,7 @@ class previous_match_metadata
 public:
 
     /// <summary>
-    /// The last game's result for the tournament.
+    /// Previous game's result for the tournament.
     /// </summary>
     _XSAPIIMP xbox::services::tournaments::tournament_team_result result() const;
 
@@ -270,7 +264,7 @@ public:
     _XSAPIIMP const utility::datetime& match_end_time() const;
 
     /// <summary>
-    /// 
+    /// Metadata associated with the team's previously played match.
     /// </summary>
     _XSAPIIMP const match_metadata& match_details() const;
 
@@ -326,6 +320,16 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
+    _XSAPIIMP const string_t& _Organizer_id() const;
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    _XSAPIIMP const string_t& _Tournament_id() const;
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
     _XSAPIIMP uint32_t _Max_items() const;
 
     /// <summary>
@@ -358,7 +362,7 @@ public:
     _XSAPIIMP const string_t& id() const;
 
     /// <summary>
-    /// he display name of the team
+    /// The display name of the team
     /// </summary>
     _XSAPIIMP const string_t& name() const;
 
@@ -371,6 +375,11 @@ public:
     /// The timestamp at which the team was registered. Used to determine ordering if team is waitlisted. 
     /// </summary>
     _XSAPIIMP const utility::datetime& registration_date() const;
+
+    /// <summary>
+    /// A formatted string that describes the team's standing in the tournament. For example '1W - 0L'.
+    /// </summary>
+    _XSAPIIMP const string_t& standing() const;
 
     /// <summary>
     /// The state of the team.
@@ -413,6 +422,7 @@ private:
 
     string_t m_teamId;
     string_t m_teamName;
+    string_t m_standing;
     std::vector<string_t> m_memberXuids;
     utility::datetime m_registrationDate;
     team_state m_state;
@@ -913,13 +923,23 @@ public:
 
 private:
 
-    pplx::task<xbox::services::xbox_live_result<tournament_request_result>> get_tournaments_internal(_In_ const string_t& subPath);
+    pplx::task<xbox::services::xbox_live_result<tournament_request_result>> get_tournaments_internal(
+        _In_ const string_t& subPath
+        );
+
+    pplx::task<xbox::services::xbox_live_result<team_request_result>> get_teams_internal(
+        _In_ const string_t& subPath
+        );
 
     string_t tournament_sub_path_url(_In_ tournament_request getTournamentsRequest);
+    string_t team_sub_path_url(_In_ team_request getTeamRequest);
 
-    string_t convert_state_to_string(_In_ tournament_state state);
-    string_t convert_sort_order_to_string(_In_ tournament_sort_order order);
-    string_t convert_order_by_to_string(_In_ tournament_order_by order);
+    string_t convert_tournament_state_to_string(_In_ tournament_state state);
+    string_t convert_tournament_sort_order_to_string(_In_ tournament_sort_order order);
+    string_t convert_tournament_order_by_to_string(_In_ tournament_order_by order);
+
+    string_t convert_team_state_to_string(_In_ team_state state);
+    string_t convert_team_order_by_to_string(_In_ team_order_by order);
 
     std::shared_ptr<xbox::services::user_context> m_userContext;
     std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;

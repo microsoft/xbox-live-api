@@ -1,12 +1,6 @@
-//*********************************************************
-//
-// Copyright (c) Microsoft. All rights reserved.
-// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-//
-//*********************************************************
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 #pragma once
 #include "xsapi/tournaments.h"
 #include "Tournament_WinRT.h"
@@ -14,7 +8,7 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_BEGIN
 
 /// <summary>
-/// Represents a collection of tournament class objects returned by a request.
+/// Represents a collection of Tournament class objects returned by a request.
 /// </summary>
 public ref class TournamentRequestResult sealed
 {
@@ -23,7 +17,7 @@ public:
     /// <summary>
     /// The collection of tournament objects returned by a request.
     /// </summary>
-    property Windows::Foundation::Collections::IVectorView<Tournament^>^ Items
+    property Windows::Foundation::Collections::IVectorView<Tournament^>^ Tournaments
     { 
         Windows::Foundation::Collections::IVectorView<Tournament^>^ get();
     }
@@ -51,7 +45,7 @@ internal:
     const xbox::services::tournaments::tournament_request_result& GetCppObj() const;
 private:
     xbox::services::tournaments::tournament_request_result m_cppObj;
-    Windows::Foundation::Collections::IVectorView<Tournament^>^ m_items;
+    Windows::Foundation::Collections::IVectorView<Tournament^>^ m_tournaments;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_END

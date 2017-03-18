@@ -1,12 +1,6 @@
-//*********************************************************
-//
-// Copyright (c) Microsoft. All rights reserved.
-// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-//
-//*********************************************************
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 #include "pch.h"
 #include "TournamentService_WinRT.h"
 #include "Utils_WinRT.h"
@@ -60,6 +54,42 @@ TournamentService::GetTournamentDetailsAsync(
     {
         THROW_IF_ERR(cppResult);
         return ref new Tournament(cppResult.payload());
+    });
+
+    return ASYNC_FROM_TASK(task);
+}
+
+Windows::Foundation::IAsyncOperation<TeamRequestResult^>^
+TournamentService::GetTeamsAsync(
+    _In_ TeamRequest^ request
+    )
+{
+    auto task = m_cppObj.get_teams(request->GetCppObj())
+    .then([](xbox_live_result<team_request_result> cppResult)
+    {
+        THROW_IF_ERR(cppResult);
+        return ref new TeamRequestResult(cppResult.payload());
+    });
+
+    return ASYNC_FROM_TASK(task);
+}
+
+Windows::Foundation::IAsyncOperation<TeamInfo^>^
+TournamentService::GetTeamDetailsAsync(
+    _In_ Platform::String^ organizerId,
+    _In_ Platform::String^ tournamentId,
+    _In_ Platform::String^ teamId
+    )
+{
+    auto task = m_cppObj.get_team_details(
+        STRING_T_FROM_PLATFORM_STRING(organizerId),
+        STRING_T_FROM_PLATFORM_STRING(tournamentId),
+        STRING_T_FROM_PLATFORM_STRING(teamId)
+    )
+    .then([](xbox_live_result<team_info> cppResult)
+    {
+        THROW_IF_ERR(cppResult);
+        return ref new TeamInfo(cppResult.payload());
     });
 
     return ASYNC_FROM_TASK(task);

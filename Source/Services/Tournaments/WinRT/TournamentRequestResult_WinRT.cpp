@@ -1,12 +1,6 @@
-//*********************************************************
-//
-// Copyright (c) Microsoft. All rights reserved.
-// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-//
-//*********************************************************
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 #include "pch.h"
 #include "TournamentRequestResult_WinRT.h"
 
@@ -24,7 +18,7 @@ TournamentRequestResult::TournamentRequestResult(
     ) :
     m_cppObj(std::move(cppObj))
 {
-    m_items = UtilsWinRT::CreatePlatformVectorFromStdVectorObj<Tournament, tournament>(m_cppObj.tournaments())->GetView();
+    m_tournaments = UtilsWinRT::CreatePlatformVectorFromStdVectorObj<Tournament, tournament>(m_cppObj.tournaments())->GetView();
 }
 
 const xbox::services::tournaments::tournament_request_result&
@@ -34,9 +28,9 @@ TournamentRequestResult::GetCppObj() const
 }
 
 IVectorView<Tournament^>^
-TournamentRequestResult::Items::get()
+TournamentRequestResult::Tournaments::get()
 {
-    return m_items;
+    return m_tournaments;
 }
 
 IAsyncOperation<TournamentRequestResult^>^

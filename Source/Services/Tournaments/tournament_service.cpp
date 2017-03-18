@@ -1,12 +1,6 @@
-//*********************************************************
-//
-// Copyright (c) Microsoft. All rights reserved.
-// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-//
-//*********************************************************
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 #include "pch.h"
 #include "xsapi/tournaments.h"
 #include "xbox_system_factory.h"
@@ -117,7 +111,7 @@ tournament_service::get_tournament_details(
         _T("GET"),
         utils::create_xboxlive_endpoint(_T("tournamentshub"), m_appConfig),
         subPath.str(),
-        xbox_live_api::get_tournaments
+        xbox_live_api::get_tournament_details
         );
     httpCall->set_xbox_contract_version_header_value(c_tournamentsHubServiceContractHeaderValue);
 
@@ -145,6 +139,117 @@ tournament_service::get_tournament_details(
     return utils::create_exception_free_task<tournament>(task);
 }
 
+pplx::task<xbox::services::xbox_live_result<team_request_result>>
+tournament_service::_Get_teams(
+    _In_ const string_t& nextLinkUrl
+    )
+{
+    return get_teams_internal(nextLinkUrl);
+}
+
+pplx::task<xbox::services::xbox_live_result<team_request_result>>
+tournament_service::get_teams(
+    _In_ team_request request
+    )
+{
+    auto subPath = team_sub_path_url(request);
+    return get_teams_internal(subPath);
+}
+
+pplx::task<xbox::services::xbox_live_result<team_request_result>> 
+tournament_service::get_teams_internal(
+    _In_ const string_t& subPath
+    )
+{
+    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+        m_xboxLiveContextSettings,
+        _T("GET"),
+        utils::create_xboxlive_endpoint(_T("tournamentshub"), m_appConfig),
+        subPath,
+        xbox_live_api::get_teams
+        );
+    httpCall->set_xbox_contract_version_header_value(c_tournamentsHubServiceContractHeaderValue);
+
+    auto userContext = m_userContext;
+    auto xboxLiveContextSettings = m_xboxLiveContextSettings;
+    auto appConfig = m_appConfig;
+
+    auto task = httpCall->get_response_with_auth(m_userContext)
+    .then([userContext, xboxLiveContextSettings, appConfig](std::shared_ptr<http_call_response> response)
+    {
+        if (response->response_body_json().size() > 0)
+        {
+            auto jsonResult = team_request_result::_Deserialize(response->response_body_json());
+            auto result = utils::generate_xbox_live_result<team_request_result>(
+                jsonResult,
+                response
+                );
+
+            auto& teamResult = result.payload();
+            teamResult._Init_next_page_info(
+                userContext,
+                xboxLiveContextSettings,
+                appConfig
+                );
+
+            return result;
+        }
+        else
+        {
+            return xbox_live_result<team_request_result>(response->err_code(), response->err_message());
+        }
+    });
+
+    return utils::create_exception_free_task<team_request_result>(task);
+}
+
+pplx::task<xbox::services::xbox_live_result<team_info>>
+tournament_service::get_team_details(
+    _In_ const string_t& organizerId,
+    _In_ const string_t& tournamentId,
+    _In_ const string_t& teamId
+)
+{
+    RETURN_TASK_CPP_INVALIDARGUMENT_IF(organizerId.empty(), team_info, "organizer id is empty");
+    RETURN_TASK_CPP_INVALIDARGUMENT_IF(tournamentId.empty(), team_info, "tournament id is empty");
+    RETURN_TASK_CPP_INVALIDARGUMENT_IF(teamId.empty(), team_info, "team id is empty");
+
+    stringstream_t subPath;
+    subPath << _T("/tournaments/") << organizerId << _T("/") << tournamentId << _T("/teams/") << teamId;
+
+    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+        m_xboxLiveContextSettings,
+        _T("GET"),
+        utils::create_xboxlive_endpoint(_T("tournamentshub"), m_appConfig),
+        subPath.str(),
+        xbox_live_api::get_tournament_details
+    );
+    httpCall->set_xbox_contract_version_header_value(c_tournamentsHubServiceContractHeaderValue);
+
+    auto userContext = m_userContext;
+    auto xboxLiveContextSettings = m_xboxLiveContextSettings;
+    auto appConfig = m_appConfig;
+
+    auto task = httpCall->get_response_with_auth(m_userContext)
+        .then([userContext, xboxLiveContextSettings, appConfig](std::shared_ptr<http_call_response> response)
+    {
+        if (response->response_body_json().size() > 0)
+        {
+            auto jsonResult = team_info::_Deserialize(response->response_body_json());
+            return utils::generate_xbox_live_result<team_info>(
+                jsonResult,
+                response
+                );
+        }
+        else
+        {
+            return xbox_live_result<team_info>(response->err_code(), response->err_message());
+        }
+    });
+
+    return utils::create_exception_free_task<team_info>(task);
+}
+
 string_t
 tournament_service::tournament_sub_path_url(
     _In_ tournament_request request
@@ -153,7 +258,7 @@ tournament_service::tournament_sub_path_url(
     web::uri_builder subPathBuilder;
 
     stringstream_t path;
-    path << _T("/tournaments/");
+    path << _T("/tournaments");
     subPathBuilder.set_path(path.str());
 
     subPathBuilder.append_query(_T("titleId"), m_appConfig->title_id());
@@ -174,7 +279,7 @@ tournament_service::tournament_sub_path_url(
         for (const auto& state : request._Tournament_states())
         {
             statesArray += L"\"";
-            statesArray += convert_state_to_string(state);
+            statesArray += convert_tournament_state_to_string(state);
             statesArray += L"\",";
         }
         statesArray.erase(statesArray.end() - 1, statesArray.end()); // remove the last ','
@@ -184,12 +289,12 @@ tournament_service::tournament_sub_path_url(
 
     if (request._Sort_order() != tournament_sort_order::none)
     {
-        subPathBuilder.append_query(_T("sortOrder"), convert_sort_order_to_string(request._Sort_order()));
+        subPathBuilder.append_query(_T("sortOrder"), convert_tournament_sort_order_to_string(request._Sort_order()));
     }
 
     if (request._Order_by() != tournament_order_by::none)
     {
-        subPathBuilder.append_query(_T("orderBy"), convert_order_by_to_string(request._Order_by()));
+        subPathBuilder.append_query(_T("orderBy"), convert_tournament_order_by_to_string(request._Order_by()));
     }
 
     if (request._Max_items() > 0)
@@ -200,8 +305,48 @@ tournament_service::tournament_sub_path_url(
     return subPathBuilder.to_string();
 }
 
+
 string_t
-tournament_service::convert_state_to_string(
+tournament_service::team_sub_path_url(
+    _In_ team_request request
+    )
+{
+    web::uri_builder subPathBuilder;
+
+    stringstream_t path;
+    path << _T("/tournaments/") << request._Organizer_id() << _T("/") << request._Tournament_id() << _T("/teams");
+    subPathBuilder.set_path(path.str());
+
+    subPathBuilder.append_query(_T("memberId"), m_userContext->xbox_user_id());
+    if (request._Max_items() > 0)
+    {
+        subPathBuilder.append_query(_T("maxItems"), request._Max_items());
+    }
+
+    if (request._Team_states().size() > 0)
+    {
+        string_t statesArray = L"[";
+        for (const auto& state : request._Team_states())
+        {
+            statesArray += L"\"";
+            statesArray += convert_team_state_to_string(state);
+            statesArray += L"\",";
+        }
+        statesArray.erase(statesArray.end() - 1, statesArray.end()); // remove the last ','
+        statesArray += L"]";
+        subPathBuilder.append_query(_T("state"), statesArray);
+    }
+
+    if (request._Order_by() != team_order_by::none)
+    {
+        subPathBuilder.append_query(_T("orderBy"), convert_team_order_by_to_string(request._Order_by()));
+    }
+
+    return subPathBuilder.to_string();
+}
+
+string_t
+tournament_service::convert_tournament_state_to_string(
     _In_ tournament_state state
     )
 {
@@ -222,7 +367,7 @@ tournament_service::convert_state_to_string(
 }
 
 string_t
-tournament_service::convert_sort_order_to_string(
+tournament_service::convert_tournament_sort_order_to_string(
     _In_ tournament_sort_order order
     )
 {
@@ -240,7 +385,7 @@ tournament_service::convert_sort_order_to_string(
 }
 
 string_t
-tournament_service::convert_order_by_to_string(
+tournament_service::convert_tournament_order_by_to_string(
     _In_ tournament_order_by order
     )
 {
@@ -251,6 +396,54 @@ tournament_service::convert_order_by_to_string(
 
     case tournament_order_by::end_time:
         return _T("endTime");
+
+    default:
+        return _T("none");
+    }
+}
+
+string_t
+tournament_service::convert_team_state_to_string(
+    _In_ team_state state
+)
+{
+    switch (state)
+    {
+    case team_state::registered:
+        return _T("registered");
+
+    case team_state::waitlisted:
+        return _T("waitlisted");
+
+    case team_state::stand_by:
+        return _T("standby");
+
+    case team_state::checked_in:
+        return _T("checkedin");
+
+    case team_state::playing:
+        return _T("playing");
+
+    case team_state::completed:
+        return _T("completed");
+
+    default:
+        return _T("unknown");
+    }
+}
+
+string_t
+tournament_service::convert_team_order_by_to_string(
+    _In_ team_order_by order
+)
+{
+    switch (order)
+    {
+    case team_order_by::name:
+        return _T("name");
+
+    case team_order_by::ranking:
+        return _T("ranking");
 
     default:
         return _T("none");
