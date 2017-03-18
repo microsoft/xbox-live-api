@@ -12,7 +12,7 @@ https://developer.microsoft.com/en-us/games/xbox/docs/xboxlive/get-started/devel
 *   Support for Visual Studio 2012 and 2015
 *   NuGet package with binaries for Windows and Xbox One platforms
 
-## How to use the API
+## How to use the Xbox Live Services API (XSAPI)
 
 The best way to learn the API and see the best practices is to look at the [Xbox Live Samples](https://github.com/Microsoft/xbox-live-samples), and the [Xbox Live developer docs](https://developer.microsoft.com/en-us/games/xbox/docs/xboxlive)
 
