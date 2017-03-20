@@ -473,6 +473,7 @@
     <ClInclude Include="..\..\Include\xsapi\tournaments.h" />
     <ClInclude Include="..\..\Include\xsapi\types.h" />
     <ClInclude Include="..\..\Include\xsapi\user_statistics.h" />
+    <ClInclude Include="..\..\Include\xsapi\xbox_cll.h" />
     <ClInclude Include="..\..\Include\xsapi\xbox_live_app_config.h" />
     <ClInclude Include="..\..\Include\xsapi\xbox_live_context.h" />
     <ClInclude Include="..\..\Include\xsapi\xbox_live_context_settings.h" />
@@ -646,7 +647,6 @@
     <ClInclude Include="..\..\Source\Services\RealTimeActivity\WinRT\RealTimeActivitySubscriptionError_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\RealTimeActivity\WinRT\RealTimeActivitySubscriptionState_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\social_manager_internal.h" />
-    <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\PeoplehubDetailLevel_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\PreferredColor_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialEventArgs_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialEventType_WinRT.h" />
@@ -654,7 +654,6 @@
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialManagerExtraDetailLevel_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialManagerPresenceRecord_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialManagerPresenceTitleRecord_WinRT.h" />
-    <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialManagerUtils_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialManager_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialUserGroupLoadedEventArgs_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialUserGroupType_WinRT.h" />
@@ -736,8 +735,10 @@
     <ClInclude Include="..\..\Source\Shared\local_config.h" />
     <ClInclude Include="..\..\Source\Shared\Logger\custom_output.h" />
     <ClInclude Include="..\..\Source\Shared\Logger\debug_output.h" />
+    <ClInclude Include="..\..\Source\Shared\Logger\ERA_ETW.h" />
     <ClInclude Include="..\..\Source\Shared\logger\etw_output.h" />
     <ClInclude Include="..\..\Source\Shared\Logger\log.h" />
+    <ClInclude Include="..\..\Source\Shared\perf_tester.h" />
     <ClInclude Include="..\..\Source\Shared\service_call_logger.h" />
     <ClInclude Include="..\..\Source\Shared\service_call_logger_data.h" />
     <ClInclude Include="..\..\Source\Shared\service_call_logger_protocol.h" />
@@ -767,6 +768,12 @@
     <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs11.xbox\casablanca110.Xbox.vcxproj">
       <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Source\Shared\Logger\ERA_ETW.man" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\Source\Shared\Logger\era_etw.rc" />
   </ItemGroup>
   <ItemDefinitionGroup>
     <ClCompile>

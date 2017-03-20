@@ -713,7 +713,6 @@
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialEvent_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialManagerPresenceRecord_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialManagerPresenceTitleRecord_WinRT.h" />
-    <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialManagerUtils_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialManager_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialUserGroupLoadedEventArgs_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialUserGroupType_WinRT.h" />
@@ -797,6 +796,7 @@
     <ClInclude Include="..\..\Source\Shared\Logger\debug_output.h" />
     <ClInclude Include="..\..\Source\Shared\logger\etw_output.h" />
     <ClInclude Include="..\..\Source\Shared\Logger\log.h" />
+    <ClInclude Include="..\..\Source\Shared\perf_tester.h" />
     <ClInclude Include="..\..\Source\Shared\service_call_logger.h" />
     <ClInclude Include="..\..\Source\Shared\service_call_logger_data.h" />
     <ClInclude Include="..\..\Source\Shared\service_call_logger_protocol.h" />

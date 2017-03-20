@@ -1302,12 +1302,6 @@
     <ClCompile Include="..\..\Source\Services\Stats\Manager\leaderboard_result_event_args.cpp">
       <Filter>C++ Source\Stats</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Stats\Manager\LeaderboardResultEventArgs_WinRT.cpp">
-      <Filter>C++ Source\Stats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Stats\Manager\LeaderboardQuery_WinRT.cpp">
-      <Filter>C++ Source\Stats</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Stats\Manager\stat_event.cpp">
       <Filter>C++ Source\Stats</Filter>
     </ClCompile>
@@ -1337,6 +1331,12 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Shared\call_buffer_timer.cpp">
       <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\WinRT\LeaderboardQuery_WinRT.cpp">
+      <Filter>C++ Source\Leaderboard\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\WinRT\LeaderboardResultEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Leaderboard\WinRT</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2117,9 +2117,6 @@
     <ClInclude Include="..\..\Source\Services\Tournaments\WinRT\TournamentTeamResult_WinRT.h">
       <Filter>C++ Source\Tournaments\WinRT</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\PeoplehubDetailLevel_WinRT.h">
-      <Filter>C++ Source\Social\Manager\WinRT</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Services\Social\WinRT\PresenceFilter_WinRT.h">
       <Filter>C++ Source\Social\WinRT Source</Filter>
     </ClInclude>
@@ -2246,9 +2243,6 @@
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialManagerPresenceTitleRecord_WinRT.h">
       <Filter>C++ Source\Social\Manager\WinRT</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialManagerUtils_WinRT.h">
-      <Filter>C++ Source\Social\Manager\WinRT</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Shared\Logger\custom_output.h">
       <Filter>Shared\logger</Filter>
     </ClInclude>
@@ -2297,5 +2291,24 @@
     <ClInclude Include="..\..\Source\Shared\call_buffer_timer.h">
       <Filter>Shared</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\xbox_cll.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\Logger\ERA_ETW.h">
+      <Filter>Shared\logger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\perf_tester.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\Source\Shared\Logger\era_etw.rc">
+      <Filter>Shared\logger</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Source\Shared\Logger\ERA_ETW.man">
+      <Filter>Shared\logger</Filter>
+    </None>
   </ItemGroup>
 </Project>

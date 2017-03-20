@@ -283,6 +283,7 @@
     <ClInclude Include="..\..\Include\xsapi\service_call_logging_config.h" />
     <ClInclude Include="..\..\Include\xsapi\social_manager.h" />
     <ClInclude Include="..\..\Include\xsapi\stats_manager.h" />
+    <ClInclude Include="..\..\Include\xsapi\xbox_cll.h" />
     <ClInclude Include="..\..\Include\xsapi\xbox_live_app_config.h" />
     <ClInclude Include="..\..\Include\xsapi\errors.h" />
     <ClInclude Include="..\..\Include\xsapi\game_server_platform.h" />
@@ -312,7 +313,6 @@
     <ClInclude Include="..\..\Source\Services\Leaderboard\leaderboard_query.h" />
     <ClInclude Include="..\..\Source\Services\Leaderboard\leaderboard_serializers.h" />
     <ClInclude Include="..\..\Source\Services\Misc\contextual_config_result.h" />
-    <ClInclude Include="..\..\Source\Services\Misc\notification_service.h" />
     <ClInclude Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_manager_internal.h" />
     <ClInclude Include="..\..\Source\Services\Multiplayer\multiplayer_internal.h" />
     <ClInclude Include="..\..\Source\Services\Presence\presence_internal.h" />
@@ -329,8 +329,10 @@
     <ClInclude Include="..\..\Source\Shared\local_config.h" />
     <ClInclude Include="..\..\Source\Shared\Logger\custom_output.h" />
     <ClInclude Include="..\..\Source\Shared\logger\debug_output.h" />
+    <ClInclude Include="..\..\Source\Shared\Logger\ERA_ETW.h" />
     <ClInclude Include="..\..\Source\Shared\logger\etw_output.h" />
     <ClInclude Include="..\..\Source\Shared\logger\log.h" />
+    <ClInclude Include="..\..\Source\Shared\perf_tester.h" />
     <ClInclude Include="..\..\Source\Shared\service_call_logger.h" />
     <ClInclude Include="..\..\Source\Shared\service_call_logger_data.h" />
     <ClInclude Include="..\..\Source\Shared\service_call_logger_protocol.h" />
@@ -348,6 +350,12 @@
     <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs11.xbox\casablanca110.Xbox.vcxproj">
       <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Source\Shared\Logger\ERA_ETW.man" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\Source\Shared\Logger\era_etw.rc" />
   </ItemGroup>
   <ItemDefinitionGroup>
     <ClCompile>
