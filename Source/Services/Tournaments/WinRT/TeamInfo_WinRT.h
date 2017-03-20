@@ -60,6 +60,12 @@ public:
     DEFINE_PROP_GET_OBJ(Ranking, ranking, uint64);
 
     /// <summary>
+    /// A protocol activation URI the title can follow after the match is done to take the user back 
+    /// to the Xbox App's Tournament Details Page.
+    /// </summary>
+    DEFINE_PROP_GET_STR_OBJ(ContinuationUri, continuation_uri);
+
+    /// <summary>
     /// Information about the team's current or upcoming match. Absent if the team does not have an current or upcoming match.
     /// </summary>
     property Microsoft::Xbox::Services::Tournaments::CurrentMatchMetadata^ CurrentMatchMetadata 

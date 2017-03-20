@@ -36,7 +36,10 @@ tournament_service::get_tournaments(
     )
 {
     auto subPath = tournament_sub_path_url(request);
-    return get_tournaments_internal(subPath);
+    return get_tournaments_internal(
+        utils::create_xboxlive_endpoint(_T("tournamentshub"), m_appConfig),
+        subPath
+        );
 }
 
 pplx::task<xbox::services::xbox_live_result<tournament_request_result>>
@@ -44,21 +47,22 @@ tournament_service::_Get_tournaments(
     _In_ const string_t& nextLinkUrl
     )
 {
-    return get_tournaments_internal(nextLinkUrl);
+    return get_tournaments_internal(nextLinkUrl, L"");
 }
 
 pplx::task<xbox::services::xbox_live_result<tournament_request_result>>
 tournament_service::get_tournaments_internal(
-    _In_ const string_t& subPath
+    _In_ const string_t& serverName,
+    _In_ const string_t& pathQueryFragment
     )
 {
     std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         _T("GET"),
-        utils::create_xboxlive_endpoint(_T("tournamentshub"), m_appConfig),
-        subPath,
+        serverName,
+        pathQueryFragment,
         xbox_live_api::get_tournaments
-    );
+        );
     httpCall->set_xbox_contract_version_header_value(c_tournamentsHubServiceContractHeaderValue);
 
     auto userContext = m_userContext;
@@ -66,7 +70,7 @@ tournament_service::get_tournaments_internal(
     auto appConfig = m_appConfig;
 
     auto task = httpCall->get_response_with_auth(m_userContext)
-        .then([userContext, xboxLiveContextSettings, appConfig](std::shared_ptr<http_call_response> response)
+    .then([userContext, xboxLiveContextSettings, appConfig](std::shared_ptr<http_call_response> response)
     {
         if (response->response_body_json().size() > 0)
         {
@@ -144,7 +148,7 @@ tournament_service::_Get_teams(
     _In_ const string_t& nextLinkUrl
     )
 {
-    return get_teams_internal(nextLinkUrl);
+    return get_teams_internal(nextLinkUrl, L"");
 }
 
 pplx::task<xbox::services::xbox_live_result<team_request_result>>
@@ -153,19 +157,23 @@ tournament_service::get_teams(
     )
 {
     auto subPath = team_sub_path_url(request);
-    return get_teams_internal(subPath);
+    return get_teams_internal(
+        utils::create_xboxlive_endpoint(_T("tournamentshub"), m_appConfig), 
+        subPath
+        );
 }
 
 pplx::task<xbox::services::xbox_live_result<team_request_result>> 
 tournament_service::get_teams_internal(
-    _In_ const string_t& subPath
+    _In_ const string_t& serverName,
+    _In_ const string_t& pathQueryFragment
     )
 {
     std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         _T("GET"),
-        utils::create_xboxlive_endpoint(_T("tournamentshub"), m_appConfig),
-        subPath,
+        serverName,
+        pathQueryFragment,
         xbox_live_api::get_teams
         );
     httpCall->set_xbox_contract_version_header_value(c_tournamentsHubServiceContractHeaderValue);

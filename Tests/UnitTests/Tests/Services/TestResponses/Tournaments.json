@@ -1,6 +1,6 @@
 {
     "defaultGetTournamentsResponse" : {
-        "@nextLink": "https://tournamentshub.xboxlive.com/tournaments?organizer=manualtest&continuationToken=10",
+        "@nextLink": "https://tournamentshub.xboxlive.com/tournaments?organizer=xbox-live&continuationToken=10",
         "value": 
         [{
             "tournament": {
@@ -91,6 +91,7 @@
         }]
     },
     "defaultGetTeamsResponse": {
+        "@nextLink": "https://tournamentshub.xboxlive.com/tournaments/xbox-live/MyTestTournamentId/teams?memberId=TestXboxUserId&continuationToken=10",
         "value": [{
             "rtaSubscription": "https://tournamentshub.xboxlive.com/tournaments/manualtest/00004/teams/0003",
             "continuationUri": {

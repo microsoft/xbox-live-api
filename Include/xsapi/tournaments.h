@@ -397,6 +397,12 @@ public:
     _XSAPIIMP uint64_t ranking() const;
 
     /// <summary>
+    /// A protocol activation URI the title can follow after the match is done to take the user back 
+    /// to the Xbox App's Tournament Details Page.
+    /// </summary>
+    _XSAPIIMP const string_t& continuation_uri() const;
+
+    /// <summary>
     /// Information about the team's current or upcoming match. Absent if the team does not have an current or upcoming match.
     /// </summary>
     _XSAPIIMP const xbox::services::tournaments::current_match_metadata& current_match_metadata() const;
@@ -422,6 +428,7 @@ private:
     string_t m_teamId;
     string_t m_teamName;
     string_t m_standing;
+    string_t m_continuationUri;
     std::vector<string_t> m_memberXuids;
     utility::datetime m_registrationDate;
     team_state m_state;
@@ -949,11 +956,13 @@ public:
 private:
 
     pplx::task<xbox::services::xbox_live_result<tournament_request_result>> get_tournaments_internal(
-        _In_ const string_t& subPath
+        _In_ const string_t& serverName,
+        _In_ const string_t& pathQueryFragment
         );
 
     pplx::task<xbox::services::xbox_live_result<team_request_result>> get_teams_internal(
-        _In_ const string_t& subPath
+        _In_ const string_t& serverName,
+        _In_ const string_t& pathQueryFragment
         );
 
     string_t tournament_sub_path_url(_In_ tournament_request getTournamentsRequest);
