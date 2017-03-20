@@ -387,6 +387,7 @@
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_service.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_team_result.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\team_info.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\team_summary.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\team_request.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\team_request_result.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\match_metadata.cpp" />
@@ -404,6 +405,7 @@
     <ClCompile Include="..\..\Source\Services\Tournaments\WinRT\TeamRequest_WinRT.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\WinRT\TeamRequestResult_WinRT.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\WinRT\TeamInfo_WinRT.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\WinRT\TeamSummary_WinRT.cpp" />
     <ClCompile Include="..\..\Source\Shared\call_buffer_timer.cpp" />
     <ClCompile Include="..\..\Source\Shared\errors.cpp" />
     <ClCompile Include="..\..\Source\Shared\http_call_impl.cpp" />
@@ -728,6 +730,7 @@
     <ClInclude Include="..\..\Source\Services\Tournaments\WinRT\TeamRequest_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Tournaments\WinRT\TeamRequestResult_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Tournaments\WinRT\TeamInfo_WinRT.h" />
+    <ClInclude Include="..\..\Source\Services\Tournaments\WinRT\TeamSummary_WinRT.h" />
     <ClInclude Include="..\..\Source\Shared\call_buffer_timer.h" />
     <ClInclude Include="..\..\Source\Shared\http_call_impl.h" />
     <ClInclude Include="..\..\Source\Shared\http_call_response.h" />

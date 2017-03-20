@@ -26,7 +26,7 @@ public:
     /// <summary>
     /// The timestamp when the match ended.
     /// </summary>
-    DEFINE_PROP_GET_DATETIME_OBJ(MatchEndTime, match_end_time);
+    DEFINE_PROP_GET_DATETIME_OBJ(EndTime, end_time);
 
     /// <summary>
     /// Metadata associated with the team's previously played match.

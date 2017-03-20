@@ -16,9 +16,9 @@ match_metadata::match_metadata() :
 }
 
 const string_t&
-match_metadata::label() const
+match_metadata::description() const
 {
-    return m_label;
+    return m_description;
 }
 
 const utility::datetime& 
@@ -48,26 +48,8 @@ match_metadata::_Deserialize(
 
     match_metadata result;
     std::error_code errCode = xbox_live_error_code::no_error;
-    
-    web::json::value labelJson = utils::extract_json_field(json, _T("label"), false);
-    if (!labelJson.is_null())
-    {
-        string_t formatMoniker = utils::extract_json_string(labelJson, _T("formatMoniker"), errCode);
-        auto params = utils::extract_json_vector<string_t>(utils::json_string_extractor, labelJson, _T("params"), errCode, false);
-        int index = 0;
-        for (const auto& param : params)
-        {
-            stringstream_t ss;
-            ss << _T("{");
-            ss << index;
-            ss << _T("}");
-            formatMoniker = utils::replace_sub_string(formatMoniker, ss.str(), param);
-            index++;
-        }
 
-        result.m_label = formatMoniker;
-    }
-
+    result.m_description = utils::extract_json_string(json, _T("label"), errCode, false);
     result.m_isBye = utils::extract_json_bool(json, _T("bye"), errCode);
     result.m_startTime = utils::extract_json_time(json, _T("startTime"), errCode);
     result.m_opposingTeamIds = utils::extract_json_vector<string_t>(utils::json_string_extractor, json, _T("opposingTeamIds"), errCode, true);

@@ -14,10 +14,10 @@ public ref class MatchMetadata sealed
 public:
 
     /// <summary>
-    /// A formatted string that describes the team's standing in the tournament. For example '1W - 0L'.
-    /// References a format string and provides values for the substitution tokens.
+    /// A label that describes the match. The string provides organizers 
+    /// the flexibility to label the match with richer text such as "Final" or "Heat 1".
     /// </summary>
-    DEFINE_PROP_GET_STR_OBJ(Label, label);
+    DEFINE_PROP_GET_STR_OBJ(Description, description);
 
     /// <summary>
     /// The time this match is scheduled to start. 

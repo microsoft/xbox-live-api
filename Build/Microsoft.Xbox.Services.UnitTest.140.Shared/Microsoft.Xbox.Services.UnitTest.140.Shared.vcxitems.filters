@@ -988,6 +988,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamInfo_WinRT.h">
       <Filter>XSAPI\Services\Touraments\WinRT</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamSummary_WinRT.h">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="XSAPI">
@@ -2330,6 +2333,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\team_info.cpp">
       <Filter>XSAPI\Services\Touraments</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\team_summary.cpp">
+      <Filter>XSAPI\Services\Touraments</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\team_request.cpp">
       <Filter>XSAPI\Services\Touraments</Filter>
     </ClCompile>
@@ -2373,6 +2379,9 @@
       <Filter>XSAPI\Services\Touraments\WinRT</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamInfo_WinRT.cpp">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamSummary_WinRT.cpp">
       <Filter>XSAPI\Services\Touraments\WinRT</Filter>
     </ClCompile>
   </ItemGroup>

@@ -177,10 +177,10 @@ class match_metadata
 {
 public:
     /// <summary>
-    /// A formatted string that describes the team's standing in the tournament. For example '1W - 0L'.
-    /// References a format string and provides values for the substitution tokens.
+    /// A label that describes the match. The string provides organizers 
+    /// the flexibility to label the match with richer text such as "Final" or "Heat 1".
     /// </summary>
-    _XSAPIIMP const string_t& label() const;
+    _XSAPIIMP const string_t& description() const;
 
     /// <summary>
     /// The time this match is scheduled to start. 
@@ -208,7 +208,7 @@ public:
     static xbox::services::xbox_live_result<match_metadata> _Deserialize(_In_ const web::json::value& json);
 
 private:
-    string_t m_label;
+    string_t m_description;
     bool m_isBye;
     utility::datetime m_startTime;
     std::vector<string_t> m_opposingTeamIds;
@@ -261,7 +261,7 @@ public:
     /// <summary>
     /// The timestamp when the match ended.
     /// </summary>
-    _XSAPIIMP const utility::datetime& match_end_time() const;
+    _XSAPIIMP const utility::datetime& end_time() const;
 
     /// <summary>
     /// Metadata associated with the team's previously played match.
@@ -351,7 +351,7 @@ private:
 };
 
 /// <summary>
-/// Represents 
+/// Represents details of the team participating in the tournament.
 /// </summary>
 class team_info
 {
@@ -417,7 +417,6 @@ public:
     team_info();
 
 private:
-    static team_state _Convert_string_to_team_state(_In_ const string_t& value);
     static team_completed_reason _Convert_string_to_completed_reason(_In_ const string_t& value);
 
     string_t m_teamId;
@@ -430,6 +429,43 @@ private:
     uint64_t m_ranking;
     xbox::services::tournaments::current_match_metadata m_currentMatchMetadata;
     xbox::services::tournaments::previous_match_metadata m_previousMatchMetadata;
+};
+
+/// <summary>
+/// Represents a summary of team details for the user participating in the tournament.
+/// </summary>
+class team_summary
+{
+public:
+    /// <summary>
+    /// The ID of the team. It is an opaque string specified by the tournament organizer.
+    /// </summary>
+    _XSAPIIMP const string_t& id() const;
+
+    /// <summary>
+    /// The state of the team.
+    /// </summary>
+    _XSAPIIMP team_state state() const;
+
+    /// <summary>
+    /// The team's final rank within the tournament, if it is available. If missing, the rank is not available.
+    /// </summary>
+    _XSAPIIMP uint64_t ranking() const;
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    team_summary();
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    static xbox::services::xbox_live_result<team_summary> _Deserialize(_In_ const web::json::value& json);
+
+private:
+    string_t m_id;
+    uint64_t m_ranking;
+    xbox::services::tournaments::team_state m_state;
 };
 
 /// <summary>
@@ -572,7 +608,7 @@ private:
 };
 
 /// <summary>
-/// Represents 
+/// Represents tournament details.
 /// </summary>
 class tournament
 {
@@ -705,19 +741,10 @@ public:
     _XSAPIIMP const utility::datetime& end_time() const;
 
     /// <summary>
-    /// The ID of the team. It is an opaque string specified by the tournament organizer.
+    /// Represents a summary of team details for the user participating in the tournament.
+    /// Only applies for those tournaments where the user has already registered.
     /// </summary>
-    _XSAPIIMP const string_t& team_id() const;
-
-    /// <summary>
-    /// The state of the team.
-    /// </summary>
-    _XSAPIIMP team_state team_state() const;
-
-    /// <summary>
-    /// The team's final rank within the tournament, if it is available. If missing, the rank is not available.
-    /// </summary>
-    _XSAPIIMP uint64_t team_ranking() const;
+    _XSAPIIMP const team_summary& team_summary() const;
 
     /// <summary>
     /// Internal function
@@ -762,9 +789,7 @@ private:
     utility::datetime m_tournamentEndTime;
     xbox::services::tournaments::tournament_state m_tournamentState;
 
-    string_t m_teamId;
-    uint64_t m_teamRanking;
-    xbox::services::tournaments::team_state m_teamState;
+    xbox::services::tournaments::team_summary m_teamSummary;
 };
 
 /// <summary>

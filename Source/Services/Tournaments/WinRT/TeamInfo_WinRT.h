@@ -11,7 +11,7 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_BEGIN
 
 /// <summary>
-/// Represents 
+/// Represents details of the team participating in the tournament.
 /// </summary>
 public ref class TeamInfo sealed
 {

@@ -116,10 +116,7 @@
                     "templateName": "templatename",
                     "name": "sessionname"
                 },
-                "label" : {
-                    "formatMoniker": "{0}W - {1}L",
-                    "params": ["6", "1"]
-                },
+                "label" : "Final Match",
                 "startTime": "2017-02-17T20:06:10.1949991Z",
                 "bye": false,
                 "opposingTeamIds": ["0001", "0002"]
@@ -129,10 +126,7 @@
                 "result": {
                     "outcome": "Win"
                 },
-                "label" : {
-                    "formatMoniker": "{0}W - {1}L",
-                    "params": ["6", "1"]
-                },
+                "label" : "Final Match",
                 "startTime": "2017-02-17T20:06:10.1949991Z",
                 "bye": false,
                 "opposingTeamIds": ["a0a15919-b490-4368-bf95-22280e4412cc", "3a6e314e-ee6c-477f-bc33-50dfc268407a"]
@@ -172,10 +166,7 @@
                     "templateName": "templatename",
                     "name": "sessionname"
                 },
-                "label" : {
-                    "formatMoniker": "{0}W - {1}L",
-                    "params": ["6", "1"]
-                },
+                "label" : "Final Match",
                 "startTime": "2017-02-17T20:06:10.1949991Z",
                 "bye": false,
                 "opposingTeamIds": ["eb947ba2-a3dd-412a-8872-4a895d59ac2a", "42bbde1c-dee3-4e23-85dc-6bd4642277ed"]
@@ -185,10 +176,7 @@
                 "result": {
                     "outcome": "Win"
                 },
-                "label" : {
-                    "formatMoniker": "{0}W - {1}L",
-                    "params": ["6", "1"]
-                },
+                "label" : "Final Match",
                 "startTime": "2017-02-17T20:06:10.1949991Z",
                 "bye": false,
                 "opposingTeamIds": ["a0a15919-b490-4368-bf95-22280e4412cc", "3a6e314e-ee6c-477f-bc33-50dfc268407a"]

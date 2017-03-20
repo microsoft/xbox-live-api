@@ -39,7 +39,7 @@ public:
 
     void VerifyMatchMetadata(Tournaments::MatchMetadata^ currentMatchData, web::json::value matchDataToVerify)
     {
-        VERIFY_ARE_EQUAL_STR(currentMatchData->Label->Data(), L"6W - 1L");
+        VERIFY_ARE_EQUAL_STR(currentMatchData->Description->Data(), L"Final Match");
         VERIFY_ARE_EQUAL(DateTimeToString(
             currentMatchData->StartTIme).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str(),
             matchDataToVerify[L"startTime"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
@@ -69,7 +69,7 @@ public:
         }
 
         VERIFY_ARE_EQUAL(DateTimeToString(
-            previousMatchData->MatchEndTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str(),
+            previousMatchData->EndTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str(),
             matchDataToVerify[L"endTime"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
         VerifyMatchMetadata(previousMatchData->MatchDetails, matchDataToVerify);
     }
@@ -89,6 +89,13 @@ public:
 
         VerifyCurrentMatchMetadata(teamInfo->CurrentMatchMetadata, teamToVerify[L"currentMatch"]);
         VerifyPreviousMatchMetadata(teamInfo->PreviousMatchMetadata, teamToVerify[L"previousMatch"]);
+    }
+
+    void VerifyTeamSummary(Tournaments::TeamSummary^ teamSummary, web::json::value teamSummaryToVerify)
+    {
+        VERIFY_ARE_EQUAL(teamSummary->Id->Data(), teamSummaryToVerify[L"id"].as_string());
+        VERIFY_ARE_EQUAL_INT(teamSummary->Ranking, teamSummaryToVerify[L"ranking"].as_integer());
+        VERIFY_ARE_EQUAL_STR_IGNORE_CASE(teamSummary->TeamState.ToString()->Data(), teamSummaryToVerify[L"state"].as_string().c_str());
     }
 
     void VerifyTournament(Tournaments::Tournament^ tournament, web::json::value tournamentToVerify)
@@ -144,9 +151,7 @@ public:
         // Team Info
         if (!teamJson.is_null())
         {
-            VERIFY_ARE_EQUAL(tournament->TeamId->Data(), teamJson[L"id"].as_string());
-            VERIFY_ARE_EQUAL_STR_IGNORE_CASE(tournament->TeamState.ToString()->Data(), teamJson[L"state"].as_string().c_str());
-            VERIFY_ARE_EQUAL_UINT(tournament->TeamRanking, teamJson[L"ranking"].as_number().to_uint64());
+            VerifyTeamSummary(tournament->TeamSummary ,teamJson);
         }
     }
 
