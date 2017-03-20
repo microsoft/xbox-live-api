@@ -974,8 +974,10 @@
     <ClInclude Include="..\..\Source\Shared\call_buffer_timer.h">
       <Filter>Shared</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Shared\perf_tester.h" />
     <ClInclude Include="..\..\Include\xsapi\xbox_cll.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\perf_tester.h">
       <Filter>C++ Public Includes</Filter>
     </ClInclude>
   </ItemGroup>

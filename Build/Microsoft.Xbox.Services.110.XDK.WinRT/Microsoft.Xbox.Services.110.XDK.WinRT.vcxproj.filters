@@ -1333,10 +1333,10 @@
       <Filter>Shared</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Services\Stats\Manager\WinRT\LeaderboardQuery_WinRT.cpp">
-      <Filter>C++ Source\Leaderboard\WinRT</Filter>
+      <Filter>C++ Source\Stats\WinRT</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Services\Stats\Manager\WinRT\LeaderboardResultEventArgs_WinRT.cpp">
-      <Filter>C++ Source\Leaderboard\WinRT</Filter>
+      <Filter>C++ Source\Stats\WinRT</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
