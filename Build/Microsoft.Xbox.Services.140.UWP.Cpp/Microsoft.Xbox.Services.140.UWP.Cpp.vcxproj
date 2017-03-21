@@ -210,6 +210,7 @@
     <ClCompile Include="..\..\Source\Services\Misc\contextual_search_service.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\notification_service.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\string_service.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\UWP\title_callable_ui.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\verify_string_result.cpp" />
     <ClCompile Include="..\..\Source\Services\Misc\Windows\notification_service_windows.cpp" />
     <ClCompile Include="..\..\Source\Services\Multiplayer\Manager\find_match_completed_event_args.cpp" />
@@ -388,6 +389,7 @@
     <ClInclude Include="..\..\Include\xsapi\multiplayer_manager.h" />
     <ClInclude Include="..\..\Include\xsapi\presence.h" />
     <ClInclude Include="..\..\Include\xsapi\real_time_activity.h" />
+    <ClInclude Include="..\..\Include\xsapi\title_callable_ui.h" />
     <ClInclude Include="..\..\Include\xsapi\title_storage.h" />
     <ClInclude Include="..\..\Include\xsapi\tournaments.h" />
     <ClInclude Include="..\..\Include\xsapi\xbox_live_app_config.h" />
@@ -411,6 +413,7 @@
     <ClInclude Include="..\..\Source\Shared\Logger\debug_output.h" />
     <ClInclude Include="..\..\Source\Shared\logger\etw_output.h" />
     <ClInclude Include="..\..\Source\Shared\Logger\log.h" />
+    <ClInclude Include="..\..\Source\Shared\perf_tester.h" />
     <ClInclude Include="..\..\Source\Shared\service_call_logger.h" />
     <ClInclude Include="..\..\Source\Shared\service_call_logger_data.h" />
     <ClInclude Include="..\..\Source\Shared\service_call_logger_protocol.h" />

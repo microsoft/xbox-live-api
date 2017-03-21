@@ -2141,9 +2141,6 @@
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialManagerPresenceTitleRecord_WinRT.h">
       <Filter>C++ Source\Social\Manager\WinRT</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialManagerUtils_WinRT.h">
-      <Filter>C++ Source\Social\Manager\WinRT</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Shared\WinRT\XboxLiveLogCallEventArgs_WinRT.h">
       <Filter>C++ Source\Shared\WinRT Source</Filter>
     </ClInclude>
@@ -2248,6 +2245,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Services\Tournaments\WinRT\TeamInfo_WinRT.h">
       <Filter>C++ Source\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\perf_tester.h">
+      <Filter>C++ Source\Shared</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
