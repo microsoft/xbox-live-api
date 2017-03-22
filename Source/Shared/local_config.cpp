@@ -20,11 +20,18 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 std::shared_ptr<local_config> local_config::get_local_config_singleton()
 {
     auto xsapiSingleton = get_xsapi_singleton();
-    std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
-    if (xsapiSingleton->s_localConfigSingleton == nullptr)
+    bool needToReadConfig = false;
     {
-        xsapiSingleton->s_localConfigSingleton = std::make_shared<local_config>();
+        std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
+        if (xsapiSingleton->s_localConfigSingleton == nullptr)
+        {
+            needToReadConfig = true; 
+            xsapiSingleton->s_localConfigSingleton = std::make_shared<local_config>();
+        }
+    }
 
+    if (needToReadConfig)
+    {
 #if !TV_API
         xbox_live_result<void> configResult = xsapiSingleton->s_localConfigSingleton->read();
         if (configResult.err())
