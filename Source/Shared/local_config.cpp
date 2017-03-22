@@ -20,28 +20,28 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 std::shared_ptr<local_config> local_config::get_local_config_singleton()
 {
     auto xsapiSingleton = get_xsapi_singleton();
-	bool needToReadConfig = false;
-	{
-		std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
-		if (xsapiSingleton->s_localConfigSingleton == nullptr)
-		{
-			needToReadConfig = true; 
-			xsapiSingleton->s_localConfigSingleton = std::make_shared<local_config>();
-		}
-	}
+    bool needToReadConfig = false;
+    {
+        std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
+        if (xsapiSingleton->s_localConfigSingleton == nullptr)
+        {
+            needToReadConfig = true; 
+            xsapiSingleton->s_localConfigSingleton = std::make_shared<local_config>();
+        }
+    }
 
-	if (needToReadConfig)
-	{
+    if (needToReadConfig)
+    {
 #if !TV_API
-		xbox_live_result<void> configResult = xsapiSingleton->s_localConfigSingleton->read();
-		if (configResult.err())
-		{
-			LOGS_ERROR << "Loading local config file error: " << configResult.err() << ", msg:" << configResult.err_message();
-			XSAPI_ASSERT(!configResult.err());
-		}
+        xbox_live_result<void> configResult = xsapiSingleton->s_localConfigSingleton->read();
+        if (configResult.err())
+        {
+            LOGS_ERROR << "Loading local config file error: " << configResult.err() << ", msg:" << configResult.err_message();
+            XSAPI_ASSERT(!configResult.err());
+        }
 #endif
-	}
-	return xsapiSingleton->s_localConfigSingleton;
+    }
+    return xsapiSingleton->s_localConfigSingleton;
 }
 
 local_config::local_config()
