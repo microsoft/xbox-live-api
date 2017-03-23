@@ -53,11 +53,12 @@ MultiplayerSession::MultiplayerSession(
     _In_ bool reserved,
     _In_ MultiplayerSessionVisibility multiplayerSessionVisibility,
     _In_opt_ Windows::Foundation::Collections::IVectorView<Platform::String^>^ initiatorXboxUserIds,
-    _In_opt_ Platform::String^ sessionCustomConstantsJson
+    _In_opt_ Platform::String^ sessionCustomConstantsJson,
+    _In_opt_ Platform::String^ sessionCloudComputePackageConstantsJson
     )
 {
     UNREFERENCED_PARAMETER(reserved);
-    _Init(xboxLiveContext, multiplayerSessionReference, maxMembersInSession, multiplayerSessionVisibility, initiatorXboxUserIds, sessionCustomConstantsJson);
+    _Init(xboxLiveContext, multiplayerSessionReference, maxMembersInSession, multiplayerSessionVisibility, initiatorXboxUserIds, sessionCustomConstantsJson, sessionCloudComputePackageConstantsJson);
 }
 #endif
 
@@ -67,10 +68,11 @@ MultiplayerSession::MultiplayerSession(
     _In_ uint32 maxMembersInSession,
     _In_ MultiplayerSessionVisibility multiplayerSessionVisibility,
     _In_opt_ Windows::Foundation::Collections::IVectorView<Platform::String^>^ initiatorXboxUserIds,
-    _In_opt_ Platform::String^ sessionCustomConstantsJson
+    _In_opt_ Platform::String^ sessionCustomConstantsJson,
+    _In_opt_ Platform::String^ sessionCloudComputePackageConstantsJson
     )
 {
-    _Init(xboxLiveContext, multiplayerSessionReference, maxMembersInSession, multiplayerSessionVisibility, initiatorXboxUserIds, sessionCustomConstantsJson);
+    _Init(xboxLiveContext, multiplayerSessionReference, maxMembersInSession, multiplayerSessionVisibility, initiatorXboxUserIds, sessionCustomConstantsJson, sessionCloudComputePackageConstantsJson);
 }
 
 void
@@ -80,7 +82,8 @@ MultiplayerSession::_Init(
     _In_ uint32 maxMembersInSession,
     _In_ MultiplayerSessionVisibility multiplayerSessionVisibility,
     _In_opt_ Windows::Foundation::Collections::IVectorView<Platform::String^>^ initiatorXboxUserIds,
-    _In_opt_ Platform::String^ sessionCustomConstantsJson
+    _In_opt_ Platform::String^ sessionCustomConstantsJson,
+    _In_opt_ Platform::String^ sessionCloudComputePackageConstantsJson
     )
 {
     THROW_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
@@ -94,13 +97,15 @@ MultiplayerSession::_Init(
 
     CONVERT_STD_EXCEPTION(
         auto sessionCustomConstantsValueString = UtilsWinRT::JsonValueFromPlatformString(sessionCustomConstantsJson);
+        auto sessionCloudComputePackageConstantsValueString = UtilsWinRT::JsonValueFromPlatformString(sessionCloudComputePackageConstantsJson);
         m_cppObj = std::make_shared<xbox::services::multiplayer::multiplayer_session>(
             STRING_T_FROM_PLATFORM_STRING(xboxLiveContext->User->XboxUserId),
             multiplayerSessionReference->GetCppObj(),
             maxMembersInSession,
             static_cast<xbox::services::multiplayer::multiplayer_session_visibility>(multiplayerSessionVisibility),
             intitiatorIds,
-            sessionCustomConstantsValueString
+            sessionCustomConstantsValueString,
+            sessionCloudComputePackageConstantsValueString
             );
         );
 }
@@ -528,6 +533,16 @@ MultiplayerSession::SetClosed(
 {
     CONVERT_STD_EXCEPTION(
         m_cppObj->set_closed(closed);
+    );
+}
+
+void
+MultiplayerSession::SetAllocateCloudCompute(
+    _In_ bool allocateCloudCompute
+    )
+{
+    CONVERT_STD_EXCEPTION(
+        m_cppObj->set_allocate_cloud_compute(allocateCloudCompute);
     );
 }
 

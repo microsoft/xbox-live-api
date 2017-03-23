@@ -96,7 +96,8 @@ multiplayer_session::multiplayer_session(
     _In_ uint32_t maxMembersInSession,
     _In_ multiplayer_session_visibility multiplayerSessionVisibility,
     _In_ std::vector<string_t> initiatorXboxUserIds,
-    _In_ web::json::value sessionCustomConstantsJson
+    _In_ web::json::value sessionCustomConstantsJson,
+    _In_ web::json::value sessionCloudComputePackageConstantsJson
     ) :
     m_xboxUserId(std::move(xboxUserId)),
     m_sessionReference(std::move(sessionReference)),
@@ -122,11 +123,19 @@ multiplayer_session::multiplayer_session(
     {
         sessionCustomConstants = std::move(sessionCustomConstantsJson);
     }
+
+    web::json::value sessionCloudComputePackageConstants;
+    if (!sessionCloudComputePackageConstantsJson.is_null())
+    {
+        sessionCloudComputePackageConstants = std::move(sessionCloudComputePackageConstantsJson);
+    }
+
     m_sessionConstants = std::make_shared<multiplayer_session_constants>(
         maxMembersInSession,
         multiplayerSessionVisibility,
         initiatorXboxUserIds,
-        sessionCustomConstants
+        sessionCustomConstants,
+        sessionCloudComputePackageConstants
         );
 
     m_sessionRequest->set_session_constants(m_sessionConstants);
@@ -771,6 +780,15 @@ multiplayer_session::set_closed(
 {
     m_sessionRequest->set_write_closed(true);
     m_sessionRequest->set_closed(closed);
+}
+
+void 
+multiplayer_session::set_allocate_cloud_compute(
+    _In_ bool allocateCloudCompute
+    )
+{
+    m_sessionRequest->set_write_allocate_cloud_compute(true);
+    m_sessionRequest->set_allocate_cloud_compute(allocateCloudCompute);
 }
 
 void

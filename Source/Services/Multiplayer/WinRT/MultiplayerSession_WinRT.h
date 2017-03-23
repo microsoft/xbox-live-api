@@ -402,7 +402,8 @@ public:
         _In_ bool reserved,
         _In_ MultiplayerSessionVisibility multiplayerSessionVisibility,
         _In_opt_ Windows::Foundation::Collections::IVectorView<Platform::String^>^ initiatorXboxUserIds,
-        _In_opt_ Platform::String^ sessionCustomConstantsJson
+        _In_opt_ Platform::String^ sessionCustomConstantsJson,
+        _In_opt_ Platform::String^ sessionCloudComputePackageConstantsJson
         );
 #endif
 
@@ -428,7 +429,8 @@ public:
         _In_ uint32 maxMembersInSession,
         _In_ MultiplayerSessionVisibility multiplayerSessionVisibility,
         _In_opt_ Windows::Foundation::Collections::IVectorView<Platform::String^>^ initiatorXboxUserIds,
-        _In_opt_ Platform::String^ sessionCustomConstantsJson
+        _In_opt_ Platform::String^ sessionCustomConstantsJson,
+        _In_opt_ Platform::String^ sessionCloudComputePackageConstantsJson
         );
 
     /// <summary>
@@ -1004,6 +1006,19 @@ public:
         );
 
     /// <summary>
+    /// Sets the session properties/system/allocateCloudCompute field
+    /// </summary>
+    /// <param name="closed">This triggers a Thunderhead allocation attempt by MPSD</param>
+    /// <remarks>
+    /// After calling this method, the caller must use MultiplayerService.WriteSessionAsync to write batched local changes
+    /// to the service.If SetHostDeviceToken is called without calling WriteSessionAsync, it only changes the local session
+    /// object but does not commit it to the service.
+    /// </remarks>
+    void SetAllocateCloudCompute(
+        _In_ bool allocateCloudCompute
+        );
+
+    /// <summary>
     /// Sets a flag that indicates if a match is not successful and needs to be resubmitted, or if the match is successful
     /// and the matchmaking service can release the session.
     /// </summary>
@@ -1267,7 +1282,8 @@ public:
         _In_ uint32 maxMembersInSession,
         _In_ MultiplayerSessionVisibility multiplayerSessionVisibility,
         _In_opt_ Windows::Foundation::Collections::IVectorView<Platform::String^>^ initiatorXboxUserIds,
-        _In_opt_ Platform::String^ sessionCustomConstantsJson
+        _In_opt_ Platform::String^ sessionCustomConstantsJson,
+        _In_opt_ Platform::String^ sessionCloudComputePackageConstantsJson
         );
 
 internal:

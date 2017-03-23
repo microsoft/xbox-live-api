@@ -35,6 +35,7 @@ multiplayer_session_properties& multiplayer_session_properties::_Deep_copy(
     m_serverConnectionString = other.m_serverConnectionString;
     m_serverConnectionStringCandidates = other.m_serverConnectionStringCandidates;
     m_closed = other.m_closed;
+    m_allocateCloudCompute = other.m_allocateCloudCompute;
 
     // We will set this from the session deep_copy.
     m_sessionRequest = std::make_shared<multiplayer_session_request>();
@@ -159,6 +160,13 @@ multiplayer_session_properties::closed() const
 {
     std::lock_guard<std::mutex> lock(m_lock);
     return m_closed;
+}
+
+bool 
+multiplayer_session_properties::allocate_cloud_compute() const
+{
+    std::lock_guard<std::mutex> lock(m_lock);
+    return m_allocateCloudCompute;
 }
 
 void 
@@ -305,6 +313,8 @@ multiplayer_session_properties::_Deserialize(
     }
 
     returnResult.m_closed = utils::extract_json_bool(systemJson, _T("closed"), errc);
+
+    returnResult.m_allocateCloudCompute = utils::extract_json_bool(systemJson, _T("allocateCloudCompute"), errc);
 
     returnResult.m_matchmakingTargetSessionConstants = utils::extract_json_field(systemMatchmakingJson, _T("targetSessionConstants"), errc, false);
     returnResult.m_customPropertiesJson = utils::extract_json_field(json, _T("custom"), errc, false);
