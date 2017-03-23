@@ -5,11 +5,12 @@
 #include "xsapi/tournaments.h"
 #include "TournamentState_WinRT.h"
 #include "TeamState_WinRT.h"
+#include "TeamSummary_WinRT.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_BEGIN
 
 /// <summary>
-/// Represents 
+/// Represents tournament details.
 /// </summary>
 public ref class Tournament sealed
 {
@@ -142,19 +143,13 @@ public:
     DEFINE_PROP_GET_DATETIME_OBJ(EndTime, end_time);
 
     /// <summary>
-    /// The ID of the team. It is an opaque string specified by the tournament organizer.
+    /// Represents a summary of team details for the user participating in the tournament.
+    /// Only applies for those tournaments where the user has already registered.
     /// </summary>
-    DEFINE_PROP_GET_STR_OBJ(TeamId, team_id);
-
-    /// <summary>
-    /// The state of the team.
-    /// </summary>
-    DEFINE_PROP_GET_ENUM_OBJ(TeamState, team_state, Microsoft::Xbox::Services::Tournaments::TeamState);
-
-    /// <summary>
-    /// The team's final rank within the tournament, if it is available. If missing, the rank is not available.
-    /// </summary>
-    DEFINE_PROP_GET_OBJ(TeamRanking, team_ranking, uint64);
+    property Microsoft::Xbox::Services::Tournaments::TeamSummary^ TeamSummary
+    {
+        Microsoft::Xbox::Services::Tournaments::TeamSummary^ get();
+    }
 
 internal:
     Tournament(
@@ -164,6 +159,7 @@ internal:
     const xbox::services::tournaments::tournament& GetCppObj() const;
 private:
     xbox::services::tournaments::tournament m_cppObj;
+    Microsoft::Xbox::Services::Tournaments::TeamSummary^ m_teamSummary;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_END

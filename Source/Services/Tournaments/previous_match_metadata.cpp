@@ -21,7 +21,7 @@ previous_match_metadata::result() const
 }
 
 const utility::datetime&
-previous_match_metadata::match_end_time() const
+previous_match_metadata::end_time() const
 {
     return m_endTime;
 }

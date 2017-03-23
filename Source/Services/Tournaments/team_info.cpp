@@ -64,6 +64,12 @@ team_info::ranking() const
     return m_ranking;
 }
 
+const string_t&
+team_info::continuation_uri() const
+{
+    return m_continuationUri;
+}
+
 const xbox::services::tournaments::current_match_metadata&
 team_info::current_match_metadata() const
 {
@@ -89,7 +95,7 @@ team_info::_Deserialize(_In_ const web::json::value& json)
     result.m_standing = utils::extract_json_string(json, _T("standing"), errCode);
     result.m_registrationDate = utils::extract_json_time(json, _T("registrationDate"), errCode);
     result.m_ranking = utils::extract_json_int(json, _T("ranking"), errCode);
-    result.m_state = _Convert_string_to_team_state(utils::extract_json_string(json, _T("state"), errCode));
+    result.m_state = tournament_service::_Convert_string_to_team_state(utils::extract_json_string(json, _T("state"), errCode));
     result.m_completedReason = _Convert_string_to_completed_reason(utils::extract_json_string(json, _T("completedReason"), errCode));
 
     web::json::value members = utils::extract_json_field(json, _T("members"), errCode, false);
@@ -98,6 +104,18 @@ team_info::_Deserialize(_In_ const web::json::value& json)
     {
         auto xuid = utils::extract_json_string(memberJson, _T("id"), errCode);
         result.m_memberXuids.push_back(xuid);
+    }
+
+    web::json::value continuationUriJson = utils::extract_json_field(json, _T("continuationUri"), errCode, false);
+    if (!continuationUriJson.is_null())
+    {
+        web::json::value continuationUriValueJson;
+#if TV_API | XBOX_UWP
+        continuationUriValueJson = utils::extract_json_field(continuationUriJson, _T("uwp_xboxone"), errCode, false);
+#else
+        continuationUriValueJson = utils::extract_json_field(continuationUriJson, _T("uwp_desktop"), errCode, false);
+#endif
+        result.m_continuationUri = utils::extract_json_string(continuationUriValueJson, _T("continuationUri"), errCode);;
     }
 
     auto currentMatchData = xbox::services::tournaments::current_match_metadata::_Deserialize(utils::extract_json_field(json, _T("currentMatch"), errCode, false));
@@ -115,39 +133,6 @@ team_info::_Deserialize(_In_ const web::json::value& json)
     result.m_previousMatchMetadata = previoustMatchData.payload();
 
     return xbox_live_result<team_info>(result, errCode);
-}
-
-team_state
-team_info::_Convert_string_to_team_state(
-    _In_ const string_t& value
-    )
-{
-    if (utils::str_icmp(value, _T("registered")) == 0)
-    {
-        return team_state::registered;
-    }
-    else if (utils::str_icmp(value, _T("waitlisted")) == 0)
-    {
-        return team_state::waitlisted;
-    }
-    else if (utils::str_icmp(value, _T("standBy")) == 0)
-    {
-        return team_state::stand_by;
-    }
-    else if (utils::str_icmp(value, _T("checkedIn")) == 0)
-    {
-        return team_state::checked_in;
-    }
-    else if (utils::str_icmp(value, _T("playing")) == 0)
-    {
-        return team_state::playing;
-    }
-    else if (utils::str_icmp(value, _T("completed")) == 0)
-    {
-        return team_state::completed;
-    }
-
-    return team_state::unknown;
 }
 
 team_completed_reason
