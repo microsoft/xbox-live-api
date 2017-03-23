@@ -991,6 +991,15 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamSummary_WinRT.h">
       <Filter>XSAPI\Services\Touraments\WinRT</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\initiator.h">
+      <Filter>XSAPI\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\perf_tester.h">
+      <Filter>XSAPI\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxLiveWnsEventArgs_WinRT.h">
+      <Filter>XSAPI\Shared\WinRT</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="XSAPI">

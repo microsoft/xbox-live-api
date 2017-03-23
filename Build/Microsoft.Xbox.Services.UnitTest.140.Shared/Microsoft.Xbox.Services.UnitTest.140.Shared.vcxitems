@@ -311,12 +311,14 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_impl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_client.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\initiator.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\local_config.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\console_output.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\custom_output.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\debug_output.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\etw_output.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\log.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\perf_tester.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_data.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_protocol.h" />
@@ -337,6 +339,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxLiveContextSettings_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxLiveLogCallEventArgs_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxLiveServicesSettings_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxLiveWnsEventArgs_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxServiceCallRoutedEventArgs_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxServicesDiagnosticsTraceLevel_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.h" />
