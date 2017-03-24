@@ -89,12 +89,20 @@ xbox_live_user::signin_silently(_In_opt_ Platform::Object^ coreDispatcherObj)
     xbox_live_context_settings::_Set_dispatcher(coreDispatcherObj);
     return m_user_impl->sign_in_impl(false, false);
 }
+
+xbox_live_user::xbox_live_user(Windows::System::User^ systemUser)
+{
+    m_user_impl = user_factory::create_user_impl(systemUser);
+}
+
 #endif
 
 xbox_live_user::xbox_live_user()
 {
     m_user_impl = user_factory::create_user_impl(nullptr);
 }
+
+
 
 const string_t& xbox_live_user::xbox_user_id() const
 {
@@ -130,6 +138,11 @@ bool xbox_live_user::is_signed_in() const
 const string_t& xbox_live_user::web_account_id() const
 {
     return m_user_impl->web_account_id();
+}
+
+Windows::System::User^ xbox_live_user::windows_system_user() const
+{
+    return m_user_impl->creation_context();
 }
 #endif
 

@@ -48,7 +48,6 @@
     <ClCompile Include="Utils\Utils.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="SocialManagerIntegration.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />

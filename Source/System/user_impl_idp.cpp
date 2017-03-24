@@ -579,10 +579,12 @@ void user_impl_idp::on_system_user_removed(Windows::System::UserWatcher ^sender,
     {
         std::lock_guard<std::mutex> lock(s_trackingUsersLock.get());
         auto user = s_trackingUsers.find(args->User->NonRoamableId->Data());
-        signOutUser = user->second;
+        if (user != s_trackingUsers.end())
+        {
+            signOutUser = user->second;
+            signOutUser->user_signed_out();
+        }
     }
-
-    signOutUser->user_signed_out();
 }
 
 bool user_impl_idp::is_multi_user_application()

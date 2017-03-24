@@ -52,7 +52,10 @@ namespace Sample
         void SignIn();
         void SignInSilently();
 
-        void HandleSignInResult(_In_ const xbox::services::system::sign_in_result &result);
+        void HandleSignInResult(
+            _In_ const xbox::services::system::sign_in_result &result,
+            const std::shared_ptr<xbox::services::system::xbox_live_user>& xboxliveuser
+        );
 
         void RegisterInputKeys();
 
@@ -66,23 +69,22 @@ namespace Sample
 
         void Log(string_t log);
 
-        int GetNumberOfUserInGraph() { return (m_xboxLiveContext == nullptr) ? 0 : 1; }
+        int GetNumberOfUserInGraph() { return static_cast<int>(m_xboxLiveContexts.size()); }
+        string_t GetAllUserNames();
+
         bool GetAllFriends() { return m_allFriends; }
         bool GetOnlineFriends() { return m_onlineFriends; }
         bool GetAllFavs() { return m_allFavs; }
         bool GetOnlineInTitle() { return m_onlineInTitle; }
         bool GetCustomList() { return m_customList; }
 
-        std::shared_ptr<xbox::services::xbox_live_context> GetXboxLiveContext() { return m_xboxLiveContext; }
-        std::vector<std::shared_ptr<xbox::services::social::manager::xbox_social_user_group>> GetSocialGroups();
 
-        static std::mutex m_socialManagerLock;
     private:
         std::shared_ptr<DX::DeviceResources> m_deviceResources;
         std::unique_ptr<Renderer> m_sceneRenderer;
         DX::StepTimer m_timer;
         bool bInitialized;
-
+        bool m_isMultiUserApplication;
         bool m_allFriends;
         bool m_onlineFriends;
         bool m_allFavs;
@@ -99,8 +101,7 @@ namespace Sample
         Input^ m_input;
 
         Concurrency::critical_section m_stateLock;
-        std::shared_ptr<xbox::services::xbox_live_context> m_xboxLiveContext;
-        std::shared_ptr<xbox::services::system::xbox_live_user> m_user;
+        std::unordered_map<string_t, std::shared_ptr<xbox::services::xbox_live_context>> m_xboxLiveContexts;
         function_context m_signOutContext;
 
         void ReadLastCsv();

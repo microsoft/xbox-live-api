@@ -101,18 +101,6 @@ void Renderer::Render()
     auto appState = g_sampleInstance->GetGameData()->GetAppState();
     auto gameState = g_sampleInstance->GetGameData()->GetGameState();
 
-    std::vector<std::shared_ptr<xbox::services::social::manager::xbox_social_user_group>> socialGroups = g_sampleInstance->GetSocialGroups();
-    RenderSocialGroupList(
-        COLUMN_1_X, 
-        COLUMN_2_X,
-        COLUMN_3_X,
-        SOCIAL_GROUP_Y, 
-        fTextHeight, 
-        scale, 
-        TEXT_COLOR,
-        socialGroups
-        );
-
     RenderMenuOptions(scale, TEXT_COLOR);
     RenderEventLog(COLUMN_1_X, SOCIAL_GROUP_Y, fTextHeight, scale, TEXT_COLOR);
 
@@ -165,7 +153,7 @@ void Renderer::RenderMenuOptions(
         L"Press 5 to toggle social group for custom list (%s).\n"
         L"Press C to import custom list.\n",
         g_sampleInstance->GetNumberOfUserInGraph(),
-        g_sampleInstance->GetXboxLiveContext() == nullptr ? L"n/a" : g_sampleInstance->GetXboxLiveContext()->user()->gamertag().c_str(),
+        g_sampleInstance->GetAllUserNames().c_str(),
         g_sampleInstance->GetAllFriends() ? L"On" : L"Off",
         g_sampleInstance->GetOnlineFriends() ? L"On" : L"Off",
         g_sampleInstance->GetAllFavs() ? L"On" : L"Off",
@@ -339,7 +327,6 @@ Renderer::RenderSocialGroupList(
             verticalBaseOffset += fTextHeight;
         }
 
-        std::lock_guard<std::mutex> guard(Game::m_socialManagerLock);
         const std::vector<xbox_social_user*>& userList = node->users();
         for (const auto& user : userList)
         {
