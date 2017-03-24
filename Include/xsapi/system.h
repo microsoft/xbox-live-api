@@ -493,6 +493,13 @@ public:
     /// </summary>
     _XSAPIIMP xbox_live_user();
 
+#if WINAPI_FAMILY && WINAPI_FAMILY==WINAPI_FAMILY_APP
+    /// <summary>
+    /// Creates a new instance of XboxLiveUser for Multi-User Application.
+    /// </summary>
+    _XSAPIIMP xbox_live_user(Windows::System::User^ systemUser);
+#endif
+
     /// <summary>
     /// Gets a unique ID that is tied to the user's account which persists across multiple devices.
     /// </summary>
@@ -529,6 +536,11 @@ public:
     /// for more information about WebAccount
     /// </remarks>
     _XSAPIIMP const string_t& web_account_id() const;
+
+    /// <summary>
+    /// The Windows System NT user associated with the Xbox Live User, only avaliable in Multi-User application.
+    /// </summary>
+    _XSAPIIMP Windows::System::User^ windows_system_user() const;
 #endif
 
     /// <summary>
