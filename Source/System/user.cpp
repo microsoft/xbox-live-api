@@ -102,8 +102,6 @@ xbox_live_user::xbox_live_user()
     m_user_impl = user_factory::create_user_impl(nullptr);
 }
 
-
-
 const string_t& xbox_live_user::xbox_user_id() const
 {
     return m_user_impl->xbox_user_id();
