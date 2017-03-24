@@ -582,8 +582,12 @@ void user_impl_idp::on_system_user_removed(Windows::System::UserWatcher ^sender,
         if (user != s_trackingUsers.end())
         {
             signOutUser = user->second;
-            signOutUser->user_signed_out();
         }
+    }
+
+    if (signOutUser != nullptr)
+    {
+        signOutUser->user_signed_out();
     }
 }
 
