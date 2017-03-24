@@ -11,7 +11,7 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_BEGIN
 
 /// <summary>
-/// Represents 
+/// Represents details of the team participating in the tournament.
 /// </summary>
 public ref class TeamInfo sealed
 {
@@ -58,6 +58,12 @@ public:
     /// The team's final rank within the tournament, if it is available. If missing, the rank is not available.
     /// </summary>
     DEFINE_PROP_GET_OBJ(Ranking, ranking, uint64);
+
+    /// <summary>
+    /// A protocol activation URI the title can follow after the match is done to take the user back 
+    /// to the Xbox App's Tournament Details Page.
+    /// </summary>
+    DEFINE_PROP_GET_STR_OBJ(ContinuationUri, continuation_uri);
 
     /// <summary>
     /// Information about the team's current or upcoming match. Absent if the team does not have an current or upcoming match.

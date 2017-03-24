@@ -177,22 +177,10 @@ tournament::end_time() const
     return m_tournamentEndTime;
 }
 
-const string_t&
-tournament::team_id() const
+const xbox::services::tournaments::team_summary&
+tournament::team_summary() const
 {
-    return m_teamId;
-}
-
-xbox::services::tournaments::team_state
-tournament::team_state() const
-{
-    return m_teamState;
-}
-
-uint64_t
-tournament::team_ranking() const
-{
-    return m_teamRanking;
+    return m_teamSummary;
 }
 
 xbox_live_result<tournament>
@@ -242,12 +230,12 @@ tournament::_Deserialize(
 
     if (!teamJson.is_null())
     {
-        result.m_teamId = utils::extract_json_string(teamJson, _T("id"), errCode, true);
-        result.m_teamState = tournament_service::_Convert_string_to_team_state(
-            utils::extract_json_string(teamJson, _T("state"), errCode)
-            );
-
-        result.m_teamRanking = utils::extract_json_int(teamJson, _T("ranking"), errCode);
+        auto teamResult = team_summary::_Deserialize(teamJson);
+        if (teamResult.err())
+        {
+            errCode = teamResult.err();
+        }
+        result.m_teamSummary = teamResult.payload();
     }
 
     return xbox_live_result<tournament>(result, errCode);

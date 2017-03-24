@@ -39,7 +39,7 @@ public:
 
     void VerifyMatchMetadata(Tournaments::MatchMetadata^ currentMatchData, web::json::value matchDataToVerify)
     {
-        VERIFY_ARE_EQUAL_STR(currentMatchData->Label->Data(), L"6W - 1L");
+        VERIFY_ARE_EQUAL_STR(currentMatchData->Description->Data(), L"Final Match");
         VERIFY_ARE_EQUAL(DateTimeToString(
             currentMatchData->StartTIme).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str(),
             matchDataToVerify[L"startTime"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
@@ -69,7 +69,7 @@ public:
         }
 
         VERIFY_ARE_EQUAL(DateTimeToString(
-            previousMatchData->MatchEndTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str(),
+            previousMatchData->EndTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str(),
             matchDataToVerify[L"endTime"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
         VerifyMatchMetadata(previousMatchData->MatchDetails, matchDataToVerify);
     }
@@ -80,6 +80,7 @@ public:
         VERIFY_ARE_EQUAL(teamInfo->Name->Data(), teamToVerify[L"name"].as_string());
         VERIFY_ARE_EQUAL(teamInfo->Standing->Data(), teamToVerify[L"standing"].as_string());
         VERIFY_ARE_EQUAL_INT(teamInfo->Ranking, teamToVerify[L"ranking"].as_integer());
+        //VERIFY_ARE_EQUAL(teamInfo->ContinuationUri->Data(), teamToVerify[L"name"].as_string());
         VERIFY_ARE_EQUAL_STR_IGNORE_CASE(teamInfo->TeamState.ToString()->Data(), teamToVerify[L"state"].as_string().c_str());
         VERIFY_ARE_EQUAL_STR_IGNORE_CASE(teamInfo->CompletedReason.ToString()->Data(), teamToVerify[L"completedReason"].as_string().c_str());
 
@@ -89,6 +90,13 @@ public:
 
         VerifyCurrentMatchMetadata(teamInfo->CurrentMatchMetadata, teamToVerify[L"currentMatch"]);
         VerifyPreviousMatchMetadata(teamInfo->PreviousMatchMetadata, teamToVerify[L"previousMatch"]);
+    }
+
+    void VerifyTeamSummary(Tournaments::TeamSummary^ teamSummary, web::json::value teamSummaryToVerify)
+    {
+        VERIFY_ARE_EQUAL(teamSummary->Id->Data(), teamSummaryToVerify[L"id"].as_string());
+        VERIFY_ARE_EQUAL_INT(teamSummary->Ranking, teamSummaryToVerify[L"ranking"].as_integer());
+        VERIFY_ARE_EQUAL_STR_IGNORE_CASE(teamSummary->TeamState.ToString()->Data(), teamSummaryToVerify[L"state"].as_string().c_str());
     }
 
     void VerifyTournament(Tournaments::Tournament^ tournament, web::json::value tournamentToVerify)
@@ -144,9 +152,7 @@ public:
         // Team Info
         if (!teamJson.is_null())
         {
-            VERIFY_ARE_EQUAL(tournament->TeamId->Data(), teamJson[L"id"].as_string());
-            VERIFY_ARE_EQUAL_STR_IGNORE_CASE(tournament->TeamState.ToString()->Data(), teamJson[L"state"].as_string().c_str());
-            VERIFY_ARE_EQUAL_UINT(tournament->TeamRanking, teamJson[L"ranking"].as_number().to_uint64());
+            VerifyTeamSummary(tournament->TeamSummary ,teamJson);
         }
     }
 
@@ -161,14 +167,22 @@ public:
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
         TournamentRequest^ request = ref new TournamentRequest(true);
-        auto task = create_task(xboxLiveContext->TournamentService->GetTournamentsAsync(request));
+        TournamentRequestResult^ result = create_task(xboxLiveContext->TournamentService->GetTournamentsAsync(request)).get();
         VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://tournamentshub.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(L"/tournaments?titleId=1234&teamForMember=TestXboxUserId&memberId=TestXboxUserId", httpCall->PathQueryFragment.to_string());
-
-        TournamentRequestResult^ result = task.get();
         VERIFY_ARE_EQUAL_INT(result->Tournaments->Size, responseJson.as_object()[L"value"].as_array().size());
+        for (uint32_t i = 0; i < result->Tournaments->Size; i++)
+        {
+            VerifyTournament(result->Tournaments->GetAt(i), responseJson.as_object()[L"value"].as_array()[i]);
+        }
 
+        VERIFY_IS_TRUE(result->HasNext);
+        result = create_task(result->GetNextAsync()).get();
+        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
+        VERIFY_ARE_EQUAL_STR(L"https://tournamentshub.xboxlive.com/tournaments?organizer=xbox-live&continuationToken=10", httpCall->ServerName);
+        VERIFY_ARE_EQUAL_STR(L"/", httpCall->PathQueryFragment.to_string());    // Creates an empty uri
+        VERIFY_ARE_EQUAL_INT(result->Tournaments->Size, responseJson.as_object()[L"value"].as_array().size());
         for (uint32_t i = 0; i < result->Tournaments->Size; i++)
         {
             VerifyTournament(result->Tournaments->GetAt(i), responseJson.as_object()[L"value"].as_array()[i]);
@@ -191,14 +205,11 @@ public:
         states->Append(TournamentState::Completed);
         request->StateFilter = states->GetView();
 
-        auto task = create_task(xboxLiveContext->TournamentService->GetTournamentsAsync(request));
+        TournamentRequestResult^ result = create_task(xboxLiveContext->TournamentService->GetTournamentsAsync(request)).get();
         VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://tournamentshub.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR_IGNORE_CASE(L"/tournaments?titleId=1234&teamForMember=TestXboxUserId&state=%5B%22active%22,%22completed%22%5D", httpCall->PathQueryFragment.to_string().c_str());
-
-        TournamentRequestResult^ result = task.get();
         VERIFY_ARE_EQUAL_INT(result->Tournaments->Size, responseJson.as_object()[L"value"].as_array().size());
-
         for (uint32_t i = 0; i < result->Tournaments->Size; i++)
         {
             VerifyTournament(result->Tournaments->GetAt(i), responseJson.as_object()[L"value"].as_array()[i]);
@@ -218,15 +229,24 @@ public:
         TeamRequest^ request = ref new TeamRequest(
             ref new Platform::String(L"xbox-live"),
             ref new Platform::String(L"MyTestTournamentId")
-        );
-        auto task = create_task(xboxLiveContext->TournamentService->GetTeamsAsync(request));
+            );
+
+        TeamRequestResult^ result = create_task(xboxLiveContext->TournamentService->GetTeamsAsync(request)).get();
         VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://tournamentshub.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(L"/tournaments/xbox-live/MyTestTournamentId/teams?memberId=TestXboxUserId", httpCall->PathQueryFragment.to_string());
-
-        TeamRequestResult^ result = task.get();
         VERIFY_ARE_EQUAL_INT(result->Teams->Size, responseJson.as_object()[L"value"].as_array().size());
+        for (uint32_t i = 0; i < result->Teams->Size; i++)
+        {
+            VerifyTeam(result->Teams->GetAt(i), responseJson.as_object()[L"value"].as_array()[i]);
+        }
 
+        VERIFY_IS_TRUE(result->HasNext);
+        result = create_task(result->GetNextAsync()).get();
+        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
+        VERIFY_ARE_EQUAL_STR(L"https://tournamentshub.xboxlive.com/tournaments/xbox-live/MyTestTournamentId/teams?memberId=TestXboxUserId&continuationToken=10", httpCall->ServerName);
+        VERIFY_ARE_EQUAL_STR(L"/", httpCall->PathQueryFragment.to_string());    // Creates an empty uri
+        VERIFY_ARE_EQUAL_INT(result->Teams->Size, responseJson.as_object()[L"value"].as_array().size());
         for (uint32_t i = 0; i < result->Teams->Size; i++)
         {
             VerifyTeam(result->Teams->GetAt(i), responseJson.as_object()[L"value"].as_array()[i]);

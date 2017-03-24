@@ -239,6 +239,7 @@
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_service.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_team_result.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\team_info.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\team_summary.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\team_request.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\team_request_result.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\match_metadata.cpp" />
