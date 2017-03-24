@@ -157,6 +157,13 @@ public:
     /// </summary>
     DEFINE_PTR_PROP_GET_OBJ(Closed, closed, bool);
 
+    /// <summary>
+    /// A value that indicates if there is an outstanding request to allocate.
+    /// Set to true to indicate that the client would like an allocation. Set to false to cancel the allocation request.
+    /// MPSD will remove this property entirely if the allocation has failed.
+    /// </summary>
+    DEFINE_PTR_PROP_GET_OBJ(AllocateCloudCompute, allocate_cloud_compute, bool);
+
 internal:
     MultiplayerSessionProperties(
         std::shared_ptr<xbox::services::multiplayer::multiplayer_session_properties> cppObj

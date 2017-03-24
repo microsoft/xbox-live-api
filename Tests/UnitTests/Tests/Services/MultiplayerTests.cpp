@@ -805,6 +805,8 @@ public:
         web::json::value closed = propertiesSystemJson[L"closed"];
         VERIFY_ARE_EQUAL(result->Closed, closed.as_bool());
 
+        VERIFY_ARE_EQUAL(result->AllocateCloudCompute, propertiesSystemJson[L"allocateCloudCompute"].as_bool());
+
         web::json::array keywords = propertiesSystemJson[L"keywords"].as_array();
         uint32 counter = 0;
         for (auto keyword : result->Keywords)
@@ -2073,6 +2075,18 @@ public:
             input.MeasurementServerAddresses
             );
         WriteSessionAsyncHelper(currentSession, measurementServerAddressJson);
+    }
+
+    DEFINE_TEST_CASE(TestGetCloudComputePackageJson)
+    {
+        DEFINE_TEST_CASE_PROPERTIES(TestGetCloudComputePackageJson);
+        const string_t cloudComputePackageJson = testResponseJsonFromFile[L"cloudComputePackageJson"].serialize();
+        MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
+        auto currentSession = ref new MultiplayerSession(GetMockXboxLiveContext_WinRT());
+        currentSession->SetCloudComputePackageJson(
+            L"{\"crossSandbox\":true, \"titleId\":\"4567\", \"gsiSet\":\"128ce92a-45d0-4319-8a7e-bd8e940114ec\"}"
+            );
+        WriteSessionAsyncHelper(currentSession, cloudComputePackageJson);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetManagedInitialization)

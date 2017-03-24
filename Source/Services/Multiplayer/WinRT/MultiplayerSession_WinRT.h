@@ -928,6 +928,16 @@ public:
         );
 
     /// <summary>
+    /// Call multiplayer_service::write_session after this to write batched local changes to the service. 
+    /// This can only be set when creating a new session.
+    /// Can only be specified if the 'cloudCompute' capability is set. Enables clients to request that a cloud compute instance be allocated on behalf of the session.
+    /// </summary>
+    /// <param name="sessionCloudComputePackageConstantsJson">Cloud compute instance be allocated on behalf of the session.</param>
+    void SetCloudComputePackageJson(
+        _In_ Platform::String^ sessionCloudComputePackageConstantsJson
+        );
+
+    /// <summary>
     /// Sets the capabilities of the session.
     /// </summary>
     /// <param name="capabilities">A collection of MultiplayerSessionCapabilities flags that apply to
@@ -1001,6 +1011,19 @@ public:
     /// </remarks>
     void SetClosed(
         _In_ bool closed
+        );
+
+    /// <summary>
+    /// Sets the session properties/system/allocateCloudCompute field
+    /// </summary>
+    /// <param name="closed">This triggers a Thunderhead allocation attempt by MPSD</param>
+    /// <remarks>
+    /// After calling this method, the caller must use MultiplayerService.WriteSessionAsync to write batched local changes
+    /// to the service.If SetHostDeviceToken is called without calling WriteSessionAsync, it only changes the local session
+    /// object but does not commit it to the service.
+    /// </remarks>
+    void SetAllocateCloudCompute(
+        _In_ bool allocateCloudCompute
         );
 
     /// <summary>
