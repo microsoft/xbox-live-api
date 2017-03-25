@@ -124,7 +124,19 @@ user_impl_idp::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
                         // if refresh fails, return the error.
                         if (refreshResult.err())
                         {
-                            return xbox_live_result<sign_in_result>(refreshResult.err(), refreshResult.err_message());
+                            //if it's silent pass, give user interaction required.
+                            if (!showUI)
+                            {
+                                return xbox_live_result<sign_in_result>(sign_in_status::user_interaction_required);
+                            }
+                            else
+                            {
+                                return xbox_live_result<sign_in_result>(refreshResult.err(), refreshResult.err_message());
+                            }
+                        }
+                        else if (refreshResult.payload().xbox_user_id().empty())
+                        {
+                            return xbox_live_result<sign_in_result>(convert_web_token_request_status(refreshResult.payload().token_request_result()));
                         }
                     }
                 }
