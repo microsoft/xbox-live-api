@@ -27,6 +27,7 @@ multiplayer_session_constants::multiplayer_session_constants() :
     m_writeMeasurementServerAddresses(false)
 {
     m_sessionCustomConstants = web::json::value::object();
+    m_sessionCloudComputePackageConstants = web::json::value::object();
     m_measurementServerAddressesJson = web::json::value::object();
 }
 
@@ -34,12 +35,14 @@ multiplayer_session_constants::multiplayer_session_constants(
     _In_ uint32_t maxMembersInSession,
     _In_ multiplayer_session_visibility visibility,
     _In_ std::vector<string_t> initiatorXboxIds,
-    _In_ web::json::value sessionCustomConstants
+    _In_ web::json::value sessionCustomConstants,
+    _In_ web::json::value sessionCloudComputePackageConstants
     ) : 
     m_maxMembersInSession(maxMembersInSession),
     m_visibility(visibility),
     m_initiatorXboxUserIds(std::move(initiatorXboxIds)),
     m_sessionCustomConstants(std::move(sessionCustomConstants)),
+    m_sessionCloudComputePackageConstants(std::move(sessionCloudComputePackageConstants)),
     m_shouldSerialize(true),
     m_writeTimeouts(false),
     m_writeArbitrationTimeouts(false),
@@ -124,6 +127,12 @@ const web::json::value&
 multiplayer_session_constants::session_custom_constants_json() const
 {
     return m_sessionCustomConstants;
+}
+
+const web::json::value&
+multiplayer_session_constants::session_cloud_compute_package_constants_json() const
+{
+    return m_sessionCloudComputePackageConstants;
 }
 
 const std::chrono::milliseconds&
@@ -629,6 +638,11 @@ multiplayer_session_constants::_Serialize()
         systemJson[_T("measurementServerAddresses")] = m_measurementServerAddressesJson;
     }
 
+    if (!m_sessionCloudComputePackageConstants.is_null())
+    {
+        systemJson[_T("cloudComputePackage")] = m_sessionCloudComputePackageConstants;
+    }
+
     serializedObject[_T("system")] = systemJson;
 
     if (!m_sessionCustomConstants.is_null())
@@ -652,6 +666,7 @@ multiplayer_session_constants::_Deserialize(
     web::json::value systemCapabilitiesJson = utils::extract_json_field(systemJson, _T("capabilities"), errc, false);
     web::json::value systemMetricsJson = utils::extract_json_field(systemJson, _T("metrics"), errc, false);
     web::json::value systemArbitrationTimeoutsJson = utils::extract_json_field(systemJson, _T("arbitration"), errc, false);
+    returnResult.m_sessionCloudComputePackageConstants = utils::extract_json_field(systemJson, _T("cloudComputePackage"), errc, false);
 
     returnResult.m_maxMembersInSession = utils::extract_json_int(systemJson, _T("maxMembersCount"), errc);
 

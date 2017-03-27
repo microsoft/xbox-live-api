@@ -1200,7 +1200,8 @@ public:
         _In_ uint32_t maxMembersInSession,
         _In_ multiplayer_session_visibility visibility,
         _In_ std::vector<string_t> initiatorXboxIds,
-        _In_ web::json::value sessionCustomConstants
+        _In_ web::json::value sessionCustomConstants,
+        _In_ web::json::value sessionCloudComputePackageConstants
         );
 
     /// <summary>
@@ -1239,6 +1240,11 @@ public:
     /// JSON string that specify the custom constants for the session.  These can not be changed after the session is created. (Optional)
     /// </summary>
     _XSAPIIMP const web::json::value& session_custom_constants_json() const;
+
+    /// <summary>
+    /// JSON string that specify the cloud compute package constants for the session.  These can not be changed after the session is created. (Optional)
+    /// </summary>
+    _XSAPIIMP const web::json::value& session_cloud_compute_package_constants_json() const;
 
     /// <summary>
     /// If a member reservation does not join within this timeout, then reservation is removed.
@@ -1485,6 +1491,7 @@ private:
     multiplayer_session_visibility m_visibility;
     std::vector<string_t> m_initiatorXboxUserIds;
     web::json::value m_sessionCustomConstants;
+    web::json::value m_sessionCloudComputePackageConstants;
     multiplayer_session_capabilities m_sessionCapabilities;
 
     // Arbitration timeouts
@@ -2665,6 +2672,12 @@ public:
     _XSAPIIMP bool closed() const;
 
     /// <summary>
+    /// Setting to true by a client triggers a Thunderhead allocation attempt by MPSD.
+    /// Defaults to false.
+    /// </summary>
+    _XSAPIIMP bool allocate_cloud_compute() const;
+
+    /// <summary>
     /// Internal function
     /// </summary>
     void _Initialize(
@@ -2724,6 +2737,7 @@ private:
     std::vector<string_t> m_serverConnectionStringCandidates;
 
     bool m_closed;
+    bool m_allocateCloudCompute;
 
     static std::mutex m_lock;
 };
@@ -2785,7 +2799,8 @@ public:
         _In_ uint32_t maxMembersInSession,
         _In_ multiplayer_session_visibility multiplayerSessionVisibility,
         _In_ std::vector<string_t> initiatorXboxUserIds = std::vector<string_t>(),
-        _In_ web::json::value sessionCustomConstantsJson = web::json::value()
+        _In_ web::json::value sessionCustomConstantsJson = web::json::value(),
+        _In_ web::json::value sessionCloudComputePackageConstantsJson = web::json::value()
         );
 
     /// <summary>
@@ -3184,6 +3199,15 @@ public:
     /// </summary>
     _XSAPIIMP void set_closed(
         _In_ bool closed
+        );
+
+    /// <summary>
+    /// Call multiplayer_service::write_session after this to write batched local changes to the service. 
+    /// If this is called without multiplayer_service::write_session, this will only change the local session object but does not commit it to the service.
+    /// If set to true, makes the session "closed", meaning that new users will not be able to join unless they already have a reservation.
+    /// </summary>
+    _XSAPIIMP void set_allocate_cloud_compute(
+        _In_ bool allocateCloudCompute
         );
 
     /// <summary>
