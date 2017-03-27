@@ -474,6 +474,19 @@ MultiplayerSession::SetMeasurementServerAddresses(
 }
 
 void
+MultiplayerSession::SetCloudComputePackageJson(
+    _In_ Platform::String^ sessionCloudComputePackageConstantsJson
+    )
+{
+    auto cloudComputePackageValueString = UtilsWinRT::JsonValueFromPlatformString(sessionCloudComputePackageConstantsJson);
+    auto errc = m_cppObj->set_cloud_compute_package_json(
+        cloudComputePackageValueString
+        );
+
+    THROW_ON_ERR_CODE(errc);
+}
+
+void
 MultiplayerSession::SetSessionCapabilities(
     _In_ MultiplayerSessionCapabilities^ capabilities
     )
@@ -528,6 +541,16 @@ MultiplayerSession::SetClosed(
 {
     CONVERT_STD_EXCEPTION(
         m_cppObj->set_closed(closed);
+    );
+}
+
+void
+MultiplayerSession::SetAllocateCloudCompute(
+    _In_ bool allocateCloudCompute
+    )
+{
+    CONVERT_STD_EXCEPTION(
+        m_cppObj->set_allocate_cloud_compute(allocateCloudCompute);
     );
 }
 

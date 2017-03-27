@@ -51,6 +51,8 @@ void multiplayer_session_request::deep_copy_from(
     m_memberRequestIndex = other.m_memberRequestIndex;
     m_writeClosed = other.m_writeClosed;
     m_closed = other.m_closed;
+    m_writeAllocateCloudCompute = other.m_writeAllocateCloudCompute;
+    m_allocateCloudCompute = other.m_allocateCloudCompute;
 }
 
 multiplayer_session_request::multiplayer_session_request() :
@@ -68,7 +70,9 @@ multiplayer_session_request::multiplayer_session_request() :
     m_memberRequestIndex(0),
     m_bLeaveSession(false),
     m_writeClosed(false),
-    m_closed(false)
+    m_closed(false),
+    m_writeAllocateCloudCompute(false),
+    m_allocateCloudCompute(false)
 {
     m_sessionConstants = std::make_shared<multiplayer_session_constants>();
     m_sessionPropertiesCustomProperties = web::json::value();
@@ -94,7 +98,9 @@ multiplayer_session_request::multiplayer_session_request(
     m_memberRequestIndex(0),
     m_bLeaveSession(false),
     m_writeClosed(false),
-    m_closed(false)
+    m_closed(false),
+    m_writeAllocateCloudCompute(false),
+    m_allocateCloudCompute(false)
 {
 }
 
@@ -486,6 +492,34 @@ multiplayer_session_request::set_closed(
     m_closed = closed;
 }
 
+bool 
+multiplayer_session_request::write_allocate_cloud_compute() const
+{
+    return m_writeAllocateCloudCompute;
+}
+
+void 
+multiplayer_session_request::set_write_allocate_cloud_compute(
+    _In_ bool writeAllocateCloudCompute
+    )
+{
+    m_writeAllocateCloudCompute = writeAllocateCloudCompute;
+}
+
+bool 
+multiplayer_session_request::allocate_cloud_compute() const
+{
+    return m_allocateCloudCompute;
+}
+
+void 
+multiplayer_session_request::set_allocate_cloud_compute(
+    _In_ bool allocateCloudCompute
+    )
+{
+    m_allocateCloudCompute = allocateCloudCompute;
+}
+
 void
 multiplayer_session_request::set_mutable_role_settings(
     _In_ const std::unordered_map<string_t, multiplayer_role_type>& roleTypes
@@ -528,6 +562,11 @@ multiplayer_session_request::create_properties_json()
     if (m_writeClosed)
     {
         jsonPropertiesSystem[_T("closed")] = web::json::value(m_closed);
+    }
+
+    if (m_writeAllocateCloudCompute)
+    {
+        jsonPropertiesSystem[_T("allocateCloudCompute")] = web::json::value(m_allocateCloudCompute);
     }
 
     if (m_writeMatchmakingClientResult || m_writeMatchmakingSessionConstants || m_writeMatchmakingServerConnectionPath)
