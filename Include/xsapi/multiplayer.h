@@ -2678,7 +2678,7 @@ public:
     _XSAPIIMP bool closed() const;
 
     /// <summary>
-    /// Setting to true by a client triggers a Thunderhead allocation attempt by MPSD.
+    /// Setting to true by a client triggers a Xbox Live Compute allocation attempt by MPSD.
     /// Defaults to false.
     /// </summary>
     _XSAPIIMP bool allocate_cloud_compute() const;
