@@ -28,7 +28,6 @@ multiplayer_session_constants::multiplayer_session_constants() :
 {
     m_sessionCustomConstants = web::json::value::object();
     m_measurementServerAddressesJson = web::json::value::object();
-    m_sessionCloudComputePackageJson = web::json::value::object();
 }
 
 multiplayer_session_constants::multiplayer_session_constants(
@@ -60,7 +59,6 @@ multiplayer_session_constants::multiplayer_session_constants(
         );
 
     m_measurementServerAddressesJson = web::json::value::object();
-    m_sessionCloudComputePackageJson = web::json::value::object();
 }
 
 multiplayer_session_constants::multiplayer_session_constants(
@@ -84,7 +82,6 @@ multiplayer_session_constants::multiplayer_session_constants(
 {
     m_sessionCustomConstants = web::json::value::object();
     m_measurementServerAddressesJson = web::json::value::object();
-    m_sessionCloudComputePackageJson = web::json::value::object();
 }
 
 uint32_t 

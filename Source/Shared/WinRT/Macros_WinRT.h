@@ -145,15 +145,6 @@
         }\
     }
 
-#define DEFINE_PROP_SET_STR_OBJ(x, cppX) \
-    property Platform::String^ x \
-    { \
-        void set(_In_ Platform::String^ value)\
-        {\
-            m_cppObj.set_##cppX(value->Data());\
-        }\
-    }
-
 #define DEFINE_PTR_PROP_GETSET_STR_OBJ(x, cppX) \
     property Platform::String^ x \
     { \
@@ -174,15 +165,6 @@
         {\
             return m_cppObj.##cppX();\
         }\
-        void set(_In_ y value)\
-        {\
-            m_cppObj.set_##cppX(value);\
-        }\
-    }
-
-#define DEFINE_PROP_SET_OBJ(x, cppX, y) \
-    property y x \
-    { \
         void set(_In_ y value)\
         {\
             m_cppObj.set_##cppX(value);\
@@ -326,15 +308,6 @@
         { \
             return (y)(m_cppObj.##cppX());\
         } \
-        void set(_In_ y value)\
-        {\
-            m_cppObj.set_##cppX(((cppY)(value))); \
-        }\
-    }
-
-#define DEFINE_PROP_SET_ENUM_OBJ(x, cppX, y, cppY) \
-    property y x \
-    { \
         void set(_In_ y value)\
         {\
             m_cppObj.set_##cppX(((cppY)(value))); \

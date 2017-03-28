@@ -69,7 +69,7 @@
                     "userAuthorizationStyle": true,
                     "crossplay": true,
                     "searchable": true,
-                    "connectionRequiredForActiveMembers": true,
+                    "connectionRequiredForActiveMembers": true
                 },
                 "version": 1,
                 "maxMembersCount": 100,

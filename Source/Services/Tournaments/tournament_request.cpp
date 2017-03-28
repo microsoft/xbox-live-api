@@ -20,13 +20,13 @@ tournament_request::tournament_request(
 }
 
 bool 
-tournament_request::_Filter_results_for_user() const
+tournament_request::filter_results_for_user() const
 {
     return m_filterResultsForUser;
 }
 
 uint32_t
-tournament_request::_Max_items() const
+tournament_request::max_items() const
 {
     return m_maxItems;
 }
@@ -40,7 +40,7 @@ tournament_request::set_max_items(
 }
 
 const std::vector<tournament_state>&
-tournament_request::_Tournament_states() const
+tournament_request::state_filter() const
 {
     return m_states;
 }
@@ -54,7 +54,7 @@ tournament_request::set_state_filter(
 }
 
 tournament_order_by 
-tournament_request::_Order_by() const
+tournament_request::order_by() const
 {
     return m_orderBy;
 }
@@ -68,7 +68,7 @@ tournament_request::set_order_by(
 }
 
 tournament_sort_order 
-tournament_request::_Sort_order() const
+tournament_request::sort_order() const
 {
     return m_sortOrder;
 }
@@ -82,7 +82,7 @@ tournament_request::set_sort_order(
 }
 
 const string_t& 
-tournament_request::_Organizer_id() const
+tournament_request::organizer_id() const
 {
     return m_organizerId;
 }
