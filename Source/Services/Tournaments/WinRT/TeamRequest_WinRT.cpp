@@ -34,6 +34,12 @@ TeamRequest::GetCppObj() const
     return m_cppObj;
 }
 
+Windows::Foundation::Collections::IVectorView<TeamState>^
+TeamRequest::StateFilter::get()
+{
+    return m_teamStates;
+}
+
 void
 TeamRequest::StateFilter::set(
     _In_ Windows::Foundation::Collections::IVectorView<TeamState>^ states

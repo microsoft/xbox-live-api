@@ -25,30 +25,31 @@ public:
     /// <summary>
     /// The maximum number of items to return.
     /// </summary>
-    DEFINE_PROP_SET_OBJ(MaxItems, max_items, uint32);
+    DEFINE_PROP_GETSET_OBJ(MaxItems, max_items, uint32);
 
     /// <summary>
     /// Filter results based on the multiple states of the tournament.
     /// </summary>
     property Windows::Foundation::Collections::IVectorView<TournamentState>^ StateFilter
     {
+        Windows::Foundation::Collections::IVectorView<TournamentState>^ get();
         void set(_In_ Windows::Foundation::Collections::IVectorView<TournamentState>^ states);
     }
 
     /// <summary>
     /// The property used to order results.
     /// </summary>
-    DEFINE_PROP_SET_ENUM_OBJ(OrderBy, order_by, TournamentOrderBy, xbox::services::tournaments::tournament_order_by);
+    DEFINE_PROP_GETSET_ENUM_OBJ(OrderBy, order_by, TournamentOrderBy, xbox::services::tournaments::tournament_order_by);
 
     /// <summary>
     ///The order in which to sort the results.
     /// </summary>
-    DEFINE_PROP_SET_ENUM_OBJ(SortOrder, sort_order, TournamentSortOrder, xbox::services::tournaments::tournament_sort_order);
+    DEFINE_PROP_GETSET_ENUM_OBJ(SortOrder, sort_order, TournamentSortOrder, xbox::services::tournaments::tournament_sort_order);
 
     /// <summary>
     /// The organizer of the tournament.
     /// </summary>
-    DEFINE_PROP_SET_STR_OBJ(OrganizerId, organizer_id);
+    DEFINE_PROP_GETSET_STR_OBJ(OrganizerId, organizer_id);
 
 internal:
     TournamentRequest(

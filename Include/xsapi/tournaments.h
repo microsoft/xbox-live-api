@@ -320,27 +320,27 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    _XSAPIIMP const string_t& _Organizer_id() const;
+    _XSAPIIMP const string_t& organizer_id() const;
 
     /// <summary>
     /// Internal function
     /// </summary>
-    _XSAPIIMP const string_t& _Tournament_id() const;
+    _XSAPIIMP const string_t& tournament_id() const;
 
     /// <summary>
     /// Internal function
     /// </summary>
-    _XSAPIIMP uint32_t _Max_items() const;
+    _XSAPIIMP uint32_t max_items() const;
 
     /// <summary>
     /// Internal function
     /// </summary>
-    _XSAPIIMP const std::vector<team_state>& _Team_states() const;
+    _XSAPIIMP const std::vector<team_state>& state_filter() const;
 
     /// <summary>
     /// Internal function
     /// </summary>
-    _XSAPIIMP team_order_by _Order_by() const;
+    _XSAPIIMP team_order_by order_by() const;
 
 private:
     uint32_t m_maxItems;
@@ -577,32 +577,32 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    _XSAPIIMP bool _Filter_results_for_user() const;
+    _XSAPIIMP bool filter_results_for_user() const;
 
     /// <summary>
     /// Internal function
     /// </summary>
-    _XSAPIIMP uint32_t _Max_items() const;
+    _XSAPIIMP uint32_t max_items() const;
 
     /// <summary>
     /// Internal function
     /// </summary>
-    _XSAPIIMP const std::vector<tournament_state>& _Tournament_states() const;
+    _XSAPIIMP const std::vector<tournament_state>& state_filter() const;
 
     /// <summary>
     /// Internal function
     /// </summary>
-    _XSAPIIMP tournament_order_by _Order_by() const;
+    _XSAPIIMP tournament_order_by order_by() const;
 
     /// <summary>
     /// Internal function
     /// </summary>
-    _XSAPIIMP tournament_sort_order _Sort_order() const;
+    _XSAPIIMP tournament_sort_order sort_order() const;
 
     /// <summary>
     /// Internal function
     /// </summary>
-    _XSAPIIMP const string_t& _Organizer_id() const;
+    _XSAPIIMP const string_t& organizer_id() const;
 
 private:
     tournament_sort_order m_sortOrder;

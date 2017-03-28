@@ -32,6 +32,12 @@ TournamentRequest::GetCppObj() const
     return m_cppObj;
 }
 
+Windows::Foundation::Collections::IVectorView<TournamentState>^
+TournamentRequest::StateFilter::get()
+{
+    return m_tournamentStates;
+}
+
 void
 TournamentRequest::StateFilter::set(
     _In_ Windows::Foundation::Collections::IVectorView<TournamentState>^ states

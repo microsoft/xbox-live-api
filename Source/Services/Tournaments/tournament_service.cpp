@@ -271,20 +271,20 @@ tournament_service::tournament_sub_path_url(
 
     subPathBuilder.append_query(_T("titleId"), m_appConfig->title_id());
     subPathBuilder.append_query(_T("teamForMember"), m_userContext->xbox_user_id());
-    if (request._Filter_results_for_user())
+    if (request.filter_results_for_user())
     {
         subPathBuilder.append_query(_T("memberId"), m_userContext->xbox_user_id());
     }
 
-    if (!request._Organizer_id().empty())
+    if (!request.organizer_id().empty())
     {
-        subPathBuilder.append_query(_T("organizer"), request._Organizer_id());
+        subPathBuilder.append_query(_T("organizer"), request.organizer_id());
     }
 
-    if (request._Tournament_states().size() > 0)
+    if (request.state_filter().size() > 0)
     {
         string_t statesArray = L"[";
-        for (const auto& state : request._Tournament_states())
+        for (const auto& state : request.state_filter())
         {
             statesArray += L"\"";
             statesArray += convert_tournament_state_to_string(state);
@@ -295,19 +295,19 @@ tournament_service::tournament_sub_path_url(
         subPathBuilder.append_query(_T("state"), statesArray);
     }
 
-    if (request._Sort_order() != tournament_sort_order::none)
+    if (request.sort_order() != tournament_sort_order::none)
     {
-        subPathBuilder.append_query(_T("sortOrder"), convert_tournament_sort_order_to_string(request._Sort_order()));
+        subPathBuilder.append_query(_T("sortOrder"), convert_tournament_sort_order_to_string(request.sort_order()));
     }
 
-    if (request._Order_by() != tournament_order_by::none)
+    if (request.order_by() != tournament_order_by::none)
     {
-        subPathBuilder.append_query(_T("orderBy"), convert_tournament_order_by_to_string(request._Order_by()));
+        subPathBuilder.append_query(_T("orderBy"), convert_tournament_order_by_to_string(request.order_by()));
     }
 
-    if (request._Max_items() > 0)
+    if (request.max_items() > 0)
     {
-        subPathBuilder.append_query(_T("maxItems"), request._Max_items());
+        subPathBuilder.append_query(_T("maxItems"), request.max_items());
     }
 
     return subPathBuilder.to_string();
@@ -322,19 +322,19 @@ tournament_service::team_sub_path_url(
     web::uri_builder subPathBuilder;
 
     stringstream_t path;
-    path << _T("/tournaments/") << request._Organizer_id() << _T("/") << request._Tournament_id() << _T("/teams");
+    path << _T("/tournaments/") << request.organizer_id() << _T("/") << request.tournament_id() << _T("/teams");
     subPathBuilder.set_path(path.str());
 
     subPathBuilder.append_query(_T("memberId"), m_userContext->xbox_user_id());
-    if (request._Max_items() > 0)
+    if (request.max_items() > 0)
     {
-        subPathBuilder.append_query(_T("maxItems"), request._Max_items());
+        subPathBuilder.append_query(_T("maxItems"), request.max_items());
     }
 
-    if (request._Team_states().size() > 0)
+    if (request.state_filter().size() > 0)
     {
         string_t statesArray = L"[";
-        for (const auto& state : request._Team_states())
+        for (const auto& state : request.state_filter())
         {
             statesArray += L"\"";
             statesArray += convert_team_state_to_string(state);
@@ -345,9 +345,9 @@ tournament_service::team_sub_path_url(
         subPathBuilder.append_query(_T("state"), statesArray);
     }
 
-    if (request._Order_by() != team_order_by::none)
+    if (request.order_by() != team_order_by::none)
     {
-        subPathBuilder.append_query(_T("orderBy"), convert_team_order_by_to_string(request._Order_by()));
+        subPathBuilder.append_query(_T("orderBy"), convert_team_order_by_to_string(request.order_by()));
     }
 
     return subPathBuilder.to_string();
