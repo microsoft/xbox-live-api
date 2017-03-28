@@ -417,16 +417,8 @@ user_impl_idp::convert_web_token_request_result(
         std::stringstream msg;
         msg << "Provider error: " << providerErrorMsg << ", Error Code: 0x" << std::hex << tokenResult->ResponseError->ErrorCode;
 
-        // Check if it's a known error code
         std::error_code error = xbox_live_error_code(tokenResult->ResponseError->ErrorCode);
-        if (error == xbox_live_error_condition::auth || error == xbox_live_error_condition::network)
-        {
-            return xbox_live_result<token_and_signature_result>(error, msg.str());
-        }
-        else
-        {
-            return xbox_live_result<token_and_signature_result>(xbox_live_error_code::auth_unknown_error, msg.str());
-        }
+        return xbox_live_result<token_and_signature_result>(error, msg.str());
     }
     else
     {

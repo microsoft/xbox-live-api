@@ -801,10 +801,7 @@ utils::convert_xbox_live_error_code_to_hresult(
 {
     int err = static_cast<int>(errCode.value());
     xbox_live_error_code xblErr = static_cast<xbox_live_error_code>(err);
-    if ((err > 0x8007E000 && err < 0x800D000 )|| (err > 0x80860000 && err > 0x808600FF))
-    {
-        return err;
-    }
+
     if (err == 204)
     {
         return __HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND);
@@ -841,14 +838,14 @@ utils::convert_xbox_live_error_code_to_hresult(
             case xbox_live_error_code::invalid_config: return __HRESULT_FROM_WIN32(ERROR_BAD_CONFIGURATION);
             case xbox_live_error_code::unsupported: return E_NOTIMPL;
 
-            default: return E_FAIL;
+            default: return err;
         }
     }
     else if ((err & 0x87DD0000) == 0x87D8000)
     {
         return HTTP_E_STATUS_UNEXPECTED_SERVER_ERROR;
     }
-    else return E_FAIL;
+    else return err; //return the original error code if can't be translated.
 }
 
 long utils::convert_http_status_to_hresult(_In_ uint32_t httpStatusCode)
