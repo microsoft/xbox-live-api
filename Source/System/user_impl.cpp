@@ -12,10 +12,6 @@
 #endif
 #endif
 
-#if UNIT_TEST_SERVICES
-bool g_is_xbox_live_creators_sdk = false;
-#endif
-
 using namespace std;
 using namespace pplx;
 
@@ -55,7 +51,7 @@ user_impl::user_impl(
         m_localConfig->environment_prefix(),
         m_localConfig->environment(),
         m_localConfig->use_first_party_token(),
-        g_is_xbox_live_creators_sdk
+        m_localConfig->is_creators_title()
         );
 #endif
 }

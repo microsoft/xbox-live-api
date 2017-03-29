@@ -30,7 +30,7 @@ public:
         _In_ string_t environmentPrefix,
         _In_ string_t environment,
         _In_ bool useCompactTicket,
-        _In_ bool isCreatorsSDK
+        _In_ bool isCreatorsTitle
         );
 
     const string_t& xbox_live_endpoint() const;
