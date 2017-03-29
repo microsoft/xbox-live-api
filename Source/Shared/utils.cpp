@@ -838,7 +838,7 @@ utils::convert_xbox_live_error_code_to_hresult(
             case xbox_live_error_code::invalid_config: return __HRESULT_FROM_WIN32(ERROR_BAD_CONFIGURATION);
             case xbox_live_error_code::unsupported: return E_NOTIMPL;
 
-            default: return err;
+            default: return E_FAIL;
         }
     }
     else if ((err & 0x87DD0000) == 0x87D8000)
