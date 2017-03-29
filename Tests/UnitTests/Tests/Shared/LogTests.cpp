@@ -13,6 +13,8 @@
 #include "XboxLiveServicesSettings_WinRT.h"
 
 using namespace xbox::services::system;
+using namespace Microsoft::Xbox::Services;
+using namespace Microsoft::Xbox::Services::System;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 

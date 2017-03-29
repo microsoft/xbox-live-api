@@ -984,7 +984,7 @@ public:
             RelationshipFilter::Friends
             );
 
-        VERIFY_ARE_EQUAL(group->Users->Size, USER_LIST.size() - 1);
+        VERIFY_ARE_EQUAL_UINT(group->Users->Size, USER_LIST.size() - 1);
 
         Cleanup(socialManagerInitializationStruct, xboxLiveContext, 1);
         Cleanup(socialManagerInitializationStruct, xboxLiveContext1);
@@ -1558,7 +1558,7 @@ public:
                     VERIFY_IS_TRUE(socialUserGroupLoaded->SocialUserGroup->SocialUserGroupType == SocialUserGroupType::UserListType);
                     VERIFY_ARE_EQUAL_STR_IGNORE_CASE(socialUserGroupLoaded->SocialUserGroup->LocalUser->XboxUserId->Data(), xboxLiveContext->xbox_live_user_id().c_str());
 
-                    VERIFY_ARE_EQUAL(vec->Size, socialUserGroupLoaded->SocialUserGroup->UsersTrackedBySocialUserGroup->Size);
+                    VERIFY_ARE_EQUAL_UINT(vec->Size, socialUserGroupLoaded->SocialUserGroup->UsersTrackedBySocialUserGroup->Size);
                     //VERIFY_ARE_EQUAL(vec->Size, socialUserGroupLoaded->SocialUserGroup->Users->Size);
                     for (auto& user : vec)
                     {
