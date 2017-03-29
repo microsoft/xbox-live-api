@@ -168,6 +168,12 @@ bool local_config::use_first_party_token()
     return get_bool_from_config(_T("FirstParty"), false, false);
 }
 
+bool local_config::is_creators_title()
+{
+    return get_bool_from_config(_T("XboxLiveCreatorsTitle"), false, false);
+}
+
+
 #if XSAPI_I
 string_t local_config::apns_environment()
 {
