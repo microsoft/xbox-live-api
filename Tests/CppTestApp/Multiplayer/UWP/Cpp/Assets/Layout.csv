@@ -1,0 +1,94 @@
+#ITEM,ID,X,Y,DX,DY,PARAMETERS
+OVERLAY,2000,0,0,1920,1080
+IMAGEBUTTON, 2101, 745, 450, 420, 40, btnCreateLobbyON.png
+IMAGEBUTTON, 2102, 745, 505, 420, 40, btnCreateCustomGameON.png
+
+OVERLAY,3000,0,0,1920,1080
+IMAGE, 3001, 112, 163, 1032.12, 315.75, LS_bg.png
+IMAGE, 3003, 112, 571, 1032.98, 315.75, GS_bg.png
+IMAGEBUTTON, 3004, 112, 969, 251, 34, btnInviteFriendsON.png
+IMAGEBUTTON, 3005, 373, 969, 251, 34, btnChangeInviteStatusON.png
+LABEL, 3009, 632, 969, 400, 30, Private, SMALL
+IMAGE, 3010, 1158, 163, 627, 724, dbug_bg.png
+
+# Lobby Session Details
+LABEL, 3100, 120, 170, 475, 27, LOBBY SESSION:, SMALL, BOLD
+LABEL, 3101, 120, 215, 375, 30, GAME MODE:, SMALL
+LABEL, 3102, 120, 250, 375, 30, MAP:, SMALL
+LABEL, 0, 432,  215, 100, 30, Member, SMALL
+LABEL, 0, 881,  215, 100, 30, Skill, SMALL
+LABEL, 0, 1038, 215, 100, 30, XP, SMALL
+IMAGEBUTTON, 3103, 1012, 164, 129, 40, btnExitON.png
+IMAGEBUTTON, 3104, 112, 482, 250, 34, btnWriteLobbyPropertiesON.png
+IMAGEBUTTON, 3105, 375, 482, 250, 34, btnBecomeLobbyHostON.png
+
+# Game Session Details
+LABEL, 3200, 120, 580, 475, 27, GAME SESSION:, SMALL, BOLD
+LABEL, 3201, 120, 625, 375, 30, GAME MODE:, SMALL
+LABEL, 3202, 120, 660, 375, 30, MAP:, SMALL
+LABEL, 0, 432,  625, 100, 30, Member, SMALL
+LABEL, 0, 881,  625, 100, 30, Skill, SMALL
+LABEL, 0, 1038, 625, 100, 30, XP, SMALL
+IMAGEBUTTON, 3203, 1014, 573, 129, 40, btnJoin.png
+IMAGEBUTTON, 3205, 112, 890, 250, 34, btnWriteGamePropertiesON.png
+IMAGEBUTTON, 3206, 375, 890, 250, 34, btnBecomeGameHostON.png
+
+# Events, Errors & Perf
+LABEL, 3040, 1171, 170, 75, 27, Events, SMALL, BOLD
+LABEL, 3041, 1171, 750, 75, 27, Errors, SMALL, BOLD
+
+# Lobby Row 1 (gamerpic, xuid, host icon, skill, xp)
+IMAGE, 3110, 430,  280, 35, 35, gamerpic_icon.png
+LABEL, 3111, 475,  280, 250, 30, , SMALL
+IMAGE, 3112, 745,  288, 22, 19, host_icon.png
+LABEL, 3113, 881,  280, 100, 30, , SMALL
+LABEL, 3114, 1038, 280, 100, 30, , SMALL
+
+# Lobby Row 2
+IMAGE, 3115, 430,  335, 35, 35, gamerpic_icon.png
+LABEL, 3116, 475,  335, 250, 30, , SMALL
+IMAGE, 3117, 745,  343, 22, 19, host_icon.png
+LABEL, 3118, 881,  335, 100, 30, , SMALL
+LABEL, 3119, 1038, 335, 100, 30, , SMALL
+
+# Lobby Row 3
+IMAGE, 3120, 430,  385, 35, 35, gamerpic_icon.png
+LABEL, 3121, 475,  385, 250, 30, , SMALL
+IMAGE, 3122, 745,  393, 22, 19, host_icon.png
+LABEL, 3123, 881,  385, 100, 30, , SMALL
+LABEL, 3124, 1038, 385, 100, 30, , SMALL
+
+# Lobby Row 4
+IMAGE, 3125, 430,  435, 35, 35, gamerpic_icon.png
+LABEL, 3126, 475,  435, 250, 30, , SMALL
+IMAGE, 3127, 745,  443, 22, 19, host_icon.png
+LABEL, 3128, 881,  435, 100, 30, , SMALL
+LABEL, 3129, 1038, 435, 100, 30, , SMALL
+
+# Game Row 1 (gamerpic, xuid, host icon, skill, xp)
+IMAGE, 3210, 430,  685, 35, 35, gamerpic_icon.png
+LABEL, 3211, 475,  685, 250, 30, , SMALL
+IMAGE, 3212, 745,  693, 22, 19, host_icon.png
+LABEL, 3213, 881,  685, 100, 30, , SMALL
+LABEL, 3214, 1038, 685, 100, 30, , SMALL
+
+# Game Row 2
+IMAGE, 3215, 430,  740, 35, 35, gamerpic_icon.png
+LABEL, 3216, 475,  740, 250, 30, , SMALL
+IMAGE, 3217, 745,  748, 22, 19, host_icon.png
+LABEL, 3218, 881,  740, 100, 30, , SMALL
+LABEL, 3219, 1038, 740, 100, 30, , SMALL
+
+# Game Row 3
+IMAGE, 3220, 430,  790, 35, 35, gamerpic_icon.png
+LABEL, 3221, 475,  790, 250, 30, , SMALL
+IMAGE, 3222, 745,  798, 22, 19, host_icon.png
+LABEL, 3223, 881,  790, 100, 30, , SMALL
+LABEL, 3224, 1038, 790, 100, 30, , SMALL
+
+# Game Row 4
+IMAGE, 3225, 430,  840, 35, 35, gamerpic_icon.png
+LABEL, 3226, 475,  840, 250, 30, , SMALL
+IMAGE, 3227, 745,  848, 22, 19, host_icon.png
+LABEL, 3228, 881,  840, 100, 30, , SMALL
+LABEL, 3229, 1038, 840, 100, 30, , SMALL
