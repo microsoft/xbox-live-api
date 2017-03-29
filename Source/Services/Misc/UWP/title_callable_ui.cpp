@@ -493,7 +493,7 @@ title_callable_ui::_Get_gaming_privilege_scope_policy(
         localConfig->environment_prefix(),
         localConfig->environment(),
         localConfig->use_first_party_token(),
-        g_is_xbox_live_creators_sdk
+        localConfig->is_creators_title()
         );
 
     scope = ref new Platform::String(authConfig.rps_ticket_service().c_str());
