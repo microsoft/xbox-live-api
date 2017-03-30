@@ -6,14 +6,4 @@
       <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Label="Debug" Condition="'$(Configuration)' == 'Debug'">
-    <Link>
-      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(Platform)\v140\$(Configuration)\cpprest140d_uwp_2_9.lib;$(MSBuildThisFileDirectory)lib\$(Platform)\v140\$(Configuration)\Microsoft.Xbox.Services.140.UWP.Ship.Cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Label="Non_Debug" Condition="'$(Configuration)' != 'Debug'">
-    <Link>
-      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(Platform)\v140\Release\cpprest140_uwp_2_9.lib;$(MSBuildThisFileDirectory)lib\$(Platform)\v140\Release\Microsoft.Xbox.Services.140.UWP.Ship.Cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-  </ItemDefinitionGroup>
 </Project>

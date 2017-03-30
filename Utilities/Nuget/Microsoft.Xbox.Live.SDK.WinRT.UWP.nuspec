@@ -15,6 +15,9 @@
         <releaseNotes>Microsoft Xbox Live WinRT API for Windows Apps.</releaseNotes>
         <copyright>© Microsoft Corporation. All rights reserved.</copyright>
         <tags>Microsoft Xbox Live Service XSAPI WinRT UWP Windows Apps</tags>
+        <dependencies>
+            <dependency id="Microsoft.Xbox.Live.SDK.WinRT.UWP.Symbols" version="$version$" />
+        </dependencies>
     </metadata>
     <files>
         <file src="\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.targets" target="build\netcore451\Microsoft.Xbox.Live.SDK.WinRT.UWP.targets" />
