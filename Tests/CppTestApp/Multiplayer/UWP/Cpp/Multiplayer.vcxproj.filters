@@ -97,6 +97,7 @@
     <ClCompile Include="..\..\..\..\..\InProgressSamples\Kits\ATGTK\Texture.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="TournamentInegration.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Logo.png">

@@ -56,12 +56,16 @@ public:
 
     void VerifyCurrentMatchMetadata(Tournaments::CurrentMatchMetadata^ currentMatchData, web::json::value matchDataToVerify)
     {
+        if (currentMatchData == nullptr) return;
+
         VerifyMultiplayerSessionReference(currentMatchData->GameSessionReference, matchDataToVerify[L"gameSessionRef"]);
         VerifyMatchMetadata(currentMatchData->MatchDetails, matchDataToVerify);
     }
 
     void VerifyPreviousMatchMetadata(Tournaments::PreviousMatchMetadata^ previousMatchData, web::json::value matchDataToVerify)
     {
+        if (previousMatchData == nullptr) return;
+
         VERIFY_ARE_EQUAL_STR_IGNORE_CASE(previousMatchData->Result->State.ToString()->Data(), matchDataToVerify[L"result"][L"outcome"].as_string().c_str());
         if (previousMatchData->Result->State == TournamentGameResultState::Rank)
         {
@@ -94,6 +98,8 @@ public:
 
     void VerifyTeamSummary(Tournaments::TeamSummary^ teamSummary, web::json::value teamSummaryToVerify)
     {
+        if (teamSummary == nullptr) return;
+
         VERIFY_ARE_EQUAL(teamSummary->Id->Data(), teamSummaryToVerify[L"id"].as_string());
         VERIFY_ARE_EQUAL_INT(teamSummary->Ranking, teamSummaryToVerify[L"ranking"].as_integer());
         VERIFY_ARE_EQUAL_STR_IGNORE_CASE(teamSummary->TeamState.ToString()->Data(), teamSummaryToVerify[L"state"].as_string().c_str());
@@ -150,10 +156,7 @@ public:
             scheduleJson[L"playingEnd"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
 
         // Team Info
-        if (!teamJson.is_null())
-        {
-            VerifyTeamSummary(tournament->TeamSummary ,teamJson);
-        }
+        VerifyTeamSummary(tournament->TeamSummary ,teamJson);
     }
 
     DEFINE_TEST_CASE(TestGetTournamentsAsync)
@@ -208,7 +211,7 @@ public:
         TournamentRequestResult^ result = create_task(xboxLiveContext->TournamentService->GetTournamentsAsync(request)).get();
         VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://tournamentshub.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR_IGNORE_CASE(L"/tournaments?titleId=1234&teamForMember=TestXboxUserId&state=%5B%22active%22,%22completed%22%5D", httpCall->PathQueryFragment.to_string().c_str());
+        VERIFY_ARE_EQUAL_STR(L"/tournaments?titleId=1234&teamForMember=TestXboxUserId&state=Active,Completed", httpCall->PathQueryFragment.to_string().c_str());
         VERIFY_ARE_EQUAL_INT(result->Tournaments->Size, responseJson.as_object()[L"value"].as_array().size());
         for (uint32_t i = 0; i < result->Tournaments->Size; i++)
         {
@@ -228,13 +231,19 @@ public:
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
         TeamRequest^ request = ref new TeamRequest(
             ref new Platform::String(L"xbox-live"),
-            ref new Platform::String(L"MyTestTournamentId")
+            ref new Platform::String(L"MyTestTournamentId"),
+            false
             );
+
+        Platform::Collections::Vector<TeamState>^ states = ref new Platform::Collections::Vector<TeamState>();
+        states->Append(TeamState::Registered);
+        states->Append(TeamState::CheckedIn);
+        request->StateFilter = states->GetView();
 
         TeamRequestResult^ result = create_task(xboxLiveContext->TournamentService->GetTeamsAsync(request)).get();
         VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://tournamentshub.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/tournaments/xbox-live/MyTestTournamentId/teams?memberId=TestXboxUserId", httpCall->PathQueryFragment.to_string());
+        VERIFY_ARE_EQUAL_STR(L"/tournaments/xbox-live/MyTestTournamentId/teams?state=Registered,CheckedIn", httpCall->PathQueryFragment.to_string());
         VERIFY_ARE_EQUAL_INT(result->Teams->Size, responseJson.as_object()[L"value"].as_array().size());
         for (uint32_t i = 0; i < result->Teams->Size; i++)
         {

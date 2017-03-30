@@ -11,6 +11,7 @@ using namespace xbox::services::tournaments;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_CPP_BEGIN
 
 previous_match_metadata::previous_match_metadata()
+    : m_isNull(true)
 {
 }
 
@@ -30,6 +31,12 @@ const match_metadata&
 previous_match_metadata::match_details() const
 {
     return m_matchDetails;
+}
+
+bool
+previous_match_metadata::is_null() const
+{
+    return m_isNull;
 }
 
 xbox_live_result<previous_match_metadata>
@@ -61,6 +68,8 @@ previous_match_metadata::_Deserialize(
 
         result.m_result = tournamentTemResult.payload();
     }
+
+    result.m_isNull = false;
 
     return result;
 }

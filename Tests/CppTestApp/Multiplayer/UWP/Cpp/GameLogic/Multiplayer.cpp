@@ -202,6 +202,14 @@ void Sample::ChangeAppStates()
         JoinGame();
         break;
 
+    case APP_GET_TOURNAMENTS:
+        GetTournaments();
+        break;
+
+    case APP_GET_TEAMS:
+        GetTeams();
+        break;
+
     case APP_SHOW_FRIEND_GAMES:
         break;
     default:

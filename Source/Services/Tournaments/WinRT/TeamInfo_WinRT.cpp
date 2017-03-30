@@ -16,8 +16,16 @@ TeamInfo::TeamInfo(
     ) :
     m_cppObj(std::move(cppObj))
 {
-    m_currentMatchMetadata = ref new Microsoft::Xbox::Services::Tournaments::CurrentMatchMetadata(m_cppObj.current_match_metadata());
-    m_previousMatchMetadata = ref new Microsoft::Xbox::Services::Tournaments::PreviousMatchMetadata(m_cppObj.previous_match_metadata());
+    if (!m_cppObj.current_match_metadata().is_null())
+    {
+        m_currentMatchMetadata = ref new Microsoft::Xbox::Services::Tournaments::CurrentMatchMetadata(m_cppObj.current_match_metadata());
+    }
+    
+    if (!m_cppObj.previous_match_metadata().is_null())
+    {
+        m_previousMatchMetadata = ref new Microsoft::Xbox::Services::Tournaments::PreviousMatchMetadata(m_cppObj.previous_match_metadata());
+    }
+    
     m_memberXboxUserIds = UtilsWinRT::CreatePlatformVectorFromStdVectorString(m_cppObj.member_xbox_user_ids())->GetView();
 }
 

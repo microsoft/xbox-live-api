@@ -31,6 +31,8 @@ enum APPSTATE
     APP_SHOW_FRIEND_GAMES,
     APP_JOINING_LOBBY,
     APP_IN_GAME,
+    APP_GET_TOURNAMENTS,
+    APP_GET_TEAMS
 };
 
 // list of game modes
@@ -122,6 +124,11 @@ private:
     void CreateDeviceDependentResources();
     void CreateWindowSizeDependentResources();
 
+
+    // Tournament Methods
+    void GetTournaments();
+    void GetTeams();
+
     // Device resources.
     std::unique_ptr<DX::DeviceResources>    m_deviceResources;
 
@@ -159,6 +166,9 @@ private:
     bool m_isJoiningGame;
     float m_clearErrorMsgTimer;
     bool m_isProtocolActivated;
+    string_t m_organizerId;
+    string_t m_tournamentId;
+    string_t m_teamId;
 
     void ChangeAppStates();
     string_t CreateGuid();

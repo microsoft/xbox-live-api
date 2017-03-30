@@ -18,9 +18,11 @@ public:
     /// <summary>Creates a team_request object.</summary>
     /// <param name="organizerId">The ID of the tournament organizer.</param>
     /// <param name="tournamentId">The ID of the tournament.</param>
+    /// <param name="filterResultsForUser">Filter results to only tournaments where this user is participating.</param>
     TeamRequest(
         _In_ Platform::String^ organizerId,
-        _In_ Platform::String^ tournamentId
+        _In_ Platform::String^ tournamentId,
+        _In_ bool filterResultsForUser
         );
 
     /// <summary>
