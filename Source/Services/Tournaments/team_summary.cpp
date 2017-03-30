@@ -33,6 +33,12 @@ team_summary::ranking() const
     return m_ranking;
 }
 
+bool
+team_summary::is_null() const
+{
+    return m_id.empty();
+}
+
 xbox::services::xbox_live_result<team_summary>
 team_summary::_Deserialize(_In_ const web::json::value& json)
 {

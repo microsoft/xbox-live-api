@@ -43,7 +43,7 @@ team_request_result::get_next()
 {
     if (m_nextLinkUrl.empty())
     {
-        xbox_live_result<team_request_result> results(xbox_live_error_code::logic_error, "team_request_result doesn't have next page");
+        xbox_live_result<team_request_result> results(xbox_live_error_code::out_of_range, "team_request_result doesn't have next page");
         return pplx::task_from_result<xbox::services::xbox_live_result<team_request_result>>(results);
     }
 

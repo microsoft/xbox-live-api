@@ -232,6 +232,11 @@ public:
     _XSAPIIMP const match_metadata& match_details() const;
 
     /// <summary>
+    /// Whether this object has been properly constructed
+    /// </summary>
+    _XSAPIIMP bool is_null() const;
+
+    /// <summary>
     /// Internal function
     /// </summary>
     current_match_metadata();
@@ -242,6 +247,7 @@ public:
     static xbox::services::xbox_live_result<current_match_metadata> _Deserialize(_In_ const web::json::value& json);
 
 private:
+    bool m_isNull;
     match_metadata m_matchDetails;
     xbox::services::multiplayer::multiplayer_session_reference m_gameSessionReference;
 };
@@ -269,6 +275,11 @@ public:
     _XSAPIIMP const match_metadata& match_details() const;
 
     /// <summary>
+    /// Whether this object has been properly constructed
+    /// </summary>
+    _XSAPIIMP bool is_null() const;
+
+    /// <summary>
     /// Internal function
     /// </summary>
     previous_match_metadata();
@@ -279,6 +290,7 @@ public:
     static xbox::services::xbox_live_result<previous_match_metadata> _Deserialize(_In_ const web::json::value& json);
 
 private:
+    bool m_isNull;
     match_metadata m_matchDetails;
     utility::datetime m_endTime;
     xbox::services::tournaments::tournament_team_result m_result;
@@ -294,9 +306,11 @@ public:
     /// <summary>Creates a team_request object.</summary>
     /// <param name="organizerId">The ID of the tournament organizer.</param>
     /// <param name="tournamentId">The ID of the tournament.</param>
+    /// <param name="filterResultsForUser">Filter results to only tournaments where this user is participating.</param>
     _XSAPIIMP team_request(
         _In_ string_t organizerId,
-        _In_ string_t tournamentId
+        _In_ string_t tournamentId,
+        _In_ bool filterResultsForUser = true
         );
 
     /// <summary>
@@ -318,27 +332,32 @@ public:
     _XSAPIIMP void set_order_by(_In_ team_order_by orderBy);
 
     /// <summary>
-    /// Internal function
+    /// Filter results to only tournaments where this user is participating.
+    /// </summary>
+    _XSAPIIMP bool filter_results_for_user() const;
+
+    /// <summary>
+    /// Filter results based on the organizer of the tournament.
     /// </summary>
     _XSAPIIMP const string_t& organizer_id() const;
 
     /// <summary>
-    /// Internal function
+    /// Filter results based on the ID the tournament.
     /// </summary>
     _XSAPIIMP const string_t& tournament_id() const;
 
     /// <summary>
-    /// Internal function
+    /// The maximum number of items to return.
     /// </summary>
     _XSAPIIMP uint32_t max_items() const;
 
     /// <summary>
-    /// Internal function
+    /// Filter results based on the multiple states of the team.
     /// </summary>
     _XSAPIIMP const std::vector<team_state>& state_filter() const;
 
     /// <summary>
-    /// Internal function
+    /// Filter results based on the order specified.
     /// </summary>
     _XSAPIIMP team_order_by order_by() const;
 
@@ -347,6 +366,7 @@ private:
     string_t m_organizerId;
     string_t m_tournamentId;
     team_order_by m_orderBy;
+    bool m_filterResultsForUser;
     std::vector<team_state> m_states;
 };
 
@@ -460,6 +480,11 @@ public:
     _XSAPIIMP uint64_t ranking() const;
 
     /// <summary>
+    /// Whether this object has been properly constructed
+    /// </summary>
+    _XSAPIIMP bool is_null() const;
+
+    /// <summary>
     /// Internal function
     /// </summary>
     team_summary();
@@ -563,7 +588,7 @@ public:
     _XSAPIIMP void set_order_by(_In_ tournament_order_by orderBy);
 
     /// <summary>
-    ///The order in which to sort the results.
+    /// The order in which to sort the results.
     /// </summary>
     /// <param name="sortOrder">The sort order to filter by.</param>
     _XSAPIIMP void set_sort_order(_In_ tournament_sort_order sortOrder);
@@ -575,22 +600,22 @@ public:
     _XSAPIIMP void set_organizer_id(_In_ const string_t& organizer);
 
     /// <summary>
-    /// Internal function
+    /// Filter results to only tournaments where this user is participating.
     /// </summary>
     _XSAPIIMP bool filter_results_for_user() const;
 
     /// <summary>
-    /// Internal function
+    /// The maximum number of items to return.
     /// </summary>
     _XSAPIIMP uint32_t max_items() const;
 
     /// <summary>
-    /// Internal function
+    /// Filter results based on the multiple states of the tournament.
     /// </summary>
     _XSAPIIMP const std::vector<tournament_state>& state_filter() const;
 
     /// <summary>
-    /// Internal function
+    /// The order in which to sort the results.
     /// </summary>
     _XSAPIIMP tournament_order_by order_by() const;
 
@@ -600,7 +625,7 @@ public:
     _XSAPIIMP tournament_sort_order sort_order() const;
 
     /// <summary>
-    /// Internal function
+    /// Filter results based on the organizer of the tournament.
     /// </summary>
     _XSAPIIMP const string_t& organizer_id() const;
 
@@ -751,7 +776,7 @@ public:
     /// Represents a summary of team details for the user participating in the tournament.
     /// Only applies for those tournaments where the user has already registered.
     /// </summary>
-    _XSAPIIMP const team_summary& team_summary() const;
+    _XSAPIIMP const xbox::services::tournaments::team_summary& team_summary() const;
 
     /// <summary>
     /// Internal function
