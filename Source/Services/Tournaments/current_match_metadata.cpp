@@ -12,6 +12,7 @@ using namespace xbox::services::tournaments;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_CPP_BEGIN
 
 current_match_metadata::current_match_metadata()
+    : m_isNull(true)
 {
 }
 
@@ -25,6 +26,12 @@ const match_metadata&
 current_match_metadata::match_details() const
 {
     return m_matchDetails;
+}
+
+bool
+current_match_metadata::is_null() const
+{
+    return m_isNull;
 }
 
 xbox_live_result<current_match_metadata>
@@ -50,6 +57,8 @@ current_match_metadata::_Deserialize(
         errCode = matchDetailsResult.err();
     }
     result.m_matchDetails = matchDetailsResult.payload();
+
+    result.m_isNull = false;
 
     return result;
 }

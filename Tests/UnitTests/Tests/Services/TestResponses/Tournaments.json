@@ -186,6 +186,63 @@
             "members": [{
                 "id": "2533274815757150"
             }]
+        },
+        {
+            "rtaSubscription": "https://tournamentshub.xboxlive.com/tournaments/manualtest/00004/teams/20170221045135",
+            "continuationUri": {
+                "uwp_xboxone": {
+                    "continuationUri": "xbox-arena://tournamentdetails?organizerId=manualtest&tournamentId=00004",
+                    "pfn": "Xbox.Social_8wekyb3d8bbwe"
+                },
+                "uwp_desktop": {
+                    "continuationUri": "xbox-arena://tournamentdetails?organizerId=manualtest&tournamentId=00004",
+                    "pfn": "Microsoft.XboxApp_8wekyb3d8bbwe"
+                }
+            },
+            "id": "20170221045135",
+            "name": "20170221045135",
+            "registrationDate": "2017-02-21T16:51:35.2138655Z",
+            "state": "Registered",
+            "completedReason": "Completed",
+            "standing": "4W - 2L",
+            "ranking": 5,
+            "currentMatch": {
+                "gameSessionRef": {
+                    "scid": "42c6562b-6841-4b21-8729-4dd643af374b",
+                    "templateName": "templatename",
+                    "name": "sessionname"
+                },
+                "label" : "Final Match",
+                "startTime": "2017-02-17T20:06:10.1949991Z",
+                "bye": false,
+                "opposingTeamIds": ["eb947ba2-a3dd-412a-8872-4a895d59ac2a", "42bbde1c-dee3-4e23-85dc-6bd4642277ed"]
+            },
+            "members": [{
+                "id": "2533274815757150"
+            }]
+        },
+        {
+            "rtaSubscription": "https://tournamentshub.xboxlive.com/tournaments/manualtest/00004/teams/20170221045135",
+            "continuationUri": {
+                "uwp_xboxone": {
+                    "continuationUri": "xbox-arena://tournamentdetails?organizerId=manualtest&tournamentId=00004",
+                    "pfn": "Xbox.Social_8wekyb3d8bbwe"
+                },
+                "uwp_desktop": {
+                    "continuationUri": "xbox-arena://tournamentdetails?organizerId=manualtest&tournamentId=00004",
+                    "pfn": "Microsoft.XboxApp_8wekyb3d8bbwe"
+                }
+            },
+            "id": "20170221045135",
+            "name": "20170221045135",
+            "registrationDate": "2017-02-21T16:51:35.2138655Z",
+            "state": "Registered",
+            "completedReason": "Completed",
+            "standing": "4W - 2L",
+            "ranking": 5,
+            "members": [{
+                "id": "2533274815757150"
+            }]
         }]
     }
 }

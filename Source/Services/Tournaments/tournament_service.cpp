@@ -13,7 +13,7 @@ using namespace xbox::services::tournaments;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_CPP_BEGIN
 
-const string_t c_tournamentsHubServiceContractHeaderValue = _T("2");
+const string_t c_tournamentsHubServiceContractHeaderValue = _T("3");
 
 tournament_service::tournament_service()
 {
@@ -283,15 +283,13 @@ tournament_service::tournament_sub_path_url(
 
     if (request.state_filter().size() > 0)
     {
-        string_t statesArray = L"[";
+        string_t statesArray;
         for (const auto& state : request.state_filter())
         {
-            statesArray += L"\"";
             statesArray += convert_tournament_state_to_string(state);
-            statesArray += L"\",";
+            statesArray += L",";
         }
         statesArray.erase(statesArray.end() - 1, statesArray.end()); // remove the last ','
-        statesArray += L"]";
         subPathBuilder.append_query(_T("state"), statesArray);
     }
 
@@ -325,7 +323,12 @@ tournament_service::team_sub_path_url(
     path << _T("/tournaments/") << request.organizer_id() << _T("/") << request.tournament_id() << _T("/teams");
     subPathBuilder.set_path(path.str());
 
-    subPathBuilder.append_query(_T("memberId"), m_userContext->xbox_user_id());
+
+    if (request.filter_results_for_user())
+    {
+        subPathBuilder.append_query(_T("memberId"), m_userContext->xbox_user_id());
+    }
+
     if (request.max_items() > 0)
     {
         subPathBuilder.append_query(_T("maxItems"), request.max_items());
@@ -333,15 +336,13 @@ tournament_service::team_sub_path_url(
 
     if (request.state_filter().size() > 0)
     {
-        string_t statesArray = L"[";
+        string_t statesArray;
         for (const auto& state : request.state_filter())
         {
-            statesArray += L"\"";
             statesArray += convert_team_state_to_string(state);
-            statesArray += L"\",";
+            statesArray += L",";
         }
         statesArray.erase(statesArray.end() - 1, statesArray.end()); // remove the last ','
-        statesArray += L"]";
         subPathBuilder.append_query(_T("state"), statesArray);
     }
 
@@ -361,16 +362,16 @@ tournament_service::convert_tournament_state_to_string(
     switch (state)
     {
         case tournament_state::active:
-            return _T("active");
+            return _T("Active");
 
         case tournament_state::canceled:
-            return _T("canceled");
+            return _T("Canceled");
 
         case tournament_state::completed:
-            return _T("completed");
+            return _T("Completed");
 
         default:
-            return _T("unknown");
+            return _T("Unknown");
     }
 }
 
@@ -418,25 +419,25 @@ tournament_service::convert_team_state_to_string(
     switch (state)
     {
     case team_state::registered:
-        return _T("registered");
+        return _T("Registered");
 
     case team_state::waitlisted:
-        return _T("waitlisted");
+        return _T("Waitlisted");
 
     case team_state::stand_by:
-        return _T("standby");
+        return _T("Standby");
 
     case team_state::checked_in:
-        return _T("checkedin");
+        return _T("CheckedIn");
 
     case team_state::playing:
-        return _T("playing");
+        return _T("Playing");
 
     case team_state::completed:
-        return _T("completed");
+        return _T("Completed");
 
     default:
-        return _T("unknown");
+        return _T("Unknown");
     }
 }
 

@@ -11,13 +11,21 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_CPP_BEGIN
 
 team_request::team_request(
     _In_ string_t organizerId,
-    _In_ string_t tournamentId
+    _In_ string_t tournamentId,
+    _In_ bool filterResultsForUser
     ) :
     m_organizerId(std::move(organizerId)),
     m_tournamentId(std::move(tournamentId)),
+    m_filterResultsForUser(filterResultsForUser),
     m_maxItems(0),
     m_orderBy(team_order_by::none)
 {
+}
+
+bool
+team_request::filter_results_for_user() const
+{
+    return m_filterResultsForUser;
 }
 
 const string_t&

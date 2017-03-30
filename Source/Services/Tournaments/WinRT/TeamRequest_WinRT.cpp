@@ -12,11 +12,15 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_BEGIN
 
 TeamRequest::TeamRequest(
     _In_ Platform::String^ organizerId,
-    _In_ Platform::String^ tournamentId
+    _In_ Platform::String^ tournamentId,
+    _In_ bool filterResultsForUser
     ) :
     m_cppObj(
-        STRING_T_FROM_PLATFORM_STRING(organizerId),
-        STRING_T_FROM_PLATFORM_STRING(tournamentId)
+        team_request(
+            STRING_T_FROM_PLATFORM_STRING(organizerId),
+            STRING_T_FROM_PLATFORM_STRING(tournamentId),
+            filterResultsForUser
+            )
         )
 {
 }
