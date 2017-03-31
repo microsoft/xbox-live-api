@@ -678,6 +678,12 @@
     <ClCompile Include="..\..\Source\Services\Tournaments\team_change_subscription.cpp">
       <Filter>C++ Source\Tournaments</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_change_event_args.cpp">
+    <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_change_subscription.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Social\Manager\social_user_group_loaded_event_args.cpp">
       <Filter>C++ Source\Social\Manager</Filter>
     </ClCompile>

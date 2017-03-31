@@ -1009,6 +1009,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_service_internal.h">
       <Filter>XSAPI\Services\Touraments</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentChangeEventArgs_WinRT.h">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentChangeSubscription_WinRT.h">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="XSAPI">
@@ -2408,6 +2414,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamChangeSubscription_WinRT.cpp">
       <Filter>XSAPI\Services\Touraments\WinRT</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentChangeEventArgs_WinRT.cpp">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentChangeSubscription_WinRT.cpp">
+      <Filter>XSAPI\Services\Touraments\WinRT</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_service_impl.cpp">
       <Filter>XSAPI\Services\Touraments</Filter>
     </ClCompile>
@@ -2415,6 +2427,12 @@
       <Filter>XSAPI\Services\Touraments</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\team_change_event_args.cpp">
+      <Filter>XSAPI\Services\Touraments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_change_subscription.cpp">
+      <Filter>XSAPI\Services\Touraments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_change_event_args.cpp">
       <Filter>XSAPI\Services\Touraments</Filter>
     </ClCompile>
   </ItemGroup>

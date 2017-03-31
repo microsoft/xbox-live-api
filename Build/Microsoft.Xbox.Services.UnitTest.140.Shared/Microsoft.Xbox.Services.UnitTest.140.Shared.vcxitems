@@ -309,6 +309,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamRequestResult_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamInfo_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamSummary_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentChangeEventArgs_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentChangeSubscription_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\build_version.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\call_buffer_timer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_impl.h" />
@@ -712,6 +714,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\team_change_event_args.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\team_change_subscription.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_service_impl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_change_event_args.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_change_subscription.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamChangeEventArgs_WinRT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamChangeSubscription_WinRT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentReference_WinRT.cpp" />
@@ -727,6 +731,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamRequestResult_WinRT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamInfo_WinRT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamSummary_WinRT.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentChangeEventArgs_WinRT.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentChangeSubscription_WinRT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\call_buffer_timer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\errors.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_impl.cpp" />

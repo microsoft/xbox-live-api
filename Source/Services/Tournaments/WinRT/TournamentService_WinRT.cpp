@@ -5,6 +5,8 @@
 #include "TournamentService_WinRT.h"
 #include "Utils_WinRT.h"
 #include "TeamChangeEventArgs_WinRT.h"
+#include "TournamentChangeEventArgs_WinRT.h"
+#include "XboxLiveContextSettings_WinRT.h"
 
 using namespace Platform;
 using namespace concurrency;

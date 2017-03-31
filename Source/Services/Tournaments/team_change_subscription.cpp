@@ -65,8 +65,12 @@ team_change_subscription::on_subscription_created(
 void
 team_change_subscription::on_event_received(
     _In_ const web::json::value& data
-)
+    )
 {
+    // The team subscription has no payload. 
+    // Clients should get the tournament or team from the Hub when they receive a tap.
+    UNREFERENCED_PARAMETER(data);
+
     team_change_event_args teamChangeEventArgs;
 
     if (m_teamChangeHandler)

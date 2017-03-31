@@ -460,6 +460,8 @@
     <ClCompile Include="..\..\Source\Services\Tournaments\team_change_event_args.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\team_change_subscription.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_service_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_change_event_args.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_change_subscription.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\current_match_metadata.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\previous_match_metadata.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\WinRT\TournamentReference_WinRT.cpp" />
@@ -477,6 +479,8 @@
     <ClCompile Include="..\..\Source\Services\Tournaments\WinRT\TeamSummary_WinRT.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\WinRT\TeamChangeEventArgs_WinRT.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\WinRT\TeamChangeSubscription_WinRT.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\WinRT\TournamentChangeEventArgs_WinRT.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\WinRT\TournamentChangeSubscription_WinRT.cpp" />
     <ClCompile Include="..\..\Source\Shared\call_buffer_timer.cpp" />
     <ClCompile Include="..\..\Source\Shared\errors.cpp" />
     <ClCompile Include="..\..\Source\Shared\http_call_impl.cpp" />
@@ -797,6 +801,8 @@
     <ClInclude Include="..\..\Source\Services\Tournaments\WinRT\TeamSummary_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Tournaments\WinRT\TeamChangeEventArgs_WinRT.h" />
     <ClInclude Include="..\..\Source\Services\Tournaments\WinRT\TeamChangeSubscription_WinRT.h" />
+    <ClInclude Include="..\..\Source\Services\Tournaments\WinRT\TournamentChangeEventArgs_WinRT.h" />
+    <ClInclude Include="..\..\Source\Services\Tournaments\WinRT\TournamentChangeSubscription_WinRT.h" />
     <ClInclude Include="..\..\Source\Shared\call_buffer_timer.h" />
     <ClInclude Include="..\..\Source\Shared\http_call_impl.h" />
     <ClInclude Include="..\..\Source\Shared\http_call_response.h" />
