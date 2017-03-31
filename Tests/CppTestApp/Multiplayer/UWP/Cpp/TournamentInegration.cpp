@@ -31,12 +31,16 @@ void Sample::GetTournaments()
             // For testing, assign the first tournament as the locally cached tournament.
             for (const auto& tournament : tournamentResult.tournaments())
             {
+                const string_t& organizerId = tournament.organizer_id();
+                const string_t& tournamentId = tournament.id();
                 if (!tournament.team_summary().is_null())
                 {
-                    m_organizerId = tournament.organizer_id();
-                    m_tournamentId = tournament.id();
-                    break;
+                    m_organizerId = organizerId;
+                    m_tournamentId = tournamentId;
                 }
+
+                GetTournamentDetails(organizerId, tournamentId);
+                SubscribeForTournamentRTASubscription(organizerId, tournamentId);
             }
 
             // Get next page until the end
@@ -51,16 +55,6 @@ void Sample::GetTournaments()
                 }).wait();
             }
 
-            // Get Tournament Details
-            auto context = m_liveResources->GetLiveContext();
-            auto getTournamentResult = context->tournament_service().get_tournament_details(m_organizerId, m_tournamentId)
-            .then([this](xbox_live_result<tournament> result)
-            {
-                if (result.err())
-                {
-                    LogErrorFormat(L"get_tournament_details failed: %S\n", result.err_message().c_str());
-                }
-            });
         }
         else
         {
@@ -74,6 +68,47 @@ void Sample::GetTournaments()
             }
         }
     });
+}
+
+void Sample::GetTournamentDetails(
+    const string_t& organizerId,
+    const string_t& tournamentId
+    )
+{
+    auto context = m_liveResources->GetLiveContext();
+    context->tournament_service().get_tournament_details(organizerId, tournamentId)
+    .then([this](xbox_live_result<tournament> result)
+    {
+        if (result.err())
+        {
+            LogErrorFormat(L"get_tournament_details failed: %S\n", result.err_message().c_str());
+        }
+    });
+}
+
+void Sample::SubscribeForTournamentRTASubscription(
+    const string_t& organizerId,
+    const string_t& tournamentId
+    )
+{
+    auto context = m_liveResources->GetLiveContext();
+    context->real_time_activity_service()->activate();
+
+    context->tournament_service().add_tournament_changed_handler(
+    [this](tournament_change_event_args args)
+    {
+        GetTournamentDetails(args.organizer_id(), args.tournament_id());
+    });
+
+    auto tournamentResults = context->tournament_service().subscribe_to_tournament_change(
+        organizerId,
+        tournamentId
+        );
+
+    if (tournamentResults.err())
+    {
+        LogErrorFormat(L"Error calling subscribe_to_tournament_change:: %S\n", tournamentResults.err_message().c_str());
+    }
 }
 
 void Sample::GetTeams()
@@ -93,10 +128,11 @@ void Sample::GetTeams()
         if (!result.err())
         {
             auto& teamResult = result.payload();
-
             for (const auto& team : teamResult.teams())
             {
-                TestTeamRTASubscription(team.id());
+                const string_t& teamId = team.id();
+                GetTeamDetails(m_organizerId, m_tournamentId, teamId);
+                SubscribeForTeamRTASubscription(m_organizerId, m_tournamentId, teamId);
             }
 
             // Get next page until the end
@@ -110,17 +146,6 @@ void Sample::GetTeams()
                     lastResult = newTeamResult;
                 }).wait();
             }
-
-            // Get Team Details
-            auto context = m_liveResources->GetLiveContext();
-            auto getTeamResult = context->tournament_service().get_team_details(m_organizerId, m_tournamentId, m_teamId)
-            .then([this](xbox_live_result<team_info> result)
-            {
-                if (result.err())
-                {
-                    LogErrorFormat(L"get_team_details failed: %S\n", result.err_message().c_str());
-                }
-            });
         }
         else
         {
@@ -136,21 +161,42 @@ void Sample::GetTeams()
     });
 }
 
-void Sample::TestTeamRTASubscription(string_t teamId)
+void Sample::GetTeamDetails(
+    const string_t& organizerId,
+    const string_t& tournamentId,
+    const string_t& teamId
+    )
+{
+    // Get Team Details
+    auto context = m_liveResources->GetLiveContext();
+    context->tournament_service().get_team_details(organizerId, tournamentId, teamId)
+    .then([this](xbox_live_result<team_info> result)
+    {
+        if (result.err())
+        {
+            LogErrorFormat(L"get_team_details failed: %S\n", result.err_message().c_str());
+        }
+    });
+}
+
+void Sample::SubscribeForTeamRTASubscription(
+    const string_t& organizerId,
+    const string_t& tournamentId,
+    const string_t& teamId
+    )
 {
     auto context = m_liveResources->GetLiveContext();
     context->real_time_activity_service()->activate();
 
-    auto teamChangeContext = context->tournament_service().add_team_changed_handler(
-        [this, context](team_change_event_args args)
-        {
-            auto orgId = args.organizer_id();
-        }
-    );
+    context->tournament_service().add_team_changed_handler(
+    [this, context](team_change_event_args args)
+    {
+        GetTeamDetails(args.organizer_id(), args.tournament_id(), args.team_id());
+    });
 
     auto teamResults = context->tournament_service().subscribe_to_team_change(
-        m_organizerId,
-        m_tournamentId,
+        organizerId,
+        tournamentId,
         teamId
         );
 

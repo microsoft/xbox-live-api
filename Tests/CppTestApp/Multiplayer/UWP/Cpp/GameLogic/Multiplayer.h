@@ -124,11 +124,15 @@ private:
     void CreateDeviceDependentResources();
     void CreateWindowSizeDependentResources();
 
-
     // Tournament Methods
     void GetTournaments();
+    void GetTournamentDetails(const string_t& organizerId, const string_t& tournamentId);
+    void SubscribeForTournamentRTASubscription(const string_t& organizerId, const string_t& tournamentId);
+
     void GetTeams();
-    void TestTeamRTASubscription(string_t teamId);
+    void GetTeamDetails(const string_t& organizerId, const string_t& tournamentId, const string_t& teamId);
+    void SubscribeForTeamRTASubscription(const string_t& organizerId, const string_t& tournamentId, const string_t& teamId);
+    
 
     // Device resources.
     std::unique_ptr<DX::DeviceResources>    m_deviceResources;
