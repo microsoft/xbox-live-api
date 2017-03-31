@@ -250,7 +250,7 @@ inventory_service::get_inventory_items(
 {
     auto mediaItemTypeResult = convert_media_item_type_to_string(mediaItemType);
     RETURN_TASK_CPP_IF_ERR(mediaItemTypeResult, inventory_items_result);
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(productIds.size() == 0 && expandSatisfyingEntitlements && mediaItemType == media_item_type::all, inventory_items_result, "expandSatisfyingEntitlements is not supported with mediaItemType::All");
+    RETURN_TASK_CPP_INVALIDARGUMENT_IF(productIds.size() == 0 && mediaItemType == media_item_type::all, inventory_items_result, "mediaItemType::All can only be used when passing a non-zero list of ProductIds");
 
     auto inventoryItemStateResult = convert_inventory_item_state_to_string(inventoryItemState);
     RETURN_TASK_CPP_IF_ERR(inventoryItemStateResult, inventory_items_result);
