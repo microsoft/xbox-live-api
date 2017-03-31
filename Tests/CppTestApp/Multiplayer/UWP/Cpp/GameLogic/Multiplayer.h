@@ -128,6 +128,7 @@ private:
     // Tournament Methods
     void GetTournaments();
     void GetTeams();
+    void TestTeamRTASubscription(string_t teamId);
 
     // Device resources.
     std::unique_ptr<DX::DeviceResources>    m_deviceResources;
@@ -169,6 +170,7 @@ private:
     string_t m_organizerId;
     string_t m_tournamentId;
     string_t m_teamId;
+    std::shared_ptr<xbox::services::tournaments::team_change_subscription> m_teamSubscription;
 
     void ChangeAppStates();
     string_t CreateGuid();

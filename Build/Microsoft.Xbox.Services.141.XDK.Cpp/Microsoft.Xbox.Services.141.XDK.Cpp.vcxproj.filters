@@ -684,6 +684,15 @@
     <ClCompile Include="..\..\Source\Services\Tournaments\previous_match_metadata.cpp">
       <Filter>C++ Source\Tournaments</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_service_impl.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\team_change_event_args.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\team_change_subscription.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Social\Manager\social_user_group_loaded_event_args.cpp">
       <Filter>C++ Source\Social\Manager</Filter>
     </ClCompile>
@@ -901,6 +910,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Services\Social\social_internal.h">
       <Filter>C++ Source\Social</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Tournaments\tournament_service_internal.h">
+      <Filter>C++ Source\Tournaments</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Services\Common\xbox_live_context_impl.h">
       <Filter>C++ Source\Common</Filter>

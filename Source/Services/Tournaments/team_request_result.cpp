@@ -18,12 +18,14 @@ team_request_result::team_request_result()
 void team_request_result::_Init_next_page_info(
     _In_ std::shared_ptr<xbox::services::user_context> userContext,
     _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
+    _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> rtaService
     )
 {
     m_userContext = std::move(userContext);
     m_xboxLiveContextSettings = std::move(xboxLiveContextSettings);
     m_appConfig = std::move(appConfig);
+    m_realTimeActivityService = std::move(rtaService);
 }
 
 const std::vector<team_info>&
@@ -50,7 +52,8 @@ team_request_result::get_next()
     return tournament_service(
         m_userContext,
         m_xboxLiveContextSettings,
-        m_appConfig
+        m_appConfig,
+        m_realTimeActivityService
         )._Get_teams(m_nextLinkUrl);
 }
 

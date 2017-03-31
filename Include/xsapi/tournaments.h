@@ -10,6 +10,8 @@ namespace xbox {
 
         namespace tournaments {
 
+class tournament_service_impl;
+
 /// <summary>
 /// Defines values used to indicate the state for a tournament.
 /// </summary>
@@ -538,7 +540,8 @@ public:
     void _Init_next_page_info(
         _In_ std::shared_ptr<xbox::services::user_context> userContext,
         _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
+        _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> rtaService
         );
 
     /// <summary>
@@ -550,6 +553,7 @@ private:
     std::shared_ptr<xbox::services::user_context> m_userContext;
     std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
     std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
+    std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> m_realTimeActivityService;
 
     std::vector<team_info> m_items;
     string_t m_nextLinkUrl;
@@ -862,7 +866,8 @@ public:
     void _Init_next_page_info(
         _In_ std::shared_ptr<xbox::services::user_context> userContext,
         _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
+        _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> rtaService
         );
 
     /// <summary>
@@ -874,9 +879,94 @@ private:
     std::shared_ptr<xbox::services::user_context> m_userContext;
     std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
     std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
+    std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> m_realTimeActivityService;
 
     std::vector<tournament> m_items;
     string_t m_nextLinkUrl;
+};
+
+/// <summary>
+/// Contains information about a change to a subscribed team.
+/// </summary>
+class team_change_event_args
+{
+public:
+    /// <summary>
+    /// The organizer ID used to create the subscription.
+    /// </summary> 
+    _XSAPIIMP const string_t& organizer_id() const;
+
+    /// <summary>
+    /// The tournament ID used to create the subscription.
+    /// </summary>
+    _XSAPIIMP const string_t& tournament_id() const;
+
+    /// <summary>
+    /// The team ID used to create the subscription.
+    /// </summary>
+    _XSAPIIMP const string_t& team_id() const;
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    team_change_event_args();
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    team_change_event_args(
+        _In_ const string_t& organizerId,
+        _In_ const string_t& tournamentId,
+        _In_ const string_t& teamId
+        );
+
+private:
+    string_t m_organizerId;
+    string_t m_tournamentId;
+    string_t m_teamId;
+};
+
+/// <summary>
+/// Handles notification when the state of a team subscription changes.
+/// </summary>
+class team_change_subscription : public xbox::services::real_time_activity::real_time_activity_subscription
+{
+public:
+    /// <summary>
+    /// The organizer ID the subscription is for.
+    /// </summary> 
+    _XSAPIIMP const string_t& organizer_id() const;
+
+    /// <summary>
+    /// The tournament ID the subscription is for.
+    /// </summary>
+    _XSAPIIMP const string_t& tournament_id() const;
+
+    /// <summary>
+    /// The team ID the subscription is for.
+    /// </summary>
+    _XSAPIIMP const string_t& team_id() const;
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    team_change_subscription(
+        _In_ const string_t& organizerId,
+        _In_ const string_t& tournamentId,
+        _In_ const string_t& teamId,
+        _In_ std::function<void(const team_change_event_args&)> handler,
+        _In_ std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)> subscriptionErrorHandler
+        );
+
+protected:
+    void on_subscription_created(_In_ uint32_t id, _In_ const web::json::value& data) override;
+    void on_event_received(_In_ const web::json::value& data) override;
+
+private:
+    std::function<void(const team_change_event_args&)> m_teamChangeHandler;
+    string_t m_organizerId;
+    string_t m_tournamentId;
+    string_t m_teamId;
 };
 
 /// <summary>
@@ -946,6 +1036,46 @@ public:
         );
 
     /// <summary>
+    /// Subscribes to team update notifications via the TeamChanged event.
+    /// </summary>
+    /// <param name="organizerId">The ID of the tournament organizer. This is case sensitive.</param>
+    /// <param name="tournamentId">The ID of the tournament.</param>
+    /// <param name="teamId">The ID of the team.</param>
+    /// <returns>A team_change_subscription object that contains the state of the subscription. 
+    /// You can register an event handler for team changes by calling add_team_changed_handler().
+    /// </returns>
+    _XSAPIIMP xbox_live_result<std::shared_ptr<team_change_subscription>> subscribe_to_team_change(
+        _In_ const string_t& organizerId,
+        _In_ const string_t& tournamentId,
+        _In_ const string_t& teamId
+        );
+
+    /// <summary>
+    /// Unsubscribes a previously created team change subscription.
+    /// </summary>
+    /// <param name="subscription">The subscription object to unsubscribe</param>
+    _XSAPIIMP xbox_live_result<void> unsubscribe_from_team_change(
+        _In_ std::shared_ptr<team_change_subscription> subscription
+        );
+
+    /// <summary>
+    /// Registers an event handler for team change notifications.
+    /// Event handlers receive a team_change_event_args object.
+    /// </summary>
+    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <returns>
+    /// A function_context object that can be used to unregister the event handler.
+    /// </returns>
+    _XSAPIIMP function_context add_team_changed_handler(_In_ std::function<void(team_change_event_args)> handler);
+
+    /// <summary>
+    /// Unregisters an event handler for team change notifications.
+    /// </summary>
+    /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
+    /// <param name="handler">The callback function that recieves notifications.</param>
+    _XSAPIIMP void remove_team_changed_handler(_In_ function_context context);
+
+    /// <summary>
     /// Internal function
     /// </summary>
     static xbox::services::tournaments::team_state _Convert_string_to_team_state(_In_ const string_t& value);
@@ -975,8 +1105,14 @@ public:
     tournament_service(
         _In_ std::shared_ptr<xbox::services::user_context> userContext,
         _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
+        _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> rtaService
         );
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    std::shared_ptr<xbox_live_context_settings> _Xbox_live_context_settings() { return m_xboxLiveContextSettings; }
 
 private:
 
@@ -1003,6 +1139,8 @@ private:
     std::shared_ptr<xbox::services::user_context> m_userContext;
     std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
     std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
+    std::shared_ptr<tournament_service_impl> m_tournamentServiceImpl;
+    std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> m_realTimeActivityService;
 };
 
 }}}

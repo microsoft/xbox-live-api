@@ -94,11 +94,9 @@ void Sample::GetTeams()
         {
             auto& teamResult = result.payload();
 
-            // For testing, assign the first team as the locally cached team.
             for (const auto& team : teamResult.teams())
             {
-                m_teamId = team.id();
-                break;
+                TestTeamRTASubscription(team.id());
             }
 
             // Get next page until the end
@@ -136,4 +134,32 @@ void Sample::GetTeams()
             }
         }
     });
+}
+
+void Sample::TestTeamRTASubscription(string_t teamId)
+{
+    auto context = m_liveResources->GetLiveContext();
+    context->real_time_activity_service()->activate();
+
+    auto teamChangeContext = context->tournament_service().add_team_changed_handler(
+        [this, context](team_change_event_args args)
+        {
+            auto orgId = args.organizer_id();
+        }
+    );
+
+    auto teamResults = context->tournament_service().subscribe_to_team_change(
+        m_organizerId,
+        m_tournamentId,
+        teamId
+        );
+
+    if (!teamResults.err())
+    {
+        m_teamSubscription = teamResults.payload();
+    }
+    else
+    {
+        LogErrorFormat(L"Error calling subscribe_to_team_change:: %S\n", teamResults.err_message().c_str());
+    }
 }
