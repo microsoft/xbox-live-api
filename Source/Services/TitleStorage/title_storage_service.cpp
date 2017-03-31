@@ -691,7 +691,7 @@ title_storage_service::title_storage_quota_subpath(
             break;
 
         case title_storage_type::universal:
-            path << _T("/universal/users/xuid(");
+            path << _T("/universalplatform/users/xuid(");
             path << xboxUserId;
             path << _T(")/scids/");
             path << serviceConfigurationId;
@@ -756,7 +756,7 @@ title_storage_service::title_storage_blob_metadata_subpath(
             break;
 
         case title_storage_type::universal:
-            path << _T("/universal/users/xuid(");
+            path << _T("/universalplatform/users/xuid(");
             path << xboxUserId;
             path << _T(")/scids/");
             path << serviceConfigurationId;
@@ -889,7 +889,7 @@ title_storage_service::title_storage_download_blob_subpath(
                 return xbox_live_result<string_t>(titleStorageBlobToString.err(), titleStorageBlobToString.err_message());
             }
 
-            path << _T("/universal/users/xuid(");
+            path << _T("/universalplatform/users/xuid(");
             path << blobMetadata.xbox_user_id();
             path << _T(")/scids/");
             path << blobMetadata.service_configuration_id();
