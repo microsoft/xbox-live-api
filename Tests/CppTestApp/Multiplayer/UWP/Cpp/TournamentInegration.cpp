@@ -13,6 +13,25 @@ using namespace xbox::services::tournaments;
 
 void Sample::GetTournaments()
 {
+    auto context = m_liveResources->GetLiveContext();
+
+    if (m_organizerId.empty() && m_tournamentId.empty())
+    {
+        // If coming for the first time, subscribe for RTA.
+        context->real_time_activity_service()->activate();
+        context->tournament_service().add_tournament_changed_handler(
+        [this](tournament_change_event_args args)
+        {
+            GetTournamentDetails(args.organizer_id(), args.tournament_id());
+        });
+
+        context->tournament_service().add_team_changed_handler(
+        [this, context](team_change_event_args args)
+        {
+            GetTeamDetails(args.organizer_id(), args.tournament_id(), args.team_id());
+        });
+    }
+
     static bool filterUsersForMe = true;
     tournament_request request = tournament_request(filterUsersForMe);
     std::vector<tournament_state> states;
@@ -20,7 +39,6 @@ void Sample::GetTournaments()
     states.push_back(tournament_state::canceled);
     request.set_state_filter(states);
 
-    auto context = m_liveResources->GetLiveContext();
     auto result = context->tournament_service().get_tournaments(request)
     .then([this](xbox_live_result<tournament_request_result> result)
     {
@@ -33,14 +51,15 @@ void Sample::GetTournaments()
             {
                 const string_t& organizerId = tournament.organizer_id();
                 const string_t& tournamentId = tournament.id();
-                if (!tournament.team_summary().is_null())
+                if (!tournament.team_summary().is_null() && 
+                    m_organizerId.empty() &&
+                    m_tournamentId.empty())
                 {
                     m_organizerId = organizerId;
                     m_tournamentId = tournamentId;
+                    GetTournamentDetails(organizerId, tournamentId);
+                    SubscribeForTournamentRTASubscription(organizerId, tournamentId);
                 }
-
-                GetTournamentDetails(organizerId, tournamentId);
-                SubscribeForTournamentRTASubscription(organizerId, tournamentId);
             }
 
             // Get next page until the end
@@ -92,14 +111,6 @@ void Sample::SubscribeForTournamentRTASubscription(
     )
 {
     auto context = m_liveResources->GetLiveContext();
-    context->real_time_activity_service()->activate();
-
-    context->tournament_service().add_tournament_changed_handler(
-    [this](tournament_change_event_args args)
-    {
-        GetTournamentDetails(args.organizer_id(), args.tournament_id());
-    });
-
     auto tournamentResults = context->tournament_service().subscribe_to_tournament_change(
         organizerId,
         tournamentId
@@ -127,23 +138,18 @@ void Sample::GetTeams()
     {
         if (!result.err())
         {
-            auto& teamResult = result.payload();
-            for (const auto& team : teamResult.teams())
-            {
-                const string_t& teamId = team.id();
-                GetTeamDetails(m_organizerId, m_tournamentId, teamId);
-                SubscribeForTeamRTASubscription(m_organizerId, m_tournamentId, teamId);
-            }
+            GetTeamDetailsAndSubscribeForRTA(result);
 
             // Get next page until the end
             xbox_live_result<team_request_result> lastResult;
-            lastResult.set_payload(teamResult);
+            lastResult.set_payload(result.payload());
             while (!lastResult.err() && lastResult.payload().has_next())
             {
                 lastResult.payload().get_next()
                 .then([this, &lastResult](xbox_live_result<team_request_result> newTeamResult)
                 {
                     lastResult = newTeamResult;
+                    GetTeamDetailsAndSubscribeForRTA(lastResult);
                 }).wait();
             }
         }
@@ -159,6 +165,17 @@ void Sample::GetTeams()
             }
         }
     });
+}
+
+void Sample::GetTeamDetailsAndSubscribeForRTA(xbox_live_result<team_request_result> &result)
+{
+    auto& teamResult = result.payload();
+    for (const auto& team : teamResult.teams())
+    {
+        const string_t& teamId = team.id();
+        GetTeamDetails(m_organizerId, m_tournamentId, teamId);
+        SubscribeForTeamRTASubscription(m_organizerId, m_tournamentId, teamId);
+    }
 }
 
 void Sample::GetTeamDetails(
@@ -186,14 +203,6 @@ void Sample::SubscribeForTeamRTASubscription(
     )
 {
     auto context = m_liveResources->GetLiveContext();
-    context->real_time_activity_service()->activate();
-
-    context->tournament_service().add_team_changed_handler(
-    [this, context](team_change_event_args args)
-    {
-        GetTeamDetails(args.organizer_id(), args.tournament_id(), args.team_id());
-    });
-
     auto teamResults = context->tournament_service().subscribe_to_team_change(
         organizerId,
         tournamentId,
