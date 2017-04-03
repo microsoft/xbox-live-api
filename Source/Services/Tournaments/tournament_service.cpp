@@ -501,9 +501,49 @@ tournament_service::_Convert_string_to_team_state(
 }
 
 function_context
+tournament_service::add_tournament_changed_handler(
+    _In_ std::function<void(tournament_change_event_args)> handler
+    )
+{
+    return m_tournamentServiceImpl->add_tournament_changed_handler(
+        std::move(handler)
+    );
+}
+
+void
+tournament_service::remove_tournament_changed_handler(
+    _In_ function_context context
+    )
+{
+    return m_tournamentServiceImpl->remove_tournament_changed_handler(
+        context
+    );
+}
+
+xbox_live_result<std::shared_ptr<tournament_change_subscription>>
+tournament_service::subscribe_to_tournament_change(
+    _In_ const string_t& organizerId, 
+    _In_ const string_t& tournamentId
+    )
+{
+    return m_tournamentServiceImpl->subscribe_to_tournament_change(
+        organizerId,
+        tournamentId
+        );
+}
+
+xbox_live_result<void>
+tournament_service::unsubscribe_from_tournament_change(
+    _In_ std::shared_ptr<tournament_change_subscription> subscription
+    )
+{
+    return m_tournamentServiceImpl->unsubscribe_from_tournament_change(subscription);
+}
+
+function_context
 tournament_service::add_team_changed_handler(
     _In_ std::function<void(team_change_event_args)> handler
-)
+    )
 {
     return m_tournamentServiceImpl->add_team_changed_handler(
         std::move(handler)
@@ -513,7 +553,7 @@ tournament_service::add_team_changed_handler(
 void
 tournament_service::remove_team_changed_handler(
     _In_ function_context context
-)
+    )
 {
     return m_tournamentServiceImpl->remove_team_changed_handler(
         context
@@ -521,9 +561,9 @@ tournament_service::remove_team_changed_handler(
 }
 
 xbox_live_result<std::shared_ptr<team_change_subscription>>
-tournament_service::subscribe_to_team_change( 
-    _In_ const string_t& organizerId, 
-    _In_ const string_t& tournamentId, 
+tournament_service::subscribe_to_team_change(
+    _In_ const string_t& organizerId,
+    _In_ const string_t& tournamentId,
     _In_ const string_t& teamId
     )
 {
@@ -531,13 +571,13 @@ tournament_service::subscribe_to_team_change(
         organizerId,
         tournamentId,
         teamId
-        );
+    );
 }
 
 xbox_live_result<void>
 tournament_service::unsubscribe_from_team_change(
     _In_ std::shared_ptr<team_change_subscription> subscription
-)
+    )
 {
     return m_tournamentServiceImpl->unsubscribe_from_team_change(subscription);
 }

@@ -1194,6 +1194,12 @@
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_service_impl.cpp">
       <Filter>C++ Source\Tournaments</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_change_event_args.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_change_subscription.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Tournaments\WinRT\Tournament_WinRT.cpp">
       <Filter>C++ Source\Tournaments\WinRT</Filter>
     </ClCompile>
@@ -1231,6 +1237,12 @@
       <Filter>C++ Source\Tournaments\WinRT</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Services\Tournaments\WinRT\TeamChangeSubscription_WinRT.cpp">
+      <Filter>C++ Source\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\WinRT\TournamentChangeEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\WinRT\TournamentChangeSubscription_WinRT.cpp">
       <Filter>C++ Source\Tournaments\WinRT</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Services\Social\Manager\social_user_group_loaded_event_args.cpp">
@@ -2223,6 +2235,12 @@
       <Filter>C++ Source\Tournaments\WinRT</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Services\Tournaments\WinRT\TeamChangeSubscription_WinRT.h">
+      <Filter>C++ Source\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Tournaments\WinRT\TournamentChangeEventArgs_WinRT.h">
+      <Filter>C++ Source\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Tournaments\WinRT\TournamentChangeSubscription_WinRT.h">
       <Filter>C++ Source\Tournaments\WinRT</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Services\Social\Manager\WinRT\SocialEventArgs_WinRT.h">

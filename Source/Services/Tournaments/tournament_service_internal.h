@@ -14,6 +14,21 @@ public:
 
     ~tournament_service_impl();
 
+    // Tournament subscriptions
+    xbox_live_result<std::shared_ptr<tournament_change_subscription>> subscribe_to_tournament_change(
+        _In_ const string_t& organizerId,
+        _In_ const string_t& tournamentId
+        );
+
+    xbox_live_result<void> unsubscribe_from_tournament_change(
+        _In_ std::shared_ptr<tournament_change_subscription> subscription
+        );
+
+    function_context add_tournament_changed_handler(_In_ std::function<void(const tournament_change_event_args&)> handler);
+
+    void remove_tournament_changed_handler(_In_ function_context context);
+
+    // Team subscriptions
     xbox_live_result<std::shared_ptr<team_change_subscription>> subscribe_to_team_change(
         _In_ const string_t& organizerId,
         _In_ const string_t& tournamentId,
@@ -29,12 +44,18 @@ public:
     void remove_team_changed_handler(_In_ function_context context);
 
 private:
+    void tournament_changed(_In_ const tournament_change_event_args& eventArgs);
     void team_changed(_In_ const team_change_event_args& eventArgs);
 
+    xbox::services::system::xbox_live_mutex m_tournamentHandlerLock;
+    std::unordered_map<function_context, std::function<void(const tournament_change_event_args&)>> m_tournamentChangeHandler;
+    function_context m_tournamentChangeHandlerCounter;
+
     xbox::services::system::xbox_live_mutex m_teamHandlerLock;
-    std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> m_realTimeActivityService;
     std::unordered_map<function_context, std::function<void(const team_change_event_args&)>> m_teamChangeHandler;
     function_context m_teamChangeHandlerCounter;
+
+    std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> m_realTimeActivityService;
 };
 
 }}}

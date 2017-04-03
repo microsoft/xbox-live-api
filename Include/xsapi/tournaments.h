@@ -970,6 +970,76 @@ private:
 };
 
 /// <summary>
+/// Contains information about a change to a subscribed tournament.
+/// </summary>
+class tournament_change_event_args
+{
+public:
+    /// <summary>
+    /// The organizer ID used to create the subscription.
+    /// </summary> 
+    _XSAPIIMP const string_t& organizer_id() const;
+
+    /// <summary>
+    /// The tournament ID used to create the subscription.
+    /// </summary>
+    _XSAPIIMP const string_t& tournament_id() const;
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    tournament_change_event_args();
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    tournament_change_event_args(
+        _In_ const string_t& organizerId,
+        _In_ const string_t& tournamentId
+        );
+
+private:
+    string_t m_organizerId;
+    string_t m_tournamentId;
+};
+
+/// <summary>
+/// Handles notification when the state of a tournament subscription changes.
+/// </summary>
+class tournament_change_subscription : public xbox::services::real_time_activity::real_time_activity_subscription
+{
+public:
+    /// <summary>
+    /// The organizer ID the subscription is for.
+    /// </summary> 
+    _XSAPIIMP const string_t& organizer_id() const;
+
+    /// <summary>
+    /// The tournament ID the subscription is for.
+    /// </summary>
+    _XSAPIIMP const string_t& tournament_id() const;
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    tournament_change_subscription(
+        _In_ const string_t& organizerId,
+        _In_ const string_t& tournamentId,
+        _In_ std::function<void(const tournament_change_event_args&)> handler,
+        _In_ std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)> subscriptionErrorHandler
+    );
+
+protected:
+    void on_subscription_created(_In_ uint32_t id, _In_ const web::json::value& data) override;
+    void on_event_received(_In_ const web::json::value& data) override;
+
+private:
+    std::function<void(const tournament_change_event_args&)> m_tournamentChangeHandler;
+    string_t m_organizerId;
+    string_t m_tournamentId;
+};
+
+/// <summary>
 /// Represents an endpoint that you can use to access the Tournament service.
 /// </summary>
 class tournament_service
@@ -1034,6 +1104,44 @@ public:
         _In_ const string_t& tournamentId,
         _In_ const string_t& teamId
         );
+
+    /// <summary>
+    /// Subscribes to tournament update notifications via the TournamentChanged event.
+    /// </summary>
+    /// <param name="organizerId">The ID of the tournament organizer. This is case sensitive.</param>
+    /// <param name="tournamentId">The ID of the tournament.</param>
+    /// <returns>A tournament_change_subscription object that contains the state of the subscription. 
+    /// You can register an event handler for tournament changes by calling add_tournament_changed_handler().
+    /// </returns>
+    _XSAPIIMP xbox_live_result<std::shared_ptr<tournament_change_subscription>> subscribe_to_tournament_change(
+        _In_ const string_t& organizerId,
+        _In_ const string_t& tournamentId
+        );
+
+    /// <summary>
+    /// Unsubscribe a previously created tournament change subscription.
+    /// </summary>
+    /// <param name="subscription">The subscription object to unsubscribe</param>
+    _XSAPIIMP xbox_live_result<void> unsubscribe_from_tournament_change(
+        _In_ std::shared_ptr<tournament_change_subscription> subscription
+        );
+
+    /// <summary>
+    /// Registers an event handler for tournament change notifications.
+    /// Event handlers receive a tournament_change_event_args object.
+    /// </summary>
+    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <returns>
+    /// A function_context object that can be used to unregister the event handler.
+    /// </returns>
+    _XSAPIIMP function_context add_tournament_changed_handler(_In_ std::function<void(tournament_change_event_args)> handler);
+
+    /// <summary>
+    /// Unregisters an event handler for tournament change notifications.
+    /// </summary>
+    /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
+    /// <param name="handler">The callback function that recieves notifications.</param>
+    _XSAPIIMP void remove_tournament_changed_handler(_In_ function_context context);
 
     /// <summary>
     /// Subscribes to team update notifications via the TeamChanged event.
