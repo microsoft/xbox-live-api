@@ -16,7 +16,8 @@
         <copyright>© Microsoft Corporation. All rights reserved.</copyright>
         <tags>Microsoft Xbox Live Service XSAPI WinRT UWP Windows Apps</tags>
         <dependencies>
-            <dependency id="Microsoft.Xbox.Live.SDK.WinRT.UWP.Symbols" version="$version$" />
+            <dependency id="Microsoft.Xbox.Live.SDK.WinRT.UWP.Symbols.Native" version="$version$" />
+            <dependency id="Microsoft.Xbox.Live.SDK.WinRT.UWP.Symbols.Netcore" version="$version$" />
         </dependencies>
     </metadata>
     <files>
