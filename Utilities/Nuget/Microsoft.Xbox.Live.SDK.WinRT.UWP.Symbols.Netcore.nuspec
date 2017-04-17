@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
-        <id>Microsoft.Xbox.Live.SDK.WinRT.UWP.Symbols</id>
+        <id>Microsoft.Xbox.Live.SDK.WinRT.UWP.Symbols.Netcore</id>
         <version>1.0.0.0</version>
         <title>Microsoft Xbox Live WinRT API for Windows Apps</title>
         <authors>Microsoft</authors>
@@ -17,7 +17,7 @@
         <tags>Microsoft Xbox Live Service XSAPI WinRT UWP Windows Apps</tags>
     </metadata>
     <files>
-        <file src="\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Symbols.targets" target="build\netcore451\Microsoft.Xbox.Live.SDK.WinRT.UWP.Symbols.targets" />
+        <file src="\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Symbols.Netcore.targets" target="build\netcore451\Microsoft.Xbox.Live.SDK.WinRT.UWP.Symbols.Netcore.targets" />
         
         <!-- x64 -->
         <file src="\Debug\x64\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\netcore451\lib\x64\v140\Debug\Microsoft.Xbox.Services.pdb" />
@@ -30,17 +30,6 @@
         <!-- ARM -->
         <file src="\Debug\ARM\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\netcore451\lib\ARM\v140\Debug\Microsoft.Xbox.Services.pdb" />
         <file src="\Release\ARM\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\netcore451\lib\ARM\v140\Release\Microsoft.Xbox.Services.pdb" />
-      
-        <!-- x64 -->
-        <file src="\Debug\x64\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\lib\x64\v140\Debug\Microsoft.Xbox.Services.pdb" />
-        <file src="\Release\x64\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\lib\x64\v140\Release\Microsoft.Xbox.Services.pdb" />
-
-        <!-- Win32 -->
-        <file src="\Debug\x86\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\lib\Win32\v140\Debug\Microsoft.Xbox.Services.pdb" />
-        <file src="\Release\x86\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\lib\Win32\v140\Release\Microsoft.Xbox.Services.pdb" />
-      
-        <!-- ARM -->
-        <file src="\Debug\ARM\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\lib\ARM\v140\Debug\Microsoft.Xbox.Services.pdb" />
-        <file src="\Release\ARM\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\lib\ARM\v140\Release\Microsoft.Xbox.Services.pdb" />
+        
     </files>
 </package>
