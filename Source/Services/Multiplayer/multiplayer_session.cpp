@@ -1583,7 +1583,7 @@ multiplayer_session::_Deserialize(
         utils::extract_json_field(
             json, 
             _T("properties"), 
-			errc,
+            errc,
             true
             )
         );
