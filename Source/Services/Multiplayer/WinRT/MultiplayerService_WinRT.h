@@ -515,15 +515,15 @@ public:
     ///
     /// Example 1:
     /// To search for search handles for a specific XboxUserId use
-    ///     "MemberXuids/any(d:d eq ‘12345678’)" or "OwnerXuids/any(d:d eq ‘12345678’)"
+    ///     "MemberXuids/any(d:d eq '12345678')" or "OwnerXuids/any(d:d eq '12345678')"
     ///
     /// Example 2:
     /// To search for search handles for a title defined string metadata use
-    ///     "Strings/stringMetadataType eq ‘value’"
+    ///     "Strings/stringMetadataType eq 'value'"
     ///
     /// Example 3:
     /// To search for search handles for a title defined numbers metadata AND a tag type value use
-    ///     “Numbers/numberMetadataType eq 53 AND Tags/tagType eq ‘value’”
+    ///     "Numbers/numberMetadataType eq 53 AND Tags/tagType eq 'value'"
     /// </param>
     /// <returns>The async object for notifying when the operation is completed.  This contains a vectorview of MultiplayerSearchHandleDetails objects, containing the details of the search handles.</returns>
     Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<MultiplayerSearchHandleDetails^>^>^ GetSearchHandlesAsync(
