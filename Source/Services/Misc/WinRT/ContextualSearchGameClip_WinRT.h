@@ -30,7 +30,7 @@ public ref class ContextualSearchGameClip sealed
 {
 public:
     /// <summary>
-    /// The localized version of the clip’s name based on the input locale of the request as looked up from the title management system.
+    /// The localized version of the clip's name based on the input locale of the request as looked up from the title management system.
     /// </summary>
     DEFINE_PROP_GET_STR_OBJ(ClipName, clip_name);
 
