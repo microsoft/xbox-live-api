@@ -96,6 +96,11 @@ public:
     /// </summary>
     DEFINE_PROP_GET_DATETIME_OBJ(HandleCreationTime, handle_creation_time);
 
+    /// <summary>
+    /// String containing custom session properties JSON blob.
+    /// </summary>
+    DEFINE_PROP_GET_STR_FROM_JSON_OBJ(CustomSessionPropertiesJson, custom_session_properties_json);
+
 internal:
     MultiplayerSearchHandleDetails(
         _In_ xbox::services::multiplayer::multiplayer_search_handle_details cppObj
