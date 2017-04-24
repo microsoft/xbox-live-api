@@ -2083,6 +2083,11 @@ public:
     _XSAPIIMP uint32_t members_count() const;
 
     /// <summary>
+    /// String containing custom session properties JSON blob.
+    /// </summary>
+    _XSAPIIMP const web::json::value& custom_session_properties_json() const;
+
+    /// <summary>
     /// The time when the search handle was created.
     /// </summary>
     _XSAPIIMP utility::datetime handle_creation_time() const;
@@ -2106,6 +2111,7 @@ private:
     uint32_t m_maxMembersCount;
     uint32_t m_membersCount;
     utility::datetime m_handleCreationTime;
+    web::json::value m_customSessionPropertiesJson;
 };
 
 /// <summary>
