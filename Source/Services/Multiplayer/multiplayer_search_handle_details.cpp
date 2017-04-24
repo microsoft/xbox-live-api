@@ -93,6 +93,12 @@ multiplayer_search_handle_details::handle_creation_time() const
     return m_handleCreationTime;
 }
 
+const web::json::value&
+multiplayer_search_handle_details::custom_session_properties_json() const
+{
+    return m_customSessionPropertiesJson;
+}
+
 xbox_live_result<multiplayer_search_handle_details>
 multiplayer_search_handle_details::_Deserialize(
     _In_ const web::json::value& json
@@ -117,6 +123,12 @@ multiplayer_search_handle_details::_Deserialize(
         errc = sessionReference.err();
     }
     returnResult.m_sessionReference = sessionReference.payload();
+
+    web::json::value customPropertiesObject = utils::extract_json_field(json, _T("customProperties"), errc, false);
+    if (!customPropertiesObject.is_null())
+    {
+        returnResult.m_customSessionPropertiesJson = customPropertiesObject;
+    }
 
     web::json::value searchAttributesObject = utils::extract_json_field(json, _T("searchAttributes"), errc, false);
     if (!searchAttributesObject.is_null())
