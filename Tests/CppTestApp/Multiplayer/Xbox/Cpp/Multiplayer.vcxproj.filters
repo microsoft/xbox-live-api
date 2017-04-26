@@ -94,6 +94,7 @@
     <ClCompile Include="pch.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="SearchHandleIntegration.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Logo.png">

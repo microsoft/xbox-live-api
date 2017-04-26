@@ -70,6 +70,12 @@ multiplayer_activity_details::members_count() const
     return m_membersCount;
 }
 
+const web::json::value&
+multiplayer_activity_details::custom_session_properties_json() const
+{
+    return m_customSessionPropertiesJson;
+}
+
 xbox_live_result<multiplayer_activity_details>
 multiplayer_activity_details::_Deserialize(
     _In_ const web::json::value& json
@@ -114,6 +120,12 @@ multiplayer_activity_details::_Deserialize(
             );
 
         returnResult.m_closed = utils::extract_json_bool(relatedInfoObject, _T("closed"), errc);
+    }
+
+    web::json::value customPropertiesObject = utils::extract_json_field(json, _T("customProperties"), errc, false);
+    if (!customPropertiesObject.is_null())
+    {
+        returnResult.m_customSessionPropertiesJson = customPropertiesObject;
     }
 
     return returnResult;

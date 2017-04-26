@@ -193,6 +193,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Profile|Durango'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="SearchHandleIntegration.cpp" />
     <ClCompile Include="Utils\PerformanceCounters.cpp" />
     <ClCompile Include="Utils\SessionListView.cpp" />
     <ClCompile Include="Utils\Utils.cpp" />
