@@ -1148,6 +1148,12 @@ public:
         VERIFY_ARE_EQUAL(result->Closed, relatedInfoJson[L"closed"].as_bool());
         VERIFY_ARE_EQUAL_INT(result->MaxMembersCount, relatedInfoJson[L"maxMembersCount"].as_integer());
         VERIFY_ARE_EQUAL_INT(result->MembersCount, relatedInfoJson[L"membersCount"].as_integer());
+
+        web::json::value customPropertiesJson = resultToVerify[L"customProperties"];
+        if (!customPropertiesJson.is_null())
+        {
+            VERIFY_ARE_EQUAL(result->CustomSessionPropertiesJson->Data(), customPropertiesJson.serialize());
+        }
     }
 
     void VerifyMultiplayerRoleInfo(MultiplayerRoleInfo^ result, web::json::value resultToVerify)
@@ -1238,6 +1244,12 @@ public:
         {
             auto key = ref new Platform::String(numbersMetadata.first.c_str());
             VERIFY_ARE_EQUAL(result->NumbersMetadata->Lookup(key), numbersMetadata.second.as_double());
+        }
+
+        web::json::value customPropertiesJson = resultToVerify[L"customProperties"];
+        if (!customPropertiesJson.is_null())
+        {
+            VERIFY_ARE_EQUAL(result->CustomSessionPropertiesJson->Data(), customPropertiesJson.serialize());
         }
 
         web::json::value relatedInfoJson = resultToVerify[L"relatedInfo"];
