@@ -2690,6 +2690,12 @@ public:
     _XSAPIIMP bool closed() const;
 
     /// <summary>
+    /// If true, it would allow the members of the session to be locked, such that if a user leaves they are able to 
+    /// come back into the session but no other user could take that spot. Defaults to false.
+    /// </summary>
+    _XSAPIIMP bool locked() const;
+
+    /// <summary>
     /// Setting to true by a client triggers a Xbox Live Compute allocation attempt by MPSD.
     /// Defaults to false.
     /// </summary>
@@ -2755,6 +2761,7 @@ private:
     std::vector<string_t> m_serverConnectionStringCandidates;
 
     bool m_closed;
+    bool m_locked;
     bool m_allocateCloudCompute;
 
     static std::mutex m_lock;
@@ -3226,6 +3233,16 @@ public:
     /// </summary>
     _XSAPIIMP void set_closed(
         _In_ bool closed
+        );
+
+    /// <summary>
+    /// Call multiplayer_service::write_session after this to write batched local changes to the service. 
+    /// If this is called without multiplayer_service::write_session, this will only change the local session object but does not commit it to the service.
+    /// If set to true, it would allow the members of the session to be locked, such that if a user leaves they are able to come back into the session but
+    /// no other user could take that spot. If the session is locked, it must also be set to closed.
+    /// </summary>
+    _XSAPIIMP void set_locked(
+        _In_ bool locked
         );
 
     /// <summary>

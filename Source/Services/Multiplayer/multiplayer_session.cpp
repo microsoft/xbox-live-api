@@ -789,6 +789,15 @@ multiplayer_session::set_closed(
     m_sessionRequest->set_closed(closed);
 }
 
+void
+multiplayer_session::set_locked(
+    _In_ bool locked
+    )
+{
+    m_sessionRequest->set_write_locked(true);
+    m_sessionRequest->set_locked(locked);
+}
+
 void 
 multiplayer_session::set_allocate_cloud_compute(
     _In_ bool allocateCloudCompute
@@ -1490,6 +1499,7 @@ multiplayer_session::compare_multiplayer_sessions(
     
 
     if (currentSession->session_properties()->closed() != oldSession->session_properties()->closed() ||
+        currentSession->session_properties()->locked() != oldSession->session_properties()->locked() ||
         currentSession->session_properties()->join_restriction() != oldSession->session_properties()->join_restriction() ||
         (currentSession->members().size() == currentSession->session_constants()->max_members_in_session()) != 
         (oldSession->members().size() == oldSession->session_constants()->max_members_in_session())     // if the session is open again or closed again because the max member has changed
