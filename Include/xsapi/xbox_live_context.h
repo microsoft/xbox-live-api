@@ -260,7 +260,7 @@ public:
     inline winrt::Windows::Xbox::System::User user_cppwinrt()
     {
         winrt::Windows::Xbox::System::User cppWinrtUser(nullptr);
-        winrt::copy_from(cppWinrtUser, reinterpret_cast<winrt::ABI::Windows::Xbox::System::IUser*>(user()));
+        winrt::copy_from_abi(cppWinrtUser, reinterpret_cast<winrt::ABI::Windows::Xbox::System::IUser*>(user()));
         return cppWinrtUser;
     }
 #endif // (TV_API | XBOX_UWP) && defined(XSAPI_CPPWINRT)
