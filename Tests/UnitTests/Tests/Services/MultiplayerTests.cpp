@@ -804,7 +804,7 @@ public:
 
         web::json::value closed = propertiesSystemJson[L"closed"];
         VERIFY_ARE_EQUAL(result->Closed, closed.as_bool());
-
+        VERIFY_ARE_EQUAL(result->Locked, propertiesSystemJson[L"locked"].as_bool());
         VERIFY_ARE_EQUAL(result->AllocateCloudCompute, propertiesSystemJson[L"allocateCloudCompute"].as_bool());
 
         web::json::array keywords = propertiesSystemJson[L"keywords"].as_array();
@@ -2245,12 +2245,25 @@ public:
 
         // can be set to true of false -- test both
         currentSession->SetClosed(true);
-
         WriteSessionAsyncHelper(currentSession, closedJsonTrue);
 
         currentSession->SetClosed(false);
         WriteSessionAsyncHelper(currentSession, closedJsonFalse);
 
+    }
+
+    TEST_METHOD(TestWriteSessionAsyncWithLocked)
+    {
+        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithLocked);
+        const string_t lockedJsonTrue = testResponseJsonFromFile[L"lockedJsonTrue"].serialize();
+        const string_t lockedJsonFalse = testResponseJsonFromFile[L"lockedJsonFalse"].serialize();
+
+        MultiplayerSession^ currentSession = GetCurrentSessionAsyncHelper();
+        currentSession->SetLocked(true);
+        WriteSessionAsyncHelper(currentSession, lockedJsonTrue);
+
+        currentSession->SetLocked(false);
+        WriteSessionAsyncHelper(currentSession, lockedJsonFalse);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserQualityOfServiceMeasurements)
@@ -2787,6 +2800,7 @@ public:
         MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
         auto oldSession = TestCreateSessionHelper(input, GetMockXboxLiveContext_WinRT());
         oldSession->SetClosed(true);
+        oldSession->SetLocked(true);
         oldSession->SetSessionCustomPropertyJson(L"hello", L"goodbye");
         oldSession->Join();
 
@@ -2801,7 +2815,6 @@ public:
                 )
             );
 
-   
         uint32 changeType = static_cast<uint32>(MultiplayerSession::CompareMultiplayerSessions(oldSession, currentSession));
 
         VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::MemberListChange) & changeType) == MultiplayerSessionChangeTypes::MemberListChange);
@@ -2820,6 +2833,14 @@ public:
         VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::MemberStatusChange) & changeType) == MultiplayerSessionChangeTypes::MemberStatusChange);
         VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::MemberCustomPropertyChange) & changeType) != MultiplayerSessionChangeTypes::MemberCustomPropertyChange);
     
+        oldSession = TestCreateSessionHelper(input, GetMockXboxLiveContext_WinRT());
+        oldSession->SetClosed(true);
+        VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::SessionJoinabilityChange) & changeType) != MultiplayerSessionChangeTypes::CustomPropertyChange);
+
+        oldSession = TestCreateSessionHelper(input, GetMockXboxLiveContext_WinRT());
+        oldSession->SetLocked(true);
+        VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::SessionJoinabilityChange) & changeType) != MultiplayerSessionChangeTypes::CustomPropertyChange);
+
         oldSession = TestCreateSessionHelper(input, GetMockXboxLiveContext_WinRT());
         currentSession = TestCreateSessionHelper(input, GetMockXboxLiveContext_WinRT());
         changeType = static_cast<uint32>(MultiplayerSession::CompareMultiplayerSessions(oldSession, currentSession));

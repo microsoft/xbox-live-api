@@ -124,6 +124,7 @@
         "properties": {
             "system": {
                 "closed": true,
+                "locked": true,
                 "allocateCloudCompute": true,
                 "keywords": [
                     "hello"
@@ -839,6 +840,20 @@
         "properties": {
             "system": {
                 "closed": false
+            }
+        }
+    },
+    "lockedJsonTrue": {
+        "properties": {
+            "system": {
+                "locked": true
+            }
+        }
+    },
+    "lockedJsonFalse": {
+        "properties": {
+            "system": {
+                "locked": false
             }
         }
     },
