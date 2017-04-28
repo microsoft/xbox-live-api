@@ -2259,8 +2259,6 @@ public:
         const string_t lockedJsonFalse = testResponseJsonFromFile[L"lockedJsonFalse"].serialize();
 
         MultiplayerSession^ currentSession = GetCurrentSessionAsyncHelper();
-        
-        // can be set to true or false -- test both
         currentSession->SetLocked(true);
         WriteSessionAsyncHelper(currentSession, lockedJsonTrue);
 
