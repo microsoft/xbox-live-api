@@ -1268,17 +1268,17 @@ public:
     /// <summary>
     /// The payload of the result.  It may be empty if there was an error
     /// </summary>
-    _XSAPIIMP T& payload();
+    T& payload();
 
     /// <summary>
     /// The payload of the result.  It may be empty if there was an error
     /// </summary>
-    _XSAPIIMP const T& payload() const;
+    const T& payload() const;
 
     /// <summary>
     /// Sets the payload.
     /// </summary>
-    _XSAPIIMP void set_payload(T payload);
+    void set_payload(T payload);
 
     /// <summary>
     /// The error returned by the operation.
@@ -1287,7 +1287,7 @@ public:
     /// For more detail about std::error_code vs std::error_condition, see 
     /// http://en.cppreference.com/w/cpp/error/error_condition
     /// </summary>
-    _XSAPIIMP const std::error_code& err() const;
+    const std::error_code& err() const;
 
     /// <summary>
     /// Sets the error.
@@ -1302,7 +1302,7 @@ public:
     /// Returns call specific debug information.  
     /// It is not localized, so only use for debugging purposes.
     /// </summary>
-    _XSAPIIMP const std::string& err_message() const;
+    const std::string& err_message() const;
 
     /// <summary>
     /// Sets error code debug information.  
