@@ -80,21 +80,21 @@ public:
     /// Return data as numerical type
     /// </summary>
     /// <returns>Float data for statistic</returns>
-    /// <remarks>Will debug assert if data is not type requested</returns>
+    /// <remarks>Will debug assert if data is not type requested</remarks>
     _XSAPIIMP double as_number() const;
 
     /// <summary> 
     /// Return data as integer type
     /// </summary>
     /// <returns>Float data for statistic</returns>
-    /// <remarks>Will debug assert if data is not type requested</returns>
+    /// <remarks>Will debug assert if data is not type requested</remarks>
     _XSAPIIMP int64_t as_integer() const;
 
     /// <summary> 
     /// Return data as string type
     /// </summary>
     /// <returns>data as char_t*</returns>
-    /// <remarks>Will debug assert if data is not type requested</returns>
+    /// <remarks>Will debug assert if data is not type requested</remarks>
     _XSAPIIMP const string_t as_string() const;
 
     /// <summary> 

@@ -33,7 +33,7 @@ public:
     /// </summary>
     /// <returns>An TournamentRequestResult object that contains a list of tournament objects.</returns>
     /// <remarks>
-    /// Returns a concurrency::task<T> object that represents the state of the asynchronous operation.
+    /// Returns a concurrency::task{T} object that represents the state of the asynchronous operation.
     /// </remarks>
     Windows::Foundation::IAsyncOperation<TournamentRequestResult^>^ GetNextAsync();
 
