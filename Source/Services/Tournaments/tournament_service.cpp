@@ -51,7 +51,7 @@ tournament_service::_Get_tournaments(
     _In_ const string_t& nextLinkUrl
     )
 {
-    return get_tournaments_internal(nextLinkUrl, L"");
+    return get_tournaments_internal(nextLinkUrl, _T(""));
 }
 
 pplx::task<xbox::services::xbox_live_result<tournament_request_result>>
@@ -154,7 +154,7 @@ tournament_service::_Get_teams(
     _In_ const string_t& nextLinkUrl
     )
 {
-    return get_teams_internal(nextLinkUrl, L"");
+    return get_teams_internal(nextLinkUrl, _T(""));
 }
 
 pplx::task<xbox::services::xbox_live_result<team_request_result>>
@@ -295,7 +295,7 @@ tournament_service::tournament_sub_path_url(
         for (const auto& state : request.state_filter())
         {
             statesArray += convert_tournament_state_to_string(state);
-            statesArray += L",";
+            statesArray += _T(",");
         }
         statesArray.erase(statesArray.end() - 1, statesArray.end()); // remove the last ','
         subPathBuilder.append_query(_T("state"), statesArray);
@@ -348,7 +348,7 @@ tournament_service::team_sub_path_url(
         for (const auto& state : request.state_filter())
         {
             statesArray += convert_team_state_to_string(state);
-            statesArray += L",";
+            statesArray += _T(",");
         }
         statesArray.erase(statesArray.end() - 1, statesArray.end()); // remove the last ','
         subPathBuilder.append_query(_T("state"), statesArray);

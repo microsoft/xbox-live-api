@@ -7,7 +7,12 @@
 #include "xsapi/services.h"
 #include "xsapi/system.h"
 #include "xbox_live_context_impl.h"
+
+#if XSAPI_U
+#include "ppltasks_extra_unix.h"
+#else
 #include "ppltasks_extra.h"
+#endif
 
 using namespace xbox::services;
 using namespace xbox::services::system;
