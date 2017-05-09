@@ -20,21 +20,21 @@ public:
     /// Return data as numerical type
     /// </summary>
     /// <returns>Float data for statistic</returns>
-    /// <remarks>Will debug assert if data is not type requested</returns>
+    /// <remarks>Will debug assert if data is not type requested</remarks>
     DEFINE_PROP_GET_OBJ(AsNumber, as_number, double);
 
     /// <summary> 
     /// Return data as integer type
     /// </summary>
     /// <returns>Integer data for statistic</returns>
-    /// <remarks>Will debug assert if data is not type requested</returns>
+    /// <remarks>Will debug assert if data is not type requested</remarks>
     DEFINE_PROP_GET_OBJ(AsInteger, as_integer, int64_t);
 
     /// <summary> 
     /// Return data as string type
     /// </summary>
     /// <returns>data as char_t*</returns>
-    /// <remarks>Will debug assert if data is not type requested</returns>
+    /// <remarks>Will debug assert if data is not type requested</remarks>
     DEFINE_PROP_GET_STR_OBJ(AsString, as_string);
 
     /// <summary> 
