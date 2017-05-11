@@ -436,7 +436,7 @@ class contextual_search_game_clip
 {
 public:
     /// <summary>
-    /// The localized version of the clip’s name based on the input locale of the request as looked up from the title management system.
+    /// The localized version of the clip's name based on the input locale of the request as looked up from the title management system.
     /// </summary>
     _XSAPIIMP const string_t& clip_name() const;
 
@@ -706,7 +706,7 @@ public:
     /// <param name="orderAscending">Pass true to order ascending, false to order descending</param>
     /// <param name="searchQuery">
     /// The search query.
-    /// The query syntax is an OData like syntax with only the following operators supported EQ, NE, GE, GT, LE and LT along with the logical operators of AND and OR. You can also use grouping operator ‘()’. The stat properties that can be used to search with are "value", "min", "max", and "delta".
+    /// The query syntax is an OData like syntax with only the following operators supported EQ, NE, GE, GT, LE and LT along with the logical operators of AND and OR. You can also use grouping operator '()'. The stat properties that can be used to search with are "value", "min", "max", and "delta".
     ///
     /// Example 1:
     /// To search for game clips during which the "gametype" stat had a value of 1 use

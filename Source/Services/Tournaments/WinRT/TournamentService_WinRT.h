@@ -49,7 +49,7 @@ public:
     /// <param name="request">A tournament request object that retrieves tournaments based on the configuration of the request.</param>
     /// <returns>A list of tournaments if they exist.</returns>
     /// <remarks>
-    /// Returns a concurrency::task<T> object that represents the state of the asynchronous operation.
+    /// Returns a concurrency::task{T} object that represents the state of the asynchronous operation.
     /// This method calls GET /tournaments
     /// </remarks>
     Windows::Foundation::IAsyncOperation<TournamentRequestResult^>^  GetTournamentsAsync(
@@ -64,7 +64,7 @@ public:
     /// <param name="tournamentId">The ID of the tournament.</param>
     /// <returns>The specific tournament if they exist.</returns>
     /// <remarks>
-    /// Returns a concurrency::task<T> object that represents the state of the asynchronous operation.
+    /// Returns a concurrency::task{T} object that represents the state of the asynchronous operation.
     /// This method calls GET /tournaments/{organizer}/{id}.
     /// </remarks>
     Windows::Foundation::IAsyncOperation<Tournament^>^ GetTournamentDetailsAsync(
@@ -78,7 +78,7 @@ public:
     /// <param name="request">A team request object that retrieves team based on the configuration of the request.</param>
     /// <returns>A list of teams if they exist.</returns>
     /// <remarks>
-    /// Returns a concurrency::task<T> object that represents the state of the asynchronous operation.
+    /// Returns a concurrency::task{T} object that represents the state of the asynchronous operation.
     /// This method calls GET /tournaments/{organizer}/{id}/teams
     /// </remarks>
     Windows::Foundation::IAsyncOperation<TeamRequestResult^>^ GetTeamsAsync(
@@ -94,7 +94,7 @@ public:
     /// <param name="teamId">The ID of the team.</param>
     /// <returns>A specific tournament if they exist.</returns>
     /// <remarks>
-    /// Returns a concurrency::task<T> object that represents the state of the asynchronous operation.
+    /// Returns a concurrency::task{T} object that represents the state of the asynchronous operation.
     /// This method calls GET /tournaments/{organizer}/{id}/teams/{teamId}
     /// </remarks>
     Windows::Foundation::IAsyncOperation<TeamInfo^>^ GetTeamDetailsAsync(

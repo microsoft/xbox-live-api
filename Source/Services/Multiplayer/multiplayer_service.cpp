@@ -16,8 +16,8 @@ using namespace xbox::services::tournaments;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_BEGIN
 const uint32_t c_multiplayerHandleVersionValue = 1;
-const string_t c_getActivitiesSubpath = _T("/handles/query?include=relatedInfo");
-const string_t c_getSearchHandlesSubpath = _T("/handles/query?include=relatedInfo,roleInfo");
+const string_t c_getActivitiesSubpath = _T("/handles/query?include=relatedInfo,customProperties");
+const string_t c_getSearchHandlesSubpath = _T("/handles/query?include=relatedInfo,roleInfo,customProperties");
 const string_t c_multiplayerServiceContractHeaderValue = _T("107");
 
 multiplayer_service::multiplayer_service()

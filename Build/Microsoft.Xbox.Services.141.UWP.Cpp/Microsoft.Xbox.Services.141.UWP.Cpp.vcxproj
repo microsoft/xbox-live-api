@@ -313,6 +313,7 @@
     <ClCompile Include="..\..\Source\Services\Tournaments\current_match_metadata.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\match_metadata.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\previous_match_metadata.cpp" />
+    <ClCompile Include="..\..\Source\Services\Tournaments\team_summary.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\team_change_event_args.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\team_change_subscription.cpp" />
     <ClCompile Include="..\..\Source\Services\Tournaments\tournament_service_impl.cpp" />

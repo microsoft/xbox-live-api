@@ -648,7 +648,7 @@ public:
     /// <param name="user">The associated system User.</param>
     /// <param name="contextStringId">The custom context string ID.  This string ID is defined 
     /// during Xbox Live ingestion to identify the invitation text that is additional to the standard 
-    /// invitation text. The ID string must be prefixed with “///”. (Optional)</param>
+    /// invitation text. The ID string must be prefixed with "///". (Optional)</param>
     /// <param name="customActivationContext">The activation context string. (Optional)</param>
     _XSAPIIMP xbox_live_result<void> invite_friends(
         _In_ xbox_live_user_t user,
@@ -665,7 +665,7 @@ public:
     /// <param name="xboxUserIds">The list of xbox user IDs who will be invited.</param>
     /// <param name="contextStringId">The custom context string ID.  This string ID is defined 
     /// during Xbox Live ingestion to identify the invitation text that is additional to the standard 
-    /// invitation text. The ID string must be prefixed with “///”. (Optional)</param>
+    /// invitation text. The ID string must be prefixed with "///". (Optional)</param>
     /// <param name="customActivationContext">The activation context string. (Optional)</param>
     /// <returns>The async object for notifying when the operation is completed.</returns>
     _XSAPIIMP xbox_live_result<void> invite_users(

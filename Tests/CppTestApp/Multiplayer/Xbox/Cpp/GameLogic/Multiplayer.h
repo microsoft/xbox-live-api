@@ -17,6 +17,8 @@
 #define GAME_SERVICE_CONFIG_ID              L"097d0100-e05c-4d37-8420-46f1169056cf"
 #define GAME_SESSION_TEMPLATE_NAME          L"GameSession"
 #define LOBBY_TEMPLATE_NAME                 L"LobbySession"
+#define OWNER_MANAGED_LFG_TEMPLATE_NAME     L"OwnerManagedLFGTest"
+#define NON_OWNER_MANAGED_LFG_TEMPLATE_NAME L"NonOwnerManagedLFGTest"
 
 // Enable this for capturing performance counters
 #define PERF_COUNTERS                       0
@@ -25,11 +27,13 @@ enum APPSTATE
 {
     APP_MAIN_MENU,
     APP_CREATE_LOBBY,
+    APP_CREATE_LFG_LOBBY,
     APP_JOIN_LOBBY,
     APP_JOIN_GAME,
-    APP_SHOW_FRIEND_GAMES,
     APP_JOINING_LOBBY,
     APP_IN_GAME,
+    APP_SHOW_FRIEND_GAMES,
+    APP_SHOW_SEARCH_HANDLES,
 };
 
 // list of game modes
@@ -102,6 +106,14 @@ private:
     void InviteFriends();
     void HandleProtocolActivation();
 
+    // Multiplayer helper methods
+    void GetActivitiesForSocialGroup();
+
+    // Search Handle methods
+    void PublishSearchHandle();
+    void SetRoleInfo();
+    void BrowseSearchHandles();
+
     void SetupUI();
     void Update(DX::StepTimer const& timer);
     void CreateDeviceDependentResources();
@@ -143,6 +155,9 @@ private:
     bool m_isLeavingGame;
     float m_clearErrorMsgTimer;
     bool m_isProtocolActivated;
+
+    // Search Handle
+    std::vector<xbox::services::multiplayer::multiplayer_search_handle_details> m_searchHandles;
 
     void ChangeAppStates();
     string_t CreateGuid();
