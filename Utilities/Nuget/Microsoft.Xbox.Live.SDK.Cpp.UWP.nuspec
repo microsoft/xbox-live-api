@@ -16,10 +16,12 @@
         <copyright>© Microsoft Corporation. All rights reserved.</copyright>
         <tags>Microsoft Xbox Live Service XSAPI C++ UWP Windows Apps Cpp</tags>
         <dependencies>
-            <dependency id="Microsoft.Xbox.Live.SDK.Cpp.UWP.v140" version="$version$" />
-            <dependency id="Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.Symbols" version="$version$" />
-            <dependency id="Microsoft.Xbox.Live.SDK.Cpp.UWP.v141" version="$version$" />
-            <dependency id="Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.Symbols" version="$version$" />
+            <dependency id="Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x86" version="$version$" />
+            <dependency id="Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x64" version="$version$" />
+            <dependency id="Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.ARM" version="$version$" />
+            <dependency id="Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x86" version="$version$" />
+            <dependency id="Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x64" version="$version$" />
+            <dependency id="Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.ARM" version="$version$" />
         </dependencies>      
     </metadata>
     <files>
