@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemDefinitionGroup Condition="'$(Configuration)' == 'Debug' AND '$(PlatformToolset)' == 'v141' AND '$(Platform)' == 'ARM'">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(Platform)\v141\$(Configuration)\cpprest141d_uwp_2_9.lib;$(MSBuildThisFileDirectory)lib\$(Platform)\v141\$(Configuration)\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)' != 'Debug' AND '$(PlatformToolset)' == 'v141' AND '$(Platform)' == 'ARM'">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(Platform)\v141\Release\cpprest141_uwp_2_9.lib;$(MSBuildThisFileDirectory)lib\$(Platform)\v141\Release\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>
