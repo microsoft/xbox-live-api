@@ -13,6 +13,9 @@
   <PropertyGroup Label="v140" Condition="'$(PlatformToolset.ToLower())' == 'v140'">
     <NugetPlatformToolset>140</NugetPlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Label="v141" Condition="'$(PlatformToolset.ToLower())' == 'v141'">
+    <NugetPlatformToolset>141</NugetPlatformToolset>
+  </PropertyGroup>
   
   <ItemDefinitionGroup>
     <ClCompile>
@@ -20,7 +23,7 @@
       <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Label="Durango and (v110 or v140)" Condition="'$(Platform.ToLower())' == 'durango'">
+  <ItemDefinitionGroup Label="Durango and (v110 or v140 or v141)" Condition="'$(Platform.ToLower())' == 'durango'">
     <Link>
       <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\Durango\$(PlatformToolset)\$(NugetConfiguration)\casablanca$(NugetPlatformToolset).xbox.lib;$(MSBuildThisFileDirectory)lib\Durango\$(PlatformToolset)\$(NugetConfiguration)\Microsoft.Xbox.Services.$(NugetPlatformToolset).XDK.Ship.Cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <XboxExtensionsDependencies>$(MSBuildThisFileDirectory)lib\Durango\$(PlatformToolset)\$(NugetConfiguration)\casablanca$(NugetPlatformToolset).xbox.lib;$(MSBuildThisFileDirectory)lib\Durango\$(PlatformToolset)\$(NugetConfiguration)\Microsoft.Xbox.Services.$(NugetPlatformToolset).XDK.Ship.Cpp.lib;%(XboxExtensionsDependencies)</XboxExtensionsDependencies>
