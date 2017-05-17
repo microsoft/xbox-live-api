@@ -126,7 +126,7 @@ notification_service_windows::on_push_notification_recieved(
         auto xuid = utils::extract_json_string(xboxLiveNotificationJson, _T("userXuid"), errc);
 
         LOGS_INFO << "Received WNS notification, type: " << notificationTypeString << ", xuid: " << xuid;
-        get_xsapi_singleton()->s_xboxServiceSettingsSingleton->_Raise_wns_event(xuid, notificationTypeString);
+        get_xsapi_singleton()->s_xboxServiceSettingsSingleton->_Raise_wns_event(xuid, notificationTypeString, string_t((args->RawNotification->Content->Data()));
 
         if (!errc && utils::str_icmp(notificationTypeString, _T("spop")) == 0)
         {
