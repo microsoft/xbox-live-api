@@ -55,12 +55,17 @@ public:
     /// <summary>
     /// Returns the xbox user id for the WNS event
     /// </summary>
-    const string_t& xbox_user_id() const { return m_xbox_user_id; }
+    _XSAPIIMP const string_t& xbox_user_id() const { return m_xbox_user_id; }
 
     /// <summary>
     /// Returns the notification type
     /// </summary>
-    const string_t& notification_type() const { return m_notification_type; }
+    _XSAPIIMP const string_t& notification_type() const { return m_notification_type; }
+
+    /// <summary>
+    /// Returns the full notification content
+    /// </summary>
+    _XSAPIIMP const string_t& notification_content() const { return m_notification_content; }
 
     /// <summary>
     /// Internal function
