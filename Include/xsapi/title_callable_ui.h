@@ -118,7 +118,7 @@ public:
     /// <param name="contextStringId">The custom context string ID.  This string ID is defined
     /// during Xbox Live ingestion to identify the invitation text that is additional to the standard
     /// invitation text. The ID string must be prefixed with "///".  Pass an empty string if
-    /// you don’t want a custom string added to the invite.</param>
+    /// you don't want a custom string added to the invite.</param>
     /// <param name="user">System user that identifies which user is sending the invite</param>
     /// <returns>
     /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
@@ -200,7 +200,7 @@ public:
     /// </summary>
     /// <param name="privilege">The privilege to check.</param>
     /// <param name="friendlyMessage">Text to display in addition to the stock text about the privilege.
-    /// Pass an empty string if you don’t want a message added.</param>
+    /// Pass an empty string if you don't want a message added.</param>
     /// <param name="user">System user that identifies the user to show the UI on behalf of</param>
     /// <returns>
     /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
@@ -251,7 +251,7 @@ public:
     /// <param name="contextStringId">The custom context string ID.  This string ID is defined
     /// during Xbox Live ingestion to identify the invitation text that is additional to the standard
     /// invitation text. The ID string must be prefixed with "///".  Pass an empty string if
-    /// you don’t want a custom string added to the invite.</param>
+    /// you don't want a custom string added to the invite.</param>
     /// <returns>
     /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
     /// The task completes when the UI is closed.
@@ -323,7 +323,7 @@ public:
     /// </summary>
     /// <param name="privilege">The privilege to check.</param>
     /// <param name="friendlyMessage">Text to display in addition to the stock text about the privilege.
-    /// Pass an empty string if you don’t want a message added.</param>
+    /// Pass an empty string if you don't want a message added.</param>
     /// <returns>
     /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
     /// The task completes when the UI is closed.

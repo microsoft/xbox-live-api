@@ -735,6 +735,21 @@
     <ClCompile Include="..\..\Source\Services\Tournaments\previous_match_metadata.cpp">
       <Filter>C++ Source\Tournaments</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_service_impl.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\team_change_event_args.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\team_change_subscription.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_change_event_args.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Tournaments\tournament_change_subscription.cpp">
+      <Filter>C++ Source\Tournaments</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Services\Tournaments\team_info.cpp">
       <Filter>C++ Source\Tournaments</Filter>
     </ClCompile>
@@ -898,6 +913,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Services\Stats\user_statistics_internal.h">
       <Filter>C++ Source\UserStats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Tournaments\tournament_service_internal.h">
+      <Filter>C++ Source\Tournaments</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Services\Common\xbox_live_context_impl.h">
       <Filter>C++ Source\Common</Filter>

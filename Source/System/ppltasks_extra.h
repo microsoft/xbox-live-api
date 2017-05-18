@@ -89,7 +89,6 @@ namespace Concurrency
         ///     This function dynamically creates a long chain of continuations by iteratively concating tasks created by user Functor <paramref name="body"/>,
         ///     The iteration will not stop until the result of the returning task from user Functor <paramref name="body"/> is <c> False </c>.
         /// </remarks>
-        /// <seealso cref="Task Parallelism (Concurrency Runtime)"/>
         /**/
         inline task<void> create_iterative_task(std::function<concurrency::task<bool>()> body, cancellation_token ct = cancellation_token::none())
         {

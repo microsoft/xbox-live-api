@@ -6,6 +6,7 @@
 #include "xbox_system_factory.h"
 #include "utils.h"
 #include "user_context.h"
+#include "tournament_service_internal.h"
 
 using namespace pplx;
 using namespace xbox::services::system;
@@ -22,11 +23,14 @@ tournament_service::tournament_service()
 tournament_service::tournament_service(
     _In_ std::shared_ptr<xbox::services::user_context> userContext,
     _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
+    _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> rtaService
     ) :
     m_userContext(std::move(userContext)),
     m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
-    m_appConfig(std::move(appConfig))
+    m_appConfig(std::move(appConfig)),
+    m_realTimeActivityService(rtaService),
+    m_tournamentServiceImpl(std::make_shared<tournament_service_impl>(rtaService))
 {
 }
 
@@ -47,7 +51,7 @@ tournament_service::_Get_tournaments(
     _In_ const string_t& nextLinkUrl
     )
 {
-    return get_tournaments_internal(nextLinkUrl, L"");
+    return get_tournaments_internal(nextLinkUrl, _T(""));
 }
 
 pplx::task<xbox::services::xbox_live_result<tournament_request_result>>
@@ -68,9 +72,10 @@ tournament_service::get_tournaments_internal(
     auto userContext = m_userContext;
     auto xboxLiveContextSettings = m_xboxLiveContextSettings;
     auto appConfig = m_appConfig;
+    auto rtaService = m_realTimeActivityService;
 
     auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([userContext, xboxLiveContextSettings, appConfig](std::shared_ptr<http_call_response> response)
+    .then([userContext, xboxLiveContextSettings, appConfig, rtaService](std::shared_ptr<http_call_response> response)
     {
         if (response->response_body_json().size() > 0)
         {
@@ -84,8 +89,9 @@ tournament_service::get_tournaments_internal(
             tournamentResult._Init_next_page_info(
                 userContext,
                 xboxLiveContextSettings,
-                appConfig
-            );
+                appConfig,
+                rtaService
+                );
 
             return result;
         }
@@ -148,7 +154,7 @@ tournament_service::_Get_teams(
     _In_ const string_t& nextLinkUrl
     )
 {
-    return get_teams_internal(nextLinkUrl, L"");
+    return get_teams_internal(nextLinkUrl, _T(""));
 }
 
 pplx::task<xbox::services::xbox_live_result<team_request_result>>
@@ -181,9 +187,10 @@ tournament_service::get_teams_internal(
     auto userContext = m_userContext;
     auto xboxLiveContextSettings = m_xboxLiveContextSettings;
     auto appConfig = m_appConfig;
+    auto rtaService = m_realTimeActivityService;
 
     auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([userContext, xboxLiveContextSettings, appConfig](std::shared_ptr<http_call_response> response)
+    .then([userContext, xboxLiveContextSettings, appConfig, rtaService](std::shared_ptr<http_call_response> response)
     {
         if (response->response_body_json().size() > 0)
         {
@@ -197,7 +204,8 @@ tournament_service::get_teams_internal(
             teamResult._Init_next_page_info(
                 userContext,
                 xboxLiveContextSettings,
-                appConfig
+                appConfig,
+                rtaService
                 );
 
             return result;
@@ -216,7 +224,7 @@ tournament_service::get_team_details(
     _In_ const string_t& organizerId,
     _In_ const string_t& tournamentId,
     _In_ const string_t& teamId
-)
+    )
 {
     RETURN_TASK_CPP_INVALIDARGUMENT_IF(organizerId.empty(), team_info, "organizer id is empty");
     RETURN_TASK_CPP_INVALIDARGUMENT_IF(tournamentId.empty(), team_info, "tournament id is empty");
@@ -287,7 +295,7 @@ tournament_service::tournament_sub_path_url(
         for (const auto& state : request.state_filter())
         {
             statesArray += convert_tournament_state_to_string(state);
-            statesArray += L",";
+            statesArray += _T(",");
         }
         statesArray.erase(statesArray.end() - 1, statesArray.end()); // remove the last ','
         subPathBuilder.append_query(_T("state"), statesArray);
@@ -340,7 +348,7 @@ tournament_service::team_sub_path_url(
         for (const auto& state : request.state_filter())
         {
             statesArray += convert_team_state_to_string(state);
-            statesArray += L",";
+            statesArray += _T(",");
         }
         statesArray.erase(statesArray.end() - 1, statesArray.end()); // remove the last ','
         subPathBuilder.append_query(_T("state"), statesArray);
@@ -490,6 +498,88 @@ tournament_service::_Convert_string_to_team_state(
     }
 
     return xbox::services::tournaments::team_state::unknown;
+}
+
+function_context
+tournament_service::add_tournament_changed_handler(
+    _In_ std::function<void(tournament_change_event_args)> handler
+    )
+{
+    return m_tournamentServiceImpl->add_tournament_changed_handler(
+        std::move(handler)
+    );
+}
+
+void
+tournament_service::remove_tournament_changed_handler(
+    _In_ function_context context
+    )
+{
+    return m_tournamentServiceImpl->remove_tournament_changed_handler(
+        context
+    );
+}
+
+xbox_live_result<std::shared_ptr<tournament_change_subscription>>
+tournament_service::subscribe_to_tournament_change(
+    _In_ const string_t& organizerId, 
+    _In_ const string_t& tournamentId
+    )
+{
+    return m_tournamentServiceImpl->subscribe_to_tournament_change(
+        organizerId,
+        tournamentId
+        );
+}
+
+xbox_live_result<void>
+tournament_service::unsubscribe_from_tournament_change(
+    _In_ std::shared_ptr<tournament_change_subscription> subscription
+    )
+{
+    return m_tournamentServiceImpl->unsubscribe_from_tournament_change(subscription);
+}
+
+function_context
+tournament_service::add_team_changed_handler(
+    _In_ std::function<void(team_change_event_args)> handler
+    )
+{
+    return m_tournamentServiceImpl->add_team_changed_handler(
+        std::move(handler)
+    );
+}
+
+void
+tournament_service::remove_team_changed_handler(
+    _In_ function_context context
+    )
+{
+    return m_tournamentServiceImpl->remove_team_changed_handler(
+        context
+    );
+}
+
+xbox_live_result<std::shared_ptr<team_change_subscription>>
+tournament_service::subscribe_to_team_change(
+    _In_ const string_t& organizerId,
+    _In_ const string_t& tournamentId,
+    _In_ const string_t& teamId
+    )
+{
+    return m_tournamentServiceImpl->subscribe_to_team_change(
+        organizerId,
+        tournamentId,
+        teamId
+    );
+}
+
+xbox_live_result<void>
+tournament_service::unsubscribe_from_team_change(
+    _In_ std::shared_ptr<team_change_subscription> subscription
+    )
+{
+    return m_tournamentServiceImpl->unsubscribe_from_team_change(subscription);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_CPP_END

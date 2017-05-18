@@ -209,7 +209,7 @@ public:
     /// <param name="user">The associated xbox_live_context for the User.</param>
     /// <param name="contextStringId">The custom context string ID.  This string ID is defined 
     /// during Xbox Live ingestion to identify the invitation text that is additional to the standard 
-    /// invitation text. The ID string must be prefixed with “///”.  Pass an empty string if 
+    /// invitation text. The ID string must be prefixed with "///".  Pass an empty string if 
     /// you don't want a custom string added to the invite.</param>
     /// <param name="customActivationContext">The activation context string. Pass an empty string if 
     /// you don't want a custom context added to the invite.</param>
@@ -227,8 +227,8 @@ public:
     /// <param name="xboxUserIds">The list of xbox user IDs who will be invited.</param>
     /// <param name="contextStringId">The custom context string ID.  This string ID is defined 
     /// during Xbox Live ingestion to identify the invitation text that is additional to the standard 
-    /// invitation text. The ID string must be prefixed with “///”.  Pass an empty string if 
-    /// you don’t want a custom string added to the invite.</param>
+    /// invitation text. The ID string must be prefixed with "///".  Pass an empty string if 
+    /// you don't want a custom string added to the invite.</param>
     /// <param name="customActivationContext">The activation context string. Pass an empty string if 
     /// you don't want a custom context added to the invite.</param>
     /// <returns>The async object for notifying when the operation is completed. </returns>

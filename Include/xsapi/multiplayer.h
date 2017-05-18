@@ -1369,7 +1369,7 @@ public:
 
     /// <summary>
     /// Session supports calls from platforms without strong title identity. This capability can't be set on large sessions.
-    /// Using this capability will cause both ‘readRestriction’ and ‘joinRestriction’ to default to “local”.
+    /// Using this capability will cause both 'readRestriction' and 'joinRestriction' to default to "local".
     /// </summary>
     _XSAPIIMP bool capabilities_user_authorization_style() const;
 
@@ -1994,6 +1994,11 @@ public:
     _XSAPIIMP uint32_t members_count() const;
 
     /// <summary>
+    /// String containing custom session properties JSON blob.
+    /// </summary>
+    _XSAPIIMP const web::json::value& custom_session_properties_json() const;
+
+    /// <summary>
     /// Internal function
     /// </summary>
     static xbox_live_result<multiplayer_activity_details> _Deserialize(_In_ const web::json::value& json);
@@ -2009,6 +2014,7 @@ private:
 
     uint32_t m_maxMembersCount;
     uint32_t m_membersCount;
+    web::json::value m_customSessionPropertiesJson;
 };
 
 /// <summary>
@@ -2083,6 +2089,11 @@ public:
     _XSAPIIMP uint32_t members_count() const;
 
     /// <summary>
+    /// String containing custom session properties JSON blob.
+    /// </summary>
+    _XSAPIIMP const web::json::value& custom_session_properties_json() const;
+
+    /// <summary>
     /// The time when the search handle was created.
     /// </summary>
     _XSAPIIMP utility::datetime handle_creation_time() const;
@@ -2106,6 +2117,7 @@ private:
     uint32_t m_maxMembersCount;
     uint32_t m_membersCount;
     utility::datetime m_handleCreationTime;
+    web::json::value m_customSessionPropertiesJson;
 };
 
 /// <summary>
@@ -2612,8 +2624,8 @@ public:
     /// Defaults to "none".
     /// If "local", only users whose token's DeviceId matches someone else already in the session and "active": true.
     /// If "followed", only local users (as defined above) and users who are followed by an existing (not reserved) member of the session can read without a reservation.
-    /// "The read restriction applies to sessions with “open” or “visible” visibility and determines who can read the session without an invite.  
-    /// The read restriction must be at least as accessible as the join restriction, i.e. ‘joinRestriction’ can’t be set to “followed” without also setting ‘readRestriction’."
+    /// The read restriction applies to sessions with "open" or "visible" visibility and determines who can read the session without an invite.
+    /// The read restriction must be at least as accessible as the join restriction, i.e. 'joinRestriction' can't be set to "followed" without also setting 'readRestriction'."
     /// </summary>
     _XSAPIIMP multiplayer_session_restriction read_restriction() const;
 
@@ -2676,6 +2688,12 @@ public:
     /// Does not affect reservations.  Defaults to false.
     /// </summary>
     _XSAPIIMP bool closed() const;
+
+    /// <summary>
+    /// If true, it would allow the members of the session to be locked, such that if a user leaves they are able to 
+    /// come back into the session but no other user could take that spot. Defaults to false.
+    /// </summary>
+    _XSAPIIMP bool locked() const;
 
     /// <summary>
     /// Setting to true by a client triggers a Xbox Live Compute allocation attempt by MPSD.
@@ -2743,6 +2761,7 @@ private:
     std::vector<string_t> m_serverConnectionStringCandidates;
 
     bool m_closed;
+    bool m_locked;
     bool m_allocateCloudCompute;
 
     static std::mutex m_lock;
@@ -3214,6 +3233,16 @@ public:
     /// </summary>
     _XSAPIIMP void set_closed(
         _In_ bool closed
+        );
+
+    /// <summary>
+    /// Call multiplayer_service::write_session after this to write batched local changes to the service. 
+    /// If this is called without multiplayer_service::write_session, this will only change the local session object but does not commit it to the service.
+    /// If set to true, it would allow the members of the session to be locked, such that if a user leaves they are able to come back into the session but
+    /// no other user could take that spot. If the session is locked, it must also be set to closed.
+    /// </summary>
+    _XSAPIIMP void set_locked(
+        _In_ bool locked
         );
 
     /// <summary>
@@ -3805,15 +3834,15 @@ public:
     ///
     /// Example 1:
     /// To search for search handles for a specific XboxUserId use
-    ///     "MemberXuids/any(d:d eq ‘12345678’)" or "OwnerXuids/any(d:d eq ‘12345678’)"
+    ///     "MemberXuids/any(d:d eq '12345678')" or "OwnerXuids/any(d:d eq '12345678')"
     ///
     /// Example 2:
     /// To search for search handles for a title defined string metadata use
-    ///     "Strings/stringMetadataType eq ‘value’"
+    ///     "Strings/stringMetadataType eq 'value'"
     ///
     /// Example 3:
     /// To search for search handles for a title defined numbers metadata AND a tag type value use
-    ///     “Numbers/numberMetadataType eq 53 AND Tags/tagType eq ‘value’”
+    ///     "Numbers/numberMetadataType eq 53 AND Tags/tagType eq 'value'"
     /// </summary>
     /// <param name="searchFilter">The filter string to search for.</param>
     _XSAPIIMP void set_search_filter(_In_ const string_t& searchFilter);
@@ -4074,8 +4103,8 @@ public:
     /// <param name="titleId">The ID of the title that the invited user will activate in order to join the session.</param>
     /// <param name="contextStringId">The custom context string ID.  This string ID is defined 
     /// during Xbox Live ingestion to identify the invitation text that is additional to the standard 
-    /// invitation text. The ID string must be prefixed with “///”.  Pass an empty string if 
-    /// you don’t want a custom string added to the invite.</param>
+    /// invitation text. The ID string must be prefixed with "///".  Pass an empty string if 
+    /// you don't want a custom string added to the invite.</param>
     /// <param name="customActivationContext">The activation context string.</param>
     /// <returns>The async object for notifying when the operation is completed.  This contains a vectorview of handle ID strings corresponding to the invites that have been sent.</returns>
     _XSAPIIMP pplx::task<xbox_live_result<std::vector<string_t>>> send_invites(
@@ -4129,15 +4158,15 @@ public:
     ///
     /// Example 1:
     /// To search for search handles for a specific XboxUserId use
-    ///     "MemberXuids/any(d:d eq ‘12345678’)" or "OwnerXuids/any(d:d eq ‘12345678’)"
+    ///     "MemberXuids/any(d:d eq '12345678')" or "OwnerXuids/any(d:d eq '12345678')"
     ///
     /// Example 2:
     /// To search for search handles for a title defined string metadata use
-    ///     "Strings/stringMetadataType eq ‘value’"
+    ///     "Strings/stringMetadataType eq 'value'"
     ///
     /// Example 3:
     /// To search for search handles for a title defined numbers metadata AND a tag type value use
-    ///     “Numbers/numberMetadataType eq 53 AND Tags/tagType eq ‘value’”
+    ///     "Numbers/numberMetadataType eq 53 AND Tags/tagType eq 'value'"
     /// </param>
     /// <returns>The async object for notifying when the operation is completed.  This contains a vectorview of multiplayer_search_handle_details objects, containing the details of the search handles.</returns>
     _XSAPIIMP pplx::task<xbox_live_result<std::vector<multiplayer_search_handle_details>>> get_search_handles(
@@ -4152,7 +4181,7 @@ public:
     /// Queries for the all search handles that references the searchable sessions given the specific query.
     /// There is no paging or continuation, and the multiplayer service will limit the number of items returned to 100.
     /// </summary>
-    /// <param name="searchHandleRequest" A search handle request object that queries for the all search handles.</param>
+    /// <param name="searchHandleRequest"> A search handle request object that queries for the all search handles.</param>
     /// <returns>The async object for notifying when the operation is completed.  This contains a vectorview of multiplayer_search_handle_details objects, containing the details of the search handles.</returns>
     _XSAPIIMP pplx::task<xbox_live_result<std::vector<multiplayer_search_handle_details>>> get_search_handles(
         _In_ const multiplayer_query_search_handle_request& searchHandleRequest

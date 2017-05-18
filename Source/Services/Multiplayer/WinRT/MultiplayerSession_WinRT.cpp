@@ -545,6 +545,16 @@ MultiplayerSession::SetClosed(
 }
 
 void
+MultiplayerSession::SetLocked(
+    _In_ bool locked
+    )
+{
+    CONVERT_STD_EXCEPTION(
+        m_cppObj->set_locked(locked);
+    );
+}
+
+void
 MultiplayerSession::SetAllocateCloudCompute(
     _In_ bool allocateCloudCompute
     )

@@ -60,6 +60,11 @@ public:
     /// </summary>
     DEFINE_PROP_GET_OBJ(MembersCount, members_count, uint32);
 
+    /// <summary>
+    /// String containing custom session properties JSON blob.
+    /// </summary>
+    DEFINE_PROP_GET_STR_FROM_JSON_OBJ(CustomSessionPropertiesJson, custom_session_properties_json);
+
 internal:
     MultiplayerActivityDetails(
         _In_ xbox::services::multiplayer::multiplayer_activity_details cppObj

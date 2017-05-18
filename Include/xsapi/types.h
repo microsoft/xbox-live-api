@@ -145,7 +145,7 @@ typedef  Windows::Xbox::System::User^ xbox_live_user_t;
 #if TV_API
 inline Windows::Xbox::System::User^ convert_user_to_cppcx(_In_ const winrt::Windows::Xbox::System::User& user)
 {
-    winrt::ABI::Windows::Xbox::System::IUser* abiUser = winrt::get(user);
+    winrt::ABI::Windows::Xbox::System::IUser* abiUser = winrt::get_abi(user);
     return reinterpret_cast<Windows::Xbox::System::User^>(abiUser);
 }
 
@@ -154,7 +154,7 @@ inline Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs^ conve
     _In_ const winrt::Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs& eventArgs
 )
 {
-    winrt::ABI::Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs* abiEventArgs = winrt::get(eventArgs);
+    winrt::ABI::Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs* abiEventArgs = winrt::get_abi(eventArgs);
     return reinterpret_cast<Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs^>(abiEventArgs);
 }
 #endif
@@ -174,7 +174,7 @@ inline std::vector<Windows::Xbox::System::User^> convert_user_vector_to_cppcx(
 inline winrt::Windows::Xbox::System::User convert_user_to_cppwinrt(_In_ Windows::Xbox::System::User^ user)
 {
     winrt::Windows::Xbox::System::User cppWinrtUser(nullptr);
-    winrt::copy_from(cppWinrtUser, reinterpret_cast<winrt::ABI::Windows::Xbox::System::IUser*>(user));
+    winrt::copy_from_abi(cppWinrtUser, reinterpret_cast<winrt::ABI::Windows::Xbox::System::IUser*>(user));
     return cppWinrtUser;
 }
 

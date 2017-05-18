@@ -102,14 +102,14 @@ void Sample::SetupUI()
     // Join Lobby
     m_ui->FindControl<ImageButton>(c_mainMenuPanelId, c_joinLobbyBtn)->SetCallback([this](IPanel*, IControl*)
     {
-        m_appState = APPSTATE::APP_CREATE_LOBBY;
+        m_appState = APPSTATE::APP_GET_TOURNAMENTS;
         ChangeAppStates();
     });
 
     // Join Custom Game
     m_ui->FindControl<ImageButton>(c_mainMenuPanelId, c_joinCustomGameBtn)->SetCallback([this](IPanel*, IControl*)
     {
-        m_appState = APPSTATE::APP_JOIN_GAME;
+        m_appState = APPSTATE::APP_GET_TEAMS;
         ChangeAppStates();
     });
 
