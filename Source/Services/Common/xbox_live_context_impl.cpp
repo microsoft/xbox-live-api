@@ -8,13 +8,11 @@
 #include "xbox_system_factory.h"
 #include "xsapi/system.h"
 #include "xbox_live_context_impl.h"
-#if !BEAM_API
 #if !TV_API && !UNIT_TEST_SERVICES && !XSAPI_SERVER
 #include "notification_service.h"
 #endif
 #include "presence_internal.h"
 #include "real_time_activity_internal.h"
-#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -97,9 +95,7 @@ xbox_live_context_impl::~xbox_live_context_impl()
 #endif
     }
 
-#if !BEAM_API
     real_time_activity::real_time_activity_service_factory::get_singleton_instance()->remove_user_from_rta_map(m_userContext);
-#endif
 }
 
 
@@ -109,9 +105,7 @@ void xbox_live_context_impl::init()
 
     m_appConfig = xbox_live_app_config::get_app_config_singleton();
 m_xboxLiveContextSettings = std::make_shared<XBOX_LIVE_NAMESPACE::xbox_live_context_settings>();
-#if !BEAM_API
     init_real_time_activity_service_instance();
-#endif
 
 #if TV_API || UWP_API
     auto dispatcher = xbox_live_context_settings::_s_dispatcher;
@@ -149,7 +143,6 @@ m_xboxLiveContextSettings = std::make_shared<XBOX_LIVE_NAMESPACE::xbox_live_cont
 
     std::weak_ptr<xbox_live_context_impl> thisWeakPtr = shared_from_this();
 
-#if !BEAM_API
     m_profileService = XBOX_LIVE_NAMESPACE::social::profile_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_reputationService = XBOX_LIVE_NAMESPACE::social::reputation_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_leaderboardService = XBOX_LIVE_NAMESPACE::leaderboard::leaderboard_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
@@ -164,7 +157,6 @@ m_xboxLiveContextSettings = std::make_shared<XBOX_LIVE_NAMESPACE::xbox_live_cont
     m_tournamentService = XBOX_LIVE_NAMESPACE::tournaments::tournament_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
     m_socialService = XBOX_LIVE_NAMESPACE::social::social_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
     m_contextualSearchService = XBOX_LIVE_NAMESPACE::contextual_search::contextual_search_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-#endif
     m_stringService = XBOX_LIVE_NAMESPACE::system::string_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
 
 #if !XSAPI_SERVER
@@ -182,7 +174,6 @@ m_xboxLiveContextSettings = std::make_shared<XBOX_LIVE_NAMESPACE::xbox_live_cont
 
 #if !XBOX_UWP
 
-#if !BEAM_API
     // Only start the presence writer on UAP
     presence::presence_writer::get_presence_writer_singleton()->start_writer(m_presenceService._Impl());
 
@@ -241,7 +232,6 @@ m_xboxLiveContextSettings = std::make_shared<XBOX_LIVE_NAMESPACE::xbox_live_cont
         });
 #endif
     }
-#endif //!BEAM_API
 #endif
 #endif
 #endif
@@ -257,7 +247,6 @@ const string_t& xbox_live_context_impl::xbox_live_user_id()
     return m_userContext->xbox_user_id();
 }
 
-#if !BEAM_API
 social::profile_service&
 xbox_live_context_impl::profile_service()
 {
@@ -360,7 +349,6 @@ xbox_live_context_impl::contextual_search_service()
 {
     return m_contextualSearchService;
 }
-#endif
 
 system::string_service&
 xbox_live_context_impl::string_service()

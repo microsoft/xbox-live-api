@@ -63,7 +63,6 @@ public:
     /// </summary>
     const string_t& xbox_live_user_id();
 
-#if !BEAM_API
     /// <summary>
     /// A service for managing user profiles.
     /// </summary>
@@ -138,7 +137,6 @@ public:
     /// A service for contextual search.
     /// </summary>
     contextual_search::contextual_search_service& contextual_search_service();
-#endif
 
     /// <summary>
     /// Returns an object containing Xbox Live app config such as title ID
@@ -180,16 +178,13 @@ public:
 #endif
 
     void init();
-#if !BEAM_API
     void init_real_time_activity_service_instance();
-#endif
 
 private:
     std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> m_userContext;
     std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> m_xboxLiveContextSettings;
     std::shared_ptr<xbox_live_app_config> m_appConfig;
 
-#if !BEAM_API
     social::profile_service m_profileService;
     social::social_service m_socialService;
     social::reputation_service m_reputationService;
@@ -205,7 +200,6 @@ private:
     title_storage::title_storage_service m_titleStorageService;
     privacy::privacy_service m_privacyService;
     contextual_search::contextual_search_service m_contextualSearchService;
-#endif
     system::string_service m_stringService;
 
 #if UWP_API || XSAPI_U

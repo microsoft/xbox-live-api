@@ -15,9 +15,6 @@ namespace xbox {
     /// Contains classes, enumerations, and namespaces used to indicate error conditions for Xbox Live service components.
     /// </summary>
     namespace services {
-#if BEAM_API
-        namespace beam {
-#endif
             /// <summary>
             /// Enumeration values that define the Xbox Live API error conditions.
             /// </summary>
@@ -1208,9 +1205,6 @@ namespace xbox {
             /// </summary>
             /// <returns>An error category instance.</returns>
             _XSAPIIMP const xbox_services_error_condition_category_impl& xbox_services_error_condition_category();
-#if BEAM_API
-        }
-#endif
     }
 };
 

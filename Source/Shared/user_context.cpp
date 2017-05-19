@@ -10,11 +10,7 @@
 using namespace Platform;
 using namespace Windows::Foundation::Collections;
 #if !XSAPI_CPP
-#if BEAM_API
-using namespace Microsoft::Xbox::Services::Beam::System;
-#else
 using namespace Microsoft::Xbox::Services::System;
-#endif
 #endif
 #endif
 
