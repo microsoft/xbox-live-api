@@ -12,7 +12,6 @@
 #include "xsapi/system.h"
 #include "xsapi/service_call_logging_config.h"
 
-#if !BEAM_API
 #include "xsapi/leaderboard.h"
 #include "xsapi/social_manager.h"
 #include "xsapi/stats_manager.h"
@@ -40,7 +39,6 @@
 #include "xsapi/entertainment_profile.h"
 #include "xsapi/xbox_live_context.h"
 #endif // !defined(XBOX_LIVE_CREATORS_SDK)
-#endif // !BEAM_API
 
 #ifdef U 
     #undef U // clean up cpprest's global define in case it's used by app

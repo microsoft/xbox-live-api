@@ -7,13 +7,7 @@ namespace xbox
 {
     namespace services
     {
-#if BEAM_API
-        namespace beam {
-#endif
-            class xbox_live_context;
-#if BEAM_API
-        }
-#endif
+        class xbox_live_context;
     }
 }
 
