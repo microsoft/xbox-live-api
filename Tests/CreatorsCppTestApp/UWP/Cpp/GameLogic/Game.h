@@ -78,7 +78,8 @@ namespace Sample
 
         static std::mutex m_socialManagerLock;
     private:
-        std::shared_ptr<DX::DeviceResources> m_deviceResources;
+        std::shared_ptr<xbox::services::xbox_live_context> m_xboxLiveContext;
+		std::shared_ptr<DX::DeviceResources> m_deviceResources;
         std::unique_ptr<Renderer> m_sceneRenderer;
         DX::StepTimer m_timer;
         bool bInitialized;

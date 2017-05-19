@@ -129,11 +129,6 @@ public:
     _XSAPIIMP std::shared_ptr<xbox_live_app_config> application_config();
 
     /// <summary>
-    /// A service for managing leaderboards.
-    /// </summary>
-    _XSAPIIMP leaderboard::leaderboard_service& leaderboard_service();
-
-    /// <summary>
     /// A service for storing data in the cloud.
     /// </summary>
     _XSAPIIMP title_storage::title_storage_service& title_storage_service();
@@ -144,6 +139,17 @@ public:
     _XSAPIIMP social::profile_service& profile_service();
 
     /// <summary>
+    /// A service for managing privacy settings.
+    /// </summary>
+    _XSAPIIMP privacy::privacy_service& privacy_service();
+
+#if !defined(XBOX_LIVE_CREATORS_SDK)
+    /// <summary>
+    /// A service for managing leaderboards.
+    /// </summary>
+    _XSAPIIMP leaderboard::leaderboard_service& leaderboard_service();
+
+    /// <summary>
     /// A service for managing social networking links.
     /// </summary>
     _XSAPIIMP social::social_service& social_service();
@@ -152,11 +158,6 @@ public:
     /// A service for managing reputation reports.
     /// </summary>
     _XSAPIIMP social::reputation_service& reputation_service();
-
-    /// <summary>
-    /// A service for managing privacy settings.
-    /// </summary>
-    _XSAPIIMP privacy::privacy_service& privacy_service();
 
     /// <summary>
     /// A service for managing achievements.
@@ -231,6 +232,7 @@ public:
     /// </summary>
     _XSAPIIMP entertainment_profile::entertainment_profile_list_service& entertainment_profile_list_service();
 #endif // TV_API || UNIT_TEST_SERVICES
+#endif // !defined(XBOX_LIVE_CREATORS_SDK)
 
 #if (TV_API | XBOX_UWP) && defined(XSAPI_CPPWINRT)
     _XSAPIIMP xbox_live_context(
