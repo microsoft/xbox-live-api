@@ -17,7 +17,7 @@ Jump to the guide that matches the platform and API type you are using:
 
 ```
   \Build\Microsoft.Xbox.Services.140.UWP.Cpp\Microsoft.Xbox.Services.140.UWP.Cpp.vcxproj
-  \External\cpprestsdk\Release\src\build\vs14.uwp\casablanca140.uwp.static.vcxproj
+  \External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.static.vcxproj
 ```
 
 - Add the source projects as a reference by choosing Project->References... and select "Add Reference". Under "Solution->Projects", check the entries for both projects above then click OK.
@@ -58,7 +58,7 @@ In Visual Studio 2015, right click on project and choose "Manage NuGet Packages.
 
 ```
 \Build\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.140.UWP.WinRT.vcxproj
-\External\cpprestsdk\Release\src\build\vs14.uwp\casablanca140.uwp.vcxproj
+\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.vcxproj
 ```
 
 - Add the source projects as a reference by choosing Project->References... and select "Add Reference". Under "Solution->Projects", check the entries for both projects above then click OK.
