@@ -13,14 +13,12 @@
 
 #endif
 
-#if !BEAM_API
 #include "xsapi/contextual_search_service.h"
 #if TV_API || UNIT_TEST_SERVICES
 #include "xsapi/entertainment_profile.h"
 #endif
 #include "xsapi/multiplayer.h"
 #include "xsapi/tournaments.h"
-#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 class xbox_live_context_server_impl;
@@ -101,19 +99,6 @@ public:
     /// </summary>
     _XSAPIIMP std::shared_ptr<system::xbox_live_user> user();
 
-#elif BEAM_API
-    /// <summary>
-    /// Creates an xbox_live_context from a Microsoft::Xbox::Services::Beam::System::XboxLiveUser^
-    /// </summary>
-    _XSAPIIMP xbox_live_context(
-        _In_ Microsoft::Xbox::Services::Beam::System::XboxLiveUser^ user
-        );
-
-    /// <summary>
-    /// Returns the associated system XboxLiveUser.
-    /// </summary>
-    _XSAPIIMP Microsoft::Xbox::Services::Beam::System::XboxLiveUser^ user();
-
 #else
     /// <summary>
     /// Creates an xbox_live_context from a Microsoft::Xbox::Services::System::XboxLiveUser^
@@ -143,12 +128,6 @@ public:
     /// </summary>
     _XSAPIIMP std::shared_ptr<xbox_live_app_config> application_config();
 
-#if !BEAM_API
-    /// <summary>
-    /// A service for managing leaderboards.
-    /// </summary>
-    _XSAPIIMP leaderboard::leaderboard_service& leaderboard_service();
-
     /// <summary>
     /// A service for storing data in the cloud.
     /// </summary>
@@ -160,6 +139,17 @@ public:
     _XSAPIIMP social::profile_service& profile_service();
 
     /// <summary>
+    /// A service for managing privacy settings.
+    /// </summary>
+    _XSAPIIMP privacy::privacy_service& privacy_service();
+
+#if !defined(XBOX_LIVE_CREATORS_SDK)
+    /// <summary>
+    /// A service for managing leaderboards.
+    /// </summary>
+    _XSAPIIMP leaderboard::leaderboard_service& leaderboard_service();
+
+    /// <summary>
     /// A service for managing social networking links.
     /// </summary>
     _XSAPIIMP social::social_service& social_service();
@@ -168,11 +158,6 @@ public:
     /// A service for managing reputation reports.
     /// </summary>
     _XSAPIIMP social::reputation_service& reputation_service();
-
-    /// <summary>
-    /// A service for managing privacy settings.
-    /// </summary>
-    _XSAPIIMP privacy::privacy_service& privacy_service();
 
     /// <summary>
     /// A service for managing achievements.
@@ -247,8 +232,7 @@ public:
     /// </summary>
     _XSAPIIMP entertainment_profile::entertainment_profile_list_service& entertainment_profile_list_service();
 #endif // TV_API || UNIT_TEST_SERVICES
-
-#endif // !BEAM_API 
+#endif // !defined(XBOX_LIVE_CREATORS_SDK)
 
 #if (TV_API | XBOX_UWP) && defined(XSAPI_CPPWINRT)
     _XSAPIIMP xbox_live_context(

@@ -7,7 +7,7 @@
 #include "user_context.h"
 #include "xbox_system_factory.h"
 #include "xbox_live_context_impl.h"
-#if !TV_API && !UNIT_TEST_SERVICES && !XSAPI_SERVER && !XSAPI_U && !BEAM_API
+#if !TV_API && !UNIT_TEST_SERVICES && !XSAPI_SERVER && !XSAPI_U
 #include "Misc/notification_service.h"
 #endif
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
@@ -23,23 +23,6 @@ xbox_live_context::xbox_live_context(
 }
 
 Windows::Xbox::System::User^
-xbox_live_context::user()
-{
-    return m_xboxLiveContextImpl->user();
-}
-
-#elif BEAM_API
-
-xbox_live_context::xbox_live_context(
-    _In_ std::shared_ptr<beam::system::xbox_live_user> user
-    )
-{
-    user->_User_impl()->set_user_pointer(user);
-    m_xboxLiveContextImpl = std::make_shared<xbox_live_context_impl>(user);
-    m_xboxLiveContextImpl->init();
-}
-
-std::shared_ptr<beam::system::xbox_live_user>
 xbox_live_context::user()
 {
     return m_xboxLiveContextImpl->user();
@@ -78,7 +61,6 @@ xbox_live_context::user()
 }
 #endif
 
-#if !BEAM_API
 const string_t& xbox_live_context::xbox_live_user_id()
 {
     return m_xboxLiveContextImpl->xbox_live_user_id();
@@ -179,7 +161,6 @@ xbox_live_context::contextual_search_service()
 {
 	return m_xboxLiveContextImpl->contextual_search_service();
 }
-#endif
 
 #if UWP_API || XSAPI_U
 events::events_service&

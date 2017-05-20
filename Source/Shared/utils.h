@@ -50,7 +50,7 @@ struct xsapi_singleton
     std::shared_ptr<XBOX_LIVE_NAMESPACE::system::xbox_live_services_settings> s_xboxServiceSettingsSingleton;
     std::shared_ptr<XBOX_LIVE_NAMESPACE::local_config> s_localConfigSingleton;
 
-#if !TV_API && !XSAPI_SERVER && !BEAM_API
+#if !TV_API && !XSAPI_SERVER
     std::shared_ptr<XBOX_LIVE_NAMESPACE::presence::presence_writer> s_presenceWriterSingleton;
 #endif
 };

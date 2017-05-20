@@ -28,12 +28,10 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
         class events_service;
     }
 
-#if !BEAM_API
     namespace multiplayer { namespace manager {
         class multiplayer_client_manager;
         class multiplayer_local_user;
     }}
-#endif
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN

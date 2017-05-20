@@ -20,8 +20,9 @@ Jump to the guide that matches the platform and API type you are using:
   \External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.static.vcxproj
 ```
 
-- In Visual Studio, Choose Project->References... and select "Add Reference". Under Solution->Projects, check Microsoft.Xbox.Services and click OK.
-- Choose "Project->Add References..." in Visual Studio. Under Projects, check Microsoft.Xbox.Services.140.UWP.Cpp and cpprestsdk140.uwp.static click OK.
+- Add the source projects as a reference by choosing Project->References... and select "Add Reference". Under "Solution->Projects", check the entries for both projects above then click OK.
+- Add the props file to your project by clicking "View->Other Windows->Property Manager", right clicking on your project, selecting "Add Existing Property Sheet", then finally selecting the xsapi.staticlib.props file in the SDK sourch root.
+- Add the services.h file to your app source by right clicking on the project Add->Existing Item and choosing the {SDK source root}\Include\xsapi\services.h file 
 - Rebuild your Visual Studio solution
 
 ### How to link against the XSAPI C++ XDK source
@@ -44,8 +45,9 @@ Jump to the guide that matches the platform and API type you are using:
   \Build\Microsoft.Xbox.Services.110.XDK.Cpp\Microsoft.Xbox.Services.110.XDK.Cpp.vcxproj
   \External\cpprestsdk\Release\src\build\vs11.xbox\casablanca110.Xbox.vcxproj
 ```
-- In Visual Studio, Choose Project->References... and select "Add Reference". Under Solution->Projects, check Microsoft.Xbox.Services and click OK.
-- Choose "Project->Add References..." in Visual Studio. Under Projects, check Microsoft.Xbox.Services.140.XDK.Cpp and cpprestsdk140.Xbox.static click OK.
+- Add the source projects as a reference by choosing Project->References... and select "Add Reference". Under "Solution->Projects", check the entries for both projects above then click OK.
+- Add the props file to your project by clicking "View->Other Windows->Property Manager", right clicking on your project, selecting "Add Existing Property Sheet", then finally selecting the xsapi.staticlib.props file in the SDK sourch root.
+- Add the services.h file to your app source by right clicking on the project Add->Existing Item and choosing the {SDK source root}\Include\xsapi\services.h file 
 - Rebuild your Visual Studio solution
 
 ### How to link against the XSAPI WinRT UWP source
@@ -59,10 +61,9 @@ In Visual Studio 2015, right click on project and choose "Manage NuGet Packages.
 \External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.vcxproj
 ```
 
-- In Visual Studio, Choose Project->References... and select "Add Reference". Under Solution->Projects, check Microsoft.Xbox.Services and click OK.
-Choose "Project->Add References..." in Visual Studio. Under Projects, check Microsoft.Xbox.Services.140.UWP.WinRT and cpprestsdk140.uwp click OK.
+- Add the source projects as a reference by choosing Project->References... and select "Add Reference". Under "Solution->Projects", check the entries for both projects above then click OK.
+- Ensure that the "Output Folder" of both the application project and the projects above are the same. This setting can be found in Visual Studio project Properties->Configuration Properties->General->Output Directory.
 - Rebuild your Visual Studio solution
-- Ensure that the "Output Folder" of both the application project and the Xbox Services Project are the same. This setting can be found in Visual Studio project Properties->Configuration Properties->General->Output Directory.
 
 ### How to link against the XSAPI WinRT XDK source
 
@@ -79,9 +80,8 @@ Choose "Project->Add References..." in Visual Studio. Under Projects, check Micr
 ```
 
 - In Visual Studio add the references:
-  - For Visual Studio 2012: Choose “Project->References...” and select “Add Reference” in Visual Studio. Under Solution->Projects, check Microsoft.Xbox.Services and casablanca110.xbox and click OK.
-  - For Visual Studio 2015: Choose “Project->Add References…” in Visual Studio. Under Projects, check Microsoft.Xbox.Services and casablanca110.xbox and click OK.
-
-
-- Rebuild your Visual Studio solution
+  - For Visual Studio 2012: Choose “Project->References...” and select “Add Reference” in Visual Studio. Under Solution->Projects, chceck the entries for both projects above and click OK.
+  - For Visual Studio 2015: Choose “Project->Add References…” in Visual Studio. Under Projects, check the entries for both projects above and click OK.
 - Ensure that the "Output Folder" of both the application project and the Xbox Services Project are the same. This setting can be found in Visual Studio project Properties->Configuration Properties->General->Output Directory.
+- Rebuild your Visual Studio solution
+

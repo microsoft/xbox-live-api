@@ -82,6 +82,7 @@ class title_callable_ui
 {
 public:
 #if UWP_API
+#if !defined(XBOX_LIVE_CREATORS_SDK)
     /// <summary>
     /// Shows a picker UI that allows a person playing the game to select players
     /// from a presented list of other people.
@@ -133,22 +134,6 @@ public:
         );
 
     /// <summary>
-    /// Shows UI displaying the profile card for a specified user.
-    /// </summary>
-    /// <param name="targetXboxUserId">The Xbox User ID to show information about.</param>
-    /// <param name="user">System user that identifies the user to show the UI on behalf of</param>
-    /// <returns>
-    /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
-    /// The task completes when the UI is closed.
-    /// result.err() contains the error based on what happened in the case of an error.
-    /// </returns>
-    _XSAPIIMP static pplx::task<xbox::services::xbox_live_result<void>>
-    show_profile_card_ui(
-        _In_ const string_t& targetXboxUserId,
-        _In_opt_ Windows::System::User^ user = nullptr
-        );
-
-    /// <summary>
     /// Shows UI for adding or removing a specified person to or from the requesting user's friend list.
     /// </summary>
     /// <param name="targetXboxUserId">The Xbox User ID to show information about.</param>
@@ -177,6 +162,23 @@ public:
     _XSAPIIMP static pplx::task<xbox::services::xbox_live_result<void>>
     show_title_achievements_ui(
         _In_ uint32_t titleId,
+        _In_opt_ Windows::System::User^ user = nullptr
+        );
+#endif // !defined(XBOX_LIVE_CREATORS_SDK)
+
+    /// <summary>
+    /// Shows UI displaying the profile card for a specified user.
+    /// </summary>
+    /// <param name="targetXboxUserId">The Xbox User ID to show information about.</param>
+    /// <param name="user">System user that identifies the user to show the UI on behalf of</param>
+    /// <returns>
+    /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
+    /// The task completes when the UI is closed.
+    /// result.err() contains the error based on what happened in the case of an error.
+    /// </returns>
+    _XSAPIIMP static pplx::task<xbox::services::xbox_live_result<void>>
+    show_profile_card_ui(
+        _In_ const string_t& targetXboxUserId,
         _In_opt_ Windows::System::User^ user = nullptr
         );
 

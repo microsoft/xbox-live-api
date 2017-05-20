@@ -18,13 +18,9 @@
 #include <objbase.h>
 #endif
 #include "http_call_response.h"
-#if !BEAM_API
 #include "xsapi/presence.h"
-#endif
 #include "xsapi/system.h"
-#if !BEAM_API
 #include "presence_internal.h"
-#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -40,7 +36,7 @@ static std::mutex g_xsapiSingletonLock;
 static std::shared_ptr<xsapi_singleton> g_xsapiSingleton;
 
 xsapi_singleton::xsapi_singleton() 
-#if !TV_API && !XSAPI_SERVER && !BEAM_API
+#if !TV_API && !XSAPI_SERVER
     : s_presenceWriterSingleton(std::shared_ptr<XBOX_LIVE_NAMESPACE::presence::presence_writer>(new XBOX_LIVE_NAMESPACE::presence::presence_writer()))
 #endif
 {
