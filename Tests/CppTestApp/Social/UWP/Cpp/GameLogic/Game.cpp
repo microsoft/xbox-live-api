@@ -32,6 +32,14 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
     m_deviceResources->RegisterDeviceNotify(this);
     m_sceneRenderer = std::unique_ptr<Renderer>(new Renderer(m_deviceResources));
     m_user = std::make_shared< xbox::services::system::xbox_live_user >();
+
+    xbox::services::system::xbox_live_services_settings::get_singleton_instance()->add_wns_handler([this](xbox::services::system::xbox_live_wns_event_args args)
+    {
+        Log(L"WNS notification received.");
+        Log(L"  type:" + args.notification_type());
+        Log(L"  xuid:" + args.xbox_user_id());
+        Log(L"  content:" + args.notification_content());
+    });
 }
 
 void Game::RegisterInputKeys()
@@ -553,6 +561,7 @@ void Game::HandleSignInResult(
     switch (result.status())
     {
         case xbox::services::system::sign_in_status::success:
+            Log(L"xuid: "+ m_user->xbox_user_id());
             m_xboxLiveContext = std::make_shared< xbox::services::xbox_live_context >(m_user);
             AddUserToSocialManager(m_user);
             Log(L"Sign in succeeded");
@@ -598,7 +607,9 @@ void Game::SignIn()
         }
         else
         {
-            pThis->Log(L"Failed signing in.");
+            std::stringstream ss;
+            ss << "Failed signing in" << t.err().value() << " ,msg: " << t.err_message();
+            pThis->Log(utility::conversions::to_utf16string(ss.str()));
         }
 
     }, task_continuation_context::use_current());
