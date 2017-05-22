@@ -538,7 +538,7 @@ public:
     /// Queries for the all search handles that references the searchable sessions given the specific query.
     /// There is no paging or continuation, and the multiplayer service will limit the number of items returned to 100.
     /// </summary>
-    /// <param name="searchHandleRequest" A search handle request object that queries for the all search handles.</param>
+    /// <param name="searchHandleRequest"> A search handle request object that queries for the all search handles.</param>
     /// <returns>The async object for notifying when the operation is completed.  This contains a vectorview of MultiplayerSearchHandleDetails objects, containing the details of the search handles.</returns>
     Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<MultiplayerSearchHandleDetails^>^>^ GetSearchHandlesAsync(
         _In_ MultiplayerQuerySearchHandleRequest^ searchHandleRequest

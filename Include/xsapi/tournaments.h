@@ -525,7 +525,7 @@ public:
     /// </summary>
     /// <returns>An team_request_result object that contains a list of team_info objects.</returns>
     /// <remarks>
-    /// Returns a concurrency::task<T> object that represents the state of the asynchronous operation.
+    /// Returns a concurrency::task{T} object that represents the state of the asynchronous operation.
     /// </remarks>
     _XSAPIIMP pplx::task<xbox::services::xbox_live_result<team_request_result>> get_next();
 
@@ -851,7 +851,7 @@ public:
     /// </summary>
     /// <returns>An tournament_request_result object that contains a list of tournament objects.</returns>
     /// <remarks>
-    /// Returns a concurrency::task<T> object that represents the state of the asynchronous operation.
+    /// Returns a concurrency::task{T} object that represents the state of the asynchronous operation.
     /// </remarks>
     _XSAPIIMP pplx::task<xbox::services::xbox_live_result<tournament_request_result>> get_next();
 
@@ -1051,7 +1051,7 @@ public:
     /// <param name="request">A tournament request object that retrieves tournaments based on the configuration of the request.</param>
     /// <returns>A list of tournaments if it exist.</returns>
     /// <remarks>
-    /// Returns a concurrency::task<T> object that represents the state of the asynchronous operation.
+    /// Returns a concurrency::task{T} object that represents the state of the asynchronous operation.
     /// This method calls GET /tournaments
     /// </remarks>
     _XSAPIIMP pplx::task<xbox::services::xbox_live_result<tournament_request_result>> get_tournaments(
@@ -1066,7 +1066,7 @@ public:
     /// <param name="tournamentId">The ID of the tournament.</param>
     /// <returns>The specific tournament if they exist.</returns>
     /// <remarks>
-    /// Returns a concurrency::task<T> object that represents the state of the asynchronous operation.
+    /// Returns a concurrency::task{T} object that represents the state of the asynchronous operation.
     /// This method calls GET /tournaments/{organizer}/{id}.
     /// </remarks>
     _XSAPIIMP pplx::task<xbox::services::xbox_live_result<tournament>> get_tournament_details(
@@ -1080,7 +1080,7 @@ public:
     /// <param name="request">A team request object that retrieves team based on the configuration of the request.</param>
     /// <returns>A list of teams if they exist.</returns>
     /// <remarks>
-    /// Returns a concurrency::task<T> object that represents the state of the asynchronous operation.
+    /// Returns a concurrency::task{T} object that represents the state of the asynchronous operation.
     /// This method calls GET /tournaments/{organizer}/{id}/teams
     /// </remarks>
     _XSAPIIMP pplx::task<xbox::services::xbox_live_result<team_request_result>> get_teams(
@@ -1096,7 +1096,7 @@ public:
     /// <param name="teamId">The ID of the team.</param>
     /// <returns>A specific tournament if they exist.</returns>
     /// <remarks>
-    /// Returns a concurrency::task<T> object that represents the state of the asynchronous operation.
+    /// Returns a concurrency::task{T} object that represents the state of the asynchronous operation.
     /// This method calls GET /tournaments/{organizer}/{id}/teams/{teamId}
     /// </remarks>
     _XSAPIIMP pplx::task<xbox::services::xbox_live_result<team_info>> get_team_details(

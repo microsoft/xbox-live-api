@@ -5,6 +5,7 @@
 
 #pragma warning(disable: 4503) // C4503: decorated name length exceeded, name was truncated  
 #pragma warning(disable: 4242) 
+#pragma warning(disable: 4634) // C4634: Discarding XML document comment for invalid target.
 
 #ifdef _WIN32
 // If you wish to build your application for a previous Windows platform, include WinSDKVer.h and
