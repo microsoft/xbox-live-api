@@ -18,6 +18,7 @@
     </metadata>
     <files>
         <file src="\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Symbols.Native.targets" target="build\netcore451\Microsoft.Xbox.Live.SDK.WinRT.UWP.Symbols.Native.targets" />
+        <file src="\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Symbols.Native.targets" target="build\native\Microsoft.Xbox.Live.SDK.WinRT.UWP.Symbols.Native.targets" />
 
         <!-- x64 -->
         <file src="\Debug\x64\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\lib\x64\v140\Debug\Microsoft.Xbox.Services.pdb" />

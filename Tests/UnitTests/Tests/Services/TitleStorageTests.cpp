@@ -268,7 +268,7 @@ public:
         GetQuotaHelper(TitleStorageType::JsonStorage, _T("/json/users/xuid(TestXboxUserId)"));
         GetQuotaHelper(TitleStorageType::TrustedPlatformStorage, _T("/trustedplatform/users/xuid(TestXboxUserId)"));
         GetQuotaHelper(TitleStorageType::UntrustedPlatformStorage, _T("/untrustedplatform/users/xuid(TestXboxUserId)"));
-        GetQuotaHelper(TitleStorageType::Universal, _T("/universal/users/xuid(TestXboxUserId)"));
+        GetQuotaHelper(TitleStorageType::Universal, _T("/universalplatform/users/xuid(TestXboxUserId)"));
     }
 
     DEFINE_TEST_CASE(GetQuotaForSessionStorageTest)
@@ -298,7 +298,7 @@ public:
         GetBlobMetadataHelper(TitleStorageType::GlobalStorage, _T("/global"));
         GetBlobMetadataHelper(TitleStorageType::TrustedPlatformStorage, _T("/trustedplatform/users/xuid(TestXboxUserId)"));
         GetBlobMetadataHelper(TitleStorageType::UntrustedPlatformStorage, _T("/untrustedplatform/users/xuid(TestXboxUserId)"));
-        GetBlobMetadataHelper(TitleStorageType::Universal, _T("/universal/users/xuid(TestXboxUserId)"));
+        GetBlobMetadataHelper(TitleStorageType::Universal, _T("/universalplatform/users/xuid(TestXboxUserId)"));
     }
 
     DEFINE_TEST_CASE(GetBlobMetadataForSessionStorageTest)
@@ -334,8 +334,8 @@ public:
         DeleteBlobHelper(TitleStorageType::TrustedPlatformStorage, TitleStorageBlobType::Binary, L"/trustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary");
         DeleteBlobHelper(TitleStorageType::UntrustedPlatformStorage, TitleStorageBlobType::Json, L"/untrustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json");
         DeleteBlobHelper(TitleStorageType::UntrustedPlatformStorage, TitleStorageBlobType::Binary, L"/untrustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary");
-        DeleteBlobHelper(TitleStorageType::Universal, TitleStorageBlobType::Json, L"/universal/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json");
-        DeleteBlobHelper(TitleStorageType::Universal, TitleStorageBlobType::Binary, L"/universal/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary");
+        DeleteBlobHelper(TitleStorageType::Universal, TitleStorageBlobType::Json, L"/universalplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json");
+        DeleteBlobHelper(TitleStorageType::Universal, TitleStorageBlobType::Binary, L"/universalplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary");
     }
 
     DEFINE_TEST_CASE(DownloadBlobTest)
@@ -408,14 +408,14 @@ public:
         DownloadBlobHelper(
             TitleStorageType::Universal,
             TitleStorageBlobType::Json,
-            L"/universal/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json",
+            L"/universalplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json",
             jsonResultBuffer
             );
 
         DownloadBlobHelper(
             TitleStorageType::Universal,
             TitleStorageBlobType::Binary,
-            L"/universal/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary",
+            L"/universalplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary",
             binaryResultBuffer
             );
 
@@ -483,14 +483,14 @@ public:
         UploadBlobHelper(
             TitleStorageType::Universal,
             TitleStorageBlobType::Json,
-            L"/universal/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json",
+            L"/universalplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json",
             jsonUploadBuffer
             );
 
         UploadBlobHelper(
             TitleStorageType::Universal,
             TitleStorageBlobType::Binary,
-            L"/universal/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary",
+            L"/universalplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary",
             binaryUploadBuffer
             );
 
@@ -588,7 +588,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"PUT", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://titlestorage.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL(
-            L"/universal/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary?continuationToken=257e3886-cf73-4b52-8e89-2d7088d60bab-1&finalBlock=true",
+            L"/universalplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary?continuationToken=257e3886-cf73-4b52-8e89-2d7088d60bab-1&finalBlock=true",
             httpCall->PathQueryFragment.to_string()
             );
     }

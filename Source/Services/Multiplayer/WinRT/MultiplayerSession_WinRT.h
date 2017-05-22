@@ -1014,6 +1014,16 @@ public:
         );
 
     /// <summary>
+    /// Call multiplayer_service::write_session after this to write batched local changes to the service. 
+    /// If this is called without multiplayer_service::write_session, this will only change the local session object but does not commit it to the service.
+    /// If set to true, it would allow the members of the session to be locked, such that if a user leaves they are able to come back into the session but
+    /// no other user could take that spot. If the session is locked, it must also be set to closed.
+    /// </summary>
+    void SetLocked(
+        _In_ bool locked
+        );
+
+    /// <summary>
     /// Sets the session properties/system/allocateCloudCompute field
     /// </summary>
     /// <param name="closed">This triggers a Thunderhead allocation attempt by MPSD</param>

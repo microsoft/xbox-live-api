@@ -27,6 +27,7 @@ namespace
     const int c_sessionDetailsPanelId   = 3000;
     const int c_joinLobbyBtn            = 2101;
     const int c_joinGameBtn             = 2102;
+    const int c_joinLFGBtn              = 2103;
 
     const float c_clearErrorMsgTimer    = 3.0f;
 }
@@ -145,8 +146,22 @@ void Sample::ChangeAppStates()
         JoinGame();
         break;
 
-    case APP_SHOW_FRIEND_GAMES:
+    case APP_CREATE_LFG_LOBBY:
+        m_displayEventQueue.clear();
+        m_mainMenuPanel->Close();
+        m_sessionDetailsPanel->Show();
+        InitializeMultiplayerManager(OWNER_MANAGED_LFG_TEMPLATE_NAME);
+        AddLocalUser();
         break;
+
+    case APP_SHOW_SEARCH_HANDLES:
+        BrowseSearchHandles();
+        break;
+
+    case APP_SHOW_FRIEND_GAMES:
+        GetActivitiesForSocialGroup();
+        break;
+
     default:
         break;
     }
@@ -222,6 +237,11 @@ void Sample::Update(DX::StepTimer const& timer)
             }
             else if (m_appState == APPSTATE::APP_IN_GAME)
             {
+                if (m_gamePadButtons.dpadRight == GamePad::ButtonStateTracker::ButtonState::PRESSED)
+                {
+                    PublishSearchHandle();
+                }
+
                 if (m_gamePadButtons.leftTrigger == GamePad::ButtonStateTracker::ButtonState::PRESSED)
                 {
                     UpdateLobbyProperties();

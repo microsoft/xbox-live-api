@@ -315,3 +315,19 @@ void Sample::SetGameHost()
         }
     }
 }
+
+void Sample::GetActivitiesForSocialGroup()
+{
+    auto context = m_liveResources->GetLiveContext();
+    if (context != nullptr)
+    {
+        context->multiplayer_service().get_activities_for_social_group(GAME_SERVICE_CONFIG_ID, context->xbox_live_user_id(), xbox::services::social::social_group_constants::people())
+        .then([this](xbox_live_result<std::vector<multiplayer_activity_details>> activityDetails)
+        {
+            if (activityDetails.err())
+            {
+                LogErrorFormat(L"GetActivitiesForSocialGroup failed: %S\n", activityDetails.err_message().c_str());
+            }
+        }).wait();
+    }
+}

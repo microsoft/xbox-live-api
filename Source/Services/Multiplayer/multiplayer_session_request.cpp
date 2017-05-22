@@ -51,6 +51,8 @@ void multiplayer_session_request::deep_copy_from(
     m_memberRequestIndex = other.m_memberRequestIndex;
     m_writeClosed = other.m_writeClosed;
     m_closed = other.m_closed;
+    m_writeLocked = other.m_writeLocked;
+    m_locked = other.m_locked;
     m_writeAllocateCloudCompute = other.m_writeAllocateCloudCompute;
     m_allocateCloudCompute = other.m_allocateCloudCompute;
 }
@@ -71,6 +73,8 @@ multiplayer_session_request::multiplayer_session_request() :
     m_bLeaveSession(false),
     m_writeClosed(false),
     m_closed(false),
+    m_writeLocked(false),
+    m_locked(false),
     m_writeAllocateCloudCompute(false),
     m_allocateCloudCompute(false)
 {
@@ -99,6 +103,8 @@ multiplayer_session_request::multiplayer_session_request(
     m_bLeaveSession(false),
     m_writeClosed(false),
     m_closed(false),
+    m_writeLocked(false),
+    m_locked(false),
     m_writeAllocateCloudCompute(false),
     m_allocateCloudCompute(false)
 {
@@ -492,6 +498,34 @@ multiplayer_session_request::set_closed(
     m_closed = closed;
 }
 
+bool
+multiplayer_session_request::write_locked() const
+{
+    return m_writeLocked;
+}
+
+void
+multiplayer_session_request::set_write_locked(
+    _In_ bool writeLocked
+    )
+{
+    m_writeLocked = writeLocked;
+}
+
+bool
+multiplayer_session_request::locked() const
+{
+    return m_locked;
+}
+
+void
+multiplayer_session_request::set_locked(
+    _In_ bool locked
+)
+{
+    m_locked = locked;
+}
+
 bool 
 multiplayer_session_request::write_allocate_cloud_compute() const
 {
@@ -562,6 +596,11 @@ multiplayer_session_request::create_properties_json()
     if (m_writeClosed)
     {
         jsonPropertiesSystem[_T("closed")] = web::json::value(m_closed);
+    }
+
+    if (m_writeLocked)
+    {
+        jsonPropertiesSystem[_T("locked")] = web::json::value(m_locked);
     }
 
     if (m_writeAllocateCloudCompute)

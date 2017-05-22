@@ -124,6 +124,7 @@
         "properties": {
             "system": {
                 "closed": true,
+                "locked": true,
                 "allocateCloudCompute": true,
                 "keywords": [
                     "hello"
@@ -842,6 +843,20 @@
             }
         }
     },
+    "lockedJsonTrue": {
+        "properties": {
+            "system": {
+                "locked": true
+            }
+        }
+    },
+    "lockedJsonFalse": {
+        "properties": {
+            "system": {
+                "locked": false
+            }
+        }
+    },
     "activityJson" : {
         "type": "activity",
         "sessionRef": {
@@ -955,6 +970,11 @@
                 "version": 1,
                 "id": "7a4d0a99-4e23-4eba-9894-5173cf123fb4",
                 "createTime": "2013-02-01T00:00:00Z",
+                "customProperties": {
+                  "Joinability": "joinable_by_friends",
+                  "GameMode": "Team Assault",
+                  "Map": "Helmand Valley"
+                },
                 "relatedInfo": {
                     "joinRestriction": "None",
                     "closed": false,
@@ -1059,6 +1079,11 @@
                     "maxMembersCount": 10,
                     "membersCount": 1,
                     "visibility": "private"
+                },
+                "customProperties": {
+                    "Joinability": "joinable_by_friends",
+                    "GameMode": "Team Assault",
+                    "Map": "Helmand Valley"
                 }
             }
         ]
