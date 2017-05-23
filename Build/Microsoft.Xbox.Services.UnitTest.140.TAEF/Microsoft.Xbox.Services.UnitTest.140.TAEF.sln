@@ -5,16 +5,12 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.Services.UnitTest.140.TAEF", "Microsoft.Xbox.Services.UnitTest.140.TAEF.vcxproj", "{15F89B6A-312D-49A6-BBA6-CFD9242DB58E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.System.140.UnitTest.Shared", "..\Microsoft.Xbox.Services.UnitTest.140.Shared\Microsoft.Xbox.Services.UnitTest.140.Shared.vcxitems", "{E73D47A1-2CF5-4ADA-B9E7-F2619F666162}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpprestsdk140.static", "..\..\External\cpprestsdk\Release\src\build\vs14.static\casablanca140.static.vcxproj", "{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\..\External\cpprestsdk\Release\src\build\common.vcxitems*{04d42f35-e5d5-4d95-980e-1bd7e900f2dd}*SharedItemsImports = 4
 		..\..\External\cpprestsdk\Release\src\build\win32.vcxitems*{04d42f35-e5d5-4d95-980e-1bd7e900f2dd}*SharedItemsImports = 4
-		..\Microsoft.Xbox.Services.UnitTest.140.Shared\Microsoft.Xbox.Services.UnitTest.140.Shared.vcxitems*{15f89b6a-312d-49a6-bba6-cfd9242db58e}*SharedItemsImports = 4
-		..\Microsoft.Xbox.Services.UnitTest.140.Shared\Microsoft.Xbox.Services.UnitTest.140.Shared.vcxitems*{e73d47a1-2cf5-4ada-b9e7-f2619f666162}*SharedItemsImports = 9
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
