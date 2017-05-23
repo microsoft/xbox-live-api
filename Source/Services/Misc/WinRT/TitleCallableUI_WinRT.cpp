@@ -181,7 +181,8 @@ TitleCallableUI::ShowPlayerPickerUIForUser(
 Windows::Foundation::IAsyncAction^ 
 TitleCallableUI::ShowGameInviteUIForUserAsync(
     _In_ Xbox::Services::Multiplayer::MultiplayerSessionReference^ sessionReference,
-    _In_ Platform::String^ contextStringId,
+	_In_ Platform::String^ invitationDisplayText,
+	_In_ Platform::String^ contextStringId,
     _In_ Windows::System::User^ user
     )
 {  
@@ -189,8 +190,9 @@ TitleCallableUI::ShowGameInviteUIForUserAsync(
 
     auto task = title_callable_ui::show_game_invite_ui(
         sessionReference->GetCppObj(),
-        STRING_T_FROM_PLATFORM_STRING(contextStringId),
-        user
+		STRING_T_FROM_PLATFORM_STRING(invitationDisplayText),
+		STRING_T_FROM_PLATFORM_STRING(contextStringId),
+		user
         )
     .then([](xbox_live_result<void> result)
     {
@@ -200,7 +202,30 @@ TitleCallableUI::ShowGameInviteUIForUserAsync(
     return ASYNC_FROM_TASK(task);
 }
 
-Windows::Foundation::IAsyncAction^ 
+Windows::Foundation::IAsyncAction^
+TitleCallableUI::ShowGameInviteUIForUserAsync(
+	_In_ Xbox::Services::Multiplayer::MultiplayerSessionReference^ sessionReference,
+	_In_ Platform::String^ contextStringId,
+	_In_ Windows::System::User^ user
+)
+{
+	THROW_INVALIDARGUMENT_IF_NULL(sessionReference);
+
+	auto task = title_callable_ui::show_game_invite_ui(
+		sessionReference->GetCppObj(),
+		string_t(),
+		STRING_T_FROM_PLATFORM_STRING(contextStringId),
+		user
+	)
+		.then([](xbox_live_result<void> result)
+	{
+		THROW_IF_ERR(result);
+	});
+
+	return ASYNC_FROM_TASK(task);
+}
+
+Windows::Foundation::IAsyncAction^
 TitleCallableUI::ShowProfileCardUIForUserAsync(
     _In_ Platform::String^ targetXboxUserId,
     _In_ Windows::System::User^ user
