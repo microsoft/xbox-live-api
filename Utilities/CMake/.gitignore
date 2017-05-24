@@ -1,0 +1,5 @@
+build
+output
+vcxprojs
+ProjectFileProcessor/bin/Debug/ProjectFileProcessor.exe.config
+!ProjectFileProcessor/bin/Debug

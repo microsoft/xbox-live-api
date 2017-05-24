@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>Microsoft.Xbox.Services.UnitTest.140.TAEF</ProjectName>
+    <ProjectGuid>{15F89B6A-312D-49A6-BBA6-CFD9242DB58E}</ProjectGuid>
+    <RootNamespace>Microsoft.Xbox.System.Test</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformMinVersion>10.0.10240.0</WindowsTargetPlatformMinVersion>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <LinkIncremental>false</LinkIncremental>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)'=='Debug'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)'=='Release'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalOptions>/bigobj /Zm512 /GS %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir);
+      $(ProjectDir)..\..\Source\Shared;
+      $(ProjectDir)..\..\Source\System;
+      $(ProjectDir)..\..\Source\System\auth;
+      $(ProjectDir)..\..\Source\Shared\WinRT;
+      $(ProjectDir)..\..\Source\System\WinRT;
+      $(ProjectDir)..\..\Source\System\Desktop;
+      $(ProjectDir)..\..\Source\System\auth\WinRT;
+      $(ProjectDir)..\..\Source\System\auth\Desktop;
+      $(ProjectDir)..\..\Source\Services;
+      $(ProjectDir)..\..\Source\Services\Common;
+      $(ProjectDir)..\..\Source\Services\Common\WinRT;
+      $(ProjectDir)..\..\Source\Services\Social;
+      $(ProjectDir)..\..\Source\Services\Social\WinRT;
+      $(ProjectDir)..\..\Source\Services\Achievements;
+      $(ProjectDir)..\..\Source\Services\Achievements\WinRT;
+      $(ProjectDir)..\..\Source\Services\EntertainmentProfile;
+      $(ProjectDir)..\..\Source\Services\EntertainmentProfile\WinRT;
+      $(ProjectDir)..\..\Source\Services\Leaderboard;
+      $(ProjectDir)..\..\Source\Services\Leaderboard\WinRT;
+      $(ProjectDir)..\..\Source\Services\Misc;
+      $(ProjectDir)..\..\Source\Services\Misc\WinRT;
+      $(ProjectDir)..\..\Source\Services\Stats;
+      $(ProjectDir)..\..\Source\Services\Stats\WinRT;
+      $(ProjectDir)..\..\Source\Services\Multiplayer;
+      $(ProjectDir)..\..\Source\Services\Multiplayer\WinRT;
+      $(ProjectDir)..\..\Source\Services\Multiplayer;
+      $(ProjectDir)..\..\Source\Services\Multiplayer\Manager;
+      $(ProjectDir)..\..\Source\Services\Multiplayer\Manager\WinRT;
+      $(ProjectDir)..\..\Source\Services\Social\Manager;
+      $(ProjectDir)..\..\Source\Services\Social\Manager\WinRT;
+      $(ProjectDir)..\..\Source\Services\Matchmaking;
+      $(ProjectDir)..\..\Source\Services\Matchmaking\WinRT;
+      $(ProjectDir)..\..\Source\Services\RealTimeActivity;
+      $(ProjectDir)..\..\Source\Services\RealTimeActivity\WinRT;
+      $(ProjectDir)..\..\Source\Services\Presence;
+      $(ProjectDir)..\..\Source\Services\Presence\WinRT;
+      $(ProjectDir)..\..\Source\Services\GameServerPlatform;
+      $(ProjectDir)..\..\Source\Services\GameServerPlatform\WinRT;
+      $(ProjectDir)..\..\Source\Services\TitleStorage;
+      $(ProjectDir)..\..\Source\Services\TitleStorage\WinRT;
+      $(ProjectDir)..\..\Source\Services\Privacy;
+      $(ProjectDir)..\..\Source\Services\Privacy\WinRT;
+      $(ProjectDir)..\..\Source\Services\Marketplace;
+      $(ProjectDir)..\..\Source\Services\Marketplace\WinRT;
+      $(ProjectDir)..\..\Source\Services\Tournaments;
+      $(ProjectDir)..\..\Source\Services\Tournaments\WinRT;
+      $(ProjectDir)..\..\Source\Services\Events;
+      $(ProjectDir)..\..\Source\Services\Events\WinRT;
+      $(ProjectDir)..\..\Source\Services\Stats\Manager\WinRT;
+      $(ProjectDir)..\..\Include;
+      $(ProjectDir)..\..\Tests\UnitTests;
+      $(ProjectDir)..\..\Tests\UnitTests\Mocks;
+      $(ProjectDir)..\..\Tests\UnitTests\Support;
+      $(ProjectDir)..\..\External\cpprestsdk\Release\include;
+      c:\Program Files (x86)\Windows Kits\10\Testing\Development\inc;
+      %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories Condition="'$(Platform)'=='x64'">C:\Program Files (x86)\Windows Kits\10\Testing\Development\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories Condition="'$(Platform)'=='Win32'">C:\Program Files (x86)\Windows Kits\10\Testing\Development\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>USING_TAEF;DASHBOARD_PRINCIPLE_GROUP;_NO_ASYNCRTIMP;_NO_PPLXIMP;_XSAPIIMP_EXPORT;XBOX_SYSTEM;INLINE_TEST_METHOD_MARKUP;WINAPI_FAMILY=WINAPI_FAMILY_DESKTOP_APP;UNIT_TEST_SERVICES;USING_STOCK_CASABLANCA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <CompileAsWinRT>true</CompileAsWinRT>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalUsingDirectories>$(WindowsSdkDir_10)UnionMetadata;$(VCInstallDir)lib\store\references;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Wex.Common.lib;Msxml6.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/DEBUGTYPE:CV,FIXUP %(AdditionalOptions)</AdditionalOptions>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(ProjectDir)..\..\Tests\UnitTests\Tests\Services\TestResponses" "$(ProjectDir)..\..\Binaries\$(Configuration)\$(Platform)\$(ProjectName)\TestResponses" /e /y /i /r</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4592</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4592</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4592</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4592</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CasablancaBinaries Include="$(SolutionDir)..\..\..\Binaries\$(Configuration)\$(Platform)\casablanca\*.*" />
+  </ItemGroup>
+****INSERTFILES****
+  <ItemGroup>
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.static\casablanca140.static.vcxproj">
+      <Project>{04d42f35-e5d5-4d95-980e-1bd7e900f2dd}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\..\External\Packages\boost.1.58.0.0\build\native\boost.targets" Condition="Exists('..\..\External\Packages\boost.1.58.0.0\build\native\boost.targets')" />
+    <Import Project="..\..\External\Packages\boost_system-vc140.1.58.0-vs140rc\build\native\boost_system-vc140.targets" Condition="Exists('..\..\External\Packages\boost_system-vc140.1.58.0-vs140rc\build\native\boost_system-vc140.targets')" />
+    <Import Project="..\..\External\Packages\\zlib.v140.windesktop.msvcstl.static.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.static.rt-dyn.targets" Condition="Exists('..\..\External\Packages\zlib.v140.windesktop.msvcstl.static.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.static.rt-dyn.targets')" />
+    <Import Project="..\..\External\Packages\openssl.v140.windesktop.msvcstl.static.rt-dyn.x64.1.0.2.0\build\native\openssl.v140.windesktop.msvcstl.static.rt-dyn.x64.targets" Condition="Exists('..\..\External\Packages\openssl.v140.windesktop.msvcstl.static.rt-dyn.x64.1.0.2.0\build\native\openssl.v140.windesktop.msvcstl.static.rt-dyn.x64.targets')" />
+    <Import Project="..\..\External\Packages\openssl.v140.windesktop.msvcstl.static.rt-dyn.x86.1.0.2.0\build\native\openssl.v140.windesktop.msvcstl.static.rt-dyn.x86.targets" Condition="Exists('..\..\External\Packages\openssl.v140.windesktop.msvcstl.static.rt-dyn.x86.1.0.2.0\build\native\openssl.v140.windesktop.msvcstl.static.rt-dyn.x86.targets')" />
+    <Import Project="..\..\External\Packages\boost_date_time-vc140.1.58.0-vs140rc\build\native\boost_date_time-vc140.targets" Condition="Exists('..\..\External\Packages\boost_date_time-vc140.1.58.0-vs140rc\build\native\boost_date_time-vc140.targets')" />
+    <Import Project="..\..\External\Packages\boost_regex-vc140.1.58.0-vs140rc\build\native\boost_regex-vc140.targets" Condition="Exists('..\..\External\Packages\boost_regex-vc140.1.58.0-vs140rc\build\native\boost_regex-vc140.targets')" />
+  </ImportGroup>
+  <PropertyGroup>
+    <ProjectFolder>Microsoft.Xbox.System.UnitTest</ProjectFolder>
+    <OutDir>$(ProjectDir)..\..\Binaries\$(Configuration)\$(Platform)\$(ProjectName)\</OutDir>
+    <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <LocalDebuggerCommand>C:\Program Files (x86)\Windows Kits\10\Testing\Runtimes\TAEF\x64\TE.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommandArguments>$(TargetPath) /inproc</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <Target Name="CopyCasablancaBinaries" AfterTargets="Build">
+    <Copy SourceFiles="@(CasablancaBinaries)" DestinationFolder="$(OutDir)" />
+  </Target>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="..\..\xsapi.staticlib.props" />
+</Project>
