@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Durango">
       <Configuration>Debug</Configuration>
@@ -13,19 +13,21 @@
   <PropertyGroup Label="Globals">
     <!-- This property is set 'title' for XDK, remove it when you need to build for ADK -->
     <ApplicationEnvironment>title</ApplicationEnvironment>
-    <ProjectGuid>{20E87245-DA60-40E5-9938-ABB445E78467}</ProjectGuid>
+    <ProjectGuid>{8A112040-CDA1-4490-B518-62DFCC451FA7}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>Microsoft.Xbox.Services.110.XDK.Ship.Cpp</ProjectName>
+    <ProjectName>Microsoft.Xbox.Services.141.XDK.Cpp</ProjectName>
     <RootNamespace>Microsoft.Xbox.Services</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
     <AppContainerApplication Condition="'$(Platform)'!='Durango'">true</AppContainerApplication>
     <ConsumeWinRT>true</ConsumeWinRT>
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <PlatformToolset>v110</PlatformToolset>
     <UseXboxServices>false</UseXboxServices>
     <GenerateManifest>false</GenerateManifest>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
@@ -41,79 +43,23 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+****INSERTFILES****
   <ItemGroup>
-    <ClCompile Include="..\..\Source\Services\Common\Desktop\pch.cpp">
-      <PrecompiledHeader>Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)\build.cpp" />
-    <ClCompile Include="..\..\Source\Shared\logger\debug_output.cpp" />
-    <ClCompile Include="..\..\Source\Shared\logger\etw_output.cpp" />
-    <ClCompile Include="..\..\Source\Shared\logger\log.cpp" />
-    <ClCompile Include="..\..\Source\Shared\logger\log_entry.cpp" />
-    <ClCompile Include="..\..\Source\Shared\Logger\log_output.cpp" />
+    <None Include="..\..\Source\Shared\Logger\ERA_ETW.man" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Include\xsapi\achievements.h" />
-    <ClInclude Include="..\..\Include\xsapi\xbox_live_app_config.h" />
-    <ClInclude Include="..\..\Include\xsapi\errors.h" />
-    <ClInclude Include="..\..\Include\xsapi\game_server_platform.h" />
-    <ClInclude Include="..\..\Include\xsapi\multiplayer_manager.h" />
-    <ClInclude Include="..\..\Include\xsapi\http_call.h" />
-    <ClInclude Include="..\..\Include\xsapi\http_call_request_message.h" />
-    <ClInclude Include="..\..\Include\xsapi\http_call_settings.h" />
-    <ClInclude Include="..\..\Include\xsapi\leaderboard.h" />
-    <ClInclude Include="..\..\Include\xsapi\marketplace.h" />
-    <ClInclude Include="..\..\Include\xsapi\matchmaking.h" />
-    <ClInclude Include="..\..\Include\xsapi\multiplayer.h" />
-    <ClInclude Include="..\..\Include\xsapi\presence.h" />
-    <ClInclude Include="..\..\Include\xsapi\privacy.h" />
-    <ClInclude Include="..\..\Include\xsapi\profile.h" />
-    <ClInclude Include="..\..\Include\xsapi\real_time_activity.h" />
-    <ClInclude Include="..\..\Include\xsapi\services.h" />
-    <ClInclude Include="..\..\Include\xsapi\social.h" />
-    <ClInclude Include="..\..\Include\xsapi\system.h" />
-    <ClInclude Include="..\..\Include\xsapi\title_callable_ui.h" />
-    <ClInclude Include="..\..\Include\xsapi\title_storage.h" />
-    <ClInclude Include="..\..\Include\xsapi\types.h" />
-    <ClInclude Include="..\..\Include\xsapi\user_statistics.h" />
-    <ClInclude Include="..\..\Include\xsapi\xbox_live_context.h" />
-    <ClInclude Include="..\..\Include\xsapi\xbox_service_call_routed_event_args.h" />
-    <ClInclude Include="..\..\Include\xsapi\social_manager.h" />
-    <ClInclude Include="..\..\Source\Services\Common\Desktop\pch.h" />
-    <ClInclude Include="..\..\Source\Services\Common\Durango\ppltasks_extra.h" />
-    <ClInclude Include="..\..\Source\Services\Common\xbox_live_context_impl.h" />
-    <ClInclude Include="..\..\Source\Services\Leaderboard\leaderboard_query.h" />
-    <ClInclude Include="..\..\Source\Services\Leaderboard\leaderboard_serializers.h" />
-    <ClInclude Include="..\..\Source\Services\Multiplayer\Manager\multiplayer_manager_internal.h" />
-    <ClInclude Include="..\..\Source\Services\Multiplayer\multiplayer_internal.h" />
-    <ClInclude Include="..\..\Source\Services\Presence\presence_internal.h" />
-    <ClInclude Include="..\..\Source\Services\RealTimeActivity\real_time_activity_internal.h" />
-    <ClInclude Include="..\..\Source\Services\Social\social_internal.h" />
-    <ClInclude Include="..\..\Source\Services\Stats\user_statistics_internal.h" />
-    <ClInclude Include="..\..\Source\Shared\Desktop\local_config_desktop.h" />
-    <ClInclude Include="..\..\Source\Shared\http_call_impl.h" />
-    <ClInclude Include="..\..\Source\Shared\http_call_request_message.h" />
-    <ClInclude Include="..\..\Source\Shared\http_call_response.h" />
-    <ClInclude Include="..\..\Source\Shared\http_client.h" />
-    <ClInclude Include="..\..\Source\Shared\local_config.h" />
-    <ClInclude Include="..\..\Source\Shared\logger\debug_output.h" />
-    <ClInclude Include="..\..\Source\Shared\logger\etw_output.h" />
-    <ClInclude Include="..\..\Source\Shared\logger\log.h" />
-    <ClInclude Include="..\..\Source\Shared\shared_macros.h" />
-    <ClInclude Include="..\..\Source\Shared\user_context.h" />
-    <ClInclude Include="..\..\Source\Shared\utils.h" />
-    <ClInclude Include="..\..\Source\Shared\web_socket_client.h" />
-    <ClInclude Include="..\..\Source\Shared\web_socket_connection.h" />
-    <ClInclude Include="..\..\Source\Shared\web_socket_connection_state.h" />
-    <ClInclude Include="..\..\Source\Shared\xbox_system_factory.h" />
-    <ClInclude Include="..\..\Source\System\user_impl.h" />
-    <ClInclude Include="..\..\Source\Services\Social\Manager\social_manager_internal.h" />
+    <ResourceCompile Include="..\..\Source\Shared\Logger\ERA_ETW.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs11.xbox\casablanca110.Xbox.vcxproj">
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs15.xbox\casablanca141.Xbox.vcxproj">
       <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
     </ProjectReference>
   </ItemGroup>
+  <PropertyGroup>
+    <ProjectFolder>$(MSBuildProjectName)</ProjectFolder>
+    <OutDir>$(ProjectDir)..\..\Binaries\$(Configuration)\$(Platform)\$(ProjectFolder)\</OutDir>
+    <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectFolder)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>

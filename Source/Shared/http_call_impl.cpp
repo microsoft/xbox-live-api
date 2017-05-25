@@ -280,32 +280,13 @@ http_call_impl::internal_get_response(
     http_retry_after_api_state apiState = retryAfterManager->get_state(httpCallData->xboxLiveApi);
     if (apiState.errCode)
     {
-        uint32_t waitTimeInMilliseconds = 0;
-        if (should_fast_fail(apiState, httpCallData, requestStartTime, waitTimeInMilliseconds))
+        if (should_fast_fail(apiState, httpCallData, requestStartTime))
         {
             return handle_fast_fail(apiState, httpCallData);
         }
         else
         {
-            if (waitTimeInMilliseconds > 0)
-            {
-                // only allow a single call per endpoint to wait for the 429 to expire, and fast fail the rest
-                if (!apiState.isCallWaiting)
-                {
-                    apiState.isCallWaiting = true;
-                    retryAfterManager->set_state(httpCallData->xboxLiveApi, apiState);
-                    utils::sleep(waitTimeInMilliseconds);
-                    retryAfterManager->clear_state(httpCallData->xboxLiveApi);
-                }
-                else
-                {
-                    return handle_fast_fail(apiState, httpCallData);
-                }
-            }
-            else
-            {
-                retryAfterManager->clear_state(httpCallData->xboxLiveApi);
-            }
+            retryAfterManager->clear_state(httpCallData->xboxLiveApi);
         }
     }
 
@@ -859,11 +840,9 @@ bool http_call_impl::handle_unauthorized_error(
 bool http_call_impl::should_fast_fail(
     _In_ const http_retry_after_api_state& apiState,
     _In_ const std::shared_ptr<http_call_data>& httpCallData,
-    _In_ const chrono_clock_t::time_point& currentTime,
-    _Out_ uint32_t& waitTimeInMilliseconds
+    _In_ const chrono_clock_t::time_point& currentTime
     )
 {
-    waitTimeInMilliseconds = 0;
     if (!apiState.errCode)
     {
         return false;

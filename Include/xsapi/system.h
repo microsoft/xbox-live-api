@@ -53,27 +53,35 @@ public:
     /// <summary>
     /// Returns the xbox user id for the WNS event
     /// </summary>
-    const string_t& xbox_user_id() const { return m_xbox_user_id; }
+    _XSAPIIMP const string_t& xbox_user_id() const { return m_xbox_user_id; }
 
     /// <summary>
     /// Returns the notification type
     /// </summary>
-    const string_t& notification_type() const { return m_notification_type; }
+    _XSAPIIMP const string_t& notification_type() const { return m_notification_type; }
+
+    /// <summary>
+    /// Returns the full notification content
+    /// </summary>
+    _XSAPIIMP const string_t& notification_content() const { return m_notification_content; }
 
     /// <summary>
     /// Internal function
     /// </summary>
     xbox_live_wns_event_args(
         _In_ string_t xbox_user_id,
-        _In_ string_t notification_type
+        _In_ string_t notification_type,
+        _In_ string_t notification_content
     ) :
     m_xbox_user_id(std::move(xbox_user_id)),
-    m_notification_type(std::move(notification_type))
+    m_notification_type(std::move(notification_type)),
+    m_notification_content(std::move(notification_content))
     {}
 
 private:
     string_t m_xbox_user_id;
     string_t m_notification_type;
+    string_t m_notification_content;
 };
 
 class xbox_live_services_settings : public std::enable_shared_from_this<xbox_live_services_settings>
@@ -153,7 +161,7 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    void _Raise_wns_event(_In_ const string_t& xbox_user_id, _In_ const string_t& nofitication_type);
+    void _Raise_wns_event(_In_ const string_t& xbox_user_id, _In_ const string_t& nofitication_type, _In_ const string_t& content);
 
     /// <summary>
     /// Internal function
