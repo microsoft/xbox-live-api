@@ -27,7 +27,7 @@ XBOX_LIVE_NAMESPACE::system::xbox_live_mutex user_impl::s_trackingUsersLock;
 std::shared_ptr<user_impl>
 user_factory::create_user_impl(user_creation_context userCreationContext)
 {
-	return XBOX_LIVE_NAMESPACE::system::xbox_system_factory::get_factory()->create_user_impl(userCreationContext);
+    return XBOX_LIVE_NAMESPACE::system::xbox_system_factory::get_factory()->create_user_impl(userCreationContext);
 }
 
 user_impl::user_impl(

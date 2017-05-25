@@ -174,7 +174,7 @@ private:
     pplx::task<void> initialize_provider();
 
     // sync version of get internal_get_token_and_signature
-	XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>
+    XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>
     internal_get_token_and_signature_helper(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,

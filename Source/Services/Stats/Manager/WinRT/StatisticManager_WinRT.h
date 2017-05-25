@@ -133,7 +133,7 @@ public:
         _In_ XboxLiveUser_t user,
         _In_ Platform::String^ name
         );
-		
+
     /// <summary> 
     /// Starts a request for a global leaderboard. You can retrieve the resulting data by checking
     /// the events returned from do_work for an event of type get_leaderboard_complete

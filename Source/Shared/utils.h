@@ -512,7 +512,7 @@ public:
         _In_ string_t::value_type seperator
     );
 
-	static XBOX_LIVE_NAMESPACE::xbox_live_error_code convert_exception_to_xbox_live_error_code();
+    static XBOX_LIVE_NAMESPACE::xbox_live_error_code convert_exception_to_xbox_live_error_code();
 
 #ifdef _WIN32
     static void convert_unix_time_to_filetime(

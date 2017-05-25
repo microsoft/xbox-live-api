@@ -3,12 +3,16 @@
 
 #include "pch.h"
 #if !UNIT_TEST_SERVICES
-#define _APISET_TARGET_VERSION _APISET_TARGET_VERSION_WIN10_RS1
+#define _APISET_TARGET_VERSION _APISET_TARGET_VERSION_WIN10_RS2
 
 #include <gamingtcui.h>
 #include <windows.system.h>
 #include "xbox_system_factory.h"
 #include "xsapi/title_callable_ui.h"
+
+#ifdef _APISET_TARGET_VERSION_WIN10_RS2
+    #define INVITE_WITH_CONTEXT
+#endif
 
 #define XBOX_APP_PFN _T("Microsoft.XboxApp_8wekyb3d8bbwe")
 #define XBOX_DEEPLINK_FRIEND_FINDER _T("xbox-friendfinder:facebook")
@@ -244,6 +248,7 @@ title_callable_ui::show_player_picker_ui(
 pplx::task<xbox::services::xbox_live_result<void>>
 title_callable_ui::show_game_invite_ui(
     _In_ const xbox::services::multiplayer::multiplayer_session_reference& sessionReference,
+    _In_ const string_t& invitationDisplayText,
     _In_ const string_t& contextStringId
 #if UWP_API
     , _In_opt_ Windows::System::User^ user
@@ -252,6 +257,7 @@ title_callable_ui::show_game_invite_ui(
 {
     auto task = pplx::create_task([
         sessionReference,
+        invitationDisplayText,
         contextStringId
 #if UWP_API
         , user
@@ -263,34 +269,70 @@ title_callable_ui::show_game_invite_ui(
         Platform::String^ serviceConfigurationId = ref new Platform::String(sessionReference.service_configuration_id().c_str());
         Platform::String^ sessionTemplateName = ref new Platform::String(sessionReference.session_template_name().c_str());
         Platform::String^ sessionName = ref new Platform::String(sessionReference.session_name().c_str());
-        Platform::String^ invitation = ref new Platform::String(contextStringId.c_str());
+        Platform::String^ strInvitationDisplayText = ref new Platform::String(invitationDisplayText.c_str());
+        Platform::String^ strContextStringId = ref new Platform::String(contextStringId.c_str());
 
         HRESULT hr = S_OK;
 #if UWP_API
         if (user != nullptr && IsMultiUserAPISupported())
         {
             ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
-            hr = ShowGameInviteUIForUser(
-                userAbi,
-                reinterpret_cast<HSTRING>(serviceConfigurationId),
-                reinterpret_cast<HSTRING>(sessionTemplateName),
-                reinterpret_cast<HSTRING>(sessionName),
-                reinterpret_cast<HSTRING>(invitation),
-                UICompletionRoutine,
-                static_cast<void*>(&context)
-                );
+#if INVITE_WITH_CONTEXT
+            if (strContextStringId != nullptr)
+            {
+                hr = ShowGameInviteUIWithContextForUser(
+                    userAbi,
+                    reinterpret_cast<HSTRING>(serviceConfigurationId),
+                    reinterpret_cast<HSTRING>(sessionTemplateName),
+                    reinterpret_cast<HSTRING>(sessionName),
+                    reinterpret_cast<HSTRING>(strInvitationDisplayText),
+                    reinterpret_cast<HSTRING>(strContextStringId),
+                    UICompletionRoutine,
+                    static_cast<void*>(&context)
+                    );
+            }
+            else
+#endif
+            {
+                hr = ShowGameInviteUIForUser(
+                    userAbi,
+                    reinterpret_cast<HSTRING>(serviceConfigurationId),
+                    reinterpret_cast<HSTRING>(sessionTemplateName),
+                    reinterpret_cast<HSTRING>(sessionName),
+                    reinterpret_cast<HSTRING>(strInvitationDisplayText),
+                    UICompletionRoutine,
+                    static_cast<void*>(&context)
+                    );
+            }
         }
         else
 #endif
         {
-            hr = ShowGameInviteUI(
-                reinterpret_cast<HSTRING>(serviceConfigurationId),
-                reinterpret_cast<HSTRING>(sessionTemplateName),
-                reinterpret_cast<HSTRING>(sessionName),
-                reinterpret_cast<HSTRING>(invitation),
-                UICompletionRoutine,
-                static_cast<void*>(&context)
-                );
+#if INVITE_WITH_CONTEXT
+            if (strContextStringId != nullptr)
+            {
+                hr = ShowGameInviteUIWithContext(
+                    reinterpret_cast<HSTRING>(serviceConfigurationId),
+                    reinterpret_cast<HSTRING>(sessionTemplateName),
+                    reinterpret_cast<HSTRING>(sessionName),
+                    reinterpret_cast<HSTRING>(strInvitationDisplayText),
+                    reinterpret_cast<HSTRING>(strContextStringId),
+                    UICompletionRoutine,
+                    static_cast<void*>(&context)
+                    );
+            }
+            else
+#endif
+            {
+                hr = ShowGameInviteUI(
+                    reinterpret_cast<HSTRING>(serviceConfigurationId),
+                    reinterpret_cast<HSTRING>(sessionTemplateName),
+                    reinterpret_cast<HSTRING>(sessionName),
+                    reinterpret_cast<HSTRING>(strInvitationDisplayText),
+                    UICompletionRoutine,
+                    static_cast<void*>(&context)
+                    );
+            }
         }
 
         if (SUCCEEDED(hr) || hr == E_PENDING)

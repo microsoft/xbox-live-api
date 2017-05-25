@@ -50,11 +50,11 @@
 #if defined _WIN32
   #ifdef _NO_XSAPIIMP
     #define _XSAPIIMP
-	#if _MSC_VER >= 1900
-	    #define _XSAPIIMP_DEPRECATED __declspec(deprecated)
-	#else
-	    #define _XSAPIIMP_DEPRECATED
-	#endif
+    #if _MSC_VER >= 1900
+        #define _XSAPIIMP_DEPRECATED __declspec(deprecated)
+    #else
+        #define _XSAPIIMP_DEPRECATED
+    #endif
   #else
     #ifdef _XSAPIIMP_EXPORT
       #define _XSAPIIMP __declspec(dllexport)
