@@ -304,15 +304,6 @@ user_impl_idp::internal_get_token_and_signature_helper(
         );
 
     xbox_live_result<token_and_signature_result> result = convert_web_token_request_result(tokenResult);
-    if (!result.err())
-    {
-        // Check if xuid has changed, if so report as user sign out
-        if (is_signed_in() && result.payload().xbox_user_id() != m_xboxUserId)
-        {
-            user_signed_out();
-            return xbox_live_result<token_and_signature_result>(xbox_live_error_code::auth_user_switched, "user has switched");
-        };
-    }
 
     return result;
 }
