@@ -353,7 +353,7 @@ xbox_live_context_impl::contextual_search_service()
 system::string_service&
 xbox_live_context_impl::string_service()
 {
-	return m_stringService;
+    return m_stringService;
 }
 
 #if UWP_API || XSAPI_U

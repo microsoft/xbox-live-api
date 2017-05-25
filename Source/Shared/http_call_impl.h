@@ -214,7 +214,7 @@ public:
         );
 
 private:
-	XBOX_LIVE_NAMESPACE::system::xbox_live_mutex m_lock;
+    XBOX_LIVE_NAMESPACE::system::xbox_live_mutex m_lock;
     std::unordered_map<uint32_t, http_retry_after_api_state> m_apiStateMap;
 };
 

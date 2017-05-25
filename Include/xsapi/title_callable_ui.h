@@ -116,10 +116,16 @@ public:
     /// specified game session to the selected people.
     /// </summary>
     /// <param name="sessionReference">A reference to the multiplayer session to invite people to.</param>
-    /// <param name="contextStringId">The custom context string ID.  This string ID is defined
-    /// during Xbox Live ingestion to identify the invitation text that is additional to the standard
-    /// invitation text. The ID string must be prefixed with "///".  Pass an empty string if
-    /// you don't want a custom string added to the invite.</param>
+    /// <param name="invitationDisplayText">The ID of the custom invite string that is displayed with 
+    /// the invite notification.The ID must match the ID that is assigned to the custom invite string 
+    /// in the title's multiplayer service configuration. The format of the parameter is "///{id}", 
+    /// where {id} is replaced with the ID of the custom string. For example, if the ID of the custom string 
+    /// "Play Capture the Flag" is 1, then you would set this parameter to "///1" in order to display the 
+    /// "Play Capture the Flag" custom string in the game invite. 
+    /// Pass an empty string if you don't want a custom string added to the invite.</param>
+    /// <param name="contextStringId">The custom activation context that is available to the invitee in the 
+    /// activation URI for an invite. The custom activation context string must be URL-safe and binary content 
+    /// should be encoded with URL-safe base64 encoding. The maximum length is 160 characters.</param>
     /// <param name="user">System user that identifies which user is sending the invite</param>
     /// <returns>
     /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
@@ -129,7 +135,8 @@ public:
     _XSAPIIMP static pplx::task<xbox::services::xbox_live_result<void>>
     show_game_invite_ui(
         _In_ const xbox::services::multiplayer::multiplayer_session_reference& sessionReference,
-        _In_ const string_t& contextStringId,
+        _In_ const string_t& invitationDisplayText,
+        _In_ const string_t& contextStringId = string_t(),
         _In_opt_ Windows::System::User^ user = nullptr
         );
 
@@ -250,10 +257,16 @@ public:
     /// specified game session to the selected people.
     /// </summary>
     /// <param name="sessionReference">A reference to the multiplayer session to invite people to.</param>
-    /// <param name="contextStringId">The custom context string ID.  This string ID is defined
-    /// during Xbox Live ingestion to identify the invitation text that is additional to the standard
-    /// invitation text. The ID string must be prefixed with "///".  Pass an empty string if
-    /// you don't want a custom string added to the invite.</param>
+    /// <param name="invitationDisplayText">The ID of the custom invite string that is displayed with 
+    /// the invite notification.The ID must match the ID that is assigned to the custom invite string 
+    /// in the title's multiplayer service configuration. The format of the parameter is "///{id}", 
+    /// where {id} is replaced with the ID of the custom string. For example, if the ID of the custom string 
+    /// "Play Capture the Flag" is 1, then you would set this parameter to "///1" in order to display the 
+    /// "Play Capture the Flag" custom string in the game invite. 
+    /// Pass an empty string if you don't want a custom string added to the invite.</param>
+    /// <param name="contextStringId">The custom activation context that is available to the invitee in the 
+    /// activation URI for an invite. The custom activation context string must be URL-safe and binary content 
+    /// should be encoded with URL-safe base64 encoding. The maximum length is 160 characters.</param>
     /// <returns>
     /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
     /// The task completes when the UI is closed.
@@ -262,7 +275,8 @@ public:
     _XSAPIIMP static pplx::task<xbox::services::xbox_live_result<void>>
     show_game_invite_ui(
         _In_ const xbox::services::multiplayer::multiplayer_session_reference& sessionReference,
-        _In_ const string_t& contextStringId
+        _In_ const string_t& invitationDisplayText,
+        _In_ const string_t& contextStringId = string_t()
         );
 
     /// <summary>

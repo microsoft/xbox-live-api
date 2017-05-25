@@ -104,7 +104,7 @@ public:
     /// Creates an xbox_live_context from a Microsoft::Xbox::Services::System::XboxLiveUser^
     /// </summary>
     _XSAPIIMP xbox_live_context(
-    	_In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user
+        _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user
         );
 
     /// <summary>

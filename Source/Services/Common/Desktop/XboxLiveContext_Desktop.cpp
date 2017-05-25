@@ -153,13 +153,13 @@ xbox_live_context::privacy_service()
 system::string_service&
 xbox_live_context::string_service()
 {
-	return m_xboxLiveContextImpl->string_service();
+    return m_xboxLiveContextImpl->string_service();
 }
 
 contextual_search::contextual_search_service&
 xbox_live_context::contextual_search_service()
 {
-	return m_xboxLiveContextImpl->contextual_search_service();
+    return m_xboxLiveContextImpl->contextual_search_service();
 }
 
 #if UWP_API || XSAPI_U
