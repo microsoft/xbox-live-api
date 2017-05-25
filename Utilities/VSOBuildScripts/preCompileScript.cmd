@@ -38,7 +38,7 @@ echo #define XBOX_SERVICES_API_VERSION_STRING _T("%NUGET_VERSION_NUMBER%") >> %B
 type %BUILD_VERSION_FILE%
 
 rem generate the .Ship. vcxprojs
-%TFS_SourcesDirectory%\Utilities\VSOBuildScripts\MakeShipProjects.cmd %TFS_SourcesDirectory%
+call %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\MakeShipProjects.cmd %TFS_SourcesDirectory%
 
 rem create the build.cpp files
 del %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.110.XDK.Cpp\build.cpp
@@ -58,8 +58,8 @@ dir %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.140.UWP.Cpp\build.cpp
 dir %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.141.UWP.Cpp\build.cpp
 
 rem generate and compare against what's in git to see if any vcxproj is stale and email team if it is
-%TFS_SourcesDirectory%\Utilities\CMake\MakeProjects.cmd %TFS_SourcesDirectory% skipCopy
-%TFS_SourcesDirectory%\Utilities\VSOBuildScripts\CompareBuildFiles.cmd %TFS_SourcesDirectory% emailfailures
+call %TFS_SourcesDirectory%\Utilities\CMake\MakeProjects.cmd %TFS_SourcesDirectory% skipCopy
+call %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\CompareBuildFiles.cmd %TFS_SourcesDirectory% emailfailures
 
 echo Done preCompileScript.cmd
 :done
