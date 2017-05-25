@@ -122,6 +122,23 @@ const string_t& xbox_live_user::privileges() const
     return m_user_impl->privileges();
 }
 
+#if XSAPI_U
+const string_t& xbox_live_user::userSettingsRestrictions() const
+{
+    return m_user_impl->userSettingsRestrictions();
+}
+
+const string_t& xbox_live_user::userEnforcementRestrictions() const
+{
+    return m_user_impl->userEnforcementRestrictions();
+}
+
+const string_t& xbox_live_user::userTitleRestrictions() const
+{
+    return m_user_impl->userTitleRestrictions();
+}
+#endif
+
 std::shared_ptr<auth_config> xbox_live_user::auth_config()
 {
     return m_user_impl->get_auth_config();
