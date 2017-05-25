@@ -6,6 +6,7 @@ cd %CMAKE_FOLDER%\build
 echo This file is created on build server > build.cpp
 
 set CMAKE_EXE="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
+if NOT EXIST %CMAKE_EXE% set CMAKE_EXE="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
  
 %CMAKE_EXE% -G "Visual Studio 15 2017" %* CMakeLists.txt %CMAKE_FOLDER%
 call :subCopy
