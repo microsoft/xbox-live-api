@@ -3,16 +3,19 @@
 
 #include "pch.h"
 #if !UNIT_TEST_SERVICES
-#define _APISET_TARGET_VERSION _APISET_TARGET_VERSION_WIN10_RS2
+
+#ifdef _APISET_TARGET_VERSION_WIN10_RS2
+    #define INVITE_WITH_CONTEXT
+    #define _APISET_TARGET_VERSION _APISET_TARGET_VERSION_WIN10_RS2
+#else
+    #define _APISET_TARGET_VERSION _APISET_TARGET_VERSION_WIN10_RS1
+#endif
 
 #include <gamingtcui.h>
 #include <windows.system.h>
 #include "xbox_system_factory.h"
 #include "xsapi/title_callable_ui.h"
 
-#ifdef _APISET_TARGET_VERSION_WIN10_RS2
-    #define INVITE_WITH_CONTEXT
-#endif
 
 #define XBOX_APP_PFN _T("Microsoft.XboxApp_8wekyb3d8bbwe")
 #define XBOX_DEEPLINK_FRIEND_FINDER _T("xbox-friendfinder:facebook")
