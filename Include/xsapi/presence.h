@@ -4,12 +4,6 @@
 #pragma once
 #include "xsapi/real_time_activity.h"
 
-#if !XSAPI_U
-namespace xbox { namespace services { namespace social { namespace manager {
-    enum class change_list_enum;
-} } } }
-#endif
-
 namespace xbox { namespace services {
     class xbox_live_context_impl;
     /// <summary>
