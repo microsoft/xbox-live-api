@@ -111,17 +111,17 @@ const string_t& token_and_signature_result::privileges() const
 }
 
 #if XSAPI_U
-const string_t& token_and_signature_result::userSettingsRestrictions() const
+const string_t& token_and_signature_result::user_settings_restrictions() const
 {
     return m_userSettingsRestrictions;
 }
 
-const string_t& token_and_signature_result::userEnforcementRestrictions() const
+const string_t& token_and_signature_result::user_enforcement_restrictions() const
 {
     return m_userEnforcementRestrictions;
 }
 
-const string_t& token_and_signature_result::userTitleRestrictions() const
+const string_t& token_and_signature_result::user_title_restrictions() const
 {
     return m_userTitleRestrictions;
 }

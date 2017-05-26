@@ -123,19 +123,19 @@ const string_t& xbox_live_user::privileges() const
 }
 
 #if XSAPI_U
-const string_t& xbox_live_user::userSettingsRestrictions() const
+const string_t& xbox_live_user::user_settings_restrictions() const
 {
-    return m_user_impl->userSettingsRestrictions();
+    return m_user_impl->user_settings_restrictions();
 }
 
-const string_t& xbox_live_user::userEnforcementRestrictions() const
+const string_t& xbox_live_user::user_enforcement_restrictions() const
 {
-    return m_user_impl->userEnforcementRestrictions();
+    return m_user_impl->user_enforcement_restrictions();
 }
 
-const string_t& xbox_live_user::userTitleRestrictions() const
+const string_t& xbox_live_user::user_title_restrictions() const
 {
-    return m_user_impl->userTitleRestrictions();
+    return m_user_impl->user_title_restrictions();
 }
 #endif
 

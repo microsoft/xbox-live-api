@@ -269,17 +269,17 @@ public:
     /// <summary>
     /// The settings related user restrictions.
     /// </summary>
-    _XSAPIIMP const string_t& userSettingsRestrictions() const;
+    _XSAPIIMP const string_t& user_settings_restrictions() const;
     
     /// <summary>
     /// The enforcement related user restrictions.
     /// </summary>
-    _XSAPIIMP const string_t& userEnforcementRestrictions() const;
+    _XSAPIIMP const string_t& user_enforcement_restrictions() const;
     
     /// <summary>
     /// The title related user restrictions.
     /// </summary>
-    _XSAPIIMP const string_t& userTitleRestrictions() const;
+    _XSAPIIMP const string_t& user_title_restrictions() const;
 #endif
 
     /// <summary>
@@ -557,17 +557,17 @@ public:
     /// <summary>
     /// Gets the settings related user restrictions.
     /// </summary>
-    _XSAPIIMP const string_t& userSettingsRestrictions() const;
+    _XSAPIIMP const string_t& user_settings_restrictions() const;
     
     /// <summary>
     /// Gets the enforcement related user restrictions.
     /// </summary>
-    _XSAPIIMP const string_t& userEnforcementRestrictions() const;
+    _XSAPIIMP const string_t& user_enforcement_restrictions() const;
     
     /// <summary>
     /// Gets the title related user restrictions.
     /// </summary>
-    _XSAPIIMP const string_t& userTitleRestrictions() const;
+    _XSAPIIMP const string_t& user_title_restrictions() const;
 #endif
     
     std::shared_ptr<auth_config> auth_config();

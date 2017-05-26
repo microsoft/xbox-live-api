@@ -45,9 +45,9 @@ public:
     const string_t& age_group() { return m_ageGroup; }
     const string_t& privileges() { return m_privileges; }
 #if XSAPI_U
-    const string_t& userSettingsRestrictions() { return m_userSettingsRestrictions; }
-    const string_t& userEnforcementRestrictions() { return m_userEnforcementRestrictions; }
-    const string_t& userTitleRestrictions() { return m_userTitleRestrictions; }
+    const string_t& user_settings_restrictions() { return m_userSettingsRestrictions; }
+    const string_t& user_enforcement_restrictions() { return m_userEnforcementRestrictions; }
+    const string_t& user_title_restrictions() { return m_userTitleRestrictions; }
 #endif
     const string_t& web_account_id() { return m_webAccountId; }
     std::shared_ptr<auth_config> get_auth_config() { return m_authConfig; }
