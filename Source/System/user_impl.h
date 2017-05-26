@@ -44,6 +44,11 @@ public:
     const string_t& gamertag() { return m_gamertag; }
     const string_t& age_group() { return m_ageGroup; }
     const string_t& privileges() { return m_privileges; }
+#if XSAPI_U
+    const string_t& user_settings_restrictions() { return m_userSettingsRestrictions; }
+    const string_t& user_enforcement_restrictions() { return m_userEnforcementRestrictions; }
+    const string_t& user_title_restrictions() { return m_userTitleRestrictions; }
+#endif
     const string_t& web_account_id() { return m_webAccountId; }
     std::shared_ptr<auth_config> get_auth_config() { return m_authConfig; }
     const user_creation_context creation_context() { return m_creationContext;  }
@@ -106,6 +111,11 @@ protected:
         _In_ string_t gamertag,
         _In_ string_t ageGroup,
         _In_ string_t privileges,
+#if XSAPI_U
+        _In_ string_t userSettingsRestrictions,
+        _In_ string_t userEnforcementRestrictions,
+        _In_ string_t userTitleRestrictions,
+#endif
         _In_ string_t accountId
         );
 
@@ -113,6 +123,11 @@ protected:
     string_t m_gamertag;
     string_t m_ageGroup;
     string_t m_privileges;
+#if XSAPI_U
+    string_t m_userSettingsRestrictions;
+    string_t m_userEnforcementRestrictions;
+    string_t m_userTitleRestrictions;
+#endif
     string_t m_webAccountId;
     string_t m_cid;
     string_t m_titleTelemetrySessionId;

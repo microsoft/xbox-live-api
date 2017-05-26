@@ -211,6 +211,11 @@ public:
         _In_ string_t userHash,
         _In_ string_t ageGroup,
         _In_ string_t privileges,
+#if XSAPI_U
+        _In_ string_t userSettingsRestrictions,
+        _In_ string_t userEnforcementRestrictions,
+        _In_ string_t userTitleRestrictions,
+#endif
         _In_ string_t webAccountId,
         _In_ string_t reserved
         );
@@ -254,11 +259,28 @@ public:
     /// The age group
     /// </summary>
     _XSAPIIMP const string_t& age_group() const;
-
+    
     /// <summary>
     /// The privileges
     /// </summary>
     _XSAPIIMP const string_t& privileges() const;
+    
+#if XSAPI_U
+    /// <summary>
+    /// The settings related user restrictions.
+    /// </summary>
+    _XSAPIIMP const string_t& user_settings_restrictions() const;
+    
+    /// <summary>
+    /// The enforcement related user restrictions.
+    /// </summary>
+    _XSAPIIMP const string_t& user_enforcement_restrictions() const;
+    
+    /// <summary>
+    /// The title related user restrictions.
+    /// </summary>
+    _XSAPIIMP const string_t& user_title_restrictions() const;
+#endif
 
     /// <summary>
     /// The web account id
@@ -274,6 +296,11 @@ private:
     string_t m_xboxUserHash;
     string_t m_ageGroup;
     string_t m_privileges;
+#if XSAPI_U
+    string_t m_userSettingsRestrictions;
+    string_t m_userEnforcementRestrictions;
+    string_t m_userTitleRestrictions;
+#endif
     string_t m_webAccountId;
     string_t m_reserved;
 
@@ -520,12 +547,29 @@ public:
     /// Gets the age group of the user.
     /// </summary>
     _XSAPIIMP const string_t& age_group() const;
-
+    
     /// <summary>
     /// Gets the privileges of the user.
     /// </summary>
     _XSAPIIMP const string_t& privileges() const;
-
+    
+#if XSAPI_U
+    /// <summary>
+    /// Gets the settings related user restrictions.
+    /// </summary>
+    _XSAPIIMP const string_t& user_settings_restrictions() const;
+    
+    /// <summary>
+    /// Gets the enforcement related user restrictions.
+    /// </summary>
+    _XSAPIIMP const string_t& user_enforcement_restrictions() const;
+    
+    /// <summary>
+    /// Gets the title related user restrictions.
+    /// </summary>
+    _XSAPIIMP const string_t& user_title_restrictions() const;
+#endif
+    
     std::shared_ptr<auth_config> auth_config();
 
     /// <summary>

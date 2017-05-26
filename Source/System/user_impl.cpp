@@ -120,6 +120,11 @@ user_impl::user_signed_in(
     _In_ string_t gamertag,
     _In_ string_t ageGroup,
     _In_ string_t privileges,
+#if XSAPI_U
+    _In_ string_t userSettingsRestrictions,
+    _In_ string_t userEnforcementRestrictions,
+    _In_ string_t userTitleRestrictions,
+#endif
     _In_ string_t webAccountId
     )
 {
@@ -131,6 +136,11 @@ user_impl::user_signed_in(
         m_gamertag = std::move(gamertag);
         m_ageGroup = std::move(ageGroup);
         m_privileges = std::move(privileges);
+#if XSAPI_U
+        m_userSettingsRestrictions = std::move(userSettingsRestrictions);
+        m_userEnforcementRestrictions = std::move(userEnforcementRestrictions);
+        m_userTitleRestrictions = std::move(userTitleRestrictions);
+#endif
         m_webAccountId = std::move(webAccountId);
 
         m_isSignedIn = true;
@@ -244,6 +254,11 @@ void user_impl::user_signed_out()
                 m_gamertag.clear();
                 m_ageGroup.clear();
                 m_privileges.clear();
+#if XSAPI_U
+                m_userSettingsRestrictions.clear();
+                m_userEnforcementRestrictions.clear();
+                m_userTitleRestrictions.clear();
+#endif
                 m_webAccountId.clear();
             }
         }
