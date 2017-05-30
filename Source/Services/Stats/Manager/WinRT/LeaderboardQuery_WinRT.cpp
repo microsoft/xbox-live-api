@@ -20,6 +20,11 @@ using namespace Microsoft::Xbox::Services::System;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_LEADERBOARD_BEGIN
 
+LeaderboardQuery::LeaderboardQuery()
+{
+    m_cppObj = leaderboard_query();
+}
+
 LeaderboardQuery::LeaderboardQuery(
     _In_ xbox::services::leaderboard::leaderboard_query cppObj) :
     m_cppObj(std::move(cppObj))
