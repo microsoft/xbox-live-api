@@ -23,6 +23,11 @@ public ref class LeaderboardQuery sealed
 public:
 
     /// <summary>
+    /// Constructs a new LeaderboardQuery object.
+    /// </summary>
+    LeaderboardQuery();
+
+    /// <summary>
     /// Gets/Sets whether or not the resulting leaderboard will start with the 
     /// user that requested the leaderboard.
     /// </summary>
