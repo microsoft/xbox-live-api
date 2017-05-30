@@ -8,9 +8,25 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 
 public enum class StatisticEventType
 {
+    /// <summary> 
+    /// A local user has been added
+    /// </summary>
     LocalUserAdded = xbox::services::stats::manager::stat_event_type::local_user_added,
+
+    /// <summary> 
+    /// A local user has been removed
+    /// </summary>
     LocalUserRemoved = xbox::services::stats::manager::stat_event_type::local_user_removed,
-    StatisticUpdateComplete = xbox::services::stats::manager::stat_event_type::stat_update_complete
+
+    /// <summary> 
+    /// stat has been updated
+    /// </summary>
+    StatisticUpdateComplete = xbox::services::stats::manager::stat_event_type::stat_update_complete,
+
+    /// <summary> 
+    /// cast event args to leaderboard_result_event_args
+    /// </summary>
+    GetLeaderboardComplete = xbox::services::stats::manager::stat_event_type::get_leaderboard_complete
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_END
