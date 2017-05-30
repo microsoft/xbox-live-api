@@ -1429,8 +1429,14 @@ multiplayer_session::compare_multiplayer_sessions(
         currentType |= multiplayer_session_change_types::initialization_state_change;
     }
 
-    if ((currentSession->matchmaking_server().is_null() != oldSession->matchmaking_server().is_null()) ||
-        (!currentSession->matchmaking_server().is_null() && currentSession->matchmaking_server().status() != oldSession->matchmaking_server().status())
+    auto currentMatchmakingServer = currentSession->matchmaking_server();
+    auto oldMatchmakingServer = oldSession->matchmaking_server();
+    if ((currentMatchmakingServer.is_null() != oldMatchmakingServer.is_null()) ||
+        (!currentMatchmakingServer.is_null() && currentMatchmakingServer.status() != oldMatchmakingServer.status()) ||
+        (!currentMatchmakingServer.is_null() && 
+            !currentMatchmakingServer.target_session_ref().is_null() &&
+            !oldMatchmakingServer.target_session_ref().is_null() &&
+            !_Do_session_references_match(currentMatchmakingServer.target_session_ref(), oldMatchmakingServer.target_session_ref()))
         )
     {
         currentType |= multiplayer_session_change_types::matchmaking_status_change;
