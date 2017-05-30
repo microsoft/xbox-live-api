@@ -293,8 +293,9 @@ stats_manager_impl::flush_to_service(
             if (!svdResult.err())
             {
                 userIter->second.statValueDocument.merge_stat_value_documents(svdResult.payload());
-                pThis->update_stats_value_document(userIter->second);
             }
+
+            pThis->update_stats_value_document(userIter->second);
         });
     }
     else
