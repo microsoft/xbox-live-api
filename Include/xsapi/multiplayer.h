@@ -3524,6 +3524,16 @@ public:
     /// </summary>
     static std::error_code _Populate_members_with_members_list(_In_ std::vector<std::shared_ptr<multiplayer_session_member>> members);
 
+    static bool _Do_session_references_match(
+        _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef1,
+        _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef2
+        )
+    {
+        return  utils::str_icmp(sessionRef1.service_configuration_id(), sessionRef2.service_configuration_id()) == 0 &&
+            utils::str_icmp(sessionRef1.session_template_name(), sessionRef2.session_template_name()) == 0 &&
+            utils::str_icmp(sessionRef1.session_name(), sessionRef2.session_name()) == 0;
+    }
+
     /// <summary>
     /// Internal function
     /// </summary>

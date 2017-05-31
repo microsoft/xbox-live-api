@@ -2853,6 +2853,27 @@ public:
         VERIFY_IS_FALSE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::CustomPropertyChange) & changeType) == MultiplayerSessionChangeTypes::CustomPropertyChange);
         VERIFY_IS_FALSE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::MemberStatusChange) & changeType) == MultiplayerSessionChangeTypes::MemberStatusChange);
         VERIFY_IS_FALSE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::MemberCustomPropertyChange) & changeType) == MultiplayerSessionChangeTypes::MemberCustomPropertyChange);
+
+        // Test MatchmakingStatusChange for different target session refs.
+        currentSession = ref new MultiplayerSession(
+            std::make_shared<multiplayer_session>(
+                sessionResult.payload()
+                )
+            );
+
+        const string_t responseForComparingSessions = testResponseJsonFromFile[L"MultiplayerResponseForComparingSessions"].serialize();
+        auto compareSessionResult = multiplayer_session::_Deserialize(
+            web::json::value::parse(responseForComparingSessions)
+            );
+        VERIFY_IS_TRUE(!compareSessionResult.err());
+        auto compareSession = ref new MultiplayerSession(
+            std::make_shared<multiplayer_session>(
+                compareSessionResult.payload()
+                )
+            );
+
+        changeType = static_cast<uint32>(MultiplayerSession::CompareMultiplayerSessions(currentSession, compareSession));
+        VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::MatchmakingStatusChange) & changeType) == MultiplayerSessionChangeTypes::MatchmakingStatusChange);
     }
 
     DEFINE_TEST_CASE(TestRTAMultiplayer)
