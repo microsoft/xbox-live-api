@@ -2769,7 +2769,7 @@ class multiplayer_session
 public:
     /// <summary>
     /// Internal function
-    /// </summary>O
+    /// </summary>
     _XSAPIIMP multiplayer_session();
 
     /// <summary>
