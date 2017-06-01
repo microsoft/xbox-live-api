@@ -27,9 +27,6 @@ using namespace XBOX_LIVE_NAMESPACE::presence;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-std::unordered_map<string_t, std::shared_ptr<user_impl_idp>> user_impl_idp::s_trackingUsers = std::unordered_map<string_t, std::shared_ptr<user_impl_idp>>();
-Windows::System::UserWatcher^ user_impl_idp::s_userWatcher = nullptr;
-
 pplx::task<xbox_live_result<sign_in_result>>
 user_impl_idp::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
 {
@@ -40,12 +37,13 @@ user_impl_idp::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
     //Initiate user watcher
     if (is_multi_user_application())
     {
-        std::lock_guard<std::mutex> lock(s_trackingUsersLock.get());
+        auto xsapiSingleton = get_xsapi_singleton();
+        std::lock_guard<std::mutex> lock(xsapiSingleton->m_trackingUsersLock);
 
-        if (s_userWatcher == nullptr)
+        if (xsapiSingleton->m_userWatcher == nullptr)
         {
-            s_userWatcher = Windows::System::User::CreateWatcher();
-            s_userWatcher->Removed += ref new Windows::Foundation::TypedEventHandler<Windows::System::UserWatcher ^, Windows::System::UserChangedEventArgs ^>(&on_system_user_removed);
+            xsapiSingleton->m_userWatcher = Windows::System::User::CreateWatcher();
+            xsapiSingleton->m_userWatcher->Removed += ref new Windows::Foundation::TypedEventHandler<Windows::System::UserWatcher ^, Windows::System::UserChangedEventArgs ^>(&on_system_user_removed);
         }
     }
 
@@ -519,8 +517,9 @@ user_impl_idp::user_signed_in(
     {
         if (m_creationContext != nullptr)
         {
-            std::lock_guard<std::mutex> lock(s_trackingUsersLock.get());
-            s_trackingUsers[m_creationContext->NonRoamableId->Data()] = std::dynamic_pointer_cast<user_impl_idp>(shared_from_this());
+            auto xsapiSingleton = get_xsapi_singleton();
+            std::lock_guard<std::mutex> lock(xsapiSingleton->m_trackingUsersLock);
+            xsapiSingleton->m_trackingUsers[m_creationContext->NonRoamableId->Data()] = std::dynamic_pointer_cast<user_impl_idp>(shared_from_this());
         }
     }
 
@@ -532,8 +531,9 @@ void user_impl_idp::user_signed_out()
 
     if (m_creationContext != nullptr)
     {
-        std::lock_guard<std::mutex> lock(s_trackingUsersLock.get());
-        s_trackingUsers.erase(m_creationContext->NonRoamableId->Data());
+        auto xsapiSingleton = get_xsapi_singleton();
+        std::lock_guard<std::mutex> lock(xsapiSingleton->m_trackingUsersLock);
+        xsapiSingleton->m_trackingUsers.erase(m_creationContext->NonRoamableId->Data());
     }
 
     if (m_timer != nullptr)
@@ -567,9 +567,10 @@ void user_impl_idp::on_system_user_removed(Windows::System::UserWatcher ^sender,
 {
     std::shared_ptr<user_impl_idp> signOutUser;
     {
-        std::lock_guard<std::mutex> lock(s_trackingUsersLock.get());
-        auto user = s_trackingUsers.find(args->User->NonRoamableId->Data());
-        if (user != s_trackingUsers.end())
+        auto xsapiSingleton = get_xsapi_singleton();
+        std::lock_guard<std::mutex> lock(xsapiSingleton->m_trackingUsersLock);
+        auto user = xsapiSingleton->m_trackingUsers.find(args->User->NonRoamableId->Data());
+        if (user != xsapiSingleton->m_trackingUsers.end())
         {
             signOutUser = user->second;
         }

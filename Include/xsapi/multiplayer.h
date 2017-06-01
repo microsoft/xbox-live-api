@@ -1536,8 +1536,6 @@ private:
     // MeasurementServerAddresses
     bool m_writeMeasurementServerAddresses;
     web::json::value m_measurementServerAddressesJson;
-
-    static std::mutex m_lock;
 };
 
 /// <summary>
@@ -2568,8 +2566,6 @@ private:
     web::json::value m_memberMeasurementsJson;
     std::shared_ptr<std::vector<multiplayer_quality_of_service_measurements>> m_memberMeasurements;
 
-    static std::mutex m_lock;
-
     friend class multiplayer_session;
 };
 
@@ -2763,8 +2759,6 @@ private:
     bool m_closed;
     bool m_locked;
     bool m_allocateCloudCompute;
-
-    static std::mutex m_lock;
 };
 
 /// <summary>

@@ -10,8 +10,6 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_BEGIN
 
-std::mutex multiplayer_session_properties::m_lock;
-
 multiplayer_session_properties::multiplayer_session_properties() :
     m_joinRestriction(multiplayer_session_restriction::unknown),
     m_readRestriction(multiplayer_session_restriction::unknown)
@@ -47,7 +45,7 @@ multiplayer_session_properties& multiplayer_session_properties::_Deep_copy(
 const std::vector<string_t>&
 multiplayer_session_properties::keywords() const
 {
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     return m_keywords;
 }
 
@@ -56,7 +54,7 @@ multiplayer_session_properties::set_keywords(
     _In_ std::vector<string_t> keywords
     )
 {
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     m_keywords = std::move(keywords);
     m_sessionRequest->set_session_properties_keywords(m_keywords);
 }
@@ -64,7 +62,7 @@ multiplayer_session_properties::set_keywords(
 multiplayer_session_restriction 
 multiplayer_session_properties::join_restriction() const
 {
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     return m_joinRestriction;
 }
 
@@ -73,7 +71,7 @@ multiplayer_session_properties::set_join_restriction(
     _In_ multiplayer_session_restriction joinRestriction
     )
 {
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     if (joinRestriction < multiplayer_session_restriction::none ||
         joinRestriction > multiplayer_session_restriction::followed)
     {
@@ -88,7 +86,7 @@ multiplayer_session_properties::set_join_restriction(
 multiplayer_session_restriction
 multiplayer_session_properties::read_restriction() const
 {
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     return m_readRestriction;
 }
 
@@ -97,7 +95,7 @@ multiplayer_session_properties::set_read_restriction(
     _In_ multiplayer_session_restriction readRestriction
     )
 {
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     if (readRestriction < multiplayer_session_restriction::none ||
         readRestriction > multiplayer_session_restriction::followed)
     {
@@ -112,21 +110,21 @@ multiplayer_session_properties::set_read_restriction(
 const std::vector<std::shared_ptr<multiplayer_session_member>>& 
 multiplayer_session_properties::turn_collection() const
 {
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     return m_turnCollection;
 }
 
 const web::json::value&
 multiplayer_session_properties::matchmaking_target_session_constants_json() const
 {
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     return m_matchmakingTargetSessionConstants;
 }
 
 const web::json::value&
 multiplayer_session_properties::session_custom_properties_json() const
 {
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     return m_customPropertiesJson;
 }
 
@@ -139,14 +137,14 @@ multiplayer_session_properties::matchmaking_server_connection_string() const
 const std::vector<string_t>& 
 multiplayer_session_properties::server_connection_string_candidates() const
 {
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     return m_serverConnectionStringCandidates;
 }
 
 const std::vector<uint32_t>&
 multiplayer_session_properties::session_owner_indices() const
 {
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     return m_sessionOwnerIndices;
 }
 
@@ -159,21 +157,21 @@ multiplayer_session_properties::host_device_token() const
 bool 
 multiplayer_session_properties::closed() const
 {
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     return m_closed;
 }
 
 bool
 multiplayer_session_properties::locked() const
 {
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     return m_locked;
 }
 
 bool 
 multiplayer_session_properties::allocate_cloud_compute() const
 {
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     return m_allocateCloudCompute;
 }
 
@@ -212,7 +210,7 @@ multiplayer_session_properties::set_turn_collection(
         return xbox_live_error_code::invalid_argument;
     }
 
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     std::vector<uint32_t> turnIndexVector;
 
     for (const auto& member : turnCollection)
@@ -236,7 +234,7 @@ multiplayer_session_properties::_Set_session_custom_property_json(
         return xbox_live_error_code::invalid_argument;
     }
 
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     web::json::value customProperty;
     if (!valueJson.is_null())
     {
@@ -284,7 +282,7 @@ multiplayer_session_properties::_Set_matchmaking_target_session_constants_json(
     _In_ const web::json::value& matchmakingTargetSessionConstantsJson
     )
 {
-    std::lock_guard<std::mutex> lock(m_lock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdPropertyLock);
     m_sessionRequest->set_write_matchmaking_session_constants(true);
     m_matchmakingTargetSessionConstants = matchmakingTargetSessionConstantsJson;
     m_sessionRequest->set_session_properties_target_sessions_constants( m_matchmakingTargetSessionConstants );

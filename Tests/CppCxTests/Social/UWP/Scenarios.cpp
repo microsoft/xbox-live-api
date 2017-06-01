@@ -86,13 +86,13 @@ void Scenarios::Scenario_GetUserProfileAsync(_In_ MainPage^ ui, Microsoft::Xbox:
             ui->LogFormat(L"");
             ui->LogFormat(L"----------------");
             ui->LogFormat(L"get_user_profile result:");
-            ui->LogFormat(L"app_display_name: %S", profile->ApplicationDisplayName->ToString()->Data());
+            ui->LogFormat(L"app_display_name: %s", profile->ApplicationDisplayName->ToString()->Data());
             //ui->LogFormat(L"app_display_picture_resize_uri: %s", gameDisplayPicResizeUri->Data());
-            ui->LogFormat(L"game_display_name: %S", profile->GameDisplayName->ToString()->Data());
-            ui->LogFormat(L"game_display_picture_resize_uri: %S", gameDisplayPicResizeUri->Data());
-            ui->LogFormat(L"gamerscore: %S", profile->Gamerscore->Data());
-            ui->LogFormat(L"gamertag: %S", profile->Gamertag->Data());
-            ui->LogFormat(L"xbox_user_id: %S", profile->XboxUserId->Data());
+            ui->LogFormat(L"game_display_name: %s", profile->GameDisplayName->ToString()->Data());
+            ui->LogFormat(L"game_display_picture_resize_uri: %s", gameDisplayPicResizeUri->Data());
+            ui->LogFormat(L"gamerscore: %s", profile->Gamerscore->Data());
+            ui->LogFormat(L"gamertag: %s", profile->Gamertag->Data());
+            ui->LogFormat(L"xbox_user_id: %s", profile->XboxUserId->Data());
         }
         catch (Platform::Exception^ ex)
         {
@@ -104,6 +104,23 @@ void Scenarios::Scenario_GetUserProfileAsync(_In_ MainPage^ ui, Microsoft::Xbox:
 void Scenarios::Scenario_GetSocialRelationshipsAsync(_In_ MainPage^ ui, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext)
 {
     ui->Log(L"Calling get_social_relationships...");
+
+    PresenceData^ presenceData = ref new PresenceData(L"12200100-88da-4d8b-af88-e38f5d2a2bca", L"rpdemo" );
+    auto pAsyncOp2 = xboxLiveContext->PresenceService->SetPresenceAsync(true, presenceData);
+    create_task(pAsyncOp2)
+    .then([this,ui](task<void> resultTask)
+    {
+        try
+        {
+            resultTask.get();
+            ui->LogFormat(L"SetPresenceAsync succeeded");
+        }
+        catch (Platform::Exception^ ex)
+        {    
+            ui->LogFormat(L"SetPresenceAsync failed:  0x%0.8x", ex->HResult);
+        }
+    });
+
 
     // Select 10 friends to display.
     // The service can override the user specified maximum to what it supports

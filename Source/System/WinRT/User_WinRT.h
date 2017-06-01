@@ -220,7 +220,6 @@ internal:
 
 private:
     std::shared_ptr<xbox::services::system::user_impl> m_cppObj;
-    static UserEventBind s_userEventBind;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_END

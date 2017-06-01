@@ -138,9 +138,9 @@ class logger
 public:
     logger() : m_logLevel(log_level::warn) {}
 
-    static void create_logger() { s_logger = std::make_shared<logger>();  }
-    static void release_logger() { s_logger = nullptr; }
-    static const std::shared_ptr<logger>& get_logger() { return s_logger; }
+    static void create_logger() { get_xsapi_singleton()->m_logger = std::make_shared<logger>();  }
+    static void release_logger() { get_xsapi_singleton()->m_logger = nullptr; }
+    static const std::shared_ptr<logger>& get_logger() { return get_xsapi_singleton()->m_logger; }
 
     void set_log_level(log_level level);
 
@@ -151,8 +151,6 @@ public:
 
 
 private:
-    static std::shared_ptr<logger> s_logger;
-
     std::vector<std::shared_ptr<log_output>> m_log_outputs;
     log_level m_logLevel;
 };

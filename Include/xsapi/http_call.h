@@ -208,7 +208,6 @@ private:
     std::chrono::seconds m_retryAfter;
     chrono_clock_t::time_point m_requestTime;
     chrono_clock_t::time_point m_responseTime;
-    static volatile long s_responseCount;
 
     string_t m_xboxUserId;
     std::shared_ptr<xbox_live_context_settings> m_xboxLiveContextSettings;

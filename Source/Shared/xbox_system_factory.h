@@ -40,11 +40,6 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 class xbox_system_factory
 {
 public:
-    xbox_system_factory()
-    {
-        static initiator s_initiator;
-    }
-
 #if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
     virtual std::shared_ptr<xsts_token_service> create_xsts_token();
 
@@ -95,10 +90,6 @@ public:
 
     static std::shared_ptr<xbox_system_factory> get_factory();
     static void set_factory(_In_ std::shared_ptr<xbox_system_factory> factory);
-
-private:
-    static std::mutex m_factoryInstanceLock;
-    static std::shared_ptr<xbox_system_factory> m_factoryInstance;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

@@ -16,12 +16,12 @@ std::shared_ptr<xbox_live_services_settings> xbox_live_services_settings::get_si
 {
     std::shared_ptr<xsapi_singleton> xsapiSingleton = get_xsapi_singleton();
     
-    std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
-    if (xsapiSingleton->s_xboxServiceSettingsSingleton == nullptr)
+    std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
+    if (xsapiSingleton->m_xboxServiceSettingsSingleton == nullptr)
     {
-        xsapiSingleton->s_xboxServiceSettingsSingleton = std::shared_ptr<xbox_live_services_settings>(new xbox_live_services_settings());
+        xsapiSingleton->m_xboxServiceSettingsSingleton = std::shared_ptr<xbox_live_services_settings>(new xbox_live_services_settings());
     }
-    return xsapiSingleton->s_xboxServiceSettingsSingleton;
+    return xsapiSingleton->m_xboxServiceSettingsSingleton;
 }
 
 xbox_live_services_settings::xbox_live_services_settings() :

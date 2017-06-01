@@ -2,24 +2,23 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
+#include "utils.h"
 #include "ServiceCallLoggingConfig_WinRT.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_BEGIN
 
-static std::mutex s_singletonLock;
-
 ServiceCallLoggingConfig^
 ServiceCallLoggingConfig::SingletonInstance::get()
 {
-    std::lock_guard<std::mutex> guard(s_singletonLock);
+    auto xsapiSingleton = xbox::services::get_xsapi_singleton();
+    std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
 
-    static ServiceCallLoggingConfig^ instance;
-    if (instance == nullptr)
+    if (xsapiSingleton->m_winrt_serviceCallLoggingConfigInstance == nullptr)
     {
-        instance = ref new ServiceCallLoggingConfig();
+        xsapiSingleton->m_winrt_serviceCallLoggingConfigInstance = ref new ServiceCallLoggingConfig();
     }
 
-    return instance;
+    return xsapiSingleton->m_winrt_serviceCallLoggingConfigInstance;
 }
 
 ServiceCallLoggingConfig::ServiceCallLoggingConfig()

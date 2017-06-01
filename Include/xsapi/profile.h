@@ -174,7 +174,6 @@ namespace social {
 
         static const string_t SETTINGS_QUERY;
 
-        static std::mutex m_settingsLock;
         std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> m_userContext;
         std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> m_xboxLiveContextSettings;
         std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_app_config> m_appConfig;

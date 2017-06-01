@@ -16,7 +16,6 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-volatile long http_call_response::s_responseCount = 0;
 const int RETRY_AFTER_CAP = 15;
 
 http_call_response::http_call_response(
@@ -217,7 +216,7 @@ void http_call_response::_Route_service_call() const
 
     if (logCall || m_xboxLiveContextSettings->enable_service_call_routed_events())
     {
-        uint32_t responseCount = InterlockedIncrement(&s_responseCount);
+        uint32_t responseCount = InterlockedIncrement(&get_xsapi_singleton()->m_responseCount);
 
         web::http::http_headers headers = m_request.headers();
 

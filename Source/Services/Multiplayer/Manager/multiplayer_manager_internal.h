@@ -123,7 +123,6 @@ private:
     context_t m_context;
     pending_request_type m_requestType;
     uint32_t m_identifier;
-    static volatile long s_uniqueIndentifier;
 
     // Local user properties
     std::shared_ptr<multiplayer_local_user> m_localUser;
