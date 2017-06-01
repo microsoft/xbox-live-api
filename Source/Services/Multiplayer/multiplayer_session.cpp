@@ -1532,6 +1532,17 @@ multiplayer_session::compare_multiplayer_sessions(
     return xbox_live_result<multiplayer_session_change_types>(static_cast<multiplayer_session_change_types>(currentType));
 }
 
+bool
+multiplayer_session::_Do_session_references_match(
+    _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef1,
+    _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef2
+    )
+{
+    return  utils::str_icmp(sessionRef1.service_configuration_id(), sessionRef2.service_configuration_id()) == 0 &&
+        utils::str_icmp(sessionRef1.session_template_name(), sessionRef2.session_template_name()) == 0 &&
+        utils::str_icmp(sessionRef1.session_name(), sessionRef2.session_name()) == 0;
+}
+
 xbox_live_result<multiplayer_session>
 multiplayer_session::_Deserialize(
     _In_ const web::json::value& json
