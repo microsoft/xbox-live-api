@@ -22,18 +22,18 @@ std::shared_ptr<local_config> local_config::get_local_config_singleton()
     auto xsapiSingleton = get_xsapi_singleton();
     bool needToReadConfig = false;
     {
-        std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
-        if (xsapiSingleton->s_localConfigSingleton == nullptr)
+        std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
+        if (xsapiSingleton->m_localConfigSingleton == nullptr)
         {
             needToReadConfig = true; 
-            xsapiSingleton->s_localConfigSingleton = std::make_shared<local_config>();
+            xsapiSingleton->m_localConfigSingleton = std::make_shared<local_config>();
         }
     }
 
     if (needToReadConfig)
     {
 #if !TV_API
-        xbox_live_result<void> configResult = xsapiSingleton->s_localConfigSingleton->read();
+        xbox_live_result<void> configResult = xsapiSingleton->m_localConfigSingleton->read();
         if (configResult.err())
         {
             LOGS_ERROR << "Loading local config file error: " << configResult.err() << ", msg:" << configResult.err_message();
@@ -41,7 +41,7 @@ std::shared_ptr<local_config> local_config::get_local_config_singleton()
         }
 #endif
     }
-    return xsapiSingleton->s_localConfigSingleton;
+    return xsapiSingleton->m_localConfigSingleton;
 }
 
 local_config::local_config()

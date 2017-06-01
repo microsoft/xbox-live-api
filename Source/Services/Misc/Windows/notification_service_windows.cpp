@@ -21,7 +21,7 @@ notification_service_windows::subscribe_to_notifications(
     )
 {
     {
-        std::lock_guard<std::mutex> guard(get_xsapi_singleton()->s_singletonLock);
+        std::lock_guard<std::mutex> guard(get_xsapi_singleton()->m_singletonLock);
         if (m_userContexts.find(userContext->xbox_user_id()) == m_userContexts.end())
         {
             m_userContexts.emplace(std::make_pair(userContext->xbox_user_id(), userContext));
@@ -129,7 +129,7 @@ notification_service_windows::on_push_notification_recieved(
         if (!errc)
         {
             LOGS_INFO << "Received WNS notification, type: " << notificationTypeString << ", xuid: " << xuid;
-            get_xsapi_singleton()->s_xboxServiceSettingsSingleton->_Raise_wns_event(xuid, notificationTypeString, content);
+            get_xsapi_singleton()->m_xboxServiceSettingsSingleton->_Raise_wns_event(xuid, notificationTypeString, content);
 
             if (utils::str_icmp(notificationTypeString, _T("spop")) == 0)
             {

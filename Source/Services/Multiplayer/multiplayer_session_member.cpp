@@ -21,7 +21,7 @@ void multiplayer_session_member::deep_copy_from(
     _In_ const multiplayer_session_member& other
     )
 {
-    std::lock_guard<std::mutex> guard(get_xsapi_singleton()->s_singletonLock);
+    std::lock_guard<std::mutex> guard(get_xsapi_singleton()->m_mpsdMemberLock);
     m_memberId = other.m_memberId;
     m_customConstantsJson = other.m_customConstantsJson;
     m_customPropertiesJson = other.m_customPropertiesJson;
@@ -149,7 +149,7 @@ multiplayer_session_member::member_custom_constants_json() const
 const string_t&
 multiplayer_session_member::secure_device_base_address64() const
 {
-    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->s_mpsdLock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdMemberLock);
 
     return m_secureDeviceAddressBase64;
 }
@@ -159,7 +159,7 @@ multiplayer_session_member::_Set_secure_device_base_address64(
     _In_ const string_t& deviceBaseAddress
     )
 {
-    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->s_mpsdLock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdMemberLock);
 
     m_secureDeviceAddressBase64 = std::move(deviceBaseAddress);
     m_memberRequest->set_secure_device_address_base64(m_secureDeviceAddressBase64);
@@ -169,7 +169,7 @@ multiplayer_session_member::_Set_secure_device_base_address64(
 const std::unordered_map<string_t, string_t>&
 multiplayer_session_member::roles() const
 {
-    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->s_mpsdLock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdMemberLock);
     return m_roles;
 }
 
@@ -178,7 +178,7 @@ multiplayer_session_member::_Set_role_info(
     _In_ const std::unordered_map<string_t, string_t>& roleInfo
     )
 {
-    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->s_mpsdLock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdMemberLock);
 
     m_roles = std::move(roleInfo);
     m_memberRequest->set_role_info(m_roles);
@@ -187,7 +187,7 @@ multiplayer_session_member::_Set_role_info(
 const web::json::value&
 multiplayer_session_member::member_custom_properties_json() const
 {
-    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->s_mpsdLock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdMemberLock);
 
     return m_customPropertiesJson;
 }
@@ -201,7 +201,7 @@ multiplayer_session_member::gamertag() const
 multiplayer_session_member_status
 multiplayer_session_member::status() const
 {
-    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->s_mpsdLock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdMemberLock);
 
     if (m_isActive)
     {
@@ -447,7 +447,7 @@ multiplayer_session_member::_Set_member_custom_property_json(
         return xbox_live_error_code::logic_error;
     }
 
-    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->s_mpsdLock);
+    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdMemberLock);
 
     web::json::value customProperty = web::json::value::null();
     if (!valueJson.is_null())

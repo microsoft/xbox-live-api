@@ -18,12 +18,12 @@ std::shared_ptr<xbox_system_factory>
 xbox_system_factory::get_factory()
 {
     auto xsapiSingleton = get_xsapi_singleton();
-    std::lock_guard<std::mutex> hold(xsapiSingleton->s_singletonLock);
-    if (xsapiSingleton->s_factoryInstance == nullptr)
+    std::lock_guard<std::mutex> hold(xsapiSingleton->m_singletonLock);
+    if (xsapiSingleton->m_factoryInstance == nullptr)
     {
-        xsapiSingleton->s_factoryInstance = std::make_shared<xbox_system_factory>();
+        xsapiSingleton->m_factoryInstance = std::make_shared<xbox_system_factory>();
     }
-    return xsapiSingleton->s_factoryInstance;
+    return xsapiSingleton->m_factoryInstance;
 }
 
 void xbox_system_factory::set_factory(
@@ -31,8 +31,8 @@ void xbox_system_factory::set_factory(
     )
 {
     auto xsapiSingleton = get_xsapi_singleton();
-    std::lock_guard<std::mutex> hold(xsapiSingleton->s_singletonLock);
-    xsapiSingleton->s_factoryInstance = factory;
+    std::lock_guard<std::mutex> hold(xsapiSingleton->m_singletonLock);
+    xsapiSingleton->m_factoryInstance = factory;
 }
 
 #if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U

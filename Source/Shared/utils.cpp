@@ -45,39 +45,39 @@ static std::shared_ptr<xsapi_singleton> s_xsapiSingleton;
 
 xsapi_singleton::xsapi_singleton()
 #if !TV_API && !XSAPI_SERVER
-    : s_presenceWriterSingleton(std::shared_ptr<XBOX_LIVE_NAMESPACE::presence::presence_writer>(new XBOX_LIVE_NAMESPACE::presence::presence_writer()))
+    : m_presenceWriterSingleton(std::shared_ptr<XBOX_LIVE_NAMESPACE::presence::presence_writer>(new XBOX_LIVE_NAMESPACE::presence::presence_writer()))
 #endif
 {
 #if TV_API || UNIT_TEST_SERVICES
-    s_bHasAchievementServiceInitialized = false;
-    s_eventPlayerSessionId = { 0 };
+    m_bHasAchievementServiceInitialized = false;
+    memset(&m_eventPlayerSessionId, 0, sizeof(m_eventPlayerSessionId));
 #endif
 
-    s_locales = _T("en-US");
-    s_custom_locale_override = false;
-    s_loggerId = 0;
-    s_responseCount = 0;
-    s_multiplayerClientPendingRequestUniqueIndentifier = 0;
+    m_locales = _T("en-US");
+    m_custom_locale_override = false;
+    m_loggerId = 0;
+    m_responseCount = 0;
+    m_multiplayerClientPendingRequestUniqueIndentifier = 0;
 
 #if !TV_API
-    s_signOutCompletedHandlerIndexer = 0;
-    s_signInCompletedHandlerIndexer = 0;
+    m_signOutCompletedHandlerIndexer = 0;
+    m_signInCompletedHandlerIndexer = 0;
 #endif
 
 #if UWP_API
-    s_trackingUsers = std::unordered_map<string_t, std::shared_ptr<system::user_impl_idp>>();
+    m_trackingUsers = std::unordered_map<string_t, std::shared_ptr<system::user_impl_idp>>();
 #endif
 }
 
 void xsapi_singleton::init()
 {
 #if UWP_API
-#ifdef __cplusplus_winrt
-    s_userEventBind = std::make_shared<Microsoft::Xbox::Services::System::UserEventBind>();
+#ifdef __cplusplum_winrt
+    m_userEventBind = std::make_shared<Microsoft::Xbox::Services::System::UserEventBind>();
 #endif
 #endif
 
-    s_initiator = std::make_shared<initiator>();
+    m_initiator = std::make_shared<initiator>();
 }
 
 xsapi_singleton::~xsapi_singleton()

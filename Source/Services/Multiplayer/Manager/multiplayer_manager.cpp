@@ -25,13 +25,13 @@ std::shared_ptr<multiplayer_manager>
 multiplayer_manager::get_singleton_instance()
 {
     auto xsapiSingleton = get_xsapi_singleton();
-    std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
-    if (xsapiSingleton->s_multiplayerManagerInstance == nullptr)
+    std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
+    if (xsapiSingleton->m_multiplayerManagerInstance == nullptr)
     {
-        xsapiSingleton->s_multiplayerManagerInstance = std::shared_ptr<multiplayer_manager>(new multiplayer_manager());
+        xsapiSingleton->m_multiplayerManagerInstance = std::shared_ptr<multiplayer_manager>(new multiplayer_manager());
     }
 
-    return xsapiSingleton->s_multiplayerManagerInstance;
+    return xsapiSingleton->m_multiplayerManagerInstance;
 }
 
 void

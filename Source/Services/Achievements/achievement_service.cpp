@@ -113,10 +113,10 @@ achievement_service::update_achievement(
 #if TV_API
     {
         auto xsapiSingleton = get_xsapi_singleton();
-        std::lock_guard<std::mutex> lock(xsapiSingleton->s_achievementServiceInitLock);
-        if (!xsapiSingleton->s_bHasAchievementServiceInitialized)
+        std::lock_guard<std::mutex> lock(xsapiSingleton->m_achievementServiceInitLock);
+        if (!xsapiSingleton->m_bHasAchievementServiceInitialized)
         {
-            HRESULT hr = CoCreateGuid(&xsapiSingleton->s_eventPlayerSessionId);
+            HRESULT hr = CoCreateGuid(&xsapiSingleton->m_eventPlayerSessionId);
             if (FAILED(hr))
             {
                 return pplx::task_from_result(xbox::services::xbox_live_result<void>(static_cast<xbox_live_error_code>(hr)));
@@ -134,8 +134,8 @@ achievement_service::update_achievement(
             std::stringstream ss;
             ss << "XSAPI_";
             ss << strTitleId;
-            xsapiSingleton->s_eventProviderName = ss.str();
-            XSAPI_Update_Achievement_Provider.Name = xsapiSingleton->s_eventProviderName.c_str();
+            xsapiSingleton->m_eventProviderName = ss.str();
+            XSAPI_Update_Achievement_Provider.Name = xsapiSingleton->m_eventProviderName.c_str();
 
             ULONG errorCode = EtxRegister(&XSAPI_Update_Achievement_Provider, &XSAPI_Update_Achievement_Handle);
             hr = HRESULT_FROM_WIN32(errorCode);
@@ -144,7 +144,7 @@ achievement_service::update_achievement(
                 return pplx::task_from_result(xbox::services::xbox_live_result<void>(static_cast<xbox_live_error_code>(hr)));
             }
 
-            xsapiSingleton->s_bHasAchievementServiceInitialized = true;
+            xsapiSingleton->m_bHasAchievementServiceInitialized = true;
         }
     }
 #endif
@@ -234,7 +234,7 @@ achievement_service::event_write_achievement_update(
     EtxFillCommonFields_v7(&eventData[0], scratch, EventWriteAchievementUpdate_ScratchSize);
 
     EventDataDescCreate(&eventData[1], userId, (ULONG)((wcslen(userId) + 1) * sizeof(WCHAR)));
-    EventDataDescCreate(&eventData[2], &get_xsapi_singleton()->s_eventPlayerSessionId, sizeof(GUID));
+    EventDataDescCreate(&eventData[2], &get_xsapi_singleton()->m_eventPlayerSessionId, sizeof(GUID));
     EventDataDescCreate(&eventData[3], achievementId, (ULONG)((wcslen(achievementId) + 1) * sizeof(WCHAR)));
     EventDataDescCreate(&eventData[4], &percentComplete, sizeof(percentComplete));
 

@@ -20,18 +20,18 @@ std::shared_ptr<notification_service>
 notification_service::get_notification_service_singleton()
 {
     auto xsapiSingleton = get_xsapi_singleton();
-    std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
-    if (xsapiSingleton->s_notificationSingleton == nullptr)
+    std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
+    if (xsapiSingleton->m_notificationSingleton == nullptr)
     {
 #if XSAPI_A
-        xsapiSingleton->s_notificationSingleton = std::make_shared<notification_service_android>();
+        xsapiSingleton->m_notificationSingleton = std::make_shared<notification_service_android>();
 #elif XSAPI_I
-        xsapiSingleton->s_notificationSingleton = std::make_shared<notification_service_ios>();
+        xsapiSingleton->m_notificationSingleton = std::make_shared<notification_service_ios>();
 #elif _WIN32
-        xsapiSingleton->s_notificationSingleton = std::make_shared<notification_service_windows>();
+        xsapiSingleton->m_notificationSingleton = std::make_shared<notification_service_windows>();
 #endif
     }
-    return xsapiSingleton->s_notificationSingleton;
+    return xsapiSingleton->m_notificationSingleton;
 }
 
 pplx::task<xbox_live_result<void>>

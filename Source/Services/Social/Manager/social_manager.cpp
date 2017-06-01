@@ -16,17 +16,17 @@ std::shared_ptr<social_manager>
 social_manager::get_singleton_instance()
 {
     auto xsapiSingleton = get_xsapi_singleton();
-    std::lock_guard<std::mutex> lock(xsapiSingleton->s_singletonLock);
-    if (xsapiSingleton->s_socialManagerInstance == nullptr)
+    std::lock_guard<std::mutex> lock(xsapiSingleton->m_singletonLock);
+    if (xsapiSingleton->m_socialManagerInstance == nullptr)
     {
-        xsapiSingleton->s_socialManagerInstance = std::shared_ptr<social_manager>(new social_manager());
+        xsapiSingleton->m_socialManagerInstance = std::shared_ptr<social_manager>(new social_manager());
     }
-    return xsapiSingleton->s_socialManagerInstance;
+    return xsapiSingleton->m_socialManagerInstance;
 }
 
 social_manager::social_manager()
 {
-    get_xsapi_singleton()->s_perfTester = std::make_shared<xbox::services::perf_tester>(_T("social_manager"));
+    get_xsapi_singleton()->m_perfTester = std::make_shared<xbox::services::perf_tester>(_T("social_manager"));
 }
 
 xbox_live_result<std::shared_ptr<xbox_social_user_group>>
@@ -399,30 +399,30 @@ social_manager::do_work()
     std::lock_guard<std::mutex> eventLock(m_socialManagerEventLock);
     std::vector<social_event> socialEvents(m_eventQueue);
     auto xsapiSingleton = get_xsapi_singleton();
-    xsapiSingleton->s_perfTester->start_timer(_T("do_work"));
-    xsapiSingleton->s_perfTester->start_timer(_T("do_work: eventqueue clear"));
+    xsapiSingleton->m_perfTester->start_timer(_T("do_work"));
+    xsapiSingleton->m_perfTester->start_timer(_T("do_work: eventqueue clear"));
     m_eventQueue.clear();
-    xsapiSingleton->s_perfTester->stop_timer(_T("do_work: eventqueue clear"));
+    xsapiSingleton->m_perfTester->stop_timer(_T("do_work: eventqueue clear"));
     for (auto& graph : m_localGraphs)
     {
-        xsapiSingleton->s_perfTester->start_timer(_T("do_work: social_graph do_work"));
+        xsapiSingleton->m_perfTester->start_timer(_T("do_work: social_graph do_work"));
         auto graphData = graph.second->do_work(socialEvents);
-        xsapiSingleton->s_perfTester->stop_timer(_T("do_work: social_graph do_work"));
+        xsapiSingleton->m_perfTester->stop_timer(_T("do_work: social_graph do_work"));
         const auto& userViewList = m_userToViewMap[graph.first];
         for (auto& viewHash : userViewList)
         {
             auto& view = m_xboxSocialUserGroups[viewHash];
             if(graphData.socialUsers != nullptr)
             {
-                xsapiSingleton->s_perfTester->start_timer(_T("do_work: update_view"));
+                xsapiSingleton->m_perfTester->start_timer(_T("do_work: update_view"));
                 view->update_view(*graphData.socialUsers, socialEvents);
-                xsapiSingleton->s_perfTester->stop_timer(_T("do_work: update_view"));
+                xsapiSingleton->m_perfTester->stop_timer(_T("do_work: update_view"));
             }
         }
     }
 
-    xsapiSingleton->s_perfTester->stop_timer(_T("do_work"));
-    xsapiSingleton->s_perfTester->clear();
+    xsapiSingleton->m_perfTester->stop_timer(_T("do_work"));
+    xsapiSingleton->m_perfTester->clear();
     return socialEvents;
 }
 

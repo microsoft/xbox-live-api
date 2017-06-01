@@ -71,7 +71,7 @@ service_call_logger_data::service_call_logger_data(
 
 void service_call_logger_data::init()
 {
-    m_id = ++get_xsapi_singleton()->s_loggerId;
+    m_id = ++get_xsapi_singleton()->m_loggerId;
     m_breadCrumb = utils::create_guid(true).c_str();
 }
 

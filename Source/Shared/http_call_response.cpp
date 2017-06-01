@@ -216,7 +216,7 @@ void http_call_response::_Route_service_call() const
 
     if (logCall || m_xboxLiveContextSettings->enable_service_call_routed_events())
     {
-        uint32_t responseCount = InterlockedIncrement(&get_xsapi_singleton()->s_responseCount);
+        uint32_t responseCount = InterlockedIncrement(&get_xsapi_singleton()->m_responseCount);
 
         web::http::http_headers headers = m_request.headers();
 

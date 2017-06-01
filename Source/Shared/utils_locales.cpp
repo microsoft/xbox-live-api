@@ -218,23 +218,23 @@ void utils::generate_locales()
         }
     }
     auto xsapiSingleton = xbox::services::get_xsapi_singleton();
-    xsapiSingleton->s_locales.clear();
+    xsapiSingleton->m_locales.clear();
     for (auto& locale : localeFallbackList)
     {
-        xsapiSingleton->s_locales += locale;
-        xsapiSingleton->s_locales += _T(',');
+        xsapiSingleton->m_locales += locale;
+        xsapiSingleton->m_locales += _T(',');
     }
     // erase the last ','
-    xsapiSingleton->s_locales.pop_back();
+    xsapiSingleton->m_locales.pop_back();
 }
 
 const string_t& utils::get_locales()
 {
     auto xsapiSingleton = xbox::services::get_xsapi_singleton();
-    std::lock_guard<std::mutex> guard(xsapiSingleton->s_locale_lock);
-    if (xsapiSingleton->s_custom_locale_override)
+    std::lock_guard<std::mutex> guard(xsapiSingleton->m_locale_lock);
+    if (xsapiSingleton->m_custom_locale_override)
     {
-        return xsapiSingleton->s_locales;
+        return xsapiSingleton->m_locales;
     }
     // For WinRT app, locale can only be get from STA, thus we generate locale in UI dispatcher assignment.
     // For desktop and xbox, we generate locale on the first call.
@@ -247,7 +247,7 @@ const string_t& utils::get_locales()
     }
 #endif
 
-    return xsapiSingleton->s_locales;
+    return xsapiSingleton->m_locales;
 }
 
 
@@ -256,8 +256,8 @@ void utils::set_locales(
     )
 {
     auto xsapiSingleton = xbox::services::get_xsapi_singleton();
-    xsapiSingleton->s_locales = locale;
-    xsapiSingleton->s_custom_locale_override = true;
+    xsapiSingleton->m_locales = locale;
+    xsapiSingleton->m_custom_locale_override = true;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

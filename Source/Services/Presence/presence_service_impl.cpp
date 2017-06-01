@@ -131,9 +131,9 @@ presence_service_impl::set_presence_helper(
         }        
 
         auto xsapiSingleton = get_xsapi_singleton();
-        if (xsapiSingleton->s_onSetPresenceFinish)
+        if (xsapiSingleton->m_onSetPresenceFinish)
         {
-            xsapiSingleton->s_onSetPresenceFinish(heartbeatDelay);
+            xsapiSingleton->m_onSetPresenceFinish(heartbeatDelay);
         }
 
         return xbox_live_result<uint32_t>(heartbeatDelay, response->err_code(), response->err_message());

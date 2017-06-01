@@ -13,13 +13,13 @@ std::shared_ptr<xbox_live_app_config>
 xbox_live_app_config::get_app_config_singleton()
 {
     auto xsapiSingleton = xbox::services::get_xsapi_singleton();
-    std::lock_guard<std::mutex> guard(xsapiSingleton->s_appConfigLock);
-    if (xsapiSingleton->g_appConfigSingleton == nullptr)
+    std::lock_guard<std::mutex> guard(xsapiSingleton->m_appConfigLock);
+    if (xsapiSingleton->m_appConfigSingleton == nullptr)
     {
-        xsapiSingleton->g_appConfigSingleton = std::shared_ptr<xbox_live_app_config>(new xbox_live_app_config());
+        xsapiSingleton->m_appConfigSingleton = std::shared_ptr<xbox_live_app_config>(new xbox_live_app_config());
     }
 
-    return xsapiSingleton->g_appConfigSingleton;
+    return xsapiSingleton->m_appConfigSingleton;
 }
 
 

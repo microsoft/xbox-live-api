@@ -18,12 +18,12 @@ SocialManager^
 SocialManager::SingletonInstance::get()
 {
     auto xsapiSingleton = get_xsapi_singleton();
-    std::lock_guard<std::mutex> lock(xsapiSingleton->s_singletonLock);
-    if (xsapiSingleton->s_winrt_socialManagerInstance == nullptr)
+    std::lock_guard<std::mutex> lock(xsapiSingleton->m_singletonLock);
+    if (xsapiSingleton->m_winrt_socialManagerInstance == nullptr)
     {
-        xsapiSingleton->s_winrt_socialManagerInstance = ref new SocialManager();
+        xsapiSingleton->m_winrt_socialManagerInstance = ref new SocialManager();
     }
-    return xsapiSingleton->s_winrt_socialManagerInstance;
+    return xsapiSingleton->m_winrt_socialManagerInstance;
 }
 
 SocialManager::SocialManager() :

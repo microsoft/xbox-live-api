@@ -14,7 +14,7 @@ multiplayer_client_pending_request::multiplayer_client_pending_request() :
     m_requestType(pending_request_type::non_synchronized_changes),
     m_localUserLobbyState(multiplayer_local_user_lobby_state::unknown)
 {
-    m_identifier = utils::interlocked_increment(get_xsapi_singleton()->s_multiplayerClientPendingRequestUniqueIndentifier);
+    m_identifier = utils::interlocked_increment(get_xsapi_singleton()->m_multiplayerClientPendingRequestUniqueIndentifier);
 }
 
 pending_request_type

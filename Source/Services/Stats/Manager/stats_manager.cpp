@@ -17,12 +17,12 @@ std::shared_ptr<stats_manager>
 stats_manager::get_singleton_instance()
 {
     auto xsapiSingleton = get_xsapi_singleton();
-    std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
-    if (xsapiSingleton->s_statsManagerInstance == nullptr)
+    std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
+    if (xsapiSingleton->m_statsManagerInstance == nullptr)
     {
-        xsapiSingleton->s_statsManagerInstance = std::make_shared<stats_manager>();
+        xsapiSingleton->m_statsManagerInstance = std::make_shared<stats_manager>();
     }
-    return xsapiSingleton->s_statsManagerInstance;
+    return xsapiSingleton->m_statsManagerInstance;
 }
 
 stats_manager::stats_manager()

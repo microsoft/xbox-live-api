@@ -11,12 +11,12 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 std::shared_ptr<service_call_logger> service_call_logger::get_singleton_instance()
 {
     auto xsapiSingleton = xbox::services::get_xsapi_singleton();
-    std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
-    if (xsapiSingleton->g_serviceLoggerSingleton == nullptr)
+    std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
+    if (xsapiSingleton->m_serviceLoggerSingleton == nullptr)
     {
-        xsapiSingleton->g_serviceLoggerSingleton = std::shared_ptr<service_call_logger>(new service_call_logger());
+        xsapiSingleton->m_serviceLoggerSingleton = std::shared_ptr<service_call_logger>(new service_call_logger());
     }
-    return xsapiSingleton->g_serviceLoggerSingleton;
+    return xsapiSingleton->m_serviceLoggerSingleton;
 }
 
 service_call_logger::service_call_logger() :

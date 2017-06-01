@@ -908,13 +908,13 @@ std::shared_ptr<http_retry_after_manager>
 http_retry_after_manager::get_http_retry_after_manager_singleton()
 {
     auto xsapiSingleton = xbox::services::get_xsapi_singleton();
-    std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
-    if (xsapiSingleton->g_httpRetryPolicyManagerSingleton == nullptr)
+    std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
+    if (xsapiSingleton->m_httpRetryPolicyManagerSingleton == nullptr)
     {
-        xsapiSingleton->g_httpRetryPolicyManagerSingleton = std::make_shared<http_retry_after_manager>();
+        xsapiSingleton->m_httpRetryPolicyManagerSingleton = std::make_shared<http_retry_after_manager>();
     }
 
-    return xsapiSingleton->g_httpRetryPolicyManagerSingleton;
+    return xsapiSingleton->m_httpRetryPolicyManagerSingleton;
 }
 
 void http_retry_after_manager::set_state(

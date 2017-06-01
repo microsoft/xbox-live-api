@@ -27,14 +27,14 @@ MultiplayerManager^
 MultiplayerManager::SingletonInstance::get()
 {
     auto xsapiSingleton = get_xsapi_singleton();
-    std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
+    std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
 
-    if (xsapiSingleton->s_winrt_multiplayerManagerInstance == nullptr)
+    if (xsapiSingleton->m_winrt_multiplayerManagerInstance == nullptr)
     {
-        xsapiSingleton->s_winrt_multiplayerManagerInstance = ref new MultiplayerManager();
+        xsapiSingleton->m_winrt_multiplayerManagerInstance = ref new MultiplayerManager();
     }
     
-    return xsapiSingleton->s_winrt_multiplayerManagerInstance;
+    return xsapiSingleton->m_winrt_multiplayerManagerInstance;
 }
 
 std::shared_ptr<xbox::services::multiplayer::manager::multiplayer_manager>
