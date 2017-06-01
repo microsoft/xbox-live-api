@@ -13,26 +13,26 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-std::mutex xbox_system_factory::m_factoryInstanceLock;
-std::shared_ptr<xbox_system_factory> xbox_system_factory::m_factoryInstance;
 
 std::shared_ptr<xbox_system_factory> 
 xbox_system_factory::get_factory()
 {
-    std::lock_guard<std::mutex> hold(m_factoryInstanceLock);
-    if (m_factoryInstance == nullptr)
+    auto xsapiSingleton = get_xsapi_singleton();
+    std::lock_guard<std::mutex> hold(xsapiSingleton->s_singletonLock);
+    if (xsapiSingleton->s_factoryInstance == nullptr)
     {
-        m_factoryInstance = std::make_shared<xbox_system_factory>();
+        xsapiSingleton->s_factoryInstance = std::make_shared<xbox_system_factory>();
     }
-    return m_factoryInstance;
+    return xsapiSingleton->s_factoryInstance;
 }
 
 void xbox_system_factory::set_factory(
     _In_ std::shared_ptr<xbox_system_factory> factory
     )
 {
-    std::lock_guard<std::mutex> hold(m_factoryInstanceLock);
-    m_factoryInstance = factory;
+    auto xsapiSingleton = get_xsapi_singleton();
+    std::lock_guard<std::mutex> hold(xsapiSingleton->s_singletonLock);
+    xsapiSingleton->s_factoryInstance = factory;
 }
 
 #if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U

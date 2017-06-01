@@ -16,10 +16,13 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
 std::shared_ptr<stats_manager>
 stats_manager::get_singleton_instance()
 {
-    static std::mutex s_singletonLock;
-    std::lock_guard<std::mutex> guard(s_singletonLock);
-    static std::shared_ptr<stats_manager> instance = std::make_shared<stats_manager>();
-    return instance;
+    auto xsapiSingleton = get_xsapi_singleton();
+    std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
+    if (xsapiSingleton->s_statsManagerInstance == nullptr)
+    {
+        xsapiSingleton->s_statsManagerInstance = std::make_shared<stats_manager>();
+    }
+    return xsapiSingleton->s_statsManagerInstance;
 }
 
 stats_manager::stats_manager()

@@ -8,17 +8,15 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-static XBOX_LIVE_NAMESPACE::system::xbox_live_mutex g_serviceLoggerSingletonLock;
-static std::shared_ptr<service_call_logger> g_serviceLoggerSingleton;
-
 std::shared_ptr<service_call_logger> service_call_logger::get_singleton_instance()
 {
-    std::lock_guard<std::mutex> guard(g_serviceLoggerSingletonLock.get());
-    if (g_serviceLoggerSingleton == nullptr)
+    auto xsapiSingleton = xbox::services::get_xsapi_singleton();
+    std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
+    if (xsapiSingleton->g_serviceLoggerSingleton == nullptr)
     {
-        g_serviceLoggerSingleton = std::shared_ptr<service_call_logger>(new service_call_logger());
+        xsapiSingleton->g_serviceLoggerSingleton = std::shared_ptr<service_call_logger>(new service_call_logger());
     }
-    return g_serviceLoggerSingleton;
+    return xsapiSingleton->g_serviceLoggerSingleton;
 }
 
 service_call_logger::service_call_logger() :

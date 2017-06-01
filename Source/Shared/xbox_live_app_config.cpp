@@ -9,20 +9,17 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-
-static std::mutex g_appConfigSingletonLock;
-static std::shared_ptr<xbox_live_app_config> g_appConfigSingleton;
-
 std::shared_ptr<xbox_live_app_config> 
 xbox_live_app_config::get_app_config_singleton()
 {
-    std::lock_guard<std::mutex> guard(g_appConfigSingletonLock);
-    if (g_appConfigSingleton == nullptr)
+    auto xsapiSingleton = xbox::services::get_xsapi_singleton();
+    std::lock_guard<std::mutex> guard(xsapiSingleton->s_appConfigLock);
+    if (xsapiSingleton->g_appConfigSingleton == nullptr)
     {
-        g_appConfigSingleton = std::shared_ptr<xbox_live_app_config>(new xbox_live_app_config());
+        xsapiSingleton->g_appConfigSingleton = std::shared_ptr<xbox_live_app_config>(new xbox_live_app_config());
     }
 
-    return g_appConfigSingleton;
+    return xsapiSingleton->g_appConfigSingleton;
 }
 
 

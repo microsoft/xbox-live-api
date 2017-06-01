@@ -17,17 +17,15 @@ using namespace Windows::Foundation;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-static XBOX_LIVE_NAMESPACE::system::xbox_live_mutex g_serviceLoggerProtocolSingletonLock;
-static std::shared_ptr<service_call_logger_protocol> g_serviceLoggerProtocolSingleton;
-
 std::shared_ptr<service_call_logger_protocol> service_call_logger_protocol::get_singleton_instance()
 {
-    std::lock_guard<std::mutex> guard(g_serviceLoggerProtocolSingletonLock.get());
-    if (g_serviceLoggerProtocolSingleton == nullptr)
+    auto xsapiSingleton = xbox::services::get_xsapi_singleton();
+    std::lock_guard<std::mutex> guard(xsapiSingleton->g_serviceLoggerProtocolSingletonLock);
+    if (xsapiSingleton->g_serviceLoggerProtocolSingleton == nullptr)
     {
-        g_serviceLoggerProtocolSingleton = std::shared_ptr<service_call_logger_protocol>(new service_call_logger_protocol());
+        xsapiSingleton->g_serviceLoggerProtocolSingleton = std::shared_ptr<service_call_logger_protocol>(new service_call_logger_protocol());
     }
-    return g_serviceLoggerProtocolSingleton;
+    return xsapiSingleton->g_serviceLoggerProtocolSingleton;
 }
 
 service_call_logger_protocol::service_call_logger_protocol()

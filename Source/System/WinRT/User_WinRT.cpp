@@ -70,8 +70,6 @@ void UserEventBind::UserSignOutCompletedHandler(_In_ xbox::services::system::sig
     }
 }
 
-UserEventBind XboxLiveUser::s_userEventBind;
-
 XboxLiveUser::XboxLiveUser():
     m_cppObj(CreateUserImpl(nullptr))
 {

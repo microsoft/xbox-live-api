@@ -21,7 +21,7 @@ notification_service_windows::subscribe_to_notifications(
     )
 {
     {
-        std::lock_guard<std::mutex> guard(s_notificationSingletonLock);
+        std::lock_guard<std::mutex> guard(get_xsapi_singleton()->s_singletonLock);
         if (m_userContexts.find(userContext->xbox_user_id()) == m_userContexts.end())
         {
             m_userContexts.emplace(std::make_pair(userContext->xbox_user_id(), userContext));

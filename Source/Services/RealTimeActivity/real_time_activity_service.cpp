@@ -44,19 +44,20 @@ real_time_activity_service::activate()
     std::lock_guard<std::recursive_mutex> lock(m_lock);
     int activationCount = 0;
     {
-        std::lock_guard<std::mutex> guard(get_xsapi_singleton()->s_rtaActivationCounterLock);
+        auto xsapiSingleton = get_xsapi_singleton();
+        std::lock_guard<std::mutex> guard(xsapiSingleton->s_rtaActivationCounterLock);
         if (m_webSocketConnection == nullptr)
         {
-            activationCount = ++get_xsapi_singleton()->s_rtaActiveSocketCountPerUser[m_userContext->xbox_user_id()];
+            activationCount = ++xsapiSingleton->s_rtaActiveSocketCountPerUser[m_userContext->xbox_user_id()];
 
-            LOGS_DEBUG << "websocket count is at " << get_xsapi_singleton()->s_rtaActiveSocketCountPerUser[m_userContext->xbox_user_id()] << " for user " << m_userContext->xbox_user_id();
+            LOGS_DEBUG << "websocket count is at " << xsapiSingleton->s_rtaActiveSocketCountPerUser[m_userContext->xbox_user_id()] << " for user " << m_userContext->xbox_user_id();
         }
 
         if (m_userContext->caller_context_type() == caller_context_type::multiplayer_manager ||
             m_userContext->caller_context_type() == caller_context_type::social_manager)
         {
-            ++get_xsapi_singleton()->s_rtaActiveManagersByUser[m_userContext->xbox_user_id()];
-            LOGS_DEBUG << "websocket manager count is at " << get_xsapi_singleton()->s_rtaActiveManagersByUser[m_userContext->xbox_user_id()] << " for user " << m_userContext->xbox_user_id();
+            ++xsapiSingleton->s_rtaActiveManagersByUser[m_userContext->xbox_user_id()];
+            LOGS_DEBUG << "websocket manager count is at " << xsapiSingleton->s_rtaActiveManagersByUser[m_userContext->xbox_user_id()] << " for user " << m_userContext->xbox_user_id();
         }
     }
 
@@ -69,8 +70,9 @@ real_time_activity_service::activate()
             if (!disableAsserts)
             {
 #if UNIT_TEST_SERVICES
-                std::lock_guard<std::mutex> guard(get_xsapi_singleton()->s_rtaActivationCounterLock);
-                --get_xsapi_singleton()->s_rtaActiveSocketCountPerUser[m_userContext->xbox_user_id()];
+                auto xsapiSingleton = get_xsapi_singleton();
+                std::lock_guard<std::mutex> guard(xsapiSingleton->s_rtaActivationCounterLock);
+                --xsapiSingleton->s_rtaActiveSocketCountPerUser[m_userContext->xbox_user_id()];
 #endif
                 std::stringstream msg;
                 LOGS_ERROR << "You've currently activated  " << activationCount << " websockets.";
@@ -149,33 +151,34 @@ real_time_activity_service::activate()
 void
 real_time_activity_service::deactivate()
 {
-    if (get_xsapi_singleton(false) != nullptr) // skip this if process is shutting down
+    std::shared_ptr<xsapi_singleton> xsapiSingleton = get_xsapi_singleton(false);
+    if (xsapiSingleton != nullptr) // skip this if process is shutting down
     {
-        std::lock_guard<std::mutex> guard(get_xsapi_singleton()->s_rtaActivationCounterLock);
+        std::lock_guard<std::mutex> guard(xsapiSingleton->s_rtaActivationCounterLock);
         auto& xuid = m_userContext->xbox_user_id();
         if (m_userContext->caller_context_type() == caller_context_type::title)
         {
-            if (m_webSocketConnection != nullptr && get_xsapi_singleton()->s_rtaActiveSocketCountPerUser[xuid] > 0)
+            if (m_webSocketConnection != nullptr && xsapiSingleton->s_rtaActiveSocketCountPerUser[xuid] > 0)
             {
-                --get_xsapi_singleton()->s_rtaActiveSocketCountPerUser[xuid];
+                --xsapiSingleton->s_rtaActiveSocketCountPerUser[xuid];
             }
         }
-        else if(get_xsapi_singleton()->s_rtaActiveManagersByUser[xuid] != 0)
+        else if(xsapiSingleton->s_rtaActiveManagersByUser[xuid] != 0)
         {
-            auto counter = --get_xsapi_singleton()->s_rtaActiveManagersByUser[xuid];
+            auto counter = --xsapiSingleton->s_rtaActiveManagersByUser[xuid];
             if (counter > 0 )
             {
                 // Since the Managers share the RTA service, only close the socket on the last deactivate() call for that user.
                 return;
             }
-            --get_xsapi_singleton()->s_rtaActiveSocketCountPerUser[xuid];
-            LOGS_DEBUG << "websocket count is at " << get_xsapi_singleton()->s_rtaActiveSocketCountPerUser[xuid] << " for user " << xuid;
-            get_xsapi_singleton()->s_rtaActiveManagersByUser.erase(xuid);
+            --xsapiSingleton->s_rtaActiveSocketCountPerUser[xuid];
+            LOGS_DEBUG << "websocket count is at " << xsapiSingleton->s_rtaActiveSocketCountPerUser[xuid] << " for user " << xuid;
+            xsapiSingleton->s_rtaActiveManagersByUser.erase(xuid);
         }
          
-        if (get_xsapi_singleton()->s_rtaActiveSocketCountPerUser[xuid] == 0)
+        if (xsapiSingleton->s_rtaActiveSocketCountPerUser[xuid] == 0)
         {
-            get_xsapi_singleton()->s_rtaActiveSocketCountPerUser.erase(xuid);
+            xsapiSingleton->s_rtaActiveSocketCountPerUser.erase(xuid);
         }
     }
 
@@ -785,15 +788,17 @@ real_time_activity_service::convert_rta_error_code_to_xbox_live_error_code(
 std::unordered_map<string_t, uint32_t> 
 real_time_activity_service::_Rta_activation_map()
 {
-    std::lock_guard<std::mutex> guard(get_xsapi_singleton()->s_rtaActivationCounterLock);
-    return get_xsapi_singleton(true)->s_rtaActiveSocketCountPerUser;
+    auto xsapiSingleton = get_xsapi_singleton();
+    std::lock_guard<std::mutex> guard(xsapiSingleton->s_rtaActivationCounterLock);
+    return xsapiSingleton->s_rtaActiveSocketCountPerUser;
 }
 
 std::unordered_map<string_t, uint32_t> 
 real_time_activity_service::_Rta_manager_activation_map()
 {
-    std::lock_guard<std::mutex> guard(get_xsapi_singleton()->s_rtaActivationCounterLock);
-    return get_xsapi_singleton(true)->s_rtaActiveManagersByUser;
+    auto xsapiSingleton = get_xsapi_singleton();
+    std::lock_guard<std::mutex> guard(xsapiSingleton->s_rtaActivationCounterLock);
+    return xsapiSingleton->s_rtaActiveManagersByUser;
 }
 
 

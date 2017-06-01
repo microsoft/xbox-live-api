@@ -13,21 +13,81 @@
 #include "http_call_response.h"
 #include "xsapi/mem.h"
 
-// Forward
+// Forward decls
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
     class xbox_live_services_settings;
+    class xbox_system_factory;
+    #if UWP_API
+        class user_impl_idp;
+    #endif
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
+    class social_manager;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_END
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
+    class stats_manager;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_END
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_BEGIN
+    class notification_service;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_END
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
+    class multiplayer_manager;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_END
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_BEGIN
+    class real_time_activity_service_factory;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_END
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+    class service_call_logging_config;
+    class service_call_logger_protocol;
+    class service_call_logger;
+    class http_retry_after_manager;
+    class logger;
+    class perf_tester;
+    class initiator;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+
+#if !TV_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+    class sign_out_completed_event_args;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif
+
+#if !TV_API && !XSAPI_SERVER
+NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
+    class presence_writer;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_END
+#endif
+
+#ifdef __cplusplus_winrt
+    NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_BEGIN
+        ref class MultiplayerManager;
+    NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_END
+
+    NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_BEGIN
+        ref class SocialManager;
+    NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_END
+
+    NAMESPACE_MICROSOFT_XBOX_SERVICES_BEGIN
+        ref class ServiceCallLoggingConfig;
+    NAMESPACE_MICROSOFT_XBOX_SERVICES_END
+
+    NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_BEGIN
+        class UserEventBind;
+    NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_END
+
+    NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
+        ref class StatisticManager;
+    NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_END
+#endif
 
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-
-
-#if !TV_API && !XSAPI_SERVER
-namespace presence
-{
-    class presence_writer;
-}
-#endif
 
 #ifndef __min
 #define __min(a,b)            (((a) < (b)) ? (a) : (b))
@@ -42,16 +102,110 @@ struct xsapi_singleton
     xsapi_singleton();
     ~xsapi_singleton();
 
+    void init();
+
     std::mutex s_rtaActivationCounterLock;
     std::unordered_map<string_t, uint32_t> s_rtaActiveSocketCountPerUser;
     std::unordered_map<string_t, uint32_t> s_rtaActiveManagersByUser;
 
     std::mutex s_singletonLock;
+    std::mutex s_appConfigLock;
+    std::mutex s_mpsdLock;
     std::shared_ptr<XBOX_LIVE_NAMESPACE::system::xbox_live_services_settings> s_xboxServiceSettingsSingleton;
     std::shared_ptr<XBOX_LIVE_NAMESPACE::local_config> s_localConfigSingleton;
 
 #if !TV_API && !XSAPI_SERVER
     std::shared_ptr<XBOX_LIVE_NAMESPACE::presence::presence_writer> s_presenceWriterSingleton;
+#endif
+
+#if TV_API || UNIT_TEST_SERVICES
+    std::mutex s_achievementServiceInitLock;
+    bool s_bHasAchievementServiceInitialized;
+    std::string s_eventProviderName;
+    GUID s_eventPlayerSessionId;
+#endif
+
+    // from Shared\xbox_live_app_config.cpp
+    std::shared_ptr<xbox_live_app_config> g_appConfigSingleton;
+
+    // from Misc\notification_service.cpp
+    std::shared_ptr<xbox::services::notification::notification_service> s_notificationSingleton;
+
+    // from Shared\service_call_logging_config.cpp
+    std::shared_ptr<service_call_logging_config> g_serviceLoggingConfigSingleton;
+
+    // from Shared\xbox_live_app_config.cpp
+    std::mutex g_serviceLoggerProtocolSingletonLock;
+    std::shared_ptr<service_call_logger_protocol> g_serviceLoggerProtocolSingleton;
+
+    // from Shared\utils_locales.cpp
+    string_t s_locales;
+    std::mutex s_locale_lock;
+    bool s_custom_locale_override;
+
+    // from Shared\service_call_logger_data.cpp
+    uint32_t s_loggerId;
+
+    // from Shared\service_call_logger.cpp
+    std::shared_ptr<service_call_logger> g_serviceLoggerSingleton;
+
+    // from Shared\http_call_response.cpp
+    volatile long s_responseCount;
+
+    // from Services\Multiplayer\Manager\multiplayer_manager.cpp
+    std::shared_ptr<xbox::services::multiplayer::manager::multiplayer_manager> s_multiplayerManagerInstance;
+
+    // from Social\Manager\social_manager.cpp
+    std::shared_ptr<xbox::services::social::manager::social_manager> s_socialManagerInstance;
+    std::shared_ptr<xbox::services::perf_tester> s_perfTester;
+
+    // from Stats\Manager\stats_manager.cpp
+    std::shared_ptr<xbox::services::stats::manager::stats_manager> s_statsManagerInstance;
+
+    // from Services\RealTimeActivity\real_time_activity_service_factory.cpp
+    std::shared_ptr<real_time_activity::real_time_activity_service_factory> s_rtaFactoryInstance;
+
+    // from Multiplayer\Manager\multiplayer_client_pending_request.cpp
+    volatile long s_multiplayerClientPendingRequestUniqueIndentifier;
+
+    // from Shared\http_call_impl.cpp
+    std::shared_ptr<http_retry_after_manager> g_httpRetryPolicyManagerSingleton;
+
+    // from Services\Presence\presence_service_impl.cpp
+    std::function<void(int heartBeatDelayInMins)> s_onSetPresenceFinish;
+
+    // from Shared\Logger\log.cpp
+    std::shared_ptr<logger> s_logger;
+
+    // from Shared\xbox_system_factory.cpp
+    std::shared_ptr<system::xbox_system_factory> s_factoryInstance;
+
+    std::shared_ptr<initiator> s_initiator;
+
+#ifdef __cplusplus_winrt
+    // from Services\Multiplayer\Manager\WinRT\MultiplayerManager_WinRT.cpp
+    Microsoft::Xbox::Services::Multiplayer::Manager::MultiplayerManager^ s_winrt_multiplayerManagerInstance;
+    Microsoft::Xbox::Services::Social::Manager::SocialManager^ s_winrt_socialManagerInstance;
+    Microsoft::Xbox::Services::ServiceCallLoggingConfig^ s_winrt_serviceCallLoggingConfigInstance;
+    Microsoft::Xbox::Services::Statistics::Manager::StatisticManager^ s_winrt_statisticManagerInstance;
+
+    // from System\WinRT\User_WinRT.cpp
+    std::shared_ptr<Microsoft::Xbox::Services::System::UserEventBind> s_userEventBind;
+#endif
+
+#if UWP_API
+    // from System\user_impl_idp.cpp
+    std::unordered_map<string_t, std::shared_ptr<system::user_impl_idp>> s_trackingUsers;
+    Windows::System::UserWatcher^ s_userWatcher;
+#endif
+
+#if !TV_API
+    // from System\user_impl.cpp
+    std::unordered_map<function_context, std::function<void(const system::sign_out_completed_event_args&)>> s_signOutCompletedHandlers;
+    std::unordered_map<function_context, std::function<void(const string_t&)>> s_signInCompletedHandlers;
+    function_context s_signOutCompletedHandlerIndexer;
+    function_context s_signInCompletedHandlerIndexer;
+    std::mutex s_trackingUsersLock;
 #endif
 };
 

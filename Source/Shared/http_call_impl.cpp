@@ -904,19 +904,17 @@ void http_call_impl::set_http_timeout(
     }
 }
 
-static std::mutex g_httpRetryPolicyManagerSingletonLock;
-static std::shared_ptr<http_retry_after_manager> g_httpRetryPolicyManagerSingleton;
-
 std::shared_ptr<http_retry_after_manager>
 http_retry_after_manager::get_http_retry_after_manager_singleton()
 {
-    std::lock_guard<std::mutex> guard(g_httpRetryPolicyManagerSingletonLock);
-    if (g_httpRetryPolicyManagerSingleton == nullptr)
+    auto xsapiSingleton = xbox::services::get_xsapi_singleton();
+    std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
+    if (xsapiSingleton->g_httpRetryPolicyManagerSingleton == nullptr)
     {
-        g_httpRetryPolicyManagerSingleton = std::make_shared<http_retry_after_manager>();
+        xsapiSingleton->g_httpRetryPolicyManagerSingleton = std::make_shared<http_retry_after_manager>();
     }
 
-    return g_httpRetryPolicyManagerSingleton;
+    return xsapiSingleton->g_httpRetryPolicyManagerSingleton;
 }
 
 void http_retry_after_manager::set_state(

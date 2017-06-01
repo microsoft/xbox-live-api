@@ -7,19 +7,18 @@
 #include "real_time_activity_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_BEGIN
-static std::mutex s_singletonLock;
 
 std::shared_ptr<real_time_activity_service_factory>
 real_time_activity_service_factory::get_singleton_instance()
 {
-    std::lock_guard<std::mutex> guard(s_singletonLock);
-    static std::shared_ptr<real_time_activity_service_factory> instance;
-    if (instance == nullptr)
+    auto xsapiSingleton = get_xsapi_singleton();
+    std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
+    if (xsapiSingleton->s_rtaFactoryInstance == nullptr)
     {
-        instance = std::make_shared<real_time_activity_service_factory>();
+        xsapiSingleton->s_rtaFactoryInstance = std::make_shared<real_time_activity_service_factory>();
     }
 
-    return instance;
+    return xsapiSingleton->s_rtaFactoryInstance;
 }
 
 real_time_activity_service_factory::real_time_activity_service_factory()
@@ -33,7 +32,7 @@ real_time_activity_service_factory::get_rta_instance(
     _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
     )
 {
-    std::lock_guard<std::mutex> guard(s_singletonLock);
+    std::lock_guard<std::mutex> guard(get_xsapi_singleton()->s_singletonLock);
     XSAPI_ASSERT(userContext != nullptr);
 
     auto xboxUserId = userContext->xbox_user_id();
@@ -65,7 +64,7 @@ real_time_activity_service_factory::remove_user_from_rta_map(
     _In_ std::shared_ptr<xbox::services::user_context> userContext
     )
 {
-    std::lock_guard<std::mutex> guard(s_singletonLock);
+    std::lock_guard<std::mutex> guard(get_xsapi_singleton()->s_singletonLock);
     XSAPI_ASSERT(userContext != nullptr);
     auto& xuid = userContext->xbox_user_id();
     if (!xuid.empty())

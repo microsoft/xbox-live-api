@@ -15,8 +15,6 @@ using namespace xbox::services::multiplayer;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 
-static std::mutex s_singletonLock;
-
 multiplayer_manager::multiplayer_manager() :
     m_joinability(joinability::none),
     m_isDirty(false)
@@ -26,14 +24,14 @@ multiplayer_manager::multiplayer_manager() :
 std::shared_ptr<multiplayer_manager>
 multiplayer_manager::get_singleton_instance()
 {
-    std::lock_guard<std::mutex> guard(s_singletonLock);
-    static std::shared_ptr<multiplayer_manager> instance;
-    if (instance == nullptr)
+    auto xsapiSingleton = get_xsapi_singleton();
+    std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
+    if (xsapiSingleton->s_multiplayerManagerInstance == nullptr)
     {
-        instance = std::shared_ptr<multiplayer_manager>(new multiplayer_manager());
+        xsapiSingleton->s_multiplayerManagerInstance = std::shared_ptr<multiplayer_manager>(new multiplayer_manager());
     }
 
-    return instance;
+    return xsapiSingleton->s_multiplayerManagerInstance;
 }
 
 void

@@ -13,8 +13,6 @@ using namespace XBOX_LIVE_NAMESPACE::system;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
 
-std::function<void(int heartBeatDelayInMins)> presence_service_impl::s_onSetPresenceFinish;
-
 presence_service_impl::presence_service_impl(
     _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> realTimeActivityService,
     _In_ std::shared_ptr<xbox::services::user_context> userContext,
@@ -132,9 +130,10 @@ presence_service_impl::set_presence_helper(
             heartbeatDelay = 5;
         }        
 
-        if (s_onSetPresenceFinish)
+        auto xsapiSingleton = get_xsapi_singleton();
+        if (xsapiSingleton->s_onSetPresenceFinish)
         {
-            s_onSetPresenceFinish(heartbeatDelay);
+            xsapiSingleton->s_onSetPresenceFinish(heartbeatDelay);
         }
 
         return xbox_live_result<uint32_t>(heartbeatDelay, response->err_code(), response->err_message());

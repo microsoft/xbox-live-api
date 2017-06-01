@@ -36,7 +36,7 @@ public:
     _XSAPIIMP string_t scid();
 
     /// <summary>
-    /// Returns the Xbox Live environment being used, it is empty before you sign in or using prodction.
+    /// Returns the Xbox Live environment being used, it is empty before you sign in or using production.
     /// </summary>
     _XSAPIIMP const string_t& environment() const;
 

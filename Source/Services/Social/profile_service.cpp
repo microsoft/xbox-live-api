@@ -11,8 +11,6 @@ using namespace pplx;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
-std::mutex profile_service::m_settingsLock;
-
 const string_t profile_service::SETTINGS_ARRAY[] = {
     _T("AppDisplayName"),
     _T("AppDisplayPicRaw"),

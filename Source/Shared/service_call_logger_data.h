@@ -80,7 +80,6 @@ private:
 
     string_t m_breadCrumb;
 
-    static uint32_t s_id;
     static const uint32_t s_invalidId = (uint32_t)-1;
 };
 

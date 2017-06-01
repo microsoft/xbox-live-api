@@ -10,8 +10,6 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 //
 // service_call_logger_data
 
-uint32_t service_call_logger_data::s_id = 0;
-
 service_call_logger_data::service_call_logger_data(
     _In_ string_t host,
     _In_ string_t uri,
@@ -73,7 +71,7 @@ service_call_logger_data::service_call_logger_data(
 
 void service_call_logger_data::init()
 {
-    m_id = ++s_id;
+    m_id = ++get_xsapi_singleton()->s_loggerId;
     m_breadCrumb = utils::create_guid(true).c_str();
 }
 

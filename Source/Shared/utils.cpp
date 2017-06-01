@@ -21,6 +21,14 @@
 #include "xsapi/presence.h"
 #include "xsapi/system.h"
 #include "presence_internal.h"
+#include "initiator.h"
+
+#if UWP_API
+#ifdef __cplusplus_winrt
+#include "WinRT/User_WinRT.h"
+#endif
+#endif
+
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -32,36 +40,67 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 static const uint64_t _msTicks = static_cast<uint64_t>(10000);
 static const uint64_t _secondTicks = 1000*_msTicks;
 
-static std::mutex g_xsapiSingletonLock;
-static std::shared_ptr<xsapi_singleton> g_xsapiSingleton;
+static std::mutex s_xsapiSingletonLock;
+static std::shared_ptr<xsapi_singleton> s_xsapiSingleton;
 
-xsapi_singleton::xsapi_singleton() 
+xsapi_singleton::xsapi_singleton()
 #if !TV_API && !XSAPI_SERVER
     : s_presenceWriterSingleton(std::shared_ptr<XBOX_LIVE_NAMESPACE::presence::presence_writer>(new XBOX_LIVE_NAMESPACE::presence::presence_writer()))
 #endif
 {
+#if TV_API || UNIT_TEST_SERVICES
+    s_bHasAchievementServiceInitialized = false;
+    s_eventPlayerSessionId = { 0 };
+#endif
+
+    s_locales = _T("en-US");
+    s_custom_locale_override = false;
+    s_loggerId = 0;
+    s_responseCount = 0;
+    s_multiplayerClientPendingRequestUniqueIndentifier = 0;
+
+#if !TV_API
+    s_signOutCompletedHandlerIndexer = 0;
+    s_signInCompletedHandlerIndexer = 0;
+#endif
+
+#if UWP_API
+    s_trackingUsers = std::unordered_map<string_t, std::shared_ptr<system::user_impl_idp>>();
+#endif
+}
+
+void xsapi_singleton::init()
+{
+#if UWP_API
+#ifdef __cplusplus_winrt
+    s_userEventBind = std::make_shared<Microsoft::Xbox::Services::System::UserEventBind>();
+#endif
+#endif
+
+    s_initiator = std::make_shared<initiator>();
 }
 
 xsapi_singleton::~xsapi_singleton()
 {
     LOG_INFO("~xsapi_singleton()");
-    std::lock_guard<std::mutex> guard(g_xsapiSingletonLock);
-    g_xsapiSingleton = nullptr;
+    std::lock_guard<std::mutex> guard(s_xsapiSingletonLock);
+    s_xsapiSingleton = nullptr;
 }
 
 std::shared_ptr<xsapi_singleton>
 get_xsapi_singleton(_In_ bool createIfRequired)
 {
-    if (createIfRequired)
+    if (createIfRequired && s_xsapiSingleton == nullptr)
     {
-        std::lock_guard<std::mutex> guard(g_xsapiSingletonLock);
-        if (g_xsapiSingleton == nullptr)
+        std::lock_guard<std::mutex> guard(s_xsapiSingletonLock);
+        if (s_xsapiSingleton == nullptr)
         {
-            g_xsapiSingleton = std::make_shared<xsapi_singleton>();
+            s_xsapiSingleton = std::make_shared<xsapi_singleton>();
+            s_xsapiSingleton->init();
         }
     }
 
-    return g_xsapiSingleton;
+    return s_xsapiSingleton;
 }
 
 
