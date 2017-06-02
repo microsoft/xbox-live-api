@@ -20,13 +20,13 @@ social_manager::get_singleton_instance()
     if (xsapiSingleton->m_socialManagerInstance == nullptr)
     {
         xsapiSingleton->m_socialManagerInstance = std::shared_ptr<social_manager>(new social_manager());
+        xsapiSingleton->m_perfTester = std::make_shared<xbox::services::perf_tester>(_T("social_manager"));
     }
     return xsapiSingleton->m_socialManagerInstance;
 }
 
 social_manager::social_manager()
 {
-    get_xsapi_singleton()->m_perfTester = std::make_shared<xbox::services::perf_tester>(_T("social_manager"));
 }
 
 xbox_live_result<std::shared_ptr<xbox_social_user_group>>
