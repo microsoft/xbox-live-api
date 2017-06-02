@@ -24,13 +24,13 @@ real_time_activity_subscription_error_event_args::subscription()
 }
 
 const std::error_code&
-real_time_activity_subscription_error_event_args::err()
+real_time_activity_subscription_error_event_args::err() const
 {
     return m_err;
 }
 
 const std::string&
-real_time_activity_subscription_error_event_args::err_message()
+real_time_activity_subscription_error_event_args::err_message() const
 {
     return m_errorMessage;
 }
