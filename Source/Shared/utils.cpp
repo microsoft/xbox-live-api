@@ -82,7 +82,6 @@ void xsapi_singleton::init()
 
 xsapi_singleton::~xsapi_singleton()
 {
-    LOG_INFO("~xsapi_singleton()");
     std::lock_guard<std::mutex> guard(s_xsapiSingletonLock);
     s_xsapiSingleton = nullptr;
 }
