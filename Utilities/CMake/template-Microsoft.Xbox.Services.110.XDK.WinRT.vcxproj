@@ -60,7 +60,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>_VARIADIC_MAX=10;ENABLE_INTSAFE_SIGNED_FUNCTIONS;_NO_XSAPIIMP;_NO_ASYNCRTIMP;_NO_PPLXIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_VARIADIC_MAX=10;_WINRT_DLL;ENABLE_INTSAFE_SIGNED_FUNCTIONS;_NO_XSAPIIMP;_NO_ASYNCRTIMP;_NO_PPLXIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
       <AdditionalUsingDirectories>$(WindowsSDK_WindowsMetadata);$(AdditionalUsingDirectories)</AdditionalUsingDirectories>

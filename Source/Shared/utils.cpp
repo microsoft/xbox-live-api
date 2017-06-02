@@ -24,7 +24,7 @@
 #include "initiator.h"
 
 #if UWP_API
-#ifdef __cplusplus_winrt
+#ifdef _WINRT_DLL
 #include "WinRT/User_WinRT.h"
 #endif
 #endif
@@ -72,7 +72,7 @@ xsapi_singleton::xsapi_singleton()
 void xsapi_singleton::init()
 {
 #if UWP_API
-#ifdef __cplusplum_winrt
+#ifdef _WINRT_DLL
     m_userEventBind = std::make_shared<Microsoft::Xbox::Services::System::UserEventBind>();
 #endif
 #endif
