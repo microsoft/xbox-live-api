@@ -16,7 +16,7 @@ std::shared_ptr<xbox_live_services_settings> xbox_live_services_settings::get_si
 {
     std::shared_ptr<xsapi_singleton> xsapiSingleton = get_xsapi_singleton();
     
-    std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
+    std::lock_guard<std::mutex> guard(xsapiSingleton->m_serviceSettingsLock);
     if (xsapiSingleton->m_xboxServiceSettingsSingleton == nullptr)
     {
         xsapiSingleton->m_xboxServiceSettingsSingleton = std::shared_ptr<xbox_live_services_settings>(new xbox_live_services_settings());

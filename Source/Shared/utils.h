@@ -113,6 +113,7 @@ struct xsapi_singleton
     std::mutex m_mpsdConstantLock;
     std::mutex m_mpsdMemberLock;
     std::mutex m_mpsdPropertyLock;
+    std::mutex m_serviceSettingsLock;
     std::shared_ptr<XBOX_LIVE_NAMESPACE::system::xbox_live_services_settings> m_xboxServiceSettingsSingleton;
     std::shared_ptr<XBOX_LIVE_NAMESPACE::local_config> m_localConfigSingleton;
 
