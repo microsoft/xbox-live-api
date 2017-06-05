@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"adityat"
+#define TEST_CLASS_OWNER L"jasonsa"
 #define TEST_CLASS_AREA L"Marketplace"
 #include "UnitTestIncludes.h"
 
@@ -1065,7 +1065,7 @@ public:
         VERIFY_IS_NOT_NULL(browseCatalogResult);
         VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://eds.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/media/en-US,en/browse?fields=all&id=ProductId&mediaItemType=DGame&relationship=bundledProducts&desiredMediaItemTypes=DGame.DDurable.DConsumable.DApp&maxItems=25", httpCall->PathQueryFragment.to_string());
+        VERIFY_ARE_EQUAL_STR(L"/media/en-US,en/browse?fields=all&id=ProductId&mediaItemType=DGame&relationship=bundledProducts&orderBy=ReleaseDate&desiredMediaItemTypes=DGame.DDurable.DConsumable.DApp&maxItems=25", httpCall->PathQueryFragment.to_string());
         VERIFY_ARE_EQUAL_INT(browseCatalogResult->Items->Size, responseJson.as_object()[L"Items"].as_array().size());
 
         int index = 0;
