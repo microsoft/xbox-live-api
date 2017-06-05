@@ -15,10 +15,16 @@ StatisticManager^
 StatisticManager::SingletonInstance::get()
 {
     auto xsapiSingleton = get_xsapi_singleton();
-    std::lock_guard<std::mutex> lock(xsapiSingleton->m_singletonLock);
     if (xsapiSingleton->m_winrt_statisticManagerInstance == nullptr)
     {
-        xsapiSingleton->m_winrt_statisticManagerInstance = ref new StatisticManager();
+        StatisticManager^ statisticManager = ref new StatisticManager();
+        {
+            std::lock_guard<std::mutex> lock(xsapiSingleton->m_singletonLock);
+            if (xsapiSingleton->m_winrt_statisticManagerInstance == nullptr)
+            {
+                xsapiSingleton->m_winrt_statisticManagerInstance = statisticManager;
+            }
+        }
     }
     return xsapiSingleton->m_winrt_statisticManagerInstance;
 }

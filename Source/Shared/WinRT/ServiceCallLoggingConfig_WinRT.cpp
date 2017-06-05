@@ -11,11 +11,16 @@ ServiceCallLoggingConfig^
 ServiceCallLoggingConfig::SingletonInstance::get()
 {
     auto xsapiSingleton = xbox::services::get_xsapi_singleton();
-    std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
-
     if (xsapiSingleton->m_winrt_serviceCallLoggingConfigInstance == nullptr)
     {
-        xsapiSingleton->m_winrt_serviceCallLoggingConfigInstance = ref new ServiceCallLoggingConfig();
+        ServiceCallLoggingConfig^ serviceCallLoggingConfig = ref new ServiceCallLoggingConfig();
+        {
+            std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
+            if (xsapiSingleton->m_winrt_serviceCallLoggingConfigInstance == nullptr)
+            {
+                xsapiSingleton->m_winrt_serviceCallLoggingConfigInstance = serviceCallLoggingConfig;
+            }
+        }
     }
 
     return xsapiSingleton->m_winrt_serviceCallLoggingConfigInstance;
@@ -23,7 +28,7 @@ ServiceCallLoggingConfig::SingletonInstance::get()
 
 ServiceCallLoggingConfig::ServiceCallLoggingConfig()
 {
-    m_cppObj = xbox::services::service_call_logging_config::get_singleton_instance();
+   m_cppObj = xbox::services::service_call_logging_config::get_singleton_instance();
 }
 
 void ServiceCallLoggingConfig::Enable()

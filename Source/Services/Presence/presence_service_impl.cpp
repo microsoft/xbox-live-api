@@ -626,4 +626,10 @@ presence_service_impl::get_presence_for_social_group_subpath(
     return subpath.str();
 }
 
+void presence_service_impl::set_presence_set_finished_handler(const std::function<void(int heartBeatDelayInMins)>& onSetPresenceFinish)
+{ 
+    auto xsapiSingleton = get_xsapi_singleton();
+    xsapiSingleton->m_onSetPresenceFinish = onSetPresenceFinish;
+}
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_END

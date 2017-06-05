@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"jasonsa2"
+#define TEST_CLASS_OWNER L"jasonsa"
 #define TEST_CLASS_AREA L"HttpCallResponse"
 #include "UnitTestIncludes.h"
 #define MAKE_HTTP_HRESULT(code) MAKE_HRESULT(1, 0x019, code)

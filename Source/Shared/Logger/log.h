@@ -139,7 +139,11 @@ public:
     logger() : m_logLevel(log_level::warn) {}
 
     static void create_logger() { get_xsapi_singleton()->m_logger = std::make_shared<logger>();  }
-    static void release_logger() { get_xsapi_singleton()->m_logger = nullptr; }
+    static void release_logger() 
+    { 
+        auto singleton = get_xsapi_singleton(false);
+        if( singleton ) singleton->m_logger = nullptr;
+    }
     static const std::shared_ptr<logger>& get_logger() { return get_xsapi_singleton()->m_logger; }
 
     void set_log_level(log_level level);

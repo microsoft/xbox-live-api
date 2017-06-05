@@ -6,16 +6,18 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
 
+static std::shared_ptr<MockSocialManager> g_socialManager;
+
 std::shared_ptr<social_manager>
 MockSocialManager::get_mock_singleton_instance()
 {
     static std::mutex socialManagerInitLock;
     std::lock_guard<std::mutex> lock(socialManagerInitLock);
-    if (m_socialManager == nullptr)
+    if (g_socialManager == nullptr)
     {
-        m_socialManager = std::shared_ptr<MockSocialManager>(new MockSocialManager());
+        g_socialManager = std::shared_ptr<MockSocialManager>(new MockSocialManager());
     }
-    return m_socialManager;
+    return g_socialManager;
 }
 
 const xsapi_internal_unordered_map(string_t, std::shared_ptr<xbox_social_user_group>)& MockSocialManager::xbox_social_user_groups() const

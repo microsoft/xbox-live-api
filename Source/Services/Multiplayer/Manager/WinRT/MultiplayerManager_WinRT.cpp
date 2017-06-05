@@ -27,11 +27,17 @@ MultiplayerManager^
 MultiplayerManager::SingletonInstance::get()
 {
     auto xsapiSingleton = get_xsapi_singleton();
-    std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
-
     if (xsapiSingleton->m_winrt_multiplayerManagerInstance == nullptr)
     {
-        xsapiSingleton->m_winrt_multiplayerManagerInstance = ref new MultiplayerManager();
+        MultiplayerManager^ mpManager = ref new MultiplayerManager();
+
+        {
+            std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
+            if (xsapiSingleton->m_winrt_multiplayerManagerInstance == nullptr)
+            {
+                xsapiSingleton->m_winrt_multiplayerManagerInstance = mpManager;
+            }
+        }
     }
     
     return xsapiSingleton->m_winrt_multiplayerManagerInstance;

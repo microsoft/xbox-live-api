@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"blgross"
+#define TEST_CLASS_OWNER L"jasonsa"
 #define TEST_CLASS_AREA L"TitleStorage"
 #include "UnitTestIncludes.h"
 

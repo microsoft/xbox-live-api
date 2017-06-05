@@ -64,7 +64,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_END
 #endif
 
-#ifdef _WINRT_DLL
+#if _WINRT_DLL || UNIT_TEST_SERVICES
     NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_BEGIN
         ref class MultiplayerManager;
     NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_END
@@ -185,7 +185,7 @@ struct xsapi_singleton
 
     std::shared_ptr<initiator> m_initiator;
 
-#if _WINRT_DLL
+#if _WINRT_DLL || UNIT_TEST_SERVICES
     // from Services\Multiplayer\Manager\WinRT\MultiplayerManager_WinRT.cpp
     Microsoft::Xbox::Services::Multiplayer::Manager::MultiplayerManager^ m_winrt_multiplayerManagerInstance;
     Microsoft::Xbox::Services::Social::Manager::SocialManager^ m_winrt_socialManagerInstance;

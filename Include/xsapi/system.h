@@ -90,7 +90,7 @@ public:
     /// <summary>
     /// Gets the singleton instance
     /// </summary>
-    _XSAPIIMP static std::shared_ptr<xbox_live_services_settings> get_singleton_instance();
+    _XSAPIIMP static std::shared_ptr<xbox_live_services_settings> get_singleton_instance(_In_ bool createIfRequired = true);
 
     /// <summary>
     /// Used by titles to register memory allocation hooks that are used by XSAPI when it 
