@@ -242,6 +242,11 @@ void Sample::Update(DX::StepTimer const& timer)
                     PublishSearchHandle();
                 }
 
+                if (m_gamePadButtons.dpadLeft == GamePad::ButtonStateTracker::ButtonState::PRESSED)
+                {
+                    BrowseSearchHandles();
+                }
+
                 if (m_gamePadButtons.leftTrigger == GamePad::ButtonStateTracker::ButtonState::PRESSED)
                 {
                     UpdateLobbyProperties();
