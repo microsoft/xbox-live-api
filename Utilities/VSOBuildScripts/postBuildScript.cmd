@@ -148,7 +148,7 @@ rmdir /s /q %XDK_BINARIES_DROP%\source\Build\Microsoft.Xbox.Services.140.UWP.Win
 del /s %XDK_BINARIES_DROP%\source\*.log
 del %XDK_BINARIES_DROP%\source\*.md
 mkdir %XDK_BINARIES_DROP%\SourceDist
-\\scratch2\scratch\jasonsa\tools\vZip.exe /FOLDER:%XDK_BINARIES_DROP%\source /OUTPUTNAME:%XDK_BINARIES_DROP%\SourceDist\Xbox.Services.zip
+\\scratch2\scratch\jasonsa\tools\vZip.exe /FOLDER:%XDK_BINARIES_DROP%\source /OUTPUTNAME:%PATH_XDK_WINRT%\SourceDist\Xbox.Services.zip
 
 
 if "%skipNuget%" == "1" goto :finalize
