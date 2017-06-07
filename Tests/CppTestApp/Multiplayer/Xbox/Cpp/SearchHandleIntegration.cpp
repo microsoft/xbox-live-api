@@ -19,7 +19,7 @@ using namespace xbox::services::multiplayer::manager;
 
 void Sample::PublishSearchHandle()
 {
-    auto searchHandleReq = multiplayer_search_handle_request(m_multiplayerManager->lobby_session()->session_reference());
+    auto searchHandleReq = multiplayer_search_handle_request(m_multiplayerManager->game_session()->session_reference());
 
     std::vector<string_t> tags;
     tags.push_back(L"micsrequired");
@@ -49,7 +49,7 @@ void Sample::BrowseSearchHandles()
 {
     m_searchHandles = std::vector<multiplayer_search_handle_details>();
     auto context = m_liveResources->GetLiveContext();
-    context->multiplayer_service().get_search_handles(GAME_SERVICE_CONFIG_ID, OWNER_MANAGED_LFG_TEMPLATE_NAME, L"", true, L"tolower(strings/mode) eq 'deathmatch'")
+    context->multiplayer_service().get_search_handles(GAME_SERVICE_CONFIG_ID, GAME_SESSION_TEMPLATE_NAME, L"", true, L"tolower(strings/mode) eq 'deathmatch'")
     .then([this](xbox_live_result<std::vector<multiplayer_search_handle_details>> searchHandles)
     {
         if (searchHandles.err())
@@ -59,6 +59,23 @@ void Sample::BrowseSearchHandles()
         else
         {
             m_searchHandles = searchHandles.payload();
+
+            // Join the game session
+
+            auto handleId = m_searchHandles.at(0).handle_id();
+            auto sessionRef = multiplayer_session_reference(m_searchHandles.at(0).session_reference());
+            auto gameSession = std::make_shared<multiplayer_session>(m_liveResources->GetLiveContext()->xbox_live_user_id(), sessionRef);
+            gameSession->join(web::json::value::null(), false, false, false);
+
+            m_liveResources->GetLiveContext()->multiplayer_service().write_session_by_handle(gameSession, multiplayer_session_write_mode::update_existing, handleId)
+            .then([this, sessionRef](xbox_live_result<std::shared_ptr<multiplayer_session>> writeResult)
+            {
+                if (!writeResult.err())
+                {
+                    // Join the game session via MPM
+                    m_multiplayerManager->join_game(sessionRef.session_name(), sessionRef.session_template_name());
+                }
+            });
         }
     });
 }
@@ -75,7 +92,7 @@ void Sample::SetRoleInfo()
 
     latestLobbySession->set_current_user_role_info(roleInfo);
     m_liveResources->GetLiveContext()->multiplayer_service().write_session(latestLobbySession, multiplayer_session_write_mode::update_existing)
-        .then([this](xbox_live_result<std::shared_ptr<multiplayer_session>> writeResult)
+    .then([this](xbox_live_result<std::shared_ptr<multiplayer_session>> writeResult)
     {
         return xbox_live_result<void>(writeResult.err(), writeResult.err_message());
 
