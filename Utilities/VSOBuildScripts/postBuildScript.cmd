@@ -151,7 +151,8 @@ rmdir /s /q %XDK_BINARIES_DROP%\source\Build\Microsoft.Xbox.Services.140.UWP.Cpp
 rmdir /s /q %XDK_BINARIES_DROP%\source\Build\Microsoft.Xbox.Services.140.UWP.WinRT
 del /s %XDK_BINARIES_DROP%\source\*.log
 del %XDK_BINARIES_DROP%\source\*.md
-mkdir %XDK_BINARIES_DROP%\SourceDist
+mkdir %PATH_XDK_WINRT%
+mkdir %PATH_XDK_WINRT%\SourceDist
 \\scratch2\scratch\jasonsa\tools\vZip.exe /FOLDER:%XDK_BINARIES_DROP%\source /OUTPUTNAME:%PATH_XDK_WINRT%\SourceDist\Xbox.Services.zip
 
 
