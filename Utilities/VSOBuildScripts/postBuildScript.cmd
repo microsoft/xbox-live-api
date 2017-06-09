@@ -153,8 +153,9 @@ del /s %XDK_BINARIES_DROP%\source\*.log
 del %XDK_BINARIES_DROP%\source\*.md
 mkdir %PATH_XDK_WINRT%
 mkdir %PATH_XDK_WINRT%\SourceDist
+if "%BUILD_DEFINITIONNAME%" NEQ "XSAPI_Internal_Full_Build" goto skipzip
 \\scratch2\scratch\jasonsa\tools\vZip.exe /FOLDER:%XDK_BINARIES_DROP%\source /OUTPUTNAME:%PATH_XDK_WINRT%\SourceDist\Xbox.Services.zip
-
+:skipzip
 
 if "%skipNuget%" == "1" goto :finalize
 rem :skipCopy
