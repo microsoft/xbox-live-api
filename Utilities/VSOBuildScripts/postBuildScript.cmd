@@ -2,7 +2,7 @@ if "%1" == "local" goto testlocal
 goto start
 
 :testlocal
-set TFS_DropLocation=c:\test
+set TFS_DropLocation=e:\test
 mkdir %TFS_DropLocation%
 set TFS_VersionNumber=1701.10000
 set TFS_SourcesDirectory=%CD%\..\..
@@ -63,7 +63,6 @@ rem copy includes to build output folder
 robocopy /NJS /NJH /MT:16 /S /NP %UWP_BUILD_SHARE%\Include %XDK_BINARIES_DROP%\cpp\include
 
 rem copy binaries to build output folder
-
 mkdir %XDK_BINARIES_DROP%
 mkdir %XDK_BINARIES_DROP%\winrt
 mkdir %XDK_BINARIES_DROP%\winrt\binaries
@@ -132,7 +131,9 @@ del %PATH_XDK_WINRT%\binaries\Debug\Microsoft.Xbox.Services.pdb
 del %PATH_XDK_WINRT%\binaries\Debug\Microsoft.Xbox.Services.winmd
 
 robocopy /NJS /NJH /MT:16 /S /NP %TFS_DropLocation%\ABI\include %XDK_BINARIES_DROP%\winrt\include\abi
+if "%1" == "local" goto skipsrccopy
 robocopy /NJS /NJH /MT:16 /S /NP %TFS_SourcesDirectory% %XDK_BINARIES_DROP%\source /XD .git
+:skipsrccopy
 rmdir /s /q %XDK_BINARIES_DROP%\source\.git
 rmdir /s /q %XDK_BINARIES_DROP%\source\External\cpprestsdk\Intermediate
 rmdir /s /q %XDK_BINARIES_DROP%\source\InProgressSamples
@@ -154,10 +155,39 @@ del %XDK_BINARIES_DROP%\source\*.md
 mkdir %PATH_XDK_WINRT%
 mkdir %PATH_XDK_WINRT%\SourceDist
 if "%BUILD_DEFINITIONNAME%" NEQ "XSAPI_Internal_Full_Build" goto skipzip
+if "%1" == "local" goto skipzip
 \\scratch2\scratch\jasonsa\tools\vZip.exe /FOLDER:%XDK_BINARIES_DROP%\source /OUTPUTNAME:%PATH_XDK_WINRT%\SourceDist\Xbox.Services.zip
 :skipzip
 
-if "%skipNuget%" == "1" goto :finalize
+rem create unity package
+set UNITY_ASSET_DEST=%TFS_DropLocation%\unity
+set UNITY_ASSET_SRC=%TFS_SourcesDirectory%\Utilities\IDXboxUnityAssetLayout
+set UNITY_ASSET_BIN_SRC_X64_XS=%UWP_BUILD_SHARE%\Release\x64\Microsoft.Xbox.Services.140.UWP.WinRT
+set UNITY_ASSET_BIN_SRC_X64_CA=%UWP_BUILD_SHARE%\Release\x64\cpprestsdk140.uwp
+set UNITY_ASSET_BIN_SRC_ARM_XS=%UWP_BUILD_SHARE%\Release\ARM\Microsoft.Xbox.Services.140.UWP.WinRT
+set UNITY_ASSET_BIN_SRC_ARM_CA=%UWP_BUILD_SHARE%\Release\ARM\cpprestsdk140.uwp
+set UNITY_ASSET_BIN_SRC_X86_XS=%UWP_BUILD_SHARE%\Release\x86\Microsoft.Xbox.Services.140.UWP.WinRT
+set UNITY_ASSET_BIN_SRC_X86_CA=%UWP_BUILD_SHARE%\Release\x86\cpprestsdk140.uwp
+
+mkdir %UNITY_ASSET_DEST%
+robocopy /NJS /NJH /MT:16 /S /NP %UNITY_ASSET_SRC% %UNITY_ASSET_DEST%
+set TYPE=x64
+copy %UWP_BUILD_SHARE%\Release\%TYPE%\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll %UNITY_ASSET_DEST%\Assets\XboxServicesAPI\Binaries\%TYPE%
+copy %UWP_BUILD_SHARE%\Release\%TYPE%\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.winmd %UNITY_ASSET_DEST%\Assets\XboxServicesAPI\Binaries\WinMD
+copy %UWP_BUILD_SHARE%\Release\%TYPE%\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll %UNITY_ASSET_DEST%\Assets\XboxServicesAPI\Binaries\%TYPE%
+set TYPE=ARM
+copy %UWP_BUILD_SHARE%\Release\%TYPE%\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll %UNITY_ASSET_DEST%\Assets\XboxServicesAPI\Binaries\%TYPE%
+copy %UWP_BUILD_SHARE%\Release\%TYPE%\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll %UNITY_ASSET_DEST%\Assets\XboxServicesAPI\Binaries\%TYPE%
+set TYPE=x86
+copy %UWP_BUILD_SHARE%\Release\%TYPE%\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll %UNITY_ASSET_DEST%\Assets\XboxServicesAPI\Binaries\%TYPE%
+copy %UWP_BUILD_SHARE%\Release\%TYPE%\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll %UNITY_ASSET_DEST%\Assets\XboxServicesAPI\Binaries\%TYPE%
+
+set UNITY_PACKAGE_NAME=%UNITY_ASSET_DEST%\XboxServicesAPI-%SDK_RELEASE_NAME%-%MINOR_VERSION_NUMBER%.unitypackage
+"C:\Program Files\Unity\Editor\Unity.exe" -ea SilentlyContinue -batchmode -logFile "%TFS_DropLocation%\unity\unity.log" -projectPath "%UNITY_ASSET_DEST%" -exportPackage "Assets\XboxServicesAPI" "%UNITY_PACKAGE_NAME%" -quit
+
+
+if "%skipNuget%" == "1" goto skipNuget
+if "%1" == "local" goto skipNuget
 rem :skipCopy
 
 rem create Cpp.UWP nuget package
@@ -202,6 +232,7 @@ rmdir /s /q %XDK_OUTPUT_DEST%
 
 mkdir %TFS_DropLocation%\NuGetBinaries
 move %TFS_DropLocation%\*.nupkg %TFS_DropLocation%\NuGetBinaries
+:skipNuget
 
 :finalize
 if "%1" == "local" goto skipEmail
