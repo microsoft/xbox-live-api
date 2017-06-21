@@ -52,6 +52,7 @@ Jump to the guide that matches the platform and API type you are using:
 
 ### How to link against the XSAPI WinRT UWP source
 
+- If you are using VS2017 for WinRT, we only have a single WinRT project that supports both VS2015 and VS2017. To use it from source, you'll need to install 140 support in VS2017. Run the VS2017 installer, modify, and go to Individual components tab and choose "VS++ 2015.3 v140 toolset". Then you should be able to open \Build\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.140.UWP.WinRT.vcxproj by itself in VS2017 and build it and follow the steps below.
 - If your project references the pre-built NuGet package, you need to remove the reference
 In Visual Studio 2015, right click on project and choose "Manage NuGet Packages...", and if Microsoft.Xbox.Live.SDK.WinRT.UWP is installed, click "Uninstall" and click "OK" and wait until its removed.
 - In Visual Studio, choose "File->Add->Existing Project..." in Visual Studio to add the following two projects to your application's solution. The vcxproj files will be located in the folder you extracted the source to.
