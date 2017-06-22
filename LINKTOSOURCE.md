@@ -21,7 +21,7 @@ Jump to the guide that matches the platform and API type you are using:
 ```
 
 - Add the source projects as a reference by choosing Project->References... and select "Add Reference". Under "Solution->Projects", check the entries for both projects above then click OK.
-- Add the props file to your project by clicking "View->Other Windows->Property Manager", right clicking on your project, selecting "Add Existing Property Sheet", then finally selecting the xsapi.staticlib.props file in the SDK sourch root.
+- Add the props file to your project by clicking "View->Other Windows->Property Manager", right clicking on your project, selecting "Add Existing Property Sheet", then finally selecting the xsapi.staticlib.props file in the SDK source root.
 - Add the services.h file to your app source by right clicking on the project Add->Existing Item and choosing the {SDK source root}\Include\xsapi\services.h file 
 - Rebuild your Visual Studio solution
 
@@ -46,7 +46,7 @@ Jump to the guide that matches the platform and API type you are using:
   \External\cpprestsdk\Release\src\build\vs11.xbox\casablanca110.Xbox.vcxproj
 ```
 - Add the source projects as a reference by choosing Project->References... and select "Add Reference". Under "Solution->Projects", check the entries for both projects above then click OK.
-- Add the props file to your project by clicking "View->Other Windows->Property Manager", right clicking on your project, selecting "Add Existing Property Sheet", then finally selecting the xsapi.staticlib.props file in the SDK sourch root.
+- Add the props file to your project by clicking "View->Other Windows->Property Manager", right clicking on your project, selecting "Add Existing Property Sheet", then finally selecting the xsapi.staticlib.props file in the SDK source root.
 - Add the services.h file to your app source by right clicking on the project Add->Existing Item and choosing the {SDK source root}\Include\xsapi\services.h file 
 - Rebuild your Visual Studio solution
 
