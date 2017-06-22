@@ -25,7 +25,7 @@ typedef Microsoft::Xbox::Services::System::XboxLiveUser^ XboxLiveUser_t;
 #if TV_API | XBOX_UWP
 typedef  Windows::Xbox::System::User^ xbox_live_user_t;
 #else
-typedef std::shared_ptr<XBOX_LIVE_NAMESPACE::system::xbox_live_user> xbox_live_user_t;
+typedef std::shared_ptr<xbox::services::system::xbox_live_user> xbox_live_user_t;
 #endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
@@ -64,9 +64,9 @@ public:
 
     const string_t& caller_context() const;
     caller_context_type caller_context_type() const;
-    void set_caller_context_type(XBOX_LIVE_NAMESPACE::caller_context_type context);
+    void set_caller_context_type(xbox::services::caller_context_type context);
 
-    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<user_context_auth_result>> get_auth_result(
+    pplx::task<xbox::services::xbox_live_result<user_context_auth_result>> get_auth_result(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
         _In_ const string_t& headers,
@@ -74,7 +74,7 @@ public:
         _In_ bool allUsersAuthRequired = false
         );
 
-    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<user_context_auth_result>> get_auth_result(
+    pplx::task<xbox::services::xbox_live_result<user_context_auth_result>> get_auth_result(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
         _In_ const string_t& headers,
@@ -82,7 +82,7 @@ public:
         _In_ bool allUsersAuthRequired = false
         );
 
-    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<void>> refresh_token();
+    pplx::task<xbox::services::xbox_live_result<void>> refresh_token();
 
     // inline helper functions
     static string_t get_user_id(xbox_live_user_t user)
@@ -101,12 +101,12 @@ public:
         return user;
     }
 #else
-    static std::shared_ptr<XBOX_LIVE_NAMESPACE::system::xbox_live_user> user_convert(Microsoft::Xbox::Services::System::XboxLiveUser^ user)
+    static std::shared_ptr<xbox::services::system::xbox_live_user> user_convert(Microsoft::Xbox::Services::System::XboxLiveUser^ user)
     {
-        return std::make_shared<XBOX_LIVE_NAMESPACE::system::xbox_live_user>(user->GetUserImpl());
+        return std::make_shared<xbox::services::system::xbox_live_user>(user->GetUserImpl());
     }
 
-    static Microsoft::Xbox::Services::System::XboxLiveUser^ user_convert(std::shared_ptr<XBOX_LIVE_NAMESPACE::system::xbox_live_user> user)
+    static Microsoft::Xbox::Services::System::XboxLiveUser^ user_convert(std::shared_ptr<xbox::services::system::xbox_live_user> user)
     {
         return ref new Microsoft::Xbox::Services::System::XboxLiveUser(user->_User_impl());
     }
@@ -115,11 +115,11 @@ public:
 
 #if XSAPI_SERVER
 public:
-    user_context(_In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::system::xbox_live_server> server);
-    std::shared_ptr<XBOX_LIVE_NAMESPACE::system::xbox_live_server> server() const;
+    user_context(_In_ std::shared_ptr<xbox::services::system::xbox_live_server> server);
+    std::shared_ptr<xbox::services::system::xbox_live_server> server() const;
 
 private:
-    std::shared_ptr<XBOX_LIVE_NAMESPACE::system::xbox_live_server> m_server;
+    std::shared_ptr<xbox::services::system::xbox_live_server> m_server;
 #endif
 
 #if TV_API | XBOX_UWP
@@ -133,14 +133,14 @@ private:
 #elif XSAPI_CPP
     // C++ Microsoft.* user object
     public:
-        user_context(_In_ std::shared_ptr< XBOX_LIVE_NAMESPACE::system::xbox_live_user > user);
-        std::shared_ptr< XBOX_LIVE_NAMESPACE::system::xbox_live_user > user();
+        user_context(_In_ std::shared_ptr< xbox::services::system::xbox_live_user > user);
+        std::shared_ptr< xbox::services::system::xbox_live_user > user();
     private:
-        std::shared_ptr< XBOX_LIVE_NAMESPACE::system::xbox_live_user > m_user;
+        std::shared_ptr< xbox::services::system::xbox_live_user > m_user;
 #else
         // WinRT Microsoft.* user object
     public:
-        user_context(_In_ std::shared_ptr< XBOX_LIVE_NAMESPACE::system::xbox_live_user > user);
+        user_context(_In_ std::shared_ptr< xbox::services::system::xbox_live_user > user);
 
         user_context(_In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user);
         
@@ -152,7 +152,7 @@ private:
 private:
     string_t m_xboxUserId;
     string_t m_callerContext;
-    XBOX_LIVE_NAMESPACE::caller_context_type m_callerContextType;
+    xbox::services::caller_context_type m_callerContextType;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

@@ -85,7 +85,7 @@ public:
     virtual std::shared_ptr<multiplayer::multiplayer_subscription> create_multiplayer_subscription(
         _In_ const std::function<void(const multiplayer::multiplayer_session_change_event_args&)>& multiplayerSessionChangeHandler,
         _In_ const std::function<void()>& multiplayerSubscriptionLostHandler,
-        _In_ const std::function<void(const XBOX_LIVE_NAMESPACE::real_time_activity::real_time_activity_subscription_error_event_args&)>& subscriptionErrorHandler
+        _In_ const std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)>& subscriptionErrorHandler
         );
 
     static std::shared_ptr<xbox_system_factory> get_factory();

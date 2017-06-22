@@ -26,8 +26,8 @@ using namespace web;                        // Common features like URIs.
 using namespace web::http;                  // Common HTTP functionality
 using namespace web::http::client;          // HTTP client features
 
-using namespace XBOX_LIVE_NAMESPACE;
-using namespace XBOX_LIVE_NAMESPACE::system;
+using namespace xbox::services;
+using namespace xbox::services::system;
 
 const int MIN_DELAY_FOR_HTTP_INTERNAL_ERROR_IN_SEC = 10;
 const double MAX_DELAY_TIME_IN_SEC = 60.0;
@@ -96,7 +96,7 @@ http_call_impl::get_response(
             bodyData.assign(body.begin(), body.end());
         }
 
-        string_t signature = XBOX_LIVE_NAMESPACE::system::request_signer::sign_request(
+        string_t signature = xbox::services::system::request_signer::sign_request(
             *proofKey,
             signaturePolicy,
             utility::datetime::utc_now().to_interval(),
@@ -180,7 +180,7 @@ http_call_impl::get_response_with_auth(
     {
         return pplx::task_from_result<std::shared_ptr<http_call_response>>(nullptr);
     }
-    std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> userContextPtr = std::make_shared<XBOX_LIVE_NAMESPACE::user_context>(user);
+    std::shared_ptr<xbox::services::user_context> userContextPtr = std::make_shared<xbox::services::user_context>(user);
     
     return _Internal_get_response_with_auth(
         userContextPtr,
@@ -685,7 +685,7 @@ http_call_impl::handle_json_body_response(
 
             if (httpCallResponse->http_status() == static_cast<int>(xbox_live_error_code::http_status_429_too_many_requests))
             {
-                std::shared_ptr<xbox_live_app_config> appConfig = XBOX_LIVE_NAMESPACE::xbox_live_app_config::get_app_config_singleton();
+                std::shared_ptr<xbox_live_app_config> appConfig = xbox::services::xbox_live_app_config::get_app_config_singleton();
                 if (utils::str_icmp(appConfig->sandbox(), _T("RETAIL")) != 0)
                 {
                     bool disableAsserts = httpCallResponse->_Context_settings()->_Is_disable_asserts_for_xbox_live_throttling_in_dev_sandboxes();

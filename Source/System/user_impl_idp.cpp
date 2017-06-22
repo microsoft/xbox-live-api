@@ -20,10 +20,10 @@ using namespace Platform;
 using namespace Windows::Security::Authentication::Web::Core;
 using namespace Windows::Security::Credentials;
 using namespace Windows::System::Threading;
-using namespace XBOX_LIVE_NAMESPACE;
+using namespace xbox::services;
 using namespace Microsoft::Xbox::Services;
 using namespace Microsoft::Xbox::Services::System;
-using namespace XBOX_LIVE_NAMESPACE::presence;
+using namespace xbox::services::presence;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
