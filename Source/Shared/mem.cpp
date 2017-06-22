@@ -15,10 +15,10 @@ void* xsapi_memory::mem_alloc(
     )
 {
     std::function<_Ret_maybenull_ _Post_writable_byte_size_(dwSize) void*(_In_ size_t dwSize)> pMemAlloc;
-    auto xboxLiveServiceSettings = XBOX_LIVE_NAMESPACE::system::xbox_live_services_settings::get_singleton_instance();
+    auto xboxLiveServiceSettings = xbox::services::system::xbox_live_services_settings::get_singleton_instance();
     if (xboxLiveServiceSettings != nullptr)
     {
-        pMemAlloc = XBOX_LIVE_NAMESPACE::system::xbox_live_services_settings::get_singleton_instance()->m_pMemAllocHook;
+        pMemAlloc = xbox::services::system::xbox_live_services_settings::get_singleton_instance()->m_pMemAllocHook;
     }
     if (pMemAlloc == nullptr)
     {
@@ -44,7 +44,7 @@ void xsapi_memory::mem_free(
     )
 {
     std::function<void(_In_ void* pAddress)> pMemFreeHook = nullptr;
-    auto xboxLiveServiceSettings = XBOX_LIVE_NAMESPACE::system::xbox_live_services_settings::get_singleton_instance(false);
+    auto xboxLiveServiceSettings = xbox::services::system::xbox_live_services_settings::get_singleton_instance(false);
     if (xboxLiveServiceSettings != nullptr)
     {
         pMemFreeHook = xboxLiveServiceSettings->m_pMemFreeHook;

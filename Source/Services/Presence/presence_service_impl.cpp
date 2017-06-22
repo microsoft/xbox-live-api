@@ -9,7 +9,7 @@
 #include "xbox_system_factory.h"
 
 using namespace pplx;
-using namespace XBOX_LIVE_NAMESPACE::system;
+using namespace xbox::services::system;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
 

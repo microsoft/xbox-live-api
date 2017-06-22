@@ -14,7 +14,7 @@ using namespace Microsoft::Xbox::Services::System;
 #endif
 #endif
 
-using namespace XBOX_LIVE_NAMESPACE::system;
+using namespace xbox::services::system;
 
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN

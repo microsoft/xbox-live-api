@@ -55,7 +55,7 @@ public:
 
 private:
 
-    std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_server_impl> m_xboxLiveContextImpl;
+    std::shared_ptr<xbox::services::xbox_live_context_server_impl> m_xboxLiveContextImpl;
 };
 
 #endif
@@ -250,7 +250,7 @@ public:
 #endif // (TV_API | XBOX_UWP) && defined(XSAPI_CPPWINRT)
 
 private:
-    std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_impl> m_xboxLiveContextImpl;
+    std::shared_ptr<xbox::services::xbox_live_context_impl> m_xboxLiveContextImpl;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

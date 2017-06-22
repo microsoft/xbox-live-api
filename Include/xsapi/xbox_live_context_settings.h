@@ -100,7 +100,7 @@ public:
     /// <returns>
     /// A function_context object that can be used to unregister the event handler.
     /// </returns>
-    _XSAPIIMP function_context add_service_call_routed_handler(_In_ std::function<void(const XBOX_LIVE_NAMESPACE::xbox_service_call_routed_event_args&)> handler);
+    _XSAPIIMP function_context add_service_call_routed_handler(_In_ std::function<void(const xbox::services::xbox_service_call_routed_event_args&)> handler);
 
     /// <summary>
     /// Unregisters from all service call notifications.
@@ -297,7 +297,7 @@ public:
     static cert_context _s_certContext;
 #endif
 
-    void _Raise_service_call_routed_event(_In_ const XBOX_LIVE_NAMESPACE::xbox_service_call_routed_event_args& result);
+    void _Raise_service_call_routed_event(_In_ const xbox::services::xbox_service_call_routed_event_args& result);
     bool _Is_disable_asserts_for_xbox_live_throttling_in_dev_sandboxes();
     bool _Is_disable_asserts_for_max_number_of_websockets_activated();
 
@@ -310,7 +310,7 @@ private:
     std::chrono::seconds m_httpTimeoutWindow;
 
     std::mutex m_writeLock;
-    std::unordered_map<function_context, std::function<void(XBOX_LIVE_NAMESPACE::xbox_service_call_routed_event_args)>> m_serviceCallRoutedHandlers;
+    std::unordered_map<function_context, std::function<void(xbox::services::xbox_service_call_routed_event_args)>> m_serviceCallRoutedHandlers;
     function_context m_serviceCallRoutedHandlersCounter;
     
     std::chrono::seconds m_websocketTimeoutWindow;

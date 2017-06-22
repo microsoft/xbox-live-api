@@ -7,7 +7,7 @@
 #include "user_impl.h"
 
 using namespace pplx;
-using XBOX_LIVE_NAMESPACE;
+using xbox::services;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
 pplx::task<xbox_live_result<sign_in_result>>

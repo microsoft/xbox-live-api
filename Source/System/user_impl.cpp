@@ -20,7 +20,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 std::shared_ptr<user_impl>
 user_factory::create_user_impl(user_creation_context userCreationContext)
 {
-    return XBOX_LIVE_NAMESPACE::system::xbox_system_factory::get_factory()->create_user_impl(userCreationContext);
+    return xbox::services::system::xbox_system_factory::get_factory()->create_user_impl(userCreationContext);
 }
 
 user_impl::user_impl(
@@ -49,7 +49,7 @@ user_impl::user_impl(
 #endif
 }
 
-pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>>
+pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
 user_impl::get_token_and_signature(
     _In_ const string_t& httpMethod,
     _In_ const string_t& url,
@@ -67,7 +67,7 @@ user_impl::get_token_and_signature(
         );
 }
 
-pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
+pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
 user_impl::get_token_and_signature(
     _In_ const string_t& httpMethod,
     _In_ const string_t& url,
@@ -88,7 +88,7 @@ user_impl::get_token_and_signature(
         );
 }
 
-pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
+pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
 user_impl::get_token_and_signature_array(
     _In_ const string_t& httpMethod,
     _In_ const string_t& url,

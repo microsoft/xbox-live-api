@@ -181,8 +181,8 @@ public:
     void init_real_time_activity_service_instance();
 
 private:
-    std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> m_userContext;
-    std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> m_xboxLiveContextSettings;
+    std::shared_ptr<xbox::services::user_context> m_userContext;
+    std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
     std::shared_ptr<xbox_live_app_config> m_appConfig;
 
     social::profile_service m_profileService;

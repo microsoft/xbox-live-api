@@ -120,7 +120,7 @@ namespace social {
         /// The result of the asynchronous operation is an xbox_user_profile object.
         /// </returns>
         /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
-        _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<xbox_user_profile>> get_user_profile(
+        _XSAPIIMP pplx::task<xbox::services::xbox_live_result<xbox_user_profile>> get_user_profile(
         _In_ string_t xboxUserId
         );
 
@@ -133,7 +133,7 @@ namespace social {
         /// The result of the asynchronous operation is a collection of xbox_user_profile objects.
         /// </returns>
         /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
-        _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<std::vector<xbox_user_profile>>> get_user_profiles(
+        _XSAPIIMP pplx::task<xbox::services::xbox_live_result<std::vector<xbox_user_profile>>> get_user_profiles(
         _In_ const std::vector<string_t>& xboxUserIds
         );
 
@@ -141,13 +141,13 @@ namespace social {
         /// Gets user profiles for users in a specified social group.
         /// </summary>
         /// <param name="socialGroup">The name of the social group of users to search.
-        /// See XBOX_LIVE_NAMESPACE::social::social_group_constants for the latest options.</param>
+        /// See xbox::services::social::social_group_constants for the latest options.</param>
         /// <returns>
         /// Returns a concurrency::task&lt;T&gt; object that represents the state of the asynchronous operation.
         /// The result of the asynchronous operation is a collection of xbox_user_profile objects.
         /// </returns>
         /// <remarks>Calls V2 GET /users/{userId}/profile/settings/people/{socialGroup}</remarks>
-        _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result< std::vector< xbox_user_profile>>> get_user_profiles_for_social_group(
+        _XSAPIIMP pplx::task<xbox::services::xbox_live_result< std::vector< xbox_user_profile>>> get_user_profiles_for_social_group(
         _In_ const string_t& socialGroup
         );
 
@@ -155,9 +155,9 @@ namespace social {
         profile_service() {};
 
         profile_service(
-            _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> userContext,
-            _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> xboxLiveContextSettings,
-            _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_app_config> appConfig
+            _In_ std::shared_ptr<xbox::services::user_context> userContext,
+            _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
+            _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
             );
 
         static const string_t settings_query();
@@ -174,9 +174,9 @@ namespace social {
 
         static const string_t SETTINGS_QUERY;
 
-        std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> m_userContext;
-        std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> m_xboxLiveContextSettings;
-        std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_app_config> m_appConfig;
+        std::shared_ptr<xbox::services::user_context> m_userContext;
+        std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
+        std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
 
         friend xbox_live_context_impl;
     };

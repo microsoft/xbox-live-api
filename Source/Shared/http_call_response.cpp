@@ -210,7 +210,7 @@ void http_call_response::_Route_service_call() const
 
     bool callFailed = FAILED(utils::convert_http_status_to_hresult(m_httpStatus));
     bool logCall = 
-        (XBOX_LIVE_NAMESPACE::service_call_logger::get_singleton_instance()->is_enabled()) ||
+        (xbox::services::service_call_logger::get_singleton_instance()->is_enabled()) ||
         (system::xbox_live_services_settings::get_singleton_instance()->_Is_at_diagnostics_trace_level(xbox_services_diagnostics_trace_level::info)) ||
         (callFailed && system::xbox_live_services_settings::get_singleton_instance()->_Is_at_diagnostics_trace_level(xbox_services_diagnostics_trace_level::error));
 
@@ -225,7 +225,7 @@ void http_call_response::_Route_service_call() const
         headers.remove(AUTH_HEADER);
         headers.remove(SIG_HEADER);
 
-        XBOX_LIVE_NAMESPACE::xbox_service_call_routed_event_args args(
+        xbox::services::xbox_service_call_routed_event_args args(
             m_xboxUserId,
             m_request.method(),
             m_fullUrl,

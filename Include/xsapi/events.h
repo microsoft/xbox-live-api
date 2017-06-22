@@ -20,8 +20,8 @@ public:
     events_service() {};
 
     events_service(
-        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> userContext,
-        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_app_config> localConfig
+        _In_ std::shared_ptr<xbox::services::user_context> userContext,
+        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> localConfig
         );
 
     /// <summary>
@@ -64,8 +64,8 @@ public:
         );
 
 private:
-    std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> m_userContext;
-    std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_app_config> m_appConfig;
+    std::shared_ptr<xbox::services::user_context> m_userContext;
+    std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
 
     string_t m_playSession;
 #if UWP_API

@@ -75,7 +75,7 @@ public:
 
     pointer allocate(size_type n, const void * = 0)
     {
-        pointer p = reinterpret_cast<pointer>(XBOX_LIVE_NAMESPACE::system::xsapi_memory::mem_alloc(n * sizeof(T)));
+        pointer p = reinterpret_cast<pointer>(xbox::services::system::xsapi_memory::mem_alloc(n * sizeof(T)));
 
         if (p == NULL)
         {
@@ -86,12 +86,12 @@ public:
 
     void deallocate(_In_opt_ void* p, size_type)
     {
-        XBOX_LIVE_NAMESPACE::system::xsapi_memory::mem_free(p);
+        xbox::services::system::xsapi_memory::mem_free(p);
     }
 
     char* _Charalloc(size_type n)
     {
-        char* p = reinterpret_cast<char*>(XBOX_LIVE_NAMESPACE::system::xsapi_memory::mem_alloc(n));
+        char* p = reinterpret_cast<char*>(xbox::services::system::xsapi_memory::mem_alloc(n));
 
         if (p == NULL)
         {
