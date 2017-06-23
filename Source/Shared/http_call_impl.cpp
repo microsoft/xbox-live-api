@@ -178,10 +178,6 @@ http_call_impl::get_response_with_auth(
 
 #endif
 
-
-
-
-
 pplx::task<std::shared_ptr<http_call_response>>
 http_call_impl::get_response_with_auth(
     _In_ const std::shared_ptr<user_context>& userContext,
