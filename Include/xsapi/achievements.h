@@ -714,7 +714,10 @@ public:
 
     achievement_service() {};
 
-    achievement_service(
+	/// <summary>
+	/// Internal function
+	/// </summary>
+	achievement_service(
         _In_ std::shared_ptr<xbox::services::user_context> userContext,
         _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
         _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
