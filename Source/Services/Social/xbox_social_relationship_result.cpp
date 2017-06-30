@@ -60,11 +60,6 @@ xbox_social_relationship_result::get_next(
     _In_ uint32_t maxItems
     )
 {   
-    m_socialImpl->get_social_relationships(
-        m_filter,
-        m_continuationSkip,
-        maxItems
-        );
     return m_socialImpl->get_social_relationships(m_filter, m_continuationSkip, maxItems);
 } 
 
