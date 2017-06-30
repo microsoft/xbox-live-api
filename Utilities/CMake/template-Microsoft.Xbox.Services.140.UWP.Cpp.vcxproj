@@ -27,7 +27,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{47FF466B-C455-48C0-8D89-37E3FC0897F8}</ProjectGuid>
+    <ProjectGuid>{8F96710E-5169-4917-8874-7DE248F4D243}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
@@ -66,7 +66,7 @@
       <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XSAPI_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalOptions>/bigobj /Zm250 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/bigobj /Zm300 %(AdditionalOptions)</AdditionalOptions>
       <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories> 
@@ -75,10 +75,10 @@
        $(ProjectDir)\..\..\Source\Services\Common;
        $(ProjectDir)\..\..\Source\Services\Common\Desktop;
        $(ProjectDir)\..\..\Source\Services\Social;
-       $(ProjectDir)\..\..\Source\Services\Social\Manager;
        $(ProjectDir)\..\..\Source\Services\Multiplayer;
        $(ProjectDir)\..\..\Source\Services\Presence;
        $(ProjectDir)\..\..\Source\Services\Misc;
+       $(ProjectDir)\..\..\Source\Services\Social\Manager;
        $(ProjectDir)\..\..\Source\Services\RealTimeActivity;
        $(ProjectDir)\..\..\Source\Shared;
        $(ProjectDir)\..\..\Source\Shared\WinRT;
@@ -89,6 +89,7 @@
        %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
       <CompileAsWinRT>true</CompileAsWinRT>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ShowIncludes>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Bcrypt.lib;Pathcch.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -109,6 +110,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WholeProgramOptimization Condition="'$(Configuration)'=='Release'">false</WholeProgramOptimization>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ShowIncludes>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -120,44 +122,14 @@
     <OutDir>$(ProjectDir)..\..\Binaries\$(Configuration)\$(Platform)\$(ProjectFolder)\</OutDir>
     <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectFolder)\</IntDir>
   </PropertyGroup>
-  <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\achievements.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\http_call_settings.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\leaderboard.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\matchmaking.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\multiplayer.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\privacy.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\profile.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\services.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\social.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\system.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\types.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\user_statistics.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_context.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_service_call_routed_event_args.h" />
-    <ClInclude Include="..\..\Include\xsapi\social_manager.h" />
-    <ClInclude Include="..\..\Include\xsapi\errors.h" />
-    <ClInclude Include="..\..\Include\xsapi\events.h" />
-    <ClInclude Include="..\..\Include\xsapi\http_call.h" />
-    <ClInclude Include="..\..\Include\xsapi\http_call_request_message.h" />
-    <ClInclude Include="..\..\Include\xsapi\game_server_platform.h" />
-    <ClInclude Include="..\..\Include\xsapi\title_callable_ui.h" />
-    <ClInclude Include="..\..\Include\xsapi\multiplayer_manager.h" />
-    <ClInclude Include="..\..\Include\xsapi\presence.h" />
-    <ClInclude Include="..\..\Include\xsapi\real_time_activity.h" />
-    <ClInclude Include="..\..\Include\xsapi\title_storage.h" />
-    <ClInclude Include="..\..\Include\xsapi\xbox_live_app_config.h" />
-  </ItemGroup>
+****INSERTFILES****
   <ItemGroup>
     <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.static.vcxproj">
-      <Project>{9AD285A2-301E-47A0-A299-14AD5D4F2758}</Project>
+      <Project>{9ad285a2-301e-47a0-a299-14ad5d4f2758}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\Source\Services\Common\Desktop\pch.cpp">
-      <PrecompiledHeader>Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)\build.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
+
+
+

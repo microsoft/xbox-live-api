@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Label="x86" Condition="'$(Platform.ToLower())' == 'win32' Or '$(Platform.ToLower())' == 'x86'">
+    <NugetPlatform>Win32</NugetPlatform>
+  </PropertyGroup>
+  <PropertyGroup Label="!x86" Condition="'$(Platform.ToLower())' == 'x64' Or '$(Platform.ToLower())' == 'arm'">
+    <NugetPlatform>$(Platform)</NugetPlatform>
+  </PropertyGroup>
+  
+  <ItemDefinitionGroup Condition="'$(Configuration)' != 'Debug'">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\Release\cpprest140_uwp_2_9.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <ItemGroup Condition="'$(Configuration)' != 'Debug'">
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\Release\cpprest140_uwp_2_9.dll" />
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\Release\Microsoft.Xbox.Services.dll" />
+    <Reference Include="Microsoft.Xbox.Services.winmd">
+      <HintPath>$(MSBuildThisFileDirectory)lib\$(NugetPlatform)\v140\Release\Microsoft.Xbox.Services.winmd</HintPath>
+      <IsWinMDFile>true</IsWinMDFile>
+      <CopyLocal>true</CopyLocal>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+    </Reference>
+  </ItemGroup>
+  
+ </Project>

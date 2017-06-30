@@ -50,11 +50,11 @@
 #if defined _WIN32
   #ifdef _NO_XSAPIIMP
     #define _XSAPIIMP
-	#if _MSC_VER >= 1900
-	    #define _XSAPIIMP_DEPRECATED __declspec(deprecated)
-	#else
-	    #define _XSAPIIMP_DEPRECATED
-	#endif
+    #if _MSC_VER >= 1900
+        #define _XSAPIIMP_DEPRECATED __declspec(deprecated)
+    #else
+        #define _XSAPIIMP_DEPRECATED
+    #endif
   #else
     #ifdef _XSAPIIMP_EXPORT
       #define _XSAPIIMP __declspec(dllexport)
@@ -106,15 +106,9 @@ typedef std::chrono::steady_clock chrono_clock_t;
 // Forward declarations
 namespace xbox {
     namespace services {
-#if BEAM_API
-        namespace beam {
-#endif
-            class user_context;
-            class xbox_live_context_settings;
-            class local_config;
-#if BEAM_API
-        }
-#endif
+        class user_context;
+        class xbox_live_context_settings;
+        class local_config;
     }
 }
 
@@ -193,21 +187,12 @@ inline std::vector<winrt::Windows::Xbox::System::User> convert_user_vector_to_cp
 #endif
 
 
-#if BEAM_API
-#define XBOX_LIVE_NAMESPACE xbox::services::beam
-
-#define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN                     namespace xbox { namespace services { namespace beam {
-#define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END                       }}}
-#define NAMESPACE_MICROSOFT_XBOX_SERVICES_BEGIN                         namespace Microsoft { namespace Xbox { namespace Services { namespace Beam {
-#define NAMESPACE_MICROSOFT_XBOX_SERVICES_END                           }}}}
-#else
 #define XBOX_LIVE_NAMESPACE xbox::services
 
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN                     namespace xbox { namespace services {
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END                       }}
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_BEGIN                         namespace Microsoft { namespace Xbox { namespace Services { 
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_END                           }}}
-#endif
 
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN              NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN namespace system {
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END                NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END }

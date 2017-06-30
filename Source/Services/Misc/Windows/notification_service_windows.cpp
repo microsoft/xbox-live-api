@@ -120,22 +120,30 @@ notification_service_windows::on_push_notification_recieved(
     std::error_code errc;
     if (args && args->RawNotification && args->RawNotification->Content)
     {
-        auto parsedJson = web::json::value::parse(args->RawNotification->Content->Data(), errc);
+        string_t content = args->RawNotification->Content->Data();
+        auto parsedJson = web::json::value::parse(content, errc);
         auto xboxLiveNotificationJson = utils::extract_json_field(parsedJson, _T("xboxLiveNotification"), errc, false);
         auto notificationTypeString = utils::extract_json_string(xboxLiveNotificationJson, _T("notificationType"), errc);
         auto xuid = utils::extract_json_string(xboxLiveNotificationJson, _T("userXuid"), errc);
 
-        LOGS_INFO << "Received WNS notification, type: " << notificationTypeString << ", xuid: " << xuid;
-        get_xsapi_singleton()->s_xboxServiceSettingsSingleton->_Raise_wns_event(xuid, notificationTypeString);
-
-        if (!errc && utils::str_icmp(notificationTypeString, _T("spop")) == 0)
+        if (!errc)
         {
-            
-            auto contextItor = m_userContexts.find(xuid);
-            if (contextItor != m_userContexts.end() && contextItor->second != nullptr && contextItor->second->user() != nullptr)
+            LOGS_INFO << "Received WNS notification, type: " << notificationTypeString << ", xuid: " << xuid;
+            get_xsapi_singleton()->s_xboxServiceSettingsSingleton->_Raise_wns_event(xuid, notificationTypeString, content);
+
+            if (utils::str_icmp(notificationTypeString, _T("spop")) == 0)
             {
-                contextItor->second->refresh_token();
+
+                auto contextItor = m_userContexts.find(xuid);
+                if (contextItor != m_userContexts.end() && contextItor->second != nullptr && contextItor->second->user() != nullptr)
+                {
+                    contextItor->second->refresh_token();
+                }
             }
+        }
+        else
+        { 
+            LOGS_ERROR << "Receiving WNS notification error: " << errc.value() << ", message: " << errc.message();
         }
     }
 }

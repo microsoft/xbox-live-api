@@ -548,6 +548,17 @@ void Game::HandleSignInResult(
     switch (result.status())
     {
         case xbox::services::system::sign_in_status::success:
+            m_xboxLiveContext = std::make_shared<xbox::services::xbox_live_context>(m_user);           
+
+            // These can be accessed from xbox_live_context:
+            m_xboxLiveContext->application_config();
+            m_xboxLiveContext->privacy_service();
+            m_xboxLiveContext->profile_service();
+            m_xboxLiveContext->title_storage_service();
+            m_xboxLiveContext->settings();
+            m_xboxLiveContext->user();
+            m_xboxLiveContext->xbox_live_user_id();
+
             AddUserToSocialManager(m_user);
             Log(L"Sign in succeeded");
             break;

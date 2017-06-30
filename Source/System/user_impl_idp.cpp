@@ -21,14 +21,9 @@ using namespace Windows::Security::Authentication::Web::Core;
 using namespace Windows::Security::Credentials;
 using namespace Windows::System::Threading;
 using namespace XBOX_LIVE_NAMESPACE;
-#if BEAM_API
-using namespace Microsoft::Xbox::Services::Beam;
-using namespace Microsoft::Xbox::Services::Beam::System;
-#else
 using namespace Microsoft::Xbox::Services;
 using namespace Microsoft::Xbox::Services::System;
 using namespace XBOX_LIVE_NAMESPACE::presence;
-#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
@@ -309,15 +304,6 @@ user_impl_idp::internal_get_token_and_signature_helper(
         );
 
     xbox_live_result<token_and_signature_result> result = convert_web_token_request_result(tokenResult);
-    if (!result.err())
-    {
-        // Check if xuid has changed, if so report as user sign out
-        if (is_signed_in() && result.payload().xbox_user_id() != m_xboxUserId)
-        {
-            user_signed_out();
-            return xbox_live_result<token_and_signature_result>(xbox_live_error_code::auth_user_switched, "user has switched");
-        };
-    }
 
     return result;
 }

@@ -246,7 +246,7 @@ title_storage_service::delete_blob(
     .then([](std::shared_ptr<http_call_response> response)
     {
         auto errorStatus = response->err_code();
-        return xbox_live_result<void>(errorStatus, "Invalid HTTP recieved on delete");
+        return xbox_live_result<void>(errorStatus, "Invalid HTTP received on delete");
     });
 
     return utils::create_exception_free_task<void>(

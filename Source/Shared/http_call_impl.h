@@ -158,15 +158,13 @@ struct http_retry_after_api_state
         ) :
         retryAfterTime(_retryAfterTime),
         errCode(_errCode),
-        errMessage(_errMessage),
-        isCallWaiting(false)
+        errMessage(_errMessage)
     {
     }
 
     chrono_clock_t::time_point retryAfterTime;
     std::error_code errCode;
     std::string errMessage;
-    bool isCallWaiting;
 };
 
 class http_call_internal : public http_call
@@ -216,7 +214,7 @@ public:
         );
 
 private:
-	XBOX_LIVE_NAMESPACE::system::xbox_live_mutex m_lock;
+    XBOX_LIVE_NAMESPACE::system::xbox_live_mutex m_lock;
     std::unordered_map<uint32_t, http_retry_after_api_state> m_apiStateMap;
 };
 
@@ -359,8 +357,7 @@ private:
     static bool should_fast_fail(
         _In_ const http_retry_after_api_state& apiState,
         _In_ const std::shared_ptr<http_call_data>& httpCallData,
-        _In_ const chrono_clock_t::time_point& currentTime,
-        _Out_ uint32_t& waitTimeInMilliseconds
+        _In_ const chrono_clock_t::time_point& currentTime
         );
 
     static pplx::task<std::shared_ptr<http_call_response>> handle_fast_fail(

@@ -16,6 +16,11 @@ token_and_signature_result::token_and_signature_result(
     _In_ string_t userHash,
     _In_ string_t ageGroup,
     _In_ string_t privileges,
+#if XSAPI_U
+    _In_ string_t userSettingsRestrictions,
+    _In_ string_t userEnforcementRestrictions,
+    _In_ string_t userTitleRestrictions,
+#endif
     _In_ string_t webAccountId,
     _In_ string_t reserved
     ) :
@@ -26,6 +31,11 @@ token_and_signature_result::token_and_signature_result(
     m_gamerTag(std::move(gamertag)),
     m_ageGroup(std::move(ageGroup)),
     m_privileges(std::move(privileges)),
+#if XSAPI_U
+    m_userSettingsRestrictions(std::move(userSettingsRestrictions)),
+    m_userEnforcementRestrictions(std::move(userEnforcementRestrictions)),
+    m_userTitleRestrictions(std::move(userTitleRestrictions)),
+#endif
     m_webAccountId(std::move(webAccountId)),
     m_reserved(std::move(reserved))
 {
@@ -52,6 +62,11 @@ token_and_signature_result& token_and_signature_result::operator = (token_and_si
         m_gamerTag = std::move(other.m_gamerTag);
         m_ageGroup = std::move(other.m_ageGroup);
         m_privileges = std::move(other.m_privileges);
+#if XSAPI_U
+        m_userSettingsRestrictions = std::move(other.m_userSettingsRestrictions);
+        m_userEnforcementRestrictions = std::move(other.m_userEnforcementRestrictions);
+        m_userTitleRestrictions = std::move(other.m_userTitleRestrictions);
+#endif
         m_webAccountId = std::move(other.m_webAccountId);
         m_reserved = std::move(other.m_reserved);
     }
@@ -94,6 +109,23 @@ const string_t& token_and_signature_result::privileges() const
 {
     return m_privileges;
 }
+
+#if XSAPI_U
+const string_t& token_and_signature_result::user_settings_restrictions() const
+{
+    return m_userSettingsRestrictions;
+}
+
+const string_t& token_and_signature_result::user_enforcement_restrictions() const
+{
+    return m_userEnforcementRestrictions;
+}
+
+const string_t& token_and_signature_result::user_title_restrictions() const
+{
+    return m_userTitleRestrictions;
+}
+#endif
 
 const string_t& token_and_signature_result::reserved() const
 {

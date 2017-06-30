@@ -151,7 +151,6 @@ xbox_system_factory::create_web_socket_client()
     return std::make_shared<xbox_web_socket_client>();
 }
 
-#if !BEAM_API
 std::shared_ptr<multiplayer::multiplayer_subscription>
 xbox_system_factory::create_multiplayer_subscription(
     _In_ const std::function<void(const multiplayer::multiplayer_session_change_event_args&)>& multiplayerSessionChangeHandler,
@@ -165,6 +164,5 @@ xbox_system_factory::create_multiplayer_subscription(
         subscriptionErrorHandler
         );
 }
-#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
