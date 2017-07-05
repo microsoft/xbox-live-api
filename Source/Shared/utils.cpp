@@ -21,6 +21,14 @@
 #include "xsapi/presence.h"
 #include "xsapi/system.h"
 #include "presence_internal.h"
+#include "initiator.h"
+
+#if UWP_API
+#ifdef _WINRT_DLL
+#include "WinRT/User_WinRT.h"
+#endif
+#endif
+
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -32,36 +40,66 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 static const uint64_t _msTicks = static_cast<uint64_t>(10000);
 static const uint64_t _secondTicks = 1000*_msTicks;
 
-static std::mutex g_xsapiSingletonLock;
-static std::shared_ptr<xsapi_singleton> g_xsapiSingleton;
+static std::mutex s_xsapiSingletonLock;
+static std::shared_ptr<xsapi_singleton> s_xsapiSingleton;
 
-xsapi_singleton::xsapi_singleton() 
+xsapi_singleton::xsapi_singleton()
 #if !TV_API && !XSAPI_SERVER
-    : s_presenceWriterSingleton(std::shared_ptr<XBOX_LIVE_NAMESPACE::presence::presence_writer>(new XBOX_LIVE_NAMESPACE::presence::presence_writer()))
+    : m_presenceWriterSingleton(std::shared_ptr<xbox::services::presence::presence_writer>(new xbox::services::presence::presence_writer()))
 #endif
 {
+#if TV_API || UNIT_TEST_SERVICES
+    m_bHasAchievementServiceInitialized = false;
+    memset(&m_eventPlayerSessionId, 0, sizeof(m_eventPlayerSessionId));
+#endif
+
+    m_locales = _T("en-US");
+    m_custom_locale_override = false;
+    m_loggerId = 0;
+    m_responseCount = 0;
+    m_multiplayerClientPendingRequestUniqueIndentifier = 0;
+
+#if !TV_API
+    m_signOutCompletedHandlerIndexer = 0;
+    m_signInCompletedHandlerIndexer = 0;
+#endif
+
+#if UWP_API
+    m_trackingUsers = std::unordered_map<string_t, std::shared_ptr<system::user_impl_idp>>();
+#endif
+}
+
+void xsapi_singleton::init()
+{
+#if UWP_API
+#ifdef _WINRT_DLL
+    m_userEventBind = std::make_shared<Microsoft::Xbox::Services::System::UserEventBind>();
+#endif
+#endif
+
+    m_initiator = std::make_shared<initiator>();
 }
 
 xsapi_singleton::~xsapi_singleton()
 {
-    LOG_INFO("~xsapi_singleton()");
-    std::lock_guard<std::mutex> guard(g_xsapiSingletonLock);
-    g_xsapiSingleton = nullptr;
+    std::lock_guard<std::mutex> guard(s_xsapiSingletonLock);
+    s_xsapiSingleton = nullptr;
 }
 
 std::shared_ptr<xsapi_singleton>
 get_xsapi_singleton(_In_ bool createIfRequired)
 {
-    if (createIfRequired)
+    if (createIfRequired && s_xsapiSingleton == nullptr)
     {
-        std::lock_guard<std::mutex> guard(g_xsapiSingletonLock);
-        if (g_xsapiSingleton == nullptr)
+        std::lock_guard<std::mutex> guard(s_xsapiSingletonLock);
+        if (s_xsapiSingleton == nullptr)
         {
-            g_xsapiSingleton = std::make_shared<xsapi_singleton>();
+            s_xsapiSingleton = std::make_shared<xsapi_singleton>();
+            s_xsapiSingleton->init();
         }
     }
 
-    return g_xsapiSingleton;
+    return s_xsapiSingleton;
 }
 
 
@@ -846,7 +884,7 @@ utils::convert_xbox_live_error_code_to_hresult(
 
 long utils::convert_http_status_to_hresult(_In_ uint32_t httpStatusCode)
 {
-    XBOX_LIVE_NAMESPACE::xbox_live_error_code errCode = static_cast<XBOX_LIVE_NAMESPACE::xbox_live_error_code>(httpStatusCode);
+    xbox::services::xbox_live_error_code errCode = static_cast<xbox::services::xbox_live_error_code>(httpStatusCode);
     long hr = HTTP_E_STATUS_UNEXPECTED;
 
     // 2xx are http success codes
@@ -1083,11 +1121,11 @@ string_t utils::convert_hresult_to_error_name(_In_ long hr)
 }
 #endif
 
-XBOX_LIVE_NAMESPACE::xbox_live_error_code
+xbox::services::xbox_live_error_code
 utils::convert_exception_to_xbox_live_error_code()
 {
     // Default value, if there is no exception appears, return no_error
-    XBOX_LIVE_NAMESPACE::xbox_live_error_code errCode = xbox_live_error_code::no_error;
+    xbox::services::xbox_live_error_code errCode = xbox_live_error_code::no_error;
 
     try
     {
@@ -1481,10 +1519,10 @@ string_t utils::datetime_to_string(
 uint32_t
 utils::try_get_master_title_id()
 {
-    auto titleId = XBOX_LIVE_NAMESPACE::xbox_live_app_config::get_app_config_singleton()->_Override_title_id_for_multiplayer();
+    auto titleId = xbox::services::xbox_live_app_config::get_app_config_singleton()->_Override_title_id_for_multiplayer();
     if (titleId == 0)
     {
-        titleId = XBOX_LIVE_NAMESPACE::xbox_live_app_config::get_app_config_singleton()->title_id();
+        titleId = xbox::services::xbox_live_app_config::get_app_config_singleton()->title_id();
     }
     return titleId;
 }
@@ -1492,10 +1530,10 @@ utils::try_get_master_title_id()
 string_t
 utils::try_get_override_scid()
 {
-    auto scid = XBOX_LIVE_NAMESPACE::xbox_live_app_config::get_app_config_singleton()->_Override_scid_for_multiplayer();
+    auto scid = xbox::services::xbox_live_app_config::get_app_config_singleton()->_Override_scid_for_multiplayer();
     if (scid.empty())
     {
-        scid = XBOX_LIVE_NAMESPACE::xbox_live_app_config::get_app_config_singleton()->scid();
+        scid = xbox::services::xbox_live_app_config::get_app_config_singleton()->scid();
     }
     return scid;
 }

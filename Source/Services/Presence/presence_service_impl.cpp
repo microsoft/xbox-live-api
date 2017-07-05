@@ -9,11 +9,9 @@
 #include "xbox_system_factory.h"
 
 using namespace pplx;
-using namespace XBOX_LIVE_NAMESPACE::system;
+using namespace xbox::services::system;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
-
-std::function<void(int heartBeatDelayInMins)> presence_service_impl::s_onSetPresenceFinish;
 
 presence_service_impl::presence_service_impl(
     _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> realTimeActivityService,
@@ -132,9 +130,10 @@ presence_service_impl::set_presence_helper(
             heartbeatDelay = 5;
         }        
 
-        if (s_onSetPresenceFinish)
+        auto xsapiSingleton = get_xsapi_singleton();
+        if (xsapiSingleton->m_onSetPresenceFinish)
         {
-            s_onSetPresenceFinish(heartbeatDelay);
+            xsapiSingleton->m_onSetPresenceFinish(heartbeatDelay);
         }
 
         return xbox_live_result<uint32_t>(heartbeatDelay, response->err_code(), response->err_message());
@@ -625,6 +624,12 @@ presence_service_impl::get_presence_for_social_group_subpath(
     subpath << _T("?level=all");
 
     return subpath.str();
+}
+
+void presence_service_impl::set_presence_set_finished_handler(const std::function<void(int heartBeatDelayInMins)>& onSetPresenceFinish)
+{ 
+    auto xsapiSingleton = get_xsapi_singleton();
+    xsapiSingleton->m_onSetPresenceFinish = onSetPresenceFinish;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_END

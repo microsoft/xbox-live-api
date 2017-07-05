@@ -15,7 +15,7 @@
 #define XPRIVILEGE_MULTIPLAYER_SESSIONS     254
 #define TITLE_ID                            0x169056CF
 #define GAME_SERVICE_CONFIG_ID              L"097d0100-e05c-4d37-8420-46f1169056cf"
-#define GAME_SESSION_TEMPLATE_NAME          L"GameSession"
+#define GAME_SESSION_TEMPLATE_NAME          L"SessionBrowseTemplate"
 #define LOBBY_TEMPLATE_NAME                 L"LobbySession"
 #define OWNER_MANAGED_LFG_TEMPLATE_NAME     L"OwnerManagedLFGTest"
 #define NON_OWNER_MANAGED_LFG_TEMPLATE_NAME L"NonOwnerManagedLFGTest"

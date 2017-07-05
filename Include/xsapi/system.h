@@ -90,7 +90,7 @@ public:
     /// <summary>
     /// Gets the singleton instance
     /// </summary>
-    _XSAPIIMP static std::shared_ptr<xbox_live_services_settings> get_singleton_instance();
+    _XSAPIIMP static std::shared_ptr<xbox_live_services_settings> get_singleton_instance(_In_ bool createIfRequired = true);
 
     /// <summary>
     /// Used by titles to register memory allocation hooks that are used by XSAPI when it 
@@ -323,16 +323,16 @@ class xbox_live_server
 public:
     _XSAPIIMP xbox_live_server();
 
-    _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<void>> signin(_In_ cert_context cert);
+    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<void>> signin(_In_ cert_context cert);
 
-    _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>>
+    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
         get_token_and_signature(
             _In_ const string_t& httpMethod,
             _In_ const string_t& url,
             _In_ const string_t& headers
             );
 
-    _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>>
+    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
         get_token_and_signature(
             _In_ const string_t& httpMethod,
             _In_ const string_t& url,
@@ -340,7 +340,7 @@ public:
             _In_ const string_t& requestBodyString
             );
 
-    _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>>
+    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
         get_token_and_signature_array(
             _In_ const string_t& httpMethod,
             _In_ const string_t& url,
@@ -353,7 +353,7 @@ public:
 private:
     std::shared_ptr<xbox_live_server_impl> m_server_impl;
 
-    friend XBOX_LIVE_NAMESPACE::user_context;
+    friend xbox::services::user_context;
 };
 
 #endif //#if XSAPI_SERVER
@@ -603,7 +603,7 @@ public:
     /// An interface for tracking the progress of the asynchronous call. The result is an object
     /// indicating the token and the digital signature of the entire request, including the token.
     /// </returns>
-    _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
+    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
     get_token_and_signature(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -622,7 +622,7 @@ public:
     /// An interface for tracking the progress of the asynchronous call. The result is an object
     /// indicating the token and the digital signature of the entire request, including the token.
     /// </returns>
-    _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
+    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
     get_token_and_signature(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -642,7 +642,7 @@ public:
     /// An interface for tracking the progress of the asynchronous call. The result is an object
     /// indicating the token and the digital signature of the entire request, including the token.
     /// </returns>
-    _XSAPIIMP pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
+    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
     get_token_and_signature_array(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -803,15 +803,15 @@ public:
     /// Internal function
     /// </summary>
     string_service(
-        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> userContext,
-        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_app_config> appConfig
+        _In_ std::shared_ptr<xbox::services::user_context> userContext,
+        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
+        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
         );
 
 private:
-    std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> m_userContext;
-    std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_context_settings> m_xboxLiveContextSettings;
-    std::shared_ptr<XBOX_LIVE_NAMESPACE::xbox_live_app_config> m_appConfig;
+    std::shared_ptr<xbox::services::user_context> m_userContext;
+    std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
+    std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
 };
 } // namespace system
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

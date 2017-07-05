@@ -1,9 +1,24 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 #pragma once
 
+#if TV_API | XBOX_UWP
+	NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_BEGIN
+		ref class XboxLiveUser;
+	NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_END
+#elif UNIT_TEST_SERVICES || !XSAPI_CPP
+	NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_BEGIN
+		ref class XboxLiveUser;
+	NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_END
+#else
+	NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+		class xbox_live_user;
+	NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+#endif
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+
+class xbox_live_context_settings;
 
 /// <summary>
 /// Enumerates the type of structured data contained in the http response body.
@@ -208,7 +223,6 @@ private:
     std::chrono::seconds m_retryAfter;
     chrono_clock_t::time_point m_requestTime;
     chrono_clock_t::time_point m_responseTime;
-    static volatile long s_responseCount;
 
     string_t m_xboxUserId;
     std::shared_ptr<xbox_live_context_settings> m_xboxLiveContextSettings;
@@ -232,20 +246,43 @@ public:
     /// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.
     /// </summary>
     virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
-        _In_ const std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context>& userContext,
-        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
-        _In_ bool allUsersAuthRequired = false
-        ) = 0;
-
-    virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body
         ) = 0;
 
-    virtual pplx::task<std::shared_ptr<http_call_response>> _Internal_get_response_with_auth(
-        _In_ const std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context>& userContext,
-        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
-        _In_ bool allUsersAuthRequired = false
-        ) = 0;
+#if TV_API | XBOX_UWP
+	
+	/// <summary>
+	/// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.
+	/// </summary>
+	virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
+		_In_ Windows::Xbox::System::User^ user,
+		_In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
+		_In_ bool allUsersAuthRequired = false
+		) = 0;
+
+#elif UNIT_TEST_SERVICES || !XSAPI_CPP
+	
+	/// <summary>
+	/// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.
+	/// </summary>
+	virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
+		_In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
+		_In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
+		_In_ bool allUsersAuthRequired = false
+		) = 0;
+
+#else
+
+	/// <summary>
+	/// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.
+	/// </summary>
+	virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
+		_In_ std::shared_ptr<xbox::services::system::xbox_live_user> user,
+		_In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
+		_In_ bool allUsersAuthRequired = false
+		) = 0;
+
+#endif
 
     /// <summary>
     /// Send the request without authentication and get the response.
@@ -337,9 +374,25 @@ public:
     virtual void set_add_default_headers(_In_ bool value) = 0;
     
     /// <summary>
-    /// Returns a flag indicating if default headers should be added or not.
+    /// Internal function
     /// </summary>
     virtual bool add_default_headers() const = 0;
+
+	virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
+        _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
+        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
+        _In_ bool allUsersAuthRequired = false
+        ) = 0;
+
+	/// <summary>
+	/// Internal function
+	/// </summary>
+	virtual pplx::task<std::shared_ptr<http_call_response>> _Internal_get_response_with_auth(
+        _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
+        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
+        _In_ bool allUsersAuthRequired = false
+        ) = 0;
+
 
     virtual ~http_call(){}
 };

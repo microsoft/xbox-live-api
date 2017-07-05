@@ -13,26 +13,26 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-std::mutex xbox_system_factory::m_factoryInstanceLock;
-std::shared_ptr<xbox_system_factory> xbox_system_factory::m_factoryInstance;
 
 std::shared_ptr<xbox_system_factory> 
 xbox_system_factory::get_factory()
 {
-    std::lock_guard<std::mutex> hold(m_factoryInstanceLock);
-    if (m_factoryInstance == nullptr)
+    auto xsapiSingleton = get_xsapi_singleton();
+    std::lock_guard<std::mutex> hold(xsapiSingleton->m_singletonLock);
+    if (xsapiSingleton->m_factoryInstance == nullptr)
     {
-        m_factoryInstance = std::make_shared<xbox_system_factory>();
+        xsapiSingleton->m_factoryInstance = std::make_shared<xbox_system_factory>();
     }
-    return m_factoryInstance;
+    return xsapiSingleton->m_factoryInstance;
 }
 
 void xbox_system_factory::set_factory(
     _In_ std::shared_ptr<xbox_system_factory> factory
     )
 {
-    std::lock_guard<std::mutex> hold(m_factoryInstanceLock);
-    m_factoryInstance = factory;
+    auto xsapiSingleton = get_xsapi_singleton();
+    std::lock_guard<std::mutex> hold(xsapiSingleton->m_singletonLock);
+    xsapiSingleton->m_factoryInstance = factory;
 }
 
 #if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
@@ -155,7 +155,7 @@ std::shared_ptr<multiplayer::multiplayer_subscription>
 xbox_system_factory::create_multiplayer_subscription(
     _In_ const std::function<void(const multiplayer::multiplayer_session_change_event_args&)>& multiplayerSessionChangeHandler,
     _In_ const std::function<void()>& multiplayerSubscriptionLostHandler,
-    _In_ const std::function<void(const XBOX_LIVE_NAMESPACE::real_time_activity::real_time_activity_subscription_error_event_args&)>& subscriptionErrorHandler
+    _In_ const std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)>& subscriptionErrorHandler
 )
 {
     return std::make_shared<multiplayer::multiplayer_subscription>(

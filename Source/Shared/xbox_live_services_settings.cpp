@@ -12,16 +12,20 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-std::shared_ptr<xbox_live_services_settings> xbox_live_services_settings::get_singleton_instance()
+std::shared_ptr<xbox_live_services_settings> xbox_live_services_settings::get_singleton_instance(_In_ bool createIfRequired)
 {
-    std::shared_ptr<xsapi_singleton> xsapiSingleton = get_xsapi_singleton();
+    std::shared_ptr<xsapi_singleton> xsapiSingleton = get_xsapi_singleton(createIfRequired);
+    if (xsapiSingleton == nullptr)
+        return nullptr;
     
-    std::lock_guard<std::mutex> guard(xsapiSingleton->s_singletonLock);
-    if (xsapiSingleton->s_xboxServiceSettingsSingleton == nullptr)
     {
-        xsapiSingleton->s_xboxServiceSettingsSingleton = std::shared_ptr<xbox_live_services_settings>(new xbox_live_services_settings());
+        std::lock_guard<std::mutex> guard(xsapiSingleton->m_serviceSettingsLock);
+        if (xsapiSingleton->m_xboxServiceSettingsSingleton == nullptr)
+        {
+            xsapiSingleton->m_xboxServiceSettingsSingleton = std::shared_ptr<xbox_live_services_settings>(new xbox_live_services_settings());
+        }
+        return xsapiSingleton->m_xboxServiceSettingsSingleton;
     }
-    return xsapiSingleton->s_xboxServiceSettingsSingleton;
 }
 
 xbox_live_services_settings::xbox_live_services_settings() :

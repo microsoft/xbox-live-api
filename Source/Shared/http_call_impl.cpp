@@ -26,8 +26,8 @@ using namespace web;                        // Common features like URIs.
 using namespace web::http;                  // Common HTTP functionality
 using namespace web::http::client;          // HTTP client features
 
-using namespace XBOX_LIVE_NAMESPACE;
-using namespace XBOX_LIVE_NAMESPACE::system;
+using namespace xbox::services;
+using namespace xbox::services::system;
 
 const int MIN_DELAY_FOR_HTTP_INTERNAL_ERROR_IN_SEC = 10;
 const double MAX_DELAY_TIME_IN_SEC = 60.0;
@@ -96,7 +96,7 @@ http_call_impl::get_response(
             bodyData.assign(body.begin(), body.end());
         }
 
-        string_t signature = XBOX_LIVE_NAMESPACE::system::request_signer::sign_request(
+        string_t signature = xbox::services::system::request_signer::sign_request(
             *proofKey,
             signaturePolicy,
             utility::datetime::utc_now().to_interval(),
@@ -135,6 +135,48 @@ http_call_impl::get_response(
 
     return internal_get_response(m_httpCallData);
 }
+
+
+#if TV_API | XBOX_UWP
+	
+pplx::task<std::shared_ptr<http_call_response>> 
+http_call_impl::get_response_with_auth(
+	_In_ Windows::Xbox::System::User^ user,
+	_In_ http_call_response_body_type httpCallResponseBodyType,
+	_In_ bool allUsersAuthRequired
+	) 
+{
+	auto userContext = std::make_shared<xbox::services::user_context>(user);
+	return get_response_with_auth(userContext, httpCallResponseBodyType, allUsersAuthRequired);
+}
+
+#elif UNIT_TEST_SERVICES || !XSAPI_CPP
+	
+pplx::task<std::shared_ptr<http_call_response>>
+http_call_impl::get_response_with_auth(
+	_In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
+	_In_ http_call_response_body_type httpCallResponseBodyType,
+	_In_ bool allUsersAuthRequired
+	)
+{
+	auto userContext = std::make_shared<xbox::services::user_context>(user);
+	return get_response_with_auth(userContext, httpCallResponseBodyType, allUsersAuthRequired);
+}
+	
+#else
+	
+pplx::task<std::shared_ptr<http_call_response>>
+http_call_impl::get_response_with_auth(
+	_In_ std::shared_ptr<system::xbox_live_user> user,
+	_In_ http_call_response_body_type httpCallResponseBodyType,
+	_In_ bool allUsersAuthRequired
+	)
+{
+	auto userContext = std::make_shared<xbox::services::user_context>(user);
+	return get_response_with_auth(userContext, httpCallResponseBodyType, allUsersAuthRequired);
+}
+
+#endif
 
 pplx::task<std::shared_ptr<http_call_response>>
 http_call_impl::get_response_with_auth(
@@ -180,7 +222,7 @@ http_call_impl::get_response_with_auth(
     {
         return pplx::task_from_result<std::shared_ptr<http_call_response>>(nullptr);
     }
-    std::shared_ptr<XBOX_LIVE_NAMESPACE::user_context> userContextPtr = std::make_shared<XBOX_LIVE_NAMESPACE::user_context>(user);
+    std::shared_ptr<xbox::services::user_context> userContextPtr = std::make_shared<xbox::services::user_context>(user);
     
     return _Internal_get_response_with_auth(
         userContextPtr,
@@ -685,7 +727,7 @@ http_call_impl::handle_json_body_response(
 
             if (httpCallResponse->http_status() == static_cast<int>(xbox_live_error_code::http_status_429_too_many_requests))
             {
-                std::shared_ptr<xbox_live_app_config> appConfig = XBOX_LIVE_NAMESPACE::xbox_live_app_config::get_app_config_singleton();
+                std::shared_ptr<xbox_live_app_config> appConfig = xbox::services::xbox_live_app_config::get_app_config_singleton();
                 if (utils::str_icmp(appConfig->sandbox(), _T("RETAIL")) != 0)
                 {
                     bool disableAsserts = httpCallResponse->_Context_settings()->_Is_disable_asserts_for_xbox_live_throttling_in_dev_sandboxes();
@@ -904,19 +946,17 @@ void http_call_impl::set_http_timeout(
     }
 }
 
-static std::mutex g_httpRetryPolicyManagerSingletonLock;
-static std::shared_ptr<http_retry_after_manager> g_httpRetryPolicyManagerSingleton;
-
 std::shared_ptr<http_retry_after_manager>
 http_retry_after_manager::get_http_retry_after_manager_singleton()
 {
-    std::lock_guard<std::mutex> guard(g_httpRetryPolicyManagerSingletonLock);
-    if (g_httpRetryPolicyManagerSingleton == nullptr)
+    auto xsapiSingleton = xbox::services::get_xsapi_singleton();
+    std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
+    if (xsapiSingleton->m_httpRetryPolicyManagerSingleton == nullptr)
     {
-        g_httpRetryPolicyManagerSingleton = std::make_shared<http_retry_after_manager>();
+        xsapiSingleton->m_httpRetryPolicyManagerSingleton = std::make_shared<http_retry_after_manager>();
     }
 
-    return g_httpRetryPolicyManagerSingleton;
+    return xsapiSingleton->m_httpRetryPolicyManagerSingleton;
 }
 
 void http_retry_after_manager::set_state(

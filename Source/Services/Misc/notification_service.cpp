@@ -16,24 +16,22 @@ static const int32_t NUM_RETRY_TIMES = 10;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_BEGIN
 
-std::mutex notification_service::s_notificationSingletonLock;
-std::shared_ptr<notification_service> notification_service::s_notificationSingleton;
-
 std::shared_ptr<notification_service>
 notification_service::get_notification_service_singleton()
 {
-    std::lock_guard<std::mutex> guard(s_notificationSingletonLock);
-    if (s_notificationSingleton == nullptr)
+    auto xsapiSingleton = get_xsapi_singleton();
+    std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
+    if (xsapiSingleton->m_notificationSingleton == nullptr)
     {
 #if XSAPI_A
-        s_notificationSingleton = std::make_shared<notification_service_android>();
+        xsapiSingleton->m_notificationSingleton = std::make_shared<notification_service_android>();
 #elif XSAPI_I
-        s_notificationSingleton = std::make_shared<notification_service_ios>();
+        xsapiSingleton->m_notificationSingleton = std::make_shared<notification_service_ios>();
 #elif _WIN32
-        s_notificationSingleton = std::make_shared<notification_service_windows>();
+        xsapiSingleton->m_notificationSingleton = std::make_shared<notification_service_windows>();
 #endif
     }
-    return s_notificationSingleton;
+    return xsapiSingleton->m_notificationSingleton;
 }
 
 pplx::task<xbox_live_result<void>>

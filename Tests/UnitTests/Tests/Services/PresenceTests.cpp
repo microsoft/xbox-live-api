@@ -3,7 +3,7 @@
 
 #include "pch.h"
 #include "UnitTestIncludes.h"
-#define TEST_CLASS_OWNER L"blgross"
+#define TEST_CLASS_OWNER L"jasonsa"
 #define TEST_CLASS_AREA L"Presence"
 #include "UnitTestIncludes.h"
 

@@ -26,7 +26,7 @@ public:
 #endif
     
 #if XSAPI_U
-    virtual pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<void>> signout() = 0;
+    virtual pplx::task<xbox::services::xbox_live_result<void>> signout() = 0;
 #endif
 
     virtual pplx::task<xbox_live_result<void>> sign_in_impl(
@@ -36,7 +36,7 @@ public:
     { 
         UNREFERENCED_PARAMETER(userDelegationTicket);
         UNREFERENCED_PARAMETER(forceRefresh);
-        return pplx::task_from_exception<XBOX_LIVE_NAMESPACE::xbox_live_result<void>>(std::exception());
+        return pplx::task_from_exception<xbox::services::xbox_live_result<void>>(std::exception());
     }
 
     // IUser
@@ -57,14 +57,14 @@ public:
     void _Set_xbox_user_id(const string_t& xboxUserId) { m_xboxUserId = xboxUserId; }
 #endif
 
-    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
+    pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
     get_token_and_signature(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
         _In_ const string_t& headers
         );
 
-    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
+    pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
     get_token_and_signature(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -72,7 +72,7 @@ public:
         _In_ const string_t& requestBodyString
         );
 
-    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
+    pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
     get_token_and_signature_array(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -85,7 +85,7 @@ public:
     void set_title_telemetry_session_id(_In_ const string_t& sessionId);
     const string_t& title_telemetry_session_id();
 
-    virtual pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
+    virtual pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
     internal_get_token_and_signature(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -137,32 +137,27 @@ protected:
 
     std::shared_ptr<auth_config> m_authConfig;
     std::shared_ptr<local_config> m_localConfig;
-    static std::unordered_map<function_context, std::function<void(const string_t&)>> s_signInCompletedHandlers;
-    static std::unordered_map<function_context, std::function<void(const sign_out_completed_event_args&)>> s_signOutCompletedHandlers;
-    static function_context s_signInCompletedHandlerIndexer;
-    static function_context s_signOutCompletedHandlerIndexer;
-    static XBOX_LIVE_NAMESPACE::system::xbox_live_mutex s_trackingUsersLock;
-    XBOX_LIVE_NAMESPACE::system::xbox_live_mutex m_lock;
+    xbox::services::system::xbox_live_mutex m_lock;
 };
 
 #if UWP_API
 class user_impl_idp : public user_impl
 {
 public:
-    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<sign_in_result>> sign_in_impl(
+    pplx::task<xbox::services::xbox_live_result<sign_in_result>> sign_in_impl(
         _In_ bool showUI,
         _In_ bool forceRefresh
         ) override;
 
     // Not supported for user_impl_idp
-    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<void>> sign_in_impl(
+    pplx::task<xbox::services::xbox_live_result<void>> sign_in_impl(
         _In_ const string_t& userDelegationTicket,
         _In_ bool forceRefresh
         ) override;
 
     user_impl_idp(Windows::System::User^ systemUser);
 
-    pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>>
+    pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
     internal_get_token_and_signature(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -189,7 +184,7 @@ private:
     pplx::task<void> initialize_provider();
 
     // sync version of get internal_get_token_and_signature
-    XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>
+    xbox::services::xbox_live_result<token_and_signature_result>
     internal_get_token_and_signature_helper(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -222,8 +217,6 @@ private:
     Windows::System::Threading::ThreadPoolTimer^ m_timer;
 
     // user watcher 
-    static Windows::System::UserWatcher^ s_userWatcher;
-    static std::unordered_map<string_t, std::shared_ptr<user_impl_idp>> s_trackingUsers;
     static void on_system_user_removed(Windows::System::UserWatcher ^sender, Windows::System::UserChangedEventArgs ^args);
 };
 

@@ -6,8 +6,6 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-std::shared_ptr<logger> logger::s_logger = nullptr;
-
 void logger::add_log_output(std::shared_ptr<log_output> output)
 {
     m_log_outputs.emplace_back(output); 

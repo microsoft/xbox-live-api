@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"blgross"
+#define TEST_CLASS_OWNER L"jasonsa"
 #define TEST_CLASS_AREA L"SimplfiedStatService"
 #include "UnitTestIncludes.h"
 #include "xsapi/stats_manager.h"
@@ -11,6 +11,7 @@
 #include "StatsManagerHelper.h"
 
 using namespace Microsoft::Xbox::Services::Statistics::Manager;
+using namespace Microsoft::Xbox::Services::Leaderboard;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
@@ -19,10 +20,31 @@ DEFINE_TEST_CLASS(StatsManagerTests)
 public:
     DEFINE_TEST_CLASS_PROPS(StatsManagerTests)
 
+    std::shared_ptr<HttpResponseStruct> GetDefaultStatsResponseStruct()
+    {
+        auto svdResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(statValueDocumentResponse), 200);
+        std::shared_ptr<HttpResponseStruct> statsValudeDocResponseStruct = std::make_shared<HttpResponseStruct>();
+        statsValudeDocResponseStruct->responseList = { svdResponse };
+        return statsValudeDocResponseStruct;
+    }
+
+    std::shared_ptr<HttpResponseStruct> GetLeaderboardResponseStruct(const web::json::value& initJSON, int errorNum = 200)
+    {
+        auto lbResponse = StockMocks::CreateMockHttpCallResponse(initJSON, errorNum);
+        std::shared_ptr<HttpResponseStruct> leaderboardResponseStruct = std::make_shared<HttpResponseStruct>();
+        leaderboardResponseStruct->responseList = { lbResponse };
+        return leaderboardResponseStruct;
+    }
+
     void InitializeStatsManager(StatisticManager^ statsManager, XboxLiveUser_t user)
     {
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(statValueDocumentResponse));
+        m_mockXboxSystemFactory->reinit();
+
+        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
+        responses[_T("https://statsread.mockenv.xboxlive.com")] = GetDefaultStatsResponseStruct();
+        responses[_T("https://leaderboards.mockenv.xboxlive.com")] = GetLeaderboardResponseStruct(web::json::value::parse(defaultLeaderboardData));
+        m_mockXboxSystemFactory->add_http_state_response(responses);
+
         statsManager->AddLocalUser(user);
         bool isDone = false;
 
@@ -155,6 +177,40 @@ public:
         statsManager->DeleteStatistic(user, L"fastestRound");
         auto eventList = statsManager->DoWork();
         VERIFY_THROWS_HR_CX(statsManager->GetStatistic(user, L"fastestRound"), E_INVALIDARG);
+
+        Cleanup(statsManager, user);
+    }
+
+    DEFINE_TEST_CASE(StatisticManagerGetLeaderboard)
+    {
+        DEFINE_TEST_CASE_PROPERTIES(StatisticManagerGetLeaderboard);
+        auto statsManager = StatisticManager::SingletonInstance;
+        auto mockXblContext = GetMockXboxLiveContext_WinRT();
+        auto user = mockXblContext->User;
+        InitializeStatsManager(statsManager, user);
+        LeaderboardQuery^ query = ref new LeaderboardQuery();
+
+        auto responseJson = web::json::value::parse(defaultLeaderboardData);
+        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
+        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+
+        statsManager->GetLeaderboard(user, L"Headshots", query);
+
+        auto eventList = statsManager->DoWork();
+        bool shouldLoop = true;
+        do
+        {
+            auto events = statsManager->DoWork();
+            for (auto evt : events)
+            {
+                if (evt->EventType == StatisticEventType::GetLeaderboardComplete)
+                {
+                    shouldLoop = false;
+                    TEST_LOG(L"GetLeaderboardComplete");
+                    break;
+                }
+            }
+        } while (shouldLoop);
 
         Cleanup(statsManager, user);
     }

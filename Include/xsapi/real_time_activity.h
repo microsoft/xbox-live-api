@@ -164,12 +164,12 @@ public:
     /// <summary>
     /// The error returned by the operation.
     /// </summary>
-    _XSAPIIMP const std::error_code& err();
+    _XSAPIIMP const std::error_code& err() const;
 
     /// <summary>
     /// The error message
     /// </summary>
-    _XSAPIIMP const std::string& err_message();
+    _XSAPIIMP const std::string& err_message() const;
 
     /// <summary>
     /// Internal function

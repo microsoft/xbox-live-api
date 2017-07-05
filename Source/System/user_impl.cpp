@@ -17,17 +17,10 @@ using namespace pplx;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-std::unordered_map<function_context, std::function<void(const sign_out_completed_event_args&)>> user_impl::s_signOutCompletedHandlers;
-std::unordered_map<function_context, std::function<void(const string_t&)>> user_impl::s_signInCompletedHandlers;
-function_context user_impl::s_signOutCompletedHandlerIndexer = 0;
-function_context user_impl::s_signInCompletedHandlerIndexer = 0;
-XBOX_LIVE_NAMESPACE::system::xbox_live_mutex user_impl::s_trackingUsersLock;
-
-
 std::shared_ptr<user_impl>
 user_factory::create_user_impl(user_creation_context userCreationContext)
 {
-    return XBOX_LIVE_NAMESPACE::system::xbox_system_factory::get_factory()->create_user_impl(userCreationContext);
+    return xbox::services::system::xbox_system_factory::get_factory()->create_user_impl(userCreationContext);
 }
 
 user_impl::user_impl(
@@ -56,7 +49,7 @@ user_impl::user_impl(
 #endif
 }
 
-pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result>>
+pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
 user_impl::get_token_and_signature(
     _In_ const string_t& httpMethod,
     _In_ const string_t& url,
@@ -74,7 +67,7 @@ user_impl::get_token_and_signature(
         );
 }
 
-pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
+pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
 user_impl::get_token_and_signature(
     _In_ const string_t& httpMethod,
     _In_ const string_t& url,
@@ -95,7 +88,7 @@ user_impl::get_token_and_signature(
         );
 }
 
-pplx::task<XBOX_LIVE_NAMESPACE::xbox_live_result<token_and_signature_result> >
+pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
 user_impl::get_token_and_signature_array(
     _In_ const string_t& httpMethod,
     _In_ const string_t& url,
@@ -144,7 +137,7 @@ user_impl::user_signed_in(
         m_webAccountId = std::move(webAccountId);
 
         m_isSignedIn = true;
-        signInCompletedHandlersCopy = s_signInCompletedHandlers;
+        signInCompletedHandlersCopy = get_xsapi_singleton()->m_signInCompletedHandlers;
     }
 
     for (auto& handler : signInCompletedHandlersCopy)
@@ -167,13 +160,14 @@ user_impl::add_sign_in_completed_handler(
     _In_ std::function<void(const string_t&)> handler
     )
 {
-    std::lock_guard<std::mutex> lock(s_trackingUsersLock.get());
+    auto xsapiSingleton = get_xsapi_singleton();
+    std::lock_guard<std::mutex> lock(xsapiSingleton->m_trackingUsersLock);
 
     function_context context = -1;
     if (handler != nullptr)
     {
-        context = ++s_signInCompletedHandlerIndexer;
-        s_signInCompletedHandlers[s_signInCompletedHandlerIndexer] = std::move(handler);
+        context = ++xsapiSingleton->m_signInCompletedHandlerIndexer;
+        xsapiSingleton->m_signInCompletedHandlers[xsapiSingleton->m_signInCompletedHandlerIndexer] = std::move(handler);
     }
 
     return context;
@@ -184,21 +178,22 @@ user_impl::remove_sign_in_completed_handler(
     _In_ function_context context
     )
 {
-    std::lock_guard<std::mutex> lock(s_trackingUsersLock.get());
-
-    s_signInCompletedHandlers.erase(context);
+    auto xsapiSingleton = get_xsapi_singleton();
+    std::lock_guard<std::mutex> lock(xsapiSingleton->m_trackingUsersLock);
+    xsapiSingleton->m_signInCompletedHandlers.erase(context);
 }
 
 function_context
 user_impl::add_sign_out_completed_handler(_In_ std::function<void(const sign_out_completed_event_args&)> handler)
 {
-    std::lock_guard<std::mutex> lock(s_trackingUsersLock.get());
+    auto xsapiSingleton = get_xsapi_singleton();
+    std::lock_guard<std::mutex> lock(xsapiSingleton->m_trackingUsersLock);
 
     function_context context = -1;
     if (handler != nullptr)
     {
-        context = ++s_signOutCompletedHandlerIndexer;
-        s_signOutCompletedHandlers[s_signOutCompletedHandlerIndexer] = std::move(handler);
+        context = ++xsapiSingleton->m_signOutCompletedHandlerIndexer;
+        xsapiSingleton->m_signOutCompletedHandlers[xsapiSingleton->m_signOutCompletedHandlerIndexer] = std::move(handler);
     }
 
     return context;
@@ -209,9 +204,9 @@ user_impl::remove_sign_out_completed_handler(
     _In_ function_context context
     )
 {
-    std::lock_guard<std::mutex> lock(s_trackingUsersLock.get());
-
-    s_signOutCompletedHandlers.erase(context);
+    auto xsapiSingleton = get_xsapi_singleton();
+    std::lock_guard<std::mutex> lock(xsapiSingleton->m_trackingUsersLock);
+    xsapiSingleton->m_signOutCompletedHandlers.erase(context);
 }
 
 void user_impl::user_signed_out()
@@ -222,7 +217,7 @@ void user_impl::user_signed_out()
         std::lock_guard<std::mutex> lock(m_lock.get());
         isSignedIn = m_isSignedIn;
         m_isSignedIn = false;
-        signOutHandlers = s_signOutCompletedHandlers;
+        signOutHandlers = get_xsapi_singleton()->m_signOutCompletedHandlers;
     }
 
     if (isSignedIn)

@@ -14,8 +14,19 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 StatisticManager^
 StatisticManager::SingletonInstance::get()
 {
-    static StatisticManager^ statisticManager = ref new StatisticManager();
-    return statisticManager;
+    auto xsapiSingleton = get_xsapi_singleton();
+    if (xsapiSingleton->m_winrt_statisticManagerInstance == nullptr)
+    {
+        StatisticManager^ statisticManager = ref new StatisticManager();
+        {
+            std::lock_guard<std::mutex> lock(xsapiSingleton->m_singletonLock);
+            if (xsapiSingleton->m_winrt_statisticManagerInstance == nullptr)
+            {
+                xsapiSingleton->m_winrt_statisticManagerInstance = statisticManager;
+            }
+        }
+    }
+    return xsapiSingleton->m_winrt_statisticManagerInstance;
 }
 
 StatisticManager::StatisticManager()

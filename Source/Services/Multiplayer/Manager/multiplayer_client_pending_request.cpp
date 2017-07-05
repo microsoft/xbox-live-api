@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#pragma once
 
 #include "pch.h"
 #include "multiplayer_manager_internal.h"
@@ -10,14 +9,12 @@ using namespace xbox::services::multiplayer;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 
-volatile long multiplayer_client_pending_request::s_uniqueIndentifier = 0;
-
 multiplayer_client_pending_request::multiplayer_client_pending_request() :
     m_joinability(joinability::none),
     m_requestType(pending_request_type::non_synchronized_changes),
     m_localUserLobbyState(multiplayer_local_user_lobby_state::unknown)
 {
-    m_identifier = utils::interlocked_increment(s_uniqueIndentifier);
+    m_identifier = utils::interlocked_increment(get_xsapi_singleton()->m_multiplayerClientPendingRequestUniqueIndentifier);
 }
 
 pending_request_type

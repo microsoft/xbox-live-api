@@ -61,9 +61,6 @@ protected:
     const string_t ENDPOINT_ID_CACHE_NAME = _T("endpointId");
     bool m_isInitialized = false;
     string_t m_endpointId;
-
-    static std::mutex s_notificationSingletonLock;
-    static std::shared_ptr<notification_service> s_notificationSingleton;
 };
 
 #ifdef _WIN32

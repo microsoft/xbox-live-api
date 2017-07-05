@@ -20,7 +20,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
 std::shared_ptr<presence_writer> 
 presence_writer::get_presence_writer_singleton()
 {
-    return get_xsapi_singleton()->s_presenceWriterSingleton;
+    return get_xsapi_singleton()->m_presenceWriterSingleton;
 }
 
 presence_writer::presence_writer() :

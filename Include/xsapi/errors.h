@@ -26,7 +26,7 @@ namespace xbox {
             /// <example>
             /// For example:
             /// <code>
-            /// if( result.err() == XBOX_LIVE_NAMESPACE::xbox_live_error_condition::auth )
+            /// if( result.err() == xbox::services::xbox_live_error_condition::auth )
             /// { 
             ///     // ...
             /// } 
@@ -35,7 +35,7 @@ namespace xbox {
             /// <code>
             /// switch (result.err().default_error_condition().value())
             /// {
-            ///   case XBOX_LIVE_NAMESPACE::xbox_live_error_condition::auth:
+            ///   case xbox::services::xbox_live_error_condition::auth:
             ///     // ...
             ///     break;
             /// }
@@ -1211,14 +1211,14 @@ namespace xbox {
 
 #if XSAPI_U
     NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-    inline std::error_code make_error_code(XBOX_LIVE_NAMESPACE::xbox_live_error_code e)
+    inline std::error_code make_error_code(xbox::services::xbox_live_error_code e)
     {
-        return std::error_code(static_cast<int>(e), XBOX_LIVE_NAMESPACE::xbox_services_error_code_category());
+        return std::error_code(static_cast<int>(e), xbox::services::xbox_services_error_code_category());
     }
 
-    inline std::error_condition make_error_condition(XBOX_LIVE_NAMESPACE::xbox_live_error_condition e)
+    inline std::error_condition make_error_condition(xbox::services::xbox_live_error_condition e)
     {
-        return std::error_condition(static_cast<int>(e), XBOX_LIVE_NAMESPACE::xbox_services_error_condition_category());
+        return std::error_condition(static_cast<int>(e), xbox::services::xbox_services_error_condition_category());
     }
     NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
 #endif
@@ -1226,21 +1226,21 @@ namespace xbox {
 
 namespace std
 {
-    inline std::error_code make_error_code(XBOX_LIVE_NAMESPACE::xbox_live_error_code e)
+    inline std::error_code make_error_code(xbox::services::xbox_live_error_code e)
     {
-        return std::error_code(static_cast<int>(e), XBOX_LIVE_NAMESPACE::xbox_services_error_code_category());
+        return std::error_code(static_cast<int>(e), xbox::services::xbox_services_error_code_category());
     }
 
-    inline std::error_condition make_error_condition(XBOX_LIVE_NAMESPACE::xbox_live_error_condition e)
+    inline std::error_condition make_error_condition(xbox::services::xbox_live_error_condition e)
     {
-        return std::error_condition(static_cast<int>(e), XBOX_LIVE_NAMESPACE::xbox_services_error_condition_category());
+        return std::error_condition(static_cast<int>(e), xbox::services::xbox_services_error_condition_category());
     }
 
     template <>
-    struct is_error_code_enum<XBOX_LIVE_NAMESPACE::xbox_live_error_code> : public true_type{};
+    struct is_error_code_enum<xbox::services::xbox_live_error_code> : public true_type{};
 
     template <>
-    struct is_error_condition_enum<XBOX_LIVE_NAMESPACE::xbox_live_error_condition> : public true_type{};
+    struct is_error_condition_enum<xbox::services::xbox_live_error_condition> : public true_type{};
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN

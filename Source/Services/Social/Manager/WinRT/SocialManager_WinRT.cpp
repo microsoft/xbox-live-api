@@ -17,8 +17,20 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_BEGIN
 SocialManager^
 SocialManager::SingletonInstance::get()
 {
-    static SocialManager^ manager = ref new SocialManager();
-    return manager;
+    auto xsapiSingleton = get_xsapi_singleton();
+    if (xsapiSingleton->m_winrt_socialManagerInstance == nullptr)
+    {
+        SocialManager^ socialManager = ref new SocialManager();
+
+        {
+            std::lock_guard<std::mutex> lock(xsapiSingleton->m_singletonLock);
+            if (xsapiSingleton->m_winrt_socialManagerInstance == nullptr)
+            {
+                xsapiSingleton->m_winrt_socialManagerInstance = socialManager;
+            }
+        }
+    }
+    return xsapiSingleton->m_winrt_socialManagerInstance;
 }
 
 SocialManager::SocialManager() :

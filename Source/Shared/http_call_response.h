@@ -9,7 +9,7 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 template<typename T>
-XBOX_LIVE_NAMESPACE::xbox_live_result<T>
+xbox::services::xbox_live_result<T>
 
 get_xbl_result_from_response(_In_ std::shared_ptr<http_call_response> response, _In_ std::function<T(_In_ const web::json::value&)> deserializeFn)
 {

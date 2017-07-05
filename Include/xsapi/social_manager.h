@@ -931,7 +931,6 @@ protected:
     std::mutex m_socialMangerLock;
     std::mutex m_socialManagerEventLock;
 
-    static std::shared_ptr<social_manager> m_socialManager;
     friend class xbox_social_user_group;
 };
 

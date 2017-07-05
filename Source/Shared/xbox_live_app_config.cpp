@@ -9,20 +9,17 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-
-static std::mutex g_appConfigSingletonLock;
-static std::shared_ptr<xbox_live_app_config> g_appConfigSingleton;
-
 std::shared_ptr<xbox_live_app_config> 
 xbox_live_app_config::get_app_config_singleton()
 {
-    std::lock_guard<std::mutex> guard(g_appConfigSingletonLock);
-    if (g_appConfigSingleton == nullptr)
+    auto xsapiSingleton = xbox::services::get_xsapi_singleton();
+    std::lock_guard<std::mutex> guard(xsapiSingleton->m_appConfigLock);
+    if (xsapiSingleton->m_appConfigSingleton == nullptr)
     {
-        g_appConfigSingleton = std::shared_ptr<xbox_live_app_config>(new xbox_live_app_config());
+        xsapiSingleton->m_appConfigSingleton = std::shared_ptr<xbox_live_app_config>(new xbox_live_app_config());
     }
 
-    return g_appConfigSingleton;
+    return xsapiSingleton->m_appConfigSingleton;
 }
 
 
@@ -47,14 +44,14 @@ xbox_live_app_config::xbox_live_app_config() :
 
 xbox_live_result<void> xbox_live_app_config::read()
 {
-    XBOX_LIVE_NAMESPACE::system::xbox_system_factory::get_factory();
+    xbox::services::system::xbox_system_factory::get_factory();
 
 #if TV_API
     m_sandbox = Windows::Xbox::Services::XboxLiveConfiguration::SandboxId->Data();
     m_scid = Windows::Xbox::Services::XboxLiveConfiguration::PrimaryServiceConfigId->Data();
     m_titleId = std::stoi(Windows::Xbox::Services::XboxLiveConfiguration::TitleId->Data());
 #else
-    std::shared_ptr<XBOX_LIVE_NAMESPACE::local_config> localConfig = XBOX_LIVE_NAMESPACE::system::xbox_system_factory::get_factory()->create_local_config();
+    std::shared_ptr<xbox::services::local_config> localConfig = xbox::services::system::xbox_system_factory::get_factory()->create_local_config();
     m_titleId = localConfig->title_id();
     m_scid = localConfig->scid();
     m_environment = localConfig->environment();
@@ -67,7 +64,7 @@ xbox_live_result<void> xbox_live_app_config::read()
     if(m_titleId == 0)
     {
         return xbox_live_result<void>(
-            std::make_error_code(XBOX_LIVE_NAMESPACE::xbox_live_error_code::invalid_config),
+            std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
             "ERROR: Could not read \"titleId\" in xboxservices.config.  Must be a JSON number"
             );
     }
@@ -75,7 +72,7 @@ xbox_live_result<void> xbox_live_app_config::read()
     if(m_scid.empty())
     {
         return xbox_live_result<void>(
-            std::make_error_code(XBOX_LIVE_NAMESPACE::xbox_live_error_code::invalid_config),
+            std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
             "ERROR: Could not read \"PrimaryServiceConfigId\" in xboxservices.config.  Must be a JSON string"
             );
     }

@@ -16,7 +16,6 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-volatile long http_call_response::s_responseCount = 0;
 const int RETRY_AFTER_CAP = 15;
 
 http_call_response::http_call_response(
@@ -211,13 +210,13 @@ void http_call_response::_Route_service_call() const
 
     bool callFailed = FAILED(utils::convert_http_status_to_hresult(m_httpStatus));
     bool logCall = 
-        (XBOX_LIVE_NAMESPACE::service_call_logger::get_singleton_instance()->is_enabled()) ||
+        (xbox::services::service_call_logger::get_singleton_instance()->is_enabled()) ||
         (system::xbox_live_services_settings::get_singleton_instance()->_Is_at_diagnostics_trace_level(xbox_services_diagnostics_trace_level::info)) ||
         (callFailed && system::xbox_live_services_settings::get_singleton_instance()->_Is_at_diagnostics_trace_level(xbox_services_diagnostics_trace_level::error));
 
     if (logCall || m_xboxLiveContextSettings->enable_service_call_routed_events())
     {
-        uint32_t responseCount = InterlockedIncrement(&s_responseCount);
+        uint32_t responseCount = InterlockedIncrement(&get_xsapi_singleton()->m_responseCount);
 
         web::http::http_headers headers = m_request.headers();
 
@@ -226,7 +225,7 @@ void http_call_response::_Route_service_call() const
         headers.remove(AUTH_HEADER);
         headers.remove(SIG_HEADER);
 
-        XBOX_LIVE_NAMESPACE::xbox_service_call_routed_event_args args(
+        xbox::services::xbox_service_call_routed_event_args args(
             m_xboxUserId,
             m_request.method(),
             m_fullUrl,

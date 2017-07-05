@@ -18,8 +18,6 @@ using namespace Windows::Foundation::Collections;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_BEGIN
 
-static std::mutex s_singletonLock;
-
 MultiplayerManager::MultiplayerManager() :
     m_cppObj(multiplayer_manager::get_singleton_instance())
 {
@@ -28,15 +26,21 @@ MultiplayerManager::MultiplayerManager() :
 MultiplayerManager^
 MultiplayerManager::SingletonInstance::get()
 {
-    std::lock_guard<std::mutex> guard(s_singletonLock);
-
-    static MultiplayerManager^ instance;
-    if (instance == nullptr)
+    auto xsapiSingleton = get_xsapi_singleton();
+    if (xsapiSingleton->m_winrt_multiplayerManagerInstance == nullptr)
     {
-        instance = ref new MultiplayerManager();
+        MultiplayerManager^ mpManager = ref new MultiplayerManager();
+
+        {
+            std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
+            if (xsapiSingleton->m_winrt_multiplayerManagerInstance == nullptr)
+            {
+                xsapiSingleton->m_winrt_multiplayerManagerInstance = mpManager;
+            }
+        }
     }
     
-    return instance;
+    return xsapiSingleton->m_winrt_multiplayerManagerInstance;
 }
 
 std::shared_ptr<xbox::services::multiplayer::manager::multiplayer_manager>

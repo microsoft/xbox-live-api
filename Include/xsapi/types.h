@@ -187,8 +187,6 @@ inline std::vector<winrt::Windows::Xbox::System::User> convert_user_vector_to_cp
 #endif
 
 
-#define XBOX_LIVE_NAMESPACE xbox::services
-
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN                     namespace xbox { namespace services {
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END                       }}
 #define NAMESPACE_MICROSOFT_XBOX_SERVICES_BEGIN                         namespace Microsoft { namespace Xbox { namespace Services { 

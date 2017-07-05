@@ -1429,8 +1429,14 @@ multiplayer_session::compare_multiplayer_sessions(
         currentType |= multiplayer_session_change_types::initialization_state_change;
     }
 
-    if ((currentSession->matchmaking_server().is_null() != oldSession->matchmaking_server().is_null()) ||
-        (!currentSession->matchmaking_server().is_null() && currentSession->matchmaking_server().status() != oldSession->matchmaking_server().status())
+    auto currentMatchmakingServer = currentSession->matchmaking_server();
+    auto oldMatchmakingServer = oldSession->matchmaking_server();
+    if ((currentMatchmakingServer.is_null() != oldMatchmakingServer.is_null()) ||
+        (!currentMatchmakingServer.is_null() && currentMatchmakingServer.status() != oldMatchmakingServer.status()) ||
+        (!currentMatchmakingServer.is_null() && 
+            !currentMatchmakingServer.target_session_ref().is_null() &&
+            !oldMatchmakingServer.target_session_ref().is_null() &&
+            !_Do_session_references_match(currentMatchmakingServer.target_session_ref(), oldMatchmakingServer.target_session_ref()))
         )
     {
         currentType |= multiplayer_session_change_types::matchmaking_status_change;
@@ -1524,6 +1530,17 @@ multiplayer_session::compare_multiplayer_sessions(
     }
 
     return xbox_live_result<multiplayer_session_change_types>(static_cast<multiplayer_session_change_types>(currentType));
+}
+
+bool
+multiplayer_session::_Do_session_references_match(
+    _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef1,
+    _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef2
+    )
+{
+    return  utils::str_icmp(sessionRef1.service_configuration_id(), sessionRef2.service_configuration_id()) == 0 &&
+        utils::str_icmp(sessionRef1.session_template_name(), sessionRef2.session_template_name()) == 0 &&
+        utils::str_icmp(sessionRef1.session_name(), sessionRef2.session_name()) == 0;
 }
 
 xbox_live_result<multiplayer_session>

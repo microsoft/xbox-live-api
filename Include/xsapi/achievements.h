@@ -714,7 +714,10 @@ public:
 
     achievement_service() {};
 
-    achievement_service(
+	/// <summary>
+	/// Internal function
+	/// </summary>
+	achievement_service(
         _In_ std::shared_ptr<xbox::services::user_context> userContext,
         _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
         _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
@@ -789,14 +792,7 @@ private:
         _In_ uint32_t percentComplete
         );
 #endif
-
-#if TV_API || UNIT_TEST_SERVICES
-    static std::mutex m_initLock;
-    static bool s_bHasInitialized;
-    static std::string s_eventProviderName;
-    static GUID s_eventPlayerSessionId;
-#endif
-    
+   
     friend class xbox_live_context_impl;
     friend class achievements_result;
 };

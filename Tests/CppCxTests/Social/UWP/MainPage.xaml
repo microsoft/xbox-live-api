@@ -1,0 +1,33 @@
+﻿<Page
+    x:Class="Social_CppCx_140.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Social_CppCx_140"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
+
+        <Grid Margin="57,26,0,0" Height="78" VerticalAlignment="Top" HorizontalAlignment="Left" Width="411">
+            <TextBlock x:Name="UserLabel" HorizontalAlignment="Left" TextWrapping="Wrap" Text="User:" VerticalAlignment="Top" FontSize="16" RequestedTheme="Dark" Margin="3,0,0,0"/>
+            <TextBlock x:Name="UserInfoLabel" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Not Signed In" VerticalAlignment="Top" FontSize="16" RequestedTheme="Dark" Margin="44,0,0,0" Width="215"/>
+            <Button x:Name="SignInButton" Content="Sign In" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Click="SignInButton_Click" Margin="-3,0,302,7" Height="38"/>
+            <Button x:Name="SwitchAccountButton" Content="Switch Account" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Click="SwitchAccountButton_Click" Margin="115,0,163,8" Height="38"/>
+        </Grid>
+
+        <TextBlock x:Name="LogLabel" HorizontalAlignment="Left" Margin="331,43,0,0" Text="Log:" VerticalAlignment="Top" FontSize="16" RequestedTheme="Dark"/>
+        <Border BorderBrush="White" BorderThickness="2" HorizontalAlignment="Left"  Height="641" Margin="331,117,0,0" VerticalAlignment="Top" Width="625" CornerRadius="4">
+            <ScrollViewer Background="#A0A0A0">
+                <StackPanel x:Name="OutputStackPanel" HorizontalAlignment="Left" />
+            </ScrollViewer>
+        </Border>
+        
+        <Grid Margin="57,109,0,0" HorizontalAlignment="Left" Width="269" Height="599" VerticalAlignment="Top">
+            <ListBox x:Name="ScenarioListBox" HorizontalAlignment="Left" Width="259" RequestedTheme="Light" DoubleTapped="ScenarioListBox_DoubleTapped" Margin="0,24,0,47"/>
+            <TextBlock x:Name="ScenarioLabel" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Choose Scenario:" VerticalAlignment="Top" FontSize="16" RequestedTheme="Dark" Margin="3,0,0,0"/>
+            <Button x:Name="RunButton_Copy" Content="Run" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="109" Click="RunButton_Click" Margin="0,0,0,7"/>
+            <Button x:Name="RunAllButton_Copy" Content="Run All" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="109" Click="RunAllButton_Click" Margin="0,0,7,7"/>
+        </Grid>
+    </Grid>
+</Page>

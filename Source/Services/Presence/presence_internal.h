@@ -216,7 +216,7 @@ public:
     ~presence_service_impl();
 
     // test hook 
-    static void set_presence_set_finished_handler(const std::function<void(int heartBeatDelayInMins)>& onSetPresenceFinish) { s_onSetPresenceFinish = onSetPresenceFinish; }
+    static void set_presence_set_finished_handler(const std::function<void(int heartBeatDelayInMins)>& onSetPresenceFinish);
 
     static string_t set_presence_sub_path(
         _In_ const string_t& xboxUserId
@@ -238,8 +238,6 @@ private:
         _In_ bool isUserActiveInTitle,
         _In_ presence_data presenceData
         );
-
-    static std::function<void(int heartBeatDelayInMins)> s_onSetPresenceFinish;
 
     void device_presence_changed(_In_ const device_presence_change_event_args& eventArgs);
     void title_presence_changed(_In_ const title_presence_change_event_args& eventArgs);

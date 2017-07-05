@@ -296,6 +296,287 @@
             }
         }
     },
+	"MultiplayerResponseForComparingSessions" : {
+        "branch": "b65ae271-a117-4359-b963-27ff55d3ab92",
+        "changeNumber": 1,
+        "contractVersion": 105,
+        "correlationId": "06365b64-3067-8039-ecee-3608af3d02fc",
+        "startTime": "2013-02-01T00:00:00Z",
+        "nextTimer": "2013-02-01T00:00:00Z",
+        "initializing": {
+            "stage": "Measuring",
+            "stageStartTime": "2013-02-01T00:00:00Z",
+            "episode": 0
+        },
+        "hostCandidates": [
+            "ab90a362",
+            "99582e67"
+        ],
+        "membersInfo": {
+            "first": 0,
+            "next": 1,
+            "count": 2,
+            "accepted": 1,
+            "active": 1
+        },
+        "roleTypes": {
+            "lfg": {
+                "ownerManaged": true,
+                "mutableRoleSettings":["max", "target"],
+                "roles": {
+                    "friend":{
+                        "count": 2,
+                        "target": 3,
+                        "max": 5,
+                        "memberXuids" : ["1234", "5678"]
+                    },
+                    "other":{
+                        "count": 3,
+                        "target": 3,
+                        "max": 5,
+                        "memberXuids" : ["1234", "5678"]
+                    }
+                }
+            }
+        },
+        "constants": {
+            "system": {
+                "capabilities": {
+                    "clientMatchmaking": true,
+                    "connectivity": true,
+                    "suppressPresenceActivityCheck": true,
+                    "gameplay": true,
+                    "large": false,
+                    "userAuthorizationStyle": true,
+                    "crossplay": true,
+                    "searchable": true,
+                    "connectionRequiredForActiveMembers": true
+                },
+                "version": 1,
+                "maxMembersCount": 100,
+                "visibility": "Open",
+                "initiators": [
+                    "3456"
+                ],
+                "inviteProtocol": "party",
+                "reservedRemovalTimeout": 30000,
+                "inactiveRemovalTimeout": 7200000,
+                "readyRemovalTimeout": 180000,
+                "sessionEmptyTimeout": 0,
+                "metrics": {
+                    "latency": true,
+                    "bandwidthDown": true,
+                    "bandwidthUp": true,
+                    "custom": true
+                },
+                "memberInitialization": {
+                    "joinTimeout": 4000,
+                    "measurementTimeout": 5000,
+                    "evaluationTimeout": 5000,
+                    "externalEvaluation": false,
+                    "membersNeededToStart": 2
+                },
+                "peerToPeerRequirements": {
+                    "latencyMaximum": 250,
+                    "bandwidthMinimum": 10000
+                },
+                "peerToHostRequirements": {
+                    "latencyMaximum": 250,
+                    "bandwidthDownMinimum": 100000,
+                    "bandwidthUpMinimum": 1000,
+                    "hostSelectionMetric": "bandwidthUp"
+                },
+                "measurementServerAddresses": {
+                    "east.azure.com": {
+                        "secureDeviceAddress": "r5Y="
+                    },
+                    "west.azure.com": {
+                        "secureDeviceAddress": "rwY="
+                    }
+                },
+                "cloudComputePackage": {
+                    "crossSandbox": true,
+                    "titleId": "4567",
+                    "gsiSet": "128ce92a-45d0-4319-8a7e-bd8e940114ec"
+                }
+            },
+            "custom": {}
+        },
+        "properties": {
+            "system": {
+                "closed": true,
+                "locked": true,
+                "allocateCloudCompute": true,
+                "keywords": [
+                    "hello"
+                ],
+                "turn": [
+                    0
+                ],
+                "owners": [0],
+                "host": "99e4c701",
+                "initializationSucceeded": true,
+                "joinRestriction": "None",
+                "readRestriction": "None",
+                "serverConnectionStringCandidates": [
+                    "west.azure.com",
+                    "east.azure.com"
+                ],
+                "matchmaking": {
+                    "clientResult": {
+                        "status": "Searching",
+                        "statusDetails": "Description",
+                        "typicalWait": 30,
+                        "targetSessionRef": {
+                            "scid": "1ECFDB89-36EB-4E59-8901-11F7393689AE",
+                            "templateName": "capture-the-flag",
+                            "name": "2D58F65F-0E3C-4F1F-8277-2BC9873FDB23"
+                        }
+                    },
+                    "targetSessionConstants": {},
+                    "serverConnectionString": "west.azure.com"
+                },
+                "matchmakingResubmit": true
+            },
+            "custom": {}
+        },
+        "servers": {
+            "matchmaking": {
+                "properties": {
+                    "system": {
+                        "status": "searching",
+                        "statusDetails": "test",
+                        "typicalWait": 10000,
+                        "targetSessionRef": {
+                            "scid": "1ECFDB89-36EB-4E59-8901-11F7393689AE",
+                            "templateName": "capture-the-flag",
+                            "name": "12345678-0E3C-4F1F-8277-2BC9873FDB23"
+                        }
+                    }
+                }
+            }
+        },
+        "members": {
+            "0": {
+                "roles": {
+                    "lfg": "friend",
+                    "admin": "super"
+                },
+                "constants": {
+                    "system": {
+                        "index": 0,
+                        "xuid": "TestXboxUserId",
+                        "initialize": true,
+                        "matchmakingResult": {
+                            "serverMeasurements": {
+                                "east.azure.com": {
+                                    "latency": 233
+                                }
+                            }
+                        }
+                    },
+                    "custom": "Hello"
+                },
+                "properties": {
+                    "system": {
+                        "subscription": {
+                            "changeTypes": [
+                                "everything",
+                                "host"
+                            ]
+                        },
+                        "ready": true,
+                        "active": false,
+                        "secureDeviceAddress": "ryY=",
+                        "initializationGroup": [
+                            5
+                        ],
+                        "measurements": {
+                            "e6Kv5zY=": {
+                                "latency": 5953,
+                                "bandwidthDown": 19342,
+                                "bandwidthUp": 944,
+                                "custom": {}
+                            }
+                        },
+                        "serverMeasurements": {
+                            "east.azure.com": {
+                                "latency": 233
+                            }
+                        }
+                    },
+                    "custom": {}
+                },
+                "gamertag": "stacy",
+                "deviceToken": "9f4032ba7",
+                "nat": "Strict",
+                "reserved": true,
+                "activeTitleId": "8397267",
+                "joinTime": "2013-02-01T00:00:00Z",
+                "turn": true,
+                "initializationFailure": "Latency",
+                "initializationEpisode": 0,
+                "next": 1
+            },
+            "1": {
+                "constants": {
+                    "system": {
+                        "index": 1,
+                        "xuid": "1234",
+                        "initialize": true,
+                        "matchmakingResult": {
+                            "serverMeasurements": {
+                                "east.azure.com": {
+                                    "latency": 233
+                                }
+                            }
+                        }
+                    },
+                    "custom": {}
+                },
+                "properties": {
+                    "system": {
+                        "subscription": {
+                            "changeTypes": [
+                                "everything",
+                                "host"
+                            ]
+                        },
+                        "ready": true,
+                        "active": false,
+                        "secureDeviceAddress": "ryY=",
+                        "initializationGroup": [
+                            5
+                        ],
+                        "measurements": {
+                            "e6Kv5zY=": {
+                                "latency": 5953,
+                                "bandwidthDown": 19342,
+                                "bandwidthUp": 944,
+                                "custom": {}
+                            }
+                        },
+                        "serverMeasurements": {
+                            "east.azure.com": {
+                                "latency": 233
+                            }
+                        }
+                    },
+                    "custom": {}
+                },
+                "gamertag": "stacy",
+                "deviceToken": "9f4032ba7",
+                "nat": "Strict",
+                "reserved": true,
+                "activeTitleId": "8397267",
+                "joinTime": "2013-02-01T00:00:00Z",
+                "turn": true,
+                "initializationFailure": "Latency",
+                "initializationEpisode": 0,
+                "next": 4
+            }
+        }
+    },
     "rtaSessionUpdateJson" : {
         "ncid": "508e6b30-e694-42ad-a396-5ff48612463f",
         "shoulderTaps": [
