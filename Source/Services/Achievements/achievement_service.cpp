@@ -190,6 +190,7 @@ achievement_service::update_achievement(
     {
         if (response->err_code() == xbox_live_error_condition::network ||
             response->err_code() == xbox_live_error_code::http_status_429_too_many_requests ||
+            response->err_code() == xbox_live_error_code::generic_error ||
             (response->err_code().value() >= 500 && response->err_code().value() < 600))
         {
 #if TV_API | UWP_API
