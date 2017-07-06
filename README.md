@@ -14,7 +14,7 @@ https://developer.microsoft.com/en-us/games/xbox/docs/xboxlive/get-started/devel
 
 ## How to use the Xbox Live Services API (XSAPI)
 
-The best way to learn the API and see the best practices is to look at the [Xbox Live Samples](https://github.com/Microsoft/xbox-live-samples), and the [Xbox Live developer docs](https://developer.microsoft.com/en-us/games/xbox/docs/xboxlive)
+The best way to learn the API and see the best practices is to look at the [Xbox Live Samples](https://github.com/Microsoft/xbox-live-samples), and the [Xbox Live developer docs](https://docs.microsoft.com/en-us/windows/uwp/xbox-live/)
 
 ## How to clone repo
 
