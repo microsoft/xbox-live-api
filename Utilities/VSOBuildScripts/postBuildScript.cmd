@@ -153,10 +153,11 @@ rmdir /s /q %XDK_BINARIES_DROP%\source\Build\Microsoft.Xbox.Services.140.UWP.Win
 del /s %XDK_BINARIES_DROP%\source\*.log
 del %XDK_BINARIES_DROP%\source\*.md
 mkdir %PATH_XDK_WINRT%
-mkdir %PATH_XDK_WINRT%\SourceDist
-if "%BUILD_DEFINITIONNAME%" NEQ "XSAPI_Internal_Full_Build" goto skipzip
+mkdir %PATH_XDK_WINRT%\binaries
+mkdir %PATH_XDK_WINRT%\binaries\SourceDist
+if "%BUILD_DEFINITIONNAME%" EQU "XSAPI_Internal_Full_Build" goto skipzip
 if "%1" == "local" goto skipzip
-\\scratch2\scratch\jasonsa\tools\vZip.exe /FOLDER:%XDK_BINARIES_DROP%\source /OUTPUTNAME:%PATH_XDK_WINRT%\SourceDist\Xbox.Services.zip
+\\scratch2\scratch\jasonsa\tools\vZip.exe /FOLDER:%XDK_BINARIES_DROP%\source /OUTPUTNAME:%PATH_XDK_WINRT%\binaries\SourceDist\Xbox.Services.zip
 :skipzip
 
 rem create unity package
