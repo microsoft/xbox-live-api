@@ -129,14 +129,7 @@ pplx::task<xbox_live_result<user_context_auth_result>> user_context::get_auth_re
         {
             auto tokenAndSig = result.get();
             user_context_auth_result userContextResult( tokenAndSig->Token->ToString()->Data(), tokenAndSig->Signature->ToString()->Data() );
-            if (userContextResult.token().length() == 0)
-            {
-                return xbox_live_result<user_context_auth_result>(xbox_live_error_code::auth_unknown_error, "No auth token");
-            }
-            else
-            {
-                return xbox_live_result<user_context_auth_result>(userContextResult);
-            }
+            return xbox_live_result<user_context_auth_result>(userContextResult);
         }
         catch(Exception^ ex)
         {
@@ -190,14 +183,7 @@ pplx::task<xbox_live_result<user_context_auth_result>> user_context::get_auth_re
         {
             auto tokenAndSig = result.get();
             user_context_auth_result userContextResult( tokenAndSig->Token->ToString()->Data(), tokenAndSig->Signature->ToString()->Data() );
-            if (userContextResult.token().length() == 0)
-            {
-                return xbox_live_result<user_context_auth_result>(xbox_live_error_code::auth_unknown_error, "No auth token");
-            }
-            else
-            {
-                return xbox_live_result<user_context_auth_result>(userContextResult);
-            }
+            return xbox_live_result<user_context_auth_result>(userContextResult);
         }
         catch(Exception^ ex)
         {
@@ -254,14 +240,7 @@ user_context::get_auth_result(
     {
         const auto& tokenResult = xblResult.payload();
         user_context_auth_result userContextResult(tokenResult.token(), tokenResult.signature());
-        if (userContextResult.token().length() == 0 && !xblResult.err())
-        {
-            return xbox_live_result<user_context_auth_result>(xbox_live_error_code::auth_unknown_error, "No auth token");
-        }
-        else
-        {
-            return xbox_live_result<user_context_auth_result>(userContextResult, xblResult.err(), xblResult.err_message());
-        }
+        return xbox_live_result<user_context_auth_result>(userContextResult, xblResult.err(), xblResult.err_message());
     });
 }
 
@@ -292,14 +271,7 @@ pplx::task<xbox_live_result<user_context_auth_result>> user_context::get_auth_re
     {
         const auto& tokenResult = xblResult.payload();
         user_context_auth_result userContextResult(tokenResult.token(), tokenResult.signature());
-        if (userContextResult.token().length() == 0 && !xblResult.err())
-        {
-            return xbox_live_result<user_context_auth_result>(xbox_live_error_code::auth_unknown_error, "No auth token");
-        }
-        else
-        {
-            return xbox_live_result<user_context_auth_result>(userContextResult, xblResult.err(), xblResult.err_message());
-        }
+        return xbox_live_result<user_context_auth_result>(userContextResult, xblResult.err(), xblResult.err_message());
     });
 }
 
@@ -383,14 +355,7 @@ pplx::task<xbox_live_result<user_context_auth_result>> user_context::get_auth_re
         {
             GetTokenAndSignatureResult^ result = t.get();
             user_context_auth_result userContextResult(result->Token->Data(), result->Signature->Data());
-            if (userContextResult.token().length() == 0)
-            {
-                return xbox_live_result<user_context_auth_result>(xbox_live_error_code::auth_unknown_error, "No auth token");
-            }
-            else
-            {
-                return xbox_live_result<user_context_auth_result>(userContextResult);
-            }
+            return xbox_live_result<user_context_auth_result>(userContextResult);
         }
         catch (Exception^ ex)
         {
@@ -429,14 +394,7 @@ pplx::task<xbox_live_result<user_context_auth_result>> user_context::get_auth_re
         {
             GetTokenAndSignatureResult^ result = t.get();
             user_context_auth_result userContextResult(result->Token->Data(), result->Signature->Data());
-            if (userContextResult.token().length() == 0)
-            {
-                return xbox_live_result<user_context_auth_result>(xbox_live_error_code::auth_unknown_error, "No auth token");
-            }
-            else
-            {
-                return xbox_live_result<user_context_auth_result>(userContextResult);
-            }
+            return xbox_live_result<user_context_auth_result>(userContextResult);
         }
         catch (Exception^ ex)
         {
