@@ -501,7 +501,7 @@ multiplayer_client_manager::invite_friends(
                 t.get();
                 pThis->add_multiplayer_event(multiplayer_event_type::invite_sent, multiplayer_session_type::lobby_session);
             }
-            catch (Platform::Exception^ ex)
+            catch (...)
             {
                 xbox_live_error_code err = utils::convert_exception_to_xbox_live_error_code();
                 pThis->add_multiplayer_event(multiplayer_event_type::invite_sent, multiplayer_session_type::lobby_session, err, "Failed sending invites.");
