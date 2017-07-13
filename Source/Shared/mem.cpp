@@ -22,7 +22,7 @@ void* xsapi_memory::mem_alloc(
     }
     if (pMemAlloc == nullptr)
     {
-        return new (std::nothrow) int8_t[dwSize];
+        return malloc(dwSize);
     }
     else
     {
@@ -50,7 +50,7 @@ void xsapi_memory::mem_free(
         pMemFreeHook = xboxLiveServiceSettings->m_pMemFreeHook;
         if (pMemFreeHook == nullptr)
         {
-            delete[] pAddress;
+            free(pAddress);
         }
         else
         {
