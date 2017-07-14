@@ -3548,27 +3548,27 @@ public:
         VERIFY_ARE_EQUAL_STR(nextGameSessionRef->SessionTemplateName, "bar");
         VERIFY_ARE_EQUAL_STR(nextGameSessionRef->SessionName, "session-seven");
 
-        auto member0 = currentSession->Members->GetAt(0);
-        VERIFY_IS_NOT_NULL(member0);
-
-        VERIFY_IS_NOT_NULL(member0->Results);
-        VERIFY_IS_TRUE(member0->Results->Size == 2);
-        for (auto item : member0->Results)
+        for (const auto& member : currentSession->Members)
         {
-            Platform::String^ key = item->Key;
-            TournamentTeamResult^ value = item->Value;
-            VERIFY_IS_TRUE(key->Equals("team1") || key->Equals("team2"));
-            VERIFY_IS_TRUE(value->State == TournamentGameResultState::Rank);
-            VERIFY_IS_TRUE(value->Ranking == 3 || value->Ranking == 2);
+            VERIFY_IS_NOT_NULL(member->Results);
+            VERIFY_IS_TRUE(member->Results->Size == 2);
+            for (auto result : member->Results)
+            {
+                Platform::String^ key = result->Key;
+                TournamentTeamResult^ teamResult = result->Value;
+                VERIFY_IS_TRUE(key->Equals("team1") || key->Equals("team2"));
+                VERIFY_IS_TRUE(teamResult->State == TournamentGameResultState::Rank);
+                VERIFY_IS_TRUE(teamResult->Ranking == 3 || teamResult->Ranking == 2);
+            }
+
+            VERIFY_IS_TRUE(member->ArbitrationStatus == TournamentArbitrationStatus::Joining);
+
+            auto teamSessionRef = member->TournamentTeamSessionRef;
+            VERIFY_IS_NOT_NULL(teamSessionRef);
+            VERIFY_ARE_EQUAL_STR(teamSessionRef->ServiceConfigurationId, "TestScid");
+            VERIFY_ARE_EQUAL_STR(teamSessionRef->SessionTemplateName, "TournamentGameSessionTest");
+            VERIFY_ARE_EQUAL_STR(teamSessionRef->SessionName, "TestName");
         }
-
-        VERIFY_IS_TRUE(member0->ArbitrationStatus == TournamentArbitrationStatus::Playing);
-
-        auto teamSessionRef = member0->TournamentTeamSessionRef;
-        VERIFY_IS_NOT_NULL(teamSessionRef);
-        VERIFY_ARE_EQUAL_STR(teamSessionRef->ServiceConfigurationId, "TestScid");
-        VERIFY_ARE_EQUAL_STR(teamSessionRef->SessionTemplateName, "TournamentGameSessionTest");
-        VERIFY_ARE_EQUAL_STR(teamSessionRef->SessionName, "TestName");
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserArbitrationResult)

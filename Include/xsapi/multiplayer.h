@@ -135,6 +135,11 @@ enum class tournament_arbitration_status
     /// The user was not able to upload results before the arbitrationTimeout deadline.
     /// </summary>
     incomplete,
+
+    /// <summary>
+    /// The status is "joining" until both the tournament_arbitration_status is "in_progress" and the member is active.
+    /// </summary>
+    joining
 };
 
 
