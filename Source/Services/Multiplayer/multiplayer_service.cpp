@@ -1218,6 +1218,10 @@ multiplayer_service::_Convert_string_to_arbitration_status(
     {
         return tournament_arbitration_status::playing;
     }
+    else if (utils::str_icmp(value, _T("joining")) == 0)
+    {
+        return tournament_arbitration_status::joining;
+    }
 
     return tournament_arbitration_status::incomplete;
 }

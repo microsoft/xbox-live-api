@@ -1633,10 +1633,10 @@
         },
         "members":{
             "0":{
+                "arbitrationStatus":"joining",
                 "constants":{
                     "system":{
-                        "team":"team1",
-                        "arbitrationStatus":"playing"
+                        "team":"team1"
                     }
                 },
                 "properties":{

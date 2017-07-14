@@ -34,7 +34,12 @@ public enum class TournamentArbitrationStatus
     /// <summary>
     /// The user was not able to upload results before the arbitrationTimeout deadline.
     /// </summary>
-    InComplete = xbox::services::tournaments::tournament_arbitration_status::incomplete
+    InComplete = xbox::services::tournaments::tournament_arbitration_status::incomplete,
+
+    /// <summary>
+    /// The status is "joining" until both the TournamentArbitrationStatus is "InProgress" and the member is active.
+    /// </summary>
+    Joining = xbox::services::tournaments::tournament_arbitration_status::joining
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TOURNAMENTS_END
