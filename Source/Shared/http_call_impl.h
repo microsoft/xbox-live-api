@@ -245,27 +245,27 @@ public:
 
 #if TV_API | XBOX_UWP
 
-	pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
-		_In_ Windows::Xbox::System::User^ user,
-		_In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
-		_In_ bool allUsersAuthRequired = false
-		) override;
+    pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
+        _In_ Windows::Xbox::System::User^ user,
+        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
+        _In_ bool allUsersAuthRequired = false
+        ) override;
 
 #elif UNIT_TEST_SERVICES || !XSAPI_CPP
 
-	virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
-		_In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
-		_In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
-		_In_ bool allUsersAuthRequired = false
-		) override;
+    virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
+        _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
+        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
+        _In_ bool allUsersAuthRequired = false
+        ) override;
 
 #else
 
-	pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
-		_In_ std::shared_ptr<system::xbox_live_user> user,
-		_In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
-		_In_ bool allUsersAuthRequired = false
-		) override;
+    pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
+        _In_ std::shared_ptr<system::xbox_live_user> user,
+        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
+        _In_ bool allUsersAuthRequired = false
+        ) override;
 
 #endif
 

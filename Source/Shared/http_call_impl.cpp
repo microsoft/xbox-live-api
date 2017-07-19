@@ -138,42 +138,42 @@ http_call_impl::get_response(
 
 
 #if TV_API | XBOX_UWP
-	
+    
 pplx::task<std::shared_ptr<http_call_response>> 
 http_call_impl::get_response_with_auth(
-	_In_ Windows::Xbox::System::User^ user,
-	_In_ http_call_response_body_type httpCallResponseBodyType,
-	_In_ bool allUsersAuthRequired
-	) 
+    _In_ Windows::Xbox::System::User^ user,
+    _In_ http_call_response_body_type httpCallResponseBodyType,
+    _In_ bool allUsersAuthRequired
+    ) 
 {
-	auto userContext = std::make_shared<xbox::services::user_context>(user);
-	return get_response_with_auth(userContext, httpCallResponseBodyType, allUsersAuthRequired);
+    auto userContext = std::make_shared<xbox::services::user_context>(user);
+    return get_response_with_auth(userContext, httpCallResponseBodyType, allUsersAuthRequired);
 }
 
 #elif UNIT_TEST_SERVICES || !XSAPI_CPP
-	
+    
 pplx::task<std::shared_ptr<http_call_response>>
 http_call_impl::get_response_with_auth(
-	_In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
-	_In_ http_call_response_body_type httpCallResponseBodyType,
-	_In_ bool allUsersAuthRequired
-	)
+    _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
+    _In_ http_call_response_body_type httpCallResponseBodyType,
+    _In_ bool allUsersAuthRequired
+    )
 {
-	auto userContext = std::make_shared<xbox::services::user_context>(user);
-	return get_response_with_auth(userContext, httpCallResponseBodyType, allUsersAuthRequired);
+    auto userContext = std::make_shared<xbox::services::user_context>(user);
+    return get_response_with_auth(userContext, httpCallResponseBodyType, allUsersAuthRequired);
 }
-	
+    
 #else
-	
+    
 pplx::task<std::shared_ptr<http_call_response>>
 http_call_impl::get_response_with_auth(
-	_In_ std::shared_ptr<system::xbox_live_user> user,
-	_In_ http_call_response_body_type httpCallResponseBodyType,
-	_In_ bool allUsersAuthRequired
-	)
+    _In_ std::shared_ptr<system::xbox_live_user> user,
+    _In_ http_call_response_body_type httpCallResponseBodyType,
+    _In_ bool allUsersAuthRequired
+    )
 {
-	auto userContext = std::make_shared<xbox::services::user_context>(user);
-	return get_response_with_auth(userContext, httpCallResponseBodyType, allUsersAuthRequired);
+    auto userContext = std::make_shared<xbox::services::user_context>(user);
+    return get_response_with_auth(userContext, httpCallResponseBodyType, allUsersAuthRequired);
 }
 
 #endif
