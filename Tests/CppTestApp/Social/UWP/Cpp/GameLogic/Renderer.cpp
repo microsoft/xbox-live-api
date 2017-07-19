@@ -4,7 +4,7 @@
 #include "pch.h"
 #include "Renderer.h"
 #include "DDSTextureLoader.h"
-#include "Common\DirectXHelper.h"	// For ThrowIfFailed and ReadDataAsync
+#include "Common\DirectXHelper.h"    // For ThrowIfFailed and ReadDataAsync
 #include "Game.h"
 #include "Utils\PerformanceCounters.h"
 
