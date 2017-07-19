@@ -147,16 +147,16 @@ void DX::DeviceResources::CreateDeviceResources()
     ComPtr<ID3D11DeviceContext> context;
 
     HRESULT hr = D3D11CreateDevice(
-        nullptr,					// Specify nullptr to use the default adapter.
-        D3D_DRIVER_TYPE_HARDWARE,	// Create a device using the hardware graphics driver.
-        0,							// Should be 0 unless the driver is D3D_DRIVER_TYPE_SOFTWARE.
-        creationFlags,				// Set debug and Direct2D compatibility flags.
-        featureLevels,				// List of feature levels this app can support.
-        ARRAYSIZE(featureLevels),	// Size of the list above.
-        D3D11_SDK_VERSION,			// Always set this to D3D11_SDK_VERSION for Windows Store apps.
-        &device,					// Returns the Direct3D device created.
-        &m_d3dFeatureLevel,			// Returns feature level of device created.
-        &context					// Returns the device immediate context.
+        nullptr,                    // Specify nullptr to use the default adapter.
+        D3D_DRIVER_TYPE_HARDWARE,    // Create a device using the hardware graphics driver.
+        0,                            // Should be 0 unless the driver is D3D_DRIVER_TYPE_SOFTWARE.
+        creationFlags,                // Set debug and Direct2D compatibility flags.
+        featureLevels,                // List of feature levels this app can support.
+        ARRAYSIZE(featureLevels),    // Size of the list above.
+        D3D11_SDK_VERSION,            // Always set this to D3D11_SDK_VERSION for Windows Store apps.
+        &device,                    // Returns the Direct3D device created.
+        &m_d3dFeatureLevel,            // Returns feature level of device created.
+        &context                    // Returns the device immediate context.
         );
 
     if (FAILED(hr))
@@ -275,7 +275,7 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
         swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         swapChainDesc.BufferCount = 2; // Use double-buffering to minimize latency.
         swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL; // All Windows Store apps must use this SwapEffect.
-        swapChainDesc.Flags = 0;	
+        swapChainDesc.Flags = 0;    
         swapChainDesc.Scaling = DXGI_SCALING_NONE;
         swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
