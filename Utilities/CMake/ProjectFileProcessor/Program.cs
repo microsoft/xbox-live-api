@@ -303,6 +303,8 @@ namespace ProjectFileProcessor
             string filteredFile = inputFile.Replace(rootFolder, @"$(MSBuildThisFileDirectory)..\..\");
             filteredFile = filteredFile.Replace(" Condition=\"'$(Configuration)|$(Platform)'=='Debug|Win32'\"", "");
             filteredFile = filteredFile.Replace(@"..\..\Utilities\CMake\build\", "");
+            filteredFile = filteredFile.Replace("\"  />", "\" />");
+
             return filteredFile;
         }
 
