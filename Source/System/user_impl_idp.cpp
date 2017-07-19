@@ -124,7 +124,19 @@ user_impl_idp::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
                         // if refresh fails, return the error.
                         if (refreshResult.err())
                         {
-                            return xbox_live_result<sign_in_result>(refreshResult.err(), refreshResult.err_message());
+                            //if it's silent pass, give user interaction required.
+                            if (!showUI)
+                            {
+                                return xbox_live_result<sign_in_result>(sign_in_status::user_interaction_required);
+                            }
+                            else
+                            {
+                                return xbox_live_result<sign_in_result>(refreshResult.err(), refreshResult.err_message());
+                            }
+                        }
+                        else if (refreshResult.payload().xbox_user_id().empty())
+                        {
+                            return xbox_live_result<sign_in_result>(convert_web_token_request_status(refreshResult.payload().token_request_result()));
                         }
                     }
                 }
@@ -405,16 +417,8 @@ user_impl_idp::convert_web_token_request_result(
         std::stringstream msg;
         msg << "Provider error: " << providerErrorMsg << ", Error Code: 0x" << std::hex << tokenResult->ResponseError->ErrorCode;
 
-        // Check if it's a known error code
         std::error_code error = xbox_live_error_code(tokenResult->ResponseError->ErrorCode);
-        if (error == xbox_live_error_condition::auth || error == xbox_live_error_condition::network)
-        {
-            return xbox_live_result<token_and_signature_result>(error, msg.str());
-        }
-        else
-        {
-            return xbox_live_result<token_and_signature_result>(xbox_live_error_code::auth_unknown_error, msg.str());
-        }
+        return xbox_live_result<token_and_signature_result>(error, msg.str());
     }
     else
     {
@@ -579,10 +583,16 @@ void user_impl_idp::on_system_user_removed(Windows::System::UserWatcher ^sender,
     {
         std::lock_guard<std::mutex> lock(s_trackingUsersLock.get());
         auto user = s_trackingUsers.find(args->User->NonRoamableId->Data());
-        signOutUser = user->second;
+        if (user != s_trackingUsers.end())
+        {
+            signOutUser = user->second;
+        }
     }
 
-    signOutUser->user_signed_out();
+    if (signOutUser != nullptr)
+    {
+        signOutUser->user_signed_out();
+    }
 }
 
 bool user_impl_idp::is_multi_user_application()

@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name='38133JasonSandlin.Social-XboxLiveSDKSample' Version="1.1.0.0" Publisher='CN=21A176D6-65FC-40A6-A44A-7DC730DA0070' />
+  <Identity Name='41336MicrosoftATG.XBLCreatorsSampleSocial' Version="1.1.0.0" Publisher='CN=A4954634-DF4B-47C7-AB70-D3215D246AF1' />
   <mp:PhoneIdentity PhoneProductId="997b70fc-d78e-48b7-ac75-4e3ed52d945a" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>Xbox LIVE SDK Sample - Social</DisplayName>
-    <PublisherDisplayName>Microsoft</PublisherDisplayName>
+    <PublisherDisplayName>Placeholder_7406</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>

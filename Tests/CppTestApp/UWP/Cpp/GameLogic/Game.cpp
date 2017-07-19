@@ -37,6 +37,7 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 void Game::RegisterInputKeys()
 {
     m_input->RegisterKey(Windows::System::VirtualKey::S, ButtonPress::SignIn);
+    m_input->RegisterKey(Windows::System::VirtualKey::GamepadA, ButtonPress::SignIn);
     m_input->RegisterKey(Windows::System::VirtualKey::Number1, ButtonPress::ToggleSocialGroup1);
     m_input->RegisterKey(Windows::System::VirtualKey::Number2, ButtonPress::ToggleSocialGroup2);
     m_input->RegisterKey(Windows::System::VirtualKey::Number3, ButtonPress::ToggleSocialGroup3);

@@ -926,9 +926,6 @@
     <ClInclude Include="..\..\Source\Shared\Logger\custom_output.h">
       <Filter>Shared\Logger</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Shared\Debug\perf_tester.h">
-      <Filter>Shared\Debug</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Shared\logger\etw_output.h">
       <Filter>Shared\Logger</Filter>
     </ClInclude>
@@ -943,6 +940,12 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Shared\call_buffer_timer.h">
       <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\xbox_cll.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\perf_tester.h">
+      <Filter>C++ Public Includes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -726,6 +726,9 @@
     <ClCompile Include="..\..\Source\Services\Stats\Manager\leaderboard_result_event_args.cpp">
       <Filter>C++ Source\Stats</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Misc\UWP\title_callable_ui.cpp">
+      <Filter>C++ Source\Misc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.h">
@@ -940,6 +943,12 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Shared\call_buffer_timer.h">
       <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\perf_tester.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\title_callable_ui.h">
+      <Filter>C++ Public Includes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

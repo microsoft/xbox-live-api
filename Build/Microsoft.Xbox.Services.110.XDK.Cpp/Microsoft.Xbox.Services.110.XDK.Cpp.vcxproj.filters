@@ -914,9 +914,6 @@
     <ClInclude Include="..\..\Source\Shared\logger\log.h">
       <Filter>Shared\logger</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Services\Misc\notification_service.h">
-      <Filter>C++ Source\Misc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Shared\initiator.h">
       <Filter>Shared</Filter>
     </ClInclude>
@@ -938,5 +935,24 @@
     <ClInclude Include="..\..\Include\xsapi\stats_manager.h">
       <Filter>C++ Public Includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\perf_tester.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\xbox_cll.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\Logger\ERA_ETW.h">
+      <Filter>Shared\logger</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\Source\Shared\Logger\era_etw.rc">
+      <Filter>Shared\logger</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Source\Shared\Logger\ERA_ETW.man">
+      <Filter>Shared\logger</Filter>
+    </None>
   </ItemGroup>
 </Project>

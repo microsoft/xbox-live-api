@@ -141,23 +141,6 @@ typedef void* user_creation_context;
 typedef  Windows::Xbox::System::User^ xbox_live_user_t;
 #endif
 
-
-#if UWP_API
-    extern bool g_is_xbox_live_creators_sdk;
-    #if XSAPI_CPP
-        // The same C++ binary is shared to titles with and without XBOX_LIVE_CREATORS_SDK defined
-        // XSAPI uses an external bool that will be defined at the time of when the title includes this header
-        #if !defined(XSAPI_BUILD)
-            #if defined(XBOX_LIVE_CREATORS_SDK)
-                bool g_is_xbox_live_creators_sdk = true;
-            #else
-                bool g_is_xbox_live_creators_sdk = false;
-            #endif
-        #endif
-    #endif
-#endif
-
-
 #if defined(XSAPI_CPPWINRT)
 #if TV_API
 inline Windows::Xbox::System::User^ convert_user_to_cppcx(_In_ const winrt::Windows::Xbox::System::User& user)
