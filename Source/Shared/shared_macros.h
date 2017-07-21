@@ -27,6 +27,7 @@
 #define THROW_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(x) { auto y = x; if ( y.empty() ) { throw std::invalid_argument(""); } }
 #define RETURN_TASK_CPP_IF_ERR(x, type) if ( x.err() ) { return pplx::task_from_result(xbox::services::xbox_live_result<type>(x.err(), x.err_message())); }
 #define RETURN_TASK_CPP_IF(x, type, message) { if ( x ) { return pplx::task_from_result(xbox::services::xbox_live_result<type>(xbox_live_error_code::logic_error, message)); } }
+#define RETURN_CPP_IF_ERR(x, type) if ( x.err() ) { return xbox::services::xbox_live_result<type>(x.err(), x.err_message()); }
 #define RETURN_CPP_IF(x, type, errc, message) { if ( x ) { return xbox::services::xbox_live_result<type>(errc, message); } }
 
 #define ASSERT_CPP_INVALIDARGUMENT_IF_NULL(x) XSAPI_ASSERT(x != nullptr);

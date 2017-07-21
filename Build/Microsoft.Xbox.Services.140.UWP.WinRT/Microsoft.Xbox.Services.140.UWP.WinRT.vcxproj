@@ -108,6 +108,8 @@
       $(ProjectDir)\..\..\Source\Services\Privacy\WinRT;
       $(ProjectDir)\..\..\Source\Services\Events;
       $(ProjectDir)\..\..\Source\Services\Events\WinRT;
+      $(ProjectDir)\..\..\Source\Services\Clubs;
+      $(ProjectDir)\..\..\Source\Services\Clubs\WinRT;
       %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>false</TreatWarningAsError>
     </ClCompile>
@@ -151,6 +153,25 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\Reward_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\TimeWindow_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\TitleAssociation_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubActionSettings_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubPresenceCounts_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubProfile_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubRecommendation_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubRoleRecord_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubRole_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubRoster_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubSearchAutoComplete_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubSearchFacetResult_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubSetting_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubType_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubUserPresenceRecord_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubUserPresence_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\Club_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubsOwnedResult_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubsSearchResult_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubsService_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_serializers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\XboxLiveContext_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\pch.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\pch_common.h" />
@@ -422,6 +443,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\system_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\achievements.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\clubs.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\contextual_search_service.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\errors.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\events.h" />
@@ -452,24 +474,52 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_context.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_context_settings.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_service_call_routed_event_args.h" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_result.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementProgression_WinRT.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementService_WinRT.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\Achievement_WinRT.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementsResult_WinRT.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\MediaAsset_WinRT.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\Reward_WinRT.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\TimeWindow_WinRT.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_media_asset.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_progression.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_requirement.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_reward.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_service.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_time_window.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_title_association.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\XboxLiveContext_Desktop.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\XboxLiveContext_WinRT.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_result.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementProgression_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementService_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\Achievement_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementsResult_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\MediaAsset_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\Reward_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\TimeWindow_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_media_asset.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_progression.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_requirement.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_reward.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_service.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_time_window.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_title_association.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubActionSettings_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubPresenceCounts_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubProfile_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubRecommendation_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubRoleRecord_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubRoster_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubSearchAutoComplete_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubSearchFacetResult_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubSetting_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubUserPresenceRecord_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\Club_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubsOwnedResult_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubsSearchResult_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubsService_WinRT.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_action_settings.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_presence_counts.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_profile.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_role_record.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_roster.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_search_auto_complete.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_search_facet_result.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_user_presence_record.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_owned_result.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_search_result.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_serializers.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\XboxLiveContext_Desktop.cpp"  />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\XboxLiveContext_WinRT.cpp"  />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\pch.cpp" >
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>

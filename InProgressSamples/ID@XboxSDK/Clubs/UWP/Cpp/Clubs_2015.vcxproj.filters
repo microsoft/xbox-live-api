@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Assets">
+      <UniqueIdentifier>f0539363-cb47-4e66-9231-72f4efdae97a</UniqueIdentifier>
+      <Extensions>bmp;dds;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
+    </Filter>
+    <Filter Include="ATG Tool Kit">
+      <UniqueIdentifier>{55f4c930-67b6-4760-9fdb-c1c23a04fc3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{7b917894-1ea3-4db6-9bb5-e611f07b1db5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LiveResources.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceResources.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="StepTimer.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Kits\ATGTK\ATGColors.h">
+      <Filter>ATG Tool Kit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Kits\ATGTK\ControllerFont.h">
+      <Filter>ATG Tool Kit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Kits\ATGTK\CSVReader.h">
+      <Filter>ATG Tool Kit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Kits\ATGTK\SampleGUI.h">
+      <Filter>ATG Tool Kit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Kits\ATGTK\TextConsole.h">
+      <Filter>ATG Tool Kit</Filter>
+    </ClInclude>
+    <ClInclude Include="Sample.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="ClubRepeater.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Include\xsapi\services.h" />
+    <ClInclude Include="ItemRepeater.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="LiveResources.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="DeviceResources.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Input.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Kits\ATGTK\SampleGUI.cpp">
+      <Filter>ATG Tool Kit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Kits\ATGTK\TextConsole.cpp">
+      <Filter>ATG Tool Kit</Filter>
+    </ClCompile>
+    <ClCompile Include="Sample.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="ClubRepeater.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="ClubsIntegration.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Logo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SmallLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\WideLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\GamerPic.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Background.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\DbugLog.png">
+      <Filter>Assets</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\LiveInfoHUD.csv">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="xboxservices.config">
+      <Filter>Utils</Filter>
+    </None>
+    <None Include="Assets\SampleUI.csv">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\Kits\Media\Fonts\Courier_16.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\Kits\Media\Fonts\SegoeUI_18.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\Kits\Media\Fonts\SegoeUI_18_Bold.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\Kits\Media\Fonts\SegoeUI_18_Italic.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\Kits\Media\Fonts\SegoeUI_22.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\Kits\Media\Fonts\SegoeUI_22_Bold.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\Kits\Media\Fonts\SegoeUI_22_Italic.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\Kits\Media\Fonts\SegoeUI_36.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\Kits\Media\Fonts\SegoeUI_36_Bold.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\Kits\Media\Fonts\SegoeUI_36_Italic.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\Kits\Media\Fonts\XboxOneController.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\Kits\Media\Fonts\XboxOneControllerLegend.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\Kits\Media\Fonts\XboxOneControllerLegendSmall.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\Kits\Media\Fonts\XboxOneControllerSmall.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <Filter>Utils</Filter>
+    </AppxManifest>
+  </ItemGroup>
+</Project>

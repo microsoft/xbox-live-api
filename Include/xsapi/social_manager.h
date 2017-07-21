@@ -204,7 +204,7 @@ private:
 };
 
 /// <summary>
-/// Preferred color for the user. Set via the shell.
+/// Preferred color for the user. Set via the shell. 
 /// </summary>
 class preferred_color
 {
@@ -240,7 +240,7 @@ public:
     static xbox::services::xbox_live_result<preferred_color> _Deserialize(
         _In_ const web::json::value& json,
         _In_ std::error_code& errcOut
-        );
+    );
 
 private:
     char_t m_primaryColor[COLOR_CHAR_SIZE];

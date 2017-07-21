@@ -149,6 +149,10 @@ XboxLiveContext::Initialize()
     m_contextualSearchService = ref new ContextualSearch::ContextualSearchService(
         m_cppObj->contextual_search_service()
         );
+
+    m_clubsService = ref new Clubs::ClubsService(
+        m_cppObj->clubs_service()
+        );
 }
 
 Social::ProfileService^ 
@@ -245,6 +249,12 @@ ContextualSearch::ContextualSearchService^
 XboxLiveContext::ContextualSearchService::get()
 {
     return m_contextualSearchService;
+}
+
+Clubs::ClubsService^
+XboxLiveContext::ClubsService::get()
+{
+    return m_clubsService;
 }
 
 #if UWP_API

@@ -89,6 +89,7 @@
       $(ProjectDir)\..\..\Source\Services\Matchmaking;
       $(ProjectDir)\..\..\Source\Services\RealTimeActivity;
       $(ProjectDir)\..\..\Source\Services\GameServerPlatform;
+      $(ProjectDir)\..\..\Source\Services\Clubs;
       $(ProjectDir)\..\..\Source\Shared;
       $(ProjectDir)\..\..\Source\System;
       $(ProjectDir)\..\..\Source\;

@@ -19,6 +19,7 @@
 #endif
 #include "xsapi/multiplayer.h"
 #include "xsapi/tournaments.h"
+#include "xsapi/clubs.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 class xbox_live_context_server_impl;
@@ -208,6 +209,11 @@ public:
     /// A service for managing Rich Presence.
     /// </summary>
     _XSAPIIMP presence::presence_service& presence_service();
+
+	/// <summary>
+	/// A service for managing Title Clubs.
+	/// </summary>
+	_XSAPIIMP clubs::clubs_service& clubs_service();
 
 #if UWP_API || XSAPI_U || XSAPI_CENTENNIAL
     /// <summary>

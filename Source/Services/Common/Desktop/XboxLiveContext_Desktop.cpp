@@ -162,6 +162,12 @@ xbox_live_context::contextual_search_service()
     return m_xboxLiveContextImpl->contextual_search_service();
 }
 
+clubs::clubs_service&
+xbox_live_context::clubs_service()
+{
+    return m_xboxLiveContextImpl->clubs_service();
+}
+
 #if UWP_API || XSAPI_U
 events::events_service&
 xbox_live_context::events_service()

@@ -362,6 +362,30 @@ public:
         _In_ bool required
     );
 
+    static std::vector<string_t> extract_json_string_vector(
+        _In_ const web::json::value& json,
+        _In_ const string_t& name,
+        _Inout_ std::error_code& error,
+        _In_ bool required
+    );
+
+    static std::vector<string_t> extract_json_string_vector(
+        _In_ const web::json::value& json,
+        _In_ const string_t& name,
+        _In_ bool required
+    );
+
+    static std::vector<string_t> extract_json_string_vector(
+        _In_ const web::json::value& json,
+        _Inout_ std::error_code& error,
+        _In_ bool required
+    );
+
+    static std::vector<string_t> extract_json_string_vector(
+        _In_ const web::json::value& json,
+        _In_ bool required
+    );
+
     static int interlocked_increment(volatile long& incrementNum);
     static int interlocked_decrement(volatile long& decrementNum);
 
@@ -670,6 +694,11 @@ public:
     );
 
     static xbox::services::xbox_live_error_code convert_exception_to_xbox_live_error_code();
+
+    static string_t vector_join(
+        _In_ const std::vector<string_t>& vector,
+        _In_ string_t::value_type seperator
+    );
 
 #ifdef _WIN32
     static void convert_unix_time_to_filetime(
