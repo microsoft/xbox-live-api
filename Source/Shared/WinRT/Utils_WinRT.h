@@ -116,6 +116,20 @@ public:
         return vector;
     }
 
+    template<typename T, typename cppT>
+    static Platform::Collections::Vector<T>^ CreatePlatformVectorFromStdVectorEnum(
+        _In_ const std::vector<cppT>& cppVector
+        )
+    {
+        auto vector = ref new Platform::Collections::Vector<T>();
+        for (const auto& item : cppVector)
+        {
+            vector->Append(static_cast<T>(item));
+        }
+
+        return vector;
+    }
+
     static std::vector<string_t> CreateStdVectorStringFromPlatformVectorObj(
         _In_opt_ Windows::Foundation::Collections::IVectorView<Platform::String^>^ platformVector
         )

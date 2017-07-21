@@ -155,6 +155,91 @@ web::json::value utils::extract_json_field(
     return web::json::value::null();
 }
 
+std::vector<string_t> utils::extract_json_string_vector(
+    _In_ const web::json::value& json,
+    _In_ const string_t& name,
+    _Inout_ std::error_code& error,
+    _In_ bool required
+    )
+{
+    return extract_json_string_vector(
+        extract_json_field(json, name, error, required), 
+        error, 
+        required
+        );
+}
+
+std::vector<string_t> utils::extract_json_string_vector(
+    _In_ const web::json::value& json,
+    _In_ const string_t& name,
+    _In_ bool required
+    )
+{
+    return extract_json_string_vector(
+        extract_json_field(json, name, required),
+        required
+        );
+}
+
+std::vector<string_t> utils::extract_json_string_vector(
+    _In_ const web::json::value& json,
+    _Inout_ std::error_code& error,
+    _In_ bool required
+)
+{
+    std::vector<string_t> result;
+
+    if ((!json.is_array()) || error)
+    {
+        if (required)
+        {
+            error = xbox_live_error_code::json_error;
+        }
+
+        return result;
+    }
+
+    const web::json::array& arr(json.as_array());
+    for (const auto& string : arr)
+    {
+        if (!string.is_string())
+        {
+            if (required)
+            {
+                error = xbox_live_error_code::json_error;
+            }
+            return result;
+        }
+        result.push_back(string.as_string());
+    }
+    return result;
+}
+
+std::vector<string_t> utils::extract_json_string_vector(
+    _In_ const web::json::value& json,
+    _In_ bool required
+)
+{
+    std::vector<string_t> result;
+
+    if (!json.is_array() && !required)
+    {
+        return result;
+    }
+
+    const web::json::array& arr(json.as_array());
+    for (const auto& string : arr)
+    {
+        if (!string.is_string() && !required)
+        {
+            return result;
+        }
+        result.push_back(string.as_string());
+    }
+    return result;
+}
+
+
 web::json::value utils::json_get_value_from_string(_In_ const string_t& value)
 {
     std::error_code error;
@@ -1329,6 +1414,23 @@ utils::string_split(
     }
 
     return vSubStrings;
+}
+
+string_t utils::vector_join(
+    _In_ const std::vector<string_t>& vector,
+    _In_ string_t::value_type seperator
+    )
+{
+    stringstream_t ss;
+    
+    if (!vector.empty())
+    {
+        string_t::value_type delimiter[2] = { seperator, 0 };
+        std::copy(vector.begin(), vector.end() - 1, std::ostream_iterator<string_t, string_t::value_type>(ss, delimiter));
+        ss << vector.back();
+    }
+
+    return ss.str();
 }
 
 string_t utils::create_xboxlive_endpoint(

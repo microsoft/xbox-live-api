@@ -5,5 +5,7 @@
 	path = External/cppwinrt
 	url = https://github.com/Microsoft/cppwinrt.git
 [submodule "InProgressSamples/Kits/DirectXTK"]
+
 	path = InProgressSamples/Kits/DirectXTK
+	
 	url = https://github.com/jasonsandlin/DirectXTK.git

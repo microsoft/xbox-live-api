@@ -98,6 +98,8 @@
       $(ProjectDir)..\..\Source\Services\Events;
       $(ProjectDir)..\..\Source\Services\Events\WinRT;
       $(ProjectDir)..\..\Source\Services\Stats\Manager\WinRT;
+      $(ProjectDir)..\..\Source\Services\Clubs;
+      $(ProjectDir)..\..\Source\Services\Clubs\WinRT;
       $(ProjectDir)..\..\Include;
       $(ProjectDir)..\..\Tests\UnitTests;
       $(ProjectDir)..\..\Tests\UnitTests\Mocks;

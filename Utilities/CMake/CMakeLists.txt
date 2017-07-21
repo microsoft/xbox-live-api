@@ -80,6 +80,7 @@ include_directories(
     $(ProjectDir)../../Source/Services/Misc
     $(ProjectDir)../../Source/Services/Social/Manager
     $(ProjectDir)../../Source/Services/RealTimeActivity
+    $(ProjectDir)../../Source/Services/Clubs
     $(ProjectDir)../../Source/Shared
     $(ProjectDir)../../Source/Shared/WinRT
     $(ProjectDir)../../include
@@ -120,6 +121,7 @@ set(Public_Source_Files
     ../../include/xsapi/tournaments.h
     ../../include/xsapi/xbox_live_app_config.h
     ../../include/xsapi/xbox_live_context_settings.h
+    ../../include/xsapi/clubs.h
     )
 	
 message(STATUS "Test")
@@ -549,6 +551,25 @@ set(Marketplace_Source_Files
 	../../Source/Services/Marketplace/inventory_items_result.cpp
 	../../Source/Services/Marketplace/inventory_service.cpp
 	)
+    
+set(Clubs_Source_Files
+    ../../Source/Services/Clubs/club.cpp
+    ../../Source/Services/Clubs/club_action_settings.cpp
+    ../../Source/Services/Clubs/club_presence_counts.cpp
+    ../../Source/Services/Clubs/club_profile.cpp
+    ../../Source/Services/Clubs/club_role_record.cpp
+    ../../Source/Services/Clubs/club_roster.cpp
+    ../../Source/Services/Clubs/club_search_auto_complete.cpp
+    ../../Source/Services/Clubs/club_search_facet_result.cpp
+    ../../Source/Services/Clubs/club_user_presence_record.cpp
+    ../../Source/Services/Clubs/clubs_owned_result.cpp
+    ../../Source/Services/Clubs/clubs_search_result.cpp
+    ../../Source/Services/Clubs/clubs_serializers.cpp
+    ../../Source/Services/Clubs/clubs_serializers.h
+    ../../Source/Services/Clubs/clubs_service.cpp
+    ../../Source/Services/Clubs/clubs_service_impl.cpp
+    ../../Source/Services/Clubs/clubs_service_impl.h
+    )
 	
 set(EntertainmentProfile_WinRT_Source_Files
 	../../Source/Services/EntertainmentProfile/WinRT/EntertainmentProfileListContainsItemResult_WinRT.cpp
@@ -1057,6 +1078,40 @@ set(System_WinRT_Source_Files
 	../../Source/System/WinRT/User_WinRT.cpp
 	../../Source/System/WinRT/User_WinRT.h
 	)
+    
+set(Clubs_WinRT_Source_Files
+    ../../Source/Services/Clubs/WinRT/Club_WinRT.cpp
+    ../../Source/Services/Clubs/WinRT/Club_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubActionSettings_WinRT.cpp
+    ../../Source/Services/Clubs/WinRT/ClubActionSettings_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubPresenceCounts_WinRT.cpp
+    ../../Source/Services/Clubs/WinRT/ClubPresenceCounts_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubProfile_WinRT.cpp
+    ../../Source/Services/Clubs/WinRT/ClubProfile_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubRecommendation_WinRT.cpp
+    ../../Source/Services/Clubs/WinRT/ClubRecommendation_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubRole_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubRoleRecord_WinRT.cpp
+    ../../Source/Services/Clubs/WinRT/ClubRoleRecord_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubRoster_WinRT.cpp
+    ../../Source/Services/Clubs/WinRT/ClubRoster_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubSearchAutoComplete_WinRT.cpp
+    ../../Source/Services/Clubs/WinRT/ClubSearchAutoComplete_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubSearchFacetResult_WinRT.cpp
+    ../../Source/Services/Clubs/WinRT/ClubSearchFacetResult_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubSetting_WinRT.cpp
+    ../../Source/Services/Clubs/WinRT/ClubSetting_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubsOwnedResult_WinRT.cpp
+    ../../Source/Services/Clubs/WinRT/ClubsOwnedResult_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubsSearchResult_WinRT.cpp
+    ../../Source/Services/Clubs/WinRT/ClubsSearchResult_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubsService_WinRT.cpp
+    ../../Source/Services/Clubs/WinRT/ClubsService_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubType_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubUserPresence_WinRT.h
+    ../../Source/Services/Clubs/WinRT/ClubUserPresenceRecord_WinRT.cpp
+    ../../Source/Services/Clubs/WinRT/ClubUserPresenceRecord_WinRT.h
+    )
 	
 set(Ship_Source_Files
     ../../Source/Services/Common/Desktop/pch.cpp
@@ -1091,6 +1146,7 @@ else()
 	source_group("C++ Source\\Services\\Multiplayer" FILES ${Multiplayer_Source_Files})
 	source_group("C++ Source\\Services\\Multiplayer\\Manager" FILES ${Multiplayer_Manager_Source_Files})
 	source_group("C++ Source\\Services\\Tournaments" FILES ${Tournaments_Source_Files})
+    source_group("C++ Source\\Services\\Clubs" FILES ${Clubs_Source_Files})
 
 	if( XDK OR UNITTEST )
 		message(STATUS "XDK source group")
@@ -1143,8 +1199,8 @@ else()
 		source_group("C++ Source\\Services\\Stats\\WinRT" FILES ${Stats_WinRT_Source_Files})
 		source_group("C++ Source\\Services\\TitleStorage\\WinRT" FILES ${TitleStorage_WinRT_Source_Files})
 		source_group("C++ Source\\Services\\Tournaments\\WinRT" FILES ${Tournaments_WinRT_Source_Files})
+        source_group("C++ Source\\Services\\Clubs\\WinRT" FILES ${Clubs_WinRT_Source_Files})
 	endif()
-
 
 	set( SOURCE_FILES 
 		${Common_Source_Files}
@@ -1168,6 +1224,7 @@ else()
 		${Multiplayer_Source_Files}
 		${Multiplayer_Manager_Source_Files}
 		${Tournaments_Source_Files}
+        ${Clubs_Source_Files}
 		)
 
 	if( WINRT OR UNITTEST )
@@ -1192,6 +1249,7 @@ else()
 			${TitleStorage_WinRT_Source_Files}
 			${Tournaments_WinRT_Source_Files}
 			${Shared_WinRT_Source_Files}
+            ${Clubs_WinRT_Source_Files}
 			)
 	endif()
 
@@ -1309,6 +1367,7 @@ set(UnitTests_Source_Files_Tests
 	../../Tests/UnitTests/Tests/Services/RtaTestHelper.h
 	../../Tests/UnitTests/Tests/Services/SocialManagerHelper.h
 	../../Tests/UnitTests/Tests/Services/StatsManagerHelper.h
+    ../../Tests/UnitTests/Tests/Services/ClubsTests.cpp
 	)
 
 set(Taef_UnitTests_Source_Files

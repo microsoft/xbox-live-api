@@ -20,6 +20,7 @@
 #include "xsapi/title_storage.h"
 #include "xsapi/privacy.h"
 #include "xsapi/profile.h"
+#include "xsapi/clubs.h"
 
 #if !defined(XBOX_LIVE_CREATORS_SDK)
 #include "xsapi/events.h"

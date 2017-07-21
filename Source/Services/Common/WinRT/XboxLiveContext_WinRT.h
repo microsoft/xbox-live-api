@@ -24,6 +24,7 @@
 #include "StringService_WinRT.h"
 #include "EventsService_WinRT.h"
 #include "ContextualSearchService_WinRT.h"
+#include "ClubsService_WinRT.h"
 #if TV_API || UNIT_TEST_SERVICES
 #include "CatalogService_WinRT.h"
 #include "InventoryService_WinRT.h"
@@ -142,6 +143,11 @@ public:
     /// </summary>
     property ContextualSearch::ContextualSearchService^ ContextualSearchService { ContextualSearch::ContextualSearchService^ get(); }
 
+    /// <summary>
+    /// Returns object containing access methods to the title clubs service.
+    /// </summary>
+    property Clubs::ClubsService^ ClubsService { Clubs::ClubsService^ get(); }
+
 #if UWP_API
     /// <summary>
     /// Returns object containing access methods to the events service.
@@ -201,6 +207,7 @@ private:
     Privacy::PrivacyService^ m_privacyService;
     ContextualSearch::ContextualSearchService^ m_contextualSearchService;
     System::StringService^ m_stringService;
+    Clubs::ClubsService^ m_clubsService;
 #if UWP_API
     Events::EventsService^ m_eventsService;
 #endif
