@@ -413,7 +413,7 @@ xbox_live_result<club> clubs_serializers::_deserialize_club_from_clubhub_club(
     club.m_followersCount = utils::extract_json_int(clubJson, _T("followersCount"), errc);
     club.m_presenceCount = utils::extract_json_int(clubJson, _T("clubPresenceCount"), errc);
     club.m_presenceTodayCount = utils::extract_json_int(clubJson, _T("clubPresenceTodayCount"), errc);
-    club.m_memebersCount = utils::extract_json_int(clubJson, _T("membersCount"), errc);
+    club.m_membersCount = utils::extract_json_int(clubJson, _T("membersCount"), errc);
     club.m_moderatorsCount = utils::extract_json_int(clubJson, _T("moderatorsCount"), errc);
     club.m_recommendedCount = utils::extract_json_int(clubJson, _T("recommendedCount"), errc);
     club.m_requestedToJoinCount = utils::extract_json_int(clubJson, _T("requestedToJoinCount"), errc);

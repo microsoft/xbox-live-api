@@ -52,19 +52,6 @@ IVectorView<String^>^ ClubStringMultiSetting::AllowedValues::get()
 ClubBooleanSetting::ClubBooleanSetting(_In_ xbox::services::clubs::club_setting<bool> cppObj)
     : m_cppObj(std::move(cppObj))
 {
-    if (m_cppObj.allowed_values().size() > 0)
-    {
-        m_allowedValues = ref new Vector<bool>();
-        for (auto val : m_cppObj.allowed_values())
-        {
-            m_allowedValues->Append(val);
-        }
-    }
-}
-
-IVectorView<bool>^ ClubBooleanSetting::AllowedValues::get()
-{
-    return m_allowedValues ? m_allowedValues->GetView() : nullptr;
 }
 
 ClubActionSetting::ClubActionSetting(_In_ xbox::services::clubs::club_action_setting cppObj)

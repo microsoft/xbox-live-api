@@ -153,7 +153,6 @@ public:
     void VerifyClubProfileBooleanSetting(ClubBooleanSetting^ setting, json::value& json)
     {
         VerifyBool(setting->Value, json[_T("value")]);
-        VerifyArray(&VerifyBool, setting->AllowedValues, json[_T("allowedValues")]);
         VerifyBool(setting->CanViewerChangeSetting, json[_T("canViewerChangeSetting")]);
     }
 

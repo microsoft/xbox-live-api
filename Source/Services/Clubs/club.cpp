@@ -100,7 +100,7 @@ uint32 club::presence_today_count() const
 
 uint32 club::members_count() const
 {
-    return m_memebersCount;
+    return m_membersCount;
 }
 
 uint32 club::moderators_count() const

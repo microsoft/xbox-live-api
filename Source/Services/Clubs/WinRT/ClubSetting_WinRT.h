@@ -65,12 +65,6 @@ public:
     /// <summary>Current value of the setting</summary>
     DEFINE_PROP_GET_OBJ(Value, value, bool);
 
-    /// <summary>List of possible values for the setting. Will be nullptr if the allowed values have not been configured.</summary>
-    property Windows::Foundation::Collections::IVectorView<bool>^ AllowedValues
-    {
-        Windows::Foundation::Collections::IVectorView<bool>^ get();
-    }
-
     /// <summary>Can the user viewing the setting change it</summary>
     DEFINE_PROP_GET_OBJ(CanViewerChangeSetting, can_viewer_change_setting, bool);
 
