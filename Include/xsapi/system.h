@@ -431,6 +431,21 @@ private:
     bool m_newAccount;
 };
 
+#if XSAPI_U
+/// <summary>
+/// Optional configuration for sign in process
+/// </summary>
+class xbox_sign_in_options
+{
+public:
+    void setLogInButtonText(const string_t& buttonText) { m_logInButtonText = buttonText; }
+    const string_t& getLogInButtonText() { return m_logInButtonText; }
+
+private:
+    string_t m_logInButtonText;
+};
+#endif
+
 /// <summary>
 /// Represents a player that is associated with a device or a controller.
 /// </summary>
@@ -457,6 +472,22 @@ public:
     /// signin_silently(Platform::Object^ coreDispatcherObj) version instead.
     /// </remarks>
     _XSAPIIMP pplx::task<xbox_live_result<sign_in_result>> signin();
+
+#if XSAPI_U
+    /// <summary>
+    /// Attempt to sign a player into their Xbox Live account. This call may bring up
+    /// a sign-in user interface that will use customization overrides from the supplied xbox_sign_in_options object.
+    /// </summary>
+    /// <returns>
+    /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
+    /// </returns>
+    /// <remarks>
+    /// You should only call this method if silent sign-in indicates that user interaction is required.
+    /// For UWA, this API is to be called from UI thread, if you're calling from non-UI thread or not sure, please use 
+    /// signin_silently(Platform::Object^ coreDispatcherObj) version instead.
+    /// </remarks>
+    _XSAPIIMP pplx::task<xbox_live_result<sign_in_result>> signin(_In_ std::shared_ptr<xbox_sign_in_options> options);
+#endif
 
     /// <summary>
     /// Attempt to silently sign a player into their Xbox Live account.

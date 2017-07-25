@@ -53,6 +53,10 @@ public:
     std::shared_ptr<auth_config> get_auth_config() { return m_authConfig; }
     const user_creation_context creation_context() { return m_creationContext;  }
 
+#if XSAPI_U
+    void set_sign_in_options(std::shared_ptr<xbox_sign_in_options> options) { m_signInOptions = options; }
+#endif
+
 #if UNIT_TEST_SERVICES
     void _Set_xbox_user_id(const string_t& xboxUserId) { m_xboxUserId = xboxUserId; }
 #endif
@@ -133,6 +137,7 @@ protected:
     string_t m_titleTelemetrySessionId;
     bool m_isSignedIn;
     user_creation_context m_creationContext;
+    std::shared_ptr<xbox_sign_in_options> m_signInOptions;
     std::weak_ptr<system::xbox_live_user> m_weakUserPtr;
 
     std::shared_ptr<auth_config> m_authConfig;
