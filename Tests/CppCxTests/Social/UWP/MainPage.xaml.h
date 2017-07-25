@@ -14,13 +14,14 @@
 
 namespace Social_CppCx_140
 {
-	/// <summary>
-	/// An empty page that can be used on its own or navigated to within a Frame.
-	/// </summary>
-	public ref class MainPage sealed
-	{
-	public:
-		MainPage();
+    /// <summary>
+    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// </summary>
+    public ref class MainPage sealed
+    {
+    public:
+        MainPage();
+        void OnTick(Object^ sender, Object^ e);
 
     internal:
         void ClearLogs();
@@ -29,6 +30,8 @@ namespace Social_CppCx_140
         property Windows::UI::Core::CoreDispatcher^ CoreDispatcher;
 
     private:
+        void StartTimerAndRegisterHandler();
+
         void ScenarioListBox_DoubleTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::DoubleTappedRoutedEventArgs^ e);
         void RunButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
         void RunAllButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
@@ -44,5 +47,5 @@ namespace Social_CppCx_140
         Microsoft::Xbox::Services::System::XboxLiveUser^ m_user;
         Microsoft::Xbox::Services::XboxLiveContext^ m_xboxLiveContext;
         Scenarios m_scenarios;
-	};
+    };
 }
