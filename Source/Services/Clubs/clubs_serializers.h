@@ -132,12 +132,12 @@ xbox::services::xbox_live_result<T> clubs_serializers::generate_xbox_live_result
         auto errorMessageFromJsonResult = deserialize_error_description(response->response_body_json());
         if (!errorMessageFromJsonResult.err())
         {
-            result._Set_err_message(
+            deserializationResult._Set_err_message(
                 utils::convert_wide_string_to_standard_string(errorMessageFromJsonResult.payload()));
         }
         else
         {
-            result._Set_err_message(response->err_message());
+            deserializationResult._Set_err_message(response->err_message());
         }
 #else
         deserializationResult._Set_err_message(response->err_message());
