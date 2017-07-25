@@ -27,6 +27,10 @@ using namespace Microsoft::Xbox::Services::Social;
 using namespace Microsoft::Xbox::Services::System;
 using namespace Microsoft::Xbox::Services::Presence;
 
+using namespace Microsoft::Xbox::Services::Statistics;
+using namespace Microsoft::Xbox::Services::Statistics::Manager;
+using namespace Microsoft::Xbox::Services::Leaderboard;
+
 std::mutex g_blockOfTextLock;
 
 void Scenarios::Active_RealTimeActivity(_In_ MainPage^ mainPage, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext)
@@ -37,22 +41,22 @@ void Scenarios::Active_RealTimeActivity(_In_ MainPage^ mainPage, Microsoft::Xbox
 
     xboxLiveContext->PresenceService->SubscribeToDevicePresenceChange(
         xboxLiveContext->User->XboxUserId
-        );
+    );
 
     xboxLiveContext->PresenceService->SubscribeToTitlePresenceChange(
-		xboxLiveContext->User->XboxUserId,
+        xboxLiveContext->User->XboxUserId,
         0x5D2A2BCA
-        );
+    );
 
     EventHandler<DevicePresenceChangeEventArgs^>^ devicePresenceChangeEvent = ref new EventHandler<DevicePresenceChangeEventArgs^>(
-    [this, mainPage](Platform::Object^, DevicePresenceChangeEventArgs^ eventArgs)
+        [this, mainPage](Platform::Object^, DevicePresenceChangeEventArgs^ eventArgs)
     {
         OnDevicePresenceChange(mainPage, eventArgs);
     });
     m_devicePresenceChangeEventToken = xboxLiveContext->PresenceService->DevicePresenceChanged += devicePresenceChangeEvent;
 
     EventHandler<TitlePresenceChangeEventArgs^>^ titlePresenceChangeEvent = ref new EventHandler<TitlePresenceChangeEventArgs^>(
-    [this, mainPage](Platform::Object^, TitlePresenceChangeEventArgs^ eventArgs)
+        [this, mainPage](Platform::Object^, TitlePresenceChangeEventArgs^ eventArgs)
     {
         OnTitlePresenceChange(mainPage, eventArgs);
     });
@@ -70,7 +74,7 @@ void Scenarios::Scenario_GetUserProfileAsync(_In_ MainPage^ ui, Microsoft::Xbox:
 
     auto asyncOp = xboxLiveContext->ProfileService->GetUserProfileAsync(xboxLiveContext->User->XboxUserId);
     create_task(asyncOp)
-    .then([this, ui](task<XboxUserProfile^> resultTask)
+        .then([this, ui](task<XboxUserProfile^> resultTask)
     {
         try
         {
@@ -105,10 +109,10 @@ void Scenarios::Scenario_GetSocialRelationshipsAsync(_In_ MainPage^ ui, Microsof
 {
     ui->Log(L"Calling get_social_relationships...");
 
-    PresenceData^ presenceData = ref new PresenceData(L"12200100-88da-4d8b-af88-e38f5d2a2bca", L"rpdemo" );
+    PresenceData^ presenceData = ref new PresenceData(L"12200100-88da-4d8b-af88-e38f5d2a2bca", L"rpdemo");
     auto pAsyncOp2 = xboxLiveContext->PresenceService->SetPresenceAsync(true, presenceData);
     create_task(pAsyncOp2)
-    .then([this,ui](task<void> resultTask)
+        .then([this, ui](task<void> resultTask)
     {
         try
         {
@@ -116,7 +120,7 @@ void Scenarios::Scenario_GetSocialRelationshipsAsync(_In_ MainPage^ ui, Microsof
             ui->LogFormat(L"SetPresenceAsync succeeded");
         }
         catch (Platform::Exception^ ex)
-        {    
+        {
             ui->LogFormat(L"SetPresenceAsync failed:  0x%0.8x", ex->HResult);
         }
     });
@@ -131,7 +135,7 @@ void Scenarios::Scenario_GetSocialRelationshipsAsync(_In_ MainPage^ ui, Microsof
         SocialRelationship::All,
         startIndex,
         maxItems
-        );
+    );
 
     create_task(pAsyncOp)
         .then([this, maxItems, ui](task<XboxSocialRelationshipResult^> resultTask)
@@ -160,14 +164,50 @@ void Scenarios::Scenario_GetSocialRelationshipsAsync(_In_ MainPage^ ui, Microsof
             }
         }
         catch (Platform::Exception^ ex)
-        {    
+        {
             ui->LogFormat(L"get_social_relationships failed:  0x%0.8x", ex->HResult);
         }
     });
 }
 
-void
-Scenarios::OnDevicePresenceChange(_In_ MainPage^ ui, _In_ DevicePresenceChangeEventArgs^ args)
+void Scenarios::Scenario_WriteStat(_In_ MainPage^ ui, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext)
+{
+    StatisticManager^ mgr = StatisticManager::SingletonInstance;
+    if (mgr == nullptr) return;
+
+    String^ statName = L"HighScore";
+    long long statValue = 1001;
+
+    mgr->SetStatisticIntegerData(xboxLiveContext->User, statName, statValue);
+    mgr->RequestFlushToService(xboxLiveContext->User);
+
+    ui->LogFormat(L"WriteStat: %s : %s", statName->Data(), statValue.ToString()->Data());
+}
+
+void Scenarios::Scenario_ReadStat(_In_ MainPage^ ui, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext)
+{
+    static bool once = false;
+
+    StatisticManager^ mgr = StatisticManager::SingletonInstance;
+    if (mgr == nullptr) return;
+
+    if (!once)
+    {
+        once = true;
+        xboxLiveContext->Settings->ServiceCallRouted += ref new EventHandler<XboxServiceCallRoutedEventArgs^>([=](Object^, XboxServiceCallRoutedEventArgs^ args)
+        {
+            ui->LogFormat(L"[URL]: %s %s", args->HttpMethod->Data(), args->Url->AbsoluteUri->Data());
+            ui->LogFormat(L"[Response]: %s %s", args->HttpStatus.ToString()->Data(), args->ResponseBody->Data());
+        });
+    }
+
+    String^ statName = L"HighScore";
+    LeaderboardQuery^ Query = ref new LeaderboardQuery();
+
+    mgr->GetLeaderboard(xboxLiveContext->User, statName, Query);
+}
+
+void Scenarios::OnDevicePresenceChange(_In_ MainPage^ ui, _In_ DevicePresenceChangeEventArgs^ args)
 {
     std::lock_guard<std::mutex> lockGuard(g_blockOfTextLock);
 
@@ -179,8 +219,7 @@ Scenarios::OnDevicePresenceChange(_In_ MainPage^ ui, _In_ DevicePresenceChangeEv
     ui->LogFormat(L"Is user logged in: %S", args->IsUserLoggedOnDevice ? L"True" : L"False");
 }
 
-void
-Scenarios::OnTitlePresenceChange(_In_ MainPage^ ui, _In_ TitlePresenceChangeEventArgs^ args)
+void Scenarios::OnTitlePresenceChange(_In_ MainPage^ ui, _In_ TitlePresenceChangeEventArgs^ args)
 {
     std::lock_guard<std::mutex> lockGuard(g_blockOfTextLock);
 
