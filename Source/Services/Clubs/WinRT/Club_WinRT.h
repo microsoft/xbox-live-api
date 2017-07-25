@@ -169,7 +169,7 @@ public:
         _In_ Platform::String^ xuid
         );
 
-    /// <summary>Gets information about club member presence.</summary
+    /// <summary>Gets information about club member presence.</summary>
     /// <returns>A ClubPresenceCounts object indicating the number of club members present currently/today</returns>
     /// <remarks>
     /// Calls V1 GET clubpresence.xboxlive.com/clubs/{clubId}/users/count

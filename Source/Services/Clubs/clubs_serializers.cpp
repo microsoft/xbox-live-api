@@ -459,12 +459,12 @@ xbox_live_result<club> clubs_serializers::_deserialize_club_from_clubhub_club(
         }
 
         // profile actionSetting
-        auto profileJson = utils::extract_json_field(settingsJson, _T("profile"), errc, false);
-        if (!profileJson.is_null())
+        auto profileActionSettingJson = utils::extract_json_field(settingsJson, _T("profile"), errc, false);
+        if (!profileActionSettingJson.is_null())
         {
-            club.m_actionSettings.m_updateProfileSetting = _deserialize_club_action_setting(profileJson, _T("update")).payload();
-            club.m_actionSettings.m_deleteProfileSetting = _deserialize_club_action_setting(profileJson, _T("delete")).payload();
-            club.m_actionSettings.m_viewProfileSetting = _deserialize_club_action_setting(profileJson, _T("view")).payload();
+            club.m_actionSettings.m_updateProfileSetting = _deserialize_club_action_setting(profileActionSettingJson, _T("update")).payload();
+            club.m_actionSettings.m_deleteProfileSetting = _deserialize_club_action_setting(profileActionSettingJson, _T("delete")).payload();
+            club.m_actionSettings.m_viewProfileSetting = _deserialize_club_action_setting(profileActionSettingJson, _T("view")).payload();
         }
 
         // viewer roles

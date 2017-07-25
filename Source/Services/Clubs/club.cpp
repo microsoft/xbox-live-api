@@ -73,7 +73,7 @@ const string_t& club::banner_image_url() const
     return m_bannerImageUrl;
 }
 
-uint32 club::followers_count() const
+uint32_t club::followers_count() const
 {
     return m_followersCount;
 }
@@ -88,42 +88,42 @@ const utility::datetime& club::suspended_until() const
     return m_suspendedUntil;
 }
 
-uint32 club::presence_count() const
+uint32_t club::presence_count() const
 {
     return m_presenceCount;
 }
 
-uint32 club::presence_today_count() const
+uint32_t club::presence_today_count() const
 {
     return m_presenceTodayCount;
 }
 
-uint32 club::members_count() const
+uint32_t club::members_count() const
 {
     return m_membersCount;
 }
 
-uint32 club::moderators_count() const
+uint32_t club::moderators_count() const
 {
     return m_moderatorsCount;
 }
 
-uint32 club::recommended_count() const
+uint32_t club::recommended_count() const
 {
     return m_recommendedCount;
 }
 
-uint32 club::requested_to_join_count() const
+uint32_t club::requested_to_join_count() const
 {
     return m_requestedToJoinCount;
 }
 
-uint32 club::report_count() const
+uint32_t club::report_count() const
 {
     return m_reportCount;
 }
 
-uint32 club::reported_items_count() const
+uint32_t club::reported_items_count() const
 {
     return m_reportedItemsCount;
 }
@@ -259,7 +259,7 @@ pplx::task<xbox_live_result<std::vector<club_role_record>>> club::get_role_recor
             
             if (iter != clubs.end())
             {
-                auto records = iter->m_roleRecords[xuid];
+                records = iter->m_roleRecords[xuid];
 
                 this->m_roleRecords[xuid] = records;
             }            

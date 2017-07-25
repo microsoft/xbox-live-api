@@ -14,7 +14,7 @@ public:
     /// <summary>Xuid of the user who was present at the club.</summary>
     DEFINE_PROP_GET_STR_OBJ(Xuid, xuid);
 
-    /// <summary>Time when the user was last present within the club.<summary>
+    /// <summary>Time when the user was last present within the club.</summary>
     DEFINE_PROP_GET_DATETIME_OBJ(LastSeen, last_seen);
 
     /// <summary>Users state when they were last seen.</summary>
