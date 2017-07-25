@@ -7,14 +7,14 @@
 #include <cpprest/ws_client.h>
 
 namespace xbox {
-	namespace services {
-		class xbox_live_context_impl;
+    namespace services {
+        class xbox_live_context_impl;
 
-		/// <summary>
-		/// Contains classes and enumerations that let you create
-		/// and configure xbox live clubs from within a game
-		/// </summary>
-		namespace clubs {
+        /// <summary>
+        /// Contains classes and enumerations that let you create
+        /// and configure xbox live clubs from within a game
+        /// </summary>
+        namespace clubs {
 
 class clubs_serializers;
 class clubs_service_impl;
@@ -26,13 +26,13 @@ enum class club_type
     unknown,
     
     /// <summary>Public club</summary>
-	public_club,
+    public_club,
 
-	/// <summary>Private club</summary>
-	private_club,
+    /// <summary>Private club</summary>
+    private_club,
 
-	/// <summary>Hidden club</summary>
-	hidden_club,
+    /// <summary>Hidden club</summary>
+    hidden_club,
 };
 
 /// <summary>
@@ -40,7 +40,11 @@ enum class club_type
 /// </summary>
 enum class club_role
 {
-    /// <summary>Not a member of the club. Used exclusively for permissions/settings</summary>
+    /// <summary>
+    /// Not a member of the club. This will never be returned when a users roles are queried - if a user
+    /// has no association with a club, an empty vector of would be returned. This enum value is used exclusively
+    /// for permissions/settings.
+    /// </summary>
     nonmember,
 
     /// <summary>Member of a club</summary>
@@ -109,7 +113,10 @@ public:
         return m_value;
     }
 
-    /// <summary>List of possible values for the setting</summary>
+    /// <summary>
+    /// List of possible values for the setting. If allowed values have not been configured an empty
+    /// vector will be returned.
+    /// </summary>
     _XSAPIIMP const std::vector<T>& allowed_values() const
     {
         return m_allowedValues;
@@ -143,7 +150,10 @@ public:
         return m_values;
     }
 
-    /// <summary>List of possible values for the setting</summary>
+    /// <summary>
+    /// List of possible values for the setting. If allowed values have not been configured an empty
+    /// vector will be returned.
+    /// </summary>
     _XSAPIIMP const std::vector<T>& allowed_values() const
     {
         return m_allowedValues;
@@ -178,7 +188,9 @@ public:
     /// <summary>Is mature content enabled within the club</summary>
     _XSAPIIMP const club_setting<bool>& mature_content_enabled() const;
 
-    /// <summary>TODO</summary>
+    /// <summary>
+    /// If true, the club can only broadcast streams for titles with which the club is officially affiliated.
+    /// </summary>
     _XSAPIIMP const club_setting<bool>& watch_club_titles_only() const;
 
     /// <summary>Should the club show up in search results</summary>
@@ -258,7 +270,10 @@ public:
     /// <summary>Can the viewer take the action</summary>
     _XSAPIIMP bool can_viewer_act() const;
 
-    /// <summary>List of possible values for the setting</summary>
+    /// <summary>
+    /// List of possible values for the setting. If allowed values have not been configured an empty
+    /// vector will be returned.
+    /// </summary>
     _XSAPIIMP const std::vector<club_role>& allowed_values() const;
 
     /// <summary>Can the user viewing the setting change it</summary>
@@ -459,7 +474,7 @@ private:
 };
 
 /// <summary>
-/// Represents info about the presence of club memebers within the club
+/// Represents info about the presence of club members within the club
 /// </summary>
 class club_presence_counts
 {
@@ -531,7 +546,7 @@ private:
 /// <summary>
 /// Information about a Club. Most fields are populated from clubhub endpoint.
 /// </summary>
-class club : public std::enable_shared_from_this<club>
+class club
 {
 public:
     club() {}
@@ -705,7 +720,7 @@ public:
     /// <summary> 
     /// Attempts to add the caller to the club. If the caller has not yet been invited, this call will send 
     /// a request to join the club which will need to be approved by a moderator before the caller becomes a member.
-    /// If the caller has been invited already, they will be immediately added as a memeber.
+    /// If the caller has been invited already, they will be immediately added as a member.
     /// </summary>
     /// <returns>A vector containing the roles the calling user now has with the club.</returns>
     /// <remarks>
@@ -861,7 +876,7 @@ private:
     utility::datetime m_suspendedUntil;
     uint32 m_presenceCount;
     uint32 m_presenceTodayCount;
-    uint32 m_memebersCount;
+    uint32 m_membersCount;
     uint32 m_moderatorsCount;
     uint32 m_recommendedCount;
     uint32 m_requestedToJoinCount;
@@ -904,7 +919,7 @@ private:
 typedef std::pair<club, std::vector<string_t>> club_recommendation_t;
 
 /// <summary>
-/// Represents the title clubs service
+/// Represents the Clubs service
 /// </summary>
 class clubs_service
 {
@@ -1026,7 +1041,7 @@ private:
     
     std::shared_ptr<clubs_service_impl> m_clubsServiceImpl;
 
-	friend xbox_live_context_impl;
+    friend xbox_live_context_impl;
 };
 
 }}}
