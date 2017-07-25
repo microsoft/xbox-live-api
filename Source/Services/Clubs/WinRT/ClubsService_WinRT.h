@@ -88,11 +88,11 @@ public:
         _In_ Platform::String^ xuid
         );
 
-    /// </summary>Get recommended clubs for the caller.</summary>
+    /// <summary>Get recommended clubs for the caller.</summary>
     /// <returns>
     /// An IVectorView of ClubRecommendation. A ClubRecommendation contains the recommended club and an IVectorView
     /// of localized "reason" strings describing why the club was recommended.
-    /// <returns>
+    /// </returns>
     /// <remarks>
     /// Calls V4 POST clubhub.xboxlive.com/clubs/recommendations
     /// </remarks>

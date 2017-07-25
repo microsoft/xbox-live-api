@@ -6,7 +6,7 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CLUBS_CPP_BEGIN
 
-uint32 club_search_facet_result::count() const
+uint32_t club_search_facet_result::count() const
 {
     return m_count;
 }

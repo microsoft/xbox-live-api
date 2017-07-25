@@ -438,7 +438,7 @@ string_t clubs_service_impl::clubhub_search_subpath(
     _In_ const string_t& query,
     _In_ const std::vector<string_t>& titleIds,
     _In_ const std::vector<string_t>& tags,
-    _In_ uint32 count
+    _In_ uint32_t count
     )
 {
     web::uri_builder builder;

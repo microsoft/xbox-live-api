@@ -11,7 +11,7 @@ const std::vector<string_t>& clubs_owned_result::club_ids() const
     return m_clubIds;
 }
 
-uint32 clubs_owned_result::remaining_clubs() const
+uint32_t clubs_owned_result::remaining_clubs() const
 {
     return m_remainingClubs;
 }

@@ -104,7 +104,7 @@ private:
         _In_ const string_t& query,
         _In_ const std::vector<string_t>& titleIds = std::vector<string_t>(),
         _In_ const std::vector<string_t>& tags = std::vector<string_t>(),
-        _In_ uint32 count = 200
+        _In_ uint32_t count = 200
         );
 
     static string_t clubhub_viewer_roles_subpath(

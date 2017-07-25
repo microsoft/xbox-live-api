@@ -418,7 +418,7 @@ public:
     /// <summary>Xuid of the user who was present at the club.</summary>
     _XSAPIIMP const string_t& xuid() const;
 
-    /// <summary>Time when the user was last present within the club.<summary>
+    /// <summary>Time when the user was last present within the club.</summary>
     _XSAPIIMP const utility::datetime& last_seen() const;
 
     /// <summary>Users state when they were last seen.</summary>
@@ -445,10 +445,10 @@ public:
     _XSAPIIMP const string_t& value() const;
 
     /// <summary>The number of times the value occurred in the returned search results. </summary>
-    _XSAPIIMP uint32 count() const;
+    _XSAPIIMP uint32_t count() const;
     
 private:
-    uint32 m_count;
+    uint32_t m_count;
     string_t m_value;
 
     friend class clubs_serializers;
@@ -464,11 +464,11 @@ public:
     _XSAPIIMP const std::vector<string_t>& club_ids() const;
 
     /// <summary>Number of clubs the user may create in addition to the ones they already own</summary>
-    _XSAPIIMP uint32 remaining_clubs() const;
+    _XSAPIIMP uint32_t remaining_clubs() const;
 
 private:
     std::vector<string_t> m_clubIds;
-    uint32 m_remainingClubs;
+    uint32_t m_remainingClubs;
 
     friend class clubs_serializers;
 };
@@ -480,22 +480,22 @@ class club_presence_counts
 {
 public:
     /// <summary>The total number of club members that been tracked by club presence</summary>
-    _XSAPIIMP uint32 total_count() const;
+    _XSAPIIMP uint32_t total_count() const;
 
     /// <summary>The number of members who are active within the club</summary>
-    _XSAPIIMP uint32 here_now() const;
+    _XSAPIIMP uint32_t here_now() const;
 
     /// <summary>The number of members who have been active within the last 24 hours</summary>
-    _XSAPIIMP uint32 here_today() const;
+    _XSAPIIMP uint32_t here_today() const;
 
     /// <summary>The number of members who are currently in game</summary>
-    _XSAPIIMP uint32 in_game_now() const;
+    _XSAPIIMP uint32_t in_game_now() const;
 
 private:
-    uint32 m_totalCount;
-    uint32 m_hereNow;
-    uint32 m_hereToday;
-    uint32 m_inGameNow;
+    uint32_t m_totalCount;
+    uint32_t m_hereNow;
+    uint32_t m_hereToday;
+    uint32_t m_inGameNow;
 
     friend class clubs_serializers;
 };
@@ -591,31 +591,31 @@ public:
     _XSAPIIMP const string_t& founder_xuid() const;
 
     /// <summary>Number of followers of the club.</summary>
-    _XSAPIIMP uint32 followers_count() const;
+    _XSAPIIMP uint32_t followers_count() const;
 
     /// <summary>Count of members present in the club.</summary>
-    _XSAPIIMP uint32 presence_count() const;
+    _XSAPIIMP uint32_t presence_count() const;
 
     /// <summary>Count of members present in the club today.</summary>
-    _XSAPIIMP uint32 presence_today_count() const;
+    _XSAPIIMP uint32_t presence_today_count() const;
 
     /// <summary>Number of club members.</summary>
-    _XSAPIIMP uint32 members_count() const;
+    _XSAPIIMP uint32_t members_count() const;
 
     /// <summary>Number of club moderators.</summary>
-    _XSAPIIMP uint32 moderators_count() const;
+    _XSAPIIMP uint32_t moderators_count() const;
 
     /// <summary>Number of users recommended for the club.</summary>
-    _XSAPIIMP uint32 recommended_count() const;
+    _XSAPIIMP uint32_t recommended_count() const;
 
     /// <summary>Number of users requesting to join the club.</summary>
-    _XSAPIIMP uint32 requested_to_join_count() const;
+    _XSAPIIMP uint32_t requested_to_join_count() const;
 
     /// <summary>Number of reports for the club.</summary>
-    _XSAPIIMP uint32 report_count() const;
+    _XSAPIIMP uint32_t report_count() const;
 
     /// <summary>Number of reported items for the club.</summary>
-    _XSAPIIMP uint32 reported_items_count() const;
+    _XSAPIIMP uint32_t reported_items_count() const;
 
     /// <summary> 
     /// Settings dictating what actions users can take within the club depending on their role.
@@ -871,17 +871,17 @@ private:
     string_t m_founderXuid;
     string_t m_glyphImageUrl;
     string_t m_bannerImageUrl;
-    uint32 m_followersCount;
+    uint32_t m_followersCount;
     bool m_isClubSuspended;
     utility::datetime m_suspendedUntil;
-    uint32 m_presenceCount;
-    uint32 m_presenceTodayCount;
-    uint32 m_membersCount;
-    uint32 m_moderatorsCount;
-    uint32 m_recommendedCount;
-    uint32 m_requestedToJoinCount;
-    uint32 m_reportCount;
-    uint32 m_reportedItemsCount;
+    uint32_t m_presenceCount;
+    uint32_t m_presenceTodayCount;
+    uint32_t m_membersCount;
+    uint32_t m_moderatorsCount;
+    uint32_t m_recommendedCount;
+    uint32_t m_requestedToJoinCount;
+    uint32_t m_reportCount;
+    uint32_t m_reportedItemsCount;
     club_action_settings m_actionSettings;
     std::vector<club_role> m_viewerRoles;
     std::map<string_t, std::vector<club_role_record>> m_roleRecords;
@@ -992,11 +992,11 @@ public:
         _In_ const string_t& xuid
         );
 
-    /// </summary>Get recommended clubs for the caller.</summary>
+    /// <summary>Get recommended clubs for the caller.</summary>
     /// <returns>
     /// A vector of club recommendations. A club recommendation is a tuple containing the recommended club
     /// and a vector of localized "reason" strings describing why the club was recommended
-    /// <returns>
+    /// </returns>
     /// <remarks>
     /// Calls V4 POST clubhub.xboxlive.com/clubs/recommendations
     /// </remarks>
