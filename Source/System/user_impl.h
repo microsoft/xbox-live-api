@@ -137,7 +137,9 @@ protected:
     string_t m_titleTelemetrySessionId;
     bool m_isSignedIn;
     user_creation_context m_creationContext;
+#if XSAPI_U
     std::shared_ptr<xbox_sign_in_options> m_signInOptions;
+#endif
     std::weak_ptr<system::xbox_live_user> m_weakUserPtr;
 
     std::shared_ptr<auth_config> m_authConfig;
