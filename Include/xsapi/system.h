@@ -139,7 +139,7 @@ public:
     _XSAPIIMP void set_diagnostics_trace_level(_In_ xbox_services_diagnostics_trace_level value);
 
     /// <summary>
-    /// Registers to recieve Windows Push Nofication Service(WNS) events.  Event handlers will receive the xbox user id and notification type.
+    /// Registers to receive Windows Push Notification Service(WNS) events.  Event handlers will receive the xbox user id and notification type.
     /// </summary>
     /// <param name="handler">The event handler function to call.</param>
     /// <returns>
@@ -148,7 +148,7 @@ public:
     _XSAPIIMP function_context add_wns_handler(_In_ const std::function<void(const xbox_live_wns_event_args&)>& handler);
 
     /// <summary>
-    /// Unregisters from recieving Windows Push Nofication Service(WNS) events.
+    /// Unregisters from receiving Windows Push Notification Service(WNS) events.
     /// </summary>
     /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
     _XSAPIIMP void remove_wns_handler(_In_ function_context context);
@@ -494,7 +494,7 @@ public:
     /// </summary>
     /// <returns>
     /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
-    /// If silent sign-in is not successfull, result.err() indicates the error.
+    /// If silent sign-in is not successful, result.err() indicates the error.
     /// </returns>
     /// <remarks>
     /// If the app is unable to silently sign-in, the API return sign_in_result with user_interaction_required status .
@@ -531,7 +531,7 @@ public:
     /// </returns>
     /// <remarks>
     /// You should only call this method if silent sign-in indicates that user interaction is required.
-    /// If you're calling this API from non-UI thread, parameter coreDispatcherObj is requried, so that app UI
+    /// If you're calling this API from non-UI thread, parameter coreDispatcherObj is required, so that app UI
     /// can be rendered and locale can be generated.
     /// </remarks>
     _XSAPIIMP pplx::task<xbox_live_result<sign_in_result>> signin(_In_opt_ Platform::Object^ coreDispatcherObj);
@@ -542,12 +542,12 @@ public:
     /// <param name="coreDispatcherObj">The Windows Runtime core event message dispatcher.</param>
     /// <returns>
     /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
-    /// If silent sign-in is not successfull, result.err() indicates the error.
+    /// If silent sign-in is not successful, result.err() indicates the error.
     /// </returns>
     /// <remarks>
     /// If the app is unable to silently sign-in, the API return sign_in_result with user_interaction_required status .
     /// to sign-in, so the app should then call signin().
-    /// If you're calling this API from non-UI thread, parameter coreDispatcherObj is requried, so that app locale can be generated.
+    /// If you're calling this API from non-UI thread, parameter coreDispatcherObj is required, so that app locale can be generated.
     /// </remarks>
     _XSAPIIMP pplx::task<xbox_live_result<sign_in_result>> signin_silently(_In_opt_ Platform::Object^ coreDispatcherObj);
 #endif 
@@ -619,7 +619,7 @@ public:
     _XSAPIIMP const string_t& web_account_id() const;
 
     /// <summary>
-    /// The Windows System NT user associated with the Xbox Live User, only avaliable in Multi-User application.
+    /// The Windows System NT user associated with the Xbox Live User, only available in Multi-User application.
     /// </summary>
     _XSAPIIMP Windows::System::User^ windows_system_user() const;
 #endif
@@ -686,7 +686,7 @@ public:
     /// <summary>
     /// Registers an event handler for when user sign out completes.
     /// </summary>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     /// <returns>
     /// A function_context object that can be used to unregister the event handler.
     /// </returns>
@@ -696,7 +696,7 @@ public:
     /// Unregisters an event handler for sign-out completion notifications.
     /// </summary>
     /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     _XSAPIIMP static void remove_sign_out_completed_handler(_In_ function_context context);
 
     std::shared_ptr<user_impl> _User_impl() { return m_user_impl; }

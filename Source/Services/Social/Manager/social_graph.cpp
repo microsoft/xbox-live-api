@@ -385,32 +385,32 @@ social_graph::apply_event(
     {
         case internal_social_event_type::users_added:
         {
-            LOG_INFO("Appling internal events: users_added");
+            LOG_INFO("Applying internal events: users_added");
             apply_users_added_event(evt, inactiveBuffer, isFreshEvent);
             break;
         }
         case internal_social_event_type::users_changed:
         {
-            LOG_INFO("Appling internal events: users_changed");
+            LOG_INFO("Applying internal events: users_changed");
             apply_users_change_event(evt, inactiveBuffer, isFreshEvent);
             break;
         }
         case internal_social_event_type::users_removed:
         {
-            LOG_INFO("Appling internal events: users_removed");
+            LOG_INFO("Applying internal events: users_removed");
             apply_users_removed_event(evt, inactiveBuffer, eventType, isFreshEvent);
             break;
         }
         case internal_social_event_type::device_presence_changed:
         {
-            LOG_INFO("Appling internal events: device_presence_changed");
+            LOG_INFO("Applying internal events: device_presence_changed");
 
             apply_device_presence_changed_event(evt, inactiveBuffer, isFreshEvent, eventType);
             break;
         }
         case internal_social_event_type::title_presence_changed:
         {
-            LOG_INFO("Appling internal events: title_presence_changed");
+            LOG_INFO("Applying internal events: title_presence_changed");
             auto& titlePresenceChanged = evt.title_presence_args();
             auto xuid = utils::string_t_to_uint64(titlePresenceChanged.xbox_user_id());
             auto xuidIter = inactiveBuffer->socialUserGraph.find(xuid);
@@ -432,14 +432,14 @@ social_graph::apply_event(
         }
         case internal_social_event_type::presence_changed:
         {
-            LOG_INFO("Appling internal events: presence_changed");
+            LOG_INFO("Applying internal events: presence_changed");
             apply_presence_changed_event(evt, inactiveBuffer, isFreshEvent);
             break;
         }
         case internal_social_event_type::social_relationships_changed:
         case internal_social_event_type::profiles_changed:
         {
-            LOG_INFO("Appling internal events: social_relationships_changed or profiles_changed");
+            LOG_INFO("Applying internal events: social_relationships_changed or profiles_changed");
             m_perfTester.start_timer(_T("profiles_changed"));
             for (auto& user : evt.users_affected())
             {
@@ -641,7 +641,7 @@ void social_graph::apply_device_presence_changed_event(
     }
     else
     {
-        LOG_ERROR("device presence record recieved for user not in graph");
+        LOG_ERROR("device presence record received for user not in graph");
         return;
     }
 
@@ -1138,12 +1138,12 @@ social_graph::do_work(
         m_perfTester.stop_timer(_T("user buffer swap"));
     }
     m_perfTester.stop_timer(_T("social_graph_state_check"));
-    m_perfTester.start_timer(_T("assgin active buffer"));
+    m_perfTester.start_timer(_T("assign active buffer"));
     if (m_userBuffer.active_buffer() != nullptr)
     {
         changeStruct.socialUsers = &m_userBuffer.active_buffer()->socialUserGraph;
     }
-    m_perfTester.stop_timer(_T("assgin active buffer"));
+    m_perfTester.stop_timer(_T("assign active buffer"));
     m_perfTester.start_timer(_T("!m_socialEventQueue.empty()"));
     if (!m_socialEventQueue.empty() && m_socialGraphState == social_graph_state::normal)
     {
@@ -1339,9 +1339,9 @@ social_graph::handle_rta_connection_state_change(
         {
             std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
             std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex); 
-            m_perfTester.start_timer(_T("handle_rta_connection_state_change: disconnected recieved"));
+            m_perfTester.start_timer(_T("handle_rta_connection_state_change: disconnected received"));
             m_wasDisconnected = true;
-            m_perfTester.stop_timer(_T("handle_rta_connection_state_change: disconnected recieved"));
+            m_perfTester.stop_timer(_T("handle_rta_connection_state_change: disconnected received"));
         }
     }
     else if (wasDisconnected)

@@ -799,7 +799,7 @@ public:
     /// Registers an event handler for device presence change notifications.
     /// Event handlers receive a device_presence_change_event_args&amp; object.
     /// </summary>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     /// <returns>
     /// A function_context object that can be used to unregister the event handler.
     /// </returns>
@@ -809,14 +809,14 @@ public:
     /// Unregisters an event handler for device presence change notifications.
     /// </summary>
     /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     _XSAPIIMP void remove_device_presence_changed_handler(_In_ function_context context);
 
     /// <summary>
     /// Registers an event handler for title presence change notifications.
     /// Event handlers receive a title_presence_change_event_args&amp; object.
     /// </summary>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     /// <returns>
     /// A function_context object that can be used to unregister the event handler.
     /// </returns>
@@ -826,7 +826,7 @@ public:
     /// Unregisters an event handler for title presence change notifications.
     /// </summary>
     /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     _XSAPIIMP void remove_title_presence_changed_handler(_In_ function_context context);
 
     /// <summary>

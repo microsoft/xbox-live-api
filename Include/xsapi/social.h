@@ -480,7 +480,7 @@ public:
     /// Registers an event handler for social relationship change notifications.
     /// Event handlers receive social_relationship_change_event_args.
     /// </summary>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     _XSAPIIMP function_context add_social_relationship_changed_handler(
         _In_ std::function<void(social_relationship_change_event_args)> handler
         );

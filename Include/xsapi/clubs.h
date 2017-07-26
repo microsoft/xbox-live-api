@@ -628,10 +628,10 @@ public:
     _XSAPIIMP const std::vector<club_role>& viewer_roles() const;
 
     /// <summary>
-    /// Retreives a roster of club members that have a special relationship with the club (something other than just member).
+    /// Retrieves a roster of club members that have a special relationship with the club (something other than just member).
     /// </summary>
     /// <returns>
-    /// A club_roster object which contains the moderators, recommeneded users, banned users, and users 
+    /// A club_roster object which contains the moderators, recommended users, banned users, and users 
     /// who have requested to join the club.
     /// </returns>
     /// <remarks>
@@ -903,7 +903,7 @@ public:
 
     /// <summary>
     /// Facets can be used to further narrow down search results. The return map maps a facet (ie. tag or title) to
-    /// to a collection of search search facet result objects.  A search facet result object decribes how often a particular 
+    /// to a collection of search search facet result objects.  A search facet result object describes how often a particular 
     /// value of that facet occurred.
     /// </summary>
     _XSAPIIMP const std::unordered_map<string_t, std::vector<club_search_facet_result>>& search_facet_results() const;

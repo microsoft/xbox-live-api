@@ -29,7 +29,7 @@ public:
 #if TV_API || UWP_API || UNIT_TEST_SERVICES
     /// <summary>
     /// Internal API
-    /// Enables Logs to be enabled/disabled through protocal activation
+    /// Enables Logs to be enabled/disabled through protocol activation
     /// </summary>
     void _Register_for_protocol_activation();
 #endif

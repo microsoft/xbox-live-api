@@ -50,11 +50,11 @@ notification_service_windows::subscribe_to_notifications(
                 {
                     try
                     {
-                        pThis->on_push_notification_recieved(channel, args);
+                        pThis->on_push_notification_received(channel, args);
                     }
                     catch (...)
                     {
-                        LOG_ERROR("on_push_notification_recieved error");
+                        LOG_ERROR("on_push_notification_received error");
                     }
                 }
             });
@@ -112,7 +112,7 @@ pplx::task<xbox_live_result<void>> notification_service_windows::subscribe_to_no
 }
 
 void
-notification_service_windows::on_push_notification_recieved(
+notification_service_windows::on_push_notification_received(
     _In_ Windows::Networking::PushNotifications::PushNotificationChannel ^sender,
     _In_ Windows::Networking::PushNotifications::PushNotificationReceivedEventArgs ^args
     )

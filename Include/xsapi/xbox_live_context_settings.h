@@ -131,13 +131,13 @@ public:
     _XSAPIIMP_DEPRECATED void set_diagnostics_trace_level(_In_ xbox_services_diagnostics_trace_level value);
 
     /// <summary>
-    /// DEPRECATED.  This value is ignored and is now automatically calcuated to ensure the http_timeout_window() is obeyed
+    /// DEPRECATED.  This value is ignored and is now automatically calculated to ensure the http_timeout_window() is obeyed
     /// This means that calls will be more deterministic about the time window they return in.
     /// </summary>
     _XSAPIIMP const std::chrono::seconds& http_timeout() const;
 
     /// <summary>
-    /// DEPRECATED.  This value is ignored and is now automatically calcuated to ensure the http_timeout_window() is obeyed
+    /// DEPRECATED.  This value is ignored and is now automatically calculated to ensure the http_timeout_window() is obeyed
     /// This means that calls will be more deterministic about the time window they return in.
     /// </summary>
     _XSAPIIMP void set_http_timeout(_In_ std::chrono::seconds value);

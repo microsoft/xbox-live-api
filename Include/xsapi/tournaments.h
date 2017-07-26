@@ -1130,7 +1130,7 @@ public:
     /// Registers an event handler for tournament change notifications.
     /// Event handlers receive a tournament_change_event_args object.
     /// </summary>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     /// <returns>
     /// A function_context object that can be used to unregister the event handler.
     /// </returns>
@@ -1140,7 +1140,7 @@ public:
     /// Unregisters an event handler for tournament change notifications.
     /// </summary>
     /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     _XSAPIIMP void remove_tournament_changed_handler(_In_ function_context context);
 
     /// <summary>
@@ -1170,7 +1170,7 @@ public:
     /// Registers an event handler for team change notifications.
     /// Event handlers receive a team_change_event_args object.
     /// </summary>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     /// <returns>
     /// A function_context object that can be used to unregister the event handler.
     /// </returns>
@@ -1180,7 +1180,7 @@ public:
     /// Unregisters an event handler for team change notifications.
     /// </summary>
     /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     _XSAPIIMP void remove_team_changed_handler(_In_ function_context context);
 
     /// <summary>

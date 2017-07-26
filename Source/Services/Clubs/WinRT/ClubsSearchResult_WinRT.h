@@ -22,7 +22,7 @@ public:
 
     /// <summary>
     /// Facets can be used to further narrow down search results. The return map maps a facet (ie. tag or title) to
-    /// to a collection of search search facet result objects.  A search facet result object decribes how often a particular 
+    /// to a collection of search search facet result objects.  A search facet result object describes how often a particular 
     /// value of that facet occurred.
     /// </summary>
     property SearchFacetResults_t SearchFacetResults

@@ -42,7 +42,7 @@ public:
     DEFINE_PROP_GET_ENUM_OBJ(RegistrationState, registration_state, Microsoft::Xbox::Services::Tournaments::TournamentRegistrationState);
 
     /// <summary>
-    /// The tournament registration reaon for the certain state.
+    /// The tournament registration reason for the certain state.
     /// </summary>
     DEFINE_PROP_GET_ENUM_OBJ(RegistrationReason, registration_reason, Microsoft::Xbox::Services::Tournaments::TournamentRegistrationReason);
 

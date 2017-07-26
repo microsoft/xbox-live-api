@@ -97,15 +97,15 @@ public:
     event Windows::Foundation::EventHandler<RealTimeActivityConnectionState>^ RealTimeActivityConnectionStateChange;
 
     /// <summary>
-    /// Registers a handler function to recieve a notification that is sent when there is an
+    /// Registers a handler function to receive a notification that is sent when there is an
     /// error in the real time activity service.
-    /// Event handlers recieve a real_time_activity_subscription_error_event_args&amp; object.
+    /// Event handlers receive a real_time_activity_subscription_error_event_args&amp; object.
     /// </summary>
     event Windows::Foundation::EventHandler<RealTimeActivitySubscriptionErrorEventArgs^>^ RealTimeActivitySubscriptionError;
 
     /// <summary>
-    /// Registers a handler function to recieve a notification that is sent when there is a
-    /// resync message from the real time activity serivce.
+    /// Registers a handler function to receive a notification that is sent when there is a
+    /// resync message from the real time activity service.
     /// This message indicates that data may have been lost and to resync all data by calling
     /// corresponding REST API's
     /// </summary>

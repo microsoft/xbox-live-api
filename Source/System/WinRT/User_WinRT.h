@@ -75,7 +75,7 @@ public:
     /// This is cast as Platform::Object^ instead of Windows::UI::Core::CoreDispatcher^ to avoid the
     /// [Windows::Foundation::Metadata::WebHostHidden] requirement.
     ///
-    /// If you're calling this API from non-UI thread, parameter coreDispatcherObj is requried, so that app UI
+    /// If you're calling this API from non-UI thread, parameter coreDispatcherObj is required, so that app UI
     /// can be rendered and locale can be generated.
     /// </remarks>
     Windows::Foundation::IAsyncOperation<SignInResult^>^
@@ -95,7 +95,7 @@ public:
     /// If the app is unable to silently sign-in, the API return SignInResult with UserInteractionRequired Status .
     /// to sign-in, so the app should then call SignInAsync().
     ///
-    /// If you're calling this API from non-UI thread, parameter coreDispatcherObj is requried, so that app locale can be generated.
+    /// If you're calling this API from non-UI thread, parameter coreDispatcherObj is required, so that app locale can be generated.
     /// </remarks>
     Windows::Foundation::IAsyncOperation<SignInResult^>^
     SignInSilentlyAsync(
@@ -204,7 +204,7 @@ public:
     DEFINE_PTR_PROP_GET_STR_OBJ(WebAccountId, web_account_id)
 
     /// <summary>
-    /// The Windows System NT user associated with the Xbox Live User, only avaliable in Multi-User application.
+    /// The Windows System NT user associated with the Xbox Live User, only available in Multi-User application.
     /// </summary>
     property Windows::System::User^ WindowsSystemUser { Windows::System::User^ get(); }
 

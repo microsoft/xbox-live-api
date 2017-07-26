@@ -281,7 +281,7 @@ enum class multiplayer_event_type
     join_game_completed,
 
     /// <summary>
-    /// Indicates that the leave_game() operation has completed. After recieving this event,
+    /// Indicates that the leave_game() operation has completed. After receiving this event,
     /// the game session object will be set to null. You can join another game by calling 
     /// join_game() or join_game_from_lobby().
     /// </summary>
@@ -459,7 +459,7 @@ private:
 
 /// <summary>
 /// Represents a multiplayer lobby. This is also where you would manage members that are local to this device.
-/// There are 2 game objects when using a mulitplayer manager.  One repesents the lobby_session() which is where friends you invite will join.  
+/// There are 2 game objects when using a multiplayer manager.  One represents the lobby_session() which is where friends you invite will join.  
 /// Another is the game_session() which contains people that your lobby has been matched with.
 /// </summary>
 class multiplayer_lobby_session
@@ -518,7 +518,7 @@ public:
     /// contain updated response returned from the server upon calling do_work().
     /// Hosts a new lobby when the first user is added. For all other users, they will be added to the existing lobby
     /// as secondary users. This API will also advertise the lobby for friends to join.
-    /// You can send invites, set lobby properties, access lobby memebers via lobby() only once you've added the local user.
+    /// You can send invites, set lobby properties, access lobby members via lobby() only once you've added the local user.
     /// While joining a lobby via an invite, or a handleId, you can skip adding the local user to avoid creating a lobby and 
     /// instead pass in the list of users in the join_lobby() API.
     /// </summary>
@@ -822,7 +822,7 @@ private:
 
 /// <summary>
 /// Represents a multiplayer game.
-/// There are 2 game objects when using a mulitplayer manager.  One repesents the lobby_session() which is where friends you invite will join.  
+/// There are 2 game objects when using a multiplayer manager.  One represents the lobby_session() which is where friends you invite will join.  
 /// Another is the game_session() which contains people that your lobby has been matched with.
 /// </summary>
 class multiplayer_game_session
