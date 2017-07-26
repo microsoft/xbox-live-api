@@ -729,7 +729,7 @@ public:
         _In_ const string_t& protocol = _T("https")
     );
 
-#if defined _WIN32
+#ifdef _WIN32
     static inline std::string convert_wide_string_to_standard_string(_In_ string_t wideString)
     {
         std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;

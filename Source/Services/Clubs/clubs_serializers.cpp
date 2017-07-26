@@ -248,6 +248,7 @@ xbox_live_result<void> clubs_serializers::generate_xbox_live_result(
     {
         result._Set_err(httpErrorCode);
 
+#ifdef _WIN32
         auto errorMessageFromJsonResult = deserialize_error_description(response->response_body_json());
         if (!errorMessageFromJsonResult.err())
         {
@@ -258,6 +259,9 @@ xbox_live_result<void> clubs_serializers::generate_xbox_live_result(
         {
             result._Set_err_message(response->err_message());
         }
+#else
+        result._Set_err_message(response->err_message());
+#endif
     }
 
     return result;
