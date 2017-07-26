@@ -208,11 +208,11 @@ public:
     _XSAPIIMP void deactivate();
 
     /// <summary>
-    /// Registers a handler function to recieve a notification that is sent when the client service
+    /// Registers a handler function to receive a notification that is sent when the client service
     /// loses or gains connectivity to the real time activity service.
-    /// Event handlers recieve a real_time_activity_connection_state object.
+    /// Event handlers receive a real_time_activity_connection_state object.
     /// </summary>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     /// <returns>
     /// A function_context object that can be used to unregister the event handler.
     /// </returns>
@@ -225,11 +225,11 @@ public:
     _XSAPIIMP void remove_connection_state_change_handler(_In_ function_context remove);
 
     /// <summary>
-    /// Registers a handler function to recieve a notification that is sent when there is an
+    /// Registers a handler function to receive a notification that is sent when there is an
     /// error in the real time activity service.
-    /// Event handlers recieve a real_time_activity_subscription_error_event_args&amp; object.
+    /// Event handlers receive a real_time_activity_subscription_error_event_args&amp; object.
     /// </summary>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     /// <returns>
     /// A function_context object that can be used to unregister the event handler.
     /// </returns>
@@ -242,12 +242,12 @@ public:
     _XSAPIIMP void remove_subscription_error_handler(_In_ function_context remove);
 
     /// <summary>
-    /// Registers a handler function to recieve a notification that is sent when there is a
-    /// resync message from the real time activity serivce.
+    /// Registers a handler function to receive a notification that is sent when there is a
+    /// resync message from the real time activity service.
     /// This message indicates that data may have been lost and to resync all data by calling
     /// corresponding REST API's
     /// </summary>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     /// <returns>
     /// A function_context object that can be used to unregister the event handler.
     /// </returns>

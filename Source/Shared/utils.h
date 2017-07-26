@@ -169,7 +169,7 @@ struct xsapi_singleton
     std::shared_ptr<real_time_activity::real_time_activity_service_factory> m_rtaFactoryInstance;
 
     // from Multiplayer\Manager\multiplayer_client_pending_request.cpp
-    volatile long m_multiplayerClientPendingRequestUniqueIndentifier;
+    volatile long m_multiplayerClientPendingRequestUniqueIdentifier;
 
     // from Shared\http_call_impl.cpp
     std::shared_ptr<http_retry_after_manager> m_httpRetryPolicyManagerSingleton;

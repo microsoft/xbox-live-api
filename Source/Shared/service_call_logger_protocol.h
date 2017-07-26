@@ -16,7 +16,7 @@ public:
     static std::shared_ptr<service_call_logger_protocol> get_singleton_instance();
 
     /// <summary>
-    /// Enables Logs to be enabled/disabled through protocal activation
+    /// Enables Logs to be enabled/disabled through protocol activation
     /// </summary>
     void register_for_protocol_activation();
 

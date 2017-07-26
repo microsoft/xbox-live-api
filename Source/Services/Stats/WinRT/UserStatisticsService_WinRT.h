@@ -64,12 +64,12 @@ public:
         );
 
     /// <summary>
-    /// Get specified statictics for a single user.
+    /// Get specified statistics for a single user.
     /// </summary>
     /// <param name="xboxUserId">The Xbox User ID of the player to get statistics for.</param>
     /// <param name="serviceConfigurationId">The service configuration ID of the service holding the statistics.</param>
     /// <param name="statisticNames">A collection of statistic names to lookup.</param>
-    /// <returns>An interface for tracking the progress of the asynchronous call. The result is the requested statisitics.
+    /// <returns>An interface for tracking the progress of the asynchronous call. The result is the requested statistics.
     /// Only statistics with values are returned. For example, if you ask for 3 statistic names and only 2 have values,
     /// only 2 statistics are returned by the service.</returns>
     /// <remarks>Calls V1 GET /users/xuid({xuid})/scids/{scid}/stats/{statname1},...,{statnameN}</remarks>

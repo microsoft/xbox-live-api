@@ -79,7 +79,7 @@ protected:
     pplx::task<xbox_live_result<void>> subscribe_to_notifications() override;
 
 private:
-    void on_push_notification_recieved(
+    void on_push_notification_received(
         _In_ Windows::Networking::PushNotifications::PushNotificationChannel ^sender,
         _In_ Windows::Networking::PushNotifications::PushNotificationReceivedEventArgs ^args
         );

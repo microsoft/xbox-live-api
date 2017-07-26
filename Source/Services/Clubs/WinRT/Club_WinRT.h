@@ -100,10 +100,10 @@ public:
     }
 
     /// <summary> 
-    /// Retreives a roster of club members that have a special relationship with the club (something other than just member).
+    /// Retrieves a roster of club members that have a special relationship with the club (something other than just member).
     /// </summary>
     /// <returns>
-    /// A ClubRoster object which contains the moderators, recommeneded users, banned users, and users 
+    /// A ClubRoster object which contains the moderators, recommended users, banned users, and users 
     /// who have requested to join the club.
     /// </returns>
     /// <remarks>
@@ -288,7 +288,7 @@ public:
 
     /// <summary> 
     /// Promotes the specified user to moderator of the club. The specified user must already be a
-    /// memeber of the club. Can only be called by the club owner.
+    /// member of the club. Can only be called by the club owner.
     /// </summary>
     /// <param name="xuid">The xuid of the user to promote.</param>
     /// <returns>An IVectorView containing the roles the target user now has with the club.</returns>

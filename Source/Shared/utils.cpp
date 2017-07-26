@@ -57,7 +57,7 @@ xsapi_singleton::xsapi_singleton()
     m_custom_locale_override = false;
     m_loggerId = 0;
     m_responseCount = 0;
-    m_multiplayerClientPendingRequestUniqueIndentifier = 0;
+    m_multiplayerClientPendingRequestUniqueIdentifier = 0;
 
 #if !TV_API
     m_signOutCompletedHandlerIndexer = 0;

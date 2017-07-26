@@ -165,7 +165,7 @@ class leaderboard_query
 {
 public:
     /// <summary>
-    /// Contructing a leaderboard_query object
+    /// Constructing a leaderboard_query object
     /// </summary>
     leaderboard_query();
 
@@ -645,7 +645,7 @@ public:
     /// The possible values are 'ascending' or 'descending', without quotes.</param>
     /// <param name="maxItems">The maximum number of items to retrieve. If this value is 0, the server defaults to 10. (Optional)</param>
     /// <returns>
-    /// A leaderboard_result object that contains a page of leaderboard results around the specifed player regardless
+    /// A leaderboard_result object that contains a page of leaderboard results around the specified player regardless
     /// of that player's rank or score.
     /// The result page is ordered by percentile rank, with the specified player in the last position of
     /// the page for predefined views, or in the middle for stat leaderboard views.
