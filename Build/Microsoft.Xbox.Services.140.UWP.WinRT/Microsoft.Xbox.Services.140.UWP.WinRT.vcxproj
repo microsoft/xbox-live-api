@@ -111,7 +111,7 @@
       $(ProjectDir)\..\..\Source\Services\Clubs;
       $(ProjectDir)\..\..\Source\Services\Clubs\WinRT;
       %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <TreatWarningAsError>false</TreatWarningAsError>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <AdditionalDependencies>windowsapp.lib;msxml6.lib;%(AdditionalDependencies)</AdditionalDependencies>
