@@ -150,15 +150,26 @@ void MainPage::OnTick(Object^ sender, Object^ e)
                 LeaderboardResultEventArgs^ LbResultEventArgs = safe_cast<LeaderboardResultEventArgs^>(Event->EventArgs);
                 LeaderboardResult^ LbResult = LbResultEventArgs->Result;
 
+                Platform::String^ displayName = LbResult->DisplayName;
+                LogFormat(L"Leaderboard displayName: %s\n", displayName->Data());
+
+                for (unsigned int i = 0; i < LbResult->Columns->Size; i++)
+                {
+                    LeaderboardColumn^ col = LbResult->Columns->GetAt(i);
+                    LogFormat(L"Column %d: DisplayName=%s StatName=%s\n", i, col->DisplayName->Data(), col->StatisticName->Data());
+                }
+
                 for (LeaderboardRow^ row : LbResult->Rows)
                 {
                     String^ colValues;
-                    for (auto columnValue : row->Values)
+                    for( unsigned int i = 0; i<row->Values->Size; i++)
                     {
+                        Platform::String^ columnValue = row->Values->GetAt(i);
+                        
                         colValues = colValues + L" ";
                         colValues = colValues + columnValue;
                     }
-                    LogFormat(L"%16s %6s %12s %8s\n", row->Gamertag->Data(), row->Rank.ToString()->Data(), row->Percentile.ToString()->Data(), colValues->Data());
+                    LogFormat(L"Gametag=%16s Rank=%s Percentile=%s colValues=%s\n", row->Gamertag->Data(), row->Rank.ToString()->Data(), row->Percentile.ToString()->Data(), colValues->Data());
                 }
             }
             break;

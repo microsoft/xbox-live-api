@@ -176,7 +176,7 @@ void Scenarios::Scenario_WriteStat(_In_ MainPage^ ui, Microsoft::Xbox::Services:
     if (mgr == nullptr) return;
 
     String^ statName = L"HighScore";
-    long long statValue = 1001;
+    long long statValue = 1002;
 
     mgr->SetStatisticIntegerData(xboxLiveContext->User, statName, statValue);
     mgr->RequestFlushToService(xboxLiveContext->User);
@@ -203,6 +203,10 @@ void Scenarios::Scenario_ReadStat(_In_ MainPage^ ui, Microsoft::Xbox::Services::
 
     String^ statName = L"HighScore";
     LeaderboardQuery^ Query = ref new LeaderboardQuery();
+
+    auto statValue = mgr->GetStatistic(xboxLiveContext->User, statName);
+    Platform::String^ name = statValue->Name;
+    auto intValue = statValue->AsInteger;
 
     mgr->GetLeaderboard(xboxLiveContext->User, statName, Query);
 }
