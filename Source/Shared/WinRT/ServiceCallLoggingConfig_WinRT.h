@@ -30,7 +30,7 @@ public:
     void Disable();
 
     /// <summary>
-    /// Enables Logs to be enabled/disabled through protocal activation
+    /// Enables Logs to be enabled/disabled through protocol activation
     /// </summary>
     void RegisterForProtocolActivation();
 

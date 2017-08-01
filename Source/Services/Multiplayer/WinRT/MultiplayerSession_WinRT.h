@@ -184,7 +184,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_BEGIN
 //            "custom": true
 //        },
 //
-//        // If a "memberInitialization" objet is set, the session expects the client system or title to perform initialization following session creation and/or as new members join the session.
+//        // If a "memberInitialization" object is set, the session expects the client system or title to perform initialization following session creation and/or as new members join the session.
 //        // The timeouts and initialization stages are automatically tracked by the session, including QoS measurements if any metrics are set.
 //        "memberInitialization": 
 //        {
@@ -228,7 +228,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_BEGIN
 //    /properties/system 
 //    {
 //        "keywords": [ "hello" ],  // Optional array of case-insensitive strings. Cannot be set if the session's visibility is "private"
-//        "turn": [ 0 ],  // Array of integer member indicies whose turn it is. Defaults to empty.
+//        "turn": [ 0 ],  // Array of integer member indices whose turn it is. Defaults to empty.
 //
 //        // Device token of the host.
 //        // Must match the "deviceToken" of at least one member, otherwise this field is deleted.
@@ -540,7 +540,7 @@ public:
     /// A list of all session members, including those who have been accepted and those who are waiting to join the session.
     /// </summary>
     /// <remarks>
-    /// Call MultiplayerSession::Join or MultiplayerSession::Leave to add or remove youself from this list.  
+    /// Call MultiplayerSession::Join or MultiplayerSession::Leave to add or remove yourself from this list.  
     /// Call MultiplayerSession::AddMemberReservation to add a reservation for another user on this list.
     /// Call MultiplayerService::WriteSessionAsync to write these changes to the service.
     /// </remarks>
@@ -804,7 +804,7 @@ public:
         );
 
     /// <summary>
-    /// Configures managed initlization parameters for a session.
+    /// Configures managed initialization parameters for a session.
     /// </summary>
     /// <param name="joinTimeout">The period of time, in milliseconds, that the system waits for a member to join the session.
     /// This value overrides the value of the memberReservedTimeout parameter for the MultiplayerSession.SetTimeouts Method
@@ -841,7 +841,7 @@ public:
         );
 
     /// <summary>
-    /// Configures managed initlization parameters for a session.
+    /// Configures managed initialization parameters for a session.
     /// </summary>
     /// <param name="joinTimeout">The period of time, in milliseconds, that the system waits for a member to join the session.
     /// This value overrides the value of the memberReservedTimeout parameter for the MultiplayerSession.SetTimeouts Method

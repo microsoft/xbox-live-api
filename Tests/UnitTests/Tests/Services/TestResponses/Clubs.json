@@ -1,0 +1,493 @@
+{
+    "createClubResponse": {
+        "name": "Sexy Title Club",
+        "owner": "2535430935305105",
+        "id": "3379871642723170",
+        "type": "closed",
+        "genre": "Title",
+        "created": "2017-04-27T18:00:05.6195377Z",
+        "titleFamilyId": "61d725ba-cfe1-41f5-8609-95f863f15a53"
+    },
+    "getClubsOwnedResponse": {
+        "owner": "2533274790395904",
+        "clubs": [
+            {
+                "name": "The Silent Cartographers",
+                "owner": "2533274790395904",
+                "id": "3379871642723170",
+                "type": "closed",
+                "genre": "social"
+            }
+        ],
+        "remainingOpenAndClosedClubs": "1",
+        "remainingSecretClubs": "5",
+        "maximumOpenAndClosedClubs": "2",
+        "maximumSecretClubs": "5"
+    },
+    "addUserToClub": {
+        "userId": "2603643534573581",
+        "roles": [
+            "Moderator",
+            "Owner",
+            "Member",
+            "Follower"
+        ]
+    },
+    "clubhubResponse": {
+        "clubs": [
+            {
+                "id": "3379871642723170",
+                "clubType": {
+                    "type": "closed",
+                    "genre": "Title",
+                    "localizedTitleFamilyName": "Beat Drop Club (en-US)",
+                    "titleFamilyId": "61d725ba-cfe1-41f5-8609-95f863f15a53"
+                },
+                "shortName": null,
+                "creationDateUtc": "2017-04-27T18:00:05.6195377Z",
+                "glyphImageUrl": "http://localhost/glyphImageUrl",
+                "bannerImageUrl": "http://localhost/bannerImageUrl",
+                "settings": {
+                    "feed": {
+                        "post": {
+                            "value": "Member",
+                            "canViewerAct": true,
+                            "allowedValues": [ "Member" ],
+                            "canViewerChangeSetting": false
+                        },
+                        "view": {
+                            "value": "Member",
+                            "canViewerAct": true,
+                            "allowedValues": [ "Member" ],
+                            "canViewerChangeSetting": false
+                        }
+                    },
+                    "chat": {
+                        "write": {
+                            "value": "Member",
+                            "canViewerAct": true,
+                            "allowedValues": [ "Member" ],
+                            "canViewerChangeSetting": false
+                        },
+                        "setChatTopic": {
+                            "value": "Moderator",
+                            "canViewerAct": false,
+                            "allowedValues": [ "Moderator" ],
+                            "canViewerChangeSetting": false
+                        },
+                        "view": {
+                            "value": "Member",
+                            "canViewerAct": true,
+                            "allowedValues": [ "Member" ],
+                            "canViewerChangeSetting": false
+                        }
+                    },
+                    "lfg": {
+                        "join": {
+                            "value": "Member",
+                            "canViewerAct": true,
+                            "allowedValues": [ "Member" ],
+                            "canViewerChangeSetting": false
+                        },
+                        "create": {
+                            "value": "Member",
+                            "canViewerAct": true,
+                            "allowedValues": [ "Member" ],
+                            "canViewerChangeSetting": false
+                        },
+                        "view": {
+                            "value": "Member",
+                            "canViewerAct": true,
+                            "allowedValues": [ "Member" ],
+                            "canViewerChangeSetting": false
+                        }
+                    },
+                    "roster": {
+                        "inviteOrAccept": {
+                            "value": "Moderator",
+                            "canViewerAct": false,
+                            "allowedValues": [ "Moderator" ],
+                            "canViewerChangeSetting": false
+                        },
+                        "kickOrBan": {
+                            "value": "Moderator",
+                            "canViewerAct": false,
+                            "allowedValues": [ "Moderator" ],
+                            "canViewerChangeSetting": false
+                        },
+                        "view": {
+                            "value": "Nonmember",
+                            "canViewerAct": true,
+                            "allowedValues": [ "Nonmember" ],
+                            "canViewerChangeSetting": false
+                        }
+                    },
+                    "profile": {
+                        "update": {
+                            "value": "Owner",
+                            "canViewerAct": false,
+                            "allowedValues": [ "Owner" ],
+                            "canViewerChangeSetting": false
+                        },
+                        "delete": {
+                            "value": "Owner",
+                            "canViewerAct": false,
+                            "allowedValues": [ "Owner" ],
+                            "canViewerChangeSetting": false
+                        },
+                        "view": {
+                            "value": "Nonmember",
+                            "canViewerAct": true,
+                            "allowedValues": [ "Nonmember" ],
+                            "canViewerChangeSetting": false
+                        }
+                    },
+                    "viewerRoles": {
+                        "roles": [
+                            "Follower",
+                            "Member"
+                        ],
+                        "localizedRole": null
+                    }
+                },
+                "followersCount": 2,
+                "membersCount": 2,
+                "moderatorsCount": 1,
+                "recommendedCount": 0,
+                "requestedToJoinCount": 0,
+                "clubPresenceCount": 0,
+                "clubPresenceTodayCount": 0,
+                "clubPresenceInGameCount": 0,
+                "roster": {
+                    "moderator": [
+                        {
+                            "actorXuid": "2535430935305105",
+                            "xuid": "2535430935305105",
+                            "createdDate": "2017-04-27T18:00:06.0500224Z",
+                            "localizedRole": null
+                        }
+                    ],
+                    "requestedToJoin": null,
+                    "recommended": null,
+                    "banned": null
+                },
+                "targetRoles": {
+                    "roles": [
+                        {
+                            "actorXuid": "2535412074763788",
+                            "role": "Follower",
+                            "createdDate": "2017-03-10T18:25:15.8059646Z"
+                        },
+                        {
+                            "actorXuid": "2535412074763788",
+                            "role": "Member",
+                            "createdDate": "2017-03-10T18:25:15.8059646Z"
+                        },
+                        {
+                            "actorXuid": "2533274829323135",
+                            "role": "Moderator",
+                            "createdDate": "2017-03-10T18:25:37.3393839Z"
+                        }
+                    ],
+                    "localizedRole": "Grunt"
+                },
+                "recommendation": {
+                    "reasons": [
+                        {
+                            "localizedText": "Played Grand Theft Auto V"
+                        }
+                    ],
+                    "criteria": "0001W3sidHlwZSI6IlBsYXllZFRpdGxlIiwibWV0YWRhdGEiOnsiVGl0bGVJZCI6Ijk3MjI0OTA5MSJ9fV0=",
+                    "titleIds": [ "972249091" ]
+                },
+                "clubPresence": [
+                    {
+                        "xuid": "2535412074763788",
+                        "lastSeenTimestamp": "2017-05-11T19:18:15.4480871Z",
+                        "lastSeenState": "Feed"
+                    },
+                    {
+                        "xuid": "2535430935305105",
+                        "lastSeenTimestamp": "2017-05-04T19:43:31.3341279Z",
+                        "lastSeenState": "NotInClub"
+                    }
+                ],
+                "state": "None",
+                "suspendedUntilUtc": null,
+                "reportCount": 0,
+                "reportedItemsCount": 0,
+                "maxMembersPerClub": 50,
+                "maxMembersInGame": 6,
+                "ownerXuid": "2535430935305105",
+                "founderXuid": "2535430935305105",
+                "titleDeeplinks": {
+                    "xbox": [
+                        {
+                            "titleId": "1748608947",
+                            "Uri": "ms-xbl-6839A7B3://"
+                        }
+                    ],
+                    "pc": [ ],
+                    "iOS": [
+                        {
+                            "titleId": "1748608947",
+                            "Uri": "http://www.minecraft.net"
+                        }
+                    ],
+                    "android": [
+                        {
+                            "titleId": "1748608947",
+                            "Uri": "http://www.minecraft.net"
+                        }
+                    ]
+                },
+                "profile": {
+                    "description": {
+                        "value": "Default description. Change this!",
+                        "allowedValues": null,
+                        "canViewerChangeSetting": false
+                    },
+                    "name": {
+                        "value": "Sexy Title Club",
+                        "allowedValues": null,
+                        "canViewerChangeSetting": false
+                    },
+                    "isSearchable": {
+                        "value": true,
+                        "allowedValues": [
+                            true,
+                            false
+                        ],
+                        "canViewerChangeSetting": false
+                    },
+                    "isRecommendable": {
+                        "value": true,
+                        "allowedValues": [
+                            true,
+                            false
+                        ],
+                        "canViewerChangeSetting": false
+                    },
+                    "requestToJoinEnabled": {
+                        "value": true,
+                        "allowedValues": [
+                            true,
+                            false
+                        ],
+                        "canViewerChangeSetting": false
+                    },
+                    "leaveEnabled": {
+                        "value": true,
+                        "allowedValues": [
+                            true,
+                            false
+                        ],
+                        "canViewerChangeSetting": false
+                    },
+                    "transferOwnershipEnabled": {
+                        "value": true,
+                        "allowedValues": [
+                            true,
+                            false
+                        ],
+                        "canViewerChangeSetting": false
+                    },
+                    "matureContentEnabled": {
+                        "value": false,
+                        "allowedValues": [
+                            true,
+                            false
+                        ],
+                        "canViewerChangeSetting": false
+                    },
+                    "watchClubTitlesOnly": {
+                        "value": true,
+                        "allowedValues": [
+                            true,
+                            false
+                        ],
+                        "canViewerChangeSetting": false
+                    },
+                    "displayImageUrl": {
+                        "value": "http://images-eds.xboxlive.com/image?url=FgQLWnJZZZTMLcclLRvZToTpXU6V37Rxh66J9G1adzT41jLpSyb9T5takQAUw5OU5dsItuQaFIUXTgoU4tCsLspddcPKAbjpdCFMA6x4qVHwB7Ao4iGnDGtfYdPUB0BVRHXukP_Gr3qsptkka0wp8y94avsGtKuySZeDzYkellLUnjKBu9F7tf2dTorN_voizs35Z3cziDwKIFGg5GDe0oomrUqqm5SGvVAiJlskcDhCZ0zQIZma.DRYRjsVCtQr",
+                        "allowedValues": null,
+                        "canViewerChangeSetting": false
+                    },
+                    "backgroundImageUrl": {
+                        "value": "http://images-eds.xboxlive.com/image?url=FgQLWnJZZZTMLcclLRvZToTpXU6V37Rxh66J9G1adzQo7LpIdEyJ_jJyx7ZH7KZ84gRumNO6JdL.Sa36CwnEVPblUAnfx1J8lS5Jpc0H.IgI9QRVqiYvH3rSVimB0XQEYd3bzPLnBEWI7O3QsHYgQSeka4TCWp1U_jiQ1OicqHIkBG_sxt0uAkaJ4yEdZJ3V2llqOILolAV6MjyqWXDUyGrJ4.04IzbNG1GVBpX2ReBsIRweHmO4y9Hh7iGVBrLToHhnfbVmdeUbfY8cLsbh9N0nG67ycx8.0_UYgICcmmcqv7gLEz8K8VFb5Rv0qrnnvVLqsR1SIc0dQ05Ch.lmKQ--",
+                        "allowedValues": null,
+                        "canViewerChangeSetting": false
+                    },
+                    "preferredLocale": {
+                        "value": "en-US",
+                        "allowedValues": null,
+                        "canViewerChangeSetting": false
+                    },
+                    "tags": {
+                        "value": [
+                            "everyoneiswelcome",
+                            "experiencedplayersonly"
+                        ],
+                        "allowedValues": null,
+                        "canViewerChangeSetting": false
+                    },
+                    "associatedTitles": {
+                        "value": [
+                            "345903534",
+                            "896928775"
+                        ],
+                        "allowedValues": null,
+                        "canViewerChangeSetting": false
+                    },
+                    "primaryColor": {
+                        "value": "107c10",
+                        "allowedValues": null,
+                        "canViewerChangeSetting": false
+                    },
+                    "secondaryColor": {
+                        "value": "102b14",
+                        "allowedValues": null,
+                        "canViewerChangeSetting": false
+                    },
+                    "tertiaryColor": {
+                        "value": "155715",
+                        "allowedValues": null,
+                        "canViewerChangeSetting": false
+                    }
+                }
+            }
+        ],
+        "searchFacetResults": {
+            "tags": [
+                {
+                    "count": 45,
+                    "value": "micoptional"
+                },
+                {
+                    "count": 45,
+                    "value": "swearingok"
+                },
+                {
+                    "count": 33,
+                    "value": "casual"
+                },
+                {
+                    "count": 33,
+                    "value": "cooperative"
+                },
+                {
+                    "count": 32,
+                    "value": "newplayerswelcome"
+                },
+                {
+                    "count": 31,
+                    "value": "allcontentok"
+                },
+                {
+                    "count": 27,
+                    "value": "everyoneiswelcome"
+                },
+                {
+                    "count": 25,
+                    "value": "willhelpnewplayers"
+                },
+                {
+                    "count": 24,
+                    "value": "competitive"
+                },
+                {
+                    "count": 22,
+                    "value": "achievementhunting"
+                }
+            ],
+            "titles": [
+                {
+                    "count": 45,
+                    "value": "247546985"
+                },
+                {
+                    "count": 45,
+                    "value": "94618376"
+                },
+                {
+                    "count": 31,
+                    "value": "972249091"
+                },
+                {
+                    "count": 27,
+                    "value": "80579825"
+                },
+                {
+                    "count": 20,
+                    "value": "219630713"
+                },
+                {
+                    "count": 20,
+                    "value": "926771636"
+                },
+                {
+                    "count": 16,
+                    "value": "345903534"
+                },
+                {
+                    "count": 16,
+                    "value": "74304278"
+                },
+                {
+                    "count": 15,
+                    "value": "1484511986"
+                },
+                {
+                    "count": 15,
+                    "value": "558797228"
+                }
+            ]
+        },
+        "recommendationCounts": null
+    },
+    "clubPresenceCounts": {
+        "totalCount": 321,
+        "activeCount": 123,
+        "hereTodayCount": 200
+    },
+    "suggestResult": {
+        "results": [
+            {
+                "text": "eVALKYRIES",
+                "result": {
+                    "description": "This is an awesome club.",
+                    "displayImageUrl": "http://localhost/3377699720589312",
+                    "id": "3377699720589312",
+                    "name": "eVALKYRIES",
+                    "score": 0.043,
+                    "tags": [
+                        "tag1",
+                        "tag2",
+                        "tag3"
+                    ],
+                    "titles": [
+                        "titleId1",
+                        "titleId2",
+                        "titleId3"
+                    ]
+                }
+            },
+            {
+                "text": "eVALKILMERS",
+                "result": {
+                    "description": "Val Kilmer <3",
+                    "displayImageUrl": "http://localhost/3377699720589518",
+                    "id": "3377699720589518",
+                    "name": "eVALKILMERS",
+                    "score": 0.066,
+                    "tags": [
+                        "tag1"
+                    ],
+                    "titles": [
+                        "titleId1"
+                    ]
+                }
+            }
+        ]
+    }
+}

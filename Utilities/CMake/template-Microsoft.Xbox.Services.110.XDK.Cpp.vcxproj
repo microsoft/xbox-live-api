@@ -91,6 +91,7 @@
       $(ProjectDir)\..\..\External\cpprestsdk\Release\include;
       $(ProjectDir)\..\..\Source\Services\Presence;
       $(ProjectDir)\..\..\Source\Services\TitleStorage;
+      $(ProjectDir)\..\..\Source\Services\Clubs;
       %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>

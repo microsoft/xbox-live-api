@@ -80,7 +80,7 @@ public:
     DEFINE_PROP_GET_STR_OBJ(LockedDescription, locked_description);
 
     /// <summary>
-    /// The ProductId the achievement was released with. This is a globally unique indentifier that
+    /// The ProductId the achievement was released with. This is a globally unique identifier that
     /// may correspond to an application, downloadable content, etc.
     /// </summary>
     DEFINE_PROP_GET_STR_OBJ(ProductId, product_id);
@@ -111,7 +111,7 @@ public:
     property Windows::Foundation::TimeSpan EstimatedUnlockTime { Windows::Foundation::TimeSpan get(); }
 
     /// <summary>
-    /// A deeplink for clients that enables the title to lauch at a desired starting point
+    /// A deeplink for clients that enables the title to launch at a desired starting point
     /// for the achievement.
     /// </summary>
     DEFINE_PROP_GET_STR_OBJ(DeepLink, deep_link);

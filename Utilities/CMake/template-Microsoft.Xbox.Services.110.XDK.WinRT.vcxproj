@@ -112,8 +112,10 @@
       $(ProjectDir)\..\..\Source\Services\Privacy\WinRT;
       $(ProjectDir)\..\..\Source\Services\Marketplace;
       $(ProjectDir)\..\..\Source\Services\Marketplace\WinRT;
-      $(ProjectDir)..\..\Source\Services\Events;
-      $(ProjectDir)..\..\Source\Services\Events\WinRT;
+      $(ProjectDir)\..\..\Source\Services\Events;
+      $(ProjectDir)\..\..\Source\Services\Events\WinRT;
+      $(ProjectDir)\..\..\Source\Services\Clubs;
+      $(ProjectDir)\..\..\Source\Services\Clubs\WinRT;
       %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>

@@ -63,11 +63,12 @@ deserialize_column(
     _In_ std::error_code& errc
     )
 {
+    string_t displayName = utils::extract_json_string(json, _T("displayName"), errc);
     string_t statName = utils::extract_json_string(json, _T("statName"), errc, true);
     string_t stat_type = utils::extract_json_string(json, _T("type"), errc, true);
 
     return leaderboard_column(
-        string_t(),
+        std::move(displayName),
         std::move(statName),
         parse_stat_type(stat_type)
         );
@@ -85,6 +86,7 @@ deserialize_result(
 {
     std::error_code errc;
     web::json::value lb_info = utils::extract_json_field(json, _T("leaderboardInfo"), errc, true);
+    string_t displayName = utils::extract_json_string(lb_info, _T("displayName"), errc);
     int totalCount = utils::extract_json_int(lb_info, _T("totalCount"), errc, true);
 
     web::json::value paging_info = utils::extract_json_field(json, _T("pagingInfo"), errc, false);
@@ -95,10 +97,23 @@ deserialize_result(
     }
 
     std::vector<leaderboard_column> columns;
-    web::json::value json_column =
-        utils::extract_json_field(lb_info, _T("columnDefinition"), errc, true);
+    if (version == _T("2017"))
+    {
+        web::json::array json_columns = utils::extract_json_as_array(
+            utils::extract_json_field(lb_info, _T("columns"), errc, false),
+            errc);
+        for (const auto& json_column : json_columns)
+        {
+            columns.push_back(deserialize_column(json_column, errc));
+        }
+    }
+    else
+    {
+        web::json::value json_column =
+            utils::extract_json_field(lb_info, _T("columnDefinition"), errc, true);
 
-    columns.push_back(deserialize_column(json_column, errc));
+        columns.push_back(deserialize_column(json_column, errc));
+    }
 
     std::vector<leaderboard_row> rows;
     web::json::array json_rows = 
@@ -113,7 +128,7 @@ deserialize_result(
     }
 
     auto result = leaderboard_result(
-        string_t(),
+        displayName,
         totalCount,
         continuationToken,
         std::move(columns),

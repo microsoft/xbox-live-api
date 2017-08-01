@@ -327,7 +327,7 @@ public:
     /// <param name="statisticNames">A collection of statistic names to lookup.</param>
     /// <returns>
     /// Returns a concurrency::task&lt;T&gt; object that represents the state of the asynchronous operation.
-    /// The result is a user_statistics_result object that contains the requested statisitics.
+    /// The result is a user_statistics_result object that contains the requested statistics.
     /// Only statistics with values are returned. For example, if you ask for 3 statistic names and only 2 have values,
     /// only 2 statistics are returned by the service.
     /// </returns>
@@ -346,7 +346,7 @@ public:
     /// <param name="statisticNames">A collection of statistic names to lookup.</param>
     /// <returns>
     /// Returns a concurrency::task&lt;T&gt; object that represents the state of the asynchronous operation.
-    /// The result is a collection of user_statistics_result objects that contain the requested statisitics.
+    /// The result is a collection of user_statistics_result objects that contain the requested statistics.
     /// Only statistics with values are returned. For example, if you ask for 3 statistic names and only 2 have values,
     /// only 2 statistics are returned by the service.
     /// </returns>
@@ -364,7 +364,7 @@ public:
     /// <param name="requestedServiceConfigurationStatisticsCollection">A list of the service config IDs and its associated array of statistics.</param>
     /// <returns>
     /// Returns a concurrency::task&lt;T&gt; object that represents the state of the asynchronous operation.
-    /// The result is a collection of user_statistics_result objects that contain the requested statisitics.
+    /// The result is a collection of user_statistics_result objects that contain the requested statistics.
     /// Only statistics with values are returned. For example, if you ask for 3 statistic names and only 2 have values,
     /// only 2 statistics are returned by the service.
     /// </returns>
@@ -401,7 +401,7 @@ public:
     /// Registers an event handler for statistic change notifications.
     /// Event handlers receive a statistic_change_event_args object.
     /// </summary>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     /// <returns>
     /// A function_context object that can be used to unregister the event handler.
     /// </returns>
@@ -411,7 +411,7 @@ public:
     /// Unregisters an event handler for statistic change notifications.
     /// </summary>
     /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     _XSAPIIMP void remove_statistic_changed_handler(_In_ function_context context);
 
     std::shared_ptr<xbox_live_context_settings> _Xbox_live_context_settings() { return m_xboxLiveContextSettings; }

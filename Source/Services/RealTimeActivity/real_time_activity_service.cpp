@@ -566,7 +566,7 @@ real_time_activity_service::complete_subscribe(
     }
     else
     {
-        LOG_ERROR("No subscription found that matches recieved message");
+        LOG_ERROR("No subscription found that matches received message");
     }
 }
 
@@ -609,7 +609,7 @@ real_time_activity_service::_Add_subscription(
     {
         return xbox_live_result<void>(
             xbox_live_error_code::invalid_argument,
-            "The webscoket has been deactivated. Call activate to reconnect."
+            "The websocket has been deactivated. Call activate to reconnect."
             );
     }
 
@@ -757,7 +757,7 @@ real_time_activity_service::_Close_websocket()
         {
             try
             {
-                // Hold the reference to the shared point, so it won't deconsturct  
+                // Hold the reference to the shared point, so it won't deconstruct  
                 auto socketConnectionSharedCopy = socketToClean;
                 t.get();
                 socketConnectionSharedCopy = nullptr;

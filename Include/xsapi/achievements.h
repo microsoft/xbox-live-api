@@ -471,7 +471,7 @@ public:
     _XSAPIIMP const string_t& locked_description() const;
 
     /// <summary>
-    /// The product_id the achievement was released with. This is a globally unique indentifier that
+    /// The product_id the achievement was released with. This is a globally unique identifier that
     /// may correspond to an application, downloadable content, etc.
     /// </summary>
     _XSAPIIMP const string_t& product_id() const;
@@ -502,7 +502,7 @@ public:
     _XSAPIIMP const std::chrono::seconds& estimated_unlock_time() const;
 
     /// <summary>
-    /// A deeplink for clients that enables the title to lauch at a desired starting point
+    /// A deeplink for clients that enables the title to launch at a desired starting point
     /// for the achievement.
     /// </summary>
     _XSAPIIMP const string_t& deep_link() const;

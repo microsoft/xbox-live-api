@@ -24,6 +24,11 @@ using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
 
+using namespace Microsoft::Xbox::Services;
+using namespace Microsoft::Xbox::Services::Leaderboard;
+using namespace Microsoft::Xbox::Services::Statistics;
+using namespace Microsoft::Xbox::Services::Statistics::Manager;
+
 struct ScenarioDescriptionItem
 {
     int tag;
@@ -34,6 +39,8 @@ enum ScenarioItemTag
 {
     Scenario_GetUserProfileAsync = 1,
     Scenario_GetSocialRelationshipsAsync,
+    Scenario_WriteStat,
+    Scenario_ReadStat,
     Scenario_VerifyStringAsync
     //Scenario_GetUserProfilesForSocialGroupAsync
 };
@@ -42,6 +49,8 @@ ScenarioDescriptionItem ScenarioDescriptions[] =
 {
     { Scenario_GetUserProfileAsync, L"Get user profile" },
     { Scenario_GetSocialRelationshipsAsync, L"Get social list" },
+    { Scenario_WriteStat, L"Write Stat" },
+    { Scenario_ReadStat, L"Read Stat" },
 };
 
 bool MainPage::RunScenario(int selectedTag)
@@ -54,9 +63,11 @@ bool MainPage::RunScenario(int selectedTag)
 
     switch (selectedTag)
     {
-        case Scenario_GetUserProfileAsync: m_scenarios.Scenario_GetUserProfileAsync(this, m_xboxLiveContext); break;
-        case Scenario_GetSocialRelationshipsAsync: m_scenarios.Scenario_GetSocialRelationshipsAsync(this, m_xboxLiveContext); break;
-        default: return false;
+    case Scenario_GetUserProfileAsync: m_scenarios.Scenario_GetUserProfileAsync(this, m_xboxLiveContext); break;
+    case Scenario_GetSocialRelationshipsAsync: m_scenarios.Scenario_GetSocialRelationshipsAsync(this, m_xboxLiveContext); break;
+    case Scenario_WriteStat: m_scenarios.Scenario_WriteStat(this, m_xboxLiveContext); break;
+    case Scenario_ReadStat: m_scenarios.Scenario_ReadStat(this, m_xboxLiveContext); break;
+    default: return false;
     }
 
     return true;
@@ -65,21 +76,22 @@ bool MainPage::RunScenario(int selectedTag)
 MainPage::MainPage()
 {
     InitializeComponent();
+
     this->CoreDispatcher = Windows::UI::Xaml::Window::Current->CoreWindow->Dispatcher;
+
     m_user = ref new Microsoft::Xbox::Services::System::XboxLiveUser();
     m_user->SignOutCompleted += ref new EventHandler<Microsoft::Xbox::Services::System::SignOutCompletedEventArgs^ >
         ([this](Platform::Object^, Microsoft::Xbox::Services::System::SignOutCompletedEventArgs^ args)
+    {
+        CoreDispatcher->RunAsync(
+            Windows::UI::Core::CoreDispatcherPriority::Normal,
+            ref new Windows::UI::Core::DispatchedHandler([this, args]()
         {
-            CoreDispatcher->RunAsync(
-                Windows::UI::Core::CoreDispatcherPriority::Normal,
-                ref new Windows::UI::Core::DispatchedHandler([this, args]()
-            {
-                this->UserInfoLabel->Text = L"user signed out";
-                Log(L"----------------");
-                LogFormat(L"User %s signed out", args->User->Gamertag->Data());
-            }));
-        });
-
+            this->UserInfoLabel->Text = L"user signed out";
+            Log(L"----------------");
+            LogFormat(L"User %s signed out", args->User->Gamertag->Data());
+        }));
+    });
 
     for (ScenarioDescriptionItem scenario : ScenarioDescriptions)
     {
@@ -89,14 +101,95 @@ MainPage::MainPage()
         this->ScenarioListBox->Items->Append(listBoxItem);
     }
 
+    StartTimerAndRegisterHandler();
+
     this->ScenarioListBox->SelectedIndex = 0;
     SignInSilently();
 }
 
-void MainPage::ScenarioListBox_DoubleTapped(
-    Platform::Object^ sender, 
-    Windows::UI::Xaml::Input::DoubleTappedRoutedEventArgs^ e
-    )
+void MainPage::StartTimerAndRegisterHandler()
+{
+    auto timer = ref new Windows::UI::Xaml::DispatcherTimer();
+
+    TimeSpan ts;
+    ts.Duration = 500;
+    timer->Interval = ts;
+    timer->Start();
+    auto registrationToken = timer->Tick += ref new EventHandler<Object^>(this, &MainPage::OnTick);
+}
+
+void MainPage::OnTick(Object^ sender, Object^ e)
+{
+    StatisticManager^ mgr = Microsoft::Xbox::Services::Statistics::Manager::StatisticManager::SingletonInstance;
+    if (mgr != nullptr)
+    {
+        auto EventList = mgr->DoWork();
+        for (StatisticEvent^ Event : EventList)
+        {
+            if (Event->ErrorCode != 0)
+            {
+                LogFormat(L"DoWork error: %s", Event->ErrorMessage->Data());
+            }
+
+            StatisticEventArgs^ args;
+
+            switch (Event->EventType)
+            {
+            case StatisticEventType::LocalUserAdded:
+                LogFormat(L"DoWork LocalUserAdded: %s", Event->User->Gamertag->Data());
+                break;
+
+            case StatisticEventType::LocalUserRemoved:
+                LogFormat(L"DoWork LocalUserRemoved: %s", Event->User->Gamertag->Data());
+                break;
+
+            case StatisticEventType::GetLeaderboardComplete:
+            {
+                Log(L"DoWork GetLeaderboardComplete:");
+
+                LeaderboardResultEventArgs^ LbResultEventArgs = safe_cast<LeaderboardResultEventArgs^>(Event->EventArgs);
+                LeaderboardResult^ LbResult = LbResultEventArgs->Result;
+
+                Platform::String^ displayName = LbResult->DisplayName;
+                LogFormat(L"Leaderboard displayName: %s\n", displayName->Data());
+
+                for (unsigned int i = 0; i < LbResult->Columns->Size; i++)
+                {
+                    LeaderboardColumn^ col = LbResult->Columns->GetAt(i);
+                    LogFormat(L"Column %d: DisplayName=%s StatName=%s\n", i, col->DisplayName->Data(), col->StatisticName->Data());
+                }
+
+                for (LeaderboardRow^ row : LbResult->Rows)
+                {
+                    String^ colValues;
+                    for( unsigned int i = 0; i<row->Values->Size; i++)
+                    {
+                        Platform::String^ columnValue = row->Values->GetAt(i);
+                        
+                        colValues = colValues + L" ";
+                        colValues = colValues + columnValue;
+                    }
+                    LogFormat(L"Gametag=%16s Rank=%s Percentile=%s colValues=%s\n", row->Gamertag->Data(), row->Rank.ToString()->Data(), row->Percentile.ToString()->Data(), colValues->Data());
+                }
+            }
+            break;
+
+            case StatisticEventType::StatisticUpdateComplete:
+                LogFormat(L"DoWork StatisticUpdateComplete: %s", Event->User->Gamertag->ToString());
+
+                IVectorView<String^>^ stats = mgr->GetStatisticNames(Event->User);
+                for (String^ stat : stats)
+                {
+                    LogFormat(L"DoWork Stat: %s", stat->Data());
+                }
+
+                break;
+            }
+        }
+    }
+}
+
+void MainPage::ScenarioListBox_DoubleTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::DoubleTappedRoutedEventArgs^ e)
 {
     RunSelectedScenario();
 }
@@ -138,7 +231,7 @@ void MainPage::RunSelectedScenario()
 {
     if (this->ScenarioListBox->SelectedItems->Size == 1)
     {
-        ClearLogs();
+        //ClearLogs();
         ListBoxItem^ selectedItem = safe_cast<ListBoxItem^>(this->ScenarioListBox->SelectedItem);
         int selectedTag = safe_cast<int>(selectedItem->Tag);
         RunScenario(selectedTag);
@@ -147,7 +240,7 @@ void MainPage::RunSelectedScenario()
 
 void MainPage::RunAllButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-    ClearLogs();
+    //ClearLogs();
     int scenarioTag = 1;
     for (;;)
     {
@@ -173,8 +266,7 @@ void MainPage::SignIn()
     Log(this->UserInfoLabel->Text);
 
     auto asyncOp = m_user->SignInAsync(this->CoreDispatcher);
-    create_task(asyncOp)
-        .then([this](task<Microsoft::Xbox::Services::System::SignInResult^> t)
+    create_task(asyncOp).then([this](task<Microsoft::Xbox::Services::System::SignInResult^> t)
     {
         try
         {
@@ -182,6 +274,11 @@ void MainPage::SignIn()
             if (result->Status == Microsoft::Xbox::Services::System::SignInStatus::Success)
             {
                 m_xboxLiveContext = ref new Microsoft::Xbox::Services::XboxLiveContext(m_user);
+
+                StatisticManager^ mgr = StatisticManager::SingletonInstance;
+                if (mgr == nullptr) return t;
+                mgr->AddLocalUser(m_xboxLiveContext->User);
+
                 this->UserInfoLabel->Text = L"Sign in succeeded";
             }
             else if (result->Status == Microsoft::Xbox::Services::System::SignInStatus::UserCancel)
@@ -207,8 +304,7 @@ void MainPage::SignInSilently()
     Log(this->UserInfoLabel->Text);
 
     auto asyncOp = m_user->SignInSilentlyAsync(nullptr);
-    create_task(asyncOp)
-    .then([this](task<Microsoft::Xbox::Services::System::SignInResult^> t) 
+    create_task(asyncOp).then([this](task<Microsoft::Xbox::Services::System::SignInResult^> t)
     {
         try
         {
@@ -216,6 +312,11 @@ void MainPage::SignInSilently()
             if (result->Status == Microsoft::Xbox::Services::System::SignInStatus::Success)
             {
                 m_xboxLiveContext = ref new Microsoft::Xbox::Services::XboxLiveContext(m_user);
+
+                StatisticManager^ mgr = StatisticManager::SingletonInstance;
+                if (mgr == nullptr) return t;
+                mgr->AddLocalUser(m_xboxLiveContext->User);
+
                 this->UserInfoLabel->Text = L"SignIn Silent succeeded";
             }
             else if (result->Status == Microsoft::Xbox::Services::System::SignInStatus::UserInteractionRequired)

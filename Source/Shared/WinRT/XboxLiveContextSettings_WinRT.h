@@ -88,7 +88,7 @@ public:
     }
 
     /// <summary>
-    /// DEPRECATED.  This value is ignored and is now automatically calcuated to ensure the http_timeout_window() is obeyed
+    /// DEPRECATED.  This value is ignored and is now automatically calculated to ensure the http_timeout_window() is obeyed
     /// This means that calls will be more deterministic about the time window they return in.
     /// </summary>
     DEFINE_PROP_GETSET_TIMESPAN_IN_SEC(HttpTimeout, http_timeout);

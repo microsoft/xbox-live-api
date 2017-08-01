@@ -630,7 +630,7 @@ enum class write_session_status
     handle_not_found,
 
     /// <summary>
-    /// HTTP Result 412- Session docuemnt is not the most recent
+    /// HTTP Result 412- Session document is not the most recent
     /// </summary>
     out_of_sync,
 
@@ -1753,7 +1753,7 @@ public:
     _XSAPIIMP xbox::services::tournaments::tournament_registration_state registration_state() const;
 
     /// <summary>
-    /// The tournament registration reaon for the certain state.
+    /// The tournament registration reason for the certain state.
     /// </summary>
     _XSAPIIMP xbox::services::tournaments::tournament_registration_reason registration_reason() const;
 
@@ -1972,7 +1972,7 @@ public:
     _XSAPIIMP multiplayer_session_visibility visibility() const;
 
     /// <summary>
-    /// The join restriction of the session, which applies if visiblity is "open".
+    /// The join restriction of the session, which applies if visibility is "open".
     /// </summary>
     _XSAPIIMP multiplayer_session_restriction join_restriction() const;
 
@@ -2316,7 +2316,7 @@ public:
     _XSAPIIMP bool is_current_user() const;
 
     /// <summary>
-    /// Indiates to run QoS initialization for this user. Defaults to false.
+    /// Indicates to run QoS initialization for this user. Defaults to false.
     /// Ignored if there is not a "memberInitialization" section for the session.
     /// </summary>
     _XSAPIIMP bool initialize_requested() const;
@@ -2911,7 +2911,7 @@ public:
     
     /// <summary>
     /// A collection of members that are in the session or entering the session together. 
-    /// Call MultiplayerSession::Join or MultiplayerSession::Leave to add or remove youself from this list.  
+    /// Call MultiplayerSession::Join or MultiplayerSession::Leave to add or remove yourself from this list.  
     /// Call MultiplayerSession::AddMemberReservation to add a reservation for another user on this list.
     /// Call multiplayer_service::write_session to write these changes to the service.
     /// </summary>
@@ -4221,7 +4221,7 @@ public:
     /// Registers an event handler for notifications when a multiplayer session changes.
     /// Event handlers receive a multiplayer_session_change_event_args&amp; object.
     /// </summary>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     /// <returns>
     /// A function_context object that can be used to unregister the event handler.
     /// </returns>
@@ -4234,13 +4234,13 @@ public:
     /// Unregisters an event handler for multiplayer session change notifications.
     /// </summary>
     /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
-    /// <param name="context">The callback function that recieves notifications.</param>
+    /// <param name="context">The callback function that receives notifications.</param>
     _XSAPIIMP void remove_multiplayer_session_changed_handler(_In_ function_context context);
 
     /// <summary>
     /// Registers an event handler for notifications when a multiplayer subscription is lost.
     /// </summary>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     /// <returns>
     /// A function_context object that can be used to unregister the event handler.
     /// </returns>
@@ -4253,7 +4253,7 @@ public:
     /// Unregisters an event handler for multiplayer subscription lost notifications.
     /// </summary>
     /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
-    /// <param name="handler">The callback function that recieves notifications.</param>
+    /// <param name="handler">The callback function that receives notifications.</param>
     _XSAPIIMP void remove_multiplayer_subscription_lost_handler(_In_ function_context context);
 
     std::shared_ptr<xbox_live_context_settings> _Xbox_live_context_settings() { return m_xboxLiveContextSettings; }

@@ -169,7 +169,7 @@ struct xsapi_singleton
     std::shared_ptr<real_time_activity::real_time_activity_service_factory> m_rtaFactoryInstance;
 
     // from Multiplayer\Manager\multiplayer_client_pending_request.cpp
-    volatile long m_multiplayerClientPendingRequestUniqueIndentifier;
+    volatile long m_multiplayerClientPendingRequestUniqueIdentifier;
 
     // from Shared\http_call_impl.cpp
     std::shared_ptr<http_retry_after_manager> m_httpRetryPolicyManagerSingleton;
@@ -359,6 +359,30 @@ public:
         _In_ const web::json::value& json,
         _In_ const string_t& name,
         _Inout_ std::error_code& error,
+        _In_ bool required
+    );
+
+    static std::vector<string_t> extract_json_string_vector(
+        _In_ const web::json::value& json,
+        _In_ const string_t& name,
+        _Inout_ std::error_code& error,
+        _In_ bool required
+    );
+
+    static std::vector<string_t> extract_json_string_vector(
+        _In_ const web::json::value& json,
+        _In_ const string_t& name,
+        _In_ bool required
+    );
+
+    static std::vector<string_t> extract_json_string_vector(
+        _In_ const web::json::value& json,
+        _Inout_ std::error_code& error,
+        _In_ bool required
+    );
+
+    static std::vector<string_t> extract_json_string_vector(
+        _In_ const web::json::value& json,
         _In_ bool required
     );
 
@@ -671,6 +695,11 @@ public:
 
     static xbox::services::xbox_live_error_code convert_exception_to_xbox_live_error_code();
 
+    static string_t vector_join(
+        _In_ const std::vector<string_t>& vector,
+        _In_ string_t::value_type seperator
+    );
+
 #ifdef _WIN32
     static void convert_unix_time_to_filetime(
         _In_ std::time_t t,
@@ -700,7 +729,7 @@ public:
         _In_ const string_t& protocol = _T("https")
     );
 
-#if defined _WIN32
+#ifdef _WIN32
     static inline std::string convert_wide_string_to_standard_string(_In_ string_t wideString)
     {
         std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;

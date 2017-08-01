@@ -143,6 +143,7 @@ m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_s
 
     std::weak_ptr<xbox_live_context_impl> thisWeakPtr = shared_from_this();
 
+
     m_profileService = xbox::services::social::profile_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_reputationService = xbox::services::social::reputation_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_leaderboardService = xbox::services::leaderboard::leaderboard_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
@@ -158,7 +159,8 @@ m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_s
     m_socialService = xbox::services::social::social_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
     m_contextualSearchService = xbox::services::contextual_search::contextual_search_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_stringService = xbox::services::system::string_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-
+    m_clubsService = xbox::services::clubs::clubs_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
+	
 #if !XSAPI_SERVER
 
 #if UWP_API || XSAPI_U
@@ -354,6 +356,12 @@ system::string_service&
 xbox_live_context_impl::string_service()
 {
     return m_stringService;
+}
+
+clubs::clubs_service&
+xbox_live_context_impl::clubs_service()
+{
+	return m_clubsService;
 }
 
 #if UWP_API || XSAPI_U

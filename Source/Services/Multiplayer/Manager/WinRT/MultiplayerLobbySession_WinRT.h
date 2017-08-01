@@ -90,7 +90,7 @@ public:
     /// contain updated response returned from the server upon calling do_work().
     /// Hosts a new lobby when the first user is added. For all other users, they will be added to the existing lobby
     // as secondary users. This API will also advertise the lobby for friends to join.
-    /// You can send invites, set lobby properties, access lobby memebers via lobby() only once you've added the local user.
+    /// You can send invites, set lobby properties, access lobby members via lobby() only once you've added the local user.
     /// While joining a lobby via an invite, or a handleId, you can skip adding the local user to avoid creating a lobby and 
     /// instead pass in the list of users in the join_lobby() API.
     /// </summary>
