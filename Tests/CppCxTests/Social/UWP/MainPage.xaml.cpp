@@ -40,7 +40,9 @@ enum ScenarioItemTag
     Scenario_GetUserProfileAsync = 1,
     Scenario_GetSocialRelationshipsAsync,
     Scenario_WriteStat,
-    Scenario_ReadStat,
+    Scenario_GetStat,
+    Scenario_GetLeaderboard,
+    Scenario_DeleteStat,
     Scenario_VerifyStringAsync
     //Scenario_GetUserProfilesForSocialGroupAsync
 };
@@ -50,7 +52,9 @@ ScenarioDescriptionItem ScenarioDescriptions[] =
     { Scenario_GetUserProfileAsync, L"Get user profile" },
     { Scenario_GetSocialRelationshipsAsync, L"Get social list" },
     { Scenario_WriteStat, L"Write Stat" },
-    { Scenario_ReadStat, L"Read Stat" },
+    { Scenario_GetStat, L"Get Stat" },
+    { Scenario_GetLeaderboard, L"Get Leaderboard" },
+    { Scenario_DeleteStat, L"Delete Stat" },
 };
 
 bool MainPage::RunScenario(int selectedTag)
@@ -66,7 +70,9 @@ bool MainPage::RunScenario(int selectedTag)
     case Scenario_GetUserProfileAsync: m_scenarios.Scenario_GetUserProfileAsync(this, m_xboxLiveContext); break;
     case Scenario_GetSocialRelationshipsAsync: m_scenarios.Scenario_GetSocialRelationshipsAsync(this, m_xboxLiveContext); break;
     case Scenario_WriteStat: m_scenarios.Scenario_WriteStat(this, m_xboxLiveContext); break;
-    case Scenario_ReadStat: m_scenarios.Scenario_ReadStat(this, m_xboxLiveContext); break;
+    case Scenario_GetStat: m_scenarios.Scenario_GetStat(this, m_xboxLiveContext); break;
+    case Scenario_GetLeaderboard: m_scenarios.Scenario_GetLeaderboard(this, m_xboxLiveContext); break;
+    case Scenario_DeleteStat: m_scenarios.Scenario_DeleteStat(this, m_xboxLiveContext); break;
     default: return false;
     }
 
@@ -278,6 +284,14 @@ void MainPage::SignIn()
                 StatisticManager^ mgr = StatisticManager::SingletonInstance;
                 if (mgr == nullptr) return t;
                 mgr->AddLocalUser(m_xboxLiveContext->User);
+
+                m_xboxLiveContext->Settings->ServiceCallRouted += 
+                    ref new EventHandler<XboxServiceCallRoutedEventArgs^>(
+                        [this](Object^, XboxServiceCallRoutedEventArgs^ args)
+                        {
+                            this->LogFormat(L"[URL]: %s %s", args->HttpMethod->Data(), args->Url->AbsoluteUri->Data());
+                            this->LogFormat(L"[Response]: %s %s", args->HttpStatus.ToString()->Data(), args->ResponseBody->Data());
+                        });
 
                 this->UserInfoLabel->Text = L"Sign in succeeded";
             }
