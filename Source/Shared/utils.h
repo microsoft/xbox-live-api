@@ -14,6 +14,8 @@
 #include "xsapi/mem.h"
 
 // Forward decls
+class xbl_thread_pool;
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
     class xbox_live_services_settings;
     class xbox_system_factory;
@@ -184,6 +186,8 @@ struct xsapi_singleton
     std::shared_ptr<system::xbox_system_factory> m_factoryInstance;
 
     std::shared_ptr<initiator> m_initiator;
+
+    std::shared_ptr<xbl_thread_pool> m_threadpool;
 
 #if _WINRT_DLL || UNIT_TEST_SERVICES
     // from Services\Multiplayer\Manager\WinRT\MultiplayerManager_WinRT.cpp

@@ -125,6 +125,8 @@
     <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectFolder)\</IntDir>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\Shared\threadpool.cpp" />
+    <ClCompile Include="..\..\Source\Shared\utils_uwp.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_serializers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.h" />
@@ -452,6 +454,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl_idp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\xbox_live_mutex.cpp" />
+    <ClInclude Include="..\..\Source\Shared\threadpool.h" />
+    <ClInclude Include="..\..\Source\Shared\utils_uwp.h" />
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>

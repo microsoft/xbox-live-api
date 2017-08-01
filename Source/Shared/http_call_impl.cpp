@@ -336,10 +336,11 @@ http_call_impl::internal_get_response(
         HCHttpCallRequestSetRetryAllowed(call, httpCallData->retryAllowed);
         HCHttpCallRequestSetTimeout(call, static_cast<uint32_t>(httpCallData->httpTimeout.count()));
 
-        HC_ASYNC_TASK_HANDLE taskHandle = HCHttpCallPerform(call, nullptr, nullptr);
+        uint64_t taskGroupId = 0; // TODO
+        HC_TASK_HANDLE taskHandle = HCHttpCallPerform(taskGroupId, call, nullptr, nullptr);
 
-        HCThreadWaitForResultsReady(taskHandle, 30000);
-        if (!HCThreadAreResultsReady(taskHandle))
+        HCTaskWaitForCompleted(taskHandle, 30000);
+        if (!HCTaskIsCompleted(taskHandle))
         {
             // TODO: handle timeout error
             auto httpCallResponse = get_http_call_response(httpCallData, http_response());

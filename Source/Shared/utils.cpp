@@ -23,6 +23,7 @@
 #include "presence_internal.h"
 #include "initiator.h"
 #include "httpClient/httpClient.h"
+#include "threadpool.h"
 
 #if UWP_API
 #ifdef _WINRT_DLL
@@ -79,6 +80,9 @@ void xsapi_singleton::init()
 #endif
 
     HCGlobalInitialize();
+    HCSettingsSetLogLevel(HC_LOG_LEVEL::LOG_VERBOSE);
+    m_threadpool = std::make_shared<xbl_thread_pool>();
+    m_threadpool->start_threads();
     m_initiator = std::make_shared<initiator>();
 }
 
