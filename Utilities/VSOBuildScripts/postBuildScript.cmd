@@ -64,6 +64,7 @@ robocopy /NJS /NJH /MT:16 /S /NP %UWP_BUILD_SHARE%\Include %XDK_BINARIES_DROP%\c
 
 rem copy binaries to build output folder
 mkdir %XDK_BINARIES_DROP%
+mkdir %XDK_BINARIES_DROP%\SourceDist
 mkdir %XDK_BINARIES_DROP%\winrt
 mkdir %XDK_BINARIES_DROP%\winrt\binaries
 mkdir %XDK_BINARIES_DROP%\winrt\binaries\Debug
@@ -72,6 +73,9 @@ mkdir %XDK_BINARIES_DROP%\cpp\binaries\release\v110
 mkdir %XDK_BINARIES_DROP%\cpp\binaries\debug\v110
 mkdir %XDK_BINARIES_DROP%\cpp\binaries\release\v140
 mkdir %XDK_BINARIES_DROP%\cpp\binaries\debug\v140
+
+copy %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\XDK\Readme.txt %XDK_BINARIES_DROP%\SourceDist\Readme.txt
+%TFS_SourcesDirectory%\Utilities\VSOBuildScripts\FindAndReplace.exe %XDK_BINARIES_DROP%\SourceDist\Readme.txt GITCOMMIT %BUILD_SOURCEVERSION%
 
 echo set MAJOR_VERSION=%SDK_RELEASE_NAME% > %XDK_BINARIES_DROP%\setver.cmd
 echo set MINOR_VERSION=%MINOR_VERSION_NUMBER% >> %XDK_BINARIES_DROP%\setver.cmd
