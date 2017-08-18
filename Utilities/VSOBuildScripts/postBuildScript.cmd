@@ -76,6 +76,7 @@ mkdir %XDK_BINARIES_DROP%\cpp\binaries\debug\v140
 
 copy %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\XDK\Readme.txt %XDK_BINARIES_DROP%\SourceDist\Readme.txt
 %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\FindAndReplace.exe %XDK_BINARIES_DROP%\SourceDist\Readme.txt GITCOMMIT %BUILD_SOURCEVERSION%
+%TFS_SourcesDirectory%\Utilities\VSOBuildScripts\FindAndReplace.exe %XDK_BINARIES_DROP%\SourceDist\Readme.txt VERSION %NUGET_VERSION_NUMBER%
 
 echo set MAJOR_VERSION=%SDK_RELEASE_NAME% > %XDK_BINARIES_DROP%\setver.cmd
 echo set MINOR_VERSION=%MINOR_VERSION_NUMBER% >> %XDK_BINARIES_DROP%\setver.cmd
