@@ -9,7 +9,6 @@ call %ROOT_FOLDER%\Utilities\CMake\scripts\RunCMake.cmd -DSHIP=TRUE
 
 %ROOT_FOLDER%\Utilities\CMake\ProjectFileProcessor\bin\Debug\ProjectFileProcessor.exe %ROOT_FOLDER%
 
-copy %NEW_FOLDER%\Microsoft.Xbox.Services.110.XDK.Ship.Cpp.vcxproj* %OLD_FOLDER%\Microsoft.Xbox.Services.110.XDK.Cpp
 copy %NEW_FOLDER%\Microsoft.Xbox.Services.140.UWP.Ship.Cpp.vcxproj* %OLD_FOLDER%\Microsoft.Xbox.Services.140.UWP.Cpp
 copy %NEW_FOLDER%\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.vcxproj* %OLD_FOLDER%\Microsoft.Xbox.Services.140.XDK.Cpp
 copy %NEW_FOLDER%\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.vcxproj* %OLD_FOLDER%\Microsoft.Xbox.Services.141.UWP.Cpp
