@@ -4,12 +4,6 @@ set ROOT_FOLDER=%1
 set NEW_FOLDER=%ROOT_FOLDER%\Utilities\CMake\output
 set OLD_FOLDER=%ROOT_FOLDER%\Build
 
-fc %OLD_FOLDER%\Microsoft.Xbox.Services.110.XDK.Cpp\Microsoft.Xbox.Services.110.XDK.Cpp.vcxproj %NEW_FOLDER%\Microsoft.Xbox.Services.110.XDK.Cpp.vcxproj
-if %ERRORLEVEL% NEQ 0 goto email
-
-fc %OLD_FOLDER%\Microsoft.Xbox.Services.110.XDK.Cpp\Microsoft.Xbox.Services.110.XDK.Ship.Cpp.vcxproj %NEW_FOLDER%\Microsoft.Xbox.Services.110.XDK.Ship.Cpp.vcxproj
-if %ERRORLEVEL% NEQ 0 goto email
-
 fc %OLD_FOLDER%\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.110.XDK.WinRT.vcxproj %NEW_FOLDER%\Microsoft.Xbox.Services.110.XDK.WinRT.vcxproj
 if %ERRORLEVEL% NEQ 0 goto email
 
