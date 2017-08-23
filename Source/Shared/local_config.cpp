@@ -173,6 +173,12 @@ bool local_config::is_creators_title()
     return get_bool_from_config(_T("XboxLiveCreatorsTitle"), false, false);
 }
 
+string_t local_config::scope()
+{
+    string_t defaultScope = is_creators_title() ? _T("xbl.signin xbl.friends") : _T("xboxlive.signin");
+    return get_value_from_config(_T("Scope"), false, defaultScope);
+}
+
 
 #if XSAPI_I
 string_t local_config::apns_environment()
