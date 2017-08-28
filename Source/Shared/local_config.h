@@ -41,6 +41,7 @@ public:
     virtual string_t client_secret();
     virtual bool use_first_party_token();
     virtual bool is_creators_title();
+    virtual string_t msa_sub_target();
 
     virtual string_t get_value_from_local_storage(_In_ const string_t& name);
     virtual xbox_live_result<void> write_value_to_local_storage(_In_ const string_t& name, _In_ const string_t& value);
