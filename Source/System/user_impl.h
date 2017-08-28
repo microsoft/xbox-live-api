@@ -198,8 +198,7 @@ private:
         _In_ const string_t& headers,
         _In_ const std::vector<uint8_t>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
-        _In_ bool forceRefresh,
-        _In_ bool isPartnerToken = false
+        _In_ bool forceRefresh
         );
 
     // sync method for request token 

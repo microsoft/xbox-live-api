@@ -75,7 +75,7 @@ user_impl_idp::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
 
             if (!payload.xbox_user_id().empty())
             {
-                // Temp fix to show partner token consent. 
+                //Call MSA IDP once getting first xtoken succeeded to show partner token consent.
                 auto localConfig = xbox_system_factory::get_factory()->create_local_config();
                 if (!localConfig->msa_sub_target().empty())
                 {
@@ -307,8 +307,7 @@ user_impl_idp::internal_get_token_and_signature_helper(
     _In_ const string_t& headers,
     _In_ const std::vector<byte>& bytes,
     _In_ bool promptForCredentialsIfNeeded,
-    _In_ bool forceRefresh,
-    _In_ bool isPantnerToken
+    _In_ bool forceRefresh
     )
 {
     if (m_provider == nullptr)
@@ -330,7 +329,7 @@ user_impl_idp::internal_get_token_and_signature_helper(
         request->Properties->Insert("RequestBody", PLATFORM_STRING_FROM_STRING_T(utility::conversions::to_base64(requestBody)));
     }
 
-    request->Properties->Insert("Target", isPantnerToken? "xboxlivepartner.signin" : PLATFORM_STRING_FROM_STRING_T(m_authConfig->rps_ticket_service()));
+    request->Properties->Insert("Target", PLATFORM_STRING_FROM_STRING_T(m_authConfig->rps_ticket_service()));
     request->Properties->Insert("Policy", PLATFORM_STRING_FROM_STRING_T(m_authConfig->rps_ticket_policy()));
 
     if (promptForCredentialsIfNeeded)
