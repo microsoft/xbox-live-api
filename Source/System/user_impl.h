@@ -198,14 +198,16 @@ private:
         _In_ const string_t& headers,
         _In_ const std::vector<uint8_t>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
-        _In_ bool forceRefresh
+        _In_ bool forceRefresh,
+        _In_ bool isPartnerToken = false
         );
 
     // sync method for request token 
-    Windows::Security::Authentication::Web::Core::WebTokenRequestResult^ request_token_from_idp(
+    static Windows::Security::Authentication::Web::Core::WebTokenRequestResult^ request_token_from_idp(
         _In_opt_ Windows::UI::Core::CoreDispatcher^ coreDispatcher,
         _In_ bool promptForCredentialsIfNeeded,
-        _In_ Windows::Security::Authentication::Web::Core::WebTokenRequest^ request
+        _In_ Windows::Security::Authentication::Web::Core::WebTokenRequest^ request,
+        _In_ Windows::Security::Credentials::WebAccount^ webAccount
         );
 
     xbox_live_result<token_and_signature_result>
