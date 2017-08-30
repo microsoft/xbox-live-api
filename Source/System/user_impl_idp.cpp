@@ -75,6 +75,50 @@ user_impl_idp::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
 
             if (!payload.xbox_user_id().empty())
             {
+                //Call MSA IDP once getting first xtoken succeeded to show partner token consent.
+                auto localConfig = xbox_system_factory::get_factory()->create_local_config();
+                if (!localConfig->msa_sub_target().empty())
+                {
+                    WebTokenRequest^ msaRequest;
+                    WebAccount^ account = create_task(WebAuthenticationCoreManager::FindAccountProviderAsync("https://login.microsoft.com", "consumers"))
+                    .then([&msaRequest, payload, localConfig](WebAccountProvider^ provider)
+                    {
+                        msaRequest = ref new WebTokenRequest(provider, "service::XboxLivePartner.Signin::DELEGATION");
+                        msaRequest->Properties->Insert("subpolicy", "JWT");
+                        msaRequest->Properties->Insert("subresource", ref new Platform::String(localConfig->msa_sub_target().c_str()));
+
+                        return WebAuthenticationCoreManager::FindAccountAsync(provider, ref new Platform::String(payload.web_account_id().c_str()));
+                    }).get();
+
+                    LOG_DEBUG("webaccount:");
+                    LOGS_DEBUG << account->Id->Data();
+                    LOGS_DEBUG << account->UserName->Data();
+                    for (auto property : account->Properties)
+                    {
+                        LOGS_DEBUG << property->Key->Data() << " : " << property->Value->Data();
+                    }
+
+                    WebTokenRequestResult^ patnerTokenResult = request_token_from_idp(
+                        xbox_live_context_settings::_s_dispatcher,
+                        showUI,
+                        msaRequest,
+                        account);
+
+                    if (patnerTokenResult != nullptr && patnerTokenResult->ResponseStatus == WebTokenRequestStatus::ProviderError)
+                    {
+                        std::string providerErrorMsg = utility::conversions::to_utf8string(patnerTokenResult->ResponseError->ErrorMessage->Data());
+                        std::stringstream msg;
+                        msg << " MSA Provider error: " << providerErrorMsg << ", Error Code: 0x" << std::hex << patnerTokenResult->ResponseError->ErrorCode;
+
+                        std::error_code error = xbox_live_error_code(patnerTokenResult->ResponseError->ErrorCode);
+                        return xbox_live_result<sign_in_result>(error, msg.str());
+                    }
+                    else if (patnerTokenResult == nullptr || patnerTokenResult->ResponseStatus != WebTokenRequestStatus::Success) //other error 
+                    {
+                        return xbox_live_result<sign_in_result>(convert_web_token_request_status(patnerTokenResult));
+                    }
+                }
+
                 // Hit presence service to validate the token.
                 if (!payload.token().empty())
                 {
@@ -298,7 +342,8 @@ user_impl_idp::internal_get_token_and_signature_helper(
     WebTokenRequestResult^ tokenResult = request_token_from_idp(
         xbox_live_context_settings::_s_dispatcher,
         promptForCredentialsIfNeeded,
-        request
+        request,
+        nullptr
         );
 
     xbox_live_result<token_and_signature_result> result = convert_web_token_request_result(tokenResult);
@@ -417,7 +462,8 @@ WebTokenRequestResult^
 user_impl_idp::request_token_from_idp(
     _In_opt_ Windows::UI::Core::CoreDispatcher^ coreDispatcher,
     _In_ bool promptForCredentialsIfNeeded,
-    _In_ WebTokenRequest^ request
+    _In_ WebTokenRequest^ request,
+    _In_ WebAccount^ webAccount
     )
 {
     WebTokenRequestResult^ tokenResult;
@@ -428,12 +474,16 @@ user_impl_idp::request_token_from_idp(
 
         coreDispatcher->RunAsync(
             Windows::UI::Core::CoreDispatcherPriority::Normal,
-            ref new Windows::UI::Core::DispatchedHandler([&tokenResult, &retException, request, completeEvent]()
+            ref new Windows::UI::Core::DispatchedHandler([&tokenResult, &retException, request, completeEvent, webAccount]()
         {
             try
             {
-                create_task(WebAuthenticationCoreManager::RequestTokenAsync(request))
-                .then([&tokenResult, &retException, completeEvent](task<WebTokenRequestResult^> t)
+                task<WebTokenRequestResult^> tokenTask = 
+                    webAccount == nullptr ?
+                    create_task(WebAuthenticationCoreManager::RequestTokenAsync(request)):
+                    create_task(WebAuthenticationCoreManager::RequestTokenAsync(request, webAccount));
+
+                tokenTask.then([&tokenResult, &retException, completeEvent](task<WebTokenRequestResult^> t)
                 {
                     try
                     {
@@ -463,9 +513,19 @@ user_impl_idp::request_token_from_idp(
     }
     else
     {
-        tokenResult = promptForCredentialsIfNeeded ?
-            create_task(WebAuthenticationCoreManager::RequestTokenAsync(request)).get() :
-            create_task(WebAuthenticationCoreManager::GetTokenSilentlyAsync(request)).get();
+        if (promptForCredentialsIfNeeded)
+        {
+            tokenResult = webAccount == nullptr? 
+                create_task(WebAuthenticationCoreManager::RequestTokenAsync(request)).get() :
+                create_task(WebAuthenticationCoreManager::RequestTokenAsync(request, webAccount)).get();
+        }
+        else
+        {
+            tokenResult = webAccount == nullptr ? 
+                create_task(WebAuthenticationCoreManager::GetTokenSilentlyAsync(request)).get() :
+                create_task(WebAuthenticationCoreManager::GetTokenSilentlyAsync(request, webAccount)).get();
+        }
+        
     }
 
     return tokenResult;
