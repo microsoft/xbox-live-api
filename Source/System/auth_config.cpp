@@ -42,7 +42,8 @@ auth_config::auth_config(
     _In_ string_t environmentPrefix,
     _In_ string_t environment,
     _In_ bool useCompactTicket,
-    _In_ bool isCreatorsTitle) :
+    _In_ bool isCreatorsTitle,
+    _In_ string_t scope) :
     m_useCompactTicket(useCompactTicket),
     m_sandbox(std::move(sandbox)),
     m_detailError(0),
@@ -58,7 +59,7 @@ auth_config::auth_config(
     m_serviceTokenEndpoint = get_endpoint_path(_T("service.auth"), environmentPrefix, environment);
     m_xTokenEndpoint = get_endpoint_path(_T("xsts.auth"), environmentPrefix, environment);
     m_userTokenSiteName = get_endpoint_path(_T("user.auth"), _T(""), environment, false); 
-    m_rpsTicketService = isCreatorsTitle ? _T("xbl.signin xbl.friends") : (useCompactTicket ? m_userTokenSiteName : _T("xboxlive.signin"));
+    m_rpsTicketService = isCreatorsTitle ? scope : (useCompactTicket ? m_userTokenSiteName : scope);
     m_xtokenComposition = { token_identity_type::u_token, token_identity_type::d_token, token_identity_type::t_token };
 }
 

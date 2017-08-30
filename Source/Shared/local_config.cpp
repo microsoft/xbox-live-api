@@ -178,6 +178,11 @@ string_t local_config::msa_sub_target()
     return get_value_from_config(_T("MsaSubTarget"), false, _T(""));
 }
 
+string_t local_config::scope()
+{
+    string_t defaultScope = is_creators_title() ? _T("xbl.signin xbl.friends") : _T("xboxlive.signin");
+    return get_value_from_config(_T("Scope"), false, defaultScope);
+}
 
 #if XSAPI_I
 string_t local_config::apns_environment()

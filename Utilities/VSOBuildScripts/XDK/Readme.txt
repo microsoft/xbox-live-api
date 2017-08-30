@@ -1,4 +1,4 @@
-Microsoft.Xbox.Services Source Distribution
+Microsoft.Xbox.Services Source Distribution v. VERSION
 -------------------------------------------
 The Microsoft.Xbox.Services binaries shipped inside this XDK version was built by source found 
 on GitHub at https://github.com/Microsoft/xbox-live-api/tree/GITCOMMIT
