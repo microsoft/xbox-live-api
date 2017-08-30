@@ -105,8 +105,8 @@ notification_service::unsubscribe_from_notifications_helper(
         {
             if (t->err_code())
             {
-                LOGS_ERROR << _T("notification service attempt failed\n");
-                LOGS_ERROR << _T("http status code: ");
+                LOGS_ERROR << "notification service attempt failed\n";
+                LOGS_ERROR << "http status code: ";
                 LOGS_ERROR << t->http_status();
                 LOGS_ERROR << t->err_message().c_str();
 

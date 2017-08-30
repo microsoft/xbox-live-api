@@ -134,7 +134,7 @@ void service_call_logger_protocol::set_state_bread_crumb(_In_ bool isTracking)
 
         if (!file.is_open())
         {
-            LOGS_ERROR << _T("WriteFile failed: ") <<filePath;
+            LOGS_ERROR << "WriteFile failed: " <<filePath;
             return;
         }
     }
