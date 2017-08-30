@@ -17,7 +17,9 @@ const xbox_live_result<leaderboard::leaderboard_result>& leaderboard_result_even
     return m_result;
 }
 
-leaderboard_result_event_args::leaderboard_result_event_args(const xbox_live_result<leaderboard::leaderboard_result>& result) :
+leaderboard_result_event_args::leaderboard_result_event_args(
+    const xbox_live_result<leaderboard::leaderboard_result>& result
+    ) :
     m_result(result)
 {
 }

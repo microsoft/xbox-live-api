@@ -22,7 +22,7 @@ public:
     call_buffer_timer();
 
     call_buffer_timer(
-        std::function<void(const std::vector<string_t>&, const call_buffer_timer_completion_context&)> callback,
+        _In_ std::function<void(const std::vector<string_t>&, const call_buffer_timer_completion_context&)> callback,
         _In_ std::chrono::seconds bufferTimePerCall
         );
 

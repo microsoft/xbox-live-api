@@ -77,9 +77,9 @@ real_time_activity_service::activate()
                 std::stringstream msg;
                 LOGS_ERROR << "You've currently activated  " << activationCount << " websockets.";
                 LOGS_ERROR << "We recommend you don't activate more than " << MAXIMUM_WEBSOCKETS_ACTIVATIONS_ALLOWED_PER_USER << " websockets";
-                LOGS_ERROR << "You can temporarily disable the assert by calling";
-                LOGS_ERROR << "xboxLiveContext->settings()->disable_asserts_for_maximum_number_of_websockets_activated()";
-                LOGS_ERROR << "however the issue must be addressed before certification.";
+                LOG_ERROR("You can temporarily disable the assert by calling");
+                LOG_ERROR("xboxLiveContext->settings()->disable_asserts_for_maximum_number_of_websockets_activated()");
+                LOG_ERROR("however the issue must be addressed before certification.");
 
                 XSAPI_ASSERT(false);
             }
