@@ -202,10 +202,11 @@ private:
         );
 
     // sync method for request token 
-    Windows::Security::Authentication::Web::Core::WebTokenRequestResult^ request_token_from_idp(
+    static Windows::Security::Authentication::Web::Core::WebTokenRequestResult^ request_token_from_idp(
         _In_opt_ Windows::UI::Core::CoreDispatcher^ coreDispatcher,
         _In_ bool promptForCredentialsIfNeeded,
-        _In_ Windows::Security::Authentication::Web::Core::WebTokenRequest^ request
+        _In_ Windows::Security::Authentication::Web::Core::WebTokenRequest^ request,
+        _In_ Windows::Security::Credentials::WebAccount^ webAccount
         );
 
     xbox_live_result<token_and_signature_result>
