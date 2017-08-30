@@ -741,9 +741,9 @@ http_call_impl::handle_json_body_response(
                         std::stringstream msg;
                         LOGS_ERROR << "Xbox Live service call to " << httpCallResponse->_Request().request_uri().to_string() << " was throttled";
                         LOGS_ERROR << utf16Error;
-                        LOGS_ERROR << "You can temporarily disable the assert by calling";
-                        LOGS_ERROR << "xboxLiveContext->settings()->disable_asserts_for_xbox_live_throttling_in_dev_sandboxes()";
-                        LOGS_ERROR << "Note that this will only disable this assert.  You will still be throttled in all sandboxes.";
+                        LOG_ERROR("You can temporarily disable the assert by calling");
+                        LOG_ERROR("xboxLiveContext->settings()->disable_asserts_for_xbox_live_throttling_in_dev_sandboxes()");
+                        LOG_ERROR("Note that this will only disable this assert.  You will still be throttled in all sandboxes.");
 
                         XSAPI_ASSERT(false && "Xbox Live service call was throttled.  See Output for more detail");
                     }
