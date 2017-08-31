@@ -170,6 +170,7 @@ class stats_manager_impl : public std::enable_shared_from_this<stats_manager_imp
 {
 public:
     stats_manager_impl();
+    ~stats_manager_impl();
 
     xbox_live_result<void> add_local_user(
         _In_ const xbox_live_user_t& user
@@ -246,7 +247,7 @@ private:
     void stop_timer();
     void handle_background_flush_timer_trigger();
 
-#ifdef  __cplusplus_winrt
+#if UWP_API
     Windows::System::Threading::ThreadPoolTimer^ m_timer;
 #else
     bool m_timerComplete;
@@ -260,7 +261,6 @@ private:
     std::unordered_map<string_t, stats_user_context> m_users;
     std::shared_ptr<xbox::services::call_buffer_timer> m_statNormalPriTimer;
     std::shared_ptr<xbox::services::call_buffer_timer> m_statHighPriTimer;
-    // TODO: change back to xsapi_internal_string
     std::mutex m_statsServiceMutex;
 };
 
