@@ -14,7 +14,7 @@
     #include "ppltasks_extra.h"
 #endif
 
-#ifdef  __cplusplus_winrt
+#if UWP_API
     #include "Utils_WinRT.h"
     #include "utils.h"
 
@@ -36,6 +36,11 @@ const std::chrono::seconds stats_manager_impl::STATS_POLL_TIME_SEC = std::chrono
 
 stats_manager_impl::stats_manager_impl()
 {
+}
+
+stats_manager_impl::~stats_manager_impl()
+{
+    stop_timer();
 }
 
 void
@@ -68,9 +73,9 @@ stats_manager_impl::initialize()
     start_background_flush_timer(thisWeakPtr);
 }
 
-void stats_manager_impl::stop_timer() // TODO
+void stats_manager_impl::stop_timer() 
 {
-#ifdef __cplusplus_winrt
+#if UWP_API
     if (m_timer)
     {
         m_timer->Cancel();
@@ -82,7 +87,7 @@ void stats_manager_impl::stop_timer() // TODO
 
 void stats_manager_impl::start_background_flush_timer(_In_ std::weak_ptr<stats_manager_impl> thisWeakPtr)
 {
-#ifdef __cplusplus_winrt
+#if UWP_API
     Windows::Foundation::TimeSpan delay = Microsoft::Xbox::Services::System::UtilsWinRT::ConvertSecondsToTimeSpan<std::chrono::seconds>(STATS_POLL_TIME_SEC);
     m_timer = ThreadPoolTimer::CreatePeriodicTimer(
         ref new TimerElapsedHandler([thisWeakPtr](ThreadPoolTimer^ source)
@@ -96,22 +101,37 @@ void stats_manager_impl::start_background_flush_timer(_In_ std::weak_ptr<stats_m
         delay
         );
 #else
-    m_timerComplete = false;
-    while (true)
+    pplx::create_task([thisWeakPtr]()
     {
-        if (m_timerComplete)
         {
-            break;
-        }
-        int delayInMilliseconds = STATS_POLL_TIME_SEC.count() * 1000; // call handle_timer_trigger() every so often
-        utils::sleep(delayInMilliseconds);
-        if (m_timerComplete)
-        {
-            break;
+            std::shared_ptr<stats_manager_impl> pThis(thisWeakPtr.lock());
+            if (pThis != nullptr)
+            {
+                pThis->m_timerComplete = false;
+            }
         }
 
-        handle_background_flush_timer_trigger();
-    }
+        while (true)
+        {
+            std::shared_ptr<stats_manager_impl> pThis(thisWeakPtr.lock());
+            if (pThis != nullptr)
+            {
+                if (pThis->m_timerComplete)
+                {
+                    break;
+                }
+                auto delayInMilliseconds = static_cast<uint32_t>(STATS_POLL_TIME_SEC.count()) * 1000; // call handle_timer_trigger() every so often
+                utils::sleep(delayInMilliseconds);
+                if (pThis->m_timerComplete)
+                {
+                    break;
+                }
+
+                pThis->handle_background_flush_timer_trigger();
+            }
+        }
+    });
+
 #endif
 }
 
@@ -346,7 +366,6 @@ stats_manager_impl::update_stats_value_document(_In_ stats_user_context& statsUs
             return;
         }
 
-        auto& statsUserContext = statsUserContextIter->second;
         if (updateSVDResult.err())
         {
             LOGS_ERROR << "Stats manager could not write stats value document. Error: " << updateSVDResult.err();
