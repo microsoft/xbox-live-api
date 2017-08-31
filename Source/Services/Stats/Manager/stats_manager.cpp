@@ -36,6 +36,7 @@ stats_manager::add_local_user(
     _In_ const xbox_live_user_t& user
     )
 {
+    LOGS_INFO << "stats_manager::add_local_user. XUID: " << user->xbox_user_id();
     return m_statsManagerImpl->add_local_user(user);
 }
 
@@ -44,6 +45,7 @@ stats_manager::remove_local_user(
     _In_ const xbox_live_user_t& user
     )
 {
+    LOGS_INFO << "stats_manager::remove_local_user. XUID: " << user->xbox_user_id();
     return m_statsManagerImpl->remove_local_user(user);
 }
 
@@ -53,6 +55,7 @@ stats_manager::request_flush_to_service(
     _In_ bool isHighPriority
     )
 {
+    LOGS_INFO << "stats_manager::request_flush_to_service. XUID: " << user->xbox_user_id() << " isHighPriority:" << isHighPriority;
     return m_statsManagerImpl->request_flush_to_service(
         user,
         isHighPriority
@@ -72,6 +75,8 @@ stats_manager::set_stat_as_integer(
     _In_ int64_t statValue
     )
 {
+    LOGS_INFO << "stats_manager::set_stat_as_integer. XUID: " << user->xbox_user_id() << " statName:" << statName << " statValue:" << statValue;
+
     return m_statsManagerImpl->set_stat(
         user,
         statName,
@@ -86,6 +91,8 @@ stats_manager::set_stat_as_number(
     _In_ double statValue
     )
 {
+    LOGS_INFO << "stats_manager::set_stat_as_number. XUID: " << user->xbox_user_id() << " statName:" << statName << " statValue:" << statValue;
+
     return m_statsManagerImpl->set_stat(
         user,
         statName,
@@ -100,6 +107,8 @@ stats_manager::set_stat_as_string(
     _In_ const string_t& statValue
     )
 {
+    LOGS_INFO << "stats_manager::set_stat_as_string. XUID: " << user->xbox_user_id() << " statName:" << statName << " statValue:" << statValue;
+
     return m_statsManagerImpl->set_stat(
         user,
         statName,
@@ -137,6 +146,8 @@ stats_manager::delete_stat(
     _In_ const string_t& statName
     )
 {
+    LOGS_INFO << "stats_manager::delete_stat. XUID: " << user->xbox_user_id() << " statName:" << statName;
+
     return m_statsManagerImpl->delete_stat(
         user,
         statName
@@ -149,6 +160,8 @@ xbox_live_result<void> stats_manager::get_leaderboard(
     leaderboard::leaderboard_query query
     )
 {
+    LOGS_INFO << "stats_manager::get_leaderboard. XUID: " << user->xbox_user_id() << " statName:" << statName;
+
     return m_statsManagerImpl->get_leaderboard(
         user,
         statName,
@@ -163,12 +176,14 @@ xbox_live_result<void> stats_manager::get_social_leaderboard(
     leaderboard::leaderboard_query query
     )
 {
+    LOGS_INFO << "stats_manager::get_social_leaderboard. XUID: " << user->xbox_user_id() << " statName:" << statName << " socialGroup:" << socialGroup;
+
     return m_statsManagerImpl->get_social_leaderboard(
         user,
         statName,
         socialGroup,
         query
-    );
+        );
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_END

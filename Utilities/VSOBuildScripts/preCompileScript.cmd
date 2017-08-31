@@ -41,17 +41,14 @@ rem generate the .Ship. vcxprojs
 call %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\MakeShipProjects.cmd %TFS_SourcesDirectory%
 
 rem create the build.cpp files
-del %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.110.XDK.Cpp\build.cpp
 del %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.140.XDK.Cpp\build.cpp
 del %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.141.XDK.Cpp\build.cpp
 del %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.140.UWP.Cpp\build.cpp
 del %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.141.UWP.Cpp\build.cpp
-%TFS_SourcesDirectory%\Utilities\VSOBuildScripts\GenSDKBuildCppFile.exe %TFS_SourcesDirectory% %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.110.XDK.Cpp\build.cpp xbox
 %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\GenSDKBuildCppFile.exe %TFS_SourcesDirectory% %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.140.XDK.Cpp\build.cpp xbox
 %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\GenSDKBuildCppFile.exe %TFS_SourcesDirectory% %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.141.XDK.Cpp\build.cpp xbox
 %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\GenSDKBuildCppFile.exe %TFS_SourcesDirectory% %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.140.UWP.Cpp\build.cpp uwp
 %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\GenSDKBuildCppFile.exe %TFS_SourcesDirectory% %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.141.UWP.Cpp\build.cpp uwp
-dir %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.110.XDK.Cpp\build.cpp
 dir %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.140.XDK.Cpp\build.cpp
 dir %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.141.XDK.Cpp\build.cpp
 dir %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.140.UWP.Cpp\build.cpp

@@ -45,6 +45,7 @@
       $(ProjectDir)..\..\Source\Services\Misc\WinRT;
       $(ProjectDir)..\..\Source\Services\Stats;
       $(ProjectDir)..\..\Source\Services\Stats\WinRT;
+      $(ProjectDir)..\..\Source\Services\Stats\Manager\WinRT;
       $(ProjectDir)..\..\Source\Services\Multiplayer;
       $(ProjectDir)..\..\Source\Services\Multiplayer\WinRT;
       $(ProjectDir)..\..\Source\Services\Multiplayer;
