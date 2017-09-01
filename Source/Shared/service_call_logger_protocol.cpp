@@ -127,6 +127,9 @@ void service_call_logger_protocol::set_state_bread_crumb(_In_ bool isTracking)
     string_t filePath = filePathTemp;
 #endif
 
+    // Try delete the old file no matter what. So the new created file will have latest timestamp.
+    DeleteFile(filePath.c_str());
+
     if (isTracking)
     {
         std::ofstream file;
@@ -137,10 +140,6 @@ void service_call_logger_protocol::set_state_bread_crumb(_In_ bool isTracking)
             LOGS_ERROR << "WriteFile failed: " <<filePath;
             return;
         }
-    }
-    else
-    {
-        DeleteFile(filePath.c_str());
     }
 }
 
