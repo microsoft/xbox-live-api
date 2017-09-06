@@ -4,7 +4,11 @@
 #include "pch.h"
 #if !UNIT_TEST_SERVICES
 
-#ifdef _APISET_TARGET_VERSION_WIN10_RS2
+#if defined(_APISET_TARGET_VERSION_WIN10_RS3)
+    #define RS3_TCUI
+    #define INVITE_WITH_CONTEXT
+    #define _APISET_TARGET_VERSION _APISET_TARGET_VERSION_WIN10_RS3
+#elif defined(_APISET_TARGET_VERSION_WIN10_RS2)
     #define INVITE_WITH_CONTEXT
     #define _APISET_TARGET_VERSION _APISET_TARGET_VERSION_WIN10_RS2
 #else
@@ -280,7 +284,7 @@ title_callable_ui::show_game_invite_ui(
         if (user != nullptr && IsMultiUserAPISupported())
         {
             ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
-#if INVITE_WITH_CONTEXT
+#ifdef INVITE_WITH_CONTEXT
             if (strContextStringId != nullptr)
             {
                 hr = ShowGameInviteUIWithContextForUser(
@@ -311,7 +315,7 @@ title_callable_ui::show_game_invite_ui(
         else
 #endif
         {
-#if INVITE_WITH_CONTEXT
+#ifdef INVITE_WITH_CONTEXT
             if (strContextStringId != nullptr)
             {
                 hr = ShowGameInviteUIWithContext(
@@ -362,7 +366,7 @@ title_callable_ui::show_profile_card_ui(
 #if UWP_API
     , _In_opt_ Windows::System::User^ user
 #endif
-)
+    )
 {
     auto task = pplx::create_task([targetXboxUserId
 #if UWP_API
@@ -665,7 +669,233 @@ title_callable_ui::check_gaming_privilege_with_ui(
         );
 }
 
-#if defined(XSAPI_U)
+#if defined(RS3_TCUI)
+pplx::task<xbox::services::xbox_live_result<void>>
+title_callable_ui::show_friend_finder_ui(
+#if UWP_API
+    _In_opt_ Windows::System::User^ user
+#endif
+    )
+{
+    auto task = pplx::create_task([
+#if UWP_API
+        user
+#endif
+    ]()
+    {
+        tcui_context context;
+
+        HRESULT hr = S_OK;
+#if UWP_API
+        if (user != nullptr && IsMultiUserAPISupported())
+        {
+            ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
+            hr = ShowFindFriendsUIForUser(
+                userAbi,
+                UICompletionRoutine,
+                static_cast<void*>(&context)
+            );
+        }
+        else
+#endif
+        {
+            hr = ShowFindFriendsUI(
+                UICompletionRoutine,
+                static_cast<void*>(&context)
+            );
+        }
+
+        if (SUCCEEDED(hr) || hr == E_PENDING)
+        {
+            hr = ProcessPendingGameUI(true);
+            if (SUCCEEDED(hr))
+            {
+                hr = context.wait();
+            }
+        }
+
+        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        return xbox_live_result<void>(errcode);
+    });
+
+    return utils::create_exception_free_task<void>(
+        task
+        );
+}
+
+pplx::task<xbox::services::xbox_live_result<void>>
+title_callable_ui::show_user_profile_ui(
+    _In_ const string_t& targetXboxUserId
+    )
+{
+    // Show the profile card tcui
+    return show_profile_card_ui(targetXboxUserId);
+}
+
+pplx::task<xbox::services::xbox_live_result<void>>
+title_callable_ui::show_title_hub_ui(
+#if UWP_API
+    _In_opt_ Windows::System::User^ user
+#endif
+    )
+{
+    auto localConfig = xbox_system_factory::get_factory()->create_local_config();
+    uint32_t titleId = localConfig->title_id();
+
+    auto task = pplx::create_task([titleId
+#if UWP_API
+        , user
+#endif
+    ]()
+    {
+        tcui_context context;
+
+        HRESULT hr = S_OK;
+#if UWP_API
+        if (user != nullptr && IsMultiUserAPISupported())
+        {
+            ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
+            hr = ShowGameInfoUIForUser(
+                userAbi,
+                titleId,
+                UICompletionRoutine,
+                static_cast<void*>(&context)
+            );
+        }
+        else
+#endif
+        {
+            hr = ShowGameInfoUI(
+                titleId,
+                UICompletionRoutine,
+                static_cast<void*>(&context)
+            );
+        }
+
+        if (SUCCEEDED(hr) || hr == E_PENDING)
+        {
+            hr = ProcessPendingGameUI(true);
+            if (SUCCEEDED(hr))
+            {
+                hr = context.wait();
+            }
+        }
+
+        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        return xbox_live_result<void>(errcode);
+    });
+
+    return utils::create_exception_free_task<void>(
+        task
+        );
+}
+
+pplx::task<xbox::services::xbox_live_result<void>>
+title_callable_ui::show_user_settings_ui(
+#if UWP_API
+    _In_opt_ Windows::System::User^ user
+#endif
+    )
+{
+    auto task = pplx::create_task([
+#if UWP_API
+        user
+#endif
+    ]()
+    {
+        tcui_context context;
+
+        HRESULT hr = S_OK;
+#if UWP_API
+        if (user != nullptr && IsMultiUserAPISupported())
+        {
+            ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
+            hr = ShowUserSettingsUIForUser(
+                userAbi,
+                UICompletionRoutine,
+                static_cast<void*>(&context)
+            );
+        }
+        else
+#endif
+        {
+            hr = ShowUserSettingsUI(
+                UICompletionRoutine,
+                static_cast<void*>(&context)
+            );
+        }
+
+        if (SUCCEEDED(hr) || hr == E_PENDING)
+        {
+            hr = ProcessPendingGameUI(true);
+            if (SUCCEEDED(hr))
+            {
+                hr = context.wait();
+            }
+        }
+
+        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        return xbox_live_result<void>(errcode);
+    });
+
+    return utils::create_exception_free_task<void>(
+        task
+        );
+}
+
+pplx::task<xbox::services::xbox_live_result<void>>
+title_callable_ui::show_customize_user_profile_ui(
+#if UWP_API
+    _In_opt_ Windows::System::User^ user
+#endif
+    )
+{
+    auto task = pplx::create_task([
+#if UWP_API
+        user
+#endif
+    ]()
+    {
+        tcui_context context;
+
+        HRESULT hr = S_OK;
+#if UWP_API
+        if (user != nullptr && IsMultiUserAPISupported())
+        {
+            ABI::Windows::System::IUser* userAbi = reinterpret_cast<ABI::Windows::System::IUser*>(user);
+            hr = ShowCustomizeUserProfileUIForUser(
+                userAbi,
+                UICompletionRoutine,
+                static_cast<void*>(&context)
+            );
+        }
+        else
+#endif
+        {
+            hr = ShowCustomizeUserProfileUI(
+                UICompletionRoutine,
+                static_cast<void*>(&context)
+            );
+        }
+
+        if (SUCCEEDED(hr) || hr == E_PENDING)
+        {
+            hr = ProcessPendingGameUI(true);
+            if (SUCCEEDED(hr))
+            {
+                hr = context.wait();
+            }
+        }
+
+        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        return xbox_live_result<void>(errcode);
+    });
+
+    return utils::create_exception_free_task<void>(
+        task
+        );
+}
+#elif defined(XSAPI_U)
 pplx::task<xbox::services::xbox_live_result<void>>
 title_callable_ui::show_friend_finder_ui()
 {
@@ -765,7 +995,9 @@ title_callable_ui::show_user_settings_ui()
         task
         );
 }
+#endif
 
+#if defined(XSAPI_U)
 pplx::task<xbox::services::xbox_live_result<void>>
 title_callable_ui::show_add_friends_ui()
 {
