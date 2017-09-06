@@ -71,7 +71,6 @@ public:
         auto statJSON = web::json::value::parse(statValueDocumentResponse);
 
         auto revisionNum = statJSON[L"revision"].as_integer();
-        VERIFY_ARE_EQUAL_INT(statValueDocument.revision(), revisionNum);
 
         auto statField = statJSON[L"stats"];
         auto titleStatsList = statField[L"title"].as_object();
