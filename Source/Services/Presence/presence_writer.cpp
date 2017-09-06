@@ -30,7 +30,7 @@ presence_writer::presence_writer() :
 {
 }
 
-#ifdef __cplusplus_winrt
+#if UWP_API || UNIT_TEST_SERVICES
 void presence_writer::start_timer(_In_ std::weak_ptr<presence_writer> thisWeakPtr)
 {
     Windows::Foundation::TimeSpan delay = Microsoft::Xbox::Services::System::UtilsWinRT::ConvertSecondsToTimeSpan<std::chrono::seconds>(std::chrono::minutes(1));
