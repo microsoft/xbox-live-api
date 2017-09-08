@@ -8,14 +8,14 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_BEGIN
 
 /// <summary>
-/// Notifies the title when a new game member joins the game. 
+/// Notifies the title when a new game member leaves the game. 
 /// </summary>
 public ref class MemberLeftEventArgs sealed : MultiplayerEventArgs
 {
 public:
 
     /// <summary>
-    /// A list of members that joined the game.
+    /// A list of members that left the game.
     /// </summary>
     property Windows::Foundation::Collections::IVectorView<MultiplayerMember^>^ Members
     {
