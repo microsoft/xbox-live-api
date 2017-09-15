@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes'?>
+<WindowsPerformanceRecorder
+    Author="Xbox Services API"
+    Comments="XSAPI ETW Profile"
+    Version="1.0"> 
+  <Profiles> 
+
+    <!-- Buffer sizes are specified in KB -->
+    <EventCollector Id="EventCollector_XSAPI" Name="XSAPI Event Collector" ProcessPrivate="false" Secure="false" Realtime="false">
+        <BufferSize Value="64"/>
+        <Buffers Value="4"/>
+    </EventCollector>
+
+    <!-- Our custom ETW Provider and its associated GUID -->
+    <EventProvider Id="EventProvider_XSAPI" Name="9594A560-E985-4EE6-B0B5-0DAC4F924144"/>
+
+    <!-- A fully specified .wprp file should have four profiles, with DetailLevel set to Verbose and Light and with Logging Mode set to Memory and File. WPR enforces that the name conforms to <name>Profile.Level.OutputType --> 
+    <Profile Id="XSAPIProfile.Verbose.File" 
+        LoggingMode="File" 
+        Name="XSAPIProfile" 
+        DetailLevel="Verbose" 
+        Description="XSAPI ETW Provider for Diagnostic trace">
+        <Collectors> 
+           <!-- EventCollectorId must match the EventCollector ID specified above -->
+           <EventCollectorId Value="EventCollector_XSAPI">
+             <EventProviders>
+                <EventProviderId Value="EventProvider_XSAPI"/>
+             </EventProviders>
+           </EventCollectorId>
+        </Collectors>
+    </Profile>
+
+     <!-- Now we can just subclass our base profile to get the other (mostly redundant) configurations  -->
+     <Profile Id="XSAPIProfile.Verbose.Memory" 
+         LoggingMode="Memory"
+         Name="XSAPIProfile" 
+         DetailLevel="Verbose" 
+         Description="XSAPI ETW Provider for Diagnostic trace"
+         Base="XSAPIProfile.Verbose.File"/>
+
+     <Profile Id="XSAPIProfile.Light.File"
+         LoggingMode="File"
+         Name="XSAPIProfile" 
+         DetailLevel="Light" 
+         Description="XSAPI ETW Provider for Diagnostic trace"
+         Base="XSAPIProfile.Verbose.File"/>
+
+  </Profiles>
+</WindowsPerformanceRecorder>
