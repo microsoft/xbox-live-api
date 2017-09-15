@@ -212,6 +212,7 @@ multiplayer_client_manager::join_lobby_by_handle(
     if (latestPending == nullptr)
     {
         initialize();
+        latestPending = latest_pending_read();
     }
 
     latestPending->lobby_client()->add_local_users(users, handleId);
@@ -231,6 +232,7 @@ multiplayer_client_manager::join_lobby_by_session_reference(
     if (latestPending == nullptr)
     {
         initialize();
+        latestPending = latest_pending_read();
     }
 
     latestPending->lobby_client()->add_local_users(users, sessionRef);

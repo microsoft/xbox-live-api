@@ -121,7 +121,8 @@ public:
         auto& versionField = serializedRequest[_T("revision")];
         auto& compareVersion = compareValue[_T("revision")];
 
-        VERIFY_IS_TRUE(versionField.as_integer() == (compareVersion.as_integer() + 1));
+        auto verInt = versionField.as_number().to_uint64();
+        VERIFY_IS_TRUE(verInt > 10000000000);
 
         VERIFY_IS_TRUE(serializedRequest.has_field(_T("timestamp")));
 
