@@ -20,7 +20,7 @@ The best way to learn the API and see the best practices is to look at the [Xbox
 
 This repo contains submodules.  There are two ways to make sure you get submodules.
 
-When initially cloning, make sure you use the "--recursive" option. IE:
+When initially cloning, make sure you use the `--recursive` option. IE:
 
     git clone --recursive https://github.com/Microsoft/xbox-live-api.git
 
@@ -44,8 +44,7 @@ Big or small we'd like to take your contributions back to help improve the Xbox 
 ## Having Trouble?
 
 We'd love to get your review score, whether good or bad, but even more than that, we want to fix your problem. If you submit your issue as a Review, we won't be able to respond to your problem and ask any follow-up questions that may be necessary. The most efficient way to do that is to open a an issue in our [issue tracker](https://github.com/Microsoft/xbox-live-api/issues).  
-
-Any questions you might have can be answered on the [MSDN Forums](https://social.msdn.microsoft.com/Forums/en-US/home?forum=xboxlivedev).  You can also ask programming related questions to [Stack Overflow](http://stackoverflow.com/questions/tagged/xbox-live) using the "xbox-live" tag.  The Xbox Live team will be engaged with the community and be continually improving our APIs, tools, and documentation based on the feedback received there.  
+Any questions you might have can be answered on the [MSDN Forums](https://social.msdn.microsoft.com/Forums/en-US/home?forum=xboxlivedev). You can also ask programming related questions to [Stack Overflow](http://stackoverflow.com/questions/tagged/xbox-live) using the "xbox-live" tag. The Xbox Live team will be engaged with the community and be continually improving our APIs, tools, and documentation based on the feedback received there.  
 
 For developers in the Xbox Live Creators Program, you can submit a new idea or vote on existing idea at our [Xbox Live Creators Program User Voice](https://aka.ms/xblcpuv)
 
