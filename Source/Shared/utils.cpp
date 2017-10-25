@@ -22,6 +22,8 @@
 #include "xsapi/system.h"
 #include "presence_internal.h"
 #include "initiator.h"
+#include "httpClient/httpClient.h"
+#include "threadpool.h"
 
 #if UWP_API
 #ifdef _WINRT_DLL
@@ -77,6 +79,10 @@ void xsapi_singleton::init()
 #endif
 #endif
 
+    HCGlobalInitialize();
+    HCSettingsSetLogLevel(HC_LOG_LEVEL::LOG_VERBOSE);
+    m_threadpool = std::make_shared<xbl_thread_pool>();
+    m_threadpool->start_threads();
     m_initiator = std::make_shared<initiator>();
 }
 
@@ -84,6 +90,7 @@ xsapi_singleton::~xsapi_singleton()
 {
     std::lock_guard<std::mutex> guard(s_xsapiSingletonLock);
     s_xsapiSingleton = nullptr;
+    HCGlobalCleanup();
 }
 
 std::shared_ptr<xsapi_singleton>

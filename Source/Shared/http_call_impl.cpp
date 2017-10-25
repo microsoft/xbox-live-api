@@ -8,6 +8,7 @@
 #include "xbox_system_factory.h"
 #include "build_version.h"
 #include "xsapi/system.h"
+#include "httpClient/httpClient.h"
 #if TV_API
 #include "System/ppltasks_extra.h"
 #elif XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
@@ -308,6 +309,89 @@ http_call_impl::_Internal_get_response_with_auth(
 
 pplx::task<std::shared_ptr<http_call_response>>
 http_call_impl::internal_get_response(
+    _In_ const std::shared_ptr<http_call_data>& httpCallData
+    )
+{
+    auto task = pplx::create_task([httpCallData]()
+    {
+        auto requestStartTime = chrono_clock_t::now();
+        http_client_config config = get_config(httpCallData);
+        set_user_agent(httpCallData);
+        pplx::task<utility::string_t> taskBody = httpCallData->request.extract_string();
+        string_t requestBody = taskBody.get();
+
+        HC_CALL_HANDLE call = nullptr;
+        HCHttpCallCreate(&call);
+
+        utility::string_t path = httpCallData->pathQueryFragment.to_string();
+        string_t uri = httpCallData->serverName + path;
+        HCHttpCallRequestSetUrl(call, httpCallData->request.method().c_str(), uri.c_str());
+        HCHttpCallRequestSetRequestBodyString(call, requestBody.c_str());
+        for (auto& header : httpCallData->request.headers())
+        {
+            PCSTR_T headerName = header.first.c_str();
+            PCSTR_T headerValue = header.second.c_str();
+            HCHttpCallRequestSetHeader(call, headerName, headerValue);
+        }
+        HCHttpCallRequestSetRetryAllowed(call, httpCallData->retryAllowed);
+        HCHttpCallRequestSetTimeout(call, static_cast<uint32_t>(httpCallData->httpTimeout.count()));
+
+        uint64_t taskGroupId = 0; // TODO
+        HC_TASK_HANDLE taskHandle = HCHttpCallPerform(taskGroupId, call, nullptr, nullptr);
+
+        HCTaskWaitForCompleted(taskHandle, 30000);
+        if (!HCTaskIsCompleted(taskHandle))
+        {
+            // TODO: handle timeout error
+            auto httpCallResponse = get_http_call_response(httpCallData, http_response());
+            return pplx::task_from_result(httpCallResponse);
+        }
+
+        std::shared_ptr<http_call_response> p;
+        auto httpCallResponse = get_http_call_response(httpCallData, http_response());
+        
+        uint32_t errorCode = 0;
+        uint32_t statusCode = 0;
+        PCSTR_T errorMessage = nullptr;
+        PCSTR_T responseBody = nullptr;
+        HCHttpCallResponseGetErrorCode(call, &errorCode);
+        HCHttpCallResponseGetStatusCode(call, &statusCode);
+        HCHttpCallResponseGetErrorMessage(call, &errorMessage);
+        HCHttpCallResponseGetResponseString(call, &responseBody);
+
+        if (errorCode == 0)
+        {
+            httpCallResponse->_Set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(statusCode)), std::string());
+        }
+        else
+        {
+            std::string errorMessageStr = utility::conversions::to_utf8string(errorMessage);
+            httpCallResponse->_Set_error_info(std::make_error_code(static_cast<xbox_live_error_code>(errorCode)), errorMessageStr);
+        }
+
+        switch (httpCallData->httpCallResponseBodyType)
+        {
+            case http_call_response_body_type::json_body:
+                std::error_code errC;
+                web::json::value responseBodyJson = web::json::value::parse(responseBody, errC);
+                if (!errC)
+                {
+                    httpCallResponse->_Set_response_body(responseBodyJson);
+                }
+                break;
+        }
+        HCHttpCallCleanup(call);
+
+        chrono_clock_t::time_point responseReceivedTime = chrono_clock_t::now();
+        httpCallResponse->_Set_timing(requestStartTime, responseReceivedTime);
+        return pplx::task_from_result(httpCallResponse);
+    });
+
+    return task;
+}
+
+pplx::task<std::shared_ptr<http_call_response>>
+http_call_impl::internal_get_response_old(
     _In_ const std::shared_ptr<http_call_data>& httpCallData
     )
 {

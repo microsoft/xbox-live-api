@@ -352,6 +352,10 @@ private:
         _In_ const std::shared_ptr<http_call_data>& httpCallData
         );
 
+    static pplx::task<std::shared_ptr<http_call_response>> internal_get_response_old(
+        _In_ const std::shared_ptr<http_call_data>& httpCallData
+        );
+    
     static pplx::task<std::shared_ptr<http_call_response>> internal_get_response(
         _In_ const std::shared_ptr<http_call_data>& httpCallData
         );
