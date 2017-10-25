@@ -215,6 +215,8 @@ social_graph::initialize()
                 auto& inactiveBufferSocialGraph = pThis->m_userBuffer.inactive_buffer()->socialUserGraph;
                 for (auto& user : inactiveBufferSocialGraph)
                 {
+                    if (user.second.socialUser == nullptr)
+                        continue;
                     auto devicePresenceSubResult = pThis->m_xboxLiveContextImpl->presence_service().subscribe_to_device_presence_change(user.second.socialUser->xbox_user_id());
                     auto titlePresenceSubResult = pThis->m_xboxLiveContextImpl->presence_service().subscribe_to_title_presence_change(
                         user.second.socialUser->xbox_user_id(),
@@ -1056,7 +1058,8 @@ social_graph::perform_diff(
         }
 
         auto previousUser = inactiveBufferUserGraph.at(currentUserPair.first).socialUser;
-        change_list_enum didChange = xbox_social_user::_Compare(*previousUser, currentUserPair.second);
+        change_list_enum didChange = previousUser ? xbox_social_user::_Compare(*previousUser, currentUserPair.second)
+            : (change_list_enum::presence_change | change_list_enum::profile_change | change_list_enum::social_relationship_change);
 
         if ((didChange & change_list_enum::presence_change) == change_list_enum::presence_change)
         {
