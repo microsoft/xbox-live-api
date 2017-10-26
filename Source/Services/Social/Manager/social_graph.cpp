@@ -446,7 +446,7 @@ social_graph::apply_event(
             for (auto& user : evt.users_affected())
             {
                 auto userIterator = inactiveBuffer->socialUserGraph.find(user._Xbox_user_id_as_integer());
-                if (userIterator != inactiveBuffer->socialUserGraph.end())
+                if (userIterator != inactiveBuffer->socialUserGraph.end() && userIterator->second.socialUser != nullptr)
                 {
                     *(userIterator->second.socialUser) = user;
                 }
