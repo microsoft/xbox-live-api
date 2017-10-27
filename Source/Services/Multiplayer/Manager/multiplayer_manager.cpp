@@ -213,7 +213,7 @@ multiplayer_manager::invite_party_to_game()
 }
 #endif
 
-#if UWP_API || TV_API
+#if (TV_API || UWP_API || UNIT_TEST_SERVICES)
 xbox_live_result<void>
 multiplayer_manager::join_lobby(
     _In_ Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs^ eventArgs,

@@ -6,6 +6,7 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_BEGIN
 
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
 Event::Event()
 {
     m_event = ::CreateEventExW(
@@ -62,5 +63,6 @@ void Event::Wait()
 {
     Wait(INFINITE);
 }
+#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_END
