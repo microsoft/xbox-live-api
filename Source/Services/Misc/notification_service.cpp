@@ -27,7 +27,7 @@ notification_service::get_notification_service_singleton()
         xsapiSingleton->m_notificationSingleton = std::make_shared<notification_service_android>();
 #elif XSAPI_I
         xsapiSingleton->m_notificationSingleton = std::make_shared<notification_service_ios>();
-#elif _WIN32
+#elif UWP_API || TV_API
         xsapiSingleton->m_notificationSingleton = std::make_shared<notification_service_windows>();
 #endif
     }
@@ -207,10 +207,6 @@ notification_service::subscribe_to_notifications_helper(
                 }
                 if (t->err_code() || errc)
                 {
-                    stringstream_t str;
-                    str << _T("http status code: ");
-                    str << t->http_status();
-                    str << t->err_message().c_str();
                     return xbox_live_result<void>(errc);
                 }
 

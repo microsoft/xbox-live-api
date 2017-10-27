@@ -162,6 +162,7 @@ std::vector<string_t> utils::get_locale_list()
 {
     auto javaInterop = java_interop::get_java_interop_singleton();
     std::vector<string_t> localeList;
+    rwlock_guard guard(javaInterop->java_interop_singletonLock, false);
     auto javaVM = javaInterop->get_java_vm();
     if (javaVM == nullptr)
     {

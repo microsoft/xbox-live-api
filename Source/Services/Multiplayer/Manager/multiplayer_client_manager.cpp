@@ -12,7 +12,7 @@ using namespace xbox::services;
 using namespace xbox::services::multiplayer;
 using namespace xbox::services::real_time_activity;
 using namespace pplx;
-#if !XSAPI_U
+#if UWP_API || TV_API
 using namespace Windows::Foundation::Collections;
 #endif
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
@@ -239,7 +239,7 @@ multiplayer_client_manager::join_lobby_by_session_reference(
     return xbox_live_result<void>();
 }
 
-#if !XSAPI_U
+#if UWP_API || TV_API
 xbox_live_result<void>
 multiplayer_client_manager::join_lobby(
     _In_ Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs^ eventArgs,

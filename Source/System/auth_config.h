@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
+#include <mutex>
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
 enum class token_identity_type
@@ -93,6 +94,7 @@ public:
     void reset();
 
 private:
+    mutable std::mutex m_mutex;
     string_t m_sandbox;
     string_t m_rpsTicketService;
     string_t m_rpsTicketPolicy;

@@ -10,7 +10,6 @@
 
 #ifdef __OBJC__
 #import <UIKit/UIKit.h>
-#import "MSAAuthentication/MSAAccountManager.h"
 #endif
 #ifndef _WIN32
 #include "pplx/pplxtasks.h"
@@ -518,6 +517,7 @@ public:
 #if XSAPI_U
     _XSAPIIMP static std::shared_ptr<xbox_live_user> get_last_signed_in_user();
     _XSAPIIMP pplx::task<xbox_live_result<void>> signout();
+    _XSAPIIMP void clear_token_cache();
 #endif
 
 #if WINAPI_FAMILY && WINAPI_FAMILY==WINAPI_FAMILY_APP

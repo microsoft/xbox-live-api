@@ -302,7 +302,7 @@ pplx::task<xbox_live_result<void>> user_context::refresh_token()
         }
         else
         {
-            return xbox_live_result<void>(result.err(), "Refresh token failed.");
+            return xbox_live_result<void>(result.err(), result.err_message());
         }
     });
 }
@@ -424,7 +424,7 @@ pplx::task<xbox_live_result<void>> user_context::refresh_token()
         }
         else
         {
-            return xbox_live_result<void>(result.err(), "Refresh token failed.");
+            return xbox_live_result<void>(result.err(), result.err_message());
         }
     });
 }

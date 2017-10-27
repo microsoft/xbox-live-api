@@ -397,7 +397,7 @@ multiplayer_session_writer::get_current_session_helper(
 void
 multiplayer_session_writer::resync()
 {
-#if !XSAPI_U
+#if UWP_API || TV_API
     std::lock_guard<std::mutex> lock(m_resyncLock.get());
 
     auto cachedSession = session();

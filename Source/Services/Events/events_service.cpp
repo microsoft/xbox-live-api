@@ -150,7 +150,7 @@ events_service::write_in_game_event(
 #elif XSAPI_I
         std::shared_ptr<xbox_cll> cll = xbox_cll::get_xbox_cll_singleton();
         std::vector<string_t> ids = { m_userContext->xbox_user_id() };
-        iOSCll* iCll = static_cast<iOSCll*>(cll->raw_cll().get());
+        DarwinCll* iCll = static_cast<DarwinCll*>(cll->raw_cll().get());
         if (iCll)
         {
             iCll->log(eventNameStream.str(),

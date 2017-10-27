@@ -331,6 +331,17 @@ string_t utils::extract_json_string(
     return field.as_string();
 }
 
+web::json::array utils::extract_json_array(
+    _In_ const web::json::value& jsonValue,
+    _In_ const string_t& arrayName,
+    _In_ bool required
+    )
+{
+    web::json::value field(utils::extract_json_field(jsonValue, arrayName, required));
+    if ((!field.is_array() && !required) || field.is_null()) { return web::json::value::array().as_array(); }
+    return field.as_array();
+}
+
 string_t utils::extract_json_as_string(
     _In_ const web::json::value& jsonValue,
     _Inout_ std::error_code& error

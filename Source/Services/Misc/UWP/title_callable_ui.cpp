@@ -15,8 +15,10 @@
     #define _APISET_TARGET_VERSION _APISET_TARGET_VERSION_WIN10_RS1
 #endif
 
+#if UWP_API || TV_API
 #include <gamingtcui.h>
 #include <windows.system.h>
+#endif
 #include "xbox_system_factory.h"
 #include "xsapi/title_callable_ui.h"
 
@@ -29,6 +31,8 @@
 #define XBOX_DEEPLINK_CUSTOMIZE_PROFILE _T("xbox-profile:customize")
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+
+#if UWP_API || TV_API
 
 class tcui_context
 {
@@ -537,7 +541,7 @@ title_callable_ui::_Get_gaming_privilege_scope_policy(
     )
 {
     auto localConfig = xbox_system_factory::get_factory()->create_local_config();
-    auth_config authConfig = auth_config(
+    auth_config authConfig(
         localConfig->sandbox(),
         localConfig->environment_prefix(),
         localConfig->environment(),
@@ -668,6 +672,7 @@ title_callable_ui::check_gaming_privilege_with_ui(
         task
         );
 }
+#endif // UWP_API || TV_API
 
 #if defined(RS3_TCUI)
 pplx::task<xbox::services::xbox_live_result<void>>

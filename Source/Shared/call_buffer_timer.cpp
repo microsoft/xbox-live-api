@@ -88,6 +88,7 @@ call_buffer_timer::fire_helper(
 {
     if (!m_isTaskInProgress)
     {
+#if UWP_API || TV_API
         std::chrono::milliseconds timeDiff = m_bufferTimePerCall - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_previousTime);
         std::chrono::milliseconds timeRemaining = std::max<std::chrono::milliseconds>(std::chrono::milliseconds::zero(), timeDiff);
         auto& usersToCall = m_usersToCall;
@@ -95,6 +96,7 @@ call_buffer_timer::fire_helper(
         std::weak_ptr<call_buffer_timer> thisWeakPtr = shared_from_this();
         m_isTaskInProgress = true;
         m_previousTime = std::chrono::high_resolution_clock::now();
+
         create_delayed_task(
             timeRemaining,
             [thisWeakPtr, usersToCall, usersAddedStruct]()
@@ -120,6 +122,9 @@ call_buffer_timer::fire_helper(
                 }
             }
         });
+#else
+        UNREFERENCED_PARAMETER(usersAddedStruct);
+#endif
 
         m_usersToCall.clear();
         m_usersToCallMap.clear();

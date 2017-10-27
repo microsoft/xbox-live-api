@@ -253,6 +253,12 @@ public:
         _In_ bool required = false,
         _In_ const string_t& defaultValue = _T("")
     );
+    
+    static web::json::array extract_json_array(
+        _In_ const web::json::value& jsonValue,
+        _In_ const string_t& arrayName,
+        _In_ bool required
+    );
 
     static bool extract_json_bool(
         _In_ const web::json::value& jsonValue,
