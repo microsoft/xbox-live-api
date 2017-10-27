@@ -145,6 +145,7 @@ social_graph::initialize()
         TIME_PER_CALL_SEC
         );
 
+#if UWP_API || TV_API
     create_delayed_task(
         REFRESH_TIME_MIN,
         [thisWeakPtr]()
@@ -155,6 +156,7 @@ social_graph::initialize()
             pThis->social_graph_refresh_callback();
         }
     });
+#endif
 
     pplx::create_task([thisWeakPtr]()
     {
@@ -1222,6 +1224,7 @@ void social_graph::social_graph_refresh_callback()
 {
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
 
+#if UWP_API || TV_API
     auto task = create_delayed_task(
         REFRESH_TIME_MIN,
         [thisWeakPtr]()
@@ -1243,6 +1246,7 @@ void social_graph::social_graph_refresh_callback()
             LOG_DEBUG("Unknown std::exception in initialization");
         }
     });
+#endif
 
     refresh_graph();
 }
@@ -1531,6 +1535,7 @@ social_graph::presence_refresh_callback()
         }
     }
 
+#if UWP_API || TV_API
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
     create_delayed_task(
         TIME_PER_CALL_SEC,
@@ -1551,6 +1556,7 @@ social_graph::presence_refresh_callback()
             pThis->presence_refresh_callback();
         }
     });
+#endif
 }
 
 void

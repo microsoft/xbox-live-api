@@ -107,7 +107,7 @@ void xbox_live_context_impl::init()
 m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_settings>();
     init_real_time_activity_service_instance();
 
-#if TV_API || UWP_API
+#if UWP_API || TV_API
     auto dispatcher = xbox_live_context_settings::_s_dispatcher;
     if (dispatcher == nullptr)
     {
@@ -200,7 +200,7 @@ m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_s
         });
 
         m_signOutContext = m_userContext->user()->_User_impl()->add_sign_out_completed_handler(
-            [thisWeakPtr](const system::sign_out_completed_event_args& args)
+            [thisWeakPtr](const system::sign_out_completed_event_args&)
         {
             std::shared_ptr<xbox_live_context_impl> pThis(thisWeakPtr.lock());
             if (pThis != nullptr)

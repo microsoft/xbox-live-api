@@ -8,9 +8,11 @@
 #include "Utils.h"
 
 using namespace std;
+#if UWP_API || TV_API
 using namespace Platform;
 using namespace Windows::Storage;
 using namespace Windows::Foundation;
+#endif
 using namespace xbox::services;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
@@ -18,6 +20,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 #if !TV_API
 xbox_live_result<void> local_config::read()
 {
+#if UWP_API
     std::lock_guard<std::mutex> guard(m_jsonConfigLock);
     if (m_jsonConfig.size() > 0)
     {
@@ -52,12 +55,16 @@ xbox_live_result<void> local_config::read()
             "ERROR: Could not find xboxservices.config"
             );
     }
+#else 
+    return xbox_live_result<void>();
+#endif
 }
 
 string_t local_config::get_value_from_local_storage(
     _In_ const string_t& name
     )
 {
+#if UWP_API
     try
     {
         ApplicationDataContainer^ localSettings = ApplicationData::Current->LocalSettings;
@@ -84,10 +91,15 @@ string_t local_config::get_value_from_local_storage(
     {
         return L"";
     }
+#else 
+    UNREFERENCED_PARAMETER(name);
+    return L"";
+#endif
 }
 
 xbox_live_result<void> local_config::write_value_to_local_storage(_In_ const string_t& name, _In_ const string_t& value)
 {
+#if UWP_API
     try
     {
         ApplicationDataContainer^ localSettings = ApplicationData::Current->LocalSettings;
@@ -104,12 +116,18 @@ xbox_live_result<void> local_config::write_value_to_local_storage(_In_ const str
         xbox_live_error_code err = utils::convert_exception_to_xbox_live_error_code();
         return xbox_live_result<void>(err, "write_value_to_local_storage exception");
     }
+#else 
+    UNREFERENCED_PARAMETER(name);
+    UNREFERENCED_PARAMETER(value);
+    return xbox_live_result<void>();
+#endif
 }
 
 xbox_live_result<void> local_config::delete_value_from_local_storage(
     _In_ const string_t& name
     )
 {
+#if UWP_API
     try
     {
         ApplicationDataContainer^ localSettings = ApplicationData::Current->LocalSettings;
@@ -121,9 +139,11 @@ xbox_live_result<void> local_config::delete_value_from_local_storage(
         xbox_live_error_code err = utils::convert_exception_to_xbox_live_error_code();
         return xbox_live_result<void>(err, "delete_value_from_local_storage exception");
     }
+#else
+    UNREFERENCED_PARAMETER(name);
+    return xbox_live_result<void>();
+#endif
 }
-
-
 #endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

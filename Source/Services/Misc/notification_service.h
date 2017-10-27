@@ -63,7 +63,7 @@ protected:
     string_t m_endpointId;
 };
 
-#ifdef _WIN32
+#if UWP_API || TV_API
 class notification_service_windows : public notification_service
 {
 public:

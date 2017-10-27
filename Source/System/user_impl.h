@@ -48,6 +48,8 @@ public:
     const string_t& user_settings_restrictions() { return m_userSettingsRestrictions; }
     const string_t& user_enforcement_restrictions() { return m_userEnforcementRestrictions; }
     const string_t& user_title_restrictions() { return m_userTitleRestrictions; }
+
+    virtual void clear_token_cache() = 0;
 #endif
     const string_t& web_account_id() { return m_webAccountId; }
     std::shared_ptr<auth_config> get_auth_config() { return m_authConfig; }
@@ -147,7 +149,7 @@ protected:
     xbox::services::system::xbox_live_mutex m_lock;
 };
 
-#if UWP_API
+#if UWP_API || XSAPI_CENTENNIAL
 class user_impl_idp : public user_impl
 {
 public:
@@ -162,7 +164,11 @@ public:
         _In_ bool forceRefresh
         ) override;
 
-    user_impl_idp(Windows::System::User^ systemUser);
+    user_impl_idp(
+#if UWP_API 
+        Windows::System::User^ systemUser
+#endif
+        );
 
     pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
     internal_get_token_and_signature(

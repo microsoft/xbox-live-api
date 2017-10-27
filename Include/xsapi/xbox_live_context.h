@@ -215,12 +215,12 @@ public:
 	/// </summary>
 	_XSAPIIMP clubs::clubs_service& clubs_service();
 
-#if UWP_API || XSAPI_U || XSAPI_CENTENNIAL
+#if UWP_API || XSAPI_U || XSAPI_CENTENNIAL || XSAPI_WIN32
     /// <summary>
     /// A service used to write in game events.
     /// </summary>
     _XSAPIIMP events::events_service& events_service();
-#endif // UWP_API || XSAPI_U || XSAPI_CENTENNIAL
+#endif // UWP_API || XSAPI_U || XSAPI_CENTENNIAL || XSAPI_WIN32
 
 #if TV_API || UNIT_TEST_SERVICES
     /// <summary>

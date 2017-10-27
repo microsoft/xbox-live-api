@@ -21,9 +21,11 @@ public:
     void register_for_protocol_activation();
 
 private:
+#if UWP_API || TV_API
     void process_service_call_tracking_activation_uri(_In_ Windows::Foundation::Uri^ activationUri);
-    void set_state_bread_crumb(_In_ bool isTracking);
     Windows::Foundation::EventRegistrationToken m_onActivatedToken;
+#endif
+    void set_state_bread_crumb(_In_ bool isTracking);
     
     service_call_logger_protocol();
     service_call_logger_protocol(const service_call_logger_protocol&);
