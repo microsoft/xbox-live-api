@@ -239,7 +239,7 @@ multiplayer_client_manager::join_lobby_by_session_reference(
     return xbox_live_result<void>();
 }
 
-#if UWP_API || TV_API
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
 xbox_live_result<void>
 multiplayer_client_manager::join_lobby(
     _In_ Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs^ eventArgs,
