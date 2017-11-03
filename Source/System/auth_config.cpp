@@ -63,7 +63,7 @@ auth_config::auth_config(
     m_xtokenComposition = { token_identity_type::u_token, token_identity_type::d_token, token_identity_type::t_token };
 }
 
-#if XSAPI_SERVER || XSAPI_U
+#if XSAPI_U
 bool auth_config::use_win10_auth() const
 {
 #if UWP_API || XSAPI_U
@@ -107,7 +107,7 @@ void auth_config::set_rps_ticket_policy(
     m_rpsTicketPolicy = std::move(value);
 }
 
-#if XSAPI_SERVER || XSAPI_U
+#if XSAPI_U
 const string_t& auth_config::environment() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -213,7 +213,7 @@ void auth_config::set_xbox_live_endpoint(
     m_xboxLiveEndpoint = std::move(value);
 }
 
-#if XSAPI_SERVER || XSAPI_U
+#if XSAPI_U
 const string_t& auth_config::x_token_endpoint() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);

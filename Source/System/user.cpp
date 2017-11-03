@@ -36,22 +36,7 @@ std::shared_ptr<user_impl> sign_out_completed_event_args::_Internal_user()
     return m_user_impl;
 }
 
-#if XSAPI_SERVER
-
-pplx::task<xbox_live_result<void>> xbox_live_user::signin(
-    _In_ std::shared_ptr<xbox_live_server> server,
-    _In_ const string_t& user_delegation_ticket
-    )
-{
-    if (!server->is_signed_in())
-    {
-        return pplx::task_from_result(xbox_live_result<void>(xbox_live_error_code::runtime_error, "xbox_live_server need to sign in first"));
-    }
-
-    return m_user_impl->sign_in_impl(user_delegation_ticket, false);
-}
-
-#elif defined(_WIN32)
+#if defined(_WIN32)
 
 pplx::task<xbox_live_result<sign_in_result>> xbox_live_user::signin()
 {

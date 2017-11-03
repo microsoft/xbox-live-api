@@ -7,7 +7,7 @@
 #include "user_context.h"
 #include "xbox_system_factory.h"
 #include "xbox_live_context_impl.h"
-#if !TV_API && !UNIT_TEST_SERVICES && !XSAPI_SERVER && !XSAPI_U
+#if !TV_API && !UNIT_TEST_SERVICES && !XSAPI_U
 #include "Misc/notification_service.h"
 #endif
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN

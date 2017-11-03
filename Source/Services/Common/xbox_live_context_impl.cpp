@@ -8,7 +8,7 @@
 #include "xbox_system_factory.h"
 #include "xsapi/system.h"
 #include "xbox_live_context_impl.h"
-#if !TV_API && !UNIT_TEST_SERVICES && !XSAPI_SERVER
+#if !TV_API && !UNIT_TEST_SERVICES
 #include "notification_service.h"
 #endif
 #include "presence_internal.h"
@@ -74,7 +74,7 @@ xbox_live_context_impl::~xbox_live_context_impl()
 {
     if (m_userContext->user() != nullptr)
     {
-#if !TV_API && !UNIT_TEST_SERVICES && !XSAPI_SERVER
+#if !TV_API && !UNIT_TEST_SERVICES
 #if XSAPI_CPP
         m_userContext->user()->_User_impl()->remove_sign_in_completed_handler(
             m_signInContext
@@ -160,9 +160,7 @@ m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_s
     m_contextualSearchService = xbox::services::contextual_search::contextual_search_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_stringService = xbox::services::system::string_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_clubsService = xbox::services::clubs::clubs_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-	
-#if !XSAPI_SERVER
-
+    
 #if UWP_API || XSAPI_U
     m_eventsService = events::events_service(m_userContext, m_appConfig);
 #endif 
@@ -232,7 +230,6 @@ m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_s
         });
 #endif
     }
-#endif
 #endif
 }
 
@@ -358,7 +355,7 @@ xbox_live_context_impl::string_service()
 clubs::clubs_service&
 xbox_live_context_impl::clubs_service()
 {
-	return m_clubsService;
+    return m_clubsService;
 }
 
 #if UWP_API || XSAPI_U

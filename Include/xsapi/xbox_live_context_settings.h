@@ -288,15 +288,6 @@ public:
     static Windows::UI::Core::CoreDispatcher^ _s_dispatcher;
 #endif
 
-#if (XSAPI_SERVER || UNIT_TEST_SYSTEM)
-    /// <summary>
-    /// Sets the SSL Cert
-    /// </summary>
-    static void _Set_SSL_cert(_In_ cert_context cert);
-
-    static cert_context _s_certContext;
-#endif
-
     void _Raise_service_call_routed_event(_In_ const xbox::services::xbox_service_call_routed_event_args& result);
     bool _Is_disable_asserts_for_xbox_live_throttling_in_dev_sandboxes();
     bool _Is_disable_asserts_for_max_number_of_websockets_activated();

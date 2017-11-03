@@ -7,7 +7,7 @@
 #include "http_client.h"
 #include "system_internal.h"
 
-#if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
+#if XSAPI_U
 #include "signature_policy.h"
 #include "Ecdsa.h"
 #endif
@@ -198,7 +198,7 @@ public:
 
     virtual const http_call_request_message& request_body() const = 0;
 
-#if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
+#if XSAPI_U
     /// <summary>
     /// Sign the request and get the response. Used for auth services.
     /// </summary>
@@ -246,7 +246,7 @@ public:
         _In_ xbox_live_api xboxLiveApi
         );
 
-#if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
+#if XSAPI_U
     pplx::task<std::shared_ptr<http_call_response>> get_response(
         _In_ std::shared_ptr<xbox::services::system::ecdsa> proofKey,
         _In_ const xbox::services::system::signature_policy& signaturePolicy,

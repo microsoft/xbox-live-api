@@ -10,11 +10,8 @@
 #include "xsapi/system.h"
 #if TV_API
 #include "System/ppltasks_extra.h"
-#elif XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
+#elif XSAPI_U
 #include "request_signer.h"
-#if XSAPI_SERVER || UNIT_TEST_SYSTEM
-#include <Winhttp.h>
-#endif
 #endif
 #if XSAPI_A
 #include "a/user_impl_a.h"
@@ -72,7 +69,7 @@ http_call_impl::http_call_impl(
 {
 }
 
-#if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
+#if XSAPI_U
 pplx::task<std::shared_ptr<http_call_response>>
 http_call_impl::get_response(
     _In_ std::shared_ptr<system::ecdsa> proofKey,
@@ -190,7 +187,7 @@ http_call_impl::get_response_with_auth(
     m_httpCallData->request = get_default_request();
 
     string_t fullUrl = m_httpCallData->serverName + m_httpCallData->request.request_uri().to_string();
-#if !TV_API && !XSAPI_SERVER
+#if !TV_API
 #if XSAPI_CPP
     if (!m_httpCallData->userContext->user() || !m_httpCallData->userContext->user()->is_signed_in())
 #else
@@ -819,21 +816,6 @@ http_client_config http_call_impl::get_config(
         web::web_proxy proxy(proxyUri);
         config.set_proxy(proxy);
     }
-
-#if XSAPI_SERVER
-    // Overwrite SSL cert with xbox live business partner cert
-    config.set_nativehandle_options([](HINTERNET handle)
-    {
-        if (xbox_live_context_settings::_s_certContext != nullptr)
-        {
-            BOOL result = WinHttpSetOption(handle, WINHTTP_OPTION_CLIENT_CERT_CONTEXT, (LPVOID)xbox_live_context_settings::_s_certContext, sizeof(CERT_CONTEXT));
-            if (!result)
-            {
-                LOG_ERROR("WinHttpSetOption error");
-            }
-        }
-    });
-#endif 
 
     return config;
 }

@@ -108,23 +108,6 @@ MockHttpCall::get_response(
     return pplx::task_from_result(ResultValue);
 }
 
-#if UNIT_TEST_SYSTEM
-pplx::task<std::shared_ptr<http_call_response>>
-MockHttpCall::get_response(
-    _In_ std::shared_ptr<ecdsa> proofKey,
-    _In_ const signature_policy& signaturePolicy,
-    _In_ http_call_response_body_type httpCallResponseBodyType
-    )
-{
-    if (FAILED(ResultHR))
-    {
-        throw ResultHR;
-    }
-    CallCounter++;
-    return pplx::task_from_result(ResultValue);
-}
-#endif
-
 pplx::task<std::shared_ptr<http_call_response>> MockHttpCall::get_response_with_auth(
     _In_ http_call_response_body_type httpCallResponseBodyType
 )

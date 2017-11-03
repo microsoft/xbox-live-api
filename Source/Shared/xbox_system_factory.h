@@ -7,22 +7,15 @@
 #include "xsapi/system.h"
 #include "http_client.h"
 
-#if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
+#if XSAPI_U
 #include "xsts_token_service.h"
 #include "user_token_service.h"
 #include "title_token_service.h"
 #include "device_token_service.h"
-#if XSAPI_SERVER
-#include "service_token_service.h"
-#endif
 #include "xtitle_service.h"
-
-#if XSAPI_SERVER
-#include "xbox_live_server_impl.h"
-#endif
 #endif
 
-#if (!TV_API || UNIT_TEST_SYSTEM)
+#if !TV_API
 #include "user_impl.h"
 #endif
 
@@ -40,7 +33,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 class xbox_system_factory
 {
 public:
-#if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
+#if XSAPI_U
     virtual std::shared_ptr<xsts_token_service> create_xsts_token();
 
     virtual std::shared_ptr<user_token_service> create_user_token();
@@ -48,10 +41,6 @@ public:
     virtual std::shared_ptr<title_token_service> create_title_token();
 
     virtual std::shared_ptr<device_token_service> create_device_token();
-
-#if XSAPI_SERVER
-    virtual std::shared_ptr<service_token_service> create_service_token();
-#endif
 
     virtual std::shared_ptr<xtitle_service> create_xtitle_service();
 #endif

@@ -71,14 +71,6 @@ public:
         _In_ bool allUsersAuthRequired = false
         ) override;
 
-#if UNIT_TEST_SYSTEM
-    virtual pplx::task<std::shared_ptr<http_call_response>> get_response(
-        _In_ std::shared_ptr<ecdsa> proofKey,
-        _In_ const signature_policy& signaturePolicy,
-        _In_ http_call_response_body_type httpCallResponseBodyType
-        ) override;
-#endif
-
     virtual const std::wstring& server_name() const override;
     virtual const web::uri& path_query_fragment() const override;
     virtual const std::wstring& http_method() const override;

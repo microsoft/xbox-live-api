@@ -7,9 +7,6 @@
 #include "shared_macros.h"
 #include "system_internal.h"
 #include "auth_config.h"
-#if defined(XSAPI_SERVER)
-#include "auth/auth_manager.h"
-#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
@@ -235,40 +232,6 @@ private:
 };
 
 #endif // #if UWP_API
-
-
-#if defined(XSAPI_SERVER)
-class user_impl_server : public user_impl
-{
-public:
-    // Not supported for user_impl_server
-    pplx::task<xbox::services::xbox_live_result<sign_in_result>> sign_in_impl(
-        _In_ bool showUI,
-        _In_ bool forceRefresh
-        ) override;
-
-    pplx::task<xbox::services::xbox_live_result<void>> sign_in_impl(
-        _In_ const string_t& userDelegationTicket,
-        _In_ bool forceRefresh
-        ) override;
-
-    user_impl_server(void*);
-
-    pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
-    internal_get_token_and_signature(
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& url,
-        _In_ const string_t& endpointForNsal,
-        _In_ const string_t& headers,
-        _In_ const std::vector<unsigned char>& bytes,
-        _In_ bool promptForCredentialsIfNeeded,
-        _In_ bool forceRefresh
-        ) override;
-
-private:
-    std::shared_ptr<auth_manager> m_authManager;
-};
-#endif
 
 #if !TV_API
 class user_factory

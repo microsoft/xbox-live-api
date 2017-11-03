@@ -44,7 +44,7 @@ static std::mutex s_xsapiSingletonLock;
 static std::shared_ptr<xsapi_singleton> s_xsapiSingleton;
 
 xsapi_singleton::xsapi_singleton()
-#if !TV_API && !XSAPI_SERVER
+#if !TV_API
     : m_presenceWriterSingleton(std::shared_ptr<xbox::services::presence::presence_writer>(new xbox::services::presence::presence_writer()))
 #endif
 {
