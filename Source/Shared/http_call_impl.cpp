@@ -137,7 +137,7 @@ http_call_impl::get_response(
 }
 
 
-#if TV_API | XBOX_UWP
+#if TV_API
     
 pplx::task<std::shared_ptr<http_call_response>> 
 http_call_impl::get_response_with_auth(

@@ -258,7 +258,7 @@ public:
         _In_ http_call_response_body_type httpCallResponseBodyType
         ) override;
 
-#if TV_API | XBOX_UWP
+#if TV_API
 
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ Windows::Xbox::System::User^ user,

@@ -20,7 +20,7 @@ class xbox_live_context_impl : public std::enable_shared_from_this < xbox_live_c
 {
 public:
 
-#if TV_API | XBOX_UWP
+#if TV_API
     xbox_live_context_impl(
         _In_ Windows::Xbox::System::User^ user
         );

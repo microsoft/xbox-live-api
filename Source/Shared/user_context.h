@@ -15,14 +15,14 @@
 #endif
 
 #if !XSAPI_CPP
-#if TV_API | XBOX_UWP
+#if TV_API
 typedef Windows::Xbox::System::User^ XboxLiveUser_t;
 #else
 typedef Microsoft::Xbox::Services::System::XboxLiveUser^ XboxLiveUser_t;
 #endif
 #endif
 
-#if TV_API | XBOX_UWP
+#if TV_API
 typedef  Windows::Xbox::System::User^ xbox_live_user_t;
 #else
 typedef std::shared_ptr<xbox::services::system::xbox_live_user> xbox_live_user_t;
@@ -87,7 +87,7 @@ public:
     // inline helper functions
     static string_t get_user_id(xbox_live_user_t user)
     {
-#if TV_API | XBOX_UWP
+#if TV_API
         return user->XboxUserId->Data();
 #else
         return user->xbox_user_id();
@@ -95,7 +95,7 @@ public:
     }
 
 #if !XSAPI_CPP
-#if TV_API | XBOX_UWP
+#if TV_API
     static Windows::Xbox::System::User^ user_convert(Windows::Xbox::System::User^ user)
     {
         return user;
@@ -122,7 +122,7 @@ private:
     std::shared_ptr<xbox::services::system::xbox_live_server> m_server;
 #endif
 
-#if TV_API | XBOX_UWP
+#if TV_API
     // XDK's Windows.* user object
     public:
         user_context(_In_ Windows::Xbox::System::User^ user);

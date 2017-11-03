@@ -38,7 +38,7 @@ MockHttpCall::get_response(
     return pplx::task_from_result(ResultValue);
 }
 
-#if TV_API | XBOX_UWP
+#if TV_API
 
 /// <summary>
 /// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.

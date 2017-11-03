@@ -12,7 +12,7 @@
 #endif
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-#if TV_API | XBOX_UWP
+#if TV_API
 
 xbox_live_context::xbox_live_context(
     _In_ Windows::Xbox::System::User^ user
