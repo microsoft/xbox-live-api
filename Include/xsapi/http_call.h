@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #pragma once
 
-#if TV_API | XBOX_UWP
+#if TV_API
     NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_BEGIN
         ref class XboxLiveUser;
     NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_END
@@ -249,7 +249,7 @@ public:
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body
         ) = 0;
 
-#if TV_API | XBOX_UWP
+#if TV_API
     
     /// <summary>
     /// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.

@@ -525,7 +525,6 @@ multiplayer_client_manager::invite_friends(
     });
 #else
     UNREFERENCED_PARAMETER(customActivationContext);
-#if !XBOX_UWP
 #if !UNIT_TEST_SERVICES
 
     auto asyncOp = xbox::services::system::title_callable_ui::show_game_invite_ui(
@@ -542,7 +541,6 @@ multiplayer_client_manager::invite_friends(
             pThis->add_multiplayer_event(multiplayer_event_type::invite_sent, multiplayer_session_type::lobby_session, result.err(), result.err_message());
         }
     });
-#endif
 #endif
 #endif
 

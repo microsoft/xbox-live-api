@@ -36,7 +36,7 @@ std::shared_ptr<system::xbox_live_server> user_context::server() const
 
 #endif
 
-#if TV_API | XBOX_UWP
+#if TV_API
 user_context::user_context(_In_ Windows::Xbox::System::User^ user) :
     m_user(user),
     m_callerContextType(xbox::services::caller_context_type::title)

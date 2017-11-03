@@ -1454,7 +1454,7 @@ string_t utils::create_xboxlive_endpoint(
     source << protocol; // eg. https or wss
     source << _T("://");
     source << subpath; // eg. "achievements"
-#if !TV_API && !XBOX_UWP
+#if !TV_API
     if (appConfig)
     {
         source << appConfig->environment(); // eg. "" or ".dnet"

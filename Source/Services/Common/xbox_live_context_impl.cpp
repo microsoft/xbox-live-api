@@ -16,7 +16,7 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-#if TV_API | XBOX_UWP
+#if TV_API
 
 xbox_live_context_impl::xbox_live_context_impl(
     _In_ Windows::Xbox::System::User^ user
@@ -174,8 +174,6 @@ m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_s
     m_entertainmentProfileService = entertainment_profile::entertainment_profile_list_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
 #else
 
-#if !XBOX_UWP
-
     // Only start the presence writer on UAP
     presence::presence_writer::get_presence_writer_singleton()->start_writer(m_presenceService._Impl());
 
@@ -234,7 +232,6 @@ m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_s
         });
 #endif
     }
-#endif
 #endif
 #endif
 }

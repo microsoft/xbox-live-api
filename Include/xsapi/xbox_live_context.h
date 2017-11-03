@@ -3,14 +3,12 @@
 
 #pragma once
 
-#if !(TV_API | XBOX_UWP)
-
-#if !XSAPI_CPP
-#include "User_WinRT.h"
-#else
-#include "xsapi/system.h"
-#endif
-
+#if !TV_API
+    #if !XSAPI_CPP
+        #include "User_WinRT.h"
+    #else
+        #include "xsapi/system.h"
+    #endif
 #endif
 
 #include "xsapi/contextual_search_service.h"
@@ -74,7 +72,7 @@ private:
 class xbox_live_context
 {
 public:
-#if TV_API | XBOX_UWP
+#if TV_API
     /// <summary>
     /// Creates an xbox_live_context from a Windows::Xbox::System::User^
     /// </summary>
@@ -240,7 +238,7 @@ public:
 #endif // TV_API || UNIT_TEST_SERVICES
 #endif // !defined(XBOX_LIVE_CREATORS_SDK)
 
-#if (TV_API | XBOX_UWP) && defined(XSAPI_CPPWINRT)
+#if TV_API && defined(XSAPI_CPPWINRT)
     _XSAPIIMP xbox_live_context(
         _In_ winrt::Windows::Xbox::System::User user
         ) : xbox_live_context(convert_user_to_cppcx(user))
@@ -253,7 +251,7 @@ public:
         winrt::copy_from_abi(cppWinrtUser, reinterpret_cast<winrt::ABI::Windows::Xbox::System::IUser*>(user()));
         return cppWinrtUser;
     }
-#endif // (TV_API | XBOX_UWP) && defined(XSAPI_CPPWINRT)
+#endif // TV_API && defined(XSAPI_CPPWINRT)
 
 private:
     std::shared_ptr<xbox::services::xbox_live_context_impl> m_xboxLiveContextImpl;

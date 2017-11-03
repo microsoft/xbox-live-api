@@ -6,7 +6,7 @@
 #include "XboxLiveContext_WinRT.h"
 #include "user_context.h"
 #include "xbox_system_factory.h"
-#if !(TV_API | XBOX_UWP)
+#if !TV_API
 #include "User_WinRT.h"
 #endif
 #include "xsapi/profile.h"
@@ -103,7 +103,7 @@ XboxLiveHttpCall^ XboxLiveHttpCall::CreateXboxLiveHttpCall(
 
 Windows::Foundation::IAsyncOperation<XboxLiveHttpCallResponse^>^
 XboxLiveHttpCall::GetResponseWithAuth(
-#if TV_API | XBOX_UWP
+#if TV_API
     _In_ Windows::Xbox::System::User^ user,
 #else
     _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,

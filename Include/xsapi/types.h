@@ -131,7 +131,7 @@ typedef Windows::System::User^ user_creation_context;
 typedef void* user_creation_context;
 #endif
 
-#if TV_API | XBOX_UWP
+#if TV_API
 typedef  Windows::Xbox::System::User^ xbox_live_user_t;
 #endif
 
@@ -142,16 +142,6 @@ inline Windows::Xbox::System::User^ convert_user_to_cppcx(_In_ const winrt::Wind
     winrt::ABI::Windows::Xbox::System::IUser* abiUser = winrt::get_abi(user);
     return reinterpret_cast<Windows::Xbox::System::User^>(abiUser);
 }
-
-#if XBOX_UWP
-inline Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs^ convert_eventargs_to_cppcx(
-    _In_ const winrt::Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs& eventArgs
-)
-{
-    winrt::ABI::Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs* abiEventArgs = winrt::get_abi(eventArgs);
-    return reinterpret_cast<Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs^>(abiEventArgs);
-}
-#endif
 
 inline std::vector<Windows::Xbox::System::User^> convert_user_vector_to_cppcx(
     _In_ const std::vector<winrt::Windows::Xbox::System::User>& users

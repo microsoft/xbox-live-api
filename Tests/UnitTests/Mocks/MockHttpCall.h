@@ -15,7 +15,7 @@ public:
         _In_ http_call_response_body_type httpCallResponseBodyType
         ) override;
 
-#if TV_API | XBOX_UWP
+#if TV_API
 
 	/// <summary>
 	/// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.

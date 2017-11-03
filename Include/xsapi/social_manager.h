@@ -15,7 +15,7 @@ namespace xbox { namespace services {
     }
 }}
 
-#if TV_API | XBOX_UWP
+#if TV_API
 typedef  Windows::Xbox::System::User^ xbox_live_user_t;
 #else
 typedef std::shared_ptr<xbox::services::system::xbox_live_user> xbox_live_user_t;
