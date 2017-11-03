@@ -154,10 +154,10 @@ public:
     /// </summary>
     system::string_service& string_service();
 
-	/// <summary>
-	/// Service used to access and update clubs.
-	/// </summary>
-	clubs::clubs_service& clubs_service();
+    /// <summary>
+    /// Service used to access and update clubs.
+    /// </summary>
+    clubs::clubs_service& clubs_service();
 
 #if UWP_API || XSAPI_U
     /// <summary>
@@ -207,7 +207,7 @@ private:
     privacy::privacy_service m_privacyService;
     contextual_search::contextual_search_service m_contextualSearchService;
     system::string_service m_stringService;
-	clubs::clubs_service m_clubsService;
+    clubs::clubs_service m_clubsService;
 
 #if UWP_API || XSAPI_U
     events::events_service m_eventsService;

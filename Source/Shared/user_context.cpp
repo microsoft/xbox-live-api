@@ -20,21 +20,6 @@ using namespace xbox::services::system;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 // XDK's Windows.* user object
-#if XSAPI_SERVER
-
-user_context::user_context(_In_ std::shared_ptr<system::xbox_live_server> server) :
-    m_server(server),
-    m_callerContextType(xbox::services::caller_context_type::title)
-{
-    XSAPI_ASSERT(server != nullptr);
-}
-
-std::shared_ptr<system::xbox_live_server> user_context::server() const
-{
-    return m_server;
-}
-
-#endif
 
 #if TV_API
 user_context::user_context(_In_ Windows::Xbox::System::User^ user) :
@@ -224,12 +209,6 @@ user_context::get_auth_result(
 {
     UNREFERENCED_PARAMETER(allUsersAuthRequired);
     pplx::task<xbox_live_result<token_and_signature_result>> tokenTask;
-#if XSAPI_SERVER
-    if (m_server != nullptr)
-    {
-        tokenTask = m_server->get_token_and_signature(httpMethod, url, headers, requestBodyString);
-    }
-#endif
     if (tokenTask._GetImpl() == nullptr && m_user != nullptr)
     {
         tokenTask = m_user->get_token_and_signature(httpMethod, url, headers, requestBodyString);
@@ -255,12 +234,6 @@ pplx::task<xbox_live_result<user_context_auth_result>> user_context::get_auth_re
     UNREFERENCED_PARAMETER(allUsersAuthRequired);
     pplx::task<xbox_live_result<token_and_signature_result>> tokenTask;
 
-#if XSAPI_SERVER
-    if (m_server != nullptr)
-    {
-        tokenTask = m_server->get_token_and_signature_array(httpMethod, url, headers, requestBodyArray);
-    }
-#endif
     if (tokenTask._GetImpl() == nullptr && m_user != nullptr)
     {
         tokenTask = m_user->get_token_and_signature_array(httpMethod, url, headers, requestBodyArray);
@@ -277,13 +250,6 @@ pplx::task<xbox_live_result<user_context_auth_result>> user_context::get_auth_re
 
 pplx::task<xbox_live_result<void>> user_context::refresh_token()
 {
-#if XSAPI_SERVER
-    if (m_server != nullptr)
-    {
-        return m_server->m_server_impl->signin(nullptr, true);
-    }
-#endif
-
     auto authConfig = m_user->_User_impl()->get_auth_config();
 
     return m_user->_User_impl()->internal_get_token_and_signature(

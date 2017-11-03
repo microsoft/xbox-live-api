@@ -316,47 +316,6 @@ private:
 #endif 
 };
 
-#if (XSAPI_SERVER || UNIT_TEST_SYSTEM)
-class xbox_live_server
-{
-public:
-    _XSAPIIMP xbox_live_server();
-
-    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<void>> signin(_In_ cert_context cert);
-
-    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
-        get_token_and_signature(
-            _In_ const string_t& httpMethod,
-            _In_ const string_t& url,
-            _In_ const string_t& headers
-            );
-
-    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
-        get_token_and_signature(
-            _In_ const string_t& httpMethod,
-            _In_ const string_t& url,
-            _In_ const string_t& headers,
-            _In_ const string_t& requestBodyString
-            );
-
-    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
-        get_token_and_signature_array(
-            _In_ const string_t& httpMethod,
-            _In_ const string_t& url,
-            _In_ const string_t& headers,
-            _In_ const std::vector<unsigned char>& requestBodyArray
-            );
-
-    _XSAPIIMP bool is_signed_in() const;
-
-private:
-    std::shared_ptr<xbox_live_server_impl> m_server_impl;
-
-    friend xbox::services::user_context;
-};
-
-#endif //#if XSAPI_SERVER
-
 #if !TV_API
 
 /// <summary>
@@ -451,13 +410,6 @@ private:
 class xbox_live_user : public std::enable_shared_from_this<xbox_live_user>
 {
 public:
-#if XSAPI_SERVER
-    _XSAPIIMP pplx::task<xbox_live_result<void>> signin(
-        _In_ std::shared_ptr<xbox_live_server> server,
-        _In_ const string_t& user_delegation_ticket
-        );
-#endif
-
     /// <summary>
     /// Attempt to sign a player into their Xbox Live account. This call may bring up
     /// a sign-in user interface.

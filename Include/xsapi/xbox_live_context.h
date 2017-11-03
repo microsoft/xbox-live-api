@@ -22,44 +22,6 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 class xbox_live_context_server_impl;
 
-#if XSAPI_SERVER
-/// <summary>
-/// Defines pointers to objects that access Xbox Live to create features for player interactions.
-/// </summary>
-class xbox_live_server_context
-{
-public:
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    _XSAPIIMP xbox_live_server_context(
-        _In_ std::shared_ptr<system::xbox_live_server> server
-        );
-
-    /// <summary>
-    /// Returns the associated system User.
-    /// </summary>
-    _XSAPIIMP std::shared_ptr<system::xbox_live_server> server();
-
-    /// <summary>
-    /// Returns an object containing settings that apply to all REST calls made such as retry and diagnostic settings.
-    /// </summary>
-    _XSAPIIMP std::shared_ptr<xbox_live_context_settings> settings();
-
-    /// <summary>
-    /// Returns an object containing Xbox Live app config such as title ID
-    /// </summary>
-    _XSAPIIMP std::shared_ptr<xbox_live_app_config> application_config();
-
-private:
-
-    std::shared_ptr<xbox::services::xbox_live_context_server_impl> m_xboxLiveContextImpl;
-};
-
-#endif
-
-
 /// <summary>
 /// Defines pointers to objects that access Xbox Live to create features for player 
 /// interactions.
@@ -208,10 +170,10 @@ public:
     /// </summary>
     _XSAPIIMP presence::presence_service& presence_service();
 
-	/// <summary>
-	/// A service for managing Title Clubs.
-	/// </summary>
-	_XSAPIIMP clubs::clubs_service& clubs_service();
+    /// <summary>
+    /// A service for managing Title Clubs.
+    /// </summary>
+    _XSAPIIMP clubs::clubs_service& clubs_service();
 
 #if UWP_API || XSAPI_U || XSAPI_CENTENNIAL || XSAPI_WIN32
     /// <summary>

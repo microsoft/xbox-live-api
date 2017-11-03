@@ -43,7 +43,7 @@ public:
     const string_t& rps_ticket_policy() const;
     void set_rps_ticket_policy(_In_ string_t value);
 
-#if XSAPI_SERVER || XSAPI_U
+#if XSAPI_U
     /// <summary>
     /// Internal function
     /// </summary>

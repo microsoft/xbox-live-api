@@ -35,7 +35,7 @@ void xbox_system_factory::set_factory(
     xsapiSingleton->m_factoryInstance = factory;
 }
 
-#if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
+#if XSAPI_U
 std::shared_ptr<xsts_token_service>
 xbox_system_factory::create_xsts_token()
 {
@@ -59,14 +59,6 @@ xbox_system_factory::create_device_token()
 {
     return std::make_shared<device_token_service_impl>();
 }
-
-#if XSAPI_SERVER
-std::shared_ptr<service_token_service>
-xbox_system_factory::create_service_token()
-{
-    return std::make_shared<service_token_service_impl>();
-}
-#endif
 
 std::shared_ptr<xtitle_service>
 xbox_system_factory::create_xtitle_service()
@@ -134,8 +126,6 @@ xbox_system_factory::create_user_impl(user_creation_context userCreationContext)
 {
 #if UWP_API
     return std::make_shared<user_impl_idp>(userCreationContext);
-#elif XSAPI_SERVER
-    return std::make_shared<user_impl_server>(userCreationContext);
 #elif XSAPI_A
     return std::make_shared<user_impl_android>();
 #else

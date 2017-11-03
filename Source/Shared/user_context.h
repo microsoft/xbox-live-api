@@ -113,15 +113,6 @@ public:
 #endif
 #endif
 
-#if XSAPI_SERVER
-public:
-    user_context(_In_ std::shared_ptr<xbox::services::system::xbox_live_server> server);
-    std::shared_ptr<xbox::services::system::xbox_live_server> server() const;
-
-private:
-    std::shared_ptr<xbox::services::system::xbox_live_server> m_server;
-#endif
-
 #if TV_API
     // XDK's Windows.* user object
     public:

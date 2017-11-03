@@ -127,11 +127,11 @@ public:
         );
 
 internal:
-	ClubsService(
-		_In_ xbox::services::clubs::clubs_service cppObj);
+    ClubsService(
+        _In_ xbox::services::clubs::clubs_service cppObj);
 
 private:
-	xbox::services::clubs::clubs_service m_cppObj;
+    xbox::services::clubs::clubs_service m_cppObj;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CLUBS_END
