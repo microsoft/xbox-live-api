@@ -294,13 +294,33 @@ namespace ProjectFileProcessor
             }
         }
 
+        public static string ReplaceString(string str, string oldValue, string newValue, StringComparison comparison)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            int previousIndex = 0;
+            int index = str.IndexOf(oldValue, comparison);
+            while (index != -1)
+            {
+                sb.Append(str.Substring(previousIndex, index - previousIndex));
+                sb.Append(newValue);
+                index += oldValue.Length;
+
+                previousIndex = index;
+                index = str.IndexOf(oldValue, index, comparison);
+            }
+            sb.Append(str.Substring(previousIndex));
+
+            return sb.ToString();
+        }
+
         private static string MakeFilePathRelative(string inputFile, string rootFolder)
         {
             //     <ClInclude Include="C:\git\forks\xbox-live-api\Source\Services\Common\Desktop\pch.h" />
             // to
             //     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.h" />
 
-            string filteredFile = inputFile.Replace(rootFolder, @"$(MSBuildThisFileDirectory)..\..\");
+            string filteredFile = ReplaceString(inputFile, rootFolder, @"$(MSBuildThisFileDirectory)..\..\", StringComparison.OrdinalIgnoreCase);
             filteredFile = filteredFile.Replace(" Condition=\"'$(Configuration)|$(Platform)'=='Debug|Win32'\"", "");
             filteredFile = filteredFile.Replace(@"..\..\Utilities\CMake\build\", "");
             filteredFile = filteredFile.Replace("\"  />", "\" />");
@@ -378,54 +398,66 @@ namespace ProjectFileProcessor
                 lines_filtered.Add(lineOutput);
             }
 
+            return lines_filtered;
 
-            // Need to sort filters file manually due to CMake bug: https://cmake.org/Bug/view.php?id=10481
-            List<string> filterLines = new List<string>();
-            List<List<string>> filterNodes = new List<List<string>>();
-            bool captureFilters = false;
-            for (int i = 0; i < lines_filtered.Count; i++)
-            {
-                string l1 = lines_filtered[i];
 
-                if( l1.Contains("<ItemGroup>") )
-                {
-                    filterLines.Add(l1);
-                    captureFilters = true;
-                    i++;
-                    l1 = lines_filtered[i];
-                }
+            //// Need to sort filters file manually due to CMake bug: https://cmake.org/Bug/view.php?id=10481
+            //List<string> filterLines = new List<string>();
+            //List<List<string>> filterNodes = new List<List<string>>();
+            //bool captureFilters = false;
+            //for (int i = 0; i < lines_filtered.Count; i++)
+            //{
+            //    string l1 = lines_filtered[i];
 
-                if(l1.Contains("</ItemGroup>"))
-                {
-                    var sortedList = filterNodes.OrderBy(x => x[0]);
-                    foreach ( var l in sortedList )
-                    {
-                        foreach( var s in l )
-                        {
-                            filterLines.Add(s);
-                        }
-                    }
-                    filterNodes.Clear();
-                    captureFilters = false;
-                }
+            //    if( l1.Contains("<ItemGroup>") )
+            //    {
+            //        filterLines.Add(l1);
+            //        captureFilters = true;
+            //        i++;
+            //        l1 = lines_filtered[i];
+            //    }
 
-                if( captureFilters )
-                {
-                    List<string> filter = new List<string>();
-                    filter.Add(lines_filtered[i]);
-                    filter.Add(lines_filtered[i + 1]);
-                    filter.Add(lines_filtered[i + 2]);
-                    i += 2;
+            //    if(l1.Contains("</ItemGroup>"))
+            //    {
+            //        //Console.WriteLine("Start");
+            //        //foreach (var l in filterNodes)
+            //        //{
+            //        //    Console.WriteLine(l[0]);
+            //        //}
+            //        var sortedList = filterNodes.OrderBy(x => x[0]);
+            //        //Console.WriteLine("Final");
+            //        //foreach (var l in sortedList)
+            //        //{
+            //        //    Console.WriteLine(l[0]);
+            //        //}
+            //        foreach ( var l in sortedList )
+            //        {
+            //            foreach( var s in l )
+            //            {
+            //                filterLines.Add(s);
+            //            }
+            //        }
+            //        filterNodes.Clear();
+            //        captureFilters = false;
+            //    }
 
-                    filterNodes.Add(filter);
-                }
-                else
-                {
-                    filterLines.Add(l1);
-                }
-            }
+            //    if( captureFilters )
+            //    {
+            //        List<string> filter = new List<string>();
+            //        filter.Add(lines_filtered[i]);
+            //        filter.Add(lines_filtered[i + 1]);
+            //        filter.Add(lines_filtered[i + 2]);
+            //        i += 2;
 
-            return filterLines;
+            //        filterNodes.Add(filter);
+            //    }
+            //    else
+            //    {
+            //        filterLines.Add(l1);
+            //    }
+            //}
+
+            //return filterLines;
         }
 
         private static void DiffFiles(string fileOld, string fileNew, string rootFolder)
