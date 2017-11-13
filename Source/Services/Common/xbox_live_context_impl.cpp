@@ -181,7 +181,7 @@ void xbox_live_context_impl::init()
         );
 
 
-#if XSAPI_NONXDK_CPP_AUTH
+#if XSAPI_NONXDK_CPP_AUTH || XSAPI_NONXDK_WINRT_AUTH
     if (m_userContext->user() != nullptr)
     {
         m_signInContext = m_userContext->user()->_User_impl()->add_sign_in_completed_handler(
