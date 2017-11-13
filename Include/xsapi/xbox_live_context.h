@@ -33,8 +33,9 @@ class xbox_live_context_server_impl;
 /// </summary>
 class xbox_live_context
 {
-public:
-#if TV_API
+public:    
+
+#if XSAPI_XDK_AUTH
     /// <summary>
     /// Creates an xbox_live_context from a Windows::Xbox::System::User^
     /// </summary>
@@ -46,8 +47,24 @@ public:
     /// Returns the associated system User 
     /// </summary>
     _XSAPIIMP Windows::Xbox::System::User^ user();
+#endif // XSAPI_XDK_AUTH
 
-#elif XSAPI_CPP
+#if XSAPI_XDK_AUTH_WITH_CPPWINRT
+    _XSAPIIMP xbox_live_context(
+        _In_ winrt::Windows::Xbox::System::User user
+    ) : xbox_live_context(convert_user_to_cppcx(user))
+    {
+    }
+
+    inline winrt::Windows::Xbox::System::User user_cppwinrt()
+    {
+        winrt::Windows::Xbox::System::User cppWinrtUser(nullptr);
+        winrt::copy_from_abi(cppWinrtUser, reinterpret_cast<winrt::ABI::Windows::Xbox::System::IUser*>(user()));
+        return cppWinrtUser;
+    }
+#endif // XSAPI_XDK_AUTH_WITH_CPPWINRT
+
+#if XSAPI_NONXDK_CPP_AUTH && !UNIT_TEST_SERVICES
     /// <summary>
     /// Creates an xbox_live_context from a xbox_live_user
     /// </summary>
@@ -59,8 +76,9 @@ public:
     /// Returns the associated system User.
     /// </summary>
     _XSAPIIMP std::shared_ptr<system::xbox_live_user> user();
+#endif // XSAPI_NONXDK_CPP_AUTH
 
-#else
+#if XSAPI_NONXDK_WINRT_AUTH
     /// <summary>
     /// Creates an xbox_live_context from a Microsoft::Xbox::Services::System::XboxLiveUser^
     /// </summary>
@@ -72,7 +90,7 @@ public:
     /// Returns the associated system XboxLiveUser.
     /// </summary>
     _XSAPIIMP Microsoft::Xbox::Services::System::XboxLiveUser^ user();
-#endif
+#endif // XSAPI_NONXDK_WINRT_AUTH
 
     /// <summary>
     /// Returns the current user's Xbox Live User ID.
@@ -198,22 +216,8 @@ public:
     /// </summary>
     _XSAPIIMP entertainment_profile::entertainment_profile_list_service& entertainment_profile_list_service();
 #endif // TV_API || UNIT_TEST_SERVICES
+
 #endif // !defined(XBOX_LIVE_CREATORS_SDK)
-
-#if TV_API && defined(XSAPI_CPPWINRT)
-    _XSAPIIMP xbox_live_context(
-        _In_ winrt::Windows::Xbox::System::User user
-        ) : xbox_live_context(convert_user_to_cppcx(user))
-    {
-    }
-
-    inline winrt::Windows::Xbox::System::User user_cppwinrt()
-    {
-        winrt::Windows::Xbox::System::User cppWinrtUser(nullptr);
-        winrt::copy_from_abi(cppWinrtUser, reinterpret_cast<winrt::ABI::Windows::Xbox::System::IUser*>(user()));
-        return cppWinrtUser;
-    }
-#endif // TV_API && defined(XSAPI_CPPWINRT)
 
 private:
     std::shared_ptr<xbox::services::xbox_live_context_impl> m_xboxLiveContextImpl;

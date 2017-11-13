@@ -249,41 +249,30 @@ public:
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body
         ) = 0;
 
-#if TV_API
-    
-    /// <summary>
-    /// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.
-    /// </summary>
+#if XSAPI_XDK_AUTH
     virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ Windows::Xbox::System::User^ user,
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
         _In_ bool allUsersAuthRequired = false
         ) = 0;
+#endif 
 
-#elif UNIT_TEST_SERVICES || !XSAPI_CPP
-    
-    /// <summary>
-    /// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.
-    /// </summary>
+#if XSAPI_NONXDK_CPP_AUTH
+    virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
+        _In_ std::shared_ptr<system::xbox_live_user> user,
+        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
+        _In_ bool allUsersAuthRequired = false
+        ) = 0;
+#endif 
+
+#if XSAPI_NONXDK_WINRT_AUTH
     virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
         _In_ bool allUsersAuthRequired = false
         ) = 0;
-
-#else
-
-    /// <summary>
-    /// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.
-    /// </summary>
-    virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
-        _In_ std::shared_ptr<xbox::services::system::xbox_live_user> user,
-        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
-        _In_ bool allUsersAuthRequired = false
-        ) = 0;
-
 #endif
-
+    
     /// <summary>
     /// Send the request without authentication and get the response.
     /// </summary>
@@ -392,7 +381,6 @@ public:
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
         _In_ bool allUsersAuthRequired = false
         ) = 0;
-
 
     virtual ~http_call(){}
 };

@@ -103,14 +103,41 @@ typedef std::chrono::steady_clock chrono_clock_t;
 #endif
 
 // Forward declarations
-// Forward declarations
 namespace xbox {
     namespace services {
         class user_context;
         class xbox_live_context_settings;
         class local_config;
+        namespace system {
+            class xbox_live_user;
+        }
     }
 }
+
+#if !XSAPI_CPP || UNIT_TEST_SERVICES
+namespace Microsoft {
+    namespace Xbox {
+        namespace Services {
+            namespace System {
+                ref class XboxLiveUser;
+            }
+        }
+    }
+}
+#endif
+
+#if TV_API
+#define XSAPI_XDK_AUTH 1
+#endif
+#if TV_API && defined(XSAPI_CPPWINRT)
+#define XSAPI_XDK_AUTH_WITH_CPPWINRT 1
+#endif
+#if !TV_API && XSAPI_CPP // Non-XDK C++
+#define XSAPI_NONXDK_CPP_AUTH 1
+#endif
+#if !TV_API && (!XSAPI_CPP || UNIT_TEST_SERVICES) // Non-XDK WinRT
+#define XSAPI_NONXDK_WINRT_AUTH 1
+#endif
 
 #if !TV_API
 // SSL client certificate context
@@ -126,13 +153,23 @@ typedef boost::asio::ssl::context* cert_context;
 #endif
 
 #if UWP_API || UNIT_TEST_SERVICES
-typedef Windows::System::User^ user_creation_context;
+    typedef Windows::System::User^ user_creation_context;
 #else
-typedef void* user_creation_context;
+    typedef void* user_creation_context;
+#endif
+
+#if !XSAPI_CPP || UNIT_TEST_SERVICES
+    #if TV_API
+        typedef Windows::Xbox::System::User^ XboxLiveUser_t;
+    #else
+        typedef Microsoft::Xbox::Services::System::XboxLiveUser^ XboxLiveUser_t;
+    #endif
 #endif
 
 #if TV_API
-typedef  Windows::Xbox::System::User^ xbox_live_user_t;
+    typedef  Windows::Xbox::System::User^ xbox_live_user_t;
+#else
+    typedef std::shared_ptr<xbox::services::system::xbox_live_user> xbox_live_user_t;
 #endif
 
 #if defined(XSAPI_CPPWINRT)
@@ -145,7 +182,7 @@ inline Windows::Xbox::System::User^ convert_user_to_cppcx(_In_ const winrt::Wind
 
 inline std::vector<Windows::Xbox::System::User^> convert_user_vector_to_cppcx(
     _In_ const std::vector<winrt::Windows::Xbox::System::User>& users
-)
+    )
 {
     std::vector<Windows::Xbox::System::User^> cppCxUsers;
     for (winrt::Windows::Xbox::System::User u : users)

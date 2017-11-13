@@ -70,10 +70,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.cpp">
       <Filter>C++ Source\Services\Clubs</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\XboxLiveContext_Desktop.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp">
       <Filter>C++ Source\Services\Common</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context.cpp">
       <Filter>C++ Source\Services\Common</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_impl.cpp">
@@ -718,6 +718,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context_xdk.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
@@ -977,6 +980,33 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="C++ Public Includes">
+      <UniqueIdentifier>{848B0C02-35A1-3A9D-81CC-513FF3F205BB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source">
+      <UniqueIdentifier>{C156B2C1-D13C-31D8-8955-CFD94B05A781}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Stats\Manager">
+      <UniqueIdentifier>{57A0A6E0-3E99-371E-952D-38DECAC4B717}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Multiplayer\Manager">
+      <UniqueIdentifier>{93130BC3-2203-3733-B903-28CDDEEEF42A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Shared\Logger">
+      <UniqueIdentifier>{D30FEB85-D0C6-32DE-B1BB-75623BAC93C3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Social\Manager">
+      <UniqueIdentifier>{432888EB-664F-3B60-A937-CEC66EB64B1A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\System">
+      <UniqueIdentifier>{D75844CD-55A8-3AB4-ABC1-4028BC89E81D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Shared">
+      <UniqueIdentifier>{B682A27C-50BA-30B6-9573-26F7B62C7BD5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services">
+      <UniqueIdentifier>{66EEBBE9-943D-3582-8058-538D12E44C73}</UniqueIdentifier>
+    </Filter>
     <Filter Include="C++ Source\Services\Misc">
       <UniqueIdentifier>{206338C2-9047-3AAE-B89B-A141CD0A774F}</UniqueIdentifier>
     </Filter>
@@ -1027,33 +1057,6 @@
     </Filter>
     <Filter Include="C++ Source\Services\Marketplace">
       <UniqueIdentifier>{E666A459-C521-327E-91C0-E95357F5268D}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="C++ Source\Shared\Logger">
-      <UniqueIdentifier>{D30FEB85-D0C6-32DE-B1BB-75623BAC93C3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="C++ Source\Services\Stats\Manager">
-      <UniqueIdentifier>{57A0A6E0-3E99-371E-952D-38DECAC4B717}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="C++ Source\Services\Social\Manager">
-      <UniqueIdentifier>{432888EB-664F-3B60-A937-CEC66EB64B1A}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="C++ Source\Services\Multiplayer\Manager">
-      <UniqueIdentifier>{93130BC3-2203-3733-B903-28CDDEEEF42A}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="C++ Source\System">
-      <UniqueIdentifier>{D75844CD-55A8-3AB4-ABC1-4028BC89E81D}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="C++ Source\Shared">
-      <UniqueIdentifier>{B682A27C-50BA-30B6-9573-26F7B62C7BD5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="C++ Source\Services">
-      <UniqueIdentifier>{66EEBBE9-943D-3582-8058-538D12E44C73}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="C++ Public Includes">
-      <UniqueIdentifier>{848B0C02-35A1-3A9D-81CC-513FF3F205BB}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="C++ Source">
-      <UniqueIdentifier>{C156B2C1-D13C-31D8-8955-CFD94B05A781}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

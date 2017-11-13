@@ -329,7 +329,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.h" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\XboxLiveContext_Desktop.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\XboxLiveContext_WinRT.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\XboxLiveContext_WinRT.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\pch.cpp" >
@@ -338,6 +337,7 @@
     </ClCompile>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\pch.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\pch_common.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_impl.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_impl.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\WinRT\EntertainmentProfileListContainsItemResult_WinRT.cpp" />
@@ -349,9 +349,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\entertainment_profile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\entertainment_profile_list_contains_item_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\entertainment_profile_list_xbox_one_pins.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\events_service.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\WinRT\EventsService_WinRT.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\WinRT\EventsService_WinRT.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\events_service_uwp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\AllocationResult_WinRT.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\AllocationResult_WinRT.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\ClusterResult_WinRT.cpp" />
@@ -998,6 +998,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context_xdk.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils_locales.cpp" />

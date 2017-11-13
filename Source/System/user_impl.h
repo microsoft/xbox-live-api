@@ -36,25 +36,22 @@ public:
         return pplx::task_from_exception<xbox::services::xbox_live_result<void>>(std::exception());
     }
 
-    // IUser
     const string_t& xbox_user_id() { return m_xboxUserId; }
     const string_t& gamertag() { return m_gamertag; }
     const string_t& age_group() { return m_ageGroup; }
     const string_t& privileges() { return m_privileges; }
+
 #if XSAPI_U
     const string_t& user_settings_restrictions() { return m_userSettingsRestrictions; }
     const string_t& user_enforcement_restrictions() { return m_userEnforcementRestrictions; }
     const string_t& user_title_restrictions() { return m_userTitleRestrictions; }
-
     virtual void clear_token_cache() = 0;
+    void set_sign_in_options(std::shared_ptr<xbox_sign_in_options> options) { m_signInOptions = options; }
 #endif
+
     const string_t& web_account_id() { return m_webAccountId; }
     std::shared_ptr<auth_config> get_auth_config() { return m_authConfig; }
     const user_creation_context creation_context() { return m_creationContext;  }
-
-#if XSAPI_U
-    void set_sign_in_options(std::shared_ptr<xbox_sign_in_options> options) { m_signInOptions = options; }
-#endif
 
 #if UNIT_TEST_SERVICES
     void _Set_xbox_user_id(const string_t& xboxUserId) { m_xboxUserId = xboxUserId; }
@@ -83,7 +80,7 @@ public:
         _In_ const std::vector<unsigned char>& requestBodyArray
         );
 
-    bool is_signed_in();
+    bool is_signed_in() const;
     void set_user_pointer(_In_ std::shared_ptr<system::xbox_live_user> user);
     void set_title_telemetry_session_id(_In_ const string_t& sessionId);
     const string_t& title_telemetry_session_id();
@@ -130,15 +127,13 @@ protected:
     string_t m_userSettingsRestrictions;
     string_t m_userEnforcementRestrictions;
     string_t m_userTitleRestrictions;
+    std::shared_ptr<xbox_sign_in_options> m_signInOptions;
 #endif
     string_t m_webAccountId;
     string_t m_cid;
     string_t m_titleTelemetrySessionId;
     bool m_isSignedIn;
     user_creation_context m_creationContext;
-#if XSAPI_U
-    std::shared_ptr<xbox_sign_in_options> m_signInOptions;
-#endif
     std::weak_ptr<system::xbox_live_user> m_weakUserPtr;
 
     std::shared_ptr<auth_config> m_authConfig;

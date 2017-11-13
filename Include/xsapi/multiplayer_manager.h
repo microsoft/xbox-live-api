@@ -5,6 +5,7 @@
 #include <mutex>
 #include "pplx/pplxtasks.h"
 #include "xsapi/services.h"
+#include "xsapi/types.h"
 
 namespace xbox { namespace services {
 
@@ -12,12 +13,6 @@ namespace xbox { namespace services {
         class xbox_live_user;
     }
 }}
-
-#if TV_API
-typedef  Windows::Xbox::System::User^ xbox_live_user_t;
-#else
-typedef std::shared_ptr<xbox::services::system::xbox_live_user> xbox_live_user_t;
-#endif
 
 #if XSAPI_CPP
 typedef const void* context_t;
@@ -1595,7 +1590,6 @@ public:
         return join_lobby(handleId, convert_user_vector_to_cppcx(users));
     }
 #endif
-
 #endif
 
 private:

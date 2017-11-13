@@ -5,14 +5,13 @@
 #include <mutex>
 #include "xsapi/services.h"
 #if !TV_API
-
-#if !XSAPI_CPP
-#include "User_WinRT.h"
-#else
-#include "xsapi/system.h"
+    #if !XSAPI_CPP
+        #include "User_WinRT.h"
+    #else
+        #include "xsapi/system.h"
+    #endif
 #endif
 
-#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -20,38 +19,22 @@ class xbox_live_context_impl : public std::enable_shared_from_this < xbox_live_c
 {
 public:
 
-#if TV_API
-    xbox_live_context_impl(
-        _In_ Windows::Xbox::System::User^ user
-        );
-
-    /// <summary>
-    /// Returns the associated system User 
-    /// </summary>
+#if XSAPI_XDK_AUTH
+    xbox_live_context_impl(_In_ Windows::Xbox::System::User^ user);
     Windows::Xbox::System::User^ user();
+#endif 
 
-#else
-    xbox_live_context_impl(
-        _In_ std::shared_ptr<system::xbox_live_user> user
-        );
-#if XSAPI_CPP
-    /// <summary>
-    /// Returns the associated system User.
-    /// </summary>
+#if XSAPI_NONXDK_CPP_AUTH && !UNIT_TEST_SERVICES
+    xbox_live_context_impl(_In_ std::shared_ptr<system::xbox_live_user> user);
     std::shared_ptr<system::xbox_live_user> user();
+#endif 
 
-#else
-    xbox_live_context_impl(
-        _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user
-        );
-
-    /// <summary>
-    /// Returns the associated system XboxLiveUser.
-    /// </summary>
+#if XSAPI_NONXDK_WINRT_AUTH
+    xbox_live_context_impl(_In_ std::shared_ptr<system::xbox_live_user> user); // also supports C++ class
+    xbox_live_context_impl(_In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user);
     Microsoft::Xbox::Services::System::XboxLiveUser^ user();
 #endif
-#endif
-
+    
     ~xbox_live_context_impl();
 
     /// <summary>
@@ -159,7 +142,7 @@ public:
     /// </summary>
     clubs::clubs_service& clubs_service();
 
-#if UWP_API || XSAPI_U
+#if (UWP_API || XSAPI_U)
     /// <summary>
     /// A service used to write in game events.
     /// </summary>
@@ -209,7 +192,7 @@ private:
     system::string_service m_stringService;
     clubs::clubs_service m_clubsService;
 
-#if UWP_API || XSAPI_U
+#if (UWP_API || XSAPI_U)
     events::events_service m_eventsService;
 #endif
 #if TV_API || UNIT_TEST_SERVICES

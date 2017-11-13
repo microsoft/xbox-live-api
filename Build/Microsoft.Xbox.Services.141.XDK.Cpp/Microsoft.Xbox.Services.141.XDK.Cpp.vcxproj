@@ -69,13 +69,13 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.h" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\XboxLiveContext_Desktop.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp" >
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\pch_common.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_impl.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_impl.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\entertainment_profile.cpp" />
@@ -321,6 +321,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logging_config.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context_xdk.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils_locales.cpp" />

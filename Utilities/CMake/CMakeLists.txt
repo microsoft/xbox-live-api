@@ -156,7 +156,7 @@ else()
 endif()
 
 set(Common_Source_Files
-    ../../Source/Services/Common/Desktop/XboxLiveContext_Desktop.cpp
+    ../../Source/Services/Common/xbox_live_context.cpp
     ../../Source/Services/Common/xbox_live_context_impl.cpp
     ../../Source/Services/Common/pch_Common.h
     ../../Source/Services/Common/xbox_live_context_impl.h
@@ -219,6 +219,18 @@ if( UNITTEST )
         ../../Source/Shared/Logger/console_output.h
         )		
 endif()
+
+set(Cpp_Shared_Source_Files
+    ../../Source/Shared/user_context_cpp.cpp
+    )
+
+set(WinRT_Shared_Source_Files
+    ../../Source/Shared/user_context_winrt.cpp
+    )
+
+set(XDK_Shared_Source_Files
+    ../../Source/Shared/user_context_xdk.cpp
+    )
 
 set(Shared_Source_Files
 	../../Source/Shared/WinRT/Event_WinRT.cpp
@@ -304,8 +316,8 @@ set(Achievements_Source_Files
     ../../Source/Services/Achievements/achievement_title_association.cpp
     )
 
-set(Events_Source_Files
-    ../../Source/Services/Events/Events_service.cpp
+set(UWP_Events_Source_Files
+    ../../Source/Services/Events/events_service_uwp.cpp
     )
 
 set(Leaderboard_Source_Files
@@ -1150,6 +1162,7 @@ else()
 
 	if( XDK OR UNITTEST )
 		message(STATUS "XDK source group")
+        source_group("C++ Source\\Shared" FILES ${XDK_Shared_Source_Files})
 		source_group("C++ Source\\Services\\EntertainmentProfile" FILES ${EntertainmentProfile_Source_Files})
 		source_group("C++ Source\\Services\\Marketplace" FILES ${Marketplace_Source_Files})
 		
@@ -1161,9 +1174,17 @@ else()
 		endif()	
 	else()
 		source_group("C++ Source\\System" FILES ${UWP_System_Source_Files})
-		source_group("C++ Source\\Services\\Misc" FILES ${UWP_Source_Files})
-		source_group("C++ Source\\Services\\Events" FILES ${Events_Source_Files})
-		if( WINRT OR UNITTEST )
+        source_group("C++ Source\\Shared" FILES ${Cpp_Shared_Source_Files})
+        source_group("C++ Source\\Services\\Misc" FILES ${UWP_Source_Files})
+        source_group("C++ Source\\Services\\Events" FILES ${UWP_Events_Source_Files})
+
+        if( PCWIN32 )
+            source_group("C++ Source\\Shared" FILES ${Xal_Shared_Source_Files})
+            source_group("C++ Source\\System" FILES ${Xal_System_Source_Files})
+        endif()
+
+        if( WINRT OR UNITTEST )
+            source_group("C++ Source\\Shared" FILES ${WinRT_Shared_Source_Files})
 			source_group("C++ Source\\Shared\\WinRT" FILES ${UWP_Shared_WinRT_Source_Files})
             source_group("C++ Source\\System\\WinRT" FILES ${System_WinRT_Source_Files})
             source_group("C++ Source\\Services\\Events\\WinRT" FILES ${Events_WinRT_Source_Files})
@@ -1174,7 +1195,7 @@ else()
         source_group("C++ Source\\Shared\\WinRT" FILES ${UWP_Shared_WinRT_Source_Files})
         source_group("C++ Source\\System" FILES ${UWP_System_Source_Files})
         source_group("C++ Source\\System\\WinRT" FILES ${System_WinRT_Source_Files})
-        source_group("C++ Source\\Services\\Events" FILES ${Events_Source_Files})
+        source_group("C++ Source\\Services\\Events" FILES ${UWP_Events_Source_Files})
         source_group("C++ Source\\Services\\Misc" FILES ${UWP_Source_Files})
         source_group("C++ Source\\Services\\Events\\WinRT" FILES ${Events_WinRT_Source_Files})
     endif()
@@ -1258,6 +1279,7 @@ else()
 			SOURCE_FILES
 			${EntertainmentProfile_Source_Files}
 			${Marketplace_Source_Files}
+            ${XDK_Shared_Source_Files}
 			)
             
 		if( WINRT OR UNITTEST )
@@ -1268,30 +1290,40 @@ else()
                 ${XDK_WinRT_Shared_Source_Files}
 				)
 		endif()	# WINRT
-	else()
-		list(APPEND
-			SOURCE_FILES
-			${UWP_System_Source_Files}
-			${Events_Source_Files}
-			${UWP_Source_Files}
-			)
+        
+        if( UNITTEST )
+            list(APPEND
+                ${Cpp_Shared_Source_Files}
+                ${WinRT_Shared_Source_Files}
+                )
+        endif()                
+
+    else()
+        list(APPEND
+            SOURCE_FILES
+            ${Cpp_Shared_Source_Files}
+            ${UWP_System_Source_Files}
+            ${UWP_Events_Source_Files}
+            ${UWP_Source_Files}
+            )
             
-		if( WINRT OR UNITTEST )
+        if( WINRT OR UNITTEST )
             list(APPEND
                 SOURCE_FILES
+                ${WinRT_Shared_Source_Files}
                 ${UWP_Shared_WinRT_Source_Files}
                 ${Events_WinRT_Source_Files}
                 ${System_WinRT_Source_Files}
                 )
-		endif()
+        endif()
             
-	endif() # XDK
+    endif() # XDK
     
     if( UNITTEST )
         list(APPEND
             SOURCE_FILES
             ${UWP_System_Source_Files}
-            ${Events_Source_Files}
+            ${UWP_Events_Source_Files}
             ${UWP_Source_Files}
             ${Events_WinRT_Source_Files}
             ${UWP_Shared_WinRT_Source_Files}

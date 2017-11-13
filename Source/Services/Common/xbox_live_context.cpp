@@ -12,8 +12,8 @@
 #endif
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-#if TV_API
 
+#if XSAPI_XDK_AUTH
 xbox_live_context::xbox_live_context(
     _In_ Windows::Xbox::System::User^ user
     )
@@ -27,9 +27,9 @@ xbox_live_context::user()
 {
     return m_xboxLiveContextImpl->user();
 }
+#endif
 
-#elif XSAPI_CPP
-
+#if XSAPI_NONXDK_CPP_AUTH && !UNIT_TEST_SERVICES
 xbox_live_context::xbox_live_context(
     _In_ std::shared_ptr<system::xbox_live_user> user
     )
@@ -44,8 +44,9 @@ xbox_live_context::user()
 {
     return m_xboxLiveContextImpl->user();
 }
+#endif
 
-#else
+#if XSAPI_NONXDK_WINRT_AUTH
 xbox_live_context::xbox_live_context(
     _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user
     )
@@ -59,6 +60,7 @@ xbox_live_context::user()
 {
     return m_xboxLiveContextImpl->user();
 }
+
 #endif
 
 const string_t& xbox_live_context::xbox_live_user_id()
