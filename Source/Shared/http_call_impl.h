@@ -246,43 +246,41 @@ public:
         _In_ xbox_live_api xboxLiveApi
         );
 
-#if XSAPI_U
-    pplx::task<std::shared_ptr<http_call_response>> get_response(
-        _In_ std::shared_ptr<xbox::services::system::ecdsa> proofKey,
-        _In_ const xbox::services::system::signature_policy& signaturePolicy,
-        _In_ http_call_response_body_type httpCallResponseBodyType
-         ) override;
-#endif
-
-    pplx::task< std::shared_ptr<http_call_response> > get_response(
-        _In_ http_call_response_body_type httpCallResponseBodyType
-        ) override;
-
-#if TV_API
-
+#if XSAPI_XDK_AUTH
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ Windows::Xbox::System::User^ user,
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
         _In_ bool allUsersAuthRequired = false
         ) override;
+#endif 
 
-#elif UNIT_TEST_SERVICES || !XSAPI_CPP
-
-    virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
-        _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
-        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
-        _In_ bool allUsersAuthRequired = false
-        ) override;
-
-#else
-
+#if XSAPI_NONXDK_CPP_AUTH
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ std::shared_ptr<system::xbox_live_user> user,
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
         _In_ bool allUsersAuthRequired = false
         ) override;
+#endif 
 
+#if XSAPI_NONXDK_WINRT_AUTH 
+    virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
+        _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
+        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
+        _In_ bool allUsersAuthRequired = false
+        ) override;
 #endif
+    
+#if XSAPI_U
+    pplx::task<std::shared_ptr<http_call_response>> get_response(
+        _In_ std::shared_ptr<xbox::services::system::ecdsa> proofKey,
+        _In_ const xbox::services::system::signature_policy& signaturePolicy,
+        _In_ http_call_response_body_type httpCallResponseBodyType
+    ) override;
+#endif
+
+    pplx::task< std::shared_ptr<http_call_response> > get_response(
+        _In_ http_call_response_body_type httpCallResponseBodyType
+        ) override;
 
     pplx::task<std::shared_ptr<http_call_response>> get_response(
         _In_ http_call_response_body_type httpCallResponseBodyType,

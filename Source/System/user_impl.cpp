@@ -261,9 +261,8 @@ void user_impl::user_signed_out()
     }
 }
 
-bool user_impl::is_signed_in()
+bool user_impl::is_signed_in() const
 {
-    std::lock_guard<std::mutex> lock(m_lock.get());
     return m_isSignedIn;
 }
 

@@ -187,6 +187,8 @@ private:
     friend class xsapi_memory;
 };
 
+
+#if XSAPI_NONXDK_CPP_AUTH || XSAPI_NONXDK_WINRT_AUTH
 /// <summary>
 /// Contains information about the authorization token and digital signature for an HTTP request by a user.
 /// This class is returned as the result of a call to xbox_live_user.get_token_and_signature().
@@ -315,8 +317,6 @@ private:
     Windows::Security::Authentication::Web::Core::WebTokenRequestResult^ m_tokenResult;
 #endif 
 };
-
-#if !TV_API
 
 /// <summary>
 /// Enumeration values that indicate the result status of sign in.
@@ -685,7 +685,8 @@ private:
     std::shared_ptr<user_impl> m_user_impl;
 };
 
-#endif //!TV_API
+#endif // XSAPI_NONXDK_CPP_AUTH || XSAPI_NONXDK_WINRT_AUTH
+
 
 /// <summary>Enumeration values that indicate the result code from string verification.
 /// These values are defined on the service side and should not be modified.

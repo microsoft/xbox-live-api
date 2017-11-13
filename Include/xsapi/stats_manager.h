@@ -6,14 +6,9 @@
 #include "xsapi/social.h"
 #include "xsapi/user_statistics.h"
 #include "xsapi/achievements.h"
+#include "xsapi/types.h"
 
 namespace xbox { namespace services { namespace stats { namespace manager { 
-
-#if TV_API
-    typedef  Windows::Xbox::System::User^ xbox_live_user_t;
-#else
-    typedef std::shared_ptr<xbox::services::system::xbox_live_user> xbox_live_user_t;
-#endif
 
 class stats_manager_impl;
 static const uint8_t STAT_PRESENCE_CHARS_NUM = 64;
@@ -119,8 +114,8 @@ private:
         );
 
     void set_name(
-    _In_ const string_t& name
-    );
+        _In_ const string_t& name
+        );
 
     web::json::value serialize() const;
 

@@ -63,22 +63,6 @@ auth_config::auth_config(
     m_xtokenComposition = { token_identity_type::u_token, token_identity_type::d_token, token_identity_type::t_token };
 }
 
-#if XSAPI_U
-bool auth_config::use_win10_auth() const
-{
-#if UWP_API || XSAPI_U
-    return true;
-#else
-    return false;
-#endif
-}
-
-bool auth_config::use_compact_ticket() const
-{
-    return m_useCompactTicket;
-}
-#endif
-
 const string_t& auth_config::rps_ticket_service() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -107,7 +91,36 @@ void auth_config::set_rps_ticket_policy(
     m_rpsTicketPolicy = std::move(value);
 }
 
+const string_t& auth_config::xbox_live_endpoint() const
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_xboxLiveEndpoint;
+}
+
+void auth_config::set_xbox_live_endpoint(
+    _In_ string_t value
+)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_xboxLiveEndpoint = std::move(value);
+}
+
+
 #if XSAPI_U
+bool auth_config::use_win10_auth() const
+{
+#if UWP_API || XSAPI_U
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool auth_config::use_compact_ticket() const
+{
+    return m_useCompactTicket;
+}
+
 const string_t& auth_config::environment() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -197,23 +210,7 @@ void auth_config::set_xbox_live_relying_party(
     std::lock_guard<std::mutex> lock(m_mutex);
     m_xboxLiveRelyingParty = std::move(value);
 }
-#endif
 
-const string_t& auth_config::xbox_live_endpoint() const
-{
-    std::lock_guard<std::mutex> lock(m_mutex);
-    return m_xboxLiveEndpoint;
-}
-
-void auth_config::set_xbox_live_endpoint(
-    _In_ string_t value
-    )
-{
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_xboxLiveEndpoint = std::move(value);
-}
-
-#if XSAPI_U
 const string_t& auth_config::x_token_endpoint() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);

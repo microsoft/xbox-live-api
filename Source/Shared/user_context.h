@@ -4,29 +4,14 @@
 #pragma once
 
 #if !TV_API
-
-#if !XSAPI_CPP
-    // This header is required for C++ Microsoft.* user object
-    #include "User_WinRT.h"
-#else
-    #include "xsapi/system.h"
+    #if !XSAPI_CPP
+        // This header is required for C++ Microsoft.* user object
+        #include "User_WinRT.h"
+    #else
+        #include "xsapi/system.h"
+    #endif
 #endif
-
-#endif
-
-#if !XSAPI_CPP
-#if TV_API
-typedef Windows::Xbox::System::User^ XboxLiveUser_t;
-#else
-typedef Microsoft::Xbox::Services::System::XboxLiveUser^ XboxLiveUser_t;
-#endif
-#endif
-
-#if TV_API
-typedef  Windows::Xbox::System::User^ xbox_live_user_t;
-#else
-typedef std::shared_ptr<xbox::services::system::xbox_live_user> xbox_live_user_t;
-#endif
+#include "xsapi/types.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -66,6 +51,8 @@ public:
     caller_context_type caller_context_type() const;
     void set_caller_context_type(xbox::services::caller_context_type context);
 
+    bool is_signed_in() const;
+
     pplx::task<xbox::services::xbox_live_result<user_context_auth_result>> get_auth_result(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -93,52 +80,56 @@ public:
         return user->xbox_user_id();
 #endif
     }
-
-#if !XSAPI_CPP
-#if TV_API
+    
+#if XSAPI_XDK_AUTH
+public:
     static Windows::Xbox::System::User^ user_convert(Windows::Xbox::System::User^ user)
     {
         return user;
     }
-#else
+
+    // XDK's Windows.* user object
+public:
+    user_context(_In_ Windows::Xbox::System::User^ user);
+    Windows::Xbox::System::User^ user() const;
+
+private:
+    Windows::Xbox::System::User^ m_user;
+#endif 
+
+
+#if XSAPI_NONXDK_CPP_AUTH && !UNIT_TEST_SERVICES
+    // C++ Microsoft.* user object
+public:
+    user_context(_In_ std::shared_ptr< xbox::services::system::xbox_live_user > user);
+    std::shared_ptr< xbox::services::system::xbox_live_user > user() const;
+
+private:
+    std::shared_ptr< xbox::services::system::xbox_live_user > m_user;
+#endif 
+    
+
+#if XSAPI_NONXDK_WINRT_AUTH
     static std::shared_ptr<xbox::services::system::xbox_live_user> user_convert(Microsoft::Xbox::Services::System::XboxLiveUser^ user)
     {
-        return std::make_shared<xbox::services::system::xbox_live_user>(user->GetUserImpl());
+        return std::make_shared<xbox::services::system::xbox_live_user>(user->_User_impl());
     }
 
     static Microsoft::Xbox::Services::System::XboxLiveUser^ user_convert(std::shared_ptr<xbox::services::system::xbox_live_user> user)
     {
         return ref new Microsoft::Xbox::Services::System::XboxLiveUser(user->_User_impl());
     }
-#endif
+
+    // WinRT Microsoft.* user object
+public:
+    user_context(_In_ std::shared_ptr< xbox::services::system::xbox_live_user > user);
+    user_context(_In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user);
+    Microsoft::Xbox::Services::System::XboxLiveUser^ user() const;
+
+private:
+    Microsoft::Xbox::Services::System::XboxLiveUser^ m_user;
 #endif
 
-#if TV_API
-    // XDK's Windows.* user object
-    public:
-        user_context(_In_ Windows::Xbox::System::User^ user);
-        Windows::Xbox::System::User^ user() const;
-
-    private:
-        Windows::Xbox::System::User^ m_user;
-#elif XSAPI_CPP
-    // C++ Microsoft.* user object
-    public:
-        user_context(_In_ std::shared_ptr< xbox::services::system::xbox_live_user > user);
-        std::shared_ptr< xbox::services::system::xbox_live_user > user();
-    private:
-        std::shared_ptr< xbox::services::system::xbox_live_user > m_user;
-#else
-        // WinRT Microsoft.* user object
-    public:
-        user_context(_In_ std::shared_ptr< xbox::services::system::xbox_live_user > user);
-
-        user_context(_In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user);
-        
-        Microsoft::Xbox::Services::System::XboxLiveUser^ user() const;
-    private:
-        Microsoft::Xbox::Services::System::XboxLiveUser^ m_user;
-#endif
 
 private:
     string_t m_xboxUserId;
