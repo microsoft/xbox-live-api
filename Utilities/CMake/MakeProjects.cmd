@@ -1,7 +1,9 @@
 @echo off
-if "%1" EQU "" goto help
 echo on
-set ROOT_FOLDER=%1
+set ROOT_FOLDER=%~dp0\..\..
+rem force root folder to an absolute path
+pushd %ROOT_FOLDER%
+set ROOT_FOLDER=%CD%
 set NEW_FOLDER=%ROOT_FOLDER%\Utilities\CMake\output
 set OLD_FOLDER=%ROOT_FOLDER%\Build
 
@@ -14,7 +16,7 @@ call %ROOT_FOLDER%\Utilities\CMake\scripts\RunCMake.cmd -DUNITTEST=TRUE -DTE=TRU
 
 %ROOT_FOLDER%\Utilities\CMake\ProjectFileProcessor\bin\Debug\ProjectFileProcessor.exe %ROOT_FOLDER%
 
-if "%2" EQU "skipCopy" goto skipCopy
+if "%1" EQU "skipCopy" goto skipCopy
 copy %NEW_FOLDER%\Microsoft.Xbox.Services.110.XDK.WinRT.vcxproj* %OLD_FOLDER%\Microsoft.Xbox.Services.110.XDK.WinRT
 copy %NEW_FOLDER%\Microsoft.Xbox.Services.140.UWP.Cpp.vcxproj* %OLD_FOLDER%\Microsoft.Xbox.Services.140.UWP.Cpp
 copy %NEW_FOLDER%\Microsoft.Xbox.Services.140.UWP.WinRT.vcxproj* %OLD_FOLDER%\Microsoft.Xbox.Services.140.UWP.WinRT
@@ -28,10 +30,10 @@ copy %NEW_FOLDER%\Microsoft.Xbox.Services.UnitTest.140.TE.vcxproj* %OLD_FOLDER%\
 goto done
 :help
 echo.
-echo MakeProjects.cmd rootFolder [skipCopy]
+echo MakeProjects.cmd [skipCopy]
 echo.
 echo Example:
-echo MakeProjects.cmd C:\git\forks\xbox-live-api
+echo MakeProjects.cmd 
 echo.
 
 :done
