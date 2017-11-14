@@ -398,66 +398,64 @@ namespace ProjectFileProcessor
                 lines_filtered.Add(lineOutput);
             }
 
-            return lines_filtered;
 
+            // Need to sort filters file manually due to CMake bug: https://cmake.org/Bug/view.php?id=10481
+            List<string> filterLines = new List<string>();
+            List<List<string>> filterNodes = new List<List<string>>();
+            bool captureFilters = false;
+            for (int i = 0; i < lines_filtered.Count; i++)
+            {
+                string l1 = lines_filtered[i];
 
-            //// Need to sort filters file manually due to CMake bug: https://cmake.org/Bug/view.php?id=10481
-            //List<string> filterLines = new List<string>();
-            //List<List<string>> filterNodes = new List<List<string>>();
-            //bool captureFilters = false;
-            //for (int i = 0; i < lines_filtered.Count; i++)
-            //{
-            //    string l1 = lines_filtered[i];
+                if (l1.Contains("<ItemGroup>"))
+                {
+                    filterLines.Add(l1);
+                    captureFilters = true;
+                    i++;
+                    l1 = lines_filtered[i];
+                }
 
-            //    if( l1.Contains("<ItemGroup>") )
-            //    {
-            //        filterLines.Add(l1);
-            //        captureFilters = true;
-            //        i++;
-            //        l1 = lines_filtered[i];
-            //    }
+                if (l1.Contains("</ItemGroup>"))
+                {
+                    //Console.WriteLine("Start");
+                    //foreach (var l in filterNodes)
+                    //{
+                    //    Console.WriteLine(l[0]);
+                    //}
+                    var sortedList = filterNodes.OrderBy(x => x[0]);
+                    //Console.WriteLine("Final");
+                    //foreach (var l in sortedList)
+                    //{
+                    //    Console.WriteLine(l[0]);
+                    //}
+                    foreach (var l in sortedList)
+                    {
+                        foreach (var s in l)
+                        {
+                            filterLines.Add(s);
+                        }
+                    }
+                    filterNodes.Clear();
+                    captureFilters = false;
+                }
 
-            //    if(l1.Contains("</ItemGroup>"))
-            //    {
-            //        //Console.WriteLine("Start");
-            //        //foreach (var l in filterNodes)
-            //        //{
-            //        //    Console.WriteLine(l[0]);
-            //        //}
-            //        var sortedList = filterNodes.OrderBy(x => x[0]);
-            //        //Console.WriteLine("Final");
-            //        //foreach (var l in sortedList)
-            //        //{
-            //        //    Console.WriteLine(l[0]);
-            //        //}
-            //        foreach ( var l in sortedList )
-            //        {
-            //            foreach( var s in l )
-            //            {
-            //                filterLines.Add(s);
-            //            }
-            //        }
-            //        filterNodes.Clear();
-            //        captureFilters = false;
-            //    }
+                if (captureFilters)
+                {
+                    List<string> filter = new List<string>();
+                    filter.Add(lines_filtered[i]);
+                    filter.Add(lines_filtered[i + 1]);
+                    filter.Add(lines_filtered[i + 2]);
+                    i += 2;
 
-            //    if( captureFilters )
-            //    {
-            //        List<string> filter = new List<string>();
-            //        filter.Add(lines_filtered[i]);
-            //        filter.Add(lines_filtered[i + 1]);
-            //        filter.Add(lines_filtered[i + 2]);
-            //        i += 2;
+                    filterNodes.Add(filter);
+                }
+                else
+                {
+                    filterLines.Add(l1);
+                }
+            }
 
-            //        filterNodes.Add(filter);
-            //    }
-            //    else
-            //    {
-            //        filterLines.Add(l1);
-            //    }
-            //}
-
-            //return filterLines;
+            return filterLines;
         }
 
         private static void DiffFiles(string fileOld, string fileNew, string rootFolder)
