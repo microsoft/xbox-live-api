@@ -365,7 +365,7 @@ private:
     real_time_activity_connection_state m_connectionState;
     std::shared_ptr<xbox::services::web_socket_connection> m_webSocketConnection;
 
-#if UWP_API || TV_API
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
     Windows::Foundation::EventRegistrationToken m_rtaShutdownToken;
 #endif
 

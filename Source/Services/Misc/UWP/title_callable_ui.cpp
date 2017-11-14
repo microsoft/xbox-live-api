@@ -15,7 +15,7 @@
     #define _APISET_TARGET_VERSION _APISET_TARGET_VERSION_WIN10_RS1
 #endif
 
-#if UWP_API || TV_API
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
 #include <gamingtcui.h>
 #include <windows.system.h>
 #endif
@@ -32,7 +32,7 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-#if UWP_API || TV_API
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
 
 class tcui_context
 {

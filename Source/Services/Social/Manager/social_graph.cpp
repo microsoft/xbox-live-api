@@ -145,7 +145,7 @@ social_graph::initialize()
         TIME_PER_CALL_SEC
         );
 
-#if UWP_API || TV_API
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
     create_delayed_task(
         REFRESH_TIME_MIN,
         [thisWeakPtr]()
@@ -1224,7 +1224,7 @@ void social_graph::social_graph_refresh_callback()
 {
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
 
-#if UWP_API || TV_API
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
     auto task = create_delayed_task(
         REFRESH_TIME_MIN,
         [thisWeakPtr]()
@@ -1535,7 +1535,7 @@ social_graph::presence_refresh_callback()
         }
     }
 
-#if UWP_API || TV_API
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
     create_delayed_task(
         TIME_PER_CALL_SEC,

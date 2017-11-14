@@ -12,7 +12,7 @@ using namespace xbox::services;
 using namespace xbox::services::multiplayer;
 using namespace xbox::services::real_time_activity;
 using namespace pplx;
-#if UWP_API || TV_API
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
 using namespace Windows::Foundation::Collections;
 #endif
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN

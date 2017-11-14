@@ -8,7 +8,7 @@
 #include "Utils.h"
 
 using namespace std;
-#if UWP_API || TV_API
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
 using namespace Platform;
 using namespace Windows::Storage;
 using namespace Windows::Foundation;
