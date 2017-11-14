@@ -63,7 +63,7 @@ protected:
     string_t m_endpointId;
 };
 
-#if UWP_API || TV_API
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
 class notification_service_windows : public notification_service
 {
 public:

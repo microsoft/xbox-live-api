@@ -21,7 +21,7 @@ public:
     void register_for_protocol_activation();
 
 private:
-#if UWP_API || TV_API
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
     void process_service_call_tracking_activation_uri(_In_ Windows::Foundation::Uri^ activationUri);
     Windows::Foundation::EventRegistrationToken m_onActivatedToken;
 #endif

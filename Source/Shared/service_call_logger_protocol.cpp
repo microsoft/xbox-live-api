@@ -30,14 +30,14 @@ std::shared_ptr<service_call_logger_protocol> service_call_logger_protocol::get_
 
 service_call_logger_protocol::service_call_logger_protocol()
 {
-#if UWP_API || TV_API
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
     m_onActivatedToken.Value = 0;
 #endif
 }
 
 void service_call_logger_protocol::register_for_protocol_activation()
 {
-#if UWP_API || TV_API
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
     if (m_onActivatedToken.Value != 0)
     {
         return;
@@ -90,7 +90,7 @@ void service_call_logger_protocol::register_for_protocol_activation()
 #endif
 }
 
-#if UWP_API || TV_API
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
 void service_call_logger_protocol::process_service_call_tracking_activation_uri(_In_ Windows::Foundation::Uri^ activationUri)
 {
     WwwFormUrlDecoder^ decoder = activationUri->QueryParsed;
