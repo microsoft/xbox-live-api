@@ -107,7 +107,7 @@ void xbox_live_context_impl::init()
     m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_settings>();
     init_real_time_activity_service_instance();
 
-#if UWP_API || TV_API || UNIT_TEST_SERVICES
+#if UWP_API || TV_API 
     auto dispatcher = xbox_live_context_settings::_s_dispatcher;
     if (dispatcher == nullptr)
     {
