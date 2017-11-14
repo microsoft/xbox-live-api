@@ -88,7 +88,7 @@ call_buffer_timer::fire_helper(
 {
     if (!m_isTaskInProgress)
     {
-#if UWP_API || TV_API
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
         std::chrono::milliseconds timeDiff = m_bufferTimePerCall - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_previousTime);
         std::chrono::milliseconds timeRemaining = std::max<std::chrono::milliseconds>(std::chrono::milliseconds::zero(), timeDiff);
         auto& usersToCall = m_usersToCall;
