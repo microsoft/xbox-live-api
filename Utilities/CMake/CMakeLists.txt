@@ -1171,7 +1171,8 @@ else()
             source_group("C++ Source\\Shared\\WinRT" FILES ${XDK_WinRT_Shared_Source_Files})
 			source_group("C++ Source\\Services\\EntertainmentProfile\\WinRT" FILES ${EntertainmentProfile_WinRT_Source_Files})
 			source_group("C++ Source\\Services\\Marketplace\\WinRT" FILES ${Marketplace_WinRT_Source_Files})
-		endif()	
+		endif()	    
+        
 	else()
 		source_group("C++ Source\\System" FILES ${UWP_System_Source_Files})
         source_group("C++ Source\\Shared" FILES ${Cpp_Shared_Source_Files})
@@ -1183,7 +1184,7 @@ else()
             source_group("C++ Source\\System" FILES ${Xal_System_Source_Files})
         endif()
 
-        if( WINRT OR UNITTEST )
+        if( WINRT )
             source_group("C++ Source\\Shared" FILES ${WinRT_Shared_Source_Files})
 			source_group("C++ Source\\Shared\\WinRT" FILES ${UWP_Shared_WinRT_Source_Files})
             source_group("C++ Source\\System\\WinRT" FILES ${System_WinRT_Source_Files})
@@ -1192,6 +1193,8 @@ else()
 	endif()
 
     if( UNITTEST )
+        source_group("C++ Source\\Shared" FILES ${Cpp_Shared_Source_Files})
+        source_group("C++ Source\\Shared" FILES ${WinRT_Shared_Source_Files})
         source_group("C++ Source\\Shared\\WinRT" FILES ${UWP_Shared_WinRT_Source_Files})
         source_group("C++ Source\\System" FILES ${UWP_System_Source_Files})
         source_group("C++ Source\\System\\WinRT" FILES ${System_WinRT_Source_Files})
@@ -1293,6 +1296,7 @@ else()
         
         if( UNITTEST )
             list(APPEND
+                SOURCE_FILES
                 ${Cpp_Shared_Source_Files}
                 ${WinRT_Shared_Source_Files}
                 )
