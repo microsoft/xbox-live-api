@@ -38,61 +38,56 @@ MockHttpCall::get_response(
     return pplx::task_from_result(ResultValue);
 }
 
-#if TV_API
-
-/// <summary>
-/// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.
-/// </summary>
-pplx::task<std::shared_ptr<http_call_response>> 
+#if XSAPI_XDK_AUTH
+pplx::task<std::shared_ptr<http_call_response>>
 MockHttpCall::get_response_with_auth(
-	_In_ Windows::Xbox::System::User^ user,
-	_In_ http_call_response_body_type httpCallResponseBodyType,
-	_In_ bool allUsersAuthRequired
-	)
+    _In_ Windows::Xbox::System::User^ user,
+    _In_ http_call_response_body_type httpCallResponseBodyType,
+    _In_ bool allUsersAuthRequired
+    )
 {
-	if (FAILED(ResultHR))
-	{
-		throw ResultHR;
-	}
-	CallCounter++;
-	return pplx::task_from_result(ResultValue);
+    if (FAILED(ResultHR))
+    {
+        throw ResultHR;
+    }
+    CallCounter++;
+    return pplx::task_from_result(ResultValue);
 }
-
-#elif UNIT_TEST_SERVICES || !XSAPI_CPP
-
-pplx::task<std::shared_ptr<http_call_response>> 
-MockHttpCall::get_response_with_auth(
-	_In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
-	_In_ http_call_response_body_type httpCallResponseBodyType,
-	_In_ bool allUsersAuthRequired
-	)
-{
-	if (FAILED(ResultHR))
-	{
-		throw ResultHR;
-	}
-	CallCounter++;
-	return pplx::task_from_result(ResultValue);
-}
-
-#else
-
-pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
-	_In_ std::shared_ptr<xbox::services::system::xbox_live_user> user,
-	_In_ http_call_response_body_type httpCallResponseBodyType,
-	_In_ bool allUsersAuthRequired
-	)
-{
-	if (FAILED(ResultHR))
-	{
-		throw ResultHR;
-	}
-	CallCounter++;
-	return pplx::task_from_result(ResultValue);
-}
-
 #endif
 
+#if XSAPI_NONXDK_CPP_AUTH
+pplx::task<std::shared_ptr<http_call_response>>
+MockHttpCall::get_response_with_auth(
+    _In_ std::shared_ptr<xbox::services::system::xbox_live_user> user,
+    _In_ http_call_response_body_type httpCallResponseBodyType,
+    _In_ bool allUsersAuthRequired
+)
+{
+    if (FAILED(ResultHR))
+    {
+        throw ResultHR;
+    }
+    CallCounter++;
+    return pplx::task_from_result(ResultValue);
+}
+#endif
+
+#if XSAPI_NONXDK_WINRT_AUTH
+pplx::task<std::shared_ptr<http_call_response>>
+MockHttpCall::get_response_with_auth(
+    _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
+    _In_ http_call_response_body_type httpCallResponseBodyType,
+    _In_ bool allUsersAuthRequired
+    )
+{
+    if (FAILED(ResultHR))
+    {
+        throw ResultHR;
+    }
+    CallCounter++;
+    return pplx::task_from_result(ResultValue);
+}
+#endif
 
 pplx::task<std::shared_ptr<http_call_response>>
 MockHttpCall::get_response(

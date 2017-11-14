@@ -822,7 +822,7 @@ public:
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto xboxLiveContext1 = GetMockXboxLiveContext_Cpp();
-        xboxLiveContext1->user()->GetUserImpl()->_Set_xbox_user_id(L"T0");
+        xboxLiveContext1->user()->_User_impl()->_Set_xbox_user_id(L"T0");
         auto socialManagerInitializationStruct1 = Initialize(xboxLiveContext1, true);
         auto socialManagerCppMock = std::dynamic_pointer_cast<MockSocialManager>(socialManagerInitializationStruct1.socialManager->GetCppObj());
 
@@ -1005,7 +1005,7 @@ public:
         SetMultipleClientWebSocketRTAAutoResponser(mockSockets, rtaConnectionIdJson, -1, false);
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto xboxLiveContext1 = GetMockXboxLiveContext_Cpp();
-        xboxLiveContext1->user()->GetUserImpl()->_Set_xbox_user_id(L"T0");
+        xboxLiveContext1->user()->_User_impl()->_Set_xbox_user_id(L"T0");
         auto socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
         auto socialManagerInitializationStruct1 = Initialize(xboxLiveContext1, false);
         auto socialManagerCppMock = std::dynamic_pointer_cast<MockSocialManager>(socialManagerInitializationStruct1.socialManager->GetCppObj());
