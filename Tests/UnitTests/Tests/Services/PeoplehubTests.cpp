@@ -123,7 +123,7 @@ public:
 
     DEFINE_TEST_CASE(PeopleHubTestOverloadStrings)
     {
-        DEFINE_TEST_CASE_PROPERTIES_FOCUS(PeopleHubTestOverloadStrings);
+        DEFINE_TEST_CASE_PROPERTIES(PeopleHubTestOverloadStrings);
         auto peoplehubService = SocialManagerHelper::GetPeoplehubService();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
         httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubOversizedResponse));
