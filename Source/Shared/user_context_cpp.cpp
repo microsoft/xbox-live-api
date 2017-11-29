@@ -18,7 +18,7 @@ using namespace Microsoft::Xbox::Services::System;
 
 using namespace xbox::services::system;
 
-#if !XSAPI_WIN32 && !TV_API && XSAPI_CPP && !UNIT_TEST_SERVICES // Non-XDK C++
+#if !TV_API && XSAPI_CPP && !UNIT_TEST_SERVICES // Non-XDK C++
 
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
