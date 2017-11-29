@@ -141,7 +141,7 @@ protected:
     xbox::services::system::xbox_live_mutex m_lock;
 };
 
-#if UWP_API || XSAPI_CENTENNIAL
+#if UWP_API
 class user_impl_idp : public user_impl
 {
 public:
