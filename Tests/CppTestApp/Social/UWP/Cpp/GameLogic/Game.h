@@ -21,6 +21,7 @@ enum ButtonPress
     ToggleSocialGroup4,
     ToggleSocialGroup5,
     ImportCustomList,
+    CallGetProfile
 };
 
 #define PERF_COUNTERS 0    // Enable this for capturing performance counters

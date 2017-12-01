@@ -183,13 +183,12 @@ void http_call_response::_Route_service_call() const
 {
     record_service_result();
 #ifdef _WIN32   
-    auto fullUrl = m_request.absolute_uri().to_string();
     if (!m_errorCode)
     {
         TraceLoggingWrite(
             g_hTraceLoggingProvider,
             "http_request",
-            TraceLoggingWideString(fullUrl.c_str(), "url"),
+            TraceLoggingWideString(m_fullUrl.c_str(), "url"),
             TraceLoggingInt32(m_httpStatus, "status"),
             TraceLoggingInt64(std::chrono::duration_cast<std::chrono::milliseconds>(m_responseTime - m_requestTime).count(), "duration"),
             TraceLoggingKeyword(XSAPI_TELEMETRY_KEYWORDS)
@@ -200,7 +199,7 @@ void http_call_response::_Route_service_call() const
         TraceLoggingWrite(
             g_hTraceLoggingProvider,
             "http_request_exception",
-            TraceLoggingWideString(fullUrl.c_str(), "url"),
+            TraceLoggingWideString(m_fullUrl.c_str(), "url"),
             TraceLoggingInt32(m_errorCode.value(), "err"),
             TraceLoggingString(m_errorMessage.c_str(), "errMsg"),
             TraceLoggingInt64(std::chrono::duration_cast<std::chrono::milliseconds>(m_responseTime - m_requestTime).count(), "duration"),
@@ -246,13 +245,13 @@ void http_call_response::_Route_service_call() const
         {
             std::shared_ptr<service_call_logger> tracker = service_call_logger::get_singleton_instance();
 
-            const web::uri uri = args.uri();
+            web::uri uri = args.uri();
             const string_t host = uri.host();
             const bool isGet = (utils::str_icmp(args.http_method(), L"GET") == 0);
 
             service_call_logger_data sharedData(
                 host,
-                fullUrl,
+                args.uri(),
                 args.xbox_user_id(),
                 isGet,
                 static_cast<uint32_t>(args.http_status()),
