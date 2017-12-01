@@ -19,12 +19,6 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_BEGIN
 /// If the invited user is not added via MultiplayerLobbySession::AddLocalUser() or through JoinLobby(), then JoinLobby() will fail
 /// and provide the InvitedXboxUserId that the invite was sent for as part of the JoinLobbyCompletedEventArgs.
 /// </remarks>
-
-
-
-
-If the invited user is not added via add_local_user() or through join_lobby, then join_lobby() will fail and provide the invited_xbox_user_id() that the invite was sent for as part of the join_lobby_completed_event_args().
-
 public ref class JoinLobbyCompletedEventArgs sealed : MultiplayerEventArgs
 {
 public:
