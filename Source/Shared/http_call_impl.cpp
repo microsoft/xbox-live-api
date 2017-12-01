@@ -689,7 +689,7 @@ http_call_impl::get_http_call_response(
     return std::make_shared<http_call_response>(
         httpCallData->userContext != nullptr ? httpCallData->userContext->xbox_user_id() : string_t(),
         httpCallData->xboxLiveContextSettings,
-        httpCallData->serverName,
+        httpCallData->serverName + httpCallData->pathQueryFragment.to_string(),
         httpCallData->request,
         httpCallData->requestBody,
         httpCallData->xboxLiveApi,
