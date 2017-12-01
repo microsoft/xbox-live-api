@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#pragma once 
+#pragma once
 #include "pch.h"
 #include "xsapi/multiplayer_manager.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_BEGIN
 
 /// <summary>
-/// Defines values used to indicate join in progress state on who can join your game.
+/// Defines values used to indicate who can join your lobby.
 /// </summary>
 public enum class Joinability
 {

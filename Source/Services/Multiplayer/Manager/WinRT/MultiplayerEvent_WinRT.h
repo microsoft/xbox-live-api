@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#pragma once 
+#pragma once
 #include "xsapi/multiplayer_manager.h"
 #include "MultiplayerEventType_WinRT.h"
 #include "MultiplayerSessionType_WinRT.h"
@@ -10,7 +10,8 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_BEGIN
 
 /// <summary>
-/// Represents a multiplayer event.
+/// Represents a multiplayer event. 
+/// Based on the MultiplayerEventType, you must cast the EventArgs to the appropriate class.
 /// </summary>
 public ref class MultiplayerEvent sealed
 {
@@ -24,8 +25,8 @@ public:
     };
 
     /// <summary>
-    /// Returns call specific debug information if join fails
-    /// It is not localized, so only use for debugging purposes.
+    /// Returns call specific debug information if join fails.
+    /// This value is not localized, so only use for debugging purposes.
     /// </summary>
     property Platform::String^ ErrorMessage
     {
@@ -33,7 +34,7 @@ public:
     };
 
     /// <summary>
-    /// A pointer to the application-defined data passed into the set_ methods.
+    /// A pointer to the application-defined data passed into the initiating method.
     /// </summary>
     property context_t Context
     {
@@ -46,7 +47,7 @@ public:
     DEFINE_PROP_GET_ENUM_OBJ(EventType, event_type, Microsoft::Xbox::Services::Multiplayer::Manager::MultiplayerEventType);
 
     /// <summary>
-    /// You need to cast this to one of the event arg classes to retrieve the data for that particular event.
+    /// You must cast this to one of the event arg classes to retrieve the data for that particular event.
     /// </summary>
     property MultiplayerEventArgs^ EventArgs
     {
@@ -55,7 +56,7 @@ public:
 
     /// <summary>
     /// The multiplayer session type this event was triggered for. Depending upon the session type,
-    /// you can then retrieve the latest lobby or game session from the multiplayer_manager class.
+    /// you can then retrieve the latest lobby or game session from the MultiplayerManager class.
     /// </summary>
     DEFINE_PROP_GET_ENUM_OBJ(SessionType, session_type, Microsoft::Xbox::Services::Multiplayer::Manager::MultiplayerSessionType);
 

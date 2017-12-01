@@ -19,6 +19,9 @@ public:
     DEFINE_PTR_PROP_GET_STR_OBJ(XboxUserId, xbox_user_id);
 
 internal:
+    /// <summary>
+    /// Internal function.
+    /// </summary>
     UserRemovedEventArgs(
         _In_ std::shared_ptr<xbox::services::multiplayer::manager::user_removed_event_args> cppObj
         );

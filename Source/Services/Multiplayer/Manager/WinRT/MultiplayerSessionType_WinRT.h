@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#pragma once 
+#pragma once
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_BEGIN
 
 /// <summary>
-/// Defines values used to indicate change types for a multiplayer game.
+/// Defines values used to indicate types for multiplayer sessions.
 /// </summary>
 public enum class MultiplayerSessionType
 {
