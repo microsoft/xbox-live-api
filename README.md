@@ -9,7 +9,7 @@ https://developer.microsoft.com/en-us/games/xbox/docs/xboxlive/get-started/devel
 
 *   Xbox Live Features - profile, social, presence, leaderboards, achievements, multiplayer, matchmaking, title storage
 *   Platforms - Windows UWP on Xbox One consoles and Windows 10 PCs, Xbox One XDK
-*   Support for Visual Studio 2017, 2015, and 2012
+*   Support for Visual Studio 2017, and 2015
 *   NuGet packages containing binaries for Windows and Xbox One platforms
 
 ## How to use the Xbox Live Services API (XSAPI)
