@@ -27,6 +27,9 @@ public:
     DEFINE_PTR_PROP_GET_ENUM_OBJ(InitializationFailureCause, initialization_failure_cause, Microsoft::Xbox::Services::Multiplayer::MultiplayerMeasurementFailure);
 
 internal:
+    /// <summary>
+    /// Internal function.
+    /// </summary>
     FindMatchCompletedEventArgs(
         _In_ std::shared_ptr<xbox::services::multiplayer::manager::find_match_completed_event_args> cppObj
         );

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#pragma once 
+#pragma once
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_BEGIN
 
@@ -30,41 +30,41 @@ public enum class MatchStatus
     /// </summary>
     Found = xbox::services::multiplayer::manager::match_status::found,
 
-    /// <summary> 
+    /// <summary>
     /// Joining initialization stage.
     /// Matchmaking creates the game session and adds users to it.
-    /// The client has up to the joining timeout to join the session during this phase.
+    /// The client has until the joining timeout to join the session during this phase.
     /// </summary>
     Joining = xbox::services::multiplayer::manager::match_status::joining,
 
-    /// <summary> 
+    /// <summary>
     /// Waiting for remote clients to join the game session.
-    /// The client has up to the joining timeout to join the session during this phase.
+    /// The client has until the joining timeout to join the session during this phase.
     /// </summary>
     WaitingForRemoteClientsToJoin = xbox::services::multiplayer::manager::match_status::waiting_for_remote_clients_to_join,
 
     /// <summary>
     /// Measuring initialization stage.
     /// Stage where QoS measurement happens.
-    /// The client has up to the measurement timeout to upload qos measurements to the service during this phase.
+    /// The client has until the measurement timeout to upload qos measurements to the service during this phase.
     /// </summary>
     Measuring = xbox::services::multiplayer::manager::match_status::measuring,
 
     /// <summary>
     /// Uploading QoS measurement results to the service.
-    /// The client has up to the measurement timeout to upload qos measurements to the service during this phase.
+    /// The client has until the measurement timeout to upload qos measurements to the service during this phase.
     /// </summary>
     UploadingQosMeasurements = xbox::services::multiplayer::manager::match_status::uploading_qos_measurements,
 
     /// <summary>
     /// Waiting for remote clients to upload QoS measurement results to the service.
-    /// The client has up to the measurement timeout to upload qos measurements to the service during this phase.
+    /// The client has until the measurement timeout to upload qos measurements to the service during this phase.
     /// </summary>
     WaitingForRemoteClientsToUploadQos = xbox::services::multiplayer::manager::match_status::waiting_for_remote_clients_to_upload_qos,
 
     /// <summary>
     /// Evaluating initialization stage.
-    /// If auto evaluate is true, then this stage is skipped.  
+    /// If auto evaluate is true, then this stage is skipped.
     /// Otherwise the title will do its own evaluation.
     /// </summary>
     Evaluating = xbox::services::multiplayer::manager::match_status::evaluating,

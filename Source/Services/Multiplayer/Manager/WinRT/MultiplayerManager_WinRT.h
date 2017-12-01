@@ -20,13 +20,13 @@ namespace Microsoft{ namespace Xbox{ namespace Services {
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_BEGIN
 
 /// <summary>
-/// APIs for matchmaking, player roster and multiplayer session management.
+/// This class contains APIs for matchmaking, player roster, and multiplayer session management.
 /// </summary>
 public ref class MultiplayerManager sealed
 {
 public:
     /// <summary>
-    /// Gets the multiplayer_manager singleton instance
+    /// Gets the multiplayer_manager singleton instance.
     /// </summary>
     static property MultiplayerManager^ SingletonInstance { MultiplayerManager^ get(); }
 
@@ -96,7 +96,6 @@ public:
 
     /// <summary>
     /// Joins a set of Xbox Live users to a lobby via the specified IProtocolActivatedEventArgs.
-    ///
     /// </summary>
     /// <param name="eventArgs">The IProtocolActivatedEventArgs when the title is protocol activated.</param>
     /// <param name="users">List of users joining the lobby.</param>
@@ -104,6 +103,7 @@ public:
     /// The IProtocolActivatedEventArgs provides arguments for protocol activation. If the user accepts an invite or
     /// joined a friends game via a shell UI, the title will get a protocol activation. The result is delivered via
     /// JoinLobbyCompletedEventArgs() callback through DoWork().
+    ///
     /// Optionally, if you haven't added the local users through LobbySession()::AddLocalUser(), you can pass in
     /// the list of users via the JoinLobby() API. If the invited user is not added either via
     /// LobbySession()::AddLocalUser() or through JoinLobby(), then JoinLobby() will fail and provide the
@@ -130,6 +130,7 @@ public:
     /// The IProtocolActivatedEventArgs provides arguments for protocol activation. If the user accepts an invite or
     /// joined a friends game via a shell UI, the title will get a protocol activation. The result is delivered via
     /// JoinLobbyCompletedEventArgs() callback through DoWork().
+    ///
     /// Optionally, if you haven't added the local users through LobbySession()::AddLocalUser(), you can pass in
     /// the list of users via the JoinLobby() API. If the invited user is not added either via
     /// LobbySession()::AddLocalUser() or through JoinLobby(), then JoinLobby() will fail and provide the
@@ -174,14 +175,16 @@ public:
         );
 
     /// <summary>
-    /// Joins a game given a globally unique session name. Callers can get the unique session name
+    /// Joins a set of Xbox Live users to the specified game session, using the specified session template. Callers can get the unique session name
     /// as a result of the title's third party matchmaking.
-    /// The result is delivered via MultiplayerEvent callback of type JoinGameCompleted through DoWork().
-    /// After joining, you can set the properties or the host via game_session()::write_synchronized APIs.
     /// </summary>
     /// <param name="sessionName">A unique name for the session.</param>
     /// <param name="sessionTemplateName">The name of the template for the game session to be based on.</param>
     /// <param name="xboxUserIds">The list of xbox user IDs you want to be part of the game.</param>
+    /// <remarks>
+    /// The result is delivered via MultiplayerEvent callback of type JoinGameCompleted through DoWork().
+    /// After joining, you can set the properties or the host via GameSession()::SetSynchronized APIs.
+    /// </remarks>
     void JoinGame(
         _In_ Platform::String^ sessionName,
         _In_ Platform::String^ sessionTemplateName,
@@ -189,17 +192,19 @@ public:
         );
 
     /// <summary>
-    /// Leaving the game will put you back into the lobby. This will remove all local users from the game.
+    /// Leaves the current game session and returns the users back into the lobby. This removes all local users from the game.
     /// </summary>
     void LeaveGame();
 
     /// <summary>
     /// Ensures proper game state updates are maintained between the title and the Xbox Live Multiplayer Service.
-    /// To ensure best performance, DoWork() must be called frequently, at least once per frame.
-    /// Title needs to be thread safe when calling DoWork() since this is when the state will change.
-    /// For example, if you looping through the list of game session members(), it may change when DoWork() is called.
     /// </summary>
     /// <returns>A list of all callback events for the game to handle. Empty if no events are triggered during this update.</returns>
+    /// <remarks>
+    /// To ensure the best performance, DoWork() must be called frequently, at least once per frame.
+    /// The title needs to be thread safe when calling DoWork() since this is when the state will change.
+    /// For example, if you looping through the list of game session members, the list may change when DoWork() is called.
+    /// </remarks>
     Windows::Foundation::Collections::IVectorView<MultiplayerEvent^>^ DoWork();
 
     /// <summary>
@@ -241,10 +246,12 @@ public:
     /// <summary>
     /// Restricts who can join the game. Defaults to "enabled", meaning only local users and users who are followed
     /// by an existing member of the lobby can join without an invite.
-    /// Changes are batched and written to the service on the next DoWork(). All session properties and members
-    /// contain updated response returned from the server upon calling DoWork().
     /// </summary>
     /// <param name="state">Restriction on members to join the lobby.</param>
+    /// <remarks>
+    /// Changes are batched and written to the service on the next DoWork(). All session properties and members
+    /// contain updated response returned from the server upon calling DoWork().
+    /// </remarks>
     void SetJoinInProgress(
         _In_ Microsoft::Xbox::Services::Multiplayer::Manager::Joinability value
         );

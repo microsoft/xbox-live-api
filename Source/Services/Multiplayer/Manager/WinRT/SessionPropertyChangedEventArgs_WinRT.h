@@ -19,6 +19,9 @@ public:
     DEFINE_PTR_PROP_GET_STR_FROM_JSON_OBJ(Properties, properties);
 
 internal:
+    /// <summary>
+    /// Internal function.
+    /// </summary>
     SessionPropertyChangedEventArgs(
         _In_ std::shared_ptr<xbox::services::multiplayer::manager::session_property_changed_event_args> cppObj
         );
