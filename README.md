@@ -29,7 +29,7 @@ If you already cloned the repo, you can initialize submodules with:
     git submodule sync
     git submodule update --init --recursive
 
-Note that using GitHub's feature to "Download Zip" does not contain the submodules and will not properly build.  Please clone recursively instead.
+**Note that using GitHub's feature to "Download Zip" does not contain the submodules and will not properly build.  Please clone recursively instead.**
 
 ## How to link your project against source
 
