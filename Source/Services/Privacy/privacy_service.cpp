@@ -210,14 +210,19 @@ privacy_service::check_permission_with_target_user(
         xbox_live_api::check_permission_with_target_user
         );
 
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([](std::shared_ptr<http_call_response> response)
-    {
-        return utils::generate_xbox_live_result<permission_check_result>(
-            permission_check_result::_Deserializer(response->response_body_json()),
-            response
-            );
-    });
+	auto task = httpCall->get_response_with_auth(m_userContext)
+		.then([permissionId](std::shared_ptr<http_call_response> response)
+	{
+		auto result = permission_check_result::_Deserializer(response->response_body_json());
+		auto permissionResult = result.payload();
+		permissionResult.initialize(permissionId);
+
+		return utils::generate_xbox_live_result<permission_check_result>(
+			permissionResult,
+			response
+			);
+	});
+
 
     return utils::create_exception_free_task<permission_check_result>(
         task
