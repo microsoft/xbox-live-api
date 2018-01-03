@@ -22,7 +22,6 @@
     <AppContainerApplication Condition="'$(Platform)'!='Durango'">true</AppContainerApplication>
     <ConsumeWinRT>true</ConsumeWinRT>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseXboxServices>false</UseXboxServices>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">

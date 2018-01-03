@@ -22,7 +22,6 @@
     <AppContainerApplication Condition="'$(Platform)'!='Durango'">true</AppContainerApplication>
     <ConsumeWinRT>true</ConsumeWinRT>
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseXboxServices>false</UseXboxServices>
     <GenerateManifest>false</GenerateManifest>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
