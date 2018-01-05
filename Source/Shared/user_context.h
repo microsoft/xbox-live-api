@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "system_internal.h"
+
 #if !TV_API
 
 #if !XSAPI_CPP
@@ -66,6 +68,34 @@ public:
     caller_context_type caller_context_type() const;
     void set_caller_context_type(xbox::services::caller_context_type context);
 
+    typedef void(*get_auth_result_completion_routine)(
+        _In_ xbox::services::xbox_live_result<user_context_auth_result> result,
+        _In_ void* context
+        );
+
+    void get_auth_result(
+        _In_ const string_t& httpMethod,
+        _In_ const string_t& url,
+        _In_ const string_t& headers,
+        _In_ const string_t& requestBodyString,
+        _In_ bool allUsersAuthRequired,
+        _In_ get_auth_result_completion_routine completionRoutine,
+        _In_opt_ void *completionRoutineContext,
+        _In_ uint64_t taskGroupId
+        );
+
+    void get_auth_result(
+        _In_ const string_t& httpMethod,
+        _In_ const string_t& url,
+        _In_ const string_t& headers,
+        _In_ const std::vector<unsigned char>& requestBodyVector,
+        _In_ bool allUsersAuthRequired,
+        _In_ get_auth_result_completion_routine completionRoutine,
+        _In_opt_ void *completionRoutineContext,
+        _In_ uint64_t taskGroupId
+        );
+
+    /// TODO eventually remove
     pplx::task<xbox::services::xbox_live_result<user_context_auth_result>> get_auth_result(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -74,6 +104,7 @@ public:
         _In_ bool allUsersAuthRequired = false
         );
 
+    /// TODO eventually remove
     pplx::task<xbox::services::xbox_live_result<user_context_auth_result>> get_auth_result(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,

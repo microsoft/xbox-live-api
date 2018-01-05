@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "user_context.h"
 #include "xbox_system_factory.h"
+#include "profile_internal.h"
 
 using namespace pplx;
 
@@ -31,37 +32,39 @@ profile_service::profile_service(
     ) :
     m_userContext(std::move(userContext)),
     m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
-    m_appConfig(std::move(appConfig))
+    m_appConfig(std::move(appConfig)), // TODO this should eventually only be needed in the internal impl class
+    m_serviceImpl(std::make_shared<profile_service_impl>(
+        m_userContext,
+        m_xboxLiveContextSettings,
+        m_appConfig))
 {
 }
+
+// TODO figure out a better solution
+template<typename T>
+struct tce_wrapper
+{
+    tce_wrapper(task_completion_event<T> _tce) : tce(_tce) {}
+    task_completion_event<T> tce;
+};
 
 pplx::task<xbox_live_result<xbox_user_profile>>
 profile_service::get_user_profile(
     _In_ string_t xboxUserId
     )
 {
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(xboxUserId.empty(), xbox_user_profile, "xboxUserId is empty");
-    std::vector< string_t> xboxUserIds;
-    xboxUserIds.push_back(std::move(xboxUserId));
+    auto context = new tce_wrapper<xbox_live_result<xbox_user_profile>>(task_completion_event<xbox_live_result<xbox_user_profile>>());
 
-    auto task = get_user_profiles(xboxUserIds)
-    .then([](xbox_live_result<std::vector<xbox_user_profile>> result)
+    m_serviceImpl->get_user_profile(xboxUserId, 
+        [](xbox_live_result<xbox_user_profile> result, void* context) 
     {
-        if (result.payload().size() == 1)
-        {
-            return xbox_live_result<xbox_user_profile>(result.payload()[0], result.err(), result.err_message());
-        }
-        else
-        {
-            return xbox_live_result<xbox_user_profile>(result.err(), result.err_message());
-        }
-    });
-    
-    return utils::create_exception_free_task<xbox_user_profile>(
-        task
-        );
-}
+        auto tceWrapper = static_cast<tce_wrapper<xbox_live_result<xbox_user_profile>>*>(context);
+        tceWrapper->tce.set(result);
+        delete context;
+    }, context, 0);
 
+    return pplx::task<xbox_live_result<xbox_user_profile>>(context->tce);
+}
 
 pplx::task<xbox_live_result<std::vector<xbox_user_profile>>>
 profile_service::get_user_profiles(

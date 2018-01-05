@@ -940,7 +940,90 @@ private:
     utils();
     utils(const utils&);
     utils& operator=(const utils&);
+};
 
+struct client_callback_info
+{
+    client_callback_info(
+        void *_completionFunction,
+        void *_clientContext
+        ) :
+        completionFunction(_completionFunction),
+        clientContext(_clientContext)
+    {
+    }
+
+    void *completionFunction;
+    void *clientContext;
+};
+
+class callback_context_helper
+{
+public:
+    template<typename T>
+    static void *store_shared_ptr(std::shared_ptr<T> contextSharedPtr)
+    {
+        std::lock_guard<std::mutex> lock(m_contextsLock);
+        void *rawVoidPtr = contextSharedPtr.get();
+        std::shared_ptr<void> voidSharedPtr(contextSharedPtr, rawVoidPtr);
+        m_sharedPtrs.insert(std::make_pair(rawVoidPtr, voidSharedPtr));
+        return rawVoidPtr;
+    }
+
+    template<typename T>
+    static std::shared_ptr<T> remove_shared_ptr(void *rawContextPtr)
+    {
+        std::lock_guard<std::mutex> lock(m_contextsLock);
+
+        auto iter = m_sharedPtrs.find(rawContextPtr);
+        if (iter != m_sharedPtrs.end())
+        {
+            auto returnPtr = std::shared_ptr<T>(iter->second, reinterpret_cast<T*>(iter->second.get()));
+            m_sharedPtrs.erase(iter);
+            return returnPtr;
+        }
+        else
+        {
+            XSAPI_ASSERT(false && "Context not found!");
+            return std::shared_ptr<T>();
+        }
+    }
+
+    static void *store_client_callback_info(void *clientCallbackFunction, void *clientContext)
+    {
+        std::lock_guard<std::mutex> lock(m_contextsLock);
+        void *index = (void*)m_clientCallbackInfoIndexer++;
+        m_clientCallbackInfoMap.insert(std::make_pair(index, client_callback_info(clientCallbackFunction, clientContext)));
+        return index;
+    }
+
+    static client_callback_info remove_client_callback_info(void * context)
+    {
+        std::lock_guard<std::mutex> lock(m_contextsLock);
+
+        auto iter = m_clientCallbackInfoMap.find(context);
+        if (iter != m_clientCallbackInfoMap.end())
+        {
+            auto callbackInfo = iter->second;
+            m_clientCallbackInfoMap.erase(iter);
+            return callbackInfo;
+        }
+        else
+        {
+            XSAPI_ASSERT(false && "Context not found!");
+            return client_callback_info(nullptr, nullptr);
+        }
+    }
+
+private:
+    static std::mutex m_contextsLock;
+    static std::unordered_map<void *, std::shared_ptr<void>> m_sharedPtrs;
+    static uint32_t m_clientCallbackInfoIndexer;
+    static std::unordered_map<void *, client_callback_info> m_clientCallbackInfoMap;
+
+    callback_context_helper();
+    callback_context_helper(const callback_context_helper&);
+    callback_context_helper& operator=(const callback_context_helper&);
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

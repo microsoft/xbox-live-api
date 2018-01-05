@@ -40,6 +40,9 @@
 #include <cstdint>
 
 #include "xsapi/types.h"
+#include "httpClient/types.h"
+#include "httpClient/httpClient.h"
+#include "httpClient/task.h"
 
 #include <cpprest/http_client.h>
 #include <cpprest/filestream.h>

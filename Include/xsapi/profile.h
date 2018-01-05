@@ -6,11 +6,14 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 class xbox_live_context_impl;
+
 /// <summary>
 /// Contains classes and enumerations that let you retrieve
 /// information about a player's Xbox Live profile.
 /// </summary>
 namespace social {
+
+    class profile_service_impl;
 
     /// <summary> 
     /// Represents a user's Xbox Live profile.
@@ -179,6 +182,8 @@ namespace social {
         std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
 
         friend xbox_live_context_impl;
+
+        std::shared_ptr<profile_service_impl> m_serviceImpl;
     };
 }
 

@@ -84,6 +84,41 @@ public:
         _In_ const std::vector<unsigned char>& requestBodyArray
         );
 
+    // TODO remove ppl versions of these eventually
+    typedef void(*get_token_and_signature_completion_routine)(
+        _In_ xbox::services::xbox_live_result<token_and_signature_result> result,
+        _In_opt_ void *context
+        );
+
+    void get_token_and_signature(
+        _In_ const string_t& httpMethod,
+        _In_ const string_t& url,
+        _In_ const string_t& headers,
+        _In_ get_token_and_signature_completion_routine completionRoutine,
+        _In_opt_ void *completionRoutineContext,
+        _In_ uint64_t taskGroupId
+        );
+
+    void get_token_and_signature(
+        _In_ const string_t& httpMethod,
+        _In_ const string_t& url,
+        _In_ const string_t& headers,
+        _In_ const string_t& requestBodyString,
+        _In_ get_token_and_signature_completion_routine completionRoutine,
+        _In_opt_ void *completionRoutineContext,
+        _In_ uint64_t taskGroupId
+        );
+
+    void get_token_and_signature(
+        _In_ const string_t& httpMethod,
+        _In_ const string_t& url,
+        _In_ const string_t& headers,
+        _In_ const std::vector<unsigned char>& requestBodyArray,
+        _In_ get_token_and_signature_completion_routine completionRoutine,
+        _In_opt_ void *completionRoutineContext,
+        _In_ uint64_t taskGroupId
+        );
+
     bool is_signed_in();
     void set_user_pointer(_In_ std::shared_ptr<system::xbox_live_user> user);
     void set_title_telemetry_session_id(_In_ const string_t& sessionId);
@@ -98,6 +133,20 @@ public:
         _In_ const std::vector<unsigned char>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh
+        ) = 0;
+
+    // TODO remove ppl version
+    virtual void internal_get_token_and_signature(
+        _In_ const string_t& httpMethod,
+        _In_ const string_t& url,
+        _In_ const string_t& endpointForNsal,
+        _In_ const string_t& headers,
+        _In_ const std::vector<unsigned char>& bytes,
+        _In_ bool promptForCredentialsIfNeeded,
+        _In_ bool forceRefresh,
+        _In_ get_token_and_signature_completion_routine completionRoutine,
+        _In_opt_ void *completionRoutineContext,
+        _In_ uint64_t taskGroupId
         ) = 0;
 
     static function_context add_sign_in_completed_handler(_In_ std::function<void(const string_t&)> handler);
@@ -173,6 +222,20 @@ public:
         _In_ const std::vector<unsigned char>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh
+        ) override;
+
+    // TODO delete ppl version eventually
+    void internal_get_token_and_signature(
+        _In_ const string_t& httpMethod,
+        _In_ const string_t& url,
+        _In_ const string_t& endpointForNsal,
+        _In_ const string_t& headers,
+        _In_ const std::vector<unsigned char>& bytes,
+        _In_ bool promptForCredentialsIfNeeded,
+        _In_ bool forceRefresh,
+        _In_ get_token_and_signature_completion_routine completionRoutine,
+        _In_opt_ void *completionRoutineContext,
+        _In_ uint64_t taskGroupId
         ) override;
 
 private:
@@ -276,5 +339,38 @@ public:
 
 };
 #endif
+
+struct get_token_and_signature_context
+{
+    get_token_and_signature_context(
+        _In_ std::shared_ptr<user_impl> _userImpl,
+        _In_ const string_t& _httpMethod,
+        _In_ const string_t& _url,
+        _In_ const string_t& _headers,
+        _In_ const std::vector<unsigned char>& _bytes,
+        _In_ bool _promptForCredentialsIfNeeded,
+        _In_ bool _forceRefresh
+        ) :
+        userImpl(_userImpl),
+        httpMethod(_httpMethod),
+        url(_url),
+        headers(_headers),
+        bytes(_bytes),
+        promptForCredentialsIfNeeded(_promptForCredentialsIfNeeded),
+        forceRefresh(_forceRefresh)
+    {
+    }
+
+    std::shared_ptr<user_impl> userImpl; // TODO should this be shared or weak?
+
+    string_t httpMethod;
+    string_t url;
+    string_t headers;
+    std::vector<unsigned char> bytes;
+    bool promptForCredentialsIfNeeded;
+    bool forceRefresh;
+
+    xbox::services::xbox_live_result<token_and_signature_result> result; // TODO best place for this?
+};
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
