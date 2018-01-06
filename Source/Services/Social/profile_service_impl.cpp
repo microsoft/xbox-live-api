@@ -98,16 +98,12 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
 
     httpCall->set_request_body(request.serialize());
 
-    // TODO figure out a better way to do this
-    auto context = new hc_completion_routine_context();
-    context->clientCompletionRountine = completionRoutine;
-    context->clientContext = completionRoutineContext;
-
+    auto context = callback_context_helper::store_client_callback_info(completionRoutine, completionRoutineContext);
     httpCall->get_response_with_auth(m_userContext, http_call_response_body_type::json_body, false,
         [](std::shared_ptr<http_call_response> response, void *context)
     {
-        auto hcContext = reinterpret_cast<hc_completion_routine_context*>(context);
-        auto completionRoutine = reinterpret_cast<get_user_profiles_completion_routine>(hcContext->clientCompletionRountine);
+        auto clientCallbackInfo = callback_context_helper::remove_client_callback_info(context);
+        auto completionRoutine = reinterpret_cast<get_user_profiles_completion_routine>(clientCallbackInfo.completionFunction);
 
         if (response->response_body_json().size() != 0)
         {
@@ -125,18 +121,14 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
                 response
                 );
 
-            completionRoutine(result, hcContext->clientContext);
+            completionRoutine(result, clientCallbackInfo.clientContext);
         }
         else
         {
-            completionRoutine(xbox_live_result<std::vector<xbox_user_profile>>(response->err_code(), response->err_message()), hcContext->clientContext);
+            completionRoutine(xbox_live_result<std::vector<xbox_user_profile>>(response->err_code(), response->err_message()), clientCallbackInfo.clientContext);
         }
-        delete context;
     }, context, 0);
 
-    //return utils::create_exception_free_task<std::vector<xbox_user_profile>>(
-    //    task
-    //    );
     return xbox_live_result<void>();
 }
 
