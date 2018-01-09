@@ -357,7 +357,7 @@ void http_call_impl::_Internal_get_response_with_auth(
         requestBodyVector = std::vector<unsigned char>(utf8Body.begin(), utf8Body.end());
     }
 
-    auto context = callback_context_helper::store_shared_ptr(m_httpCallData);
+    auto context = async_helpers::store_shared_ptr(m_httpCallData);
 
     m_httpCallData->userContext->get_auth_result(
         m_httpCallData->httpMethod,
@@ -367,7 +367,7 @@ void http_call_impl::_Internal_get_response_with_auth(
         allUsersAuthRequired,
         [](_In_ xbox::services::xbox_live_result<user_context_auth_result> result, _In_ void* context)
         {
-            auto httpCallData = callback_context_helper::remove_shared_ptr<http_call_data>(context);
+            auto httpCallData = async_helpers::remove_shared_ptr<http_call_data>(context);
 
             if (result.err())
             {
@@ -509,13 +509,13 @@ void http_call_impl::internal_get_response_hc(
     HCHttpCallRequestSetRetryAllowed(call, httpCallData->retryAllowed);
     HCHttpCallRequestSetTimeout(call, static_cast<uint32_t>(httpCallData->httpTimeout.count()));
 
-    auto context = callback_context_helper::store_shared_ptr(httpCallData);
+    auto context = async_helpers::store_shared_ptr(httpCallData);
 
     HC_TASK_HANDLE taskHandle;
     auto hcResult = HCHttpCallPerform(call, &taskHandle, HC_SUBSYSTEM_ID_XSAPI, httpCallData->taskGroupId, context,
         [](_In_ void* context, _In_ HC_CALL_HANDLE call)
     {
-        auto httpCallData = callback_context_helper::remove_shared_ptr<http_call_data>(context);
+        auto httpCallData = async_helpers::remove_shared_ptr<http_call_data>(context);
         auto httpCallResponse = get_http_call_response(httpCallData, http_response());
 
         HC_RESULT errorCode = HC_OK;

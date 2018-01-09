@@ -66,30 +66,44 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XSAPI_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XSAPI_BUILD;XBL_API_NONE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;XBL_API_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalOptions>/bigobj /Zm300 %(AdditionalOptions)</AdditionalOptions>
       <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories> 
        $(ProjectDir);
-       $(ProjectDir)\..\..\Source\Services;
-       $(ProjectDir)\..\..\Source\Services\Common;
-       $(ProjectDir)\..\..\Source\Services\Common\Desktop;
-       $(ProjectDir)\..\..\Source\Services\Social;
-       $(ProjectDir)\..\..\Source\Services\Multiplayer;
-       $(ProjectDir)\..\..\Source\Services\Presence;
-       $(ProjectDir)\..\..\Source\Services\Misc;
-       $(ProjectDir)\..\..\Source\Services\Social\Manager;
-       $(ProjectDir)\..\..\Source\Services\RealTimeActivity;
-       $(ProjectDir)\..\..\Source\Services\Clubs;
-       $(ProjectDir)\..\..\Source\Shared;
-       $(ProjectDir)\..\..\Source\Shared\WinRT;
-       $(ProjectDir)\..\..\Include;
+       $(ProjectDir)..\..\Source\Services;
+       $(ProjectDir)..\..\Source\Services\Common;
+       $(ProjectDir)..\..\Source\Services\Common\Desktop;
+       $(ProjectDir)..\..\Source\Services\Social;
+       $(ProjectDir)..\..\Source\Services\Multiplayer;
+       $(ProjectDir)..\..\Source\Services\Presence;
+       $(ProjectDir)..\..\Source\Services\Misc;
+       $(ProjectDir)..\..\Source\Services\Social\Manager;
+       $(ProjectDir)..\..\Source\Services\RealTimeActivity;
+       $(ProjectDir)..\..\Source\Services\Clubs;
+       $(ProjectDir)..\..\Source\Shared;
+       $(ProjectDir)..\..\Source\Shared\WinRT;
+       $(ProjectDir)..\..\Include;
        ..\..\External\cpprestsdk\Release\include;
-       $(ProjectDir)\..\..\Source\System\WinRT;
-       $(ProjectDir)\..\..\Source\System;
+       $(ProjectDir)..\..\Source\System\WinRT;
+       $(ProjectDir)..\..\Source\System;
+       $(ProjectDir)..\..\Source\C\Services\TitleStorage;
+       $(ProjectDir)..\..\Source\C\Services\Common;
+       $(ProjectDir)..\..\Source\C\Services\Social;
+       $(ProjectDir)..\..\Source\C\Services\Multiplayer;
+       $(ProjectDir)..\..\Source\C\Services\Presence;
+       $(ProjectDir)..\..\Source\C\Services\Misc;
+       $(ProjectDir)..\..\Source\C\Services\Social\Manager;
+       $(ProjectDir)..\..\Source\C\Services\RealTimeActivity;
+       $(ProjectDir)..\..\Source\C\Services\Achievements;
+       $(ProjectDir)..\..\Source\C\Shared;
+       $(ProjectDir)..\..\Source\C\Shared\WinRT;
+       $(ProjectDir)..\..\Source\C\System;
+       $(ProjectDir)..\..\Source\C\Services\Leaderboard;
+       $(ProjectDir)..\..\Source\C\Services\Stats\Manager;
        %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
       <CompileAsWinRT>true</CompileAsWinRT>
@@ -127,6 +141,33 @@
     <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectFolder)\</IntDir>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\C\Services\Achievements\achievements.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Achievements\achievements_helper.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Common\xbox_live_context.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Common\xbox_live_context_impl_c.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Common\xbox_live_global.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Leaderboard\leaderboard.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Leaderboard\leaderboard_helper.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Misc\title_callable_ui_c.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Privacy\privacy.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Privacy\privacy_multiple_permissions_check_result_impl.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Privacy\privacy_permission_check_result_impl.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Privacy\privacy_permission_deny_reason_impl.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Social\Manager\social_manager_c.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Social\Manager\social_manager_helper.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Social\profile.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Stats\Manager\stats_manager_c.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\Stats\Manager\stats_manager_helper.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\TitleStorage\title_storage.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_impl.cpp" />
+    <ClCompile Include="..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_result_impl.cpp" />
+    <ClCompile Include="..\..\Source\C\Shared\singleton_c.cpp" />
+    <ClCompile Include="..\..\Source\C\Shared\threadpool_c.cpp" />
+    <ClCompile Include="..\..\Source\C\Shared\utils_c.cpp" />
+    <ClCompile Include="..\..\Source\C\Shared\xbox_live_app_config_c.cpp" />
+    <ClCompile Include="..\..\Source\C\System\user_c.cpp" />
+    <ClCompile Include="..\..\Source\C\System\user_impl_c.cpp" />
+    <ClCompile Include="..\..\Source\C\System\user_taskargs.cpp" />
     <ClCompile Include="..\..\Source\Services\Social\profile_service_impl.cpp" />
     <ClCompile Include="..\..\Source\Shared\threadpool.cpp" />
     <ClCompile Include="..\..\Source\Shared\utils_uwp.cpp" />
@@ -457,6 +498,44 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl_idp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\xbox_live_mutex.cpp" />
+    <ClInclude Include="..\..\Include\xsapi-c\achievements_c.h" />
+    <ClInclude Include="..\..\Include\xsapi-c\errors_c.h" />
+    <ClInclude Include="..\..\Include\xsapi-c\leaderboard_c.h" />
+    <ClInclude Include="..\..\Include\xsapi-c\presence_c.h" />
+    <ClInclude Include="..\..\Include\xsapi-c\privacy_c.h" />
+    <ClInclude Include="..\..\Include\xsapi-c\profile_c.h" />
+    <ClInclude Include="..\..\Include\xsapi-c\social_manager_c.h" />
+    <ClInclude Include="..\..\Include\xsapi-c\stats_manager_c.h" />
+    <ClInclude Include="..\..\Include\xsapi-c\system_c.h" />
+    <ClInclude Include="..\..\Include\xsapi-c\title_callable_ui_c.h" />
+    <ClInclude Include="..\..\Include\xsapi-c\title_storage_c.h" />
+    <ClInclude Include="..\..\Include\xsapi-c\types_c.h" />
+    <ClInclude Include="..\..\Include\xsapi-c\xbox_live_app_config_c.h" />
+    <ClInclude Include="..\..\Include\xsapi-c\xbox_live_context_c.h" />
+    <ClInclude Include="..\..\Include\xsapi-c\xbox_live_global_c.h" />
+    <ClInclude Include="..\..\Source\C\Services\Achievements\achievements_helper.h" />
+    <ClInclude Include="..\..\Source\C\Services\Achievements\achievements_state.h" />
+    <ClInclude Include="..\..\Source\C\Services\Achievements\achievements_taskargs.h" />
+    <ClInclude Include="..\..\Source\C\Services\Common\taskargs.h" />
+    <ClInclude Include="..\..\Source\C\Services\Common\xbox_live_context_impl_c.h" />
+    <ClInclude Include="..\..\Source\C\Services\Leaderboard\leaderboard_helper.h" />
+    <ClInclude Include="..\..\Source\C\Services\Privacy\privacy_multiple_permissions_check_result_impl.h" />
+    <ClInclude Include="..\..\Source\C\Services\Privacy\privacy_permission_check_result_impl.h" />
+    <ClInclude Include="..\..\Source\C\Services\Privacy\privacy_permission_deny_reason_impl.h" />
+    <ClInclude Include="..\..\Source\C\Services\Privacy\privacy_taskargs.h" />
+    <ClInclude Include="..\..\Source\C\Services\Social\Manager\social_manager_helper.h" />
+    <ClInclude Include="..\..\Source\C\Services\Social\Manager\social_manager_state.h" />
+    <ClInclude Include="..\..\Source\C\Services\Stats\Manager\stats_manager_helper.h" />
+    <ClInclude Include="..\..\Source\C\Services\Stats\Manager\stats_manager_state.h" />
+    <ClInclude Include="..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_impl.h" />
+    <ClInclude Include="..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_result_impl.h" />
+    <ClInclude Include="..\..\Source\C\Services\TitleStorage\title_storage_state.h" />
+    <ClInclude Include="..\..\Source\C\Services\TitleStorage\title_storage_taskargs.h" />
+    <ClInclude Include="..\..\Source\C\Shared\singleton_c.h" />
+    <ClInclude Include="..\..\Source\C\Shared\threadpool_c.h" />
+    <ClInclude Include="..\..\Source\C\Shared\utils_c.h" />
+    <ClInclude Include="..\..\Source\C\System\user_impl_c.h" />
+    <ClInclude Include="..\..\Source\C\System\user_taskargs.h" />
     <ClInclude Include="..\..\Source\Services\Social\profile_internal.h" />
     <ClInclude Include="..\..\Source\Shared\threadpool.h" />
     <ClInclude Include="..\..\Source\Shared\utils_uwp.h" />

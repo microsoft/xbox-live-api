@@ -1691,10 +1691,10 @@ utils::read_test_response_file(_In_ const string_t& filePath)
 }
 #endif
 
-std::mutex callback_context_helper::m_contextsLock;
-std::unordered_map<void *, std::shared_ptr<void>> callback_context_helper::m_sharedPtrs;
+std::mutex async_helpers::m_contextsLock;
+std::unordered_map<void *, std::shared_ptr<void>> async_helpers::m_sharedPtrs;
 
-uint32_t callback_context_helper::m_clientCallbackInfoIndexer;
-std::unordered_map<void *, client_callback_info> callback_context_helper::m_clientCallbackInfoMap;
+uint32_t async_helpers::m_clientCallbackInfoIndexer;
+std::unordered_map<void *, client_callback_info> async_helpers::m_clientCallbackInfoMap;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

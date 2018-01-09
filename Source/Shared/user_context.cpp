@@ -271,12 +271,12 @@ void user_context::get_auth_result(
 #endif
     if (m_user != nullptr)
     {
-        void *clientCallbackInfo = callback_context_helper::store_client_callback_info(completionRoutine, completionRoutineContext);
+        void *clientCallbackInfo = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
 
         m_user->_User_impl()->get_token_and_signature(httpMethod, url, headers, requestBodyVector,
         [](xbox_live_result<token_and_signature_result> result, void *callbackContext)
         {
-            auto callbackInfo = callback_context_helper::remove_client_callback_info(callbackContext);
+            auto callbackInfo = async_helpers::remove_client_callback_info(callbackContext);
 
             const auto& tokenResult = result.payload();
             user_context_auth_result userContextResult(tokenResult.token(), tokenResult.signature());

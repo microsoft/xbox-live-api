@@ -54,9 +54,9 @@
 #include <cpprest/uri.h>                        // URI library
 
 // flat-C headers
-#include "xsapi/types_c.h"
-#include "xsapi/errors_c.h"
-#include "xsapi/xbox_live_global_c.h"
+#include "xsapi-c/types_c.h"
+#include "xsapi-c/errors_c.h"
+#include "xsapi-c/xbox_live_global_c.h"
 #include "utils_c.h"
 #include "singleton_c.h"
 
