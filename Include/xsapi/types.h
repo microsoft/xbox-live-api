@@ -109,6 +109,10 @@ namespace xbox {
         class user_context;
         class xbox_live_context_settings;
         class local_config;
+        namespace system
+        {
+            class xbox_live_user;
+        }
     }
 }
 
@@ -133,6 +137,8 @@ typedef void* user_creation_context;
 
 #if TV_API | XBOX_UWP
 typedef  Windows::Xbox::System::User^ xbox_live_user_t;
+#else
+typedef std::shared_ptr<xbox::services::system::xbox_live_user> xbox_live_user_t;
 #endif
 
 #if defined(XSAPI_CPPWINRT)

@@ -4,6 +4,7 @@
 #pragma once
 #include <mutex>
 #include "xsapi/services.h"
+#include "profile_internal.h"
 #if !TV_API
 
 #if !XSAPI_CPP
@@ -67,7 +68,7 @@ public:
     /// <summary>
     /// A service for managing user profiles.
     /// </summary>
-    social::profile_service& profile_service();
+    std::shared_ptr<social::profile_service_impl> profile_service_impl();
 
     /// <summary>
     /// A service for managing social networking links.
@@ -154,10 +155,10 @@ public:
     /// </summary>
     system::string_service& string_service();
 
-	/// <summary>
-	/// Service used to access and update clubs.
-	/// </summary>
-	clubs::clubs_service& clubs_service();
+    /// <summary>
+    /// Service used to access and update clubs.
+    /// </summary>
+    clubs::clubs_service& clubs_service();
 
 #if UWP_API || XSAPI_U
     /// <summary>
@@ -191,7 +192,7 @@ private:
     std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
     std::shared_ptr<xbox_live_app_config> m_appConfig;
 
-    social::profile_service m_profileService;
+    std::shared_ptr<social::profile_service_impl> m_profileServiceImpl;
     social::social_service m_socialService;
     social::reputation_service m_reputationService;
     leaderboard::leaderboard_service m_leaderboardService;
@@ -207,7 +208,7 @@ private:
     privacy::privacy_service m_privacyService;
     contextual_search::contextual_search_service m_contextualSearchService;
     system::string_service m_stringService;
-	clubs::clubs_service m_clubsService;
+    clubs::clubs_service m_clubsService;
 
 #if UWP_API || XSAPI_U
     events::events_service m_eventsService;

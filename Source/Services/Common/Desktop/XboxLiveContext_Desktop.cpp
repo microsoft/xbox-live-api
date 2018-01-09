@@ -37,6 +37,12 @@ xbox_live_context::xbox_live_context(
     user->_User_impl()->set_user_pointer(user);
     m_xboxLiveContextImpl = std::make_shared<xbox_live_context_impl>(user);
     m_xboxLiveContextImpl->init();
+
+    m_profileService = social::profile_service(
+        m_xboxLiveContextImpl->profile_service_impl(),
+        m_xboxLiveContextImpl->m_userContext,
+        m_xboxLiveContextImpl->m_xboxLiveContextSettings,
+        m_xboxLiveContextImpl->m_appConfig);
 }
 
 std::shared_ptr<system::xbox_live_user>
@@ -69,7 +75,7 @@ const string_t& xbox_live_context::xbox_live_user_id()
 social::profile_service&
 xbox_live_context::profile_service()
 {
-    return m_xboxLiveContextImpl->profile_service();
+    return m_profileService;
 }
 
 social::social_service&

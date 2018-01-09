@@ -23,18 +23,6 @@ enum GAMESTATE
 
 namespace Sample
 {
-    class SocialGroupNode
-    {
-    public:
-        std::shared_ptr<xbox::services::system::xbox_live_user> User;
-        std::wstring XboxUserId;
-        bool FromFilter;
-        std::vector<string_t> XboxUserIdList;
-        xbox::services::social::manager::presence_filter PresenceFilter;
-        xbox::services::social::manager::relationship_filter RelationshipFilter;
-        std::shared_ptr<xbox::services::social::manager::xbox_social_user_group> SocialUserGroup;
-    };
-
     class GameData
     {
     public:

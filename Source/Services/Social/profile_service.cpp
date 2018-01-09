@@ -32,11 +32,24 @@ profile_service::profile_service(
     ) :
     m_userContext(std::move(userContext)),
     m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
-    m_appConfig(std::move(appConfig)), // TODO this should eventually only be needed in the internal impl class
-    m_serviceImpl(std::make_shared<profile_service_impl>(
+    m_appConfig(std::move(appConfig)) // TODO this should eventually only be needed in the internal impl class
+{
+    m_serviceImpl = std::make_shared<profile_service_impl>(
         m_userContext,
         m_xboxLiveContextSettings,
-        m_appConfig))
+        m_appConfig);
+}
+
+profile_service::profile_service(
+    _In_ std::shared_ptr<profile_service_impl> serviceImpl,
+    _In_ std::shared_ptr<user_context> userContext,
+    _In_ std::shared_ptr<xbox_live_context_settings> xboxLiveContextSettings,
+    _In_ std::shared_ptr<xbox_live_app_config> appConfig
+    ) :
+    m_serviceImpl(std::move(serviceImpl)),
+    m_userContext(std::move(userContext)),
+    m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
+    m_appConfig(std::move(appConfig)) // TODO this should eventually only be needed in the internal impl class
 {
 }
 

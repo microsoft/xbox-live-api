@@ -10,46 +10,46 @@ using namespace Sample;
 using namespace Windows::Foundation;
 using namespace Windows::System::Threading;
 using namespace Concurrency;
-using namespace xbox::services::social::manager;
 
 Game* g_sampleInstance = nullptr;
 std::mutex Game::m_displayEventQueueLock;
-std::mutex Game::m_socialManagerLock;
 
 // Loads and initializes application assets when the application is loaded.
 Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
     m_deviceResources(deviceResources),
-    bInitialized(false),
-    m_allFriends(false),
-    m_onlineFriends(false),
-    m_allFavs(false),
-    m_onlineInTitle(false),
-    m_customList(false)
+    bInitialized(false)
 {
     g_sampleInstance = this;
 
     // Register to be notified if the Device is lost or recreated
     m_deviceResources->RegisterDeviceNotify(this);
     m_sceneRenderer = std::unique_ptr<Renderer>(new Renderer(m_deviceResources));
-    m_user = std::make_shared< xbox::services::system::xbox_live_user >();
+    
+    XsapiGlobalInitialize();
+
+    XboxLiveUserCreate(&m_user);
 }
 
 void Game::RegisterInputKeys()
 {
     m_input->RegisterKey(Windows::System::VirtualKey::S, ButtonPress::SignIn);
-    m_input->RegisterKey(Windows::System::VirtualKey::Number1, ButtonPress::ToggleSocialGroup1);
-    m_input->RegisterKey(Windows::System::VirtualKey::Number2, ButtonPress::ToggleSocialGroup2);
-    m_input->RegisterKey(Windows::System::VirtualKey::Number3, ButtonPress::ToggleSocialGroup3);
-    m_input->RegisterKey(Windows::System::VirtualKey::Number4, ButtonPress::ToggleSocialGroup4);
-    m_input->RegisterKey(Windows::System::VirtualKey::Number5, ButtonPress::ToggleSocialGroup5);
-    m_input->RegisterKey(Windows::System::VirtualKey::C, ButtonPress::ImportCustomList);
-    m_input->RegisterKey(Windows::System::VirtualKey::A, ButtonPress::GetUserProfile);
+    m_input->RegisterKey(Windows::System::VirtualKey::P, ButtonPress::GetUserProfile);
 }
 
 Game::~Game()
 {
     // Deregister device notification
     m_deviceResources->RegisterDeviceNotify(nullptr);
+    if (m_user != nullptr)
+    {
+        XboxLiveUserDelete(m_user);
+    }
+    if (m_xboxLiveContext != nullptr)
+    {
+        XboxLiveContextDelete(m_xboxLiveContext);
+    }
+
+    XsapiGlobalCleanup();
 }
 
 // Updates application state when the window size changes (e.g. device orientation change)
@@ -70,11 +70,6 @@ void Game::Update()
     m_timer.Tick([&]()
     {
         m_input->Update();
-
-        if (m_socialManager != nullptr)
-        {
-            UpdateSocialManager();
-        }
 
         switch (m_gameData->GetAppState())
         {
@@ -117,71 +112,6 @@ void Game::OnGameUpdate()
     {
         if (m_input != nullptr)
         {
-            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup1))
-            {
-                m_allFriends = !m_allFriends;
-                UpdateSocialGroupForAllUsers(m_allFriends, presence_filter::all, relationship_filter::friends);
-            }
-
-            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup2))
-            {
-                m_onlineFriends = !m_onlineFriends;
-                UpdateSocialGroupForAllUsers(m_onlineFriends, presence_filter::all_online, relationship_filter::friends);
-            }
-
-            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup3))
-            {
-                m_allFavs = !m_allFavs;
-                UpdateSocialGroupForAllUsers(m_allFavs, presence_filter::all , relationship_filter::favorite);
-            }
-
-            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup4))
-            {
-                m_onlineInTitle = !m_onlineInTitle;
-                UpdateSocialGroupForAllUsers(m_onlineInTitle, presence_filter::title_online, relationship_filter::friends);
-            }
-
-            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup5))
-            {
-                m_customList = !m_customList;
-                UpdateSocialGroupOfListForAllUsers(m_customList);
-            }
-
-            if (m_input->IsKeyDown(ButtonPress::ImportCustomList))
-            {
-                Log(L"Dev accounts CSV can be exported from XDP");
-
-                Windows::Storage::Pickers::FileOpenPicker^ openPicker = ref new Windows::Storage::Pickers::FileOpenPicker();
-                openPicker->ViewMode = Windows::Storage::Pickers::PickerViewMode::List;
-                openPicker->SuggestedStartLocation = Windows::Storage::Pickers::PickerLocationId::Desktop;
-                openPicker->FileTypeFilter->Append(ref new Platform::String(L".csv"));
-
-                std::weak_ptr<Game> thisWeakPtr = shared_from_this();
-
-                create_task(openPicker->PickSingleFileAsync())
-                .then([thisWeakPtr](pplx::task<Windows::Storage::StorageFile^> t)
-                {
-                    try
-                    {
-                        std::shared_ptr<Game> pThis(thisWeakPtr.lock());
-                        if (pThis == nullptr)
-                        {
-                            return;
-                        }
-
-                        Windows::Storage::StorageFile^ file = t.get();
-                        if (file != nullptr)
-                        {
-                            Windows::Storage::AccessCache::StorageApplicationPermissions::FutureAccessList->AddOrReplace(ref new Platform::String(L"LastUsedFile"), file);
-                            pThis->ReadCsvFile(file);
-                        }
-                    }
-                    catch (Platform::Exception^)
-                    {
-                    }
-                });
-            }
-
             if (m_input->IsKeyDown(ButtonPress::SignIn))
             {
                 SignIn();
@@ -200,32 +130,21 @@ void Game::OnGameUpdate()
     }
 }
 
-void Game::UpdateCustomList(_In_ const std::vector<string_t>& xuidList)
-{
-    m_xuidList = xuidList;
-
-    // Refresh custom list if its active
-    if (m_customList)
-    {
-        UpdateSocialGroupOfListForAllUsers(false);
-    }
-}
-
-std::vector<string_t>
+std::vector<std::wstring>
 string_split(
-    _In_ const string_t& string,
-    _In_ string_t::value_type seperator
+    _In_ const std::wstring& string,
+    _In_ std::wstring::value_type seperator
     )
 {
-    std::vector<string_t> vSubStrings;
+    std::vector<std::wstring> vSubStrings;
 
     if (!string.empty())
     {
         size_t posStart = 0, posFound = 0;
-        while (posFound != string_t::npos && posStart < string.length())
+        while (posFound != std::wstring::npos && posStart < string.length())
         {
             posFound = string.find(seperator, posStart);
-            if (posFound != string_t::npos)
+            if (posFound != std::wstring::npos)
             {
                 if (posFound != posStart)
                 {
@@ -328,7 +247,7 @@ void Game::ReadCsvFile(Windows::Storage::StorageFile^ file)
                 }
             }
 
-            pThis->UpdateCustomList(xuidList);
+            //pThis->UpdateCustomList(xuidList);
         }
         catch (Platform::Exception^)
         {
@@ -357,18 +276,11 @@ void Game::Init(Windows::UI::Core::CoreWindow^ window)
     window->KeyUp += ref new TypedEventHandler<Windows::UI::Core::CoreWindow^, Windows::UI::Core::KeyEventArgs^>(m_input, &Input::OnKeyUp);
 
     std::weak_ptr<Game> thisWeakPtr = shared_from_this();
-    m_signOutContext = xbox::services::system::xbox_live_user::add_sign_out_completed_handler(
-    [thisWeakPtr](const xbox::services::system::sign_out_completed_event_args& args)
+    AddSignOutCompletedHandler([](XSAPI_XBOX_LIVE_USER *user)
     {
-        UNREFERENCED_PARAMETER(args);
-        std::shared_ptr<Game> pThis(thisWeakPtr.lock());
-        if (pThis != nullptr)
-        {
-            pThis->HandleSignout(args.user());
-        }
+        // TODO need to be able to pass a context
     });
 
-    InitializeSocialManager();
     ReadLastCsv();
     SignInSilently();
 }
@@ -416,19 +328,7 @@ void Game::OnDeviceRestored()
     CreateWindowSizeDependentResources();
 }
 
-void
-Game::CreateSocialGroupsBasedOnUI(
-    _In_ std::shared_ptr<xbox::services::system::xbox_live_user> user
-    )
-{
-    UpdateSocialGroup(user, m_allFriends, presence_filter::all, relationship_filter::friends);
-    UpdateSocialGroup(user, m_onlineFriends, presence_filter::all_online, relationship_filter::friends);
-    UpdateSocialGroup(user, m_allFavs, presence_filter::all, relationship_filter::favorite);
-    UpdateSocialGroup(user, m_onlineInTitle, presence_filter::title_online, relationship_filter::friends);
-    UpdateSocialGroupOfList(user, m_customList);
-}
-
-void Game::Log(string_t log)
+void Game::Log(std::wstring log)
 {
     std::lock_guard<std::mutex> guard(m_displayEventQueueLock);
     m_displayEventQueue.push_back(log);
@@ -438,239 +338,83 @@ void Game::Log(string_t log)
     }
 }
 
-string_t
-ConvertEventTypeToString(xbox::services::social::manager::social_event_type eventType)
-{
-    switch (eventType)
-    {
-        case xbox::services::social::manager::social_event_type::users_added_to_social_graph: return _T("users_added");
-        case xbox::services::social::manager::social_event_type::users_removed_from_social_graph: return _T("users_removed");
-        case xbox::services::social::manager::social_event_type::presence_changed: return _T("presence_changed");
-        case xbox::services::social::manager::social_event_type::profiles_changed: return _T("profiles_changed");
-        case xbox::services::social::manager::social_event_type::social_relationships_changed: return _T("social_relationships_changed");
-        case xbox::services::social::manager::social_event_type::local_user_added: return _T("local_user_added");
-        case xbox::services::social::manager::social_event_type::local_user_removed: return _T("local user removed");
-        case xbox::services::social::manager::social_event_type::social_user_group_loaded: return _T("social_user_group_loaded");
-        case xbox::services::social::manager::social_event_type::social_user_group_updated: return _T("social_user_group_updated");
-        default: return _T("unknown");
-    }
-}
-
-void
-Game::LogSocialEventList(std::vector<social_event> eventList)
-{
-    for (const auto& socialEvent : eventList)
-    {
-        stringstream_t source;
-        if (socialEvent.err())
-        {
-            source << _T("Event:");
-            source << ConvertEventTypeToString(socialEvent.event_type());
-            source << _T(" ErrorCode: ");
-            source << utility::conversions::to_utf16string(socialEvent.err().message());
-            source << _T(" ErrorMessage:");
-            source << utility::conversions::to_utf16string(socialEvent.err_message());
-        }
-        else
-        {
-            source << _T("Event: ");
-            source << ConvertEventTypeToString(socialEvent.event_type());
-            if (socialEvent.users_affected().size() > 0)
-            {
-                source << _T(" UserAffected: ");
-                for (const auto& u : socialEvent.users_affected())
-                {
-                    source << u.xbox_user_id();
-                    source << _T(", ");
-                }
-            }
-        }
-        Log(source.str());
-    }
-}
-
-void Game::UpdateSocialGroupForAllUsers(
-    _In_ bool toggle,
-    _In_ presence_filter presenceFilter,
-    _In_ relationship_filter relationshipFilter
-    )
-{
-    if (GetUser() != nullptr)
-    {
-        UpdateSocialGroup(GetUser(), toggle, presenceFilter, relationshipFilter);
-    }
-}
-
-void Game::UpdateSocialGroup(
-    _In_ std::shared_ptr<xbox::services::system::xbox_live_user> user,
-    _In_ bool toggle,
-    _In_ presence_filter presenceFilter,
-    _In_ relationship_filter relationshipFilter
-    )
-{
-    if (GetUser() != nullptr)
-    {
-        if (toggle)
-        {
-            CreateSocialGroupFromFilters(GetUser(), presenceFilter, relationshipFilter);
-        }
-        else
-        {
-            DestroySocialGroup(GetUser(), presenceFilter, relationshipFilter);
-        }
-    }
-}
-
-void Game::UpdateSocialGroupOfListForAllUsers(_In_ bool toggle)
-{
-    if (GetUser() != nullptr)
-    {
-        return UpdateSocialGroupOfList(GetUser(), toggle);
-    }
-}
-
-void Game::UpdateSocialGroupOfList(
-    _In_ std::shared_ptr<xbox::services::system::xbox_live_user> user,
-    _In_ bool toggle
-    )
-{
-    if (GetUser() != nullptr)
-    {
-        if (toggle)
-        {
-            CreateOrUpdateSocialGroupFromList(GetUser(), m_xuidList);
-        }
-        else
-        {
-            DestorySocialGroupFromList(GetUser());
-        }
-    }
-}
-
 void Game::HandleSignInResult(
-    _In_ const xbox::services::system::sign_in_result& result
-    )
+    _In_ XSAPI_RESULT_INFO result,
+    _In_ XSAPI_SIGN_IN_RESULT payload,
+    _In_opt_ void* context)
 {
-    switch (result.status())
+    Game *pThis = reinterpret_cast<Game*>(context);
+
+    if (!result.errorCode == XSAPI_RESULT_OK)
+    {
+        pThis->Log(L"Failed signing in.");
+        return;
+    }
+
+    switch (payload.status)
     {
         case xbox::services::system::sign_in_status::success:
-            m_xboxLiveContext = std::make_shared<xbox::services::xbox_live_context>(m_user);           
-
-            // These can be accessed from xbox_live_context:
-            m_xboxLiveContext->application_config();
-            m_xboxLiveContext->privacy_service();
-            m_xboxLiveContext->profile_service();
-            m_xboxLiveContext->title_storage_service();
-            m_xboxLiveContext->settings();
-            m_xboxLiveContext->user();
-            m_xboxLiveContext->xbox_live_user_id();
-
-            AddUserToSocialManager(m_user);
-            Log(L"Sign in succeeded");
+            XboxLiveContextCreate(pThis->m_user, &(pThis->m_xboxLiveContext));
+            pThis->Log(L"Sign in succeeded");
             break;
 
         case xbox::services::system::sign_in_status::user_cancel:
-            Log(L"User cancel");
+            pThis->Log(L"User cancel");
             break;
 
         case xbox::services::system::sign_in_status::user_interaction_required:
-            Log(L"User interaction required");
+            pThis->Log(L"User interaction required");
             break;
 
         default:
-            Log(L"Unknown error");
+            pThis->Log(L"Unknown error");
             break;
     }
 }
 
 void Game::SignIn()
 {
-    if (m_user->is_signed_in())
+    if (m_user->isSignedIn)
     {
         Log(L"Already signed in.");
         return;
     }
-
-    std::weak_ptr<Game> thisWeakPtr = shared_from_this();
-    auto asyncOp = m_user->signin(nullptr);
-    create_task(asyncOp)
-    .then([thisWeakPtr](xbox::services::xbox_live_result<xbox::services::system::sign_in_result> t)
-    {
-        std::shared_ptr<Game> pThis(thisWeakPtr.lock());
-        if (pThis == nullptr)
-        {
-            return;
-        }
-
-        if (!t.err())
-        {
-            auto result = t.payload();
-            pThis->HandleSignInResult(result);
-        }
-        else
-        {
-            pThis->Log(L"Failed signing in.");
-        }
-
-    }, task_continuation_context::use_current());
+    XboxLiveUserSignIn(m_user, HandleSignInResult, this, 0);
 }
 
 void Game::SignInSilently()
 {
-    std::weak_ptr<Game> thisWeakPtr = shared_from_this();
-
-    auto asyncOp = m_user->signin_silently(nullptr);
-    create_task(asyncOp)
-    .then([thisWeakPtr](xbox::services::xbox_live_result<xbox::services::system::sign_in_result> t)
-    {
-        std::shared_ptr<Game> pThis(thisWeakPtr.lock());
-        if (pThis == nullptr)
-        {
-            return;
-        }
-
-        if (!t.err())
-        {
-            auto result = t.payload();
-            pThis->HandleSignInResult(result);
-        }
-        else
-        {
-            pThis->Log(L"Failed signing in.");
-        }
-    }, task_continuation_context::use_current());
+    XboxLiveUserSignInSilently(m_user, HandleSignInResult, this, 0);
 }
 
 void Game::GetUserProfile()
 {
+    if (!m_user->isSignedIn)
+    {
+        Log(L"Must be signed in first to get profile!");
+        return;
+    }
+
     std::weak_ptr<Game> thisWeakPtr = shared_from_this();
 
-    m_xboxLiveContext->profile_service().get_user_profile(m_user->xbox_user_id())
-        .then([thisWeakPtr](xbox::services::xbox_live_result<xbox::services::social::xbox_user_profile> result)
+    XSAPIGetUserProfile(m_xboxLiveContext, m_user->xboxUserId, 
+    [](XSAPI_RESULT_INFO result, XSAPI_XBOX_USER_PROFILE profile, void* context)
     {
-        std::shared_ptr<Game> pThis(thisWeakPtr.lock());
-        if (pThis == nullptr)
+        Game *pThis = reinterpret_cast<Game*>(context);
+        if (result.errorCode == XSAPI_RESULT_OK)
         {
-            return;
-        }
-
-        if (!result.err())
-        {
-            auto profile = result.payload();
             pThis->Log(L"Successfully got profile!");
         }
         else
         {
-            pThis->Log(L"Failed signing in.");
+            pThis->Log(L"Failed getting profile.");
         }
-    });
+    }, this, 0);
 }
 
-void Game::HandleSignout(_In_ std::shared_ptr<xbox::services::system::xbox_live_user> user)
+void Game::HandleSignout(XSAPI_XBOX_LIVE_USER *user)
 {
     WCHAR text[1024];
-    swprintf_s(text, ARRAYSIZE(text), L"User %s signed out", user->gamertag().c_str());
-    Log(text);
-
-    RemoveUserFromSocialManager(user);
+    swprintf_s(text, ARRAYSIZE(text), L"User %s signed out", utility::conversions::utf8_to_utf16(user->gamertag).data());
+    //Log(text);
 }

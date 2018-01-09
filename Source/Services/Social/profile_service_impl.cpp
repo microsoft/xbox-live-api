@@ -66,7 +66,6 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profile(
                 clientCallbackInfo.clientContext
             );
         }
-        delete context;
     }, context, taskGroupId);
 }
 

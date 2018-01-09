@@ -104,7 +104,7 @@ void xbox_live_context_impl::init()
     xbox_live_result<void> servicesConfigFileReadResult;
 
     m_appConfig = xbox_live_app_config::get_app_config_singleton();
-m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_settings>();
+    m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_settings>();
     init_real_time_activity_service_instance();
 
 #if TV_API || UWP_API
@@ -143,8 +143,8 @@ m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_s
 
     std::weak_ptr<xbox_live_context_impl> thisWeakPtr = shared_from_this();
 
-
-    m_profileService = xbox::services::social::profile_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
+    m_profileServiceImpl = std::make_shared<xbox::services::social::profile_service_impl>(m_userContext, m_xboxLiveContextSettings, m_appConfig);
+    //m_profileService = xbox::services::social::profile_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_reputationService = xbox::services::social::reputation_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_leaderboardService = xbox::services::leaderboard::leaderboard_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_achievementService = xbox::services::achievements::achievement_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, thisWeakPtr);
@@ -160,7 +160,7 @@ m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_s
     m_contextualSearchService = xbox::services::contextual_search::contextual_search_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_stringService = xbox::services::system::string_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_clubsService = xbox::services::clubs::clubs_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-	
+
 #if !XSAPI_SERVER
 
 #if UWP_API || XSAPI_U
@@ -249,10 +249,10 @@ const string_t& xbox_live_context_impl::xbox_live_user_id()
     return m_userContext->xbox_user_id();
 }
 
-social::profile_service&
-xbox_live_context_impl::profile_service()
+std::shared_ptr<social::profile_service_impl>
+xbox_live_context_impl::profile_service_impl()
 {
-    return m_profileService;
+    return m_profileServiceImpl;
 }
 
 social::social_service&

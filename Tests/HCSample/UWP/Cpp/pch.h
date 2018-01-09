@@ -19,4 +19,8 @@
 #include <string>
 
 #define XBOX_LIVE_CREATORS_SDK
+#include "xsapi\system_c.h"
+#include "xsapi\xbox_live_context_c.h"
+#include "xsapi\profile_c.h"
 #include "xsapi\services.h"
+#include "xsapi\xbox_live_global_c.h"

@@ -101,18 +101,6 @@ void Renderer::Render()
     auto appState = g_sampleInstance->GetGameData()->GetAppState();
     auto gameState = g_sampleInstance->GetGameData()->GetGameState();
 
-    std::vector<std::shared_ptr<xbox::services::social::manager::xbox_social_user_group>> socialGroups = g_sampleInstance->GetSocialGroups();
-    RenderSocialGroupList(
-        COLUMN_1_X, 
-        COLUMN_2_X,
-        COLUMN_3_X,
-        SOCIAL_GROUP_Y, 
-        fTextHeight, 
-        scale, 
-        TEXT_COLOR,
-        socialGroups
-        );
-
     RenderMenuOptions(scale, TEXT_COLOR);
     RenderEventLog(COLUMN_1_X, SOCIAL_GROUP_Y, fTextHeight, scale, TEXT_COLOR);
 
@@ -156,21 +144,18 @@ void Renderer::RenderMenuOptions(
     WCHAR text[1024];
     swprintf_s(text, ARRAYSIZE(text), L"");
 
+    LPWSTR gamertag = L"n/a";
+    std::wstring gamertagString;
+    if (g_sampleInstance->GetUser() != nullptr && g_sampleInstance->GetUser()->gamertag != nullptr)
+    {
+        gamertagString = utility::conversions::utf8_to_utf16(g_sampleInstance->GetUser()->gamertag);
+        gamertag = (LPWSTR)gamertagString.c_str();
+    }
+
     swprintf_s(text, ARRAYSIZE(text),
-        L"Press S to sign-in (%d user signed in: %s).\n"
-        L"Press 1 to toggle social group for all friends (%s).\n"
-        L"Press 2 to toggle social group for online friends (%s).\n"
-        L"Press 3 to toggle social group for all favorites (%s).\n"
-        L"Press 4 to toggle social group for online in title (%s).\n"
-        L"Press 5 to toggle social group for custom list (%s).\n"
-        L"Press C to import custom list.\n",
-        g_sampleInstance->GetNumberOfUserInGraph(),
-        g_sampleInstance->GetUser() == nullptr ? L"n/a" : g_sampleInstance->GetUser()->gamertag().c_str(),
-        g_sampleInstance->GetAllFriends() ? L"On" : L"Off",
-        g_sampleInstance->GetOnlineFriends() ? L"On" : L"Off",
-        g_sampleInstance->GetAllFavs() ? L"On" : L"Off",
-        g_sampleInstance->GetOnlineInTitle() ? L"On" : L"Off",
-        g_sampleInstance->GetCustomList() ? L"On" : L"Off"
+        L"Press S to sign-in (user signed in: %s).\n"
+        L"Press P to get profile",
+        gamertag
         );
 
     m_font->DrawString(m_sprites.get(), text, XMFLOAT2(COLUMN_1_X, ACTION_BUTONS_Y), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
@@ -260,103 +245,5 @@ void Renderer::RenderPerfCounters(
         m_font->DrawString(m_sprites.get(), text, XMFLOAT2(fGridXColumn1 + 450.0f, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
 
         verticalBaseOffset += fTextHeight;
-    }
-}
-
-std::wstring
-ConvertPresenceUserStateToString(
-    _In_ xbox::services::presence::user_presence_state presenceState
-    )
-{
-    switch (presenceState)
-    {
-        case xbox::services::presence::user_presence_state::away: return _T("away");
-        case xbox::services::presence::user_presence_state::offline: return _T("offline");
-        case xbox::services::presence::user_presence_state::online: return _T("online");
-        default:
-        case xbox::services::presence::user_presence_state::unknown: return _T("unknown");
-    }
-}
-
-std::wstring
-ConvertPresenceFilterToString(_In_ xbox::services::social::manager::presence_filter presenceFilter)
-{
-    switch (presenceFilter)
-    {
-        case xbox::services::social::manager::presence_filter::unknown: return _T("unknown");
-        case xbox::services::social::manager::presence_filter::title_online: return _T("title_online");
-        case xbox::services::social::manager::presence_filter::title_offline: return _T("title_offline");
-        case xbox::services::social::manager::presence_filter::all_online: return _T("all_online");
-        case xbox::services::social::manager::presence_filter::all_offline: return _T("all_offline");
-        case xbox::services::social::manager::presence_filter::all_title: return _T("all_title");
-        default:
-        case xbox::services::social::manager::presence_filter::all: return _T("all");
-    }
-}
-
-std::wstring
-ConvertRelationshipFilterToString(_In_ xbox::services::social::manager::relationship_filter relationshipFilter)
-{
-    switch (relationshipFilter)
-    {
-        case xbox::services::social::manager::relationship_filter::favorite: return _T("favorite");
-        default:
-        case xbox::services::social::manager::relationship_filter::friends: return _T("friends");
-    }
-}
-
-void
-Renderer::RenderSocialGroupList(
-    FLOAT fGridXColumn1,
-    FLOAT fGridXColumn2,
-    FLOAT fGridXColumn3,
-    FLOAT fGridY,
-    FLOAT fTextHeight,
-    FLOAT scale,
-    const DirectX::XMVECTORF32& TEXT_COLOR,
-    std::vector<std::shared_ptr<xbox::services::social::manager::xbox_social_user_group>> nodeList
-    )
-{
-    WCHAR text[1024];
-    float verticalBaseOffset = 2 * fTextHeight;
-
-    for (const std::shared_ptr<xbox::services::social::manager::xbox_social_user_group>& node : nodeList)
-    {
-        m_font->DrawString(m_sprites.get(), L"_________________________________________", XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-        verticalBaseOffset += fTextHeight;
-        if( node->social_user_group_type() == social_user_group_type::filter_type )
-        {
-            swprintf_s(text, ARRAYSIZE(text), L"Group from filter: %s %s",
-                ConvertPresenceFilterToString(node->presence_filter_of_group()).c_str(),
-                ConvertRelationshipFilterToString(node->relationship_filter_of_group()).c_str()
-                );
-            m_font->DrawString(m_sprites.get(), text, XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-            verticalBaseOffset += fTextHeight;
-        }
-        else
-        {
-            m_font->DrawString(m_sprites.get(), L"Group from custom list", XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-            verticalBaseOffset += fTextHeight;
-        }
-
-        std::lock_guard<std::mutex> guard(Game::m_socialManagerLock);
-        const std::vector<xbox_social_user*>& userList = node->users();
-        for (const auto& user : userList)
-        {
-            stringstream_t titleCount;
-            titleCount << user->presence_record().presence_title_records().size();
-            auto titleCountStr = titleCount.str();
-
-            m_font->DrawString(m_sprites.get(), user->gamertag(), XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-            m_font->DrawString(m_sprites.get(), ConvertPresenceUserStateToString(user->presence_record().user_state()).c_str(), XMFLOAT2(fGridXColumn2, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-            m_font->DrawString(m_sprites.get(), titleCountStr.c_str(), XMFLOAT2(fGridXColumn3, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-
-            verticalBaseOffset += fTextHeight;
-        }
-        if (userList.size() == 0)
-        {
-            m_font->DrawString(m_sprites.get(), L"No friends found", XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-            verticalBaseOffset += fTextHeight;
-        }
     }
 }

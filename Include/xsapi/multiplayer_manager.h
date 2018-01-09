@@ -6,18 +6,18 @@
 #include "pplx/pplxtasks.h"
 #include "xsapi/services.h"
 
-namespace xbox { namespace services {
-
-    namespace system {
-        class xbox_live_user;
-    }
-}}
-
-#if TV_API | XBOX_UWP
-typedef  Windows::Xbox::System::User^ xbox_live_user_t;
-#else
-typedef std::shared_ptr<xbox::services::system::xbox_live_user> xbox_live_user_t;
-#endif
+//namespace xbox { namespace services {
+//
+//    namespace system {
+//        class xbox_live_user;
+//    }
+//}}
+//
+//#if TV_API | XBOX_UWP
+//typedef  Windows::Xbox::System::User^ xbox_live_user_t;
+//#else
+//typedef std::shared_ptr<xbox::services::system::xbox_live_user> xbox_live_user_t;
+//#endif
 
 #if XSAPI_CPP
 typedef const void* context_t;

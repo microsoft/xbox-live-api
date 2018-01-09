@@ -1,0 +1,261 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="C++ Source">
+      <UniqueIdentifier>{e9e0bd97-69fe-4b02-9f7d-b3cfe9ba4124}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\System">
+      <UniqueIdentifier>{ea2d9fb0-5988-4a56-9f0d-ce6039746f26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services">
+      <UniqueIdentifier>{f846991a-979e-44b1-814c-940fe71f9688}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Achievements">
+      <UniqueIdentifier>{d1b70c59-0c14-4c78-bdab-16a351ae30d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Common">
+      <UniqueIdentifier>{5eb1bf88-b7c6-4004-8f89-a51e2a57015b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Misc">
+      <UniqueIdentifier>{821efd41-1e0c-4b6a-8e36-6e0e033fe4f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Shared">
+      <UniqueIdentifier>{994762ae-76e5-4e26-aedb-03cbf6741127}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Public Includes">
+      <UniqueIdentifier>{b79b5071-f94f-443a-b903-1b604db21b8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\TitleStorage">
+      <UniqueIdentifier>{912c9396-dff4-4469-9c25-161bec7dbfa6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Privacy">
+      <UniqueIdentifier>{bc845480-97e6-486a-81e0-2445018cfcc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Leaderboard">
+      <UniqueIdentifier>{786ea23b-a393-4aea-a48e-7b51d42ead27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Stats">
+      <UniqueIdentifier>{318e9fd7-15a0-4fb6-9bea-b1970f8fd025}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Stats\Manager">
+      <UniqueIdentifier>{bef12ff3-7e04-45fb-9159-b2ff46e6e28f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Social">
+      <UniqueIdentifier>{477a7e10-2f60-4ad0-a2a1-a5e414961c1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Social\Manager">
+      <UniqueIdentifier>{ac30dfbe-380d-4513-ba18-fb6eb50f4441}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Source\Services\Common\pch.h">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Common\pch_common.h">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\title_callable_ui_c.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\types_c.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Common\taskargs.h">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\system_c.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\errors_c.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\xbox_live_context_c.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\xbox_live_app_config_c.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\utils.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\System\user_impl.h">
+      <Filter>C++ Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\threadpool.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Shared\singleton.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\title_storage_c.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\TitleStorage\title_storage_taskargs.h">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Common\xbox_live_context_impl.h">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\TitleStorage\title_storage_blob_metadata_impl.h">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\System\user_taskargs.h">
+      <Filter>C++ Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\TitleStorage\title_storage_blob_metadata_result_impl.h">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\TitleStorage\title_storage_state.h">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\privacy_c.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Privacy\privacy_taskargs.h">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Privacy\privacy_permission_check_result_impl.h">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Privacy\privacy_permission_deny_reason_impl.h">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Privacy\privacy_multiple_permissions_check_result_impl.h">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\leaderboard_c.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\presence_c.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\social_manager_c.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\stats_manager_c.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Leaderboard\leaderboard_helper.h">
+      <Filter>C++ Source\Services\Leaderboard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Social\Manager\social_manager_helper.h">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Social\Manager\social_manager_state.h">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\stats_manager_helper.h">
+      <Filter>C++ Source\Services\Stats\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\stats_manager_state.h">
+      <Filter>C++ Source\Services\Stats\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\xbox_live_global_c.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Achievements\achievements_helper.h">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Achievements\achievements_taskargs.h">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\achievements_c.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Achievements\achievements_state.h">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi\profile_c.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Source\Services\Achievements\achievements.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Achievements\achievements_helper.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Common\pch.cpp">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Shared\utils.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\System\user.cpp">
+      <Filter>C++ Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Misc\title_callable_ui.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Common\xbox_live_context.cpp">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Shared\xbox_live_app_config.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Shared\threadpool.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Shared\singleton.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Common\xbox_live_context_impl.cpp">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_blob_metadata_impl.cpp">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\System\user_taskargs.cpp">
+      <Filter>C++ Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_blob_metadata_result_impl.cpp">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage.cpp">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Privacy\privacy.cpp">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Privacy\privacy_permission_check_result_impl.cpp">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Privacy\privacy_permission_deny_reason_impl.cpp">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Privacy\privacy_multiple_permissions_check_result_impl.cpp">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\System\user_impl.cpp">
+      <Filter>C++ Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Leaderboard\leaderboard.cpp">
+      <Filter>C++ Source\Services\Leaderboard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Leaderboard\leaderboard_helper.cpp">
+      <Filter>C++ Source\Services\Leaderboard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Social\Manager\social_manager.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Social\Manager\social_manager_helper.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager.cpp">
+      <Filter>C++ Source\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager_helper.cpp">
+      <Filter>C++ Source\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Common\xbox_live_global.cpp">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Social\profile.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>

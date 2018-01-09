@@ -1,0 +1,233 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{302A6153-39E5-4F6D-BA44-6E9394F40A9C}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <ApplicationType>Windows Store</ApplicationType>
+    <ApplicationTypeRevision>10.0</ApplicationTypeRevision>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <AppContainerApplication>true</AppContainerApplication>
+    <GenerateManifest>false</GenerateManifest>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformMinVersion>10.0.14393.0</WindowsTargetPlatformMinVersion>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <WindowsAppContainer>true</WindowsAppContainer>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="..\..\..\xsapi.staticlib.props" />
+    <Import Project="..\..\..\External\libHttpClient\libHttpClient.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <Import Project="..\..\..\xsapi.staticlib.props" />
+    <Import Project="..\..\..\External\libHttpClient\libHttpClient.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="..\..\..\xsapi.staticlib.props" />
+    <Import Project="..\..\..\External\libHttpClient\libHttpClient.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="..\..\..\xsapi.staticlib.props" />
+    <Import Project="..\..\..\External\libHttpClient\libHttpClient.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <Import Project="..\..\..\xsapi.staticlib.props" />
+    <Import Project="..\..\..\External\libHttpClient\libHttpClient.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="..\..\..\xsapi.staticlib.props" />
+    <Import Project="..\..\..\External\libHttpClient\libHttpClient.props" />
+  </ImportGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XSAPI_BUILD;XBL_API_NONE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">HC_API_EXPORT;XBL_API_EXPORT;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalOptions>/bigobj /Zm300 %(AdditionalOptions)</AdditionalOptions>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\Source\Services\TitleStorage;$(ProjectDir);$(ProjectDir)..\..\Source\Services\Common;$(ProjectDir)..\..\Source\Services\Social;$(ProjectDir)..\..\Source\Services\Multiplayer;$(ProjectDir)..\..\Source\Services\Presence;$(ProjectDir)..\..\Source\Services\Misc;$(ProjectDir)..\..\Source\Services\Social\Manager;$(ProjectDir)..\..\Source\Services\RealTimeActivity;$(ProjectDir)..\..\Source\Services\Achievements;$(ProjectDir)..\..\Source\Shared;$(ProjectDir)..\..\Source\Shared\WinRT;$(ProjectDir)..\..\Include;$(ProjectDir)..\..\Source\System;$(ProjectDir)..\..\Source\Services\Leaderboard;$(ProjectDir)..\..\Source\Services\Stats\Manager;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAsWinRT>true</CompileAsWinRT>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ShowIncludes>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Bcrypt.lib;Pathcch.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+      <FullProgramDatabaseFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</FullProgramDatabaseFile>
+      <FullProgramDatabaseFile Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</FullProgramDatabaseFile>
+      <FullProgramDatabaseFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</FullProgramDatabaseFile>
+    </Link>
+    <Lib>
+      <AdditionalOptions>/ignore:4099 /ignore:4264</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <WholeProgramOptimization Condition="'$(Configuration)'=='Release'">false</WholeProgramOptimization>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ShowIncludes>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <FullProgramDatabaseFile Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</FullProgramDatabaseFile>
+      <FullProgramDatabaseFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</FullProgramDatabaseFile>
+      <FullProgramDatabaseFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</FullProgramDatabaseFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <PropertyGroup>
+    <ProjectFolder>$(MSBuildProjectName)</ProjectFolder>
+    <OutDir>$(ProjectDir)..\..\Binaries\$(Configuration)\$(Platform)\$(ProjectFolder)\</OutDir>
+    <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectFolder)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Source\Services\Achievements\achievements.cpp" />
+    <ClCompile Include="..\..\Source\Services\Achievements\achievements_helper.cpp" />
+    <ClCompile Include="..\..\Source\Services\Common\pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Common\xbox_live_global.cpp" />
+    <ClCompile Include="..\..\Source\Services\Common\xbox_live_context.cpp" />
+    <ClCompile Include="..\..\Source\Services\Common\xbox_live_context_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\Leaderboard\leaderboard.cpp" />
+    <ClCompile Include="..\..\Source\Services\Leaderboard\leaderboard_helper.cpp" />
+    <ClCompile Include="..\..\Source\Services\Misc\title_callable_ui.cpp" />
+    <ClCompile Include="..\..\Source\Services\Privacy\privacy.cpp" />
+    <ClCompile Include="..\..\Source\Services\Privacy\privacy_multiple_permissions_check_result_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\Privacy\privacy_permission_check_result_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\Privacy\privacy_permission_deny_reason_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\Manager\social_manager.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\Manager\social_manager_helper.cpp" />
+    <ClCompile Include="..\..\Source\Services\Social\profile.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager.cpp" />
+    <ClCompile Include="..\..\Source\Services\Stats\Manager\stats_manager_helper.cpp" />
+    <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_blob_metadata_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage_blob_metadata_result_impl.cpp" />
+    <ClCompile Include="..\..\Source\Services\TitleStorage\title_storage.cpp" />
+    <ClCompile Include="..\..\Source\Shared\singleton.cpp" />
+    <ClCompile Include="..\..\Source\Shared\threadpool.cpp" />
+    <ClCompile Include="..\..\Source\Shared\utils.cpp" />
+    <ClCompile Include="..\..\Source\Shared\xbox_live_app_config.cpp" />
+    <ClCompile Include="..\..\Source\System\user.cpp" />
+    <ClCompile Include="..\..\Source\System\user_taskargs.cpp" />
+    <ClCompile Include="..\..\Source\System\user_impl.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\xsapi\achievements_c.h" />
+    <ClInclude Include="..\..\Include\xsapi\errors_c.h" />
+    <ClInclude Include="..\..\Include\xsapi\privacy_c.h" />
+    <ClInclude Include="..\..\Include\xsapi\leaderboard_c.h" />
+    <ClInclude Include="..\..\Include\xsapi\presence_c.h" />
+    <ClInclude Include="..\..\Include\xsapi\profile_c.h" />
+    <ClInclude Include="..\..\Include\xsapi\social_manager_c.h" />
+    <ClInclude Include="..\..\Include\xsapi\stats_manager_c.h" />
+    <ClInclude Include="..\..\Include\xsapi\system_c.h" />
+    <ClInclude Include="..\..\Include\xsapi\title_callable_ui_c.h" />
+    <ClInclude Include="..\..\Include\xsapi\title_storage_c.h" />
+    <ClInclude Include="..\..\Include\xsapi\types_c.h" />
+    <ClInclude Include="..\..\Include\xsapi\xbox_live_app_config_c.h" />
+    <ClInclude Include="..\..\Include\xsapi\xbox_live_context_c.h" />
+    <ClInclude Include="..\..\Include\xsapi\xbox_live_global_c.h" />
+    <ClInclude Include="..\..\Source\Services\Achievements\achievements_helper.h" />
+    <ClInclude Include="..\..\Source\Services\Achievements\achievements_taskargs.h" />
+    <ClInclude Include="..\..\Source\Services\Common\pch.h" />
+    <ClInclude Include="..\..\Source\Services\Common\pch_common.h" />
+    <ClInclude Include="..\..\Source\Services\Common\taskargs.h" />
+    <ClInclude Include="..\..\Source\Services\Common\xbox_live_context_impl.h" />
+    <ClInclude Include="..\..\Source\Services\Leaderboard\leaderboard_helper.h" />
+    <ClInclude Include="..\..\Source\Services\Privacy\privacy_multiple_permissions_check_result_impl.h" />
+    <ClInclude Include="..\..\Source\Services\Privacy\privacy_permission_check_result_impl.h" />
+    <ClInclude Include="..\..\Source\Services\Privacy\privacy_permission_deny_reason_impl.h" />
+    <ClInclude Include="..\..\Source\Services\Privacy\privacy_taskargs.h" />
+    <ClInclude Include="..\..\Source\Services\Social\Manager\social_manager_helper.h" />
+    <ClInclude Include="..\..\Source\Services\Social\Manager\social_manager_state.h" />
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\stats_manager_helper.h" />
+    <ClInclude Include="..\..\Source\Services\Stats\Manager\stats_manager_state.h" />
+    <ClInclude Include="..\..\Source\Services\TitleStorage\title_storage_blob_metadata_impl.h" />
+    <ClInclude Include="..\..\Source\Services\TitleStorage\title_storage_blob_metadata_result_impl.h" />
+    <ClInclude Include="..\..\Source\Services\TitleStorage\title_storage_state.h" />
+    <ClInclude Include="..\..\Source\Services\TitleStorage\title_storage_taskargs.h" />
+    <ClInclude Include="..\..\Source\Shared\singleton.h" />
+    <ClInclude Include="..\..\Source\Shared\threadpool.h" />
+    <ClInclude Include="..\..\Source\Shared\utils.h" />
+    <ClInclude Include="..\..\Source\System\user_impl.h" />
+    <ClInclude Include="..\..\Source\System\user_taskargs.h" />
+    <ClInclude Include="..\..\Source\Services\Achievements\achievements_state.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Build\Microsoft.Xbox.Services.140.UWP.Cpp\Microsoft.Xbox.Services.140.UWP.Cpp.vcxproj">
+      <Project>{8f96710e-5169-4917-8874-7de248f4d243}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\External\libHttpClient\Build\libHttpClient.140.UWP.C\libHttpClient.140.UWP.C.vcxproj">
+      <Project>{a6349408-5ba8-47db-9a74-e9f9cf1f7958}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="CopyToUnityLibs" AfterTargets="Build">
+    <PropertyGroup Label="x86" Condition="'$(Platform.ToLower())' == 'win32' Or '$(Platform.ToLower())' == 'x86'">
+      <PluginPlatform>x86</PluginPlatform>
+    </PropertyGroup>
+    <PropertyGroup Label="!x86" Condition="'$(Platform.ToLower())' == 'x64' Or '$(Platform.ToLower())' == 'arm'">
+      <PluginPlatform>$(Platform)</PluginPlatform>
+    </PropertyGroup>
+    <Message Importance="high" Text="Copying binaries from $(OutDir) to Unity Libs folder $(ProjectDir)..\..\..\Assets\Plugins\" />
+    <Exec Command="xcopy /y /d /i &quot;$(OutDir)*.dll&quot; &quot;$(ProjectDir)..\..\..\Assets\Plugins\$(PluginPlatform)&quot;" />
+    <Exec Command="xcopy /y /d /i &quot;$(OutDir)*.pdb&quot; &quot;$(ProjectDir)..\..\..\Assets\Plugins\$(PluginPlatform)&quot;" Condition="'$(Configuration)' == 'Debug'" />
+  </Target>
+</Project>

@@ -5,11 +5,11 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Social", "Social.vcxproj", "{2F06C416-72FB-449E-B517-EDA9C6897515}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.Services.140.UWP.Cpp", "..\..\..\..\Build\Microsoft.Xbox.Services.140.UWP.Cpp\Microsoft.Xbox.Services.140.UWP.Cpp.vcxproj", "{8F96710E-5169-4917-8874-7DE248F4D243}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTK", "..\..\..\..\InProgressSamples\Kits\DirectXTK\DirectXTK_Windows10_2015.vcxproj", "{F4776924-619C-42C7-88B2-82C947CCC9E7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpprestsdk140.uwp.static", "..\..\..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.static.vcxproj", "{9AD285A2-301E-47A0-A299-14AD5D4F2758}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.Services.140.UWP.C", "..\..\..\..\Build\Microsoft.Xbox.Services.140.UWP.C\Microsoft.Xbox.Services.140.UWP.C.vcxproj", "{302A6153-39E5-4F6D-BA44-6E9394F40A9C}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -43,18 +43,6 @@ Global
 		{2F06C416-72FB-449E-B517-EDA9C6897515}.Release|x86.ActiveCfg = Release|Win32
 		{2F06C416-72FB-449E-B517-EDA9C6897515}.Release|x86.Build.0 = Release|Win32
 		{2F06C416-72FB-449E-B517-EDA9C6897515}.Release|x86.Deploy.0 = Release|Win32
-		{8F96710E-5169-4917-8874-7DE248F4D243}.Debug|ARM.ActiveCfg = Debug|ARM
-		{8F96710E-5169-4917-8874-7DE248F4D243}.Debug|ARM.Build.0 = Debug|ARM
-		{8F96710E-5169-4917-8874-7DE248F4D243}.Debug|x64.ActiveCfg = Debug|x64
-		{8F96710E-5169-4917-8874-7DE248F4D243}.Debug|x64.Build.0 = Debug|x64
-		{8F96710E-5169-4917-8874-7DE248F4D243}.Debug|x86.ActiveCfg = Debug|Win32
-		{8F96710E-5169-4917-8874-7DE248F4D243}.Debug|x86.Build.0 = Debug|Win32
-		{8F96710E-5169-4917-8874-7DE248F4D243}.Release|ARM.ActiveCfg = Release|ARM
-		{8F96710E-5169-4917-8874-7DE248F4D243}.Release|ARM.Build.0 = Release|ARM
-		{8F96710E-5169-4917-8874-7DE248F4D243}.Release|x64.ActiveCfg = Release|x64
-		{8F96710E-5169-4917-8874-7DE248F4D243}.Release|x64.Build.0 = Release|x64
-		{8F96710E-5169-4917-8874-7DE248F4D243}.Release|x86.ActiveCfg = Release|Win32
-		{8F96710E-5169-4917-8874-7DE248F4D243}.Release|x86.Build.0 = Release|Win32
 		{F4776924-619C-42C7-88B2-82C947CCC9E7}.Debug|ARM.ActiveCfg = Debug|ARM
 		{F4776924-619C-42C7-88B2-82C947CCC9E7}.Debug|ARM.Build.0 = Debug|ARM
 		{F4776924-619C-42C7-88B2-82C947CCC9E7}.Debug|x64.ActiveCfg = Debug|x64
@@ -79,6 +67,18 @@ Global
 		{9AD285A2-301E-47A0-A299-14AD5D4F2758}.Release|x64.Build.0 = Release|x64
 		{9AD285A2-301E-47A0-A299-14AD5D4F2758}.Release|x86.ActiveCfg = Release|Win32
 		{9AD285A2-301E-47A0-A299-14AD5D4F2758}.Release|x86.Build.0 = Release|Win32
+		{302A6153-39E5-4F6D-BA44-6E9394F40A9C}.Debug|ARM.ActiveCfg = Debug|ARM
+		{302A6153-39E5-4F6D-BA44-6E9394F40A9C}.Debug|ARM.Build.0 = Debug|ARM
+		{302A6153-39E5-4F6D-BA44-6E9394F40A9C}.Debug|x64.ActiveCfg = Debug|x64
+		{302A6153-39E5-4F6D-BA44-6E9394F40A9C}.Debug|x64.Build.0 = Debug|x64
+		{302A6153-39E5-4F6D-BA44-6E9394F40A9C}.Debug|x86.ActiveCfg = Debug|Win32
+		{302A6153-39E5-4F6D-BA44-6E9394F40A9C}.Debug|x86.Build.0 = Debug|Win32
+		{302A6153-39E5-4F6D-BA44-6E9394F40A9C}.Release|ARM.ActiveCfg = Release|ARM
+		{302A6153-39E5-4F6D-BA44-6E9394F40A9C}.Release|ARM.Build.0 = Release|ARM
+		{302A6153-39E5-4F6D-BA44-6E9394F40A9C}.Release|x64.ActiveCfg = Release|x64
+		{302A6153-39E5-4F6D-BA44-6E9394F40A9C}.Release|x64.Build.0 = Release|x64
+		{302A6153-39E5-4F6D-BA44-6E9394F40A9C}.Release|x86.ActiveCfg = Release|Win32
+		{302A6153-39E5-4F6D-BA44-6E9394F40A9C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
