@@ -53,30 +53,28 @@ profile_service::profile_service(
 {
 }
 
-// TODO figure out a better solution
-template<typename T>
-struct tce_wrapper
-{
-    tce_wrapper(task_completion_event<T> _tce) : tce(_tce) {}
-    task_completion_event<T> tce;
-};
-
 pplx::task<xbox_live_result<xbox_user_profile>>
 profile_service::get_user_profile(
     _In_ string_t xboxUserId
     )
 {
-    auto context = new tce_wrapper<xbox_live_result<xbox_user_profile>>(task_completion_event<xbox_live_result<xbox_user_profile>>());
+    // Maybe create some global store of these
+    auto context = new task_completion_event<xbox_live_result<xbox_user_profile>>();
 
-    m_serviceImpl->get_user_profile(xboxUserId, 
+    auto result = m_serviceImpl->get_user_profile(xboxUserId, 
         [](xbox_live_result<xbox_user_profile> result, void* context) 
     {
-        auto tceWrapper = static_cast<tce_wrapper<xbox_live_result<xbox_user_profile>>*>(context);
-        tceWrapper->tce.set(result);
+        auto tce = static_cast<task_completion_event<xbox_live_result<xbox_user_profile>>*>(context);
+        tce->set(result);
         delete context;
     }, context, 0);
 
-    return pplx::task<xbox_live_result<xbox_user_profile>>(context->tce);
+    if (result.err())
+    {
+        delete context;
+        return pplx::task_from_result(xbox_live_result<xbox_user_profile>(result.err(), result.err_message()));
+    }
+    return pplx::task<xbox_live_result<xbox_user_profile>>(*context);
 }
 
 pplx::task<xbox_live_result<std::vector<xbox_user_profile>>>

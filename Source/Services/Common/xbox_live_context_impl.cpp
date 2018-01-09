@@ -144,7 +144,6 @@ void xbox_live_context_impl::init()
     std::weak_ptr<xbox_live_context_impl> thisWeakPtr = shared_from_this();
 
     m_profileServiceImpl = std::make_shared<xbox::services::social::profile_service_impl>(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-    //m_profileService = xbox::services::social::profile_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_reputationService = xbox::services::social::reputation_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_leaderboardService = xbox::services::leaderboard::leaderboard_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_achievementService = xbox::services::achievements::achievement_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, thisWeakPtr);

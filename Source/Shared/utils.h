@@ -957,7 +957,7 @@ struct client_callback_info
     void *clientContext;
 };
 
-class callback_context_helper
+class async_helpers
 {
 public:
     template<typename T>
@@ -1021,9 +1021,9 @@ private:
     static uint32_t m_clientCallbackInfoIndexer;
     static std::unordered_map<void *, client_callback_info> m_clientCallbackInfoMap;
 
-    callback_context_helper();
-    callback_context_helper(const callback_context_helper&);
-    callback_context_helper& operator=(const callback_context_helper&);
+    async_helpers();
+    async_helpers(const async_helpers&);
+    async_helpers& operator=(const async_helpers&);
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

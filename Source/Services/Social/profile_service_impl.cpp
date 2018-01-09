@@ -45,11 +45,11 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profile(
     std::vector< string_t> xboxUserIds;
     xboxUserIds.push_back(std::move(xboxUserId));
 
-    auto context = callback_context_helper::store_client_callback_info(completionRoutine, completionRoutineContext);
+    auto context = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
     return get_user_profiles(xboxUserIds, 
         [](xbox_live_result<std::vector<xbox_user_profile>> result, void *context)
     {
-        auto clientCallbackInfo = callback_context_helper::remove_client_callback_info(context);
+        auto clientCallbackInfo = async_helpers::remove_client_callback_info(context);
         auto completionRoutine = reinterpret_cast<get_user_profile_completion_routine>(clientCallbackInfo.completionFunction);
 
         if (result.payload().size() == 1)
@@ -97,11 +97,11 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
 
     httpCall->set_request_body(request.serialize());
 
-    auto context = callback_context_helper::store_client_callback_info(completionRoutine, completionRoutineContext);
+    auto context = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
     httpCall->get_response_with_auth(m_userContext, http_call_response_body_type::json_body, false,
         [](std::shared_ptr<http_call_response> response, void *context)
     {
-        auto clientCallbackInfo = callback_context_helper::remove_client_callback_info(context);
+        auto clientCallbackInfo = async_helpers::remove_client_callback_info(context);
         auto completionRoutine = reinterpret_cast<get_user_profiles_completion_routine>(clientCallbackInfo.completionFunction);
 
         if (response->response_body_json().size() != 0)

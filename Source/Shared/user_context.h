@@ -24,12 +24,6 @@ typedef Microsoft::Xbox::Services::System::XboxLiveUser^ XboxLiveUser_t;
 #endif
 #endif
 
-//#if TV_API | XBOX_UWP
-//typedef  Windows::Xbox::System::User^ xbox_live_user_t;
-//#else
-//typedef std::shared_ptr<xbox::services::system::xbox_live_user> xbox_live_user_t;
-//#endif
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 enum class caller_context_type
