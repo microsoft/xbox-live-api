@@ -6,7 +6,7 @@
 #include "achievements_helper.h"
 #include "achievements_taskargs.h"
 #include "achievements_state.h"
-#include "xbox_live_context_impl.h"
+#include "xbox_live_context_impl_c.h"
 
 using namespace xbox::services;
 using namespace xbox::services::achievements;
@@ -273,7 +273,7 @@ try
 {
     verify_global_init();
 
-    auto singleton = get_xsapi_singleton_c();
+    auto singleton = get_xsapi_singleton();
     std::lock_guard<std::recursive_mutex> lock(singleton->m_achievementsState->m_lock);
 
     size_t erasedItems = singleton->m_achievementsState->m_achievementResults.erase(achievementsResult);
@@ -294,7 +294,7 @@ try
 {
     verify_global_init();
 
-    auto singleton = get_xsapi_singleton_c();
+    auto singleton = get_xsapi_singleton();
     std::lock_guard<std::recursive_mutex> lock(singleton->m_achievementsState->m_lock);
 
     size_t erasedItems = singleton->m_achievementsState->m_achievements.erase(achievement);

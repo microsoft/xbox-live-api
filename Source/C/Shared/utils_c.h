@@ -3,6 +3,7 @@
 
 #pragma once
 
+// TODO merge these functions with xsapi core utils
 class utils_c
 {
 public:

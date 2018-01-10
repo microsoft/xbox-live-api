@@ -39,9 +39,6 @@
 #include <atomic>
 #include <cstdint>
 
-// TODO eventually remove this
-#include "xsapi/services.h"
-
 #include "xsapi/types.h"
 #include "httpClient/types.h"
 #include "httpClient/httpClient.h"
@@ -53,22 +50,20 @@
 #include <cpprest/json.h>                       // JSON library
 #include <cpprest/uri.h>                        // URI library
 
+#include "xsapi/errors.h"
+#include "utils.h"
+#include "Logger/Log.h"
+
 // flat-C headers
 #include "xsapi-c/types_c.h"
 #include "xsapi-c/errors_c.h"
 #include "xsapi-c/xbox_live_global_c.h"
 #include "utils_c.h"
-#include "singleton_c.h"
 
 #include "shared_macros.h"
 #if UWP_API
 #include <collection.h>
 #endif
-
-#include "xsapi/errors.h"
-#include "utils.h"
-#include "Logger/Log.h"
-
 
 #ifndef _WIN32
 #define UNREFERENCED_PARAMETER(args)
@@ -81,18 +76,3 @@
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(x) sizeof(x) / sizeof(x[0])
 #endif
-
-// Might want to put these elsewhere
-#define CATCH_RETURN() CATCH_RETURN_IMPL(__FILE__, __LINE__)
-
-#define CATCH_RETURN_IMPL(file, line) \
-    catch (std::bad_alloc const& e) { return utils_c::std_bad_alloc_to_result(e, file, line); } \
-    catch (std::exception const& e) { return utils_c::std_exception_to_result(e, file, line); } \
-    catch (...) { return utils_c::unknown_exception_to_result(file, line); }
-
-#define CATCH_RETURN_WITH(errCode) CATCH_RETURN_IMPL_WITH(__FILE__, __LINE__, errCode)
-
-#define CATCH_RETURN_IMPL_WITH(file, line, errCode) \
-    catch (std::bad_alloc const& e) { utils_c::std_bad_alloc_to_result(e, file, line); return errCode; } \
-    catch (std::exception const& e) { utils_c::std_exception_to_result(e, file, line); return errCode; } \
-    catch (...) { utils_c::unknown_exception_to_result(file, line); return errCode; }

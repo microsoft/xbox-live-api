@@ -16,6 +16,13 @@
 // Forward decls
 class xbl_thread_pool;
 
+class title_storage_state;
+struct XSAPI_XBOX_LIVE_APP_CONFIG;
+struct XSAPI_ACHIEVEMENTS_STATE; // TODO use c++ naming conventions for internal classes, make them classes
+struct XSAPI_SOCIAL_MANAGER_VARS;
+struct XSAPI_STATS_MANAGER_VARS;
+struct XSAPI_XBOX_LIVE_USER;
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
     class xbox_live_services_settings;
     class xbox_system_factory;
@@ -214,9 +221,25 @@ struct xsapi_singleton
     function_context m_signInCompletedHandlerIndexer;
     std::mutex m_trackingUsersLock;
 #endif
+
+    // From xsapi C singleton. Revisit if this is needed after reworking code.
+    std::shared_ptr<title_storage_state> m_titleStorageState;
+
+    std::mutex m_usersLock;
+    std::unordered_map<std::string, XSAPI_XBOX_LIVE_USER*> m_signedInUsers;
+
+    std::shared_ptr<XSAPI_XBOX_LIVE_APP_CONFIG> m_appConfigSingletonC;
+    std::string m_scid;
+    std::string m_environment;
+    std::string m_sandbox;
+
+    std::shared_ptr<XSAPI_ACHIEVEMENTS_STATE> m_achievementsState;
+    std::shared_ptr<XSAPI_SOCIAL_MANAGER_VARS> m_socialVars;
+    std::shared_ptr<XSAPI_STATS_MANAGER_VARS> m_statsVars;
 };
 
 std::shared_ptr<xsapi_singleton> get_xsapi_singleton(_In_ bool createIfRequired = true);
+void verify_global_init();
 
 #ifndef _In_reads_bytes_
 #define _In_reads_bytes_(s)
@@ -942,6 +965,8 @@ private:
     utils& operator=(const utils&);
 };
 
+static const uint64_t XSAPI_DEFAULT_TASKGROUP = 99;
+
 struct client_callback_info
 {
     client_callback_info(
@@ -1018,7 +1043,7 @@ public:
 private:
     static std::mutex m_contextsLock;
     static std::unordered_map<void *, std::shared_ptr<void>> m_sharedPtrs;
-    static uint32_t m_clientCallbackInfoIndexer;
+    static uintptr_t m_clientCallbackInfoIndexer;
     static std::unordered_map<void *, client_callback_info> m_clientCallbackInfoMap;
 
     async_helpers();

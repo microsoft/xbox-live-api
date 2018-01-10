@@ -1,18 +1,13 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include "pch.h"
-#include "xsapi-c\stats_manager_c.h"
-#include "xsapi\stats_manager.h"
-
-using namespace xbox::services::system;
-using namespace xbox::services::stats::manager;
+#pragma once
 
 struct XSAPI_STATS_MANAGER_VARS
 {
 public:
-    xbox_live_result<void> cppVoidResult;
-    xbox_live_result<stat_value> cppStatValueResult;
+    xbox::services::xbox_live_result<void> cppVoidResult;
+    xbox::services::xbox_live_result<xbox::services::stats::manager::stat_value> cppStatValueResult;
 
     std::vector<XSAPI_STAT_EVENT *> cEvents;
 

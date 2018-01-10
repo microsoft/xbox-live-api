@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "xsapi/profile.h"
+
 namespace xbox { namespace services { namespace social {
 
 typedef void (*get_user_profile_completion_routine)(
@@ -26,6 +28,7 @@ public:
         _In_ std::shared_ptr<xbox_live_app_config> appConfig
         );
 
+    // TODO these should use mem hooked types
     _XSAPIIMP xbox::services::xbox_live_result<void> get_user_profile(
         _In_ string_t xboxUserId,
         _In_ get_user_profile_completion_routine completionRoutine,

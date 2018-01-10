@@ -4,6 +4,7 @@
 #pragma once
 
 #include "xsapi-c/title_storage_c.h"
+#include "xsapi/title_storage.h"
 
 class XSAPI_TITLE_STORAGE_BLOB_METADATA_RESULT_IMPL
 {
@@ -11,8 +12,7 @@ public:
     void update(const xbox::services::title_storage::title_storage_blob_metadata_result& cppObject);
     const XSAPI_TITLE_STORAGE_BLOB_METADATA* first_item() const;
     size_t item_count() const;
-    // TODO We should be able to just return a const ref here, but the cpp get_next API needs to be marked as const first
-    /* const */ xbox::services::title_storage::title_storage_blob_metadata_result& cppObject() /* const */;
+    const xbox::services::title_storage::title_storage_blob_metadata_result& cppObject() const;
 
 private:
     std::mutex m_lock;

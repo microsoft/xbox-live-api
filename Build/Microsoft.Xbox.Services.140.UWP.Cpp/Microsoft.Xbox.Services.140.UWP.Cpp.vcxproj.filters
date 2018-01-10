@@ -757,12 +757,6 @@
     <ClCompile Include="..\..\Source\C\System\user_taskargs.cpp">
       <Filter>C++ Source\C\System</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\C\Shared\singleton_c.cpp">
-      <Filter>C++ Source\C\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\C\Shared\threadpool_c.cpp">
-      <Filter>C++ Source\C\Shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\C\Shared\utils_c.cpp">
       <Filter>C++ Source\C\Shared</Filter>
     </ClCompile>
@@ -793,30 +787,6 @@
     <ClCompile Include="..\..\Source\C\Services\Misc\title_callable_ui_c.cpp">
       <Filter>C++ Source\C\Services\Misc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\C\Services\TitleStorage\title_storage.cpp">
-      <Filter>C++ Source\C\Services\TitleStorage</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_impl.cpp">
-      <Filter>C++ Source\C\Services\TitleStorage</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_result_impl.cpp">
-      <Filter>C++ Source\C\Services\TitleStorage</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\C\Services\Stats\Manager\stats_manager_c.cpp">
-      <Filter>C++ Source\C\Services\Stats\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\C\Services\Stats\Manager\stats_manager_helper.cpp">
-      <Filter>C++ Source\C\Services\Stats\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\C\Services\Social\Manager\social_manager_c.cpp">
-      <Filter>C++ Source\C\Services\Social\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\C\Services\Social\Manager\social_manager_helper.cpp">
-      <Filter>C++ Source\C\Services\Social\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\C\Services\Social\profile.cpp">
-      <Filter>C++ Source\C\Services\Social</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\C\Services\Privacy\privacy.cpp">
       <Filter>C++ Source\C\Services\Privacy</Filter>
     </ClCompile>
@@ -828,6 +798,30 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\C\Services\Privacy\privacy_permission_deny_reason_impl.cpp">
       <Filter>C++ Source\C\Services\Privacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\C\Services\Social\profile.cpp">
+      <Filter>C++ Source\C\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\C\Services\Social\Manager\social_manager_c.cpp">
+      <Filter>C++ Source\C\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\C\Services\Social\Manager\social_manager_helper.cpp">
+      <Filter>C++ Source\C\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\C\Services\Stats\Manager\stats_manager_c.cpp">
+      <Filter>C++ Source\C\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\C\Services\Stats\Manager\stats_manager_helper.cpp">
+      <Filter>C++ Source\C\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\C\Services\TitleStorage\title_storage.cpp">
+      <Filter>C++ Source\C\Services\TitleStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_impl.cpp">
+      <Filter>C++ Source\C\Services\TitleStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_result_impl.cpp">
+      <Filter>C++ Source\C\Services\TitleStorage</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1125,12 +1119,6 @@
     <ClInclude Include="..\..\Source\C\System\user_taskargs.h">
       <Filter>C++ Source\C\System</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\C\Shared\singleton_c.h">
-      <Filter>C++ Source\C\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\C\Shared\threadpool_c.h">
-      <Filter>C++ Source\C\Shared</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\C\Shared\utils_c.h">
       <Filter>C++ Source\C\Shared</Filter>
     </ClInclude>
@@ -1152,30 +1140,6 @@
     <ClInclude Include="..\..\Source\C\Services\Leaderboard\leaderboard_helper.h">
       <Filter>C++ Source\C\Services\Leaderboard</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_impl.h">
-      <Filter>C++ Source\C\Services\TitleStorage</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_result_impl.h">
-      <Filter>C++ Source\C\Services\TitleStorage</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\C\Services\TitleStorage\title_storage_state.h">
-      <Filter>C++ Source\C\Services\TitleStorage</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\C\Services\TitleStorage\title_storage_taskargs.h">
-      <Filter>C++ Source\C\Services\TitleStorage</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\C\Services\Stats\Manager\stats_manager_helper.h">
-      <Filter>C++ Source\C\Services\Stats\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\C\Services\Stats\Manager\stats_manager_state.h">
-      <Filter>C++ Source\C\Services\Stats\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\C\Services\Social\Manager\social_manager_helper.h">
-      <Filter>C++ Source\C\Services\Social\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\C\Services\Social\Manager\social_manager_state.h">
-      <Filter>C++ Source\C\Services\Social\Manager</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\C\Services\Privacy\privacy_multiple_permissions_check_result_impl.h">
       <Filter>C++ Source\C\Services\Privacy</Filter>
     </ClInclude>
@@ -1187,6 +1151,30 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\C\Services\Privacy\privacy_taskargs.h">
       <Filter>C++ Source\C\Services\Privacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\C\Services\Social\Manager\social_manager_helper.h">
+      <Filter>C++ Source\C\Services\Social\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\C\Services\Social\Manager\social_manager_state.h">
+      <Filter>C++ Source\C\Services\Social\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\C\Services\Stats\Manager\stats_manager_state.h">
+      <Filter>C++ Source\C\Services\Stats\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\C\Services\Stats\Manager\stats_manager_helper.h">
+      <Filter>C++ Source\C\Services\Stats\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_impl.h">
+      <Filter>C++ Source\C\Services\TitleStorage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_result_impl.h">
+      <Filter>C++ Source\C\Services\TitleStorage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\C\Services\TitleStorage\title_storage_state.h">
+      <Filter>C++ Source\C\Services\TitleStorage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\C\Services\TitleStorage\title_storage_taskargs.h">
+      <Filter>C++ Source\C\Services\TitleStorage</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

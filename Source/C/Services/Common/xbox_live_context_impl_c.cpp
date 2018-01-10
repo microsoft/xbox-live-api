@@ -5,12 +5,12 @@
 #include "xsapi-c/xbox_live_context_c.h"
 #include "xsapi-c/xbox_live_app_config_c.h"
 #include "user_impl_c.h"
-#include "xbox_live_context_impl.h"
+#include "xbox_live_context_impl_c.h"
 
 XSAPI_XBOX_LIVE_CONTEXT_IMPL::XSAPI_XBOX_LIVE_CONTEXT_IMPL(_In_ CONST XSAPI_XBOX_LIVE_USER *user, _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext) 
     : m_pContext(pContext)
 {
-    m_cppContext = std::make_shared<xbox_live_context_impl>(user->pImpl->cppUser());
+    m_cppContext = std::make_shared<xbox::services::xbox_live_context_impl>(user->pImpl->cppUser());
     m_cppContext->init();
 
     GetXboxLiveAppConfigSingleton(&(pContext->pAppConfig));

@@ -2,23 +2,23 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "../Leaderboard/leaderboard_helper.h"
+#include "leaderboard_helper.h"
 #include "user_impl_c.h"
 #include "stats_manager_helper.h"
+#include "stats_manager_state.h"
 
 using namespace xbox::services;
 using namespace xbox::services::system;
 using namespace xbox::services::stats::manager;
 
-xsapi_singleton_c* get_singleton_for_stats() 
+std::shared_ptr<xsapi_singleton> get_singleton_for_stats() 
 {
-    auto singleton = get_xsapi_singleton_c();
+    auto singleton = get_xsapi_singleton();
 
     if (singleton->m_statsVars == nullptr) 
     {
-        singleton->m_statsVars = std::make_unique<XSAPI_STATS_MANAGER_VARS>();
+        singleton->m_statsVars = std::make_shared<XSAPI_STATS_MANAGER_VARS>();
     }
-
     return singleton;
 }
 

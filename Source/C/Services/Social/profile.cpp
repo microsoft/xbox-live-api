@@ -3,8 +3,8 @@
 
 #include "pch.h"
 #include "xsapi-c/profile_c.h"
-#include "C:\github\xbox-live-api\Source\Services\Social\profile_internal.h"
-#include "C:\github\xbox-live-api\Source\Shared\utils.h"
+#include "profile_internal.h"
+#include "xbox_live_context_impl_c.h"
 
 using namespace xbox::services;
 using namespace xbox::services::system;

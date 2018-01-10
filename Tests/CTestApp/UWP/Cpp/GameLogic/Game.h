@@ -74,7 +74,7 @@ namespace Sample
         XSAPI_XBOX_LIVE_USER *m_user;
         XSAPI_XBOX_LIVE_CONTEXT *m_xboxLiveContext;
 
-//        function_context m_signOutContext;
+        function_context m_signOutContext;
 
         std::shared_ptr<DX::DeviceResources> m_deviceResources;
         std::unique_ptr<Renderer> m_sceneRenderer;
@@ -92,6 +92,8 @@ namespace Sample
         void ReadCsvFile(_In_ Windows::Storage::StorageFile^ file);
 
         void GetUserProfile();
+
+        HANDLE m_hBackgroundThread;
     };
 }
 

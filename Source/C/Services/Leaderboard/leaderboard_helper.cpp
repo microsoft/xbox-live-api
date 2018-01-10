@@ -4,6 +4,9 @@
 #include "pch.h"
 #include "leaderboard_helper.h"
 
+using namespace xbox::services;
+using namespace xbox::services::leaderboard;
+
 leaderboard_result_get_next_taskargs::leaderboard_result_get_next_taskargs(
     _In_ XSAPI_LEADERBOARD_RESULT* _leaderboard,
     _In_ uint32 _maxItems

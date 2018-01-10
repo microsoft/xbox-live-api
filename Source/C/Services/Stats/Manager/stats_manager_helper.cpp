@@ -3,6 +3,10 @@
 
 #include "pch.h"
 #include "stats_manager_helper.h"
+#include "stats_manager_state.h"
+
+using namespace xbox::services;
+using namespace xbox::services::stats::manager;
 
 XSAPI_STAT_VALUE_IMPL::XSAPI_STAT_VALUE_IMPL(
     _In_ stat_value cppStatValue,
@@ -30,7 +34,9 @@ stat_value XSAPI_STAT_VALUE_IMPL::cppStatValue() const
 XSAPI_LEADERBOARD_RESULT_EVENT_ARGS_IMPL::XSAPI_LEADERBOARD_RESULT_EVENT_ARGS_IMPL(
     _In_ std::shared_ptr<leaderboard_result_event_args> cppEventArgs,
     _In_ XSAPI_LEADERBOARD_RESULT_EVENT_ARGS* cEventArgs
-) : m_cEventArgs(cEventArgs), m_cppEventArgs(cppEventArgs)
+    ) :
+    m_cEventArgs(cEventArgs),
+    m_cppEventArgs(cppEventArgs)
 {
     auto result = m_cppEventArgs->result();
 
@@ -65,7 +71,7 @@ XSAPI_STAT_EVENT_IMPL::XSAPI_STAT_EVENT_IMPL(
     }
     m_cStatEvent->eventArgs = m_args;
 
-    auto mapping = get_xsapi_singleton_c()->m_statsVars->cUsersMapping;
+    auto mapping = get_xsapi_singleton()->m_statsVars->cUsersMapping;
     if (mapping.find(m_cppStatEvent.local_user()) != mapping.end())
     {
         m_localUser = mapping[m_cppStatEvent.local_user()];

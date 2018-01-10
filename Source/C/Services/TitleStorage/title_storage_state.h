@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "xsapi-c/title_storage_c.h"
 #include "title_storage_blob_metadata_result_impl.h"
 
 class title_storage_state

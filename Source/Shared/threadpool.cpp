@@ -7,6 +7,8 @@
 
 #define MAX_THREADS 64
 
+using namespace xbox::services;
+
 xbl_thread_pool::xbl_thread_pool() :
     m_numActiveThreads(0),
     m_targetNumThreads(2),
@@ -77,8 +79,8 @@ DWORD WINAPI xbox_live_thread_proc(LPVOID lpParam)
 
             break;
         case WAIT_OBJECT_0 + 1:
-            HCTaskProcessNextCompletedTask(HC_SUBSYSTEM_ID_XSAPI, 0);
-            if (HCTaskGetCompletedTaskQueueSize(HC_SUBSYSTEM_ID_XSAPI, 0) > 0)
+            HCTaskProcessNextCompletedTask(HC_SUBSYSTEM_ID_XSAPI, XSAPI_DEFAULT_TASKGROUP);
+            if (HCTaskGetCompletedTaskQueueSize(HC_SUBSYSTEM_ID_XSAPI, XSAPI_DEFAULT_TASKGROUP) > 0)
             {
                 SetEvent(threadPool->get_complete_ready_handle());
             }

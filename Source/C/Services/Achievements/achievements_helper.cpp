@@ -4,6 +4,7 @@
 #include "pch.h"
 #include "xsapi-c/achievements_c.h"
 #include "achievements_helper.h"
+#include "achievements_state.h"
 
 using namespace xbox::services::achievements;
 
@@ -180,7 +181,7 @@ XSAPI_ACHIEVEMENT* CreateAchievementFromCpp(
     _In_ achievement cppAchievement
 )
 {
-    auto singleton = get_xsapi_singleton_c();
+    auto singleton = get_xsapi_singleton();
     std::lock_guard<std::recursive_mutex> lock(singleton->m_achievementsState->m_lock);
 
     auto achievement = new XSAPI_ACHIEVEMENT();
@@ -195,7 +196,7 @@ XSAPI_ACHIEVEMENTS_RESULT* CreateAchievementsResultFromCpp(
     _In_ achievements_result cppResult
 )
 {
-    auto singleton = get_xsapi_singleton_c();
+    auto singleton = get_xsapi_singleton();
     std::lock_guard<std::recursive_mutex> lock(singleton->m_achievementsState->m_lock);
 
     auto result = new XSAPI_ACHIEVEMENTS_RESULT();

@@ -7,7 +7,7 @@ class xbl_thread_pool
 {
 public:
     xbl_thread_pool();
-        
+
     void start_threads();
 
     void set_target_num_active_threads(long targetNumThreads);

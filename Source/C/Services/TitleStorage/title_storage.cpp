@@ -3,10 +3,13 @@
 
 #include "pch.h"
 #include "xsapi-c/title_storage_c.h"
+#include "xsapi/title_storage.h"
 #include "title_storage_taskargs.h"
-#include "xbox_live_context_impl.h"
+#include "xbox_live_context_impl_c.h"
 #include "title_storage_blob_metadata_impl.h"
+#include "title_storage_state.h"
 
+using namespace xbox::services;
 using namespace xbox::services::title_storage;
 
 HC_RESULT get_quota_execute(
@@ -95,7 +98,7 @@ HC_RESULT get_blob_metadata_execute(
 
     if (!result.err())
     {
-        auto& metadataResultImpl = get_xsapi_singleton_c()->m_titleStorageState->m_blobMetadataResultImpl;
+        auto& metadataResultImpl = get_xsapi_singleton()->m_titleStorageState->m_blobMetadataResultImpl;
 
         metadataResultImpl.update(result.payload());
 
@@ -162,7 +165,7 @@ HC_RESULT blob_metadata_result_get_next_execute(
 {
     auto args = reinterpret_cast<blob_metadata_result_get_next_taskargs*>(context);
 
-    auto& metadataResultImpl = get_xsapi_singleton_c()->m_titleStorageState->m_blobMetadataResultImpl;
+    auto& metadataResultImpl = get_xsapi_singleton()->m_titleStorageState->m_blobMetadataResultImpl;
     auto result = metadataResultImpl.cppObject().get_next(args->maxItems).get();
 
     args->copy_xbox_live_result(result);
@@ -190,7 +193,7 @@ try
 {
     verify_global_init();
 
-    auto singleton = get_xsapi_singleton_c();
+    auto singleton = get_xsapi_singleton();
     {
         std::lock_guard<std::recursive_mutex> lock(singleton->m_titleStorageState->m_lock);
         if (!singleton->m_titleStorageState->m_blobMetadataResultImpl.cppObject().has_next())
@@ -230,7 +233,7 @@ TitleStorageCreateBlobMetadata(
     ) XBL_NOEXCEPT
 try
 {
-    auto singleton = get_xsapi_singleton_c();
+    auto singleton = get_xsapi_singleton();
     std::lock_guard<std::recursive_mutex> lock(singleton->m_titleStorageState->m_lock);
 
     auto pMetadata = new XSAPI_TITLE_STORAGE_BLOB_METADATA();
@@ -260,7 +263,7 @@ TitleStorageReleaseBlobMetadata(
     ) XBL_NOEXCEPT
 try
 {
-    auto singleton = get_xsapi_singleton_c();
+    auto singleton = get_xsapi_singleton();
     std::lock_guard<std::recursive_mutex> lock(singleton->m_titleStorageState->m_lock);
 
     size_t erasedItems = singleton->m_titleStorageState->m_blobMetadata.erase(pMetadata);

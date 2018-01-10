@@ -45,7 +45,7 @@ XboxLiveUserDelete(
     ) XBL_NOEXCEPT
 try
 {
-    auto singleton = get_xsapi_singleton_c();
+    auto singleton = get_xsapi_singleton();
     std::lock_guard<std::mutex> lock(singleton->m_usersLock);
     
     singleton->m_signedInUsers.erase(pUser->xboxUserId);
@@ -92,7 +92,7 @@ HC_RESULT XboxLiveUserSignInExecute(
         args->completionRoutinePayload.status = static_cast<XSAPI_SIGN_IN_STATUS>(result.payload().status());
         args->pUser->pImpl->Refresh();
         {
-            auto singleton = get_xsapi_singleton_c();
+            auto singleton = get_xsapi_singleton();
             std::lock_guard<std::mutex> lock(singleton->m_usersLock);
             singleton->m_signedInUsers[args->pUser->xboxUserId] = args->pUser;
         }
@@ -279,7 +279,7 @@ try
     return xbox_live_user::add_sign_out_completed_handler(
         [signOutHandler](const xbox::services::system::sign_out_completed_event_args& args)
         {
-            auto singleton = get_xsapi_singleton_c();
+            auto singleton = get_xsapi_singleton();
             std::lock_guard<std::mutex> lock(singleton->m_usersLock);
 
             auto iter = singleton->m_signedInUsers.find(utils_c::to_utf8string(args.user()->xbox_user_id()));

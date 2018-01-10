@@ -4,8 +4,9 @@
 #include "pch.h"
 #include "xsapi-c/privacy_c.h"
 #include "privacy_taskargs.h"
-#include "xbox_live_context_impl.h"
+#include "xbox_live_context_impl_c.h"
 
+using namespace xbox::services;
 using namespace xbox::services::privacy;
 
 HC_RESULT get_privacy_list_execute(

@@ -3,9 +3,9 @@
 
 #pragma once
 #include "user_impl_c.h"
-#include "singleton_c.h"
 #include "xsapi-c/social_manager_c.h"
-#include<time.h>
+#include "xsapi/social_manager.h"
+#include <time.h>
 
 using namespace xbox::services;
 using namespace xbox::services::system;

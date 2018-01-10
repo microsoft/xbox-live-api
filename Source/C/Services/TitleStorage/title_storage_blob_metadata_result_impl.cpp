@@ -40,7 +40,7 @@ size_t XSAPI_TITLE_STORAGE_BLOB_METADATA_RESULT_IMPL::item_count() const
     return m_items.size();
 }
 
-/* const */ title_storage_blob_metadata_result& XSAPI_TITLE_STORAGE_BLOB_METADATA_RESULT_IMPL::cppObject() /* const */
+const title_storage_blob_metadata_result& XSAPI_TITLE_STORAGE_BLOB_METADATA_RESULT_IMPL::cppObject() const
 {
     return m_cppObject;
 }

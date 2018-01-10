@@ -4,6 +4,7 @@
 #pragma once
 
 #include "xsapi-c/title_storage_c.h"
+#include "xsapi/title_storage.h"
 
 struct XSAPI_TITLE_STORAGE_BLOB_METADATA_IMPL
 {

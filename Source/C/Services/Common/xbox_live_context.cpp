@@ -4,8 +4,8 @@
 #include "pch.h"
 #include "xsapi-c/xbox_live_app_config_c.h"
 #include "xsapi-c/xbox_live_context_c.h"
+#include "xbox_live_context_impl_c.h"
 #include "user_impl_c.h"
-#include "xbox_live_context_impl.h"
 
 using namespace xbox::services;
 

@@ -3,8 +3,10 @@
 
 #include "pch.h"
 #include "xsapi-c/title_callable_ui_c.h"
+#include "xsapi/title_callable_ui.h"
 #include "taskargs.h"
 
+using namespace xbox::services;
 using namespace xbox::services::system;
 
 struct show_profile_card_taskargs : public taskargs

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "xsapi-c/privacy_c.h"
+#include "xsapi/privacy.h"
 #include "privacy_permission_deny_reason_impl.h"
 
 class XSAPI_PRIVACY_PERMISSION_CHECK_RESULT_IMPL

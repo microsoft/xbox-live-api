@@ -87,7 +87,7 @@
        $(ProjectDir)..\..\Source\Shared;
        $(ProjectDir)..\..\Source\Shared\WinRT;
        $(ProjectDir)..\..\Include;
-       ..\..\External\cpprestsdk\Release\include;
+       $(ProjectDir)..\..\External\cpprestsdk\Release\include;
        $(ProjectDir)..\..\Source\System\WinRT;
        $(ProjectDir)..\..\Source\System;
        $(ProjectDir)..\..\Source\C\Services\TitleStorage;
@@ -108,6 +108,7 @@
       </AdditionalIncludeDirectories>
       <CompileAsWinRT>true</CompileAsWinRT>
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ShowIncludes>
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Bcrypt.lib;Pathcch.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -161,8 +162,6 @@
     <ClCompile Include="..\..\Source\C\Services\TitleStorage\title_storage.cpp" />
     <ClCompile Include="..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_impl.cpp" />
     <ClCompile Include="..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_result_impl.cpp" />
-    <ClCompile Include="..\..\Source\C\Shared\singleton_c.cpp" />
-    <ClCompile Include="..\..\Source\C\Shared\threadpool_c.cpp" />
     <ClCompile Include="..\..\Source\C\Shared\utils_c.cpp" />
     <ClCompile Include="..\..\Source\C\Shared\xbox_live_app_config_c.cpp" />
     <ClCompile Include="..\..\Source\C\System\user_c.cpp" />
@@ -531,8 +530,6 @@
     <ClInclude Include="..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_result_impl.h" />
     <ClInclude Include="..\..\Source\C\Services\TitleStorage\title_storage_state.h" />
     <ClInclude Include="..\..\Source\C\Services\TitleStorage\title_storage_taskargs.h" />
-    <ClInclude Include="..\..\Source\C\Shared\singleton_c.h" />
-    <ClInclude Include="..\..\Source\C\Shared\threadpool_c.h" />
     <ClInclude Include="..\..\Source\C\Shared\utils_c.h" />
     <ClInclude Include="..\..\Source\C\System\user_impl_c.h" />
     <ClInclude Include="..\..\Source\C\System\user_taskargs.h" />

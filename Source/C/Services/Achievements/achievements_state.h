@@ -3,7 +3,8 @@
 
 #pragma once
 
-#include "xsapi-c/achievements_c.h"
+struct XSAPI_ACHIEVEMENT;
+struct XSAPI_ACHIEVEMENTS_RESULT;
 
 struct XSAPI_ACHIEVEMENTS_STATE
 {

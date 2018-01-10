@@ -67,7 +67,7 @@ profile_service::get_user_profile(
         auto tce = static_cast<task_completion_event<xbox_live_result<xbox_user_profile>>*>(context);
         tce->set(result);
         delete context;
-    }, context, 0);
+    }, context, XSAPI_DEFAULT_TASKGROUP);
 
     if (result.err())
     {

@@ -4,20 +4,20 @@
 #include "pch.h"
 #include "user_impl_c.h"
 #include "social_manager_helper.h"
+#include "social_manager_state.h"
 
 using namespace xbox::services;
 using namespace xbox::services::system;
 using namespace xbox::services::social::manager;
 
-xsapi_singleton_c* get_singleton_for_social()
+std::shared_ptr<xsapi_singleton> get_singleton_for_social()
 {
-    auto singleton = get_xsapi_singleton_c();
+    auto singleton = get_xsapi_singleton();
 
     if (singleton->m_socialVars == nullptr)
     {
-        singleton->m_socialVars = std::make_unique<XSAPI_SOCIAL_MANAGER_VARS>();
+        singleton->m_socialVars = std::make_shared<XSAPI_SOCIAL_MANAGER_VARS>();
     }
-
     return singleton;
 }
 

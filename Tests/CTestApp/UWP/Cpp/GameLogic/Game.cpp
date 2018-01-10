@@ -5,6 +5,7 @@
 #include "Game.h"
 #include "Common\DirectXHelper.h"
 #include "Utils\PerformanceCounters.h"
+#include "httpClient\httpClient.h"
 
 using namespace Sample;
 using namespace Windows::Foundation;
@@ -13,6 +14,80 @@ using namespace Concurrency;
 
 Game* g_sampleInstance = nullptr;
 std::mutex Game::m_displayEventQueueLock;
+
+HANDLE g_stopRequestedHandle;
+HANDLE g_pendingReadyHandle;
+HANDLE g_completeReadyHandle;
+
+HC_RESULT hc_event_handler(
+    _In_opt_ void* context,
+    _In_ HC_TASK_EVENT_TYPE eventType,
+    _In_ HC_TASK_HANDLE taskHandle
+)
+{
+    UNREFERENCED_PARAMETER(context);
+    UNREFERENCED_PARAMETER(taskHandle);
+
+    switch (eventType)
+    {
+    case HC_TASK_EVENT_TYPE::HC_TASK_EVENT_PENDING:
+        SetEvent(g_pendingReadyHandle);
+        break;
+
+    case HC_TASK_EVENT_TYPE::HC_TASK_EVENT_EXECUTE_STARTED:
+        break;
+
+    case HC_TASK_EVENT_TYPE::HC_TASK_EVENT_EXECUTE_COMPLETED:
+        SetEvent(g_completeReadyHandle);
+        break;
+    }
+
+    return HC_OK;
+}
+
+DWORD WINAPI background_thread_proc(LPVOID lpParam)
+{
+    HANDLE hEvents[3] =
+    {
+        g_pendingReadyHandle,
+        g_completeReadyHandle,
+        g_stopRequestedHandle
+    };
+
+    bool stop = false;
+    while (!stop)
+    {
+        DWORD dwResult = WaitForMultipleObjectsEx(3, hEvents, false, INFINITE, false);
+        switch (dwResult)
+        {
+        case WAIT_OBJECT_0: // pending 
+            // TODO Wrap into XBLProcessNextPendingTask()
+            HCTaskProcessNextPendingTask(HC_SUBSYSTEM_ID_XSAPI);
+
+            // If there's more pending tasks, then set the event to process them
+            if (HCTaskGetPendingTaskQueueSize(HC_SUBSYSTEM_ID_XSAPI) > 0)
+            {
+                SetEvent(g_pendingReadyHandle);
+            }
+            break;
+
+        case WAIT_OBJECT_0 + 1: // completed 
+            HCTaskProcessNextCompletedTask(HC_SUBSYSTEM_ID_XSAPI, 0);
+
+            // If there's more completed tasks, then set the event to process them
+            if (HCTaskGetCompletedTaskQueueSize(HC_SUBSYSTEM_ID_XSAPI, 0) > 0)
+            {
+                SetEvent(g_completeReadyHandle);
+            }
+            break;
+
+        default:
+            stop = true;
+            break;
+        }
+    }
+    return 0;
+}
 
 // Loads and initializes application assets when the application is loaded.
 Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
@@ -24,9 +99,22 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
     // Register to be notified if the Device is lost or recreated
     m_deviceResources->RegisterDeviceNotify(this);
     m_sceneRenderer = std::unique_ptr<Renderer>(new Renderer(m_deviceResources));
-    
+
+    g_stopRequestedHandle = CreateEvent(nullptr, true, false, nullptr);
+    g_pendingReadyHandle = CreateEvent(nullptr, false, false, nullptr);
+    g_completeReadyHandle = CreateEvent(nullptr, false, false, nullptr);
+
     XsapiGlobalInitialize();
 
+    // TODO wrap these functions in XSAPI so clients aren't calling through to libHttpClient directly
+    HCAddTaskEventHandler(
+        HC_SUBSYSTEM_ID_XSAPI,
+        nullptr,
+        hc_event_handler,
+        nullptr);
+
+    m_hBackgroundThread = CreateThread(nullptr, 0, background_thread_proc, nullptr, 0, nullptr);
+    
     XboxLiveUserCreate(&m_user);
 }
 
@@ -281,7 +369,7 @@ void Game::Init(Windows::UI::Core::CoreWindow^ window)
         // TODO need to be able to pass a context
     });
 
-    ReadLastCsv();
+    //ReadLastCsv();
     SignInSilently();
 }
 
@@ -416,5 +504,5 @@ void Game::HandleSignout(XSAPI_XBOX_LIVE_USER *user)
 {
     WCHAR text[1024];
     swprintf_s(text, ARRAYSIZE(text), L"User %s signed out", utility::conversions::utf8_to_utf16(user->gamertag).data());
-    //Log(text);
+    g_sampleInstance->Log(text);
 }
