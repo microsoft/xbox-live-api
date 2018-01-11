@@ -67,7 +67,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
 #endif
 
-#if !TV_API && !XSAPI_SERVER
+#if !TV_API
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
     class presence_writer;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_END
@@ -126,7 +126,7 @@ struct xsapi_singleton
     std::shared_ptr<xbox::services::system::xbox_live_services_settings> m_xboxServiceSettingsSingleton;
     std::shared_ptr<xbox::services::local_config> m_localConfigSingleton;
 
-#if !TV_API && !XSAPI_SERVER
+#if !TV_API
     std::shared_ptr<xbox::services::presence::presence_writer> m_presenceWriterSingleton;
 #endif
 
@@ -281,6 +281,12 @@ public:
         _In_ const string_t& stringName,
         _In_ bool required = false,
         _In_ const string_t& defaultValue = _T("")
+    );
+    
+    static web::json::array extract_json_array(
+        _In_ const web::json::value& jsonValue,
+        _In_ const string_t& arrayName,
+        _In_ bool required
     );
 
     static bool extract_json_bool(

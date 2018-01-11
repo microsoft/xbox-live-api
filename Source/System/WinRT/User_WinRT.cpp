@@ -92,7 +92,7 @@ XboxLiveUser::SignInAsync(
 {
     xbox_live_context_settings::_Set_dispatcher(coreDispatcherObj);
 
-    auto task = GetUserImpl()->sign_in_impl(true, false)
+    auto task = _User_impl()->sign_in_impl(true, false)
     .then([](xbox_live_result<sign_in_result> t)
     {
         THROW_IF_ERR(t);
@@ -109,7 +109,7 @@ XboxLiveUser::SignInSilentlyAsync(
 {
     xbox_live_context_settings::_Set_dispatcher(coreDispatcherObj);
 
-    auto task = GetUserImpl()->sign_in_impl(false, false)
+    auto task = _User_impl()->sign_in_impl(false, false)
     .then([](xbox_live_result<sign_in_result> t)
     {
         THROW_IF_ERR(t);

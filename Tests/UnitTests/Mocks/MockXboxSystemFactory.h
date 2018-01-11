@@ -36,15 +36,6 @@ class MockXboxSystemFactory : public xbox_system_factory
 public:
     MockXboxSystemFactory();
 
-#if UNIT_TEST_SYSTEM
-    std::shared_ptr<xsts_token_service> create_xsts_token() override { return m_mockXstsToken; }
-    std::shared_ptr<user_token_service> create_user_token() override { return m_mockUserToken; }
-    std::shared_ptr<title_token_service> create_title_token() override { return m_mockTitleToken; }
-    std::shared_ptr<device_token_service> create_device_token() override { return nullptr; }
-    std::shared_ptr<service_token_service> create_service_token() override { return m_mockServiceToken; }
-    std::shared_ptr<xtitle_service> create_xtitle_service() override { return m_mockXTitle; }
-#endif
-
     std::shared_ptr<xbox_http_client> create_http_client(
         _In_ const web::http::uri& base_uri,
         _In_ const web::http::client::http_client_config& client_config

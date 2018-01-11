@@ -15,40 +15,29 @@ public:
         _In_ http_call_response_body_type httpCallResponseBodyType
         ) override;
 
-#if TV_API | XBOX_UWP
+#if XSAPI_XDK_AUTH
+    virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
+        _In_ Windows::Xbox::System::User^ user,
+        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
+        _In_ bool allUsersAuthRequired = false
+        ) override;
+#endif 
 
-	/// <summary>
-	/// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.
-	/// </summary>
-	virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
-		_In_ Windows::Xbox::System::User^ user,
-		_In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
-		_In_ bool allUsersAuthRequired = false
-		) override;
-
-#elif UNIT_TEST_SERVICES || !XSAPI_CPP
-
-	/// <summary>
-	/// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.
-	/// </summary>
-	virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
-		_In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
-		_In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
-		_In_ bool allUsersAuthRequired = false
-		) override;
-
-#else
-
-	/// <summary>
-	/// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.
-	/// </summary>
-	virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
-		_In_ std::shared_ptr<xbox::services::system::xbox_live_user> user,
-		_In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
-		_In_ bool allUsersAuthRequired = false
-		) override;
-
+#if XSAPI_NONXDK_CPP_AUTH
+    virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
+        _In_ std::shared_ptr<xbox::services::system::xbox_live_user> user,
+        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
+        _In_ bool allUsersAuthRequired = false
+    ) override;
 #endif
+
+#if XSAPI_NONXDK_WINRT_AUTH
+    virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
+        _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
+        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
+        _In_ bool allUsersAuthRequired = false
+        ) override;
+#endif 
 
     virtual pplx::task< std::shared_ptr<http_call_response> > get_response(
         _In_ http_call_response_body_type httpCallResponseBodyType,
@@ -70,14 +59,6 @@ public:
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
         _In_ bool allUsersAuthRequired = false
         ) override;
-
-#if UNIT_TEST_SYSTEM
-    virtual pplx::task<std::shared_ptr<http_call_response>> get_response(
-        _In_ std::shared_ptr<ecdsa> proofKey,
-        _In_ const signature_policy& signaturePolicy,
-        _In_ http_call_response_body_type httpCallResponseBodyType
-        ) override;
-#endif
 
     virtual const std::wstring& server_name() const override;
     virtual const web::uri& path_query_fragment() const override;

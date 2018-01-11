@@ -5,6 +5,7 @@
 #include <mutex>
 #include "pplx/pplxtasks.h"
 #include "xsapi/services.h"
+#include "xsapi/types.h"
 
 #if XSAPI_CPP
 typedef const void* context_t;
@@ -1402,7 +1403,7 @@ public:
         );
 #endif
 
-#if TV_API | XBOX_UWP
+#if TV_API
     /// <summary>
     /// Joins a game given a session handle id. A handle is a service-side pointer to a game session.
     /// The handleId is a GUID identifier of the handle.  Callers will usually get the handleId from 
@@ -1573,31 +1574,13 @@ public:
 #endif
 
 #if defined(XSAPI_CPPWINRT)
-#if TV_API | XBOX_UWP
+#if TV_API
     _XSAPIIMP xbox_live_result<void> join_lobby(
         _In_ const string_t& handleId,
         _In_ std::vector<winrt::Windows::Xbox::System::User> users
         )
     {
         return join_lobby(handleId, convert_user_vector_to_cppcx(users));
-    }
-#endif
-
-#if XBOX_UWP
-    _XSAPIIMP xbox_live_result<void> join_lobby(
-        _In_ winrt::Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs eventArgs,
-        _In_ std::vector<winrt::Windows::Xbox::System::User> users
-        )
-    {
-        return join_lobby(convert_eventargs_to_cppcx(eventArgs), convert_user_vector_to_cppcx(users));
-    }
-
-    _XSAPIIMP xbox_live_result<void> join_lobby(
-        _In_ winrt::Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs eventArgs,
-        _In_ winrt::Windows::Xbox::System::User user
-        )
-    {
-        return join_lobby(convert_eventargs_to_cppcx(eventArgs), convert_user_to_cppcx(user));
     }
 #endif
 #endif

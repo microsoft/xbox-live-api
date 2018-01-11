@@ -12,7 +12,7 @@ using namespace xbox::services;
 using namespace xbox::services::multiplayer;
 using namespace xbox::services::real_time_activity;
 using namespace pplx;
-#if !XSAPI_U
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
 using namespace Windows::Foundation::Collections;
 #endif
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
@@ -131,9 +131,10 @@ multiplayer_client_manager::set_properties(
     RETURN_CPP_IF(name.empty(), void, xbox_live_error_code::invalid_argument, "Name was empty");
 
     std::lock_guard<std::mutex> guard(m_clientRequestLock);
-    RETURN_CPP_IF(latest_pending_read() == nullptr || get_xbox_live_context_map().size() == 0, void, xbox_live_error_code::logic_error, "Call add_local_user() before writing lobby properties.");
+    auto latestPending = latest_pending_read();
+    RETURN_CPP_IF(latestPending == nullptr || get_xbox_live_context_map().size() == 0, void, xbox_live_error_code::logic_error, "Call add_local_user() before writing lobby properties.");
 
-    latest_pending_read()->set_properties(sessionRef, name, valueJson, context);
+    latestPending->set_properties(sessionRef, name, valueJson, context);
     return xbox_live_result<void>();
 }
 
@@ -144,9 +145,10 @@ multiplayer_client_manager::set_joinability(
     )
 {
     std::lock_guard<std::mutex> guard(m_clientRequestLock);
-    RETURN_CPP_IF(latest_pending_read() == nullptr || get_xbox_live_context_map().size() == 0, void, xbox_live_error_code::logic_error, "Call add_local_user() before writing lobby properties.");
+    auto latestPending = latest_pending_read();
+    RETURN_CPP_IF(latestPending == nullptr || get_xbox_live_context_map().size() == 0, void, xbox_live_error_code::logic_error, "Call add_local_user() before writing lobby properties.");
 
-    return latest_pending_read()->lobby_client()->set_joinability(value, context);
+    return latestPending->lobby_client()->set_joinability(value, context);
 }
 
 xbox_live_result<void>
@@ -160,9 +162,10 @@ multiplayer_client_manager::set_synchronized_host(
     RETURN_CPP_IF(hostDeviceToken.empty(), void, xbox_live_error_code::invalid_argument, "HostDeviceToken was empty");
 
     std::lock_guard<std::mutex> guard(m_clientRequestLock);
-    RETURN_CPP_IF(latest_pending_read() == nullptr || get_xbox_live_context_map().size() == 0, void, xbox_live_error_code::logic_error, "Call add_local_user() before writing host properties.");
+    auto latestPending = latest_pending_read();
+    RETURN_CPP_IF(latestPending == nullptr || get_xbox_live_context_map().size() == 0, void, xbox_live_error_code::logic_error, "Call add_local_user() before writing host properties.");
 
-    latest_pending_read()->set_synchronized_host(sessionRef, hostDeviceToken, context);
+    latestPending->set_synchronized_host(sessionRef, hostDeviceToken, context);
     return xbox_live_result<void>();
 }
 
@@ -178,9 +181,10 @@ multiplayer_client_manager::set_synchronized_properties(
     RETURN_CPP_IF(name.empty(), void, xbox_live_error_code::invalid_argument, "Name was empty");
 
     std::lock_guard<std::mutex> guard(m_clientRequestLock);
-    RETURN_CPP_IF(latest_pending_read() == nullptr || get_xbox_live_context_map().size() == 0, void, xbox_live_error_code::logic_error, "Call add_local_user() before writing lobby properties.");
+    auto latestPending = latest_pending_read();
+    RETURN_CPP_IF(latestPending == nullptr || get_xbox_live_context_map().size() == 0, void, xbox_live_error_code::logic_error, "Call add_local_user() before writing lobby properties.");
 
-    latest_pending_read()->set_synchronized_properties(sessionRef, name, valueJson, context);
+    latestPending->set_synchronized_properties(sessionRef, name, valueJson, context);
     return xbox_live_result<void>();
 }
 
@@ -204,12 +208,14 @@ multiplayer_client_manager::join_lobby_by_handle(
     if(handleId.empty()) return xbox_live_result<void>(xbox_live_error_code::invalid_argument);
     if (users.size() == 0) return xbox_live_result<void>(xbox_live_error_code::invalid_argument);
 
-    if (latest_pending_read() == nullptr)
+    auto latestPending = latest_pending_read();
+    if (latestPending == nullptr)
     {
         initialize();
+        latestPending = latest_pending_read();
     }
 
-    latest_pending_read()->lobby_client()->add_local_users(users, handleId);
+    latestPending->lobby_client()->add_local_users(users, handleId);
     return xbox_live_result<void>();
 }
 
@@ -222,16 +228,18 @@ multiplayer_client_manager::join_lobby_by_session_reference(
     if(sessionRef.is_null()) return xbox_live_result<void>(xbox_live_error_code::invalid_argument);
     if (users.size() == 0) return xbox_live_result<void>(xbox_live_error_code::invalid_argument);
 
-    if (latest_pending_read() == nullptr)
+    auto latestPending = latest_pending_read();
+    if (latestPending == nullptr)
     {
         initialize();
+        latestPending = latest_pending_read();
     }
 
-    latest_pending_read()->lobby_client()->add_local_users(users, sessionRef);
+    latestPending->lobby_client()->add_local_users(users, sessionRef);
     return xbox_live_result<void>();
 }
 
-#if !XSAPI_U
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
 xbox_live_result<void>
 multiplayer_client_manager::join_lobby(
     _In_ Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs^ eventArgs,
@@ -362,8 +370,13 @@ multiplayer_client_manager::join_game(
 
     std::shared_ptr<xbox_live_context_impl> primaryContext = get_primary_context();
     RETURN_CPP_IF(primaryContext == nullptr, void, xbox_live_error_code::logic_error, "Call add_local_user() before joining.");
+    auto latestPending = latest_pending_read();
+    if (latestPending == nullptr)
+    {
+        return xbox_live_result<void>(xbox_live_error_code::logic_error, "No lobby session exists. Call add_local_user() to create a lobby first.");
+    }
 
-    if (latest_pending_read()->match_client()->match_status() > match_status::none)
+    if (latestPending->match_client()->match_status() > match_status::none)
     {
         return xbox_live_result<void>(xbox_live_error_code::logic_error, "Matchmaking is currently in progress. Call cancel_match() before joining a game.");
     }
@@ -373,8 +386,9 @@ multiplayer_client_manager::join_game(
     {
         std::shared_ptr<multiplayer_client_manager> pThis(thisWeakPtr.lock());
         RETURN_CPP_IF(pThis == nullptr, void, xbox_live_error_code::generic_error, "multiplayer_client_manager class was destroyed.");
-
-        auto gameClient = pThis->latest_pending_read()->game_client();
+        auto latestPending2 = pThis->latest_pending_read();
+        RETURN_CPP_IF(latestPending2 == nullptr, void, xbox_live_error_code::generic_error, "multiplayer_client_manager class was destroyed.");
+        auto gameClient = latestPending2->game_client();
         RETURN_CPP_IF(gameClient == nullptr, void, xbox_live_error_code::generic_error, "multiplayer_game_client class was destroyed.");
 
         if (xboxUserIds.size() > 0)
@@ -425,7 +439,7 @@ multiplayer_client_manager::leave_game()
 {
     std::shared_ptr<xbox_live_context_impl> primaryContext = get_primary_context();
     auto latestPendingRead = latest_pending_read();
-    if(latestPendingRead == nullptr || primaryContext == nullptr)
+    if (latestPendingRead == nullptr || primaryContext == nullptr)
     {
         return xbox_live_result<void>(xbox_live_error_code::logic_error, "Call add_local_user() before committing.");
     }
@@ -469,14 +483,15 @@ multiplayer_client_manager::invite_friends(
     )
 {
     RETURN_CPP_IF(user == nullptr, void, xbox_live_error_code::invalid_argument, "Invalid user argument passed.");
-    RETURN_CPP_IF(latest_pending_read() == nullptr, void, xbox_live_error_code::logic_error, "Call add_local_user() and wait for user_added completion event before sending invites.");
-    RETURN_CPP_IF(latest_pending_read()->lobby_client()->session() == nullptr, void, xbox_live_error_code::logic_error, "Call add_local_user() and wait for user_added completion event before sending invites.");
+    auto latestPendingRead = latest_pending_read();
+    RETURN_CPP_IF(latestPendingRead == nullptr, void, xbox_live_error_code::logic_error, "Call add_local_user() and wait for user_added completion event before sending invites.");
+    RETURN_CPP_IF(latestPendingRead->lobby_client()->session() == nullptr, void, xbox_live_error_code::logic_error, "Call add_local_user() and wait for user_added completion event before sending invites.");
 
     std::weak_ptr<multiplayer_client_manager> thisWeakPtr = shared_from_this();
 
 #if TV_API
 
-    auto sessionRef = latest_pending_read()->lobby_client()->session()->session_reference();
+    auto sessionRef = latestPendingRead->lobby_client()->session()->session_reference();
     auto sessionReferenceToInviteTo = ref new Windows::Xbox::Multiplayer::MultiplayerSessionReference(
         ref new Platform::String(sessionRef.session_name().c_str()),
         ref new Platform::String(sessionRef.service_configuration_id().c_str()),
@@ -510,11 +525,10 @@ multiplayer_client_manager::invite_friends(
     });
 #else
     UNREFERENCED_PARAMETER(customActivationContext);
-#if !XBOX_UWP
 #if !UNIT_TEST_SERVICES
 
     auto asyncOp = xbox::services::system::title_callable_ui::show_game_invite_ui(
-        latest_pending_read()->lobby_client()->session()->session_reference(),
+        latestPendingRead->lobby_client()->session()->session_reference(),
         contextStringId
         );
 
@@ -527,7 +541,6 @@ multiplayer_client_manager::invite_friends(
             pThis->add_multiplayer_event(multiplayer_event_type::invite_sent, multiplayer_session_type::lobby_session, result.err(), result.err_message());
         }
     });
-#endif
 #endif
 #endif
 
@@ -543,13 +556,14 @@ multiplayer_client_manager::invite_users(
     )
 {
     RETURN_CPP_IF(user == nullptr, void, xbox_live_error_code::invalid_argument, "Invalid user argument passed.");
-    RETURN_CPP_IF(latest_pending_read() == nullptr, void, xbox_live_error_code::logic_error, "Call add_local_user() and wait for user_added completion event before sending invites.");
-    RETURN_CPP_IF(latest_pending_read()->lobby_client()->session() == nullptr, void, xbox_live_error_code::logic_error, "Call add_local_user() and wait for user_added completion event before sending invites.");
+    auto latestPendingRead = latest_pending_read();
+    RETURN_CPP_IF(latestPendingRead == nullptr, void, xbox_live_error_code::logic_error, "Call add_local_user() and wait for user_added completion event before sending invites.");
+    RETURN_CPP_IF(latestPendingRead->lobby_client()->session() == nullptr, void, xbox_live_error_code::logic_error, "Call add_local_user() and wait for user_added completion event before sending invites.");
 
     std::weak_ptr<multiplayer_client_manager> thisWeakPtr = shared_from_this();
 
     auto task = get_multiplayer_service(user).send_invites(
-            latest_pending_read()->lobby_client()->session()->session_reference(),
+            latestPendingRead->lobby_client()->session()->session_reference(),
             xboxUserIds,
             utils::try_get_master_title_id(),
             contextStringId,
@@ -832,13 +846,17 @@ multiplayer_client_manager::get_session_type(
     )
 {
     multiplayer_session_type sessionType = multiplayer_session_type::unknown;
-    if (latest_pending_read()->is_lobby(session->session_reference()))
+    auto latestPendingRead = latest_pending_read();
+    if (latestPendingRead != nullptr)
     {
-        sessionType = multiplayer_session_type::lobby_session;
-    }
-    else if (latest_pending_read()->is_game(session->session_reference()))
-    {
-        sessionType = multiplayer_session_type::game_session;
+        if (latestPendingRead->is_lobby(session->session_reference()))
+        {
+            sessionType = multiplayer_session_type::lobby_session;
+        }
+        else if (latestPendingRead->is_game(session->session_reference()))
+        {
+            sessionType = multiplayer_session_type::game_session;
+        }
     }
 
     return sessionType;
@@ -958,12 +976,18 @@ multiplayer_client_manager::handle_member_list_changed(
 
     if (haveMembersJoined || haveMembersLeft)
     {
+        auto latestPendingRead = latest_pending_read();
+        if (latestPendingRead == nullptr)
+        {
+            return;
+        }
+
         if (haveMembersJoined)
         {
             std::vector<std::shared_ptr<multiplayer_member>> gameMembers;
             for (const auto& member : membersJoined)
             {
-                gameMembers.push_back(latest_pending_read()->convert_to_game_member(member));
+                gameMembers.push_back(latestPendingRead->convert_to_game_member(member));
             }
 
             std::shared_ptr<member_joined_event_args> memberJoinedEventArgs = std::make_shared<member_joined_event_args>(
@@ -986,7 +1010,7 @@ multiplayer_client_manager::handle_member_list_changed(
             std::vector<std::shared_ptr<multiplayer_member>> gameMembers;
             for (const auto& member : membersLeft)
             {
-                gameMembers.push_back(latest_pending_read()->convert_to_game_member(member));
+                gameMembers.push_back(latestPendingRead->convert_to_game_member(member));
             }
 
             std::shared_ptr<member_left_event_args> memberLeftEventArgs = std::make_shared<member_left_event_args>(
@@ -1047,8 +1071,13 @@ multiplayer_client_manager::handle_member_properties_changed(
                 continue;
             }
 
+            auto latestPendingRead = latest_pending_read();
+            if (latestPendingRead == nullptr)
+            {
+                continue;
+            }
             std::shared_ptr<member_property_changed_event_args> memberPropertiesChangedArgs = std::make_shared<member_property_changed_event_args>(
-                latest_pending_read()->convert_to_game_member(member),
+                latestPendingRead->convert_to_game_member(member),
                 member->member_custom_properties_json()
                 );
 
@@ -1076,18 +1105,19 @@ multiplayer_client_manager::handle_session_properties_changed(
         m_multiplayerLocalUserManager->is_local_user_game_state(multiplayer_local_user_game_state::pending_join))
     {
         // Don't join the game if matchmaking is in progress.
-        if (latest_pending_read()->match_client()->match_status() == match_status::none)
+        auto latestPendingRead = latest_pending_read();
+        if (latestPendingRead != nullptr && latestPendingRead->match_client()->match_status() == match_status::none)
         {
             // If state is completed, or transfer handle was removed.
-            if ( latest_pending_read()->lobby_client()->is_transfer_handle_state(_T("completed")) ||
+            if (latestPendingRead->lobby_client()->is_transfer_handle_state(_T("completed")) ||
                 (multiplayer_manager_utils::has_session_property_changed(currentSession, oldSession, multiplayer_lobby_client::c_transferHandlePropertyName) &&
-                 latest_pending_read()->lobby_client()->get_transfer_handle().empty())
+                latestPendingRead->lobby_client()->get_transfer_handle().empty())
                 )
             {
                 m_multiplayerLocalUserManager->change_all_local_user_game_state(multiplayer_local_user_game_state::join);
 
                 // Join the game session using the handleId.
-                latest_pending_read()->game_client()->join_game_from_lobby_helper();
+                latestPendingRead->game_client()->join_game_from_lobby_helper();
             }
         }
     }
@@ -1121,15 +1151,19 @@ multiplayer_client_manager::handle_host_changed(
     )
 {
     /// A host may have left, and there may be no new host.
-    std::shared_ptr<multiplayer_member> hostMemeber = nullptr;
+    std::shared_ptr<multiplayer_member> hostMember = nullptr;
     std::shared_ptr<multiplayer_session_member> host = multiplayer_manager_utils::host_member(currentSession);
     if (host != nullptr)
     {
-        hostMemeber = latest_pending_read()->convert_to_game_member(host);
+        auto latestPendingRead = latest_pending_read();
+        if (latestPendingRead != nullptr)
+        {
+            hostMember = latestPendingRead->convert_to_game_member(host);
+        }
     }
 
     std::shared_ptr<host_changed_event_args> hostChangedEventArgs = std::make_shared<host_changed_event_args>(
-        hostMemeber
+        hostMember
         );
 
     multiplayer_event multiplayerEvent(
@@ -1177,14 +1211,24 @@ multiplayer_client_manager::handle_tournament_properties_changed(
          !currentGameSessionRef.is_null() &&
          currentGameSessionRef._Serialize() != oldTournamentsServer.next_game_session_reference()._Serialize())
     {
-        latest_pending_read()->lobby_client()->handle_game_session_ready_event(currentSession);
+        auto latestPendingRead = latest_pending_read();
+        if (latestPendingRead != nullptr)
+        {
+            latestPendingRead->lobby_client()->handle_game_session_ready_event(currentSession);
+        }
     }
 }
 
 std::shared_ptr<multiplayer_match_client>
 multiplayer_client_manager::match_client()
 {
-    return latest_pending_read()->match_client();
+    auto latestPendingRead = latest_pending_read();
+    if (latestPendingRead == nullptr)
+    {
+        return nullptr;
+    }
+
+    return latestPendingRead->match_client();
 }
 
 xbox_live_result<void>
@@ -1194,8 +1238,9 @@ multiplayer_client_manager::find_match(
     _In_ const std::chrono::seconds& timeout
 )
 {
-    RETURN_CPP_IF(latest_pending_read() == nullptr || latest_pending_read()->lobby_client()->session() == nullptr, void, xbox_live_error_code::logic_error, "No local user added. Call add_local_user() first.");
-    return latest_pending_read()->find_match(hopperName, attributes, timeout);
+    auto latestPendingRead = latest_pending_read();
+    RETURN_CPP_IF(latestPendingRead == nullptr || latestPendingRead->lobby_client()->session() == nullptr, void, xbox_live_error_code::logic_error, "No local user added. Call add_local_user() first.");
+    return latestPendingRead->find_match(hopperName, attributes, timeout);
 }
 
 void
@@ -1204,9 +1249,10 @@ multiplayer_client_manager::set_auto_fill_members_during_matchmaking(
     )
 {
     m_autoFillMembers = autoFillMembers;
-    if (latest_pending_read() != nullptr)
+    auto latestPendingRead = latest_pending_read();
+    if (latestPendingRead != nullptr)
     {
-        latest_pending_read()->set_auto_fill_members_during_matchmaking(autoFillMembers);
+        latestPendingRead->set_auto_fill_members_during_matchmaking(autoFillMembers);
     }
 }
 

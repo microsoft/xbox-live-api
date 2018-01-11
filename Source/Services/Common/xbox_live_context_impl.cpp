@@ -8,7 +8,7 @@
 #include "xbox_system_factory.h"
 #include "xsapi/system.h"
 #include "xbox_live_context_impl.h"
-#if !TV_API && !UNIT_TEST_SERVICES && !XSAPI_SERVER
+#if !TV_API && !UNIT_TEST_SERVICES
 #include "notification_service.h"
 #endif
 #include "presence_internal.h"
@@ -16,8 +16,7 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-#if TV_API | XBOX_UWP
-
+#if XSAPI_XDK_AUTH
 xbox_live_context_impl::xbox_live_context_impl(
     _In_ Windows::Xbox::System::User^ user
     ) :
@@ -32,9 +31,9 @@ xbox_live_context_impl::user()
 {
     return m_userContext->user();
 }
+#endif
 
-#else
-
+#if XSAPI_NONXDK_CPP_AUTH && !UNIT_TEST_SERVICES
 xbox_live_context_impl::xbox_live_context_impl(
     _In_ std::shared_ptr<system::xbox_live_user> user
     ) :
@@ -45,14 +44,24 @@ xbox_live_context_impl::xbox_live_context_impl(
     m_userContext = std::make_shared<xbox::services::user_context>(user);
 }
 
-#if XSAPI_CPP
 std::shared_ptr<system::xbox_live_user>
 xbox_live_context_impl::user()
 {
     return m_userContext->user();
 }
+#endif
 
-#else
+#if XSAPI_NONXDK_WINRT_AUTH
+xbox_live_context_impl::xbox_live_context_impl(
+    _In_ std::shared_ptr<system::xbox_live_user> user
+) :
+    m_signInContext(0),
+    m_signOutContext(0)
+{
+    user->_User_impl()->set_user_pointer(user);
+    m_userContext = std::make_shared<xbox::services::user_context>(user);
+}
+
 xbox_live_context_impl::xbox_live_context_impl(
     _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user
     ) :
@@ -68,32 +77,23 @@ xbox_live_context_impl::user()
     return m_userContext->user();
 }
 #endif
-#endif
 
 xbox_live_context_impl::~xbox_live_context_impl()
 {
+#if XSAPI_NONXDK_CPP_AUTH
     if (m_userContext->user() != nullptr)
     {
-#if !TV_API && !UNIT_TEST_SERVICES && !XSAPI_SERVER
-#if XSAPI_CPP
-        m_userContext->user()->_User_impl()->remove_sign_in_completed_handler(
+        auto userImpl = m_userContext->user()->_User_impl();
+
+        userImpl->remove_sign_in_completed_handler(
             m_signInContext
             );
 
-        m_userContext->user()->_User_impl()->remove_sign_out_completed_handler(
+        userImpl->remove_sign_out_completed_handler(
             m_signOutContext
             );
-#else
-        m_userContext->user()->GetUserImpl()->remove_sign_in_completed_handler(
-            m_signInContext
-            );
-
-        m_userContext->user()->GetUserImpl()->remove_sign_out_completed_handler(
-            m_signOutContext
-            );
-#endif
-#endif
     }
+#endif
 
     real_time_activity::real_time_activity_service_factory::get_singleton_instance()->remove_user_from_rta_map(m_userContext);
 }
@@ -107,7 +107,7 @@ void xbox_live_context_impl::init()
     m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_settings>();
     init_real_time_activity_service_instance();
 
-#if TV_API || UWP_API
+#if UWP_API || TV_API 
     auto dispatcher = xbox_live_context_settings::_s_dispatcher;
     if (dispatcher == nullptr)
     {
@@ -160,9 +160,7 @@ void xbox_live_context_impl::init()
     m_stringService = xbox::services::system::string_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_clubsService = xbox::services::clubs::clubs_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
 
-#if !XSAPI_SERVER
-
-#if UWP_API || XSAPI_U
+#if (UWP_API || XSAPI_U)
     m_eventsService = events::events_service(m_userContext, m_appConfig);
 #endif 
 
@@ -172,9 +170,6 @@ void xbox_live_context_impl::init()
     m_inventoryService = marketplace::inventory_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_entertainmentProfileService = entertainment_profile::entertainment_profile_list_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
 #else
-
-#if !XBOX_UWP
-
     // Only start the presence writer on UAP
     presence::presence_writer::get_presence_writer_singleton()->start_writer(m_presenceService._Impl());
 
@@ -185,9 +180,10 @@ void xbox_live_context_impl::init()
         m_appConfig
         );
 
+
+#if XSAPI_NONXDK_CPP_AUTH || XSAPI_NONXDK_WINRT_AUTH
     if (m_userContext->user() != nullptr)
     {
-#if !TV_API && XSAPI_CPP
         m_signInContext = m_userContext->user()->_User_impl()->add_sign_in_completed_handler(
         [thisWeakPtr](const string_t& xboxUserId)
         {
@@ -199,7 +195,7 @@ void xbox_live_context_impl::init()
         });
 
         m_signOutContext = m_userContext->user()->_User_impl()->add_sign_out_completed_handler(
-            [thisWeakPtr](const system::sign_out_completed_event_args& args)
+            [thisWeakPtr](const system::sign_out_completed_event_args&)
         {
             std::shared_ptr<xbox_live_context_impl> pThis(thisWeakPtr.lock());
             if (pThis != nullptr)
@@ -208,32 +204,7 @@ void xbox_live_context_impl::init()
                 presence::presence_writer::get_presence_writer_singleton()->stop_writer(pThis->xbox_live_user_id());
             }
         });
-
-#elif !TV_API
-        m_signInContext = m_userContext->user()->GetUserImpl()->add_sign_in_completed_handler(
-            [thisWeakPtr](const string_t& xboxUserId)
-        {
-            std::shared_ptr<xbox_live_context_impl> pThis(thisWeakPtr.lock());
-            if (pThis != nullptr && utils::str_icmp(pThis->xbox_live_user_id(), xboxUserId) == 0)
-            {
-                presence::presence_writer::get_presence_writer_singleton()->start_writer(pThis->m_presenceService._Impl());
-            }
-        });
-
-        m_signOutContext = m_userContext->user()->GetUserImpl()->add_sign_out_completed_handler(
-                [thisWeakPtr](const system::sign_out_completed_event_args& args)
-        {
-            UNREFERENCED_PARAMETER(args);
-            std::shared_ptr<xbox_live_context_impl> pThis(thisWeakPtr.lock());
-            if (pThis != nullptr)
-            {
-                pThis->real_time_activity_service()->_Close_websocket();
-                presence::presence_writer::get_presence_writer_singleton()->stop_writer(pThis->xbox_live_user_id());
-            }
-        });
-#endif
     }
-#endif
 #endif
 #endif
 }
@@ -360,10 +331,10 @@ xbox_live_context_impl::string_service()
 clubs::clubs_service&
 xbox_live_context_impl::clubs_service()
 {
-	return m_clubsService;
+    return m_clubsService;
 }
 
-#if UWP_API || XSAPI_U
+#if (UWP_API || XSAPI_U)
 events::events_service&
 xbox_live_context_impl::events_service()
 {

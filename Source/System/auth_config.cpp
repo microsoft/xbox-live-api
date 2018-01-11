@@ -42,7 +42,8 @@ auth_config::auth_config(
     _In_ string_t environmentPrefix,
     _In_ string_t environment,
     _In_ bool useCompactTicket,
-    _In_ bool isCreatorsTitle) :
+    _In_ bool isCreatorsTitle,
+    _In_ string_t scope) :
     m_useCompactTicket(useCompactTicket),
     m_sandbox(std::move(sandbox)),
     m_detailError(0),
@@ -57,12 +58,55 @@ auth_config::auth_config(
     m_userTokenEndpoint = get_endpoint_path(_T("user.auth"), environmentPrefix, environment);
     m_serviceTokenEndpoint = get_endpoint_path(_T("service.auth"), environmentPrefix, environment);
     m_xTokenEndpoint = get_endpoint_path(_T("xsts.auth"), environmentPrefix, environment);
-    m_userTokenSiteName = get_endpoint_path(_T("user.auth"), _T(""), environment, false); 
-    m_rpsTicketService = isCreatorsTitle ? _T("xbl.signin xbl.friends") : (useCompactTicket ? m_userTokenSiteName : _T("xboxlive.signin"));
+    m_userTokenSiteName = get_endpoint_path(_T("open-user.auth"), _T(""), environment, false);
+    m_rpsTicketService = isCreatorsTitle ? scope : (useCompactTicket ? m_userTokenSiteName : scope);
     m_xtokenComposition = { token_identity_type::u_token, token_identity_type::d_token, token_identity_type::t_token };
 }
 
-#if XSAPI_SERVER || XSAPI_U
+const string_t& auth_config::rps_ticket_service() const
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_rpsTicketService;
+}
+
+void auth_config::set_rps_ticket_service(
+    _In_ string_t value
+    )
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_rpsTicketService = std::move(value);
+}
+
+const string_t& auth_config::rps_ticket_policy() const
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_rpsTicketPolicy;
+}
+
+void auth_config::set_rps_ticket_policy(
+    _In_ string_t value
+    )
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_rpsTicketPolicy = std::move(value);
+}
+
+const string_t& auth_config::xbox_live_endpoint() const
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_xboxLiveEndpoint;
+}
+
+void auth_config::set_xbox_live_endpoint(
+    _In_ string_t value
+)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_xboxLiveEndpoint = std::move(value);
+}
+
+
+#if XSAPI_U
 bool auth_config::use_win10_auth() const
 {
 #if UWP_API || XSAPI_U
@@ -76,40 +120,16 @@ bool auth_config::use_compact_ticket() const
 {
     return m_useCompactTicket;
 }
-#endif
 
-const string_t& auth_config::rps_ticket_service() const
-{
-    return m_rpsTicketService;
-}
-
-void auth_config::set_rps_ticket_service(
-    _In_ string_t value
-    )
-{
-    m_rpsTicketService = std::move(value);
-}
-
-const string_t& auth_config::rps_ticket_policy() const
-{
-    return m_rpsTicketPolicy;
-}
-
-void auth_config::set_rps_ticket_policy(
-    _In_ string_t value
-    )
-{
-    m_rpsTicketPolicy = std::move(value);
-}
-
-#if XSAPI_SERVER || XSAPI_U
 const string_t& auth_config::environment() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     return m_environment;
 }
 
 const string_t& auth_config::device_token_endpoint() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     return m_deviceTokenEndpoint;
 }
 
@@ -117,11 +137,13 @@ void auth_config::set_device_token_endpoint(
     _In_ string_t value
     )
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_deviceTokenEndpoint = std::move(value);
 }
 
 const string_t& auth_config::title_token_endpoint() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     return m_titleTokenEndpoint;
 }
 
@@ -129,11 +151,13 @@ void auth_config::set_title_token_endpoint(
     _In_ string_t value
     )
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_titleTokenEndpoint = std::move(value);
 }
 
 const string_t& auth_config::user_token_site_name() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     return m_userTokenSiteName;
 }
 
@@ -141,11 +165,13 @@ void auth_config::set_user_token_site_name(
     _In_ string_t value
     )
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_userTokenSiteName = std::move(value);
 }
 
 const string_t& auth_config::user_token_endpoint() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     return m_userTokenEndpoint;
 }
 
@@ -153,11 +179,13 @@ void auth_config::set_user_token_endpoint(
     _In_ string_t value
     )
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_userTokenEndpoint = std::move(value);
 }
 
 const string_t& auth_config::service_token_endpoint() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     return m_serviceTokenEndpoint;
 }
 
@@ -165,11 +193,13 @@ void auth_config::set_service_token_endpoint(
     _In_ string_t value
     )
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_serviceTokenEndpoint = std::move(value);
 }
 
 const string_t& auth_config::xbox_live_relying_party() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     return m_xboxLiveRelyingParty;
 }
 
@@ -177,25 +207,13 @@ void auth_config::set_xbox_live_relying_party(
     _In_ string_t value
     )
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_xboxLiveRelyingParty = std::move(value);
 }
-#endif
 
-const string_t& auth_config::xbox_live_endpoint() const
-{
-    return m_xboxLiveEndpoint;
-}
-
-void auth_config::set_xbox_live_endpoint(
-    _In_ string_t value
-    )
-{
-    m_xboxLiveEndpoint = std::move(value);
-}
-
-#if XSAPI_SERVER || XSAPI_U
 const string_t& auth_config::x_token_endpoint() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     return m_xTokenEndpoint;
 }
 
@@ -203,11 +221,13 @@ void auth_config::set_x_token_endpoint(
     _In_ string_t value
     )
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_xTokenEndpoint = std::move(value);
 }
 
 const string_t& auth_config::x_title_endpoint() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     return m_xTitleEndpoint;
 }
 
@@ -215,26 +235,31 @@ void auth_config::set_x_title_endpoint(
     _In_ string_t value
     )
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_xTitleEndpoint = std::move(value);
 }
 
 void auth_config::set_app_id(string_t appId)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_appId = std::move(appId);
 }
 
 const string_t& auth_config::app_id() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     return m_appId;
 }
 
 void auth_config::set_microsoft_account_id(string_t accountId)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_accountId = std::move(accountId);
 }
 
 const string_t& auth_config::microsoft_account_id() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     return m_accountId;
 }
 
@@ -250,27 +275,32 @@ uint32_t auth_config::detail_error() const
 
 void auth_config::reset()
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_redirect.clear();
     m_detailError = 0;
 }
 
 void auth_config::set_redirect(_In_ string_t value)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_redirect = std::move(value);
 }
 
 const string_t& auth_config::redirect() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     return m_redirect;
 }
 
 const std::vector<token_identity_type>& auth_config::xtoken_composition() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     return m_xtokenComposition;
 }
 
 void auth_config::set_xtoken_composition(std::vector<token_identity_type> value)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_xtokenComposition = value;
 }
 

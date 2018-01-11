@@ -10,11 +10,8 @@
 #include "xsapi/system.h"
 #if TV_API
 #include "System/ppltasks_extra.h"
-#elif XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
+#elif XSAPI_U
 #include "request_signer.h"
-#if XSAPI_SERVER || UNIT_TEST_SYSTEM
-#include <Winhttp.h>
-#endif
 #endif
 #if XSAPI_A
 #include "a/user_impl_a.h"
@@ -72,47 +69,6 @@ http_call_impl::http_call_impl(
 {
 }
 
-#if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
-pplx::task<std::shared_ptr<http_call_response>>
-http_call_impl::get_response(
-    _In_ std::shared_ptr<system::ecdsa> proofKey,
-    _In_ const system::signature_policy& signaturePolicy,
-    _In_ http_call_response_body_type httpCallResponseBodyType
-    )
-{
-    m_httpCallData->request = get_default_request();
-    std::string body;
-
-    if (proofKey->pub_key().x.size() != 0 || proofKey->pub_key().y.size() != 0)
-    {
-        std::vector<unsigned char> bodyData;
-        if (m_httpCallData->requestBody.get_http_request_message_type() == http_request_message_type::vector_message)
-        {
-            bodyData = m_httpCallData->requestBody.request_message_vector();
-        }
-        else
-        {
-            body = utility::conversions::to_utf8string(m_httpCallData->requestBody.request_message_string());
-            bodyData.assign(body.begin(), body.end());
-        }
-
-        string_t signature = xbox::services::system::request_signer::sign_request(
-            *proofKey,
-            signaturePolicy,
-            utility::datetime::utc_now().to_interval(),
-            m_httpCallData->httpMethod,
-            utils::path_and_query_from_uri(m_httpCallData->request.request_uri()),
-            m_httpCallData->request.headers(),
-            bodyData
-            );
-
-        m_httpCallData->request.headers().add(_T("Signature"), signature);
-    }
-
-    return internal_get_response(m_httpCallData);
-}
-#endif
-
 pplx::task<std::shared_ptr<http_call_response>>
 http_call_impl::get_response(
     _In_ http_call_response_body_type httpCallResponseBodyType
@@ -136,25 +92,9 @@ http_call_impl::get_response(
     return internal_get_response(m_httpCallData);
 }
 
-
-#if TV_API | XBOX_UWP
-    
-pplx::task<std::shared_ptr<http_call_response>> 
-http_call_impl::get_response_with_auth(
+#if XSAPI_XDK_AUTH // XDK
+pplx::task<std::shared_ptr<http_call_response>> http_call_impl::get_response_with_auth(
     _In_ Windows::Xbox::System::User^ user,
-    _In_ http_call_response_body_type httpCallResponseBodyType,
-    _In_ bool allUsersAuthRequired
-    ) 
-{
-    auto userContext = std::make_shared<xbox::services::user_context>(user);
-    return get_response_with_auth(userContext, httpCallResponseBodyType, allUsersAuthRequired);
-}
-
-#elif UNIT_TEST_SERVICES || !XSAPI_CPP
-    
-pplx::task<std::shared_ptr<http_call_response>>
-http_call_impl::get_response_with_auth(
-    _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
     _In_ http_call_response_body_type httpCallResponseBodyType,
     _In_ bool allUsersAuthRequired
     )
@@ -162,11 +102,10 @@ http_call_impl::get_response_with_auth(
     auto userContext = std::make_shared<xbox::services::user_context>(user);
     return get_response_with_auth(userContext, httpCallResponseBodyType, allUsersAuthRequired);
 }
-    
-#else
-    
-pplx::task<std::shared_ptr<http_call_response>>
-http_call_impl::get_response_with_auth(
+#endif 
+
+#if XSAPI_NONXDK_CPP_AUTH
+pplx::task<std::shared_ptr<http_call_response>> http_call_impl::get_response_with_auth(
     _In_ std::shared_ptr<system::xbox_live_user> user,
     _In_ http_call_response_body_type httpCallResponseBodyType,
     _In_ bool allUsersAuthRequired
@@ -175,8 +114,20 @@ http_call_impl::get_response_with_auth(
     auto userContext = std::make_shared<xbox::services::user_context>(user);
     return get_response_with_auth(userContext, httpCallResponseBodyType, allUsersAuthRequired);
 }
-
 #endif
+
+#if XSAPI_NONXDK_WINRT_AUTH 
+pplx::task<std::shared_ptr<http_call_response>> http_call_impl::get_response_with_auth(
+    _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
+    _In_ http_call_response_body_type httpCallResponseBodyType,
+    _In_ bool allUsersAuthRequired
+    )
+{
+    auto userContext = std::make_shared<xbox::services::user_context>(user);
+    return get_response_with_auth(userContext, httpCallResponseBodyType, allUsersAuthRequired);
+}
+#endif
+
 
 pplx::task<std::shared_ptr<http_call_response>>
 http_call_impl::get_response_with_auth(
@@ -190,18 +141,13 @@ http_call_impl::get_response_with_auth(
     m_httpCallData->request = get_default_request();
 
     string_t fullUrl = m_httpCallData->serverName + m_httpCallData->request.request_uri().to_string();
-#if !TV_API && !XSAPI_SERVER
-#if XSAPI_CPP
-    if (!m_httpCallData->userContext->user() || !m_httpCallData->userContext->user()->is_signed_in())
-#else
-    if (!userContext->user() || !userContext->user()->IsSignedIn)
-#endif
+
+    if (!m_httpCallData->userContext->is_signed_in())
     {
         auto httpCallResponse = get_http_call_response(m_httpCallData, http_response());
         handle_response_error(httpCallResponse, xbox_live_error_code::auth_user_not_signed_in, "User must be signed in to call this API", http_response());
         return pplx::task_from_result<std::shared_ptr<http_call_response>>(httpCallResponse);
     }
-#endif
 
     return _Internal_get_response_with_auth(
         userContext,
@@ -276,6 +222,49 @@ http_call_impl::get_response_with_auth(
     return pplx::task_from_result<std::shared_ptr<http_call_response>>(nullptr);
 }
 #endif
+
+
+#if XSAPI_U
+pplx::task<std::shared_ptr<http_call_response>>
+http_call_impl::get_response(
+    _In_ std::shared_ptr<system::ecdsa> proofKey,
+    _In_ const system::signature_policy& signaturePolicy,
+    _In_ http_call_response_body_type httpCallResponseBodyType
+)
+{
+    m_httpCallData->request = get_default_request();
+    std::string body;
+
+    if (proofKey->pub_key().x.size() != 0 || proofKey->pub_key().y.size() != 0)
+    {
+        std::vector<unsigned char> bodyData;
+        if (m_httpCallData->requestBody.get_http_request_message_type() == http_request_message_type::vector_message)
+        {
+            bodyData = m_httpCallData->requestBody.request_message_vector();
+        }
+        else
+        {
+            body = utility::conversions::to_utf8string(m_httpCallData->requestBody.request_message_string());
+            bodyData.assign(body.begin(), body.end());
+        }
+
+        string_t signature = xbox::services::system::request_signer::sign_request(
+            *proofKey,
+            signaturePolicy,
+            utility::datetime::utc_now().to_interval(),
+            m_httpCallData->httpMethod,
+            utils::path_and_query_from_uri(m_httpCallData->request.request_uri()),
+            m_httpCallData->request.headers(),
+            bodyData
+        );
+
+        m_httpCallData->request.headers().add(_T("Signature"), signature);
+    }
+
+    return internal_get_response(m_httpCallData);
+}
+#endif
+
 
 pplx::task<std::shared_ptr<http_call_response>>
 http_call_impl::_Internal_get_response_with_auth(
@@ -954,7 +943,7 @@ http_call_impl::get_http_call_response(
     return std::make_shared<http_call_response>(
         httpCallData->userContext != nullptr ? httpCallData->userContext->xbox_user_id() : string_t(),
         httpCallData->xboxLiveContextSettings,
-        httpCallData->serverName,
+        httpCallData->serverName + httpCallData->pathQueryFragment.to_string(),
         httpCallData->request,
         httpCallData->requestBody,
         httpCallData->xboxLiveApi,
@@ -996,9 +985,9 @@ http_call_impl::handle_json_body_response(
                         std::stringstream msg;
                         LOGS_ERROR << "Xbox Live service call to " << httpCallResponse->_Request().request_uri().to_string() << " was throttled";
                         LOGS_ERROR << utf16Error;
-                        LOGS_ERROR << "You can temporarily disable the assert by calling";
-                        LOGS_ERROR << "xboxLiveContext->settings()->disable_asserts_for_xbox_live_throttling_in_dev_sandboxes()";
-                        LOGS_ERROR << "Note that this will only disable this assert.  You will still be throttled in all sandboxes.";
+                        LOG_ERROR("You can temporarily disable the assert by calling");
+                        LOG_ERROR("xboxLiveContext->settings()->disable_asserts_for_xbox_live_throttling_in_dev_sandboxes()");
+                        LOG_ERROR("Note that this will only disable this assert.  You will still be throttled in all sandboxes.");
 
                         XSAPI_ASSERT(false && "Xbox Live service call was throttled.  See Output for more detail");
                     }
@@ -1074,21 +1063,6 @@ http_client_config http_call_impl::get_config(
         web::web_proxy proxy(proxyUri);
         config.set_proxy(proxy);
     }
-
-#if XSAPI_SERVER
-    // Overwrite SSL cert with xbox live business partner cert
-    config.set_nativehandle_options([](HINTERNET handle)
-    {
-        if (xbox_live_context_settings::_s_certContext != nullptr)
-        {
-            BOOL result = WinHttpSetOption(handle, WINHTTP_OPTION_CLIENT_CERT_CONTEXT, (LPVOID)xbox_live_context_settings::_s_certContext, sizeof(CERT_CONTEXT));
-            if (!result)
-            {
-                LOG_ERROR("WinHttpSetOption error");
-            }
-        }
-    });
-#endif 
 
     return config;
 }

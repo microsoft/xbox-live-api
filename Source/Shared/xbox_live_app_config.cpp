@@ -77,7 +77,7 @@ xbox_live_result<void> xbox_live_app_config::read()
             );
     }
 
-#if XSAPI_SERVER || XSAPI_U
+#if XSAPI_U
     m_sandbox = localConfig->sandbox();
 #endif
 

@@ -6,7 +6,7 @@
 #include "http_call_response.h"
 #include "system_internal.h"
 
-#if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
+#if XSAPI_U
 #include "signature_policy.h"
 #include "Ecdsa.h"
 #endif
@@ -203,7 +203,7 @@ public:
 
     virtual const http_call_request_message& request_body() const = 0;
 
-#if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
+#if XSAPI_U
     /// <summary>
     /// Sign the request and get the response. Used for auth services.
     /// </summary>
@@ -251,43 +251,41 @@ public:
         _In_ xbox_live_api xboxLiveApi
         );
 
-#if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
-    pplx::task<std::shared_ptr<http_call_response>> get_response(
-        _In_ std::shared_ptr<xbox::services::system::ecdsa> proofKey,
-        _In_ const xbox::services::system::signature_policy& signaturePolicy,
-        _In_ http_call_response_body_type httpCallResponseBodyType
-         ) override;
-#endif
-
-    pplx::task< std::shared_ptr<http_call_response> > get_response(
-        _In_ http_call_response_body_type httpCallResponseBodyType
-        ) override;
-
-#if TV_API | XBOX_UWP
-
+#if XSAPI_XDK_AUTH
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ Windows::Xbox::System::User^ user,
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
         _In_ bool allUsersAuthRequired = false
         ) override;
+#endif 
 
-#elif UNIT_TEST_SERVICES || !XSAPI_CPP
-
-    virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
-        _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
-        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
-        _In_ bool allUsersAuthRequired = false
-        ) override;
-
-#else
-
+#if XSAPI_NONXDK_CPP_AUTH
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ std::shared_ptr<system::xbox_live_user> user,
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
         _In_ bool allUsersAuthRequired = false
         ) override;
+#endif 
 
+#if XSAPI_NONXDK_WINRT_AUTH 
+    virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
+        _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,
+        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
+        _In_ bool allUsersAuthRequired = false
+        ) override;
 #endif
+    
+#if XSAPI_U
+    pplx::task<std::shared_ptr<http_call_response>> get_response(
+        _In_ std::shared_ptr<xbox::services::system::ecdsa> proofKey,
+        _In_ const xbox::services::system::signature_policy& signaturePolicy,
+        _In_ http_call_response_body_type httpCallResponseBodyType
+    ) override;
+#endif
+
+    pplx::task< std::shared_ptr<http_call_response> > get_response(
+        _In_ http_call_response_body_type httpCallResponseBodyType
+        ) override;
 
     pplx::task<std::shared_ptr<http_call_response>> get_response(
         _In_ http_call_response_body_type httpCallResponseBodyType,
@@ -306,7 +304,7 @@ public:
         _In_ bool allUsersAuthRequired,
         _In_ get_response_with_auth_completion_routine completionRoutine,
         _In_opt_ void* completionRoutineContext,
-        _In_ uint64_t taskGroupId // TODO I suspect this should not be a parameter
+        _In_ uint64_t taskGroupId
         ) override;
 
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
@@ -317,10 +315,6 @@ public:
     pplx::task<std::shared_ptr<http_call_response>> _Internal_get_response_with_auth(
         _In_ const std::shared_ptr<user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
-        _In_ bool allUsersAuthRequired
-        ) override;
-
-    virtual void _Internal_get_response_with_auth(
         _In_ bool allUsersAuthRequired
         ) override;
 
@@ -383,7 +377,11 @@ private:
     typedef void(*get_response_completion_routine)(
         _In_ std::shared_ptr<http_call_response> response
         );
-    
+
+    virtual void _Internal_get_response_with_auth(
+        _In_ bool allUsersAuthRequired
+        );
+
     // TODO rename after deleting ppl version
     static void internal_get_response_hc(
         _In_ const std::shared_ptr<http_call_data>& httpCallData

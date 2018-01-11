@@ -4,7 +4,7 @@
 #pragma once
 
 
-#if UWP_API || XSAPI_U || XSAPI_CENTENNIAL
+#if UWP_API || XSAPI_U
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
     /// <summary>
     /// Contains classes that let you send an in-game event.

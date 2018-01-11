@@ -353,7 +353,71 @@ public:
         );
 #endif
 
-#if defined(XSAPI_U)
+#if defined(_APISET_TARGET_VERSION_WIN10_RS3)
+    /// <summary>
+    /// Shows UI displaying the friend finder app, so the user can get more friends
+    /// </summary>
+    /// <returns>
+    /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
+    /// The task completes when the UI is closed.
+    /// result.err() contains the error based on what happened in the case of an error.
+    /// </returns>
+    _XSAPIIMP static pplx::task<xbox::services::xbox_live_result<void>>
+    show_friend_finder_ui(
+#if UWP_API
+        _In_opt_ Windows::System::User^ user = nullptr
+#endif
+    );
+
+    /// <summary>
+    /// Invokes the Xbox App to show full user profile for the target user
+    /// </summary>
+    /// <param name="targetXboxUserId">The Xbox target xuid to show the profile for.</param>
+    /// <returns>
+    /// result.err() contains the error based on what happened in the case of an error.
+    /// </returns>
+    _XSAPIIMP static pplx::task<xbox::services::xbox_live_result<void>>
+    show_user_profile_ui(_In_ const string_t& targetXboxUserId);
+
+    /// <summary>
+    /// Shows UI displaying the title app for the calling application.
+    /// </summary>
+    /// <returns>
+    /// result.err() contains the error based on what happened in the case of an error.
+    /// </returns>
+    _XSAPIIMP static pplx::task<xbox::services::xbox_live_result<void>>
+    show_title_hub_ui(
+#if UWP_API
+        _In_opt_ Windows::System::User^ user = nullptr
+#endif
+    );
+
+    /// <summary>
+    /// Shows UI displaying the user settings
+    /// </summary>
+    /// <returns>
+    /// result.err() contains the error based on what happened in the case of an error.
+    /// </returns>
+    _XSAPIIMP static pplx::task<xbox::services::xbox_live_result<void>>
+    show_user_settings_ui(
+#if UWP_API
+        _In_opt_ Windows::System::User^ user = nullptr
+#endif
+    );
+
+    /// <summary>
+    /// Shows UI displaying a dialog to customize the user's profile
+    /// </summary>
+    /// <returns>
+    /// result.err() contains the error based on what happened in the case of an error.
+    /// </returns>
+    _XSAPIIMP static pplx::task<xbox::services::xbox_live_result<void>>
+        show_customize_user_profile_ui(
+#if UWP_API
+            _In_opt_ Windows::System::User^ user = nullptr
+#endif
+        );
+#elif defined(XSAPI_U)
     /// <summary>
     /// Shows UI displaying the friend finder app, so the user can get more friends
     /// </summary>
@@ -392,7 +456,9 @@ public:
     /// </returns>
     _XSAPIIMP static pplx::task<xbox::services::xbox_live_result<void>>
     show_user_settings_ui();
+#endif
 
+#if defined(XSAPI_U)
     /// <summary>
     /// Invokes the Xbox App to show add friends functionality.
     /// </summary>

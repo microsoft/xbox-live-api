@@ -7,6 +7,9 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_BEGIN
 
+/// <summary>
+/// Represents a reference to a member in a multiplayer game.
+/// </summary>
 public ref class MultiplayerMember sealed
 {
 public:
@@ -27,7 +30,9 @@ public:
     DEFINE_PTR_PROP_GET_STR_OBJ(XboxUserId, xbox_user_id);
 
     /// <summary>
-    /// The Gamertag of the member. This is only to be used for debugging purposes.
+    /// The Gamertag of the member. This is only to be used for debugging purposes
+    /// as this gamertag may be out of date. It is recommended you use social manager
+    /// or the profile service to get this information.
     /// </summary>
     DEFINE_PTR_PROP_GET_STR_OBJ(DebugGamertag, debug_gamertag);
 

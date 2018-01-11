@@ -145,6 +145,7 @@ social_graph::initialize()
         TIME_PER_CALL_SEC
         );
 
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
     create_delayed_task(
         REFRESH_TIME_MIN,
         [thisWeakPtr]()
@@ -155,6 +156,7 @@ social_graph::initialize()
             pThis->social_graph_refresh_callback();
         }
     });
+#endif
 
     pplx::create_task([thisWeakPtr]()
     {
@@ -215,6 +217,8 @@ social_graph::initialize()
                 auto& inactiveBufferSocialGraph = pThis->m_userBuffer.inactive_buffer()->socialUserGraph;
                 for (auto& user : inactiveBufferSocialGraph)
                 {
+                    if (user.second.socialUser == nullptr)
+                        continue;
                     auto devicePresenceSubResult = pThis->m_xboxLiveContextImpl->presence_service().subscribe_to_device_presence_change(user.second.socialUser->xbox_user_id());
                     auto titlePresenceSubResult = pThis->m_xboxLiveContextImpl->presence_service().subscribe_to_title_presence_change(
                         user.second.socialUser->xbox_user_id(),
@@ -443,7 +447,11 @@ social_graph::apply_event(
             m_perfTester.start_timer(_T("profiles_changed"));
             for (auto& user : evt.users_affected())
             {
-                *inactiveBuffer->socialUserGraph[user._Xbox_user_id_as_integer()].socialUser = user;
+                auto userIterator = inactiveBuffer->socialUserGraph.find(user._Xbox_user_id_as_integer());
+                if (userIterator != inactiveBuffer->socialUserGraph.end() && userIterator->second.socialUser != nullptr)
+                {
+                    *(userIterator->second.socialUser) = user;
+                }
             }
 
             eventType = social_event_type::profiles_changed;
@@ -1056,7 +1064,8 @@ social_graph::perform_diff(
         }
 
         auto previousUser = inactiveBufferUserGraph.at(currentUserPair.first).socialUser;
-        change_list_enum didChange = xbox_social_user::_Compare(*previousUser, currentUserPair.second);
+        change_list_enum didChange = previousUser ? xbox_social_user::_Compare(*previousUser, currentUserPair.second)
+            : (change_list_enum::presence_change | change_list_enum::profile_change | change_list_enum::social_relationship_change);
 
         if ((didChange & change_list_enum::presence_change) == change_list_enum::presence_change)
         {
@@ -1215,6 +1224,7 @@ void social_graph::social_graph_refresh_callback()
 {
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
 
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
     auto task = create_delayed_task(
         REFRESH_TIME_MIN,
         [thisWeakPtr]()
@@ -1236,6 +1246,7 @@ void social_graph::social_graph_refresh_callback()
             LOG_DEBUG("Unknown std::exception in initialization");
         }
     });
+#endif
 
     refresh_graph();
 }
@@ -1524,6 +1535,7 @@ social_graph::presence_refresh_callback()
         }
     }
 
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
     create_delayed_task(
         TIME_PER_CALL_SEC,
@@ -1544,6 +1556,7 @@ social_graph::presence_refresh_callback()
             pThis->presence_refresh_callback();
         }
     });
+#endif
 }
 
 void

@@ -6,6 +6,7 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_BEGIN
 
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
 /// <summary>
 /// Wrapper for Win32 event object.
 /// All events are manual-reset, unnamed, and use the application's default security context.
@@ -25,5 +26,6 @@ public:
 private:
     HANDLE m_event;
 };
+#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_END

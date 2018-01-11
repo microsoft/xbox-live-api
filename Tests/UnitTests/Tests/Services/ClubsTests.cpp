@@ -16,6 +16,7 @@ using namespace xbox::services::clubs;
 
 using namespace Platform;
 using namespace Platform::Collections;
+using namespace Microsoft::Xbox::Services;
 using namespace Microsoft::Xbox::Services::System;
 using namespace Microsoft::Xbox::Services::Clubs;
 using namespace Windows::Foundation::Collections;
@@ -31,7 +32,7 @@ void VerifyString(Platform::String^ string, json::value& json)
     }
     else
     {
-        VERIFY_ARE_EQUAL_STR(string, json.as_string());
+        VERIFY_ARE_EQUAL_STR(string->Data(), json.as_string());
     }
 }
 
@@ -39,7 +40,7 @@ void VerifyInt(int value, json::value& json)
 {
     if (!json.is_null())
     {
-        VERIFY_ARE_EQUAL(value, json.as_integer());
+        VERIFY_ARE_EQUAL_INT(value, json.as_integer());
     }
 }
 
@@ -64,7 +65,7 @@ void VerifyClubRole(ClubRole role, json::value& json)
     if (!json.is_null())
     {
         auto jsonRole = static_cast<ClubRole>(clubs_serializers::convert_string_to_club_role(json.as_string()).payload());
-        VERIFY_ARE_EQUAL(role, jsonRole);
+        VERIFY_ARE_EQUAL_INT(role, jsonRole);
     }
 }
 
@@ -85,7 +86,7 @@ void VerifyClubRoleRecord(ClubRoleRecord^ record, json::value& json)
     
     if (!json[_T("xuid")].is_null())
     {
-        VERIFY_ARE_EQUAL_STR(record->Xuid, json[_T("xuid")].as_string());
+        VERIFY_ARE_EQUAL_STR(record->Xuid->Data(), json[_T("xuid")].as_string());
     }
 }
 
@@ -93,7 +94,7 @@ void VerifyClubPresenceRecord(ClubUserPresenceRecord^ record, json::value& json)
 {
     VerifyString(record->Xuid, json[_T("xuid")]);
     VerifyDateTime(record->LastSeen, json[_T("lastSeenTimestamp")]);
-    VERIFY_ARE_EQUAL(record->LastSeenState, static_cast<ClubUserPresence>(clubs_serializers::convert_string_to_club_user_presence(json[_T("lastSeenState")].as_string()).payload()));
+    VERIFY_ARE_EQUAL_INT(record->LastSeenState, static_cast<ClubUserPresence>(clubs_serializers::convert_string_to_club_user_presence(json[_T("lastSeenState")].as_string()).payload()));
 }
 
 DEFINE_TEST_CLASS(ClubsTests)
@@ -116,7 +117,7 @@ public:
         {
             VERIFY_IS_TRUE(json.is_array());
             auto jsonArray = json.as_array();
-            VERIFY_ARE_EQUAL(vector->Size, jsonArray.size());
+            VERIFY_ARE_EQUAL_INT(vector->Size, jsonArray.size());
 
             auto jsonIter = jsonArray.begin();
             for (const auto& elt : vector)
@@ -131,7 +132,7 @@ public:
     {
         VerifyString(club->Profile->Name->Value, json[_T("name")]);
         VerifyString(club->Owner, json[_T("owner")]);
-        VERIFY_ARE_EQUAL(club->Type, static_cast<ClubType>(clubs_serializers::convert_string_to_club_type(json[_T("type")].as_string()).payload()));
+        VERIFY_ARE_EQUAL_INT(club->Type, static_cast<ClubType>(clubs_serializers::convert_string_to_club_type(json[_T("type")].as_string()).payload()));
         VerifyDateTime(club->Created, json[_T("created")]);
         VerifyString(club->TitleFamilyId, json[_T("titleFamilyId")]);
     }
@@ -216,7 +217,7 @@ public:
         VerifyString(club->Id, json[_T("id")]);
         
         auto typeJson = json[_T("clubType")];
-        VERIFY_ARE_EQUAL(club->Type, static_cast<ClubType>(clubs_serializers::convert_string_to_club_type(typeJson[_T("type")].as_string()).payload()));
+        VERIFY_ARE_EQUAL_INT(club->Type, static_cast<ClubType>(clubs_serializers::convert_string_to_club_type(typeJson[_T("type")].as_string()).payload()));
         VerifyString(club->TitleFamilyId, typeJson[_T("titleFamilyId")]);
         VerifyString(club->TitleFamilyName, typeJson[_T("localizedTitleFamilyName")]);
         VerifyDateTime(club->Created, json[_T("creationDateUtc")]);
@@ -244,15 +245,15 @@ public:
     void VerifySearchFacetResults(SearchFacetResults_t facetResuls, json::value& json)
     {
         auto jsonAsObject = json.as_object();
-        VERIFY_ARE_EQUAL(jsonAsObject.size(), facetResuls->Size);
+        VERIFY_ARE_EQUAL_INT(jsonAsObject.size(), facetResuls->Size);
 
         auto sfrIt = jsonAsObject.begin();
         for (const auto& facet : facetResuls)
         {
-            VERIFY_ARE_EQUAL_STR(facet->Key, sfrIt->first);
+            VERIFY_ARE_EQUAL_STR(facet->Key->Data(), sfrIt->first);
 
             auto facetValuesArray = sfrIt->second.as_array();
-            VERIFY_ARE_EQUAL(facetValuesArray.size(), facet->Value->Size);
+            VERIFY_ARE_EQUAL_INT(facetValuesArray.size(), facet->Value->Size);
 
             auto facetValuesIt = facetValuesArray.begin();
             for (const auto& facetValue : facet->Value)
@@ -296,7 +297,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"/clubs/Ids(3379871642723170)/decoration/settings", httpCall->PathQueryFragment.to_string());
 
         auto clubsJsonArray = responseJson[_T("clubs")].as_array();
-        VERIFY_ARE_EQUAL(clubsJsonArray.size(), 1);
+        VERIFY_ARE_EQUAL_INT(clubsJsonArray.size(), 1);
 
         VerifyClub(club, clubsJsonArray[0]);
         
@@ -320,7 +321,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"/users/xuid(TestXboxUserId)/clubsowned", httpCall->PathQueryFragment.to_string());
                 
         auto clubsJsonArray = responseJson[_T("clubs")].as_array();
-        VERIFY_ARE_EQUAL(clubsJsonArray.size(), result->ClubIds->Size);
+        VERIFY_ARE_EQUAL_INT(clubsJsonArray.size(), result->ClubIds->Size);
         
         auto jsonIter = clubsJsonArray.begin();   
         for (const auto& id : result->ClubIds)
@@ -331,7 +332,7 @@ public:
         uint32 remainingClubs = utils::string_t_to_int32(responseJson[_T("remainingOpenAndClosedClubs")].as_string()) +
                                 utils::string_t_to_int32(responseJson[_T("remainingSecretClubs")].as_string());
 
-        VERIFY_ARE_EQUAL(result->RemainingClubs, remainingClubs);
+        VERIFY_ARE_EQUAL_INT(result->RemainingClubs, remainingClubs);
     }
 
     DEFINE_TEST_CASE(TestCreateClub)
@@ -360,7 +361,7 @@ public:
         VerifyClubAgainstAccountsResponse(result, responseJson);
 
         auto clubsJsonArray = responseJson[_T("clubs")].as_array();
-        VERIFY_ARE_EQUAL(clubsJsonArray.size(), 1);
+        VERIFY_ARE_EQUAL_INT(clubsJsonArray.size(), 1);
 
         VerifyClub(result, clubsJsonArray[0]);
     }
@@ -472,7 +473,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"/clubs/Xuid(2535412074763788)", httpCall->PathQueryFragment.to_string());
 
         auto clubsJsonArray = responseJson[_T("clubs")].as_array();
-        VERIFY_ARE_EQUAL(clubsJsonArray.size(), result->Size);
+        VERIFY_ARE_EQUAL_INT(clubsJsonArray.size(), result->Size);
 
         auto jsonIter = clubsJsonArray.begin();
         for (auto club : result)
@@ -503,7 +504,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"/clubs/recommendations/decoration/settings", httpCall->PathQueryFragment.to_string());
 
         auto clubsJsonArray = responseJson[_T("clubs")].as_array();
-        VERIFY_ARE_EQUAL(clubsJsonArray.size(), result->Size);
+        VERIFY_ARE_EQUAL_INT(clubsJsonArray.size(), result->Size);
 
         auto clubsIt = clubsJsonArray.begin();
         for (const auto& recommendation : result)
@@ -511,7 +512,7 @@ public:
             VerifyClub(recommendation->RecommendedClub, *clubsIt);
             
             auto reasonsJsonArray = (((*clubsIt)[_T("recommendation")])[_T("reasons")]).as_array();
-            VERIFY_ARE_EQUAL(recommendation->Reasons->Size, reasonsJsonArray.size());
+            VERIFY_ARE_EQUAL_INT(recommendation->Reasons->Size, reasonsJsonArray.size());
 
             auto reasonsIt = reasonsJsonArray.begin();
             for (const auto& reason : recommendation->Reasons)
@@ -544,7 +545,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"/clubs/search/decoration/settings?q=xbox&count=200", httpCall->PathQueryFragment.to_string());
 
         auto clubsJsonArray = responseJson[_T("clubs")].as_array();
-        VERIFY_ARE_EQUAL(clubsJsonArray.size(), result->Clubs->Size);
+        VERIFY_ARE_EQUAL_INT(clubsJsonArray.size(), result->Clubs->Size);
 
         auto clubsIt = clubsJsonArray.begin();
         for (const auto& club : result->Clubs)
@@ -576,7 +577,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"/suggest?q=eVALKYRIES", httpCall->PathQueryFragment.to_string());
 
         auto resultsArray = responseJson[_T("results")].as_array();
-        VERIFY_ARE_EQUAL(resultsArray.size(), result->Size);
+        VERIFY_ARE_EQUAL_INT(resultsArray.size(), result->Size);
 
         auto resultsIt = resultsArray.begin();
         for (const auto& suggestion : result)

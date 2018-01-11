@@ -109,7 +109,7 @@ std::unordered_map<string_t, string_t> serviceLocales =
 
 #ifdef _WIN32
 // Locale api for desktop and xbox
-#if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP | TV_API | XBOX_UWP
+#if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP | TV_API
 
 std::vector<string_t> utils::get_locale_list()
 {
@@ -162,6 +162,7 @@ std::vector<string_t> utils::get_locale_list()
 {
     auto javaInterop = java_interop::get_java_interop_singleton();
     std::vector<string_t> localeList;
+    rwlock_guard guard(javaInterop->java_interop_singletonLock, false);
     auto javaVM = javaInterop->get_java_vm();
     if (javaVM == nullptr)
     {
@@ -238,7 +239,7 @@ const string_t& utils::get_locales()
     }
     // For WinRT app, locale can only be get from STA, thus we generate locale in UI dispatcher assignment.
     // For desktop and xbox, we generate locale on the first call.
-#if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP | TV_API | XBOX_UWP
+#if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP | TV_API
     static bool s_localeGenerated = false;
     if (!s_localeGenerated)
     {

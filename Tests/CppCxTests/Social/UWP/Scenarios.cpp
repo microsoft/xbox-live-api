@@ -170,6 +170,19 @@ void Scenarios::Scenario_GetSocialRelationshipsAsync(_In_ MainPage^ ui, Microsof
     });
 }
 
+void Scenarios::Scenario_GetStat(_In_ MainPage^ ui, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext)
+{
+    StatisticManager^ mgr = StatisticManager::SingletonInstance;
+    if (mgr == nullptr) return;
+
+    auto statNames = mgr->GetStatisticNames(xboxLiveContext->User);
+    for(auto statName : statNames)
+    {
+        auto statValue = mgr->GetStatistic(xboxLiveContext->User, statName);
+        ui->LogFormat(L"Stat %s=%d", statName->Data(), statValue->AsInteger);
+    }
+}
+    
 void Scenarios::Scenario_WriteStat(_In_ MainPage^ ui, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext)
 {
     StatisticManager^ mgr = StatisticManager::SingletonInstance;
@@ -184,22 +197,20 @@ void Scenarios::Scenario_WriteStat(_In_ MainPage^ ui, Microsoft::Xbox::Services:
     ui->LogFormat(L"WriteStat: %s : %s", statName->Data(), statValue.ToString()->Data());
 }
 
-void Scenarios::Scenario_ReadStat(_In_ MainPage^ ui, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext)
+void Scenarios::Scenario_DeleteStat(_In_ MainPage^ ui, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext)
 {
-    static bool once = false;
-
     StatisticManager^ mgr = StatisticManager::SingletonInstance;
     if (mgr == nullptr) return;
 
-    if (!once)
-    {
-        once = true;
-        xboxLiveContext->Settings->ServiceCallRouted += ref new EventHandler<XboxServiceCallRoutedEventArgs^>([=](Object^, XboxServiceCallRoutedEventArgs^ args)
-        {
-            ui->LogFormat(L"[URL]: %s %s", args->HttpMethod->Data(), args->Url->AbsoluteUri->Data());
-            ui->LogFormat(L"[Response]: %s %s", args->HttpStatus.ToString()->Data(), args->ResponseBody->Data());
-        });
-    }
+    String^ statName = L"HighScore";
+    mgr->DeleteStatistic(xboxLiveContext->User, statName);
+    mgr->RequestFlushToService(xboxLiveContext->User);
+}
+
+void Scenarios::Scenario_GetLeaderboard(_In_ MainPage^ ui, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext)
+{
+    StatisticManager^ mgr = StatisticManager::SingletonInstance;
+    if (mgr == nullptr) return;
 
     String^ statName = L"HighScore";
     LeaderboardQuery^ Query = ref new LeaderboardQuery();

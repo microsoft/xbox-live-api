@@ -285,7 +285,7 @@ private:
     std::unordered_map<string_t, std::shared_ptr<presence_service_impl>> m_presenceServices;
     int m_heartBeatDelayInMins;
 
-#ifdef  __cplusplus_winrt
+#if UWP_API || UNIT_TEST_SERVICES
     Windows::System::Threading::ThreadPoolTimer^ m_timer;
 #else
     bool m_timerComplete;

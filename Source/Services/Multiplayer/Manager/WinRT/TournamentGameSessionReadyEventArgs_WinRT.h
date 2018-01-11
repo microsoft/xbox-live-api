@@ -7,7 +7,7 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_BEGIN
 
 /// <summary>
-/// Contains information for an event that indicates when the tournament registration state changes.
+/// Triggered when a new game has been scheduled. Game session is where the match will actually be played.
 /// </summary>
 public ref class TournamentGameSessionReadyEventArgs sealed : MultiplayerEventArgs
 {
@@ -19,6 +19,9 @@ public:
     DEFINE_PTR_PROP_GET_DATETIME_OBJ(StartTime, start_time);
 
 internal:
+    /// <summary>
+    /// Internal function.
+    /// </summary>
     TournamentGameSessionReadyEventArgs(
         _In_ std::shared_ptr<xbox::services::multiplayer::manager::tournament_game_session_ready_event_args> cppObj
         );

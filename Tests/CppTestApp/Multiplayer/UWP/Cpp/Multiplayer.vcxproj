@@ -300,7 +300,6 @@
     <None Include="Assets\LiveInfoHUD.csv">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="packages.config" />
     <None Include="ReadMe.docx">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
     </None>

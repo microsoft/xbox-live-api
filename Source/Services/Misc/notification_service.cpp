@@ -27,7 +27,7 @@ notification_service::get_notification_service_singleton()
         xsapiSingleton->m_notificationSingleton = std::make_shared<notification_service_android>();
 #elif XSAPI_I
         xsapiSingleton->m_notificationSingleton = std::make_shared<notification_service_ios>();
-#elif _WIN32
+#elif UWP_API || TV_API
         xsapiSingleton->m_notificationSingleton = std::make_shared<notification_service_windows>();
 #endif
     }
@@ -105,8 +105,8 @@ notification_service::unsubscribe_from_notifications_helper(
         {
             if (t->err_code())
             {
-                LOGS_ERROR << _T("notification service attempt failed\n");
-                LOGS_ERROR << _T("http status code: ");
+                LOG_ERROR("notification service attempt failed\n");
+                LOG_ERROR("http status code: ");
                 LOGS_ERROR << t->http_status();
                 LOGS_ERROR << t->err_message().c_str();
 
@@ -207,10 +207,6 @@ notification_service::subscribe_to_notifications_helper(
                 }
                 if (t->err_code() || errc)
                 {
-                    stringstream_t str;
-                    str << _T("http status code: ");
-                    str << t->http_status();
-                    str << t->err_message().c_str();
                     return xbox_live_result<void>(errc);
                 }
 

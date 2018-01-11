@@ -8,6 +8,7 @@
 #include "User_WinRT.h"
 #endif
 #include "xsapi/mem.h"
+#include "xsapi/types.h"
 
 namespace xbox {
     namespace services {
@@ -26,7 +27,7 @@ enum class change_list_enum;
 
 static const uint32_t GAMERSCORE_CHAR_SIZE = 16;
 static const uint32_t GAMERTAG_CHAR_SIZE = 16;
-static const uint32_t XBOX_USER_ID_CHAR_SIZE = 17;
+static const uint32_t XBOX_USER_ID_CHAR_SIZE = 21;
 static const uint32_t DISPLAY_NAME_CHAR_SIZE = 30;
 static const uint32_t REAL_NAME_CHAR_SIZE = 255;
 static const uint32_t DISPLAY_PIC_URL_RAW_CHAR_SIZE = 225;

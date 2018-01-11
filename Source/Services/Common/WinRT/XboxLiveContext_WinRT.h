@@ -45,7 +45,7 @@ public ref class XboxLiveContext sealed
 {
 public:
 
-#if TV_API | XBOX_UWP
+#if TV_API
     XboxLiveContext(_In_ Windows::Xbox::System::User^ user);
 
     /// <summary>

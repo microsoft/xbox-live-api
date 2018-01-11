@@ -25,7 +25,6 @@ stat_value::set_name(
     utils::char_t_copy(m_name, ARRAYSIZE(m_name), name.c_str());
 }
 
-
 double
 stat_value::as_number() const
 {
@@ -58,6 +57,7 @@ stat_value::set_stat(
     m_statData.numberType = value;
     m_dataType = stat_data_type::number;
 }
+
 void
 stat_value::set_stat(
     _In_ const char_t* value
@@ -100,10 +100,12 @@ stat_value::_Deserialize(
             statValue.m_statData.numberType = value.as_double();
             statValue.m_dataType = stat_data_type::number;
             break;
+
         case web::json::value::value_type::String:
             utils::char_t_copy(statValue.m_statData.stringType, ARRAYSIZE(statValue.m_statData.stringType), value.as_string().c_str());
             statValue.m_dataType = stat_data_type::string;
             break;
+
         default:
             // error
             break;

@@ -254,13 +254,7 @@ public:
     static xbox_live_user SignInUserWithMocks()
     {
         xbox_live_user userTemp;
-#if XSAPI_SERVER
-        std::shared_ptr<xbox_live_server> server;
-        string_t user_delegation_ticket = _T("");
-        VERIFY_NO_THROW(userTemp.signin(server, user_delegation_ticket).get());
-#else
         VERIFY_NO_THROW(userTemp.signin_silently().get());
-#endif
         return userTemp;
     }
 };

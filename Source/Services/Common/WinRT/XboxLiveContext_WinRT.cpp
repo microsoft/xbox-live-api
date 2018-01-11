@@ -7,7 +7,7 @@
 #include "XboxLiveContext_WinRT.h"
 #include "user_context.h"
 #include "xbox_system_factory.h"
-#if !(TV_API | XBOX_UWP)
+#if !TV_API
 #include "User_WinRT.h"
 #endif
 #include "xsapi/profile.h"
@@ -24,7 +24,7 @@ using namespace Windows::Foundation::Collections;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_BEGIN
 
-#if TV_API | XBOX_UWP
+#if TV_API
 XboxLiveContext::XboxLiveContext(
     _In_ Windows::Xbox::System::User^ user
     ) 

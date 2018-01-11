@@ -103,7 +103,7 @@ public:
     /// Attach the Xbox Live token, sign the request, send the request to the service, and return the response.
     /// </summary>
     Windows::Foundation::IAsyncOperation<XboxLiveHttpCallResponse^>^ GetResponseWithAuth(
-#if TV_API | XBOX_UWP
+#if TV_API
         _In_ Windows::Xbox::System::User^ user,
 #else
         _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user,

@@ -17,16 +17,19 @@ public ref class TournamentRegistrationStateChangedEventArgs sealed : Multiplaye
 public:
 
     /// <summary>
-    /// The tournament team registration state.
+    /// The tournament team's registration state.
     /// </summary>
     DEFINE_PTR_PROP_GET_ENUM_OBJ(RegistrationState, registration_state, Microsoft::Xbox::Services::Tournaments::TournamentRegistrationState);
 
     /// <summary>
-    /// The tournament team registration reason for the certain registration states.
+    /// The tournament team's registration reason for the certain registration states.
     /// </summary>
     DEFINE_PTR_PROP_GET_ENUM_OBJ(RegistrationReason, registration_reason, Microsoft::Xbox::Services::Tournaments::TournamentRegistrationReason);
 
 internal:
+    /// <summary>
+    /// Internal function.
+    /// </summary>
     TournamentRegistrationStateChangedEventArgs(
         _In_ std::shared_ptr<xbox::services::multiplayer::manager::tournament_registration_state_changed_event_args> cppObj
         );

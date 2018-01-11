@@ -24,9 +24,7 @@ enum class svd_event_type
 enum class svd_state
 {
     not_loaded,
-    loaded,
-    offline_not_loaded,
-    offline_loaded,
+    loaded
 };
 
 struct stat_pending_state
@@ -61,10 +59,6 @@ private:
 class stats_value_document
 {
 public:
-    void set_flush_function(
-        _In_ const std::function<void()> flushFunction
-        );
-
     xbox_live_result<stat_value> get_stat(
         _In_ const char_t* name
         ) const;
@@ -87,23 +81,21 @@ public:
         _In_ const char_t* name
         );
 
-    void increment_revision();
+    void set_revision_from_clock();
 
     web::json::value serialize();
-
-    uint64_t revision() const;
-
+    
     bool is_dirty() const;
 
     void clear_dirty_state();
 
     void do_work();
 
-    void set_state(_In_ svd_state svdState);
+    void set_svd_state(_In_ svd_state svdState);
 
     void merge_stat_value_documents(_In_ const stats_value_document& mergeSVD);
 
-    svd_state state() const;
+    svd_state get_svd_state() const;
 
     stats_value_document();
 
@@ -115,7 +107,7 @@ private:
     bool m_isDirty;
     svd_state m_state;
     uint64_t m_revision;
-    std::function<void()> m_fRequestFlush;
+    uint64_t m_previousRevision;
     xsapi_internal_string m_clientId;
     xsapi_internal_vector(svd_event) m_svdEventList;
     xsapi_internal_unordered_map(string_t, stat_value) m_statisticDocument;
@@ -135,7 +127,7 @@ public:
         );
 
     pplx::task<xbox_live_result<void>> update_stats_value_document(
-        _In_ stats_value_document& statValuePostDocument
+        _In_ stats_value_document& statsDocToPost
         );
 
     pplx::task<xbox_live_result<stats_value_document>> get_stats_value_document();
@@ -178,6 +170,7 @@ class stats_manager_impl : public std::enable_shared_from_this<stats_manager_imp
 {
 public:
     stats_manager_impl();
+    ~stats_manager_impl();
 
     xbox_live_result<void> add_local_user(
         _In_ const xbox_live_user_t& user
@@ -242,17 +235,6 @@ public:
     );
 
 private:
-    static inline bool should_write_offline(xbox_live_result<void>& postResult)
-    {
-        return postResult.err() == xbox_live_error_condition::network || postResult.err() == xbox_live_error_condition::http_429_too_many_requests 
-            || postResult.err() == xbox_live_error_code::http_status_500_internal_server_error || postResult.err() == xbox_live_error_code::http_status_502_bad_gateway
-            || postResult.err() == xbox_live_error_code::http_status_503_service_unavailable || postResult.err() == xbox_live_error_code::http_status_504_gateway_timeout;
-    }
-
-    void write_offline(
-        _In_ stats_user_context& userContext
-        );
-
     void flush_to_service(
         _In_ stats_user_context& statsUserContext
         );
@@ -261,17 +243,24 @@ private:
 
     void request_flush_to_service_callback(_In_ const string_t& userXuid);
 
-    void run_flush_timer();
+    void start_background_flush_timer(_In_ std::weak_ptr<stats_manager_impl> thisWeakPtr);
+    void stop_timer();
+    void handle_background_flush_timer_trigger();
+
+#if UWP_API
+    Windows::System::Threading::ThreadPoolTimer^ m_timer;
+#else
+    bool m_timerComplete;
+#endif
 
     static const std::chrono::seconds TIME_PER_CALL_SEC;
-    static const std::chrono::milliseconds STATS_POLL_TIME_MS;
+    static const std::chrono::seconds STATS_POLL_TIME_SEC;
 
     std::vector<stat_event> m_statEventList;
     std::vector<xbox::services::xbox_live_result<leaderboard::leaderboard_result>> m_leaderboardResults;
     std::unordered_map<string_t, stats_user_context> m_users;
-    std::shared_ptr<xbox::services::call_buffer_timer> m_statTimer;
-    std::shared_ptr<xbox::services::call_buffer_timer> m_statPriorityTimer;
-    // TODO: change back to xsapi_internal_string
+    std::shared_ptr<xbox::services::call_buffer_timer> m_statNormalPriTimer;
+    std::shared_ptr<xbox::services::call_buffer_timer> m_statHighPriTimer;
     std::mutex m_statsServiceMutex;
 };
 
