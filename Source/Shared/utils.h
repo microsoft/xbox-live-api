@@ -194,7 +194,9 @@ struct xsapi_singleton
 
     std::shared_ptr<initiator> m_initiator;
 
+#if UWP_API
     std::shared_ptr<xbl_thread_pool> m_threadpool;
+#endif
 
 #if _WINRT_DLL || UNIT_TEST_SERVICES
     // from Services\Multiplayer\Manager\WinRT\MultiplayerManager_WinRT.cpp
