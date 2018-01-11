@@ -126,7 +126,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
         {
             completionRoutine(xbox_live_result<std::vector<xbox_user_profile>>(response->err_code(), response->err_message()), clientCallbackInfo.clientContext);
         }
-    }, context, 0);
+    }, context, taskGroupId);
 
     return xbox_live_result<void>();
 }

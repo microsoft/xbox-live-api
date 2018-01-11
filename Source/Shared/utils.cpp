@@ -23,7 +23,9 @@
 #include "presence_internal.h"
 #include "initiator.h"
 #include "httpClient/httpClient.h"
+#if UWP_API
 #include "threadpool.h"
+#endif
 
 #if UWP_API
 #ifdef _WINRT_DLL
@@ -80,10 +82,12 @@ void xsapi_singleton::init()
 #endif
     // TODO this shouldn't happen here. Should be in some other internal call so that the threadpool
     // is only started for "legacy" mode.
+#if UWP_API
     HCGlobalInitialize();
     HCSettingsSetLogLevel(HC_LOG_LEVEL::LOG_VERBOSE);
     m_threadpool = std::make_shared<xbl_thread_pool>();
     m_threadpool->start_threads();
+#endif
     m_initiator = std::make_shared<initiator>();
 }
 

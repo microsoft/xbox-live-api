@@ -144,7 +144,7 @@
       <Project>{9ad285a2-301e-47a0-a299-14ad5d4f2758}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.140.UWP.C\libHttpClient.140.UWP.C.vcxproj">
-      <Project>{a6349408-5ba8-47db-9a74-e9f9cf1f7958}</Project>
+      <Project>{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

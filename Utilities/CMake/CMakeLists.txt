@@ -1251,17 +1251,6 @@ else()
 	source_group("C++ Source\\Services\\Multiplayer\\Manager" FILES ${Multiplayer_Manager_Source_Files})
 	source_group("C++ Source\\Services\\Tournaments" FILES ${Tournaments_Source_Files})
     source_group("C++ Source\\Services\\Clubs" FILES ${Clubs_Source_Files})
-    source_group("C++ Source\\C\\Shared" FILES ${Shared_Source_Files_C})
-    source_group("C++ Source\\C\\System" FILES ${System_Source_Files_C})
-    source_group("C++ Source\\C\\Services\\Achievements" FILES ${Achievements_Source_Files_C})
-    source_group("C++ Source\\C\\Services\\Common" FILES ${Common_Source_Files_C})
-    source_group("C++ Source\\C\\Services\\Leaderboard" FILES ${Leaderboard_Source_Files_C})
-    source_group("C++ Source\\C\\Services\\Misc" FILES ${Misc_Source_Files_C})
-    source_group("C++ Source\\C\\Services\\Privacy" FILES ${Privacy_Source_Files_C})
-    source_group("C++ Source\\C\\Services\\Social" FILES ${Social_Source_Files_C})
-    source_group("C++ Source\\C\\Services\\Social\\Manager" FILES ${Social_Manager_Source_Files_C})
-    source_group("C++ Source\\C\\Services\\Stats\\Manager" FILES ${Stats_Manager_Source_Files_C})
-    source_group("C++ Source\\C\\Services\\TitleStorage" FILES ${TitleStorage_Souce_Files_C})
     
 	if( XDK OR UNITTEST )
 		message(STATUS "XDK source group")
@@ -1282,7 +1271,19 @@ else()
 			source_group("C++ Source\\Shared\\WinRT" FILES ${UWP_Shared_WinRT_Source_Files})
             source_group("C++ Source\\System\\WinRT" FILES ${System_WinRT_Source_Files})
             source_group("C++ Source\\Services\\Events\\WinRT" FILES ${Events_WinRT_Source_Files})
-		endif()
+		else()
+            source_group("C++ Source\\C\\Shared" FILES ${Shared_Source_Files_C})
+            source_group("C++ Source\\C\\System" FILES ${System_Source_Files_C})
+            source_group("C++ Source\\C\\Services\\Achievements" FILES ${Achievements_Source_Files_C})
+            source_group("C++ Source\\C\\Services\\Common" FILES ${Common_Source_Files_C})
+            source_group("C++ Source\\C\\Services\\Leaderboard" FILES ${Leaderboard_Source_Files_C})
+            source_group("C++ Source\\C\\Services\\Misc" FILES ${Misc_Source_Files_C})
+            source_group("C++ Source\\C\\Services\\Privacy" FILES ${Privacy_Source_Files_C})
+            source_group("C++ Source\\C\\Services\\Social" FILES ${Social_Source_Files_C})
+            source_group("C++ Source\\C\\Services\\Social\\Manager" FILES ${Social_Manager_Source_Files_C})
+            source_group("C++ Source\\C\\Services\\Stats\\Manager" FILES ${Stats_Manager_Source_Files_C})
+            source_group("C++ Source\\C\\Services\\TitleStorage" FILES ${TitleStorage_Souce_Files_C})
+        endif()
 	endif()
 
     if( UNITTEST )
@@ -1318,7 +1319,6 @@ else()
 	endif()
 
 	set( SOURCE_FILES 
-		${Public_Source_Files_C}
 		${Common_Source_Files}
 		${Public_Source_Files}
 		${System_Source_Files}
@@ -1341,17 +1341,6 @@ else()
 		${Multiplayer_Manager_Source_Files}
 		${Tournaments_Source_Files}
         ${Clubs_Source_Files}
-        ${TitleStorage_Souce_Files_C}
-        ${Stats_Manager_Source_Files_C}
-        ${Social_Manager_Source_Files_C}
-        ${Social_Source_Files_C}
-        ${Privacy_Source_Files_C}
-        ${Misc_Source_Files_C}
-        ${Leaderboard_Source_Files_C}
-        ${Common_Source_Files_C}
-        ${Achievements_Source_Files_C}
-        ${Shared_Source_Files_C}
-        ${System_Source_Files_C}
 		)
 
 	if( WINRT OR UNITTEST )
@@ -1409,6 +1398,22 @@ else()
                 ${UWP_Shared_WinRT_Source_Files}
                 ${Events_WinRT_Source_Files}
                 ${System_WinRT_Source_Files}
+                )
+        else()
+            list(APPEND
+                SOURCE_FILES
+                ${Public_Source_Files_C}
+                ${TitleStorage_Souce_Files_C}
+                ${Stats_Manager_Source_Files_C}
+                ${Social_Manager_Source_Files_C}
+                ${Social_Source_Files_C}
+                ${Privacy_Source_Files_C}
+                ${Misc_Source_Files_C}
+                ${Leaderboard_Source_Files_C}
+                ${Common_Source_Files_C}
+                ${Achievements_Source_Files_C}
+                ${Shared_Source_Files_C}
+                ${System_Source_Files_C}
                 )
 		endif()
             

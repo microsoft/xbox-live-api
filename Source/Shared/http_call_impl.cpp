@@ -429,7 +429,7 @@ http_call_impl::internal_get_response(
 
         uint64_t taskGroupId = 0; // TODO
         HC_TASK_HANDLE taskHandle;
-        auto hcResult = HCHttpCallPerform(call, &taskHandle, HC_SUBSYSTEM_ID_XSAPI, taskGroupId, nullptr, nullptr);
+        HCHttpCallPerform(call, &taskHandle, HC_SUBSYSTEM_ID_XSAPI, taskGroupId, nullptr, nullptr);
 
         HCTaskWaitForCompleted(taskHandle, 30000);
         if (!HCTaskIsCompleted(taskHandle))
@@ -452,6 +452,7 @@ http_call_impl::internal_get_response(
 
         if (errorCode == 0)
         {
+#pragma warning(suppress: 4244)
             httpCallResponse->_Set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(statusCode)), std::string());
         }
         else
@@ -512,7 +513,7 @@ void http_call_impl::internal_get_response_hc(
     auto context = async_helpers::store_shared_ptr(httpCallData);
 
     HC_TASK_HANDLE taskHandle;
-    auto hcResult = HCHttpCallPerform(call, &taskHandle, HC_SUBSYSTEM_ID_XSAPI, httpCallData->taskGroupId, context,
+    HCHttpCallPerform(call, &taskHandle, HC_SUBSYSTEM_ID_XSAPI, httpCallData->taskGroupId, context,
         [](_In_ void* context, _In_ HC_CALL_HANDLE call)
     {
         auto httpCallData = async_helpers::remove_shared_ptr<http_call_data>(context);
@@ -528,6 +529,7 @@ void http_call_impl::internal_get_response_hc(
 
         if (errorCode == 0)
         {
+#pragma warning(suppress: 4244)
             httpCallResponse->_Set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(statusCode)), std::string());
         }
         else

@@ -123,7 +123,10 @@ void user_impl::get_token_and_signature(
         headers,
         std::vector<unsigned char>(),
         false,
-        false
+        false,
+        completionRoutine,
+        completionRoutineContext,
+        taskGroupId
         );
 }
 

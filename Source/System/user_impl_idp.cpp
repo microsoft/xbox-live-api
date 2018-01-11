@@ -318,6 +318,8 @@ void user_impl_idp::internal_get_token_and_signature(
         context,
         [](_In_opt_ void *_context, _In_ HC_TASK_HANDLE taskHandle, void *_completionRoutine, void *completionRoutineContext)
         {
+            UNREFERENCED_PARAMETER(taskHandle);
+
             /// TODO make a generic function that does this similar to what we have in flat C implementation
             auto context = reinterpret_cast<get_token_and_signature_context*>(_context);
             auto completionRoutine = reinterpret_cast<get_token_and_signature_completion_routine>(_completionRoutine);
