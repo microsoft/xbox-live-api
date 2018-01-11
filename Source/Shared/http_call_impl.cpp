@@ -8,7 +8,6 @@
 #include "xbox_system_factory.h"
 #include "build_version.h"
 #include "xsapi/system.h"
-#include "httpClient/httpClient.h"
 #if TV_API
 #include "System/ppltasks_extra.h"
 #elif XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
@@ -211,6 +210,40 @@ http_call_impl::get_response_with_auth(
         );
 }
 
+void http_call_impl::get_response_with_auth(
+    _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
+    _In_ http_call_response_body_type httpCallResponseBodyType,
+    _In_ bool allUsersAuthRequired,
+    _In_ get_response_with_auth_completion_routine completionRoutine,
+    _In_opt_ void* completionRoutineContext,
+    _In_ uint64_t taskGroupId
+    ) 
+{
+    m_httpCallData->userContext = userContext;
+    m_httpCallData->httpCallResponseBodyType = httpCallResponseBodyType;
+    m_httpCallData->request = get_default_request();
+    m_httpCallData->completionRoutine = completionRoutine;
+    m_httpCallData->completionRoutineContext = completionRoutineContext;
+    m_httpCallData->taskGroupId = taskGroupId;
+
+    string_t fullUrl = m_httpCallData->serverName + m_httpCallData->request.request_uri().to_string();
+#if !TV_API && !XSAPI_SERVER
+#if XSAPI_CPP
+    if (!m_httpCallData->userContext->user() || !m_httpCallData->userContext->user()->is_signed_in())
+#else
+    if (!userContext->user() || !userContext->user()->IsSignedIn)
+#endif
+    {
+        auto httpCallResponse = get_http_call_response(m_httpCallData, http_response());
+        handle_response_error(httpCallResponse, xbox_live_error_code::auth_user_not_signed_in, "User must be signed in to call this API", http_response());
+        // TODO how should we this be handled? Call the completion routine? Exception? change return value to xbox_live_result<void>?
+        return;
+    }
+#endif
+
+    _Internal_get_response_with_auth(allUsersAuthRequired);
+}
+
 #if XSAPI_U
 pplx::task<std::shared_ptr<http_call_response>>
 http_call_impl::get_response_with_auth(
@@ -307,6 +340,62 @@ http_call_impl::_Internal_get_response_with_auth(
     });
 }
 
+void http_call_impl::_Internal_get_response_with_auth(
+    _In_ bool allUsersAuthRequired
+    )
+{
+    string_t fullUrl = m_httpCallData->serverName + m_httpCallData->request.request_uri().to_string();
+
+    std::vector<unsigned char> requestBodyVector;
+    if (m_httpCallData->requestBody.get_http_request_message_type() == http_request_message_type::vector_message)
+    {
+        requestBodyVector = m_httpCallData->requestBody.request_message_vector();
+    }
+    else
+    {
+        std::string utf8Body(utility::conversions::to_utf8string(m_httpCallData->requestBody.request_message_string()));
+        requestBodyVector = std::vector<unsigned char>(utf8Body.begin(), utf8Body.end());
+    }
+
+    auto context = async_helpers::store_shared_ptr(m_httpCallData);
+
+    m_httpCallData->userContext->get_auth_result(
+        m_httpCallData->httpMethod,
+        fullUrl,
+        utils::headers_to_string(m_httpCallData->request.headers()),
+        requestBodyVector,
+        allUsersAuthRequired,
+        [](_In_ xbox::services::xbox_live_result<user_context_auth_result> result, _In_ void* context)
+        {
+            auto httpCallData = async_helpers::remove_shared_ptr<http_call_data>(context);
+
+            if (result.err())
+            {
+                auto httpCallResponse = get_http_call_response(httpCallData, http_response());
+                handle_response_error(httpCallResponse, static_cast<xbox_live_error_code>(result.err().value()), result.err_message(), http_response());
+                httpCallResponse->_Route_service_call();
+                // TODO handle auth failure
+                return;
+            }
+
+            const auto& authResult = result.payload();
+            if (!authResult.token().empty())
+            {
+                httpCallData->request.headers().add(AUTH_HEADER, authResult.token());
+            }
+
+            if (!authResult.signature().empty())
+            {
+                httpCallData->request.headers().add(SIG_HEADER, authResult.signature());
+            }
+
+            internal_get_response_hc(httpCallData);
+        },
+        context,
+        0
+        );
+}
+
 pplx::task<std::shared_ptr<http_call_response>>
 http_call_impl::internal_get_response(
     _In_ const std::shared_ptr<http_call_data>& httpCallData
@@ -318,26 +407,29 @@ http_call_impl::internal_get_response(
         http_client_config config = get_config(httpCallData);
         set_user_agent(httpCallData);
         pplx::task<utility::string_t> taskBody = httpCallData->request.extract_string();
-        string_t requestBody = taskBody.get();
+        std::string requestBody = utility::conversions::to_utf8string(taskBody.get());
 
         HC_CALL_HANDLE call = nullptr;
         HCHttpCallCreate(&call);
 
         utility::string_t path = httpCallData->pathQueryFragment.to_string();
-        string_t uri = httpCallData->serverName + path;
-        HCHttpCallRequestSetUrl(call, httpCallData->request.method().c_str(), uri.c_str());
+        std::string uri = utility::conversions::to_utf8string(httpCallData->serverName + path);
+        std::string method = utility::conversions::to_utf8string(httpCallData->request.method());
+
+        HCHttpCallRequestSetUrl(call, method.c_str(), uri.c_str());
         HCHttpCallRequestSetRequestBodyString(call, requestBody.c_str());
         for (auto& header : httpCallData->request.headers())
         {
-            PCSTR_T headerName = header.first.c_str();
-            PCSTR_T headerValue = header.second.c_str();
-            HCHttpCallRequestSetHeader(call, headerName, headerValue);
+            std::string headerName = utility::conversions::to_utf8string(header.first);
+            std::string headerValue = utility::conversions::to_utf8string(header.second);
+            HCHttpCallRequestSetHeader(call, headerName.c_str(), headerValue.c_str());
         }
         HCHttpCallRequestSetRetryAllowed(call, httpCallData->retryAllowed);
         HCHttpCallRequestSetTimeout(call, static_cast<uint32_t>(httpCallData->httpTimeout.count()));
 
         uint64_t taskGroupId = 0; // TODO
-        HC_TASK_HANDLE taskHandle = HCHttpCallPerform(taskGroupId, call, nullptr, nullptr);
+        HC_TASK_HANDLE taskHandle;
+        HCHttpCallPerform(call, &taskHandle, HC_SUBSYSTEM_ID_XSAPI, taskGroupId, nullptr, nullptr);
 
         HCTaskWaitForCompleted(taskHandle, 30000);
         if (!HCTaskIsCompleted(taskHandle))
@@ -349,31 +441,31 @@ http_call_impl::internal_get_response(
 
         std::shared_ptr<http_call_response> p;
         auto httpCallResponse = get_http_call_response(httpCallData, http_response());
-        
-        uint32_t errorCode = 0;
+
+        HC_RESULT errorCode = HC_OK;
+        uint32_t platformErrorCode = 0;
         uint32_t statusCode = 0;
-        PCSTR_T errorMessage = nullptr;
-        PCSTR_T responseBody = nullptr;
-        HCHttpCallResponseGetErrorCode(call, &errorCode);
+        PCSTR responseBody = nullptr;
+        HCHttpCallResponseGetNetworkErrorCode(call, &errorCode, &platformErrorCode);
         HCHttpCallResponseGetStatusCode(call, &statusCode);
-        HCHttpCallResponseGetErrorMessage(call, &errorMessage);
         HCHttpCallResponseGetResponseString(call, &responseBody);
 
         if (errorCode == 0)
         {
+#pragma warning(suppress: 4244)
             httpCallResponse->_Set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(statusCode)), std::string());
         }
         else
         {
-            std::string errorMessageStr = utility::conversions::to_utf8string(errorMessage);
-            httpCallResponse->_Set_error_info(std::make_error_code(static_cast<xbox_live_error_code>(errorCode)), errorMessageStr);
+            httpCallResponse->_Set_error_info(std::make_error_code(static_cast<xbox_live_error_code>(errorCode)), std::string());
         }
 
         switch (httpCallData->httpCallResponseBodyType)
         {
             case http_call_response_body_type::json_body:
                 std::error_code errC;
-                web::json::value responseBodyJson = web::json::value::parse(responseBody, errC);
+                string_t utf16responseBody = utility::conversions::to_utf16string(responseBody);
+                web::json::value responseBodyJson = web::json::value::parse(utf16responseBody, errC);
                 if (!errC)
                 {
                     httpCallResponse->_Set_response_body(responseBodyJson);
@@ -388,6 +480,85 @@ http_call_impl::internal_get_response(
     });
 
     return task;
+}
+
+void http_call_impl::internal_get_response_hc(
+    _In_ const std::shared_ptr<http_call_data>& httpCallData
+    )
+{
+    httpCallData->requestStartTime = chrono_clock_t::now();
+    http_client_config config = get_config(httpCallData);
+    set_user_agent(httpCallData);
+    pplx::task<utility::string_t> taskBody = httpCallData->request.extract_string();
+    std::string requestBody = utility::conversions::to_utf8string(taskBody.get());
+
+    HC_CALL_HANDLE call = nullptr;
+    HCHttpCallCreate(&call);
+
+    utility::string_t path = httpCallData->pathQueryFragment.to_string();
+    std::string uri = utility::conversions::to_utf8string(httpCallData->serverName + path);
+    std::string method = utility::conversions::to_utf8string(httpCallData->request.method());
+
+    HCHttpCallRequestSetUrl(call, method.c_str(), uri.c_str());
+    HCHttpCallRequestSetRequestBodyString(call, requestBody.c_str());
+    for (auto& header : httpCallData->request.headers())
+    {
+        std::string headerName = utility::conversions::to_utf8string(header.first);
+        std::string headerValue = utility::conversions::to_utf8string(header.second);
+        HCHttpCallRequestSetHeader(call, headerName.c_str(), headerValue.c_str());
+    }
+    HCHttpCallRequestSetRetryAllowed(call, httpCallData->retryAllowed);
+    HCHttpCallRequestSetTimeout(call, static_cast<uint32_t>(httpCallData->httpTimeout.count()));
+
+    auto context = async_helpers::store_shared_ptr(httpCallData);
+
+    HC_TASK_HANDLE taskHandle;
+    HCHttpCallPerform(call, &taskHandle, HC_SUBSYSTEM_ID_XSAPI, httpCallData->taskGroupId, context,
+        [](_In_ void* context, _In_ HC_CALL_HANDLE call)
+    {
+        auto httpCallData = async_helpers::remove_shared_ptr<http_call_data>(context);
+        auto httpCallResponse = get_http_call_response(httpCallData, http_response());
+
+        HC_RESULT errorCode = HC_OK;
+        uint32_t platformErrorCode = 0;
+        uint32_t statusCode = 0;
+        PCSTR responseBody = nullptr;
+        HCHttpCallResponseGetNetworkErrorCode(call, &errorCode, &platformErrorCode);
+        HCHttpCallResponseGetStatusCode(call, &statusCode);
+        HCHttpCallResponseGetResponseString(call, &responseBody);
+
+        if (errorCode == 0)
+        {
+#pragma warning(suppress: 4244)
+            httpCallResponse->_Set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(statusCode)), std::string());
+        }
+        else
+        {
+            httpCallResponse->_Set_error_info(std::make_error_code(static_cast<xbox_live_error_code>(errorCode)), std::string());
+        }
+
+        switch (httpCallData->httpCallResponseBodyType)
+        {
+        case http_call_response_body_type::json_body:
+            std::error_code errC;
+            string_t utf16responseBody = utility::conversions::to_utf16string(responseBody);
+            web::json::value responseBodyJson = web::json::value::parse(utf16responseBody, errC);
+            if (!errC)
+            {
+                httpCallResponse->_Set_response_body(responseBodyJson);
+            }
+            break;
+        }
+        HCHttpCallCleanup(call);
+
+        chrono_clock_t::time_point responseReceivedTime = chrono_clock_t::now();
+        httpCallResponse->_Set_timing(httpCallData->requestStartTime, responseReceivedTime);
+
+        // Call the callback function
+        httpCallData->completionRoutine(httpCallResponse, httpCallData->completionRoutineContext);
+    });
+
+    return;
 }
 
 pplx::task<std::shared_ptr<http_call_response>>

@@ -57,6 +57,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\External\libHttpClient\libHttpClient.props" />
   </ImportGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -342,6 +343,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxSocialRelationshipResult_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxSocialRelationship_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxUserProfile_WinRT.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_manager_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\LeaderboardQuery_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\LeaderboardResultEventArgs_WinRT.h" />
@@ -428,8 +430,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_data.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_protocol.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\threadpool.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils_uwp.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_client.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_connection.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_connection_state.h" />
@@ -771,6 +775,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxSocialRelationship_WinRT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxUserProfile_WinRT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_feedback_request.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_service.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_social_relationship.cpp" />
@@ -879,9 +884,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_protocol.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logging_config.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\threadpool.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils_locales.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils_uwp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_client.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_connection.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_app_config.cpp" />
@@ -903,6 +910,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.vcxproj">
       <Project>{8EE38792-FFD4-4897-BB32-308A4DDCF0C5}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.140.UWP.C\libHttpClient.140.UWP.C.vcxproj">
+      <Project>{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}</Project>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

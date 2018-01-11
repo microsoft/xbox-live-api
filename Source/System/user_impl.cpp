@@ -107,6 +107,80 @@ user_impl::get_token_and_signature_array(
         );
 }
 
+void user_impl::get_token_and_signature(
+    _In_ const string_t& httpMethod,
+    _In_ const string_t& url,
+    _In_ const string_t& headers,
+    _In_ get_token_and_signature_completion_routine completionRoutine,
+    _In_opt_ void *completionRoutineContext,
+    _In_ uint64_t taskGroupId
+    )
+{
+    internal_get_token_and_signature(
+        httpMethod,
+        url,
+        url,
+        headers,
+        std::vector<unsigned char>(),
+        false,
+        false,
+        completionRoutine,
+        completionRoutineContext,
+        taskGroupId
+        );
+}
+
+void user_impl::get_token_and_signature(
+    _In_ const string_t& httpMethod,
+    _In_ const string_t& url,
+    _In_ const string_t& headers,
+    _In_ const string_t& requestBodyString,
+    _In_ get_token_and_signature_completion_routine completionRoutine,
+    _In_opt_ void *completionRoutineContext,
+    _In_ uint64_t taskGroupId
+    )
+{
+    std::string utf8Body(utility::conversions::to_utf8string(requestBodyString));
+    std::vector<unsigned char> utf8Vec(utf8Body.begin(), utf8Body.end());
+
+    internal_get_token_and_signature(
+        httpMethod,
+        url,
+        url,
+        headers,
+        utf8Vec,
+        false,
+        false,
+        completionRoutine,
+        completionRoutineContext,
+        taskGroupId
+        );
+}
+
+void user_impl::get_token_and_signature(
+    _In_ const string_t& httpMethod,
+    _In_ const string_t& url,
+    _In_ const string_t& headers,
+    _In_ const std::vector<unsigned char>& requestBodyArray,
+    _In_ get_token_and_signature_completion_routine completionRoutine,
+    _In_opt_ void *completionRoutineContext,
+    _In_ uint64_t taskGroupId
+    )
+{
+    internal_get_token_and_signature(
+        httpMethod,
+        url,
+        url,
+        headers,
+        requestBodyArray,
+        false,
+        false,
+        completionRoutine,
+        completionRoutineContext,
+        taskGroupId
+        );
+}
+
 void
 user_impl::user_signed_in(
     _In_ string_t xboxUserId,

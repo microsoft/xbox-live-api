@@ -4,7 +4,6 @@
 #pragma once
 #include "xsapi/system.h"
 #include "http_call_response.h"
-#include "http_client.h"
 #include "system_internal.h"
 
 #if XSAPI_SERVER || UNIT_TEST_SYSTEM || XSAPI_U
@@ -157,6 +156,12 @@ struct http_call_data
     http_call_response_body_type httpCallResponseBodyType;
     http_call_request_message requestBody;
     bool addDefaultHeaders;
+
+    /// TODO add these to constructor
+    http_call::get_response_with_auth_completion_routine completionRoutine;
+    void *completionRoutineContext;
+    uint64_t taskGroupId;
+    chrono_clock_t::time_point requestStartTime;
 };
 
 struct http_retry_after_api_state
@@ -295,13 +300,27 @@ public:
         _In_ bool allUsersAuthRequired = false
         ) override;
 
+    void get_response_with_auth(
+        _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
+        _In_ http_call_response_body_type httpCallResponseBodyType,
+        _In_ bool allUsersAuthRequired,
+        _In_ get_response_with_auth_completion_routine completionRoutine,
+        _In_opt_ void* completionRoutineContext,
+        _In_ uint64_t taskGroupId // TODO I suspect this should not be a parameter
+        ) override;
+
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ http_call_response_body_type httpCallResponseBodyType
         ) override;
 
+    // TODO eventually remove this
     pplx::task<std::shared_ptr<http_call_response>> _Internal_get_response_with_auth(
         _In_ const std::shared_ptr<user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
+        _In_ bool allUsersAuthRequired
+        ) override;
+
+    virtual void _Internal_get_response_with_auth(
         _In_ bool allUsersAuthRequired
         ) override;
 
@@ -355,8 +374,18 @@ private:
     static pplx::task<std::shared_ptr<http_call_response>> internal_get_response_old(
         _In_ const std::shared_ptr<http_call_data>& httpCallData
         );
-    
+
     static pplx::task<std::shared_ptr<http_call_response>> internal_get_response(
+        _In_ const std::shared_ptr<http_call_data>& httpCallData
+        );
+
+    // TODO move this somewhere better
+    typedef void(*get_response_completion_routine)(
+        _In_ std::shared_ptr<http_call_response> response
+        );
+    
+    // TODO rename after deleting ppl version
+    static void internal_get_response_hc(
         _In_ const std::shared_ptr<http_call_data>& httpCallData
         );
 

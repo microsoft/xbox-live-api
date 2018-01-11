@@ -58,13 +58,14 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\External\libHttpClient\libHttpClient.props" />
   </ImportGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XSAPI_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XSAPI_BUILD;XBL_API_NONE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;XBL_API_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalOptions>/bigobj /Zm300 %(AdditionalOptions)</AdditionalOptions>
       <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
@@ -87,6 +88,20 @@
        $(ProjectDir)..\..\External\cpprestsdk\Release\include;
        $(ProjectDir)..\..\Source\System\WinRT;
        $(ProjectDir)..\..\Source\System;
+       $(ProjectDir)..\..\Source\C\Services\TitleStorage;
+       $(ProjectDir)..\..\Source\C\Services\Common;
+       $(ProjectDir)..\..\Source\C\Services\Social;
+       $(ProjectDir)..\..\Source\C\Services\Multiplayer;
+       $(ProjectDir)..\..\Source\C\Services\Presence;
+       $(ProjectDir)..\..\Source\C\Services\Misc;
+       $(ProjectDir)..\..\Source\C\Services\Social\Manager;
+       $(ProjectDir)..\..\Source\C\Services\RealTimeActivity;
+       $(ProjectDir)..\..\Source\C\Services\Achievements;
+       $(ProjectDir)..\..\Source\C\Shared;
+       $(ProjectDir)..\..\Source\C\Shared\WinRT;
+       $(ProjectDir)..\..\Source\C\System;
+       $(ProjectDir)..\..\Source\C\Services\Leaderboard;
+       $(ProjectDir)..\..\Source\C\Services\Stats\Manager;
        %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
       <CompileAsWinRT>true</CompileAsWinRT>
@@ -127,6 +142,9 @@
   <ItemGroup>
     <ProjectReference Include="$(ProjectDir)..\..\External\cpprestsdk\Release\src\build\vs15.uwp\cpprestsdk141.uwp.static.vcxproj">
       <Project>{9ad285a2-301e-47a0-a299-14ad5d4f2758}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.141.UWP.C\libHttpClient.141.UWP.C.vcxproj">
+      <Project>{cf37beb2-a66a-42ba-b348-1f07566f4865}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

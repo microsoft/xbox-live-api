@@ -23,7 +23,9 @@
 #include "presence_internal.h"
 #include "initiator.h"
 #include "httpClient/httpClient.h"
+#if UWP_API
 #include "threadpool.h"
+#endif
 
 #if UWP_API
 #ifdef _WINRT_DLL
@@ -78,11 +80,14 @@ void xsapi_singleton::init()
     m_userEventBind = std::make_shared<Microsoft::Xbox::Services::System::UserEventBind>();
 #endif
 #endif
-
+    // TODO this shouldn't happen here. Should be in some other internal call so that the threadpool
+    // is only started for "legacy" mode.
+#if UWP_API
     HCGlobalInitialize();
     HCSettingsSetLogLevel(HC_LOG_LEVEL::LOG_VERBOSE);
     m_threadpool = std::make_shared<xbl_thread_pool>();
     m_threadpool->start_threads();
+#endif
     m_initiator = std::make_shared<initiator>();
 }
 
@@ -109,6 +114,14 @@ get_xsapi_singleton(_In_ bool createIfRequired)
     return s_xsapiSingleton;
 }
 
+void verify_global_init()
+{
+    std::lock_guard<std::mutex> guard(s_xsapiSingletonLock);
+    if (s_xsapiSingleton == nullptr)
+    {
+        assert(s_xsapiSingleton != nullptr);
+    }
+}
 
 web::json::value utils::extract_json_field(
     _In_ const web::json::value& json, 
@@ -1690,5 +1703,11 @@ utils::read_test_response_file(_In_ const string_t& filePath)
     return jsonResponse;
 }
 #endif
+
+std::mutex async_helpers::m_contextsLock;
+std::unordered_map<void *, std::shared_ptr<void>> async_helpers::m_sharedPtrs;
+
+uintptr_t async_helpers::m_clientCallbackInfoIndexer;
+std::unordered_map<void *, client_callback_info> async_helpers::m_clientCallbackInfoMap;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

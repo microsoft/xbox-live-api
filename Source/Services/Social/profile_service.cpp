@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "user_context.h"
 #include "xbox_system_factory.h"
+#include "profile_internal.h"
 
 using namespace pplx;
 
@@ -31,7 +32,24 @@ profile_service::profile_service(
     ) :
     m_userContext(std::move(userContext)),
     m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
-    m_appConfig(std::move(appConfig))
+    m_appConfig(std::move(appConfig)) // TODO this should eventually only be needed in the internal impl class
+{
+    m_serviceImpl = std::make_shared<profile_service_impl>(
+        m_userContext,
+        m_xboxLiveContextSettings,
+        m_appConfig);
+}
+
+profile_service::profile_service(
+    _In_ std::shared_ptr<profile_service_impl> serviceImpl,
+    _In_ std::shared_ptr<user_context> userContext,
+    _In_ std::shared_ptr<xbox_live_context_settings> xboxLiveContextSettings,
+    _In_ std::shared_ptr<xbox_live_app_config> appConfig
+    ) :
+    m_serviceImpl(std::move(serviceImpl)),
+    m_userContext(std::move(userContext)),
+    m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
+    m_appConfig(std::move(appConfig)) // TODO this should eventually only be needed in the internal impl class
 {
 }
 
@@ -40,28 +58,24 @@ profile_service::get_user_profile(
     _In_ string_t xboxUserId
     )
 {
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(xboxUserId.empty(), xbox_user_profile, "xboxUserId is empty");
-    std::vector< string_t> xboxUserIds;
-    xboxUserIds.push_back(std::move(xboxUserId));
+    // Maybe create some global store of these
+    auto context = new task_completion_event<xbox_live_result<xbox_user_profile>>();
 
-    auto task = get_user_profiles(xboxUserIds)
-    .then([](xbox_live_result<std::vector<xbox_user_profile>> result)
+    auto result = m_serviceImpl->get_user_profile(xboxUserId, 
+        [](xbox_live_result<xbox_user_profile> result, void* context) 
     {
-        if (result.payload().size() == 1)
-        {
-            return xbox_live_result<xbox_user_profile>(result.payload()[0], result.err(), result.err_message());
-        }
-        else
-        {
-            return xbox_live_result<xbox_user_profile>(result.err(), result.err_message());
-        }
-    });
-    
-    return utils::create_exception_free_task<xbox_user_profile>(
-        task
-        );
-}
+        auto tce = static_cast<task_completion_event<xbox_live_result<xbox_user_profile>>*>(context);
+        tce->set(result);
+        delete context;
+    }, context, XSAPI_DEFAULT_TASKGROUP);
 
+    if (result.err())
+    {
+        delete context;
+        return pplx::task_from_result(xbox_live_result<xbox_user_profile>(result.err(), result.err_message()));
+    }
+    return pplx::task<xbox_live_result<xbox_user_profile>>(*context);
+}
 
 pplx::task<xbox_live_result<std::vector<xbox_user_profile>>>
 profile_service::get_user_profiles(

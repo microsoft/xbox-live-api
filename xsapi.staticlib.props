@@ -8,7 +8,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <PreprocessorDefinitions>XSAPI_CPP=1;_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>XSAPI_CPP=1;_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XBL_API_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(XsapiInclde);$(CasablancaInclde);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>

@@ -42,6 +42,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\External\libHttpClient\libHttpClient.props" />
   </ImportGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_serializers.h" />
@@ -58,6 +59,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\real_time_activity_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_internal.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_manager_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\user_statistics_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_service_internal.h" />
@@ -296,6 +298,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_service.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_service_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_feedback_request.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_service.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_social_relationship.cpp" />
@@ -384,6 +387,9 @@
     <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.xbox\casablanca140.Xbox.vcxproj">
       <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.vcxproj">
+      <Project>{cf37beb2-a66a-42ba-b348-1f07566f4865}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <ProjectFolder>$(MSBuildProjectName)</ProjectFolder>
@@ -393,8 +399,8 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XBL_API_NONE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;XBL_API_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions>_VARIADIC_MAX=10;ENABLE_INTSAFE_SIGNED_FUNCTIONS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
@@ -406,27 +412,27 @@
       <CompileAsWinRT>true</CompileAsWinRT>
       <AdditionalIncludeDirectories>
       $(ProjectDir);
-      $(ProjectDir)\..\..\Source\Services;
-      $(ProjectDir)\..\..\Source\Services\Common;
-      $(ProjectDir)\..\..\Source\Services\Common\Desktop;
-      $(ProjectDir)\..\..\Source\Services\Common\Durango;
-      $(ProjectDir)\..\..\Source\Services\Social;
-      $(ProjectDir)\..\..\Source\Services\Social\Manager;
-      $(ProjectDir)\..\..\Source\Services\Achievements;
-      $(ProjectDir)\..\..\Source\Services\Leaderboard;
-      $(ProjectDir)\..\..\Source\Services\Stats;
-      $(ProjectDir)\..\..\Source\Services\Multiplayer;
-      $(ProjectDir)\..\..\Source\Services\Matchmaking;
-      $(ProjectDir)\..\..\Source\Services\RealTimeActivity;
-      $(ProjectDir)\..\..\Source\Services\GameServerPlatform;
-      $(ProjectDir)\..\..\Source\Services\Clubs;
-      $(ProjectDir)\..\..\Source\Shared;
-      $(ProjectDir)\..\..\Source\System;
-      $(ProjectDir)\..\..\Source\;
-      $(ProjectDir)\..\..\Include;
-      $(ProjectDir)\..\..\External\cpprestsdk\Release\include;
-      $(ProjectDir)\..\..\Source\Services\Presence;
-      $(ProjectDir)\..\..\Source\Services\TitleStorage;
+      $(ProjectDir)..\..\Source\Services;
+      $(ProjectDir)..\..\Source\Services\Common;
+      $(ProjectDir)..\..\Source\Services\Common\Desktop;
+      $(ProjectDir)..\..\Source\Services\Common\Durango;
+      $(ProjectDir)..\..\Source\Services\Social;
+      $(ProjectDir)..\..\Source\Services\Social\Manager;
+      $(ProjectDir)..\..\Source\Services\Achievements;
+      $(ProjectDir)..\..\Source\Services\Leaderboard;
+      $(ProjectDir)..\..\Source\Services\Stats;
+      $(ProjectDir)..\..\Source\Services\Multiplayer;
+      $(ProjectDir)..\..\Source\Services\Matchmaking;
+      $(ProjectDir)..\..\Source\Services\RealTimeActivity;
+      $(ProjectDir)..\..\Source\Services\GameServerPlatform;
+      $(ProjectDir)..\..\Source\Services\Clubs;
+      $(ProjectDir)..\..\Source\Shared;
+      $(ProjectDir)..\..\Source\System;
+      $(ProjectDir)..\..\Source\;
+      $(ProjectDir)..\..\Include;
+      $(ProjectDir)..\..\External\cpprestsdk\Release\include;
+      $(ProjectDir)..\..\Source\Services\Presence;
+      $(ProjectDir)..\..\Source\Services\TitleStorage;
       %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>

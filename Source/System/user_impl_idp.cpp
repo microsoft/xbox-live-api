@@ -256,6 +256,86 @@ user_impl_idp::internal_get_token_and_signature(
         );
 }
 
+void user_impl_idp::internal_get_token_and_signature(
+    _In_ const string_t& httpMethod,
+    _In_ const string_t& url,
+    _In_ const string_t& endpointForNsal,
+    _In_ const string_t& headers,
+    _In_ const std::vector<unsigned char>& bytes,
+    _In_ bool promptForCredentialsIfNeeded,
+    _In_ bool forceRefresh,
+    _In_ get_token_and_signature_completion_routine completionRoutine,
+    _In_opt_ void *completionRoutineContext,
+    _In_ uint64_t taskGroupId
+    )
+{
+    UNREFERENCED_PARAMETER(endpointForNsal);
+
+    // TODO might want to allocate with shared pointer and keep in some global store to ensure eventual cleanup
+    auto context = new get_token_and_signature_context(
+        shared_from_this(),
+        httpMethod,
+        url,
+        headers,
+        bytes,
+        promptForCredentialsIfNeeded,
+        forceRefresh
+        );
+
+    HCTaskCreate(HC_SUBSYSTEM_ID::HC_SUBSYSTEM_ID_XSAPI, taskGroupId,
+        [](_In_opt_ void *_context, _In_ HC_TASK_HANDLE taskHandle)
+        {
+            auto context = static_cast<get_token_and_signature_context*>(_context);
+            auto pThis = std::dynamic_pointer_cast<user_impl_idp>(context->userImpl);
+
+            context->result = pThis->internal_get_token_and_signature_helper(
+                context->httpMethod,
+                context->url,
+                context->headers,
+                context->bytes,
+                context->promptForCredentialsIfNeeded,
+                context->forceRefresh
+                );
+
+            // Handle UserInteractionRequired
+            if (context->result.payload().token_request_result() != nullptr
+                && context->result.payload().token_request_result()->ResponseStatus == WebTokenRequestStatus::UserInteractionRequired)
+            {
+                // Failed to get 'xboxlive.com' token, sign out if already sign in (SPOP or user banned).
+                // But for sign in path, it's expected.
+                if (context->url == pThis->get_auth_config()->xbox_live_endpoint() && pThis->is_signed_in())
+                {
+                    pThis->user_signed_out();
+                }
+                else if (context->url != pThis->get_auth_config()->xbox_live_endpoint()) // If it's not asking for xboxlive.com's token, we treat UserInteractionRequired as an error
+                {
+                    std::string errorMsg = "Failed to get token for endpoint: " + utility::conversions::to_utf8string(context->url);
+                    context->result = xbox_live_result<token_and_signature_result>(xbox_live_error_code::runtime_error, errorMsg);
+                }
+            }
+            return HCTaskSetCompleted(taskHandle);
+        },
+        context,
+        [](_In_opt_ void *_context, _In_ HC_TASK_HANDLE taskHandle, void *_completionRoutine, void *completionRoutineContext)
+        {
+            UNREFERENCED_PARAMETER(taskHandle);
+
+            /// TODO make a generic function that does this similar to what we have in flat C implementation
+            auto context = reinterpret_cast<get_token_and_signature_context*>(_context);
+            auto completionRoutine = reinterpret_cast<get_token_and_signature_completion_routine>(_completionRoutine);
+
+            completionRoutine(context->result, completionRoutineContext);
+
+            delete context;
+            return HC_OK;
+        },
+        context,
+        completionRoutine,
+        completionRoutineContext,
+        nullptr
+        );
+}
+
 xbox::services::xbox_live_result<token_and_signature_result>
 user_impl_idp::internal_get_token_and_signature_helper(
     _In_ const string_t& httpMethod,

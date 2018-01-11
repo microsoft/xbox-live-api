@@ -934,6 +934,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service.cpp">
       <Filter>C++ Source\Services\Social</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service_impl.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_feedback_request.cpp">
       <Filter>C++ Source\Services\Social</Filter>
     </ClCompile>
@@ -1267,6 +1270,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.cpp">
       <Filter>C++ Source\Services\Misc</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\threadpool.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
@@ -1275,6 +1281,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils_locales.cpp">
       <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils_uwp.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_client.cpp">
       <Filter>C++ Source\Shared</Filter>
@@ -2220,6 +2229,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\XboxSocialUserGroup_WinRT.h">
       <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_internal.h">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_internal.h">
       <Filter>C++ Source\Services\Social</Filter>
     </ClInclude>
@@ -2487,11 +2499,17 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.h">
       <Filter>C++ Source\Services\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\threadpool.h">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.h">
       <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils_uwp.h">
+      <Filter>C++ Source\Services\Misc</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_client.h">
       <Filter>C++ Source\Shared</Filter>
