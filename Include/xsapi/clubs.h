@@ -16,6 +16,7 @@ namespace xbox {
         /// </summary>
         namespace clubs {
 
+
 class clubs_serializers;
 class clubs_service_impl;
 

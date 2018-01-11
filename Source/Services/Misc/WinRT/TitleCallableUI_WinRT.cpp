@@ -315,6 +315,71 @@ TitleCallableUI::CheckGamingPrivilegeWithUIForUser(
     return ASYNC_FROM_TASK(task);
 }
 
+#if defined(_APISET_TARGET_VERSION_WIN10_RS3)
+Windows::Foundation::IAsyncAction^
+TitleCallableUI::ShowFriendFinderForUser(
+    _In_ Windows::System::User^ user
+    )
+{
+    auto task = title_callable_ui::show_friend_finder_ui(
+        user
+        )
+    .then([](xbox_live_result<void> result)
+    {
+        THROW_IF_ERR(result);
+    });
+
+    return ASYNC_FROM_TASK(task);
+}
+
+Windows::Foundation::IAsyncAction^
+TitleCallableUI::ShowTitleHubForUser(
+    _In_ Windows::System::User^ user
+    )
+{
+    auto task = title_callable_ui::show_title_hub_ui(
+        user
+    )
+    .then([](xbox_live_result<void> result)
+    {
+        THROW_IF_ERR(result);
+    });
+
+    return ASYNC_FROM_TASK(task);
+}
+
+Windows::Foundation::IAsyncAction^
+TitleCallableUI::ShowUserSettingsForUser(
+    _In_ Windows::System::User^ user
+    )
+{
+    auto task = title_callable_ui::show_user_settings_ui(
+        user
+    )
+    .then([](xbox_live_result<void> result)
+    {
+        THROW_IF_ERR(result);
+    });
+
+    return ASYNC_FROM_TASK(task);
+}
+
+Windows::Foundation::IAsyncAction^
+TitleCallableUI::ShowCustomizeUserProfileForUser(
+    _In_opt_ Windows::System::User^ user
+    )
+{
+    auto task = title_callable_ui::show_customize_user_profile_ui(
+        user
+    )
+    .then([](xbox_live_result<void> result)
+    {
+        THROW_IF_ERR(result);
+    });
+
+    return ASYNC_FROM_TASK(task);
+}
+#endif
 #endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_END

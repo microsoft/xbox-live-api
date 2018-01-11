@@ -133,7 +133,7 @@ public:
         VERIFY_IS_TRUE(!userGroupResult.err());
         auto xboxUserId = web::json::value::parse(peoplehubOversizedResponse)[_T("people")][0][_T("xuid")];
         auto user = userGroupResult.payload()[0];
-        auto compareUser = xboxUserId.serialize().substr(0, 17);
+        auto compareUser = xboxUserId.serialize().substr(0, 21);
         wchar_t* compareUserChar = &compareUser[1];
         VERIFY_IS_TRUE(utils::str_icmp(user.xbox_user_id(), compareUserChar) == 0);
     }

@@ -27,7 +27,7 @@ XboxLiveUser^ SignInUserWithMocks_WinRT(const string_t& id)
     VERIFY_NO_THROW(pplx::create_task(asyncOp).wait());
     if (!id.empty())
     {
-        user->GetUserImpl()->_Set_xbox_user_id(id);
+        user->_User_impl()->_Set_xbox_user_id(id);
     }
 
     return user;

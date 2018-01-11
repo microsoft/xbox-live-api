@@ -56,23 +56,6 @@ xbox_live_context_settings::_Set_dispatcher(
 }
 #endif
 
-#if (XSAPI_SERVER || UNIT_TEST_SYSTEM)
-
-cert_context xbox_live_context_settings::_s_certContext;
-
-/// <summary>
-/// Sets the SSL Cert
-/// </summary>
-void xbox_live_context_settings::_Set_SSL_cert(_In_ cert_context cert)
-{
-    if (cert != nullptr)
-    {
-        _s_certContext = cert;
-    }
-};
-
-#endif
-
 xbox_live_context_settings::xbox_live_context_settings() :
     m_enableServiceCallRoutedEvents(false),
     m_httpTimeout(std::chrono::seconds(DEFAULT_HTTP_TIMEOUT_SECONDS)),

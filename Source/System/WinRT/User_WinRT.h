@@ -211,7 +211,7 @@ public:
 internal:
     XboxLiveUser(std::shared_ptr<xbox::services::system::user_impl> user_impl);
 
-    std::shared_ptr<xbox::services::system::user_impl> GetUserImpl()
+    std::shared_ptr<xbox::services::system::user_impl> _User_impl()
     {
         return m_cppObj;
     }

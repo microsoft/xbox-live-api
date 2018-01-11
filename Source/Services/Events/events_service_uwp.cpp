@@ -2,19 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#if !UNIT_TEST_SERVICES
+#if !UNIT_TEST_SERVICES && UWP_API
 #include "xsapi/events.h"
 #include "xbox_system_factory.h"
 #include "utils.h"
 #include "user_context.h"
-#if XSAPI_A
-#include "a/user_impl_a.h"
-#include "a/java_interop.h"
-#elif XSAPI_I
-#include "xbox_cll.h"
-#endif
 
-#if UWP_API
+#include "service_call_logger_data.h"
+#include "service_call_logger.h"
+
 #include <initguid.h>
 #include <regex>
 #include <debugapi.h>
@@ -34,7 +30,6 @@ DEFINE_GUID(GUID_LOGGING_CHANNEL,
 
 #define XBOX_LIVE_LOGGING_OPTIONS  0x0000800000000000
 #define XBOX_LIVE_LOGGING_TAGS  0x00B00000
-#endif
 
 using namespace xbox::services::system;
 
@@ -49,7 +44,6 @@ events_service::events_service(
     m_appConfig(std::move(appConfig))
 {
     m_playSession = utils::create_guid(true).c_str();
-#if UWP_API
     m_loggingOptions = ref new LoggingOptions(XBOX_LIVE_LOGGING_OPTIONS);
     m_loggingOptions->Tags = XBOX_LIVE_LOGGING_TAGS;
 
@@ -63,7 +57,6 @@ events_service::events_service(
         Guid(GUID_LOGGING_CHANNEL));
 
     m_appInsightsKey = load_app_insights_key();
-#endif
 }
 
 xbox_live_result<void>
@@ -77,15 +70,11 @@ events_service::write_in_game_event(
     _In_ const string_t& eventName,
     _In_ const web::json::value& dimensions,
     _In_ const web::json::value& measurements
-)
+    )
 {
     try
     {
-#if XSAPI_CPP
-        if (!m_userContext->user() || !m_userContext->user()->is_signed_in())
-#else
-        if (!m_userContext->user() || !m_userContext->user()->IsSignedIn)
-#endif
+        if (!m_userContext->is_signed_in())
         {
             return xbox_live_result<void>(xbox_live_error_code::auth_user_not_signed_in, "User must be signed in to call this API");
         }
@@ -98,7 +87,6 @@ events_service::write_in_game_event(
             return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "Invalid event name");
         }
 
-#ifdef _WIN32
         //Log service call
         if (xbox::services::service_call_logger::get_singleton_instance()->is_enabled())
         {
@@ -115,72 +103,25 @@ events_service::write_in_game_event(
 
             tracker->log(logData.to_string());
         }
-#endif
-#if UWP_API
 
         auto fields = create_logging_field(eventName, dimensions, measurements);
 
         m_loggingChannel->LogEvent(ref new String(eventName.c_str()), fields, LoggingLevel::Critical, m_loggingOptions);
-#elif XSAPI_U
-        stringstream_t ss;
-        ss << m_appConfig->title_id();
-        web::json::value eventData;
-        eventData[_T("baseType")] = web::json::value::string(_T("Microsoft.XboxLive.InGame"));
-
-        web::json::value baseData;
-        baseData[_T("name")] = web::json::value::string(eventName.c_str());
-        baseData[_T("serviceConfigId")] = web::json::value::string(m_appConfig->scid().c_str());
-        baseData[_T("playerSessionId")] = web::json::value::string(m_playSession.c_str());
-        baseData[_T("titleId")] = web::json::value::string(ss.str());
-        baseData[_T("userId")] = web::json::value::string(m_userContext->xbox_user_id().c_str());
-        baseData[_T("ver")] = web::json::value::number(1);
-        baseData[_T("properties")] = dimensions;
-        baseData[_T("measurements")] = measurements;
-
-        eventData[_T("baseData")] = baseData;
-
-        stringstream_t eventNameStream;
-        eventNameStream << "Microsoft.XboxLive.T" << ss.str() << "." << eventName;
-#if XSAPI_A
-        std::shared_ptr<java_interop> interop = java_interop::get_java_interop_singleton();
-        if (interop)
-        {
-            interop->log_cll(m_userContext->xbox_user_id(), eventNameStream.str(), eventData.serialize());
-        }
-#elif XSAPI_I
-        std::shared_ptr<xbox_cll> cll = xbox_cll::get_xbox_cll_singleton();
-        std::vector<string_t> ids = { m_userContext->xbox_user_id() };
-        iOSCll* iCll = static_cast<iOSCll*>(cll->raw_cll().get());
-        if (iCll)
-        {
-            iCll->log(eventNameStream.str(),
-                eventData.serialize(),
-                cll::Latency::LatencyRealtime,
-                cll::Persistence::PersistenceCritical,
-                cll::Sensitivity::SensitivityNone,
-                cll::SampleRate_NoSampling,
-                ids);
-        }
-#endif
-#endif
-
     }
     catch (const std::exception& e)
     {
         xbox_live_error_code err = utils::convert_exception_to_xbox_live_error_code();
         return xbox_live_result<void>(err, e.what());
     }
-#if UWP_API
     catch (Platform::Exception^ e)
     {
         xbox_live_error_code errc = static_cast<xbox_live_error_code>(e->HResult);
         return xbox_live_result<void>(errc, utility::conversions::to_utf8string(e->Message->Data()));
     }
-#endif
+
     return xbox_live_result<void>();
 }
 
-#if UWP_API
 void events_service::add_common_logging_field(_In_ Windows::Foundation::Diagnostics::LoggingFields^ fields)
 {
     fields->AddString("serviceConfigId", ref new String(m_appConfig->scid().c_str()));
@@ -335,6 +276,6 @@ string_t events_service::load_app_insights_key()
 
     return result;
 }
-#endif
 NAMESPACE_MICROSOFT_XBOX_SERVICES_EVENTS_CPP_END
-#endif
+
+#endif // !UNIT_TEST_SERVICES && UWP_API

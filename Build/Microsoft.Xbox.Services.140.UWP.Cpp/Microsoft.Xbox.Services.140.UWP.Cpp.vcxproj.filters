@@ -7,7 +7,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements_helper.cpp">
       <Filter>C++ Source\C\Services\Achievements</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Common\xbox_live_context.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Common\xbox_live_context_c.cpp">
       <Filter>C++ Source\C\Services\Common</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Common\xbox_live_context_impl_c.cpp">
@@ -148,13 +148,13 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp">
       <Filter>C++ Source\Services\Common</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\XboxLiveContext_Desktop.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context.cpp">
       <Filter>C++ Source\Services\Common</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_impl.cpp">
       <Filter>C++ Source\Services\Common</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\events_service.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\events_service_uwp.cpp">
       <Filter>C++ Source\Services\Events</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\allocation_result.cpp">
@@ -767,6 +767,9 @@
       <Filter>C++ Source\Services\Misc</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context_cpp.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.cpp">

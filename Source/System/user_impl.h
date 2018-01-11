@@ -7,9 +7,6 @@
 #include "shared_macros.h"
 #include "system_internal.h"
 #include "auth_config.h"
-#if defined(XSAPI_SERVER)
-#include "auth/auth_manager.h"
-#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
@@ -39,23 +36,22 @@ public:
         return pplx::task_from_exception<xbox::services::xbox_live_result<void>>(std::exception());
     }
 
-    // IUser
     const string_t& xbox_user_id() { return m_xboxUserId; }
     const string_t& gamertag() { return m_gamertag; }
     const string_t& age_group() { return m_ageGroup; }
     const string_t& privileges() { return m_privileges; }
+
 #if XSAPI_U
     const string_t& user_settings_restrictions() { return m_userSettingsRestrictions; }
     const string_t& user_enforcement_restrictions() { return m_userEnforcementRestrictions; }
     const string_t& user_title_restrictions() { return m_userTitleRestrictions; }
+    virtual void clear_token_cache() = 0;
+    void set_sign_in_options(std::shared_ptr<xbox_sign_in_options> options) { m_signInOptions = options; }
 #endif
+
     const string_t& web_account_id() { return m_webAccountId; }
     std::shared_ptr<auth_config> get_auth_config() { return m_authConfig; }
     const user_creation_context creation_context() { return m_creationContext;  }
-
-#if XSAPI_U
-    void set_sign_in_options(std::shared_ptr<xbox_sign_in_options> options) { m_signInOptions = options; }
-#endif
 
 #if UNIT_TEST_SERVICES
     void _Set_xbox_user_id(const string_t& xboxUserId) { m_xboxUserId = xboxUserId; }
@@ -119,7 +115,7 @@ public:
         _In_ uint64_t taskGroupId
         );
 
-    bool is_signed_in();
+    bool is_signed_in() const;
     void set_user_pointer(_In_ std::shared_ptr<system::xbox_live_user> user);
     void set_title_telemetry_session_id(_In_ const string_t& sessionId);
     const string_t& title_telemetry_session_id();
@@ -180,15 +176,13 @@ protected:
     string_t m_userSettingsRestrictions;
     string_t m_userEnforcementRestrictions;
     string_t m_userTitleRestrictions;
+    std::shared_ptr<xbox_sign_in_options> m_signInOptions;
 #endif
     string_t m_webAccountId;
     string_t m_cid;
     string_t m_titleTelemetrySessionId;
     bool m_isSignedIn;
     user_creation_context m_creationContext;
-#if XSAPI_U
-    std::shared_ptr<xbox_sign_in_options> m_signInOptions;
-#endif
     std::weak_ptr<system::xbox_live_user> m_weakUserPtr;
 
     std::shared_ptr<auth_config> m_authConfig;
@@ -211,7 +205,11 @@ public:
         _In_ bool forceRefresh
         ) override;
 
-    user_impl_idp(Windows::System::User^ systemUser);
+    user_impl_idp(
+#if UWP_API 
+        Windows::System::User^ systemUser
+#endif
+        );
 
     pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
     internal_get_token_and_signature(
@@ -265,10 +263,11 @@ private:
         );
 
     // sync method for request token 
-    Windows::Security::Authentication::Web::Core::WebTokenRequestResult^ request_token_from_idp(
+    static Windows::Security::Authentication::Web::Core::WebTokenRequestResult^ request_token_from_idp(
         _In_opt_ Windows::UI::Core::CoreDispatcher^ coreDispatcher,
         _In_ bool promptForCredentialsIfNeeded,
-        _In_ Windows::Security::Authentication::Web::Core::WebTokenRequest^ request
+        _In_ Windows::Security::Authentication::Web::Core::WebTokenRequest^ request,
+        _In_ Windows::Security::Credentials::WebAccount^ webAccount
         );
 
     xbox_live_result<token_and_signature_result>
@@ -291,40 +290,6 @@ private:
 };
 
 #endif // #if UWP_API
-
-
-#if defined(XSAPI_SERVER)
-class user_impl_server : public user_impl
-{
-public:
-    // Not supported for user_impl_server
-    pplx::task<xbox::services::xbox_live_result<sign_in_result>> sign_in_impl(
-        _In_ bool showUI,
-        _In_ bool forceRefresh
-        ) override;
-
-    pplx::task<xbox::services::xbox_live_result<void>> sign_in_impl(
-        _In_ const string_t& userDelegationTicket,
-        _In_ bool forceRefresh
-        ) override;
-
-    user_impl_server(void*);
-
-    pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
-    internal_get_token_and_signature(
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& url,
-        _In_ const string_t& endpointForNsal,
-        _In_ const string_t& headers,
-        _In_ const std::vector<unsigned char>& bytes,
-        _In_ bool promptForCredentialsIfNeeded,
-        _In_ bool forceRefresh
-        ) override;
-
-private:
-    std::shared_ptr<auth_manager> m_authManager;
-};
-#endif
 
 #if !TV_API
 class user_factory

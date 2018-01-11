@@ -1,21 +1,21 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#pragma once 
+#pragma once
 #include "MultiplayerEventArgs_WinRT.h"
 #include "MultiplayerMember_WinRT.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_BEGIN
 
 /// <summary>
-/// Notifies the title when a new game member joins the game. 
+/// Notifies the title when an existing game member leaves the game.
 /// </summary>
 public ref class MemberLeftEventArgs sealed : MultiplayerEventArgs
 {
 public:
 
     /// <summary>
-    /// A list of members that joined the game.
+    /// A list of members that left the game.
     /// </summary>
     property Windows::Foundation::Collections::IVectorView<MultiplayerMember^>^ Members
     {

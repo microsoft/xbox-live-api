@@ -12,6 +12,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
 stats_value_document::stats_value_document() :
     m_isDirty(false),
     m_revision(0),
+    m_previousRevision(0),
     m_state(svd_state::not_loaded)
 {
     m_svdEventList.reserve(100);
@@ -84,16 +85,21 @@ stats_value_document::delete_stat(
     return xbox_live_result<void>();
 }
 
-uint64_t
-stats_value_document::revision() const
-{
-    return m_revision;
-}
-
 void
-stats_value_document::increment_revision()
+stats_value_document::set_revision_from_clock()
 {
-    ++m_revision;
+    uint64_t dateTime = utility::datetime::utc_now().to_interval(); // eg. 131472330440000000
+    const uint64_t dateTimeFromJan1st2015 = 130645440000000000;
+    if (dateTime < dateTimeFromJan1st2015)
+    {
+        m_revision = 1; // Clock is wrong and is not yet sync'd with internet time, so just setting the revision to 1
+    }
+    else
+    {
+        uint64_t dateTimeSince2015 = dateTime - dateTimeFromJan1st2015; // eg. 826888900000000
+        uint64_t dateTimeTrimmed = dateTimeSince2015 >> 16; // divide by 2^16 to get it to sub second range.  eg. 12617323303
+        m_revision = dateTimeTrimmed;
+    }
 }
 
 bool stats_value_document::is_dirty() const
@@ -136,9 +142,12 @@ stats_value_document::do_work()
                     m_isDirty = true;
                     break;
                 }
+
                 case svd_event_type::stat_delete:
+                {
                     m_statisticDocument.erase(pendingStat.statPendingName);
                     break;
+                }
             }
         }
     }
@@ -147,16 +156,7 @@ stats_value_document::do_work()
 }
 
 void
-stats_value_document::set_flush_function(
-    _In_ const std::function<void()> flushFunction
-    )
-{
-    m_fRequestFlush = flushFunction;
-}
-
-
-void
-stats_value_document::set_state(
+stats_value_document::set_svd_state(
     _In_ svd_state svdState
     )
 {
@@ -164,41 +164,29 @@ stats_value_document::set_state(
 }
 
 svd_state
-stats_value_document::state() const
+stats_value_document::get_svd_state() const
 {
     return m_state;
 }
 
 void
 stats_value_document::merge_stat_value_documents(
-    _In_ const stats_value_document& mergeSVD
+    _In_ const stats_value_document& sdvFromService
     )
 {
-    switch (m_state)
+    if( m_state == svd_state::not_loaded )
     {
-        case svd_state::not_loaded:
-            m_revision = mergeSVD.m_revision;
-            m_statisticDocument = mergeSVD.m_statisticDocument;
-            break;
-
-        // for offline the stat values local override any service values
-        // only add any undefined stats into our list
-        case svd_state::offline_not_loaded:
-        case svd_state::offline_loaded:
-            for (auto& stat : mergeSVD.m_statisticDocument)
+        // Local values are override service values
+        // Only merge in any undefined stats into the stats doc
+        for (auto& statFromService : sdvFromService.m_statisticDocument)
+        {
+            auto statIter = m_statisticDocument.find(statFromService.first);
+            if (statIter == m_statisticDocument.end())
             {
-                auto statIter = m_statisticDocument.find(stat.first);
-                if (statIter == m_statisticDocument.end())
-                {
-                    m_statisticDocument[stat.first] = stat.second;
-                }
+                m_statisticDocument[statFromService.first] = statFromService.second;
             }
-            break;
-
-        case svd_state::loaded:
-        default:
-            LOG_ERROR("Merge cannot happen with invalid or loaded document");
-            break;
+        }
+        m_previousRevision = sdvFromService.m_previousRevision;
     }
 
     m_state = svd_state::loaded;
@@ -209,12 +197,8 @@ stats_value_document::serialize()
 {
     web::json::value requestJSON;
     requestJSON[_T("$schema")] = web::json::value::string(_T("http://stats.xboxlive.com/2017-1/schema#"));
-    if (m_state == svd_state::offline_not_loaded) // if offline svd with no revision, make revision number the current datetime. Revision number must always be last highest
-    {
-        m_revision = utility::datetime::utc_now().to_interval();
-    }
-
     requestJSON[_T("revision")] = web::json::value::number(m_revision);
+    requestJSON[_T("previousRevision")] = web::json::value::number(m_previousRevision);
 #if TV_API
     requestJSON[_T("timestamp")] = web::json::value(utils::datetime_to_string(utility::datetime::utc_now()));
 #else
@@ -243,7 +227,7 @@ stats_value_document::_Deserialize(
     std::error_code errc;
 
     returnObject.m_state = svd_state::loaded;
-    returnObject.m_revision = utils::extract_json_int(data, _T("revision"), errc, false);
+    returnObject.m_previousRevision = utils::extract_json_uint52(data, _T("revision"), errc, false);
 
     auto statsField = utils::extract_json_field(data, _T("stats"), errc, false);
     auto titleField = utils::extract_json_field(statsField, _T("title"), errc, false);

@@ -19,8 +19,10 @@ namespace Social_CppCx_140
         void Active_RealTimeActivity(_In_ MainPage^ mainPage, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext);
         void Scenario_GetUserProfileAsync(_In_ MainPage^ mainPage, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext);
         void Scenario_GetSocialRelationshipsAsync(_In_ MainPage^ mainPage, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext);
+        void Scenario_GetStat(_In_ MainPage^ ui, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext);
         void Scenario_WriteStat(_In_ MainPage^ mainPage, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext);
-        void Scenario_ReadStat(_In_ MainPage^ mainPage, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext);
+        void Scenario_GetLeaderboard(_In_ MainPage^ mainPage, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext);
+        void Scenario_DeleteStat(_In_ MainPage^ ui, Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext);
 
     private:
         Windows::Foundation::EventRegistrationToken m_devicePresenceChangeEventToken;

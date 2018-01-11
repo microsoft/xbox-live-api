@@ -10,7 +10,6 @@
 
 #ifdef __OBJC__
 #import <UIKit/UIKit.h>
-#import "MSAAuthentication/MSAAccountManager.h"
 #endif
 #ifndef _WIN32
 #include "pplx/pplxtasks.h"
@@ -188,6 +187,8 @@ private:
     friend class xsapi_memory;
 };
 
+
+#if XSAPI_NONXDK_CPP_AUTH || XSAPI_NONXDK_WINRT_AUTH
 /// <summary>
 /// Contains information about the authorization token and digital signature for an HTTP request by a user.
 /// This class is returned as the result of a call to xbox_live_user.get_token_and_signature().
@@ -317,49 +318,6 @@ private:
 #endif 
 };
 
-#if (XSAPI_SERVER || UNIT_TEST_SYSTEM)
-class xbox_live_server
-{
-public:
-    _XSAPIIMP xbox_live_server();
-
-    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<void>> signin(_In_ cert_context cert);
-
-    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
-        get_token_and_signature(
-            _In_ const string_t& httpMethod,
-            _In_ const string_t& url,
-            _In_ const string_t& headers
-            );
-
-    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
-        get_token_and_signature(
-            _In_ const string_t& httpMethod,
-            _In_ const string_t& url,
-            _In_ const string_t& headers,
-            _In_ const string_t& requestBodyString
-            );
-
-    _XSAPIIMP pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
-        get_token_and_signature_array(
-            _In_ const string_t& httpMethod,
-            _In_ const string_t& url,
-            _In_ const string_t& headers,
-            _In_ const std::vector<unsigned char>& requestBodyArray
-            );
-
-    _XSAPIIMP bool is_signed_in() const;
-
-private:
-    std::shared_ptr<xbox_live_server_impl> m_server_impl;
-
-    friend xbox::services::user_context;
-};
-
-#endif //#if XSAPI_SERVER
-
-#if !TV_API
-
 /// <summary>
 /// Enumeration values that indicate the result status of sign in.
 /// </summary>
@@ -452,13 +410,6 @@ private:
 class xbox_live_user : public std::enable_shared_from_this<xbox_live_user>
 {
 public:
-#if XSAPI_SERVER
-    _XSAPIIMP pplx::task<xbox_live_result<void>> signin(
-        _In_ std::shared_ptr<xbox_live_server> server,
-        _In_ const string_t& user_delegation_ticket
-        );
-#endif
-
     /// <summary>
     /// Attempt to sign a player into their Xbox Live account. This call may bring up
     /// a sign-in user interface.
@@ -518,6 +469,7 @@ public:
 #if XSAPI_U
     _XSAPIIMP static std::shared_ptr<xbox_live_user> get_last_signed_in_user();
     _XSAPIIMP pplx::task<xbox_live_result<void>> signout();
+    _XSAPIIMP void clear_token_cache();
 #endif
 
 #if WINAPI_FAMILY && WINAPI_FAMILY==WINAPI_FAMILY_APP
@@ -733,7 +685,8 @@ private:
     std::shared_ptr<user_impl> m_user_impl;
 };
 
-#endif //!TV_API
+#endif // XSAPI_NONXDK_CPP_AUTH || XSAPI_NONXDK_WINRT_AUTH
+
 
 /// <summary>Enumeration values that indicate the result code from string verification.
 /// These values are defined on the service side and should not be modified.

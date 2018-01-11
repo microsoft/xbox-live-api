@@ -343,6 +343,55 @@ public:
         _In_opt_ Platform::String^ friendlyMessage,
         _In_ Windows::System::User^ user
         );
+
+#if defined(_APISET_TARGET_VERSION_WIN10_RS3)
+    /// <summary>
+    /// Shows UI displaying the friend finder app, so the user can get more friends
+    /// </summary>
+    /// <returns>
+    /// An interface for tracking the progress of the asynchronous call.
+    /// The operation completes when the UI is closed.
+    /// </returns>
+    static Windows::Foundation::IAsyncAction^
+    ShowFriendFinderForUser(
+        _In_ Windows::System::User^ user
+        );
+
+    /// <summary>
+    /// Shows UI displaying the title app for the calling application.
+    /// </summary>
+    /// <returns>
+    /// An interface for tracking the progress of the asynchronous call.
+    /// The operation completes when the UI is closed.
+    /// </returns>
+    static Windows::Foundation::IAsyncAction^
+    ShowTitleHubForUser(
+        _In_ Windows::System::User^ user
+        );
+
+    /// <summary>
+    /// Shows UI displaying the user settings
+    /// </summary>
+    /// <returns>
+    /// An interface for tracking the progress of the asynchronous call.
+    /// The operation completes when the UI is closed.
+    /// </returns>
+    static Windows::Foundation::IAsyncAction^
+    ShowUserSettingsForUser(
+        _In_ Windows::System::User^ user
+        );
+
+    /// <summary>
+    /// Shows UI displaying a dialog to customize the user's profile
+    /// </summary>
+    /// <returns>
+    /// result.err() contains the error based on what happened in the case of an error.
+    /// </returns>
+    static Windows::Foundation::IAsyncAction^
+    ShowCustomizeUserProfileForUser(
+        _In_opt_ Windows::System::User^ user
+        );
+#endif
 #endif
 
 internal:

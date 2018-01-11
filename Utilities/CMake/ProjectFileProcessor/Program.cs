@@ -294,13 +294,33 @@ namespace ProjectFileProcessor
             }
         }
 
+        public static string ReplaceString(string str, string oldValue, string newValue, StringComparison comparison)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            int previousIndex = 0;
+            int index = str.IndexOf(oldValue, comparison);
+            while (index != -1)
+            {
+                sb.Append(str.Substring(previousIndex, index - previousIndex));
+                sb.Append(newValue);
+                index += oldValue.Length;
+
+                previousIndex = index;
+                index = str.IndexOf(oldValue, index, comparison);
+            }
+            sb.Append(str.Substring(previousIndex));
+
+            return sb.ToString();
+        }
+
         private static string MakeFilePathRelative(string inputFile, string rootFolder)
         {
             //     <ClInclude Include="C:\git\forks\xbox-live-api\Source\Services\Common\Desktop\pch.h" />
             // to
             //     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.h" />
 
-            string filteredFile = inputFile.Replace(rootFolder, @"$(MSBuildThisFileDirectory)..\..\");
+            string filteredFile = ReplaceString(inputFile, rootFolder, @"$(MSBuildThisFileDirectory)..\..\", StringComparison.OrdinalIgnoreCase);
             filteredFile = filteredFile.Replace(" Condition=\"'$(Configuration)|$(Platform)'=='Debug|Win32'\"", "");
             filteredFile = filteredFile.Replace(@"..\..\Utilities\CMake\build\", "");
             filteredFile = filteredFile.Replace("\"  />", "\" />");
@@ -387,7 +407,7 @@ namespace ProjectFileProcessor
             {
                 string l1 = lines_filtered[i];
 
-                if( l1.Contains("<ItemGroup>") )
+                if (l1.Contains("<ItemGroup>"))
                 {
                     filterLines.Add(l1);
                     captureFilters = true;
@@ -395,12 +415,22 @@ namespace ProjectFileProcessor
                     l1 = lines_filtered[i];
                 }
 
-                if(l1.Contains("</ItemGroup>"))
+                if (l1.Contains("</ItemGroup>"))
                 {
+                    //Console.WriteLine("Start");
+                    //foreach (var l in filterNodes)
+                    //{
+                    //    Console.WriteLine(l[0]);
+                    //}
                     var sortedList = filterNodes.OrderBy(x => x[0]);
-                    foreach ( var l in sortedList )
+                    //Console.WriteLine("Final");
+                    //foreach (var l in sortedList)
+                    //{
+                    //    Console.WriteLine(l[0]);
+                    //}
+                    foreach (var l in sortedList)
                     {
-                        foreach( var s in l )
+                        foreach (var s in l)
                         {
                             filterLines.Add(s);
                         }
@@ -409,7 +439,7 @@ namespace ProjectFileProcessor
                     captureFilters = false;
                 }
 
-                if( captureFilters )
+                if (captureFilters)
                 {
                     List<string> filter = new List<string>();
                     filter.Add(lines_filtered[i]);

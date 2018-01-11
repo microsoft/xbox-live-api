@@ -6,6 +6,7 @@
 #include "xsapi/social.h"
 #include "xsapi/user_statistics.h"
 #include "xsapi/achievements.h"
+#include "xsapi/types.h"
 
 namespace xbox { namespace services { namespace stats { namespace manager { 
 
@@ -113,8 +114,8 @@ private:
         );
 
     void set_name(
-    _In_ const string_t& name
-    );
+        _In_ const string_t& name
+        );
 
     web::json::value serialize() const;
 
@@ -220,10 +221,19 @@ public:
         );
 
     /// <summary> 
-    /// Requests the current stat values to be uploaded to the service
-    /// This will send immediately instead of automatically during a 30 second window
+    /// Stats will be sent to the service automatically every 5 minutes or you can call 
+    /// request_flush_to_service() if you want to update the service with the latest stats sooner
+    /// such as when a match or round ends.
+    /// 
+    /// This will cause the current stat values to be uploaded to the service with
+    /// a maximum rate of once every 30 seconds.  Set isHighPriority to true when your title 
+    /// is getting suspended as this will try to update the stats even if it hasn't been 30 seconds 
+    /// since the last flush. However requests to flush with isHighPriority=true are still limited 
+    /// to a maximum rate of once every 30 seconds so it can't be used to flood the service.
+    ///
+    /// Note that you may still be throttled when calling the stats service such if you are 
+    /// relaunching the title over and over and send stats at every launch.
     /// </summary>
-    /// <remarks>This will be throttled if called too often</remarks>
     _XSAPIIMP xbox_live_result<void> request_flush_to_service(
         _In_ const xbox_live_user_t& user,
         _In_ bool isHighPriority = false
@@ -237,6 +247,10 @@ public:
 
     /// <summary> 
     /// Replaces the numerical stat by the value. Can be positive or negative
+    /// 
+    /// Stats will be sent to the service automatically every 5 minutes or you can call 
+    /// request_flush_to_service() if you want to update the service with the latest stats sooner
+    /// such as when a match or round ends.
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
     /// <param name="statName">The name of the statistic to modify</param>
@@ -250,6 +264,10 @@ public:
 
     /// <summary> 
     /// Replaces the numerical stat by the value. Can be positive or negative
+    /// 
+    /// Stats will be sent to the service automatically every 5 minutes or you can call 
+    /// request_flush_to_service() if you want to update the service with the latest stats sooner
+    /// such as when a match or round ends.
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
     /// <param name="statName">The name of the statistic to modify</param>
@@ -263,6 +281,10 @@ public:
 
     /// <summary> 
     /// Replaces a string stat with the given value.
+    /// 
+    /// Stats will be sent to the service automatically every 5 minutes or you can call 
+    /// request_flush_to_service() if you want to update the service with the latest stats sooner
+    /// such as when a match or round ends.
     /// </summary>
     /// <param name="user">The local user whose stats to access</param>
     /// <param name="statName">The name of the statistic to modify</param>

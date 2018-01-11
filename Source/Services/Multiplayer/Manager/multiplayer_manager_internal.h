@@ -827,7 +827,7 @@ public:
         _In_ const multiplayer_session_reference& sessionRef,
         _In_ std::vector<xbox_live_user_t> users
         );
-#if !XSAPI_U
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
     xbox_live_result<void> join_lobby(
         _In_ Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs^ eventArgs,
         _In_ std::vector<xbox_live_user_t> users

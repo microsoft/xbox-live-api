@@ -48,7 +48,7 @@ static std::mutex s_xsapiSingletonLock;
 static std::shared_ptr<xsapi_singleton> s_xsapiSingleton;
 
 xsapi_singleton::xsapi_singleton()
-#if !TV_API && !XSAPI_SERVER
+#if !TV_API
     : m_presenceWriterSingleton(std::shared_ptr<xbox::services::presence::presence_writer>(new xbox::services::presence::presence_writer()))
 #endif
 {
@@ -349,6 +349,17 @@ string_t utils::extract_json_string(
     web::json::value field(utils::extract_json_field(jsonValue, stringName, required));
     if ((!field.is_string() && !required) || field.is_null()) { return defaultValue; }
     return field.as_string();
+}
+
+web::json::array utils::extract_json_array(
+    _In_ const web::json::value& jsonValue,
+    _In_ const string_t& arrayName,
+    _In_ bool required
+    )
+{
+    web::json::value field(utils::extract_json_field(jsonValue, arrayName, required));
+    if ((!field.is_array() && !required) || field.is_null()) { return web::json::value::array().as_array(); }
+    return field.as_array();
 }
 
 string_t utils::extract_json_as_string(
@@ -1463,7 +1474,7 @@ string_t utils::create_xboxlive_endpoint(
     source << protocol; // eg. https or wss
     source << _T("://");
     source << subpath; // eg. "achievements"
-#if !TV_API && !XBOX_UWP
+#if !TV_API
     if (appConfig)
     {
         source << appConfig->environment(); // eg. "" or ".dnet"

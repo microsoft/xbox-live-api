@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
+#include <mutex>
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
 enum class token_identity_type
@@ -30,7 +31,8 @@ public:
         _In_ string_t environmentPrefix,
         _In_ string_t environment,
         _In_ bool useCompactTicket,
-        _In_ bool isCreatorsTitle
+        _In_ bool isCreatorsTitle,
+        _In_ string_t scope
         );
 
     const string_t& xbox_live_endpoint() const;
@@ -41,7 +43,7 @@ public:
     const string_t& rps_ticket_policy() const;
     void set_rps_ticket_policy(_In_ string_t value);
 
-#if XSAPI_SERVER || XSAPI_U
+#if XSAPI_U
     /// <summary>
     /// Internal function
     /// </summary>
@@ -92,6 +94,7 @@ public:
     void reset();
 
 private:
+    mutable std::mutex m_mutex;
     string_t m_sandbox;
     string_t m_rpsTicketService;
     string_t m_rpsTicketPolicy;

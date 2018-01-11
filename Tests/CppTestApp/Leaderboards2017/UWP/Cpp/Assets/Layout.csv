@@ -1,0 +1,9 @@
+#ITEM,ID,X,Y,DX,DY,PARAMETERS
+OVERLAY,2000,0,0,1920,1080
+IMAGE,202,850,200,700,660,dbuglog.png
+BUTTON,2101,82,375,400,40,Set 'Score' stat,,SMALL
+BUTTON,2106,82,425,400,40,Get 'Score' stat,,SMALL
+BUTTON,2102,82,475,400,40,Get leaderboard,,SMALL
+BUTTON,2103,82,525,400,40,Get leaderboard skip to self,,SMALL
+BUTTON,2104,82,575,400,40,Get leaderboard skip to rank,,SMALL
+BUTTON,2105,82,625,400,40,Get leaderboard for social group,,SMALL

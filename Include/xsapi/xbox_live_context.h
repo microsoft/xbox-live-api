@@ -3,14 +3,12 @@
 
 #pragma once
 
-#if !(TV_API | XBOX_UWP)
-
-#if !XSAPI_CPP
-#include "User_WinRT.h"
-#else
-#include "xsapi/system.h"
-#endif
-
+#if !TV_API
+    #if !XSAPI_CPP
+        #include "User_WinRT.h"
+    #else
+        #include "xsapi/system.h"
+    #endif
 #endif
 
 #include "xsapi/contextual_search_service.h"
@@ -24,44 +22,6 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 class xbox_live_context_server_impl;
 
-#if XSAPI_SERVER
-/// <summary>
-/// Defines pointers to objects that access Xbox Live to create features for player interactions.
-/// </summary>
-class xbox_live_server_context
-{
-public:
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    _XSAPIIMP xbox_live_server_context(
-        _In_ std::shared_ptr<system::xbox_live_server> server
-        );
-
-    /// <summary>
-    /// Returns the associated system User.
-    /// </summary>
-    _XSAPIIMP std::shared_ptr<system::xbox_live_server> server();
-
-    /// <summary>
-    /// Returns an object containing settings that apply to all REST calls made such as retry and diagnostic settings.
-    /// </summary>
-    _XSAPIIMP std::shared_ptr<xbox_live_context_settings> settings();
-
-    /// <summary>
-    /// Returns an object containing Xbox Live app config such as title ID
-    /// </summary>
-    _XSAPIIMP std::shared_ptr<xbox_live_app_config> application_config();
-
-private:
-
-    std::shared_ptr<xbox::services::xbox_live_context_server_impl> m_xboxLiveContextImpl;
-};
-
-#endif
-
-
 /// <summary>
 /// Defines pointers to objects that access Xbox Live to create features for player 
 /// interactions.
@@ -73,8 +33,9 @@ private:
 /// </summary>
 class xbox_live_context
 {
-public:
-#if TV_API | XBOX_UWP
+public:    
+
+#if XSAPI_XDK_AUTH
     /// <summary>
     /// Creates an xbox_live_context from a Windows::Xbox::System::User^
     /// </summary>
@@ -86,8 +47,24 @@ public:
     /// Returns the associated system User 
     /// </summary>
     _XSAPIIMP Windows::Xbox::System::User^ user();
+#endif // XSAPI_XDK_AUTH
 
-#elif XSAPI_CPP
+#if XSAPI_XDK_AUTH_WITH_CPPWINRT
+    _XSAPIIMP xbox_live_context(
+        _In_ winrt::Windows::Xbox::System::User user
+    ) : xbox_live_context(convert_user_to_cppcx(user))
+    {
+    }
+
+    inline winrt::Windows::Xbox::System::User user_cppwinrt()
+    {
+        winrt::Windows::Xbox::System::User cppWinrtUser(nullptr);
+        winrt::copy_from_abi(cppWinrtUser, reinterpret_cast<winrt::ABI::Windows::Xbox::System::IUser*>(user()));
+        return cppWinrtUser;
+    }
+#endif // XSAPI_XDK_AUTH_WITH_CPPWINRT
+
+#if XSAPI_NONXDK_CPP_AUTH && !UNIT_TEST_SERVICES
     /// <summary>
     /// Creates an xbox_live_context from a xbox_live_user
     /// </summary>
@@ -99,8 +76,9 @@ public:
     /// Returns the associated system User.
     /// </summary>
     _XSAPIIMP std::shared_ptr<system::xbox_live_user> user();
+#endif // XSAPI_NONXDK_CPP_AUTH
 
-#else
+#if XSAPI_NONXDK_WINRT_AUTH
     /// <summary>
     /// Creates an xbox_live_context from a Microsoft::Xbox::Services::System::XboxLiveUser^
     /// </summary>
@@ -112,7 +90,7 @@ public:
     /// Returns the associated system XboxLiveUser.
     /// </summary>
     _XSAPIIMP Microsoft::Xbox::Services::System::XboxLiveUser^ user();
-#endif
+#endif // XSAPI_NONXDK_WINRT_AUTH
 
     /// <summary>
     /// Returns the current user's Xbox Live User ID.
@@ -210,17 +188,17 @@ public:
     /// </summary>
     _XSAPIIMP presence::presence_service& presence_service();
 
-	/// <summary>
-	/// A service for managing Title Clubs.
-	/// </summary>
-	_XSAPIIMP clubs::clubs_service& clubs_service();
+    /// <summary>
+    /// A service for managing Title Clubs.
+    /// </summary>
+    _XSAPIIMP clubs::clubs_service& clubs_service();
 
-#if UWP_API || XSAPI_U || XSAPI_CENTENNIAL
+#if UWP_API || XSAPI_U
     /// <summary>
     /// A service used to write in game events.
     /// </summary>
     _XSAPIIMP events::events_service& events_service();
-#endif // UWP_API || XSAPI_U || XSAPI_CENTENNIAL
+#endif // UWP_API || XSAPI_U
 
 #if TV_API || UNIT_TEST_SERVICES
     /// <summary>
@@ -238,22 +216,8 @@ public:
     /// </summary>
     _XSAPIIMP entertainment_profile::entertainment_profile_list_service& entertainment_profile_list_service();
 #endif // TV_API || UNIT_TEST_SERVICES
+
 #endif // !defined(XBOX_LIVE_CREATORS_SDK)
-
-#if (TV_API | XBOX_UWP) && defined(XSAPI_CPPWINRT)
-    _XSAPIIMP xbox_live_context(
-        _In_ winrt::Windows::Xbox::System::User user
-        ) : xbox_live_context(convert_user_to_cppcx(user))
-    {
-    }
-
-    inline winrt::Windows::Xbox::System::User user_cppwinrt()
-    {
-        winrt::Windows::Xbox::System::User cppWinrtUser(nullptr);
-        winrt::copy_from_abi(cppWinrtUser, reinterpret_cast<winrt::ABI::Windows::Xbox::System::IUser*>(user()));
-        return cppWinrtUser;
-    }
-#endif // (TV_API | XBOX_UWP) && defined(XSAPI_CPPWINRT)
 
 private:
     std::shared_ptr<xbox::services::xbox_live_context_impl> m_xboxLiveContextImpl;

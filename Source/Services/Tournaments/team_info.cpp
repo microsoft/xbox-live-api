@@ -110,7 +110,7 @@ team_info::_Deserialize(_In_ const web::json::value& json)
     if (!continuationUriJson.is_null())
     {
         web::json::value continuationUriValueJson;
-#if TV_API | XBOX_UWP
+#if TV_API
         continuationUriValueJson = utils::extract_json_field(continuationUriJson, _T("uwp_xboxone"), errCode, false);
 #else
         continuationUriValueJson = utils::extract_json_field(continuationUriJson, _T("uwp_desktop"), errCode, false);
