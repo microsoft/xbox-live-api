@@ -17,14 +17,14 @@ extern "C" {
 
 /// <summary>
 /// A callback invoked every time a new memory buffer must be dynamically allocated by the library.
-/// This callback is optionally installed by calling XSAPIMemSetFunctions()
+/// This callback is optionally installed by calling XblMemSetFunctions()
 /// 
 /// The callback must allocate and return a pointer to a contiguous block of memory of the 
-/// specified size that will remain valid until the app's corresponding XSAPI_MEM_FREE_FUNC 
+/// specified size that will remain valid until the app's corresponding XBL_MEM_FREE_FUNC 
 /// callback is invoked to release it.
 /// 
 /// Every non-null pointer returned by this method will be subsequently passed to the corresponding
-/// XSAPI_MEM_FREE_FUNC callback once the memory is no longer needed.
+/// XBL_MEM_FREE_FUNC callback once the memory is no longer needed.
 /// </summary>
 /// <returns>A pointer to an allocated block of memory of the specified size, or a null 
 /// pointer if allocation failed.</returns>
@@ -32,17 +32,17 @@ extern "C" {
 /// <param name="memoryTypeId">An opaque identifier representing the internal category of 
 /// memory being allocated.</param>
 typedef _Ret_maybenull_ _Post_writable_byte_size_(size) void*
-(XBL_CALLING_CONV* XSAPI_MEM_ALLOC_FUNC)(
+(XBL_CALLING_CONV* XBL_MEM_ALLOC_FUNC)(
     _In_ size_t size,
-    _In_ XSAPI_MEMORY_TYPE memoryType
+    _In_ XBL_MEMORY_TYPE memoryType
     );
 
 /// <summary>
 /// A callback invoked every time a previously allocated memory buffer is no longer needed by 
-/// the library and can be freed. This callback is optionally installed by calling XSAPIMemSetFunctions()
+/// the library and can be freed. This callback is optionally installed by calling XblMemSetFunctions()
 ///
 /// The callback is invoked whenever the library has finished using a memory buffer previously 
-/// returned by the app's corresponding XSAPI_MEM_ALLOC_FUNC such that the application can free the
+/// returned by the app's corresponding XBL_MEM_ALLOC_FUNC such that the application can free the
 /// memory buffer.
 /// </summary>
 /// <param name="pointer">The pointer to the memory buffer previously allocated. This value will
@@ -50,9 +50,9 @@ typedef _Ret_maybenull_ _Post_writable_byte_size_(size) void*
 /// <param name="memoryTypeId">An opaque identifier representing the internal category of 
 /// memory being allocated.</param>
 typedef void
-(XBL_CALLING_CONV* XSAPI_MEM_FREE_FUNC)(
+(XBL_CALLING_CONV* XBL_MEM_FREE_FUNC)(
     _In_ _Post_invalid_ void* pointer,
-    _In_ XSAPI_MEMORY_TYPE memoryType
+    _In_ XBL_MEMORY_TYPE memoryType
     );
 
 /// <summary>
@@ -71,16 +71,16 @@ typedef void
 /// pointer to restore the default.</param>
 /// <param name="memFreeFunc">A pointer to the custom freeing callback to use, or a null 
 /// pointer to restore the default.</param>
-XBL_API void XBL_CALLING_CONV
-XsapiMemSetFunctions(
-    _In_opt_ XSAPI_MEM_ALLOC_FUNC memAllocFunc,
-    _In_opt_ XSAPI_MEM_FREE_FUNC memFreeFunc
+XBL_API XBL_RESULT XBL_CALLING_CONV
+XblMemSetFunctions(
+    _In_opt_ XBL_MEM_ALLOC_FUNC memAllocFunc,
+    _In_opt_ XBL_MEM_FREE_FUNC memFreeFunc
     ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Gets the memory hook functions to allow callers to control route memory allocations to their 
 /// own memory manager.  This method allows the application get the default memory allocation routines.
-/// This can be used along with XSAPIMemSetFunctions() to monitor all memory allocations.
+/// This can be used along with XblMemSetFunctions() to monitor all memory allocations.
 /// </summary>
 /// <param name="memAllocFunc">Set to the current allocation callback.  Returns the default routine 
 /// if not previously set</param>
@@ -88,9 +88,9 @@ XsapiMemSetFunctions(
 /// routine if not previously set</param>
 /// <returns>Result code for this API operation.  Possible values are XBL_RESULT_OK, XBL_RESULT_E_HC_INVALIDARG, or XBL_RESULT_E_HC_FAIL.</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
-XsapiMemGetFunctions(
-    _Out_ XSAPI_MEM_ALLOC_FUNC* memAllocFunc,
-    _Out_ XSAPI_MEM_FREE_FUNC* memFreeFunc
+XblMemGetFunctions(
+    _Out_ XBL_MEM_ALLOC_FUNC* memAllocFunc,
+    _Out_ XBL_MEM_FREE_FUNC* memFreeFunc
     ) XBL_NOEXCEPT;
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -99,19 +99,19 @@ XsapiMemGetFunctions(
 
 /// <summary>
 /// Initializes the library instance.
-/// This must be called before any other method, except for XSAPIMemSetFunctions() and XSAPIMemGetFunctions()
-/// Should have a corresponding call to XSAPIGlobalCleanup().
+/// This must be called before any other method, except for XblMemSetFunctions() and XblMemGetFunctions()
+/// Should have a corresponding call to XblGlobalCleanup().
 /// </summary>
-/// <returns>Result code for this API operation.  Possible values are HC_OK, HC_E_INVALIDARG, HC_E_OUTOFMEMORY, or HC_E_FAIL.</returns>
+/// <returns>Result code for this API operation.</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
-XsapiGlobalInitialize() XBL_NOEXCEPT;
+XblGlobalInitialize() XBL_NOEXCEPT;
 
 /// <summary>
 /// Immediately reclaims all resources associated with the library.
-/// If you called XSAPIMemSetFunctions(), call this before shutting down your app's memory manager.
+/// If you called XblMemSetFunctions(), call this before shutting down your app's memory manager.
 /// </summary>
 XBL_API void XBL_CALLING_CONV
-XsapiGlobalCleanup() XBL_NOEXCEPT;
+XblGlobalCleanup() XBL_NOEXCEPT;
 
 #if defined(__cplusplus)
 } // end extern "C"

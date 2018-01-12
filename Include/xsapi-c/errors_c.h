@@ -13,6 +13,7 @@ typedef enum XBL_RESULT
 {
     XBL_RESULT_OK = 0,
     XBL_RESULT_E_INVALIDARG = 1,
+    XBL_RESULT_E_ALREADYINITIALISED = 2,
 
     // TODO: remove these generic errors and into platformSpecificErrorCode below
     //////////////////////////////////////////////////////////////////////////
@@ -25,6 +26,8 @@ typedef enum XBL_RESULT
     XBL_RESULT_E_HC_BUFFERTOOSMALL = -5,
     XBL_RESULT_E_HC_NOTINITIALIZED = -6,
     XBL_RESULT_E_HC_FEATURENOTPRESENT = -7,
+    XBL_RESULT_E_HC_PERFORMALREADYCALLED = -8,
+    XBL_RESULT_E_HC_ALREADYINITIALISED = -9,
 
     //////////////////////////////////////////////////////////////////////////
     // XSAPI error conditions

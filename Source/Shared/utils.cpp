@@ -73,6 +73,18 @@ xsapi_singleton::xsapi_singleton()
 #endif
 }
 
+XBL_MEM_ALLOC_FUNC g_pMemAllocHook = [](size_t size, XBL_MEMORY_TYPE memoryType)
+{
+    UNREFERENCED_PARAMETER(memoryType);
+    return malloc(size);
+};
+
+XBL_MEM_FREE_FUNC g_pMemFreeHook = [](void *pointer, XBL_MEMORY_TYPE memoryType)
+{
+    UNREFERENCED_PARAMETER(memoryType);
+    free(pointer);
+};
+
 void xsapi_singleton::init()
 {
 #if UWP_API

@@ -262,7 +262,7 @@ social_graph::initialize()
     });
 }
 
-const xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)*
+const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>*
 social_graph::active_buffer_social_graph()
 {
     std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
@@ -685,7 +685,7 @@ void social_graph::apply_presence_changed_event(
     )
 {
     m_perfTester.start_timer(_T("apply_presence_changed_event"));
-    xsapi_internal_vector(uint64_t) userAddedVec;
+    xsapi_internal_vector<uint64_t> userAddedVec;
     auto& presenceRecords = evt.presence_records();
     for (auto& presenceRecord : presenceRecords)
     {
@@ -1012,7 +1012,7 @@ social_graph::refresh_graph()
             if (!socialListResult.err())
             {
                 auto& socialList = socialListResult.payload();
-                xsapi_internal_unordered_map(uint64_t, xbox_social_user) socialMap;
+                xsapi_internal_unordered_map<uint64_t, xbox_social_user> socialMap;
                 for (auto& user : socialList)
                 {
                     socialMap[user._Xbox_user_id_as_integer()] = user;
@@ -1030,7 +1030,7 @@ social_graph::refresh_graph()
 
 void
 social_graph::perform_diff(
-    _In_ const xsapi_internal_unordered_map(uint64_t, xbox_social_user)& xboxSocialUsers
+    _In_ const xsapi_internal_unordered_map<uint64_t, xbox_social_user>& xboxSocialUsers
     )
 {
     std::lock_guard<std::recursive_mutex> socialGraphStateLock(m_socialGraphStateMutex);
@@ -1047,11 +1047,11 @@ social_graph::perform_diff(
         m_perfTester.stop_timer(_T("set_state"));
     }
 
-    xsapi_internal_vector(xbox_social_user) usersAddedList;
-    xsapi_internal_vector(uint64_t) usersRemovedList;
-    xsapi_internal_vector(social_manager_presence_record) presenceChangeList;
-    xsapi_internal_vector(xbox_social_user) socialRelationshipChangeList;
-    xsapi_internal_vector(xbox_social_user) profileChangeList;
+    xsapi_internal_vector<xbox_social_user> usersAddedList;
+    xsapi_internal_vector<uint64_t> usersRemovedList;
+    xsapi_internal_vector<social_manager_presence_record> presenceChangeList;
+    xsapi_internal_vector<xbox_social_user> socialRelationshipChangeList;
+    xsapi_internal_vector<xbox_social_user> profileChangeList;
 
     for (auto& currentUserPair : xboxSocialUsers)
     {
@@ -1196,7 +1196,7 @@ social_graph::social_graph_timer_callback(
                 }
                 else
                 {
-                    xsapi_internal_vector(xsapi_internal_string) xsapiStrVec;
+                    xsapi_internal_vector<xsapi_internal_string> xsapiStrVec;
                     for (auto user : users)
                     {
                         xsapiStrVec.push_back(user.c_str());
@@ -1292,7 +1292,7 @@ social_graph::handle_social_relationship_change(
     auto socialNotification = socialRelationshipChanged.social_notification();
     if (socialNotification == social_notification_type::added)
     {
-        xsapi_internal_vector(xsapi_internal_string) xsapiStrVec;
+        xsapi_internal_vector<xsapi_internal_string> xsapiStrVec;
         for (auto user : socialRelationshipChanged.xbox_user_ids())
         {
             xsapiStrVec.push_back(user.c_str());
@@ -1422,7 +1422,7 @@ social_graph::presence_timer_callback(
                 }
 
                 auto presenceRecordReturnVec = presenceRecordsResult.payload();
-                xsapi_internal_vector(social_manager_presence_record) socialManagerPresenceVec;
+                xsapi_internal_vector<social_manager_presence_record> socialManagerPresenceVec;
                 socialManagerPresenceVec.reserve(presenceRecordReturnVec.size());
                 for (auto& presenceRecord : presenceRecordReturnVec)
                 {
@@ -1712,7 +1712,7 @@ user_buffers_holder::initialize_users_in_map(
     _In_ size_t bufferOffset
     )
 {
-    xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)& socialUserGraph = userBuffer.socialUserGraph;
+    xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>& socialUserGraph = userBuffer.socialUserGraph;
     auto buffer = userBuffer.buffer + bufferOffset;
     for (uint32_t i = 0; i < numUsers; ++i)
     {

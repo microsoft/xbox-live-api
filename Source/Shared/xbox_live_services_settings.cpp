@@ -16,8 +16,10 @@ std::shared_ptr<xbox_live_services_settings> xbox_live_services_settings::get_si
 {
     std::shared_ptr<xsapi_singleton> xsapiSingleton = get_xsapi_singleton(createIfRequired);
     if (xsapiSingleton == nullptr)
+    {
         return nullptr;
-    
+    }
+
     {
         std::lock_guard<std::mutex> guard(xsapiSingleton->m_serviceSettingsLock);
         if (xsapiSingleton->m_xboxServiceSettingsSingleton == nullptr)
@@ -29,12 +31,57 @@ std::shared_ptr<xbox_live_services_settings> xbox_live_services_settings::get_si
 }
 
 xbox_live_services_settings::xbox_live_services_settings() :
-    m_pMemAllocHook(nullptr),
-    m_pMemFreeHook(nullptr),
+    m_pCustomMemAllocHook(nullptr),
+    m_pCustomMemFreeHook(nullptr),
     m_loggingHandlersCounter(0),
     m_wnsHandlersCounter(0),
     m_traceLevel(xbox_services_diagnostics_trace_level::off)
 {
+}
+
+static void *custom_mem_alloc_wrapper(_In_ size_t size, _In_ XBL_MEMORY_TYPE memoryType)
+{
+    UNREFERENCED_PARAMETER(memoryType);
+    auto xboxLiveServiceSettings = xbox::services::system::xbox_live_services_settings::get_singleton_instance();
+    if (xboxLiveServiceSettings == nullptr || xboxLiveServiceSettings->m_pCustomMemAllocHook == nullptr)
+    {
+        XSAPI_ASSERT(true && L"Custom mem hook function not set!");
+        return nullptr;
+    }
+    else
+    {
+        try
+        {
+            return xbox::services::system::xbox_live_services_settings::get_singleton_instance()->m_pCustomMemAllocHook(size);
+        }
+        catch (...)
+        {
+            LOG_ERROR("mem_alloc callback failed.");
+            return nullptr;
+        }
+    }
+}
+
+static void custom_mem_free_wrapper(_In_ void *pointer, _In_ XBL_MEMORY_TYPE memoryType)
+{
+    UNREFERENCED_PARAMETER(memoryType);
+    auto xboxLiveServiceSettings = xbox::services::system::xbox_live_services_settings::get_singleton_instance(false);
+    if (xboxLiveServiceSettings == nullptr || xboxLiveServiceSettings->m_pCustomMemFreeHook == nullptr)
+    {
+        XSAPI_ASSERT(true && L"Custom mem hook function not set!");
+        return;
+    }
+    else
+    {
+        try
+        {
+            return xboxLiveServiceSettings->m_pCustomMemFreeHook(pointer);
+        }
+        catch (...)
+        {
+            LOG_ERROR("mem_free callback failed.");
+        }
+    }
 }
 
 void xbox_live_services_settings::set_memory_allocation_hooks(
@@ -48,8 +95,12 @@ void xbox_live_services_settings::set_memory_allocation_hooks(
         THROW_CPP_INVALIDARGUMENT_IF(memAllocHandler == nullptr || memFreeHandler == nullptr);
     }
 
-    m_pMemAllocHook = memAllocHandler;
-    m_pMemFreeHook = memFreeHandler;
+    m_pCustomMemAllocHook = memAllocHandler;
+    m_pCustomMemFreeHook = memFreeHandler;
+
+    auto xsapiSingleton = get_xsapi_singleton();
+    g_pMemAllocHook = custom_mem_alloc_wrapper;
+    g_pMemFreeHook = custom_mem_free_wrapper;
 }
 
 function_context xbox_live_services_settings::add_logging_handler(_In_ std::function<void(xbox_services_diagnostics_trace_level, const std::string&, const std::string&)> handler)

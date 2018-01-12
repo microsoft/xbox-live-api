@@ -109,8 +109,8 @@ private:
     uint64_t m_revision;
     uint64_t m_previousRevision;
     xsapi_internal_string m_clientId;
-    xsapi_internal_vector(svd_event) m_svdEventList;
-    xsapi_internal_unordered_map(string_t, stat_value) m_statisticDocument;
+    xsapi_internal_vector<svd_event> m_svdEventList;
+    xsapi_internal_unordered_map<string_t, stat_value> m_statisticDocument;
 };
 
 /// internal class

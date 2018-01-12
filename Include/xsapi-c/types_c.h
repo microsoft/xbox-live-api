@@ -84,7 +84,7 @@ extern "C" {
 #define XBL_NOEXCEPT
 #endif
 
-typedef uint32_t XSAPI_MEMORY_TYPE;
+typedef uint32_t XBL_MEMORY_TYPE;
 typedef int32_t FUNCTION_CONTEXT;
 
 #if defined(__cplusplus)

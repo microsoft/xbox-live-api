@@ -12,6 +12,7 @@
 #include "xsapi/xbox_live_app_config.h"
 #include "http_call_response.h"
 #include "xsapi/mem.h"
+#include "xsapi-c/xbox_live_global_c.h"
 
 // Forward decls
 class xbl_thread_pool;
@@ -239,6 +240,9 @@ struct xsapi_singleton
     std::shared_ptr<XSAPI_SOCIAL_MANAGER_VARS> m_socialVars;
     std::shared_ptr<XSAPI_STATS_MANAGER_VARS> m_statsVars;
 };
+
+extern XBL_MEM_ALLOC_FUNC g_pMemAllocHook;
+extern XBL_MEM_FREE_FUNC g_pMemFreeHook;
 
 std::shared_ptr<xsapi_singleton> get_xsapi_singleton(_In_ bool createIfRequired = true);
 void verify_global_init();
@@ -864,12 +868,12 @@ public:
         return vec;
     }
 
-    static xsapi_internal_vector(xsapi_internal_string) std_vector_string_to_xsapi_vector_internal_string(
+    static xsapi_internal_vector<xsapi_internal_string> std_vector_string_to_xsapi_vector_internal_string(
         _In_ const std::vector<string_t>& xsapiInternalVector
     )
     {
         auto internalVectorSize = xsapiInternalVector.size();
-        xsapi_internal_vector(xsapi_internal_string) vec(internalVectorSize);
+        xsapi_internal_vector<xsapi_internal_string> vec(internalVectorSize);
         for (size_t i = 0; i < internalVectorSize; ++i)
         {
             vec[i] = xsapiInternalVector.at(i).c_str();

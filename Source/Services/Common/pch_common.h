@@ -44,6 +44,13 @@
 #include "httpClient/httpClient.h"
 #include "httpClient/task.h"
 
+#if XSAPI_CPP && UWP_API // TODO eventually extend where these are included
+#include "xsapi-c/types_c.h"
+#include "xsapi-c/errors_c.h"
+#include "xsapi-c/xbox_live_global_c.h"
+#include "utils_c.h"
+#endif
+
 #include <cpprest/http_client.h>
 #include <cpprest/filestream.h>
 #include <cpprest/http_listener.h>              // HTTP server
@@ -53,13 +60,6 @@
 #include "xsapi/errors.h"
 #include "utils.h"
 #include "Logger/Log.h"
-
-#if XSAPI_CPP && UWP_API // TODO eventually extend where these are included
-#include "xsapi-c/types_c.h"
-#include "xsapi-c/errors_c.h"
-#include "xsapi-c/xbox_live_global_c.h"
-#include "utils_c.h"
-#endif
 
 #include "shared_macros.h"
 #if UWP_API
