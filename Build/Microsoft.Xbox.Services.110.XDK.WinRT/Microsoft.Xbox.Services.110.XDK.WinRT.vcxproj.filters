@@ -2025,7 +2025,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\XboxSocialUserGroup_WinRT.h">
       <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_internal.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service_impl.h">
       <Filter>C++ Source\Services\Social</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_internal.h">

@@ -3,6 +3,8 @@
 #include "pch.h"
 #include "user_taskargs.h"
 
+using namespace xbox::services;
+
 sign_in_taskargs::sign_in_taskargs(
     _In_ XSAPI_XBOX_LIVE_USER* _pUser,
     _In_ Platform::Object^ _coreDispatcher,
@@ -23,11 +25,11 @@ get_token_and_signature_taskargs::get_token_and_signature_taskargs(
     )
     : pUser(_pUser)
 {
-    httpMethod = utils_c::to_utf16string(_httpMethod);
-    url = utils_c::to_utf16string(_url);
-    headers = utils_c::to_utf16string(_headers);
+    httpMethod = utils::utf16_from_utf8(_httpMethod);
+    url = utils::utf16_from_utf8(_url);
+    headers = utils::utf16_from_utf8(_headers);
     if (_requestBodyString != nullptr)
     {
-        requestBodyString = utils_c::to_utf16string(_requestBodyString);
+        requestBodyString = utils::utf16_from_utf8(_requestBodyString);
     }
 }

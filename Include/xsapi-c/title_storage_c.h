@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-struct XSAPI_XBOX_LIVE_CONTEXT;
+struct XBL_XBOX_LIVE_CONTEXT;
 struct XSAPI_TITLE_STORAGE_BLOB_METADATA_IMPL;
 
 typedef enum XSAPI_TITLE_STORAGE_TYPE
@@ -114,14 +114,14 @@ typedef struct XSAPI_TITLE_STORAGE_BLOB_RESULT
 } XSAPI_TITLE_STORAGE_BLOB_RESULT;
 
 typedef void(*XSAPI_GET_QUOTA_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT_INFO result,
     _In_ XSAPI_TITLE_STORAGE_QUOTA quota,
     _In_opt_ void* context
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageGetQuota(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ PCSTR serviceConfigurationId,
     _In_ XSAPI_TITLE_STORAGE_TYPE storageType,
     _In_ XSAPI_GET_QUOTA_COMPLETION_ROUTINE completionRoutine,
@@ -136,14 +136,14 @@ TitleStorageGetQuota(
 /// 3) TitleStorageReleaseBlobMetadata
 ///</summary>
 typedef void(*XSAPI_GET_BLOB_METADATA_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT_INFO result,
     _In_ XSAPI_TITLE_STORAGE_BLOB_METADATA_RESULT payload,
     _In_opt_ void* context
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageGetBlobMetadata(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ PCSTR serviceConfigurationId,
     _In_ XSAPI_TITLE_STORAGE_TYPE storageType,
     _In_opt_ PCSTR blobPath,
@@ -155,7 +155,7 @@ TitleStorageGetBlobMetadata(
     _In_ uint64_t taskGroupId
     ) XBL_NOEXCEPT;
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageBlobMetadataResultGetNext(
     _In_ XSAPI_TITLE_STORAGE_BLOB_METADATA_RESULT metadataResult,
     _In_ uint32_t maxItems,
@@ -167,7 +167,7 @@ TitleStorageBlobMetadataResultGetNext(
 ///<summary>
 /// The returned blob metadata object is valid until TitleStorageReleaseBlobMetadata is called
 ///</summary>
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageCreateBlobMetadata(
     _In_ PCSTR serviceConfigurationId,
     _In_ XSAPI_TITLE_STORAGE_TYPE storageType,
@@ -180,19 +180,19 @@ TitleStorageCreateBlobMetadata(
     _Out_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA** ppMetadata
     ) XBL_NOEXCEPT;
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageReleaseBlobMetadata(
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_DELETE_BLOB_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT_INFO result,
     _In_opt_ void* context
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageDeleteBlob(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata,
     _In_ bool deleteOnlyIfEtagMatches,
     _In_ XSAPI_DELETE_BLOB_COMPLETION_ROUTINE completionRoutine,
@@ -201,14 +201,14 @@ TitleStorageDeleteBlob(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_DOWNLOAD_BLOB_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT_INFO result,
     _In_ XSAPI_TITLE_STORAGE_BLOB_RESULT payload,
     _In_opt_ void* context
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageDownloadBlob(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata,
     _Out_ PBYTE blobBuffer,
     _In_ uint32_t cbBlobBuffer,
@@ -221,14 +221,14 @@ TitleStorageDownloadBlob(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_UPLOAD_BLOB_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT_INFO result,
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata,
     _In_opt_ void* context
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageUploadBlob(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata,
     _In_ PBYTE blobBuffer,
     _In_ uint32_t cbBlobBuffer,

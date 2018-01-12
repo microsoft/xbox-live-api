@@ -7,7 +7,7 @@
 #include "user_impl_c.h"
 #include "xbox_live_context_impl_c.h"
 
-XSAPI_XBOX_LIVE_CONTEXT_IMPL::XSAPI_XBOX_LIVE_CONTEXT_IMPL(_In_ CONST XSAPI_XBOX_LIVE_USER *user, _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext) 
+XSAPI_XBOX_LIVE_CONTEXT_IMPL::XSAPI_XBOX_LIVE_CONTEXT_IMPL(_In_ CONST XSAPI_XBOX_LIVE_USER *user, _In_ XBL_XBOX_LIVE_CONTEXT* pContext) 
     : m_pContext(pContext)
 {
     m_cppContext = std::make_shared<xbox::services::xbox_live_context_impl>(user->pImpl->cppUser());

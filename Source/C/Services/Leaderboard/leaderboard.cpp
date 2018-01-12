@@ -119,7 +119,7 @@ HC_RESULT LeaderboardResultGetNextExecute(
     return HCTaskSetCompleted(taskHandle);
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 LeaderboardResultGetNext(
     _In_ XSAPI_LEADERBOARD_RESULT* leaderboardResult,
     _In_ uint32_t maxItems,
@@ -151,7 +151,7 @@ try
 CATCH_RETURN()
 #endif
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 LeaderboardResultGetNextQuery(
     _In_ XSAPI_LEADERBOARD_RESULT* leaderboardResult,
     _Out_ XSAPI_LEADERBOARD_QUERY** nextQuery,

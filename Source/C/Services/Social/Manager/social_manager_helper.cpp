@@ -18,7 +18,7 @@ XSAPI_SOCIAL_MANAGER_PRESENCE_TITLE_RECORD_IMPL::XSAPI_SOCIAL_MANAGER_PRESENCE_T
 
     m_cPresenceTitleRecord->titleId = m_cppPresenceTitleRecord.title_id();
 
-    m_presenceText = utils_c::to_utf8string(m_cppPresenceTitleRecord.presence_text());
+    m_presenceText = utils::utf8_from_utf16(m_cppPresenceTitleRecord.presence_text());
     m_cPresenceTitleRecord->presenceText = m_presenceText.c_str();
 }
 
@@ -62,13 +62,13 @@ XSAPI_PREFERRED_COLOR_IMPL::XSAPI_PREFERRED_COLOR_IMPL(
     _In_ XSAPI_PREFERRED_COLOR* cColor
 ) : m_cColor(cColor), m_cppColor(cppColor)
 {
-    m_primaryColor = utils_c::to_utf8string(m_cppColor.primary_color());
+    m_primaryColor = utils::utf8_from_utf16(m_cppColor.primary_color());
     m_cColor->primaryColor = m_primaryColor.c_str();
 
-    m_secondaryColor = utils_c::to_utf8string(m_cppColor.secondary_color());
+    m_secondaryColor = utils::utf8_from_utf16(m_cppColor.secondary_color());
     m_cColor->secondaryColor = m_secondaryColor.c_str();
 
-    m_tertiaryColor = utils_c::to_utf8string(m_cppColor.tertiary_color());
+    m_tertiaryColor = utils::utf8_from_utf16(m_cppColor.tertiary_color());
     m_cColor->tertiaryColor = m_tertiaryColor.c_str();
 }
 
@@ -82,7 +82,7 @@ XSAPI_XBOX_SOCIAL_USER_IMPL::XSAPI_XBOX_SOCIAL_USER_IMPL(
     _In_ XSAPI_XBOX_SOCIAL_USER* cXboxSocialUser
 ) : m_cXboxSocialUser(cXboxSocialUser), m_cppXboxSocialUser(cppXboxSocialUser)
 {
-    m_xboxUserId = utils_c::to_utf8string(std::wstring(m_cppXboxSocialUser->xbox_user_id()));
+    m_xboxUserId = utils::utf8_from_utf16(std::wstring(m_cppXboxSocialUser->xbox_user_id()));
     m_cXboxSocialUser->xboxUserId = m_xboxUserId.c_str();
 
     m_cXboxSocialUser->isFavorite = m_cppXboxSocialUser->is_favorite();
@@ -91,21 +91,21 @@ XSAPI_XBOX_SOCIAL_USER_IMPL::XSAPI_XBOX_SOCIAL_USER_IMPL(
 
     m_cXboxSocialUser->isFollowedByCaller = m_cppXboxSocialUser->is_followed_by_caller();
 
-    m_displayName = utils_c::to_utf8string(std::wstring(m_cppXboxSocialUser->display_name()));
+    m_displayName = utils::utf8_from_utf16(std::wstring(m_cppXboxSocialUser->display_name()));
     m_cXboxSocialUser->displayName = m_displayName.c_str();
 
-    m_realName = utils_c::to_utf8string(std::wstring(m_cppXboxSocialUser->real_name()));
+    m_realName = utils::utf8_from_utf16(std::wstring(m_cppXboxSocialUser->real_name()));
     m_cXboxSocialUser->realName = m_realName.c_str();
 
-    m_displayPicUrlRaw = utils_c::to_utf8string(std::wstring(m_cppXboxSocialUser->display_pic_url_raw()));
+    m_displayPicUrlRaw = utils::utf8_from_utf16(std::wstring(m_cppXboxSocialUser->display_pic_url_raw()));
     m_cXboxSocialUser->displayPicUrlRaw = m_displayPicUrlRaw.c_str();
 
     m_cXboxSocialUser->useAvatar = m_cppXboxSocialUser->use_avatar();
 
-    m_gamerscore = utils_c::to_utf8string(std::wstring(m_cppXboxSocialUser->gamerscore()));
+    m_gamerscore = utils::utf8_from_utf16(std::wstring(m_cppXboxSocialUser->gamerscore()));
     m_cXboxSocialUser->gamerscore = m_gamerscore.c_str();
 
-    m_gamertag = utils_c::to_utf8string(std::wstring(m_cppXboxSocialUser->gamertag()));
+    m_gamertag = utils::utf8_from_utf16(std::wstring(m_cppXboxSocialUser->gamertag()));
     m_cXboxSocialUser->gamertag = m_gamertag.c_str();
 
     m_presenceRecord = CreateSocialManagerPresenceRecordFromCpp(m_cppXboxSocialUser->presence_record());
@@ -114,7 +114,7 @@ XSAPI_XBOX_SOCIAL_USER_IMPL::XSAPI_XBOX_SOCIAL_USER_IMPL(
     auto cppTitleHistory = m_cppXboxSocialUser->title_history();
     m_titleHistory = new XSAPI_TITLE_HISTORY();
     m_titleHistory->userHasPlayed = cppTitleHistory.has_user_played();
-    m_titleHistory->lastTimeUserPlayed = utils_c::time_t_from_datetime(cppTitleHistory.last_time_user_played());
+    m_titleHistory->lastTimeUserPlayed = utils::time_t_from_datetime(cppTitleHistory.last_time_user_played());
     m_cXboxSocialUser->titleHistory = m_titleHistory;
 
     m_preferredColor = new XSAPI_PREFERRED_COLOR();
@@ -132,7 +132,7 @@ XSAPI_XBOX_USER_ID_CONTAINER_IMPL::XSAPI_XBOX_USER_ID_CONTAINER_IMPL(
     _In_ XSAPI_XBOX_USER_ID_CONTAINER* cContainer
 ) : m_cContainer(cContainer), m_cppContainer(cppContainer)
 {
-    m_xboxUserId = utils_c::to_utf8string(m_cppContainer.xbox_user_id());
+    m_xboxUserId = utils::utf8_from_utf16(m_cppContainer.xbox_user_id());
     m_cContainer->xboxUserId = m_xboxUserId.c_str();
 }
 

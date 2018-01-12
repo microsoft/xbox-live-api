@@ -40,7 +40,7 @@ HC_RESULT get_next_execute(
     return HCTaskSetCompleted(taskHandle);
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementsResultGetNext(
     _In_ XSAPI_ACHIEVEMENTS_RESULT* achievementsResult,
     _In_ uint32_t maxItems,
@@ -101,9 +101,9 @@ HC_RESULT update_achievement_execute(
     return HCTaskSetCompleted(taskHandle);
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceUpdateAchievement(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ PCSTR xboxUserId,
     _In_opt_ uint32_t* titleId,
     _In_opt_ PCSTR serviceConfigurationId,
@@ -119,10 +119,10 @@ try
 
     auto args = new update_achievement_taskargs();
     args->pXboxLiveContext = pContext;
-    args->xboxUserId = utils_c::to_utf16string(xboxUserId);
+    args->xboxUserId = utils::utf16_from_utf8(xboxUserId);
     args->titleId = titleId;
-    args->serviceConfigurationId = utils_c::to_utf16string(serviceConfigurationId);
-    args->achievementId = utils_c::to_utf16string(achievementId);
+    args->serviceConfigurationId = utils::utf16_from_utf8(serviceConfigurationId);
+    args->achievementId = utils::utf16_from_utf8(achievementId);
     args->percentComplete = percentComplete;
 
     return utils_c::xsapi_result_from_hc_result(
@@ -165,9 +165,9 @@ HC_RESULT get_achievements_for_title_id_execute(
 
     return HCTaskSetCompleted(taskHandle);
 }
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceGetAchievementsForTitleId(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ PCSTR xboxUserId,
     _In_ uint32_t titleId,
     _In_ XSAPI_ACHIEVEMENT_TYPE type,
@@ -184,7 +184,7 @@ try
     verify_global_init();
 
     auto args = new get_achievement_for_title_id_taskargs();
-    args->xboxUserId = utils_c::to_utf16string(xboxUserId);
+    args->xboxUserId = utils::utf16_from_utf8(xboxUserId);
     args->titleId = titleId;
     args->type = static_cast<achievement_type>(type);
     args->unlockedOnly = unlockedOnly;
@@ -228,9 +228,9 @@ HC_RESULT get_achievement_execute(
 
     return HCTaskSetCompleted(taskHandle);
 }
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceGetAchievement(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ PCSTR xboxUserId,
     _In_ PCSTR serviceConfigurationId,
     _In_ PCSTR achievementId,
@@ -245,9 +245,9 @@ try
     // Task args are cleaned up in write results routine. TODO add similar comment elsewhere.
     auto args = new get_achievement_taskargs();
     args->pXboxLiveContext = pContext;
-    args->xboxUserId = utils_c::to_utf16string(xboxUserId);
-    args->serviceConfigurationId = utils_c::to_utf16string(serviceConfigurationId);
-    args->achievementId = utils_c::to_utf16string(achievementId);
+    args->xboxUserId = utils::utf16_from_utf8(xboxUserId);
+    args->serviceConfigurationId = utils::utf16_from_utf8(serviceConfigurationId);
+    args->achievementId = utils::utf16_from_utf8(achievementId);
 
     return utils_c::xsapi_result_from_hc_result(
         HCTaskCreate(
@@ -265,7 +265,7 @@ try
 CATCH_RETURN()
 
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceReleaseAchievementsResult(
     _In_ XSAPI_ACHIEVEMENTS_RESULT* achievementsResult
     ) XBL_NOEXCEPT
@@ -281,12 +281,12 @@ try
     {
         delete achievementsResult->pImpl;
     }
-    return XSAPI_RESULT_OK;
+    return XBL_RESULT_OK;
 }
 CATCH_RETURN()
 
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceReleaseAchievement(
     _In_ XSAPI_ACHIEVEMENT* achievement
     ) XBL_NOEXCEPT
@@ -302,6 +302,6 @@ try
     {
         delete achievement->pImpl;
     }
-    return XSAPI_RESULT_OK;
+    return XBL_RESULT_OK;
 }
 CATCH_RETURN()

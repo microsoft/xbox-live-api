@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-struct XSAPI_XBOX_LIVE_CONTEXT;
+struct XBL_XBOX_LIVE_CONTEXT;
 
 /// <summary>
 /// Constant values for permission IDs.
@@ -58,7 +58,7 @@ typedef struct XSAPI_PRIVACY_MULTIPLE_PERMISSIONS_CHECK_RESULT
 /// The 'result' fields and the 'xboxUserIds' array will only be valid until the completion routine returns.
 /// </remarks>
 typedef void(*XSAPI_PRIVACY_GET_USER_LIST_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT_INFO result,
     _In_ PCSTR* xboxUserIds,
     _In_ uint32_t xboxUserIdsCount,
     _In_opt_ void* context
@@ -67,17 +67,17 @@ typedef void(*XSAPI_PRIVACY_GET_USER_LIST_COMPLETION_ROUTINE)(
 /// <summary>
 /// Get the list of Xbox Live Ids the calling user should avoid during multiplayer matchmaking.
 /// </summary>
-/// <param name="pContext">A XSAPI_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
+/// <param name="pContext">A XBL_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
 /// <param name="completionRoutine">The method to be called when the async operation completes.</param>
 /// <param name="completionRoutineContext">Optional context to pass back to the completion routine.</param>
 /// <param name="taskGroupId">An Id that can be used to filter callbacks to specific threads.</param>
 /// <returns>
-/// A XSAPI_RESULT indicating success or failure. The payload of the completion routine will contain an
+/// A XBL_RESULT indicating success or failure. The payload of the completion routine will contain an
 /// array of xuids which the calling user should avoid.
 ///</returns>
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 PrivacyGetAvoidList(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ XSAPI_PRIVACY_GET_USER_LIST_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
     _In_ uint64_t taskGroupId
@@ -86,17 +86,17 @@ PrivacyGetAvoidList(
 /// <summary>
 /// Get the list of Xbox Live Ids that the calling user should not hear (mute) during multiplayer matchmaking.
 /// </summary>
-/// <param name="pContext">A XSAPI_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
+/// <param name="pContext">A XBL_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
 /// <param name="completionRoutine">The method to be called when the async operation completes.</param>
 /// <param name="completionRoutineContext">Optional context to pass back to the completion routine.</param>
 /// <param name="taskGroupId">An Id that can be used to filter callbacks to specific threads.</param>
 /// <returns>
-/// A XSAPI_RESULT indicating success or failure. The payload of the completion routine will contain an
+/// A XBL_RESULT indicating success or failure. The payload of the completion routine will contain an
 /// array of xuids which the calling user has muted.
 ///</returns>
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 PrivacyGetMuteList(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ XSAPI_PRIVACY_GET_USER_LIST_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
     _In_ uint64_t taskGroupId
@@ -109,7 +109,7 @@ PrivacyGetMuteList(
 /// The fields of 'result' and 'payload' will only be valid until the completion routine returns.
 /// </remarks>
 typedef void(*XSAPI_PRIVACY_CHECK_PERMISSION_WITH_TARGET_USER_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT_INFO result,
     _In_ XSAPI_PRIVACY_PERMISSION_CHECK_RESULT payload,
     _In_opt_ void* context
     );
@@ -117,19 +117,19 @@ typedef void(*XSAPI_PRIVACY_CHECK_PERMISSION_WITH_TARGET_USER_COMPLETION_ROUTINE
 /// <summary>
 /// Check a single permission with a single target user.
 /// </summary>
-/// <param name="pContext">A XSAPI_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
+/// <param name="pContext">A XBL_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
 /// <param name="permissionId">The ID of the permission to check.</param>
 /// <param name="xboxUserId">The target user's xbox user ID for validation.</param>
 /// <param name="completionRoutine">The method to be called when the async operation completes.</param>
 /// <param name="completionRoutineContext">Optional context to pass back to the completion routine.</param>
 /// <param name="taskGroupId">An Id that can be used to filter callbacks to specific threads.</param>
 /// <returns>
-/// A XSAPI_RESULT indicating success or failure. The payload of the completion routine will contain an
+/// A XBL_RESULT indicating success or failure. The payload of the completion routine will contain an
 /// XSAPI_PRIVACY_PERMISSION_CHECK_RESULT indicating the users permission.
 ///</returns>
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 PrivacyCheckPermissionWithTargetUser(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ PCSTR permissionId,
     _In_ PCSTR xboxUserId,
     _In_ XSAPI_PRIVACY_CHECK_PERMISSION_WITH_TARGET_USER_COMPLETION_ROUTINE completionRoutine,
@@ -144,7 +144,7 @@ PrivacyCheckPermissionWithTargetUser(
 /// The 'result' fields and the 'privacyCheckResults' array will only be valid until the completion routine returns.
 /// </remarks>
 typedef void(*XSAPI_PRIVACY_CHECK_PERMISSION_WITH_MULTIPLE_TARGET_USERS_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT_INFO result,
     _In_ XSAPI_PRIVACY_MULTIPLE_PERMISSIONS_CHECK_RESULT* privacyCheckResults,
     _In_ uint32_t privacyCheckResultsCount,
     _In_opt_ void* context
@@ -153,7 +153,7 @@ typedef void(*XSAPI_PRIVACY_CHECK_PERMISSION_WITH_MULTIPLE_TARGET_USERS_COMPLETI
 /// <summary>
 /// Check multiple permissions with multiple target users.
 /// </summary>
-/// <param name="pContext">A XSAPI_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
+/// <param name="pContext">A XBL_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
 /// <param name="permissionIds">The array of IDs of permissions to check.</param>
 /// <param name="permissionIdsCount">Size of the permissionIds array.</param>
 /// <param name="xboxUserIds">The array of xbox user IDs to check permission against.</param>
@@ -162,12 +162,12 @@ typedef void(*XSAPI_PRIVACY_CHECK_PERMISSION_WITH_MULTIPLE_TARGET_USERS_COMPLETI
 /// <param name="completionRoutineContext">Optional context to pass back to the completion routine.</param>
 /// <param name="taskGroupId">An Id that can be used to filter callbacks to specific threads.</param>
 /// <returns>
-/// A XSAPI_RESULT indicating success or failure. The payload of the completion routine will contain an
+/// A XBL_RESULT indicating success or failure. The payload of the completion routine will contain an
 /// XSAPI_PRIVACY_MULTIPLE_PERMISSIONS_CHECK_RESULT indicating the users' permissions.
 ///</returns>
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 PrivacyCheckMultiplePermissionsWithMultipleTargetUsers(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ PCSTR* permissionIds,
     _In_ uint32_t permissionIdsCount,
     _In_ PCSTR* xboxUserIds,

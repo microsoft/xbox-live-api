@@ -4,7 +4,7 @@
 #pragma once
 #include <mutex>
 #include "xsapi/services.h"
-#include "profile_internal.h"
+#include "profile_service_impl.h"
 #if !TV_API
     #if !XSAPI_CPP
         #include "User_WinRT.h"

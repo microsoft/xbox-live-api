@@ -13,7 +13,7 @@ XSAPI_ACHIEVEMENT_TITLE_ASSOCIATION_IMPL::XSAPI_ACHIEVEMENT_TITLE_ASSOCIATION_IM
     _In_ XSAPI_ACHIEVEMENT_TITLE_ASSOCIATION* cAssociation
 ) : m_cppAssociation(cppAssociation), m_cAssociation(cAssociation)
 {
-    m_name = utils_c::to_utf8string(m_cppAssociation.name());
+    m_name = utils::utf8_from_utf16(m_cppAssociation.name());
     m_cAssociation->name = m_name.c_str();
 
     m_cAssociation->titleId = m_cppAssociation.title_id();
@@ -24,13 +24,13 @@ XSAPI_ACHIEVEMENT_REQUIREMENT_IMPL::XSAPI_ACHIEVEMENT_REQUIREMENT_IMPL(
     _In_ XSAPI_ACHIEVEMENT_REQUIREMENT* cRequirement
 ) : m_cppRequirement(cppRequirement), m_cRequirement(cRequirement)
 {
-    m_id = utils_c::to_utf8string(m_cppRequirement.id());
+    m_id = utils::utf8_from_utf16(m_cppRequirement.id());
     m_cRequirement->id = m_id.c_str();
 
-    m_currentProgressValue = utils_c::to_utf8string(m_cppRequirement.current_progress_value());
+    m_currentProgressValue = utils::utf8_from_utf16(m_cppRequirement.current_progress_value());
     m_cRequirement->currentProgressValue = m_currentProgressValue.c_str();
 
-    m_targetProgressValue = utils_c::to_utf8string(m_cppRequirement.target_progress_value());
+    m_targetProgressValue = utils::utf8_from_utf16(m_cppRequirement.target_progress_value());
     m_cRequirement->targetProgressValue = m_targetProgressValue.c_str();
 }
 
@@ -49,7 +49,7 @@ XSAPI_ACHIEVEMENT_PROGRESSION_IMPL::XSAPI_ACHIEVEMENT_PROGRESSION_IMPL(
     m_cProgression->requirements = m_requirements.data();
     m_cProgression->requirementsCount = (uint32_t)m_requirements.size();
 
-    m_cProgression->timeUnlocked = utils_c::time_t_from_datetime(m_cppProgression.time_unlocked());
+    m_cProgression->timeUnlocked = utils::time_t_from_datetime(m_cppProgression.time_unlocked());
 }
 
 XSAPI_ACHIEVEMENT_MEDIA_ASSET_IMPL::XSAPI_ACHIEVEMENT_MEDIA_ASSET_IMPL(
@@ -57,11 +57,11 @@ XSAPI_ACHIEVEMENT_MEDIA_ASSET_IMPL::XSAPI_ACHIEVEMENT_MEDIA_ASSET_IMPL(
     _In_ XSAPI_ACHIEVEMENT_MEDIA_ASSET* cMediaAsset
 ) : m_cppMediaAsset(cppMediaAsset), m_cMediaAsset(cMediaAsset)
 {
-    m_name = utils_c::to_utf8string(m_cppMediaAsset.name());
+    m_name = utils::utf8_from_utf16(m_cppMediaAsset.name());
     m_cMediaAsset->name = m_name.c_str();
 
     m_uri = m_cppMediaAsset.url().to_string();
-    m_url = utils_c::to_utf8string(m_uri);
+    m_url = utils::utf8_from_utf16(m_uri);
     m_cMediaAsset->name = m_url.c_str();
 
     m_cMediaAsset->mediaAssetType = static_cast<XSAPI_ACHIEVEMENT_MEDIA_ASSET_TYPE>(m_cppMediaAsset.media_asset_type());
@@ -72,16 +72,16 @@ XSAPI_ACHIEVEMENT_REWARD_IMPL::XSAPI_ACHIEVEMENT_REWARD_IMPL(
     _In_ XSAPI_ACHIEVEMENT_REWARD* cReward
 ) : m_cppReward(cppReward), m_cReward(cReward)
 {
-    m_name = utils_c::to_utf8string(m_cppReward.name());
+    m_name = utils::utf8_from_utf16(m_cppReward.name());
     m_cReward->name = m_name.c_str();
 
-    m_description = utils_c::to_utf8string(m_cppReward.description());
+    m_description = utils::utf8_from_utf16(m_cppReward.description());
     m_cReward->description = m_description.c_str();
 
-    m_value = utils_c::to_utf8string(m_cppReward.value());
+    m_value = utils::utf8_from_utf16(m_cppReward.value());
     m_cReward->value = m_value.c_str();
 
-    m_valueType = utils_c::to_utf8string(m_cppReward.value_type());
+    m_valueType = utils::utf8_from_utf16(m_cppReward.value_type());
     m_cReward->valueType = m_valueType.c_str();
 
     m_mediaAsset = new XSAPI_ACHIEVEMENT_MEDIA_ASSET();
@@ -96,13 +96,13 @@ XSAPI_ACHIEVEMENT_IMPL::XSAPI_ACHIEVEMENT_IMPL(
     _In_ XSAPI_ACHIEVEMENT* cAchievement
 ) : m_cppAchievement(cppAchievement), m_cAchievement(cAchievement)
 {
-    m_id = utils_c::to_utf8string(m_cppAchievement.id());
+    m_id = utils::utf8_from_utf16(m_cppAchievement.id());
     m_cAchievement->id = m_id.c_str();
 
-    m_serviceConfigurationId = utils_c::to_utf8string(m_cppAchievement.service_configuration_id());
+    m_serviceConfigurationId = utils::utf8_from_utf16(m_cppAchievement.service_configuration_id());
     m_cAchievement->serviceConfigurationId = m_serviceConfigurationId.c_str();
 
-    m_name = utils_c::to_utf8string(m_cppAchievement.name());
+    m_name = utils::utf8_from_utf16(m_cppAchievement.name());
     m_cAchievement->name = m_name.c_str();
 
     for (auto cppTitleAssociation : m_cppAchievement.title_associations())
@@ -126,25 +126,25 @@ XSAPI_ACHIEVEMENT_IMPL::XSAPI_ACHIEVEMENT_IMPL(
     std::vector<PCSTR> cPlatforms;
     for (auto cppPlatform : m_cppAchievement.platforms_available_on())
     {
-        auto platform = utils_c::to_utf8string(cppPlatform);
+        auto platform = utils::utf8_from_utf16(cppPlatform);
         m_platformsAvailableOn.push_back(platform);
         cPlatforms.push_back(platform.c_str());
     }
     m_cAchievement->platformsAvailableOn = cPlatforms.data();
     m_cAchievement->platformsAvailableOnCount = (uint32_t)cPlatforms.size();
 
-    m_unlockedDescription = utils_c::to_utf8string(m_cppAchievement.unlocked_description());
+    m_unlockedDescription = utils::utf8_from_utf16(m_cppAchievement.unlocked_description());
     m_cAchievement->unlockedDescription = m_unlockedDescription.c_str();
 
-    m_lockedDescription = utils_c::to_utf8string(m_cppAchievement.locked_description());
+    m_lockedDescription = utils::utf8_from_utf16(m_cppAchievement.locked_description());
     m_cAchievement->lockedDescription = m_lockedDescription.c_str();
 
-    m_productId = utils_c::to_utf8string(m_cppAchievement.product_id());
+    m_productId = utils::utf8_from_utf16(m_cppAchievement.product_id());
     m_cAchievement->productId = m_productId.c_str();
 
     m_available = new XSAPI_ACHIEVEMENT_TIME_WINDOW();
-    m_available->startDate = utils_c::time_t_from_datetime(m_cppAchievement.available().start_date());
-    m_available->endDate = utils_c::time_t_from_datetime(m_cppAchievement.available().end_date());
+    m_available->startDate = utils::time_t_from_datetime(m_cppAchievement.available().start_date());
+    m_available->endDate = utils::time_t_from_datetime(m_cppAchievement.available().end_date());
 
     for (auto cppReward : m_cppAchievement.rewards())
     {
@@ -155,7 +155,7 @@ XSAPI_ACHIEVEMENT_IMPL::XSAPI_ACHIEVEMENT_IMPL(
     m_cAchievement->rewards = m_rewards.data();
     m_cAchievement->rewardsCount = (uint32_t)m_rewards.size();
 
-    m_deepLink = utils_c::to_utf8string(m_cppAchievement.deep_link());
+    m_deepLink = utils::utf8_from_utf16(m_cppAchievement.deep_link());
     m_cAchievement->deepLink = m_deepLink.c_str();
 }
 

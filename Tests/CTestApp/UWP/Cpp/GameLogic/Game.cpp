@@ -427,13 +427,13 @@ void Game::Log(std::wstring log)
 }
 
 void Game::HandleSignInResult(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT_INFO result,
     _In_ XSAPI_SIGN_IN_RESULT payload,
     _In_opt_ void* context)
 {
     Game *pThis = reinterpret_cast<Game*>(context);
 
-    if (!result.errorCode == XSAPI_RESULT_OK)
+    if (!result.errorCode == XBL_RESULT_OK)
     {
         pThis->Log(L"Failed signing in.");
         return;
@@ -485,11 +485,11 @@ void Game::GetUserProfile()
 
     std::weak_ptr<Game> thisWeakPtr = shared_from_this();
 
-    XSAPIGetUserProfile(m_xboxLiveContext, m_user->xboxUserId, 
-    [](XSAPI_RESULT_INFO result, XSAPI_XBOX_USER_PROFILE profile, void* context)
+    XblGetUserProfile(m_xboxLiveContext, m_user->xboxUserId, 0, 
+    [](XBL_RESULT_INFO result, const XBL_XBOX_USER_PROFILE *profile, void* context)
     {
         Game *pThis = reinterpret_cast<Game*>(context);
-        if (result.errorCode == XSAPI_RESULT_OK)
+        if (result.errorCode == XBL_RESULT_OK)
         {
             pThis->Log(L"Successfully got profile!");
         }
@@ -497,7 +497,7 @@ void Game::GetUserProfile()
         {
             pThis->Log(L"Failed getting profile.");
         }
-    }, this, 0);
+    }, this);
 }
 
 void Game::HandleSignout(XSAPI_XBOX_LIVE_USER *user)

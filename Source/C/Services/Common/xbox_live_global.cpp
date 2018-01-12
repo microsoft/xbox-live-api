@@ -15,7 +15,7 @@ XsapiMemSetFunctions(
     HCMemSetFunctions(memAllocFunc, memFreeFunc);
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XsapiMemGetFunctions(
     _Out_ XSAPI_MEM_ALLOC_FUNC* memAllocFunc,
     _Out_ XSAPI_MEM_FREE_FUNC* memFreeFunc
@@ -24,13 +24,13 @@ XsapiMemGetFunctions(
     return utils_c::xsapi_result_from_hc_result(HCMemGetFunctions(memAllocFunc, memFreeFunc));
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XsapiGlobalInitialize() XBL_NOEXCEPT
 try
 {
     // Force init
-    auto singleton = get_xsapi_singleton();
-    return XSAPI_RESULT_OK;
+    get_xsapi_singleton();
+    return XBL_RESULT_OK;
 }
 CATCH_RETURN()
 

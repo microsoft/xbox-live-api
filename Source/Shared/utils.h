@@ -772,6 +772,17 @@ public:
     }
 #endif
 
+#ifdef UWP_API
+    static std::string utf8_from_utf16(std::wstring const& utf16);
+    static std::wstring utf16_from_utf8(std::string const& utf8);
+
+    static std::string utf8_from_utf16(_In_z_ PCWSTR utf16);
+    static std::wstring utf16_from_utf8(_In_z_ PCSTR utf8);
+
+    static std::string utf8_from_utf16(_In_reads_(size) PCWSTR utf16, size_t size);
+    static std::wstring utf16_from_utf8(_In_reads_(size) PCSTR utf8, size_t size);
+#endif
+
     static void generate_locales();
     static const string_t& get_locales();
 
@@ -964,6 +975,18 @@ public:
 #if UNIT_TEST_SERVICES
     static web::json::value read_test_response_file(_In_ const string_t& filePath);
 #endif
+
+    static std::vector<string_t> string_array_to_string_vector(
+        PCSTR *stringArray, 
+        size_t stringArrayCount
+        );
+
+    static PCSTR alloc_string(const string_t& str);
+    static void free_string(PCSTR str);
+
+    static time_t time_t_from_datetime(const utility::datetime& datetime);
+
+    static utility::datetime datetime_from_time_t(const time_t* time);
 
 private:
     static std::vector<string_t> get_locale_list();

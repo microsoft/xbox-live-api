@@ -21,9 +21,9 @@ public:
 
 private:
     long m_targetNumThreads;
-    win32_handle m_stopRequestedHandle;
-    win32_handle m_pendingReadyHandle;
-    win32_handle m_completeReadyHandle;
+    xbox::services::win32_handle m_stopRequestedHandle;
+    xbox::services::win32_handle m_pendingReadyHandle;
+    xbox::services::win32_handle m_completeReadyHandle;
 
     long m_numActiveThreads;
     HANDLE m_hActiveThreads[64];

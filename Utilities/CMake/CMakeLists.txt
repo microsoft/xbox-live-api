@@ -238,8 +238,15 @@ if( UNITTEST )
         )		
 endif()
 
-set(Cpp_Shared_Source_Files
+set(UWP_Shared_Source_Files
     ../../Source/Shared/user_context_cpp.cpp
+    ../../Source/Shared/telemetry.h
+    ../../Source/Shared/telemetry.cpp
+    ../../Source/Shared/WinRT/local_config_winrt.cpp
+    ../../Source/Shared/threadpool.h
+    ../../Source/Shared/threadpool.cpp
+    ../../Source/Shared/utils_uwp.h
+    ../../Source/Shared/utils_uwp.cpp
     )
 
 set(WinRT_Shared_Source_Files
@@ -311,19 +318,11 @@ set(Misc_Source_Files
     ../../Source/Services/Misc/contextual_config_result.h
     )
 
-set(UWP_Source_Files
-    ../../Source/Shared/telemetry.h
-    ../../Source/Shared/telemetry.cpp
-    ../../Source/Services/Presence/presence_writer.cpp
+set(UWP_Misc_Source_Files    
     ../../Source/Services/Misc/UWP/title_callable_ui.cpp
     ../../Source/Services/Misc/Windows/notification_service_windows.cpp
 	../../Source/Services/Misc/notification_service.cpp
     ../../Source/Services/Misc/notification_service.h
-	../../Source/Shared/WinRT/local_config_winrt.cpp
-    ../../Source/Shared/threadpool.h
-    ../../Source/Shared/threadpool.cpp
-    ../../Source/Shared/utils_uwp.h
-    ../../Source/Shared/utils_uwp.cpp
 	)
 
 set(Achievements_Source_Files
@@ -381,6 +380,10 @@ set(Presence_Source_Files
     ../../Source/Services/Presence/title_presence_change_event_args.cpp
     ../../Source/Services/Presence/title_presence_change_subscription.cpp
     )
+    
+set(UWP_Presence_Source_Files
+    ../../Source/Services/Presence/presence_writer.cpp
+    )
 
 set(Gameserverplatform_Source_Files
     ../../Source/Services/GameServerPlatform/allocation_result.cpp
@@ -423,7 +426,7 @@ set(Social_Source_Files
     ../../Source/Services/Social/Social_relationship_change_subscription.cpp
     ../../Source/Services/Social/Social_service_impl.cpp
     ../../Source/Services/Social/Social_internal.h
-    ../../Source/Services/Social/profile_internal.h
+    ../../Source/Services/Social/profile_service_impl.h
     ../../Source/Services/Social/profile_service_impl.cpp
     )
 
@@ -659,7 +662,9 @@ set(Privacy_Source_Files_C
     )
     
 set(Social_Source_Files_C
-    ../../Source/C/Services/Social/profile.cpp
+    ../../Source/Services/Social/C/profile.cpp
+    ../../Source/Services/Social/C/profile_helpers.h
+    ../../Source/Services/Social/C/profile_helpers.cpp
     )
     
 set(Social_Manager_Source_Files_C
@@ -1279,8 +1284,9 @@ else()
         
 	else()
 		source_group("C++ Source\\System" FILES ${UWP_System_Source_Files})
-        source_group("C++ Source\\Shared" FILES ${Cpp_Shared_Source_Files})
-        source_group("C++ Source\\Services\\Misc" FILES ${UWP_Source_Files})
+        source_group("C++ Source\\Shared" FILES ${UWP_Shared_Source_Files})
+        source_group("C++ Source\\Services\\Presence" FILES ${UWP_Presence_Source_Files})
+        source_group("C++ Source\\Services\\Misc" FILES ${UWP_Misc_Source_Files})
         source_group("C++ Source\\Services\\Events" FILES ${UWP_Events_Source_Files})
 
         if( PCWIN32 )
@@ -1301,7 +1307,7 @@ else()
             source_group("C++ Source\\C\\Services\\Leaderboard" FILES ${Leaderboard_Source_Files_C})
             source_group("C++ Source\\C\\Services\\Misc" FILES ${Misc_Source_Files_C})
             source_group("C++ Source\\C\\Services\\Privacy" FILES ${Privacy_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\Social" FILES ${Social_Source_Files_C})
+            source_group("C++ Source\\Services\\Social\\C" FILES ${Social_Source_Files_C})
             source_group("C++ Source\\C\\Services\\Social\\Manager" FILES ${Social_Manager_Source_Files_C})
             source_group("C++ Source\\C\\Services\\Stats\\Manager" FILES ${Stats_Manager_Source_Files_C})
             source_group("C++ Source\\C\\Services\\TitleStorage" FILES ${TitleStorage_Souce_Files_C})
@@ -1309,13 +1315,14 @@ else()
 	endif()
 
     if( UNITTEST )
-        source_group("C++ Source\\Shared" FILES ${Cpp_Shared_Source_Files})
+        source_group("C++ Source\\Shared" FILES ${UWP_Shared_Source_Files})
         source_group("C++ Source\\Shared" FILES ${WinRT_Shared_Source_Files})
         source_group("C++ Source\\Shared\\WinRT" FILES ${UWP_Shared_WinRT_Source_Files})
         source_group("C++ Source\\System" FILES ${UWP_System_Source_Files})
         source_group("C++ Source\\System\\WinRT" FILES ${System_WinRT_Source_Files})
         source_group("C++ Source\\Services\\Events" FILES ${UWP_Events_Source_Files})
-        source_group("C++ Source\\Services\\Misc" FILES ${UWP_Source_Files})
+        source_group("C++ Source\\Services\\Misc" FILES ${UWP_Misc_Source_Files})
+        source_group("C++ Source\\Services\\Presence" FILES ${UWP_Presence_Source_Files})
         source_group("C++ Source\\Services\\Events\\WinRT" FILES ${Events_WinRT_Source_Files})
     endif()
     
@@ -1413,7 +1420,7 @@ else()
         if( UNITTEST )
             list(APPEND
                 SOURCE_FILES
-                ${Cpp_Shared_Source_Files}
+                ${UWP_Shared_Source_Files}
                 ${WinRT_Shared_Source_Files}
                 )
         endif()                
@@ -1421,10 +1428,11 @@ else()
     else()
         list(APPEND
             SOURCE_FILES
-            ${Cpp_Shared_Source_Files}
+            ${UWP_Shared_Source_Files}
             ${UWP_System_Source_Files}
             ${UWP_Events_Source_Files}
-            ${UWP_Source_Files}
+            ${UWP_Misc_Source_Files}
+            ${UWP_Presence_Source_Files}
             )
             
         if( WINRT OR UNITTEST )
@@ -1460,7 +1468,8 @@ else()
             SOURCE_FILES
             ${UWP_System_Source_Files}
             ${UWP_Events_Source_Files}
-            ${UWP_Source_Files}
+            ${UWP_Misc_Source_Files}
+            ${UWP_Presence_Source_Files}
             ${Events_WinRT_Source_Files}
             ${UWP_Shared_WinRT_Source_Files}
             ${System_WinRT_Source_Files}

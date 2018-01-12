@@ -3,7 +3,7 @@
 #pragma once
 #include "pch.h"
 
-#if UWP_API || UNITTEST_API
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 class Win32Event
 {
@@ -41,5 +41,4 @@ private:
     HANDLE m_handle;
 };
 
-
-#endif
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

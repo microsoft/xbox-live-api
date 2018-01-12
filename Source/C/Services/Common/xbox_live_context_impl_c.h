@@ -9,10 +9,10 @@
 struct XSAPI_XBOX_LIVE_CONTEXT_IMPL
 {
 public:
-    XSAPI_XBOX_LIVE_CONTEXT_IMPL(_In_ CONST XSAPI_XBOX_LIVE_USER* pUser, _In_ XSAPI_XBOX_LIVE_CONTEXT *pContext);
+    XSAPI_XBOX_LIVE_CONTEXT_IMPL(_In_ CONST XSAPI_XBOX_LIVE_USER* pUser, _In_ XBL_XBOX_LIVE_CONTEXT *pContext);
     std::shared_ptr<xbox::services::xbox_live_context_impl> cppObject();
 
 private:
-    XSAPI_XBOX_LIVE_CONTEXT *m_pContext;
+    XBL_XBOX_LIVE_CONTEXT *m_pContext;
     std::shared_ptr<xbox::services::xbox_live_context_impl> m_cppContext;
 };

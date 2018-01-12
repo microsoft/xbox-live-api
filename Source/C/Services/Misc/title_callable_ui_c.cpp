@@ -32,7 +32,7 @@ HC_RESULT TCUIShowProfileCardUIExecute(
     return HCTaskSetCompleted(taskHandle);
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TCUIShowProfileCardUI(
     _In_ PCSTR targetXboxUserId,
     _In_ XSAPI_SHOW_PROFILE_CARD_UI_COMPLETION_ROUTINE completionRoutine,
@@ -44,7 +44,7 @@ try
     verify_global_init();
 
     auto args = new show_profile_card_taskargs();
-    args->targetXboxUserId = utils_c::to_utf16string(targetXboxUserId);
+    args->targetXboxUserId = utils::utf16_from_utf8(targetXboxUserId);
 
     return utils_c::xsapi_result_from_hc_result(
         HCTaskCreate(
@@ -75,7 +75,7 @@ HC_RESULT TCUICheckGamingPrivilegeSilentlyExecute(
     return HCTaskSetCompleted(taskHandle);
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TCUICheckGamingPrivilegeSilently(
     _In_ XSAPI_GAMING_PRIVILEGE privilege,
     _In_ XSAPI_CHECK_GAMING_PRIVILEGE_COMPLETION_ROUTINE completionRoutine,
@@ -123,7 +123,7 @@ HC_RESULT TCUICheckGamingPrivilegeWithUIExecute(
     return HCTaskSetCompleted(taskHandle);
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TCUICheckGamingPrivilegeWithUI(
     _In_ XSAPI_GAMING_PRIVILEGE privilege,
     _In_ PCSTR friendlyMessage,
@@ -137,7 +137,7 @@ try
 
     auto tcuiArgs = new check_gaming_privilege_taskargs();
     tcuiArgs->privilege = privilege;
-    tcuiArgs->friendlyMessage = utils_c::to_utf16string(friendlyMessage);
+    tcuiArgs->friendlyMessage = utils::utf16_from_utf8(friendlyMessage);
 
     return utils_c::xsapi_result_from_hc_result(
         HCTaskCreate(

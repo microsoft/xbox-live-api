@@ -24,7 +24,7 @@ HC_RESULT get_privacy_list_execute(
     {
         for (const auto& xuid : result.payload())
         {
-            args->xboxUserIds.emplace_back(utils_c::to_utf8string(xuid));
+            args->xboxUserIds.emplace_back(utils::utf8_from_utf16(xuid));
             args->xboxUserIdPointers.emplace_back(args->xboxUserIds.back().data());
         }
     }
@@ -49,9 +49,9 @@ HC_RESULT get_privacy_list_write_results(
     return HC_OK;
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 PrivacyGetAvoidList(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ XSAPI_PRIVACY_GET_USER_LIST_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
     _In_ uint64_t taskGroupId
@@ -79,9 +79,9 @@ try
 }
 CATCH_RETURN()
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 PrivacyGetMuteList(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ XSAPI_PRIVACY_GET_USER_LIST_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
     _In_ uint64_t taskGroupId
@@ -118,8 +118,8 @@ HC_RESULT check_permission_execute(
     auto privacyService = args->pXboxLiveContext->pImpl->cppObject()->privacy_service();
 
     auto result = privacyService.check_permission_with_target_user(
-        utils_c::to_utf16string(args->permissionId),
-        utils_c::to_utf16string(args->xboxUserId))
+        utils::utf16_from_utf8(args->permissionId),
+        utils::utf16_from_utf8(args->xboxUserId))
         .get();
 
     args->copy_xbox_live_result(result);
@@ -132,9 +132,9 @@ HC_RESULT check_permission_execute(
 }
 
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 PrivacyCheckPermissionWithTargetUser(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ PCSTR permissionId,
     _In_ PCSTR xboxUserId,
     _In_ XSAPI_PRIVACY_CHECK_PERMISSION_WITH_TARGET_USER_COMPLETION_ROUTINE completionRoutine,
@@ -210,9 +210,9 @@ HC_RESULT check_multiple_permissions_write_results(
     return HC_OK;
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 PrivacyCheckMultiplePermissionsWithMultipleTargetUsers(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ PCSTR* permissionIds,
     _In_ uint32_t permissionIdsCount,
     _In_ PCSTR* xboxUserIds,
@@ -227,8 +227,8 @@ try
 
     auto args = new privacy_check_multiple_permissions_taskargs();
     args->pXboxLiveContext = pContext;
-    args->permissionIds = utils_c::to_string_vector(permissionIds, permissionIdsCount);
-    args->xboxUserIds = utils_c::to_string_vector(xboxUserIds, xboxUserIdsCount);
+    args->permissionIds = utils::string_array_to_string_vector(permissionIds, permissionIdsCount);
+    args->xboxUserIds = utils::string_array_to_string_vector(xboxUserIds, xboxUserIdsCount);
     
     return utils_c::xsapi_result_from_hc_result(
         HCTaskCreate(

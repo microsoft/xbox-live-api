@@ -80,6 +80,7 @@
        $(ProjectDir)..\..\Source\Services\Presence;
        $(ProjectDir)..\..\Source\Services\Misc;
        $(ProjectDir)..\..\Source\Services\Social\Manager;
+       $(ProjectDir)..\..\Source\Services\Social\C;
        $(ProjectDir)..\..\Source\Services\RealTimeActivity;
        $(ProjectDir)..\..\Source\Services\Clubs;
        $(ProjectDir)..\..\Source\Shared;

@@ -64,19 +64,19 @@ typedef struct XSAPI_STAT_EVENT
     XSAPI_STAT_EVENT_IMPL* pImpl;
 } XSAPI_STAT_EVENT;
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerAddLocalUser(
     _In_ XSAPI_XBOX_LIVE_USER* user,
     _Out_ PCSTR* errMessage
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerRemoveLocalUser(
     _In_ XSAPI_XBOX_LIVE_USER* user,
     _Out_ PCSTR* errMessage
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerRequestFlushToService(
     _In_ XSAPI_XBOX_LIVE_USER* user,
     _In_ bool isHighPriority,
@@ -88,7 +88,7 @@ StatsManagerDoWork(
     _Out_ uint32_t* statEventsCount
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerSetStatisticNumberData(
     _In_ XSAPI_XBOX_LIVE_USER* user,
     _In_ PCSTR statName,
@@ -96,7 +96,7 @@ StatsManagerSetStatisticNumberData(
     _Out_ PCSTR* errMessage
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerSetStatisticIntegerData(
     _In_ XSAPI_XBOX_LIVE_USER* user,
     _In_ PCSTR statName,
@@ -104,7 +104,7 @@ StatsManagerSetStatisticIntegerData(
     _Out_ PCSTR* errMessage
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerSetStatisticStringData(
     _In_ XSAPI_XBOX_LIVE_USER* user,
     _In_ PCSTR statName,
@@ -112,7 +112,7 @@ StatsManagerSetStatisticStringData(
     _Out_ PCSTR* errMessage
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerGetStatNames(
     _In_ XSAPI_XBOX_LIVE_USER* user,
     _Out_ PCSTR** statNameList,
@@ -120,7 +120,7 @@ StatsManagerGetStatNames(
     _Out_ PCSTR* errMessage
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerGetStat(
     _In_ XSAPI_XBOX_LIVE_USER* user,
     _In_ PCSTR statName,
@@ -128,14 +128,14 @@ StatsManagerGetStat(
     _Out_ PCSTR* errMessage
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerDeleteStat(
     _In_ XSAPI_XBOX_LIVE_USER* user,
     _In_ PCSTR statName,
     _Out_ PCSTR* errMessage
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerGetLeaderboard(
     _In_ XSAPI_XBOX_LIVE_USER* user,
     _In_ PCSTR statName,
@@ -143,7 +143,7 @@ StatsManagerGetLeaderboard(
     _Out_ PCSTR* errMessage
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerGetSocialLeaderboard(
     _In_ XSAPI_XBOX_LIVE_USER* user,
     _In_ PCSTR statName,

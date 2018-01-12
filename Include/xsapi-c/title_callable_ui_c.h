@@ -80,17 +80,17 @@ typedef enum XSAPI_GAMING_PRIVILEGE
 } XSAPI_GAMING_PRIVILEGE;
 
 typedef void(*XSAPI_SHOW_PROFILE_CARD_UI_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT_INFO result,
     _In_opt_ void* completionRoutineContext
     );
 
 typedef void(*XSAPI_CHECK_GAMING_PRIVILEGE_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT_INFO result,
     _In_ bool hasPrivilege,
     _In_opt_ void* completionRoutineContext
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TCUIShowProfileCardUI(
     _In_ PCSTR targetXboxUserId,
     _In_ XSAPI_SHOW_PROFILE_CARD_UI_COMPLETION_ROUTINE completionRoutine,
@@ -98,7 +98,7 @@ TCUIShowProfileCardUI(
     _In_ uint64_t taskGroupId
     ) XBL_NOEXCEPT;
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TCUICheckGamingPrivilegeSilently(
     _In_ XSAPI_GAMING_PRIVILEGE privilege,
     _In_ XSAPI_CHECK_GAMING_PRIVILEGE_COMPLETION_ROUTINE completionRoutine,
@@ -106,7 +106,7 @@ TCUICheckGamingPrivilegeSilently(
     _In_ uint64_t taskGroupId
     ) XBL_NOEXCEPT;
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TCUICheckGamingPrivilegeWithUI(
     _In_ XSAPI_GAMING_PRIVILEGE privilege,
     _In_ PCSTR friendlyMessage,

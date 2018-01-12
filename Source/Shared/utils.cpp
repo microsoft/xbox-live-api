@@ -80,11 +80,12 @@ void xsapi_singleton::init()
     m_userEventBind = std::make_shared<Microsoft::Xbox::Services::System::UserEventBind>();
 #endif
 #endif
-    // TODO this shouldn't happen here. Should be in some other internal call so that the threadpool
-    // is only started for "legacy" mode.
-#if UWP_API
     HCGlobalInitialize();
     HCSettingsSetLogLevel(HC_LOG_LEVEL::LOG_VERBOSE);
+
+#if UWP_API
+    // TODO this shouldn't happen here. Should be in some other internal call so that the threadpool
+    // is only started for "legacy" mode.
     m_threadpool = std::make_shared<xbl_thread_pool>();
     m_threadpool->start_threads();
 #endif
@@ -1714,6 +1715,41 @@ utils::read_test_response_file(_In_ const string_t& filePath)
     return jsonResponse;
 }
 #endif
+
+std::vector<string_t> utils::string_array_to_string_vector(
+    PCSTR *stringArray,
+    size_t stringArrayCount
+    )
+{
+    std::vector<utility::string_t> stringVector;
+    for (size_t i = 0; i < stringArrayCount; ++i)
+    {
+#if _WIN32
+        stringVector.push_back(utf16_from_utf8(stringArray[i]));
+#else
+        stringVector.push_back(stringArray[i]);
+#endif
+    }
+    return stringVector;
+}
+
+PCSTR utils::alloc_string(const string_t& str)
+{
+#if _WIN32
+    // TODO add helper and remove extra copy here
+    std::string utf8 = utf8_from_utf16(str);
+#else
+    std::string utf8 = std::move(str);
+#endif
+    char *out = static_cast<char*>(system::xsapi_memory::mem_alloc(utf8.size() + 1));
+    strcpy_s(out, utf8.size() + 1, &utf8[0]);
+    return out;
+}
+
+void utils::free_string(PCSTR str)
+{
+    system::xsapi_memory::mem_free((void*)str);
+}
 
 std::mutex async_helpers::m_contextsLock;
 std::unordered_map<void *, std::shared_ptr<void>> async_helpers::m_sharedPtrs;

@@ -17,7 +17,7 @@ struct taskargs
         result.errorCode = utils_c::xsapi_result_from_xbox_live_result_err(cppResult.err());
     }
 
-    XSAPI_RESULT_INFO result;
+    XBL_RESULT_INFO result;
     std::string errorMessage;
 };
 

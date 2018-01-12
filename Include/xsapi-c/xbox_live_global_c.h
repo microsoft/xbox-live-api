@@ -86,8 +86,8 @@ XsapiMemSetFunctions(
 /// if not previously set</param>
 /// <param name="memFreeFunc">Set to the to the current memory free callback.  Returns the default 
 /// routine if not previously set</param>
-/// <returns>Result code for this API operation.  Possible values are XSAPI_RESULT_OK, XSAPI_RESULT_E_HC_INVALIDARG, or XSAPI_RESULT_E_HC_FAIL.</returns>
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+/// <returns>Result code for this API operation.  Possible values are XBL_RESULT_OK, XBL_RESULT_E_HC_INVALIDARG, or XBL_RESULT_E_HC_FAIL.</returns>
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XsapiMemGetFunctions(
     _Out_ XSAPI_MEM_ALLOC_FUNC* memAllocFunc,
     _Out_ XSAPI_MEM_FREE_FUNC* memFreeFunc
@@ -102,7 +102,8 @@ XsapiMemGetFunctions(
 /// This must be called before any other method, except for XSAPIMemSetFunctions() and XSAPIMemGetFunctions()
 /// Should have a corresponding call to XSAPIGlobalCleanup().
 /// </summary>
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+/// <returns>Result code for this API operation.  Possible values are HC_OK, HC_E_INVALIDARG, HC_E_OUTOFMEMORY, or HC_E_FAIL.</returns>
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XsapiGlobalInitialize() XBL_NOEXCEPT;
 
 /// <summary>
