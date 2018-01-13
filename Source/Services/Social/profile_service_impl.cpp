@@ -12,7 +12,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
 using namespace xbox::services;
 
-const string_t profile_service_impl::SETTINGS_ARRAY[] = {
+const xsapi_internal_string profile_service_impl::SETTINGS_ARRAY[] = {
     _T("AppDisplayName"),
     _T("AppDisplayPicRaw"),
     _T("GameDisplayName"),
@@ -23,7 +23,7 @@ const string_t profile_service_impl::SETTINGS_ARRAY[] = {
 
 const web::json::value profile_service_impl::SETTINGS_SERIALIZED = serialize_settings_json();
 
-const string_t profile_service_impl::SETTINGS_QUERY = settings_query();
+const xsapi_internal_string profile_service_impl::SETTINGS_QUERY = settings_query();
 
 profile_service_impl::profile_service_impl(
     _In_ std::shared_ptr<user_context> userContext,
@@ -37,19 +37,19 @@ profile_service_impl::profile_service_impl(
 }
 
 _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profile(
-    _In_ string_t xboxUserId,
+    _In_ xsapi_internal_string xboxUserId,
     _In_ uint64_t taskGroupId,
     _In_ get_user_profile_completion_routine completionRoutine,
     _In_opt_ void* completionRoutineContext
     )
 {
     RETURN_CPP_INVALIDARGUMENT_IF(xboxUserId.empty(), void, "xboxUserId is empty");
-    std::vector< string_t> xboxUserIds;
+    xsapi_internal_vector<xsapi_internal_string> xboxUserIds;
     xboxUserIds.push_back(std::move(xboxUserId));
 
     auto context = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
     return get_user_profiles(xboxUserIds, taskGroupId,
-        [](xbox_live_result<std::vector<xbox_user_profile>> result, void *context)
+        [](xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result, void *context)
     {
         auto clientCallbackInfo = async_helpers::remove_client_callback_info(context);
         auto completionRoutine = reinterpret_cast<get_user_profile_completion_routine>(clientCallbackInfo.completionFunction);
@@ -72,14 +72,14 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profile(
 }
 
 _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
-    _In_ const std::vector<string_t>& xboxUserIds,
+    _In_ const xsapi_internal_vector<xsapi_internal_string>& xboxUserIds,
     _In_ uint64_t taskGroupId,
     _In_ get_user_profiles_completion_routine completionRoutine,
     _In_opt_ void* completionRoutineContext
     )
 {
     RETURN_CPP_INVALIDARGUMENT_IF(xboxUserIds.size() == 0, void, "xbox user ids size is 0");
-    for (string_t s : xboxUserIds)
+    for (xsapi_internal_string s : xboxUserIds)
     {
         RETURN_CPP_INVALIDARGUMENT_IF(s.empty(), void, "Found empty string in xbox user ids");
     }
@@ -94,7 +94,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
     httpCall->set_xbox_contract_version_header_value(_T("2"));
 
     web::json::value request;
-    request[_T("userIds")] = utils::serialize_vector<string_t>(utils::json_string_serializer, xboxUserIds);
+    request[_T("userIds")] = utils::serialize_vector<xsapi_internal_string>(utils::json_internal_string_serializer, xboxUserIds);
     request[_T("settings")] = SETTINGS_SERIALIZED;
 
     httpCall->set_request_body(request.serialize());
@@ -112,7 +112,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
 }
 
 _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_social_group(
-    _In_ const string_t& socialGroup,
+    _In_ const xsapi_internal_string& socialGroup,
     _In_ uint64_t taskGroupId,
     _In_ get_user_profiles_completion_routine completionRoutine,
     _In_opt_ void* completionRoutineContext
@@ -120,7 +120,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_soc
 {
     RETURN_CPP_INVALIDARGUMENT_IF(socialGroup.empty(), void, "socialGroup is empty");
 
-    string_t pathAndQuery = pathandquery_user_profiles_for_social_group(
+    xsapi_internal_string pathAndQuery = pathandquery_user_profiles_for_social_group(
         socialGroup
         );
 
@@ -164,7 +164,7 @@ void profile_service_impl::handle_get_user_profiles_response(
             true
             );
 
-        auto result = utils::generate_xbox_live_result<std::vector<xbox_user_profile>>(
+        auto result = utils::generate_xbox_live_result<xsapi_internal_vector<xbox_user_profile>>(
             profileVector,
             response
             );
@@ -177,11 +177,11 @@ void profile_service_impl::handle_get_user_profiles_response(
     }
 }
 
-const string_t profile_service_impl::pathandquery_user_profiles_for_social_group(
-    _In_ const string_t& socialGroup
+const xsapi_internal_string profile_service_impl::pathandquery_user_profiles_for_social_group(
+    _In_ const xsapi_internal_string& socialGroup
     )
 {
-    stringstream_t source;
+    xsapi_internal_stringstream source;
     source << _T("/users/me/profile/settings/people/");
     source << socialGroup;
     source << _T("?settings=");
@@ -190,20 +190,20 @@ const string_t profile_service_impl::pathandquery_user_profiles_for_social_group
     return source.str();
 }
 
-const string_t profile_service_impl::settings_query()
+const xsapi_internal_string profile_service_impl::settings_query()
 {
-    stringstream_t source;
+    xsapi_internal_stringstream source;
     uint32_t arraySize = ARRAYSIZE(SETTINGS_ARRAY);
     for (uint32_t i = 0; i < arraySize; ++i)
     {
-        const string_t& setting = SETTINGS_ARRAY[i];
+        // TODO change to all internal strings
+        string_t setting(SETTINGS_ARRAY[i].begin(), SETTINGS_ARRAY[i].end());
         source << web::http::uri::encode_uri(setting);
         if (i + 1 != arraySize)
         {
             source << _T(",");
         }
     }
-
     return source.str();
 }
 

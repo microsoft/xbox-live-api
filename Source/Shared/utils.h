@@ -12,6 +12,7 @@
 #include "xsapi/xbox_live_app_config.h"
 #include "http_call_response.h"
 #include "xsapi/mem.h"
+#include "xsapi/system.h"
 #include "xsapi-c/xbox_live_global_c.h"
 
 // Forward decls
@@ -654,6 +655,8 @@ public:
 
     static web::json::value json_string_serializer(_In_ const string_t& value);
 
+    static web::json::value json_internal_string_serializer(_In_ const xsapi_internal_string& value);
+
     static xbox_live_result<int> json_int_extractor(_In_ const web::json::value& json);
 
     static web::json::value json_int_serializer(_In_ int32_t value);
@@ -663,6 +666,22 @@ public:
         _In_ F serializer,
         _In_ std::vector<T> inputVector
     )
+    {
+        int i = 0;
+        web::json::value jsonArray = web::json::value::array();
+        for (auto& s : inputVector)
+        {
+            jsonArray[i++] = serializer(s);
+        }
+
+        return jsonArray;
+    }
+
+    template<typename T, typename F>
+    static web::json::value serialize_vector(
+        _In_ F serializer,
+        _In_ xsapi_internal_vector<T> inputVector
+        )
     {
         int i = 0;
         web::json::value jsonArray = web::json::value::array();
@@ -777,6 +796,8 @@ public:
 #endif
 
 #ifdef UWP_API
+    static xsapi_internal_utf8string utf8_from_utf16(const xsapi_internal_string& utf16);
+
     static std::string utf8_from_utf16(std::wstring const& utf16);
     static std::wstring utf16_from_utf8(std::string const& utf8);
 
@@ -1077,9 +1098,9 @@ public:
 
 private:
     static std::mutex m_contextsLock;
-    static std::unordered_map<void *, std::shared_ptr<void>> m_sharedPtrs;
+    static xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_sharedPtrs;
     static uintptr_t m_clientCallbackInfoIndexer;
-    static std::unordered_map<void *, client_callback_info> m_clientCallbackInfoMap;
+    static xsapi_internal_unordered_map<void *, client_callback_info> m_clientCallbackInfoMap;
 
     async_helpers();
     async_helpers(const async_helpers&);

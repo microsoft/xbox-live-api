@@ -4,7 +4,7 @@
 #pragma once
 #include <new>
 #include <stddef.h>
-#include "xsapi/system.h"
+//#include "xsapi/system.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
@@ -177,7 +177,8 @@ using xsapi_internal_unordered_map = std::unordered_map<K, V, HASH, EQUAL, xsapi
 template<class C, class TRAITS = std::char_traits<C>>
 using xsapi_internal_basic_string = std::basic_string<C, TRAITS, xsapi_stl_allocator<C>>;
 
-using xsapi_internal_string = xsapi_internal_basic_string<char_t>;
+using xsapi_internal_string = xsapi_internal_basic_string<char>;
+using xsapi_internal_wstring = xsapi_internal_basic_string<wchar_t>;
 
 template<class C, class TRAITS = std::char_traits<C>>
 using xsapi_internal_basic_stringstream = std::basic_stringstream<C, TRAITS, xsapi_stl_allocator<C>>;

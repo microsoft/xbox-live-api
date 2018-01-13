@@ -55,12 +55,12 @@ http_call_impl::http_call_impl() :
 
 http_call_impl::http_call_impl(
     _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
-    _In_ const string_t& httpMethod,
-    _In_ const string_t& serverName,
+    _In_ const xsapi_internal_string& httpMethod,
+    _In_ const xsapi_internal_string& serverName,
     _In_ const web::uri& pathQueryFragment,
     _In_ xbox_live_api xboxLiveApi
     ) :
-    m_httpCallData(std::make_shared<http_call_data>(
+    m_httpCallData(xsapi_allocate_shared<http_call_data>(
         xboxLiveContextSettings,
         httpMethod,
         serverName,
@@ -140,8 +140,6 @@ http_call_impl::get_response_with_auth(
     m_httpCallData->httpCallResponseBodyType = httpCallResponseBodyType;
     m_httpCallData->request = get_default_request();
 
-    string_t fullUrl = m_httpCallData->serverName + m_httpCallData->request.request_uri().to_string();
-
     if (!m_httpCallData->userContext->is_signed_in())
     {
         auto httpCallResponse = get_http_call_response(m_httpCallData, http_response());
@@ -172,7 +170,7 @@ void http_call_impl::get_response_with_auth(
     m_httpCallData->completionRoutineContext = completionRoutineContext;
     m_httpCallData->taskGroupId = taskGroupId;
 
-    string_t fullUrl = m_httpCallData->serverName + m_httpCallData->request.request_uri().to_string();
+    //string_t fullUrl = m_httpCallData->serverName + m_httpCallData->request.request_uri().to_string();
 #if !TV_API && !XSAPI_SERVER
 #if XSAPI_CPP
     if (!m_httpCallData->userContext->user() || !m_httpCallData->userContext->user()->is_signed_in())
@@ -333,26 +331,37 @@ void http_call_impl::_Internal_get_response_with_auth(
     _In_ bool allUsersAuthRequired
     )
 {
-    string_t fullUrl = m_httpCallData->serverName + m_httpCallData->request.request_uri().to_string();
+    // TODO here and everywhere replace web::details::uri class
+    string_t requestUri = m_httpCallData->request.request_uri().to_string();
+    xsapi_internal_string internalRequestUri(requestUri.begin(), requestUri.end());
 
-    std::vector<unsigned char> requestBodyVector;
+    xsapi_internal_string fullUrl = m_httpCallData->serverName + internalRequestUri;
+
+    xsapi_internal_vector<unsigned char> requestBodyVector;
     if (m_httpCallData->requestBody.get_http_request_message_type() == http_request_message_type::vector_message)
     {
-        requestBodyVector = m_httpCallData->requestBody.request_message_vector();
+        requestBodyVector = m_httpCallData->requestBody.m_requestMessageVector;
     }
     else
     {
-        std::string utf8Body(utility::conversions::to_utf8string(m_httpCallData->requestBody.request_message_string()));
-        requestBodyVector = std::vector<unsigned char>(utf8Body.begin(), utf8Body.end());
+        requestBodyVector = xsapi_internal_vector<unsigned char>(
+            m_httpCallData->requestBody.m_requestMessageString.begin(), 
+            m_httpCallData->requestBody.m_requestMessageString.end()
+            );
     }
 
     auto context = async_helpers::store_shared_ptr(m_httpCallData);
 
+    // Auth stack still using non mem hooked types. Not changing because we will switch to XAL soon anyhow
+    string_t tempHttpMethod(m_httpCallData->httpMethod.begin(), m_httpCallData->httpMethod.end());
+    string_t tempFullUrl(fullUrl.begin(), fullUrl.end());
+    std::vector<unsigned char> tempRequestBodyVector(requestBodyVector.begin(), requestBodyVector.end());
+
     m_httpCallData->userContext->get_auth_result(
-        m_httpCallData->httpMethod,
-        fullUrl,
+        tempHttpMethod,
+        tempFullUrl,
         utils::headers_to_string(m_httpCallData->request.headers()),
-        requestBodyVector,
+        tempRequestBodyVector,
         allUsersAuthRequired,
         [](_In_ xbox::services::xbox_live_result<user_context_auth_result> result, _In_ void* context)
         {

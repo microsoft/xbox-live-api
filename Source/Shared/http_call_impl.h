@@ -110,8 +110,8 @@ struct http_call_data
 {
     http_call_data(
         _In_ const std::shared_ptr<xbox_live_context_settings>& _xboxLiveContextSettings,
-        _In_ const string_t& _httpMethod,
-        _In_ const string_t& _serverName,
+        _In_ const xsapi_internal_string& _httpMethod,
+        _In_ const xsapi_internal_string& _serverName,
         _In_ const web::uri& _pathQueryFragment,
         _In_ xbox_live_api _xboxLiveApi
         ) :
@@ -145,12 +145,12 @@ struct http_call_data
     std::shared_ptr<user_context> userContext;
 
     xbox_live_api xboxLiveApi;
-    string_t httpMethod;
-    string_t serverName;
+    xsapi_internal_string httpMethod;
+    xsapi_internal_string serverName;
     web::uri pathQueryFragment;
-    string_t xboxContractVersionHeaderValue;
-    string_t contentTypeHeaderValue;
-    std::unordered_map<string_t, string_t> customHeaderMap;
+    xsapi_internal_string xboxContractVersionHeaderValue;
+    xsapi_internal_string contentTypeHeaderValue;
+    xsapi_internal_unordered_map<xsapi_internal_string, xsapi_internal_string> customHeaderMap;
 
     web::http::http_request request;
     http_call_response_body_type httpCallResponseBodyType;
@@ -245,8 +245,8 @@ public:
 
     http_call_impl(
         _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& serverName,
+        _In_ const xsapi_internal_string& httpMethod,
+        _In_ const xsapi_internal_string& serverName,
         _In_ const web::uri& pathQueryFragment,
         _In_ xbox_live_api xboxLiveApi
         );

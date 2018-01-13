@@ -31,6 +31,9 @@
 // STL includes
 #include <string>
 #include <map>
+#include <unordered_map>
+#include <deque>
+#include <queue>
 #include <vector>
 #include <memory>
 #include <stdint.h>
@@ -40,6 +43,7 @@
 #include <cstdint>
 
 #include "xsapi/types.h"
+#include "xsapi/mem.h"
 #include "httpClient/types.h"
 #include "httpClient/httpClient.h"
 #include "httpClient/task.h"
@@ -55,6 +59,7 @@
 #include <cpprest/filestream.h>
 #include <cpprest/http_listener.h>              // HTTP server
 #include <cpprest/json.h>                       // JSON library
+#include "json_cpp/json.h"
 #include <cpprest/uri.h>                        // URI library
 
 #include "xsapi/errors.h"

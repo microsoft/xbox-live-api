@@ -82,14 +82,35 @@ xbox_system_factory::create_http_client(
 std::shared_ptr<http_call>
 xbox_system_factory::create_http_call(
     _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
-    _In_ const string_t& httpMethod,
-    _In_ const string_t& serverName,
+    _In_ const string_t& _httpMethod,
+    _In_ const string_t& _serverName,
     _In_ const web::uri& pathQueryFragment,
     _In_ xbox_live_api xboxLiveApi
     )
 {
+    xsapi_internal_string httpMethod(_httpMethod.begin(), _httpMethod.end());
+    xsapi_internal_string serverName(_serverName.begin(), _serverName.end());
+
     return std::make_shared<http_call_impl>(
         xboxLiveContextSettings, 
+        httpMethod,
+        serverName,
+        pathQueryFragment,
+        xboxLiveApi
+        );
+}
+
+std::shared_ptr<http_call> 
+xbox_system_factory::create_http_call(
+    _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
+    _In_ const xsapi_internal_string& httpMethod,
+    _In_ const xsapi_internal_string& serverName,
+    _In_ const web::uri& pathQueryFragment,
+    _In_ xbox_live_api xboxLiveApi
+    )
+{
+    return xsapi_allocate_shared<http_call_impl>(
+        xboxLiveContextSettings,
         httpMethod,
         serverName,
         pathQueryFragment,

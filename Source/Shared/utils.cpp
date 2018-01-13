@@ -299,6 +299,12 @@ web::json::value utils::json_string_serializer(_In_ const string_t& value)
     return web::json::value::string(value);
 }
 
+web::json::value utils::json_internal_string_serializer(_In_ const xsapi_internal_string& value)
+{
+    string_t v(value.begin(), value.end());
+    return web::json::value::string(v);
+}
+
 xbox_live_result<int>
 utils::json_int_extractor(_In_ const web::json::value& json)
 {

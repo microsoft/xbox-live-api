@@ -25,26 +25,26 @@ public:
 
     // TODO these should use mem hooked types
     _XSAPIIMP xbox::services::xbox_live_result<void> get_user_profile(
-        _In_ string_t xboxUserId,
+        _In_ xsapi_internal_string xboxUserId,
         _In_ uint64_t taskGroupId,
         _In_ get_user_profile_completion_routine completionRoutine,
         _In_opt_ void* completionRoutineContext
         );
 
     typedef void(*get_user_profiles_completion_routine)(
-        _In_ xbox::services::xbox_live_result<std::vector<xbox_user_profile>> result,
+        _In_ xbox::services::xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result,
         _In_opt_ void* context
         );
 
     _XSAPIIMP xbox::services::xbox_live_result<void> get_user_profiles(
-        _In_ const std::vector<string_t>& xboxUserIds,
+        _In_ const xsapi_internal_vector<xsapi_internal_string>& xboxUserIds,
         _In_ uint64_t taskGroupId,
         _In_ get_user_profiles_completion_routine completionRoutine,
         _In_opt_ void* completionRoutineContext
         );
 
     _XSAPIIMP xbox::services::xbox_live_result<void> get_user_profiles_for_social_group(
-        _In_ const string_t& socialGroup,
+        _In_ const xsapi_internal_string& socialGroup,
         _In_ uint64_t taskGroupId,
         _In_ get_user_profiles_completion_routine completionRoutine,
         _In_opt_ void* completionRoutineContext
@@ -56,20 +56,21 @@ private:
         void *context
         );
 
-    static const string_t settings_query();
+    static const xsapi_internal_string settings_query();
 
-    static const string_t pathandquery_user_profiles_for_social_group(
-        _In_ const string_t& socialGroup
+    static const xsapi_internal_string pathandquery_user_profiles_for_social_group(
+        _In_ const xsapi_internal_string& socialGroup
         );
 
     static web::json::value serialize_settings_json();
 
-    static const string_t SETTINGS_ARRAY[];
+    static const xsapi_internal_string SETTINGS_ARRAY[];
 
     static const web::json::value SETTINGS_SERIALIZED;
 
-    static const string_t SETTINGS_QUERY;
+    static const xsapi_internal_string SETTINGS_QUERY;
 
+    // TODO use memhooked types
     std::shared_ptr<xbox::services::user_context> m_userContext;
     std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
     std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
