@@ -58,7 +58,7 @@ typedef struct XSAPI_PRIVACY_MULTIPLE_PERMISSIONS_CHECK_RESULT
 /// The 'result' fields and the 'xboxUserIds' array will only be valid until the completion routine returns.
 /// </remarks>
 typedef void(*XSAPI_PRIVACY_GET_USER_LIST_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ PCSTR* xboxUserIds,
     _In_ uint32_t xboxUserIdsCount,
     _In_opt_ void* context
@@ -109,7 +109,7 @@ PrivacyGetMuteList(
 /// The fields of 'result' and 'payload' will only be valid until the completion routine returns.
 /// </remarks>
 typedef void(*XSAPI_PRIVACY_CHECK_PERMISSION_WITH_TARGET_USER_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_PRIVACY_PERMISSION_CHECK_RESULT payload,
     _In_opt_ void* context
     );
@@ -144,7 +144,7 @@ PrivacyCheckPermissionWithTargetUser(
 /// The 'result' fields and the 'privacyCheckResults' array will only be valid until the completion routine returns.
 /// </remarks>
 typedef void(*XSAPI_PRIVACY_CHECK_PERMISSION_WITH_MULTIPLE_TARGET_USERS_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_PRIVACY_MULTIPLE_PERMISSIONS_CHECK_RESULT* privacyCheckResults,
     _In_ uint32_t privacyCheckResultsCount,
     _In_opt_ void* context

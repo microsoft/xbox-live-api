@@ -35,9 +35,9 @@ try
     singleton->m_statsVars->cppVoidResult = stats_manager::get_singleton_instance()->add_local_user(user->pImpl->cppUser());
 
     *errMessage = singleton->m_statsVars->cppVoidResult.err_message().c_str();
-    auto cResult = utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_statsVars->cppVoidResult.err());
+    auto cResult = utils::create_xbl_result(singleton->m_statsVars->cppVoidResult.err());
 
-    if (cResult == XBL_RESULT::XBL_RESULT_OK)
+    if (cResult.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
     {
         singleton->m_statsVars->cUsersMapping[user->pImpl->cppUser()] = user;
     }
@@ -59,9 +59,9 @@ try
     singleton->m_statsVars->cppVoidResult = stats_manager::get_singleton_instance()->remove_local_user(user->pImpl->cppUser());
 
     *errMessage = singleton->m_statsVars->cppVoidResult.err_message().c_str();
-    auto cResult = utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_statsVars->cppVoidResult.err());
+    auto cResult = utils::create_xbl_result(singleton->m_statsVars->cppVoidResult.err());
 
-    if (cResult == XBL_RESULT::XBL_RESULT_OK)
+    if (cResult.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
     {
         singleton->m_statsVars->cUsersMapping.erase(user->pImpl->cppUser());
     }
@@ -84,7 +84,7 @@ try
     singleton->m_statsVars->cppVoidResult = stats_manager::get_singleton_instance()->request_flush_to_service(user->pImpl->cppUser(), isHighPriority);
 
     *errMessage = singleton->m_statsVars->cppVoidResult.err_message().c_str();
-    return utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_statsVars->cppVoidResult.err());
+    return utils::create_xbl_result(singleton->m_statsVars->cppVoidResult.err());
 }
 CATCH_RETURN()
 
@@ -124,7 +124,7 @@ try
     singleton->m_statsVars->cppVoidResult = stats_manager::get_singleton_instance()->set_stat_as_number(user->pImpl->cppUser(), utils::utf16_from_utf8(statName), statValue);
 
     *errMessage = singleton->m_statsVars->cppVoidResult.err_message().c_str();
-    return utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_statsVars->cppVoidResult.err());
+    return utils::create_xbl_result(singleton->m_statsVars->cppVoidResult.err());
 }
 CATCH_RETURN()
 
@@ -143,7 +143,7 @@ try
     singleton->m_statsVars->cppVoidResult = stats_manager::get_singleton_instance()->set_stat_as_integer(user->pImpl->cppUser(), utils::utf16_from_utf8(statName), statValue);
 
     *errMessage = singleton->m_statsVars->cppVoidResult.err_message().c_str();
-    return utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_statsVars->cppVoidResult.err());
+    return utils::create_xbl_result(singleton->m_statsVars->cppVoidResult.err());
 }
 CATCH_RETURN()
 
@@ -162,7 +162,7 @@ try
     singleton->m_statsVars->cppVoidResult = stats_manager::get_singleton_instance()->set_stat_as_string(user->pImpl->cppUser(), utils::utf16_from_utf8(statName), utils::utf16_from_utf8(statValue));
 
     *errMessage = singleton->m_statsVars->cppVoidResult.err_message().c_str();
-    return utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_statsVars->cppVoidResult.err());
+    return utils::create_xbl_result(singleton->m_statsVars->cppVoidResult.err());
 }
 CATCH_RETURN()
 
@@ -194,7 +194,7 @@ try
     *statNameListCount = (uint32_t)singleton->m_statsVars->cStatNameCharList.size();
 
     *errMessage = singleton->m_statsVars->cppVoidResult.err_message().c_str();
-    return utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_statsVars->cppVoidResult.err());
+    return utils::create_xbl_result(singleton->m_statsVars->cppVoidResult.err());
 }
 CATCH_RETURN()
 
@@ -214,7 +214,7 @@ try
     *statValue = CreateStatValueFromCpp(singleton->m_statsVars->cppStatValueResult.payload());
 
     *errMessage = singleton->m_statsVars->cppStatValueResult.err_message().c_str();
-    return utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_statsVars->cppStatValueResult.err());
+    return utils::create_xbl_result(singleton->m_statsVars->cppStatValueResult.err());
 }
 CATCH_RETURN()
 
@@ -232,7 +232,7 @@ try
     singleton->m_statsVars->cppVoidResult = stats_manager::get_singleton_instance()->delete_stat(user->pImpl->cppUser(), utils::utf16_from_utf8(statName));
 
     *errMessage = singleton->m_statsVars->cppVoidResult.err_message().c_str();
-    return utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_statsVars->cppVoidResult.err());
+    return utils::create_xbl_result(singleton->m_statsVars->cppVoidResult.err());
 }
 CATCH_RETURN()
 
@@ -251,7 +251,7 @@ try
     singleton->m_statsVars->cppVoidResult = stats_manager::get_singleton_instance()->get_leaderboard(user->pImpl->cppUser(), utils::utf16_from_utf8(statName), query->pImpl->cppQuery());
 
     *errMessage = singleton->m_statsVars->cppVoidResult.err_message().c_str();
-    return utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_statsVars->cppVoidResult.err());
+    return utils::create_xbl_result(singleton->m_statsVars->cppVoidResult.err());
 }
 CATCH_RETURN()
 
@@ -271,6 +271,6 @@ try
     singleton->m_statsVars->cppVoidResult = stats_manager::get_singleton_instance()->get_social_leaderboard(user->pImpl->cppUser(), utils::utf16_from_utf8(statName), utils::utf16_from_utf8(socialGroup), query->pImpl->cppQuery());
 
     *errMessage = singleton->m_statsVars->cppVoidResult.err_message().c_str();
-    return utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_statsVars->cppVoidResult.err());
+    return utils::create_xbl_result(singleton->m_statsVars->cppVoidResult.err());
 }
 CATCH_RETURN()

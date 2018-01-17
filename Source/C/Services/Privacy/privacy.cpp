@@ -64,7 +64,7 @@ try
     args->pXboxLiveContext = pContext;
     args->subpathName = L"avoid";
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -94,7 +94,7 @@ try
     args->pXboxLiveContext = pContext;
     args->subpathName = L"mute";
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -151,7 +151,7 @@ try
     args->xboxUserId = xboxUserId;
     args->permissionId = permissionId;
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -230,7 +230,7 @@ try
     args->permissionIds = utils::string_array_to_string_vector(permissionIds, permissionIdsCount);
     args->xboxUserIds = utils::string_array_to_string_vector(xboxUserIds, xboxUserIdsCount);
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,

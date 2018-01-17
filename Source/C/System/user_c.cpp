@@ -17,7 +17,7 @@ try
 {
     if (ppUser == nullptr)
     {
-        return XBL_RESULT_E_HC_INVALIDARG;
+        return XBL_RESULT_INVALID_ARG;
     }
 
     auto cUser = new XSAPI_XBOX_LIVE_USER();
@@ -114,18 +114,19 @@ XBL_RESULT XboxLiveUserSignInHelper(
 
     auto args = new sign_in_taskargs(pUser, coreDispatcher, signInSilently);
 
-    return utils_c::xsapi_result_from_hc_result(
-        HCTaskCreate(
-            HC_SUBSYSTEM_ID::HC_SUBSYSTEM_ID_XSAPI,
-            taskGroupId,
-            XboxLiveUserSignInExecute,
-            static_cast<void*>(args),
-            utils_c::execute_completion_routine_with_payload<sign_in_taskargs, XSAPI_SIGN_IN_COMPLETION_ROUTINE>,
-            static_cast<void*>(args),
-            static_cast<void*>(completionRoutine),
-            completionRoutineContext,
-            nullptr
-        ));
+    auto hcResult = HCTaskCreate(
+        HC_SUBSYSTEM_ID::HC_SUBSYSTEM_ID_XSAPI,
+        taskGroupId,
+        XboxLiveUserSignInExecute,
+        static_cast<void*>(args),
+        utils_c::execute_completion_routine_with_payload<sign_in_taskargs, XSAPI_SIGN_IN_COMPLETION_ROUTINE>,
+        static_cast<void*>(args),
+        static_cast<void*>(completionRoutine),
+        completionRoutineContext,
+        nullptr
+        );
+
+    return utils::create_xbl_result(hcResult);
 }
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
@@ -253,18 +254,19 @@ try
         headers,
         requestBodyString);
 
-    return utils_c::xsapi_result_from_hc_result(
-        HCTaskCreate(
-            HC_SUBSYSTEM_ID::HC_SUBSYSTEM_ID_XSAPI,
-            taskGroupId,
-            XboxLiveUserGetTokenAndSignatureExecute,
-            static_cast<void*>(args),
-            utils_c::execute_completion_routine_with_payload<get_token_and_signature_taskargs, XSAPI_GET_TOKEN_AND_SIGNATURE_COMPLETION_ROUTINE>,
-            static_cast<void*>(args),
-            static_cast<void*>(completionRoutine),
-            completionRoutineContext,
-            nullptr
-        ));
+    auto hcResult = HCTaskCreate(
+        HC_SUBSYSTEM_ID::HC_SUBSYSTEM_ID_XSAPI,
+        taskGroupId,
+        XboxLiveUserGetTokenAndSignatureExecute,
+        static_cast<void*>(args),
+        utils_c::execute_completion_routine_with_payload<get_token_and_signature_taskargs, XSAPI_GET_TOKEN_AND_SIGNATURE_COMPLETION_ROUTINE>,
+        static_cast<void*>(args),
+        static_cast<void*>(completionRoutine),
+        completionRoutineContext,
+        nullptr
+        );
+
+    return utils::create_xbl_result(hcResult);
 }
 CATCH_RETURN()
 

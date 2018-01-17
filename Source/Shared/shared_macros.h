@@ -70,13 +70,13 @@
 #define CATCH_RETURN() CATCH_RETURN_IMPL(__FILE__, __LINE__)
 
 #define CATCH_RETURN_IMPL(file, line) \
-    catch (std::bad_alloc const& e) { return utils_c::std_bad_alloc_to_result(e, file, line); } \
-    catch (std::exception const& e) { return utils_c::std_exception_to_result(e, file, line); } \
-    catch (...) { return utils_c::unknown_exception_to_result(file, line); }
+    catch (std::bad_alloc const& e) { return utils::std_bad_alloc_to_xbl_result(e, file, line); } \
+    catch (std::exception const& e) { return utils::std_exception_to_xbl_result(e, file, line); } \
+    catch (...) { return utils::unknown_exception_to_xbl_result(file, line); }
 
 #define CATCH_RETURN_WITH(errCode) CATCH_RETURN_IMPL_WITH(__FILE__, __LINE__, errCode)
 
 #define CATCH_RETURN_IMPL_WITH(file, line, errCode) \
-    catch (std::bad_alloc const& e) { utils_c::std_bad_alloc_to_result(e, file, line); return errCode; } \
-    catch (std::exception const& e) { utils_c::std_exception_to_result(e, file, line); return errCode; } \
-    catch (...) { utils_c::unknown_exception_to_result(file, line); return errCode; }
+    catch (std::bad_alloc const& e) { utils::std_bad_alloc_to_xbl_result(e, file, line); return errCode; } \
+    catch (std::exception const& e) { utils::std_exception_to_xbl_result(e, file, line); return errCode; } \
+    catch (...) { utils::unknown_exception_to_xbl_result(file, line); return errCode; }

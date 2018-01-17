@@ -62,7 +62,7 @@ try
     args->serviceConfigurationId = serviceConfigurationId;
     args->storageType = storageType;
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -143,7 +143,7 @@ try
         args->xboxUserId = utils::utf16_from_utf8(xboxUserId);
     }
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -198,13 +198,13 @@ try
         std::lock_guard<std::recursive_mutex> lock(singleton->m_titleStorageState->m_lock);
         if (!singleton->m_titleStorageState->m_blobMetadataResultImpl.cppObject().has_next())
         {
-            return XBL_RESULT_E_GENERIC_ERROR;
+            return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_GENERIC_ERROR };
         }
     }
     auto args = new blob_metadata_result_get_next_taskargs();
     args->maxItems = maxItems;
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -305,7 +305,7 @@ try
 
     if (pContext == nullptr || pMetadata == nullptr || pMetadata->pImpl == nullptr)
     {
-        return XBL_RESULT_E_HC_INVALIDARG;
+        return XBL_RESULT_INVALID_ARG;
     }
 
     auto args = new delete_blob_taskargs();
@@ -313,7 +313,7 @@ try
     args->pMetadata = pMetadata;
     args->deleteOnlyIfEtagMatches = deleteOnlyIfEtagMatches;
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -380,7 +380,7 @@ try
 
     if (pContext == nullptr || pMetadata == nullptr || pMetadata->pImpl == nullptr)
     {
-        return XBL_RESULT_E_HC_INVALIDARG;
+        return XBL_RESULT_INVALID_ARG;
     }
 
     auto args = new download_blob_taskargs();
@@ -392,7 +392,7 @@ try
     args->selectQuery = selectQuery == nullptr ? string_t() : utils::utf16_from_utf8(selectQuery);
     args->preferredDownloadBlockSize = preferredDownloadBlockSize == nullptr ? title_storage_service::DEFAULT_DOWNLOAD_BLOCK_SIZE : *preferredDownloadBlockSize;
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -450,7 +450,7 @@ try
 
     if (pContext == nullptr || pMetadata == nullptr || pMetadata->pImpl == nullptr)
     {
-        return XBL_RESULT_E_HC_INVALIDARG;
+        return XBL_RESULT_INVALID_ARG;
     }
 
     auto args = new upload_blob_taskargs();
@@ -460,7 +460,7 @@ try
     args->etagMatchCondition = etagMatchCondition;
     args->preferredUploadBlockSize = preferredUploadBlockSize == nullptr ? title_storage_service::DEFAULT_UPLOAD_BLOCK_SIZE : *preferredUploadBlockSize;
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,

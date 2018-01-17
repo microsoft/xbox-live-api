@@ -100,11 +100,8 @@ HC_RESULT LeaderboardResultGetNextExecute(
     auto args = reinterpret_cast<leaderboard_result_get_next_taskargs*>(context);
 
     auto result = args->leaderboard->pImpl->cppLeaderboardResult().get_next(args->maxItems).get();
-    
-    args->resultErrorMsg = result.err_message();
-    args->result.errorCode = utils_c::xsapi_result_from_xbox_live_result_err(result.err());
-    args->result.errorMessage = args->resultErrorMsg.c_str();
 
+    args->copy_xbox_live_result(result);
     if (!result.err())
     {
         auto cppPayload = result.payload();
@@ -136,7 +133,7 @@ try
         maxItems
     );
 
-    return utils_c::xsapi_result_from_hc_result(HCTaskCreate(
+    auto hcResult = HCTaskCreate(
         HC_SUBSYSTEM_ID_XSAPI,
         taskGroupId,
         LeaderboardResultGetNextExecute,
@@ -146,7 +143,8 @@ try
         static_cast<void*>(completionRoutine),
         completionRoutineContext,
         nullptr
-    ));
+    );
+    return utils::create_xbl_result(hcResult);
 }
 CATCH_RETURN()
 #endif
@@ -166,6 +164,6 @@ try
     *nextQuery = CreateLeaderboardQueryFromCpp(cppLeaderboardQueryResult.payload());
 
     *errMessage = cppLeaderboardQueryResult.err_message().c_str();
-    return utils_c::xsapi_result_from_xbox_live_result_err(cppLeaderboardQueryResult.err());
+    return utils::create_xbl_result(cppLeaderboardQueryResult.err());
 }
 CATCH_RETURN()

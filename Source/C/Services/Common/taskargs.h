@@ -12,13 +12,9 @@ struct taskargs
     template<typename T>
     void copy_xbox_live_result(xbox::services::xbox_live_result<T> cppResult)
     {
-        errorMessage = cppResult.err_message();
-        result.errorMessage = errorMessage.data();
-        result.errorCode = utils_c::xsapi_result_from_xbox_live_result_err(cppResult.err());
+        result = utils::create_xbl_result(cppResult.err());
     }
-
-    XBL_RESULT_INFO result;
-    std::string errorMessage;
+    XBL_RESULT result;
 };
 
 template<typename T>

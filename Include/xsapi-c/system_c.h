@@ -85,7 +85,7 @@ XboxLiveUserDelete(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_SIGN_IN_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_SIGN_IN_RESULT payload,
     _In_opt_ void* context
     );
@@ -129,7 +129,7 @@ XboxLiveUserSignInSilentlyWithCoreDispatcher(
 #endif
 
 typedef void(*XSAPI_GET_TOKEN_AND_SIGNATURE_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_TOKEN_AND_SIGNATURE_RESULT payload,
     _In_opt_ void* context
     );

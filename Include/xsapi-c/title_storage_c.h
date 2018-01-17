@@ -114,7 +114,7 @@ typedef struct XSAPI_TITLE_STORAGE_BLOB_RESULT
 } XSAPI_TITLE_STORAGE_BLOB_RESULT;
 
 typedef void(*XSAPI_GET_QUOTA_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_TITLE_STORAGE_QUOTA quota,
     _In_opt_ void* context
     );
@@ -136,7 +136,7 @@ TitleStorageGetQuota(
 /// 3) TitleStorageReleaseBlobMetadata
 ///</summary>
 typedef void(*XSAPI_GET_BLOB_METADATA_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_TITLE_STORAGE_BLOB_METADATA_RESULT payload,
     _In_opt_ void* context
     );
@@ -186,7 +186,7 @@ TitleStorageReleaseBlobMetadata(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_DELETE_BLOB_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_opt_ void* context
     );
 
@@ -201,7 +201,7 @@ TitleStorageDeleteBlob(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_DOWNLOAD_BLOB_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_TITLE_STORAGE_BLOB_RESULT payload,
     _In_opt_ void* context
     );
@@ -221,7 +221,7 @@ TitleStorageDownloadBlob(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_UPLOAD_BLOB_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata,
     _In_opt_ void* context
     );

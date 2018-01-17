@@ -46,7 +46,7 @@ http_call_request_message::http_call_request_message(
 
 string_t http_call_request_message::request_message_string() const
 {
-    return string_t(m_requestMessageString.begin(), m_requestMessageString.end());
+    return utils::external_string_from_internal_string(m_requestMessageString);
 }
 
 std::vector<unsigned char> http_call_request_message::request_message_vector() const

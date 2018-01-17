@@ -15,13 +15,13 @@ XblMemSetFunctions(
 {
     if (get_xsapi_singleton(false) != nullptr)
     {
-        return XBL_RESULT_E_ALREADYINITIALISED;
+        return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_ALREADYINITITIALIZED };
     }
 
     auto hcResult = HCMemSetFunctions(memAllocFunc, memFreeFunc);
     if (hcResult != HC_OK)
     {
-        return utils_c::xsapi_result_from_hc_result(hcResult);
+        return utils::create_xbl_result(hcResult);
     }
 
     if (memAllocFunc != nullptr)
@@ -43,7 +43,7 @@ XblMemGetFunctions(
 {
     if (memAllocFunc == nullptr || memFreeFunc == nullptr)
     {
-        return XBL_RESULT_E_INVALIDARG;
+        return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_INVALID_ARGUMENT };
     }
 
     *memAllocFunc = g_pMemAllocHook;

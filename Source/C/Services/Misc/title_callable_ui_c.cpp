@@ -46,7 +46,7 @@ try
     auto args = new show_profile_card_taskargs();
     args->targetXboxUserId = utils::utf16_from_utf8(targetXboxUserId);
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -89,7 +89,7 @@ try
     auto tcuiArgs = new check_gaming_privilege_taskargs();
     tcuiArgs->privilege = privilege;
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -139,7 +139,7 @@ try
     tcuiArgs->privilege = privilege;
     tcuiArgs->friendlyMessage = utils::utf16_from_utf8(friendlyMessage);
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,

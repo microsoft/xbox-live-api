@@ -68,7 +68,7 @@ typedef struct XBL_XBOX_USER_PROFILE
 /// Callback function for XblGetUserProfile. result and profile are valid only until the callback returns.
 /// </summary>
 typedef void(*XBL_GET_USER_PROFILE_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ CONST XBL_XBOX_USER_PROFILE *profile,
     _In_opt_ void* context
     );
@@ -102,7 +102,7 @@ XblGetUserProfile(
 /// Callback function for XblGetUserProfile. result and profiles are valid only until the callback returns.
 /// </summary>
 typedef void(*XBL_GET_USER_PROFILES_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ CONST XBL_XBOX_USER_PROFILE *profiles,
     _In_ uint32_t profilesCount,
     _In_opt_ void* context

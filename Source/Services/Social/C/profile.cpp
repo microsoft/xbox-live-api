@@ -30,11 +30,7 @@ XblGetUserProfile(
         {
             auto clientCallbackInfo = async_helpers::remove_client_callback_info(context);
 
-            XBL_RESULT_INFO cResult;
-            std::string errorMessage = result.err_message();
-            cResult.errorMessage = errorMessage.data();
-            cResult.errorCode = ::utils_c::xsapi_result_from_xbox_live_result_err(result.err());
-
+            XBL_RESULT cResult = utils::create_xbl_result(result.err());
             auto callback = (XBL_GET_USER_PROFILE_COMPLETION_ROUTINE)(clientCallbackInfo.completionFunction);
             if (!result.err())
             {
@@ -48,7 +44,7 @@ XblGetUserProfile(
         },
         context);
 
-    return utils_c::xsapi_result_from_xbox_live_result_err(result.err());
+    return utils::create_xbl_result(result.err());
 }
 
 void get_user_profiles_complete(
@@ -58,11 +54,7 @@ void get_user_profiles_complete(
 {
     auto clientCallbackInfo = async_helpers::remove_client_callback_info(context);
 
-    XBL_RESULT_INFO cResult;
-    std::string errorMessage = result.err_message();
-    cResult.errorMessage = errorMessage.data();
-    cResult.errorCode = ::utils_c::xsapi_result_from_xbox_live_result_err(result.err());
-
+    XBL_RESULT cResult = utils::create_xbl_result(result.err());
     auto callback = (XBL_GET_USER_PROFILES_COMPLETION_ROUTINE)(clientCallbackInfo.completionFunction);
     if (!result.err())
     {
@@ -94,7 +86,7 @@ XblGetUserProfiles(
         get_user_profiles_complete,
         context);
 
-    return utils_c::xsapi_result_from_xbox_live_result_err(result.err());
+    return utils::create_xbl_result(result.err());
 }
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
@@ -115,5 +107,5 @@ XblGetUserProfilesForSocialGroup(
         get_user_profiles_complete,
         context);
 
-    return utils_c::xsapi_result_from_xbox_live_result_err(result.err());
+    return utils::create_xbl_result(result.err());
 }

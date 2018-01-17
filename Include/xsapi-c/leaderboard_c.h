@@ -116,12 +116,12 @@ typedef struct XSAPI_GET_NEXT_RESULT_PAYLOAD
 
 typedef struct XSAPI_GET_NEXT_RESULT
 {
-    XBL_RESULT_INFO result;
+    XBL_RESULT result;
     XSAPI_GET_NEXT_RESULT_PAYLOAD payload;
 } XSAPI_GET_NEXT_RESULT;
 
 typedef void(*GET_NEXT_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_GET_NEXT_RESULT payload,
     _In_opt_ void* context
     );

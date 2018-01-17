@@ -118,23 +118,6 @@ xbox_system_factory::create_http_call(
         );
 }
 
-//std::shared_ptr<http_call_internal>
-//xbox_system_factory::create_http_call_internal(
-//    _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
-//    _In_ const string_t& httpMethod,
-//    _In_ const string_t& serverName,
-//    _In_ const web::uri& pathQueryFragment
-//    )
-//{
-//    return std::make_shared<http_call_impl>(
-//        xboxLiveContextSettings, 
-//        httpMethod,
-//        serverName,
-//        pathQueryFragment,
-//        xbox_live_api::unspecified
-//        );
-//}
-
 std::shared_ptr<local_config>
 xbox_system_factory::create_local_config()
 {

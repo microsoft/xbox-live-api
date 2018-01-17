@@ -59,7 +59,6 @@
 #include <cpprest/filestream.h>
 #include <cpprest/http_listener.h>              // HTTP server
 #include <cpprest/json.h>                       // JSON library
-#include "json_cpp/json.h"
 #include <cpprest/uri.h>                        // URI library
 
 #include "xsapi/errors.h"

@@ -56,7 +56,7 @@ try
     args->achievementsResult = achievementsResult;
     args->maxItems = maxItems;
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -125,7 +125,7 @@ try
     args->achievementId = utils::utf16_from_utf8(achievementId);
     args->percentComplete = percentComplete;
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -192,7 +192,7 @@ try
     args->skipItems = skipItems;
     args->maxItems = maxItems;
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -249,7 +249,7 @@ try
     args->serviceConfigurationId = utils::utf16_from_utf8(serviceConfigurationId);
     args->achievementId = utils::utf16_from_utf8(achievementId);
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,

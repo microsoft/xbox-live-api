@@ -162,7 +162,7 @@ AchievementsResultHasNext(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_GET_NEXT_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_ACHIEVEMENTS_RESULT* achievementsResult,
     _In_opt_ void* context
     );
@@ -177,7 +177,7 @@ AchievementsResultGetNext(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_UPDATE_ACVHIEVEMENT_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_opt_ void* context
     );
 
@@ -195,7 +195,7 @@ AchievementServiceUpdateAchievement(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_GET_ACHIEVEMENTS_FOR_TITLE_ID_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_ACHIEVEMENTS_RESULT* achievementsResult,
     _In_opt_ void* context
     );
@@ -216,7 +216,7 @@ AchievementServiceGetAchievementsForTitleId(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_GET_ACHIEVEMENT_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_ACHIEVEMENT* achievement,
     _In_opt_ void* context
     );

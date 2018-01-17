@@ -80,12 +80,12 @@ typedef enum XSAPI_GAMING_PRIVILEGE
 } XSAPI_GAMING_PRIVILEGE;
 
 typedef void(*XSAPI_SHOW_PROFILE_CARD_UI_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_opt_ void* completionRoutineContext
     );
 
 typedef void(*XSAPI_CHECK_GAMING_PRIVILEGE_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ bool hasPrivilege,
     _In_opt_ void* completionRoutineContext
     );

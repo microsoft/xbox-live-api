@@ -17,7 +17,7 @@ XboxLiveContextCreate(
 {
     if (user == nullptr || ppContext == nullptr)
     {
-        return XBL_RESULT_E_HC_INVALIDARG;
+        return XBL_RESULT_INVALID_ARG;
     }
 
     verify_global_init();

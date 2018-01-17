@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements.cpp">
@@ -57,9 +57,6 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_result_impl.cpp">
       <Filter>C++ Source\C\Services\TitleStorage</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Shared\utils_c.cpp">
-      <Filter>C++ Source\C\Shared</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Shared\xbox_live_app_config_c.cpp">
       <Filter>C++ Source\C\Shared</Filter>

@@ -1805,6 +1805,98 @@ void utils::free_string(PCSTR str)
     system::xsapi_memory::mem_free((void*)str);
 }
 
+XBL_RESULT utils::create_xbl_result(std::error_code errc)
+{
+    XBL_RESULT result
+    {
+        XBL_ERROR_CONDITION_NO_ERROR, 
+        static_cast<XBL_ERROR_CODE>(errc.value())
+    };
+
+    xbox_live_error_condition code = static_cast<xbox_live_error_condition>(errc.default_error_condition().value());
+    switch (code)
+    {
+    case xbox::services::xbox_live_error_condition::no_error:
+        result.errorCondition = XBL_ERROR_CONDITION_NO_ERROR;
+        break;
+    case xbox::services::xbox_live_error_condition::generic_error:
+        result.errorCondition = XBL_ERROR_CONDITION_GENERIC_ERROR;
+        break;
+    case xbox::services::xbox_live_error_condition::generic_out_of_range:
+        result.errorCondition = XBL_ERROR_CONDITION_GENERIC_OUT_OF_RANGE;
+        break;
+    case xbox::services::xbox_live_error_condition::auth:
+        result.errorCondition = XBL_ERROR_CONDITION_AUTH;
+        break;
+    case xbox::services::xbox_live_error_condition::network:
+        result.errorCondition = XBL_ERROR_CONDITION_NETWORK;
+        break;
+    case xbox::services::xbox_live_error_condition::http:
+        result.errorCondition = XBL_ERROR_CONDITION_HTTP;
+        break;
+    case xbox::services::xbox_live_error_condition::http_404_not_found:
+        result.errorCondition = XBL_ERROR_CONDITION_HTTP_404_NOT_FOUND;
+        break;
+    case xbox::services::xbox_live_error_condition::http_412_precondition_failed:
+        result.errorCondition = XBL_ERROR_CONDITION_HTTP_412_PRECONDITION_FAILED;
+        break;
+    case xbox::services::xbox_live_error_condition::http_429_too_many_requests:
+        result.errorCondition = XBL_ERROR_CONDITION_HTTP_429_TOO_MANY_REQUESTS;
+        break;
+    case xbox::services::xbox_live_error_condition::http_service_timeout:
+        result.errorCondition = XBL_ERROR_CONDITION_HTTP_SERVICE_TIMEOUT;
+        break;
+    case xbox::services::xbox_live_error_condition::rta:
+        result.errorCondition = XBL_ERROR_CONDITION_RTA;
+        break;
+    default:
+        XSAPI_ASSERT(L"Unknown error codition!" && false);
+        break;
+    }
+    return result;
+}
+
+XBL_RESULT utils::create_xbl_result(HC_RESULT hcResult)
+{
+    if (hcResult == HC_OK)
+    {
+        return XBL_RESULT_OK;
+    }
+    return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, static_cast<XBL_ERROR_CODE>(hcResult) };
+}
+
+XBL_RESULT utils::std_bad_alloc_to_xbl_result(
+    std::bad_alloc const& e,
+    _In_z_ char const* file,
+    uint32_t line
+    )
+{
+    LOG_ERROR("[%d] std::bad_alloc reached api boundary: %s\n    %s:%u",
+        XBL_ERROR_CODE_BAD_ALLOC, e.what(), file, line);
+    return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_BAD_ALLOC };
+}
+
+XBL_RESULT utils::std_exception_to_xbl_result(
+    std::exception const& e,
+    _In_z_ char const* file,
+    uint32_t line
+    )
+{
+    LOG_ERROR("[%d] std::exception reached api boundary: %s\n    %s:%u",
+        XBL_ERROR_CODE_GENERIC_ERROR, e.what(), file, line);
+    return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_GENERIC_ERROR };
+}
+
+XBL_RESULT utils::unknown_exception_to_xbl_result(
+    _In_z_ char const* file,
+    uint32_t line
+    )
+{
+    LOG_ERROR("[%d] unknown exception reached api boundary\n    %s:%u",
+        XBL_ERROR_CODE_GENERIC_ERROR, file, line);
+    return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_GENERIC_ERROR };
+}
+
 std::mutex async_helpers::m_contextsLock;
 xsapi_internal_unordered_map<void *, std::shared_ptr<void>> async_helpers::m_sharedPtrs;
 

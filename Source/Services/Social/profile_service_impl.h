@@ -23,7 +23,6 @@ public:
         _In_opt_ void* context
         );
 
-    // TODO these should use mem hooked types
     _XSAPIIMP xbox::services::xbox_live_result<void> get_user_profile(
         _In_ xsapi_internal_string xboxUserId,
         _In_ uint64_t taskGroupId,
@@ -70,7 +69,6 @@ private:
 
     static const xsapi_internal_string SETTINGS_QUERY;
 
-    // TODO use memhooked types
     std::shared_ptr<xbox::services::user_context> m_userContext;
     std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
     std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;

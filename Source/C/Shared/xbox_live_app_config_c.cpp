@@ -14,9 +14,9 @@ try
 {
     if (ppConfig == nullptr)
     {
-        return XBL_RESULT_E_HC_INVALIDARG;
+        return XBL_RESULT_INVALID_ARG;
     }
-    
+
     auto singleton = get_xsapi_singleton();
     std::lock_guard<std::mutex> lock(singleton->m_singletonLock);
 
