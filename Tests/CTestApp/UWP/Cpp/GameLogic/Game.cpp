@@ -104,7 +104,7 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
     g_pendingReadyHandle = CreateEvent(nullptr, false, false, nullptr);
     g_completeReadyHandle = CreateEvent(nullptr, false, false, nullptr);
 
-    XsapiGlobalInitialize();
+    XblGlobalInitialize();
 
     // TODO wrap these functions in XSAPI so clients aren't calling through to libHttpClient directly
     HCAddTaskEventHandler(
@@ -137,7 +137,7 @@ Game::~Game()
         XboxLiveContextDelete(m_xboxLiveContext);
     }
 
-    XsapiGlobalCleanup();
+    XblGlobalCleanup();
 }
 
 // Updates application state when the window size changes (e.g. device orientation change)

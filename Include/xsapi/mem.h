@@ -4,7 +4,6 @@
 #pragma once
 #include <new>
 #include <stddef.h>
-//#include "xsapi/system.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 

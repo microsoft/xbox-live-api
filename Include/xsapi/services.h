@@ -9,6 +9,7 @@
 #include <cpprest/http_msg.h>
 #include "xsapi/types.h"
 #include "xsapi/errors.h"
+#include "xsapi/mem.h"
 #include "xsapi/system.h"
 #include "xsapi/service_call_logging_config.h"
 

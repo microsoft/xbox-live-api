@@ -69,12 +69,12 @@ public:
         _In_ xbox_live_api xboxLiveApi
         );
 
-    virtual std::shared_ptr<http_call_internal> create_http_call_internal(
-        _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& serverName,
-        _In_ const web::uri& pathQueryFragment
-        );
+    //virtual std::shared_ptr<http_call_internal> create_http_call_internal(
+    //    _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
+    //    _In_ const string_t& httpMethod,
+    //    _In_ const string_t& serverName,
+    //    _In_ const web::uri& pathQueryFragment
+    //    );
 
     virtual std::shared_ptr<user_impl> create_user_impl(user_creation_context userCreationContext);
 

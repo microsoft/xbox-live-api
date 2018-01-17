@@ -62,12 +62,12 @@ public:
     /// <summary>
     /// The http request message if it is a string type.
     /// </summary>
-    _XSAPIIMP const string_t& request_message_string() const;
+    _XSAPIIMP string_t request_message_string() const;
 
     /// <summary>
     /// The http request message if it is a buffer.
     /// </summary>
-    _XSAPIIMP const std::vector<unsigned char>& request_message_vector() const;
+    _XSAPIIMP std::vector<unsigned char> request_message_vector() const;
 
     /// <summary>
     /// The type of message.

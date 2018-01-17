@@ -44,14 +44,12 @@ http_call_request_message::http_call_request_message(
 {
 }
 
-const string_t&
-http_call_request_message::request_message_string() const
+string_t http_call_request_message::request_message_string() const
 {
     return string_t(m_requestMessageString.begin(), m_requestMessageString.end());
 }
 
-const std::vector<unsigned char>&
-http_call_request_message::request_message_vector() const
+std::vector<unsigned char> http_call_request_message::request_message_vector() const
 {
     return std::vector<unsigned char>(m_requestMessageVector.begin(), m_requestMessageVector.end());
 }
