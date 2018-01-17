@@ -27,7 +27,9 @@ profile_service::get_user_profile(
     // TODO Maybe create some global store of these
     auto context = new task_completion_event<xbox_live_result<xbox_user_profile>>();
 
-    auto result = m_serviceImpl->get_user_profile(xboxUserId, XSAPI_DEFAULT_TASKGROUP,
+    auto result = m_serviceImpl->get_user_profile(
+        utils::internal_string_from_external_string(xboxUserId),
+        XSAPI_DEFAULT_TASKGROUP,
         [](xbox_live_result<xbox_user_profile> result, void* context) 
     {
         auto tce = static_cast<task_completion_event<xbox_live_result<xbox_user_profile>>*>(context);
@@ -49,11 +51,13 @@ profile_service::get_user_profiles(
     )
 {
     auto context = new task_completion_event<xbox_live_result<std::vector<xbox_user_profile>>>();
-    auto result = m_serviceImpl->get_user_profiles(xboxUserIds, XSAPI_DEFAULT_TASKGROUP,
-        [](xbox_live_result<std::vector<xbox_user_profile>> result, void* context)
+    auto result = m_serviceImpl->get_user_profiles(
+        utils::internal_string_vector_from_std_string_vector(xboxUserIds), 
+        XSAPI_DEFAULT_TASKGROUP,
+        [](xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result, void* context)
     {
         auto tce = static_cast<task_completion_event<xbox_live_result<std::vector<xbox_user_profile>>>*>(context);
-        tce->set(result);
+        tce->set(xbox_live_result<std::vector<xbox_user_profile>>(utils::std_vector_from_internal_vector(result.payload())));
         delete context;
     }, context);
 
@@ -71,11 +75,13 @@ profile_service::get_user_profiles_for_social_group(
     )
 {
     auto context = new task_completion_event<xbox_live_result<std::vector<xbox_user_profile>>>();
-    auto result = m_serviceImpl->get_user_profiles_for_social_group(socialGroup, XSAPI_DEFAULT_TASKGROUP,
-        [](xbox_live_result<std::vector<xbox_user_profile>> result, void* context)
+    auto result = m_serviceImpl->get_user_profiles_for_social_group(
+        utils::internal_string_from_external_string(socialGroup), 
+        XSAPI_DEFAULT_TASKGROUP,
+        [](xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result, void* context)
     {
         auto tce = static_cast<task_completion_event<xbox_live_result<std::vector<xbox_user_profile>>>*>(context);
-        tce->set(result);
+        tce->set(xbox_live_result<std::vector<xbox_user_profile>>(utils::std_vector_from_internal_vector(result.payload())));
         delete context;
     }, context);
 

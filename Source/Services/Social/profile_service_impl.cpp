@@ -13,12 +13,12 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 using namespace xbox::services;
 
 const xsapi_internal_string profile_service_impl::SETTINGS_ARRAY[] = {
-    _T("AppDisplayName"),
-    _T("AppDisplayPicRaw"),
-    _T("GameDisplayName"),
-    _T("GameDisplayPicRaw"),
-    _T("Gamerscore"),
-    _T("Gamertag")
+    "AppDisplayName",
+    "AppDisplayPicRaw",
+    "GameDisplayName",
+    "GameDisplayPicRaw",
+    "Gamerscore",
+    "Gamertag"
 };
 
 const web::json::value profile_service_impl::SETTINGS_SERIALIZED = serialize_settings_json();
@@ -126,9 +126,9 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_soc
 
     std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
-        _T("GET"),
-        utils::create_xboxlive_endpoint(_T("profile"), m_appConfig),
-        pathAndQuery,
+        "GET",
+        utils::create_xboxlive_endpoint("profile", m_appConfig),
+        utils::external_string_from_internal_string(pathAndQuery), // TODO switch this after changing to internal uri impl
         xbox_live_api::get_user_profiles_for_social_group
         );
     httpCall->set_xbox_contract_version_header_value(_T("2"));
@@ -155,6 +155,7 @@ void profile_service_impl::handle_get_user_profiles_response(
 
     if (response->response_body_json().size() != 0)
     {
+        // TODO change utils functions to return mem hooked types so we don't translate here
         std::error_code errc = xbox_live_error_code::no_error;
         auto profileVector = utils::extract_xbox_live_result_json_vector<xbox_user_profile>(
             xbox_user_profile::_Deserialize,
@@ -165,7 +166,7 @@ void profile_service_impl::handle_get_user_profiles_response(
             );
 
         auto result = utils::generate_xbox_live_result<xsapi_internal_vector<xbox_user_profile>>(
-            profileVector,
+            utils::internal_vector_from_std_vector(profileVector.payload()),
             response
             );
 
@@ -173,7 +174,7 @@ void profile_service_impl::handle_get_user_profiles_response(
     }
     else
     {
-        completionRoutine(xbox_live_result<std::vector<xbox_user_profile>>(response->err_code(), response->err_message()), clientCallbackInfo.clientContext);
+        completionRoutine(xbox_live_result<xsapi_internal_vector<xbox_user_profile>>(response->err_code(), response->err_message()), clientCallbackInfo.clientContext);
     }
 }
 
@@ -182,9 +183,9 @@ const xsapi_internal_string profile_service_impl::pathandquery_user_profiles_for
     )
 {
     xsapi_internal_stringstream source;
-    source << _T("/users/me/profile/settings/people/");
+    source << "/users/me/profile/settings/people/";
     source << socialGroup;
-    source << _T("?settings=");
+    source << "?settings=";
     source << SETTINGS_QUERY;
 
     return source.str();
@@ -196,9 +197,8 @@ const xsapi_internal_string profile_service_impl::settings_query()
     uint32_t arraySize = ARRAYSIZE(SETTINGS_ARRAY);
     for (uint32_t i = 0; i < arraySize; ++i)
     {
-        // TODO change to all internal strings
-        string_t setting(SETTINGS_ARRAY[i].begin(), SETTINGS_ARRAY[i].end());
-        source << web::http::uri::encode_uri(setting);
+        // TODO change to all internal strings so we don't double convert here
+        source << utils::internal_string_from_external_string(web::http::uri::encode_uri(utils::external_string_from_internal_string(SETTINGS_ARRAY[i])));
         if (i + 1 != arraySize)
         {
             source << _T(",");
@@ -209,8 +209,8 @@ const xsapi_internal_string profile_service_impl::settings_query()
 
 web::json::value profile_service_impl::serialize_settings_json()
 {
-    std::vector<string_t> settingsVector(SETTINGS_ARRAY, SETTINGS_ARRAY + sizeof(SETTINGS_ARRAY) / sizeof(SETTINGS_ARRAY[0]));
-    return utils::serialize_vector<string_t>(utils::json_string_serializer, settingsVector);
+    xsapi_internal_vector<xsapi_internal_string> settingsVector(SETTINGS_ARRAY, SETTINGS_ARRAY + sizeof(SETTINGS_ARRAY) / sizeof(SETTINGS_ARRAY[0]));
+    return utils::serialize_vector<xsapi_internal_string>(utils::json_internal_string_serializer, settingsVector);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

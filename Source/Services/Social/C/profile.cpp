@@ -24,7 +24,7 @@ XblGetUserProfile(
 
     auto context = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
     auto result = profileService->get_user_profile(
-        utils::utf16_from_utf8(xboxUserId), 
+        xboxUserId,
         taskGroupId,
         [](xbox_live_result<xbox_user_profile> result, void* context)
         {
@@ -52,7 +52,7 @@ XblGetUserProfile(
 }
 
 void get_user_profiles_complete(
-    xbox_live_result<std::vector<xbox_user_profile>> result, 
+    xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result, 
     void* context
     )
 {
@@ -89,7 +89,7 @@ XblGetUserProfiles(
 
     auto context = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
     auto result = profileService->get_user_profiles(
-        utils::string_array_to_string_vector(xboxUserIds, xboxUserIdsCount),
+        utils::string_array_to_internal_string_vector(xboxUserIds, xboxUserIdsCount),
         taskGroupId,
         get_user_profiles_complete,
         context);
@@ -110,7 +110,7 @@ XblGetUserProfilesForSocialGroup(
 
     auto context = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
     auto result = profileService->get_user_profiles_for_social_group(
-        utils::utf16_from_utf8(socialGroup),
+        socialGroup,
         taskGroupId,
         get_user_profiles_complete,
         context);

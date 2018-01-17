@@ -8,7 +8,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 class xbl_xbox_user_profiles_wrapper
 {
 public:
-    xbl_xbox_user_profiles_wrapper(const std::vector<xbox::services::social::xbox_user_profile>& profiles);
+    xbl_xbox_user_profiles_wrapper(const xsapi_internal_vector<xbox::services::social::xbox_user_profile>& profiles);
     xbl_xbox_user_profiles_wrapper(const xbox::services::social::xbox_user_profile& profile);
     ~xbl_xbox_user_profiles_wrapper();
 

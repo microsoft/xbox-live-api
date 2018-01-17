@@ -329,7 +329,7 @@ public:
     /// <summary>
     /// Gets the content type header value for this call.
     /// </summary>
-    virtual const string_t& content_type_header_value() const = 0;
+    virtual string_t content_type_header_value() const = 0;
 
     /// <summary>
     /// Sets the Xbox Live contract version header value for this call.
@@ -339,12 +339,12 @@ public:
     /// <summary>
     /// Gets the Xbox Live contract version header value for this call.
     /// </summary>
-    virtual const string_t& xbox_contract_version_header_value() const = 0;
+    virtual string_t xbox_contract_version_header_value() const = 0;
 
     /// <summary>
     /// Gets the server name for this call.
     /// </summary>
-    virtual const string_t& server_name() const = 0;
+    virtual string_t server_name() const = 0;
 
     /// <summary>
     /// Gets the path for this call.
@@ -354,7 +354,7 @@ public:
     /// <summary>
     /// Gets the http method for this call.
     /// </summary>
-    virtual const string_t& http_method() const = 0;
+    virtual string_t http_method() const = 0;
 
     /// <summary>
     /// Sets a flag indicating if default headers should be added or not.
@@ -373,7 +373,6 @@ public:
         _In_ bool allUsersAuthRequired = false
         ) = 0;
 
-    // TODO move this somewhere better
     typedef void(*get_response_with_auth_completion_routine)(
         _In_ std::shared_ptr<http_call_response>,
         _In_opt_ void* context
@@ -386,16 +385,6 @@ public:
         _In_ get_response_with_auth_completion_routine completionRoutine,
         _In_opt_ void* completionRoutineContext,
         _In_ uint64_t taskGroupId
-        ) = 0;
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    // TODO eventually remove this
-    virtual pplx::task<std::shared_ptr<http_call_response>> _Internal_get_response_with_auth(
-        _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
-        _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
-        _In_ bool allUsersAuthRequired = false
         ) = 0;
 
     virtual ~http_call(){}

@@ -787,6 +787,13 @@ public:
         _In_ const string_t& protocol = _T("https")
     );
 
+    // TODO above should not be needed eventually
+    static xsapi_internal_string create_xboxlive_endpoint(
+        _In_ const xsapi_internal_string& subpath,
+        _In_ const std::shared_ptr<xbox_live_app_config>& appConfig,
+        _In_ const xsapi_internal_string& protocol = "https"
+    );
+
 #ifdef _WIN32
     static inline std::string convert_wide_string_to_standard_string(_In_ string_t wideString)
     {
@@ -796,7 +803,14 @@ public:
 #endif
 
 #ifdef UWP_API
-    static xsapi_internal_utf8string utf8_from_utf16(const xsapi_internal_string& utf16);
+    // TODO cleanup these functions
+    static xsapi_internal_string utf8_from_utf16(const xsapi_internal_wstring& utf16);
+    
+    static xsapi_internal_string internal_string_from_external_string(_In_ const string_t& externalString);
+    static xsapi_internal_string internal_string_from_utf16(_In_reads_(size) PCWSTR utf16, size_t size);
+
+    static string_t external_string_from_internal_string(_In_ const xsapi_internal_string& internalString);
+    static string_t external_string_from_utf8(_In_reads_(size) PCSTR utf8, size_t size);
 
     static std::string utf8_from_utf16(std::wstring const& utf16);
     static std::wstring utf16_from_utf8(std::string const& utf8);
@@ -889,18 +903,46 @@ public:
         return vec;
     }
 
-    static xsapi_internal_vector<xsapi_internal_string> std_vector_string_to_xsapi_vector_internal_string(
-        _In_ const std::vector<string_t>& xsapiInternalVector
+    static xsapi_internal_vector<xsapi_internal_string> internal_string_vector_from_std_string_vector(
+        _In_ const std::vector<string_t>& stdVector
+        )
+    {
+        auto size = stdVector.size();
+        xsapi_internal_vector<xsapi_internal_string> internalVector(size);
+        for (size_t i = 0; i < size; ++i)
+        {
+            internalVector[i] = utils::internal_string_from_external_string(stdVector[i]);
+        }
+        return internalVector;
+    }
+
+    static std::vector<string_t> std_string_vector_from_internal_string_vector(
+        _In_ const xsapi_internal_vector<xsapi_internal_string>& internalVector
+        )
+    {
+        auto size = internalVector.size();
+        std::vector<string_t> vector(size);
+        for (size_t i = 0; i < size; ++i)
+        {
+            vector[i] = utils::external_string_from_internal_string(internalVector[i]);
+        }
+        return vector;
+    }
+
+    template<typename T>
+    static std::vector<T> std_vector_from_internal_vector(
+        _In_ const xsapi_internal_vector<T>& internalVector
     )
     {
-        auto internalVectorSize = xsapiInternalVector.size();
-        xsapi_internal_vector<xsapi_internal_string> vec(internalVectorSize);
-        for (size_t i = 0; i < internalVectorSize; ++i)
-        {
-            vec[i] = xsapiInternalVector.at(i).c_str();
-        }
+        return std::vector<T>(internalVector.begin(), internalVector.end());
+    }
 
-        return vec;
+    template<typename T>
+    static xsapi_internal_vector<T> internal_vector_from_std_vector(
+        _In_ const std::vector<T>& vector
+        )
+    {
+        return xsapi_internal_vector<T>(vector.begin(), vector.end());
     }
 
     static uint32_t try_get_master_title_id();
@@ -950,6 +992,13 @@ public:
 #else
         return _wtoi64(str.c_str());
 #endif
+    }
+
+    inline static uint64_t internal_string_to_uint64(
+        _In_ const xsapi_internal_string& str
+    )
+    {
+        return strtoull(str.c_str(), nullptr, 0);
     }
 
     inline static int32_t string_t_to_int32(
@@ -1002,7 +1051,13 @@ public:
 #endif
 
     static std::vector<string_t> string_array_to_string_vector(
-        PCSTR *stringArray, 
+        PCSTR *stringArray,
+        size_t stringArrayCount
+        );
+
+    // These both might not be needed
+    static xsapi_internal_vector<xsapi_internal_string> string_array_to_internal_string_vector(
+        PCSTR *stringArray,
         size_t stringArrayCount
         );
 

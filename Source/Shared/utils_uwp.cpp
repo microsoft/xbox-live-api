@@ -26,7 +26,7 @@ void Win32Event::WaitForever()
     WaitForSingleObject(m_event, INFINITE);
 }
 
-xsapi_internal_utf8string utils::utf8_from_utf16(const xsapi_internal_string& utf16)
+xsapi_internal_string utils::utf8_from_utf16(const xsapi_internal_wstring& utf16)
 {
     // early out on empty strings since they are trivially convertible
     if (utf16.size() == 0)
@@ -47,7 +47,48 @@ xsapi_internal_utf8string utils::utf8_from_utf16(const xsapi_internal_string& ut
     }
 
     // allocate the output buffer, queryResult is the required size
-    xsapi_internal_utf8string utf8(static_cast<size_t>(queryResult), L'\0');
+    xsapi_internal_string utf8(static_cast<size_t>(queryResult), L'\0');
+    auto conversionResult = WideCharToMultiByte(
+        CP_UTF8, WC_ERR_INVALID_CHARS,
+        utf16.data(), static_cast<int>(utf16.size()),
+        &utf8[0], static_cast<int>(utf8.size()),
+        nullptr, nullptr
+    );
+    if (conversionResult == 0)
+    {
+        throw std::exception("utf8_from_utf16 failed");
+    }
+
+    return utf8;
+}
+
+xsapi_internal_string utils::internal_string_from_external_string(_In_ const string_t& externalString)
+{
+    return internal_string_from_utf16(externalString.c_str(), externalString.size());
+}
+
+xsapi_internal_string utils::internal_string_from_utf16(_In_reads_(size) PCWSTR utf16, size_t size)
+{
+    // early out on empty strings since they are trivially convertible
+    if (size == 0)
+    {
+        return "";
+    }
+
+    // query for the buffer size
+    auto queryResult = WideCharToMultiByte(
+        CP_UTF8, WC_ERR_INVALID_CHARS,
+        utf16, static_cast<int>(size),
+        nullptr, 0,
+        nullptr, nullptr
+    );
+    if (queryResult == 0)
+    {
+        throw std::exception("utf8_from_utf16 failed");
+    }
+
+    // allocate the output buffer, queryResult is the required size
+    xsapi_internal_string utf8(static_cast<size_t>(queryResult), L'\0');
     auto conversionResult = WideCharToMultiByte(
         CP_UTF8, WC_ERR_INVALID_CHARS,
         utf16, static_cast<int>(size),
@@ -60,6 +101,45 @@ xsapi_internal_utf8string utils::utf8_from_utf16(const xsapi_internal_string& ut
     }
 
     return utf8;
+}
+
+string_t utils::external_string_from_internal_string(_In_ const xsapi_internal_string& internalString)
+{
+    return external_string_from_utf8(internalString.data(), internalString.size());
+}
+
+string_t utils::external_string_from_utf8(_In_reads_(size) PCSTR utf8, size_t size)
+{
+    // early out on empty strings since they are trivially convertible
+    if (size == 0)
+    {
+        return L"";
+    }
+
+    // query for the buffer size
+    auto queryResult = MultiByteToWideChar(
+        CP_UTF8, MB_ERR_INVALID_CHARS,
+        utf8, static_cast<int>(size),
+        nullptr, 0
+    );
+    if (queryResult == 0)
+    {
+        throw std::exception("utf16_from_utf8 failed");
+    }
+
+    // allocate the output buffer, queryResult is the required size
+    string_t utf16(static_cast<size_t>(queryResult), L'\0');
+    auto conversionResult = MultiByteToWideChar(
+        CP_UTF8, MB_ERR_INVALID_CHARS,
+        utf8, static_cast<int>(size),
+        &utf16[0], static_cast<int>(utf16.size())
+    );
+    if (conversionResult == 0)
+    {
+        throw std::exception("utf16_from_utf8 failed");
+    }
+
+    return utf16;
 }
 
 std::string utils::utf8_from_utf16(std::wstring const& utf16)

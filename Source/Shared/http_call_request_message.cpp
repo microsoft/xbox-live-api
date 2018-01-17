@@ -13,10 +13,26 @@ http_call_request_message::http_call_request_message() :
 }
 
 http_call_request_message::http_call_request_message(
+    _In_ string_t messageString
+) :
+    m_requestMessageString(utils::internal_string_from_external_string(messageString)),
+    m_httpRequestMessageType(http_request_message_type::string_message)
+{
+}
+
+http_call_request_message::http_call_request_message(
     _In_ xsapi_internal_string messageString
     ) : 
     m_requestMessageString(std::move(messageString)),
     m_httpRequestMessageType(http_request_message_type::string_message)
+{
+}
+
+http_call_request_message::http_call_request_message(
+    _In_ std::vector<unsigned char> messageVector
+    ) :
+    m_requestMessageVector(utils::internal_vector_from_std_vector(messageVector)),
+    m_httpRequestMessageType(http_request_message_type::vector_message)
 {
 }
 

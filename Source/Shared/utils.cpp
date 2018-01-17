@@ -301,7 +301,7 @@ web::json::value utils::json_string_serializer(_In_ const string_t& value)
 
 web::json::value utils::json_internal_string_serializer(_In_ const xsapi_internal_string& value)
 {
-    string_t v(value.begin(), value.end());
+    auto v = utils::external_string_from_internal_string(value);
     return web::json::value::string(v);
 }
 
@@ -1505,6 +1505,28 @@ string_t utils::create_xboxlive_endpoint(
     return source.str();
 }
 
+xsapi_internal_string utils::create_xboxlive_endpoint(
+    _In_ const xsapi_internal_string& subpath,
+    _In_ const std::shared_ptr<xbox_live_app_config>& appConfig,
+    _In_ const xsapi_internal_string& protocol
+    )
+{
+    xsapi_internal_stringstream source;
+    source << protocol; // eg. https or wss
+    source << "://";
+    source << subpath; // eg. "achievements"
+#if !TV_API
+    if (appConfig)
+    {
+        source << internal_string_from_external_string(appConfig->environment()); // eg. "" or ".dnet"
+    }
+#else
+    UNREFERENCED_PARAMETER(appConfig);
+#endif
+    source << ".xboxlive.com";
+    return source.str();
+}
+
 string_t
 utils::replace_sub_string(
     _In_ const string_t& source,
@@ -1751,6 +1773,20 @@ std::vector<string_t> utils::string_array_to_string_vector(
     return stringVector;
 }
 
+xsapi_internal_vector<xsapi_internal_string> utils::string_array_to_internal_string_vector(
+    PCSTR *stringArray,
+    size_t stringArrayCount
+    )
+{
+    xsapi_internal_vector<xsapi_internal_string> stringVector;
+    stringVector.reserve(stringArrayCount);
+    for (size_t i = 0; i < stringArrayCount; ++i)
+    {
+        stringVector.push_back(stringArray[i]);
+    }
+    return stringVector;
+}
+
 PCSTR utils::alloc_string(const string_t& str)
 {
 #if _WIN32
@@ -1770,9 +1806,9 @@ void utils::free_string(PCSTR str)
 }
 
 std::mutex async_helpers::m_contextsLock;
-std::unordered_map<void *, std::shared_ptr<void>> async_helpers::m_sharedPtrs;
+xsapi_internal_unordered_map<void *, std::shared_ptr<void>> async_helpers::m_sharedPtrs;
 
 uintptr_t async_helpers::m_clientCallbackInfoIndexer;
-std::unordered_map<void *, client_callback_info> async_helpers::m_clientCallbackInfoMap;
+xsapi_internal_unordered_map<void *, client_callback_info> async_helpers::m_clientCallbackInfoMap;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

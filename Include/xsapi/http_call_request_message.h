@@ -42,7 +42,17 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
+    http_call_request_message(_In_ string_t messageString);
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
     http_call_request_message(_In_ xsapi_internal_string messageString);
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    http_call_request_message(_In_ std::vector<unsigned char> messageVector);
 
     /// <summary>
     /// Internal function

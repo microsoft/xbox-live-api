@@ -183,7 +183,8 @@ using xsapi_internal_wstring = xsapi_internal_basic_string<wchar_t>;
 template<class C, class TRAITS = std::char_traits<C>>
 using xsapi_internal_basic_stringstream = std::basic_stringstream<C, TRAITS, xsapi_stl_allocator<C>>;
 
-using xsapi_internal_stringstream = xsapi_internal_basic_stringstream<char_t>;
+using xsapi_internal_stringstream = xsapi_internal_basic_stringstream<char>;
+using xsapi_internal_wstringstream = xsapi_internal_basic_stringstream<wchar_t>;
 
 template<class T>
 using xsapi_internal_dequeue = std::deque<T, xsapi_stl_allocator<T>>;

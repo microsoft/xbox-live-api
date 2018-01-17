@@ -229,7 +229,7 @@ try
     args->pXboxLiveContext = pContext;
     args->permissionIds = utils::string_array_to_string_vector(permissionIds, permissionIdsCount);
     args->xboxUserIds = utils::string_array_to_string_vector(xboxUserIds, xboxUserIdsCount);
-    
+
     return utils_c::xsapi_result_from_hc_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,

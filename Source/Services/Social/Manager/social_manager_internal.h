@@ -425,7 +425,7 @@ protected:
         );
 
     pplx::task<xbox_live_result<std::vector<xbox_social_user>>> social_graph_timer_callback(
-        _In_ const std::vector<string_t>& users,
+        _In_ const xsapi_internal_vector<xsapi_internal_string>& users,
         _In_ const call_buffer_timer_completion_context& completionContext
         );
 

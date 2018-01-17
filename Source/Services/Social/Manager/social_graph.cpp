@@ -124,7 +124,7 @@ social_graph::initialize()
         if (pThis)
         {
             pThis->social_graph_timer_callback(
-                eventArgs,
+                utils::internal_string_vector_from_std_string_vector(eventArgs),
                 completionContext
                 );
         }
@@ -478,18 +478,17 @@ void social_graph::apply_users_added_event(
     )
 {
     m_perfTester.start_timer(_T("apply_users_added_event"));
-    std::vector<string_t> usersToAdd;
+    xsapi_internal_vector<xsapi_internal_string> usersToAdd;
     for (auto& user : evt.users_affected_as_string_vec())
     {
-        string_t addUser(user.c_str());
-        auto userIter = inactiveBuffer->socialUserGraph.find(utils::string_t_to_uint64(addUser));
+        auto userIter = inactiveBuffer->socialUserGraph.find(utils::internal_string_to_uint64(user));
         if (userIter != inactiveBuffer->socialUserGraph.end())
         {
             ++userIter->second.refCount;
         }
         else
         {
-            usersToAdd.push_back(addUser);
+            usersToAdd.push_back(user);
         }
     }
 
@@ -508,12 +507,14 @@ void social_graph::apply_users_added_event(
 
         if (isFreshEvent)
         {
-            m_socialGraphRefreshTimer->fire(usersToAdd, usersAddedStruct);
+            // TODO update call_buffer_timer to use mem hooked types and eliminate this copy
+            auto stdVec = utils::std_string_vector_from_internal_string_vector(usersToAdd);
+            m_socialGraphRefreshTimer->fire(stdVec, usersAddedStruct);
         }
 
         for (auto& user : usersToAdd)
         {
-            auto userAsInt = utils::string_t_to_uint64(user);
+            auto userAsInt = utils::internal_string_to_uint64(user);
             inactiveBuffer->socialUserGraph[userAsInt].socialUser = nullptr;
             inactiveBuffer->socialUserGraph[userAsInt].refCount = 1;
         }
@@ -655,8 +656,8 @@ void social_graph::apply_device_presence_changed_event(
 
     if (fireCallbackTimer && isFreshEvent)
     {
-        std::vector<string_t> entryVec(1);
-        entryVec[0] = devicePresenceChangedArgs.xbox_user_id();
+        // TODO update call_buffer_timer to use mem hooked types
+        std::vector<string_t> entryVec(1, devicePresenceChangedArgs.xbox_user_id());
         m_presenceRefreshTimer->fire(entryVec);
     }
     else if (!fireCallbackTimer)
@@ -985,6 +986,7 @@ social_graph::refresh_graph()
         }
     }
 
+    // TODO update call_buffer_timer to use mem hooked types then change this
     std::vector<string_t> userRefreshListStr;
     for (auto& user : userRefreshList)
     {
@@ -1093,23 +1095,23 @@ social_graph::perform_diff(
 
     if (usersAddedList.size() > 0)
     {
-        m_internalEventQueue.push(internal_social_event_type::users_changed, usersAddedList);
+        //m_internalEventQueue.push(internal_social_event_type::users_changed, usersAddedList);
     }
     if (usersRemovedList.size() > 0)
     {
-        m_internalEventQueue.push(internal_social_event_type::users_removed, usersRemovedList);
+        //m_internalEventQueue.push(internal_social_event_type::users_removed, usersRemovedList);
     }
     if (presenceChangeList.size() > 0)
     {
-        m_internalEventQueue.push(internal_social_event_type::presence_changed, presenceChangeList);
+        //m_internalEventQueue.push(internal_social_event_type::presence_changed, presenceChangeList);
     }
     if (profileChangeList.size() > 0)
     {
-        m_internalEventQueue.push(internal_social_event_type::profiles_changed, profileChangeList);
+        //m_internalEventQueue.push(internal_social_event_type::profiles_changed, profileChangeList);
     }
     if (socialRelationshipChangeList.size() > 0)
     {
-        m_internalEventQueue.push(internal_social_event_type::social_relationships_changed, socialRelationshipChangeList);
+        //m_internalEventQueue.push(internal_social_event_type::social_relationships_changed, socialRelationshipChangeList);
     }
 
     {
@@ -1173,15 +1175,17 @@ social_graph::do_work(
 
 pplx::task<xbox_live_result<std::vector<xbox_social_user>>>
 social_graph::social_graph_timer_callback(
-    _In_ const std::vector<string_t>& users,
+    _In_ const xsapi_internal_vector<xsapi_internal_string>& users,
     _In_ const call_buffer_timer_completion_context& completionContext
     )
 {
+    auto stdUsers = utils::std_string_vector_from_internal_string_vector(users);
+
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
     return m_peoplehubService.get_social_graph(
         m_xboxLiveContextImpl->xbox_live_user_id(),
         m_detailLevel,
-        users
+        stdUsers
         )
     .then([thisWeakPtr, users, completionContext](xbox_live_result<std::vector<xbox_social_user>> socialListResult)
     {
@@ -1192,7 +1196,7 @@ social_graph::social_graph_timer_callback(
             {
                 if (!socialListResult.err())
                 {
-                    pThis->m_internalEventQueue.push(internal_social_event_type::users_changed, utils::std_vector_to_xsapi_vector(socialListResult.payload()), completionContext);
+                    //pThis->m_internalEventQueue.push(internal_social_event_type::users_changed, utils::std_vector_to_xsapi_vector(socialListResult.payload()), completionContext);
                 }
                 else
                 {
@@ -1273,8 +1277,8 @@ social_graph::handle_title_presence_change(
 {
     if (titlePresenceChanged.title_state() == title_presence_state::started)
     {
-        std::vector<string_t> presenceVec(1);
-        presenceVec[0] = titlePresenceChanged.xbox_user_id();
+        // TODO update call buffer timer
+        std::vector<string_t> presenceVec(1, titlePresenceChanged.xbox_user_id());
         m_presenceRefreshTimer->fire(presenceVec);
     }
     else
@@ -1292,13 +1296,8 @@ social_graph::handle_social_relationship_change(
     auto socialNotification = socialRelationshipChanged.social_notification();
     if (socialNotification == social_notification_type::added)
     {
-        xsapi_internal_vector<xsapi_internal_string> xsapiStrVec;
-        for (auto user : socialRelationshipChanged.xbox_user_ids())
-        {
-            xsapiStrVec.push_back(user.c_str());
-        }
-
-        m_internalEventQueue.push(internal_social_event_type::users_added, xsapiStrVec);
+        auto internalVec = utils::internal_string_vector_from_std_string_vector(socialRelationshipChanged.xbox_user_ids());
+        //m_internalEventQueue.push(internal_social_event_type::users_added, internalVec);
     }
     else if (socialNotification == social_notification_type::changed)
     {
@@ -1449,10 +1448,10 @@ social_graph::presence_timer_callback(
                     }
                 }
 
-                pThis->m_internalEventQueue.push(
-                    internal_social_event_type::presence_changed,
-                    socialManagerPresenceVec
-                    );
+                //pThis->m_internalEventQueue.push(
+                //    internal_social_event_type::presence_changed,
+                //    socialManagerPresenceVec
+                //    );
 
                 {
                     std::lock_guard<std::recursive_mutex> lock(pThis->m_socialGraphMutex);
@@ -1487,7 +1486,7 @@ social_graph::add_users(
     _In_ const pplx::task_completion_event<xbox_live_result<void>>& tce
     )
 {
-    m_internalEventQueue.push(internal_social_event(internal_social_event_type::users_added, utils::std_vector_string_to_xsapi_vector_internal_string(users), tce));    // this is fine to be n-sized because it will generate 0 events
+    //m_internalEventQueue.push(internal_social_event(internal_social_event_type::users_added, utils::internal_string_vector_from_std_string_vector(users), tce));    // this is fine to be n-sized because it will generate 0 events
 }
 
 void
@@ -1495,7 +1494,7 @@ social_graph::remove_users(
     _In_ const std::vector<uint64_t>& users
     )
 {
-    m_internalEventQueue.push(internal_social_event_type::users_removed, utils::std_vector_to_xsapi_vector(users));
+    //m_internalEventQueue.push(internal_social_event_type::users_removed, users);
 }
 
 void
@@ -1875,7 +1874,7 @@ event_queue::push(
     usersAffected.reserve(socialEvent.users_affected_as_string_vec().size());
     for (auto& affectedUser : socialEvent.users_affected_as_string_vec())
     {
-        usersAffected.push_back(affectedUser.c_str());
+        usersAffected.push_back(utils::external_string_from_internal_string(affectedUser).data());
     }
 
     std::lock_guard<std::mutex> lock(m_eventGraphMutex.get());

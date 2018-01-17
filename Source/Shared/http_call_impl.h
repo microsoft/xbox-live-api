@@ -126,8 +126,8 @@ struct http_call_data
         httpCallResponseBodyType(http_call_response_body_type::json_body),
         longHttpCall(false),
         httpTimeout(std::chrono::seconds(DEFAULT_HTTP_TIMEOUT_SECONDS)),
-        contentTypeHeaderValue(_T("application/json; charset=utf-8")),
-        xboxContractVersionHeaderValue(_T("1")),
+        contentTypeHeaderValue("application/json; charset=utf-8"),
+        xboxContractVersionHeaderValue("1"),
         addDefaultHeaders(true)
     {
         delayBeforeRetry = xboxLiveContextSettings->http_retry_delay();
@@ -292,6 +292,7 @@ public:
         _In_ const web::http::http_request& httpRequest
         ) override;
 
+    // TODO this should go away eventually
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
@@ -311,16 +312,9 @@ public:
         _In_ http_call_response_body_type httpCallResponseBodyType
         ) override;
 
-    // TODO eventually remove this
-    pplx::task<std::shared_ptr<http_call_response>> _Internal_get_response_with_auth(
-        _In_ const std::shared_ptr<user_context>& userContext,
-        _In_ http_call_response_body_type httpCallResponseBodyType,
-        _In_ bool allUsersAuthRequired
-        ) override;
-
-    const string_t& server_name() const override;
+    string_t server_name() const override;
     const web::uri& path_query_fragment() const override;
-    const string_t& http_method() const override;
+    string_t http_method() const override;
 
     void set_add_default_headers(bool value) override;
     bool add_default_headers() const override;
@@ -338,10 +332,10 @@ public:
     const http_call_request_message& request_body() const override;
 
     void set_content_type_header_value(_In_ const string_t& value) override;
-    const string_t& content_type_header_value() const override;
+    string_t content_type_header_value() const override;
 
     void set_xbox_contract_version_header_value(_In_ const string_t& value) override;
-    const string_t& xbox_contract_version_header_value() const override;
+    string_t xbox_contract_version_header_value() const override;
 
     void set_custom_header(
         _In_ const string_t& headerName,
@@ -365,25 +359,11 @@ private:
         _In_ const std::shared_ptr<http_call_data>& httpCallData
         );
 
-    static pplx::task<std::shared_ptr<http_call_response>> internal_get_response_old(
-        _In_ const std::shared_ptr<http_call_data>& httpCallData
-        );
-
-    static pplx::task<std::shared_ptr<http_call_response>> internal_get_response(
-        _In_ const std::shared_ptr<http_call_data>& httpCallData
-        );
-
-    // TODO move this somewhere better
-    typedef void(*get_response_completion_routine)(
-        _In_ std::shared_ptr<http_call_response> response
-        );
-
-    virtual void _Internal_get_response_with_auth(
+    virtual void internal_get_response_with_auth(
         _In_ bool allUsersAuthRequired
         );
 
-    // TODO rename after deleting ppl version
-    static void internal_get_response_hc(
+    static void internal_get_response(
         _In_ const std::shared_ptr<http_call_data>& httpCallData
         );
 

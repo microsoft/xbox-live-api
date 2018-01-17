@@ -10,7 +10,7 @@ using namespace xbox::services;
 using namespace xbox::services::social;
 
 xbl_xbox_user_profiles_wrapper::xbl_xbox_user_profiles_wrapper(
-    const std::vector<xbox_user_profile>& profiles
+    const xsapi_internal_vector<xbox_user_profile>& profiles
     )
 {
     for (auto& profile : profiles)
@@ -30,7 +30,7 @@ xbl_xbox_user_profiles_wrapper::xbl_xbox_user_profiles_wrapper(
 xbl_xbox_user_profiles_wrapper::xbl_xbox_user_profiles_wrapper(
     const xbox_user_profile& profile
     ) 
-    : xbl_xbox_user_profiles_wrapper(std::vector<xbox_user_profile>(1, profile))
+    : xbl_xbox_user_profiles_wrapper(xsapi_internal_vector<xbox_user_profile>(1, profile))
 {
 }
 

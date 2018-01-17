@@ -18,7 +18,7 @@ internal_social_event::internal_social_event(
 {
     for (auto& user : m_usersAffected)
     {
-        m_usersAffectedAsStringVec.push_back(user.xbox_user_id());
+        m_usersAffectedAsStringVec.push_back(utils::internal_string_from_external_string(user.xbox_user_id()));
     }
 }
 
@@ -31,11 +31,9 @@ internal_social_event::internal_social_event(
 {
     for (auto& record : m_presenceRecords)
     {
-        stringstream_t str;
+        xsapi_internal_stringstream str;
         str << record._Xbox_user_id();
-        auto strStr = str.str();
-        xsapi_internal_string xuid(strStr.c_str());
-        m_usersAffectedAsStringVec.push_back(xuid);
+        m_usersAffectedAsStringVec.push_back(str.str());
     }
 }
 
@@ -46,8 +44,7 @@ internal_social_event::internal_social_event(
     m_socialEventType(eventType),
     m_devicePresenceArgs(std::move(devicePresenceArgs))
 {
-    xsapi_internal_string xuidStr(m_devicePresenceArgs.xbox_user_id().c_str());
-    m_usersAffectedAsStringVec.push_back(xuidStr);
+    m_usersAffectedAsStringVec.push_back(utils::internal_string_from_external_string(m_devicePresenceArgs.xbox_user_id()));
 }
 
 internal_social_event::internal_social_event(
@@ -57,7 +54,7 @@ internal_social_event::internal_social_event(
     m_socialEventType(eventType),
     m_titlePresenceArgs(std::move(titlePresenceArgs))
 {
-    m_usersAffectedAsStringVec.push_back(m_titlePresenceArgs.xbox_user_id().c_str());
+    m_usersAffectedAsStringVec.push_back(utils::internal_string_from_external_string(titlePresenceArgs.xbox_user_id()));
 }
 
 internal_social_event::internal_social_event(
@@ -69,11 +66,9 @@ internal_social_event::internal_social_event(
 {
     for (auto& user : m_userList)
     {
-        stringstream_t str;
+        xsapi_internal_stringstream str;
         str << user;
-        auto strStr = str.str();
-        xsapi_internal_string xuid(strStr.c_str());
-        m_usersAffectedAsStringVec.push_back(xuid);
+        m_usersAffectedAsStringVec.push_back(str.str());
     }
 }
 
