@@ -16,7 +16,7 @@ public:
     const uint32_t profiles_count() const;
 
 private:
-    std::vector<XBL_XBOX_USER_PROFILE> m_profiles;
+    xsapi_internal_vector<XBL_XBOX_USER_PROFILE> m_profiles;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

@@ -205,7 +205,7 @@ void http_call_impl::get_response_with_auth(
     {
         auto httpCallResponse = get_http_call_response(m_httpCallData, http_response());
         handle_response_error(httpCallResponse, xbox_live_error_code::auth_user_not_signed_in, "User must be signed in to call this API", http_response());
-        // TODO how should we this be handled? Call the completion routine? Exception? change return value to xbox_live_result<void>?
+        completionRoutine(httpCallResponse, completionRoutineContext);
         return;
     }
 #endif
@@ -333,7 +333,7 @@ void http_call_impl::internal_get_response_with_auth(
                 auto httpCallResponse = get_http_call_response(httpCallData, http_response());
                 handle_response_error(httpCallResponse, static_cast<xbox_live_error_code>(result.err().value()), result.err_message(), http_response());
                 httpCallResponse->_Route_service_call();
-                // TODO handle auth failure
+                httpCallData->completionRoutine(httpCallResponse, httpCallData->completionRoutineContext);
                 return;
             }
 

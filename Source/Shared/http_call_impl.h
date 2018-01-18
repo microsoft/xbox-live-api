@@ -157,7 +157,6 @@ struct http_call_data
     http_call_request_message requestBody;
     bool addDefaultHeaders;
 
-    /// TODO add these to constructor
     http_call::get_response_with_auth_completion_routine completionRoutine;
     void *completionRoutineContext;
     uint64_t taskGroupId;

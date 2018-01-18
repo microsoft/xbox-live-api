@@ -13,7 +13,7 @@
 #include "http_call_response.h"
 #include "xsapi/mem.h"
 #include "xsapi/system.h"
-#include "xsapi-c/xbox_live_global_c.h"
+//#include "xsapi-c/xbox_live_global_c.h"
 
 // Forward decls
 class xbl_thread_pool;
