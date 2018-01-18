@@ -54,7 +54,7 @@ namespace Sample
         void SignInSilently();
 
         static void HandleSignInResult(
-            _In_ XBL_RESULT_INFO result,
+            _In_ XBL_RESULT result,
             _In_ XSAPI_SIGN_IN_RESULT payload,
             _In_opt_ void* context);
 

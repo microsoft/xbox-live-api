@@ -11,6 +11,11 @@ extern "C" {
 /// <summary>
 /// Enumeration values that define the Xbox Live API error conditions.
 /// </summary>
+/// <remarks>
+/// A best practice is to test the returned XBL_RESULT.errorCondition against these error conditions.
+/// For more detail about std::error_code vs std::error_condition, see 
+/// http://en.cppreference.com/w/cpp/error/error_condition 
+/// </remarks>
 typedef enum XBL_ERROR_CONDITION
 {
     /// <summary>

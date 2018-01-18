@@ -1071,22 +1071,9 @@ public:
     static XBL_RESULT create_xbl_result(std::error_code errc);
     static XBL_RESULT create_xbl_result(HC_RESULT hcResult);
 
-    static XBL_RESULT std_bad_alloc_to_xbl_result(
-        std::bad_alloc const& e,
-        _In_z_ char const* file,
-        uint32_t line
-        );
-
-    static XBL_RESULT std_exception_to_xbl_result(
-        std::exception const& e,
-        _In_z_ char const* file,
-        uint32_t line
-        );
-
-    static XBL_RESULT unknown_exception_to_xbl_result(
-        _In_z_ char const* file,
-        uint32_t line
-        );
+    static XBL_RESULT std_bad_alloc_to_xbl_result(std::bad_alloc const& e);
+    static XBL_RESULT std_exception_to_xbl_result(std::exception const& e);
+    static XBL_RESULT unknown_exception_to_xbl_result();
 
 private:
     static std::vector<string_t> get_locale_list();

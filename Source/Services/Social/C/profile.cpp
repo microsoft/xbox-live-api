@@ -20,6 +20,7 @@ XblGetUserProfile(
     _In_opt_ void* completionRoutineContext
     ) XBL_NOEXCEPT
 {
+    RETURN_C_INVALIDARGUMENT_IF(pContext == nullptr || xboxUserId == nullptr);
     auto profileService = pContext->pImpl->cppObject()->profile_service_impl();
 
     auto context = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
@@ -77,6 +78,7 @@ XblGetUserProfiles(
     _In_opt_ void* completionRoutineContext
     ) XBL_NOEXCEPT
 {
+    RETURN_C_INVALIDARGUMENT_IF(pContext == nullptr || xboxUserIds == nullptr);
     auto profileService = pContext->pImpl->cppObject()->profile_service_impl();
 
     auto context = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
@@ -98,6 +100,7 @@ XblGetUserProfilesForSocialGroup(
     _In_opt_ void* completionRoutineContext
     ) XBL_NOEXCEPT
 {
+    RETURN_C_INVALIDARGUMENT_IF(pContext == nullptr || socialGroup == nullptr);
     auto profileService = pContext->pImpl->cppObject()->profile_service_impl();
 
     auto context = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
