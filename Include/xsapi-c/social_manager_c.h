@@ -182,14 +182,14 @@ typedef struct XSAPI_SOCIAL_MANAGER
     PCSTR localUsers;
 } XSAPI_SOCIAL_MANAGER;
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerAddLocalUser(
     _In_ XSAPI_XBOX_LIVE_USER *user,
     _In_ XSAPI_SOCIAL_MANAGER_EXTRA_DETAIL_LEVEL extraLevelDetail,
     _Out_ PCSTR* errMessage
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerRemoveLocalUser(
     _In_ XSAPI_XBOX_LIVE_USER *user,
     _Out_ PCSTR* errMessage
@@ -200,7 +200,7 @@ SocialManagerDoWork(
     _Out_ uint32_t* socialEventsCount
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerCreateSocialUserGroupFromFilters(
     _In_ XSAPI_XBOX_LIVE_USER *user,
     _In_ XSAPI_PRESENCE_FILTER presenceDetailLevel,
@@ -209,7 +209,7 @@ SocialManagerCreateSocialUserGroupFromFilters(
     _Out_ PCSTR* errMessage
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerCreateSocialUserGroupFromList(
     _In_ XSAPI_XBOX_LIVE_USER *user,
     _In_ PCSTR* xboxUserIdList,
@@ -218,13 +218,13 @@ SocialManagerCreateSocialUserGroupFromList(
     _Out_ PCSTR* errMessage
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerDestroySocialUserGroup(
     _In_ XSAPI_XBOX_SOCIAL_USER_GROUP *group,
     _Out_ PCSTR* errMessage
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerUpdateSocialUserGroup(
     _In_ XSAPI_XBOX_SOCIAL_USER_GROUP *group,
     _In_ PCSTR* users,
@@ -232,7 +232,7 @@ SocialManagerUpdateSocialUserGroup(
     _Out_ PCSTR* errMessage
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerSetRichPresencePollingStatus(
     _In_ XSAPI_XBOX_LIVE_USER *user,
     _In_ bool shouldEnablePolling,

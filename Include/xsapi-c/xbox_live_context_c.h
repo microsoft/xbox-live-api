@@ -16,7 +16,7 @@ struct XSAPI_XBOX_LIVE_USER;
 struct XSAPI_XBOX_LIVE_APP_CONFIG;
 struct XSAPI_XBOX_LIVE_CONTEXT_IMPL;
 
-typedef struct XSAPI_XBOX_LIVE_CONTEXT
+typedef struct XBL_XBOX_LIVE_CONTEXT
 {
     PCSTR xboxUserId;
 #if XDK_API | XBOX_UWP
@@ -26,15 +26,15 @@ typedef struct XSAPI_XBOX_LIVE_CONTEXT
 #endif
     CONST XSAPI_XBOX_LIVE_APP_CONFIG* pAppConfig;
     XSAPI_XBOX_LIVE_CONTEXT_IMPL* pImpl;
-} XSAPI_XBOX_LIVE_CONTEXT;
+} XBL_XBOX_LIVE_CONTEXT;
 
 #if !(XDK_API | XBOX_UWP)
 
 // TODO: Change to *CreateHandle
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveContextCreate(
     _In_ CONST XSAPI_XBOX_LIVE_USER* pUser,
-    _Out_ XSAPI_XBOX_LIVE_CONTEXT** ppContext
+    _Out_ XBL_XBOX_LIVE_CONTEXT** ppContext
     );
 
 #endif
@@ -42,7 +42,7 @@ XboxLiveContextCreate(
 // TODO: Change to *CloseHandle, and *DuplicateHandle
 XBL_API void XBL_CALLING_CONV
 XboxLiveContextDelete(
-    XSAPI_XBOX_LIVE_CONTEXT* pContext
+    XBL_XBOX_LIVE_CONTEXT* pContext
     );
 
 #if defined(__cplusplus)

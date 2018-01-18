@@ -13,14 +13,14 @@ XSAPI_STAT_VALUE_IMPL::XSAPI_STAT_VALUE_IMPL(
     _In_ XSAPI_STAT_VALUE *cStatValue
 ) : m_cStatValue(cStatValue), m_cppStatValue(cppStatValue)
 {
-    m_name = utils_c::to_utf8string(m_cppStatValue.name());
+    m_name = utils::utf8_from_utf16(m_cppStatValue.name());
     m_cStatValue->name = m_name.c_str();
 
     m_cStatValue->asNumber = m_cppStatValue.as_number();
 
     m_cStatValue->asInteger = m_cppStatValue.as_integer();
 
-    m_asString = utils_c::to_utf8string(m_cppStatValue.as_string());
+    m_asString = utils::utf8_from_utf16(m_cppStatValue.as_string());
     m_cStatValue->asString = m_asString.c_str();
 
     m_cStatValue->dataType = static_cast<XSAPI_STAT_DATA_TYPE>(m_cppStatValue.data_type());

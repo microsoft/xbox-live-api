@@ -116,17 +116,17 @@ typedef struct XSAPI_GET_NEXT_RESULT_PAYLOAD
 
 typedef struct XSAPI_GET_NEXT_RESULT
 {
-    XSAPI_RESULT_INFO result;
+    XBL_RESULT result;
     XSAPI_GET_NEXT_RESULT_PAYLOAD payload;
 } XSAPI_GET_NEXT_RESULT;
 
 typedef void(*GET_NEXT_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_GET_NEXT_RESULT payload,
     _In_opt_ void* context
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 LeaderboardResultGetNext(
     _In_ XSAPI_LEADERBOARD_RESULT* leaderboardResult,
     _In_ uint32_t maxItems,
@@ -136,7 +136,7 @@ LeaderboardResultGetNext(
     );
 #endif
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 LeaderboardResultGetNextQuery(
     _In_ XSAPI_LEADERBOARD_RESULT* leaderboardResult,
     _Out_ XSAPI_LEADERBOARD_QUERY** nextQuery,

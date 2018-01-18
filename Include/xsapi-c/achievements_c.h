@@ -162,12 +162,12 @@ AchievementsResultHasNext(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_GET_NEXT_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_ACHIEVEMENTS_RESULT* achievementsResult,
     _In_opt_ void* context
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementsResultGetNext(
     _In_ XSAPI_ACHIEVEMENTS_RESULT* achievementsResult,
     _In_ uint32_t maxItems,
@@ -177,13 +177,13 @@ AchievementsResultGetNext(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_UPDATE_ACVHIEVEMENT_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_opt_ void* context
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceUpdateAchievement(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ PCSTR xboxUserId,
     _In_opt_ uint32_t* titleId,
     _In_opt_ PCSTR serviceConfigurationId,
@@ -195,14 +195,14 @@ AchievementServiceUpdateAchievement(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_GET_ACHIEVEMENTS_FOR_TITLE_ID_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_ACHIEVEMENTS_RESULT* achievementsResult,
     _In_opt_ void* context
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceGetAchievementsForTitleId(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ PCSTR xboxUserId,
     _In_ uint32_t titleId,
     _In_ XSAPI_ACHIEVEMENT_TYPE type,
@@ -216,14 +216,14 @@ AchievementServiceGetAchievementsForTitleId(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_GET_ACHIEVEMENT_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_ACHIEVEMENT* achievement,
     _In_opt_ void* context
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceGetAchievement(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ PCSTR xboxUserId,
     _In_ PCSTR serviceConfigurationId,
     _In_ PCSTR achievementId,
@@ -232,12 +232,12 @@ AchievementServiceGetAchievement(
     _In_ uint64_t taskGroupId
     ) XBL_NOEXCEPT;
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceReleaseAchievementsResult(
     _In_ XSAPI_ACHIEVEMENTS_RESULT* achievementsResult
     ) XBL_NOEXCEPT;
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceReleaseAchievement(
     _In_ XSAPI_ACHIEVEMENT* achievement
     ) XBL_NOEXCEPT;

@@ -4,6 +4,7 @@
 #include "pch.h"
 #include "privacy_multiple_permissions_check_result_impl.h"
 
+using namespace xbox::services;
 using namespace xbox::services::privacy;
 
 XSAPI_PRIVACY_MULTIPLE_PERMISSIONS_CHECK_RESULT_IMPL::XSAPI_PRIVACY_MULTIPLE_PERMISSIONS_CHECK_RESULT_IMPL(
@@ -19,7 +20,7 @@ void XSAPI_PRIVACY_MULTIPLE_PERMISSIONS_CHECK_RESULT_IMPL::update(
     XSAPI_PRIVACY_MULTIPLE_PERMISSIONS_CHECK_RESULT* cObj
     )
 {
-    m_xboxUserId = utils_c::to_utf8string(cppObj.xbox_user_id());
+    m_xboxUserId = utils::utf8_from_utf16(cppObj.xbox_user_id());
     
     auto& cppItems = cppObj.items();
     m_items = std::vector<XSAPI_PRIVACY_PERMISSION_CHECK_RESULT>(cppItems.size());

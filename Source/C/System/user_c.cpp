@@ -8,7 +8,7 @@
 using namespace xbox::services;
 using namespace xbox::services::system;
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserCreateFromSystemUser(
     _In_ Windows::System::User^ creationContext,
     _Out_ XSAPI_XBOX_LIVE_USER* *ppUser
@@ -17,7 +17,7 @@ try
 {
     if (ppUser == nullptr)
     {
-        return XSAPI_RESULT_E_HC_INVALIDARG;
+        return XBL_RESULT_INVALID_ARG;
     }
 
     auto cUser = new XSAPI_XBOX_LIVE_USER();
@@ -25,11 +25,11 @@ try
 
     *ppUser = cUser;
 
-    return XSAPI_RESULT_OK;
+    return XBL_RESULT_OK;
 }
 CATCH_RETURN()
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserCreate(
     _Out_ XSAPI_XBOX_LIVE_USER* *ppUser
     ) XBL_NOEXCEPT
@@ -101,7 +101,7 @@ HC_RESULT XboxLiveUserSignInExecute(
     return HCTaskSetCompleted(taskHandle);
 }
 
-XSAPI_RESULT XboxLiveUserSignInHelper(
+XBL_RESULT XboxLiveUserSignInHelper(
     _Inout_ XSAPI_XBOX_LIVE_USER* pUser,
     _In_ Platform::Object^ coreDispatcher,
     _In_ bool signInSilently,
@@ -114,21 +114,22 @@ XSAPI_RESULT XboxLiveUserSignInHelper(
 
     auto args = new sign_in_taskargs(pUser, coreDispatcher, signInSilently);
 
-    return utils_c::xsapi_result_from_hc_result(
-        HCTaskCreate(
-            HC_SUBSYSTEM_ID::HC_SUBSYSTEM_ID_XSAPI,
-            taskGroupId,
-            XboxLiveUserSignInExecute,
-            static_cast<void*>(args),
-            utils_c::execute_completion_routine_with_payload<sign_in_taskargs, XSAPI_SIGN_IN_COMPLETION_ROUTINE>,
-            static_cast<void*>(args),
-            static_cast<void*>(completionRoutine),
-            completionRoutineContext,
-            nullptr
-        ));
+    auto hcResult = HCTaskCreate(
+        HC_SUBSYSTEM_ID::HC_SUBSYSTEM_ID_XSAPI,
+        taskGroupId,
+        XboxLiveUserSignInExecute,
+        static_cast<void*>(args),
+        utils_c::execute_completion_routine_with_payload<sign_in_taskargs, XSAPI_SIGN_IN_COMPLETION_ROUTINE>,
+        static_cast<void*>(args),
+        static_cast<void*>(completionRoutine),
+        completionRoutineContext,
+        nullptr
+        );
+
+    return utils::create_xbl_result(hcResult);
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserSignIn(
     _Inout_ XSAPI_XBOX_LIVE_USER* pUser,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
@@ -141,7 +142,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserSignInSilently(
     _Inout_ XSAPI_XBOX_LIVE_USER* pUser,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
@@ -154,7 +155,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserSignInWithCoreDispatcher(
     _Inout_ XSAPI_XBOX_LIVE_USER* pUser,
     _In_ Platform::Object^ coreDispatcher,
@@ -168,7 +169,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserSignInSilentlyWithCoreDispatcher(
     _Inout_ XSAPI_XBOX_LIVE_USER* pUser,
     _In_ Platform::Object^ coreDispatcher,
@@ -203,35 +204,35 @@ HC_RESULT XboxLiveUserGetTokenAndSignatureExecute(
         auto cppPayload = result.payload();
         XSAPI_TOKEN_AND_SIGNATURE_RESULT& payload = args->completionRoutinePayload;
 
-        args->token = utils_c::to_utf8string(cppPayload.token());
+        args->token = utils::utf8_from_utf16(cppPayload.token());
         payload.token = args->token.data();
 
-        args->signature = utils_c::to_utf8string(cppPayload.signature());
+        args->signature = utils::utf8_from_utf16(cppPayload.signature());
         payload.signature = args->signature.data();
 
-        args->xboxUserId = utils_c::to_utf8string(cppPayload.xbox_user_id());
+        args->xboxUserId = utils::utf8_from_utf16(cppPayload.xbox_user_id());
         payload.xboxUserId = args->xboxUserId.data();
 
-        args->gamertag = utils_c::to_utf8string(cppPayload.gamertag());
+        args->gamertag = utils::utf8_from_utf16(cppPayload.gamertag());
         payload.gamertag = args->gamertag.data();
 
-        args->xboxUserHash = utils_c::to_utf8string(cppPayload.xbox_user_hash());
+        args->xboxUserHash = utils::utf8_from_utf16(cppPayload.xbox_user_hash());
         payload.xboxUserHash = args->xboxUserHash.data();
 
-        args->ageGroup = utils_c::to_utf8string(cppPayload.age_group());
+        args->ageGroup = utils::utf8_from_utf16(cppPayload.age_group());
         payload.ageGroup = args->ageGroup.data();
 
-        args->privileges = utils_c::to_utf8string(cppPayload.privileges());
+        args->privileges = utils::utf8_from_utf16(cppPayload.privileges());
         payload.privileges = args->privileges.data();
 
-        args->webAccountId = utils_c::to_utf8string(cppPayload.web_account_id());
+        args->webAccountId = utils::utf8_from_utf16(cppPayload.web_account_id());
         payload.webAccountId = args->webAccountId.data();
     }
 
     return HCTaskSetCompleted(taskHandle);
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserGetTokenAndSignature(
     _Inout_ XSAPI_XBOX_LIVE_USER* pUser,
     _In_ PCSTR httpMethod,
@@ -253,18 +254,19 @@ try
         headers,
         requestBodyString);
 
-    return utils_c::xsapi_result_from_hc_result(
-        HCTaskCreate(
-            HC_SUBSYSTEM_ID::HC_SUBSYSTEM_ID_XSAPI,
-            taskGroupId,
-            XboxLiveUserGetTokenAndSignatureExecute,
-            static_cast<void*>(args),
-            utils_c::execute_completion_routine_with_payload<get_token_and_signature_taskargs, XSAPI_GET_TOKEN_AND_SIGNATURE_COMPLETION_ROUTINE>,
-            static_cast<void*>(args),
-            static_cast<void*>(completionRoutine),
-            completionRoutineContext,
-            nullptr
-        ));
+    auto hcResult = HCTaskCreate(
+        HC_SUBSYSTEM_ID::HC_SUBSYSTEM_ID_XSAPI,
+        taskGroupId,
+        XboxLiveUserGetTokenAndSignatureExecute,
+        static_cast<void*>(args),
+        utils_c::execute_completion_routine_with_payload<get_token_and_signature_taskargs, XSAPI_GET_TOKEN_AND_SIGNATURE_COMPLETION_ROUTINE>,
+        static_cast<void*>(args),
+        static_cast<void*>(completionRoutine),
+        completionRoutineContext,
+        nullptr
+        );
+
+    return utils::create_xbl_result(hcResult);
 }
 CATCH_RETURN()
 
@@ -282,7 +284,7 @@ try
             auto singleton = get_xsapi_singleton();
             std::lock_guard<std::mutex> lock(singleton->m_usersLock);
 
-            auto iter = singleton->m_signedInUsers.find(utils_c::to_utf8string(args.user()->xbox_user_id()));
+            auto iter = singleton->m_signedInUsers.find(utils::utf8_from_utf16(args.user()->xbox_user_id()));
             if (iter != singleton->m_signedInUsers.end())
             {
                 iter->second->pImpl->Refresh();

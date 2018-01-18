@@ -12,6 +12,8 @@
 #include "xsapi/xbox_live_app_config.h"
 #include "http_call_response.h"
 #include "xsapi/mem.h"
+#include "xsapi/system.h"
+//#include "xsapi-c/xbox_live_global_c.h"
 
 // Forward decls
 class xbl_thread_pool;
@@ -239,6 +241,9 @@ struct xsapi_singleton
     std::shared_ptr<XSAPI_SOCIAL_MANAGER_VARS> m_socialVars;
     std::shared_ptr<XSAPI_STATS_MANAGER_VARS> m_statsVars;
 };
+
+extern XBL_MEM_ALLOC_FUNC g_pMemAllocHook;
+extern XBL_MEM_FREE_FUNC g_pMemFreeHook;
 
 std::shared_ptr<xsapi_singleton> get_xsapi_singleton(_In_ bool createIfRequired = true);
 void verify_global_init();
@@ -650,6 +655,8 @@ public:
 
     static web::json::value json_string_serializer(_In_ const string_t& value);
 
+    static web::json::value json_internal_string_serializer(_In_ const xsapi_internal_string& value);
+
     static xbox_live_result<int> json_int_extractor(_In_ const web::json::value& json);
 
     static web::json::value json_int_serializer(_In_ int32_t value);
@@ -659,6 +666,22 @@ public:
         _In_ F serializer,
         _In_ std::vector<T> inputVector
     )
+    {
+        int i = 0;
+        web::json::value jsonArray = web::json::value::array();
+        for (auto& s : inputVector)
+        {
+            jsonArray[i++] = serializer(s);
+        }
+
+        return jsonArray;
+    }
+
+    template<typename T, typename F>
+    static web::json::value serialize_vector(
+        _In_ F serializer,
+        _In_ xsapi_internal_vector<T> inputVector
+        )
     {
         int i = 0;
         web::json::value jsonArray = web::json::value::array();
@@ -764,12 +787,39 @@ public:
         _In_ const string_t& protocol = _T("https")
     );
 
+    // TODO above should not be needed eventually
+    static xsapi_internal_string create_xboxlive_endpoint(
+        _In_ const xsapi_internal_string& subpath,
+        _In_ const std::shared_ptr<xbox_live_app_config>& appConfig,
+        _In_ const xsapi_internal_string& protocol = "https"
+    );
+
 #ifdef _WIN32
     static inline std::string convert_wide_string_to_standard_string(_In_ string_t wideString)
     {
         std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
         return converter.to_bytes(wideString);
     }
+#endif
+
+#ifdef UWP_API
+    // TODO cleanup these functions
+    static xsapi_internal_string utf8_from_utf16(const xsapi_internal_wstring& utf16);
+    
+    static xsapi_internal_string internal_string_from_external_string(_In_ const string_t& externalString);
+    static xsapi_internal_string internal_string_from_utf16(_In_reads_(size) PCWSTR utf16, size_t size);
+
+    static string_t external_string_from_internal_string(_In_ const xsapi_internal_string& internalString);
+    static string_t external_string_from_utf8(_In_reads_(size) PCSTR utf8, size_t size);
+
+    static std::string utf8_from_utf16(std::wstring const& utf16);
+    static std::wstring utf16_from_utf8(std::string const& utf8);
+
+    static std::string utf8_from_utf16(_In_z_ PCWSTR utf16);
+    static std::wstring utf16_from_utf8(_In_z_ PCSTR utf8);
+
+    static std::string utf8_from_utf16(_In_reads_(size) PCWSTR utf16, size_t size);
+    static std::wstring utf16_from_utf8(_In_reads_(size) PCSTR utf8, size_t size);
 #endif
 
     static void generate_locales();
@@ -853,18 +903,46 @@ public:
         return vec;
     }
 
-    static xsapi_internal_vector(xsapi_internal_string) std_vector_string_to_xsapi_vector_internal_string(
-        _In_ const std::vector<string_t>& xsapiInternalVector
+    static xsapi_internal_vector<xsapi_internal_string> internal_string_vector_from_std_string_vector(
+        _In_ const std::vector<string_t>& stdVector
+        )
+    {
+        auto size = stdVector.size();
+        xsapi_internal_vector<xsapi_internal_string> internalVector(size);
+        for (size_t i = 0; i < size; ++i)
+        {
+            internalVector[i] = utils::internal_string_from_external_string(stdVector[i]);
+        }
+        return internalVector;
+    }
+
+    static std::vector<string_t> std_string_vector_from_internal_string_vector(
+        _In_ const xsapi_internal_vector<xsapi_internal_string>& internalVector
+        )
+    {
+        auto size = internalVector.size();
+        std::vector<string_t> vector(size);
+        for (size_t i = 0; i < size; ++i)
+        {
+            vector[i] = utils::external_string_from_internal_string(internalVector[i]);
+        }
+        return vector;
+    }
+
+    template<typename T>
+    static std::vector<T> std_vector_from_internal_vector(
+        _In_ const xsapi_internal_vector<T>& internalVector
     )
     {
-        auto internalVectorSize = xsapiInternalVector.size();
-        xsapi_internal_vector(xsapi_internal_string) vec(internalVectorSize);
-        for (size_t i = 0; i < internalVectorSize; ++i)
-        {
-            vec[i] = xsapiInternalVector.at(i).c_str();
-        }
+        return std::vector<T>(internalVector.begin(), internalVector.end());
+    }
 
-        return vec;
+    template<typename T>
+    static xsapi_internal_vector<T> internal_vector_from_std_vector(
+        _In_ const std::vector<T>& vector
+        )
+    {
+        return xsapi_internal_vector<T>(vector.begin(), vector.end());
     }
 
     static uint32_t try_get_master_title_id();
@@ -916,6 +994,13 @@ public:
 #endif
     }
 
+    inline static uint64_t internal_string_to_uint64(
+        _In_ const xsapi_internal_string& str
+    )
+    {
+        return strtoull(str.c_str(), nullptr, 0);
+    }
+
     inline static int32_t string_t_to_int32(
         _In_ const string_t& str
     )
@@ -964,6 +1049,31 @@ public:
 #if UNIT_TEST_SERVICES
     static web::json::value read_test_response_file(_In_ const string_t& filePath);
 #endif
+
+    static std::vector<string_t> string_array_to_string_vector(
+        PCSTR *stringArray,
+        size_t stringArrayCount
+        );
+
+    // These both might not be needed
+    static xsapi_internal_vector<xsapi_internal_string> string_array_to_internal_string_vector(
+        PCSTR *stringArray,
+        size_t stringArrayCount
+        );
+
+    static PCSTR alloc_string(const string_t& str);
+    static void free_string(PCSTR str);
+
+    static time_t time_t_from_datetime(const utility::datetime& datetime);
+
+    static utility::datetime datetime_from_time_t(const time_t* time);
+
+    static XBL_RESULT create_xbl_result(std::error_code errc);
+    static XBL_RESULT create_xbl_result(HC_RESULT hcResult);
+
+    static XBL_RESULT std_bad_alloc_to_xbl_result(std::bad_alloc const& e);
+    static XBL_RESULT std_exception_to_xbl_result(std::exception const& e);
+    static XBL_RESULT unknown_exception_to_xbl_result();
 
 private:
     static std::vector<string_t> get_locale_list();
@@ -1050,9 +1160,9 @@ public:
 
 private:
     static std::mutex m_contextsLock;
-    static std::unordered_map<void *, std::shared_ptr<void>> m_sharedPtrs;
+    static xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_sharedPtrs;
     static uintptr_t m_clientCallbackInfoIndexer;
-    static std::unordered_map<void *, client_callback_info> m_clientCallbackInfoMap;
+    static xsapi_internal_unordered_map<void *, client_callback_info> m_clientCallbackInfoMap;
 
     async_helpers();
     async_helpers(const async_helpers&);

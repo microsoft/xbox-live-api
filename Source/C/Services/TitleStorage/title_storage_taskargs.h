@@ -8,7 +8,7 @@
 
 struct title_storage_taskargs
 {
-    XSAPI_XBOX_LIVE_CONTEXT* pXboxLiveContext;
+    XBL_XBOX_LIVE_CONTEXT* pXboxLiveContext;
 };
 
 struct get_quota_taskargs : public title_storage_taskargs, public taskargs_with_payload<XSAPI_TITLE_STORAGE_QUOTA>

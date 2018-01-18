@@ -14,6 +14,14 @@ http_call_request_message::http_call_request_message() :
 
 http_call_request_message::http_call_request_message(
     _In_ string_t messageString
+) :
+    m_requestMessageString(utils::internal_string_from_external_string(messageString)),
+    m_httpRequestMessageType(http_request_message_type::string_message)
+{
+}
+
+http_call_request_message::http_call_request_message(
+    _In_ xsapi_internal_string messageString
     ) : 
     m_requestMessageString(std::move(messageString)),
     m_httpRequestMessageType(http_request_message_type::string_message)
@@ -23,21 +31,27 @@ http_call_request_message::http_call_request_message(
 http_call_request_message::http_call_request_message(
     _In_ std::vector<unsigned char> messageVector
     ) :
+    m_requestMessageVector(utils::internal_vector_from_std_vector(messageVector)),
+    m_httpRequestMessageType(http_request_message_type::vector_message)
+{
+}
+
+http_call_request_message::http_call_request_message(
+    _In_ xsapi_internal_vector<unsigned char> messageVector
+    ) :
     m_requestMessageVector(std::move(messageVector)),
     m_httpRequestMessageType(http_request_message_type::vector_message)
 {
 }
 
-const string_t&
-http_call_request_message::request_message_string() const
+string_t http_call_request_message::request_message_string() const
 {
-    return m_requestMessageString;
+    return utils::external_string_from_internal_string(m_requestMessageString);
 }
 
-const std::vector<unsigned char>&
-http_call_request_message::request_message_vector() const
+std::vector<unsigned char> http_call_request_message::request_message_vector() const
 {
-    return m_requestMessageVector;
+    return std::vector<unsigned char>(m_requestMessageVector.begin(), m_requestMessageVector.end());
 }
 
 http_request_message_type

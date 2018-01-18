@@ -156,37 +156,7 @@ namespace social {
     private:
         profile_service() {};
 
-        profile_service(
-            _In_ std::shared_ptr<xbox::services::user_context> userContext,
-            _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-            _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
-            );
-
-        // TODO eventually serviceImpl should be the only parameter and the other values will be unneeded in this class
-        profile_service(
-            _In_ std::shared_ptr<profile_service_impl> serviceImpl,
-            _In_ std::shared_ptr<xbox::services::user_context> userContext,
-            _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-            _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
-            );
-
-        static const string_t settings_query();
-
-        static const string_t pathandquery_user_profiles_for_social_group(
-        _In_ const string_t& socialGroup
-        );
-
-        static web::json::value serialize_settings_json();
-
-        static const string_t SETTINGS_ARRAY[];
-
-        static const web::json::value SETTINGS_SERIALIZED;
-
-        static const string_t SETTINGS_QUERY;
-
-        std::shared_ptr<xbox::services::user_context> m_userContext;
-        std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
-        std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
+        profile_service(_In_ std::shared_ptr<profile_service_impl> serviceImpl);
 
         std::shared_ptr<profile_service_impl> m_serviceImpl;
 

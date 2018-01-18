@@ -54,7 +54,7 @@ namespace Sample
         void SignInSilently();
 
         static void HandleSignInResult(
-            _In_ XSAPI_RESULT_INFO result,
+            _In_ XBL_RESULT result,
             _In_ XSAPI_SIGN_IN_RESULT payload,
             _In_opt_ void* context);
 
@@ -72,7 +72,7 @@ namespace Sample
         XSAPI_XBOX_LIVE_USER *GetUser() { return m_user; }
     private:
         XSAPI_XBOX_LIVE_USER *m_user;
-        XSAPI_XBOX_LIVE_CONTEXT *m_xboxLiveContext;
+        XBL_XBOX_LIVE_CONTEXT *m_xboxLiveContext;
 
         function_context m_signOutContext;
 

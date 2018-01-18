@@ -50,7 +50,7 @@ try
 
     for (size_t i = 0; i < xboxUserIdsCount; i++)
     {
-        cXboxUserIds[i] = utils_c::to_utf16string(xboxUserIds[i]);
+        cXboxUserIds[i] = utils::utf16_from_utf8(xboxUserIds[i]);
         cXboxUserIdContainers[i] = xbox_user_id_container(cXboxUserIds[i].c_str());
     }
        
@@ -58,7 +58,7 @@ try
 }
 CATCH_RETURN_WITH(nullptr)
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerAddLocalUser(
     _In_ XSAPI_XBOX_LIVE_USER *user,
     _In_ XSAPI_SOCIAL_MANAGER_EXTRA_DETAIL_LEVEL extraLevelDetail,
@@ -73,9 +73,9 @@ try
     singleton->m_socialVars->cppVoidResult = social_manager::get_singleton_instance()->add_local_user(user->pImpl->cppUser(), cExtraLevelDetail);
 
     *errMessage = singleton->m_socialVars->cppVoidResult.err_message().c_str();
-    auto cResult = utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_socialVars->cppVoidResult.err());
+    auto cResult = utils::create_xbl_result(singleton->m_socialVars->cppVoidResult.err());
 
-    if (cResult == XSAPI_RESULT::XSAPI_RESULT_OK)
+    if (cResult.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
     {
         singleton->m_socialVars->cUsersMapping[user->pImpl->cppUser()] = user;
     }
@@ -84,7 +84,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerRemoveLocalUser(
     _In_ XSAPI_XBOX_LIVE_USER *user,
     _Out_ PCSTR* errMessage
@@ -97,9 +97,9 @@ try
     singleton->m_socialVars->cppVoidResult = social_manager::get_singleton_instance()->remove_local_user(user->pImpl->cppUser());
 
     *errMessage = singleton->m_socialVars->cppVoidResult.err_message().c_str();
-    auto cResult = utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_socialVars->cppVoidResult.err());
+    auto cResult = utils::create_xbl_result(singleton->m_socialVars->cppVoidResult.err());
 
-    if (cResult == XSAPI_RESULT::XSAPI_RESULT_OK)
+    if (cResult.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
     {
         singleton->m_socialVars->cUsersMapping.erase(user->pImpl->cppUser());
     }
@@ -143,7 +143,7 @@ try
 }
 CATCH_RETURN_WITH(nullptr)
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerCreateSocialUserGroupFromFilters(
     _In_ XSAPI_XBOX_LIVE_USER *user,
     _In_ XSAPI_PRESENCE_FILTER presenceDetailLevel,
@@ -164,14 +164,13 @@ try
     socialUserGroup->pImpl = new XSAPI_XBOX_SOCIAL_USER_GROUP_IMPL(singleton->m_socialVars->cppGroupResult.payload(), socialUserGroup);
     singleton->m_socialVars->cGroups.push_back(socialUserGroup);
     *group = socialUserGroup;
-    
 
     *errMessage = singleton->m_socialVars->cppGroupResult.err_message().c_str();
-    return utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_socialVars->cppGroupResult.err());
+    return utils::create_xbl_result(singleton->m_socialVars->cppGroupResult.err());
 }
 CATCH_RETURN()
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerCreateSocialUserGroupFromList(
     _In_ XSAPI_XBOX_LIVE_USER *user,
     _In_ PCSTR* xboxUserIdList,
@@ -188,7 +187,7 @@ try
 
     for (uint32_t i = 0; i < xboxUserIdListCount; i++)
     {
-        xboxUserIdVector[i] = utils_c::to_utf16string(xboxUserIdList[i]);
+        xboxUserIdVector[i] = utils::utf16_from_utf8(xboxUserIdList[i]);
     }
     
     singleton->m_socialVars->cppGroupResult = social_manager::get_singleton_instance()->create_social_user_group_from_list(user->pImpl->cppUser(), xboxUserIdVector);
@@ -199,11 +198,11 @@ try
     *group = socialUserGroup;
 
     *errMessage = singleton->m_socialVars->cppGroupResult.err_message().c_str();
-    return utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_socialVars->cppGroupResult.err());
+    return utils::create_xbl_result(singleton->m_socialVars->cppGroupResult.err());
 }
 CATCH_RETURN()
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerDestroySocialUserGroup(
     _In_ XSAPI_XBOX_SOCIAL_USER_GROUP *group,
     _Out_ PCSTR* errMessage
@@ -220,11 +219,11 @@ try
     singleton->m_socialVars->cppVoidResult = social_manager::get_singleton_instance()->destroy_social_user_group(group->pImpl->cppSocialUserGroup());
 
     *errMessage = singleton->m_socialVars->cppVoidResult.err_message().c_str();
-    return utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_socialVars->cppVoidResult.err());
+    return utils::create_xbl_result(singleton->m_socialVars->cppVoidResult.err());
 }
 CATCH_RETURN()
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerUpdateSocialUserGroup(
     _In_ XSAPI_XBOX_SOCIAL_USER_GROUP *group,
     _In_ PCSTR* users,
@@ -240,18 +239,18 @@ try
 
     for (uint32_t i = 0; i < usersCount; i++)
     {
-        usersVector.push_back(utils_c::to_utf16string(users[i]));
+        usersVector.push_back(utils::utf16_from_utf8(users[i]));
     }
 
     singleton->m_socialVars->cppVoidResult = social_manager::get_singleton_instance()->update_social_user_group(group->pImpl->cppSocialUserGroup(), usersVector);
     group->pImpl->Refresh();
 
     *errMessage = singleton->m_socialVars->cppVoidResult.err_message().c_str();
-    return utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_socialVars->cppVoidResult.err());
+    return utils::create_xbl_result(singleton->m_socialVars->cppVoidResult.err());
 }
 CATCH_RETURN()
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerSetRichPresencePollingStatus(
     _In_ XSAPI_XBOX_LIVE_USER *user,
     _In_ bool shouldEnablePolling,
@@ -266,6 +265,6 @@ try
     user->pImpl->Refresh();
 
     *errMessage = singleton->m_socialVars->cppVoidResult.err_message().c_str();
-    return utils_c::xsapi_result_from_xbox_live_result_err(singleton->m_socialVars->cppVoidResult.err());
+    return utils::create_xbl_result(singleton->m_socialVars->cppVoidResult.err());
 }
 CATCH_RETURN()

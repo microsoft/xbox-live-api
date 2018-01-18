@@ -4,7 +4,6 @@
 #pragma once
 #include <new>
 #include <stddef.h>
-#include "xsapi/system.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
@@ -118,6 +117,41 @@ public:
     }
 };
 
+template<typename T>
+struct xsapi_alloc_deleter
+{
+    xsapi_alloc_deleter() {}
+    xsapi_alloc_deleter(const xsapi_stl_allocator<T>& alloc) : m_alloc(alloc) { }
+
+    void operator()(typename std::allocator_traits<xsapi_stl_allocator<T>>::pointer p) const
+    {
+        xsapi_stl_allocator<T> alloc(m_alloc);
+        std::allocator_traits<xsapi_stl_allocator<T>>::destroy(alloc, std::addressof(*p));
+        std::allocator_traits<xsapi_stl_allocator<T>>::deallocate(alloc, p, 1);
+    }
+
+private:
+    xsapi_stl_allocator<T> m_alloc;
+};
+
+template<typename T, typename... Args>
+std::shared_ptr<T> xsapi_allocate_shared(Args&&... args)
+{
+    return std::allocate_shared<T, xsapi_stl_allocator<T>>(xsapi_stl_allocator<T>(), std::forward<Args>(args)...);
+}
+
+template<typename T, typename... Args>
+std::unique_ptr<T, xsapi_alloc_deleter<T>> xsapi_allocate_unique()
+{
+    xsapi_stl_allocator<T> alloc;
+    auto p = std::allocator_traits<xsapi_stl_allocator<T>>::allocate(alloc, 1); // malloc memory
+    auto o = new(p) T(std::forward<Args>(args)...); // call class ctor using placement new
+    return std::unique_ptr<T, xaspi_alloc_deleter<T>>(o, xsapi_alloc_deleter<T>(alloc));
+}
+
+template<typename T>
+using XAPI_UNIQUE_PTR = std::unique_ptr<T, xsapi_alloc_deleter<T>>;
+
 template<typename T1, typename T2>
 inline bool operator==(const xsapi_stl_allocator<T1>&, const xsapi_stl_allocator<T2>&)
 {
@@ -130,10 +164,29 @@ bool operator!=(const xsapi_stl_allocator<T1>&, const xsapi_stl_allocator<T2>&)
     return false;
 }
 
-#define xsapi_internal_vector(T) std::vector<T, xsapi_stl_allocator<T> >
+template<class T>
+using xsapi_internal_vector = std::vector<T, xsapi_stl_allocator<T>>;
 
-#define xsapi_internal_unordered_map(Key, T) std::unordered_map<Key, T, std::hash<Key>, std::equal_to<Key>, xsapi_stl_allocator< std::pair< const Key, T > > >
+template<class K, class V, class LESS = std::less<K>>
+using xsapi_internal_map = std::map<K, V, LESS, xsapi_stl_allocator<std::pair<K const, V>>>;
 
-#define xsapi_internal_string std::basic_string<char_t, std::char_traits<char_t>, xsapi_stl_allocator<char_t> >
+template<class K, class V, class HASH = std::hash<K>, class EQUAL = std::equal_to<K>>
+using xsapi_internal_unordered_map = std::unordered_map<K, V, HASH, EQUAL, xsapi_stl_allocator<std::pair<K const, V>>>;
 
-#define xsapi_internal_dequeue(T) std::deque<T, xsapi_stl_allocator<T> >
+template<class C, class TRAITS = std::char_traits<C>>
+using xsapi_internal_basic_string = std::basic_string<C, TRAITS, xsapi_stl_allocator<C>>;
+
+using xsapi_internal_string = xsapi_internal_basic_string<char>;
+using xsapi_internal_wstring = xsapi_internal_basic_string<wchar_t>;
+
+template<class C, class TRAITS = std::char_traits<C>>
+using xsapi_internal_basic_stringstream = std::basic_stringstream<C, TRAITS, xsapi_stl_allocator<C>>;
+
+using xsapi_internal_stringstream = xsapi_internal_basic_stringstream<char>;
+using xsapi_internal_wstringstream = xsapi_internal_basic_stringstream<wchar_t>;
+
+template<class T>
+using xsapi_internal_dequeue = std::deque<T, xsapi_stl_allocator<T>>;
+
+template<class T>
+using xsapi_internal_queue = std::queue<T, xsapi_internal_dequeue<T>>;

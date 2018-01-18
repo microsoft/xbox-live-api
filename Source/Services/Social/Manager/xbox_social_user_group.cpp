@@ -93,7 +93,7 @@ xbox_social_user_group::tracking_users()
 }
 
 void xbox_social_user_group::update_view(
-    _In_ const xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)& snapshotList,
+    _In_ const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>& snapshotList,
     _In_ const std::vector<social_event>& socialEvents
     )
 {
@@ -145,7 +145,7 @@ void xbox_social_user_group::update_view(
 
 void
 xbox_social_user_group::initialize_filter_list(
-    _In_ const xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)& users
+    _In_ const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>& users
     )
 {
     std::lock_guard<std::mutex> lock(m_groupMutex);
@@ -216,7 +216,7 @@ xbox_social_user_group::remove_users(
 
 void
 xbox_social_user_group::filter_list(
-    _In_ const xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)& snapshotList,
+    _In_ const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>& snapshotList,
     _In_ const std::vector<social_event>& socialEvents
     )
 {
@@ -368,8 +368,8 @@ xbox_social_user_group::_Update_users_in_group(
     _In_ const std::vector<string_t>& userList
     )
 {
-    xsapi_internal_unordered_map(uint64_t, uint32_t) changeMap;
-    xsapi_internal_vector(uint64_t) userIdList;
+    xsapi_internal_unordered_map<int64_t, uint32_t> changeMap;
+    xsapi_internal_vector<uint64_t> userIdList;
     userIdList.reserve(userList.size());
 
     user_group_status_change changeGroups;

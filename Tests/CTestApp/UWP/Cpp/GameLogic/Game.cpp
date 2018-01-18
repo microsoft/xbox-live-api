@@ -104,7 +104,7 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
     g_pendingReadyHandle = CreateEvent(nullptr, false, false, nullptr);
     g_completeReadyHandle = CreateEvent(nullptr, false, false, nullptr);
 
-    XsapiGlobalInitialize();
+    XblGlobalInitialize();
 
     // TODO wrap these functions in XSAPI so clients aren't calling through to libHttpClient directly
     HCAddTaskEventHandler(
@@ -137,7 +137,7 @@ Game::~Game()
         XboxLiveContextDelete(m_xboxLiveContext);
     }
 
-    XsapiGlobalCleanup();
+    XblGlobalCleanup();
 }
 
 // Updates application state when the window size changes (e.g. device orientation change)
@@ -366,7 +366,7 @@ void Game::Init(Windows::UI::Core::CoreWindow^ window)
     std::weak_ptr<Game> thisWeakPtr = shared_from_this();
     AddSignOutCompletedHandler([](XSAPI_XBOX_LIVE_USER *user)
     {
-        // TODO need to be able to pass a context
+        g_sampleInstance->HandleSignout(user);
     });
 
     //ReadLastCsv();
@@ -427,13 +427,13 @@ void Game::Log(std::wstring log)
 }
 
 void Game::HandleSignInResult(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_SIGN_IN_RESULT payload,
     _In_opt_ void* context)
 {
     Game *pThis = reinterpret_cast<Game*>(context);
 
-    if (!result.errorCode == XSAPI_RESULT_OK)
+    if (!result.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
     {
         pThis->Log(L"Failed signing in.");
         return;
@@ -485,11 +485,11 @@ void Game::GetUserProfile()
 
     std::weak_ptr<Game> thisWeakPtr = shared_from_this();
 
-    XSAPIGetUserProfile(m_xboxLiveContext, m_user->xboxUserId, 
-    [](XSAPI_RESULT_INFO result, XSAPI_XBOX_USER_PROFILE profile, void* context)
+    XblGetUserProfile(m_xboxLiveContext, m_user->xboxUserId, 0, 
+    [](XBL_RESULT result, const XBL_XBOX_USER_PROFILE *profile, void* context)
     {
         Game *pThis = reinterpret_cast<Game*>(context);
-        if (result.errorCode == XSAPI_RESULT_OK)
+        if (result.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
         {
             pThis->Log(L"Successfully got profile!");
         }
@@ -497,7 +497,7 @@ void Game::GetUserProfile()
         {
             pThis->Log(L"Failed getting profile.");
         }
-    }, this, 0);
+    }, this);
 }
 
 void Game::HandleSignout(XSAPI_XBOX_LIVE_USER *user)

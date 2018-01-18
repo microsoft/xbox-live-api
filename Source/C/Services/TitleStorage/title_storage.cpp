@@ -21,7 +21,7 @@ HC_RESULT get_quota_execute(
     auto titleStorageService = args->pXboxLiveContext->pImpl->cppObject()->title_storage_service();
 
     auto result = titleStorageService.get_quota(
-        utils_c::to_utf16string(args->serviceConfigurationId),
+        utils::utf16_from_utf8(args->serviceConfigurationId),
         static_cast<title_storage_type>(args->storageType))
         .get();
 
@@ -34,7 +34,7 @@ HC_RESULT get_quota_execute(
     {
         XSAPI_TITLE_STORAGE_QUOTA& quota = args->completionRoutinePayload;
 
-        args->xboxUserId = utils_c::to_utf8string(result.payload().xbox_user_id());
+        args->xboxUserId = utils::utf8_from_utf16(result.payload().xbox_user_id());
         quota.xboxUserId = args->xboxUserId.data();
 
         quota.usedBytes = result.payload().used_bytes();
@@ -44,9 +44,9 @@ HC_RESULT get_quota_execute(
     return HCTaskSetCompleted(taskHandle);
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageGetQuota(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ PCSTR serviceConfigurationId,
     _In_ XSAPI_TITLE_STORAGE_TYPE storageType,
     _In_ XSAPI_GET_QUOTA_COMPLETION_ROUTINE completionRoutine,
@@ -62,7 +62,7 @@ try
     args->serviceConfigurationId = serviceConfigurationId;
     args->storageType = storageType;
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -109,9 +109,9 @@ HC_RESULT get_blob_metadata_execute(
     return HCTaskSetCompleted(taskHandle);
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageGetBlobMetadata(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ PCSTR serviceConfigurationId,
     _In_ XSAPI_TITLE_STORAGE_TYPE storageType,
     _In_opt_ PCSTR blobPath,
@@ -128,22 +128,22 @@ try
 
     auto args = new get_blob_metadata_taskargs();
     args->pXboxLiveContext = pContext;
-    args->serviceConfigurationId = utils_c::to_utf16string(serviceConfigurationId);
+    args->serviceConfigurationId = utils::utf16_from_utf8(serviceConfigurationId);
     args->storageType = storageType;
     args->skipItems = skipItems;
     args->maxItems = maxItems;
 
     if (blobPath != nullptr)
     {
-        args->blobPath = utils_c::to_utf16string(blobPath);
+        args->blobPath = utils::utf16_from_utf8(blobPath);
     }
 
     if (xboxUserId != nullptr)
     {
-        args->xboxUserId = utils_c::to_utf16string(xboxUserId);
+        args->xboxUserId = utils::utf16_from_utf8(xboxUserId);
     }
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -181,7 +181,7 @@ HC_RESULT blob_metadata_result_get_next_execute(
     return HCTaskSetCompleted(taskHandle);
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageBlobMetadataResultGetNext(
     _In_ XSAPI_TITLE_STORAGE_BLOB_METADATA_RESULT metadataResult,
     _In_ uint32_t maxItems,
@@ -198,13 +198,13 @@ try
         std::lock_guard<std::recursive_mutex> lock(singleton->m_titleStorageState->m_lock);
         if (!singleton->m_titleStorageState->m_blobMetadataResultImpl.cppObject().has_next())
         {
-            return XSAPI_RESULT_E_GENERIC_ERROR;
+            return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_GENERIC_ERROR };
         }
     }
     auto args = new blob_metadata_result_get_next_taskargs();
     args->maxItems = maxItems;
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -219,7 +219,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageCreateBlobMetadata(
     _In_ PCSTR serviceConfigurationId,
     _In_ XSAPI_TITLE_STORAGE_TYPE storageType,
@@ -239,25 +239,25 @@ try
     auto pMetadata = new XSAPI_TITLE_STORAGE_BLOB_METADATA();
 
     title_storage_blob_metadata cppMetadata = title_storage_blob_metadata(
-        utils_c::to_utf16string(serviceConfigurationId),
+        utils::utf16_from_utf8(serviceConfigurationId),
         static_cast<title_storage_type>(storageType),
-        utils_c::to_utf16string(blobPath),
+        utils::utf16_from_utf8(blobPath),
         static_cast<title_storage_blob_type>(blobType),
-        xboxUserId == nullptr ? string_t() : utils_c::to_utf16string(xboxUserId),
-        displayName == nullptr ? string_t() : utils_c::to_utf16string(displayName),
-        etag == nullptr ? string_t() : utils_c::to_utf16string(etag),
-        pClientTimeStamp == nullptr ? utility::datetime() : utils_c::datetime_from_time_t(pClientTimeStamp));
+        xboxUserId == nullptr ? string_t() : utils::utf16_from_utf8(xboxUserId),
+        displayName == nullptr ? string_t() : utils::utf16_from_utf8(displayName),
+        etag == nullptr ? string_t() : utils::utf16_from_utf8(etag),
+        pClientTimeStamp == nullptr ? utility::datetime() : utils::datetime_from_time_t(pClientTimeStamp));
 
     pMetadata->pImpl = new XSAPI_TITLE_STORAGE_BLOB_METADATA_IMPL(pMetadata, cppMetadata);
     singleton->m_titleStorageState->m_blobMetadata.insert(pMetadata);
 
     *ppMetadata = pMetadata;
 
-    return XSAPI_RESULT_OK;
+    return XBL_RESULT_OK;
 }
 CATCH_RETURN()
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageReleaseBlobMetadata(
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata
     ) XBL_NOEXCEPT
@@ -271,7 +271,7 @@ try
     {
         delete pMetadata->pImpl;
     }
-    return XSAPI_RESULT_OK;
+    return XBL_RESULT_OK;
 }
 CATCH_RETURN()
 
@@ -290,9 +290,9 @@ HC_RESULT delete_blob_execute(
     return HCTaskSetCompleted(taskHandle);
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageDeleteBlob(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata,
     _In_ bool deleteOnlyIfEtagMatches,
     _In_ XSAPI_DELETE_BLOB_COMPLETION_ROUTINE completionRoutine,
@@ -305,7 +305,7 @@ try
 
     if (pContext == nullptr || pMetadata == nullptr || pMetadata->pImpl == nullptr)
     {
-        return XSAPI_RESULT_E_HC_INVALIDARG;
+        return XBL_RESULT_INVALID_ARG;
     }
 
     auto args = new delete_blob_taskargs();
@@ -313,7 +313,7 @@ try
     args->pMetadata = pMetadata;
     args->deleteOnlyIfEtagMatches = deleteOnlyIfEtagMatches;
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -361,9 +361,9 @@ HC_RESULT download_blob_execute(
     return HCTaskSetCompleted(taskHandle);
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageDownloadBlob(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata,
     _In_ PBYTE blobBuffer,
     _In_ uint32_t cbBlobBuffer,
@@ -380,7 +380,7 @@ try
 
     if (pContext == nullptr || pMetadata == nullptr || pMetadata->pImpl == nullptr)
     {
-        return XSAPI_RESULT_E_HC_INVALIDARG;
+        return XBL_RESULT_INVALID_ARG;
     }
 
     auto args = new download_blob_taskargs();
@@ -389,10 +389,10 @@ try
     args->blobBuffer = blobBuffer;
     args->cbBlobBuffer = cbBlobBuffer;
     args->etagMatchCondition = etagMatchCondition;
-    args->selectQuery = selectQuery == nullptr ? string_t() : utils_c::to_utf16string(selectQuery);
+    args->selectQuery = selectQuery == nullptr ? string_t() : utils::utf16_from_utf8(selectQuery);
     args->preferredDownloadBlockSize = preferredDownloadBlockSize == nullptr ? title_storage_service::DEFAULT_DOWNLOAD_BLOCK_SIZE : *preferredDownloadBlockSize;
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,
@@ -432,9 +432,9 @@ HC_RESULT upload_blob_execute(
     return HCTaskSetCompleted(taskHandle);
 }
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageUploadBlob(
-    _In_ XSAPI_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata,
     _In_ PBYTE blobBuffer,
     _In_ uint32_t cbBlobBuffer,
@@ -450,7 +450,7 @@ try
 
     if (pContext == nullptr || pMetadata == nullptr || pMetadata->pImpl == nullptr)
     {
-        return XSAPI_RESULT_E_HC_INVALIDARG;
+        return XBL_RESULT_INVALID_ARG;
     }
 
     auto args = new upload_blob_taskargs();
@@ -460,7 +460,7 @@ try
     args->etagMatchCondition = etagMatchCondition;
     args->preferredUploadBlockSize = preferredUploadBlockSize == nullptr ? title_storage_service::DEFAULT_UPLOAD_BLOCK_SIZE : *preferredUploadBlockSize;
 
-    return utils_c::xsapi_result_from_hc_result(
+    return utils::create_xbl_result(
         HCTaskCreate(
             HC_SUBSYSTEM_ID_XSAPI,
             taskGroupId,

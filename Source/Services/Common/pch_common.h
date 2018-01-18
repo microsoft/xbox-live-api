@@ -31,6 +31,9 @@
 // STL includes
 #include <string>
 #include <map>
+#include <unordered_map>
+#include <deque>
+#include <queue>
 #include <vector>
 #include <memory>
 #include <stdint.h>
@@ -40,9 +43,17 @@
 #include <cstdint>
 
 #include "xsapi/types.h"
+#include "xsapi/mem.h"
 #include "httpClient/types.h"
 #include "httpClient/httpClient.h"
 #include "httpClient/task.h"
+
+#if XSAPI_CPP && UWP_API // TODO eventually extend where these are included
+#include "xsapi-c/types_c.h"
+#include "xsapi-c/errors_c.h"
+#include "xsapi-c/xbox_live_global_c.h"
+#include "utils_c.h"
+#endif
 
 #include <cpprest/http_client.h>
 #include <cpprest/filestream.h>
@@ -53,13 +64,6 @@
 #include "xsapi/errors.h"
 #include "utils.h"
 #include "Logger/Log.h"
-
-#if XSAPI_CPP && UWP_API // TODO eventually extend where these are included
-#include "xsapi-c/types_c.h"
-#include "xsapi-c/errors_c.h"
-#include "xsapi-c/xbox_live_global_c.h"
-#include "utils_c.h"
-#endif
 
 #include "shared_macros.h"
 #if UWP_API

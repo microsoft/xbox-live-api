@@ -19,7 +19,7 @@ XSAPI_LEADERBOARD_COLUMN_IMPL::XSAPI_LEADERBOARD_COLUMN_IMPL(
     _In_ XSAPI_LEADERBOARD_COLUMN* cLeaderboardColumn
 ) : m_cLeaderboardColumn(cLeaderboardColumn), m_cppLeaderboardColumn(cppLeaderboardColumn)
 {
-    m_statName = utils_c::to_utf8string(m_cppLeaderboardColumn.stat_name());
+    m_statName = utils::utf8_from_utf16(m_cppLeaderboardColumn.stat_name());
     m_cLeaderboardColumn->statName = m_statName.c_str();
 
     m_cLeaderboardColumn->statType = static_cast<XSAPI_LEADERBOARD_STAT_TYPE>(m_cppLeaderboardColumn.stat_type());
@@ -35,10 +35,10 @@ XSAPI_LEADERBOARD_ROW_IMPL::XSAPI_LEADERBOARD_ROW_IMPL(
     _In_ XSAPI_LEADERBOARD_ROW* cLeaderboardRow
 ) : m_cLeaderboardRow(cLeaderboardRow), m_cppLeaderboardRow(cppLeaderboardRow)
 {
-    m_gamertag = utils_c::to_utf8string(m_cppLeaderboardRow.gamertag());
+    m_gamertag = utils::utf8_from_utf16(m_cppLeaderboardRow.gamertag());
     m_cLeaderboardRow->gamertag = m_gamertag.c_str();
 
-    m_xboxUserId = utils_c::to_utf8string(m_cppLeaderboardRow.xbox_user_id());
+    m_xboxUserId = utils::utf8_from_utf16(m_cppLeaderboardRow.xbox_user_id());
     m_cLeaderboardRow->xboxUserId = m_xboxUserId.c_str();
 
     m_cLeaderboardRow->percentile = m_cppLeaderboardRow.percentile();
@@ -47,7 +47,7 @@ XSAPI_LEADERBOARD_ROW_IMPL::XSAPI_LEADERBOARD_ROW_IMPL(
 
     for (size_t i = 0; i < m_cppLeaderboardRow.column_values().size(); i++)
     {
-        m_columnValuesStrs.push_back(utils_c::to_utf8string(m_cppLeaderboardRow.column_values()[i]));
+        m_columnValuesStrs.push_back(utils::utf8_from_utf16(m_cppLeaderboardRow.column_values()[i]));
         m_columnValues.push_back(m_columnValuesStrs[i].c_str());
     }
     m_cLeaderboardRow->columnValues = m_columnValues.data();
@@ -82,10 +82,10 @@ void XSAPI_LEADERBOARD_QUERY_IMPL::Refresh()
 
     m_cQuery->order = static_cast<XSAPI_SORT_ORDER>(m_cppQuery.order());
 
-    m_statName = utils_c::to_utf8string(m_cppQuery.stat_name());
+    m_statName = utils::utf8_from_utf16(m_cppQuery.stat_name());
     m_cQuery->statName = m_statName.c_str();
 
-    m_socialGroup = utils_c::to_utf8string(m_cppQuery.social_group());
+    m_socialGroup = utils::utf8_from_utf16(m_cppQuery.social_group());
     m_cQuery->socialGroup = m_socialGroup.c_str();
 
     m_cQuery->hasNext = m_cppQuery.has_next();

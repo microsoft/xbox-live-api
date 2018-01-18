@@ -9,30 +9,30 @@
 
 using namespace xbox::services;
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveContextCreate(
     _In_ CONST XSAPI_XBOX_LIVE_USER *user,
-    _Out_ XSAPI_XBOX_LIVE_CONTEXT** ppContext
+    _Out_ XBL_XBOX_LIVE_CONTEXT** ppContext
     )
 {
     if (user == nullptr || ppContext == nullptr)
     {
-        return XSAPI_RESULT_E_HC_INVALIDARG;
+        return XBL_RESULT_INVALID_ARG;
     }
 
     verify_global_init();
 
-    auto context = new XSAPI_XBOX_LIVE_CONTEXT();
+    auto context = new XBL_XBOX_LIVE_CONTEXT();
     context->pImpl = new XSAPI_XBOX_LIVE_CONTEXT_IMPL(user, context);
 
     *ppContext = context;
 
-    return XSAPI_RESULT_OK;
+    return XBL_RESULT_OK;
 }
 
 XBL_API void XBL_CALLING_CONV
 XboxLiveContextDelete(
-    XSAPI_XBOX_LIVE_CONTEXT *context
+    XBL_XBOX_LIVE_CONTEXT *context
     )
 {
     delete context->pImpl;

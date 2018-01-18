@@ -73,6 +73,18 @@ xsapi_singleton::xsapi_singleton()
 #endif
 }
 
+XBL_MEM_ALLOC_FUNC g_pMemAllocHook = [](size_t size, XBL_MEMORY_TYPE memoryType)
+{
+    UNREFERENCED_PARAMETER(memoryType);
+    return malloc(size);
+};
+
+XBL_MEM_FREE_FUNC g_pMemFreeHook = [](void *pointer, XBL_MEMORY_TYPE memoryType)
+{
+    UNREFERENCED_PARAMETER(memoryType);
+    free(pointer);
+};
+
 void xsapi_singleton::init()
 {
 #if UWP_API
@@ -80,11 +92,12 @@ void xsapi_singleton::init()
     m_userEventBind = std::make_shared<Microsoft::Xbox::Services::System::UserEventBind>();
 #endif
 #endif
-    // TODO this shouldn't happen here. Should be in some other internal call so that the threadpool
-    // is only started for "legacy" mode.
-#if UWP_API
     HCGlobalInitialize();
     HCSettingsSetLogLevel(HC_LOG_LEVEL::LOG_VERBOSE);
+
+#if UWP_API
+    // TODO this shouldn't happen here. Should be in some other internal call so that the threadpool
+    // is only started for "legacy" mode.
     m_threadpool = std::make_shared<xbl_thread_pool>();
     m_threadpool->start_threads();
 #endif
@@ -284,6 +297,12 @@ xbox_live_result<string_t> utils::json_string_extractor(_In_ const web::json::va
 web::json::value utils::json_string_serializer(_In_ const string_t& value)
 {
     return web::json::value::string(value);
+}
+
+web::json::value utils::json_internal_string_serializer(_In_ const xsapi_internal_string& value)
+{
+    auto v = utils::external_string_from_internal_string(value);
+    return web::json::value::string(v);
 }
 
 xbox_live_result<int>
@@ -1486,6 +1505,28 @@ string_t utils::create_xboxlive_endpoint(
     return source.str();
 }
 
+xsapi_internal_string utils::create_xboxlive_endpoint(
+    _In_ const xsapi_internal_string& subpath,
+    _In_ const std::shared_ptr<xbox_live_app_config>& appConfig,
+    _In_ const xsapi_internal_string& protocol
+    )
+{
+    xsapi_internal_stringstream source;
+    source << protocol; // eg. https or wss
+    source << "://";
+    source << subpath; // eg. "achievements"
+#if !TV_API
+    if (appConfig)
+    {
+        source << internal_string_from_external_string(appConfig->environment()); // eg. "" or ".dnet"
+    }
+#else
+    UNREFERENCED_PARAMETER(appConfig);
+#endif
+    source << ".xboxlive.com";
+    return source.str();
+}
+
 string_t
 utils::replace_sub_string(
     _In_ const string_t& source,
@@ -1715,10 +1756,150 @@ utils::read_test_response_file(_In_ const string_t& filePath)
 }
 #endif
 
+std::vector<string_t> utils::string_array_to_string_vector(
+    PCSTR *stringArray,
+    size_t stringArrayCount
+    )
+{
+    std::vector<utility::string_t> stringVector;
+    for (size_t i = 0; i < stringArrayCount; ++i)
+    {
+#if _WIN32
+        stringVector.push_back(utf16_from_utf8(stringArray[i]));
+#else
+        stringVector.push_back(stringArray[i]);
+#endif
+    }
+    return stringVector;
+}
+
+xsapi_internal_vector<xsapi_internal_string> utils::string_array_to_internal_string_vector(
+    PCSTR *stringArray,
+    size_t stringArrayCount
+    )
+{
+    xsapi_internal_vector<xsapi_internal_string> stringVector;
+    stringVector.reserve(stringArrayCount);
+    for (size_t i = 0; i < stringArrayCount; ++i)
+    {
+        stringVector.push_back(stringArray[i]);
+    }
+    return stringVector;
+}
+
+PCSTR utils::alloc_string(const string_t& str)
+{
+#if _WIN32
+    // TODO add helper and remove extra copy here
+    std::string utf8 = utf8_from_utf16(str);
+#else
+    std::string utf8 = std::move(str);
+#endif
+    char *out = static_cast<char*>(system::xsapi_memory::mem_alloc(utf8.size() + 1));
+    strcpy_s(out, utf8.size() + 1, &utf8[0]);
+    return out;
+}
+
+void utils::free_string(PCSTR str)
+{
+    system::xsapi_memory::mem_free((void*)str);
+}
+
+XBL_RESULT utils::create_xbl_result(std::error_code errc)
+{
+    XBL_RESULT result
+    {
+        XBL_ERROR_CONDITION_NO_ERROR, 
+        static_cast<XBL_ERROR_CODE>(errc.value())
+    };
+
+    if (errc == xbox::services::xbox_live_error_condition::no_error)
+    {
+        result.errorCondition = XBL_ERROR_CONDITION_NO_ERROR;
+    }
+    else if (errc == xbox::services::xbox_live_error_condition::generic_error)
+    {
+        result.errorCondition = XBL_ERROR_CONDITION_GENERIC_ERROR;
+    }
+    else if (errc == xbox::services::xbox_live_error_condition::generic_out_of_range)
+    {
+        result.errorCondition = XBL_ERROR_CONDITION_GENERIC_OUT_OF_RANGE;
+    }
+    else if (errc == xbox::services::xbox_live_error_condition::auth)
+    {
+        result.errorCondition = XBL_ERROR_CONDITION_AUTH;
+    }
+    else if (errc == xbox::services::xbox_live_error_condition::network)
+    {
+        result.errorCondition = XBL_ERROR_CONDITION_NETWORK;
+    }
+    else if (errc == xbox::services::xbox_live_error_condition::http)
+    {
+        result.errorCondition = XBL_ERROR_CONDITION_HTTP;
+    }
+    else if (errc == xbox::services::xbox_live_error_condition::http_404_not_found)
+    {
+        result.errorCondition = XBL_ERROR_CONDITION_HTTP_404_NOT_FOUND;
+    }
+    else if (errc == xbox::services::xbox_live_error_condition::http_412_precondition_failed)
+    {
+        result.errorCondition = XBL_ERROR_CONDITION_HTTP_412_PRECONDITION_FAILED;
+    }
+    else if (errc == xbox::services::xbox_live_error_condition::http_429_too_many_requests)
+    {
+        result.errorCondition = XBL_ERROR_CONDITION_HTTP_429_TOO_MANY_REQUESTS;
+    }
+    else if (errc == xbox::services::xbox_live_error_condition::http_service_timeout)
+    {
+        result.errorCondition = XBL_ERROR_CONDITION_HTTP_SERVICE_TIMEOUT;
+    }
+    else if (errc == xbox::services::xbox_live_error_condition::rta)
+    {
+        result.errorCondition = XBL_ERROR_CONDITION_RTA;
+    }
+    else
+    {
+        XSAPI_ASSERT(L"Unknown error codition!" && false);
+    }
+    return result;
+}
+
+XBL_RESULT utils::create_xbl_result(HC_RESULT hcResult)
+{
+    if (hcResult == HC_OK)
+    {
+        return XBL_RESULT_OK;
+    }
+    return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, static_cast<XBL_ERROR_CODE>(hcResult) };
+}
+
+XBL_RESULT utils::std_bad_alloc_to_xbl_result(
+    std::bad_alloc const& e
+    )
+{
+    LOG_ERROR("std::bad_alloc reached api boundary!");
+    return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_BAD_ALLOC };
+}
+
+XBL_RESULT utils::std_exception_to_xbl_result(
+    std::exception const& e
+    )
+{
+    LOG_ERROR("std::exception reached api boundary");
+    return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_GENERIC_ERROR };
+}
+
+XBL_RESULT utils::unknown_exception_to_xbl_result()
+{
+    LOG_ERROR("[%d] unknown exception reached api boundary\n    %s:%u",
+        XBL_ERROR_CODE_GENERIC_ERROR, file, line);
+    return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_GENERIC_ERROR };
+}
+
 std::mutex async_helpers::m_contextsLock;
-std::unordered_map<void *, std::shared_ptr<void>> async_helpers::m_sharedPtrs;
+xsapi_internal_unordered_map<void *, std::shared_ptr<void>> async_helpers::m_sharedPtrs;
 
 uintptr_t async_helpers::m_clientCallbackInfoIndexer;
-std::unordered_map<void *, client_callback_info> async_helpers::m_clientCallbackInfoMap;
+xsapi_internal_unordered_map<void *, client_callback_info> async_helpers::m_clientCallbackInfoMap;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

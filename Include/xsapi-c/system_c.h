@@ -64,14 +64,14 @@ typedef struct XSAPI_TOKEN_AND_SIGNATURE_RESULT
     PCSTR webAccountId;
 } XSAPI_TOKEN_AND_SIGNATURE_RESULT;
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserCreate(
     _Out_ XSAPI_XBOX_LIVE_USER** ppUser
     ) XBL_NOEXCEPT;
 
 #if UWP_API
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserCreateFromSystemUser(
     _In_ Windows::System::User^ creationContext,
     _Out_ XSAPI_XBOX_LIVE_USER** ppUser
@@ -85,12 +85,12 @@ XboxLiveUserDelete(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_SIGN_IN_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_SIGN_IN_RESULT payload,
     _In_opt_ void* context
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserSignIn(
     _Inout_ XSAPI_XBOX_LIVE_USER* pUser,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
@@ -98,7 +98,7 @@ XboxLiveUserSignIn(
     _In_ uint64_t taskGroupId
     ) XBL_NOEXCEPT;
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserSignInSilently(
     _Inout_ XSAPI_XBOX_LIVE_USER* pUser,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
@@ -108,7 +108,7 @@ XboxLiveUserSignInSilently(
 
 #if WINAPI_FAMILY && WINAPI_FAMILY==WINAPI_FAMILY_APP
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserSignInWithCoreDispatcher(
     _Inout_ XSAPI_XBOX_LIVE_USER* pUser,
     _In_ Platform::Object^ coreDispatcher,
@@ -117,7 +117,7 @@ XboxLiveUserSignInWithCoreDispatcher(
     _In_ uint64_t taskGroupId
     ) XBL_NOEXCEPT;
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserSignInSilentlyWithCoreDispatcher(
     _Inout_ XSAPI_XBOX_LIVE_USER* pUser,
     _In_ Platform::Object^ coreDispatcher,
@@ -129,12 +129,12 @@ XboxLiveUserSignInSilentlyWithCoreDispatcher(
 #endif
 
 typedef void(*XSAPI_GET_TOKEN_AND_SIGNATURE_COMPLETION_ROUTINE)(
-    _In_ XSAPI_RESULT_INFO result,
+    _In_ XBL_RESULT result,
     _In_ XSAPI_TOKEN_AND_SIGNATURE_RESULT payload,
     _In_opt_ void* context
     );
 
-XBL_API XSAPI_RESULT XBL_CALLING_CONV
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserGetTokenAndSignature(
     _In_ XSAPI_XBOX_LIVE_USER* pUser,
     _In_ PCSTR httpMethod,

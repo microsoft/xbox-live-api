@@ -4,6 +4,7 @@
 #include "pch.h"
 #include "privacy_permission_check_result_impl.h"
 
+using namespace xbox::services;
 using namespace xbox::services::privacy;
 
 XSAPI_PRIVACY_PERMISSION_CHECK_RESULT_IMPL::XSAPI_PRIVACY_PERMISSION_CHECK_RESULT_IMPL(
@@ -19,7 +20,7 @@ void XSAPI_PRIVACY_PERMISSION_CHECK_RESULT_IMPL::update(
     XSAPI_PRIVACY_PERMISSION_CHECK_RESULT* cObj
     )
 {
-    m_permissionRequested = utils_c::to_utf8string(cppObj.permission_requested());
+    m_permissionRequested = utils::utf8_from_utf16(cppObj.permission_requested());
 
     auto& denyReasons = cppObj.deny_reasons();
     m_items = std::vector<XSAPI_PRIVACY_PERMISSION_DENY_REASON>(denyReasons.size());
