@@ -18,41 +18,28 @@ public:
         _In_ std::shared_ptr<xbox_live_app_config> appConfig
         );
 
-    typedef void(*get_user_profile_completion_routine)(
-        _In_ xbox::services::xbox_live_result<xbox_user_profile> result,
-        _In_opt_ void* context
-        );
-
     _XSAPIIMP xbox::services::xbox_live_result<void> get_user_profile(
         _In_ xsapi_internal_string xboxUserId,
         _In_ uint64_t taskGroupId,
-        _In_ get_user_profile_completion_routine completionRoutine,
-        _In_opt_ void* completionRoutineContext
-        );
-
-    typedef void(*get_user_profiles_completion_routine)(
-        _In_ xbox::services::xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result,
-        _In_opt_ void* context
+        _In_ xsapi_callback<xbox::services::xbox_live_result<xbox_user_profile>> callback
         );
 
     _XSAPIIMP xbox::services::xbox_live_result<void> get_user_profiles(
         _In_ const xsapi_internal_vector<xsapi_internal_string>& xboxUserIds,
         _In_ uint64_t taskGroupId,
-        _In_ get_user_profiles_completion_routine completionRoutine,
-        _In_opt_ void* completionRoutineContext
+        _In_ xsapi_callback<xbox::services::xbox_live_result<xsapi_internal_vector<xbox_user_profile>>> callback
         );
 
     _XSAPIIMP xbox::services::xbox_live_result<void> get_user_profiles_for_social_group(
         _In_ const xsapi_internal_string& socialGroup,
         _In_ uint64_t taskGroupId,
-        _In_ get_user_profiles_completion_routine completionRoutine,
-        _In_opt_ void* completionRoutineContext
+        _In_ xsapi_callback<xbox::services::xbox_live_result<xsapi_internal_vector<xbox_user_profile>>> callback
         );
 
 private:
     static void handle_get_user_profiles_response(
-        std::shared_ptr<http_call_response> response,
-        void *context
+        _In_ std::shared_ptr<http_call_response> response,
+        _In_ xsapi_callback<xbox::services::xbox_live_result<xsapi_internal_vector<xbox_user_profile>>> callback
         );
 
     static const xsapi_internal_string settings_query();

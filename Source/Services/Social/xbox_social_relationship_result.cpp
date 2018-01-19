@@ -60,7 +60,9 @@ xbox_social_relationship_result::get_next(
     _In_ uint32_t maxItems
     )
 {   
-    return m_socialImpl->get_social_relationships(m_filter, m_continuationSkip, maxItems);
+    // TODO 
+    return pplx::task_from_result<xbox_live_result<xbox_social_relationship_result>>(xbox_live_result<xbox_social_relationship_result>());
+    //return m_socialImpl->get_social_relationships(m_filter, m_continuationSkip, maxItems);
 } 
 
 xbox_live_result<xbox_social_relationship_result>

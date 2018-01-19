@@ -42,9 +42,8 @@ void user_context::get_auth_result(
     _In_ const string_t& headers,
     _In_ const string_t& requestBodyString,
     _In_ bool allUsersAuthRequired,
-    _In_ get_auth_result_completion_routine completionRoutine,
-    _In_opt_ void *completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ uint64_t taskGroupId,
+    _In_ xsapi_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
     )
 {
     UNREFERENCED_PARAMETER(allUsersAuthRequired);
@@ -58,9 +57,8 @@ void user_context::get_auth_result(
         headers,
         utf8Vec,
         allUsersAuthRequired,
-        completionRoutine,
-        completionRoutineContext,
-        taskGroupId
+        taskGroupId,
+        callback
     );
 }
 
@@ -70,9 +68,8 @@ void user_context::get_auth_result(
     _In_ const string_t& headers,
     _In_ const std::vector<unsigned char>& requestBodyVector,
     _In_ bool allUsersAuthRequired,
-    _In_ get_auth_result_completion_routine completionRoutine,
-    _In_opt_ void *completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ uint64_t taskGroupId,
+    _In_ xsapi_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
     )
 {
     UNREFERENCED_PARAMETER(allUsersAuthRequired);
@@ -85,30 +82,20 @@ void user_context::get_auth_result(
         {
             const auto& tokenResult = xblResult.payload();
             user_context_auth_result userContextResult(tokenResult.token(), tokenResult.signature());
-            completionRoutine(
-                xbox_live_result<user_context_auth_result>(userContextResult, xblResult.err(), xblResult.err_message()),
-                completionRoutineContext);
+            callback(xbox_live_result<user_context_auth_result>(userContextResult, xblResult.err(), xblResult.err_message()));
         });
         return;
     }
 #endif
     if (m_user != nullptr)
     {
-        void *clientCallbackInfo = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
-
-        m_user->_User_impl()->get_token_and_signature(httpMethod, url, headers, requestBodyVector,
-            [](xbox_live_result<token_and_signature_result> result, void *callbackContext)
+        m_user->_User_impl()->get_token_and_signature(httpMethod, url, headers, requestBodyVector, taskGroupId,
+            [callback](xbox_live_result<token_and_signature_result> result)
         {
-            auto callbackInfo = async_helpers::remove_client_callback_info(callbackContext);
-
             const auto& tokenResult = result.payload();
             user_context_auth_result userContextResult(tokenResult.token(), tokenResult.signature());
-
-            ((get_auth_result_completion_routine)(callbackInfo.completionFunction))(
-                xbox_live_result<user_context_auth_result>(userContextResult, result.err(), result.err_message()),
-                callbackInfo.clientContext);
-
-        }, clientCallbackInfo, taskGroupId);
+            callback(xbox_live_result<user_context_auth_result>(userContextResult, result.err(), result.err_message()));
+        });
     }
 }
 

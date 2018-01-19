@@ -13,7 +13,6 @@
 #include "http_call_response.h"
 #include "xsapi/mem.h"
 #include "xsapi/system.h"
-//#include "xsapi-c/xbox_live_global_c.h"
 
 // Forward decls
 class xbl_thread_pool;
@@ -1085,21 +1084,6 @@ private:
 
 static const uint64_t XSAPI_DEFAULT_TASKGROUP = 99;
 
-struct client_callback_info
-{
-    client_callback_info(
-        void *_completionFunction,
-        void *_clientContext
-        ) :
-        completionFunction(_completionFunction),
-        clientContext(_clientContext)
-    {
-    }
-
-    void *completionFunction;
-    void *clientContext;
-};
-
 class async_helpers
 {
 public:
@@ -1132,41 +1116,88 @@ public:
         }
     }
 
-    static void *store_client_callback_info(void *clientCallbackFunction, void *clientContext)
-    {
-        std::lock_guard<std::mutex> lock(m_contextsLock);
-        void *index = (void*)m_clientCallbackInfoIndexer++;
-        m_clientCallbackInfoMap.insert(std::make_pair(index, client_callback_info(clientCallbackFunction, clientContext)));
-        return index;
-    }
-
-    static client_callback_info remove_client_callback_info(void * context)
-    {
-        std::lock_guard<std::mutex> lock(m_contextsLock);
-
-        auto iter = m_clientCallbackInfoMap.find(context);
-        if (iter != m_clientCallbackInfoMap.end())
-        {
-            auto callbackInfo = iter->second;
-            m_clientCallbackInfoMap.erase(iter);
-            return callbackInfo;
-        }
-        else
-        {
-            XSAPI_ASSERT(false && "Context not found!");
-            return client_callback_info(nullptr, nullptr);
-        }
-    }
-
 private:
     static std::mutex m_contextsLock;
     static xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_sharedPtrs;
-    static uintptr_t m_clientCallbackInfoIndexer;
-    static xsapi_internal_unordered_map<void *, client_callback_info> m_clientCallbackInfoMap;
 
     async_helpers();
     async_helpers(const async_helpers&);
     async_helpers& operator=(const async_helpers&);
+};
+
+template<typename... Args>
+class xsapi_callback
+{
+    typedef void(*invoke_functor_t)(void *functor, Args&&...);
+    typedef void *(*copy_functor_t)(void *src);
+    typedef void(*delete_functor_t)(void *functor);
+
+    template <typename Functor>
+    static void invoke_functor(Functor *functor, Args&&... args)
+    {
+        (*functor)(std::forward<Args>(args)...);
+    }
+
+    template <typename Functor>
+    static void *copy_functor(Functor *src)
+    {
+        void *dest = xbox::services::system::xsapi_memory::mem_alloc(sizeof(src));
+        auto out = new (dest) Functor(*src);
+        return static_cast<void*>(out);
+    }
+
+    template <typename Functor>
+    static void delete_functor(Functor *functor)
+    {
+        functor->~Functor();
+    }
+
+    invoke_functor_t m_invokeFunctor;
+    copy_functor_t m_copyFunctor;
+    delete_functor_t m_deleteFunctor;
+
+    void *m_functor;
+public:
+    xsapi_callback() :
+        m_invokeFunctor(nullptr),
+        m_copyFunctor(nullptr),
+        m_deleteFunctor(nullptr),
+        m_functor(nullptr)
+    {
+    }
+
+    template<typename Functor>
+    xsapi_callback(Functor functor) :
+        m_invokeFunctor(reinterpret_cast<invoke_functor_t>(invoke_functor<Functor>)),
+        m_copyFunctor(reinterpret_cast<copy_functor_t>(copy_functor<Functor>)),
+        m_deleteFunctor(reinterpret_cast<delete_functor_t>(delete_functor<Functor>))
+    {
+        m_functor = m_copyFunctor(&functor);
+    }
+
+    xsapi_callback(const xsapi_callback& rhs) :
+        m_invokeFunctor(rhs.m_invokeFunctor),
+        m_copyFunctor(rhs.m_copyFunctor),
+        m_deleteFunctor(rhs.m_deleteFunctor)
+    {
+        if (m_invokeFunctor && rhs.m_functor)
+        {
+            m_functor = m_copyFunctor(rhs.m_functor);
+        }
+    }
+
+    ~xsapi_callback()
+    {
+        if (m_functor != nullptr)
+        {
+            m_deleteFunctor(m_functor);
+        }
+    }
+
+    void operator()(Args... args) const
+    {
+        m_invokeFunctor(m_functor, std::forward<Args>(args)...);
+    }
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

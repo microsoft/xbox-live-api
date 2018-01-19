@@ -24,25 +24,14 @@ profile_service::get_user_profile(
     _In_ string_t xboxUserId
     )
 {
-    // TODO Maybe create some global store of these
-    auto context = new task_completion_event<xbox_live_result<xbox_user_profile>>();
+    task_completion_event<xbox_live_result<xbox_user_profile>> tce;
 
     auto result = m_serviceImpl->get_user_profile(
         utils::internal_string_from_external_string(xboxUserId),
         XSAPI_DEFAULT_TASKGROUP,
-        [](xbox_live_result<xbox_user_profile> result, void* context) 
-    {
-        auto tce = static_cast<task_completion_event<xbox_live_result<xbox_user_profile>>*>(context);
-        tce->set(result);
-        delete context;
-    }, context);
-
-    if (result.err())
-    {
-        delete context;
-        return pplx::task_from_result(xbox_live_result<xbox_user_profile>(result.err(), result.err_message()));
-    }
-    return pplx::task<xbox_live_result<xbox_user_profile>>(*context);
+        [tce](xbox_live_result<xbox_user_profile> result) { tce.set(result); }
+    );
+    return pplx::task<xbox_live_result<xbox_user_profile>>(tce);
 }
 
 pplx::task<xbox_live_result<std::vector<xbox_user_profile>>>
@@ -50,23 +39,16 @@ profile_service::get_user_profiles(
     _In_ const std::vector< string_t >& xboxUserIds
     )
 {
-    auto context = new task_completion_event<xbox_live_result<std::vector<xbox_user_profile>>>();
+    task_completion_event<xbox_live_result<std::vector<xbox_user_profile>>> tce;
     auto result = m_serviceImpl->get_user_profiles(
         utils::internal_string_vector_from_std_string_vector(xboxUserIds), 
         XSAPI_DEFAULT_TASKGROUP,
-        [](xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result, void* context)
+        [tce](xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result) 
     {
-        auto tce = static_cast<task_completion_event<xbox_live_result<std::vector<xbox_user_profile>>>*>(context);
-        tce->set(xbox_live_result<std::vector<xbox_user_profile>>(utils::std_vector_from_internal_vector(result.payload())));
-        delete context;
-    }, context);
+        tce.set(xbox_live_result<std::vector<xbox_user_profile>>(utils::std_vector_from_internal_vector(result.payload())));
+    });
 
-    if (result.err())
-    {
-        delete context;
-        return pplx::task_from_result(xbox_live_result<std::vector<xbox_user_profile>>(result.err(), result.err_message()));
-    }
-    return pplx::task<xbox_live_result<std::vector<xbox_user_profile>>>(*context);
+    return pplx::task<xbox_live_result<std::vector<xbox_user_profile>>>(tce);
 }
 
 pplx::task<xbox_live_result<std::vector<xbox_user_profile>>> 
@@ -74,23 +56,16 @@ profile_service::get_user_profiles_for_social_group(
     _In_ const string_t& socialGroup
     )
 {
-    auto context = new task_completion_event<xbox_live_result<std::vector<xbox_user_profile>>>();
+    task_completion_event<xbox_live_result<std::vector<xbox_user_profile>>> tce;
     auto result = m_serviceImpl->get_user_profiles_for_social_group(
         utils::internal_string_from_external_string(socialGroup), 
         XSAPI_DEFAULT_TASKGROUP,
-        [](xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result, void* context)
+        [tce](xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result)
     {
-        auto tce = static_cast<task_completion_event<xbox_live_result<std::vector<xbox_user_profile>>>*>(context);
-        tce->set(xbox_live_result<std::vector<xbox_user_profile>>(utils::std_vector_from_internal_vector(result.payload())));
-        delete context;
-    }, context);
+        tce.set(xbox_live_result<std::vector<xbox_user_profile>>(utils::std_vector_from_internal_vector(result.payload())));
+    });
 
-    if (result.err())
-    {
-        delete context;
-        return pplx::task_from_result(xbox_live_result<std::vector<xbox_user_profile>>(result.err(), result.err_message()));
-    }
-    return pplx::task<xbox_live_result<std::vector<xbox_user_profile>>>(*context);
+    return pplx::task<xbox_live_result<std::vector<xbox_user_profile>>>(tce);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

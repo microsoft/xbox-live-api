@@ -53,11 +53,14 @@ social_service::get_social_relationships(
     _In_ unsigned int maxItems
     )
 {
-    return m_socialServiceImpl->get_social_relationships(
-        filter,
-        startIndex,
-        maxItems
-        );
+    // TODO
+
+    return pplx::task_from_result<xbox_live_result<xbox_social_relationship_result>>(xbox_live_result<xbox_social_relationship_result>());
+    //return m_socialServiceImpl->get_social_relationships(
+    //    filter,
+    //    startIndex,
+    //    maxItems
+    //    );
 }
 
 pplx::task<xbox_live_result<xbox_social_relationship_result>>
@@ -68,12 +71,15 @@ social_service::get_social_relationships(
     _In_ unsigned int maxItems
     )
 {
-    return m_socialServiceImpl->get_social_relationships(
+    // TODO
+    return pplx::task_from_result<xbox_live_result<xbox_social_relationship_result>>(xbox_live_result<xbox_social_relationship_result>());
+    
+    /*return m_socialServiceImpl->get_social_relationships(
         xboxUserId,
         filter,
         startIndex,
         maxItems
-        );
+        );*/
 }
 
 xbox_live_result<std::shared_ptr<social_relationship_change_subscription>>
@@ -82,7 +88,7 @@ social_service::subscribe_to_social_relationship_change(
     )
 {
     return m_socialServiceImpl->subscribe_to_social_relationship_change(
-        xboxUserId
+        utils::internal_string_from_external_string(xboxUserId)
         );
 }
 

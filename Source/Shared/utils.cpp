@@ -1891,15 +1891,11 @@ XBL_RESULT utils::std_exception_to_xbl_result(
 
 XBL_RESULT utils::unknown_exception_to_xbl_result()
 {
-    LOG_ERROR("[%d] unknown exception reached api boundary\n    %s:%u",
-        XBL_ERROR_CODE_GENERIC_ERROR, file, line);
+    LOG_ERROR("unknown exception reached api boundary");
     return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_GENERIC_ERROR };
 }
 
 std::mutex async_helpers::m_contextsLock;
 xsapi_internal_unordered_map<void *, std::shared_ptr<void>> async_helpers::m_sharedPtrs;
-
-uintptr_t async_helpers::m_clientCallbackInfoIndexer;
-xsapi_internal_unordered_map<void *, client_callback_info> async_helpers::m_clientCallbackInfoMap;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

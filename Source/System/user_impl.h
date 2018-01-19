@@ -80,19 +80,12 @@ public:
         _In_ const std::vector<unsigned char>& requestBodyArray
         );
 
-    // TODO remove ppl versions of these eventually
-    typedef void(*get_token_and_signature_completion_routine)(
-        _In_ xbox::services::xbox_live_result<token_and_signature_result> result,
-        _In_opt_ void *context
-        );
-
     void get_token_and_signature(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
         _In_ const string_t& headers,
-        _In_ get_token_and_signature_completion_routine completionRoutine,
-        _In_opt_ void *completionRoutineContext,
-        _In_ uint64_t taskGroupId
+        _In_ uint64_t taskGroupId,
+        _In_ xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
         );
 
     void get_token_and_signature(
@@ -100,9 +93,8 @@ public:
         _In_ const string_t& url,
         _In_ const string_t& headers,
         _In_ const string_t& requestBodyString,
-        _In_ get_token_and_signature_completion_routine completionRoutine,
-        _In_opt_ void *completionRoutineContext,
-        _In_ uint64_t taskGroupId
+        _In_ uint64_t taskGroupId,
+        _In_ xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
         );
 
     void get_token_and_signature(
@@ -110,9 +102,8 @@ public:
         _In_ const string_t& url,
         _In_ const string_t& headers,
         _In_ const std::vector<unsigned char>& requestBodyArray,
-        _In_ get_token_and_signature_completion_routine completionRoutine,
-        _In_opt_ void *completionRoutineContext,
-        _In_ uint64_t taskGroupId
+        _In_ uint64_t taskGroupId,
+        _In_ xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
         );
 
     bool is_signed_in() const;
@@ -140,9 +131,8 @@ public:
         _In_ const std::vector<unsigned char>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh,
-        _In_ get_token_and_signature_completion_routine completionRoutine,
-        _In_opt_ void *completionRoutineContext,
-        _In_ uint64_t taskGroupId
+        _In_ uint64_t taskGroupId,
+        _In_ xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
         ) = 0;
 
     static function_context add_sign_in_completed_handler(_In_ std::function<void(const string_t&)> handler);
@@ -231,9 +221,8 @@ public:
         _In_ const std::vector<unsigned char>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh,
-        _In_ get_token_and_signature_completion_routine completionRoutine,
-        _In_opt_ void *completionRoutineContext,
-        _In_ uint64_t taskGroupId
+        _In_ uint64_t taskGroupId,
+        _In_ xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
         ) override;
 
 private:
@@ -314,7 +303,8 @@ struct get_token_and_signature_context
         _In_ const string_t& _headers,
         _In_ const std::vector<unsigned char>& _bytes,
         _In_ bool _promptForCredentialsIfNeeded,
-        _In_ bool _forceRefresh
+        _In_ bool _forceRefresh,
+        _In_ xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> _callback
         ) :
         userImpl(_userImpl),
         httpMethod(_httpMethod),
@@ -322,20 +312,20 @@ struct get_token_and_signature_context
         headers(_headers),
         bytes(_bytes),
         promptForCredentialsIfNeeded(_promptForCredentialsIfNeeded),
-        forceRefresh(_forceRefresh)
+        forceRefresh(_forceRefresh),
+        callback(_callback)
     {
     }
 
-    std::shared_ptr<user_impl> userImpl; // TODO should this be shared or weak?
-
+    std::shared_ptr<user_impl> userImpl; 
     string_t httpMethod;
     string_t url;
     string_t headers;
     std::vector<unsigned char> bytes;
     bool promptForCredentialsIfNeeded;
     bool forceRefresh;
-
-    xbox::services::xbox_live_result<token_and_signature_result> result; // TODO best place for this?
+    xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback;
+    xbox_live_result<token_and_signature_result> result;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

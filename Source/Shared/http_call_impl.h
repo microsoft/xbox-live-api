@@ -114,7 +114,7 @@ struct http_call_data
         _In_ const xsapi_internal_string& _serverName,
         _In_ const web::uri& _pathQueryFragment,
         _In_ xbox_live_api _xboxLiveApi
-        ) :
+    ) :
         xboxLiveContextSettings(_xboxLiveContextSettings),
         httpMethod(_httpMethod),
         serverName(_serverName),
@@ -157,10 +157,9 @@ struct http_call_data
     http_call_request_message requestBody;
     bool addDefaultHeaders;
 
-    http_call::get_response_with_auth_completion_routine completionRoutine;
-    void *completionRoutineContext;
     uint64_t taskGroupId;
     chrono_clock_t::time_point requestStartTime;
+    xsapi_callback<std::shared_ptr<http_call_response>> callback;
 };
 
 struct http_retry_after_api_state
@@ -250,6 +249,8 @@ public:
         _In_ xbox_live_api xboxLiveApi
         );
 
+    ~http_call_impl();
+
 #if XSAPI_XDK_AUTH
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ Windows::Xbox::System::User^ user,
@@ -291,7 +292,6 @@ public:
         _In_ const web::http::http_request& httpRequest
         ) override;
 
-    // TODO this should go away eventually
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
@@ -302,10 +302,9 @@ public:
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired,
-        _In_ get_response_with_auth_completion_routine completionRoutine,
-        _In_opt_ void* completionRoutineContext,
-        _In_ uint64_t taskGroupId
-        ) override;
+        _In_ uint64_t taskGroupId,
+        _In_ xsapi_callback<std::shared_ptr<http_call_response>> callback
+        );
 
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ http_call_response_body_type httpCallResponseBodyType

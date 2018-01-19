@@ -23,48 +23,65 @@ XblGetUserProfile(
     RETURN_C_INVALIDARGUMENT_IF(pContext == nullptr || xboxUserId == nullptr);
     auto profileService = pContext->pImpl->cppObject()->profile_service_impl();
 
-    auto context = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
+
+
+    //auto context = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
+    //auto result = profileService->get_user_profile(
+    //    xboxUserId,
+    //    taskGroupId,
+    //    [](xbox_live_result<xbox_user_profile> result, void* context)
+    //    {
+    //        auto clientCallbackInfo = async_helpers::remove_client_callback_info(context);
+
+    //        XBL_RESULT cResult = utils::create_xbl_result(result.err());
+    //        auto callback = (XBL_GET_USER_PROFILE_COMPLETION_ROUTINE)(clientCallbackInfo.completionFunction);
+    //        if (!result.err())
+    //        {
+    //            xbl_xbox_user_profiles_wrapper wrapper(result.payload());
+    //            callback(cResult, wrapper.xbl_xbox_user_profile(), clientCallbackInfo.clientContext);
+    //        }
+    //        else
+    //        {
+    //            callback(cResult, nullptr, clientCallbackInfo.clientContext);
+    //        }
+    //    },
+    //    context);
+
     auto result = profileService->get_user_profile(
         xboxUserId,
         taskGroupId,
-        [](xbox_live_result<xbox_user_profile> result, void* context)
+        [completionRoutine, completionRoutineContext](xbox_live_result<xbox_user_profile> result)
+    {
+        XBL_RESULT cResult = utils::create_xbl_result(result.err());
+        if (!result.err())
         {
-            auto clientCallbackInfo = async_helpers::remove_client_callback_info(context);
-
-            XBL_RESULT cResult = utils::create_xbl_result(result.err());
-            auto callback = (XBL_GET_USER_PROFILE_COMPLETION_ROUTINE)(clientCallbackInfo.completionFunction);
-            if (!result.err())
-            {
-                xbl_xbox_user_profiles_wrapper wrapper(result.payload());
-                callback(cResult, wrapper.xbl_xbox_user_profile(), clientCallbackInfo.clientContext);
-            }
-            else
-            {
-                callback(cResult, nullptr, clientCallbackInfo.clientContext);
-            }
-        },
-        context);
+            xbl_xbox_user_profiles_wrapper wrapper(result.payload());
+            completionRoutine(cResult, wrapper.xbl_xbox_user_profile(), completionRoutineContext);
+        }
+        else
+        {
+            completionRoutine(cResult, nullptr, completionRoutineContext);
+        }
+    });
 
     return utils::create_xbl_result(result.err());
 }
 
 void get_user_profiles_complete(
-    xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result, 
-    void* context
+    xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result,
+    XBL_GET_USER_PROFILES_COMPLETION_ROUTINE completionRoutine,
+    void *completionRoutineContext
     )
 {
-    auto clientCallbackInfo = async_helpers::remove_client_callback_info(context);
-
     XBL_RESULT cResult = utils::create_xbl_result(result.err());
-    auto callback = (XBL_GET_USER_PROFILES_COMPLETION_ROUTINE)(clientCallbackInfo.completionFunction);
     if (!result.err())
     {
         xbl_xbox_user_profiles_wrapper wrapper(result.payload());
-        callback(cResult, wrapper.xbl_xbox_user_profile(), wrapper.profiles_count(), clientCallbackInfo.clientContext);
+        completionRoutine(cResult, wrapper.xbl_xbox_user_profile(), wrapper.profiles_count(), completionRoutineContext);
     }
     else
     {
-        callback(cResult, nullptr, 0, clientCallbackInfo.clientContext);
+        completionRoutine(cResult, nullptr, 0, completionRoutineContext);
     }
 }
 
@@ -81,12 +98,13 @@ XblGetUserProfiles(
     RETURN_C_INVALIDARGUMENT_IF(pContext == nullptr || xboxUserIds == nullptr);
     auto profileService = pContext->pImpl->cppObject()->profile_service_impl();
 
-    auto context = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
     auto result = profileService->get_user_profiles(
         utils::string_array_to_internal_string_vector(xboxUserIds, xboxUserIdsCount),
         taskGroupId,
-        get_user_profiles_complete,
-        context);
+        [completionRoutine, completionRoutineContext](xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result)
+        {
+            get_user_profiles_complete(result, completionRoutine, completionRoutineContext);
+        });
 
     return utils::create_xbl_result(result.err());
 }
@@ -103,12 +121,13 @@ XblGetUserProfilesForSocialGroup(
     RETURN_C_INVALIDARGUMENT_IF(pContext == nullptr || socialGroup == nullptr);
     auto profileService = pContext->pImpl->cppObject()->profile_service_impl();
 
-    auto context = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
     auto result = profileService->get_user_profiles_for_social_group(
         socialGroup,
         taskGroupId,
-        get_user_profiles_complete,
-        context);
+        [completionRoutine, completionRoutineContext](xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result)
+        {
+            get_user_profiles_complete(result, completionRoutine, completionRoutineContext);
+        });
 
     return utils::create_xbl_result(result.err());
 }
