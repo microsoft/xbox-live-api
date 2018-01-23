@@ -52,7 +52,7 @@
 #include "xsapi-c/errors_c.h"
 #include "xsapi-c/xbox_live_global_c.h"
 
-#if XSAPI_CPP && UWP_API // TODO eventually extend where these are included
+#if XSAPI_C
 #include "utils_c.h"
 #endif
 

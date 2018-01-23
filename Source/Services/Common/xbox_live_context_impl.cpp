@@ -14,7 +14,6 @@
 #include "presence_internal.h"
 #include "real_time_activity_internal.h"
 
-// TODO maybe create something similar to xsapi/services.h for internal service impls and put these there
 #include "profile_service_impl.h"
 #include "social_internal.h"
 

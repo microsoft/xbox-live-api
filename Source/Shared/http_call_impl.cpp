@@ -69,11 +69,6 @@ http_call_impl::http_call_impl(
 {
 }
 
-http_call_impl::~http_call_impl()
-{
-    LOG_DEBUG("http call impl destructor");
-}
-
 pplx::task<std::shared_ptr<http_call_response>>
 http_call_impl::get_response(
     _In_ http_call_response_body_type httpCallResponseBodyType

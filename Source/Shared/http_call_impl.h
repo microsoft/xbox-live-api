@@ -249,8 +249,6 @@ public:
         _In_ xbox_live_api xboxLiveApi
         );
 
-    ~http_call_impl();
-
 #if XSAPI_XDK_AUTH
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ Windows::Xbox::System::User^ user,

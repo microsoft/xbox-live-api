@@ -494,8 +494,6 @@ public:
         _In_ function_context context
         );
 
-//    std::shared_ptr<xbox_live_context_settings> _Xbox_live_context_settings() { return m_xboxLiveContextSettings; }
-
 private:
     social_service() {};
 
@@ -511,7 +509,6 @@ private:
     std::shared_ptr<social_service_impl> m_socialServiceImpl;
 
     friend xbox_live_context;
-    //friend xbox_social_relationship_result;
 };
 
 /// <summary>

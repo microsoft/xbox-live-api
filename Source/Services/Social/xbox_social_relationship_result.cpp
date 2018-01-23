@@ -59,10 +59,18 @@ pplx::task<xbox_live_result<xbox_social_relationship_result>>
 xbox_social_relationship_result::get_next(
     _In_ uint32_t maxItems
     )
-{   
-    // TODO 
-    return pplx::task_from_result<xbox_live_result<xbox_social_relationship_result>>(xbox_live_result<xbox_social_relationship_result>());
-    //return m_socialImpl->get_social_relationships(m_filter, m_continuationSkip, maxItems);
+{
+    task_completion_event<xbox_live_result<xbox_social_relationship_result>> tce;
+
+    auto result = m_socialImpl->get_social_relationships(
+        m_filter,
+        m_continuationSkip,
+        maxItems,
+        XSAPI_DEFAULT_TASKGROUP,
+        [tce](xbox_live_result<xbox_social_relationship_result> result) { tce.set(result); }
+    );
+
+    return pplx::task<xbox_live_result<xbox_social_relationship_result>>(tce);
 } 
 
 xbox_live_result<xbox_social_relationship_result>
