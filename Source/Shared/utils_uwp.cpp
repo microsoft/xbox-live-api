@@ -231,6 +231,7 @@ std::wstring utils::utf16_from_utf8(_In_reads_(size) PCSTR utf8, size_t size)
     return utf16;
 }
 
+#if XSAPI_C
 time_t utils::time_t_from_datetime(const utility::datetime& datetime)
 {
     time_t currentUtcTime = time(nullptr);
@@ -244,5 +245,6 @@ utility::datetime utils::datetime_from_time_t(const time_t* pTime)
     auto diffTime = time(nullptr) - *pTime;
     return datetime - utility::datetime::from_seconds((unsigned int)diffTime);
 }
+#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

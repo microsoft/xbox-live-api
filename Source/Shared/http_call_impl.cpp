@@ -93,11 +93,18 @@ http_call_impl::get_response(
     m_httpCallData->taskGroupId = XSAPI_DEFAULT_TASKGROUP;
 
     pplx::task_completion_event<std::shared_ptr<http_call_response>> tce;
-    m_httpCallData->callback = [tce](std::shared_ptr<http_call_response> response) { tce.set(response); };
+    pplx::task<std::shared_ptr<http_call_response>> task(tce);
+
+    xbox_live_callback<std::shared_ptr<http_call_response>> callback([tce](std::shared_ptr<http_call_response> response)
+    {
+        tce.set(response);
+    });
+
+    m_httpCallData->callback = callback;
 
     internal_get_response(m_httpCallData);
 
-    return pplx::task<std::shared_ptr<http_call_response>>(tce);
+    return task;
 }
 
 #if XSAPI_XDK_AUTH // XDK
@@ -161,7 +168,7 @@ void http_call_impl::get_response_with_auth(
     _In_ http_call_response_body_type httpCallResponseBodyType,
     _In_ bool allUsersAuthRequired,
     _In_ uint64_t taskGroupId,
-    _In_ xsapi_callback<std::shared_ptr<http_call_response>> callback
+    _In_ xbox_live_callback<std::shared_ptr<http_call_response>> callback
     )
 {
     m_httpCallData->userContext = userContext;
@@ -292,7 +299,6 @@ void http_call_impl::internal_get_response_with_auth(
 
     auto httpCallData = m_httpCallData;
 
-    // TODO switch this call to take function object as well
     m_httpCallData->userContext->get_auth_result(
         tempHttpMethod,
         tempFullUrl,

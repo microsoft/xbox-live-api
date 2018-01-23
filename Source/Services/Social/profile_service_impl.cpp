@@ -39,7 +39,7 @@ profile_service_impl::profile_service_impl(
 _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profile(
     _In_ xsapi_internal_string xboxUserId,
     _In_ uint64_t taskGroupId,
-    _In_ xsapi_callback<xbox_live_result<xbox_user_profile>> callback
+    _In_ xbox_live_callback<xbox_live_result<xbox_user_profile>> callback
     )
 {
     RETURN_CPP_INVALIDARGUMENT_IF(xboxUserId.empty(), void, "xboxUserId is empty");
@@ -60,15 +60,11 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profile(
                 callback(xbox_live_result<xbox_user_profile>(result.err(), result.err_message()));
             }
         });
-
-    callback(xbox::services::xbox_live_result<xbox_user_profile>());
-
-    return xbox_live_result<void>();
 }
 _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
     _In_ const xsapi_internal_vector<xsapi_internal_string>& xboxUserIds,
     _In_ uint64_t taskGroupId,
-    _In_ xsapi_callback<xbox_live_result<xsapi_internal_vector<xbox_user_profile>>> callback
+    _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_user_profile>>> callback
     )
 {
     RETURN_CPP_INVALIDARGUMENT_IF(xboxUserIds.size() == 0, void, "xbox user ids size is 0");
@@ -108,7 +104,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
 _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_social_group(
     _In_ const xsapi_internal_string& socialGroup,
     _In_ uint64_t taskGroupId,
-    _In_ xsapi_callback<xbox_live_result<xsapi_internal_vector<xbox_user_profile>>> callback
+    _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_user_profile>>> callback
     )
 {
     RETURN_CPP_INVALIDARGUMENT_IF(socialGroup.empty(), void, "socialGroup is empty");
@@ -133,7 +129,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_soc
         http_call_response_body_type::json_body, 
         false,
         taskGroupId,
-        [callback](std::shared_ptr<http_call_response> response) mutable { handle_get_user_profiles_response(response, callback); }
+        [callback](std::shared_ptr<http_call_response> response) { handle_get_user_profiles_response(response, callback); }
         );
 
     return xbox_live_result<void>();
@@ -141,7 +137,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_soc
 
 void profile_service_impl::handle_get_user_profiles_response(
     _In_ std::shared_ptr<http_call_response> response,
-    _In_ xsapi_callback<xbox_live_result<xsapi_internal_vector<xbox_user_profile>>> callback
+    _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_user_profile>>> callback
     )
 {
     if (response->response_body_json().size() != 0)

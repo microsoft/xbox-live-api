@@ -113,7 +113,7 @@ void user_impl::get_token_and_signature(
     _In_ const string_t& url,
     _In_ const string_t& headers,
     _In_ uint64_t taskGroupId,
-    _In_ xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
     )
 {
     internal_get_token_and_signature(
@@ -135,7 +135,7 @@ void user_impl::get_token_and_signature(
     _In_ const string_t& headers,
     _In_ const string_t& requestBodyString,
     _In_ uint64_t taskGroupId,
-    _In_ xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
     )
 {
     std::string utf8Body(utility::conversions::to_utf8string(requestBodyString));
@@ -160,7 +160,7 @@ void user_impl::get_token_and_signature(
     _In_ const string_t& headers,
     _In_ const std::vector<unsigned char>& requestBodyArray,
     _In_ uint64_t taskGroupId,
-    _In_ xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
     )
 {
     internal_get_token_and_signature(

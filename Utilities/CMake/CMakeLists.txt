@@ -619,7 +619,6 @@ set(System_Source_Files_C
     )
 
 set(Shared_Source_Files_C
-    ../../Source/C/Shared/utils_c.cpp
     ../../Source/C/Shared/utils_c.h
     ../../Source/C/Shared/xbox_live_app_config_c.cpp
     )
@@ -1541,6 +1540,7 @@ set(UnitTests_Source_Files_Tests
 	../../Tests/UnitTests/Tests/Shared/ServiceCallLoggerTests.cpp
 	../../Tests/UnitTests/Tests/Shared/WebsocketTests.cpp
 	../../Tests/UnitTests/Tests/Shared/XboxLiveContextTests.cpp
+    ../../Tests/UnitTests/Tests/Shared/XboxLiveCallbackTests.cpp
 	../../Tests/UnitTests/Tests/Services/RtaTestHelper.h
 	../../Tests/UnitTests/Tests/Services/SocialManagerHelper.h
 	../../Tests/UnitTests/Tests/Services/StatsManagerHelper.h

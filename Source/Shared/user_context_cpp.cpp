@@ -43,7 +43,7 @@ void user_context::get_auth_result(
     _In_ const string_t& requestBodyString,
     _In_ bool allUsersAuthRequired,
     _In_ uint64_t taskGroupId,
-    _In_ xsapi_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
     )
 {
     UNREFERENCED_PARAMETER(allUsersAuthRequired);
@@ -69,7 +69,7 @@ void user_context::get_auth_result(
     _In_ const std::vector<unsigned char>& requestBodyVector,
     _In_ bool allUsersAuthRequired,
     _In_ uint64_t taskGroupId,
-    _In_ xsapi_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
     )
 {
     UNREFERENCED_PARAMETER(allUsersAuthRequired);

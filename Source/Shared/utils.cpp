@@ -73,17 +73,26 @@ xsapi_singleton::xsapi_singleton()
 #endif
 }
 
-XBL_MEM_ALLOC_FUNC g_pMemAllocHook = [](size_t size, XBL_MEMORY_TYPE memoryType)
-{
-    UNREFERENCED_PARAMETER(memoryType);
-    return malloc(size);
-};
+XBL_MEM_ALLOC_FUNC g_pMemAllocHook = nullptr;
+XBL_MEM_FREE_FUNC g_pMemFreeHook = nullptr;
 
-XBL_MEM_FREE_FUNC g_pMemFreeHook = [](void *pointer, XBL_MEMORY_TYPE memoryType)
+void init_mem_hooks()
 {
-    UNREFERENCED_PARAMETER(memoryType);
-    free(pointer);
-};
+    if (g_pMemAllocHook == nullptr || g_pMemFreeHook == nullptr)
+    {
+        g_pMemAllocHook = [](size_t size, XBL_MEMORY_TYPE memoryType)
+        {
+            UNREFERENCED_PARAMETER(memoryType);
+            return malloc(size);
+        };
+
+        g_pMemFreeHook = [](void *pointer, XBL_MEMORY_TYPE memoryType)
+        {
+            UNREFERENCED_PARAMETER(memoryType);
+            free(pointer);
+        };
+    }
+}
 
 void xsapi_singleton::init()
 {
@@ -1787,6 +1796,7 @@ xsapi_internal_vector<xsapi_internal_string> utils::string_array_to_internal_str
     return stringVector;
 }
 
+#if XSAPI_C
 PCSTR utils::alloc_string(const string_t& str)
 {
 #if _WIN32
@@ -1894,6 +1904,7 @@ XBL_RESULT utils::unknown_exception_to_xbl_result()
     LOG_ERROR("unknown exception reached api boundary");
     return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_GENERIC_ERROR };
 }
+#endif // XSAPI_C
 
 std::mutex async_helpers::m_contextsLock;
 xsapi_internal_unordered_map<void *, std::shared_ptr<void>> async_helpers::m_sharedPtrs;

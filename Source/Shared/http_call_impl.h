@@ -159,7 +159,7 @@ struct http_call_data
 
     uint64_t taskGroupId;
     chrono_clock_t::time_point requestStartTime;
-    xsapi_callback<std::shared_ptr<http_call_response>> callback;
+    xbox_live_callback<std::shared_ptr<http_call_response>> callback;
 };
 
 struct http_retry_after_api_state
@@ -303,7 +303,7 @@ public:
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired,
         _In_ uint64_t taskGroupId,
-        _In_ xsapi_callback<std::shared_ptr<http_call_response>> callback
+        _In_ xbox_live_callback<std::shared_ptr<http_call_response>> callback
         );
 
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(

@@ -23,30 +23,6 @@ XblGetUserProfile(
     RETURN_C_INVALIDARGUMENT_IF(pContext == nullptr || xboxUserId == nullptr);
     auto profileService = pContext->pImpl->cppObject()->profile_service_impl();
 
-
-
-    //auto context = async_helpers::store_client_callback_info(completionRoutine, completionRoutineContext);
-    //auto result = profileService->get_user_profile(
-    //    xboxUserId,
-    //    taskGroupId,
-    //    [](xbox_live_result<xbox_user_profile> result, void* context)
-    //    {
-    //        auto clientCallbackInfo = async_helpers::remove_client_callback_info(context);
-
-    //        XBL_RESULT cResult = utils::create_xbl_result(result.err());
-    //        auto callback = (XBL_GET_USER_PROFILE_COMPLETION_ROUTINE)(clientCallbackInfo.completionFunction);
-    //        if (!result.err())
-    //        {
-    //            xbl_xbox_user_profiles_wrapper wrapper(result.payload());
-    //            callback(cResult, wrapper.xbl_xbox_user_profile(), clientCallbackInfo.clientContext);
-    //        }
-    //        else
-    //        {
-    //            callback(cResult, nullptr, clientCallbackInfo.clientContext);
-    //        }
-    //    },
-    //    context);
-
     auto result = profileService->get_user_profile(
         xboxUserId,
         taskGroupId,

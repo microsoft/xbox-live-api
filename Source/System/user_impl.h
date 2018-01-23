@@ -85,7 +85,7 @@ public:
         _In_ const string_t& url,
         _In_ const string_t& headers,
         _In_ uint64_t taskGroupId,
-        _In_ xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
         );
 
     void get_token_and_signature(
@@ -94,7 +94,7 @@ public:
         _In_ const string_t& headers,
         _In_ const string_t& requestBodyString,
         _In_ uint64_t taskGroupId,
-        _In_ xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
         );
 
     void get_token_and_signature(
@@ -103,7 +103,7 @@ public:
         _In_ const string_t& headers,
         _In_ const std::vector<unsigned char>& requestBodyArray,
         _In_ uint64_t taskGroupId,
-        _In_ xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
         );
 
     bool is_signed_in() const;
@@ -122,7 +122,7 @@ public:
         _In_ bool forceRefresh
         ) = 0;
 
-    // TODO remove ppl version
+    // TODO remove ppl version, change to xsapi_internal_strings
     virtual void internal_get_token_and_signature(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -132,7 +132,7 @@ public:
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh,
         _In_ uint64_t taskGroupId,
-        _In_ xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
         ) = 0;
 
     static function_context add_sign_in_completed_handler(_In_ std::function<void(const string_t&)> handler);
@@ -222,7 +222,7 @@ public:
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh,
         _In_ uint64_t taskGroupId,
-        _In_ xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
         ) override;
 
 private:
@@ -304,7 +304,7 @@ struct get_token_and_signature_context
         _In_ const std::vector<unsigned char>& _bytes,
         _In_ bool _promptForCredentialsIfNeeded,
         _In_ bool _forceRefresh,
-        _In_ xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> _callback
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> _callback
         ) :
         userImpl(_userImpl),
         httpMethod(_httpMethod),
@@ -324,7 +324,7 @@ struct get_token_and_signature_context
     std::vector<unsigned char> bytes;
     bool promptForCredentialsIfNeeded;
     bool forceRefresh;
-    xsapi_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback;
+    xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback;
     xbox_live_result<token_and_signature_result> result;
 };
 

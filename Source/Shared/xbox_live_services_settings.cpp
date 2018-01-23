@@ -98,7 +98,6 @@ void xbox_live_services_settings::set_memory_allocation_hooks(
     m_pCustomMemAllocHook = memAllocHandler;
     m_pCustomMemFreeHook = memFreeHandler;
 
-    auto xsapiSingleton = get_xsapi_singleton();
     g_pMemAllocHook = custom_mem_alloc_wrapper;
     g_pMemFreeHook = custom_mem_free_wrapper;
 }

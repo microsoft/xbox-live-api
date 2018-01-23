@@ -58,11 +58,11 @@ public:
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
         _In_ bool allUsersAuthRequired = false
-        ) override;
+        );
 
-    virtual const std::wstring& server_name() const override;
+    virtual std::wstring server_name() const override;
     virtual const web::uri& path_query_fragment() const override;
-    virtual const std::wstring& http_method() const override;
+    virtual std::wstring http_method() const override;
 
     virtual void set_long_http_call(_In_ bool value) override;
     virtual bool long_http_call() const override;
@@ -76,10 +76,10 @@ public:
     virtual const http_call_request_message& request_body() const override;
 
     virtual void set_content_type_header_value(_In_ const std::wstring& value) override;
-    virtual const std::wstring& content_type_header_value() const override;
+    virtual std::wstring content_type_header_value() const override;
 
     virtual void set_xbox_contract_version_header_value(_In_ const std::wstring& value) override;
-    virtual const std::wstring& xbox_contract_version_header_value() const override;
+    virtual std::wstring xbox_contract_version_header_value() const override;
 
     virtual void set_add_default_headers(bool value) override;
     virtual bool add_default_headers() const override;

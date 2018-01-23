@@ -1501,6 +1501,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\WebsocketTests.cpp">
       <Filter>C++ Source\UnitTests\Tests</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\XboxLiveCallbackTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\XboxLiveContextTests.cpp">
       <Filter>C++ Source\UnitTests\Tests</Filter>
     </ClCompile>
