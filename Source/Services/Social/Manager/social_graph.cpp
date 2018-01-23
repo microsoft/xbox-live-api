@@ -9,6 +9,7 @@
 #include "xbox_live_context_impl.h"
 #include "system_internal.h"
 #include "xbox_system_factory.h"
+#include "social_internal.h"
 
 using namespace xbox::services;
 using namespace xbox::services::system;
@@ -769,7 +770,7 @@ social_graph::setup_rta()
         }
     });
 
-    m_socialRelationshipContext = m_xboxLiveContextImpl->social_service().add_social_relationship_changed_handler(
+    m_socialRelationshipContext = m_xboxLiveContextImpl->social_service_impl()->add_social_relationship_changed_handler(
         [thisWeakPtr](social_relationship_change_event_args eventArgs)
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
@@ -791,8 +792,8 @@ social_graph::setup_rta_subscriptions(
     std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
     m_perfTester.start_timer(_T("setup_rta_subscriptions"));
     m_xboxLiveContextImpl->real_time_activity_service()->activate();
-    auto socialRelationshipChangeResult = m_xboxLiveContextImpl->social_service().subscribe_to_social_relationship_change(
-        m_xboxLiveContextImpl->xbox_live_user_id()
+    auto socialRelationshipChangeResult = m_xboxLiveContextImpl->social_service_impl()->subscribe_to_social_relationship_change(
+        utils::internal_string_from_external_string(m_xboxLiveContextImpl->xbox_live_user_id())
         );
 
     if (socialRelationshipChangeResult.err())

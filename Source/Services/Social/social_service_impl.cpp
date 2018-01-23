@@ -133,8 +133,7 @@ social_service_impl::get_social_relationships(
     _In_ uint32_t startIndex,
     _In_ uint32_t maxItems,
     _In_ uint64_t taskGroupId,
-    _In_ get_social_relationships_completion_routine completionRoutine,
-    _In_opt_ void* completionRoutineContext
+    _In_ xbox_live_callback<xbox_live_result<xbox_social_relationship_result>> callback
     )
 {
     return get_social_relationships(
@@ -143,8 +142,7 @@ social_service_impl::get_social_relationships(
         startIndex,
         maxItems,
         taskGroupId,
-        completionRoutine,
-        completionRoutineContext
+        callback
         );
 }
 
@@ -152,11 +150,10 @@ xbox_live_result<void>
 social_service_impl::get_social_relationships(
     _In_ const xsapi_internal_string& xboxUserId,
     _In_ xbox_social_relationship_filter filter,
-    _In_ unsigned int startIndex,
-    _In_ unsigned int maxItems,
+    _In_ uint32_t startIndex,
+    _In_ uint32_t maxItems,
     _In_ uint64_t taskGroupId,
-    _In_ get_social_relationships_completion_routine completionRoutine,
-    _In_opt_ void* completionRoutineContext
+    _In_ xbox_live_callback<xbox_live_result<xbox_social_relationship_result>> callback
     )
 {
     bool includeViewFilter = (filter != xbox_social_relationship_filter::all);
@@ -169,7 +166,7 @@ social_service_impl::get_social_relationships(
         maxItems
         );
 
-    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_impl> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         "GET",
         utils::create_xboxlive_endpoint("social", m_appConfig),
@@ -177,16 +174,14 @@ social_service_impl::get_social_relationships(
         xbox_live_api::get_social_relationships
         );
 
-    auto httpCallImpl = std::dynamic_pointer_cast<http_call_impl>(httpCall);
-
     std::shared_ptr<social_service_impl> thisShared = shared_from_this();
 
-    httpCallImpl->get_response_with_auth(
+    httpCall->get_response_with_auth(
         m_userContext, 
         http_call_response_body_type::json_body,
         false,
         taskGroupId,
-        [thisShared, startIndex, filter, completionRoutine, completionRoutineContext](std::shared_ptr<http_call_response> response)
+        [thisShared, startIndex, filter, callback](std::shared_ptr<http_call_response> response)
     {
         auto result = xbox_social_relationship_result::_Deserialize(response->response_body_json());
 
@@ -204,9 +199,8 @@ social_service_impl::get_social_relationships(
             );
         }
 
-        completionRoutine(result, completionRoutineContext);
-    }
-    );
+        callback(result);
+    });
 
     return xbox_live_result<void>();
 }

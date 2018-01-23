@@ -372,15 +372,6 @@ public:
         _In_ bool allUsersAuthRequired = false
         ) = 0;
 
-    //template<typename Func>
-    //virtual void get_response_with_auth(
-    //    _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
-    //    _In_ http_call_response_body_type httpCallResponseBodyType,
-    //    _In_ bool allUsersAuthRequired,
-    //    _In_ uint64_t taskGroupId,
-    //    _In_ Func callback
-    //    );
-
     virtual ~http_call(){}
 };
 

@@ -71,28 +71,21 @@ public:
         _In_ function_context context
         );
 
-    typedef void(*get_social_relationships_completion_routine)(
-        _In_ xbox_live_result<xbox_social_relationship_result> result,
-        _In_ void* context
-        );
-
     xbox_live_result<void> get_social_relationships(
         _In_ xbox_social_relationship_filter socialRelationshipFilter,
         _In_ uint32_t startIndex,
         _In_ uint32_t maxItems,
         _In_ uint64_t taskGroupId,
-        _In_ get_social_relationships_completion_routine completionRoutine,
-        _In_opt_ void* completionRoutineContext
+        _In_ xbox_live_callback<xbox_live_result<xbox_social_relationship_result>> callback
         );
 
     xbox_live_result<void> get_social_relationships(
         _In_ const xsapi_internal_string& xboxUserId,
         _In_ xbox_social_relationship_filter filter,
-        _In_ unsigned int startIndex,
-        _In_ unsigned int maxItems,
+        _In_ uint32_t startIndex,
+        _In_ uint32_t maxItems,
         _In_ uint64_t taskGroupId,
-        _In_ get_social_relationships_completion_routine completionRoutine,
-        _In_opt_ void* completionRoutineContext
+        _In_ xbox_live_callback<xbox_live_result<xbox_social_relationship_result>> callback
         );
 
 private:

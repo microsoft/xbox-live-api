@@ -73,7 +73,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
         RETURN_CPP_INVALIDARGUMENT_IF(s.empty(), void, "Found empty string in xbox user ids");
     }
 
-    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_impl> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         "POST",
         utils::create_xboxlive_endpoint("profile", m_appConfig),
@@ -88,9 +88,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
 
     httpCall->set_request_body(request.serialize());
 
-    auto httpCallImpl = std::dynamic_pointer_cast<http_call_impl>(httpCall);
-
-    httpCallImpl->get_response_with_auth(
+    httpCall->get_response_with_auth(
         m_userContext,
         http_call_response_body_type::json_body,
         false,
@@ -113,7 +111,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_soc
         socialGroup
         );
 
-    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_impl> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         "GET",
         utils::create_xboxlive_endpoint("profile", m_appConfig),
@@ -122,9 +120,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_soc
         );
     httpCall->set_xbox_contract_version_header_value(_T("2"));
 
-    auto httpCallImpl = std::dynamic_pointer_cast<http_call_impl>(httpCall);
-
-    httpCallImpl->get_response_with_auth(
+    httpCall->get_response_with_auth(
         m_userContext, 
         http_call_response_body_type::json_body, 
         false,
