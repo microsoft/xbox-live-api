@@ -14,6 +14,9 @@
 #include "presence_internal.h"
 #include "real_time_activity_internal.h"
 
+#include "profile_service_impl.h"
+#include "social_internal.h"
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 #if XSAPI_XDK_AUTH
@@ -155,7 +158,7 @@ void xbox_live_context_impl::init()
     m_userStatisticsService = xbox::services::user_statistics::user_statistics_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
     m_multiplayerService = xbox::services::multiplayer::multiplayer_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
     m_tournamentService = xbox::services::tournaments::tournament_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
-    m_socialService = xbox::services::social::social_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
+    m_socialServiceImpl = std::make_shared<xbox::services::social::social_service_impl>(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
     m_contextualSearchService = xbox::services::contextual_search::contextual_search_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_stringService = xbox::services::system::string_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_clubsService = xbox::services::clubs::clubs_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
@@ -225,10 +228,10 @@ xbox_live_context_impl::profile_service_impl()
     return m_profileServiceImpl;
 }
 
-social::social_service&
-xbox_live_context_impl::social_service()
+std::shared_ptr<social::social_service_impl>
+xbox_live_context_impl::social_service_impl()
 {
-    return m_socialService;
+    return m_socialServiceImpl;
 }
 
 social::reputation_service&

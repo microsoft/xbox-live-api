@@ -4,7 +4,6 @@
 #pragma once
 #include <mutex>
 #include "xsapi/services.h"
-#include "profile_service_impl.h"
 #if !TV_API
     #if !XSAPI_CPP
         #include "User_WinRT.h"
@@ -56,7 +55,7 @@ public:
     /// <summary>
     /// A service for managing social networking links.
     /// </summary>
-    social::social_service& social_service();
+    std::shared_ptr<social::social_service_impl> social_service_impl();
 
     /// <summary>
     /// A service for managing reputation reports.
@@ -176,7 +175,7 @@ private:
     std::shared_ptr<xbox_live_app_config> m_appConfig;
 
     std::shared_ptr<social::profile_service_impl> m_profileServiceImpl;
-    social::social_service m_socialService;
+    std::shared_ptr<social::social_service_impl> m_socialServiceImpl;
     social::reputation_service m_reputationService;
     leaderboard::leaderboard_service m_leaderboardService;
     achievements::achievement_service m_achievementService;

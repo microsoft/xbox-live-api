@@ -13,6 +13,7 @@ void* xsapi_memory::mem_alloc(
 {
     try
     {
+        init_mem_hooks();
         return g_pMemAllocHook(dwSize, 0);
     }
     catch (...)
@@ -28,6 +29,7 @@ void xsapi_memory::mem_free(
 {
     try
     {
+        init_mem_hooks();
         if (pAddress)
         {
             g_pMemFreeHook(pAddress, 0);

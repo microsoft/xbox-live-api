@@ -51,7 +51,7 @@ reputation_service::submit_batch_reputation_feedback(
     httpCall->set_xbox_contract_version_header_value(_T("101"));
 
     std::error_code err;
-    web::json::value request = reputation_feedback_request::serialize_batch_feedback_request(feedbackItems, err);
+    web::json::value request = reputation_feedback_request::serialize_batch_feedback_request(utils::internal_vector_from_std_vector(feedbackItems), err);
     RETURN_TASK_CPP_INVALIDARGUMENT_IF(err, void, "Invalid reputation_feedback_item");
     httpCall->set_request_body(request.serialize());
 
@@ -98,9 +98,9 @@ reputation_service::submit_reputation_feedback(
 
     reputation_feedback_request reputationFeedbackRequest(
         reputationFeedbackType,
-        sessionName,
-        reasonMessage,
-        evidenceResourceId
+        utils::internal_string_from_external_string(sessionName),
+        utils::internal_string_from_external_string(reasonMessage),
+        utils::internal_string_from_external_string(evidenceResourceId)
         );
 
     web::json::value request = reputationFeedbackRequest.serialize_feedback_request();

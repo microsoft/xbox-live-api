@@ -52,11 +52,12 @@ public:
         _In_ xbox_live_api xboxLiveApi
         ) override;
 
-    std::shared_ptr<http_call_internal> create_http_call_internal(
+    std::shared_ptr<http_call> create_http_call(
         _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& serverName,
-        _In_ const web::uri& pathQueryFragment
+        _In_ const xsapi_internal_string& httpMethod,
+        _In_ const xsapi_internal_string& serverName,
+        _In_ const web::uri& pathQueryFragment,
+        _In_ xbox_live_api xboxLiveApi
         ) override;
 
     std::shared_ptr<xbox_web_socket_client> create_web_socket_client() override

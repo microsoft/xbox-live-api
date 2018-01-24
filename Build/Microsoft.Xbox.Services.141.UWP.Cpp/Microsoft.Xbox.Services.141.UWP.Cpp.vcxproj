@@ -80,6 +80,7 @@
        $(ProjectDir)..\..\Source\Services\Presence;
        $(ProjectDir)..\..\Source\Services\Misc;
        $(ProjectDir)..\..\Source\Services\Social\Manager;
+       $(ProjectDir)..\..\Source\Services\Social\C;
        $(ProjectDir)..\..\Source\Services\RealTimeActivity;
        $(ProjectDir)..\..\Source\Services\Clubs;
        $(ProjectDir)..\..\Source\Shared;
@@ -276,7 +277,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_result_impl.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Shared\utils_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Shared\xbox_live_app_config_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_impl_c.cpp" />

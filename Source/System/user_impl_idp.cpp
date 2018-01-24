@@ -308,28 +308,27 @@ void user_impl_idp::internal_get_token_and_signature(
     _In_ const std::vector<unsigned char>& bytes,
     _In_ bool promptForCredentialsIfNeeded,
     _In_ bool forceRefresh,
-    _In_ get_token_and_signature_completion_routine completionRoutine,
-    _In_opt_ void *completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
     )
 {
     UNREFERENCED_PARAMETER(endpointForNsal);
 
-    // TODO might want to allocate with shared pointer and keep in some global store to ensure eventual cleanup
-    auto context = new get_token_and_signature_context(
+    auto context = async_helpers::store_shared_ptr(xsapi_allocate_shared<get_token_and_signature_context>(
         shared_from_this(),
         httpMethod,
         url,
         headers,
         bytes,
         promptForCredentialsIfNeeded,
-        forceRefresh
-        );
+        forceRefresh,
+        callback
+        ));
 
     HCTaskCreate(HC_SUBSYSTEM_ID::HC_SUBSYSTEM_ID_XSAPI, taskGroupId,
         [](_In_opt_ void *_context, _In_ HC_TASK_HANDLE taskHandle)
         {
-            auto context = static_cast<get_token_and_signature_context*>(_context);
+            auto context = async_helpers::remove_shared_ptr<get_token_and_signature_context>(_context, false);
             auto pThis = std::dynamic_pointer_cast<user_impl_idp>(context->userImpl);
 
             context->result = pThis->internal_get_token_and_signature_helper(
@@ -360,22 +359,18 @@ void user_impl_idp::internal_get_token_and_signature(
             return HCTaskSetCompleted(taskHandle);
         },
         context,
-        [](_In_opt_ void *_context, _In_ HC_TASK_HANDLE taskHandle, void *_completionRoutine, void *completionRoutineContext)
+        [](_In_opt_ void *_context, _In_ HC_TASK_HANDLE taskHandle, void *completionRoutine, void *completionRoutineContext)
         {
             UNREFERENCED_PARAMETER(taskHandle);
-
-            /// TODO make a generic function that does this similar to what we have in flat C implementation
-            auto context = reinterpret_cast<get_token_and_signature_context*>(_context);
-            auto completionRoutine = reinterpret_cast<get_token_and_signature_completion_routine>(_completionRoutine);
-
-            completionRoutine(context->result, completionRoutineContext);
-
-            delete context;
+            UNREFERENCED_PARAMETER(completionRoutine);
+            UNREFERENCED_PARAMETER(completionRoutineContext);
+            auto context = async_helpers::remove_shared_ptr<get_token_and_signature_context>(_context);
+            context->callback(context->result);
             return HC_OK;
         },
         context,
-        completionRoutine,
-        completionRoutineContext,
+        nullptr,
+        nullptr,
         nullptr
         );
 }
@@ -558,6 +553,7 @@ user_impl_idp::request_token_from_idp(
         {
             try
             {
+                // TODO remove ppl here
                 task<WebTokenRequestResult^> tokenTask = 
                     webAccount == nullptr ?
                     create_task(WebAuthenticationCoreManager::RequestTokenAsync(request)):

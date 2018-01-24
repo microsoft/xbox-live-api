@@ -26,12 +26,12 @@ social_service_impl::social_service_impl(
 
 xbox_live_result<std::shared_ptr<social_relationship_change_subscription>>
 social_service_impl::subscribe_to_social_relationship_change(
-    _In_ const string_t& xboxUserId
+    _In_ const xsapi_internal_string& xboxUserId
     )
 {
     std::weak_ptr<social_service_impl> thisWeakPtr = shared_from_this();
-    auto socialRelationshipSub = std::make_shared<social_relationship_change_subscription>(
-        xboxUserId,
+    auto socialRelationshipSub = xsapi_allocate_shared<social_relationship_change_subscription>(
+        utils::external_string_from_internal_string(xboxUserId),
         ([thisWeakPtr](social_relationship_change_event_args eventArgs)
         {
             std::shared_ptr<social_service_impl> pThis(thisWeakPtr);
@@ -104,7 +104,7 @@ social_service_impl::social_relationship_changed(
     _In_ social_relationship_change_event_args eventArgs
     )
 {
-    std::unordered_map<uint32_t, std::function<void(const social_relationship_change_event_args&)>> socialRelationshipChangedHandlersCopy;
+    xsapi_internal_unordered_map<uint32_t, std::function<void(const social_relationship_change_event_args&)>> socialRelationshipChangedHandlersCopy;
     {
         std::lock_guard<std::mutex> lock(m_socialRelationshipChangeHandlerLock.get());
         socialRelationshipChangedHandlersCopy = m_socialRelationshipChangeHandler;
@@ -127,27 +127,38 @@ social_service_impl::social_relationship_changed(
     }
 }
 
-pplx::task<xbox_live_result<xbox_social_relationship_result>>
+xbox_live_result<void>
 social_service_impl::get_social_relationships(
     _In_ xbox_social_relationship_filter filter,
-    _In_ unsigned int startIndex,
-    _In_ unsigned int maxItems
+    _In_ uint32_t startIndex,
+    _In_ uint32_t maxItems,
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox_live_result<xbox_social_relationship_result>> callback
     )
 {
-    return get_social_relationships(m_userContext->xbox_user_id(), filter, startIndex, maxItems);
+    return get_social_relationships(
+        utils::internal_string_from_external_string(m_userContext->xbox_user_id()), 
+        filter,
+        startIndex,
+        maxItems,
+        taskGroupId,
+        callback
+        );
 }
 
-pplx::task<xbox_live_result<xbox_social_relationship_result>>
+xbox_live_result<void>
 social_service_impl::get_social_relationships(
-    _In_ const string_t& xboxUserId,
+    _In_ const xsapi_internal_string& xboxUserId,
     _In_ xbox_social_relationship_filter filter,
-    _In_ unsigned int startIndex,
-    _In_ unsigned int maxItems
+    _In_ uint32_t startIndex,
+    _In_ uint32_t maxItems,
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox_live_result<xbox_social_relationship_result>> callback
     )
 {
     bool includeViewFilter = (filter != xbox_social_relationship_filter::all);
 
-    string_t pathAndQuery = pathandquery_social_subpath(
+    xsapi_internal_string pathAndQuery = pathandquery_social_subpath(
         xboxUserId,
         includeViewFilter,
         xbox_social_relationship_filter_to_string(filter),
@@ -155,21 +166,22 @@ social_service_impl::get_social_relationships(
         maxItems
         );
 
-    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_impl> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
-        _T("GET"),
-        utils::create_xboxlive_endpoint(_T("social"), m_appConfig),
-        pathAndQuery,
+        "GET",
+        utils::create_xboxlive_endpoint("social", m_appConfig),
+        utils::external_string_from_internal_string(pathAndQuery), // TODO switch after changing to internal uri impl
         xbox_live_api::get_social_relationships
         );
 
-    auto userContext = m_userContext;
-    auto xboxLiveContextSettings = m_xboxLiveContextSettings;
-    auto appConfig = m_appConfig;
-
     std::shared_ptr<social_service_impl> thisShared = shared_from_this();
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([thisShared, userContext, xboxLiveContextSettings, appConfig, startIndex, filter](std::shared_ptr<http_call_response> response)
+
+    httpCall->get_response_with_auth(
+        m_userContext, 
+        http_call_response_body_type::json_body,
+        false,
+        taskGroupId,
+        [thisShared, startIndex, filter, callback](std::shared_ptr<http_call_response> response)
     {
         auto result = xbox_social_relationship_result::_Deserialize(response->response_body_json());
 
@@ -178,27 +190,22 @@ social_service_impl::get_social_relationships(
         if (itemSize > 0)
         {
             unsigned continuationSkip = startIndex + itemSize;
-            
+
             // Initialize the request params for get_next()
             socialRelationship._Init_next_page_info(
                 thisShared,
                 filter,
                 continuationSkip
-                );
+            );
         }
 
-        return utils::generate_xbox_live_result<xbox_social_relationship_result>(
-            result,
-            response
-            );
+        callback(result);
     });
 
-    return utils::create_exception_free_task<xbox_social_relationship_result>(
-        task
-        );
+    return xbox_live_result<void>();
 }
 
-const string_t
+const xsapi_internal_string
 social_service_impl::xbox_social_relationship_filter_to_string(
     _In_ xbox_social_relationship_filter xboxSocialRelationshipFilter
     )
@@ -206,55 +213,55 @@ social_service_impl::xbox_social_relationship_filter_to_string(
     switch (xboxSocialRelationshipFilter)
     {
     case xbox_social_relationship_filter::favorite:
-        return _T("Favorite");
+        return "Favorite";
 
     case xbox_social_relationship_filter::legacy_xbox_live_friends:
-        return _T("LegacyXboxLiveFriends");
+        return "LegacyXboxLiveFriends";
 
     default:
     case xbox_social_relationship_filter::all:
-        return string_t();
+        return xsapi_internal_string();
     }
 }
 
-string_t
+xsapi_internal_string
 social_service_impl::pathandquery_social_subpath(
-    _In_ const string_t& ownerId,
+    _In_ const xsapi_internal_string& ownerId,
     _In_ bool includeViewFilter,
-    _In_ const string_t& view,
+    _In_ const xsapi_internal_string& view,
     _In_ uint64_t startIndex,
     _In_ uint64_t maxItems
     )
 {
-    stringstream_t source;
-    source << _T("/users/xuid(");
+    xsapi_internal_stringstream source;
+    source << "/users/xuid(";
     source << ownerId;
     source << ")/people";
 
-    string_t nextDelimiter = _T("?");
+    xsapi_internal_string nextDelimiter = "?";
 
     if (includeViewFilter)
     {
         source << nextDelimiter;
-        source << _T("view=");
+        source << "view=";
         source << view;
-        nextDelimiter = _T("&");
+        nextDelimiter = "&";
     }
 
     if (startIndex > 0)
     {
         source << nextDelimiter;
-        source << _T("startIndex=");
+        source << "startIndex=";
         source << startIndex;
-        nextDelimiter = _T("&");
+        nextDelimiter = "&";
     }
 
     if (maxItems > 0)
     {
         source << nextDelimiter;
-        source << _T("maxItems=");
+        source << "maxItems=";
         source << maxItems;
-        nextDelimiter = _T("&");
+        nextDelimiter = "&";
     }
 
     return source.str();

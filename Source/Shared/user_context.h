@@ -55,20 +55,14 @@ public:
 
     bool is_signed_in() const;
 
-    typedef void(*get_auth_result_completion_routine)(
-        _In_ xbox::services::xbox_live_result<user_context_auth_result> result,
-        _In_ void* context
-        );
-
     void get_auth_result(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
         _In_ const string_t& headers,
         _In_ const string_t& requestBodyString,
         _In_ bool allUsersAuthRequired,
-        _In_ get_auth_result_completion_routine completionRoutine,
-        _In_opt_ void *completionRoutineContext,
-        _In_ uint64_t taskGroupId
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
         );
 
     void get_auth_result(
@@ -77,9 +71,8 @@ public:
         _In_ const string_t& headers,
         _In_ const std::vector<unsigned char>& requestBodyVector,
         _In_ bool allUsersAuthRequired,
-        _In_ get_auth_result_completion_routine completionRoutine,
-        _In_opt_ void *completionRoutineContext,
-        _In_ uint64_t taskGroupId
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
         );
 
     /// TODO eventually remove

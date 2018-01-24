@@ -74,23 +74,7 @@ http_call_impl::get_response(
     _In_ http_call_response_body_type httpCallResponseBodyType
     )
 {
-    m_httpCallData->httpCallResponseBodyType = httpCallResponseBodyType;
-    m_httpCallData->request = get_default_request();
-
-    m_httpCallData->completionRoutine = [](std::shared_ptr<http_call_response> response, void* context)
-    {
-        auto tce = static_cast<pplx::task_completion_event<std::shared_ptr<http_call_response>>*>(context);
-        tce->set(response);
-        delete context;
-    };
-
-    auto context = new pplx::task_completion_event<std::shared_ptr<http_call_response>>();
-    m_httpCallData->completionRoutineContext = context;
-    m_httpCallData->taskGroupId = XSAPI_DEFAULT_TASKGROUP;
-
-    internal_get_response(m_httpCallData);
-
-    return pplx::task<std::shared_ptr<http_call_response>>(*context);
+    return get_response(httpCallResponseBodyType, get_default_request());
 }
 
 pplx::task<std::shared_ptr<http_call_response>>
@@ -100,22 +84,22 @@ http_call_impl::get_response(
     )
 {
     m_httpCallData->httpCallResponseBodyType = httpCallResponseBodyType;
-    m_httpCallData->request = get_default_request();
-
-    m_httpCallData->completionRoutine = [](std::shared_ptr<http_call_response> response, void* context)
-    {
-        auto tce = static_cast<pplx::task_completion_event<std::shared_ptr<http_call_response>>*>(context);
-        tce->set(response);
-        delete context;
-    };
-
-    auto context = new pplx::task_completion_event<std::shared_ptr<http_call_response>>();
-    m_httpCallData->completionRoutineContext = context;
+    m_httpCallData->request = httpRequest;
     m_httpCallData->taskGroupId = XSAPI_DEFAULT_TASKGROUP;
+
+    pplx::task_completion_event<std::shared_ptr<http_call_response>> tce;
+    pplx::task<std::shared_ptr<http_call_response>> task(tce);
+
+    xbox_live_callback<std::shared_ptr<http_call_response>> callback([tce](std::shared_ptr<http_call_response> response)
+    {
+        tce.set(response);
+    });
+
+    m_httpCallData->callback = callback;
 
     internal_get_response(m_httpCallData);
 
-    return pplx::task<std::shared_ptr<http_call_response>>(*context);
+    return task;
 }
 
 #if XSAPI_XDK_AUTH // XDK
@@ -162,39 +146,31 @@ http_call_impl::get_response_with_auth(
     _In_ bool allUsersAuthRequired
 )
 {
-    auto context = new pplx::task_completion_event<std::shared_ptr<http_call_response>>();
+    pplx::task_completion_event<std::shared_ptr<http_call_response>> tce;
     get_response_with_auth(
         userContext,
         httpCallResponseBodyType,
-        allUsersAuthRequired,
-        [](std::shared_ptr<http_call_response> response, void* context)
-        {
-            auto tce = static_cast<pplx::task_completion_event<std::shared_ptr<http_call_response>>*>(context);
-            tce->set(response);
-            delete context;
-        },
-        context,
-        XSAPI_DEFAULT_TASKGROUP
+        allUsersAuthRequired, 
+        XSAPI_DEFAULT_TASKGROUP,
+        [tce](std::shared_ptr<http_call_response> response) { tce.set(response); }
         );
 
-    return pplx::task<std::shared_ptr<http_call_response>>(*context);
+    return pplx::task<std::shared_ptr<http_call_response>>(tce);
 }
 
 void http_call_impl::get_response_with_auth(
     _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
     _In_ http_call_response_body_type httpCallResponseBodyType,
     _In_ bool allUsersAuthRequired,
-    _In_ get_response_with_auth_completion_routine completionRoutine,
-    _In_opt_ void* completionRoutineContext,
-    _In_ uint64_t taskGroupId
-    ) 
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<std::shared_ptr<http_call_response>> callback
+    )
 {
     m_httpCallData->userContext = userContext;
     m_httpCallData->httpCallResponseBodyType = httpCallResponseBodyType;
     m_httpCallData->request = get_default_request();
-    m_httpCallData->completionRoutine = completionRoutine;
-    m_httpCallData->completionRoutineContext = completionRoutineContext;
     m_httpCallData->taskGroupId = taskGroupId;
+    m_httpCallData->callback = callback;
 
 #if !TV_API && !XSAPI_SERVER
 #if XSAPI_CPP
@@ -205,9 +181,9 @@ void http_call_impl::get_response_with_auth(
     {
         auto httpCallResponse = get_http_call_response(m_httpCallData, http_response());
         handle_response_error(httpCallResponse, xbox_live_error_code::auth_user_not_signed_in, "User must be signed in to call this API", http_response());
-        completionRoutine(httpCallResponse, completionRoutineContext);
+        callback(httpCallResponse);
         return;
-    }
+}
 #endif
 
     internal_get_response_with_auth(allUsersAuthRequired);
@@ -311,12 +287,12 @@ void http_call_impl::internal_get_response_with_auth(
             );
     }
 
-    auto context = async_helpers::store_shared_ptr(m_httpCallData);
-
     // Auth stack still using non mem hooked types. Not changing because we will switch to XAL soon anyhow
     string_t tempHttpMethod(m_httpCallData->httpMethod.begin(), m_httpCallData->httpMethod.end());
     string_t tempFullUrl(fullUrl.begin(), fullUrl.end());
     std::vector<unsigned char> tempRequestBodyVector(requestBodyVector.begin(), requestBodyVector.end());
+
+    auto httpCallData = m_httpCallData;
 
     m_httpCallData->userContext->get_auth_result(
         tempHttpMethod,
@@ -324,16 +300,15 @@ void http_call_impl::internal_get_response_with_auth(
         utils::headers_to_string(m_httpCallData->request.headers()),
         tempRequestBodyVector,
         allUsersAuthRequired,
-        [](_In_ xbox::services::xbox_live_result<user_context_auth_result> result, _In_ void* context)
+        m_httpCallData->taskGroupId,
+        [httpCallData](_In_ xbox::services::xbox_live_result<user_context_auth_result> result)
         {
-            auto httpCallData = async_helpers::remove_shared_ptr<http_call_data>(context);
-
             if (result.err())
             {
                 auto httpCallResponse = get_http_call_response(httpCallData, http_response());
                 handle_response_error(httpCallResponse, static_cast<xbox_live_error_code>(result.err().value()), result.err_message(), http_response());
                 httpCallResponse->_Route_service_call();
-                httpCallData->completionRoutine(httpCallResponse, httpCallData->completionRoutineContext);
+                httpCallData->callback(httpCallResponse);
                 return;
             }
 
@@ -349,10 +324,7 @@ void http_call_impl::internal_get_response_with_auth(
             }
 
             internal_get_response(httpCallData);
-        },
-        context,
-        0
-        );
+        });
 }
 
 void http_call_impl::internal_get_response(
@@ -428,7 +400,7 @@ void http_call_impl::internal_get_response(
         httpCallResponse->_Set_timing(httpCallData->requestStartTime, responseReceivedTime);
 
         // Call the callback function
-        httpCallData->completionRoutine(httpCallResponse, httpCallData->completionRoutineContext);
+        httpCallData->callback(httpCallResponse);
     });
 
     return;

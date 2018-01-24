@@ -45,6 +45,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)'=='Release'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="..\..\External\libHttpClient\libHttpClient.props" />
+  </ImportGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalOptions>/bigobj /Zm512 /GS %(AdditionalOptions)</AdditionalOptions>
@@ -1046,6 +1049,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\LogTests.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\ServiceCallLoggerTests.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\WebsocketTests.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\XboxLiveCallbackTests.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\XboxLiveContextTests.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -1053,6 +1057,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.static\casablanca140.static.vcxproj">
       <Project>{04d42f35-e5d5-4d95-980e-1bd7e900f2dd}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.140.Win32.C\libHttpClient.140.Win32.C.vcxproj">
+      <Project>{bd57c607-e104-4505-8a43-3d152f016f16}</Project>
     </ProjectReference>
   </ItemGroup>
   <ImportGroup Label="ExtensionTargets">

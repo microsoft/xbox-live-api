@@ -366,25 +366,10 @@ public:
     /// </summary>
     virtual bool add_default_headers() const = 0;
 
-    // TODO eventually remove this
     virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body,
         _In_ bool allUsersAuthRequired = false
-        ) = 0;
-
-    typedef void(*get_response_with_auth_completion_routine)(
-        _In_ std::shared_ptr<http_call_response>,
-        _In_opt_ void* context
-        );
-
-    virtual void get_response_with_auth(
-        _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
-        _In_ http_call_response_body_type httpCallResponseBodyType,
-        _In_ bool allUsersAuthRequired,
-        _In_ get_response_with_auth_completion_routine completionRoutine,
-        _In_opt_ void* completionRoutineContext,
-        _In_ uint64_t taskGroupId
         ) = 0;
 
     virtual ~http_call(){}

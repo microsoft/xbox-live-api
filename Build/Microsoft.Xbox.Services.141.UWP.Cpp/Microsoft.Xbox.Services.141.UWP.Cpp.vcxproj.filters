@@ -58,9 +58,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_result_impl.cpp">
       <Filter>C++ Source\C\Services\TitleStorage</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Shared\utils_c.cpp">
-      <Filter>C++ Source\C\Shared</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Shared\xbox_live_app_config_c.cpp">
       <Filter>C++ Source\C\Shared</Filter>
     </ClCompile>

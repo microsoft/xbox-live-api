@@ -223,6 +223,7 @@ private:
     std::shared_ptr<xbox::services::xbox_live_context_impl> m_xboxLiveContextImpl;
 
     social::profile_service m_profileService;
+    social::social_service m_socialService;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

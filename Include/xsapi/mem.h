@@ -141,16 +141,16 @@ std::shared_ptr<T> xsapi_allocate_shared(Args&&... args)
 }
 
 template<typename T, typename... Args>
-std::unique_ptr<T, xsapi_alloc_deleter<T>> xsapi_allocate_unique()
+std::unique_ptr<T, xsapi_alloc_deleter<T>> xsapi_allocate_unique(Args&&... args)
 {
     xsapi_stl_allocator<T> alloc;
     auto p = std::allocator_traits<xsapi_stl_allocator<T>>::allocate(alloc, 1); // malloc memory
     auto o = new(p) T(std::forward<Args>(args)...); // call class ctor using placement new
-    return std::unique_ptr<T, xaspi_alloc_deleter<T>>(o, xsapi_alloc_deleter<T>(alloc));
+    return std::unique_ptr<T, xsapi_alloc_deleter<T>>(o, xsapi_alloc_deleter<T>(alloc));
 }
 
 template<typename T>
-using XAPI_UNIQUE_PTR = std::unique_ptr<T, xsapi_alloc_deleter<T>>;
+using xsapi_unique_ptr = std::unique_ptr<T, xsapi_alloc_deleter<T>>;
 
 template<typename T1, typename T2>
 inline bool operator==(const xsapi_stl_allocator<T1>&, const xsapi_stl_allocator<T2>&)

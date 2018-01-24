@@ -7,7 +7,8 @@
 #include "xsapi/system.h"
 
 namespace xbox { namespace services {
-    class xbox_live_context_impl;
+    class xbox_live_context;
+    class xbox_live_context_impl; // TODO remove
     /// <summary>
     /// Contains classes and enumerations that let you retrieve
     /// information about player reputation and relationship with
@@ -493,17 +494,10 @@ public:
         _In_ function_context context
         );
 
-    std::shared_ptr<xbox_live_context_settings> _Xbox_live_context_settings() { return m_xboxLiveContextSettings; }
-
 private:
     social_service() {};
 
-    social_service(
-        _In_ std::shared_ptr<xbox::services::user_context> userContext,
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
-        _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> realTimeActivityService
-        );
+    social_service(_In_ std::shared_ptr<social_service_impl> serviceImpl);
 
     pplx::task<xbox_live_result<xbox_social_relationship_result>> get_social_relationships(
         _In_ const string_t& xboxUserId,
@@ -512,12 +506,9 @@ private:
         _In_ uint32_t maxItems
         );
 
-    std::shared_ptr<xbox::services::user_context> m_userContext;
-    std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
     std::shared_ptr<social_service_impl> m_socialServiceImpl;
 
-    friend xbox_live_context_impl;
-    friend xbox_social_relationship_result;
+    friend xbox_live_context;
 };
 
 /// <summary>

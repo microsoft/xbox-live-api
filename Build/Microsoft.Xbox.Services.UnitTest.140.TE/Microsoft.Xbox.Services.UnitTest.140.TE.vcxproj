@@ -18,6 +18,9 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="..\..\External\libHttpClient\libHttpClient.props" />
+  </ImportGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalOptions>/bigobj /Zm512 %(AdditionalOptions)</AdditionalOptions>
@@ -1134,6 +1137,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\LogTests.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\ServiceCallLoggerTests.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\WebsocketTests.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\XboxLiveCallbackTests.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\XboxLiveContextTests.cpp" />
   </ItemGroup>
   <ItemGroup>

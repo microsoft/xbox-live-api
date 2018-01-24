@@ -48,10 +48,11 @@
 #include "httpClient/httpClient.h"
 #include "httpClient/task.h"
 
-#if XSAPI_CPP && UWP_API // TODO eventually extend where these are included
 #include "xsapi-c/types_c.h"
 #include "xsapi-c/errors_c.h"
 #include "xsapi-c/xbox_live_global_c.h"
+
+#if XSAPI_C
 #include "utils_c.h"
 #endif
 

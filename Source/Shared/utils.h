@@ -13,7 +13,6 @@
 #include "http_call_response.h"
 #include "xsapi/mem.h"
 #include "xsapi/system.h"
-//#include "xsapi-c/xbox_live_global_c.h"
 
 // Forward decls
 class xbl_thread_pool;
@@ -242,6 +241,7 @@ struct xsapi_singleton
     std::shared_ptr<XSAPI_STATS_MANAGER_VARS> m_statsVars;
 };
 
+void init_mem_hooks();
 extern XBL_MEM_ALLOC_FUNC g_pMemAllocHook;
 extern XBL_MEM_FREE_FUNC g_pMemFreeHook;
 
@@ -1061,6 +1061,7 @@ public:
         size_t stringArrayCount
         );
 
+#if XSAPI_C
     static PCSTR alloc_string(const string_t& str);
     static void free_string(PCSTR str);
 
@@ -1074,6 +1075,7 @@ public:
     static XBL_RESULT std_bad_alloc_to_xbl_result(std::bad_alloc const& e);
     static XBL_RESULT std_exception_to_xbl_result(std::exception const& e);
     static XBL_RESULT unknown_exception_to_xbl_result();
+#endif
 
 private:
     static std::vector<string_t> get_locale_list();
@@ -1084,21 +1086,6 @@ private:
 };
 
 static const uint64_t XSAPI_DEFAULT_TASKGROUP = 99;
-
-struct client_callback_info
-{
-    client_callback_info(
-        void *_completionFunction,
-        void *_clientContext
-        ) :
-        completionFunction(_completionFunction),
-        clientContext(_clientContext)
-    {
-    }
-
-    void *completionFunction;
-    void *clientContext;
-};
 
 class async_helpers
 {
@@ -1114,7 +1101,7 @@ public:
     }
 
     template<typename T>
-    static std::shared_ptr<T> remove_shared_ptr(void *rawContextPtr)
+    static std::shared_ptr<T> remove_shared_ptr(void *rawContextPtr, bool deleteShared = true)
     {
         std::lock_guard<std::mutex> lock(m_contextsLock);
 
@@ -1122,7 +1109,10 @@ public:
         if (iter != m_sharedPtrs.end())
         {
             auto returnPtr = std::shared_ptr<T>(iter->second, reinterpret_cast<T*>(iter->second.get()));
-            m_sharedPtrs.erase(iter);
+            if (deleteShared)
+            {
+                m_sharedPtrs.erase(iter);
+            }
             return returnPtr;
         }
         else
@@ -1132,41 +1122,90 @@ public:
         }
     }
 
-    static void *store_client_callback_info(void *clientCallbackFunction, void *clientContext)
-    {
-        std::lock_guard<std::mutex> lock(m_contextsLock);
-        void *index = (void*)m_clientCallbackInfoIndexer++;
-        m_clientCallbackInfoMap.insert(std::make_pair(index, client_callback_info(clientCallbackFunction, clientContext)));
-        return index;
-    }
-
-    static client_callback_info remove_client_callback_info(void * context)
-    {
-        std::lock_guard<std::mutex> lock(m_contextsLock);
-
-        auto iter = m_clientCallbackInfoMap.find(context);
-        if (iter != m_clientCallbackInfoMap.end())
-        {
-            auto callbackInfo = iter->second;
-            m_clientCallbackInfoMap.erase(iter);
-            return callbackInfo;
-        }
-        else
-        {
-            XSAPI_ASSERT(false && "Context not found!");
-            return client_callback_info(nullptr, nullptr);
-        }
-    }
-
 private:
     static std::mutex m_contextsLock;
     static xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_sharedPtrs;
-    static uintptr_t m_clientCallbackInfoIndexer;
-    static xsapi_internal_unordered_map<void *, client_callback_info> m_clientCallbackInfoMap;
 
     async_helpers();
     async_helpers(const async_helpers&);
     async_helpers& operator=(const async_helpers&);
+};
+
+template<typename... Args>
+class xbox_live_callback
+{
+public:
+    xbox_live_callback() : m_callable(nullptr) {}
+
+    template <typename Functor>
+    xbox_live_callback(Functor functor)
+    {
+        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(functor).release());
+    }
+
+    xbox_live_callback(const xbox_live_callback& rhs)
+    {
+        *this = rhs;
+    }
+
+    xbox_live_callback(xbox_live_callback&& rhs)
+    {
+        *this = std::move(rhs);
+    }
+
+    template <typename Functor>
+    xbox_live_callback& operator=(Functor f)
+    {
+        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(functor).release());
+        return *this;
+    }
+
+    xbox_live_callback& operator=(const xbox_live_callback& rhs)
+    {
+        m_callable = rhs.m_callable->copy();
+        return *this;
+    }
+
+    xbox_live_callback& operator=(xbox_live_callback&& rhs)
+    {
+        m_callable = std::move(rhs.m_callable);
+        return *this;
+    }
+
+    void operator()(Args... args) const
+    {
+        XSAPI_ASSERT(m_callable != nullptr);
+        (*m_callable)(args...);
+    }
+
+private:
+    struct ICallable
+    {
+        virtual ~ICallable() = default;
+        virtual void operator()(Args...) = 0;
+        virtual xsapi_unique_ptr<ICallable> copy() = 0;
+    };
+
+    template <typename Functor>
+    struct callable : public ICallable
+    {
+        callable(const Functor& functor) : m_functor(functor) { }
+        ~callable() override = default;
+
+        void operator()(Args... args) override
+        {
+            m_functor(args...);
+        }
+
+        xsapi_unique_ptr<ICallable> copy() override
+        {
+            return xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(m_functor).release());
+        }
+
+        Functor m_functor;
+    };
+
+    xsapi_unique_ptr<ICallable> m_callable;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

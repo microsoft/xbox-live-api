@@ -155,7 +155,7 @@ MockHttpCall::_Internal_get_response_with_auth(
     return pplx::task_from_result(ResultValue);
 }
 
-const std::wstring& MockHttpCall::server_name() const
+std::wstring MockHttpCall::server_name() const
 {
     return ServerName;
 }
@@ -165,7 +165,7 @@ const web::uri& MockHttpCall::path_query_fragment() const
     return PathQueryFragment;
 }
 
-const std::wstring& MockHttpCall::http_method() const
+std::wstring MockHttpCall::http_method() const
 {
     return HttpMethod;
 }
@@ -222,7 +222,7 @@ void MockHttpCall::set_content_type_header_value(
 {
 }
 
-const std::wstring& MockHttpCall::content_type_header_value() const
+std::wstring MockHttpCall::content_type_header_value() const
 {
     static std::wstring value = L"MockGetContentTypeHeaderValue";
     return value;
@@ -233,7 +233,7 @@ void MockHttpCall::set_xbox_contract_version_header_value(
 {
 }
 
-const std::wstring& MockHttpCall::xbox_contract_version_header_value() const
+std::wstring MockHttpCall::xbox_contract_version_header_value() const
 {
     static std::wstring value = L"MockGetXboxContractVersionHeaderValue";
     return value;

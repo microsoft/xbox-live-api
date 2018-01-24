@@ -112,9 +112,8 @@ void user_impl::get_token_and_signature(
     _In_ const string_t& httpMethod,
     _In_ const string_t& url,
     _In_ const string_t& headers,
-    _In_ get_token_and_signature_completion_routine completionRoutine,
-    _In_opt_ void *completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
     )
 {
     internal_get_token_and_signature(
@@ -125,9 +124,8 @@ void user_impl::get_token_and_signature(
         std::vector<unsigned char>(),
         false,
         false,
-        completionRoutine,
-        completionRoutineContext,
-        taskGroupId
+        taskGroupId,
+        callback
         );
 }
 
@@ -136,9 +134,8 @@ void user_impl::get_token_and_signature(
     _In_ const string_t& url,
     _In_ const string_t& headers,
     _In_ const string_t& requestBodyString,
-    _In_ get_token_and_signature_completion_routine completionRoutine,
-    _In_opt_ void *completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
     )
 {
     std::string utf8Body(utility::conversions::to_utf8string(requestBodyString));
@@ -152,9 +149,8 @@ void user_impl::get_token_and_signature(
         utf8Vec,
         false,
         false,
-        completionRoutine,
-        completionRoutineContext,
-        taskGroupId
+        taskGroupId,
+        callback
         );
 }
 
@@ -163,9 +159,8 @@ void user_impl::get_token_and_signature(
     _In_ const string_t& url,
     _In_ const string_t& headers,
     _In_ const std::vector<unsigned char>& requestBodyArray,
-    _In_ get_token_and_signature_completion_routine completionRoutine,
-    _In_opt_ void *completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
     )
 {
     internal_get_token_and_signature(
@@ -176,9 +171,8 @@ void user_impl::get_token_and_signature(
         requestBodyArray,
         false,
         false,
-        completionRoutine,
-        completionRoutineContext,
-        taskGroupId
+        taskGroupId,
+        callback
         );
 }
 
