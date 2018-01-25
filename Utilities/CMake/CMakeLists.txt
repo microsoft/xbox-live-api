@@ -131,7 +131,7 @@ set(Public_Source_Files_C
     ../../include/xsapi-c/presence_c.h
     ../../include/xsapi-c/privacy_c.h
     ../../include/xsapi-c/profile_c.h
-    ../../include/xsapi-c/social.h
+    ../../include/xsapi-c/social_c.h
     ../../include/xsapi-c/social_manager_c.h
     ../../include/xsapi-c/stats_manager_c.h
     ../../include/xsapi-c/system_c.h
