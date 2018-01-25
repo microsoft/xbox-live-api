@@ -83,7 +83,11 @@ void init_mem_hooks()
         g_pMemAllocHook = [](size_t size, XBL_MEMORY_TYPE memoryType)
         {
             UNREFERENCED_PARAMETER(memoryType);
-            return malloc(size);
+            if (size > 0)
+            {
+                return malloc(size);
+            }
+            return static_cast<void*>(nullptr);
         };
 
         g_pMemFreeHook = [](void *pointer, XBL_MEMORY_TYPE memoryType)
@@ -156,6 +160,31 @@ web::json::value utils::extract_json_field(
     {
         auto& jsonObj = json.as_object();
         auto it = jsonObj.find(name);
+        if (it != jsonObj.end())
+        {
+            return it->second;
+        }
+    }
+
+    if (required)
+    {
+        error = xbox_live_error_code::json_error;
+    }
+
+    return web::json::value::null();
+}
+
+web::json::value utils::extract_json_field(
+    _In_ const web::json::value& json,
+    _In_ const xsapi_internal_string& name,
+    _Inout_ std::error_code& error,
+    _In_ bool required
+    )
+{
+    if (json.is_object())
+    {
+        auto& jsonObj = json.as_object();
+        auto it = jsonObj.find(utils::external_string_from_internal_string(name)); // TODO
         if (it != jsonObj.end())
         {
             return it->second;
@@ -303,6 +332,15 @@ xbox_live_result<string_t> utils::json_string_extractor(_In_ const web::json::va
     return xbox_live_result<string_t>(json.as_string());
 }
 
+xbox_live_result<xsapi_internal_string> utils::json_internal_string_extractor(_In_ const web::json::value& json)
+{
+    if (!json.is_string())
+    {
+        return xbox_live_result<xsapi_internal_string>(xbox_live_error_code::json_error, "JSON being deserialized is not a string");
+    }
+    return xbox_live_result<xsapi_internal_string>(utils::internal_string_from_external_string(json.as_string()));
+}
+
 web::json::value utils::json_string_serializer(_In_ const string_t& value)
 {
     return web::json::value::string(value);
@@ -341,6 +379,19 @@ string_t utils::extract_json_string(
     web::json::value field(utils::extract_json_field(jsonValue, stringName, error, required));
     if ((!field.is_string() && !required) || field.is_null()) { return defaultValue; }
     return field.as_string();
+}
+
+xsapi_internal_string utils::extract_json_string(
+    _In_ const web::json::value& jsonValue,
+    _In_ const xsapi_internal_string& stringName,
+    _Inout_ std::error_code& error,
+    _In_ bool required,
+    _In_ const xsapi_internal_string& defaultValue
+    )
+{
+    web::json::value field(utils::extract_json_field(jsonValue, stringName, error, required));
+    if ((!field.is_string() && !required) || field.is_null()) { return defaultValue; }
+    return utils::internal_string_from_external_string(field.as_string()); // TODO
 }
 
 void
@@ -424,6 +475,19 @@ web::json::array utils::extract_json_as_array(
 bool utils::extract_json_bool(
     _In_ const web::json::value& jsonValue,
     _In_ const string_t& stringName,
+    _Inout_ std::error_code& error,
+    _In_ bool required,
+    _In_ bool defaultValue
+    )
+{
+    web::json::value field(utils::extract_json_field(jsonValue, stringName, error, required));
+    if (!field.is_boolean() && !required) { return defaultValue; }
+    return field.as_bool();
+}
+
+bool utils::extract_json_bool(
+    _In_ const web::json::value& jsonValue,
+    _In_ const xsapi_internal_string& stringName,
     _Inout_ std::error_code& error,
     _In_ bool required,
     _In_ bool defaultValue

@@ -131,6 +131,7 @@ set(Public_Source_Files_C
     ../../include/xsapi-c/presence_c.h
     ../../include/xsapi-c/privacy_c.h
     ../../include/xsapi-c/profile_c.h
+    ../../include/xsapi-c/social.h
     ../../include/xsapi-c/social_manager_c.h
     ../../include/xsapi-c/stats_manager_c.h
     ../../include/xsapi-c/system_c.h
@@ -418,6 +419,7 @@ set(Social_Source_Files
     ../../Source/Services/Social/profile_service.cpp
     ../../Source/Services/Social/reputation_feedback_request.cpp
     ../../Source/Services/Social/reputation_service.cpp
+    ../../Source/Services/Social/reputation_service_impl.cpp
     ../../Source/Services/Social/Social_service.cpp
     ../../Source/Services/Social/xbox_Social_relationship.cpp
     ../../Source/Services/Social/xbox_Social_relationship_result.cpp
@@ -664,6 +666,9 @@ set(Social_Source_Files_C
     ../../Source/Services/Social/C/profile.cpp
     ../../Source/Services/Social/C/profile_helpers.h
     ../../Source/Services/Social/C/profile_helpers.cpp
+    ../../Source/Services/Social/C/social.cpp
+    ../../Source/Services/Social/C/social_helpers.h
+    ../../Source/Services/Social/C/social_helpers.cpp
     )
     
 set(Social_Manager_Source_Files_C

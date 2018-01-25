@@ -11,9 +11,9 @@ social_relationship_change_event_args::social_relationship_change_event_args()
 }
 
 social_relationship_change_event_args::social_relationship_change_event_args(
-    _In_ string_t callerXboxUserId,
+    _In_ xsapi_internal_string callerXboxUserId,
     _In_ social_notification_type notificationType,
-    _In_ std::vector<string_t> xboxUserIds
+    _In_ xsapi_internal_vector<xsapi_internal_string> xboxUserIds
     ) :
     m_callerXboxUserId(std::move(callerXboxUserId)),
     m_notificationType(notificationType),
@@ -21,10 +21,10 @@ social_relationship_change_event_args::social_relationship_change_event_args(
 {
 }
 
-const string_t&
+string_t
 social_relationship_change_event_args::caller_xbox_user_id() const
 {
-    return m_callerXboxUserId;
+    return utils::external_string_from_internal_string(m_callerXboxUserId);
 }
 
 social_notification_type
@@ -33,10 +33,10 @@ social_relationship_change_event_args::social_notification() const
     return m_notificationType;
 }
 
-const std::vector<string_t>&
+std::vector<string_t>
 social_relationship_change_event_args::xbox_user_ids() const
 {
-    return m_xboxUserIds;
+    return utils::std_string_vector_from_internal_string_vector(m_xboxUserIds);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

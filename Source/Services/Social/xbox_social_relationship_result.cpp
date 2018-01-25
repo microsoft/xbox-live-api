@@ -19,7 +19,7 @@ xbox_social_relationship_result::xbox_social_relationship_result():
 }
 
 xbox_social_relationship_result::xbox_social_relationship_result(
-    _In_ std::vector<xbox_social_relationship> socialRelationships, 
+    _In_ xsapi_internal_vector<xbox_social_relationship> socialRelationships, 
     _In_ uint32_t totalCount
     ) : 
     m_socialRelationships(std::move(socialRelationships)),
@@ -38,10 +38,10 @@ void xbox_social_relationship_result::_Init_next_page_info(
     m_continuationSkip = continuationSkip;
 }
 
-const std::vector< xbox_social_relationship >&
+std::vector< xbox_social_relationship >
 xbox_social_relationship_result::items() const
 {
-    return m_socialRelationships;
+    return utils::std_vector_from_internal_vector<xbox_social_relationship>(m_socialRelationships);
 }
 
 uint32_t xbox_social_relationship_result::total_count() const
@@ -50,7 +50,7 @@ uint32_t xbox_social_relationship_result::total_count() const
 }
 
 bool
-xbox_social_relationship_result::has_next()
+xbox_social_relationship_result::has_next() const
 {
     return (m_continuationSkip < m_totalCount);
 }
@@ -81,7 +81,7 @@ xbox_social_relationship_result::_Deserialize(_In_ const web::json::value& json)
     std::error_code errc = xbox_live_error_code::no_error;
 
     auto result = xbox_social_relationship_result(
-        utils::extract_json_vector<xbox_social_relationship>(xbox_social_relationship::_Deserialize, json, _T("people"), errc, true),
+        utils::extract_json_vector<xbox_social_relationship>(xbox_social_relationship::_Deserialize, json, "people", errc, true),
         utils::extract_json_int(json, _T("totalCount"), errc, false, 0)
         );
 

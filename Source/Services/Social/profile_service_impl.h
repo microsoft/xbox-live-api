@@ -10,8 +10,6 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 class profile_service_impl : public std::enable_shared_from_this<profile_service_impl>
 {
 public:
-    profile_service_impl() {}
-
     profile_service_impl(
         _In_ std::shared_ptr<user_context> userContext,
         _In_ std::shared_ptr<xbox_live_context_settings> xboxLiveContextSettings,

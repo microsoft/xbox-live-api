@@ -19,10 +19,10 @@ xbox_social_relationship::xbox_social_relationship():
 }
 
 xbox_social_relationship::xbox_social_relationship(
-    _In_ string_t xboxUserId,
+    _In_ xsapi_internal_string xboxUserId,
     _In_ bool isFavorite,
     _In_ bool isFollowingCaller,
-    _In_ std::vector<string_t> socialNetworks
+    _In_ xsapi_internal_vector<xsapi_internal_string> socialNetworks
     ) : 
     m_xboxUserId(std::move(xboxUserId)),
     m_isFavorite(isFavorite),
@@ -31,9 +31,9 @@ xbox_social_relationship::xbox_social_relationship(
 {
 }
 
-const string_t& xbox_social_relationship::xbox_user_id() const
+string_t xbox_social_relationship::xbox_user_id() const
 {
-    return m_xboxUserId;
+    return utils::external_string_from_internal_string(m_xboxUserId);
 }
 
 bool xbox_social_relationship::is_favorite() const
@@ -46,9 +46,9 @@ bool xbox_social_relationship::is_following_caller() const
     return m_isFollowingCaller;
 }
 
-const std::vector< string_t >& xbox_social_relationship::social_networks() const
+std::vector< string_t > xbox_social_relationship::social_networks() const
 {
-    return m_socialNetworks;
+    return utils::std_string_vector_from_internal_string_vector(m_socialNetworks);
 }
 
 xbox_live_result<xbox_social_relationship>
@@ -59,10 +59,10 @@ xbox_social_relationship::_Deserialize(_In_ const web::json::value& json)
     std::error_code errc = xbox_live_error_code::no_error;
 
     auto result = xbox_social_relationship(
-        utils::extract_json_string(json, _T("xuid"), errc, true),
-        utils::extract_json_bool(json, _T("isFavorite"), errc),
-        utils::extract_json_bool(json, _T("isFollowingCaller"), errc),
-        utils::extract_json_vector<string_t>(utils::json_string_extractor, json, _T("socialNetworks"), errc, false)
+        utils::extract_json_string(json, "xuid", errc, true),
+        utils::extract_json_bool(json, "isFavorite", errc),
+        utils::extract_json_bool(json, "isFollowingCaller", errc),
+        utils::extract_json_vector<xsapi_internal_string>(utils::json_internal_string_extractor, json, "socialNetworks", errc, false)
         );
 
     return xbox_live_result<xbox_social_relationship>(result, errc);

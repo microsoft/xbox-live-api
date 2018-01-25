@@ -8,7 +8,6 @@
 
 namespace xbox { namespace services {
     class xbox_live_context;
-    class xbox_live_context_impl; // TODO remove
     /// <summary>
     /// Contains classes and enumerations that let you retrieve
     /// information about player reputation and relationship with
@@ -17,6 +16,9 @@ namespace xbox { namespace services {
     namespace social {
 
 class social_service_impl;
+class reputation_service_impl;
+class xbl_xbox_social_relationship_result_wrapper;
+class xbl_social_relationship_change_event_args_wrapper;
 
 enum class xbox_social_relationship_filter
 {
@@ -206,34 +208,37 @@ public:
     /// </summary>
     xbox_social_relationship();
 
+    /// <summary>
+    /// Internal function
+    /// </summary>
     xbox_social_relationship(
-        _In_ string_t xboxUserId,
+        _In_ xsapi_internal_string xboxUserId,
         _In_ bool isFavorite,
         _In_ bool isFollowingCaller,
-        _In_ std::vector<string_t> socialNetworks
+        _In_ xsapi_internal_vector<xsapi_internal_string> socialNetworks
         );
 
     /// <summary>
     /// The person's Xbox user identifier.
     /// </summary>
-    _XSAPIIMP const string_t& xbox_user_id() const;
+    _XSAPIIMP string_t xbox_user_id() const;
 
     /// <summary>
     /// Indicates whether the person is one that the user cares about more. 
     /// Users can have a very large number of people in their people list, 
     /// favorite people should be prioritized first in experiences and shown before others that are not favorites. 
-    /// </summary>        
+    /// </summary>
     _XSAPIIMP bool is_favorite() const;
 
     /// <summary>
     /// Indicates whether the person is following the person that requested the information.
-    /// </summary>        
+    /// </summary>
     _XSAPIIMP bool is_following_caller() const;
 
     /// <summary>
     /// A collection of strings indicating which social networks this person has a relationship with. 
     /// </summary>
-    _XSAPIIMP const std::vector< string_t >& social_networks() const;
+    _XSAPIIMP std::vector< string_t > social_networks() const;
 
     /// <summary>
     /// Internal function
@@ -241,10 +246,12 @@ public:
     static xbox_live_result<xbox_social_relationship> _Deserialize(_In_ const web::json::value& json);
 
 private:
-    string_t m_xboxUserId;
+    xsapi_internal_string m_xboxUserId;
     bool m_isFavorite;
     bool m_isFollowingCaller;
-    std::vector<string_t> m_socialNetworks;
+    xsapi_internal_vector<xsapi_internal_string> m_socialNetworks;
+
+    friend xbl_xbox_social_relationship_result_wrapper;
 };
 
 /// <summary>
@@ -286,14 +293,14 @@ public:
     /// Internal function
     /// </summary>
     xbox_social_relationship_result(
-        _In_ std::vector< xbox_social_relationship > socialRelationships,
+        _In_ xsapi_internal_vector< xbox_social_relationship > socialRelationships,
         _In_ uint32_t totalCount
         );
 
     /// <summary>
     /// Collection of XboxSocialRelationship objects returned by a request.
     /// </summary>
-    _XSAPIIMP const std::vector< xbox_social_relationship >& items() const;
+    _XSAPIIMP std::vector< xbox_social_relationship > items() const;
 
     /// <summary>
     /// The total number of XboxSocialRelationship objects that can be requested.
@@ -304,7 +311,7 @@ public:
     /// Returns a boolean value that indicates if there are more pages of social relationships to retrieve.
     /// </summary>
     /// <returns>True if there are more pages, otherwise false.</returns>
-    _XSAPIIMP bool has_next();
+    _XSAPIIMP bool has_next() const;
 
     /// <summary>
     /// Returns an XboxSocialRelationshipResult object containing the next page.
@@ -334,10 +341,12 @@ public:
 private:
     std::shared_ptr<social_service_impl> m_socialImpl;
 
-    std::vector< xbox_social_relationship > m_socialRelationships;
+    xsapi_internal_vector< xbox_social_relationship > m_socialRelationships;
     uint32_t m_totalCount;
     xbox_social_relationship_filter m_filter;
     uint32_t m_continuationSkip;
+
+    friend xbl_xbox_social_relationship_result_wrapper;
 };
 
 class social_relationship_change_event_args
@@ -346,7 +355,7 @@ public:
     /// <summary>
     /// The Xbox user ID for the user who's social graph changes are being listed for.
     /// </summary>
-    _XSAPIIMP const string_t& caller_xbox_user_id() const;
+    _XSAPIIMP string_t caller_xbox_user_id() const;
 
     /// <summary>
     /// The type of notification change.
@@ -356,7 +365,7 @@ public:
     /// <summary>
     /// The Xbox user ids who the event is for
     /// </summary>
-    _XSAPIIMP const std::vector<string_t>& xbox_user_ids() const;
+    _XSAPIIMP std::vector<string_t> xbox_user_ids() const;
 
     /// <summary>
     /// Internal function
@@ -367,15 +376,17 @@ public:
     /// Internal function
     /// </summary>
     social_relationship_change_event_args(
-        _In_ string_t callerXboxUserId,
+        _In_ xsapi_internal_string callerXboxUserId,
         _In_ social_notification_type notificationType,
-        _In_ std::vector<string_t> xboxUserIds
+        _In_ xsapi_internal_vector<xsapi_internal_string> xboxUserIds
         );
 
 private:
-    string_t m_callerXboxUserId;
+    xsapi_internal_string m_callerXboxUserId;
     social_notification_type m_notificationType;
-    std::vector<string_t> m_xboxUserIds;
+    xsapi_internal_vector<xsapi_internal_string> m_xboxUserIds;
+
+    friend xbl_social_relationship_change_event_args_wrapper;
 };
 
 class social_relationship_change_subscription : public xbox::services::real_time_activity::real_time_activity_subscription
@@ -384,15 +395,15 @@ public:
     /// <summary>
     /// The Xbox user ID.
     /// </summary>
-    _XSAPIIMP const string_t& xbox_user_id() const;
+    _XSAPIIMP string_t xbox_user_id() const;
 
     /// <summary>
     /// Internal function
     /// </summary>
     social_relationship_change_subscription(
-        _In_ string_t xboxUserId,
-        _In_ std::function<void(const social_relationship_change_event_args&)> handler,
-        _In_ std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)> subscriptionErrorHandler
+        _In_ xsapi_internal_string xboxUserId,
+        _In_ xbox_live_callback<const social_relationship_change_event_args&> handler,
+        _In_ std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)> subscriptionErrorHandler // TODO change to xbox_live_callback
         );
 
 protected:
@@ -402,11 +413,11 @@ protected:
 
 private:
     social_notification_type convert_string_type_to_notification_type(
-        _In_ const string_t& notificationType
+        _In_ const xsapi_internal_string& notificationType
         ) const;
 
-    string_t m_xboxUserId;
-    std::function<void(const social_relationship_change_event_args&)> m_handler;
+    xsapi_internal_string m_xboxUserId;
+    xbox_live_callback<const social_relationship_change_event_args&> m_handler;
 };
 
 /// <summary>
@@ -523,6 +534,17 @@ public:
     reputation_feedback_item();
 
     /// <summary>
+    /// Internal function
+    /// </summary>
+    reputation_feedback_item(
+        _In_ xsapi_internal_string xboxUserId,
+        _In_ reputation_feedback_type reputationFeedbackType,
+        _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef = xbox::services::multiplayer::multiplayer_session_reference(),
+        _In_ xsapi_internal_string reasonMessage = xsapi_internal_string(),
+        _In_ xsapi_internal_string evidenceResourceId = xsapi_internal_string()
+        );
+
+    /// <summary>
     /// Construct a reputation_feedback_item object
     /// </summary>
     /// <param name="xboxUserId">The Xbox User ID of the user that reputation feedback is being submitted on.</param>
@@ -541,7 +563,7 @@ public:
     /// <summary>
     /// The Xbox User ID of the user that reputation feedback is being submitted on.
     /// </summary>
-    _XSAPIIMP const string_t& xbox_user_id() const;
+    _XSAPIIMP string_t xbox_user_id() const;
 
     /// <summary>
     /// The reputation feedback type being submitted.
@@ -556,19 +578,19 @@ public:
     /// <summary>
     /// User supplied text added to explain the reason for the feedback.
     /// </summary>
-    _XSAPIIMP const string_t& reason_message() const;
+    _XSAPIIMP string_t reason_message() const;
 
     /// <summary>
     /// The Id of a resource that can be used as evidence for the feedback. Example: the Id of a video file.
     /// </summary>
-    _XSAPIIMP const string_t& evidence_resource_id() const;
+    _XSAPIIMP string_t evidence_resource_id() const;
 
 private:
-    string_t m_xboxUserId;
+    xsapi_internal_string m_xboxUserId;
     reputation_feedback_type m_reputationFeedbackType;
     xbox::services::multiplayer::multiplayer_session_reference m_sessionRef;
-    string_t m_reasonMessage;
-    string_t m_evidenceResourceId;
+    xsapi_internal_string m_reasonMessage;
+    xsapi_internal_string m_evidenceResourceId;
 };
 
 
@@ -609,30 +631,11 @@ public:
 private:
     reputation_service() {};
 
-    reputation_service(
-        _In_ std::shared_ptr<xbox::services::user_context> userContext,
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
-        );
+    reputation_service(_In_ std::shared_ptr<reputation_service_impl> serviceImpl);
 
-    std::shared_ptr<xbox::services::user_context> m_userContext;
-    std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
-    std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
+    std::shared_ptr<reputation_service_impl> m_serviceImpl;
 
-    string_t reputation_feedback_subpath(
-        _In_ const string_t& xboxUserId
-        );
-
-    string_t reputation_history_subpath(
-        _In_ const string_t& xboxUserId
-        );
-
-    string_t reputation_history_subpath(
-        _In_ const string_t& xboxUserId,
-        _In_ uint32_t days
-        );
-
-    friend xbox_live_context_impl;
+    friend xbox_live_context;
 };
 
 

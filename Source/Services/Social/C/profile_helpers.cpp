@@ -6,8 +6,7 @@
 #include "xsapi/profile.h"
 #include "profile_helpers.h"
 
-using namespace xbox::services;
-using namespace xbox::services::social;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
 xbl_xbox_user_profiles_wrapper::xbl_xbox_user_profiles_wrapper(
     const xsapi_internal_vector<xbox_user_profile>& profiles
@@ -53,7 +52,9 @@ const XBL_XBOX_USER_PROFILE *xbl_xbox_user_profiles_wrapper::xbl_xbox_user_profi
     return &m_profiles[0];
 }
 
-const uint32_t xbl_xbox_user_profiles_wrapper::profiles_count() const
+uint32_t xbl_xbox_user_profiles_wrapper::profiles_count() const
 {
     return static_cast<uint32_t>(m_profiles.size());
 }
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements.cpp">
@@ -826,6 +826,15 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\xbox_live_mutex.cpp">
       <Filter>C++ Source\System</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Social\reputation_service_impl.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Social\C\social.cpp">
+      <Filter>C++ Source\Services\Social\C</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Social\C\social_helpers.cpp">
+      <Filter>C++ Source\Services\Social\C</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\achievements.h">
@@ -1181,6 +1190,12 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl.h">
       <Filter>C++ Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\xsapi-c\social_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Social\C\social_helpers.h">
+      <Filter>C++ Source\Services\Social\C</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

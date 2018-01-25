@@ -40,6 +40,7 @@ xbox_live_context::xbox_live_context(
 
     m_profileService = social::profile_service(m_xboxLiveContextImpl->profile_service_impl());
     m_socialService = social::social_service(m_xboxLiveContextImpl->social_service_impl());
+    m_reputationService = social::reputation_service(m_xboxLiveContextImpl->reputation_service_impl());
 }
 
 std::shared_ptr<system::xbox_live_user>
@@ -86,7 +87,7 @@ xbox_live_context::social_service()
 social::reputation_service&
 xbox_live_context::reputation_service()
 {
-    return m_xboxLiveContextImpl->reputation_service();
+    return m_reputationService;
 }
 
 leaderboard::leaderboard_service&

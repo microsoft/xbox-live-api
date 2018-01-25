@@ -147,7 +147,7 @@ void xbox_live_context_impl::init()
     std::weak_ptr<xbox_live_context_impl> thisWeakPtr = shared_from_this();
 
     m_profileServiceImpl = std::make_shared<xbox::services::social::profile_service_impl>(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-    m_reputationService = xbox::services::social::reputation_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
+    m_reputationServiceImpl = std::make_shared<xbox::services::social::reputation_service_impl>(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_leaderboardService = xbox::services::leaderboard::leaderboard_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_achievementService = xbox::services::achievements::achievement_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, thisWeakPtr);
     m_matchmakingService = xbox::services::matchmaking::matchmaking_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
@@ -234,10 +234,10 @@ xbox_live_context_impl::social_service_impl()
     return m_socialServiceImpl;
 }
 
-social::reputation_service&
-xbox_live_context_impl::reputation_service()
+std::shared_ptr<social::reputation_service_impl>
+xbox_live_context_impl::reputation_service_impl()
 {
-    return m_reputationService;
+    return m_reputationServiceImpl;
 }
 
 leaderboard::leaderboard_service&
