@@ -73,7 +73,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
         RETURN_CPP_INVALIDARGUMENT_IF(s.empty(), void, "Found empty string in xbox user ids");
     }
 
-    std::shared_ptr<http_call_impl> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         "POST",
         utils::create_xboxlive_endpoint("profile", m_appConfig),
@@ -111,7 +111,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_soc
         socialGroup
         );
 
-    std::shared_ptr<http_call_impl> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         "GET",
         utils::create_xboxlive_endpoint("profile", m_appConfig),
@@ -184,7 +184,7 @@ const xsapi_internal_string profile_service_impl::settings_query()
         source << utils::internal_string_from_external_string(web::http::uri::encode_uri(utils::external_string_from_internal_string(SETTINGS_ARRAY[i])));
         if (i + 1 != arraySize)
         {
-            source << _T(",");
+            source << ",";
         }
     }
     return source.str();

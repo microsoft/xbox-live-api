@@ -26,6 +26,25 @@ xbox_user_profile::xbox_user_profile(
     _In_ string_t gamertag,
     _In_ string_t xboxUserId
     ) :
+    m_appDisplayName(utils::internal_string_from_external_string(appDisplayName)),
+    m_appDisplayPictureResizeUri(std::move(appDisplayPictureResizeUri)),
+    m_gameDisplayName(utils::internal_string_from_external_string(gameDisplayName)),
+    m_gameDisplayPictureResizeUri(std::move(gameDisplayPictureResizeUri)),
+    m_gamerscore(utils::internal_string_from_external_string(gamerscore)),
+    m_gamertag(utils::internal_string_from_external_string(gamertag)),
+    m_xboxUserId(utils::internal_string_from_external_string(xboxUserId))
+{
+}
+
+xbox_user_profile::xbox_user_profile(
+    _In_ xsapi_internal_string appDisplayName,
+    _In_ web::uri appDisplayPictureResizeUri,
+    _In_ xsapi_internal_string gameDisplayName,
+    _In_ web::uri gameDisplayPictureResizeUri,
+    _In_ xsapi_internal_string gamerscore,
+    _In_ xsapi_internal_string gamertag,
+    _In_ xsapi_internal_string xboxUserId
+    ) :
     m_appDisplayName(std::move(appDisplayName)),
     m_appDisplayPictureResizeUri(std::move(appDisplayPictureResizeUri)),
     m_gameDisplayName(std::move(gameDisplayName)),
@@ -36,9 +55,9 @@ xbox_user_profile::xbox_user_profile(
 {
 }
 
-const string_t& xbox_user_profile::app_display_name() const
+string_t xbox_user_profile::app_display_name() const
 {
-    return m_appDisplayName;
+    return utils::external_string_from_internal_string(m_appDisplayName);
 }
 
 const web::uri& xbox_user_profile::app_display_picture_resize_uri() const
@@ -46,9 +65,9 @@ const web::uri& xbox_user_profile::app_display_picture_resize_uri() const
     return m_appDisplayPictureResizeUri;
 }
 
-const string_t& xbox_user_profile::game_display_name() const
+string_t xbox_user_profile::game_display_name() const
 {
-    return m_gameDisplayName;
+    return utils::external_string_from_internal_string(m_gameDisplayName);
 }
 
 const web::uri& xbox_user_profile::game_display_picture_resize_uri() const
@@ -56,19 +75,19 @@ const web::uri& xbox_user_profile::game_display_picture_resize_uri() const
     return m_gameDisplayPictureResizeUri;
 }
 
-const string_t& xbox_user_profile::gamerscore() const
+string_t xbox_user_profile::gamerscore() const
 {
-    return m_gamerscore;
+    return utils::external_string_from_internal_string(m_gamerscore);
 }
 
-const string_t& xbox_user_profile::gamertag() const
+string_t xbox_user_profile::gamertag() const
 {
-    return m_gamertag;
+    return utils::external_string_from_internal_string(m_gamertag);
 }
 
-const string_t& xbox_user_profile::xbox_user_id() const
+string_t xbox_user_profile::xbox_user_id() const
 {
-    return m_xboxUserId;
+    return utils::external_string_from_internal_string(m_xboxUserId);
 }
 
 xbox_live_result<xbox_user_profile>
@@ -83,40 +102,40 @@ xbox_user_profile::_Deserialize(
 
     web::json::array setttings = jsonSettings.as_array();
 
-    string_t appDisplayName;
+    xsapi_internal_string appDisplayName;
     web::uri appDisplayPictureResizeUri;
-    string_t gameDisplayName;
+    xsapi_internal_string gameDisplayName;
     web::uri gameDisplayPictureResizeUri;
-    string_t gamerscore;
-    string_t gamertag;
-    string_t xboxUserId = utils::extract_json_string(json, _T("id"), errc, true);
+    xsapi_internal_string gamerscore;
+    xsapi_internal_string gamertag;
+    xsapi_internal_string xboxUserId = utils::extract_json_string(json, "id", errc, true);
 
     for (const auto& setting : setttings)
     {
-        string_t name = utils::extract_json_string(setting, _T("id"), errc, true);
-        string_t stringValue = utils::extract_json_string(setting, _T("value"), errc, true);
+        xsapi_internal_string name = utils::extract_json_string(setting, "id", errc, true);
+        xsapi_internal_string stringValue = utils::extract_json_string(setting, "value", errc, true);
 
-        if (name == _T("AppDisplayName"))
+        if (name == "AppDisplayName")
         {
             appDisplayName = std::move(stringValue);
         }
-        else if (name == _T("AppDisplayPicRaw"))
+        else if (name == "AppDisplayPicRaw")
         {
-            appDisplayPictureResizeUri = std::move(stringValue);
+            appDisplayPictureResizeUri = utils::external_string_from_internal_string(stringValue); // TODO don't double convert here
         }
-        else if (name == _T("GameDisplayName"))
+        else if (name == "GameDisplayName")
         {
             gameDisplayName = std::move(stringValue);
         }
-        else if (name == _T("GameDisplayPicRaw"))
+        else if (name == "GameDisplayPicRaw")
         {
-            gameDisplayPictureResizeUri = std::move(stringValue);
+            gameDisplayPictureResizeUri = utils::external_string_from_internal_string(stringValue); // TODO don't double convert here
         }
-        else if (name == _T("Gamerscore"))
+        else if (name == "Gamerscore")
         {
             gamerscore = std::move(stringValue);
         }
-        else if (name == _T("Gamertag"))
+        else if (name == "Gamertag")
         {
             gamertag = std::move(stringValue);
         }

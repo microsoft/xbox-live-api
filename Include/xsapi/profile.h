@@ -44,10 +44,23 @@ namespace social {
         _XSAPIIMP xbox_user_profile();
 
         /// <summary>
+        /// Internal function
+        /// </summary>
+        _XSAPIIMP xbox_user_profile(
+        _In_ xsapi_internal_string appDisplayName,
+        _In_ web::uri appDisplayPictureResizeUri,
+        _In_ xsapi_internal_string gameDisplayName,
+        _In_ web::uri gameDisplayPictureResizeUri,
+        _In_ xsapi_internal_string gamerscore,
+        _In_ xsapi_internal_string gamertag,
+        _In_ xsapi_internal_string xboxUserId
+        );
+
+        /// <summary>
         /// The user's display name to be used in application UI.  This value is privacy gated and could
         /// be a user's real name or their Gamertag.
         /// </summary>
-        _XSAPIIMP const string_t& app_display_name() const;
+        _XSAPIIMP string_t app_display_name() const;
 
         /// <summary>
         /// Uri for the user's display picture to be used in application UI.
@@ -64,7 +77,7 @@ namespace social {
         /// The user's display name to be used in game UI.  This value is privacy gated and could
         /// be a user's real name or their Gamertag.
         /// </summary>
-        _XSAPIIMP const string_t& game_display_name() const;
+        _XSAPIIMP string_t game_display_name() const;
 
         /// <summary>
         /// Uri for the user's display picture to be used in games.
@@ -80,17 +93,17 @@ namespace social {
         /// <summary>
         /// The user's Gamerscore.
         /// </summary>
-        _XSAPIIMP const string_t& gamerscore() const;
+        _XSAPIIMP string_t gamerscore() const;
 
         /// <summary>
         /// The user's Gamertag.
         /// </summary>
-        _XSAPIIMP const string_t& gamertag() const;
+        _XSAPIIMP string_t gamertag() const;
 
         /// <summary>
         /// The user's Xbox user ID.
         /// </summary>
-        _XSAPIIMP const string_t& xbox_user_id() const;
+        _XSAPIIMP string_t xbox_user_id() const;
 
         /// <summary>
         /// Internal function
@@ -98,13 +111,13 @@ namespace social {
         static xbox_live_result<xbox_user_profile> _Deserialize(_In_ const web::json::value& json);
 
     private:
-        string_t m_appDisplayName;
+        xsapi_internal_string m_appDisplayName;
         web::uri m_appDisplayPictureResizeUri;
-        string_t m_gameDisplayName;
+        xsapi_internal_string m_gameDisplayName;
         web::uri m_gameDisplayPictureResizeUri;
-        string_t m_gamerscore;
-        string_t m_gamertag;
-        string_t m_xboxUserId;
+        xsapi_internal_string m_gamerscore;
+        xsapi_internal_string m_gamertag;
+        xsapi_internal_string m_xboxUserId;
     };
 
     /// <summary>

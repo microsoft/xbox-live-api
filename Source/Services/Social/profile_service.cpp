@@ -26,11 +26,18 @@ profile_service::get_user_profile(
 {
     task_completion_event<xbox_live_result<xbox_user_profile>> tce;
 
-    m_serviceImpl->get_user_profile(
+    auto result = m_serviceImpl->get_user_profile(
         utils::internal_string_from_external_string(xboxUserId),
         XSAPI_DEFAULT_TASKGROUP,
-        [tce](xbox_live_result<xbox_user_profile> result) { tce.set(result); }
-    );
+        [tce](xbox_live_result<xbox_user_profile> result) 
+    { 
+        tce.set(result); 
+    });
+
+    if (result.err())
+    {
+        return pplx::task_from_result<xbox_live_result<xbox_user_profile>>(xbox_live_result<xbox_user_profile>(result.err(), result.err_message()));
+    }
     return pplx::task<xbox_live_result<xbox_user_profile>>(tce);
 }
 

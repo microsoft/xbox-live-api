@@ -39,7 +39,7 @@ xbox_live_context::xbox_live_context(
     m_xboxLiveContextImpl->init();
 
     m_profileService = social::profile_service(m_xboxLiveContextImpl->profile_service_impl());
-    m_socialService = social::social_service(m_xboxLiveContextImpl->social_service_impl());
+    m_socialService = social::social_service(settings(), m_xboxLiveContextImpl->social_service_impl());
     m_reputationService = social::reputation_service(m_xboxLiveContextImpl->reputation_service_impl());
 }
 
@@ -57,6 +57,10 @@ xbox_live_context::xbox_live_context(
 {
     m_xboxLiveContextImpl = std::make_shared<xbox_live_context_impl>(user);
     m_xboxLiveContextImpl->init();
+
+    m_profileService = social::profile_service(m_xboxLiveContextImpl->profile_service_impl());
+    m_socialService = social::social_service(settings(), m_xboxLiveContextImpl->social_service_impl());
+    m_reputationService = social::reputation_service(m_xboxLiveContextImpl->reputation_service_impl());
 }
 
 Microsoft::Xbox::Services::System::XboxLiveUser^

@@ -505,10 +505,15 @@ public:
         _In_ function_context context
         );
 
+    std::shared_ptr<xbox_live_context_settings> _Xbox_live_context_settings() { return m_xboxLiveContextSettings; }
+
 private:
     social_service() {};
 
-    social_service(_In_ std::shared_ptr<social_service_impl> serviceImpl);
+    social_service(
+        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> contextSettings,
+        _In_ std::shared_ptr<social_service_impl> serviceImpl
+        );
 
     pplx::task<xbox_live_result<xbox_social_relationship_result>> get_social_relationships(
         _In_ const string_t& xboxUserId,
@@ -517,6 +522,7 @@ private:
         _In_ uint32_t maxItems
         );
 
+    std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
     std::shared_ptr<social_service_impl> m_socialServiceImpl;
 
     friend xbox_live_context;

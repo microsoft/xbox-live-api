@@ -166,7 +166,7 @@ social_service_impl::get_social_relationships(
         maxItems
         );
 
-    std::shared_ptr<http_call_impl> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         "GET",
         utils::create_xboxlive_endpoint("social", m_appConfig),

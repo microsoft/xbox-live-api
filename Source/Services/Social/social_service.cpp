@@ -13,8 +13,10 @@ using namespace pplx;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
 social_service::social_service(
+    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> contextSettings,
     _In_ std::shared_ptr<social_service_impl> serviceImpl
     ) :
+    m_xboxLiveContextSettings(std::move(contextSettings)),
     m_socialServiceImpl(std::move(serviceImpl))
 {
 }

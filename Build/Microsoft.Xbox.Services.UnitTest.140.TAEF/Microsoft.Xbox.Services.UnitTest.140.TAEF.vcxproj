@@ -874,6 +874,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_feedback_request.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_service_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_social_relationship.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_social_relationship_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_user_profile.cpp" />

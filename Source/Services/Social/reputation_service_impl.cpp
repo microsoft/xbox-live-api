@@ -40,7 +40,7 @@ void reputation_service_impl::submit_reputation_feedback(
         );
 
     xsapi_internal_string pathAndQuery = reputation_feedback_subpath(xboxUserId);
-    std::shared_ptr<http_call_impl> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         "POST",
         utils::create_xboxlive_endpoint("reputation", m_appConfig),
@@ -90,7 +90,7 @@ void reputation_service_impl::submit_batch_reputation_feedback(
         );
     }
 
-    std::shared_ptr<http_call_impl> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         "POST",
         utils::create_xboxlive_endpoint("reputation", m_appConfig),
