@@ -13,8 +13,10 @@ using namespace pplx;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
 social_service::social_service(
+    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> contextSettings,
     _In_ std::shared_ptr<social_service_impl> serviceImpl
     ) :
+    m_xboxLiveContextSettings(std::move(contextSettings)),
     m_socialServiceImpl(std::move(serviceImpl))
 {
 }
@@ -58,6 +60,10 @@ social_service::get_social_relationships(
         [tce](xbox_live_result<xbox_social_relationship_result> result) { tce.set(result); }
         );
 
+    if (result.err())
+    {
+        return pplx::task_from_result(xbox_live_result<xbox_social_relationship_result>(result.err(), result.err_message()));
+    }
     return pplx::task<xbox_live_result<xbox_social_relationship_result>>(tce);
 }
 
@@ -80,6 +86,10 @@ social_service::get_social_relationships(
         [tce](xbox_live_result<xbox_social_relationship_result> result) { tce.set(result); }
     );
 
+    if (result.err())
+    {
+        return pplx::task_from_result(xbox_live_result<xbox_social_relationship_result>(result.err(), result.err_message()));
+    }
     return pplx::task<xbox_live_result<xbox_social_relationship_result>>(tce);
 }
 

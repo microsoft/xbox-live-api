@@ -122,6 +122,7 @@ void Game::RegisterInputKeys()
 {
     m_input->RegisterKey(Windows::System::VirtualKey::S, ButtonPress::SignIn);
     m_input->RegisterKey(Windows::System::VirtualKey::P, ButtonPress::GetUserProfile);
+    m_input->RegisterKey(Windows::System::VirtualKey::F, ButtonPress::GetFriends);
 }
 
 Game::~Game()
@@ -208,6 +209,11 @@ void Game::OnGameUpdate()
             if (m_input->IsKeyDown(ButtonPress::GetUserProfile))
             {
                 GetUserProfile();
+            }
+
+            if (m_input->IsKeyDown(ButtonPress::GetFriends))
+            {
+                GetSocialRelationships();
             }
         }
     }
@@ -483,8 +489,6 @@ void Game::GetUserProfile()
         return;
     }
 
-    std::weak_ptr<Game> thisWeakPtr = shared_from_this();
-
     XblGetUserProfile(m_xboxLiveContext, m_user->xboxUserId, 0, 
     [](XBL_RESULT result, const XBL_XBOX_USER_PROFILE *profile, void* context)
     {
@@ -496,6 +500,29 @@ void Game::GetUserProfile()
         else
         {
             pThis->Log(L"Failed getting profile.");
+        }
+    }, this);
+}
+
+void Game::GetSocialRelationships()
+{
+    if (!m_user->isSignedIn)
+    {
+        Log(L"Must be signed in first to get profile!");
+        return;
+    }
+
+    XblGetSocialRelationships(m_xboxLiveContext, 0,
+        [](XBL_RESULT result, CONST XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT *socialResult, void* context)
+    {
+        Game *pThis = reinterpret_cast<Game*>(context);
+        if (result.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
+        {
+            pThis->Log(L"Successfully got social relationships!");
+        }
+        else
+        {
+            pThis->Log(L"Failed getting social relationships.");
         }
     }, this);
 }

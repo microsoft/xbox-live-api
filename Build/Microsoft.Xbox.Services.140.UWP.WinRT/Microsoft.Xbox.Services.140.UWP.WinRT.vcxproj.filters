@@ -856,6 +856,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_service.cpp">
       <Filter>C++ Source\Services\Social</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_service_impl.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_relationship_change_event_args.cpp">
       <Filter>C++ Source\Services\Social</Filter>
     </ClCompile>

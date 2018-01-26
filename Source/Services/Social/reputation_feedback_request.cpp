@@ -160,7 +160,22 @@ reputation_feedback_item::reputation_feedback_item(
     _In_ string_t reasonMessage,
     _In_ string_t evidenceResourceId
     ) : 
-    m_xboxUserId(std::move(xboxUserId)), 
+    m_xboxUserId(utils::internal_string_from_external_string(xboxUserId)), 
+    m_reputationFeedbackType(reputationFeedbackType),
+    m_sessionRef(std::move(sessionRef)),
+    m_reasonMessage(utils::internal_string_from_external_string(reasonMessage)),
+    m_evidenceResourceId(utils::internal_string_from_external_string(evidenceResourceId))
+{
+}
+
+reputation_feedback_item::reputation_feedback_item(
+    _In_ xsapi_internal_string xboxUserId,
+    _In_ reputation_feedback_type reputationFeedbackType,
+    _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef,
+    _In_ xsapi_internal_string reasonMessage,
+    _In_ xsapi_internal_string evidenceResourceId
+    ) :
+    m_xboxUserId(std::move(xboxUserId)),
     m_reputationFeedbackType(reputationFeedbackType),
     m_sessionRef(std::move(sessionRef)),
     m_reasonMessage(std::move(reasonMessage)),
@@ -168,13 +183,13 @@ reputation_feedback_item::reputation_feedback_item(
 {
 }
 
-const string_t& 
+string_t
 reputation_feedback_item::xbox_user_id() const
 {
-    return m_xboxUserId;
+    return utils::external_string_from_internal_string(m_xboxUserId);
 }
 
-reputation_feedback_type 
+reputation_feedback_type
 reputation_feedback_item::feedback_type() const
 {
     return m_reputationFeedbackType;
@@ -186,16 +201,16 @@ reputation_feedback_item::session_reference() const
     return m_sessionRef;
 }
 
-const string_t& 
+string_t
 reputation_feedback_item::reason_message() const
 {
-    return m_reasonMessage;
+    return utils::external_string_from_internal_string(m_reasonMessage);
 }
 
-const string_t& 
+string_t
 reputation_feedback_item::evidence_resource_id() const
 {
-    return m_evidenceResourceId;
+    return utils::external_string_from_internal_string(m_evidenceResourceId);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

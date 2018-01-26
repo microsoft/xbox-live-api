@@ -1147,8 +1147,7 @@ typedef enum XBL_ERROR_CODE
 typedef struct XBL_RESULT
 {
     XBL_ERROR_CONDITION errorCondition;
-    // TODO rename
-    XBL_ERROR_CODE _errorCode;
+    XBL_ERROR_CODE errorCode;
 } XBL_RESULT;
 
 const XBL_RESULT XBL_RESULT_OK { XBL_ERROR_CONDITION_NO_ERROR, XBL_ERROR_CODE_NO_ERROR };

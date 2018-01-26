@@ -13,6 +13,9 @@ XSAPI_XBOX_LIVE_CONTEXT_IMPL::XSAPI_XBOX_LIVE_CONTEXT_IMPL(_In_ CONST XSAPI_XBOX
     m_cppContext = std::make_shared<xbox::services::xbox_live_context_impl>(user->pImpl->cppUser());
     m_cppContext->init();
 
+    pContext->pUser = user;
+    pContext->xboxUserId = user->xboxUserId;
+
     GetXboxLiveAppConfigSingleton(&(pContext->pAppConfig));
 }
 

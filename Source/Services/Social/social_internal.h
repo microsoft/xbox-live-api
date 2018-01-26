@@ -4,7 +4,7 @@
 #pragma once
 #include "system_internal.h"
 
-namespace xbox { namespace services { namespace social {
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
 /// <summary>
 /// Used to provide feedback within a game session.
@@ -64,7 +64,7 @@ public:
         );
 
     function_context add_social_relationship_changed_handler(
-        _In_ std::function<void(social_relationship_change_event_args)> handler
+        _In_ xbox_live_callback<social_relationship_change_event_args> handler
         );
 
     void remove_social_relationship_changed_handler(
@@ -105,10 +105,45 @@ private:
     std::shared_ptr<xbox::services::user_context> m_userContext;
     std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
     std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
-    xsapi_internal_unordered_map<uint32_t, std::function<void(const social_relationship_change_event_args&)>> m_socialRelationshipChangeHandler;
+    xsapi_internal_unordered_map<uint32_t, xbox_live_callback<const social_relationship_change_event_args&>> m_socialRelationshipChangeHandler;
     function_context m_socialRelationshipChangeHandlerCounter;
     xbox::services::system::xbox_live_mutex m_socialRelationshipChangeHandlerLock;
     std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> m_realTimeActivityService;
 };
 
-}}}
+class reputation_service_impl : public std::enable_shared_from_this<reputation_service_impl>
+{
+public:
+    reputation_service_impl(
+        _In_ std::shared_ptr<xbox::services::user_context> userContext,
+        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
+        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+        );
+
+    _XSAPIIMP xbox_live_result<void> submit_reputation_feedback(
+        _In_ const xsapi_internal_string& xboxUserId,
+        _In_ reputation_feedback_type reputationFeedbackType,
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<xbox_live_result<void>> callback,
+        _In_ const xsapi_internal_string& sessionName = xsapi_internal_string(),
+        _In_ const xsapi_internal_string& reasonMessage = xsapi_internal_string(),
+        _In_ const xsapi_internal_string& evidenceResourceId = xsapi_internal_string()
+        );
+
+    _XSAPIIMP xbox_live_result<void> submit_batch_reputation_feedback(
+        _In_ const xsapi_internal_vector< reputation_feedback_item >& feedbackItems,
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<xbox_live_result<void>> callback
+        );
+
+private:
+    std::shared_ptr<xbox::services::user_context> m_userContext;
+    std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
+    std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
+
+    xsapi_internal_string reputation_feedback_subpath(
+        _In_ const xsapi_internal_string& xboxUserId
+        );
+};
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

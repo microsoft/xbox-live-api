@@ -31,7 +31,7 @@ social_service_impl::subscribe_to_social_relationship_change(
 {
     std::weak_ptr<social_service_impl> thisWeakPtr = shared_from_this();
     auto socialRelationshipSub = xsapi_allocate_shared<social_relationship_change_subscription>(
-        utils::external_string_from_internal_string(xboxUserId),
+        xboxUserId,
         ([thisWeakPtr](social_relationship_change_event_args eventArgs)
         {
             std::shared_ptr<social_service_impl> pThis(thisWeakPtr);
@@ -74,7 +74,7 @@ social_service_impl::unsubscribe_from_social_relationship_change(
 
 function_context
 social_service_impl::add_social_relationship_changed_handler(
-    _In_ std::function<void(social_relationship_change_event_args)> handler
+    _In_ xbox_live_callback<social_relationship_change_event_args> handler
     )
 {
     std::lock_guard<std::mutex> lock(m_socialRelationshipChangeHandlerLock.get());
@@ -104,7 +104,7 @@ social_service_impl::social_relationship_changed(
     _In_ social_relationship_change_event_args eventArgs
     )
 {
-    xsapi_internal_unordered_map<uint32_t, std::function<void(const social_relationship_change_event_args&)>> socialRelationshipChangedHandlersCopy;
+    xsapi_internal_unordered_map<uint32_t, xbox_live_callback<const social_relationship_change_event_args&>> socialRelationshipChangedHandlersCopy;
     {
         std::lock_guard<std::mutex> lock(m_socialRelationshipChangeHandlerLock.get());
         socialRelationshipChangedHandlersCopy = m_socialRelationshipChangeHandler;
@@ -156,6 +156,7 @@ social_service_impl::get_social_relationships(
     _In_ xbox_live_callback<xbox_live_result<xbox_social_relationship_result>> callback
     )
 {
+    RETURN_CPP_INVALIDARGUMENT_IF(xboxUserId.empty(), void, "xboxUserId is empty");
     bool includeViewFilter = (filter != xbox_social_relationship_filter::all);
 
     xsapi_internal_string pathAndQuery = pathandquery_social_subpath(
@@ -166,7 +167,7 @@ social_service_impl::get_social_relationships(
         maxItems
         );
 
-    std::shared_ptr<http_call_impl> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         "GET",
         utils::create_xboxlive_endpoint("social", m_appConfig),

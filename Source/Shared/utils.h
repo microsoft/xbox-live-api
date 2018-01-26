@@ -263,6 +263,14 @@ public:
         _In_ const string_t& defaultValue = _T("")
     );
 
+    static xsapi_internal_string extract_json_string(
+        _In_ const web::json::value& jsonValue,
+        _In_ const xsapi_internal_string& stringName,
+        _Inout_ std::error_code& error,
+        _In_ bool required = false,
+        _In_ const xsapi_internal_string& defaultValue = ""
+    );
+
     static void extract_json_string_to_char_t_array(
         _In_ const web::json::value& jsonValue,
         _In_ const string_t& stringName,
@@ -297,6 +305,14 @@ public:
     static bool extract_json_bool(
         _In_ const web::json::value& jsonValue,
         _In_ const string_t& stringName,
+        _Inout_ std::error_code& error,
+        _In_ bool required = false,
+        _In_ bool defaultValue = false
+    );
+
+    static bool extract_json_bool(
+        _In_ const web::json::value& jsonValue,
+        _In_ const xsapi_internal_string& stringName,
         _Inout_ std::error_code& error,
         _In_ bool required = false,
         _In_ bool defaultValue = false
@@ -401,6 +417,13 @@ public:
         _Inout_ std::error_code& error,
         _In_ bool required
     );
+
+    static web::json::value extract_json_field(
+        _In_ const web::json::value& json,
+        _In_ const xsapi_internal_string& name,
+        _Inout_ std::error_code& error,
+        _In_ bool required
+        );
 
     static std::vector<string_t> extract_json_string_vector(
         _In_ const web::json::value& json,
@@ -514,17 +537,17 @@ public:
         return result;
     }
 
-    template<typename T, typename U, typename F>
-    static std::vector<T, U> extract_json_internal_vector(
+    template<typename T, typename F>
+    static xsapi_internal_vector<T> extract_json_vector(
         _In_ F deserialize,
         _In_ const web::json::value& json,
-        _In_ const string_t& name,
+        _In_ const xsapi_internal_string& name,
         _Inout_ std::error_code& errc,
         _In_ bool required
     )
     {
         web::json::value field(extract_json_field(json, name, errc, required));
-        std::vector<T, U> result;
+        xsapi_internal_vector<T> result;
 
         if ((!field.is_array()) || errc)
         {
@@ -653,6 +676,8 @@ public:
 
     static xbox_live_result<string_t> json_string_extractor(_In_ const web::json::value& json);
 
+    static xbox_live_result<xsapi_internal_string> json_internal_string_extractor(_In_ const web::json::value& json);
+
     static web::json::value json_string_serializer(_In_ const string_t& value);
 
     static web::json::value json_internal_string_serializer(_In_ const xsapi_internal_string& value);
@@ -735,6 +760,11 @@ public:
     static inline int str_icmp(const string_t &left, const string_t &right)
     {
         return char_t_cmp(left.c_str(), right.c_str());
+    }
+
+    static inline int str_icmp(const xsapi_internal_string& left, const xsapi_internal_string& right)
+    {
+        return _stricmp(left.c_str(), right.c_str());
     }
 
     static inline int char_t_cmp(const char_t* left, const char_t* right)
@@ -1129,83 +1159,6 @@ private:
     async_helpers();
     async_helpers(const async_helpers&);
     async_helpers& operator=(const async_helpers&);
-};
-
-template<typename... Args>
-class xbox_live_callback
-{
-public:
-    xbox_live_callback() : m_callable(nullptr) {}
-
-    template <typename Functor>
-    xbox_live_callback(Functor functor)
-    {
-        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(functor).release());
-    }
-
-    xbox_live_callback(const xbox_live_callback& rhs)
-    {
-        *this = rhs;
-    }
-
-    xbox_live_callback(xbox_live_callback&& rhs)
-    {
-        *this = std::move(rhs);
-    }
-
-    template <typename Functor>
-    xbox_live_callback& operator=(Functor f)
-    {
-        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(functor).release());
-        return *this;
-    }
-
-    xbox_live_callback& operator=(const xbox_live_callback& rhs)
-    {
-        m_callable = rhs.m_callable->copy();
-        return *this;
-    }
-
-    xbox_live_callback& operator=(xbox_live_callback&& rhs)
-    {
-        m_callable = std::move(rhs.m_callable);
-        return *this;
-    }
-
-    void operator()(Args... args) const
-    {
-        XSAPI_ASSERT(m_callable != nullptr);
-        (*m_callable)(args...);
-    }
-
-private:
-    struct ICallable
-    {
-        virtual ~ICallable() = default;
-        virtual void operator()(Args...) = 0;
-        virtual xsapi_unique_ptr<ICallable> copy() = 0;
-    };
-
-    template <typename Functor>
-    struct callable : public ICallable
-    {
-        callable(const Functor& functor) : m_functor(functor) { }
-        ~callable() override = default;
-
-        void operator()(Args... args) override
-        {
-            m_functor(args...);
-        }
-
-        xsapi_unique_ptr<ICallable> copy() override
-        {
-            return xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(m_functor).release());
-        }
-
-        Functor m_functor;
-    };
-
-    xsapi_unique_ptr<ICallable> m_callable;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

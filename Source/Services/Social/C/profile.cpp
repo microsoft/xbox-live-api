@@ -19,6 +19,7 @@ XblGetUserProfile(
     _In_ XBL_GET_USER_PROFILE_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext
     ) XBL_NOEXCEPT
+try
 {
     RETURN_C_INVALIDARGUMENT_IF(pContext == nullptr || xboxUserId == nullptr);
     auto profileService = pContext->pImpl->cppObject()->profile_service_impl();
@@ -42,6 +43,7 @@ XblGetUserProfile(
 
     return utils::create_xbl_result(result.err());
 }
+CATCH_RETURN()
 
 void get_user_profiles_complete(
     xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result,
@@ -70,6 +72,7 @@ XblGetUserProfiles(
     _In_ XBL_GET_USER_PROFILES_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext
     ) XBL_NOEXCEPT
+try
 {
     RETURN_C_INVALIDARGUMENT_IF(pContext == nullptr || xboxUserIds == nullptr);
     auto profileService = pContext->pImpl->cppObject()->profile_service_impl();
@@ -84,6 +87,7 @@ XblGetUserProfiles(
 
     return utils::create_xbl_result(result.err());
 }
+CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetUserProfilesForSocialGroup(
@@ -93,6 +97,7 @@ XblGetUserProfilesForSocialGroup(
     _In_ XBL_GET_USER_PROFILES_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext
     ) XBL_NOEXCEPT
+try
 {
     RETURN_C_INVALIDARGUMENT_IF(pContext == nullptr || socialGroup == nullptr);
     auto profileService = pContext->pImpl->cppObject()->profile_service_impl();
@@ -107,3 +112,4 @@ XblGetUserProfilesForSocialGroup(
 
     return utils::create_xbl_result(result.err());
 }
+CATCH_RETURN()

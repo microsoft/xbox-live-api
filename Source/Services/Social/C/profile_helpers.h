@@ -13,7 +13,7 @@ public:
     ~xbl_xbox_user_profiles_wrapper();
 
     const XBL_XBOX_USER_PROFILE *xbl_xbox_user_profile() const;
-    const uint32_t profiles_count() const;
+    uint32_t profiles_count() const;
 
 private:
     xsapi_internal_vector<XBL_XBOX_USER_PROFILE> m_profiles;
