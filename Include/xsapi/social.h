@@ -8,6 +8,7 @@
 
 namespace xbox { namespace services {
     class xbox_live_context;
+
     /// <summary>
     /// Contains classes and enumerations that let you retrieve
     /// information about player reputation and relationship with
@@ -505,8 +506,6 @@ public:
         _In_ function_context context
         );
 
-    std::shared_ptr<xbox_live_context_settings> _Xbox_live_context_settings() { return m_xboxLiveContextSettings; }
-
 private:
     social_service() {};
 
@@ -523,6 +522,7 @@ private:
         );
 
     std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
+
     std::shared_ptr<social_service_impl> m_socialServiceImpl;
 
     friend xbox_live_context;
