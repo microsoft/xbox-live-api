@@ -3,14 +3,21 @@
 
 #include "pch.h"
 #include "xsapi/social.h"
+#include "social_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
-social_relationship_change_event_args::social_relationship_change_event_args()
+social_relationship_change_event_args::social_relationship_change_event_args(
+    _In_ std::shared_ptr<social_relationship_change_event_args_internal> internalObj
+    )
+    : m_internalObj(std::move(internalObj))
 {
 }
 
-social_relationship_change_event_args::social_relationship_change_event_args(
+DEFINE_GET_STRING(social_relationship_change_event_args, caller_xbox_user_id);
+DEFINE_GET_STRING_VECTOR(social_relationship_change_event_args, xbox_user_ids);
+
+social_relationship_change_event_args_internal::social_relationship_change_event_args_internal(
     _In_ xsapi_internal_string callerXboxUserId,
     _In_ social_notification_type notificationType,
     _In_ xsapi_internal_vector<xsapi_internal_string> xboxUserIds
@@ -21,22 +28,22 @@ social_relationship_change_event_args::social_relationship_change_event_args(
 {
 }
 
-string_t
-social_relationship_change_event_args::caller_xbox_user_id() const
+const xsapi_internal_string&
+social_relationship_change_event_args_internal::caller_xbox_user_id() const
 {
-    return utils::external_string_from_internal_string(m_callerXboxUserId);
+    return m_callerXboxUserId;
 }
 
 social_notification_type
-social_relationship_change_event_args::social_notification() const
+social_relationship_change_event_args_internal::social_notification() const
 {
     return m_notificationType;
 }
 
-std::vector<string_t>
-social_relationship_change_event_args::xbox_user_ids() const
+const xsapi_internal_vector<xsapi_internal_string>&
+social_relationship_change_event_args_internal::xbox_user_ids() const
 {
-    return utils::std_string_vector_from_internal_string_vector(m_xboxUserIds);
+    return m_xboxUserIds;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

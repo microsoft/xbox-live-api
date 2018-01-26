@@ -24,7 +24,7 @@ reputation_service::submit_batch_reputation_feedback(
     task_completion_event<xbox_live_result<void>> tce;
 
     auto result = m_serviceImpl->submit_batch_reputation_feedback(
-        utils::internal_vector_from_std_vector<reputation_feedback_item>(feedbackItems),
+        utils::internal_vector_from_std_vector<reputation_feedback_item_internal, reputation_feedback_item>(feedbackItems),
         XSAPI_DEFAULT_TASKGROUP,
         [tce](xbox_live_result<void> result) 
         {

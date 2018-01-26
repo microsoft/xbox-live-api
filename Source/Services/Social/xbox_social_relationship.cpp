@@ -3,27 +3,31 @@
 
 #include "pch.h"
 #include "xsapi/social.h"
-#include "xbox_system_factory.h"
-#include "utils.h"
-#include "user_context.h"
+#include "social_internal.h"
 #include "utils.h"
 
 using namespace pplx;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
-xbox_social_relationship::xbox_social_relationship():
-    m_isFavorite(false),
-    m_isFollowingCaller(false)
+xbox_social_relationship::xbox_social_relationship(
+    _In_ std::shared_ptr<xbox_social_relationship_internal> internalObj
+    ) :
+    m_internalObj(std::move(internalObj))
 {
 }
 
-xbox_social_relationship::xbox_social_relationship(
+DEFINE_GET_STRING(xbox_social_relationship, xbox_user_id);
+DEFINE_GET_BOOL(xbox_social_relationship, is_favorite);
+DEFINE_GET_BOOL(xbox_social_relationship, is_following_caller);
+DEFINE_GET_STRING_VECTOR(xbox_social_relationship, social_networks);
+
+xbox_social_relationship_internal::xbox_social_relationship_internal(
     _In_ xsapi_internal_string xboxUserId,
     _In_ bool isFavorite,
     _In_ bool isFollowingCaller,
     _In_ xsapi_internal_vector<xsapi_internal_string> socialNetworks
-    ) : 
+    ) :
     m_xboxUserId(std::move(xboxUserId)),
     m_isFavorite(isFavorite),
     m_isFollowingCaller(isFollowingCaller),
@@ -31,41 +35,42 @@ xbox_social_relationship::xbox_social_relationship(
 {
 }
 
-string_t xbox_social_relationship::xbox_user_id() const
+const xsapi_internal_string& xbox_social_relationship_internal::xbox_user_id() const
 {
-    return utils::external_string_from_internal_string(m_xboxUserId);
+    return m_xboxUserId;
 }
 
-bool xbox_social_relationship::is_favorite() const
+bool xbox_social_relationship_internal::is_favorite() const
 {
     return m_isFavorite;
 }
 
-bool xbox_social_relationship::is_following_caller() const
+bool xbox_social_relationship_internal::is_following_caller() const
 {
     return m_isFollowingCaller;
 }
 
-std::vector< string_t > xbox_social_relationship::social_networks() const
+const xsapi_internal_vector<xsapi_internal_string>& xbox_social_relationship_internal::social_networks() const
 {
-    return utils::std_string_vector_from_internal_string_vector(m_socialNetworks);
+    return m_socialNetworks;
 }
 
-xbox_live_result<xbox_social_relationship>
-xbox_social_relationship::_Deserialize(_In_ const web::json::value& json)
+xbox_live_result<std::shared_ptr<xbox_social_relationship_internal>>
+xbox_social_relationship_internal::deserialize(_In_ const web::json::value& json)
 {
-    if (json.is_null()) return xbox_live_result<xbox_social_relationship>();
+    if (json.is_null()) return xbox_live_result<std::shared_ptr<xbox_social_relationship_internal>>();
 
     std::error_code errc = xbox_live_error_code::no_error;
 
-    auto result = xbox_social_relationship(
+    auto result = xsapi_allocate_shared<xbox_social_relationship_internal>(
         utils::extract_json_string(json, "xuid", errc, true),
         utils::extract_json_bool(json, "isFavorite", errc),
         utils::extract_json_bool(json, "isFollowingCaller", errc),
         utils::extract_json_vector<xsapi_internal_string>(utils::json_internal_string_extractor, json, "socialNetworks", errc, false)
         );
 
-    return xbox_live_result<xbox_social_relationship>(result, errc);
+    return xbox_live_result<std::shared_ptr<xbox_social_relationship_internal>>(result, errc);
 }
+
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

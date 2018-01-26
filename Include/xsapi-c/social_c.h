@@ -280,10 +280,10 @@ typedef void(*XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE)(
 /// <remarks>Calls V1 GET /users/{ownerId}/people?view={view}&amp;startIndex={startIndex}&amp;maxItems={maxItems}</remarks>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationships(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
     _In_ uint64_t taskGroupId,
-    _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE completionRoutine,
-    _In_opt_ void* completionRoutineContext
+    _In_opt_ void* callbackContext,
+    _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -303,11 +303,11 @@ XblGetSocialRelationships(
 /// <remarks>Calls V1 GET /users/{ownerId}/people?view={view}&amp;startIndex={startIndex}&amp;maxItems={maxItems}</remarks>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationshipsWithFilter(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
     _In_ XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER socialRelationshipFilter,
     _In_ uint64_t taskGroupId,
-    _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE completionRoutine,
-    _In_opt_ void* completionRoutineContext
+    _In_opt_ void* callbackContext,
+    _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -327,11 +327,11 @@ XblGetSocialRelationshipsWithFilter(
 /// <remarks>Calls V1 GET /users/{ownerId}/people?view={view}&amp;startIndex={startIndex}&amp;maxItems={maxItems}</remarks>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationshipsForUser(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_ uint64_t taskGroupId,
-    _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE completionRoutine,
-    _In_opt_ void* completionRoutineContext
+    _In_opt_ void* callbackContext,
+    _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -353,13 +353,13 @@ XblGetSocialRelationshipsForUser(
 /// <remarks>Calls V1 GET /users/{ownerId}/people?view={view}&amp;startIndex={startIndex}&amp;maxItems={maxItems}</remarks>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationshipsEx(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
     _In_ XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER socialRelationshipFilter,
     _In_ uint32_t startIndex,
     _In_ uint32_t maxItems,
     _In_ uint64_t taskGroupId,
-    _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE completionRoutine,
-    _In_opt_ void* completionRoutineContext
+    _In_opt_ void* callbackContext,
+    _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
 
 typedef void* XBL_SOCIAL_RELATIONSHIP_CHANGE_SUBSCRIPTION;
@@ -373,7 +373,7 @@ typedef void* XBL_SOCIAL_RELATIONSHIP_CHANGE_SUBSCRIPTION;
 /// <returns>Result code for this API operation.</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSubscribeToSocialRelationshipChange(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _Out_ XBL_SOCIAL_RELATIONSHIP_CHANGE_SUBSCRIPTION *subscriptionHandle
     ) XBL_NOEXCEPT;
@@ -386,7 +386,7 @@ XblSubscribeToSocialRelationshipChange(
 /// <returns>Result code for this API operation.</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblUnsubscribeFromSocialRelationshipChange(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
     _In_ XBL_SOCIAL_RELATIONSHIP_CHANGE_SUBSCRIPTION subscriptionHandle
     ) XBL_NOEXCEPT;
 
@@ -405,7 +405,7 @@ typedef void(*XBL_SOCIAL_RELATIONSHIP_CHANGED_HANDLER)(
 /// <returns>A FUNCTION_CONTEXT used to remove the handler</returns>
 XBL_API FUNCTION_CONTEXT XBL_CALLING_CONV
 XblAddSocialRelationshipChangedHandler(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveConext,
     _In_ XBL_SOCIAL_RELATIONSHIP_CHANGED_HANDLER handler,
     _In_ void *handlerContext
     ) XBL_NOEXCEPT;
@@ -417,8 +417,8 @@ XblAddSocialRelationshipChangedHandler(
 /// <param name="handlerContext">Context for the handler to remove.</param>
 XBL_API void XBL_CALLING_CONV
 XblRemoveSocialRelationshipChangedHandler(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
-    _In_ FUNCTION_CONTEXT handlerContext
+    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
+    _In_ FUNCTION_CONTEXT handlerFunctionContext
     ) XBL_NOEXCEPT;
 
 typedef struct XBL_REPUTATION_FEEDBACK_ITEM
@@ -473,15 +473,15 @@ typedef void(*XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE)(
 /// <remarks>Calls V100 POST /users/xuid({xuid})/feedback</remarks>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSubmitReputationFeedback(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_ XBL_REPUTATION_FEEDBACK_TYPE reputationFeedbackType,
     _In_opt_ PCSTR sessionName,
     _In_opt_ PCSTR reasonMessage,
     _In_opt_ PCSTR evidenceResourceId,
     _In_ uint64_t taskGroupId,
-    _In_ XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE completionRoutine,
-    _In_opt_ void *completionRoutineContext
+    _In_opt_ void *callbackContext,
+    _In_ XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -500,12 +500,12 @@ XblSubmitReputationFeedback(
 /// <remarks>Calls V101 POST /users/batchfeedback</remarks>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSubmitBatchReputationFeedback(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
     _In_ XBL_REPUTATION_FEEDBACK_ITEM *feedbackItems,
     _In_ uint32_t feedbackItemsCount,
     _In_ uint64_t taskGroupId,
-    _In_ XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE completionRoutine,
-    _In_opt_ void *completionRoutineContext
+    _In_opt_ void *callbackContext,
+    _In_ XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
 
 #if defined(__cplusplus)

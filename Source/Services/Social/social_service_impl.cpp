@@ -24,15 +24,15 @@ social_service_impl::social_service_impl(
 {
 }
 
-xbox_live_result<std::shared_ptr<social_relationship_change_subscription>>
+xbox_live_result<std::shared_ptr<social_relationship_change_subscription_internal>>
 social_service_impl::subscribe_to_social_relationship_change(
     _In_ const xsapi_internal_string& xboxUserId
     )
 {
     std::weak_ptr<social_service_impl> thisWeakPtr = shared_from_this();
-    auto socialRelationshipSub = xsapi_allocate_shared<social_relationship_change_subscription>(
+    auto socialRelationshipSub = xsapi_allocate_shared<social_relationship_change_subscription_internal>(
         xboxUserId,
-        ([thisWeakPtr](social_relationship_change_event_args eventArgs)
+        ([thisWeakPtr](std::shared_ptr<social_relationship_change_event_args_internal> eventArgs)
         {
             std::shared_ptr<social_service_impl> pThis(thisWeakPtr);
             if (pThis)
@@ -56,15 +56,15 @@ social_service_impl::subscribe_to_social_relationship_change(
 
     if (!subscriptionSucceed.err())
     {
-        return xbox_live_result<std::shared_ptr<social_relationship_change_subscription>>(socialRelationshipSub);
+        return xbox_live_result<std::shared_ptr<social_relationship_change_subscription_internal>>(socialRelationshipSub);
     }
 
-    return xbox_live_result<std::shared_ptr<social_relationship_change_subscription>>(subscriptionSucceed.err(), subscriptionSucceed.err_message());
+    return xbox_live_result<std::shared_ptr<social_relationship_change_subscription_internal>>(subscriptionSucceed.err(), subscriptionSucceed.err_message());
 }
 
 xbox_live_result<void>
 social_service_impl::unsubscribe_from_social_relationship_change(
-    _In_ std::shared_ptr<social_relationship_change_subscription> subscription
+    _In_ std::shared_ptr<social_relationship_change_subscription_internal> subscription
     )
 {
     return m_realTimeActivityService->_Remove_subscription(
@@ -74,7 +74,7 @@ social_service_impl::unsubscribe_from_social_relationship_change(
 
 function_context
 social_service_impl::add_social_relationship_changed_handler(
-    _In_ xbox_live_callback<social_relationship_change_event_args> handler
+    _In_ xbox_live_callback<std::shared_ptr<social_relationship_change_event_args_internal>> handler
     )
 {
     std::lock_guard<std::mutex> lock(m_socialRelationshipChangeHandlerLock.get());
@@ -101,10 +101,10 @@ social_service_impl::remove_social_relationship_changed_handler(
 
 void
 social_service_impl::social_relationship_changed(
-    _In_ social_relationship_change_event_args eventArgs
+    _In_ std::shared_ptr<social_relationship_change_event_args_internal> eventArgs
     )
 {
-    xsapi_internal_unordered_map<uint32_t, xbox_live_callback<const social_relationship_change_event_args&>> socialRelationshipChangedHandlersCopy;
+    xsapi_internal_unordered_map<uint32_t, xbox_live_callback<std::shared_ptr<social_relationship_change_event_args_internal>>> socialRelationshipChangedHandlersCopy;
     {
         std::lock_guard<std::mutex> lock(m_socialRelationshipChangeHandlerLock.get());
         socialRelationshipChangedHandlersCopy = m_socialRelationshipChangeHandler;
@@ -133,7 +133,7 @@ social_service_impl::get_social_relationships(
     _In_ uint32_t startIndex,
     _In_ uint32_t maxItems,
     _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox_live_result<xbox_social_relationship_result>> callback
+    _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>> callback
     )
 {
     return get_social_relationships(
@@ -153,7 +153,7 @@ social_service_impl::get_social_relationships(
     _In_ uint32_t startIndex,
     _In_ uint32_t maxItems,
     _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox_live_result<xbox_social_relationship_result>> callback
+    _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>> callback
     )
 {
     RETURN_CPP_INVALIDARGUMENT_IF(xboxUserId.empty(), void, "xboxUserId is empty");
@@ -184,16 +184,16 @@ social_service_impl::get_social_relationships(
         taskGroupId,
         [thisShared, startIndex, filter, callback](std::shared_ptr<http_call_response> response)
     {
-        auto result = xbox_social_relationship_result::_Deserialize(response->response_body_json());
+        auto result = xbox_social_relationship_result_internal::deserialize(response->response_body_json());
 
-        auto& socialRelationship = result.payload();
-        uint32_t itemSize = static_cast<uint32_t>(socialRelationship.items().size());
+        auto socialRelationship = result.payload();
+        uint32_t itemSize = static_cast<uint32_t>(socialRelationship->items().size());
         if (itemSize > 0)
         {
             unsigned continuationSkip = startIndex + itemSize;
 
             // Initialize the request params for get_next()
-            socialRelationship._Init_next_page_info(
+            socialRelationship->init_next_page_info(
                 thisShared,
                 filter,
                 continuationSkip

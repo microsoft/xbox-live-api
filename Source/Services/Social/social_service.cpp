@@ -57,8 +57,14 @@ social_service::get_social_relationships(
         startIndex,
         maxItems,
         XSAPI_DEFAULT_TASKGROUP,
-        [tce](xbox_live_result<xbox_social_relationship_result> result) { tce.set(result); }
-        );
+        [tce](xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>> result)
+        {
+            tce.set(xbox_live_result<xbox_social_relationship_result>(
+                xbox_social_relationship_result(result.payload()),
+                result.err(),
+                result.err_message()
+                ));
+        });
 
     if (result.err())
     {
@@ -83,8 +89,14 @@ social_service::get_social_relationships(
         startIndex,
         maxItems,
         XSAPI_DEFAULT_TASKGROUP,
-        [tce](xbox_live_result<xbox_social_relationship_result> result) { tce.set(result); }
-    );
+        [tce](xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>> result)
+        {
+            tce.set(xbox_live_result<xbox_social_relationship_result>(
+                xbox_social_relationship_result(result.payload()),
+                result.err(), 
+                result.err_message()
+                ));
+        });
 
     if (result.err())
     {
@@ -98,8 +110,16 @@ social_service::subscribe_to_social_relationship_change(
     _In_ const string_t& xboxUserId
     )
 {
-    return m_socialServiceImpl->subscribe_to_social_relationship_change(
+    auto result = m_socialServiceImpl->subscribe_to_social_relationship_change(
         utils::internal_string_from_external_string(xboxUserId)
+        );
+
+    if (result.err())
+    {
+        return xbox_live_result<std::shared_ptr<social_relationship_change_subscription>>(result.err(), result.err_message());
+    }
+    return xbox_live_result<std::shared_ptr<social_relationship_change_subscription>>(
+        std::make_shared<social_relationship_change_subscription>(social_relationship_change_subscription(result.payload()))
         );
 }
 
@@ -109,7 +129,7 @@ social_service::unsubscribe_from_social_relationship_change(
     )
 {
     return m_socialServiceImpl->unsubscribe_from_social_relationship_change(
-        subscription
+        subscription->m_internalObj
         );
 }
 
@@ -119,8 +139,10 @@ social_service::add_social_relationship_changed_handler(
     )
 {
     return m_socialServiceImpl->add_social_relationship_changed_handler(
-        std::move(handler)
-        );
+        [handler](std::shared_ptr<social_relationship_change_event_args_internal> internalArgs)
+    {
+        handler(social_relationship_change_event_args(internalArgs));
+    });
 }
 
 void

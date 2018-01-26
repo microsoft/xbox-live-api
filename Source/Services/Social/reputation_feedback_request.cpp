@@ -25,7 +25,7 @@ reputation_feedback_request::reputation_feedback_request(
 
 web::json::value
 reputation_feedback_request::serialize_batch_feedback_request(
-    _In_ const xsapi_internal_vector< reputation_feedback_item >& feedbackItems,
+    _In_ const xsapi_internal_vector<reputation_feedback_item_internal>& feedbackItems,
     _Out_ std::error_code& err
     )
 {
@@ -57,7 +57,7 @@ reputation_feedback_request::serialize_batch_feedback_request(
         }
 
         web::json::value itemJson;
-        itemJson[_T("targetXuid")] = web::json::value::string(feedbackItem.xbox_user_id());
+        itemJson[_T("targetXuid")] = web::json::value::string(utils::external_string_from_internal_string(feedbackItem.xbox_user_id()));
         itemJson[_T("titleId")] = web::json::value::null();
 
         web::json::value sessionRefJson;
@@ -74,10 +74,10 @@ reputation_feedback_request::serialize_batch_feedback_request(
         }
 
         itemJson[_T("feedbackType")] = web::json::value::string(utils::external_string_from_internal_string(feedbackTypeToString.payload()));
-        itemJson[_T("textReason")] = web::json::value::string(feedbackItem.reason_message());
+        itemJson[_T("textReason")] = web::json::value::string(utils::external_string_from_internal_string(feedbackItem.reason_message()));
         if (!feedbackItem.evidence_resource_id().empty())
         {
-            itemJson[_T("evidenceId")] = web::json::value::string(feedbackItem.evidence_resource_id());
+            itemJson[_T("evidenceId")] = web::json::value::string(utils::external_string_from_internal_string(feedbackItem.evidence_resource_id()));
         }
         else
         {

@@ -117,6 +117,11 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
+    real_time_activity_subscription();
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
     real_time_activity_subscription(_In_ std::function<void(const real_time_activity_subscription_error_event_args&)> subscriptionErrorHandler);
 
     /// <summary>The state of the subscription request.</summary>

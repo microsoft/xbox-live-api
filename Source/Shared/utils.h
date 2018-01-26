@@ -967,12 +967,28 @@ public:
         return std::vector<T>(internalVector.begin(), internalVector.end());
     }
 
+    template<typename External, typename Internal>
+    static std::vector<External> std_vector_from_internal_vector(
+        _In_ const xsapi_internal_vector<Internal>& internalVector
+        )
+    {
+        return std::vector<External>(internalVector.begin(), internalVector.end());
+    }
+
     template<typename T>
     static xsapi_internal_vector<T> internal_vector_from_std_vector(
         _In_ const std::vector<T>& vector
         )
     {
         return xsapi_internal_vector<T>(vector.begin(), vector.end());
+    }
+
+    template<typename Internal, typename External> 
+    static xsapi_internal_vector<Internal> internal_vector_from_std_vector(
+        _In_ const std::vector<External>& vector
+        )
+    {
+        return xsapi_internal_vector<Internal>(vector.begin(), vector.end());
     }
 
     static uint32_t try_get_master_title_id();

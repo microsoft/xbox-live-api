@@ -3,13 +3,23 @@
 
 #include "pch.h"
 #include "xsapi/social.h"
+#include "social_internal.h"
 
 using namespace xbox::services::real_time_activity;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
 social_relationship_change_subscription::social_relationship_change_subscription(
+    _In_ std::shared_ptr<social_relationship_change_subscription_internal> internalObj
+    ) :
+    m_internalObj(std::move(internalObj))
+{
+}
+
+DEFINE_GET_STRING(social_relationship_change_subscription, xbox_user_id);
+
+social_relationship_change_subscription_internal::social_relationship_change_subscription_internal(
     _In_ xsapi_internal_string xboxUserId,
-    _In_ xbox_live_callback<const social_relationship_change_event_args&> handler,
+    _In_ xbox_live_callback<std::shared_ptr<social_relationship_change_event_args_internal>> handler,
     _In_ std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)> subscriptionErrorHandler
     ) :
     real_time_activity_subscription(subscriptionErrorHandler),
@@ -17,7 +27,7 @@ social_relationship_change_subscription::social_relationship_change_subscription
     m_handler(std::move(handler))
 {
     XSAPI_ASSERT(!m_xboxUserId.empty());
-    XSAPI_ASSERT(m_handler != nullptr); 
+    XSAPI_ASSERT(m_handler != nullptr);
 
     // TODO change to internal string
     stringstream_t uri;
@@ -26,14 +36,8 @@ social_relationship_change_subscription::social_relationship_change_subscription
     m_resourceUri = uri.str();
 }
 
-string_t
-social_relationship_change_subscription::xbox_user_id() const
-{
-    return utils::external_string_from_internal_string(m_xboxUserId);
-}
-
 void
-social_relationship_change_subscription::on_subscription_created(
+social_relationship_change_subscription_internal::on_subscription_created(
     _In_ uint32_t id,
     _In_ const web::json::value& data
     )
@@ -50,11 +54,10 @@ social_relationship_change_subscription::on_subscription_created(
                 )
             );
     }
-
 }
 
 void
-social_relationship_change_subscription::on_event_received(_In_ const web::json::value& data)
+social_relationship_change_subscription_internal::on_event_received(_In_ const web::json::value& data)
 {
     std::error_code errc;
     auto notificationTypeString = utils::extract_json_string(data, "NotificationType", errc);
@@ -80,7 +83,7 @@ social_relationship_change_subscription::on_event_received(_In_ const web::json:
     else
     {
         m_handler(
-            social_relationship_change_event_args(
+            xsapi_allocate_shared<social_relationship_change_event_args_internal>(
                 m_xboxUserId,
                 notificationType,
                 xboxUserIds
@@ -90,7 +93,7 @@ social_relationship_change_subscription::on_event_received(_In_ const web::json:
 }
 
 social_notification_type
-social_relationship_change_subscription::convert_string_type_to_notification_type(
+social_relationship_change_subscription_internal::convert_string_type_to_notification_type(
     _In_ const xsapi_internal_string& notificationTypeString
     ) const
 {

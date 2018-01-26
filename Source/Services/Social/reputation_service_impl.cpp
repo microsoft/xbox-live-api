@@ -73,7 +73,7 @@ xbox_live_result<void> reputation_service_impl::submit_reputation_feedback(
 }
 
 xbox_live_result<void> reputation_service_impl::submit_batch_reputation_feedback(
-    _In_ const xsapi_internal_vector< reputation_feedback_item >& feedbackItems,
+    _In_ const xsapi_internal_vector<reputation_feedback_item_internal>& feedbackItems,
     _In_ uint64_t taskGroupId,
     _In_ xbox_live_callback<xbox_live_result<void>> callback
     )
