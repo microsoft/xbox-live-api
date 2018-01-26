@@ -156,6 +156,7 @@ social_service_impl::get_social_relationships(
     _In_ xbox_live_callback<xbox_live_result<xbox_social_relationship_result>> callback
     )
 {
+    RETURN_CPP_INVALIDARGUMENT_IF(xboxUserId.empty(), void, "xboxUserId is empty");
     bool includeViewFilter = (filter != xbox_social_relationship_filter::all);
 
     xsapi_internal_string pathAndQuery = pathandquery_social_subpath(

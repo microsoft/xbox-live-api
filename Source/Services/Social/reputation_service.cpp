@@ -23,13 +23,18 @@ reputation_service::submit_batch_reputation_feedback(
 {
     task_completion_event<xbox_live_result<void>> tce;
 
-    m_serviceImpl->submit_batch_reputation_feedback(
+    auto result = m_serviceImpl->submit_batch_reputation_feedback(
         utils::internal_vector_from_std_vector<reputation_feedback_item>(feedbackItems),
         XSAPI_DEFAULT_TASKGROUP,
         [tce](xbox_live_result<void> result) 
         {
             tce.set(result); 
         });
+
+    if (result.err())
+    {
+        return pplx::task_from_result(result);
+    }
     return pplx::task<xbox_live_result<void>>(tce);
 }
 
@@ -45,7 +50,7 @@ reputation_service::submit_reputation_feedback(
 {
     task_completion_event<xbox_live_result<void>> tce;
 
-    m_serviceImpl->submit_reputation_feedback(
+    auto result = m_serviceImpl->submit_reputation_feedback(
         utils::internal_string_from_external_string(xboxUserId),
         reputationFeedbackType,
         XSAPI_DEFAULT_TASKGROUP,
@@ -57,6 +62,11 @@ reputation_service::submit_reputation_feedback(
         utils::internal_string_from_external_string(reasonMessage),
         utils::internal_string_from_external_string(evidenceResourceId)
         );
+
+    if (result.err())
+    {
+        return pplx::task_from_result(result);
+    }
     return pplx::task<xbox_live_result<void>>(tce);
 }
 

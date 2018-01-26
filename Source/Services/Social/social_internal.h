@@ -120,7 +120,7 @@ public:
         _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
         );
 
-    _XSAPIIMP void submit_reputation_feedback(
+    _XSAPIIMP xbox_live_result<void> submit_reputation_feedback(
         _In_ const xsapi_internal_string& xboxUserId,
         _In_ reputation_feedback_type reputationFeedbackType,
         _In_ uint64_t taskGroupId,
@@ -130,7 +130,7 @@ public:
         _In_ const xsapi_internal_string& evidenceResourceId = xsapi_internal_string()
         );
 
-    _XSAPIIMP void submit_batch_reputation_feedback(
+    _XSAPIIMP xbox_live_result<void> submit_batch_reputation_feedback(
         _In_ const xsapi_internal_vector< reputation_feedback_item >& feedbackItems,
         _In_ uint64_t taskGroupId,
         _In_ xbox_live_callback<xbox_live_result<void>> callback

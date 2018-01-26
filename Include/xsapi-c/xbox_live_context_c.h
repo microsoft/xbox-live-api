@@ -22,7 +22,7 @@ typedef struct XBL_XBOX_LIVE_CONTEXT
 #if XDK_API | XBOX_UWP
     Windows::Xbox::System::User^ user;
 #else
-    XSAPI_XBOX_LIVE_USER* pUser;
+    CONST XSAPI_XBOX_LIVE_USER* pUser;
 #endif
     CONST XSAPI_XBOX_LIVE_APP_CONFIG* pAppConfig;
     XSAPI_XBOX_LIVE_CONTEXT_IMPL* pImpl;

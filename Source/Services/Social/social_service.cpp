@@ -60,6 +60,10 @@ social_service::get_social_relationships(
         [tce](xbox_live_result<xbox_social_relationship_result> result) { tce.set(result); }
         );
 
+    if (result.err())
+    {
+        return pplx::task_from_result(xbox_live_result<xbox_social_relationship_result>(result.err(), result.err_message()));
+    }
     return pplx::task<xbox_live_result<xbox_social_relationship_result>>(tce);
 }
 
@@ -82,6 +86,10 @@ social_service::get_social_relationships(
         [tce](xbox_live_result<xbox_social_relationship_result> result) { tce.set(result); }
     );
 
+    if (result.err())
+    {
+        return pplx::task_from_result(xbox_live_result<xbox_social_relationship_result>(result.err(), result.err_message()));
+    }
     return pplx::task<xbox_live_result<xbox_social_relationship_result>>(tce);
 }
 

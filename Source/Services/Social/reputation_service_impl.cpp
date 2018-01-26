@@ -8,7 +8,6 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
-
 reputation_service_impl::reputation_service_impl(
     _In_ std::shared_ptr<xbox::services::user_context> userContext,
     _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
@@ -20,7 +19,7 @@ reputation_service_impl::reputation_service_impl(
 {
 }
 
-void reputation_service_impl::submit_reputation_feedback(
+xbox_live_result<void> reputation_service_impl::submit_reputation_feedback(
     _In_ const xsapi_internal_string& xboxUserId,
     _In_ reputation_feedback_type reputationFeedbackType,
     _In_ uint64_t taskGroupId,
@@ -30,11 +29,10 @@ void reputation_service_impl::submit_reputation_feedback(
     _In_ const xsapi_internal_string& evidenceResourceId
     )
 {
-    INVOKE_CALLBACK_WITH_INVALIDARGUMENT_IF(xboxUserId.empty(), callback, void, "Xbox user id is empty");
-    INVOKE_CALLBACK_WITH_INVALIDARGUMENT_IF(
+    RETURN_CPP_INVALIDARGUMENT_IF(xboxUserId.empty(), void, "Xbox user id is empty");
+    RETURN_CPP_INVALIDARGUMENT_IF(
         reputationFeedbackType < reputation_feedback_type::fair_play_kills_teammates ||
         reputationFeedbackType > reputation_feedback_type::fair_play_leaderboard_cheater,
-        callback,
         void,
         "Reputation feedback type is out of range"
         );
@@ -70,9 +68,11 @@ void reputation_service_impl::submit_reputation_feedback(
     {
         callback(xbox_live_result<void>(response->err_code(), response->err_message()));
     });
+
+    return xbox_live_result<void>();
 }
 
-void reputation_service_impl::submit_batch_reputation_feedback(
+xbox_live_result<void> reputation_service_impl::submit_batch_reputation_feedback(
     _In_ const xsapi_internal_vector< reputation_feedback_item >& feedbackItems,
     _In_ uint64_t taskGroupId,
     _In_ xbox_live_callback<xbox_live_result<void>> callback
@@ -80,11 +80,10 @@ void reputation_service_impl::submit_batch_reputation_feedback(
 {
     for (auto& feedbackItem : feedbackItems)
     {
-        INVOKE_CALLBACK_WITH_INVALIDARGUMENT_IF(feedbackItem.xbox_user_id().empty(), callback, void, "Xbox user id is empty");
-        INVOKE_CALLBACK_WITH_INVALIDARGUMENT_IF(
+        RETURN_CPP_INVALIDARGUMENT_IF(feedbackItem.xbox_user_id().empty(), void, "Xbox user id is empty");
+        RETURN_CPP_INVALIDARGUMENT_IF(
             feedbackItem.feedback_type() < reputation_feedback_type::fair_play_kills_teammates ||
             feedbackItem.feedback_type() > reputation_feedback_type::fair_play_leaderboard_cheater,
-            callback,
             void,
             "Reputation feedback type is out of range"
         );
@@ -103,7 +102,7 @@ void reputation_service_impl::submit_batch_reputation_feedback(
 
     std::error_code err;
     web::json::value request = reputation_feedback_request::serialize_batch_feedback_request(feedbackItems, err);
-    INVOKE_CALLBACK_WITH_INVALIDARGUMENT_IF(err, callback, void, "Invalid reputation_feedback_item");
+    RETURN_CPP_INVALIDARGUMENT_IF(err, void, "Invalid reputation_feedback_item");
     httpCall->set_request_body(request.serialize());
 
     httpCall->get_response_with_auth(
@@ -115,6 +114,8 @@ void reputation_service_impl::submit_batch_reputation_feedback(
     {
         callback(xbox_live_result<void>(response->err_code(), response->err_message()));
     });
+
+    return xbox_live_result<void>();
 }
 
 

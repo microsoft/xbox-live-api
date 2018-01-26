@@ -36,7 +36,7 @@ profile_service::get_user_profile(
 
     if (result.err())
     {
-        return pplx::task_from_result<xbox_live_result<xbox_user_profile>>(xbox_live_result<xbox_user_profile>(result.err(), result.err_message()));
+        return pplx::task_from_result(xbox_live_result<xbox_user_profile>(result.err(), result.err_message()));
     }
     return pplx::task<xbox_live_result<xbox_user_profile>>(tce);
 }
@@ -47,7 +47,7 @@ profile_service::get_user_profiles(
     )
 {
     task_completion_event<xbox_live_result<std::vector<xbox_user_profile>>> tce;
-    m_serviceImpl->get_user_profiles(
+    auto result = m_serviceImpl->get_user_profiles(
         utils::internal_string_vector_from_std_string_vector(xboxUserIds), 
         XSAPI_DEFAULT_TASKGROUP,
         [tce](xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result) 
@@ -55,6 +55,10 @@ profile_service::get_user_profiles(
         tce.set(xbox_live_result<std::vector<xbox_user_profile>>(utils::std_vector_from_internal_vector(result.payload())));
     });
 
+    if (result.err())
+    {
+        return pplx::task_from_result(xbox_live_result<std::vector<xbox_user_profile>>(result.err(), result.err_message()));
+    }
     return pplx::task<xbox_live_result<std::vector<xbox_user_profile>>>(tce);
 }
 
@@ -64,7 +68,7 @@ profile_service::get_user_profiles_for_social_group(
     )
 {
     task_completion_event<xbox_live_result<std::vector<xbox_user_profile>>> tce;
-    m_serviceImpl->get_user_profiles_for_social_group(
+    auto result = m_serviceImpl->get_user_profiles_for_social_group(
         utils::internal_string_from_external_string(socialGroup), 
         XSAPI_DEFAULT_TASKGROUP,
         [tce](xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result)
@@ -72,6 +76,10 @@ profile_service::get_user_profiles_for_social_group(
         tce.set(xbox_live_result<std::vector<xbox_user_profile>>(utils::std_vector_from_internal_vector(result.payload())));
     });
 
+    if (result.err())
+    {
+        return pplx::task_from_result(xbox_live_result<std::vector<xbox_user_profile>>(result.err(), result.err_message()));
+    }
     return pplx::task<xbox_live_result<std::vector<xbox_user_profile>>>(tce);
 }
 
