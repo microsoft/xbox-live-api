@@ -3,7 +3,7 @@
 
 #include "pch.h"
 #include "xsapi/profile.h"
-#include "profile_service_impl.h"
+#include "profile_internal.h"
 #include "utils.h"
 #include "user_context.h"
 #include "xbox_system_factory.h"
@@ -39,7 +39,7 @@ profile_service_impl::profile_service_impl(
 _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profile(
     _In_ xsapi_internal_string xboxUserId,
     _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox_live_result<xbox_user_profile>> callback
+    _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_user_profile_internal>>> callback
     )
 {
     RETURN_CPP_INVALIDARGUMENT_IF(xboxUserId.empty(), void, "xboxUserId is empty");
@@ -49,22 +49,22 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profile(
     return get_user_profiles(
         xboxUserIds,
         taskGroupId,
-        [callback](xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result) mutable
+        [callback](xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>> result)
         {
             if (result.payload().size() == 1)
             {
-                callback(xbox_live_result<xbox_user_profile>(result.payload()[0], result.err(), result.err_message()));
+                callback(xbox_live_result<std::shared_ptr<xbox_user_profile_internal>>(result.payload()[0], result.err(), result.err_message()));
             }
             else
             {
-                callback(xbox_live_result<xbox_user_profile>(result.err(), result.err_message()));
+                callback(xbox_live_result<std::shared_ptr<xbox_user_profile_internal>>(result.err(), result.err_message()));
             }
         });
 }
 _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
     _In_ const xsapi_internal_vector<xsapi_internal_string>& xboxUserIds,
     _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_user_profile>>> callback
+    _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>> callback
     )
 {
     RETURN_CPP_INVALIDARGUMENT_IF(xboxUserIds.size() == 0, void, "xbox user ids size is 0");
@@ -93,8 +93,10 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
         http_call_response_body_type::json_body,
         false,
         taskGroupId,
-        [callback](std::shared_ptr<http_call_response> response) { handle_get_user_profiles_response(response, callback); }
-        );
+        [callback](std::shared_ptr<http_call_response> response) 
+        { 
+            handle_get_user_profiles_response(response, callback); 
+        });
 
     return xbox_live_result<void>();
 }
@@ -102,7 +104,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
 _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_social_group(
     _In_ const xsapi_internal_string& socialGroup,
     _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_user_profile>>> callback
+    _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>> callback
     )
 {
     RETURN_CPP_INVALIDARGUMENT_IF(socialGroup.empty(), void, "socialGroup is empty");
@@ -125,31 +127,32 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_soc
         http_call_response_body_type::json_body, 
         false,
         taskGroupId,
-        [callback](std::shared_ptr<http_call_response> response) { handle_get_user_profiles_response(response, callback); }
-        );
+        [callback](std::shared_ptr<http_call_response> response) 
+        { 
+            handle_get_user_profiles_response(response, callback); 
+        });
 
     return xbox_live_result<void>();
 }
 
 void profile_service_impl::handle_get_user_profiles_response(
     _In_ std::shared_ptr<http_call_response> response,
-    _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_user_profile>>> callback
+    _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>> callback
     )
 {
     if (response->response_body_json().size() != 0)
     {
-        // TODO change utils functions to return mem hooked types so we don't translate here
         std::error_code errc = xbox_live_error_code::no_error;
-        auto profileVector = utils::extract_xbox_live_result_json_vector<xbox_user_profile>(
-            xbox_user_profile::_Deserialize,
+        auto profileVector = utils::extract_xbox_live_result_json_vector<std::shared_ptr<xbox_user_profile_internal>>(
+            xbox_user_profile_internal::deserialize,
             response->response_body_json(),
-            _T("profileUsers"),
+            "profileUsers",
             errc,
             true
             );
 
-        auto result = utils::generate_xbox_live_result<xsapi_internal_vector<xbox_user_profile>>(
-            utils::internal_vector_from_std_vector(profileVector.payload()),
+        auto result = utils::generate_xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>(
+            profileVector.payload(),
             response
             );
 
@@ -157,7 +160,7 @@ void profile_service_impl::handle_get_user_profiles_response(
     }
     else
     {
-        callback(xbox_live_result<xsapi_internal_vector<xbox_user_profile>>(response->err_code(), response->err_message()));
+        callback(xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>(response->err_code(), response->err_message()));
     }
 }
 

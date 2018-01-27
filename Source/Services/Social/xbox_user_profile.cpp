@@ -5,9 +5,9 @@
 #include "shared_macros.h"
 #include "xsapi/system.h"
 #include "xsapi/profile.h"
+#include "profile_internal.h"
 #include "utils.h"
 
-using namespace pplx;
 using namespace xbox::services;
 using namespace xbox::services::system;
 
@@ -18,25 +18,21 @@ xbox_user_profile::xbox_user_profile()
 }
 
 xbox_user_profile::xbox_user_profile(
-    _In_ string_t appDisplayName,
-    _In_ web::uri appDisplayPictureResizeUri,
-    _In_ string_t gameDisplayName,
-    _In_ web::uri gameDisplayPictureResizeUri,
-    _In_ string_t gamerscore,
-    _In_ string_t gamertag,
-    _In_ string_t xboxUserId
+    _In_ std::shared_ptr<xbox_user_profile_internal> internalObj
     ) :
-    m_appDisplayName(utils::internal_string_from_external_string(appDisplayName)),
-    m_appDisplayPictureResizeUri(std::move(appDisplayPictureResizeUri)),
-    m_gameDisplayName(utils::internal_string_from_external_string(gameDisplayName)),
-    m_gameDisplayPictureResizeUri(std::move(gameDisplayPictureResizeUri)),
-    m_gamerscore(utils::internal_string_from_external_string(gamerscore)),
-    m_gamertag(utils::internal_string_from_external_string(gamertag)),
-    m_xboxUserId(utils::internal_string_from_external_string(xboxUserId))
+    m_internalObj(std::move(internalObj))
 {
 }
 
-xbox_user_profile::xbox_user_profile(
+DEFINE_GET_STRING(xbox_user_profile, app_display_name);
+DEFINE_GET_URI(xbox_user_profile, app_display_picture_resize_uri);
+DEFINE_GET_STRING(xbox_user_profile, game_display_name);
+DEFINE_GET_URI(xbox_user_profile, game_display_picture_resize_uri);
+DEFINE_GET_STRING(xbox_user_profile, gamerscore);
+DEFINE_GET_STRING(xbox_user_profile, gamertag);
+DEFINE_GET_STRING(xbox_user_profile, xbox_user_id);
+
+xbox_user_profile_internal::xbox_user_profile_internal(
     _In_ xsapi_internal_string appDisplayName,
     _In_ web::uri appDisplayPictureResizeUri,
     _In_ xsapi_internal_string gameDisplayName,
@@ -55,47 +51,47 @@ xbox_user_profile::xbox_user_profile(
 {
 }
 
-string_t xbox_user_profile::app_display_name() const
+const xsapi_internal_string& xbox_user_profile_internal::app_display_name() const
 {
-    return utils::external_string_from_internal_string(m_appDisplayName);
+    return m_appDisplayName;
 }
 
-const web::uri& xbox_user_profile::app_display_picture_resize_uri() const
+const web::uri& xbox_user_profile_internal::app_display_picture_resize_uri() const
 {
     return m_appDisplayPictureResizeUri;
 }
 
-string_t xbox_user_profile::game_display_name() const
+const xsapi_internal_string& xbox_user_profile_internal::game_display_name() const
 {
-    return utils::external_string_from_internal_string(m_gameDisplayName);
+    return m_gameDisplayName;
 }
 
-const web::uri& xbox_user_profile::game_display_picture_resize_uri() const
+const web::uri& xbox_user_profile_internal::game_display_picture_resize_uri() const
 {
     return m_gameDisplayPictureResizeUri;
 }
 
-string_t xbox_user_profile::gamerscore() const
+const xsapi_internal_string& xbox_user_profile_internal::gamerscore() const
 {
-    return utils::external_string_from_internal_string(m_gamerscore);
+    return m_gamerscore;
 }
 
-string_t xbox_user_profile::gamertag() const
+const xsapi_internal_string& xbox_user_profile_internal::gamertag() const
 {
-    return utils::external_string_from_internal_string(m_gamertag);
+    return m_gamertag;
 }
 
-string_t xbox_user_profile::xbox_user_id() const
+const xsapi_internal_string& xbox_user_profile_internal::xbox_user_id() const
 {
-    return utils::external_string_from_internal_string(m_xboxUserId);
+    return m_xboxUserId;
 }
 
-xbox_live_result<xbox_user_profile>
-xbox_user_profile::_Deserialize(
+xbox_live_result<std::shared_ptr<xbox_user_profile_internal>>
+xbox_user_profile_internal::deserialize(
     _In_ const web::json::value& json
     )
 {
-    if (json.is_null()) return xbox_live_result<xbox_user_profile>();
+    if (json.is_null()) return xbox_live_result<std::shared_ptr<xbox_user_profile_internal>>();
 
     std::error_code errc = xbox_live_error_code::no_error;
     web::json::value jsonSettings = utils::extract_json_field(json, _T("settings"), errc, true);
@@ -141,7 +137,7 @@ xbox_user_profile::_Deserialize(
         }
     }
 
-    auto result = xbox_user_profile(
+    auto result = xsapi_allocate_shared<xbox_user_profile_internal>(
         std::move(appDisplayName),
         std::move(appDisplayPictureResizeUri),
         std::move(gameDisplayName),
@@ -151,7 +147,7 @@ xbox_user_profile::_Deserialize(
         std::move(xboxUserId)
         );
 
-    return xbox_live_result<xbox_user_profile>(result, errc);
+    return xbox_live_result<std::shared_ptr<xbox_user_profile_internal>>(result, errc);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

@@ -23,10 +23,7 @@ xbox_social_relationship_result::xbox_social_relationship_result(
 {
 }
 
-std::vector<xbox_social_relationship> xbox_social_relationship_result::items() const
-{
-    return utils::std_vector_from_internal_vector<xbox_social_relationship, std::shared_ptr<xbox_social_relationship_internal>>(m_internalObj->items());
-}
+DEFINE_GET_VECTOR(xbox_social_relationship_result, xbox_social_relationship, items);
 
 //pplx::task<xbox_live_result<xbox_social_relationship_result>>
 //xbox_social_relationship_result::get_next(

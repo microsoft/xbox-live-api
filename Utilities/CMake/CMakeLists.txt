@@ -426,11 +426,11 @@ set(Social_Source_Files
     ../../Source/Services/Social/xbox_Social_relationship.cpp
     ../../Source/Services/Social/xbox_Social_relationship_result.cpp
     ../../Source/Services/Social/xbox_user_profile.cpp
-    ../../Source/Services/Social/Social_relationship_change_event_args.cpp
-    ../../Source/Services/Social/Social_relationship_change_subscription.cpp
-    ../../Source/Services/Social/Social_service_impl.cpp
-    ../../Source/Services/Social/Social_internal.h
-    ../../Source/Services/Social/profile_service_impl.h
+    ../../Source/Services/Social/social_relationship_change_event_args.cpp
+    ../../Source/Services/Social/social_relationship_change_subscription.cpp
+    ../../Source/Services/Social/social_service_impl.cpp
+    ../../Source/Services/Social/social_internal.h
+    ../../Source/Services/Social/profile_internal.h
     ../../Source/Services/Social/profile_service_impl.cpp
     )
 

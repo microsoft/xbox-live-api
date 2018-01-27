@@ -7,6 +7,45 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
+class xbox_user_profile_internal
+{
+public:
+    _XSAPIIMP xbox_user_profile_internal(
+        _In_ xsapi_internal_string appDisplayName,
+        _In_ web::uri appDisplayPictureResizeUri,
+        _In_ xsapi_internal_string gameDisplayName,
+        _In_ web::uri gameDisplayPictureResizeUri,
+        _In_ xsapi_internal_string gamerscore,
+        _In_ xsapi_internal_string gamertag,
+        _In_ xsapi_internal_string xboxUserId
+        );
+
+    const xsapi_internal_string& app_display_name() const;
+
+    const web::uri& app_display_picture_resize_uri() const;
+
+    const xsapi_internal_string& game_display_name() const;
+
+    const web::uri& game_display_picture_resize_uri() const;
+
+    const xsapi_internal_string& gamerscore() const;
+
+    const xsapi_internal_string& gamertag() const;
+
+    const xsapi_internal_string& xbox_user_id() const;
+
+    static xbox_live_result<std::shared_ptr<xbox_user_profile_internal>> deserialize(_In_ const web::json::value& json);
+
+private:
+    xsapi_internal_string m_appDisplayName;
+    web::uri m_appDisplayPictureResizeUri;
+    xsapi_internal_string m_gameDisplayName;
+    web::uri m_gameDisplayPictureResizeUri;
+    xsapi_internal_string m_gamerscore;
+    xsapi_internal_string m_gamertag;
+    xsapi_internal_string m_xboxUserId;
+};
+
 class profile_service_impl : public std::enable_shared_from_this<profile_service_impl>
 {
 public:
@@ -19,25 +58,25 @@ public:
     _XSAPIIMP xbox::services::xbox_live_result<void> get_user_profile(
         _In_ xsapi_internal_string xboxUserId,
         _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<xbox_user_profile>> callback
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<std::shared_ptr<xbox_user_profile_internal>>> callback
         );
 
     _XSAPIIMP xbox::services::xbox_live_result<void> get_user_profiles(
         _In_ const xsapi_internal_vector<xsapi_internal_string>& xboxUserIds,
         _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<xsapi_internal_vector<xbox_user_profile>>> callback
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>> callback
         );
 
     _XSAPIIMP xbox::services::xbox_live_result<void> get_user_profiles_for_social_group(
         _In_ const xsapi_internal_string& socialGroup,
         _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<xsapi_internal_vector<xbox_user_profile>>> callback
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>> callback
         );
 
 private:
     static void handle_get_user_profiles_response(
         _In_ std::shared_ptr<http_call_response> response,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<xsapi_internal_vector<xbox_user_profile>>> callback
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>> callback
         );
 
     static const xsapi_internal_string settings_query();

@@ -14,7 +14,7 @@
 #include "presence_internal.h"
 #include "real_time_activity_internal.h"
 
-#include "profile_service_impl.h"
+#include "profile_internal.h"
 #include "social_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN

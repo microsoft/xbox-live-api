@@ -59,11 +59,7 @@ social_service::get_social_relationships(
         XSAPI_DEFAULT_TASKGROUP,
         [tce](xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>> result)
         {
-            tce.set(xbox_live_result<xbox_social_relationship_result>(
-                xbox_social_relationship_result(result.payload()),
-                result.err(),
-                result.err_message()
-                ));
+            tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(xbox_social_relationship_result, result));
         });
 
     if (result.err())
@@ -91,11 +87,7 @@ social_service::get_social_relationships(
         XSAPI_DEFAULT_TASKGROUP,
         [tce](xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>> result)
         {
-            tce.set(xbox_live_result<xbox_social_relationship_result>(
-                xbox_social_relationship_result(result.payload()),
-                result.err(), 
-                result.err_message()
-                ));
+            tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(xbox_social_relationship_result, result));
         });
 
     if (result.err())

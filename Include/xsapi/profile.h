@@ -13,6 +13,7 @@ class xbox_live_context;
 namespace social {
 
     class profile_service_impl;
+    class xbox_user_profile_internal;
 
     /// <summary> 
     /// Represents a user's Xbox Live profile.
@@ -20,24 +21,6 @@ namespace social {
     class xbox_user_profile
     {
     public:
-        /// <summary>Constructor for a user profile object.</summary>
-        /// <param name="appDisplayName">The user's display name to be used in application UI.</param>
-        /// <param name="appDisplayPictureResizeUri">Uri for the user's display picture to be used in application UI.</param>
-        /// <param name="gameDisplayName">The user's display name to be used in game UI.</param>
-        /// <param name="gameDisplayPictureResizeUri">Uri for the user's display picture to be used in games.</param>
-        /// <param name="gamerscore">The user's Gamerscore.</param>
-        /// <param name="gamertag">The user's Gamertag.</param>
-        /// <param name="xboxUserId">The user's Xbox user ID.</param>
-        _XSAPIIMP xbox_user_profile(
-        _In_ string_t appDisplayName,
-        _In_ web::uri appDisplayPictureResizeUri,
-        _In_ string_t gameDisplayName,
-        _In_ web::uri gameDisplayPictureResizeUri,
-        _In_ string_t gamerscore,
-        _In_ string_t gamertag,
-        _In_ string_t xboxUserId
-        );
-
         /// <summary>
         /// Internal function
         /// </summary>
@@ -47,14 +30,8 @@ namespace social {
         /// Internal function
         /// </summary>
         _XSAPIIMP xbox_user_profile(
-        _In_ xsapi_internal_string appDisplayName,
-        _In_ web::uri appDisplayPictureResizeUri,
-        _In_ xsapi_internal_string gameDisplayName,
-        _In_ web::uri gameDisplayPictureResizeUri,
-        _In_ xsapi_internal_string gamerscore,
-        _In_ xsapi_internal_string gamertag,
-        _In_ xsapi_internal_string xboxUserId
-        );
+            _In_ std::shared_ptr<xbox_user_profile_internal> internalObj
+            );
 
         /// <summary>
         /// The user's display name to be used in application UI.  This value is privacy gated and could
@@ -105,19 +82,8 @@ namespace social {
         /// </summary>
         _XSAPIIMP string_t xbox_user_id() const;
 
-        /// <summary>
-        /// Internal function
-        /// </summary>
-        static xbox_live_result<xbox_user_profile> _Deserialize(_In_ const web::json::value& json);
-
     private:
-        xsapi_internal_string m_appDisplayName;
-        web::uri m_appDisplayPictureResizeUri;
-        xsapi_internal_string m_gameDisplayName;
-        web::uri m_gameDisplayPictureResizeUri;
-        xsapi_internal_string m_gamerscore;
-        xsapi_internal_string m_gamertag;
-        xsapi_internal_string m_xboxUserId;
+        std::shared_ptr<xbox_user_profile_internal> m_internalObj;
     };
 
     /// <summary>

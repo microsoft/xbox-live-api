@@ -71,6 +71,10 @@
     } \
 }
 
+#define CREATE_EXTERNAL_XBOX_LIVE_RESULT(type, internalReturnObj) \
+    xbox_live_result<type>(type(internalReturnObj.payload()), internalReturnObj.err(), internalReturnObj.err_message())
+
+
 #define CATCH_RETURN() \
     catch (std::bad_alloc const& e) { return utils::std_bad_alloc_to_xbl_result(e); } \
     catch (std::exception const& e) { return utils::std_exception_to_xbl_result(e); } \
@@ -109,4 +113,16 @@
     enumType className::methodName() const \
     { \
         return m_internalObj->methodName(); \
+    }
+
+#define DEFINE_GET_URI(className, methodName) \
+    const web::uri& className::methodName() const \
+    { \
+        return m_internalObj->methodName(); \
+    }
+
+#define DEFINE_GET_VECTOR(className, externalType, methodName) \
+    std::vector<externalType> className::methodName() const \
+    { \
+        return utils::std_vector_from_internal_vector<externalType, std::shared_ptr<externalType##_internal>>(m_internalObj->methodName()); \
     }

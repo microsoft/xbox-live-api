@@ -621,6 +621,30 @@ public:
     }
 
     template<typename T, typename F>
+    static xbox_live_result<xsapi_internal_vector<T>> extract_xbox_live_result_json_vector(
+        _In_ F deserialize,
+        _In_ const web::json::value& json,
+        _In_ const xsapi_internal_string& name,
+        _Inout_ std::error_code& errc,
+        _In_ bool required
+    )
+    {
+        auto jsonVector = extract_json_vector<T>(
+            deserialize,
+            json,
+            name,
+            errc,
+            required
+            );
+
+        return xbox_live_result<xsapi_internal_vector<T>>(
+            jsonVector,
+            errc,
+            ""
+            );
+    }
+
+    template<typename T, typename F>
     static std::vector<T> extract_json_vector(
         _In_ F deserialize,
         _In_ const web::json::value& json,

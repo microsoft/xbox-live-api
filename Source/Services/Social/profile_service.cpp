@@ -3,10 +3,8 @@
 
 #include "pch.h"
 #include "xsapi/profile.h"
+#include "profile_internal.h"
 #include "utils.h"
-#include "user_context.h"
-#include "xbox_system_factory.h"
-#include "profile_service_impl.h"
 
 using namespace pplx;
 
@@ -29,9 +27,9 @@ profile_service::get_user_profile(
     auto result = m_serviceImpl->get_user_profile(
         utils::internal_string_from_external_string(xboxUserId),
         XSAPI_DEFAULT_TASKGROUP,
-        [tce](xbox_live_result<xbox_user_profile> result) 
+        [tce](xbox_live_result<std::shared_ptr<xbox_user_profile_internal>> result) 
     { 
-        tce.set(result); 
+        tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(xbox_user_profile, result));
     });
 
     if (result.err())
@@ -50,9 +48,14 @@ profile_service::get_user_profiles(
     auto result = m_serviceImpl->get_user_profiles(
         utils::internal_string_vector_from_std_string_vector(xboxUserIds), 
         XSAPI_DEFAULT_TASKGROUP,
-        [tce](xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result) 
+        [tce](xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>> result) 
     {
-        tce.set(xbox_live_result<std::vector<xbox_user_profile>>(utils::std_vector_from_internal_vector(result.payload())));
+        auto vector = utils::std_vector_from_internal_vector<xbox_user_profile, std::shared_ptr<xbox_user_profile_internal>>(result.payload());
+        tce.set(xbox_live_result<std::vector<xbox_user_profile>>(
+            vector,
+            result.err(),
+            result.err_message()
+            ));
     });
 
     if (result.err())
@@ -71,9 +74,14 @@ profile_service::get_user_profiles_for_social_group(
     auto result = m_serviceImpl->get_user_profiles_for_social_group(
         utils::internal_string_from_external_string(socialGroup), 
         XSAPI_DEFAULT_TASKGROUP,
-        [tce](xbox_live_result<xsapi_internal_vector<xbox_user_profile>> result)
+        [tce](xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>> result)
     {
-        tce.set(xbox_live_result<std::vector<xbox_user_profile>>(utils::std_vector_from_internal_vector(result.payload())));
+        auto vector = utils::std_vector_from_internal_vector<xbox_user_profile, std::shared_ptr<xbox_user_profile_internal>>(result.payload());
+        tce.set(xbox_live_result<std::vector<xbox_user_profile>>(
+            vector,
+            result.err(),
+            result.err_message()
+            ));
     });
 
     if (result.err())
