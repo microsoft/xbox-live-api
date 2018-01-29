@@ -23,6 +23,7 @@ class xbox_social_relationship_internal;
 class xbox_social_relationship_result_internal;
 class social_relationship_change_event_args_internal;
 class social_relationship_change_subscription_internal;
+class reputation_feedback_item_internal;
 
 enum class xbox_social_relationship_filter
 {
@@ -362,6 +363,16 @@ public:
     /// </summary>
     _XSAPIIMP string_t xbox_user_id() const;
 
+    // TODO remove these after migrating real time activity service
+    /// <summary>The state of the subscription request.</summary>
+    _XSAPIIMP virtual xbox::services::real_time_activity::real_time_activity_subscription_state state() const override;
+
+    /// <summary>The resource uri for the request.</summary>
+    _XSAPIIMP virtual const string_t& resource_uri() const override;
+
+    /// <summary>The unique subscription id for the request.</summary>
+    _XSAPIIMP virtual uint32_t subscription_id() const override;
+
 private:
     std::shared_ptr<social_relationship_change_subscription_internal> m_internalObj;
 
@@ -453,6 +464,8 @@ public:
         _In_ function_context context
         );
 
+    std::shared_ptr<xbox_live_context_settings> _Xbox_live_context_settings() { return m_xboxLiveContextSettings; }
+
 private:
     social_service() {};
 
@@ -487,17 +500,6 @@ public:
     reputation_feedback_item();
 
     /// <summary>
-    /// Internal function
-    /// </summary>
-    reputation_feedback_item(
-        _In_ xsapi_internal_string xboxUserId,
-        _In_ reputation_feedback_type reputationFeedbackType,
-        _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef = xbox::services::multiplayer::multiplayer_session_reference(),
-        _In_ xsapi_internal_string reasonMessage = xsapi_internal_string(),
-        _In_ xsapi_internal_string evidenceResourceId = xsapi_internal_string()
-        );
-
-    /// <summary>
     /// Construct a reputation_feedback_item object
     /// </summary>
     /// <param name="xboxUserId">The Xbox User ID of the user that reputation feedback is being submitted on.</param>
@@ -516,7 +518,7 @@ public:
     /// <summary>
     /// The Xbox User ID of the user that reputation feedback is being submitted on.
     /// </summary>
-    _XSAPIIMP string_t xbox_user_id() const;
+    _XSAPIIMP const string_t& xbox_user_id() const;
 
     /// <summary>
     /// The reputation feedback type being submitted.
@@ -531,19 +533,19 @@ public:
     /// <summary>
     /// User supplied text added to explain the reason for the feedback.
     /// </summary>
-    _XSAPIIMP string_t reason_message() const;
+    _XSAPIIMP const string_t& reason_message() const;
 
     /// <summary>
     /// The Id of a resource that can be used as evidence for the feedback. Example: the Id of a video file.
     /// </summary>
-    _XSAPIIMP string_t evidence_resource_id() const;
+    _XSAPIIMP const string_t& evidence_resource_id() const;
 
 private:
-    xsapi_internal_string m_xboxUserId;
+    string_t m_xboxUserId;
     reputation_feedback_type m_reputationFeedbackType;
     xbox::services::multiplayer::multiplayer_session_reference m_sessionRef;
-    xsapi_internal_string m_reasonMessage;
-    xsapi_internal_string m_evidenceResourceId;
+    string_t m_reasonMessage;
+    string_t m_evidenceResourceId;
 };
 
 

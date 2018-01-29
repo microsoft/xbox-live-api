@@ -16,6 +16,13 @@ social_relationship_change_subscription::social_relationship_change_subscription
 }
 
 DEFINE_GET_STRING(social_relationship_change_subscription, xbox_user_id);
+DEFINE_GET_ENUM_TYPE(social_relationship_change_subscription, real_time_activity_subscription_state, state);
+DEFINE_GET_UINT32(social_relationship_change_subscription, subscription_id);
+
+const string_t& social_relationship_change_subscription::resource_uri() const
+{
+    return m_internalObj->resource_uri();
+}
 
 social_relationship_change_subscription_internal::social_relationship_change_subscription_internal(
     _In_ xsapi_internal_string xboxUserId,
@@ -34,6 +41,11 @@ social_relationship_change_subscription_internal::social_relationship_change_sub
     uri << _T("http://social.xboxlive.com/users/xuid(") << utils::external_string_from_internal_string(m_xboxUserId) << _T(")/friends");
 
     m_resourceUri = uri.str();
+}
+
+const xsapi_internal_string& social_relationship_change_subscription_internal::xbox_user_id() const
+{
+    return m_xboxUserId;
 }
 
 void

@@ -118,11 +118,7 @@ std::shared_ptr<http_call> MockXboxSystemFactory::create_http_call(
     return m_mockHttpCall;
 }
 
-<<<<<<< HEAD
 std::shared_ptr<http_call_internal> MockXboxSystemFactory::create_http_call(
-=======
-std::shared_ptr<http_call> MockXboxSystemFactory::create_http_call(
->>>>>>> up/libHttpClient
     _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
     _In_ const xsapi_internal_string& httpMethod,
     _In_ const xsapi_internal_string& serverName,

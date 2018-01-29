@@ -24,24 +24,28 @@ xbox_social_relationship_result::xbox_social_relationship_result(
 }
 
 DEFINE_GET_VECTOR(xbox_social_relationship_result, xbox_social_relationship, items);
+DEFINE_GET_UINT32(xbox_social_relationship_result, total_count);
+DEFINE_GET_BOOL(xbox_social_relationship_result, has_next);
 
-//pplx::task<xbox_live_result<xbox_social_relationship_result>>
-//xbox_social_relationship_result::get_next(
-//    _In_ uint32_t maxItems
-//)
-//{
-//    task_completion_event<xbox_live_result<xbox_social_relationship_result>> tce;
-//
-//    auto result = m_socialImpl->get_social_relationships(
-//        m_filter,
-//        m_continuationSkip,
-//        maxItems,
-//        XSAPI_DEFAULT_TASKGROUP,
-//        [tce](xbox_live_result<xbox_social_relationship_result> result) { tce.set(result); }
-//    );
-//
-//    return pplx::task<xbox_live_result<xbox_social_relationship_result>>(tce);
-//}
+pplx::task<xbox_live_result<xbox_social_relationship_result>>
+xbox_social_relationship_result::get_next(
+    _In_ uint32_t maxItems
+    )
+{
+    task_completion_event<xbox_live_result<xbox_social_relationship_result>> tce;
+
+    auto result = m_internalObj->get_next(maxItems,
+        [tce](xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>> result) 
+    { 
+        tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(xbox_social_relationship_result, result));
+    });
+
+    if (result.err())
+    {
+        return pplx::task_from_result(xbox_live_result<xbox_social_relationship_result>(result.err(), result.err_message()));
+    }
+    return pplx::task<xbox_live_result<xbox_social_relationship_result>>(tce);
+}
 
 xbox_social_relationship_result_internal::xbox_social_relationship_result_internal(
     _In_ xsapi_internal_vector<std::shared_ptr<xbox_social_relationship_internal>> socialRelationships, 
@@ -78,6 +82,19 @@ bool xbox_social_relationship_result_internal::has_next() const
     return (m_continuationSkip < m_totalCount);
 }
 
+xbox_live_result<void> xbox_social_relationship_result_internal::get_next(
+    _In_ uint32_t maxItems,
+    _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>> callback
+    )
+{
+    return m_socialImpl->get_social_relationships(
+        m_filter,
+        m_continuationSkip,
+        maxItems,
+        XSAPI_DEFAULT_TASKGROUP,
+        callback
+        );
+}
 
 xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>
 xbox_social_relationship_result_internal::deserialize(_In_ const web::json::value& json)

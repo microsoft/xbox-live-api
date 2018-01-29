@@ -15,6 +15,7 @@ social_relationship_change_event_args::social_relationship_change_event_args(
 }
 
 DEFINE_GET_STRING(social_relationship_change_event_args, caller_xbox_user_id);
+DEFINE_GET_ENUM_TYPE(social_relationship_change_event_args, social_notification_type, social_notification);
 DEFINE_GET_STRING_VECTOR(social_relationship_change_event_args, xbox_user_ids);
 
 social_relationship_change_event_args_internal::social_relationship_change_event_args_internal(

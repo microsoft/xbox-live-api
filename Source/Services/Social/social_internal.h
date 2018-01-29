@@ -47,9 +47,9 @@ public:
 
     bool has_next() const;
 
-    void get_next(
+    xbox_live_result<void> get_next(
         _In_ uint32_t maxItems,
-        _In_ xbox_live_callback<xbox_live_result<xbox_social_relationship_result>> callback
+        _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>> callback
         );
 
     void init_next_page_info(
@@ -187,9 +187,9 @@ private:
 class reputation_feedback_item_internal
 {
 public:
-    reputation_feedback_item_internal(const reputation_feedback_item& legacyCppObj);
-
-    reputation_feedback_item_internal();
+    reputation_feedback_item_internal(
+        _In_ const reputation_feedback_item& legacyCppObj
+        );
 
     reputation_feedback_item_internal(
         _In_ xsapi_internal_string xboxUserId,
@@ -199,15 +199,15 @@ public:
         _In_ xsapi_internal_string evidenceResourceId = xsapi_internal_string()
         );
 
-    xsapi_internal_string xbox_user_id() const;
+    const xsapi_internal_string& xbox_user_id() const;
 
     reputation_feedback_type feedback_type() const;
 
     const xbox::services::multiplayer::multiplayer_session_reference& session_reference() const;
 
-    xsapi_internal_string reason_message() const;
+    const xsapi_internal_string& reason_message() const;
 
-    xsapi_internal_string evidence_resource_id() const;
+    const xsapi_internal_string& evidence_resource_id() const;
 
 private:
     xsapi_internal_string m_xboxUserId;
@@ -220,18 +220,23 @@ private:
 class reputation_feedback_request
 {
 public:
-    reputation_feedback_request(const reputation_feedback_request& legacyCppObj);
-
     reputation_feedback_request(
         _In_ reputation_feedback_type feedbackType,
         _In_ xsapi_internal_string sessionName,
         _In_ xsapi_internal_string reasonMessage,
         _In_ xsapi_internal_string evidenceResourceId
-    );
+        );
 
     web::json::value serialize_feedback_request();
-    static web::json::value serialize_batch_feedback_request(_In_ const xsapi_internal_vector<reputation_feedback_item_internal>& feedbackItems, _Out_ std::error_code& err);
-    static const xbox_live_result<xsapi_internal_string> convert_reputation_feedback_type_to_string(reputation_feedback_type feedbackType);
+
+    static web::json::value serialize_batch_feedback_request(
+        _In_ const xsapi_internal_vector<reputation_feedback_item_internal>& feedbackItems,
+        _Out_ std::error_code& err
+        );
+
+    static const xbox_live_result<xsapi_internal_string> convert_reputation_feedback_type_to_string(
+        reputation_feedback_type feedbackType
+        );
 
 private:
     reputation_feedback_type m_feedbackType;
