@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|ARM">
@@ -178,7 +178,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\social_helpers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_internal.h" />
-    <ClInclude Include="..\..\Source\Services\Social\profile_internal.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service_impl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_manager_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\user_statistics_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_service_internal.h" />
@@ -306,7 +306,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_serializers.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp" >
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -541,7 +541,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl_idp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\xbox_live_mutex.cpp" />
-    <ClInclude Include="..\..\Include\xsapi\xbox_live_callback.h" />
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>
