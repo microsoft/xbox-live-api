@@ -23,7 +23,6 @@ class xbox_social_relationship_internal;
 class xbox_social_relationship_result_internal;
 class social_relationship_change_event_args_internal;
 class social_relationship_change_subscription_internal;
-class reputation_feedback_item_internal;
 
 enum class xbox_social_relationship_filter
 {
@@ -242,8 +241,6 @@ public:
 
 private:
     std::shared_ptr<xbox_social_relationship_internal> m_internalObj;
-
-    friend xbox_social_relationship_internal;
 };
 
 /// <summary>
@@ -592,6 +589,5 @@ private:
 
     friend xbox_live_context;
 };
-
 
 }}}

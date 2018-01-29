@@ -120,7 +120,6 @@ set(Public_Source_Files
     ../../include/xsapi/title_storage.h
     ../../include/xsapi/tournaments.h
     ../../include/xsapi/xbox_live_app_config.h
-    ../../include/xsapi/xbox_live_app_callback.h
     ../../include/xsapi/xbox_live_context_settings.h
     ../../include/xsapi/clubs.h
     ../../include/xsapi/macros.h

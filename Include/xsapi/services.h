@@ -10,7 +10,6 @@
 #include "xsapi/types.h"
 #include "xsapi/errors.h"
 #include "xsapi/mem.h"
-#include "xsapi/xbox_live_callback.h"
 #include "xsapi/system.h"
 #include "xsapi/service_call_logging_config.h"
 

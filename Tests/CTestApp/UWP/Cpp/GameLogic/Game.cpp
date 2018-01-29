@@ -489,7 +489,7 @@ void Game::GetUserProfile()
         return;
     }
 
-    XblGetUserProfile(m_xboxLiveContext, m_user->xboxUserId, 0, 
+    XblGetUserProfile(m_xboxLiveContext, m_user->xboxUserId, 0, this,
     [](XBL_RESULT result, const XBL_XBOX_USER_PROFILE *profile, void* context)
     {
         Game *pThis = reinterpret_cast<Game*>(context);
@@ -501,7 +501,7 @@ void Game::GetUserProfile()
         {
             pThis->Log(L"Failed getting profile.");
         }
-    }, this);
+    });
 }
 
 void Game::GetSocialRelationships()
@@ -512,7 +512,7 @@ void Game::GetSocialRelationships()
         return;
     }
 
-    XblGetSocialRelationships(m_xboxLiveContext, 0,
+    XblGetSocialRelationships(m_xboxLiveContext, 0, this,
         [](XBL_RESULT result, CONST XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT *socialResult, void* context)
     {
         Game *pThis = reinterpret_cast<Game*>(context);
@@ -524,7 +524,7 @@ void Game::GetSocialRelationships()
         {
             pThis->Log(L"Failed getting social relationships.");
         }
-    }, this);
+    });
 }
 
 void Game::HandleSignout(XSAPI_XBOX_LIVE_USER *user)

@@ -117,7 +117,7 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    real_time_activity_subscription();
+    real_time_activity_subscription() {}
 
     /// <summary>
     /// Internal function

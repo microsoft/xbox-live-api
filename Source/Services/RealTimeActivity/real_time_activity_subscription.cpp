@@ -7,10 +7,6 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_BEGIN
 
-real_time_activity_subscription::real_time_activity_subscription()
-{
-}
-
 real_time_activity_subscription::real_time_activity_subscription(
     _In_ std::function<void(const real_time_activity_subscription_error_event_args&)> subscriptionErrorHandler
     ) :

@@ -63,7 +63,6 @@
 #include <cpprest/uri.h>                        // URI library
 
 #include "xsapi/errors.h"
-#include "xsapi/xbox_live_callback.h"
 #include "utils.h"
 #include "Logger/Log.h"
 

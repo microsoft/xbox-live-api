@@ -187,6 +187,8 @@ private:
 class reputation_feedback_item_internal
 {
 public:
+    reputation_feedback_item_internal() {}
+
     reputation_feedback_item_internal(
         _In_ const reputation_feedback_item& legacyCppObj
         );
