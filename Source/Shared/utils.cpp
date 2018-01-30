@@ -57,7 +57,7 @@ xsapi_singleton::xsapi_singleton()
     memset(&m_eventPlayerSessionId, 0, sizeof(m_eventPlayerSessionId));
 #endif
 
-    m_locales = _T("en-US");
+    m_locales = "en-US";
     m_custom_locale_override = false;
     m_loggerId = 0;
     m_responseCount = 0;

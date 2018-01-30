@@ -8,7 +8,7 @@
 #include "user_context.h"
 #include "utils.h"
 #include "telemetry.h"
-#ifdef _WIN32   
+#ifdef _WIN32
 #include "service_call_logger_data.h"
 #include "service_call_logger.h"
 #endif
@@ -19,23 +19,32 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 const int RETRY_AFTER_CAP = 15;
 
 http_call_response::http_call_response(
-    _In_ const string_t& xboxUserId,
+    _In_ std::shared_ptr<http_call_response_internal> internalObj
+    ) :
+    m_internalObj(std::move(internalObj))
+{
+}
+
+DEFINE_GET_
+
+
+
+
+
+http_call_response_internal::http_call_response_internal(
+    _In_ const xsapi_internal_string& xboxUserId,
     _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
     _In_ const string_t& fullUrl,
-    _In_ const web::http::http_request& request,
     _In_ const http_call_request_message& requestBody,
-    _In_ xbox_live_api xboxLiveApi,
-    _In_ const web::http::http_response& response
+    _In_ xbox_live_api xboxLiveApi
     ) :
     m_httpCallResponseBodyType(http_call_response_body_type::json_body),
     m_xboxUserId(xboxUserId),
     m_xboxLiveContextSettings(xboxLiveContextSettings),
     m_fullUrl(fullUrl),
-    m_request(request),
     m_xboxLiveApi(xboxLiveApi),
     m_requestBody(requestBody)
 {
-    m_responseHeaders = response.headers();
     m_httpStatus = response.status_code();
     m_eTag = utils::extract_header_value(m_responseHeaders, ETAG_HEADER);
     m_responseDate = utils::extract_header_value(m_responseHeaders, DATE_HEADER);

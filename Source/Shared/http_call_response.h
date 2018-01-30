@@ -8,6 +8,122 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
+class http_call_response_internal
+{
+public:
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    http_call_response_internal(
+        _In_ const xsapi_internal_string& xboxUserId,
+        _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
+        _In_ const string_t& baseUrl,
+        _In_ const http_call_request_message& requestBody,
+        _In_ xbox_live_api xboxLiveApi
+        );
+
+#ifndef DEFAULT_MOVE_ENABLED
+    http_call_response(http_call_response&& other);
+    http_call_response& operator=(http_call_response&& other);
+#endif
+
+    http_call_response_body_type body_type() const { return m_httpCallResponseBodyType; }
+
+    const xsapi_internal_string& response_body_string() const { return m_responseBodyString; }
+
+    const web::json::value& response_body_json() const { return m_responseBodyJson; }
+
+    const std::vector<unsigned char>& response_body_vector() const { return m_responseBodyVector; }
+
+    const http_headers& response_headers() const;
+
+    uint32_t http_status() const { return m_httpStatus; }
+
+    const std::error_code& err_code() const { return m_errorCode; }
+
+    const xsapi_internal_string& err_message() const { return m_errorMessage; }
+
+    const xsapi_internal_string& e_tag() const { return m_eTag; }
+
+    const xsapi_internal_string& response_date() const { return m_responseDate; }
+
+    const std::chrono::seconds& retry_after() const { return m_retryAfter; }
+
+    void set_error(_In_ const std::error_code& errCode, _In_ const xsapi_internal_string& errMessage)
+    {
+        m_errorCode = errCode;
+        m_errorMessage = errMessage;
+    }
+
+    void add_response_header(_In_ const xsapi_internal_string& headerName, _In_ const xsapi_internal_string &headerValue)
+    {
+        m_responseHeaders[headerName] = headerValue;
+    }
+
+    void remove_response_header(_In_ const xsapi_internal_string& headerName)
+    {
+        m_responseHeaders.erase(headerName);
+    }
+
+    void set_response_body(_In_ const xsapi_internal_string& responseBodyString);
+
+    // TODO these are unused right now since HC only returns the response body as a string. We either need to do
+    // some extra work to detect a JSON body or we can remove these.
+    void set_response_body(_In_ const std::vector<unsigned char>& responseBodyVector);
+
+    void set_response_body(_In_ const web::json::value& responseBodyJson);
+
+    void set_timing(
+        _In_ const chrono_clock_t::time_point& requestTime,
+        _In_ const chrono_clock_t::time_point& responseTime
+        );
+
+    void set_error_info(
+        _In_ const std::error_code& errCode,
+        _In_ const std::string& errMessage
+        );
+
+    void route_service_call() const;
+
+    const chrono_clock_t::time_point& local_response_time() const;
+
+    std::shared_ptr<xbox_live_context_settings> context_settings() const;
+
+    void set_full_url(_In_ const string_t& url);
+
+private:
+    void record_service_result() const;
+    std::string get_throttling_error_message() const;
+
+    http_call_response_body_type m_httpCallResponseBodyType;
+    std::vector<unsigned char> m_responseBodyVector;
+    xsapi_internal_string m_responseBodyString;
+    web::json::value m_responseBodyJson;
+
+    uint32_t m_httpStatus;
+    std::error_code m_errorCode;
+    xsapi_internal_string m_errorMessage;
+
+    http_headers m_responseHeaders;
+    xsapi_internal_string m_eTag;
+    xsapi_internal_string m_responseDate;
+    std::chrono::seconds m_retryAfter;
+    chrono_clock_t::time_point m_requestTime;
+    chrono_clock_t::time_point m_responseTime;
+
+    xsapi_internal_string m_xboxUserId;
+    std::shared_ptr<xbox_live_context_settings> m_xboxLiveContextSettings;
+    xsapi_internal_string m_fullUrl;
+    http_call_request_message m_requestBody;
+    xbox_live_api m_xboxLiveApi;
+
+    xsapi_internal_string response_body_to_string() const;
+
+    static std::chrono::seconds extract_retry_after_from_header(
+        _In_ const http_headers& responseHeaders
+        );
+};
+
 template<typename T>
 xbox::services::xbox_live_result<T>
 

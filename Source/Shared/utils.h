@@ -152,7 +152,7 @@ struct xsapi_singleton
     std::shared_ptr<service_call_logger_protocol> m_serviceLoggerProtocolSingleton;
 
     // from Shared\utils_locales.cpp
-    string_t m_locales;
+    xsapi_internal_string m_locales;
     std::mutex m_locale_lock;
     bool m_custom_locale_override;
 
@@ -737,6 +737,11 @@ public:
         return char_t_cmp(left.c_str(), right.c_str());
     }
 
+    static inline int str_icmp(const xsapi_internal_string& left, const xsapi_internal_string& right)
+    {
+        return _stricmp(left.c_str(), right.c_str());
+    }
+
     static inline int char_t_cmp(const char_t* left, const char_t* right)
     {
 #ifdef  _WIN32
@@ -823,7 +828,7 @@ public:
 #endif
 
     static void generate_locales();
-    static const string_t& get_locales();
+    static const xsapi_internal_string& get_locales();
 
     static void set_locales(_In_ const string_t& locale);
     template<typename T>
@@ -1078,7 +1083,7 @@ public:
 #endif
 
 private:
-    static std::vector<string_t> get_locale_list();
+    static xsapi_internal_vector<xsapi_internal_string> get_locale_list();
     
     utils();
     utils(const utils&);

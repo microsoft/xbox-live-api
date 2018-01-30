@@ -150,9 +150,9 @@ struct http_call_data
     web::uri pathQueryFragment;
     xsapi_internal_string xboxContractVersionHeaderValue;
     xsapi_internal_string contentTypeHeaderValue;
-    xsapi_internal_unordered_map<xsapi_internal_string, xsapi_internal_string> customHeaderMap;
+    http_headers headers;
+    //xsapi_internal_unordered_map<xsapi_internal_string, xsapi_internal_string> customHeaderMap;
 
-    web::http::http_request request;
     http_call_response_body_type httpCallResponseBodyType;
     http_call_request_message requestBody;
     bool addDefaultHeaders;
@@ -368,39 +368,18 @@ private:
         _In_ const std::shared_ptr<http_call_data>& httpCallData
         );
 
-    static web::http::client::http_client_config get_config(
-        _In_ const std::shared_ptr<http_call_data>& httpCallData
-        );
-
     static void handle_response_error(
         _In_ const std::shared_ptr<http_call_response>& httpCallResponse,
         _In_ xbox_live_error_code errFromException,
-        _In_ const std::string& errMessage,
-        _In_ const web::http::http_response& response
+        _In_ const std::string& errMessage
         );
 
-    static std::shared_ptr<http_call_response> get_http_call_response(
-        _In_ const std::shared_ptr<http_call_data>& httpCallData,
-        _In_ const web::http::http_response& response
+    static std::shared_ptr<http_call_response> create_http_call_response(
+        _In_ const std::shared_ptr<http_call_data>& httpCallData
         );
 
     static xbox::services::xbox_live_error_code get_xbox_live_error_code_from_http_status(
-        _In_ const web::http::status_code& statusCode
-        );
-
-    static pplx::task<std::shared_ptr<http_call_response>> handle_json_body_response(
-        _In_ web::http::http_response httpResponse,
-        _In_ std::shared_ptr<http_call_response> httpCallResponse
-        );
-
-    static pplx::task<std::shared_ptr<http_call_response>> handle_string_body_response(
-        _In_ web::http::http_response httpResponse,
-        _In_ std::shared_ptr<http_call_response> httpCallResponse
-        );
-
-    static pplx::task<std::shared_ptr<http_call_response>> handle_vector_body_response(
-        _In_ web::http::http_response httpResponse,
-        _In_ std::shared_ptr<http_call_response> httpCallResponse
+        _In_ uint32_t statusCode
         );
 
     static bool should_fast_fail(
