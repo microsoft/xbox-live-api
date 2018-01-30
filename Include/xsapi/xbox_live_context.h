@@ -224,6 +224,7 @@ private:
 
     social::profile_service m_profileService;
     social::social_service m_socialService;
+    social::reputation_service m_reputationService;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

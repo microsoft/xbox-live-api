@@ -190,7 +190,7 @@ pplx::task<xbox_live_result<std::vector<club_recommendation_t>>> clubs_service_i
         return clubs_serializers::generate_xbox_live_result<std::vector<club_recommendation_t>>(
             clubs_serializers::deserialize_recommendations_from_clubhub_response(response->response_body_json(), sharedThis),
             response
-            );            
+            );
     });
 
     return utils::create_exception_free_task(task);

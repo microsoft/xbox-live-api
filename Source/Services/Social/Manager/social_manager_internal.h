@@ -516,7 +516,7 @@ protected:
     std::shared_ptr<call_buffer_timer> m_presencePollingTimer;
     std::shared_ptr<call_buffer_timer> m_socialGraphRefreshTimer;
     std::shared_ptr<call_buffer_timer> m_resyncRefreshTimer;
-    std::shared_ptr<xbox::services::social::social_relationship_change_subscription> m_socialRelationshipChangeSubscription;
+    std::shared_ptr<xbox::services::social::social_relationship_change_subscription_internal> m_socialRelationshipChangeSubscription;
     peoplehub_service m_peoplehubService;
     std::function<void()> m_graphDestructionCompleteCallback;
     std::function<void(_In_ xbox::services::real_time_activity::real_time_activity_connection_state state)> m_stateRTAFunction;

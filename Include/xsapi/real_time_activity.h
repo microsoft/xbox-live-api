@@ -117,17 +117,22 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
+    real_time_activity_subscription() {}
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
     real_time_activity_subscription(_In_ std::function<void(const real_time_activity_subscription_error_event_args&)> subscriptionErrorHandler);
 
     /// <summary>The state of the subscription request.</summary>
-    _XSAPIIMP real_time_activity_subscription_state state() const;
+    _XSAPIIMP virtual real_time_activity_subscription_state state() const; // TODO this shouldn't be virtual after we migrate this class
     virtual void _Set_state(_In_ real_time_activity_subscription_state newState);
 
     /// <summary>The resource uri for the request.</summary>
-    _XSAPIIMP const string_t& resource_uri() const;
+    _XSAPIIMP virtual const string_t& resource_uri() const; // TODO this shouldn't be virtual after we migrate this class
 
     /// <summary>The unique subscription id for the request.</summary>
-    _XSAPIIMP uint32_t subscription_id() const;
+    _XSAPIIMP virtual uint32_t subscription_id() const; // TODO this shouldn't be virtual after we migrate this class
     
     virtual ~real_time_activity_subscription() {}
 

@@ -122,6 +122,7 @@ set(Public_Source_Files
     ../../include/xsapi/xbox_live_app_config.h
     ../../include/xsapi/xbox_live_context_settings.h
     ../../include/xsapi/clubs.h
+    ../../include/xsapi/macros.h
     )
 
 set(Public_Source_Files_C
@@ -131,6 +132,7 @@ set(Public_Source_Files_C
     ../../include/xsapi-c/presence_c.h
     ../../include/xsapi-c/privacy_c.h
     ../../include/xsapi-c/profile_c.h
+    ../../include/xsapi-c/social_c.h
     ../../include/xsapi-c/social_manager_c.h
     ../../include/xsapi-c/stats_manager_c.h
     ../../include/xsapi-c/system_c.h
@@ -418,15 +420,16 @@ set(Social_Source_Files
     ../../Source/Services/Social/profile_service.cpp
     ../../Source/Services/Social/reputation_feedback_request.cpp
     ../../Source/Services/Social/reputation_service.cpp
+    ../../Source/Services/Social/reputation_service_impl.cpp
     ../../Source/Services/Social/Social_service.cpp
     ../../Source/Services/Social/xbox_Social_relationship.cpp
     ../../Source/Services/Social/xbox_Social_relationship_result.cpp
     ../../Source/Services/Social/xbox_user_profile.cpp
-    ../../Source/Services/Social/Social_relationship_change_event_args.cpp
-    ../../Source/Services/Social/Social_relationship_change_subscription.cpp
-    ../../Source/Services/Social/Social_service_impl.cpp
-    ../../Source/Services/Social/Social_internal.h
-    ../../Source/Services/Social/profile_service_impl.h
+    ../../Source/Services/Social/social_relationship_change_event_args.cpp
+    ../../Source/Services/Social/social_relationship_change_subscription.cpp
+    ../../Source/Services/Social/social_service_impl.cpp
+    ../../Source/Services/Social/social_internal.h
+    ../../Source/Services/Social/profile_internal.h
     ../../Source/Services/Social/profile_service_impl.cpp
     )
 
@@ -664,6 +667,9 @@ set(Social_Source_Files_C
     ../../Source/Services/Social/C/profile.cpp
     ../../Source/Services/Social/C/profile_helpers.h
     ../../Source/Services/Social/C/profile_helpers.cpp
+    ../../Source/Services/Social/C/social.cpp
+    ../../Source/Services/Social/C/social_helpers.h
+    ../../Source/Services/Social/C/social_helpers.cpp
     )
     
 set(Social_Manager_Source_Files_C

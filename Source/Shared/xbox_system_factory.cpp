@@ -100,7 +100,7 @@ xbox_system_factory::create_http_call(
         );
 }
 
-std::shared_ptr<http_call_impl> 
+std::shared_ptr<http_call_internal>
 xbox_system_factory::create_http_call(
     _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
     _In_ const xsapi_internal_string& httpMethod,

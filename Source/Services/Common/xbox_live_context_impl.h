@@ -60,7 +60,7 @@ public:
     /// <summary>
     /// A service for managing reputation reports.
     /// </summary>
-    social::reputation_service& reputation_service();
+    std::shared_ptr<social::reputation_service_impl> reputation_service_impl();
 
     /// <summary>
     /// A service for managing leaderboards.
@@ -176,7 +176,7 @@ private:
 
     std::shared_ptr<social::profile_service_impl> m_profileServiceImpl;
     std::shared_ptr<social::social_service_impl> m_socialServiceImpl;
-    social::reputation_service m_reputationService;
+    std::shared_ptr<social::reputation_service_impl> m_reputationServiceImpl;
     leaderboard::leaderboard_service m_leaderboardService;
     achievements::achievement_service m_achievementService;
     user_statistics::user_statistics_service m_userStatisticsService;

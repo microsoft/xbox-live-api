@@ -8,7 +8,7 @@
 
 namespace xbox { namespace services {
     class xbox_live_context;
-    class xbox_live_context_impl; // TODO remove
+
     /// <summary>
     /// Contains classes and enumerations that let you retrieve
     /// information about player reputation and relationship with
@@ -16,7 +16,13 @@ namespace xbox { namespace services {
     /// </summary>
     namespace social {
 
+class social_service;
 class social_service_impl;
+class reputation_service_impl;
+class xbox_social_relationship_internal;
+class xbox_social_relationship_result_internal;
+class social_relationship_change_event_args_internal;
+class social_relationship_change_subscription_internal;
 
 enum class xbox_social_relationship_filter
 {
@@ -198,53 +204,43 @@ public:
     static const string_t people() { return _T("People"); }
 };
 
+/// <summary>
+/// Represents the relationship between the user and another Xbox user.
+/// </summary>
 class xbox_social_relationship
 {
 public:
     /// <summary>
-    /// Represents the relationship between the user and another Xbox user.
+    /// Internal function
     /// </summary>
-    xbox_social_relationship();
-
     xbox_social_relationship(
-        _In_ string_t xboxUserId,
-        _In_ bool isFavorite,
-        _In_ bool isFollowingCaller,
-        _In_ std::vector<string_t> socialNetworks
+        _In_ std::shared_ptr<xbox_social_relationship_internal> internalObj
         );
 
     /// <summary>
     /// The person's Xbox user identifier.
     /// </summary>
-    _XSAPIIMP const string_t& xbox_user_id() const;
+    _XSAPIIMP string_t xbox_user_id() const;
 
     /// <summary>
     /// Indicates whether the person is one that the user cares about more. 
     /// Users can have a very large number of people in their people list, 
     /// favorite people should be prioritized first in experiences and shown before others that are not favorites. 
-    /// </summary>        
+    /// </summary>
     _XSAPIIMP bool is_favorite() const;
 
     /// <summary>
     /// Indicates whether the person is following the person that requested the information.
-    /// </summary>        
+    /// </summary>
     _XSAPIIMP bool is_following_caller() const;
 
     /// <summary>
     /// A collection of strings indicating which social networks this person has a relationship with. 
     /// </summary>
-    _XSAPIIMP const std::vector< string_t >& social_networks() const;
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static xbox_live_result<xbox_social_relationship> _Deserialize(_In_ const web::json::value& json);
+    _XSAPIIMP std::vector< string_t > social_networks() const;
 
 private:
-    string_t m_xboxUserId;
-    bool m_isFavorite;
-    bool m_isFollowingCaller;
-    std::vector<string_t> m_socialNetworks;
+    std::shared_ptr<xbox_social_relationship_internal> m_internalObj;
 };
 
 /// <summary>
@@ -286,14 +282,13 @@ public:
     /// Internal function
     /// </summary>
     xbox_social_relationship_result(
-        _In_ std::vector< xbox_social_relationship > socialRelationships,
-        _In_ uint32_t totalCount
+        _In_ std::shared_ptr<xbox_social_relationship_result_internal> internalObj
         );
 
     /// <summary>
     /// Collection of XboxSocialRelationship objects returned by a request.
     /// </summary>
-    _XSAPIIMP const std::vector< xbox_social_relationship >& items() const;
+    _XSAPIIMP std::vector<xbox_social_relationship> items() const;
 
     /// <summary>
     /// The total number of XboxSocialRelationship objects that can be requested.
@@ -304,7 +299,7 @@ public:
     /// Returns a boolean value that indicates if there are more pages of social relationships to retrieve.
     /// </summary>
     /// <returns>True if there are more pages, otherwise false.</returns>
-    _XSAPIIMP bool has_next();
+    _XSAPIIMP bool has_next() const;
 
     /// <summary>
     /// Returns an XboxSocialRelationshipResult object containing the next page.
@@ -317,36 +312,24 @@ public:
         _In_ uint32_t maxItems
         );
 
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    void _Init_next_page_info(
-        _In_ std::shared_ptr<social_service_impl> socialImpl,
-        _In_ xbox_social_relationship_filter filter,
-        _In_ uint32_t continuationSkip
-        );
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static xbox_live_result<xbox_social_relationship_result> _Deserialize(_In_ const web::json::value& json);
-
 private:
-    std::shared_ptr<social_service_impl> m_socialImpl;
-
-    std::vector< xbox_social_relationship > m_socialRelationships;
-    uint32_t m_totalCount;
-    xbox_social_relationship_filter m_filter;
-    uint32_t m_continuationSkip;
+    std::shared_ptr<xbox_social_relationship_result_internal> m_internalObj;
 };
 
 class social_relationship_change_event_args
 {
 public:
     /// <summary>
+    /// Internal function
+    /// </summary>
+    social_relationship_change_event_args(
+        _In_ std::shared_ptr<social_relationship_change_event_args_internal> internalObj
+        );
+
+    /// <summary>
     /// The Xbox user ID for the user who's social graph changes are being listed for.
     /// </summary>
-    _XSAPIIMP const string_t& caller_xbox_user_id() const;
+    _XSAPIIMP string_t caller_xbox_user_id() const;
 
     /// <summary>
     /// The type of notification change.
@@ -356,57 +339,41 @@ public:
     /// <summary>
     /// The Xbox user ids who the event is for
     /// </summary>
-    _XSAPIIMP const std::vector<string_t>& xbox_user_ids() const;
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    social_relationship_change_event_args();
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    social_relationship_change_event_args(
-        _In_ string_t callerXboxUserId,
-        _In_ social_notification_type notificationType,
-        _In_ std::vector<string_t> xboxUserIds
-        );
+    _XSAPIIMP std::vector<string_t> xbox_user_ids() const;
 
 private:
-    string_t m_callerXboxUserId;
-    social_notification_type m_notificationType;
-    std::vector<string_t> m_xboxUserIds;
+    std::shared_ptr<social_relationship_change_event_args_internal> m_internalObj;
 };
 
 class social_relationship_change_subscription : public xbox::services::real_time_activity::real_time_activity_subscription
 {
 public:
     /// <summary>
-    /// The Xbox user ID.
-    /// </summary>
-    _XSAPIIMP const string_t& xbox_user_id() const;
-
-    /// <summary>
     /// Internal function
     /// </summary>
     social_relationship_change_subscription(
-        _In_ string_t xboxUserId,
-        _In_ std::function<void(const social_relationship_change_event_args&)> handler,
-        _In_ std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)> subscriptionErrorHandler
+        _In_ std::shared_ptr<social_relationship_change_subscription_internal> internalObj
         );
 
-protected:
-    void on_subscription_created(_In_ uint32_t id, _In_ const web::json::value& data) override;
+    /// <summary>
+    /// The Xbox user ID.
+    /// </summary>
+    _XSAPIIMP string_t xbox_user_id() const;
 
-    void on_event_received(_In_ const web::json::value& data) override;
+    // TODO remove these after migrating real time activity service
+    /// <summary>The state of the subscription request.</summary>
+    _XSAPIIMP virtual xbox::services::real_time_activity::real_time_activity_subscription_state state() const override;
+
+    /// <summary>The resource uri for the request.</summary>
+    _XSAPIIMP virtual const string_t& resource_uri() const override;
+
+    /// <summary>The unique subscription id for the request.</summary>
+    _XSAPIIMP virtual uint32_t subscription_id() const override;
 
 private:
-    social_notification_type convert_string_type_to_notification_type(
-        _In_ const string_t& notificationType
-        ) const;
+    std::shared_ptr<social_relationship_change_subscription_internal> m_internalObj;
 
-    string_t m_xboxUserId;
-    std::function<void(const social_relationship_change_event_args&)> m_handler;
+    friend social_service;
 };
 
 /// <summary>
@@ -494,10 +461,15 @@ public:
         _In_ function_context context
         );
 
+    std::shared_ptr<xbox_live_context_settings> _Xbox_live_context_settings() { return m_xboxLiveContextSettings; }
+
 private:
     social_service() {};
 
-    social_service(_In_ std::shared_ptr<social_service_impl> serviceImpl);
+    social_service(
+        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> contextSettings,
+        _In_ std::shared_ptr<social_service_impl> serviceImpl
+        );
 
     pplx::task<xbox_live_result<xbox_social_relationship_result>> get_social_relationships(
         _In_ const string_t& xboxUserId,
@@ -505,6 +477,8 @@ private:
         _In_ uint32_t startIndex,
         _In_ uint32_t maxItems
         );
+
+    std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
 
     std::shared_ptr<social_service_impl> m_socialServiceImpl;
 
@@ -609,31 +583,11 @@ public:
 private:
     reputation_service() {};
 
-    reputation_service(
-        _In_ std::shared_ptr<xbox::services::user_context> userContext,
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
-        );
+    reputation_service(_In_ std::shared_ptr<reputation_service_impl> serviceImpl);
 
-    std::shared_ptr<xbox::services::user_context> m_userContext;
-    std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
-    std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
+    std::shared_ptr<reputation_service_impl> m_serviceImpl;
 
-    string_t reputation_feedback_subpath(
-        _In_ const string_t& xboxUserId
-        );
-
-    string_t reputation_history_subpath(
-        _In_ const string_t& xboxUserId
-        );
-
-    string_t reputation_history_subpath(
-        _In_ const string_t& xboxUserId,
-        _In_ uint32_t days
-        );
-
-    friend xbox_live_context_impl;
+    friend xbox_live_context;
 };
-
 
 }}}

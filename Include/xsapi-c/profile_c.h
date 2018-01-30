@@ -76,14 +76,14 @@ typedef void(*XBL_GET_USER_PROFILE_COMPLETION_ROUTINE)(
 /// <summary>
 /// Gets a user profile for a specific Xbox user.
 /// </summary>
-/// <param name="pContext">A pointer to an XBL_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
+/// <param name="xboxLiveContext">A pointer to an XBL_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
 /// <param name="xboxUserId">The Xbox User ID of the user to get the profile for.</param>
 /// <param name="taskGroupId">
 /// The task group ID to assign to this async operation. XblProcessNextCompletedTask(taskGroupId) will only process
 /// completed tasks that have a matching taskGroupId. If this isn't needed, just pass in 0.
 ///</param>
-/// <param name="completionRoutine">A client callback function that will be called when the async operation is complete.</param>
-/// <param name="completionRoutineContext">Context passed back to completionRoutine.</param>
+/// <param name="callbackContext">Context passed back to callback.</param>
+/// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
 /// <returns>
 /// Result code for this API operation. Possible values are XBL_RESULT_OK and XBL_RESULT_E_INVALIDARG.
 /// The result of the asynchronous operation is returned via the callback parameters.
@@ -91,11 +91,11 @@ typedef void(*XBL_GET_USER_PROFILE_COMPLETION_ROUTINE)(
 /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetUserProfile(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_ uint64_t taskGroupId,
-    _In_ XBL_GET_USER_PROFILE_COMPLETION_ROUTINE completionRoutine,
-    _In_opt_ void* completionRoutineContext
+    _In_opt_ void* callbackContext,
+    _In_ XBL_GET_USER_PROFILE_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -111,15 +111,15 @@ typedef void(*XBL_GET_USER_PROFILES_COMPLETION_ROUTINE)(
 /// <summary>
 /// Gets one or more user profiles for a collection of specified Xbox users.
 /// </summary>
-/// <param name="pContext">A pointer to an XBL_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
+/// <param name="xboxLiveContext">A pointer to an XBL_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
 /// <param name="xboxUserIds">C-style Array of Xbox User IDs of the users to get profiles for.</param>
 /// <param name="xboxUserIdsCount">The number of Xbox User IDs in the array.</param>
 /// <param name="taskGroupId">
 /// The task group ID to assign to this async operation. XblProcessNextCompletedTask(taskGroupId) will only process
 /// completed tasks that have a matching taskGroupId. If this isn't needed, just pass in 0.
 ///</param>
-/// <param name="completionRoutine">A client callback function that will be called when the async operation is complete.</param>
-/// <param name="completionRoutineContext">Context passed back to completionRoutine.</param>
+/// <param name="callbackContext">Context passed back to callback.</param>
+/// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
 /// <returns>
 /// <returns>
 /// Result code for this API operation. Possible values are XBL_RESULT_OK and XBL_RESULT_E_INVALIDARG.
@@ -128,25 +128,25 @@ typedef void(*XBL_GET_USER_PROFILES_COMPLETION_ROUTINE)(
 /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetUserProfiles(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
     _In_ PCSTR *xboxUserIds,
     _In_ uint32_t xboxUserIdsCount,
     _In_ uint64_t taskGroupId,
-    _In_ XBL_GET_USER_PROFILES_COMPLETION_ROUTINE completionRoutine,
-    _In_opt_ void* completionRoutineContext
+    _In_opt_ void* callbackContext,
+    _In_ XBL_GET_USER_PROFILES_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Gets a user profile for a specific Xbox user.
 /// </summary>
-/// <param name="pContext">A pointer to an XBL_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
+/// <param name="xboxLiveContext">A pointer to an XBL_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
 /// <param name="socialGroup">The name of the social group of users to search. Options are "Favorites" and "People".</param>
 /// <param name="taskGroupId">
 /// The task group ID to assign to this async operation. XblProcessNextCompletedTask(taskGroupId) will only process
 /// completed tasks that have a matching taskGroupId. If this isn't needed, just pass in 0.
 ///</param>
-/// <param name="completionRoutine">A client callback function that will be called when the async operation is complete.</param>
-/// <param name="completionRoutineContext">Context passed back to completionRoutine.</param>
+/// <param name="callbackContext">Context passed back to callback.</param>
+/// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
 /// <returns>
 /// Result code for this API operation. Possible values are XBL_RESULT_OK and XBL_RESULT_E_INVALIDARG.
 /// The result of the asynchronous operation is returned via the callback parameters.
@@ -154,11 +154,11 @@ XblGetUserProfiles(
 /// <remarks>Calls V2 GET /users/{userId}/profile/settings/people/{socialGroup}</remarks>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetUserProfilesForSocialGroup(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
     _In_ PCSTR socialGroup,
     _In_ uint64_t taskGroupId,
-    _In_ XBL_GET_USER_PROFILES_COMPLETION_ROUTINE completionRoutine,
-    _In_opt_ void* completionRoutineContext
+    _In_opt_ void* callbackContext,
+    _In_ XBL_GET_USER_PROFILES_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
 
 #if defined(__cplusplus)
