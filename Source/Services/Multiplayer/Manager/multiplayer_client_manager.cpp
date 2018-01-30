@@ -638,7 +638,7 @@ multiplayer_client_manager::is_request_in_progress()
 bool
 multiplayer_client_manager::is_update_avaialable()
 {
-    if (m_latestPendingRead == nullptr)
+    if (m_latestPendingRead == nullptr || m_lastPendingRead == nullptr)
     {
         return false;
     }
