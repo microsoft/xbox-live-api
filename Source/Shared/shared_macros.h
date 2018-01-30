@@ -71,6 +71,10 @@
     } \
 }
 
+#define CREATE_EXTERNAL_XBOX_LIVE_RESULT(type, internalReturnObj) \
+    xbox_live_result<type>(type(internalReturnObj.payload()), internalReturnObj.err(), internalReturnObj.err_message())
+
+
 #define CATCH_RETURN() \
     catch (std::bad_alloc const& e) { return utils::std_bad_alloc_to_xbl_result(e); } \
     catch (std::exception const& e) { return utils::std_exception_to_xbl_result(e); } \
@@ -80,3 +84,45 @@
     catch (std::bad_alloc const& e) { utils::std_bad_alloc_to_xbl_result(e); return errCode; } \
     catch (std::exception const& e) { utils::std_exception_to_xbl_result(e); return errCode; } \
     catch (...) { utils::unknown_exception_to_xbl_result(); return errCode; }
+
+#define DEFINE_GET_STRING(className, methodName) \
+    string_t className::methodName() const \
+    { \
+        return utils::external_string_from_internal_string(m_internalObj->methodName()); \
+    }
+
+#define DEFINE_GET_BOOL(className, methodName) \
+    bool className::methodName() const \
+    { \
+        return m_internalObj->methodName(); \
+    }
+
+#define DEFINE_GET_UINT32(className, methodName) \
+    uint32_t className::methodName() const \
+    { \
+        return m_internalObj->methodName(); \
+    }
+
+#define DEFINE_GET_STRING_VECTOR(className, methodName) \
+    std::vector<string_t> className::methodName() const \
+    { \
+        return utils::std_string_vector_from_internal_string_vector(m_internalObj->methodName()); \
+    }
+
+#define DEFINE_GET_ENUM_TYPE(className, enumType, methodName) \
+    enumType className::methodName() const \
+    { \
+        return m_internalObj->methodName(); \
+    }
+
+#define DEFINE_GET_URI(className, methodName) \
+    const web::uri& className::methodName() const \
+    { \
+        return m_internalObj->methodName(); \
+    }
+
+#define DEFINE_GET_VECTOR(className, externalType, methodName) \
+    std::vector<externalType> className::methodName() const \
+    { \
+        return utils::std_vector_from_internal_vector<externalType, std::shared_ptr<externalType##_internal>>(m_internalObj->methodName()); \
+    }

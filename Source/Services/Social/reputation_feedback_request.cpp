@@ -25,7 +25,7 @@ reputation_feedback_request::reputation_feedback_request(
 
 web::json::value
 reputation_feedback_request::serialize_batch_feedback_request(
-    _In_ const xsapi_internal_vector< reputation_feedback_item >& feedbackItems,
+    _In_ const xsapi_internal_vector<reputation_feedback_item_internal>& feedbackItems,
     _Out_ std::error_code& err
     )
 {
@@ -57,7 +57,7 @@ reputation_feedback_request::serialize_batch_feedback_request(
         }
 
         web::json::value itemJson;
-        itemJson[_T("targetXuid")] = web::json::value::string(feedbackItem.xbox_user_id());
+        itemJson[_T("targetXuid")] = web::json::value::string(utils::external_string_from_internal_string(feedbackItem.xbox_user_id()));
         itemJson[_T("titleId")] = web::json::value::null();
 
         web::json::value sessionRefJson;
@@ -74,10 +74,10 @@ reputation_feedback_request::serialize_batch_feedback_request(
         }
 
         itemJson[_T("feedbackType")] = web::json::value::string(utils::external_string_from_internal_string(feedbackTypeToString.payload()));
-        itemJson[_T("textReason")] = web::json::value::string(feedbackItem.reason_message());
+        itemJson[_T("textReason")] = web::json::value::string(utils::external_string_from_internal_string(feedbackItem.reason_message()));
         if (!feedbackItem.evidence_resource_id().empty())
         {
-            itemJson[_T("evidenceId")] = web::json::value::string(feedbackItem.evidence_resource_id());
+            itemJson[_T("evidenceId")] = web::json::value::string(utils::external_string_from_internal_string(feedbackItem.evidence_resource_id()));
         }
         else
         {
@@ -148,8 +148,7 @@ reputation_feedback_request::convert_reputation_feedback_type_to_string(reputati
     }
 }
 
-reputation_feedback_item::reputation_feedback_item() :
-    m_reputationFeedbackType(reputation_feedback_type::fair_play_kills_teammates)
+reputation_feedback_item::reputation_feedback_item()
 {
 }
 
@@ -159,8 +158,8 @@ reputation_feedback_item::reputation_feedback_item(
     _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef,
     _In_ string_t reasonMessage,
     _In_ string_t evidenceResourceId
-    ) : 
-    m_xboxUserId(std::move(xboxUserId)), 
+    ) :
+    m_xboxUserId(std::move(xboxUserId)),
     m_reputationFeedbackType(reputationFeedbackType),
     m_sessionRef(std::move(sessionRef)),
     m_reasonMessage(std::move(reasonMessage)),
@@ -168,32 +167,89 @@ reputation_feedback_item::reputation_feedback_item(
 {
 }
 
-const string_t& 
+const string_t&
 reputation_feedback_item::xbox_user_id() const
 {
     return m_xboxUserId;
 }
 
-reputation_feedback_type 
+reputation_feedback_type
 reputation_feedback_item::feedback_type() const
 {
     return m_reputationFeedbackType;
 }
 
-const xbox::services::multiplayer::multiplayer_session_reference& 
+const xbox::services::multiplayer::multiplayer_session_reference&
 reputation_feedback_item::session_reference() const
 {
     return m_sessionRef;
 }
 
-const string_t& 
+const string_t&
 reputation_feedback_item::reason_message() const
 {
     return m_reasonMessage;
 }
 
-const string_t& 
+const string_t&
 reputation_feedback_item::evidence_resource_id() const
+{
+    return m_evidenceResourceId;
+}
+
+
+reputation_feedback_item_internal::reputation_feedback_item_internal(
+    const reputation_feedback_item& legacyCppObj
+    ) :
+    m_xboxUserId(utils::internal_string_from_external_string(legacyCppObj.xbox_user_id())),
+    m_reputationFeedbackType(legacyCppObj.feedback_type()),
+    m_sessionRef(legacyCppObj.session_reference()),
+    m_reasonMessage(utils::internal_string_from_external_string(legacyCppObj.reason_message())),
+    m_evidenceResourceId(utils::internal_string_from_external_string(legacyCppObj.evidence_resource_id()))
+{
+}
+
+reputation_feedback_item_internal::reputation_feedback_item_internal(
+    _In_ xsapi_internal_string xboxUserId,
+    _In_ reputation_feedback_type reputationFeedbackType,
+    _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef,
+    _In_ xsapi_internal_string reasonMessage,
+    _In_ xsapi_internal_string evidenceResourceId
+    ) :
+    m_xboxUserId(std::move(xboxUserId)),
+    m_reputationFeedbackType(reputationFeedbackType),
+    m_sessionRef(std::move(sessionRef)),
+    m_reasonMessage(std::move(reasonMessage)),
+    m_evidenceResourceId(std::move(evidenceResourceId))
+{
+}
+
+const xsapi_internal_string&
+reputation_feedback_item_internal::xbox_user_id() const
+{
+    return m_xboxUserId;
+}
+
+reputation_feedback_type
+reputation_feedback_item_internal::feedback_type() const
+{
+    return m_reputationFeedbackType;
+}
+
+const xbox::services::multiplayer::multiplayer_session_reference& 
+reputation_feedback_item_internal::session_reference() const
+{
+    return m_sessionRef;
+}
+
+const xsapi_internal_string&
+reputation_feedback_item_internal::reason_message() const
+{
+    return m_reasonMessage;
+}
+
+const xsapi_internal_string&
+reputation_feedback_item_internal::evidence_resource_id() const
 {
     return m_evidenceResourceId;
 }

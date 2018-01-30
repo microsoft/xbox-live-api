@@ -339,8 +339,6 @@ void http_call_impl::internal_get_response(
 {
     httpCallData->requestStartTime = chrono_clock_t::now();
     set_user_agent(httpCallData);
-    pplx::task<utility::string_t> taskBody = httpCallData->request.extract_string();
-    xsapi_internal_string requestBody = utils::internal_string_from_external_string(taskBody.get());
 
     HC_CALL_HANDLE call = nullptr;
     HCHttpCallCreate(&call);
@@ -350,7 +348,13 @@ void http_call_impl::internal_get_response(
     xsapi_internal_string method = utils::internal_string_from_external_string(httpCallData->request.method());
 
     HCHttpCallRequestSetUrl(call, method.c_str(), uri.c_str());
-    HCHttpCallRequestSetRequestBodyString(call, requestBody.c_str());
+
+    if (httpCallData->requestBody.get_http_request_message_type() != empty_message)
+    {
+        pplx::task<utility::string_t> taskBody = httpCallData->request.extract_string(); // TODO remove this needless casablanca dependency
+        xsapi_internal_string requestBody = utils::internal_string_from_external_string(taskBody.get());
+        HCHttpCallRequestSetRequestBodyString(call, requestBody.c_str());
+    }
     for (auto& header : httpCallData->request.headers())
     {
         std::string headerName = utility::conversions::to_utf8string(header.first);

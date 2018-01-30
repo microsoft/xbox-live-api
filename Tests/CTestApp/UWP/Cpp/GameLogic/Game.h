@@ -22,6 +22,7 @@ enum ButtonPress
     ToggleSocialGroup5,
     ImportCustomList,
     GetUserProfile,
+    GetFriends
 };
 
 #define PERF_COUNTERS 0    // Enable this for capturing performance counters
@@ -92,6 +93,7 @@ namespace Sample
         void ReadCsvFile(_In_ Windows::Storage::StorageFile^ file);
 
         void GetUserProfile();
+        void GetSocialRelationships();
 
         HANDLE m_hBackgroundThread;
     };

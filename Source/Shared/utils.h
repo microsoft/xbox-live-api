@@ -263,6 +263,14 @@ public:
         _In_ const string_t& defaultValue = _T("")
     );
 
+    static xsapi_internal_string extract_json_string(
+        _In_ const web::json::value& jsonValue,
+        _In_ const xsapi_internal_string& stringName,
+        _Inout_ std::error_code& error,
+        _In_ bool required = false,
+        _In_ const xsapi_internal_string& defaultValue = ""
+    );
+
     static void extract_json_string_to_char_t_array(
         _In_ const web::json::value& jsonValue,
         _In_ const string_t& stringName,
@@ -297,6 +305,14 @@ public:
     static bool extract_json_bool(
         _In_ const web::json::value& jsonValue,
         _In_ const string_t& stringName,
+        _Inout_ std::error_code& error,
+        _In_ bool required = false,
+        _In_ bool defaultValue = false
+    );
+
+    static bool extract_json_bool(
+        _In_ const web::json::value& jsonValue,
+        _In_ const xsapi_internal_string& stringName,
         _Inout_ std::error_code& error,
         _In_ bool required = false,
         _In_ bool defaultValue = false
@@ -401,6 +417,13 @@ public:
         _Inout_ std::error_code& error,
         _In_ bool required
     );
+
+    static web::json::value extract_json_field(
+        _In_ const web::json::value& json,
+        _In_ const xsapi_internal_string& name,
+        _Inout_ std::error_code& error,
+        _In_ bool required
+        );
 
     static std::vector<string_t> extract_json_string_vector(
         _In_ const web::json::value& json,
@@ -514,17 +537,17 @@ public:
         return result;
     }
 
-    template<typename T, typename U, typename F>
-    static std::vector<T, U> extract_json_internal_vector(
+    template<typename T, typename F>
+    static xsapi_internal_vector<T> extract_json_vector(
         _In_ F deserialize,
         _In_ const web::json::value& json,
-        _In_ const string_t& name,
+        _In_ const xsapi_internal_string& name,
         _Inout_ std::error_code& errc,
         _In_ bool required
     )
     {
         web::json::value field(extract_json_field(json, name, errc, required));
-        std::vector<T, U> result;
+        xsapi_internal_vector<T> result;
 
         if ((!field.is_array()) || errc)
         {
@@ -598,6 +621,30 @@ public:
     }
 
     template<typename T, typename F>
+    static xbox_live_result<xsapi_internal_vector<T>> extract_xbox_live_result_json_vector(
+        _In_ F deserialize,
+        _In_ const web::json::value& json,
+        _In_ const xsapi_internal_string& name,
+        _Inout_ std::error_code& errc,
+        _In_ bool required
+    )
+    {
+        auto jsonVector = extract_json_vector<T>(
+            deserialize,
+            json,
+            name,
+            errc,
+            required
+            );
+
+        return xbox_live_result<xsapi_internal_vector<T>>(
+            jsonVector,
+            errc,
+            ""
+            );
+    }
+
+    template<typename T, typename F>
     static std::vector<T> extract_json_vector(
         _In_ F deserialize,
         _In_ const web::json::value& json,
@@ -652,6 +699,8 @@ public:
     static web::json::value json_get_value_from_string(_In_ const string_t& value);
 
     static xbox_live_result<string_t> json_string_extractor(_In_ const web::json::value& json);
+
+    static xbox_live_result<xsapi_internal_string> json_internal_string_extractor(_In_ const web::json::value& json);
 
     static web::json::value json_string_serializer(_In_ const string_t& value);
 
@@ -942,12 +991,28 @@ public:
         return std::vector<T>(internalVector.begin(), internalVector.end());
     }
 
+    template<typename External, typename Internal>
+    static std::vector<External> std_vector_from_internal_vector(
+        _In_ const xsapi_internal_vector<Internal>& internalVector
+        )
+    {
+        return std::vector<External>(internalVector.begin(), internalVector.end());
+    }
+
     template<typename T>
     static xsapi_internal_vector<T> internal_vector_from_std_vector(
         _In_ const std::vector<T>& vector
         )
     {
         return xsapi_internal_vector<T>(vector.begin(), vector.end());
+    }
+
+    template<typename Internal, typename External> 
+    static xsapi_internal_vector<Internal> internal_vector_from_std_vector(
+        _In_ const std::vector<External>& vector
+        )
+    {
+        return xsapi_internal_vector<Internal>(vector.begin(), vector.end());
     }
 
     static uint32_t try_get_master_title_id();
@@ -1161,7 +1226,7 @@ public:
     template <typename Functor>
     xbox_live_callback& operator=(Functor f)
     {
-        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(functor).release());
+        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(f).release());
         return *this;
     }
 
@@ -1179,8 +1244,17 @@ public:
 
     void operator()(Args... args) const
     {
-        XSAPI_ASSERT(m_callable != nullptr);
         (*m_callable)(args...);
+    }
+
+    bool operator==(std::nullptr_t) noexcept
+    {
+        return m_callable == nullptr;
+    }
+
+    bool operator!=(std::nullptr_t) noexcept
+    {
+        return m_callable != nullptr;
     }
 
 private:

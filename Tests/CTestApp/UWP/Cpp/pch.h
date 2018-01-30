@@ -24,3 +24,4 @@
 #include "xsapi-c\xbox_live_context_c.h"
 #include "xsapi-c\profile_c.h"
 #include "xsapi-c\xbox_live_global_c.h"
+#include "xsapi-c\social_c.h"
