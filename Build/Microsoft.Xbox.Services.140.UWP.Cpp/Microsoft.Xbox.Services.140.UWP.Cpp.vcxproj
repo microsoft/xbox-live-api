@@ -70,7 +70,7 @@
       <AdditionalOptions>/bigobj /Zm300 %(AdditionalOptions)</AdditionalOptions>
       <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\Source\Services;$(ProjectDir)..\..\Source\Services\Common;$(ProjectDir)..\..\Source\Services\Common\Desktop;$(ProjectDir)..\..\Source\Services\Social;$(ProjectDir)..\..\Source\Services\Multiplayer;$(ProjectDir)..\..\Source\Services\Presence;$(ProjectDir)..\..\Source\Services\Misc;$(ProjectDir)..\..\Source\Services\Social\Manager;$(ProjectDir)..\..\Source\Services\Social\C;$(ProjectDir)..\..\Source\Services\RealTimeActivity;$(ProjectDir)..\..\Source\Services\Clubs;$(ProjectDir)..\..\Source\Shared;$(ProjectDir)..\..\Source\Shared\WinRT;$(ProjectDir)..\..\Include;$(ProjectDir)..\..\Source\System\WinRT;$(ProjectDir)..\..\Source\System;$(ProjectDir)..\..\Source\C\Services\TitleStorage;$(ProjectDir)..\..\Source\C\Services\Common;$(ProjectDir)..\..\Source\C\Services\Social;$(ProjectDir)..\..\Source\C\Services\Multiplayer;$(ProjectDir)..\..\Source\C\Services\Presence;$(ProjectDir)..\..\Source\C\Services\Misc;$(ProjectDir)..\..\Source\C\Services\Social\Manager;$(ProjectDir)..\..\Source\C\Services\RealTimeActivity;$(ProjectDir)..\..\Source\C\Services\Achievements;$(ProjectDir)..\..\Source\C\Shared;$(ProjectDir)..\..\Source\C\Shared\WinRT;$(ProjectDir)..\..\Source\C\System;$(ProjectDir)..\..\Source\C\Services\Leaderboard;$(ProjectDir)..\..\Include\cpprestsdk;$(ProjectDir)..\..\Source\C\Services\Stats\Manager;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\Source\Services;$(ProjectDir)..\..\Source\Services\Common\C;$(ProjectDir)..\..\Source\Services\Common;$(ProjectDir)..\..\Source\Services\Common\Desktop;$(ProjectDir)..\..\Source\Services\Social;$(ProjectDir)..\..\Source\Services\Multiplayer;$(ProjectDir)..\..\Source\Services\Presence;$(ProjectDir)..\..\Source\Services\Misc;$(ProjectDir)..\..\Source\Services\Social\Manager;$(ProjectDir)..\..\Source\Services\Social\C;$(ProjectDir)..\..\Source\Services\RealTimeActivity;$(ProjectDir)..\..\Source\Services\Clubs;$(ProjectDir)..\..\Source\Shared;$(ProjectDir)..\..\Source\Shared\WinRT;$(ProjectDir)..\..\Include;$(ProjectDir)..\..\Source\System\WinRT;$(ProjectDir)..\..\Source\System;$(ProjectDir)..\..\Source\C\Services\TitleStorage;$(ProjectDir)..\..\Source\C\Services\Common;$(ProjectDir)..\..\Source\C\Services\Social;$(ProjectDir)..\..\Source\C\Services\Multiplayer;$(ProjectDir)..\..\Source\C\Services\Presence;$(ProjectDir)..\..\Source\C\Services\Misc;$(ProjectDir)..\..\Source\C\Services\Social\Manager;$(ProjectDir)..\..\Source\C\Services\RealTimeActivity;$(ProjectDir)..\..\Source\C\Services\Achievements;$(ProjectDir)..\..\Source\C\Shared;$(ProjectDir)..\..\Source\C\Shared\WinRT;$(ProjectDir)..\..\Source\C\System;$(ProjectDir)..\..\Source\C\Services\Leaderboard;$(ProjectDir)..\..\Include\cpprestsdk;$(ProjectDir)..\..\Source\C\Services\Stats\Manager;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAsWinRT>true</CompileAsWinRT>
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ShowIncludes>
     </ClCompile>
@@ -106,11 +106,12 @@
     <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectFolder)\</IntDir>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\Services\Common\C\xbox_live_context_c.cpp" />
+    <ClCompile Include="..\..\Source\Services\Common\C\xbox_live_global_c.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements_helper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements_state.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements_taskargs.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Common\taskargs.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Common\xbox_live_context_impl_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Leaderboard\leaderboard_helper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_multiple_permissions_check_result_impl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_permission_check_result_impl.h" />
@@ -226,9 +227,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_service_call_routed_event_args.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements_helper.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Common\xbox_live_context_c.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Common\xbox_live_context_impl_c.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Common\xbox_live_global.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Leaderboard\leaderboard.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Leaderboard\leaderboard_helper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Misc\title_callable_ui_c.cpp" />
@@ -504,6 +502,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl_idp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\xbox_live_mutex.cpp" />
+    <ClInclude Include="..\..\Source\Services\Common\C\xbox_live_context_internal_c.h" />
     <ClInclude Include="..\..\Source\Services\Social\profile_internal.h" />
     <ClInclude Include="..\..\Source\Shared\http_headers.h" />
   </ItemGroup>

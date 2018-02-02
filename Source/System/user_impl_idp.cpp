@@ -314,7 +314,7 @@ void user_impl_idp::internal_get_token_and_signature(
 {
     UNREFERENCED_PARAMETER(endpointForNsal);
 
-    auto context = async_helpers::store_shared_ptr(xsapi_allocate_shared<get_token_and_signature_context>(
+    auto context = utils::store_shared_ptr(xsapi_allocate_shared<get_token_and_signature_context>(
         shared_from_this(),
         httpMethod,
         url,
@@ -328,7 +328,7 @@ void user_impl_idp::internal_get_token_and_signature(
     HCTaskCreate(HC_SUBSYSTEM_ID::HC_SUBSYSTEM_ID_XSAPI, taskGroupId,
         [](_In_opt_ void *_context, _In_ HC_TASK_HANDLE taskHandle)
         {
-            auto context = async_helpers::remove_shared_ptr<get_token_and_signature_context>(_context, false);
+            auto context = utils::remove_shared_ptr<get_token_and_signature_context>(_context, false);
             auto pThis = std::dynamic_pointer_cast<user_impl_idp>(context->userImpl);
 
             context->result = pThis->internal_get_token_and_signature_helper(
@@ -364,7 +364,7 @@ void user_impl_idp::internal_get_token_and_signature(
             UNREFERENCED_PARAMETER(taskHandle);
             UNREFERENCED_PARAMETER(completionRoutine);
             UNREFERENCED_PARAMETER(completionRoutineContext);
-            auto context = async_helpers::remove_shared_ptr<get_token_and_signature_context>(_context);
+            auto context = utils::remove_shared_ptr<get_token_and_signature_context>(_context);
             context->callback(context->result);
             return HC_OK;
         },
@@ -553,7 +553,6 @@ user_impl_idp::request_token_from_idp(
         {
             try
             {
-                // TODO remove ppl here
                 task<WebTokenRequestResult^> tokenTask = 
                     webAccount == nullptr ?
                     create_task(WebAuthenticationCoreManager::RequestTokenAsync(request)):

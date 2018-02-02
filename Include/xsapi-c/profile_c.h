@@ -76,7 +76,7 @@ typedef void(*XBL_GET_USER_PROFILE_COMPLETION_ROUTINE)(
 /// <summary>
 /// Gets a user profile for a specific Xbox user.
 /// </summary>
-/// <param name="xboxLiveContext">A pointer to an XBL_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
+/// <param name="xboxLiveContext">An xbox live context handle created with XblXboxLiveContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the user to get the profile for.</param>
 /// <param name="taskGroupId">
 /// The task group ID to assign to this async operation. XblProcessNextCompletedTask(taskGroupId) will only process
@@ -91,7 +91,7 @@ typedef void(*XBL_GET_USER_PROFILE_COMPLETION_ROUTINE)(
 /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetUserProfile(
-    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_ uint64_t taskGroupId,
     _In_opt_ void* callbackContext,
@@ -111,7 +111,7 @@ typedef void(*XBL_GET_USER_PROFILES_COMPLETION_ROUTINE)(
 /// <summary>
 /// Gets one or more user profiles for a collection of specified Xbox users.
 /// </summary>
-/// <param name="xboxLiveContext">A pointer to an XBL_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
+/// <param name="xboxLiveContext">An xbox live context handle created with XblXboxLiveContextCreateHandle.</param>
 /// <param name="xboxUserIds">C-style Array of Xbox User IDs of the users to get profiles for.</param>
 /// <param name="xboxUserIdsCount">The number of Xbox User IDs in the array.</param>
 /// <param name="taskGroupId">
@@ -128,7 +128,7 @@ typedef void(*XBL_GET_USER_PROFILES_COMPLETION_ROUTINE)(
 /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetUserProfiles(
-    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR *xboxUserIds,
     _In_ uint32_t xboxUserIdsCount,
     _In_ uint64_t taskGroupId,
@@ -139,7 +139,7 @@ XblGetUserProfiles(
 /// <summary>
 /// Gets a user profile for a specific Xbox user.
 /// </summary>
-/// <param name="xboxLiveContext">A pointer to an XBL_XBOX_LIVE_CONTEXT created with XboxLiveContextCreate.</param>
+/// <param name="xboxLiveContext">An xbox live context handle created with XblXboxLiveContextCreateHandle.</param>
 /// <param name="socialGroup">The name of the social group of users to search. Options are "Favorites" and "People".</param>
 /// <param name="taskGroupId">
 /// The task group ID to assign to this async operation. XblProcessNextCompletedTask(taskGroupId) will only process
@@ -154,7 +154,7 @@ XblGetUserProfiles(
 /// <remarks>Calls V2 GET /users/{userId}/profile/settings/people/{socialGroup}</remarks>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetUserProfilesForSocialGroup(
-    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR socialGroup,
     _In_ uint64_t taskGroupId,
     _In_opt_ void* callbackContext,

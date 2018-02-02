@@ -18,11 +18,11 @@
 class xbl_thread_pool;
 
 class title_storage_state;
-struct XSAPI_XBOX_LIVE_APP_CONFIG;
+struct XBL_XBOX_LIVE_APP_CONFIG;
 struct XSAPI_ACHIEVEMENTS_STATE; // TODO use c++ naming conventions for internal classes, make them classes
 struct XSAPI_SOCIAL_MANAGER_VARS;
 struct XSAPI_STATS_MANAGER_VARS;
-struct XSAPI_XBOX_LIVE_USER;
+struct XBL_XBOX_LIVE_USER;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
     class xbox_live_services_settings;
@@ -113,6 +113,7 @@ struct xsapi_singleton
     ~xsapi_singleton();
 
     void init();
+    void start_threadpool();
 
     std::mutex m_rtaActivationCounterLock;
     std::unordered_map<string_t, uint32_t> m_rtaActiveSocketCountPerUser;
@@ -229,9 +230,9 @@ struct xsapi_singleton
     std::shared_ptr<title_storage_state> m_titleStorageState;
 
     std::mutex m_usersLock;
-    std::unordered_map<std::string, XSAPI_XBOX_LIVE_USER*> m_signedInUsers;
+    std::unordered_map<std::string, XBL_XBOX_LIVE_USER*> m_signedInUsers;
 
-    std::shared_ptr<XSAPI_XBOX_LIVE_APP_CONFIG> m_appConfigSingletonC;
+    std::shared_ptr<XBL_XBOX_LIVE_APP_CONFIG> m_appConfigSingletonC;
     std::string m_scid;
     std::string m_environment;
     std::string m_sandbox;
@@ -239,6 +240,9 @@ struct xsapi_singleton
     std::shared_ptr<XSAPI_ACHIEVEMENTS_STATE> m_achievementsState;
     std::shared_ptr<XSAPI_SOCIAL_MANAGER_VARS> m_socialVars;
     std::shared_ptr<XSAPI_STATS_MANAGER_VARS> m_statsVars;
+
+    std::mutex m_callbackContextsLock;
+    xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_callbackContextPtrs;
 };
 
 void init_mem_hooks();
@@ -1154,6 +1158,40 @@ public:
         size_t stringArrayCount
         );
 
+    template<typename T>
+    static void *store_shared_ptr(std::shared_ptr<T> contextSharedPtr)
+    {
+        auto singleton = get_xsapi_singleton();
+        std::lock_guard<std::mutex> lock(singleton->m_callbackContextsLock);
+        void *rawVoidPtr = contextSharedPtr.get();
+        std::shared_ptr<void> voidSharedPtr(contextSharedPtr, rawVoidPtr);
+        singleton->m_callbackContextPtrs.insert(std::make_pair(rawVoidPtr, voidSharedPtr));
+        return rawVoidPtr;
+    }
+
+    template<typename T>
+    static std::shared_ptr<T> remove_shared_ptr(void *rawContextPtr, bool deleteShared = true)
+    {
+        auto singleton = get_xsapi_singleton();
+        std::lock_guard<std::mutex> lock(singleton->m_callbackContextsLock);
+
+        auto iter = singleton->m_callbackContextPtrs.find(rawContextPtr);
+        if (iter != singleton->m_callbackContextPtrs.end())
+        {
+            auto returnPtr = std::shared_ptr<T>(iter->second, reinterpret_cast<T*>(iter->second.get()));
+            if (deleteShared)
+            {
+                singleton->m_callbackContextPtrs.erase(iter);
+            }
+            return returnPtr;
+        }
+        else
+        {
+            XSAPI_ASSERT(false && "Context not found!");
+            return std::shared_ptr<T>();
+        }
+    }
+
 #if XSAPI_C
     static PCSTR alloc_string(const string_t& str);
     static void free_string(PCSTR str);
@@ -1179,51 +1217,6 @@ private:
 };
 
 static const uint64_t XSAPI_DEFAULT_TASKGROUP = 99;
-
-class async_helpers
-{
-public:
-    template<typename T>
-    static void *store_shared_ptr(std::shared_ptr<T> contextSharedPtr)
-    {
-        std::lock_guard<std::mutex> lock(m_contextsLock);
-        void *rawVoidPtr = contextSharedPtr.get();
-        std::shared_ptr<void> voidSharedPtr(contextSharedPtr, rawVoidPtr);
-        m_sharedPtrs.insert(std::make_pair(rawVoidPtr, voidSharedPtr));
-        return rawVoidPtr;
-    }
-
-    template<typename T>
-    static std::shared_ptr<T> remove_shared_ptr(void *rawContextPtr, bool deleteShared = true)
-    {
-        std::lock_guard<std::mutex> lock(m_contextsLock);
-
-        auto iter = m_sharedPtrs.find(rawContextPtr);
-        if (iter != m_sharedPtrs.end())
-        {
-            auto returnPtr = std::shared_ptr<T>(iter->second, reinterpret_cast<T*>(iter->second.get()));
-            if (deleteShared)
-            {
-                m_sharedPtrs.erase(iter);
-            }
-            return returnPtr;
-        }
-        else
-        {
-            XSAPI_ASSERT(false && "Context not found!");
-            return std::shared_ptr<T>();
-        }
-    }
-
-private:
-    /// TODO move this xsapi_singleton and assert if not empty on shutdown
-    static std::mutex m_contextsLock;
-    static xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_sharedPtrs;
-
-    async_helpers();
-    async_helpers(const async_helpers&);
-    async_helpers& operator=(const async_helpers&);
-};
 
 template<typename... Args>
 class xbox_live_callback

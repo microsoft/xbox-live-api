@@ -8,8 +8,8 @@
 struct XSAPI_XBOX_LIVE_USER_IMPL
 {
 public:
-    XSAPI_XBOX_LIVE_USER_IMPL(_In_ Windows::System::User^ creationContext, _In_ XSAPI_XBOX_LIVE_USER* pUser);
-    XSAPI_XBOX_LIVE_USER_IMPL(_In_ std::shared_ptr<xbox::services::system::xbox_live_user> cppUser, _In_ XSAPI_XBOX_LIVE_USER *cUser);
+    XSAPI_XBOX_LIVE_USER_IMPL(_In_ Windows::System::User^ creationContext, _In_ XBL_XBOX_LIVE_USER* pUser);
+    XSAPI_XBOX_LIVE_USER_IMPL(_In_ std::shared_ptr<xbox::services::system::xbox_live_user> cppUser, _In_ XBL_XBOX_LIVE_USER *cUser);
     void Refresh();
     std::shared_ptr<xbox::services::system::xbox_live_user> cppUser() const;
 
@@ -20,6 +20,6 @@ private:
     std::string m_privileges;
     std::string m_webAccountId;
 
-    XSAPI_XBOX_LIVE_USER* m_pUser;
+    XBL_XBOX_LIVE_USER* m_pUser;
     std::shared_ptr<xbox::services::system::xbox_live_user> m_cppUser;
 };

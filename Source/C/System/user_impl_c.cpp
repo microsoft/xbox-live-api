@@ -8,7 +8,7 @@ using namespace xbox::services;
 
 XSAPI_XBOX_LIVE_USER_IMPL::XSAPI_XBOX_LIVE_USER_IMPL(
     _In_ Windows::System::User^ creationContext,
-    _In_ XSAPI_XBOX_LIVE_USER* pUser
+    _In_ XBL_XBOX_LIVE_USER* pUser
 )
     : m_pUser(pUser)
 {
@@ -24,7 +24,7 @@ XSAPI_XBOX_LIVE_USER_IMPL::XSAPI_XBOX_LIVE_USER_IMPL(
 
 XSAPI_XBOX_LIVE_USER_IMPL::XSAPI_XBOX_LIVE_USER_IMPL(
     _In_ std::shared_ptr<xbox::services::system::xbox_live_user> cppUser, 
-    _In_ XSAPI_XBOX_LIVE_USER *cUser
+    _In_ XBL_XBOX_LIVE_USER *cUser
 )
     : m_pUser(cUser), m_cppUser(cppUser)
 {

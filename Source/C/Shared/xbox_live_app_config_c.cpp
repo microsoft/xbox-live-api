@@ -8,7 +8,7 @@ using namespace xbox::services;
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 GetXboxLiveAppConfigSingleton(
-    _Out_ CONST XSAPI_XBOX_LIVE_APP_CONFIG** ppConfig
+    _Out_ CONST XBL_XBOX_LIVE_APP_CONFIG** ppConfig
     ) XBL_NOEXCEPT
 try
 {
@@ -22,7 +22,7 @@ try
 
     if (singleton->m_appConfigSingletonC == nullptr)
     {
-        singleton->m_appConfigSingletonC = std::make_shared<XSAPI_XBOX_LIVE_APP_CONFIG>();
+        singleton->m_appConfigSingletonC = std::make_shared<XBL_XBOX_LIVE_APP_CONFIG>();
 
         auto cppConfig = xbox::services::xbox_live_app_config::get_app_config_singleton();
 

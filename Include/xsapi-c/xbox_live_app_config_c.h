@@ -9,17 +9,17 @@
 extern "C" {
 #endif
 
-typedef struct XSAPI_XBOX_LIVE_APP_CONFIG
+typedef struct XBL_XBOX_LIVE_APP_CONFIG
 {
     uint32_t titleId;
     PCSTR scid;
     PCSTR environment;
     PCSTR sandbox;
-} XSAPI_XBOX_LIVE_APP_CONFIG;
+} XBL_XBOX_LIVE_APP_CONFIG;
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 GetXboxLiveAppConfigSingleton(
-    _Out_ CONST XSAPI_XBOX_LIVE_APP_CONFIG** ppConfig
+    _Out_ CONST XBL_XBOX_LIVE_APP_CONFIG** ppConfig
     );
 
 #if defined(__cplusplus)

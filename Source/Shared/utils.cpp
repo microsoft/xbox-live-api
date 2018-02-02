@@ -104,23 +104,32 @@ void xsapi_singleton::init()
 #ifdef _WINRT_DLL
     m_userEventBind = std::make_shared<Microsoft::Xbox::Services::System::UserEventBind>();
 #endif
+    // TODO this should be started only in legacy mode, but need to migrate all API's first
+    start_threadpool();
 #endif
+
     HCGlobalInitialize();
     HCSettingsSetLogLevel(HC_LOG_LEVEL::LOG_VERBOSE);
+    m_initiator = std::make_shared<initiator>();
+}
 
-#if UWP_API
-    // TODO this shouldn't happen here. Should be in some other internal call so that the threadpool
-    // is only started for "legacy" mode.
+void xsapi_singleton::start_threadpool()
+{
     m_threadpool = std::make_shared<xbl_thread_pool>();
     m_threadpool->start_threads();
-#endif
-    m_initiator = std::make_shared<initiator>();
 }
 
 xsapi_singleton::~xsapi_singleton()
 {
     std::lock_guard<std::mutex> guard(s_xsapiSingletonLock);
     s_xsapiSingleton = nullptr;
+
+    if (m_callbackContextPtrs.size() > 0)
+    {
+        XSAPI_ASSERT(false && "Context remaining in context store!");
+        m_callbackContextPtrs.clear();
+    }
+
     HCGlobalCleanup();
 }
 
@@ -1966,8 +1975,5 @@ XBL_RESULT utils::unknown_exception_to_xbl_result()
     return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_GENERIC_ERROR };
 }
 #endif // XSAPI_C
-
-std::mutex async_helpers::m_contextsLock;
-xsapi_internal_unordered_map<void *, std::shared_ptr<void>> async_helpers::m_sharedPtrs;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

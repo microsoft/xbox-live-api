@@ -10,7 +10,6 @@
 extern "C" {
 #endif
 
-struct XBL_XBOX_LIVE_CONTEXT;
 struct XSAPI_TITLE_STORAGE_BLOB_METADATA_IMPL;
 
 typedef enum XSAPI_TITLE_STORAGE_TYPE
@@ -121,7 +120,7 @@ typedef void(*XSAPI_GET_QUOTA_COMPLETION_ROUTINE)(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageGetQuota(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR serviceConfigurationId,
     _In_ XSAPI_TITLE_STORAGE_TYPE storageType,
     _In_ XSAPI_GET_QUOTA_COMPLETION_ROUTINE completionRoutine,
@@ -143,7 +142,7 @@ typedef void(*XSAPI_GET_BLOB_METADATA_COMPLETION_ROUTINE)(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageGetBlobMetadata(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR serviceConfigurationId,
     _In_ XSAPI_TITLE_STORAGE_TYPE storageType,
     _In_opt_ PCSTR blobPath,
@@ -192,7 +191,7 @@ typedef void(*XSAPI_DELETE_BLOB_COMPLETION_ROUTINE)(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageDeleteBlob(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata,
     _In_ bool deleteOnlyIfEtagMatches,
     _In_ XSAPI_DELETE_BLOB_COMPLETION_ROUTINE completionRoutine,
@@ -208,7 +207,7 @@ typedef void(*XSAPI_DOWNLOAD_BLOB_COMPLETION_ROUTINE)(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageDownloadBlob(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata,
     _Out_ PBYTE blobBuffer,
     _In_ uint32_t cbBlobBuffer,
@@ -228,7 +227,7 @@ typedef void(*XSAPI_UPLOAD_BLOB_COMPLETION_ROUTINE)(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageUploadBlob(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata,
     _In_ PBYTE blobBuffer,
     _In_ uint32_t cbBlobBuffer,

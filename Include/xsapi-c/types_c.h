@@ -86,6 +86,9 @@ extern "C" {
 
 typedef uint32_t XBL_MEMORY_TYPE;
 typedef int32_t FUNCTION_CONTEXT;
+typedef HC_TASK_HANDLE XBL_TASK_HANDLE;
+typedef HC_TASK_EVENT_HANDLE XBL_TASK_EVENT_HANDLE;
+typedef struct xbl_xbox_live_context* XBL_XBOX_LIVE_CONTEXT_HANDLE;
 
 #if defined(__cplusplus)
 } // end extern "C"

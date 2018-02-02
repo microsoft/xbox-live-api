@@ -7,15 +7,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements_helper.cpp">
       <Filter>C++ Source\C\Services\Achievements</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Common\xbox_live_context_c.cpp">
-      <Filter>C++ Source\C\Services\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Common\xbox_live_context_impl_c.cpp">
-      <Filter>C++ Source\C\Services\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Common\xbox_live_global.cpp">
-      <Filter>C++ Source\C\Services\Common</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Leaderboard\leaderboard.cpp">
       <Filter>C++ Source\C\Services\Leaderboard</Filter>
     </ClCompile>
@@ -832,6 +823,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\xbox_live_mutex.cpp">
       <Filter>C++ Source\System</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Common\C\xbox_live_context_c.cpp">
+      <Filter>C++ Source\Services\Common\C</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Common\C\xbox_live_global_c.cpp">
+      <Filter>C++ Source\Services\Common\C</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\achievements.h">
@@ -988,9 +985,6 @@
       <Filter>C++ Source\C\Services\Achievements</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Common\taskargs.h">
-      <Filter>C++ Source\C\Services\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Common\xbox_live_context_impl_c.h">
       <Filter>C++ Source\C\Services\Common</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Leaderboard\leaderboard_helper.h">
@@ -1194,6 +1188,9 @@
     <ClInclude Include="..\..\Source\Services\Social\profile_internal.h">
       <Filter>C++ Source\Services\Social</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Services\Common\C\xbox_live_context_internal_c.h">
+      <Filter>C++ Source\Services\Common\C</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="C Public Includes">
@@ -1318,6 +1315,9 @@
     </Filter>
     <Filter Include="C++ Source\System">
       <UniqueIdentifier>{726C90DE-90DC-36A6-B559-090139CBCAD4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Common\C">
+      <UniqueIdentifier>{a1b4f226-1ef0-4c3f-959a-bc2179f661bc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

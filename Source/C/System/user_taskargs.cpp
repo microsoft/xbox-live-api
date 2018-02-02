@@ -6,7 +6,7 @@
 using namespace xbox::services;
 
 sign_in_taskargs::sign_in_taskargs(
-    _In_ XSAPI_XBOX_LIVE_USER* _pUser,
+    _In_ XBL_XBOX_LIVE_USER* _pUser,
     _In_ Platform::Object^ _coreDispatcher,
     _In_opt_ bool _signInSilently
     )
@@ -17,7 +17,7 @@ sign_in_taskargs::sign_in_taskargs(
 }
 
 get_token_and_signature_taskargs::get_token_and_signature_taskargs(
-    _In_ XSAPI_XBOX_LIVE_USER* _pUser,
+    _In_ XBL_XBOX_LIVE_USER* _pUser,
     _In_ PCSTR _httpMethod,
     _In_ PCSTR _url,
     _In_ PCSTR _headers,

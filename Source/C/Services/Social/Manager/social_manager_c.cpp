@@ -60,7 +60,7 @@ CATCH_RETURN_WITH(nullptr)
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerAddLocalUser(
-    _In_ XSAPI_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER *user,
     _In_ XSAPI_SOCIAL_MANAGER_EXTRA_DETAIL_LEVEL extraLevelDetail,
     _Out_ PCSTR* errMessage
     ) XBL_NOEXCEPT
@@ -86,7 +86,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerRemoveLocalUser(
-    _In_ XSAPI_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER *user,
     _Out_ PCSTR* errMessage
     ) XBL_NOEXCEPT
 try
@@ -145,7 +145,7 @@ CATCH_RETURN_WITH(nullptr)
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerCreateSocialUserGroupFromFilters(
-    _In_ XSAPI_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER *user,
     _In_ XSAPI_PRESENCE_FILTER presenceDetailLevel,
     _In_ XSAPI_RELATIONSHIP_FILTER filter,
     _Out_ XSAPI_XBOX_SOCIAL_USER_GROUP** group,
@@ -172,7 +172,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerCreateSocialUserGroupFromList(
-    _In_ XSAPI_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER *user,
     _In_ PCSTR* xboxUserIdList,
     _In_ uint32_t xboxUserIdListCount,
     _Out_ XSAPI_XBOX_SOCIAL_USER_GROUP** group,
@@ -252,7 +252,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerSetRichPresencePollingStatus(
-    _In_ XSAPI_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER *user,
     _In_ bool shouldEnablePolling,
     _Out_ PCSTR* errMessage
     ) XBL_NOEXCEPT

@@ -385,13 +385,13 @@ void http_call_impl::internal_get_response(
     HCHttpCallRequestSetRetryAllowed(httpCallData->callHandle, httpCallData->retryAllowed);
     HCHttpCallRequestSetTimeout(httpCallData->callHandle, static_cast<uint32_t>(httpCallData->httpTimeout.count()));
 
-    auto context = async_helpers::store_shared_ptr(httpCallData);
+    auto context = utils::store_shared_ptr(httpCallData);
 
     HC_TASK_HANDLE taskHandle;
     HCHttpCallPerform(httpCallData->callHandle, &taskHandle, HC_SUBSYSTEM_ID_XSAPI, httpCallData->taskGroupId, context,
         [](_In_ void* context, _In_ HC_CALL_HANDLE call)
     {
-        auto httpCallData = async_helpers::remove_shared_ptr<http_call_data>(context);
+        auto httpCallData = utils::remove_shared_ptr<http_call_data>(context);
 
         HC_RESULT errorCode = HC_OK;
         uint32_t platformErrorCode = 0;
