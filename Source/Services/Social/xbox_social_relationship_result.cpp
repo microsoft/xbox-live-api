@@ -23,7 +23,7 @@ xbox_social_relationship_result::xbox_social_relationship_result(
 {
 }
 
-DEFINE_GET_VECTOR(xbox_social_relationship_result, xbox_social_relationship, items);
+DEFINE_GET_VECTOR_INTERNAL_TYPE(xbox_social_relationship_result, xbox_social_relationship, items);
 DEFINE_GET_UINT32(xbox_social_relationship_result, total_count);
 DEFINE_GET_BOOL(xbox_social_relationship_result, has_next);
 

@@ -335,6 +335,14 @@ public:
 
     static int extract_json_int(
         _In_ const web::json::value& jsonValue,
+        _In_ const xsapi_internal_string& name,
+        _Inout_ std::error_code& error,
+        _In_ bool required = false,
+        _In_ int defaultValue = 0
+    );
+
+    static int extract_json_int(
+        _In_ const web::json::value& jsonValue,
         _In_ const string_t& name,
         _In_ bool required = false,
         _In_ int defaultValue = 0
@@ -746,7 +754,7 @@ public:
 
     static string_t base64_url_encode(_In_ const std::vector<unsigned char>& data);
 
-    static string_t headers_to_string(_In_ const web::http::http_headers& headers);
+    static string_t headers_to_string(_In_ const http_headers& headers);
 
     static web::http::http_headers string_to_headers(_In_ const string_t& headers);
 
@@ -826,12 +834,6 @@ public:
     static HRESULT convert_xbox_live_error_code_to_hresult(_In_ const std::error_code& errCode);
 #endif
 
-    static string_t extract_header_value(
-        _In_ const web::http::http_headers& responseHeaders,
-        _In_ const string_t& name,
-        _In_ const string_t& defaultValue = _T("")
-    );
-
     static string_t convert_hresult_to_error_name(_In_ long hr);
     static long convert_http_status_to_hresult(_In_ uint32_t httpStatusCode);
 
@@ -879,7 +881,7 @@ public:
     static void generate_locales();
     static const xsapi_internal_string& get_locales();
 
-    static void set_locales(_In_ const string_t& locale);
+    static void set_locales(_In_ const xsapi_internal_string& locale);
     template<typename T>
     static xbox::services::xbox_live_result<T> generate_xbox_live_result(
         _Inout_ xbox::services::xbox_live_result<T> deserializationResult,
@@ -896,6 +898,27 @@ public:
         {
             deserializationResult._Set_err(httpErrorCode);
             deserializationResult._Set_err_message(response->err_message());
+        }
+
+        return deserializationResult;
+    }
+
+    template<typename T>
+    static xbox::services::xbox_live_result<T> generate_xbox_live_result(
+        _Inout_ xbox::services::xbox_live_result<T> deserializationResult,
+        _In_ const std::shared_ptr<xbox::services::http_call_response_internal>& response
+    )
+    {
+        if (deserializationResult.err())
+        {
+            deserializationResult.set_payload(T());
+        }
+
+        const std::error_code& httpErrorCode = response->err_code();
+        if (httpErrorCode != xbox_live_error_code::no_error)
+        {
+            deserializationResult._Set_err(httpErrorCode);
+            deserializationResult._Set_err_message(std::string(response->err_message().data()));
         }
 
         return deserializationResult;
@@ -992,7 +1015,7 @@ public:
     }
 
     template<typename External, typename Internal>
-    static std::vector<External> std_vector_from_internal_vector(
+    static std::vector<External> std_vector_external_from_internal_vector(
         _In_ const xsapi_internal_vector<Internal>& internalVector
         )
     {
@@ -1193,6 +1216,7 @@ public:
     }
 
 private:
+    /// TODO move this xsapi_singleton and assert if not empty on shutdown
     static std::mutex m_contextsLock;
     static xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_sharedPtrs;
 

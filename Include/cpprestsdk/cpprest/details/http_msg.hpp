@@ -22,10 +22,14 @@
 *
 * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 ****/
-#include "stdafx.h"
+
+#pragma once
+
+#include "cpprest/details/http_helpers.h"
+#include "cpprest/producerconsumerstream.h"
+#include <limits>
 
 using namespace web;
-using namespace utility;
 using namespace concurrency;
 using namespace utility::conversions;
 using namespace http::details;
@@ -305,7 +309,7 @@ size_t http_msg_base::_get_content_length()
 
         if (has_xfr_encode)
         {
-            return std::numeric_limits<size_t>::max();
+            return SIZE_MAX;
         }
 
         if (has_cnt_length)
@@ -316,7 +320,7 @@ size_t http_msg_base::_get_content_length()
         // Neither is set. Assume transfer-encoding for now (until we have the ability to determine
         // the length of the stream).
         headers().add(header_names::transfer_encoding, _XPLATSTR("chunked"));
-        return std::numeric_limits<size_t>::max();
+        return SIZE_MAX;
     }
 
     return 0;
@@ -881,7 +885,7 @@ static utility::string_t convert_body_to_string_t(const utility::string_t &conte
     {
         std::string body;
         body.resize(streambuf.in_avail());
-        if(streambuf.scopy((unsigned char *)&body[0], body.size()) == 0) return string_t();
+        if(streambuf.scopy((unsigned char *)&body[0], body.size()) == 0) return utility::string_t();
         return to_string_t(latin1_to_utf16(std::move(body)));
     }
 
@@ -890,7 +894,7 @@ static utility::string_t convert_body_to_string_t(const utility::string_t &conte
     {
         std::string body;
         body.resize(streambuf.in_avail());
-        if(streambuf.scopy((unsigned char *)&body[0], body.size()) == 0) return string_t();
+        if(streambuf.scopy((unsigned char *)&body[0], body.size()) == 0) return utility::string_t();
         return to_string_t(std::move(body));
     }
 
@@ -899,7 +903,7 @@ static utility::string_t convert_body_to_string_t(const utility::string_t &conte
     {
         utf16string body;
         body.resize(streambuf.in_avail() / sizeof(utf16string::value_type));
-        if(streambuf.scopy((unsigned char *)&body[0], body.size() * sizeof(utf16string::value_type)) == 0) return string_t();
+        if(streambuf.scopy((unsigned char *)&body[0], body.size() * sizeof(utf16string::value_type)) == 0) return utility::string_t();
         return convert_utf16_to_string_t(std::move(body));
     }
 
@@ -908,7 +912,7 @@ static utility::string_t convert_body_to_string_t(const utility::string_t &conte
     {
         utf16string body;
         body.resize(streambuf.in_avail() / sizeof(utf16string::value_type));
-        if(streambuf.scopy((unsigned char *)&body[0], body.size() * sizeof(utf16string::value_type)) == 0) return string_t();
+        if(streambuf.scopy((unsigned char *)&body[0], body.size() * sizeof(utf16string::value_type)) == 0) return utility::string_t();
         return convert_utf16le_to_string_t(std::move(body), false);
     }
 
@@ -917,7 +921,7 @@ static utility::string_t convert_body_to_string_t(const utility::string_t &conte
     {
         utf16string body;
         body.resize(streambuf.in_avail() / sizeof(utf16string::value_type));
-        if(streambuf.scopy((unsigned char *)&body[0], body.size() * sizeof(utf16string::value_type)) == 0) return string_t();
+        if(streambuf.scopy((unsigned char *)&body[0], body.size() * sizeof(utf16string::value_type)) == 0) return utility::string_t();
         return convert_utf16be_to_string_t(std::move(body), false);
     }
 

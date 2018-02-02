@@ -182,7 +182,7 @@ social_service_impl::get_social_relationships(
         http_call_response_body_type::json_body,
         false,
         taskGroupId,
-        [thisShared, startIndex, filter, callback](std::shared_ptr<http_call_response> response)
+        [thisShared, startIndex, filter, callback](std::shared_ptr<http_call_response_internal> response)
     {
         auto result = xbox_social_relationship_result_internal::deserialize(response->response_body_json());
 

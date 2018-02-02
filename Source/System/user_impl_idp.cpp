@@ -138,10 +138,10 @@ user_impl_idp::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
                     httpCall->set_retry_allowed(false);
                     httpCall->set_request_body(request.serialize().serialize());
                     httpCall->set_xbox_contract_version_header_value(_T("3"));
-                    httpCall->set_custom_header(AUTH_HEADER, payload.token());
+                    httpCall->set_custom_header(L"Authorization", payload.token());
                     if (!payload.signature().empty())
                     {
-                        httpCall->set_custom_header(SIG_HEADER, payload.signature());
+                        httpCall->set_custom_header(L"Signature", payload.signature());
                     }
 
                     auto response = httpCall->get_response(http_call_response_body_type::json_body).get();

@@ -524,6 +524,19 @@ int utils::extract_json_int(
 }
 
 int utils::extract_json_int(
+    _In_ const web::json::value& jsonValue,
+    _In_ const xsapi_internal_string& name,
+    _Inout_ std::error_code& error,
+    _In_ bool required,
+    _In_ int defaultValue
+    )
+{
+    web::json::value field(extract_json_field(jsonValue, name, error, required));
+    if ((!field.is_integer() && !required) || error) { return defaultValue; }
+    return field.as_integer();
+}
+
+int utils::extract_json_int(
     _In_ const web::json::value& jsonValue, 
     _In_ const string_t& name, 
     _In_ bool required, 
@@ -690,17 +703,17 @@ string_t utils::base64_url_encode(
 }
 
 string_t utils::headers_to_string(
-    _In_ const web::http::http_headers& headers
+    _In_ const http_headers& headers
     )
 {
-    stringstream_t ss;
+    xsapi_internal_stringstream ss;
 
     for (const auto& header : headers)
     {
-        ss << header.first << _T(": ") << header.second << _T("\r\n");
+        ss << header.first << ": " << header.second << "\r\n";
     }
 
-    return ss.str();
+    return utils::external_string_from_internal_string(ss.str());
 }
 
 web::http::http_headers utils::string_to_headers(
@@ -1488,22 +1501,6 @@ string_t utils::create_guid(_In_ bool removeBraces)
     }
 
     return strGuid;
-}
-
-string_t utils::extract_header_value(
-    _In_ const web::http::http_headers& responseHeaders,
-    _In_ const string_t& name,
-    _In_ const string_t& defaultValue
-    )
-{
-    auto iter = responseHeaders.find(name);
-    if (iter != responseHeaders.end())
-    {
-        string_t value = iter->second;
-        return value;
-    }
-
-    return defaultValue;
 }
 
 std::vector<string_t>

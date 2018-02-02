@@ -25,30 +25,55 @@ http_call_response::http_call_response(
 {
 }
 
-DEFINE_GET_
+void http_call_response::_Set_error(
+    _In_ const std::error_code& errCode, 
+    _In_ const std::string& errMessage
+    )
+{
+    m_internalObj->set_error_info(errCode, xsapi_internal_string(errMessage.data()));
+}
 
+web::http::http_headers http_call_response::response_headers() const
+{
+    auto headers = web::http::http_headers();
 
+    auto& internalHeaders = m_internalObj->response_headers();
+    for (auto& kvp : internalHeaders)
+    {
+        headers.add(utils::external_string_from_internal_string(kvp.first), utils::external_string_from_internal_string(kvp.second));
+    }
+    return headers;
+}
 
-
+DEFINE_GET_ENUM_TYPE(http_call_response, http_call_response_body_type, body_type);
+DEFINE_GET_STRING(http_call_response, response_body_string);
+DEFINE_GET_OBJECT_REF(http_call_response, web::json::value, response_body_json);
+DEFINE_GET_VECTOR(http_call_response, unsigned char, response_body_vector);
+DEFINE_GET_UINT32(http_call_response, http_status);
+DEFINE_GET_OBJECT_REF(http_call_response, std::error_code, err_code);
+DEFINE_GET_STD_STRING(http_call_response, err_message);
+DEFINE_GET_STRING(http_call_response, e_tag);
+DEFINE_GET_STRING(http_call_response, response_date);
+DEFINE_GET_OBJECT_REF(http_call_response, std::chrono::seconds, retry_after);
 
 http_call_response_internal::http_call_response_internal(
     _In_ const xsapi_internal_string& xboxUserId,
     _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
-    _In_ const string_t& fullUrl,
+    _In_ const xsapi_internal_string& httpMethod,
+    _In_ const xsapi_internal_string& fullUrl,
     _In_ const http_call_request_message& requestBody,
-    _In_ xbox_live_api xboxLiveApi
+    _In_ xbox_live_api xboxLiveApi,
+    _In_ uint32_t responseStatusCode
     ) :
-    m_httpCallResponseBodyType(http_call_response_body_type::json_body),
+    m_httpCallResponseBodyType(http_call_response_body_type::string_body),
     m_xboxUserId(xboxUserId),
     m_xboxLiveContextSettings(xboxLiveContextSettings),
+    m_httpMethod(httpMethod),
     m_fullUrl(fullUrl),
     m_xboxLiveApi(xboxLiveApi),
-    m_requestBody(requestBody)
+    m_requestBody(requestBody),
+    m_httpStatus(responseStatusCode)
 {
-    m_httpStatus = response.status_code();
-    m_eTag = utils::extract_header_value(m_responseHeaders, ETAG_HEADER);
-    m_responseDate = utils::extract_header_value(m_responseHeaders, DATE_HEADER);
-    m_retryAfter = extract_retry_after_from_header(m_responseHeaders);
 }
 
 #ifndef DEFAULT_MOVE_ENABLED
@@ -85,17 +110,37 @@ http_call_response& http_call_response::operator=(http_call_response&& other)
 }
 #endif
 
-std::chrono::seconds http_call_response::extract_retry_after_from_header(
-    _In_ const web::http::http_headers& responseHeaders
+xsapi_internal_string http_call_response_internal::response_body_to_string() const
+{
+    switch (m_httpCallResponseBodyType)
+    {
+        case http_call_response_body_type::json_body: return utils::internal_string_from_external_string(m_responseBodyJson.serialize());
+        case http_call_response_body_type::string_body: return m_responseBodyString;
+        case http_call_response_body_type::vector_body: return "Binary data response";
+        default: return "Unknown response";
+    }
+}
+
+void http_call_response_internal::add_response_header(
+    _In_ const xsapi_internal_string& headerName,
+    _In_ const xsapi_internal_string& headerValue
     )
 {
-    std::chrono::seconds retryAfter = std::chrono::seconds();
+    m_responseHeaders[headerName] = headerValue;
 
-    string_t retryAfterValue = utils::extract_header_value(responseHeaders, _T("Retry-After"), _T(""));
-    if (retryAfterValue.length() > 0)
+    // special handling for certain headers
+    if (headerName == ETAG_HEADER)
+    {
+        m_eTag = headerValue;
+    }
+    else if (headerName == DATE_HEADER)
+    {
+        m_responseDate = headerValue;
+    }
+    else if (headerName == RETRY_AFTER_HEADER && headerValue.length() > 0)
     {
         int value = 0;
-        stringstream_t ss(retryAfterValue);
+        xsapi_internal_stringstream ss(headerValue);
         ss >> value;
 
         if (!ss.fail())
@@ -106,37 +151,24 @@ std::chrono::seconds http_call_response::extract_retry_after_from_header(
                 value = RETRY_AFTER_CAP;
             }
 
-            retryAfter = std::chrono::seconds(value);
+            m_retryAfter = std::chrono::seconds(value);
         }
     }
-
-    return retryAfter;
 }
 
-string_t http_call_response::response_body_to_string() const
-{
-    switch (m_httpCallResponseBodyType)
-    {
-        case http_call_response_body_type::json_body: return m_responseBodyJson.serialize();
-        case http_call_response_body_type::string_body: return m_responseBodyString;
-        case http_call_response_body_type::vector_body: return _T("Binary data response");
-        default: return _T("Unknown response");
-    }
-}
-
-void http_call_response::_Set_response_body(_In_ const string_t& responseBodyString)
+void http_call_response_internal::set_response_body(_In_ const xsapi_internal_string& responseBodyString)
 {
     m_responseBodyString = responseBodyString;
     m_httpCallResponseBodyType = http_call_response_body_type::string_body;
 }
 
-void http_call_response::_Set_response_body(_In_ const std::vector<unsigned char>& responseBodyVector)
+void http_call_response_internal::set_response_body(_In_ const xsapi_internal_vector<unsigned char>& responseBodyVector)
 {
     m_responseBodyVector = responseBodyVector;
     m_httpCallResponseBodyType = http_call_response_body_type::vector_body;
 }
 
-void http_call_response::_Set_response_body(_In_ const web::json::value& responseBodyJson)
+void http_call_response_internal::set_response_body(_In_ const web::json::value& responseBodyJson)
 {
     m_responseBodyJson = responseBodyJson;
     m_httpCallResponseBodyType = http_call_response_body_type::json_body;
@@ -148,7 +180,7 @@ void http_call_response::_Set_response_body(_In_ const web::json::value& respons
 
 }
 
-void http_call_response::_Set_timing(
+void http_call_response_internal::set_timing(
     _In_ const chrono_clock_t::time_point& requestTime,
     _In_ const chrono_clock_t::time_point& responseTime
     )
@@ -157,47 +189,35 @@ void http_call_response::_Set_timing(
     m_responseTime = responseTime;
 }
 
-void http_call_response::_Set_error_info(
+void http_call_response_internal::set_error_info(
     _In_ const std::error_code& errCode,
-    _In_ const std::string& errMessage
+    _In_ const xsapi_internal_string& errMessage
     )
 {
     m_errorCode = errCode;
     m_errorMessage = errMessage;
 }
 
-const chrono_clock_t::time_point& http_call_response::_Local_response_time() const 
+const chrono_clock_t::time_point& http_call_response_internal::local_response_time() const 
 { 
-    return m_responseTime; 
+    return m_responseTime;
 }
 
-std::shared_ptr<xbox_live_context_settings> http_call_response::_Context_settings() const
+std::shared_ptr<xbox_live_context_settings> http_call_response_internal::context_settings() const
 {
     return m_xboxLiveContextSettings;
 }
 
-const web::http::http_request& http_call_response::_Request() const
-{
-    return m_request;
-}
-
-void http_call_response::_Set_full_url(
-    _In_ const string_t& fullUrl
-    )
-{
-    m_fullUrl = fullUrl;
-}
-
-void http_call_response::_Route_service_call() const
+void http_call_response_internal::route_service_call() const
 {
     record_service_result();
-#ifdef _WIN32   
+#ifdef _WIN32
     if (!m_errorCode)
     {
         TraceLoggingWrite(
             g_hTraceLoggingProvider,
             "http_request",
-            TraceLoggingWideString(m_fullUrl.c_str(), "url"),
+            TraceLoggingString(m_fullUrl.c_str(), "url"),
             TraceLoggingInt32(m_httpStatus, "status"),
             TraceLoggingInt64(std::chrono::duration_cast<std::chrono::milliseconds>(m_responseTime - m_requestTime).count(), "duration"),
             TraceLoggingKeyword(XSAPI_TELEMETRY_KEYWORDS)
@@ -208,7 +228,7 @@ void http_call_response::_Route_service_call() const
         TraceLoggingWrite(
             g_hTraceLoggingProvider,
             "http_request_exception",
-            TraceLoggingWideString(m_fullUrl.c_str(), "url"),
+            TraceLoggingString(m_fullUrl.c_str(), "url"),
             TraceLoggingInt32(m_errorCode.value(), "err"),
             TraceLoggingString(m_errorMessage.c_str(), "errMsg"),
             TraceLoggingInt64(std::chrono::duration_cast<std::chrono::milliseconds>(m_responseTime - m_requestTime).count(), "duration"),
@@ -226,25 +246,36 @@ void http_call_response::_Route_service_call() const
     {
         uint32_t responseCount = InterlockedIncrement(&get_xsapi_singleton()->m_responseCount);
 
-        web::http::http_headers headers = m_request.headers();
+        http_headers headers = m_responseHeaders;
 
-        string_t token = utils::extract_header_value(headers, AUTH_HEADER);
-        string_t sig = utils::extract_header_value(headers, SIG_HEADER);
-        headers.remove(AUTH_HEADER);
-        headers.remove(SIG_HEADER);
+        xsapi_internal_string token;
+        auto iter = headers.find(AUTH_HEADER);
+        if (iter != headers.end())
+        {
+            token = iter->second;
+            headers.erase(iter);
+        }
+        xsapi_internal_string sig;
+        iter = headers.find(SIG_HEADER);
+        if (iter != headers.end())
+        {
+            sig = iter->second;
+            headers.erase(iter);
+        }
 
+        // TODO
         xbox::services::xbox_service_call_routed_event_args args(
-            m_xboxUserId,
-            m_request.method(),
-            m_fullUrl,
+            utils::external_string_from_internal_string(m_xboxUserId),
+            utils::external_string_from_internal_string(m_httpMethod),
+            utils::external_string_from_internal_string(m_fullUrl),
             utils::headers_to_string(headers),
             m_requestBody,
             responseCount,
             utils::headers_to_string(m_responseHeaders),
-            response_body_to_string(),
-            e_tag(),
-            token,
-            sig,
+            utils::external_string_from_internal_string(response_body_to_string()),
+            utils::external_string_from_internal_string(m_eTag),
+            utils::external_string_from_internal_string(token),
+            utils::external_string_from_internal_string(sig),
             m_httpStatus,
             m_requestTime,
             m_responseTime
@@ -282,14 +313,14 @@ void http_call_response::_Route_service_call() const
 #endif
 }
 
-void http_call_response::record_service_result() const
+void http_call_response_internal::record_service_result() const
 {
     // Only remember result if there was an error and there was a Retry-After header
     if (m_xboxLiveApi != xbox_live_api::unspecified &&
         http_status() >= 400 &&
         retry_after().count() > 0)
     {
-        const auto& currentTime = _Local_response_time();
+        const auto& currentTime = m_responseTime;
 
         http_retry_after_api_state state(
             currentTime + retry_after(),
@@ -301,20 +332,20 @@ void http_call_response::record_service_result() const
     }
 }
 
-std::string http_call_response::get_throttling_error_message() const
+xsapi_internal_string http_call_response_internal::get_throttling_error_message() const
 {
     _In_ const web::json::value& json = response_body_json();
     _In_ const std::chrono::seconds& retryAfter = retry_after();
-        
-    std::error_code errc;
-    string_t limitType = utils::extract_json_string(json, _T("limitType"), errc);
-    int currentRequests = utils::extract_json_int(json, _T("currentRequests"), errc);
-    int maxRequests = utils::extract_json_int(json, _T("maxRequests"), errc);
-    int periodInSeconds = utils::extract_json_int(json, _T("periodInSeconds"), errc);
 
-    if (!errc && maxRequests > 0 && currentRequests > 0 && periodInSeconds > 0 && limitType == _T("Rate"))
+    std::error_code errc;
+    xsapi_internal_string limitType = utils::extract_json_string(json, "limitType", errc);
+    int currentRequests = utils::extract_json_int(json, "currentRequests", errc);
+    int maxRequests = utils::extract_json_int(json, "maxRequests", errc);
+    int periodInSeconds = utils::extract_json_int(json, "periodInSeconds", errc);
+
+    if (!errc && maxRequests > 0 && currentRequests > 0 && periodInSeconds > 0 && limitType == "Rate")
     {
-        std::stringstream errMessage;
+        xsapi_internal_stringstream errMessage;
         errMessage << "Too many requests sent. ";
         errMessage << currentRequests;
         errMessage << " of ";

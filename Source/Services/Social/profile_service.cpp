@@ -50,7 +50,7 @@ profile_service::get_user_profiles(
         XSAPI_DEFAULT_TASKGROUP,
         [tce](xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>> result) 
     {
-        auto vector = utils::std_vector_from_internal_vector<xbox_user_profile, std::shared_ptr<xbox_user_profile_internal>>(result.payload());
+        auto vector = utils::std_vector_external_from_internal_vector<xbox_user_profile, std::shared_ptr<xbox_user_profile_internal>>(result.payload());
         tce.set(xbox_live_result<std::vector<xbox_user_profile>>(
             vector,
             result.err(),
@@ -76,7 +76,7 @@ profile_service::get_user_profiles_for_social_group(
         XSAPI_DEFAULT_TASKGROUP,
         [tce](xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>> result)
     {
-        auto vector = utils::std_vector_from_internal_vector<xbox_user_profile, std::shared_ptr<xbox_user_profile_internal>>(result.payload());
+        auto vector = utils::std_vector_external_from_internal_vector<xbox_user_profile, std::shared_ptr<xbox_user_profile_internal>>(result.payload());
         tce.set(xbox_live_result<std::vector<xbox_user_profile>>(
             vector,
             result.err(),

@@ -1,7 +1,19 @@
 /***
-* Copyright (C) Microsoft. All rights reserved.
-* Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
+* ==++==
 *
+* Copyright (c) Microsoft Corporation. All rights reserved.
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+* ==--==
 * =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 *
 * HTTP Library: JSON parser and writer
@@ -21,8 +33,8 @@
 #include <vector>
 #include <unordered_map>
 #include <cstdint>
-#include <mutex>
-#include "details/asyncrt_utils.h"
+#include "cpprest/details/basic_types.h"
+#include "cpprest/asyncrt_utils.h"
 
 namespace web
 {
@@ -138,7 +150,7 @@ namespace json
         /// <remarks>
         /// This constructor has O(n) performance because it tries to determine if
         /// specified string has characters that should be properly escaped in JSON.
-        /// <remarks>
+        /// </remarks>
         _ASYNCRTIMP explicit value(utility::string_t value);
 
         /// <summary>
@@ -173,7 +185,7 @@ namespace json
         /// Constructor creating a JSON string value
         /// </summary>
         /// <param name="value">The C++ value to create a JSON value from, a C++ STL string of the platform-native character width</param>
-        /// <param name="has_escape_chars">Whether <paramref name="value" /> contains characters
+        /// <param name="has_escape_chars">Whether <paramref name="value" /> contains characters</param>
         /// <remarks>
         /// <para>
         /// This overload has O(1) performance.
@@ -266,10 +278,8 @@ namespace json
         /// <remarks>
         /// This overload has O(n) performance because it tries to determine if
         /// specified string has characters that should be properly escaped in JSON.
-        /// <remarks>
+        /// </remarks>
         static _ASYNCRTIMP value __cdecl string(utility::string_t value);
-        
-        static _ASYNCRTIMP value __cdecl string(xsapi_internal_string value);
 
         /// <summary>
         /// Creates a string value specifying if the string contains characters to escape
@@ -465,21 +475,21 @@ public:
 
         /// <summary>
         /// Converts the JSON value to a C++ double, if and only if it is a number value.
-        /// Throws <see cref="json_exception"/>  if the value is not a number
+        /// Throws json_exception if the value is not a number
         /// </summary>
         /// <returns>A double representation of the value</returns>
         _ASYNCRTIMP double as_double() const;
 
         /// <summary>
         /// Converts the JSON value to a C++ integer, if and only if it is a number value.
-        /// Throws <see cref="json_exception"/> if the value is not a number
+        /// Throws json_exception if the value is not a number
         /// </summary>
         /// <returns>An integer representation of the value</returns>
         _ASYNCRTIMP int as_integer() const;
 
         /// <summary>
         /// Converts the JSON value to a number class, if and only if it is a number value.
-        /// Throws <see cref="json_exception"/>  if the value is not a number
+        /// Throws json_exception if the value is not a number
         /// </summary>
         /// <returns>An instance of number class</returns>
         _ASYNCRTIMP const json::number& as_number() const;
@@ -1922,10 +1932,5 @@ public:
     /// <returns>The input stream object.</returns>
     _ASYNCRTIMP utility::istream_t& __cdecl operator >> (utility::istream_t &is, json::value &val);
 }}
-
-#include "details/asyncrt_utils.hpp"
-#include "details/json_parsing.hpp"
-#include "details/json_serialization.hpp"
-#include "details/json.hpp"
 
 #endif

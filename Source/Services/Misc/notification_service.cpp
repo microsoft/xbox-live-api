@@ -148,7 +148,7 @@ notification_service::subscribe_to_notifications_helper(
     {
         payload[_T("deviceName")] = web::json::value::string(deviceName);
     }
-    payload[_T("locale")] = web::json::value::string(utils::get_locales());
+    payload[_T("locale")] = web::json::value::string(utils::external_string_from_internal_string(utils::get_locales()));
     payload[_T("titleId")] = web::json::value::string(titleId);
 
     web::json::value filterJson;

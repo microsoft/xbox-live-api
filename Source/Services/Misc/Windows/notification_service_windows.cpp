@@ -90,7 +90,7 @@ notification_service_windows::subscribe_to_notifications(
             payload[_T("endpointUri")] = web::json::value::string(channel->Uri->Data());
             payload[_T("platform")] = web::json::value::string(platform);
             payload[_T("platformVersion")] = web::json::value::string(_T("10"));
-            payload[_T("locale")] = web::json::value::string(utils::get_locales());
+            payload[_T("locale")] = web::json::value::string(utils::external_string_from_internal_string(utils::get_locales()));
             payload[_T("titleId")] = web::json::value::string(std::to_wstring(appConfig->title_id()));
 
             httpCall->set_request_body(payload.serialize());

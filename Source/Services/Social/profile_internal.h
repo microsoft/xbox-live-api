@@ -75,7 +75,7 @@ public:
 
 private:
     static void handle_get_user_profiles_response(
-        _In_ std::shared_ptr<http_call_response> response,
+        _In_ std::shared_ptr<http_call_response_internal> response,
         _In_ xbox_live_callback<xbox::services::xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>> callback
         );
 

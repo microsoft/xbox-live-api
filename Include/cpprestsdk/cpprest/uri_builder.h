@@ -29,8 +29,8 @@
 #include <string>
 #include <vector>
 
-#include "web/details/base_uri.h"
-#include "web/details/uri_parser.h"
+#include "cpprest/base_uri.h"
+#include "cpprest/details/uri_parser.h"
 
 namespace web
 {

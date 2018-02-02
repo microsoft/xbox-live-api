@@ -23,7 +23,8 @@
 * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 ****/
 
-#include "../uri.h"
+#pragma once
+
 #include <locale>
 
 namespace web { namespace details { namespace uri_parser

@@ -41,6 +41,8 @@
 #include <mutex>
 #include <atomic>
 #include <cstdint>
+#include <limits>
+#include <assert.h>
 
 #include "xsapi/types.h"
 #include "xsapi/mem.h"
@@ -57,13 +59,9 @@
 #endif
 
 #include "http_headers.h"
-//#include <cpprest/http_client.h>
-//#include <cpprest/filestream.h>
-//#include <cpprest/http_listener.h>              // HTTP server
-#include <cpprest/json.h>                       // JSON library
-//#include <cpprest/uri.h>                        // URI library
-#include "web/http_msg.h"
-#include "web/uri.h"
+#include "cpprest/json.h"
+#include "cpprest/http_msg.h"
+#include "cpprest/uri.h"
 
 #include "xsapi/errors.h"
 #include "utils.h"

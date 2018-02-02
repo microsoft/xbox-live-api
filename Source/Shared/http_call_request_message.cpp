@@ -36,13 +36,13 @@ http_call_request_message::http_call_request_message(
 {
 }
 
-http_call_request_message::http_call_request_message(
-    _In_ xsapi_internal_vector<unsigned char> messageVector
-    ) :
-    m_requestMessageVector(std::move(messageVector)),
-    m_httpRequestMessageType(http_request_message_type::vector_message)
-{
-}
+//http_call_request_message::http_call_request_message(
+//    _In_ xsapi_internal_vector<unsigned char> messageVector
+//    ) :
+//    m_requestMessageVector(std::move(messageVector)),
+//    m_httpRequestMessageType(http_request_message_type::vector_message)
+//{
+//}
 
 string_t http_call_request_message::request_message_string() const
 {

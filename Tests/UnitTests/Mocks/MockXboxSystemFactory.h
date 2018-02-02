@@ -36,14 +36,6 @@ class MockXboxSystemFactory : public xbox_system_factory
 public:
     MockXboxSystemFactory();
 
-    std::shared_ptr<xbox_http_client> create_http_client(
-        _In_ const web::http::uri& base_uri,
-        _In_ const web::http::client::http_client_config& client_config
-        ) override
-    { 
-        return m_mockHttpClient; 
-    }
-    
     std::shared_ptr<http_call> create_http_call(
         _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
         _In_ const std::wstring& httpMethod,

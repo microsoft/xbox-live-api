@@ -55,11 +55,12 @@
 #define PLATFORM_STRING_FROM_STRING_T(x) \
     (x.empty() ? nullptr : ref new Platform::String(x.c_str()))
 
-#define AUTH_HEADER (_T("Authorization"))
-#define SIG_HEADER (_T("Signature"))
-#define ETAG_HEADER (_T("ETag"))
-#define DATE_HEADER (_T("Date"))
-#define DEFAULT_USER_AGENT _T("XboxServicesAPI/") XBOX_SERVICES_API_VERSION_STRING
+#define AUTH_HEADER ("Authorization")
+#define SIG_HEADER ("Signature")
+#define ETAG_HEADER ("ETag")
+#define DATE_HEADER ("Date")
+#define RETRY_AFTER_HEADER ("Retry-After")
+#define DEFAULT_USER_AGENT "XboxServicesAPI/" XBOX_SERVICES_API_VERSION_STRING
 
 #define RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(func, type) \
 { \
@@ -89,6 +90,12 @@
     string_t className::methodName() const \
     { \
         return utils::external_string_from_internal_string(m_internalObj->methodName()); \
+    }
+
+#define DEFINE_GET_STD_STRING(className, methodName) \
+    std::string className::methodName() const \
+    { \
+        return std::string(m_internalObj->methodName().data()); \
     }
 
 #define DEFINE_GET_BOOL(className, methodName) \
@@ -121,8 +128,21 @@
         return m_internalObj->methodName(); \
     }
 
-#define DEFINE_GET_VECTOR(className, externalType, methodName) \
+#define DEFINE_GET_VECTOR_INTERNAL_TYPE(className, externalType, methodName) \
     std::vector<externalType> className::methodName() const \
     { \
-        return utils::std_vector_from_internal_vector<externalType, std::shared_ptr<externalType##_internal>>(m_internalObj->methodName()); \
+        return utils::std_vector_external_from_internal_vector<externalType, std::shared_ptr<externalType##_internal>>(m_internalObj->methodName()); \
     }
+
+#define DEFINE_GET_VECTOR(className, typeName, methodName) \
+    std::vector<typeName> className::methodName() const \
+    { \
+        return utils::std_vector_from_internal_vector<typeName>(m_internalObj->methodName()); \
+    }
+
+#define DEFINE_GET_OBJECT_REF(className, objectType, methodName) \
+    const objectType& className::methodName() const \
+    { \
+        return m_internalObj->methodName(); \
+    }
+

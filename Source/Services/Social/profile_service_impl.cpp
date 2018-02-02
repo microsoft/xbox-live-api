@@ -93,8 +93,8 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
         http_call_response_body_type::json_body,
         false,
         taskGroupId,
-        [callback](std::shared_ptr<http_call_response> response) 
-        { 
+        [callback](std::shared_ptr<http_call_response_internal> response) 
+        {
             handle_get_user_profiles_response(response, callback); 
         });
 
@@ -127,7 +127,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_soc
         http_call_response_body_type::json_body, 
         false,
         taskGroupId,
-        [callback](std::shared_ptr<http_call_response> response) 
+        [callback](std::shared_ptr<http_call_response_internal> response) 
         { 
             handle_get_user_profiles_response(response, callback); 
         });
@@ -136,7 +136,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_soc
 }
 
 void profile_service_impl::handle_get_user_profiles_response(
-    _In_ std::shared_ptr<http_call_response> response,
+    _In_ std::shared_ptr<http_call_response_internal> response,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>> callback
     )
 {
@@ -160,7 +160,8 @@ void profile_service_impl::handle_get_user_profiles_response(
     }
     else
     {
-        callback(xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>(response->err_code(), response->err_message()));
+        // TODO add xbox_live_result_internal
+        callback(xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>(response->err_code(), std::string(response->err_message().data())));
     }
 }
 

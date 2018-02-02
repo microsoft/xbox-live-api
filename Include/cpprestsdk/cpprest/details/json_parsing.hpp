@@ -11,9 +11,10 @@
 * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 ****/
 
+#pragma once
+
 #include <cstdlib>
 #include <array>
-#include "../json.h"
 
 #if defined(_MSC_VER)
 #pragma warning(disable : 4127) // allow expressions like while(true) pass

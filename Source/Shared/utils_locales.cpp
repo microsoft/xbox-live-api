@@ -253,7 +253,7 @@ const xsapi_internal_string& utils::get_locales()
 
 
 void utils::set_locales(
-    _In_ const string_t& locale
+    _In_ const xsapi_internal_string& locale
     )
 {
     auto xsapiSingleton = xbox::services::get_xsapi_singleton();

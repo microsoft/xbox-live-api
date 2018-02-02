@@ -81,7 +81,7 @@ public:
     /// <summary>
     /// Gets the response body of the response as a byte vector.
     /// </summary>
-    _XSAPIIMP const std::vector<unsigned char>& response_body_vector() const;
+    _XSAPIIMP std::vector<unsigned char> response_body_vector() const;
 
     /// <summary>
     /// Gets the http headers of the response.
@@ -117,6 +117,11 @@ public:
     /// Gets the "retry after" value found in the response.
     /// </summary>
     _XSAPIIMP const std::chrono::seconds& retry_after() const;
+
+    /// <summary>
+    /// Internal function - TODO remove after migrating all multiplayer
+    /// </summary>
+    void _Set_error(_In_ const std::error_code& errCode, _In_ const std::string& errMessage);
 
 private:
     std::shared_ptr<http_call_response_internal> m_internalObj;

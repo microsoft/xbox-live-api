@@ -114,24 +114,9 @@ struct http_call_data
         _In_ const xsapi_internal_string& _serverName,
         _In_ const web::uri& _pathQueryFragment,
         _In_ xbox_live_api _xboxLiveApi
-    ) :
-        xboxLiveContextSettings(_xboxLiveContextSettings),
-        httpMethod(_httpMethod),
-        serverName(_serverName),
-        pathQueryFragment(_pathQueryFragment),
-        xboxLiveApi(_xboxLiveApi),
-        hasPerformedRetryOn401(false),
-        retryAllowed(true),
-        iterationNumber(0),
-        httpCallResponseBodyType(http_call_response_body_type::json_body),
-        longHttpCall(false),
-        httpTimeout(std::chrono::seconds(DEFAULT_HTTP_TIMEOUT_SECONDS)),
-        contentTypeHeaderValue("application/json; charset=utf-8"),
-        xboxContractVersionHeaderValue("1"),
-        addDefaultHeaders(true)
-    {
-        delayBeforeRetry = xboxLiveContextSettings->http_retry_delay();
-    }
+        );
+
+    ~http_call_data();
 
     std::chrono::milliseconds delayBeforeRetry;
     chrono_clock_t::time_point firstCallStartTime;
@@ -148,18 +133,19 @@ struct http_call_data
     xsapi_internal_string httpMethod;
     xsapi_internal_string serverName;
     web::uri pathQueryFragment;
+    xsapi_internal_string fullUrl;
     xsapi_internal_string xboxContractVersionHeaderValue;
     xsapi_internal_string contentTypeHeaderValue;
-    http_headers headers;
-    //xsapi_internal_unordered_map<xsapi_internal_string, xsapi_internal_string> customHeaderMap;
 
+    HC_CALL_HANDLE callHandle;
     http_call_response_body_type httpCallResponseBodyType;
     http_call_request_message requestBody;
+    http_headers requestHeaders; // TODO these are used by auth right now, can probably remove with xal
     bool addDefaultHeaders;
 
     uint64_t taskGroupId;
     chrono_clock_t::time_point requestStartTime;
-    xbox_live_callback<std::shared_ptr<http_call_response>> callback;
+    xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback;
 };
 
 struct http_retry_after_api_state
@@ -172,7 +158,7 @@ struct http_retry_after_api_state
     http_retry_after_api_state(
         _In_ const chrono_clock_t::time_point& _retryAfterTime,
         _In_ const std::error_code& _errCode,
-        _In_ const std::string& _errMessage
+        _In_ const xsapi_internal_string& _errMessage
         ) :
         retryAfterTime(_retryAfterTime),
         errCode(_errCode),
@@ -182,7 +168,7 @@ struct http_retry_after_api_state
 
     chrono_clock_t::time_point retryAfterTime;
     std::error_code errCode;
-    std::string errMessage;
+    xsapi_internal_string errMessage;
 };
 
 class http_call_internal : public http_call
@@ -197,15 +183,13 @@ public:
         _In_ const web::http::http_request& httpRequest
         ) = 0;
 
-    virtual void get_response_with_auth(
+    virtual xbox_live_result<void> get_response_with_auth(
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired,
         _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<std::shared_ptr<http_call_response>> callback
+        _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
         ) = 0;
-
-    virtual web::http::http_request get_default_request() = 0;
 
     virtual const http_call_request_message& request_body() const = 0;
 
@@ -304,13 +288,12 @@ public:
         _In_ bool allUsersAuthRequired = false
         ) override;
 
-    // TODO should this be part of public header
-    void get_response_with_auth(
+    xbox_live_result<void> get_response_with_auth(
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired,
         _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<std::shared_ptr<http_call_response>> callback
+        _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
         ) override;
 
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
@@ -347,15 +330,13 @@ public:
         _In_ const string_t& headerValue
         ) override;
 
-    web::http::http_request get_default_request() override;
-
 private:
     NO_COPY_AND_ASSIGN(http_call_impl);
 
     std::shared_ptr<http_call_data> m_httpCallData;
 
     static bool should_retry(
-        _In_ const std::shared_ptr<http_call_response>& httpCallResponse,
+        _In_ const std::shared_ptr<http_call_response_internal>& httpCallResponse,
         _In_ const std::shared_ptr<http_call_data>& httpCallData,
         _In_ xbox_live_error_code httpNetworkError
         );
@@ -364,7 +345,7 @@ private:
         _In_ const std::shared_ptr<http_call_data>& httpCallData
         );
 
-    virtual void internal_get_response_with_auth(
+    virtual xbox_live_result<void> internal_get_response_with_auth(
         _In_ bool allUsersAuthRequired
         );
 
@@ -376,14 +357,9 @@ private:
         _In_ const std::shared_ptr<http_call_data>& httpCallData
         );
 
-    static void handle_response_error(
-        _In_ const std::shared_ptr<http_call_response>& httpCallResponse,
-        _In_ xbox_live_error_code errFromException,
-        _In_ const std::string& errMessage
-        );
-
-    static std::shared_ptr<http_call_response> create_http_call_response(
-        _In_ const std::shared_ptr<http_call_data>& httpCallData
+    static std::shared_ptr<http_call_response_internal> create_http_call_response(
+        _In_ const std::shared_ptr<http_call_data>& httpCallData,
+        _In_ uint32_t responseStatusCode = 0
         );
 
     static xbox::services::xbox_live_error_code get_xbox_live_error_code_from_http_status(
@@ -392,8 +368,7 @@ private:
 
     static bool should_fast_fail(
         _In_ const http_retry_after_api_state& apiState,
-        _In_ const std::shared_ptr<http_call_data>& httpCallData,
-        _In_ const chrono_clock_t::time_point& currentTime
+        _In_ const std::shared_ptr<http_call_data>& httpCallData
         );
 
     static pplx::task<std::shared_ptr<http_call_response>> handle_fast_fail(
@@ -402,8 +377,17 @@ private:
         );
 
     static void set_http_timeout(
+        _In_ const std::shared_ptr<http_call_data>& httpCallData
+        );
+
+    static void add_default_headers_if_needed(
+        _In_ const std::shared_ptr<http_call_data>& httpCallData
+        );
+
+    static void add_header(
         _In_ const std::shared_ptr<http_call_data>& httpCallData,
-        _In_ const chrono_clock_t::time_point& currentTime
+        _In_ const xsapi_internal_string& headerName,
+        _In_ const xsapi_internal_string& headerValue
         );
 };
 

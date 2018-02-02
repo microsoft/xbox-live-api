@@ -11,7 +11,7 @@
 * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 ****/
 
-#include "../json.h"
+#pragma once
 
 using namespace web;
 
@@ -185,18 +185,6 @@ web::json::value web::json::value::boolean(bool value)
 
 web::json::value web::json::value::string(utility::string_t value)
 {
-    std::unique_ptr<details::_Value> ptr = utility::details::make_unique<details::_String>(std::move(value));
-    return web::json::value(std::move(ptr)
-#ifdef ENABLE_JSON_VALUE_VISUALIZER
-            ,value::String
-#endif
-            );
-}
-
-web::json::value web::json::value::string(xsapi_internal_string internalValue)
-{
-    utility::string_t value(internalValue.begin(), internalValue.end());
-
     std::unique_ptr<details::_Value> ptr = utility::details::make_unique<details::_String>(std::move(value));
     return web::json::value(std::move(ptr)
 #ifdef ENABLE_JSON_VALUE_VISUALIZER
