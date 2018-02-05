@@ -33,6 +33,16 @@ void http_call_response::_Set_error(
     m_internalObj->set_error_info(errCode, xsapi_internal_string(errMessage.data()));
 }
 
+void http_call_response::_Route_service_call() const
+{
+    m_internalObj->route_service_call();
+}
+
+void http_call_response::_Set_full_url(_In_ const string_t& url)
+{
+    m_internalObj->set_full_url(utils::internal_string_from_external_string(url));
+}
+
 web::http::http_headers http_call_response::response_headers() const
 {
     auto headers = web::http::http_headers();
@@ -196,6 +206,11 @@ void http_call_response_internal::set_error_info(
 {
     m_errorCode = errCode;
     m_errorMessage = errMessage;
+}
+
+void http_call_response_internal::set_full_url(_In_ const xsapi_internal_string& fullUrl)
+{
+    m_fullUrl = fullUrl;
 }
 
 const chrono_clock_t::time_point& http_call_response_internal::local_response_time() const 

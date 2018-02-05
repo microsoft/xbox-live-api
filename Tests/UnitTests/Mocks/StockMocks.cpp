@@ -6,6 +6,7 @@
 #include "StockMocks.h"
 #include "http_call_response.h"
 #include "user_context.h"
+#include "httpClient/mock.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
@@ -77,6 +78,17 @@ StockMocks::InitializeResponse(
     response.set_status_code(statusCode);
 }
 
+http_headers 
+StockMocks::HttpHeadersFromResponse(_In_ const web::http::http_response& response)
+{
+    http_headers out;
+    for (const auto& header : response.headers())
+    {
+        out[utils::internal_string_from_external_string(header.first)] = utils::internal_string_from_external_string(header.second);
+    }
+    return out;
+}
+
 xbox::services::xbox_live_error_code get_xbox_live_error_code_from_http_status(
     _In_ web::http::status_code statusCode
     )
@@ -112,77 +124,46 @@ StockMocks::CreateMockHttpCallResponse(
     _In_ std::shared_ptr<xbox_live_context_settings> xboxLiveContextSettings
     )
 {
-    if (xboxLiveContextSettings == nullptr)
-    {
-        xboxLiveContextSettings = std::make_shared<xbox_live_context_settings>();
-    }
-
-    std::shared_ptr<user_context> userContext = std::make_shared<user_context>();
-    web::http::http_request request;
-    std::wstring requestBody = L"";
-    std::wstring baseUrl = L"www.microsoft.com";
-
     web::http::http_response response;
     if (httpResponse.headers().size() > 0)
     {
         response = httpResponse;
-        response.set_status_code(statusCode);
     }
     else
     {
         InitializeResponse(statusCode, response);
     }
 
-    auto httpCallResponse = std::make_shared<http_call_response>(
-        userContext->xbox_user_id(),
-        xboxLiveContextSettings,
-        baseUrl,
-        request,
-        requestBody,
-        xbox_live_api::unspecified,
-        response
-        );
-    httpCallResponse->_Set_response_body(responseBodyJson);
-    httpCallResponse->_Set_error(std::make_error_code(get_xbox_live_error_code_from_http_status(response.status_code())), std::string());
-    return httpCallResponse;
+    return std::make_shared<http_call_response>(CreateMockHttpCallResponseInternal(
+        responseBodyJson,
+        statusCode,
+        HttpHeadersFromResponse(response),
+        xboxLiveContextSettings
+    ));
 }
 
-std::shared_ptr<http_call_response>
+std::shared_ptr<http_call_response> 
 StockMocks::CreateMockHttpCallResponse(
     _In_ string_t responseString,
     _In_ int statusCode,
     _In_ web::http::http_response httpResponse
     )
 {
-    std::shared_ptr<xbox_live_context_settings> xboxLiveContextSettings = std::make_shared<xbox_live_context_settings>();
-    std::shared_ptr<user_context> userContext = std::make_shared<user_context>();
-    web::http::http_request request;
-    std::wstring requestBody = L"";
-    std::wstring baseUrl = L"www.microsoft.com";
-
     web::http::http_response response;
     if (httpResponse.headers().size() > 0)
     {
         response = httpResponse;
-        response.set_status_code(statusCode);
     }
     else
     {
         InitializeResponse(statusCode, response);
     }
 
-    auto httpCallResponse = std::make_shared<http_call_response>(
-        userContext->xbox_user_id(),
-        xboxLiveContextSettings,
-        baseUrl,
-        request,
-        requestBody,
-        xbox_live_api::unspecified,
-        response
-        );
-    httpCallResponse->_Set_response_body(responseString);
-    httpCallResponse->_Set_error(std::make_error_code(get_xbox_live_error_code_from_http_status(response.status_code())), std::string());
-    return httpCallResponse;
+    return std::make_shared<http_call_response>(CreateMockHttpCallResponseInternal(
+        responseString,
+        statusCode,
+        HttpHeadersFromResponse(response)
+    ));
 }
 
 std::shared_ptr<http_call_response>
@@ -192,35 +173,144 @@ StockMocks::CreateMockHttpCallResponse(
     _In_ web::http::http_response httpResponse
     )
 {
-    std::shared_ptr<xbox_live_context_settings> xboxLiveContextSettings = std::make_shared<xbox_live_context_settings>();
-    std::shared_ptr<user_context> userContext = std::make_shared<user_context>();
-    web::http::http_request request;
-    std::wstring requestBody = L"";
-    std::wstring baseUrl = L"www.microsoft.com";
-
     web::http::http_response response;
     if (httpResponse.headers().size() > 0)
     {
         response = httpResponse;
-        response.set_status_code(statusCode);
     }
     else
     {
         InitializeResponse(statusCode, response);
     }
 
-    auto httpCallResponse = std::make_shared<http_call_response>(
-        userContext->xbox_user_id(),
+    return std::make_shared<http_call_response>(CreateMockHttpCallResponseInternal(
+        responseVector,
+        statusCode,
+        HttpHeadersFromResponse(response)
+    ));
+}
+
+std::shared_ptr<http_call_response_internal>
+StockMocks::CreateMockHttpCallResponseInternal(
+    _In_ web::json::value responseBodyJson,
+    _In_ const http_headers& responseHeaders
+    )
+{
+    return CreateMockHttpCallResponseInternal(responseBodyJson, 200, responseHeaders);
+}
+
+std::shared_ptr<http_call_response_internal>
+StockMocks::CreateMockHttpCallResponseInternal(
+    _In_ web::json::value responseBodyJson,
+    _In_ int statusCode,
+    _In_ const http_headers& responseHeaders,
+    _In_ std::shared_ptr<xbox_live_context_settings> xboxLiveContextSettings
+    )
+{
+    if (xboxLiveContextSettings == nullptr)
+    {
+        xboxLiveContextSettings = std::make_shared<xbox_live_context_settings>();
+    }
+
+    std::shared_ptr<user_context> userContext = std::make_shared<user_context>();
+
+    auto httpCallResponse = std::make_shared<http_call_response_internal>(
+        utils::internal_string_from_external_string(userContext->xbox_user_id()),
         xboxLiveContextSettings,
-        baseUrl,
-        request,
-        requestBody,
+        "GET",
+        "www.microsoft.com",
+        http_call_request_message(),
         xbox_live_api::unspecified,
-        response
+        statusCode
         );
-    httpCallResponse->_Set_response_body(responseVector);
-    httpCallResponse->_Set_error(std::make_error_code(get_xbox_live_error_code_from_http_status(response.status_code())), std::string());
+
+    for (const auto& header : responseHeaders)
+    {
+        httpCallResponse->add_response_header(header.first, header.second);
+    }
+
+    httpCallResponse->set_response_body(responseBodyJson);
+    httpCallResponse->set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(statusCode)));
     return httpCallResponse;
+}
+
+std::shared_ptr<http_call_response_internal>
+StockMocks::CreateMockHttpCallResponseInternal(
+    _In_ string_t responseString,
+    _In_ int statusCode,
+    _In_ const http_headers& responseHeaders
+    )
+{
+    auto xboxLiveContextSettings = std::make_shared<xbox_live_context_settings>();
+    std::shared_ptr<user_context> userContext = std::make_shared<user_context>();
+
+    auto httpCallResponse = std::make_shared<http_call_response_internal>(
+        utils::internal_string_from_external_string(userContext->xbox_user_id()),
+        xboxLiveContextSettings,
+        "GET",
+        "www.microsoft.com",
+        http_call_request_message(),
+        xbox_live_api::unspecified,
+        statusCode
+        );
+
+    for (const auto& header : responseHeaders)
+    {
+        httpCallResponse->add_response_header(header.first, header.second);
+    }
+
+    httpCallResponse->set_response_body(utils::internal_string_from_external_string(responseString));
+    httpCallResponse->set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(statusCode)));
+    return httpCallResponse;
+}
+
+std::shared_ptr<http_call_response_internal>
+StockMocks::CreateMockHttpCallResponseInternal(
+    _In_ std::vector<unsigned char> responseVector,
+    _In_ int statusCode,
+    _In_ const http_headers& responseHeaders
+    )
+{
+    auto xboxLiveContextSettings = std::make_shared<xbox_live_context_settings>();
+    std::shared_ptr<user_context> userContext = std::make_shared<user_context>();
+
+    auto httpCallResponse = std::make_shared<http_call_response_internal>(
+        utils::internal_string_from_external_string(userContext->xbox_user_id()),
+        xboxLiveContextSettings,
+        "GET",
+        "www.microsoft.com",
+        http_call_request_message(),
+        xbox_live_api::unspecified,
+        statusCode
+        );
+
+    for (const auto& header : responseHeaders)
+    {
+        httpCallResponse->add_response_header(header.first, header.second);
+    }
+
+    httpCallResponse->set_response_body(xsapi_internal_vector<unsigned char>(responseVector.begin(), responseVector.end()));
+    httpCallResponse->set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(statusCode)));
+    return httpCallResponse;
+}
+
+void StockMocks::AddHttpMockResponse(
+    _In_ const string_t& responseBody,
+    _In_ uint32_t statusCode
+    )
+{
+    // TODO move
+    HCGlobalInitialize();
+
+    HC_MOCK_CALL_HANDLE mockCall;
+
+    HCMockCallCreate(&mockCall);
+
+    auto utf8body = utils::utf8_from_utf16(responseBody);
+
+    HCMockResponseSetResponseString(mockCall, utf8body.data());
+    HCMockResponseSetStatusCode(mockCall, statusCode);
+    HCMockAddMock(mockCall, nullptr, nullptr, nullptr, 0);
 }
 
 

@@ -141,7 +141,7 @@ public:
         }
         auto jsonResponse = BuildSocialJsonArray(socialList);
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(jsonResponse);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(jsonResponse);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
 

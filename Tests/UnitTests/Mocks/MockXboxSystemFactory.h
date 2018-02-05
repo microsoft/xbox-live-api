@@ -6,7 +6,6 @@
 #include "xbox_system_factory.h"
 #include "MockUser.h"
 #include "MockHttpCall.h"
-#include "MockHttpClient.h"
 #include "MockWebSocketClient.h"
 #include "MockLocalConfig.h"
 #include "MockMultiplayer.h"
@@ -80,7 +79,6 @@ public:
 
     std::shared_ptr<MockUser> GetMockUser() { return m_mockUser; }
     std::shared_ptr<MockHttpCall> GetMockHttpCall() { return m_mockHttpCall; }
-    std::shared_ptr<MockHttpClient> GetMockHttpClient() { return m_mockHttpClient; }
     std::shared_ptr<MockWebSocketClient> GetMockWebSocketClient();
     std::vector<std::shared_ptr<MockWebSocketClient>> GetMockWebSocketClients();
     std::vector<std::shared_ptr<MockWebSocketClient>> AddMultipleMockWebSocketClients(uint32_t numberOfClients);
@@ -103,7 +101,6 @@ private:
     uint32_t m_webSocketClientCounter;
     std::shared_ptr<MockUser> m_mockUser;
     std::shared_ptr<MockHttpCall> m_mockHttpCall;
-    std::shared_ptr<MockHttpClient> m_mockHttpClient;
     std::vector<std::shared_ptr<MockWebSocketClient>> m_mockWebSocketClients;
     std::shared_ptr<MockLocalConfig> m_mockLocalConfig;
     std::shared_ptr<local_config> m_localConfig;

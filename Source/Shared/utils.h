@@ -113,7 +113,9 @@ struct xsapi_singleton
     ~xsapi_singleton();
 
     void init();
+#if UWP_API
     void start_threadpool();
+#endif
 
     std::mutex m_rtaActivationCounterLock;
     std::unordered_map<string_t, uint32_t> m_rtaActiveSocketCountPerUser;

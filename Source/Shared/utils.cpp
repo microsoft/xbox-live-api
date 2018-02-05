@@ -113,11 +113,13 @@ void xsapi_singleton::init()
     m_initiator = std::make_shared<initiator>();
 }
 
+#if UWP_API
 void xsapi_singleton::start_threadpool()
 {
     m_threadpool = std::make_shared<xbl_thread_pool>();
     m_threadpool->start_threads();
 }
+#endif
 
 xsapi_singleton::~xsapi_singleton()
 {

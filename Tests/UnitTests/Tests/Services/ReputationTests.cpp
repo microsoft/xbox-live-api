@@ -70,7 +70,7 @@ public:
     {
         auto responseJson = web::json::value::parse(defaultUserReputationData);
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto success = create_task(xboxLiveContext->ReputationService->SubmitReputationFeedbackAsync(
@@ -126,7 +126,7 @@ public:
     {
         DEFINE_TEST_CASE_PROPERTIES(TestSubmitReputationFeedbackAsyncInvalidArgs);
         auto responseJson = web::json::value::parse(defaultUserReputationData);
-        m_mockXboxSystemFactory->GetMockHttpCall()->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        m_mockXboxSystemFactory->GetMockHttpCall()->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
 

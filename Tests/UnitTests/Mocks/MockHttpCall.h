@@ -54,12 +54,12 @@ public:
         _In_ bool allUsersAuthRequired = false
         ) override;
 
-    virtual void get_response_with_auth(
+    virtual xbox_live_result<void> get_response_with_auth(
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired,
         _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<std::shared_ptr<http_call_response>> callback
+        _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
         ) override;
 
     virtual pplx::task<std::shared_ptr<http_call_response>> _Internal_get_response_with_auth(
@@ -101,14 +101,13 @@ public:
         _In_ const std::wstring& headerName
         );
 
-    virtual web::http::http_request get_default_request() override;
-
     void reinit();
 
     MockHttpCall();
 
     HRESULT ResultHR;
-    std::shared_ptr<http_call_response> ResultValue;
+    std::shared_ptr<http_call_response> ResultValue; // TODO remove
+    std::shared_ptr<http_call_response_internal> ResultValueInternal;
 
     std::wstring HttpMethod;
     std::wstring ServerName;

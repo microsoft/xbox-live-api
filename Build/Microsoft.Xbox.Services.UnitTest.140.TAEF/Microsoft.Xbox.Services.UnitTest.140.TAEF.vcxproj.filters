@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement.cpp">
@@ -1225,9 +1225,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_client.cpp">
-      <Filter>C++ Source\Shared</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\initiator.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
@@ -1373,9 +1370,6 @@
       <Filter>C++ Source\System</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\MockHttpCall.cpp">
-      <Filter>C++ Source\UnitTests\Mocks</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\MockHttpClient.cpp">
       <Filter>C++ Source\UnitTests\Mocks</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\MockLocalConfig.cpp">
@@ -2472,9 +2466,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_client.h">
-      <Filter>C++ Source\Shared</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\initiator.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
@@ -2602,9 +2593,6 @@
       <Filter>C++ Source\System\WinRT</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\MockHttpCall.h">
-      <Filter>C++ Source\UnitTests\Mocks</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\MockHttpClient.h">
       <Filter>C++ Source\UnitTests\Mocks</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\MockLocalConfig.h">

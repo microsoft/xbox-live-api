@@ -140,12 +140,12 @@ MockHttpCall::get_response_with_auth(
     return pplx::task_from_result(ResultValue);
 }
 
-void MockHttpCall::get_response_with_auth(
+xbox_live_result<void> MockHttpCall::get_response_with_auth(
     _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
     _In_ http_call_response_body_type httpCallResponseBodyType,
     _In_ bool allUsersAuthRequired,
     _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<std::shared_ptr<http_call_response>> callback
+    _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
     )
 {
     if (FAILED(ResultHR))
@@ -157,9 +157,11 @@ void MockHttpCall::get_response_with_auth(
     {
         fRequestPostFunc(ResultValue, m_requestBody.request_message_string());
     }
-    ResultValue->_Set_full_url(ServerName);
-    ResultValue->_Route_service_call();
-    callback(ResultValue);
+    ResultValueInternal->set_full_url(utils::internal_string_from_external_string(ServerName));
+    ResultValueInternal->route_service_call();
+    callback(ResultValueInternal);
+
+    return xbox_live_result<void>();
 }
 
 pplx::task<std::shared_ptr<http_call_response>>
@@ -276,7 +278,8 @@ void MockHttpCall::set_custom_header(
     )
 {
 #if UNIT_TEST_SERVICES
-    ResultValue->_Add_response_header(headerName, headerValue);
+    // TODO
+    //ResultValue->_Add_response_header(headerName, headerValue);
 #endif
 }
 
@@ -285,14 +288,9 @@ void MockHttpCall::remove_custom_header(
     )
 {
 #if UNIT_TEST_SERVICES
-    ResultValue->_Remove_response_header(headerName);
+    // TODO
+    //ResultValue->_Remove_response_header(headerName);
 #endif
-}
-
-web::http::http_request MockHttpCall::get_default_request()
-{
-    web::http::http_request request(_T("GET"));
-    return request;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

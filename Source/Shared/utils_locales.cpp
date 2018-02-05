@@ -111,19 +111,20 @@ std::unordered_map<string_t, string_t> serviceLocales =
 // Locale api for desktop and xbox
 #if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP | TV_API
 
-std::vector<string_t> utils::get_locale_list()
+xsapi_internal_vector<xsapi_internal_string> utils::get_locale_list()
 {
-    std::vector<string_t> localeList;
+    xsapi_internal_vector<xsapi_internal_string> localeList;
 
     TCHAR localeName[LOCALE_NAME_MAX_LENGTH] = { 0 };
+    auto localeLen = GetUserDefaultLocaleName(localeName, ARRAYSIZE(localeName));
 
-    if (GetUserDefaultLocaleName(localeName, ARRAYSIZE(localeName)))
+    if (localeLen > 0)
     {
-        localeList.push_back(localeName);
+        localeList.push_back(utils::internal_string_from_utf16(localeName, localeLen));
     }
     else
     {
-        localeList.push_back(_T("en-US"));
+        localeList.push_back("en-US");
     }
 
     return localeList;

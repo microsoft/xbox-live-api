@@ -1,7 +1,19 @@
 /***
-* Copyright (C) Microsoft. All rights reserved.
-* Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
+* ==++==
 *
+* Copyright (c) Microsoft Corporation. All rights reserved.
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+* ==--==
 * =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 *
 * Utilities
@@ -10,11 +22,6 @@
 *
 * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 ****/
-
-#pragma once
-
-#include <windows.h>
-#include <winhttp.h>
 
 #ifndef _WIN32
 #if defined(__clang__)
@@ -27,16 +34,6 @@
 #pragma clang diagnostic pop
 #endif
 #endif
-#include <limits>
-
-#ifndef _WIN32
-# define __STDC_LIMIT_MACROS
-# include <stdint.h>
-#else
-#include <cstdint>
-#endif
-
-#include "SafeInt3.hpp"
 
 // Could use C++ standard library if not __GLIBCXX__,
 // For testing purposes we just the handwritten on all platforms.
@@ -44,6 +41,8 @@
 #include <codecvt>
 #endif
 
+using namespace web;
+using namespace utility;
 using namespace utility::conversions;
 
 namespace utility
@@ -61,6 +60,10 @@ scoped_c_thread_locale::xplat_locale scoped_c_thread_locale::c_locale()
     {
         scoped_c_thread_locale::xplat_locale *clocale = new scoped_c_thread_locale::xplat_locale();
 #ifdef _WIN32
+        if (clocale == nullptr)
+        {
+            throw std::runtime_error("Unable to create 'C' locale.");
+        }
         *clocale = _create_locale(LC_ALL, "C");
         if (clocale == nullptr || *clocale == nullptr)
         {
@@ -910,6 +913,7 @@ datetime __cdecl datetime::from_string(const utility::string_t& dateString, date
         {
             unsetenv("TZ");
         }
+        tzset();
     }
 #else
     time_t time = timegm(&output);

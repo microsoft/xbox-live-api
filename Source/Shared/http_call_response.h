@@ -50,7 +50,7 @@ public:
 
     void add_response_header(
         _In_ const xsapi_internal_string& headerName,
-        _In_ const xsapi_internal_string &headerValue
+        _In_ const xsapi_internal_string& headerValue
         );
 
     void remove_response_header(_In_ const xsapi_internal_string& headerName)
@@ -73,6 +73,8 @@ public:
         _In_ const std::error_code& errCode,
         _In_ const xsapi_internal_string& errMessage = xsapi_internal_string()
         );
+
+    void set_full_url(_In_ const xsapi_internal_string& fullUrl);
 
     void route_service_call() const;
 

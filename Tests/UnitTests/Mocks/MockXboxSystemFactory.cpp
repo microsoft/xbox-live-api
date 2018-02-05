@@ -11,7 +11,6 @@ MockXboxSystemFactory::MockXboxSystemFactory() :
     m_webSocketClientCounter(0)
 {
     m_mockHttpCall = std::make_shared<MockHttpCall>();
-    m_mockHttpClient = std::make_shared<MockHttpClient>();
     m_mockLocalConfig = std::make_shared<MockLocalConfig>();
     m_mockWebSocketClients = std::vector<std::shared_ptr<MockWebSocketClient>>();
 }
@@ -57,7 +56,6 @@ void MockXboxSystemFactory::reinit()
     m_httpStateResponses.clear();
     m_httpApiStateResponses.clear();
     m_mockHttpCall->reinit();
-    m_mockHttpClient->reinit();
     m_mockLocalConfig->reinit();
     m_mockWebSocketClients.clear();
     m_webSocketClientCounter = 0;

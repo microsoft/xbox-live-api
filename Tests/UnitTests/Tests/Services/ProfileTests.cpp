@@ -179,7 +179,7 @@ public:
         profileList.push_back(x);
         web::json::value responseJson = BuildXboxUserProfilesResultJsonResponse(profileList);
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto task = create_task(xboxLiveContext->ProfileService->GetUserProfileAsync(x.xboxUserId));
@@ -207,7 +207,7 @@ public:
 
         web::json::value responseJson = BuildXboxUserProfilesResultJsonResponse(profileList);
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto task = create_task(xboxLiveContext->ProfileService->GetUserProfilesAsync(xboxUserIds->GetView()));
@@ -239,7 +239,7 @@ public:
 
         web::json::value responseJson = BuildXboxUserProfilesResultJsonResponse(profileList);
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto task = create_task(xboxLiveContext->ProfileService->GetUserProfilesForSocialGroupAsync(SocialGroupConstants::People));

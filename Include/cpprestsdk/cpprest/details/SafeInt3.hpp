@@ -633,6 +633,8 @@ enum SafeIntError
 #define SAFEINT_NOTHROW throw()
 #endif
 
+// JOHLAFO safeint
+
 namespace msl
 {
 
