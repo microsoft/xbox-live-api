@@ -122,7 +122,6 @@ set(Public_Source_Files
     ../../include/xsapi/xbox_live_app_config.h
     ../../include/xsapi/xbox_live_context_settings.h
     ../../include/xsapi/clubs.h
-    ../../include/xsapi/macros.h
     )
 
 set(Public_Source_Files_C
@@ -264,7 +263,6 @@ set(Shared_Source_Files
 	../../Source/Shared/WinRT/Event_WinRT.h
     ../../Source/Shared/http_call_impl.cpp
     ../../Source/Shared/http_call_response.cpp
-    ../../Source/Shared/http_client.cpp
     ../../Source/Shared/user_context.cpp
     ../../Source/Shared/utils.cpp
     ../../Source/Shared/xbox_service_call_routed_event_args.cpp
@@ -288,7 +286,6 @@ set(Shared_Source_Files
     ../../Source/Shared/xbox_system_factory.cpp
     ../../Source/Shared/http_call_impl.h
     ../../Source/Shared/http_call_response.h
-    ../../Source/Shared/http_client.h
     ../../Source/Shared/local_config.h
     ../../Source/Shared/Shared_macros.h
     ../../Source/Shared/user_context.h
@@ -303,6 +300,7 @@ set(Shared_Source_Files
     ../../Source/Shared/web_socket_connection.h
     ../../Source/Shared/web_socket_connection_state.h
     ../../Source/Shared/xbox_system_factory.h
+    ../../Source/Shared/http_headers.h
     )
 
 set(Misc_Source_Files
@@ -634,12 +632,14 @@ set(Achievements_Source_Files_C
     ../../Source/C/Services/Achievements/achievements_taskargs.h
     )
 
-set(Common_Source_Files_C
+set(Common_Source_Files_C_Legacy
     ../../Source/C/Services/Common/taskargs.h
-    ../../Source/C/Services/Common/xbox_live_context_c.cpp
-    ../../Source/C/Services/Common/xbox_live_context_impl_c.h
-    ../../Source/C/Services/Common/xbox_live_context_impl_c.cpp
-    ../../Source/C/Services/Common/xbox_live_global.cpp
+    )
+    
+set(Common_Source_Files_C
+    ../../Source/Services/Common/C/xbox_live_context_internal_c.h
+    ../../Source/Services/Common/C/xbox_live_context_c.cpp
+    ../../Source/Services/Common/C/xbox_live_global_c.cpp
     )
 
 set(Leaderboard_Source_Files_C
@@ -1308,7 +1308,8 @@ else()
             source_group("C++ Source\\C\\Shared" FILES ${Shared_Source_Files_C})
             source_group("C++ Source\\C\\System" FILES ${System_Source_Files_C})
             source_group("C++ Source\\C\\Services\\Achievements" FILES ${Achievements_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\Common" FILES ${Common_Source_Files_C})
+            source_group("C++ Source\\C\\Services\\Common" FILES ${Common_Source_Files_C_Legacy})
+            source_group("C++ Source\\Services\\Common\\C" FILES ${Common_Source_Files_C})
             source_group("C++ Source\\C\\Services\\Leaderboard" FILES ${Leaderboard_Source_Files_C})
             source_group("C++ Source\\C\\Services\\Misc" FILES ${Misc_Source_Files_C})
             source_group("C++ Source\\C\\Services\\Privacy" FILES ${Privacy_Source_Files_C})
@@ -1460,6 +1461,7 @@ else()
                 ${Misc_Source_Files_C}
                 ${Leaderboard_Source_Files_C}
                 ${Common_Source_Files_C}
+                ${Common_Source_Files_C_Legacy}
                 ${Achievements_Source_Files_C}
                 ${Shared_Source_Files_C}
                 ${System_Source_Files_C}
@@ -1485,7 +1487,6 @@ endif() # SHIP
 
 set(UnitTests_Source_Files_Mocks
 	../../Tests/UnitTests/Mocks/MockHttpCall.cpp
-	../../Tests/UnitTests/Mocks/MockHttpClient.cpp
 	../../Tests/UnitTests/Mocks/MockLocalConfig.cpp
 	../../Tests/UnitTests/Mocks/MockMultiplayer.cpp
 	../../Tests/UnitTests/Mocks/MockSocialManager.cpp
@@ -1493,7 +1494,6 @@ set(UnitTests_Source_Files_Mocks
 	../../Tests/UnitTests/Mocks/MockXboxSystemFactory.cpp
 	../../Tests/UnitTests/Mocks/StockMocks.cpp
 	../../Tests/UnitTests/Mocks/MockHttpCall.h
-	../../Tests/UnitTests/Mocks/MockHttpClient.h
 	../../Tests/UnitTests/Mocks/MockLocalConfig.h
 	../../Tests/UnitTests/Mocks/MockMultiplayer.h
 	../../Tests/UnitTests/Mocks/MockSocialManager.h

@@ -74,6 +74,7 @@
        $(ProjectDir);
        $(ProjectDir)..\..\Source\Services;
        $(ProjectDir)..\..\Source\Services\Common;
+       $(ProjectDir)..\..\Source\Services\Common\C;
        $(ProjectDir)..\..\Source\Services\Common\Desktop;
        $(ProjectDir)..\..\Source\Services\Social;
        $(ProjectDir)..\..\Source\Services\Multiplayer;
@@ -86,7 +87,7 @@
        $(ProjectDir)..\..\Source\Shared;
        $(ProjectDir)..\..\Source\Shared\WinRT;
        $(ProjectDir)..\..\Include;
-       $(ProjectDir)..\..\External\cpprestsdk\Release\include;
+       $(ProjectDir)..\..\Include\cpprestsdk;
        $(ProjectDir)..\..\Source\System\WinRT;
        $(ProjectDir)..\..\Source\System;
        $(ProjectDir)..\..\Source\C\Services\TitleStorage;
@@ -141,9 +142,6 @@
   </PropertyGroup>
 ****INSERTFILES****
   <ItemGroup>
-    <ProjectReference Include="$(ProjectDir)..\..\External\cpprestsdk\Release\src\build\vs15.uwp\cpprestsdk141.uwp.static.vcxproj">
-      <Project>{9ad285a2-301e-47a0-a299-14ad5d4f2758}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.141.UWP.C\libHttpClient.141.UWP.C.vcxproj">
       <Project>{cf37beb2-a66a-42ba-b348-1f07566f4865}</Project>
     </ProjectReference>

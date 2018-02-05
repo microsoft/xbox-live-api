@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -51,7 +51,65 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalOptions>/bigobj /Zm512 /GS %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\Source\Shared;$(ProjectDir)..\..\Source\System;$(ProjectDir)..\..\Source\System\auth;$(ProjectDir)..\..\Source\Shared\WinRT;$(ProjectDir)..\..\Source\System\WinRT;$(ProjectDir)..\..\Source\System\Desktop;$(ProjectDir)..\..\Source\System\auth\WinRT;$(ProjectDir)..\..\Source\System\auth\Desktop;$(ProjectDir)..\..\Source\Services;$(ProjectDir)..\..\Source\Services\Common;$(ProjectDir)..\..\Source\Services\Common\WinRT;$(ProjectDir)..\..\Source\Services\Social;$(ProjectDir)..\..\Source\Services\Social\WinRT;$(ProjectDir)..\..\Source\Services\Achievements;$(ProjectDir)..\..\Source\Services\Achievements\WinRT;$(ProjectDir)..\..\Source\Services\EntertainmentProfile;$(ProjectDir)..\..\Source\Services\EntertainmentProfile\WinRT;$(ProjectDir)..\..\Source\Services\Leaderboard;$(ProjectDir)..\..\Source\Services\Leaderboard\WinRT;$(ProjectDir)..\..\Source\Services\Misc;$(ProjectDir)..\..\Source\Services\Misc\WinRT;$(ProjectDir)..\..\Source\Services\Stats;$(ProjectDir)..\..\Source\Services\Stats\WinRT;$(ProjectDir)..\..\Source\Services\Multiplayer;$(ProjectDir)..\..\Source\Services\Multiplayer\WinRT;$(ProjectDir)..\..\Source\Services\Multiplayer\Manager;$(ProjectDir)..\..\Source\Services\Multiplayer\Manager\WinRT;$(ProjectDir)..\..\Source\Services\Social\Manager;$(ProjectDir)..\..\Source\Services\Social\Manager\WinRT;$(ProjectDir)..\..\Source\Services\Matchmaking;$(ProjectDir)..\..\Source\Services\Matchmaking\WinRT;$(ProjectDir)..\..\Source\Services\RealTimeActivity;$(ProjectDir)..\..\Source\Services\RealTimeActivity\WinRT;$(ProjectDir)..\..\Source\Services\Presence;$(ProjectDir)..\..\Source\Services\Presence\WinRT;$(ProjectDir)..\..\Source\Services\GameServerPlatform;$(ProjectDir)..\..\Source\Services\GameServerPlatform\WinRT;$(ProjectDir)..\..\Source\Services\TitleStorage;$(ProjectDir)..\..\Source\Services\TitleStorage\WinRT;$(ProjectDir)..\..\Source\Services\Privacy;$(ProjectDir)..\..\Source\Services\Privacy\WinRT;$(ProjectDir)..\..\Source\Services\Marketplace;$(ProjectDir)..\..\Source\Services\Marketplace\WinRT;$(ProjectDir)..\..\Source\Services\Tournaments;$(ProjectDir)..\..\Source\Services\Tournaments\WinRT;$(ProjectDir)..\..\Source\Services\Events;$(ProjectDir)..\..\Source\Services\Events\WinRT;$(ProjectDir)..\..\Source\Services\Stats\Manager\WinRT;$(ProjectDir)..\..\Source\Services\Clubs;$(ProjectDir)..\..\Source\Services\Clubs\WinRT;$(ProjectDir)..\..\Include\cpprestsdk;$(ProjectDir)..\..\Include;$(ProjectDir)..\..\Tests\UnitTests;$(ProjectDir)..\..\Tests\UnitTests\Mocks;$(ProjectDir)..\..\Tests\UnitTests\Support;c:\Program Files (x86)\Windows Kits\10\Testing\Development\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);
+      $(ProjectDir)..\..\Source\Shared;
+      $(ProjectDir)..\..\Source\System;
+      $(ProjectDir)..\..\Source\System\auth;
+      $(ProjectDir)..\..\Source\Shared\WinRT;
+      $(ProjectDir)..\..\Source\System\WinRT;
+      $(ProjectDir)..\..\Source\System\Desktop;
+      $(ProjectDir)..\..\Source\System\auth\WinRT;
+      $(ProjectDir)..\..\Source\System\auth\Desktop;
+      $(ProjectDir)..\..\Source\Services;
+      $(ProjectDir)..\..\Source\Services\Common;
+      $(ProjectDir)..\..\Source\Services\Common\WinRT;
+      $(ProjectDir)..\..\Source\Services\Social;
+      $(ProjectDir)..\..\Source\Services\Social\WinRT;
+      $(ProjectDir)..\..\Source\Services\Achievements;
+      $(ProjectDir)..\..\Source\Services\Achievements\WinRT;
+      $(ProjectDir)..\..\Source\Services\EntertainmentProfile;
+      $(ProjectDir)..\..\Source\Services\EntertainmentProfile\WinRT;
+      $(ProjectDir)..\..\Source\Services\Leaderboard;
+      $(ProjectDir)..\..\Source\Services\Leaderboard\WinRT;
+      $(ProjectDir)..\..\Source\Services\Misc;
+      $(ProjectDir)..\..\Source\Services\Misc\WinRT;
+      $(ProjectDir)..\..\Source\Services\Stats;
+      $(ProjectDir)..\..\Source\Services\Stats\WinRT;
+      $(ProjectDir)..\..\Source\Services\Multiplayer;
+      $(ProjectDir)..\..\Source\Services\Multiplayer\WinRT;
+      $(ProjectDir)..\..\Source\Services\Multiplayer;
+      $(ProjectDir)..\..\Source\Services\Multiplayer\Manager;
+      $(ProjectDir)..\..\Source\Services\Multiplayer\Manager\WinRT;
+      $(ProjectDir)..\..\Source\Services\Social\Manager;
+      $(ProjectDir)..\..\Source\Services\Social\Manager\WinRT;
+      $(ProjectDir)..\..\Source\Services\Matchmaking;
+      $(ProjectDir)..\..\Source\Services\Matchmaking\WinRT;
+      $(ProjectDir)..\..\Source\Services\RealTimeActivity;
+      $(ProjectDir)..\..\Source\Services\RealTimeActivity\WinRT;
+      $(ProjectDir)..\..\Source\Services\Presence;
+      $(ProjectDir)..\..\Source\Services\Presence\WinRT;
+      $(ProjectDir)..\..\Source\Services\GameServerPlatform;
+      $(ProjectDir)..\..\Source\Services\GameServerPlatform\WinRT;
+      $(ProjectDir)..\..\Source\Services\TitleStorage;
+      $(ProjectDir)..\..\Source\Services\TitleStorage\WinRT;
+      $(ProjectDir)..\..\Source\Services\Privacy;
+      $(ProjectDir)..\..\Source\Services\Privacy\WinRT;
+      $(ProjectDir)..\..\Source\Services\Marketplace;
+      $(ProjectDir)..\..\Source\Services\Marketplace\WinRT;
+      $(ProjectDir)..\..\Source\Services\Tournaments;
+      $(ProjectDir)..\..\Source\Services\Tournaments\WinRT;
+      $(ProjectDir)..\..\Source\Services\Events;
+      $(ProjectDir)..\..\Source\Services\Events\WinRT;
+      $(ProjectDir)..\..\Source\Services\Stats\Manager\WinRT;
+      $(ProjectDir)..\..\Source\Services\Clubs;
+      $(ProjectDir)..\..\Source\Services\Clubs\WinRT;
+      $(ProjectDir)..\..\Include;
+      $(ProjectDir)..\..\Include\cpprestsdk;
+      $(ProjectDir)..\..\Tests\UnitTests;
+      $(ProjectDir)..\..\Tests\UnitTests\Mocks;
+      $(ProjectDir)..\..\Tests\UnitTests\Support;
+      c:\Program Files (x86)\Windows Kits\10\Testing\Development\inc;
+      %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories Condition="'$(Platform)'=='x64'">C:\Program Files (x86)\Windows Kits\10\Testing\Development\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -88,7 +146,6 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4592</DisableSpecificWarnings>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4592</DisableSpecificWarnings>
-      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
@@ -312,7 +369,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\TitleHistory_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\XboxSocialUserGroup_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\XboxSocialUser_WinRT.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\PresenceFilter_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\ProfileService_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\RelationshipFilter_WinRT.h" />
@@ -327,7 +383,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxSocialRelationshipResult_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxSocialRelationship_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxUserProfile_WinRT.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service_impl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_internal.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_manager_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\LeaderboardQuery_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\LeaderboardResultEventArgs_WinRT.h" />
@@ -407,6 +464,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\call_buffer_timer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_impl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_headers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\initiator.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\local_config.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\perf_tester.h" />
@@ -528,7 +586,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\XboxLiveContext_WinRT.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\pch.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\pch.cpp" >
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -796,10 +854,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\xbox_social_user.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\xbox_social_user_group.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\xbox_user_id_container.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_relationship_change_event_args.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_relationship_change_subscription.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_service.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_service_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\ProfileService_WinRT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\ReputationService_WinRT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\SocialRelationshipChangeEventArgs_WinRT.cpp" />
@@ -813,6 +868,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_feedback_request.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_service.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_service_impl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_relationship_change_event_args.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_relationship_change_subscription.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_service_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_social_relationship.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_social_relationship_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_user_profile.cpp" />
