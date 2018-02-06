@@ -394,7 +394,7 @@ multiplayer_client_manager::join_game(
         if (xboxUserIds.size() > 0)
         {
             // Create a session with reservations.
-            multiplayer_session_reference gameSessionRef(utils::try_get_override_scid(), sessionTemplateName, sessionName);
+            multiplayer_session_reference gameSessionRef(utils::string_t_from_internal_string(utils::try_get_override_scid()), sessionTemplateName, sessionName);
             auto gameSession = std::make_shared<multiplayer_session>(
                 primaryContext->xbox_live_user_id(),
                 gameSessionRef,
@@ -470,7 +470,7 @@ multiplayer_client_manager::get_activities_for_social_group(
     RETURN_TASK_CPP_INVALIDARGUMENT_IF(user == nullptr, std::vector<multiplayer_activity_details>, "Invalid xboxLiveContext argument passed.");
 
     return get_multiplayer_service(user).get_activities_for_social_group(
-        utils::try_get_override_scid(),
+        utils::string_t_from_internal_string(utils::try_get_override_scid()),
         multiplayer_manager_utils::get_local_user_xbox_user_id(user),
         socialGroup);
 }

@@ -1153,7 +1153,7 @@ multiplayer_session::ensure_session_subscription_id_initialized()
 {
     if (m_sessionSubscriptionGuid.empty())
     {
-        m_sessionSubscriptionGuid = utils::create_guid(true);
+        m_sessionSubscriptionGuid = utils::string_t_from_internal_string(utils::create_guid(true));
     }
 }
 

@@ -89,7 +89,7 @@
 #define DEFINE_GET_STRING(className, methodName) \
     string_t className::methodName() const \
     { \
-        return utils::external_string_from_internal_string(m_internalObj->methodName()); \
+        return utils::string_t_from_internal_string(m_internalObj->methodName()); \
     }
 
 #define DEFINE_GET_STD_STRING(className, methodName) \

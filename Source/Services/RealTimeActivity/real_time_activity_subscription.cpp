@@ -12,7 +12,7 @@ real_time_activity_subscription::real_time_activity_subscription(
     ) :
     m_subscriptionErrorHandler(std::move(subscriptionErrorHandler)),
     m_state(real_time_activity_subscription_state::unknown),
-    m_guid(xbox::services::utils::create_guid(true))
+    m_guid(utils::string_t_from_internal_string(xbox::services::utils::create_guid(true)))
 {
     XSAPI_ASSERT(m_subscriptionErrorHandler != nullptr);
 }

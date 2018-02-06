@@ -51,16 +51,16 @@ reputation_service::submit_reputation_feedback(
     task_completion_event<xbox_live_result<void>> tce;
 
     auto result = m_serviceImpl->submit_reputation_feedback(
-        utils::internal_string_from_external_string(xboxUserId),
+        utils::internal_string_from_string_t(xboxUserId),
         reputationFeedbackType,
         XSAPI_DEFAULT_TASKGROUP,
         [tce](xbox_live_result<void> result) 
         {
             tce.set(result); 
         },
-        utils::internal_string_from_external_string(sessionName),
-        utils::internal_string_from_external_string(reasonMessage),
-        utils::internal_string_from_external_string(evidenceResourceId)
+        utils::internal_string_from_string_t(sessionName),
+        utils::internal_string_from_string_t(reasonMessage),
+        utils::internal_string_from_string_t(evidenceResourceId)
         );
 
     if (result.err())

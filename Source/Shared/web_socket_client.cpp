@@ -6,6 +6,7 @@
 #include "user_context.h"
 #include "web_socket_client.h"
 #include "utils.h"
+#include "xbox_live_app_config_internal.h"
 
 using namespace web::websockets::client;
 
@@ -46,15 +47,15 @@ xbox_web_socket_client::connect(
         config.add_subprotocol(subProtocol);
         config.headers().add(_T("Authorization"), result.token());
         config.headers().add(_T("Signature"), result.signature());
-        config.headers().add(_T("Accept-Language"), utils::external_string_from_internal_string(utils::get_locales()));
-        auto proxyUri = xbox_live_app_config::get_app_config_singleton()->_Proxy();
+        config.headers().add(_T("Accept-Language"), utils::string_t_from_internal_string(utils::get_locales()));
+        auto proxyUri = xbox_live_app_config_internal::get_app_config_singleton()->proxy();
         if (!proxyUri.is_empty())
         {
             web::web_proxy proxy(proxyUri);
             config.set_proxy(proxy);
         }
         xsapi_internal_string userAgentInt = DEFAULT_USER_AGENT;
-        string_t userAgent = utils::external_string_from_internal_string(userAgentInt);
+        string_t userAgent = utils::string_t_from_internal_string(userAgentInt);
         if (!callerContext.empty())
         {
             userAgent += _T(" ") + callerContext;

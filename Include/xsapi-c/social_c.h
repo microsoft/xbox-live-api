@@ -224,8 +224,17 @@ typedef struct XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT
     /// <summary>
     /// Returns a boolean value that indicates if there are more pages of social relationships to retrieve.
     /// </summary>
-    /// <returns>True if there are more pages, otherwise false.</returns>
     bool hasNext;
+
+    /// <summary>
+    /// Internal
+    /// </summary>
+    XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER filter;
+
+    /// <summary>
+    /// Internal
+    /// </summary>
+    uint32_t continuationSkip;
 } XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT;
 
 typedef struct XBL_SOCIAL_RELATIONSHIP_CHANGE_EVENT_ARGS
@@ -261,7 +270,7 @@ typedef void(*XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE)(
     );
 
 /// <summary>
-/// Returns a XboxSocialRelationshipResult containing a the list of people that the caller is connected to.
+/// Gets a XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT containing a the list of people that the caller is connected to.
 /// Defaults to filtering to PersonView.All.
 /// Defaults to startIndex and maxItems of 0 to return entire list if possible.
 /// </summary>
@@ -285,7 +294,7 @@ XblGetSocialRelationships(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns a xbox_social_relationship_result containing a the list of people that the caller is connected to.
+/// Gets a XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT containing a the list of people that the caller is connected to.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblXboxLiveContextCreateHandle.</param>
 /// <param name="socialRelationshipFilter">Controls how the list is filtered.</param>
@@ -309,7 +318,7 @@ XblGetSocialRelationshipsWithFilter(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns a xbox_social_relationship_result containing a the list of people that the specified user is connected to.
+/// Gets a XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT containing a the list of people that the specified user is connected to.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblXboxLiveContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User Id to get the social relationships for.</param>
@@ -333,12 +342,12 @@ XblGetSocialRelationshipsForUser(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns a xbox_social_relationship_result containing a the list of people that the caller is connected to.
+/// Gets a XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT containing a the list of people that the caller is connected to.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblXboxLiveContextCreateHandle.</param>
 /// <param name="socialRelationshipFilter">Controls how the list is filtered.</param>
 /// <param name="startIndex">Controls the starting index to return.</param>
-/// <param name="maxItems">Controls the number of xbox_social_relationship_result objects to get.  0 will return as many as possible</param>
+/// <param name="maxItems">Controls the number of XBL_XBOX_SOCIAL_RELATIONSHIP objects to get.  0 will return as many as possible</param>
 /// <param name="taskGroupId">
 /// The task group ID to assign to this async operation. XblProcessNextCompletedTask(taskGroupId) will only process
 /// completed tasks that have a matching taskGroupId. If this isn't needed, just pass in 0.
@@ -360,7 +369,32 @@ XblGetSocialRelationshipsEx(
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
 
-// TODO XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT get next
+/// <summary>
+/// Gets an XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT object containing the next page.
+/// </summary>
+/// <param name="xboxLiveContext">An xbox live context handle created with XblXboxLiveContextCreateHandle.</param>
+/// <param name="socialRelationshipResult">Result returned from a previous call to XblGetSocialRelations*.</param>
+/// <param name="maxItems">Controls the number of XBL_XBOX_SOCIAL_RELATIONSHIP objects to get.  0 will return as many as possible</param>
+/// <param name="taskGroupId">
+/// The task group ID to assign to this async operation. XblProcessNextCompletedTask(taskGroupId) will only process
+/// completed tasks that have a matching taskGroupId. If this isn't needed, just pass in 0.
+///</param>
+/// <param name="callbackContext">Context passed back to callback.</param>
+/// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
+/// <returns>
+/// <returns>
+/// Result code for this API operation. The result of the asynchronous operation is returned via the callback parameters.
+/// </returns>
+/// <remarks>Calls V1 GET /users/{ownerId}/people</remarks>
+XBL_API XBL_RESULT XBL_CALLING_CONV
+XblSocialRelationshipResultGetNext(
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ CONST XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT *socialRelationshipResult,
+    _In_ uint32_t maxItems,
+    _In_ uint64_t taskGroupId,
+    _In_opt_ void* callbackContext,
+    _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
+    ) XBL_NOEXCEPT;
 
 typedef void* XBL_SOCIAL_RELATIONSHIP_CHANGE_SUBSCRIPTION;
 

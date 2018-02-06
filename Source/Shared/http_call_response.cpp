@@ -3,8 +3,8 @@
 
 #include "pch.h"
 #include "xsapi/xbox_live_context_settings.h"
-#include "xsapi/xbox_service_call_routed_event_args.h"
-#include "http_call_response.h"
+#include "xbox_service_call_routed_event_args_internal.h"
+#include "http_call_response_internal.h"
 #include "user_context.h"
 #include "utils.h"
 #include "telemetry.h"
@@ -40,7 +40,7 @@ void http_call_response::_Route_service_call() const
 
 void http_call_response::_Set_full_url(_In_ const string_t& url)
 {
-    m_internalObj->set_full_url(utils::internal_string_from_external_string(url));
+    m_internalObj->set_full_url(utils::internal_string_from_string_t(url));
 }
 
 web::http::http_headers http_call_response::response_headers() const
@@ -50,7 +50,7 @@ web::http::http_headers http_call_response::response_headers() const
     auto& internalHeaders = m_internalObj->response_headers();
     for (auto& kvp : internalHeaders)
     {
-        headers.add(utils::external_string_from_internal_string(kvp.first), utils::external_string_from_internal_string(kvp.second));
+        headers.add(utils::string_t_from_internal_string(kvp.first), utils::string_t_from_internal_string(kvp.second));
     }
     return headers;
 }
@@ -71,7 +71,7 @@ http_call_response_internal::http_call_response_internal(
     _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
     _In_ const xsapi_internal_string& httpMethod,
     _In_ const xsapi_internal_string& fullUrl,
-    _In_ const http_call_request_message& requestBody,
+    _In_ const http_call_request_message_internal& requestBody,
     _In_ xbox_live_api xboxLiveApi,
     _In_ uint32_t responseStatusCode
     ) :
@@ -124,7 +124,7 @@ xsapi_internal_string http_call_response_internal::response_body_to_string() con
 {
     switch (m_httpCallResponseBodyType)
     {
-        case http_call_response_body_type::json_body: return utils::internal_string_from_external_string(m_responseBodyJson.serialize());
+        case http_call_response_body_type::json_body: return utils::internal_string_from_string_t(m_responseBodyJson.serialize());
         case http_call_response_body_type::string_body: return m_responseBodyString;
         case http_call_response_body_type::vector_body: return "Binary data response";
         default: return "Unknown response";
@@ -278,19 +278,18 @@ void http_call_response_internal::route_service_call() const
             headers.erase(iter);
         }
 
-        // TODO
-        xbox::services::xbox_service_call_routed_event_args args(
-            utils::external_string_from_internal_string(m_xboxUserId),
-            utils::external_string_from_internal_string(m_httpMethod),
-            utils::external_string_from_internal_string(m_fullUrl),
+        auto args = xsapi_allocate_shared<xbox::services::xbox_service_call_routed_event_args_internal>(
+            m_xboxUserId,
+            m_httpMethod,
+            m_fullUrl,
             utils::headers_to_string(headers),
             m_requestBody,
             responseCount,
             utils::headers_to_string(m_responseHeaders),
-            utils::external_string_from_internal_string(response_body_to_string()),
-            utils::external_string_from_internal_string(m_eTag),
-            utils::external_string_from_internal_string(token),
-            utils::external_string_from_internal_string(sig),
+            response_body_to_string(),
+            m_eTag,
+            token,
+            sig,
             m_httpStatus,
             m_requestTime,
             m_responseTime
@@ -300,29 +299,29 @@ void http_call_response_internal::route_service_call() const
         {
             std::shared_ptr<service_call_logger> tracker = service_call_logger::get_singleton_instance();
 
-            web::uri uri = args.uri();
-            const string_t host = uri.host();
-            const bool isGet = (utils::str_icmp(args.http_method(), L"GET") == 0);
+            web::uri uri = utils::string_t_from_internal_string(args->uri());
+            const xsapi_internal_string host = utils::internal_string_from_string_t(uri.host());
+            const bool isGet = (utils::str_icmp(args->http_method(), "GET") == 0);
 
             service_call_logger_data sharedData(
                 host,
-                args.uri(),
-                args.xbox_user_id(),
+                args->uri(),
+                args->xbox_user_id(),
                 isGet,
-                static_cast<uint32_t>(args.http_status()),
-                args.request_headers(),
-                args.request_body().request_message_string(),
-                args.response_headers(),
-                args.response_body(),
-                args.elapsed_call_time(),
-                args.request_time());
+                args->http_status(),
+                args->request_headers(),
+                m_requestBody.request_message_string(),
+                args->response_headers(),
+                args->response_body(),
+                args->elapsed_call_time(),
+                args->request_time());
 
             tracker->log(sharedData.to_string());
         }
 
         if (m_xboxLiveContextSettings->enable_service_call_routed_events())
         {
-            m_xboxLiveContextSettings->_Raise_service_call_routed_event(args);
+            m_xboxLiveContextSettings->_Raise_service_call_routed_event(xbox_service_call_routed_event_args(args));
         }
     }
 #endif

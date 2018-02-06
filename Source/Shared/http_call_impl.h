@@ -3,7 +3,8 @@
 
 #pragma once
 #include "xsapi/system.h"
-#include "http_call_response.h"
+#include "http_call_response_internal.h"
+#include "http_call_request_message_internal.h"
 #include "system_internal.h"
 
 #if XSAPI_U
@@ -139,7 +140,7 @@ struct http_call_data
 
     HC_CALL_HANDLE callHandle;
     http_call_response_body_type httpCallResponseBodyType;
-    http_call_request_message requestBody;
+    http_call_request_message_internal requestBody;
     http_headers requestHeaders; // TODO these are used by auth right now, can probably remove with xal
     bool addDefaultHeaders;
 
@@ -191,7 +192,9 @@ public:
         _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
         ) = 0;
 
-    virtual const http_call_request_message& request_body() const = 0;
+    virtual const http_call_request_message_internal& request_body() const = 0;
+
+    virtual void set_request_body(_In_ const xsapi_internal_string& value) = 0;
 
 #if XSAPI_U
     /// <summary>
@@ -317,7 +320,8 @@ public:
     void set_request_body(_In_ const string_t& value) override;
     void set_request_body(_In_ const web::json::value& value) override;
     void set_request_body(_In_ const std::vector<uint8_t>& value) override;
-    const http_call_request_message& request_body() const override;
+    void set_request_body(_In_ const xsapi_internal_string& value) override;
+    const http_call_request_message_internal& request_body() const override;
 
     void set_content_type_header_value(_In_ const string_t& value) override;
     string_t content_type_header_value() const override;

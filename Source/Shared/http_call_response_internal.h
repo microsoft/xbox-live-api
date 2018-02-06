@@ -2,8 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
+
 #include "xsapi/http_call_request_message.h"
 #include "xsapi/http_call.h"
+#include "http_call_request_message_internal.h"
 #include "shared_macros.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
@@ -16,7 +18,7 @@ public:
         _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
         _In_ const xsapi_internal_string& httpMethod,
         _In_ const xsapi_internal_string& baseUrl,
-        _In_ const http_call_request_message& requestBody,
+        _In_ const http_call_request_message_internal& requestBody,
         _In_ xbox_live_api xboxLiveApi,
         _In_ uint32_t responseStatusCode = 0
         );
@@ -106,7 +108,7 @@ private:
     xsapi_internal_string m_xboxUserId;
     std::shared_ptr<xbox_live_context_settings> m_xboxLiveContextSettings;
     xsapi_internal_string m_fullUrl;
-    http_call_request_message m_requestBody;
+    http_call_request_message_internal m_requestBody;
     xbox_live_api m_xboxLiveApi;
 
     xsapi_internal_string response_body_to_string() const;

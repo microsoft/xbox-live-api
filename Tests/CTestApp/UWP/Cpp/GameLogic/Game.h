@@ -40,7 +40,7 @@ namespace Sample
         bool Render();
         void Init(Windows::UI::Core::CoreWindow^ window);
 
-        static void HandleSignout(_In_ XSAPI_XBOX_LIVE_USER *user);
+        static void HandleSignout(_In_ XBL_XBOX_LIVE_USER *user);
 
         void OnProtocolActivation(Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs^ args);
 
@@ -70,10 +70,10 @@ namespace Sample
 
         void Log(std::wstring log);
 
-        XSAPI_XBOX_LIVE_USER *GetUser() { return m_user; }
+        XBL_XBOX_LIVE_USER *GetUser() { return m_user; }
     private:
-        XSAPI_XBOX_LIVE_USER *m_user;
-        XBL_XBOX_LIVE_CONTEXT *m_xboxLiveContext;
+        XBL_XBOX_LIVE_USER *m_user;
+        XBL_XBOX_LIVE_CONTEXT_HANDLE m_xboxLiveContext;
 
         function_context m_signOutContext;
 

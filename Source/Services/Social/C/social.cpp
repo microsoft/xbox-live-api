@@ -141,6 +141,28 @@ try
 CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
+XblSocialRelationshipResultGetNext(
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ CONST XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT *socialRelationshipResult,
+    _In_ uint32_t maxItems,
+    _In_ uint64_t taskGroupId,
+    _In_opt_ void* callbackContext,
+    _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
+    ) XBL_NOEXCEPT
+{
+    return XblGetSocialRelationshipsHelper(
+        xboxLiveContext,
+        xboxLiveContext->user->xboxUserId,
+        socialRelationshipResult->filter,
+        socialRelationshipResult->continuationSkip,
+        maxItems,
+        taskGroupId,
+        callbackContext,
+        callback
+        );
+}
+
+XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSubscribeToSocialRelationshipChange(
     _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR xboxUserId,

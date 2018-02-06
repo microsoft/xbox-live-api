@@ -552,7 +552,7 @@ multiplayer_game_client::join_game_helper(
     )
 {
     multiplayer_session_reference gameSessionRef(
-        utils::try_get_override_scid(),
+        utils::string_t_from_internal_string(utils::try_get_override_scid()),
         m_gameSessionTemplateName,
         sessionName
         );

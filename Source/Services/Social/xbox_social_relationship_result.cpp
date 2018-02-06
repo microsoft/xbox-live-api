@@ -82,6 +82,16 @@ bool xbox_social_relationship_result_internal::has_next() const
     return (m_continuationSkip < m_totalCount);
 }
 
+uint32_t xbox_social_relationship_result_internal::continuation_skip() const
+{
+    return m_continuationSkip;
+}
+
+xbox_social_relationship_filter xbox_social_relationship_result_internal::filter() const
+{
+    return m_filter;
+}
+
 xbox_live_result<void> xbox_social_relationship_result_internal::get_next(
     _In_ uint32_t maxItems,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>> callback

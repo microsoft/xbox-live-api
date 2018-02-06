@@ -10,7 +10,7 @@
 #include <boost/uuid/uuid.hpp>
 #endif
 #include "xsapi/xbox_live_app_config.h"
-#include "http_call_response.h"
+#include "http_call_response_internal.h"
 #include "xsapi/mem.h"
 #include "xsapi/system.h"
 
@@ -122,7 +122,7 @@ struct xsapi_singleton
     std::unordered_map<string_t, uint32_t> m_rtaActiveManagersByUser;
 
     std::mutex m_singletonLock;
-    std::mutex m_appConfigLock;
+    std::recursive_mutex m_appConfigLock;
     std::mutex m_mpsdConstantLock;
     std::mutex m_mpsdMemberLock;
     std::mutex m_mpsdPropertyLock;
@@ -143,6 +143,10 @@ struct xsapi_singleton
 
     // from Shared\xbox_live_app_config.cpp
     std::shared_ptr<xbox_live_app_config> m_appConfigSingleton;
+    std::shared_ptr<xbox_live_app_config_internal> m_internalAppConfigSinglton;
+
+    // from Shared\C\xbox_live_app_config.cpp
+    std::shared_ptr<XBL_XBOX_LIVE_APP_CONFIG> m_cAppConfigSingleton;
 
     // from Misc\notification_service.cpp
     std::shared_ptr<xbox::services::notification::notification_service> m_notificationSingleton;
@@ -234,11 +238,6 @@ struct xsapi_singleton
     std::mutex m_usersLock;
     std::unordered_map<std::string, XBL_XBOX_LIVE_USER*> m_signedInUsers;
 
-    std::shared_ptr<XBL_XBOX_LIVE_APP_CONFIG> m_appConfigSingletonC;
-    std::string m_scid;
-    std::string m_environment;
-    std::string m_sandbox;
-
     std::shared_ptr<XSAPI_ACHIEVEMENTS_STATE> m_achievementsState;
     std::shared_ptr<XSAPI_SOCIAL_MANAGER_VARS> m_socialVars;
     std::shared_ptr<XSAPI_STATS_MANAGER_VARS> m_statsVars;
@@ -301,7 +300,14 @@ public:
         _In_ bool required = false,
         _In_ const string_t& defaultValue = _T("")
     );
-    
+
+    static xsapi_internal_string extract_json_string(
+        _In_ const web::json::value& jsonValue,
+        _In_ const xsapi_internal_string& stringName,
+        _In_ bool required = false,
+        _In_ const xsapi_internal_string& defaultValue = ""
+    );
+
     static web::json::array extract_json_array(
         _In_ const web::json::value& jsonValue,
         _In_ const string_t& arrayName,
@@ -371,7 +377,7 @@ public:
 
     static uint64_t extract_json_uint52(
         _In_ const web::json::value& jsonValue,
-        _In_ const string_t& name,
+        _In_ const xsapi_internal_string& name,
         _Inout_ std::error_code& error,
         _In_ bool required = false,
         _In_ uint64_t defaultValue = 0
@@ -379,7 +385,7 @@ public:
 
     static uint64_t extract_json_uint52(
         _In_ const web::json::value& jsonValue,
-        _In_ const string_t& name,
+        _In_ const xsapi_internal_string& name,
         _In_ bool required = false,
         _In_ uint64_t defaultValue = 0
     );
@@ -489,6 +495,12 @@ public:
     static web::json::value extract_json_field(
         _In_ const web::json::value& json,
         _In_ const string_t& name,
+        _In_ bool required
+    );
+
+    static web::json::value extract_json_field(
+        _In_ const web::json::value& json,
+        _In_ const xsapi_internal_string& name,
         _In_ bool required
     );
 
@@ -760,7 +772,7 @@ public:
 
     static string_t base64_url_encode(_In_ const std::vector<unsigned char>& data);
 
-    static string_t headers_to_string(_In_ const http_headers& headers);
+    static xsapi_internal_string headers_to_string(_In_ const http_headers& headers);
 
     static web::http::http_headers string_to_headers(_In_ const string_t& headers);
 
@@ -768,7 +780,7 @@ public:
 
     static string_t get_query_from_params(_In_ const std::vector<string_t>& params);
 
-    static string_t create_guid(_In_ bool removeBraces);
+    static xsapi_internal_string create_guid(_In_ bool removeBraces);
 
 #ifdef _WIN32
     static std::error_code guid_from_string(_In_ const string_t& str, _In_ GUID* guid, _In_ bool withBraces);
@@ -789,11 +801,11 @@ public:
         _In_ const chrono_clock_t::time_point& time_point
     );
 
-    static string_t convert_timepoint_to_string(
+    static xsapi_internal_string convert_timepoint_to_string(
         _In_ const chrono_clock_t::time_point& time_point
     );
 
-    static string_t escape_special_characters(const string_t& str);
+    static xsapi_internal_string escape_special_characters(const xsapi_internal_string& str);
 
     static inline int str_icmp(const string_t &left, const string_t &right)
     {
@@ -840,7 +852,7 @@ public:
     static HRESULT convert_xbox_live_error_code_to_hresult(_In_ const std::error_code& errCode);
 #endif
 
-    static string_t convert_hresult_to_error_name(_In_ long hr);
+    static xsapi_internal_string convert_hresult_to_error_name(_In_ long hr);
     static long convert_http_status_to_hresult(_In_ uint32_t httpStatusCode);
 
     static string_t create_xboxlive_endpoint(
@@ -852,7 +864,7 @@ public:
     // TODO above should not be needed eventually
     static xsapi_internal_string create_xboxlive_endpoint(
         _In_ const xsapi_internal_string& subpath,
-        _In_ const std::shared_ptr<xbox_live_app_config>& appConfig,
+        _In_ const std::shared_ptr<xbox_live_app_config_internal>& appConfig,
         _In_ const xsapi_internal_string& protocol = "https"
     );
 
@@ -864,16 +876,17 @@ public:
     }
 #endif
 
-#ifdef UWP_API
-    // TODO cleanup these functions
-    static xsapi_internal_string utf8_from_utf16(const xsapi_internal_wstring& utf16);
-    
-    static xsapi_internal_string internal_string_from_external_string(_In_ const string_t& externalString);
+#ifdef UWP_API // TODO add definitions for other platforms
+
+    static xsapi_internal_string internal_string_from_string_t(_In_ const string_t& externalString);
     static xsapi_internal_string internal_string_from_utf16(_In_reads_(size) PCWSTR utf16, size_t size);
+    static xsapi_internal_string internal_string_from_utf16(_In_z_ PCWSTR utf16);
 
-    static string_t external_string_from_internal_string(_In_ const xsapi_internal_string& internalString);
-    static string_t external_string_from_utf8(_In_reads_(size) PCSTR utf8, size_t size);
+    static string_t string_t_from_internal_string(_In_ const xsapi_internal_string& internalString);
+    static string_t string_t_from_utf8(_In_reads_(size) PCSTR utf8, size_t size);
+    static string_t string_t_from_utf8(_In_z_ PCSTR utf8);
 
+    // TODO remove these after migrating all APIs
     static std::string utf8_from_utf16(std::wstring const& utf16);
     static std::wstring utf16_from_utf8(std::string const& utf8);
 
@@ -994,7 +1007,7 @@ public:
         xsapi_internal_vector<xsapi_internal_string> internalVector(size);
         for (size_t i = 0; i < size; ++i)
         {
-            internalVector[i] = utils::internal_string_from_external_string(stdVector[i]);
+            internalVector[i] = utils::internal_string_from_string_t(stdVector[i]);
         }
         return internalVector;
     }
@@ -1007,7 +1020,7 @@ public:
         std::vector<string_t> vector(size);
         for (size_t i = 0; i < size; ++i)
         {
-            vector[i] = utils::external_string_from_internal_string(internalVector[i]);
+            vector[i] = utils::string_t_from_internal_string(internalVector[i]);
         }
         return vector;
     }
@@ -1046,7 +1059,7 @@ public:
 
     static uint32_t try_get_master_title_id();
 
-    static string_t try_get_override_scid();
+    static xsapi_internal_string try_get_override_scid();
 
     static string_t replace_sub_string(
         _In_ const string_t& source,

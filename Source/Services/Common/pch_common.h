@@ -46,13 +46,13 @@
 
 #include "xsapi/types.h"
 #include "xsapi/mem.h"
-#include "httpClient/types.h"
-#include "httpClient/httpClient.h"
-#include "httpClient/task.h"
-
 #include "xsapi-c/types_c.h"
 #include "xsapi-c/errors_c.h"
 #include "xsapi-c/xbox_live_global_c.h"
+
+#include "httpClient/types.h"
+#include "httpClient/httpClient.h"
+#include "httpClient/task.h"
 
 #if XSAPI_C
 #include "utils_c.h"

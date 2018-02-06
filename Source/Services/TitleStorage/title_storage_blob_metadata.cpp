@@ -272,7 +272,7 @@ title_storage_blob_metadata::_Deserialize(
     returnObject.m_clientTimestamp = utils::extract_json_time(json, _T("clientFileTime"), errc);
     returnObject.m_displayName = utils::extract_json_string(json, _T("displayName"), errc);
     returnObject.m_eTag = utils::extract_json_string(json, _T("etag"), errc);
-    returnObject.m_lengthBytes = utils::extract_json_uint52(json, _T("size"), errc);
+    returnObject.m_lengthBytes = utils::extract_json_uint52(json, "size", errc);
 
     string_t fileName = utils::extract_json_string(json, _T("fileName"), errc);
     if (!fileName.empty())

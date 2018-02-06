@@ -108,7 +108,10 @@ XblXboxLiveContextGetAppConfig(
     ) XBL_NOEXCEPT
 try
 {
-    // TODO
-    return XBL_RESULT_OK;
+    if (xboxLiveContextHandle == nullptr)
+    {
+        return XBL_RESULT_INVALID_ARG;
+    }
+    return XblGetXboxLiveAppConfigSingleton(appConfig);
 }
 CATCH_RETURN()

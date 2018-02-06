@@ -73,7 +73,7 @@ http_call_data::http_call_data(
 
     HCHttpCallCreate(&callHandle);
 
-    fullUrl = serverName + utils::internal_string_from_external_string(pathQueryFragment.to_string());
+    fullUrl = serverName + utils::internal_string_from_string_t(pathQueryFragment.to_string());
     HCHttpCallRequestSetUrl(callHandle, httpMethod.data(), fullUrl.data());
 }
 
@@ -138,12 +138,12 @@ http_call_impl::get_response(
 
     for (const auto& header : httpRequest.headers())
     {
-        add_header(m_httpCallData, utils::internal_string_from_external_string(header.first), utils::internal_string_from_external_string(header.second));
+        add_header(m_httpCallData, utils::internal_string_from_string_t(header.first), utils::internal_string_from_string_t(header.second));
     }
 
-    auto body = httpRequest.extract_string().get();
-    m_httpCallData->requestBody = http_call_request_message(body);
-    HCHttpCallRequestSetRequestBodyString(m_httpCallData->callHandle, utils::internal_string_from_external_string(body).data());
+    auto body = utils::internal_string_from_string_t(httpRequest.extract_string().get());
+    m_httpCallData->requestBody = http_call_request_message_internal(body);
+    HCHttpCallRequestSetRequestBodyString(m_httpCallData->callHandle, body.data());
 
     pplx::task_completion_event<std::shared_ptr<http_call_response>> tce;
     pplx::task<std::shared_ptr<http_call_response>> task(tce);
@@ -326,24 +326,23 @@ xbox_live_result<void> http_call_impl::internal_get_response_with_auth(
     xsapi_internal_vector<unsigned char> requestBodyVector;
     if (m_httpCallData->requestBody.get_http_request_message_type() == http_request_message_type::vector_message)
     {
-        requestBodyVector = m_httpCallData->requestBody.m_requestMessageVector;
+        requestBodyVector = m_httpCallData->requestBody.request_message_vector();
     }
     else
     {
         requestBodyVector = xsapi_internal_vector<unsigned char>(
-            m_httpCallData->requestBody.m_requestMessageString.begin(), 
-            m_httpCallData->requestBody.m_requestMessageString.end()
+            m_httpCallData->requestBody.request_message_string().begin(), 
+            m_httpCallData->requestBody.request_message_string().end()
             );
     }
 
     // Auth stack still using non mem hooked types. Not changing because we will switch to XAL soon anyhow
     auto httpCallData = m_httpCallData;
 
-    // TODO change return type
     m_httpCallData->userContext->get_auth_result(
-        utils::external_string_from_internal_string(m_httpCallData->httpMethod),
-        utils::external_string_from_internal_string(m_httpCallData->fullUrl),
-        utils::headers_to_string(m_httpCallData->requestHeaders),
+        utils::string_t_from_internal_string(m_httpCallData->httpMethod),
+        utils::string_t_from_internal_string(m_httpCallData->fullUrl),
+        utils::string_t_from_internal_string(utils::headers_to_string(m_httpCallData->requestHeaders)),
         utils::std_vector_from_internal_vector<unsigned char>(requestBodyVector),
         allUsersAuthRequired,
         m_httpCallData->taskGroupId,
@@ -361,12 +360,12 @@ xbox_live_result<void> http_call_impl::internal_get_response_with_auth(
             const auto& authResult = result.payload();
             if (!authResult.token().empty())
             {
-                add_header(httpCallData, AUTH_HEADER, utils::internal_string_from_external_string(authResult.token()));
+                add_header(httpCallData, AUTH_HEADER, utils::internal_string_from_string_t(authResult.token()));
             }
 
             if (!authResult.signature().empty())
             {
-                add_header(httpCallData, SIG_HEADER, utils::internal_string_from_external_string(authResult.signature()));
+                add_header(httpCallData, SIG_HEADER, utils::internal_string_from_string_t(authResult.signature()));
             }
 
             internal_get_response(httpCallData);
@@ -427,7 +426,7 @@ void http_call_impl::internal_get_response(
             switch (httpCallData->httpCallResponseBodyType)
             {
             case http_call_response_body_type::json_body:
-                responseBodyJson = web::json::value::parse(utils::external_string_from_internal_string(responseBody), errCode);
+                responseBodyJson = web::json::value::parse(utils::string_t_from_internal_string(responseBody), errCode);
                 if (!errCode)
                 {
                     httpCallResponse->set_response_body(responseBodyJson);
@@ -449,7 +448,7 @@ void http_call_impl::internal_get_response(
 
 string_t http_call_impl::server_name() const
 {
-    return utils::external_string_from_internal_string(m_httpCallData->serverName);
+    return utils::string_t_from_internal_string(m_httpCallData->serverName);
 }
 
 const web::uri& http_call_impl::path_query_fragment() const
@@ -459,7 +458,7 @@ const web::uri& http_call_impl::path_query_fragment() const
 
 string_t http_call_impl::http_method() const
 {
-    return utils::external_string_from_internal_string(m_httpCallData->httpMethod);
+    return utils::string_t_from_internal_string(m_httpCallData->httpMethod);
 }
 
 void http_call_impl::set_add_default_headers(_In_ bool value)
@@ -496,7 +495,7 @@ bool http_call_impl::retry_allowed() const
     return m_httpCallData->retryAllowed;
 }
 
-const http_call_request_message& http_call_impl::request_body() const
+const http_call_request_message_internal& http_call_impl::request_body() const
 {
     return m_httpCallData->requestBody;
 }
@@ -505,15 +504,16 @@ void http_call_impl::set_request_body(
     _In_ const string_t& value
     )
 {
-    m_httpCallData->requestBody = http_call_request_message(value);
-    HCHttpCallRequestSetRequestBodyString(m_httpCallData->callHandle, utils::internal_string_from_external_string(value).data());
+    xsapi_internal_string internalValue = utils::internal_string_from_string_t(value);
+    m_httpCallData->requestBody = http_call_request_message_internal(internalValue);
+    HCHttpCallRequestSetRequestBodyString(m_httpCallData->callHandle, internalValue.data());
 }
 
 void http_call_impl::set_request_body(
     _In_ const std::vector<uint8_t>& value
     )
 {
-    m_httpCallData->requestBody = http_call_request_message(value);
+    m_httpCallData->requestBody = http_call_request_message_internal(xsapi_internal_vector<uint8_t>(value.begin(), value.end()));
     HCHttpCallRequestSetRequestBodyBytes(m_httpCallData->callHandle, value.data(), static_cast<uint32_t>(value.size()));
 }
 
@@ -521,33 +521,39 @@ void http_call_impl::set_request_body(
     _In_ const web::json::value& value
     )
 {
-    m_httpCallData->requestBody = http_call_request_message(value.serialize());
-    xsapi_internal_string stringValue = utils::internal_string_from_external_string(value.serialize());
+    xsapi_internal_string stringValue = utils::internal_string_from_string_t(value.serialize());
+    m_httpCallData->requestBody = http_call_request_message_internal(stringValue);
     HCHttpCallRequestSetRequestBodyString(m_httpCallData->callHandle, stringValue.data());
+}
+
+void http_call_impl::set_request_body(_In_ const xsapi_internal_string& value)
+{
+    m_httpCallData->requestBody = http_call_request_message_internal(value);
+    HCHttpCallRequestSetRequestBodyString(m_httpCallData->callHandle, value.data());
 }
 
 string_t http_call_impl::content_type_header_value() const
 {
-    return utils::external_string_from_internal_string(m_httpCallData->contentTypeHeaderValue);
+    return utils::string_t_from_internal_string(m_httpCallData->contentTypeHeaderValue);
 }
 
 void http_call_impl::set_content_type_header_value(
     _In_ const string_t& value
     )
 {
-    m_httpCallData->contentTypeHeaderValue = utils::internal_string_from_external_string(value);
+    m_httpCallData->contentTypeHeaderValue = utils::internal_string_from_string_t(value);
 }
 
 string_t http_call_impl::xbox_contract_version_header_value() const
 {
-    return utils::external_string_from_internal_string(m_httpCallData->xboxContractVersionHeaderValue);
+    return utils::string_t_from_internal_string(m_httpCallData->xboxContractVersionHeaderValue);
 }
 
 void http_call_impl::set_xbox_contract_version_header_value(
     _In_ const string_t& value
     )
 {
-    m_httpCallData->xboxContractVersionHeaderValue = utils::internal_string_from_external_string(value);
+    m_httpCallData->xboxContractVersionHeaderValue = utils::internal_string_from_string_t(value);
 }
 
 void http_call_impl::set_custom_header(
@@ -557,8 +563,8 @@ void http_call_impl::set_custom_header(
 {
     add_header(
         m_httpCallData,
-        utils::internal_string_from_external_string(headerName).data(),
-        utils::internal_string_from_external_string(headerValue).data()
+        utils::internal_string_from_string_t(headerName).data(),
+        utils::internal_string_from_string_t(headerValue).data()
         );
 }
 
@@ -671,10 +677,10 @@ http_call_impl::create_http_call_response(
     )
 {
     return std::make_shared<http_call_response_internal>(
-        utils::internal_string_from_external_string(httpCallData->userContext != nullptr ? httpCallData->userContext->xbox_user_id() : string_t()),
+        utils::internal_string_from_string_t(httpCallData->userContext != nullptr ? httpCallData->userContext->xbox_user_id() : string_t()),
         httpCallData->xboxLiveContextSettings,
         httpCallData->httpMethod,
-        httpCallData->serverName + utils::internal_string_from_external_string(httpCallData->pathQueryFragment.to_string()),
+        httpCallData->serverName + utils::internal_string_from_string_t(httpCallData->pathQueryFragment.to_string()),
         httpCallData->requestBody,
         httpCallData->xboxLiveApi,
         responseStatusCode
@@ -690,7 +696,7 @@ void http_call_impl::set_user_agent(
         xsapi_internal_string userAgent = DEFAULT_USER_AGENT;
         if (!httpCallData->userContext->caller_context().empty())
         {
-            userAgent += " " + utils::internal_string_from_external_string(httpCallData->userContext->caller_context());
+            userAgent += " " + utils::internal_string_from_string_t(httpCallData->userContext->caller_context());
         }
         add_header(httpCallData, "User-Agent", userAgent);
     }

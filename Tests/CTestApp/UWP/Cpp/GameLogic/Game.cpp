@@ -135,7 +135,7 @@ Game::~Game()
     }
     if (m_xboxLiveContext != nullptr)
     {
-        XboxLiveContextDelete(m_xboxLiveContext);
+        XblXboxLiveContextCloseHandle(m_xboxLiveContext);
     }
 
     XblGlobalCleanup();
@@ -370,7 +370,7 @@ void Game::Init(Windows::UI::Core::CoreWindow^ window)
     window->KeyUp += ref new TypedEventHandler<Windows::UI::Core::CoreWindow^, Windows::UI::Core::KeyEventArgs^>(m_input, &Input::OnKeyUp);
 
     std::weak_ptr<Game> thisWeakPtr = shared_from_this();
-    AddSignOutCompletedHandler([](XSAPI_XBOX_LIVE_USER *user)
+    AddSignOutCompletedHandler([](XBL_XBOX_LIVE_USER *user)
     {
         g_sampleInstance->HandleSignout(user);
     });
@@ -448,7 +448,7 @@ void Game::HandleSignInResult(
     switch (payload.status)
     {
         case xbox::services::system::sign_in_status::success:
-            XboxLiveContextCreate(pThis->m_user, &(pThis->m_xboxLiveContext));
+            XblXboxLiveContextCreateHandle(pThis->m_user, &(pThis->m_xboxLiveContext));
             pThis->Log(L"Sign in succeeded");
             break;
 
@@ -527,7 +527,7 @@ void Game::GetSocialRelationships()
     });
 }
 
-void Game::HandleSignout(XSAPI_XBOX_LIVE_USER *user)
+void Game::HandleSignout(XBL_XBOX_LIVE_USER *user)
 {
     WCHAR text[1024];
     swprintf_s(text, ARRAYSIZE(text), L"User %s signed out", utility::conversions::utf8_to_utf16(user->gamertag).data());

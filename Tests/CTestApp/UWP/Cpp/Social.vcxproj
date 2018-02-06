@@ -193,7 +193,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\github\xbox-live-api\FlatC\Include\;$(ProjectDir)..\..\..\..\InProgressSamples\Kits\;$(ProjectDir)..\..\..\..\InProgressSamples\Kits\DirectXTK\Inc\;$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\Include\cpprestsdk\;$(ProjectDir)..\..\..\..\InProgressSamples\Kits\;$(ProjectDir)..\..\..\..\InProgressSamples\Kits\DirectXTK\Inc\;$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

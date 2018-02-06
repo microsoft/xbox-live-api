@@ -117,7 +117,7 @@ xbox_user_profile_internal::deserialize(
         }
         else if (name == "AppDisplayPicRaw")
         {
-            appDisplayPictureResizeUri = utils::external_string_from_internal_string(stringValue); // TODO don't double convert here
+            appDisplayPictureResizeUri = utils::string_t_from_internal_string(stringValue); // TODO don't double convert here
         }
         else if (name == "GameDisplayName")
         {
@@ -125,7 +125,7 @@ xbox_user_profile_internal::deserialize(
         }
         else if (name == "GameDisplayPicRaw")
         {
-            gameDisplayPictureResizeUri = utils::external_string_from_internal_string(stringValue); // TODO don't double convert here
+            gameDisplayPictureResizeUri = utils::string_t_from_internal_string(stringValue); // TODO don't double convert here
         }
         else if (name == "Gamerscore")
         {

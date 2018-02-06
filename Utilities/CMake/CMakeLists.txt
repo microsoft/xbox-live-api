@@ -265,6 +265,7 @@ set(Shared_Source_Files
     ../../Source/Shared/http_call_response.cpp
     ../../Source/Shared/user_context.cpp
     ../../Source/Shared/utils.cpp
+    ../../Source/Shared/xbox_service_call_routed_event_args_internal.h
     ../../Source/Shared/xbox_service_call_routed_event_args.cpp
     ../../Source/Shared/call_buffer_timer.cpp
     ../../Source/Shared/errors.cpp
@@ -280,12 +281,13 @@ set(Shared_Source_Files
     ../../Source/Shared/utils_locales.cpp
     ../../Source/Shared/web_socket_client.cpp
     ../../Source/Shared/web_socket_connection.cpp
+    ../../Source/Shared/xbox_live_app_config_internal.h
     ../../Source/Shared/xbox_live_app_config.cpp
     ../../Source/Shared/xbox_live_context_settings.cpp
     ../../Source/Shared/xbox_live_services_settings.cpp
     ../../Source/Shared/xbox_system_factory.cpp
     ../../Source/Shared/http_call_impl.h
-    ../../Source/Shared/http_call_response.h
+    ../../Source/Shared/http_call_response_internal.h
     ../../Source/Shared/local_config.h
     ../../Source/Shared/Shared_macros.h
     ../../Source/Shared/user_context.h
@@ -301,6 +303,7 @@ set(Shared_Source_Files
     ../../Source/Shared/web_socket_connection_state.h
     ../../Source/Shared/xbox_system_factory.h
     ../../Source/Shared/http_headers.h
+    ../../Source/Shared/http_call_request_message_internal.h
     )
 
 set(Misc_Source_Files
@@ -619,11 +622,14 @@ set(System_Source_Files_C
     ../../Source/C/System/user_taskargs.h
     )
 
-set(Shared_Source_Files_C
+set(Shared_Source_Files_C_Legacy
     ../../Source/C/Shared/utils_c.h
-    ../../Source/C/Shared/xbox_live_app_config_c.cpp
     )
 
+set(Shared_Source_Files_C
+    ../../Source/C/Shared/xbox_live_app_config_c.cpp
+    )
+    
 set(Achievements_Source_Files_C
     ../../Source/C/Services/Achievements/achievements.cpp
     ../../Source/C/Services/Achievements/achievements_helper.cpp
@@ -1305,7 +1311,8 @@ else()
             source_group("C++ Source\\System\\WinRT" FILES ${System_WinRT_Source_Files})
             source_group("C++ Source\\Services\\Events\\WinRT" FILES ${Events_WinRT_Source_Files})
 		else()
-            source_group("C++ Source\\C\\Shared" FILES ${Shared_Source_Files_C})
+            source_group("C++ Source\\C\\Shared" FILES ${Shared_Source_Files_C_Legacy})
+            source_group("C++ Source\\Shared\\C" FILES ${Shared_Source_Files_C})
             source_group("C++ Source\\C\\System" FILES ${System_Source_Files_C})
             source_group("C++ Source\\C\\Services\\Achievements" FILES ${Achievements_Source_Files_C})
             source_group("C++ Source\\C\\Services\\Common" FILES ${Common_Source_Files_C_Legacy})
@@ -1464,6 +1471,7 @@ else()
                 ${Common_Source_Files_C_Legacy}
                 ${Achievements_Source_Files_C}
                 ${Shared_Source_Files_C}
+                ${Shared_Source_Files_C_Legacy}
                 ${System_Source_Files_C}
                 )
 		endif()

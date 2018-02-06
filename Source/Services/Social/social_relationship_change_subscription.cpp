@@ -38,7 +38,7 @@ social_relationship_change_subscription_internal::social_relationship_change_sub
 
     // TODO change to internal string
     stringstream_t uri;
-    uri << _T("http://social.xboxlive.com/users/xuid(") << utils::external_string_from_internal_string(m_xboxUserId) << _T(")/friends");
+    uri << _T("http://social.xboxlive.com/users/xuid(") << utils::string_t_from_internal_string(m_xboxUserId) << _T(")/friends");
 
     m_resourceUri = uri.str();
 }

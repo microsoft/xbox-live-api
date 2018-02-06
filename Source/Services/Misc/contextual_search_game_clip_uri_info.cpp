@@ -57,7 +57,7 @@ contextual_search_game_clip_uri_info::_Deserialize(_In_ const web::json::value& 
 
     contextual_search_game_clip_uri_info result(
         utils::extract_json_string(inputJson, _T("Uri"), errc, false),
-        utils::extract_json_uint52(inputJson, _T("FileSize"), errc, false),
+        utils::extract_json_uint52(inputJson, "FileSize", errc, false),
         convert_string_to_clip_uri_type(utils::extract_json_string(inputJson, _T("UriType"), errc, false)),
         utils::extract_json_time(inputJson, _T("Expiration"), errc, false)
         );

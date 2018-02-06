@@ -84,6 +84,8 @@ extern "C" {
 #define XBL_NOEXCEPT
 #endif
 
+#include "httpClient/types.h"
+
 typedef uint32_t XBL_MEMORY_TYPE;
 typedef int32_t FUNCTION_CONTEXT;
 typedef HC_TASK_HANDLE XBL_TASK_HANDLE;

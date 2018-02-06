@@ -14,6 +14,7 @@
 #include "Event_WinRT.h"
 #include "xsapi\presence.h"
 #include "presence_internal.h"
+#include "xbox_live_app_config_internal.h"
 
 using namespace pplx;
 using namespace Platform;
@@ -85,7 +86,7 @@ user_impl_idp::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
                     {
                         msaRequest = ref new WebTokenRequest(provider, "service::XboxLivePartner.Signin::DELEGATION");
                         msaRequest->Properties->Insert("subpolicy", "JWT");
-                        msaRequest->Properties->Insert("subresource", ref new Platform::String(localConfig->msa_sub_target().c_str()));
+                        msaRequest->Properties->Insert("subresource", ref new Platform::String(utils::string_t_from_internal_string(localConfig->msa_sub_target()).c_str()));
 
                         return WebAuthenticationCoreManager::FindAccountAsync(provider, ref new Platform::String(payload.web_account_id().c_str()));
                     }).get();
@@ -494,9 +495,9 @@ user_impl_idp::convert_web_token_request_result(
             environment = _T(".") + environment;
         }
 
-        auto app_config = xbox_live_app_config::get_app_config_singleton();
-        app_config->set_environment(environment);
-        app_config->set_sandbox(sandbox);
+        auto app_config = xbox_live_app_config_internal::get_app_config_singleton();
+        app_config->set_environment(utils::internal_string_from_string_t(environment));
+        app_config->set_sandbox(utils::internal_string_from_string_t(sandbox));
 
         return xbox_live_result<token_and_signature_result>(
             token_and_signature_result(

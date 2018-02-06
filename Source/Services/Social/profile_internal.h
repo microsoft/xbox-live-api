@@ -52,7 +52,7 @@ public:
     profile_service_impl(
         _In_ std::shared_ptr<user_context> userContext,
         _In_ std::shared_ptr<xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox_live_app_config> appConfig
+        _In_ std::shared_ptr<xbox_live_app_config_internal> appConfig
         );
 
     _XSAPIIMP xbox::services::xbox_live_result<void> get_user_profile(
@@ -95,7 +95,7 @@ private:
 
     std::shared_ptr<xbox::services::user_context> m_userContext;
     std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
-    std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
+    std::shared_ptr<xbox::services::xbox_live_app_config_internal> m_appConfig;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

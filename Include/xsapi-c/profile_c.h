@@ -7,8 +7,6 @@
 extern "C" {
 #endif
 
-struct XBL_XBOX_LIVE_CONTEXT;
-
 /// <summary> 
 /// Represents a user's Xbox Live profile.
 /// </summary>
