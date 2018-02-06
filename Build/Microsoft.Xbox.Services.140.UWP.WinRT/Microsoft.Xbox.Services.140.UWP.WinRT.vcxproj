@@ -421,7 +421,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\build_version.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\call_buffer_timer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_impl.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_request_message_internal.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_headers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\initiator.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\local_config.h" />
@@ -437,6 +438,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_client.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_connection.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_connection_state.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_app_config_internal.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_service_call_routed_event_args_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\WinRT\GetTokenAndSignatureResult_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\WinRT\SignInResult_WinRT.h" />

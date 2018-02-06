@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements.cpp">
@@ -706,6 +706,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_team_result.cpp">
       <Filter>C++ Source\Services\Tournaments</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\C\xbox_live_app_config_c.cpp">
+      <Filter>C++ Source\Shared\C</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\call_buffer_timer.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
@@ -825,9 +828,6 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\xbox_live_mutex.cpp">
       <Filter>C++ Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Shared\C\xbox_live_app_config_c.cpp">
-      <Filter>C++ Source\Shared\C</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1110,6 +1110,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_impl.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_request_message_internal.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response_internal.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_headers.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
@@ -1173,6 +1179,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\Event_WinRT.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_app_config_internal.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_service_call_routed_event_args_internal.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
@@ -1187,18 +1199,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl.h">
       <Filter>C++ Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Shared\xbox_service_call_routed_event_args_internal.h">
-      <Filter>C++ Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Shared\http_call_request_message_internal.h">
-      <Filter>C++ Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Shared\http_call_response_internal.h">
-      <Filter>C++ Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Shared\xbox_live_app_config_internal.h">
-      <Filter>C++ Source\Shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1322,14 +1322,14 @@
     <Filter Include="C++ Source\Shared">
       <UniqueIdentifier>{4B225209-5709-3A59-81F9-27B50CED1B10}</UniqueIdentifier>
     </Filter>
+    <Filter Include="C++ Source\Shared\C">
+      <UniqueIdentifier>{48CB674C-6D4B-3D72-8011-D0F63128CC64}</UniqueIdentifier>
+    </Filter>
     <Filter Include="C++ Source\Shared\Logger">
       <UniqueIdentifier>{6356990A-FB32-312F-BDA4-177C7F312F3B}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\System">
       <UniqueIdentifier>{726C90DE-90DC-36A6-B559-090139CBCAD4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="C++ Source\Shared\C">
-      <UniqueIdentifier>{a593f34f-dbdd-4868-9b94-da5315815da0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

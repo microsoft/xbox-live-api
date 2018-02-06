@@ -627,7 +627,7 @@ set(Shared_Source_Files_C_Legacy
     )
 
 set(Shared_Source_Files_C
-    ../../Source/C/Shared/xbox_live_app_config_c.cpp
+    ../../Source/Shared/C/xbox_live_app_config_c.cpp
     )
     
 set(Achievements_Source_Files_C
