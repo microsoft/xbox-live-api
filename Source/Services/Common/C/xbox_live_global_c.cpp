@@ -14,30 +14,35 @@ XblAddTaskEventHandler(
     _Out_opt_ XBL_TASK_EVENT_HANDLE* eventHandle
     ) XBL_NOEXCEPT
 {
-    struct addEventHandlerContext
-    {
-        XBL_TASK_EVENT_FUNC taskEventFunc;
-        void* context;
-    };
+    XBL_TASK_EVENT_HANDLE tempEventHandle;
 
-    auto contextSharedPtr = xsapi_allocate_shared<addEventHandlerContext>();
-    contextSharedPtr->taskEventFunc = taskEventFunc;
-    contextSharedPtr->context = context;
+    auto hcAddTaskEventHandlerContext = xsapi_allocate_shared<std::pair<XBL_TASK_EVENT_FUNC, void*>>(taskEventFunc, context);
 
-    auto hcAddTaskEventHandlerContext = utils::store_shared_ptr<addEventHandlerContext>(contextSharedPtr);
-
-    HC_RESULT hcResult = HCAddTaskEventHandler(HC_SUBSYSTEM_ID_XSAPI, hcAddTaskEventHandlerContext,
+    HC_RESULT hcResult = HCAddTaskEventHandler(HC_SUBSYSTEM_ID_XSAPI, hcAddTaskEventHandlerContext.get(),
         [](void* context, HC_TASK_EVENT_TYPE eventType, HC_TASK_HANDLE taskHandle)
     {
-        auto hcAddTaskEventHandlerContext = utils::remove_shared_ptr<addEventHandlerContext>(context);
-        hcAddTaskEventHandlerContext->taskEventFunc(
-            hcAddTaskEventHandlerContext->context, 
+        auto hcAddTaskEventHandlerContext = reinterpret_cast<std::pair<XBL_TASK_EVENT_FUNC, void *>*>(context);
+
+        hcAddTaskEventHandlerContext->first(
+            hcAddTaskEventHandlerContext->second, 
             static_cast<XBL_TASK_EVENT_TYPE>(eventType),
             taskHandle);
 
         return HC_OK;
 
-    }, eventHandle);
+    }, &tempEventHandle);
+
+    if (hcResult == HC_OK)
+    {
+        if (eventHandle != nullptr)
+        {
+            *eventHandle = tempEventHandle;
+        }
+        auto singleton = get_xsapi_singleton();
+        std::lock_guard<std::mutex> lock(singleton->m_eventHandlerContextsLock);
+
+        singleton->m_eventHandlerContexts[tempEventHandle] = hcAddTaskEventHandlerContext;
+    }
 
     return utils::create_xbl_result(hcResult);
 }
@@ -47,6 +52,11 @@ XblRemoveTaskEventHandler(
     _In_ XBL_TASK_EVENT_HANDLE eventHandle
     ) XBL_NOEXCEPT
 {
+    auto singleton = get_xsapi_singleton();
+    std::lock_guard<std::mutex> lock(singleton->m_eventHandlerContextsLock);
+
+    singleton->m_eventHandlerContexts.erase(eventHandle);
+
     return utils::create_xbl_result(HCRemoveTaskEventHandler(eventHandle));
 }
 
@@ -60,6 +70,20 @@ XBL_API XBL_RESULT XBL_CALLING_CONV
 XblTaskProcessNextCompletedTask(_In_ uint64_t taskGroupId) XBL_NOEXCEPT
 {
     return utils::create_xbl_result(HCTaskProcessNextCompletedTask(HC_SUBSYSTEM_ID_XSAPI, taskGroupId));
+}
+
+XBL_API uint64_t XBL_CALLING_CONV
+XblTaskGetPendingTaskQueueSize() XBL_NOEXCEPT
+{
+    return HCTaskGetPendingTaskQueueSize(HC_SUBSYSTEM_ID_XSAPI);
+}
+
+XBL_API uint64_t XBL_CALLING_CONV
+XblTaskGetCompletedTaskQueueSize(
+    _In_ uint64_t taskGroupId
+    ) XBL_NOEXCEPT
+{
+    return HCTaskGetCompletedTaskQueueSize(HC_SUBSYSTEM_ID_XSAPI, taskGroupId);
 }
 
 XBL_API XBL_RESULT XBL_CALLING_CONV

@@ -95,6 +95,26 @@ XblTaskProcessNextPendingTask() XBL_NOEXCEPT;
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblTaskProcessNextCompletedTask(_In_ uint64_t taskGroupId) XBL_NOEXCEPT;
 
+/// <summary>
+/// Returns the size of the pending task queue for a specific task group ID
+/// </summary>
+/// <returns>Returns the size of the pending task queue.</returns>
+XBL_API uint64_t XBL_CALLING_CONV
+XblTaskGetPendingTaskQueueSize() XBL_NOEXCEPT;
+
+/// <summary>
+/// Returns the size of the completed task queue for a specific task group ID
+/// </summary>
+/// <param name="taskGroupId">
+/// This enables the caller to split the where results are returned between between a set of app threads.
+/// If this isn't needed, just pass in 0.
+/// </param>
+/// <returns>Returns the size of the completed task queue for a specific task group ID</returns>
+XBL_API uint64_t XBL_CALLING_CONV
+XblTaskGetCompletedTaskQueueSize(
+    _In_ uint64_t taskGroupId
+    ) XBL_NOEXCEPT;
+
 /////////////////////////////////////////////////////////////////////////////////////////
 // Memory APIs
 //

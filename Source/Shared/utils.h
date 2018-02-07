@@ -244,6 +244,9 @@ struct xsapi_singleton
 
     std::mutex m_callbackContextsLock;
     xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_callbackContextPtrs;
+
+    std::mutex m_eventHandlerContextsLock;
+    xsapi_internal_unordered_map<XBL_TASK_EVENT_HANDLE, std::shared_ptr<std::pair<XBL_TASK_EVENT_FUNC, void *>>> m_eventHandlerContexts;
 };
 
 void init_mem_hooks();
