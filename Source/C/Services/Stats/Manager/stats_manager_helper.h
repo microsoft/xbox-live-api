@@ -55,7 +55,7 @@ public:
 private:
     XSAPI_STAT_EVENT_TYPE m_eventType;
     XSAPI_STAT_EVENT_ARGS *m_args;
-    XSAPI_XBOX_LIVE_USER *m_localUser;
+    XBL_XBOX_LIVE_USER *m_localUser;
     xbox::services::xbox_live_result<void> m_errorInfo;
     std::error_code m_errorCode;
     std::string m_errorMessage;

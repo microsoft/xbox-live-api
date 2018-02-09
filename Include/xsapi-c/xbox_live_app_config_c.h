@@ -9,17 +9,38 @@
 extern "C" {
 #endif
 
-typedef struct XSAPI_XBOX_LIVE_APP_CONFIG
+/// <summary>
+/// Represents the configuration of an Xbox Live application.
+/// </summary>
+typedef struct XBL_XBOX_LIVE_APP_CONFIG
 {
+    /// <summary>
+    /// Title id of the app.
+    /// </summary>
     uint32_t titleId;
-    PCSTR scid;
-    PCSTR environment;
-    PCSTR sandbox;
-} XSAPI_XBOX_LIVE_APP_CONFIG;
 
+    /// <summary>
+    /// Service config id of the app.
+    /// </summary>
+    PCSTR scid;
+
+    /// <summary>
+    /// Xbox Live environment being used, it is empty before you sign in or using production.
+    /// </summary>
+    PCSTR environment;
+
+    /// <summary>
+    /// The sandbox such as "XDKS.1", it is empty until you sign in.
+    /// </summary>
+    PCSTR sandbox;
+} XBL_XBOX_LIVE_APP_CONFIG;
+
+/// <summary>
+/// Gets the app config singleton.
+/// </summary>
 XBL_API XBL_RESULT XBL_CALLING_CONV
-GetXboxLiveAppConfigSingleton(
-    _Out_ CONST XSAPI_XBOX_LIVE_APP_CONFIG** ppConfig
+XblGetXboxLiveAppConfigSingleton(
+    _Out_ CONST XBL_XBOX_LIVE_APP_CONFIG** appConfig
     );
 
 #if defined(__cplusplus)

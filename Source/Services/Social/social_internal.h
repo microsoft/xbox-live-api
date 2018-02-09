@@ -58,6 +58,10 @@ public:
         _In_ uint32_t continuationSkip
         );
 
+    xbox_social_relationship_filter filter() const;
+
+    uint32_t continuation_skip() const;
+
     static xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>> deserialize(_In_ const web::json::value& json);
 
 private:
@@ -123,7 +127,7 @@ public:
     social_service_impl(
         _In_ std::shared_ptr<xbox::services::user_context> userContext,
         _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
+        _In_ std::shared_ptr<xbox::services::xbox_live_app_config_internal> appConfig,
         _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> realTimeActivityService
         );
 
@@ -177,7 +181,7 @@ private:
 
     std::shared_ptr<xbox::services::user_context> m_userContext;
     std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
-    std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
+    std::shared_ptr<xbox::services::xbox_live_app_config_internal> m_appConfig;
     xsapi_internal_unordered_map<uint32_t, xbox_live_callback<std::shared_ptr<social_relationship_change_event_args_internal>>> m_socialRelationshipChangeHandler;
     function_context m_socialRelationshipChangeHandlerCounter;
     xbox::services::system::xbox_live_mutex m_socialRelationshipChangeHandlerLock;
@@ -253,7 +257,7 @@ public:
     reputation_service_impl(
         _In_ std::shared_ptr<xbox::services::user_context> userContext,
         _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+        _In_ std::shared_ptr<xbox::services::xbox_live_app_config_internal> appConfig
         );
 
     _XSAPIIMP xbox_live_result<void> submit_reputation_feedback(
@@ -275,7 +279,7 @@ public:
 private:
     std::shared_ptr<xbox::services::user_context> m_userContext;
     std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
-    std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
+    std::shared_ptr<xbox::services::xbox_live_app_config_internal> m_appConfig;
 
     xsapi_internal_string reputation_feedback_subpath(
         _In_ const xsapi_internal_string& xboxUserId

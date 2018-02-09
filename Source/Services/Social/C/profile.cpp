@@ -4,8 +4,9 @@
 #include "pch.h"
 #include "xsapi-c/profile_c.h"
 #include "profile_internal.h"
-#include "xbox_live_context_impl_c.h"
 #include "profile_helpers.h"
+#include "xbox_live_context_internal_c.h"
+#include "xbox_live_context_impl.h"
 
 using namespace xbox::services;
 using namespace xbox::services::system;
@@ -13,7 +14,7 @@ using namespace xbox::services::social;
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetUserProfile(
-    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_ uint64_t taskGroupId,
     _In_opt_ void* callbackContext,
@@ -22,7 +23,7 @@ XblGetUserProfile(
 try
 {
     RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || xboxUserId == nullptr);
-    auto profileService = xboxLiveContext->pImpl->cppObject()->profile_service_impl();
+    auto profileService = xboxLiveContext->contextImpl->profile_service_impl();
 
     auto result = profileService->get_user_profile(
         xboxUserId,
@@ -65,7 +66,7 @@ void get_user_profiles_complete(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetUserProfiles(
-    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR *xboxUserIds,
     _In_ uint32_t xboxUserIdsCount,
     _In_ uint64_t taskGroupId,
@@ -75,7 +76,7 @@ XblGetUserProfiles(
 try
 {
     RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || xboxUserIds == nullptr);
-    auto profileService = xboxLiveContext->pImpl->cppObject()->profile_service_impl();
+    auto profileService = xboxLiveContext->contextImpl->profile_service_impl();
 
     auto result = profileService->get_user_profiles(
         utils::string_array_to_internal_string_vector(xboxUserIds, xboxUserIdsCount),
@@ -91,7 +92,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetUserProfilesForSocialGroup(
-    _In_ XBL_XBOX_LIVE_CONTEXT* xboxLiveContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR socialGroup,
     _In_ uint64_t taskGroupId,
     _In_opt_ void* callbackContext,
@@ -100,7 +101,7 @@ XblGetUserProfilesForSocialGroup(
 try
 {
     RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || socialGroup == nullptr);
-    auto profileService = xboxLiveContext->pImpl->cppObject()->profile_service_impl();
+    auto profileService = xboxLiveContext->contextImpl->profile_service_impl();
 
     auto result = profileService->get_user_profiles_for_social_group(
         socialGroup,

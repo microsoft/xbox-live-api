@@ -16,37 +16,37 @@ public:
 
 #if !TV_API
 
-    virtual string_t get_value_from_config(
-        _In_ const string_t& name,
+    virtual xsapi_internal_string get_value_from_config(
+        _In_ const xsapi_internal_string& name,
         _In_ bool required,
-        _In_ const string_t& defaultValue);
+        _In_ const xsapi_internal_string& defaultValue);
 
     virtual uint64_t get_uint64_from_config(
-        _In_ const string_t& name,
+        _In_ const xsapi_internal_string& name,
         _In_ bool required,
         _In_ uint64_t defaultValue);
     
     virtual bool get_bool_from_config(
-        _In_ const string_t& name,
+        _In_ const xsapi_internal_string& name,
         _In_ bool required,
         _In_ bool defaultValue);
 
     virtual uint32_t title_id();
     virtual uint32_t override_title_id();
-    virtual string_t scid();
-    virtual string_t override_scid();
-    virtual string_t environment_prefix();
-    virtual string_t environment();
-    virtual string_t sandbox();
-    virtual string_t client_secret();
+    virtual xsapi_internal_string scid();
+    virtual xsapi_internal_string override_scid();
+    virtual xsapi_internal_string environment_prefix();
+    virtual xsapi_internal_string environment();
+    virtual xsapi_internal_string sandbox();
+    virtual xsapi_internal_string client_secret();
     virtual bool use_first_party_token();
     virtual bool is_creators_title();
-    virtual string_t msa_sub_target();
-    virtual string_t scope();
+    virtual xsapi_internal_string msa_sub_target();
+    virtual xsapi_internal_string scope();
 
-    virtual string_t get_value_from_local_storage(_In_ const string_t& name);
-    virtual xbox_live_result<void> write_value_to_local_storage(_In_ const string_t& name, _In_ const string_t& value);
-    virtual xbox_live_result<void> delete_value_from_local_storage(_In_ const string_t& name);
+    virtual xsapi_internal_string get_value_from_local_storage(_In_ const xsapi_internal_string& name);
+    virtual xbox_live_result<void> write_value_to_local_storage(_In_ const xsapi_internal_string& name, _In_ const xsapi_internal_string& value);
+    virtual xbox_live_result<void> delete_value_from_local_storage(_In_ const xsapi_internal_string& name);
 
 #if XSAPI_I
     virtual string_t apns_environment();

@@ -58,7 +58,7 @@ protected:
     std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
     std::unordered_map<string_t, std::shared_ptr<xbox::services::user_context>> m_userContexts;
 
-    const string_t ENDPOINT_ID_CACHE_NAME = _T("endpointId");
+    const xsapi_internal_string ENDPOINT_ID_CACHE_NAME = "endpointId";
     bool m_isInitialized = false;
     string_t m_endpointId;
 };

@@ -33,7 +33,7 @@ typedef enum XSAPI_SIGN_IN_STATUS
     XSAPI_SIGN_IN_STATUS_USER_CANCEL
 } XSAPI_SIGN_IN_STATUS;
 
-typedef struct XSAPI_XBOX_LIVE_USER
+typedef struct XBL_XBOX_LIVE_USER
 {
     PCSTR xboxUserId; 
     PCSTR gamertag;
@@ -45,7 +45,7 @@ typedef struct XSAPI_XBOX_LIVE_USER
     Windows::System::User^ windowsSystemUser;
 #endif
     XSAPI_XBOX_LIVE_USER_IMPL *pImpl;
-} XSAPI_XBOX_LIVE_USER;
+} XBL_XBOX_LIVE_USER;
 
 typedef struct XSAPI_SIGN_IN_RESULT
 {
@@ -66,7 +66,7 @@ typedef struct XSAPI_TOKEN_AND_SIGNATURE_RESULT
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserCreate(
-    _Out_ XSAPI_XBOX_LIVE_USER** ppUser
+    _Out_ XBL_XBOX_LIVE_USER** ppUser
     ) XBL_NOEXCEPT;
 
 #if UWP_API
@@ -74,14 +74,14 @@ XboxLiveUserCreate(
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserCreateFromSystemUser(
     _In_ Windows::System::User^ creationContext,
-    _Out_ XSAPI_XBOX_LIVE_USER** ppUser
+    _Out_ XBL_XBOX_LIVE_USER** ppUser
     ) XBL_NOEXCEPT;
 
 #endif
 
 XBL_API void XBL_CALLING_CONV
 XboxLiveUserDelete(
-    _In_ XSAPI_XBOX_LIVE_USER* pUser
+    _In_ XBL_XBOX_LIVE_USER* pUser
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_SIGN_IN_COMPLETION_ROUTINE)(
@@ -92,7 +92,7 @@ typedef void(*XSAPI_SIGN_IN_COMPLETION_ROUTINE)(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserSignIn(
-    _Inout_ XSAPI_XBOX_LIVE_USER* pUser,
+    _Inout_ XBL_XBOX_LIVE_USER* pUser,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
     _In_ uint64_t taskGroupId
@@ -100,7 +100,7 @@ XboxLiveUserSignIn(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserSignInSilently(
-    _Inout_ XSAPI_XBOX_LIVE_USER* pUser,
+    _Inout_ XBL_XBOX_LIVE_USER* pUser,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
     _In_ uint64_t taskGroupId
@@ -110,7 +110,7 @@ XboxLiveUserSignInSilently(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserSignInWithCoreDispatcher(
-    _Inout_ XSAPI_XBOX_LIVE_USER* pUser,
+    _Inout_ XBL_XBOX_LIVE_USER* pUser,
     _In_ Platform::Object^ coreDispatcher,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
@@ -119,7 +119,7 @@ XboxLiveUserSignInWithCoreDispatcher(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserSignInSilentlyWithCoreDispatcher(
-    _Inout_ XSAPI_XBOX_LIVE_USER* pUser,
+    _Inout_ XBL_XBOX_LIVE_USER* pUser,
     _In_ Platform::Object^ coreDispatcher,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
@@ -136,7 +136,7 @@ typedef void(*XSAPI_GET_TOKEN_AND_SIGNATURE_COMPLETION_ROUTINE)(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XboxLiveUserGetTokenAndSignature(
-    _In_ XSAPI_XBOX_LIVE_USER* pUser,
+    _In_ XBL_XBOX_LIVE_USER* pUser,
     _In_ PCSTR httpMethod,
     _In_ PCSTR url,
     _In_ PCSTR headers,
@@ -147,7 +147,7 @@ XboxLiveUserGetTokenAndSignature(
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_SIGN_OUT_COMPLETED_HANDLER)(
-    _In_ XSAPI_XBOX_LIVE_USER* pUser
+    _In_ XBL_XBOX_LIVE_USER* pUser
     );
 
 XBL_API FUNCTION_CONTEXT XBL_CALLING_CONV

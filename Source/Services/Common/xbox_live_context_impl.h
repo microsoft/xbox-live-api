@@ -172,7 +172,8 @@ public:
 private:
     std::shared_ptr<xbox::services::user_context> m_userContext;
     std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
-    std::shared_ptr<xbox_live_app_config> m_appConfig;
+    std::shared_ptr<xbox_live_app_config> m_appConfig; // Remove after migrating all services
+    std::shared_ptr<xbox_live_app_config_internal> m_appConfigInternal;
 
     std::shared_ptr<social::profile_service_impl> m_profileServiceImpl;
     std::shared_ptr<social::social_service_impl> m_socialServiceImpl;

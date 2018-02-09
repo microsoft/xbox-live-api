@@ -26,7 +26,7 @@ enum http_request_message_type
     vector_message
 };
 
-class http_call_impl;
+class http_call_request_message_internal;
 
 /// <summary>
 /// Represents an http request message.
@@ -37,37 +37,17 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    http_call_request_message();
+    http_call_request_message(const http_call_request_message_internal* internalObj);
 
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    http_call_request_message(_In_ string_t messageString);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    http_call_request_message(_In_ xsapi_internal_string messageString);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    http_call_request_message(_In_ std::vector<unsigned char> messageVector);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    http_call_request_message(_In_ xsapi_internal_vector<unsigned char> messageVector);
-    
     /// <summary>
     /// The http request message if it is a string type.
     /// </summary>
-    _XSAPIIMP string_t request_message_string() const;
+    _XSAPIIMP const string_t& request_message_string() const;
 
     /// <summary>
     /// The http request message if it is a buffer.
     /// </summary>
-    _XSAPIIMP std::vector<unsigned char> request_message_vector() const;
+    _XSAPIIMP const std::vector<unsigned char>& request_message_vector() const;
 
     /// <summary>
     /// The type of message.
@@ -75,11 +55,9 @@ public:
     _XSAPIIMP http_request_message_type get_http_request_message_type() const;
 
 private:
-    xsapi_internal_vector<unsigned char> m_requestMessageVector;
-    xsapi_internal_string m_requestMessageString;
+    std::vector<unsigned char> m_requestMessageVector;
+    string_t m_requestMessageString;
     http_request_message_type m_httpRequestMessageType;
-
-    friend http_call_impl;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

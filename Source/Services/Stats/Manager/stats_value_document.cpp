@@ -227,7 +227,7 @@ stats_value_document::_Deserialize(
     std::error_code errc;
 
     returnObject.m_state = svd_state::loaded;
-    returnObject.m_previousRevision = utils::extract_json_uint52(data, _T("revision"), errc, false);
+    returnObject.m_previousRevision = utils::extract_json_uint52(data, "revision", errc, false);
 
     auto statsField = utils::extract_json_field(data, _T("stats"), errc, false);
     auto titleField = utils::extract_json_field(statsField, _T("title"), errc, false);

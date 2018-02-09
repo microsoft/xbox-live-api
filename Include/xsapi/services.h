@@ -6,7 +6,7 @@
 #pragma warning(disable: 4266)
 #pragma warning(disable: 4062)
 
-#include <cpprest/http_msg.h>
+#include "cpprest/http_msg.h"
 #include "xsapi/types.h"
 #include "xsapi/errors.h"
 #include "xsapi/mem.h"

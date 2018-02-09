@@ -57,7 +57,7 @@ reputation_feedback_request::serialize_batch_feedback_request(
         }
 
         web::json::value itemJson;
-        itemJson[_T("targetXuid")] = web::json::value::string(utils::external_string_from_internal_string(feedbackItem.xbox_user_id()));
+        itemJson[_T("targetXuid")] = web::json::value::string(utils::string_t_from_internal_string(feedbackItem.xbox_user_id()));
         itemJson[_T("titleId")] = web::json::value::null();
 
         web::json::value sessionRefJson;
@@ -73,11 +73,11 @@ reputation_feedback_request::serialize_batch_feedback_request(
             itemJson[_T("sessionRef")] = web::json::value::null();
         }
 
-        itemJson[_T("feedbackType")] = web::json::value::string(utils::external_string_from_internal_string(feedbackTypeToString.payload()));
-        itemJson[_T("textReason")] = web::json::value::string(utils::external_string_from_internal_string(feedbackItem.reason_message()));
+        itemJson[_T("feedbackType")] = web::json::value::string(utils::string_t_from_internal_string(feedbackTypeToString.payload()));
+        itemJson[_T("textReason")] = web::json::value::string(utils::string_t_from_internal_string(feedbackItem.reason_message()));
         if (!feedbackItem.evidence_resource_id().empty())
         {
-            itemJson[_T("evidenceId")] = web::json::value::string(utils::external_string_from_internal_string(feedbackItem.evidence_resource_id()));
+            itemJson[_T("evidenceId")] = web::json::value::string(utils::string_t_from_internal_string(feedbackItem.evidence_resource_id()));
         }
         else
         {
@@ -99,12 +99,12 @@ reputation_feedback_request::serialize_feedback_request()
     xbox_live_result<xsapi_internal_string> feedbackTypeToString = convert_reputation_feedback_type_to_string(m_feedbackType);
     if (!feedbackTypeToString.err())
     {
-        request[_T("sessionName")] = web::json::value::string(utils::external_string_from_internal_string(m_sessionName));
-        request[_T("feedbackType")] = web::json::value::string(utils::external_string_from_internal_string(feedbackTypeToString.payload()));
-        request[_T("textReason")] = web::json::value::string(utils::external_string_from_internal_string(m_reasonMessage));
+        request[_T("sessionName")] = web::json::value::string(utils::string_t_from_internal_string(m_sessionName));
+        request[_T("feedbackType")] = web::json::value::string(utils::string_t_from_internal_string(feedbackTypeToString.payload()));
+        request[_T("textReason")] = web::json::value::string(utils::string_t_from_internal_string(m_reasonMessage));
         if (!m_evidenceResourceId.empty())
         {
-            request[_T("evidenceId")] = web::json::value::string(utils::external_string_from_internal_string(m_evidenceResourceId));
+            request[_T("evidenceId")] = web::json::value::string(utils::string_t_from_internal_string(m_evidenceResourceId));
         }
         else
         {
@@ -201,11 +201,11 @@ reputation_feedback_item::evidence_resource_id() const
 reputation_feedback_item_internal::reputation_feedback_item_internal(
     const reputation_feedback_item& legacyCppObj
     ) :
-    m_xboxUserId(utils::internal_string_from_external_string(legacyCppObj.xbox_user_id())),
+    m_xboxUserId(utils::internal_string_from_string_t(legacyCppObj.xbox_user_id())),
     m_reputationFeedbackType(legacyCppObj.feedback_type()),
     m_sessionRef(legacyCppObj.session_reference()),
-    m_reasonMessage(utils::internal_string_from_external_string(legacyCppObj.reason_message())),
-    m_evidenceResourceId(utils::internal_string_from_external_string(legacyCppObj.evidence_resource_id()))
+    m_reasonMessage(utils::internal_string_from_string_t(legacyCppObj.reason_message())),
+    m_evidenceResourceId(utils::internal_string_from_string_t(legacyCppObj.evidence_resource_id()))
 {
 }
 

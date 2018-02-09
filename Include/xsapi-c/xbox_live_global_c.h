@@ -12,6 +12,110 @@ extern "C" {
 #endif
 
 /////////////////////////////////////////////////////////////////////////////////////////
+// Task APIs
+//
+
+/// <summary>
+/// The task event type
+/// </summary>
+typedef enum XBL_TASK_EVENT_TYPE
+{
+    /// <summary>
+    /// The task is in a pending task and has not started executing
+    /// </summary>
+    XBL_TASK_EVENT_PENDING,
+
+    /// <summary>
+    /// The task has started executing but has not yet completed execution
+    /// </summary>
+    XBL_TASK_EVENT_EXECUTE_STARTED,
+
+    /// <summary>
+    /// The task has completed executing
+    /// </summary>
+    XBL_TASK_EVENT_EXECUTE_COMPLETED
+} XBL_TASK_EVENT_TYPE;
+
+/// <summary>
+/// The callback definition used by XblAddTaskEventHandler that's raised when a task changes state (pending, executing, completed).
+/// </summary>
+/// <param name="context">The context passed to this callback</param>
+/// <param name="eventType">The event type for this callback</param>
+/// <param name="taskHandle">The handle to the task</param>
+typedef void
+(XBL_CALLING_CONV* XBL_TASK_EVENT_FUNC)(
+    _In_opt_ void* context,
+    _In_ XBL_TASK_EVENT_TYPE eventType,
+    _In_ XBL_TASK_HANDLE taskHandle
+    );
+
+/// <summary>
+/// Sets the callback that is called when when task changes state (pending, executing, completed)
+/// </summary>
+/// <param name="context">The context passed to the event handler whenever it is called</param>
+/// <param name="taskEventFunc">The function pointer for the event handler.  Set it to nullptr to disable</param>
+/// <param name="eventHandle">Handle to the event handler.  Use this to remove the handler using XblRemoveTaskEventHandler</param>
+XBL_API XBL_RESULT XBL_CALLING_CONV
+XblAddTaskEventHandler(
+    _In_opt_ void* context,
+    _In_opt_ XBL_TASK_EVENT_FUNC taskEventFunc,
+    _Out_opt_ XBL_TASK_EVENT_HANDLE* eventHandle
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Removes the callback that is called when when task changes state (pending, executing, completed)
+/// </summary>
+/// <param name="eventHandle">Handle to the event handler.  Use this to remove the handler using HCRemoveTaskEventHandler</param>
+XBL_API XBL_RESULT XBL_CALLING_CONV
+XblRemoveTaskEventHandler(
+    _In_ XBL_TASK_EVENT_HANDLE eventHandle
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Calls the executionRoutine callback for the next pending Xbox Live task. It is recommended
+/// the app calls XblTaskProcessNextPendingTask() in a background thread.
+/// </summary>
+XBL_API XBL_RESULT XBL_CALLING_CONV
+XblTaskProcessNextPendingTask() XBL_NOEXCEPT;
+
+/// <summary>
+/// Calls the completionRoutine callback for the next task that is completed.
+/// This enables the caller to execute the callback on a specific thread to
+/// avoid the need to marshal data to a app thread from a background thread.
+///
+/// XblTaskProcessNextCompletedTask will only process completed tasks that have a
+/// matching taskGroupId.  This enables the caller to split the where results are
+/// returned between between a set of app threads.  If this isn't needed, just pass in 0.
+/// </summary>
+/// <param name="taskGroupId">
+/// HCTaskProcessNextCompletedTask will only process completed tasks that have a
+/// matching taskGroupId.  This enables the caller to split the where results are
+/// returned between between a set of app threads.  If this isn't needed, just pass in 0.
+/// </param>
+XBL_API XBL_RESULT XBL_CALLING_CONV
+XblTaskProcessNextCompletedTask(_In_ uint64_t taskGroupId) XBL_NOEXCEPT;
+
+/// <summary>
+/// Returns the size of the pending task queue for a specific task group ID
+/// </summary>
+/// <returns>Returns the size of the pending task queue.</returns>
+XBL_API uint64_t XBL_CALLING_CONV
+XblTaskGetPendingTaskQueueSize() XBL_NOEXCEPT;
+
+/// <summary>
+/// Returns the size of the completed task queue for a specific task group ID
+/// </summary>
+/// <param name="taskGroupId">
+/// This enables the caller to split the where results are returned between between a set of app threads.
+/// If this isn't needed, just pass in 0.
+/// </param>
+/// <returns>Returns the size of the completed task queue for a specific task group ID</returns>
+XBL_API uint64_t XBL_CALLING_CONV
+XblTaskGetCompletedTaskQueueSize(
+    _In_ uint64_t taskGroupId
+    ) XBL_NOEXCEPT;
+
+/////////////////////////////////////////////////////////////////////////////////////////
 // Memory APIs
 //
 

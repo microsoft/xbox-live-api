@@ -3,10 +3,10 @@
 
 #include "pch.h"
 #include "xsapi-c/achievements_c.h"
+#include "xbox_live_context_internal_c.h"
 #include "achievements_helper.h"
 #include "achievements_taskargs.h"
 #include "achievements_state.h"
-#include "xbox_live_context_impl_c.h"
 
 using namespace xbox::services;
 using namespace xbox::services::achievements;
@@ -77,10 +77,10 @@ HC_RESULT update_achievement_execute(
     )
 {
     auto args = reinterpret_cast<update_achievement_taskargs*>(context);
-    auto achievementService = args->pXboxLiveContext->pImpl->cppObject()->achievement_service();
+    auto achievementService = args->xboxLiveContext->contextImpl->achievement_service();
 
     xbox_live_result<void> result;
-    
+
     if (args->titleId == nullptr)
     {
         result = achievementService.update_achievement(args->xboxUserId, 
@@ -103,7 +103,7 @@ HC_RESULT update_achievement_execute(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceUpdateAchievement(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_opt_ uint32_t* titleId,
     _In_opt_ PCSTR serviceConfigurationId,
@@ -118,7 +118,7 @@ try
     verify_global_init();
 
     auto args = new update_achievement_taskargs();
-    args->pXboxLiveContext = pContext;
+    args->xboxLiveContext = xboxLiveContext;
     args->xboxUserId = utils::utf16_from_utf8(xboxUserId);
     args->titleId = titleId;
     args->serviceConfigurationId = utils::utf16_from_utf8(serviceConfigurationId);
@@ -146,7 +146,7 @@ HC_RESULT get_achievements_for_title_id_execute(
     )
 {
     auto args = reinterpret_cast<get_achievement_for_title_id_taskargs*>(context);
-    auto achievementService = args->pXboxLiveContext->pImpl->cppObject()->achievement_service();
+    auto achievementService = args->xboxLiveContext->contextImpl->achievement_service();
 
     auto result = achievementService.get_achievements_for_title_id(args->xboxUserId, 
                                                                    args->titleId, 
@@ -167,7 +167,7 @@ HC_RESULT get_achievements_for_title_id_execute(
 }
 XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceGetAchievementsForTitleId(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_ uint32_t titleId,
     _In_ XSAPI_ACHIEVEMENT_TYPE type,
@@ -184,6 +184,7 @@ try
     verify_global_init();
 
     auto args = new get_achievement_for_title_id_taskargs();
+    args->xboxLiveContext = xboxLiveContext;
     args->xboxUserId = utils::utf16_from_utf8(xboxUserId);
     args->titleId = titleId;
     args->type = static_cast<achievement_type>(type);
@@ -213,7 +214,7 @@ HC_RESULT get_achievement_execute(
     )
 {
     auto args = reinterpret_cast<get_achievement_taskargs*>(context);
-    auto achievementService = args->pXboxLiveContext->pImpl->cppObject()->achievement_service();
+    auto achievementService = args->xboxLiveContext->contextImpl->achievement_service();
 
     auto result = achievementService.get_achievement(args->xboxUserId,
             args->serviceConfigurationId,
@@ -230,7 +231,7 @@ HC_RESULT get_achievement_execute(
 }
 XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceGetAchievement(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_ PCSTR serviceConfigurationId,
     _In_ PCSTR achievementId,
@@ -244,7 +245,7 @@ try
 
     // Task args are cleaned up in write results routine. TODO add similar comment elsewhere.
     auto args = new get_achievement_taskargs();
-    args->pXboxLiveContext = pContext;
+    args->xboxLiveContext = xboxLiveContext;
     args->xboxUserId = utils::utf16_from_utf8(xboxUserId);
     args->serviceConfigurationId = utils::utf16_from_utf8(serviceConfigurationId);
     args->achievementId = utils::utf16_from_utf8(achievementId);

@@ -33,7 +33,7 @@ class xbox_live_context_server_impl;
 /// </summary>
 class xbox_live_context
 {
-public:    
+public:
 
 #if XSAPI_XDK_AUTH
     /// <summary>

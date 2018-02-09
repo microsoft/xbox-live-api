@@ -3,9 +3,6 @@
 
 #pragma once
 
-#include "pch.h"
-#include "xsapi-c/achievements_c.h"
-
 using namespace xbox::services;
 using namespace xbox::services::system;
 using namespace xbox::services::achievements;

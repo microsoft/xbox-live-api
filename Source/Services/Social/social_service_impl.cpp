@@ -13,7 +13,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 social_service_impl::social_service_impl(
     _In_ std::shared_ptr<xbox::services::user_context> userContext,
     _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
+    _In_ std::shared_ptr<xbox::services::xbox_live_app_config_internal> appConfig,
     _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> realTimeActivityService
     ) :
     m_userContext(std::move(userContext)),
@@ -137,7 +137,7 @@ social_service_impl::get_social_relationships(
     )
 {
     return get_social_relationships(
-        utils::internal_string_from_external_string(m_userContext->xbox_user_id()), 
+        utils::internal_string_from_string_t(m_userContext->xbox_user_id()), 
         filter,
         startIndex,
         maxItems,
@@ -171,7 +171,7 @@ social_service_impl::get_social_relationships(
         m_xboxLiveContextSettings,
         "GET",
         utils::create_xboxlive_endpoint("social", m_appConfig),
-        utils::external_string_from_internal_string(pathAndQuery), // TODO switch after changing to internal uri impl
+        utils::string_t_from_internal_string(pathAndQuery), // TODO switch after changing to internal uri impl
         xbox_live_api::get_social_relationships
         );
 
@@ -182,7 +182,7 @@ social_service_impl::get_social_relationships(
         http_call_response_body_type::json_body,
         false,
         taskGroupId,
-        [thisShared, startIndex, filter, callback](std::shared_ptr<http_call_response> response)
+        [thisShared, startIndex, filter, callback](std::shared_ptr<http_call_response_internal> response)
     {
         auto result = xbox_social_relationship_result_internal::deserialize(response->response_body_json());
 

@@ -28,7 +28,7 @@ const xsapi_internal_string profile_service_impl::SETTINGS_QUERY = settings_quer
 profile_service_impl::profile_service_impl(
     _In_ std::shared_ptr<user_context> userContext,
     _In_ std::shared_ptr<xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox_live_app_config> appConfig
+    _In_ std::shared_ptr<xbox_live_app_config_internal> appConfig
     ) :
     m_userContext(std::move(userContext)),
     m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
@@ -86,15 +86,15 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
     request[_T("userIds")] = utils::serialize_vector<xsapi_internal_string>(utils::json_internal_string_serializer, xboxUserIds);
     request[_T("settings")] = SETTINGS_SERIALIZED;
 
-    httpCall->set_request_body(request.serialize());
+    httpCall->set_request_body(utils::internal_string_from_string_t(request.serialize()));
 
     httpCall->get_response_with_auth(
         m_userContext,
         http_call_response_body_type::json_body,
         false,
         taskGroupId,
-        [callback](std::shared_ptr<http_call_response> response) 
-        { 
+        [callback](std::shared_ptr<http_call_response_internal> response) 
+        {
             handle_get_user_profiles_response(response, callback); 
         });
 
@@ -117,7 +117,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_soc
         m_xboxLiveContextSettings,
         "GET",
         utils::create_xboxlive_endpoint("profile", m_appConfig),
-        utils::external_string_from_internal_string(pathAndQuery), // TODO switch this after changing to internal uri impl
+        utils::string_t_from_internal_string(pathAndQuery), // TODO switch this after changing to internal uri impl
         xbox_live_api::get_user_profiles_for_social_group
         );
     httpCall->set_xbox_contract_version_header_value(_T("2"));
@@ -127,7 +127,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_soc
         http_call_response_body_type::json_body, 
         false,
         taskGroupId,
-        [callback](std::shared_ptr<http_call_response> response) 
+        [callback](std::shared_ptr<http_call_response_internal> response) 
         { 
             handle_get_user_profiles_response(response, callback); 
         });
@@ -136,7 +136,7 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_soc
 }
 
 void profile_service_impl::handle_get_user_profiles_response(
-    _In_ std::shared_ptr<http_call_response> response,
+    _In_ std::shared_ptr<http_call_response_internal> response,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>> callback
     )
 {
@@ -160,7 +160,8 @@ void profile_service_impl::handle_get_user_profiles_response(
     }
     else
     {
-        callback(xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>(response->err_code(), response->err_message()));
+        // TODO add xbox_live_result_internal
+        callback(xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>(response->err_code(), std::string(response->err_message().data())));
     }
 }
 
@@ -184,7 +185,7 @@ const xsapi_internal_string profile_service_impl::settings_query()
     for (uint32_t i = 0; i < arraySize; ++i)
     {
         // TODO change to all internal strings so we don't double convert here
-        source << utils::internal_string_from_external_string(web::http::uri::encode_uri(utils::external_string_from_internal_string(SETTINGS_ARRAY[i])));
+        source << utils::internal_string_from_string_t(web::http::uri::encode_uri(utils::string_t_from_internal_string(SETTINGS_ARRAY[i])));
         if (i + 1 != arraySize)
         {
             source << ",";

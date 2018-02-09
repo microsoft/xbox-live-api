@@ -793,7 +793,7 @@ social_graph::setup_rta_subscriptions(
     m_perfTester.start_timer(_T("setup_rta_subscriptions"));
     m_xboxLiveContextImpl->real_time_activity_service()->activate();
     auto socialRelationshipChangeResult = m_xboxLiveContextImpl->social_service_impl()->subscribe_to_social_relationship_change(
-        utils::internal_string_from_external_string(m_xboxLiveContextImpl->xbox_live_user_id())
+        utils::internal_string_from_string_t(m_xboxLiveContextImpl->xbox_live_user_id())
         );
 
     if (socialRelationshipChangeResult.err())
@@ -1875,7 +1875,7 @@ event_queue::push(
     usersAffected.reserve(socialEvent.users_affected_as_string_vec().size());
     for (auto& affectedUser : socialEvent.users_affected_as_string_vec())
     {
-        usersAffected.push_back(utils::external_string_from_internal_string(affectedUser).data());
+        usersAffected.push_back(utils::string_t_from_internal_string(affectedUser).data());
     }
 
     std::lock_guard<std::mutex> lock(m_eventGraphMutex.get());

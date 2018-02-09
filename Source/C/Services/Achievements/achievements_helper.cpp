@@ -3,6 +3,7 @@
 
 #include "pch.h"
 #include "xsapi-c/achievements_c.h"
+#include "xsapi/achievements.h"
 #include "achievements_helper.h"
 #include "achievements_state.h"
 

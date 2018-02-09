@@ -208,7 +208,7 @@ void XSAPI_XBOX_SOCIAL_USER_GROUP_IMPL::Init()
 {
     auto mapping = get_xsapi_singleton()->m_socialVars->cUsersMapping;
 
-    auto user = new XSAPI_XBOX_LIVE_USER();
+    auto user = new XBL_XBOX_LIVE_USER();
     if (mapping.find(m_cppSocialUserGroup->local_user()) != mapping.end())
     {
         user = mapping[m_cppSocialUserGroup->local_user()];
@@ -230,7 +230,7 @@ XSAPI_SOCIAL_EVENT_IMPL::XSAPI_SOCIAL_EVENT_IMPL(
 {
     auto mapping = get_xsapi_singleton()->m_socialVars->cUsersMapping;
 
-    auto user = new XSAPI_XBOX_LIVE_USER();
+    auto user = new XBL_XBOX_LIVE_USER();
     if (mapping.find(m_cppEvent.user()) != mapping.end())
     {
         user = mapping[m_cppEvent.user()];

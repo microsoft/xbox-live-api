@@ -6,7 +6,7 @@
 struct XSAPI_SOCIAL_MANAGER_VARS
 {
 public:
-    std::map<xbox_live_user_t, XSAPI_XBOX_LIVE_USER*> cUsersMapping;
+    std::map<xbox_live_user_t, XBL_XBOX_LIVE_USER*> cUsersMapping;
     std::vector<XSAPI_XBOX_SOCIAL_USER*> cXboxSocialUserGroupUsers;
     std::vector<XSAPI_XBOX_SOCIAL_USER_GROUP*> cGroups;
     std::vector<XSAPI_SOCIAL_EVENT*> cEvents;

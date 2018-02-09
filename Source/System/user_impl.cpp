@@ -40,12 +40,12 @@ user_impl::user_impl(
     m_localConfig = xbox_system_factory::get_factory()->create_local_config();
 
     m_authConfig = std::make_shared<auth_config>(
-        m_localConfig->sandbox(),
-        m_localConfig->environment_prefix(),
-        m_localConfig->environment(),
+        utils::string_t_from_internal_string(m_localConfig->sandbox()),
+        utils::string_t_from_internal_string(m_localConfig->environment_prefix()),
+        utils::string_t_from_internal_string(m_localConfig->environment()),
         m_localConfig->use_first_party_token(),
         m_localConfig->is_creators_title(),
-        m_localConfig->scope()
+        utils::string_t_from_internal_string(m_localConfig->scope())
         );
 #endif
 }

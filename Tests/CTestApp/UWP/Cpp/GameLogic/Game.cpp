@@ -19,10 +19,10 @@ HANDLE g_stopRequestedHandle;
 HANDLE g_pendingReadyHandle;
 HANDLE g_completeReadyHandle;
 
-HC_RESULT hc_event_handler(
+void xbl_event_handler(
     _In_opt_ void* context,
-    _In_ HC_TASK_EVENT_TYPE eventType,
-    _In_ HC_TASK_HANDLE taskHandle
+    _In_ XBL_TASK_EVENT_TYPE eventType,
+    _In_ XBL_TASK_HANDLE taskHandle
 )
 {
     UNREFERENCED_PARAMETER(context);
@@ -30,19 +30,17 @@ HC_RESULT hc_event_handler(
 
     switch (eventType)
     {
-    case HC_TASK_EVENT_TYPE::HC_TASK_EVENT_PENDING:
+    case XBL_TASK_EVENT_TYPE::XBL_TASK_EVENT_PENDING:
         SetEvent(g_pendingReadyHandle);
         break;
 
-    case HC_TASK_EVENT_TYPE::HC_TASK_EVENT_EXECUTE_STARTED:
+    case XBL_TASK_EVENT_TYPE::XBL_TASK_EVENT_EXECUTE_STARTED:
         break;
 
-    case HC_TASK_EVENT_TYPE::HC_TASK_EVENT_EXECUTE_COMPLETED:
+    case XBL_TASK_EVENT_TYPE::XBL_TASK_EVENT_EXECUTE_COMPLETED:
         SetEvent(g_completeReadyHandle);
         break;
     }
-
-    return HC_OK;
 }
 
 DWORD WINAPI background_thread_proc(LPVOID lpParam)
@@ -61,21 +59,20 @@ DWORD WINAPI background_thread_proc(LPVOID lpParam)
         switch (dwResult)
         {
         case WAIT_OBJECT_0: // pending 
-            // TODO Wrap into XBLProcessNextPendingTask()
-            HCTaskProcessNextPendingTask(HC_SUBSYSTEM_ID_XSAPI);
+            XblTaskProcessNextPendingTask();
 
             // If there's more pending tasks, then set the event to process them
-            if (HCTaskGetPendingTaskQueueSize(HC_SUBSYSTEM_ID_XSAPI) > 0)
+            if (XblTaskGetPendingTaskQueueSize() > 0)
             {
                 SetEvent(g_pendingReadyHandle);
             }
             break;
 
         case WAIT_OBJECT_0 + 1: // completed 
-            HCTaskProcessNextCompletedTask(HC_SUBSYSTEM_ID_XSAPI, 0);
+            XblTaskProcessNextCompletedTask(0);
 
             // If there's more completed tasks, then set the event to process them
-            if (HCTaskGetCompletedTaskQueueSize(HC_SUBSYSTEM_ID_XSAPI, 0) > 0)
+            if (XblTaskGetCompletedTaskQueueSize(0) > 0)
             {
                 SetEvent(g_completeReadyHandle);
             }
@@ -106,15 +103,13 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 
     XblGlobalInitialize();
 
-    // TODO wrap these functions in XSAPI so clients aren't calling through to libHttpClient directly
-    HCAddTaskEventHandler(
-        HC_SUBSYSTEM_ID_XSAPI,
+    XblAddTaskEventHandler(
         nullptr,
-        hc_event_handler,
+        xbl_event_handler,
         nullptr);
 
     m_hBackgroundThread = CreateThread(nullptr, 0, background_thread_proc, nullptr, 0, nullptr);
-    
+
     XboxLiveUserCreate(&m_user);
 }
 
@@ -135,7 +130,7 @@ Game::~Game()
     }
     if (m_xboxLiveContext != nullptr)
     {
-        XboxLiveContextDelete(m_xboxLiveContext);
+        XblXboxLiveContextCloseHandle(m_xboxLiveContext);
     }
 
     XblGlobalCleanup();
@@ -370,7 +365,7 @@ void Game::Init(Windows::UI::Core::CoreWindow^ window)
     window->KeyUp += ref new TypedEventHandler<Windows::UI::Core::CoreWindow^, Windows::UI::Core::KeyEventArgs^>(m_input, &Input::OnKeyUp);
 
     std::weak_ptr<Game> thisWeakPtr = shared_from_this();
-    AddSignOutCompletedHandler([](XSAPI_XBOX_LIVE_USER *user)
+    AddSignOutCompletedHandler([](XBL_XBOX_LIVE_USER *user)
     {
         g_sampleInstance->HandleSignout(user);
     });
@@ -448,7 +443,7 @@ void Game::HandleSignInResult(
     switch (payload.status)
     {
         case xbox::services::system::sign_in_status::success:
-            XboxLiveContextCreate(pThis->m_user, &(pThis->m_xboxLiveContext));
+            XblXboxLiveContextCreateHandle(pThis->m_user, &(pThis->m_xboxLiveContext));
             pThis->Log(L"Sign in succeeded");
             break;
 
@@ -527,7 +522,7 @@ void Game::GetSocialRelationships()
     });
 }
 
-void Game::HandleSignout(XSAPI_XBOX_LIVE_USER *user)
+void Game::HandleSignout(XBL_XBOX_LIVE_USER *user)
 {
     WCHAR text[1024];
     swprintf_s(text, ARRAYSIZE(text), L"User %s signed out", utility::conversions::utf8_to_utf16(user->gamertag).data());

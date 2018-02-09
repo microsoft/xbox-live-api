@@ -5,7 +5,6 @@
 #include <cpprest/ws_client.h>
 #include "shared_macros.h"
 #include "xsapi/system.h"
-#include "http_client.h"
 
 #if XSAPI_U
 #include "xsts_token_service.h"
@@ -44,11 +43,6 @@ public:
 
     virtual std::shared_ptr<xtitle_service> create_xtitle_service();
 #endif
-
-    virtual std::shared_ptr<xbox_http_client> create_http_client(
-        _In_ const web::http::uri& base_uri,
-        _In_ const web::http::client::http_client_config& client_config
-        );
 
     virtual std::shared_ptr<local_config> create_local_config();
 

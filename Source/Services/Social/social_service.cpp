@@ -80,7 +80,7 @@ social_service::get_social_relationships(
     task_completion_event<xbox_live_result<xbox_social_relationship_result>> tce;
 
     auto result = m_socialServiceImpl->get_social_relationships(
-        utils::internal_string_from_external_string(xboxUserId),
+        utils::internal_string_from_string_t(xboxUserId),
         filter,
         startIndex,
         maxItems,
@@ -103,7 +103,7 @@ social_service::subscribe_to_social_relationship_change(
     )
 {
     auto result = m_socialServiceImpl->subscribe_to_social_relationship_change(
-        utils::internal_string_from_external_string(xboxUserId)
+        utils::internal_string_from_string_t(xboxUserId)
         );
 
     if (result.err())

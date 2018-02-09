@@ -11,7 +11,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 reputation_service_impl::reputation_service_impl(
     _In_ std::shared_ptr<xbox::services::user_context> userContext,
     _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+    _In_ std::shared_ptr<xbox::services::xbox_live_app_config_internal> appConfig
     ) :
     m_userContext(std::move(userContext)),
     m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
@@ -42,7 +42,7 @@ xbox_live_result<void> reputation_service_impl::submit_reputation_feedback(
         m_xboxLiveContextSettings,
         "POST",
         utils::create_xboxlive_endpoint("reputation", m_appConfig),
-        web::uri(utils::external_string_from_internal_string(pathAndQuery)),
+        web::uri(utils::string_t_from_internal_string(pathAndQuery)),
         xbox_live_api::submit_reputation_feedback
         );
 
@@ -57,16 +57,16 @@ xbox_live_result<void> reputation_service_impl::submit_reputation_feedback(
         );
 
     web::json::value request = reputationFeedbackRequest.serialize_feedback_request();
-    httpCall->set_request_body(request.serialize());
+    httpCall->set_request_body(utils::internal_string_from_string_t(request.serialize()));
 
     httpCall->get_response_with_auth(
         m_userContext, 
         http_call_response_body_type::string_body,
         false,
         taskGroupId,
-        [callback](std::shared_ptr<http_call_response> response)
+        [callback](std::shared_ptr<http_call_response_internal> response)
     {
-        callback(xbox_live_result<void>(response->err_code(), response->err_message()));
+        callback(xbox_live_result<void>(response->err_code(), std::string(response->err_message().data())));
     });
 
     return xbox_live_result<void>();
@@ -103,16 +103,16 @@ xbox_live_result<void> reputation_service_impl::submit_batch_reputation_feedback
     std::error_code err;
     web::json::value request = reputation_feedback_request::serialize_batch_feedback_request(feedbackItems, err);
     RETURN_CPP_INVALIDARGUMENT_IF(err, void, "Invalid reputation_feedback_item");
-    httpCall->set_request_body(request.serialize());
+    httpCall->set_request_body(utils::internal_string_from_string_t(request.serialize()));
 
     httpCall->get_response_with_auth(
         m_userContext, 
         http_call_response_body_type::string_body,
         false, 
         taskGroupId,
-        [callback](std::shared_ptr<http_call_response> response)
+        [callback](std::shared_ptr<http_call_response_internal> response)
     {
-        callback(xbox_live_result<void>(response->err_code(), response->err_message()));
+        callback(xbox_live_result<void>(response->err_code(), std::string(response->err_message().data())));
     });
 
     return xbox_live_result<void>();

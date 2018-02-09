@@ -4,7 +4,7 @@
 #include "pch.h"
 #include "xsapi-c/privacy_c.h"
 #include "privacy_taskargs.h"
-#include "xbox_live_context_impl_c.h"
+#include "xbox_live_context_internal_c.h"
 
 using namespace xbox::services;
 using namespace xbox::services::privacy;
@@ -15,7 +15,7 @@ HC_RESULT get_privacy_list_execute(
     )
 {
     auto args = reinterpret_cast<privacy_user_list_taskargs*>(context);
-    auto privacyService = args->pXboxLiveContext->pImpl->cppObject()->privacy_service();
+    auto privacyService = args->xboxLiveContext->contextImpl->privacy_service();
 
     auto result = privacyService.get_avoid_or_mute_list(args->subpathName).get();
     args->copy_xbox_live_result(result);
@@ -51,7 +51,7 @@ HC_RESULT get_privacy_list_write_results(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 PrivacyGetAvoidList(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ XSAPI_PRIVACY_GET_USER_LIST_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
     _In_ uint64_t taskGroupId
@@ -61,7 +61,7 @@ try
     verify_global_init();
 
     auto args = new privacy_user_list_taskargs();
-    args->pXboxLiveContext = pContext;
+    args->xboxLiveContext = xboxLiveContext;
     args->subpathName = L"avoid";
 
     return utils::create_xbl_result(
@@ -81,7 +81,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 PrivacyGetMuteList(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ XSAPI_PRIVACY_GET_USER_LIST_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
     _In_ uint64_t taskGroupId
@@ -91,7 +91,7 @@ try
     verify_global_init();
 
     auto args = new privacy_user_list_taskargs();
-    args->pXboxLiveContext = pContext;
+    args->xboxLiveContext = xboxLiveContext;
     args->subpathName = L"mute";
 
     return utils::create_xbl_result(
@@ -115,7 +115,7 @@ HC_RESULT check_permission_execute(
     )
 {
     auto args = reinterpret_cast<privacy_check_permission_taskargs*>(context);
-    auto privacyService = args->pXboxLiveContext->pImpl->cppObject()->privacy_service();
+    auto privacyService = args->xboxLiveContext->contextImpl->privacy_service();
 
     auto result = privacyService.check_permission_with_target_user(
         utils::utf16_from_utf8(args->permissionId),
@@ -134,7 +134,7 @@ HC_RESULT check_permission_execute(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 PrivacyCheckPermissionWithTargetUser(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR permissionId,
     _In_ PCSTR xboxUserId,
     _In_ XSAPI_PRIVACY_CHECK_PERMISSION_WITH_TARGET_USER_COMPLETION_ROUTINE completionRoutine,
@@ -147,7 +147,7 @@ try
 
     // TODO here and elsewhere - switch to memory hook function instead of 'new'
     auto args = new privacy_check_permission_taskargs();
-    args->pXboxLiveContext = pContext;
+    args->xboxLiveContext = xboxLiveContext;
     args->xboxUserId = xboxUserId;
     args->permissionId = permissionId;
 
@@ -172,7 +172,7 @@ HC_RESULT check_multiple_permissions_execute(
     )
 {
     auto args = reinterpret_cast<privacy_check_multiple_permissions_taskargs*>(context);
-    auto privacyService = args->pXboxLiveContext->pImpl->cppObject()->privacy_service();
+    auto privacyService = args->xboxLiveContext->contextImpl->privacy_service();
 
     auto result = privacyService.check_multiple_permissions_with_multiple_target_users(args->permissionIds, args->xboxUserIds).get();
 
@@ -212,7 +212,7 @@ HC_RESULT check_multiple_permissions_write_results(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 PrivacyCheckMultiplePermissionsWithMultipleTargetUsers(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR* permissionIds,
     _In_ uint32_t permissionIdsCount,
     _In_ PCSTR* xboxUserIds,
@@ -226,7 +226,7 @@ try
     verify_global_init();
 
     auto args = new privacy_check_multiple_permissions_taskargs();
-    args->pXboxLiveContext = pContext;
+    args->xboxLiveContext = xboxLiveContext;
     args->permissionIds = utils::string_array_to_string_vector(permissionIds, permissionIdsCount);
     args->xboxUserIds = utils::string_array_to_string_vector(xboxUserIds, xboxUserIdsCount);
 

@@ -16,7 +16,7 @@ struct get_next_taskargs : public taskargs_with_payload<XSAPI_ACHIEVEMENTS_RESUL
 
 struct achievements_taskargs
 {
-    XBL_XBOX_LIVE_CONTEXT* pXboxLiveContext;
+    XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext;
 };
 
 struct update_achievement_taskargs : public achievements_taskargs, public taskargs

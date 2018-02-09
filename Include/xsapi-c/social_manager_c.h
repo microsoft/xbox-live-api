@@ -138,7 +138,7 @@ typedef struct XSAPI_XBOX_USER_ID_CONTAINER
 
 typedef struct XSAPI_SOCIAL_EVENT
 {
-    XSAPI_XBOX_LIVE_USER* user;
+    XBL_XBOX_LIVE_USER* user;
     XSAPI_SOCIAL_EVENT_TYPE eventType;
     XSAPI_XBOX_USER_ID_CONTAINER** usersAffected;
     uint32_t usersAffectedCount;
@@ -156,7 +156,7 @@ typedef struct XSAPI_XBOX_SOCIAL_USER_GROUP
     XSAPI_SOCIAL_USER_GROUP_TYPE socialUserGroupType;
     XSAPI_XBOX_USER_ID_CONTAINER** usersTrackedBySocialUserGroup;
     uint32_t usersTrackedBySocialUserGroupCount;
-    XSAPI_XBOX_LIVE_USER* localUser;
+    XBL_XBOX_LIVE_USER* localUser;
     XSAPI_PRESENCE_FILTER presenceFilterOfGroup;
     XSAPI_RELATIONSHIP_FILTER relationshipFilterOfGroup;
 
@@ -184,14 +184,14 @@ typedef struct XSAPI_SOCIAL_MANAGER
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerAddLocalUser(
-    _In_ XSAPI_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER *user,
     _In_ XSAPI_SOCIAL_MANAGER_EXTRA_DETAIL_LEVEL extraLevelDetail,
     _Out_ PCSTR* errMessage
     );
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerRemoveLocalUser(
-    _In_ XSAPI_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER *user,
     _Out_ PCSTR* errMessage
     );
 
@@ -202,7 +202,7 @@ SocialManagerDoWork(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerCreateSocialUserGroupFromFilters(
-    _In_ XSAPI_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER *user,
     _In_ XSAPI_PRESENCE_FILTER presenceDetailLevel,
     _In_ XSAPI_RELATIONSHIP_FILTER filter,
     _Out_ XSAPI_XBOX_SOCIAL_USER_GROUP** group,
@@ -211,7 +211,7 @@ SocialManagerCreateSocialUserGroupFromFilters(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerCreateSocialUserGroupFromList(
-    _In_ XSAPI_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER *user,
     _In_ PCSTR* xboxUserIdList,
     _In_ uint32_t xboxUserIdListCount,
     _Out_ XSAPI_XBOX_SOCIAL_USER_GROUP** group,
@@ -234,7 +234,7 @@ SocialManagerUpdateSocialUserGroup(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 SocialManagerSetRichPresencePollingStatus(
-    _In_ XSAPI_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER *user,
     _In_ bool shouldEnablePolling,
     _Out_ PCSTR* errMessage
     );

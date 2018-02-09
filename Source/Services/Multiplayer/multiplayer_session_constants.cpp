@@ -705,12 +705,12 @@ multiplayer_session_constants::_Deserialize(
     returnResult.m_sessionCapabilities.set_has_owners(hasOwners);
     returnResult.m_sessionCapabilities.set_searchable(searchable);
 
-    returnResult.m_memberReservedTimeout = std::chrono::milliseconds(utils::extract_json_uint52(systemJson, _T("reservedRemovalTimeout"), errc, false));
-    returnResult.m_memberInactiveTimeout = std::chrono::milliseconds(utils::extract_json_uint52(systemJson, _T("inactiveRemovalTimeout"), errc, false));
-    returnResult.m_memberReadyTimeout = std::chrono::milliseconds(utils::extract_json_uint52(systemJson, _T("readyRemovalTimeout"), errc, false));
-    returnResult.m_sessionEmptyTimeout = std::chrono::milliseconds(utils::extract_json_uint52(systemJson, _T("sessionEmptyTimeout"), errc, false));
-    returnResult.m_arbitrationTimeout = std::chrono::milliseconds(utils::extract_json_uint52(systemArbitrationTimeoutsJson, _T("arbitrationTimeout"), errc, false));
-    returnResult.m_forfeitTimeout = std::chrono::milliseconds(utils::extract_json_uint52(systemArbitrationTimeoutsJson, _T("forfeitTimeout"), errc, false));
+    returnResult.m_memberReservedTimeout = std::chrono::milliseconds(utils::extract_json_uint52(systemJson, "reservedRemovalTimeout", errc, false));
+    returnResult.m_memberInactiveTimeout = std::chrono::milliseconds(utils::extract_json_uint52(systemJson, "inactiveRemovalTimeout", errc, false));
+    returnResult.m_memberReadyTimeout = std::chrono::milliseconds(utils::extract_json_uint52(systemJson, "readyRemovalTimeout", errc, false));
+    returnResult.m_sessionEmptyTimeout = std::chrono::milliseconds(utils::extract_json_uint52(systemJson, "sessionEmptyTimeout", errc, false));
+    returnResult.m_arbitrationTimeout = std::chrono::milliseconds(utils::extract_json_uint52(systemArbitrationTimeoutsJson, "arbitrationTimeout", errc, false));
+    returnResult.m_forfeitTimeout = std::chrono::milliseconds(utils::extract_json_uint52(systemArbitrationTimeoutsJson, "forfeitTimeout", errc, false));
 
     returnResult.m_enableMetricsLatency = utils::extract_json_bool(systemMetricsJson, _T("latency"), errc, false);
     returnResult.m_enableMetricsBandwidthDown = utils::extract_json_bool(systemMetricsJson, _T("bandwidthDown"), errc, false);

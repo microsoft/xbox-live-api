@@ -148,7 +148,7 @@ notification_service::subscribe_to_notifications_helper(
     {
         payload[_T("deviceName")] = web::json::value::string(deviceName);
     }
-    payload[_T("locale")] = web::json::value::string(utils::get_locales());
+    payload[_T("locale")] = web::json::value::string(utils::string_t_from_internal_string(utils::get_locales()));
     payload[_T("titleId")] = web::json::value::string(titleId);
 
     web::json::value filterJson;
@@ -200,7 +200,7 @@ notification_service::subscribe_to_notifications_helper(
                 std::error_code errc;
                 pThis->m_endpointId = utils::extract_json_string(responseJson, _T("endpointId"), errc);
                 auto localConfig = xbox_system_factory::get_factory()->create_local_config();
-                auto localConfigResult = localConfig->write_value_to_local_storage(pThis->ENDPOINT_ID_CACHE_NAME, pThis->m_endpointId);
+                auto localConfigResult = localConfig->write_value_to_local_storage(pThis->ENDPOINT_ID_CACHE_NAME, utils::internal_string_from_string_t(pThis->m_endpointId));
                 if (localConfigResult.err())
                 {
                     LOG_ERROR("Writing endpoint id to local config failed");

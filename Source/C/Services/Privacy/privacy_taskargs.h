@@ -10,7 +10,7 @@
 
 struct privacy_taskargs
 {
-    XBL_XBOX_LIVE_CONTEXT* pXboxLiveContext;
+    XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext;
 };
 
 struct privacy_user_list_taskargs : public privacy_taskargs, public taskargs

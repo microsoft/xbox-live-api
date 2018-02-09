@@ -23,7 +23,7 @@ xbox_social_relationship_result::xbox_social_relationship_result(
 {
 }
 
-DEFINE_GET_VECTOR(xbox_social_relationship_result, xbox_social_relationship, items);
+DEFINE_GET_VECTOR_INTERNAL_TYPE(xbox_social_relationship_result, xbox_social_relationship, items);
 DEFINE_GET_UINT32(xbox_social_relationship_result, total_count);
 DEFINE_GET_BOOL(xbox_social_relationship_result, has_next);
 
@@ -80,6 +80,16 @@ uint32_t xbox_social_relationship_result_internal::total_count() const
 bool xbox_social_relationship_result_internal::has_next() const
 {
     return (m_continuationSkip < m_totalCount);
+}
+
+uint32_t xbox_social_relationship_result_internal::continuation_skip() const
+{
+    return m_continuationSkip;
+}
+
+xbox_social_relationship_filter xbox_social_relationship_result_internal::filter() const
+{
+    return m_filter;
 }
 
 xbox_live_result<void> xbox_social_relationship_result_internal::get_next(

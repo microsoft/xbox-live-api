@@ -41,26 +41,27 @@
 #include <mutex>
 #include <atomic>
 #include <cstdint>
+#include <limits>
+#include <assert.h>
 
 #include "xsapi/types.h"
 #include "xsapi/mem.h"
-#include "httpClient/types.h"
-#include "httpClient/httpClient.h"
-#include "httpClient/task.h"
-
 #include "xsapi-c/types_c.h"
 #include "xsapi-c/errors_c.h"
 #include "xsapi-c/xbox_live_global_c.h"
+
+#include "httpClient/types.h"
+#include "httpClient/httpClient.h"
+#include "httpClient/task.h"
 
 #if XSAPI_C
 #include "utils_c.h"
 #endif
 
-#include <cpprest/http_client.h>
-#include <cpprest/filestream.h>
-#include <cpprest/http_listener.h>              // HTTP server
-#include <cpprest/json.h>                       // JSON library
-#include <cpprest/uri.h>                        // URI library
+#include "http_headers.h"
+#include "cpprest/json.h"
+#include "cpprest/http_msg.h"
+#include "cpprest/uri.h"
 
 #include "xsapi/errors.h"
 #include "utils.h"

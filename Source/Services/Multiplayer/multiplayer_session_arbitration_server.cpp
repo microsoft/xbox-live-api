@@ -114,7 +114,7 @@ multiplayer_session_arbitration_server::_Deserialize(
 
     returnObject.m_resultState = _Convert_string_to_arbitration_state(utils::extract_json_string(systemPropertiesJson, _T("resultState"), errc, false));
     returnObject.m_resultSource = multiplayer_service::_Convert_string_to_game_result_source(utils::extract_json_string(systemPropertiesJson, _T("resultSource"), errc, false));
-    returnObject.m_resultConfidenceLevel = static_cast<uint32_t>(utils::extract_json_uint52(systemPropertiesJson, _T("resultConfidenceLevel"), errc, false));
+    returnObject.m_resultConfidenceLevel = static_cast<uint32_t>(utils::extract_json_uint52(systemPropertiesJson, "resultConfidenceLevel", errc, false));
 
     auto resultsJson = utils::extract_json_field(systemPropertiesJson, _T("results"), errc, false);
     if (!resultsJson.is_null())

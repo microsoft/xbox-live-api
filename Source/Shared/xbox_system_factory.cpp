@@ -5,7 +5,6 @@
 #if !TV_API
 #include "xbox_system_factory.h"
 #endif
-#include "http_client.h"
 #include "xbox_system_factory.h"
 #if XSAPI_A
 #include "a/user_impl_a.h"
@@ -66,18 +65,6 @@ xbox_system_factory::create_xtitle_service()
     return std::shared_ptr<xtitle_service>(new xtitle_service_impl());
 }
 #endif
-
-std::shared_ptr<xbox_http_client> 
-xbox_system_factory::create_http_client(
-    _In_ const web::http::uri& baseUri,
-    _In_ const web::http::client::http_client_config& clientConfig
-    )
-{
-    return std::make_shared<xbox_http_client_impl>(
-        baseUri,
-        clientConfig
-        );
-}
 
 std::shared_ptr<http_call>
 xbox_system_factory::create_http_call(

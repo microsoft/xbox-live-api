@@ -24,7 +24,7 @@ std::shared_ptr<xsapi_singleton> get_singleton_for_stats()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerAddLocalUser(
-    _In_ XSAPI_XBOX_LIVE_USER* user,
+    _In_ XBL_XBOX_LIVE_USER* user,
     _Out_ PCSTR* errMessage
 ) XBL_NOEXCEPT
 try
@@ -48,7 +48,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerRemoveLocalUser(
-    _In_ XSAPI_XBOX_LIVE_USER* user,
+    _In_ XBL_XBOX_LIVE_USER* user,
     _Out_ PCSTR* errMessage
 ) XBL_NOEXCEPT
 try
@@ -72,7 +72,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerRequestFlushToService(
-    _In_ XSAPI_XBOX_LIVE_USER* user,
+    _In_ XBL_XBOX_LIVE_USER* user,
     _In_ bool isHighPriority,
     _Out_ PCSTR* errMessage
 ) XBL_NOEXCEPT
@@ -111,7 +111,7 @@ CATCH_RETURN_WITH(nullptr)
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerSetStatisticNumberData(
-    _In_ XSAPI_XBOX_LIVE_USER* user,
+    _In_ XBL_XBOX_LIVE_USER* user,
     _In_ PCSTR statName,
     _In_ double statValue,
     _Out_ PCSTR* errMessage
@@ -130,7 +130,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerSetStatisticIntegerData(
-    _In_ XSAPI_XBOX_LIVE_USER* user,
+    _In_ XBL_XBOX_LIVE_USER* user,
     _In_ PCSTR statName,
     _In_ int64_t statValue,
     _Out_ PCSTR* errMessage
@@ -149,7 +149,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerSetStatisticStringData(
-    _In_ XSAPI_XBOX_LIVE_USER* user,
+    _In_ XBL_XBOX_LIVE_USER* user,
     _In_ PCSTR statName,
     _In_ PCSTR statValue,
     _Out_ PCSTR* errMessage
@@ -168,7 +168,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerGetStatNames(
-    _In_ XSAPI_XBOX_LIVE_USER* user,
+    _In_ XBL_XBOX_LIVE_USER* user,
     _Out_ PCSTR** statNameList,
     _Out_ uint32_t* statNameListCount,
     _Out_ PCSTR* errMessage
@@ -200,7 +200,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerGetStat(
-    _In_ XSAPI_XBOX_LIVE_USER* user,
+    _In_ XBL_XBOX_LIVE_USER* user,
     _In_ PCSTR statName,
     _Out_ XSAPI_STAT_VALUE** statValue,
     _Out_ PCSTR* errMessage
@@ -220,7 +220,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerDeleteStat(
-    _In_ XSAPI_XBOX_LIVE_USER* user,
+    _In_ XBL_XBOX_LIVE_USER* user,
     _In_ PCSTR statName,
     _Out_ PCSTR* errMessage
 ) XBL_NOEXCEPT
@@ -238,7 +238,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerGetLeaderboard(
-    _In_ XSAPI_XBOX_LIVE_USER* user,
+    _In_ XBL_XBOX_LIVE_USER* user,
     _In_ PCSTR statName,
     _In_ XSAPI_LEADERBOARD_QUERY* query,
     _Out_ PCSTR* errMessage
@@ -257,7 +257,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 StatsManagerGetSocialLeaderboard(
-    _In_ XSAPI_XBOX_LIVE_USER* user,
+    _In_ XBL_XBOX_LIVE_USER* user,
     _In_ PCSTR statName,
     _In_ PCSTR socialGroup,
     _In_ XSAPI_LEADERBOARD_QUERY* query,

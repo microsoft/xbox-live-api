@@ -6,7 +6,6 @@
 #include "types_c.h"
 #include "xsapi-c/errors_c.h"
 #include "xsapi-c/system_c.h"
-#include "xbox_live_context_impl_c.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -183,7 +182,7 @@ typedef void(*XSAPI_UPDATE_ACVHIEVEMENT_COMPLETION_ROUTINE)(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceUpdateAchievement(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_opt_ uint32_t* titleId,
     _In_opt_ PCSTR serviceConfigurationId,
@@ -202,7 +201,7 @@ typedef void(*XSAPI_GET_ACHIEVEMENTS_FOR_TITLE_ID_COMPLETION_ROUTINE)(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceGetAchievementsForTitleId(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_ uint32_t titleId,
     _In_ XSAPI_ACHIEVEMENT_TYPE type,
@@ -223,7 +222,7 @@ typedef void(*XSAPI_GET_ACHIEVEMENT_COMPLETION_ROUTINE)(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 AchievementServiceGetAchievement(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_ PCSTR serviceConfigurationId,
     _In_ PCSTR achievementId,

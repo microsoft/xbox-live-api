@@ -48,7 +48,7 @@ multiplayer_peer_to_peer_requirements::_Deserialize(_In_ const web::json::value&
 
     std::error_code errc = xbox_live_error_code::no_error;
     auto response = multiplayer_peer_to_peer_requirements(
-        std::chrono::milliseconds(utils::extract_json_uint52(json, _T("latencyMaximum"), errc)),
+        std::chrono::milliseconds(utils::extract_json_uint52(json, "latencyMaximum", errc)),
         utils::extract_json_int(json, _T("bandwidthMinimum"), errc)
         );
 

@@ -8,11 +8,11 @@
 struct sign_in_taskargs : public taskargs_with_payload<XSAPI_SIGN_IN_RESULT>
 {
     sign_in_taskargs(
-        _In_ XSAPI_XBOX_LIVE_USER* pUser,
+        _In_ XBL_XBOX_LIVE_USER* pUser,
         _In_ Platform::Object^ coreDispatcher,
         _In_opt_ bool signInSilently = false);
 
-    XSAPI_XBOX_LIVE_USER* pUser;
+    XBL_XBOX_LIVE_USER* pUser;
     bool signInSilently;
     Platform::Object^ coreDispatcher;
 };
@@ -20,13 +20,13 @@ struct sign_in_taskargs : public taskargs_with_payload<XSAPI_SIGN_IN_RESULT>
 struct get_token_and_signature_taskargs : public taskargs_with_payload<XSAPI_TOKEN_AND_SIGNATURE_RESULT>
 {
     get_token_and_signature_taskargs(
-        _In_ XSAPI_XBOX_LIVE_USER* pUser,
+        _In_ XBL_XBOX_LIVE_USER* pUser,
         _In_ PCSTR httpMethod,
         _In_ PCSTR url,
         _In_ PCSTR headers,
         _In_ PCSTR requestBodyString);
 
-    XSAPI_XBOX_LIVE_USER* pUser;
+    XBL_XBOX_LIVE_USER* pUser;
     string_t httpMethod;
     string_t url;
     string_t headers;

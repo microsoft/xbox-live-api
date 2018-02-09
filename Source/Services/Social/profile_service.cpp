@@ -25,7 +25,7 @@ profile_service::get_user_profile(
     task_completion_event<xbox_live_result<xbox_user_profile>> tce;
 
     auto result = m_serviceImpl->get_user_profile(
-        utils::internal_string_from_external_string(xboxUserId),
+        utils::internal_string_from_string_t(xboxUserId),
         XSAPI_DEFAULT_TASKGROUP,
         [tce](xbox_live_result<std::shared_ptr<xbox_user_profile_internal>> result) 
     { 
@@ -50,7 +50,7 @@ profile_service::get_user_profiles(
         XSAPI_DEFAULT_TASKGROUP,
         [tce](xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>> result) 
     {
-        auto vector = utils::std_vector_from_internal_vector<xbox_user_profile, std::shared_ptr<xbox_user_profile_internal>>(result.payload());
+        auto vector = utils::std_vector_external_from_internal_vector<xbox_user_profile, std::shared_ptr<xbox_user_profile_internal>>(result.payload());
         tce.set(xbox_live_result<std::vector<xbox_user_profile>>(
             vector,
             result.err(),
@@ -72,11 +72,11 @@ profile_service::get_user_profiles_for_social_group(
 {
     task_completion_event<xbox_live_result<std::vector<xbox_user_profile>>> tce;
     auto result = m_serviceImpl->get_user_profiles_for_social_group(
-        utils::internal_string_from_external_string(socialGroup), 
+        utils::internal_string_from_string_t(socialGroup), 
         XSAPI_DEFAULT_TASKGROUP,
         [tce](xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>> result)
     {
-        auto vector = utils::std_vector_from_internal_vector<xbox_user_profile, std::shared_ptr<xbox_user_profile_internal>>(result.payload());
+        auto vector = utils::std_vector_external_from_internal_vector<xbox_user_profile, std::shared_ptr<xbox_user_profile_internal>>(result.payload());
         tce.set(xbox_live_result<std::vector<xbox_user_profile>>(
             vector,
             result.err(),

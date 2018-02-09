@@ -15,5 +15,5 @@ public:
     std::vector<std::string> cStatNameStringList;
     std::vector<PCSTR> cStatNameCharList;
 
-    std::map<xbox_live_user_t, XSAPI_XBOX_LIVE_USER*> cUsersMapping;
+    std::map<xbox_live_user_t, XBL_XBOX_LIVE_USER*> cUsersMapping;
 };

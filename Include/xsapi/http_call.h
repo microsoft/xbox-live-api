@@ -19,6 +19,7 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 class xbox_live_context_settings;
+class http_call_response_internal;
 
 /// <summary>
 /// Enumerates the type of structured data contained in the http response body.
@@ -54,13 +55,7 @@ public:
     /// Internal function
     /// </summary>
     http_call_response(
-        _In_ const string_t& xboxUserId,
-        _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
-        _In_ const string_t& baseUrl,
-        _In_ const web::http::http_request& request,
-        _In_ const http_call_request_message& requestBody,
-        _In_ xbox_live_api xboxLiveApi,
-        _In_ const web::http::http_response& response
+        std::shared_ptr<http_call_response_internal> internalObj
         );
 
 #ifndef DEFAULT_MOVE_ENABLED
@@ -71,171 +66,75 @@ public:
     /// <summary>
     /// Gets the body type of the response.
     /// </summary>
-    _XSAPIIMP http_call_response_body_type body_type() const { return m_httpCallResponseBodyType; }
+    _XSAPIIMP http_call_response_body_type body_type() const;
 
     /// <summary>
     /// Gets the response body of the response as a string.
     /// </summary>
-    _XSAPIIMP const string_t& response_body_string() const { return m_responseBodyString; }
+    _XSAPIIMP string_t response_body_string() const;
 
     /// <summary>
     /// Gets the response body of the response as a JSON value.
     /// </summary>
-    _XSAPIIMP const web::json::value& response_body_json() const { return m_responseBodyJson; }
+    _XSAPIIMP const web::json::value& response_body_json() const;
 
     /// <summary>
     /// Gets the response body of the response as a byte vector.
     /// </summary>
-    _XSAPIIMP const std::vector<unsigned char>& response_body_vector() const { return m_responseBodyVector; }
+    _XSAPIIMP std::vector<unsigned char> response_body_vector() const;
 
     /// <summary>
     /// Gets the http headers of the response.
     /// </summary>
-    _XSAPIIMP const web::http::http_headers& response_headers() const { return m_responseHeaders; }
+    _XSAPIIMP web::http::http_headers response_headers() const;
 
     /// <summary>
     /// Gets the http status of the response.
     /// </summary>
-    _XSAPIIMP uint32_t http_status() const { return m_httpStatus; }
+    _XSAPIIMP uint32_t http_status() const;
 
     /// <summary>
     /// Gets the error code of the response.
     /// </summary>
-    _XSAPIIMP const std::error_code& err_code() const { return m_errorCode; }
+    _XSAPIIMP const std::error_code& err_code() const;
 
     /// <summary>
     /// Gets the error message of the response.
     /// </summary>
-    _XSAPIIMP const std::string& err_message() const { return m_errorMessage; }
+    _XSAPIIMP std::string err_message() const;
 
     /// <summary>
     /// Gets the eTag of the response.
     /// </summary>
-    _XSAPIIMP const string_t& e_tag() const { return m_eTag; }
+    _XSAPIIMP string_t e_tag() const;
 
     /// <summary>
     /// Gets the response date of the response.
     /// </summary>
-    _XSAPIIMP const string_t& response_date() const { return m_responseDate; }
+    _XSAPIIMP string_t response_date() const;
 
     /// <summary>
     /// Gets the "retry after" value found in the response.
     /// </summary>
-    _XSAPIIMP const std::chrono::seconds& retry_after() const { return m_retryAfter; }
+    _XSAPIIMP const std::chrono::seconds& retry_after() const;
 
     /// <summary>
-    /// Internal function
+    /// Internal function - TODO remove after migrating all APIs
     /// </summary>
-    void _Set_error(_In_ const std::error_code& errCode, _In_ const std::string& errMessage)
-    {
-        m_errorCode = errCode;
-        m_errorMessage = errMessage;
-    }
+    void _Set_error(_In_ const std::error_code& errCode, _In_ const std::string& errMessage);
 
     /// <summary>
-    /// Internal function
-    /// </summary>
-    void _Add_response_header(_In_ const string_t& headerName, _In_ const string_t& headerValue)
-    {
-        m_responseHeaders.add(headerName, headerValue);
-    }
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    void _Remove_response_header(_In_ const string_t& headerName)
-    {
-        m_responseHeaders.remove(headerName);
-    }
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    void _Set_response_body(_In_ const string_t& responseBodyString);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    void _Set_response_body(_In_ const std::vector<unsigned char>& responseBodyVector);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    void _Set_response_body(_In_ const web::json::value& responseBodyJson);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    void _Set_timing(
-        _In_ const chrono_clock_t::time_point& requestTime,
-        _In_ const chrono_clock_t::time_point& responseTime
-        );
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    void _Set_error_info(
-        _In_ const std::error_code& errCode,
-        _In_ const std::string& errMessage
-        );
-
-    /// <summary>
-    /// Internal function
+    /// Internal function - TODO remove after migrating all APIs
     /// </summary>
     void _Route_service_call() const;
 
     /// <summary>
-    /// Internal function
-    /// </summary>
-    const chrono_clock_t::time_point& _Local_response_time() const;
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    std::shared_ptr<xbox_live_context_settings> _Context_settings() const;
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    const web::http::http_request& _Request() const;
-
-    /// <summary>
-    /// Internal function
+    /// Internal function - TODO remove after migrating all APIs
     /// </summary>
     void _Set_full_url(_In_ const string_t& url);
 
 private:
-    void record_service_result() const;
-    std::string get_throttling_error_message() const;
-
-    http_call_response_body_type m_httpCallResponseBodyType;
-    std::vector<unsigned char> m_responseBodyVector;
-    string_t m_responseBodyString;
-    web::json::value m_responseBodyJson;
-
-    uint32_t m_httpStatus;
-    std::error_code m_errorCode;
-    std::string m_errorMessage;
-
-    web::http::http_headers m_responseHeaders;
-    string_t m_eTag;
-    string_t m_responseDate;
-    std::chrono::seconds m_retryAfter;
-    chrono_clock_t::time_point m_requestTime;
-    chrono_clock_t::time_point m_responseTime;
-
-    string_t m_xboxUserId;
-    std::shared_ptr<xbox_live_context_settings> m_xboxLiveContextSettings;
-    string_t m_fullUrl;
-    web::http::http_request m_request;
-    http_call_request_message m_requestBody;
-    xbox_live_api m_xboxLiveApi;
-
-    string_t response_body_to_string() const;
-
-    static std::chrono::seconds extract_retry_after_from_header(
-        _In_ const web::http::http_headers& responseHeaders
-        );
+    std::shared_ptr<http_call_response_internal> m_internalObj;
 };
 
 class http_call

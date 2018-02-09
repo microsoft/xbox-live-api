@@ -5,9 +5,10 @@
 #include "xsapi-c/title_storage_c.h"
 #include "xsapi/title_storage.h"
 #include "title_storage_taskargs.h"
-#include "xbox_live_context_impl_c.h"
 #include "title_storage_blob_metadata_impl.h"
 #include "title_storage_state.h"
+#include "xbox_live_context_internal_c.h"
+#include "xbox_live_context_impl.h"
 
 using namespace xbox::services;
 using namespace xbox::services::title_storage;
@@ -18,7 +19,7 @@ HC_RESULT get_quota_execute(
     )
 {
     auto args = reinterpret_cast<get_quota_taskargs*>(context);
-    auto titleStorageService = args->pXboxLiveContext->pImpl->cppObject()->title_storage_service();
+    auto titleStorageService = args->xboxLiveContext->contextImpl->title_storage_service();
 
     auto result = titleStorageService.get_quota(
         utils::utf16_from_utf8(args->serviceConfigurationId),
@@ -46,7 +47,7 @@ HC_RESULT get_quota_execute(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageGetQuota(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR serviceConfigurationId,
     _In_ XSAPI_TITLE_STORAGE_TYPE storageType,
     _In_ XSAPI_GET_QUOTA_COMPLETION_ROUTINE completionRoutine,
@@ -58,7 +59,7 @@ try
     verify_global_init();
 
     auto args = new get_quota_taskargs();
-    args->pXboxLiveContext = pContext;
+    args->xboxLiveContext = xboxLiveContext;
     args->serviceConfigurationId = serviceConfigurationId;
     args->storageType = storageType;
 
@@ -83,7 +84,7 @@ HC_RESULT get_blob_metadata_execute(
     )
 {
     auto args = reinterpret_cast<get_blob_metadata_taskargs*>(context);
-    auto titleStorageService = args->pXboxLiveContext->pImpl->cppObject()->title_storage_service();
+    auto titleStorageService = args->xboxLiveContext->contextImpl->title_storage_service();
 
     auto result = titleStorageService.get_blob_metadata(
         args->serviceConfigurationId,
@@ -111,7 +112,7 @@ HC_RESULT get_blob_metadata_execute(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageGetBlobMetadata(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR serviceConfigurationId,
     _In_ XSAPI_TITLE_STORAGE_TYPE storageType,
     _In_opt_ PCSTR blobPath,
@@ -127,7 +128,7 @@ try
     verify_global_init();
 
     auto args = new get_blob_metadata_taskargs();
-    args->pXboxLiveContext = pContext;
+    args->xboxLiveContext = xboxLiveContext;
     args->serviceConfigurationId = utils::utf16_from_utf8(serviceConfigurationId);
     args->storageType = storageType;
     args->skipItems = skipItems;
@@ -281,7 +282,7 @@ HC_RESULT delete_blob_execute(
     )
 {
     auto args = reinterpret_cast<delete_blob_taskargs*>(context);
-    auto titleStorageService = args->pXboxLiveContext->pImpl->cppObject()->title_storage_service();
+    auto titleStorageService = args->xboxLiveContext->contextImpl->title_storage_service();
 
     auto result = titleStorageService.delete_blob(args->pMetadata->pImpl->cppObject(), args->deleteOnlyIfEtagMatches).get();
 
@@ -292,7 +293,7 @@ HC_RESULT delete_blob_execute(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageDeleteBlob(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata,
     _In_ bool deleteOnlyIfEtagMatches,
     _In_ XSAPI_DELETE_BLOB_COMPLETION_ROUTINE completionRoutine,
@@ -303,13 +304,13 @@ try
 {
     verify_global_init();
 
-    if (pContext == nullptr || pMetadata == nullptr || pMetadata->pImpl == nullptr)
+    if (xboxLiveContext == nullptr || pMetadata == nullptr || pMetadata->pImpl == nullptr)
     {
         return XBL_RESULT_INVALID_ARG;
     }
 
     auto args = new delete_blob_taskargs();
-    args->pXboxLiveContext = pContext;
+    args->xboxLiveContext = xboxLiveContext;
     args->pMetadata = pMetadata;
     args->deleteOnlyIfEtagMatches = deleteOnlyIfEtagMatches;
 
@@ -334,7 +335,7 @@ HC_RESULT download_blob_execute(
 )
 {
     auto args = reinterpret_cast<download_blob_taskargs*>(context);
-    auto titleStorageService = args->pXboxLiveContext->pImpl->cppObject()->title_storage_service();
+    auto titleStorageService = args->xboxLiveContext->contextImpl->title_storage_service();
 
     auto blobBufferSharedPtr = std::make_shared<std::vector<unsigned char>>(args->cbBlobBuffer);
 
@@ -363,7 +364,7 @@ HC_RESULT download_blob_execute(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageDownloadBlob(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata,
     _In_ PBYTE blobBuffer,
     _In_ uint32_t cbBlobBuffer,
@@ -378,14 +379,14 @@ try
 {
     verify_global_init();
 
-    if (pContext == nullptr || pMetadata == nullptr || pMetadata->pImpl == nullptr)
+    if (xboxLiveContext == nullptr || pMetadata == nullptr || pMetadata->pImpl == nullptr)
     {
         return XBL_RESULT_INVALID_ARG;
     }
 
     auto args = new download_blob_taskargs();
     args->pMetadata = pMetadata;
-    args->pXboxLiveContext = pContext;
+    args->xboxLiveContext = xboxLiveContext;
     args->blobBuffer = blobBuffer;
     args->cbBlobBuffer = cbBlobBuffer;
     args->etagMatchCondition = etagMatchCondition;
@@ -413,7 +414,7 @@ HC_RESULT upload_blob_execute(
 )
 {
     auto args = reinterpret_cast<upload_blob_taskargs*>(context);
-    auto titleStorageService = args->pXboxLiveContext->pImpl->cppObject()->title_storage_service();
+    auto titleStorageService = args->xboxLiveContext->contextImpl->title_storage_service();
 
     auto result = titleStorageService.upload_blob(
         args->pMetadata->pImpl->cppObject(),
@@ -434,7 +435,7 @@ HC_RESULT upload_blob_execute(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 TitleStorageUploadBlob(
-    _In_ XBL_XBOX_LIVE_CONTEXT* pContext,
+    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ CONST XSAPI_TITLE_STORAGE_BLOB_METADATA* pMetadata,
     _In_ PBYTE blobBuffer,
     _In_ uint32_t cbBlobBuffer,
@@ -448,14 +449,14 @@ try
 {
     verify_global_init();
 
-    if (pContext == nullptr || pMetadata == nullptr || pMetadata->pImpl == nullptr)
+    if (xboxLiveContext == nullptr || pMetadata == nullptr || pMetadata->pImpl == nullptr)
     {
         return XBL_RESULT_INVALID_ARG;
     }
 
     auto args = new upload_blob_taskargs();
     args->pMetadata = pMetadata;
-    args->pXboxLiveContext = pContext;
+    args->xboxLiveContext = xboxLiveContext;
     args->blobBuffer = std::make_shared<std::vector<unsigned char>>(blobBuffer, blobBuffer + cbBlobBuffer);
     args->etagMatchCondition = etagMatchCondition;
     args->preferredUploadBlockSize = preferredUploadBlockSize == nullptr ? title_storage_service::DEFAULT_UPLOAD_BLOCK_SIZE : *preferredUploadBlockSize;
