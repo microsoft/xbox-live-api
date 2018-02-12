@@ -113,9 +113,6 @@ struct xsapi_singleton
     ~xsapi_singleton();
 
     void init();
-#if UWP_API
-    void start_threadpool();
-#endif
 
     std::mutex m_rtaActivationCounterLock;
     std::unordered_map<string_t, uint32_t> m_rtaActiveSocketCountPerUser;
@@ -202,7 +199,8 @@ struct xsapi_singleton
 
     std::shared_ptr<initiator> m_initiator;
 
-#if UWP_API
+#if UWP_API || UNIT_TEST_SERVICES
+    void start_threadpool();
     std::shared_ptr<xbl_thread_pool> m_threadpool;
 #endif
 
@@ -244,9 +242,6 @@ struct xsapi_singleton
 
     std::mutex m_callbackContextsLock;
     xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_callbackContextPtrs;
-
-    std::mutex m_eventHandlerContextsLock;
-    xsapi_internal_unordered_map<XBL_TASK_EVENT_HANDLE, std::shared_ptr<std::pair<XBL_TASK_EVENT_FUNC, void *>>> m_eventHandlerContexts;
 };
 
 void init_mem_hooks();
@@ -858,13 +853,13 @@ public:
     static xsapi_internal_string convert_hresult_to_error_name(_In_ long hr);
     static long convert_http_status_to_hresult(_In_ uint32_t httpStatusCode);
 
+    // TODO should not be needed eventually
     static string_t create_xboxlive_endpoint(
         _In_ const string_t& subpath,
         _In_ const std::shared_ptr<xbox_live_app_config>& appConfig,
         _In_ const string_t& protocol = _T("https")
     );
 
-    // TODO above should not be needed eventually
     static xsapi_internal_string create_xboxlive_endpoint(
         _In_ const xsapi_internal_string& subpath,
         _In_ const std::shared_ptr<xbox_live_app_config_internal>& appConfig,
@@ -1241,6 +1236,7 @@ class xbox_live_callback
 {
 public:
     xbox_live_callback() : m_callable(nullptr) {}
+    xbox_live_callback(nullptr_t) : m_callable(nullptr) {}
 
     template <typename Functor>
     xbox_live_callback(Functor functor)
@@ -1267,7 +1263,14 @@ public:
 
     xbox_live_callback& operator=(const xbox_live_callback& rhs)
     {
-        m_callable = rhs.m_callable->copy();
+        if (rhs.m_callable != nullptr)
+        {
+            m_callable = rhs.m_callable->copy();
+        }
+        else
+        {
+            m_callable = nullptr;
+        }
         return *this;
     }
 
@@ -1277,9 +1280,18 @@ public:
         return *this;
     }
 
+    xbox_live_callback& operator=(nullptr_t)
+    {
+        m_callable = nullptr;
+        return *this;
+    }
+
     void operator()(Args... args) const
     {
-        (*m_callable)(args...);
+        if (m_callable != nullptr)
+        {
+            (*m_callable)(args...);
+        }
     }
 
     bool operator==(std::nullptr_t) noexcept

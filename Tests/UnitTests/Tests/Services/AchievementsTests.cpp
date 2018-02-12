@@ -501,8 +501,8 @@ public:
             percentComplete
         )).get();
 
-        std::wstring expectedRequest =
-            LR"({"achievements":[{"id":"4","percentComplete":5}],"action":"progressUpdate","serviceConfigId":"MockScid","titleId":1234,"userId":"1"})";
+        xsapi_internal_string expectedRequest =
+            R"({"achievements":[{"id":"4","percentComplete":5}],"action":"progressUpdate","serviceConfigId":"MockScid","titleId":1234,"userId":"1"})";
 
         VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://achievements.mockenv.xboxlive.com", httpCall->ServerName);

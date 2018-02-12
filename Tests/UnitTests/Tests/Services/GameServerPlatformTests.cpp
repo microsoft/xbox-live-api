@@ -213,7 +213,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://gameserverms.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(L"/titles/123/inlineclusters", httpCall->PathQueryFragment.to_string());
-        TEST_LOG(httpCall->request_body().request_message_string().c_str());
+        TEST_LOG(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()).c_str());
         VERIFY_IS_EQUAL_JSON_FROM_STRINGS(LR"({"abortIfQueued":true,"gameVariantId":"testGameVariantId","gsiSetId":"testGsiSetId","location":"testLocation","maxAllowedPlayers":100,"sandboxId":"testSandboxId","serviceConfigId":"testServiceConfigurationId","ticketId":"testTicketId"})", httpCall->request_body().request_message_string());
         VerifyClusterResult(result, responseJson);
     }
@@ -255,7 +255,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://gameserverms.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(L"/titles/123/tickets/testTicketId/status", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL(LR"()", httpCall->request_body().request_message_string());
+        VERIFY_ARE_EQUAL(R"()", httpCall->request_body().request_message_string());
 
         TestVerifyGameTicketResult(result, responseJson);
     }
@@ -333,7 +333,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://gameserverds.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(L"/xplatqosservers", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL(LR"()", httpCall->request_body().request_message_string());
+        VERIFY_ARE_EQUAL(R"()", httpCall->request_body().request_message_string());
 
         VERIFY_ARE_EQUAL_INT(2, result->Size);
         auto server1 = result->GetAt(0);

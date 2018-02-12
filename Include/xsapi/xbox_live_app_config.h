@@ -46,6 +46,12 @@ public:
     /// </summary>
     _XSAPIIMP string_t sandbox() const;
 
+    /// <summary>
+    /// Internal function
+    /// TODO remove
+    /// </summary>
+    _XSAPIIMP std::shared_ptr<xbox_live_app_config_internal> internal_app_config() const { return m_internalObj; }
+
 private:
     xbox_live_app_config(std::shared_ptr<xbox_live_app_config_internal> internalObj);
     std::shared_ptr<xbox_live_app_config_internal> m_internalObj;

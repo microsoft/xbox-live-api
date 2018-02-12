@@ -1442,7 +1442,7 @@ public:
 
         auto writeJson = web::json::value::parse(expectedJson);
         auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        TEST_LOG(httpCall->request_body().request_message_string().c_str());
+        TEST_LOG(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()).c_str());
         VERIFY_IS_EQUAL_JSON(writeJson, requestJson);
     }
 
@@ -2911,7 +2911,7 @@ public:
         //Make websocket auto reconnect
         // Write session on connection, make sure it can finish once connected
         mockSocket->m_waitForSignal = true;
-        mockSocket->m_closeHandler(1001, L"");
+        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
         helper->connectingEvent.wait();
         TEST_LOG(L"Auto-reconnecting event triggered");
 
@@ -2970,7 +2970,7 @@ public:
             }
         });
 
-        mockSocket->m_closeHandler(1001, L"");
+        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
         helper->connectingEvent.wait();
         helper->connectedEvent.wait();
         create_task(xboxLiveContext->MultiplayerService->WriteSessionAsync(session,MultiplayerSessionWriteMode::CreateNew)).get();
@@ -2984,7 +2984,7 @@ public:
         didFire = false;
         mockSocket->m_waitForSignal = false;
         mockSocket->m_connectToFail = true;
-        mockSocket->m_closeHandler(1001, L"");
+        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_NORMAL);
         helper->disconnectedEvent.wait();
 
         // should not be able to receive 
@@ -3000,7 +3000,7 @@ public:
         mockSocket->receive_rta_event(subId, rtaSessionUpdateJson);
         VERIFY_IS_FALSE(didFire);
 
-        mockSocket->close().wait();
+        mockSocket->close();
         VERIFY_IS_TRUE(didLostFire);
     }
 

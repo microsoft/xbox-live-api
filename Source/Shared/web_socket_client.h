@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
-#include <cpprest/ws_client.h>
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -10,31 +9,37 @@ class xbox_web_socket_client : public std::enable_shared_from_this<xbox_web_sock
 {
 public:
     xbox_web_socket_client();
+    ~xbox_web_socket_client();
 
-    virtual pplx::task<void> connect(
+    virtual void connect(
         _In_ const std::shared_ptr<user_context>& userContext,
-        _In_ const web::uri& uri,
-        _In_ const string_t& subProtocol
+        _In_ const xsapi_internal_string& uri,
+        _In_ const xsapi_internal_string& subProtocol,
+        _In_ xbox::services::xbox_live_callback<HC_RESULT, uint32_t> callback
         );
 
-    virtual pplx::task<void> send(
-        _In_ const string_t& message
+    virtual void send(
+        _In_ const xsapi_internal_string& message,
+        _In_ xbox::services::xbox_live_callback<HC_RESULT, uint32_t> callback
         );
 
-    virtual pplx::task<void> close();
+    virtual void close();
 
     virtual void set_received_handler(
-        _In_ std::function<void(string_t)> handler
+        _In_ xbox_live_callback<xsapi_internal_string> handler
         );
 
     virtual void set_closed_handler(
-        _In_ std::function<void(uint16_t closeStatus, string_t closeReason)> handler
+        _In_ xbox_live_callback<HC_WEBSOCKET_CLOSE_STATUS> handler
         );
 
 private:
-    std::shared_ptr<web::websockets::client::websocket_callback_client> m_client;
-    std::function<void(string_t)> m_receiveHandler;
-    std::function<void(uint16_t closeStatus, string_t closeReason)> m_closeHandler;
+    HC_WEBSOCKET_HANDLE m_websocket;
+
+    xbox_live_callback<xsapi_internal_string> m_receiveHandler;
+    xbox_live_callback<HC_WEBSOCKET_CLOSE_STATUS> m_closeHandler;
+
+    static xsapi_internal_unordered_map<HC_WEBSOCKET_HANDLE, xbox_web_socket_client*> m_handleMap;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

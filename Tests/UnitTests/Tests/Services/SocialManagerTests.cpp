@@ -2320,7 +2320,7 @@ public:
         for (auto& ws : m_mockXboxSystemFactory->GetMockWebSocketClients())
         {
             ws->m_connectToFail = true;
-            ws->m_closeStatus = web::websockets::client::websocket_close_status::abnormal_close;
+            ws->m_closeStatus = HC_WEBSOCKET_CLOSE_ABNORMAL_CLOSE;
             ws->close();
         }
 

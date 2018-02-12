@@ -125,8 +125,8 @@ std::shared_ptr<http_call_internal> MockXboxSystemFactory::create_http_call(
     ) 
 {
     std::lock_guard<std::mutex> lock(m_httpLock.get());
-    m_mockHttpCall->HttpMethod = utils::external_string_from_internal_string(httpMethod);
-    m_mockHttpCall->ServerName = utils::external_string_from_internal_string(serverName);
+    m_mockHttpCall->HttpMethod = utils::string_t_from_internal_string(httpMethod);
+    m_mockHttpCall->ServerName = utils::string_t_from_internal_string(serverName);
     m_mockHttpCall->PathQueryFragment = pathQueryFragment;
     return m_mockHttpCall;
 }

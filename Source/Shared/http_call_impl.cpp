@@ -79,7 +79,7 @@ http_call_data::http_call_data(
 
 http_call_data::~http_call_data()
 {
-    HCHttpCallCleanup(callHandle);
+    HCHttpCallCloseHandle(callHandle);
 }
 
 http_call_impl::http_call_impl() :

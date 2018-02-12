@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
-#include <cpprest/ws_client.h>
 #include "shared_macros.h"
 #include "xsapi/system.h"
 

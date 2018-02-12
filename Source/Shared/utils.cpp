@@ -8,7 +8,6 @@
 #include <iomanip>
 #include <chrono>
 #include <time.h>
-#include <cpprest/ws_client.h>
 #if XSAPI_U
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid.hpp>
@@ -22,7 +21,7 @@
 #include "presence_internal.h"
 #include "initiator.h"
 #include "httpClient/httpClient.h"
-#if UWP_API
+#if UWP_API || UNIT_TEST_SERVICES
 #include "threadpool.h"
 #endif
 
@@ -107,13 +106,13 @@ void xsapi_singleton::init()
     HCGlobalInitialize();
     HCSettingsSetLogLevel(HC_LOG_LEVEL::LOG_VERBOSE);
     m_initiator = std::make_shared<initiator>();
-#ifdef UWP_API
+#if UWP_API || UNIT_TEST_SERVICES
     // TODO this should be started only in legacy mode, but need to migrate all API's first
     start_threadpool();
 #endif
 }
 
-#if UWP_API
+#if UWP_API || UNIT_TEST_SERVICES
 void xsapi_singleton::start_threadpool()
 {
     m_threadpool = std::make_shared<xbl_thread_pool>();
@@ -1443,10 +1442,6 @@ utils::convert_exception_to_xbox_live_error_code()
     catch (const web::json::json_exception&) // is an exception
     {
         errCode = xbox_live_error_code::json_error;
-    }
-    catch (const web::websockets::client::websocket_exception&) // is an exception
-    {
-        errCode = xbox_live_error_code::websocket_error;
     }
     catch (const web::http::http_exception& ex) // is an exception
     {
