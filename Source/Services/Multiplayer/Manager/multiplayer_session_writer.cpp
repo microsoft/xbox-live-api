@@ -176,7 +176,7 @@ multiplayer_session_writer::set_tap_change_number(
     m_tapChangeNumber = changeNumber;
 }
 
-pplx::task<xbox_live_result<void>>
+pplx::task<xbox_live_result<std::shared_ptr<multiplayer_session>>>
 multiplayer_session_writer::commit_synchronized_changes(
     _In_ std::shared_ptr<multiplayer_session> sessionToCommit
     )
@@ -185,10 +185,10 @@ multiplayer_session_writer::commit_synchronized_changes(
     auto task = write_session(m_multiplayerLocalUserManager->get_primary_context(), sessionToCommit, multiplayer_session_write_mode::synchronized_update)
     .then([](xbox_live_result<std::shared_ptr<multiplayer_session>> sessionResult)
     {
-        return xbox_live_result<void>(sessionResult.err(), sessionResult.err_message());
+        return sessionResult;
     });
 
-    return utils::create_exception_free_task<void>(task);
+    return utils::create_exception_free_task<std::shared_ptr<multiplayer_session>>(task);
 }
 
 pplx::task<xbox_live_result<std::vector<multiplayer_event>>>

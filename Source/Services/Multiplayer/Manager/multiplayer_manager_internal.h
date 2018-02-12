@@ -167,7 +167,7 @@ public:
         _In_ const xbox::services::multiplayer::multiplayer_session_change_event_args& args
         );
 
-    pplx::task<xbox_live_result<void>> commit_synchronized_changes(
+    pplx::task<xbox_live_result<std::shared_ptr<multiplayer_session>>> commit_synchronized_changes(
         _In_ std::shared_ptr<xbox::services::multiplayer::multiplayer_session> sessionToCommit
         );
 
