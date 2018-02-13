@@ -1255,9 +1255,9 @@ web::json::value web::json::value::parse(const utility::string_t& str)
     return value;
 }
 
-web::json::value web::json::value::parse(const xsapi_internal_string& str)
+web::json::value web::json::value::parse(const char* str)
 {
-    return parse(utility::conversions::to_string_t(str.data()));
+    return parse(utility::conversions::to_string_t(str));
 }
 
 web::json::value web::json::value::parse(const utility::string_t& str, std::error_code& error)

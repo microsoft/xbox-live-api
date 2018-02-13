@@ -35,7 +35,6 @@
 #include <cstdint>
 #include "cpprest/details/basic_types.h"
 #include "cpprest/asyncrt_utils.h"
-#include "xsapi/mem.h"
 
 namespace web
 {
@@ -414,7 +413,7 @@ public:
         /// Parses a string and construct a JSON value.
         /// </summary>
         /// <param name="value">The C++ value to create a JSON value from, a C++ STL double-byte string</param>
-        _ASYNCRTIMP static value __cdecl parse(const xsapi_internal_string &value);
+        _ASYNCRTIMP static value __cdecl parse(const char* value);
 
         /// <summary>
         /// Attempts to parse a string and construct a JSON value.
