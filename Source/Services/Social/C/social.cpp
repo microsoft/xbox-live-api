@@ -162,6 +162,62 @@ XblSocialRelationshipResultGetNext(
         );
 }
 
+XBL_API XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT* XBL_CALLING_CONV
+XblCopySocialRelationshipResult(
+    _In_ CONST XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT *source,
+    _In_ void *buffer,
+    _Inout_ uint64_t *cbBuffer
+    ) XBL_NOEXCEPT
+{
+    uint64_t neededBufferSize = sizeof(XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT);
+    neededBufferSize += sizeof(XBL_XBOX_SOCIAL_RELATIONSHIP) * source->itemsCount;
+    for (uint64_t i = 0; i < source->itemsCount; ++i)
+    {
+        neededBufferSize += std::char_traits<xsapi_internal_string::value_type>::length(source->items[i].xboxUserId) + 1;
+        neededBufferSize += sizeof(PCSTR) * source->items[i].socialNetworksCount;
+        for (uint64_t j = 0; j < source->items[i].socialNetworksCount; ++j)
+        {
+            neededBufferSize += std::char_traits<xsapi_internal_string::value_type>::length(source->items[i].socialNetworks[j]) + 1;
+        }
+    }
+
+    if (neededBufferSize > *cbBuffer)
+    {
+        *cbBuffer = neededBufferSize;
+        return nullptr;
+    }
+
+    buffer_allocator b(buffer, *cbBuffer);
+    auto dest = b.alloc<XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT>(*source);
+
+    // allocate the items
+    for (uint64_t i = 0; i < dest->itemsCount; ++i)
+    {
+        auto item = b.alloc<XBL_XBOX_SOCIAL_RELATIONSHIP>(source->items[i]);
+        if (i == 0)
+        {
+            dest->items = item;
+        }
+    }
+
+    // populate the items
+    for (uint64_t i = 0; i < dest->itemsCount; ++i)
+    {
+        auto xboxUserIdLen = std::char_traits<xsapi_internal_string::value_type>::length(source->items[i].xboxUserId) + 1;
+        dest->items[i].xboxUserId = (PCSTR)b.alloc(xboxUserIdLen);
+        memcpy((void*)dest->items[i].xboxUserId, source->items[i].xboxUserId, xboxUserIdLen);
+
+        dest->items[i].socialNetworks = (PCSTR *)b.alloc(sizeof(PCSTR) * dest->items[i].socialNetworksCount);
+        for (uint64_t j = 0; j < dest->items[i].socialNetworksCount; ++j)
+        {
+            auto socialNetworkLen = std::char_traits<xsapi_internal_string::value_type>::length(source->items[i].socialNetworks[j]) + 1;
+            dest->items[i].socialNetworks[j] = (PCSTR)b.alloc(socialNetworkLen);
+            memcpy((void*)dest->items[i].socialNetworks[j], source->items[i].socialNetworks[j], socialNetworkLen);
+        }
+    }
+    return dest;
+}
+
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSubscribeToSocialRelationshipChange(
     _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,

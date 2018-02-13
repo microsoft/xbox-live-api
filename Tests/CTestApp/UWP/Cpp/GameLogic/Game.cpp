@@ -499,6 +499,38 @@ void Game::GetUserProfile()
     });
 }
 
+void Game::CopySocialRelationshipResult()
+{
+    XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT r;
+    r.filter = XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER_ALL;
+    r.hasNext = false;
+    r.itemsCount = 3;
+    r.totalCount = 3;
+    r.items = new XBL_XBOX_SOCIAL_RELATIONSHIP[3];
+    r.items[0].xboxUserId = "1";
+    r.items[1].xboxUserId = "2";
+    r.items[2].xboxUserId = "3";
+    r.items[0].isFavorite = true;
+    r.items[1].isFavorite = true;
+    r.items[2].isFavorite = false;
+    r.items[0].socialNetworks = (PCSTR*)new char*[2];
+    r.items[0].socialNetworksCount = 2;
+    r.items[0].socialNetworks[0] = "foo";
+    r.items[0].socialNetworks[1] = "bar";
+    r.items[1].socialNetworks = nullptr;
+    r.items[1].socialNetworksCount = 0;
+    r.items[2].socialNetworks = nullptr;
+    r.items[2].socialNetworksCount = 0;
+
+    uint64_t size = 0;
+    auto copy = XblCopySocialRelationshipResult(&r, nullptr, &size);
+
+    auto buffer = new char[size];
+    copy = XblCopySocialRelationshipResult(&r, buffer, &size);
+
+    Log(L"Copied result");
+}
+
 void Game::GetSocialRelationships()
 {
     if (!m_user->isSignedIn)
@@ -511,8 +543,10 @@ void Game::GetSocialRelationships()
         [](XBL_RESULT result, CONST XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT *socialResult, void* context)
     {
         Game *pThis = reinterpret_cast<Game*>(context);
+
         if (result.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
         {
+            pThis->CopySocialRelationshipResult();
             pThis->Log(L"Successfully got social relationships!");
         }
         else

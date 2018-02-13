@@ -396,6 +396,26 @@ XblSocialRelationshipResultGetNext(
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
 
+/// <summary>
+/// Creates a deep copy of an XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT in a user allocated buffer. If the provided buffer
+/// is not large enough, nullptr will be returned and cbBuffer will be set to the required buffer size. If the buffer is
+/// large enough, the source object will be copied into the provided buffer. The returned pointer will be the same as the
+/// provided buffer pointer (except that it is typed). The caller is responsible for freeing the buffer when they no longer
+/// need the copied object. This method will not allocate any additional memory.
+/// </summary>
+/// <param name="source">An XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT returned from another API.</param>
+/// <param name="buffer">User allocated buffer to copy the source object into.</param>
+/// <param name="cbBuffer">Size in bytes of the input buffer. If the buffer is not large enough, this will be set to the required size.</param>
+/// <returns>
+/// A pointer to the copied object. Equivalent to the provided buffer pointer.
+/// </returns>
+XBL_API XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT* XBL_CALLING_CONV
+XblCopySocialRelationshipResult(
+    _In_ CONST XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT *source,
+    _In_ void *buffer,
+    _Inout_ uint64_t *cbBuffer
+    ) XBL_NOEXCEPT;
+
 typedef void* XBL_SOCIAL_RELATIONSHIP_CHANGE_SUBSCRIPTION;
 
 /// <summary>

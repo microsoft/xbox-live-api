@@ -1334,4 +1334,51 @@ private:
     xsapi_unique_ptr<ICallable> m_callable;
 };
 
+class buffer_allocator
+{
+public:
+    buffer_allocator(void *buffer, size_t cbBuffer)
+    {
+        m_buffer = static_cast<char*>(buffer);
+        m_cbRemaining = cbBuffer;
+    }
+
+    void* alloc(size_t count)
+    {
+        if (m_cbRemaining >= count)
+        {
+            void *out = m_buffer;
+            m_buffer += count;
+            m_cbRemaining -= count;
+            return out;
+        }
+        else
+        {
+            XSAPI_ASSERT(false && "Buffer unexpectedly to small!");
+            return nullptr;
+        }
+    }
+
+    template<typename T, typename... Args>
+    T* alloc(Args... args)
+    {
+        if (sizeof(T) <= m_cbRemaining)
+        {
+            T* out = new (static_cast<void*>(m_buffer)) T(args...);
+            m_buffer += sizeof(T);
+            m_cbRemaining -= sizeof(T);
+            return out;
+        }
+        else
+        {
+            XSAPI_ASSERT(false && "Buffer unexpectedly to small!");
+            return nullptr;
+        }
+    }
+
+private:
+    char *m_buffer;
+    size_t m_cbRemaining;
+};
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
