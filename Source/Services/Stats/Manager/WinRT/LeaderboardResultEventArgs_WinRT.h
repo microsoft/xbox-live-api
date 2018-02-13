@@ -24,7 +24,7 @@ public ref class LeaderboardResultEventArgs sealed : StatisticEventArgs
 {
 public:
     /// <summary> 
-    /// Gets the leaderboard result from a leaderboard request
+    /// Gets the leaderboard result from a leaderboard request.
     /// </summary>
     property Leaderboard::LeaderboardResult^ Result
     {

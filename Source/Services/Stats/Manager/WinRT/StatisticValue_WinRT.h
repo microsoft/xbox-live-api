@@ -7,6 +7,9 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 
+/// <summary> 
+/// Represents a simplified stat.
+/// </summary>
 public ref class StatisticValue sealed
 {
 public:

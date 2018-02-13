@@ -12,6 +12,9 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 
+/// <summary> 
+/// An interface for the data of a statistic event from stats manager.
+/// </summary>
 public interface class StatisticEventArgs
 {
 };
