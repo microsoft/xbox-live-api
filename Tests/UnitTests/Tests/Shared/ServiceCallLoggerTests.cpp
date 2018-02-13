@@ -18,16 +18,16 @@ public:
 
     bool LoggerFileExists(std::shared_ptr<xbox::services::service_call_logger> logger)
     {
-        char_t buff[MAX_PATH];
-        GetCurrentDirectory(MAX_PATH, buff);
-        string_t filePath(buff);
-        string_t fileName = logger->file_location();
+        char buff[MAX_PATH];
+        GetCurrentDirectoryA(MAX_PATH, buff);
+        xsapi_internal_string filePath(buff);
+        xsapi_internal_string fileName = logger->file_location();
         if (fileName.empty())
         {
             return false;
         }
-        filePath += _T("\\") + fileName;
-        std::ifstream stream(filePath);
+        filePath += "\\" + fileName;
+        std::ifstream stream(filePath.data());
         if (!stream)
         {
             return false;
@@ -93,15 +93,15 @@ public:
 
         //create mock data
         xbox::services::service_call_logger_data data(
-            _T("fake.endpoint.com"),
-            _T(""),
-            _T(""),
+            "fake.endpoint.com",
+            "",
+            "",
             false,
             0,
-            _T(""),
-            _T(""),
-            _T(""),
-            _T(""),
+            "",
+            "",
+            "",
+            "",
             std::chrono::milliseconds::zero(),
             chrono_clock_t::now());
 

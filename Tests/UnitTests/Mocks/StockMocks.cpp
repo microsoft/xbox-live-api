@@ -4,8 +4,8 @@
 #include "pch.h"
 #include "TE/UnitTestHelpers.h"
 #include "StockMocks.h"
-#include "http_call_response.h"
 #include "user_context.h"
+#include "http_call_request_message_internal.h"
 #include "httpClient/mock.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
@@ -84,7 +84,7 @@ StockMocks::HttpHeadersFromResponse(_In_ const web::http::http_response& respons
     http_headers out;
     for (const auto& header : response.headers())
     {
-        out[utils::internal_string_from_external_string(header.first)] = utils::internal_string_from_external_string(header.second);
+        out[utils::internal_string_from_string_t(header.first)] = utils::internal_string_from_string_t(header.second);
     }
     return out;
 }
@@ -215,11 +215,11 @@ StockMocks::CreateMockHttpCallResponseInternal(
     std::shared_ptr<user_context> userContext = std::make_shared<user_context>();
 
     auto httpCallResponse = std::make_shared<http_call_response_internal>(
-        utils::internal_string_from_external_string(userContext->xbox_user_id()),
+        utils::internal_string_from_string_t(userContext->xbox_user_id()),
         xboxLiveContextSettings,
         "GET",
         "www.microsoft.com",
-        http_call_request_message(),
+        http_call_request_message_internal(),
         xbox_live_api::unspecified,
         statusCode
         );
@@ -245,11 +245,11 @@ StockMocks::CreateMockHttpCallResponseInternal(
     std::shared_ptr<user_context> userContext = std::make_shared<user_context>();
 
     auto httpCallResponse = std::make_shared<http_call_response_internal>(
-        utils::internal_string_from_external_string(userContext->xbox_user_id()),
+        utils::internal_string_from_string_t(userContext->xbox_user_id()),
         xboxLiveContextSettings,
         "GET",
         "www.microsoft.com",
-        http_call_request_message(),
+        http_call_request_message_internal(),
         xbox_live_api::unspecified,
         statusCode
         );
@@ -259,7 +259,7 @@ StockMocks::CreateMockHttpCallResponseInternal(
         httpCallResponse->add_response_header(header.first, header.second);
     }
 
-    httpCallResponse->set_response_body(utils::internal_string_from_external_string(responseString));
+    httpCallResponse->set_response_body(utils::internal_string_from_string_t(responseString));
     httpCallResponse->set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(statusCode)));
     return httpCallResponse;
 }
@@ -275,11 +275,11 @@ StockMocks::CreateMockHttpCallResponseInternal(
     std::shared_ptr<user_context> userContext = std::make_shared<user_context>();
 
     auto httpCallResponse = std::make_shared<http_call_response_internal>(
-        utils::internal_string_from_external_string(userContext->xbox_user_id()),
+        utils::internal_string_from_string_t(userContext->xbox_user_id()),
         xboxLiveContextSettings,
         "GET",
         "www.microsoft.com",
-        http_call_request_message(),
+        http_call_request_message_internal(),
         xbox_live_api::unspecified,
         statusCode
         );

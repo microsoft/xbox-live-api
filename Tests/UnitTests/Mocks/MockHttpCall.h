@@ -81,7 +81,8 @@ public:
     virtual void set_request_body(_In_ const string_t& value) override;
     virtual void set_request_body(_In_ const web::json::value& value) override;
     virtual void set_request_body(_In_ const std::vector<BYTE>& value) override;
-    virtual const http_call_request_message& request_body() const override;
+    virtual void set_request_body(_In_ const xsapi_internal_string& value) override;
+    virtual const http_call_request_message_internal& request_body() const override;
 
     virtual void set_content_type_header_value(_In_ const std::wstring& value) override;
     virtual std::wstring content_type_header_value() const override;
@@ -119,7 +120,7 @@ public:
     std::function<void(std::shared_ptr<http_call_response>&, const string_t& requestPost)> fRequestPostFunc;
 
 private:
-    http_call_request_message m_requestBody;
+    http_call_request_message_internal m_requestBody;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

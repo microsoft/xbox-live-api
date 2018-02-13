@@ -16,7 +16,7 @@ MockHttpCall::MockHttpCall() :
 
 void MockHttpCall::reinit()
 {
-    m_requestBody = http_call_request_message();
+    m_requestBody = http_call_request_message_internal();
     ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(L"{}"));
     ServerName = std::wstring();
     HttpMethod = std::wstring();
@@ -114,7 +114,7 @@ pplx::task<std::shared_ptr<http_call_response>> MockHttpCall::get_response_with_
     CallCounter++;
     if (fRequestPostFunc != nullptr)
     {
-        fRequestPostFunc(ResultValue, m_requestBody.request_message_string());
+        fRequestPostFunc(ResultValue, utils::string_t_from_internal_string(m_requestBody.request_message_string()));
     }
     return pplx::task_from_result(ResultValue);
 }
@@ -133,7 +133,7 @@ MockHttpCall::get_response_with_auth(
     CallCounter++;
     if (fRequestPostFunc != nullptr)
     {
-        fRequestPostFunc(ResultValue, m_requestBody.request_message_string());
+        fRequestPostFunc(ResultValue, utils::string_t_from_internal_string(m_requestBody.request_message_string()));
     }
     ResultValue->_Set_full_url(ServerName);
     ResultValue->_Route_service_call();
@@ -155,9 +155,9 @@ xbox_live_result<void> MockHttpCall::get_response_with_auth(
     CallCounter++;
     if (fRequestPostFunc != nullptr)
     {
-        fRequestPostFunc(ResultValue, m_requestBody.request_message_string());
+        fRequestPostFunc(ResultValue, utils::string_t_from_internal_string(m_requestBody.request_message_string()));
     }
-    ResultValueInternal->set_full_url(utils::internal_string_from_external_string(ServerName));
+    ResultValueInternal->set_full_url(utils::internal_string_from_string_t(ServerName));
     ResultValueInternal->route_service_call();
     callback(ResultValueInternal);
 
@@ -215,9 +215,9 @@ bool MockHttpCall::long_http_call() const
 }
 
 void MockHttpCall::set_request_body(
-    _In_ const std::wstring& value)
+    _In_ const string_t& value)
 {
-    m_requestBody = http_call_request_message(value);
+    m_requestBody = http_call_request_message_internal(utils::internal_string_from_string_t(value));
 }
 
 void
@@ -225,7 +225,7 @@ MockHttpCall::set_request_body(
     _In_ const web::json::value& value
     )
 {
-    m_requestBody = http_call_request_message(value.serialize());
+    m_requestBody = http_call_request_message_internal(utils::internal_string_from_string_t(value.serialize()));
 }
 
 void
@@ -233,10 +233,18 @@ MockHttpCall::set_request_body(
     _In_ const std::vector<BYTE>& value
     )
 {
-    m_requestBody = http_call_request_message(value);
+    m_requestBody = http_call_request_message_internal(xsapi_internal_vector<BYTE>(value.begin(), value.end()));
 }
 
-const http_call_request_message& MockHttpCall::request_body() const
+void
+MockHttpCall::set_request_body(
+    _In_ const xsapi_internal_string& value
+)
+{
+    m_requestBody = http_call_request_message_internal(value);
+}
+
+const http_call_request_message_internal& MockHttpCall::request_body() const
 {
     return m_requestBody;
 }

@@ -93,7 +93,7 @@ xsapi_internal_string local_config::get_value_from_local_storage(
     }
 #else 
     UNREFERENCED_PARAMETER(name);
-    return L"";
+    return "";
 #endif
 }
 

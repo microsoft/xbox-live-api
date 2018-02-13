@@ -95,7 +95,7 @@ DWORD WINAPI xbox_live_thread_proc(LPVOID lpParam)
     return 0;
 }
 
-HC_RESULT libhttpclient_event_handler(
+void libhttpclient_event_handler(
     _In_opt_ void* context,
     _In_ HC_TASK_EVENT_TYPE eventType,
     _In_ HC_TASK_HANDLE taskHandle
@@ -117,7 +117,6 @@ HC_RESULT libhttpclient_event_handler(
         SetEvent(threadPool->get_complete_ready_handle());
         break;
     }
-    return HC_OK;
 }
 
 void xbl_thread_pool::start_threads()

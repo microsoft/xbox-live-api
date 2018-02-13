@@ -304,7 +304,7 @@ public:
             );
 
         auto setPresenceJson = web::json::value::parse(setPresenceRequest);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string().data());
         VERIFY_IS_EQUAL_JSON(setPresenceJson, requestJson);
     }
 
@@ -360,7 +360,7 @@ public:
             );
 
         auto getPresenceForMultipleUsers = web::json::value::parse(getPresenceForMultipleUsersRequest);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string().data());
         VERIFY_IS_EQUAL_JSON(getPresenceForMultipleUsers, requestJson);
 
         web::json::array jsonArray = responseJson.as_array();
@@ -412,7 +412,7 @@ public:
             );
 
         auto getPresenceForMultipleUsers = web::json::value::parse(getPresenceForMultipleUsersOverloadRequest);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string().data());
         VERIFY_IS_EQUAL_JSON(getPresenceForMultipleUsers, requestJson);
 
         web::json::array jsonArray = responseJson.as_array();
@@ -492,7 +492,7 @@ public:
             );
 
         auto getPresenceForSocialGroup = web::json::value::parse(getPresenceForSocialGroupOverloadRequest);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string().data());
         VERIFY_IS_EQUAL_JSON(getPresenceForSocialGroup, requestJson);
 
         web::json::array jsonArray = responseJson.as_array();

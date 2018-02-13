@@ -237,9 +237,6 @@
     <ProjectReference Include="..\..\..\..\..\Build\Microsoft.Xbox.Services.140.UWP.Cpp\Microsoft.Xbox.Services.140.UWP.Cpp.vcxproj">
       <Project>{8f96710e-5169-4917-8874-7de248f4d243}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.static.vcxproj">
-      <Project>{9ad285a2-301e-47a0-a299-14ad5d4f2758}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\..\..\InProgressSamples\Kits\DirectXTK\DirectXTK_Windows10_2015.vcxproj">
       <Project>{f4776924-619c-42c7-88b2-82c947ccc9e7}</Project>
     </ProjectReference>

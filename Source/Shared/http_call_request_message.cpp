@@ -27,6 +27,11 @@ const std::vector<unsigned char>& http_call_request_message::request_message_vec
     return m_requestMessageVector;
 }
 
+http_request_message_type http_call_request_message::get_http_request_message_type() const
+{
+    return m_httpRequestMessageType;
+}
+
 http_call_request_message_internal::http_call_request_message_internal()
     : m_httpRequestMessageType(http_request_message_type::empty_message)
 {

@@ -3,7 +3,6 @@
 
 #pragma once
 #include <mutex>
-#include <cpprest/ws_client.h>
 
 namespace xbox { namespace services {
     class web_socket_connection;
@@ -355,8 +354,7 @@ private:
     std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
 
     // web socket events callbacks
-    void on_socket_message_received(_In_ const string_t& message);
-    void on_socket_closed(_In_ web::websockets::client::websocket_close_status closeStatus, _In_ string_t closeReason);
+    void on_socket_message_received(_In_ const xsapi_internal_string& message);
     void on_socket_connection_state_change(_In_ web_socket_connection_state oldState, _In_ web_socket_connection_state newState);
 
     volatile long m_sequenceNumber;

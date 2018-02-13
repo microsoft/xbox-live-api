@@ -15,9 +15,3 @@
 #include "cpprest/details/http_helpers.hpp"
 #include "cpprest/details/base64.hpp"
 #include "cpprest/details/http_client_msg.hpp"
-#include "cpprest/details/ws_client.hpp"
-#if UWP_API || UNIT_TEST_SERVICES
-#include "cpprest/details/ws_client_winrt.hpp"
-#endif
-#include "cpprest/details/ws_msg.hpp"
-#include "cpprest/details/web_utilities.hpp"

@@ -3,7 +3,6 @@
 
 #pragma once
 #include "pch.h"
-#include "http_call_response.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
