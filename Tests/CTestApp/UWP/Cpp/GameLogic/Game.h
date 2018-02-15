@@ -93,6 +93,7 @@ namespace Sample
         void ReadCsvFile(_In_ Windows::Storage::StorageFile^ file);
 
         void GetUserProfile();
+        void CopySocialRelationshipResult();
         void GetSocialRelationships();
 
         HANDLE m_hBackgroundThread;
