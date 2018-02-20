@@ -69,6 +69,8 @@ xsapi_singleton::xsapi_singleton()
 #if UWP_API
     m_trackingUsers = std::unordered_map<string_t, std::shared_ptr<system::user_impl_idp>>();
 #endif
+
+    m_nextTaskGroupId = 0;
 }
 
 XBL_MEM_ALLOC_FUNC g_pMemAllocHook = nullptr;

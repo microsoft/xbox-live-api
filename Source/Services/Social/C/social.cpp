@@ -21,15 +21,15 @@ XblGetSocialRelationshipsHelper(
     _In_ XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER socialRelationshipFilter,
     _In_ uint32_t startIndex,
     _In_ uint32_t maxItems,
-    _In_ uint64_t taskGroupId,
+    _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     )
 {
-    RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr);
+    RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || queue == nullptr);
 
     auto result = xboxLiveContext->contextImpl->social_service_impl()->get_social_relationships(
-        xboxUserId, static_cast<xbox_social_relationship_filter>(socialRelationshipFilter), startIndex, maxItems, taskGroupId,
+        xboxUserId, static_cast<xbox_social_relationship_filter>(socialRelationshipFilter), startIndex, maxItems, queue->taskGroupId,
         [callback, callbackContext](xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>> result)
     {
         XBL_RESULT cResult = utils::create_xbl_result(result.err());
@@ -50,7 +50,7 @@ XblGetSocialRelationshipsHelper(
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationships(
     _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
-    _In_ uint64_t taskGroupId,
+    _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
@@ -62,7 +62,7 @@ try
         XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER_ALL,
         0,
         0,
-        taskGroupId,
+        queue,
         callbackContext,
         callback
         );
@@ -73,7 +73,7 @@ XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationshipsWithFilter(
     _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER socialRelationshipFilter,
-    _In_ uint64_t taskGroupId,
+    _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
@@ -85,7 +85,7 @@ try
         socialRelationshipFilter,
         0,
         0,
-        taskGroupId,
+        queue,
         callbackContext,
         callback
         );
@@ -96,7 +96,7 @@ XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationshipsForUser(
     _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR xboxUserId,
-    _In_ uint64_t taskGroupId,
+    _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
@@ -108,7 +108,7 @@ try
         XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER_ALL,
         0,
         0,
-        taskGroupId,
+        queue,
         callbackContext,
         callback
         );
@@ -121,7 +121,7 @@ XblGetSocialRelationshipsEx(
     _In_ XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER socialRelationshipFilter,
     _In_ uint32_t startIndex,
     _In_ uint32_t maxItems,
-    _In_ uint64_t taskGroupId,
+    _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
@@ -133,7 +133,7 @@ try
         socialRelationshipFilter,
         startIndex,
         maxItems,
-        taskGroupId,
+        queue,
         callbackContext,
         callback
         );
@@ -145,7 +145,7 @@ XblSocialRelationshipResultGetNext(
     _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ CONST XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT *socialRelationshipResult,
     _In_ uint32_t maxItems,
-    _In_ uint64_t taskGroupId,
+    _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
@@ -156,7 +156,7 @@ XblSocialRelationshipResultGetNext(
         socialRelationshipResult->filter,
         socialRelationshipResult->continuationSkip,
         maxItems,
-        taskGroupId,
+        queue,
         callbackContext,
         callback
         );
@@ -290,17 +290,17 @@ XblSubmitReputationFeedback(
     _In_opt_ PCSTR sessionName,
     _In_opt_ PCSTR reasonMessage,
     _In_opt_ PCSTR evidenceResourceId,
-    _In_ uint64_t taskGroupId,
+    _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void *callbackContext,
     _In_ XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
 {
-    RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || xboxUserId == nullptr);
+    RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || xboxUserId == nullptr || queue == nullptr);
 
     xboxLiveContext->contextImpl->reputation_service_impl()->submit_reputation_feedback(
         xboxUserId,
         static_cast<reputation_feedback_type>(reputationFeedbackType),
-        taskGroupId,
+        queue->taskGroupId,
         [callback, callbackContext](xbox_live_result<void> result)
         {
             callback(utils::create_xbl_result(result.err()), callbackContext);
@@ -318,12 +318,12 @@ XblSubmitBatchReputationFeedback(
     _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ XBL_REPUTATION_FEEDBACK_ITEM *feedbackItems,
     _In_ uint32_t feedbackItemsCount,
-    _In_ uint64_t taskGroupId,
+    _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void *callbackContext,
     _In_ XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
 {
-    RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || feedbackItems == nullptr);
+    RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || feedbackItems == nullptr || queue == nullptr);
 
     xsapi_internal_vector<reputation_feedback_item_internal> internalItems(feedbackItemsCount);
     for (uint32_t i = 0; i < feedbackItemsCount; ++i)
@@ -339,7 +339,7 @@ XblSubmitBatchReputationFeedback(
 
     xboxLiveContext->contextImpl->reputation_service_impl()->submit_batch_reputation_feedback(
         internalItems,
-        taskGroupId,
+        queue->taskGroupId,
         [callback, callbackContext](xbox_live_result<void> result)
     {
         callback(utils::create_xbl_result(result.err()), callbackContext);
