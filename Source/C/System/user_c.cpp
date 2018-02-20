@@ -107,16 +107,18 @@ XBL_RESULT XboxLiveUserSignInHelper(
     _In_ bool signInSilently,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ XBL_ASYNC_QUEUE queue
     )
 {
+    RETURN_C_INVALIDARGUMENT_IF_NULL(queue);
+
     verify_global_init();
 
     auto args = new sign_in_taskargs(pUser, coreDispatcher, signInSilently);
 
     auto hcResult = HCTaskCreate(
         HC_SUBSYSTEM_ID::HC_SUBSYSTEM_ID_XSAPI,
-        taskGroupId,
+        queue->taskGroupId,
         XboxLiveUserSignInExecute,
         static_cast<void*>(args),
         utils_c::execute_completion_routine_with_payload<sign_in_taskargs, XSAPI_SIGN_IN_COMPLETION_ROUTINE>,
@@ -134,11 +136,11 @@ XboxLiveUserSignIn(
     _Inout_ XBL_XBOX_LIVE_USER* pUser,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ XBL_ASYNC_QUEUE queue
     ) XBL_NOEXCEPT
 try
 {
-    return XboxLiveUserSignInHelper(pUser, nullptr, false, completionRoutine, completionRoutineContext, taskGroupId);
+    return XboxLiveUserSignInHelper(pUser, nullptr, false, completionRoutine, completionRoutineContext, queue);
 }
 CATCH_RETURN()
 
@@ -147,11 +149,11 @@ XboxLiveUserSignInSilently(
     _Inout_ XBL_XBOX_LIVE_USER* pUser,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ XBL_ASYNC_QUEUE queue
     ) XBL_NOEXCEPT
 try
 {
-    return XboxLiveUserSignInHelper(pUser, nullptr, true, completionRoutine, completionRoutineContext, taskGroupId);
+    return XboxLiveUserSignInHelper(pUser, nullptr, true, completionRoutine, completionRoutineContext, queue);
 }
 CATCH_RETURN()
 
@@ -161,11 +163,11 @@ XboxLiveUserSignInWithCoreDispatcher(
     _In_ Platform::Object^ coreDispatcher,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ XBL_ASYNC_QUEUE queue
     ) XBL_NOEXCEPT
 try
 {
-    return XboxLiveUserSignInHelper(pUser, coreDispatcher, false, completionRoutine, completionRoutineContext, taskGroupId);
+    return XboxLiveUserSignInHelper(pUser, coreDispatcher, false, completionRoutine, completionRoutineContext, queue);
 }
 CATCH_RETURN()
 
@@ -175,11 +177,11 @@ XboxLiveUserSignInSilentlyWithCoreDispatcher(
     _In_ Platform::Object^ coreDispatcher,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ XBL_ASYNC_QUEUE queue
     ) XBL_NOEXCEPT
 try
 {
-    return XboxLiveUserSignInHelper(pUser, coreDispatcher, true, completionRoutine, completionRoutineContext, taskGroupId);
+    return XboxLiveUserSignInHelper(pUser, coreDispatcher, true, completionRoutine, completionRoutineContext, queue);
 }
 CATCH_RETURN()
 
@@ -241,10 +243,12 @@ XboxLiveUserGetTokenAndSignature(
     _In_ PCSTR requestBodyString,
     _In_ XSAPI_GET_TOKEN_AND_SIGNATURE_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ XBL_ASYNC_QUEUE queue
     ) XBL_NOEXCEPT
 try
 {
+    RETURN_C_INVALIDARGUMENT_IF_NULL(queue);
+
     verify_global_init();
 
     auto args = new get_token_and_signature_taskargs(
@@ -256,7 +260,7 @@ try
 
     auto hcResult = HCTaskCreate(
         HC_SUBSYSTEM_ID::HC_SUBSYSTEM_ID_XSAPI,
-        taskGroupId,
+        queue->taskGroupId,
         XboxLiveUserGetTokenAndSignatureExecute,
         static_cast<void*>(args),
         utils_c::execute_completion_routine_with_payload<get_token_and_signature_taskargs, XSAPI_GET_TOKEN_AND_SIGNATURE_COMPLETION_ROUTINE>,

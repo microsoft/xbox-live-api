@@ -646,6 +646,7 @@ set(Common_Source_Files_C
     ../../Source/Services/Common/C/xbox_live_context_internal_c.h
     ../../Source/Services/Common/C/xbox_live_context_c.cpp
     ../../Source/Services/Common/C/xbox_live_global_c.cpp
+    ../../Source/Services/Common/C/async_queue.h
     )
 
 set(Leaderboard_Source_Files_C

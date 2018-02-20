@@ -275,10 +275,7 @@ typedef void(*XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE)(
 /// Defaults to startIndex and maxItems of 0 to return entire list if possible.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblXboxLiveContextCreateHandle.</param>
-/// <param name="taskGroupId">
-/// The task group ID to assign to this async operation. XblProcessNextCompletedTask(taskGroupId) will only process
-/// completed tasks that have a matching taskGroupId. If this isn't needed, just pass in 0.
-///</param>
+/// <param name="queue">The async queue to associate this call with.</param>
 /// <param name="callbackContext">Context passed back to callback.</param>
 /// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
 /// <returns>
@@ -288,7 +285,7 @@ typedef void(*XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE)(
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationships(
     _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
-    _In_ uint64_t taskGroupId,
+    _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
@@ -298,10 +295,7 @@ XblGetSocialRelationships(
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblXboxLiveContextCreateHandle.</param>
 /// <param name="socialRelationshipFilter">Controls how the list is filtered.</param>
-/// <param name="taskGroupId">
-/// The task group ID to assign to this async operation. XblProcessNextCompletedTask(taskGroupId) will only process
-/// completed tasks that have a matching taskGroupId. If this isn't needed, just pass in 0.
-///</param>
+/// <param name="queue">The async queue to associate this call with.</param>
 /// <param name="callbackContext">Context passed back to callback.</param>
 /// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
 /// <returns>
@@ -312,7 +306,7 @@ XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationshipsWithFilter(
     _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER socialRelationshipFilter,
-    _In_ uint64_t taskGroupId,
+    _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
@@ -322,10 +316,7 @@ XblGetSocialRelationshipsWithFilter(
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblXboxLiveContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User Id to get the social relationships for.</param>
-/// <param name="taskGroupId">
-/// The task group ID to assign to this async operation. XblProcessNextCompletedTask(taskGroupId) will only process
-/// completed tasks that have a matching taskGroupId. If this isn't needed, just pass in 0.
-///</param>
+/// <param name="queue">The async queue to associate this call with.</param>
 /// <param name="callbackContext">Context passed back to callback.</param>
 /// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
 /// <returns>
@@ -336,7 +327,7 @@ XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationshipsForUser(
     _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ PCSTR xboxUserId,
-    _In_ uint64_t taskGroupId,
+    _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
@@ -348,10 +339,7 @@ XblGetSocialRelationshipsForUser(
 /// <param name="socialRelationshipFilter">Controls how the list is filtered.</param>
 /// <param name="startIndex">Controls the starting index to return.</param>
 /// <param name="maxItems">Controls the number of XBL_XBOX_SOCIAL_RELATIONSHIP objects to get.  0 will return as many as possible</param>
-/// <param name="taskGroupId">
-/// The task group ID to assign to this async operation. XblProcessNextCompletedTask(taskGroupId) will only process
-/// completed tasks that have a matching taskGroupId. If this isn't needed, just pass in 0.
-///</param>
+/// <param name="queue">The async queue to associate this call with.</param>
 /// <param name="callbackContext">Context passed back to callback.</param>
 /// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
 /// <returns>
@@ -364,7 +352,7 @@ XblGetSocialRelationshipsEx(
     _In_ XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER socialRelationshipFilter,
     _In_ uint32_t startIndex,
     _In_ uint32_t maxItems,
-    _In_ uint64_t taskGroupId,
+    _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
@@ -375,10 +363,7 @@ XblGetSocialRelationshipsEx(
 /// <param name="xboxLiveContext">An xbox live context handle created with XblXboxLiveContextCreateHandle.</param>
 /// <param name="socialRelationshipResult">Result returned from a previous call to XblGetSocialRelations*.</param>
 /// <param name="maxItems">Controls the number of XBL_XBOX_SOCIAL_RELATIONSHIP objects to get.  0 will return as many as possible</param>
-/// <param name="taskGroupId">
-/// The task group ID to assign to this async operation. XblProcessNextCompletedTask(taskGroupId) will only process
-/// completed tasks that have a matching taskGroupId. If this isn't needed, just pass in 0.
-///</param>
+/// <param name="queue">The async queue to associate this call with.</param>
 /// <param name="callbackContext">Context passed back to callback.</param>
 /// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
 /// <returns>
@@ -391,7 +376,7 @@ XblSocialRelationshipResultGetNext(
     _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ CONST XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT *socialRelationshipResult,
     _In_ uint32_t maxItems,
-    _In_ uint64_t taskGroupId,
+    _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
@@ -517,10 +502,7 @@ typedef void(*XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE)(
 /// <param name="sessionName">The name of the multiplayer session directory session the user is sending feedback from. (Optional)</param>
 /// <param name="reasonMessage">User supplied text added to explain the reason for the feedback. (Optional)</param>
 /// <param name="evidenceResourceId">The Id of a resource that can be used as evidence for the feedback. Example: the Id of a video file. (Optional)</param>
-/// <param name="taskGroupId">
-/// The task group ID to assign to this async operation. XblProcessNextCompletedTask(taskGroupId) will only process
-/// completed tasks that have a matching taskGroupId. If this isn't needed, just pass in 0.
-///</param>
+/// <param name="queue">The async queue to associate this call with.</param>
 /// <param name="callbackContext">Context passed back to callback.</param>
 /// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
 /// <returns>Result code for this API operation. The result of the asynchronous operation is returned via the callback parameters.</returns>
@@ -533,7 +515,7 @@ XblSubmitReputationFeedback(
     _In_opt_ PCSTR sessionName,
     _In_opt_ PCSTR reasonMessage,
     _In_opt_ PCSTR evidenceResourceId,
-    _In_ uint64_t taskGroupId,
+    _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void *callbackContext,
     _In_ XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;
@@ -544,10 +526,7 @@ XblSubmitReputationFeedback(
 /// <param name="xboxLiveContext">An xbox live context handle created with XblXboxLiveContextCreateHandle.</param>
 /// <param name="feedbackItems">An array of XBL_REPUTATION_FEEDBACK_ITEM objects to submit reputation feedback on.</param>
 /// <param name="feedbackItemsCount">The count of items in the feedbackItems array.</param>
-/// <param name="taskGroupId">
-/// The task group ID to assign to this async operation. XblProcessNextCompletedTask(taskGroupId) will only process
-/// completed tasks that have a matching taskGroupId. If this isn't needed, just pass in 0.
-///</param>
+/// <param name="queue">The async queue to associate this call with.</param>
 /// <param name="callbackContext">Context passed back to callback.</param>
 /// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
 /// <returns>Result code for this API operation. The result of the asynchronous operation is returned via the callback parameters.</returns>
@@ -557,7 +536,7 @@ XblSubmitBatchReputationFeedback(
     _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
     _In_ XBL_REPUTATION_FEEDBACK_ITEM *feedbackItems,
     _In_ uint32_t feedbackItemsCount,
-    _In_ uint64_t taskGroupId,
+    _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void *callbackContext,
     _In_ XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT;

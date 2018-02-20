@@ -18,26 +18,27 @@ std::mutex Game::m_displayEventQueueLock;
 HANDLE g_stopRequestedHandle;
 HANDLE g_pendingReadyHandle;
 HANDLE g_completeReadyHandle;
+XBL_ASYNC_QUEUE g_asyncQueue;
 
 void xbl_event_handler(
     _In_opt_ void* context,
-    _In_ XBL_TASK_EVENT_TYPE eventType,
-    _In_ XBL_TASK_HANDLE taskHandle
+    _In_ XBL_ASYNC_EVENT_TYPE eventType,
+    _In_ XBL_ASYNC_QUEUE queue
 )
 {
     UNREFERENCED_PARAMETER(context);
-    UNREFERENCED_PARAMETER(taskHandle);
+    UNREFERENCED_PARAMETER(queue);
 
     switch (eventType)
     {
-    case XBL_TASK_EVENT_TYPE::XBL_TASK_EVENT_PENDING:
+    case XBL_ASYNC_EVENT_TYPE::XBL_ASYNC_EVENT_WORK_PENDING:
         SetEvent(g_pendingReadyHandle);
         break;
 
-    case XBL_TASK_EVENT_TYPE::XBL_TASK_EVENT_EXECUTE_STARTED:
+    case XBL_ASYNC_EVENT_TYPE::XBL_ASYNC_EVENT_WORK_STARTED:
         break;
 
-    case XBL_TASK_EVENT_TYPE::XBL_TASK_EVENT_EXECUTE_COMPLETED:
+    case XBL_ASYNC_EVENT_TYPE::XBL_ASYNC_EVENT_WORK_COMPLETED:
         SetEvent(g_completeReadyHandle);
         break;
     }
@@ -59,25 +60,19 @@ DWORD WINAPI background_thread_proc(LPVOID lpParam)
         switch (dwResult)
         {
         case WAIT_OBJECT_0: // pending 
-            XblTaskProcessNextPendingTask();
-
-            // If there's more pending tasks, then set the event to process them
-            if (XblTaskGetPendingTaskQueueSize() > 0)
+            XblDispatchAsyncQueue(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_WORK);
+            if (!XblIsAsyncQueueEmpty(g_asyncQueue))
             {
                 SetEvent(g_pendingReadyHandle);
             }
             break;
-
         case WAIT_OBJECT_0 + 1: // completed 
-            XblTaskProcessNextCompletedTask(0);
-
-            // If there's more completed tasks, then set the event to process them
-            if (XblTaskGetCompletedTaskQueueSize(0) > 0)
+            XblDispatchAsyncQueue(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_COMPLETION);
+            if (!XblIsAsyncQueueEmpty(g_asyncQueue))
             {
                 SetEvent(g_completeReadyHandle);
             }
             break;
-
         default:
             stop = true;
             break;
@@ -102,6 +97,7 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
     g_completeReadyHandle = CreateEvent(nullptr, false, false, nullptr);
 
     XblGlobalInitialize();
+    XblCreateAsyncQueue(&g_asyncQueue);
 
     XblAddTaskEventHandler(
         nullptr,
@@ -131,6 +127,10 @@ Game::~Game()
     if (m_xboxLiveContext != nullptr)
     {
         XblXboxLiveContextCloseHandle(m_xboxLiveContext);
+    }
+    if (g_asyncQueue != nullptr)
+    {
+        XblCloseAsyncQueue(g_asyncQueue);
     }
 
     XblGlobalCleanup();
@@ -468,12 +468,12 @@ void Game::SignIn()
         Log(L"Already signed in.");
         return;
     }
-    XboxLiveUserSignIn(m_user, HandleSignInResult, this, 0);
+    XboxLiveUserSignIn(m_user, HandleSignInResult, this, g_asyncQueue);
 }
 
 void Game::SignInSilently()
 {
-    XboxLiveUserSignInSilently(m_user, HandleSignInResult, this, 0);
+    XboxLiveUserSignInSilently(m_user, HandleSignInResult, this, g_asyncQueue);
 }
 
 void Game::GetUserProfile()
@@ -484,7 +484,7 @@ void Game::GetUserProfile()
         return;
     }
 
-    XblGetUserProfile(m_xboxLiveContext, m_user->xboxUserId, 0, this,
+    XblGetUserProfile(m_xboxLiveContext, m_user->xboxUserId, g_asyncQueue, this,
     [](XBL_RESULT result, const XBL_XBOX_USER_PROFILE *profile, void* context)
     {
         Game *pThis = reinterpret_cast<Game*>(context);
@@ -539,7 +539,7 @@ void Game::GetSocialRelationships()
         return;
     }
 
-    XblGetSocialRelationships(m_xboxLiveContext, 0, this,
+    XblGetSocialRelationships(m_xboxLiveContext, g_asyncQueue, this,
         [](XBL_RESULT result, CONST XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT *socialResult, void* context)
     {
         Game *pThis = reinterpret_cast<Game*>(context);

@@ -95,7 +95,7 @@ XboxLiveUserSignIn(
     _Inout_ XBL_XBOX_LIVE_USER* pUser,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ XBL_ASYNC_QUEUE queue
     ) XBL_NOEXCEPT;
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
@@ -103,7 +103,7 @@ XboxLiveUserSignInSilently(
     _Inout_ XBL_XBOX_LIVE_USER* pUser,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ XBL_ASYNC_QUEUE queue
     ) XBL_NOEXCEPT;
 
 #if WINAPI_FAMILY && WINAPI_FAMILY==WINAPI_FAMILY_APP
@@ -114,7 +114,7 @@ XboxLiveUserSignInWithCoreDispatcher(
     _In_ Platform::Object^ coreDispatcher,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ XBL_ASYNC_QUEUE queue
     ) XBL_NOEXCEPT;
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
@@ -123,7 +123,7 @@ XboxLiveUserSignInSilentlyWithCoreDispatcher(
     _In_ Platform::Object^ coreDispatcher,
     _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ XBL_ASYNC_QUEUE queue
     ) XBL_NOEXCEPT;
 
 #endif
@@ -143,7 +143,7 @@ XboxLiveUserGetTokenAndSignature(
     _In_ PCSTR requestBodyString,
     _In_ XSAPI_GET_TOKEN_AND_SIGNATURE_COMPLETION_ROUTINE completionRoutine,
     _In_opt_ void* completionRoutineContext,
-    _In_ uint64_t taskGroupId
+    _In_ XBL_ASYNC_QUEUE queue
     ) XBL_NOEXCEPT;
 
 typedef void(*XSAPI_SIGN_OUT_COMPLETED_HANDLER)(

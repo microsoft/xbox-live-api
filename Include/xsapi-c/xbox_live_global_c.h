@@ -12,41 +12,71 @@ extern "C" {
 #endif
 
 /////////////////////////////////////////////////////////////////////////////////////////
-// Task APIs
+// Async APIs
 //
 
 /// <summary>
 /// The task event type
 /// </summary>
-typedef enum XBL_TASK_EVENT_TYPE
+typedef enum XBL_ASYNC_EVENT_TYPE
 {
     /// <summary>
-    /// The task is in a pending task and has not started executing
+    /// An async task is pending and will be executed on next dispatch call
     /// </summary>
-    XBL_TASK_EVENT_PENDING,
+    XBL_ASYNC_EVENT_WORK_PENDING,
 
     /// <summary>
-    /// The task has started executing but has not yet completed execution
+    /// An async task has started executing but has not yet completed execution
     /// </summary>
-    XBL_TASK_EVENT_EXECUTE_STARTED,
+    XBL_ASYNC_EVENT_WORK_STARTED,
 
     /// <summary>
-    /// The task has completed executing
+    /// An async task has completed executing
     /// </summary>
-    XBL_TASK_EVENT_EXECUTE_COMPLETED
-} XBL_TASK_EVENT_TYPE;
+    XBL_ASYNC_EVENT_WORK_COMPLETED
+} XBL_ASYNC_EVENT_TYPE;
+
+typedef enum XBL_ASYNC_QUEUE_CALLBACK_TYPE
+{
+    /// <summary>
+    /// Used to dispatch pending async tasks from an async queue
+    /// </summary>
+    XBL_ASYNC_QUEUE_CALLBACK_TYPE_WORK,
+
+    /// <summary>
+    /// Used to dispatch completed tasks from an async queue
+    /// </summary>
+    XBL_ASYNC_QUEUE_CALLBACK_TYPE_COMPLETION
+} XBL_ASYNC_QUEUE_CALLBACK_TYPE;
+
+/// <summary>
+/// Creates an async queue handle which is used to group async operations (i.e. by feature area or by processor core).
+/// </summary>
+/// <param name="queue">Handle to the async queue</param>
+XBL_API XBL_RESULT XblCreateAsyncQueue(
+    _Out_ XBL_ASYNC_QUEUE* queue
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Closes an async queue. If there is still work undispatched pending or completed work associated with the queue,
+/// there will be no way to dispatch it after closing the queue.
+/// </summary>
+/// <param name="queue">Handle to the async queue</param>
+XBL_API XBL_RESULT XblCloseAsyncQueue(
+    _In_ XBL_ASYNC_QUEUE queue
+    ) XBL_NOEXCEPT;
 
 /// <summary>
 /// The callback definition used by XblAddTaskEventHandler that's raised when a task changes state (pending, executing, completed).
 /// </summary>
 /// <param name="context">The context passed to this callback</param>
 /// <param name="eventType">The event type for this callback</param>
-/// <param name="taskHandle">The handle to the task</param>
+/// <param name="asyncQueue">The queue that event is associated with</param>
 typedef void
 (XBL_CALLING_CONV* XBL_TASK_EVENT_FUNC)(
     _In_opt_ void* context,
-    _In_ XBL_TASK_EVENT_TYPE eventType,
-    _In_ XBL_TASK_HANDLE taskHandle
+    _In_ XBL_ASYNC_EVENT_TYPE eventType,
+    _In_ XBL_ASYNC_QUEUE asyncQueue
     );
 
 /// <summary>
@@ -59,60 +89,39 @@ XBL_API XBL_RESULT XBL_CALLING_CONV
 XblAddTaskEventHandler(
     _In_opt_ void* context,
     _In_opt_ XBL_TASK_EVENT_FUNC taskEventFunc,
-    _Out_opt_ XBL_TASK_EVENT_HANDLE* eventHandle
+    _Out_opt_ XBL_ASYNC_EVENT_HANDLE* eventHandle
     ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Removes the callback that is called when when task changes state (pending, executing, completed)
 /// </summary>
-/// <param name="eventHandle">Handle to the event handler.  Use this to remove the handler using HCRemoveTaskEventHandler</param>
+/// <param name="eventHandle">Handle to the event handler to remove.</param>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblRemoveTaskEventHandler(
-    _In_ XBL_TASK_EVENT_HANDLE eventHandle
+    _In_ XBL_ASYNC_EVENT_HANDLE eventHandle
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Calls the executionRoutine callback for the next pending Xbox Live task. It is recommended
-/// the app calls XblTaskProcessNextPendingTask() in a background thread.
+/// Dispatches the next pending or completed async Xbox Live task in the given queue on the calling thread.
 /// </summary>
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblTaskProcessNextPendingTask() XBL_NOEXCEPT;
-
-/// <summary>
-/// Calls the completionRoutine callback for the next task that is completed.
-/// This enables the caller to execute the callback on a specific thread to
-/// avoid the need to marshal data to a app thread from a background thread.
-///
-/// XblTaskProcessNextCompletedTask will only process completed tasks that have a
-/// matching taskGroupId.  This enables the caller to split the where results are
-/// returned between between a set of app threads.  If this isn't needed, just pass in 0.
-/// </summary>
-/// <param name="taskGroupId">
-/// HCTaskProcessNextCompletedTask will only process completed tasks that have a
-/// matching taskGroupId.  This enables the caller to split the where results are
-/// returned between between a set of app threads.  If this isn't needed, just pass in 0.
+/// <param name="queue">Async queue from which to dispatch work.</param>
+/// <param name="type">
+/// The type of work to dispatch from the queue. It is recommended that XBL_ASYNC_QUEUE_CALLBACK_TYPE_WORK be dispatched
+/// to background threads.
 /// </param>
 XBL_API XBL_RESULT XBL_CALLING_CONV
-XblTaskProcessNextCompletedTask(_In_ uint64_t taskGroupId) XBL_NOEXCEPT;
+XblDispatchAsyncQueue(
+    _In_ XBL_ASYNC_QUEUE queue,
+    _In_ XBL_ASYNC_QUEUE_CALLBACK_TYPE type
+    ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns the size of the pending task queue for a specific task group ID
+/// Query if there is remaining work to be dispatched in the queue.
 /// </summary>
-/// <returns>Returns the size of the pending task queue.</returns>
-XBL_API uint64_t XBL_CALLING_CONV
-XblTaskGetPendingTaskQueueSize() XBL_NOEXCEPT;
-
-/// <summary>
-/// Returns the size of the completed task queue for a specific task group ID
-/// </summary>
-/// <param name="taskGroupId">
-/// This enables the caller to split the where results are returned between between a set of app threads.
-/// If this isn't needed, just pass in 0.
-/// </param>
-/// <returns>Returns the size of the completed task queue for a specific task group ID</returns>
-XBL_API uint64_t XBL_CALLING_CONV
-XblTaskGetCompletedTaskQueueSize(
-    _In_ uint64_t taskGroupId
+/// <returns>Whether or no there is working remaining in the queue.</returns>
+XBL_API bool XBL_CALLING_CONV
+XblIsAsyncQueueEmpty(
+    _In_ XBL_ASYNC_QUEUE queue
     ) XBL_NOEXCEPT;
 
 /////////////////////////////////////////////////////////////////////////////////////////

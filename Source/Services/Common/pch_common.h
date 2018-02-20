@@ -65,6 +65,7 @@
 
 #include "xsapi/errors.h"
 #include "utils.h"
+#include "async_queue.h"
 #include "Logger/Log.h"
 
 #include "shared_macros.h"

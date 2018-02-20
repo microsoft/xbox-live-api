@@ -1041,6 +1041,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.h">
       <Filter>C++ Source\Services\Clubs</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\async_queue.h">
+      <Filter>C++ Source\Services\Common\C</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\xbox_live_context_internal_c.h">
       <Filter>C++ Source\Services\Common\C</Filter>
     </ClInclude>
