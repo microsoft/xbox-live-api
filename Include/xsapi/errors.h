@@ -1361,7 +1361,7 @@ public:
     /// For more detail about std::error_code vs std::error_condition, see 
     /// http://en.cppreference.com/w/cpp/error/error_condition
     /// </summary>
-    _XSAPIIMP const std::error_code& err()
+    _XSAPIIMP const std::error_code& err() const
     {
         return m_errorCode;
     }
@@ -1370,7 +1370,7 @@ public:
     /// Returns call specific debug information.  
     /// It is not localized, so only use for debugging purposes.
     /// </summary>
-    _XSAPIIMP const std::string& err_message()
+    _XSAPIIMP const std::string& err_message() const
     {
         return m_errorMessage;
     }
