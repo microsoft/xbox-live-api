@@ -539,7 +539,7 @@ catalog_service::browse_catalog_bundles_helper(
         }
         
         return utils::generate_xbox_live_result<browse_catalog_result>(
-            browse_catalog_result::_Deserialize(response->response_body_json()),
+            catalogResult,
             response
             );
     });

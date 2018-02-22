@@ -6,6 +6,9 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 
+/// <summary> 
+/// Indicates the type of statistic change event.
+/// </summary>
 public enum class StatisticEventType
 {
     /// <summary> 

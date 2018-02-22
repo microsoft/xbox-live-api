@@ -8,16 +8,19 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STATISTIC_MANAGER_BEGIN
 
+/// <summary> 
+/// Represents a statistic event.
+/// </summary>
 public ref class StatisticEvent sealed
 {
 public:
     /// <summary>
-    /// The Xbox Live user this event is for
+    /// The Xbox Live user this event is for.
     /// </summary>
     property XboxLiveUser_t User { XboxLiveUser_t get(); }
 
     /// <summary> 
-    /// The type of event the statistic is
+    /// The type of event the statistic is.
     /// </summary>
     /// <return>The event type</return>
     DEFINE_PROP_GET_ENUM_OBJ(EventType, event_type, StatisticEventType);
@@ -31,7 +34,7 @@ public:
     };
 
     /// <summary>
-    /// Returns call specific debug information if join fails
+    /// Returns call specific debug information if join fails.
     /// It is not localized, so only use for debugging purposes.
     /// </summary>
     property Platform::String^ ErrorMessage
@@ -40,7 +43,7 @@ public:
     };
 
     /// <summary> 
-    /// The data of event from stats manager
+    /// The data of event from stats manager.
     /// </summary>
     property StatisticEventArgs^ EventArgs
     {
