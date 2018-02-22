@@ -4,7 +4,6 @@
 #pragma once
 #include "types.h"
 #include "errors.h"
-#include <cpprest/ws_client.h>
 
 namespace xbox {
     namespace services {

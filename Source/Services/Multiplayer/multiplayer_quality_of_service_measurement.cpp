@@ -78,9 +78,9 @@ multiplayer_quality_of_service_measurements::_Deserialize(
     if (json.is_null()) return xbox_live_result<multiplayer_quality_of_service_measurements>(returnResult);
 
     std::error_code errc = xbox_live_error_code::no_error;
-    returnResult.m_latency = std::chrono::milliseconds(utils::extract_json_uint52(json, _T("latency"), errc));
-    returnResult.m_bandwidthDownInKilobitsPerSecond = utils::extract_json_uint52(json, _T("bandwidthDown"), errc);
-    returnResult.m_bandwidthUpInKilobitsPerSecond = utils::extract_json_uint52(json, _T("bandwidthUp"), errc);
+    returnResult.m_latency = std::chrono::milliseconds(utils::extract_json_uint52(json, "latency", errc));
+    returnResult.m_bandwidthDownInKilobitsPerSecond = utils::extract_json_uint52(json, "bandwidthDown", errc);
+    returnResult.m_bandwidthUpInKilobitsPerSecond = utils::extract_json_uint52(json, "bandwidthUp", errc);
     returnResult.m_customJson = utils::extract_json_field(json, _T("custom"), errc, false);
 
     return returnResult;

@@ -25,9 +25,9 @@ class MockSocialManager : public social_manager
 public:
     static std::shared_ptr<social_manager> get_mock_singleton_instance();
 
-    const xsapi_internal_unordered_map(string_t, std::shared_ptr<xbox_social_user_group>)& xbox_social_user_groups() const;
-    const xsapi_internal_unordered_map(string_t, xsapi_internal_vector(string_t))& user_to_view_map() const;
-    const xsapi_internal_unordered_map(string_t, std::shared_ptr<MockSocialGraph>) local_graphs();
+    const xsapi_internal_unordered_map<string_t, std::shared_ptr<xbox_social_user_group>>& xbox_social_user_groups() const;
+    const xsapi_internal_unordered_map<string_t, xsapi_internal_vector<string_t>>& user_to_view_map() const;
+    const xsapi_internal_unordered_map<string_t, std::shared_ptr<MockSocialGraph>> local_graphs();
     const std::vector<social_event>& event_queue() const;
     const std::vector<xbox_live_user_t>& local_user_list() const;
     bool social_graph_event_queue_empty(_In_ const string_t& xuid);

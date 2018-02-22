@@ -12,8 +12,14 @@
 
 #if defined(UNIT_TEST_SERVICES)
 #define RETURN_TASK_CPP_INVALIDARGUMENT_IF(x, type, message) { if ( x ) { return pplx::task_from_result(xbox::services::xbox_live_result<type>(xbox_live_error_code::invalid_argument, message)); } }
+#define RETURN_CPP_INVALIDARGUMENT_IF(x, type, message) { if ( x ) { return xbox::services::xbox_live_result<type>(xbox_live_error_code::invalid_argument, message); } }
+#define RETURN_C_INVALIDARGUMENT_IF(x) { if ( x ) { return XBL_RESULT_INVALID_ARG; } }
+#define RETURN_C_INVALIDARGUMENT_IF_NULL(x) { if ( ( x ) == nullptr ) { return XBL_RESULT_INVALID_ARG; } }
 #else
 #define RETURN_TASK_CPP_INVALIDARGUMENT_IF(x, type, message) { assert(!(x)); if ( x ) { return pplx::task_from_result(xbox::services::xbox_live_result<type>(xbox_live_error_code::invalid_argument, message)); } }
+#define RETURN_CPP_INVALIDARGUMENT_IF(x, type, message) { assert(!(x)); if ( x ) { return xbox::services::xbox_live_result<type>(xbox_live_error_code::invalid_argument, message); } }
+#define RETURN_C_INVALIDARGUMENT_IF(x) { assert(!(x)); if ( x ) { return XBL_RESULT_INVALID_ARG; } }
+#define RETURN_C_INVALIDARGUMENT_IF_NULL(x) { assert(!(( x ) == nullptr)); if ( ( x ) == nullptr ) { return XBL_RESULT_INVALID_ARG; } }
 #endif
 #define THROW_CPP_INVALIDARGUMENT_IF(x) if ( x ) { throw std::invalid_argument(""); }
 #define THROW_CPP_INVALIDARGUMENT_IF_NULL(x) if ( ( x ) == nullptr ) { throw std::invalid_argument(""); }
@@ -49,11 +55,12 @@
 #define PLATFORM_STRING_FROM_STRING_T(x) \
     (x.empty() ? nullptr : ref new Platform::String(x.c_str()))
 
-#define AUTH_HEADER (_T("Authorization"))
-#define SIG_HEADER (_T("Signature"))
-#define ETAG_HEADER (_T("ETag"))
-#define DATE_HEADER (_T("Date"))
-#define DEFAULT_USER_AGENT _T("XboxServicesAPI/") XBOX_SERVICES_API_VERSION_STRING
+#define AUTH_HEADER ("Authorization")
+#define SIG_HEADER ("Signature")
+#define ETAG_HEADER ("ETag")
+#define DATE_HEADER ("Date")
+#define RETRY_AFTER_HEADER ("Retry-After")
+#define DEFAULT_USER_AGENT "XboxServicesAPI/" XBOX_SERVICES_API_VERSION_STRING
 
 #define RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(func, type) \
 { \
@@ -64,3 +71,78 @@
         return xbox_live_result<type>(err, e.what()); \
     } \
 }
+
+#define CREATE_EXTERNAL_XBOX_LIVE_RESULT(type, internalReturnObj) \
+    xbox_live_result<type>(type(internalReturnObj.payload()), internalReturnObj.err(), internalReturnObj.err_message())
+
+
+#define CATCH_RETURN() \
+    catch (std::bad_alloc const& e) { return utils::std_bad_alloc_to_xbl_result(e); } \
+    catch (std::exception const& e) { return utils::std_exception_to_xbl_result(e); } \
+    catch (...) { return utils::unknown_exception_to_xbl_result(); }
+
+#define CATCH_RETURN_WITH(errCode) \
+    catch (std::bad_alloc const& e) { utils::std_bad_alloc_to_xbl_result(e); return errCode; } \
+    catch (std::exception const& e) { utils::std_exception_to_xbl_result(e); return errCode; } \
+    catch (...) { utils::unknown_exception_to_xbl_result(); return errCode; }
+
+#define DEFINE_GET_STRING(className, methodName) \
+    string_t className::methodName() const \
+    { \
+        return utils::string_t_from_internal_string(m_internalObj->methodName()); \
+    }
+
+#define DEFINE_GET_STD_STRING(className, methodName) \
+    std::string className::methodName() const \
+    { \
+        return std::string(m_internalObj->methodName().data()); \
+    }
+
+#define DEFINE_GET_BOOL(className, methodName) \
+    bool className::methodName() const \
+    { \
+        return m_internalObj->methodName(); \
+    }
+
+#define DEFINE_GET_UINT32(className, methodName) \
+    uint32_t className::methodName() const \
+    { \
+        return m_internalObj->methodName(); \
+    }
+
+#define DEFINE_GET_STRING_VECTOR(className, methodName) \
+    std::vector<string_t> className::methodName() const \
+    { \
+        return utils::std_string_vector_from_internal_string_vector(m_internalObj->methodName()); \
+    }
+
+#define DEFINE_GET_ENUM_TYPE(className, enumType, methodName) \
+    enumType className::methodName() const \
+    { \
+        return m_internalObj->methodName(); \
+    }
+
+#define DEFINE_GET_URI(className, methodName) \
+    const web::uri& className::methodName() const \
+    { \
+        return m_internalObj->methodName(); \
+    }
+
+#define DEFINE_GET_VECTOR_INTERNAL_TYPE(className, externalType, methodName) \
+    std::vector<externalType> className::methodName() const \
+    { \
+        return utils::std_vector_external_from_internal_vector<externalType, std::shared_ptr<externalType##_internal>>(m_internalObj->methodName()); \
+    }
+
+#define DEFINE_GET_VECTOR(className, typeName, methodName) \
+    std::vector<typeName> className::methodName() const \
+    { \
+        return utils::std_vector_from_internal_vector<typeName>(m_internalObj->methodName()); \
+    }
+
+#define DEFINE_GET_OBJECT_REF(className, objectType, methodName) \
+    const objectType& className::methodName() const \
+    { \
+        return m_internalObj->methodName(); \
+    }
+

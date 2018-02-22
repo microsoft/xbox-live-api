@@ -443,7 +443,7 @@ public:
     /// <returns>title_storage_blob_metadata_result object for the next page.</returns>
     _XSAPIIMP pplx::task<xbox_live_result<title_storage_blob_metadata_result>> get_next(
         _In_ uint32_t maxItems
-        );
+        ) const;
 
     /// <summary>
     /// Indicates if there is additional data to retrieve from a get_next call

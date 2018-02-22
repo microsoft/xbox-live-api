@@ -179,14 +179,14 @@ public:
         profileList.push_back(x);
         web::json::value responseJson = BuildXboxUserProfilesResultJsonResponse(profileList);
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto task = create_task(xboxLiveContext->ProfileService->GetUserProfileAsync(x.xboxUserId));
         VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://profile.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(L"/users/batch/profile/settings", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_STR(LR"({"settings":["AppDisplayName","AppDisplayPicRaw","GameDisplayName","GameDisplayPicRaw","Gamerscore","Gamertag"],"userIds":["xboxUserId_0"]})", httpCall->request_body().request_message_string());
+        VERIFY_ARE_EQUAL_STR(R"({"settings":["AppDisplayName","AppDisplayPicRaw","GameDisplayName","GameDisplayPicRaw","Gamerscore","Gamertag"],"userIds":["xboxUserId_0"]})", httpCall->request_body().request_message_string());
 
         auto result = task.get();
         VerifyXboxUserProfileProperties(result, &x);
@@ -207,14 +207,14 @@ public:
 
         web::json::value responseJson = BuildXboxUserProfilesResultJsonResponse(profileList);
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto task = create_task(xboxLiveContext->ProfileService->GetUserProfilesAsync(xboxUserIds->GetView()));
         VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://profile.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(L"/users/batch/profile/settings", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_STR(LR"({"settings":["AppDisplayName","AppDisplayPicRaw","GameDisplayName","GameDisplayPicRaw","Gamerscore","Gamertag"],"userIds":["xboxUserId_0","xboxUserId_1","xboxUserId_2","xboxUserId_3"]})", httpCall->request_body().request_message_string());
+        VERIFY_ARE_EQUAL_STR(R"({"settings":["AppDisplayName","AppDisplayPicRaw","GameDisplayName","GameDisplayPicRaw","Gamerscore","Gamertag"],"userIds":["xboxUserId_0","xboxUserId_1","xboxUserId_2","xboxUserId_3"]})", httpCall->request_body().request_message_string());
 
         auto profiles = task.get();
         int index = 0;
@@ -239,7 +239,7 @@ public:
 
         web::json::value responseJson = BuildXboxUserProfilesResultJsonResponse(profileList);
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto task = create_task(xboxLiveContext->ProfileService->GetUserProfilesForSocialGroupAsync(SocialGroupConstants::People));

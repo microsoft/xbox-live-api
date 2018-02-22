@@ -20,18 +20,18 @@ MockSocialManager::get_mock_singleton_instance()
     return g_socialManager;
 }
 
-const xsapi_internal_unordered_map(string_t, std::shared_ptr<xbox_social_user_group>)& MockSocialManager::xbox_social_user_groups() const
+const xsapi_internal_unordered_map<string_t, std::shared_ptr<xbox_social_user_group>>& MockSocialManager::xbox_social_user_groups() const
 {
     return m_xboxSocialUserGroups;
 }
-const xsapi_internal_unordered_map(string_t, xsapi_internal_vector(string_t))& MockSocialManager::user_to_view_map() const
+const xsapi_internal_unordered_map<string_t, xsapi_internal_vector<string_t>>& MockSocialManager::user_to_view_map() const
 {
     return m_userToViewMap;
 }
 
-const xsapi_internal_unordered_map(string_t, std::shared_ptr<MockSocialGraph>) MockSocialManager::local_graphs()
+const xsapi_internal_unordered_map<string_t, std::shared_ptr<MockSocialGraph>> MockSocialManager::local_graphs()
 {
-    xsapi_internal_unordered_map(string_t, std::shared_ptr<MockSocialGraph>) mockGraphs;
+    xsapi_internal_unordered_map<string_t, std::shared_ptr<MockSocialGraph>> mockGraphs;
     for (auto& graph : m_localGraphs)
     {
         mockGraphs[graph.first] = std::dynamic_pointer_cast<MockSocialGraph>(graph.second);

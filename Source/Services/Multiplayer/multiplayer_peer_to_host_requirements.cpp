@@ -80,7 +80,7 @@ multiplayer_peer_to_host_requirements::_Deserialize(
 
     std::error_code errc = xbox_live_error_code::no_error;
     auto result = multiplayer_peer_to_host_requirements(
-        std::chrono::milliseconds(utils::extract_json_uint52(json, _T("latencyMaximum"), errc)),
+        std::chrono::milliseconds(utils::extract_json_uint52(json, "latencyMaximum", errc)),
         utils::extract_json_int(json, _T("bandwidthDownMinimum"), errc),
         utils::extract_json_int(json, _T("bandwidthUpMinimum"), errc),
         multiplayer_session::_Convert_string_to_multiplayer_host_selection_metric(utils::extract_json_string(json, _T("hostSelectionMetric"), errc))

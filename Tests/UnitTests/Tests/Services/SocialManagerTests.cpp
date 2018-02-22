@@ -290,7 +290,8 @@ public:
                 newResponse[i] = responseTemplate;
             }
 
-            initialCallResponse->_Set_response_body(newResponse);
+            // TODO
+            //initialCallResponse->_Set_response_body(newResponse);
         };
         responses[_T("https://userpresence.mockenv.xboxlive.com")] = responseStruct;
         m_mockXboxSystemFactory->add_http_state_response(responses);
@@ -1613,7 +1614,8 @@ public:
         auto peoplehubResponseJson = GenerateInitialPeoplehubJSON();
         auto responseStruct = GetPeoplehubResponseStruct(peoplehubResponseJson, 200);
         peoplehubResponseJson[L"people"][0][L"gamertag"] = web::json::value::string(testTag);
-        responseStruct->responseList[0]->_Set_response_body(peoplehubResponseJson);
+        // TODO
+        //responseStruct->responseList[0]->_Set_response_body(peoplehubResponseJson);
 
         std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
 
@@ -2318,7 +2320,7 @@ public:
         for (auto& ws : m_mockXboxSystemFactory->GetMockWebSocketClients())
         {
             ws->m_connectToFail = true;
-            ws->m_closeStatus = web::websockets::client::websocket_close_status::abnormal_close;
+            ws->m_closeStatus = HC_WEBSOCKET_CLOSE_ABNORMAL_CLOSE;
             ws->close();
         }
 

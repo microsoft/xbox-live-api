@@ -80,6 +80,32 @@ public:
         _In_ const std::vector<unsigned char>& requestBodyArray
         );
 
+    void get_token_and_signature(
+        _In_ const string_t& httpMethod,
+        _In_ const string_t& url,
+        _In_ const string_t& headers,
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+        );
+
+    void get_token_and_signature(
+        _In_ const string_t& httpMethod,
+        _In_ const string_t& url,
+        _In_ const string_t& headers,
+        _In_ const string_t& requestBodyString,
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+        );
+
+    void get_token_and_signature(
+        _In_ const string_t& httpMethod,
+        _In_ const string_t& url,
+        _In_ const string_t& headers,
+        _In_ const std::vector<unsigned char>& requestBodyArray,
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+        );
+
     bool is_signed_in() const;
     void set_user_pointer(_In_ std::shared_ptr<system::xbox_live_user> user);
     void set_title_telemetry_session_id(_In_ const string_t& sessionId);
@@ -94,6 +120,19 @@ public:
         _In_ const std::vector<unsigned char>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh
+        ) = 0;
+
+    // TODO remove ppl version, change to xsapi_internal_strings
+    virtual void internal_get_token_and_signature(
+        _In_ const string_t& httpMethod,
+        _In_ const string_t& url,
+        _In_ const string_t& endpointForNsal,
+        _In_ const string_t& headers,
+        _In_ const std::vector<unsigned char>& bytes,
+        _In_ bool promptForCredentialsIfNeeded,
+        _In_ bool forceRefresh,
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
         ) = 0;
 
     static function_context add_sign_in_completed_handler(_In_ std::function<void(const string_t&)> handler);
@@ -173,6 +212,19 @@ public:
         _In_ bool forceRefresh
         ) override;
 
+    // TODO delete ppl version eventually
+    void internal_get_token_and_signature(
+        _In_ const string_t& httpMethod,
+        _In_ const string_t& url,
+        _In_ const string_t& endpointForNsal,
+        _In_ const string_t& headers,
+        _In_ const std::vector<unsigned char>& bytes,
+        _In_ bool promptForCredentialsIfNeeded,
+        _In_ bool forceRefresh,
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+        ) override;
+
 private:
 
     void user_signed_out();
@@ -241,5 +293,39 @@ public:
 
 };
 #endif
+
+struct get_token_and_signature_context
+{
+    get_token_and_signature_context(
+        _In_ std::shared_ptr<user_impl> _userImpl,
+        _In_ const string_t& _httpMethod,
+        _In_ const string_t& _url,
+        _In_ const string_t& _headers,
+        _In_ const std::vector<unsigned char>& _bytes,
+        _In_ bool _promptForCredentialsIfNeeded,
+        _In_ bool _forceRefresh,
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> _callback
+        ) :
+        userImpl(_userImpl),
+        httpMethod(_httpMethod),
+        url(_url),
+        headers(_headers),
+        bytes(_bytes),
+        promptForCredentialsIfNeeded(_promptForCredentialsIfNeeded),
+        forceRefresh(_forceRefresh),
+        callback(_callback)
+    {
+    }
+
+    std::shared_ptr<user_impl> userImpl; 
+    string_t httpMethod;
+    string_t url;
+    string_t headers;
+    std::vector<unsigned char> bytes;
+    bool promptForCredentialsIfNeeded;
+    bool forceRefresh;
+    xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback;
+    xbox_live_result<token_and_signature_result> result;
+};
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

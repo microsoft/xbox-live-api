@@ -10,12 +10,6 @@
 #include "xsapi/mem.h"
 #include "xsapi/types.h"
 
-namespace xbox { namespace services {
-    namespace system {
-        class xbox_live_user;
-    }
-}}
-
 namespace xbox {
     namespace services {
 
@@ -703,16 +697,16 @@ private:
     const std::vector<uint64_t>& tracking_users();
 
     void update_view(
-        _In_ const xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)& snapshotList,
+        _In_ const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>& snapshotList,
         _In_ const std::vector<social_event>& socialEvents
         );
 
     void initialize_filter_list(
-        _In_ const xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)& users
+        _In_ const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>& users
         );
 
     void filter_list(
-        _In_ const xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)& snapshotList,
+        _In_ const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>& snapshotList,
         _In_ const std::vector<social_event>& socialEvents
         );
 
@@ -920,9 +914,9 @@ protected:
 
     std::vector<social_event> m_eventQueue;
     std::vector<xbox_live_user_t> m_localUserList;
-    xsapi_internal_unordered_map(string_t, std::shared_ptr<xbox_social_user_group>) m_xboxSocialUserGroups;
-    xsapi_internal_unordered_map(string_t, xsapi_internal_vector(string_t)) m_userToViewMap;
-    xsapi_internal_unordered_map(string_t, std::shared_ptr<social_graph>) m_localGraphs;
+    xsapi_internal_unordered_map<string_t, std::shared_ptr<xbox_social_user_group>> m_xboxSocialUserGroups;
+    xsapi_internal_unordered_map<string_t, xsapi_internal_vector<string_t>> m_userToViewMap;
+    xsapi_internal_unordered_map<string_t, std::shared_ptr<social_graph>> m_localGraphs;
     std::mutex m_socialMangerLock;
     std::mutex m_socialManagerEventLock;
 

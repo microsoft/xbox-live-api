@@ -60,8 +60,8 @@ xbox_live_result<void> local_config::read()
 #endif
 }
 
-string_t local_config::get_value_from_local_storage(
-    _In_ const string_t& name
+xsapi_internal_string local_config::get_value_from_local_storage(
+    _In_ const xsapi_internal_string& name
     )
 {
 #if UWP_API
@@ -70,7 +70,7 @@ string_t local_config::get_value_from_local_storage(
         ApplicationDataContainer^ localSettings = ApplicationData::Current->LocalSettings;
 
         auto values = localSettings->Values;
-        String^ key = ref new String(name.c_str());
+        String^ key = ref new String(utils::string_t_from_internal_string(name).data());
         String^ value = nullptr;
         
         if (values->HasKey(key))
@@ -80,24 +80,24 @@ string_t local_config::get_value_from_local_storage(
          
         if (!value)
         {
-            return L"";
+            return "";
         }
         else
         {
-            return value->Data();
+            return xsapi_internal_string(utils::internal_string_from_utf16(value->Data(), value->Length()));
         }
     }
     catch (Exception^ ex)
     {
-        return L"";
+        return "";
     }
 #else 
     UNREFERENCED_PARAMETER(name);
-    return L"";
+    return "";
 #endif
 }
 
-xbox_live_result<void> local_config::write_value_to_local_storage(_In_ const string_t& name, _In_ const string_t& value)
+xbox_live_result<void> local_config::write_value_to_local_storage(_In_ const xsapi_internal_string& name, _In_ const xsapi_internal_string& value)
 {
 #if UWP_API
     try
@@ -106,8 +106,8 @@ xbox_live_result<void> local_config::write_value_to_local_storage(_In_ const str
 
         auto values = localSettings->Values;
         values->Insert(
-            ref new Platform::String(name.c_str()),
-            dynamic_cast<PropertyValue^>(PropertyValue::CreateString(ref new Platform::String(value.c_str())))
+            ref new Platform::String(utils::string_t_from_internal_string(name).c_str()),
+            dynamic_cast<PropertyValue^>(PropertyValue::CreateString(ref new Platform::String(utils::string_t_from_internal_string(value).c_str())))
             );
         return xbox_live_result<void>();
     }
@@ -124,14 +124,14 @@ xbox_live_result<void> local_config::write_value_to_local_storage(_In_ const str
 }
 
 xbox_live_result<void> local_config::delete_value_from_local_storage(
-    _In_ const string_t& name
+    _In_ const xsapi_internal_string& name
     )
 {
 #if UWP_API
     try
     {
         ApplicationDataContainer^ localSettings = ApplicationData::Current->LocalSettings;
-        localSettings->Values->Remove(ref new Platform::String(name.c_str()));
+        localSettings->Values->Remove(ref new Platform::String(utils::string_t_from_internal_string(name).c_str()));
         return xbox_live_result<void>();
     }
     catch (Exception^ ex)

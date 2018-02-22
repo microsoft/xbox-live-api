@@ -690,9 +690,9 @@ multiplayer_lobby_client::commit_pending_lobby_changes(
             {
                 if (sessionRef.is_null())
                 {
-                    string_t sessionName = utils::create_guid(true);
+                    string_t sessionName = utils::string_t_from_internal_string(utils::create_guid(true));
                     sessionRef = multiplayer_session_reference(
-                        utils::try_get_override_scid(),
+                        utils::string_t_from_internal_string(utils::try_get_override_scid()),
                         m_lobbySessionTemplateName,
                         sessionName
                         );
@@ -962,7 +962,7 @@ multiplayer_lobby_client::create_game_from_lobby()
             }
         }
 
-        auto sessionName = utils::create_guid(true);
+        string_t sessionName = utils::string_t_from_internal_string(utils::create_guid(true));
         RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(gameClient->join_game_helper(sessionName), void);
     });
 

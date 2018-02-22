@@ -3,7 +3,6 @@
 
 #pragma once
 #include <mutex>
-#include <cpprest/ws_client.h>
 
 namespace xbox { namespace services {
     class web_socket_connection;
@@ -117,17 +116,22 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
+    real_time_activity_subscription() {}
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
     real_time_activity_subscription(_In_ std::function<void(const real_time_activity_subscription_error_event_args&)> subscriptionErrorHandler);
 
     /// <summary>The state of the subscription request.</summary>
-    _XSAPIIMP real_time_activity_subscription_state state() const;
+    _XSAPIIMP virtual real_time_activity_subscription_state state() const; // TODO this shouldn't be virtual after we migrate this class
     virtual void _Set_state(_In_ real_time_activity_subscription_state newState);
 
     /// <summary>The resource uri for the request.</summary>
-    _XSAPIIMP const string_t& resource_uri() const;
+    _XSAPIIMP virtual const string_t& resource_uri() const; // TODO this shouldn't be virtual after we migrate this class
 
     /// <summary>The unique subscription id for the request.</summary>
-    _XSAPIIMP uint32_t subscription_id() const;
+    _XSAPIIMP virtual uint32_t subscription_id() const; // TODO this shouldn't be virtual after we migrate this class
     
     virtual ~real_time_activity_subscription() {}
 
@@ -350,8 +354,7 @@ private:
     std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
 
     // web socket events callbacks
-    void on_socket_message_received(_In_ const string_t& message);
-    void on_socket_closed(_In_ web::websockets::client::websocket_close_status closeStatus, _In_ string_t closeReason);
+    void on_socket_message_received(_In_ const xsapi_internal_string& message);
     void on_socket_connection_state_change(_In_ web_socket_connection_state oldState, _In_ web_socket_connection_state newState);
 
     volatile long m_sequenceNumber;

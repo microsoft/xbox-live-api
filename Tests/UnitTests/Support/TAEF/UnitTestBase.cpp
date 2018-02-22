@@ -135,4 +135,19 @@ void VerifyEqualStr(
     VERIFY_IS_EQUAL_STR_HELPER(expected, actual, actualName.c_str(), errorInfo);
 }
 
+void VerifyEqualStr(
+    xsapi_internal_string expected,
+    xsapi_internal_string actual,
+    std::wstring actualName,
+    const WEX::TestExecution::ErrorInfo& errorInfo
+    )
+{
+    VERIFY_IS_EQUAL_STR_HELPER(
+        xbox::services::utils::string_t_from_internal_string(expected),
+        xbox::services::utils::string_t_from_internal_string(actual),
+        actualName.c_str(),
+        errorInfo
+    );
+}
+
 #endif

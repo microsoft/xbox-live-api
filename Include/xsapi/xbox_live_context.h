@@ -33,7 +33,7 @@ class xbox_live_context_server_impl;
 /// </summary>
 class xbox_live_context
 {
-public:    
+public:
 
 #if XSAPI_XDK_AUTH
     /// <summary>
@@ -221,6 +221,10 @@ public:
 
 private:
     std::shared_ptr<xbox::services::xbox_live_context_impl> m_xboxLiveContextImpl;
+
+    social::profile_service m_profileService;
+    social::social_service m_socialService;
+    social::reputation_service m_reputationService;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

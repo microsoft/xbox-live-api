@@ -118,6 +118,32 @@ pplx::task<xbox_live_result<user_context_auth_result>> user_context::get_auth_re
     });
 }
 
+void user_context::get_auth_result(
+    _In_ const string_t& httpMethod,
+    _In_ const string_t& url,
+    _In_ const string_t& headers,
+    _In_ const string_t& requestBodyString,
+    _In_ bool allUsersAuthRequired,
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+    )
+{
+    // TODO
+}
+
+void user_context::get_auth_result(
+    _In_ const string_t& httpMethod,
+    _In_ const string_t& url,
+    _In_ const string_t& headers,
+    _In_ const std::vector<unsigned char>& requestBodyVector,
+    _In_ bool allUsersAuthRequired,
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+    )
+{
+    // TODO
+}
+
 pplx::task<xbox_live_result<void>> user_context::refresh_token()
 {
     auto authConfig = m_user->_User_impl()->get_auth_config();

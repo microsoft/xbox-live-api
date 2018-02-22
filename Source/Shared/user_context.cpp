@@ -16,7 +16,6 @@ using namespace Microsoft::Xbox::Services::System;
 
 using namespace xbox::services::system;
 
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 const string_t&

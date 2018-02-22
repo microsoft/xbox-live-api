@@ -36,6 +36,69 @@ std::shared_ptr< xbox::services::system::xbox_live_user > user_context::user() c
     return m_user;
 }
 
+void user_context::get_auth_result(
+    _In_ const string_t& httpMethod,
+    _In_ const string_t& url,
+    _In_ const string_t& headers,
+    _In_ const string_t& requestBodyString,
+    _In_ bool allUsersAuthRequired,
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+    )
+{
+    UNREFERENCED_PARAMETER(allUsersAuthRequired);
+
+    std::string utf8Body(utility::conversions::to_utf8string(requestBodyString));
+    std::vector<unsigned char> utf8Vec(utf8Body.begin(), utf8Body.end());
+
+    get_auth_result(
+        httpMethod,
+        url,
+        headers,
+        utf8Vec,
+        allUsersAuthRequired,
+        taskGroupId,
+        callback
+    );
+}
+
+void user_context::get_auth_result(
+    _In_ const string_t& httpMethod,
+    _In_ const string_t& url,
+    _In_ const string_t& headers,
+    _In_ const std::vector<unsigned char>& requestBodyVector,
+    _In_ bool allUsersAuthRequired,
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+    )
+{
+    UNREFERENCED_PARAMETER(allUsersAuthRequired);
+
+#if XSAPI_SERVER
+    if (m_server != nullptr)
+    {
+        m_server->get_token_and_signature(httpMethod, url, headers, requestBodyString)
+            .then([completionRoutine, completionRoutineContext, taskGroupId](xbox_live_result<token_and_signature_result> xblResult)
+        {
+            const auto& tokenResult = xblResult.payload();
+            user_context_auth_result userContextResult(tokenResult.token(), tokenResult.signature());
+            callback(xbox_live_result<user_context_auth_result>(userContextResult, xblResult.err(), xblResult.err_message()));
+        });
+        return;
+    }
+#endif
+    if (m_user != nullptr)
+    {
+        m_user->_User_impl()->get_token_and_signature(httpMethod, url, headers, requestBodyVector, taskGroupId,
+            [callback](xbox_live_result<token_and_signature_result> result)
+        {
+            const auto& tokenResult = result.payload();
+            user_context_auth_result userContextResult(tokenResult.token(), tokenResult.signature());
+            callback(xbox_live_result<user_context_auth_result>(userContextResult, result.err(), result.err_message()));
+        });
+    }
+}
+
 pplx::task<xbox_live_result<user_context_auth_result> >
 user_context::get_auth_result(
     _In_ const string_t& httpMethod,

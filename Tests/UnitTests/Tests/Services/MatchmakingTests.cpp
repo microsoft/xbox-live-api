@@ -76,8 +76,8 @@ public:
 
         Platform::String^ ticketAttributes = ref new Platform::String(LR"({"desiredMap":"Hang 'em high", "desiredGameType" : "Crazy King"})");
 
-        std::wstring expectedRequest =
-            LR"({"giveUpDuration":10,"preserveSession":"never","ticketAttributes":{"desiredGameType":"Crazy King","desiredMap":"Hang 'em high"},"ticketSessionRef":{"name":"5E55104-0000-0000-0000-000000000001","scid":"FEEDFACE-0000-0000-0000-000000000001","templateName":"TestTemplate"}})";
+        xsapi_internal_string expectedRequest =
+            R"({"giveUpDuration":10,"preserveSession":"never","ticketAttributes":{"desiredGameType":"Crazy King","desiredMap":"Hang 'em high"},"ticketSessionRef":{"name":"5E55104-0000-0000-0000-000000000001","scid":"FEEDFACE-0000-0000-0000-000000000001","templateName":"TestTemplate"}})";
 
         std::wstring matchmakingUri = L"https://smartmatch.xboxlive.com/serviceconfigs/07617C5B-3423-4505-B6C6-10A16E1E5DDB/hoppers/DeathMatch";
 
@@ -123,8 +123,8 @@ public:
 
         auto expecteResponse = web::json::value::parse(LR"({})");
 
-        std::wstring expectedRequest =
-            LR"({"giveUpDuration":10,"preserveSession":"always","ticketSessionRef":{"name":"5E55104-0000-0000-0000-000000000001","scid":"FEEDFACE-0000-0000-0000-000000000001","templateName":"TestTemplate"}})";
+        xsapi_internal_string expectedRequest =
+            R"({"giveUpDuration":10,"preserveSession":"always","ticketSessionRef":{"name":"5E55104-0000-0000-0000-000000000001","scid":"FEEDFACE-0000-0000-0000-000000000001","templateName":"TestTemplate"}})";
 
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
         httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(expecteResponse);
@@ -165,7 +165,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"DELETE", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://smartmatch.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(std::wstring(L"/serviceconfigs/") + DEFAULT_SCID + L"/hoppers/" + DEFAULT_HOPPER_NAME + L"/tickets/" + DEFAULT_TICKET_ID, httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_STR(L"", httpCall->request_body().request_message_string());
+        VERIFY_ARE_EQUAL_STR("", httpCall->request_body().request_message_string());
     }
 
     DEFINE_TEST_CASE(TestGetMatchTicketAsync)
@@ -185,7 +185,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://smartmatch.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(std::wstring(L"/serviceconfigs/") + DEFAULT_SCID + L"/hoppers/" + DEFAULT_HOPPER_NAME + L"/tickets/" + DEFAULT_TICKET_ID, httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_STR(L"", httpCall->request_body().request_message_string());
+        VERIFY_ARE_EQUAL_STR("", httpCall->request_body().request_message_string());
 
         VerifyTicketDetails(ticket, expecteResponse);
     }
@@ -208,7 +208,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://smartmatch.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(std::wstring(L"/serviceconfigs/") + DEFAULT_SCID + L"/hoppers/" + DEFAULT_HOPPER_NAME + L"/stats", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_STR(L"", httpCall->request_body().request_message_string());
+        VERIFY_ARE_EQUAL_STR("", httpCall->request_body().request_message_string());
 
         VERIFY_ARE_EQUAL_STR(hopper->HopperName->Data(), L"gameawesome2");
         VERIFY_ARE_EQUAL_INT(hopper->EstimatedWaitTime.Duration, (long long)(30 * TICKS_PER_SECOND)); // 30 seconds

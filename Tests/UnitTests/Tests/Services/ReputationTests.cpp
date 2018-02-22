@@ -70,7 +70,7 @@ public:
     {
         auto responseJson = web::json::value::parse(defaultUserReputationData);
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto success = create_task(xboxLiveContext->ReputationService->SubmitReputationFeedbackAsync(
@@ -85,7 +85,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"https://reputation.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(L"/users/xuid(98052)/feedback", httpCall->PathQueryFragment.to_string());
 
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string().data());
         auto feedbackRequest = reputation_feedback_request::convert_reputation_feedback_type_to_string(static_cast<reputation_feedback_type>(reputationFeedback));
         VERIFY_IS_TRUE(!feedbackRequest.err() && !feedbackRequest.payload().empty());
         if (!sessionName->IsEmpty())
@@ -126,7 +126,7 @@ public:
     {
         DEFINE_TEST_CASE_PROPERTIES(TestSubmitReputationFeedbackAsyncInvalidArgs);
         auto responseJson = web::json::value::parse(defaultUserReputationData);
-        m_mockXboxSystemFactory->GetMockHttpCall()->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        m_mockXboxSystemFactory->GetMockHttpCall()->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
 
