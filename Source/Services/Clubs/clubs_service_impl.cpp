@@ -182,7 +182,7 @@ pplx::task<xbox_live_result<std::vector<club_recommendation_t>>> clubs_service_i
     auto task = make_clubs_http_call(
         _T("POST"),
         _T("clubhub"),
-        _T("/clubs/recommendations/decoration/settings"),
+        _T("/clubs/recommendations"),
         xbox_live_api::recommend_clubs
         )
     .then([sharedThis](std::shared_ptr<http_call_response> response)
