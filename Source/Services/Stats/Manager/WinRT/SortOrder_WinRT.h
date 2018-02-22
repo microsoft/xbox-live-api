@@ -13,12 +13,18 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_LEADERBOARD_BEGIN
 
 /// <summary> 
-/// The order to sort the leaderboard in
+/// The order to sort the leaderboard in.
 /// </summary>
 public enum class SortOrder
 {
+	/// <summary> 
+	/// Sort the leaderboard by ascending values (lower values indicate better ranking).
+	/// </summary>
     Ascending = xbox::services::leaderboard::sort_order::ascending,
 
+	/// <summary> 
+	/// Sort the leaderboard by descending values (higher values indicate better ranking).
+	/// </summary>
     Descending = xbox::services::leaderboard::sort_order::descending
 };
 

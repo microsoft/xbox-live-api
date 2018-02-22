@@ -244,6 +244,7 @@ xbox_live_result<void> http_call_impl::get_response_with_auth(
     return internal_get_response_with_auth(allUsersAuthRequired);
 }
 
+
 #if XSAPI_U
 pplx::task<std::shared_ptr<http_call_response>>
 http_call_impl::get_response_with_auth(
