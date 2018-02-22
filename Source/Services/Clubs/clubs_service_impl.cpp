@@ -182,7 +182,7 @@ pplx::task<xbox_live_result<std::vector<club_recommendation_t>>> clubs_service_i
     auto task = make_clubs_http_call(
         _T("POST"),
         _T("clubhub"),
-        _T("/clubs/recommendations/decoration/settings"),
+        _T("/clubs/recommendations"),
         xbox_live_api::recommend_clubs
         )
     .then([sharedThis](std::shared_ptr<http_call_response> response)
@@ -190,7 +190,7 @@ pplx::task<xbox_live_result<std::vector<club_recommendation_t>>> clubs_service_i
         return clubs_serializers::generate_xbox_live_result<std::vector<club_recommendation_t>>(
             clubs_serializers::deserialize_recommendations_from_clubhub_response(response->response_body_json(), sharedThis),
             response
-            );            
+            );
     });
 
     return utils::create_exception_free_task(task);
