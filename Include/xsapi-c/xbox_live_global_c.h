@@ -23,17 +23,12 @@ typedef enum XBL_ASYNC_EVENT_TYPE
     /// <summary>
     /// An async task is pending and will be executed on next dispatch call
     /// </summary>
-    XBL_ASYNC_EVENT_WORK_PENDING,
-
-    /// <summary>
-    /// An async task has started executing but has not yet completed execution
-    /// </summary>
-    XBL_ASYNC_EVENT_WORK_STARTED,
+    XBL_ASYNC_EVENT_WORK_READY = 0,
 
     /// <summary>
     /// An async task has completed executing
     /// </summary>
-    XBL_ASYNC_EVENT_WORK_COMPLETED
+    XBL_ASYNC_EVENT_COMPLETION_READY = 2
 } XBL_ASYNC_EVENT_TYPE;
 
 typedef enum XBL_ASYNC_QUEUE_CALLBACK_TYPE
