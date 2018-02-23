@@ -62,10 +62,19 @@ XblDispatchAsyncQueue(
 
 XBL_API bool XBL_CALLING_CONV
 XblIsAsyncQueueEmpty(
-    _In_ XBL_ASYNC_QUEUE queue
+    _In_ XBL_ASYNC_QUEUE queue,
+    _In_ XBL_ASYNC_QUEUE_CALLBACK_TYPE type
     ) XBL_NOEXCEPT
 {
-    return !(HCTaskGetCompletedTaskQueueSize(HC_SUBSYSTEM_ID_XSAPI, queue->taskGroupId) > 0);
+    if (type == XBL_ASYNC_QUEUE_CALLBACK_TYPE_WORK)
+    {
+        return !(HCTaskGetPendingTaskQueueSize(HC_SUBSYSTEM_ID_XSAPI) > 0);
+    }
+    else if (type == XBL_ASYNC_QUEUE_CALLBACK_TYPE_COMPLETION)
+    {
+        return !(HCTaskGetCompletedTaskQueueSize(HC_SUBSYSTEM_ID_XSAPI, queue->taskGroupId) > 0);
+    }
+    return true;
 }
 
 XBL_API XBL_RESULT XBL_CALLING_CONV

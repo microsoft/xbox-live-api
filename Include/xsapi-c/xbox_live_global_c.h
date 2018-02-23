@@ -121,7 +121,8 @@ XblDispatchAsyncQueue(
 /// <returns>Whether or no there is working remaining in the queue.</returns>
 XBL_API bool XBL_CALLING_CONV
 XblIsAsyncQueueEmpty(
-    _In_ XBL_ASYNC_QUEUE queue
+    _In_ XBL_ASYNC_QUEUE queue,
+    _In_ XBL_ASYNC_QUEUE_CALLBACK_TYPE type
     ) XBL_NOEXCEPT;
 
 /////////////////////////////////////////////////////////////////////////////////////////
