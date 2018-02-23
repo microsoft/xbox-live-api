@@ -471,7 +471,7 @@ void Game::SignIn()
     XboxLiveUserSignInWithCoreDispatcher(
         m_user, 
         Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->CoreWindow->Dispatcher, 
-        HandleSignInResult,
+        HandleSignInResult, 
         this,
         g_asyncQueue);
 }
@@ -483,7 +483,7 @@ void Game::SignInSilently()
 
 void Game::GetUserProfile()
 {
-    if (!m_user->isSignedIn)
+    if (m_xboxLiveContext == nullptr || m_user == nullptr || !m_user->isSignedIn)
     {
         Log(L"Must be signed in first to get profile!");
         return;
@@ -496,6 +496,15 @@ void Game::GetUserProfile()
         if (result.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
         {
             pThis->Log(L"Successfully got profile!");
+            WCHAR text[1024];
+            swprintf_s(text, ARRAYSIZE(text), L"Gamertag: %S", profile->gamertag);
+            pThis->Log(text);
+            swprintf_s(text, ARRAYSIZE(text), L"XboxUserId: %S", profile->xboxUserId);
+            pThis->Log(text);
+            swprintf_s(text, ARRAYSIZE(text), L"Gamerscore: %S", profile->gamerscore);
+            pThis->Log(text);
+            swprintf_s(text, ARRAYSIZE(text), L"GameDisplayPic: %S", profile->gameDisplayPictureResizeUri);
+            pThis->Log(text);
         }
         else
         {
