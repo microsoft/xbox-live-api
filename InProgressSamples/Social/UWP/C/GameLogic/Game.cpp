@@ -16,8 +16,8 @@ Game* g_sampleInstance = nullptr;
 std::mutex Game::m_displayEventQueueLock;
 
 HANDLE g_stopRequestedHandle;
-HANDLE g_pendingReadyHandle;
-HANDLE g_completeReadyHandle;
+HANDLE g_workReadyHandle;
+HANDLE g_completionReadyHandle;
 XBL_ASYNC_QUEUE g_asyncQueue;
 
 void xbl_event_handler(
@@ -31,15 +31,12 @@ void xbl_event_handler(
 
     switch (eventType)
     {
-    case XBL_ASYNC_EVENT_TYPE::XBL_ASYNC_EVENT_WORK_PENDING:
-        SetEvent(g_pendingReadyHandle);
+    case XBL_ASYNC_EVENT_TYPE::XBL_ASYNC_EVENT_WORK_READY:
+        SetEvent(g_workReadyHandle);
         break;
 
-    case XBL_ASYNC_EVENT_TYPE::XBL_ASYNC_EVENT_WORK_STARTED:
-        break;
-
-    case XBL_ASYNC_EVENT_TYPE::XBL_ASYNC_EVENT_WORK_COMPLETED:
-        SetEvent(g_completeReadyHandle);
+    case XBL_ASYNC_EVENT_TYPE::XBL_ASYNC_EVENT_COMPLETION_READY:
+        SetEvent(g_completionReadyHandle);
         break;
     }
 }
@@ -48,8 +45,8 @@ DWORD WINAPI background_thread_proc(LPVOID lpParam)
 {
     HANDLE hEvents[3] =
     {
-        g_pendingReadyHandle,
-        g_completeReadyHandle,
+        g_workReadyHandle,
+        g_completionReadyHandle,
         g_stopRequestedHandle
     };
 
@@ -59,18 +56,18 @@ DWORD WINAPI background_thread_proc(LPVOID lpParam)
         DWORD dwResult = WaitForMultipleObjectsEx(3, hEvents, false, INFINITE, false);
         switch (dwResult)
         {
-        case WAIT_OBJECT_0: // pending 
+        case WAIT_OBJECT_0: // work ready 
             XblDispatchAsyncQueue(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_WORK);
             if (!XblIsAsyncQueueEmpty(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_WORK))
             {
-                SetEvent(g_pendingReadyHandle);
+                SetEvent(g_workReadyHandle);
             }
             break;
-        case WAIT_OBJECT_0 + 1: // completed 
+        case WAIT_OBJECT_0 + 1: // completion ready
             XblDispatchAsyncQueue(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_COMPLETION);
             if (!XblIsAsyncQueueEmpty(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_COMPLETION))
             {
-                SetEvent(g_completeReadyHandle);
+                SetEvent(g_completionReadyHandle);
             }
             break;
         default:
@@ -93,8 +90,8 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
     m_sceneRenderer = std::unique_ptr<Renderer>(new Renderer(m_deviceResources));
 
     g_stopRequestedHandle = CreateEvent(nullptr, true, false, nullptr);
-    g_pendingReadyHandle = CreateEvent(nullptr, false, false, nullptr);
-    g_completeReadyHandle = CreateEvent(nullptr, false, false, nullptr);
+    g_workReadyHandle = CreateEvent(nullptr, false, false, nullptr);
+    g_completionReadyHandle = CreateEvent(nullptr, false, false, nullptr);
 
     XblGlobalInitialize();
     XblCreateAsyncQueue(&g_asyncQueue);
