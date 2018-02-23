@@ -3,7 +3,6 @@
 #pragma once
 
 #include "xsapi-c/errors_c.h"
-#include "xsapi-c/leaderboard_c.h"
 
 struct taskargs
 {
