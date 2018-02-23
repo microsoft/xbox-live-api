@@ -61,14 +61,14 @@ DWORD WINAPI background_thread_proc(LPVOID lpParam)
         {
         case WAIT_OBJECT_0: // pending 
             XblDispatchAsyncQueue(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_WORK);
-            if (!XblIsAsyncQueueEmpty(g_asyncQueue))
+            if (!XblIsAsyncQueueEmpty(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_WORK))
             {
                 SetEvent(g_pendingReadyHandle);
             }
             break;
         case WAIT_OBJECT_0 + 1: // completed 
             XblDispatchAsyncQueue(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_COMPLETION);
-            if (!XblIsAsyncQueueEmpty(g_asyncQueue))
+            if (!XblIsAsyncQueueEmpty(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_COMPLETION))
             {
                 SetEvent(g_completeReadyHandle);
             }
