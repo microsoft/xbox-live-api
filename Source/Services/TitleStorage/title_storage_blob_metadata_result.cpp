@@ -22,10 +22,10 @@ title_storage_blob_metadata_result::items() const
     return m_items;
 }
 
-pplx::task<xbox_live_result<title_storage_blob_metadata_result>> 
+pplx::task<xbox_live_result<title_storage_blob_metadata_result>>
 title_storage_blob_metadata_result::get_next(
     _In_ uint32_t maxItems
-    )
+    ) const
 {
     if (m_continuationToken.empty())
     {

@@ -114,14 +114,14 @@ real_time_activity_service::activate()
         });
 #endif
 
-        stringstream_t endpoint;
-        endpoint << utils::create_xboxlive_endpoint(_T("rta"), m_appConfig, _T("wss"));
-        endpoint << _T("/connect");
+        xsapi_internal_stringstream endpoint;
+        endpoint << utils::create_xboxlive_endpoint("rta", m_appConfig->internal_app_config(), "wss");
+        endpoint << "/connect";
 
         m_webSocketConnection = std::make_shared<web_socket_connection>(
             m_userContext,
             endpoint.str(),
-            _T("rta.xboxlive.com.V2"),
+            "rta.xboxlive.com.V2",
             m_xboxLiveContextSettings
             );
 
@@ -135,7 +135,7 @@ real_time_activity_service::activate()
             }
         });
 
-        m_webSocketConnection->set_received_handler([thisWeakPtr](string_t message)
+        m_webSocketConnection->set_received_handler([thisWeakPtr](xsapi_internal_string message)
         {
             std::shared_ptr<real_time_activity_service> pThis(thisWeakPtr.lock());
             if (pThis != nullptr)
@@ -462,10 +462,10 @@ real_time_activity_service::trigger_connection_state_changed_event(
 
 void
 real_time_activity_service::on_socket_message_received(
-    _In_ const string_t& message
+    _In_ const xsapi_internal_string& message
     )
 {
-    auto msgJson = web::json::value::parse(message);
+    auto msgJson = web::json::value::parse(utils::string_t_from_internal_string(message));
     real_time_activity_message_type messageType = static_cast<real_time_activity_message_type>(msgJson[0].as_integer());
 
     switch (messageType)
@@ -638,18 +638,7 @@ real_time_activity_service::submit_subscriptions()
         request[1] = sequenceNumber;
         request[2] = web::json::value(subscription->resource_uri());
 
-        m_webSocketConnection->send(request.serialize())
-        .then([](task<void> t)
-        {
-            try
-            {
-                t.get();
-            }
-            catch (...)
-            {
-                // Throws this exception on failure to send, our retry logic once the websocket comes back online will resend
-            }
-        });
+        m_webSocketConnection->send(utils::internal_string_from_string_t(request.serialize()));
     }
 }
 
@@ -686,17 +675,7 @@ real_time_activity_service::_Remove_subscription(
             request[1] = sequenceNumber;
             request[2] = subscriptionId;
 
-            auto asyncOp = m_webSocketConnection->send(request.serialize())
-                .then([subscriptionIter](task<void> t)
-            {
-                try
-                {
-                    t.get();
-                }
-                catch (const web::websockets::client::websocket_exception&)
-                {
-                }
-            });
+            m_webSocketConnection->send(utils::internal_string_from_string_t(request.serialize()));
         }
     }
     else if(subscription->state() == real_time_activity_subscription_state::pending_subscribe)
@@ -752,21 +731,7 @@ real_time_activity_service::_Close_websocket()
     if (socketToClean != nullptr)
     {
         socketToClean->set_received_handler(nullptr);
-
-        socketToClean->close().then([socketToClean](task<void> t)
-        {
-            try
-            {
-                // Hold the reference to the shared point, so it won't deconstruct  
-                auto socketConnectionSharedCopy = socketToClean;
-                t.get();
-                socketConnectionSharedCopy = nullptr;
-            }
-            catch (...)
-            {
-            }
-        });
-
+        socketToClean->close();
         socketToClean->set_connection_state_change_handler(nullptr);
     }
 }

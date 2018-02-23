@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "system_internal.h"
+
 #if !TV_API
     #if !XSAPI_CPP
         // This header is required for C++ Microsoft.* user object
@@ -53,6 +55,27 @@ public:
 
     bool is_signed_in() const;
 
+    void get_auth_result(
+        _In_ const string_t& httpMethod,
+        _In_ const string_t& url,
+        _In_ const string_t& headers,
+        _In_ const string_t& requestBodyString,
+        _In_ bool allUsersAuthRequired,
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+        );
+
+    void get_auth_result(
+        _In_ const string_t& httpMethod,
+        _In_ const string_t& url,
+        _In_ const string_t& headers,
+        _In_ const std::vector<unsigned char>& requestBodyVector,
+        _In_ bool allUsersAuthRequired,
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+        );
+
+    /// TODO eventually remove
     pplx::task<xbox::services::xbox_live_result<user_context_auth_result>> get_auth_result(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,
@@ -61,6 +84,7 @@ public:
         _In_ bool allUsersAuthRequired = false
         );
 
+    /// TODO eventually remove
     pplx::task<xbox::services::xbox_live_result<user_context_auth_result>> get_auth_result(
         _In_ const string_t& httpMethod,
         _In_ const string_t& url,

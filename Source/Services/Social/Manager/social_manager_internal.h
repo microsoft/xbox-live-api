@@ -59,8 +59,8 @@ enum class social_graph_state
 
 struct user_group_status_change
 {
-    xsapi_internal_vector(string_t) addGroup;
-    xsapi_internal_vector(uint64_t) removeGroup;
+    xsapi_internal_vector<string_t> addGroup;
+    xsapi_internal_vector<uint64_t> removeGroup;
 };
 
 inline change_list_enum operator|(change_list_enum lhs, change_list_enum rhs)
@@ -77,36 +77,36 @@ class internal_social_event
 {
 public:
     internal_social_event() : m_socialEventType(internal_social_event_type::unknown) {}
-    internal_social_event(_In_ internal_social_event_type eventType, _In_ xsapi_internal_vector(xbox_social_user) usersAffected);
-    internal_social_event(_In_ internal_social_event_type eventType, _In_ xsapi_internal_vector(social_manager_presence_record) presenceRecords);
+    internal_social_event(_In_ internal_social_event_type eventType, _In_ xsapi_internal_vector<xbox_social_user> usersAffected);
+    internal_social_event(_In_ internal_social_event_type eventType, _In_ xsapi_internal_vector<social_manager_presence_record> presenceRecords);
     internal_social_event(_In_ internal_social_event_type eventType, _In_ xbox::services::presence::device_presence_change_event_args devicePresenceArgs);
     internal_social_event(_In_ internal_social_event_type eventType, _In_ xbox::services::presence::title_presence_change_event_args titlePresenceArgs);
-    internal_social_event(_In_ internal_social_event_type eventType, _In_ xsapi_internal_vector(uint64_t) userList);
+    internal_social_event(_In_ internal_social_event_type eventType, _In_ xsapi_internal_vector<uint64_t> userList);
     internal_social_event(
         _In_ internal_social_event_type socialEventType,
         _In_ xbox_live_result<void> errorInfo,
-        _In_ xsapi_internal_vector(xsapi_internal_string) userList
+        _In_ xsapi_internal_vector<xsapi_internal_string> userList
         );
 
     internal_social_event(
         _In_ internal_social_event_type eventType,
-        _In_ xsapi_internal_vector(xsapi_internal_string) userAddList,
+        _In_ xsapi_internal_vector<xsapi_internal_string> userAddList,
         _In_ pplx::task_completion_event<xbox_live_result<void>> tce
         );
 
     internal_social_event(
         _In_ internal_social_event_type eventType,
-        _In_ xsapi_internal_vector(xsapi_internal_string) userAddList
+        _In_ xsapi_internal_vector<xsapi_internal_string> userAddList
         );
 
     const call_buffer_timer_completion_context& completion_context() const;
     void set_completion_context(_In_ const call_buffer_timer_completion_context& compleitionContext);
-    const xsapi_internal_vector(xbox_social_user)& users_affected() const;
-    const xsapi_internal_vector(uint64_t)& users_to_remove() const;
-    const xsapi_internal_vector(social_manager_presence_record)& presence_records() const;
+    const xsapi_internal_vector<xbox_social_user>& users_affected() const;
+    const xsapi_internal_vector<uint64_t>& users_to_remove() const;
+    const xsapi_internal_vector<social_manager_presence_record>& presence_records() const;
     const xbox::services::presence::device_presence_change_event_args& device_presence_args() const;
     const xbox::services::presence::title_presence_change_event_args& title_presence_args() const;
-    const xsapi_internal_vector(xsapi_internal_string)& users_affected_as_string_vec() const;
+    const xsapi_internal_vector<xsapi_internal_string>& users_affected_as_string_vec() const;
     const pplx::task_completion_event<xbox_live_result<void>>& tce() const;
     const xbox_live_result<void>& error() const;
     internal_social_event_type event_type() const;
@@ -114,10 +114,10 @@ public:
 private:
     internal_social_event_type m_socialEventType;
     call_buffer_timer_completion_context m_completionContext;
-    xsapi_internal_vector(social_manager_presence_record) m_presenceRecords;
-    xsapi_internal_vector(xbox_social_user) m_usersAffected;
-    xsapi_internal_vector(xsapi_internal_string) m_usersAffectedAsStringVec;
-    xsapi_internal_vector(uint64_t) m_userList;
+    xsapi_internal_vector<social_manager_presence_record> m_presenceRecords;
+    xsapi_internal_vector<xbox_social_user> m_usersAffected;
+    xsapi_internal_vector<xsapi_internal_string> m_usersAffectedAsStringVec;
+    xsapi_internal_vector<uint64_t> m_userList;
     pplx::task_completion_event<xbox_live_result<void>> m_tce;
     xbox::services::presence::device_presence_change_event_args m_devicePresenceArgs;
     xbox::services::presence::title_presence_change_event_args m_titlePresenceArgs;
@@ -138,7 +138,7 @@ struct xbox_social_user_subscriptions
 
 struct change_struct
 {
-    const xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)* socialUsers;
+    const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>* socialUsers;
 };
 
 class internal_event_queue
@@ -200,7 +200,7 @@ private:
     static const uint32_t MAX_USERS_AFFECTED_PER_EVENT = 10;
 
     bool m_useLock;
-    xsapi_internal_dequeue(internal_social_event) m_eventQueue;
+    xsapi_internal_dequeue<internal_social_event> m_eventQueue;
     xbox::services::system::xbox_live_mutex m_eventMutex;
     xbox::services::system::xbox_live_mutex m_eventPriorityMutex;
 };
@@ -211,7 +211,7 @@ struct user_buffer
 
     byte* buffer;
     std::queue<byte*> freeData;
-    xsapi_internal_unordered_map(uint64_t, xbox_social_user_context) socialUserGraph;
+    xsapi_internal_unordered_map<uint64_t, xbox_social_user_context> socialUserGraph;
     internal_event_queue socialUserEventQueue;
 };
 
@@ -245,9 +245,9 @@ protected:
 
     void buffer_init(_Inout_ user_buffer& userBuffer, _In_ const std::vector<xbox_social_user>& users, _In_ size_t freeSpaceRequired);
 
-    static void add_users_impl(_In_ const xsapi_internal_vector(xbox_social_user)& users, _Inout_ user_buffer& userBufferActive, _Inout_ user_buffer& userBufferInactive);
+    static void add_users_impl(_In_ const xsapi_internal_vector<xbox_social_user>& users, _Inout_ user_buffer& userBufferActive, _Inout_ user_buffer& userBufferInactive);
 
-    static void remove_users_impl(_In_ const xsapi_internal_vector(xbox_social_user)& users, _Inout_ user_buffer& userBufferActive, _Inout_ user_buffer& userBufferInactive);
+    static void remove_users_impl(_In_ const xsapi_internal_vector<xbox_social_user>& users, _Inout_ user_buffer& userBufferActive, _Inout_ user_buffer& userBufferInactive);
 
     byte* buffer_alloc(
         _In_ size_t numUsers,
@@ -353,12 +353,12 @@ class social_graph_snapshot
 {
 public:
     social_graph_snapshot(
-        _In_ xsapi_internal_unordered_map(string_t, xbox_social_user_context) snapshot
+        _In_ xsapi_internal_unordered_map<string_t, xbox_social_user_context> snapshot
         );
 
-    const xsapi_internal_unordered_map(string_t, xbox_social_user_context)& snapshot();
+    const xsapi_internal_unordered_map<string_t, xbox_social_user_context>& snapshot();
 private:
-    xsapi_internal_unordered_map(string_t, xbox_social_user_context) m_socialUsers;
+    xsapi_internal_unordered_map<string_t, xbox_social_user_context> m_socialUsers;
 };
 
 
@@ -393,7 +393,7 @@ public:
     
     void enable_rich_presence_polling(_In_ bool shouldEnablePolling);
 
-    const xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)* active_buffer_social_graph();
+    const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>* active_buffer_social_graph();
 
 protected:
     static const std::chrono::minutes REFRESH_TIME_MIN;
@@ -425,7 +425,7 @@ protected:
         );
 
     pplx::task<xbox_live_result<std::vector<xbox_social_user>>> social_graph_timer_callback(
-        _In_ const std::vector<string_t>& users,
+        _In_ const xsapi_internal_vector<xsapi_internal_string>& users,
         _In_ const call_buffer_timer_completion_context& completionContext
         );
 
@@ -453,7 +453,7 @@ protected:
         _In_ xbox::services::real_time_activity::real_time_activity_connection_state rtaState
         );
 
-    void perform_diff(_In_ const xsapi_internal_unordered_map(uint64_t, xbox_social_user)& xboxSocialUsers);
+    void perform_diff(_In_ const xsapi_internal_unordered_map<uint64_t, xbox_social_user>& xboxSocialUsers);
 
     void set_state(_In_ social_graph_state socialGraphState);
 
@@ -516,11 +516,11 @@ protected:
     std::shared_ptr<call_buffer_timer> m_presencePollingTimer;
     std::shared_ptr<call_buffer_timer> m_socialGraphRefreshTimer;
     std::shared_ptr<call_buffer_timer> m_resyncRefreshTimer;
-    std::shared_ptr<xbox::services::social::social_relationship_change_subscription> m_socialRelationshipChangeSubscription;
+    std::shared_ptr<xbox::services::social::social_relationship_change_subscription_internal> m_socialRelationshipChangeSubscription;
     peoplehub_service m_peoplehubService;
     std::function<void()> m_graphDestructionCompleteCallback;
     std::function<void(_In_ xbox::services::real_time_activity::real_time_activity_connection_state state)> m_stateRTAFunction;
-    xsapi_internal_unordered_map(uint64_t, xbox_social_user_subscriptions) m_socialUserSubscriptions;
+    xsapi_internal_unordered_map<uint64_t, xbox_social_user_subscriptions> m_socialUserSubscriptions;
     std::recursive_mutex m_socialGraphMutex;
     std::recursive_mutex m_socialGraphPriorityMutex;
     std::recursive_mutex m_socialGraphStateMutex;

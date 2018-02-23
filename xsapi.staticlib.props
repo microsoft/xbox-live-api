@@ -3,12 +3,12 @@
   <PropertyGroup>
     <XsapiRoot>$(MSBuildThisFileDirectory)</XsapiRoot>
     <XsapiInclde>$(XsapiRoot)include\</XsapiInclde>
-    <CasablancaInclde>$(XsapiRoot)External\cpprestsdk\release\include\</CasablancaInclde>
+    <CasablancaInclde>$(XsapiRoot)include\cpprestsdk\</CasablancaInclde>
     <PackagesRoot>$(XsapiRoot)External\Packages\</PackagesRoot>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <PreprocessorDefinitions>XSAPI_CPP=1;_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>XSAPI_CPP=1;_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XBL_API_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(XsapiInclde);$(CasablancaInclde);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>

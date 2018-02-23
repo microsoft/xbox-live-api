@@ -115,7 +115,7 @@ public:
         statsValueDoc.do_work();
         auto updateStatResult = simplifiedStatService.update_stats_value_document(statsValueDoc).get();
         VERIFY_IS_TRUE(!updateStatResult.err());
-        auto& serializedRequest = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto& serializedRequest = web::json::value::parse(httpCall->request_body().request_message_string().data());
         auto& compareValue = web::json::value::parse(statValueDocumentResponse);
         
         auto& versionField = serializedRequest[_T("revision")];

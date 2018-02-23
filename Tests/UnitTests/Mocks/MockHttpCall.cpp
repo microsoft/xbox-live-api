@@ -16,7 +16,7 @@ MockHttpCall::MockHttpCall() :
 
 void MockHttpCall::reinit()
 {
-    m_requestBody = http_call_request_message();
+    m_requestBody = http_call_request_message_internal();
     ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(L"{}"));
     ServerName = std::wstring();
     HttpMethod = std::wstring();
@@ -114,7 +114,7 @@ pplx::task<std::shared_ptr<http_call_response>> MockHttpCall::get_response_with_
     CallCounter++;
     if (fRequestPostFunc != nullptr)
     {
-        fRequestPostFunc(ResultValue, m_requestBody.request_message_string());
+        fRequestPostFunc(ResultValue, utils::string_t_from_internal_string(m_requestBody.request_message_string()));
     }
     return pplx::task_from_result(ResultValue);
 }
@@ -133,11 +133,35 @@ MockHttpCall::get_response_with_auth(
     CallCounter++;
     if (fRequestPostFunc != nullptr)
     {
-        fRequestPostFunc(ResultValue, m_requestBody.request_message_string());
+        fRequestPostFunc(ResultValue, utils::string_t_from_internal_string(m_requestBody.request_message_string()));
     }
     ResultValue->_Set_full_url(ServerName);
     ResultValue->_Route_service_call();
     return pplx::task_from_result(ResultValue);
+}
+
+xbox_live_result<void> MockHttpCall::get_response_with_auth(
+    _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
+    _In_ http_call_response_body_type httpCallResponseBodyType,
+    _In_ bool allUsersAuthRequired,
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
+    )
+{
+    if (FAILED(ResultHR))
+    {
+        throw ResultHR;
+    }
+    CallCounter++;
+    if (fRequestPostFunc != nullptr)
+    {
+        fRequestPostFunc(ResultValue, utils::string_t_from_internal_string(m_requestBody.request_message_string()));
+    }
+    ResultValueInternal->set_full_url(utils::internal_string_from_string_t(ServerName));
+    ResultValueInternal->route_service_call();
+    callback(ResultValueInternal);
+
+    return xbox_live_result<void>();
 }
 
 pplx::task<std::shared_ptr<http_call_response>>
@@ -155,7 +179,7 @@ MockHttpCall::_Internal_get_response_with_auth(
     return pplx::task_from_result(ResultValue);
 }
 
-const std::wstring& MockHttpCall::server_name() const
+std::wstring MockHttpCall::server_name() const
 {
     return ServerName;
 }
@@ -165,7 +189,7 @@ const web::uri& MockHttpCall::path_query_fragment() const
     return PathQueryFragment;
 }
 
-const std::wstring& MockHttpCall::http_method() const
+std::wstring MockHttpCall::http_method() const
 {
     return HttpMethod;
 }
@@ -191,9 +215,9 @@ bool MockHttpCall::long_http_call() const
 }
 
 void MockHttpCall::set_request_body(
-    _In_ const std::wstring& value)
+    _In_ const string_t& value)
 {
-    m_requestBody = http_call_request_message(value);
+    m_requestBody = http_call_request_message_internal(utils::internal_string_from_string_t(value));
 }
 
 void
@@ -201,7 +225,7 @@ MockHttpCall::set_request_body(
     _In_ const web::json::value& value
     )
 {
-    m_requestBody = http_call_request_message(value.serialize());
+    m_requestBody = http_call_request_message_internal(utils::internal_string_from_string_t(value.serialize()));
 }
 
 void
@@ -209,10 +233,18 @@ MockHttpCall::set_request_body(
     _In_ const std::vector<BYTE>& value
     )
 {
-    m_requestBody = http_call_request_message(value);
+    m_requestBody = http_call_request_message_internal(xsapi_internal_vector<BYTE>(value.begin(), value.end()));
 }
 
-const http_call_request_message& MockHttpCall::request_body() const
+void
+MockHttpCall::set_request_body(
+    _In_ const xsapi_internal_string& value
+)
+{
+    m_requestBody = http_call_request_message_internal(value);
+}
+
+const http_call_request_message_internal& MockHttpCall::request_body() const
 {
     return m_requestBody;
 }
@@ -222,7 +254,7 @@ void MockHttpCall::set_content_type_header_value(
 {
 }
 
-const std::wstring& MockHttpCall::content_type_header_value() const
+std::wstring MockHttpCall::content_type_header_value() const
 {
     static std::wstring value = L"MockGetContentTypeHeaderValue";
     return value;
@@ -233,7 +265,7 @@ void MockHttpCall::set_xbox_contract_version_header_value(
 {
 }
 
-const std::wstring& MockHttpCall::xbox_contract_version_header_value() const
+std::wstring MockHttpCall::xbox_contract_version_header_value() const
 {
     static std::wstring value = L"MockGetXboxContractVersionHeaderValue";
     return value;
@@ -254,7 +286,8 @@ void MockHttpCall::set_custom_header(
     )
 {
 #if UNIT_TEST_SERVICES
-    ResultValue->_Add_response_header(headerName, headerValue);
+    // TODO
+    //ResultValue->_Add_response_header(headerName, headerValue);
 #endif
 }
 
@@ -263,14 +296,9 @@ void MockHttpCall::remove_custom_header(
     )
 {
 #if UNIT_TEST_SERVICES
-    ResultValue->_Remove_response_header(headerName);
+    // TODO
+    //ResultValue->_Remove_response_header(headerName);
 #endif
-}
-
-web::http::http_request MockHttpCall::get_default_request()
-{
-    web::http::http_request request(_T("GET"));
-    return request;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

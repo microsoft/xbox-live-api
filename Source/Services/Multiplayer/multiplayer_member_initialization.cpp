@@ -103,9 +103,9 @@ multiplayer_member_initialization::_Deserialize(
 
     if (returnObject.m_managedInitializationSet)
     {
-        returnObject.m_joinTimeout = std::chrono::milliseconds(utils::extract_json_uint52(managedInitializationJson, _T("joinTimeout"), errc));
-        returnObject.m_measurementTimeout = std::chrono::milliseconds(utils::extract_json_uint52(managedInitializationJson, _T("measurementTimeout"), errc));
-        returnObject.m_evaluationTimeout = std::chrono::milliseconds(utils::extract_json_uint52(managedInitializationJson, _T("evaluationTimeout"), errc));
+        returnObject.m_joinTimeout = std::chrono::milliseconds(utils::extract_json_uint52(managedInitializationJson, "joinTimeout", errc));
+        returnObject.m_measurementTimeout = std::chrono::milliseconds(utils::extract_json_uint52(managedInitializationJson, "measurementTimeout", errc));
+        returnObject.m_evaluationTimeout = std::chrono::milliseconds(utils::extract_json_uint52(managedInitializationJson, "evaluationTimeout", errc));
         returnObject.m_externalEvaluation = utils::extract_json_bool(managedInitializationJson, _T("externalEvaluation"), errc);
         returnObject.m_membersNeededToStart = utils::extract_json_int(managedInitializationJson, _T("membersNeededToStart"), errc);
     }

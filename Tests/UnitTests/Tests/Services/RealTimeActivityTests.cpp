@@ -278,7 +278,7 @@ public:
             subscription->reset();
         }
         // make it reconnect and re-subscribe
-        mockSocket->m_closeHandler(1001, L"");
+        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
         for (auto& subscription : subscriptionList)
         {
             subscription->subscribedEvent.wait();
@@ -478,14 +478,14 @@ public:
 
         // force to close and not reconnectedable
         mockSocket->m_connectToFail = true;
-        mockSocket->m_closeHandler(1001, L"");
-        mockSocket->m_closeHandler(1001, L"");
-        mockSocket->m_closeHandler(1001, L"");
-        mockSocket->m_closeHandler(1001, L"");
-        mockSocket->m_closeHandler(1001, L"");
-        mockSocket->m_closeHandler(1001, L"");
-        mockSocket->m_closeHandler(1001, L"");
-        mockSocket->m_closeHandler(1001, L"");
+        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
+        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
+        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
+        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
+        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
+        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
+        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
+        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
 
         VERIFY_ARE_EQUAL_INT(subscription->state(), real_time_activity_subscription_state::pending_subscribe);
 
@@ -541,7 +541,7 @@ public:
 
         // force to close and not reconnectedable
         mockSocket->m_connectToFail = true;
-        mockSocket->m_closeHandler(1001, L"");
+        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
         subscription->pendingSubEvent.wait();
 
         // wait the connection to be lost after timeout

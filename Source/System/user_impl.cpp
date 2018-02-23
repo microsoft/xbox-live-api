@@ -40,12 +40,12 @@ user_impl::user_impl(
     m_localConfig = xbox_system_factory::get_factory()->create_local_config();
 
     m_authConfig = std::make_shared<auth_config>(
-        m_localConfig->sandbox(),
-        m_localConfig->environment_prefix(),
-        m_localConfig->environment(),
+        utils::string_t_from_internal_string(m_localConfig->sandbox()),
+        utils::string_t_from_internal_string(m_localConfig->environment_prefix()),
+        utils::string_t_from_internal_string(m_localConfig->environment()),
         m_localConfig->use_first_party_token(),
         m_localConfig->is_creators_title(),
-        m_localConfig->scope()
+        utils::string_t_from_internal_string(m_localConfig->scope())
         );
 #endif
 }
@@ -105,6 +105,74 @@ user_impl::get_token_and_signature_array(
         requestBodyArray, 
         false,
         false
+        );
+}
+
+void user_impl::get_token_and_signature(
+    _In_ const string_t& httpMethod,
+    _In_ const string_t& url,
+    _In_ const string_t& headers,
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+    )
+{
+    internal_get_token_and_signature(
+        httpMethod,
+        url,
+        url,
+        headers,
+        std::vector<unsigned char>(),
+        false,
+        false,
+        taskGroupId,
+        callback
+        );
+}
+
+void user_impl::get_token_and_signature(
+    _In_ const string_t& httpMethod,
+    _In_ const string_t& url,
+    _In_ const string_t& headers,
+    _In_ const string_t& requestBodyString,
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+    )
+{
+    std::string utf8Body(utility::conversions::to_utf8string(requestBodyString));
+    std::vector<unsigned char> utf8Vec(utf8Body.begin(), utf8Body.end());
+
+    internal_get_token_and_signature(
+        httpMethod,
+        url,
+        url,
+        headers,
+        utf8Vec,
+        false,
+        false,
+        taskGroupId,
+        callback
+        );
+}
+
+void user_impl::get_token_and_signature(
+    _In_ const string_t& httpMethod,
+    _In_ const string_t& url,
+    _In_ const string_t& headers,
+    _In_ const std::vector<unsigned char>& requestBodyArray,
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+    )
+{
+    internal_get_token_and_signature(
+        httpMethod,
+        url,
+        url,
+        headers,
+        requestBodyArray,
+        false,
+        false,
+        taskGroupId,
+        callback
         );
 }
 

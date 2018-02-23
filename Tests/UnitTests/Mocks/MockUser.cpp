@@ -80,6 +80,39 @@ MockUser::internal_get_token_and_signature(
 
 }
 
+void MockUser::internal_get_token_and_signature(
+    _In_ const string_t& httpMethod,
+    _In_ const string_t& url,
+    _In_ const string_t& endpointForNsal,
+    _In_ const string_t& headers,
+    _In_ const std::vector<unsigned char>& bytes,
+    _In_ bool promptForCredentialsIfNeeded,
+    _In_ bool forceRefresh,
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+    )
+{
+    HRESULT hr = ResultHR;
+    if (FAILED(hr))
+    {
+        throw hr;
+    }
+
+    callback(xbox_live_result<token_and_signature_result>(
+        token_and_signature_result(
+            L"TestToken",
+            L"",
+            m_xboxUserId,
+            m_gamertag,
+            L"TestXboxUserHash",
+            m_ageGroup,
+            m_privileges,
+            L"",
+            L""
+        )));
+}
+
+
 std::shared_ptr<xbox::services::system::auth_config> MockUser::auth_config()
 {
     return std::make_shared<xbox::services::system::auth_config>(_T("MockSandbox"), _T("MockPrefix-"), _T("MockEnv"), false, false, _T("MockScope"));

@@ -170,8 +170,8 @@ public:
 private:
     xbox_live_services_settings();
 
-    std::function<_Ret_maybenull_ _Post_writable_byte_size_(dwSize) void*(_In_ size_t dwSize)> m_pMemAllocHook;
-    std::function<void(_In_ void* pAddress)> m_pMemFreeHook;
+    std::function<_Ret_maybenull_ _Post_writable_byte_size_(dwSize) void*(_In_ size_t dwSize)> m_pCustomMemAllocHook;
+    std::function<void(_In_ void* pAddress)> m_pCustomMemFreeHook;
 
     void set_log_level_from_diagnostics_trace_level();
 
@@ -185,6 +185,8 @@ private:
     function_context m_wnsHandlersCounter;
 
     friend class xsapi_memory;
+    friend void *custom_mem_alloc_wrapper(_In_ size_t size, _In_ uint32_t memoryType);
+    friend void custom_mem_free_wrapper(_In_ void *pointer, _In_ uint32_t memoryType);
 };
 
 

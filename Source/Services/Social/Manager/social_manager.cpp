@@ -49,7 +49,7 @@ social_manager::create_social_user_group_from_filters(
             );
     }
 
-    auto viewHash = utils::create_guid(true);
+    string_t viewHash = utils::string_t_from_internal_string(utils::create_guid(true));
 
     uint32_t titleId = m_localGraphs[ownerUserId]->title_id();
     auto socialGroup = std::make_shared<xbox_social_user_group>(
@@ -110,7 +110,7 @@ social_manager::create_social_user_group_from_list(
             );
     }
 
-    auto viewHash = utils::create_guid(true);
+    string_t viewHash = utils::string_t_from_internal_string(utils::create_guid(true));
     auto socialGroup = std::make_shared<xbox_social_user_group>(
         viewHash,
         xboxUserIdList,

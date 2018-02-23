@@ -360,7 +360,7 @@ string_t catalog_service::marketplace_browse_catalog_subpath(
 #if TV_API
     source << Windows::Xbox::ApplicationModel::Store::Configuration::MarketplaceId->Data();
 #else
-    source << utils::get_locales();
+    source << utils::string_t_from_internal_string(utils::get_locales());
 #endif
     source << _T("/browse");
 
@@ -438,7 +438,7 @@ catalog_service::marketplace_catalog_details_subpath(
 #if TV_API
     source << Windows::Xbox::ApplicationModel::Store::Configuration::MarketplaceId->Data();
 #else
-    source << utils::get_locales();
+    source << utils::string_t_from_internal_string(utils::get_locales());
 #endif
     source << _T("/details");
 
