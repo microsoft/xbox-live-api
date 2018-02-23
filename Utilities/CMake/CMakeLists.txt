@@ -125,18 +125,10 @@ set(Public_Source_Files
     )
 
 set(Public_Source_Files_C
-    ../../include/xsapi-c/achievements_c.h
     ../../include/xsapi-c/errors_c.h
-    ../../include/xsapi-c/leaderboard_c.h
-    ../../include/xsapi-c/presence_c.h
-    ../../include/xsapi-c/privacy_c.h
     ../../include/xsapi-c/profile_c.h
     ../../include/xsapi-c/social_c.h
-    ../../include/xsapi-c/social_manager_c.h
-    ../../include/xsapi-c/stats_manager_c.h
     ../../include/xsapi-c/system_c.h
-    ../../include/xsapi-c/title_callable_ui_c.h
-    ../../include/xsapi-c/title_storage_c.h
     ../../include/xsapi-c/types_c.h
     ../../include/xsapi-c/xbox_live_app_config_c.h
     ../../include/xsapi-c/xbox_live_context_c.h
@@ -1315,16 +1307,9 @@ else()
             source_group("C++ Source\\C\\Shared" FILES ${Shared_Source_Files_C_Legacy})
             source_group("C++ Source\\Shared\\C" FILES ${Shared_Source_Files_C})
             source_group("C++ Source\\C\\System" FILES ${System_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\Achievements" FILES ${Achievements_Source_Files_C})
             source_group("C++ Source\\C\\Services\\Common" FILES ${Common_Source_Files_C_Legacy})
             source_group("C++ Source\\Services\\Common\\C" FILES ${Common_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\Leaderboard" FILES ${Leaderboard_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\Misc" FILES ${Misc_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\Privacy" FILES ${Privacy_Source_Files_C})
             source_group("C++ Source\\Services\\Social\\C" FILES ${Social_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\Social\\Manager" FILES ${Social_Manager_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\Stats\\Manager" FILES ${Stats_Manager_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\TitleStorage" FILES ${TitleStorage_Souce_Files_C})
         endif()
 	endif()
 
