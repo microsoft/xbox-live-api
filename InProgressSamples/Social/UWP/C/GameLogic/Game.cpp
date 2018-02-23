@@ -468,7 +468,12 @@ void Game::SignIn()
         Log(L"Already signed in.");
         return;
     }
-    XboxLiveUserSignIn(m_user, HandleSignInResult, this, g_asyncQueue);
+    XboxLiveUserSignInWithCoreDispatcher(
+        m_user, 
+        Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->CoreWindow->Dispatcher, 
+        HandleSignInResult,
+        this,
+        g_asyncQueue);
 }
 
 void Game::SignInSilently()
