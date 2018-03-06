@@ -982,8 +982,7 @@ multiplayer_lobby_client::create_game_from_lobby()
             RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(gameClient->join_game_helper(sessionName), void);
         }
 
-        // todo: do we need this?
-        // pThis->update_lobby_session(sessionToCommitCopy);
+        pThis->update_session(sessionToCommitCopy);
         pThis->join_lobby_completed(commitResult.err(), commitResult.err_message(), string_t());
     });
 
