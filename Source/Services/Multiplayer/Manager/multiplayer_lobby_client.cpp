@@ -10,6 +10,12 @@ using namespace xbox::services::multiplayer;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 const string_t multiplayer_lobby_client::c_transferHandlePropertyName = _T("GameSessionTransferHandle");
 const string_t multiplayer_lobby_client::c_joinabilityPropertyName = _T("Joinability");
+#if UNIT_TEST_SERVICES
+const std::chrono::seconds RETRY_LENGTH(0);
+#else
+const std::chrono::seconds RETRY_LENGTH(1);
+#endif
+const int MAX_CONNECTION_ATTEMPTS = 3;
 
 multiplayer_lobby_client::multiplayer_lobby_client() :
     m_pendingCommitInProgress(false),
@@ -944,26 +950,40 @@ multiplayer_lobby_client::create_game_from_lobby()
         // If succeeded, then create the game session, set the transfer handle, and advertise the game session.
         // If failed, wait for the property changed event.
 
+        int attempts = 0;
+        xbox_live_result<std::shared_ptr<multiplayer_session>> commitResult;
         auto sessionToCommitCopy  = lobbySession->_Create_deep_copy();
-
-        string_t jsonValue;
-        jsonValue = _T("pending~") + primaryContext->xbox_live_user_id();
-        sessionToCommitCopy->set_session_custom_property_json(multiplayer_lobby_client::c_transferHandlePropertyName, web::json::value::string(jsonValue));
-
-        auto commitResult = pThis->m_sessionWriter->commit_synchronized_changes(sessionToCommitCopy).get();
-        auto gameClient = pThis->game_client();
-        RETURN_CPP_IF(gameClient == nullptr, void, xbox_live_error_code::generic_error, "multiplayer_game_client class was destroyed.");
-
-        if (commitResult.err() == xbox_live_error_condition::http_412_precondition_failed)
+        while (attempts < MAX_CONNECTION_ATTEMPTS)
         {
-            if (pThis->is_transfer_handle_state(_T("completed")) || pThis->is_transfer_handle_state(_T("pending")))
+            string_t jsonValue;
+            jsonValue = _T("pending~") + primaryContext->xbox_live_user_id();
+            sessionToCommitCopy->set_session_custom_property_json(multiplayer_lobby_client::c_transferHandlePropertyName, web::json::value::string(jsonValue));
+
+            commitResult = pThis->m_sessionWriter->commit_synchronized_changes(sessionToCommitCopy).get();
+            auto gameClient = pThis->game_client();
+            RETURN_CPP_IF(gameClient == nullptr, void, xbox_live_error_code::generic_error, "multiplayer_game_client class was destroyed.");
+
+            if (commitResult.err() == xbox_live_error_condition::http_412_precondition_failed)
             {
-                return gameClient->join_game_from_lobby_helper();
+                if (pThis->is_transfer_handle_state(_T("completed")) || pThis->is_transfer_handle_state(_T("pending")))
+                {
+                    return gameClient->join_game_from_lobby_helper();
+                }
+                else
+                {
+                    attempts++;
+                    sessionToCommitCopy = commitResult.payload();
+                    std::this_thread::sleep_for(RETRY_LENGTH);
+                    continue;
+                }
             }
+
+            auto sessionName = utils::create_guid(true);
+            RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(gameClient->join_game_helper(sessionName), void);
         }
 
-        auto sessionName = utils::create_guid(true);
-        RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(gameClient->join_game_helper(sessionName), void);
+        pThis->update_session(sessionToCommitCopy);
+        pThis->join_lobby_completed(commitResult.err(), commitResult.err_message(), string_t());
     });
 
     return xbox_live_result<void>();
