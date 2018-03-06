@@ -984,6 +984,7 @@ multiplayer_lobby_client::create_game_from_lobby()
 
         pThis->update_session(sessionToCommitCopy);
         pThis->join_lobby_completed(commitResult.err(), commitResult.err_message(), string_t());
+        return xbox_live_result<void>(commitResult.err(), commitResult.err_message());
     });
 
     return xbox_live_result<void>();
