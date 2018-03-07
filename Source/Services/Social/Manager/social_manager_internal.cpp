@@ -15,7 +15,7 @@ std::shared_ptr<social_manager_internal>
 social_manager_internal::get_singleton_instance()
 {
     auto xsapiSingleton = get_xsapi_singleton();
-    std::lock_guard<std::mutex> lock(xsapiSingleton->m_singletonLock);
+    std::lock_guard<std::recursive_mutex> lock(xsapiSingleton->m_socialManagerLock);
     if (xsapiSingleton->m_socialManagerInternalInstance == nullptr)
     {
         auto buffer = xsapi_memory::mem_alloc(sizeof(social_manager_internal));

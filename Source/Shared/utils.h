@@ -121,6 +121,7 @@ struct xsapi_singleton
 
     std::mutex m_singletonLock;
     std::recursive_mutex m_appConfigLock;
+    std::recursive_mutex m_socialManagerLock;
     std::mutex m_mpsdConstantLock;
     std::mutex m_mpsdMemberLock;
     std::mutex m_mpsdPropertyLock;
