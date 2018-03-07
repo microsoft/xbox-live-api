@@ -3,6 +3,7 @@
 
 #pragma once
 #include "xbox_live_context_impl.h"
+#include "xbox_live_app_config_internal.h"
 
 const std::wstring peoplehubResponse =
 LR"(
@@ -244,7 +245,7 @@ public:
         return xbox::services::social::manager::peoplehub_service(
             xblContextImpl->user_context(),
             xblContextImpl->settings(),
-            xblContextImpl->application_config()
+            xbox::services::xbox_live_app_config_internal::get_app_config_singleton()
         );
     }
 };

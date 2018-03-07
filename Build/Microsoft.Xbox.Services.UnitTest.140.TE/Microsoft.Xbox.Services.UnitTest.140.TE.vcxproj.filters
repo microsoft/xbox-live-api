@@ -763,7 +763,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_service.cpp">
       <Filter>C++ Source\Services\Presence</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_service_impl.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_service_internal.cpp">
       <Filter>C++ Source\Services\Presence</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_title_record.cpp">
@@ -881,6 +881,9 @@
       <Filter>C++ Source\Services\Social\Manager</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_internal.cpp">
       <Filter>C++ Source\Services\Social\Manager</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_presence_record.cpp">
@@ -1475,6 +1478,9 @@
       <Filter>C++ Source\UnitTests\Tests</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\TournamentsTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\DelayedTaskTests.cpp">
       <Filter>C++ Source\UnitTests\Tests</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\EventTests_WinRT.cpp">

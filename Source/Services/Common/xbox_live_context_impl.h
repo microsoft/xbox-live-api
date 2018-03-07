@@ -45,7 +45,7 @@ public:
     /// <summary>
     /// Returns the current user's Xbox Live User ID.
     /// </summary>
-    const string_t& xbox_live_user_id();
+    xsapi_internal_string xbox_live_user_id();
 
     /// <summary>
     /// A service for managing user profiles.
@@ -105,7 +105,7 @@ public:
     /// <summary>
     /// A service for managing Rich Presence.
     /// </summary>
-    presence::presence_service& presence_service();
+    std::shared_ptr<presence::presence_service_internal> presence_service();
 
     /// <summary>
     /// A service for storing data in the cloud.
@@ -185,7 +185,7 @@ private:
     matchmaking::matchmaking_service m_matchmakingService;
     tournaments::tournament_service m_tournamentService;
     std::shared_ptr<real_time_activity::real_time_activity_service> m_realTimeActivityService;
-    presence::presence_service m_presenceService;
+    std::shared_ptr<presence::presence_service_internal> m_presenceService;
     game_server_platform::game_server_platform_service m_gameServerPlatformService;
     title_storage::title_storage_service m_titleStorageService;
     privacy::privacy_service m_privacyService;

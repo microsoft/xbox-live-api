@@ -5,8 +5,9 @@
 #include "xsapi/social.h"
 #include "social_internal.h"
 
-using namespace xbox::services::real_time_activity;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
+
+using namespace xbox::services::real_time_activity;
 
 social_relationship_change_subscription::social_relationship_change_subscription(
     _In_ std::shared_ptr<social_relationship_change_subscription_internal> internalObj

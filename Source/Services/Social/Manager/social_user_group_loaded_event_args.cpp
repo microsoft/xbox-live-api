@@ -13,6 +13,13 @@ social_user_group_loaded_event_args::social_user_group_loaded_event_args(
 {
 }
 
+social_user_group_loaded_event_args::social_user_group_loaded_event_args(
+    _In_ std::shared_ptr<xbox_social_user_group_internal> socialUserGroup
+) :
+    m_socialUserGroup(xsapi_allocate_shared<xbox_social_user_group>(socialUserGroup))
+{
+}
+
 const std::shared_ptr<xbox_social_user_group>&
 social_user_group_loaded_event_args::social_user_group() const
 {

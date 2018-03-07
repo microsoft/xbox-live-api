@@ -10,7 +10,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
 
 presence_title_request::presence_title_request(
     _In_ bool isUserActive,
-    _In_ presence_data presenceData,
+    _In_ presence_data_internal presenceData,
     _In_ media_presence_data mediaPresenceData
     ) :
     m_isUserActive(isUserActive)

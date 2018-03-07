@@ -680,6 +680,25 @@ utility::datetime utils::extract_json_time(
     return result;
 }
 
+utility::datetime utils::extract_json_time(
+    _In_ const web::json::value& jsonValue,
+    _In_ const xsapi_internal_string& name,
+    _Inout_ std::error_code& error,
+    _In_ bool required
+    )
+{
+    return extract_json_time(jsonValue, utils::string_t_from_internal_string(name), error, required);
+}
+
+utility::datetime utils::extract_json_time(
+    _In_ const web::json::value& jsonValue,
+    _In_ const xsapi_internal_string& name,
+    _In_ bool required
+    )
+{
+    return extract_json_time(jsonValue, utils::string_t_from_internal_string(name), required);
+}
+
 std::chrono::seconds utils::extract_json_string_timespan_in_seconds(
     _In_ const web::json::value& jsonValue,
     _In_ const string_t& name,
@@ -1563,6 +1582,38 @@ utils::string_split(
     {
         size_t posStart = 0, posFound = 0;
         while (posFound != string_t::npos && posStart < string.length())
+        {
+            posFound = string.find(seperator, posStart);
+            if (posFound != string_t::npos)
+            {
+                if (posFound != posStart)
+                {
+                    // this substring is not empty
+                    vSubStrings.push_back(string.substr(posStart, posFound - posStart));
+                }
+                posStart = posFound + 1;
+            }
+            else
+            {
+                vSubStrings.push_back(string.substr(posStart));
+            }
+        }
+    }
+
+    return vSubStrings;
+}
+
+xsapi_internal_vector<xsapi_internal_string> utils::string_split(
+    _In_ const xsapi_internal_string& string,
+    _In_ xsapi_internal_string::value_type seperator
+    )
+{
+    xsapi_internal_vector<xsapi_internal_string> vSubStrings;
+
+    if (!string.empty())
+    {
+        size_t posStart = 0, posFound = 0;
+        while (posFound != xsapi_internal_string::npos && posStart < string.length())
         {
             posFound = string.find(seperator, posStart);
             if (posFound != string_t::npos)

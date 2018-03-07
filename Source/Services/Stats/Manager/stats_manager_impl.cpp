@@ -49,23 +49,23 @@ stats_manager_impl::initialize()
     std::weak_ptr<stats_manager_impl> thisWeakPtr = shared_from_this();
 
     m_statNormalPriTimer = std::make_shared<call_buffer_timer>(
-        [thisWeakPtr](std::vector<string_t> eventArgs, const call_buffer_timer_completion_context&)
+        [thisWeakPtr](xsapi_internal_vector<xsapi_internal_string> eventArgs, std::shared_ptr<call_buffer_timer_completion_context>)
         {
             std::shared_ptr<stats_manager_impl> pThis(thisWeakPtr.lock());
             if (pThis != nullptr && !eventArgs.empty())
             {
-                pThis->request_flush_to_service_callback(eventArgs[0]);
+                pThis->request_flush_to_service_callback(utils::string_t_from_internal_string(eventArgs[0]));
             }
         },
         TIME_PER_CALL_SEC);
 
     m_statHighPriTimer = std::make_shared<call_buffer_timer>(
-        [thisWeakPtr](std::vector<string_t> eventArgs, const call_buffer_timer_completion_context&)
+        [thisWeakPtr](xsapi_internal_vector<xsapi_internal_string> eventArgs, std::shared_ptr<call_buffer_timer_completion_context>)
         {
             std::shared_ptr<stats_manager_impl> pThis(thisWeakPtr.lock());
             if (pThis != nullptr && !eventArgs.empty())
             {
-                pThis->request_flush_to_service_callback(eventArgs[0]);
+                pThis->request_flush_to_service_callback(utils::string_t_from_internal_string(eventArgs[0]));
             }
         },
         TIME_PER_CALL_SEC);
@@ -271,13 +271,14 @@ stats_manager_impl::request_flush_to_service(
     std::vector<string_t> userVec;
     userVec.push_back(userStr);
 
+    auto internalUserVec = utils::internal_string_vector_from_std_string_vector(userVec);
     if (isHighPriority)
     {
-        m_statHighPriTimer->fire(userVec);
+        m_statHighPriTimer->fire(internalUserVec);
     }
     else
     {
-        m_statNormalPriTimer->fire(userVec);
+        m_statNormalPriTimer->fire(internalUserVec);
     }
 
     return xbox_live_result<void>();

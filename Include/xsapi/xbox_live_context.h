@@ -95,7 +95,7 @@ public:
     /// <summary>
     /// Returns the current user's Xbox Live User ID.
     /// </summary>
-    _XSAPIIMP const string_t& xbox_live_user_id();
+    _XSAPIIMP string_t xbox_live_user_id();
 
     /// <summary>
     /// Returns an object containing settings that apply to all REST calls made such as retry and diagnostic settings.
@@ -222,9 +222,12 @@ public:
 private:
     std::shared_ptr<xbox::services::xbox_live_context_impl> m_xboxLiveContextImpl;
 
+    void init();
+
     social::profile_service m_profileService;
     social::social_service m_socialService;
     social::reputation_service m_reputationService;
+    presence::presence_service m_presenceService;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

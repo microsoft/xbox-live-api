@@ -148,15 +148,15 @@ void xbox_live_context_impl::init()
 
     std::weak_ptr<xbox_live_context_impl> thisWeakPtr = shared_from_this();
 
-    m_profileServiceImpl = std::make_shared<xbox::services::social::profile_service_impl>(m_userContext, m_xboxLiveContextSettings, m_appConfigInternal);
-    m_reputationServiceImpl = std::make_shared<xbox::services::social::reputation_service_impl>(m_userContext, m_xboxLiveContextSettings, m_appConfigInternal);
+    m_profileServiceImpl = xsapi_allocate_shared<xbox::services::social::profile_service_impl>(m_userContext, m_xboxLiveContextSettings, m_appConfigInternal);
+    m_reputationServiceImpl = xsapi_allocate_shared<xbox::services::social::reputation_service_impl>(m_userContext, m_xboxLiveContextSettings, m_appConfigInternal);
     m_leaderboardService = xbox::services::leaderboard::leaderboard_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_achievementService = xbox::services::achievements::achievement_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, thisWeakPtr);
     m_matchmakingService = xbox::services::matchmaking::matchmaking_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_gameServerPlatformService = xbox::services::game_server_platform::game_server_platform_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_titleStorageService = xbox::services::title_storage::title_storage_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_privacyService = xbox::services::privacy::privacy_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-    m_presenceService = xbox::services::presence::presence_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
+    m_presenceService = xsapi_allocate_shared<xbox::services::presence::presence_service_internal>(m_realTimeActivityService, m_userContext, m_xboxLiveContextSettings, m_appConfigInternal);
     m_userStatisticsService = xbox::services::user_statistics::user_statistics_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
     m_multiplayerService = xbox::services::multiplayer::multiplayer_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
     m_tournamentService = xbox::services::tournaments::tournament_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, m_realTimeActivityService);
@@ -176,7 +176,7 @@ void xbox_live_context_impl::init()
     m_entertainmentProfileService = entertainment_profile::entertainment_profile_list_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
 #else
     // Only start the presence writer on UAP
-    presence::presence_writer::get_presence_writer_singleton()->start_writer(m_presenceService._Impl());
+    presence::presence_writer::get_presence_writer_singleton()->start_writer(m_presenceService);
 
     auto notificationService = notification::notification_service::get_notification_service_singleton();
     notificationService->subscribe_to_notifications(
@@ -193,9 +193,9 @@ void xbox_live_context_impl::init()
         [thisWeakPtr](const string_t& xboxUserId)
         {
             std::shared_ptr<xbox_live_context_impl> pThis(thisWeakPtr.lock());
-            if (pThis != nullptr && utils::str_icmp(pThis->xbox_live_user_id(), xboxUserId) == 0)
+            if (pThis != nullptr && utils::str_icmp(pThis->xbox_live_user_id(), utils::internal_string_from_string_t(xboxUserId)) == 0)
             {
-                presence::presence_writer::get_presence_writer_singleton()->start_writer(pThis->m_presenceService._Impl());
+                presence::presence_writer::get_presence_writer_singleton()->start_writer(pThis->m_presenceService);
             }
         });
 
@@ -219,9 +219,9 @@ std::shared_ptr<user_context> xbox_live_context_impl::user_context()
     return m_userContext;
 }
 
-const string_t& xbox_live_context_impl::xbox_live_user_id()
+xsapi_internal_string xbox_live_context_impl::xbox_live_user_id()
 {
-    return m_userContext->xbox_user_id();
+    return utils::internal_string_from_string_t(m_userContext->xbox_user_id());
 }
 
 std::shared_ptr<social::profile_service_impl>
@@ -297,7 +297,7 @@ xbox_live_context_impl::real_time_activity_service()
     return m_realTimeActivityService;
 }
 
-presence::presence_service&
+std::shared_ptr<presence::presence_service_internal>
 xbox_live_context_impl::presence_service()
 {
     return m_presenceService;

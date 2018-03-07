@@ -178,6 +178,7 @@ using xsapi_internal_basic_string = std::basic_string<C, TRAITS, xsapi_stl_alloc
 
 using xsapi_internal_string = xsapi_internal_basic_string<char>;
 using xsapi_internal_wstring = xsapi_internal_basic_string<wchar_t>;
+using xsapi_internal_string_t = xsapi_internal_basic_string<char_t>;
 
 template<class C, class TRAITS = std::char_traits<C>>
 using xsapi_internal_basic_stringstream = std::basic_stringstream<C, TRAITS, xsapi_stl_allocator<C>>;

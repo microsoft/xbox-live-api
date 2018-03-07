@@ -35,12 +35,8 @@ xbox_live_context::xbox_live_context(
     )
 {
     user->_User_impl()->set_user_pointer(user);
-    m_xboxLiveContextImpl = std::make_shared<xbox_live_context_impl>(user);
-    m_xboxLiveContextImpl->init();
-
-    m_profileService = social::profile_service(m_xboxLiveContextImpl->profile_service_impl());
-    m_socialService = social::social_service(settings(), m_xboxLiveContextImpl->social_service_impl());
-    m_reputationService = social::reputation_service(m_xboxLiveContextImpl->reputation_service_impl());
+    m_xboxLiveContextImpl = xsapi_allocate_shared<xbox_live_context_impl>(user);
+    this->init();
 }
 
 std::shared_ptr<system::xbox_live_user>
@@ -55,12 +51,8 @@ xbox_live_context::xbox_live_context(
     _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user
     )
 {
-    m_xboxLiveContextImpl = std::make_shared<xbox_live_context_impl>(user);
-    m_xboxLiveContextImpl->init();
-
-    m_profileService = social::profile_service(m_xboxLiveContextImpl->profile_service_impl());
-    m_socialService = social::social_service(settings(), m_xboxLiveContextImpl->social_service_impl());
-    m_reputationService = social::reputation_service(m_xboxLiveContextImpl->reputation_service_impl());
+    m_xboxLiveContextImpl = xsapi_allocate_shared<xbox_live_context_impl>(user);
+    this->init();
 }
 
 Microsoft::Xbox::Services::System::XboxLiveUser^
@@ -71,9 +63,19 @@ xbox_live_context::user()
 
 #endif
 
-const string_t& xbox_live_context::xbox_live_user_id()
+void xbox_live_context::init()
 {
-    return m_xboxLiveContextImpl->xbox_live_user_id();
+    m_xboxLiveContextImpl->init();
+
+    m_profileService = social::profile_service(m_xboxLiveContextImpl->profile_service_impl());
+    m_socialService = social::social_service(settings(), m_xboxLiveContextImpl->social_service_impl());
+    m_reputationService = social::reputation_service(m_xboxLiveContextImpl->reputation_service_impl());
+    m_presenceService = presence::presence_service(m_xboxLiveContextImpl->presence_service());
+}
+
+string_t xbox_live_context::xbox_live_user_id()
+{
+    return utils::string_t_from_internal_string(m_xboxLiveContextImpl->xbox_live_user_id());
 }
 
 social::profile_service&
@@ -139,7 +141,7 @@ xbox_live_context::real_time_activity_service()
 presence::presence_service&
 xbox_live_context::presence_service()
 {
-    return m_xboxLiveContextImpl->presence_service();
+    return m_presenceService;
 }
 
 game_server_platform::game_server_platform_service&
