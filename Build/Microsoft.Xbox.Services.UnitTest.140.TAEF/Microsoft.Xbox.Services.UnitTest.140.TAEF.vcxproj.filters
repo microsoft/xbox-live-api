@@ -1483,9 +1483,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\TournamentsTests.cpp">
       <Filter>C++ Source\UnitTests\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\DelayedTaskTests.cpp">
-      <Filter>C++ Source\UnitTests\Tests</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\EventTests_WinRT.cpp">
       <Filter>C++ Source\UnitTests\Tests</Filter>
     </ClCompile>

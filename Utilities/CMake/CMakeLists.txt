@@ -1561,7 +1561,6 @@ set(UnitTests_Source_Files_Tests
 	../../Tests/UnitTests/Tests/Services/SocialManagerHelper.h
 	../../Tests/UnitTests/Tests/Services/StatsManagerHelper.h
     ../../Tests/UnitTests/Tests/Services/ClubsTests.cpp
-    ../../Tests/UnitTests/Tests/Shared/DelayedTaskTests.cpp
 	)
 
 set(Taef_UnitTests_Source_Files
