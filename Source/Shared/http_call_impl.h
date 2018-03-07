@@ -283,6 +283,14 @@ public:
         _In_ http_call_response_body_type httpCallResponseBodyType
     ) override;
 #endif
+    
+#if XSAPI_U
+    pplx::task<std::shared_ptr<http_call_response>> get_response(
+        _In_ std::shared_ptr<xbox::services::system::ecdsa> proofKey,
+        _In_ const xbox::services::system::signature_policy& signaturePolicy,
+        _In_ http_call_response_body_type httpCallResponseBodyType
+    ) override;
+#endif
 
     pplx::task<std::shared_ptr<http_call_response>> get_response(
         _In_ http_call_response_body_type httpCallResponseBodyType

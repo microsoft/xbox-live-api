@@ -99,7 +99,7 @@ public:
         ) override;
 
     void remove_custom_header(
-        _In_ const std::wstring& headerName
+        _In_ const xsapi_internal_string& headerName
         );
 
     void reinit();
@@ -117,7 +117,8 @@ public:
 
     int CallCounter;
 
-    std::function<void(std::shared_ptr<http_call_response>&, const string_t& requestPost)> fRequestPostFunc;
+    std::function<void(std::shared_ptr<http_call_response>&, const string_t& requestPost)> fRequestPostFunc; // TODO remove eventually
+    xbox_live_callback<std::shared_ptr<http_call_response_internal>, const xsapi_internal_string&> fRequestPostFuncInternal; 
 
 private:
     http_call_request_message_internal m_requestBody;

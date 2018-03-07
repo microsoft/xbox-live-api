@@ -31,6 +31,11 @@ xsapi_internal_string utils::internal_string_from_string_t(_In_ const string_t& 
     return internal_string_from_utf16(externalString.c_str(), externalString.size());
 }
 
+xsapi_internal_string utils::internal_string_from_char_t(_In_ const char_t* char_t)
+{
+    return internal_string_from_utf16(char_t, wcslen(char_t));
+}
+
 xsapi_internal_string utils::internal_string_from_utf16(_In_z_ PCWSTR utf16)
 {
     return internal_string_from_utf16(utf16, wcslen(utf16));

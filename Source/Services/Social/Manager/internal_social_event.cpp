@@ -9,8 +9,8 @@ using namespace xbox::services::presence;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
 
-internal_social_event::internal_social_event(
-    _In_ internal_social_event_type eventType,
+unprocessed_social_event::unprocessed_social_event(
+    _In_ unprocessed_social_event_type eventType,
     _In_ xsapi_internal_vector<xbox_social_user> usersAffected
     ) :
     m_socialEventType(eventType),
@@ -22,8 +22,8 @@ internal_social_event::internal_social_event(
     }
 }
 
-internal_social_event::internal_social_event(
-    _In_ internal_social_event_type eventType, 
+unprocessed_social_event::unprocessed_social_event(
+    _In_ unprocessed_social_event_type eventType, 
     _In_ xsapi_internal_vector<social_manager_presence_record> presenceRecords
     ) :
     m_socialEventType(eventType),
@@ -37,28 +37,28 @@ internal_social_event::internal_social_event(
     }
 }
 
-internal_social_event::internal_social_event(
-    _In_ internal_social_event_type eventType,
-    _In_ device_presence_change_event_args devicePresenceArgs
+unprocessed_social_event::unprocessed_social_event(
+    _In_ unprocessed_social_event_type eventType,
+    _In_ std::shared_ptr<device_presence_change_event_args_internal> devicePresenceArgs
     ) :
     m_socialEventType(eventType),
     m_devicePresenceArgs(std::move(devicePresenceArgs))
 {
-    m_usersAffectedAsStringVec.push_back(utils::internal_string_from_string_t(m_devicePresenceArgs.xbox_user_id()));
+    m_usersAffectedAsStringVec.push_back(m_devicePresenceArgs->xbox_user_id());
 }
 
-internal_social_event::internal_social_event(
-    _In_ internal_social_event_type eventType,
-    _In_ xbox::services::presence::title_presence_change_event_args titlePresenceArgs
+unprocessed_social_event::unprocessed_social_event(
+    _In_ unprocessed_social_event_type eventType,
+    _In_ std::shared_ptr<xbox::services::presence::title_presence_change_event_args_internal> titlePresenceArgs
     ) :
     m_socialEventType(eventType),
     m_titlePresenceArgs(std::move(titlePresenceArgs))
 {
-    m_usersAffectedAsStringVec.push_back(utils::internal_string_from_string_t(titlePresenceArgs.xbox_user_id()));
+    m_usersAffectedAsStringVec.push_back(m_titlePresenceArgs->xbox_user_id());
 }
 
-internal_social_event::internal_social_event(
-    _In_ internal_social_event_type eventType,
+unprocessed_social_event::unprocessed_social_event(
+    _In_ unprocessed_social_event_type eventType,
     _In_ xsapi_internal_vector<uint64_t> userList
     ) :
     m_socialEventType(eventType),
@@ -72,19 +72,19 @@ internal_social_event::internal_social_event(
     }
 }
 
-internal_social_event::internal_social_event(
-    _In_ internal_social_event_type eventType,
+unprocessed_social_event::unprocessed_social_event(
+    _In_ unprocessed_social_event_type eventType,
     _In_ xsapi_internal_vector<xsapi_internal_string> userAddList,
-    _In_ pplx::task_completion_event<xbox_live_result<void>> tce
+    _In_ xbox_live_callback<xbox_live_result<void>> _callback
     ) :
     m_socialEventType(eventType),
     m_usersAffectedAsStringVec(std::move(userAddList)),
-    m_tce(std::move(tce))
+    callback(std::move(_callback))
 {
 }
 
-internal_social_event::internal_social_event(
-    _In_ internal_social_event_type socialEventType,
+unprocessed_social_event::unprocessed_social_event(
+    _In_ unprocessed_social_event_type socialEventType,
     _In_ xbox_live_result<void> errorInfo,
     _In_ xsapi_internal_vector<xsapi_internal_string> userList
     ) :
@@ -94,8 +94,8 @@ internal_social_event::internal_social_event(
 {
 }
 
-internal_social_event::internal_social_event(
-    _In_ internal_social_event_type eventType,
+unprocessed_social_event::unprocessed_social_event(
+    _In_ unprocessed_social_event_type eventType,
     _In_ xsapi_internal_vector<xsapi_internal_string> userAddList
     ) :
     m_socialEventType(eventType),
@@ -103,69 +103,63 @@ internal_social_event::internal_social_event(
 {
 }
 
-internal_social_event_type
-internal_social_event::event_type() const
+unprocessed_social_event_type
+unprocessed_social_event::event_type() const
 {
     return m_socialEventType;
 }
 
 const xsapi_internal_vector<xbox_social_user>&
-internal_social_event::users_affected() const
+unprocessed_social_event::users_affected() const
 {
     return m_usersAffected;
 }
 
 const xsapi_internal_vector<uint64_t>&
-internal_social_event::users_to_remove() const
+unprocessed_social_event::users_to_remove() const
 {
     return m_userList;
 }
 
 const xsapi_internal_vector<social_manager_presence_record>&
-internal_social_event::presence_records() const
+unprocessed_social_event::presence_records() const
 {
     return m_presenceRecords;
 }
 
-const device_presence_change_event_args&
-internal_social_event::device_presence_args() const
+const std::shared_ptr<device_presence_change_event_args_internal>
+unprocessed_social_event::device_presence_args() const
 {
     return m_devicePresenceArgs;
 }
 
-const title_presence_change_event_args&
-internal_social_event::title_presence_args() const
+const std::shared_ptr<title_presence_change_event_args_internal>
+unprocessed_social_event::title_presence_args() const
 {
     return m_titlePresenceArgs;
 }
 
 const xsapi_internal_vector<xsapi_internal_string>&
-internal_social_event::users_affected_as_string_vec() const
+unprocessed_social_event::users_affected_as_string_vec() const
 {
     return m_usersAffectedAsStringVec;
 }
 
-const pplx::task_completion_event<xbox_live_result<void>>&
-internal_social_event::tce() const
-{
-    return m_tce;
-}
-
 const xbox_live_result<void>&
-internal_social_event::error() const
+unprocessed_social_event::error() const
 {
     return m_error;
 }
 
-const call_buffer_timer_completion_context&
-internal_social_event::completion_context() const
+std::shared_ptr<call_buffer_timer_completion_context>
+unprocessed_social_event::completion_context() const
 {
     return m_completionContext;
 }
 
 void
-internal_social_event::set_completion_context(
-    _In_ const call_buffer_timer_completion_context& compleitionContext
+unprocessed_social_event::set_completion_context(
+    _In_ std::shared_ptr<call_buffer_timer_completion_context> compleitionContext
     )
 {
     m_completionContext = compleitionContext;

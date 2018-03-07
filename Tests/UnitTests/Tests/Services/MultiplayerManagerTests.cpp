@@ -2916,7 +2916,7 @@ public:
         else
             primaryContext = clientManager->latest_pending_read()->game_client()->session_writer()->get_primary_context();
 
-        auto mpsdSession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id());
+        auto mpsdSession = std::make_shared<multiplayer_session>(utils::string_t_from_internal_string(primaryContext->xbox_live_user_id()));
 
         for (uint32_t count = 1; count <= 3; ++count)
         {
@@ -3065,7 +3065,7 @@ public:
         auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
         auto primaryContext = clientManager->latest_pending_read()->game_client()->session_writer()->get_primary_context();
 
-        auto mpsdSession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id());
+        auto mpsdSession = std::make_shared<multiplayer_session>(utils::string_t_from_internal_string(primaryContext->xbox_live_user_id()));
         auto result = primaryContext->multiplayer_service().write_session(mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
         clientManager->latest_pending_read()->game_client()->update_session(result.payload());
         mpInstance->DoWork();
@@ -3120,7 +3120,7 @@ public:
         auto mpInstance = MultiplayerManager::SingletonInstance;
         auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
         auto primaryContext = clientManager->latest_pending_read()->game_client()->session_writer()->get_primary_context();
-        auto mpsdSession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id());
+        auto mpsdSession = std::make_shared<multiplayer_session>(utils::string_t_from_internal_string(primaryContext->xbox_live_user_id()));
         
         
         // Should not clear the game session as you are not the last person to leave the session.
@@ -3213,7 +3213,7 @@ public:
         auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
         auto lobbyClient = clientManager->latest_pending_read()->lobby_client();
         auto primaryContext = lobbyClient->session_writer()->get_primary_context();
-        auto mpsdSession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id());
+        auto mpsdSession = std::make_shared<multiplayer_session>(utils::string_t_from_internal_string(primaryContext->xbox_live_user_id()));
 
         VERIFY_IS_TRUE(lobbyClient->is_transfer_handle_state(_T("completed")));
         VERIFY_IS_TRUE(utils::str_icmp(lobbyClient->get_transfer_handle(), _T("TestGameSessionTransferHandle")) == 0);

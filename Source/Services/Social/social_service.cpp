@@ -111,7 +111,7 @@ social_service::subscribe_to_social_relationship_change(
         return xbox_live_result<std::shared_ptr<social_relationship_change_subscription>>(result.err(), result.err_message());
     }
     return xbox_live_result<std::shared_ptr<social_relationship_change_subscription>>(
-        std::make_shared<social_relationship_change_subscription>(social_relationship_change_subscription(result.payload()))
+        xsapi_allocate_shared<social_relationship_change_subscription>(result.payload())
         );
 }
 

@@ -124,7 +124,7 @@ user_impl_idp::sign_in_impl(_In_ bool showUI, _In_ bool forceRefresh)
                 if (!payload.token().empty())
                 {
                     const string_t& xboxUserId = payload.xbox_user_id();
-                    string_t pathAndQuery = presence_service_impl::set_presence_sub_path(xboxUserId);
+                    string_t pathAndQuery = utils::string_t_from_internal_string(presence_service_internal::set_presence_sub_path(utils::internal_string_from_string_t(xboxUserId)));
 
                     std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
                         std::make_shared<xbox_live_context_settings>(),

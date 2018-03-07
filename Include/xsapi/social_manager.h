@@ -21,6 +21,9 @@ namespace xbox {
             namespace manager {
 
 class social_graph;
+class social_manager_internal;
+class xbox_social_user_group_internal;
+class social_event_internal;
 struct xbox_social_user_context;
 struct user_group_status_change;
 enum class change_list_enum;
@@ -548,7 +551,7 @@ public:
     /// <summary>
     /// List of users this event affects
     /// </summary>
-    _XSAPIIMP const std::vector<xbox_user_id_container>& users_affected() const;
+    _XSAPIIMP std::vector<xbox_user_id_container> users_affected() const;
 
     /// <summary>
     /// The social event args
@@ -563,24 +566,7 @@ public:
     /// <summary>
     /// Error message
     /// </summary>
-    _XSAPIIMP const std::string& err_message() const;
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    social_event();
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    social_event(
-        _In_ xbox_live_user_t user,
-        _In_ social_event_type eventType,
-        _In_ std::vector<xbox_user_id_container> usersAffected,
-        _In_ std::shared_ptr<social_event_args> socialEventArgs = nullptr,
-        _In_ std::error_code errCode = xbox_live_error_code::no_error,
-        _In_ std::string errMessage = std::string()
-    );
+    _XSAPIIMP std::string err_message() const;
 
 #if defined(XSAPI_CPPWINRT)
 #if TV_API
@@ -591,22 +577,15 @@ public:
 #endif
 #endif
 
-private:
-    social_event_type m_eventType;
-    std::error_code m_errCode;
-    xbox_live_user_t m_user;
-    std::shared_ptr<social_event_args> m_eventArgs;
-    std::vector<xbox_user_id_container> m_usersAffected;
-    std::string m_errMessage;
-};
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    social_event(
+        _In_ std::shared_ptr<social_event_internal> internalObj
+        );
 
-/// <summary>
-/// Internal structure
-/// </summary>
-struct xbox_removal_struct
-{
-    uint64_t xuidNum;
-    xbox_user_id_container xuidContainer;
+private:
+    std::shared_ptr<social_event_internal> m_internalObj;
 };
 
 /// <summary>
@@ -619,7 +598,7 @@ public:
     /// Gets an up to date list of users from the social graph
     /// The returned value remains valid until the next call to do_work
     /// </summary>
-    _XSAPIIMP const std::vector<xbox_social_user*>& users();
+    _XSAPIIMP std::vector<xbox_social_user*> users() const;
 
     /// <summary>
     /// Returns copied group of users from social user group
@@ -633,53 +612,33 @@ public:
     /// <summary>
     /// Type of social user group
     /// </summary>
-    _XSAPIIMP social_user_group_type social_user_group_type();
+    _XSAPIIMP social_user_group_type social_user_group_type() const;
 
     /// <summary>
     /// Users who are contained in this user group currently
     /// For list this is static, for filter this is dynamic and will change on do_work
     /// </summary>
-    _XSAPIIMP const std::vector<xbox_user_id_container>& users_tracked_by_social_user_group();
+    _XSAPIIMP std::vector<xbox_user_id_container> users_tracked_by_social_user_group() const;
 
     /// <summary>
     /// The local user who the user group is related to
     /// </summary>
-    _XSAPIIMP const xbox_live_user_t& local_user();
+    _XSAPIIMP const xbox_live_user_t& local_user() const;
 
     /// <summary>
     /// Returns the presence filter used if group type is filter type
     /// </summary>
-    _XSAPIIMP presence_filter presence_filter_of_group() { return m_presenceFilter; }
+    _XSAPIIMP presence_filter presence_filter_of_group() const;
 
     /// <summary>
     /// Returns the relationship filter used if group type is filter type
     /// </summary>
-    _XSAPIIMP relationship_filter relationship_filter_of_group() { return m_relationshipFilter; }
+    _XSAPIIMP relationship_filter relationship_filter_of_group() const;
 
     /// <summary>
     /// Returns users from xuids. Pointers become invalidated by next do_work
     /// </summary>
     _XSAPIIMP std::vector<xbox_social_user*> get_users_from_xbox_user_ids(_In_ const std::vector<xbox_user_id_container>& xboxUserIds);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    xbox_social_user_group(
-        _In_ string_t viewHash,
-        _In_ presence_filter presenceFilter,
-        _In_ relationship_filter relationshipFilter,
-        _In_ uint32_t titleId,
-        _In_ xbox_live_user_t xboxLiveUser
-        );
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    xbox_social_user_group(
-        _In_ string_t viewHash,
-        _In_ std::vector<string_t> userList,
-        _In_ xbox_live_user_t xboxLiveUser
-        );
 
 #if defined(XSAPI_CPPWINRT)
 #if TV_API
@@ -689,50 +648,16 @@ public:
     }
 #endif
 #endif
+
+    /// <summary>
+    /// Internal function
+    /// </summary>
+    xbox_social_user_group(
+        _In_ std::shared_ptr<xbox_social_user_group_internal> internalObj
+        );
+
 private:
-    void destroy();
-
-    const string_t& hash() const;
-
-    const std::vector<uint64_t>& tracking_users();
-
-    void update_view(
-        _In_ const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>& snapshotList,
-        _In_ const std::vector<social_event>& socialEvents
-        );
-
-    void initialize_filter_list(
-        _In_ const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>& users
-        );
-
-    void filter_list(
-        _In_ const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>& snapshotList,
-        _In_ const std::vector<social_event>& socialEvents
-        );
-
-    bool get_presence_filter_result(
-        _In_ const xbox_social_user* user,
-        _In_ presence_filter presenceFilter
-        ) const;
-
-    bool needs_update();
-
-    void remove_users(_In_ const std::vector<xbox_removal_struct>& usersToRemove);
-
-    user_group_status_change _Update_users_in_group(_In_ const std::vector<string_t>& userList);
-
-    bool m_needsUpdate;
-    xbox::services::social::manager::social_user_group_type m_userGroupType;
-    social_manager_extra_detail_level m_detailLevel;
-    presence_filter m_presenceFilter;
-    relationship_filter m_relationshipFilter;
-    uint32_t m_titleId;
-    xbox_live_user_t m_xboxLiveUser;
-    std::vector<xbox_user_id_container> m_userUpdateListString;
-    std::vector<xbox_social_user*> m_userGroupVector;
-    std::vector<uint64_t> m_userUpdateListInt;
-    string_t m_viewHash;
-    std::mutex m_groupMutex;
+    std::shared_ptr<xbox_social_user_group_internal> m_internalObj;
 
     friend class social_manager;
 };
@@ -752,6 +677,11 @@ public:
     /// internal function
     /// </summary>
     social_user_group_loaded_event_args(_In_ std::shared_ptr<xbox_social_user_group> socialUserGroup);
+
+    /// <summary>
+    /// internal function
+    /// </summary>
+    social_user_group_loaded_event_args(_In_ std::shared_ptr<xbox_social_user_group_internal> socialUserGroup);
 
 private:
     std::shared_ptr<xbox_social_user_group> m_socialUserGroup;
@@ -836,7 +766,7 @@ public:
     /// <summary>
     /// Returns all local users who have been added to the social manager
     /// </summary>
-    _XSAPIIMP const std::vector<xbox_live_user_t>& local_users() const;
+    _XSAPIIMP std::vector<xbox_live_user_t> local_users() const;
 
     /// <summary>
     /// Updates specified social user group to new group of users
@@ -909,16 +839,8 @@ public:
 #endif
 
 protected:
-    
     social_manager();
-
-    std::vector<social_event> m_eventQueue;
-    std::vector<xbox_live_user_t> m_localUserList;
-    xsapi_internal_unordered_map<string_t, std::shared_ptr<xbox_social_user_group>> m_xboxSocialUserGroups;
-    xsapi_internal_unordered_map<string_t, xsapi_internal_vector<string_t>> m_userToViewMap;
-    xsapi_internal_unordered_map<string_t, std::shared_ptr<social_graph>> m_localGraphs;
-    std::mutex m_socialMangerLock;
-    std::mutex m_socialManagerEventLock;
+    std::shared_ptr<social_manager_internal> m_internalObj;
 
     friend class xbox_social_user_group;
 };

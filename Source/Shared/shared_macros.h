@@ -140,6 +140,12 @@
         return utils::std_vector_from_internal_vector<typeName>(m_internalObj->methodName()); \
     }
 
+#define DEFINE_GET_OBJECT(className, objectType, methodName) \
+    objectType className::methodName() const \
+    { \
+        return m_internalObj->methodName(); \
+    }
+
 #define DEFINE_GET_OBJECT_REF(className, objectType, methodName) \
     const objectType& className::methodName() const \
     { \

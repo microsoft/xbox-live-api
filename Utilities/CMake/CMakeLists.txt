@@ -376,7 +376,7 @@ set(Presence_Source_Files
     ../../Source/Services/Presence/presence_media_record.cpp
     ../../Source/Services/Presence/presence_record.cpp
     ../../Source/Services/Presence/presence_service.cpp
-    ../../Source/Services/Presence/presence_service_impl.cpp
+    ../../Source/Services/Presence/presence_service_internal.cpp
     ../../Source/Services/Presence/presence_title_record.cpp
     ../../Source/Services/Presence/presence_title_request.cpp
     ../../Source/Services/Presence/presence_user_batch_request.cpp
@@ -449,6 +449,7 @@ set(Social_Manager_Source_Files
     ../../Source/Services/Social/Manager/xbox_Social_user_group.cpp
     ../../Source/Services/Social/Manager/xbox_user_id_container.cpp
     ../../Source/Services/Social/Manager/Social_manager_internal.h
+    ../../Source/Services/Social/Manager/Social_manager_internal.cpp
     )
 
 set(Stats_Source_Files

@@ -72,7 +72,7 @@ presence_writer::start_timer(
 
 void
 presence_writer::start_writer(
-    _In_ std::shared_ptr<presence_service_impl> presenceServiceImpl
+    _In_ std::shared_ptr<presence_service_internal> presenceServiceImpl
     )
 {
     bool startWriter = false;
@@ -85,7 +85,7 @@ presence_writer::start_writer(
             startWriter = true;
         }
 
-        const string_t& id = presenceServiceImpl->m_userContext->xbox_user_id();
+        xsapi_internal_string id = utils::internal_string_from_string_t(presenceServiceImpl->m_userContext->xbox_user_id());
         if (m_presenceServices.find(id) == m_presenceServices.end())
         {
             LOG_INFO("Add new presence service into writer");
@@ -130,7 +130,7 @@ presence_writer::handle_timer_trigger()
 
 void 
 presence_writer::stop_writer(
-    _In_ const string_t& xboxLiveUserId
+    _In_ const xsapi_internal_string& xboxLiveUserId
     )
 {
     std::lock_guard<std::mutex> guard(m_lock.get());
@@ -162,19 +162,27 @@ presence_writer::stop_writer(
 
 void 
 presence_writer::set_inactive_in_title(
-    _In_ std::shared_ptr<presence_service_impl> presenceServiceImpl
+    _In_ std::shared_ptr<presence_service_internal> presenceServiceImpl
     )
 {
     // Set the presence to be not in this title
     try
     {
-        presenceServiceImpl->set_presence(false);
+        presenceServiceImpl->set_presence(false, presence_data_internal(), XSAPI_DEFAULT_TASKGROUP, nullptr);
     }
     catch (...)
     {
         LOG_ERROR("Set presence inactive fail");
     }
 }
+
+struct set_active_in_title_context
+{
+    set_active_in_title_context(uint32_t _writeTaskCount) : writeTaskCount(_writeTaskCount), writeTasksComplete(0) {}
+
+    const uint32_t writeTaskCount;
+    std::atomic<uint32_t> writeTasksComplete;
+};
 
 void 
 presence_writer::set_active_in_title()
@@ -186,39 +194,43 @@ presence_writer::set_active_in_title()
 
         std::lock_guard<std::mutex> guard(m_lock.get());
 
-        std::vector<pplx::task<xbox_live_result<uint32_t>>> writeTasks;
+        auto context = xsapi_allocate_shared<set_active_in_title_context>(static_cast<uint32_t>(m_presenceServices.size()));
+        std::weak_ptr<presence_writer> thisWeakPtr = shared_from_this();
+
         for (auto& presencePair : m_presenceServices)
         {
             auto& presenceService = presencePair.second;
             if (presenceService != nullptr)
             {
-                writeTasks.push_back(pplx::create_task(presenceService->set_presence_helper(true, presence_data())));
+                presenceService->set_presence(
+                    true,
+                    presence_data_internal(), 
+                    XSAPI_DEFAULT_TASKGROUP,
+                    [context, thisWeakPtr](xbox_live_result<uint32_t> result)
+                {
+                    // only look at the last result
+                    context->writeTasksComplete++;
+                    if ((++context->writeTasksComplete) >= context->writeTaskCount)
+                    {
+                        std::shared_ptr<presence_writer> pThis(thisWeakPtr.lock());
+
+                        pThis->m_isCallInProgress.store(false);
+                        LOG_INFO("Presence writing finish.");
+
+                        if (!result.err())
+                        {
+                            pThis->m_heartBeatDelayInMins = result.payload();
+                        }
+                        else
+                        {
+                            LOGS_ERROR << "Error detected on presence writing, using default interval for next write:"
+                                << result.err() << ", msg:" << result.err_message();
+                            // Ignore failures
+                            pThis->m_heartBeatDelayInMins = s_defaultHeartBeatDelayInMins;
+                        }
+                    }
+                });
             }
-
-            std::weak_ptr<presence_writer> thisWeakPtr = shared_from_this();
-            pplx::when_all(writeTasks.begin(), writeTasks.end())
-            .then([thisWeakPtr](std::vector<xbox_live_result<uint32_t>> results)
-            {
-                std::shared_ptr<presence_writer> pThis(thisWeakPtr.lock());
-
-                pThis->m_isCallInProgress.store(false);
-                LOG_INFO("Presence writing finish.");
-
-                // only look at the last result
-                auto heartBeat = (results.end() -1);
-                if (!heartBeat->err())
-                {
-                    pThis->m_heartBeatDelayInMins = heartBeat->payload();
-                }
-                else
-                {
-                    LOGS_ERROR <<"Error detected on presence writing, using default interval for next write:" 
-                        << heartBeat->err() << ", msg:" << heartBeat->err_message();
-                    // Ignore failures
-                    pThis->m_heartBeatDelayInMins = s_defaultHeartBeatDelayInMins;
-                }
-
-            });
         }
     }
     else

@@ -18,6 +18,7 @@ void MockHttpCall::reinit()
 {
     m_requestBody = http_call_request_message_internal();
     ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(L"{}"));
+    ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(web::json::value::parse(L"{}"));
     ServerName = std::wstring();
     HttpMethod = std::wstring();
     PathQueryFragment = web::uri();
@@ -153,9 +154,9 @@ xbox_live_result<void> MockHttpCall::get_response_with_auth(
         throw ResultHR;
     }
     CallCounter++;
-    if (fRequestPostFunc != nullptr)
+    if (fRequestPostFuncInternal != nullptr)
     {
-        fRequestPostFunc(ResultValue, utils::string_t_from_internal_string(m_requestBody.request_message_string()));
+        fRequestPostFuncInternal(ResultValueInternal, m_requestBody.request_message_string());
     }
     ResultValueInternal->set_full_url(utils::internal_string_from_string_t(ServerName));
     ResultValueInternal->route_service_call();
@@ -286,18 +287,18 @@ void MockHttpCall::set_custom_header(
     )
 {
 #if UNIT_TEST_SERVICES
-    // TODO
-    //ResultValue->_Add_response_header(headerName, headerValue);
+    ResultValueInternal->add_response_header(utils::internal_string_from_string_t(headerName), 
+        utils::internal_string_from_string_t(headerValue)
+        );
 #endif
 }
 
 void MockHttpCall::remove_custom_header(
-    _In_ const std::wstring& headerName
+    _In_ const xsapi_internal_string& headerName
     )
 {
 #if UNIT_TEST_SERVICES
-    // TODO
-    //ResultValue->_Remove_response_header(headerName);
+    ResultValueInternal->remove_response_header(headerName);
 #endif
 }
 

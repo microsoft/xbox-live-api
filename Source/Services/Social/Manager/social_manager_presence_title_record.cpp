@@ -4,6 +4,7 @@
 #include "pch.h"
 #include "xsapi/social_manager.h"
 #include "xsapi/presence.h"
+#include "presence_internal.h"
 
 using namespace xbox::services::presence;
 
@@ -77,8 +78,8 @@ social_manager_presence_title_record::_Deserialize(
     social_manager_presence_title_record returnObject;
     std::error_code errc;
 
-    auto deviceString = utils::extract_json_string(json, _T("Device"), errc);
-    returnObject.m_deviceType = presence_device_record::_Convert_string_to_presence_device_type(deviceString);
+    auto deviceString = utils::extract_json_string(json, "Device", errc);
+    returnObject.m_deviceType = presence_device_record_internal::convert_string_to_presence_device_type(deviceString);
     utils::extract_json_string_to_char_t_array(json, _T("PresenceText"), errc, returnObject.m_presenceText, ARRAYSIZE(returnObject.m_presenceText));
     auto state = utils::extract_json_string(json, _T("State"), errc);
     returnObject.m_isTitleActive = (!state.empty() && utils::str_icmp(state, _T("active")) == 0);

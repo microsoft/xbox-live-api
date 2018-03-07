@@ -6,59 +6,76 @@
 #include "social_manager_internal.h"
 #endif
 #include "xsapi/presence.h"
+#include "presence_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
 
-presence_record::presence_record():
+presence_record::presence_record(
+    _In_ std::shared_ptr<presence_record_internal> internalObj
+    ) :
+    m_internalObj(std::move(internalObj))
+{
+}
+
+DEFINE_GET_STRING(presence_record, xbox_user_id);
+DEFINE_GET_ENUM_TYPE(presence_record, user_presence_state, user_state);
+DEFINE_GET_VECTOR_INTERNAL_TYPE(presence_record, presence_device_record, presence_device_records);
+
+bool presence_record::is_user_playing_title(_In_ uint32_t titleId) const
+{
+    return m_internalObj->is_user_playing_title(titleId);
+}
+
+presence_record_internal::presence_record_internal():
     m_userState(user_presence_state::unknown)
 {
 }
 
-const string_t& 
-presence_record::xbox_user_id() const
+const xsapi_internal_string& 
+presence_record_internal::xbox_user_id() const
 {
     return m_xboxUserId;
 }
 
 user_presence_state 
-presence_record::user_state() const
+presence_record_internal::user_state() const
 {
     return m_userState;
 }
 
-const std::vector<presence_device_record>&
-presence_record::presence_device_records() const
+const xsapi_internal_vector<std::shared_ptr<presence_device_record_internal>>&
+presence_record_internal::presence_device_records() const
 {
     return m_presenceDeviceRecords;
 }
 
-xbox_live_result<presence_record>
-presence_record::_Deserialize(
+xbox_live_result<std::shared_ptr<presence_record_internal>>
+presence_record_internal::deserialize(
     _In_ const web::json::value& json
     )
 {
-    presence_record returnObject;
-    if (json.is_null()) return xbox_live_result<presence_record>(returnObject);
+    auto returnObject = xsapi_allocate_shared<presence_record_internal>();
+    if (json.is_null()) return xbox_live_result<std::shared_ptr<presence_record_internal>>(returnObject);
 
     std::error_code errc = xbox_live_error_code::no_error;
-    returnObject.m_xboxUserId = utils::extract_json_string(json, _T("xuid"), errc);
-    returnObject.m_userState = _Convert_string_to_user_presence_state(
-        utils::extract_json_string(json, _T("state"), errc)
+    returnObject->m_xboxUserId = utils::extract_json_string(json, "xuid", errc);
+    returnObject->m_userState = convert_string_to_user_presence_state(
+        utils::extract_json_string(json, "state", errc)
         );
 
-    returnObject.m_presenceDeviceRecords = utils::extract_json_vector<presence_device_record>(
-        presence_device_record::_Deserialize,
+    returnObject->m_presenceDeviceRecords = utils::extract_json_vector<std::shared_ptr<presence_device_record_internal>>(
+        presence_device_record_internal::deserialize,
         json,
-        _T("devices"),
+        "devices",
         errc,
         false
         );
-    
-    return xbox_live_result<presence_record>(returnObject, errc);
+
+    return xbox_live_result<std::shared_ptr<presence_record_internal>>(returnObject, errc);
 }
 
 bool
-presence_record::is_user_playing_title(
+presence_record_internal::is_user_playing_title(
     _In_ uint32_t titleId
     ) const
 {
@@ -69,13 +86,13 @@ presence_record::is_user_playing_title(
 
     for (const auto& deviceRecord : m_presenceDeviceRecords)
     {
-        for (const auto& titleRecord : deviceRecord.presence_title_records())
+        for (const auto& titleRecord : deviceRecord->presence_title_records())
         {
-            if (titleRecord.title_id() == titleId && titleRecord.is_title_active())
+            if (titleRecord->title_id() == titleId && titleRecord->is_title_active())
             {
                 return true;
             }
-            else if (titleRecord.title_id() == titleId)
+            else if (titleRecord->title_id() == titleId)
             {
                 return false;
             }
@@ -86,19 +103,19 @@ presence_record::is_user_playing_title(
 }
 
 user_presence_state 
-presence_record::_Convert_string_to_user_presence_state(
-    _In_ const string_t& value
+presence_record_internal::convert_string_to_user_presence_state(
+    _In_ const xsapi_internal_string& value
     )
 {
-    if (utils::str_icmp(value, _T("Online")) == 0)
+    if (utils::str_icmp(value, "Online") == 0)
     {
         return user_presence_state::online;
     }
-    else if (utils::str_icmp(value, _T("Away")) == 0)
+    else if (utils::str_icmp(value, "Away") == 0)
     {
         return user_presence_state::away;
     }
-    else if (utils::str_icmp(value, _T("Offline")) == 0)
+    else if (utils::str_icmp(value, "Offline") == 0)
     {
         return user_presence_state::offline;
     }

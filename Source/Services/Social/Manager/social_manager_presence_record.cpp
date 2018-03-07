@@ -4,6 +4,7 @@
 #include "pch.h"
 #include "xsapi/social_manager.h"
 #include "xsapi/presence.h"
+#include "presence_internal.h"
 
 using namespace xbox::services::presence;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
@@ -77,8 +78,8 @@ social_manager_presence_record::_Deserialize(
         false
         );
 
-    auto presenceStateString = utils::extract_json_string(json, _T("presenceState"), errc);
-    returnObject.m_userState = presence_record::_Convert_string_to_user_presence_state(presenceStateString);
+    auto presenceStateString = utils::extract_json_string(json, "presenceState", errc);
+    returnObject.m_userState = presence_record_internal::convert_string_to_user_presence_state(presenceStateString);
     auto presenceEntries = utils::extract_json_vector<social_manager_presence_title_record>(
         social_manager_presence_title_record::_Deserialize,
         presenceDetailsJson,
