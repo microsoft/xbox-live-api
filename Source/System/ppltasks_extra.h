@@ -7,6 +7,7 @@
 #include <agents.h>
 #include <memory>
 #include <chrono>
+#include "Utils_WinRT.h"
 
 namespace Concurrency
 {

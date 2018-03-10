@@ -681,10 +681,7 @@ set(Social_Source_Files_C
     )
     
 set(Social_Manager_Source_Files_C
-    ../../Source/C/Services/Social/Manager/social_manager_c.cpp
-    ../../Source/C/Services/Social/Manager/social_manager_helper.cpp
-    ../../Source/C/Services/Social/Manager/social_manager_helper.h
-    ../../Source/C/Services/Social/Manager/social_manager_state.h
+    ../../Source/Services/Social/Manager/C/social_manager_c.cpp
     )
     
 set(Stats_Manager_Source_Files_C
@@ -1323,7 +1320,7 @@ else()
             source_group("C++ Source\\C\\Services\\Misc" FILES ${Misc_Source_Files_C})
             source_group("C++ Source\\C\\Services\\Privacy" FILES ${Privacy_Source_Files_C})
             source_group("C++ Source\\Services\\Social\\C" FILES ${Social_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\Social\\Manager" FILES ${Social_Manager_Source_Files_C})
+            source_group("C++ Source\\Services\\Social\\Manager\\C" FILES ${Social_Manager_Source_Files_C})
             source_group("C++ Source\\C\\Services\\Stats\\Manager" FILES ${Stats_Manager_Source_Files_C})
             source_group("C++ Source\\C\\Services\\TitleStorage" FILES ${TitleStorage_Souce_Files_C})
         endif()

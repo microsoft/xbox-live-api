@@ -150,8 +150,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_permission_check_result_impl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_permission_deny_reason_impl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_taskargs.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_helper.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_state.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_helper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_state.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_impl.h" />
@@ -274,8 +272,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_multiple_permissions_check_result_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_permission_check_result_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_permission_deny_reason_impl.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_c.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_helper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_helper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage.cpp" />
@@ -439,6 +435,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\profile_helpers.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\social.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\social_helpers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\C\social_manager_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_event.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_graph.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager.cpp" />

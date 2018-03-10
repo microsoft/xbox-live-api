@@ -20,7 +20,6 @@ class xbl_thread_pool;
 class title_storage_state;
 struct XBL_XBOX_LIVE_APP_CONFIG;
 struct XSAPI_ACHIEVEMENTS_STATE; // TODO use c++ naming conventions for internal classes, make them classes
-struct XSAPI_SOCIAL_MANAGER_VARS;
 struct XSAPI_STATS_MANAGER_VARS;
 struct XBL_XBOX_LIVE_USER;
 
@@ -35,6 +34,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
     class social_manager;
     class social_manager_internal;
+    class xbl_social_manager;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_END
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
@@ -240,7 +240,7 @@ struct xsapi_singleton
     std::unordered_map<std::string, XBL_XBOX_LIVE_USER*> m_signedInUsers;
 
     std::shared_ptr<XSAPI_ACHIEVEMENTS_STATE> m_achievementsState;
-    std::shared_ptr<XSAPI_SOCIAL_MANAGER_VARS> m_socialVars;
+    std::shared_ptr<xbox::services::social::manager::xbl_social_manager> m_xblSocialManagerState;
     std::shared_ptr<XSAPI_STATS_MANAGER_VARS> m_statsVars;
 
     std::mutex m_callbackContextsLock;
@@ -960,6 +960,8 @@ public:
     static xsapi_internal_string internal_string_from_utf16(_In_reads_(size) PCWSTR utf16, size_t size);
     static xsapi_internal_string internal_string_from_utf16(_In_z_ PCWSTR utf16);
 
+    static int utf8_from_char_t(_In_z_ const char_t* inArray, _Out_writes_z_(size) char* outArray, _In_ int cbOutArray);
+
     static string_t string_t_from_internal_string(_In_ const xsapi_internal_string& internalString);
     static string_t string_t_from_utf8(_In_reads_(size) PCSTR utf8, size_t size);
     static string_t string_t_from_utf8(_In_z_ PCSTR utf8);
@@ -1569,6 +1571,57 @@ public:
 private:
     char *m_buffer;
     size_t m_cbRemaining;
+};
+
+template<typename K, typename V>
+class bimap
+{
+public:
+    typename xsapi_internal_unordered_map<K, V>::iterator find(const K& key)
+    {
+        return m_map.find(key);
+    }
+
+    typename xsapi_internal_unordered_map<K, V>::iterator begin()
+    {
+        return m_map.begin();
+    }
+
+    typename xsapi_internal_unordered_map<K, V>::iterator end()
+    {
+        return m_map.end();
+    }
+
+    typename xsapi_internal_unordered_map<V, K>::iterator reverse_find(const V& value)
+    {
+        return m_reverseMap.find(value);
+    }
+
+    typename xsapi_internal_unordered_map<V, K>::iterator reverse_begin()
+    {
+        return m_reverseMap.begin();
+    }
+
+    typename xsapi_internal_unordered_map<V, K>::iterator reverse_end()
+    {
+        return m_reverseMap.end();
+    }
+
+    void insert(const K& key, const V& value)
+    {
+        m_map[key] = value;
+        m_reverseMap[value] = key;
+    }
+
+    void erase(typename xsapi_internal_unordered_map<K, V>::iterator iterator)
+    {
+        m_reverseMap.erase(iterator->second);
+        m_map.erase(iterator);
+    }
+
+private:
+    xsapi_internal_unordered_map<K, V> m_map;
+    xsapi_internal_unordered_map<V, K> m_reverseMap;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|ARM">
@@ -141,6 +141,7 @@
     <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectFolder)\</IntDir>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\Services\Social\Manager\C\social_manager_c.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements_helper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements_state.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements_taskargs.h" />
@@ -150,8 +151,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_permission_check_result_impl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_permission_deny_reason_impl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_taskargs.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_helper.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_state.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_helper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_state.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_impl.h" />
@@ -274,8 +273,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_multiple_permissions_check_result_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_permission_check_result_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_permission_deny_reason_impl.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_c.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_helper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_helper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage.cpp" />
@@ -309,7 +306,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\xbox_live_context_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\xbox_live_global_c.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp" >
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>

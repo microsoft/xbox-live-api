@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements.cpp">
@@ -27,12 +27,6 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_permission_deny_reason_impl.cpp">
       <Filter>C++ Source\C\Services\Privacy</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_c.cpp">
-      <Filter>C++ Source\C\Services\Social\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_helper.cpp">
-      <Filter>C++ Source\C\Services\Social\Manager</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_c.cpp">
       <Filter>C++ Source\C\Services\Stats\Manager</Filter>
@@ -832,6 +826,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\xbox_live_mutex.cpp">
       <Filter>C++ Source\System</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Services\Social\Manager\C\social_manager_c.cpp">
+      <Filter>C++ Source\Services\Social\Manager\C</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\achievements.h">
@@ -1004,12 +1001,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_taskargs.h">
       <Filter>C++ Source\C\Services\Privacy</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_helper.h">
-      <Filter>C++ Source\C\Services\Social\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_state.h">
-      <Filter>C++ Source\C\Services\Social\Manager</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_helper.h">
       <Filter>C++ Source\C\Services\Stats\Manager</Filter>
@@ -1238,12 +1229,6 @@
     <Filter Include="C++ Source\C\Services\Privacy">
       <UniqueIdentifier>{04D5FBA6-705C-38C4-A53B-99FE12E30C84}</UniqueIdentifier>
     </Filter>
-    <Filter Include="C++ Source\C\Services\Social">
-      <UniqueIdentifier>{D971A11F-C118-38C6-A821-0CFC9A6B8B59}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="C++ Source\C\Services\Social\Manager">
-      <UniqueIdentifier>{075369BC-6DA3-36F6-9DFA-1CA98AA537BF}</UniqueIdentifier>
-    </Filter>
     <Filter Include="C++ Source\C\Services\Stats">
       <UniqueIdentifier>{FD74AA6F-7F28-31F1-A7B6-BC2D2BFC1602}</UniqueIdentifier>
     </Filter>
@@ -1336,6 +1321,9 @@
     </Filter>
     <Filter Include="C++ Source\System">
       <UniqueIdentifier>{726C90DE-90DC-36A6-B559-090139CBCAD4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Social\Manager\C">
+      <UniqueIdentifier>{7f3fd370-95a9-41a0-bb21-46becaa4c5ce}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

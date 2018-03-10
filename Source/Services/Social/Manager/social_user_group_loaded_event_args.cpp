@@ -3,25 +3,33 @@
 
 #include "pch.h"
 #include "xsapi/social_manager.h"
+#include "social_manager_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
 
 social_user_group_loaded_event_args::social_user_group_loaded_event_args(
-    _In_ std::shared_ptr<xbox_social_user_group> socialUserGroup
+    _In_ std::shared_ptr<social_user_group_loaded_event_args_internal> internalObj
     ) :
+    m_internalObj(internalObj)
+{
+}
+const std::shared_ptr<xbox_social_user_group>&
+social_user_group_loaded_event_args::social_user_group() const
+{
+    // TODO is it ok to just allocate a new object here?
+    return xsapi_allocate_shared<xbox_social_user_group>(m_internalObj->social_user_group());
+}
+
+
+social_user_group_loaded_event_args_internal::social_user_group_loaded_event_args_internal(
+    _In_ std::shared_ptr<xbox_social_user_group_internal> socialUserGroup
+) :
     m_socialUserGroup(socialUserGroup)
 {
 }
 
-social_user_group_loaded_event_args::social_user_group_loaded_event_args(
-    _In_ std::shared_ptr<xbox_social_user_group_internal> socialUserGroup
-) :
-    m_socialUserGroup(xsapi_allocate_shared<xbox_social_user_group>(socialUserGroup))
-{
-}
-
-const std::shared_ptr<xbox_social_user_group>&
-social_user_group_loaded_event_args::social_user_group() const
+std::shared_ptr<xbox_social_user_group_internal>
+social_user_group_loaded_event_args_internal::social_user_group() const
 {
     return m_socialUserGroup;
 }

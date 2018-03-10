@@ -1238,7 +1238,7 @@ multiplayer_lobby_client::handle_lobby_change_events(
     _In_ const std::vector<std::shared_ptr<multiplayer_client_pending_request>>& processingQueue
     )
 {
-    std::map<string_t, web::json::value> localUserMap;
+    std::map<string_t, web::json::value> localUsersMap;
     string_t localUserConnectionAddress;
     for (auto& request : processingQueue)
     {
@@ -1270,7 +1270,7 @@ multiplayer_lobby_client::handle_lobby_change_events(
                     request->context()
                     );
 
-                localUserMap[prop.first] = prop.second;
+                localUsersMap[prop.first] = prop.second;
             }
         }
     }
@@ -1286,13 +1286,13 @@ multiplayer_lobby_client::handle_lobby_change_events(
         }
     }
 
-    if (localUserMap.size() != 0 || !localUserConnectionAddress.empty())
+    if (localUsersMap.size() != 0 || !localUserConnectionAddress.empty())
     {
         // write member properties to the game session.
         auto gameClient = game_client();
         if (gameClient != nullptr)
         {
-            gameClient->set_local_member_properties_to_remote_session(localUser, localUserMap, localUserConnectionAddress);
+            gameClient->set_local_member_properties_to_remote_session(localUser, localUsersMap, localUserConnectionAddress);
         }
     }
 }

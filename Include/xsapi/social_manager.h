@@ -24,6 +24,7 @@ class social_graph;
 class social_manager_internal;
 class xbox_social_user_group_internal;
 class social_event_internal;
+class social_user_group_loaded_event_args_internal;
 struct xbox_social_user_context;
 struct user_group_status_change;
 enum class change_list_enum;
@@ -676,15 +677,10 @@ public:
     /// <summary>
     /// internal function
     /// </summary>
-    social_user_group_loaded_event_args(_In_ std::shared_ptr<xbox_social_user_group> socialUserGroup);
-
-    /// <summary>
-    /// internal function
-    /// </summary>
-    social_user_group_loaded_event_args(_In_ std::shared_ptr<xbox_social_user_group_internal> socialUserGroup);
+    social_user_group_loaded_event_args(_In_ std::shared_ptr<social_user_group_loaded_event_args_internal> internalObj);
 
 private:
-    std::shared_ptr<xbox_social_user_group> m_socialUserGroup;
+    std::shared_ptr<social_user_group_loaded_event_args_internal> m_internalObj;
 };
 
 /// <summary>

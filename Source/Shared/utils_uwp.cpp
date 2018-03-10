@@ -41,6 +41,41 @@ xsapi_internal_string utils::internal_string_from_utf16(_In_z_ PCWSTR utf16)
     return internal_string_from_utf16(utf16, wcslen(utf16));
 }
 
+int utils::utf8_from_char_t(_In_z_ const char_t* inArray, _Out_writes_z_(size) char* outArray, _In_ int cbOutArray)
+{
+    auto cchInArray = wcslen(inArray);
+
+    // query for the buffer size
+    auto queryResult = WideCharToMultiByte(
+        CP_UTF8, WC_ERR_INVALID_CHARS,
+        inArray, cchInArray,
+        nullptr, 0,
+        nullptr, nullptr
+    );
+
+    if (queryResult > cbOutArray && cbOutArray == 0)
+    {
+        return queryResult;
+    }
+    else if (queryResult == 0 || queryResult > cbOutArray)
+    {
+        throw std::exception("utf8_from_char_t failed");
+    }
+
+    auto conversionResult = WideCharToMultiByte(
+        CP_UTF8, WC_ERR_INVALID_CHARS,
+        inArray, cchInArray,
+        outArray, cbOutArray,
+        nullptr, nullptr
+    );
+    if (conversionResult == 0)
+    {
+        throw std::exception("internal_string_from_utf16 failed");
+    }
+
+    return conversionResult;
+}
+
 xsapi_internal_string utils::internal_string_from_utf16(_In_reads_(size) PCWSTR utf16, size_t size)
 {
     // early out on empty strings since they are trivially convertible
