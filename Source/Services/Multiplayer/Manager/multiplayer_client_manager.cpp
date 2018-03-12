@@ -1061,11 +1061,11 @@ multiplayer_client_manager::handle_member_properties_changed(
     if (memberPropertiesChanged.size() > 0)
     {
         std::vector<std::shared_ptr<multiplayer_member>> gameMembers;
-        const auto& localUserMap = m_multiplayerLocalUserManager->get_local_user_map();
+        const auto& localUsersMap = m_multiplayerLocalUserManager->get_local_user_map();
         for (const auto& member : memberPropertiesChanged)
         {
-            auto iter = localUserMap.find(member->xbox_user_id());
-            if (iter != localUserMap.end())
+            auto iter = localUsersMap.find(member->xbox_user_id());
+            if (iter != localUsersMap.end())
             {
                 // Don't trigger member property changed events for local users.
                 continue;

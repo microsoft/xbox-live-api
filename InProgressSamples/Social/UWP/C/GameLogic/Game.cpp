@@ -111,6 +111,12 @@ void Game::RegisterInputKeys()
     m_input->RegisterKey(Windows::System::VirtualKey::S, ButtonPress::SignIn);
     m_input->RegisterKey(Windows::System::VirtualKey::P, ButtonPress::GetUserProfile);
     m_input->RegisterKey(Windows::System::VirtualKey::F, ButtonPress::GetFriends);
+    m_input->RegisterKey(Windows::System::VirtualKey::Number1, ButtonPress::ToggleSocialGroup1);
+    m_input->RegisterKey(Windows::System::VirtualKey::Number2, ButtonPress::ToggleSocialGroup2);
+    m_input->RegisterKey(Windows::System::VirtualKey::Number3, ButtonPress::ToggleSocialGroup3);
+    m_input->RegisterKey(Windows::System::VirtualKey::Number4, ButtonPress::ToggleSocialGroup4);
+    m_input->RegisterKey(Windows::System::VirtualKey::Number5, ButtonPress::ToggleSocialGroup5);
+    m_input->RegisterKey(Windows::System::VirtualKey::C, ButtonPress::ImportCustomList);
 }
 
 Game::~Game()
@@ -151,6 +157,8 @@ void Game::Update()
     m_timer.Tick([&]()
     {
         m_input->Update();
+
+        UpdateSocialManager();
 
         switch (m_gameData->GetAppState())
         {
@@ -193,6 +201,36 @@ void Game::OnGameUpdate()
     {
         if (m_input != nullptr)
         {
+            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup1))
+            {
+                m_allFriends = !m_allFriends;
+                UpdateSocialGroupForAllUsers(m_allFriends, XBL_PRESENCE_FILTER_ALL, XBL_RELATIONSHIP_FILTER_FRIENDS);
+            }
+
+            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup2))
+            {
+                m_onlineFriends = !m_onlineFriends;
+                UpdateSocialGroupForAllUsers(m_onlineFriends, XBL_PRESENCE_FILTER_ALL_ONLINE, XBL_RELATIONSHIP_FILTER_FRIENDS);
+            }
+
+            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup3))
+            {
+                m_allFavs = !m_allFavs;
+                UpdateSocialGroupForAllUsers(m_allFavs, XBL_PRESENCE_FILTER_ALL, XBL_RELATIONSHIP_FILTER_FAVORITE);
+            }
+
+            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup4))
+            {
+                m_onlineInTitle = !m_onlineInTitle;
+                UpdateSocialGroupForAllUsers(m_onlineInTitle, XBL_PRESENCE_FILTER_TITLE_ONLINE, XBL_RELATIONSHIP_FILTER_FRIENDS);
+            }
+
+            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup5))
+            {
+                m_customList = !m_customList;
+                UpdateSocialGroupOfListForAllUsers(m_customList);
+            }
+
             if (m_input->IsKeyDown(ButtonPress::SignIn))
             {
                 SignIn();
@@ -249,7 +287,7 @@ string_split(
     return vSubStrings;
 }
 
-void replace_all(std::wstring& str, const std::wstring& from, const std::wstring& to) 
+void replace_all(std::string& str, const std::string& from, const std::string& to)
 {
     size_t start_pos = 0;
     while ((start_pos = str.find(from, start_pos)) != std::string::npos)
@@ -287,6 +325,18 @@ void Game::ReadLastCsv()
     }
 }
 
+void Game::UpdateCustomList(_In_ const std::vector<std::string>& xuidList)
+{
+    m_xuidList = xuidList;
+
+    // Refresh custom list if its active
+    if (m_customList)
+    {
+        UpdateSocialGroupOfListForAllUsers(false);
+    }
+}
+
+
 void Game::ReadCsvFile(Windows::Storage::StorageFile^ file)
 {
     WCHAR text[1024];
@@ -309,7 +359,7 @@ void Game::ReadCsvFile(Windows::Storage::StorageFile^ file)
             }
 
             Windows::Foundation::Collections::IVector<Platform::String^>^ lines = t.get();
-            std::vector<string_t> xuidList;
+            std::vector<std::string> xuidList;
             int count = 0;
             for (Platform::String^ line : lines)
             {
@@ -322,18 +372,18 @@ void Game::ReadCsvFile(Windows::Storage::StorageFile^ file)
                 std::vector<string_t> items = string_split(line->Data(), L',');
                 if (items.size() > 4)
                 {
-                    std::wstring xuid = items[3];
-                    replace_all(xuid, L"\"", L"");
-                    replace_all(xuid, L"=", L"");
+                    std::string xuid = utility::conversions::to_utf8string(items[3]);
+                    replace_all(xuid, "\"", "");
+                    replace_all(xuid, "=", "");
                     xuidList.push_back(xuid);
 
-                    WCHAR text[1024];
-                    swprintf_s(text, ARRAYSIZE(text), L"Read from CSV: %s", xuid.c_str());
-                    pThis->Log(text);
+                    CHAR text[1024];
+                    sprintf_s(text, ARRAYSIZE(text), "Read from CSV: %s", xuid.c_str());
+                    pThis->Log(utility::conversions::utf8_to_utf16(text));
                 }
             }
 
-            //pThis->UpdateCustomList(xuidList);
+            pThis->UpdateCustomList(xuidList);
         }
         catch (Platform::Exception^)
         {
@@ -367,7 +417,7 @@ void Game::Init(Windows::UI::Core::CoreWindow^ window)
         g_sampleInstance->HandleSignout(user);
     });
 
-    //ReadLastCsv();
+    ReadLastCsv();
     SignInSilently();
 }
 
@@ -424,6 +474,133 @@ void Game::Log(std::wstring log)
     }
 }
 
+string_t
+ConvertEventTypeToString(XBL_SOCIAL_EVENT_TYPE eventType)
+{
+    switch (eventType)
+    {
+    case XBL_SOCIAL_EVENT_TYPE_USERS_ADDED_TO_SOCIAL_GRAPH: return _T("users_added");
+    case XBL_SOCIAL_EVENT_TYPE_USERS_REMOVED_FROM_SOCIAL_GRAPH: return _T("users_removed");
+    case XBL_SOCIAL_EVENT_TYPE_PRESENCE_CHANGED: return _T("presence_changed");
+    case XBL_SOCIAL_EVENT_TYPE_PROFILES_CHANGED: return _T("profiles_changed");
+    case XBL_SOCIAL_EVENT_TYPE_SOCIAL_RELATIONSHIPS_CHANGED: return _T("social_relationships_changed");
+    case XBL_SOCIAL_EVENT_TYPE_LOCAL_USER_ADDED: return _T("local_user_added");
+    case XBL_SOCIAL_EVENT_TYPE_LOCAL_USER_REMOVED: return _T("local user removed");
+    case XBL_SOCIAL_EVENT_TYPE_SOCIAL_USER_GROUP_LOADED: return _T("social_user_group_loaded");
+    case XBL_SOCIAL_EVENT_TYPE_SOCIAL_USER_GROUP_UPDATED: return _T("social_user_group_updated");
+    default: return _T("unknown");
+    }
+}
+
+void
+Game::LogSocialEventList(XBL_SOCIAL_EVENT* events, uint32_t eventCount)
+{
+    for (uint32_t i = 0; i < eventCount; ++i)
+    {
+        auto socialEvent = events[i];
+
+        stringstream_t source;
+        if (socialEvent.err)
+        {
+            source << _T("Event:");
+            source << utility::conversions::to_utf16string(ConvertEventTypeToString(socialEvent.eventType));
+            source << _T(" ErrorCode: ");
+            source << socialEvent.err;
+        }
+        else
+        {
+            source << _T("Event: ");
+            source << ConvertEventTypeToString(socialEvent.eventType);
+            if (socialEvent.usersAffectedCount > 0)
+            {
+                XBL_XBOX_USER_ID_CONTAINER *affectedUsers;
+                affectedUsers = new XBL_XBOX_USER_ID_CONTAINER[socialEvent.usersAffectedCount];
+
+                XblSocialEventGetUsersAffected(&socialEvent, affectedUsers);
+
+                source << _T(" UserAffected: ");
+                for (uint32_t i = 0; i < socialEvent.usersAffectedCount; ++i)
+                {
+                    source << affectedUsers[i].xboxUserId;
+                    source << _T(", ");
+                }
+            }
+        }
+        Log(source.str());
+    }
+}
+
+void Game::UpdateSocialGroupForAllUsers(
+    _In_ bool toggle,
+    _In_ XBL_PRESENCE_FILTER presenceFilter,
+    _In_ XBL_RELATIONSHIP_FILTER relationshipFilter
+)
+{
+    if (m_xboxLiveContext != nullptr)
+    {
+        UpdateSocialGroup(m_user, toggle, presenceFilter, relationshipFilter);
+    }
+}
+
+void Game::UpdateSocialGroup(
+    _In_ XBL_XBOX_LIVE_USER* user,
+    _In_ bool toggle,
+    _In_ XBL_PRESENCE_FILTER presenceFilter,
+    _In_ XBL_RELATIONSHIP_FILTER relationshipFilter
+)
+{
+    if (m_xboxLiveContext != nullptr)
+    {
+        if (toggle)
+        {
+            CreateSocialUserGroupFromFilters(user, presenceFilter, relationshipFilter);
+        }
+        else
+        {
+            DestroySocialGroup(user, presenceFilter, relationshipFilter);
+        }
+    }
+}
+
+void Game::UpdateSocialGroupOfListForAllUsers(_In_ bool toggle)
+{
+    if (m_xboxLiveContext != nullptr)
+    {
+        return UpdateSocialGroupOfList(m_user, toggle);
+    }
+}
+
+void Game::UpdateSocialGroupOfList(
+    _In_ XBL_XBOX_LIVE_USER* user,
+    _In_ bool toggle
+)
+{
+    if (m_xboxLiveContext != nullptr)
+    {
+        if (toggle)
+        {
+            CreateOrUpdateSocialGroupFromList(m_user, m_xuidList);
+        }
+        else
+        {
+            DestroySocialGroup(m_user);
+        }
+    }
+}
+
+void
+Game::CreateSocialGroupsBasedOnUI(
+    XBL_XBOX_LIVE_USER* user
+)
+{
+    UpdateSocialGroup(user, m_allFriends, XBL_PRESENCE_FILTER_ALL, XBL_RELATIONSHIP_FILTER_FRIENDS);
+    UpdateSocialGroup(user, m_onlineFriends, XBL_PRESENCE_FILTER_ALL_ONLINE, XBL_RELATIONSHIP_FILTER_FRIENDS);
+    UpdateSocialGroup(user, m_allFavs, XBL_PRESENCE_FILTER_ALL, XBL_RELATIONSHIP_FILTER_FAVORITE);
+    UpdateSocialGroup(user, m_onlineInTitle, XBL_PRESENCE_FILTER_ALL_TITLE, XBL_RELATIONSHIP_FILTER_FRIENDS);
+    UpdateSocialGroupOfList(user, m_customList);
+}
+
+
 void Game::HandleSignInResult(
     _In_ XBL_RESULT result,
     _In_ XSAPI_SIGN_IN_RESULT payload,
@@ -441,6 +618,7 @@ void Game::HandleSignInResult(
     {
         case xbox::services::system::sign_in_status::success:
             XblXboxLiveContextCreateHandle(pThis->m_user, &(pThis->m_xboxLiveContext));
+            pThis->AddUserToSocialManager(pThis->m_user);
             pThis->Log(L"Sign in succeeded");
             break;
 

@@ -17,6 +17,8 @@
 #include <concrt.h>
 #include <collection.h>
 #include <string>
+#include <set>
+#include <unordered_set>
 
 #define XBOX_LIVE_CREATORS_SDK
 #include "xsapi\services.h"
@@ -25,3 +27,4 @@
 #include "xsapi-c\profile_c.h"
 #include "xsapi-c\xbox_live_global_c.h"
 #include "xsapi-c\social_c.h"
+#include "xsapi-c\social_manager_c.h"

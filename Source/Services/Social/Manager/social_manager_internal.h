@@ -163,6 +163,16 @@ private:
     xsapi_internal_string m_errMessage;
 };
 
+class social_user_group_loaded_event_args_internal : public social_event_args
+{
+public:
+    std::shared_ptr<xbox_social_user_group_internal> social_user_group() const;
+
+    social_user_group_loaded_event_args_internal(_In_ std::shared_ptr<xbox_social_user_group_internal> socialUserGroup);
+
+private:
+    std::shared_ptr<xbox_social_user_group_internal> m_socialUserGroup;
+};
 
 struct xbox_social_user_context
 {

@@ -83,7 +83,7 @@ social_manager_internal::create_social_user_group_from_filters(
                 user,
                 social_event_type::social_user_group_loaded,
                 xsapi_internal_vector<xbox_user_id_container>(),
-                std::make_shared<social_user_group_loaded_event_args>(socialGroup)
+                std::make_shared<social_user_group_loaded_event_args_internal>(socialGroup)
             )
         );
     }
@@ -143,7 +143,7 @@ social_manager_internal::create_social_user_group_from_list(
                         user,
                         social_event_type::social_user_group_loaded,
                         xsapi_internal_vector<xbox_user_id_container>(),
-                        std::make_shared<social_user_group_loaded_event_args>(socialGroup),
+                        std::make_shared<social_user_group_loaded_event_args_internal>(socialGroup),
                         users.err(),
                         users.err_message().data()
                     )
@@ -162,7 +162,7 @@ social_manager_internal::create_social_user_group_from_list(
                         user,
                         social_event_type::social_user_group_loaded,
                         usersAffected,
-                        std::make_shared<social_user_group_loaded_event_args>(socialGroup)
+                        std::make_shared<social_user_group_loaded_event_args_internal>(socialGroup)
                     )
                 );
 
@@ -318,7 +318,7 @@ social_manager_internal::add_local_user(
                                             user,
                                             social_event_type::social_user_group_loaded,
                                             xsapi_internal_vector<xbox_user_id_container>(),
-                                            std::make_shared<social_user_group_loaded_event_args>(currentView)
+                                            std::make_shared<social_user_group_loaded_event_args_internal>(currentView)
                                         )
                                     );
                                 }

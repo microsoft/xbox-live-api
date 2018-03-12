@@ -154,8 +154,19 @@ void Renderer::RenderMenuOptions(
 
     swprintf_s(text, ARRAYSIZE(text),
         L"Press S to sign-in (user signed in: %s).\n"
+        L"Press 1 to toggle social group for all friends (%s).\n"
+        L"Press 2 to toggle social group for online friends (%s).\n"
+        L"Press 3 to toggle social group for all favorites (%s).\n"
+        L"Press 4 to toggle social group for online in title (%s).\n"
+        L"Press 5 to toggle social group for custom list (%s).\n"
+        L"Press C to import custom list.\n"
         L"Press P to get profile",
-        gamertag
+        gamertag,
+        g_sampleInstance->GetAllFriends() ? L"On" : L"Off",
+        g_sampleInstance->GetOnlineFriends() ? L"On" : L"Off",
+        g_sampleInstance->GetAllFavs() ? L"On" : L"Off",
+        g_sampleInstance->GetOnlineInTitle() ? L"On" : L"Off",
+        g_sampleInstance->GetCustomList() ? L"On" : L"Off"
         );
 
     m_font->DrawString(m_sprites.get(), text, XMFLOAT2(COLUMN_1_X, ACTION_BUTONS_Y), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);

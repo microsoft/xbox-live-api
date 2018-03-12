@@ -70,6 +70,13 @@ namespace Sample
 
         void Log(std::wstring log);
 
+        int GetNumberOfUserInGraph() { return (m_xboxLiveContext == nullptr) ? 0 : 1; }
+        bool GetAllFriends() { return m_allFriends; }
+        bool GetOnlineFriends() { return m_onlineFriends; }
+        bool GetAllFavs() { return m_allFavs; }
+        bool GetOnlineInTitle() { return m_onlineInTitle; }
+        bool GetCustomList() { return m_customList; }
+
         XBL_XBOX_LIVE_USER *GetUser() { return m_user; }
     private:
         XBL_XBOX_LIVE_USER *m_user;
@@ -91,10 +98,67 @@ namespace Sample
 
         void ReadLastCsv();
         void ReadCsvFile(_In_ Windows::Storage::StorageFile^ file);
+        void UpdateCustomList(_In_ const std::vector<std::string>& xuidList);
 
         void GetUserProfile();
         void CopySocialRelationshipResult();
         void GetSocialRelationships();
+
+        bool m_allFriends;
+        bool m_onlineFriends;
+        bool m_allFavs;
+        bool m_onlineInTitle;
+        bool m_customList;
+        std::vector<std::string> m_xuidList;
+
+        std::vector<XBL_XBOX_SOCIAL_USER_GROUP*> m_socialGroups;
+
+        // SocialManagerIntegration.cpp
+        void AddUserToSocialManager(XBL_XBOX_LIVE_USER* user);
+        void RemoveUserFromSocialManager(XBL_XBOX_LIVE_USER* user);
+        void CreateOrUpdateSocialGroupFromList(
+            XBL_XBOX_LIVE_USER* user,
+            std::vector<std::string> xuidList
+        );
+        void DestroySocialGroup(XBL_XBOX_LIVE_USER* user);
+        void CreateSocialUserGroupFromFilters(
+            XBL_XBOX_LIVE_USER* user,
+            XBL_PRESENCE_FILTER presenceFilter,
+            XBL_RELATIONSHIP_FILTER relationshipFilter
+        );
+        void DestroySocialGroup(
+            XBL_XBOX_LIVE_USER* user,
+            XBL_PRESENCE_FILTER presenceFilter,
+            XBL_RELATIONSHIP_FILTER relationshipFilter
+        );
+        void UpdateSocialManager();
+
+        void LogSocialEventList(
+            XBL_SOCIAL_EVENT* eventList,
+            uint32_t eventListCount
+        );
+
+        void CreateSocialGroupsBasedOnUI(XBL_XBOX_LIVE_USER* user);
+
+        void UpdateSocialGroupForAllUsers(
+            bool toggle,
+            XBL_PRESENCE_FILTER presenceFilter,
+            XBL_RELATIONSHIP_FILTER relationshipFilter
+        );
+
+        void UpdateSocialGroup(
+            XBL_XBOX_LIVE_USER* user,
+            bool toggle,
+            XBL_PRESENCE_FILTER presenceFilter,
+            XBL_RELATIONSHIP_FILTER relationshipFilter
+        );
+
+        void UpdateSocialGroupOfListForAllUsers(bool toggle);
+
+        void UpdateSocialGroupOfList(
+            XBL_XBOX_LIVE_USER* user,
+            bool toggle
+        );
 
         HANDLE m_hBackgroundThread;
     };

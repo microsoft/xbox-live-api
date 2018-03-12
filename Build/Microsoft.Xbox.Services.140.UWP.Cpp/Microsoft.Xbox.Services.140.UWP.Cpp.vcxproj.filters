@@ -28,12 +28,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_permission_deny_reason_impl.cpp">
       <Filter>C++ Source\C\Services\Privacy</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_c.cpp">
-      <Filter>C++ Source\C\Services\Social\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_helper.cpp">
-      <Filter>C++ Source\C\Services\Social\Manager</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_c.cpp">
       <Filter>C++ Source\C\Services\Stats\Manager</Filter>
     </ClCompile>
@@ -513,6 +507,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\social_helpers.cpp">
       <Filter>C++ Source\Services\Social\C</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\C\social_manager_c.cpp">
+      <Filter>C++ Source\Services\Social\Manager\C</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\internal_social_event.cpp">
       <Filter>C++ Source\Services\Social\Manager</Filter>
@@ -1005,12 +1002,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_taskargs.h">
       <Filter>C++ Source\C\Services\Privacy</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_helper.h">
-      <Filter>C++ Source\C\Services\Social\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Social\Manager\social_manager_state.h">
-      <Filter>C++ Source\C\Services\Social\Manager</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_helper.h">
       <Filter>C++ Source\C\Services\Stats\Manager</Filter>
     </ClInclude>
@@ -1238,12 +1229,6 @@
     <Filter Include="C++ Source\C\Services\Privacy">
       <UniqueIdentifier>{04D5FBA6-705C-38C4-A53B-99FE12E30C84}</UniqueIdentifier>
     </Filter>
-    <Filter Include="C++ Source\C\Services\Social">
-      <UniqueIdentifier>{D971A11F-C118-38C6-A821-0CFC9A6B8B59}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="C++ Source\C\Services\Social\Manager">
-      <UniqueIdentifier>{075369BC-6DA3-36F6-9DFA-1CA98AA537BF}</UniqueIdentifier>
-    </Filter>
     <Filter Include="C++ Source\C\Services\Stats">
       <UniqueIdentifier>{FD74AA6F-7F28-31F1-A7B6-BC2D2BFC1602}</UniqueIdentifier>
     </Filter>
@@ -1312,6 +1297,9 @@
     </Filter>
     <Filter Include="C++ Source\Services\Social\Manager">
       <UniqueIdentifier>{0311E669-4A78-3C49-A288-9B2EEB0CEE0A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Social\Manager\C">
+      <UniqueIdentifier>{848B2DE2-A527-3617-ABED-B64E41BF7130}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Stats">
       <UniqueIdentifier>{DD13831D-24DF-3B79-B767-37AEFB76D89A}</UniqueIdentifier>

@@ -392,7 +392,7 @@ multiplayer_game_client::is_request_in_progress()
 void
 multiplayer_game_client::set_local_member_properties_to_remote_session(
     _In_ const std::shared_ptr<multiplayer_local_user>& localUser,
-    _In_ const std::map<string_t, web::json::value>& localUserMap,
+    _In_ const std::map<string_t, web::json::value>& localUsersMap,
     _In_ const string_t& localUserConnectionAddress
     )
 {
@@ -402,7 +402,7 @@ multiplayer_game_client::set_local_member_properties_to_remote_session(
     }
 
     std::weak_ptr<multiplayer_game_client> thisWeakPtr = shared_from_this();
-    pplx::create_task([thisWeakPtr, localUser, localUserMap, localUserConnectionAddress]()
+    pplx::create_task([thisWeakPtr, localUser, localUsersMap, localUserConnectionAddress]()
     {
         std::shared_ptr<multiplayer_game_client> pThis(thisWeakPtr.lock());
         if (pThis == nullptr) return;
@@ -419,7 +419,7 @@ multiplayer_game_client::set_local_member_properties_to_remote_session(
         {
             auto sessionToCommit = std::make_shared<multiplayer_session>(localUser->xbox_user_id(), gameSession->session_reference());
             sessionToCommit->join(web::json::value::null(), false, true, false);
-            for (const auto& prop : localUserMap)
+            for (const auto& prop : localUsersMap)
             {
                 sessionToCommit->set_current_user_member_custom_property_json(prop.first, prop.second);
             }
