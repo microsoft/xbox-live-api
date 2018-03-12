@@ -92,7 +92,7 @@ typedef enum XBL_SOCIAL_EVENT_TYPE
     /// <summary>Social user group updated</summary>
     XBL_SOCIAL_EVENT_TYPE_SOCIAL_USER_GROUP_UPDATED,
 
-    /// <summary>unknown.</summary>
+    /// <summary>Unknown</summary>
     XBL_SOCIAL_EVENT_TYPE_UNKNOWN_EVENT
 } XBL_SOCIAL_EVENT_TYPE;
 
@@ -480,7 +480,7 @@ XblSocialEventGetSocialUserGroup(
 /// </summary>
 /// <param name="user">Xbox Live User</param>
 /// <param name="presenceDetailLevel">The restriction of users based on their presence and title activity</param>
-/// <param name="relationshipFilter">The restriction of users based on their relationship to the calling user</param>
+/// <param name="filter">The restriction of users based on their relationship to the calling user</param>
 /// <param name="group">A pointer to the created group. This group must later be cleaned up with XblSocialManagerDestroySocialUserGroup.</param>
 /// <returns>An XBL_RESULT to report any errors.</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
@@ -497,7 +497,7 @@ XblSocialManagerCreateSocialUserGroupFromFilters(
 /// </summary>
 /// <param name="user">Xbox Live User</param>
 /// <param name="xboxUserIdList">List of users to populate the Xbox Social User Group with. This is currently capped at 100 users total.</param>
-/// <param name="xboxUserIdList">The number of items in the xboxUserIdList.</param>
+/// <param name="xboxUserIdListCount">The number of items in the xboxUserIdList.</param>
 /// <param name="group">A pointer to the created group. This group must later be cleaned up with XblSocialManagerDestroySocialUserGroup.</param>
 /// <returns>An XBL_RESULT to report any errors.</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
@@ -512,7 +512,7 @@ XblSocialManagerCreateSocialUserGroupFromList(
 /// Destroys a created social Xbox Social User Group
 /// This will stop updating the Xbox Social User Group and remove tracking for any users the Xbox Social User Group holds
 /// </summary>
-/// <param name="socialUserGroup">The social Xbox Social User Group to destroy and stop tracking</param>
+/// <param name="group">The social Xbox Social User Group to destroy and stop tracking</param>
 /// <returns>An XBL_RESULT to report any potential error</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerDestroySocialUserGroup(

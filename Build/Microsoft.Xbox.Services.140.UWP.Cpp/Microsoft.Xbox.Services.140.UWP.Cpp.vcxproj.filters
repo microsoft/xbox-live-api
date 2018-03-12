@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements.cpp">
@@ -508,6 +508,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\social_helpers.cpp">
       <Filter>C++ Source\Services\Social\C</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\C\social_manager_c.cpp">
+      <Filter>C++ Source\Services\Social\Manager\C</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\internal_social_event.cpp">
       <Filter>C++ Source\Services\Social\Manager</Filter>
     </ClCompile>
@@ -825,9 +828,6 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\xbox_live_mutex.cpp">
       <Filter>C++ Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Services\Social\Manager\C\social_manager_c.cpp">
-      <Filter>C++ Source\Services\Social\Manager\C</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1298,6 +1298,9 @@
     <Filter Include="C++ Source\Services\Social\Manager">
       <UniqueIdentifier>{0311E669-4A78-3C49-A288-9B2EEB0CEE0A}</UniqueIdentifier>
     </Filter>
+    <Filter Include="C++ Source\Services\Social\Manager\C">
+      <UniqueIdentifier>{848B2DE2-A527-3617-ABED-B64E41BF7130}</UniqueIdentifier>
+    </Filter>
     <Filter Include="C++ Source\Services\Stats">
       <UniqueIdentifier>{DD13831D-24DF-3B79-B767-37AEFB76D89A}</UniqueIdentifier>
     </Filter>
@@ -1321,9 +1324,6 @@
     </Filter>
     <Filter Include="C++ Source\System">
       <UniqueIdentifier>{726C90DE-90DC-36A6-B559-090139CBCAD4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="C++ Source\Services\Social\Manager\C">
-      <UniqueIdentifier>{7f3fd370-95a9-41a0-bb21-46becaa4c5ce}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

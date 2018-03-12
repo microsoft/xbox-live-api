@@ -83,7 +83,10 @@ typedef enum XBL_PRESENCE_TITLE_VIEW_STATE
     XBL_PRESENCE_TITLE_VIEW_STATE_BACKGROUND
 } XBL_PRESENCE_TITLE_VIEW_STATE;
 
-/// <summary> Defines values used to set the level of presence detail return from the service. Choosing proper detail level could help the performance of the API.</summary>
+/// <summary>
+/// Defines values used to set the level of presence detail return from the service.
+/// Choosing proper detail level could help the performance of the API.
+/// </summary>
 typedef enum XBL_PRESENCE_DETAIL_LEVEL 
 {
     /// <summary>Default detail level.</summary>

@@ -65,6 +65,7 @@ void Game::CreateOrUpdateSocialGroupFromList(
         if (group->socialUserGroupType == XBL_SOCIAL_USER_GROUP_TYPE_USER_LIST_TYPE && group->localUser == user)
         {
             XblSocialManagerUpdateSocialUserGroup(group, xuidListArray, (uint32_t)xuidList.size());
+            delete[] xuidListArray;
             return;
         }
     }
