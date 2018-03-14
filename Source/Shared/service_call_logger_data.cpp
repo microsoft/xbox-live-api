@@ -21,7 +21,8 @@ service_call_logger_data::service_call_logger_data(
     _In_ string_t responseHeader,
     _In_ string_t responseBody,
     _In_ std::chrono::milliseconds elapsedCallTime,
-    _In_ chrono_clock_t::time_point requestTime
+    _In_ chrono_clock_t::time_point requestTime,
+    _In_ string_t method
     ) :
     m_host(std::move(host)),
     m_uri(std::move(uri)),
@@ -37,7 +38,8 @@ service_call_logger_data::service_call_logger_data(
     m_isShoulderTap(false),
     m_isInGameEvent(false),
     m_changeNumber(0),
-    m_version(0)
+    m_version(0),
+    m_method(std::move(method))
 {
     init();
 }
@@ -194,6 +196,11 @@ string_t service_call_logger_data::to_string() const
     //breadCrumb
     result << _T('\"');
     result << m_breadCrumb;
+    result << _T("\",");
+
+    //breadCrumb
+    result << _T('\"');
+    result << m_method;
     result << _T("\"");
 
     result << _T("\n");
@@ -252,7 +259,9 @@ string_t service_call_logger_data::get_csv_header()
 
     result << _T("\"EventMeasurementData\",");
 
-    result << _T("\"BreadCrumb\"");
+    result << _T("\"BreadCrumb\",");
+
+    result << _T("\"Method\"");
 
     result << _T("\n");
 
