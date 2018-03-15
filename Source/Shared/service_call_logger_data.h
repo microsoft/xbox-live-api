@@ -23,7 +23,8 @@ public:
         _In_ string_t responseHeader,
         _In_ string_t responseBody,
         _In_ std::chrono::milliseconds elapsedCallTime,
-        _In_ chrono_clock_t::time_point requestTime
+        _In_ chrono_clock_t::time_point requestTime,
+        _In_ string_t method
         );
 
     service_call_logger_data(
@@ -65,6 +66,7 @@ private:
     chrono_clock_t::time_point m_requestTime;
 
     bool m_isGet;
+    string_t m_method;
     uint32_t m_id;
 
     bool m_isShoulderTap;
