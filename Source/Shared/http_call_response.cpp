@@ -314,7 +314,8 @@ void http_call_response_internal::route_service_call() const
                 args->response_headers(),
                 args->response_body(),
                 args->elapsed_call_time(),
-                args->request_time());
+                args.request_time());
+                args.http_method());
 
             tracker->log(sharedData.to_string());
         }
