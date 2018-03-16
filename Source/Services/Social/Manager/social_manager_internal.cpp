@@ -30,6 +30,7 @@ social_manager_internal::get_singleton_instance()
 }
 
 social_manager_internal::social_manager_internal()
+    : m_graphBackgroundTaskId(0)
 {
 }
 

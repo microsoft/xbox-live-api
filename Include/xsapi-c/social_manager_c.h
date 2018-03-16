@@ -12,8 +12,6 @@
 extern "C" {
 #endif
 
-#if !XDK_API
-
 static const uint32_t XBL_GAMERSCORE_CHAR_SIZE = 16;
 static const uint32_t XBL_GAMERTAG_CHAR_SIZE = 16;
 static const uint32_t XBL_XBOX_USER_ID_CHAR_SIZE = 21;
@@ -285,7 +283,7 @@ typedef struct XBL_SOCIAL_EVENT
     /// <summary>
     /// The user whose graph got changed
     /// </summary>
-    XBL_XBOX_LIVE_USER* user;
+    XBL_XBOX_LIVE_USER_PTR user;
 
     /// <summary>
     /// The type of event this is 
@@ -336,7 +334,7 @@ typedef struct XBL_XBOX_SOCIAL_USER_GROUP
     /// <summary>
     /// The local user who the user group is related to
     /// </summary>
-    XBL_XBOX_LIVE_USER* localUser;
+    XBL_XBOX_LIVE_USER_PTR localUser;
 
     /// <summary>
     /// Returns the presence filter used if group type is filter type
@@ -421,7 +419,7 @@ XblSocialUserGroupGetUsersTrackedByGroup(
 /// <returns>An XBL_RESULT to report any potential error</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerAddLocalUser(
-    _In_ XBL_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER_PTR user,
     _In_ XBL_SOCIAL_MANAGER_EXTRA_DETAIL_LEVEL extraLevelDetail
     ) XBL_NOEXCEPT;
 
@@ -433,7 +431,7 @@ XblSocialManagerAddLocalUser(
 /// <returns>An XBL_RESULT to report any potential error</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerRemoveLocalUser(
-    _In_ XBL_XBOX_LIVE_USER *user
+    _In_ XBL_XBOX_LIVE_USER_PTR user
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -485,7 +483,7 @@ XblSocialEventGetSocialUserGroup(
 /// <returns>An XBL_RESULT to report any errors.</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerCreateSocialUserGroupFromFilters(
-    _In_ XBL_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER_PTR user,
     _In_ XBL_PRESENCE_FILTER presenceDetailLevel,
     _In_ XBL_RELATIONSHIP_FILTER filter,
     _Out_ XBL_XBOX_SOCIAL_USER_GROUP** group
@@ -502,7 +500,7 @@ XblSocialManagerCreateSocialUserGroupFromFilters(
 /// <returns>An XBL_RESULT to report any errors.</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerCreateSocialUserGroupFromList(
-    _In_ XBL_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER_PTR user,
     _In_ PCSTR* xboxUserIdList,
     _In_ uint32_t xboxUserIdListCount,
     _Out_ XBL_XBOX_SOCIAL_USER_GROUP** group
@@ -524,7 +522,7 @@ XblSocialManagerDestroySocialUserGroup(
 /// </summary>
 /// <param name="userCount">The number of items in the returned array</param>
 /// <returns>Array of XBL_XBOX_LIVE_USER objects that are managed by social manager.</returns>
-XBL_API XBL_XBOX_LIVE_USER** XBL_CALLING_CONV
+XBL_API XBL_XBOX_LIVE_USER_PTR const* XBL_CALLING_CONV
 XblSocialManagerGetLocalUsers(
     _Out_ uint32_t* userCount
     ) XBL_NOEXCEPT;
@@ -553,9 +551,8 @@ XblSocialManagerUpdateSocialUserGroup(
 /// <returns>An XBL_RESULT representing the success enabling polling</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerSetRichPresencePollingStatus(
-    _In_ XBL_XBOX_LIVE_USER *user,
-    _In_ bool shouldEnablePolling,
-    _Out_ PCSTR* errMessage
+    _In_ XBL_XBOX_LIVE_USER_PTR user,
+    _In_ bool shouldEnablePolling
     ) XBL_NOEXCEPT;
 
 /// TODO should this be per user of for all social graphs?
@@ -569,7 +566,6 @@ XblSocialManagerSetBackgroundWorkAsyncQueue(
     _In_ XBL_ASYNC_QUEUE queue
     ) XBL_NOEXCEPT;
 
-#endif //!XDK_API
 
 #if defined(__cplusplus)
 } // end extern "C"

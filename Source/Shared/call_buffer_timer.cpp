@@ -22,7 +22,7 @@ struct fire_context
         : thisWeak(std::move(_thisWeak)),
         usersAddedStruct(std::move(_usersAddedStruct)),
         usersToCall(std::move(_usersToCall)),
-        delay(std::move(delay))
+        delay(std::move(_delay))
     {
     }
 

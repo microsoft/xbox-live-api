@@ -13,7 +13,7 @@ social_user_group_loaded_event_args::social_user_group_loaded_event_args(
     m_internalObj(internalObj)
 {
 }
-const std::shared_ptr<xbox_social_user_group>&
+std::shared_ptr<xbox_social_user_group>
 social_user_group_loaded_event_args::social_user_group() const
 {
     // TODO is it ok to just allocate a new object here?

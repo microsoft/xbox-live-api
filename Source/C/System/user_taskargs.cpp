@@ -25,11 +25,11 @@ get_token_and_signature_taskargs::get_token_and_signature_taskargs(
     )
     : pUser(_pUser)
 {
-    httpMethod = utils::utf16_from_utf8(_httpMethod);
-    url = utils::utf16_from_utf8(_url);
-    headers = utils::utf16_from_utf8(_headers);
+    httpMethod = utils::string_t_from_utf8(_httpMethod);
+    url = utils::string_t_from_utf8(_url);
+    headers = utils::string_t_from_utf8(_headers);
     if (_requestBodyString != nullptr)
     {
-        requestBodyString = utils::utf16_from_utf8(_requestBodyString);
+        requestBodyString = utils::string_t_from_utf8(_requestBodyString);
     }
 }

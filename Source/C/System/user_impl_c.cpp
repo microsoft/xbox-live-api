@@ -35,22 +35,22 @@ void XSAPI_XBOX_LIVE_USER_IMPL::Refresh()
 {
     if (m_pUser != nullptr)
     {
-        m_xboxUserId = utils::utf8_from_utf16(m_cppUser->xbox_user_id());
+        m_xboxUserId = utils::internal_string_from_string_t(m_cppUser->xbox_user_id());
         m_pUser->xboxUserId = m_xboxUserId.data();
 
-        m_gamertag = utils::utf8_from_utf16(m_cppUser->gamertag());
+        m_gamertag = utils::internal_string_from_string_t(m_cppUser->gamertag());
         m_pUser->gamertag = m_gamertag.data();
 
-        m_ageGroup = utils::utf8_from_utf16(m_cppUser->age_group());
+        m_ageGroup = utils::internal_string_from_string_t(m_cppUser->age_group());
         m_pUser->ageGroup = m_ageGroup.data();
 
-        m_privileges = utils::utf8_from_utf16(m_cppUser->privileges());
+        m_privileges = utils::internal_string_from_string_t(m_cppUser->privileges());
         m_pUser->privileges = m_privileges.data();
 
         m_pUser->isSignedIn = m_cppUser->is_signed_in();
 
 #if WINAPI_FAMILY && WINAPI_FAMILY==WINAPI_FAMILY_APP
-        m_webAccountId = utils::utf8_from_utf16(m_cppUser->web_account_id());
+        m_webAccountId = utils::internal_string_from_string_t(m_cppUser->web_account_id());
         m_pUser->webAccountId = m_webAccountId.data();
 #endif
         m_pUser->windowsSystemUser = m_cppUser->windows_system_user();

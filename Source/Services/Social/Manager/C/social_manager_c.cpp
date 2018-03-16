@@ -3,12 +3,20 @@
 
 #include "pch.h"
 #include "xsapi-c/social_manager_c.h"
+#if !XDK_API
 #include "user_impl_c.h"
+#endif
 #include "social_manager_internal.h"
 
 using namespace xbox::services;
 using namespace xbox::services::system;
 using namespace xbox::services::social::manager;
+
+#if XDK_API
+#define GET_INTERNAL_USER(xbl_xbox_live_user) xbl_xbox_live_user
+#else
+#define GET_INTERNAL_USER(xbl_xbox_live_user) xbl_xbox_live_user->pImpl->cppUser()
+#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
 
@@ -19,11 +27,17 @@ public:
         _In_ std::shared_ptr<xbox_social_user_group_internal> internalGroup
     )
     {
+        XBL_XBOX_LIVE_USER_PTR userPtr;
+#if !XDK_API
         auto userIter = localUsersMap.find(internalGroup->local_user());
         if (userIter == localUsersMap.end())
         {
             throw new std::exception("User doesn't exist. Did you call AddLocalUser?");
         }
+        userPtr = userIter->second;
+#else
+        userPtr = internalGroup->local_user();
+#endif
 
         auto buffer = xbox::services::system::xsapi_memory::mem_alloc(sizeof(XBL_XBOX_SOCIAL_USER_GROUP));
         XBL_XBOX_SOCIAL_USER_GROUP *socialUserGroup = new (buffer) XBL_XBOX_SOCIAL_USER_GROUP
@@ -31,7 +45,7 @@ public:
             uint32_t(internalGroup->users().size()),
             static_cast<XBL_SOCIAL_USER_GROUP_TYPE>(internalGroup->social_user_group_type()),
             uint32_t(internalGroup->users_tracked_by_social_user_group().size()),
-            userIter->second,
+            userPtr,
             static_cast<XBL_PRESENCE_FILTER>(internalGroup->presence_filter_of_group()),
             static_cast<XBL_RELATIONSHIP_FILTER>(internalGroup->relationship_filter_of_group())
         };
@@ -40,7 +54,10 @@ public:
         return socialUserGroup;
     }
 
-    xsapi_internal_unordered_map<xbox_live_user_t, XBL_XBOX_LIVE_USER*> localUsersMap;
+#if !XDK_API
+    xsapi_internal_unordered_map<xbox_live_user_t, XBL_XBOX_LIVE_USER_PTR> localUsersMap;
+    xsapi_internal_vector<XBL_XBOX_LIVE_USER_PTR> localUsersVector;
+#endif
     bimap<XBL_XBOX_SOCIAL_USER_GROUP*, std::shared_ptr<xbox_social_user_group_internal>> socialUserGroupsMap;
     xsapi_internal_vector<XBL_SOCIAL_EVENT> socialEvents;
     xsapi_internal_vector<std::shared_ptr<social_event_internal>> internalSocialEvents;
@@ -206,7 +223,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerAddLocalUser(
-    _In_ XBL_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER_PTR user,
     _In_ XBL_SOCIAL_MANAGER_EXTRA_DETAIL_LEVEL extraLevelDetail
     ) XBL_NOEXCEPT
 try
@@ -214,32 +231,48 @@ try
     verify_global_init();
 
     auto result = social_manager_internal::get_singleton_instance()->add_local_user(
-        user->pImpl->cppUser(),
+        GET_INTERNAL_USER(user),
         static_cast<social_manager_extra_detail_level>(extraLevelDetail)
         );
 
+#if !XDK_API
     if (!result.err())
     {
-        get_xbl_social_manager()->localUsersMap[user->pImpl->cppUser()] = user;
+        auto state = get_xbl_social_manager();
+        state->localUsersMap[user->pImpl->cppUser()] = user;
+        state->localUsersVector.push_back(user);
     }
+#endif
     return utils::create_xbl_result(result.err());
 }
 CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerRemoveLocalUser(
-    _In_ XBL_XBOX_LIVE_USER *user
+    _In_ XBL_XBOX_LIVE_USER_PTR user
     ) XBL_NOEXCEPT
 try
 {
     verify_global_init();
 
-    auto result = social_manager_internal::get_singleton_instance()->remove_local_user(user->pImpl->cppUser());
-
+    auto result = social_manager_internal::get_singleton_instance()->remove_local_user(GET_INTERNAL_USER(user));
+#if !XDK_API
     if (!result.err())
     {
-        get_xbl_social_manager()->localUsersMap.erase(user->pImpl->cppUser());
+        auto state = get_xbl_social_manager();
+        state->localUsersMap.erase(user->pImpl->cppUser());
+
+        auto& usersVector = state->localUsersVector;
+        for (auto iter = usersVector.begin(); iter != usersVector.end(); ++iter)
+        {
+            if (user == *iter)
+            {
+                usersVector.erase(iter);
+                break;
+            }
+        }
     }
+#endif
     return utils::create_xbl_result(result.err());
 }
 CATCH_RETURN()
@@ -261,15 +294,21 @@ try
     {
         for (auto internalEvent : state->internalSocialEvents)
         {
+            XBL_XBOX_LIVE_USER_PTR userPtr;
+#if !XDK_API
             auto userIter = state->localUsersMap.find(internalEvent->user());
             if (userIter == state->localUsersMap.end())
             {
                 throw new std::exception("User doesn't exist. Did you call AddLocalUser?");
             }
+            userPtr = userIter->second;
+#else
+            userPtr = internalEvent->user();
+#endif
 
             state->socialEvents.push_back(XBL_SOCIAL_EVENT
             {
-                userIter->second,
+                userPtr,
                 static_cast<XBL_SOCIAL_EVENT_TYPE>(internalEvent->event_type()),
                 uint32_t(internalEvent->users_affected().size()),
                 internalEvent->err().value(),
@@ -348,7 +387,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerCreateSocialUserGroupFromFilters(
-    _In_ XBL_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER_PTR user,
     _In_ XBL_PRESENCE_FILTER presenceDetailLevel,
     _In_ XBL_RELATIONSHIP_FILTER filter,
     _Out_ XBL_XBOX_SOCIAL_USER_GROUP** group
@@ -359,7 +398,7 @@ try
     auto state = get_xbl_social_manager();
 
     auto result = social_manager_internal::get_singleton_instance()->create_social_user_group_from_filters(
-        user->pImpl->cppUser(),
+        GET_INTERNAL_USER(user),
         static_cast<presence_filter>(presenceDetailLevel),
         static_cast<relationship_filter>(filter)
         );
@@ -374,7 +413,7 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerCreateSocialUserGroupFromList(
-    _In_ XBL_XBOX_LIVE_USER *user,
+    _In_ XBL_XBOX_LIVE_USER_PTR user,
     _In_ PCSTR* xboxUserIdList,
     _In_ uint32_t xboxUserIdListCount,
     _Out_ XBL_XBOX_SOCIAL_USER_GROUP** group
@@ -387,7 +426,7 @@ try
     auto xboxUserIdVector = xsapi_internal_vector<xsapi_internal_string>(xboxUserIdList, xboxUserIdList + xboxUserIdListCount);
 
     auto result = social_manager_internal::get_singleton_instance()->create_social_user_group_from_list(
-        user->pImpl->cppUser(),
+        GET_INTERNAL_USER(user),
         xboxUserIdVector
         );
 
@@ -424,10 +463,19 @@ try
 }
 CATCH_RETURN()
 
-XBL_API XBL_XBOX_LIVE_USER** XBL_CALLING_CONV
+XBL_API XBL_XBOX_LIVE_USER_PTR const* XBL_CALLING_CONV
 XblSocialManagerGetLocalUsers(
     _Out_ uint32_t* userCount
-) XBL_NOEXCEPT;
+    ) XBL_NOEXCEPT
+{
+#if XDK_API
+    auto& usersVector = social_manager_internal::get_singleton_instance()->local_users();
+#else
+    auto& usersVector = get_xbl_social_manager()->localUsersVector;
+#endif
+    *userCount = static_cast<uint32_t>(usersVector.size());
+    return usersVector.data();
+}
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerUpdateSocialUserGroup(
@@ -461,16 +509,15 @@ CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerSetRichPresencePollingStatus(
-    _In_ XBL_XBOX_LIVE_USER *user,
-    _In_ bool shouldEnablePolling,
-    _Out_ PCSTR* errMessage
+    _In_ XBL_XBOX_LIVE_USER_PTR user,
+    _In_ bool shouldEnablePolling
     ) XBL_NOEXCEPT
 try
 {
     verify_global_init();
 
     auto result = social_manager_internal::get_singleton_instance()->set_rich_presence_polling_status(
-        user->pImpl->cppUser(),
+        GET_INTERNAL_USER(user),
         shouldEnablePolling
         );
    

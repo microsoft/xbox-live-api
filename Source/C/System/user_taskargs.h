@@ -32,12 +32,12 @@ struct get_token_and_signature_taskargs : public taskargs_with_payload<XSAPI_TOK
     string_t headers;
     string_t requestBodyString;
 
-    std::string token;
-    std::string signature;
-    std::string xboxUserId;
-    std::string gamertag;
-    std::string xboxUserHash;
-    std::string ageGroup;
-    std::string privileges;
-    std::string webAccountId;
+    xsapi_internal_string token;
+    xsapi_internal_string signature;
+    xsapi_internal_string xboxUserId;
+    xsapi_internal_string gamertag;
+    xsapi_internal_string xboxUserHash;
+    xsapi_internal_string ageGroup;
+    xsapi_internal_string privileges;
+    xsapi_internal_string webAccountId;
 };

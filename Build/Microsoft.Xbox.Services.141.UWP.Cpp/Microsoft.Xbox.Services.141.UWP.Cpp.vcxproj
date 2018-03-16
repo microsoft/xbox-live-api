@@ -141,22 +141,6 @@
     <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectFolder)\</IntDir>
   </PropertyGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements_helper.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements_state.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements_taskargs.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Common\taskargs.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Leaderboard\leaderboard_helper.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_multiple_permissions_check_result_impl.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_permission_check_result_impl.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_permission_deny_reason_impl.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_taskargs.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_helper.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_state.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_impl.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_result_impl.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage_state.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage_taskargs.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\Shared\utils_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_impl_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_taskargs.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_serializers.h" />
@@ -204,7 +188,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\threadpool.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils_uwp.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_client.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_connection.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_connection_state.h" />
@@ -215,18 +198,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\ppltasks_extra.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\system_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\achievements_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\errors_c.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\leaderboard_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\presence_c.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\privacy_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\profile_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_manager_c.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\stats_manager_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\system_c.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\title_callable_ui_c.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\title_storage_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\types_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_app_config_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_context_c.h" />
@@ -263,20 +240,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_context.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_context_settings.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_service_call_routed_event_args.h" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Achievements\achievements_helper.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Leaderboard\leaderboard.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Leaderboard\leaderboard_helper.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Misc\title_callable_ui_c.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_multiple_permissions_check_result_impl.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_permission_check_result_impl.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Privacy\privacy_permission_deny_reason_impl.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_c.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\Stats\Manager\stats_manager_helper.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_impl.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\Services\TitleStorage\title_storage_blob_metadata_result_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_impl_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_taskargs.cpp" />
@@ -528,7 +491,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context_cpp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils_locales.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils_uwp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_client.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_connection.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_app_config.cpp" />

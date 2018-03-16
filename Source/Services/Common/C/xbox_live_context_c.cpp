@@ -4,7 +4,9 @@
 #include "pch.h"
 #include "xsapi-c/xbox_live_app_config_c.h"
 #include "xsapi-c/xbox_live_context_c.h"
+#if !XDK_API
 #include "user_impl_c.h"
+#endif
 #include "xbox_live_context_internal_c.h"
 
 using namespace xbox::services;
@@ -12,7 +14,7 @@ using namespace xbox::services::system;
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblXboxLiveContextCreateHandle(
-    _In_ CONST XBL_XBOX_LIVE_USER* user,
+    _In_ XBL_XBOX_LIVE_USER_PTR user,
     _Out_ XBL_XBOX_LIVE_CONTEXT_HANDLE* xboxLiveContextHandle
     ) XBL_NOEXCEPT
 try
@@ -72,7 +74,7 @@ CATCH_RETURN()
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblXboxLiveContextGetUser(
     _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContextHandle,
-    _Out_ CONST XBL_XBOX_LIVE_USER** user
+    _Out_ XBL_XBOX_LIVE_USER_PTR* user
     ) XBL_NOEXCEPT
 try
 {

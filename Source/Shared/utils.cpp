@@ -21,16 +21,13 @@
 #include "presence_internal.h"
 #include "initiator.h"
 #include "httpClient/httpClient.h"
-#if UWP_API || UNIT_TEST_SERVICES
 #include "threadpool.h"
-#endif
 
 #if UWP_API
 #ifdef _WINRT_DLL
 #include "WinRT/User_WinRT.h"
 #endif
 #endif
-
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -108,19 +105,11 @@ void xsapi_singleton::init()
     HCGlobalInitialize();
     HCSettingsSetLogLevel(HC_LOG_LEVEL::LOG_VERBOSE);
     m_initiator = std::make_shared<initiator>();
-#if UWP_API || UNIT_TEST_SERVICES
-    // TODO this should be started only in legacy mode, but need to migrate all API's first
-    start_threadpool();
-#endif
-}
 
-#if UWP_API || UNIT_TEST_SERVICES
-void xsapi_singleton::start_threadpool()
-{
+    // TODO this should be started only in legacy mode, but need to migrate all API's first
     m_threadpool = std::make_shared<xbl_thread_pool>();
     m_threadpool->start_threads();
 }
-#endif
 
 xsapi_singleton::~xsapi_singleton()
 {
@@ -196,7 +185,7 @@ web::json::value utils::extract_json_field(
     if (json.is_object())
     {
         auto& jsonObj = json.as_object();
-        auto it = jsonObj.find(utils::string_t_from_internal_string(name)); // TODO
+        auto it = jsonObj.find(utils::string_t_from_internal_string(name));
         if (it != jsonObj.end())
         {
             return it->second;
@@ -1541,7 +1530,7 @@ xsapi_internal_string utils::create_guid(_In_ bool removeBraces)
         ARRAYSIZE(wszGuid)
         )), "");
 
-    xsapi_internal_string strGuid = utils::internal_string_from_utf16(wszGuid, wcslen(wszGuid));
+    xsapi_internal_string strGuid = utils::internal_string_from_utf16(wszGuid);
 #elif XSAPI_U
     boost::uuids::uuid uuid;
     auto uuidGenerator = boost::uuids::random_generator();
@@ -1933,11 +1922,7 @@ std::vector<string_t> utils::string_array_to_string_vector(
     std::vector<utility::string_t> stringVector;
     for (size_t i = 0; i < stringArrayCount; ++i)
     {
-#if _WIN32
-        stringVector.push_back(utf16_from_utf8(stringArray[i]));
-#else
-        stringVector.push_back(stringArray[i]);
-#endif
+        stringVector.push_back(string_t_from_utf8(stringArray[i]));
     }
     return stringVector;
 }
@@ -1957,23 +1942,35 @@ xsapi_internal_vector<xsapi_internal_string> utils::string_array_to_internal_str
 }
 
 #if XSAPI_C
-PCSTR utils::alloc_string(const string_t& str)
+
+const char* utils::alloc_string(const string_t& str)
 {
-#if _WIN32
-    // TODO add helper and remove extra copy here
-    std::string utf8 = utf8_from_utf16(str);
-#else
-    std::string utf8 = std::move(str);
-#endif
-    char *out = static_cast<char*>(system::xsapi_memory::mem_alloc(utf8.size() + 1));
-    strcpy_s(out, utf8.size() + 1, &utf8[0]);
+    auto cchOut = utf8_from_char_t(str.data(), nullptr, 0);
+    char *out = static_cast<char*>(system::xsapi_memory::mem_alloc(cchOut));
+    utf8_from_char_t(str.data(), out, cchOut);
     return out;
 }
 
-void utils::free_string(PCSTR str)
+void utils::free_string(const char* str)
 {
     system::xsapi_memory::mem_free((void*)str);
 }
+
+#ifdef _WIN32 // TODO implementation for other platforms may be different
+time_t utils::time_t_from_datetime(const utility::datetime& datetime)
+{
+    time_t currentUtcTime = time(nullptr);
+    auto diffTime = utility::datetime::utc_now() - datetime;
+    return currentUtcTime - diffTime;
+}
+
+utility::datetime utils::datetime_from_time_t(const time_t* pTime)
+{
+    utility::datetime datetime = utility::datetime::utc_now();
+    auto diffTime = time(nullptr) - *pTime;
+    return datetime - utility::datetime::from_seconds((unsigned int)diffTime);
+}
+#endif // _WIN32
 
 XBL_RESULT utils::create_xbl_result(std::error_code errc)
 {
@@ -2047,6 +2044,7 @@ XBL_RESULT utils::std_bad_alloc_to_xbl_result(
     std::bad_alloc const& e
     )
 {
+    UNREFERENCED_PARAMETER(e);
     LOG_ERROR("std::bad_alloc reached api boundary!");
     return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_BAD_ALLOC };
 }
@@ -2055,6 +2053,7 @@ XBL_RESULT utils::std_exception_to_xbl_result(
     std::exception const& e
     )
 {
+    UNREFERENCED_PARAMETER(e);
     LOG_ERROR("std::exception reached api boundary");
     return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_GENERIC_ERROR };
 }
@@ -2065,5 +2064,112 @@ XBL_RESULT utils::unknown_exception_to_xbl_result()
     return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_GENERIC_ERROR };
 }
 #endif // XSAPI_C
+
+#ifdef _WIN32 // TODO add implementations of these for non Windows platforms
+
+xsapi_internal_string utils::internal_string_from_string_t(_In_ const string_t& externalString)
+{
+    return internal_string_from_utf16(externalString.c_str());
+}
+
+xsapi_internal_string utils::internal_string_from_utf16(_In_z_ PCWSTR utf16)
+{
+    return internal_string_from_char_t(utf16);
+}
+
+xsapi_internal_string utils::internal_string_from_char_t(_In_ const char_t* char_t)
+{
+    auto cchOutString = utf8_from_char_t(char_t, nullptr, 0);
+    xsapi_internal_string out(cchOutString - 1, '\0');
+    utf8_from_char_t(char_t, &out[0], cchOutString);
+    return out;
+}
+
+string_t utils::string_t_from_internal_string(_In_ const xsapi_internal_string& internalString)
+{
+    return string_t_from_utf8(internalString.data());
+}
+
+string_t utils::string_t_from_utf8(_In_z_ PCSTR utf8)
+{
+    auto cchOutString = char_t_from_utf8(utf8, nullptr, 0);
+    string_t out(cchOutString - 1, '\0');
+    char_t_from_utf8(utf8, &out[0], cchOutString);
+    return out;
+}
+
+int utils::utf8_from_char_t(
+    _In_z_ const char_t* inArray, 
+    _Out_writes_z_(cchOutArray) char* outArray,
+    _In_ int cchOutArray
+    )
+{
+    // query for the buffer size
+    auto queryResult = WideCharToMultiByte(
+        CP_UTF8, WC_ERR_INVALID_CHARS,
+        inArray, -1,
+        nullptr, 0,
+        nullptr, nullptr
+    );
+
+    if (queryResult > cchOutArray && cchOutArray == 0)
+    {
+        return queryResult;
+    }
+    else if (queryResult == 0 || queryResult > cchOutArray)
+    {
+        throw std::exception("utf8_from_char_t failed");
+    }
+
+    auto conversionResult = WideCharToMultiByte(
+        CP_UTF8, WC_ERR_INVALID_CHARS,
+        inArray, -1,
+        outArray, cchOutArray,
+        nullptr, nullptr
+    );
+    if (conversionResult == 0)
+    {
+        throw std::exception("utf8_from_char_t failed");
+    }
+
+    return conversionResult;
+}
+
+int utils::char_t_from_utf8(
+    _In_z_ const char* inArray,
+    _Out_writes_z_(cchOutArray) char_t* outArray,
+    _In_ int cchOutArray
+    )
+{
+    // query for the buffer size
+    auto queryResult = MultiByteToWideChar(
+        CP_UTF8, MB_ERR_INVALID_CHARS,
+        inArray, -1,
+        nullptr, 0
+    );
+
+    if (queryResult > cchOutArray && cchOutArray == 0)
+    {
+        return queryResult;
+    }
+    else if (queryResult == 0 || queryResult > cchOutArray)
+    {
+        throw std::exception("char_t_from_utf8 failed");
+    }
+
+    auto conversionResult = MultiByteToWideChar(
+        CP_UTF8, MB_ERR_INVALID_CHARS,
+        inArray, -1,
+        outArray, cchOutArray
+    );
+    if (conversionResult == 0)
+    {
+        throw std::exception("char_t_from_utf8 failed");
+    }
+
+    return conversionResult;
+}
+
+#endif // _WIN32
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

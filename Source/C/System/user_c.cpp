@@ -206,28 +206,28 @@ HC_RESULT XboxLiveUserGetTokenAndSignatureExecute(
         auto cppPayload = result.payload();
         XSAPI_TOKEN_AND_SIGNATURE_RESULT& payload = args->completionRoutinePayload;
 
-        args->token = utils::utf8_from_utf16(cppPayload.token());
+        args->token = utils::internal_string_from_string_t(cppPayload.token());
         payload.token = args->token.data();
 
-        args->signature = utils::utf8_from_utf16(cppPayload.signature());
+        args->signature = utils::internal_string_from_string_t(cppPayload.signature());
         payload.signature = args->signature.data();
 
-        args->xboxUserId = utils::utf8_from_utf16(cppPayload.xbox_user_id());
+        args->xboxUserId = utils::internal_string_from_string_t(cppPayload.xbox_user_id());
         payload.xboxUserId = args->xboxUserId.data();
 
-        args->gamertag = utils::utf8_from_utf16(cppPayload.gamertag());
+        args->gamertag = utils::internal_string_from_string_t(cppPayload.gamertag());
         payload.gamertag = args->gamertag.data();
 
-        args->xboxUserHash = utils::utf8_from_utf16(cppPayload.xbox_user_hash());
+        args->xboxUserHash = utils::internal_string_from_string_t(cppPayload.xbox_user_hash());
         payload.xboxUserHash = args->xboxUserHash.data();
 
-        args->ageGroup = utils::utf8_from_utf16(cppPayload.age_group());
+        args->ageGroup = utils::internal_string_from_string_t(cppPayload.age_group());
         payload.ageGroup = args->ageGroup.data();
 
-        args->privileges = utils::utf8_from_utf16(cppPayload.privileges());
+        args->privileges = utils::internal_string_from_string_t(cppPayload.privileges());
         payload.privileges = args->privileges.data();
 
-        args->webAccountId = utils::utf8_from_utf16(cppPayload.web_account_id());
+        args->webAccountId = utils::internal_string_from_string_t(cppPayload.web_account_id());
         payload.webAccountId = args->webAccountId.data();
     }
 
@@ -288,7 +288,7 @@ try
             auto singleton = get_xsapi_singleton();
             std::lock_guard<std::mutex> lock(singleton->m_usersLock);
 
-            auto iter = singleton->m_signedInUsers.find(utils::utf8_from_utf16(args.user()->xbox_user_id()));
+            auto iter = singleton->m_signedInUsers.find(utils::internal_string_from_string_t(args.user()->xbox_user_id()));
             if (iter != singleton->m_signedInUsers.end())
             {
                 iter->second->pImpl->Refresh();

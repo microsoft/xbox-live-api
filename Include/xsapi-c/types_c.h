@@ -86,6 +86,12 @@ extern "C" {
 
 #include "httpClient/types.h"
 
+#if XDK_API
+    typedef Windows::Xbox::System::User^ XBL_XBOX_LIVE_USER_PTR;
+#else
+    typedef const struct XBL_XBOX_LIVE_USER *XBL_XBOX_LIVE_USER_PTR;
+#endif
+
 typedef uint32_t XBL_MEMORY_TYPE;
 typedef int32_t FUNCTION_CONTEXT;
 typedef struct xbl_async_queue* XBL_ASYNC_QUEUE;

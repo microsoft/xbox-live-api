@@ -9,7 +9,6 @@
 extern "C" {
 #endif
 
-struct XBL_XBOX_LIVE_USER;
 struct XBL_XBOX_LIVE_APP_CONFIG;
 
 /// <summary>
@@ -20,7 +19,7 @@ struct XBL_XBOX_LIVE_APP_CONFIG;
 /// <returns>Result code for this API operation.</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblXboxLiveContextCreateHandle(
-    _In_ CONST XBL_XBOX_LIVE_USER* user,
+    _In_ XBL_XBOX_LIVE_USER_PTR user,
     _Out_ XBL_XBOX_LIVE_CONTEXT_HANDLE* xboxLiveContextHandle
     ) XBL_NOEXCEPT;
 
@@ -55,7 +54,7 @@ XblXboxLiveContextCloseHandle(
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblXboxLiveContextGetUser(
     _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContextHandle,
-    _Out_ CONST XBL_XBOX_LIVE_USER** user
+    _Out_ XBL_XBOX_LIVE_USER_PTR* user
     ) XBL_NOEXCEPT;
 
 /// <summary>

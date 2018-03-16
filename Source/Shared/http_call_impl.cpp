@@ -324,53 +324,58 @@ xbox_live_result<void> http_call_impl::internal_get_response_with_auth(
     _In_ bool allUsersAuthRequired
     )
 {
-    xsapi_internal_vector<unsigned char> requestBodyVector;
-    if (m_httpCallData->requestBody.get_http_request_message_type() == http_request_message_type::vector_message)
-    {
-        requestBodyVector = m_httpCallData->requestBody.request_message_vector();
-    }
-    else
-    {
-        requestBodyVector = xsapi_internal_vector<unsigned char>(
-            m_httpCallData->requestBody.request_message_string().begin(), 
-            m_httpCallData->requestBody.request_message_string().end()
-            );
-    }
-
     // Auth stack still using non mem hooked types. Not changing because we will switch to XAL soon anyhow
     auto httpCallData = m_httpCallData;
 
-    m_httpCallData->userContext->get_auth_result(
-        utils::string_t_from_internal_string(m_httpCallData->httpMethod),
-        utils::string_t_from_internal_string(m_httpCallData->fullUrl),
-        utils::string_t_from_internal_string(utils::headers_to_string(m_httpCallData->requestHeaders)),
-        utils::std_vector_from_internal_vector<unsigned char>(requestBodyVector),
-        allUsersAuthRequired,
-        m_httpCallData->taskGroupId,
-        [httpCallData](_In_ xbox::services::xbox_live_result<user_context_auth_result> result)
+    xbox_live_callback<xbox_live_result<user_context_auth_result>> callback = [httpCallData](_In_ xbox::services::xbox_live_result<user_context_auth_result> result)
+    {
+        if (result.err())
         {
-            if (result.err())
-            {
-                auto httpCallResponse = create_http_call_response(httpCallData);
-                httpCallResponse->set_error_info(static_cast<xbox_live_error_code>(result.err().value()), result.err_message().data());
-                httpCallResponse->route_service_call();
-                httpCallData->callback(httpCallResponse);
-                return;
-            }
+            auto httpCallResponse = create_http_call_response(httpCallData);
+            httpCallResponse->set_error_info(static_cast<xbox_live_error_code>(result.err().value()), result.err_message().data());
+            httpCallResponse->route_service_call();
+            httpCallData->callback(httpCallResponse);
+            return;
+        }
 
-            const auto& authResult = result.payload();
-            if (!authResult.token().empty())
-            {
-                add_header(httpCallData, AUTH_HEADER, utils::internal_string_from_string_t(authResult.token()));
-            }
+        const auto& authResult = result.payload();
+        if (!authResult.token().empty())
+        {
+            add_header(httpCallData, AUTH_HEADER, utils::internal_string_from_string_t(authResult.token()));
+        }
 
-            if (!authResult.signature().empty())
-            {
-                add_header(httpCallData, SIG_HEADER, utils::internal_string_from_string_t(authResult.signature()));
-            }
+        if (!authResult.signature().empty())
+        {
+            add_header(httpCallData, SIG_HEADER, utils::internal_string_from_string_t(authResult.signature()));
+        }
 
-            internal_get_response(httpCallData);
-        });
+        internal_get_response(httpCallData);
+    };
+
+    if (m_httpCallData->requestBody.get_http_request_message_type() == http_request_message_type::vector_message)
+    {
+        m_httpCallData->userContext->get_auth_result(
+            utils::string_t_from_internal_string(m_httpCallData->httpMethod),
+            utils::string_t_from_internal_string(m_httpCallData->fullUrl),
+            utils::string_t_from_internal_string(utils::headers_to_string(m_httpCallData->requestHeaders)),
+            utils::std_vector_from_internal_vector<unsigned char>(m_httpCallData->requestBody.request_message_vector()),
+            allUsersAuthRequired,
+            m_httpCallData->taskGroupId,
+            callback
+            );
+    }
+    else
+    {
+        m_httpCallData->userContext->get_auth_result(
+            utils::string_t_from_internal_string(m_httpCallData->httpMethod),
+            utils::string_t_from_internal_string(m_httpCallData->fullUrl),
+            utils::string_t_from_internal_string(utils::headers_to_string(m_httpCallData->requestHeaders)),
+            utils::string_t_from_internal_string(m_httpCallData->requestBody.request_message_string()),
+            allUsersAuthRequired,
+            m_httpCallData->taskGroupId,
+            callback
+            );
+    }
 
     return xbox_live_result<void>();
 }
