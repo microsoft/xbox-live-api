@@ -81,7 +81,7 @@ try
 {
     return XblGetSocialRelationshipsHelper(
         xboxLiveContext,
-        xboxLiveContext->user->xboxUserId,
+        xboxLiveContext->xboxUserId.data(),
         socialRelationshipFilter,
         0,
         0,
@@ -129,7 +129,7 @@ try
 {
     return XblGetSocialRelationshipsHelper(
         xboxLiveContext,
-        xboxLiveContext->user->xboxUserId,
+        xboxLiveContext->xboxUserId.data(),
         socialRelationshipFilter,
         startIndex,
         maxItems,
@@ -152,7 +152,7 @@ XblSocialRelationshipResultGetNext(
 {
     return XblGetSocialRelationshipsHelper(
         xboxLiveContext,
-        xboxLiveContext->user->xboxUserId,
+        xboxLiveContext->xboxUserId.data(),
         socialRelationshipResult->filter,
         socialRelationshipResult->continuationSkip,
         maxItems,

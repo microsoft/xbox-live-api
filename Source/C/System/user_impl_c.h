@@ -14,11 +14,11 @@ public:
     std::shared_ptr<xbox::services::system::xbox_live_user> cppUser() const;
 
 private:
-    std::string m_xboxUserId;
-    std::string m_gamertag;
-    std::string m_ageGroup;
-    std::string m_privileges;
-    std::string m_webAccountId;
+    xsapi_internal_string m_xboxUserId;
+    xsapi_internal_string m_gamertag;
+    xsapi_internal_string m_ageGroup;
+    xsapi_internal_string m_privileges;
+    xsapi_internal_string m_webAccountId;
 
     XBL_XBOX_LIVE_USER* m_pUser;
     std::shared_ptr<xbox::services::system::xbox_live_user> m_cppUser;

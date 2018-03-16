@@ -111,7 +111,7 @@ void xbox_web_socket_client::connect(
         auto connectContext = utils::store_shared_ptr(xsapi_allocate_shared<xbox_live_callback<HC_RESULT, uint32_t>>(callback));
 
         HCWebSocketConnect(uri.data(), subProtocol.data(), pThis->m_websocket, HC_SUBSYSTEM_ID_XSAPI, XSAPI_DEFAULT_TASKGROUP, connectContext,
-            [](void* context, HC_WEBSOCKET_HANDLE websocket, HC_RESULT errorCode, uint32_t platformErrorCode)
+            [](void* context, HC_WEBSOCKET_HANDLE, HC_RESULT errorCode, uint32_t platformErrorCode)
         {
             auto callback = utils::remove_shared_ptr<xbox_live_callback<HC_RESULT, uint32_t>>(context);
             (*callback)(errorCode, platformErrorCode);
@@ -127,7 +127,7 @@ void xbox_web_socket_client::send(
     auto sendContext = utils::store_shared_ptr(xsapi_allocate_shared<xbox_live_callback<HC_RESULT, uint32_t>>(callback));
 
     HCWebSocketSendMessage(m_websocket, message.data(), HC_SUBSYSTEM_ID_XSAPI, XSAPI_DEFAULT_TASKGROUP, sendContext,
-        [](void* context, HC_WEBSOCKET_HANDLE websocket, HC_RESULT errorCode, uint32_t platformErrorCode)
+        [](void* context, HC_WEBSOCKET_HANDLE, HC_RESULT errorCode, uint32_t platformErrorCode)
     {
         auto callback = utils::remove_shared_ptr<xbox_live_callback<HC_RESULT, uint32_t>>(context);
         (*callback)(errorCode, platformErrorCode);

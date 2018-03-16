@@ -672,7 +672,7 @@ public:
     /// <summary>
     /// The loaded social user group
     /// </summary>
-    _XSAPIIMP const std::shared_ptr<xbox_social_user_group>& social_user_group() const;
+    _XSAPIIMP std::shared_ptr<xbox_social_user_group> social_user_group() const;
 
     /// <summary>
     /// internal function

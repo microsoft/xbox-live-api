@@ -70,6 +70,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.cpp">
       <Filter>C++ Source\Services\Clubs</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\xbox_live_context_c.cpp">
+      <Filter>C++ Source\Services\Common\C</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\xbox_live_global_c.cpp">
+      <Filter>C++ Source\Services\Common\C</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp">
       <Filter>C++ Source\Services\Common</Filter>
     </ClCompile>
@@ -469,6 +475,21 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\real_time_activity_subscription_error_event_args.cpp">
       <Filter>C++ Source\Services\RTA</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\profile.cpp">
+      <Filter>C++ Source\Services\Social\C</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\profile_helpers.cpp">
+      <Filter>C++ Source\Services\Social\C</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\social.cpp">
+      <Filter>C++ Source\Services\Social\C</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\social_helpers.cpp">
+      <Filter>C++ Source\Services\Social\C</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\C\social_manager_c.cpp">
+      <Filter>C++ Source\Services\Social\Manager\C</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\internal_social_event.cpp">
       <Filter>C++ Source\Services\Social\Manager</Filter>
     </ClCompile>
@@ -664,6 +685,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_team_result.cpp">
       <Filter>C++ Source\Services\Tournaments</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\C\xbox_live_app_config_c.cpp">
+      <Filter>C++ Source\Shared\C</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\call_buffer_timer.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
@@ -716,6 +740,9 @@
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logging_config.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\threadpool.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp">
@@ -858,11 +885,47 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_service_call_routed_event_args.h">
       <Filter>C++ Public Includes</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\errors_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\presence_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\profile_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_manager_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\system_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\types_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_app_config_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_context_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_global_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_serializers.h">
       <Filter>C++ Source\Services\Clubs</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.h">
       <Filter>C++ Source\Services\Clubs</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\async_queue.h">
+      <Filter>C++ Source\Services\Common\C</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\xbox_live_context_internal_c.h">
+      <Filter>C++ Source\Services\Common\C</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.h">
       <Filter>C++ Source\Services\Common</Filter>
@@ -893,6 +956,12 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\real_time_activity_internal.h">
       <Filter>C++ Source\Services\RTA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\profile_helpers.h">
+      <Filter>C++ Source\Services\Social\C</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\social_helpers.h">
+      <Filter>C++ Source\Services\Social\C</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_internal.h">
       <Filter>C++ Source\Services\Social\Manager</Filter>
@@ -963,6 +1032,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\shared_macros.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\threadpool.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
@@ -998,6 +1070,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="C Public Includes">
+      <UniqueIdentifier>{9CB7BEE5-6736-3CF8-B32C-CA8C008437D8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="C++ Public Includes">
       <UniqueIdentifier>{3DE8CCA4-8E4A-3583-A3BE-7A6401156977}</UniqueIdentifier>
     </Filter>
@@ -1015,6 +1090,9 @@
     </Filter>
     <Filter Include="C++ Source\Services\Common">
       <UniqueIdentifier>{72F9FCDF-3BCF-3EC0-AF83-57BBB2FBB5BD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Common\C">
+      <UniqueIdentifier>{74AE9296-EF2C-3988-86D9-9AB6F1C870C4}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\EntertainmentProfile">
       <UniqueIdentifier>{87B22C65-826B-35A5-940A-B54044DB6E24}</UniqueIdentifier>
@@ -1052,8 +1130,14 @@
     <Filter Include="C++ Source\Services\Social">
       <UniqueIdentifier>{AA84E8CC-7F03-3DB0-9298-91F25994A8A8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="C++ Source\Services\Social\C">
+      <UniqueIdentifier>{A4BF22E5-5A37-3F00-A38E-DFEE290FB4C9}</UniqueIdentifier>
+    </Filter>
     <Filter Include="C++ Source\Services\Social\Manager">
       <UniqueIdentifier>{0311E669-4A78-3C49-A288-9B2EEB0CEE0A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Social\Manager\C">
+      <UniqueIdentifier>{848B2DE2-A527-3617-ABED-B64E41BF7130}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Stats">
       <UniqueIdentifier>{DD13831D-24DF-3B79-B767-37AEFB76D89A}</UniqueIdentifier>
@@ -1069,6 +1153,9 @@
     </Filter>
     <Filter Include="C++ Source\Shared">
       <UniqueIdentifier>{4B225209-5709-3A59-81F9-27B50CED1B10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Shared\C">
+      <UniqueIdentifier>{48CB674C-6D4B-3D72-8011-D0F63128CC64}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Shared\Logger">
       <UniqueIdentifier>{6356990A-FB32-312F-BDA4-177C7F312F3B}</UniqueIdentifier>

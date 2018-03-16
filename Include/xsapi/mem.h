@@ -3,6 +3,8 @@
 
 #pragma once
 #include <new>
+#include <set>
+#include <unordered_set>
 #include <stddef.h>
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN

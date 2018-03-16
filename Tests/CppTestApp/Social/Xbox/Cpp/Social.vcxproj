@@ -185,9 +185,6 @@
     <ProjectReference Include="..\..\..\..\..\Build\Microsoft.Xbox.Services.140.XDK.Cpp\Microsoft.Xbox.Services.140.XDK.Cpp.vcxproj">
       <Project>{8a112040-cda1-4490-b518-62dfcc451fa7}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\External\cpprestsdk\Release\src\build\vs14.xbox\casablanca140.Xbox.vcxproj">
-      <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\..\..\InProgressSamples\Kits\DirectXTK\DirectXTK_XboxOneXDK_2015.vcxproj">
       <Project>{4fdfdccd-ee2e-415c-b458-1e8fdb0d85f2}</Project>
     </ProjectReference>

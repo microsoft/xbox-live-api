@@ -8,7 +8,9 @@
 
 #if defined __cplusplus_winrt
 using namespace Platform;
+using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
+using namespace Windows::Xbox::System;
 #if !XSAPI_CPP
 using namespace Microsoft::Xbox::Services::System;
 #endif
@@ -37,6 +39,135 @@ user_context::user_context(_In_ Windows::Xbox::System::User^ user) :
 Windows::Xbox::System::User^ user_context::user() const
 {
     return m_user;
+}
+
+void user_context::get_auth_result(
+    _In_ const string_t& httpMethod,
+    _In_ const string_t& url,
+    _In_ const string_t& headers,
+    _In_ const string_t& requestBodyString,
+    _In_ bool allUsersAuthRequired,
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+    )
+{
+    UNREFERENCED_PARAMETER(taskGroupId);
+
+    auto platformHttp = ref new String(httpMethod.c_str());
+    auto platformUrl = ref new String(url.c_str());
+    auto platformHeaders = ref new String(headers.c_str());
+    auto platformRequestBody = ref new String(requestBodyString.c_str());
+
+    IAsyncOperation<GetTokenAndSignatureResult^>^ asyncOp;
+
+    if (allUsersAuthRequired)
+    {
+        if (platformRequestBody == nullptr)
+        {
+            asyncOp = m_user->GetTokenAndSignatureForAllUsersAsync(
+                platformHttp,
+                platformUrl,
+                platformHeaders
+            );
+        }
+        else
+        {
+            asyncOp = m_user->GetTokenAndSignatureForAllUsersAsync(
+                platformHttp,
+                platformUrl,
+                platformHeaders,
+                platformRequestBody
+            );
+        }
+    }
+    else
+    {
+        if (platformRequestBody == nullptr)
+        {
+            asyncOp = m_user->GetTokenAndSignatureAsync(
+                platformHttp,
+                platformUrl,
+                platformHeaders
+            );
+        }
+        else
+        {
+            asyncOp = m_user->GetTokenAndSignatureAsync(
+                platformHttp,
+                platformUrl,
+                platformHeaders,
+                platformRequestBody
+            );
+        }
+    }
+
+    asyncOp->Completed = ref new AsyncOperationCompletedHandler<GetTokenAndSignatureResult^>(
+        [asyncOp, callback](IAsyncOperation<GetTokenAndSignatureResult^>^ asyncInfo, AsyncStatus asyncStatus)
+    {
+        UNREFERENCED_PARAMETER(asyncStatus);
+        try
+        {
+            auto tokenAndSig = asyncInfo->GetResults();
+            user_context_auth_result userContextResult(tokenAndSig->Token->ToString()->Data(), tokenAndSig->Signature->ToString()->Data());
+            callback(xbox_live_result<user_context_auth_result>(userContextResult));
+        }
+        catch (Exception^ ex)
+        {
+            xbox_live_error_code err = utils::convert_exception_to_xbox_live_error_code();
+            callback(xbox_live_result<user_context_auth_result>(err, "Failed getting auth token"));
+        }
+    });
+}
+
+void user_context::get_auth_result(
+    _In_ const string_t& httpMethod,
+    _In_ const string_t& url,
+    _In_ const string_t& headers,
+    _In_ const std::vector<unsigned char>& requestBodyVector,
+    _In_ bool allUsersAuthRequired,
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+    )
+{
+    auto byteArr = ref new Array<unsigned char, 1U>(static_cast<uint32_t>(requestBodyVector.size()));
+    memcpy(&byteArr->Data[0], &requestBodyVector[0], requestBodyVector.size());
+    IAsyncOperation<GetTokenAndSignatureResult^>^ asyncOp;
+
+    if (allUsersAuthRequired)
+    {
+        asyncOp = m_user->GetTokenAndSignatureForAllUsersAsync(
+            ref new String(httpMethod.c_str()),
+            ref new String(url.c_str()),
+            ref new String(headers.c_str()),
+            byteArr
+            );
+    }
+    else
+    {
+        asyncOp = m_user->GetTokenAndSignatureAsync(
+            ref new String(httpMethod.c_str()),
+            ref new String(url.c_str()),
+            ref new String(headers.c_str()),
+            byteArr
+            );
+    }
+
+    asyncOp->Completed = ref new AsyncOperationCompletedHandler<GetTokenAndSignatureResult^>(
+        [asyncOp, callback](IAsyncOperation<GetTokenAndSignatureResult^>^ asyncInfo, AsyncStatus asyncStatus)
+    {
+        UNREFERENCED_PARAMETER(asyncStatus);
+        try
+        {
+            auto tokenAndSig = asyncInfo->GetResults();
+            user_context_auth_result userContextResult(tokenAndSig->Token->ToString()->Data(), tokenAndSig->Signature->ToString()->Data());
+            callback(xbox_live_result<user_context_auth_result>(userContextResult));
+        }
+        catch (Exception^ ex)
+        {
+            xbox_live_error_code err = utils::convert_exception_to_xbox_live_error_code();
+            callback(xbox_live_result<user_context_auth_result>(err, "Failed getting auth token"));
+        }
+    });
 }
 
 pplx::task<xbox_live_result<user_context_auth_result>> user_context::get_auth_result(

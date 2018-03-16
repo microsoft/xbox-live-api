@@ -11,9 +11,11 @@ using namespace xbox::services;
 
 xbl_thread_pool::xbl_thread_pool() :
     m_numActiveThreads(0),
-    m_targetNumThreads(2),
-    m_defaultIdealProcessor(MAXIMUM_PROCESSORS)
+    m_targetNumThreads(2)
 {
+    m_defaultIdealProcessor.Group = 0;
+    m_defaultIdealProcessor.Number = MAXIMUM_PROCESSORS;
+
     memset(m_hActiveThreads, 0, sizeof(HANDLE) * MAX_THREADS);
     m_stopRequestedHandle.set(CreateEvent(nullptr, true, false, nullptr));
     m_completeReadyHandle.set(CreateEvent(nullptr, false, false, nullptr));
@@ -126,9 +128,9 @@ void xbl_thread_pool::start_threads()
     for (int i = 0; i < m_targetNumThreads; i++)
     {
         m_hActiveThreads[i] = CreateThread(nullptr, 0, xbox_live_thread_proc, this, 0, nullptr);
-        if (m_defaultIdealProcessor != MAXIMUM_PROCESSORS)
+        if (m_defaultIdealProcessor.Number != MAXIMUM_PROCESSORS)
         {
-            SetThreadIdealProcessor(m_hActiveThreads[i], m_defaultIdealProcessor);
+            SetThreadIdealProcessorEx(m_hActiveThreads[i], &m_defaultIdealProcessor, nullptr);
         }
     }
 
@@ -151,20 +153,20 @@ void xbl_thread_pool::shutdown_active_threads()
     }
 }
 
-void xbl_thread_pool::set_thread_ideal_processor(_In_ int threadIndex, _In_ DWORD dwIdealProcessor)
+void xbl_thread_pool::set_thread_ideal_processor(_In_ int threadIndex, _In_ BYTE dwIdealProcessor)
 {
     if (threadIndex == -1)
     {
+        m_defaultIdealProcessor.Number = dwIdealProcessor;
+
         for (int i = 0; i < m_numActiveThreads; i++)
         {
             HANDLE hThread = m_hActiveThreads[i];
             if (hThread != nullptr)
             {
-                SetThreadIdealProcessor(hThread, dwIdealProcessor);
+                SetThreadIdealProcessorEx(hThread, &m_defaultIdealProcessor, nullptr);
             }
         }
-
-        m_defaultIdealProcessor = dwIdealProcessor;
     }
     else
     {
@@ -173,7 +175,8 @@ void xbl_thread_pool::set_thread_ideal_processor(_In_ int threadIndex, _In_ DWOR
             HANDLE hThread = m_hActiveThreads[threadIndex];
             if (hThread != nullptr)
             {
-                SetThreadIdealProcessor(hThread, dwIdealProcessor);
+                PROCESSOR_NUMBER number{ 0, dwIdealProcessor, 0 };
+                SetThreadIdealProcessorEx(hThread, &number, nullptr);
             }
         }
     }

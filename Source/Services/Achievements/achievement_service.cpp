@@ -256,7 +256,7 @@ achievement_service::write_offline_update_achievement(
     )
 {
     ULONG errorCode = event_write_achievement_update(
-        xboxLiveContextImpl->xbox_live_user_id().c_str(),
+        utils::string_t_from_internal_string(xboxLiveContextImpl->xbox_live_user_id()).c_str(),
         achievementId.c_str(),
         percentComplete
         );

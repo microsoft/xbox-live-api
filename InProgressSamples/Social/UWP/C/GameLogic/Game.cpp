@@ -519,9 +519,9 @@ Game::LogSocialEventList(XBL_SOCIAL_EVENT* events, uint32_t eventCount)
                 XblSocialEventGetUsersAffected(&socialEvent, affectedUsers);
 
                 source << _T(" UserAffected: ");
-                for (uint32_t i = 0; i < socialEvent.usersAffectedCount; ++i)
+                for (uint32_t j = 0; j < socialEvent.usersAffectedCount; ++j)
                 {
-                    source << affectedUsers[i].xboxUserId;
+                    source << affectedUsers[j].xboxUserId;
                     source << _T(", ");
                 }
             }

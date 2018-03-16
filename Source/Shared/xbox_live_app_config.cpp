@@ -78,8 +78,8 @@ xbox_live_result<void> xbox_live_app_config_internal::read()
     xbox::services::system::xbox_system_factory::get_factory();
 
 #if TV_API
-    m_sandbox = Windows::Xbox::Services::XboxLiveConfiguration::SandboxId->Data();
-    m_scid = Windows::Xbox::Services::XboxLiveConfiguration::PrimaryServiceConfigId->Data();
+    m_sandbox = utils::internal_string_from_char_t(Windows::Xbox::Services::XboxLiveConfiguration::SandboxId->Data());
+    m_scid = utils::internal_string_from_char_t(Windows::Xbox::Services::XboxLiveConfiguration::PrimaryServiceConfigId->Data());
     m_titleId = std::stoi(Windows::Xbox::Services::XboxLiveConfiguration::TitleId->Data());
 #else
     std::shared_ptr<xbox::services::local_config> localConfig = xbox::services::system::xbox_system_factory::get_factory()->create_local_config();

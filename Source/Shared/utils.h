@@ -14,14 +14,8 @@
 #include "xsapi/mem.h"
 #include "xsapi/system.h"
 
-// Forward decls
-class xbl_thread_pool;
-
-class title_storage_state;
-struct XBL_XBOX_LIVE_APP_CONFIG;
-struct XSAPI_ACHIEVEMENTS_STATE; // TODO use c++ naming conventions for internal classes, make them classes
-struct XSAPI_STATS_MANAGER_VARS;
 struct XBL_XBOX_LIVE_USER;
+struct XBL_XBOX_LIVE_APP_CONFIG;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
     class xbox_live_services_settings;
@@ -61,6 +55,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
     class logger;
     class perf_tester;
     class initiator;
+    class xbl_thread_pool;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
 
 #if !TV_API
@@ -178,6 +173,8 @@ struct xsapi_singleton
     std::shared_ptr<xbox::services::social::manager::social_manager> m_socialManagerInstance;
     std::shared_ptr<xbox::services::social::manager::social_manager_internal> m_socialManagerInternalInstance;
     std::shared_ptr<xbox::services::perf_tester> m_perfTester;
+    // from Social\Manager\C\social_manager_c.cpp
+    std::shared_ptr<xbox::services::social::manager::xbl_social_manager> m_xblSocialManagerState;
 
     // from Stats\Manager\stats_manager.cpp
     std::shared_ptr<xbox::services::stats::manager::stats_manager> m_statsManagerInstance;
@@ -202,10 +199,7 @@ struct xsapi_singleton
 
     std::shared_ptr<initiator> m_initiator;
 
-#if UWP_API || UNIT_TEST_SERVICES
-    void start_threadpool();
     std::shared_ptr<xbl_thread_pool> m_threadpool;
-#endif
 
 #if _WINRT_DLL || UNIT_TEST_SERVICES
     // from Services\Multiplayer\Manager\WinRT\MultiplayerManager_WinRT.cpp
@@ -233,15 +227,8 @@ struct xsapi_singleton
     std::mutex m_trackingUsersLock;
 #endif
 
-    // From xsapi C singleton. Revisit if this is needed after reworking code.
-    std::shared_ptr<title_storage_state> m_titleStorageState;
-
     std::mutex m_usersLock;
-    std::unordered_map<std::string, XBL_XBOX_LIVE_USER*> m_signedInUsers;
-
-    std::shared_ptr<XSAPI_ACHIEVEMENTS_STATE> m_achievementsState;
-    std::shared_ptr<xbox::services::social::manager::xbl_social_manager> m_xblSocialManagerState;
-    std::shared_ptr<XSAPI_STATS_MANAGER_VARS> m_statsVars;
+    std::unordered_map<xsapi_internal_string, XBL_XBOX_LIVE_USER*> m_signedInUsers;
 
     std::mutex m_callbackContextsLock;
     xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_callbackContextPtrs;
@@ -953,29 +940,15 @@ public:
     }
 #endif
 
-#ifdef UWP_API // TODO add definitions for other platforms
-
     static xsapi_internal_string internal_string_from_string_t(_In_ const string_t& externalString);
     static xsapi_internal_string internal_string_from_char_t(_In_ const char_t* char_t);
-    static xsapi_internal_string internal_string_from_utf16(_In_reads_(size) PCWSTR utf16, size_t size);
     static xsapi_internal_string internal_string_from_utf16(_In_z_ PCWSTR utf16);
 
-    static int utf8_from_char_t(_In_z_ const char_t* inArray, _Out_writes_z_(size) char* outArray, _In_ int cbOutArray);
-
     static string_t string_t_from_internal_string(_In_ const xsapi_internal_string& internalString);
-    static string_t string_t_from_utf8(_In_reads_(size) PCSTR utf8, size_t size);
     static string_t string_t_from_utf8(_In_z_ PCSTR utf8);
 
-    // TODO remove these after migrating all APIs
-    static std::string utf8_from_utf16(std::wstring const& utf16);
-    static std::wstring utf16_from_utf8(std::string const& utf8);
-
-    static std::string utf8_from_utf16(_In_z_ PCWSTR utf16);
-    static std::wstring utf16_from_utf8(_In_z_ PCSTR utf8);
-
-    static std::string utf8_from_utf16(_In_reads_(size) PCWSTR utf16, size_t size);
-    static std::wstring utf16_from_utf8(_In_reads_(size) PCSTR utf8, size_t size);
-#endif
+    static int utf8_from_char_t(_In_z_ const char_t* inArray, _Out_writes_z_(cchOutArray) char* outArray, _In_ int cchOutArray);
+    static int char_t_from_utf8(_In_z_ const char* inArray, _Out_writes_z_(cchOutArray) char_t* outArray, _In_ int cchOutArray);
 
     static void generate_locales();
     static const xsapi_internal_string& get_locales();
@@ -1254,7 +1227,6 @@ public:
         size_t stringArrayCount
         );
 
-    // These both might not be needed
     static xsapi_internal_vector<xsapi_internal_string> string_array_to_internal_string_vector(
         PCSTR *stringArray,
         size_t stringArrayCount
@@ -1295,8 +1267,8 @@ public:
     }
 
 #if XSAPI_C
-    static PCSTR alloc_string(const string_t& str);
-    static void free_string(PCSTR str);
+    static const char* alloc_string(const string_t& str);
+    static void free_string(const char* str);
 
     static time_t time_t_from_datetime(const utility::datetime& datetime);
 

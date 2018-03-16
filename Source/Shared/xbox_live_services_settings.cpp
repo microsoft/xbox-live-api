@@ -39,7 +39,7 @@ xbox_live_services_settings::xbox_live_services_settings() :
 {
 }
 
-static void *custom_mem_alloc_wrapper(_In_ size_t size, _In_ uint32_t memoryType)
+void *custom_mem_alloc_wrapper(_In_ size_t size, _In_ uint32_t memoryType)
 {
     UNREFERENCED_PARAMETER(memoryType);
     auto xboxLiveServiceSettings = xbox::services::system::xbox_live_services_settings::get_singleton_instance();
@@ -62,7 +62,7 @@ static void *custom_mem_alloc_wrapper(_In_ size_t size, _In_ uint32_t memoryType
     }
 }
 
-static void custom_mem_free_wrapper(_In_ void *pointer, _In_ uint32_t memoryType)
+void custom_mem_free_wrapper(_In_ void *pointer, _In_ uint32_t memoryType)
 {
     UNREFERENCED_PARAMETER(memoryType);
     auto xboxLiveServiceSettings = xbox::services::system::xbox_live_services_settings::get_singleton_instance(false);

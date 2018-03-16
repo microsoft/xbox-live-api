@@ -115,12 +115,12 @@ xsapi_internal_vector<xsapi_internal_string> utils::get_locale_list()
 {
     xsapi_internal_vector<xsapi_internal_string> localeList;
 
-    TCHAR localeName[LOCALE_NAME_MAX_LENGTH] = { 0 };
+    char_t localeName[LOCALE_NAME_MAX_LENGTH] = { 0 };
     auto localeLen = GetUserDefaultLocaleName(localeName, ARRAYSIZE(localeName));
 
     if (localeLen > 0)
     {
-        localeList.push_back(utils::internal_string_from_utf16(localeName, localeLen));
+        localeList.push_back(utils::internal_string_from_char_t(localeName));
     }
     else
     {
@@ -143,7 +143,7 @@ xsapi_internal_vector<xsapi_internal_string> utils::get_locale_list()
         auto languages = resourceContext->Languages;
         for (auto language : languages)
         {
-            localeList.push_back(utils::internal_string_from_utf16(language->Data(), language->Length()));
+            localeList.push_back(utils::internal_string_from_utf16(language->Data()));
         }
     }
     catch (...)

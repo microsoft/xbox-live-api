@@ -125,18 +125,12 @@ set(Public_Source_Files
     )
 
 set(Public_Source_Files_C
-    ../../include/xsapi-c/achievements_c.h
     ../../include/xsapi-c/errors_c.h
-    ../../include/xsapi-c/leaderboard_c.h
     ../../include/xsapi-c/presence_c.h
-    ../../include/xsapi-c/privacy_c.h
     ../../include/xsapi-c/profile_c.h
     ../../include/xsapi-c/social_c.h
     ../../include/xsapi-c/social_manager_c.h
-    ../../include/xsapi-c/stats_manager_c.h
     ../../include/xsapi-c/system_c.h
-    ../../include/xsapi-c/title_callable_ui_c.h
-    ../../include/xsapi-c/title_storage_c.h
     ../../include/xsapi-c/types_c.h
     ../../include/xsapi-c/xbox_live_app_config_c.h
     ../../include/xsapi-c/xbox_live_context_c.h
@@ -195,7 +189,6 @@ else()
         )
 endif()
 
-
 set(UWP_System_Source_Files
     ../../Source/System/token_and_signature_result.cpp
     ../../Source/System/user.cpp
@@ -244,10 +237,6 @@ set(UWP_Shared_Source_Files
     ../../Source/Shared/telemetry.h
     ../../Source/Shared/telemetry.cpp
     ../../Source/Shared/WinRT/local_config_winrt.cpp
-    ../../Source/Shared/threadpool.h
-    ../../Source/Shared/threadpool.cpp
-    ../../Source/Shared/utils_uwp.h
-    ../../Source/Shared/utils_uwp.cpp
     )
 
 set(WinRT_Shared_Source_Files
@@ -304,6 +293,8 @@ set(Shared_Source_Files
     ../../Source/Shared/xbox_system_factory.h
     ../../Source/Shared/http_headers.h
     ../../Source/Shared/http_call_request_message_internal.h
+    ../../Source/Shared/threadpool.h
+    ../../Source/Shared/threadpool.cpp
     )
 
 set(Misc_Source_Files
@@ -615,7 +606,7 @@ set(Clubs_Source_Files
     ../../Source/Services/Clubs/clubs_service_impl.h
     )
 
-set(System_Source_Files_C
+set(UWP_System_Source_Files_C
     ../../Source/C/System/user_c.cpp
     ../../Source/C/System/user_impl_c.cpp
     ../../Source/C/System/user_impl_c.h
@@ -623,26 +614,10 @@ set(System_Source_Files_C
     ../../Source/C/System/user_taskargs.h
     )
 
-set(Shared_Source_Files_C_Legacy
-    ../../Source/C/Shared/utils_c.h
-    )
-
 set(Shared_Source_Files_C
     ../../Source/Shared/C/xbox_live_app_config_c.cpp
     )
-    
-set(Achievements_Source_Files_C
-    ../../Source/C/Services/Achievements/achievements.cpp
-    ../../Source/C/Services/Achievements/achievements_helper.cpp
-    ../../Source/C/Services/Achievements/achievements_helper.h
-    ../../Source/C/Services/Achievements/achievements_state.h
-    ../../Source/C/Services/Achievements/achievements_taskargs.h
-    )
 
-set(Common_Source_Files_C_Legacy
-    ../../Source/C/Services/Common/taskargs.h
-    )
-    
 set(Common_Source_Files_C
     ../../Source/Services/Common/C/xbox_live_context_internal_c.h
     ../../Source/Services/Common/C/xbox_live_context_c.cpp
@@ -650,27 +625,6 @@ set(Common_Source_Files_C
     ../../Source/Services/Common/C/async_queue.h
     )
 
-set(Leaderboard_Source_Files_C
-    ../../Source/C/Services/Leaderboard/leaderboard.cpp
-    ../../Source/C/Services/Leaderboard/leaderboard_helper.cpp
-    ../../Source/C/Services/Leaderboard/leaderboard_helper.h
-    )
-    
-set(Misc_Source_Files_C
-    ../../Source/C/Services/Misc/title_callable_ui_c.cpp
-    )
-    
-set(Privacy_Source_Files_C
-    ../../Source/C/Services/Privacy/privacy.cpp
-    ../../Source/C/Services/Privacy/privacy_multiple_permissions_check_result_impl.cpp
-    ../../Source/C/Services/Privacy/privacy_multiple_permissions_check_result_impl.h
-    ../../Source/C/Services/Privacy/privacy_permission_check_result_impl.cpp
-    ../../Source/C/Services/Privacy/privacy_permission_check_result_impl.h
-    ../../Source/C/Services/Privacy/privacy_permission_deny_reason_impl.cpp
-    ../../Source/C/Services/Privacy/privacy_permission_deny_reason_impl.h
-    ../../Source/C/Services/Privacy/privacy_taskargs.h
-    )
-    
 set(Social_Source_Files_C
     ../../Source/Services/Social/C/profile.cpp
     ../../Source/Services/Social/C/profile_helpers.h
@@ -683,23 +637,7 @@ set(Social_Source_Files_C
 set(Social_Manager_Source_Files_C
     ../../Source/Services/Social/Manager/C/social_manager_c.cpp
     )
-    
-set(Stats_Manager_Source_Files_C
-    ../../Source/C/Services/Stats/Manager/stats_manager_c.cpp
-    ../../Source/C/Services/Stats/Manager/stats_manager_helper.cpp
-    ../../Source/C/Services/Stats/Manager/stats_manager_helper.h
-    ../../Source/C/Services/Stats/Manager/stats_manager_state.h
-    )
 
-set(TitleStorage_Souce_Files_C
-    ../../Source/C/Services/TitleStorage/title_storage.cpp
-    ../../Source/C/Services/TitleStorage/title_storage_blob_metadata_impl.cpp
-    ../../Source/C/Services/TitleStorage/title_storage_blob_metadata_impl.h
-    ../../Source/C/Services/TitleStorage/title_storage_blob_metadata_result_impl.cpp
-    ../../Source/C/Services/TitleStorage/title_storage_blob_metadata_result_impl.h
-    ../../Source/C/Services/TitleStorage/title_storage_state.h
-    ../../Source/C/Services/TitleStorage/title_storage_taskargs.h
-    )
 
 set(EntertainmentProfile_WinRT_Source_Files
 	../../Source/Services/EntertainmentProfile/WinRT/EntertainmentProfileListContainsItemResult_WinRT.cpp
@@ -1278,7 +1216,7 @@ else()
 	source_group("C++ Source\\Services\\Multiplayer\\Manager" FILES ${Multiplayer_Manager_Source_Files})
 	source_group("C++ Source\\Services\\Tournaments" FILES ${Tournaments_Source_Files})
     source_group("C++ Source\\Services\\Clubs" FILES ${Clubs_Source_Files})
-    
+
 	if( XDK OR UNITTEST )
 		message(STATUS "XDK source group")
         source_group("C++ Source\\Shared" FILES ${XDK_Shared_Source_Files})
@@ -1309,20 +1247,6 @@ else()
 			source_group("C++ Source\\Shared\\WinRT" FILES ${UWP_Shared_WinRT_Source_Files})
             source_group("C++ Source\\System\\WinRT" FILES ${System_WinRT_Source_Files})
             source_group("C++ Source\\Services\\Events\\WinRT" FILES ${Events_WinRT_Source_Files})
-		else()
-            source_group("C++ Source\\C\\Shared" FILES ${Shared_Source_Files_C_Legacy})
-            source_group("C++ Source\\Shared\\C" FILES ${Shared_Source_Files_C})
-            source_group("C++ Source\\C\\System" FILES ${System_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\Achievements" FILES ${Achievements_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\Common" FILES ${Common_Source_Files_C_Legacy})
-            source_group("C++ Source\\Services\\Common\\C" FILES ${Common_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\Leaderboard" FILES ${Leaderboard_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\Misc" FILES ${Misc_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\Privacy" FILES ${Privacy_Source_Files_C})
-            source_group("C++ Source\\Services\\Social\\C" FILES ${Social_Source_Files_C})
-            source_group("C++ Source\\Services\\Social\\Manager\\C" FILES ${Social_Manager_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\Stats\\Manager" FILES ${Stats_Manager_Source_Files_C})
-            source_group("C++ Source\\C\\Services\\TitleStorage" FILES ${TitleStorage_Souce_Files_C})
         endif()
 	endif()
 
@@ -1359,6 +1283,15 @@ else()
 		source_group("C++ Source\\Services\\TitleStorage\\WinRT" FILES ${TitleStorage_WinRT_Source_Files})
 		source_group("C++ Source\\Services\\Tournaments\\WinRT" FILES ${Tournaments_WinRT_Source_Files})
         source_group("C++ Source\\Services\\Clubs\\WinRT" FILES ${Clubs_WinRT_Source_Files})
+    else()
+        source_group("C++ Source\\Shared\\C" FILES ${Shared_Source_Files_C})
+        source_group("C++ Source\\Services\\Common\\C" FILES ${Common_Source_Files_C})
+        source_group("C++ Source\\Services\\Social\\C" FILES ${Social_Source_Files_C})
+        source_group("C++ Source\\Services\\Social\\Manager\\C" FILES ${Social_Manager_Source_Files_C})
+        
+        if( NOT XDK )
+            source_group("C++ Source\\C\\System" FILES ${UWP_System_Source_Files_C})
+        endif()
 	endif()
 
 	set( SOURCE_FILES 
@@ -1410,6 +1343,24 @@ else()
 			${Shared_WinRT_Source_Files}
             ${Clubs_WinRT_Source_Files}
 			)
+    else()
+        message(STATUS "Adding flat C source")
+        list(APPEND
+            SOURCE_FILES
+            ${Public_Source_Files_C}
+            ${Social_Manager_Source_Files_C}
+            ${Social_Source_Files_C}
+            ${Common_Source_Files_C}
+            ${Shared_Source_Files_C}
+            ${System_Source_Files_C}
+            )
+        
+        if( NOT XDK )
+            list(APPEND
+                SOURCE_FILES
+                ${UWP_System_Source_Files_C}
+                )
+        endif()
 	endif()
 
 	if( XDK OR UNITTEST )
@@ -1435,7 +1386,7 @@ else()
                 ${UWP_Shared_Source_Files}
                 ${WinRT_Shared_Source_Files}
                 )
-        endif()                
+        endif()
 
     else()
         list(APPEND
@@ -1454,24 +1405,6 @@ else()
                 ${UWP_Shared_WinRT_Source_Files}
                 ${Events_WinRT_Source_Files}
                 ${System_WinRT_Source_Files}
-                )
-        else()
-            list(APPEND
-                SOURCE_FILES
-                ${Public_Source_Files_C}
-                ${TitleStorage_Souce_Files_C}
-                ${Stats_Manager_Source_Files_C}
-                ${Social_Manager_Source_Files_C}
-                ${Social_Source_Files_C}
-                ${Privacy_Source_Files_C}
-                ${Misc_Source_Files_C}
-                ${Leaderboard_Source_Files_C}
-                ${Common_Source_Files_C}
-                ${Common_Source_Files_C_Legacy}
-                ${Achievements_Source_Files_C}
-                ${Shared_Source_Files_C}
-                ${Shared_Source_Files_C_Legacy}
-                ${System_Source_Files_C}
                 )
 		endif()
             
