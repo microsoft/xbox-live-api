@@ -103,7 +103,8 @@ public:
             _T(""),
             _T(""),
             std::chrono::milliseconds::zero(),
-            chrono_clock_t::now());
+            chrono_clock_t::now(),
+            _T(""));
 
         //check logging when disabled
         logger->disable();
