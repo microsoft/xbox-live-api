@@ -128,6 +128,7 @@ set(Public_Source_Files_C
     ../../include/xsapi-c/errors_c.h
     ../../include/xsapi-c/presence_c.h
     ../../include/xsapi-c/profile_c.h
+    ../../include/xsapi-c/services_c.h
     ../../include/xsapi-c/social_c.h
     ../../include/xsapi-c/social_manager_c.h
     ../../include/xsapi-c/system_c.h
