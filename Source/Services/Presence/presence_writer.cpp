@@ -85,7 +85,7 @@ presence_writer::start_writer(
             startWriter = true;
         }
 
-        xsapi_internal_string id = utils::internal_string_from_string_t(presenceServiceImpl->m_userContext->xbox_user_id());
+        xsapi_internal_string id = presenceServiceImpl->m_userContext->xbox_user_id();
         if (m_presenceServices.find(id) == m_presenceServices.end())
         {
             LOG_INFO("Add new presence service into writer");

@@ -33,6 +33,11 @@ std::vector<unsigned char> __cdecl conversions::from_base64(const utility::strin
     return _from_base64(str);
 }
 
+utility::string_t __cdecl conversions::to_base64(const unsigned char* data, size_t dataSize)
+{
+    return _to_base64(data, dataSize);
+}
+
 utility::string_t __cdecl conversions::to_base64(const std::vector<unsigned char>& input)
 {
     if (input.size() == 0)

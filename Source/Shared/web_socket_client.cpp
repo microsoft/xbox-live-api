@@ -35,8 +35,8 @@ void xbox_web_socket_client::connect(
 
     std::weak_ptr<xbox_web_socket_client> thisWeakPtr = shared_from_this();
 
-    string_t callerContext = userContext->caller_context();
-    userContext->get_auth_result(_T("GET"), utils::string_t_from_internal_string(uri), string_t(), string_t(), false, XSAPI_DEFAULT_TASKGROUP, 
+    string_t callerContext = utils::string_t_from_internal_string(userContext->caller_context());
+    userContext->get_auth_result("GET", uri, xsapi_internal_string(), xsapi_internal_string(), false, /* TODO */ XSAPI_DEFAULT_TASKGROUP,
     [uri, subProtocol, callerContext, thisWeakPtr, callback](xbox::services::xbox_live_result<user_context_auth_result> xblResult)
     {
         std::shared_ptr<xbox_web_socket_client> pThis(thisWeakPtr.lock());
@@ -58,8 +58,8 @@ void xbox_web_socket_client::connect(
             HCWebSocketSetProxyUri(pThis->m_websocket, proxyUri.data());
         }
 
-        HCWebSocketSetHeader(pThis->m_websocket, "Authorization", utils::internal_string_from_string_t(result.token()).data());
-        HCWebSocketSetHeader(pThis->m_websocket, "Signature", utils::internal_string_from_string_t(result.signature()).data());
+        HCWebSocketSetHeader(pThis->m_websocket, "Authorization", result.token().data());
+        HCWebSocketSetHeader(pThis->m_websocket, "Signature", result.signature().data());
         HCWebSocketSetHeader(pThis->m_websocket, "Accept-Language", utils::get_locales().data());
 
         xsapi_internal_string userAgent = DEFAULT_USER_AGENT;

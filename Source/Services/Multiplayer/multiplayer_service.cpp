@@ -237,7 +237,7 @@ multiplayer_service::write_session_using_subpath(
                 response->e_tag(),
                 response->response_date(),
                 localSessionRef,
-                userContext->xbox_user_id()
+                utils::string_t_from_internal_string(userContext->xbox_user_id())
                 );
 
             newSession->_Set_write_session_status(
@@ -307,7 +307,7 @@ multiplayer_service::get_current_session(
             response->e_tag(), 
             response->response_date(),
             sessionReference,
-            userContextShared->xbox_user_id()
+            utils::string_t_from_internal_string(userContextShared->xbox_user_id())
             );
 
         return multiplayerSessionSharedResult;
@@ -375,7 +375,7 @@ multiplayer_service::get_current_session_by_handle(
             response->e_tag(), 
             response->response_date(),
             sessionReference,
-            userContextShared->xbox_user_id()
+            utils::string_t_from_internal_string(userContextShared->xbox_user_id())
             );
 
         return multiplayerSessionShared;
@@ -518,7 +518,7 @@ multiplayer_service::clear_activity(
     RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(serviceConfigurationId, void, "Service configuration id is empty");
 
     std::vector<string_t> xuidVector;
-    xuidVector.push_back(m_userContext->xbox_user_id());
+    xuidVector.push_back(utils::string_t_from_internal_string(m_userContext->xbox_user_id()));
 
     auto sharedXboxLiveContextSettings = m_xboxLiveContextSettings;
     auto appConfig = m_appConfig;
@@ -915,7 +915,7 @@ multiplayer_service::get_search_handles(
         );
 
     httpCall->set_xbox_contract_version_header_value(c_multiplayerServiceContractHeaderValue);
-    httpCall->set_request_body(searchHandleRequest._Serialize(m_userContext->xbox_user_id()));
+    httpCall->set_request_body(searchHandleRequest._Serialize(utils::string_t_from_internal_string(m_userContext->xbox_user_id())));
 
     auto task = httpCall->get_response_with_auth(m_userContext)
     .then([](std::shared_ptr<http_call_response> response)

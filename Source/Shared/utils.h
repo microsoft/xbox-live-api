@@ -103,6 +103,212 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 #define __max(a,b)            (((a) < (b)) ? (b) : (a))
 #endif  
 
+template<typename... Args>
+class xbox_live_callback
+{
+public:
+    xbox_live_callback() : m_callable(nullptr) {}
+    xbox_live_callback(nullptr_t) : m_callable(nullptr) {}
+
+    template <typename Functor>
+    xbox_live_callback(Functor functor)
+    {
+        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(functor).release());
+    }
+
+    xbox_live_callback(const xbox_live_callback& rhs)
+    {
+        *this = rhs;
+    }
+
+    xbox_live_callback(xbox_live_callback&& rhs)
+    {
+        *this = std::move(rhs);
+    }
+
+    template <typename Functor>
+    xbox_live_callback& operator=(Functor f)
+    {
+        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(f).release());
+        return *this;
+    }
+
+    xbox_live_callback& operator=(const xbox_live_callback& rhs)
+    {
+        if (rhs.m_callable != nullptr)
+        {
+            m_callable = rhs.m_callable->copy();
+        }
+        else
+        {
+            m_callable = nullptr;
+        }
+        return *this;
+    }
+
+    xbox_live_callback& operator=(xbox_live_callback&& rhs)
+    {
+        m_callable = std::move(rhs.m_callable);
+        return *this;
+    }
+
+    xbox_live_callback& operator=(nullptr_t)
+    {
+        m_callable = nullptr;
+        return *this;
+    }
+
+    void operator()(Args... args) const
+    {
+        if (m_callable != nullptr)
+        {
+            (*m_callable)(args...);
+        }
+    }
+
+    bool operator==(std::nullptr_t) noexcept
+    {
+        return m_callable == nullptr;
+    }
+
+    bool operator!=(std::nullptr_t) noexcept
+    {
+        return m_callable != nullptr;
+    }
+
+private:
+    struct ICallable
+    {
+        virtual ~ICallable() = default;
+        virtual void operator()(Args...) = 0;
+        virtual xsapi_unique_ptr<ICallable> copy() = 0;
+    };
+
+    template <typename Functor>
+    struct callable : public ICallable
+    {
+        callable(const Functor& functor) : m_functor(functor) { }
+        ~callable() override = default;
+
+        void operator()(Args... args) override
+        {
+            m_functor(args...);
+        }
+
+        xsapi_unique_ptr<ICallable> copy() override
+        {
+            return xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(m_functor).release());
+        }
+
+        Functor m_functor;
+    };
+
+    xsapi_unique_ptr<ICallable> m_callable;
+};
+
+template<>
+class xbox_live_callback<void>
+{
+public:
+    xbox_live_callback() : m_callable(nullptr) {}
+    xbox_live_callback(nullptr_t) : m_callable(nullptr) {}
+
+    template <typename Functor>
+    xbox_live_callback(Functor functor)
+    {
+        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(functor).release());
+    }
+
+    xbox_live_callback(const xbox_live_callback& rhs)
+    {
+        *this = rhs;
+    }
+
+    xbox_live_callback(xbox_live_callback&& rhs)
+    {
+        *this = std::move(rhs);
+    }
+
+    template <typename Functor>
+    xbox_live_callback& operator=(Functor f)
+    {
+        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(f).release());
+        return *this;
+    }
+
+    xbox_live_callback& operator=(const xbox_live_callback& rhs)
+    {
+        if (rhs.m_callable != nullptr)
+        {
+            m_callable = rhs.m_callable->copy();
+        }
+        else
+        {
+            m_callable = nullptr;
+        }
+        return *this;
+    }
+
+    xbox_live_callback& operator=(xbox_live_callback&& rhs)
+    {
+        m_callable = std::move(rhs.m_callable);
+        return *this;
+    }
+
+    xbox_live_callback& operator=(nullptr_t)
+    {
+        m_callable = nullptr;
+        return *this;
+    }
+
+    void operator()() const
+    {
+        if (m_callable != nullptr)
+        {
+            (*m_callable)();
+        }
+    }
+
+    bool operator==(std::nullptr_t) noexcept
+    {
+        return m_callable == nullptr;
+    }
+
+    bool operator!=(std::nullptr_t) noexcept
+    {
+        return m_callable != nullptr;
+    }
+
+private:
+    struct ICallable
+    {
+        virtual ~ICallable() = default;
+        virtual void operator()() = 0;
+        virtual xsapi_unique_ptr<ICallable> copy() = 0;
+    };
+
+    template <typename Functor>
+    struct callable : public ICallable
+    {
+        callable(const Functor& functor) : m_functor(functor) { }
+        ~callable() override = default;
+
+        void operator()() override
+        {
+            m_functor();
+        }
+
+        xsapi_unique_ptr<ICallable> copy() override
+        {
+            return xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(m_functor).release());
+        }
+
+        Functor m_functor;
+    };
+
+    xsapi_unique_ptr<ICallable> m_callable;
+};
+
 struct xsapi_singleton
 {
     xsapi_singleton();
@@ -220,8 +426,8 @@ struct xsapi_singleton
 
 #if !TV_API
     // from System\user_impl.cpp
-    std::unordered_map<function_context, std::function<void(const system::sign_out_completed_event_args&)>> m_signOutCompletedHandlers;
-    std::unordered_map<function_context, std::function<void(const string_t&)>> m_signInCompletedHandlers;
+    std::unordered_map<function_context, xbox_live_callback<const system::sign_out_completed_event_args&>> m_signOutCompletedHandlers;
+    std::unordered_map<function_context, xbox_live_callback<const xsapi_internal_string&>> m_signInCompletedHandlers;
     function_context m_signOutCompletedHandlerIndexer;
     function_context m_signInCompletedHandlerIndexer;
     std::mutex m_trackingUsersLock;
@@ -1291,212 +1497,6 @@ private:
 };
 
 static const uint64_t XSAPI_DEFAULT_TASKGROUP = 99;
-
-template<typename... Args>
-class xbox_live_callback
-{
-public:
-    xbox_live_callback() : m_callable(nullptr) {}
-    xbox_live_callback(nullptr_t) : m_callable(nullptr) {}
-
-    template <typename Functor>
-    xbox_live_callback(Functor functor)
-    {
-        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(functor).release());
-    }
-
-    xbox_live_callback(const xbox_live_callback& rhs)
-    {
-        *this = rhs;
-    }
-
-    xbox_live_callback(xbox_live_callback&& rhs)
-    {
-        *this = std::move(rhs);
-    }
-
-    template <typename Functor>
-    xbox_live_callback& operator=(Functor f)
-    {
-        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(f).release());
-        return *this;
-    }
-
-    xbox_live_callback& operator=(const xbox_live_callback& rhs)
-    {
-        if (rhs.m_callable != nullptr)
-        {
-            m_callable = rhs.m_callable->copy();
-        }
-        else
-        {
-            m_callable = nullptr;
-        }
-        return *this;
-    }
-
-    xbox_live_callback& operator=(xbox_live_callback&& rhs)
-    {
-        m_callable = std::move(rhs.m_callable);
-        return *this;
-    }
-
-    xbox_live_callback& operator=(nullptr_t)
-    {
-        m_callable = nullptr;
-        return *this;
-    }
-
-    void operator()(Args... args) const
-    {
-        if (m_callable != nullptr)
-        {
-            (*m_callable)(args...);
-        }
-    }
-
-    bool operator==(std::nullptr_t) noexcept
-    {
-        return m_callable == nullptr;
-    }
-
-    bool operator!=(std::nullptr_t) noexcept
-    {
-        return m_callable != nullptr;
-    }
-
-private:
-    struct ICallable
-    {
-        virtual ~ICallable() = default;
-        virtual void operator()(Args...) = 0;
-        virtual xsapi_unique_ptr<ICallable> copy() = 0;
-    };
-
-    template <typename Functor>
-    struct callable : public ICallable
-    {
-        callable(const Functor& functor) : m_functor(functor) { }
-        ~callable() override = default;
-
-        void operator()(Args... args) override
-        {
-            m_functor(args...);
-        }
-
-        xsapi_unique_ptr<ICallable> copy() override
-        {
-            return xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(m_functor).release());
-        }
-
-        Functor m_functor;
-    };
-
-    xsapi_unique_ptr<ICallable> m_callable;
-};
-
-template<>
-class xbox_live_callback<void>
-{
-public:
-    xbox_live_callback() : m_callable(nullptr) {}
-    xbox_live_callback(nullptr_t) : m_callable(nullptr) {}
-
-    template <typename Functor>
-    xbox_live_callback(Functor functor)
-    {
-        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(functor).release());
-    }
-
-    xbox_live_callback(const xbox_live_callback& rhs)
-    {
-        *this = rhs;
-    }
-
-    xbox_live_callback(xbox_live_callback&& rhs)
-    {
-        *this = std::move(rhs);
-    }
-
-    template <typename Functor>
-    xbox_live_callback& operator=(Functor f)
-    {
-        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(f).release());
-        return *this;
-    }
-
-    xbox_live_callback& operator=(const xbox_live_callback& rhs)
-    {
-        if (rhs.m_callable != nullptr)
-        {
-            m_callable = rhs.m_callable->copy();
-        }
-        else
-        {
-            m_callable = nullptr;
-        }
-        return *this;
-    }
-
-    xbox_live_callback& operator=(xbox_live_callback&& rhs)
-    {
-        m_callable = std::move(rhs.m_callable);
-        return *this;
-    }
-
-    xbox_live_callback& operator=(nullptr_t)
-    {
-        m_callable = nullptr;
-        return *this;
-    }
-
-    void operator()() const
-    {
-        if (m_callable != nullptr)
-        {
-            (*m_callable)();
-        }
-    }
-
-    bool operator==(std::nullptr_t) noexcept
-    {
-        return m_callable == nullptr;
-    }
-
-    bool operator!=(std::nullptr_t) noexcept
-    {
-        return m_callable != nullptr;
-    }
-
-private:
-    struct ICallable
-    {
-        virtual ~ICallable() = default;
-        virtual void operator()() = 0;
-        virtual xsapi_unique_ptr<ICallable> copy() = 0;
-    };
-
-    template <typename Functor>
-    struct callable : public ICallable
-    {
-        callable(const Functor& functor) : m_functor(functor) { }
-        ~callable() override = default;
-
-        void operator()() override
-        {
-            m_functor();
-        }
-
-        xsapi_unique_ptr<ICallable> copy() override
-        {
-            return xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(m_functor).release());
-        }
-
-        Functor m_functor;
-    };
-
-    xsapi_unique_ptr<ICallable> m_callable;
-};
 
 class buffer_allocator
 {

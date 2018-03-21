@@ -179,7 +179,7 @@ multiplayer_local_user_manager::add_user_to_xbox_live_context_to_map(
 {
     XSAPI_ASSERT(user != nullptr);
 
-    string_t xboxUserId = user_context::get_user_id(user);
+    string_t xboxUserId = utils::string_t_from_internal_string(user_context::get_user_id(user));
 
     bool isPrimary = m_localUserRequestMap.size() == 0 ? true : false;
 

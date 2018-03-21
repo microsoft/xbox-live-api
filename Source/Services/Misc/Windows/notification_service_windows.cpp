@@ -22,9 +22,9 @@ notification_service_windows::subscribe_to_notifications(
 {
     {
         std::lock_guard<std::mutex> guard(get_xsapi_singleton()->m_singletonLock);
-        if (m_userContexts.find(userContext->xbox_user_id()) == m_userContexts.end())
+        if (m_userContexts.find(utils::string_t_from_internal_string(userContext->xbox_user_id())) == m_userContexts.end())
         {
-            m_userContexts.emplace(std::make_pair(userContext->xbox_user_id(), userContext));
+            m_userContexts.emplace(std::make_pair(utils::string_t_from_internal_string(userContext->xbox_user_id()), userContext));
         }
         else
         {
@@ -137,7 +137,7 @@ notification_service_windows::on_push_notification_received(
                 auto contextItor = m_userContexts.find(xuid);
                 if (contextItor != m_userContexts.end() && contextItor->second != nullptr && contextItor->second->user() != nullptr)
                 {
-                    contextItor->second->refresh_token();
+                    contextItor->second->refresh_token(/* TODO */ XSAPI_DEFAULT_TASKGROUP, nullptr);
                 }
             }
         }

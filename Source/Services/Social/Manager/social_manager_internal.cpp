@@ -47,7 +47,7 @@ social_manager_internal::create_social_user_group_from_filters(
         return xbox_live_result<std::shared_ptr<xbox_social_user_group_internal>>(xbox_live_error_code::invalid_argument, "user is null");
     }
 
-    xsapi_internal_string ownerUserId = utils::internal_string_from_string_t(user_context::get_user_id(user));
+    xsapi_internal_string ownerUserId = user_context::get_user_id(user);
 
     if (m_localGraphs.find(ownerUserId) == m_localGraphs.end())
     {
@@ -107,7 +107,7 @@ social_manager_internal::create_social_user_group_from_list(
     }
 
     std::lock_guard<std::recursive_mutex> lock(m_socialMangerLock);
-    xsapi_internal_string ownerUserId = utils::internal_string_from_string_t(user_context::get_user_id(user));
+    auto ownerUserId = user_context::get_user_id(user);
 
     auto userGraph = m_localGraphs.find(ownerUserId);
     if (userGraph == m_localGraphs.end())
@@ -235,7 +235,7 @@ social_manager_internal::add_local_user(
         return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "user object is null");
     }
 
-    auto userString = utils::internal_string_from_string_t(user_context::get_user_id(user));
+    auto userString = user_context::get_user_id(user);
 
     {
         std::lock_guard<std::recursive_mutex> lock(m_socialMangerLock);
@@ -360,7 +360,7 @@ social_manager_internal::remove_local_user(
 
     std::lock_guard<std::recursive_mutex> lock(m_socialMangerLock);
 
-    auto xboxUserId = utils::internal_string_from_string_t(user_context::get_user_id(user));
+    auto xboxUserId = user_context::get_user_id(user);
     auto graphIter = m_localGraphs.find(xboxUserId);
     if (graphIter == m_localGraphs.end())
     {
@@ -386,8 +386,8 @@ social_manager_internal::remove_local_user(
     for (i = 0; i < m_localUserList.size(); ++i)
     {
         auto localUser = m_localUserList[i];
-        string_t userId = user_context::get_user_id(user);
-        string_t localUserId = user_context::get_user_id(localUser);
+        auto userId = user_context::get_user_id(user);
+        auto localUserId = user_context::get_user_id(localUser);
         if (utils::str_icmp(localUserId, userId) != 0)
         {
             userList.push_back(localUser);
@@ -463,7 +463,7 @@ xbox_live_result<void> social_manager_internal::update_social_user_group(
     auto diffUsers = socialGroup->update_users_in_group(users);
 
     auto localUser = socialGroup->local_user();
-    xsapi_internal_string xuid = utils::internal_string_from_string_t(user_context::get_user_id(localUser));
+    xsapi_internal_string xuid = user_context::get_user_id(localUser);
     m_localGraphs[xuid]->remove_users(diffUsers.removeGroup);
     std::weak_ptr<social_manager_internal> thisWeakPtr = shared_from_this();
 
@@ -500,7 +500,7 @@ social_manager_internal::set_rich_presence_polling_status(
 )
 {
     std::lock_guard<std::recursive_mutex> lock(m_socialMangerLock);
-    auto localGraphIter = m_localGraphs.find(utils::internal_string_from_string_t(user_context::get_user_id(user)));
+    auto localGraphIter = m_localGraphs.find(user_context::get_user_id(user));
     if (localGraphIter == m_localGraphs.end())
     {
         return xbox_live_result<void>(xbox_live_error_code::logic_error, "User not found in graph");
