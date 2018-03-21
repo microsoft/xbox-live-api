@@ -13,9 +13,11 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 class user_impl : public std::enable_shared_from_this<user_impl>
 {
 public:
-    virtual pplx::task<xbox_live_result<sign_in_result>> sign_in_impl(
+    virtual void sign_in_impl(
         _In_ bool showUI,
-        _In_ bool forceRefresh
+        _In_ bool forceRefresh,
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<xbox_live_result<sign_in_result>> callback
         ) = 0;
 
 #if XSAPI_A
@@ -27,7 +29,7 @@ public:
 #endif
 
     virtual pplx::task<xbox_live_result<void>> sign_in_impl(
-        _In_ const string_t& userDelegationTicket,
+        _In_ const xsapi_internal_string& userDelegationTicket,
         _In_ bool forceRefresh
         )
     { 
@@ -36,109 +38,74 @@ public:
         return pplx::task_from_exception<xbox::services::xbox_live_result<void>>(std::exception());
     }
 
-    const string_t& xbox_user_id() { return m_xboxUserId; }
-    const string_t& gamertag() { return m_gamertag; }
-    const string_t& age_group() { return m_ageGroup; }
-    const string_t& privileges() { return m_privileges; }
+    const xsapi_internal_string& xbox_user_id() { return m_xboxUserId; }
+    const xsapi_internal_string& gamertag() { return m_gamertag; }
+    const xsapi_internal_string& age_group() { return m_ageGroup; }
+    const xsapi_internal_string& privileges() { return m_privileges; }
 
 #if XSAPI_U
-    const string_t& user_settings_restrictions() { return m_userSettingsRestrictions; }
-    const string_t& user_enforcement_restrictions() { return m_userEnforcementRestrictions; }
-    const string_t& user_title_restrictions() { return m_userTitleRestrictions; }
+    const xsapi_internal_string& user_settings_restrictions() { return m_userSettingsRestrictions; }
+    const xsapi_internal_string& user_enforcement_restrictions() { return m_userEnforcementRestrictions; }
+    const xsapi_internal_string& user_title_restrictions() { return m_userTitleRestrictions; }
     virtual void clear_token_cache() = 0;
     void set_sign_in_options(std::shared_ptr<xbox_sign_in_options> options) { m_signInOptions = options; }
 #endif
 
-    const string_t& web_account_id() { return m_webAccountId; }
+    const xsapi_internal_string& web_account_id() { return m_webAccountId; }
     std::shared_ptr<auth_config> get_auth_config() { return m_authConfig; }
     const user_creation_context creation_context() { return m_creationContext;  }
 
 #if UNIT_TEST_SERVICES
-    void _Set_xbox_user_id(const string_t& xboxUserId) { m_xboxUserId = xboxUserId; }
+    void _Set_xbox_user_id(const xsapi_internal_string& xboxUserId) { m_xboxUserId = xboxUserId; }
 #endif
 
-    pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
-    get_token_and_signature(
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& url,
-        _In_ const string_t& headers
-        );
-
-    pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
-    get_token_and_signature(
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& url,
-        _In_ const string_t& headers,
-        _In_ const string_t& requestBodyString
-        );
-
-    pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
-    get_token_and_signature_array(
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& url,
-        _In_ const string_t& headers,
-        _In_ const std::vector<unsigned char>& requestBodyArray
+    void get_token_and_signature(
+        _In_ const xsapi_internal_string& httpMethod,
+        _In_ const xsapi_internal_string& url,
+        _In_ const xsapi_internal_string& headers,
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
         );
 
     void get_token_and_signature(
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& url,
-        _In_ const string_t& headers,
+        _In_ const xsapi_internal_string& httpMethod,
+        _In_ const xsapi_internal_string& url,
+        _In_ const xsapi_internal_string& headers,
+        _In_ const xsapi_internal_string& requestBodyString,
         _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
         );
 
     void get_token_and_signature(
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& url,
-        _In_ const string_t& headers,
-        _In_ const string_t& requestBodyString,
+        _In_ const xsapi_internal_string& httpMethod,
+        _In_ const xsapi_internal_string& url,
+        _In_ const xsapi_internal_string& headers,
+        _In_ const xsapi_internal_vector<unsigned char>& requestBodyArray,
         _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
-        );
-
-    void get_token_and_signature(
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& url,
-        _In_ const string_t& headers,
-        _In_ const std::vector<unsigned char>& requestBodyArray,
-        _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
         );
 
     bool is_signed_in() const;
     void set_user_pointer(_In_ std::shared_ptr<system::xbox_live_user> user);
-    void set_title_telemetry_session_id(_In_ const string_t& sessionId);
-    const string_t& title_telemetry_session_id();
+    void set_title_telemetry_session_id(_In_ const xsapi_internal_string& sessionId);
+    const xsapi_internal_string& title_telemetry_session_id();
 
-    virtual pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
-    internal_get_token_and_signature(
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& url,
-        _In_ const string_t& endpointForNsal,
-        _In_ const string_t& headers,
-        _In_ const std::vector<unsigned char>& bytes,
-        _In_ bool promptForCredentialsIfNeeded,
-        _In_ bool forceRefresh
-        ) = 0;
-
-    // TODO remove ppl version, change to xsapi_internal_strings
     virtual void internal_get_token_and_signature(
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& url,
-        _In_ const string_t& endpointForNsal,
-        _In_ const string_t& headers,
-        _In_ const std::vector<unsigned char>& bytes,
+        _In_ const xsapi_internal_string& httpMethod,
+        _In_ const xsapi_internal_string& url,
+        _In_ const xsapi_internal_string& endpointForNsal,
+        _In_ const xsapi_internal_string& headers,
+        _In_ const xsapi_internal_vector<unsigned char>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh,
         _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
         ) = 0;
 
-    static function_context add_sign_in_completed_handler(_In_ std::function<void(const string_t&)> handler);
+    static function_context add_sign_in_completed_handler(_In_ xbox_live_callback<const xsapi_internal_string&> handler);
     static void remove_sign_in_completed_handler(_In_ function_context context);
 
-    static function_context add_sign_out_completed_handler(_In_ std::function<void(const sign_out_completed_event_args&)> handler);
+    static function_context add_sign_out_completed_handler(_In_ xbox_live_callback<const sign_out_completed_event_args&> handler);
     static void remove_sign_out_completed_handler(_In_ function_context context);
 
 protected:
@@ -146,31 +113,31 @@ protected:
 
     void user_signed_out();
     void user_signed_in(
-        _In_ string_t xboxUserId,
-        _In_ string_t gamertag,
-        _In_ string_t ageGroup,
-        _In_ string_t privileges,
+        _In_ xsapi_internal_string xboxUserId,
+        _In_ xsapi_internal_string gamertag,
+        _In_ xsapi_internal_string ageGroup,
+        _In_ xsapi_internal_string privileges,
 #if XSAPI_U
-        _In_ string_t userSettingsRestrictions,
-        _In_ string_t userEnforcementRestrictions,
-        _In_ string_t userTitleRestrictions,
+        _In_ xsapi_internal_string userSettingsRestrictions,
+        _In_ xsapi_internal_string userEnforcementRestrictions,
+        _In_ xsapi_internal_string userTitleRestrictions,
 #endif
-        _In_ string_t accountId
+        _In_ xsapi_internal_string accountId
         );
 
-    string_t m_xboxUserId;
-    string_t m_gamertag;
-    string_t m_ageGroup;
-    string_t m_privileges;
+    xsapi_internal_string m_xboxUserId;
+    xsapi_internal_string m_gamertag;
+    xsapi_internal_string m_ageGroup;
+    xsapi_internal_string m_privileges;
 #if XSAPI_U
-    string_t m_userSettingsRestrictions;
-    string_t m_userEnforcementRestrictions;
-    string_t m_userTitleRestrictions;
+    xsapi_internal_string m_userSettingsRestrictions;
+    xsapi_internal_string m_userEnforcementRestrictions;
+    xsapi_internal_string m_userTitleRestrictions;
     std::shared_ptr<xbox_sign_in_options> m_signInOptions;
 #endif
-    string_t m_webAccountId;
-    string_t m_cid;
-    string_t m_titleTelemetrySessionId;
+    xsapi_internal_string m_webAccountId;
+    xsapi_internal_string m_cid;
+    xsapi_internal_string m_titleTelemetrySessionId;
     bool m_isSignedIn;
     user_creation_context m_creationContext;
     std::weak_ptr<system::xbox_live_user> m_weakUserPtr;
@@ -184,15 +151,11 @@ protected:
 class user_impl_idp : public user_impl
 {
 public:
-    pplx::task<xbox::services::xbox_live_result<sign_in_result>> sign_in_impl(
+    void sign_in_impl(
         _In_ bool showUI,
-        _In_ bool forceRefresh
-        ) override;
-
-    // Not supported for user_impl_idp
-    pplx::task<xbox::services::xbox_live_result<void>> sign_in_impl(
-        _In_ const string_t& userDelegationTicket,
-        _In_ bool forceRefresh
+        _In_ bool forceRefresh,
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<xbox_live_result<sign_in_result>> callback
         ) override;
 
     user_impl_idp(
@@ -201,52 +164,40 @@ public:
 #endif
         );
 
-    pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
-    internal_get_token_and_signature(
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& url,
-        _In_ const string_t& endpointForNsal,
-        _In_ const string_t& headers,
-        _In_ const std::vector<unsigned char>& bytes,
-        _In_ bool promptForCredentialsIfNeeded,
-        _In_ bool forceRefresh
-        ) override;
-
-    // TODO delete ppl version eventually
     void internal_get_token_and_signature(
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& url,
-        _In_ const string_t& endpointForNsal,
-        _In_ const string_t& headers,
-        _In_ const std::vector<unsigned char>& bytes,
+        _In_ const xsapi_internal_string& httpMethod,
+        _In_ const xsapi_internal_string& url,
+        _In_ const xsapi_internal_string& endpointForNsal,
+        _In_ const xsapi_internal_string& headers,
+        _In_ const xsapi_internal_vector<unsigned char>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh,
         _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
         ) override;
 
 private:
 
     void user_signed_out();
     void user_signed_in(
-        _In_ string_t xboxUserId,
-        _In_ string_t gamertag,
-        _In_ string_t ageGroup,
-        _In_ string_t privileges,
-        _In_ string_t accountId
+        _In_ xsapi_internal_string xboxUserId,
+        _In_ xsapi_internal_string gamertag,
+        _In_ xsapi_internal_string ageGroup,
+        _In_ xsapi_internal_string privileges,
+        _In_ xsapi_internal_string accountId
         );
 
     void check_user_signed_out();
 
-    pplx::task<void> initialize_provider();
+    void initialize_provider(xbox_live_callback<void> callback);
 
     // sync version of get internal_get_token_and_signature
-    xbox::services::xbox_live_result<token_and_signature_result>
+    xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>
     internal_get_token_and_signature_helper(
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& url,
-        _In_ const string_t& headers,
-        _In_ const std::vector<uint8_t>& bytes,
+        _In_ const xsapi_internal_string& httpMethod,
+        _In_ const xsapi_internal_string& url,
+        _In_ const xsapi_internal_string& headers,
+        _In_ const xsapi_internal_vector<uint8_t>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh
         );
@@ -259,7 +210,7 @@ private:
         _In_ Windows::Security::Credentials::WebAccount^ webAccount
         );
 
-    xbox_live_result<token_and_signature_result>
+    xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>
     convert_web_token_request_result(
         _In_ Windows::Security::Authentication::Web::Core::WebTokenRequestResult^ tokenResult
         );
@@ -298,13 +249,13 @@ struct get_token_and_signature_context
 {
     get_token_and_signature_context(
         _In_ std::shared_ptr<user_impl> _userImpl,
-        _In_ const string_t& _httpMethod,
-        _In_ const string_t& _url,
-        _In_ const string_t& _headers,
-        _In_ const std::vector<unsigned char>& _bytes,
+        _In_ const xsapi_internal_string& _httpMethod,
+        _In_ const xsapi_internal_string& _url,
+        _In_ const xsapi_internal_string& _headers,
+        _In_ const xsapi_internal_vector<unsigned char>& _bytes,
         _In_ bool _promptForCredentialsIfNeeded,
         _In_ bool _forceRefresh,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> _callback
+        _In_ xbox_live_callback<xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> _callback
         ) :
         userImpl(_userImpl),
         httpMethod(_httpMethod),
@@ -318,14 +269,14 @@ struct get_token_and_signature_context
     }
 
     std::shared_ptr<user_impl> userImpl; 
-    string_t httpMethod;
-    string_t url;
-    string_t headers;
-    std::vector<unsigned char> bytes;
+    xsapi_internal_string httpMethod;
+    xsapi_internal_string url;
+    xsapi_internal_string headers;
+    xsapi_internal_vector<unsigned char> bytes;
     bool promptForCredentialsIfNeeded;
     bool forceRefresh;
-    xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback;
-    xbox_live_result<token_and_signature_result> result;
+    xbox_live_callback<xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback;
+    xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

@@ -33,7 +33,7 @@ simplified_stats_service::update_stats_value_document(
     statsDocToPost.set_revision_from_clock();
 
     string_t pathAndQuery = pathandquery_simplified_stats_subpath(
-        m_userContext->xbox_user_id(),
+        utils::string_t_from_internal_string(m_userContext->xbox_user_id()),
         m_appConfig->scid(),
         false
         );
@@ -63,7 +63,7 @@ pplx::task<xbox_live_result<stats_value_document>>
 simplified_stats_service::get_stats_value_document()
 {
     string_t pathAndQuery = pathandquery_simplified_stats_subpath(
-        m_userContext->xbox_user_id(),
+        utils::string_t_from_internal_string(m_userContext->xbox_user_id()),
         m_appConfig->scid(),
         false
         );

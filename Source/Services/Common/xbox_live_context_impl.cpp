@@ -190,10 +190,10 @@ void xbox_live_context_impl::init()
     if (m_userContext->user() != nullptr)
     {
         m_signInContext = m_userContext->user()->_User_impl()->add_sign_in_completed_handler(
-        [thisWeakPtr](const string_t& xboxUserId)
+        [thisWeakPtr](const xsapi_internal_string& xboxUserId)
         {
             std::shared_ptr<xbox_live_context_impl> pThis(thisWeakPtr.lock());
-            if (pThis != nullptr && utils::str_icmp(pThis->xbox_live_user_id(), utils::internal_string_from_string_t(xboxUserId)) == 0)
+            if (pThis != nullptr && utils::str_icmp(pThis->xbox_live_user_id(), xboxUserId) == 0)
             {
                 presence::presence_writer::get_presence_writer_singleton()->start_writer(pThis->m_presenceService);
             }
@@ -221,7 +221,7 @@ std::shared_ptr<user_context> xbox_live_context_impl::user_context()
 
 xsapi_internal_string xbox_live_context_impl::xbox_live_user_id()
 {
-    return utils::internal_string_from_string_t(m_userContext->xbox_user_id());
+    return m_userContext->xbox_user_id();
 }
 
 std::shared_ptr<social::profile_service_impl>

@@ -30,10 +30,10 @@ user_context::user_context(_In_ Windows::Xbox::System::User^ user) :
     XSAPI_ASSERT(m_user != nullptr);
     if (m_user == nullptr)
     {
-        m_xboxUserId = string_t();
+        m_xboxUserId = xsapi_internal_string();
     }
 
-    m_xboxUserId = m_user->XboxUserId->Data();
+    m_xboxUserId = utils::internal_string_from_char_t(m_user->XboxUserId->Data());
 }
 
 Windows::Xbox::System::User^ user_context::user() const
@@ -42,10 +42,10 @@ Windows::Xbox::System::User^ user_context::user() const
 }
 
 void user_context::get_auth_result(
-    _In_ const string_t& httpMethod,
-    _In_ const string_t& url,
-    _In_ const string_t& headers,
-    _In_ const string_t& requestBodyString,
+    _In_ const xsapi_internal_string& httpMethod,
+    _In_ const xsapi_internal_string& url,
+    _In_ const xsapi_internal_string& headers,
+    _In_ const xsapi_internal_string& requestBodyString,
     _In_ bool allUsersAuthRequired,
     _In_ uint64_t taskGroupId,
     _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
@@ -53,10 +53,10 @@ void user_context::get_auth_result(
 {
     UNREFERENCED_PARAMETER(taskGroupId);
 
-    auto platformHttp = ref new String(httpMethod.c_str());
-    auto platformUrl = ref new String(url.c_str());
-    auto platformHeaders = ref new String(headers.c_str());
-    auto platformRequestBody = ref new String(requestBodyString.c_str());
+    auto platformHttp = PLATFORM_STRING_FROM_INTERNAL_STRING(httpMethod);
+    auto platformUrl = PLATFORM_STRING_FROM_INTERNAL_STRING(url);
+    auto platformHeaders = PLATFORM_STRING_FROM_INTERNAL_STRING(headers);
+    auto platformRequestBody = PLATFORM_STRING_FROM_INTERNAL_STRING(requestBodyString);
 
     IAsyncOperation<GetTokenAndSignatureResult^>^ asyncOp;
 
@@ -108,7 +108,10 @@ void user_context::get_auth_result(
         try
         {
             auto tokenAndSig = asyncInfo->GetResults();
-            user_context_auth_result userContextResult(tokenAndSig->Token->ToString()->Data(), tokenAndSig->Signature->ToString()->Data());
+            user_context_auth_result userContextResult(
+                utils::internal_string_from_char_t(tokenAndSig->Token->ToString()->Data()), 
+                utils::internal_string_from_char_t(tokenAndSig->Signature->ToString()->Data())
+                );
             callback(xbox_live_result<user_context_auth_result>(userContextResult));
         }
         catch (Exception^ ex)
@@ -120,15 +123,17 @@ void user_context::get_auth_result(
 }
 
 void user_context::get_auth_result(
-    _In_ const string_t& httpMethod,
-    _In_ const string_t& url,
-    _In_ const string_t& headers,
-    _In_ const std::vector<unsigned char>& requestBodyVector,
+    _In_ const xsapi_internal_string& httpMethod,
+    _In_ const xsapi_internal_string& url,
+    _In_ const xsapi_internal_string& headers,
+    _In_ const xsapi_internal_vector<unsigned char>& requestBodyVector,
     _In_ bool allUsersAuthRequired,
     _In_ uint64_t taskGroupId,
     _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
     )
 {
+    UNREFERENCED_PARAMETER(taskGroupId);
+
     auto byteArr = ref new Array<unsigned char, 1U>(static_cast<uint32_t>(requestBodyVector.size()));
     memcpy(&byteArr->Data[0], &requestBodyVector[0], requestBodyVector.size());
     IAsyncOperation<GetTokenAndSignatureResult^>^ asyncOp;
@@ -136,18 +141,18 @@ void user_context::get_auth_result(
     if (allUsersAuthRequired)
     {
         asyncOp = m_user->GetTokenAndSignatureForAllUsersAsync(
-            ref new String(httpMethod.c_str()),
-            ref new String(url.c_str()),
-            ref new String(headers.c_str()),
+            PLATFORM_STRING_FROM_INTERNAL_STRING(httpMethod),
+            PLATFORM_STRING_FROM_INTERNAL_STRING(url),
+            PLATFORM_STRING_FROM_INTERNAL_STRING(headers),
             byteArr
             );
     }
     else
     {
         asyncOp = m_user->GetTokenAndSignatureAsync(
-            ref new String(httpMethod.c_str()),
-            ref new String(url.c_str()),
-            ref new String(headers.c_str()),
+            PLATFORM_STRING_FROM_INTERNAL_STRING(httpMethod),
+            PLATFORM_STRING_FROM_INTERNAL_STRING(url),
+            PLATFORM_STRING_FROM_INTERNAL_STRING(headers),
             byteArr
             );
     }
@@ -159,7 +164,10 @@ void user_context::get_auth_result(
         try
         {
             auto tokenAndSig = asyncInfo->GetResults();
-            user_context_auth_result userContextResult(tokenAndSig->Token->ToString()->Data(), tokenAndSig->Signature->ToString()->Data());
+            user_context_auth_result userContextResult(
+                utils::internal_string_from_char_t(tokenAndSig->Token->ToString()->Data()), 
+                utils::internal_string_from_char_t(tokenAndSig->Signature->ToString()->Data())
+                );
             callback(xbox_live_result<user_context_auth_result>(userContextResult));
         }
         catch (Exception^ ex)
@@ -170,148 +178,14 @@ void user_context::get_auth_result(
     });
 }
 
-pplx::task<xbox_live_result<user_context_auth_result>> user_context::get_auth_result(
-    _In_ const string_t& httpMethod,
-    _In_ const string_t& url,
-    _In_ const string_t& headers,
-    _In_ const string_t& requestBodyString,
-    _In_ bool allUsersAuthRequired
-    )
-{
-    auto platformHttp = ref new String(httpMethod.c_str());
-    auto platformUrl = ref new String(url.c_str());
-    auto platformHeaders = ref new String(headers.c_str());
-    auto platformRequestBody = ref new String(requestBodyString.c_str());
-    pplx::task<Windows::Xbox::System::GetTokenAndSignatureResult^> asyncTask;
-
-    if(allUsersAuthRequired)
-    {
-        if(platformRequestBody == nullptr)
-        {
-            asyncTask = pplx::create_task([this, platformHttp, platformUrl, platformHeaders]()
-            {
-                return m_user->GetTokenAndSignatureForAllUsersAsync(
-                    platformHttp,
-                    platformUrl,
-                    platformHeaders
-                );
-            });
-        }
-        else
-        {
-            asyncTask = pplx::create_task([this, platformHttp, platformUrl, platformHeaders, platformRequestBody]()
-            {
-                return m_user->GetTokenAndSignatureForAllUsersAsync(
-                    platformHttp,
-                    platformUrl,
-                    platformHeaders,
-                    platformRequestBody
-                );
-            });
-        }
-    }
-    else
-    {
-        if(platformRequestBody == nullptr)
-        {
-            asyncTask = pplx::create_task([this, platformHttp, platformUrl, platformHeaders]()
-            {
-                return m_user->GetTokenAndSignatureAsync(
-                    platformHttp,
-                    platformUrl,
-                    platformHeaders
-                );
-            });
-        }
-        else
-        {
-            asyncTask = pplx::create_task([this, platformHttp, platformUrl, platformHeaders, platformRequestBody]()
-            {
-                return m_user->GetTokenAndSignatureAsync(
-                    platformHttp,
-                    platformUrl,
-                    platformHeaders,
-                    platformRequestBody
-                );
-            });
-        }
-    }
-
-    return asyncTask
-    .then([](pplx::task<Windows::Xbox::System::GetTokenAndSignatureResult^> result) 
-    {
-        try
-        {
-            auto tokenAndSig = result.get();
-            user_context_auth_result userContextResult( tokenAndSig->Token->ToString()->Data(), tokenAndSig->Signature->ToString()->Data() );
-            return xbox_live_result<user_context_auth_result>(userContextResult);
-        }
-        catch(Exception^ ex)
-        {
-            xbox_live_error_code err = utils::convert_exception_to_xbox_live_error_code();
-            return xbox_live_result<user_context_auth_result>(err, "Failed getting auth token");
-        }
-    }, pplx::task_continuation_context::use_arbitrary());
-}
-
-pplx::task<xbox_live_result<user_context_auth_result>> user_context::get_auth_result(
-    _In_ const string_t& httpMethod,
-    _In_ const string_t& url,
-    _In_ const string_t& headers,
-    _In_ const std::vector<unsigned char>& requestBody,
-    _In_ bool allUsersAuthRequired
-    )
-{
-    auto byteArr = ref new Array<unsigned char, 1U>(static_cast<uint32_t>(requestBody.size()));
-    memcpy(&byteArr->Data[0], &requestBody[0], requestBody.size());
-    pplx::task<Windows::Xbox::System::GetTokenAndSignatureResult^> asyncTask;
-
-    if(allUsersAuthRequired)
-    {
-        asyncTask = pplx::create_task([this, httpMethod, url, headers, byteArr]()
-        {
-            return m_user->GetTokenAndSignatureForAllUsersAsync(
-                ref new String(httpMethod.c_str()),
-                ref new String(url.c_str()),
-                ref new String(headers.c_str()),
-                byteArr
-            );
-        });
-    }
-    else
-    {
-        asyncTask = pplx::create_task([this, httpMethod, url, headers, byteArr]()
-        {
-            return m_user->GetTokenAndSignatureAsync(
-                ref new String(httpMethod.c_str()),
-                ref new String(url.c_str()),
-                ref new String(headers.c_str()),
-                byteArr
-            );
-        });
-    }
-
-    return asyncTask
-    .then([](pplx::task<Windows::Xbox::System::GetTokenAndSignatureResult^> result) 
-    {
-        try
-        {
-            auto tokenAndSig = result.get();
-            user_context_auth_result userContextResult( tokenAndSig->Token->ToString()->Data(), tokenAndSig->Signature->ToString()->Data() );
-            return xbox_live_result<user_context_auth_result>(userContextResult);
-        }
-        catch(Exception^ ex)
-        {
-            xbox_live_error_code err = utils::convert_exception_to_xbox_live_error_code();
-            return xbox_live_result<user_context_auth_result>(err, "Failed getting auth token");
-        }
-    }, pplx::task_continuation_context::use_arbitrary());
-}
-
 // Console OS will auto refresh tokens, we don't need to do anything here.
-pplx::task<xbox_live_result<void>> user_context::refresh_token()
+void user_context::refresh_token(
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<xbox_live_result<void>> callback
+    )
 {
-    return pplx::task_from_result(xbox_live_result<void>());
+    UNREFERENCED_PARAMETER(taskGroupId);
+    callback(xbox_live_result<void>());
 }
 
 bool user_context::is_signed_in() const

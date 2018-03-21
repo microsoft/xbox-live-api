@@ -542,16 +542,16 @@ title_callable_ui::_Get_gaming_privilege_scope_policy(
 {
     auto localConfig = xbox_system_factory::get_factory()->create_local_config();
     auth_config authConfig(
-        utils::string_t_from_internal_string(localConfig->sandbox()),
-        utils::string_t_from_internal_string(localConfig->environment_prefix()),
-        utils::string_t_from_internal_string(localConfig->environment()),
+        localConfig->sandbox(),
+        localConfig->environment_prefix(),
+        localConfig->environment(),
         localConfig->use_first_party_token(),
         localConfig->is_creators_title(),
-        utils::string_t_from_internal_string(localConfig->scope())
+        localConfig->scope()
         );
 
-    scope = ref new Platform::String(authConfig.rps_ticket_service().c_str());
-    policy = ref new Platform::String(authConfig.rps_ticket_policy().c_str());
+    scope = PLATFORM_STRING_FROM_INTERNAL_STRING(authConfig.rps_ticket_service());
+    policy = PLATFORM_STRING_FROM_INTERNAL_STRING(authConfig.rps_ticket_policy());
 }
 
 xbox::services::xbox_live_result<bool>

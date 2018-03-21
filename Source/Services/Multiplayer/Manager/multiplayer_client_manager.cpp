@@ -296,7 +296,7 @@ multiplayer_client_manager::join_lobby(
     bool invitedUserFound = false;
     for (auto& user: users)
     {
-        if (utils::str_icmp(invitedXuid, user_context::get_user_id(user)) == 0)
+        if (utils::str_icmp(invitedXuid, utils::string_t_from_internal_string(user_context::get_user_id(user))) == 0)
         {
             invitedUserFound = true;
             break;

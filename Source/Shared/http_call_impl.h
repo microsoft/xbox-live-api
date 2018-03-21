@@ -184,6 +184,12 @@ public:
         _In_ const web::http::http_request& httpRequest
         ) = 0;
 
+    virtual xbox_live_result<void> get_response(
+        _In_ http_call_response_body_type httpCallResponseBodyType,
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
+        ) = 0;
+
     virtual xbox_live_result<void> get_response_with_auth(
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
@@ -195,6 +201,11 @@ public:
     virtual const http_call_request_message_internal& request_body() const = 0;
 
     virtual void set_request_body(_In_ const xsapi_internal_string& value) = 0;
+
+    virtual void set_custom_header(
+        _In_ const xsapi_internal_string& headerName,
+        _In_ const xsapi_internal_string& headerValue
+        ) = 0;
 
 #if XSAPI_U
     /// <summary>
@@ -296,6 +307,12 @@ public:
         _In_ http_call_response_body_type httpCallResponseBodyType
         ) override;
 
+    xbox_live_result<void> get_response(
+        _In_ http_call_response_body_type httpCallResponseBodyType,
+        _In_ uint64_t taskGroupId,
+        _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
+        ) override;
+
     pplx::task<std::shared_ptr<http_call_response>> get_response(
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ const web::http::http_request& httpRequest
@@ -350,20 +367,15 @@ public:
         _In_ const string_t& headerValue
         ) override;
 
+    void set_custom_header(
+        _In_ const xsapi_internal_string& headerName,
+        _In_ const xsapi_internal_string& headerValue
+        ) override;
+
 private:
     NO_COPY_AND_ASSIGN(http_call_impl);
 
     std::shared_ptr<http_call_data> m_httpCallData;
-
-    static bool should_retry(
-        _In_ const std::shared_ptr<http_call_response_internal>& httpCallResponse,
-        _In_ const std::shared_ptr<http_call_data>& httpCallData,
-        _In_ xbox_live_error_code httpNetworkError
-        );
-
-    static bool handle_unauthorized_error(
-        _In_ const std::shared_ptr<http_call_data>& httpCallData
-        );
 
     virtual xbox_live_result<void> internal_get_response_with_auth(
         _In_ bool allUsersAuthRequired
@@ -384,11 +396,6 @@ private:
 
     static xbox::services::xbox_live_error_code get_xbox_live_error_code_from_http_status(
         _In_ uint32_t statusCode
-        );
-
-    static bool should_fast_fail(
-        _In_ const http_retry_after_api_state& apiState,
-        _In_ const std::shared_ptr<http_call_data>& httpCallData
         );
 
     static pplx::task<std::shared_ptr<http_call_response>> handle_fast_fail(

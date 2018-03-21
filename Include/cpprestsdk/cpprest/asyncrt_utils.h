@@ -153,6 +153,11 @@ namespace conversions
     /// <summary>
     /// Encode the given byte array into a base64 string
     /// </summary>
+    _ASYNCRTIMP utility::string_t __cdecl to_base64(const unsigned char* data, size_t dataSize);
+
+    /// <summary>
+    /// Encode the given byte array into a base64 string
+    /// </summary>
     _ASYNCRTIMP utility::string_t __cdecl to_base64(const std::vector<unsigned char>& data);
 
     /// <summary>

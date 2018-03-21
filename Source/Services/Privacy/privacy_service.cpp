@@ -84,7 +84,7 @@ privacy_service::get_avoid_or_mute_list(
     _In_ const string_t& subPathName
     )
 {
-    string_t xboxUserId = m_userContext->xbox_user_id();
+    string_t xboxUserId = utils::string_t_from_internal_string(m_userContext->xbox_user_id());
     string_t subPathAndQuery = avoid_mute_list_sub_path(xboxUserId, subPathName);
 
     std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
@@ -199,7 +199,7 @@ privacy_service::check_permission_with_target_user(
     RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(permissionId, permission_check_result, "PermissionID is empty");
     RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(targetXboxUserId, permission_check_result, "Target Xbox User Id is empty");
 
-    string_t xboxUserId = m_userContext->xbox_user_id();
+    string_t xboxUserId = utils::string_t_from_internal_string(m_userContext->xbox_user_id());
     string_t subpathAndQuery = permission_validate_sub_path(xboxUserId, permissionId, targetXboxUserId);
 
     std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
@@ -238,7 +238,7 @@ privacy_service::check_multiple_permissions_with_multiple_target_users(
     RETURN_TASK_CPP_INVALIDARGUMENT_IF(permissionIds.empty(), std::vector<multiple_permissions_check_result>, "Permission Ids are empty");
     RETURN_TASK_CPP_INVALIDARGUMENT_IF(targetXboxUserIds.empty(), std::vector<multiple_permissions_check_result>, "Target Xbox User Ids are empty");
 
-    string_t xboxUserId = m_userContext->xbox_user_id();
+    string_t xboxUserId = utils::string_t_from_internal_string(m_userContext->xbox_user_id());
     web::uri subpathAndQuery = permission_batch_validate_sub_path(xboxUserId);
 
     // Set request body to something like:

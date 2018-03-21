@@ -69,10 +69,8 @@ presence_service_internal::set_presence(
     _In_ xbox_live_callback<xbox_live_result<uint32_t>> callback
     )
 {
-    xsapi_internal_string xboxUserId = utils::internal_string_from_string_t(m_userContext->xbox_user_id());
-
     xsapi_internal_string pathAndQuery = set_presence_sub_path(
-        xboxUserId
+        m_userContext->xbox_user_id()
         );
 
     std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call(
@@ -477,10 +475,9 @@ presence_service_internal::get_presence_for_social_group(
     )
 {
     RETURN_CPP_INVALIDARGUMENT_IF(socialGroup.empty(), void, "socialGroup is empty");
-    xsapi_internal_string xboxUserId = utils::internal_string_from_string_t(m_userContext->xbox_user_id());
 
     xsapi_internal_string pathAndQuery = get_presence_for_social_group_subpath(
-        xboxUserId,
+        m_userContext->xbox_user_id(),
         socialGroup
         );
 

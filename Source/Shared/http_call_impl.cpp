@@ -108,20 +108,31 @@ http_call_impl::get_response(
     _In_ http_call_response_body_type httpCallResponseBodyType
     )
 {
-    m_httpCallData->httpCallResponseBodyType = httpCallResponseBodyType;
-    m_httpCallData->taskGroupId = XSAPI_DEFAULT_TASKGROUP;
-    add_default_headers_if_needed(m_httpCallData);
-
     pplx::task_completion_event<std::shared_ptr<http_call_response>> tce;
-    pplx::task<std::shared_ptr<http_call_response>> task(tce);
-    xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback([tce](std::shared_ptr<http_call_response_internal> response)
+    
+    get_response(httpCallResponseBodyType, XSAPI_DEFAULT_TASKGROUP,
+        [tce](std::shared_ptr<http_call_response_internal> response)
     {
         tce.set(std::make_shared<http_call_response>(response));
     });
+    return pplx::task<std::shared_ptr<http_call_response>>(tce);
+}
+
+xbox_live_result<void> 
+http_call_impl::get_response(
+    _In_ http_call_response_body_type httpCallResponseBodyType,
+    _In_ uint64_t taskGroupId,
+    _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
+    )
+{
+    m_httpCallData->httpCallResponseBodyType = httpCallResponseBodyType;
+    m_httpCallData->taskGroupId = taskGroupId;
     m_httpCallData->callback = callback;
 
+    add_default_headers_if_needed(m_httpCallData);
+
     internal_get_response(m_httpCallData);
-    return task;
+    return xbox_live_result<void>();
 }
 
 pplx::task<std::shared_ptr<http_call_response>>
@@ -341,12 +352,12 @@ xbox_live_result<void> http_call_impl::internal_get_response_with_auth(
         const auto& authResult = result.payload();
         if (!authResult.token().empty())
         {
-            add_header(httpCallData, AUTH_HEADER, utils::internal_string_from_string_t(authResult.token()));
+            add_header(httpCallData, AUTH_HEADER, authResult.token());
         }
 
         if (!authResult.signature().empty())
         {
-            add_header(httpCallData, SIG_HEADER, utils::internal_string_from_string_t(authResult.signature()));
+            add_header(httpCallData, SIG_HEADER, authResult.signature());
         }
 
         internal_get_response(httpCallData);
@@ -355,10 +366,10 @@ xbox_live_result<void> http_call_impl::internal_get_response_with_auth(
     if (m_httpCallData->requestBody.get_http_request_message_type() == http_request_message_type::vector_message)
     {
         m_httpCallData->userContext->get_auth_result(
-            utils::string_t_from_internal_string(m_httpCallData->httpMethod),
-            utils::string_t_from_internal_string(m_httpCallData->fullUrl),
-            utils::string_t_from_internal_string(utils::headers_to_string(m_httpCallData->requestHeaders)),
-            utils::std_vector_from_internal_vector<unsigned char>(m_httpCallData->requestBody.request_message_vector()),
+            m_httpCallData->httpMethod,
+            m_httpCallData->fullUrl,
+            utils::headers_to_string(m_httpCallData->requestHeaders),
+            m_httpCallData->requestBody.request_message_vector(),
             allUsersAuthRequired,
             m_httpCallData->taskGroupId,
             callback
@@ -367,10 +378,10 @@ xbox_live_result<void> http_call_impl::internal_get_response_with_auth(
     else
     {
         m_httpCallData->userContext->get_auth_result(
-            utils::string_t_from_internal_string(m_httpCallData->httpMethod),
-            utils::string_t_from_internal_string(m_httpCallData->fullUrl),
-            utils::string_t_from_internal_string(utils::headers_to_string(m_httpCallData->requestHeaders)),
-            utils::string_t_from_internal_string(m_httpCallData->requestBody.request_message_string()),
+            m_httpCallData->httpMethod,
+            m_httpCallData->fullUrl,
+            utils::headers_to_string(m_httpCallData->requestHeaders),
+            m_httpCallData->requestBody.request_message_string(),
             allUsersAuthRequired,
             m_httpCallData->taskGroupId,
             callback
@@ -574,6 +585,18 @@ void http_call_impl::set_custom_header(
         );
 }
 
+void http_call_impl::set_custom_header(
+    _In_ const xsapi_internal_string& headerName,
+    _In_ const xsapi_internal_string& headerValue
+    )
+{
+    add_header(
+        m_httpCallData,
+        headerName,
+        headerValue
+    );
+}
+
 xbox_live_error_code http_call_impl::get_xbox_live_error_code_from_http_status(
     _In_ uint32_t statusCode
     )
@@ -591,91 +614,6 @@ xbox_live_error_code http_call_impl::get_xbox_live_error_code_from_http_status(
     }
 }
 
-bool
-http_call_impl::should_retry(
-    _In_ const std::shared_ptr<http_call_response_internal>& httpCallResponse,
-    _In_ const std::shared_ptr<http_call_data>& httpCallData,
-    _In_ xbox_live_error_code httpNetworkError
-    )
-{
-    auto httpStatus = httpCallResponse->http_status();
-
-    if (!httpCallData->retryAllowed
-        && !(httpStatus == web::http::status_codes::Unauthorized && httpCallData->userContext != nullptr))
-    {
-        return false;
-    }
-
-    if ((httpStatus == static_cast<int>(xbox_live_error_code::http_status_401_unauthorized) && !httpCallData->hasPerformedRetryOn401) ||
-        httpStatus == web::http::status_codes::RequestTimeout ||
-        httpStatus == static_cast<int>(xbox_live_error_code::http_status_429_too_many_requests) ||
-        httpStatus == web::http::status_codes::InternalError ||
-        httpStatus == web::http::status_codes::BadGateway ||
-        httpStatus == web::http::status_codes::ServiceUnavailable ||
-        httpStatus == web::http::status_codes::GatewayTimeout ||
-        httpNetworkError != xbox_live_error_code::no_error
-        )
-    {
-        std::chrono::milliseconds retryAfter = httpCallResponse->retry_after();
-
-        // Compute how much time left before hitting the http_timeout_window setting.  
-        const chrono_clock_t::time_point& responseReceivedTime = httpCallResponse->local_response_time();
-        std::chrono::milliseconds timeElapsedSinceFirstCall = std::chrono::duration_cast<std::chrono::milliseconds>(responseReceivedTime - httpCallData->firstCallStartTime);
-        std::chrono::milliseconds remainingTimeBeforeTimeout = httpCallData->xboxLiveContextSettings->http_timeout_window() - timeElapsedSinceFirstCall;
-        if (remainingTimeBeforeTimeout.count() <= MIN_HTTP_TIMEOUT_MILLISECONDS) // Need at least 5 seconds to bother making a call
-        {
-            return false;
-        }
-
-        // Based on the retry iteration, delay 2,4,8,16,etc seconds by default between retries
-        // Jitter the response between the current and next delay based on system clock
-        // Max wait time is 1 minute
-        double secondsToWaitMin = std::pow(httpCallData->xboxLiveContextSettings->http_retry_delay().count(), httpCallData->iterationNumber);
-        double secondsToWaitMax = std::pow(httpCallData->xboxLiveContextSettings->http_retry_delay().count(), httpCallData->iterationNumber+1);
-        double secondsToWaitDelta = secondsToWaitMax - secondsToWaitMin;
-        const chrono_clock_t::time_point& responseDate = httpCallResponse->local_response_time();
-        double lerpScaler = (responseDate.time_since_epoch().count() % 10000) / 10000.0; // from 0 to 1 based on clock
-#if UNIT_TEST_SERVICES
-        lerpScaler = 0; // make unit tests deterministic
-#endif
-        double secondsToWaitUncapped = secondsToWaitMin + secondsToWaitDelta * lerpScaler; // lerp between min & max wait
-        double secondsToWait = __min(secondsToWaitUncapped, MAX_DELAY_TIME_IN_SEC); // cap max wait to 1 min
-        std::chrono::milliseconds waitTime = std::chrono::milliseconds(static_cast<int64_t>(secondsToWait * 1000.0));
-        if (retryAfter.count() > 0)
-        {
-            // Use either the waitTime or Retry-After header, whichever is bigger
-            httpCallData->delayBeforeRetry = std::chrono::milliseconds(__max(waitTime.count(), retryAfter.count()));
-        }
-        else
-        {
-            httpCallData->delayBeforeRetry = waitTime;
-        }
-
-        if (remainingTimeBeforeTimeout < httpCallData->delayBeforeRetry + std::chrono::milliseconds(MIN_HTTP_TIMEOUT_MILLISECONDS))
-        {
-            // Don't bother retrying when out of time
-            return false;
-        }
-
-        if (httpStatus == web::http::status_codes::InternalError)
-        {
-            // For 500 - Internal Error, wait at least 10 seconds before retrying.
-            if (httpCallData->delayBeforeRetry.count() < MIN_DELAY_FOR_HTTP_INTERNAL_ERROR_IN_SEC * 1000)
-            {
-                httpCallData->delayBeforeRetry = std::chrono::seconds(MIN_DELAY_FOR_HTTP_INTERNAL_ERROR_IN_SEC);
-            }
-        }
-        else if (httpStatus == web::http::status_codes::Unauthorized)
-        {
-            return handle_unauthorized_error(httpCallData);
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
 std::shared_ptr<http_call_response_internal> 
 http_call_impl::create_http_call_response(
     _In_ const std::shared_ptr<http_call_data>& httpCallData,
@@ -683,7 +621,7 @@ http_call_impl::create_http_call_response(
     )
 {
     return std::make_shared<http_call_response_internal>(
-        utils::internal_string_from_string_t(httpCallData->userContext != nullptr ? httpCallData->userContext->xbox_user_id() : string_t()),
+        httpCallData->userContext != nullptr ? httpCallData->userContext->xbox_user_id() : xsapi_internal_string(),
         httpCallData->xboxLiveContextSettings,
         httpCallData->httpMethod,
         httpCallData->serverName + utils::internal_string_from_string_t(httpCallData->pathQueryFragment.to_string()),
@@ -702,65 +640,9 @@ void http_call_impl::set_user_agent(
         xsapi_internal_string userAgent = DEFAULT_USER_AGENT;
         if (!httpCallData->userContext->caller_context().empty())
         {
-            userAgent += " " + utils::internal_string_from_string_t(httpCallData->userContext->caller_context());
+            userAgent += " " + httpCallData->userContext->caller_context();
         }
         add_header(httpCallData, "User-Agent", userAgent);
-    }
-}
-
-bool http_call_impl::handle_unauthorized_error(
-    _In_ const std::shared_ptr<http_call_data>& httpCallData
-    )
-{
-    if (httpCallData->userContext != nullptr)    // if this is null, it does not need a valid token anyways
-    {
-        auto refreshResult = httpCallData->userContext->refresh_token().get();
-
-        if (!refreshResult.err())
-        {
-            httpCallData->hasPerformedRetryOn401 = true;
-        }
-        else
-        {
-            return false;   // if getting a new token failed, then we need to just return the 401 upwards
-        }
-    }
-    else
-    {
-        httpCallData->hasPerformedRetryOn401 = true;
-    }
-
-    return true;
-}
-
-bool http_call_impl::should_fast_fail(
-    _In_ const http_retry_after_api_state& apiState,
-    _In_ const std::shared_ptr<http_call_data>& httpCallData
-    )
-{
-    if (!apiState.errCode)
-    {
-        return false;
-    }
-
-    std::chrono::milliseconds remainingTimeBeforeRetryAfter = std::chrono::duration_cast<std::chrono::milliseconds>(apiState.retryAfterTime - httpCallData->requestStartTime);
-    if (remainingTimeBeforeRetryAfter.count() <= 0)
-    {
-        return false;
-    }
-
-    chrono_clock_t::time_point timeoutTime = httpCallData->firstCallStartTime + httpCallData->xboxLiveContextSettings->http_timeout_window();
-
-    // If the Retry-After will happen first, just wait till Retry-After is done, and don't fast fail
-    if (apiState.retryAfterTime < timeoutTime)
-    {
-        auto retryAfterCount = static_cast<uint32_t>(remainingTimeBeforeRetryAfter.count());
-        utils::sleep(retryAfterCount);
-        return false;
-    }
-    else
-    {
-        return true;
     }
 }
 

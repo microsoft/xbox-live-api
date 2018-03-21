@@ -55,6 +55,9 @@
 #define PLATFORM_STRING_FROM_STRING_T(x) \
     (x.empty() ? nullptr : ref new Platform::String(x.c_str()))
 
+#define PLATFORM_STRING_FROM_INTERNAL_STRING(x) \
+    (x.empty() ? nullptr : ref new Platform::String(utils::string_t_from_internal_string(x).c_str()))
+
 #define AUTH_HEADER ("Authorization")
 #define SIG_HEADER ("Signature")
 #define ETAG_HEADER ("ETag")

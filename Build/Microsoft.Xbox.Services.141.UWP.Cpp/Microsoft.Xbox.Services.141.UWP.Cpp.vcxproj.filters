@@ -891,6 +891,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\profile_c.h">
       <Filter>C Public Includes</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\services_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_c.h">
       <Filter>C Public Includes</Filter>
     </ClInclude>
