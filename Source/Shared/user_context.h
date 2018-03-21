@@ -4,7 +4,6 @@
 #pragma once
 
 #include "system_internal.h"
-#include "user_impl.h"
 
 #if !TV_API
     #if !XSAPI_CPP
@@ -12,6 +11,7 @@
         #include "User_WinRT.h"
     #else
         #include "xsapi/system.h"
+        #include "user_impl.h"
     #endif
 #endif
 #include "xsapi/types.h"
@@ -85,7 +85,7 @@ public:
     static xsapi_internal_string get_user_id(xbox_live_user_t user)
     {
 #if TV_API
-        return user->XboxUserId->Data();
+        return utils::internal_string_from_char_t(user->XboxUserId->Data());
 #else
         return user->_User_impl()->xbox_user_id();
 #endif
