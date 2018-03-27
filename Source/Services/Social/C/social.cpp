@@ -16,7 +16,7 @@ using namespace xbox::services::social;
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationshipsHelper(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_ XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER socialRelationshipFilter,
     _In_ uint32_t startIndex,
@@ -26,7 +26,10 @@ XblGetSocialRelationshipsHelper(
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     )
 {
-    RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || queue == nullptr);
+    if (xboxLiveContext == nullptr || queue == nullptr)
+    {
+        return XBL_RESULT_OK;
+    }
 
     auto result = xboxLiveContext->contextImpl->social_service_impl()->get_social_relationships(
         xboxUserId, static_cast<xbox_social_relationship_filter>(socialRelationshipFilter), startIndex, maxItems, queue->taskGroupId,
@@ -49,12 +52,12 @@ XblGetSocialRelationshipsHelper(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationships(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
-try
+//try
 {
     return XblGetSocialRelationshipsHelper(
         xboxLiveContext,
@@ -67,17 +70,17 @@ try
         callback
         );
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationshipsWithFilter(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER socialRelationshipFilter,
     _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
-try
+//try
 {
     return XblGetSocialRelationshipsHelper(
         xboxLiveContext,
@@ -90,17 +93,17 @@ try
         callback
         );
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationshipsForUser(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
-try
+//try
 {
     return XblGetSocialRelationshipsHelper(
         xboxLiveContext,
@@ -113,11 +116,11 @@ try
         callback
         );
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationshipsEx(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER socialRelationshipFilter,
     _In_ uint32_t startIndex,
     _In_ uint32_t maxItems,
@@ -125,7 +128,7 @@ XblGetSocialRelationshipsEx(
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
-try
+//try
 {
     return XblGetSocialRelationshipsHelper(
         xboxLiveContext,
@@ -138,11 +141,11 @@ try
         callback
         );
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialRelationshipResultGetNext(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ CONST XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT *socialRelationshipResult,
     _In_ uint32_t maxItems,
     _In_ XBL_ASYNC_QUEUE queue,
@@ -220,13 +223,16 @@ XblCopySocialRelationshipResult(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSubscribeToSocialRelationshipChange(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _Out_ XBL_SOCIAL_RELATIONSHIP_CHANGE_SUBSCRIPTION *subscriptionHandle
     ) XBL_NOEXCEPT
-try
+//try
 {
-    RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || xboxUserId == nullptr || subscriptionHandle == nullptr);
+    if (xboxLiveContext == nullptr || xboxUserId == nullptr || subscriptionHandle == nullptr)
+    {
+        return XBL_RESULT_INVALID_ARG;
+    }
 
     auto result = xboxLiveContext->contextImpl->social_service_impl()->subscribe_to_social_relationship_change(xboxUserId);
     if (!result.err())
@@ -235,16 +241,19 @@ try
     }
     return utils::create_xbl_result(result.err());
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblUnsubscribeFromSocialRelationshipChange(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ XBL_SOCIAL_RELATIONSHIP_CHANGE_SUBSCRIPTION subscriptionHandle
     ) XBL_NOEXCEPT
-try
+//try
 {
-    RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr);
+    if (xboxLiveContext == nullptr)
+    {
+        return XBL_RESULT_INVALID_ARG;
+    }
 
     return utils::create_xbl_result(
         xboxLiveContext->contextImpl->social_service_impl()->unsubscribe_from_social_relationship_change(
@@ -252,11 +261,11 @@ try
             ).err()
         );
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
-XBL_API FUNCTION_CONTEXT XBL_CALLING_CONV
+XBL_API function_context XBL_CALLING_CONV
 XblAddSocialRelationshipChangedHandler(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ XBL_SOCIAL_RELATIONSHIP_CHANGED_HANDLER handler,
     _In_ void *handlerContext
     ) XBL_NOEXCEPT
@@ -273,8 +282,8 @@ CATCH_RETURN_WITH(-1)
 
 XBL_API void XBL_CALLING_CONV
 XblRemoveSocialRelationshipChangedHandler(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
-    _In_ FUNCTION_CONTEXT handlerFunctionContext
+    _In_ xbl_context_handle xboxLiveContext,
+    _In_ function_context handlerFunctionContext
     ) XBL_NOEXCEPT
 try
 {
@@ -284,7 +293,7 @@ CATCH_RETURN_WITH(;)
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSubmitReputationFeedback(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_ XBL_REPUTATION_FEEDBACK_TYPE reputationFeedbackType,
     _In_opt_ PCSTR sessionName,
@@ -295,7 +304,10 @@ XblSubmitReputationFeedback(
     _In_ XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
 {
-    RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || xboxUserId == nullptr || queue == nullptr);
+    if (xboxLiveContext == nullptr || xboxUserId == nullptr || queue == nullptr)
+    {
+        return XBL_RESULT_INVALID_ARG;
+    }
 
     xboxLiveContext->contextImpl->reputation_service_impl()->submit_reputation_feedback(
         xboxUserId,
@@ -315,7 +327,7 @@ XblSubmitReputationFeedback(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSubmitBatchReputationFeedback(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ XBL_REPUTATION_FEEDBACK_ITEM *feedbackItems,
     _In_ uint32_t feedbackItemsCount,
     _In_ XBL_ASYNC_QUEUE queue,
@@ -323,7 +335,10 @@ XblSubmitBatchReputationFeedback(
     _In_ XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
 {
-    RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || feedbackItems == nullptr || queue == nullptr);
+    if (xboxLiveContext == nullptr || feedbackItems == nullptr || queue == nullptr)
+    {
+        return XBL_RESULT_INVALID_ARG;
+    }
 
     xsapi_internal_vector<reputation_feedback_item_internal> internalItems(feedbackItemsCount);
     for (uint32_t i = 0; i < feedbackItemsCount; ++i)

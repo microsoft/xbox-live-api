@@ -42,8 +42,7 @@ void user_context::get_auth_result(
     _In_ const xsapi_internal_string& headers,
     _In_ const xsapi_internal_string& requestBodyString,
     _In_ bool allUsersAuthRequired,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+    _In_ std::shared_ptr<AuthAsyncBlock> asyncBlock
     )
 {
     UNREFERENCED_PARAMETER(allUsersAuthRequired);
@@ -55,8 +54,7 @@ void user_context::get_auth_result(
         headers,
         utf8Vec,
         allUsersAuthRequired,
-        taskGroupId,
-        callback
+        asyncBlock
     );
 }
 
@@ -66,8 +64,7 @@ void user_context::get_auth_result(
     _In_ const xsapi_internal_string& headers,
     _In_ const xsapi_internal_vector<unsigned char>& requestBodyVector,
     _In_ bool allUsersAuthRequired,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+    _In_ std::shared_ptr<AuthAsyncBlock> asyncBlock
     )
 {
     UNREFERENCED_PARAMETER(allUsersAuthRequired);
@@ -87,13 +84,14 @@ void user_context::get_auth_result(
 #endif
     if (m_user != nullptr)
     {
-        m_user->_User_impl()->get_token_and_signature(httpMethod, url, headers, requestBodyVector, taskGroupId,
-            [callback](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
+        m_user->_User_impl()->get_token_and_signature(httpMethod, url, headers, requestBodyVector, 
+            TokenAndSignatureAsyncBlock::alloc(
+            [asyncBlock](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
         {
             const auto& tokenResult = result.payload();
             user_context_auth_result userContextResult(tokenResult->token(), tokenResult->signature());
-            callback(xbox_live_result<user_context_auth_result>(userContextResult, result.err(), result.err_message()));
-        });
+            asyncBlock->typedCallback(xbox_live_result<user_context_auth_result>(userContextResult, result.err(), result.err_message()));
+        }));
     }
 }
 
@@ -112,8 +110,7 @@ void user_context::refresh_token(
         xsapi_internal_vector<unsigned char>(),
         false,
         true,
-        XSAPI_DEFAULT_TASKGROUP,
-        [](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
+        TokenAndSignatureAsyncBlock::alloc([](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
     {
         if (!result.err())
         {
@@ -123,7 +120,7 @@ void user_context::refresh_token(
         {
             return xbox_live_result<void>(result.err(), result.err_message());
         }
-    });
+    }));
 }
 
 bool user_context::is_signed_in() const

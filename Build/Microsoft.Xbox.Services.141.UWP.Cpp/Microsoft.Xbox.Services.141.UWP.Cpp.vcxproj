@@ -141,8 +141,6 @@
     <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectFolder)\</IntDir>
   </PropertyGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_impl_c.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_taskargs.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_serializers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\async_queue.h" />
@@ -194,6 +192,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_app_config_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_service_call_routed_event_args_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\auth_config.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\ppltasks_extra.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\system_internal.h" />
@@ -241,9 +240,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_context.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_context_settings.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_service_call_routed_event_args.h" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_c.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_impl_c.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_taskargs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_media_asset.cpp" />
@@ -499,6 +495,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_services_settings.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_service_call_routed_event_args.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\auth_config.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\token_and_signature_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\user.cpp" />

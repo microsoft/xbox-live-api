@@ -123,12 +123,12 @@ XblMemGetFunctions(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGlobalInitialize() XBL_NOEXCEPT
-try
+//try
 {
     (void) get_xsapi_singleton();
     return XBL_RESULT_OK;
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API void XBL_CALLING_CONV
 XblGlobalCleanup() XBL_NOEXCEPT

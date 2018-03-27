@@ -86,17 +86,20 @@ extern "C" {
 
 #include "httpClient/types.h"
 
-#if XDK_API
-    typedef Windows::Xbox::System::User^ XBL_XBOX_LIVE_USER_PTR;
-#else
-    typedef const struct XBL_XBOX_LIVE_USER *XBL_XBOX_LIVE_USER_PTR;
-#endif
+typedef _Null_terminated_ char* utf8_string;
+typedef _Null_terminated_ const char* const_utf8_string;
 
-typedef uint32_t XBL_MEMORY_TYPE;
-typedef int32_t FUNCTION_CONTEXT;
-typedef struct xbl_async_queue* XBL_ASYNC_QUEUE;
-typedef HC_TASK_EVENT_HANDLE XBL_ASYNC_EVENT_HANDLE;
-typedef struct xbl_xbox_live_context* XBL_XBOX_LIVE_CONTEXT_HANDLE;
+typedef uint32_t XblMemoryType;
+typedef int32_t function_context;
+typedef struct xbl_async_queue* XBL_ASYNC_QUEUE; // TODO remove
+typedef HC_TASK_EVENT_HANDLE XBL_ASYNC_EVENT_HANDLE; // TODO remove
+typedef struct xbl_xbox_live_context* xbl_context_handle;
+
+#if XDK_API
+typedef Windows::Xbox::System::User^ xbl_user_handle;
+#else
+typedef struct xbl_xbox_live_user* xbl_user_handle;
+#endif
 
 #if defined(__cplusplus)
 } // end extern "C"

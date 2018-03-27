@@ -110,24 +110,25 @@ http_call_impl::get_response(
 {
     pplx::task_completion_event<std::shared_ptr<http_call_response>> tce;
     
-    get_response(httpCallResponseBodyType, XSAPI_DEFAULT_TASKGROUP,
-        [tce](std::shared_ptr<http_call_response_internal> response)
-    {
-        tce.set(std::make_shared<http_call_response>(response));
-    });
+    get_response(
+        httpCallResponseBodyType, 
+        XblAsyncBlock<std::shared_ptr<http_call_response_internal>>::alloc(
+            [tce](std::shared_ptr<http_call_response_internal> response)
+            {
+                tce.set(std::make_shared<http_call_response>(response));
+            })
+        );
     return pplx::task<std::shared_ptr<http_call_response>>(tce);
 }
 
 xbox_live_result<void> 
 http_call_impl::get_response(
     _In_ http_call_response_body_type httpCallResponseBodyType,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
+    _In_ HttpCallAsyncBlockPtr asyncBlock
     )
 {
     m_httpCallData->httpCallResponseBodyType = httpCallResponseBodyType;
-    m_httpCallData->taskGroupId = taskGroupId;
-    m_httpCallData->callback = callback;
+    m_httpCallData->asyncBlock = asyncBlock;
 
     add_default_headers_if_needed(m_httpCallData);
 
@@ -145,7 +146,6 @@ http_call_impl::get_response(
     auto httpRequest = _httpRequest;
 
     m_httpCallData->httpCallResponseBodyType = httpCallResponseBodyType;
-    m_httpCallData->taskGroupId = XSAPI_DEFAULT_TASKGROUP;
 
     for (const auto& header : httpRequest.headers())
     {
@@ -158,11 +158,11 @@ http_call_impl::get_response(
 
     pplx::task_completion_event<std::shared_ptr<http_call_response>> tce;
     pplx::task<std::shared_ptr<http_call_response>> task(tce);
-    xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback([tce](std::shared_ptr<http_call_response_internal> response)
-    {
-        tce.set(std::make_shared<http_call_response>(response));
-    });
-    m_httpCallData->callback = callback;
+    m_httpCallData->asyncBlock = XblAsyncBlock<std::shared_ptr<http_call_response_internal>>::alloc(
+        [tce](std::shared_ptr<http_call_response_internal> response)
+        {
+            tce.set(std::make_shared<http_call_response>(response));
+        });
 
     internal_get_response(m_httpCallData);
     return task;
@@ -217,11 +217,12 @@ http_call_impl::get_response_with_auth(
         userContext,
         httpCallResponseBodyType,
         allUsersAuthRequired, 
-        XSAPI_DEFAULT_TASKGROUP,
-        [tce](std::shared_ptr<http_call_response_internal> response)
-        {
-            tce.set(std::make_shared<http_call_response>(response)); 
-        });
+        XblAsyncBlock<std::shared_ptr<http_call_response_internal>>::alloc(
+            [tce](std::shared_ptr<http_call_response_internal> response)
+            {
+                tce.set(std::make_shared<http_call_response>(response)); 
+            })
+        );
 
     return pplx::task<std::shared_ptr<http_call_response>>(tce);
 }
@@ -230,14 +231,12 @@ xbox_live_result<void> http_call_impl::get_response_with_auth(
     _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
     _In_ http_call_response_body_type httpCallResponseBodyType,
     _In_ bool allUsersAuthRequired,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
+    _In_ HttpCallAsyncBlockPtr asyncBlock
     )
 {
     m_httpCallData->userContext = userContext;
     m_httpCallData->httpCallResponseBodyType = httpCallResponseBodyType;
-    m_httpCallData->taskGroupId = taskGroupId;
-    m_httpCallData->callback = callback;
+    m_httpCallData->asyncBlock = asyncBlock;
 
     add_default_headers_if_needed(m_httpCallData);
 
@@ -335,17 +334,18 @@ xbox_live_result<void> http_call_impl::internal_get_response_with_auth(
     _In_ bool allUsersAuthRequired
     )
 {
-    // Auth stack still using non mem hooked types. Not changing because we will switch to XAL soon anyhow
     auto httpCallData = m_httpCallData;
 
-    xbox_live_callback<xbox_live_result<user_context_auth_result>> callback = [httpCallData](_In_ xbox::services::xbox_live_result<user_context_auth_result> result)
+    auto authAsyncBlock = AuthAsyncBlock::alloc(
+        httpCallData->asyncBlock->queue,
+        [httpCallData](_In_ xbox::services::xbox_live_result<user_context_auth_result> result)
     {
         if (result.err())
         {
             auto httpCallResponse = create_http_call_response(httpCallData);
             httpCallResponse->set_error_info(static_cast<xbox_live_error_code>(result.err().value()), result.err_message().data());
             httpCallResponse->route_service_call();
-            httpCallData->callback(httpCallResponse);
+            httpCallData->asyncBlock->typedCallback(httpCallResponse);
             return;
         }
 
@@ -361,7 +361,7 @@ xbox_live_result<void> http_call_impl::internal_get_response_with_auth(
         }
 
         internal_get_response(httpCallData);
-    };
+    });
 
     if (m_httpCallData->requestBody.get_http_request_message_type() == http_request_message_type::vector_message)
     {
@@ -371,8 +371,7 @@ xbox_live_result<void> http_call_impl::internal_get_response_with_auth(
             utils::headers_to_string(m_httpCallData->requestHeaders),
             m_httpCallData->requestBody.request_message_vector(),
             allUsersAuthRequired,
-            m_httpCallData->taskGroupId,
-            callback
+            authAsyncBlock
             );
     }
     else
@@ -383,8 +382,7 @@ xbox_live_result<void> http_call_impl::internal_get_response_with_auth(
             utils::headers_to_string(m_httpCallData->requestHeaders),
             m_httpCallData->requestBody.request_message_string(),
             allUsersAuthRequired,
-            m_httpCallData->taskGroupId,
-            callback
+            authAsyncBlock
             );
     }
 
@@ -393,7 +391,7 @@ xbox_live_result<void> http_call_impl::internal_get_response_with_auth(
 
 void http_call_impl::internal_get_response(
     _In_ const std::shared_ptr<http_call_data>& httpCallData
-    )
+)
 {
     set_http_timeout(httpCallData);
     set_user_agent(httpCallData);
@@ -401,22 +399,21 @@ void http_call_impl::internal_get_response(
     HCHttpCallRequestSetRetryAllowed(httpCallData->callHandle, httpCallData->retryAllowed);
     HCHttpCallRequestSetTimeout(httpCallData->callHandle, static_cast<uint32_t>(httpCallData->httpTimeout.count()));
 
-    auto context = utils::store_shared_ptr(httpCallData);
-
-    HC_TASK_HANDLE taskHandle;
-    HCHttpCallPerform(httpCallData->callHandle, &taskHandle, HC_SUBSYSTEM_ID_XSAPI, httpCallData->taskGroupId, context,
-        [](_In_ void* context, _In_ HC_CALL_HANDLE call)
+    AsyncBlock *asyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    asyncBlock->queue = httpCallData->asyncBlock->queue; // TODO child queue?
+    asyncBlock->context = utils::store_shared_ptr(httpCallData);
+    asyncBlock->callback = [](_In_ AsyncBlock* asyncBlock)
     {
-        auto httpCallData = utils::remove_shared_ptr<http_call_data>(context);
+        auto httpCallData = utils::remove_shared_ptr<http_call_data>(asyncBlock->context);
 
         HC_RESULT errorCode = HC_OK;
         uint32_t platformErrorCode = 0;
         uint32_t statusCode = 0;
         PCSTR responseBody = nullptr;
 
-        HCHttpCallResponseGetNetworkErrorCode(call, &errorCode, &platformErrorCode);
-        HCHttpCallResponseGetStatusCode(call, &statusCode);
-        HCHttpCallResponseGetResponseString(call, &responseBody);
+        HCHttpCallResponseGetNetworkErrorCode(httpCallData->callHandle, &errorCode, &platformErrorCode);
+        HCHttpCallResponseGetStatusCode(httpCallData->callHandle, &statusCode);
+        HCHttpCallResponseGetResponseString(httpCallData->callHandle, &responseBody);
 
         auto networkError = get_xbox_live_error_code_from_http_status(statusCode);
         auto httpCallResponse = create_http_call_response(httpCallData, statusCode);
@@ -457,10 +454,11 @@ void http_call_impl::internal_get_response(
                 break;
             }
         }
-        httpCallData->callback(httpCallResponse);
-    });
+        httpCallData->asyncBlock->typedCallback(httpCallResponse);
+        delete asyncBlock;
+    };
 
-    return;
+    HCHttpCallPerform(httpCallData->callHandle, asyncBlock);
 }
 
 string_t http_call_impl::server_name() const

@@ -107,6 +107,9 @@ enum class xbox_live_api
     xbox_one_pins_remove_item
 };
 
+typedef xbox::services::XblAsyncBlock<std::shared_ptr<http_call_response_internal>> HttpCallAsyncBlock;
+typedef std::shared_ptr<HttpCallAsyncBlock> HttpCallAsyncBlockPtr;
+
 struct http_call_data
 {
     http_call_data(
@@ -144,9 +147,8 @@ struct http_call_data
     http_headers requestHeaders; // TODO these are used by auth right now, can probably remove with xal
     bool addDefaultHeaders;
 
-    uint64_t taskGroupId;
     chrono_clock_t::time_point requestStartTime;
-    xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback;
+    HttpCallAsyncBlockPtr asyncBlock;
 };
 
 struct http_retry_after_api_state
@@ -175,7 +177,6 @@ struct http_retry_after_api_state
 class http_call_internal : public http_call
 {
 public:
-
     /// <summary>
     /// Send the request without authentication and get the response of a specific type
     /// </summary>
@@ -186,16 +187,14 @@ public:
 
     virtual xbox_live_result<void> get_response(
         _In_ http_call_response_body_type httpCallResponseBodyType,
-        _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
+        _In_ HttpCallAsyncBlockPtr asyncBlock
         ) = 0;
 
     virtual xbox_live_result<void> get_response_with_auth(
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired,
-        _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
+        _In_ HttpCallAsyncBlockPtr asyncBlock
         ) = 0;
 
     virtual const http_call_request_message_internal& request_body() const = 0;
@@ -309,8 +308,7 @@ public:
 
     xbox_live_result<void> get_response(
         _In_ http_call_response_body_type httpCallResponseBodyType,
-        _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
+        _In_ HttpCallAsyncBlockPtr asyncBlock
         ) override;
 
     pplx::task<std::shared_ptr<http_call_response>> get_response(
@@ -328,8 +326,7 @@ public:
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired,
-        _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
+        _In_ HttpCallAsyncBlockPtr asyncBlock
         ) override;
 
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(

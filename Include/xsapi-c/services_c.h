@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "httpClient/async.h"
 #include "xsapi-c/types_c.h"
 #include "xsapi-c/errors_c.h"
 #include "xsapi-c/system_c.h"

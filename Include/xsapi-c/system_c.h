@@ -11,153 +11,318 @@ extern "C" {
 
 #if !XDK_API
 
-struct XSAPI_XBOX_LIVE_USER_IMPL;
-
-typedef enum XSAPI_SIGN_IN_STATUS
+/// <summary>
+/// Enumeration values that indicate the result status of sign in.
+/// </summary>
+typedef enum XblSignInStatus
 {
     /// <summary>
     /// Signed in successfully.
     /// </summary>
-    XSAPI_SIGN_IN_STATUS_SUCCESS = 0,
+    XblSignInStatus_Success = 0,
 
     /// <summary>
     /// Need to invoke the signin API (w/ UX) to let the user take necessary actions for the sign-in operation to continue.
-    /// Can only be returned from signin_silently().
+    /// Can only be returned from silent sign in APIs.
     /// </summary>
-    XSAPI_SIGN_IN_STATUS_USER_INTERACTION_REQUIRED,
+    XblSignInStatus_UserInterationRequired,
 
     /// <summary>
     /// The user decided to cancel the sign-in operation.
-    /// Can only be returned from signin().
+    /// Can only by returned from non-silent sign in APIs.
     /// </summary>
-    XSAPI_SIGN_IN_STATUS_USER_CANCEL
-} XSAPI_SIGN_IN_STATUS;
+    XblSignInStatus_UserCancel
+} XblSignInStatus;
 
-typedef struct XBL_XBOX_LIVE_USER
+/// <summary>
+/// Enum defining the various age groups.
+/// </summary>
+typedef enum XblAgeGroup
 {
-    PCSTR xboxUserId; 
-    PCSTR gamertag;
-    PCSTR ageGroup;
-    PCSTR privileges;
-    bool isSignedIn;
-#if UWP_API
-    PCSTR webAccountId;
-    Windows::System::User^ windowsSystemUser;
-#endif
-    XSAPI_XBOX_LIVE_USER_IMPL *pImpl;
-} XBL_XBOX_LIVE_USER;
+    XblAgeGroup_Unknown = 0,
+    XblAgeGroup_Child = 1,
+    XblAgeGroup_Teen = 2,
+    XblAgeGroup_Adult = 3,
+} XblAgeGroup;
 
-typedef struct XSAPI_SIGN_IN_RESULT
+/// <summary>
+/// Represents the result of the sign in operation.
+/// </summary>
+typedef struct XblSignInResult
 {
-    XSAPI_SIGN_IN_STATUS status;
-} XSAPI_SIGN_IN_RESULT;
+    /// <summary>
+    /// The status of sign in operation.
+    /// </summary>
+    XblSignInStatus status;
+} XblSignInResult;
 
-typedef struct XSAPI_TOKEN_AND_SIGNATURE_RESULT
-{
-    PCSTR token;
-    PCSTR signature;
-    PCSTR xboxUserId;
-    PCSTR gamertag;
-    PCSTR xboxUserHash;
-    PCSTR ageGroup;
-    PCSTR privileges;
-    PCSTR webAccountId;
-} XSAPI_TOKEN_AND_SIGNATURE_RESULT;
-
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XboxLiveUserCreate(
-    _Out_ XBL_XBOX_LIVE_USER** ppUser
+/// <summary>
+/// Creates an xbl_user_handle used for Xbox Live authentication/sign in.
+/// </summary>
+/// <param name="user">The returned Xbox Live user handle.</param>
+/// <returns>Result code for this API operation.</returns>
+XBL_API HRESULT XBL_CALLING_CONV
+XblUserCreateHandle(
+    _Out_ xbl_user_handle* user
     ) XBL_NOEXCEPT;
 
 #if UWP_API
 
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XboxLiveUserCreateFromSystemUser(
+/// <summary>
+/// Creates an xbl_user_handle associated with a Windows System User.
+/// </summary>
+/// <param name="user">The returned Xbox Live user handle.</param>
+/// <returns>Result code for this API operation.</returns>
+XBL_API HRESULT XBL_CALLING_CONV
+XblUserCreateHandleFromSystemUser(
     _In_ Windows::System::User^ creationContext,
-    _Out_ XBL_XBOX_LIVE_USER** ppUser
+    _Out_ xbl_user_handle* user
     ) XBL_NOEXCEPT;
 
 #endif
 
-XBL_API void XBL_CALLING_CONV
-XboxLiveUserDelete(
-    _In_ XBL_XBOX_LIVE_USER* pUser
+/// <summary>
+/// Increments the reference count on the user object.
+/// </summary>
+/// <param name="user">The user handle.</param>
+/// <returns>The duplicate handle.</returns>
+XBL_API xbl_user_handle XBL_CALLING_CONV
+XblUserDuplicateHandle(
+    _In_ xbl_user_handle user
     ) XBL_NOEXCEPT;
 
-typedef void(*XSAPI_SIGN_IN_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT result,
-    _In_ XSAPI_SIGN_IN_RESULT payload,
-    _In_opt_ void* context
-    );
-
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XboxLiveUserSignIn(
-    _Inout_ XBL_XBOX_LIVE_USER* pUser,
-    _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
-    _In_opt_ void* completionRoutineContext,
-    _In_ XBL_ASYNC_QUEUE queue
+/// <summary>
+/// Decrements the reference count on the user object.
+/// </summary>
+/// <param name="user">The user handle.</param>
+XBL_API HRESULT XBL_CALLING_CONV
+XblUserCloseHandle(
+    _In_ xbl_user_handle user
     ) XBL_NOEXCEPT;
 
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XboxLiveUserSignInSilently(
-    _Inout_ XBL_XBOX_LIVE_USER* pUser,
-    _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
-    _In_opt_ void* completionRoutineContext,
-    _In_ XBL_ASYNC_QUEUE queue
+const size_t XuidMaxBytes = 21;
+
+/// <summary>
+/// Returns the id of the user.
+/// </summary>
+/// <param name="user">The user handle.</param>
+/// <param name="xuidBufferSize">Size of the provided output buffer.</param>
+/// <param name="xuidBuffer">Buffer to write xuid.</param>
+/// <param name="written">The actual number of bytes written to the buffer.</param>
+XBL_API HRESULT XBL_CALLING_CONV
+XblUserGetXuid(
+    _In_ xbl_user_handle user,
+    _In_ size_t xuidBufferSize,
+    _Out_writes_to_(xuidBufferSize, *written) utf8_string xuidBuffer,
+    _Out_opt_ size_t* written
+    ) XBL_NOEXCEPT;
+
+const size_t GamertagMaxBytes = 16;
+
+/// <summary>
+/// Returns the gamertag of the user.
+/// </summary>
+/// <param name="user">The user handle.</param>
+/// <param name="gamertagBufferSize">Size of the provided output buffer.</param>
+/// <param name="gamertagBuffer">Buffer to write gamertag.</param>
+/// <param name="written">The actual number of bytes written to the buffer.</param>
+XBL_API HRESULT XBL_CALLING_CONV
+XblUserGetGamertag(
+    _In_ xbl_user_handle user,
+    _In_ size_t gamertagBufferSize,
+    _Out_writes_to_(gamertagBufferSize, *written) utf8_string gamertagBuffer,
+    _Out_opt_ size_t* written
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Returns the age group of the user.
+/// </summary>
+/// <param name="user">The user handle.</param>
+/// <param name="ageGroup">The age group.</param>
+XBL_API HRESULT XBL_CALLING_CONV
+XblUserGetAgeGroup(
+    _In_ xbl_user_handle user,
+    _Out_ XblAgeGroup* ageGroup
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Get the length of the privileges string for a user. 
+/// </summary>
+/// <param name="user">The user handle.</param>
+/// <param name="size">The required buffer size for the privileges string.</param>
+XBL_API HRESULT XBL_CALLING_CONV
+XblUserGetPrivilegesSize(
+    _In_ xbl_user_handle user,
+    _Out_ size_t* size
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Get the privileges string for a user.
+/// </summary>
+/// <param name="user">The user handle.</param>
+/// <param name="gamertagBufferSize">Size of the provided output buffer.</param>
+/// <param name="privileges">Buffer to write the users privileges.</param>
+/// <param name="written">The actual number of bytes written to the buffer.</param>
+XBL_API HRESULT XBL_CALLING_CONV
+XblUserGetPrivileges(
+    _In_ xbl_user_handle user,
+    _In_ size_t privilegesSize,
+    _Out_writes_to_(privilegesSize, *written) utf8_string privileges,
+    _Out_opt_ size_t* written
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Checks if a user is signed in.
+/// </summary>
+/// <param name="userHandle">The user handle.</param>
+/// <param name="isSignedIn">Whether the user is currently signed in.</param>
+XBL_API HRESULT XBL_CALLING_CONV
+XblUserIsSignedIn(
+    _In_ xbl_user_handle user,
+    _Out_ bool* isSignedIn
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Attempt to sign a player into their Xbox Live account. This call may bring up
+/// a sign-in user interface.
+/// </summary>
+/// <param name="user">The user handle.</param>
+/// <param name="async">Caller allocated AsyncBlock.</param>
+/// <remarks>
+/// You should only call this method if silent sign-in indicates that user interaction is required.
+/// For UWA, this API is to be called from UI thread, if you're calling from non-UI thread or not sure, please use 
+/// XblUserSignInWithCoreDispatcher instead.
+/// </remarks>
+XBL_API HRESULT XBL_CALLING_CONV
+XblUserSignIn(
+    _In_ xbl_user_handle user,
+    _In_ AsyncBlock* async
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Attempt to silently sign a player into their Xbox Live account.
+/// </summary>
+/// <param name="user">The user handle.</param>
+/// <param name="async">Caller allocated AsyncBlock.</param>
+/// <remarks>
+/// If the app is unable to silently sign-in, the result will be an XblSignInResult with a user interaction required status .
+/// to sign-in, so the app should then call XblUserSignIn.
+/// For UWA, this API is to be called from UI thread, if you're not calling from non-UI thread or not sure, please use
+/// XblUserSignInSilentlyWithCoreDispatcher instead.
+/// </remarks>
+XBL_API HRESULT XBL_CALLING_CONV
+XblUserSignInSilently(
+    _In_ xbl_user_handle user,
+    _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 #if WINAPI_FAMILY && WINAPI_FAMILY==WINAPI_FAMILY_APP
 
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XboxLiveUserSignInWithCoreDispatcher(
-    _Inout_ XBL_XBOX_LIVE_USER* pUser,
-    _In_ Platform::Object^ coreDispatcher,
-    _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
-    _In_opt_ void* completionRoutineContext,
-    _In_ XBL_ASYNC_QUEUE queue
+/// <summary>
+/// Attempt to sign a player into their Xbox Live account. This call may bring up
+/// a sign-in user interface.
+/// </summary>
+/// <param name="user">The user handle.</param>
+/// <param name="coreDispatcherObj">The Windows Runtime core event message dispatcher.</param>
+/// <param name="async">Caller allocated AsyncBlock.</param>
+/// <remarks>
+/// You should only call this method if silent sign-in indicates that user interaction is required.
+/// If you're calling this API from non-UI thread, parameter coreDispatcherObj is required, so that app UI
+/// can be rendered and locale can be generated.
+/// </remarks>
+XBL_API HRESULT XBL_CALLING_CONV
+XblUserSignInWithCoreDispatcher(
+    _In_ xbl_user_handle user,
+    _In_ Platform::Object^ coreDispatcherObj,
+    _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XboxLiveUserSignInSilentlyWithCoreDispatcher(
-    _Inout_ XBL_XBOX_LIVE_USER* pUser,
-    _In_ Platform::Object^ coreDispatcher,
-    _In_ XSAPI_SIGN_IN_COMPLETION_ROUTINE completionRoutine,
-    _In_opt_ void* completionRoutineContext,
-    _In_ XBL_ASYNC_QUEUE queue
+/// <summary>
+/// Attempt to silently sign a player into their Xbox Live account.
+/// </summary>
+/// <param name="user">The user handle.</param>
+/// <param name="coreDispatcherObj">The Windows Runtime core event message dispatcher.</param>
+/// <param name="async">Caller allocated AsyncBlock.</param>
+/// <remarks>
+/// If the app is unable to silently sign-in, the API return sign_in_result with user_interaction_required status .
+/// to sign-in, so the app should then call signin().
+/// If you're calling this API from non-UI thread, parameter coreDispatcherObj is required, so that app locale can be generated.
+/// </remarks>
+XBL_API HRESULT XBL_CALLING_CONV
+XblUserSignInSilentlyWithCoreDispatcher(
+    _In_ xbl_user_handle user,
+    _In_ Platform::Object^ coreDispatcherObj,
+    _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 #endif
 
-typedef void(*XSAPI_GET_TOKEN_AND_SIGNATURE_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT result,
-    _In_ XSAPI_TOKEN_AND_SIGNATURE_RESULT payload,
-    _In_opt_ void* context
-    );
-
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XboxLiveUserGetTokenAndSignature(
-    _In_ XBL_XBOX_LIVE_USER* pUser,
-    _In_ PCSTR httpMethod,
-    _In_ PCSTR url,
-    _In_ PCSTR headers,
-    _In_ PCSTR requestBodyString,
-    _In_ XSAPI_GET_TOKEN_AND_SIGNATURE_COMPLETION_ROUTINE completionRoutine,
-    _In_opt_ void* completionRoutineContext,
-    _In_ XBL_ASYNC_QUEUE queue
+/// <summary>
+/// Get the result of a completed sign in attempt.
+/// </summary>
+/// <param name="async">The async block passed to the sign in function.</param>
+/// <param name="signInResult">Caller allocated object to write results into.</param>
+XBL_API HRESULT XBL_CALLING_CONV
+XblGetSignInResult(
+    _In_ AsyncBlock* async,
+    _Out_ XblSignInResult* signInResult
     ) XBL_NOEXCEPT;
 
-typedef void(*XSAPI_SIGN_OUT_COMPLETED_HANDLER)(
-    _In_ XBL_XBOX_LIVE_USER* pUser
+typedef void (CALLBACK *XblGetTokenAndSignatureCallback)(
+    _In_ void* context,
+    _In_ const_utf8_string token,
+    _In_ const_utf8_string signature
     );
 
-XBL_API FUNCTION_CONTEXT XBL_CALLING_CONV
-AddSignOutCompletedHandler(
-    _In_ XSAPI_SIGN_OUT_COMPLETED_HANDLER signOutHandler
+/// <summary>
+/// Retrieves an authorization token and digital signature for an HTTP request by this user,
+/// with a request body expressed as an array of bytes.
+/// </summary>
+/// <param name="user">The user handle.</param>
+/// <param name="httpMethod">The HTTP method (GET, PUT, POST, etc.) for this request.</param>
+/// <param name="url">The URL for which to retrieve the authorization token and digital signature.</param>
+/// <param name="headers">The headers to be included in the HTTP request.</param>
+/// <param name="requestBodyString">The body of the request, expressed as a string.</param>
+/// <param name="async">Caller allocated AsyncBlock.</param>
+/// <param name="context>A context to be passed back to the typed callback.</param>
+/// <param name="callback">A strongly typed callback function that will be called when the operation completes.
+/// Note that the token and signature parameteres pass to the callback are only valid until the callback returns.
+/// </param>
+XBL_API HRESULT XBL_CALLING_CONV
+XblUserGetTokenAndSignature(
+    _In_ xbl_user_handle user,
+    _In_ const_utf8_string httpMethod,
+    _In_ const_utf8_string url,
+    _In_ const_utf8_string headers,
+    _In_ const_utf8_string requestBodyString,
+    _In_ AsyncBlock* async,
+    _In_ void* callbackContext,
+    _In_ XblGetTokenAndSignatureCallback callback
     ) XBL_NOEXCEPT;
 
+typedef void (CALLBACK *XblSignOutCompletedHandler)(
+    _In_ xbl_user_handle user
+    );
+
+/// <summary>
+/// Registers a handler that will be called when user sign out completes.
+/// </summary>
+/// <param name="handler">The callback function that receives notifications.</param>
+/// <returns>
+/// A function_context object that can be used to unregister the event handler.
+/// </returns>
+XBL_API function_context XBL_CALLING_CONV
+XblAddSignOutCompletedHandler(
+    _In_ XblSignOutCompletedHandler handler
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Unregisters an event handler for sign-out completion notifications.
+/// </summary>
+/// <param name="context">The function_context that was returned when the event handler was registered. </param>
 XBL_API void XBL_CALLING_CONV
-RemoveSignOutCompletedHandler(
-    _In_ FUNCTION_CONTEXT context
+XblRemoveSignOutCompletedHandler(
+    _In_ function_context context
     ) XBL_NOEXCEPT;
 
 #endif //!XDK_API

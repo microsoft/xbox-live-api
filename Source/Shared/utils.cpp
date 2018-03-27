@@ -77,7 +77,7 @@ void init_mem_hooks()
 {
     if (g_pMemAllocHook == nullptr || g_pMemFreeHook == nullptr)
     {
-        g_pMemAllocHook = [](size_t size, XBL_MEMORY_TYPE memoryType)
+        g_pMemAllocHook = [](size_t size, XblMemoryType memoryType)
         {
             UNREFERENCED_PARAMETER(memoryType);
             if (size > 0)
@@ -87,7 +87,7 @@ void init_mem_hooks()
             return static_cast<void*>(nullptr);
         };
 
-        g_pMemFreeHook = [](void *pointer, XBL_MEMORY_TYPE memoryType)
+        g_pMemFreeHook = [](void *pointer, XblMemoryType memoryType)
         {
             UNREFERENCED_PARAMETER(memoryType);
             free(pointer);
@@ -2040,28 +2040,38 @@ XBL_RESULT utils::create_xbl_result(HC_RESULT hcResult)
     return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, static_cast<XBL_ERROR_CODE>(hcResult) };
 }
 
-XBL_RESULT utils::std_bad_alloc_to_xbl_result(
+HRESULT utils::hresult_from_error_code(std::error_code errc)
+{
+    // TODO flush this out
+    if (errc == xbox::services::xbox_live_error_condition::no_error)
+    {
+        return S_OK;
+    }
+    return E_FAIL;
+}
+
+HRESULT utils::std_bad_alloc_to_xbl_result(
     std::bad_alloc const& e
     )
 {
     UNREFERENCED_PARAMETER(e);
     LOG_ERROR("std::bad_alloc reached api boundary!");
-    return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_BAD_ALLOC };
+    return E_OUTOFMEMORY;
 }
 
-XBL_RESULT utils::std_exception_to_xbl_result(
+HRESULT utils::std_exception_to_xbl_result(
     std::exception const& e
     )
 {
     UNREFERENCED_PARAMETER(e);
     LOG_ERROR("std::exception reached api boundary");
-    return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_GENERIC_ERROR };
+    return E_FAIL;
 }
 
-XBL_RESULT utils::unknown_exception_to_xbl_result()
+HRESULT utils::unknown_exception_to_xbl_result()
 {
     LOG_ERROR("unknown exception reached api boundary");
-    return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, XBL_ERROR_CODE_GENERIC_ERROR };
+    return E_FAIL;
 }
 #endif // XSAPI_C
 

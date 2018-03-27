@@ -171,7 +171,7 @@ social_service_impl::get_social_relationships(
         m_xboxLiveContextSettings,
         "GET",
         utils::create_xboxlive_endpoint("social", m_appConfig),
-        utils::string_t_from_internal_string(pathAndQuery), // TODO switch after changing to internal uri impl
+        utils::string_t_from_internal_string(pathAndQuery),
         xbox_live_api::get_social_relationships
         );
 
@@ -181,8 +181,7 @@ social_service_impl::get_social_relationships(
         m_userContext, 
         http_call_response_body_type::json_body,
         false,
-        taskGroupId,
-        [thisShared, startIndex, filter, callback](std::shared_ptr<http_call_response_internal> response)
+        HttpCallAsyncBlock::alloc([thisShared, startIndex, filter, callback](std::shared_ptr<http_call_response_internal> response)
     {
         auto result = xbox_social_relationship_result_internal::deserialize(response->response_body_json());
 
@@ -201,7 +200,7 @@ social_service_impl::get_social_relationships(
         }
 
         callback(result);
-    });
+    }));
 
     return xbox_live_result<void>();
 }

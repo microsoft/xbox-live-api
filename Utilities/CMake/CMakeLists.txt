@@ -608,11 +608,8 @@ set(Clubs_Source_Files
     )
 
 set(UWP_System_Source_Files_C
-    ../../Source/C/System/user_c.cpp
-    ../../Source/C/System/user_impl_c.cpp
-    ../../Source/C/System/user_impl_c.h
-    ../../Source/C/System/user_taskargs.cpp
-    ../../Source/C/System/user_taskargs.h
+    ../../Source/System/C/user_c.h
+    ../../Source/System/C/user_c.cpp
     )
 
 set(Shared_Source_Files_C
@@ -1291,7 +1288,7 @@ else()
         source_group("C++ Source\\Services\\Social\\Manager\\C" FILES ${Social_Manager_Source_Files_C})
         
         if( NOT XDK )
-            source_group("C++ Source\\C\\System" FILES ${UWP_System_Source_Files_C})
+            source_group("C++ Source\\System\\C" FILES ${UWP_System_Source_Files_C})
         endif()
 	endif()
 

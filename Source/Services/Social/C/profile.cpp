@@ -14,15 +14,18 @@ using namespace xbox::services::social;
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetUserProfile(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_USER_PROFILE_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
-try
+//try
 {
-    RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || xboxUserId == nullptr || queue == nullptr);
+    if(xboxLiveContext == nullptr || xboxUserId == nullptr || queue == nullptr)
+    {
+        return XBL_RESULT_INVALID_ARG;
+    }
     auto profileService = xboxLiveContext->contextImpl->profile_service_impl();
 
     auto result = profileService->get_user_profile(
@@ -44,7 +47,7 @@ try
 
     return utils::create_xbl_result(result.err());
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 void get_user_profiles_complete(
     xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>> result,
@@ -66,16 +69,19 @@ void get_user_profiles_complete(
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetUserProfiles(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ PCSTR *xboxUserIds,
     _In_ uint32_t xboxUserIdsCount,
     _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_USER_PROFILES_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
-try
+//try
 {
-    RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || xboxUserIds == nullptr || queue == nullptr);
+    if (xboxLiveContext == nullptr || xboxUserIds == nullptr || queue == nullptr)
+    {
+        return XBL_RESULT_INVALID_ARG;
+    }
     auto profileService = xboxLiveContext->contextImpl->profile_service_impl();
 
     auto result = profileService->get_user_profiles(
@@ -88,19 +94,22 @@ try
 
     return utils::create_xbl_result(result.err());
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetUserProfilesForSocialGroup(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ PCSTR socialGroup,
     _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_USER_PROFILES_COMPLETION_ROUTINE callback
     ) XBL_NOEXCEPT
-try
+//try
 {
-    RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || socialGroup == nullptr || queue == nullptr);
+    if (xboxLiveContext == nullptr || socialGroup == nullptr || queue == nullptr)
+    {
+        return XBL_RESULT_INVALID_ARG;
+    }
     auto profileService = xboxLiveContext->contextImpl->profile_service_impl();
 
     auto result = profileService->get_user_profiles_for_social_group(
@@ -113,4 +122,4 @@ try
 
     return utils::create_xbl_result(result.err());
 }
-CATCH_RETURN()
+//CATCH_RETURN()

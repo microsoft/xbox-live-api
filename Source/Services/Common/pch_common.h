@@ -48,17 +48,18 @@
 
 #include "xsapi/types.h"
 #include "xsapi/mem.h"
+#if XSAPI_C
 #include "xsapi-c/types_c.h"
 #include "xsapi-c/errors_c.h"
 #include "xsapi-c/xbox_live_global_c.h"
+#endif
 
 #include "httpClient/types.h"
 #include "httpClient/httpClient.h"
 #include "httpClient/task.h"
-
-#if XSAPI_C
-#include "utils_c.h"
-#endif
+#include "httpClient/async.h"
+#include "httpClient/asyncProvider.h"
+#include "httpClient/asyncQueue.h"
 
 #include "http_headers.h"
 #include "cpprest/json.h"
@@ -67,6 +68,7 @@
 
 #include "xsapi/errors.h"
 #include "utils.h"
+#include "xbox_live_async.h"
 #if XSAPI_C
 #include "async_queue.h"
 #endif

@@ -1,15 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_c.cpp">
-      <Filter>C++ Source\C\System</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_impl_c.cpp">
-      <Filter>C++ Source\C\System</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_taskargs.cpp">
-      <Filter>C++ Source\C\System</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement.cpp">
       <Filter>C++ Source\Services\Achievements</Filter>
     </ClCompile>
@@ -769,6 +760,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\auth_config.cpp">
       <Filter>C++ Source\System</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_c.cpp">
+      <Filter>C++ Source\System\C</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\token_and_signature_result.cpp">
       <Filter>C++ Source\System</Filter>
     </ClCompile>
@@ -891,6 +885,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\profile_c.h">
       <Filter>C Public Includes</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\services_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_c.h">
       <Filter>C Public Includes</Filter>
     </ClInclude>
@@ -911,12 +908,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_global_c.h">
       <Filter>C Public Includes</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_impl_c.h">
-      <Filter>C++ Source\C\System</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_taskargs.h">
-      <Filter>C++ Source\C\System</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_serializers.h">
       <Filter>C++ Source\Services\Clubs</Filter>
@@ -1074,6 +1065,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\auth_config.h">
       <Filter>C++ Source\System</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_c.h">
+      <Filter>C++ Source\System\C</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\ppltasks_extra.h">
       <Filter>C++ Source\System</Filter>
     </ClInclude>
@@ -1083,8 +1077,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl.h">
       <Filter>C++ Source\System</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\xsapi-c\services_c.h">
-      <Filter>C Public Includes</Filter>
+    <ClInclude Include="..\..\Source\Shared\xbox_live_async.h">
+      <Filter>C++ Source\Shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1096,12 +1090,6 @@
     </Filter>
     <Filter Include="C++ Source">
       <UniqueIdentifier>{AFCC838D-D7FF-37A0-A511-3F4CB2127DCB}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="C++ Source\C">
-      <UniqueIdentifier>{F5A7B068-BDCD-3987-8577-2B2CE664D62B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="C++ Source\C\System">
-      <UniqueIdentifier>{5F1C6EFC-22B1-3CF0-B11B-B0DC0CE97C18}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services">
       <UniqueIdentifier>{7AD88441-A4AD-368B-AF0C-5AF02B604837}</UniqueIdentifier>
@@ -1183,6 +1171,9 @@
     </Filter>
     <Filter Include="C++ Source\System">
       <UniqueIdentifier>{726C90DE-90DC-36A6-B559-090139CBCAD4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\System\C">
+      <UniqueIdentifier>{ADE29175-A900-335D-8BEE-020474634852}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

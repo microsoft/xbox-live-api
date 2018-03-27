@@ -101,7 +101,7 @@ void web_socket_connection::ensure_connected()
     set_state_helper(web_socket_connection_state::connecting);
 
     auto context = utils::store_shared_ptr(shared_from_this());
-    HCTaskCreate(HC_SUBSYSTEM_ID_XSAPI, XSAPI_DEFAULT_TASKGROUP, // TODO API tp set this
+    HCTaskCreate(HC_SUBSYSTEM_ID_XSAPI, XSAPI_DEFAULT_TASKGROUP, // TODO API to set this
         [](void* context, HC_TASK_HANDLE taskHandle)
         {
             auto pThis = utils::remove_shared_ptr<web_socket_connection>(context);

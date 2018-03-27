@@ -54,8 +54,7 @@ void user_impl::get_token_and_signature(
     _In_ const xsapi_internal_string& httpMethod,
     _In_ const xsapi_internal_string& url,
     _In_ const xsapi_internal_string& headers,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
+    _In_ std::shared_ptr<TokenAndSignatureAsyncBlock> asyncBlock
     )
 {
     internal_get_token_and_signature(
@@ -66,8 +65,7 @@ void user_impl::get_token_and_signature(
         xsapi_internal_vector<unsigned char>(),
         false,
         false,
-        taskGroupId,
-        callback
+        asyncBlock
         );
 }
 
@@ -76,8 +74,7 @@ void user_impl::get_token_and_signature(
     _In_ const xsapi_internal_string& url,
     _In_ const xsapi_internal_string& headers,
     _In_ const xsapi_internal_string& requestBodyString,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
+    _In_ std::shared_ptr<TokenAndSignatureAsyncBlock> asyncBlock
     )
 {
     xsapi_internal_vector<unsigned char> utf8Vec(requestBodyString.begin(), requestBodyString.end());
@@ -90,8 +87,7 @@ void user_impl::get_token_and_signature(
         utf8Vec,
         false,
         false,
-        taskGroupId,
-        callback
+        asyncBlock
         );
 }
 
@@ -100,8 +96,7 @@ void user_impl::get_token_and_signature(
     _In_ const xsapi_internal_string& url,
     _In_ const xsapi_internal_string& headers,
     _In_ const xsapi_internal_vector<unsigned char>& requestBodyArray,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
+    _In_ std::shared_ptr<TokenAndSignatureAsyncBlock> asyncBlock
     )
 {
     internal_get_token_and_signature(
@@ -112,8 +107,7 @@ void user_impl::get_token_and_signature(
         requestBodyArray,
         false,
         false,
-        taskGroupId,
-        callback
+        asyncBlock
         );
 }
 

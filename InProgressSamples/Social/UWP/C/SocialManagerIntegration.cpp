@@ -12,11 +12,11 @@ using namespace Windows::Foundation;
 using namespace Windows::System::Threading;
 using namespace Concurrency;
 
-void Game::AddUserToSocialManager(XBL_XBOX_LIVE_USER* user)
+void Game::AddUserToSocialManager(xbl_user_handle user)
 {
     stringstream_t source;
     source << _T("Adding user ");
-    source << user->gamertag;
+    source << GetGamertag();
     source << _T(" to SocialManager");
     Log(source.str());
 
@@ -25,31 +25,33 @@ void Game::AddUserToSocialManager(XBL_XBOX_LIVE_USER* user)
     CreateSocialGroupsBasedOnUI(user);
 }
 
-void Game::RemoveUserFromSocialManager(XBL_XBOX_LIVE_USER* user)
+void Game::RemoveUserFromSocialManager(xbl_user_handle user)
 {
     stringstream_t source;
     source << _T("Removing user ");
-    source << user->gamertag;
+    char gamertag[GamertagMaxBytes];
+    XblUserGetGamertag(user, GamertagMaxBytes, gamertag, nullptr);
+    source << utility::conversions::utf8_to_utf16(gamertag);
     source << _T(" from SocialManager");
     Log(source.str());
 
-    auto it = m_socialGroups.begin();
-    while (it != m_socialGroups.end())
-    {
-        if (strcmp(m_user->xboxUserId, (*it)->localUser->xboxUserId) == 0)
-        {
-            it = m_socialGroups.erase(it);
-        }
-        else
-        {
-            ++it;
-        }
-    }
+    //auto it = m_socialGroups.begin();
+    //while (it != m_socialGroups.end())
+    //{
+    //    if (strcmp(m_user->xboxUserId, (*it)->localUser->xboxUserId) == 0)
+    //    {
+    //        it = m_socialGroups.erase(it);
+    //    }
+    //    else
+    //    {
+    //        ++it;
+    //    }
+    //}
     XblSocialManagerRemoveLocalUser(user);
 }
 
 void Game::CreateOrUpdateSocialGroupFromList(
-    XBL_XBOX_LIVE_USER* user,
+    xbl_user_handle user,
     std::vector<std::string> xuidList
     )
 {
@@ -83,7 +85,7 @@ void Game::CreateOrUpdateSocialGroupFromList(
     delete[] xuidListArray;
 }
 
-void Game::DestroySocialGroup(XBL_XBOX_LIVE_USER* user)
+void Game::DestroySocialGroup(xbl_user_handle user)
 {
     auto it = m_socialGroups.begin();
     while (it != m_socialGroups.end())
@@ -101,7 +103,7 @@ void Game::DestroySocialGroup(XBL_XBOX_LIVE_USER* user)
 }
 
 void Game::CreateSocialUserGroupFromFilters(
-    XBL_XBOX_LIVE_USER* user,
+    xbl_user_handle user,
     XBL_PRESENCE_FILTER presenceFilter,
     XBL_RELATIONSHIP_FILTER relationshipFilter
     )
@@ -116,7 +118,7 @@ void Game::CreateSocialUserGroupFromFilters(
 }
 
 void Game::DestroySocialGroup(
-    XBL_XBOX_LIVE_USER* user,
+    xbl_user_handle user,
     XBL_PRESENCE_FILTER presenceFilter,
     XBL_RELATIONSHIP_FILTER relationshipFilter
     )

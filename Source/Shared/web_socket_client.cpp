@@ -10,6 +10,8 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
+using namespace xbox::services::system;
+
 xsapi_internal_unordered_map<HC_WEBSOCKET_HANDLE, xbox_web_socket_client*> xbox_web_socket_client::m_handleMap;
 
 xbox_web_socket_client::xbox_web_socket_client()
@@ -35,9 +37,10 @@ void xbox_web_socket_client::connect(
 
     std::weak_ptr<xbox_web_socket_client> thisWeakPtr = shared_from_this();
 
-    string_t callerContext = utils::string_t_from_internal_string(userContext->caller_context());
-    userContext->get_auth_result("GET", uri, xsapi_internal_string(), xsapi_internal_string(), false, /* TODO */ XSAPI_DEFAULT_TASKGROUP,
-    [uri, subProtocol, callerContext, thisWeakPtr, callback](xbox::services::xbox_live_result<user_context_auth_result> xblResult)
+    xsapi_internal_string callerContext = userContext->caller_context();
+    userContext->get_auth_result("GET", uri, xsapi_internal_string(), xsapi_internal_string(), false,
+        AuthAsyncBlock::alloc(
+        [uri, subProtocol, callerContext, thisWeakPtr, callback](xbox::services::xbox_live_result<user_context_auth_result> xblResult)
     {
         std::shared_ptr<xbox_web_socket_client> pThis(thisWeakPtr.lock());
         if (pThis == nullptr)
@@ -65,7 +68,7 @@ void xbox_web_socket_client::connect(
         xsapi_internal_string userAgent = DEFAULT_USER_AGENT;
         if (!callerContext.empty())
         {
-            userAgent += " " + utils::internal_string_from_string_t(callerContext);
+            userAgent += " " + callerContext;
         }
         HCWebSocketSetHeader(pThis->m_websocket, "User-Agent", userAgent.data());
 
@@ -108,15 +111,20 @@ void xbox_web_socket_client::connect(
             }
         });
 
-        auto connectContext = utils::store_shared_ptr(xsapi_allocate_shared<xbox_live_callback<HC_RESULT, uint32_t>>(callback));
-
-        HCWebSocketConnect(uri.data(), subProtocol.data(), pThis->m_websocket, HC_SUBSYSTEM_ID_XSAPI, XSAPI_DEFAULT_TASKGROUP, connectContext,
-            [](void* context, HC_WEBSOCKET_HANDLE, HC_RESULT errorCode, uint32_t platformErrorCode)
+        AsyncBlock *asyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+        // TODO should have some way to set the queue here
+        asyncBlock->context = utils::store_shared_ptr(xsapi_allocate_shared<xbox_live_callback<HC_RESULT, uint32_t>>(callback));
+        asyncBlock->callback = [](_In_ AsyncBlock* asyncBlock)
         {
-            auto callback = utils::remove_shared_ptr<xbox_live_callback<HC_RESULT, uint32_t>>(context);
-            (*callback)(errorCode, platformErrorCode);
-        });
-    });
+            WebSocketCompletionResult result = {};
+            HCGetWebSocketConnectResult(asyncBlock, &result);
+
+            auto callback = utils::remove_shared_ptr<xbox_live_callback<HC_RESULT, uint32_t>>(asyncBlock->context);
+            (*callback)(result.errorCode, result.platformErrorCode);
+        };
+
+        HCWebSocketConnect(uri.data(), subProtocol.data(), pThis->m_websocket, asyncBlock);
+    }));
 }
 
 void xbox_web_socket_client::send(
@@ -126,12 +134,12 @@ void xbox_web_socket_client::send(
 {
     auto sendContext = utils::store_shared_ptr(xsapi_allocate_shared<xbox_live_callback<HC_RESULT, uint32_t>>(callback));
 
-    HCWebSocketSendMessage(m_websocket, message.data(), HC_SUBSYSTEM_ID_XSAPI, XSAPI_DEFAULT_TASKGROUP, sendContext,
-        [](void* context, HC_WEBSOCKET_HANDLE, HC_RESULT errorCode, uint32_t platformErrorCode)
-    {
-        auto callback = utils::remove_shared_ptr<xbox_live_callback<HC_RESULT, uint32_t>>(context);
-        (*callback)(errorCode, platformErrorCode);
-    });
+    //HCWebSocketSendMessage(m_websocket, message.data(), HC_SUBSYSTEM_ID_XSAPI, XSAPI_DEFAULT_TASKGROUP, sendContext,
+    //    [](void* context, HC_WEBSOCKET_HANDLE, HC_RESULT errorCode, uint32_t platformErrorCode)
+    //{
+    //    auto callback = utils::remove_shared_ptr<xbox_live_callback<HC_RESULT, uint32_t>>(context);
+    //    (*callback)(errorCode, platformErrorCode);
+    //});
 }
 
 void xbox_web_socket_client::close()

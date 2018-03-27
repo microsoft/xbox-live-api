@@ -32,8 +32,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 void user_impl_idp::sign_in_impl(
     _In_ bool showUI, 
     _In_ bool forceRefresh,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox_live_result<sign_in_result>> callback
+    _In_ std::shared_ptr<SignInAsyncBlock> asyncBlock
     )
 {
     UNREFERENCED_PARAMETER(forceRefresh);
@@ -53,12 +52,12 @@ void user_impl_idp::sign_in_impl(
         }
     }
 
-    initialize_provider([thisWeakPtr, showUI, callback, taskGroupId](void)
+    initialize_provider([thisWeakPtr, showUI, asyncBlock](void)
     {
         std::shared_ptr<user_impl_idp> pThis(thisWeakPtr.lock());
         if (pThis == nullptr)
         {
-            callback(xbox_live_result<sign_in_result>(xbox_live_error_code::runtime_error, "user_impl shutting down"));
+            asyncBlock->typedCallback(xbox_live_result<sign_in_result>(xbox_live_error_code::runtime_error, "user_impl shutting down"));
             return;
         }
 
@@ -73,7 +72,7 @@ void user_impl_idp::sign_in_impl(
 
         if (result.err())
         {
-            callback(xbox_live_result<sign_in_result>(result.err(), result.err_message()));
+            asyncBlock->typedCallback(xbox_live_result<sign_in_result>(result.err(), result.err_message()));
         }
         else
         {
@@ -131,12 +130,12 @@ void user_impl_idp::sign_in_impl(
                         msg << " MSA Provider error: " << providerErrorMsg << ", Error Code: 0x" << std::hex << patnerTokenResult->ResponseError->ErrorCode;
 
                         std::error_code error = xbox_live_error_code(patnerTokenResult->ResponseError->ErrorCode);
-                        callback(xbox_live_result<sign_in_result>(error, msg.str()));
+                        asyncBlock->typedCallback(xbox_live_result<sign_in_result>(error, msg.str()));
                         return;
                     }
                     else if (patnerTokenResult == nullptr || patnerTokenResult->ResponseStatus != WebTokenRequestStatus::Success) //other error 
                     {
-                        callback(xbox_live_result<sign_in_result>(convert_web_token_request_status(patnerTokenResult)));
+                        asyncBlock->typedCallback(xbox_live_result<sign_in_result>(convert_web_token_request_status(patnerTokenResult)));
                         return;
                     }
                 }
@@ -166,8 +165,8 @@ void user_impl_idp::sign_in_impl(
                         httpCall->set_custom_header("Signature", payload.signature());
                     }
 
-                    httpCall->get_response(http_call_response_body_type::json_body, taskGroupId,
-                        [pThis, showUI, payload, callback](std::shared_ptr<http_call_response_internal> response)
+                    httpCall->get_response(http_call_response_body_type::json_body, HttpCallAsyncBlock::alloc(
+                        [pThis, showUI, payload, asyncBlock](std::shared_ptr<http_call_response_internal> response)
                     {
                         // If gettig 401, try to refresh token. If we succeeded or failed or any other reason, ignore the result and move on.
                         if (response->err_code().value() == (int)xbox_live_error_code::http_status_401_unauthorized)
@@ -187,36 +186,36 @@ void user_impl_idp::sign_in_impl(
                                 //if it's silent pass, give user interaction required.
                                 if (!showUI)
                                 {
-                                    callback( xbox_live_result<sign_in_result>(sign_in_status::user_interaction_required));
+                                    asyncBlock->typedCallback( xbox_live_result<sign_in_result>(sign_in_status::user_interaction_required));
                                     return;
                                 }
                                 else
                                 {
-                                    callback(xbox_live_result<sign_in_result>(refreshResult.err(), refreshResult.err_message()));
+                                    asyncBlock->typedCallback(xbox_live_result<sign_in_result>(refreshResult.err(), refreshResult.err_message()));
                                     return;
                                 }
                             }
                             else if (refreshResult.payload()->xbox_user_id().empty())
                             {
-                                callback(xbox_live_result<sign_in_result>(convert_web_token_request_status(refreshResult.payload()->token_request_result())));
+                                asyncBlock->typedCallback(xbox_live_result<sign_in_result>(convert_web_token_request_status(refreshResult.payload()->token_request_result())));
                                 return;
                             }
                         }
 
                         pThis->user_signed_in(payload.xbox_user_id(), payload.gamertag(), payload.age_group(), payload.privileges(), payload.web_account_id());
-                        callback(xbox_live_result<sign_in_result>(sign_in_status::success));
-                    });
+                        asyncBlock->typedCallback(xbox_live_result<sign_in_result>(sign_in_status::success));
+                    }));
                 }
                 else
                 {
                     pThis->user_signed_in(payload.xbox_user_id(), payload.gamertag(), payload.age_group(), payload.privileges(), payload.web_account_id());
 
-                    callback(xbox_live_result<sign_in_result>(sign_in_status::success));
+                    asyncBlock->typedCallback(xbox_live_result<sign_in_result>(sign_in_status::success));
                 }
             }
             else
             {
-                callback(xbox_live_result<sign_in_result>(convert_web_token_request_status(payload.token_request_result())));
+                asyncBlock->typedCallback(xbox_live_result<sign_in_result>(convert_web_token_request_status(payload.token_request_result())));
             }
         }
     });
@@ -277,6 +276,19 @@ user_impl_idp::user_impl_idp(Windows::System::User^ systemUser) :
 {
 }
 
+struct get_token_and_signature_context
+{
+    std::shared_ptr<user_impl> userImpl;
+    xsapi_internal_string httpMethod;
+    xsapi_internal_string url;
+    xsapi_internal_string headers;
+    xsapi_internal_vector<unsigned char> bytes;
+    bool promptForCredentialsIfNeeded;
+    bool forceRefresh;
+    xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result;
+    std::shared_ptr<TokenAndSignatureAsyncBlock> asyncBlock;
+};
+
 void user_impl_idp::internal_get_token_and_signature(
     _In_ const xsapi_internal_string& httpMethod,
     _In_ const xsapi_internal_string& url,
@@ -285,28 +297,32 @@ void user_impl_idp::internal_get_token_and_signature(
     _In_ const xsapi_internal_vector<unsigned char>& bytes,
     _In_ bool promptForCredentialsIfNeeded,
     _In_ bool forceRefresh,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
+    _In_ std::shared_ptr<TokenAndSignatureAsyncBlock> asyncBlock
     )
 {
     UNREFERENCED_PARAMETER(endpointForNsal);
 
-    auto context = utils::store_shared_ptr(xsapi_allocate_shared<get_token_and_signature_context>(
-        shared_from_this(),
-        httpMethod,
-        url,
-        headers,
-        bytes,
-        promptForCredentialsIfNeeded,
-        forceRefresh,
-        callback
-        ));
+    auto context = xsapi_allocate_shared<get_token_and_signature_context>();
+    context->userImpl = shared_from_this();
+    context->httpMethod = httpMethod;
+    context->url = url;
+    context->headers = headers;
+    context->bytes = bytes;
+    context->promptForCredentialsIfNeeded = promptForCredentialsIfNeeded;
+    context->forceRefresh = forceRefresh;
+    context->asyncBlock = asyncBlock;
 
-    HCTaskCreate(HC_SUBSYSTEM_ID::HC_SUBSYSTEM_ID_XSAPI, taskGroupId,
-        [](_In_opt_ void *_context, _In_ HC_TASK_HANDLE taskHandle)
+    auto hresult = BeginAsync(asyncBlock.get(), utils::store_shared_ptr(context), nullptr, __FUNCTION__,
+        [](_In_ AsyncOp op, _Inout_ AsyncProviderData* data)
+    {
+        std::shared_ptr<get_token_and_signature_context> context;
+        std::shared_ptr<user_impl_idp> pThis;
+
+        switch (op)
         {
-            auto context = utils::remove_shared_ptr<get_token_and_signature_context>(_context, false);
-            auto pThis = std::dynamic_pointer_cast<user_impl_idp>(context->userImpl);
+        case AsyncOp_DoWork:
+            context = utils::remove_shared_ptr<get_token_and_signature_context>(data->context, false);
+            pThis = std::dynamic_pointer_cast<user_impl_idp>(context->userImpl);
 
             context->result = pThis->internal_get_token_and_signature_helper(
                 context->httpMethod,
@@ -334,23 +350,23 @@ void user_impl_idp::internal_get_token_and_signature(
                     context->result = xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>(xbox_live_error_code::runtime_error, ss.str());
                 }
             }
-            return HCTaskSetCompleted(taskHandle);
-        },
-        context,
-        [](_In_opt_ void *_context, _In_ HC_TASK_HANDLE taskHandle, void *completionRoutine, void *completionRoutineContext)
-        {
-            UNREFERENCED_PARAMETER(taskHandle);
-            UNREFERENCED_PARAMETER(completionRoutine);
-            UNREFERENCED_PARAMETER(completionRoutineContext);
-            auto context = utils::remove_shared_ptr<get_token_and_signature_context>(_context);
-            context->callback(context->result);
-            return HC_OK;
-        },
-        context,
-        nullptr,
-        nullptr,
-        nullptr
-        );
+
+            CompleteAsync(data->async, S_OK, sizeof(xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>));
+            break;
+
+        case AsyncOp_GetResult:
+            context = utils::remove_shared_ptr<get_token_and_signature_context>(data->context, false);
+            (void) new (data->buffer) xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>(context->result);
+            break;
+
+        case AsyncOp_Cleanup:
+            context = utils::remove_shared_ptr<get_token_and_signature_context>(data->context, true);
+            break;
+        }
+        return S_OK;
+    });
+
+    ScheduleAsync(asyncBlock.get(), 0);
 }
 
 xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>

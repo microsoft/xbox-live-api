@@ -92,11 +92,11 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
         m_userContext,
         http_call_response_body_type::json_body,
         false,
-        taskGroupId,
-        [callback](std::shared_ptr<http_call_response_internal> response) 
+        HttpCallAsyncBlock::alloc([callback](std::shared_ptr<http_call_response_internal> response) 
         {
             handle_get_user_profiles_response(response, callback); 
-        });
+        })
+    );
 
     return xbox_live_result<void>();
 }
@@ -126,11 +126,11 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_soc
         m_userContext, 
         http_call_response_body_type::json_body, 
         false,
-        taskGroupId,
-        [callback](std::shared_ptr<http_call_response_internal> response) 
+        HttpCallAsyncBlock::alloc([callback](std::shared_ptr<http_call_response_internal> response) 
         { 
             handle_get_user_profiles_response(response, callback); 
-        });
+        })
+    );
 
     return xbox_live_result<void>();
 }
@@ -160,7 +160,6 @@ void profile_service_impl::handle_get_user_profiles_response(
     }
     else
     {
-        // TODO add xbox_live_result_internal
         callback(xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>(response->err_code(), std::string(response->err_message().data())));
     }
 }
@@ -184,7 +183,6 @@ const xsapi_internal_string profile_service_impl::settings_query()
     uint32_t arraySize = ARRAYSIZE(SETTINGS_ARRAY);
     for (uint32_t i = 0; i < arraySize; ++i)
     {
-        // TODO change to all internal strings so we don't double convert here
         source << utils::internal_string_from_string_t(web::http::uri::encode_uri(utils::string_t_from_internal_string(SETTINGS_ARRAY[i])));
         if (i + 1 != arraySize)
         {

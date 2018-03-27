@@ -15,7 +15,7 @@
 #include "xsapi/system.h"
 
 struct XBL_XBOX_LIVE_USER;
-struct XBL_XBOX_LIVE_APP_CONFIG;
+struct XblAppConfig;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
     class xbox_live_services_settings;
@@ -346,7 +346,7 @@ struct xsapi_singleton
     std::shared_ptr<xbox_live_app_config_internal> m_internalAppConfigSinglton;
 
     // from Shared\C\xbox_live_app_config.cpp
-    std::shared_ptr<XBL_XBOX_LIVE_APP_CONFIG> m_cAppConfigSingleton;
+    std::shared_ptr<XblAppConfig> m_cAppConfigSingleton;
 
     // from Misc\notification_service.cpp
     std::shared_ptr<xbox::services::notification::notification_service> m_notificationSingleton;
@@ -431,10 +431,9 @@ struct xsapi_singleton
     function_context m_signOutCompletedHandlerIndexer;
     function_context m_signInCompletedHandlerIndexer;
     std::mutex m_trackingUsersLock;
+    // from System\C\user_c.cpp
+    std::unordered_map<std::shared_ptr<xbox::services::system::xbox_live_user>, xbl_user_handle> m_signedInUsers;
 #endif
-
-    std::mutex m_usersLock;
-    std::unordered_map<xsapi_internal_string, XBL_XBOX_LIVE_USER*> m_signedInUsers;
 
     std::mutex m_callbackContextsLock;
     xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_callbackContextPtrs;
@@ -1483,9 +1482,11 @@ public:
     static XBL_RESULT create_xbl_result(std::error_code errc);
     static XBL_RESULT create_xbl_result(HC_RESULT hcResult);
 
-    static XBL_RESULT std_bad_alloc_to_xbl_result(std::bad_alloc const& e);
-    static XBL_RESULT std_exception_to_xbl_result(std::exception const& e);
-    static XBL_RESULT unknown_exception_to_xbl_result();
+    static HRESULT hresult_from_error_code(std::error_code errc);
+
+    static HRESULT std_bad_alloc_to_xbl_result(std::bad_alloc const& e);
+    static HRESULT std_exception_to_xbl_result(std::exception const& e);
+    static HRESULT unknown_exception_to_xbl_result();
 #endif
 
 private:

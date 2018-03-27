@@ -101,7 +101,7 @@ void peoplehub_service::get_social_graph(
     auto task = httpCall->get_response_with_auth(m_userContext,
         http_call_response_body_type::json_body,
         false,
-        taskGroupId,
+        HttpCallAsyncBlock::alloc(
     [callback](std::shared_ptr<http_call_response_internal> response)
     {
         std::error_code errc;
@@ -134,7 +134,7 @@ void peoplehub_service::get_social_graph(
             );
 
         callback(result);
-    });
+    }));
 }
 
 xsapi_internal_string peoplehub_service::social_graph_subpath(

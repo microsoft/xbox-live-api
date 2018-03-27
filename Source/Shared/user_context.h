@@ -44,6 +44,8 @@ private:
     xsapi_internal_string m_signature;
 };
 
+typedef XblAsyncBlock<xbox_live_result<user_context_auth_result>> AuthAsyncBlock;
+
 class user_context
 {
 public:
@@ -62,8 +64,7 @@ public:
         _In_ const xsapi_internal_string& headers,
         _In_ const xsapi_internal_string& requestBodyString,
         _In_ bool allUsersAuthRequired,
-        _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+        _In_ std::shared_ptr<AuthAsyncBlock> asyncBlock
         );
 
     void get_auth_result(
@@ -72,8 +73,7 @@ public:
         _In_ const xsapi_internal_string& headers,
         _In_ const xsapi_internal_vector<unsigned char>& requestBodyVector,
         _In_ bool allUsersAuthRequired,
-        _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+        _In_ std::shared_ptr<AuthAsyncBlock> asyncBlock
         );
 
     void refresh_token(

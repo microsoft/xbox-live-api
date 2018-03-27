@@ -63,11 +63,11 @@ xbox_live_result<void> reputation_service_impl::submit_reputation_feedback(
         m_userContext, 
         http_call_response_body_type::string_body,
         false,
-        taskGroupId,
-        [callback](std::shared_ptr<http_call_response_internal> response)
-    {
-        callback(xbox_live_result<void>(response->err_code(), std::string(response->err_message().data())));
-    });
+        HttpCallAsyncBlock::alloc([callback](std::shared_ptr<http_call_response_internal> response)
+        {
+            callback(xbox_live_result<void>(response->err_code(), std::string(response->err_message().data())));
+        })
+    );
 
     return xbox_live_result<void>();
 }
@@ -109,11 +109,11 @@ xbox_live_result<void> reputation_service_impl::submit_batch_reputation_feedback
         m_userContext, 
         http_call_response_body_type::string_body,
         false, 
-        taskGroupId,
-        [callback](std::shared_ptr<http_call_response_internal> response)
-    {
-        callback(xbox_live_result<void>(response->err_code(), std::string(response->err_message().data())));
-    });
+        HttpCallAsyncBlock::alloc([callback](std::shared_ptr<http_call_response_internal> response)
+        {
+            callback(xbox_live_result<void>(response->err_code(), std::string(response->err_message().data())));
+        })
+    );
 
     return xbox_live_result<void>();
 }

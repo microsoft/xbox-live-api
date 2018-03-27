@@ -18,8 +18,8 @@
 #else
 #define RETURN_TASK_CPP_INVALIDARGUMENT_IF(x, type, message) { assert(!(x)); if ( x ) { return pplx::task_from_result(xbox::services::xbox_live_result<type>(xbox_live_error_code::invalid_argument, message)); } }
 #define RETURN_CPP_INVALIDARGUMENT_IF(x, type, message) { assert(!(x)); if ( x ) { return xbox::services::xbox_live_result<type>(xbox_live_error_code::invalid_argument, message); } }
-#define RETURN_C_INVALIDARGUMENT_IF(x) { assert(!(x)); if ( x ) { return XBL_RESULT_INVALID_ARG; } }
-#define RETURN_C_INVALIDARGUMENT_IF_NULL(x) { assert(!(( x ) == nullptr)); if ( ( x ) == nullptr ) { return XBL_RESULT_INVALID_ARG; } }
+#define RETURN_C_INVALIDARGUMENT_IF(x) { assert(!(x)); if ( x ) { return E_INVALIDARG; } }
+#define RETURN_C_INVALIDARGUMENT_IF_NULL(x) { assert(!(( x ) == nullptr)); if ( ( x ) == nullptr ) { return E_INVALIDARG; } }
 #endif
 #define THROW_CPP_INVALIDARGUMENT_IF(x) if ( x ) { throw std::invalid_argument(""); }
 #define THROW_CPP_INVALIDARGUMENT_IF_NULL(x) if ( ( x ) == nullptr ) { throw std::invalid_argument(""); }

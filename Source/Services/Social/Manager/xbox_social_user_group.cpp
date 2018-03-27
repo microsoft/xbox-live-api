@@ -92,7 +92,7 @@ xbox_social_user_group_internal::xbox_social_user_group_internal(
             continue;
         }
 
-        m_userUpdateListString.push_back(utils::string_t_from_internal_string(user).c_str()); // TODO
+        m_userUpdateListString.push_back(utils::string_t_from_internal_string(user).c_str());
         m_userUpdateListInt.push_back(id);
     }
 }

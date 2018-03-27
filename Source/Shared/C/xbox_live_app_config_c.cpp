@@ -7,23 +7,20 @@
 
 using namespace xbox::services;
 
-XBL_API XBL_RESULT XBL_CALLING_CONV
+XBL_API HRESULT XBL_CALLING_CONV
 XblGetXboxLiveAppConfigSingleton(
-    _Out_ CONST XBL_XBOX_LIVE_APP_CONFIG** ppConfig
+    _Out_ const XblAppConfig** appConfig
     ) XBL_NOEXCEPT
 try
 {
-    if (ppConfig == nullptr)
-    {
-        return XBL_RESULT_INVALID_ARG;
-    }
+    RETURN_C_INVALIDARGUMENT_IF_NULL(appConfig);
 
     auto singleton = get_xsapi_singleton();
     std::lock_guard<std::mutex> lock(singleton->m_singletonLock);
 
     if (singleton->m_cAppConfigSingleton == nullptr)
     {
-        singleton->m_cAppConfigSingleton = xsapi_allocate_shared<XBL_XBOX_LIVE_APP_CONFIG>();
+        singleton->m_cAppConfigSingleton = xsapi_allocate_shared<XblAppConfig>();
         auto internalConfig = xbox_live_app_config_internal::get_app_config_singleton();
 
         singleton->m_cAppConfigSingleton->environment = internalConfig->environment().data();
@@ -31,8 +28,8 @@ try
         singleton->m_cAppConfigSingleton->sandbox = internalConfig->sandbox().data();
         singleton->m_cAppConfigSingleton->titleId = internalConfig->title_id();
     }
-    *ppConfig = singleton->m_cAppConfigSingleton.get();
+    *appConfig = singleton->m_cAppConfigSingleton.get();
 
-    return XBL_RESULT_OK;
+    return S_OK;
 }
 CATCH_RETURN()

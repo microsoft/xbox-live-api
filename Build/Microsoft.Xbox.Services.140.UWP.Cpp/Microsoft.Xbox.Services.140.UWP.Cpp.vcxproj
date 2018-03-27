@@ -70,42 +70,7 @@
       <AdditionalOptions>/bigobj /Zm300 %(AdditionalOptions)</AdditionalOptions>
       <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories> 
-       $(ProjectDir);
-       $(ProjectDir)..\..\Source\Services;
-       $(ProjectDir)..\..\Source\Services\Common;
-       $(ProjectDir)..\..\Source\Services\Common\C;
-       $(ProjectDir)..\..\Source\Services\Common\Desktop;
-       $(ProjectDir)..\..\Source\Services\Social;
-       $(ProjectDir)..\..\Source\Services\Multiplayer;
-       $(ProjectDir)..\..\Source\Services\Presence;
-       $(ProjectDir)..\..\Source\Services\Misc;
-       $(ProjectDir)..\..\Source\Services\Social\Manager;
-       $(ProjectDir)..\..\Source\Services\Social\C;
-       $(ProjectDir)..\..\Source\Services\RealTimeActivity;
-       $(ProjectDir)..\..\Source\Services\Clubs;
-       $(ProjectDir)..\..\Source\Shared;
-       $(ProjectDir)..\..\Source\Shared\WinRT;
-       $(ProjectDir)..\..\Include;
-       $(ProjectDir)..\..\Include\cpprestsdk;
-       $(ProjectDir)..\..\Source\System\WinRT;
-       $(ProjectDir)..\..\Source\System;
-       $(ProjectDir)..\..\Source\C\Services\TitleStorage;
-       $(ProjectDir)..\..\Source\C\Services\Common;
-       $(ProjectDir)..\..\Source\C\Services\Social;
-       $(ProjectDir)..\..\Source\C\Services\Multiplayer;
-       $(ProjectDir)..\..\Source\C\Services\Presence;
-       $(ProjectDir)..\..\Source\C\Services\Misc;
-       $(ProjectDir)..\..\Source\C\Services\Social\Manager;
-       $(ProjectDir)..\..\Source\C\Services\RealTimeActivity;
-       $(ProjectDir)..\..\Source\C\Services\Achievements;
-       $(ProjectDir)..\..\Source\C\Shared;
-       $(ProjectDir)..\..\Source\C\Shared\WinRT;
-       $(ProjectDir)..\..\Source\C\System;
-       $(ProjectDir)..\..\Source\C\Services\Leaderboard;
-       $(ProjectDir)..\..\Source\C\Services\Stats\Manager;
-       %(AdditionalIncludeDirectories)
-      </AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\Source\Services;$(ProjectDir)..\..\Source\Services\Common;$(ProjectDir)..\..\Source\Services\Common\C;$(ProjectDir)..\..\Source\Services\Common\Desktop;$(ProjectDir)..\..\Source\Services\Social;$(ProjectDir)..\..\Source\Services\Multiplayer;$(ProjectDir)..\..\Source\Services\Presence;$(ProjectDir)..\..\Source\Services\Misc;$(ProjectDir)..\..\Source\Services\Social\Manager;$(ProjectDir)..\..\Source\Services\Social\C;$(ProjectDir)..\..\Source\Services\RealTimeActivity;$(ProjectDir)..\..\Source\Services\Clubs;$(ProjectDir)..\..\Source\Shared;$(ProjectDir)..\..\Source\Shared\WinRT;$(ProjectDir)..\..\Include;$(ProjectDir)..\..\Include\cpprestsdk;$(ProjectDir)..\..\Source\System\WinRT;$(ProjectDir)..\..\Source\System;$(ProjectDir)..\..\Source\C\Services\TitleStorage;$(ProjectDir)..\..\Source\C\Services\Common;$(ProjectDir)..\..\Source\C\Services\Social;$(ProjectDir)..\..\Source\C\Services\Multiplayer;$(ProjectDir)..\..\Source\C\Services\Presence;$(ProjectDir)..\..\Source\C\Services\Misc;$(ProjectDir)..\..\Source\C\Services\Social\Manager;$(ProjectDir)..\..\Source\C\Services\RealTimeActivity;$(ProjectDir)..\..\Source\C\Services\Achievements;$(ProjectDir)..\..\Source\C\Shared;$(ProjectDir)..\..\Source\C\Shared\WinRT;$(ProjectDir)..\..\Source\C\System;$(ProjectDir)..\..\Source\C\Services\Leaderboard;$(ProjectDir)..\..\Source\C\Services\Stats\Manager;$(ProjectDir)..\..\Source\System\C;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAsWinRT>true</CompileAsWinRT>
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ShowIncludes>
     </ClCompile>
@@ -141,8 +106,6 @@
     <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectFolder)\</IntDir>
   </PropertyGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_impl_c.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_taskargs.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_serializers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\async_queue.h" />
@@ -194,6 +157,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_app_config_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_service_call_routed_event_args_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\auth_config.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\ppltasks_extra.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\system_internal.h" />
@@ -201,6 +165,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\errors_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\presence_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\profile_c.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\services_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_manager_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\system_c.h" />
@@ -240,9 +205,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_context.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_context_settings.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_service_call_routed_event_args.h" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_c.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_impl_c.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\C\System\user_taskargs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_media_asset.cpp" />
@@ -498,13 +460,14 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_services_settings.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_service_call_routed_event_args.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\auth_config.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\token_and_signature_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\user.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl_idp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\xbox_live_mutex.cpp" />
-    <ClInclude Include="..\..\Include\xsapi-c\services_c.h" />
+    <ClInclude Include="..\..\Source\Shared\xbox_live_async.h" />
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>

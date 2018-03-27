@@ -143,7 +143,7 @@ XblIsAsyncQueueEmpty(
 typedef _Ret_maybenull_ _Post_writable_byte_size_(size) void*
 (XBL_CALLING_CONV* XBL_MEM_ALLOC_FUNC)(
     _In_ size_t size,
-    _In_ XBL_MEMORY_TYPE memoryType
+    _In_ XblMemoryType memoryType
     );
 
 /// <summary>
@@ -161,7 +161,7 @@ typedef _Ret_maybenull_ _Post_writable_byte_size_(size) void*
 typedef void
 (XBL_CALLING_CONV* XBL_MEM_FREE_FUNC)(
     _In_ _Post_invalid_ void* pointer,
-    _In_ XBL_MEMORY_TYPE memoryType
+    _In_ XblMemoryType memoryType
     );
 
 /// <summary>
