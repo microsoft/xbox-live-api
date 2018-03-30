@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.Services.140.XDK.WinRT", "Microsoft.Xbox.Services.140.XDK.WinRT.vcxproj", "{9BF96BF1-7E60-49B7-A137-E6C961A28336}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.Services.141.XDK.WinRT", "Microsoft.Xbox.Services.141.XDK.WinRT.vcxproj", "{9BF96BF1-7E60-49B7-A137-E6C961A28336}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "casablanca140.xbox", "..\..\External\cpprestsdk\Release\src\build\vs14.xbox\casablanca140.Xbox.vcxproj", "{E621C269-D177-4C1B-80EA-C0A274B7A151}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "casablanca141.xbox", "..\..\External\cpprestsdk\Release\src\build\vs15.xbox\casablanca141.Xbox.vcxproj", "{E621C269-D177-4C1B-80EA-C0A274B7A151}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
