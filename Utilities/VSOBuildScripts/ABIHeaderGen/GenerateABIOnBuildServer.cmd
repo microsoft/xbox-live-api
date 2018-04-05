@@ -19,7 +19,7 @@ goto done
 echo on
 set XDK=lnm
 set TARGETFOLDER=%TFS_DropLocation%\ABI
-set TARGETWINMD=%TFS_DropLocation%\Release\x64\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.winmd
+set TARGETWINMD=%TFS_DropLocation%\Release\x64\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.winmd
 set SDK_ROOT_FOLDER=C:\Program Files (x86)\Windows Kits\8.1\bin\x64
 set SDK_METADATA_FOLDER="C:\Program Files (x86)\Microsoft SDKs\%LOCALXDK%\v8.0\References\CommonConfiguration\Neutral"
 set SDK_INC_FOLDER="C:\Program Files (x86)\Microsoft Durango XDK\xdk\Include\shared"

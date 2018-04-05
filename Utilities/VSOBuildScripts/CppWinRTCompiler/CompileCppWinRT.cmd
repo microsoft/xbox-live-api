@@ -35,7 +35,7 @@ set XDK_LOCAL_OUT_BASE=%SDKSRC%\Utilities\VSOBuildScripts\CppWinRTCompiler\XDK_H
 set XDK_LOCAL_OUT=%SDKSRC%\Utilities\VSOBuildScripts\CppWinRTCompiler\XDK_Headers
 set XDK_LOCAL_OUT_XSAPI=%OUTFOLDER%\XSAPI_XDK_Headers
 set XDK_XSAPI_WINRT="C:\Program Files (x86)\Microsoft SDKs\Durango.%XDKVER%\v8.0\ExtensionSDKs\Xbox Services API\8.0\References\CommonConfiguration\neutral\Microsoft.Xbox.Services.winmd"
-if EXIST %TFS_DropLocation%\Release\x64\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.winmd set XDK_XSAPI_WINRT=%TFS_DropLocation%\Release\x64\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.winmd
+if EXIST %TFS_DropLocation%\Release\x64\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.winmd set XDK_XSAPI_WINRT=%TFS_DropLocation%\Release\x64\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.winmd
 echo %XDK_XSAPI_WINRT%
 
 set WINSDK_RSP=%SDKSRC%\Utilities\VSOBuildScripts\CppWinRTCompiler\WinSDK.rsp
