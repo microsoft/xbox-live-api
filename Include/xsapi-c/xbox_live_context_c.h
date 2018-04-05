@@ -4,11 +4,6 @@
 #pragma once
 #include "types_c.h"
 
-// TODO: run and clean code analysis errors
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 struct XblAppConfig;
 
 /// <summary>
@@ -17,8 +12,7 @@ struct XblAppConfig;
 /// <param name="user">The Xbox Live user associated with this context.</param>
 /// <param name="context">The returned Xbox Live context handle.</param>
 /// <returns>Result code for this API operation.</returns>
-XBL_API HRESULT XBL_CALLING_CONV
-XblContextCreateHandle(
+STDAPI XblContextCreateHandle(
     _In_ xbl_user_handle user,
     _Out_ xbl_context_handle* context
     ) XBL_NOEXCEPT;
@@ -29,7 +23,7 @@ XblContextCreateHandle(
 /// </summary>
 /// <param name="xboxLiveContextHandle">The Xbox Live context handle.</param>
 /// <returns>Returns the duplicated handle.</returns>
-XBL_API xbl_context_handle XBL_CALLING_CONV
+STDAPI_(xbl_context_handle)
 XblContextDuplicateHandle(
     _In_ xbl_context_handle xboxLiveContextHandle
     ) XBL_NOEXCEPT;
@@ -40,7 +34,7 @@ XblContextDuplicateHandle(
 /// </summary>
 /// <param name="xboxLiveContextHandle">The Xbox Live context handle.</param>
 /// <returns>Result code for this API operation.</returns>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblContextCloseHandle(
     _In_ xbl_context_handle xboxLiveContextHandle
     ) XBL_NOEXCEPT;
@@ -51,7 +45,7 @@ XblContextCloseHandle(
 /// <param name="context">The Xbox Live context handle.</param>
 /// <param name="user">The returned Xbox Live user handle.</param>
 /// <returns>Result code for this API operation.</returns>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblContextGetUser(
     _In_ xbl_context_handle context,
     _Out_ xbl_user_handle* user
@@ -64,12 +58,8 @@ XblContextGetUser(
 /// <param name="context">The Xbox Live context handle.</param>
 /// <param name="xboxUserId">The returned xbox user ID string.</param>
 /// <returns>Result code for this API operation.</returns>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblContextGetXboxUserId(
     _In_ xbl_context_handle context,
-    _Out_ const_utf8_string* xboxUserId
+    _Out_ UTF8CSTR* xboxUserId
     ) XBL_NOEXCEPT;
-
-#if defined(__cplusplus)
-} // end extern "C"
-#endif // defined(__cplusplus)

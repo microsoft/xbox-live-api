@@ -645,7 +645,7 @@ void Game::HandleSignInResult(XblSignInResult signInResult)
     switch (signInResult.status)
     {
     case xbox::services::system::sign_in_status::success:
-        XblContextCreateHandle(m_user, &(m_xboxLiveContext));
+        XblContextCreateHandle(m_user, &m_xboxLiveContext);
         //pThis->AddUserToSocialManager(pThis->m_user);
         Log(L"Sign in succeeded");
         break;
@@ -701,6 +701,38 @@ void Game::SignIn()
         );
 }
 
+void Game::GetUserProfile()
+{
+    AsyncBlock* asyncBlock = new AsyncBlock{};
+    asyncBlock->queue = m_queue;
+    asyncBlock->context = this;
+    asyncBlock->callback = [](AsyncBlock* asyncBlock)
+    {
+        Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
+
+        size_t sizeInBytes;
+        HRESULT hr = XblGetUserProfileResultSize(asyncBlock, &sizeInBytes);
+        if (SUCCEEDED(hr))
+        {
+            XblUserProfile* userProfile = static_cast<XblUserProfile*>(new (std::nothrow) char[sizeInBytes]);
+            hr = XblGetUserProfileResult(asyncBlock, &userProfile);
+            if (SUCCEEDED(hr))
+            {
+                pThis->Log(L"Got profile %s", userProfile->gamertag);
+            }
+        }
+        else
+        {
+            pThis->Log(L"Failed signing in.");
+        }
+
+        delete asyncBlock;
+    };
+
+    XblGetUserProfile(xblContext, xuid, asyncBlock);
+}
+
+
 void Game::SignInSilently()
 {
     AsyncBlock* asyncBlock = new AsyncBlock{};
@@ -737,7 +769,7 @@ void Game::GetUserProfile()
     //}
 
     //XblGetUserProfile(m_xboxLiveContext, m_user->xboxUserId, g_asyncQueue, this,
-    //[](XBL_RESULT result, const XBL_XBOX_USER_PROFILE *profile, void* context)
+    //[](XBL_RESULT result, const XblUserProfile *profile, void* context)
     //{
     //    Game *pThis = reinterpret_cast<Game*>(context);
     //    if (result.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)

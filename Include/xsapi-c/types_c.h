@@ -86,8 +86,8 @@ extern "C" {
 
 #include "httpClient/types.h"
 
-typedef _Null_terminated_ char* utf8_string;
-typedef _Null_terminated_ const char* const_utf8_string;
+typedef _Null_terminated_ char* UTF8STR;
+typedef _Null_terminated_ const char* UTF8CSTR;
 
 typedef uint32_t XblMemoryType;
 typedef int32_t function_context;
@@ -96,7 +96,7 @@ typedef HC_TASK_EVENT_HANDLE XBL_ASYNC_EVENT_HANDLE; // TODO remove
 typedef struct xbl_xbox_live_context* xbl_context_handle;
 
 #if XDK_API
-typedef Windows::Xbox::System::User^ xbl_user_handle;
+typedef winrt::Windows::Xbox::System::User xbl_user_handle;
 #else
 typedef struct xbl_xbox_live_user* xbl_user_handle;
 #endif

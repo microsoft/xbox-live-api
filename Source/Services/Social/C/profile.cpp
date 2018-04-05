@@ -67,7 +67,7 @@ void get_user_profiles_complete(
     }
 }
 
-XBL_API XBL_RESULT XBL_CALLING_CONV
+STDAPI
 XblGetUserProfiles(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ PCSTR *xboxUserIds,
@@ -96,7 +96,7 @@ XblGetUserProfiles(
 }
 //CATCH_RETURN()
 
-XBL_API XBL_RESULT XBL_CALLING_CONV
+STDAPI
 XblGetUserProfilesForSocialGroup(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ PCSTR socialGroup,
