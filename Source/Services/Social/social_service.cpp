@@ -56,7 +56,7 @@ social_service::get_social_relationships(
         filter,
         startIndex,
         maxItems,
-        XSAPI_DEFAULT_TASKGROUP,
+        nullptr,
         [tce](xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>> result)
         {
             tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(xbox_social_relationship_result, result));
@@ -84,7 +84,7 @@ social_service::get_social_relationships(
         filter,
         startIndex,
         maxItems,
-        XSAPI_DEFAULT_TASKGROUP,
+        nullptr,
         [tce](xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>> result)
         {
             tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(xbox_social_relationship_result, result));

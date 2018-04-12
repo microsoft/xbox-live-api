@@ -36,7 +36,7 @@ social_graph::social_graph(
     _In_ xbox_live_user_t user,
     _In_ social_manager_extra_detail_level socialManagerExtraDetailLevel,
     _In_ xbox_live_callback<void> graphDestructionCompleteCallback,
-    _In_ uint64_t backgroundTaskGroupId
+    _In_ async_queue_t backgroundAsyncQueue
     ) :
     m_detailLevel(socialManagerExtraDetailLevel),
     m_xboxLiveContextImpl(new xbox_live_context_impl(m_user)),
@@ -51,7 +51,7 @@ social_graph::social_graph(
     m_userAddedContext(0),
     m_shouldCancel(utility::details::make_unique<bool>(false)),
     m_isPollingRichPresence(false),
-    m_backgroundTaskGroupId(backgroundTaskGroupId)
+    m_backgroundAsyncQueue(backgroundAsyncQueue)
 {
     m_xboxLiveContextImpl->user_context()->set_caller_context_type(caller_context_type::social_manager);
     m_xboxLiveContextImpl->init();
@@ -107,7 +107,7 @@ void social_graph::initialize(xbox_live_callback<xbox_live_result<void>> callbac
         }
     },
         TIME_PER_CALL_SEC,
-        m_backgroundTaskGroupId
+        0 // TODO m_backgroundAsyncQueue
         );
 
     m_presencePollingTimer = xsapi_allocate_shared<call_buffer_timer>(
@@ -122,7 +122,7 @@ void social_graph::initialize(xbox_live_callback<xbox_live_result<void>> callbac
         }
     },
         TIME_PER_CALL_SEC,
-        m_backgroundTaskGroupId
+        0 // TODO m_backgroundAsyncQueue
         );
 
     m_socialGraphRefreshTimer = xsapi_allocate_shared<call_buffer_timer>(
@@ -138,7 +138,7 @@ void social_graph::initialize(xbox_live_callback<xbox_live_result<void>> callbac
         }
     },
         TIME_PER_CALL_SEC,
-        m_backgroundTaskGroupId
+        0 // TODO m_backgroundAsyncQueue
         );
 
     m_resyncRefreshTimer = xsapi_allocate_shared<call_buffer_timer>(
@@ -151,7 +151,7 @@ void social_graph::initialize(xbox_live_callback<xbox_live_result<void>> callbac
         }
     },
         TIME_PER_CALL_SEC,
-        m_backgroundTaskGroupId
+        0 // TODO m_backgroundAsyncQueue
         );
 
 #if UWP_API || TV_API || UNIT_TEST_SERVICES
@@ -210,7 +210,7 @@ void social_graph::initialize(xbox_live_callback<xbox_live_result<void>> callbac
         utils::internal_string_from_string_t(m_xboxLiveContextImpl->user()->xbox_user_id()),
 #endif
         m_detailLevel,
-        m_backgroundTaskGroupId,
+        m_backgroundAsyncQueue,
     [thisWeakPtr, callback](xbox_live_result<xsapi_internal_vector<xbox_social_user>> socialUsersResult)
     {
         try
@@ -285,9 +285,9 @@ social_graph::active_buffer_social_graph()
 }
 
 void
-social_graph::set_background_work_task_group_id(uint64_t taskGroupId)
+social_graph::set_background_async_queue(async_queue_t queue)
 {
-    m_backgroundTaskGroupId = taskGroupId;
+    m_backgroundAsyncQueue = queue;
 }
 
 bool
@@ -930,7 +930,7 @@ social_graph::setup_device_and_presence_subscriptions(
 )
 {
     auto context = utils::store_shared_ptr(xsapi_allocate_shared<social_graph_context>(users, shared_from_this()));
-    HCTaskCreate(HC_SUBSYSTEM_ID_XSAPI, m_backgroundTaskGroupId,
+    HCTaskCreate(HC_SUBSYSTEM_ID_XSAPI, 0,// TODO
         [](void* _context, HC_TASK_HANDLE taskHandle)
         {
             auto context = utils::remove_shared_ptr<social_graph_context>(_context);
@@ -951,7 +951,7 @@ social_graph::unsubscribe_users(
     )
 {
     auto context = utils::store_shared_ptr(xsapi_allocate_shared<social_graph_context>(users, shared_from_this()));
-    HCTaskCreate(HC_SUBSYSTEM_ID_XSAPI, m_backgroundTaskGroupId,
+    HCTaskCreate(HC_SUBSYSTEM_ID_XSAPI, 0, // TODO
         [](void* _context, HC_TASK_HANDLE taskHandle)
         {
             auto context = utils::remove_shared_ptr<social_graph_context>(_context);
@@ -1041,7 +1041,7 @@ social_graph::refresh_graph()
         utils::internal_string_from_string_t(m_xboxLiveContextImpl->user()->xbox_user_id()),
 #endif
         m_detailLevel,
-        m_backgroundTaskGroupId,
+        m_backgroundAsyncQueue,
         [thisWeakPtr](xbox_live_result<xsapi_internal_vector<xbox_social_user>> socialListResult)
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
@@ -1222,7 +1222,7 @@ social_graph::social_graph_timer_callback(
         m_xboxLiveContextImpl->xbox_live_user_id(),
         m_detailLevel,
         users,
-        m_backgroundTaskGroupId,
+        m_backgroundAsyncQueue,
     [thisWeakPtr, users, completionContext](xbox_live_result<xsapi_internal_vector<xbox_social_user>> socialListResult)
     {
         try
@@ -1430,7 +1430,7 @@ social_graph::presence_timer_callback(
         presence_detail_level::all,
         false,
         false,
-        m_backgroundTaskGroupId,
+        m_backgroundAsyncQueue,
         [thisWeakPtr](xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>> presenceRecordsResult)
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());

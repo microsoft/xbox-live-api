@@ -65,7 +65,7 @@ xbox_live_result<void>
 presence_service_internal::set_presence(
     _In_ bool isUserActiveInTitle,
     _In_ presence_data_internal presenceData,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_t queue,
     _In_ xbox_live_callback<xbox_live_result<uint32_t>> callback
     )
 {
@@ -93,32 +93,32 @@ presence_service_internal::set_presence(
         m_userContext, 
         http_call_response_body_type::json_body,
         false,
-        HttpCallAsyncBlock::alloc(
-            [callback](std::shared_ptr<http_call_response_internal> response)
+        queue,
+        [callback](std::shared_ptr<http_call_response_internal> response)
+        {
+            uint32_t heartbeatDelay = 0;
+            auto headers = response->response_headers();
+
+            auto iter = headers.find("X-Heartbeat-After");
+            if (iter != headers.end())
             {
-                uint32_t heartbeatDelay = 0;
-                auto headers = response->response_headers();
+                auto heartbeatDelayInSeconds = iter->second;
+                heartbeatDelay = utils::internal_string_to_uint32(heartbeatDelayInSeconds) / 60;
+            }
+            else
+            {
+                heartbeatDelay = 5;
+            }
 
-                auto iter = headers.find("X-Heartbeat-After");
-                if (iter != headers.end())
-                {
-                    auto heartbeatDelayInSeconds = iter->second;
-                    heartbeatDelay = utils::internal_string_to_uint32(heartbeatDelayInSeconds) / 60;
-                }
-                else
-                {
-                    heartbeatDelay = 5;
-                }
+            auto xsapiSingleton = get_xsapi_singleton();
+            if (xsapiSingleton->m_onSetPresenceFinish)
+            {
+                xsapiSingleton->m_onSetPresenceFinish(heartbeatDelay);
+            }
 
-                auto xsapiSingleton = get_xsapi_singleton();
-                if (xsapiSingleton->m_onSetPresenceFinish)
-                {
-                    xsapiSingleton->m_onSetPresenceFinish(heartbeatDelay);
-                }
-
-                callback(xbox_live_result<uint32_t>(heartbeatDelay, response->err_code(), response->err_message().data()));
-            })
-        );
+            callback(xbox_live_result<uint32_t>(heartbeatDelay, response->err_code(), response->err_message().data()));
+        }
+    );
 }
 
 function_context
@@ -311,7 +311,7 @@ presence_service_internal::unsubscribe_from_title_presence_change(
 xbox_live_result<void>
 presence_service_internal::get_presence(
     _In_ const xsapi_internal_string& xboxUserId,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<presence_record_internal>>> callback
     )
 {
@@ -334,15 +334,15 @@ presence_service_internal::get_presence(
         m_userContext,
         http_call_response_body_type::json_body,
         false,
-        XblAsyncBlock<std::shared_ptr<http_call_response_internal>>::alloc(
-            [callback](std::shared_ptr<http_call_response_internal> response)
-            {
-                callback(utils::generate_xbox_live_result<std::shared_ptr<presence_record_internal>>(
-                    presence_record_internal::deserialize(response->response_body_json()),
-                    response
-                    ));
-            })
-        );
+        queue,
+        [callback](std::shared_ptr<http_call_response_internal> response)
+        {
+            callback(utils::generate_xbox_live_result<std::shared_ptr<presence_record_internal>>(
+                presence_record_internal::deserialize(response->response_body_json()),
+                response
+                ));
+        }
+    );
 
     return xbox_live_result<void>();
 }
@@ -350,7 +350,7 @@ presence_service_internal::get_presence(
 xbox_live_result<void>
 presence_service_internal::get_presence_for_multiple_users(
     _In_ const xsapi_internal_vector<xsapi_internal_string>& xboxUserIds,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_t queue,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>> callback
     )
 {
@@ -384,23 +384,22 @@ presence_service_internal::get_presence_for_multiple_users(
         m_userContext,
         http_call_response_body_type::json_body,
         false,
-        XblAsyncBlock<std::shared_ptr<http_call_response_internal>>::alloc(
-            [callback](std::shared_ptr<http_call_response_internal> response)
-            {
-                std::error_code errc = xbox_live_error_code::no_error;
-                auto presenceRecords = utils::extract_xbox_live_result_json_vector_internal<std::shared_ptr<presence_record_internal>>(
-                    presence_record_internal::deserialize,
-                    response->response_body_json(),
-                    errc,
-                    true
-                    );
+        queue,
+        [callback](std::shared_ptr<http_call_response_internal> response)
+        {
+            std::error_code errc = xbox_live_error_code::no_error;
+            auto presenceRecords = utils::extract_xbox_live_result_json_vector_internal<std::shared_ptr<presence_record_internal>>(
+                presence_record_internal::deserialize,
+                response->response_body_json(),
+                errc,
+                true
+                );
 
-                callback(utils::generate_xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>(
-                    presenceRecords,
-                    response
-                    ));
-            })
-        );
+            callback(utils::generate_xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>(
+                presenceRecords,
+                response
+                ));
+        });
 
     return xbox_live_result<void>();
 }
@@ -413,7 +412,7 @@ presence_service_internal::get_presence_for_multiple_users(
     _In_ presence_detail_level presenceDetailLevel,
     _In_ bool onlineOnly,
     _In_ bool broadcastingOnly,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_t queue,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>> callback
     )
 {
@@ -447,24 +446,23 @@ presence_service_internal::get_presence_for_multiple_users(
         m_userContext,
         http_call_response_body_type::json_body,
         false,
-        XblAsyncBlock<std::shared_ptr<http_call_response_internal>>::alloc(
-            [callback](std::shared_ptr<http_call_response_internal> response)
-            {
-                std::error_code errc = xbox_live_error_code::no_error;
-                auto responseBody = response->response_body_json();
-                auto presenceRecords = utils::extract_xbox_live_result_json_vector_internal<std::shared_ptr<presence_record_internal>>(
-                    presence_record_internal::deserialize,
-                    responseBody,
-                    errc,
-                    true
-                    );
+        queue,
+        [callback](std::shared_ptr<http_call_response_internal> response)
+        {
+            std::error_code errc = xbox_live_error_code::no_error;
+            auto responseBody = response->response_body_json();
+            auto presenceRecords = utils::extract_xbox_live_result_json_vector_internal<std::shared_ptr<presence_record_internal>>(
+                presence_record_internal::deserialize,
+                responseBody,
+                errc,
+                true
+                );
 
-                callback(utils::generate_xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>(
-                    presenceRecords,
-                    response
-                    ));
-            })
-        );
+            callback(utils::generate_xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>(
+                presenceRecords,
+                response
+                ));
+        });
 
     return xbox_live_result<void>();
 }
@@ -472,7 +470,7 @@ presence_service_internal::get_presence_for_multiple_users(
 xbox_live_result<void>
 presence_service_internal::get_presence_for_social_group(
     _In_ const xsapi_internal_string& socialGroup,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_t queue,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>> callback
     )
 {
@@ -496,24 +494,23 @@ presence_service_internal::get_presence_for_social_group(
         m_userContext,
         http_call_response_body_type::json_body,
         false,
-        HttpCallAsyncBlock::alloc(
-            [callback](std::shared_ptr<http_call_response_internal> response)
-            {
-                std::error_code errc = xbox_live_error_code::no_error;
-                auto responseBody = response->response_body_json();
-                auto presenceRecords = utils::extract_xbox_live_result_json_vector_internal<std::shared_ptr<presence_record_internal>>(
-                    presence_record_internal::deserialize,
-                    responseBody,
-                    errc,
-                    true
-                    );
+        queue,
+        [callback](std::shared_ptr<http_call_response_internal> response)
+        {
+            std::error_code errc = xbox_live_error_code::no_error;
+            auto responseBody = response->response_body_json();
+            auto presenceRecords = utils::extract_xbox_live_result_json_vector_internal<std::shared_ptr<presence_record_internal>>(
+                presence_record_internal::deserialize,
+                responseBody,
+                errc,
+                true
+                );
 
-                callback(utils::generate_xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>(
-                    presenceRecords,
-                    response
-                    ));
-            })
-        );
+            callback(utils::generate_xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>(
+                presenceRecords,
+                response
+                ));
+        });
 
     return xbox_live_result<void>();
 }
@@ -527,7 +524,7 @@ presence_service_internal::get_presence_for_social_group(
     _In_ presence_detail_level peoplehubDetailLevel,
     _In_ bool onlineOnly,
     _In_ bool broadcastingOnly,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_t queue,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>> callback
     )
 {
@@ -561,24 +558,23 @@ presence_service_internal::get_presence_for_social_group(
         m_userContext,
         http_call_response_body_type::json_body,
         false,
-        HttpCallAsyncBlock::alloc(
-            [callback](std::shared_ptr<http_call_response_internal> response)
-            {
-                std::error_code errc = xbox_live_error_code::no_error;
-                auto responseBody = response->response_body_json();
-                auto presenceRecords = utils::extract_xbox_live_result_json_vector_internal<std::shared_ptr<presence_record_internal>>(
-                    presence_record_internal::deserialize,
-                    responseBody,
-                    errc,
-                    true
-                    );
+        queue,
+        [callback](std::shared_ptr<http_call_response_internal> response)
+        {
+            std::error_code errc = xbox_live_error_code::no_error;
+            auto responseBody = response->response_body_json();
+            auto presenceRecords = utils::extract_xbox_live_result_json_vector_internal<std::shared_ptr<presence_record_internal>>(
+                presence_record_internal::deserialize,
+                responseBody,
+                errc,
+                true
+                );
 
-                callback(utils::generate_xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>(
-                    presenceRecords,
-                    response
-                    ));
-            })
-        );
+            callback(utils::generate_xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>(
+                presenceRecords,
+                response
+                ));
+        });
 
     return xbox_live_result<void>();
 }

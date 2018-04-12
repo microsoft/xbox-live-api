@@ -30,7 +30,7 @@ social_manager_internal::get_singleton_instance()
 }
 
 social_manager_internal::social_manager_internal()
-    : m_graphBackgroundTaskId(0)
+    : m_backgroundAsyncQueue(nullptr)
 {
 }
 
@@ -269,7 +269,7 @@ social_manager_internal::add_local_user(
             }
         }
 #if !UNIT_TEST_SERVICES
-        , m_graphBackgroundTaskId
+        , m_backgroundAsyncQueue
 #endif
         );
 
@@ -510,13 +510,13 @@ social_manager_internal::set_rich_presence_polling_status(
     return xbox_live_result<void>();
 }
 
-void social_manager_internal::set_social_graph_background_task_id(uint64_t backgroundTaskId)
+void social_manager_internal::set_social_graph_background_async_queue(async_queue_t queue)
 {
     std::lock_guard<std::recursive_mutex> lock(m_socialMangerLock);
-    m_graphBackgroundTaskId = backgroundTaskId;
+    m_backgroundAsyncQueue = queue;
     for (auto& graph : m_localGraphs)
     {
-        graph.second->set_background_work_task_group_id(m_graphBackgroundTaskId);
+        graph.second->set_background_async_queue(queue);
     }
 }
 

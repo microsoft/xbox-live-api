@@ -548,6 +548,7 @@ XblSocialManagerSetBackgroundWorkAsyncQueue(
 try
 {
     verify_global_init();
-    social_manager_internal::get_singleton_instance()->set_social_graph_background_task_id(queue->taskGroupId);
+    //social_manager_internal::get_singleton_instance()->set_social_graph_background_async_queue(queue->taskGroupId);
+    // TODO
 }
 CATCH_RETURN_WITH(;)

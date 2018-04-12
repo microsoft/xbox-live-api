@@ -238,20 +238,19 @@ HRESULT SignInHelper(
         case AsyncOp_DoWork:
             context = utils::remove_shared_ptr<SignInContext>(data->context, false);
 
-            context->user->userImpl->sign_in_impl(context->showUi, false, SignInAsyncBlock::alloc(
-                data->async->queue,
+            context->user->userImpl->sign_in_impl(context->showUi, false, data->async->queue,
                 [data, context](xbox_live_result<sign_in_result> result)
             {
                 context->result = result;
                 auto hr = utils::hresult_from_error_code(result.err());
-                CompleteAsync(data->async, hr, sizeof(XblSignInResult));
                 if (SUCCEEDED(hr))
                 {
                     auto singleton = get_xsapi_singleton();
                     std::lock_guard<std::mutex> lock(singleton->m_trackingUsersLock);
                     singleton->m_signedInUsers[context->user->internalUser] = context->user;
                 }
-            }));
+                CompleteAsync(data->async, hr, sizeof(XblSignInResult));
+            });
             return E_PENDING;
 
         case AsyncOp_GetResult:
@@ -371,10 +370,12 @@ try
         case AsyncOp_DoWork:
             std::shared_ptr<GetTokenAndSignatureContext> context = utils::remove_shared_ptr<GetTokenAndSignatureContext>(data->context);
 
-            context->user->userImpl->get_token_and_signature(context->httpMethod, context->url, context->headers, context->requestBodyString,
-                TokenAndSignatureAsyncBlock::alloc(
-                    data->async->queue,
-                    [data, context](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
+            context->user->userImpl->get_token_and_signature(context->httpMethod, 
+                context->url, 
+                context->headers, 
+                context->requestBodyString,
+                data->async->queue,
+                [data, context](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
             {
                 auto hr = utils::hresult_from_error_code(result.err());
                 CompleteAsync(data->async, hr, 0);
@@ -387,7 +388,7 @@ try
                         result.payload()->signature().data()
                         );
                 }
-            }));
+            });
             return E_PENDING;
         }
         return S_OK;

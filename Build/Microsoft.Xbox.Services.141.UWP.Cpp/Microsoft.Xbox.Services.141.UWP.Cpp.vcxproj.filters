@@ -448,9 +448,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\profile.cpp">
       <Filter>C++ Source\Services\Social\C</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\profile_helpers.cpp">
-      <Filter>C++ Source\Services\Social\C</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\social.cpp">
       <Filter>C++ Source\Services\Social\C</Filter>
     </ClCompile>
@@ -953,9 +950,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\real_time_activity_internal.h">
       <Filter>C++ Source\Services\RTA</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\profile_helpers.h">
-      <Filter>C++ Source\Services\Social\C</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\social_helpers.h">
       <Filter>C++ Source\Services\Social\C</Filter>

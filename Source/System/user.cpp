@@ -42,11 +42,11 @@ pplx::task<xbox_live_result<sign_in_result>> xbox_live_user::signin_helper(bool 
 {
     task_completion_event<xbox_live_result<sign_in_result>> tce;
 
-    m_user_impl->sign_in_impl(showUI, forceRefresh, SignInAsyncBlock::alloc(
+    m_user_impl->sign_in_impl(showUI, forceRefresh, nullptr,
         [tce](xbox_live_result<sign_in_result> result)
     {
         tce.set(result);
-    }));
+    });
     return task<xbox_live_result<sign_in_result>>(tce);
 }
 
@@ -171,10 +171,11 @@ xbox_live_user::get_token_and_signature(
         utils::internal_string_from_string_t(httpMethod),
         utils::internal_string_from_string_t(url),
         utils::internal_string_from_string_t(headers),
-        TokenAndSignatureAsyncBlock::alloc([tce](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
+        nullptr,
+        [tce](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
     {
         tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(token_and_signature_result, result));
-    }));
+    });
 
     return task<xbox_live_result<token_and_signature_result>>(tce);
 }
@@ -194,10 +195,11 @@ xbox_live_user::get_token_and_signature(
         utils::internal_string_from_string_t(url),
         utils::internal_string_from_string_t(headers),
         utils::internal_string_from_string_t(requestBodyString),
-        TokenAndSignatureAsyncBlock::alloc([tce](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
+        nullptr,
+        [tce](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
     {
         tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(token_and_signature_result, result));
-    }));
+    });
 
     return task<xbox_live_result<token_and_signature_result>>(tce);
 }
@@ -216,10 +218,11 @@ xbox_live_user::get_token_and_signature_array(
         utils::internal_string_from_string_t(url),
         utils::internal_string_from_string_t(headers),
         utils::internal_vector_from_std_vector(requestBodyArray),
-        TokenAndSignatureAsyncBlock::alloc([tce](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
+        nullptr,
+        [tce](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
     {
         tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(token_and_signature_result, result));
-    }));
+    });
 
     return task<xbox_live_result<token_and_signature_result>>(tce);
 }

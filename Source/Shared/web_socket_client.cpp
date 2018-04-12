@@ -38,8 +38,7 @@ void xbox_web_socket_client::connect(
     std::weak_ptr<xbox_web_socket_client> thisWeakPtr = shared_from_this();
 
     xsapi_internal_string callerContext = userContext->caller_context();
-    userContext->get_auth_result("GET", uri, xsapi_internal_string(), xsapi_internal_string(), false,
-        AuthAsyncBlock::alloc(
+    userContext->get_auth_result("GET", uri, xsapi_internal_string(), xsapi_internal_string(), false, nullptr, /* TODO */
         [uri, subProtocol, callerContext, thisWeakPtr, callback](xbox::services::xbox_live_result<user_context_auth_result> xblResult)
     {
         std::shared_ptr<xbox_web_socket_client> pThis(thisWeakPtr.lock());
@@ -124,7 +123,7 @@ void xbox_web_socket_client::connect(
         };
 
         HCWebSocketConnect(uri.data(), subProtocol.data(), pThis->m_websocket, asyncBlock);
-    }));
+    });
 }
 
 void xbox_web_socket_client::send(

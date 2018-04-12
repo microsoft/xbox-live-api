@@ -34,7 +34,7 @@ xbox_social_relationship_result::get_next(
 {
     task_completion_event<xbox_live_result<xbox_social_relationship_result>> tce;
 
-    auto result = m_internalObj->get_next(maxItems,
+    auto result = m_internalObj->get_next(maxItems, nullptr,
         [tce](xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>> result) 
     { 
         tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(xbox_social_relationship_result, result));
@@ -94,6 +94,7 @@ xbox_social_relationship_filter xbox_social_relationship_result_internal::filter
 
 xbox_live_result<void> xbox_social_relationship_result_internal::get_next(
     _In_ uint32_t maxItems,
+    _In_ async_queue_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>> callback
     )
 {
@@ -101,7 +102,7 @@ xbox_live_result<void> xbox_social_relationship_result_internal::get_next(
         m_filter,
         m_continuationSkip,
         maxItems,
-        XSAPI_DEFAULT_TASKGROUP,
+        queue,
         callback
         );
 }

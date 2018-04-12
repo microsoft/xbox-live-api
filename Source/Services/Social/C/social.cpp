@@ -32,7 +32,7 @@ XblGetSocialRelationshipsHelper(
     }
 
     auto result = xboxLiveContext->contextImpl->social_service_impl()->get_social_relationships(
-        xboxUserId, static_cast<xbox_social_relationship_filter>(socialRelationshipFilter), startIndex, maxItems, queue->taskGroupId,
+        xboxUserId, static_cast<xbox_social_relationship_filter>(socialRelationshipFilter), startIndex, maxItems, nullptr /* TODO */,
         [callback, callbackContext](xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>> result)
     {
         XBL_RESULT cResult = utils::create_xbl_result(result.err());
@@ -312,7 +312,7 @@ XblSubmitReputationFeedback(
     xboxLiveContext->contextImpl->reputation_service_impl()->submit_reputation_feedback(
         xboxUserId,
         static_cast<reputation_feedback_type>(reputationFeedbackType),
-        queue->taskGroupId,
+        nullptr, /* TODO */
         [callback, callbackContext](xbox_live_result<void> result)
         {
             callback(utils::create_xbl_result(result.err()), callbackContext);
@@ -354,7 +354,7 @@ XblSubmitBatchReputationFeedback(
 
     xboxLiveContext->contextImpl->reputation_service_impl()->submit_batch_reputation_feedback(
         internalItems,
-        queue->taskGroupId,
+        nullptr, /* TODO */
         [callback, callbackContext](xbox_live_result<void> result)
     {
         callback(utils::create_xbl_result(result.err()), callbackContext);

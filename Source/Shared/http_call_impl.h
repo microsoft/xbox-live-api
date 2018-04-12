@@ -107,8 +107,7 @@ enum class xbox_live_api
     xbox_one_pins_remove_item
 };
 
-typedef xbox::services::XblAsyncBlock<std::shared_ptr<http_call_response_internal>> HttpCallAsyncBlock;
-typedef std::shared_ptr<HttpCallAsyncBlock> HttpCallAsyncBlockPtr;
+typedef xbox_live_callback<std::shared_ptr<http_call_response_internal>> http_call_callback;
 
 struct http_call_data
 {
@@ -148,7 +147,8 @@ struct http_call_data
     bool addDefaultHeaders;
 
     chrono_clock_t::time_point requestStartTime;
-    HttpCallAsyncBlockPtr asyncBlock;
+    async_queue_t queue;
+    http_call_callback callback;
 };
 
 struct http_retry_after_api_state
@@ -187,14 +187,16 @@ public:
 
     virtual xbox_live_result<void> get_response(
         _In_ http_call_response_body_type httpCallResponseBodyType,
-        _In_ HttpCallAsyncBlockPtr asyncBlock
+        _In_ async_queue_t queue,
+        _In_ http_call_callback callback
         ) = 0;
 
     virtual xbox_live_result<void> get_response_with_auth(
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired,
-        _In_ HttpCallAsyncBlockPtr asyncBlock
+        _In_ async_queue_t queue,
+        _In_ http_call_callback callback
         ) = 0;
 
     virtual const http_call_request_message_internal& request_body() const = 0;
@@ -308,7 +310,8 @@ public:
 
     xbox_live_result<void> get_response(
         _In_ http_call_response_body_type httpCallResponseBodyType,
-        _In_ HttpCallAsyncBlockPtr asyncBlock
+        _In_ async_queue_t queue,
+        _In_ http_call_callback callback
         ) override;
 
     pplx::task<std::shared_ptr<http_call_response>> get_response(
@@ -326,7 +329,8 @@ public:
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired,
-        _In_ HttpCallAsyncBlockPtr asyncBlock
+        _In_ async_queue_t queue,
+        _In_ http_call_callback callback
         ) override;
 
     pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(

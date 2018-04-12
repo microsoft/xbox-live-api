@@ -10,8 +10,7 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-typedef XblAsyncBlock<xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> TokenAndSignatureAsyncBlock;
-typedef XblAsyncBlock<xbox_live_result<sign_in_result>> SignInAsyncBlock;
+typedef xbox_live_callback<xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> token_and_signature_callback;
 
 class user_impl : public std::enable_shared_from_this<user_impl>
 {
@@ -19,7 +18,8 @@ public:
     virtual void sign_in_impl(
         _In_ bool showUI,
         _In_ bool forceRefresh,
-        _In_ std::shared_ptr<SignInAsyncBlock> asyncBlock
+        _In_ async_queue_t queue,
+        _In_ xbox_live_callback<xbox_live_result<sign_in_result>> asyncBlock
         ) = 0;
 
 #if XSAPI_A
@@ -65,7 +65,8 @@ public:
         _In_ const xsapi_internal_string& httpMethod,
         _In_ const xsapi_internal_string& url,
         _In_ const xsapi_internal_string& headers,
-        _In_ std::shared_ptr<TokenAndSignatureAsyncBlock> asyncBlock
+        _In_ async_queue_t queue,
+        _In_ token_and_signature_callback callback
         );
 
     void get_token_and_signature(
@@ -73,7 +74,8 @@ public:
         _In_ const xsapi_internal_string& url,
         _In_ const xsapi_internal_string& headers,
         _In_ const xsapi_internal_string& requestBodyString,
-        _In_ std::shared_ptr<TokenAndSignatureAsyncBlock> asyncBlock
+        _In_ async_queue_t queue,
+        _In_ token_and_signature_callback callback
         );
 
     void get_token_and_signature(
@@ -81,7 +83,8 @@ public:
         _In_ const xsapi_internal_string& url,
         _In_ const xsapi_internal_string& headers,
         _In_ const xsapi_internal_vector<unsigned char>& requestBodyArray,
-        _In_ std::shared_ptr<TokenAndSignatureAsyncBlock> asyncBlock
+        _In_ async_queue_t queue,
+        _In_ token_and_signature_callback callback
         );
 
     bool is_signed_in() const;
@@ -97,7 +100,8 @@ public:
         _In_ const xsapi_internal_vector<unsigned char>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh,
-        _In_ std::shared_ptr<TokenAndSignatureAsyncBlock> asyncBlock
+        _In_ async_queue_t queue,
+        _In_ token_and_signature_callback callback
         ) = 0;
 
     static function_context add_sign_in_completed_handler(_In_ xbox_live_callback<const xsapi_internal_string&> handler);
@@ -152,7 +156,8 @@ public:
     void sign_in_impl(
         _In_ bool showUI,
         _In_ bool forceRefresh,
-        _In_ std::shared_ptr<SignInAsyncBlock> asyncBlock
+        _In_ async_queue_t queue,
+        _In_ xbox_live_callback<xbox_live_result<sign_in_result>> callback
         ) override;
 
     user_impl_idp(
@@ -169,7 +174,8 @@ public:
         _In_ const xsapi_internal_vector<unsigned char>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh,
-        _In_ std::shared_ptr<TokenAndSignatureAsyncBlock> asyncBlock
+        _In_ async_queue_t queue,
+        _In_ token_and_signature_callback callback
         ) override;
 
 private:

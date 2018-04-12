@@ -22,7 +22,7 @@ reputation_service_impl::reputation_service_impl(
 xbox_live_result<void> reputation_service_impl::submit_reputation_feedback(
     _In_ const xsapi_internal_string& xboxUserId,
     _In_ reputation_feedback_type reputationFeedbackType,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_t queue,
     _In_ xbox_live_callback<xbox_live_result<void>> callback,
     _In_ const xsapi_internal_string& sessionName,
     _In_ const xsapi_internal_string& reasonMessage,
@@ -63,10 +63,11 @@ xbox_live_result<void> reputation_service_impl::submit_reputation_feedback(
         m_userContext, 
         http_call_response_body_type::string_body,
         false,
-        HttpCallAsyncBlock::alloc([callback](std::shared_ptr<http_call_response_internal> response)
+        queue,
+        [callback](std::shared_ptr<http_call_response_internal> response)
         {
             callback(xbox_live_result<void>(response->err_code(), std::string(response->err_message().data())));
-        })
+        }
     );
 
     return xbox_live_result<void>();
@@ -74,7 +75,7 @@ xbox_live_result<void> reputation_service_impl::submit_reputation_feedback(
 
 xbox_live_result<void> reputation_service_impl::submit_batch_reputation_feedback(
     _In_ const xsapi_internal_vector<reputation_feedback_item_internal>& feedbackItems,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_t queue,
     _In_ xbox_live_callback<xbox_live_result<void>> callback
     )
 {
@@ -108,11 +109,12 @@ xbox_live_result<void> reputation_service_impl::submit_batch_reputation_feedback
     httpCall->get_response_with_auth(
         m_userContext, 
         http_call_response_body_type::string_body,
-        false, 
-        HttpCallAsyncBlock::alloc([callback](std::shared_ptr<http_call_response_internal> response)
+        false,
+        queue,
+        [callback](std::shared_ptr<http_call_response_internal> response)
         {
             callback(xbox_live_result<void>(response->err_code(), std::string(response->err_message().data())));
-        })
+        }
     );
 
     return xbox_live_result<void>();

@@ -86,6 +86,16 @@ extern "C" {
 
 #include "httpClient/types.h"
 
+#define XBL_GAMERSCORE_CHAR_SIZE 16
+#define XBL_GAMERTAG_CHAR_SIZE 16
+#define XBL_XBOX_USER_ID_CHAR_SIZE 21
+#define XBL_DISPLAY_NAME_CHAR_SIZE 30
+#define XBL_REAL_NAME_CHAR_SIZE 255
+#define XBL_DISPLAY_PIC_URL_RAW_CHAR_SIZE 225
+#define XBL_COLOR_CHAR_SIZE 7
+#define XBL_RICH_PRESENCE_CHAR_SIZE 100
+#define XBL_NUM_PRESENCE_RECORDS 6
+
 typedef _Null_terminated_ char* utf8_string;
 typedef _Null_terminated_ const char* const_utf8_string;
 

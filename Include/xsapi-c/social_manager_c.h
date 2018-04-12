@@ -12,16 +12,6 @@
 extern "C" {
 #endif
 
-#define XBL_GAMERSCORE_CHAR_SIZE 16
-#define XBL_GAMERTAG_CHAR_SIZE 16
-#define XBL_XBOX_USER_ID_CHAR_SIZE 21
-#define XBL_DISPLAY_NAME_CHAR_SIZE 30
-#define XBL_REAL_NAME_CHAR_SIZE 255
-#define XBL_DISPLAY_PIC_URL_RAW_CHAR_SIZE 225
-#define XBL_COLOR_CHAR_SIZE 7
-#define XBL_RICH_PRESENCE_CHAR_SIZE 100
-#define XBL_NUM_PRESENCE_RECORDS 6
-
 typedef enum XBL_SOCIAL_MANAGER_EXTRA_DETAIL_LEVEL 
 {
     /// <summary>Only get default PeopleHub information (presence, profile)</summary>
@@ -200,7 +190,7 @@ typedef struct XBL_XBOX_SOCIAL_USER
     /// <summary>
     /// The xbox user id
     /// </summary>
-    char xboxUserId[XBL_GAMERSCORE_CHAR_SIZE];
+    char xboxUserId[XBL_XBOX_USER_ID_CHAR_SIZE];
 
     /// <summary>
     /// Whether they are a favorite
