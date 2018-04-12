@@ -22,7 +22,8 @@ enum ButtonPress
     ToggleSocialGroup5,
     ImportCustomList,
     GetUserProfile,
-    GetFriends
+    GetFriends,
+    GetAchievementsForTitle
 };
 
 #define PERF_COUNTERS 0    // Enable this for capturing performance counters
@@ -81,6 +82,7 @@ namespace Sample
     private:
         XBL_XBOX_LIVE_USER *m_user;
         XBL_XBOX_LIVE_CONTEXT_HANDLE m_xboxLiveContext;
+        const XBL_XBOX_LIVE_APP_CONFIG* m_config;
 
         function_context m_signOutContext;
 
@@ -100,6 +102,7 @@ namespace Sample
         void ReadCsvFile(_In_ Windows::Storage::StorageFile^ file);
         void UpdateCustomList(_In_ const std::vector<std::string>& xuidList);
 
+        // Social Tests
         void GetUserProfile();
         void CopySocialRelationshipResult();
         void GetSocialRelationships();
@@ -159,6 +162,16 @@ namespace Sample
             XBL_XBOX_LIVE_USER* user,
             bool toggle
         );
+
+        // Achievement Tests
+        void GetAchievmentsForTitle();
+        void AchievementResultsGetNext(XBL_ACHIEVEMENTS_RESULT* result);
+        void GetAchievement(PCSTR scid, PCSTR achievementId);
+        void UpdateAchievement(PCSTR scid, PCSTR achievementId);
+
+        void TestAchievementCopy(XBL_ACHIEVEMENT* source);
+        void TestAchievementsResultCopy(XBL_ACHIEVEMENTS_RESULT* source);
+        void AssertAchievement(XBL_ACHIEVEMENT* copy, XBL_ACHIEVEMENT* source);
 
         HANDLE m_hBackgroundThread;
     };

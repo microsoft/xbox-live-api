@@ -8,9 +8,9 @@
 
 using namespace xbox::services::achievements;
 
-struct get_next_taskargs : public taskargs_with_payload<XSAPI_ACHIEVEMENTS_RESULT*>
+struct get_next_taskargs : public taskargs_with_payload<XBL_ACHIEVEMENTS_RESULT*>
 {
-    XSAPI_ACHIEVEMENTS_RESULT* achievementsResult;
+    XBL_ACHIEVEMENTS_RESULT* achievementsResult;
     uint32_t maxItems;
 };
 
@@ -28,7 +28,7 @@ struct update_achievement_taskargs : public achievements_taskargs, public taskar
     uint32_t percentComplete;
 };
 
-struct get_achievement_for_title_id_taskargs : public achievements_taskargs, public taskargs_with_payload<XSAPI_ACHIEVEMENTS_RESULT*>
+struct get_achievement_for_title_id_taskargs : public achievements_taskargs, public taskargs_with_payload<XBL_ACHIEVEMENTS_RESULT*>
 {
     string_t xboxUserId;
     uint32_t titleId;
@@ -39,7 +39,7 @@ struct get_achievement_for_title_id_taskargs : public achievements_taskargs, pub
     uint32_t maxItems;
 };
 
-struct get_achievement_taskargs : public achievements_taskargs, public taskargs_with_payload<XSAPI_ACHIEVEMENT*>
+struct get_achievement_taskargs : public achievements_taskargs, public taskargs_with_payload<XBL_ACHIEVEMENT*>
 {
     string_t xboxUserId;
     string_t serviceConfigurationId;

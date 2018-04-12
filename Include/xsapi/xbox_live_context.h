@@ -224,6 +224,7 @@ private:
 
     void init();
 
+    achievements::achievement_service m_achievementService;
     social::profile_service m_profileService;
     social::social_service m_socialService;
     social::reputation_service m_reputationService;

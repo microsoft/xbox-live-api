@@ -3,15 +3,24 @@
 
 #pragma once
 #include "xbox_live_app_config.h"
+#include "xsapi/system.h"
 
-namespace xbox { namespace services { 
-    class xbox_live_context_impl;
+namespace xbox { namespace services {
+    class xbox_live_context;
 
     /// <summary>
     /// Contains classes and enumerations that let you retrieve
     /// information about player achievements from Xbox Live.
     /// </summary>
     namespace achievements {
+    class achievement_internal;
+    class achievement_progression_internal;
+    class achievement_media_asset_internal;
+    class achievement_requirement_internal;
+    class achievement_reward_internal;
+    class achievement_service_internal;
+    class achievement_title_association_internal;
+    class achievements_result_internal; 
 
 /// <summary>Enumeration values that indicate the achievement type.</summary>
 enum class achievement_type
@@ -114,30 +123,31 @@ class achievement_title_association
 {
 public:
     achievement_title_association();
-
+    
     achievement_title_association(
         _In_ string_t name,
         _In_ uint32_t id
         );
 
     /// <summary>
+    /// Internal function
+    /// </summary>
+    achievement_title_association(
+        _In_ std::shared_ptr<achievement_title_association_internal>
+        );
+
+    /// <summary>
     /// The localized name of the title.
     /// </summary>
-    _XSAPIIMP const string_t& name() const;
+    _XSAPIIMP string_t name() const;
 
     /// <summary>
     /// The title ID.
     /// </summary>
     _XSAPIIMP uint32_t title_id() const;
 
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static xbox_live_result<achievement_title_association> _Deserialize(_In_ const web::json::value& json);
-
 private:
-    string_t m_name;
-    uint32_t m_id;
+    std::shared_ptr<achievement_title_association_internal> m_internalObj;
 };
 
 /// <summary>
@@ -152,37 +162,28 @@ public:
     /// Internal function
     /// </summary>
     achievement_requirement(
-        _In_ string_t id,
-        _In_ string_t currentProgressValue,
-        _In_ string_t targetProgressValue
+        _In_ std::shared_ptr<achievement_requirement_internal> 
         );
 
     /// <summary>
     /// The achievement requirement ID.
     /// </summary>
-    _XSAPIIMP const string_t& id() const;
+    _XSAPIIMP string_t id() const;
 
     /// <summary>
     /// A value that indicates the current progress of the player towards meeting
     /// the requirement.
     /// </summary>
-    _XSAPIIMP const string_t& current_progress_value() const;
+    _XSAPIIMP string_t current_progress_value() const;
 
     /// <summary>
     /// The target progress value that the player must reach in order to meet
     /// the requirement.
     /// </summary>
-    _XSAPIIMP const string_t& target_progress_value() const;
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static xbox_live_result<achievement_requirement> _Deserialize(_In_ const web::json::value& json);
-
+    _XSAPIIMP string_t target_progress_value() const;
+    
 private:
-    string_t m_id;
-    string_t m_currentProgressValue;
-    string_t m_targetProgressValue;
+    std::shared_ptr<achievement_requirement_internal> m_internalObj;
 };
 
 /// <summary>
@@ -197,28 +198,21 @@ public:
     /// Internal function
     /// </summary>
     achievement_progression(
-        _In_ std::vector<achievement_requirement> requirements,
-        _In_ utility::datetime timeUnlocked
+        _In_ std::shared_ptr<achievement_progression_internal> internalObj
         );
 
     /// <summary>
     /// The actions and conditions that are required to unlock the achievement.
     /// </summary>
-    _XSAPIIMP const std::vector<achievement_requirement>& requirements() const;
+    _XSAPIIMP std::vector<achievement_requirement> requirements() const;
 
     /// <summary>
     /// The timestamp when the achievement was first unlocked.
     /// </summary>
     _XSAPIIMP const utility::datetime& time_unlocked() const;
 
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static xbox_live_result<achievement_progression> _Deserialize(_In_ const web::json::value& json);
-
 private:
-    std::vector<achievement_requirement> m_requirements;
-    utility::datetime m_timeUnlocked;
+    std::shared_ptr<achievement_progression_internal> m_internalObj;
 };
 
 /// <summary>
@@ -247,7 +241,7 @@ public:
     /// The end date and time of the achievement time window.
     /// </summary>
     _XSAPIIMP const utility::datetime& end_date() const;
-
+    
     /// <summary>
     /// Internal function
     /// </summary>
@@ -270,42 +264,26 @@ public:
     /// Internal function
     /// </summary>
     achievement_media_asset(
-        _In_ string_t name,
-        _In_ achievement_media_asset_type type,
-        _In_ web::uri m_url
+        std::shared_ptr<achievement_media_asset_internal> internalObj
         );
 
     /// <summary>
     /// The name of the media asset, such as "tile01".
     /// </summary>
-    _XSAPIIMP const string_t& name() const;
+    _XSAPIIMP string_t name() const;
 
     /// <summary>
     /// The type of media asset.
     /// </summary>
-    _XSAPIIMP achievement_media_asset_type media_asset_type() const;
+    _XSAPIIMP const achievement_media_asset_type& media_asset_type() const;
 
     /// <summary>
     /// The URL of the media asset.
     /// </summary>
     _XSAPIIMP const web::uri& url() const;
 
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static achievement_media_asset_type _Convert_string_to_media_asset_type(
-        _In_ const string_t& value
-        );
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static xbox_live_result<achievement_media_asset> _Deserialize(_In_ const web::json::value& json);
-
 private:
-    string_t m_name;
-    achievement_media_asset_type m_type;
-    web::uri m_url;
+    std::shared_ptr<achievement_media_asset_internal> m_internalObj;
 };
 
 /// <summary>
@@ -320,38 +298,33 @@ public:
     /// Internal function
     /// </summary>
     achievement_reward(
-        _In_ string_t name,
-        _In_ string_t description,
-        _In_ string_t value,
-        _In_ achievement_reward_type type,
-        _In_ string_t valuePropertyType,
-        _In_ achievement_media_asset mediaAsset
+        _In_ std::shared_ptr<achievement_reward_internal> internalObj
         );
 
     /// <summary>
     /// The localized reward name.
     /// </summary>
-    _XSAPIIMP const string_t& name() const;
+    _XSAPIIMP string_t name() const;
 
     /// <summary>
     /// The description of the reward.
     /// </summary>
-    _XSAPIIMP const string_t& description() const;
+    _XSAPIIMP string_t description() const;
 
     /// <summary>
     /// The title-defined reward value (data type and content varies by reward type).
     /// </summary>
-    _XSAPIIMP const string_t& value() const;
+    _XSAPIIMP string_t value() const;
 
     /// <summary>
     /// The reward type.
     /// </summary>
-    _XSAPIIMP achievement_reward_type reward_type() const;
+    _XSAPIIMP const achievement_reward_type& reward_type() const;
 
     /// <summary>
     /// The property type of the reward value string.
     /// </summary>
-    _XSAPIIMP const string_t& value_type() const;
+    _XSAPIIMP string_t value_type() const;
 
     /// <summary>
     /// The media asset associated with the reward.
@@ -361,22 +334,8 @@ public:
     /// </summary>
     _XSAPIIMP const achievement_media_asset& media_asset() const;
 
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static xbox_live_result<achievement_reward> _Deserialize(_In_ const web::json::value& json);
-
 private:
-    static achievement_reward_type convert_string_to_reward_type(
-        _In_ const string_t& value
-        );
-
-    string_t m_name;
-    string_t m_description;
-    string_t m_value;
-    achievement_reward_type m_rewardType;
-    string_t m_valuePropertyType;
-    achievement_media_asset m_mediaAsset;
+    std::shared_ptr<achievement_reward_internal> m_internalObj;
 };
 
 
@@ -393,51 +352,33 @@ public:
     /// Internal function
     /// </summary>
     achievement(
-        _In_ string_t id,
-        _In_ string_t serviceConfigurationId,
-        _In_ string_t name,
-        _In_ std::vector<achievement_title_association> titleAssociations,
-        _In_ achievement_progress_state progressState,
-        _In_ std::vector<achievement_media_asset> mediaAssets,
-        _In_ std::vector<string_t> platformsAvailableOn,
-        _In_ bool isSecret,
-        _In_ string_t unlockedDescription,
-        _In_ string_t lockedDescription,
-        _In_ string_t productId,
-        _In_ achievement_type achievementType,
-        _In_ achievement_participation_type participationType,
-        _In_ achievement_time_window available,
-        _In_ std::vector<achievement_reward> rewards,
-        _In_ std::chrono::seconds estimatedUnlockTime,
-        _In_ string_t deepLink,
-        _In_ bool isRevoked,
-        _In_ achievement_progression progression
+        _In_ std::shared_ptr<achievement_internal> internalObj
         );
 
     /// <summary>
     /// The achievement ID. Can be a uint or a guid.
     /// </summary>
-    _XSAPIIMP const string_t& id() const;
+    _XSAPIIMP string_t id() const;
 
     /// <summary>
     /// The ID of the service configuration set associated with the achievement.
     /// </summary>
-    _XSAPIIMP const string_t& service_configuration_id() const;
+    _XSAPIIMP string_t service_configuration_id() const;
 
     /// <summary>
     /// The localized achievement name.
     /// </summary>
-    _XSAPIIMP const string_t& name() const;
+    _XSAPIIMP string_t name() const;
 
     /// <summary>
     /// The game/app titles associated with the achievement.
     /// </summary>
-    _XSAPIIMP const std::vector<achievement_title_association>& title_associations() const;
+    _XSAPIIMP std::vector<achievement_title_association> title_associations() const;
 
     /// <summary>
     /// The state of a user's progress towards the earning of the achievement.
     /// </summary>
-    _XSAPIIMP achievement_progress_state progress_state() const;
+    _XSAPIIMP const achievement_progress_state& progress_state() const;
 
     /// <summary>
     /// The progression object containing progress details about the achievement,
@@ -448,12 +389,12 @@ public:
     /// <summary>
     /// The media assets associated with the achievement, such as image IDs.
     /// </summary>
-    _XSAPIIMP const std::vector<achievement_media_asset>& media_assets() const;
+    _XSAPIIMP std::vector<achievement_media_asset> media_assets() const;
 
     /// <summary>
     /// The collection of platforms that the achievement is available on.
     /// </summary>
-    _XSAPIIMP const std::vector<string_t>& platforms_available_on() const;
+    _XSAPIIMP std::vector<string_t> platforms_available_on() const;
 
     /// <summary>
     /// Whether or not the achievement is secret.
@@ -463,28 +404,28 @@ public:
     /// <summary>
     /// The description of the unlocked achievement.
     /// </summary>
-    _XSAPIIMP const string_t& unlocked_description() const;
+    _XSAPIIMP string_t unlocked_description() const;
 
     /// <summary>
     /// The description of the locked achievement.
     /// </summary>
-    _XSAPIIMP const string_t& locked_description() const;
+    _XSAPIIMP string_t locked_description() const;
 
     /// <summary>
     /// The product_id the achievement was released with. This is a globally unique identifier that
     /// may correspond to an application, downloadable content, etc.
     /// </summary>
-    _XSAPIIMP const string_t& product_id() const;
+    _XSAPIIMP string_t product_id() const;
 
     /// <summary>
     /// The type of achievement, such as a challenge achievement.
     /// </summary>
-    _XSAPIIMP achievement_type type() const;
+    _XSAPIIMP const achievement_type& type() const;
 
     /// <summary>
     /// The participation type for the achievement, such as group or individual.
     /// </summary>
-    _XSAPIIMP achievement_participation_type participation_type() const;
+    _XSAPIIMP const achievement_participation_type& participation_type() const;
 
     /// <summary>
     /// The time window during which the achievement is available. Applies to Challenges.
@@ -494,7 +435,7 @@ public:
     /// <summary>
     /// The collection of rewards that the player earns when the achievement is unlocked.
     /// </summary>
-    _XSAPIIMP const std::vector<achievement_reward>& rewards() const;
+    _XSAPIIMP std::vector<achievement_reward> rewards() const;
 
     /// <summary>
     /// The estimated time that the achievement takes to be earned.
@@ -505,38 +446,15 @@ public:
     /// A deeplink for clients that enables the title to launch at a desired starting point
     /// for the achievement.
     /// </summary>
-    _XSAPIIMP const string_t& deep_link() const;
+    _XSAPIIMP string_t deep_link() const;
 
     /// <summary>
     /// A value that indicates whether or not the achievement is revoked by enforcement.
     /// </summary>
     _XSAPIIMP bool is_revoked() const;
 
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static xbox_live_result<achievement> _Deserialize(_In_ const web::json::value& json);
-
 private:
-    string_t m_id;
-    string_t m_serviceConfigurationId;
-    string_t m_name;
-    std::vector<achievement_title_association> m_titleAssociations;
-    achievement_progress_state m_progressState;
-    std::vector<achievement_media_asset> m_mediaAssets;
-    std::vector<string_t> m_platformsAvailableOn;
-    bool m_isSecret;
-    string_t m_unlockedDescription;
-    string_t m_lockedDescription;
-    string_t m_productId;
-    achievement_type m_achievementType;
-    achievement_participation_type m_participationType;
-    achievement_time_window m_available;
-    std::vector<achievement_reward> m_rewards;
-    std::chrono::seconds m_estimatedUnlockTime;
-    string_t m_deepLink;
-    bool m_isRevoked;
-    achievement_progression m_progression;
+    std::shared_ptr<achievement_internal> m_internalObj;
 };
 
 /// <summary>
@@ -551,30 +469,20 @@ public:
     _XSAPIIMP achievements_result();
 
     /// <summary>
-    /// Internal function
+    /// Internal function.
     /// </summary>
-    void _Init_next_page_info(
-        _In_ std::shared_ptr<xbox::services::user_context> userContext,
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
-        _In_ std::weak_ptr<xbox_live_context_impl> xboxLiveContextImpl,
-        _In_ string_t xboxUserId,
-        _In_ std::vector<uint32_t> titleIds,
-        _In_ achievement_type type,
-        _In_ bool unlockedOnly,
-        _In_ achievement_order_by orderBy
-        );
-
+    _XSAPIIMP achievements_result(std::shared_ptr<achievements_result_internal> internalObj);
+    
     /// <summary>
     /// The collection of achievement objects returned by a request.
     /// </summary>
-    _XSAPIIMP const std::vector<achievement>& items() const;
+    _XSAPIIMP std::vector<achievement> items() const;
 
     /// <summary>
     /// Returns a boolean value that indicates if there are more pages of achievements to retrieve.
     /// </summary>
     /// <returns>True if there are more pages, otherwise false.</returns>
-    _XSAPIIMP bool has_next();
+    _XSAPIIMP bool has_next() const;
 
     /// <summary>
     /// Returns an achievements_result object that contains the next page of achievements.
@@ -590,25 +498,9 @@ public:
     _XSAPIIMP pplx::task<xbox::services::xbox_live_result<achievements_result>> get_next(
         _In_ uint32_t maxItems
         );
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static xbox::services::xbox_live_result<achievements_result> _Deserialize(_In_ const web::json::value& json);
-
+    
 private:
-    std::shared_ptr<xbox::services::user_context> m_userContext;
-    std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
-    std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
-    std::weak_ptr<xbox_live_context_impl> m_xboxLiveContextImpl;
-
-    string_t m_xboxUserId;
-    std::vector<uint32_t> m_titleIds;
-    achievement_type m_achievementType;
-    bool m_unlockedOnly;
-    achievement_order_by m_orderBy;
-    std::vector<achievement> m_items;
-    string_t m_continuationToken;
+    std::shared_ptr<achievements_result_internal> m_internalObj;
 };
 
 /// <summary>
@@ -712,89 +604,16 @@ public:
         _In_ const string_t& achievementId
         );
 
+private:
     achievement_service() {};
 
-    /// <summary>
-    /// Internal function
-    /// </summary>
     achievement_service(
-        _In_ std::shared_ptr<xbox::services::user_context> userContext,
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
-        _In_ std::weak_ptr<xbox_live_context_impl> xboxLiveContextImpl
-        );
+        std::shared_ptr<achievement_service_internal> internalObj
+    );
 
-private:
-    pplx::task<xbox::services::xbox_live_result<achievements_result>> get_achievements(
-        _In_ const string_t& xboxUserId,
-        _In_ const std::vector<uint32_t>& titleIds,
-        _In_ achievement_type type,
-        _In_ bool unlockedOnly,
-        _In_ achievement_order_by orderBy,
-        _In_ uint32_t skipItems,
-        _In_ uint32_t maxItems,
-        _In_ const string_t& continuationToken
-        );
+    std::shared_ptr<achievement_service_internal> m_internalObj;
 
-    // Achievements endpoints
-    static const string_t achievements_sub_path(
-        _In_ const string_t& xboxUserId,
-        _In_ const std::vector<uint32_t>& titleIds,
-        _In_ const string_t& types,
-        _In_ bool unlockedOnly,
-        _In_ const string_t& orderBy,
-        _In_ uint32_t skipItems,
-        _In_ uint32_t maxItems,
-        _In_ const string_t& continuationToken
-        );
-
-    static const string_t update_achievement_sub_path(
-        _In_ const string_t& xboxUserId,
-        _In_ const string_t& serviceConfigurationId
-        );
-
-    static const string_t achievement_by_id_sub_path(
-        _In_ const string_t& xboxUserId,
-        _In_ const string_t& serviceConfigurationId,
-        _In_ const string_t& achievementId
-        );
-
-    static xbox_live_result<string_t> convert_type_to_string(
-        _In_ achievement_type type
-        );
-
-    static xbox_live_result<string_t> convert_order_by_to_string(
-        _In_ achievement_order_by orderBy
-        );
-
-    std::shared_ptr<xbox::services::user_context> m_userContext;
-    std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
-    std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
-    std::weak_ptr<xbox_live_context_impl> m_xboxLiveContextImpl;
-
-#if TV_API
-    static xbox::services::xbox_live_result<void> write_offline_update_achievement(
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_impl> xboxLiveContextImpl,
-        _In_ const string_t& achievementId,
-        _In_ uint32_t percentComplete
-        );
-
-    static ULONG event_write_achievement_update(
-        _In_ PCWSTR userId,
-        _In_ PCWSTR achievementId,
-        _In_ const uint32_t percentComplete
-        );
-
-#elif UWP_API
-    static xbox::services::xbox_live_result<void> write_offline_update_achievement(
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_impl> xboxLiveContextImpl,
-        _In_ const string_t& achievementId,
-        _In_ uint32_t percentComplete
-        );
-#endif
-   
-    friend class xbox_live_context_impl;
-    friend class achievements_result;
+    friend xbox_live_context;
 };
 
 }}}
