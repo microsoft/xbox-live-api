@@ -25,10 +25,10 @@ void copy_profile(
     strcpy_s(profile->xboxUserId, internal->xbox_user_id().data());
 }
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblGetUserProfile(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ const_utf8_string xboxUserId,
+    _In_ UTF8CSTR xboxUserId,
     _In_ AsyncBlock* async
     ) XBL_NOEXCEPT
 try
@@ -84,10 +84,10 @@ try
 }
 CATCH_RETURN()
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblGetUserProfiles(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ const_utf8_string* xboxUserIds,
+    _In_ UTF8CSTR* xboxUserIds,
     _In_ size_t xboxUserIdsCount,
     _In_ AsyncBlock* async
     ) XBL_NOEXCEPT
@@ -149,10 +149,10 @@ try
 }
 CATCH_RETURN()
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblGetUserProfilesForSocialGroup(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ const_utf8_string socialGroup,
+    _In_ UTF8CSTR socialGroup,
     _In_ AsyncBlock* async
     ) XBL_NOEXCEPT
 try

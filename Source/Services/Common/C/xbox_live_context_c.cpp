@@ -12,7 +12,7 @@
 using namespace xbox::services;
 using namespace xbox::services::system;
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblContextCreateHandle(
     _In_ xbl_user_handle user,
     _Out_ xbl_context_handle* context
@@ -30,7 +30,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API xbl_context_handle XBL_CALLING_CONV
+STDAPI_(xbl_context_handle)
 XblContextDuplicateHandle(
     _In_ xbl_context_handle context
     ) XBL_NOEXCEPT
@@ -46,25 +46,22 @@ try
 }
 CATCH_RETURN_WITH(nullptr)
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI_(void)
 XblContextCloseHandle(
     _In_ xbl_context_handle xboxLiveContextHandle
     ) XBL_NOEXCEPT
 try
 {
-    RETURN_C_INVALIDARGUMENT_IF_NULL(xboxLiveContextHandle);
-
     int refCount = --xboxLiveContextHandle->refCount;
     if (refCount <= 0)
     {
         assert(refCount == 0);
         xsapi_memory::mem_free(xboxLiveContextHandle);
     }
-    return S_OK;
 }
-CATCH_RETURN()
+CATCH_RETURN_WITH(;)
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblContextGetUser(
     _In_ xbl_context_handle context,
     _Out_ xbl_user_handle* user
@@ -77,7 +74,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblContextGetXboxUserId(
     _In_ xbl_context_handle context,
     _Out_ const char** xboxUserId

@@ -3,10 +3,6 @@
 
 #pragma once
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 /// <summary> 
 /// Represents a user's Xbox Live profile.
 /// </summary>
@@ -73,11 +69,37 @@ typedef struct XblUserProfile
 /// The result of the asynchronous operation is obtained using XblGetProfileResult.
 /// </returns>
 /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
-XBL_API HRESULT XBL_CALLING_CONV
-XblGetUserProfile(
+STDAPI XblGetUserProfile(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ const_utf8_string xboxUserId,
+    _In_ UTF8CSTR xboxUserId,
     _In_ AsyncBlock* async
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Gets the results from XblGetUserProfile
+/// </summary>
+/// <param name="async">Caller allocated AsyncBlock.</param>
+/// <param name="sizeInBytes">Size in bytes of buffer to allocate for result.</param>
+/// <returns>
+/// Result code for this API operation. Possible values are S_OK, E_INVALIDARG, or E_OUTOFMEMORY
+/// </returns>
+STDAPI XblGetUserProfileResultSize(
+    _In_ AsyncBlock* async,
+    _Out_ size_t* sizeInBytes
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Gets the results from XblGetUserProfile
+/// </summary>
+/// <param name="async">Caller allocated AsyncBlock.</param>
+/// <param name="profile">A pointer to store the result.</param>
+/// <returns>
+/// Result code for this API operation. Possible values are S_OK, E_INVALIDARG, or E_OUTOFMEMORY
+/// </returns>
+STDAPI XblGetUserProfileResult(
+    _In_ AsyncBlock* async,
+    _Out_ XblUserProfile** profile,
+    _In_ size_t sizeInBytes
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -88,15 +110,12 @@ XblGetUserProfile(
 /// <param name="xboxUserIdsCount">The number of Xbox User IDs in the array.</param>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>
-/// <returns>
-/// Result code for this API operation. Possible values are S_OK and E_INVALIDARG.
 /// The result of the asynchronous operation is obtained using XblGetProfileResult.
 /// </returns>
 /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
-XBL_API HRESULT XBL_CALLING_CONV
-XblGetUserProfiles(
+STDAPI XblGetUserProfiles(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ const_utf8_string* xboxUserIds,
+    _In_ UTF8CSTR* xboxUserIds,
     _In_ size_t xboxUserIdsCount,
     _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
@@ -106,18 +125,15 @@ XblGetUserProfiles(
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="socialGroup">The name of the social group of users to search. Options are "Favorites" and "People".</param>
-/// <param name="queue">The async queue to associate this call with.</param>
-/// <param name="callbackContext">Context passed back to callback.</param>
-/// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>
-/// Result code for this API operation. Possible values are XBL_RESULT_OK and XBL_RESULT_E_INVALIDARG.
+/// Result code for this API operation. Possible values are S_OK and E_INVALIDARG.
 /// The result of the asynchronous operation is returned via the callback parameters.
 /// </returns>
 /// <remarks>Calls V2 GET /users/{userId}/profile/settings/people/{socialGroup}</remarks>
-XBL_API HRESULT XBL_CALLING_CONV
-XblGetUserProfilesForSocialGroup(
+STDAPI XblGetUserProfilesForSocialGroup(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ const_utf8_string socialGroup,
+    _In_ UTF8CSTR socialGroup,
     _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
@@ -146,7 +162,3 @@ XblGetProfileResult(
     _Out_writes_to_(profilesCount, written) XblUserProfile* profiles,
     _Out_opt_ size_t* written
     ) XBL_NOEXCEPT;
-
-#if defined(__cplusplus)
-} // end extern "C"
-#endif // defined(__cplusplus)

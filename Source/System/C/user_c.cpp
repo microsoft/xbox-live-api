@@ -9,7 +9,7 @@
 using namespace xbox::services;
 using namespace xbox::services::system;
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserCreateHandleFromSystemUser(
     _In_ Windows::System::User^ creationContext,
     _Out_ xbl_user_handle* user
@@ -22,7 +22,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserCreateHandle(
     _Out_ xbl_user_handle* user
     ) XBL_NOEXCEPT
@@ -47,7 +47,7 @@ try
 }
 CATCH_RETURN_WITH(nullptr)
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserCloseHandle(
     _In_ xbl_user_handle user
     ) XBL_NOEXCEPT
@@ -70,7 +70,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserGetXuid(
     _In_ xbl_user_handle user,
     _In_ size_t xuidBufferSize,
@@ -95,7 +95,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserGetGamertag(
     _In_ xbl_user_handle user,
     _In_ size_t gamertagBufferSize,
@@ -119,7 +119,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserGetAgeGroup(
     _In_ xbl_user_handle user,
     _Out_ XblAgeGroup* ageGroup
@@ -148,7 +148,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserGetPrivilegesSize(
     _In_ xbl_user_handle user,
     _Out_ size_t* size
@@ -161,7 +161,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserGetPrivileges(
     _In_ xbl_user_handle user,
     _In_ size_t privilegesSize,
@@ -187,7 +187,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserIsSignedIn(
     _In_ xbl_user_handle user,
     _Out_ bool *isSignedIn
@@ -273,7 +273,7 @@ HRESULT SignInHelper(
     return ScheduleAsync(asyncBlock, 0);
 }
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserSignIn(
     _In_ xbl_user_handle user,
     _In_ AsyncBlock* async
@@ -284,7 +284,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserSignInSilently(
     _In_ xbl_user_handle user,
     _In_ AsyncBlock* async
@@ -295,7 +295,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserSignInWithCoreDispatcher(
     _In_ xbl_user_handle user,
     _In_ Platform::Object^ coreDispatcherObj,
@@ -307,7 +307,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserSignInSilentlyWithCoreDispatcher(
     _In_ xbl_user_handle user,
     _In_ Platform::Object^ coreDispatcherObj,
@@ -319,7 +319,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblGetSignInResult(
     _In_ AsyncBlock* async,
     _Out_ XblSignInResult* signInResult
@@ -335,20 +335,18 @@ struct GetTokenAndSignatureContext
     xsapi_internal_string url;
     xsapi_internal_string headers;
     xsapi_internal_string requestBodyString;
-    void* callbackContext;
     XblGetTokenAndSignatureCallback callback;
     xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result;
 };
 
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserGetTokenAndSignature(
     _In_ xbl_user_handle user,
-    _In_ const char* httpMethod,
-    _In_ const char* url,
-    _In_ const char* headers,
-    _In_ const char* requestBodyString,
+    _In_ UTF8CSTR httpMethod,
+    _In_ UTF8CSTR url,
+    _In_ UTF8CSTR headers,
+    _In_ UTF8CSTR requestBodyString,
     _In_ AsyncBlock* async,
-    _In_ void* callbackContext,
     _In_ XblGetTokenAndSignatureCallback callback
     ) XBL_NOEXCEPT
 try
@@ -359,7 +357,6 @@ try
     context->url = url;
     context->headers = headers;
     context->requestBodyString = requestBodyString;
-    context->callbackContext = callbackContext;
     context->callback = callback;
 
     auto result = BeginAsync(async, utils::store_shared_ptr<GetTokenAndSignatureContext>(context), nullptr, __FUNCTION__,
@@ -383,7 +380,7 @@ try
                 // Only calling the typed callback on success
                 if (SUCCEEDED(hr))
                 {
-                    context->callback(context->callbackContext,
+                    context->callback(data->async->context,
                         result.payload()->token().data(),
                         result.payload()->signature().data()
                         );

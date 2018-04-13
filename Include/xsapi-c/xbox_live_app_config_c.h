@@ -22,24 +22,24 @@ typedef struct XblAppConfig
     /// <summary>
     /// Service config id of the app.
     /// </summary>
-    const_utf8_string scid;
+    UTF8CSTR scid;
 
     /// <summary>
     /// Xbox Live environment being used, it is empty before you sign in or using production.
     /// </summary>
-    const_utf8_string environment;
+    UTF8CSTR environment;
 
     /// <summary>
     /// The sandbox such as "XDKS.1", it is empty until you sign in.
     /// </summary>
-    const_utf8_string sandbox;
+    UTF8CSTR sandbox;
 } XblAppConfig;
 
 /// <summary>
-/// Gets the app config singleton.
+/// Gets the Xbox Live app config 
 /// </summary>
-XBL_API HRESULT XBL_CALLING_CONV
-XblGetXboxLiveAppConfigSingleton(
+STDAPI
+XblGetXboxLiveAppConfig(
     _Out_ const XblAppConfig** appConfig
     );
 

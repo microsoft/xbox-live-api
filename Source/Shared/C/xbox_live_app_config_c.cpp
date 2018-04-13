@@ -7,8 +7,8 @@
 
 using namespace xbox::services;
 
-XBL_API HRESULT XBL_CALLING_CONV
-XblGetXboxLiveAppConfigSingleton(
+STDAPI
+XblGetXboxLiveAppConfig(
     _Out_ const XblAppConfig** appConfig
     ) XBL_NOEXCEPT
 try

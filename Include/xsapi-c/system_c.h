@@ -5,9 +5,10 @@
 #include "types_c.h"
 #include "xsapi-c/errors_c.h"
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+
+const size_t XuidMaxBytes = 21;
+const size_t GamertagMaxBytes = 16;
+
 
 #if !XDK_API
 
@@ -61,7 +62,7 @@ typedef struct XblSignInResult
 /// </summary>
 /// <param name="user">The returned Xbox Live user handle.</param>
 /// <returns>Result code for this API operation.</returns>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI 
 XblUserCreateHandle(
     _Out_ xbl_user_handle* user
     ) XBL_NOEXCEPT;
@@ -73,7 +74,7 @@ XblUserCreateHandle(
 /// </summary>
 /// <param name="user">The returned Xbox Live user handle.</param>
 /// <returns>Result code for this API operation.</returns>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserCreateHandleFromSystemUser(
     _In_ Windows::System::User^ creationContext,
     _Out_ xbl_user_handle* user
@@ -86,7 +87,7 @@ XblUserCreateHandleFromSystemUser(
 /// </summary>
 /// <param name="user">The user handle.</param>
 /// <returns>The duplicate handle.</returns>
-XBL_API xbl_user_handle XBL_CALLING_CONV
+STDAPI_(xbl_user_handle)
 XblUserDuplicateHandle(
     _In_ xbl_user_handle user
     ) XBL_NOEXCEPT;
@@ -95,12 +96,10 @@ XblUserDuplicateHandle(
 /// Decrements the reference count on the user object.
 /// </summary>
 /// <param name="user">The user handle.</param>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserCloseHandle(
     _In_ xbl_user_handle user
     ) XBL_NOEXCEPT;
-
-const size_t XuidMaxBytes = 21;
 
 /// <summary>
 /// Returns the id of the user.
@@ -109,15 +108,13 @@ const size_t XuidMaxBytes = 21;
 /// <param name="xuidBufferSize">Size of the provided output buffer.</param>
 /// <param name="xuidBuffer">Buffer to write xuid.</param>
 /// <param name="written">The actual number of bytes written to the buffer.</param>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserGetXuid(
     _In_ xbl_user_handle user,
     _In_ size_t xuidBufferSize,
-    _Out_writes_to_(xuidBufferSize, *written) utf8_string xuidBuffer,
+    _Out_writes_to_(xuidBufferSize, *written) UTF8STR xuidBuffer,
     _Out_opt_ size_t* written
     ) XBL_NOEXCEPT;
-
-const size_t GamertagMaxBytes = 16;
 
 /// <summary>
 /// Returns the gamertag of the user.
@@ -126,11 +123,11 @@ const size_t GamertagMaxBytes = 16;
 /// <param name="gamertagBufferSize">Size of the provided output buffer.</param>
 /// <param name="gamertagBuffer">Buffer to write gamertag.</param>
 /// <param name="written">The actual number of bytes written to the buffer.</param>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserGetGamertag(
     _In_ xbl_user_handle user,
     _In_ size_t gamertagBufferSize,
-    _Out_writes_to_(gamertagBufferSize, *written) utf8_string gamertagBuffer,
+    _Out_writes_to_(gamertagBufferSize, *written) UTF8STR gamertagBuffer,
     _Out_opt_ size_t* written
     ) XBL_NOEXCEPT;
 
@@ -139,7 +136,7 @@ XblUserGetGamertag(
 /// </summary>
 /// <param name="user">The user handle.</param>
 /// <param name="ageGroup">The age group.</param>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserGetAgeGroup(
     _In_ xbl_user_handle user,
     _Out_ XblAgeGroup* ageGroup
@@ -150,7 +147,7 @@ XblUserGetAgeGroup(
 /// </summary>
 /// <param name="user">The user handle.</param>
 /// <param name="size">The required buffer size for the privileges string.</param>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserGetPrivilegesSize(
     _In_ xbl_user_handle user,
     _Out_ size_t* size
@@ -163,11 +160,11 @@ XblUserGetPrivilegesSize(
 /// <param name="gamertagBufferSize">Size of the provided output buffer.</param>
 /// <param name="privileges">Buffer to write the users privileges.</param>
 /// <param name="written">The actual number of bytes written to the buffer.</param>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserGetPrivileges(
     _In_ xbl_user_handle user,
     _In_ size_t privilegesSize,
-    _Out_writes_to_(privilegesSize, *written) utf8_string privileges,
+    _Out_writes_to_(privilegesSize, *written) UTF8STR privileges,
     _Out_opt_ size_t* written
     ) XBL_NOEXCEPT;
 
@@ -176,7 +173,7 @@ XblUserGetPrivileges(
 /// </summary>
 /// <param name="userHandle">The user handle.</param>
 /// <param name="isSignedIn">Whether the user is currently signed in.</param>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserIsSignedIn(
     _In_ xbl_user_handle user,
     _Out_ bool* isSignedIn
@@ -193,7 +190,7 @@ XblUserIsSignedIn(
 /// For UWA, this API is to be called from UI thread, if you're calling from non-UI thread or not sure, please use 
 /// XblUserSignInWithCoreDispatcher instead.
 /// </remarks>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserSignIn(
     _In_ xbl_user_handle user,
     _In_ AsyncBlock* async
@@ -210,13 +207,13 @@ XblUserSignIn(
 /// For UWA, this API is to be called from UI thread, if you're not calling from non-UI thread or not sure, please use
 /// XblUserSignInSilentlyWithCoreDispatcher instead.
 /// </remarks>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserSignInSilently(
     _In_ xbl_user_handle user,
     _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
-#if WINAPI_FAMILY && WINAPI_FAMILY==WINAPI_FAMILY_APP
+#if UWP_API
 
 /// <summary>
 /// Attempt to sign a player into their Xbox Live account. This call may bring up
@@ -230,7 +227,7 @@ XblUserSignInSilently(
 /// If you're calling this API from non-UI thread, parameter coreDispatcherObj is required, so that app UI
 /// can be rendered and locale can be generated.
 /// </remarks>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserSignInWithCoreDispatcher(
     _In_ xbl_user_handle user,
     _In_ Platform::Object^ coreDispatcherObj,
@@ -248,7 +245,7 @@ XblUserSignInWithCoreDispatcher(
 /// to sign-in, so the app should then call signin().
 /// If you're calling this API from non-UI thread, parameter coreDispatcherObj is required, so that app locale can be generated.
 /// </remarks>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserSignInSilentlyWithCoreDispatcher(
     _In_ xbl_user_handle user,
     _In_ Platform::Object^ coreDispatcherObj,
@@ -262,7 +259,7 @@ XblUserSignInSilentlyWithCoreDispatcher(
 /// </summary>
 /// <param name="async">The async block passed to the sign in function.</param>
 /// <param name="signInResult">Caller allocated object to write results into.</param>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblGetSignInResult(
     _In_ AsyncBlock* async,
     _Out_ XblSignInResult* signInResult
@@ -270,8 +267,8 @@ XblGetSignInResult(
 
 typedef void (CALLBACK *XblGetTokenAndSignatureCallback)(
     _In_ void* context,
-    _In_ const_utf8_string token,
-    _In_ const_utf8_string signature
+    _In_ UTF8CSTR token,
+    _In_ UTF8CSTR signature
     );
 
 /// <summary>
@@ -286,17 +283,16 @@ typedef void (CALLBACK *XblGetTokenAndSignatureCallback)(
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="context>A context to be passed back to the typed callback.</param>
 /// <param name="callback">A strongly typed callback function that will be called when the operation completes.
-/// Note that the token and signature parameteres pass to the callback are only valid until the callback returns.
+/// Note that the token and signature parameters pass to the callback are only valid until the callback returns.
 /// </param>
-XBL_API HRESULT XBL_CALLING_CONV
+STDAPI
 XblUserGetTokenAndSignature(
     _In_ xbl_user_handle user,
-    _In_ const_utf8_string httpMethod,
-    _In_ const_utf8_string url,
-    _In_ const_utf8_string headers,
-    _In_ const_utf8_string requestBodyString,
+    _In_ UTF8CSTR httpMethod,
+    _In_ UTF8CSTR url,
+    _In_ UTF8CSTR headers,
+    _In_ UTF8CSTR requestBodyString,
     _In_ AsyncBlock* async,
-    _In_ void* callbackContext,
     _In_ XblGetTokenAndSignatureCallback callback
     ) XBL_NOEXCEPT;
 
@@ -311,7 +307,7 @@ typedef void (CALLBACK *XblSignOutCompletedHandler)(
 /// <returns>
 /// A function_context object that can be used to unregister the event handler.
 /// </returns>
-XBL_API function_context XBL_CALLING_CONV
+STDAPI_(function_context)
 XblAddSignOutCompletedHandler(
     _In_ XblSignOutCompletedHandler handler
     ) XBL_NOEXCEPT;
@@ -320,13 +316,9 @@ XblAddSignOutCompletedHandler(
 /// Unregisters an event handler for sign-out completion notifications.
 /// </summary>
 /// <param name="context">The function_context that was returned when the event handler was registered. </param>
-XBL_API void XBL_CALLING_CONV
+STDAPI_(void)
 XblRemoveSignOutCompletedHandler(
     _In_ function_context context
     ) XBL_NOEXCEPT;
 
 #endif //!XDK_API
-
-#if defined(__cplusplus)
-} // end extern "C"
-#endif // defined(__cplusplus)
