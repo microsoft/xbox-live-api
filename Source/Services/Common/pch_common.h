@@ -54,9 +54,8 @@
 #include "xsapi-c/xbox_live_global_c.h"
 #endif
 
-#include "httpClient/types.h"
+#include "httpClient/pal.h"
 #include "httpClient/httpClient.h"
-#include "httpClient/task.h"
 #include "httpClient/async.h"
 #include "httpClient/asyncProvider.h"
 #include "httpClient/asyncQueue.h"

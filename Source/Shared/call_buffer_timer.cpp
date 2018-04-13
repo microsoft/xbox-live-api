@@ -11,6 +11,8 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
+using namespace xbox::services::system;
+
 struct fire_context
 {
     fire_context(
@@ -91,23 +93,32 @@ call_buffer_timer::fire(
 
     auto context = utils::store_shared_ptr(xsapi_allocate_shared<fire_context>(shared_from_this(), usersAddedStruct));
 
-    HCTaskCreate(HC_SUBSYSTEM_ID_XSAPI, XSAPI_DEFAULT_TASKGROUP, 
-        [](void* _context, HC_TASK_HANDLE taskHandle)
+    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    ZeroMemory(async, sizeof(async));
+    BeginAsync(async, context, nullptr, __FUNCTION__,
+        [](AsyncOp op, const AsyncProviderData* data)
     {
-        auto context = utils::remove_shared_ptr<fire_context>(_context);
-        std::shared_ptr<call_buffer_timer> pThis(context->thisWeak.lock());
-        if (pThis == nullptr)
+        if (op == AsyncOp_DoWork)
         {
-            return HC_OK;
+            auto context = static_cast<fire_context*>(data->context);
+            std::shared_ptr<call_buffer_timer> pThis(context->thisWeak.lock());
+            if (pThis == nullptr)
+            {
+                return S_OK;
+            }
+
+            std::lock_guard<std::mutex> lock(pThis->m_timerLock);
+            pThis->fire_helper(context->usersAddedStruct);
+            return S_OK;
         }
-
-        std::lock_guard<std::mutex> lock(pThis->m_timerLock);
-        pThis->fire_helper(context->usersAddedStruct);
-
-        return HCTaskSetCompleted(taskHandle);
-    },
-        context, nullptr, nullptr, nullptr, nullptr, nullptr
-        );
+        else if (op == AsyncOp_Cleanup)
+        {
+            utils::remove_shared_ptr<fire_context>(data->context);
+            delete data->async;
+            return S_OK;
+        }
+    });
+    ScheduleAsync(async, 0);
 }
 
 void
@@ -129,37 +140,44 @@ call_buffer_timer::fire_helper(
         auto contextSharedPtr = xsapi_allocate_shared<fire_context>(shared_from_this(), usersAddedStruct, usersToCall);
         contextSharedPtr->delay = timeRemaining;
 
-        HCTaskCreate(HC_SUBSYSTEM_ID_XSAPI, XSAPI_DEFAULT_TASKGROUP,
-            [](void* _context, HC_TASK_HANDLE taskHandle)
+        AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+        ZeroMemory(async, sizeof(async));
+
+        BeginAsync(async, utils::store_shared_ptr(contextSharedPtr), nullptr, __FUNCTION__,
+            [](AsyncOp op, const AsyncProviderData* data)
         {
-            auto context = utils::remove_shared_ptr<fire_context>(_context);
-
-            utils::sleep(static_cast<uint32_t>(context->delay.count()));
-
-            std::shared_ptr<call_buffer_timer> pThis(context->thisWeak.lock());
-            if (pThis != nullptr)
+            if (op == AsyncOp_DoWork)
             {
-                {
-                    std::lock_guard<std::mutex> lock(pThis->m_timerLock);
-                    pThis->m_isTaskInProgress = false;
-                }
+                auto context = utils::remove_shared_ptr<fire_context>(data->context);
 
-                // no lock around this since it is never set after construction and can cause deadlock
-                pThis->m_fCallback(context->usersToCall, context->usersAddedStruct);
-
+                std::shared_ptr<call_buffer_timer> pThis(context->thisWeak.lock());
+                if (pThis != nullptr)
                 {
-                    std::lock_guard<std::mutex> lock(pThis->m_timerLock);
-                    if (pThis->m_queuedTask)
                     {
-                        pThis->m_queuedTask = false;
-                        pThis->fire_helper();
+                        std::lock_guard<std::mutex> lock(pThis->m_timerLock);
+                        pThis->m_isTaskInProgress = false;
+                    }
+
+                    // no lock around this since it is never set after construction and can cause deadlock
+                    pThis->m_fCallback(context->usersToCall, context->usersAddedStruct);
+
+                    {
+                        std::lock_guard<std::mutex> lock(pThis->m_timerLock);
+                        if (pThis->m_queuedTask)
+                        {
+                            pThis->m_queuedTask = false;
+                            pThis->fire_helper();
+                        }
                     }
                 }
             }
-            return HCTaskSetCompleted(taskHandle);
-        },
-            utils::store_shared_ptr(contextSharedPtr), nullptr, nullptr, nullptr, nullptr, nullptr
-            );
+            else if (op == AsyncOp_Cleanup)
+            {
+                delete data->async;
+            }
+            return S_OK;
+        });
+        ScheduleAsync(async, contextSharedPtr->delay.count());
 #else
         UNREFERENCED_PARAMETER(usersAddedStruct);
 #endif

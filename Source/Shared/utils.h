@@ -442,8 +442,8 @@ struct xsapi_singleton
 };
 
 void init_mem_hooks();
-extern XBL_MEM_ALLOC_FUNC g_pMemAllocHook;
-extern XBL_MEM_FREE_FUNC g_pMemFreeHook;
+extern XblMemAllocFunction g_pMemAllocHook;
+extern XblMemFreeFunction g_pMemFreeHook;
 
 std::shared_ptr<xsapi_singleton> get_xsapi_singleton(_In_ bool createIfRequired = true);
 void verify_global_init();
@@ -1480,7 +1480,6 @@ public:
     static utility::datetime datetime_from_time_t(const time_t* time);
 
     static XBL_RESULT create_xbl_result(std::error_code errc);
-    static XBL_RESULT create_xbl_result(HC_RESULT hcResult);
 
     static HRESULT hresult_from_error_code(std::error_code errc);
 

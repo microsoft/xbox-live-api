@@ -12,7 +12,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 using namespace xbox::services::system;
 
-xsapi_internal_unordered_map<HC_WEBSOCKET_HANDLE, xbox_web_socket_client*> xbox_web_socket_client::m_handleMap;
+xsapi_internal_unordered_map<hc_websocket_handle_t, xbox_web_socket_client*> xbox_web_socket_client::m_handleMap;
 
 xbox_web_socket_client::xbox_web_socket_client()
 {
@@ -30,7 +30,7 @@ void xbox_web_socket_client::connect(
     _In_ const std::shared_ptr<user_context>& userContext,
     _In_ const xsapi_internal_string& uri,
     _In_ const xsapi_internal_string& subProtocol,
-    _In_ xbox_live_callback<HC_RESULT, uint32_t> callback
+    _In_ xbox_live_callback<WebSocketCompletionResult> callback
     )
 {
     THROW_CPP_INVALIDARGUMENT_IF_NULL(userContext);
@@ -71,7 +71,7 @@ void xbox_web_socket_client::connect(
         }
         HCWebSocketSetHeader(pThis->m_websocket, "User-Agent", userAgent.data());
 
-        HCWebSocketSetFunctions([](HC_WEBSOCKET_HANDLE websocket, PCSTR incomingBodyString)
+        HCWebSocketSetFunctions([](hc_websocket_handle_t websocket, UTF8CSTR incomingBodyString)
         {
             try
             {
@@ -90,7 +90,7 @@ void xbox_web_socket_client::connect(
                 LOG_ERROR("Exception happened in web socket receiving handler.");
             }
         },
-        [](HC_WEBSOCKET_HANDLE websocket, HC_WEBSOCKET_CLOSE_STATUS closeStatus)
+        [](hc_websocket_handle_t websocket, HCWebSocketCloseStatus closeStatus)
         {
             try
             {
@@ -112,14 +112,14 @@ void xbox_web_socket_client::connect(
 
         AsyncBlock *asyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
         // TODO should have some way to set the queue here
-        asyncBlock->context = utils::store_shared_ptr(xsapi_allocate_shared<xbox_live_callback<HC_RESULT, uint32_t>>(callback));
+        asyncBlock->context = utils::store_shared_ptr(xsapi_allocate_shared<xbox_live_callback<WebSocketCompletionResult>>(callback));
         asyncBlock->callback = [](_In_ AsyncBlock* asyncBlock)
         {
             WebSocketCompletionResult result = {};
             HCGetWebSocketConnectResult(asyncBlock, &result);
-
-            auto callback = utils::remove_shared_ptr<xbox_live_callback<HC_RESULT, uint32_t>>(asyncBlock->context);
-            (*callback)(result.errorCode, result.platformErrorCode);
+            auto callback = utils::remove_shared_ptr<xbox_live_callback<WebSocketCompletionResult>>(asyncBlock->context);
+            (*callback)(result);
+            delete asyncBlock;
         };
 
         HCWebSocketConnect(uri.data(), subProtocol.data(), pThis->m_websocket, asyncBlock);
@@ -128,17 +128,19 @@ void xbox_web_socket_client::connect(
 
 void xbox_web_socket_client::send(
     _In_ const xsapi_internal_string& message,
-    _In_ xbox::services::xbox_live_callback<HC_RESULT, uint32_t> callback
+    _In_ xbox::services::xbox_live_callback<WebSocketCompletionResult> callback
     )
 {
-    auto sendContext = utils::store_shared_ptr(xsapi_allocate_shared<xbox_live_callback<HC_RESULT, uint32_t>>(callback));
-
-    //HCWebSocketSendMessage(m_websocket, message.data(), HC_SUBSYSTEM_ID_XSAPI, XSAPI_DEFAULT_TASKGROUP, sendContext,
-    //    [](void* context, HC_WEBSOCKET_HANDLE, HC_RESULT errorCode, uint32_t platformErrorCode)
-    //{
-    //    auto callback = utils::remove_shared_ptr<xbox_live_callback<HC_RESULT, uint32_t>>(context);
-    //    (*callback)(errorCode, platformErrorCode);
-    //});
+    AsyncBlock* asyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    asyncBlock->context = utils::store_shared_ptr(xsapi_allocate_shared<xbox_live_callback<WebSocketCompletionResult>>(callback));
+    asyncBlock->callback = [](_In_ AsyncBlock* asyncBlock)
+    {
+        WebSocketCompletionResult result = {};
+        HCGetWebSocketSendMessageResult(asyncBlock, &result);
+        auto callback = utils::remove_shared_ptr<xbox_live_callback<WebSocketCompletionResult>>(asyncBlock->context);
+        (*callback)(result);
+        delete asyncBlock;
+    };
 }
 
 void xbox_web_socket_client::close()
@@ -154,7 +156,7 @@ void xbox_web_socket_client::set_received_handler(
 }
 
 void xbox_web_socket_client::set_closed_handler(
-    _In_ xbox_live_callback<HC_WEBSOCKET_CLOSE_STATUS> handler
+    _In_ xbox_live_callback<HCWebSocketCloseStatus> handler
     )
 {
     m_closeHandler = handler;

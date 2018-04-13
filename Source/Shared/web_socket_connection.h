@@ -22,7 +22,7 @@ public:
 
     void send(
         _In_ const xsapi_internal_string& message,
-        _In_ xbox::services::xbox_live_callback<HC_RESULT, uint32_t> callback = nullptr
+        _In_ xbox::services::xbox_live_callback<WebSocketCompletionResult> callback = nullptr
         );
 
     void close();
@@ -40,12 +40,21 @@ public:
 
 private:
 
-    void attempt_connect(_In_ std::chrono::milliseconds retryInterval, _In_ std::chrono::time_point<std::chrono::steady_clock> startTime);
+    struct retry_context
+    {
+        AsyncBlock* outerAsyncBlock;
+        uint32_t delay;
+        std::chrono::time_point<std::chrono::steady_clock> startTime;
+        std::shared_ptr<web_socket_connection> pThis;
+        WebSocketCompletionResult result;
+    };
+    void retry_until_connected(retry_context* retryContext);
+    HRESULT attempt_connect(retry_context* retryContext, AsyncBlock* asyncBlock);
 
     void set_state_helper(_In_ web_socket_connection_state newState);
 
     // Close callback. It could because of client call, network issue or service termination
-    void on_close(HC_WEBSOCKET_CLOSE_STATUS closeStatus);
+    void on_close(HCWebSocketCloseStatus closeStatus);
 
     xsapi_internal_string convert_web_socket_connection_state_to_string(_In_ web_socket_connection_state state);
 

@@ -32,7 +32,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 void user_impl_idp::sign_in_impl(
     _In_ bool showUI, 
     _In_ bool forceRefresh,
-    _In_ async_queue_t queue,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<sign_in_result>> callback
     )
 {
@@ -298,7 +298,7 @@ void user_impl_idp::internal_get_token_and_signature(
     _In_ const xsapi_internal_vector<unsigned char>& bytes,
     _In_ bool promptForCredentialsIfNeeded,
     _In_ bool forceRefresh,
-    _In_ async_queue_t queue,
+    _In_ async_queue_handle_t queue,
     _In_ token_and_signature_callback callback
     )
 {
@@ -322,12 +322,12 @@ void user_impl_idp::internal_get_token_and_signature(
     {
         auto context = utils::remove_shared_ptr<get_token_and_signature_context>(asyncBlock->context, false);
         xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result;
-        GetAsyncResult(asyncBlock, nullptr, sizeof(result), &result);
+        GetAsyncResult(asyncBlock, nullptr, sizeof(result), &result, nullptr);
         context->callback(result);
     };
 
     auto hresult = BeginAsync(internalAsyncBlock, internalAsyncBlock->context, nullptr, __FUNCTION__,
-        [](_In_ AsyncOp op, _Inout_ AsyncProviderData* data)
+        [](AsyncOp op, const AsyncProviderData* data)
     {
         std::shared_ptr<get_token_and_signature_context> context;
         std::shared_ptr<user_impl_idp> pThis;

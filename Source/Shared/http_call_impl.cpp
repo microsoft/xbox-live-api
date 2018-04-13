@@ -126,7 +126,7 @@ http_call_impl::get_response(
 xbox_live_result<void> 
 http_call_impl::get_response(
     _In_ http_call_response_body_type httpCallResponseBodyType,
-    _In_ async_queue_t queue,
+    _In_ async_queue_handle_t queue,
     _In_ http_call_callback callback
     )
 {
@@ -233,7 +233,7 @@ xbox_live_result<void> http_call_impl::get_response_with_auth(
     _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
     _In_ http_call_response_body_type httpCallResponseBodyType,
     _In_ bool allUsersAuthRequired,
-    _In_ async_queue_t queue,
+    _In_ async_queue_handle_t queue,
     _In_ http_call_callback callback
     )
 {
@@ -412,12 +412,12 @@ void http_call_impl::internal_get_response(
     {
         auto httpCallData = utils::remove_shared_ptr<http_call_data>(asyncBlock->context);
 
-        HC_RESULT errorCode = HC_OK;
+        HRESULT hr = S_OK;
         uint32_t platformErrorCode = 0;
         uint32_t statusCode = 0;
         PCSTR responseBody = nullptr;
 
-        HCHttpCallResponseGetNetworkErrorCode(httpCallData->callHandle, &errorCode, &platformErrorCode);
+        HCHttpCallResponseGetNetworkErrorCode(httpCallData->callHandle, &hr, &platformErrorCode);
         HCHttpCallResponseGetStatusCode(httpCallData->callHandle, &statusCode);
         HCHttpCallResponseGetResponseString(httpCallData->callHandle, &responseBody);
 
@@ -427,14 +427,15 @@ void http_call_impl::internal_get_response(
         chrono_clock_t::time_point responseReceivedTime = chrono_clock_t::now();
         httpCallResponse->set_timing(httpCallData->requestStartTime, responseReceivedTime);
 
-        if (errorCode != HC_OK)
+        if (FAILED(hr))
         {
             xsapi_internal_string errMessage;
             if (responseBody != nullptr)
             {
                 errMessage = " HTTP Response Body: " + xsapi_internal_string(responseBody);
             }
-            httpCallResponse->set_error_info(std::make_error_code(static_cast<xbox_live_error_code>(errorCode)), responseBody);
+            // TODO this error code conversion is not right
+            httpCallResponse->set_error_info(std::make_error_code(static_cast<xbox_live_error_code>(hr)), responseBody);
         }
         else
         {
@@ -690,7 +691,7 @@ void http_call_impl::add_header(
     )
 {
     httpCallData->requestHeaders[headerName] = headerValue;
-    HCHttpCallRequestSetHeader(httpCallData->callHandle, headerName.data(), headerValue.data());
+    HCHttpCallRequestSetHeader(httpCallData->callHandle, headerName.data(), headerValue.data(), true);
 }
 
 std::shared_ptr<http_retry_after_manager>

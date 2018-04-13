@@ -510,7 +510,7 @@ social_manager_internal::set_rich_presence_polling_status(
     return xbox_live_result<void>();
 }
 
-void social_manager_internal::set_social_graph_background_async_queue(async_queue_t queue)
+void social_manager_internal::set_social_graph_background_async_queue(async_queue_handle_t queue)
 {
     std::lock_guard<std::recursive_mutex> lock(m_socialMangerLock);
     m_backgroundAsyncQueue = queue;

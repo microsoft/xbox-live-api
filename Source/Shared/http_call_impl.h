@@ -140,14 +140,14 @@ struct http_call_data
     xsapi_internal_string xboxContractVersionHeaderValue;
     xsapi_internal_string contentTypeHeaderValue;
 
-    HC_CALL_HANDLE callHandle;
+    hc_call_handle_t callHandle;
     http_call_response_body_type httpCallResponseBodyType;
     http_call_request_message_internal requestBody;
     http_headers requestHeaders; // TODO these are used by auth right now, can probably remove with xal
     bool addDefaultHeaders;
 
     chrono_clock_t::time_point requestStartTime;
-    async_queue_t queue;
+    async_queue_handle_t queue;
     http_call_callback callback;
 };
 
@@ -187,7 +187,7 @@ public:
 
     virtual xbox_live_result<void> get_response(
         _In_ http_call_response_body_type httpCallResponseBodyType,
-        _In_ async_queue_t queue,
+        _In_ async_queue_handle_t queue,
         _In_ http_call_callback callback
         ) = 0;
 
@@ -195,7 +195,7 @@ public:
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired,
-        _In_ async_queue_t queue,
+        _In_ async_queue_handle_t queue,
         _In_ http_call_callback callback
         ) = 0;
 
@@ -310,7 +310,7 @@ public:
 
     xbox_live_result<void> get_response(
         _In_ http_call_response_body_type httpCallResponseBodyType,
-        _In_ async_queue_t queue,
+        _In_ async_queue_handle_t queue,
         _In_ http_call_callback callback
         ) override;
 
@@ -329,7 +329,7 @@ public:
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired,
-        _In_ async_queue_t queue,
+        _In_ async_queue_handle_t queue,
         _In_ http_call_callback callback
         ) override;
 

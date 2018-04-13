@@ -25,7 +25,7 @@ peoplehub_service::peoplehub_service(
 void peoplehub_service::get_social_graph(
     _In_ const xsapi_internal_string& callerXboxUserId,
     _In_ social_manager_extra_detail_level decorations,
-    _In_ async_queue_t queue,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
     )
 {
@@ -44,7 +44,7 @@ void peoplehub_service::get_social_graph(
     _In_ const xsapi_internal_string& callerXboxUserId,
     _In_ social_manager_extra_detail_level decorations,
     _In_ const xsapi_internal_vector<xsapi_internal_string> xboxLiveUsers,
-    _In_ async_queue_t queue,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
     )
 {
@@ -65,7 +65,7 @@ void peoplehub_service::get_social_graph(
     _In_ const xsapi_internal_string& relationshipType,
     _In_ const xsapi_internal_vector<xsapi_internal_string> xboxLiveUsers,
     _In_ bool isBatch,
-    _In_ async_queue_t queue,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
     )
 {

@@ -36,7 +36,7 @@ social_graph::social_graph(
     _In_ xbox_live_user_t user,
     _In_ social_manager_extra_detail_level socialManagerExtraDetailLevel,
     _In_ xbox_live_callback<void> graphDestructionCompleteCallback,
-    _In_ async_queue_t backgroundAsyncQueue
+    _In_ async_queue_handle_t backgroundAsyncQueue
     ) :
     m_detailLevel(socialManagerExtraDetailLevel),
     m_xboxLiveContextImpl(new xbox_live_context_impl(m_user)),
@@ -285,7 +285,7 @@ social_graph::active_buffer_social_graph()
 }
 
 void
-social_graph::set_background_async_queue(async_queue_t queue)
+social_graph::set_background_async_queue(async_queue_handle_t queue)
 {
     m_backgroundAsyncQueue = queue;
 }
@@ -929,20 +929,33 @@ social_graph::setup_device_and_presence_subscriptions(
     _In_ const xsapi_internal_vector<uint64_t>& users
 )
 {
+    // TODO why does this need to happen asynchronously
+    // TODO here and else where create an async queue for all social manager background work
+    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock;
+    ZeroMemory(async, sizeof(AsyncBlock));
+
     auto context = utils::store_shared_ptr(xsapi_allocate_shared<social_graph_context>(users, shared_from_this()));
-    HCTaskCreate(HC_SUBSYSTEM_ID_XSAPI, 0,// TODO
-        [](void* _context, HC_TASK_HANDLE taskHandle)
+
+    BeginAsync(async, context, nullptr, __FUNCTION__,
+        [](AsyncOp op, const AsyncProviderData* data)
+    {   
+        if (op == AsyncOp_DoWork)
         {
-            auto context = utils::remove_shared_ptr<social_graph_context>(_context);
+            auto context = utils::remove_shared_ptr<social_graph_context>(data->context);
             std::shared_ptr<social_graph> pThis(context->pThis.lock());
 
             if (pThis != nullptr)
             {
                 pThis->setup_device_and_presence_subscriptions_helper(context->users);
             }
-            return HCTaskSetCompleted(taskHandle);
-        },
-        context, nullptr, nullptr, nullptr, nullptr, nullptr);
+        }
+        else if (op == AsyncOp_Cleanup)
+        {
+            delete data->async;
+        }
+        return S_OK;
+    });
+    ScheduleAsync(async, 0);
 }
 
 void
@@ -950,11 +963,17 @@ social_graph::unsubscribe_users(
     _In_ const xsapi_internal_vector<uint64_t>& users
     )
 {
+    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock;
+    ZeroMemory(async, sizeof(AsyncBlock));
+
     auto context = utils::store_shared_ptr(xsapi_allocate_shared<social_graph_context>(users, shared_from_this()));
-    HCTaskCreate(HC_SUBSYSTEM_ID_XSAPI, 0, // TODO
-        [](void* _context, HC_TASK_HANDLE taskHandle)
+
+    BeginAsync(async, context, nullptr, __FUNCTION__,
+        [](AsyncOp op, const AsyncProviderData* data)
+    {
+        if (op == AsyncOp_DoWork)
         {
-            auto context = utils::remove_shared_ptr<social_graph_context>(_context);
+            auto context = utils::remove_shared_ptr<social_graph_context>(data->context);
 
             std::shared_ptr<social_graph> pThis(context->pThis.lock());
             if (pThis != nullptr)
@@ -971,9 +990,14 @@ social_graph::unsubscribe_users(
                     pThis->m_perfTester.stop_timer("unsubscribe_users");
                 }
             }
-            return HCTaskSetCompleted(taskHandle);
-        },
-        context, nullptr, nullptr, nullptr, nullptr, nullptr);
+        }
+        else if (op == AsyncOp_Cleanup)
+        {
+            delete data->async;
+        }
+        return S_OK;
+    });
+    ScheduleAsync(async, 0);
 }
 
 void social_graph::refresh_graph_helper(xsapi_internal_vector<uint64_t>& userRefreshList)

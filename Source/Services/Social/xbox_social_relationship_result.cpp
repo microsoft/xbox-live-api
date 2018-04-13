@@ -94,7 +94,7 @@ xbox_social_relationship_filter xbox_social_relationship_result_internal::filter
 
 xbox_live_result<void> xbox_social_relationship_result_internal::get_next(
     _In_ uint32_t maxItems,
-    _In_ async_queue_t queue,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>> callback
     )
 {

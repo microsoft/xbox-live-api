@@ -62,7 +62,7 @@ public:
         _In_ const xsapi_internal_string& headers,
         _In_ const xsapi_internal_string& requestBodyString,
         _In_ bool allUsersAuthRequired,
-        _In_ async_queue_t queue,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<user_context_auth_result>> callback
         );
 
@@ -72,7 +72,7 @@ public:
         _In_ const xsapi_internal_string& headers,
         _In_ const xsapi_internal_vector<unsigned char>& requestBodyVector,
         _In_ bool allUsersAuthRequired,
-        _In_ async_queue_t queue,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<user_context_auth_result>> callback
         );
 

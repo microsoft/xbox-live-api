@@ -21,7 +21,6 @@
 #include "presence_internal.h"
 #include "initiator.h"
 #include "httpClient/httpClient.h"
-#include "threadpool.h"
 
 #if UWP_API
 #ifdef _WINRT_DLL
@@ -70,14 +69,14 @@ xsapi_singleton::xsapi_singleton()
     m_nextTaskGroupId = 0;
 }
 
-XBL_MEM_ALLOC_FUNC g_pMemAllocHook = nullptr;
-XBL_MEM_FREE_FUNC g_pMemFreeHook = nullptr;
+XblMemAllocFunction g_pMemAllocHook = nullptr;
+XblMemFreeFunction g_pMemFreeHook = nullptr;
 
 void init_mem_hooks()
 {
     if (g_pMemAllocHook == nullptr || g_pMemFreeHook == nullptr)
     {
-        g_pMemAllocHook = [](size_t size, XblMemoryType memoryType)
+        g_pMemAllocHook = [](size_t size, hc_memory_type memoryType)
         {
             UNREFERENCED_PARAMETER(memoryType);
             if (size > 0)
@@ -87,7 +86,7 @@ void init_mem_hooks()
             return static_cast<void*>(nullptr);
         };
 
-        g_pMemFreeHook = [](void *pointer, XblMemoryType memoryType)
+        g_pMemFreeHook = [](void *pointer, hc_memory_type memoryType)
         {
             UNREFERENCED_PARAMETER(memoryType);
             free(pointer);
@@ -103,12 +102,7 @@ void xsapi_singleton::init()
 #endif
 #endif
     HCGlobalInitialize();
-    HCSettingsSetLogLevel(HC_LOG_LEVEL::LOG_VERBOSE);
     m_initiator = std::make_shared<initiator>();
-
-    // TODO this should be started only in legacy mode, but need to migrate all API's first
-    m_threadpool = std::make_shared<xbl_thread_pool>();
-    m_threadpool->start_threads();
 }
 
 xsapi_singleton::~xsapi_singleton()
@@ -2029,15 +2023,6 @@ XBL_RESULT utils::create_xbl_result(std::error_code errc)
         XSAPI_ASSERT(L"Unknown error codition!" && false);
     }
     return result;
-}
-
-XBL_RESULT utils::create_xbl_result(HC_RESULT hcResult)
-{
-    if (hcResult == HC_OK)
-    {
-        return XBL_RESULT_OK;
-    }
-    return XBL_RESULT{ XBL_ERROR_CONDITION_GENERIC_ERROR, static_cast<XBL_ERROR_CODE>(hcResult) };
 }
 
 HRESULT utils::hresult_from_error_code(std::error_code errc)

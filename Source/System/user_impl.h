@@ -18,7 +18,7 @@ public:
     virtual void sign_in_impl(
         _In_ bool showUI,
         _In_ bool forceRefresh,
-        _In_ async_queue_t queue,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<sign_in_result>> asyncBlock
         ) = 0;
 
@@ -65,7 +65,7 @@ public:
         _In_ const xsapi_internal_string& httpMethod,
         _In_ const xsapi_internal_string& url,
         _In_ const xsapi_internal_string& headers,
-        _In_ async_queue_t queue,
+        _In_ async_queue_handle_t queue,
         _In_ token_and_signature_callback callback
         );
 
@@ -74,7 +74,7 @@ public:
         _In_ const xsapi_internal_string& url,
         _In_ const xsapi_internal_string& headers,
         _In_ const xsapi_internal_string& requestBodyString,
-        _In_ async_queue_t queue,
+        _In_ async_queue_handle_t queue,
         _In_ token_and_signature_callback callback
         );
 
@@ -83,7 +83,7 @@ public:
         _In_ const xsapi_internal_string& url,
         _In_ const xsapi_internal_string& headers,
         _In_ const xsapi_internal_vector<unsigned char>& requestBodyArray,
-        _In_ async_queue_t queue,
+        _In_ async_queue_handle_t queue,
         _In_ token_and_signature_callback callback
         );
 
@@ -100,7 +100,7 @@ public:
         _In_ const xsapi_internal_vector<unsigned char>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh,
-        _In_ async_queue_t queue,
+        _In_ async_queue_handle_t queue,
         _In_ token_and_signature_callback callback
         ) = 0;
 
@@ -156,7 +156,7 @@ public:
     void sign_in_impl(
         _In_ bool showUI,
         _In_ bool forceRefresh,
-        _In_ async_queue_t queue,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<sign_in_result>> callback
         ) override;
 
@@ -174,7 +174,7 @@ public:
         _In_ const xsapi_internal_vector<unsigned char>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh,
-        _In_ async_queue_t queue,
+        _In_ async_queue_handle_t queue,
         _In_ token_and_signature_callback callback
         ) override;
 

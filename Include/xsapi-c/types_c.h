@@ -84,7 +84,10 @@ extern "C" {
 #define XBL_NOEXCEPT
 #endif
 
-#include "httpClient/types.h"
+#include "httpClient/pal.h"
+
+#define MAKE_E_XBL(code)                 MAKE_HRESULT(1, FACILITY_XBOX, code)
+#define E_XBL_ALREADY_INITIALISED        MAKE_E_XBL(5504L)
 
 #define XBL_GAMERSCORE_CHAR_SIZE 16
 #define XBL_GAMERTAG_CHAR_SIZE 16
@@ -96,14 +99,11 @@ extern "C" {
 #define XBL_RICH_PRESENCE_CHAR_SIZE 100
 #define XBL_NUM_PRESENCE_RECORDS 6
 
-typedef _Null_terminated_ char* UTF8STR;
-typedef _Null_terminated_ const char* UTF8CSTR;
-
-typedef uint32_t XblMemoryType;
 typedef int32_t function_context;
-typedef struct xbl_async_queue* XBL_ASYNC_QUEUE; // TODO remove
-typedef HC_TASK_EVENT_HANDLE XBL_ASYNC_EVENT_HANDLE; // TODO remove
 typedef struct xbl_xbox_live_context* xbl_context_handle;
+
+// TODO remove this
+typedef void* XBL_ASYNC_QUEUE;
 
 #if XDK_API
 typedef winrt::Windows::Xbox::System::User xbl_user_handle;

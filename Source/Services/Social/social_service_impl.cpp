@@ -132,7 +132,7 @@ social_service_impl::get_social_relationships(
     _In_ xbox_social_relationship_filter filter,
     _In_ uint32_t startIndex,
     _In_ uint32_t maxItems,
-    _In_ async_queue_t queue,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>> callback
     )
 {
@@ -152,7 +152,7 @@ social_service_impl::get_social_relationships(
     _In_ xbox_social_relationship_filter filter,
     _In_ uint32_t startIndex,
     _In_ uint32_t maxItems,
-    _In_ async_queue_t queue,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>> callback
     )
 {

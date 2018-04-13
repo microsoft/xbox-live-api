@@ -47,7 +47,7 @@ try
     context->xboxLiveContext = xboxLiveContext;
 
     auto hr = BeginAsync(async, context, nullptr, __FUNCTION__,
-        [](_In_ AsyncOp op, _Inout_ AsyncProviderData* data)
+        [](AsyncOp op, const AsyncProviderData* data)
     {
         auto context = static_cast<GetUserProfileContext*>(data->context);
 
@@ -107,7 +107,7 @@ try
     context->xboxLiveContext = xboxLiveContext;
 
     auto hr = BeginAsync(async, context, nullptr, __FUNCTION__,
-        [](_In_ AsyncOp op, _Inout_ AsyncProviderData* data)
+        [](AsyncOp op, const AsyncProviderData* data)
     {
         auto context = static_cast<GetUserProfilesContext*>(data->context);
         XblUserProfile* profile;
@@ -171,7 +171,7 @@ try
     context->xboxLiveContext = xboxLiveContext;
 
     auto hr = BeginAsync(async, context, nullptr, __FUNCTION__,
-        [](_In_ AsyncOp op, _Inout_ AsyncProviderData* data)
+        [](AsyncOp op, const AsyncProviderData* data)
     {
         auto context = static_cast<GetUserProfilesContext*>(data->context);
         XblUserProfile* profile;
@@ -245,7 +245,7 @@ XblGetProfileResult(
     auto hr = XblGetProfileResultCount(async, &actualProfilesCount);
     RETURN_C_INVALIDARGUMENT_IF(actualProfilesCount > profilesCount);
 
-    hr = GetAsyncResult(async, nullptr, profilesCount * sizeof(XblUserProfile), profiles);
+    hr = GetAsyncResult(async, nullptr, profilesCount * sizeof(XblUserProfile), profiles, nullptr);
     if (SUCCEEDED(hr))
     {
         *written = actualProfilesCount;

@@ -294,8 +294,6 @@ set(Shared_Source_Files
     ../../Source/Shared/xbox_system_factory.h
     ../../Source/Shared/http_headers.h
     ../../Source/Shared/http_call_request_message_internal.h
-    ../../Source/Shared/threadpool.h
-    ../../Source/Shared/threadpool.cpp
     )
 
 set(Misc_Source_Files

@@ -228,7 +228,7 @@ HRESULT SignInHelper(
     context->user = user;
 
     auto result = BeginAsync(asyncBlock, utils::store_shared_ptr<SignInContext>(context), SignInHelper, __FUNCTION__,
-        [](_In_ AsyncOp op, _Inout_ AsyncProviderData* data)
+        [](AsyncOp op, const AsyncProviderData* data)
     {
         std::shared_ptr<SignInContext> context;
         XblSignInResult result = {};
@@ -325,7 +325,7 @@ XblGetSignInResult(
     _Out_ XblSignInResult* signInResult
     ) XBL_NOEXCEPT
 {
-    return GetAsyncResult(async, SignInHelper, sizeof(XblSignInResult), signInResult);
+    return GetAsyncResult(async, SignInHelper, sizeof(XblSignInResult), signInResult, nullptr);
 }
 
 struct GetTokenAndSignatureContext
@@ -360,7 +360,7 @@ try
     context->callback = callback;
 
     auto result = BeginAsync(async, utils::store_shared_ptr<GetTokenAndSignatureContext>(context), nullptr, __FUNCTION__,
-        [](_In_ AsyncOp op, _Inout_ AsyncProviderData* data)
+        [](AsyncOp op, const AsyncProviderData* data)
     {
         switch (op)
         {
