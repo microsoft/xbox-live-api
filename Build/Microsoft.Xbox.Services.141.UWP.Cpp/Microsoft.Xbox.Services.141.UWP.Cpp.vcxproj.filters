@@ -712,9 +712,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\threadpool.cpp">
-      <Filter>C++ Source\Shared</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
@@ -876,6 +873,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\errors_c.h">
       <Filter>C Public Includes</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\pal.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\presence_c.h">
       <Filter>C Public Includes</Filter>
     </ClInclude>
@@ -892,9 +892,6 @@
       <Filter>C Public Includes</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\system_c.h">
-      <Filter>C Public Includes</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\types_c.h">
       <Filter>C Public Includes</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_app_config_c.h">
@@ -1024,9 +1021,6 @@
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.h">
-      <Filter>C++ Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\threadpool.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.h">

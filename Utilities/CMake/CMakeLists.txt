@@ -132,7 +132,7 @@ set(Public_Source_Files_C
     ../../include/xsapi-c/social_c.h
     ../../include/xsapi-c/social_manager_c.h
     ../../include/xsapi-c/system_c.h
-    ../../include/xsapi-c/types_c.h
+    ../../include/xsapi-c/pal.h
     ../../include/xsapi-c/xbox_live_app_config_c.h
     ../../include/xsapi-c/xbox_live_context_c.h
     ../../include/xsapi-c/xbox_live_global_c.h

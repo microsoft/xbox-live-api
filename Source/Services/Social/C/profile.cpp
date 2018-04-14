@@ -66,7 +66,7 @@ try
             return E_PENDING;
 
         case AsyncOp_GetResult:
-            copy_profile(context->result.payload(), static_cast<XblUserProfile*>(data->context));
+            copy_profile(context->result.payload(), static_cast<XblUserProfile*>(data->buffer));
             break;
 
         case AsyncOp_Cleanup:
@@ -127,7 +127,7 @@ try
             return E_PENDING;
 
         case AsyncOp_GetResult:
-            profile = static_cast<XblUserProfile*>(data->context);
+            profile = static_cast<XblUserProfile*>(data->buffer);
             for (const auto& internalProfile : context->result.payload())
             {
                 copy_profile(internalProfile, profile++);
@@ -191,7 +191,7 @@ try
             return E_PENDING;
 
         case AsyncOp_GetResult:
-            profile = static_cast<XblUserProfile*>(data->context);
+            profile = static_cast<XblUserProfile*>(data->buffer);
             for (const auto& internalProfile : context->result.payload())
             {
                 copy_profile(internalProfile, profile++);
@@ -246,7 +246,7 @@ XblGetProfileResult(
     RETURN_C_INVALIDARGUMENT_IF(actualProfilesCount > profilesCount);
 
     hr = GetAsyncResult(async, nullptr, profilesCount * sizeof(XblUserProfile), profiles, nullptr);
-    if (SUCCEEDED(hr))
+    if (SUCCEEDED(hr) && written != nullptr)
     {
         *written = actualProfilesCount;
     }

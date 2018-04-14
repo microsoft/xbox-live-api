@@ -66,6 +66,7 @@ namespace Sample
         static std::mutex m_displayEventQueueLock;
 
         void Log(std::wstring log);
+        void Log(std::string log);
 
         int GetNumberOfUserInGraph() { return (m_xboxLiveContext == nullptr) ? 0 : 1; }
         bool GetAllFriends() { return m_allFriends; }
@@ -83,8 +84,9 @@ namespace Sample
         }
     private:
         xbl_user_handle m_user;
+        char m_xuid[XuidMaxBytes];
         xbl_context_handle m_xboxLiveContext;
-        async_queue_t m_queue;
+        async_queue_handle_t m_queue;
         uint32_t m_callbackToken;
 
         function_context m_signOutContext;

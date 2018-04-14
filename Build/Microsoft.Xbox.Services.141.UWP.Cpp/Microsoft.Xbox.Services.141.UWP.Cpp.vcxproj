@@ -183,7 +183,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_data.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_protocol.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\threadpool.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_client.h" />
@@ -198,13 +197,13 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\system_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\errors_c.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\pal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\presence_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\profile_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\services_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_manager_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\system_c.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\types_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_app_config_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_context_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_global_c.h" />
@@ -482,7 +481,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_protocol.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logging_config.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\threadpool.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context_cpp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.cpp" />

@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
-#include "types_c.h"
+#include "pal.h"
 #include "xsapi-c/errors_c.h"
 
 
@@ -265,7 +265,7 @@ XblGetSignInResult(
     _Out_ XblSignInResult* signInResult
     ) XBL_NOEXCEPT;
 
-typedef void (CALLBACK *XblGetTokenAndSignatureCallback)(
+typedef void (STDAPIVCALLTYPE *XblGetTokenAndSignatureCallback)(
     _In_ void* context,
     _In_ UTF8CSTR token,
     _In_ UTF8CSTR signature
@@ -296,7 +296,7 @@ XblUserGetTokenAndSignature(
     _In_ XblGetTokenAndSignatureCallback callback
     ) XBL_NOEXCEPT;
 
-typedef void (CALLBACK *XblSignOutCompletedHandler)(
+typedef void (STDAPIVCALLTYPE *XblSignOutCompletedHandler)(
     _In_ xbl_user_handle user
     );
 

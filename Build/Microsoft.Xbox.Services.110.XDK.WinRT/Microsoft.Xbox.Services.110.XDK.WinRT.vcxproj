@@ -352,7 +352,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_data.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_protocol.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\threadpool.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_client.h" />
@@ -824,7 +823,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_data.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_protocol.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logging_config.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\threadpool.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context_xdk.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.cpp" />

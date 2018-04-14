@@ -1273,9 +1273,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\threadpool.cpp">
-      <Filter>C++ Source\Shared</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
@@ -2506,9 +2503,6 @@
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.h">
-      <Filter>C++ Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\threadpool.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.h">

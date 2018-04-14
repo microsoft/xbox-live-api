@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "types_c.h"
+#include "pal.h"
 #include "xsapi-c/errors_c.h"
 
 #if defined(__cplusplus)

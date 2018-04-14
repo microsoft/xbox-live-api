@@ -3,7 +3,7 @@
 
 #pragma once
 #include <stdint.h>
-#include "types_c.h"
+#include "pal.h"
 
 #if defined(__cplusplus)
 extern "C" {

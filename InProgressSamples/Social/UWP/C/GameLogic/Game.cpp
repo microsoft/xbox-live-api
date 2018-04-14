@@ -43,9 +43,9 @@ win32_handle g_stopRequestedHandle;
 win32_handle g_workReadyHandle;
 win32_handle g_completionReadyHandle;
 
-void HandleAsyncQueueCallback(
+void CALLBACK HandleAsyncQueueCallback(
     _In_ void* context,
-    _In_ async_queue_t queue,
+    _In_ async_queue_handle_t queue,
     _In_ AsyncQueueCallbackType type
 )
 {
@@ -74,7 +74,7 @@ DWORD WINAPI background_thread_proc(LPVOID lpParam)
         g_stopRequestedHandle.get()
     };
 
-    async_queue_t queue;
+    async_queue_handle_t queue;
     uint32_t sharedAsyncQueueId = 0;
     CreateSharedAsyncQueue(
         sharedAsyncQueueId,
@@ -143,7 +143,7 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
         AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
         AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
         &m_queue);
-    AddAsyncCallbackSubmitted(m_queue, nullptr, HandleAsyncQueueCallback, &m_callbackToken);
+    AddAsyncQueueCallbackSubmitted(m_queue, nullptr, HandleAsyncQueueCallback, &m_callbackToken);
 
     m_hBackgroundThread = CreateThread(nullptr, 0, background_thread_proc, nullptr, 0, nullptr);
 
@@ -513,6 +513,11 @@ void Game::Log(std::wstring log)
     }
 }
 
+void Game::Log(std::string log)
+{
+    Log(utility::conversions::to_utf16string(log));
+}
+
 string_t
 ConvertEventTypeToString(XBL_SOCIAL_EVENT_TYPE eventType)
 {
@@ -645,6 +650,7 @@ void Game::HandleSignInResult(XblSignInResult signInResult)
     switch (signInResult.status)
     {
     case xbox::services::system::sign_in_status::success:
+        XblUserGetXuid(m_user, XuidMaxBytes, m_xuid, nullptr);
         XblContextCreateHandle(m_user, &m_xboxLiveContext);
         //pThis->AddUserToSocialManager(pThis->m_user);
         Log(L"Sign in succeeded");
@@ -710,26 +716,23 @@ void Game::GetUserProfile()
     {
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-        size_t sizeInBytes;
-        HRESULT hr = XblGetUserProfileResultSize(asyncBlock, &sizeInBytes);
-        if (SUCCEEDED(hr))
-        {
-            XblUserProfile* userProfile = static_cast<XblUserProfile*>(new (std::nothrow) char[sizeInBytes]);
-            hr = XblGetUserProfileResult(asyncBlock, &userProfile);
-            if (SUCCEEDED(hr))
-            {
-                pThis->Log(L"Got profile %s", userProfile->gamertag);
-            }
-        }
-        else
-        {
-            pThis->Log(L"Failed signing in.");
-        }
+        XblUserProfile profile;
+        XblGetProfileResult(asyncBlock, 1, &profile, nullptr);
+
+        pThis->Log(L"Successfully got profile!");
+        WCHAR text[1024];
+        swprintf_s(text, ARRAYSIZE(text), L"Gamertag: %S", profile.gamertag);
+        pThis->Log(text);
+        swprintf_s(text, ARRAYSIZE(text), L"XboxUserId: %S", profile.xboxUserId);
+        pThis->Log(text);
+        swprintf_s(text, ARRAYSIZE(text), L"Gamerscore: %S", profile.gamerscore);
+        pThis->Log(text);
+        swprintf_s(text, ARRAYSIZE(text), L"GameDisplayPic: %S", profile.gameDisplayPictureResizeUri);
+        pThis->Log(text);
 
         delete asyncBlock;
     };
-
-    XblGetUserProfile(xblContext, xuid, asyncBlock);
+    XblGetUserProfile(m_xboxLiveContext, m_xuid, asyncBlock);
 }
 
 
@@ -758,38 +761,6 @@ void Game::SignInSilently()
     };
 
     XblUserSignInSilently(m_user, asyncBlock);
-}
-
-void Game::GetUserProfile()
-{
-    //if (m_xboxLiveContext == nullptr || m_user == nullptr || !m_user->isSignedIn)
-    //{
-    //    Log(L"Must be signed in first to get profile!");
-    //    return;
-    //}
-
-    //XblGetUserProfile(m_xboxLiveContext, m_user->xboxUserId, g_asyncQueue, this,
-    //[](XBL_RESULT result, const XblUserProfile *profile, void* context)
-    //{
-    //    Game *pThis = reinterpret_cast<Game*>(context);
-    //    if (result.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
-    //    {
-    //        pThis->Log(L"Successfully got profile!");
-    //        WCHAR text[1024];
-    //        swprintf_s(text, ARRAYSIZE(text), L"Gamertag: %S", profile->gamertag);
-    //        pThis->Log(text);
-    //        swprintf_s(text, ARRAYSIZE(text), L"XboxUserId: %S", profile->xboxUserId);
-    //        pThis->Log(text);
-    //        swprintf_s(text, ARRAYSIZE(text), L"Gamerscore: %S", profile->gamerscore);
-    //        pThis->Log(text);
-    //        swprintf_s(text, ARRAYSIZE(text), L"GameDisplayPic: %S", profile->gameDisplayPictureResizeUri);
-    //        pThis->Log(text);
-    //    }
-    //    else
-    //    {
-    //        pThis->Log(L"Failed getting profile.");
-    //    }
-    //});
 }
 
 void Game::CopySocialRelationshipResult()

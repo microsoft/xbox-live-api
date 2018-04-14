@@ -49,7 +49,7 @@
 #include "xsapi/types.h"
 #include "xsapi/mem.h"
 #if XSAPI_C
-#include "xsapi-c/types_c.h"
+#include "xsapi-c/pal.h"
 #include "xsapi-c/errors_c.h"
 #include "xsapi-c/xbox_live_global_c.h"
 #endif
