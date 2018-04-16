@@ -14,6 +14,7 @@
 #include "presence_internal.h"
 #include "real_time_activity_internal.h"
 
+#include "Achievements\achievements_internal.h"
 #include "profile_internal.h"
 #include "social_internal.h"
 #include "xbox_live_app_config_internal.h"
@@ -148,10 +149,10 @@ void xbox_live_context_impl::init()
 
     std::weak_ptr<xbox_live_context_impl> thisWeakPtr = shared_from_this();
 
+    m_achievementServiceInternal = xsapi_allocate_shared<xbox::services::achievements::achievement_service_internal>(m_userContext, m_xboxLiveContextSettings, m_appConfigInternal, thisWeakPtr);
     m_profileServiceImpl = xsapi_allocate_shared<xbox::services::social::profile_service_impl>(m_userContext, m_xboxLiveContextSettings, m_appConfigInternal);
     m_reputationServiceImpl = xsapi_allocate_shared<xbox::services::social::reputation_service_impl>(m_userContext, m_xboxLiveContextSettings, m_appConfigInternal);
     m_leaderboardService = xbox::services::leaderboard::leaderboard_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-    m_achievementService = xbox::services::achievements::achievement_service(m_userContext, m_xboxLiveContextSettings, m_appConfig, thisWeakPtr);
     m_matchmakingService = xbox::services::matchmaking::matchmaking_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_gameServerPlatformService = xbox::services::game_server_platform::game_server_platform_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     m_titleStorageService = xbox::services::title_storage::title_storage_service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
@@ -248,10 +249,10 @@ xbox_live_context_impl::leaderboard_service()
     return m_leaderboardService;
 }
 
-achievements::achievement_service&
-xbox_live_context_impl::achievement_service()
+std::shared_ptr<achievements::achievement_service_internal>&
+xbox_live_context_impl::achievement_service_internal()
 {
-    return m_achievementService;
+    return m_achievementServiceInternal;
 }
 
 multiplayer::multiplayer_service&
