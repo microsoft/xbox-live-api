@@ -35,6 +35,7 @@ void Game::RemoveUserFromSocialManager(xbl_user_handle user)
     source << _T(" from SocialManager");
     Log(source.str());
 
+    // TODO update this after porting social manager to new async
     //auto it = m_socialGroups.begin();
     //while (it != m_socialGroups.end())
     //{
