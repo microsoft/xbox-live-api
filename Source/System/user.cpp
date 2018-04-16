@@ -42,7 +42,7 @@ pplx::task<xbox_live_result<sign_in_result>> xbox_live_user::signin_helper(bool 
 {
     task_completion_event<xbox_live_result<sign_in_result>> tce;
 
-    m_user_impl->sign_in_impl(showUI, forceRefresh, nullptr,
+    m_user_impl->sign_in_impl(showUI, forceRefresh, get_xsapi_singleton()->m_asyncQueue,
         [tce](xbox_live_result<sign_in_result> result)
     {
         tce.set(result);

@@ -765,12 +765,12 @@ void Game::SignInSilently()
 
 void Game::CopySocialRelationshipResult()
 {
-    XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT r;
+    XblSocialRelationshipResult r;
     r.filter = XblSocialRelationshipFilter_All;
     r.hasNext = false;
     r.itemsCount = 3;
     r.totalCount = 3;
-    r.items = new XBL_XBOX_SOCIAL_RELATIONSHIP[3];
+    r.items = new XblSocialRelationship[3];
     r.items[0].xboxUserId = "1";
     r.items[1].xboxUserId = "2";
     r.items[2].xboxUserId = "3";
@@ -804,7 +804,7 @@ void Game::GetSocialRelationships()
     //}
 
     //XblGetSocialRelationships(m_xboxLiveContext, g_asyncQueue, this,
-    //    [](XBL_RESULT result, CONST XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT *socialResult, void* context)
+    //    [](XBL_RESULT result, CONST XblSocialRelationshipResult *socialResult, void* context)
     //{
     //    Game *pThis = reinterpret_cast<Game*>(context);
 

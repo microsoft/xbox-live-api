@@ -23,9 +23,9 @@ xbl_xbox_social_relationship_result_wrapper::xbl_xbox_social_relationship_result
 
     for (const auto& relationship : m_socialRelationshipResult->items())
     {
-        XBL_XBOX_SOCIAL_RELATIONSHIP item;
+        XblSocialRelationship item;
 
-        item.xboxUserId = relationship->xbox_user_id().data();
+        strcpy_s(item.xboxUserId, relationship->xbox_user_id().data());
         item.isFavorite = relationship->is_favorite();
         item.isFollowingCaller = relationship->is_following_caller();
         item.socialNetworksCount = static_cast<uint32_t>(relationship->social_networks().size());
@@ -48,7 +48,7 @@ xbl_xbox_social_relationship_result_wrapper::~xbl_xbox_social_relationship_resul
     }
 }
 
-const XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT* xbl_xbox_social_relationship_result_wrapper::xbl_xbox_social_relationship_result() const
+const XblSocialRelationshipResult* xbl_xbox_social_relationship_result_wrapper::xbl_xbox_social_relationship_result() const
 {
     return &m_xblXboxSocialRelationshipResult;
 }
@@ -59,7 +59,7 @@ xbl_social_relationship_change_event_args_wrapper::xbl_social_relationship_chang
     m_socialRelationshipChangeEventArgs(std::move(eventArgs))
 {
     m_xblSocialRelationshipChangeEventArgs.callerXboxUserId = m_socialRelationshipChangeEventArgs->caller_xbox_user_id().data();
-    m_xblSocialRelationshipChangeEventArgs.socialNotification = static_cast<XBL_SOCIAL_NOTIFICATION_TYPE>(m_socialRelationshipChangeEventArgs->social_notification());
+    m_xblSocialRelationshipChangeEventArgs.socialNotification = static_cast<XblSocialNotificationType>(m_socialRelationshipChangeEventArgs->social_notification());
     m_xblSocialRelationshipChangeEventArgs.xboxUserIdsCount = static_cast<uint32_t>(m_socialRelationshipChangeEventArgs->xbox_user_ids().size());
     m_xblSocialRelationshipChangeEventArgs.xboxUserIds = (PCSTR*)xsapi_memory::mem_alloc(m_xblSocialRelationshipChangeEventArgs.xboxUserIdsCount * sizeof(PCSTR));
 

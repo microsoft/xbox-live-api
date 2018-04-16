@@ -4,7 +4,6 @@
 #include "pch.h"
 #include "utils.h"
 #include "user_impl.h"
-//#include "auth_manager.h"
 
 #if WINAPI_FAMILY==WINAPI_FAMILY_APP
 #if !XSAPI_CPP

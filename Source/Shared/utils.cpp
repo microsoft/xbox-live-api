@@ -65,8 +65,6 @@ xsapi_singleton::xsapi_singleton()
 #if UWP_API
     m_trackingUsers = std::unordered_map<string_t, std::shared_ptr<system::user_impl_idp>>();
 #endif
-
-    m_nextTaskGroupId = 0;
 }
 
 XblMemAllocFunction g_pMemAllocHook = nullptr;
@@ -103,6 +101,8 @@ void xsapi_singleton::init()
 #endif
     HCGlobalInitialize();
     m_initiator = std::make_shared<initiator>();
+
+    CreateAsyncQueue(AsyncQueueDispatchMode_ThreadPool, AsyncQueueDispatchMode_ThreadPool, &m_asyncQueue);
 }
 
 xsapi_singleton::~xsapi_singleton()
@@ -117,6 +117,8 @@ xsapi_singleton::~xsapi_singleton()
     }
 
     HCGlobalCleanup();
+
+    CloseAsyncQueue(m_asyncQueue);
 }
 
 std::shared_ptr<xsapi_singleton>

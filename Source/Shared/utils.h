@@ -438,7 +438,7 @@ struct xsapi_singleton
     std::mutex m_callbackContextsLock;
     xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_callbackContextPtrs;
 
-    std::atomic<uint64_t> m_nextTaskGroupId;
+    async_queue_handle_t m_asyncQueue;
 };
 
 void init_mem_hooks();

@@ -68,9 +68,6 @@
 #include "xsapi/errors.h"
 #include "utils.h"
 #include "xbox_live_async.h"
-#if XSAPI_C
-#include "async_queue.h"
-#endif
 #include "Logger/Log.h"
 
 #include "shared_macros.h"
