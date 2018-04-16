@@ -115,7 +115,7 @@ XBL_RESULT populate_social_user_array(
         utils::utf8_from_char_t(internalUser->gamertag(), users[i].gamertag, sizeof(users[i].gamertag));
 
         // presence record
-        users[i].presenceRecord.userState = static_cast<XBL_USER_PRESENCE_STATE>(internalUser->presence_record().user_state());
+        users[i].presenceRecord.userState = static_cast<XblUserPresenceState>(internalUser->presence_record().user_state());
         
         uint8_t j = 0;
         for (auto& internalTitleRecord : internalUser->presence_record().presence_title_records())
@@ -126,7 +126,7 @@ XBL_RESULT populate_social_user_array(
             titleRecord.isTitleActive = internalTitleRecord.is_title_active();
             utils::utf8_from_char_t(internalTitleRecord.presence_text(), titleRecord.presenceText, sizeof(titleRecord.presenceText));
             titleRecord.isBroadcasting = internalTitleRecord.is_broadcasting();
-            titleRecord.deviceType = static_cast<XBL_PRESENCE_DEVICE_TYPE>(internalTitleRecord.device_type());
+            titleRecord.deviceType = static_cast<XblPresenceDeviceType>(internalTitleRecord.device_type());
             ++j;
         }
         users[i].presenceRecord.presenceTitleRecordCount = j;

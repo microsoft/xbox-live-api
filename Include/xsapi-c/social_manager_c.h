@@ -158,7 +158,7 @@ typedef struct XBL_SOCIAL_MANAGER_PRESENCE_TITLE_RECORD
     /// <summary>
     /// Device type
     /// </summary>
-    XBL_PRESENCE_DEVICE_TYPE deviceType;
+    XblPresenceDeviceType deviceType;
 } XBL_SOCIAL_MANAGER_PRESENCE_TITLE_RECORD;
 
 /// <summary>
@@ -169,7 +169,7 @@ typedef struct XBL_SOCIAL_MANAGER_PRESENCE_RECORD
     /// <summary>
     /// The user's presence state.
     /// </summary>
-    XBL_USER_PRESENCE_STATE userState;
+    XblUserPresenceState userState;
 
     /// <summary>
     /// Collection of presence title record objects returned by a request.

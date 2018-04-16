@@ -766,7 +766,7 @@ void Game::SignInSilently()
 void Game::CopySocialRelationshipResult()
 {
     XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT r;
-    r.filter = XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER_ALL;
+    r.filter = XblSocialRelationshipFilter_All;
     r.hasNext = false;
     r.itemsCount = 3;
     r.totalCount = 3;

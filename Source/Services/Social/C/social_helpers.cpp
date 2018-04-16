@@ -18,7 +18,7 @@ xbl_xbox_social_relationship_result_wrapper::xbl_xbox_social_relationship_result
     m_xblXboxSocialRelationshipResult.hasNext = m_socialRelationshipResult->has_next();
     m_xblXboxSocialRelationshipResult.itemsCount = static_cast<uint32_t>(m_socialRelationshipResult->items().size());
     m_xblXboxSocialRelationshipResult.totalCount = m_socialRelationshipResult->total_count();
-    m_xblXboxSocialRelationshipResult.filter = static_cast<XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER>(m_socialRelationshipResult->filter());
+    m_xblXboxSocialRelationshipResult.filter = static_cast<XblSocialRelationshipFilter>(m_socialRelationshipResult->filter());
     m_xblXboxSocialRelationshipResult.continuationSkip = m_socialRelationshipResult->continuation_skip();
 
     for (const auto& relationship : m_socialRelationshipResult->items())

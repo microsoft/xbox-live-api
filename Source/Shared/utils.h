@@ -1496,6 +1496,7 @@ private:
     utils& operator=(const utils&);
 };
 
+// TODO remove this
 static const uint64_t XSAPI_DEFAULT_TASKGROUP = 99;
 
 class buffer_allocator

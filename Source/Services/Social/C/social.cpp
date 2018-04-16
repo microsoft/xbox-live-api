@@ -18,7 +18,7 @@ XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationshipsHelper(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ PCSTR xboxUserId,
-    _In_ XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER socialRelationshipFilter,
+    _In_ XblSocialRelationshipFilter socialRelationshipFilter,
     _In_ uint32_t startIndex,
     _In_ uint32_t maxItems,
     _In_ XBL_ASYNC_QUEUE queue,
@@ -62,7 +62,7 @@ XblGetSocialRelationships(
     return XblGetSocialRelationshipsHelper(
         xboxLiveContext,
         xboxLiveContext->xboxUserId.data(),
-        XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER_ALL,
+        XblSocialRelationshipFilter_All,
         0,
         0,
         queue,
@@ -75,7 +75,7 @@ XblGetSocialRelationships(
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationshipsWithFilter(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER socialRelationshipFilter,
+    _In_ XblSocialRelationshipFilter socialRelationshipFilter,
     _In_ XBL_ASYNC_QUEUE queue,
     _In_opt_ void* callbackContext,
     _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
@@ -108,7 +108,7 @@ XblGetSocialRelationshipsForUser(
     return XblGetSocialRelationshipsHelper(
         xboxLiveContext,
         xboxUserId,
-        XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER_ALL,
+        XblSocialRelationshipFilter_All,
         0,
         0,
         queue,
@@ -121,7 +121,7 @@ XblGetSocialRelationshipsForUser(
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblGetSocialRelationshipsEx(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER socialRelationshipFilter,
+    _In_ XblSocialRelationshipFilter socialRelationshipFilter,
     _In_ uint32_t startIndex,
     _In_ uint32_t maxItems,
     _In_ XBL_ASYNC_QUEUE queue,
@@ -295,7 +295,7 @@ XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSubmitReputationFeedback(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ PCSTR xboxUserId,
-    _In_ XBL_REPUTATION_FEEDBACK_TYPE reputationFeedbackType,
+    _In_ XblReputationFeedbackType reputationFeedbackType,
     _In_opt_ PCSTR sessionName,
     _In_opt_ PCSTR reasonMessage,
     _In_opt_ PCSTR evidenceResourceId,
