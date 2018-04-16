@@ -155,6 +155,7 @@ void Game::RegisterInputKeys()
     m_input->RegisterKey(Windows::System::VirtualKey::S, ButtonPress::SignIn);
     m_input->RegisterKey(Windows::System::VirtualKey::P, ButtonPress::GetUserProfile);
     m_input->RegisterKey(Windows::System::VirtualKey::F, ButtonPress::GetFriends);
+    m_input->RegisterKey(Windows::System::VirtualKey::A, ButtonPress::GetAchievementsForTitle);
     m_input->RegisterKey(Windows::System::VirtualKey::Number1, ButtonPress::ToggleSocialGroup1);
     m_input->RegisterKey(Windows::System::VirtualKey::Number2, ButtonPress::ToggleSocialGroup2);
     m_input->RegisterKey(Windows::System::VirtualKey::Number3, ButtonPress::ToggleSocialGroup3);
@@ -286,6 +287,11 @@ void Game::OnGameUpdate()
             if (m_input->IsKeyDown(ButtonPress::GetFriends))
             {
                 GetSocialRelationships();
+            }
+
+            if (m_input->IsKeyDown(ButtonPress::GetAchievementsForTitle))
+            {
+                GetAchievmentsForTitle();
             }
         }
     }
@@ -771,9 +777,6 @@ void Game::CopySocialRelationshipResult()
     r.itemsCount = 3;
     r.totalCount = 3;
     r.items = new XblSocialRelationship[3];
-    r.items[0].xboxUserId = "1";
-    r.items[1].xboxUserId = "2";
-    r.items[2].xboxUserId = "3";
     r.items[0].isFavorite = true;
     r.items[1].isFavorite = true;
     r.items[2].isFavorite = false;
@@ -818,6 +821,238 @@ void Game::GetSocialRelationships()
     //        pThis->Log(L"Failed getting social relationships.");
     //    }
     //});
+}
+
+void Game::GetAchievmentsForTitle()
+{
+    XblGetXboxLiveAppConfig(&m_config);
+    
+    XblAchievementServiceGetAchievementsForTitleId(
+        m_xboxLiveContext, 
+        m_xuid,
+        m_config->titleId,
+        XBL_ACHIEVEMENT_TYPE_ALL, 
+        false, 
+        XBL_ACIEVEMENT_ORDER_BY_DEFAULT_ORDER, 
+        0, 
+        1,
+        nullptr,
+        this,
+        [](XBL_RESULT result,
+           XBL_ACHIEVEMENTS_RESULT* achievementsResult,
+           void* context) 
+        {
+            Game *pThis = reinterpret_cast<Game*>(context);
+
+            if (result.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
+            {
+                pThis->Log(L"Successfully got achievements for this title!");
+
+                pThis->AchievementResultsGetNext(achievementsResult);
+            }
+            else
+            {
+                pThis->Log(L"Failed getting achievements for this title.");
+            }
+        });
+}
+
+void Game::AchievementResultsGetNext(XBL_ACHIEVEMENTS_RESULT* result)
+{
+    if (XblAchievementsResultHasNext(result))
+    {
+        XblAchievementsResultGetNext(
+            result, 
+            1,
+            nullptr,
+            this,
+            [](XBL_RESULT result,
+                XBL_ACHIEVEMENTS_RESULT* achievementsResult,
+                void* context) 
+            {
+                Game *pThis = reinterpret_cast<Game*>(context);
+
+                if (result.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
+                {
+                    pThis->Log(L"Successfully got next page of achievements!");
+
+                    pThis->AchievementResultsGetNext(achievementsResult);
+
+                    pThis->TestAchievementsResultCopy(achievementsResult);
+
+                    XblAchievementServiceReleaseAchievementsResult(achievementsResult);
+                }
+                else
+                {
+                    pThis->Log(L"Failed getting next page of achievements.");
+                }
+            });
+    }
+    else if (result->itemsCount > 0)
+    {
+        GetAchievement(result->items[0]->serviceConfigurationId, result->items[0]->id);
+    }
+}
+
+void Game::GetAchievement(PCSTR scid, PCSTR achievementId)
+{
+    XblAchievementServiceGetAchievement(
+        m_xboxLiveContext,
+        m_xuid,
+        scid,
+        achievementId,
+        nullptr,
+        this,
+        [](XBL_RESULT result,
+           XBL_ACHIEVEMENT* achievement,
+           void* context)
+        {
+            Game *pThis = reinterpret_cast<Game*>(context);
+
+            if (result.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
+            {
+                pThis->Log(L"Successfully got achievement!");
+
+                pThis->TestAchievementCopy(achievement);
+
+                pThis->UpdateAchievement(achievement->serviceConfigurationId, achievement->id);
+                XblAchievementServiceReleaseAchievement(achievement);
+            }
+            else
+            {
+                pThis->Log(L"Failed getting achievement.");
+            }
+        });
+}
+
+void Game::UpdateAchievement(PCSTR scid, PCSTR achievementId)
+{
+    auto tid = m_config->titleId;
+    XblAchievementServiceUpdateAchievement(
+        m_xboxLiveContext,
+        m_xuid,
+        &tid,
+        scid,
+        achievementId,
+        10,
+        nullptr,
+        this,
+        [](XBL_RESULT result,
+            void* context)
+    {
+        Game *pThis = reinterpret_cast<Game*>(context);
+
+        if (result.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
+        {
+            pThis->Log(L"Successfully updated achievement!");
+        }
+        else if (result.errorCode == XBL_ERROR_CODE_HTTP_STATUS_304_NOT_MODIFIED)
+        {
+            pThis->Log(L"Achievement not modified!");
+        }
+        else
+        {
+            pThis->Log(L"Failed updating achievement.");
+        }
+    });
+}
+
+void Game::TestAchievementCopy(XBL_ACHIEVEMENT* source)
+{
+    uint64_t size = 0;
+    XblCopyAchievement(source, nullptr, &size);
+
+    auto buffer = Alloc(size);
+    auto copy = XblCopyAchievement(source, buffer, &size);
+
+    AssertAchievement(copy, source);
+}
+
+void Game::TestAchievementsResultCopy(XBL_ACHIEVEMENTS_RESULT* source)
+{
+    uint64_t size = 0;
+    XblCopyAchievementsResult(source, nullptr, &size);
+
+    auto buffer = Alloc(size);
+    auto copy = XblCopyAchievementsResult(source, buffer, &size);
+
+    assert((copy->items != source->items) || (copy->items == nullptr && source->items == nullptr));
+    assert(copy->itemsCount == source->itemsCount);
+    for (size_t i = 0; i < copy->itemsCount; i++)
+    {
+        assert(copy->items[i] != source->items[i]);
+        AssertAchievement(copy->items[i], source->items[i]);
+    }
+
+}
+
+void Game::AssertAchievement(XBL_ACHIEVEMENT* copy, XBL_ACHIEVEMENT* source)
+{
+    assert(copy->id != source->id);
+    assert(copy->serviceConfigurationId != source->serviceConfigurationId);
+    assert(copy->name != source->name);
+    assert((copy->titleAssociations != source->titleAssociations) || (copy->titleAssociations == nullptr && source->titleAssociations == nullptr));
+    assert(copy->titleAssociationsCount == source->titleAssociationsCount);
+    for (size_t i = 0; i < copy->titleAssociationsCount; i++)
+    {
+        assert(copy->titleAssociations[i]->name != source->titleAssociations[i]->name);
+        assert(copy->titleAssociations[i]->titleId == source->titleAssociations[i]->titleId);
+    }
+    assert(copy->progressState == source->progressState);
+    assert(copy->progression != source->progression);
+        assert((copy->progression->requirements != source->progression->requirements) || (copy->progression->requirements == nullptr && source->progression->requirements == nullptr));
+        assert(copy->progression->requirementsCount == source->progression->requirementsCount);
+        for (size_t i = 0; i < copy->progression->requirementsCount; i++)
+        {
+            assert(copy->progression->requirements[i] != source->progression->requirements[i]);
+            assert(copy->progression->requirements[i]->id != source->progression->requirements[i]->id);
+            assert(copy->progression->requirements[i]->currentProgressValue != source->progression->requirements[i]->currentProgressValue);
+            assert(copy->progression->requirements[i]->targetProgressValue != source->progression->requirements[i]->targetProgressValue);
+        }
+        assert(copy->progression->timeUnlocked == source->progression->timeUnlocked);
+    assert((copy->mediaAssets != source->mediaAssets) || (copy->mediaAssets == nullptr && source->mediaAssets == nullptr));
+    assert(copy->mediaAssetsCount == source->mediaAssetsCount);
+    for (size_t i = 0; i < copy->mediaAssetsCount; i++)
+    {
+        assert(copy->mediaAssets[i]->name != source->mediaAssets[i]->name);
+        assert(copy->mediaAssets[i]->url != source->mediaAssets[i]->url);
+        assert(copy->mediaAssets[i]->mediaAssetType == source->mediaAssets[i]->mediaAssetType);
+    }
+    assert((copy->platformsAvailableOn != source->platformsAvailableOn) || (copy->platformsAvailableOn == nullptr && source->platformsAvailableOn == nullptr));
+    assert(copy->platformsAvailableOnCount == source->platformsAvailableOnCount);
+    for (size_t i = 0; i < copy->platformsAvailableOnCount; i++)
+    {
+        assert(copy->platformsAvailableOn[i] != source->platformsAvailableOn[i]);
+    }
+    assert(copy->isSecret == source->isSecret);
+    assert(copy->unlockedDescription != source->unlockedDescription);
+    assert(copy->lockedDescription != source->lockedDescription);
+    assert(copy->productId != source->productId);
+    assert(copy->type == source->type);
+    assert(copy->participationType == source->participationType);
+    assert(copy->available != source->available);
+        assert(copy->available->startDate == source->available->startDate);
+        assert(copy->available->endDate == source->available->endDate);
+    assert((copy->rewards != source->rewards) || (copy->rewards == nullptr && source->rewards == nullptr));
+    assert(copy->rewardsCount == source->rewardsCount);
+    for (size_t i = 0; i < copy->rewardsCount; i++)
+    {
+        assert(copy->rewards[i]->description != source->rewards[i]->description);
+        assert((copy->rewards[i]->mediaAsset != source->rewards[i]->mediaAsset) || (copy->rewards[i]->mediaAsset == nullptr && source->rewards[i]->mediaAsset == nullptr));
+        if (copy->rewards[i]->mediaAsset != nullptr && source->rewards[i]->mediaAsset != nullptr)
+        {
+            assert(copy->rewards[i]->mediaAsset->name != source->rewards[i]->mediaAsset->name);
+            assert(copy->rewards[i]->mediaAsset->url != source->rewards[i]->mediaAsset->url);
+            assert(copy->rewards[i]->mediaAsset->mediaAssetType == source->rewards[i]->mediaAsset->mediaAssetType);
+        }
+        assert(copy->rewards[i]->name != source->rewards[i]->name);
+        assert(copy->rewards[i]->rewardType == source->rewards[i]->rewardType);
+        assert(copy->rewards[i]->value != source->rewards[i]->value);
+        assert(copy->rewards[i]->valueType != source->rewards[i]->valueType);
+    }
+    assert(copy->estimatedUnlockTime == source->estimatedUnlockTime);
+    assert(copy->deepLink != source->deepLink);
+    assert(copy->isRevoked == source->isRevoked);
 }
 
 void Game::HandleSignout(xbl_user_handle user)

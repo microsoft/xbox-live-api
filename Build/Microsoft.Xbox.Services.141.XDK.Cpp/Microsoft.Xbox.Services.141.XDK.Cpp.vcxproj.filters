@@ -19,6 +19,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_service.cpp">
       <Filter>C++ Source\Services\Achievements</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_service_internal.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_time_window.cpp">
       <Filter>C++ Source\Services\Achievements</Filter>
     </ClCompile>
@@ -27,6 +30,12 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_result.cpp">
       <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\C\achievements.cpp">
+      <Filter>C++ Source\Services\Achievements\C</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\C\achievements_helper.cpp">
+      <Filter>C++ Source\Services\Achievements\C</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club.cpp">
       <Filter>C++ Source\Services\Clubs</Filter>
@@ -879,6 +888,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_service_call_routed_event_args.h">
       <Filter>C++ Public Includes</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\achievements_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\errors_c.h">
       <Filter>C Public Includes</Filter>
     </ClInclude>
@@ -911,6 +923,15 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_global_c.h">
       <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_internal.h">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\C\achievements_helper.h">
+      <Filter>C++ Source\Services\Achievements\C</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\C\achievements_state.h">
+      <Filter>C++ Source\Services\Achievements\C</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_serializers.h">
       <Filter>C++ Source\Services\Clubs</Filter>
@@ -1072,6 +1093,9 @@
     </Filter>
     <Filter Include="C++ Source\Services\Achievements">
       <UniqueIdentifier>{8FC7F5B8-D8DB-32F1-BE20-8B7E608F529E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Achievements\C">
+      <UniqueIdentifier>{066FC811-29AA-3E7A-84D3-01E1156A1F14}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Clubs">
       <UniqueIdentifier>{4DDFC8A5-0A32-33A3-B56A-EF057C1E8BCE}</UniqueIdentifier>

@@ -158,7 +158,8 @@ void Renderer::RenderMenuOptions(
         L"Press 4 to toggle social group for online in title (%s).\n"
         L"Press 5 to toggle social group for custom list (%s).\n"
         L"Press C to import custom list.\n"
-        L"Press P to get profile",
+        L"Press P to get profile\n"
+        L"Press A to test achievements",
         gamertagString.data(),
         g_sampleInstance->GetAllFriends() ? L"On" : L"Off",
         g_sampleInstance->GetOnlineFriends() ? L"On" : L"Off",

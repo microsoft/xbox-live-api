@@ -1955,16 +1955,14 @@ void utils::free_string(const char* str)
 #ifdef _WIN32 // TODO implementation for other platforms may be different
 time_t utils::time_t_from_datetime(const utility::datetime& datetime)
 {
-    time_t currentUtcTime = time(nullptr);
-    auto diffTime = utility::datetime::utc_now() - datetime;
-    return currentUtcTime - diffTime;
+    // todo we need to test if datetime.to_interval() is in seconds or miliseconds
+    return static_cast<time_t>(datetime.to_interval());
 }
 
 utility::datetime utils::datetime_from_time_t(const time_t* pTime)
 {
-    utility::datetime datetime = utility::datetime::utc_now();
-    auto diffTime = time(nullptr) - *pTime;
-    return datetime - utility::datetime::from_seconds((unsigned int)diffTime);
+    // todo we need to test if time_t is in seconds or miliseconds
+    return utility::datetime() + utility::datetime::from_seconds((unsigned int)(*pTime));
 }
 #endif // _WIN32
 

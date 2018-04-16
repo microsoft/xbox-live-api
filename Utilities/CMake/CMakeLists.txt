@@ -125,6 +125,7 @@ set(Public_Source_Files
     )
 
 set(Public_Source_Files_C
+    ../../include/xsapi-c/achievements_c.h
     ../../include/xsapi-c/errors_c.h
     ../../include/xsapi-c/presence_c.h
     ../../include/xsapi-c/profile_c.h
@@ -320,14 +321,16 @@ set(UWP_Misc_Source_Files
 
 set(Achievements_Source_Files
     ../../Source/Services/Achievements/achievement.cpp
-    ../../Source/Services/Achievements/Achievements_result.cpp
     ../../Source/Services/Achievements/achievement_media_asset.cpp
     ../../Source/Services/Achievements/achievement_progression.cpp
     ../../Source/Services/Achievements/achievement_requirement.cpp
     ../../Source/Services/Achievements/achievement_reward.cpp
     ../../Source/Services/Achievements/achievement_service.cpp
+    ../../Source/Services/Achievements/achievement_service_internal.cpp
     ../../Source/Services/Achievements/achievement_time_window.cpp
     ../../Source/Services/Achievements/achievement_title_association.cpp
+    ../../Source/Services/Achievements/achievements_internal.h
+    ../../Source/Services/Achievements/achievements_result.cpp
     )
 
 set(UWP_Events_Source_Files
@@ -629,6 +632,13 @@ set(Social_Source_Files_C
     
 set(Social_Manager_Source_Files_C
     ../../Source/Services/Social/Manager/C/social_manager_c.cpp
+    )
+
+set(Achievements_Source_Files_C
+    ../../Source/Services/Achievements/C/achievements.cpp
+    ../../Source/Services/Achievements/C/achievements_helper.cpp
+    ../../Source/Services/Achievements/C/achievements_helper.h
+    ../../Source/Services/Achievements/C/achievements_state.h
     )
 
 
@@ -1278,6 +1288,7 @@ else()
         source_group("C++ Source\\Services\\Clubs\\WinRT" FILES ${Clubs_WinRT_Source_Files})
     else()
         source_group("C++ Source\\Shared\\C" FILES ${Shared_Source_Files_C})
+        source_group("C++ Source\\Services\\Achievements\\C" FILES ${Achievements_Source_Files_C})
         source_group("C++ Source\\Services\\Common\\C" FILES ${Common_Source_Files_C})
         source_group("C++ Source\\Services\\Social\\C" FILES ${Social_Source_Files_C})
         source_group("C++ Source\\Services\\Social\\Manager\\C" FILES ${Social_Manager_Source_Files_C})
@@ -1341,6 +1352,7 @@ else()
         list(APPEND
             SOURCE_FILES
             ${Public_Source_Files_C}
+            ${Achievements_Source_Files_C}
             ${Social_Manager_Source_Files_C}
             ${Social_Source_Files_C}
             ${Common_Source_Files_C}

@@ -70,7 +70,7 @@ public:
     /// <summary>
     /// A service for managing achievements.
     /// </summary>
-    achievements::achievement_service& achievement_service();
+    std::shared_ptr<achievements::achievement_service_internal>& achievement_service_internal();
 
     /// <summary>
     /// A service for managing user statistics.
@@ -175,11 +175,11 @@ private:
     std::shared_ptr<xbox_live_app_config> m_appConfig; // Remove after migrating all services
     std::shared_ptr<xbox_live_app_config_internal> m_appConfigInternal;
 
+    std::shared_ptr<achievements::achievement_service_internal> m_achievementServiceInternal;
     std::shared_ptr<social::profile_service_impl> m_profileServiceImpl;
-    std::shared_ptr<social::social_service_impl> m_socialServiceImpl;
     std::shared_ptr<social::reputation_service_impl> m_reputationServiceImpl;
+    std::shared_ptr<social::social_service_impl> m_socialServiceImpl;
     leaderboard::leaderboard_service m_leaderboardService;
-    achievements::achievement_service m_achievementService;
     user_statistics::user_statistics_service m_userStatisticsService;
     multiplayer::multiplayer_service m_multiplayerService;
     matchmaking::matchmaking_service m_matchmakingService;

@@ -14,8 +14,8 @@
 #include "xsapi/mem.h"
 #include "xsapi/system.h"
 
-struct XBL_XBOX_LIVE_USER;
 struct XblAppConfig;
+struct XBL_ACHIEVEMENTS_STATE;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
     class xbox_live_services_settings;
@@ -434,6 +434,8 @@ struct xsapi_singleton
     // from System\C\user_c.cpp
     std::unordered_map<std::shared_ptr<xbox::services::system::xbox_live_user>, xbl_user_handle> m_signedInUsers;
 #endif
+
+    std::shared_ptr<XBL_ACHIEVEMENTS_STATE> m_achievementsState;
 
     std::mutex m_callbackContextsLock;
     xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_callbackContextPtrs;
@@ -1191,6 +1193,22 @@ public:
             deserializationResult.set_payload(T());
         }
 
+        const std::error_code& httpErrorCode = response->err_code();
+        if (httpErrorCode != xbox_live_error_code::no_error)
+        {
+            deserializationResult._Set_err(httpErrorCode);
+            deserializationResult._Set_err_message(std::string(response->err_message().data()));
+        }
+
+        return deserializationResult;
+    }
+
+    template<>
+    static xbox::services::xbox_live_result<void> generate_xbox_live_result(
+        _Inout_ xbox::services::xbox_live_result<void> deserializationResult,
+        _In_ const std::shared_ptr<xbox::services::http_call_response_internal>& response
+    )
+    {
         const std::error_code& httpErrorCode = response->err_code();
         if (httpErrorCode != xbox_live_error_code::no_error)
         {
