@@ -42,8 +42,8 @@ void user_context::get_auth_result(
     _In_ const xsapi_internal_string& headers,
     _In_ const xsapi_internal_string& requestBodyString,
     _In_ bool allUsersAuthRequired,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+    _In_ async_queue_handle_t queue,
+    _In_ xbox_live_callback<xbox_live_result<user_context_auth_result>> callback
     )
 {
     UNREFERENCED_PARAMETER(allUsersAuthRequired);
@@ -55,7 +55,7 @@ void user_context::get_auth_result(
         headers,
         utf8Vec,
         allUsersAuthRequired,
-        taskGroupId,
+        queue,
         callback
     );
 }
@@ -66,8 +66,8 @@ void user_context::get_auth_result(
     _In_ const xsapi_internal_string& headers,
     _In_ const xsapi_internal_vector<unsigned char>& requestBodyVector,
     _In_ bool allUsersAuthRequired,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+    _In_ async_queue_handle_t queue,
+    _In_ xbox_live_callback<xbox_live_result<user_context_auth_result>> callback
     )
 {
     UNREFERENCED_PARAMETER(allUsersAuthRequired);
@@ -87,7 +87,7 @@ void user_context::get_auth_result(
 #endif
     if (m_user != nullptr)
     {
-        m_user->_User_impl()->get_token_and_signature(httpMethod, url, headers, requestBodyVector, taskGroupId,
+        m_user->_User_impl()->get_token_and_signature(httpMethod, url, headers, requestBodyVector, queue,
             [callback](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
         {
             const auto& tokenResult = result.payload();
@@ -112,7 +112,7 @@ void user_context::refresh_token(
         xsapi_internal_vector<unsigned char>(),
         false,
         true,
-        XSAPI_DEFAULT_TASKGROUP,
+        nullptr, // TODO
         [](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
     {
         if (!result.err())

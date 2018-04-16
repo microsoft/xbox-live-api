@@ -31,13 +31,13 @@ XblAchievementsResultGetNext(
     _In_opt_ void* completionRoutineContext,
     _In_ XBL_GET_NEXT_COMPLETION_ROUTINE completionRoutine
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
 
     auto result = achievementsResult->pImpl->cppAchievementsResult()->get_next(
         maxItems,
-        queue->taskGroupId,
+        0, // TODO
         [completionRoutineContext, completionRoutine](xbox_live_result<std::shared_ptr<achievements_result_internal>> result) {
         auto xblResult = utils::create_xbl_result(result.err());
         XBL_ACHIEVEMENTS_RESULT* achievementsResult = nullptr;
@@ -51,11 +51,11 @@ try
 
     return utils::create_xbl_result(result.err());
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblAchievementServiceUpdateAchievement(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_opt_ uint32_t* titleId,
     _In_opt_ PCSTR serviceConfigurationId,
@@ -65,7 +65,7 @@ XblAchievementServiceUpdateAchievement(
     _In_opt_ void* completionRoutineContext,
     _In_ XBL_UPDATE_ACVHIEVEMENT_COMPLETION_ROUTINE completionRoutine
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
     
@@ -77,7 +77,7 @@ try
         result = achievementService->update_achievement(xboxUserId,
             achievementId,
             percentComplete,
-            queue->taskGroupId,
+            0, // TODO
             [completionRoutine, completionRoutineContext](xbox_live_result<void> result) {
                 completionRoutine(utils::create_xbl_result(result.err()), completionRoutineContext);
             });
@@ -89,7 +89,7 @@ try
             serviceConfigurationId,
             achievementId,
             percentComplete,
-            queue->taskGroupId,
+            0, // TODO
             [completionRoutine, completionRoutineContext](xbox_live_result<void> result) {
                 completionRoutine(utils::create_xbl_result(result.err()), completionRoutineContext);
             });
@@ -97,11 +97,11 @@ try
 
     return utils::create_xbl_result(result.err());
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblAchievementServiceGetAchievementsForTitleId(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_ uint32_t titleId,
     _In_ XBL_ACHIEVEMENT_TYPE type,
@@ -113,7 +113,7 @@ XblAchievementServiceGetAchievementsForTitleId(
     _In_opt_ void* completionRoutineContext,
     _In_ XBL_GET_ACHIEVEMENTS_FOR_TITLE_ID_COMPLETION_ROUTINE completionRoutine
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
 
@@ -126,18 +126,18 @@ try
         static_cast<achievement_order_by>(orderBy),
         skipItems,
         maxItems,
-        queue->taskGroupId,
+        0, // TODO
         [completionRoutine, completionRoutineContext](xbox_live_result<std::shared_ptr<achievements_result_internal>> result) {
             completionRoutine(utils::create_xbl_result(result.err()), CreateAchievementsResultFromCpp(result.payload()), completionRoutineContext);
         });
 
     return utils::create_xbl_result(result.err());
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblAchievementServiceGetAchievement(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContext,
+    _In_ xbl_context_handle xboxLiveContext,
     _In_ PCSTR xboxUserId,
     _In_ PCSTR serviceConfigurationId,
     _In_ PCSTR achievementId,
@@ -145,7 +145,7 @@ XblAchievementServiceGetAchievement(
     _In_opt_ void* completionRoutineContext,
     _In_ XBL_GET_ACHIEVEMENT_COMPLETION_ROUTINE completionRoutine
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
     
@@ -154,21 +154,21 @@ try
     auto result = achievementService->get_achievement(xboxUserId,
         serviceConfigurationId,
         achievementId,
-        queue->taskGroupId,
+        0, // TODO
         [completionRoutine, completionRoutineContext](xbox_live_result<std::shared_ptr<achievement_internal>> result) {
             completionRoutine(utils::create_xbl_result(result.err()), CreateAchievementFromCpp(result.payload()), completionRoutineContext);
         });
 
     return utils::create_xbl_result(result.err());
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblAchievementServiceReleaseAchievementsResult(
     _In_ XBL_ACHIEVEMENTS_RESULT* achievementsResult
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
 
@@ -182,14 +182,14 @@ try
     }
     return XBL_RESULT_OK;
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblAchievementServiceReleaseAchievement(
     _In_ XBL_ACHIEVEMENT* achievement
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
 
@@ -203,7 +203,7 @@ try
     }
     return XBL_RESULT_OK;
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 void CopyString(buffer_allocator& b, PCSTR* dest, PCSTR val)
 {

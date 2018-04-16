@@ -144,12 +144,10 @@ void Renderer::RenderMenuOptions(
     WCHAR text[1024];
     swprintf_s(text, ARRAYSIZE(text), L"");
 
-    LPWSTR gamertag = L"n/a";
-    std::wstring gamertagString;
-    if (g_sampleInstance->GetUser() != nullptr && g_sampleInstance->GetUser()->gamertag != nullptr)
+    string_t gamertagString = L"n/a";
+    if (g_sampleInstance->GetUser() != nullptr)
     {
-        gamertagString = utility::conversions::utf8_to_utf16(g_sampleInstance->GetUser()->gamertag);
-        gamertag = (LPWSTR)gamertagString.c_str();
+        gamertagString = g_sampleInstance->GetGamertag();
     }
 
     swprintf_s(text, ARRAYSIZE(text),
@@ -162,7 +160,7 @@ void Renderer::RenderMenuOptions(
         L"Press C to import custom list.\n"
         L"Press P to get profile\n"
         L"Press A to test achievements",
-        gamertag,
+        gamertagString.data(),
         g_sampleInstance->GetAllFriends() ? L"On" : L"Off",
         g_sampleInstance->GetOnlineFriends() ? L"On" : L"Off",
         g_sampleInstance->GetAllFavs() ? L"On" : L"Off",

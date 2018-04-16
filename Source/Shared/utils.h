@@ -14,8 +14,7 @@
 #include "xsapi/mem.h"
 #include "xsapi/system.h"
 
-struct XBL_XBOX_LIVE_USER;
-struct XBL_XBOX_LIVE_APP_CONFIG;
+struct XblAppConfig;
 struct XBL_ACHIEVEMENTS_STATE;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
@@ -347,7 +346,7 @@ struct xsapi_singleton
     std::shared_ptr<xbox_live_app_config_internal> m_internalAppConfigSinglton;
 
     // from Shared\C\xbox_live_app_config.cpp
-    std::shared_ptr<XBL_XBOX_LIVE_APP_CONFIG> m_cAppConfigSingleton;
+    std::shared_ptr<XblAppConfig> m_cAppConfigSingleton;
 
     // from Misc\notification_service.cpp
     std::shared_ptr<xbox::services::notification::notification_service> m_notificationSingleton;
@@ -432,22 +431,21 @@ struct xsapi_singleton
     function_context m_signOutCompletedHandlerIndexer;
     function_context m_signInCompletedHandlerIndexer;
     std::mutex m_trackingUsersLock;
+    // from System\C\user_c.cpp
+    std::unordered_map<std::shared_ptr<xbox::services::system::xbox_live_user>, xbl_user_handle> m_signedInUsers;
 #endif
-
-    std::mutex m_usersLock;
-    std::unordered_map<xsapi_internal_string, XBL_XBOX_LIVE_USER*> m_signedInUsers;
 
     std::shared_ptr<XBL_ACHIEVEMENTS_STATE> m_achievementsState;
 
     std::mutex m_callbackContextsLock;
     xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_callbackContextPtrs;
 
-    std::atomic<uint64_t> m_nextTaskGroupId;
+    async_queue_handle_t m_asyncQueue;
 };
 
 void init_mem_hooks();
-extern XBL_MEM_ALLOC_FUNC g_pMemAllocHook;
-extern XBL_MEM_FREE_FUNC g_pMemFreeHook;
+extern XblMemAllocFunction g_pMemAllocHook;
+extern XblMemFreeFunction g_pMemFreeHook;
 
 std::shared_ptr<xsapi_singleton> get_xsapi_singleton(_In_ bool createIfRequired = true);
 void verify_global_init();
@@ -1500,11 +1498,12 @@ public:
     static utility::datetime datetime_from_time_t(const time_t* time);
 
     static XBL_RESULT create_xbl_result(std::error_code errc);
-    static XBL_RESULT create_xbl_result(HC_RESULT hcResult);
 
-    static XBL_RESULT std_bad_alloc_to_xbl_result(std::bad_alloc const& e);
-    static XBL_RESULT std_exception_to_xbl_result(std::exception const& e);
-    static XBL_RESULT unknown_exception_to_xbl_result();
+    static HRESULT hresult_from_error_code(std::error_code errc);
+
+    static HRESULT std_bad_alloc_to_xbl_result(std::bad_alloc const& e);
+    static HRESULT std_exception_to_xbl_result(std::exception const& e);
+    static HRESULT unknown_exception_to_xbl_result();
 #endif
 
 private:
@@ -1515,6 +1514,7 @@ private:
     utils& operator=(const utils&);
 };
 
+// TODO remove this
 static const uint64_t XSAPI_DEFAULT_TASKGROUP = 99;
 
 class buffer_allocator

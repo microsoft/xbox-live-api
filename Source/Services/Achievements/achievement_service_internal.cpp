@@ -199,7 +199,7 @@ achievement_service_internal::update_achievement(
         m_userContext,
         http_call_response_body_type::json_body,
         false,
-        taskGroupId,
+        0, // TODO
         [callback, achievementId, percentComplete, xboxLiveContextImpl](std::shared_ptr<http_call_response_internal> response)
         {
             if (response->err_code() == xbox_live_error_condition::network ||
@@ -355,7 +355,7 @@ achievement_service_internal::get_achievement(
         m_userContext,
         http_call_response_body_type::json_body,
         false,
-        taskGroupId,
+        0, // TODO
         [callback](std::shared_ptr<http_call_response_internal> response)
         {
             auto achievementResult = achievements_result_internal::_Deserialize(response->response_body_json());
@@ -439,7 +439,7 @@ achievement_service_internal::get_achievements(
         m_userContext,
         http_call_response_body_type::json_body,
         false,
-        taskGroupId,
+        0, // TODO
         [callback, userContext, xboxLiveContextSettings, appConfig, xboxLiveContextImpl, xboxUserId, titleIds, type, unlockedOnly, orderBy](std::shared_ptr<http_call_response_internal> response)
         {
             if (response->response_body_json().size() > 0)

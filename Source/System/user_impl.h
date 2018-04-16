@@ -10,14 +10,16 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
+typedef xbox_live_callback<xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> token_and_signature_callback;
+
 class user_impl : public std::enable_shared_from_this<user_impl>
 {
 public:
     virtual void sign_in_impl(
         _In_ bool showUI,
         _In_ bool forceRefresh,
-        _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox_live_result<sign_in_result>> callback
+        _In_ async_queue_handle_t queue,
+        _In_ xbox_live_callback<xbox_live_result<sign_in_result>> asyncBlock
         ) = 0;
 
 #if XSAPI_A
@@ -63,8 +65,8 @@ public:
         _In_ const xsapi_internal_string& httpMethod,
         _In_ const xsapi_internal_string& url,
         _In_ const xsapi_internal_string& headers,
-        _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
+        _In_ async_queue_handle_t queue,
+        _In_ token_and_signature_callback callback
         );
 
     void get_token_and_signature(
@@ -72,8 +74,8 @@ public:
         _In_ const xsapi_internal_string& url,
         _In_ const xsapi_internal_string& headers,
         _In_ const xsapi_internal_string& requestBodyString,
-        _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
+        _In_ async_queue_handle_t queue,
+        _In_ token_and_signature_callback callback
         );
 
     void get_token_and_signature(
@@ -81,8 +83,8 @@ public:
         _In_ const xsapi_internal_string& url,
         _In_ const xsapi_internal_string& headers,
         _In_ const xsapi_internal_vector<unsigned char>& requestBodyArray,
-        _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
+        _In_ async_queue_handle_t queue,
+        _In_ token_and_signature_callback callback
         );
 
     bool is_signed_in() const;
@@ -98,8 +100,8 @@ public:
         _In_ const xsapi_internal_vector<unsigned char>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh,
-        _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
+        _In_ async_queue_handle_t queue,
+        _In_ token_and_signature_callback callback
         ) = 0;
 
     static function_context add_sign_in_completed_handler(_In_ xbox_live_callback<const xsapi_internal_string&> handler);
@@ -154,7 +156,7 @@ public:
     void sign_in_impl(
         _In_ bool showUI,
         _In_ bool forceRefresh,
-        _In_ uint64_t taskGroupId,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<sign_in_result>> callback
         ) override;
 
@@ -172,8 +174,8 @@ public:
         _In_ const xsapi_internal_vector<unsigned char>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
         _In_ bool forceRefresh,
-        _In_ uint64_t taskGroupId,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
+        _In_ async_queue_handle_t queue,
+        _In_ token_and_signature_callback callback
         ) override;
 
 private:
@@ -244,39 +246,5 @@ public:
 
 };
 #endif
-
-struct get_token_and_signature_context
-{
-    get_token_and_signature_context(
-        _In_ std::shared_ptr<user_impl> _userImpl,
-        _In_ const xsapi_internal_string& _httpMethod,
-        _In_ const xsapi_internal_string& _url,
-        _In_ const xsapi_internal_string& _headers,
-        _In_ const xsapi_internal_vector<unsigned char>& _bytes,
-        _In_ bool _promptForCredentialsIfNeeded,
-        _In_ bool _forceRefresh,
-        _In_ xbox_live_callback<xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> _callback
-        ) :
-        userImpl(_userImpl),
-        httpMethod(_httpMethod),
-        url(_url),
-        headers(_headers),
-        bytes(_bytes),
-        promptForCredentialsIfNeeded(_promptForCredentialsIfNeeded),
-        forceRefresh(_forceRefresh),
-        callback(_callback)
-    {
-    }
-
-    std::shared_ptr<user_impl> userImpl; 
-    xsapi_internal_string httpMethod;
-    xsapi_internal_string url;
-    xsapi_internal_string headers;
-    xsapi_internal_vector<unsigned char> bytes;
-    bool promptForCredentialsIfNeeded;
-    bool forceRefresh;
-    xbox_live_callback<xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback;
-    xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result;
-};
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

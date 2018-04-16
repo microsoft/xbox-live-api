@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "types_c.h"
+#include "pal.h"
 #include "xsapi-c/errors_c.h"
 #include "xsapi-c/system_c.h"
 #include "xsapi-c/presence_c.h"
@@ -11,16 +11,6 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
-
-static const uint32_t XBL_GAMERSCORE_CHAR_SIZE = 16;
-static const uint32_t XBL_GAMERTAG_CHAR_SIZE = 16;
-static const uint32_t XBL_XBOX_USER_ID_CHAR_SIZE = 21;
-static const uint32_t XBL_DISPLAY_NAME_CHAR_SIZE = 30;
-static const uint32_t XBL_REAL_NAME_CHAR_SIZE = 255;
-static const uint32_t XBL_DISPLAY_PIC_URL_RAW_CHAR_SIZE = 225;
-static const uint32_t XBL_COLOR_CHAR_SIZE = 7;
-static const uint32_t XBL_RICH_PRESENCE_CHAR_SIZE = 100;
-static const uint32_t XBL_NUM_PRESENCE_RECORDS = 6;
 
 typedef enum XBL_SOCIAL_MANAGER_EXTRA_DETAIL_LEVEL 
 {
@@ -168,7 +158,7 @@ typedef struct XBL_SOCIAL_MANAGER_PRESENCE_TITLE_RECORD
     /// <summary>
     /// Device type
     /// </summary>
-    XBL_PRESENCE_DEVICE_TYPE deviceType;
+    XblPresenceDeviceType deviceType;
 } XBL_SOCIAL_MANAGER_PRESENCE_TITLE_RECORD;
 
 /// <summary>
@@ -179,7 +169,7 @@ typedef struct XBL_SOCIAL_MANAGER_PRESENCE_RECORD
     /// <summary>
     /// The user's presence state.
     /// </summary>
-    XBL_USER_PRESENCE_STATE userState;
+    XblUserPresenceState userState;
 
     /// <summary>
     /// Collection of presence title record objects returned by a request.
@@ -200,7 +190,7 @@ typedef struct XBL_XBOX_SOCIAL_USER
     /// <summary>
     /// The xbox user id
     /// </summary>
-    char xboxUserId[XBL_GAMERSCORE_CHAR_SIZE];
+    char xboxUserId[XBL_XBOX_USER_ID_CHAR_SIZE];
 
     /// <summary>
     /// Whether they are a favorite
@@ -283,7 +273,7 @@ typedef struct XBL_SOCIAL_EVENT
     /// <summary>
     /// The user whose graph got changed
     /// </summary>
-    XBL_XBOX_LIVE_USER_PTR user;
+    xbl_user_handle user;
 
     /// <summary>
     /// The type of event this is 
@@ -334,7 +324,7 @@ typedef struct XBL_XBOX_SOCIAL_USER_GROUP
     /// <summary>
     /// The local user who the user group is related to
     /// </summary>
-    XBL_XBOX_LIVE_USER_PTR localUser;
+    xbl_user_handle localUser;
 
     /// <summary>
     /// Returns the presence filter used if group type is filter type
@@ -419,7 +409,7 @@ XblSocialUserGroupGetUsersTrackedByGroup(
 /// <returns>An XBL_RESULT to report any potential error</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerAddLocalUser(
-    _In_ XBL_XBOX_LIVE_USER_PTR user,
+    _In_ xbl_user_handle user,
     _In_ XBL_SOCIAL_MANAGER_EXTRA_DETAIL_LEVEL extraLevelDetail
     ) XBL_NOEXCEPT;
 
@@ -431,7 +421,7 @@ XblSocialManagerAddLocalUser(
 /// <returns>An XBL_RESULT to report any potential error</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerRemoveLocalUser(
-    _In_ XBL_XBOX_LIVE_USER_PTR user
+    _In_ xbl_user_handle user
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -483,7 +473,7 @@ XblSocialEventGetSocialUserGroup(
 /// <returns>An XBL_RESULT to report any errors.</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerCreateSocialUserGroupFromFilters(
-    _In_ XBL_XBOX_LIVE_USER_PTR user,
+    _In_ xbl_user_handle user,
     _In_ XBL_PRESENCE_FILTER presenceDetailLevel,
     _In_ XBL_RELATIONSHIP_FILTER filter,
     _Out_ XBL_XBOX_SOCIAL_USER_GROUP** group
@@ -500,7 +490,7 @@ XblSocialManagerCreateSocialUserGroupFromFilters(
 /// <returns>An XBL_RESULT to report any errors.</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerCreateSocialUserGroupFromList(
-    _In_ XBL_XBOX_LIVE_USER_PTR user,
+    _In_ xbl_user_handle user,
     _In_ PCSTR* xboxUserIdList,
     _In_ uint32_t xboxUserIdListCount,
     _Out_ XBL_XBOX_SOCIAL_USER_GROUP** group
@@ -522,7 +512,7 @@ XblSocialManagerDestroySocialUserGroup(
 /// </summary>
 /// <param name="userCount">The number of items in the returned array</param>
 /// <returns>Array of XBL_XBOX_LIVE_USER objects that are managed by social manager.</returns>
-XBL_API XBL_XBOX_LIVE_USER_PTR const* XBL_CALLING_CONV
+XBL_API xbl_user_handle const* XBL_CALLING_CONV
 XblSocialManagerGetLocalUsers(
     _Out_ uint32_t* userCount
     ) XBL_NOEXCEPT;
@@ -551,7 +541,7 @@ XblSocialManagerUpdateSocialUserGroup(
 /// <returns>An XBL_RESULT representing the success enabling polling</returns>
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerSetRichPresencePollingStatus(
-    _In_ XBL_XBOX_LIVE_USER_PTR user,
+    _In_ xbl_user_handle user,
     _In_ bool shouldEnablePolling
     ) XBL_NOEXCEPT;
 

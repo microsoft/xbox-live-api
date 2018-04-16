@@ -41,7 +41,7 @@ namespace Sample
         bool Render();
         void Init(Windows::UI::Core::CoreWindow^ window);
 
-        static void HandleSignout(_In_ XBL_XBOX_LIVE_USER *user);
+        static void HandleSignout(_In_ xbl_user_handle user);
 
         void OnProtocolActivation(Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs^ args);
 
@@ -55,10 +55,7 @@ namespace Sample
         void SignIn();
         void SignInSilently();
 
-        static void HandleSignInResult(
-            _In_ XBL_RESULT result,
-            _In_ XSAPI_SIGN_IN_RESULT payload,
-            _In_opt_ void* context);
+        void HandleSignInResult(_In_ XblSignInResult signInResult);
 
         void RegisterInputKeys();
 
@@ -70,6 +67,7 @@ namespace Sample
         static std::mutex m_displayEventQueueLock;
 
         void Log(std::wstring log);
+        void Log(std::string log);
 
         int GetNumberOfUserInGraph() { return (m_xboxLiveContext == nullptr) ? 0 : 1; }
         bool GetAllFriends() { return m_allFriends; }
@@ -78,11 +76,20 @@ namespace Sample
         bool GetOnlineInTitle() { return m_onlineInTitle; }
         bool GetCustomList() { return m_customList; }
 
-        XBL_XBOX_LIVE_USER *GetUser() { return m_user; }
+        xbl_user_handle GetUser() { return m_user; }
+        string_t GetGamertag()
+        {
+            char gamertag[GamertagMaxBytes];
+            XblUserGetGamertag(m_user, GamertagMaxBytes, gamertag, nullptr);
+            return utility::conversions::utf8_to_utf16(gamertag);
+        }
     private:
-        XBL_XBOX_LIVE_USER *m_user;
-        XBL_XBOX_LIVE_CONTEXT_HANDLE m_xboxLiveContext;
-        const XBL_XBOX_LIVE_APP_CONFIG* m_config;
+        xbl_user_handle m_user;
+        char m_xuid[XuidMaxBytes];
+        xbl_context_handle m_xboxLiveContext;
+        async_queue_handle_t m_queue;
+        uint32_t m_callbackToken;
+        const XblAppConfig* m_config;
 
         function_context m_signOutContext;
 
@@ -117,20 +124,20 @@ namespace Sample
         std::vector<XBL_XBOX_SOCIAL_USER_GROUP*> m_socialGroups;
 
         // SocialManagerIntegration.cpp
-        void AddUserToSocialManager(XBL_XBOX_LIVE_USER* user);
-        void RemoveUserFromSocialManager(XBL_XBOX_LIVE_USER* user);
+        void AddUserToSocialManager(xbl_user_handle user);
+        void RemoveUserFromSocialManager(xbl_user_handle user);
         void CreateOrUpdateSocialGroupFromList(
-            XBL_XBOX_LIVE_USER* user,
+            xbl_user_handle user,
             std::vector<std::string> xuidList
         );
-        void DestroySocialGroup(XBL_XBOX_LIVE_USER* user);
+        void DestroySocialGroup(xbl_user_handle user);
         void CreateSocialUserGroupFromFilters(
-            XBL_XBOX_LIVE_USER* user,
+            xbl_user_handle user,
             XBL_PRESENCE_FILTER presenceFilter,
             XBL_RELATIONSHIP_FILTER relationshipFilter
         );
         void DestroySocialGroup(
-            XBL_XBOX_LIVE_USER* user,
+            xbl_user_handle user,
             XBL_PRESENCE_FILTER presenceFilter,
             XBL_RELATIONSHIP_FILTER relationshipFilter
         );
@@ -141,7 +148,7 @@ namespace Sample
             uint32_t eventListCount
         );
 
-        void CreateSocialGroupsBasedOnUI(XBL_XBOX_LIVE_USER* user);
+        void CreateSocialGroupsBasedOnUI(xbl_user_handle user);
 
         void UpdateSocialGroupForAllUsers(
             bool toggle,
@@ -150,7 +157,7 @@ namespace Sample
         );
 
         void UpdateSocialGroup(
-            XBL_XBOX_LIVE_USER* user,
+            xbl_user_handle user,
             bool toggle,
             XBL_PRESENCE_FILTER presenceFilter,
             XBL_RELATIONSHIP_FILTER relationshipFilter
@@ -159,7 +166,7 @@ namespace Sample
         void UpdateSocialGroupOfListForAllUsers(bool toggle);
 
         void UpdateSocialGroupOfList(
-            XBL_XBOX_LIVE_USER* user,
+            xbl_user_handle user,
             bool toggle
         );
 

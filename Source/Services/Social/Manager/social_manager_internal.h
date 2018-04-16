@@ -358,7 +358,7 @@ public:
     void get_social_graph(
         _In_ const xsapi_internal_string& callerXboxUserId,
         _In_ social_manager_extra_detail_level decorations,
-        _In_ uint64_t taskGroupId,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
         );
 
@@ -366,14 +366,14 @@ public:
         _In_ const xsapi_internal_string& callerXboxUserId,
         _In_ social_manager_extra_detail_level decorations,
         _In_ const xsapi_internal_vector<xsapi_internal_string> xboxLiveUsers,
-        _In_ uint64_t taskGroupId,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
         );
 
     void get_suggested_friends(
         _In_ const xsapi_internal_string& xboxUserId,
         _In_ social_manager_extra_detail_level decorations,
-        _In_ uint64_t taskGroupId,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
         );
 
@@ -384,7 +384,7 @@ private:
         _In_ const xsapi_internal_string& relationshipType,
         _In_ const xsapi_internal_vector<xsapi_internal_string> xboxLiveUsers,
         _In_ bool isBatch,
-        _In_ uint64_t taskGroupId,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
         );
 
@@ -421,7 +421,7 @@ public:
         _In_ xbox_live_user_t user,
         _In_ social_manager_extra_detail_level socialManagerExtraDetailLevel,
         _In_ xbox_live_callback<void> graphDestructionCompleteCallback,
-        _In_ uint64_t backgroundTaskGroupId = XSAPI_DEFAULT_TASKGROUP
+        _In_ async_queue_handle_t backgroundAsyncQueue = nullptr
         );
 
     virtual ~social_graph();
@@ -451,7 +451,7 @@ public:
 
     const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>* active_buffer_social_graph();
 
-    void set_background_work_task_group_id(uint64_t taskGroupId);
+    void set_background_async_queue(async_queue_handle_t queue);
 
 protected:
     static const std::chrono::minutes REFRESH_TIME_MIN;
@@ -561,14 +561,25 @@ protected:
         context->result = result;
         context->callback = callback;
 
-        HCTaskCreate(HC_SUBSYSTEM_ID_XSAPI, m_backgroundTaskGroupId,
-            [](void* _context, HC_TASK_HANDLE taskHandle)
+        AsyncBlock* async = new (xbox::services::system::xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock;
+        ZeroMemory(async, sizeof(AsyncBlock));
+
+        BeginAsync(async, utils::store_shared_ptr(context), nullptr, __FUNCTION__,
+            [](AsyncOp op, const AsyncProviderData* data)
         {
-            auto context = utils::remove_shared_ptr<invoke_callback_context>(_context);
-            context->callback(context->result);
-            return HCTaskSetCompleted(taskHandle);
-        },
-            utils::store_shared_ptr(context), nullptr, nullptr, nullptr, nullptr, nullptr);
+            auto context = utils::remove_shared_ptr<invoke_callback_context>(data->context);
+            switch (op)
+            {
+                case AsyncOp_DoWork:
+                    context->callback(context->result);
+                    return S_OK;
+
+                case AsyncOp_Cleanup:
+                    delete data->async;
+                    return S_OK;
+            }
+            return S_OK;
+        });
     }
 
     bool m_isInitialized;
@@ -610,7 +621,7 @@ protected:
     user_buffers_holder m_userBuffer;
 
     std::thread m_backgroundThread;
-    uint64_t m_backgroundTaskGroupId;
+    async_queue_handle_t m_backgroundAsyncQueue;
 };
 
 class xbox_social_user_group_internal
@@ -747,8 +758,8 @@ public:
         _In_ bool shouldEnablePolling
         );
 
-    _XSAPIIMP void set_social_graph_background_task_id(
-        uint64_t taskGroupId
+    _XSAPIIMP void set_social_graph_background_async_queue(
+        async_queue_handle_t queue
         );
 
     void log_state();
@@ -806,7 +817,7 @@ protected:
     xsapi_internal_unordered_map<xsapi_internal_string, xsapi_internal_vector<xsapi_internal_string>> m_userToViewMap;
     xsapi_internal_unordered_map<xsapi_internal_string, std::shared_ptr<social_graph>> m_localGraphs;
 
-    uint64_t m_graphBackgroundTaskId;
+    async_queue_handle_t m_backgroundAsyncQueue;
 
     friend class xbox_social_user_group_internal;
     friend class MockSocialManager;

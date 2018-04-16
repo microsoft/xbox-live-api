@@ -4,7 +4,6 @@
 #include "pch.h"
 #include "utils.h"
 #include "user_impl.h"
-//#include "auth_manager.h"
 
 #if WINAPI_FAMILY==WINAPI_FAMILY_APP
 #if !XSAPI_CPP
@@ -54,8 +53,8 @@ void user_impl::get_token_and_signature(
     _In_ const xsapi_internal_string& httpMethod,
     _In_ const xsapi_internal_string& url,
     _In_ const xsapi_internal_string& headers,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
+    _In_ async_queue_handle_t queue,
+    _In_ token_and_signature_callback callback
     )
 {
     internal_get_token_and_signature(
@@ -66,7 +65,7 @@ void user_impl::get_token_and_signature(
         xsapi_internal_vector<unsigned char>(),
         false,
         false,
-        taskGroupId,
+        queue,
         callback
         );
 }
@@ -76,8 +75,8 @@ void user_impl::get_token_and_signature(
     _In_ const xsapi_internal_string& url,
     _In_ const xsapi_internal_string& headers,
     _In_ const xsapi_internal_string& requestBodyString,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
+    _In_ async_queue_handle_t queue,
+    _In_ token_and_signature_callback callback
     )
 {
     xsapi_internal_vector<unsigned char> utf8Vec(requestBodyString.begin(), requestBodyString.end());
@@ -90,7 +89,7 @@ void user_impl::get_token_and_signature(
         utf8Vec,
         false,
         false,
-        taskGroupId,
+        queue,
         callback
         );
 }
@@ -100,8 +99,8 @@ void user_impl::get_token_and_signature(
     _In_ const xsapi_internal_string& url,
     _In_ const xsapi_internal_string& headers,
     _In_ const xsapi_internal_vector<unsigned char>& requestBodyArray,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
+    _In_ async_queue_handle_t queue,
+    _In_ token_and_signature_callback callback
     )
 {
     internal_get_token_and_signature(
@@ -112,7 +111,7 @@ void user_impl::get_token_and_signature(
         requestBodyArray,
         false,
         false,
-        taskGroupId,
+        queue,
         callback
         );
 }

@@ -47,12 +47,9 @@ void user_context::get_auth_result(
     _In_ const xsapi_internal_string& headers,
     _In_ const xsapi_internal_string& requestBodyString,
     _In_ bool allUsersAuthRequired,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+    _In_ std::shared_ptr<AuthAsyncBlock> asyncBlock
     )
 {
-    UNREFERENCED_PARAMETER(taskGroupId);
-
     auto platformHttp = PLATFORM_STRING_FROM_INTERNAL_STRING(httpMethod);
     auto platformUrl = PLATFORM_STRING_FROM_INTERNAL_STRING(url);
     auto platformHeaders = PLATFORM_STRING_FROM_INTERNAL_STRING(headers);
@@ -102,7 +99,7 @@ void user_context::get_auth_result(
     }
 
     asyncOp->Completed = ref new AsyncOperationCompletedHandler<GetTokenAndSignatureResult^>(
-        [asyncOp, callback](IAsyncOperation<GetTokenAndSignatureResult^>^ asyncInfo, AsyncStatus asyncStatus)
+        [asyncOp, asyncBlock](IAsyncOperation<GetTokenAndSignatureResult^>^ asyncInfo, AsyncStatus asyncStatus)
     {
         UNREFERENCED_PARAMETER(asyncStatus);
         try
@@ -112,12 +109,12 @@ void user_context::get_auth_result(
                 utils::internal_string_from_char_t(tokenAndSig->Token->ToString()->Data()), 
                 utils::internal_string_from_char_t(tokenAndSig->Signature->ToString()->Data())
                 );
-            callback(xbox_live_result<user_context_auth_result>(userContextResult));
+            asyncBlock->typedCallback(xbox_live_result<user_context_auth_result>(userContextResult));
         }
         catch (Exception^ ex)
         {
             xbox_live_error_code err = utils::convert_exception_to_xbox_live_error_code();
-            callback(xbox_live_result<user_context_auth_result>(err, "Failed getting auth token"));
+            asyncBlock->typedCallback(xbox_live_result<user_context_auth_result>(err, "Failed getting auth token"));
         }
     });
 }
@@ -128,12 +125,9 @@ void user_context::get_auth_result(
     _In_ const xsapi_internal_string& headers,
     _In_ const xsapi_internal_vector<unsigned char>& requestBodyVector,
     _In_ bool allUsersAuthRequired,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox::services::xbox_live_result<user_context_auth_result>> callback
+    _In_ std::shared_ptr<AuthAsyncBlock> asyncBlock
     )
 {
-    UNREFERENCED_PARAMETER(taskGroupId);
-
     auto byteArr = ref new Array<unsigned char, 1U>(static_cast<uint32_t>(requestBodyVector.size()));
     memcpy(&byteArr->Data[0], &requestBodyVector[0], requestBodyVector.size());
     IAsyncOperation<GetTokenAndSignatureResult^>^ asyncOp;
@@ -158,7 +152,7 @@ void user_context::get_auth_result(
     }
 
     asyncOp->Completed = ref new AsyncOperationCompletedHandler<GetTokenAndSignatureResult^>(
-        [asyncOp, callback](IAsyncOperation<GetTokenAndSignatureResult^>^ asyncInfo, AsyncStatus asyncStatus)
+        [asyncOp, asyncBlock](IAsyncOperation<GetTokenAndSignatureResult^>^ asyncInfo, AsyncStatus asyncStatus)
     {
         UNREFERENCED_PARAMETER(asyncStatus);
         try
@@ -168,12 +162,12 @@ void user_context::get_auth_result(
                 utils::internal_string_from_char_t(tokenAndSig->Token->ToString()->Data()), 
                 utils::internal_string_from_char_t(tokenAndSig->Signature->ToString()->Data())
                 );
-            callback(xbox_live_result<user_context_auth_result>(userContextResult));
+            asyncBlock->typedCallback(xbox_live_result<user_context_auth_result>(userContextResult));
         }
         catch (Exception^ ex)
         {
             xbox_live_error_code err = utils::convert_exception_to_xbox_live_error_code();
-            callback(xbox_live_result<user_context_auth_result>(err, "Failed getting auth token"));
+            asyncBlock->typedCallback(xbox_live_result<user_context_auth_result>(err, "Failed getting auth token"));
         }
     });
 }

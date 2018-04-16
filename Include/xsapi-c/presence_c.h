@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "types_c.h"
+#include "pal.h"
 #include "xsapi-c/errors_c.h"
 
 #if defined(__cplusplus)
@@ -11,131 +11,131 @@ extern "C" {
 #endif
 
 /// <summary>Defines values used to indicate the device type associate with an XBL_SOCIAL_MANAGER_PRESENCE_TITLE_RECORD.</summary>
-typedef enum XBL_PRESENCE_DEVICE_TYPE
+typedef enum XblPresenceDeviceType
 {
     /// <summary>Unknown device</summary>
-    XBL_PRESENCE_DEVICE_TYPE_UNKNOWN,
+    XblPresenceDeviceType_Unknown,
 
     /// <summary>Windows Phone device</summary>
-    XBL_PRESENCE_DEVICE_TYPE_WINDOWS_PHONE,
+    XblPresenceDeviceType_WindowsPhone,
 
     /// <summary>Windows Phone 7 device</summary>
-    XBL_PRESENCE_DEVICE_TYPE_WINDOWS_PHONE_7,
+    XblPresenceDeviceType_WindowsPhone7,
 
     /// <summary>Web device, like Xbox.com</summary>
-    XBL_PRESENCE_DEVICE_TYPE_WEB,
+    XblPresenceDeviceType_Web,
 
     /// <summary>Xbox360 device</summary>
-    XBL_PRESENCE_DEVICE_TYPE_XBOX_360,
+    XblPresenceDeviceType_Xbox360,
 
     /// <summary>Games for Windows LIVE device</summary>
-    XBL_PRESENCE_DEVICE_TYPE_PC,
+    XblPresenceDeviceType_PC,
 
     /// <summary>Xbox LIVE for Windows device</summary>
-    XBL_PRESENCE_DEVICE_TYPE_WINDOWS_8,
+    XblPresenceDeviceType_Windows8,
 
     /// <summary>Xbox One device</summary>
-    XBL_PRESENCE_DEVICE_TYPE_XBOX_ONE,
+    XblPresenceDeviceType_XboxOne,
 
     /// <summary>Windows One Core devices</summary>
-    XBL_PRESENCE_DEVICE_TYPE_WINDOWS_ONE_CORE,
+    XblPresenceDeviceType_WindowsOneCore,
 
     /// <summary>Windows One Core Mobile devices</summary>
-    XBL_PRESENCE_DEVICE_TYPE_WINDOWS_ONE_CORE_MOBILE
-} XBL_PRESENCE_DEVICE_TYPE;
+    XblPresenceDeviceType_WindowsOneCoreMobile
+} XblPresenceDeviceType;
 
 /// <summary>
 /// Defines values used to indicate the state of the user with regard to the presence service.
 /// </summary>
-typedef enum XBL_USER_PRESENCE_STATE 
+typedef enum XblUserPresenceState 
 {
     /// <summary>The state is unknown.</summary>
-    XBL_USER_PRESENCE_STATE_UNKNOWN,
+    XblUserPresenceState_Unknown,
 
     /// <summary>User is signed in to Xbox LIVE and active in a title.</summary>
-    XBL_USER_PRESENCE_STATE_ONLINE,
+    XblUserPresenceState_Online,
 
     /// <summary>User is signed-in to Xbox LIVE, but inactive in all titles.</summary>
-    XBL_USER_PRESENCE_STATE_AWAY,
+    XblUserPresenceState_Away,
 
     /// <summary>User is not signed in to Xbox LIVE.</summary>
-    XBL_USER_PRESENCE_STATE_OFFLINE
-} XBL_USER_PRESENCE_STATE;
+    XblUserPresenceState_Offline
+} XblUserPresenceState;
 
 /// <summary>
 /// Defines values used to indicate the states of the screen view of presence information.
 /// </summary>
-typedef enum XBL_PRESENCE_TITLE_VIEW_STATE 
+typedef enum XblPresenceTitleViewState 
 {
     /// <summary>Unknown view state.</summary>
-    XBL_PRESENCE_TITLE_VIEW_STATE_UNKNOWN,
+    XblPresenceTitleViewState_Unknown,
 
     /// <summary>The title's view is using the full screen.</summary>
-    XBL_PRESENCE_TITLE_VIEW_STATE_FULL_SCREEN,
+    XblPresenceTitleViewState_FullScreen,
 
     /// <summary>The title's view is using part of the screen with another application snapped.</summary>
-    XBL_PRESENCE_TITLE_VIEW_STATE_FILLED,
+    XblPresenceTitleViewState_Filled,
 
     /// <summary>The title's view is snapped with another application using a part of the screen.</summary>
-    XBL_PRESENCE_TITLE_VIEW_STATE_SNAPPED,
+    XblPresenceTitleViewState_Snapped,
 
     /// <summary>The title's running in the background and is not visible.</summary>
-    XBL_PRESENCE_TITLE_VIEW_STATE_BACKGROUND
-} XBL_PRESENCE_TITLE_VIEW_STATE;
+    XblPresenceTitleViewState_Background
+} XblPresenceTitleViewState;
 
 /// <summary>
 /// Defines values used to set the level of presence detail return from the service.
 /// Choosing proper detail level could help the performance of the API.
 /// </summary>
-typedef enum XBL_PRESENCE_DETAIL_LEVEL 
+typedef enum XblPresenceDetailLevel 
 {
     /// <summary>Default detail level.</summary>
-    XBL_PRESENCE_DETAIL_LEVEL_DEFAULT,
+    XblPresenceDetailLevel_Default,
 
     /// <summary>User detail level. User presence info only, no device, title or rich presence info.</summary>
-    XBL_PRESENCE_DETAIL_LEVEL_USER,
+    XblPresenceDetailLevel_User,
 
     /// <summary>Device detail level. User and device presence info only, no title or rich presence info.</summary>
-    XBL_PRESENCE_DETAIL_LEVEL_DEVICE,
+    XblPresenceDetailLevel_Device,
 
     /// <summary>Title detail level. User, device and title presence info only, no rich presence info.</summary>
-    XBL_PRESENCE_DETAIL_LEVEL_TITLE,
+    XblPresenceDetailLevel_Title,
 
     /// <summary>All detail possible. User, device, title and rich presence info will be provided.</summary>
-    XBL_PRESENCE_DETAIL_LEVEL_ALL
-} XBL_PRESENCE_DETAIL_LEVEL;
+    XblPresenceDetailLevel_All
+} XblPresenceDetailLevel;
 
 /// <summary>Defines values used to indicate the media id types for media presence data.</summary>
-typedef enum XBL_PRESENCE_MEDIA_ID_TYPE 
+typedef enum XblPresenceMediaIdType 
 {
     /// <summary>Unknown media Id.</summary>
-    XBL_PRESENCE_MEDIA_ID_TYPE_UNKNOWN,
+    XblPresenceMediaIdType_Unknown,
 
     /// <summary>Bing media Id.</summary>
-    XBL_PRESENCE_MEDIA_ID_TYPE_BING,
+    XblPresenceMediaIdType_Bing,
 
     /// <summary>MediaProvider media Id.</summary>
-    XBL_PRESENCE_MEDIA_ID_TYPE_MEDIA_PROVIDER
-} XBL_PRESENCE_MEDIA_ID_TYPE;
+    XblPresenceMediaIdType_MediaProvider
+} XblPresenceMediaIdType;
 
 /// <summary>Defines values used to indicate the title presence state for a user.</summary>
-typedef enum XBL_TITLE_PRESENCE_STATE 
+typedef enum XblTitlePresenceState 
 {
     /// <summary>
     /// Indicates this is a Unknown state.
     /// </summary>
-    XBL_TITLE_PRESENCE_STATE_UNKNOWN,
+    XblTitlePresenceState_Unknown,
 
     /// <summary>
     /// Indicates the user started playing the title.
     /// </summary>
-    XBL_TITLE_PRESENCE_STATE_STARTED,
+    XblTitlePresenceState_Started,
 
     /// <summary>
     /// Indicates the user ended playing the title.
     /// </summary>
-    XBL_TITLE_PRESENCE_STATE_ENDED
-} XBL_TITLE_PRESENCE_STATE;
+    XblTitlePresenceState_Ended
+} XblTitlePresenceState;
 
 #if defined(__cplusplus)
 } // end extern "C"

@@ -168,7 +168,7 @@ presence_writer::set_inactive_in_title(
     // Set the presence to be not in this title
     try
     {
-        presenceServiceImpl->set_presence(false, presence_data_internal(), XSAPI_DEFAULT_TASKGROUP, nullptr);
+        presenceServiceImpl->set_presence(false, presence_data_internal(), nullptr, nullptr);
     }
     catch (...)
     {
@@ -205,7 +205,7 @@ presence_writer::set_active_in_title()
                 presenceService->set_presence(
                     true,
                     presence_data_internal(), 
-                    XSAPI_DEFAULT_TASKGROUP,
+                    nullptr,
                     [context, thisWeakPtr](xbox_live_result<uint32_t> result)
                 {
                     // only look at the last result

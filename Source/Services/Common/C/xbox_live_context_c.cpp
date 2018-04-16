@@ -5,115 +5,84 @@
 #include "xsapi-c/xbox_live_app_config_c.h"
 #include "xsapi-c/xbox_live_context_c.h"
 #if !XDK_API
-#include "user_impl_c.h"
+#include "user_c.h"
 #endif
 #include "xbox_live_context_internal_c.h"
 
 using namespace xbox::services;
 using namespace xbox::services::system;
 
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblXboxLiveContextCreateHandle(
-    _In_ XBL_XBOX_LIVE_USER_PTR user,
-    _Out_ XBL_XBOX_LIVE_CONTEXT_HANDLE* xboxLiveContextHandle
+STDAPI
+XblContextCreateHandle(
+    _In_ xbl_user_handle user,
+    _Out_ xbl_context_handle* context
     ) XBL_NOEXCEPT
 try
 {
-    if (user == nullptr || xboxLiveContextHandle == nullptr)
-    {
-        return XBL_RESULT_INVALID_ARG;
-    }
+    RETURN_C_INVALIDARGUMENT_IF(user == nullptr || context == nullptr);
 
     verify_global_init();
 
     void *buffer = xsapi_memory::mem_alloc(sizeof(xbl_xbox_live_context));
-    xbl_xbox_live_context *context = new (buffer) xbl_xbox_live_context(user);
-    *xboxLiveContextHandle = context;
+    *context = new (buffer) xbl_xbox_live_context(user);
 
-    return XBL_RESULT_OK;
+    return S_OK;
 }
 CATCH_RETURN()
 
-XBL_API XBL_XBOX_LIVE_CONTEXT_HANDLE XBL_CALLING_CONV
-XblXboxLiveContextDuplicateHandle(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContextHandle
+STDAPI_(xbl_context_handle)
+XblContextDuplicateHandle(
+    _In_ xbl_context_handle context
     ) XBL_NOEXCEPT
 try
 {
-    if (xboxLiveContextHandle == nullptr)
+    if (context == nullptr)
     {
         return nullptr;
     }
 
-    xboxLiveContextHandle->refCount++;
-    return xboxLiveContextHandle;
+    context->refCount++;
+    return context;
 }
 CATCH_RETURN_WITH(nullptr)
 
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblXboxLiveContextCloseHandle(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContextHandle
+STDAPI_(void)
+XblContextCloseHandle(
+    _In_ xbl_context_handle xboxLiveContextHandle
     ) XBL_NOEXCEPT
 try
 {
-    if (xboxLiveContextHandle == nullptr)
-    {
-        return XBL_RESULT_INVALID_ARG;
-    }
-
     int refCount = --xboxLiveContextHandle->refCount;
     if (refCount <= 0)
     {
         assert(refCount == 0);
         xsapi_memory::mem_free(xboxLiveContextHandle);
     }
-    return XBL_RESULT_OK;
 }
-CATCH_RETURN()
+CATCH_RETURN_WITH(;)
 
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblXboxLiveContextGetUser(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContextHandle,
-    _Out_ XBL_XBOX_LIVE_USER_PTR* user
+STDAPI
+XblContextGetUser(
+    _In_ xbl_context_handle context,
+    _Out_ xbl_user_handle* user
     ) XBL_NOEXCEPT
 try
 {
-    if (xboxLiveContextHandle == nullptr || user == nullptr)
-    {
-        return XBL_RESULT_INVALID_ARG;
-    }
-    *user = xboxLiveContextHandle->user;
-    return XBL_RESULT_OK;
+    RETURN_C_INVALIDARGUMENT_IF(user == nullptr || context == nullptr);
+    *user = context->user;
+    return S_OK;
 }
 CATCH_RETURN()
 
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblXboxLiveContextGetXboxUserId(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContextHandle,
-    _Out_ PCSTR* xboxUserId
+STDAPI
+XblContextGetXboxUserId(
+    _In_ xbl_context_handle context,
+    _Out_ const char** xboxUserId
     ) XBL_NOEXCEPT
 try
 {
-    if (xboxLiveContextHandle == nullptr || xboxUserId == nullptr)
-    {
-        return XBL_RESULT_INVALID_ARG;
-    }
-    *xboxUserId = xboxLiveContextHandle->xboxUserId.data();
-    return XBL_RESULT_OK;
-}
-CATCH_RETURN()
-
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblXboxLiveContextGetAppConfig(
-    _In_ XBL_XBOX_LIVE_CONTEXT_HANDLE xboxLiveContextHandle,
-    _Out_ CONST XBL_XBOX_LIVE_APP_CONFIG** appConfig
-    ) XBL_NOEXCEPT
-try
-{
-    if (xboxLiveContextHandle == nullptr)
-    {
-        return XBL_RESULT_INVALID_ARG;
-    }
-    return XblGetXboxLiveAppConfigSingleton(appConfig);
+    RETURN_C_INVALIDARGUMENT_IF(context == nullptr || xboxUserId == nullptr);
+    *xboxUserId = context->xboxUserId.data();
+    return S_OK;
 }
 CATCH_RETURN()

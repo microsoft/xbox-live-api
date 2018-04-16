@@ -4,7 +4,7 @@
 #include "pch.h"
 #include "xsapi-c/social_manager_c.h"
 #if !XDK_API
-#include "user_impl_c.h"
+#include "user_c.h"
 #endif
 #include "social_manager_internal.h"
 
@@ -13,9 +13,9 @@ using namespace xbox::services::system;
 using namespace xbox::services::social::manager;
 
 #if XDK_API
-#define GET_INTERNAL_USER(xbl_xbox_live_user) xbl_xbox_live_user
+#define GET_INTERNAL_USER(user) user
 #else
-#define GET_INTERNAL_USER(xbl_xbox_live_user) xbl_xbox_live_user->pImpl->cppUser()
+#define GET_INTERNAL_USER(user) user->internalUser
 #endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
@@ -27,7 +27,7 @@ public:
         _In_ std::shared_ptr<xbox_social_user_group_internal> internalGroup
     )
     {
-        XBL_XBOX_LIVE_USER_PTR userPtr;
+        xbl_user_handle userPtr;
 #if !XDK_API
         auto userIter = localUsersMap.find(internalGroup->local_user());
         if (userIter == localUsersMap.end())
@@ -55,8 +55,8 @@ public:
     }
 
 #if !XDK_API
-    xsapi_internal_unordered_map<xbox_live_user_t, XBL_XBOX_LIVE_USER_PTR> localUsersMap;
-    xsapi_internal_vector<XBL_XBOX_LIVE_USER_PTR> localUsersVector;
+    xsapi_internal_unordered_map<xbox_live_user_t, xbl_user_handle> localUsersMap;
+    xsapi_internal_vector<xbl_user_handle> localUsersVector;
 #endif
     bimap<XBL_XBOX_SOCIAL_USER_GROUP*, std::shared_ptr<xbox_social_user_group_internal>> socialUserGroupsMap;
     xsapi_internal_vector<XBL_SOCIAL_EVENT> socialEvents;
@@ -115,7 +115,7 @@ XBL_RESULT populate_social_user_array(
         utils::utf8_from_char_t(internalUser->gamertag(), users[i].gamertag, sizeof(users[i].gamertag));
 
         // presence record
-        users[i].presenceRecord.userState = static_cast<XBL_USER_PRESENCE_STATE>(internalUser->presence_record().user_state());
+        users[i].presenceRecord.userState = static_cast<XblUserPresenceState>(internalUser->presence_record().user_state());
         
         uint8_t j = 0;
         for (auto& internalTitleRecord : internalUser->presence_record().presence_title_records())
@@ -126,7 +126,7 @@ XBL_RESULT populate_social_user_array(
             titleRecord.isTitleActive = internalTitleRecord.is_title_active();
             utils::utf8_from_char_t(internalTitleRecord.presence_text(), titleRecord.presenceText, sizeof(titleRecord.presenceText));
             titleRecord.isBroadcasting = internalTitleRecord.is_broadcasting();
-            titleRecord.deviceType = static_cast<XBL_PRESENCE_DEVICE_TYPE>(internalTitleRecord.device_type());
+            titleRecord.deviceType = static_cast<XblPresenceDeviceType>(internalTitleRecord.device_type());
             ++j;
         }
         users[i].presenceRecord.presenceTitleRecordCount = j;
@@ -149,20 +149,23 @@ XblXboxSocialUserGroupGetUsers(
     _In_ XBL_XBOX_SOCIAL_USER_GROUP* group,
     _Out_ XBL_XBOX_SOCIAL_USER* xboxSocialUsers
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
     auto state = get_xbl_social_manager();
 
     auto groupIter = state->socialUserGroupsMap.find(group);
-    RETURN_C_INVALIDARGUMENT_IF(groupIter == state->socialUserGroupsMap.end());
+    if (groupIter == state->socialUserGroupsMap.end())
+    {
+        return XBL_RESULT_INVALID_ARG;
+    }
 
     return populate_social_user_array(
         groupIter->second->users(),
         xboxSocialUsers
         );
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblXboxSocialUserGroupGetUsersFromXboxUserIds(
@@ -172,13 +175,16 @@ XblXboxSocialUserGroupGetUsersFromXboxUserIds(
     _Out_ XBL_XBOX_SOCIAL_USER* xboxSocialUsers,
     _Inout_ uint32_t* xboxSocialUsersCount
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
     auto state = get_xbl_social_manager();
 
     auto groupIter = state->socialUserGroupsMap.find(group);
-    RETURN_C_INVALIDARGUMENT_IF(groupIter == state->socialUserGroupsMap.end());
+    if (groupIter == state->socialUserGroupsMap.end())
+    {
+        return XBL_RESULT_INVALID_ARG;
+    }
 
     xsapi_internal_vector<xbox_user_id_container> userIdsVector;
     for (uint32_t i = 0; i < xboxUserIdsCount; ++i)
@@ -196,20 +202,23 @@ try
     }
     return populate_social_user_array(result, xboxSocialUsers);
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialUserGroupGetUsersTrackedByGroup(
     _In_ XBL_XBOX_SOCIAL_USER_GROUP* group,
     _Out_ XBL_XBOX_USER_ID_CONTAINER* trackedUsers
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
     auto state = get_xbl_social_manager();
 
     auto groupIter = state->socialUserGroupsMap.find(group);
-    RETURN_C_INVALIDARGUMENT_IF(groupIter == state->socialUserGroupsMap.end());
+    if (groupIter == state->socialUserGroupsMap.end())
+    {
+        return XBL_RESULT_INVALID_ARG;
+    }
 
     uint32_t count = 0;
     for (auto& internalContainer : groupIter->second->users_tracked_by_social_user_group())
@@ -219,14 +228,14 @@ try
     }
     return XBL_RESULT_OK;
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerAddLocalUser(
-    _In_ XBL_XBOX_LIVE_USER_PTR user,
+    _In_ xbl_user_handle user,
     _In_ XBL_SOCIAL_MANAGER_EXTRA_DETAIL_LEVEL extraLevelDetail
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
 
@@ -239,19 +248,19 @@ try
     if (!result.err())
     {
         auto state = get_xbl_social_manager();
-        state->localUsersMap[user->pImpl->cppUser()] = user;
+        state->localUsersMap[user->internalUser] = user;
         state->localUsersVector.push_back(user);
     }
 #endif
     return utils::create_xbl_result(result.err());
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerRemoveLocalUser(
-    _In_ XBL_XBOX_LIVE_USER_PTR user
+    _In_ xbl_user_handle user
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
 
@@ -260,7 +269,7 @@ try
     if (!result.err())
     {
         auto state = get_xbl_social_manager();
-        state->localUsersMap.erase(user->pImpl->cppUser());
+        state->localUsersMap.erase(user->internalUser);
 
         auto& usersVector = state->localUsersVector;
         for (auto iter = usersVector.begin(); iter != usersVector.end(); ++iter)
@@ -275,7 +284,7 @@ try
 #endif
     return utils::create_xbl_result(result.err());
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 
 XBL_API XBL_SOCIAL_EVENT* XBL_CALLING_CONV
@@ -294,7 +303,7 @@ try
     {
         for (auto internalEvent : state->internalSocialEvents)
         {
-            XBL_XBOX_LIVE_USER_PTR userPtr;
+            xbl_user_handle userPtr;
 #if !XDK_API
             auto userIter = state->localUsersMap.find(internalEvent->user());
             if (userIter == state->localUsersMap.end())
@@ -335,9 +344,12 @@ XblSocialEventGetUsersAffected(
     _In_ XBL_SOCIAL_EVENT* socialEvent,
     _Out_ XBL_XBOX_USER_ID_CONTAINER* usersAffected
     ) XBL_NOEXCEPT
-try
+//try
 {
-    RETURN_C_INVALIDARGUMENT_IF(socialEvent == nullptr || usersAffected == nullptr);
+    if (socialEvent == nullptr || usersAffected == nullptr)
+    {
+        return XBL_RESULT_INVALID_ARG;
+    }
 
     auto internalEvent = static_cast<social_event_internal*>(socialEvent->internalEvent);
 
@@ -349,16 +361,19 @@ try
     }
     return XBL_RESULT_OK;
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialEventGetSocialUserGroup(
     _In_ XBL_SOCIAL_EVENT* socialEvent,
     _Out_ XBL_XBOX_SOCIAL_USER_GROUP** loadedGroup
     ) XBL_NOEXCEPT
-try
+//try
 {
-    RETURN_C_INVALIDARGUMENT_IF(socialEvent == nullptr || loadedGroup == nullptr || socialEvent->eventType != XBL_SOCIAL_EVENT_TYPE_SOCIAL_USER_GROUP_LOADED);
+    if (socialEvent == nullptr || loadedGroup == nullptr || socialEvent->eventType != XBL_SOCIAL_EVENT_TYPE_SOCIAL_USER_GROUP_LOADED)
+    {
+        return XBL_RESULT_INVALID_ARG;
+    }
 
     auto internalEvent = static_cast<social_event_internal*>(socialEvent->internalEvent);
 
@@ -383,16 +398,16 @@ try
     }
     return XBL_RESULT_OK;
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerCreateSocialUserGroupFromFilters(
-    _In_ XBL_XBOX_LIVE_USER_PTR user,
+    _In_ xbl_user_handle user,
     _In_ XBL_PRESENCE_FILTER presenceDetailLevel,
     _In_ XBL_RELATIONSHIP_FILTER filter,
     _Out_ XBL_XBOX_SOCIAL_USER_GROUP** group
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
     auto state = get_xbl_social_manager();
@@ -409,16 +424,16 @@ try
     }
     return utils::create_xbl_result(result.err());
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerCreateSocialUserGroupFromList(
-    _In_ XBL_XBOX_LIVE_USER_PTR user,
+    _In_ xbl_user_handle user,
     _In_ PCSTR* xboxUserIdList,
     _In_ uint32_t xboxUserIdListCount,
     _Out_ XBL_XBOX_SOCIAL_USER_GROUP** group
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
     auto state = get_xbl_social_manager();
@@ -436,13 +451,13 @@ try
     }
     return utils::create_xbl_result(result.err());
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerDestroySocialUserGroup(
     _In_ XBL_XBOX_SOCIAL_USER_GROUP* group
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
     auto state = get_xbl_social_manager();
@@ -461,9 +476,9 @@ try
     }
     return utils::create_xbl_result(result.err());
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
-XBL_API XBL_XBOX_LIVE_USER_PTR const* XBL_CALLING_CONV
+XBL_API xbl_user_handle const* XBL_CALLING_CONV
 XblSocialManagerGetLocalUsers(
     _Out_ uint32_t* userCount
     ) XBL_NOEXCEPT
@@ -483,7 +498,7 @@ XblSocialManagerUpdateSocialUserGroup(
     _In_ PCSTR* users,
     _In_ uint32_t usersCount
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
 
@@ -505,14 +520,14 @@ try
 
     return utils::create_xbl_result(result.err());
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 XBL_API XBL_RESULT XBL_CALLING_CONV
 XblSocialManagerSetRichPresencePollingStatus(
-    _In_ XBL_XBOX_LIVE_USER_PTR user,
+    _In_ xbl_user_handle user,
     _In_ bool shouldEnablePolling
     ) XBL_NOEXCEPT
-try
+//try
 {
     verify_global_init();
 
@@ -523,7 +538,7 @@ try
    
     return utils::create_xbl_result(result.err());
 }
-CATCH_RETURN()
+//CATCH_RETURN()
 
 
 XBL_API void XBL_CALLING_CONV
@@ -533,6 +548,7 @@ XblSocialManagerSetBackgroundWorkAsyncQueue(
 try
 {
     verify_global_init();
-    social_manager_internal::get_singleton_instance()->set_social_graph_background_task_id(queue->taskGroupId);
+    //social_manager_internal::get_singleton_instance()->set_social_graph_background_async_queue(queue->taskGroupId);
+    // TODO
 }
 CATCH_RETURN_WITH(;)

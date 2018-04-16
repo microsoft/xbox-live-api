@@ -15,7 +15,7 @@ xbl_xbox_user_profiles_wrapper::xbl_xbox_user_profiles_wrapper(
 {
     for (auto& profile : profiles)
     {
-        XBL_XBOX_USER_PROFILE cProfile;
+        XblUserProfile cProfile;
         cProfile.appDisplayName = profile->app_display_name().data();
         cProfile.appDisplayPictureResizeUri = utils::alloc_string(profile->app_display_picture_resize_uri().to_string());  // TODO change after we have new URI class
         cProfile.gameDisplayName = profile->game_display_name().data();
@@ -43,7 +43,7 @@ xbl_xbox_user_profiles_wrapper::~xbl_xbox_user_profiles_wrapper()
     }
 }
 
-const XBL_XBOX_USER_PROFILE *xbl_xbox_user_profiles_wrapper::xbl_xbox_user_profile() const
+const XblUserProfile *xbl_xbox_user_profiles_wrapper::xbl_xbox_user_profile() const
 {
     return &m_profiles[0];
 }

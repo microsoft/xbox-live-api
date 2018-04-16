@@ -133,7 +133,7 @@ set(Public_Source_Files_C
     ../../include/xsapi-c/social_c.h
     ../../include/xsapi-c/social_manager_c.h
     ../../include/xsapi-c/system_c.h
-    ../../include/xsapi-c/types_c.h
+    ../../include/xsapi-c/pal.h
     ../../include/xsapi-c/xbox_live_app_config_c.h
     ../../include/xsapi-c/xbox_live_context_c.h
     ../../include/xsapi-c/xbox_live_global_c.h
@@ -295,8 +295,6 @@ set(Shared_Source_Files
     ../../Source/Shared/xbox_system_factory.h
     ../../Source/Shared/http_headers.h
     ../../Source/Shared/http_call_request_message_internal.h
-    ../../Source/Shared/threadpool.h
-    ../../Source/Shared/threadpool.cpp
     )
 
 set(Misc_Source_Files
@@ -611,11 +609,8 @@ set(Clubs_Source_Files
     )
 
 set(UWP_System_Source_Files_C
-    ../../Source/C/System/user_c.cpp
-    ../../Source/C/System/user_impl_c.cpp
-    ../../Source/C/System/user_impl_c.h
-    ../../Source/C/System/user_taskargs.cpp
-    ../../Source/C/System/user_taskargs.h
+    ../../Source/System/C/user_c.h
+    ../../Source/System/C/user_c.cpp
     )
 
 set(Shared_Source_Files_C
@@ -626,13 +621,10 @@ set(Common_Source_Files_C
     ../../Source/Services/Common/C/xbox_live_context_internal_c.h
     ../../Source/Services/Common/C/xbox_live_context_c.cpp
     ../../Source/Services/Common/C/xbox_live_global_c.cpp
-    ../../Source/Services/Common/C/async_queue.h
     )
 
 set(Social_Source_Files_C
     ../../Source/Services/Social/C/profile.cpp
-    ../../Source/Services/Social/C/profile_helpers.h
-    ../../Source/Services/Social/C/profile_helpers.cpp
     ../../Source/Services/Social/C/social.cpp
     ../../Source/Services/Social/C/social_helpers.h
     ../../Source/Services/Social/C/social_helpers.cpp
@@ -1302,7 +1294,7 @@ else()
         source_group("C++ Source\\Services\\Social\\Manager\\C" FILES ${Social_Manager_Source_Files_C})
         
         if( NOT XDK )
-            source_group("C++ Source\\C\\System" FILES ${UWP_System_Source_Files_C})
+            source_group("C++ Source\\System\\C" FILES ${UWP_System_Source_Files_C})
         endif()
 	endif()
 

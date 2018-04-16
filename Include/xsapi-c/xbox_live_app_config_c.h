@@ -3,7 +3,7 @@
 
 #pragma once
 #include <stdint.h>
-#include "types_c.h"
+#include "pal.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -12,7 +12,7 @@ extern "C" {
 /// <summary>
 /// Represents the configuration of an Xbox Live application.
 /// </summary>
-typedef struct XBL_XBOX_LIVE_APP_CONFIG
+typedef struct XblAppConfig
 {
     /// <summary>
     /// Title id of the app.
@@ -22,25 +22,25 @@ typedef struct XBL_XBOX_LIVE_APP_CONFIG
     /// <summary>
     /// Service config id of the app.
     /// </summary>
-    PCSTR scid;
+    UTF8CSTR scid;
 
     /// <summary>
     /// Xbox Live environment being used, it is empty before you sign in or using production.
     /// </summary>
-    PCSTR environment;
+    UTF8CSTR environment;
 
     /// <summary>
     /// The sandbox such as "XDKS.1", it is empty until you sign in.
     /// </summary>
-    PCSTR sandbox;
-} XBL_XBOX_LIVE_APP_CONFIG;
+    UTF8CSTR sandbox;
+} XblAppConfig;
 
 /// <summary>
-/// Gets the app config singleton.
+/// Gets the Xbox Live app config 
 /// </summary>
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblGetXboxLiveAppConfigSingleton(
-    _Out_ CONST XBL_XBOX_LIVE_APP_CONFIG** appConfig
+STDAPI
+XblGetXboxLiveAppConfig(
+    _Out_ const XblAppConfig** appConfig
     );
 
 #if defined(__cplusplus)

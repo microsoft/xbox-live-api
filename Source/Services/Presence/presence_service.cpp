@@ -36,7 +36,7 @@ presence_service::set_presence(
     auto result = m_presenceServiceInternal->set_presence(
         isUserActiveInTitle,
         presence_data_internal(presenceData),
-        XSAPI_DEFAULT_TASKGROUP,
+        nullptr,
         [tce](xbox_live_result<uint32_t> result)
     {
         tce.set(xbox_live_result<void>(result.err(), result.err_message()));
@@ -64,7 +64,7 @@ presence_service::get_presence(
 
     auto result = m_presenceServiceInternal->get_presence(
         utils::internal_string_from_string_t(xboxUserId),
-        XSAPI_DEFAULT_TASKGROUP,
+        nullptr,
         [tce](xbox_live_result<std::shared_ptr<presence_record_internal>> result)
     {
         tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(presence_record, result));
@@ -128,7 +128,7 @@ presence_service::get_presence_for_multiple_users(
         presenceDetailLevel,
         onlineOnly,
         broadcastingOnly,
-        XSAPI_DEFAULT_TASKGROUP,
+        nullptr,
         [tce](xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>> result)
     {
         tce.set(create_external_presence_records_result(result));
@@ -150,7 +150,7 @@ presence_service::get_presence_for_social_group(
 
     auto result = m_presenceServiceInternal->get_presence_for_social_group(
         utils::internal_string_from_string_t(socialGroup),
-        XSAPI_DEFAULT_TASKGROUP,
+        nullptr,
         [tce](xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>> result)
     {
         tce.set(create_external_presence_records_result(result));
@@ -184,7 +184,7 @@ presence_service::get_presence_for_social_group(
         peoplehubDetailLevel,
         onlineOnly,
         broadcastingOnly,
-        XSAPI_DEFAULT_TASKGROUP,
+        nullptr,
         [tce](xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>> result)
     {
         tce.set(create_external_presence_records_result(result));

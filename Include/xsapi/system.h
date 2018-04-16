@@ -611,7 +611,6 @@ public:
     /// Unregisters an event handler for sign-out completion notifications.
     /// </summary>
     /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
-    /// <param name="handler">The callback function that receives notifications.</param>
     _XSAPIIMP static void remove_sign_out_completed_handler(_In_ function_context context);
 
     std::shared_ptr<user_impl> _User_impl() { return m_user_impl; }

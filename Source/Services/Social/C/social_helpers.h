@@ -11,11 +11,11 @@ public:
     xbl_xbox_social_relationship_result_wrapper(std::shared_ptr<xbox_social_relationship_result_internal> socialRelationshipResult);
     ~xbl_xbox_social_relationship_result_wrapper();
 
-    const XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT* xbl_xbox_social_relationship_result() const;
+    const XblSocialRelationshipResult* xbl_xbox_social_relationship_result() const;
 
 private:
-    XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT m_xblXboxSocialRelationshipResult;
-    xsapi_internal_vector<XBL_XBOX_SOCIAL_RELATIONSHIP> m_items;
+    XblSocialRelationshipResult m_xblXboxSocialRelationshipResult;
+    xsapi_internal_vector<XblSocialRelationship> m_items;
 
     std::shared_ptr<xbox_social_relationship_result_internal> m_socialRelationshipResult;
 };

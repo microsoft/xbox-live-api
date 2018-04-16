@@ -90,6 +90,7 @@
        $(ProjectDir)..\..\Include\cpprestsdk;
        $(ProjectDir)..\..\Source\System\WinRT;
        $(ProjectDir)..\..\Source\System;
+       $(ProjectDir)..\..\Source\System\C;
        $(ProjectDir)..\..\Source\C\Services\TitleStorage;
        $(ProjectDir)..\..\Source\C\Services\Common;
        $(ProjectDir)..\..\Source\C\Services\Social;

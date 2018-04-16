@@ -25,7 +25,7 @@ peoplehub_service::peoplehub_service(
 void peoplehub_service::get_social_graph(
     _In_ const xsapi_internal_string& callerXboxUserId,
     _In_ social_manager_extra_detail_level decorations,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
     )
 {
@@ -35,7 +35,7 @@ void peoplehub_service::get_social_graph(
         "social",
         xsapi_internal_vector<xsapi_internal_string>(),
         false,
-        taskGroupId,
+        queue,
         callback
         );
 }
@@ -44,7 +44,7 @@ void peoplehub_service::get_social_graph(
     _In_ const xsapi_internal_string& callerXboxUserId,
     _In_ social_manager_extra_detail_level decorations,
     _In_ const xsapi_internal_vector<xsapi_internal_string> xboxLiveUsers,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
     )
 {
@@ -54,7 +54,7 @@ void peoplehub_service::get_social_graph(
         "",
         xboxLiveUsers,
         true,
-        taskGroupId,
+        queue,
         callback
         );
 }
@@ -65,7 +65,7 @@ void peoplehub_service::get_social_graph(
     _In_ const xsapi_internal_string& relationshipType,
     _In_ const xsapi_internal_vector<xsapi_internal_string> xboxLiveUsers,
     _In_ bool isBatch,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
     )
 {
@@ -101,8 +101,8 @@ void peoplehub_service::get_social_graph(
     auto task = httpCall->get_response_with_auth(m_userContext,
         http_call_response_body_type::json_body,
         false,
-        taskGroupId,
-    [callback](std::shared_ptr<http_call_response_internal> response)
+        queue,
+        [callback](std::shared_ptr<http_call_response_internal> response)
     {
         std::error_code errc;
         web::json::value peopleArray = utils::extract_json_field(

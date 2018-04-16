@@ -132,7 +132,7 @@ social_service_impl::get_social_relationships(
     _In_ xbox_social_relationship_filter filter,
     _In_ uint32_t startIndex,
     _In_ uint32_t maxItems,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>> callback
     )
 {
@@ -141,7 +141,7 @@ social_service_impl::get_social_relationships(
         filter,
         startIndex,
         maxItems,
-        taskGroupId,
+        queue,
         callback
         );
 }
@@ -152,7 +152,7 @@ social_service_impl::get_social_relationships(
     _In_ xbox_social_relationship_filter filter,
     _In_ uint32_t startIndex,
     _In_ uint32_t maxItems,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>> callback
     )
 {
@@ -171,7 +171,7 @@ social_service_impl::get_social_relationships(
         m_xboxLiveContextSettings,
         "GET",
         utils::create_xboxlive_endpoint("social", m_appConfig),
-        utils::string_t_from_internal_string(pathAndQuery), // TODO switch after changing to internal uri impl
+        utils::string_t_from_internal_string(pathAndQuery),
         xbox_live_api::get_social_relationships
         );
 
@@ -181,7 +181,7 @@ social_service_impl::get_social_relationships(
         m_userContext, 
         http_call_response_body_type::json_body,
         false,
-        taskGroupId,
+        queue,
         [thisShared, startIndex, filter, callback](std::shared_ptr<http_call_response_internal> response)
     {
         auto result = xbox_social_relationship_result_internal::deserialize(response->response_body_json());
