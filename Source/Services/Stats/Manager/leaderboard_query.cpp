@@ -16,7 +16,8 @@ leaderboard_query::leaderboard_query() :
     m_skipResultToMe(false),
     m_skipResultToRank(0),
     m_maxItems(0),
-    m_order(sort_order::ascending)
+    m_order(sort_order::ascending),
+    m_callbackId(0)
 {
 }
 
@@ -38,6 +39,16 @@ void leaderboard_query::set_max_items(_In_ uint32_t maxItems)
 void leaderboard_query::set_order(_In_ sort_order order)
 {
     m_order = order;
+}
+
+void leaderboard_query::set_callback_id(_In_ uint64_t callbackId)
+{
+    m_callbackId = callbackId;
+}
+
+uint64_t leaderboard_query::callback_id() const
+{
+    return m_callbackId;
 }
 
 bool leaderboard_query::skip_result_to_me() const

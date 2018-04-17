@@ -87,6 +87,8 @@ void Sample::GetLeaderboard(
     )
 {
     leaderboard::leaderboard_query leaderboardQuery;
+    // Example set the callback ID to correlate to the event
+    // leaderboardQuery.set_callback_id(1234);
     m_statsManager->get_leaderboard(user, statName, leaderboardQuery);
 
     stringstream_t source;
@@ -197,6 +199,8 @@ void Sample::ProcessLeaderboards(
             if (!leaderboardResult.get_next_query().err())
             {               
                 auto lbQuery = leaderboardResult.get_next_query().payload();
+                // Example to get the ID
+                // auto callbackId = lbQuery.callback_id();
                 if (lbQuery.social_group().empty())
                 {
                     m_statsManager->get_leaderboard(user, lbQuery.stat_name(), lbQuery);
