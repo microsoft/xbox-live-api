@@ -142,8 +142,7 @@ void web_socket_connection::ensure_connected()
     m_attemptingConnection = true;
     set_state_helper(web_socket_connection_state::connecting);
 
-    AsyncBlock* outerAsync = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock;
-    ZeroMemory(outerAsync, sizeof(AsyncBlock));
+    AsyncBlock* outerAsync = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
     outerAsync->callback = [](AsyncBlock* async)
     {
         LOG_DEBUG("Web socket connection completed.");

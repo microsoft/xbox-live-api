@@ -240,7 +240,7 @@ STDAPI XblGetProfileResult(
     _In_ AsyncBlock* async,
     _In_ uint32_t profilesCount,
     _Out_writes_to_(profilesCount, written) XblUserProfile* profiles,
-    _Out_opt_ size_t* written
+    _Out_opt_ uint32_t* written
     ) XBL_NOEXCEPT
 {
     RETURN_C_INVALIDARGUMENT_IF_NULL(async);
