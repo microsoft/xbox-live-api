@@ -656,7 +656,7 @@ void Game::HandleSignInResult(XblSignInResult signInResult)
     switch (signInResult.status)
     {
     case xbox::services::system::sign_in_status::success:
-        XblUserGetXuid(m_user, XuidMaxBytes, m_xuid, nullptr);
+        XblUserGetXboxUserId(m_user, &m_xuid);
         XblContextCreateHandle(m_user, &m_xboxLiveContext);
         //pThis->AddUserToSocialManager(pThis->m_user);
         Log(L"Sign in succeeded");
@@ -729,7 +729,7 @@ void Game::GetUserProfile()
         WCHAR text[1024];
         swprintf_s(text, ARRAYSIZE(text), L"Gamertag: %S", profile.gamertag);
         pThis->Log(text);
-        swprintf_s(text, ARRAYSIZE(text), L"XboxUserId: %S", profile.xboxUserId);
+        swprintf_s(text, ARRAYSIZE(text), L"XboxUserId: %I64u", profile.xboxUserId);
         pThis->Log(text);
         swprintf_s(text, ARRAYSIZE(text), L"Gamerscore: %S", profile.gamerscore);
         pThis->Log(text);
@@ -769,58 +769,44 @@ void Game::SignInSilently()
     XblUserSignInSilently(m_user, asyncBlock);
 }
 
-void Game::CopySocialRelationshipResult()
-{
-    XblSocialRelationshipResult r;
-    r.filter = XblSocialRelationshipFilter_All;
-    r.hasNext = false;
-    r.itemsCount = 3;
-    r.totalCount = 3;
-    r.items = new XblSocialRelationship[3];
-    r.items[0].isFavorite = true;
-    r.items[1].isFavorite = true;
-    r.items[2].isFavorite = false;
-    r.items[0].socialNetworks = (PCSTR*)new char*[2];
-    r.items[0].socialNetworksCount = 2;
-    r.items[0].socialNetworks[0] = "foo";
-    r.items[0].socialNetworks[1] = "bar";
-    r.items[1].socialNetworks = nullptr;
-    r.items[1].socialNetworksCount = 0;
-    r.items[2].socialNetworks = nullptr;
-    r.items[2].socialNetworksCount = 0;
-
-    uint64_t size = 0;
-    auto copy = XblCopySocialRelationshipResult(&r, nullptr, &size);
-
-    auto buffer = new char[size];
-    copy = XblCopySocialRelationshipResult(&r, buffer, &size);
-
-    Log(L"Copied result");
-}
-
 void Game::GetSocialRelationships()
 {
-    //if (!m_user->isSignedIn)
-    //{
-    //    Log(L"Must be signed in first to get profile!");
-    //    return;
-    //}
+    AsyncBlock* asyncBlock = new AsyncBlock{};
+    asyncBlock->queue = m_queue;
+    asyncBlock->context = this;
+    asyncBlock->callback = [](AsyncBlock* asyncBlock)
+    {
+        Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-    //XblGetSocialRelationships(m_xboxLiveContext, g_asyncQueue, this,
-    //    [](XBL_RESULT result, CONST XblSocialRelationshipResult *socialResult, void* context)
-    //{
-    //    Game *pThis = reinterpret_cast<Game*>(context);
+        size_t size;
+        auto hr = XblGetSocialRelationshipResultSize(asyncBlock, &size);
 
-    //    if (result.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
-    //    {
-    //        pThis->CopySocialRelationshipResult();
-    //        pThis->Log(L"Successfully got social relationships!");
-    //    }
-    //    else
-    //    {
-    //        pThis->Log(L"Failed getting social relationships.");
-    //    }
-    //});
+        if (SUCCEEDED(hr))
+        {
+            auto result = (XblSocialRelationshipResult*) malloc(size);
+
+            XblGetSocialRelationshipResult(asyncBlock, size, result, nullptr);
+
+            std::stringstream ss;
+            ss << "Got social relationships. User has " << result->itemsCount << " relationships:";
+            pThis->Log(ss.str());
+
+            for (unsigned i = 0; i < result->itemsCount; ++i)
+            {
+                std::stringstream ss;
+                ss << "Xuid: " << result->items[i].xboxUserId << " isFollowing: " << result->items[i].isFollowingCaller;
+                ss << " isFavorite: " << result->items[i].isFavorite;
+                pThis->Log(ss.str());
+            }
+            free(result);
+        }
+        else
+        {
+            pThis->Log(L"Failed getting social relationships.");
+        }
+    };
+
+    XblGetSocialRelationships(m_xboxLiveContext, asyncBlock);
 }
 
 void Game::GetAchievmentsForTitle()
@@ -829,7 +815,7 @@ void Game::GetAchievmentsForTitle()
     
     XblAchievementServiceGetAchievementsForTitleId(
         m_xboxLiveContext, 
-        m_xuid,
+        nullptr, // TODO
         m_config->titleId,
         XBL_ACHIEVEMENT_TYPE_ALL, 
         false, 
@@ -898,7 +884,7 @@ void Game::GetAchievement(PCSTR scid, PCSTR achievementId)
 {
     XblAchievementServiceGetAchievement(
         m_xboxLiveContext,
-        m_xuid,
+        nullptr, // TODO
         scid,
         achievementId,
         nullptr,
@@ -930,7 +916,7 @@ void Game::UpdateAchievement(PCSTR scid, PCSTR achievementId)
     auto tid = m_config->titleId;
     XblAchievementServiceUpdateAchievement(
         m_xboxLiveContext,
-        m_xuid,
+        nullptr, // TODO
         &tid,
         scid,
         achievementId,

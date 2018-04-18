@@ -6,7 +6,7 @@
 #include "xsapi-c/errors_c.h"
 
 
-const size_t XuidMaxBytes = 21;
+const size_t XuidStringMaxBytes = 21;
 const size_t GamertagMaxBytes = 16;
 
 
@@ -105,15 +105,11 @@ XblUserCloseHandle(
 /// Returns the id of the user.
 /// </summary>
 /// <param name="user">The user handle.</param>
-/// <param name="xuidBufferSize">Size of the provided output buffer.</param>
-/// <param name="xuidBuffer">Buffer to write xuid.</param>
-/// <param name="written">The actual number of bytes written to the buffer.</param>
+/// <param name="xboxUserId">The returned Xbox User ID.</param>
 STDAPI
-XblUserGetXuid(
+XblUserGetXboxUserId(
     _In_ xbl_user_handle user,
-    _In_ size_t xuidBufferSize,
-    _Out_writes_to_(xuidBufferSize, *written) UTF8STR xuidBuffer,
-    _Out_opt_ size_t* written
+    _Out_ uint64_t* xboxUserId
     ) XBL_NOEXCEPT;
 
 /// <summary>

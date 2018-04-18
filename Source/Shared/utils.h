@@ -1370,10 +1370,19 @@ public:
     }
 
     inline static string_t uint32_to_string_t(
-        _In_ const uint32_t& val
+        _In_ uint32_t val
     )
     {
         stringstream_t stream;
+        stream << val;
+        return stream.str();
+    }
+
+    inline static xsapi_internal_string uint64_to_internal_string(
+        _In_ uint64_t val
+    )
+    {
+        xsapi_internal_stringstream stream;
         stream << val;
         return stream.str();
     }
@@ -1451,8 +1460,13 @@ public:
         );
 
     static xsapi_internal_vector<xsapi_internal_string> string_array_to_internal_string_vector(
-        PCSTR *stringArray,
+        PCSTR* stringArray,
         size_t stringArrayCount
+        );
+
+    static xsapi_internal_vector<xsapi_internal_string> xuid_array_to_internal_string_vector(
+        uint64_t* xuidArray,
+        size_t xuidArrayCount
         );
 
     template<typename T>
@@ -1490,13 +1504,11 @@ public:
     }
 
 #if XSAPI_C
-    static const char* alloc_string(const string_t& str);
-    static void free_string(const char* str);
-
     static time_t time_t_from_datetime(const utility::datetime& datetime);
 
     static utility::datetime datetime_from_time_t(const time_t* time);
 
+    // TODO REMOVE
     static XBL_RESULT create_xbl_result(std::error_code errc);
 
     static HRESULT hresult_from_error_code(std::error_code errc);
@@ -1551,6 +1563,29 @@ public:
             m_buffer += sizeof(T);
             m_cbRemaining -= sizeof(T);
             return out;
+        }
+        else
+        {
+            XSAPI_ASSERT(false && "Buffer unexpectedly to small!");
+            return nullptr;
+        }
+    }
+
+    template<typename T>
+    T* alloc_array(uint32_t count)
+    {
+        if (sizeof(T) * count <= m_cbRemaining)
+        {
+            T* first = nullptr;
+            for (uint32_t i = 0; i < count; ++i)
+            {
+                T* elt = alloc<T>();
+                if (first == nullptr)
+                {
+                    first = elt;
+                }
+            }
+            return first;
         }
         else
         {

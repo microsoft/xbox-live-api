@@ -56,10 +56,10 @@ XblContextGetUser(
 /// remains valid until the associated context is destroyed.
 /// </summary>
 /// <param name="context">The Xbox Live context handle.</param>
-/// <param name="xboxUserId">The returned xbox user ID string.</param>
+/// <param name="xboxUserId">The returned xbox user ID.</param>
 /// <returns>Result code for this API operation.</returns>
 STDAPI
 XblContextGetXboxUserId(
     _In_ xbl_context_handle context,
-    _Out_ UTF8CSTR* xboxUserId
+    _Out_ uint64_t* xboxUserId
     ) XBL_NOEXCEPT;

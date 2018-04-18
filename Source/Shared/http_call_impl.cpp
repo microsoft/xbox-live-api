@@ -462,7 +462,7 @@ void http_call_impl::internal_get_response(
             }
         }
         httpCallData->callback(httpCallResponse);
-        delete asyncBlock;
+        xsapi_memory::mem_free(asyncBlock);
     };
 
     HCHttpCallPerform(httpCallData->callHandle, asyncBlock);

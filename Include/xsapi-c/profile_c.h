@@ -55,7 +55,7 @@ typedef struct XblUserProfile
     /// <summary>
     /// The user's Xbox user ID.
     /// </summary>
-    char xboxUserId[XBL_XBOX_USER_ID_CHAR_SIZE];
+    uint64_t xboxUserId;
 } XblUserProfile;
 
 /// <summary>
@@ -71,35 +71,8 @@ typedef struct XblUserProfile
 /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
 STDAPI XblGetUserProfile(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ UTF8CSTR xboxUserId,
+    _In_ uint64_t xboxUserId,
     _In_ AsyncBlock* async
-    ) XBL_NOEXCEPT;
-
-/// <summary>
-/// Gets the results from XblGetUserProfile
-/// </summary>
-/// <param name="async">Caller allocated AsyncBlock.</param>
-/// <param name="sizeInBytes">Size in bytes of buffer to allocate for result.</param>
-/// <returns>
-/// Result code for this API operation. Possible values are S_OK, E_INVALIDARG, or E_OUTOFMEMORY
-/// </returns>
-STDAPI XblGetUserProfileResultSize(
-    _In_ AsyncBlock* async,
-    _Out_ size_t* sizeInBytes
-    ) XBL_NOEXCEPT;
-
-/// <summary>
-/// Gets the results from XblGetUserProfile
-/// </summary>
-/// <param name="async">Caller allocated AsyncBlock.</param>
-/// <param name="profile">A pointer to store the result.</param>
-/// <returns>
-/// Result code for this API operation. Possible values are S_OK, E_INVALIDARG, or E_OUTOFMEMORY
-/// </returns>
-STDAPI XblGetUserProfileResult(
-    _In_ AsyncBlock* async,
-    _Out_ XblUserProfile** profile,
-    _In_ size_t sizeInBytes
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -115,7 +88,7 @@ STDAPI XblGetUserProfileResult(
 /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
 STDAPI XblGetUserProfiles(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ UTF8CSTR* xboxUserIds,
+    _In_ uint64_t* xboxUserIds,
     _In_ size_t xboxUserIdsCount,
     _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
@@ -142,10 +115,9 @@ STDAPI XblGetUserProfilesForSocialGroup(
 /// </summary>
 /// <param name="async">AsyncBlock from the get profile(s) API.</param>
 /// <param name="profileCount">Number of profiles returned.</param>
-XBL_API HRESULT XBL_CALLING_CONV
-XblGetProfileResultCount(
+STDAPI XblGetProfileResultCount(
     _In_ AsyncBlock* async,
-    _Out_ size_t* profileCount
+    _Out_ uint32_t* profileCount
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -155,10 +127,9 @@ XblGetProfileResultCount(
 /// <param name="profilesCount">Size of the profiles array.</param>
 /// <param name="profiles">Array of XblUserProfile objects to copy result into.</param>
 /// <param name="written">Actual number of profiles written to the array.</param>
-XBL_API HRESULT XBL_CALLING_CONV
-XblGetProfileResult(
+STDAPI XblGetProfileResult(
     _In_ AsyncBlock* async,
-    _In_ size_t profilesCount,
+    _In_ uint32_t profilesCount,
     _Out_writes_to_(profilesCount, written) XblUserProfile* profiles,
     _Out_opt_ size_t* written
     ) XBL_NOEXCEPT;

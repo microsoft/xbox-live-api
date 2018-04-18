@@ -77,12 +77,12 @@ CATCH_RETURN()
 STDAPI
 XblContextGetXboxUserId(
     _In_ xbl_context_handle context,
-    _Out_ const char** xboxUserId
+    _Out_ uint64_t* xboxUserId
     ) XBL_NOEXCEPT
 try
 {
     RETURN_C_INVALIDARGUMENT_IF(context == nullptr || xboxUserId == nullptr);
-    *xboxUserId = context->xboxUserId.data();
+    *xboxUserId = context->xboxUserId;
     return S_OK;
 }
 CATCH_RETURN()

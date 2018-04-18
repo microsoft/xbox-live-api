@@ -179,7 +179,7 @@ typedef struct XblSocialRelationship
     /// <summary>
     /// The person's Xbox user identifier.
     /// </summary>
-    char xboxUserId[XBL_XBOX_USER_ID_CHAR_SIZE];
+    uint64_t xboxUserId;
 
     /// <summary>
     /// Indicates whether the person is one that the user cares about more.
@@ -196,7 +196,7 @@ typedef struct XblSocialRelationship
     /// <summary>
     /// A collection of strings indicating which social networks this person has a relationship with. 
     /// </summary>
-    PCSTR *socialNetworks;
+    UTF8CSTR* socialNetworks;
 
     /// <summary>
     /// The count of string in socialNetworks array
@@ -209,7 +209,7 @@ typedef struct XblSocialRelationshipResult
     /// <summary>
     /// Collection of XboxSocialRelationship objects returned by a request.
     /// </summary>
-    XblSocialRelationship *items;
+    XblSocialRelationship* items;
 
     /// <summary>
     /// The count of XboxSocialRelationship objects in items array.
@@ -237,12 +237,12 @@ typedef struct XblSocialRelationshipResult
     uint32_t continuationSkip;
 } XblSocialRelationshipResult;
 
-typedef struct XBL_SOCIAL_RELATIONSHIP_CHANGE_EVENT_ARGS
+typedef struct XblSocialRelationshipChangeEventArgs
 {
     /// <summary>
     /// The Xbox user ID for the user who's social graph changes are being listed for.
     /// </summary>
-    PCSTR callerXboxUserId;
+    uint64_t callerXboxUserId;
 
     /// <summary>
     /// The type of notification change.
@@ -250,24 +250,15 @@ typedef struct XBL_SOCIAL_RELATIONSHIP_CHANGE_EVENT_ARGS
     XblSocialNotificationType socialNotification;
 
     /// <summary>
-    /// The Xbox user ids who the event is for
-    /// </summary>
-    PCSTR *xboxUserIds;
-
-    /// <summary>
     /// The number of strings in the xboxUserIds array
     /// </summary>
     uint32_t xboxUserIdsCount;
-} XBL_SOCIAL_RELATIONSHIP_CHANGE_EVENT_ARGS;
 
-/// <summary>
-/// Callback function signature for XblGetSocialRelationships*. result and profile are valid only until the callback returns.
-/// </summary>
-typedef void(*XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT result,
-    _In_ CONST XblSocialRelationshipResult *socialRelationShipResult,
-    _In_opt_ void* context
-    );
+    /// <summary>
+    /// The Xbox user ids who the event is for
+    /// </summary>
+    uint64_t xboxUserIds[ANYSIZE_ARRAY];
+} XblSocialRelationshipChangeEventArgs;
 
 /// <summary>
 /// Gets a XblSocialRelationshipResult containing a the list of people that the caller is connected to.
@@ -275,19 +266,11 @@ typedef void(*XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE)(
 /// Defaults to startIndex and maxItems of 0 to return entire list if possible.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
-/// <param name="queue">The async queue to associate this call with.</param>
-/// <param name="callbackContext">Context passed back to callback.</param>
-/// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
-/// <returns>
-/// Result code for this API operation. The result of the asynchronous operation is returned via the callback parameters.
-/// </returns>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>Calls V1 GET /users/{ownerId}/people?view={view}&amp;startIndex={startIndex}&amp;maxItems={maxItems}</remarks>
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblGetSocialRelationships(
+STDAPI XblGetSocialRelationships(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ XBL_ASYNC_QUEUE queue,
-    _In_opt_ void* callbackContext,
-    _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
+    _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -295,20 +278,12 @@ XblGetSocialRelationships(
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="socialRelationshipFilter">Controls how the list is filtered.</param>
-/// <param name="queue">The async queue to associate this call with.</param>
-/// <param name="callbackContext">Context passed back to callback.</param>
-/// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
-/// <returns>
-/// Result code for this API operation. The result of the asynchronous operation is returned via the callback parameters.
-/// </returns>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>Calls V1 GET /users/{ownerId}/people?view={view}&amp;startIndex={startIndex}&amp;maxItems={maxItems}</remarks>
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblGetSocialRelationshipsWithFilter(
+STDAPI XblGetSocialRelationshipsWithFilter(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ XblSocialRelationshipFilter socialRelationshipFilter,
-    _In_ XBL_ASYNC_QUEUE queue,
-    _In_opt_ void* callbackContext,
-    _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
+    _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -316,45 +291,12 @@ XblGetSocialRelationshipsWithFilter(
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User Id to get the social relationships for.</param>
-/// <param name="queue">The async queue to associate this call with.</param>
-/// <param name="callbackContext">Context passed back to callback.</param>
-/// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
-/// <returns>
-/// Result code for this API operation. The result of the asynchronous operation is returned via the callback parameters.
-/// </returns>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>Calls V1 GET /users/{ownerId}/people?view={view}&amp;startIndex={startIndex}&amp;maxItems={maxItems}</remarks>
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblGetSocialRelationshipsForUser(
+STDAPI XblGetSocialRelationshipsForUser(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ PCSTR xboxUserId,
-    _In_ XBL_ASYNC_QUEUE queue,
-    _In_opt_ void* callbackContext,
-    _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
-    ) XBL_NOEXCEPT;
-
-/// <summary>
-/// Gets a XblSocialRelationshipResult containing a the list of people that the caller is connected to.
-/// </summary>
-/// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
-/// <param name="socialRelationshipFilter">Controls how the list is filtered.</param>
-/// <param name="startIndex">Controls the starting index to return.</param>
-/// <param name="maxItems">Controls the number of XblSocialRelationship objects to get.  0 will return as many as possible</param>
-/// <param name="queue">The async queue to associate this call with.</param>
-/// <param name="callbackContext">Context passed back to callback.</param>
-/// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
-/// <returns>
-/// Result code for this API operation. The result of the asynchronous operation is returned via the callback parameters.
-/// </returns>
-/// <remarks>Calls V1 GET /users/{ownerId}/people?view={view}&amp;startIndex={startIndex}&amp;maxItems={maxItems}</remarks>
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblGetSocialRelationshipsEx(
-    _In_ xbl_context_handle xboxLiveContext,
-    _In_ XblSocialRelationshipFilter socialRelationshipFilter,
-    _In_ uint32_t startIndex,
-    _In_ uint32_t maxItems,
-    _In_ XBL_ASYNC_QUEUE queue,
-    _In_opt_ void* callbackContext,
-    _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
+    _In_ uint64_t xboxUserId,
+    _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -362,46 +304,45 @@ XblGetSocialRelationshipsEx(
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="socialRelationshipResult">Result returned from a previous call to XblGetSocialRelations*.</param>
-/// <param name="maxItems">Controls the number of XblSocialRelationship objects to get.  0 will return as many as possible</param>
-/// <param name="queue">The async queue to associate this call with.</param>
-/// <param name="callbackContext">Context passed back to callback.</param>
-/// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
-/// <returns>
-/// <returns>
-/// Result code for this API operation. The result of the asynchronous operation is returned via the callback parameters.
-/// </returns>
+/// <param name="maxItems">Controls the number of XblSocialRelationship objects to get. 0 will return as many as possible</param>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>Calls V1 GET /users/{ownerId}/people</remarks>
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblSocialRelationshipResultGetNext(
+STDAPI XblSocialRelationshipResultGetNext(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ CONST XblSocialRelationshipResult *socialRelationshipResult,
+    _In_ const XblSocialRelationshipResult* socialRelationshipResult,
     _In_ uint32_t maxItems,
-    _In_ XBL_ASYNC_QUEUE queue,
-    _In_opt_ void* callbackContext,
-    _In_ XBL_GET_SOCIAL_RELATIONSHIPS_COMPLETION_ROUTINE callback
+    _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Creates a deep copy of an XblSocialRelationshipResult in a user allocated buffer. If the provided buffer
-/// is not large enough, nullptr will be returned and cbBuffer will be set to the required buffer size. If the buffer is
-/// large enough, the source object will be copied into the provided buffer. The returned pointer will be the same as the
-/// provided buffer pointer (except that it is typed). The caller is responsible for freeing the buffer when they no longer
-/// need the copied object. This method will not allocate any additional memory.
+/// Get the size in bytes of the result from any of XblGetSocialRelationships, XblGetSocialRelationshipsWithFilter,
+/// XblGetSocialRelationshipsForUser, or XblSocialRelationshipResultGetNext.
 /// </summary>
-/// <param name="source">An XblSocialRelationshipResult returned from another API.</param>
-/// <param name="buffer">User allocated buffer to copy the source object into.</param>
-/// <param name="cbBuffer">Size in bytes of the input buffer. If the buffer is not large enough, this will be set to the required size.</param>
-/// <returns>
-/// A pointer to the copied object. Equivalent to the provided buffer pointer.
-/// </returns>
-XBL_API XblSocialRelationshipResult* XBL_CALLING_CONV
-XblCopySocialRelationshipResult(
-    _In_ CONST XblSocialRelationshipResult *source,
-    _In_ void *buffer,
-    _Inout_ uint64_t *cbBuffer
+/// <param name="async">The async block that was used on the asyncronous call.</param>
+/// <param name="resultSize">The result size.</param>
+STDAPI XblGetSocialRelationshipResultSize(
+    _In_ AsyncBlock* async,
+    _Out_ size_t* resultSize
     ) XBL_NOEXCEPT;
 
-typedef void* XBL_SOCIAL_RELATIONSHIP_CHANGE_SUBSCRIPTION;
+/// <summary>
+/// Get the result from any of XblGetSocialRelationships, XblGetSocialRelationshipsWithFilter, XblGetSocialRelationshipsForUser,
+/// or XblSocialRelationshipResultGetNext. The required buffer size should first be obtained with
+/// XblGetSocialRelationshipResultSize.
+/// <summary>
+/// <param name="async">The async block that was used on the asyncronous call.</param>
+/// <param name="resultSize">The size of the provided buffer.</param>
+/// <param name="result">The buffer to be written to.</param>
+/// <param name="bufferUser">The actual number of bytes written to the buffer.</param>
+STDAPI XblGetSocialRelationshipResult(
+    _In_ AsyncBlock* async,
+    _In_ size_t bufferSize,
+    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblSocialRelationshipResult* buffer,
+    _Out_opt_ size_t* bufferUsed
+    ) XBL_NOEXCEPT;
+
+
+typedef void* xbl_social_relationship_change_subscription_handle;
 
 /// <summary>
 /// Subscribes to the social service for people changed events
@@ -410,11 +351,10 @@ typedef void* XBL_SOCIAL_RELATIONSHIP_CHANGE_SUBSCRIPTION;
 /// <param name="xboxUserId">The Xbox User ID of the player requesting the subscription.</param>
 /// <param name="subscriptionHandle">A handle to the subscription which is used to unsubscribe.</param>
 /// <returns>Result code for this API operation.</returns>
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblSubscribeToSocialRelationshipChange(
+STDAPI XblSubscribeToSocialRelationshipChange(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ PCSTR xboxUserId,
-    _Out_ XBL_SOCIAL_RELATIONSHIP_CHANGE_SUBSCRIPTION *subscriptionHandle
+    _In_ uint64_t xboxUserId,
+    _Out_ xbl_social_relationship_change_subscription_handle* subscriptionHandle
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -423,49 +363,54 @@ XblSubscribeToSocialRelationshipChange(
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="subscription">The subscription handle to unsubscribe</param>
 /// <returns>Result code for this API operation.</returns>
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblUnsubscribeFromSocialRelationshipChange(
+STDAPI XblUnsubscribeFromSocialRelationshipChange(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ XBL_SOCIAL_RELATIONSHIP_CHANGE_SUBSCRIPTION subscriptionHandle
+    _In_ xbl_social_relationship_change_subscription_handle subscriptionHandle
     ) XBL_NOEXCEPT;
 
-typedef void(*XBL_SOCIAL_RELATIONSHIP_CHANGED_HANDLER)(
-    _In_ XBL_SOCIAL_RELATIONSHIP_CHANGE_EVENT_ARGS eventArgs,
+/// <summary>
+/// A callback invoked when a social relationship changes. For the callback to be called, you must
+/// first subscribe to social relationship changes for at least one user by calling XblSubscribeToSocialRelationshipChange.
+/// </summary>
+/// <param name="eventArgs">
+/// The arguments associated with the relationship change. The fields of the struct are only valid during the callback.
+/// </param>
+/// <param name="context">Context provided by when the handler is added.</param>
+typedef void
+(STDAPIVCALLTYPE* XblSocialRelationshipChangedHandler)(
+    _In_ XblSocialRelationshipChangeEventArgs* eventArgs,
     _In_opt_ void* context
     );
 
 /// <summary>
 /// Registers an event handler for social relationship change notifications.
-/// Event handlers receive social_relationship_change_event_args.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="handler">The callback function that receives notifications.</param>
 /// <param name="handlerContext">Client context pointer to be passed back to the handler.</param>
 /// <returns>A function_context used to remove the handler</returns>
-XBL_API function_context XBL_CALLING_CONV
-XblAddSocialRelationshipChangedHandler(
+STDAPI_(function_context) XblAddSocialRelationshipChangedHandler(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ XBL_SOCIAL_RELATIONSHIP_CHANGED_HANDLER handler,
-    _In_ void *handlerContext
+    _In_ XblSocialRelationshipChangedHandler handler,
+    _In_ void* handlerContext
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Removes a social relationship change handler
+/// Removes a social relationship change handler.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="handlerContext">Context for the handler to remove.</param>
-XBL_API void XBL_CALLING_CONV
-XblRemoveSocialRelationshipChangedHandler(
+STDAPI_(void) XblRemoveSocialRelationshipChangedHandler(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ function_context handlerFunctionContext
     ) XBL_NOEXCEPT;
 
-typedef struct XBL_REPUTATION_FEEDBACK_ITEM
+typedef struct XblReputationFeedbackItem
 {
     /// <summary>
     /// The Xbox User ID of the user that reputation feedback is being submitted on.
     /// </summary>
-    PCSTR xboxUserId;
+    uint64_t xboxUserId;
 
     /// <summary>
     /// The reputation feedback type being submitted.
@@ -480,21 +425,17 @@ typedef struct XBL_REPUTATION_FEEDBACK_ITEM
     /// <summary>
     /// User supplied text added to explain the reason for the feedback.
     /// </summary>
-    PCSTR reasonMessage;
+    UTF8CSTR reasonMessage;
 
     /// <summary>
     /// The Id of a resource that can be used as evidence for the feedback. Example: the Id of a video file.
     /// </summary>
-    PCSTR evidenceResourceId;
-} XBL_REPUTATION_FEEDBACK_ITEM;
-
-typedef void(*XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE)(
-    _In_ XBL_RESULT result,
-    _In_opt_ void* context
-    );
+    UTF8CSTR evidenceResourceId;
+} XblReputationFeedbackItem;
 
 /// <summary>
-/// Submits reputation feedback on the specified user.
+/// Submits reputation feedback on the specified user. The status of the async operation can be obtained with
+/// GetAsyncStatus.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the user that reputation feedback is being submitted on.</param>
@@ -502,43 +443,33 @@ typedef void(*XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE)(
 /// <param name="sessionName">The name of the multiplayer session directory session the user is sending feedback from. (Optional)</param>
 /// <param name="reasonMessage">User supplied text added to explain the reason for the feedback. (Optional)</param>
 /// <param name="evidenceResourceId">The Id of a resource that can be used as evidence for the feedback. Example: the Id of a video file. (Optional)</param>
-/// <param name="queue">The async queue to associate this call with.</param>
-/// <param name="callbackContext">Context passed back to callback.</param>
-/// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
-/// <returns>Result code for this API operation. The result of the asynchronous operation is returned via the callback parameters.</returns>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>Calls V100 POST /users/xuid({xuid})/feedback</remarks>
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblSubmitReputationFeedback(
+STDAPI XblSubmitReputationFeedback(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ PCSTR xboxUserId,
+    _In_ uint64_t xboxUserId,
     _In_ XblReputationFeedbackType reputationFeedbackType,
-    _In_opt_ PCSTR sessionName,
-    _In_opt_ PCSTR reasonMessage,
-    _In_opt_ PCSTR evidenceResourceId,
-    _In_ XBL_ASYNC_QUEUE queue,
-    _In_opt_ void *callbackContext,
-    _In_ XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE callback
+    _In_opt_ UTF8CSTR sessionName,
+    _In_opt_ UTF8CSTR reasonMessage,
+    _In_opt_ UTF8CSTR evidenceResourceId,
+    _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Submits reputation feedback on the specified user.
+/// Submits reputation feedback on the specified user. The status of the async operation can be obtained with
+/// GetAsyncStatus.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
-/// <param name="feedbackItems">An array of XBL_REPUTATION_FEEDBACK_ITEM objects to submit reputation feedback on.</param>
+/// <param name="feedbackItems">An array of XblReputationFeedbackItem objects to submit reputation feedback on.</param>
 /// <param name="feedbackItemsCount">The count of items in the feedbackItems array.</param>
-/// <param name="queue">The async queue to associate this call with.</param>
-/// <param name="callbackContext">Context passed back to callback.</param>
-/// <param name="callback">A client callback function that will be called when the async operation is complete.</param>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>Result code for this API operation. The result of the asynchronous operation is returned via the callback parameters.</returns>
 /// <remarks>Calls V101 POST /users/batchfeedback</remarks>
-XBL_API XBL_RESULT XBL_CALLING_CONV
-XblSubmitBatchReputationFeedback(
+STDAPI XblSubmitBatchReputationFeedback(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ XBL_REPUTATION_FEEDBACK_ITEM *feedbackItems,
+    _In_ XblReputationFeedbackItem* feedbackItems,
     _In_ uint32_t feedbackItemsCount,
-    _In_ XBL_ASYNC_QUEUE queue,
-    _In_opt_ void *callbackContext,
-    _In_ XBL_SUBMIT_REPUTATION_FEEDBACK_COMPLETION_ROUTINE callback
+    _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 #if defined(__cplusplus)

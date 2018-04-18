@@ -60,7 +60,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\real_time_activity_internal.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\social_helpers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_internal.h" />
@@ -306,7 +305,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\real_time_activity_subscription_error_event_args.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\profile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\social.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\social_helpers.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\C\social_manager_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_event.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_graph.cpp" />
