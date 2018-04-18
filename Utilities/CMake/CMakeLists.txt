@@ -626,8 +626,6 @@ set(Common_Source_Files_C
 set(Social_Source_Files_C
     ../../Source/Services/Social/C/profile.cpp
     ../../Source/Services/Social/C/social.cpp
-    ../../Source/Services/Social/C/social_helpers.h
-    ../../Source/Services/Social/C/social_helpers.cpp
     )
     
 set(Social_Manager_Source_Files_C

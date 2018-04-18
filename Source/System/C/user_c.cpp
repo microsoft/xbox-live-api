@@ -71,26 +71,14 @@ try
 CATCH_RETURN()
 
 STDAPI
-XblUserGetXuid(
+XblUserGetXboxUserId(
     _In_ xbl_user_handle user,
-    _In_ size_t xuidBufferSize,
-    _Out_writes_to_(xuidBufferSize, *written) char* xuidBuffer,
-    _Out_opt_ size_t* written
+    _Out_ uint64_t* xboxUserId
     ) XBL_NOEXCEPT
 try
 {
-    RETURN_C_INVALIDARGUMENT_IF(user == nullptr || xuidBuffer == nullptr);
-    
-    size_t requiredSize = user->userImpl->xbox_user_id().size() + 1;
-    if (xuidBufferSize < requiredSize)
-    {
-        return E_HC_BUFFER_TOO_SMALL;
-    }
-    CopyMemory(xuidBuffer, user->userImpl->xbox_user_id().data(), requiredSize);
-    if (written != nullptr)
-    {
-        *written = requiredSize;
-    }
+    RETURN_C_INVALIDARGUMENT_IF(user == nullptr || xboxUserId == nullptr);
+    *xboxUserId = utils::internal_string_to_uint64(user->userImpl->xbox_user_id());
     return S_OK;
 }
 CATCH_RETURN()

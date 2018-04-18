@@ -1924,7 +1924,7 @@ std::vector<string_t> utils::string_array_to_string_vector(
 }
 
 xsapi_internal_vector<xsapi_internal_string> utils::string_array_to_internal_string_vector(
-    PCSTR *stringArray,
+    PCSTR* stringArray,
     size_t stringArrayCount
     )
 {
@@ -1937,20 +1937,21 @@ xsapi_internal_vector<xsapi_internal_string> utils::string_array_to_internal_str
     return stringVector;
 }
 
+xsapi_internal_vector<xsapi_internal_string> utils::xuid_array_to_internal_string_vector(
+    uint64_t* xuidArray,
+    size_t xuidArrayCount
+    )
+{
+    xsapi_internal_vector<xsapi_internal_string> stringVector;
+    stringVector.reserve(xuidArrayCount);
+    for (size_t i = 0; i < xuidArrayCount; ++i)
+    {
+        stringVector.push_back(utils::uint64_to_internal_string(xuidArray[i]));
+    }
+    return stringVector;
+}
+
 #if XSAPI_C
-
-const char* utils::alloc_string(const string_t& str)
-{
-    auto cchOut = utf8_from_char_t(str.data(), nullptr, 0);
-    char *out = static_cast<char*>(system::xsapi_memory::mem_alloc(cchOut));
-    utf8_from_char_t(str.data(), out, cchOut);
-    return out;
-}
-
-void utils::free_string(const char* str)
-{
-    system::xsapi_memory::mem_free((void*)str);
-}
 
 #ifdef _WIN32 // TODO implementation for other platforms may be different
 time_t utils::time_t_from_datetime(const utility::datetime& datetime)

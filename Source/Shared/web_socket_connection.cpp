@@ -112,7 +112,7 @@ void web_socket_connection::retry_until_connected(retry_context* context)
                 pThis->m_attemptingConnection = false;
             }
         }
-        delete async;
+        xsapi_memory::mem_free(async);
     };
 
     HRESULT hr = attempt_connect(context, nestedAsyncBlock);
@@ -143,11 +143,10 @@ void web_socket_connection::ensure_connected()
     set_state_helper(web_socket_connection_state::connecting);
 
     AsyncBlock* outerAsync = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
-    ZeroMemory(outerAsync, sizeof(AsyncBlock));
     outerAsync->callback = [](AsyncBlock* async)
     {
         LOG_DEBUG("Web socket connection completed.");
-        delete async;
+        xsapi_memory::mem_free(async);
     };
 
     auto retryContext = xsapi_allocate_shared<retry_context>();

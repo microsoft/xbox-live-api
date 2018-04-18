@@ -85,7 +85,7 @@ namespace Sample
         }
     private:
         xbl_user_handle m_user;
-        char m_xuid[XuidMaxBytes];
+        uint64_t m_xuid;
         xbl_context_handle m_xboxLiveContext;
         async_queue_handle_t m_queue;
         uint32_t m_callbackToken;
@@ -111,7 +111,6 @@ namespace Sample
 
         // Social Tests
         void GetUserProfile();
-        void CopySocialRelationshipResult();
         void GetSocialRelationships();
 
         bool m_allFriends;

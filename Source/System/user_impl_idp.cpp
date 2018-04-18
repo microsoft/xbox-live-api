@@ -324,7 +324,7 @@ void user_impl_idp::internal_get_token_and_signature(
         xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result;
         GetAsyncResult(asyncBlock, nullptr, sizeof(result), &result, nullptr);
         context->callback(result);
-        delete asyncBlock;
+        xsapi_memory::mem_free(asyncBlock);
     };
 
     auto hresult = BeginAsync(internalAsyncBlock, internalAsyncBlock->context, nullptr, __FUNCTION__,
