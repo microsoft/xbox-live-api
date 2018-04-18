@@ -35,6 +35,14 @@
     #undef _Post_writable_byte_size_
     #endif
     #define _Post_writable_byte_size_(X)
+
+    #ifndef ANYSIZE_ARRAY
+    #define ANYSIZE_ARRAY 1
+    #endif
+
+    #ifndef FIELD_OFFSET
+    #define FIELD_OFFSET(type, field)    ((LONG)(LONG_PTR)&(((type *)0)->field))
+    #endif
 #endif
 
 #if defined _WIN32
