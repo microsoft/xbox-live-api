@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-/// <summary>Defines values used to indicate the device type associate with an XBL_SOCIAL_MANAGER_PRESENCE_TITLE_RECORD.</summary>
+/// <summary>Defines values used to indicate the device type associate with an XblSocialManagerPresenceTitleRecord.</summary>
 typedef enum XblPresenceDeviceType
 {
     /// <summary>Unknown device</summary>
