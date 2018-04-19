@@ -239,6 +239,10 @@ public:
         _In_ Windows::Foundation::Collections::PropertySet^ value
         );
 
+    static inline Platform::String^ StringFromInternalString(const xsapi_internal_string& internalString)
+    {
+        return ref new Platform::String(xbox::services::utils::string_t_from_internal_string(internalString).data());
+    }
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_END

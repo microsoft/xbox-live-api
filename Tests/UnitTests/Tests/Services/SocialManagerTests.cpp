@@ -13,7 +13,7 @@
 #include "SocialUserGroupLoadedEventArgs_WinRT.h"
 #include "MockSocialManager.h"
 #include "SocialManagerHelper.h"
-#include "utils_uwp.h"
+#include "Event_WinRT.h"
 
 using namespace xbox::services;
 using namespace xbox::services::presence;
@@ -824,7 +824,7 @@ public:
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto xboxLiveContext1 = GetMockXboxLiveContext_Cpp();
-        xboxLiveContext1->user()->_User_impl()->_Set_xbox_user_id(L"T0");
+        xboxLiveContext1->user()->_User_impl()->_Set_xbox_user_id("T0");
         auto socialManagerInitializationStruct1 = Initialize(xboxLiveContext1, true);
         auto socialManagerCppMock = std::dynamic_pointer_cast<MockSocialManager>(socialManagerInitializationStruct1.socialManager->GetCppObj());
 
@@ -1007,7 +1007,7 @@ public:
         SetMultipleClientWebSocketRTAAutoResponser(mockSockets, rtaConnectionIdJson, -1, false);
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto xboxLiveContext1 = GetMockXboxLiveContext_Cpp();
-        xboxLiveContext1->user()->_User_impl()->_Set_xbox_user_id(L"T0");
+        xboxLiveContext1->user()->_User_impl()->_Set_xbox_user_id("T0");
         auto socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
         auto socialManagerInitializationStruct1 = Initialize(xboxLiveContext1, false);
         auto socialManagerCppMock = std::dynamic_pointer_cast<MockSocialManager>(socialManagerInitializationStruct1.socialManager->GetCppObj());
@@ -2064,7 +2064,7 @@ public:
         xsapi_internal_vector<xsapi_internal_string> xuids;
         xuids.push_back("1");
 
-        Win32Event callComplete;
+        Event^ callComplete = ref new Event();
         user_buffers_holder userBufferHolder;
         size_t userGroupSize;
 
@@ -2079,10 +2079,10 @@ public:
             VERIFY_IS_TRUE(&userBufferHolder.user_buffer_a() == userBufferHolder.active_buffer());
             VERIFY_IS_TRUE(&userBufferHolder.user_buffer_b() == userBufferHolder.inactive_buffer());
 
-            callComplete.Set();
+            callComplete->Set();
         });
 
-        callComplete.WaitForever();
+        callComplete->Wait();
 
         VerifyUserBuffer(userBufferHolder.user_buffer_a(), userGroupSize);
         VerifyUserBuffer(userBufferHolder.user_buffer_b(), userGroupSize);
@@ -2098,7 +2098,7 @@ public:
         xsapi_internal_vector<xsapi_internal_string> xuids;
         xuids.push_back("1");
 
-        Win32Event callComplete;
+        Event^ callComplete = ref new Event();
         user_buffers_holder userBufferHolder;
         size_t userGroupSize;
 
@@ -2115,11 +2115,11 @@ public:
             VERIFY_IS_TRUE(&userBufferHolder.user_buffer_a() == userBufferHolder.active_buffer());
             VERIFY_IS_TRUE(&userBufferHolder.user_buffer_b() == userBufferHolder.inactive_buffer());
 
-            callComplete.Set();
+            callComplete->Set();
 
         });
 
-        callComplete.WaitForever();
+        callComplete->Wait();
 
         VerifyUserBuffer(userBufferHolder.user_buffer_a(), userGroupSize);
         VerifyUserBuffer(userBufferHolder.user_buffer_b(), userGroupSize);
@@ -2343,7 +2343,7 @@ public:
         for (auto& ws : m_mockXboxSystemFactory->GetMockWebSocketClients())
         {
             ws->m_connectToFail = true;
-            ws->m_closeStatus = HC_WEBSOCKET_CLOSE_ABNORMAL_CLOSE;
+            ws->m_closeStatus = HCWebSocketCloseStatus_AbnormalClose;
             ws->close();
         }
 

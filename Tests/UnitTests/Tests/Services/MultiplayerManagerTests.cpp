@@ -1226,7 +1226,7 @@ public:
         InitializeManager(2);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_2");
 
         Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
         xboxLiveContexts->Append(xboxLiveContext);
@@ -1730,7 +1730,7 @@ public:
         InitializeManager(2);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_2");
 
         Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
         xboxLiveContexts->Append(xboxLiveContext);
@@ -1773,9 +1773,9 @@ public:
         InitializeManager(3);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_2");
         auto xboxLiveContext3 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext3->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_3");
+        xboxLiveContext3->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_3");
 
         Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
         xboxLiveContexts->Append(xboxLiveContext);
@@ -1845,13 +1845,13 @@ public:
         InitializeManager(5);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_2");
         auto xboxLiveContext3 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext3->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_3");
+        xboxLiveContext3->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_3");
         auto xboxLiveContext4 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext4->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_4");
+        xboxLiveContext4->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_4");
         auto xboxLiveContext5 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext5->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_5");
+        xboxLiveContext5->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_5");
 
         Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
         xboxLiveContexts->Append(xboxLiveContext);
@@ -2985,7 +2985,7 @@ public:
         InitializeManager(2);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_2");
         AddLocalUserHelper(xboxLiveContext);
 
         auto mpInstance = MultiplayerManager::SingletonInstance;
@@ -3383,7 +3383,7 @@ public:
         InitializeManager(2);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_2");
 
         Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
         xboxLiveContexts->Append(xboxLiveContext);
@@ -3445,7 +3445,7 @@ public:
         InitializeManager(2);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_2");
 
         Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
         xboxLiveContexts->Append(xboxLiveContext);

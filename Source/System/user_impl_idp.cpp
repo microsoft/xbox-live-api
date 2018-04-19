@@ -314,16 +314,13 @@ void user_impl_idp::internal_get_token_and_signature(
     context->forceRefresh = forceRefresh;
     context->callback = callback;
 
-    AsyncBlock* internalAsyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock;
-    ZeroMemory(internalAsyncBlock, sizeof(AsyncBlock));
+    AsyncBlock* internalAsyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
     internalAsyncBlock->context = utils::store_shared_ptr(context);
     internalAsyncBlock->queue = queue;
     internalAsyncBlock->callback = [](_In_ struct AsyncBlock* asyncBlock)
     {
         auto context = utils::remove_shared_ptr<get_token_and_signature_context>(asyncBlock->context, false);
-        xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result;
-        GetAsyncResult(asyncBlock, nullptr, sizeof(result), &result, nullptr);
-        context->callback(result);
+        context->callback(context->result);
         xsapi_memory::mem_free(asyncBlock);
     };
 
@@ -365,14 +362,7 @@ void user_impl_idp::internal_get_token_and_signature(
                     context->result = xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>(xbox_live_error_code::runtime_error, ss.str());
                 }
             }
-
-            CompleteAsync(data->async, S_OK, sizeof(xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>));
-            break;
-
-        case AsyncOp_GetResult:
-            context = utils::remove_shared_ptr<get_token_and_signature_context>(data->context, false);
-            // Use placement new to invoke the constructor on user provided buffer
-            (void) new (data->buffer) xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>(context->result);
+            CompleteAsync(data->async, S_OK, 0);
             break;
 
         case AsyncOp_Cleanup:

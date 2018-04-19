@@ -43,7 +43,7 @@ void
 real_time_activity_service::activate()
 {
     std::lock_guard<std::recursive_mutex> lock(m_lock);
-    auto xuid = utils::string_t_from_internal_string(m_userContext->xbox_user_id());
+    auto& xuid = m_userContext->xbox_user_id();
     int activationCount = 0;
     {
         auto xsapiSingleton = get_xsapi_singleton();
@@ -157,7 +157,7 @@ real_time_activity_service::deactivate()
     if (xsapiSingleton != nullptr) // skip this if process is shutting down
     {
         std::lock_guard<std::mutex> guard(xsapiSingleton->m_rtaActivationCounterLock);
-        auto xuid = utils::string_t_from_internal_string(m_userContext->xbox_user_id());
+        auto& xuid = m_userContext->xbox_user_id();
         if (m_userContext->caller_context_type() == caller_context_type::title)
         {
             if (m_webSocketConnection != nullptr && xsapiSingleton->m_rtaActiveSocketCountPerUser[xuid] > 0)
@@ -752,7 +752,7 @@ real_time_activity_service::convert_rta_error_code_to_xbox_live_error_code(
     }
 }
 
-std::unordered_map<string_t, uint32_t> 
+std::unordered_map<xsapi_internal_string, uint32_t> 
 real_time_activity_service::_Rta_activation_map()
 {
     auto xsapiSingleton = get_xsapi_singleton();
@@ -760,7 +760,7 @@ real_time_activity_service::_Rta_activation_map()
     return xsapiSingleton->m_rtaActiveSocketCountPerUser;
 }
 
-std::unordered_map<string_t, uint32_t> 
+std::unordered_map<xsapi_internal_string, uint32_t>
 real_time_activity_service::_Rta_manager_activation_map()
 {
     auto xsapiSingleton = get_xsapi_singleton();

@@ -262,7 +262,7 @@ public:
 
         // 2 connecting, 2 connected
         stateChangeHelper->reset_events();
-        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
         stateChangeHelper->connectedEvent.wait();
         VERIFY_ARE_EQUAL_INT(connection->state(), web_socket_connection_state::connected);
 

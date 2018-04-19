@@ -317,8 +317,8 @@ struct xsapi_singleton
     void init();
 
     std::mutex m_rtaActivationCounterLock;
-    std::unordered_map<string_t, uint32_t> m_rtaActiveSocketCountPerUser;
-    std::unordered_map<string_t, uint32_t> m_rtaActiveManagersByUser;
+    std::unordered_map<xsapi_internal_string, uint32_t> m_rtaActiveSocketCountPerUser;
+    std::unordered_map<xsapi_internal_string, uint32_t> m_rtaActiveManagersByUser;
 
     std::mutex m_singletonLock;
     std::recursive_mutex m_appConfigLock;

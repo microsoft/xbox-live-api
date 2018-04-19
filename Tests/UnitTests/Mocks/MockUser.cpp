@@ -14,82 +14,33 @@ MockUser::MockUser() :
 {
 }
 
-pplx::task<xbox_live_result<sign_in_result>>
-MockUser::sign_in_impl(
+void MockUser::sign_in_impl(
     _In_ bool showUI,
-    _In_ bool forceRefresh
+    _In_ bool forceRefresh,
+    _In_ async_queue_handle_t queue,
+    _In_ xbox_live_callback<xbox_live_result<sign_in_result>> callback
     )
 {
     user_signed_in(
-        L"TestXboxUserId",
-        L"TestGamerTag",
-        L"Adult",
-        L"191 192",
-        L""
+        "TestXboxUserId",
+        "TestGamerTag",
+        "Adult",
+        "191 192",
+        ""
         );
-    return pplx::task_from_result(xbox_live_result<sign_in_result>());
-}
-
-
-pplx::task<xbox_live_result<void>> 
-MockUser::sign_in_impl(
-    _In_ const string_t& userDelegationTicket,
-    _In_ bool forceRefresh
-    )
-{
-    user_signed_in(
-        L"TestXboxUserId",
-        L"TestGamerTag",
-        L"Adult",
-        L"191 192",
-        L""
-        );
-    return pplx::task_from_result(xbox_live_result<void>());
-}
-
-pplx::task<xbox_live_result<token_and_signature_result> >
-MockUser::internal_get_token_and_signature(
-    _In_ const string_t& httpMethod,
-    _In_ const string_t& url,
-    _In_ const string_t& endpointForNsal,
-    _In_ const string_t& headers,
-    _In_ const std::vector<unsigned char>& bytes,
-    _In_ bool promptForCredentialsIfNeeded,
-    _In_ bool forceRefresh
-    )
-{
-    HRESULT hr = ResultHR;
-    if (FAILED(hr))
-    {
-        throw hr;
-    }
-
-    auto result = token_and_signature_result(
-        L"TestToken",
-        L"",
-        m_xboxUserId,
-        m_gamertag,
-        L"TestXboxUserHash",
-        m_ageGroup,
-        m_privileges,
-        L"",
-        L""
-        );
-
-    return pplx::task_from_result(xbox_live_result<token_and_signature_result>(result));
-
+    callback(xbox_live_result<sign_in_result>());
 }
 
 void MockUser::internal_get_token_and_signature(
-    _In_ const string_t& httpMethod,
-    _In_ const string_t& url,
-    _In_ const string_t& endpointForNsal,
-    _In_ const string_t& headers,
-    _In_ const std::vector<unsigned char>& bytes,
+    _In_ const xsapi_internal_string& httpMethod,
+    _In_ const xsapi_internal_string& url,
+    _In_ const xsapi_internal_string& endpointForNsal,
+    _In_ const xsapi_internal_string& headers,
+    _In_ const xsapi_internal_vector<unsigned char>& bytes,
     _In_ bool promptForCredentialsIfNeeded,
     _In_ bool forceRefresh,
-    _In_ uint64_t taskGroupId,
-    _In_ xbox_live_callback<xbox::services::xbox_live_result<token_and_signature_result>> callback
+    _In_ async_queue_handle_t queue,
+    _In_ token_and_signature_callback callback
     )
 {
     HRESULT hr = ResultHR;
@@ -98,24 +49,24 @@ void MockUser::internal_get_token_and_signature(
         throw hr;
     }
 
-    callback(xbox_live_result<token_and_signature_result>(
-        token_and_signature_result(
-            L"TestToken",
-            L"",
+    callback(xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>(
+        xsapi_allocate_shared<token_and_signature_result_internal>(
+            "TestToken",
+            "",
             m_xboxUserId,
             m_gamertag,
-            L"TestXboxUserHash",
+            "TestXboxUserHash",
             m_ageGroup,
             m_privileges,
-            L"",
-            L""
+            "",
+            ""
         )));
 }
 
 
 std::shared_ptr<xbox::services::system::auth_config> MockUser::auth_config()
 {
-    return std::make_shared<xbox::services::system::auth_config>(_T("MockSandbox"), _T("MockPrefix-"), _T("MockEnv"), false, false, _T("MockScope"));
+    return std::make_shared<xbox::services::system::auth_config>("MockSandbox", "MockPrefix-", "MockEnv", false, false, "MockScope");
 }
 
 std::shared_ptr<xbox::services::xbox_live_context_settings> MockUser::xbox_live_context_settings()
