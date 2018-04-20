@@ -514,7 +514,7 @@ void social_graph::apply_users_added_event(
 
     if (usersToAdd.empty())
     {
-        // delay callback invocation to avoid deadlock
+        // invoke callback on another thread to avoid deadlock
         invoke_callback(evt.callback, xbox_live_result<void>());
     }
     else

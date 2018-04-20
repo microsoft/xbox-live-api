@@ -20,7 +20,20 @@ social_event::social_event(
 DEFINE_GET_OBJECT(social_event, xbox_live_user_t, user);
 DEFINE_GET_ENUM_TYPE(social_event, social_event_type, event_type);
 DEFINE_GET_VECTOR(social_event, xbox_user_id_container, users_affected);
-DEFINE_GET_OBJECT_REF(social_event, std::shared_ptr<social_event_args>, event_args);
+
+std::shared_ptr<social_event_args> social_event::event_args() const
+{
+    switch (m_internalObj->event_type())
+    {
+    case social_event_type::social_user_group_loaded:
+        return xsapi_allocate_shared<social_user_group_loaded_event_args>(
+            std::dynamic_pointer_cast<social_user_group_loaded_event_args_internal>(m_internalObj->event_args())
+            );
+    default:
+        return nullptr;
+    }
+}
+
 DEFINE_GET_OBJECT_REF(social_event, std::error_code, err);
 DEFINE_GET_STD_STRING(social_event, err_message);
 
