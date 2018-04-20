@@ -30,7 +30,7 @@ public:
     call_buffer_timer(
         _In_ xbox_live_callback<const xsapi_internal_vector<xsapi_internal_string>&, std::shared_ptr<call_buffer_timer_completion_context>> callback,
         _In_ std::chrono::seconds bufferTimePerCall,
-        _In_ uint64_t taskGroupId = XSAPI_DEFAULT_TASKGROUP
+        _In_ async_queue_handle_t queue = nullptr
         );
 
     void fire();
@@ -58,7 +58,7 @@ private:
     xsapi_internal_unordered_map<xsapi_internal_string, bool> m_usersToCallMap;    // duplicating data to make lookup faster. SHould be a better way to do this
     xbox_live_callback<const xsapi_internal_vector<xsapi_internal_string>&, std::shared_ptr<call_buffer_timer_completion_context>> m_fCallback;
     std::mutex m_timerLock;
-    uint64_t m_taskGroupId;
+    async_queue_handle_t m_queue;
 };
 
 } }

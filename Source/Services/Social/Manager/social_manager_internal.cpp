@@ -30,8 +30,8 @@ social_manager_internal::get_singleton_instance()
 }
 
 social_manager_internal::social_manager_internal()
-    : m_backgroundAsyncQueue(nullptr)
 {
+    m_backgroundAsyncQueue = get_xsapi_singleton()->m_asyncQueue;
 }
 
 xbox_live_result<std::shared_ptr<xbox_social_user_group_internal>>

@@ -57,7 +57,7 @@ try
         case AsyncOp_DoWork:
             context->xboxLiveContext->contextImpl->profile_service_impl()->get_user_profile(
                 utils::uint64_to_internal_string(context->xboxUserId),
-                data->async->queue, // TODO should this be nested queue
+                data->async->queue,
                 [data, context](xbox_live_result<std::shared_ptr<xbox_user_profile_internal>> result)
             {
                 context->result = std::move(result);

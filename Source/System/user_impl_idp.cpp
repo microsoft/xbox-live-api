@@ -319,7 +319,7 @@ void user_impl_idp::internal_get_token_and_signature(
     internalAsyncBlock->queue = queue;
     internalAsyncBlock->callback = [](_In_ struct AsyncBlock* asyncBlock)
     {
-        auto context = utils::remove_shared_ptr<get_token_and_signature_context>(asyncBlock->context, false);
+        auto context = utils::remove_shared_ptr<get_token_and_signature_context>(asyncBlock->context, true);
         context->callback(context->result);
         xsapi_memory::mem_free(asyncBlock);
     };
@@ -366,8 +366,8 @@ void user_impl_idp::internal_get_token_and_signature(
             break;
 
         case AsyncOp_Cleanup:
-            context = utils::remove_shared_ptr<get_token_and_signature_context>(data->context, true);
-            break;
+            // Since the context is also shared by the caller, it is cleaned up in the callback
+            return S_OK;
         }
         return S_OK;
     });

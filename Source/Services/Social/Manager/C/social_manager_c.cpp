@@ -143,7 +143,7 @@ void populate_social_user_array(
 
 STDAPI XblXboxSocialUserGroupGetUsers(
     _In_ XblXboxSocialUserGroup* group,
-    _Out_writes_to_(group->usersCount) XblXboxSocialUser* xboxSocialUsers
+    _Out_writes_all_(group->usersCount) XblXboxSocialUser* xboxSocialUsers
     ) XBL_NOEXCEPT
 try
 {
@@ -188,15 +188,15 @@ try
     populate_social_user_array(result, xboxSocialUsers);
     if (xboxSocialUsersCount != nullptr)
     {
-        *xboxSocialUsersCount = result.size();
+        *xboxSocialUsersCount = static_cast<uint32_t>(result.size());
     }
     return S_OK;
 }
 CATCH_RETURN()
 
-STDAPI XblSocialUserGroupGetUsersTrackedByGroup(
+STDAPI XblXboxSocialUserGroupGetUsersTrackedByGroup(
     _In_ XblXboxSocialUserGroup* group,
-    _Out_writes_(group->usersCount) uint64_t* trackedUsers
+    _Out_writes_all_(group->trackedUsersCount) uint64_t* trackedUsers
     ) XBL_NOEXCEPT
 try
 {
@@ -211,7 +211,7 @@ try
     uint32_t count = 0;
     for (auto& internalContainer : groupIter->second->users_tracked_by_social_user_group())
     {
-        trackedUsers[count++] == utils::string_t_to_uint64(internalContainer.xbox_user_id());
+        trackedUsers[count++] = utils::string_t_to_uint64(internalContainer.xbox_user_id());
     }
     return S_OK;
 }
@@ -326,10 +326,8 @@ try
             });
         }
 
-        // TODO There might be a way to update only a subset of group, but just update all for now
         for (auto groupMapping : state->socialUserGroupsMap)
         {
-            // TODO I think we only need to update the usersCount and trackedUsersCount properties
             groupMapping.first->trackedUsersCount = static_cast<uint32_t>(groupMapping.second->users_tracked_by_social_user_group().size());
             groupMapping.first->usersCount = static_cast<uint32_t>(groupMapping.second->users().size());
         }
@@ -354,7 +352,7 @@ try
     uint32_t count = 0;
     for (auto& internalContainer : internalPtr->users_affected())
     {
-        usersAffected[count++] == utils::string_t_to_uint64(internalContainer.xbox_user_id());
+        usersAffected[count++] = utils::string_t_to_uint64(internalContainer.xbox_user_id());
     }
     return S_OK;
 }

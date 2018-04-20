@@ -143,7 +143,7 @@ struct http_call_data
     hc_call_handle_t callHandle;
     http_call_response_body_type httpCallResponseBodyType;
     http_call_request_message_internal requestBody;
-    http_headers requestHeaders; // TODO these are used by auth right now, can probably remove with xal
+    http_headers requestHeaders;
     bool addDefaultHeaders;
 
     chrono_clock_t::time_point requestStartTime;

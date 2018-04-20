@@ -416,7 +416,7 @@ xsapi_internal_string utils::extract_json_string(
 {
     web::json::value field(utils::extract_json_field(jsonValue, stringName, error, required));
     if ((!field.is_string() && !required) || field.is_null()) { return defaultValue; }
-    return utils::internal_string_from_string_t(field.as_string()); // TODO
+    return utils::internal_string_from_string_t(field.as_string());
 }
 
 void
@@ -1953,7 +1953,7 @@ xsapi_internal_vector<xsapi_internal_string> utils::xuid_array_to_internal_strin
 
 #if XSAPI_C
 
-#ifdef _WIN32 // TODO implementation for other platforms may be different
+#ifdef _WIN32
 time_t utils::time_t_from_datetime(const utility::datetime& datetime)
 {
     // todo we need to test if datetime.to_interval() is in seconds or miliseconds

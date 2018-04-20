@@ -83,6 +83,8 @@ namespace Sample
             XblUserGetGamertag(m_user, GamertagMaxBytes, gamertag, nullptr);
             return utility::conversions::utf8_to_utf16(gamertag);
         }
+        std::vector<XblXboxSocialUserGroup*> GetSocialGroups();
+
     private:
         xbl_user_handle m_user;
         uint64_t m_xuid;
@@ -107,7 +109,7 @@ namespace Sample
 
         void ReadLastCsv();
         void ReadCsvFile(_In_ Windows::Storage::StorageFile^ file);
-        void UpdateCustomList(_In_ const std::vector<std::string>& xuidList);
+        void UpdateCustomList(_In_ const std::vector<uint64_t>& xuidList);
 
         // Social Tests
         void GetUserProfile();
@@ -118,32 +120,32 @@ namespace Sample
         bool m_allFavs;
         bool m_onlineInTitle;
         bool m_customList;
-        std::vector<std::string> m_xuidList;
+        std::vector<uint64_t> m_xuidList;
 
-        std::vector<XBL_XBOX_SOCIAL_USER_GROUP*> m_socialGroups;
+        std::vector<XblXboxSocialUserGroup*> m_socialGroups;
 
         // SocialManagerIntegration.cpp
         void AddUserToSocialManager(xbl_user_handle user);
         void RemoveUserFromSocialManager(xbl_user_handle user);
         void CreateOrUpdateSocialGroupFromList(
             xbl_user_handle user,
-            std::vector<std::string> xuidList
+            std::vector<uint64_t> xuidList
         );
         void DestroySocialGroup(xbl_user_handle user);
         void CreateSocialUserGroupFromFilters(
             xbl_user_handle user,
-            XBL_PRESENCE_FILTER presenceFilter,
-            XBL_RELATIONSHIP_FILTER relationshipFilter
+            XblPresenceFilter presenceFilter,
+            XblRelationshipFilter relationshipFilter
         );
         void DestroySocialGroup(
             xbl_user_handle user,
-            XBL_PRESENCE_FILTER presenceFilter,
-            XBL_RELATIONSHIP_FILTER relationshipFilter
+            XblPresenceFilter presenceFilter,
+            XblRelationshipFilter relationshipFilter
         );
         void UpdateSocialManager();
 
         void LogSocialEventList(
-            XBL_SOCIAL_EVENT* eventList,
+            XblSocialEvent* eventList,
             uint32_t eventListCount
         );
 
@@ -151,15 +153,15 @@ namespace Sample
 
         void UpdateSocialGroupForAllUsers(
             bool toggle,
-            XBL_PRESENCE_FILTER presenceFilter,
-            XBL_RELATIONSHIP_FILTER relationshipFilter
+            XblPresenceFilter presenceFilter,
+            XblRelationshipFilter relationshipFilter
         );
 
         void UpdateSocialGroup(
             xbl_user_handle user,
             bool toggle,
-            XBL_PRESENCE_FILTER presenceFilter,
-            XBL_RELATIONSHIP_FILTER relationshipFilter
+            XblPresenceFilter presenceFilter,
+            XblRelationshipFilter relationshipFilter
         );
 
         void UpdateSocialGroupOfListForAllUsers(bool toggle);

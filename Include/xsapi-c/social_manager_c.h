@@ -351,7 +351,7 @@ STDAPI_(bool) XblSocialManagerPresenceRecordIsUserPlayingTitle(
 /// <param name="xboxSocialUsers">User provided array to populate.</param>
 STDAPI XblXboxSocialUserGroupGetUsers(
     _In_ XblXboxSocialUserGroup* group,
-    _Out_writes_to_(group->usersCount) XblXboxSocialUser* xboxSocialUsers
+    _Out_writes_all_(group->usersCount) XblXboxSocialUser* xboxSocialUsers
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -382,9 +382,9 @@ STDAPI XblXboxSocialUserGroupGetUsersFromXboxUserIds(
 /// </summary>
 /// <param name="group">The group from which to get users.</param>
 /// <param name="trackedUsers">User provided array to populate.</param>
-STDAPI XblSocialUserGroupGetUsersTrackedByGroup(
+STDAPI XblXboxSocialUserGroupGetUsersTrackedByGroup(
     _In_ XblXboxSocialUserGroup* group,
-    _Out_writes_(group->usersCount) uint64_t* trackedUsers
+    _Out_writes_all_(group->trackedUsersCount) uint64_t* trackedUsers
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -511,7 +511,6 @@ STDAPI XblSocialManagerSetRichPresencePollingStatus(
     _In_ bool shouldEnablePolling
     ) XBL_NOEXCEPT;
 
-/// TODO should this be per user of for all social graphs?
 /// <summary>
 /// Sets a async queue to be used by all background social graph updates.
 /// </summary>

@@ -39,23 +39,27 @@ call_buffer_timer::call_buffer_timer() :
     m_previousTime(std::chrono::steady_clock::duration::zero()),
     m_isTaskInProgress(false),
     m_queuedTask(false),
-    m_createThreads(false),
-    m_taskGroupId(XSAPI_DEFAULT_TASKGROUP)
+    m_createThreads(false)
 {
+    m_queue = get_xsapi_singleton()->m_asyncQueue;
 }
 
 call_buffer_timer::call_buffer_timer(
     _In_ xbox_live_callback<const xsapi_internal_vector<xsapi_internal_string>&, std::shared_ptr<call_buffer_timer_completion_context>> callback,
     _In_ std::chrono::seconds bufferTimePerCall,
-    _In_ uint64_t taskGroupId
+    _In_ async_queue_handle_t queue
     ) :
     m_fCallback(std::move(callback)),
     m_bufferTimePerCall(std::move(bufferTimePerCall)),
     m_previousTime(std::chrono::steady_clock::duration::zero()),
     m_isTaskInProgress(false),
     m_queuedTask(false),
-    m_taskGroupId(taskGroupId)
+    m_queue(queue)
 {
+    if (m_queue == nullptr)
+    {
+        m_queue = get_xsapi_singleton()->m_asyncQueue;
+    }
 }
 
 void
@@ -117,6 +121,7 @@ call_buffer_timer::fire(
             delete data->async;
             return S_OK;
         }
+        return S_OK;
     });
     ScheduleAsync(async, 0);
 }
@@ -177,7 +182,7 @@ call_buffer_timer::fire_helper(
             }
             return S_OK;
         });
-        ScheduleAsync(async, contextSharedPtr->delay.count());
+        ScheduleAsync(async, static_cast<uint32_t>(contextSharedPtr->delay.count()));
 #else
         UNREFERENCED_PARAMETER(usersAddedStruct);
 #endif
