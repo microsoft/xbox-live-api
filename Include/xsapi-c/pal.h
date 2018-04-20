@@ -35,6 +35,14 @@
     #undef _Post_writable_byte_size_
     #endif
     #define _Post_writable_byte_size_(X)
+
+    #ifndef ANYSIZE_ARRAY
+    #define ANYSIZE_ARRAY 1
+    #endif
+
+    #ifndef FIELD_OFFSET
+    #define FIELD_OFFSET(type, field)    ((LONG)(LONG_PTR)&(((type *)0)->field))
+    #endif
 #endif
 
 #if defined _WIN32
@@ -84,13 +92,32 @@ extern "C" {
 #define XBL_NOEXCEPT
 #endif
 
-#include "httpClient/types.h"
+#include "httpClient/pal.h"
 
-typedef uint32_t XBL_MEMORY_TYPE;
-typedef int32_t FUNCTION_CONTEXT;
-typedef struct xbl_async_queue* XBL_ASYNC_QUEUE;
-typedef HC_TASK_EVENT_HANDLE XBL_ASYNC_EVENT_HANDLE;
-typedef struct xbl_xbox_live_context* XBL_XBOX_LIVE_CONTEXT_HANDLE;
+#define MAKE_E_XBL(code)                 MAKE_HRESULT(1, FACILITY_XBOX, code)
+#define E_XBL_ALREADY_INITIALISED        MAKE_E_XBL(5504L)
+
+#define XBL_GAMERSCORE_CHAR_SIZE 16
+#define XBL_GAMERTAG_CHAR_SIZE 16
+#define XBL_XBOX_USER_ID_CHAR_SIZE 21
+#define XBL_DISPLAY_NAME_CHAR_SIZE 30
+#define XBL_REAL_NAME_CHAR_SIZE 255
+#define XBL_DISPLAY_PIC_URL_RAW_CHAR_SIZE 225
+#define XBL_COLOR_CHAR_SIZE 7
+#define XBL_RICH_PRESENCE_CHAR_SIZE 100
+#define XBL_NUM_PRESENCE_RECORDS 6
+
+typedef int32_t function_context;
+typedef struct xbl_xbox_live_context* xbl_context_handle;
+
+// TODO remove this
+typedef void* XBL_ASYNC_QUEUE;
+
+#if XDK_API
+typedef winrt::Windows::Xbox::System::User xbl_user_handle;
+#else
+typedef struct xbl_xbox_live_user* xbl_user_handle;
+#endif
 
 #if defined(__cplusplus)
 } // end extern "C"

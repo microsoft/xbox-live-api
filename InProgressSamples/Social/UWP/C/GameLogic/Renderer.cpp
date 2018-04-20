@@ -20,9 +20,11 @@ using namespace xbox::services::social::manager;
 #if PERF_COUNTERS
 #define PERF_X_POS                      900
 #define PERF_ROW_OFFSET                 50
-#define SOCIAL_GROUP_Y                  300
+#define SOCIAL_GROUP_Y                  400
+#define EVENT_LOG_Y                     300
 #else
-#define SOCIAL_GROUP_Y                  200
+#define EVENT_LOG_Y                     200
+#define SOCIAL_GROUP_Y                  300
 #endif
 
 
@@ -101,8 +103,20 @@ void Renderer::Render()
     auto appState = g_sampleInstance->GetGameData()->GetAppState();
     auto gameState = g_sampleInstance->GetGameData()->GetGameState();
 
+    std::vector<XblXboxSocialUserGroup*> socialGroups = g_sampleInstance->GetSocialGroups();
+    RenderSocialGroupList(
+        COLUMN_1_X,
+        COLUMN_2_X,
+        COLUMN_3_X,
+        SOCIAL_GROUP_Y,
+        fTextHeight,
+        scale,
+        TEXT_COLOR,
+        socialGroups
+        );
+
     RenderMenuOptions(scale, TEXT_COLOR);
-    RenderEventLog(COLUMN_1_X, SOCIAL_GROUP_Y, fTextHeight, scale, TEXT_COLOR);
+    RenderEventLog(COLUMN_1_X, EVENT_LOG_Y, fTextHeight, scale, TEXT_COLOR);
 
 #if PERF_COUNTERS
     RenderPerfCounters(PERF_X_POS, PERF_ROW_OFFSET, fTextHeight, scale, TEXT_COLOR);
@@ -144,18 +158,28 @@ void Renderer::RenderMenuOptions(
     WCHAR text[1024];
     swprintf_s(text, ARRAYSIZE(text), L"");
 
-    LPWSTR gamertag = L"n/a";
-    std::wstring gamertagString;
-    if (g_sampleInstance->GetUser() != nullptr && g_sampleInstance->GetUser()->gamertag != nullptr)
+    string_t gamertagString = L"n/a";
+    if (g_sampleInstance->GetUser() != nullptr)
     {
-        gamertagString = utility::conversions::utf8_to_utf16(g_sampleInstance->GetUser()->gamertag);
-        gamertag = (LPWSTR)gamertagString.c_str();
+        gamertagString = g_sampleInstance->GetGamertag();
     }
 
     swprintf_s(text, ARRAYSIZE(text),
         L"Press S to sign-in (user signed in: %s).\n"
-        L"Press P to get profile",
-        gamertag
+        L"Press 1 to toggle social group for all friends (%s).\n"
+        L"Press 2 to toggle social group for online friends (%s).\n"
+        L"Press 3 to toggle social group for all favorites (%s).\n"
+        L"Press 4 to toggle social group for online in title (%s).\n"
+        L"Press 5 to toggle social group for custom list (%s).\n"
+        L"Press C to import custom list.\n"
+        L"Press P to get profile\n"
+        L"Press F to get friends\n",
+        gamertagString.data(),
+        g_sampleInstance->GetAllFriends() ? L"On" : L"Off",
+        g_sampleInstance->GetOnlineFriends() ? L"On" : L"Off",
+        g_sampleInstance->GetAllFavs() ? L"On" : L"Off",
+        g_sampleInstance->GetOnlineInTitle() ? L"On" : L"Off",
+        g_sampleInstance->GetCustomList() ? L"On" : L"Off"
         );
 
     m_font->DrawString(m_sprites.get(), text, XMFLOAT2(COLUMN_1_X, ACTION_BUTONS_Y), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
@@ -245,5 +269,104 @@ void Renderer::RenderPerfCounters(
         m_font->DrawString(m_sprites.get(), text, XMFLOAT2(fGridXColumn1 + 450.0f, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
 
         verticalBaseOffset += fTextHeight;
+    }
+}
+
+std::wstring
+ConvertPresenceUserStateToString(
+    _In_ XblUserPresenceState presenceState
+)
+{
+    switch (presenceState)
+    {
+    case XblUserPresenceState_Away: return _T("away");
+    case XblUserPresenceState_Offline: return _T("offline");
+    case XblUserPresenceState_Online: return _T("online");
+    default:
+    case XblUserPresenceState_Unknown: return _T("unknown");
+    }
+}
+
+std::wstring
+ConvertPresenceFilterToString(XblPresenceFilter presenceFilter)
+{
+    switch (presenceFilter)
+    {
+    case XblPresenceFilter_Unknown: return _T("unknown");
+    case XblPresenceFilter_TitleOnline: return _T("title_online");
+    case XblPresenceFilter_TitleOffline: return _T("title_offline");
+    case XblPresenceFilter_AllOnline: return _T("all_online");
+    case XblPresenceFilter_AllOffline: return _T("all_offline");
+    case XblPresenceFilter_AllTitle: return _T("all_title");
+    default:
+    case XblPresenceFilter_All: return _T("all");
+    }
+}
+
+std::wstring
+ConvertRelationshipFilterToString(_In_ XblRelationshipFilter relationshipFilter)
+{
+    switch (relationshipFilter)
+    {
+    case XblRelationshipFilter_Favorite: return _T("favorite");
+    default:
+    case XblRelationshipFilter_Friends: return _T("friends");
+    }
+}
+
+void
+Renderer::RenderSocialGroupList(
+    FLOAT fGridXColumn1,
+    FLOAT fGridXColumn2,
+    FLOAT fGridXColumn3,
+    FLOAT fGridY,
+    FLOAT fTextHeight,
+    FLOAT scale,
+    const DirectX::XMVECTORF32& TEXT_COLOR,
+    std::vector<XblXboxSocialUserGroup*> nodeList
+)
+{
+    WCHAR text[1024];
+    float verticalBaseOffset = 2 * fTextHeight;
+
+    for (auto node : nodeList)
+    {
+        m_font->DrawString(m_sprites.get(), L"_________________________________________", XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
+        verticalBaseOffset += fTextHeight;
+        if (node->socialUserGroupType == XblSocialUserGroupType_FilterType)
+        {
+            swprintf_s(text, ARRAYSIZE(text), L"Group from filter: %s %s",
+                ConvertPresenceFilterToString(node->presenceFilterOfGroup).c_str(),
+                ConvertRelationshipFilterToString(node->relationshipFilterOfGroup).c_str()
+            );
+            m_font->DrawString(m_sprites.get(), text, XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
+            verticalBaseOffset += fTextHeight;
+        }
+        else
+        {
+            m_font->DrawString(m_sprites.get(), L"Group from custom list", XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
+            verticalBaseOffset += fTextHeight;
+        }
+
+        std::vector<XblXboxSocialUser> userList(node->usersCount);
+        XblXboxSocialUserGroupGetUsers(node, userList.data());
+
+        for (const auto& user : userList)
+        {
+            stringstream_t titleCount;
+            titleCount << user.presenceRecord.presenceTitleRecordCount;
+            auto titleCountStr = titleCount.str();
+
+            m_font->DrawString(m_sprites.get(), utility::conversions::utf8_to_utf16(user.gamertag).data(), XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
+            m_font->DrawString(m_sprites.get(), ConvertPresenceUserStateToString(user.presenceRecord.userState).c_str(), XMFLOAT2(fGridXColumn2, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
+            m_font->DrawString(m_sprites.get(), titleCountStr.c_str(), XMFLOAT2(fGridXColumn3, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
+
+            verticalBaseOffset += fTextHeight;
+        }
+        if (userList.size() == 0)
+        {
+            m_font->DrawString(m_sprites.get(), L"No friends found", XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
+            verticalBaseOffset += fTextHeight;
+        }
     }
 }

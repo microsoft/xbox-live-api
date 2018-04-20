@@ -296,7 +296,7 @@ multiplayer_client_manager::join_lobby(
     bool invitedUserFound = false;
     for (auto& user: users)
     {
-        if (utils::str_icmp(invitedXuid, user_context::get_user_id(user)) == 0)
+        if (utils::str_icmp(invitedXuid, utils::string_t_from_internal_string(user_context::get_user_id(user))) == 0)
         {
             invitedUserFound = true;
             break;
@@ -396,7 +396,7 @@ multiplayer_client_manager::join_game(
             // Create a session with reservations.
             multiplayer_session_reference gameSessionRef(utils::string_t_from_internal_string(utils::try_get_override_scid()), sessionTemplateName, sessionName);
             auto gameSession = std::make_shared<multiplayer_session>(
-                primaryContext->xbox_live_user_id(),
+                utils::string_t_from_internal_string(primaryContext->xbox_live_user_id()),
                 gameSessionRef,
                 xboxUserIds
                 );
@@ -404,7 +404,7 @@ multiplayer_client_manager::join_game(
             gameSession->join(web::json::value::null(), false);
             for (const auto& memberXuid : xboxUserIds)
             {
-                if (utils::str_icmp(memberXuid, primaryContext->xbox_live_user_id()) != 0)
+                if (utils::str_icmp(utils::internal_string_from_string_t(memberXuid), primaryContext->xbox_live_user_id()) != 0)
                 {
                     gameSession->add_member_reservation(memberXuid);
                 }
@@ -1061,11 +1061,11 @@ multiplayer_client_manager::handle_member_properties_changed(
     if (memberPropertiesChanged.size() > 0)
     {
         std::vector<std::shared_ptr<multiplayer_member>> gameMembers;
-        const auto& localUserMap = m_multiplayerLocalUserManager->get_local_user_map();
+        const auto& localUsersMap = m_multiplayerLocalUserManager->get_local_user_map();
         for (const auto& member : memberPropertiesChanged)
         {
-            auto iter = localUserMap.find(member->xbox_user_id());
-            if (iter != localUserMap.end())
+            auto iter = localUsersMap.find(member->xbox_user_id());
+            if (iter != localUsersMap.end())
             {
                 // Don't trigger member property changed events for local users.
                 continue;

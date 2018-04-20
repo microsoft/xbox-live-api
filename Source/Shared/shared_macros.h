@@ -13,13 +13,13 @@
 #if defined(UNIT_TEST_SERVICES)
 #define RETURN_TASK_CPP_INVALIDARGUMENT_IF(x, type, message) { if ( x ) { return pplx::task_from_result(xbox::services::xbox_live_result<type>(xbox_live_error_code::invalid_argument, message)); } }
 #define RETURN_CPP_INVALIDARGUMENT_IF(x, type, message) { if ( x ) { return xbox::services::xbox_live_result<type>(xbox_live_error_code::invalid_argument, message); } }
-#define RETURN_C_INVALIDARGUMENT_IF(x) { if ( x ) { return XBL_RESULT_INVALID_ARG; } }
-#define RETURN_C_INVALIDARGUMENT_IF_NULL(x) { if ( ( x ) == nullptr ) { return XBL_RESULT_INVALID_ARG; } }
+#define RETURN_C_INVALIDARGUMENT_IF(x) { if ( x ) { return E_INVALIDARG; } }
+#define RETURN_C_INVALIDARGUMENT_IF_NULL(x) { if ( ( x ) == nullptr ) { return E_INVALIDARG; } }
 #else
 #define RETURN_TASK_CPP_INVALIDARGUMENT_IF(x, type, message) { assert(!(x)); if ( x ) { return pplx::task_from_result(xbox::services::xbox_live_result<type>(xbox_live_error_code::invalid_argument, message)); } }
 #define RETURN_CPP_INVALIDARGUMENT_IF(x, type, message) { assert(!(x)); if ( x ) { return xbox::services::xbox_live_result<type>(xbox_live_error_code::invalid_argument, message); } }
-#define RETURN_C_INVALIDARGUMENT_IF(x) { assert(!(x)); if ( x ) { return XBL_RESULT_INVALID_ARG; } }
-#define RETURN_C_INVALIDARGUMENT_IF_NULL(x) { assert(!(( x ) == nullptr)); if ( ( x ) == nullptr ) { return XBL_RESULT_INVALID_ARG; } }
+#define RETURN_C_INVALIDARGUMENT_IF(x) { assert(!(x)); if ( x ) { return E_INVALIDARG; } }
+#define RETURN_C_INVALIDARGUMENT_IF_NULL(x) { assert(!(( x ) == nullptr)); if ( ( x ) == nullptr ) { return E_INVALIDARG; } }
 #endif
 #define THROW_CPP_INVALIDARGUMENT_IF(x) if ( x ) { throw std::invalid_argument(""); }
 #define THROW_CPP_INVALIDARGUMENT_IF_NULL(x) if ( ( x ) == nullptr ) { throw std::invalid_argument(""); }
@@ -54,6 +54,12 @@
 
 #define PLATFORM_STRING_FROM_STRING_T(x) \
     (x.empty() ? nullptr : ref new Platform::String(x.c_str()))
+
+#define PLATFORM_STRING_FROM_INTERNAL_STRING(x) \
+    (x.empty() ? nullptr : ref new Platform::String(xbox::services::utils::string_t_from_internal_string(x).c_str()))
+
+#define INTERNAL_STRING_FROM_PLATFORM_STRING(x) \
+    (x->IsEmpty() ? xsapi_internal_string() : xbox::services::utils::internal_string_from_utf16(x->Data()))
 
 #define AUTH_HEADER ("Authorization")
 #define SIG_HEADER ("Signature")
@@ -138,6 +144,12 @@
     std::vector<typeName> className::methodName() const \
     { \
         return utils::std_vector_from_internal_vector<typeName>(m_internalObj->methodName()); \
+    }
+
+#define DEFINE_GET_OBJECT(className, objectType, methodName) \
+    objectType className::methodName() const \
+    { \
+        return m_internalObj->methodName(); \
     }
 
 #define DEFINE_GET_OBJECT_REF(className, objectType, methodName) \

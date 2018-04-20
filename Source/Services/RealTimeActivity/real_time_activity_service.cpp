@@ -10,6 +10,7 @@
 #include "web_socket_connection_state.h"
 #include "web_socket_client.h"
 #include "utils.h"
+#include "xbox_live_app_config_internal.h"
 using namespace pplx;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_BEGIN
@@ -42,22 +43,23 @@ void
 real_time_activity_service::activate()
 {
     std::lock_guard<std::recursive_mutex> lock(m_lock);
+    auto& xuid = m_userContext->xbox_user_id();
     int activationCount = 0;
     {
         auto xsapiSingleton = get_xsapi_singleton();
         std::lock_guard<std::mutex> guard(xsapiSingleton->m_rtaActivationCounterLock);
         if (m_webSocketConnection == nullptr)
         {
-            activationCount = ++xsapiSingleton->m_rtaActiveSocketCountPerUser[m_userContext->xbox_user_id()];
+            activationCount = ++xsapiSingleton->m_rtaActiveSocketCountPerUser[xuid];
 
-            LOGS_DEBUG << "websocket count is at " << xsapiSingleton->m_rtaActiveSocketCountPerUser[m_userContext->xbox_user_id()] << " for user " << m_userContext->xbox_user_id();
+            LOGS_DEBUG << "websocket count is at " << xsapiSingleton->m_rtaActiveSocketCountPerUser[xuid] << " for user " << m_userContext->xbox_user_id();
         }
 
         if (m_userContext->caller_context_type() == caller_context_type::multiplayer_manager ||
             m_userContext->caller_context_type() == caller_context_type::social_manager)
         {
-            ++xsapiSingleton->m_rtaActiveManagersByUser[m_userContext->xbox_user_id()];
-            LOGS_DEBUG << "websocket manager count is at " << xsapiSingleton->m_rtaActiveManagersByUser[m_userContext->xbox_user_id()] << " for user " << m_userContext->xbox_user_id();
+            ++xsapiSingleton->m_rtaActiveManagersByUser[xuid];
+            LOGS_DEBUG << "websocket manager count is at " << xsapiSingleton->m_rtaActiveManagersByUser[xuid] << " for user " << m_userContext->xbox_user_id();
         }
     }
 
@@ -115,7 +117,7 @@ real_time_activity_service::activate()
 #endif
 
         xsapi_internal_stringstream endpoint;
-        endpoint << utils::create_xboxlive_endpoint("rta", m_appConfig->internal_app_config(), "wss");
+        endpoint << utils::create_xboxlive_endpoint("rta", xbox_live_app_config_internal::get_app_config_singleton(), "wss");
         endpoint << "/connect";
 
         m_webSocketConnection = std::make_shared<web_socket_connection>(
@@ -750,7 +752,7 @@ real_time_activity_service::convert_rta_error_code_to_xbox_live_error_code(
     }
 }
 
-std::unordered_map<string_t, uint32_t> 
+std::unordered_map<xsapi_internal_string, uint32_t> 
 real_time_activity_service::_Rta_activation_map()
 {
     auto xsapiSingleton = get_xsapi_singleton();
@@ -758,7 +760,7 @@ real_time_activity_service::_Rta_activation_map()
     return xsapiSingleton->m_rtaActiveSocketCountPerUser;
 }
 
-std::unordered_map<string_t, uint32_t> 
+std::unordered_map<xsapi_internal_string, uint32_t>
 real_time_activity_service::_Rta_manager_activation_map()
 {
     auto xsapiSingleton = get_xsapi_singleton();

@@ -9,6 +9,7 @@
 #include "xsapi/services.h"
 #include "xbox_live_context_impl.h"
 #include "SocialManagerHelper.h"
+#include "Event_WinRT.h"
 
 using namespace xbox::services;
 using namespace xbox::services::social::manager;
@@ -29,7 +30,7 @@ public:
             auto titleEntry = presenceRecord.presence_title_records()[i];
 
             VERIFY_ARE_EQUAL(jsonEntry[L"IsBroadcasting"].as_bool(), titleEntry.is_broadcasting());
-            VERIFY_IS_TRUE(xbox::services::presence::presence_device_record::_Convert_string_to_presence_device_type(jsonEntry[L"Device"].as_string()) == titleEntry.device_type());
+            VERIFY_IS_TRUE(xbox::services::presence::presence_device_record_internal::convert_string_to_presence_device_type(utils::internal_string_from_string_t(jsonEntry[L"Device"].as_string())) == titleEntry.device_type());
             auto state = jsonEntry[L"State"].as_string();
             auto presenceState = (!state.empty() && utils::str_icmp(state, _T("active")) == 0);
             VERIFY_ARE_EQUAL(presenceState, titleEntry.is_title_active());
@@ -87,23 +88,33 @@ public:
     DEFINE_TEST_CASE(PeopleHubTestGetSocialGraph)
     {
         DEFINE_TEST_CASE_PROPERTIES(PeopleHubTestGetSocialGraph);
-        std::vector<string_t> xuids;
-        xuids.push_back(_T("1"));
+        xsapi_internal_vector<xsapi_internal_string> xuids;
+        xuids.push_back("1");
 
         auto peoplehubService = SocialManagerHelper::GetPeoplehubService();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
         httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubResponse));
-        auto userGroup = peoplehubService.get_social_graph(_T("TestXboxUserId"), social_manager_extra_detail_level::preferred_color_level, xuids).get();
-        VERIFY_IS_TRUE(!userGroup.err());
-        web::json::array userGroupArr = web::json::value::parse(peoplehubResponse)[_T("people")].as_array();
 
-        uint32_t counter = 0;
-        for (auto& socialUsers : userGroup.payload())
+        Event^ callComplete = ref new Event();
+
+        peoplehubService.get_social_graph("TestXboxUserId", social_manager_extra_detail_level::preferred_color_level, xuids, 0,
+            [&callComplete, this](xbox_live_result<xsapi_internal_vector<xbox_social_user>> userGroup)
         {
-            web::json::value socialUserJson = userGroupArr[counter];
-            VerifyXboxSocialUser(socialUsers, socialUserJson);
-            ++counter;
-        }
+            VERIFY_IS_TRUE(!userGroup.err());
+
+            web::json::array userGroupArr = web::json::value::parse(peoplehubResponse)[_T("people")].as_array();
+
+            uint32_t counter = 0;
+            for (auto& socialUsers : userGroup.payload())
+            {
+                web::json::value socialUserJson = userGroupArr[counter];
+                VerifyXboxSocialUser(socialUsers, socialUserJson);
+                ++counter;
+            }
+            callComplete->Set();
+        });
+
+        callComplete->Wait();
 
         VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://peoplehub.mockenv.xboxlive.com", httpCall->ServerName);
@@ -127,15 +138,22 @@ public:
         auto peoplehubService = SocialManagerHelper::GetPeoplehubService();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
         httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubOversizedResponse));
-        std::vector<string_t> xuids;
-        xuids.push_back(_T("1"));
-        auto userGroupResult = peoplehubService.get_social_graph(_T("TestXboxUserId"), social_manager_extra_detail_level::preferred_color_level, xuids).get();
-        VERIFY_IS_TRUE(!userGroupResult.err());
-        auto xboxUserId = web::json::value::parse(peoplehubOversizedResponse)[_T("people")][0][_T("xuid")];
-        auto user = userGroupResult.payload()[0];
-        auto compareUser = xboxUserId.serialize().substr(0, 21);
-        wchar_t* compareUserChar = &compareUser[1];
-        VERIFY_IS_TRUE(utils::str_icmp(user.xbox_user_id(), compareUserChar) == 0);
+        xsapi_internal_vector<xsapi_internal_string> xuids;
+        xuids.push_back("1");
+
+        Event^ callComplete = ref new Event();
+        peoplehubService.get_social_graph("TestXboxUserId", social_manager_extra_detail_level::preferred_color_level, xuids, 0,
+            [&callComplete](xbox_live_result<xsapi_internal_vector<xbox_social_user>> userGroupResult)
+        {
+            VERIFY_IS_TRUE(!userGroupResult.err());
+            auto xboxUserId = web::json::value::parse(peoplehubOversizedResponse)[_T("people")][0][_T("xuid")];
+            auto user = userGroupResult.payload()[0];
+            auto compareUser = xboxUserId.serialize().substr(0, 21);
+            wchar_t* compareUserChar = &compareUser[1];
+            VERIFY_IS_TRUE(utils::str_icmp(user.xbox_user_id(), compareUserChar) == 0);
+            callComplete->Set();
+        });
+        callComplete->Wait();
     }
 };
 

@@ -14,13 +14,13 @@ presence_activity_data::presence_activity_data() :
 }
 
 presence_activity_data::presence_activity_data(
-    _In_ presence_data presenceData,
+    _In_ presence_data_internal presenceData,
     _In_ media_presence_data mediaPresenceData
     ) :
     m_presenceData(std::move(presenceData)),
     m_mediaPresenceData(std::move(mediaPresenceData))
 {
-    m_shouldSerialize = (m_presenceData._Should_serialize() || m_mediaPresenceData.should_serialize());
+    m_shouldSerialize = (m_presenceData.should_serialize() || m_mediaPresenceData.should_serialize());
 }
 
 bool
@@ -34,9 +34,9 @@ presence_activity_data::serialize() const
 {
     web::json::value serializedObject;
 
-    if (m_presenceData._Should_serialize())
+    if (m_presenceData.should_serialize())
     {
-        serializedObject[_T("richPresence")] = m_presenceData._Serialize();
+        serializedObject[_T("richPresence")] = m_presenceData.serialize();
     }
     if (m_mediaPresenceData.should_serialize())
     {

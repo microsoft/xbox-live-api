@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Social_2015", "Social_2015.vcxproj", "{2F06C416-72FB-449E-B517-EDA9C6897515}"
 EndProject
@@ -9,7 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.Services.140
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTK", "..\..\..\..\..\InProgressSamples\Kits\DirectXTK\DirectXTK_Windows10_2015.vcxproj", "{F4776924-619C-42C7-88B2-82C947CCC9E7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libHttpClient.140.UWP.C", "..\..\..\..\..\External\libHttpClient\Build\libHttpClient.140.UWP.C\libHttpClient.140.UWP.C.vcxproj", "{A6349408-5BA8-47DB-9A74-E9F9CF1F7958}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libHttpClient.140.UWP.C", "..\..\..\..\..\External\libHttpClient\Build\libHttpClient.140.UWP.C\libHttpClient.140.UWP.C.vcxproj", "{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,18 +63,18 @@ Global
 		{F4776924-619C-42C7-88B2-82C947CCC9E7}.Release|x64.Build.0 = Release|x64
 		{F4776924-619C-42C7-88B2-82C947CCC9E7}.Release|x86.ActiveCfg = Release|Win32
 		{F4776924-619C-42C7-88B2-82C947CCC9E7}.Release|x86.Build.0 = Release|Win32
-		{A6349408-5BA8-47DB-9A74-E9F9CF1F7958}.Debug|ARM.ActiveCfg = Debug|ARM
-		{A6349408-5BA8-47DB-9A74-E9F9CF1F7958}.Debug|ARM.Build.0 = Debug|ARM
-		{A6349408-5BA8-47DB-9A74-E9F9CF1F7958}.Debug|x64.ActiveCfg = Debug|x64
-		{A6349408-5BA8-47DB-9A74-E9F9CF1F7958}.Debug|x64.Build.0 = Debug|x64
-		{A6349408-5BA8-47DB-9A74-E9F9CF1F7958}.Debug|x86.ActiveCfg = Debug|Win32
-		{A6349408-5BA8-47DB-9A74-E9F9CF1F7958}.Debug|x86.Build.0 = Debug|Win32
-		{A6349408-5BA8-47DB-9A74-E9F9CF1F7958}.Release|ARM.ActiveCfg = Release|ARM
-		{A6349408-5BA8-47DB-9A74-E9F9CF1F7958}.Release|ARM.Build.0 = Release|ARM
-		{A6349408-5BA8-47DB-9A74-E9F9CF1F7958}.Release|x64.ActiveCfg = Release|x64
-		{A6349408-5BA8-47DB-9A74-E9F9CF1F7958}.Release|x64.Build.0 = Release|x64
-		{A6349408-5BA8-47DB-9A74-E9F9CF1F7958}.Release|x86.ActiveCfg = Release|Win32
-		{A6349408-5BA8-47DB-9A74-E9F9CF1F7958}.Release|x86.Build.0 = Release|Win32
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|ARM.ActiveCfg = Debug|ARM
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|ARM.Build.0 = Debug|ARM
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|x64.ActiveCfg = Debug|x64
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|x64.Build.0 = Debug|x64
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|x86.ActiveCfg = Debug|Win32
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|x86.Build.0 = Debug|Win32
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|ARM.ActiveCfg = Release|ARM
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|ARM.Build.0 = Release|ARM
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|x64.ActiveCfg = Release|x64
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|x64.Build.0 = Release|x64
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|x86.ActiveCfg = Release|Win32
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

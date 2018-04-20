@@ -2911,7 +2911,7 @@ public:
         //Make websocket auto reconnect
         // Write session on connection, make sure it can finish once connected
         mockSocket->m_waitForSignal = true;
-        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
         helper->connectingEvent.wait();
         TEST_LOG(L"Auto-reconnecting event triggered");
 
@@ -2970,7 +2970,7 @@ public:
             }
         });
 
-        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
         helper->connectingEvent.wait();
         helper->connectedEvent.wait();
         create_task(xboxLiveContext->MultiplayerService->WriteSessionAsync(session,MultiplayerSessionWriteMode::CreateNew)).get();
@@ -2984,7 +2984,7 @@ public:
         didFire = false;
         mockSocket->m_waitForSignal = false;
         mockSocket->m_connectToFail = true;
-        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_NORMAL);
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_Normal);
         helper->disconnectedEvent.wait();
 
         // should not be able to receive 

@@ -215,7 +215,7 @@ StockMocks::CreateMockHttpCallResponseInternal(
     std::shared_ptr<user_context> userContext = std::make_shared<user_context>();
 
     auto httpCallResponse = std::make_shared<http_call_response_internal>(
-        utils::internal_string_from_string_t(userContext->xbox_user_id()),
+        userContext->xbox_user_id(),
         xboxLiveContextSettings,
         "GET",
         "www.microsoft.com",
@@ -245,7 +245,7 @@ StockMocks::CreateMockHttpCallResponseInternal(
     std::shared_ptr<user_context> userContext = std::make_shared<user_context>();
 
     auto httpCallResponse = std::make_shared<http_call_response_internal>(
-        utils::internal_string_from_string_t(userContext->xbox_user_id()),
+        userContext->xbox_user_id(),
         xboxLiveContextSettings,
         "GET",
         "www.microsoft.com",
@@ -275,7 +275,7 @@ StockMocks::CreateMockHttpCallResponseInternal(
     std::shared_ptr<user_context> userContext = std::make_shared<user_context>();
 
     auto httpCallResponse = std::make_shared<http_call_response_internal>(
-        utils::internal_string_from_string_t(userContext->xbox_user_id()),
+        userContext->xbox_user_id(),
         xboxLiveContextSettings,
         "GET",
         "www.microsoft.com",
@@ -302,11 +302,11 @@ void StockMocks::AddHttpMockResponse(
     // TODO move
     HCGlobalInitialize();
 
-    HC_MOCK_CALL_HANDLE mockCall;
+    hc_mock_call_handle mockCall;
 
     HCMockCallCreate(&mockCall);
 
-    auto utf8body = utils::utf8_from_utf16(responseBody);
+    auto utf8body = utils::internal_string_from_string_t(responseBody);
 
     HCMockResponseSetResponseString(mockCall, utf8body.data());
     HCMockResponseSetStatusCode(mockCall, statusCode);

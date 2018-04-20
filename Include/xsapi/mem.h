@@ -3,6 +3,8 @@
 
 #pragma once
 #include <new>
+#include <set>
+#include <unordered_set>
 #include <stddef.h>
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
@@ -170,14 +172,21 @@ using xsapi_internal_vector = std::vector<T, xsapi_stl_allocator<T>>;
 template<class K, class V, class LESS = std::less<K>>
 using xsapi_internal_map = std::map<K, V, LESS, xsapi_stl_allocator<std::pair<K const, V>>>;
 
+template<class K, class LESS = std::less<K>>
+using xsapi_internal_set = std::set<K, LESS, xsapi_stl_allocator<K>>;
+
 template<class K, class V, class HASH = std::hash<K>, class EQUAL = std::equal_to<K>>
 using xsapi_internal_unordered_map = std::unordered_map<K, V, HASH, EQUAL, xsapi_stl_allocator<std::pair<K const, V>>>;
+
+template<class K, class HASH = std::hash<K>, class EQUAL = std::equal_to<K>>
+using xsapi_internal_unordered_set = std::unordered_set<K, HASH, EQUAL, xsapi_stl_allocator<K>>;
 
 template<class C, class TRAITS = std::char_traits<C>>
 using xsapi_internal_basic_string = std::basic_string<C, TRAITS, xsapi_stl_allocator<C>>;
 
 using xsapi_internal_string = xsapi_internal_basic_string<char>;
 using xsapi_internal_wstring = xsapi_internal_basic_string<wchar_t>;
+using xsapi_internal_string_t = xsapi_internal_basic_string<char_t>;
 
 template<class C, class TRAITS = std::char_traits<C>>
 using xsapi_internal_basic_stringstream = std::basic_stringstream<C, TRAITS, xsapi_stl_allocator<C>>;

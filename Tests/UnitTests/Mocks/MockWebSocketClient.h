@@ -15,19 +15,23 @@ public:
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ const xsapi_internal_string& uri,
         _In_ const xsapi_internal_string& subProtocol,
-        _In_ xbox::services::xbox_live_callback<HC_RESULT, uint32_t> callback
+        _In_ xbox::services::xbox_live_callback<WebSocketCompletionResult> callback
         ) override
     {
         if (m_waitForSignal)
         {
             m_connectEvent.wait();
         }
-        callback(m_connectToFail ? HC_E_FAIL : HC_OK, 0);
+        callback(WebSocketCompletionResult{
+            nullptr,
+            m_connectToFail ? E_FAIL : S_OK,
+            0
+        });
     }
 
     void send(
         _In_ const xsapi_internal_string& message,
-        _In_ xbox::services::xbox_live_callback<HC_RESULT, uint32_t> callback
+        _In_ xbox::services::xbox_live_callback<WebSocketCompletionResult> callback
         ) override
     {
         auto jsonValueObj = web::json::value::parse(utils::string_t_from_internal_string(message)).as_array();
@@ -43,7 +47,11 @@ public:
         {
             m_sendHandler(message);
         }
-        callback(HC_OK, 0);
+        callback(WebSocketCompletionResult{
+            nullptr,
+            S_OK,
+            0
+        });
     }
 
     void close() override 
@@ -63,7 +71,7 @@ public:
     }
 
     void set_closed_handler(
-        _In_ xbox_live_callback<HC_WEBSOCKET_CLOSE_STATUS> handler
+        _In_ xbox_live_callback<HCWebSocketCloseStatus> handler
         ) override
     {
         std::lock_guard<std::mutex> lock(m_lock);
@@ -191,7 +199,7 @@ public:
         std::lock_guard<std::mutex> lock(m_lock);
         m_waitForSignal = false;
         m_connectToFail = false;
-        m_closeStatus = HC_WEBSOCKET_CLOSE_NORMAL;
+        m_closeStatus = HCWebSocketCloseStatus_Normal;
         m_subUriToIdMap.clear();
         m_eventUriToIdMap.clear();
         m_closeHandler = nullptr;
@@ -203,13 +211,13 @@ public:
 
     bool m_waitForSignal = false;
     bool m_connectToFail = false;
-    HC_WEBSOCKET_CLOSE_STATUS m_closeStatus = HC_WEBSOCKET_CLOSE_NORMAL;
+    HCWebSocketCloseStatus m_closeStatus = HCWebSocketCloseStatus_Normal;
     concurrency::event m_connectEvent;
 
     std::unordered_map<xsapi_internal_string, uint32_t> m_subUriToIdMap;
     std::unordered_map<xsapi_internal_string, uint32_t> m_eventUriToIdMap;
     uint32_t m_sequenceNum = 0;
-    xbox_live_callback<HC_WEBSOCKET_CLOSE_STATUS> m_closeHandler;
+    xbox_live_callback<HCWebSocketCloseStatus> m_closeHandler;
     xbox_live_callback<xsapi_internal_string> m_sendHandler;
     xbox_live_callback<xsapi_internal_string> m_receiveHandler;
     std::mutex m_lock;

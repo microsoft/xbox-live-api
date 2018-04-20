@@ -392,7 +392,7 @@ multiplayer_game_client::is_request_in_progress()
 void
 multiplayer_game_client::set_local_member_properties_to_remote_session(
     _In_ const std::shared_ptr<multiplayer_local_user>& localUser,
-    _In_ const std::map<string_t, web::json::value>& localUserMap,
+    _In_ const std::map<string_t, web::json::value>& localUsersMap,
     _In_ const string_t& localUserConnectionAddress
     )
 {
@@ -402,7 +402,7 @@ multiplayer_game_client::set_local_member_properties_to_remote_session(
     }
 
     std::weak_ptr<multiplayer_game_client> thisWeakPtr = shared_from_this();
-    pplx::create_task([thisWeakPtr, localUser, localUserMap, localUserConnectionAddress]()
+    pplx::create_task([thisWeakPtr, localUser, localUsersMap, localUserConnectionAddress]()
     {
         std::shared_ptr<multiplayer_game_client> pThis(thisWeakPtr.lock());
         if (pThis == nullptr) return;
@@ -419,7 +419,7 @@ multiplayer_game_client::set_local_member_properties_to_remote_session(
         {
             auto sessionToCommit = std::make_shared<multiplayer_session>(localUser->xbox_user_id(), gameSession->session_reference());
             sessionToCommit->join(web::json::value::null(), false, true, false);
-            for (const auto& prop : localUserMap)
+            for (const auto& prop : localUsersMap)
             {
                 sessionToCommit->set_current_user_member_custom_property_json(prop.first, prop.second);
             }
@@ -578,7 +578,7 @@ multiplayer_game_client::join_game_by_session_reference(
     RETURN_TASK_CPP_IF(primaryContext == nullptr, std::shared_ptr<multiplayer_session>, "Call add_local_user() before joining.");
 
     auto gameSession = std::make_shared<multiplayer_session>(
-        primaryContext->xbox_live_user_id(),
+        utils::string_t_from_internal_string(primaryContext->xbox_live_user_id()),
         gameSessionRef
         );
 
@@ -594,7 +594,7 @@ multiplayer_game_client::join_game_by_handle(
     std::shared_ptr<xbox_live_context_impl> primaryContext = m_multiplayerLocalUserManager->get_primary_context();
     RETURN_TASK_CPP_IF(primaryContext == nullptr, std::shared_ptr<multiplayer_session>, "Call add_local_user() before joining.");
 
-    auto gameSession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id());
+    auto gameSession = std::make_shared<multiplayer_session>(utils::string_t_from_internal_string(primaryContext->xbox_live_user_id()));
 
     return join_game_for_all_local_members(gameSession, handleId, createGameIfFailedToJoin);
 }

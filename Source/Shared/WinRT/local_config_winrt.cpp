@@ -84,7 +84,7 @@ xsapi_internal_string local_config::get_value_from_local_storage(
         }
         else
         {
-            return xsapi_internal_string(utils::internal_string_from_utf16(value->Data(), value->Length()));
+            return xsapi_internal_string(utils::internal_string_from_utf16(value->Data()));
         }
     }
     catch (Exception^ ex)

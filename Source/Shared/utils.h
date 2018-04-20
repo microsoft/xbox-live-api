@@ -14,15 +14,8 @@
 #include "xsapi/mem.h"
 #include "xsapi/system.h"
 
-// Forward decls
-class xbl_thread_pool;
-
-class title_storage_state;
-struct XBL_XBOX_LIVE_APP_CONFIG;
-struct XSAPI_ACHIEVEMENTS_STATE; // TODO use c++ naming conventions for internal classes, make them classes
-struct XSAPI_SOCIAL_MANAGER_VARS;
-struct XSAPI_STATS_MANAGER_VARS;
-struct XBL_XBOX_LIVE_USER;
+struct XblAppConfig;
+struct XBL_ACHIEVEMENTS_STATE;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
     class xbox_live_services_settings;
@@ -34,6 +27,8 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
     class social_manager;
+    class social_manager_internal;
+    class xbl_social_manager;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_END
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
@@ -60,6 +55,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
     class logger;
     class perf_tester;
     class initiator;
+    class xbl_thread_pool;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
 
 #if !TV_API
@@ -107,6 +103,212 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 #define __max(a,b)            (((a) < (b)) ? (b) : (a))
 #endif  
 
+template<typename... Args>
+class xbox_live_callback
+{
+public:
+    xbox_live_callback() : m_callable(nullptr) {}
+    xbox_live_callback(nullptr_t) : m_callable(nullptr) {}
+
+    template <typename Functor>
+    xbox_live_callback(Functor functor)
+    {
+        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(functor).release());
+    }
+
+    xbox_live_callback(const xbox_live_callback& rhs)
+    {
+        *this = rhs;
+    }
+
+    xbox_live_callback(xbox_live_callback&& rhs)
+    {
+        *this = std::move(rhs);
+    }
+
+    template <typename Functor>
+    xbox_live_callback& operator=(Functor f)
+    {
+        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(f).release());
+        return *this;
+    }
+
+    xbox_live_callback& operator=(const xbox_live_callback& rhs)
+    {
+        if (rhs.m_callable != nullptr)
+        {
+            m_callable = rhs.m_callable->copy();
+        }
+        else
+        {
+            m_callable = nullptr;
+        }
+        return *this;
+    }
+
+    xbox_live_callback& operator=(xbox_live_callback&& rhs)
+    {
+        m_callable = std::move(rhs.m_callable);
+        return *this;
+    }
+
+    xbox_live_callback& operator=(nullptr_t)
+    {
+        m_callable = nullptr;
+        return *this;
+    }
+
+    void operator()(Args... args) const
+    {
+        if (m_callable != nullptr)
+        {
+            (*m_callable)(args...);
+        }
+    }
+
+    bool operator==(std::nullptr_t) noexcept
+    {
+        return m_callable == nullptr;
+    }
+
+    bool operator!=(std::nullptr_t) noexcept
+    {
+        return m_callable != nullptr;
+    }
+
+private:
+    struct ICallable
+    {
+        virtual ~ICallable() = default;
+        virtual void operator()(Args...) = 0;
+        virtual xsapi_unique_ptr<ICallable> copy() = 0;
+    };
+
+    template <typename Functor>
+    struct callable : public ICallable
+    {
+        callable(const Functor& functor) : m_functor(functor) { }
+        ~callable() override = default;
+
+        void operator()(Args... args) override
+        {
+            m_functor(args...);
+        }
+
+        xsapi_unique_ptr<ICallable> copy() override
+        {
+            return xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(m_functor).release());
+        }
+
+        Functor m_functor;
+    };
+
+    xsapi_unique_ptr<ICallable> m_callable;
+};
+
+template<>
+class xbox_live_callback<void>
+{
+public:
+    xbox_live_callback() : m_callable(nullptr) {}
+    xbox_live_callback(nullptr_t) : m_callable(nullptr) {}
+
+    template <typename Functor>
+    xbox_live_callback(Functor functor)
+    {
+        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(functor).release());
+    }
+
+    xbox_live_callback(const xbox_live_callback& rhs)
+    {
+        *this = rhs;
+    }
+
+    xbox_live_callback(xbox_live_callback&& rhs)
+    {
+        *this = std::move(rhs);
+    }
+
+    template <typename Functor>
+    xbox_live_callback& operator=(Functor f)
+    {
+        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(f).release());
+        return *this;
+    }
+
+    xbox_live_callback& operator=(const xbox_live_callback& rhs)
+    {
+        if (rhs.m_callable != nullptr)
+        {
+            m_callable = rhs.m_callable->copy();
+        }
+        else
+        {
+            m_callable = nullptr;
+        }
+        return *this;
+    }
+
+    xbox_live_callback& operator=(xbox_live_callback&& rhs)
+    {
+        m_callable = std::move(rhs.m_callable);
+        return *this;
+    }
+
+    xbox_live_callback& operator=(nullptr_t)
+    {
+        m_callable = nullptr;
+        return *this;
+    }
+
+    void operator()() const
+    {
+        if (m_callable != nullptr)
+        {
+            (*m_callable)();
+        }
+    }
+
+    bool operator==(std::nullptr_t) noexcept
+    {
+        return m_callable == nullptr;
+    }
+
+    bool operator!=(std::nullptr_t) noexcept
+    {
+        return m_callable != nullptr;
+    }
+
+private:
+    struct ICallable
+    {
+        virtual ~ICallable() = default;
+        virtual void operator()() = 0;
+        virtual xsapi_unique_ptr<ICallable> copy() = 0;
+    };
+
+    template <typename Functor>
+    struct callable : public ICallable
+    {
+        callable(const Functor& functor) : m_functor(functor) { }
+        ~callable() override = default;
+
+        void operator()() override
+        {
+            m_functor();
+        }
+
+        xsapi_unique_ptr<ICallable> copy() override
+        {
+            return xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(m_functor).release());
+        }
+
+        Functor m_functor;
+    };
+
+    xsapi_unique_ptr<ICallable> m_callable;
+};
+
 struct xsapi_singleton
 {
     xsapi_singleton();
@@ -115,11 +317,12 @@ struct xsapi_singleton
     void init();
 
     std::mutex m_rtaActivationCounterLock;
-    std::unordered_map<string_t, uint32_t> m_rtaActiveSocketCountPerUser;
-    std::unordered_map<string_t, uint32_t> m_rtaActiveManagersByUser;
+    std::unordered_map<xsapi_internal_string, uint32_t> m_rtaActiveSocketCountPerUser;
+    std::unordered_map<xsapi_internal_string, uint32_t> m_rtaActiveManagersByUser;
 
     std::mutex m_singletonLock;
     std::recursive_mutex m_appConfigLock;
+    std::recursive_mutex m_socialManagerLock;
     std::mutex m_mpsdConstantLock;
     std::mutex m_mpsdMemberLock;
     std::mutex m_mpsdPropertyLock;
@@ -143,7 +346,7 @@ struct xsapi_singleton
     std::shared_ptr<xbox_live_app_config_internal> m_internalAppConfigSinglton;
 
     // from Shared\C\xbox_live_app_config.cpp
-    std::shared_ptr<XBL_XBOX_LIVE_APP_CONFIG> m_cAppConfigSingleton;
+    std::shared_ptr<XblAppConfig> m_cAppConfigSingleton;
 
     // from Misc\notification_service.cpp
     std::shared_ptr<xbox::services::notification::notification_service> m_notificationSingleton;
@@ -172,9 +375,12 @@ struct xsapi_singleton
     // from Services\Multiplayer\Manager\multiplayer_manager.cpp
     std::shared_ptr<xbox::services::multiplayer::manager::multiplayer_manager> m_multiplayerManagerInstance;
 
-    // from Social\Manager\social_manager.cpp
+    // from Social\Manager\social_manager.cpp and Social\Manager\social_manager_internal.cpp
     std::shared_ptr<xbox::services::social::manager::social_manager> m_socialManagerInstance;
+    std::shared_ptr<xbox::services::social::manager::social_manager_internal> m_socialManagerInternalInstance;
     std::shared_ptr<xbox::services::perf_tester> m_perfTester;
+    // from Social\Manager\C\social_manager_c.cpp
+    std::shared_ptr<xbox::services::social::manager::xbl_social_manager> m_xblSocialManagerState;
 
     // from Stats\Manager\stats_manager.cpp
     std::shared_ptr<xbox::services::stats::manager::stats_manager> m_statsManagerInstance;
@@ -188,7 +394,7 @@ struct xsapi_singleton
     // from Shared\http_call_impl.cpp
     std::shared_ptr<http_retry_after_manager> m_httpRetryPolicyManagerSingleton;
 
-    // from Services\Presence\presence_service_impl.cpp
+    // from Services\Presence\presence_service_internal.cpp
     std::function<void(int heartBeatDelayInMins)> m_onSetPresenceFinish;
 
     // from Shared\Logger\log.cpp
@@ -199,10 +405,7 @@ struct xsapi_singleton
 
     std::shared_ptr<initiator> m_initiator;
 
-#if UWP_API || UNIT_TEST_SERVICES
-    void start_threadpool();
     std::shared_ptr<xbl_thread_pool> m_threadpool;
-#endif
 
 #if _WINRT_DLL || UNIT_TEST_SERVICES
     // from Services\Multiplayer\Manager\WinRT\MultiplayerManager_WinRT.cpp
@@ -223,32 +426,26 @@ struct xsapi_singleton
 
 #if !TV_API
     // from System\user_impl.cpp
-    std::unordered_map<function_context, std::function<void(const system::sign_out_completed_event_args&)>> m_signOutCompletedHandlers;
-    std::unordered_map<function_context, std::function<void(const string_t&)>> m_signInCompletedHandlers;
+    std::unordered_map<function_context, xbox_live_callback<const system::sign_out_completed_event_args&>> m_signOutCompletedHandlers;
+    std::unordered_map<function_context, xbox_live_callback<const xsapi_internal_string&>> m_signInCompletedHandlers;
     function_context m_signOutCompletedHandlerIndexer;
     function_context m_signInCompletedHandlerIndexer;
     std::mutex m_trackingUsersLock;
+    // from System\C\user_c.cpp
+    std::unordered_map<std::shared_ptr<xbox::services::system::xbox_live_user>, xbl_user_handle> m_signedInUsers;
 #endif
 
-    // From xsapi C singleton. Revisit if this is needed after reworking code.
-    std::shared_ptr<title_storage_state> m_titleStorageState;
-
-    std::mutex m_usersLock;
-    std::unordered_map<std::string, XBL_XBOX_LIVE_USER*> m_signedInUsers;
-
-    std::shared_ptr<XSAPI_ACHIEVEMENTS_STATE> m_achievementsState;
-    std::shared_ptr<XSAPI_SOCIAL_MANAGER_VARS> m_socialVars;
-    std::shared_ptr<XSAPI_STATS_MANAGER_VARS> m_statsVars;
+    std::shared_ptr<XBL_ACHIEVEMENTS_STATE> m_achievementsState;
 
     std::mutex m_callbackContextsLock;
     xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_callbackContextPtrs;
 
-    std::atomic<uint64_t> m_nextTaskGroupId;
+    async_queue_handle_t m_asyncQueue;
 };
 
 void init_mem_hooks();
-extern XBL_MEM_ALLOC_FUNC g_pMemAllocHook;
-extern XBL_MEM_FREE_FUNC g_pMemFreeHook;
+extern XblMemAllocFunction g_pMemAllocHook;
+extern XblMemFreeFunction g_pMemFreeHook;
 
 std::shared_ptr<xsapi_singleton> get_xsapi_singleton(_In_ bool createIfRequired = true);
 void verify_global_init();
@@ -400,6 +597,19 @@ public:
     static utility::datetime extract_json_time(
         _In_ const web::json::value& jsonValue,
         _In_ const string_t& name,
+        _In_ bool required = false
+    );
+
+    static utility::datetime extract_json_time(
+        _In_ const web::json::value& jsonValue,
+        _In_ const xsapi_internal_string& name,
+        _Inout_ std::error_code& error,
+        _In_ bool required = false
+    );
+
+    static utility::datetime extract_json_time(
+        _In_ const web::json::value& jsonValue,
+        _In_ const xsapi_internal_string& name,
         _In_ bool required = false
     );
 
@@ -647,6 +857,28 @@ public:
     }
 
     template<typename T, typename F>
+    static xbox_live_result<xsapi_internal_vector<T>> extract_xbox_live_result_json_vector_internal(
+        _In_ F deserialize,
+        _In_ const web::json::value& json,
+        _Inout_ std::error_code& errc,
+        _In_ bool required
+    )
+    {
+        auto jsonVector = extract_json_vector_internal<T>(
+            deserialize,
+            json,
+            errc,
+            required
+            );
+
+        return xbox_live_result<xsapi_internal_vector<T>>(
+            jsonVector,
+            errc,
+            ""
+            );
+    }
+
+    template<typename T, typename F>
     static xbox_live_result<xsapi_internal_vector<T>> extract_xbox_live_result_json_vector(
         _In_ F deserialize,
         _In_ const web::json::value& json,
@@ -702,6 +934,40 @@ public:
 
         return result;
     }
+
+    template<typename T, typename F>
+    static xsapi_internal_vector<T> extract_json_vector_internal(
+        _In_ F deserialize,
+        _In_ const web::json::value& json,
+        _Inout_ std::error_code& errc,
+        _In_ bool required
+    )
+    {
+        xsapi_internal_vector<T> result;
+        if (!json.is_array())
+        {
+            if (required)
+            {
+                errc = xbox_live_error_code::json_error;
+            }
+            return result;
+        }
+
+        auto arrJson = json.as_array();
+        for (uint32_t i = 0; i < arrJson.size(); ++i)
+        {
+            auto it = arrJson[i];
+            auto obj = deserialize(it);
+            if (obj.err())
+            {
+                errc = obj.err();
+            }
+            result.push_back(obj.payload());
+        }
+
+        return result;
+    }
+
 
     template<typename T, typename F>
     static std::vector<T> extract_json_vector(
@@ -831,6 +1097,11 @@ public:
         _In_ string_t::value_type seperator
     );
 
+    static xsapi_internal_vector<xsapi_internal_string> string_split(
+        _In_ const xsapi_internal_string& string,
+        _In_ xsapi_internal_string::value_type seperator
+    );
+
     static xbox::services::xbox_live_error_code convert_exception_to_xbox_live_error_code();
 
     static string_t vector_join(
@@ -876,26 +1147,15 @@ public:
     }
 #endif
 
-#ifdef UWP_API // TODO add definitions for other platforms
-
     static xsapi_internal_string internal_string_from_string_t(_In_ const string_t& externalString);
-    static xsapi_internal_string internal_string_from_utf16(_In_reads_(size) PCWSTR utf16, size_t size);
+    static xsapi_internal_string internal_string_from_char_t(_In_ const char_t* char_t);
     static xsapi_internal_string internal_string_from_utf16(_In_z_ PCWSTR utf16);
 
     static string_t string_t_from_internal_string(_In_ const xsapi_internal_string& internalString);
-    static string_t string_t_from_utf8(_In_reads_(size) PCSTR utf8, size_t size);
     static string_t string_t_from_utf8(_In_z_ PCSTR utf8);
 
-    // TODO remove these after migrating all APIs
-    static std::string utf8_from_utf16(std::wstring const& utf16);
-    static std::wstring utf16_from_utf8(std::string const& utf8);
-
-    static std::string utf8_from_utf16(_In_z_ PCWSTR utf16);
-    static std::wstring utf16_from_utf8(_In_z_ PCSTR utf8);
-
-    static std::string utf8_from_utf16(_In_reads_(size) PCWSTR utf16, size_t size);
-    static std::wstring utf16_from_utf8(_In_reads_(size) PCSTR utf8, size_t size);
-#endif
+    static int utf8_from_char_t(_In_z_ const char_t* inArray, _Out_writes_z_(cchOutArray) char* outArray, _In_ int cchOutArray);
+    static int char_t_from_utf8(_In_z_ const char* inArray, _Out_writes_z_(cchOutArray) char_t* outArray, _In_ int cchOutArray);
 
     static void generate_locales();
     static const xsapi_internal_string& get_locales();
@@ -933,6 +1193,22 @@ public:
             deserializationResult.set_payload(T());
         }
 
+        const std::error_code& httpErrorCode = response->err_code();
+        if (httpErrorCode != xbox_live_error_code::no_error)
+        {
+            deserializationResult._Set_err(httpErrorCode);
+            deserializationResult._Set_err_message(std::string(response->err_message().data()));
+        }
+
+        return deserializationResult;
+    }
+
+    template<>
+    static xbox::services::xbox_live_result<void> generate_xbox_live_result(
+        _Inout_ xbox::services::xbox_live_result<void> deserializationResult,
+        _In_ const std::shared_ptr<xbox::services::http_call_response_internal>& response
+    )
+    {
         const std::error_code& httpErrorCode = response->err_code();
         if (httpErrorCode != xbox_live_error_code::no_error)
         {
@@ -1086,11 +1362,27 @@ public:
 #endif
     }
 
+    inline static uint32_t internal_string_to_uint32(
+        _In_ const xsapi_internal_string& str
+    )
+    {
+        return std::strtoul(str.c_str(), nullptr, 0);
+    }
+
     inline static string_t uint32_to_string_t(
-        _In_ const uint32_t& val
+        _In_ uint32_t val
     )
     {
         stringstream_t stream;
+        stream << val;
+        return stream.str();
+    }
+
+    inline static xsapi_internal_string uint64_to_internal_string(
+        _In_ uint64_t val
+    )
+    {
+        xsapi_internal_stringstream stream;
         stream << val;
         return stream.str();
     }
@@ -1167,10 +1459,14 @@ public:
         size_t stringArrayCount
         );
 
-    // These both might not be needed
     static xsapi_internal_vector<xsapi_internal_string> string_array_to_internal_string_vector(
-        PCSTR *stringArray,
+        PCSTR* stringArray,
         size_t stringArrayCount
+        );
+
+    static xsapi_internal_vector<xsapi_internal_string> xuid_array_to_internal_string_vector(
+        uint64_t* xuidArray,
+        size_t xuidArrayCount
         );
 
     template<typename T>
@@ -1202,25 +1498,24 @@ public:
         }
         else
         {
-            XSAPI_ASSERT(false && "Context not found!");
+            XSAPI_ASSERT(false && "Shared pointer not found!");
             return std::shared_ptr<T>();
         }
     }
 
 #if XSAPI_C
-    static PCSTR alloc_string(const string_t& str);
-    static void free_string(PCSTR str);
-
     static time_t time_t_from_datetime(const utility::datetime& datetime);
 
     static utility::datetime datetime_from_time_t(const time_t* time);
 
+    // TODO REMOVE
     static XBL_RESULT create_xbl_result(std::error_code errc);
-    static XBL_RESULT create_xbl_result(HC_RESULT hcResult);
 
-    static XBL_RESULT std_bad_alloc_to_xbl_result(std::bad_alloc const& e);
-    static XBL_RESULT std_exception_to_xbl_result(std::exception const& e);
-    static XBL_RESULT unknown_exception_to_xbl_result();
+    static HRESULT hresult_from_error_code(std::error_code errc);
+
+    static HRESULT std_bad_alloc_to_xbl_result(std::bad_alloc const& e);
+    static HRESULT std_exception_to_xbl_result(std::exception const& e);
+    static HRESULT unknown_exception_to_xbl_result();
 #endif
 
 private:
@@ -1231,110 +1526,8 @@ private:
     utils& operator=(const utils&);
 };
 
+// TODO remove this
 static const uint64_t XSAPI_DEFAULT_TASKGROUP = 99;
-
-template<typename... Args>
-class xbox_live_callback
-{
-public:
-    xbox_live_callback() : m_callable(nullptr) {}
-    xbox_live_callback(nullptr_t) : m_callable(nullptr) {}
-
-    template <typename Functor>
-    xbox_live_callback(Functor functor)
-    {
-        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(functor).release());
-    }
-
-    xbox_live_callback(const xbox_live_callback& rhs)
-    {
-        *this = rhs;
-    }
-
-    xbox_live_callback(xbox_live_callback&& rhs)
-    {
-        *this = std::move(rhs);
-    }
-
-    template <typename Functor>
-    xbox_live_callback& operator=(Functor f)
-    {
-        m_callable = xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(f).release());
-        return *this;
-    }
-
-    xbox_live_callback& operator=(const xbox_live_callback& rhs)
-    {
-        if (rhs.m_callable != nullptr)
-        {
-            m_callable = rhs.m_callable->copy();
-        }
-        else
-        {
-            m_callable = nullptr;
-        }
-        return *this;
-    }
-
-    xbox_live_callback& operator=(xbox_live_callback&& rhs)
-    {
-        m_callable = std::move(rhs.m_callable);
-        return *this;
-    }
-
-    xbox_live_callback& operator=(nullptr_t)
-    {
-        m_callable = nullptr;
-        return *this;
-    }
-
-    void operator()(Args... args) const
-    {
-        if (m_callable != nullptr)
-        {
-            (*m_callable)(args...);
-        }
-    }
-
-    bool operator==(std::nullptr_t) noexcept
-    {
-        return m_callable == nullptr;
-    }
-
-    bool operator!=(std::nullptr_t) noexcept
-    {
-        return m_callable != nullptr;
-    }
-
-private:
-    struct ICallable
-    {
-        virtual ~ICallable() = default;
-        virtual void operator()(Args...) = 0;
-        virtual xsapi_unique_ptr<ICallable> copy() = 0;
-    };
-
-    template <typename Functor>
-    struct callable : public ICallable
-    {
-        callable(const Functor& functor) : m_functor(functor) { }
-        ~callable() override = default;
-
-        void operator()(Args... args) override
-        {
-            m_functor(args...);
-        }
-
-        xsapi_unique_ptr<ICallable> copy() override
-        {
-            return xsapi_unique_ptr<ICallable>(xsapi_allocate_unique<callable<Functor>>(m_functor).release());
-        }
-
-        Functor m_functor;
-    };
-
-    xsapi_unique_ptr<ICallable> m_callable;
-};
 
 class buffer_allocator
 {
@@ -1378,9 +1571,83 @@ public:
         }
     }
 
+    template<typename T>
+    T* alloc_array(uint32_t count)
+    {
+        if (sizeof(T) * count <= m_cbRemaining)
+        {
+            T* first = nullptr;
+            for (uint32_t i = 0; i < count; ++i)
+            {
+                T* elt = alloc<T>();
+                if (first == nullptr)
+                {
+                    first = elt;
+                }
+            }
+            return first;
+        }
+        else
+        {
+            XSAPI_ASSERT(false && "Buffer unexpectedly to small!");
+            return nullptr;
+        }
+    }
+
 private:
     char *m_buffer;
     size_t m_cbRemaining;
+};
+
+template<typename K, typename V>
+class bimap
+{
+public:
+    typename xsapi_internal_unordered_map<K, V>::iterator find(const K& key)
+    {
+        return m_map.find(key);
+    }
+
+    typename xsapi_internal_unordered_map<K, V>::iterator begin()
+    {
+        return m_map.begin();
+    }
+
+    typename xsapi_internal_unordered_map<K, V>::iterator end()
+    {
+        return m_map.end();
+    }
+
+    typename xsapi_internal_unordered_map<V, K>::iterator reverse_find(const V& value)
+    {
+        return m_reverseMap.find(value);
+    }
+
+    typename xsapi_internal_unordered_map<V, K>::iterator reverse_begin()
+    {
+        return m_reverseMap.begin();
+    }
+
+    typename xsapi_internal_unordered_map<V, K>::iterator reverse_end()
+    {
+        return m_reverseMap.end();
+    }
+
+    void insert(const K& key, const V& value)
+    {
+        m_map[key] = value;
+        m_reverseMap[value] = key;
+    }
+
+    void erase(typename xsapi_internal_unordered_map<K, V>::iterator iterator)
+    {
+        m_reverseMap.erase(iterator->second);
+        m_map.erase(iterator);
+    }
+
+private:
+    xsapi_internal_unordered_map<K, V> m_map;
+    xsapi_internal_unordered_map<V, K> m_reverseMap;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

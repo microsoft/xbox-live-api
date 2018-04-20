@@ -17,8 +17,11 @@ xbox_live_app_config::get_app_config_singleton()
     std::lock_guard<std::recursive_mutex> guard(xsapiSingleton->m_appConfigLock);
     if (xsapiSingleton->m_appConfigSingleton == nullptr)
     {
+        auto buffer = xbox::services::system::xsapi_memory::mem_alloc(sizeof(xbox_live_app_config));
+
         xsapiSingleton->m_appConfigSingleton = std::shared_ptr<xbox_live_app_config>(
-            new xbox_live_app_config(xbox_live_app_config_internal::get_app_config_singleton())
+            new (buffer) xbox_live_app_config(xbox_live_app_config_internal::get_app_config_singleton()),
+            xsapi_alloc_deleter<xbox_live_app_config>()
             );
     }
 
@@ -47,7 +50,8 @@ xbox_live_app_config_internal::get_app_config_singleton()
         auto buffer = xbox::services::system::xsapi_memory::mem_alloc(sizeof(xbox_live_app_config_internal));
 
         xsapiSingleton->m_internalAppConfigSinglton = std::shared_ptr<xbox_live_app_config_internal>(
-            new (buffer) xbox_live_app_config_internal()
+            new (buffer) xbox_live_app_config_internal(),
+            xsapi_alloc_deleter<xbox_live_app_config_internal>()
             );
     }
 
@@ -78,8 +82,8 @@ xbox_live_result<void> xbox_live_app_config_internal::read()
     xbox::services::system::xbox_system_factory::get_factory();
 
 #if TV_API
-    m_sandbox = Windows::Xbox::Services::XboxLiveConfiguration::SandboxId->Data();
-    m_scid = Windows::Xbox::Services::XboxLiveConfiguration::PrimaryServiceConfigId->Data();
+    m_sandbox = utils::internal_string_from_char_t(Windows::Xbox::Services::XboxLiveConfiguration::SandboxId->Data());
+    m_scid = utils::internal_string_from_char_t(Windows::Xbox::Services::XboxLiveConfiguration::PrimaryServiceConfigId->Data());
     m_titleId = std::stoi(Windows::Xbox::Services::XboxLiveConfiguration::TitleId->Data());
 #else
     std::shared_ptr<xbox::services::local_config> localConfig = xbox::services::system::xbox_system_factory::get_factory()->create_local_config();

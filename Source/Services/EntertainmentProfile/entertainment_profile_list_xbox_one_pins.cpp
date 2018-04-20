@@ -37,7 +37,7 @@ pplx::task<xbox::services::xbox_live_result<void>> entertainment_profile_list_xb
     RETURN_TASK_CPP_INVALIDARGUMENT_IF(locale.empty(), void, "locale is empty");
     RETURN_TASK_CPP_INVALIDARGUMENT_IF(provider.empty(), void, "provider is empty");
 
-    auto subPath = entertainment_profile_list_xbox_one_pins_add_item_sub_path(m_userContext->xbox_user_id());
+    auto subPath = entertainment_profile_list_xbox_one_pins_add_item_sub_path(utils::string_t_from_internal_string(m_userContext->xbox_user_id()));
 
     std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
@@ -102,7 +102,7 @@ pplx::task<xbox::services::xbox_live_result<void>> entertainment_profile_list_xb
 {
     RETURN_TASK_CPP_INVALIDARGUMENT_IF(provider.empty(), void, "provider is empty");
 
-    auto subPath = entertainment_profile_list_xbox_one_pins_remove_item_sub_path(m_userContext->xbox_user_id());
+    auto subPath = entertainment_profile_list_xbox_one_pins_remove_item_sub_path(utils::string_t_from_internal_string(m_userContext->xbox_user_id()));
 
     std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
@@ -149,7 +149,7 @@ pplx::task<xbox::services::xbox_live_result<entertainment_profile_list_contains_
 {
     RETURN_TASK_CPP_INVALIDARGUMENT_IF(provider.empty(), entertainment_profile_list_contains_item_result, "provider is empty");
 
-    auto subPath = entertainment_profile_list_xbox_one_pins_contains_item_sub_path(m_userContext->xbox_user_id());
+    auto subPath = entertainment_profile_list_xbox_one_pins_contains_item_sub_path(utils::string_t_from_internal_string(m_userContext->xbox_user_id()));
 
     std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,

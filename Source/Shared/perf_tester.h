@@ -25,12 +25,12 @@ class perf_tester
 public:
     perf_tester() { }
 
-    perf_tester(_In_ string_t ownerName) :
+    perf_tester(_In_ xsapi_internal_string ownerName) :
         m_ownerName(std::move(ownerName))
     {
     }
 
-    void start_timer(_In_ const string_t& logName)
+    void start_timer(_In_ const xsapi_internal_string& logName)
     {
     #if PERF_TESTING
         perf_counter counter;
@@ -44,7 +44,7 @@ public:
     #endif
     }
 
-    void stop_timer(_In_ const string_t& logName, _In_ bool shouldReportAnyways = false)
+    void stop_timer(_In_ const xsapi_internal_string& logName, _In_ bool shouldReportAnyways = false)
     {
     #if PERF_TESTING
         std::chrono::nanoseconds totalTime = std::chrono::high_resolution_clock::now() - m_logNameToProcessTime[logName].previousTime;
@@ -82,8 +82,8 @@ public:
     }
 
 private:
-    string_t m_ownerName;
-    std::map<string_t, perf_counter> m_logNameToProcessTime;
+    xsapi_internal_string m_ownerName;
+    std::map<xsapi_internal_string, perf_counter> m_logNameToProcessTime;
     xbox::services::system::xbox_live_mutex m_lock;
 };
 

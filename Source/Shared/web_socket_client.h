@@ -15,12 +15,12 @@ public:
         _In_ const std::shared_ptr<user_context>& userContext,
         _In_ const xsapi_internal_string& uri,
         _In_ const xsapi_internal_string& subProtocol,
-        _In_ xbox::services::xbox_live_callback<HC_RESULT, uint32_t> callback
+        _In_ xbox::services::xbox_live_callback<WebSocketCompletionResult> callback
         );
 
     virtual void send(
         _In_ const xsapi_internal_string& message,
-        _In_ xbox::services::xbox_live_callback<HC_RESULT, uint32_t> callback
+        _In_ xbox::services::xbox_live_callback<WebSocketCompletionResult> callback
         );
 
     virtual void close();
@@ -30,16 +30,16 @@ public:
         );
 
     virtual void set_closed_handler(
-        _In_ xbox_live_callback<HC_WEBSOCKET_CLOSE_STATUS> handler
+        _In_ xbox_live_callback<HCWebSocketCloseStatus> handler
         );
 
 private:
-    HC_WEBSOCKET_HANDLE m_websocket;
+    hc_websocket_handle_t m_websocket;
 
     xbox_live_callback<xsapi_internal_string> m_receiveHandler;
-    xbox_live_callback<HC_WEBSOCKET_CLOSE_STATUS> m_closeHandler;
+    xbox_live_callback<HCWebSocketCloseStatus> m_closeHandler;
 
-    static xsapi_internal_unordered_map<HC_WEBSOCKET_HANDLE, xbox_web_socket_client*> m_handleMap;
+    static xsapi_internal_unordered_map<hc_websocket_handle_t, xbox_web_socket_client*> m_handleMap;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

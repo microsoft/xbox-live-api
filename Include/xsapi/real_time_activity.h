@@ -314,12 +314,12 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    static std::unordered_map<string_t, uint32_t> _Rta_activation_map();
+    static std::unordered_map<xsapi_internal_string, uint32_t> _Rta_activation_map();
 
     /// <summary>
     /// Internal function
     /// </summary>
-    static std::unordered_map<string_t, uint32_t> _Rta_manager_activation_map();
+    static std::unordered_map<xsapi_internal_string, uint32_t> _Rta_manager_activation_map();
 
 private:
     std::unordered_map<function_context, std::function<void(real_time_activity_connection_state)>> m_connectionStateChangeHandler;

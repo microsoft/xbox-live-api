@@ -111,7 +111,7 @@ public:
         auto user = SignInUserWithMocks_WinRT();
 
         xbox::services::user_context userContext(user);
-        VERIFY_ARE_EQUAL_STR(L"TestXboxUserId", userContext.xbox_user_id()); // StockMock results
+        VERIFY_ARE_EQUAL_STR("TestXboxUserId", userContext.xbox_user_id()); // StockMock results
         VERIFY_ARE_EQUAL(user->XboxUserId, userContext.user()->XboxUserId);
     }
 

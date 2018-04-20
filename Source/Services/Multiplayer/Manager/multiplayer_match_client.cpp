@@ -555,7 +555,7 @@ multiplayer_match_client::handle_match_found(
     m_matchStatus = match_status::found;
     auto targetSessionRef = currentSession->matchmaking_server().target_session_ref();
     auto targetGameSession = std::make_shared<multiplayer_session>(
-        primaryXboxLiveContext->xbox_live_user_id(),
+        utils::string_t_from_internal_string(primaryXboxLiveContext->xbox_live_user_id()),
         targetSessionRef
         );
 

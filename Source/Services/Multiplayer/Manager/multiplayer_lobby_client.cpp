@@ -684,7 +684,7 @@ multiplayer_lobby_client::commit_pending_lobby_changes(
             auto primaryContext  = m_multiplayerLocalUserManager->get_primary_context();
             if (joinByHandleId)
             {
-                latestLobbySession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id());
+                latestLobbySession = std::make_shared<multiplayer_session>(utils::string_t_from_internal_string(primaryContext->xbox_live_user_id()));
             }
             else
             {
@@ -698,7 +698,7 @@ multiplayer_lobby_client::commit_pending_lobby_changes(
                         );
                 }
 
-                latestLobbySession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id(), sessionRef);
+                latestLobbySession = std::make_shared<multiplayer_session>(utils::string_t_from_internal_string(primaryContext->xbox_live_user_id()), sessionRef);
             }
         }
         else
@@ -947,7 +947,7 @@ multiplayer_lobby_client::create_game_from_lobby()
         auto sessionToCommitCopy  = lobbySession->_Create_deep_copy();
 
         string_t jsonValue;
-        jsonValue = _T("pending~") + primaryContext->xbox_live_user_id();
+        jsonValue = _T("pending~") + utils::string_t_from_internal_string(primaryContext->xbox_live_user_id());
         sessionToCommitCopy->set_session_custom_property_json(multiplayer_lobby_client::c_transferHandlePropertyName, web::json::value::string(jsonValue));
 
         auto commitResult = pThis->m_sessionWriter->commit_synchronized_changes(sessionToCommitCopy).get();
@@ -1021,7 +1021,7 @@ multiplayer_lobby_client::advertise_game_session()
 
         auto lobbyProperties = lobbySession->session_properties()->session_custom_properties_json();
         if (!lobbyProperties.has_field(c_transferHandlePropertyName) ||
-            (pThis->is_transfer_handle_state(_T("pending")) && pThis->get_transfer_handle() == primaryContext->xbox_live_user_id()))
+            (pThis->is_transfer_handle_state(_T("pending")) && pThis->get_transfer_handle() == utils::string_t_from_internal_string(primaryContext->xbox_live_user_id())))
         {
             auto gameSession = pThis->game_session();
             if (gameSession == nullptr) return;
@@ -1238,7 +1238,7 @@ multiplayer_lobby_client::handle_lobby_change_events(
     _In_ const std::vector<std::shared_ptr<multiplayer_client_pending_request>>& processingQueue
     )
 {
-    std::map<string_t, web::json::value> localUserMap;
+    std::map<string_t, web::json::value> localUsersMap;
     string_t localUserConnectionAddress;
     for (auto& request : processingQueue)
     {
@@ -1270,7 +1270,7 @@ multiplayer_lobby_client::handle_lobby_change_events(
                     request->context()
                     );
 
-                localUserMap[prop.first] = prop.second;
+                localUsersMap[prop.first] = prop.second;
             }
         }
     }
@@ -1286,13 +1286,13 @@ multiplayer_lobby_client::handle_lobby_change_events(
         }
     }
 
-    if (localUserMap.size() != 0 || !localUserConnectionAddress.empty())
+    if (localUsersMap.size() != 0 || !localUserConnectionAddress.empty())
     {
         // write member properties to the game session.
         auto gameClient = game_client();
         if (gameClient != nullptr)
         {
-            gameClient->set_local_member_properties_to_remote_session(localUser, localUserMap, localUserConnectionAddress);
+            gameClient->set_local_member_properties_to_remote_session(localUser, localUsersMap, localUserConnectionAddress);
         }
     }
 }

@@ -17,7 +17,7 @@ web_socket_connection::web_socket_connection(
     _In_ const xsapi_internal_string& uri,
     _In_ const xsapi_internal_string& subProtocol,
     _In_ std::shared_ptr<xbox_live_context_settings> httpSetting
-) :
+    ) :
     m_userContext(std::move(userContext)),
     m_uri(std::move(uri)),
     m_subProtocol(std::move(subProtocol)),
@@ -30,34 +30,69 @@ web_socket_connection::web_socket_connection(
     XSAPI_ASSERT(m_httpSetting != nullptr);
 }
 
-void web_socket_connection::attempt_connect(
-    _In_ std::chrono::milliseconds retryInterval,
-    _In_ std::chrono::time_point<std::chrono::steady_clock> startTime
-    )
+HRESULT web_socket_connection::attempt_connect(retry_context* retryContext, AsyncBlock* asyncBlock)
 {
-    LOG_DEBUG("Start websocket connection attempt");
-
-    auto pThis = shared_from_this();
-    m_client->connect(m_userContext, m_uri, m_subProtocol,
-        [pThis, retryInterval, startTime](HC_RESULT errorCode, uint32_t platformErrorCode)
+    HRESULT hr = BeginAsync(asyncBlock, retryContext, nullptr, __FUNCTION__,
+        [](AsyncOp opCode, const AsyncProviderData* data)
     {
-        if (errorCode == HC_OK)
+        switch (opCode)
+        {
+        case AsyncOp_DoWork:
+            auto retryContext = static_cast<retry_context*>(data->context);
+
+            retryContext->pThis->m_client->connect(retryContext->pThis->m_userContext, 
+                retryContext->pThis->m_uri, 
+                retryContext->pThis->m_subProtocol,
+                [data, retryContext](WebSocketCompletionResult result)
+            {
+                retryContext->result = result;
+                CompleteAsync(data->async, S_OK, 0);
+            });
+            return E_PENDING;
+        }
+        return S_OK;
+    });
+
+    if (SUCCEEDED(hr))
+    {
+        hr = ScheduleAsync(asyncBlock, retryContext->delay);
+    }
+    return hr;
+}
+
+void web_socket_connection::retry_until_connected(retry_context* context)
+{
+    AsyncBlock* nestedAsyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    nestedAsyncBlock->context = context;
+    if (context->outerAsyncBlock->queue != nullptr)
+    {
+        // TODO since we are never setting the outer async queue
+        CreateNestedAsyncQueue(context->outerAsyncBlock->queue, &nestedAsyncBlock->queue); 
+    }
+
+    nestedAsyncBlock->callback = [](AsyncBlock* async)
+    {
+        retry_context* retryContext = static_cast<retry_context*>(async->context);
+        auto pThis = retryContext->pThis;
+        if (SUCCEEDED(retryContext->result.errorCode))
         {
             pThis->m_attemptingConnection = false;
             pThis->set_state_helper(web_socket_connection_state::connected);
 
-            pThis->m_client->set_closed_handler([pThis](HC_WEBSOCKET_CLOSE_STATUS closeStatus)
+            pThis->m_client->set_closed_handler([pThis](HCWebSocketCloseStatus closeStatus)
             {
                 pThis->on_close(closeStatus);
             });
+
+            CompleteAsync(retryContext->outerAsyncBlock, S_OK, 0);
         }
         else
         {
-            LOGS_INFO << "Websocket connect attempt failed with platform error code..." << platformErrorCode;
+            LOGS_INFO << "Websocket connect attempt failed with platform error code..." << retryContext->result.platformErrorCode;
 
             // check if we need to retry
             auto timeCurrent = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeCurrent - startTime);
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeCurrent - retryContext->startTime);
 
             if (duration >= pThis->m_httpSetting->websocket_timeout_window())
             {
@@ -65,20 +100,26 @@ void web_socket_connection::attempt_connect(
                 pThis->set_state_helper(web_socket_connection_state::disconnected);
             }
 
-            std::this_thread::sleep_for(retryInterval);
-
             if (!pThis->m_closeRequested)
             {
                 // increase retry interval each time
-                auto newRetryInterval = min((3 * retryInterval), std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::minutes(1)));
-                pThis->attempt_connect(newRetryInterval, startTime);
+                retryContext->delay = min((3 * retryContext->delay), 1000 * 60 /* 1 minute in ms */);
+                pThis->retry_until_connected(retryContext);
             }
             else
             {
                 pThis->m_attemptingConnection = false;
             }
         }
-    });
+        xsapi_memory::mem_free(async);
+    };
+
+    HRESULT hr = attempt_connect(context, nestedAsyncBlock);
+    if (FAILED(hr))
+    {
+        CompleteAsync(context->outerAsyncBlock, hr, 0);
+        return;
+    }
 }
 
 void web_socket_connection::ensure_connected()
@@ -100,21 +141,33 @@ void web_socket_connection::ensure_connected()
     m_attemptingConnection = true;
     set_state_helper(web_socket_connection_state::connecting);
 
-    auto context = utils::store_shared_ptr(shared_from_this());
-    HCTaskCreate(HC_SUBSYSTEM_ID_XSAPI, XSAPI_DEFAULT_TASKGROUP,
-        [](void* context, HC_TASK_HANDLE taskHandle)
+    AsyncBlock* outerAsync = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    outerAsync->callback = [](AsyncBlock* async)
+    {
+        LOG_DEBUG("Web socket connection completed.");
+        xsapi_memory::mem_free(async);
+    };
+
+    auto retryContext = xsapi_allocate_shared<retry_context>();
+    retryContext->delay = 0;
+    retryContext->outerAsyncBlock = outerAsync;
+    retryContext->pThis = shared_from_this();
+    retryContext->startTime = std::chrono::high_resolution_clock::now();
+
+    BeginAsync(outerAsync, utils::store_shared_ptr(retryContext), nullptr, __FUNCTION__,
+        [](_In_ AsyncOp op, _In_ const AsyncProviderData* data)
+    {
+        auto context = utils::remove_shared_ptr<retry_context>(data->context, op == AsyncOp_Cleanup);
+
+        switch (op)
         {
-            auto pThis = utils::remove_shared_ptr<web_socket_connection>(context);
-            pThis->attempt_connect(std::chrono::milliseconds(100), std::chrono::high_resolution_clock::now());
-            return HC_OK;
-        },
-        context,
-        nullptr,
-        nullptr,
-        nullptr,
-        nullptr,
-        nullptr
-        );
+        case AsyncOp_DoWork:
+            context->pThis->retry_until_connected(context.get());
+            return E_PENDING;
+        }
+        return S_OK;
+    });
+    ScheduleAsync(outerAsync, 0);
 }
 
 web_socket_connection_state
@@ -127,7 +180,7 @@ web_socket_connection::state()
 void 
 web_socket_connection::send(
     _In_ const xsapi_internal_string& message,
-    _In_ xbox::services::xbox_live_callback<HC_RESULT, uint32_t> callback
+    _In_ xbox::services::xbox_live_callback<WebSocketCompletionResult> callback
     )
 {
     m_client->send(message, callback);
@@ -152,12 +205,12 @@ web_socket_connection::set_received_handler(
 }
 
 void
-web_socket_connection::on_close(HC_WEBSOCKET_CLOSE_STATUS closeStatus)
+web_socket_connection::on_close(HCWebSocketCloseStatus closeStatus)
 {
     // websocket_close_status::normal means the socket completed its purpose. Normally it means close
     // was triggered by client. Don't reconnect.
     LOGS_INFO << "web_socket_connection on_close code:" << closeStatus;
-    if (closeStatus != HC_WEBSOCKET_CLOSE_NORMAL && !m_closeRequested)
+    if (closeStatus != HCWebSocketCloseStatus_Normal && !m_closeRequested)
     {
         LOG_INFO("web_socket_connection on close, not requested");
         // try to reconnect

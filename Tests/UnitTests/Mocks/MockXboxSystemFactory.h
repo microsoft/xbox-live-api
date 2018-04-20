@@ -16,9 +16,13 @@ using namespace multiplayer;
 
 struct HttpResponseStruct
 {
-    std::vector<std::shared_ptr<http_call_response>> responseList;
     uint32_t counter = 0;
+
+    std::vector<std::shared_ptr<http_call_response>> responseList; // TODO get rid of this eventually
+    std::vector<std::shared_ptr<http_call_response_internal>> responseListInternal;
+
     std::function<void(std::shared_ptr<http_call_response>&, const string_t& requestPost)> fRequestPostFunc;
+    xbox_live_callback<std::shared_ptr<http_call_response_internal>, const xsapi_internal_string&> fRequestPostFuncInternal;
 };
 
 struct WebsocketMockResponse

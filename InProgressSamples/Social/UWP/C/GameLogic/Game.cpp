@@ -15,66 +15,109 @@ using namespace Concurrency;
 Game* g_sampleInstance = nullptr;
 std::mutex Game::m_displayEventQueueLock;
 
-HANDLE g_stopRequestedHandle;
-HANDLE g_workReadyHandle;
-HANDLE g_completionReadyHandle;
-XBL_ASYNC_QUEUE g_asyncQueue;
+class win32_handle
+{
+public:
+    win32_handle() : m_handle(nullptr)
+    {
+    }
 
-void xbl_event_handler(
-    _In_opt_ void* context,
-    _In_ XBL_ASYNC_EVENT_TYPE eventType,
-    _In_ XBL_ASYNC_QUEUE queue
+    ~win32_handle()
+    {
+        if (m_handle != nullptr) CloseHandle(m_handle);
+        m_handle = nullptr;
+    }
+
+    void set(HANDLE handle)
+    {
+        m_handle = handle;
+    }
+
+    HANDLE get() { return m_handle; }
+
+private:
+    HANDLE m_handle;
+};
+
+win32_handle g_stopRequestedHandle;
+win32_handle g_workReadyHandle;
+win32_handle g_completionReadyHandle;
+
+void CALLBACK HandleAsyncQueueCallback(
+    _In_ void* context,
+    _In_ async_queue_handle_t queue,
+    _In_ AsyncQueueCallbackType type
 )
 {
     UNREFERENCED_PARAMETER(context);
     UNREFERENCED_PARAMETER(queue);
 
-    switch (eventType)
+    switch (type)
     {
-    case XBL_ASYNC_EVENT_TYPE::XBL_ASYNC_EVENT_WORK_READY:
-        SetEvent(g_workReadyHandle);
+    case AsyncQueueCallbackType::AsyncQueueCallbackType_Work:
+        SetEvent(g_workReadyHandle.get());
         break;
 
-    case XBL_ASYNC_EVENT_TYPE::XBL_ASYNC_EVENT_COMPLETION_READY:
-        SetEvent(g_completionReadyHandle);
+    case AsyncQueueCallbackType::AsyncQueueCallbackType_Completion:
+        SetEvent(g_completionReadyHandle.get());
         break;
     }
 }
+
 
 DWORD WINAPI background_thread_proc(LPVOID lpParam)
 {
     HANDLE hEvents[3] =
     {
-        g_workReadyHandle,
-        g_completionReadyHandle,
-        g_stopRequestedHandle
+        g_workReadyHandle.get(),
+        g_completionReadyHandle.get(),
+        g_stopRequestedHandle.get()
     };
 
+    async_queue_handle_t queue;
+    uint32_t sharedAsyncQueueId = 0;
+    CreateSharedAsyncQueue(
+        sharedAsyncQueueId,
+        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
+        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
+        &queue);
+
     bool stop = false;
+    uint64_t taskGroupId = 0;
     while (!stop)
     {
         DWORD dwResult = WaitForMultipleObjectsEx(3, hEvents, false, INFINITE, false);
         switch (dwResult)
         {
-        case WAIT_OBJECT_0: // work ready 
-            XblDispatchAsyncQueue(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_WORK);
-            if (!XblIsAsyncQueueEmpty(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_WORK))
+        case WAIT_OBJECT_0: // work ready
+            DispatchAsyncQueue(queue, AsyncQueueCallbackType_Work, 0);
+
+            if (!IsAsyncQueueEmpty(queue, AsyncQueueCallbackType_Work))
             {
-                SetEvent(g_workReadyHandle);
+                // If there's more pending work, then set the event to process them
+                SetEvent(g_workReadyHandle.get());
             }
             break;
-        case WAIT_OBJECT_0 + 1: // completion ready
-            XblDispatchAsyncQueue(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_COMPLETION);
-            if (!XblIsAsyncQueueEmpty(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_COMPLETION))
+
+        case WAIT_OBJECT_0 + 1: // completed 
+                                // Typically completions should be dispatched on the game thread, but
+                                // for this simple XAML app we're doing it here
+            DispatchAsyncQueue(queue, AsyncQueueCallbackType_Completion, 0);
+
+            if (!IsAsyncQueueEmpty(queue, AsyncQueueCallbackType_Completion))
             {
-                SetEvent(g_completionReadyHandle);
+                // If there's more pending completions, then set the event to process them
+                SetEvent(g_completionReadyHandle.get());
             }
             break;
+
         default:
             stop = true;
             break;
         }
     }
+
+    CloseAsyncQueue(queue);
     return 0;
 }
 
@@ -89,21 +132,22 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
     m_deviceResources->RegisterDeviceNotify(this);
     m_sceneRenderer = std::unique_ptr<Renderer>(new Renderer(m_deviceResources));
 
-    g_stopRequestedHandle = CreateEvent(nullptr, true, false, nullptr);
-    g_workReadyHandle = CreateEvent(nullptr, false, false, nullptr);
-    g_completionReadyHandle = CreateEvent(nullptr, false, false, nullptr);
+    g_stopRequestedHandle.set(CreateEvent(nullptr, true, false, nullptr));
+    g_workReadyHandle.set(CreateEvent(nullptr, false, false, nullptr));
+    g_completionReadyHandle.set(CreateEvent(nullptr, false, false, nullptr));
 
     XblGlobalInitialize();
-    XblCreateAsyncQueue(&g_asyncQueue);
-
-    XblAddTaskEventHandler(
-        nullptr,
-        xbl_event_handler,
-        nullptr);
+    uint32_t sharedAsyncQueueId = 0;
+    CreateSharedAsyncQueue(
+        sharedAsyncQueueId,
+        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
+        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
+        &m_queue);
+    AddAsyncQueueCallbackSubmitted(m_queue, nullptr, HandleAsyncQueueCallback, &m_callbackToken);
 
     m_hBackgroundThread = CreateThread(nullptr, 0, background_thread_proc, nullptr, 0, nullptr);
 
-    XboxLiveUserCreate(&m_user);
+    XblUserCreateHandle(&m_user);
 }
 
 void Game::RegisterInputKeys()
@@ -111,6 +155,13 @@ void Game::RegisterInputKeys()
     m_input->RegisterKey(Windows::System::VirtualKey::S, ButtonPress::SignIn);
     m_input->RegisterKey(Windows::System::VirtualKey::P, ButtonPress::GetUserProfile);
     m_input->RegisterKey(Windows::System::VirtualKey::F, ButtonPress::GetFriends);
+    m_input->RegisterKey(Windows::System::VirtualKey::A, ButtonPress::GetAchievementsForTitle);
+    m_input->RegisterKey(Windows::System::VirtualKey::Number1, ButtonPress::ToggleSocialGroup1);
+    m_input->RegisterKey(Windows::System::VirtualKey::Number2, ButtonPress::ToggleSocialGroup2);
+    m_input->RegisterKey(Windows::System::VirtualKey::Number3, ButtonPress::ToggleSocialGroup3);
+    m_input->RegisterKey(Windows::System::VirtualKey::Number4, ButtonPress::ToggleSocialGroup4);
+    m_input->RegisterKey(Windows::System::VirtualKey::Number5, ButtonPress::ToggleSocialGroup5);
+    m_input->RegisterKey(Windows::System::VirtualKey::C, ButtonPress::ImportCustomList);
 }
 
 Game::~Game()
@@ -119,16 +170,14 @@ Game::~Game()
     m_deviceResources->RegisterDeviceNotify(nullptr);
     if (m_user != nullptr)
     {
-        XboxLiveUserDelete(m_user);
+        XblUserCloseHandle(m_user);
     }
     if (m_xboxLiveContext != nullptr)
     {
-        XblXboxLiveContextCloseHandle(m_xboxLiveContext);
+        XblContextCloseHandle(m_xboxLiveContext);
     }
-    if (g_asyncQueue != nullptr)
-    {
-        XblCloseAsyncQueue(g_asyncQueue);
-    }
+    RemoveAsyncQueueCallbackSubmitted(m_queue, m_callbackToken);
+    CloseAsyncQueue(m_queue);
 
     XblGlobalCleanup();
 }
@@ -151,6 +200,8 @@ void Game::Update()
     m_timer.Tick([&]()
     {
         m_input->Update();
+
+        UpdateSocialManager();
 
         switch (m_gameData->GetAppState())
         {
@@ -193,6 +244,36 @@ void Game::OnGameUpdate()
     {
         if (m_input != nullptr)
         {
+            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup1))
+            {
+                m_allFriends = !m_allFriends;
+                UpdateSocialGroupForAllUsers(m_allFriends, XblPresenceFilter_All, XblRelationshipFilter_Friends);
+            }
+
+            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup2))
+            {
+                m_onlineFriends = !m_onlineFriends;
+                UpdateSocialGroupForAllUsers(m_onlineFriends, XblPresenceFilter_AllOnline, XblRelationshipFilter_Friends);
+            }
+
+            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup3))
+            {
+                m_allFavs = !m_allFavs;
+                UpdateSocialGroupForAllUsers(m_allFavs, XblPresenceFilter_All, XblRelationshipFilter_Favorite);
+            }
+
+            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup4))
+            {
+                m_onlineInTitle = !m_onlineInTitle;
+                UpdateSocialGroupForAllUsers(m_onlineInTitle, XblPresenceFilter_TitleOnline, XblRelationshipFilter_Friends);
+            }
+
+            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup5))
+            {
+                m_customList = !m_customList;
+                UpdateSocialGroupOfListForAllUsers(m_customList);
+            }
+
             if (m_input->IsKeyDown(ButtonPress::SignIn))
             {
                 SignIn();
@@ -249,7 +330,7 @@ string_split(
     return vSubStrings;
 }
 
-void replace_all(std::wstring& str, const std::wstring& from, const std::wstring& to) 
+void replace_all(std::string& str, const std::string& from, const std::string& to)
 {
     size_t start_pos = 0;
     while ((start_pos = str.find(from, start_pos)) != std::string::npos)
@@ -287,6 +368,18 @@ void Game::ReadLastCsv()
     }
 }
 
+void Game::UpdateCustomList(_In_ const std::vector<uint64_t>& xuidList)
+{
+    m_xuidList = xuidList;
+
+    // Refresh custom list if its active
+    if (m_customList)
+    {
+        UpdateSocialGroupOfListForAllUsers(false);
+    }
+}
+
+
 void Game::ReadCsvFile(Windows::Storage::StorageFile^ file)
 {
     WCHAR text[1024];
@@ -309,7 +402,7 @@ void Game::ReadCsvFile(Windows::Storage::StorageFile^ file)
             }
 
             Windows::Foundation::Collections::IVector<Platform::String^>^ lines = t.get();
-            std::vector<string_t> xuidList;
+            std::vector<uint64_t> xuidList;
             int count = 0;
             for (Platform::String^ line : lines)
             {
@@ -322,18 +415,18 @@ void Game::ReadCsvFile(Windows::Storage::StorageFile^ file)
                 std::vector<string_t> items = string_split(line->Data(), L',');
                 if (items.size() > 4)
                 {
-                    std::wstring xuid = items[3];
-                    replace_all(xuid, L"\"", L"");
-                    replace_all(xuid, L"=", L"");
-                    xuidList.push_back(xuid);
+                    std::string xuid = utility::conversions::to_utf8string(items[3]);
+                    replace_all(xuid, "\"", "");
+                    replace_all(xuid, "=", "");
+                    xuidList.push_back(std::strtoul(xuid.data(), nullptr, 0));
 
-                    WCHAR text[1024];
-                    swprintf_s(text, ARRAYSIZE(text), L"Read from CSV: %s", xuid.c_str());
-                    pThis->Log(text);
+                    CHAR text[1024];
+                    sprintf_s(text, ARRAYSIZE(text), "Read from CSV: %s", xuid.c_str());
+                    pThis->Log(utility::conversions::utf8_to_utf16(text));
                 }
             }
 
-            //pThis->UpdateCustomList(xuidList);
+            pThis->UpdateCustomList(xuidList);
         }
         catch (Platform::Exception^)
         {
@@ -362,12 +455,9 @@ void Game::Init(Windows::UI::Core::CoreWindow^ window)
     window->KeyUp += ref new TypedEventHandler<Windows::UI::Core::CoreWindow^, Windows::UI::Core::KeyEventArgs^>(m_input, &Input::OnKeyUp);
 
     std::weak_ptr<Game> thisWeakPtr = shared_from_this();
-    AddSignOutCompletedHandler([](XBL_XBOX_LIVE_USER *user)
-    {
-        g_sampleInstance->HandleSignout(user);
-    });
+    XblAddSignOutCompletedHandler(Game::HandleSignout);
 
-    //ReadLastCsv();
+    ReadLastCsv();
     SignInSilently();
 }
 
@@ -424,152 +514,300 @@ void Game::Log(std::wstring log)
     }
 }
 
-void Game::HandleSignInResult(
-    _In_ XBL_RESULT result,
-    _In_ XSAPI_SIGN_IN_RESULT payload,
-    _In_opt_ void* context)
+void Game::Log(std::string log)
 {
-    Game *pThis = reinterpret_cast<Game*>(context);
+    Log(utility::conversions::to_utf16string(log));
+}
 
-    if (!result.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
+string_t
+ConvertEventTypeToString(XblSocialEventType eventType)
+{
+    switch (eventType)
     {
-        pThis->Log(L"Failed signing in.");
-        return;
+    case XblSocialEventType_UsersAddedToSocialGraph: return _T("users_added");
+    case XblSocialEventType_UsersRemovedFromSocialGraph: return _T("users_removed");
+    case XblSocialEventType_PresenceChanged: return _T("presence_changed");
+    case XblSocialEventType_ProfilesChanged: return _T("profiles_changed");
+    case XblSocialEventType_SocialRelationshipsChanged: return _T("social_relationships_changed");
+    case XblSocialEventType_LocalUserAdded: return _T("local_user_added");
+    case XblSocialEventType_LocalUserRemoved: return _T("local user removed");
+    case XblSocialEventType_SocialUserGroupLoaded : return _T("social_user_group_loaded");
+    case XblSocialEventType_SocialUserGroupUpdated: return _T("social_user_group_updated");
+    default: return _T("unknown");
     }
+}
 
-    switch (payload.status)
+void
+Game::LogSocialEventList(XblSocialEvent* events, uint32_t eventCount)
+{
+    for (uint32_t i = 0; i < eventCount; ++i)
     {
-        case xbox::services::system::sign_in_status::success:
-            XblXboxLiveContextCreateHandle(pThis->m_user, &(pThis->m_xboxLiveContext));
-            pThis->Log(L"Sign in succeeded");
-            break;
+        auto socialEvent = events[i];
 
-        case xbox::services::system::sign_in_status::user_cancel:
-            pThis->Log(L"User cancel");
-            break;
+        stringstream_t source;
+        if (socialEvent.err)
+        {
+            source << _T("Event:");
+            source << utility::conversions::to_utf16string(ConvertEventTypeToString(socialEvent.eventType));
+            source << _T(" ErrorCode: ");
+            source << socialEvent.err;
+        }
+        else
+        {
+            source << _T("Event: ");
+            source << ConvertEventTypeToString(socialEvent.eventType);
+            if (socialEvent.usersAffectedCount > 0)
+            {
+                std::vector<uint64_t> affectedUsers(socialEvent.usersAffectedCount);
 
-        case xbox::services::system::sign_in_status::user_interaction_required:
-            pThis->Log(L"User interaction required");
-            break;
+                XblSocialEventGetUsersAffected(&socialEvent, affectedUsers.data());
 
-        default:
-            pThis->Log(L"Unknown error");
-            break;
+                source << _T(" UserAffected: ");
+                for (uint32_t j = 0; j < socialEvent.usersAffectedCount; ++j)
+                {
+                    source << affectedUsers[j] << _T(", ");
+                }
+            }
+        }
+        Log(source.str());
+    }
+}
+
+void Game::UpdateSocialGroupForAllUsers(
+    _In_ bool toggle,
+    _In_ XblPresenceFilter presenceFilter,
+    _In_ XblRelationshipFilter relationshipFilter
+)
+{
+    if (m_xboxLiveContext != nullptr)
+    {
+        UpdateSocialGroup(m_user, toggle, presenceFilter, relationshipFilter);
+    }
+}
+
+void Game::UpdateSocialGroup(
+    _In_ xbl_user_handle user,
+    _In_ bool toggle,
+    _In_ XblPresenceFilter presenceFilter,
+    _In_ XblRelationshipFilter relationshipFilter
+)
+{
+    if (m_xboxLiveContext != nullptr)
+    {
+        if (toggle)
+        {
+            CreateSocialUserGroupFromFilters(user, presenceFilter, relationshipFilter);
+        }
+        else
+        {
+            DestroySocialGroup(user, presenceFilter, relationshipFilter);
+        }
+    }
+}
+
+void Game::UpdateSocialGroupOfListForAllUsers(_In_ bool toggle)
+{
+    if (m_xboxLiveContext != nullptr)
+    {
+        return UpdateSocialGroupOfList(m_user, toggle);
+    }
+}
+
+void Game::UpdateSocialGroupOfList(
+    _In_ xbl_user_handle user,
+    _In_ bool toggle
+)
+{
+    if (m_xboxLiveContext != nullptr)
+    {
+        if (toggle)
+        {
+            CreateOrUpdateSocialGroupFromList(m_user, m_xuidList);
+        }
+        else
+        {
+            DestroySocialGroup(m_user);
+        }
+    }
+}
+
+void
+Game::CreateSocialGroupsBasedOnUI(
+    xbl_user_handle user
+)
+{
+    UpdateSocialGroup(user, m_allFriends, XblPresenceFilter_All, XblRelationshipFilter_Friends);
+    UpdateSocialGroup(user, m_onlineFriends, XblPresenceFilter_AllOnline, XblRelationshipFilter_Friends);
+    UpdateSocialGroup(user, m_allFavs, XblPresenceFilter_All, XblRelationshipFilter_Favorite);
+    UpdateSocialGroup(user, m_onlineInTitle, XblPresenceFilter_AllTitle, XblRelationshipFilter_Friends);
+    UpdateSocialGroupOfList(user, m_customList);
+}
+
+
+void Game::HandleSignInResult(XblSignInResult signInResult)
+{
+    switch (signInResult.status)
+    {
+    case xbox::services::system::sign_in_status::success:
+        XblUserGetXboxUserId(m_user, &m_xuid);
+        XblContextCreateHandle(m_user, &m_xboxLiveContext);
+        AddUserToSocialManager(m_user);
+        Log(L"Sign in succeeded");
+        break;
+
+    case xbox::services::system::sign_in_status::user_cancel:
+        Log(L"User cancel");
+        break;
+
+    case xbox::services::system::sign_in_status::user_interaction_required:
+        Log(L"User interaction required");
+        break;
+
+    default:
+        Log(L"Unknown error");
+        break;
     }
 }
 
 void Game::SignIn()
 {
-    if (m_user->isSignedIn)
+    bool isSignedIn;
+    XblUserIsSignedIn(m_user, &isSignedIn);
+    if (isSignedIn)
     {
         Log(L"Already signed in.");
         return;
     }
-    XboxLiveUserSignInWithCoreDispatcher(
-        m_user, 
-        Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->CoreWindow->Dispatcher, 
-        HandleSignInResult, 
-        this,
-        g_asyncQueue);
-}
+    AsyncBlock* asyncBlock = new AsyncBlock;
+    asyncBlock->context = this;
+    asyncBlock->callback = [](AsyncBlock* asyncBlock)
+    {
+        Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-void Game::SignInSilently()
-{
-    XboxLiveUserSignInSilently(m_user, HandleSignInResult, this, g_asyncQueue);
+        XblSignInResult signInResult;
+        auto result = XblGetSignInResult(asyncBlock, &signInResult);
+
+        if (SUCCEEDED(result))
+        {
+            pThis->HandleSignInResult(signInResult);
+        }
+        else
+        {
+            pThis->Log(L"Failed signing in.");
+            return;
+        }
+        delete asyncBlock;
+    };
+
+    XblUserSignInWithCoreDispatcher(
+        m_user, 
+        Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->CoreWindow->Dispatcher,
+        asyncBlock
+        );
 }
 
 void Game::GetUserProfile()
 {
-    if (m_xboxLiveContext == nullptr || m_user == nullptr || !m_user->isSignedIn)
+    AsyncBlock* asyncBlock = new AsyncBlock{};
+    asyncBlock->queue = m_queue;
+    asyncBlock->context = this;
+    asyncBlock->callback = [](AsyncBlock* asyncBlock)
     {
-        Log(L"Must be signed in first to get profile!");
-        return;
-    }
+        Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-    XblGetUserProfile(m_xboxLiveContext, m_user->xboxUserId, g_asyncQueue, this,
-    [](XBL_RESULT result, const XBL_XBOX_USER_PROFILE *profile, void* context)
+        XblUserProfile profile;
+        XblGetProfileResult(asyncBlock, 1, &profile, nullptr);
+
+        pThis->Log(L"Successfully got profile!");
+        WCHAR text[1024];
+        swprintf_s(text, ARRAYSIZE(text), L"Gamertag: %S", profile.gamertag);
+        pThis->Log(text);
+        swprintf_s(text, ARRAYSIZE(text), L"XboxUserId: %I64u", profile.xboxUserId);
+        pThis->Log(text);
+        swprintf_s(text, ARRAYSIZE(text), L"Gamerscore: %S", profile.gamerscore);
+        pThis->Log(text);
+        swprintf_s(text, ARRAYSIZE(text), L"GameDisplayPic: %S", profile.gameDisplayPictureResizeUri);
+        pThis->Log(text);
+
+        delete asyncBlock;
+    };
+    XblGetUserProfile(m_xboxLiveContext, m_xuid, asyncBlock);
+}
+
+
+void Game::SignInSilently()
+{
+    AsyncBlock* asyncBlock = new AsyncBlock{};
+    asyncBlock->queue = m_queue;
+    asyncBlock->context = this;
+    asyncBlock->callback = [](AsyncBlock* asyncBlock)
     {
-        Game *pThis = reinterpret_cast<Game*>(context);
-        if (result.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
+        Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
+
+        XblSignInResult signInResult;
+        auto result = XblGetSignInResult(asyncBlock, &signInResult);
+
+        if (SUCCEEDED(result))
         {
-            pThis->Log(L"Successfully got profile!");
-            WCHAR text[1024];
-            swprintf_s(text, ARRAYSIZE(text), L"Gamertag: %S", profile->gamertag);
-            pThis->Log(text);
-            swprintf_s(text, ARRAYSIZE(text), L"XboxUserId: %S", profile->xboxUserId);
-            pThis->Log(text);
-            swprintf_s(text, ARRAYSIZE(text), L"Gamerscore: %S", profile->gamerscore);
-            pThis->Log(text);
-            swprintf_s(text, ARRAYSIZE(text), L"GameDisplayPic: %S", profile->gameDisplayPictureResizeUri);
-            pThis->Log(text);
+            pThis->HandleSignInResult(signInResult);
         }
         else
         {
-            pThis->Log(L"Failed getting profile.");
+            pThis->Log(L"Failed signing in.");
+            return;
         }
-    });
-}
+        delete asyncBlock;
+    };
 
-void Game::CopySocialRelationshipResult()
-{
-    XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT r;
-    r.filter = XBL_XBOX_SOCIAL_RELATIONSHIP_FILTER_ALL;
-    r.hasNext = false;
-    r.itemsCount = 3;
-    r.totalCount = 3;
-    r.items = new XBL_XBOX_SOCIAL_RELATIONSHIP[3];
-    r.items[0].xboxUserId = "1";
-    r.items[1].xboxUserId = "2";
-    r.items[2].xboxUserId = "3";
-    r.items[0].isFavorite = true;
-    r.items[1].isFavorite = true;
-    r.items[2].isFavorite = false;
-    r.items[0].socialNetworks = (PCSTR*)new char*[2];
-    r.items[0].socialNetworksCount = 2;
-    r.items[0].socialNetworks[0] = "foo";
-    r.items[0].socialNetworks[1] = "bar";
-    r.items[1].socialNetworks = nullptr;
-    r.items[1].socialNetworksCount = 0;
-    r.items[2].socialNetworks = nullptr;
-    r.items[2].socialNetworksCount = 0;
-
-    uint64_t size = 0;
-    auto copy = XblCopySocialRelationshipResult(&r, nullptr, &size);
-
-    auto buffer = new char[size];
-    copy = XblCopySocialRelationshipResult(&r, buffer, &size);
-
-    Log(L"Copied result");
+    XblUserSignInSilently(m_user, asyncBlock);
 }
 
 void Game::GetSocialRelationships()
 {
-    if (!m_user->isSignedIn)
+    AsyncBlock* asyncBlock = new AsyncBlock{};
+    asyncBlock->queue = m_queue;
+    asyncBlock->context = this;
+    asyncBlock->callback = [](AsyncBlock* asyncBlock)
     {
-        Log(L"Must be signed in first to get profile!");
-        return;
-    }
+        Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-    XblGetSocialRelationships(m_xboxLiveContext, g_asyncQueue, this,
-        [](XBL_RESULT result, CONST XBL_XBOX_SOCIAL_RELATIONSHIP_RESULT *socialResult, void* context)
-    {
-        Game *pThis = reinterpret_cast<Game*>(context);
+        size_t size;
+        auto hr = XblGetSocialRelationshipResultSize(asyncBlock, &size);
 
-        if (result.errorCondition == XBL_ERROR_CONDITION_NO_ERROR)
+        if (SUCCEEDED(hr))
         {
-            pThis->CopySocialRelationshipResult();
-            pThis->Log(L"Successfully got social relationships!");
+            auto result = (XblSocialRelationshipResult*) malloc(size);
+
+            XblGetSocialRelationshipResult(asyncBlock, size, result, nullptr);
+
+            std::stringstream ss;
+            ss << "Got social relationships. User has " << result->itemsCount << " relationships:";
+            pThis->Log(ss.str());
+
+            for (unsigned i = 0; i < result->itemsCount; ++i)
+            {
+                std::stringstream ss;
+                ss << "Xuid: " << result->items[i].xboxUserId << " isFollowing: " << result->items[i].isFollowingCaller;
+                ss << " isFavorite: " << result->items[i].isFavorite;
+                pThis->Log(ss.str());
+            }
+            free(result);
         }
         else
         {
             pThis->Log(L"Failed getting social relationships.");
         }
-    });
+    };
+
+    XblGetSocialRelationships(m_xboxLiveContext, asyncBlock);
 }
 
-void Game::HandleSignout(XBL_XBOX_LIVE_USER *user)
+void Game::HandleSignout(xbl_user_handle user)
 {
     WCHAR text[1024];
-    swprintf_s(text, ARRAYSIZE(text), L"User %s signed out", utility::conversions::utf8_to_utf16(user->gamertag).data());
+    char gamertag[GamertagMaxBytes];
+    XblUserGetGamertag(user, GamertagMaxBytes, gamertag, nullptr);
+
+    swprintf_s(text, ARRAYSIZE(text), L"User %s signed out", utility::conversions::utf8_to_utf16(gamertag).data());
     g_sampleInstance->Log(text);
 }

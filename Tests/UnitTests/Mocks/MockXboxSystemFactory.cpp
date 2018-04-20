@@ -98,6 +98,7 @@ std::shared_ptr<http_call> MockXboxSystemFactory::create_http_call(
             m_mockHttpCall->ServerName = serverName;
             m_mockHttpCall->ResultValue = std::make_shared<http_call_response>(*httpStateResponses->responseList[httpStateResponses->counter]);
             m_mockHttpCall->fRequestPostFunc = httpStateResponses->fRequestPostFunc;
+
             if (httpStateResponses->counter + 1 < httpStateResponses->responseList.size())
             {
                 ++httpStateResponses->counter;
@@ -125,9 +126,49 @@ std::shared_ptr<http_call_internal> MockXboxSystemFactory::create_http_call(
     ) 
 {
     std::lock_guard<std::mutex> lock(m_httpLock.get());
+    if (m_setupMockForHttpClient)
+    {
+        return xbox_system_factory::create_http_call(xboxLiveContextSettings, httpMethod, serverName, pathQueryFragment, xboxLiveApi);
+    }
+
+    if (m_httpStateResponses.size() > 0 || m_httpApiStateResponses.size() > 0)
+    {
+        m_mockHttpCall = std::make_shared<MockHttpCall>();
+
+        auto pathQuery = pathQueryFragment.to_string();
+
+        auto httpStateResponses = m_httpApiStateResponses[xboxLiveApi];
+        if (httpStateResponses == nullptr)
+        {
+            httpStateResponses = m_httpStateResponses[pathQuery];
+        }
+
+        if (httpStateResponses == nullptr)
+        {
+            httpStateResponses = m_httpStateResponses[utils::string_t_from_internal_string(serverName)];
+        }
+
+        if (httpStateResponses != nullptr && httpStateResponses->responseListInternal.size() > 0)
+        {
+            m_mockHttpCall->ServerName = utils::string_t_from_internal_string(serverName);
+            m_mockHttpCall->ResultValueInternal = std::make_shared<http_call_response_internal>(*httpStateResponses->responseListInternal[httpStateResponses->counter]);
+            m_mockHttpCall->fRequestPostFuncInternal = httpStateResponses->fRequestPostFuncInternal;
+
+            if (httpStateResponses->counter + 1 < httpStateResponses->responseListInternal.size())
+            {
+                ++httpStateResponses->counter;
+            }
+
+            return m_mockHttpCall;
+        }
+    }
+
+    m_mockHttpCall->fRequestPostFuncInternal = nullptr;
     m_mockHttpCall->HttpMethod = utils::string_t_from_internal_string(httpMethod);
     m_mockHttpCall->ServerName = utils::string_t_from_internal_string(serverName);
     m_mockHttpCall->PathQueryFragment = pathQueryFragment;
+    m_mockHttpCall->XboxLiveApi = xboxLiveApi;
+
     return m_mockHttpCall;
 }
 

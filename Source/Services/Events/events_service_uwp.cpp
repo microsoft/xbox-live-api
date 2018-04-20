@@ -93,7 +93,7 @@ events_service::write_in_game_event(
             std::shared_ptr<service_call_logger> tracker = service_call_logger::get_singleton_instance();
 
             service_call_logger_data logData(
-                utils::internal_string_from_string_t(m_userContext->xbox_user_id()),
+                m_userContext->xbox_user_id(),
                 utils::internal_string_from_string_t(eventName),
                 utils::internal_string_from_string_t(m_playSession),
                 utils::internal_string_from_string_t(dimensions.serialize()),
@@ -124,10 +124,10 @@ events_service::write_in_game_event(
 
 void events_service::add_common_logging_field(_In_ Windows::Foundation::Diagnostics::LoggingFields^ fields)
 {
-    fields->AddString("serviceConfigId", ref new String(m_appConfig->scid().c_str()));
-    fields->AddString("playerSessionId", ref new String(m_playSession.c_str()));
+    fields->AddString("serviceConfigId", PLATFORM_STRING_FROM_STRING_T(m_appConfig->scid()));
+    fields->AddString("playerSessionId", PLATFORM_STRING_FROM_STRING_T(m_playSession));
     fields->AddString("titleId", m_appConfig->title_id().ToString());
-    fields->AddString("userId", ref new String(m_userContext->xbox_user_id().c_str()));
+    fields->AddString("userId", PLATFORM_STRING_FROM_INTERNAL_STRING(m_userContext->xbox_user_id()));
     fields->AddUInt16("ver", 1);
 }
 

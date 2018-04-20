@@ -206,7 +206,7 @@ pplx::task<xbox_live_result<std::vector<club_role>>> club::get_roles(
     _In_ const string_t& xuid
 )
 {
-    if (xuid == m_service->m_userContext->xbox_user_id())
+    if (xuid == utils::string_t_from_internal_string(m_service->m_userContext->xbox_user_id()))
     {
         return pplx::task_from_result(xbox_live_result<std::vector<club_role>>(m_viewerRoles));
     }
@@ -229,7 +229,7 @@ pplx::task<xbox_live_result<std::vector<club_role>>> club::get_roles(
 
 pplx::task<xbox_live_result<std::vector<club_role_record>>> club::get_role_records()
 {
-    return get_role_records(m_service->m_userContext->xbox_user_id());
+    return get_role_records(utils::string_t_from_internal_string(m_service->m_userContext->xbox_user_id()));
 }
 
 pplx::task<xbox_live_result<std::vector<club_role_record>>> club::get_role_records(
@@ -298,7 +298,7 @@ pplx::task<xbox_live_result<void>> club::set_presence_within_club(
     auto task = m_service->make_clubs_http_call(
         _T("POST"),
         _T("clubpresence"),
-        clubs_service_impl::clubpresence_subpath(m_id, m_service->m_userContext->xbox_user_id()),
+        clubs_service_impl::clubpresence_subpath(m_id, utils::string_t_from_internal_string(m_service->m_userContext->xbox_user_id())),
         xbox_live_api::set_user_presence_within_club,
         body
         )
@@ -312,22 +312,22 @@ pplx::task<xbox_live_result<void>> club::set_presence_within_club(
 
 pplx::task<xbox_live_result<std::vector<club_role>>> club::add_user_to_club()
 {
-    return update_users_club_roles(m_service->m_userContext->xbox_user_id(), true);
+    return update_users_club_roles(utils::string_t_from_internal_string(m_service->m_userContext->xbox_user_id()), true);
 }
 
 pplx::task<xbox_live_result<std::vector<club_role>>> club::remove_user_from_club()
 {
-    return update_users_club_roles(m_service->m_userContext->xbox_user_id(), false);
+    return update_users_club_roles(utils::string_t_from_internal_string(m_service->m_userContext->xbox_user_id()), false);
 }
 
 pplx::task<xbox_live_result<std::vector<club_role>>> club::follow_club()
 {
-    return set_users_club_roles(m_service->m_userContext->xbox_user_id(), club_role::follower, true);
+    return set_users_club_roles(utils::string_t_from_internal_string(m_service->m_userContext->xbox_user_id()), club_role::follower, true);
 }
 
 pplx::task<xbox_live_result<std::vector<club_role>>> club::unfollow_club()
 {
-    return set_users_club_roles(m_service->m_userContext->xbox_user_id(), club_role::follower, false);
+    return set_users_club_roles(utils::string_t_from_internal_string(m_service->m_userContext->xbox_user_id()), club_role::follower, false);
 }
 
 pplx::task<xbox_live_result<std::vector<club_role>>> club::add_user_to_club(

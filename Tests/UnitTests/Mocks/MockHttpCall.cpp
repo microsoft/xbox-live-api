@@ -18,6 +18,7 @@ void MockHttpCall::reinit()
 {
     m_requestBody = http_call_request_message_internal();
     ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(L"{}"));
+    ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(web::json::value::parse(L"{}"));
     ServerName = std::wstring();
     HttpMethod = std::wstring();
     PathQueryFragment = web::uri();
@@ -103,6 +104,29 @@ MockHttpCall::get_response(
     return pplx::task_from_result(ResultValue);
 }
 
+xbox_live_result<void> 
+MockHttpCall::get_response(
+    _In_ http_call_response_body_type httpCallResponseBodyType,
+    _In_ async_queue_handle_t queue,
+    _In_ http_call_callback callback
+    )
+{
+    if (FAILED(ResultHR))
+    {
+        throw ResultHR;
+    }
+    CallCounter++;
+    if (fRequestPostFuncInternal != nullptr)
+    {
+        fRequestPostFuncInternal(ResultValueInternal, m_requestBody.request_message_string());
+    }
+    ResultValueInternal->set_full_url(utils::internal_string_from_string_t(ServerName));
+    ResultValueInternal->route_service_call();
+    callback(ResultValueInternal);
+
+    return xbox_live_result<void>();
+}
+
 pplx::task<std::shared_ptr<http_call_response>> MockHttpCall::get_response_with_auth(
     _In_ http_call_response_body_type httpCallResponseBodyType
 )
@@ -144,7 +168,7 @@ xbox_live_result<void> MockHttpCall::get_response_with_auth(
     _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
     _In_ http_call_response_body_type httpCallResponseBodyType,
     _In_ bool allUsersAuthRequired,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
     )
 {
@@ -153,9 +177,9 @@ xbox_live_result<void> MockHttpCall::get_response_with_auth(
         throw ResultHR;
     }
     CallCounter++;
-    if (fRequestPostFunc != nullptr)
+    if (fRequestPostFuncInternal != nullptr)
     {
-        fRequestPostFunc(ResultValue, utils::string_t_from_internal_string(m_requestBody.request_message_string()));
+        fRequestPostFuncInternal(ResultValueInternal, m_requestBody.request_message_string());
     }
     ResultValueInternal->set_full_url(utils::internal_string_from_string_t(ServerName));
     ResultValueInternal->route_service_call();
@@ -285,19 +309,27 @@ void MockHttpCall::set_custom_header(
     _In_ const std::wstring& headerValue
     )
 {
+    set_custom_header(utils::internal_string_from_string_t(headerName),
+        utils::internal_string_from_string_t(headerValue)
+        );
+}
+
+void MockHttpCall::set_custom_header(
+    _In_ const xsapi_internal_string& headerName,
+    _In_ const xsapi_internal_string& headerValue
+    )
+{
 #if UNIT_TEST_SERVICES
-    // TODO
-    //ResultValue->_Add_response_header(headerName, headerValue);
+    ResultValueInternal->add_response_header(headerName, headerValue);
 #endif
 }
 
 void MockHttpCall::remove_custom_header(
-    _In_ const std::wstring& headerName
+    _In_ const xsapi_internal_string& headerName
     )
 {
 #if UNIT_TEST_SERVICES
-    // TODO
-    //ResultValue->_Remove_response_header(headerName);
+    ResultValueInternal->remove_response_header(headerName);
 #endif
 }
 

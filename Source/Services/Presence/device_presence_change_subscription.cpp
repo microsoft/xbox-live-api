@@ -3,12 +3,31 @@
 
 #include "pch.h"
 #include "xsapi/presence.h"
+#include "presence_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
 
+using namespace xbox::services::real_time_activity;
+
 device_presence_change_subscription::device_presence_change_subscription(
-    _In_ string_t xboxUserId,
-    _In_ std::function<void(const device_presence_change_event_args&)> handler,
+    _In_ std::shared_ptr<device_presence_change_subscription_internal> internalObj
+    ) :
+    m_internalObj(internalObj)
+{
+}
+
+DEFINE_GET_STRING(device_presence_change_subscription, xbox_user_id);
+DEFINE_GET_ENUM_TYPE(device_presence_change_subscription, real_time_activity_subscription_state, state);
+DEFINE_GET_UINT32(device_presence_change_subscription, subscription_id);
+
+const string_t& device_presence_change_subscription::resource_uri() const
+{
+    return m_internalObj->resource_uri();
+}
+
+device_presence_change_subscription_internal::device_presence_change_subscription_internal(
+    _In_ xsapi_internal_string xboxUserId,
+    _In_ xbox_live_callback<std::shared_ptr<device_presence_change_event_args_internal>> handler,
     _In_ std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)> subscriptionErrorHandler
     ) :
     real_time_activity_subscription(subscriptionErrorHandler),
@@ -19,13 +38,13 @@ device_presence_change_subscription::device_presence_change_subscription(
     XSAPI_ASSERT(handler != nullptr);
 
     stringstream_t uri;
-    uri << _T("https://userpresence.xboxlive.com/users/xuid(") << m_xboxUserId << _T(")/devices");
+    uri << _T("https://userpresence.xboxlive.com/users/xuid(") << utils::string_t_from_internal_string(m_xboxUserId) << _T(")/devices");
 
     m_resourceUri = uri.str();
 }
 
 void
-device_presence_change_subscription::on_subscription_created(
+device_presence_change_subscription_internal::on_subscription_created(
     _In_ uint32_t id, 
     _In_ const web::json::value& data
     )
@@ -35,18 +54,18 @@ device_presence_change_subscription::on_subscription_created(
 
     if (!data.is_null())
     {
-        auto initialPresenceRecord = presence_record::_Deserialize(data);
+        auto initialPresenceRecord = presence_record_internal::deserialize(data);
 
         if (!initialPresenceRecord.err())
         {
             if (m_devicePresenceChangeHandler != nullptr)
             {
-                for (const auto& deviceRecord : initialPresenceRecord.payload().presence_device_records())
+                for (const auto& deviceRecord : initialPresenceRecord.payload()->presence_device_records())
                 {
-                    auto deviceType = deviceRecord.device_type();
+                    auto deviceType = deviceRecord->device_type();
 
                     m_devicePresenceChangeHandler(
-                        device_presence_change_event_args(
+                        xsapi_allocate_shared<device_presence_change_event_args_internal>(
                             m_xboxUserId,
                             deviceType,
                             true
@@ -85,16 +104,15 @@ device_presence_change_subscription::on_subscription_created(
 }
 
 void
-device_presence_change_subscription::on_event_received(
+device_presence_change_subscription_internal::on_event_received(
     _In_ const web::json::value& data
     )
 {
     std::error_code errc;
-    auto dataAsString = utils::extract_json_as_string(data, errc);
-    xbox_live_result<device_presence_change_event_args> eventArgs;
+    auto dataAsString = utils::internal_string_from_string_t(utils::extract_json_as_string(data, errc));
     if (!errc)
     {
-        std::vector<string_t> devicePresenceValues = utils::string_split(dataAsString, ':');
+        auto devicePresenceValues = utils::string_split(dataAsString, ':');
 
         if (devicePresenceValues.size() != 2)
         {
@@ -115,10 +133,10 @@ device_presence_change_subscription::on_event_received(
         if (m_devicePresenceChangeHandler != nullptr)
         {
             m_devicePresenceChangeHandler(
-                device_presence_change_event_args(
+                xsapi_allocate_shared<device_presence_change_event_args_internal>(
                     m_xboxUserId,
-                    presence_device_record::_Convert_string_to_presence_device_type(devicePresenceValues[0]),
-                    utils::str_icmp(devicePresenceValues[1], _T("true")) == 0
+                    presence_device_record_internal::convert_string_to_presence_device_type(devicePresenceValues[0]),
+                    utils::str_icmp(devicePresenceValues[1], "true") == 0
                     )
                 );
         }
@@ -139,8 +157,8 @@ device_presence_change_subscription::on_event_received(
     }
 }
 
-const string_t&
-device_presence_change_subscription::xbox_user_id() const
+const xsapi_internal_string&
+device_presence_change_subscription_internal::xbox_user_id() const
 {
     return m_xboxUserId;
 }
