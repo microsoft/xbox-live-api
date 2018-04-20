@@ -9,7 +9,7 @@
 #include "xsapi/services.h"
 #include "xbox_live_context_impl.h"
 #include "SocialManagerHelper.h"
-#include "utils_uwp.h"
+#include "Event_WinRT.h"
 
 using namespace xbox::services;
 using namespace xbox::services::social::manager;
@@ -95,7 +95,7 @@ public:
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
         httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubResponse));
 
-        Win32Event callComplete;
+        Event^ callComplete = ref new Event();
 
         peoplehubService.get_social_graph("TestXboxUserId", social_manager_extra_detail_level::preferred_color_level, xuids, 0,
             [&callComplete, this](xbox_live_result<xsapi_internal_vector<xbox_social_user>> userGroup)
@@ -111,10 +111,10 @@ public:
                 VerifyXboxSocialUser(socialUsers, socialUserJson);
                 ++counter;
             }
-            callComplete.Set();
+            callComplete->Set();
         });
 
-        callComplete.WaitForever();
+        callComplete->Wait();
 
         VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://peoplehub.mockenv.xboxlive.com", httpCall->ServerName);
@@ -141,7 +141,7 @@ public:
         xsapi_internal_vector<xsapi_internal_string> xuids;
         xuids.push_back("1");
 
-        Win32Event callComplete;
+        Event^ callComplete = ref new Event();
         peoplehubService.get_social_graph("TestXboxUserId", social_manager_extra_detail_level::preferred_color_level, xuids, 0,
             [&callComplete](xbox_live_result<xsapi_internal_vector<xbox_social_user>> userGroupResult)
         {
@@ -151,9 +151,9 @@ public:
             auto compareUser = xboxUserId.serialize().substr(0, 21);
             wchar_t* compareUserChar = &compareUser[1];
             VERIFY_IS_TRUE(utils::str_icmp(user.xbox_user_id(), compareUserChar) == 0);
-            callComplete.Set();
+            callComplete->Set();
         });
-        callComplete.WaitForever();
+        callComplete->Wait();
     }
 };
 

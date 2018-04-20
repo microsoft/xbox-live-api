@@ -172,22 +172,22 @@ public:
     /// <summary>
     /// Gets a unique ID that is tied to the user's account which persists across multiple devices.
     /// </summary>
-    DEFINE_PTR_PROP_GET_STR_OBJ(XboxUserId, xbox_user_id)
+    DEFINE_PTR_PROP_GET_STR_OBJ_FROM_INTERNAL_STRING(XboxUserId, xbox_user_id)
 
     /// <summary>
     /// The Xbox Live public gamertag name associated with the user.
     /// </summary>
-    DEFINE_PTR_PROP_GET_STR_OBJ(Gamertag, gamertag)
+    DEFINE_PTR_PROP_GET_STR_OBJ_FROM_INTERNAL_STRING(Gamertag, gamertag)
 
     /// <summary>
     /// Gets the age group of the user.
     /// </summary>
-    DEFINE_PTR_PROP_GET_STR_OBJ(AgeGroup, age_group)
+    DEFINE_PTR_PROP_GET_STR_OBJ_FROM_INTERNAL_STRING(AgeGroup, age_group)
 
     /// <summary>
     /// Gets the privileges of the user.
     /// </summary>
-    DEFINE_PTR_PROP_GET_STR_OBJ(Privileges, privileges)
+    DEFINE_PTR_PROP_GET_STR_OBJ_FROM_INTERNAL_STRING(Privileges, privileges)
 
     /// <summary>
     /// Indicates if the Xbox Live user is currently signed in.
@@ -201,7 +201,7 @@ public:
     /// Check https://msdn.microsoft.com/en-us/library/windows/apps/windows.security.credentials.webaccount.aspx
     /// for more information about WebAccount
     /// </remarks>
-    DEFINE_PTR_PROP_GET_STR_OBJ(WebAccountId, web_account_id)
+    DEFINE_PTR_PROP_GET_STR_OBJ_FROM_INTERNAL_STRING(WebAccountId, web_account_id)
 
     /// <summary>
     /// The Windows System NT user associated with the Xbox Live User, only available in Multi-User application.

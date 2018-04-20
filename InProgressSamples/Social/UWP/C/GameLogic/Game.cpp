@@ -247,25 +247,25 @@ void Game::OnGameUpdate()
             if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup1))
             {
                 m_allFriends = !m_allFriends;
-                UpdateSocialGroupForAllUsers(m_allFriends, XBL_PRESENCE_FILTER_ALL, XBL_RELATIONSHIP_FILTER_FRIENDS);
+                UpdateSocialGroupForAllUsers(m_allFriends, XblPresenceFilter_All, XblRelationshipFilter_Friends);
             }
 
             if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup2))
             {
                 m_onlineFriends = !m_onlineFriends;
-                UpdateSocialGroupForAllUsers(m_onlineFriends, XBL_PRESENCE_FILTER_ALL_ONLINE, XBL_RELATIONSHIP_FILTER_FRIENDS);
+                UpdateSocialGroupForAllUsers(m_onlineFriends, XblPresenceFilter_AllOnline, XblRelationshipFilter_Friends);
             }
 
             if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup3))
             {
                 m_allFavs = !m_allFavs;
-                UpdateSocialGroupForAllUsers(m_allFavs, XBL_PRESENCE_FILTER_ALL, XBL_RELATIONSHIP_FILTER_FAVORITE);
+                UpdateSocialGroupForAllUsers(m_allFavs, XblPresenceFilter_All, XblRelationshipFilter_Favorite);
             }
 
             if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup4))
             {
                 m_onlineInTitle = !m_onlineInTitle;
-                UpdateSocialGroupForAllUsers(m_onlineInTitle, XBL_PRESENCE_FILTER_TITLE_ONLINE, XBL_RELATIONSHIP_FILTER_FRIENDS);
+                UpdateSocialGroupForAllUsers(m_onlineInTitle, XblPresenceFilter_TitleOnline, XblRelationshipFilter_Friends);
             }
 
             if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup5))
@@ -373,7 +373,7 @@ void Game::ReadLastCsv()
     }
 }
 
-void Game::UpdateCustomList(_In_ const std::vector<std::string>& xuidList)
+void Game::UpdateCustomList(_In_ const std::vector<uint64_t>& xuidList)
 {
     m_xuidList = xuidList;
 
@@ -407,7 +407,7 @@ void Game::ReadCsvFile(Windows::Storage::StorageFile^ file)
             }
 
             Windows::Foundation::Collections::IVector<Platform::String^>^ lines = t.get();
-            std::vector<std::string> xuidList;
+            std::vector<uint64_t> xuidList;
             int count = 0;
             for (Platform::String^ line : lines)
             {
@@ -423,7 +423,7 @@ void Game::ReadCsvFile(Windows::Storage::StorageFile^ file)
                     std::string xuid = utility::conversions::to_utf8string(items[3]);
                     replace_all(xuid, "\"", "");
                     replace_all(xuid, "=", "");
-                    xuidList.push_back(xuid);
+                    xuidList.push_back(std::strtoul(xuid.data(), nullptr, 0));
 
                     CHAR text[1024];
                     sprintf_s(text, ARRAYSIZE(text), "Read from CSV: %s", xuid.c_str());
@@ -525,25 +525,25 @@ void Game::Log(std::string log)
 }
 
 string_t
-ConvertEventTypeToString(XBL_SOCIAL_EVENT_TYPE eventType)
+ConvertEventTypeToString(XblSocialEventType eventType)
 {
     switch (eventType)
     {
-    case XBL_SOCIAL_EVENT_TYPE_USERS_ADDED_TO_SOCIAL_GRAPH: return _T("users_added");
-    case XBL_SOCIAL_EVENT_TYPE_USERS_REMOVED_FROM_SOCIAL_GRAPH: return _T("users_removed");
-    case XBL_SOCIAL_EVENT_TYPE_PRESENCE_CHANGED: return _T("presence_changed");
-    case XBL_SOCIAL_EVENT_TYPE_PROFILES_CHANGED: return _T("profiles_changed");
-    case XBL_SOCIAL_EVENT_TYPE_SOCIAL_RELATIONSHIPS_CHANGED: return _T("social_relationships_changed");
-    case XBL_SOCIAL_EVENT_TYPE_LOCAL_USER_ADDED: return _T("local_user_added");
-    case XBL_SOCIAL_EVENT_TYPE_LOCAL_USER_REMOVED: return _T("local user removed");
-    case XBL_SOCIAL_EVENT_TYPE_SOCIAL_USER_GROUP_LOADED: return _T("social_user_group_loaded");
-    case XBL_SOCIAL_EVENT_TYPE_SOCIAL_USER_GROUP_UPDATED: return _T("social_user_group_updated");
+    case XblSocialEventType_UsersAddedToSocialGraph: return _T("users_added");
+    case XblSocialEventType_UsersRemovedFromSocialGraph: return _T("users_removed");
+    case XblSocialEventType_PresenceChanged: return _T("presence_changed");
+    case XblSocialEventType_ProfilesChanged: return _T("profiles_changed");
+    case XblSocialEventType_SocialRelationshipsChanged: return _T("social_relationships_changed");
+    case XblSocialEventType_LocalUserAdded: return _T("local_user_added");
+    case XblSocialEventType_LocalUserRemoved: return _T("local user removed");
+    case XblSocialEventType_SocialUserGroupLoaded : return _T("social_user_group_loaded");
+    case XblSocialEventType_SocialUserGroupUpdated: return _T("social_user_group_updated");
     default: return _T("unknown");
     }
 }
 
 void
-Game::LogSocialEventList(XBL_SOCIAL_EVENT* events, uint32_t eventCount)
+Game::LogSocialEventList(XblSocialEvent* events, uint32_t eventCount)
 {
     for (uint32_t i = 0; i < eventCount; ++i)
     {
@@ -563,16 +563,14 @@ Game::LogSocialEventList(XBL_SOCIAL_EVENT* events, uint32_t eventCount)
             source << ConvertEventTypeToString(socialEvent.eventType);
             if (socialEvent.usersAffectedCount > 0)
             {
-                XBL_XBOX_USER_ID_CONTAINER *affectedUsers;
-                affectedUsers = new XBL_XBOX_USER_ID_CONTAINER[socialEvent.usersAffectedCount];
+                std::vector<uint64_t> affectedUsers(socialEvent.usersAffectedCount);
 
-                XblSocialEventGetUsersAffected(&socialEvent, affectedUsers);
+                XblSocialEventGetUsersAffected(&socialEvent, affectedUsers.data());
 
                 source << _T(" UserAffected: ");
                 for (uint32_t j = 0; j < socialEvent.usersAffectedCount; ++j)
                 {
-                    source << affectedUsers[j].xboxUserId;
-                    source << _T(", ");
+                    source << affectedUsers[j] << _T(", ");
                 }
             }
         }
@@ -582,8 +580,8 @@ Game::LogSocialEventList(XBL_SOCIAL_EVENT* events, uint32_t eventCount)
 
 void Game::UpdateSocialGroupForAllUsers(
     _In_ bool toggle,
-    _In_ XBL_PRESENCE_FILTER presenceFilter,
-    _In_ XBL_RELATIONSHIP_FILTER relationshipFilter
+    _In_ XblPresenceFilter presenceFilter,
+    _In_ XblRelationshipFilter relationshipFilter
 )
 {
     if (m_xboxLiveContext != nullptr)
@@ -595,8 +593,8 @@ void Game::UpdateSocialGroupForAllUsers(
 void Game::UpdateSocialGroup(
     _In_ xbl_user_handle user,
     _In_ bool toggle,
-    _In_ XBL_PRESENCE_FILTER presenceFilter,
-    _In_ XBL_RELATIONSHIP_FILTER relationshipFilter
+    _In_ XblPresenceFilter presenceFilter,
+    _In_ XblRelationshipFilter relationshipFilter
 )
 {
     if (m_xboxLiveContext != nullptr)
@@ -643,10 +641,10 @@ Game::CreateSocialGroupsBasedOnUI(
     xbl_user_handle user
 )
 {
-    UpdateSocialGroup(user, m_allFriends, XBL_PRESENCE_FILTER_ALL, XBL_RELATIONSHIP_FILTER_FRIENDS);
-    UpdateSocialGroup(user, m_onlineFriends, XBL_PRESENCE_FILTER_ALL_ONLINE, XBL_RELATIONSHIP_FILTER_FRIENDS);
-    UpdateSocialGroup(user, m_allFavs, XBL_PRESENCE_FILTER_ALL, XBL_RELATIONSHIP_FILTER_FAVORITE);
-    UpdateSocialGroup(user, m_onlineInTitle, XBL_PRESENCE_FILTER_ALL_TITLE, XBL_RELATIONSHIP_FILTER_FRIENDS);
+    UpdateSocialGroup(user, m_allFriends, XblPresenceFilter_All, XblRelationshipFilter_Friends);
+    UpdateSocialGroup(user, m_onlineFriends, XblPresenceFilter_AllOnline, XblRelationshipFilter_Friends);
+    UpdateSocialGroup(user, m_allFavs, XblPresenceFilter_All, XblRelationshipFilter_Favorite);
+    UpdateSocialGroup(user, m_onlineInTitle, XblPresenceFilter_AllTitle, XblRelationshipFilter_Friends);
     UpdateSocialGroupOfList(user, m_customList);
 }
 
@@ -658,7 +656,7 @@ void Game::HandleSignInResult(XblSignInResult signInResult)
     case xbox::services::system::sign_in_status::success:
         XblUserGetXboxUserId(m_user, &m_xuid);
         XblContextCreateHandle(m_user, &m_xboxLiveContext);
-        //pThis->AddUserToSocialManager(pThis->m_user);
+        AddUserToSocialManager(m_user);
         Log(L"Sign in succeeded");
         break;
 

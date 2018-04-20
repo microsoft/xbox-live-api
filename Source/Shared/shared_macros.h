@@ -56,7 +56,10 @@
     (x.empty() ? nullptr : ref new Platform::String(x.c_str()))
 
 #define PLATFORM_STRING_FROM_INTERNAL_STRING(x) \
-    (x.empty() ? nullptr : ref new Platform::String(utils::string_t_from_internal_string(x).c_str()))
+    (x.empty() ? nullptr : ref new Platform::String(xbox::services::utils::string_t_from_internal_string(x).c_str()))
+
+#define INTERNAL_STRING_FROM_PLATFORM_STRING(x) \
+    (x->IsEmpty() ? xsapi_internal_string() : xbox::services::utils::internal_string_from_utf16(x->Data()))
 
 #define AUTH_HEADER ("Authorization")
 #define SIG_HEADER ("Signature")

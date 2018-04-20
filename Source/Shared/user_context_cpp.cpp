@@ -98,7 +98,7 @@ void user_context::get_auth_result(
 }
 
 void user_context::refresh_token(
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<void>> callback
     )
 {
@@ -112,17 +112,10 @@ void user_context::refresh_token(
         xsapi_internal_vector<unsigned char>(),
         false,
         true,
-        nullptr, // TODO
-        [](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
+        queue,
+        [callback](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
     {
-        if (!result.err())
-        {
-            return xbox_live_result<void>();
-        }
-        else
-        {
-            return xbox_live_result<void>(result.err(), result.err_message());
-        }
+        callback(xbox_live_result<void>(result.err(), result.err_message()));
     });
 }
 

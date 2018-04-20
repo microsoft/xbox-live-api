@@ -580,6 +580,7 @@ protected:
             }
             return S_OK;
         });
+        ScheduleAsync(async, 0);
     }
 
     bool m_isInitialized;

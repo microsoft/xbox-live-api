@@ -6,6 +6,8 @@
 #include "user_context.h"
 #include "shared_macros.h"
 
+#if TV_API
+
 #if defined __cplusplus_winrt
 using namespace Platform;
 using namespace Windows::Foundation;
@@ -19,7 +21,6 @@ using namespace Microsoft::Xbox::Services::System;
 using namespace xbox::services::system;
 
 // XDK's Windows.* user object
-#if TV_API
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 

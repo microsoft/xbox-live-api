@@ -63,7 +63,6 @@ HRESULT web_socket_connection::attempt_connect(retry_context* retryContext, Asyn
 void web_socket_connection::retry_until_connected(retry_context* context)
 {
     AsyncBlock* nestedAsyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
-    ZeroMemory(nestedAsyncBlock, sizeof(AsyncBlock));
     nestedAsyncBlock->context = context;
     if (context->outerAsyncBlock->queue != nullptr)
     {
@@ -155,7 +154,7 @@ void web_socket_connection::ensure_connected()
     retryContext->pThis = shared_from_this();
     retryContext->startTime = std::chrono::high_resolution_clock::now();
 
-    HRESULT hr = BeginAsync(outerAsync, utils::store_shared_ptr(retryContext), nullptr, __FUNCTION__,
+    BeginAsync(outerAsync, utils::store_shared_ptr(retryContext), nullptr, __FUNCTION__,
         [](_In_ AsyncOp op, _In_ const AsyncProviderData* data)
     {
         auto context = utils::remove_shared_ptr<retry_context>(data->context, op == AsyncOp_Cleanup);
@@ -168,6 +167,7 @@ void web_socket_connection::ensure_connected()
         }
         return S_OK;
     });
+    ScheduleAsync(outerAsync, 0);
 }
 
 web_socket_connection_state

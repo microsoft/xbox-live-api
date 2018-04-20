@@ -278,7 +278,7 @@ public:
             subscription->reset();
         }
         // make it reconnect and re-subscribe
-        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
         for (auto& subscription : subscriptionList)
         {
             subscription->subscribedEvent.wait();
@@ -478,14 +478,14 @@ public:
 
         // force to close and not reconnectedable
         mockSocket->m_connectToFail = true;
-        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
-        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
-        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
-        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
-        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
-        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
-        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
-        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
 
         VERIFY_ARE_EQUAL_INT(subscription->state(), real_time_activity_subscription_state::pending_subscribe);
 
@@ -541,7 +541,7 @@ public:
 
         // force to close and not reconnectedable
         mockSocket->m_connectToFail = true;
-        mockSocket->m_closeHandler(HC_WEBSOCKET_CLOSE_GOING_AWAY);
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
         subscription->pendingSubEvent.wait();
 
         // wait the connection to be lost after timeout
@@ -738,9 +738,9 @@ public:
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto mockSocket = m_mockXboxSystemFactory->GetMockWebSocketClient();
         auto helper = SetupStateChangeHelper(xboxLiveContext->RealTimeActivityService);
-        std::unordered_map<string_t, uint32_t> rtaActivationMap;
+        std::unordered_map<xsapi_internal_string, uint32_t> rtaActivationMap;
 
-        string_t xuid = string_t(xboxLiveContext->User->XboxUserId->Data());
+        xsapi_internal_string xuid = utils::internal_string_from_utf16(xboxLiveContext->User->XboxUserId->Data());
         {
             // Ensure we decrement the counter when the context is set to null.
             auto xboxLiveContextTest = GetMockXboxLiveContext_WinRT();
@@ -818,7 +818,7 @@ public:
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto mockSocket = m_mockXboxSystemFactory->GetMockWebSocketClient();
         auto helper = SetupStateChangeHelper(xboxLiveContext->RealTimeActivityService);
-        string_t xuid = string_t(xboxLiveContext->User->XboxUserId->Data());
+        xsapi_internal_string xuid = utils::internal_string_from_utf16(xboxLiveContext->User->XboxUserId->Data());
 
         auto xboxLiveContext1 = GetMockXboxLiveContext_WinRT();
         auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();

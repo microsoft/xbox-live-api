@@ -35,6 +35,17 @@ namespace Sample
         void RenderEventLog(FLOAT fGridXColumn1, FLOAT fGridY, FLOAT fTextHeight, FLOAT scale, const DirectX::FXMVECTOR& TEXT_COLOR);
         void RenderPerfCounters(FLOAT fGridXColumn1, FLOAT fGridY, FLOAT fTextHeight, FLOAT scale, const DirectX::XMVECTORF32& TEXT_COLOR);
 
+        void RenderSocialGroupList(
+            FLOAT fGridXColumn1,
+            FLOAT fGridXColumn2,
+            FLOAT fGridXColumn3,
+            FLOAT fGridY,
+            FLOAT fTextHeight,
+            FLOAT scale,
+            const DirectX::XMVECTORF32& TEXT_COLOR,
+            std::vector<XblXboxSocialUserGroup*> nodeList
+            );
+
     private:
         std::shared_ptr<DX::DeviceResources> m_deviceResources;
 

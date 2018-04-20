@@ -406,7 +406,7 @@ void http_call_impl::internal_get_response(
 
     AsyncBlock *asyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
     ZeroMemory(asyncBlock, sizeof(AsyncBlock));
-    asyncBlock->queue = httpCallData->queue; // TODO child queue?
+    asyncBlock->queue = httpCallData->queue;
     asyncBlock->context = utils::store_shared_ptr(httpCallData);
     asyncBlock->callback = [](_In_ AsyncBlock* asyncBlock)
     {
@@ -434,7 +434,6 @@ void http_call_impl::internal_get_response(
             {
                 errMessage = " HTTP Response Body: " + xsapi_internal_string(responseBody);
             }
-            // TODO this error code conversion is not right
             httpCallResponse->set_error_info(std::make_error_code(static_cast<xbox_live_error_code>(hr)), responseBody);
         }
         else

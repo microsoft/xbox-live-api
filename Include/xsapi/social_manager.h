@@ -557,7 +557,7 @@ public:
     /// <summary>
     /// The social event args
     /// </summary>
-    _XSAPIIMP const std::shared_ptr<social_event_args>& event_args() const;
+    _XSAPIIMP std::shared_ptr<social_event_args> event_args() const;
 
     /// <summary>
     /// Error that occurred

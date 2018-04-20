@@ -19,7 +19,7 @@ public:
         _In_ bool showUI,
         _In_ bool forceRefresh,
         _In_ async_queue_handle_t queue,
-        _In_ xbox_live_callback<xbox_live_result<sign_in_result>> asyncBlock
+        _In_ xbox_live_callback<xbox_live_result<sign_in_result>> callback
         ) = 0;
 
 #if XSAPI_A
@@ -29,16 +29,6 @@ public:
 #if XSAPI_U
     virtual pplx::task<xbox::services::xbox_live_result<void>> signout() = 0;
 #endif
-
-    virtual pplx::task<xbox_live_result<void>> sign_in_impl(
-        _In_ const xsapi_internal_string& userDelegationTicket,
-        _In_ bool forceRefresh
-        )
-    { 
-        UNREFERENCED_PARAMETER(userDelegationTicket);
-        UNREFERENCED_PARAMETER(forceRefresh);
-        return pplx::task_from_exception<xbox::services::xbox_live_result<void>>(std::exception());
-    }
 
     const xsapi_internal_string& xbox_user_id() { return m_xboxUserId; }
     const xsapi_internal_string& gamertag() { return m_gamertag; }

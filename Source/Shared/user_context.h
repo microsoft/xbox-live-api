@@ -77,7 +77,7 @@ public:
         );
 
     void refresh_token(
-        _In_ uint64_t taskGroupId,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<void>> callback
         );
 

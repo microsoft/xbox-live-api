@@ -37,7 +37,6 @@ social_relationship_change_subscription_internal::social_relationship_change_sub
     XSAPI_ASSERT(!m_xboxUserId.empty());
     XSAPI_ASSERT(m_handler != nullptr);
 
-    // TODO change to internal string
     stringstream_t uri;
     uri << _T("http://social.xboxlive.com/users/xuid(") << utils::string_t_from_internal_string(m_xboxUserId) << _T(")/friends");
 

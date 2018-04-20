@@ -44,6 +44,12 @@ public:
         _In_ const web::http::http_request& httpRequest
         ) override;
 
+    virtual xbox_live_result<void> get_response(
+        _In_ http_call_response_body_type httpCallResponseBodyType,
+        _In_ async_queue_handle_t queue,
+        _In_ http_call_callback callback
+        ) override;
+
     virtual pplx::task<std::shared_ptr<http_call_response>> get_response_with_auth(
         _In_ http_call_response_body_type httpCallResponseBodyType = http_call_response_body_type::json_body
         ) override;
@@ -58,7 +64,7 @@ public:
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired,
-        _In_ uint64_t taskGroupId,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
         ) override;
 
@@ -96,6 +102,11 @@ public:
     virtual void set_custom_header(
         _In_ const std::wstring& headerName,
         _In_ const std::wstring& headerValue
+        ) override;
+
+    virtual void set_custom_header(
+        _In_ const xsapi_internal_string& headerName,
+        _In_ const xsapi_internal_string& headerValue
         ) override;
 
     void remove_custom_header(

@@ -34,7 +34,9 @@ DEFINE_GET_STRING(token_and_signature_result, user_enforcement_restrictions);
 DEFINE_GET_STRING(token_and_signature_result, user_title_restrictions);
 #endif
 DEFINE_GET_STRING(token_and_signature_result, web_account_id);
+#if UWP_API
 DEFINE_GET_OBJECT(token_and_signature_result, Windows::Security::Authentication::Web::Core::WebTokenRequestResult^, token_request_result);
+#endif
 
 token_and_signature_result_internal::token_and_signature_result_internal(
     _In_ xsapi_internal_string token,

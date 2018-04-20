@@ -137,7 +137,7 @@ notification_service_windows::on_push_notification_received(
                 auto contextItor = m_userContexts.find(xuid);
                 if (contextItor != m_userContexts.end() && contextItor->second != nullptr && contextItor->second->user() != nullptr)
                 {
-                    contextItor->second->refresh_token(/* TODO */ XSAPI_DEFAULT_TASKGROUP, nullptr);
+                    contextItor->second->refresh_token(get_xsapi_singleton()->m_asyncQueue, nullptr);
                 }
             }
         }
