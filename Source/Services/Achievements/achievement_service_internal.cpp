@@ -116,6 +116,7 @@ achievement_service_internal::update_achievement(
     _In_ xbox_live_callback<xbox_live_result<void>> callback
     )
 {
+    UNREFERENCED_PARAMETER(taskGroupId);
     RETURN_CPP_INVALIDARGUMENT_IF(xboxUserId.empty(), void, "xbox user id is empty");
     RETURN_CPP_INVALIDARGUMENT_IF(titleId == 0, void, "title id is empty");
     RETURN_CPP_INVALIDARGUMENT_IF(serviceConfigurationId.empty(), void, "serviceConfigurationId is empty");
@@ -332,6 +333,7 @@ achievement_service_internal::get_achievement(
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<achievement_internal>>> callback
     )
 {
+    UNREFERENCED_PARAMETER(taskGroupId);
     RETURN_CPP_INVALIDARGUMENT_IF(xboxUserId.empty(), void, "xbox user id is empty");
     RETURN_CPP_INVALIDARGUMENT_IF(serviceConfigurationId.empty(), void, "service configuration id is empty");
     RETURN_CPP_INVALIDARGUMENT_IF(achievementId.empty(), void, "achievement id is empty");
@@ -405,6 +407,7 @@ achievement_service_internal::get_achievements(
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<achievements_result_internal>>> callback
 )
 {
+    UNREFERENCED_PARAMETER(taskGroupId);
     xbox_live_result<xsapi_internal_string> stringType = convert_type_to_string(type);
     RETURN_CPP_IF_ERR(stringType, void);
     xbox_live_result<xsapi_internal_string> orderType = convert_order_by_to_string(orderBy);

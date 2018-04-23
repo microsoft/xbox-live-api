@@ -324,7 +324,7 @@ public:
 /// <summary>
 /// Gets the one global instance of the windows error category.
 /// </summary>
-/// </returns>An error category instance.</returns>
+/// <returns>An error category instance.</returns>
 _ASYNCRTIMP const std::error_category & __cdecl windows_category();
 
 #else
@@ -339,7 +339,7 @@ _ASYNCRTIMP const std::error_category & __cdecl linux_category();
 
 /// <summary>
 /// Gets the one global instance of the current platform's error category.
-/// <summary>
+/// </summary>
 _ASYNCRTIMP const std::error_category & __cdecl platform_category();
 
 /// <summary>

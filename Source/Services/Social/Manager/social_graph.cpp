@@ -70,8 +70,6 @@ social_graph::~social_graph()
     std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
     m_xboxLiveContextImpl->real_time_activity_service()->deactivate();
 
-    m_backgroundThread.detach();
-
     m_perfTester.start_timer("~social_graph");
     try
     {
@@ -167,42 +165,39 @@ void social_graph::initialize(xbox_live_callback<xbox_live_result<void>> callbac
     });
 #endif
 
-    // TODO remove this thread
-    m_backgroundThread = std::thread([thisWeakPtr]()
+    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+
+    auto context = xsapi_allocate_shared<do_event_work_context>();
+    context->pThis = thisWeakPtr;
+    context->hasRemainingEvent = true;
+    context->outerAsyncBlock = async;
+    async->queue = m_backgroundAsyncQueue;
+    async->context = utils::store_shared_ptr(context);
+    async->callback = [](AsyncBlock* async)
     {
-        try
+        utils::remove_shared_ptr<do_event_work_context>(async->context);
+        xsapi_memory::mem_free(async);
+    };
+
+    auto hr = BeginAsync(async, async->context, nullptr, __FUNCTION__,
+        [](AsyncOp op, const AsyncProviderData* data)
+    {
+        if (op == AsyncOp_DoWork)
         {
-            static const std::chrono::milliseconds sleepTime(30);
-            while (true)
+            auto context = static_cast<do_event_work_context*>(data->context);
+            auto pThis = context->pThis.lock();
+            if (pThis)
             {
-                bool hasRemainingEvent = false;
-                {
-                    std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
-                    if (pThis)
-                    {
-                        hasRemainingEvent = pThis->do_event_work();
-                    }
-                    else
-                    {
-                        LOG_DEBUG("exiting event processing loop");
-                        return;
-                    }
-                }
-                if (!hasRemainingEvent)
-                {
-                    std::this_thread::sleep_for(sleepTime);
-                }
+                pThis->schedule_event_work(context);
+                return E_PENDING;
             }
         }
-        catch (const std::exception& e)
-        {
-            LOGS_DEBUG << "Exception in event processing " << e.what();
-        }
-        catch (...)
-        {
-            LOG_DEBUG("Unknown std::exception in event processing");
-        }
+        return S_OK;
     });
+    if (SUCCEEDED(hr))
+    {
+        ScheduleAsync(async, 0);
+    }
 
     m_peoplehubService.get_social_graph(
 #if TV_API || UNIT_TEST_SERVICES || !XSAPI_CPP
@@ -289,6 +284,43 @@ void
 social_graph::set_background_async_queue(async_queue_handle_t queue)
 {
     m_backgroundAsyncQueue = queue;
+}
+
+void 
+social_graph::schedule_event_work(do_event_work_context* context)
+{
+    AsyncBlock* nestedAsync = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    nestedAsync->context = static_cast<void*>(context);
+    nestedAsync->queue = m_backgroundAsyncQueue;
+    nestedAsync->callback = [](AsyncBlock* nestedAsync)
+    {
+        auto context = static_cast<do_event_work_context*>(nestedAsync->context);
+        auto pThis = context->pThis.lock();
+        if (pThis)
+        {
+            pThis->schedule_event_work(context);
+        }
+        else
+        {
+            CompleteAsync(context->outerAsyncBlock, S_OK, 0);
+        }
+    };
+
+    BeginAsync(nestedAsync, nestedAsync->context, nullptr, __FUNCTION__,
+        [](AsyncOp op, const AsyncProviderData* data)
+    {
+        if (op == AsyncOp_DoWork)
+        {
+            auto context = static_cast<do_event_work_context*>(data->context);
+            auto pThis = context->pThis.lock();
+            if (pThis)
+            {
+                context->hasRemainingEvent = pThis->do_event_work();
+            }
+        }
+        return S_OK;
+    });
+    ScheduleAsync(nestedAsync, context->hasRemainingEvent ? 0 : 30);
 }
 
 bool

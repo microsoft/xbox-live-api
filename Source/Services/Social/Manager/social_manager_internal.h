@@ -476,6 +476,14 @@ protected:
 
     void presence_refresh_callback();
 
+    struct do_event_work_context
+    {
+        std::weak_ptr<social_graph> pThis;
+        AsyncBlock* outerAsyncBlock;
+        bool hasRemainingEvent;
+    };
+
+    void schedule_event_work(do_event_work_context* context);
     bool do_event_work();
 
     void presence_timer_callback(
@@ -620,8 +628,6 @@ protected:
     event_queue m_socialEventQueue;
     unprocessed_event_queue m_unprocessedEventQueue;
     user_buffers_holder m_userBuffer;
-
-    std::thread m_backgroundThread;
     async_queue_handle_t m_backgroundAsyncQueue;
 };
 

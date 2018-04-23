@@ -96,7 +96,7 @@
       $(ProjectDir)..\..\Source\System;
       $(ProjectDir)..\..\Source\;
       $(ProjectDir)..\..\Include;
-      $(ProjectDir)..\..\Include\cpprestsdk;
+      $(ProjectDir)..\..\Include\cpprestinclude;
       $(ProjectDir)..\..\Source\Services\Presence;
       $(ProjectDir)..\..\Source\Services\TitleStorage;
       $(ProjectDir)..\..\Source\C\Services\TitleStorage;
