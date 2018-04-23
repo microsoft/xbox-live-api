@@ -205,7 +205,7 @@ utility::string_t uri::encode_impl(const utility::string_t &raw, const std::func
     return encoded;
 }
 
-/// </summary>
+/// <summary>
 /// Encodes a string by converting all characters except for RFC 3986 unreserved characters to their
 /// hexadecimal representation.
 /// </summary>

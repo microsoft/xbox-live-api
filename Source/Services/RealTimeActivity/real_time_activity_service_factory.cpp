@@ -35,7 +35,7 @@ real_time_activity_service_factory::get_rta_instance(
     std::lock_guard<std::mutex> guard(get_xsapi_singleton()->m_singletonLock);
     XSAPI_ASSERT(userContext != nullptr);
 
-    auto& xboxUserId = utils::string_t_from_internal_string(userContext->xbox_user_id());
+    auto xboxUserId = utils::string_t_from_internal_string(userContext->xbox_user_id());
     auto iter = m_xuidToRTAMap.find(xboxUserId);
     if (iter == m_xuidToRTAMap.end())
     {
@@ -66,7 +66,7 @@ real_time_activity_service_factory::remove_user_from_rta_map(
 {
     std::lock_guard<std::mutex> guard(get_xsapi_singleton()->m_singletonLock);
     XSAPI_ASSERT(userContext != nullptr);
-    auto& xuid = utils::string_t_from_internal_string(userContext->xbox_user_id());
+    auto xuid = utils::string_t_from_internal_string(userContext->xbox_user_id());
     if (!xuid.empty())
     {
         auto iter = m_xuidToRTAMap.find(xuid);

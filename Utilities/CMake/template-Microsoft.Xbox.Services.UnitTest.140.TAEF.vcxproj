@@ -104,7 +104,7 @@
       $(ProjectDir)..\..\Source\Services\Clubs;
       $(ProjectDir)..\..\Source\Services\Clubs\WinRT;
       $(ProjectDir)..\..\Include;
-      $(ProjectDir)..\..\Include\cpprestsdk;
+      $(ProjectDir)..\..\Include\cpprestinclude;
       $(ProjectDir)..\..\Tests\UnitTests;
       $(ProjectDir)..\..\Tests\UnitTests\Mocks;
       $(ProjectDir)..\..\Tests\UnitTests\Support;

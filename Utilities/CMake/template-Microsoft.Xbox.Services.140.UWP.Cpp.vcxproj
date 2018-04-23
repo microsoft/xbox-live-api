@@ -87,7 +87,7 @@
        $(ProjectDir)..\..\Source\Shared;
        $(ProjectDir)..\..\Source\Shared\WinRT;
        $(ProjectDir)..\..\Include;
-       $(ProjectDir)..\..\Include\cpprestsdk;
+       $(ProjectDir)..\..\Include\cpprestinclude;
        $(ProjectDir)..\..\Source\System\WinRT;
        $(ProjectDir)..\..\Source\System;
        $(ProjectDir)..\..\Source\System\C;

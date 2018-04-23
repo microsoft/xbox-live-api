@@ -93,6 +93,7 @@ void user_impl_idp::sign_in_impl(
                     findProviderAsyncOp->Completed = ref new AsyncOperationCompletedHandler<WebAccountProvider^>(
                     [&msaRequest, payload, localConfig, showUI, completeEvent, &account](IAsyncOperation<WebAccountProvider^>^ asyncOp, AsyncStatus status)
                     {
+                        UNREFERENCED_PARAMETER(status);
                         auto provider = asyncOp->GetResults();
 
                         msaRequest = ref new WebTokenRequest(provider, "service::XboxLivePartner.Signin::DELEGATION");
@@ -103,6 +104,7 @@ void user_impl_idp::sign_in_impl(
                         findAccountAsyncOp->Completed = ref new AsyncOperationCompletedHandler<WebAccount^>(
                             [msaRequest, showUI, completeEvent, &account](IAsyncOperation<WebAccount^>^ asyncOp, AsyncStatus status)
                         {
+                            UNREFERENCED_PARAMETER(status);
                             account = asyncOp->GetResults();
                             completeEvent->Set();
                         });
@@ -255,6 +257,7 @@ void user_impl_idp::initialize_provider(xbox_live_callback<void> callback)
     asyncOp->Completed = ref new AsyncOperationCompletedHandler<WebAccountProvider^>(
         [thisWeakPtr, callback](IAsyncOperation<WebAccountProvider^>^ asyncInfo, AsyncStatus status)
     {
+        UNREFERENCED_PARAMETER(status);
         std::shared_ptr<user_impl_idp> pThis(thisWeakPtr.lock());
         if (pThis == nullptr)
         {
@@ -300,7 +303,7 @@ void user_impl_idp::internal_get_token_and_signature(
     _In_ bool forceRefresh,
     _In_ async_queue_handle_t queue,
     _In_ token_and_signature_callback callback
-    )
+)
 {
     UNREFERENCED_PARAMETER(endpointForNsal);
 
@@ -343,7 +346,7 @@ void user_impl_idp::internal_get_token_and_signature(
                 context->bytes,
                 context->promptForCredentialsIfNeeded,
                 context->forceRefresh
-                );
+            );
 
             // Handle UserInteractionRequired
             if (context->result.payload()->token_request_result() != nullptr
@@ -372,7 +375,10 @@ void user_impl_idp::internal_get_token_and_signature(
         return S_OK;
     });
 
-    ScheduleAsync(internalAsyncBlock, 0);
+    if (SUCCEEDED(hresult))
+    {
+        ScheduleAsync(internalAsyncBlock, 0);
+    }
 }
 
 xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>
@@ -549,6 +555,7 @@ user_impl_idp::request_token_from_idp(
     auto asyncOpCompletedHandler = ref new AsyncOperationCompletedHandler<WebTokenRequestResult^>(
         [&tokenResult, &retException, completeEvent](IAsyncOperation<WebTokenRequestResult^>^ asyncOp, AsyncStatus status)
     {
+        UNREFERENCED_PARAMETER(status);
         try
         {
             tokenResult = asyncOp->GetResults();
@@ -684,6 +691,7 @@ void user_impl_idp::check_user_signed_out()
             asyncOp->Completed = ref new AsyncOperationCompletedHandler<WebAccount^>(
                 [pThis](IAsyncOperation<WebAccount^>^ asyncOp, AsyncStatus status)
             {
+                UNREFERENCED_PARAMETER(status);
                 auto signedInAccount = asyncOp->GetResults();
                 if (signedInAccount == nullptr)
                 {

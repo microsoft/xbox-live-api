@@ -106,6 +106,7 @@ void get_auth_result(
             asyncOp->Completed = ref new AsyncOperationCompletedHandler<GetTokenAndSignatureResult^>(
                 [data, context](IAsyncOperation<GetTokenAndSignatureResult^>^ asyncOp, AsyncStatus status)
             {
+                UNREFERENCED_PARAMETER(status);
                 try
                 {
                     auto result = asyncOp->GetResults();
@@ -131,7 +132,10 @@ void get_auth_result(
         return S_OK;
     });
 
-    ScheduleAsync(async, 0);
+    if (SUCCEEDED(hr))
+    {
+        ScheduleAsync(async, 0);
+    }
 }
 
 void user_context::get_auth_result(

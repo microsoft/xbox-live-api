@@ -62,7 +62,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>_WINRT_DLL;_NO_XSAPIIMP;ENABLE_INTSAFE_SIGNED_FUNCTIONS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ASYNCRT_EXPORT;_PPLX_EXPORT;_WINRT_DLL;_NO_XSAPIIMP;ENABLE_INTSAFE_SIGNED_FUNCTIONS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
       <AdditionalUsingDirectories>$(WindowsSDK_WindowsMetadata);$(AdditionalUsingDirectories)</AdditionalUsingDirectories>
@@ -98,8 +98,7 @@
       $(ProjectDir)\..\..\Source\Shared;
       $(ProjectDir)\..\..\Source\Shared\WinRT;
       $(ProjectDir)\..\..\Include;
-      $(ProjectDir)\..\..\Include\cpprestsdk;
-      $(ProjectDir)\..\..\External\cpprestsdk\Release\include;
+      $(ProjectDir)\..\..\Include\cpprestinclude;
       $(ProjectDir)\..\..\Source\System\WinRT;
       $(ProjectDir)\..\..\Source\System;
       $(ProjectDir)\..\..\Source\Services\Presence;
@@ -141,9 +140,6 @@
   </ItemDefinitionGroup>
 ****INSERTFILES****
   <ItemGroup>
-    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.vcxproj">
-      <Project>{8EE38792-FFD4-4897-BB32-308A4DDCF0C5}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.140.UWP.C\libHttpClient.140.UWP.C.vcxproj">
       <Project>{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}</Project>
     </ProjectReference>
