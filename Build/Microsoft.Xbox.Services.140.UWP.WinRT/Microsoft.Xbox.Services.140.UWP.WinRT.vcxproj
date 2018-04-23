@@ -98,6 +98,7 @@
       $(ProjectDir)\..\..\Source\Shared;
       $(ProjectDir)\..\..\Source\Shared\WinRT;
       $(ProjectDir)\..\..\Include;
+      $(ProjectDir)\..\..\Include\cpprestsdk;
       $(ProjectDir)\..\..\External\cpprestsdk\Release\include;
       $(ProjectDir)\..\..\Source\System\WinRT;
       $(ProjectDir)\..\..\Source\System;
