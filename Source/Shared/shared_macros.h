@@ -83,14 +83,17 @@
 
 
 #define CATCH_RETURN() \
-    catch (std::bad_alloc const& e) { return utils::std_bad_alloc_to_xbl_result(e); } \
-    catch (std::exception const& e) { return utils::std_exception_to_xbl_result(e); } \
-    catch (...) { return utils::unknown_exception_to_xbl_result(); }
+    catch (...) { return utils::convert_exception_to_hresult(); }
 
 #define CATCH_RETURN_WITH(errCode) \
-    catch (std::bad_alloc const& e) { utils::std_bad_alloc_to_xbl_result(e); return errCode; } \
-    catch (std::exception const& e) { utils::std_exception_to_xbl_result(e); return errCode; } \
-    catch (...) { utils::unknown_exception_to_xbl_result(); return errCode; }
+    catch (...) \
+    { \
+        HRESULT hr = utils::convert_exception_to_hresult(); \
+        xsapi_internal_stringstream ss; \
+        ss << "Exception reached api boundry: HR" << hr; \
+        LOG_ERROR(ss.str().data()); \
+        return errCode; \
+    }
 
 #define DEFINE_GET_STRING(className, methodName) \
     string_t className::methodName() const \

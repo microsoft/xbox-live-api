@@ -94,8 +94,17 @@ extern "C" {
 
 #include "httpClient/pal.h"
 
-#define MAKE_E_XBL(code)                 MAKE_HRESULT(1, FACILITY_XBOX, code)
-#define E_XBL_ALREADY_INITIALISED        MAKE_E_XBL(5504L)
+#define XBL_ERROR_CODE_START 5200
+#define MAKE_E_XBL(offset)                      MAKE_HRESULT(1, FACILITY_XBOX, (XBL_ERROR_CODE_START + offset))
+
+#define E_XBL_RUNTIME_ERROR                     MAKE_HRESULT(1, FACILITY_XBOX, 5500L)
+#define E_XBL_RTA_GENERIC_ERROR                 MAKE_E_XBL(1)
+#define E_XBL_RTA_SUBSCRIPTION_LIMIT_REACHED    MAKE_E_XBL(2)
+#define E_XBL_RTA_ACCESS_DENIED                 MAKE_E_XBL(3)
+#define E_XBL_AUTH_UNKNOWN_ERROR                MAKE_E_XBL(4)
+#define E_XBL_AUTH_RUNTIME_ERROR                MAKE_E_XBL(5)
+#define E_XBL_AUTHO_NO_TOKEN                    MAKE_E_XBL(6)
+#define E_XBL_ALREADY_INITIALISED               MAKE_E_XBL(7)
 
 #define XBL_GAMERSCORE_CHAR_SIZE 16
 #define XBL_GAMERTAG_CHAR_SIZE 16
@@ -114,7 +123,7 @@ typedef struct xbl_xbox_live_context* xbl_context_handle;
 typedef void* XBL_ASYNC_QUEUE;
 
 #if XDK_API
-typedef winrt::Windows::Xbox::System::User xbl_user_handle;
+typedef Windows::Xbox::System::User^ xbl_user_handle;
 #else
 typedef struct xbl_xbox_live_user* xbl_user_handle;
 #endif
