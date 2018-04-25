@@ -103,7 +103,7 @@ extern "C" {
 #define E_XBL_RTA_ACCESS_DENIED                 MAKE_E_XBL(3)
 #define E_XBL_AUTH_UNKNOWN_ERROR                MAKE_E_XBL(4)
 #define E_XBL_AUTH_RUNTIME_ERROR                MAKE_E_XBL(5)
-#define E_XBL_AUTHO_NO_TOKEN                    MAKE_E_XBL(6)
+#define E_XBL_AUTH_NO_TOKEN                     MAKE_E_XBL(6)
 #define E_XBL_ALREADY_INITIALISED               MAKE_E_XBL(7)
 
 #define XBL_GAMERSCORE_CHAR_SIZE 16

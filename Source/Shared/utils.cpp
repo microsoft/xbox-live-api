@@ -1142,7 +1142,7 @@ utils::convert_xbox_live_error_code_to_hresult(
             case xbox_live_error_code::rta_access_denied: return E_XBL_RTA_ACCESS_DENIED;
             case xbox_live_error_code::auth_unknown_error: return E_XBL_AUTH_UNKNOWN_ERROR;
             case xbox_live_error_code::auth_runtime_error: return E_XBL_AUTH_RUNTIME_ERROR;
-            case xbox_live_error_code::auth_no_token_error: return E_XBL_AUTHO_NO_TOKEN;
+            case xbox_live_error_code::auth_no_token_error: return E_XBL_AUTH_NO_TOKEN;
             case xbox_live_error_code::auth_user_not_signed_in: return __HRESULT_FROM_WIN32(ERROR_NO_SUCH_USER);
             case xbox_live_error_code::auth_user_cancel: return __HRESULT_FROM_WIN32(ERROR_CANCELLED);
             case xbox_live_error_code::auth_user_switched: return __HRESULT_FROM_WIN32(ERROR_NO_SUCH_USER);
