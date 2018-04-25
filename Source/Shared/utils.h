@@ -55,7 +55,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
     class logger;
     class perf_tester;
     class initiator;
-    class xbl_thread_pool;
+    class xbox_web_socket_client;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
 
 #if !TV_API
@@ -385,6 +385,9 @@ struct xsapi_singleton
     // from Stats\Manager\stats_manager.cpp
     std::shared_ptr<xbox::services::stats::manager::stats_manager> m_statsManagerInstance;
 
+    // from Shared\web_socket_client.cpp
+    xsapi_internal_unordered_map<hc_websocket_handle_t, xbox_web_socket_client*> m_websocketHandles;
+
     // from Services\RealTimeActivity\real_time_activity_service_factory.cpp
     std::shared_ptr<real_time_activity::real_time_activity_service_factory> m_rtaFactoryInstance;
 
@@ -404,8 +407,6 @@ struct xsapi_singleton
     std::shared_ptr<system::xbox_system_factory> m_factoryInstance;
 
     std::shared_ptr<initiator> m_initiator;
-
-    std::shared_ptr<xbl_thread_pool> m_threadpool;
 
 #if _WINRT_DLL || UNIT_TEST_SERVICES
     // from Services\Multiplayer\Manager\WinRT\MultiplayerManager_WinRT.cpp
@@ -1503,19 +1504,13 @@ public:
         }
     }
 
-#if XSAPI_C
     static time_t time_t_from_datetime(const utility::datetime& datetime);
 
     static utility::datetime datetime_from_time_t(const time_t* time);
 
-    // TODO REMOVE
+#if XSAPI_C
+    // SHIPTODO REMOVE
     static XBL_RESULT create_xbl_result(std::error_code errc);
-
-    static HRESULT hresult_from_error_code(std::error_code errc);
-
-    static HRESULT std_bad_alloc_to_xbl_result(std::bad_alloc const& e);
-    static HRESULT std_exception_to_xbl_result(std::exception const& e);
-    static HRESULT unknown_exception_to_xbl_result();
 #endif
 
 private:

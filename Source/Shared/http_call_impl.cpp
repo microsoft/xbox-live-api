@@ -456,7 +456,7 @@ void http_call_impl::internal_get_response(
                 httpCallResponse->set_response_body(responseBody);
                 break;
             case http_call_response_body_type::vector_body:
-                // TODO 
+                // SHIPTODO
                 break;
             }
         }

@@ -115,7 +115,7 @@ STDAPI XblGetSocialRelationshipsHelper(
                 [data, context](xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>> result)
             {
                 context->result = result.payload();
-                auto hr = utils::hresult_from_error_code(result.err());
+                auto hr = utils::convert_xbox_live_error_code_to_hresult(result.err());
                 CompleteAsync(data->async, hr, calculate_social_relationship_result_size(context->result));
             });
             return E_PENDING;
@@ -241,7 +241,7 @@ try
     {
         *subscriptionHandle = static_cast<void*>(result.payload().get());
     }
-    return utils::hresult_from_error_code(result.err());
+    return utils::convert_xbox_live_error_code_to_hresult(result.err());
 }
 CATCH_RETURN()
 
@@ -253,7 +253,7 @@ try
 {
     RETURN_C_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
 
-    return utils::hresult_from_error_code(
+    return utils::convert_xbox_live_error_code_to_hresult(
         xboxLiveContext->contextImpl->social_service_impl()->unsubscribe_from_social_relationship_change(
             std::shared_ptr<social_relationship_change_subscription_internal>(static_cast<social_relationship_change_subscription_internal*>(subscriptionHandle))
             ).err()
@@ -348,7 +348,7 @@ try
                 data->async->queue,
                 [data](xbox_live_result<void> result)
                 {
-                    CompleteAsync(data->async, utils::hresult_from_error_code(result.err()), 0);
+                    CompleteAsync(data->async, utils::convert_xbox_live_error_code_to_hresult(result.err()), 0);
                 },
                 context->sessionName,
                 context->reasonMessage,
@@ -413,7 +413,7 @@ try
                 data->async->queue,
                 [data](xbox_live_result<void> result)
                 {
-                    CompleteAsync(data->async, utils::hresult_from_error_code(result.err()), 0);
+                    CompleteAsync(data->async, utils::convert_xbox_live_error_code_to_hresult(result.err()), 0);
                 });
             return E_PENDING;
 

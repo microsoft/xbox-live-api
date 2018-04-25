@@ -28,15 +28,10 @@
 #include <concrt.h>
 #include <collection.h>
 #include <string>
-#include <ppltasks.h>
+#include <unordered_set>
 
 #include "xsapi\services.h"
-#include "xsapi-c\system_c.h"
-#include "xsapi-c\xbox_live_context_c.h"
-#include "xsapi-c\profile_c.h"
-#include "xsapi-c\xbox_live_global_c.h"
-#include "xsapi-c\social_c.h"
-#include "xsapi-c\social_manager_c.h"
+#include "xsapi-c\services_c.h"
 
 namespace DX
 {

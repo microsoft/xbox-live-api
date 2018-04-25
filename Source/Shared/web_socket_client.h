@@ -38,8 +38,6 @@ private:
 
     xbox_live_callback<xsapi_internal_string> m_receiveHandler;
     xbox_live_callback<HCWebSocketCloseStatus> m_closeHandler;
-
-    static xsapi_internal_unordered_map<hc_websocket_handle_t, xbox_web_socket_client*> m_handleMap;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

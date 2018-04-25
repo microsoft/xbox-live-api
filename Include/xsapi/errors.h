@@ -525,7 +525,7 @@ namespace xbox {
                 logic_error,
 
                 /// <summary>
-                /// <b>0x80004005</b>
+                /// <b>0x89231450</b>
                 /// xbox_live_error_code 1007
                 /// Runtime error
                 /// </summary>
@@ -563,21 +563,21 @@ namespace xbox {
                 // RTA errors
                 //////////////////////////////////////////////////////////////////////////
                 /// <summary>
-                /// <b>0x80004005</b>
+                /// <b>0x89231451</b>
                 /// xbox_live_error_code 1500
                 /// RTA generic error
                 /// </summary>
                 rta_generic_error = 1500,
 
                 /// <summary>
-                /// <b>0x80004005</b>
+                /// <b>0x89231452</b>
                 /// xbox_live_error_code 1501
                 /// RTA subscription limit reached
                 /// </summary>
                 rta_subscription_limit_reached,
 
                 /// <summary>
-                /// <b>0x80004005</b>
+                /// <b>0x89231453</b>
                 /// xbox_live_error_code 1502
                 /// RTA access denied
                 /// </summary>
@@ -588,7 +588,7 @@ namespace xbox {
                 //////////////////////////////////////////////////////////////////////////
 
                 /// <summary>
-                /// <b>0x80004005</b>
+                /// <b>0x89231454</b>
                 /// xbox_live_error_code 2000
                 /// Unknown auth error
                 /// </summary>
@@ -623,14 +623,14 @@ namespace xbox {
                 auth_user_not_signed_in,
 
                 /// <summary>
-                /// <b>0x80004005</b>
+                /// <b>0x89231455</b>
                 /// xbox_live_error_code 2005
                 /// Auth runtime error
                 /// </summary>
                 auth_runtime_error,
 
                 /// <summary>
-                /// <b>0x80070525</b>
+                /// <b>0x89231456</b>
                 /// xbox_live_error_code 2006
                 /// Auth no token error
                 /// </summary>

@@ -226,7 +226,7 @@ HRESULT SignInHelper(
                 [data, context](xbox_live_result<sign_in_result> result)
             {
                 context->result = result;
-                auto hr = utils::hresult_from_error_code(result.err());
+                auto hr = utils::convert_xbox_live_error_code_to_hresult(result.err());
                 CompleteAsync(data->async, hr, sizeof(XblSignInResult));
             });
             return E_PENDING;
@@ -352,7 +352,7 @@ try
                 data->async->queue,
                 [data, context](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
             {
-                auto hr = utils::hresult_from_error_code(result.err());
+                auto hr = utils::convert_xbox_live_error_code_to_hresult(result.err());
                 CompleteAsync(data->async, hr, 0);
 
                 // Only calling the typed callback on success
