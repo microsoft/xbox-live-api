@@ -16,6 +16,10 @@
 #endif
 #include "xsapi/types.h"
 
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+class token_and_signature_result_internal;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 enum class caller_context_type
@@ -78,7 +82,7 @@ public:
 
     void refresh_token(
         _In_ async_queue_handle_t queue,
-        _In_ xbox_live_callback<xbox_live_result<void>> callback
+        _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox::services::system::token_and_signature_result_internal>>> callback
         );
 
     // inline helper functions

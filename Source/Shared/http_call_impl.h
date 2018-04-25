@@ -3,6 +3,7 @@
 
 #pragma once
 #include "xsapi/system.h"
+#include "httpClient/httpClient.h"
 #include "http_call_response_internal.h"
 #include "http_call_request_message_internal.h"
 #include "system_internal.h"
@@ -121,7 +122,6 @@ struct http_call_data
 
     ~http_call_data();
 
-    std::chrono::milliseconds delayBeforeRetry;
     chrono_clock_t::time_point firstCallStartTime;
     bool hasPerformedRetryOn401;
     bool retryAllowed;
@@ -380,6 +380,12 @@ private:
 
     virtual xbox_live_result<void> internal_get_response_with_auth(
         _In_ bool allUsersAuthRequired
+        );
+
+    static void handle_unauthorized_error(
+        _In_ void* context,
+        _In_ const std::shared_ptr<http_call_response_internal>& httpCallResponse,
+        _In_ const std::shared_ptr<http_call_data>& httpCallData
         );
 
     static void internal_get_response(
