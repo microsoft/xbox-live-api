@@ -94,7 +94,7 @@ private:
 
     std::shared_ptr<UserController> m_userController;
 
-    std::vector<std::string> m_xuidsInCustomSocialGroup;
+    std::vector<uint64_t> m_xuidsInCustomSocialGroup;
     std::vector<XblXboxSocialUserGroup*> m_socialGroups;
     static std::mutex m_socialManagerLock;
 
@@ -124,24 +124,24 @@ private:
 
     void CreateSocialGroupFromList(
         _In_ Windows::Xbox::System::User^ user,
-        _In_ std::vector<std::string> xuidList
+        _In_ std::vector<uint64_t> xuidList
         );
     void DestorySocialGroup(
         _In_ Windows::Xbox::System::User^ user
         );
     void CreateSocialGroupFromFilters(
         _In_ Windows::Xbox::System::User^ user,
-        _In_ XBL_PRESENCE_FILTER presenceDetailLevel,
-        _In_ XBL_RELATIONSHIP_FILTER filter
+        _In_ XblPresenceFilter presenceDetailLevel,
+        _In_ XblRelationshipFilter filter
         );
     void DestroySocialGroup(
         _In_ Windows::Xbox::System::User^ user,
-        _In_ XBL_PRESENCE_FILTER presenceDetailLevel,
-        _In_ XBL_RELATIONSHIP_FILTER filter
+        _In_ XblPresenceFilter presenceDetailLevel,
+        _In_ XblRelationshipFilter filter
         );
     void UpdateSocialManager();
     void LogSocialEventList(
-        XBL_SOCIAL_EVENT* eventList,
+        XblSocialEvent* eventList,
         uint32_t eventListCount
         );
     void CreateSocialGroupsBasedOnUI(
@@ -150,14 +150,14 @@ private:
 
     void UpdateSocialGroupForAllUsers(
         _In_ bool toggle,
-        _In_ XBL_PRESENCE_FILTER presenceFilter,
-        _In_ XBL_RELATIONSHIP_FILTER relationshipFilter
+        _In_ XblPresenceFilter presenceFilter,
+        _In_ XblRelationshipFilter relationshipFilter
         );
     void UpdateSocialGroup(
         _In_ Windows::Xbox::System::User^ user,
         _In_ bool toggle,
-        _In_ XBL_PRESENCE_FILTER presenceFilter,
-        _In_ XBL_RELATIONSHIP_FILTER relationshipFilter
+        _In_ XblPresenceFilter presenceFilter,
+        _In_ XblRelationshipFilter relationshipFilter
         );
 
     void UpdateSocialGroupOfListForAllUsers(

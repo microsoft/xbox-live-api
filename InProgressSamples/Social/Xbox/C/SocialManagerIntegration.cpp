@@ -26,9 +26,6 @@ Game::AddUserToSocialManager(
     _In_ Windows::Xbox::System::User^ user
     )
 {
-    // Is this needed
-    //std::shared_ptr<xbox::services::xbox_live_context> xboxLiveContext = std::make_shared<xbox::services::xbox_live_context>(user);
-
     {
         std::lock_guard<std::mutex> guard(m_socialManagerLock);
 
@@ -38,7 +35,7 @@ Game::AddUserToSocialManager(
         source << _T(" to SocialManager");
         Log(source.str());
 
-        XblSocialManagerAddLocalUser(user, XBL_SOCIAL_MANAGER_EXTRA_DETAIL_LEVEL_ALL);
+        XblSocialManagerAddLocalUser(user, XblSocialManagerExtraDetailLevel_All);
         m_userAdded = true;
     }
 
@@ -76,49 +73,40 @@ Game::RemoveUserFromSocialManager(
 void 
 Game::CreateSocialGroupFromList(
     _In_ Windows::Xbox::System::User^ user,
-    _In_ std::vector<std::string> xuidList
+    _In_ std::vector<uint64_t> xuidList
     )
 {
-    PCSTR *xuidListArray;
-    xuidListArray = new PCSTR[xuidList.size()];
-    for (auto i = 0; i < xuidList.size(); ++i)
-    {
-        xuidListArray[i] = xuidList[i].data();
-    }
-
     for (auto group : m_socialGroups)
     {
-        if (group->socialUserGroupType == XBL_SOCIAL_USER_GROUP_TYPE_USER_LIST_TYPE && group->localUser == user)
+        if (group->socialUserGroupType == XblSocialUserGroupType_UserListType && group->localUser == user)
         {
-            XblSocialManagerUpdateSocialUserGroup(group, xuidListArray, (uint32_t)xuidList.size());
-            delete[] xuidListArray;
+            XblSocialManagerUpdateSocialUserGroup(group, xuidList.data(), (uint32_t)xuidList.size());
             return;
         }
     }
 
     if( xuidList.size() > 0 )
     {
-        XBL_XBOX_SOCIAL_USER_GROUP *newGroup;
-        auto result = XblSocialManagerCreateSocialUserGroupFromList(user, xuidListArray, (uint32_t)xuidList.size(), &newGroup);
-        if (result.errorCondition = XBL_ERROR_CONDITION_NO_ERROR)
+        XblXboxSocialUserGroup *newGroup;
+        auto hr = XblSocialManagerCreateSocialUserGroupFromList(user, xuidList.data(), (uint32_t)xuidList.size(), &newGroup);
+        if (SUCCEEDED(hr))
         {
             m_socialGroups.push_back(newGroup);
         }
     }
-    delete[] xuidListArray;
 }
 
 void
 Game::CreateSocialGroupFromFilters(
     _In_ Windows::Xbox::System::User^ user,
-    _In_ XBL_PRESENCE_FILTER presenceFilter,
-    _In_ XBL_RELATIONSHIP_FILTER relationshipFilter
+    _In_ XblPresenceFilter presenceFilter,
+    _In_ XblRelationshipFilter relationshipFilter
     )
 {
-    XBL_XBOX_SOCIAL_USER_GROUP *newGroup;
-    auto result = XblSocialManagerCreateSocialUserGroupFromFilters(user, presenceFilter, relationshipFilter, &newGroup);
+    XblXboxSocialUserGroup *newGroup;
+    auto hr = XblSocialManagerCreateSocialUserGroupFromFilters(user, presenceFilter, relationshipFilter, &newGroup);
 
-    if (!result.errorCondition)
+    if (SUCCEEDED(hr))
     {
         m_socialGroups.push_back(newGroup);
     }
@@ -134,7 +122,7 @@ Game::DestorySocialGroup(
     auto it = m_socialGroups.begin();
     while (it != m_socialGroups.end())
     {
-        if ((*it)->localUser == user && (*it)->socialUserGroupType == XBL_SOCIAL_USER_GROUP_TYPE_USER_LIST_TYPE)
+        if ((*it)->localUser == user && (*it)->socialUserGroupType == XblSocialUserGroupType_UserListType)
         {
             XblSocialManagerDestroySocialUserGroup(*it);
             it = m_socialGroups.erase(it);
@@ -149,8 +137,8 @@ Game::DestorySocialGroup(
 void
 Game::DestroySocialGroup(
     _In_ Windows::Xbox::System::User^ user,
-    _In_ XBL_PRESENCE_FILTER presenceFilter,
-    _In_ XBL_RELATIONSHIP_FILTER relationshipFilter
+    _In_ XblPresenceFilter presenceFilter,
+    _In_ XblRelationshipFilter relationshipFilter
     )
 {
     std::lock_guard<std::mutex> guard(m_socialManagerLock);
@@ -183,8 +171,9 @@ Game::UpdateSocialManager()
     perfInstance->begin_capture(L"no_updates");
     perfInstance->begin_capture(L"updates");
 #endif
+    XblSocialEvent* events;
     uint32_t eventCount;
-    auto socialEvents = XblSocialManagerDoWork(&eventCount);
+    XblSocialManagerDoWork(&events, &eventCount);
 #if PERF_COUNTERS
     if (eventCount == 0)
     {
@@ -196,5 +185,5 @@ Game::UpdateSocialManager()
     }
 #endif
 
-    LogSocialEventList(socialEvents, eventCount);
+    LogSocialEventList(events, eventCount);
 }
