@@ -7,6 +7,7 @@
 #include "shared_macros.h"
 #include "xsapi/system.h"
 #include "xsapi/types.h"
+#include "system_internal.h"
 
 #if defined __cplusplus_winrt
 using namespace Platform;
@@ -72,19 +73,6 @@ void user_context::get_auth_result(
 {
     UNREFERENCED_PARAMETER(allUsersAuthRequired);
 
-#if XSAPI_SERVER
-    if (m_server != nullptr)
-    {
-        m_server->get_token_and_signature(httpMethod, url, headers, requestBodyString)
-            .then([completionRoutine, completionRoutineContext, taskGroupId](xbox_live_result<token_and_signature_result> xblResult)
-        {
-            const auto& tokenResult = xblResult.payload();
-            user_context_auth_result userContextResult(tokenResult.token(), tokenResult.signature());
-            callback(xbox_live_result<user_context_auth_result>(userContextResult, xblResult.err(), xblResult.err_message()));
-        });
-        return;
-    }
-#endif
     if (m_user != nullptr)
     {
         m_user->_User_impl()->get_token_and_signature(httpMethod, url, headers, requestBodyVector, queue,
@@ -99,7 +87,7 @@ void user_context::get_auth_result(
 
 void user_context::refresh_token(
     _In_ async_queue_handle_t queue,
-    _In_ xbox_live_callback<xbox_live_result<void>> callback
+    _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
     )
 {
     auto authConfig = m_user->_User_impl()->get_auth_config();
@@ -115,7 +103,7 @@ void user_context::refresh_token(
         queue,
         [callback](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
     {
-        callback(xbox_live_result<void>(result.err(), result.err_message()));
+        callback(xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>(result.err(), result.err_message()));
     });
 }
 

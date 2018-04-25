@@ -71,9 +71,10 @@ http_call_data::http_call_data(
     queue(nullptr),
     callback(nullptr)
 {
-    delayBeforeRetry = xboxLiveContextSettings->http_retry_delay();
-
     HCHttpCallCreate(&callHandle);
+    HCHttpCallRequestSetRetryCacheId(callHandle, static_cast<uint32_t>(xboxLiveApi));
+    HCHttpCallRequestSetTimeoutWindow(callHandle, static_cast<uint32_t>(xboxLiveContextSettings->http_timeout_window().count()));
+    HCHttpCallRequestSetRetryDelay(callHandle, static_cast<uint32_t>(xboxLiveContextSettings->http_retry_delay().count()));
 
     fullUrl = serverName + utils::internal_string_from_string_t(pathQueryFragment.to_string());
     HCHttpCallRequestSetUrl(callHandle, httpMethod.data(), fullUrl.data());
@@ -244,7 +245,7 @@ xbox_live_result<void> http_call_impl::get_response_with_auth(
 
     add_default_headers_if_needed(m_httpCallData);
 
-#if !TV_API && !XSAPI_SERVER
+#if !TV_API 
 #if XSAPI_CPP
     if (!m_httpCallData->userContext->user() || !m_httpCallData->userContext->user()->is_signed_in())
 #else
@@ -394,9 +395,36 @@ xbox_live_result<void> http_call_impl::internal_get_response_with_auth(
     return xbox_live_result<void>();
 }
 
+ 
+void http_call_impl::handle_unauthorized_error(
+    _In_ void* context,
+    _In_ const std::shared_ptr<http_call_response_internal>& httpCallResponse,
+    _In_ const std::shared_ptr<http_call_data>& httpCallData
+    )
+{
+    httpCallData->userContext->refresh_token(
+        httpCallData->queue, 
+        [context, httpCallResponse, httpCallData](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
+        {
+            httpCallData->hasPerformedRetryOn401 = true;
+            if (!result.err())
+            {
+                // if got new token, try http call again
+                // it won't repeat the token refresh since hasPerformedRetryOn401 is now true
+                internal_get_response(httpCallData);
+            }
+            else
+            {
+                // if getting a new token failed, then we need to just return the 401 upwards
+                utils::remove_shared_ptr<http_call_data>(context, true);
+                httpCallData->callback(httpCallResponse);
+            }
+        });
+}
+
 void http_call_impl::internal_get_response(
     _In_ const std::shared_ptr<http_call_data>& httpCallData
-)
+    )
 {
     set_http_timeout(httpCallData);
     set_user_agent(httpCallData);
@@ -404,13 +432,16 @@ void http_call_impl::internal_get_response(
     HCHttpCallRequestSetRetryAllowed(httpCallData->callHandle, httpCallData->retryAllowed);
     HCHttpCallRequestSetTimeout(httpCallData->callHandle, static_cast<uint32_t>(httpCallData->httpTimeout.count()));
 
+    async_queue_handle_t nestedQueue;
+    CreateNestedAsyncQueue(httpCallData->queue, &nestedQueue);
+
     AsyncBlock *asyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
     ZeroMemory(asyncBlock, sizeof(AsyncBlock));
-    asyncBlock->queue = httpCallData->queue;
+    asyncBlock->queue = nestedQueue;
     asyncBlock->context = utils::store_shared_ptr(httpCallData);
     asyncBlock->callback = [](_In_ AsyncBlock* asyncBlock)
     {
-        auto httpCallData = utils::remove_shared_ptr<http_call_data>(asyncBlock->context);
+        auto httpCallData = utils::remove_shared_ptr<http_call_data>(asyncBlock->context, false);
 
         HRESULT hr = S_OK;
         uint32_t platformErrorCode = 0;
@@ -452,16 +483,33 @@ void http_call_impl::internal_get_response(
                     httpCallResponse->set_response_body(responseBodyJson);
                 }
                 break;
+
             case http_call_response_body_type::string_body:
                 httpCallResponse->set_response_body(responseBody);
                 break;
+
             case http_call_response_body_type::vector_body:
                 // TODO 
                 break;
             }
         }
-        httpCallData->callback(httpCallResponse);
+
+        CloseAsyncQueue(asyncBlock->queue);
+        void* context = asyncBlock->context;
         xsapi_memory::mem_free(asyncBlock);
+
+        if (httpCallData->retryAllowed && 
+            httpCallResponse->http_status() == web::http::status_codes::Unauthorized &&
+            httpCallData->userContext != nullptr &&
+            !httpCallData->hasPerformedRetryOn401)
+        {
+            handle_unauthorized_error(context, httpCallResponse, httpCallData);
+        }
+        else
+        {
+            utils::remove_shared_ptr<http_call_data>(context, true);
+            httpCallData->callback(httpCallResponse);
+        }
     };
 
     HCHttpCallPerform(httpCallData->callHandle, asyncBlock);
