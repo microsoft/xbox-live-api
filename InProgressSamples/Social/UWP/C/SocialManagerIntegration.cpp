@@ -131,26 +131,26 @@ void Game::DestroySocialGroup(
 
 void Game::UpdateSocialManager()
 {
-#if PERF_COUNTERS
-    auto perfInstance = performance_counters::get_singleton_instance();
-    perfInstance->begin_capture(L"no_updates");
-    perfInstance->begin_capture(L"updates");
-#endif
-    XblSocialEvent* events;
-    uint32_t eventCount;
-    auto hr =  XblSocialManagerDoWork(&events, &eventCount);
-#if PERF_COUNTERS
-    if (eventCount == 0)
-    {
-        perfInstance->end_capture(L"no_updates");
-    }
-    else
-    {
-        perfInstance->end_capture(L"updates");
-    }
-#endif
-
-    LogSocialEventList(events, eventCount);
+//#if PERF_COUNTERS
+//    auto perfInstance = performance_counters::get_singleton_instance();
+//    perfInstance->begin_capture(L"no_updates");
+//    perfInstance->begin_capture(L"updates");
+//#endif
+//    XblSocialEvent* events;
+//    uint32_t eventCount;
+//    auto hr =  XblSocialManagerDoWork(&events, &eventCount);
+//#if PERF_COUNTERS
+//    if (eventCount == 0)
+//    {
+//        perfInstance->end_capture(L"no_updates");
+//    }
+//    else
+//    {
+//        perfInstance->end_capture(L"updates");
+//    }
+//#endif
+//
+//    LogSocialEventList(events, eventCount);
 }
 
 std::vector<XblXboxSocialUserGroup*> Game::GetSocialGroups()

@@ -683,7 +683,8 @@ void Game::SignIn()
         Log(L"Already signed in.");
         return;
     }
-    AsyncBlock* asyncBlock = new AsyncBlock;
+    AsyncBlock* asyncBlock = new AsyncBlock{};
+    asyncBlock->queue = m_queue;
     asyncBlock->context = this;
     asyncBlock->callback = [](AsyncBlock* asyncBlock)
     {

@@ -95,7 +95,7 @@ private:
     std::shared_ptr<UserController> m_userController;
 
     std::vector<std::string> m_xuidsInCustomSocialGroup;
-    std::vector<XBL_XBOX_SOCIAL_USER_GROUP*> m_socialGroups;
+    std::vector<XblXboxSocialUserGroup*> m_socialGroups;
     static std::mutex m_socialManagerLock;
 
     bool m_allFriends;
@@ -105,6 +105,7 @@ private:
     bool m_customList;
     bool m_isInitialized;
     bool m_userAdded;
+    std::vector<uint64_t> m_xuidList;
 
 private:
     void InitializeSocialManager(Windows::Foundation::Collections::IVectorView<Windows::Xbox::System::User^>^ userList);
@@ -116,7 +117,9 @@ public:
         _In_ Windows::Xbox::System::User^ user
         );
 private:
-    XBL_XBOX_LIVE_CONTEXT_HANDLE m_xboxLiveContext;
+    xbl_context_handle m_xboxLiveContext;
+    async_queue_handle_t m_queue;
+    uint32_t m_callbackToken;
     HANDLE m_hBackgroundThread;
 
     void CreateSocialGroupFromList(

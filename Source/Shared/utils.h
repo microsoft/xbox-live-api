@@ -432,7 +432,7 @@ struct xsapi_singleton
     function_context m_signInCompletedHandlerIndexer;
     std::mutex m_trackingUsersLock;
     // from System\C\user_c.cpp
-    std::unordered_map<std::shared_ptr<xbox::services::system::xbox_live_user>, xbl_user_handle> m_signedInUsers;
+    std::unordered_map<std::shared_ptr<xbox::services::system::xbox_live_user>, xbl_user_handle> m_userHandlesMap;
 #endif
 
     std::shared_ptr<XBL_ACHIEVEMENTS_STATE> m_achievementsState;

@@ -29,11 +29,10 @@ public:
     {
         xbl_user_handle userPtr;
 #if !XDK_API
-        auto userIter = localUsersMap.find(internalGroup->local_user());
-        if (userIter == localUsersMap.end())
-        {
-            throw new std::exception("User doesn't exist. Did you call AddLocalUser?");
-        }
+        auto singleton = get_xsapi_singleton();
+        std::lock_guard<std::mutex> lock(singleton->m_trackingUsersLock);
+        auto userIter = singleton->m_userHandlesMap.find(internalGroup->local_user());
+        XSAPI_ASSERT(userIter != singleton->m_userHandlesMap.end());
         userPtr = userIter->second;
 #else
         userPtr = internalGroup->local_user();
@@ -55,7 +54,6 @@ public:
     }
 
 #if !XDK_API
-    xsapi_internal_unordered_map<xbox_live_user_t, xbl_user_handle> localUsersMap;
     xsapi_internal_vector<xbl_user_handle> localUsersVector;
 #endif
     bimap<XblXboxSocialUserGroup*, std::shared_ptr<xbox_social_user_group_internal>> socialUserGroupsMap;
@@ -234,7 +232,6 @@ try
     if (!result.err())
     {
         auto state = get_xbl_social_manager();
-        state->localUsersMap[user->internalUser] = user;
         state->localUsersVector.push_back(user);
     }
 #endif
@@ -254,8 +251,6 @@ try
     if (!result.err())
     {
         auto state = get_xbl_social_manager();
-        state->localUsersMap.erase(user->internalUser);
-
         auto& usersVector = state->localUsersVector;
         for (auto iter = usersVector.begin(); iter != usersVector.end(); ++iter)
         {
@@ -290,12 +285,13 @@ try
         {
             xbl_user_handle userHandle;
 #if !XDK_API
-            auto userIter = state->localUsersMap.find(internalEvent->user());
-            if (userIter == state->localUsersMap.end())
             {
-                throw new std::exception("User doesn't exist. Did you call AddLocalUser?");
+                auto singleton = get_xsapi_singleton();
+                std::lock_guard<std::mutex> lock(singleton->m_trackingUsersLock);
+                auto userIter = singleton->m_userHandlesMap.find(internalEvent->user());
+                XSAPI_ASSERT(userIter != singleton->m_userHandlesMap.end());
+                userHandle = userIter->second;
             }
-            userHandle = userIter->second;
 #else
             userHandle = internalEvent->user();
 #endif
