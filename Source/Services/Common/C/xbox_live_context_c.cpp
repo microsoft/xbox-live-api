@@ -56,6 +56,7 @@ try
     if (refCount <= 0)
     {
         assert(refCount == 0);
+        xboxLiveContextHandle->~xbl_xbox_live_context();
         xsapi_memory::mem_free(xboxLiveContextHandle);
     }
 }

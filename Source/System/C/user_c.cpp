@@ -59,11 +59,7 @@ try
     if (refCount <= 0)
     {
         assert(refCount == 0);
-        auto singleton = get_xsapi_singleton();
-        std::lock_guard<std::mutex> lock(singleton->m_trackingUsersLock);
-
-        singleton->m_signedInUsers.erase(user->internalUser);
-
+        user->~xbl_xbox_live_user();
         xsapi_memory::mem_free(user);
     }
     return S_OK;
@@ -231,12 +227,6 @@ HRESULT SignInHelper(
             {
                 context->result = result;
                 auto hr = utils::hresult_from_error_code(result.err());
-                if (SUCCEEDED(hr))
-                {
-                    auto singleton = get_xsapi_singleton();
-                    std::lock_guard<std::mutex> lock(singleton->m_trackingUsersLock);
-                    singleton->m_signedInUsers[context->user->internalUser] = context->user;
-                }
                 CompleteAsync(data->async, hr, sizeof(XblSignInResult));
             });
             return E_PENDING;
@@ -401,8 +391,8 @@ try
         auto singleton = get_xsapi_singleton();
         std::lock_guard<std::mutex> lock(singleton->m_trackingUsersLock);
 
-        auto iter = singleton->m_signedInUsers.find(args.user());
-        if (iter != singleton->m_signedInUsers.end())
+        auto iter = singleton->m_userHandlesMap.find(args.user());
+        if (iter != singleton->m_userHandlesMap.end())
         {
             handler(iter->second);
         }
