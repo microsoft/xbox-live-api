@@ -97,7 +97,7 @@ extern "C" {
 #define XBL_ERROR_CODE_START 5200
 #define MAKE_E_XBL(offset)                      MAKE_HRESULT(1, FACILITY_XBOX, (XBL_ERROR_CODE_START + offset))
 
-#define E_XBL_RUNTIME_ERROR                     MAKE_HRESULT(1, FACILITY_XBOX, 5500L)
+#define E_XBL_RUNTIME_ERROR                     MAKE_E_XBL(0)
 #define E_XBL_RTA_GENERIC_ERROR                 MAKE_E_XBL(1)
 #define E_XBL_RTA_SUBSCRIPTION_LIMIT_REACHED    MAKE_E_XBL(2)
 #define E_XBL_RTA_ACCESS_DENIED                 MAKE_E_XBL(3)

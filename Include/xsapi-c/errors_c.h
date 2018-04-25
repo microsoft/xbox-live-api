@@ -63,6 +63,8 @@ STDAPI_(XblErrorCondition) XblGetErrorCondition(
     _In_ HRESULT hr
     ) XBL_NOEXCEPT;
 
+// SHIPTODO remove everything below
+
 /// <summary>
 /// Enumeration values that define the Xbox Live API error conditions.
 /// </summary>
@@ -129,14 +131,6 @@ typedef enum XBL_ERROR_CONDITION
     /// </summary>
     XBL_ERROR_CONDITION_RTA
 } XBL_ERROR_CONDITION;
-
-
-STDAPI
-XblUserCreateHandle(
-    _Out_ xbl_user_handle* user
-) XBL_NOEXCEPT;
-
-// SHIPTODO remove everything below
 
 /// <summary>
 /// These are XSAPI specific error codes.
