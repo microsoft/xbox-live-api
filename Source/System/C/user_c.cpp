@@ -227,12 +227,6 @@ HRESULT SignInHelper(
             {
                 context->result = result;
                 auto hr = utils::hresult_from_error_code(result.err());
-                if (SUCCEEDED(hr))
-                {
-                    auto singleton = get_xsapi_singleton();
-                    std::lock_guard<std::mutex> lock(singleton->m_trackingUsersLock);
-                    singleton->m_userHandlesMap[context->user->internalUser] = context->user;
-                }
                 CompleteAsync(data->async, hr, sizeof(XblSignInResult));
             });
             return E_PENDING;
