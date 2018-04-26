@@ -12,17 +12,19 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 using namespace xbox::services::system;
 
-xsapi_internal_unordered_map<hc_websocket_handle_t, xbox_web_socket_client*> xbox_web_socket_client::m_handleMap;
-
 xbox_web_socket_client::xbox_web_socket_client()
 {
     HCWebSocketCreate(&m_websocket);
-    m_handleMap[m_websocket] = this;
+    get_xsapi_singleton()->m_websocketHandles[m_websocket] = this;
 }
 
 xbox_web_socket_client::~xbox_web_socket_client()
 {
-    m_handleMap.erase(m_websocket);
+    auto singleton = get_xsapi_singleton(false);
+    if (singleton != nullptr)
+    {
+        singleton->m_websocketHandles.erase(m_websocket);
+    }
     HCWebSocketCloseHandle(m_websocket);
 }
 
@@ -75,8 +77,9 @@ void xbox_web_socket_client::connect(
         {
             try
             {
-                auto iter = xbox_web_socket_client::m_handleMap.find(websocket);
-                if (iter != xbox_web_socket_client::m_handleMap.end())
+                auto singleton = get_xsapi_singleton();
+                auto iter = singleton->m_websocketHandles.find(websocket);
+                if (iter != singleton->m_websocketHandles.end())
                 {
                     iter->second->m_receiveHandler(incomingBodyString);
                 }
@@ -94,8 +97,9 @@ void xbox_web_socket_client::connect(
         {
             try
             {
-                auto iter = xbox_web_socket_client::m_handleMap.find(websocket);
-                if (iter != xbox_web_socket_client::m_handleMap.end())
+                auto singleton = get_xsapi_singleton();
+                auto iter = singleton->m_websocketHandles.find(websocket);
+                if (iter != singleton->m_websocketHandles.end())
                 {
                     iter->second->m_closeHandler(closeStatus);
                 }

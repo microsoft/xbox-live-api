@@ -112,7 +112,7 @@ xsapi_singleton::~xsapi_singleton()
 
     if (m_callbackContextPtrs.size() > 0)
     {
-        //XSAPI_ASSERT(false && "Context remaining in context store!");
+        XSAPI_ASSERT(false && "Context remaining in context store!");
         m_callbackContextPtrs.clear();
     }
 
@@ -1127,7 +1127,7 @@ utils::convert_xbox_live_error_code_to_hresult(
         {
             case xbox_live_error_code::bad_alloc: return E_OUTOFMEMORY;
             case xbox_live_error_code::invalid_argument: return E_INVALIDARG;
-            case xbox_live_error_code::runtime_error: return E_FAIL;
+            case xbox_live_error_code::runtime_error: return E_XBL_RUNTIME_ERROR;
             case xbox_live_error_code::length_error: return __HRESULT_FROM_WIN32(ERROR_BAD_LENGTH);
             case xbox_live_error_code::out_of_range: return E_BOUNDS;
             case xbox_live_error_code::range_error: return E_BOUNDS;
@@ -1137,12 +1137,12 @@ utils::convert_xbox_live_error_code_to_hresult(
             case xbox_live_error_code::uri_error: return WEB_E_UNEXPECTED_CONTENT;
             case xbox_live_error_code::websocket_error: return WEB_E_UNEXPECTED_CONTENT;
             case xbox_live_error_code::auth_user_interaction_required: return ONL_E_ACTION_REQUIRED;
-            case xbox_live_error_code::rta_generic_error: return E_FAIL;
-            case xbox_live_error_code::rta_subscription_limit_reached: return E_FAIL;
-            case xbox_live_error_code::rta_access_denied: return E_FAIL;
-            case xbox_live_error_code::auth_unknown_error: return E_FAIL;
-            case xbox_live_error_code::auth_runtime_error: return E_FAIL;
-            case xbox_live_error_code::auth_no_token_error: return E_FAIL;
+            case xbox_live_error_code::rta_generic_error: return E_XBL_RTA_GENERIC_ERROR;
+            case xbox_live_error_code::rta_subscription_limit_reached: return E_XBL_RTA_SUBSCRIPTION_LIMIT_REACHED;
+            case xbox_live_error_code::rta_access_denied: return E_XBL_RTA_ACCESS_DENIED;
+            case xbox_live_error_code::auth_unknown_error: return E_XBL_AUTH_UNKNOWN_ERROR;
+            case xbox_live_error_code::auth_runtime_error: return E_XBL_AUTH_RUNTIME_ERROR;
+            case xbox_live_error_code::auth_no_token_error: return E_XBL_AUTH_NO_TOKEN;
             case xbox_live_error_code::auth_user_not_signed_in: return __HRESULT_FROM_WIN32(ERROR_NO_SUCH_USER);
             case xbox_live_error_code::auth_user_cancel: return __HRESULT_FROM_WIN32(ERROR_CANCELLED);
             case xbox_live_error_code::auth_user_switched: return __HRESULT_FROM_WIN32(ERROR_NO_SUCH_USER);
@@ -1951,8 +1951,6 @@ xsapi_internal_vector<xsapi_internal_string> utils::xuid_array_to_internal_strin
     return stringVector;
 }
 
-#if XSAPI_C
-
 #ifdef _WIN32
 time_t utils::time_t_from_datetime(const utility::datetime& datetime)
 {
@@ -1967,6 +1965,7 @@ utility::datetime utils::datetime_from_time_t(const time_t* pTime)
 }
 #endif // _WIN32
 
+#if XSAPI_C
 XBL_RESULT utils::create_xbl_result(std::error_code errc)
 {
     XBL_RESULT result
@@ -2024,40 +2023,6 @@ XBL_RESULT utils::create_xbl_result(std::error_code errc)
         XSAPI_ASSERT(L"Unknown error codition!" && false);
     }
     return result;
-}
-
-HRESULT utils::hresult_from_error_code(std::error_code errc)
-{
-    // TODO flush this out
-    if (errc == xbox::services::xbox_live_error_condition::no_error)
-    {
-        return S_OK;
-    }
-    return E_FAIL;
-}
-
-HRESULT utils::std_bad_alloc_to_xbl_result(
-    std::bad_alloc const& e
-    )
-{
-    UNREFERENCED_PARAMETER(e);
-    LOG_ERROR("std::bad_alloc reached api boundary!");
-    return E_OUTOFMEMORY;
-}
-
-HRESULT utils::std_exception_to_xbl_result(
-    std::exception const& e
-    )
-{
-    UNREFERENCED_PARAMETER(e);
-    LOG_ERROR("std::exception reached api boundary");
-    return E_FAIL;
-}
-
-HRESULT utils::unknown_exception_to_xbl_result()
-{
-    LOG_ERROR("unknown exception reached api boundary");
-    return E_FAIL;
 }
 #endif // XSAPI_C
 

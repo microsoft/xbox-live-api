@@ -66,3 +66,44 @@ try
     HCGlobalCleanup();
 }
 CATCH_RETURN_WITH(;)
+
+STDAPI_(XblErrorCondition)
+XblGetErrorCondition(
+    _In_ HRESULT hr
+    ) XBL_NOEXCEPT
+{
+    if (SUCCEEDED(hr))
+    {
+        return XblErrorCondition_NoError;
+    }
+    else if (HRESULT_FACILITY(hr) == FACILITY_HTTP)
+    {
+        return XblErrorCondition_Http;
+    }
+    else if (HRESULT_FACILITY(hr) == FACILITY_INTERNET)
+    {
+        return XblErrorCondition_Network;
+    }
+    else if (hr >= (unsigned)xbox_live_error_code::AM_E_XASD_UNEXPECTED && hr <= (unsigned)xbox_live_error_code::AM_E_XTITLE_TIMEOUT || 
+             hr >= (unsigned)xbox_live_error_code::XO_E_DEVMODE_NOT_AUTHORIZED && hr <= (unsigned)xbox_live_error_code::XO_E_CONTENT_NOT_AUTHORIZED)
+    {
+        return XblErrorCondition_Auth;
+    }
+    else
+    {
+        switch (hr)
+        {
+        case ONL_E_ACTION_REQUIRED:
+        case E_XBL_AUTH_UNKNOWN_ERROR:
+        case E_XBL_AUTH_RUNTIME_ERROR:
+        case E_XBL_AUTH_NO_TOKEN:
+        case __HRESULT_FROM_WIN32(ERROR_NO_SUCH_USER):
+        case __HRESULT_FROM_WIN32(ERROR_CANCELLED):
+            return XblErrorCondition_Auth;
+        case E_BOUNDS:
+            return XblErrorCondition_GenericOutOfRange;
+        default:
+            return XblErrorCondition_GenericError;
+        }
+    }
+}

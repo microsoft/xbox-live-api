@@ -235,7 +235,7 @@ try
         state->localUsersVector.push_back(user);
     }
 #endif
-    return utils::hresult_from_error_code(result.err());
+    return utils::convert_xbox_live_error_code_to_hresult(result.err());
 }
 CATCH_RETURN()
 
@@ -262,7 +262,7 @@ try
         }
     }
 #endif
-    return utils::hresult_from_error_code(result.err());
+    return utils::convert_xbox_live_error_code_to_hresult(result.err());
 }
 CATCH_RETURN()
 
@@ -375,7 +375,7 @@ try
     {
         *group = state->create_social_user_group(result.payload());
     }
-    return utils::hresult_from_error_code(result.err());
+    return utils::convert_xbox_live_error_code_to_hresult(result.err());
 }
 CATCH_RETURN()
 
@@ -401,7 +401,7 @@ try
     {
         *group = state->create_social_user_group(result.payload());
     }
-    return utils::hresult_from_error_code(result.err());
+    return utils::convert_xbox_live_error_code_to_hresult(result.err());
 }
 CATCH_RETURN()
 
@@ -424,7 +424,7 @@ try
         xsapi_memory::mem_free(groupIter->first);
         state->socialUserGroupsMap.erase(groupIter);
     }
-    return utils::hresult_from_error_code(result.err());
+    return utils::convert_xbox_live_error_code_to_hresult(result.err());
 }
 CATCH_RETURN()
 
@@ -436,11 +436,12 @@ STDAPI XblSocialManagerGetLocalUsers(
     RETURN_C_INVALIDARGUMENT_IF(users == nullptr || userCount == nullptr);
 #if XDK_API
     auto& usersVector = social_manager_internal::get_singleton_instance()->local_users();
+    *users = const_cast<xbl_user_handle*>(usersVector.data());
 #else
     auto& usersVector = get_xbl_social_manager()->localUsersVector;
+    *users = usersVector.data();
 #endif
     *userCount = static_cast<uint32_t>(usersVector.size());
-    *users = usersVector.data();
 
     return S_OK;
 }
@@ -465,7 +466,7 @@ try
         usersVector
         );
 
-    return utils::hresult_from_error_code(result.err());
+    return utils::convert_xbox_live_error_code_to_hresult(result.err());
 }
 CATCH_RETURN()
 
@@ -482,7 +483,7 @@ try
         shouldEnablePolling
         );
    
-    return utils::hresult_from_error_code(result.err());
+    return utils::convert_xbox_live_error_code_to_hresult(result.err());
 }
 CATCH_RETURN()
 

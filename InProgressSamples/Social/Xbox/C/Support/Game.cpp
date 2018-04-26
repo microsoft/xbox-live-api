@@ -15,42 +15,73 @@ Game* g_sampleInstance = nullptr;
 std::mutex Game::m_displayEventQueueLock;
 std::mutex Game::m_socialManagerLock;
 
-HANDLE g_stopRequestedHandle;
-HANDLE g_workReadyHandle;
-HANDLE g_completionReadyHandle;
-XBL_ASYNC_QUEUE g_asyncQueue;
+class win32_handle
+{
+public:
+    win32_handle() : m_handle(nullptr)
+    {
+    }
 
-void xbl_event_handler(
-    _In_opt_ void* context,
-    _In_ XBL_ASYNC_EVENT_TYPE eventType,
-    _In_ XBL_ASYNC_QUEUE queue
+    ~win32_handle()
+    {
+        if (m_handle != nullptr) CloseHandle(m_handle);
+        m_handle = nullptr;
+    }
+
+    void set(HANDLE handle)
+    {
+        m_handle = handle;
+    }
+
+    HANDLE get() { return m_handle; }
+
+private:
+    HANDLE m_handle;
+};
+
+win32_handle g_stopRequestedHandle;
+win32_handle g_workReadyHandle;
+win32_handle g_completionReadyHandle;
+
+void CALLBACK HandleAsyncQueueCallback(
+    _In_ void* context,
+    _In_ async_queue_handle_t queue,
+    _In_ AsyncQueueCallbackType type
 )
 {
     UNREFERENCED_PARAMETER(context);
     UNREFERENCED_PARAMETER(queue);
 
-    switch (eventType)
+    switch (type)
     {
-    case XBL_ASYNC_EVENT_TYPE::XBL_ASYNC_EVENT_WORK_READY:
-        SetEvent(g_workReadyHandle);
+    case AsyncQueueCallbackType::AsyncQueueCallbackType_Work:
+        SetEvent(g_workReadyHandle.get());
         break;
 
-    case XBL_ASYNC_EVENT_TYPE::XBL_ASYNC_EVENT_COMPLETION_READY:
-        SetEvent(g_completionReadyHandle);
+    case AsyncQueueCallbackType::AsyncQueueCallbackType_Completion:
+        SetEvent(g_completionReadyHandle.get());
         break;
     }
 }
 
+
 DWORD WINAPI background_thread_proc(LPVOID lpParam)
 {
     UNREFERENCED_PARAMETER(lpParam);
-
     HANDLE hEvents[3] =
     {
-        g_workReadyHandle,
-        g_completionReadyHandle,
-        g_stopRequestedHandle
+        g_workReadyHandle.get(),
+        g_completionReadyHandle.get(),
+        g_stopRequestedHandle.get()
     };
+
+    async_queue_handle_t queue;
+    uint32_t sharedAsyncQueueId = 0;
+    CreateSharedAsyncQueue(
+        sharedAsyncQueueId,
+        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
+        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
+        &queue);
 
     bool stop = false;
     while (!stop)
@@ -58,28 +89,37 @@ DWORD WINAPI background_thread_proc(LPVOID lpParam)
         DWORD dwResult = WaitForMultipleObjectsEx(3, hEvents, false, INFINITE, false);
         switch (dwResult)
         {
-        case WAIT_OBJECT_0: // work ready 
-            XblDispatchAsyncQueue(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_WORK);
-            if (!XblIsAsyncQueueEmpty(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_WORK))
+        case WAIT_OBJECT_0: // work ready
+            DispatchAsyncQueue(queue, AsyncQueueCallbackType_Work, 0);
+
+            if (!IsAsyncQueueEmpty(queue, AsyncQueueCallbackType_Work))
             {
-                SetEvent(g_workReadyHandle);
+                // If there's more pending work, then set the event to process them
+                SetEvent(g_workReadyHandle.get());
             }
             break;
-        case WAIT_OBJECT_0 + 1: // completion ready
-            XblDispatchAsyncQueue(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_COMPLETION);
-            if (!XblIsAsyncQueueEmpty(g_asyncQueue, XBL_ASYNC_QUEUE_CALLBACK_TYPE_COMPLETION))
+
+        case WAIT_OBJECT_0 + 1: // completed 
+                                // Typically completions should be dispatched on the game thread, but
+                                // for this simple XAML app we're doing it here
+            DispatchAsyncQueue(queue, AsyncQueueCallbackType_Completion, 0);
+
+            if (!IsAsyncQueueEmpty(queue, AsyncQueueCallbackType_Completion))
             {
-                SetEvent(g_completionReadyHandle);
+                // If there's more pending completions, then set the event to process them
+                SetEvent(g_completionReadyHandle.get());
             }
             break;
+
         default:
             stop = true;
             break;
         }
     }
+
+    CloseAsyncQueue(queue);
     return 0;
 }
-
 
 #define COLUMN_1_X                      60
 #define COLUMN_2_X                      300
@@ -106,17 +146,18 @@ Game::Game() :
     m_userController->Initialize();
     m_deviceResources = std::make_shared<DX::DeviceResources>();
 
-    g_stopRequestedHandle = CreateEvent(nullptr, true, false, nullptr);
-    g_workReadyHandle = CreateEvent(nullptr, false, false, nullptr);
-    g_completionReadyHandle = CreateEvent(nullptr, false, false, nullptr);
+    g_stopRequestedHandle.set(CreateEvent(nullptr, true, false, nullptr));
+    g_workReadyHandle.set(CreateEvent(nullptr, false, false, nullptr));
+    g_completionReadyHandle.set(CreateEvent(nullptr, false, false, nullptr));
 
     XblGlobalInitialize();
-    XblCreateAsyncQueue(&g_asyncQueue);
-
-    XblAddTaskEventHandler(
-        nullptr,
-        xbl_event_handler,
-        nullptr);
+    uint32_t sharedAsyncQueueId = 0;
+    CreateSharedAsyncQueue(
+        sharedAsyncQueueId,
+        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
+        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
+        &m_queue);
+    AddAsyncQueueCallbackSubmitted(m_queue, nullptr, HandleAsyncQueueCallback, &m_callbackToken);
 
     m_hBackgroundThread = CreateThread(nullptr, 0, background_thread_proc, nullptr, 0, nullptr);
 }
@@ -199,7 +240,7 @@ void Game::UpdateGame()
             return;
         }
         m_allFriends = !m_allFriends;
-        UpdateSocialGroupForAllUsers(m_allFriends, XBL_PRESENCE_FILTER_ALL, XBL_RELATIONSHIP_FILTER_FRIENDS);
+        UpdateSocialGroupForAllUsers(m_allFriends, XblPresenceFilter_All, XblRelationshipFilter_Friends);
     }
 
     if (m_gamePadButtons.b == GamePad::ButtonStateTracker::PRESSED)
@@ -210,7 +251,7 @@ void Game::UpdateGame()
             return;
         }
         m_onlineFriends = !m_onlineFriends;
-        UpdateSocialGroupForAllUsers(m_onlineFriends, XBL_PRESENCE_FILTER_ALL_ONLINE, XBL_RELATIONSHIP_FILTER_FRIENDS);
+        UpdateSocialGroupForAllUsers(m_onlineFriends, XblPresenceFilter_AllOnline, XblRelationshipFilter_Friends);
     }
 
     if (m_gamePadButtons.x == GamePad::ButtonStateTracker::PRESSED)
@@ -221,7 +262,7 @@ void Game::UpdateGame()
             return;
         }
         m_allFavs = !m_allFavs;
-        UpdateSocialGroupForAllUsers(m_allFavs, XBL_PRESENCE_FILTER_ALL, XBL_RELATIONSHIP_FILTER_FAVORITE);
+        UpdateSocialGroupForAllUsers(m_allFavs, XblPresenceFilter_All, XblRelationshipFilter_Favorite);
     }
 
     if (m_gamePadButtons.y == GamePad::ButtonStateTracker::PRESSED)
@@ -232,7 +273,7 @@ void Game::UpdateGame()
             return;
         }
         m_onlineInTitle = !m_onlineInTitle;
-        UpdateSocialGroupForAllUsers(m_onlineInTitle, XBL_PRESENCE_FILTER_TITLE_ONLINE, XBL_RELATIONSHIP_FILTER_FRIENDS);
+        UpdateSocialGroupForAllUsers(m_onlineInTitle, XblPresenceFilter_TitleOnline, XblRelationshipFilter_Friends);
     }
 
     if (m_gamePadButtons.leftShoulder == GamePad::ButtonStateTracker::PRESSED)
@@ -277,28 +318,25 @@ void Game::Log(string_t log)
 }
 
 string_t
-ConvertEventTypeToString(XBL_SOCIAL_EVENT_TYPE eventType)
+ConvertEventTypeToString(XblSocialEventType eventType)
 {
     switch (eventType)
     {
-    case XBL_SOCIAL_EVENT_TYPE_USERS_ADDED_TO_SOCIAL_GRAPH: return _T("users_added");
-    case XBL_SOCIAL_EVENT_TYPE_USERS_REMOVED_FROM_SOCIAL_GRAPH: return _T("users_removed");
-    case XBL_SOCIAL_EVENT_TYPE_PRESENCE_CHANGED: return _T("presence_changed");
-    case XBL_SOCIAL_EVENT_TYPE_PROFILES_CHANGED: return _T("profiles_changed");
-    case XBL_SOCIAL_EVENT_TYPE_SOCIAL_RELATIONSHIPS_CHANGED: return _T("social_relationships_changed");
-    case XBL_SOCIAL_EVENT_TYPE_LOCAL_USER_ADDED: return _T("local_user_added");
-    case XBL_SOCIAL_EVENT_TYPE_LOCAL_USER_REMOVED: return _T("local user removed");
-    case XBL_SOCIAL_EVENT_TYPE_SOCIAL_USER_GROUP_LOADED: return _T("social_user_group_loaded");
-    case XBL_SOCIAL_EVENT_TYPE_SOCIAL_USER_GROUP_UPDATED: return _T("social_user_group_updated");
+    case XblSocialEventType_UsersAddedToSocialGraph: return _T("users_added");
+    case XblSocialEventType_UsersRemovedFromSocialGraph: return _T("users_removed");
+    case XblSocialEventType_PresenceChanged: return _T("presence_changed");
+    case XblSocialEventType_ProfilesChanged: return _T("profiles_changed");
+    case XblSocialEventType_SocialRelationshipsChanged: return _T("social_relationships_changed");
+    case XblSocialEventType_LocalUserAdded: return _T("local_user_added");
+    case XblSocialEventType_LocalUserRemoved: return _T("local user removed");
+    case XblSocialEventType_SocialUserGroupLoaded: return _T("social_user_group_loaded");
+    case XblSocialEventType_SocialUserGroupUpdated: return _T("social_user_group_updated");
     default: return _T("unknown");
     }
 }
 
 void
-Game::LogSocialEventList(
-    XBL_SOCIAL_EVENT* events,
-    uint32_t eventCount
-    )
+Game::LogSocialEventList(XblSocialEvent* events, uint32_t eventCount)
 {
     for (uint32_t i = 0; i < eventCount; ++i)
     {
@@ -318,16 +356,14 @@ Game::LogSocialEventList(
             source << ConvertEventTypeToString(socialEvent.eventType);
             if (socialEvent.usersAffectedCount > 0)
             {
-                XBL_XBOX_USER_ID_CONTAINER *affectedUsers;
-                affectedUsers = new XBL_XBOX_USER_ID_CONTAINER[socialEvent.usersAffectedCount];
+                std::vector<uint64_t> affectedUsers(socialEvent.usersAffectedCount);
 
-                XblSocialEventGetUsersAffected(&socialEvent, affectedUsers);
+                XblSocialEventGetUsersAffected(&socialEvent, affectedUsers.data());
 
                 source << _T(" UserAffected: ");
                 for (uint32_t j = 0; j < socialEvent.usersAffectedCount; ++j)
                 {
-                    source << affectedUsers[j].xboxUserId;
-                    source << _T(", ");
+                    source << affectedUsers[j] << _T(", ");
                 }
             }
         }
@@ -340,17 +376,17 @@ Game::CreateSocialGroupsBasedOnUI(
     _In_ Windows::Xbox::System::User^ user
     )
 {
-    UpdateSocialGroup(user, m_allFriends, XBL_PRESENCE_FILTER_ALL, XBL_RELATIONSHIP_FILTER_FRIENDS);
-    UpdateSocialGroup(user, m_onlineFriends, XBL_PRESENCE_FILTER_ALL_ONLINE, XBL_RELATIONSHIP_FILTER_FRIENDS);
-    UpdateSocialGroup(user, m_allFavs, XBL_PRESENCE_FILTER_ALL, XBL_RELATIONSHIP_FILTER_FAVORITE);
-    UpdateSocialGroup(user, m_onlineInTitle, XBL_PRESENCE_FILTER_TITLE_ONLINE, XBL_RELATIONSHIP_FILTER_FRIENDS);
+    UpdateSocialGroup(user, m_allFriends, XblPresenceFilter_All, XblRelationshipFilter_Friends);
+    UpdateSocialGroup(user, m_onlineFriends, XblPresenceFilter_AllOnline, XblRelationshipFilter_Friends);
+    UpdateSocialGroup(user, m_allFavs, XblPresenceFilter_All, XblRelationshipFilter_Favorite);
+    UpdateSocialGroup(user, m_onlineInTitle, XblPresenceFilter_AllTitle, XblRelationshipFilter_Friends);
     UpdateSocialGroupOfList(user, m_customList);
 }
 
 void Game::UpdateSocialGroupForAllUsers(
     _In_ bool toggle,
-    _In_ XBL_PRESENCE_FILTER presenceFilter,
-    _In_ XBL_RELATIONSHIP_FILTER relationshipFilter
+    _In_ XblPresenceFilter presenceFilter,
+    _In_ XblRelationshipFilter relationshipFilter
     )
 {
     for (const auto& user : m_userController->GetUserList())
@@ -360,10 +396,10 @@ void Game::UpdateSocialGroupForAllUsers(
 }
 
 void Game::UpdateSocialGroup(
-    _In_ Windows::Xbox::System::User^ user,
+    _In_ xbl_user_handle user,
     _In_ bool toggle,
-    _In_ XBL_PRESENCE_FILTER presenceFilter,
-    _In_ XBL_RELATIONSHIP_FILTER relationshipFilter
+    _In_ XblPresenceFilter presenceFilter,
+    _In_ XblRelationshipFilter relationshipFilter
     )
 {
     if (toggle)
@@ -394,10 +430,10 @@ void Game::UpdateSocialGroupOfList(
         m_xuidsInCustomSocialGroup.clear();
 
         // Change these XUIDs to a list of users that your title to track from multiplayer, etc
-        m_xuidsInCustomSocialGroup.push_back("2814674724269793");
-        m_xuidsInCustomSocialGroup.push_back("2814667276146249");
-        m_xuidsInCustomSocialGroup.push_back("2814666456633892");
-        m_xuidsInCustomSocialGroup.push_back("2814672389110410");
+        m_xuidsInCustomSocialGroup.push_back(2814674724269793);
+        m_xuidsInCustomSocialGroup.push_back(2814667276146249);
+        m_xuidsInCustomSocialGroup.push_back(2814666456633892);
+        m_xuidsInCustomSocialGroup.push_back(2814672389110410);
 
         CreateSocialGroupFromList(user, m_xuidsInCustomSocialGroup);
     }
@@ -459,43 +495,43 @@ void Game::RenderUI()
 
 std::wstring
 ConvertPresenceUserStateToString(
-    _In_ XBL_USER_PRESENCE_STATE presenceState
+    _In_ XblUserPresenceState presenceState
     )
 {
     switch (presenceState)
     {
-        case XBL_USER_PRESENCE_STATE_AWAY: return _T("away");
-        case XBL_USER_PRESENCE_STATE_OFFLINE: return _T("offline");
-        case XBL_USER_PRESENCE_STATE_ONLINE: return _T("online");
+        case XblUserPresenceState_Away: return _T("away");
+        case XblUserPresenceState_Offline: return _T("offline");
+        case XblUserPresenceState_Online: return _T("online");
         default:
-        case XBL_USER_PRESENCE_STATE_UNKNOWN: return _T("unknown");
+        case XblUserPresenceState_Unknown: return _T("unknown");
     }
 }
 
 std::wstring
-ConvertPresenceFilterToString(_In_ XBL_PRESENCE_FILTER presenceFilter)
+ConvertPresenceFilterToString(_In_ XblPresenceFilter presenceFilter)
 {
     switch (presenceFilter)
     {
-        case XBL_PRESENCE_FILTER_UNKNOWN: return _T("unknown");
-        case XBL_PRESENCE_FILTER_TITLE_ONLINE: return _T("title_online");
-        case XBL_PRESENCE_FILTER_TITLE_OFFLINE: return _T("title_offline");
-        case XBL_PRESENCE_FILTER_ALL_ONLINE: return _T("all_online");
-        case XBL_PRESENCE_FILTER_ALL_OFFLINE: return _T("all_offline");
-        case XBL_PRESENCE_FILTER_ALL_TITLE: return _T("all_title");
+        case XblPresenceFilter_Unknown: return _T("unknown");
+        case XblPresenceFilter_TitleOnline: return _T("title_online");
+        case XblPresenceFilter_TitleOffline: return _T("title_offline");
+        case XblPresenceFilter_AllOnline: return _T("all_online");
+        case XblPresenceFilter_AllOffline: return _T("all_offline");
+        case XblPresenceFilter_AllTitle: return _T("all_title");
         default:
-        case XBL_PRESENCE_FILTER_ALL: return _T("all");
+        case XblPresenceFilter_All: return _T("all");
     }
 }
 
 std::wstring
-ConvertRelationshipFilterToString(_In_ XBL_RELATIONSHIP_FILTER relationshipFilter)
+ConvertRelationshipFilterToString(_In_ XblRelationshipFilter relationshipFilter)
 {
     switch (relationshipFilter)
     {
-        case XBL_RELATIONSHIP_FILTER_FAVORITE: return _T("favorite");
+        case XblRelationshipFilter_Favorite: return _T("favorite");
         default:
-        case XBL_RELATIONSHIP_FILTER_FRIENDS: return _T("friends");
+        case XblRelationshipFilter_Friends: return _T("friends");
     }
 }
 
@@ -518,7 +554,7 @@ Game::RenderSocialGroupList(
     {
         m_font->DrawString(m_sprites.get(), L"_________________________________________", XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
         verticalBaseOffset += fTextHeight;
-        if(group->socialUserGroupType == XBL_SOCIAL_USER_GROUP_TYPE_FILTER_TYPE)
+        if(group->socialUserGroupType == XblSocialUserGroupType_FilterType)
         {
             swprintf_s(text, ARRAYSIZE(text), L"Group from filter: %s %s",
                 ConvertPresenceFilterToString(group->presenceFilterOfGroup).c_str(),
@@ -533,8 +569,8 @@ Game::RenderSocialGroupList(
             verticalBaseOffset += fTextHeight;
         }
 
-        XBL_XBOX_SOCIAL_USER* userList = new XBL_XBOX_SOCIAL_USER[group->usersCount];
-        XblXboxSocialUserGroupGetUsers(group, userList);
+        std::vector<XblXboxSocialUser> userList(group->usersCount);
+        XblXboxSocialUserGroupGetUsers(group, userList.data());
 
         for (uint32_t i = 0; i < group->usersCount; ++i)
         {
@@ -549,8 +585,6 @@ Game::RenderSocialGroupList(
             m_font->DrawString(m_sprites.get(), L"No friends found", XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
             verticalBaseOffset += fTextHeight;
         }
-
-        delete[] userList;
     }
 }
 
