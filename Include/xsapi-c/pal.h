@@ -94,7 +94,7 @@ extern "C" {
 
 #include "httpClient/pal.h"
 
-#define XBL_ERROR_CODE_START 5200
+#define XBL_ERROR_CODE_START 0x5200
 #define MAKE_E_XBL(offset)                      MAKE_HRESULT(1, FACILITY_XBOX, (XBL_ERROR_CODE_START + offset))
 
 #define E_XBL_RUNTIME_ERROR                     MAKE_E_XBL(0)
