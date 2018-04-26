@@ -634,9 +634,6 @@ set(Social_Manager_Source_Files_C
 
 set(Achievements_Source_Files_C
     ../../Source/Services/Achievements/C/achievements.cpp
-    ../../Source/Services/Achievements/C/achievements_helper.cpp
-    ../../Source/Services/Achievements/C/achievements_helper.h
-    ../../Source/Services/Achievements/C/achievements_state.h
     )
 
 

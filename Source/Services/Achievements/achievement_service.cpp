@@ -33,10 +33,11 @@ achievement_service::update_achievement(
         utils::internal_string_from_string_t(xboxUserId),
         utils::internal_string_from_string_t(achievementId),
         percentComplete,
-        XSAPI_DEFAULT_TASKGROUP,
-        [tce](xbox_live_result<void> result) {
-        tce.set(result);
-    });
+        nullptr,
+        [tce](xbox_live_result<void> result) 
+        {
+            tce.set(result);
+        });
 
 
     if (result.err())
@@ -63,8 +64,9 @@ achievement_service::update_achievement(
         utils::internal_string_from_string_t(serviceConfigurationId),
         utils::internal_string_from_string_t(achievementId),
         percentComplete,
-        XSAPI_DEFAULT_TASKGROUP,
-        [tce](xbox_live_result<void> result) {
+        nullptr,
+        [tce](xbox_live_result<void> result)
+        {
             tce.set(result);
         });
 
@@ -97,8 +99,9 @@ achievement_service::get_achievements_for_title_id(
         orderBy,
         skipItems,
         maxItems,
-        XSAPI_DEFAULT_TASKGROUP,
-        [tce](xbox_live_result<std::shared_ptr<achievements_result_internal>> result) {
+        nullptr,
+        [tce](xbox_live_result<std::shared_ptr<achievements_result_internal>> result)
+        {
             tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(achievements_result, result));
         });
 
@@ -123,7 +126,7 @@ achievement_service::get_achievement(
         utils::internal_string_from_string_t(xboxUserId),
         utils::internal_string_from_string_t(serviceConfigurationId),
         utils::internal_string_from_string_t(achievementId),
-        XSAPI_DEFAULT_TASKGROUP,
+        nullptr,
         [tce](xbox_live_result<std::shared_ptr<achievement_internal>> result) {
             tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(achievement, result));
         });

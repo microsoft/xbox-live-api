@@ -253,16 +253,24 @@ public:
     );
 
     xsapi_internal_vector<std::shared_ptr<achievement_internal>> items() const;
-
+    
     bool has_next() const;
 
-    xbox_live_result<void> get_next(
+    _XSAPIIMP  xbox_live_result<void> get_next(
         _In_ uint32_t maxItems,
-        _In_ uint64_t taskGroupId,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<achievements_result_internal>>> callback
     );
 
     static xbox_live_result<std::shared_ptr<achievements_result_internal>> _Deserialize(_In_ const web::json::value& json);
+
+    // Internal
+    xsapi_internal_string xbox_user_id() const;
+    xsapi_internal_vector<uint32_t> title_ids() const;
+    achievement_type type() const;
+    bool unlocked_only() const;
+    achievement_order_by order_by() const;
+    xsapi_internal_string continuation_token() const;
 
 private:
     std::shared_ptr<xbox::services::user_context> m_userContext;
@@ -289,25 +297,25 @@ public:
         _In_ std::weak_ptr<xbox_live_context_impl> xboxLiveContextImpl
     );
 
-    xbox_live_result<void> update_achievement(
+    _XSAPIIMP xbox_live_result<void> update_achievement(
         _In_ const xsapi_internal_string& xboxUserId,
         _In_ const xsapi_internal_string& achievementId,
         _In_ uint32_t percentComplete,
-        _In_ uint64_t taskGroupId,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<void>> callback
     );
 
-    xbox_live_result<void> update_achievement(
+    _XSAPIIMP xbox_live_result<void> update_achievement(
         _In_ const xsapi_internal_string& xboxUserId,
         _In_ uint32_t titleId,
         _In_ const xsapi_internal_string& serviceConfigurationId,
         _In_ const xsapi_internal_string& achievementId,
         _In_ uint32_t percentComplete,
-        _In_ uint64_t taskGroupId,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<void>> callback
     );
     
-    xbox_live_result<void> get_achievements_for_title_id(
+    _XSAPIIMP xbox_live_result<void> get_achievements_for_title_id(
         _In_ const xsapi_internal_string& xboxUserId,
         _In_ uint32_t titleId,
         _In_ achievement_type type,
@@ -315,19 +323,19 @@ public:
         _In_ achievement_order_by orderBy,
         _In_ uint32_t skipItems,
         _In_ uint32_t maxItems,
-        _In_ uint64_t taskGroupId,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<achievements_result_internal>>> callback
     );
 
-    xbox_live_result<void> get_achievement(
+    _XSAPIIMP xbox_live_result<void> get_achievement(
         _In_ const xsapi_internal_string& xboxUserId,
         _In_ const xsapi_internal_string& serviceConfigurationId,
         _In_ const xsapi_internal_string& achievementId,
-        _In_ uint64_t taskGroupId,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<achievement_internal>>> callback
     );
     
-private:
+    // Internal
     xbox_live_result<void> get_achievements(
         _In_ const xsapi_internal_string& xboxUserId,
         _In_ const xsapi_internal_vector<uint32_t>& titleIds,
@@ -337,10 +345,11 @@ private:
         _In_ uint32_t skipItems,
         _In_ uint32_t maxItems,
         _In_ const xsapi_internal_string& continuationToken,
-        _In_ uint64_t taskGroupId,
+        _In_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<achievements_result_internal>>> callback
     );
 
+private:
     // Achievements endpoints
     static const xsapi_internal_string achievements_sub_path(
         _In_ const xsapi_internal_string& xboxUserId,

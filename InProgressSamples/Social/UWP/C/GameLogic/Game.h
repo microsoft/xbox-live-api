@@ -173,13 +173,9 @@ namespace Sample
 
         // Achievement Tests
         void GetAchievmentsForTitle();
-        void AchievementResultsGetNext(XBL_ACHIEVEMENTS_RESULT* result);
+        void AchievementResultsGetNext(XblAchievementsResult* result);
         void GetAchievement(PCSTR scid, PCSTR achievementId);
         void UpdateAchievement(PCSTR scid, PCSTR achievementId);
-
-        void TestAchievementCopy(XBL_ACHIEVEMENT* source);
-        void TestAchievementsResultCopy(XBL_ACHIEVEMENTS_RESULT* source);
-        void AssertAchievement(XBL_ACHIEVEMENT* copy, XBL_ACHIEVEMENT* source);
 
         HANDLE m_hBackgroundThread;
     };

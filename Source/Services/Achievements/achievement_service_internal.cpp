@@ -85,12 +85,12 @@ achievement_service_internal::achievement_service_internal(
 {
 }
 
-xbox_live_result<void>
+_XSAPIIMP xbox_live_result<void>
 achievement_service_internal::update_achievement(
     _In_ const xsapi_internal_string& xboxUserId,
     _In_ const xsapi_internal_string& achievementId,
     _In_ uint32_t percentComplete,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<void>> callback
     )
 {
@@ -100,23 +100,22 @@ achievement_service_internal::update_achievement(
         m_appConfig->scid(),
         achievementId,
         percentComplete,
-        taskGroupId,
+        queue,
         callback
         );
 }
 
-xbox_live_result<void>
+_XSAPIIMP xbox_live_result<void>
 achievement_service_internal::update_achievement(
     _In_ const xsapi_internal_string& xboxUserId,
     _In_ uint32_t titleId,
     _In_ const xsapi_internal_string& serviceConfigurationId,
     _In_ const xsapi_internal_string& achievementId,
     _In_ uint32_t percentComplete,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<void>> callback
     )
 {
-    UNREFERENCED_PARAMETER(taskGroupId);
     RETURN_CPP_INVALIDARGUMENT_IF(xboxUserId.empty(), void, "xbox user id is empty");
     RETURN_CPP_INVALIDARGUMENT_IF(titleId == 0, void, "title id is empty");
     RETURN_CPP_INVALIDARGUMENT_IF(serviceConfigurationId.empty(), void, "serviceConfigurationId is empty");
@@ -200,7 +199,7 @@ achievement_service_internal::update_achievement(
         m_userContext,
         http_call_response_body_type::json_body,
         false,
-        0, // TODO
+        queue,
         [callback, achievementId, percentComplete, xboxLiveContextImpl](std::shared_ptr<http_call_response_internal> response)
         {
             if (response->err_code() == xbox_live_error_condition::network ||
@@ -292,7 +291,7 @@ achievement_service_internal::write_offline_update_achievement(
 }
 #endif
 
-xbox_live_result<void>
+_XSAPIIMP xbox_live_result<void>
 achievement_service_internal::get_achievements_for_title_id(
     _In_ const xsapi_internal_string& xboxUserId,
     _In_ uint32_t titleId,
@@ -301,7 +300,7 @@ achievement_service_internal::get_achievements_for_title_id(
     _In_ achievement_order_by orderBy,
     _In_ uint32_t skipItems,
     _In_ uint32_t maxItems,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<achievements_result_internal>>> callback
     )
 {
@@ -319,21 +318,20 @@ achievement_service_internal::get_achievements_for_title_id(
         skipItems,
         maxItems,
         xsapi_internal_string(),
-        taskGroupId,
+        queue,
         callback
     );
 }
 
-xbox_live_result<void> 
+_XSAPIIMP xbox_live_result<void>
 achievement_service_internal::get_achievement(
     _In_ const xsapi_internal_string& xboxUserId,
     _In_ const xsapi_internal_string& serviceConfigurationId,
     _In_ const xsapi_internal_string& achievementId,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<achievement_internal>>> callback
     )
 {
-    UNREFERENCED_PARAMETER(taskGroupId);
     RETURN_CPP_INVALIDARGUMENT_IF(xboxUserId.empty(), void, "xbox user id is empty");
     RETURN_CPP_INVALIDARGUMENT_IF(serviceConfigurationId.empty(), void, "service configuration id is empty");
     RETURN_CPP_INVALIDARGUMENT_IF(achievementId.empty(), void, "achievement id is empty");
@@ -357,7 +355,7 @@ achievement_service_internal::get_achievement(
         m_userContext,
         http_call_response_body_type::json_body,
         false,
-        0, // TODO
+        queue,
         [callback](std::shared_ptr<http_call_response_internal> response)
         {
             auto achievementResult = achievements_result_internal::_Deserialize(response->response_body_json());
@@ -393,7 +391,7 @@ achievement_service_internal::get_achievement(
     return xbox_live_result<void>();
 }
 
-xbox_live_result<void>
+_XSAPIIMP xbox_live_result<void>
 achievement_service_internal::get_achievements(
     _In_ const xsapi_internal_string& xboxUserId,
     _In_ const xsapi_internal_vector<uint32_t>& titleIds,
@@ -403,11 +401,10 @@ achievement_service_internal::get_achievements(
     _In_ uint32_t skipItems,
     _In_ uint32_t maxItems,
     _In_ const xsapi_internal_string& continuationToken,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<achievements_result_internal>>> callback
 )
 {
-    UNREFERENCED_PARAMETER(taskGroupId);
     xbox_live_result<xsapi_internal_string> stringType = convert_type_to_string(type);
     RETURN_CPP_IF_ERR(stringType, void);
     xbox_live_result<xsapi_internal_string> orderType = convert_order_by_to_string(orderBy);
@@ -442,7 +439,7 @@ achievement_service_internal::get_achievements(
         m_userContext,
         http_call_response_body_type::json_body,
         false,
-        0, // TODO
+        queue,
         [callback, userContext, xboxLiveContextSettings, appConfig, xboxLiveContextImpl, xboxUserId, titleIds, type, unlockedOnly, orderBy](std::shared_ptr<http_call_response_internal> response)
         {
             if (response->response_body_json().size() > 0)

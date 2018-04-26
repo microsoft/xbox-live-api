@@ -1951,6 +1951,20 @@ xsapi_internal_vector<xsapi_internal_string> utils::xuid_array_to_internal_strin
     return stringVector;
 }
 
+xsapi_internal_vector<uint32_t> utils::uint32_array_to_internal_vector(
+    uint32_t* arr,
+    size_t arrCount
+    )
+{
+    xsapi_internal_vector<uint32_t> vector;
+    vector.reserve(arrCount);
+    for (size_t i = 0; i < arrCount; ++i)
+    {
+        vector.push_back(arr[i]);
+    }
+    return vector;
+}
+
 #ifdef _WIN32
 time_t utils::time_t_from_datetime(const utility::datetime& datetime)
 {
