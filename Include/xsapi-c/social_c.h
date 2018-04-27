@@ -3,10 +3,6 @@
 
 #pragma once
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 typedef enum XblSocialRelationshipFilter
 {
     /// <summary>All the people on the user's people list.</summary>
@@ -471,7 +467,3 @@ STDAPI XblSubmitBatchReputationFeedback(
     _In_ uint32_t feedbackItemsCount,
     _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
-
-#if defined(__cplusplus)
-} // end extern "C"
-#endif // defined(__cplusplus)

@@ -23,7 +23,7 @@ public:
         int value = 1;
         xbox_live_callback<int> lambda = [value](int _value)
         {
-            VERIFY_ARE_EQUAL(value, _value);
+            VERIFY_ARE_EQUAL_INT(value, _value);
         };
 
         invoke_callback(value, lambda);
@@ -36,12 +36,12 @@ public:
 
         xbox_live_callback<int> lambda = [firstValue](int _value)
         {
-            VERIFY_ARE_EQUAL(firstValue, _value);
+            VERIFY_ARE_EQUAL_INT(firstValue, _value);
         };
 
         xbox_live_callback<int> enclosingLambda = [firstValue, secondValue, lambda](int _value)
         {
-            VERIFY_ARE_EQUAL(secondValue, _value);
+            VERIFY_ARE_EQUAL_INT(secondValue, _value);
             invoke_callback(firstValue, lambda);
         };
 

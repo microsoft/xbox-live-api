@@ -1979,67 +1979,6 @@ utility::datetime utils::datetime_from_time_t(const time_t* pTime)
 }
 #endif // _WIN32
 
-#if XSAPI_C
-XBL_RESULT utils::create_xbl_result(std::error_code errc)
-{
-    XBL_RESULT result
-    {
-        XBL_ERROR_CONDITION_NO_ERROR, 
-        static_cast<XBL_ERROR_CODE>(errc.value())
-    };
-
-    if (errc == xbox::services::xbox_live_error_condition::no_error)
-    {
-        result.errorCondition = XBL_ERROR_CONDITION_NO_ERROR;
-    }
-    else if (errc == xbox::services::xbox_live_error_condition::generic_error)
-    {
-        result.errorCondition = XBL_ERROR_CONDITION_GENERIC_ERROR;
-    }
-    else if (errc == xbox::services::xbox_live_error_condition::generic_out_of_range)
-    {
-        result.errorCondition = XBL_ERROR_CONDITION_GENERIC_OUT_OF_RANGE;
-    }
-    else if (errc == xbox::services::xbox_live_error_condition::auth)
-    {
-        result.errorCondition = XBL_ERROR_CONDITION_AUTH;
-    }
-    else if (errc == xbox::services::xbox_live_error_condition::network)
-    {
-        result.errorCondition = XBL_ERROR_CONDITION_NETWORK;
-    }
-    else if (errc == xbox::services::xbox_live_error_condition::http)
-    {
-        result.errorCondition = XBL_ERROR_CONDITION_HTTP;
-    }
-    else if (errc == xbox::services::xbox_live_error_condition::http_404_not_found)
-    {
-        result.errorCondition = XBL_ERROR_CONDITION_HTTP_404_NOT_FOUND;
-    }
-    else if (errc == xbox::services::xbox_live_error_condition::http_412_precondition_failed)
-    {
-        result.errorCondition = XBL_ERROR_CONDITION_HTTP_412_PRECONDITION_FAILED;
-    }
-    else if (errc == xbox::services::xbox_live_error_condition::http_429_too_many_requests)
-    {
-        result.errorCondition = XBL_ERROR_CONDITION_HTTP_429_TOO_MANY_REQUESTS;
-    }
-    else if (errc == xbox::services::xbox_live_error_condition::http_service_timeout)
-    {
-        result.errorCondition = XBL_ERROR_CONDITION_HTTP_SERVICE_TIMEOUT;
-    }
-    else if (errc == xbox::services::xbox_live_error_condition::rta)
-    {
-        result.errorCondition = XBL_ERROR_CONDITION_RTA;
-    }
-    else
-    {
-        XSAPI_ASSERT(L"Unknown error codition!" && false);
-    }
-    return result;
-}
-#endif // XSAPI_C
-
 #ifdef _WIN32 // TODO add implementations of these for non Windows platforms
 
 xsapi_internal_string utils::internal_string_from_string_t(_In_ const string_t& externalString)

@@ -8,10 +8,6 @@
 #include "xsapi-c/system_c.h"
 #include "xsapi-c/presence_c.h"
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 typedef enum XblSocialManagerExtraDetailLevel 
 {
     /// <summary>Only get default PeopleHub information (presence, profile)</summary>
@@ -518,7 +514,3 @@ STDAPI XblSocialManagerSetRichPresencePollingStatus(
 STDAPI_(void) XblSocialManagerSetBackgroundWorkAsyncQueue(
     _In_ async_queue_handle_t queue
     ) XBL_NOEXCEPT;
-
-#if defined(__cplusplus)
-} // end extern "C"
-#endif // defined(__cplusplus)

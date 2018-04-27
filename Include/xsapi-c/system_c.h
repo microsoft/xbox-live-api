@@ -5,10 +5,7 @@
 #include "pal.h"
 #include "xsapi-c/errors_c.h"
 
-
-const size_t XuidStringMaxBytes = 21;
 const size_t GamertagMaxBytes = 16;
-
 
 #if !XDK_API
 

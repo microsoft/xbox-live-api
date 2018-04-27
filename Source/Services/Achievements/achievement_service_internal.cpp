@@ -528,7 +528,6 @@ achievement_service_internal::achievements_sub_path(
     _In_ const xsapi_internal_string& continuationToken
 )
 {
-    // todo replace with internal implementation and remove utils::string_t_from_internal_string(
     web::uri_builder subPathBuilder;
     xsapi_internal_stringstream path;
     path << ("/users/xuid(");

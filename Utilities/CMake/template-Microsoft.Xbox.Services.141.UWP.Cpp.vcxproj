@@ -87,24 +87,10 @@
        $(ProjectDir)..\..\Source\Shared;
        $(ProjectDir)..\..\Source\Shared\WinRT;
        $(ProjectDir)..\..\Include;
-       $(ProjectDir)..\..\Include\cpprestinclude;
+       $(ProjectDir)..\..\External\cpprestsdk\Release\include;
        $(ProjectDir)..\..\Source\System\WinRT;
        $(ProjectDir)..\..\Source\System;
        $(ProjectDir)..\..\Source\System\C;
-       $(ProjectDir)..\..\Source\C\Services\TitleStorage;
-       $(ProjectDir)..\..\Source\C\Services\Common;
-       $(ProjectDir)..\..\Source\C\Services\Social;
-       $(ProjectDir)..\..\Source\C\Services\Multiplayer;
-       $(ProjectDir)..\..\Source\C\Services\Presence;
-       $(ProjectDir)..\..\Source\C\Services\Misc;
-       $(ProjectDir)..\..\Source\C\Services\Social\Manager;
-       $(ProjectDir)..\..\Source\C\Services\RealTimeActivity;
-       $(ProjectDir)..\..\Source\C\Services\Achievements;
-       $(ProjectDir)..\..\Source\C\Shared;
-       $(ProjectDir)..\..\Source\C\Shared\WinRT;
-       $(ProjectDir)..\..\Source\C\System;
-       $(ProjectDir)..\..\Source\C\Services\Leaderboard;
-       $(ProjectDir)..\..\Source\C\Services\Stats\Manager;
        %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
       <CompileAsWinRT>true</CompileAsWinRT>
@@ -143,6 +129,9 @@
   </PropertyGroup>
 ****INSERTFILES****
   <ItemGroup>
+    <ProjectReference Include="$(ProjectDir)..\..\External\cpprestsdk\Release\src\build\vs15.uwp\cpprestsdk141.uwp.static.vcxproj">
+      <Project>{9ad285a2-301e-47a0-a299-14ad5d4f2758}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.141.UWP.C\libHttpClient.141.UWP.C.vcxproj">
       <Project>{cf37beb2-a66a-42ba-b348-1f07566f4865}</Project>
     </ProjectReference>
