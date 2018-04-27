@@ -123,7 +123,7 @@ typedef struct XblAchievementRequirement
     /// <summary>
     /// The achievement requirement ID.
     /// </summary>
-    char id[XBL_ACHIEVEMENT_REQUIREMENT_ID_CHAR_SIZE];
+    UTF8CSTR id;
 
     /// <summary>
     /// A value that indicates the current progress of the player towards meeting
@@ -205,12 +205,12 @@ typedef struct XblAchievementReward
     /// <summary>
     /// The localized reward name.
     /// </summary>
-    char name[XBL_ACHIEVEMENT_REWARD_NAME_CHAR_SIZE];
+    UTF8CSTR name;
 
     /// <summary>
     /// The description of the reward.
     /// </summary>
-    char description[XBL_ACHIEVEMENT_REWARD_DESCRIPTION_CHAR_SIZE];
+    UTF8CSTR description;
 
     /// <summary>
     /// The title-defined reward value (data type and content varies by reward type).
@@ -225,7 +225,7 @@ typedef struct XblAchievementReward
     /// <summary>
     /// The property type of the reward value string.
     /// </summary>
-    char valueType[XBL_ACHIEVEMENT_REWARD_VALUE_TYPE_CHAR_SIZE];
+    UTF8CSTR valueType;
 
     /// <summary>
     /// The media asset associated with the reward.
@@ -245,17 +245,17 @@ typedef struct XblAchievement
     /// <summary>
     /// The achievement ID. Can be a uint or a guid.
     /// </summary>
-    char id[XBL_ACHIEVEMENT_ID_CHAR_SIZE];
+    UTF8CSTR id;
 
     /// <summary>
     /// The ID of the service configuration set associated with the achievement.
     /// </summary>
-    char serviceConfigurationId[XBL_SERVICE_CONFIGURATION_ID_CHAR_SIZE];
+    UTF8CSTR serviceConfigurationId;
 
     /// <summary>
     /// The localized achievement name.
     /// </summary>
-    char name[XBL_ACHIEVEMENT_NAME_CHAR_SIZE];
+    UTF8CSTR name;
 
     /// <summary>
     /// The game/app titles associated with the achievement.
@@ -306,18 +306,18 @@ typedef struct XblAchievement
     /// <summary>
     /// The description of the unlocked achievement.
     /// </summary>
-    char unlockedDescription[XBL_ACHIEVEMENT_UNLOCKED_DESCRIPTION_CHAR_SIZE];
+    UTF8CSTR unlockedDescription;
 
     /// <summary>
     /// The description of the locked achievement.
     /// </summary>
-    char lockedDescription[XBL_ACHIEVEMENT_LOCKED_DESCRIPTION_CHAR_SIZE];
+    UTF8CSTR lockedDescription;
 
     /// <summary>
     /// The product_id the achievement was released with. This is a globally unique identifier that
     /// may correspond to an application, downloadable content, etc.
     /// </summary>
-    char productId[XBL_ACHIEVEMENT_PRODUCT_ID_CHAR_SIZE];
+    UTF8CSTR productId;
 
     /// <summary>
     /// The type of achievement, such as a challenge achievement.

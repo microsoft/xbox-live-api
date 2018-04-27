@@ -103,7 +103,7 @@ void copy_string_array(
 )
 {
     UTF8CSTR* tempArr = allocator.alloc_array<UTF8CSTR>((uint32_t)source.size());
-    for (uint64_t i = 0; i < source.size(); ++i)
+    for (size_t i = 0; i < source.size(); ++i)
     {
         UTF8CSTR copy;
         copy_string(allocator, &copy, source[i]);
@@ -142,6 +142,7 @@ size_t calculate_achievement_requirement_size(std::shared_ptr<achievement_requir
     if (source == nullptr) return 0;
 
     size_t neededBufferSize = sizeof(XblAchievementRequirement);
+    neededBufferSize += source->id().size() + 1;
     neededBufferSize += source->current_progress_value().size() + 1;
     neededBufferSize += source->target_progress_value().size() + 1;
 
@@ -156,7 +157,7 @@ XblAchievementRequirement* copy_achievement_requirement(
     if (source == nullptr) return nullptr;
 
     auto dest = allocator.alloc<XblAchievementRequirement>();
-    strcpy_s(dest->id, source->id().c_str());
+    copy_string(allocator, &dest->id, source->id());
     copy_string(allocator, &dest->currentProgressValue, source->current_progress_value());
     copy_string(allocator, &dest->targetProgressValue, source->target_progress_value());
 
@@ -194,7 +195,10 @@ size_t calculate_achievement_reward_size(std::shared_ptr<achievement_reward_inte
     if (source == nullptr) return 0;
 
     size_t neededBufferSize = sizeof(XblAchievementReward);
+    neededBufferSize += source->name().size() + 1;
+    neededBufferSize += source->description().size() + 1;
     neededBufferSize += source->value().size() + 1;
+    neededBufferSize += source->value_type().size() + 1;
 
     if (source->media_asset_internal())
     {
@@ -212,11 +216,11 @@ XblAchievementReward* copy_achievement_reward(
     if (source == nullptr) return nullptr;
 
     auto dest = allocator.alloc<XblAchievementReward>();
-    strcpy_s(dest->name, source->name().c_str());
-    strcpy_s(dest->description, source->description().c_str());
+    copy_string(allocator, &dest->name, source->name());
+    copy_string(allocator, &dest->description, source->description());
     copy_string(allocator, &dest->value, source->value());
     dest->rewardType = static_cast<XblAchievementRewardType>(source->reward_type());
-    strcpy_s(dest->valueType, source->value_type().c_str());
+    copy_string(allocator, &dest->valueType, source->value_type());
     dest->mediaAsset = copy_achievement_media_asset(source->media_asset_internal(), allocator);
 
     return dest;
@@ -254,10 +258,16 @@ size_t calculate_achievement_size(
 
     size_t neededBufferSize = sizeof(XblAchievement);
 
+    neededBufferSize += source->id().size() + 1;
+    neededBufferSize += source->service_configuration_id().size() + 1;
+    neededBufferSize += source->name().size() + 1;
     neededBufferSize += calculate_array_size(source->title_associations(), calculate_achievement_title_association_size);
     neededBufferSize += calculate_achievement_progression_size(source->progression_internal());
     neededBufferSize += calculate_array_size(source->media_assets(), calculate_achievement_media_asset_size);
     neededBufferSize += calculate_string_array_size(source->platforms_available_on());
+    neededBufferSize += source->unlocked_description().size() + 1;
+    neededBufferSize += source->locked_description().size() + 1;
+    neededBufferSize += source->product_id().size() + 1;
     neededBufferSize += sizeof(XblAchievementTimeWindow);
     neededBufferSize += calculate_array_size(source->rewards(), calculate_achievement_reward_size);
     neededBufferSize += source->deep_link().size() + 1;
@@ -284,18 +294,18 @@ XblAchievement* copy_achievement(
     if (internal == nullptr) return nullptr;
 
     auto result = allocator.alloc<XblAchievement>();
-    strcpy_s(result->id, internal->id().c_str());
-    strcpy_s(result->serviceConfigurationId, internal->service_configuration_id().c_str());
-    strcpy_s(result->name, internal->name().c_str());
+    copy_string(allocator, &result->id, internal->id());
+    copy_string(allocator, &result->serviceConfigurationId, internal->service_configuration_id());
+    copy_string(allocator, &result->name, internal->name());
     copy_array(allocator, &result->titleAssociations, &result->titleAssociationsCount, internal->title_associations(), copy_achievement_title_association);
     result->progressState = static_cast<XblAchievementProgressState>(internal->progress_state());
     result->progression = copy_achievement_progression(internal->progression_internal(), allocator);
     copy_array(allocator, &result->mediaAssets, &result->mediaAssetsCount, internal->media_assets(), copy_achievement_media_asset);
     copy_string_array(allocator, &result->platformsAvailableOn, &result->platformsAvailableOnCount, internal->platforms_available_on());
     result->isSecret = internal->is_secret();
-    strcpy_s(result->unlockedDescription, internal->unlocked_description().c_str());
-    strcpy_s(result->lockedDescription, internal->locked_description().c_str());
-    strcpy_s(result->productId, internal->product_id().c_str());
+    copy_string(allocator, &result->unlockedDescription, internal->unlocked_description());
+    copy_string(allocator, &result->lockedDescription, internal->locked_description());
+    copy_string(allocator, &result->productId, internal->product_id());
     result->type = static_cast<XblAchievementType>(internal->type());
     result->participationType = static_cast<XblAchievementParticipationType>(internal->participation_type());
     result->available = allocator.alloc<XblAchievementTimeWindow>();
