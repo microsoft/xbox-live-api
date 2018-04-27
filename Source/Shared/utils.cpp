@@ -1952,15 +1952,15 @@ xsapi_internal_vector<xsapi_internal_string> utils::xuid_array_to_internal_strin
 }
 
 xsapi_internal_vector<uint32_t> utils::uint32_array_to_internal_vector(
-    uint32_t* arr,
-    size_t arrCount
+    uint32_t* intArray,
+    size_t intArrayCount
     )
 {
     xsapi_internal_vector<uint32_t> vector;
-    vector.reserve(arrCount);
-    for (size_t i = 0; i < arrCount; ++i)
+    vector.reserve(intArrayCount);
+    for (size_t i = 0; i < intArrayCount; ++i)
     {
-        vector.push_back(arr[i]);
+        vector.push_back(intArray[i]);
     }
     return vector;
 }

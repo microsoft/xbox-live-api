@@ -7,9 +7,7 @@
 #include "xsapi-c/errors_c.h"
 #include "xsapi-c/system_c.h"
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+/// <summary>Enumeration values that indicate the achievement type.</summary>
 typedef enum XblAchievementType
 {
     /// <summary>The achievement type is unknown.</summary>
@@ -27,6 +25,7 @@ typedef enum XblAchievementType
     XblAchievementType_Challenge
 } XblAchievementType;
 
+/// <summary>Enumeration values that indicate the achievement sort order.</summary>
 typedef enum XblAchievementOrderBy
 {
     /// <summary>Default order does not guarantee sort order.</summary>
@@ -39,6 +38,7 @@ typedef enum XblAchievementOrderBy
     XblAchievementOrderBy_UnlockTime
 } XblAchievementOrderBy;
 
+/// <summary>Enumeration values that indicate the state of a player's progress towards unlocking an achievement.</summary>
 typedef enum XblAchievementProgressState
 {
     /// <summary>Achievement progress is unknown.</summary>
@@ -54,6 +54,10 @@ typedef enum XblAchievementProgressState
     XblAchievementProgressState_InProgress
 } XblAchievementProgressState;
 
+/// <summary>
+/// Enumeration values that indicate the media asset type associated with
+/// the achievement.
+/// </summary>
 typedef enum XblAchievementMediaAssetType
 {
     /// <summary>The media asset type is unknown.</summary>
@@ -66,6 +70,7 @@ typedef enum XblAchievementMediaAssetType
     XblAchievementMediaAssetType_Art
 } XblAchievementMediaAssetType;
 
+/// <summary>Enumeration values that indicate the participation type for an achievement.</summary>
 typedef enum XblAchievementParticipationType
 {
     /// <summary>The participation type is unknown.</summary>
@@ -78,6 +83,7 @@ typedef enum XblAchievementParticipationType
     XblAchievementParticipationType_Group
 } XblAchievementParticipationType;
 
+/// <summary>Enumeration values that indicate the reward type for an achievement.</summary>
 typedef enum XblAchievementRewardType
 {
     /// <summary>The reward type is unknown.</summary>
@@ -101,7 +107,7 @@ typedef struct XblAchievementTitleAssociation
     /// <summary>
     /// The localized name of the title.
     /// </summary>
-    PCSTR name;
+    UTF8CSTR name;
 
     /// <summary>
     /// The title ID.
@@ -117,19 +123,19 @@ typedef struct XblAchievementRequirement
     /// <summary>
     /// The achievement requirement ID.
     /// </summary>
-    char id[XBL_GUID_CHAR_SIZE];
+    char id[XBL_ACHIEVEMENT_REQUIREMENT_ID_CHAR_SIZE];
 
     /// <summary>
     /// A value that indicates the current progress of the player towards meeting
     /// the requirement.
     /// </summary>
-    PCSTR currentProgressValue;
+    UTF8CSTR currentProgressValue;
 
     /// <summary>
     /// The target progress value that the player must reach in order to meet
     /// the requirement.
     /// </summary>
-    PCSTR targetProgressValue;
+    UTF8CSTR targetProgressValue;
 } XblAchievementRequirement;
 
 /// <summary>
@@ -178,7 +184,7 @@ typedef struct XblAchievementMediaAsset
     /// <summary>
     /// The name of the media asset, such as "tile01".
     /// </summary>
-    PCSTR name;
+    UTF8CSTR name;
 
     /// <summary>
     /// The type of media asset.
@@ -188,7 +194,7 @@ typedef struct XblAchievementMediaAsset
     /// <summary>
     /// The URL of the media asset.
     /// </summary>
-    PCSTR url;
+    UTF8CSTR url;
 } XblAchievementMediaAsset;
 
 /// <summary>
@@ -209,7 +215,7 @@ typedef struct XblAchievementReward
     /// <summary>
     /// The title-defined reward value (data type and content varies by reward type).
     /// </summary>
-    PCSTR value;
+    UTF8CSTR value;
 
     /// <summary>
     /// The reward type.
@@ -239,12 +245,12 @@ typedef struct XblAchievement
     /// <summary>
     /// The achievement ID. Can be a uint or a guid.
     /// </summary>
-    char id[XBL_INT_32_CHAR_SIZE];
+    char id[XBL_ACHIEVEMENT_ID_CHAR_SIZE];
 
     /// <summary>
     /// The ID of the service configuration set associated with the achievement.
     /// </summary>
-    char serviceConfigurationId[XBL_GUID_CHAR_SIZE];
+    char serviceConfigurationId[XBL_SERVICE_CONFIGURATION_ID_CHAR_SIZE];
 
     /// <summary>
     /// The localized achievement name.
@@ -285,7 +291,7 @@ typedef struct XblAchievement
     /// <summary>
     /// The collection of platforms that the achievement is available on.
     /// </summary>
-    PCSTR* platformsAvailableOn;
+    UTF8CSTR* platformsAvailableOn;
 
     /// <summary>
     /// The size of <ref>platformsAvailableOn</ref>.
@@ -300,18 +306,18 @@ typedef struct XblAchievement
     /// <summary>
     /// The description of the unlocked achievement.
     /// </summary>
-    char unlockedDescription[XBL_101_CHAR_SIZE];
+    char unlockedDescription[XBL_ACHIEVEMENT_UNLOCKED_DESCRIPTION_CHAR_SIZE];
 
     /// <summary>
     /// The description of the locked achievement.
     /// </summary>
-    char lockedDescription[XBL_101_CHAR_SIZE];
+    char lockedDescription[XBL_ACHIEVEMENT_LOCKED_DESCRIPTION_CHAR_SIZE];
 
     /// <summary>
     /// The product_id the achievement was released with. This is a globally unique identifier that
     /// may correspond to an application, downloadable content, etc.
     /// </summary>
-    char productId[XBL_GUID_CHAR_SIZE];
+    char productId[XBL_ACHIEVEMENT_PRODUCT_ID_CHAR_SIZE];
 
     /// <summary>
     /// The type of achievement, such as a challenge achievement.
@@ -347,7 +353,7 @@ typedef struct XblAchievement
     /// A deeplink for clients that enables the title to launch at a desired starting point
     /// for the achievement.
     /// </summary>
-    PCSTR deepLink;
+    UTF8CSTR deepLink;
 
     /// <summary>
     /// A value that indicates whether or not the achievement is revoked by enforcement.
@@ -369,6 +375,11 @@ typedef struct XblAchievementsResult
     /// The size of <ref>items</ref>.
     /// </summary>
     uint32_t itemsCount;
+
+    /// <summary>
+    /// A boolean value that indicates if there are more pages of achievements to retrieve.
+    /// </summary>
+    bool hasNext;
 
     /// <summary>
     /// Internal
@@ -403,18 +414,8 @@ typedef struct XblAchievementsResult
     /// <summary>
     /// Internal
     /// </summary>
-    PCSTR continuationToken;
+    UTF8CSTR continuationToken;
 } XblAchievementsResult;
-
-/// <summary>
-/// Returns a boolean value that indicates if there are more pages of achievements to retrieve.
-/// </summary>
-/// <param name="achievementsResult">The XblAchievementsResult to check.</param>
-/// <returns>True if there are more pages, otherwise false.</returns>
-XBL_API bool XBL_CALLING_CONV
-XblAchievementsResultHasNext(
-    _In_ XblAchievementsResult* achievementsResult
-    ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Returns a XblAchievementsResult object that contains the next page of achievements.
@@ -457,8 +458,8 @@ STDAPI XblAchievementServiceUpdateAchievement(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_opt_ uint32_t* titleId,
-    _In_opt_ PCSTR serviceConfigurationId,
-    _In_ PCSTR achievementId,
+    _In_opt_ UTF8CSTR serviceConfigurationId,
+    _In_ UTF8CSTR achievementId,
     _In_ uint32_t percentComplete,
     _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
@@ -513,24 +514,25 @@ STDAPI XblAchievementServiceGetAchievementsForTitleId(
 STDAPI XblAchievementServiceGetAchievement(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
-    _In_ PCSTR serviceConfigurationId,
-    _In_ PCSTR achievementId,
+    _In_ UTF8CSTR serviceConfigurationId,
+    _In_ UTF8CSTR achievementId,
     _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Get the size in bytes of the result from XblAchievementServiceGetAchievement.
+/// A wrapper for GetAsyncResultSize.
 /// </summary>
 /// <param name="async">The async block that was used on the asyncronous call.</param>
 /// <param name="resultSize">The result size.</param>
 STDAPI XblGetAchievementSize(
     _In_ AsyncBlock* async,
     _Out_ size_t* resultSize
-) XBL_NOEXCEPT;
+    ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Get the result from any of XblAchievementServiceGetAchievement. 
-/// The required buffer size should first be obtained XblGetAchievementSize.
+/// The required buffer size should first be obtained from XblGetAchievementSize or GetAsyncResultSize.
 /// <summary>
 /// <param name="async">The async block that was used on the asyncronous call.</param>
 /// <param name="resultSize">The size of the provided buffer.</param>
@@ -541,23 +543,24 @@ STDAPI XblGetAchievement(
     _In_ size_t bufferSize,
     _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblAchievement* buffer,
     _Out_opt_ size_t* bufferUsed
-) XBL_NOEXCEPT;
+    ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Get the size in bytes of the result from XblAchievementServiceGetAchievementsForTitleId
 /// and XblAchievementsResultGetNext.
+/// A wrapper for GetAsyncResultSize.
 /// </summary>
 /// <param name="async">The async block that was used on the asyncronous call.</param>
 /// <param name="resultSize">The result size.</param>
 STDAPI XblGetAchievementsResultSize(
     _In_ AsyncBlock* async,
     _Out_ size_t* resultSize
-) XBL_NOEXCEPT;
+    ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Get the result from any of XblAchievementServiceGetAchievementsForTitleId
 /// and XblAchievementsResultGetNext. 
-/// The required buffer size should first be obtained XblGetAchievementSize.
+/// The required buffer size should first be obtained from XblGetAchievementSize or GetAsyncResultSize.
 /// <summary>
 /// <param name="async">The async block that was used on the asyncronous call.</param>
 /// <param name="resultSize">The size of the provided buffer.</param>
@@ -568,7 +571,4 @@ STDAPI XblGetAchievementsResult(
     _In_ size_t bufferSize,
     _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblAchievementsResult* buffer,
     _Out_opt_ size_t* bufferUsed
-) XBL_NOEXCEPT;
-#if defined(__cplusplus)
-} // end extern "C"
-#endif // defined(__cplusplus)
+    ) XBL_NOEXCEPT;

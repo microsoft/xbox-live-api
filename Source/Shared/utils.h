@@ -15,7 +15,6 @@
 #include "xsapi/system.h"
 
 struct XblAppConfig;
-struct XblAchievementS_STATE;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
     class xbox_live_services_settings;
@@ -1469,8 +1468,8 @@ public:
         );
 
     static xsapi_internal_vector<uint32_t> uint32_array_to_internal_vector(
-        uint32_t* xuidArray,
-        size_t xuidArrayCount
+        uint32_t* intArray,
+        size_t intArrayCount
         );
     
     template<typename T>

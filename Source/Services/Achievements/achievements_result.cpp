@@ -78,7 +78,7 @@ achievements_result::get_next(
 
     auto result = m_internalObj->get_next(
         maxItems,
-        nullptr,
+        get_xsapi_singleton(true)->m_asyncQueue,
         [tce](xbox_live_result<std::shared_ptr<achievements_result_internal>> result)
         {
             tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(achievements_result, result));
@@ -122,32 +122,32 @@ _XSAPIIMP xbox_live_result<void> achievements_result_internal::get_next(
 }
 
 
-xsapi_internal_string achievements_result_internal::xbox_user_id() const
+const xsapi_internal_string& achievements_result_internal::xbox_user_id() const
 {
     return m_xboxUserId;
 }
 
-xsapi_internal_vector<uint32_t> achievements_result_internal::title_ids() const
+const xsapi_internal_vector<uint32_t>& achievements_result_internal::title_ids() const
 {
     return m_titleIds;
 }
 
-achievement_type achievements_result_internal::type() const
+const achievement_type& achievements_result_internal::type() const
 {
     return m_achievementType;
 }
 
-bool achievements_result_internal::unlocked_only() const
+const bool& achievements_result_internal::unlocked_only() const
 {
     return m_unlockedOnly;
 }
 
-achievement_order_by achievements_result_internal::order_by() const
+const achievement_order_by& achievements_result_internal::order_by() const
 {
     return m_orderBy;
 }
 
-xsapi_internal_string achievements_result_internal::continuation_token() const
+const xsapi_internal_string& achievements_result_internal::continuation_token() const
 {
     return m_continuationToken;
 }

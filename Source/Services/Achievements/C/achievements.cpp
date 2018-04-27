@@ -11,9 +11,9 @@ using namespace xbox::services::achievements;
 using namespace xbox::services::system;
 
 #pragma region CopyHelpers
-void copy_string(buffer_allocator& allocator, PCSTR* dest, xsapi_internal_string val)
+void copy_string(buffer_allocator& allocator, UTF8CSTR* dest, xsapi_internal_string val)
 {
-    *dest = (PCSTR)allocator.alloc(val.size() + 1);
+    *dest = (UTF8CSTR)allocator.alloc(val.size() + 1);
     memcpy((void*)(*dest), val.c_str(), val.size() + 1);
 }
 
@@ -85,7 +85,7 @@ void copy_array(
 
 size_t calculate_string_array_size(xsapi_internal_vector<xsapi_internal_string> arr)
 {
-    size_t neededBufferSize = sizeof(PCSTR) * arr.size();
+    size_t neededBufferSize = sizeof(UTF8CSTR) * arr.size();
 
     for (size_t i = 0; i < arr.size(); ++i)
     {
@@ -97,19 +97,20 @@ size_t calculate_string_array_size(xsapi_internal_vector<xsapi_internal_string> 
 
 void copy_string_array(
     buffer_allocator& allocator,
-    PCSTR** dest,
+    UTF8CSTR** dest,
     uint32_t* destCount,
     xsapi_internal_vector<xsapi_internal_string> source
 )
 {
-    PCSTR* tempArr = allocator.alloc_array<PCSTR>((uint32_t)source.size());
+    UTF8CSTR* tempArr = allocator.alloc_array<UTF8CSTR>((uint32_t)source.size());
     for (uint64_t i = 0; i < source.size(); ++i)
     {
-        PCSTR copy;
+        UTF8CSTR copy;
         copy_string(allocator, &copy, source[i]);
         tempArr[i] = copy;
     }
     *dest = tempArr;
+    *destCount = (uint32_t)source.size();
 }
 
 size_t calculate_achievement_title_association_size(std::shared_ptr<achievement_title_association_internal> source)
@@ -328,15 +329,15 @@ void xbl_copy_achievements_result(
 
     auto result = allocator.alloc<XblAchievementsResult>();
     copy_array(allocator, &result->items, &result->itemsCount, internal->items(), copy_achievement);
+    result->hasNext = internal->has_next();
+
     result->xboxUserId = utils::internal_string_to_uint64(internal->xbox_user_id());
-    
     result->titleIds = allocator.alloc_array<uint32_t>((uint32_t)internal->title_ids().size());
     result->titleIdsCount = (uint32_t)internal->title_ids().size();
     for (size_t i = 0; i < internal->title_ids().size(); i++)
     {
         result->titleIds[i] = internal->title_ids()[i];
-    }
-    
+    }    
     result->type = static_cast<XblAchievementType>(internal->type());
     result->unlockedOnly = internal->unlocked_only();
     result->orderBy = static_cast<XblAchievementOrderBy>(internal->order_by());
@@ -367,14 +368,14 @@ try
 {
     verify_global_init();
 
-    struct GetNextContext
+    struct Context
     {
         XblAchievementsResult* achievementsResult;
         xbl_context_handle xboxLiveContext;
         uint32_t maxItems;
         std::shared_ptr<achievements_result_internal> result;
     };
-    auto context = new (xsapi_memory::mem_alloc(sizeof(GetNextContext))) GetNextContext;
+    auto context = new (xsapi_memory::mem_alloc(sizeof(Context))) Context;
     context->xboxLiveContext = xboxLiveContext;
     context->maxItems = maxItems;
     context->achievementsResult = achievementsResult;
@@ -382,7 +383,7 @@ try
     auto hr = BeginAsync(async, context, nullptr, __FUNCTION__,
         [](AsyncOp op, const AsyncProviderData* data)
     {
-        auto context = static_cast<GetNextContext*>(data->context);
+        auto context = static_cast<Context*>(data->context);
 
         switch (op)
         {
@@ -410,7 +411,8 @@ try
             break;
 
         case AsyncOp_Cleanup:
-            delete data->context;
+            context->~Context();
+            xsapi_memory::mem_free(context);
             break;
         }
         return S_OK;
@@ -428,8 +430,8 @@ STDAPI XblAchievementServiceUpdateAchievement(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_opt_ uint32_t* titleId,
-    _In_opt_ PCSTR serviceConfigurationId,
-    _In_ PCSTR achievementId,
+    _In_opt_ UTF8CSTR serviceConfigurationId,
+    _In_ UTF8CSTR achievementId,
     _In_ uint32_t percentComplete,
     _In_ AsyncBlock* async
     ) XBL_NOEXCEPT
@@ -437,7 +439,7 @@ try
 {
     verify_global_init();
 
-    struct UpdateAchievementContext
+    struct Context
     {
         xbl_context_handle xboxLiveContext;
         xsapi_internal_string xboxUserId;
@@ -448,7 +450,7 @@ try
         xbox_live_result<void> result;
     };
 
-    auto context = new (xsapi_memory::mem_alloc(sizeof(UpdateAchievementContext))) UpdateAchievementContext;
+    auto context = new (xsapi_memory::mem_alloc(sizeof(Context))) Context;
     context->xboxLiveContext = xboxLiveContext;
     context->xboxUserId = utils::uint64_to_internal_string(xboxUserId);
     context->titleId = titleId;
@@ -459,7 +461,7 @@ try
     auto hr = BeginAsync(async, context, nullptr, __FUNCTION__,
         [](AsyncOp op, const AsyncProviderData* data)
     {
-        auto context = static_cast<UpdateAchievementContext*>(data->context);
+        auto context = static_cast<Context*>(data->context);
 
         switch (op)
         {
@@ -501,7 +503,8 @@ try
             break;
 
         case AsyncOp_Cleanup:
-            delete data->context;
+            context->~Context();
+            xsapi_memory::mem_free(context);
             break;
         }
         return S_OK;
@@ -530,7 +533,7 @@ try
 {
     verify_global_init();
 
-    struct GetAchievementsForTitleIdContext
+    struct Context
     {
         xbl_context_handle xboxLiveContext;
         xsapi_internal_string xboxUserId;
@@ -542,7 +545,7 @@ try
         uint32_t maxItems;
         std::shared_ptr<achievements_result_internal> result;
     };
-    auto context = new (xsapi_memory::mem_alloc(sizeof(GetAchievementsForTitleIdContext))) GetAchievementsForTitleIdContext;
+    auto context = new (xsapi_memory::mem_alloc(sizeof(Context))) Context;
     context->xboxLiveContext = xboxLiveContext;
     context->xboxUserId = utils::uint64_to_internal_string(xboxUserId);
     context->titleId = titleId;
@@ -555,7 +558,7 @@ try
     auto hr = BeginAsync(async, context, nullptr, __FUNCTION__,
         [](AsyncOp op, const AsyncProviderData* data)
     {
-        auto context = static_cast<GetAchievementsForTitleIdContext*>(data->context);
+        auto context = static_cast<Context*>(data->context);
 
         switch (op)
         {
@@ -582,7 +585,8 @@ try
             break;
 
         case AsyncOp_Cleanup:
-            delete data->context;
+            context->~Context();
+            xsapi_memory::mem_free(context);
             break;
         }
         return S_OK;
@@ -599,15 +603,15 @@ CATCH_RETURN()
 STDAPI XblAchievementServiceGetAchievement(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
-    _In_ PCSTR serviceConfigurationId,
-    _In_ PCSTR achievementId,
+    _In_ UTF8CSTR serviceConfigurationId,
+    _In_ UTF8CSTR achievementId,
     _In_ AsyncBlock* async
     ) XBL_NOEXCEPT
 try
 {
     verify_global_init();
 
-    struct GetAchievementContext
+    struct Context
     {
         xbl_context_handle xboxLiveContext;
         xsapi_internal_string xboxUserId;
@@ -615,7 +619,7 @@ try
         xsapi_internal_string achievementId;
         std::shared_ptr<achievement_internal> result;
     };
-    auto context = new (xsapi_memory::mem_alloc(sizeof(GetAchievementContext))) GetAchievementContext;
+    auto context = new (xsapi_memory::mem_alloc(sizeof(Context))) Context;
     context->xboxLiveContext = xboxLiveContext;
     context->xboxUserId = utils::uint64_to_internal_string(xboxUserId);
     context->serviceConfigurationId = serviceConfigurationId;
@@ -624,7 +628,7 @@ try
     auto hr = BeginAsync(async, context, nullptr, __FUNCTION__,
         [](AsyncOp op, const AsyncProviderData* data)
     {
-        auto context = static_cast<GetAchievementContext*>(data->context);
+        auto context = static_cast<Context*>(data->context);
 
         switch (op)
         {
@@ -647,7 +651,8 @@ try
             break;
 
         case AsyncOp_Cleanup:
-            delete data->context;
+            context->~Context();
+            xsapi_memory::mem_free(context);
             break;
         }
         return S_OK;

@@ -265,12 +265,12 @@ public:
     static xbox_live_result<std::shared_ptr<achievements_result_internal>> _Deserialize(_In_ const web::json::value& json);
 
     // Internal
-    xsapi_internal_string xbox_user_id() const;
-    xsapi_internal_vector<uint32_t> title_ids() const;
-    achievement_type type() const;
-    bool unlocked_only() const;
-    achievement_order_by order_by() const;
-    xsapi_internal_string continuation_token() const;
+    const xsapi_internal_string& xbox_user_id() const;
+    const xsapi_internal_vector<uint32_t>& title_ids() const;
+    const achievement_type& type() const;
+    const bool& unlocked_only() const;
+    const achievement_order_by& order_by() const;
+    const xsapi_internal_string& continuation_token() const;
 
 private:
     std::shared_ptr<xbox::services::user_context> m_userContext;

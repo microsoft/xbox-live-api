@@ -854,7 +854,7 @@ void Game::GetAchievmentsForTitle()
 
 void Game::AchievementResultsGetNext(XblAchievementsResult* result)
 {
-    if (XblAchievementsResultHasNext(result))
+    if (result->hasNext)
     {
         AsyncBlock* asyncBlock = new AsyncBlock{};
         asyncBlock->queue = m_queue;
@@ -948,11 +948,10 @@ void Game::UpdateAchievement(PCSTR scid, PCSTR achievementId)
         {
             pThis->Log(L"Successfully updated achievement!");
         }
-        // todo change XBL_* to E_*
-        //else if (result.errorCode == XBL_ERROR_CODE_HTTP_STATUS_304_NOT_MODIFIED)
-        //{
-        //    pThis->Log(L"Achievement not modified!");
-        //}
+        else if (result == HTTP_E_STATUS_NOT_MODIFIED)
+        {
+            pThis->Log(L"Achievement not modified!");
+        }
         else
         {
             pThis->Log(L"Failed updating achievement.");
