@@ -5,7 +5,6 @@
 
 #include "pal.h"
 #include "xsapi-c/errors_c.h"
-#include "xsapi-c/system_c.h"
 #include "xsapi-c/presence_c.h"
 
 typedef enum XblSocialManagerExtraDetailLevel 
@@ -47,38 +46,38 @@ typedef enum XblPresenceFilter
     XblPresenceFilter_All
 } XblPresenceFilter;
 
-typedef enum XblSocialEventType
+typedef enum XblSocialManagerEventType
 {
     /// <summary>Users added to social graph</summary>
-    XblSocialEventType_UsersAddedToSocialGraph,
+    XblSocialManagerEventType_UsersAddedToSocialGraph,
 
     /// <summary>Users removed from social graph</summary>
-    XblSocialEventType_UsersRemovedFromSocialGraph,
+    XblSocialManagerEventType_UsersRemovedFromSocialGraph,
 
     /// <summary>Users presence record has changed</summary>
-    XblSocialEventType_PresenceChanged,
+    XblSocialManagerEventType_PresenceChanged,
 
     /// <summary>Users profile information has changed</summary>
-    XblSocialEventType_ProfilesChanged,
+    XblSocialManagerEventType_ProfilesChanged,
 
     /// <summary>Relationship to users has changed</summary>
-    XblSocialEventType_SocialRelationshipsChanged,
+    XblSocialManagerEventType_SocialRelationshipsChanged,
 
     /// <summary>Social graph load complete from adding a local user</summary>
-    XblSocialEventType_LocalUserAdded,
+    XblSocialManagerEventType_LocalUserAdded,
 
     /// <summary>Social graph removal complete</summary>
-    XblSocialEventType_LocalUserRemoved,
+    XblSocialManagerEventType_LocalUserRemoved,
 
     /// <summary>Xbox Social User Group load complete (will only trigger for views that take a list of users)</summary>
-    XblSocialEventType_SocialUserGroupLoaded,
+    XblSocialManagerEventType_SocialUserGroupLoaded,
 
     /// <summary>Social user group updated</summary>
-    XblSocialEventType_SocialUserGroupUpdated,
+    XblSocialManagerEventType_SocialUserGroupUpdated,
 
     /// <summary>Unknown</summary>
-    XblSocialEventType_UnknownEvent
-} XblSocialEventType;
+    XblSocialManagerEventType_UnknownEvent
+} XblSocialManagerEventType;
 
 typedef enum XblRelationshipFilter 
 {
@@ -165,7 +164,7 @@ typedef struct XblSocialManagerPresenceRecord
     /// <summary>
     /// The user's presence state.
     /// </summary>
-    XblUserPresenceState userState;
+    XblPresenceUserState userState;
 
     /// <summary>
     /// Collection of presence title record objects returned by a request.
@@ -181,7 +180,7 @@ typedef struct XblSocialManagerPresenceRecord
 /// <summary>
 /// Xbox Social User that contains profile, presence, preferred color, and title history data
 /// </summary>
-typedef struct XblXboxSocialUser
+typedef struct XblSocialManagerUser
 {
     /// <summary>
     /// The xbox user id
@@ -247,12 +246,12 @@ typedef struct XblXboxSocialUser
     /// Preferred color for the user
     /// </summary>
     XblPreferredColor preferredColor;
-} XblXboxSocialUser;
+} XblSocialManagerUser;
 
 /// <summary>
 /// A subset snapshot of the users social graph
 /// </summary>
-typedef struct XblXboxSocialUserGroup
+typedef struct XblSocialManagerUserGroup
 {
     /// <summary>
     /// The count of items in the users array. This value is dynamic and may change
@@ -286,12 +285,12 @@ typedef struct XblXboxSocialUserGroup
     /// Returns the relationship filter used if group type is filter type
     /// </summary>
     XblRelationshipFilter relationshipFilterOfGroup;
-} XblXboxSocialUserGroup;
+} XblSocialManagerUserGroup;
 
 /// <summary>
 /// An event that something in the social graph has changed
 /// </summary>
-typedef struct XblSocialEvent
+typedef struct XblSocialManagerEvent
 {
     /// <summary>
     /// The user whose graph got changed
@@ -302,7 +301,7 @@ typedef struct XblSocialEvent
     /// The type of event this is 
     /// Tells the caller what to cast the event_args to
     /// </summary>
-    XblSocialEventType eventType;
+    XblSocialManagerEventType eventType;
 
     /// <summary>
     /// Number of items in the usersAffected array
@@ -310,10 +309,10 @@ typedef struct XblSocialEvent
     uint32_t usersAffectedCount;
 
     /// <summary>
-    /// The user group that was loaded for XblSocialEventType_SocialUserGroupLoaded events.
+    /// The user group that was loaded for XblSocialManagerEventType_SocialUserGroupLoaded events.
     /// This field is unused for other events types.
     /// </summary>
-    XblXboxSocialUserGroup* loadedGroup;
+    XblSocialManagerUserGroup* loadedGroup;
 
     /// <summary>
     /// Error that occurred
@@ -325,7 +324,7 @@ typedef struct XblSocialEvent
     /// </summary>
     void* internalPtr;
 
-} XblSocialEvent;
+} XblSocialManagerEvent;
 
 /// <summary>
 /// Query whether the user associated with the provided presence record is playing a given title id.
@@ -339,19 +338,19 @@ STDAPI_(bool) XblSocialManagerPresenceRecordIsUserPlayingTitle(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Populates a users provided array of XblXboxSocialUser objects. Returned data may be stale after future calls
+/// Populates a users provided array of XblSocialManagerUser objects. Returned data may be stale after future calls
 /// to XblSocialManagerDoWork. The provided array must be large enough to hold all of the users, as indicated
 /// by the value of the "usersCount" property of the group.
 /// </summary>
 /// <param name="group">The group from which to get users.</param>
 /// <param name="xboxSocialUsers">User provided array to populate.</param>
-STDAPI XblXboxSocialUserGroupGetUsers(
-    _In_ XblXboxSocialUserGroup* group,
-    _Out_writes_all_(group->usersCount) XblXboxSocialUser* xboxSocialUsers
+STDAPI XblSocialManagerUserGroupGetUsers(
+    _In_ XblSocialManagerUserGroup* group,
+    _Out_writes_all_(group->usersCount) XblSocialManagerUser* xboxSocialUsers
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Populates a user provided array of XblXboxSocialUser objects. Returned data may be stale after future calls
+/// Populates a user provided array of XblSocialManagerUser objects. Returned data may be stale after future calls
 /// to XblSocialManagerDoWork. If the provided array is not large enough, XBL_RESULT_INVALID_ARG will be returned and
 /// xboxSocialUsersCount will be set to the required number of elements.
 /// </summary>
@@ -363,11 +362,11 @@ STDAPI XblXboxSocialUserGroupGetUsers(
 /// The actual number of users written to the xboxSocialUsers array. If all of the xuids provided are members of the group,
 /// this will be equal to the 'xboxUserIdsCount'.
 /// </param>
-STDAPI XblXboxSocialUserGroupGetUsersFromXboxUserIds(
-    _In_ XblXboxSocialUserGroup* group,
+STDAPI XblSocialManagerUserGroupGetUsersFromXboxUserIds(
+    _In_ XblSocialManagerUserGroup* group,
     _In_ const uint64_t* xboxUserIds,
     _In_ uint32_t xboxUserIdsCount,
-    _Out_writes_to_(xboxUserIdsCount, *xboxSocialUsersCount) XblXboxSocialUser* xboxSocialUsers,
+    _Out_writes_to_(xboxUserIdsCount, *xboxSocialUsersCount) XblSocialManagerUser* xboxSocialUsers,
     _Out_opt_ uint32_t* xboxSocialUsersCount
     ) XBL_NOEXCEPT;
 
@@ -378,14 +377,14 @@ STDAPI XblXboxSocialUserGroupGetUsersFromXboxUserIds(
 /// </summary>
 /// <param name="group">The group from which to get users.</param>
 /// <param name="trackedUsers">User provided array to populate.</param>
-STDAPI XblXboxSocialUserGroupGetUsersTrackedByGroup(
-    _In_ XblXboxSocialUserGroup* group,
+STDAPI XblSocialManagerUserGroupGetUsersTrackedByGroup(
+    _In_ XblSocialManagerUserGroup* group,
     _Out_writes_all_(group->trackedUsersCount) uint64_t* trackedUsers
     ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Create a social graph for the specified local user.
-/// The result of a local user being added will be triggered through the XblSocialEventType_LocalUserAdded event in XblSocialManagerDoWork
+/// The result of a local user being added will be triggered through the XblSocialManagerEventType_LocalUserAdded event in XblSocialManagerDoWork
 /// </summary>
 /// <param name="user">Xbox Live User</param>
 /// <param name="extraDetailLevel">The level of verbosity that should be in the xbox_social_user</param>
@@ -396,7 +395,7 @@ STDAPI XblSocialManagerAddLocalUser(
 
 /// <summary>
 /// Removes a social graph for the specified local user
-/// The result of a local user being added will be triggered through the XblSocialEventType_LocalUserRemoved event in XblSocialManagerDoWork
+/// The result of a local user being added will be triggered through the XblSocialManagerEventType_LocalUserRemoved event in XblSocialManagerDoWork
 /// </summary>
 /// <param name="user">Xbox Live User</param>
 STDAPI XblSocialManagerRemoveLocalUser(
@@ -415,7 +414,7 @@ STDAPI XblSocialManagerRemoveLocalUser(
 /// </param>
 /// <param name="socialEventsCount">The number of events in the returned array.</param>
 STDAPI XblSocialManagerDoWork(
-    _Outptr_ XblSocialEvent** socialEvents,
+    _Outptr_ XblSocialManagerEvent** socialEvents,
     _Out_ uint32_t* socialEventsCount
     ) XBL_NOEXCEPT;
 
@@ -425,14 +424,14 @@ STDAPI XblSocialManagerDoWork(
 /// </summary>
 /// <param name="socialEvent">The social event, returned from XblSocialManagerDoWork.</param>
 /// <param name="usersAffected">Array of afftected users to populate.</param>
-STDAPI XblSocialEventGetUsersAffected(
-    _In_ XblSocialEvent* socialEvent,
+STDAPI XblSocialManagerEventGetUsersAffected(
+    _In_ XblSocialManagerEvent* socialEvent,
     _Out_writes_(socialEvent->affectedUsersCount) uint64_t* usersAffected
     ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Constructs a social Xbox Social User Group, which is a collection of users with social information
-/// The result of a user group being loaded will be triggered through the XblSocialEventType_SocialUserGroupLoaded event in XblSocialManagerDoWork
+/// The result of a user group being loaded will be triggered through the XblSocialManagerEventType_SocialUserGroupLoaded event in XblSocialManagerDoWork
 /// </summary>
 /// <param name="user">Xbox Live User</param>
 /// <param name="presenceDetailLevel">The restriction of users based on their presence and title activity</param>
@@ -442,12 +441,12 @@ STDAPI XblSocialManagerCreateSocialUserGroupFromFilters(
     _In_ xbl_user_handle user,
     _In_ XblPresenceFilter presenceDetailLevel,
     _In_ XblRelationshipFilter filter,
-    _Outptr_ XblXboxSocialUserGroup** group
+    _Outptr_ XblSocialManagerUserGroup** group
     ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Constructs a social Xbox Social User Group, which is a collection of users with social information
-/// The result of a user group being loaded will be triggered through the XblSocialEventType_SocialUserGroupLoaded event in XblSocialManagerDoWork
+/// The result of a user group being loaded will be triggered through the XblSocialManagerEventType_SocialUserGroupLoaded event in XblSocialManagerDoWork
 /// </summary>
 /// <param name="user">Xbox Live User</param>
 /// <param name="xboxUserIdList">List of users to populate the Xbox Social User Group with. This is currently capped at 100 users total.</param>
@@ -458,7 +457,7 @@ STDAPI XblSocialManagerCreateSocialUserGroupFromList(
     _In_ xbl_user_handle user,
     _In_ uint64_t* xboxUserIdList,
     _In_ uint32_t xboxUserIdListCount,
-    _Outptr_ XblXboxSocialUserGroup** group
+    _Outptr_ XblSocialManagerUserGroup** group
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -468,7 +467,7 @@ STDAPI XblSocialManagerCreateSocialUserGroupFromList(
 /// <param name="group">The social Xbox Social User Group to destroy and stop tracking</param>
 /// <returns>An XBL_RESULT to report any potential error</returns>
 STDAPI XblSocialManagerDestroySocialUserGroup(
-    _In_ XblXboxSocialUserGroup* group
+    _In_ XblSocialManagerUserGroup* group
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -485,13 +484,13 @@ STDAPI XblSocialManagerGetLocalUsers(
 /// <summary>
 /// Updates specified social user group to new group of users
 /// Does a diff to see which users have been added or removed from
-/// The result of a user group being updated will be triggered through the XblSocialEventType_SocialUserGroupUpdated event in XblSocialManagerDoWork
+/// The result of a user group being updated will be triggered through the XblSocialManagerEventType_SocialUserGroupUpdated event in XblSocialManagerDoWork
 /// </summary>
 /// <param name="group">The xbox social user group to add users to.</param>
 /// <param name="users">List of users to add to the xbox social user group. Total number of users not in social graph is limited at 100.</param>
 /// <param name="usersCount">Number of items in the users array.</param>
 STDAPI XblSocialManagerUpdateSocialUserGroup(
-    _In_ XblXboxSocialUserGroup* group,
+    _In_ XblSocialManagerUserGroup* group,
     _In_ uint64_t* users,
     _In_ uint32_t usersCount
     ) XBL_NOEXCEPT;

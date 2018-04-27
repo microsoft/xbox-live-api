@@ -5,7 +5,6 @@
 
 #include "pal.h"
 #include "xsapi-c/errors_c.h"
-#include "xsapi-c/system_c.h"
 
 /// <summary>Enumeration values that indicate the achievement type.</summary>
 typedef enum XblAchievementType
@@ -438,6 +437,21 @@ STDAPI XblAchievementsResultGetNext(
     ) XBL_NOEXCEPT;
 
 /// <summary>
+/// Get the result from an XblAchievementsResultGetNext call.
+/// The required buffer size should first be obtained from GetAsyncResultSize.
+/// <summary>
+/// <param name="async">The async block that was used on the asyncronous call.</param>
+/// <param name="resultSize">The size of the provided buffer.</param>
+/// <param name="result">The buffer to be written to.</param>
+/// <param name="bufferUser">The actual number of bytes written to the buffer.</param>
+STDAPI XblAchievementsResultGetNextResult(
+    _In_ AsyncBlock* async,
+    _In_ size_t bufferSize,
+    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblAchievementsResult* buffer,
+    _Out_opt_ size_t* bufferUsed
+    ) XBL_NOEXCEPT;
+
+/// <summary>
 /// Allow achievement progress to be updated and achievements to be unlocked.
 /// This API will work even when offline. On PC and Xbox One, updates will be 
 /// posted by the system when connection is re-established even if the title isn't running.
@@ -454,7 +468,7 @@ STDAPI XblAchievementsResultGetNext(
 ///
 /// This method calls V2 POST /users/xuid({xuid})/achievements/{scid}/update
 /// </remarks>
-STDAPI XblAchievementServiceUpdateAchievement(
+STDAPI XblAchievementsUpdateAchievement(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_opt_ uint32_t* titleId,
@@ -485,7 +499,7 @@ STDAPI XblAchievementServiceUpdateAchievement(
 ///
 /// This method calls V2 GET /users/xuid({xuid})/achievements
 /// </remarks>
-STDAPI XblAchievementServiceGetAchievementsForTitleId(
+STDAPI XblAchievementsGetAchievementsForTitleId(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ uint32_t titleId,
@@ -495,6 +509,21 @@ STDAPI XblAchievementServiceGetAchievementsForTitleId(
     _In_ uint32_t skipItems,
     _In_ uint32_t maxItems,
     _In_ AsyncBlock* async
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Get the result from an XblAchievementsGetAchievementsForTitleId call.
+/// The required buffer size should first be obtained from GetAsyncResultSize.
+/// <summary>
+/// <param name="async">The async block that was used on the asyncronous call.</param>
+/// <param name="resultSize">The size of the provided buffer.</param>
+/// <param name="result">The buffer to be written to.</param>
+/// <param name="bufferUser">The actual number of bytes written to the buffer.</param>
+STDAPI XblAchievementsGetAchievementsForTitleIdResult(
+    _In_ AsyncBlock* async,
+    _In_ size_t bufferSize,
+    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblAchievementsResult* buffer,
+    _Out_opt_ size_t* bufferUsed
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -511,7 +540,7 @@ STDAPI XblAchievementServiceGetAchievementsForTitleId(
 ///
 /// This method calls V2 GET /users/xuid({xuid})/achievements/{scid}/{achievementId}.
 /// </remarks>
-STDAPI XblAchievementServiceGetAchievement(
+STDAPI XblAchievementsGetAchievement(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ UTF8CSTR serviceConfigurationId,
@@ -520,55 +549,16 @@ STDAPI XblAchievementServiceGetAchievement(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Get the size in bytes of the result from XblAchievementServiceGetAchievement.
-/// A wrapper for GetAsyncResultSize.
-/// </summary>
-/// <param name="async">The async block that was used on the asyncronous call.</param>
-/// <param name="resultSize">The result size.</param>
-STDAPI XblGetAchievementSize(
-    _In_ AsyncBlock* async,
-    _Out_ size_t* resultSize
-    ) XBL_NOEXCEPT;
-
-/// <summary>
-/// Get the result from any of XblAchievementServiceGetAchievement. 
-/// The required buffer size should first be obtained from XblGetAchievementSize or GetAsyncResultSize.
+/// Get the result from an XblAchievementsGetAchievement call.
+/// The required buffer size should first be obtained from GetAsyncResultSize.
 /// <summary>
 /// <param name="async">The async block that was used on the asyncronous call.</param>
 /// <param name="resultSize">The size of the provided buffer.</param>
 /// <param name="result">The buffer to be written to.</param>
 /// <param name="bufferUser">The actual number of bytes written to the buffer.</param>
-STDAPI XblGetAchievement(
+STDAPI XblAchievementsGetAchievementResult(
     _In_ AsyncBlock* async,
     _In_ size_t bufferSize,
     _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblAchievement* buffer,
-    _Out_opt_ size_t* bufferUsed
-    ) XBL_NOEXCEPT;
-
-/// <summary>
-/// Get the size in bytes of the result from XblAchievementServiceGetAchievementsForTitleId
-/// and XblAchievementsResultGetNext.
-/// A wrapper for GetAsyncResultSize.
-/// </summary>
-/// <param name="async">The async block that was used on the asyncronous call.</param>
-/// <param name="resultSize">The result size.</param>
-STDAPI XblGetAchievementsResultSize(
-    _In_ AsyncBlock* async,
-    _Out_ size_t* resultSize
-    ) XBL_NOEXCEPT;
-
-/// <summary>
-/// Get the result from any of XblAchievementServiceGetAchievementsForTitleId
-/// and XblAchievementsResultGetNext. 
-/// The required buffer size should first be obtained from XblGetAchievementSize or GetAsyncResultSize.
-/// <summary>
-/// <param name="async">The async block that was used on the asyncronous call.</param>
-/// <param name="resultSize">The size of the provided buffer.</param>
-/// <param name="result">The buffer to be written to.</param>
-/// <param name="bufferUser">The actual number of bytes written to the buffer.</param>
-STDAPI XblGetAchievementsResult(
-    _In_ AsyncBlock* async,
-    _In_ size_t bufferSize,
-    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblAchievementsResult* buffer,
     _Out_opt_ size_t* bufferUsed
     ) XBL_NOEXCEPT;

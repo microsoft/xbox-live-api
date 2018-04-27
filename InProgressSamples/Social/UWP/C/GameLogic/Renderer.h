@@ -43,7 +43,7 @@ namespace Sample
             FLOAT fTextHeight,
             FLOAT scale,
             const DirectX::XMVECTORF32& TEXT_COLOR,
-            std::vector<XblXboxSocialUserGroup*> nodeList
+            std::vector<XblSocialManagerUserGroup*> nodeList
             );
 
     private:

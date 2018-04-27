@@ -23,7 +23,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
 class xbl_social_manager
 {
 public:
-    XblXboxSocialUserGroup* create_social_user_group(
+    XblSocialManagerUserGroup* create_social_user_group(
         _In_ std::shared_ptr<xbox_social_user_group_internal> internalGroup
     )
     {
@@ -38,8 +38,8 @@ public:
         userPtr = internalGroup->local_user();
 #endif
 
-        auto buffer = xbox::services::system::xsapi_memory::mem_alloc(sizeof(XblXboxSocialUserGroup));
-        XblXboxSocialUserGroup *socialUserGroup = new (buffer) XblXboxSocialUserGroup
+        auto buffer = xbox::services::system::xsapi_memory::mem_alloc(sizeof(XblSocialManagerUserGroup));
+        XblSocialManagerUserGroup *socialUserGroup = new (buffer) XblSocialManagerUserGroup
         {
             uint32_t(internalGroup->users().size()),
             static_cast<XblSocialUserGroupType>(internalGroup->social_user_group_type()),
@@ -56,8 +56,8 @@ public:
 #if !XDK_API
     xsapi_internal_vector<xbl_user_handle> localUsersVector;
 #endif
-    bimap<XblXboxSocialUserGroup*, std::shared_ptr<xbox_social_user_group_internal>> socialUserGroupsMap;
-    xsapi_internal_vector<XblSocialEvent> socialEvents;
+    bimap<XblSocialManagerUserGroup*, std::shared_ptr<xbox_social_user_group_internal>> socialUserGroupsMap;
+    xsapi_internal_vector<XblSocialManagerEvent> socialEvents;
     xsapi_internal_vector<std::shared_ptr<social_event_internal>> internalSocialEvents;
 };
 
@@ -94,7 +94,7 @@ CATCH_RETURN_WITH(false);
 
 void populate_social_user_array(
     _In_ xsapi_internal_vector<xbox_social_user*> internalXboxSocialUsers,
-    _Out_ XblXboxSocialUser* users
+    _Out_ XblSocialManagerUser* users
     )
 {
     uint32_t i = 0;
@@ -112,7 +112,7 @@ void populate_social_user_array(
         utils::utf8_from_char_t(internalUser->gamertag(), users[i].gamertag, sizeof(users[i].gamertag));
 
         // presence record
-        users[i].presenceRecord.userState = static_cast<XblUserPresenceState>(internalUser->presence_record().user_state());
+        users[i].presenceRecord.userState = static_cast<XblPresenceUserState>(internalUser->presence_record().user_state());
         
         uint8_t j = 0;
         for (auto& internalTitleRecord : internalUser->presence_record().presence_title_records())
@@ -139,9 +139,9 @@ void populate_social_user_array(
     }
 }
 
-STDAPI XblXboxSocialUserGroupGetUsers(
-    _In_ XblXboxSocialUserGroup* group,
-    _Out_writes_all_(group->usersCount) XblXboxSocialUser* xboxSocialUsers
+STDAPI XblSocialManagerUserGroupGetUsers(
+    _In_ XblSocialManagerUserGroup* group,
+    _Out_writes_all_(group->usersCount) XblSocialManagerUser* xboxSocialUsers
     ) XBL_NOEXCEPT
 try
 {
@@ -158,11 +158,11 @@ try
 }
 CATCH_RETURN()
 
-STDAPI XblXboxSocialUserGroupGetUsersFromXboxUserIds(
-    _In_ XblXboxSocialUserGroup* group,
+STDAPI XblSocialManagerUserGroupGetUsersFromXboxUserIds(
+    _In_ XblSocialManagerUserGroup* group,
     _In_ const uint64_t* xboxUserIds,
     _In_ uint32_t xboxUserIdsCount,
-    _Out_writes_to_(xboxUserIdsCount, *xboxSocialUsersCount) XblXboxSocialUser* xboxSocialUsers,
+    _Out_writes_to_(xboxUserIdsCount, *xboxSocialUsersCount) XblSocialManagerUser* xboxSocialUsers,
     _Out_opt_ uint32_t* xboxSocialUsersCount
     ) XBL_NOEXCEPT
 try
@@ -192,8 +192,8 @@ try
 }
 CATCH_RETURN()
 
-STDAPI XblXboxSocialUserGroupGetUsersTrackedByGroup(
-    _In_ XblXboxSocialUserGroup* group,
+STDAPI XblSocialManagerUserGroupGetUsersTrackedByGroup(
+    _In_ XblSocialManagerUserGroup* group,
     _Out_writes_all_(group->trackedUsersCount) uint64_t* trackedUsers
     ) XBL_NOEXCEPT
 try
@@ -268,7 +268,7 @@ CATCH_RETURN()
 
 
 STDAPI XblSocialManagerDoWork(
-    _Outptr_ XblSocialEvent** socialEvents,
+    _Outptr_ XblSocialManagerEvent** socialEvents,
     _Out_ uint32_t* socialEventsCount
     ) XBL_NOEXCEPT
 try
@@ -295,7 +295,7 @@ try
 #else
             userHandle = internalEvent->user();
 #endif
-            XblXboxSocialUserGroup* loadedGroup = nullptr;
+            XblSocialManagerUserGroup* loadedGroup = nullptr;
             if (internalEvent->event_type() == social_event_type::social_user_group_loaded)
             {
                 auto groupLoadedEventArgs = std::dynamic_pointer_cast<social_user_group_loaded_event_args_internal>(internalEvent->event_args());
@@ -311,10 +311,10 @@ try
                 }
             }
 
-            state->socialEvents.push_back(XblSocialEvent
+            state->socialEvents.push_back(XblSocialManagerEvent
             {
                 userHandle,
-                static_cast<XblSocialEventType>(internalEvent->event_type()),
+                static_cast<XblSocialManagerEventType>(internalEvent->event_type()),
                 uint32_t(internalEvent->users_affected().size()),
                 loadedGroup,
                 internalEvent->err().value(),
@@ -335,8 +335,8 @@ try
 }
 CATCH_RETURN()
 
-STDAPI XblSocialEventGetUsersAffected(
-    _In_ XblSocialEvent* socialEvent,
+STDAPI XblSocialManagerEventGetUsersAffected(
+    _In_ XblSocialManagerEvent* socialEvent,
     _Out_writes_(socialEvent->affectedUsersCount) uint64_t* usersAffected
     ) XBL_NOEXCEPT
 try
@@ -358,7 +358,7 @@ STDAPI XblSocialManagerCreateSocialUserGroupFromFilters(
     _In_ xbl_user_handle user,
     _In_ XblPresenceFilter presenceDetailLevel,
     _In_ XblRelationshipFilter filter,
-    _Outptr_ XblXboxSocialUserGroup** group
+    _Outptr_ XblSocialManagerUserGroup** group
     ) XBL_NOEXCEPT
 try
 {
@@ -383,7 +383,7 @@ STDAPI XblSocialManagerCreateSocialUserGroupFromList(
     _In_ xbl_user_handle user,
     _In_ uint64_t* xboxUserIdList,
     _In_ uint32_t xboxUserIdListCount,
-    _Outptr_ XblXboxSocialUserGroup** group
+    _Outptr_ XblSocialManagerUserGroup** group
     ) XBL_NOEXCEPT
 try
 {
@@ -406,7 +406,7 @@ try
 CATCH_RETURN()
 
 STDAPI XblSocialManagerDestroySocialUserGroup(
-    _In_ XblXboxSocialUserGroup* group
+    _In_ XblSocialManagerUserGroup* group
     ) XBL_NOEXCEPT
 try
 {
@@ -447,7 +447,7 @@ STDAPI XblSocialManagerGetLocalUsers(
 }
 
 STDAPI XblSocialManagerUpdateSocialUserGroup(
-    _In_ XblXboxSocialUserGroup* group,
+    _In_ XblSocialManagerUserGroup* group,
     _In_ uint64_t* users,
     _In_ uint32_t usersCount
     ) XBL_NOEXCEPT

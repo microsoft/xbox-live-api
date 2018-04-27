@@ -83,7 +83,7 @@ namespace Sample
             XblUserGetGamertag(m_user, GamertagMaxBytes, gamertag, nullptr);
             return utility::conversions::utf8_to_utf16(gamertag);
         }
-        std::vector<XblXboxSocialUserGroup*> GetSocialGroups();
+        std::vector<XblSocialManagerUserGroup*> GetSocialGroups();
 
     private:
         xbl_user_handle m_user;
@@ -122,7 +122,7 @@ namespace Sample
         bool m_customList;
         std::vector<uint64_t> m_xuidList;
 
-        std::vector<XblXboxSocialUserGroup*> m_socialGroups;
+        std::vector<XblSocialManagerUserGroup*> m_socialGroups;
 
         // SocialManagerIntegration.cpp
         void AddUserToSocialManager(xbl_user_handle user);
@@ -145,7 +145,7 @@ namespace Sample
         void UpdateSocialManager();
 
         void LogSocialEventList(
-            XblSocialEvent* eventList,
+            XblSocialManagerEvent* eventList,
             uint32_t eventListCount
         );
 

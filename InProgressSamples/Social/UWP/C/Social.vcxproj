@@ -193,7 +193,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\Include\cpprestsdk\;$(ProjectDir)..\..\..\..\InProgressSamples\Kits\;$(ProjectDir)..\..\..\..\InProgressSamples\Kits\DirectXTK\Inc\;$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\InProgressSamples\Kits\;$(ProjectDir)..\..\..\..\InProgressSamples\Kits\DirectXTK\Inc\;$(ProjectDir);$(ProjectDir)..\..\..\..\Source\System\C\;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

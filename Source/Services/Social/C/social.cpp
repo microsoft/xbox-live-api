@@ -139,25 +139,9 @@ STDAPI XblGetSocialRelationshipsHelper(
     return ScheduleAsync(async, 0);
 }
 
-STDAPI XblGetSocialRelationships(
+STDAPI XblSocialGetSocialRelationships(
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ AsyncBlock* async
-    ) XBL_NOEXCEPT
-try
-{
-    return XblGetSocialRelationshipsHelper(
-        xboxLiveContext,
-        xboxLiveContext->xboxUserId,
-        XblSocialRelationshipFilter_All,
-        0,
-        0,
-        async
-        );
-}
-CATCH_RETURN()
-
-STDAPI XblGetSocialRelationshipsWithFilter(
-    _In_ xbl_context_handle xboxLiveContext,
+    _In_ uint64_t xboxUserId,
     _In_ XblSocialRelationshipFilter socialRelationshipFilter,
     _In_ AsyncBlock* async
     ) XBL_NOEXCEPT
@@ -165,26 +149,8 @@ try
 {
     return XblGetSocialRelationshipsHelper(
         xboxLiveContext,
-        xboxLiveContext->xboxUserId,
-        socialRelationshipFilter,
-        0,
-        0,
-        async
-        );
-}
-CATCH_RETURN()
-
-STDAPI XblGetSocialRelationshipsForUser(
-    _In_ xbl_context_handle xboxLiveContext,
-    _In_ uint64_t xboxUserId,
-    _In_ AsyncBlock* async
-    ) XBL_NOEXCEPT
-try
-{
-    return XblGetSocialRelationshipsHelper(
-        xboxLiveContext,
         xboxUserId,
-        XblSocialRelationshipFilter_All,
+        socialRelationshipFilter,
         0,
         0,
         async
@@ -209,15 +175,7 @@ STDAPI XblSocialRelationshipResultGetNext(
         );
 }
 
-STDAPI XblGetSocialRelationshipResultSize(
-    _In_ AsyncBlock* async,
-    _Out_ size_t* resultSize
-    ) XBL_NOEXCEPT
-{
-    return GetAsyncResultSize(async, resultSize);
-}
-
-STDAPI XblGetSocialRelationshipResult(
+STDAPI XblSocialGetSocialRelationshipsResult(
     _In_ AsyncBlock* async,
     _In_ size_t bufferSize,
     _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblSocialRelationshipResult* buffer,
@@ -227,7 +185,17 @@ STDAPI XblGetSocialRelationshipResult(
     return GetAsyncResult(async, nullptr, bufferSize, buffer, bufferUsed);
 }
 
-STDAPI XblSubscribeToSocialRelationshipChange(
+STDAPI XblSocialRelationshipResultGetNextResult(
+    _In_ AsyncBlock* async,
+    _In_ size_t bufferSize,
+    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblSocialRelationshipResult* buffer,
+    _Out_opt_ size_t* bufferUsed
+    ) XBL_NOEXCEPT
+{
+    return GetAsyncResult(async, nullptr, bufferSize, buffer, bufferUsed);
+}
+
+STDAPI XblSocialSubscribeToSocialRelationshipChange(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _Out_ xbl_social_relationship_change_subscription_handle* subscriptionHandle
@@ -245,7 +213,7 @@ try
 }
 CATCH_RETURN()
 
-STDAPI XblUnsubscribeFromSocialRelationshipChange(
+STDAPI XblSocialUnsubscribeFromSocialRelationshipChange(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ xbl_social_relationship_change_subscription_handle subscriptionHandle
     ) XBL_NOEXCEPT
@@ -262,7 +230,7 @@ try
 CATCH_RETURN()
 
 STDAPI_(function_context)
-XblAddSocialRelationshipChangedHandler(
+XblSocialAddSocialRelationshipChangedHandler(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ XblSocialRelationshipChangedHandler handler,
     _In_ void* handlerContext
@@ -291,7 +259,7 @@ try
 }
 CATCH_RETURN_WITH(-1)
 
-STDAPI_(void) XblRemoveSocialRelationshipChangedHandler(
+STDAPI_(void) XblSocialRemoveSocialRelationshipChangedHandler(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ function_context handlerFunctionContext
     ) XBL_NOEXCEPT
@@ -301,7 +269,7 @@ try
 }
 CATCH_RETURN_WITH(;)
 
-STDAPI XblSubmitReputationFeedback(
+STDAPI XblSocialSubmitReputationFeedback(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ XblReputationFeedbackType reputationFeedbackType,
@@ -372,7 +340,7 @@ try
 }
 CATCH_RETURN()
 
-STDAPI XblSubmitBatchReputationFeedback(
+STDAPI XblSocialSubmitBatchReputationFeedback(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ XblReputationFeedbackItem* feedbackItems,
     _In_ uint32_t feedbackItemsCount,

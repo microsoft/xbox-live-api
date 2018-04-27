@@ -25,7 +25,7 @@ void copy_profile(
     profile->xboxUserId = utils::internal_string_to_uint64(internal->xbox_user_id());
 }
 
-STDAPI XblGetUserProfile(
+STDAPI XblProfileGetUserProfile(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ AsyncBlock* async
@@ -86,7 +86,7 @@ try
 }
 CATCH_RETURN()
 
-STDAPI XblGetUserProfiles(
+STDAPI XblProfileGetUserProfiles(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t* xboxUserIds,
     _In_ size_t xboxUserIdsCount,
@@ -153,7 +153,7 @@ try
 }
 CATCH_RETURN()
 
-STDAPI XblGetUserProfilesForSocialGroup(
+STDAPI XblProfileGetUserProfilesForSocialGroup(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ UTF8CSTR socialGroup,
     _In_ AsyncBlock* async
@@ -219,7 +219,7 @@ try
 }
 CATCH_RETURN()
 
-STDAPI XblGetProfileResultCount(
+STDAPI XblProfileGetUserProfilesResultCount(
     _In_ AsyncBlock* async,
     _Out_ uint32_t* profileCount
     ) XBL_NOEXCEPT
@@ -236,7 +236,15 @@ STDAPI XblGetProfileResultCount(
     return hr;
 }
 
-STDAPI XblGetProfileResult(
+STDAPI XblProfileGetUserProfileResult(
+    _In_ AsyncBlock* async,
+    _Out_ XblUserProfile* profile
+    ) XBL_NOEXCEPT
+{
+    return GetAsyncResult(async, nullptr, sizeof(XblUserProfile), profile, nullptr);
+}
+
+STDAPI XblProfileGetUserProfilesResult(
     _In_ AsyncBlock* async,
     _In_ uint32_t profilesCount,
     _Out_writes_to_(profilesCount, written) XblUserProfile* profiles,
@@ -246,7 +254,7 @@ STDAPI XblGetProfileResult(
     RETURN_C_INVALIDARGUMENT_IF_NULL(async);
 
     uint32_t actualProfilesCount;
-    auto hr = XblGetProfileResultCount(async, &actualProfilesCount);
+    auto hr = XblProfileGetUserProfilesResultCount(async, &actualProfilesCount);
     RETURN_C_INVALIDARGUMENT_IF(actualProfilesCount > profilesCount);
 
     hr = GetAsyncResult(async, nullptr, profilesCount * sizeof(XblUserProfile), profiles, nullptr);
@@ -255,4 +263,14 @@ STDAPI XblGetProfileResult(
         *written = actualProfilesCount;
     }
     return hr;
+}
+
+STDAPI XblProfileGetUserProfilesForSocialGroupResult(
+    _In_ AsyncBlock* async,
+    _In_ uint32_t profilesCount,
+    _Out_writes_to_(profilesCount, written) XblUserProfile* profiles,
+    _Out_opt_ uint32_t* written
+    ) XBL_NOEXCEPT
+{
+    return XblProfileGetUserProfilesResult(async, profilesCount, profiles, written);
 }
