@@ -106,6 +106,7 @@ extern "C" {
 #define E_XBL_AUTH_NO_TOKEN                     MAKE_E_XBL(6)
 #define E_XBL_ALREADY_INITIALISED               MAKE_E_XBL(7)
 
+// SHIPTODO: WCHAR -> UTF8 isn't 1:1 for bytes
 #define XBL_COLOR_CHAR_SIZE 7
 #define XBL_DISPLAY_NAME_CHAR_SIZE 30
 #define XBL_DISPLAY_PIC_URL_RAW_CHAR_SIZE 225
