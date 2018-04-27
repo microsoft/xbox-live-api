@@ -19,9 +19,9 @@ struct XblAppConfig;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
     class xbox_live_services_settings;
     class xbox_system_factory;
-    #if UWP_API
-        class user_impl_idp;
-    #endif
+#if UWP_API
+    class user_impl_idp;
+#endif
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
@@ -1510,11 +1510,6 @@ public:
 
     static utility::datetime datetime_from_time_t(const time_t* time);
 
-#if XSAPI_C
-    // SHIPTODO REMOVE
-    static XBL_RESULT create_xbl_result(std::error_code errc);
-#endif
-
 private:
     static xsapi_internal_vector<xsapi_internal_string> get_locale_list();
     
@@ -1522,9 +1517,6 @@ private:
     utils(const utils&);
     utils& operator=(const utils&);
 };
-
-// TODO remove this
-static const uint64_t XSAPI_DEFAULT_TASKGROUP = 99;
 
 class buffer_allocator
 {

@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.Services.Uni
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpprestsdk140.static", "..\..\External\cpprestsdk\Release\src\build\vs14\casablanca140.static.vcxproj", "{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libHttpClient.140.Win32.C", "..\..\External\libHttpClient\Build\libHttpClient.140.Win32.C\libHttpClient.140.Win32.C.vcxproj", "{BD57C607-E104-4505-8A43-3D152F016F16}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\..\External\cpprestsdk\Release\src\build\common.vcxitems*{04d42f35-e5d5-4d95-980e-1bd7e900f2dd}*SharedItemsImports = 4
@@ -43,6 +45,18 @@ Global
 		{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}.Release|x64.Build.0 = Release|x64
 		{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}.Release|x86.ActiveCfg = Release|Win32
 		{04D42F35-E5D5-4D95-980E-1BD7E900F2DD}.Release|x86.Build.0 = Release|Win32
+		{BD57C607-E104-4505-8A43-3D152F016F16}.Debug|ARM.ActiveCfg = Debug|ARM
+		{BD57C607-E104-4505-8A43-3D152F016F16}.Debug|ARM.Build.0 = Debug|ARM
+		{BD57C607-E104-4505-8A43-3D152F016F16}.Debug|x64.ActiveCfg = Debug|x64
+		{BD57C607-E104-4505-8A43-3D152F016F16}.Debug|x64.Build.0 = Debug|x64
+		{BD57C607-E104-4505-8A43-3D152F016F16}.Debug|x86.ActiveCfg = Debug|Win32
+		{BD57C607-E104-4505-8A43-3D152F016F16}.Debug|x86.Build.0 = Debug|Win32
+		{BD57C607-E104-4505-8A43-3D152F016F16}.Release|ARM.ActiveCfg = Release|ARM
+		{BD57C607-E104-4505-8A43-3D152F016F16}.Release|ARM.Build.0 = Release|ARM
+		{BD57C607-E104-4505-8A43-3D152F016F16}.Release|x64.ActiveCfg = Release|x64
+		{BD57C607-E104-4505-8A43-3D152F016F16}.Release|x64.Build.0 = Release|x64
+		{BD57C607-E104-4505-8A43-3D152F016F16}.Release|x86.ActiveCfg = Release|Win32
+		{BD57C607-E104-4505-8A43-3D152F016F16}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

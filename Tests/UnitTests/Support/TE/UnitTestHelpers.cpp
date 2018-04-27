@@ -39,7 +39,7 @@ Microsoft::Xbox::Services::System::XboxLiveUser^ SignInUserWithMocks_WinRT(const
     pplx::create_task(asyncOp).wait();
     if (!id.empty())
     {
-        user->GetUserImpl()->_Set_xbox_user_id(id);
+        user->_User_impl()->_Set_xbox_user_id(xbox::services::utils::internal_string_from_string_t(id));
     }
 
     return user;

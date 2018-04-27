@@ -21,6 +21,7 @@ using namespace xbox::services::real_time_activity;
 using namespace xbox::services::social::manager;
 using namespace Microsoft::Xbox::Services::Social::Manager;
 using namespace Microsoft::Xbox::Services::Presence;
+using namespace Microsoft::Xbox::Services::System;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 

@@ -6,10 +6,6 @@
 #include "pal.h"
 #include "xsapi-c/errors_c.h"
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 /// <summary>Defines values used to indicate the device type associate with an XblSocialManagerPresenceTitleRecord.</summary>
 typedef enum XblPresenceDeviceType
 {
@@ -136,7 +132,3 @@ typedef enum XblTitlePresenceState
     /// </summary>
     XblTitlePresenceState_Ended
 } XblTitlePresenceState;
-
-#if defined(__cplusplus)
-} // end extern "C"
-#endif // defined(__cplusplus)

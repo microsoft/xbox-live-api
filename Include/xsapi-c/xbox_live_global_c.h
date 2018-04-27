@@ -7,10 +7,6 @@
 #pragma warning(disable: 4062)
 
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 /////////////////////////////////////////////////////////////////////////////////////////
 // Memory APIs
 //
@@ -108,8 +104,3 @@ STDAPI XblGlobalInitialize() XBL_NOEXCEPT;
 /// If you called XblMemSetFunctions(), call this before shutting down your app's memory manager.
 /// </summary>
 STDAPI_(void) XblGlobalCleanup() XBL_NOEXCEPT;
-
-#if defined(__cplusplus)
-} // end extern "C"
-#endif // defined(__cplusplus)
-

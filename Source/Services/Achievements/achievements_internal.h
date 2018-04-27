@@ -66,10 +66,8 @@ public:
 
 private:
     xsapi_internal_vector<std::shared_ptr<achievement_requirement_internal>> m_requirements;
-    utility::datetime m_timeUnlocked; // todo might have to wrap this in an xsapi_internal_datetime
+    utility::datetime m_timeUnlocked;
 };
-
-// todo if need to wrap utility:datetime in xsapi_internal_datetime then create internal for achievement_time_window
 
 class achievement_media_asset_internal
 {

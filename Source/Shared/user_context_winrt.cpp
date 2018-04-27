@@ -187,7 +187,7 @@ void user_context::get_auth_result(
 
 void user_context::refresh_token(
     _In_ async_queue_handle_t queue,
-    _In_ xbox_live_callback<xbox_live_result<void>> callback
+    _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>> callback
     )
 {
     auto authConfig = m_user->_User_impl()->get_auth_config();
@@ -203,7 +203,7 @@ void user_context::refresh_token(
         queue,
         [callback](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
     {
-        callback(xbox_live_result<void>(result.err(), result.err_message()));
+        callback(xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>(result.err(), result.err_message()));
     });
 }
 

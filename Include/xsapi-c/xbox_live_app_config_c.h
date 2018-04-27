@@ -5,10 +5,6 @@
 #include <stdint.h>
 #include "pal.h"
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 /// <summary>
 /// Represents the configuration of an Xbox Live application.
 /// </summary>
@@ -42,7 +38,3 @@ STDAPI
 XblGetXboxLiveAppConfig(
     _Out_ const XblAppConfig** appConfig
     );
-
-#if defined(__cplusplus)
-} // end extern "C"
-#endif // defined(__cplusplus)
