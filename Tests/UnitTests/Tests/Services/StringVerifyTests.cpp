@@ -58,7 +58,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"/system/strings/validate", httpCall->PathQueryFragment.to_string());
 
         //verify the request
-        auto& requestJson = web::json::value::parse(httpCall->request_body().request_message_string().data());
+        auto& requestJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         auto& requestStringJson = requestJson[L"stringstoVerify"];
         VERIFY_ARE_EQUAL_INT(requestStringJson.size(), 1);
         VERIFY_ARE_EQUAL(requestStringJson[0].as_string(), requestString->Data());
@@ -87,7 +87,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://client-strings.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(L"/system/strings/validate", httpCall->PathQueryFragment.to_string());
-        auto& requestJson = web::json::value::parse(httpCall->request_body().request_message_string().data());
+        auto& requestJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         auto& requestStringJson = requestJson[L"stringstoVerify"];
         VERIFY_ARE_EQUAL_INT(requestStringJson.size(), 2);
         VERIFY_ARE_EQUAL(requestStringJson[0].as_string(), requestStrings->GetAt(0)->Data());

@@ -13,6 +13,7 @@
 
 using namespace xbox::services;
 using namespace xbox::services::social::manager;
+using namespace Microsoft::Xbox::Services::System;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 

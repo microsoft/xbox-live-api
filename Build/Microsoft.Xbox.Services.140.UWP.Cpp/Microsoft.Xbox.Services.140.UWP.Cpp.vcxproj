@@ -87,24 +87,10 @@
        $(ProjectDir)..\..\Source\Shared;
        $(ProjectDir)..\..\Source\Shared\WinRT;
        $(ProjectDir)..\..\Include;
-       $(ProjectDir)..\..\Include\cpprestinclude;
+       $(ProjectDir)..\..\External\cpprestsdk\Release\include;
        $(ProjectDir)..\..\Source\System\WinRT;
        $(ProjectDir)..\..\Source\System;
        $(ProjectDir)..\..\Source\System\C;
-       $(ProjectDir)..\..\Source\C\Services\TitleStorage;
-       $(ProjectDir)..\..\Source\C\Services\Common;
-       $(ProjectDir)..\..\Source\C\Services\Social;
-       $(ProjectDir)..\..\Source\C\Services\Multiplayer;
-       $(ProjectDir)..\..\Source\C\Services\Presence;
-       $(ProjectDir)..\..\Source\C\Services\Misc;
-       $(ProjectDir)..\..\Source\C\Services\Social\Manager;
-       $(ProjectDir)..\..\Source\C\Services\RealTimeActivity;
-       $(ProjectDir)..\..\Source\C\Services\Achievements;
-       $(ProjectDir)..\..\Source\C\Shared;
-       $(ProjectDir)..\..\Source\C\Shared\WinRT;
-       $(ProjectDir)..\..\Source\C\System;
-       $(ProjectDir)..\..\Source\C\Services\Leaderboard;
-       $(ProjectDir)..\..\Source\C\Services\Stats\Manager;
        %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
       <CompileAsWinRT>true</CompileAsWinRT>
@@ -504,6 +490,9 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.static.vcxproj">
+      <Project>{9ad285a2-301e-47a0-a299-14ad5d4f2758}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.140.UWP.C\libHttpClient.140.UWP.C.vcxproj">
       <Project>{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}</Project>
     </ProjectReference>

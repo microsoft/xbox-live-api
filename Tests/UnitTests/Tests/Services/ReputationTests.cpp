@@ -85,7 +85,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"https://reputation.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(L"/users/xuid(98052)/feedback", httpCall->PathQueryFragment.to_string());
 
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string().data());
+        auto requestJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         auto feedbackRequest = reputation_feedback_request::convert_reputation_feedback_type_to_string(static_cast<reputation_feedback_type>(reputationFeedback));
         VERIFY_IS_TRUE(!feedbackRequest.err() && !feedbackRequest.payload().empty());
         if (!sessionName->IsEmpty())
