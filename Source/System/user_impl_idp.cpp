@@ -406,7 +406,8 @@ user_impl_idp::internal_get_token_and_signature_helper(
     }
     if (bytes.size() > 0)
     {
-        request->Properties->Insert("RequestBody", PLATFORM_STRING_FROM_STRING_T(utility::conversions::to_base64(std::vector<byte>(bytes.begin(), bytes.end()))));
+        std::vector<byte> stdVector(bytes.begin(), bytes.end());
+        request->Properties->Insert("RequestBody", PLATFORM_STRING_FROM_STRING_T(utility::conversions::to_base64(stdVector)));
     }
 
     request->Properties->Insert("Target", PLATFORM_STRING_FROM_INTERNAL_STRING(m_authConfig->rps_ticket_service()));

@@ -18,9 +18,6 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ImportGroup Label="PropertySheets">
-    <Import Project="..\..\External\libHttpClient\libHttpClient.props" />
-  </ImportGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalOptions>/bigobj /Zm512 %(AdditionalOptions)</AdditionalOptions>
@@ -146,6 +143,9 @@
     <UseOfMfc>false</UseOfMfc>
     <WindowsAppContainer>false</WindowsAppContainer>
   </PropertyGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="..\..\External\libHttpClient\libHttpClient.props" />
+  </ImportGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -257,6 +257,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14\casablanca140.static.vcxproj">
       <Project>{04d42f35-e5d5-4d95-980e-1bd7e900f2dd}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.140.Win32.C\libHttpClient.140.Win32.C.vcxproj">
+      <Project>{bd57c607-e104-4505-8a43-3d152f016f16}</Project>
     </ProjectReference>
   </ItemGroup>
   <ImportGroup Label="ExtensionTargets">
