@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|ARM">
@@ -70,7 +70,29 @@
       <AdditionalOptions>/bigobj /Zm300 %(AdditionalOptions)</AdditionalOptions>
       <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\Source\Services;$(ProjectDir)..\..\Source\Services\Common;$(ProjectDir)..\..\Source\Services\Common\C;$(ProjectDir)..\..\Source\Services\Common\Desktop;$(ProjectDir)..\..\Source\Services\Social;$(ProjectDir)..\..\Source\Services\Multiplayer;$(ProjectDir)..\..\Source\Services\Presence;$(ProjectDir)..\..\Source\Services\Misc;$(ProjectDir)..\..\Source\Services\Social\Manager;$(ProjectDir)..\..\Source\Services\Social\C;$(ProjectDir)..\..\Source\Services\RealTimeActivity;$(ProjectDir)..\..\Source\Services\Clubs;$(ProjectDir)..\..\Source\Shared;$(ProjectDir)..\..\Source\Shared\WinRT;$(ProjectDir)..\..\Include;$(ProjectDir)..\..\External\cpprestsdk\Release\include;$(ProjectDir)..\..\Source\System\WinRT;$(ProjectDir)..\..\Source\System;$(ProjectDir)..\..\Source\System\C;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories> 
+       $(ProjectDir);
+       $(ProjectDir)..\..\Source\Services;
+       $(ProjectDir)..\..\Source\Services\Common;
+       $(ProjectDir)..\..\Source\Services\Common\C;
+       $(ProjectDir)..\..\Source\Services\Common\Desktop;
+       $(ProjectDir)..\..\Source\Services\Social;
+       $(ProjectDir)..\..\Source\Services\Multiplayer;
+       $(ProjectDir)..\..\Source\Services\Presence;
+       $(ProjectDir)..\..\Source\Services\Misc;
+       $(ProjectDir)..\..\Source\Services\Social\Manager;
+       $(ProjectDir)..\..\Source\Services\Social\C;
+       $(ProjectDir)..\..\Source\Services\RealTimeActivity;
+       $(ProjectDir)..\..\Source\Services\Clubs;
+       $(ProjectDir)..\..\Source\Shared;
+       $(ProjectDir)..\..\Source\Shared\WinRT;
+       $(ProjectDir)..\..\Include;
+       $(ProjectDir)..\..\External\cpprestsdk\Release\include;
+       $(ProjectDir)..\..\Source\System\WinRT;
+       $(ProjectDir)..\..\Source\System;
+       $(ProjectDir)..\..\Source\System\C;
+       %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
       <CompileAsWinRT>true</CompileAsWinRT>
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ShowIncludes>
     </ClCompile>
@@ -230,7 +252,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\xbox_live_context_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\xbox_live_global_c.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp" >
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
