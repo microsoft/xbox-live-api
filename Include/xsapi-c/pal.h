@@ -119,9 +119,6 @@ extern "C" {
 typedef int32_t function_context;
 typedef struct xbl_xbox_live_context* xbl_context_handle;
 
-// TODO remove this
-typedef void* XBL_ASYNC_QUEUE;
-
 #if XDK_API
 typedef Windows::Xbox::System::User^ xbl_user_handle;
 #else

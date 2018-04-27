@@ -406,7 +406,7 @@ try
                 static_cast<achievement_order_by>(context->achievementsResult->orderBy),
                 0, // use continuationToken, ignore skipItems.
                 context->maxItems,
-                xsapi_internal_string(context->achievementsResult->continuationToken), // todo is this right
+                context->achievementsResult->continuationToken,
                 data->async->queue,
                 [data, context](xbox_live_result<std::shared_ptr<achievements_result_internal>> result)
             {
