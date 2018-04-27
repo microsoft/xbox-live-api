@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "xsapi-c/system_c.h"
+#include "system_c.h"
 #include "xbox_live_context_impl.h"
 #if !XDK_API
 #include "user_c.h"

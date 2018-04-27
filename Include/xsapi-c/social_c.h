@@ -258,41 +258,32 @@ typedef struct XblSocialRelationshipChangeEventArgs
 
 /// <summary>
 /// Gets a XblSocialRelationshipResult containing a the list of people that the caller is connected to.
-/// Defaults to filtering to PersonView.All.
-/// Defaults to startIndex and maxItems of 0 to return entire list if possible.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
-/// <param name="async">Caller allocated AsyncBlock.</param>
-/// <remarks>Calls V1 GET /users/{ownerId}/people?view={view}&amp;startIndex={startIndex}&amp;maxItems={maxItems}</remarks>
-STDAPI XblGetSocialRelationships(
-    _In_ xbl_context_handle xboxLiveContext,
-    _In_ AsyncBlock* async
-    ) XBL_NOEXCEPT;
-
-/// <summary>
-/// Gets a XblSocialRelationshipResult containing a the list of people that the caller is connected to.
-/// </summary>
-/// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
+/// <param name="xboxUserId">The Xbox User Id to get the social relationships for.</param>
 /// <param name="socialRelationshipFilter">Controls how the list is filtered.</param>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>Calls V1 GET /users/{ownerId}/people?view={view}&amp;startIndex={startIndex}&amp;maxItems={maxItems}</remarks>
-STDAPI XblGetSocialRelationshipsWithFilter(
+STDAPI XblSocialGetSocialRelationships(
     _In_ xbl_context_handle xboxLiveContext,
+    _In_ uint64_t xboxUserId,
     _In_ XblSocialRelationshipFilter socialRelationshipFilter,
     _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Gets a XblSocialRelationshipResult containing a the list of people that the specified user is connected to.
-/// </summary>
-/// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
-/// <param name="xboxUserId">The Xbox User Id to get the social relationships for.</param>
-/// <param name="async">Caller allocated AsyncBlock.</param>
-/// <remarks>Calls V1 GET /users/{ownerId}/people?view={view}&amp;startIndex={startIndex}&amp;maxItems={maxItems}</remarks>
-STDAPI XblGetSocialRelationshipsForUser(
-    _In_ xbl_context_handle xboxLiveContext,
-    _In_ uint64_t xboxUserId,
-    _In_ AsyncBlock* async
+/// Get the result from an XblSocialGetSocialRelationships API call.
+/// The required buffer size should first be obtained with GetAsyncResultSize.
+/// <summary>
+/// <param name="async">The async block that was used on the asyncronous call.</param>
+/// <param name="resultSize">The size of the provided buffer.</param>
+/// <param name="result">The buffer to be written to.</param>
+/// <param name="bufferUser">The actual number of bytes written to the buffer.</param>
+STDAPI XblSocialGetSocialRelationshipsResult(
+    _In_ AsyncBlock* async,
+    _In_ size_t bufferSize,
+    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblSocialRelationshipResult* buffer,
+    _Out_opt_ size_t* bufferUsed
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -311,32 +302,19 @@ STDAPI XblSocialRelationshipResultGetNext(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Get the size in bytes of the result from any of XblGetSocialRelationships, XblGetSocialRelationshipsWithFilter,
-/// XblGetSocialRelationshipsForUser, or XblSocialRelationshipResultGetNext.
-/// </summary>
-/// <param name="async">The async block that was used on the asyncronous call.</param>
-/// <param name="resultSize">The result size.</param>
-STDAPI XblGetSocialRelationshipResultSize(
-    _In_ AsyncBlock* async,
-    _Out_ size_t* resultSize
-    ) XBL_NOEXCEPT;
-
-/// <summary>
-/// Get the result from any of XblGetSocialRelationships, XblGetSocialRelationshipsWithFilter, XblGetSocialRelationshipsForUser,
-/// or XblSocialRelationshipResultGetNext. The required buffer size should first be obtained with
-/// XblGetSocialRelationshipResultSize.
+/// Get the result from an XblSocialRelationshipResultGetNextResult API call.
+/// The required buffer size should first be obtained with GetAsyncResultSize.
 /// <summary>
 /// <param name="async">The async block that was used on the asyncronous call.</param>
 /// <param name="resultSize">The size of the provided buffer.</param>
 /// <param name="result">The buffer to be written to.</param>
 /// <param name="bufferUser">The actual number of bytes written to the buffer.</param>
-STDAPI XblGetSocialRelationshipResult(
+STDAPI XblSocialRelationshipResultGetNextResult(
     _In_ AsyncBlock* async,
     _In_ size_t bufferSize,
     _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblSocialRelationshipResult* buffer,
     _Out_opt_ size_t* bufferUsed
     ) XBL_NOEXCEPT;
-
 
 typedef void* xbl_social_relationship_change_subscription_handle;
 
@@ -347,7 +325,7 @@ typedef void* xbl_social_relationship_change_subscription_handle;
 /// <param name="xboxUserId">The Xbox User ID of the player requesting the subscription.</param>
 /// <param name="subscriptionHandle">A handle to the subscription which is used to unsubscribe.</param>
 /// <returns>Result code for this API operation.</returns>
-STDAPI XblSubscribeToSocialRelationshipChange(
+STDAPI XblSocialSubscribeToSocialRelationshipChange(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _Out_ xbl_social_relationship_change_subscription_handle* subscriptionHandle
@@ -359,14 +337,14 @@ STDAPI XblSubscribeToSocialRelationshipChange(
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="subscription">The subscription handle to unsubscribe</param>
 /// <returns>Result code for this API operation.</returns>
-STDAPI XblUnsubscribeFromSocialRelationshipChange(
+STDAPI XblSocialUnsubscribeFromSocialRelationshipChange(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ xbl_social_relationship_change_subscription_handle subscriptionHandle
     ) XBL_NOEXCEPT;
 
 /// <summary>
 /// A callback invoked when a social relationship changes. For the callback to be called, you must
-/// first subscribe to social relationship changes for at least one user by calling XblSubscribeToSocialRelationshipChange.
+/// first subscribe to social relationship changes for at least one user by calling XblSocialSubscribeToSocialRelationshipChange.
 /// </summary>
 /// <param name="eventArgs">
 /// The arguments associated with the relationship change. The fields of the struct are only valid during the callback.
@@ -385,7 +363,7 @@ typedef void
 /// <param name="handler">The callback function that receives notifications.</param>
 /// <param name="handlerContext">Client context pointer to be passed back to the handler.</param>
 /// <returns>A function_context used to remove the handler</returns>
-STDAPI_(function_context) XblAddSocialRelationshipChangedHandler(
+STDAPI_(function_context) XblSocialAddSocialRelationshipChangedHandler(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ XblSocialRelationshipChangedHandler handler,
     _In_ void* handlerContext
@@ -396,7 +374,7 @@ STDAPI_(function_context) XblAddSocialRelationshipChangedHandler(
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="handlerContext">Context for the handler to remove.</param>
-STDAPI_(void) XblRemoveSocialRelationshipChangedHandler(
+STDAPI_(void) XblSocialRemoveSocialRelationshipChangedHandler(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ function_context handlerFunctionContext
     ) XBL_NOEXCEPT;
@@ -412,11 +390,6 @@ typedef struct XblReputationFeedbackItem
     /// The reputation feedback type being submitted.
     /// </summary>
     XblReputationFeedbackType feedbackType;
-
-    /// <summary>
-    /// The reference to the multiplayer session directory session the user is sending feedback from.
-    /// </summary>
-    // TODO multiplayer session reference
 
     /// <summary>
     /// User supplied text added to explain the reason for the feedback.
@@ -441,7 +414,7 @@ typedef struct XblReputationFeedbackItem
 /// <param name="evidenceResourceId">The Id of a resource that can be used as evidence for the feedback. Example: the Id of a video file. (Optional)</param>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>Calls V100 POST /users/xuid({xuid})/feedback</remarks>
-STDAPI XblSubmitReputationFeedback(
+STDAPI XblSocialSubmitReputationFeedback(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ XblReputationFeedbackType reputationFeedbackType,
@@ -461,7 +434,7 @@ STDAPI XblSubmitReputationFeedback(
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>Result code for this API operation. The result of the asynchronous operation is returned via the callback parameters.</returns>
 /// <remarks>Calls V101 POST /users/batchfeedback</remarks>
-STDAPI XblSubmitBatchReputationFeedback(
+STDAPI XblSocialSubmitBatchReputationFeedback(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ XblReputationFeedbackItem* feedbackItems,
     _In_ uint32_t feedbackItemsCount,

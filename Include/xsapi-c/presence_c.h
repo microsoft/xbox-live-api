@@ -43,20 +43,20 @@ typedef enum XblPresenceDeviceType
 /// <summary>
 /// Defines values used to indicate the state of the user with regard to the presence service.
 /// </summary>
-typedef enum XblUserPresenceState 
+typedef enum XblPresenceUserState 
 {
     /// <summary>The state is unknown.</summary>
-    XblUserPresenceState_Unknown,
+    XblPresenceUserState_Unknown,
 
     /// <summary>User is signed in to Xbox LIVE and active in a title.</summary>
-    XblUserPresenceState_Online,
+    XblPresenceUserState_Online,
 
     /// <summary>User is signed-in to Xbox LIVE, but inactive in all titles.</summary>
-    XblUserPresenceState_Away,
+    XblPresenceUserState_Away,
 
     /// <summary>User is not signed in to Xbox LIVE.</summary>
-    XblUserPresenceState_Offline
-} XblUserPresenceState;
+    XblPresenceUserState_Offline
+} XblPresenceUserState;
 
 /// <summary>
 /// Defines values used to indicate the states of the screen view of presence information.
@@ -115,20 +115,20 @@ typedef enum XblPresenceMediaIdType
 } XblPresenceMediaIdType;
 
 /// <summary>Defines values used to indicate the title presence state for a user.</summary>
-typedef enum XblTitlePresenceState 
+typedef enum XblPresenceTitleState 
 {
     /// <summary>
     /// Indicates this is a Unknown state.
     /// </summary>
-    XblTitlePresenceState_Unknown,
+    XblPresenceTitleState_Unknown,
 
     /// <summary>
     /// Indicates the user started playing the title.
     /// </summary>
-    XblTitlePresenceState_Started,
+    XblPresenceTitleState_Started,
 
     /// <summary>
     /// Indicates the user ended playing the title.
     /// </summary>
-    XblTitlePresenceState_Ended
-} XblTitlePresenceState;
+    XblPresenceTitleState_Ended
+} XblPresenceTitleState;

@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
-#include "pal.h"
 #include "xsapi-c/errors_c.h"
 
 const size_t GamertagMaxBytes = 16;
@@ -253,7 +252,7 @@ XblUserSignInSilentlyWithCoreDispatcher(
 /// <param name="async">The async block passed to the sign in function.</param>
 /// <param name="signInResult">Caller allocated object to write results into.</param>
 STDAPI
-XblGetSignInResult(
+XblUserGetSignInResult(
     _In_ AsyncBlock* async,
     _Out_ XblSignInResult* signInResult
     ) XBL_NOEXCEPT;
@@ -301,7 +300,7 @@ typedef void (STDAPIVCALLTYPE *XblSignOutCompletedHandler)(
 /// A function_context object that can be used to unregister the event handler.
 /// </returns>
 STDAPI_(function_context)
-XblAddSignOutCompletedHandler(
+XblUserAddSignOutCompletedHandler(
     _In_ XblSignOutCompletedHandler handler
     ) XBL_NOEXCEPT;
 
@@ -310,7 +309,7 @@ XblAddSignOutCompletedHandler(
 /// </summary>
 /// <param name="context">The function_context that was returned when the event handler was registered. </param>
 STDAPI_(void)
-XblRemoveSignOutCompletedHandler(
+XblUserRemoveSignOutCompletedHandler(
     _In_ function_context context
     ) XBL_NOEXCEPT;
 
