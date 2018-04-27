@@ -678,30 +678,30 @@ CATCH_RETURN()
 
 STDAPI XblAchievementsGetAchievementResult(
     _In_ AsyncBlock* async,
-    _In_ size_t bufferSize,
-    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblAchievement* buffer,
+    _In_ size_t resultSize,
+    _Out_writes_bytes_to_opt_(resultSize, *bufferUsed) XblAchievement* result,
     _Out_opt_ size_t* bufferUsed
     ) XBL_NOEXCEPT
 {
-    return GetAsyncResult(async, nullptr, bufferSize, buffer, bufferUsed);
+    return GetAsyncResult(async, nullptr, resultSize, result, bufferUsed);
 }
 
 STDAPI XblAchievementsGetAchievementsForTitleIdResult(
     _In_ AsyncBlock* async,
-    _In_ size_t bufferSize,
-    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblAchievementsResult* buffer,
+    _In_ size_t resultSize,
+    _Out_writes_bytes_to_opt_(resultSize, *bufferUsed) XblAchievementsResult* result,
     _Out_opt_ size_t* bufferUsed
     ) XBL_NOEXCEPT
 {
-    return GetAsyncResult(async, nullptr, bufferSize, buffer, bufferUsed);
+    return GetAsyncResult(async, nullptr, resultSize, result, bufferUsed);
 }
 
 STDAPI XblAchievementsResultGetNextResult(
     _In_ AsyncBlock* async,
-    _In_ size_t bufferSize,
-    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblAchievementsResult* buffer,
+    _In_ size_t resultSize,
+    _Out_writes_bytes_to_opt_(resultSize, *bufferUsed) XblAchievementsResult* result,
     _Out_opt_ size_t* bufferUsed
     ) XBL_NOEXCEPT
 {
-    return GetAsyncResult(async, nullptr, bufferSize, buffer, bufferUsed);
+    return GetAsyncResult(async, nullptr, resultSize, result, bufferUsed);
 }

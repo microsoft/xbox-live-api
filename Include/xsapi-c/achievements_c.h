@@ -381,37 +381,37 @@ typedef struct XblAchievementsResult
     bool hasNext;
 
     /// <summary>
-    /// Internal
+    /// Internal use only
     /// </summary>
     uint64_t xboxUserId;
 
     /// <summary>
-    /// Internal
+    /// Internal use only
     /// </summary>
     uint32_t* titleIds;
 
     /// <summary>
-    /// Internal
+    /// Internal use only
     /// </summary>
     uint32_t titleIdsCount;
 
     /// <summary>
-    /// Internal
+    /// Internal use only
     /// </summary>
     XblAchievementType type;
 
     /// <summary>
-    /// Internal
+    /// Internal use only
     /// </summary>
     bool unlockedOnly;
 
     /// <summary>
-    /// Internal
+    /// Internal use only
     /// </summary>
     XblAchievementOrderBy orderBy;
 
     /// <summary>
-    /// Internal
+    /// Internal use only
     /// </summary>
     UTF8CSTR continuationToken;
 } XblAchievementsResult;
@@ -425,8 +425,6 @@ typedef struct XblAchievementsResult
 /// to retrieve all items.</param>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>
-/// Returns a concurrency::task&lt;T&gt; object that represents the state of the asynchronous operation.
-///
 /// This method calls V2 GET /users/xuid({xuid})/achievements.
 /// </remarks>
 STDAPI XblAchievementsResultGetNext(
@@ -446,26 +444,26 @@ STDAPI XblAchievementsResultGetNext(
 /// <param name="bufferUser">The actual number of bytes written to the buffer.</param>
 STDAPI XblAchievementsResultGetNextResult(
     _In_ AsyncBlock* async,
-    _In_ size_t bufferSize,
-    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblAchievementsResult* buffer,
+    _In_ size_t resultSize,
+    _Out_writes_bytes_to_opt_(resultSize, *bufferUsed) XblAchievementsResult* result,
     _Out_opt_ size_t* bufferUsed
     ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Allow achievement progress to be updated and achievements to be unlocked.
-/// This API will work even when offline. On PC and Xbox One, updates will be 
+/// This API will work even when offline on PC and Xbox One. Offline updates will be 
 /// posted by the system when connection is re-established even if the title isn't running.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>
+/// <param name="titleId">The title ID.</param>
+/// <param name="serviceConfigurationId">The service configuration ID (SCID) for the title.</param>
 /// <param name="achievementId">The achievement ID as defined by XDP or Dev Center.</param>
 /// <param name="percentComplete">The completion percentage of the achievement to indicate progress.
 /// Valid values are from 1 to 100. Set to 100 to unlock the achievement.
 /// Progress will be set by the server to the highest value sent</param>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>
-/// Returns a task&lt;T&gt; object that represents the state of the asynchronous operation.
-///
 /// This method calls V2 POST /users/xuid({xuid})/achievements/{scid}/update
 /// </remarks>
 STDAPI XblAchievementsUpdateAchievement(
@@ -493,9 +491,7 @@ STDAPI XblAchievementsUpdateAchievement(
 /// to retrieve all items.</param>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>
-/// Returns a task&lt;T&gt; object that represents the state of the asynchronous operation.
-///
-/// See achievements_result:get_next to page in the next set of results.
+/// See XblAchievementsResultGetNext to page in the next set of results.
 ///
 /// This method calls V2 GET /users/xuid({xuid})/achievements
 /// </remarks>
@@ -521,8 +517,8 @@ STDAPI XblAchievementsGetAchievementsForTitleId(
 /// <param name="bufferUser">The actual number of bytes written to the buffer.</param>
 STDAPI XblAchievementsGetAchievementsForTitleIdResult(
     _In_ AsyncBlock* async,
-    _In_ size_t bufferSize,
-    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblAchievementsResult* buffer,
+    _In_ size_t resultSize,
+    _Out_writes_bytes_to_opt_(resultSize, *bufferUsed) XblAchievementsResult* result,
     _Out_opt_ size_t* bufferUsed
     ) XBL_NOEXCEPT;
 
@@ -536,8 +532,6 @@ STDAPI XblAchievementsGetAchievementsForTitleIdResult(
 /// <param name="achievementId">The unique identifier of the Achievement as defined by XDP or Dev Center.</param>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>
-/// Returns a task&lt;T&gt; object that represents the state of the asynchronous operation.
-///
 /// This method calls V2 GET /users/xuid({xuid})/achievements/{scid}/{achievementId}.
 /// </remarks>
 STDAPI XblAchievementsGetAchievement(
@@ -558,7 +552,7 @@ STDAPI XblAchievementsGetAchievement(
 /// <param name="bufferUser">The actual number of bytes written to the buffer.</param>
 STDAPI XblAchievementsGetAchievementResult(
     _In_ AsyncBlock* async,
-    _In_ size_t bufferSize,
-    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblAchievement* buffer,
+    _In_ size_t resultSize,
+    _Out_writes_bytes_to_opt_(resultSize, *bufferUsed) XblAchievement* result,
     _Out_opt_ size_t* bufferUsed
     ) XBL_NOEXCEPT;
