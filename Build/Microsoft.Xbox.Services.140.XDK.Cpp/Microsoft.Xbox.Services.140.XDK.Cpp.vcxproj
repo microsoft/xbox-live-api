@@ -413,6 +413,9 @@
     <ResourceCompile Include="..\..\Source\Shared\Logger\ERA_ETW.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.xbox\casablanca140.Xbox.vcxproj">
+      <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.vcxproj">
       <Project>{cf37beb2-a66a-42ba-b348-1f07566f4865}</Project>
     </ProjectReference>
@@ -458,23 +461,9 @@
       $(ProjectDir)..\..\Source\System;
       $(ProjectDir)..\..\Source\;
       $(ProjectDir)..\..\Include;
-      $(ProjectDir)..\..\Include\cpprestinclude;
+      $(ProjectDir)..\..\External\cpprestsdk\Release\include;
       $(ProjectDir)..\..\Source\Services\Presence;
       $(ProjectDir)..\..\Source\Services\TitleStorage;
-      $(ProjectDir)..\..\Source\C\Services\TitleStorage;
-      $(ProjectDir)..\..\Source\C\Services\Common;
-      $(ProjectDir)..\..\Source\C\Services\Social;
-      $(ProjectDir)..\..\Source\C\Services\Multiplayer;
-      $(ProjectDir)..\..\Source\C\Services\Presence;
-      $(ProjectDir)..\..\Source\C\Services\Misc;
-      $(ProjectDir)..\..\Source\C\Services\Social\Manager;
-      $(ProjectDir)..\..\Source\C\Services\RealTimeActivity;
-      $(ProjectDir)..\..\Source\C\Services\Achievements;
-      $(ProjectDir)..\..\Source\C\Shared;
-      $(ProjectDir)..\..\Source\C\Shared\WinRT;
-      $(ProjectDir)..\..\Source\C\System;
-      $(ProjectDir)..\..\Source\C\Services\Leaderboard;
-      $(ProjectDir)..\..\Source\C\Services\Stats\Manager;
       %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
     </ClCompile>

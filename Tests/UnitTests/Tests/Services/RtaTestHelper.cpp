@@ -23,7 +23,7 @@ void SetWebSocketRTAAutoResponser(std::shared_ptr<MockWebSocketClient> ws, strin
 {
     ws->set_send_handler([ws, subscriptionInitData, subId, useAutoReply](xsapi_internal_string msg)
     {
-        auto msgJson = web::json::value::parse(msg.data());
+        auto msgJson = web::json::value::parse(xbox::services::utils::string_t_from_internal_string(msg).data());
         int apiId = msgJson[0].as_integer();
 
         if (useAutoReply)

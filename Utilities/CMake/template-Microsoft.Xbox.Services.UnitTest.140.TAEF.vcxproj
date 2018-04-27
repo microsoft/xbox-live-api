@@ -104,7 +104,7 @@
       $(ProjectDir)..\..\Source\Services\Clubs;
       $(ProjectDir)..\..\Source\Services\Clubs\WinRT;
       $(ProjectDir)..\..\Include;
-      $(ProjectDir)..\..\Include\cpprestinclude;
+      $(ProjectDir)..\..\External\cpprestsdk\Release\include;
       $(ProjectDir)..\..\Tests\UnitTests;
       $(ProjectDir)..\..\Tests\UnitTests\Mocks;
       $(ProjectDir)..\..\Tests\UnitTests\Support;
@@ -160,8 +160,14 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <CasablancaBinaries Include="$(SolutionDir)..\..\..\Binaries\$(Configuration)\$(Platform)\casablanca\*.*" />
+  </ItemGroup>
 ****INSERTFILES****
   <ItemGroup>
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.static\casablanca140.static.vcxproj">
+      <Project>{04d42f35-e5d5-4d95-980e-1bd7e900f2dd}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.140.Win32.C\libHttpClient.140.Win32.C.vcxproj">
       <Project>{bd57c607-e104-4505-8a43-3d152f016f16}</Project>
     </ProjectReference>
@@ -183,6 +189,9 @@
     <LocalDebuggerCommandArguments>$(TargetPath) /inproc</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <Target Name="CopyCasablancaBinaries" AfterTargets="Build">
+    <Copy SourceFiles="@(CasablancaBinaries)" DestinationFolder="$(OutDir)" />
+  </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="..\..\xsapi.staticlib.props" />
 </Project>
