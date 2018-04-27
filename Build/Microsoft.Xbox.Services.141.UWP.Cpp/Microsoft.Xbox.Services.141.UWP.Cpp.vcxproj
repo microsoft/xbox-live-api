@@ -142,8 +142,6 @@
     <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectFolder)\</IntDir>
   </PropertyGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\C\achievements_helper.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\C\achievements_state.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_serializers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.h" />
@@ -242,7 +240,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_context_settings.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_service_call_routed_event_args.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\C\achievements.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\C\achievements_helper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_media_asset.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_progression.cpp" />
@@ -269,7 +266,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\xbox_live_context_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\xbox_live_global_c.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp" >
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
