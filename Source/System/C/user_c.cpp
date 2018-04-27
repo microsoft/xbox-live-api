@@ -298,7 +298,7 @@ try
 CATCH_RETURN()
 
 STDAPI
-XblGetSignInResult(
+XblUserGetSignInResult(
     _In_ AsyncBlock* async,
     _Out_ XblSignInResult* signInResult
     ) XBL_NOEXCEPT
@@ -378,7 +378,7 @@ try
 CATCH_RETURN()
 
 XBL_API function_context XBL_CALLING_CONV
-XblAddSignOutCompletedHandler(
+XblUserAddSignOutCompletedHandler(
     _In_ XblSignOutCompletedHandler handler
     ) XBL_NOEXCEPT
 try

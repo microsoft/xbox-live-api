@@ -103,7 +103,7 @@ void Renderer::Render()
     auto appState = g_sampleInstance->GetGameData()->GetAppState();
     auto gameState = g_sampleInstance->GetGameData()->GetGameState();
 
-    std::vector<XblXboxSocialUserGroup*> socialGroups = g_sampleInstance->GetSocialGroups();
+    std::vector<XblSocialManagerUserGroup*> socialGroups = g_sampleInstance->GetSocialGroups();
     RenderSocialGroupList(
         COLUMN_1_X,
         COLUMN_2_X,
@@ -275,16 +275,16 @@ void Renderer::RenderPerfCounters(
 
 std::wstring
 ConvertPresenceUserStateToString(
-    _In_ XblUserPresenceState presenceState
+    _In_ XblPresenceUserState presenceState
 )
 {
     switch (presenceState)
     {
-    case XblUserPresenceState_Away: return _T("away");
-    case XblUserPresenceState_Offline: return _T("offline");
-    case XblUserPresenceState_Online: return _T("online");
+    case XblPresenceUserState_Away: return _T("away");
+    case XblPresenceUserState_Offline: return _T("offline");
+    case XblPresenceUserState_Online: return _T("online");
     default:
-    case XblUserPresenceState_Unknown: return _T("unknown");
+    case XblPresenceUserState_Unknown: return _T("unknown");
     }
 }
 
@@ -324,7 +324,7 @@ Renderer::RenderSocialGroupList(
     FLOAT fTextHeight,
     FLOAT scale,
     const DirectX::XMVECTORF32& TEXT_COLOR,
-    std::vector<XblXboxSocialUserGroup*> nodeList
+    std::vector<XblSocialManagerUserGroup*> nodeList
 )
 {
     WCHAR text[1024];
@@ -349,8 +349,8 @@ Renderer::RenderSocialGroupList(
             verticalBaseOffset += fTextHeight;
         }
 
-        std::vector<XblXboxSocialUser> userList(node->usersCount);
-        XblXboxSocialUserGroupGetUsers(node, userList.data());
+        std::vector<XblSocialManagerUser> userList(node->usersCount);
+        XblSocialManagerUserGroupGetUsers(node, userList.data());
 
         for (const auto& user : userList)
         {

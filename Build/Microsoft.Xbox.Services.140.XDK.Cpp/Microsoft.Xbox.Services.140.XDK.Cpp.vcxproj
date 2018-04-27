@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Durango">
@@ -100,7 +100,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\services_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_manager_c.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\system_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_app_config_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_context_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_global_c.h" />
@@ -164,7 +163,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\xbox_live_context_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\xbox_live_global_c.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp" >
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>

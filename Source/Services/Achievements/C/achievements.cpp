@@ -436,7 +436,7 @@ try
 }
 CATCH_RETURN()
 
-STDAPI XblAchievementServiceUpdateAchievement(
+STDAPI XblAchievementsUpdateAchievement(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_opt_ uint32_t* titleId,
@@ -528,7 +528,7 @@ try
 }
 CATCH_RETURN()
 
-STDAPI XblAchievementServiceGetAchievementsForTitleId(
+STDAPI XblAchievementsGetAchievementsForTitleId(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ uint32_t titleId,
@@ -610,7 +610,7 @@ try
 }
 CATCH_RETURN()
 
-STDAPI XblAchievementServiceGetAchievement(
+STDAPI XblAchievementsGetAchievement(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ UTF8CSTR serviceConfigurationId,
@@ -676,15 +676,7 @@ try
 }
 CATCH_RETURN()
 
-STDAPI XblGetAchievementSize(
-    _In_ AsyncBlock* async,
-    _Out_ size_t* resultSize
-    ) XBL_NOEXCEPT
-{
-    return GetAsyncResultSize(async, resultSize);
-}
-
-STDAPI XblGetAchievement(
+STDAPI XblAchievementsGetAchievementResult(
     _In_ AsyncBlock* async,
     _In_ size_t bufferSize,
     _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblAchievement* buffer,
@@ -694,15 +686,17 @@ STDAPI XblGetAchievement(
     return GetAsyncResult(async, nullptr, bufferSize, buffer, bufferUsed);
 }
 
-STDAPI XblGetAchievementsResultSize(
+STDAPI XblAchievementsGetAchievementsForTitleIdResult(
     _In_ AsyncBlock* async,
-    _Out_ size_t* resultSize
+    _In_ size_t bufferSize,
+    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblAchievementsResult* buffer,
+    _Out_opt_ size_t* bufferUsed
     ) XBL_NOEXCEPT
 {
-    return GetAsyncResultSize(async, resultSize);
+    return GetAsyncResult(async, nullptr, bufferSize, buffer, bufferUsed);
 }
 
-STDAPI XblGetAchievementsResult(
+STDAPI XblAchievementsResultGetNextResult(
     _In_ AsyncBlock* async,
     _In_ size_t bufferSize,
     _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblAchievementsResult* buffer,

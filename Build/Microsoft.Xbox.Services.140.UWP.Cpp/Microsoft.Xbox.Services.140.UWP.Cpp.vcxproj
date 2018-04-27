@@ -70,29 +70,7 @@
       <AdditionalOptions>/bigobj /Zm300 %(AdditionalOptions)</AdditionalOptions>
       <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories> 
-       $(ProjectDir);
-       $(ProjectDir)..\..\Source\Services;
-       $(ProjectDir)..\..\Source\Services\Common;
-       $(ProjectDir)..\..\Source\Services\Common\C;
-       $(ProjectDir)..\..\Source\Services\Common\Desktop;
-       $(ProjectDir)..\..\Source\Services\Social;
-       $(ProjectDir)..\..\Source\Services\Multiplayer;
-       $(ProjectDir)..\..\Source\Services\Presence;
-       $(ProjectDir)..\..\Source\Services\Misc;
-       $(ProjectDir)..\..\Source\Services\Social\Manager;
-       $(ProjectDir)..\..\Source\Services\Social\C;
-       $(ProjectDir)..\..\Source\Services\RealTimeActivity;
-       $(ProjectDir)..\..\Source\Services\Clubs;
-       $(ProjectDir)..\..\Source\Shared;
-       $(ProjectDir)..\..\Source\Shared\WinRT;
-       $(ProjectDir)..\..\Include;
-       $(ProjectDir)..\..\External\cpprestsdk\Release\include;
-       $(ProjectDir)..\..\Source\System\WinRT;
-       $(ProjectDir)..\..\Source\System;
-       $(ProjectDir)..\..\Source\System\C;
-       %(AdditionalIncludeDirectories)
-      </AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\Source\Services;$(ProjectDir)..\..\Source\Services\Common;$(ProjectDir)..\..\Source\Services\Common\C;$(ProjectDir)..\..\Source\Services\Common\Desktop;$(ProjectDir)..\..\Source\Services\Social;$(ProjectDir)..\..\Source\Services\Multiplayer;$(ProjectDir)..\..\Source\Services\Presence;$(ProjectDir)..\..\Source\Services\Misc;$(ProjectDir)..\..\Source\Services\Social\Manager;$(ProjectDir)..\..\Source\Services\Social\C;$(ProjectDir)..\..\Source\Services\RealTimeActivity;$(ProjectDir)..\..\Source\Services\Clubs;$(ProjectDir)..\..\Source\Shared;$(ProjectDir)..\..\Source\Shared\WinRT;$(ProjectDir)..\..\Include;$(ProjectDir)..\..\External\cpprestsdk\Release\include;$(ProjectDir)..\..\Source\System\WinRT;$(ProjectDir)..\..\Source\System;$(ProjectDir)..\..\Source\System\C;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAsWinRT>true</CompileAsWinRT>
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ShowIncludes>
     </ClCompile>
@@ -176,6 +154,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_app_config_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_service_call_routed_event_args_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\system_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\auth_config.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\ppltasks_extra.h" />
@@ -189,7 +168,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\services_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_manager_c.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\system_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_app_config_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_context_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_global_c.h" />

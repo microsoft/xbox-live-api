@@ -23,3 +23,4 @@
 #define XBOX_LIVE_CREATORS_SDK
 #include "xsapi\services.h"
 #include "xsapi-c\services_c.h"
+#include "system_c.h"

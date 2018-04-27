@@ -460,7 +460,7 @@ void Game::Init(Windows::UI::Core::CoreWindow^ window)
     window->KeyUp += ref new TypedEventHandler<Windows::UI::Core::CoreWindow^, Windows::UI::Core::KeyEventArgs^>(m_input, &Input::OnKeyUp);
 
     std::weak_ptr<Game> thisWeakPtr = shared_from_this();
-    XblAddSignOutCompletedHandler(Game::HandleSignout);
+    XblUserAddSignOutCompletedHandler(Game::HandleSignout);
 
     ReadLastCsv();
     SignInSilently();
@@ -525,25 +525,25 @@ void Game::Log(std::string log)
 }
 
 string_t
-ConvertEventTypeToString(XblSocialEventType eventType)
+ConvertEventTypeToString(XblSocialManagerEventType eventType)
 {
     switch (eventType)
     {
-    case XblSocialEventType_UsersAddedToSocialGraph: return _T("users_added");
-    case XblSocialEventType_UsersRemovedFromSocialGraph: return _T("users_removed");
-    case XblSocialEventType_PresenceChanged: return _T("presence_changed");
-    case XblSocialEventType_ProfilesChanged: return _T("profiles_changed");
-    case XblSocialEventType_SocialRelationshipsChanged: return _T("social_relationships_changed");
-    case XblSocialEventType_LocalUserAdded: return _T("local_user_added");
-    case XblSocialEventType_LocalUserRemoved: return _T("local user removed");
-    case XblSocialEventType_SocialUserGroupLoaded : return _T("social_user_group_loaded");
-    case XblSocialEventType_SocialUserGroupUpdated: return _T("social_user_group_updated");
+    case XblSocialManagerEventType_UsersAddedToSocialGraph: return _T("users_added");
+    case XblSocialManagerEventType_UsersRemovedFromSocialGraph: return _T("users_removed");
+    case XblSocialManagerEventType_PresenceChanged: return _T("presence_changed");
+    case XblSocialManagerEventType_ProfilesChanged: return _T("profiles_changed");
+    case XblSocialManagerEventType_SocialRelationshipsChanged: return _T("social_relationships_changed");
+    case XblSocialManagerEventType_LocalUserAdded: return _T("local_user_added");
+    case XblSocialManagerEventType_LocalUserRemoved: return _T("local user removed");
+    case XblSocialManagerEventType_SocialUserGroupLoaded : return _T("social_user_group_loaded");
+    case XblSocialManagerEventType_SocialUserGroupUpdated: return _T("social_user_group_updated");
     default: return _T("unknown");
     }
 }
 
 void
-Game::LogSocialEventList(XblSocialEvent* events, uint32_t eventCount)
+Game::LogSocialEventList(XblSocialManagerEvent* events, uint32_t eventCount)
 {
     for (uint32_t i = 0; i < eventCount; ++i)
     {
@@ -565,7 +565,7 @@ Game::LogSocialEventList(XblSocialEvent* events, uint32_t eventCount)
             {
                 std::vector<uint64_t> affectedUsers(socialEvent.usersAffectedCount);
 
-                XblSocialEventGetUsersAffected(&socialEvent, affectedUsers.data());
+                XblSocialManagerEventGetUsersAffected(&socialEvent, affectedUsers.data());
 
                 source << _T(" UserAffected: ");
                 for (uint32_t j = 0; j < socialEvent.usersAffectedCount; ++j)
@@ -691,7 +691,7 @@ void Game::SignIn()
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
         XblSignInResult signInResult;
-        auto result = XblGetSignInResult(asyncBlock, &signInResult);
+        auto result = XblUserGetSignInResult(asyncBlock, &signInResult);
 
         if (SUCCEEDED(result))
         {
@@ -722,7 +722,7 @@ void Game::GetUserProfile()
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
         XblUserProfile profile;
-        XblGetProfileResult(asyncBlock, 1, &profile, nullptr);
+        XblProfileGetUserProfileResult(asyncBlock, &profile);
 
         pThis->Log(L"Successfully got profile!");
         WCHAR text[1024];
@@ -737,7 +737,7 @@ void Game::GetUserProfile()
 
         delete asyncBlock;
     };
-    XblGetUserProfile(m_xboxLiveContext, m_xuid, asyncBlock);
+    XblProfileGetUserProfile(m_xboxLiveContext, m_xuid, asyncBlock);
 }
 
 
@@ -751,7 +751,7 @@ void Game::SignInSilently()
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
         XblSignInResult signInResult;
-        auto result = XblGetSignInResult(asyncBlock, &signInResult);
+        auto result = XblUserGetSignInResult(asyncBlock, &signInResult);
 
         if (SUCCEEDED(result))
         {
@@ -778,13 +778,13 @@ void Game::GetSocialRelationships()
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
         size_t size;
-        auto hr = XblGetSocialRelationshipResultSize(asyncBlock, &size);
+        auto hr = GetAsyncResultSize(asyncBlock, &size);
 
         if (SUCCEEDED(hr))
         {
             auto result = (XblSocialRelationshipResult*) malloc(size);
 
-            XblGetSocialRelationshipResult(asyncBlock, size, result, nullptr);
+            XblSocialGetSocialRelationshipsResult(asyncBlock, size, result, nullptr);
 
             std::stringstream ss;
             ss << "Got social relationships. User has " << result->itemsCount << " relationships:";
@@ -805,7 +805,7 @@ void Game::GetSocialRelationships()
         }
     };
 
-    XblGetSocialRelationships(m_xboxLiveContext, asyncBlock);
+    XblSocialGetSocialRelationships(m_xboxLiveContext, m_xuid, XblSocialRelationshipFilter_All, asyncBlock);
 }
 
 void Game::GetAchievmentsForTitle()
@@ -820,14 +820,14 @@ void Game::GetAchievmentsForTitle()
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
         size_t size = 0;
-        auto result = XblGetAchievementsResultSize(asyncBlock, &size);
+        auto result = GetAsyncResultSize(asyncBlock, &size);
 
         if (SUCCEEDED(result))
         {
             pThis->Log(L"Successfully got achievements for this title!");
 
             XblAchievementsResult* achievementsResult = (XblAchievementsResult*)malloc(size);
-            XblGetAchievementsResult(asyncBlock, size, achievementsResult, nullptr);
+            XblAchievementsGetAchievementsForTitleIdResult(asyncBlock, size, achievementsResult, nullptr);
 
             pThis->AchievementResultsGetNext(achievementsResult);
         }
@@ -840,7 +840,7 @@ void Game::GetAchievmentsForTitle()
         delete asyncBlock;
     };
 
-    XblAchievementServiceGetAchievementsForTitleId(
+    XblAchievementsGetAchievementsForTitleId(
         m_xboxLiveContext,
         m_xuid,
         m_config->titleId,
@@ -864,14 +864,14 @@ void Game::AchievementResultsGetNext(XblAchievementsResult* result)
             Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
             size_t size = 0;
-            auto result = XblGetAchievementsResultSize(asyncBlock, &size);
+            auto result = GetAsyncResultSize(asyncBlock, &size);
 
             if (SUCCEEDED(result))
             {
                 pThis->Log(L"Successfully got next page of achievements!");
 
                 XblAchievementsResult* achievementsResult = (XblAchievementsResult*)malloc(size);
-                XblGetAchievementsResult(asyncBlock, size, achievementsResult, nullptr);
+                XblAchievementsResultGetNextResult(asyncBlock, size, achievementsResult, nullptr);
 
                 pThis->AchievementResultsGetNext(achievementsResult);
             }
@@ -906,14 +906,14 @@ void Game::GetAchievement(PCSTR scid, PCSTR achievementId)
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
         
         size_t size = 0;
-        auto result = XblGetAchievementSize(asyncBlock, &size);
+        auto result = GetAsyncResultSize(asyncBlock, &size);
 
         if (SUCCEEDED(result))
         {
             pThis->Log(L"Successfully got achievement!");
 
             XblAchievement* achievement = (XblAchievement*)malloc(size);
-            XblGetAchievement(asyncBlock, size, achievement, nullptr);
+            XblAchievementsGetAchievementResult(asyncBlock, size, achievement, nullptr);
 
             pThis->UpdateAchievement(achievement->serviceConfigurationId, achievement->id);
         }
@@ -926,7 +926,7 @@ void Game::GetAchievement(PCSTR scid, PCSTR achievementId)
         delete asyncBlock;
     };
 
-    XblAchievementServiceGetAchievement(
+    XblAchievementsGetAchievement(
         m_xboxLiveContext,
         m_xuid,
         scid,
@@ -961,7 +961,7 @@ void Game::UpdateAchievement(PCSTR scid, PCSTR achievementId)
     };
 
     auto tid = m_config->titleId;
-    XblAchievementServiceUpdateAchievement(
+    XblAchievementsUpdateAchievement(
         m_xboxLiveContext,
         m_xuid,
         &tid,
