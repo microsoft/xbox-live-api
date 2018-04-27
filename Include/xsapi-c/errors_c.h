@@ -44,6 +44,29 @@ typedef enum XblErrorCondition
     /// </summary>
     XblErrorCondition_Http = 5,
 
+    // SHIPTODO add these and rename XblErrorCondition_Http to XblErrorCondition_Http_Generic
+    ///// <summary>
+    ///// The requested resource was not found.
+    ///// </summary>
+    //XBL_ERROR_CONDITION_HTTP_404_NOT_FOUND,
+
+    ///// <summary>
+    ///// The precondition given in one or more of the request-header fields evaluated
+    ///// to false when it was tested on the server.
+    ///// </summary>
+    //XBL_ERROR_CONDITION_HTTP_412_PRECONDITION_FAILED,
+
+    ///// <summary>
+    ///// Client is sending too many requests
+    ///// </summary>
+    //XBL_ERROR_CONDITION_HTTP_429_TOO_MANY_REQUESTS,
+
+    ///// <summary>
+    ///// The service timed out while attempting to process the request.
+    ///// </summary>
+    //XBL_ERROR_CONDITION_HTTP_SERVICE_TIMEOUT,
+
+
     /// <summary>
     /// An error related to real time activity.
     /// </summary>
