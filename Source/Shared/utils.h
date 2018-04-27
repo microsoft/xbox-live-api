@@ -15,7 +15,6 @@
 #include "xsapi/system.h"
 
 struct XblAppConfig;
-struct XBL_ACHIEVEMENTS_STATE;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
     class xbox_live_services_settings;
@@ -435,9 +434,7 @@ struct xsapi_singleton
     // from System\C\user_c.cpp
     std::unordered_map<std::shared_ptr<xbox::services::system::xbox_live_user>, xbl_user_handle> m_userHandlesMap;
 #endif
-
-    std::shared_ptr<XBL_ACHIEVEMENTS_STATE> m_achievementsState;
-
+    
     std::mutex m_callbackContextsLock;
     xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_callbackContextPtrs;
 
@@ -1464,12 +1461,17 @@ public:
         PCSTR* stringArray,
         size_t stringArrayCount
         );
-
+    
     static xsapi_internal_vector<xsapi_internal_string> xuid_array_to_internal_string_vector(
         uint64_t* xuidArray,
         size_t xuidArrayCount
         );
 
+    static xsapi_internal_vector<uint32_t> uint32_array_to_internal_vector(
+        uint32_t* intArray,
+        size_t intArrayCount
+        );
+    
     template<typename T>
     static void *store_shared_ptr(std::shared_ptr<T> contextSharedPtr)
     {

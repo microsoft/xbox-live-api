@@ -155,9 +155,9 @@ achievement_internal::achievement_internal(
     m_estimatedUnlockTime(std::move(estimatedUnlockTime)),
     m_deepLink(std::move(deepLink)),
     m_isRevoked(isRevoked),
-    m_progressionInternal(std::move(progression)),
-    m_progression(m_progressionInternal)
+    m_progressionInternal(std::move(progression))
 {
+    m_progression = achievement_progression(m_progressionInternal);
 }
 
 const xsapi_internal_string&

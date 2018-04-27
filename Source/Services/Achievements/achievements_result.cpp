@@ -78,7 +78,7 @@ achievements_result::get_next(
 
     auto result = m_internalObj->get_next(
         maxItems,
-        XSAPI_DEFAULT_TASKGROUP,
+        get_xsapi_singleton(true)->m_asyncQueue,
         [tce](xbox_live_result<std::shared_ptr<achievements_result_internal>> result)
         {
             tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(achievements_result, result));
@@ -91,9 +91,9 @@ achievements_result::get_next(
     return pplx::task<xbox_live_result<achievements_result>>(tce);
 }
 
-xbox_live_result<void> achievements_result_internal::get_next(
+_XSAPIIMP xbox_live_result<void> achievements_result_internal::get_next(
     _In_ uint32_t maxItems,
-    _In_ uint64_t taskGroupId,
+    _In_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<achievements_result_internal>>> callback
     )
 {
@@ -102,7 +102,6 @@ xbox_live_result<void> achievements_result_internal::get_next(
         return xbox_live_result<void>(xbox_live_error_code::out_of_range, "achievements_result doesn't have next page");
     }
     
-
     return xsapi_allocate_shared<achievement_service_internal>(
         m_userContext,
         m_xboxLiveContextSettings,
@@ -116,10 +115,41 @@ xbox_live_result<void> achievements_result_internal::get_next(
             0, // use continuationToken, ignore skipItems.
             maxItems,
             m_continuationToken,
-            taskGroupId,
+            queue,
             [callback](xbox_live_result<std::shared_ptr<achievements_result_internal>> result) {
                 callback(result);
             });
+}
+
+
+const xsapi_internal_string& achievements_result_internal::xbox_user_id() const
+{
+    return m_xboxUserId;
+}
+
+const xsapi_internal_vector<uint32_t>& achievements_result_internal::title_ids() const
+{
+    return m_titleIds;
+}
+
+const achievement_type& achievements_result_internal::type() const
+{
+    return m_achievementType;
+}
+
+const bool& achievements_result_internal::unlocked_only() const
+{
+    return m_unlockedOnly;
+}
+
+const achievement_order_by& achievements_result_internal::order_by() const
+{
+    return m_orderBy;
+}
+
+const xsapi_internal_string& achievements_result_internal::continuation_token() const
+{
+    return m_continuationToken;
 }
 
 xbox_live_result<std::shared_ptr<achievements_result_internal>>
