@@ -78,6 +78,7 @@ private:
     uint16_t m_version;
     xsapi_internal_string m_dimensions;
     xsapi_internal_string m_measurements;
+    xsapi_internal_string m_method;
 
     xsapi_internal_string m_breadCrumb;
 
