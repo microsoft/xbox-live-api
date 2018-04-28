@@ -956,7 +956,7 @@ multiplayer_lobby_client::create_game_from_lobby()
         while (attempts < MAX_CONNECTION_ATTEMPTS)
         {
             string_t jsonValue;
-        jsonValue = _T("pending~") + utils::string_t_from_internal_string(primaryContext->xbox_live_user_id());
+            jsonValue = _T("pending~") + utils::string_t_from_internal_string(primaryContext->xbox_live_user_id());
             sessionToCommitCopy->set_session_custom_property_json(multiplayer_lobby_client::c_transferHandlePropertyName, web::json::value::string(jsonValue));
 
             commitResult = pThis->m_sessionWriter->commit_synchronized_changes(sessionToCommitCopy).get();
@@ -978,7 +978,7 @@ multiplayer_lobby_client::create_game_from_lobby()
                 }
             }
 
-        string_t sessionName = utils::string_t_from_internal_string(utils::create_guid(true));
+            auto sessionName = utils::string_t_from_internal_string(utils::create_guid(true));
             RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(gameClient->join_game_helper(sessionName), void);
         }
 

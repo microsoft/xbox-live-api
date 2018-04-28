@@ -22,7 +22,7 @@ service_call_logger_data::service_call_logger_data(
     _In_ xsapi_internal_string responseBody,
     _In_ std::chrono::milliseconds elapsedCallTime,
     _In_ chrono_clock_t::time_point requestTime,
-    _In_ string_t method
+    _In_ xsapi_internal_string method
     ) :
     m_host(std::move(host)),
     m_uri(std::move(uri)),
@@ -196,10 +196,10 @@ xsapi_internal_string service_call_logger_data::to_string() const
     //breadCrumb
     result << '\"';
     result << m_breadCrumb;
-    result << _T("\",");
+    result << "\",";
 
     //breadCrumb
-    result << _T('\"');
+    result << '\"';
     result << m_method;
     result << "\"";
 
@@ -259,9 +259,9 @@ xsapi_internal_string service_call_logger_data::get_csv_header()
 
     result << "\"EventMeasurementData\",";
 
-    result << _T("\"BreadCrumb\"");
+    result << "\"BreadCrumb\",";
 
-    result << _T("\"Method\"");
+    result << "\"Method\"";
 
     result << "\n";
 

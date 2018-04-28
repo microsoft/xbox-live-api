@@ -1062,100 +1062,100 @@
   </ItemGroup>
   <ItemGroup>
     <Filter Include="C Public Includes">
-      <UniqueIdentifier>{9CB7BEE5-6736-3CF8-B32C-CA8C008437D8}</UniqueIdentifier>
+      <UniqueIdentifier>{1880B039-E2B5-3775-8DE3-7D47B4DCCAD7}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Public Includes">
-      <UniqueIdentifier>{848B0C02-35A1-3A9D-81CC-513FF3F205BB}</UniqueIdentifier>
+      <UniqueIdentifier>{766B9DF7-E860-3A8D-B1BB-740D51A6577D}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source">
-      <UniqueIdentifier>{C156B2C1-D13C-31D8-8955-CFD94B05A781}</UniqueIdentifier>
+      <UniqueIdentifier>{B13BCE54-B66F-3462-BD85-D63B26FD96C0}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services">
-      <UniqueIdentifier>{66EEBBE9-943D-3582-8058-538D12E44C73}</UniqueIdentifier>
+      <UniqueIdentifier>{7BC69A50-5331-3B29-95EA-3DBF91C48DD5}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Achievements">
-      <UniqueIdentifier>{8FC7F5B8-D8DB-32F1-BE20-8B7E608F529E}</UniqueIdentifier>
+      <UniqueIdentifier>{E6DEF213-E428-39F5-92FE-A29353D0D53C}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Achievements\C">
-      <UniqueIdentifier>{944DCCD5-BE38-3EF1-8751-B67A25DEE141}</UniqueIdentifier>
+      <UniqueIdentifier>{DC44D524-6C50-3CBD-9586-C99A9C53C4C9}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Clubs">
-      <UniqueIdentifier>{4544D624-4272-3396-A7C6-D5B0291B41C6}</UniqueIdentifier>
+      <UniqueIdentifier>{4CE87DC8-3985-362D-81DF-1DC7E408703F}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Common">
-      <UniqueIdentifier>{72F9FCDF-3BCF-3EC0-AF83-57BBB2FBB5BD}</UniqueIdentifier>
+      <UniqueIdentifier>{9DB1507C-3615-37E4-BD2B-CD7597C6044B}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Common\C">
-      <UniqueIdentifier>{EC7FB0B8-2870-322C-A888-BF97E9F2F231}</UniqueIdentifier>
+      <UniqueIdentifier>{A918756C-B654-31D2-9B12-65AB220370D8}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\EntertainmentProfile">
-      <UniqueIdentifier>{C3EF846E-2B89-3268-BDF3-297B1FF30022}</UniqueIdentifier>
+      <UniqueIdentifier>{7720B721-DE03-37E0-834C-0BCDA97B8274}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\GameServerPlatform">
-      <UniqueIdentifier>{8F4A8E1F-8415-3656-B646-A59C8EEA0241}</UniqueIdentifier>
+      <UniqueIdentifier>{6FD09BFD-FD9E-3288-BE34-EE541AAA4DF3}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Leaderboard">
-      <UniqueIdentifier>{8BCC6200-A2AA-35D5-8419-768DFB76293A}</UniqueIdentifier>
+      <UniqueIdentifier>{4BA06724-1866-39C3-BE8C-FC236C92ACA5}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Marketplace">
-      <UniqueIdentifier>{E666A459-C521-327E-91C0-E95357F5268D}</UniqueIdentifier>
+      <UniqueIdentifier>{5D2B2A99-CCEE-364A-9D78-3A54502B3A0C}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Matchmaking">
-      <UniqueIdentifier>{CE5C21E4-A2E5-3E52-BA16-687703199D04}</UniqueIdentifier>
+      <UniqueIdentifier>{1508743B-5FC8-3E6D-BBCE-98AC247B1175}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Misc">
-      <UniqueIdentifier>{206338C2-9047-3AAE-B89B-A141CD0A774F}</UniqueIdentifier>
+      <UniqueIdentifier>{CBC9A0F1-4C43-3873-AF13-3416F7E90E9D}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Multiplayer">
-      <UniqueIdentifier>{99823FCB-D3ED-3A5D-B62C-320A9D786606}</UniqueIdentifier>
+      <UniqueIdentifier>{7A60F7C6-0247-3124-911A-03FA1B4FD801}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Multiplayer\Manager">
-      <UniqueIdentifier>{93130BC3-2203-3733-B903-28CDDEEEF42A}</UniqueIdentifier>
+      <UniqueIdentifier>{05826AC3-3862-30BB-9E32-489096C7C1D0}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Presence">
-      <UniqueIdentifier>{5017E436-F879-3FF1-BCAD-83B4C72A2292}</UniqueIdentifier>
+      <UniqueIdentifier>{9902EE94-FD6B-320B-94E7-5AE0317B19E5}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Privacy">
-      <UniqueIdentifier>{49F10E9A-819C-3954-B991-180F11B46226}</UniqueIdentifier>
+      <UniqueIdentifier>{1F627E37-A996-328F-AC21-234ED07BEE9A}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\RTA">
-      <UniqueIdentifier>{FC0030F7-3F0D-3EFA-9646-AF5EB6399395}</UniqueIdentifier>
+      <UniqueIdentifier>{0CEDCAE7-DF86-3419-AB0A-BD906CBDA0DF}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Social">
-      <UniqueIdentifier>{AA84E8CC-7F03-3DB0-9298-91F25994A8A8}</UniqueIdentifier>
+      <UniqueIdentifier>{D682D817-E17E-3890-BBFA-7B5F8BCFC447}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Social\C">
-      <UniqueIdentifier>{2EC6F0EB-F705-3F60-82EC-D9E20529347D}</UniqueIdentifier>
+      <UniqueIdentifier>{88A6B6CD-718C-3C65-95AB-21534A88E3CD}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Social\Manager">
-      <UniqueIdentifier>{432888EB-664F-3B60-A937-CEC66EB64B1A}</UniqueIdentifier>
+      <UniqueIdentifier>{5199B0B5-11AF-3E7F-BD7C-0AEC96B42E99}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Social\Manager\C">
-      <UniqueIdentifier>{848B2DE2-A527-3617-ABED-B64E41BF7130}</UniqueIdentifier>
+      <UniqueIdentifier>{CF55D182-2D81-3C0D-8306-27C483CA7E16}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Stats">
-      <UniqueIdentifier>{1DA27FD2-950D-35B3-8628-88F1AED33D47}</UniqueIdentifier>
+      <UniqueIdentifier>{F3598CA1-0D2F-35D3-B5E6-96A1391B350E}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Stats\Manager">
-      <UniqueIdentifier>{57A0A6E0-3E99-371E-952D-38DECAC4B717}</UniqueIdentifier>
+      <UniqueIdentifier>{75E71BF7-7179-3BA6-B689-5D3691DA8220}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\TitleStorage">
-      <UniqueIdentifier>{BC1BDE36-893F-3602-9627-CA4C4527DE0E}</UniqueIdentifier>
+      <UniqueIdentifier>{04C512DA-BB3C-3E5B-BFD1-83BAC8A6E1B6}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\Tournaments">
-      <UniqueIdentifier>{07AFE11C-DC40-366D-8518-3C19089D73FF}</UniqueIdentifier>
+      <UniqueIdentifier>{C8A5CF22-8105-3AD9-8525-165512CF5E97}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Shared">
-      <UniqueIdentifier>{B682A27C-50BA-30B6-9573-26F7B62C7BD5}</UniqueIdentifier>
+      <UniqueIdentifier>{484ED728-83F3-3A62-B16A-D54B9D7AAFD3}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Shared\C">
-      <UniqueIdentifier>{48CB674C-6D4B-3D72-8011-D0F63128CC64}</UniqueIdentifier>
+      <UniqueIdentifier>{BC5E30A9-D086-3581-B20C-4EF73234D9E3}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Shared\Logger">
-      <UniqueIdentifier>{D30FEB85-D0C6-32DE-B1BB-75623BAC93C3}</UniqueIdentifier>
+      <UniqueIdentifier>{7BA2DC17-13D1-3161-B98F-7BE3FA5D2C78}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\System">
-      <UniqueIdentifier>{D75844CD-55A8-3AB4-ABC1-4028BC89E81D}</UniqueIdentifier>
+      <UniqueIdentifier>{34302F3B-DFF3-3D86-BEAF-068010CDB7AA}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

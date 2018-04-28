@@ -24,7 +24,7 @@ public:
         _In_ xsapi_internal_string responseBody,
         _In_ std::chrono::milliseconds elapsedCallTime,
         _In_ chrono_clock_t::time_point requestTime,
-        _In_ string_t method
+        _In_ xsapi_internal_string method
         );
 
     service_call_logger_data(
@@ -66,7 +66,6 @@ private:
     chrono_clock_t::time_point m_requestTime;
 
     bool m_isGet;
-    string_t m_method;
     uint32_t m_id;
 
     bool m_isShoulderTap;
