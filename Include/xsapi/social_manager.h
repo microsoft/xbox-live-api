@@ -789,6 +789,14 @@ public:
         );
 
     /// <summary>
+    /// Sets the level of debug messages to send to the debugger's Output window.
+    /// </summary>
+    /// <param name="traceLevel">The level of detail</param>
+    _XSAPIIMP void set_diagnostics_trace_level(
+        _In_ xbox_services_diagnostics_trace_level traceLevel
+    );
+
+    /// <summary>
     /// Internal function
     /// </summary>
     void _Log_state();

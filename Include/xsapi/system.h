@@ -137,7 +137,7 @@ public:
     /// Sets the level of debug messages to send to the debugger's Output window.
     /// </summary>
     _XSAPIIMP void set_diagnostics_trace_level(_In_ xbox_services_diagnostics_trace_level value);
-
+    
     /// <summary>
     /// Registers to receive Windows Push Notification Service(WNS) events.  Event handlers will receive the xbox user id and notification type.
     /// </summary>

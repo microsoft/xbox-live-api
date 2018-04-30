@@ -3,6 +3,7 @@
 
 #include "pch.h"
 #include "xsapi/system.h"
+#include "xsapi/social_manager.h"
 #if XSAPI_A
 #include "Logger/android/logcat_output.h"
 #else
@@ -149,6 +150,7 @@ xbox_services_diagnostics_trace_level xbox_live_services_settings::diagnostics_t
 void xbox_live_services_settings::set_diagnostics_trace_level(_In_ xbox_services_diagnostics_trace_level value)
 {
     m_traceLevel = value;
+    social::manager::social_manager::get_singleton_instance()->set_diagnostics_trace_level(value);
     set_log_level_from_diagnostics_trace_level();
 }
 

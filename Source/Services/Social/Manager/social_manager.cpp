@@ -118,6 +118,14 @@ social_manager::set_rich_presence_polling_status(
     return m_internalObj->set_rich_presence_polling_status(user, shouldEnablePolling);
 }
 
+void 
+social_manager::set_diagnostics_trace_level(
+    _In_ xbox_services_diagnostics_trace_level traceLevel
+    )
+{
+    m_internalObj->set_diagnostics_trace_level(traceLevel);
+}
+
 void social_manager::_Log_state()
 {
     m_internalObj->log_state();

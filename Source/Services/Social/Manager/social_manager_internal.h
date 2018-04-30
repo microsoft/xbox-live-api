@@ -769,6 +769,12 @@ public:
         async_queue_handle_t queue
         );
 
+    _XSAPIIMP xbox_services_diagnostics_trace_level diagnostics_trace_level() const;
+
+    _XSAPIIMP void set_diagnostics_trace_level(
+        _In_ xbox_services_diagnostics_trace_level traceLevel
+    );
+
     void log_state();
 
 #if defined(XSAPI_CPPWINRT)
@@ -814,6 +820,8 @@ public:
 
 protected:
     social_manager_internal();
+
+    xbox_services_diagnostics_trace_level m_traceLevel;
 
     std::recursive_mutex m_socialMangerLock;
     std::recursive_mutex m_socialManagerEventLock;
