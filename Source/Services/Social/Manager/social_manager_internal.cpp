@@ -522,7 +522,7 @@ void social_manager_internal::set_social_graph_background_async_queue(async_queu
 
 void social_manager_internal::log_state()
 {
-    LOGS_DEBUG << "[SM] State: m_xboxSocialUserGroups: " << m_xboxSocialUserGroups.size()
+    SOCIAL_LOGS_DEBUG << "[SM] State: m_xboxSocialUserGroups: " << m_xboxSocialUserGroups.size()
         << " m_userToViewMap: " << m_userToViewMap.size()
         << " m_localGraphs: " << m_localGraphs.size()
         << " m_eventQueue: " << m_eventQueue.size()

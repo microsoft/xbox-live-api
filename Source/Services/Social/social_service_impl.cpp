@@ -121,7 +121,7 @@ social_service_impl::social_relationship_changed(
             }
             catch (...)
             {
-                LOG_ERROR("social_relationship_changed call threw an exception");
+                SOCIAL_LOG_ERROR("social_relationship_changed call threw an exception");
             }
         }
     }

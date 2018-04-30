@@ -61,7 +61,7 @@ social_graph::social_graph(
         xbox_live_app_config_internal::get_app_config_singleton()
         );
 
-    LOG_DEBUG("social_graph created");
+    SOCIAL_LOG_DEBUG("social_graph created");
 }
 
 social_graph::~social_graph()
@@ -80,10 +80,10 @@ social_graph::~social_graph()
     }
     catch (...)
     {
-        LOG_ERROR("Exception happened during graph destruction complete callback");
+        SOCIAL_LOG_ERROR("Exception happened during graph destruction complete callback");
     }
 
-    LOG_DEBUG("social_graph destroyed");
+    SOCIAL_LOG_DEBUG("social_graph destroyed");
 
     m_perfTester.stop_timer("~social_graph");
 }
@@ -262,11 +262,11 @@ void social_graph::initialize(xbox_live_callback<xbox_live_result<void>> callbac
         }
         catch (const std::exception& e)
         {
-            LOGS_DEBUG << "Exception in get_social_graph " << e.what();
+            SOCIAL_LOGS_DEBUG << "Exception in get_social_graph " << e.what();
         }
         catch (...)
         {
-            LOG_DEBUG("Unknown std::exception in initialization");
+            SOCIAL_LOG_DEBUG("Unknown std::exception in initialization");
         }
         callback(xbox_live_result<void>());
     });
@@ -342,7 +342,7 @@ social_graph::do_event_work()
             if (hasCachedEvents)
             {
                 m_perfTester.start_timer("do_event_work: set_state");
-                LOG_INFO("set state: event_processing");
+                SOCIAL_LOG_INFO("set state: event_processing");
                 m_perfTester.stop_timer("do_event_work: set_state");
             }
             m_perfTester.stop_timer("do_event_work: event_processing");
@@ -433,7 +433,7 @@ social_graph::apply_event(
     const auto& inactiveBuffer = m_userBuffer.inactive_buffer();
     if (inactiveBuffer == nullptr)
     {
-        LOG_ERROR("In active buffer null in event processing");
+        SOCIAL_LOG_ERROR("In active buffer null in event processing");
         return;
     }
 
@@ -442,38 +442,38 @@ social_graph::apply_event(
     {
         case unprocessed_social_event_type::users_added:
         {
-            LOG_INFO("Applying internal events: users_added");
+            SOCIAL_LOG_INFO("Applying internal events: users_added");
             apply_users_added_event(evt, inactiveBuffer, isFreshEvent);
             break;
         }
         case unprocessed_social_event_type::users_changed:
         {
-            LOG_INFO("Applying internal events: users_changed");
+            SOCIAL_LOG_INFO("Applying internal events: users_changed");
             apply_users_change_event(evt, inactiveBuffer, isFreshEvent);
             break;
         }
         case unprocessed_social_event_type::users_removed:
         {
-            LOG_INFO("Applying internal events: users_removed");
+            SOCIAL_LOG_INFO("Applying internal events: users_removed");
             apply_users_removed_event(evt, inactiveBuffer, eventType, isFreshEvent);
             break;
         }
         case unprocessed_social_event_type::device_presence_changed:
         {
-            LOG_INFO("Applying internal events: device_presence_changed");
+            SOCIAL_LOG_INFO("Applying internal events: device_presence_changed");
 
             apply_device_presence_changed_event(evt, inactiveBuffer, isFreshEvent, eventType);
             break;
         }
         case unprocessed_social_event_type::title_presence_changed:
         {
-            LOG_INFO("Applying internal events: title_presence_changed");
+            SOCIAL_LOG_INFO("Applying internal events: title_presence_changed");
             auto titlePresenceChanged = evt.title_presence_args();
             auto xuid = utils::internal_string_to_uint64(titlePresenceChanged->xbox_user_id());
             auto xuidIter = inactiveBuffer->socialUserGraph.find(xuid);
             if (xuidIter == inactiveBuffer->socialUserGraph.end() || (xuidIter != inactiveBuffer->socialUserGraph.end() && xuidIter->second.socialUser == nullptr))
             {
-                LOG_ERROR("social graph: social user not found in title presence change");
+                SOCIAL_LOG_ERROR("social graph: social user not found in title presence change");
                 break;
             }
             auto& userPresenceRecord = inactiveBuffer->socialUserGraph.at(xuid).socialUser->m_presenceRecord;
@@ -489,14 +489,14 @@ social_graph::apply_event(
         }
         case unprocessed_social_event_type::presence_changed:
         {
-            LOG_INFO("Applying internal events: presence_changed");
+            SOCIAL_LOG_INFO("Applying internal events: presence_changed");
             apply_presence_changed_event(evt, inactiveBuffer, isFreshEvent);
             break;
         }
         case unprocessed_social_event_type::social_relationships_changed:
         case unprocessed_social_event_type::profiles_changed:
         {
-            LOG_INFO("Applying internal events: social_relationships_changed or profiles_changed");
+            SOCIAL_LOG_INFO("Applying internal events: social_relationships_changed or profiles_changed");
             m_perfTester.start_timer("profiles_changed");
             for (auto& user : evt.users_affected())
             {
@@ -514,7 +514,7 @@ social_graph::apply_event(
         case unprocessed_social_event_type::unknown:
         default:
         {
-            LOG_ERROR("unknown event in process_events");
+            SOCIAL_LOG_ERROR("unknown event in process_events");
         }
     }
 
@@ -693,7 +693,7 @@ void social_graph::apply_device_presence_changed_event(
     {
         if (mapIter->second.socialUser == nullptr)
         {
-            LOG_ERROR("social graph: social user null in apply_device_presence_changed_event");
+            SOCIAL_LOG_ERROR("social graph: social user null in apply_device_presence_changed_event");
             return;
         }
         auto& userPresenceRecord = mapIter->second.socialUser->presence_record();
@@ -702,7 +702,7 @@ void social_graph::apply_device_presence_changed_event(
     }
     else
     {
-        LOG_ERROR("device presence record received for user not in graph");
+        SOCIAL_LOG_ERROR("device presence record received for user not in graph");
         return;
     }
 
@@ -716,7 +716,7 @@ void social_graph::apply_device_presence_changed_event(
         auto xuidIter = inactiveBuffer->socialUserGraph.find(xuid);
         if (xuidIter == inactiveBuffer->socialUserGraph.end() || (xuidIter != inactiveBuffer->socialUserGraph.end() && xuidIter->second.socialUser == nullptr))
         {
-            LOG_ERROR("social graph: social user null in inactiveBuffer");
+            SOCIAL_LOG_ERROR("social graph: social user null in inactiveBuffer");
             return;
         }
         auto& userPresenceRecord = xuidIter->second.socialUser->m_presenceRecord;
@@ -744,7 +744,7 @@ void social_graph::apply_presence_changed_event(
         uint64_t index = presenceRecord._Xbox_user_id();
         if (index == 0)
         {
-            LOG_ERROR("social_graph: Invalid user in apply_presence_changed_event");
+            SOCIAL_LOG_ERROR("social_graph: Invalid user in apply_presence_changed_event");
             continue;
         }
 
@@ -754,7 +754,7 @@ void social_graph::apply_presence_changed_event(
             auto socialUser = userPresenceRecordIter->second.socialUser;
             if (socialUser == nullptr)
             {
-                LOG_ERROR("social_graph: User not found in updating presence");
+                SOCIAL_LOG_ERROR("social_graph: User not found in updating presence");
                 continue;
             }
             auto userPresenceRecord = socialUser->presence_record();
@@ -763,7 +763,7 @@ void social_graph::apply_presence_changed_event(
                 auto socialUserGraphUser = inactiveBuffer->socialUserGraph.at(presenceRecord._Xbox_user_id()).socialUser;
                 if (socialUserGraphUser == nullptr)
                 {
-                    LOG_ERROR("social_graph: User not found in social user graph");
+                    SOCIAL_LOG_ERROR("social_graph: User not found in social user graph");
                     continue;
                 }
                 socialUserGraphUser->_Set_presence_record(presenceRecord);
@@ -848,7 +848,7 @@ social_graph::setup_rta_subscriptions(
 
     if (socialRelationshipChangeResult.err())
     {
-        LOGS_ERROR << "Social relationship change error " << socialRelationshipChangeResult.err().message() << " message: " << socialRelationshipChangeResult.err_message();
+        SOCIAL_LOGS_ERROR << "Social relationship change error " << socialRelationshipChangeResult.err().message() << " message: " << socialRelationshipChangeResult.err_message();
     }
     else
     {
@@ -859,7 +859,7 @@ social_graph::setup_rta_subscriptions(
     {
         if (m_userBuffer.inactive_buffer() == nullptr)
         {
-            LOG_ERROR("Failed to reinitialize rta subs");
+            SOCIAL_LOG_ERROR("Failed to reinitialize rta subs");
             return;
         }
         xsapi_internal_vector<uint64_t> users;
@@ -868,7 +868,7 @@ social_graph::setup_rta_subscriptions(
             auto user = userPair.second.socialUser;
             if (user == nullptr)
             {
-                LOG_ERROR("social_graph: setup_rta_subscriptions get users");
+                SOCIAL_LOG_ERROR("social_graph: setup_rta_subscriptions get users");
                 continue;
             }
 
@@ -931,7 +931,7 @@ social_graph::setup_device_and_presence_subscriptions_helper(
 
         if (devicePresenceSubResult.err() || titlePresenceSubResult.err())
         {
-            LOG_ERROR("presence subscription failed in social manager");
+            SOCIAL_LOG_ERROR("presence subscription failed in social manager");
         }
 
 
@@ -1041,7 +1041,7 @@ void social_graph::refresh_graph_helper(xsapi_internal_vector<uint64_t>& userRef
         auto socialUser = user.second.socialUser;
         if (socialUser == nullptr)
         {
-            LOG_ERROR("social graph: no user found in refresh_graph_helper");
+            SOCIAL_LOG_ERROR("social graph: no user found in refresh_graph_helper");
             continue;
         }
         if (!socialUser->is_followed_by_caller())
@@ -1113,7 +1113,7 @@ social_graph::refresh_graph()
             }
             else
             {
-                LOGS_ERROR << "social_graph: refresh_graph call failed with error: " << socialListResult.err() << " " << socialListResult.err_message();
+                SOCIAL_LOGS_ERROR << "social_graph: refresh_graph call failed with error: " << socialListResult.err() << " " << socialListResult.err_message();
             }
         }
     });
@@ -1131,7 +1131,7 @@ social_graph::perform_diff(
         m_perfTester.start_timer("set_state");
         if (m_userBuffer.inactive_buffer() == nullptr)
         {
-            LOG_ERROR("Diff cannot happening with null buffer");
+            SOCIAL_LOG_ERROR("Diff cannot happening with null buffer");
             return;
         }
         set_state(social_graph_state::diff);
@@ -1302,11 +1302,11 @@ social_graph::social_graph_timer_callback(
         }
         catch (const std::exception& e)
         {
-            LOGS_DEBUG << "Exception in social_graph_timer_callback " << e.what();
+            SOCIAL_LOGS_DEBUG << "Exception in social_graph_timer_callback " << e.what();
         }
         catch (...)
         {
-            LOG_DEBUG("Unknown std::exception in initialization");
+            SOCIAL_LOG_DEBUG("Unknown std::exception in initialization");
         }
     });
 }
@@ -1330,11 +1330,11 @@ void social_graph::social_graph_refresh_callback()
         }
         catch (const std::exception& e)
         {
-            LOGS_DEBUG << "Exception in social_graph_refresh_callback " << e.what();
+            SOCIAL_LOGS_DEBUG << "Exception in social_graph_refresh_callback " << e.what();
         }
         catch (...)
         {
-            LOG_DEBUG("Unknown std::exception in initialization");
+            SOCIAL_LOG_DEBUG("Unknown std::exception in initialization");
         }
     });
 #endif
@@ -1350,7 +1350,7 @@ social_graph::handle_device_presence_change(
     uint64_t id = utils::internal_string_to_uint64(devicePresenceChanged->xbox_user_id());
     if (id == 0)
     {
-        LOG_ERROR("Invalid user");
+        SOCIAL_LOG_ERROR("Invalid user");
         return;
     }
 
@@ -1398,7 +1398,7 @@ social_graph::handle_social_relationship_change(
             uint64_t id = utils::internal_string_to_uint64(xuid);
             if (id == 0)
             {
-                LOG_ERROR("Invalid user");
+                SOCIAL_LOG_ERROR("Invalid user");
                 continue;
             }
             xboxUserIdsAsInt.push_back(id);
@@ -1413,7 +1413,7 @@ social_graph::handle_rta_subscription_error(
     _In_ xbox::services::real_time_activity::real_time_activity_subscription_error_event_args& rtaErrorEventArgs
     )
 {
-    LOGS_ERROR << "RTA subscription error occurred in social manager: " << rtaErrorEventArgs.err().message() << " " << rtaErrorEventArgs.err_message();
+    SOCIAL_LOGS_ERROR << "RTA subscription error occurred in social manager: " << rtaErrorEventArgs.err().message() << " " << rtaErrorEventArgs.err_message();
 }
 
 void
@@ -1498,7 +1498,7 @@ social_graph::presence_timer_callback(
                     pThis->m_perfTester.start_timer("social graph refresh state set");
                     if (pThis->m_userBuffer.inactive_buffer() == nullptr)
                     {
-                        LOG_ERROR("Cannot update presence when user buffer is null");
+                        SOCIAL_LOG_ERROR("Cannot update presence when user buffer is null");
                         return;
                     }
                     pThis->set_state(social_graph_state::refresh);
@@ -1548,7 +1548,7 @@ social_graph::presence_timer_callback(
             }
             else
             {
-                LOG_ERROR("social_graph: presence record update failed");
+                SOCIAL_LOG_ERROR("social_graph: presence record update failed");
             }
         }
     });
@@ -1687,7 +1687,7 @@ user_buffers_holder::user_buffers_holder() : m_activeBuffer(nullptr), m_inactive
 
 user_buffers_holder::~user_buffers_holder()
 {
-    LOG_DEBUG("destroying user buffer holder");
+    SOCIAL_LOG_DEBUG("destroying user buffer holder");
 
     if (m_userBufferA.buffer != nullptr)
     {
@@ -1880,7 +1880,7 @@ user_buffers_holder::remove_users_from_buffer(
         }
         else
         {
-            LOG_ERROR("user_buffers_holder: user not found in buffer");
+            SOCIAL_LOG_ERROR("user_buffers_holder: user not found in buffer");
         }
     }
 }

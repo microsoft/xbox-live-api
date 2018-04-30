@@ -88,7 +88,7 @@ xbox_social_user_group_internal::xbox_social_user_group_internal(
         uint64_t id = utils::internal_string_to_uint64(user);
         if (id == 0)
         {
-            LOG_ERROR("Invalid user");
+            SOCIAL_LOG_ERROR("Invalid user");
             continue;
         }
 
@@ -419,7 +419,7 @@ xbox_social_user_group_internal::update_users_in_group(
 
         if (id == 0)
         {
-            LOG_ERROR("Invalid user");
+            SOCIAL_LOG_ERROR("Invalid user");
             continue;
         }
 
