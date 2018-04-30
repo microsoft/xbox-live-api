@@ -3,6 +3,7 @@
 
 #include "pch.h"
 #include "xsapi/system.h"
+#include "xsapi/social_manager.h"
 #if XSAPI_A
 #include "Logger/android/logcat_output.h"
 #else
@@ -35,8 +36,7 @@ xbox_live_services_settings::xbox_live_services_settings() :
     m_pCustomMemFreeHook(nullptr),
     m_loggingHandlersCounter(0),
     m_wnsHandlersCounter(0),
-    m_traceLevel(xbox_services_diagnostics_trace_level::off),
-    m_socialManagerTraceLevel(xbox_services_diagnostics_trace_level::off)
+    m_traceLevel(xbox_services_diagnostics_trace_level::off)
 {
 }
 
@@ -150,18 +150,8 @@ xbox_services_diagnostics_trace_level xbox_live_services_settings::diagnostics_t
 void xbox_live_services_settings::set_diagnostics_trace_level(_In_ xbox_services_diagnostics_trace_level value)
 {
     m_traceLevel = value;
-    m_socialManagerTraceLevel = value;
+    social::manager::social_manager::get_singleton_instance()->set_diagnostics_trace_level(value);
     set_log_level_from_diagnostics_trace_level();
-}
-
-xbox_services_diagnostics_trace_level xbox_live_services_settings::social_manager_diagnostics_trace_level() const
-{
-    return m_socialManagerTraceLevel;
-}
-
-void xbox_live_services_settings::set_social_manager_diagnostics_trace_level(_In_ xbox_services_diagnostics_trace_level value)
-{
-    m_socialManagerTraceLevel = value;
 }
 
 void xbox_live_services_settings::_Raise_logging_event(_In_ xbox_services_diagnostics_trace_level level, _In_ const std::string& category, _In_ const std::string& message)

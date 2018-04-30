@@ -88,7 +88,10 @@ xbox_social_user_group_internal::xbox_social_user_group_internal(
         uint64_t id = utils::internal_string_to_uint64(user);
         if (id == 0)
         {
-            SOCIAL_LOG_ERROR("Invalid user");
+            LOG_ERROR_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                "Invalid user"
+            );
             continue;
         }
 
@@ -419,7 +422,10 @@ xbox_social_user_group_internal::update_users_in_group(
 
         if (id == 0)
         {
-            SOCIAL_LOG_ERROR("Invalid user");
+            LOG_ERROR_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                "Invalid user"
+            );
             continue;
         }
 

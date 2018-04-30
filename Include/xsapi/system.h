@@ -137,17 +137,7 @@ public:
     /// Sets the level of debug messages to send to the debugger's Output window.
     /// </summary>
     _XSAPIIMP void set_diagnostics_trace_level(_In_ xbox_services_diagnostics_trace_level value);
-
-    /// <summary>
-    /// Indicates the level of debug messages for social_manager to send to the debugger's Output window.
-    /// </summary>
-    _XSAPIIMP xbox_services_diagnostics_trace_level social_manager_diagnostics_trace_level() const;
-
-    /// <summary>
-    /// Sets the level of debug messages for social_manager to send to the debugger's Output window.
-    /// </summary>
-    _XSAPIIMP void set_social_manager_diagnostics_trace_level(_In_ xbox_services_diagnostics_trace_level value);
-
+    
     /// <summary>
     /// Registers to receive Windows Push Notification Service(WNS) events.  Event handlers will receive the xbox user id and notification type.
     /// </summary>
@@ -187,7 +177,6 @@ private:
     void set_log_level_from_diagnostics_trace_level();
 
     xbox_services_diagnostics_trace_level m_traceLevel;
-    xbox_services_diagnostics_trace_level m_socialManagerTraceLevel;
     std::mutex m_loggingWriteLock;
     std::unordered_map<function_context, std::function<void(xbox_services_diagnostics_trace_level, const std::string&, const std::string&)>> m_loggingHandlers;
     function_context m_loggingHandlersCounter;

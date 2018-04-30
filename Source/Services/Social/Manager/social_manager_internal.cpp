@@ -520,9 +520,24 @@ void social_manager_internal::set_social_graph_background_async_queue(async_queu
     }
 }
 
+xbox_services_diagnostics_trace_level
+social_manager_internal::diagnostics_trace_level() const
+{
+    return m_traceLevel;
+}
+
+void
+social_manager_internal::set_diagnostics_trace_level(
+    _In_ xbox_services_diagnostics_trace_level traceLevel
+)
+{
+    m_traceLevel = traceLevel;
+}
+
 void social_manager_internal::log_state()
 {
-    SOCIAL_LOGS_DEBUG << "[SM] State: m_xboxSocialUserGroups: " << m_xboxSocialUserGroups.size()
+    LOGS_DEBUG_IF(social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose) 
+        << "[SM] State: m_xboxSocialUserGroups: " << m_xboxSocialUserGroups.size()
         << " m_userToViewMap: " << m_userToViewMap.size()
         << " m_localGraphs: " << m_localGraphs.size()
         << " m_eventQueue: " << m_eventQueue.size()

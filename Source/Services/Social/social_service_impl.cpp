@@ -4,6 +4,7 @@
 #include "pch.h"
 #include "xsapi/social.h"
 #include "social_internal.h"
+#include "social_manager_internal.h"
 #include "http_call_impl.h"
 #include "user_context.h"
 #include "xbox_system_factory.h"
@@ -121,7 +122,10 @@ social_service_impl::social_relationship_changed(
             }
             catch (...)
             {
-                SOCIAL_LOG_ERROR("social_relationship_changed call threw an exception");
+                LOG_ERROR_IF(
+                    manager::social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error, 
+                    "social_relationship_changed call threw an exception"
+                );
             }
         }
     }

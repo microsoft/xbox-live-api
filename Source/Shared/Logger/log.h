@@ -16,32 +16,26 @@ const char defaultCategory[] = "";
 #define IF_LOG_ERROR() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, xbox::services::log_level::error)
 #define LOG_ERROR(msg) LOG(DEFAULT_LOGGER, xbox::services::log_level::error, defaultCategory, msg)
 #define LOG_ERROR_IF(boolean_expression, msg) if(boolean_expression) LOG_ERROR(msg)
-#define SOCIAL_LOG_ERROR(msg) LOG_ERROR_IF(xbox::services::system::xbox_live_services_settings::get_singleton_instance()->social_manager_diagnostics_trace_level() >= xbox::services::xbox_services_diagnostics_trace_level::error, msg)
 #define LOGS_ERROR LOGS(DEFAULT_LOGGER, xbox::services::log_level::error, defaultCategory)
 #define LOGS_ERROR_IF(boolean_expression) if(boolean_expression) LOGS_ERROR
-#define SOCIAL_LOGS_ERROR LOGS_ERROR_IF(xbox::services::system::xbox_live_services_settings::get_singleton_instance()->social_manager_diagnostics_trace_level() >= xbox::services::xbox_services_diagnostics_trace_level::error)
 
 #define IF_LOG_WARN() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, xbox::services::log_level::warn)
 #define LOG_WARN(msg) LOG(DEFAULT_LOGGER, xbox::services::log_level::warn, defaultCategory, msg)
 #define LOG_WARN_IF(boolean_expression, msg) if(boolean_expression) LOG_WARN(msg)
-#define SOCIAL_LOG_WARN(msg) LOG_WARN_IF(xbox::services::system::xbox_live_services_settings::get_singleton_instance()->social_manager_diagnostics_trace_level() >= xbox::services::xbox_services_diagnostics_trace_level::warning, msg)
 #define LOGS_WARN LOGS(DEFAULT_LOGGER, xbox::services::log_level::warn, defaultCategory)
 #define LOGS_WARN_IF(boolean_expression) if(boolean_expression) LOGS_WARN
 
 #define IF_LOG_INFO() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, xbox::services::log_level::info)
 #define LOG_INFO(msg) LOG(DEFAULT_LOGGER, xbox::services::log_level::info, defaultCategory, msg)
 #define LOG_INFO_IF(boolean_expression, msg) if(boolean_expression) LOG_INFO(msg)
-#define SOCIAL_LOG_INFO(msg) LOG_INFO_IF(xbox::services::system::xbox_live_services_settings::get_singleton_instance()->social_manager_diagnostics_trace_level() >= xbox::services::xbox_services_diagnostics_trace_level::info, msg)
 #define LOGS_INFO LOGS(DEFAULT_LOGGER, xbox::services::log_level::info, defaultCategory)
 #define LOGS_INFO_IF(boolean_expression) if(boolean_expression) LOGS_INFO
 
 #define IF_LOG_DEBUG() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, xbox::services::log_level::debug)
 #define LOG_DEBUG(msg) LOG(DEFAULT_LOGGER, xbox::services::log_level::debug, defaultCategory, msg)
 #define LOG_DEBUG_IF(boolean_expression, msg) if(boolean_expression) LOG_DEBUG(msg)
-#define SOCIAL_LOG_DEBUG(msg) LOG_DEBUG_IF(xbox::services::system::xbox_live_services_settings::get_singleton_instance()->social_manager_diagnostics_trace_level() >= xbox::services::xbox_services_diagnostics_trace_level::verbose, msg)
 #define LOGS_DEBUG LOGS(DEFAULT_LOGGER, xbox::services::log_level::debug, defaultCategory)
 #define LOGS_DEBUG_IF(boolean_expression) if(boolean_expression) LOGS_DEBUG
-#define SOCIAL_LOGS_DEBUG LOGS_DEBUG_IF(xbox::services::system::xbox_live_services_settings::get_singleton_instance()->social_manager_diagnostics_trace_level() >= xbox::services::xbox_services_diagnostics_trace_level::verbose)
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
