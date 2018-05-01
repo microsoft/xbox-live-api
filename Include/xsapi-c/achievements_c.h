@@ -453,6 +453,7 @@ STDAPI XblAchievementsResultGetNextResult(
 /// Allow achievement progress to be updated and achievements to be unlocked.
 /// This API will work even when offline on PC and Xbox One. Offline updates will be 
 /// posted by the system when connection is re-established even if the title isn't running.
+/// The result of the asyncronous operation can be obtained with GetAsyncStatus.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>

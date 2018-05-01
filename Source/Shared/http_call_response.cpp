@@ -25,22 +25,9 @@ http_call_response::http_call_response(
 {
 }
 
-void http_call_response::_Set_error(
-    _In_ const std::error_code& errCode, 
-    _In_ const std::string& errMessage
-    )
+std::shared_ptr<http_call_response_internal> http_call_response::_Internal_response() const
 {
-    m_internalObj->set_error_info(errCode, xsapi_internal_string(errMessage.data()));
-}
-
-void http_call_response::_Route_service_call() const
-{
-    m_internalObj->route_service_call();
-}
-
-void http_call_response::_Set_full_url(_In_ const string_t& url)
-{
-    m_internalObj->set_full_url(utils::internal_string_from_string_t(url));
+    return m_internalObj;
 }
 
 web::http::http_headers http_call_response::response_headers() const

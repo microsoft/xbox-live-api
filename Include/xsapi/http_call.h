@@ -121,17 +121,7 @@ public:
     /// <summary>
     /// Internal function - TODO remove after migrating all APIs
     /// </summary>
-    void _Set_error(_In_ const std::error_code& errCode, _In_ const std::string& errMessage);
-
-    /// <summary>
-    /// Internal function - TODO remove after migrating all APIs
-    /// </summary>
-    void _Route_service_call() const;
-
-    /// <summary>
-    /// Internal function - TODO remove after migrating all APIs
-    /// </summary>
-    void _Set_full_url(_In_ const string_t& url);
+    std::shared_ptr<http_call_response_internal> _Internal_response() const;
 
 private:
     std::shared_ptr<http_call_response_internal> m_internalObj;

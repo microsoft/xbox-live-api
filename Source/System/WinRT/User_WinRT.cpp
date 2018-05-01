@@ -146,7 +146,7 @@ XboxLiveUser::GetTokenAndSignatureAsync(
         [tce](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
     {
         THROW_IF_ERR(result);
-        return ref new GetTokenAndSignatureResult(result.payload());
+        tce.set(ref new GetTokenAndSignatureResult(result.payload()));
     });
     
     auto t = task<GetTokenAndSignatureResult^>(tce);
@@ -180,7 +180,7 @@ XboxLiveUser::GetTokenAndSignatureArrayAsync(
         [tce](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
     {
         THROW_IF_ERR(result);
-        return ref new GetTokenAndSignatureResult(result.payload());
+        tce.set(ref new GetTokenAndSignatureResult(result.payload()));
     });
 
     auto t = task<GetTokenAndSignatureResult^>(tce);
@@ -205,7 +205,7 @@ XboxLiveUser::GetTokenAndSignatureAsync(
         [tce](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
     {
         THROW_IF_ERR(result);
-        return ref new GetTokenAndSignatureResult(result.payload());
+        tce.set(ref new GetTokenAndSignatureResult(result.payload()));
     });
 
     auto t = task<GetTokenAndSignatureResult^>(tce);
