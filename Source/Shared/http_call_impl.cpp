@@ -221,7 +221,7 @@ http_call_impl::get_response_with_auth(
         userContext,
         httpCallResponseBodyType,
         allUsersAuthRequired,
-        nullptr,
+        get_xsapi_singleton()->m_asyncQueue,
         [tce](std::shared_ptr<http_call_response_internal> response)
         {
             tce.set(std::make_shared<http_call_response>(response));
@@ -508,6 +508,7 @@ void http_call_impl::internal_get_response(
         else
         {
             utils::remove_shared_ptr<http_call_data>(context, true);
+            httpCallResponse->route_service_call();
             httpCallData->callback(httpCallResponse);
         }
     };

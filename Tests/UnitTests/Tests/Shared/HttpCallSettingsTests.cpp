@@ -98,10 +98,8 @@ public:
             );
 
         m_mockXboxSystemFactory->setup_mock_for_http_client();
+        StockMocks::AddHttpMockResponse(responseJson.serialize(), 503);
 
-        // TODO
-        //httpCall->ResultValue.set_body(responseJson);
-        //httpCall->ResultValue.set_status_code(503);
         xboxLiveContext->settings()->set_http_timeout_window(std::chrono::seconds(3));
 
         auto timeStart = std::chrono::high_resolution_clock::now();
@@ -131,9 +129,10 @@ public:
         xboxLiveContext->settings()->set_enable_service_call_routed_events(true);
         xboxLiveContext->settings()->set_http_timeout_window(std::chrono::seconds(0));
         m_mockXboxSystemFactory->setup_mock_for_http_client();
+        StockMocks::AddHttpMockResponse(responseJson.serialize(), 503);
 
-        //httpClient->ResultValue.set_body(responseJson);
-        //httpClient->ResultValue.set_status_code(503);
+        //httpCall->ResultValue->_Internal_response()->set_response_body(responseJson);
+        //httpCall->ResultValue->_Internal_response()->set_error_info(xbox_live_error_code::http_status_503_service_unavailable);
 
         auto timeStart = std::chrono::high_resolution_clock::now();
         xboxLiveContext->string_service().verify_string(requestString)
@@ -162,9 +161,10 @@ public:
         xboxLiveContext->settings()->set_http_timeout_window(std::chrono::seconds(1));
         m_mockXboxSystemFactory->setup_mock_for_http_client();
 
-        //httpClient->ResultValue.set_body(responseJson);
-        //httpClient->ResultValue.set_status_code(503);
-        //httpClient->ResultValue.headers().add(L"Retry-After", L"20");
+        http_headers headers;
+        headers["Retry-After"] = "20";
+        StockMocks::AddHttpMockResponse(responseJson.serialize(), 503, headers);
+
         xboxLiveContext->settings()->set_http_timeout_window(std::chrono::seconds(1));
 
         auto timeStart = std::chrono::high_resolution_clock::now();

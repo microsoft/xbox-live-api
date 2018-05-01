@@ -265,6 +265,14 @@ STDAPI XblProfileGetUserProfilesResult(
     return hr;
 }
 
+STDAPI XblProfileGetUserProfilesForSocialGroupResultCount(
+    _In_ AsyncBlock* async,
+    _Out_ uint32_t* profileCount
+    ) XBL_NOEXCEPT
+{
+    return XblProfileGetUserProfilesResultCount(async, profileCount);
+}
+
 STDAPI XblProfileGetUserProfilesForSocialGroupResult(
     _In_ AsyncBlock* async,
     _In_ uint32_t profilesCount,
