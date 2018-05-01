@@ -100,6 +100,8 @@ void xbox_live_services_settings::set_memory_allocation_hooks(
 
     g_pMemAllocHook = custom_mem_alloc_wrapper;
     g_pMemFreeHook = custom_mem_free_wrapper;
+
+    HCMemSetFunctions(g_pMemAllocHook, g_pMemFreeHook);
 }
 
 function_context xbox_live_services_settings::add_logging_handler(_In_ std::function<void(xbox_services_diagnostics_trace_level, const std::string&, const std::string&)> handler)
