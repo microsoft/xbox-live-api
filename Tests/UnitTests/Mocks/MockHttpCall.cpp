@@ -159,8 +159,8 @@ MockHttpCall::get_response_with_auth(
     {
         fRequestPostFunc(ResultValue, utils::string_t_from_internal_string(m_requestBody.request_message_string()));
     }
-    ResultValue->_Set_full_url(ServerName);
-    ResultValue->_Route_service_call();
+    ResultValue->_Internal_response()->set_full_url(utils::internal_string_from_string_t(ServerName));
+    ResultValue->_Internal_response()->route_service_call();
     return pplx::task_from_result(ResultValue);
 }
 

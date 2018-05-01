@@ -97,9 +97,9 @@ STDAPI XblProfileGetUserProfiles(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Get the number of profiles returned from a completed get XblProfileGetUserProfiles or XblProfileGetUserProfilesForSocialGroup operation
+/// Get the number of profiles returned from a completed get XblProfileGetUserProfiles operation
 /// </summary>
-/// <param name="async">AsyncBlock from the get profile(s) API.</param>
+/// <param name="async">AsyncBlock from the get profile API.</param>
 /// <param name="profileCount">Number of profiles returned.</param>
 STDAPI XblProfileGetUserProfilesResultCount(
     _In_ AsyncBlock* async,
@@ -134,6 +134,15 @@ STDAPI XblProfileGetUserProfilesForSocialGroup(
     _In_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
+/// <summary>
+/// Get the number of profiles returned from a completed get XblProfileGetUserProfilesForSocialGroup operation
+/// </summary>
+/// <param name="async">AsyncBlock from the get profile API.</param>
+/// <param name="profileCount">Number of profiles returned.</param>
+STDAPI XblProfileGetUserProfilesForSocialGroupResultCount(
+    _In_ AsyncBlock* async,
+    _Out_ uint32_t* profileCount
+    ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Get the result for a completed XblProfileGetUserProfilesForSocialGroup operation.

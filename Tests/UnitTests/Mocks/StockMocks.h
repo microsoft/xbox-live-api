@@ -68,7 +68,8 @@ public:
     // TODO extend
     static void AddHttpMockResponse(
         _In_ const string_t& responseBody,
-        _In_ uint32_t statusCode = 200
+        _In_ uint32_t statusCode = 200,
+        _In_ const http_headers& responseHeaders = http_headers()
         );
 
 private:

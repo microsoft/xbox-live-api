@@ -2897,7 +2897,7 @@ public:
         // Verify it should fail before RTA activated
         VERIFY_THROWS_HR_CX(
             create_task(xboxLiveContext->MultiplayerService->WriteSessionAsync(session, MultiplayerSessionWriteMode::CreateNew)).get(),
-            E_FAIL
+            E_XBL_RUNTIME_ERROR
             );
 
         // Connect RTA
@@ -2984,7 +2984,7 @@ public:
         didFire = false;
         mockSocket->m_waitForSignal = false;
         mockSocket->m_connectToFail = true;
-        mockSocket->m_closeHandler(HCWebSocketCloseStatus_Normal);
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
         helper->disconnectedEvent.wait();
 
         // should not be able to receive 
@@ -3399,7 +3399,7 @@ public:
                 session,
                 MultiplayerSessionWriteMode::UpdateOrCreateNew
                 )).get(),
-            E_FAIL
+            E_XBL_RUNTIME_ERROR
             );
 
         TEST_LOG(L"TestRTAConnectionFailed: Already enabled");

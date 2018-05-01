@@ -501,7 +501,7 @@ public:
 
         VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://clubhub.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/clubs/recommendations/decoration/settings", httpCall->PathQueryFragment.to_string());
+        VERIFY_ARE_EQUAL_STR(L"/clubs/recommendations", httpCall->PathQueryFragment.to_string());
 
         auto clubsJsonArray = responseJson[_T("clubs")].as_array();
         VERIFY_ARE_EQUAL_INT(clubsJsonArray.size(), result->Size);

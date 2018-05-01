@@ -124,10 +124,6 @@ void get_auth_result(
                 }
             });
             return E_PENDING;
-
-        case AsyncOp_Cleanup:
-            utils::remove_shared_ptr<auth_context>(data->context);
-            break;
         }
         return S_OK;
     });
