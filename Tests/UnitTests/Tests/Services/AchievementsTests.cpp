@@ -191,7 +191,7 @@ public:
         auto achievementToVerify = responseJson.as_object()[L"achievements"].as_array()[0];
 
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto result = pplx::create_task(xboxLiveContext->AchievementService->GetAchievementAsync(
@@ -213,7 +213,7 @@ public:
         auto responseJson = web::json::value::parse(defaultAchievementResponse);
 
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto result = create_task(xboxLiveContext->AchievementService->GetAchievementsForTitleIdAsync(
@@ -256,7 +256,7 @@ public:
         DEFINE_TEST_CASE_PROPERTIES(TestGetAchievementsEmptyResult);
         auto responseJson = web::json::value::parse(LR"({"achievements":[]})");
 
-        m_mockXboxSystemFactory->GetMockHttpCall()->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        m_mockXboxSystemFactory->GetMockHttpCall()->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto task = create_task(xboxLiveContext->AchievementService->GetAchievementsForTitleIdAsync(
@@ -281,7 +281,7 @@ public:
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
 
         auto responseJson = web::json::value::parse(LR"({"achievements":[]})");
-        m_mockXboxSystemFactory->GetMockHttpCall()->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        m_mockXboxSystemFactory->GetMockHttpCall()->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         TEST_LOG(L"TestGetAchievementsForTitleIdAsyncInvalidArgs: Null xboxUserId param.");
 #pragma warning(suppress: 6387)
@@ -501,8 +501,8 @@ public:
             percentComplete
         )).get();
 
-        std::wstring expectedRequest =
-            LR"({"achievements":[{"id":"4","percentComplete":5}],"action":"progressUpdate","serviceConfigId":"MockScid","titleId":1234,"userId":"1"})";
+        xsapi_internal_string expectedRequest =
+            R"({"achievements":[{"id":"4","percentComplete":5}],"action":"progressUpdate","serviceConfigId":"MockScid","titleId":1234,"userId":"1"})";
 
         VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://achievements.mockenv.xboxlive.com", httpCall->ServerName);

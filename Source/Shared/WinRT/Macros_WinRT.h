@@ -132,6 +132,15 @@
         }\
     }
 
+#define DEFINE_PTR_PROP_GET_STR_OBJ_FROM_INTERNAL_STRING(x, cppX) \
+    property Platform::String^ x \
+    { \
+        Platform::String^ get() \
+        {\
+            return ref new Platform::String(xbox::services::utils::string_t_from_internal_string(m_cppObj->##cppX()).c_str());\
+        }\
+    }
+
 #define DEFINE_PROP_GETSET_STR_OBJ(x, cppX) \
     property Platform::String^ x \
     { \

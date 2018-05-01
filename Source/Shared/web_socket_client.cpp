@@ -6,29 +6,42 @@
 #include "user_context.h"
 #include "web_socket_client.h"
 #include "utils.h"
-
-using namespace web::websockets::client;
+#include "xbox_live_app_config_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
- 
+
+using namespace xbox::services::system;
+
 xbox_web_socket_client::xbox_web_socket_client()
 {
+    HCWebSocketCreate(&m_websocket);
+    get_xsapi_singleton()->m_websocketHandles[m_websocket] = this;
 }
 
-pplx::task<void>
-xbox_web_socket_client::connect(
+xbox_web_socket_client::~xbox_web_socket_client()
+{
+    auto singleton = get_xsapi_singleton(false);
+    if (singleton != nullptr)
+    {
+        singleton->m_websocketHandles.erase(m_websocket);
+    }
+    HCWebSocketCloseHandle(m_websocket);
+}
+
+void xbox_web_socket_client::connect(
     _In_ const std::shared_ptr<user_context>& userContext,
-    _In_ const web::uri& uri,
-    _In_ const string_t& subProtocol
+    _In_ const xsapi_internal_string& uri,
+    _In_ const xsapi_internal_string& subProtocol,
+    _In_ xbox_live_callback<WebSocketCompletionResult> callback
     )
 {
     THROW_CPP_INVALIDARGUMENT_IF_NULL(userContext);
 
     std::weak_ptr<xbox_web_socket_client> thisWeakPtr = shared_from_this();
 
-    string_t callerContext = userContext->caller_context();
-    return userContext->get_auth_result(_T("GET"), uri.to_string(), string_t(), string_t())
-    .then([uri, subProtocol, callerContext, thisWeakPtr](xbox::services::xbox_live_result<user_context_auth_result> xblResult)
+    xsapi_internal_string callerContext = userContext->caller_context();
+    userContext->get_auth_result("GET", uri, xsapi_internal_string(), xsapi_internal_string(), false, get_xsapi_singleton()->m_asyncQueue, 
+        [uri, subProtocol, callerContext, thisWeakPtr, callback](xbox::services::xbox_live_result<user_context_auth_result> xblResult)
     {
         std::shared_ptr<xbox_web_socket_client> pThis(thisWeakPtr.lock());
         if (pThis == nullptr)
@@ -42,69 +55,58 @@ xbox_web_socket_client::connect(
         }
 
         const auto& result = xblResult.payload();
-        websocket_client_config config;
-        config.add_subprotocol(subProtocol);
-        config.headers().add(_T("Authorization"), result.token());
-        config.headers().add(_T("Signature"), result.signature());
-        config.headers().add(_T("Accept-Language"), utils::get_locales());
-        auto proxyUri = xbox_live_app_config::get_app_config_singleton()->_Proxy();
-        if (!proxyUri.is_empty())
+
+        auto proxyUri = utils::internal_string_from_string_t(xbox_live_app_config_internal::get_app_config_singleton()->proxy().to_string());
+        if (!proxyUri.empty())
         {
-            web::web_proxy proxy(proxyUri);
-            config.set_proxy(proxy);
+            HCWebSocketSetProxyUri(pThis->m_websocket, proxyUri.data());
         }
-        string_t userAgent = DEFAULT_USER_AGENT;
+
+        HCWebSocketSetHeader(pThis->m_websocket, "Authorization", result.token().data());
+        HCWebSocketSetHeader(pThis->m_websocket, "Signature", result.signature().data());
+        HCWebSocketSetHeader(pThis->m_websocket, "Accept-Language", utils::get_locales().data());
+
+        xsapi_internal_string userAgent = DEFAULT_USER_AGENT;
         if (!callerContext.empty())
         {
-            userAgent += _T(" ") + callerContext;
+            userAgent += " " + callerContext;
         }
-        config.headers().add(_T("User-Agent"), userAgent);
+        HCWebSocketSetHeader(pThis->m_websocket, "User-Agent", userAgent.data());
 
-        pThis->m_client = std::make_shared<websocket_callback_client>(config);
-
-        pThis->m_client->set_message_handler([thisWeakPtr](websocket_incoming_message msg)
+        HCWebSocketSetFunctions([](hc_websocket_handle_t websocket, UTF8CSTR incomingBodyString)
         {
             try
             {
-                std::shared_ptr<xbox_web_socket_client> pThis2(thisWeakPtr.lock());
-                if (pThis2 == nullptr)
+                auto singleton = get_xsapi_singleton();
+                auto iter = singleton->m_websocketHandles.find(websocket);
+                if (iter != singleton->m_websocketHandles.end())
                 {
-                    throw std::runtime_error("xbox_web_socket_client shutting down");
+                    iter->second->m_receiveHandler(incomingBodyString);
                 }
-
-                if (msg.message_type() == websocket_message_type::text_message)
+                else
                 {
-                    auto msg_body = msg.extract_string().get();
-                    if (pThis2->m_receiveHandler)
-                    {
-                        pThis2->m_receiveHandler(utility::conversions::to_string_t(msg_body));
-                    }
+                    XSAPI_ASSERT(false && "Could not find web_socket_client associated with HC_WEBSOCKET_HANDLER");
                 }
             }
-            catch(...)
+            catch (...)
             {
                 LOG_ERROR("Exception happened in web socket receiving handler.");
             }
-            
-        });
-
-        pThis->m_client->set_close_handler([thisWeakPtr](websocket_close_status closeStatus, utility::string_t closeReason, const std::error_code errc)
+        },
+        [](hc_websocket_handle_t websocket, HCWebSocketCloseStatus closeStatus)
         {
-            UNREFERENCED_PARAMETER(errc);
-
             try
             {
-                std::shared_ptr<xbox_web_socket_client> pThis2(thisWeakPtr.lock());
-                if (pThis2 == nullptr)
+                auto singleton = get_xsapi_singleton();
+                auto iter = singleton->m_websocketHandles.find(websocket);
+                if (iter != singleton->m_websocketHandles.end())
                 {
-                    LOG_DEBUG("xbox_web_socket_client shutting down");
-                    throw std::runtime_error("xbox_web_socket_client shutting down");
+                    iter->second->m_closeHandler(closeStatus);
                 }
-
-                if (pThis2->m_closeHandler)
+                else
                 {
-                    pThis2->m_closeHandler(static_cast<uint16_t>(closeStatus), closeReason);
-                };
+                    XSAPI_ASSERT(false && "Could not find web_socket_client associated with HC_WEBSOCKET_HANDLER");
+                }
             }
             catch (...)
             {
@@ -112,43 +114,54 @@ xbox_web_socket_client::connect(
             }
         });
 
-        return pThis->m_client->connect(uri);
+        AsyncBlock *asyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+        // TODO should have some way to set the queue here
+        asyncBlock->context = utils::store_shared_ptr(xsapi_allocate_shared<xbox_live_callback<WebSocketCompletionResult>>(callback));
+        asyncBlock->callback = [](_In_ AsyncBlock* asyncBlock)
+        {
+            WebSocketCompletionResult result = {};
+            HCGetWebSocketConnectResult(asyncBlock, &result);
+            auto callback = utils::remove_shared_ptr<xbox_live_callback<WebSocketCompletionResult>>(asyncBlock->context);
+            (*callback)(result);
+            xsapi_memory::mem_free(asyncBlock);
+        };
+
+        HCWebSocketConnect(uri.data(), subProtocol.data(), pThis->m_websocket, asyncBlock);
     });
 }
 
-pplx::task<void>
-xbox_web_socket_client::send(
-    _In_ const string_t& message
+void xbox_web_socket_client::send(
+    _In_ const xsapi_internal_string& message,
+    _In_ xbox::services::xbox_live_callback<WebSocketCompletionResult> callback
     )
 {
-    if (m_client == nullptr)
-        return pplx::task_from_exception<void>(std::runtime_error("web socket is not created yet."));
-
-    websocket_outgoing_message msg;
-    msg.set_utf8_message(utility::conversions::to_utf8string(message));
-    return m_client->send(msg);
+    AsyncBlock* asyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    asyncBlock->context = utils::store_shared_ptr(xsapi_allocate_shared<xbox_live_callback<WebSocketCompletionResult>>(callback));
+    asyncBlock->callback = [](_In_ AsyncBlock* asyncBlock)
+    {
+        WebSocketCompletionResult result = {};
+        HCGetWebSocketSendMessageResult(asyncBlock, &result);
+        auto callback = utils::remove_shared_ptr<xbox_live_callback<WebSocketCompletionResult>>(asyncBlock->context);
+        (*callback)(result);
+        xsapi_memory::mem_free(asyncBlock);
+    };
+    HCWebSocketSendMessage(m_websocket, message.data(), asyncBlock);
 }
 
-pplx::task<void>
-xbox_web_socket_client::close()
+void xbox_web_socket_client::close()
 {
-    if (m_client == nullptr)
-        return pplx::task_from_exception<void>(std::runtime_error("web socket is not created yet."));
-
-    return m_client->close();
+    HCWebSocketCloseHandle(m_websocket);
 }
 
-void 
-xbox_web_socket_client::set_received_handler(
-    _In_ std::function<void(string_t)> handler
+void xbox_web_socket_client::set_received_handler(
+    _In_ xbox_live_callback<xsapi_internal_string> handler
     )
 {
     m_receiveHandler = handler;
 }
 
-void 
-xbox_web_socket_client::set_closed_handler(
-    _In_ std::function<void(uint16_t closeStatus, string_t closeReason)> handler
+void xbox_web_socket_client::set_closed_handler(
+    _In_ xbox_live_callback<HCWebSocketCloseStatus> handler
     )
 {
     m_closeHandler = handler;

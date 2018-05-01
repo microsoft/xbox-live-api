@@ -5,9 +5,9 @@
 #include "shared_macros.h"
 #include "xsapi/system.h"
 #include "xsapi/profile.h"
+#include "profile_internal.h"
 #include "utils.h"
 
-using namespace pplx;
 using namespace xbox::services;
 using namespace xbox::services::system;
 
@@ -18,13 +18,28 @@ xbox_user_profile::xbox_user_profile()
 }
 
 xbox_user_profile::xbox_user_profile(
-    _In_ string_t appDisplayName,
+    _In_ std::shared_ptr<xbox_user_profile_internal> internalObj
+    ) :
+    m_internalObj(std::move(internalObj))
+{
+}
+
+DEFINE_GET_STRING(xbox_user_profile, app_display_name);
+DEFINE_GET_URI(xbox_user_profile, app_display_picture_resize_uri);
+DEFINE_GET_STRING(xbox_user_profile, game_display_name);
+DEFINE_GET_URI(xbox_user_profile, game_display_picture_resize_uri);
+DEFINE_GET_STRING(xbox_user_profile, gamerscore);
+DEFINE_GET_STRING(xbox_user_profile, gamertag);
+DEFINE_GET_STRING(xbox_user_profile, xbox_user_id);
+
+xbox_user_profile_internal::xbox_user_profile_internal(
+    _In_ xsapi_internal_string appDisplayName,
     _In_ web::uri appDisplayPictureResizeUri,
-    _In_ string_t gameDisplayName,
+    _In_ xsapi_internal_string gameDisplayName,
     _In_ web::uri gameDisplayPictureResizeUri,
-    _In_ string_t gamerscore,
-    _In_ string_t gamertag,
-    _In_ string_t xboxUserId
+    _In_ xsapi_internal_string gamerscore,
+    _In_ xsapi_internal_string gamertag,
+    _In_ xsapi_internal_string xboxUserId
     ) :
     m_appDisplayName(std::move(appDisplayName)),
     m_appDisplayPictureResizeUri(std::move(appDisplayPictureResizeUri)),
@@ -36,93 +51,93 @@ xbox_user_profile::xbox_user_profile(
 {
 }
 
-const string_t& xbox_user_profile::app_display_name() const
+const xsapi_internal_string& xbox_user_profile_internal::app_display_name() const
 {
     return m_appDisplayName;
 }
 
-const web::uri& xbox_user_profile::app_display_picture_resize_uri() const
+const web::uri& xbox_user_profile_internal::app_display_picture_resize_uri() const
 {
     return m_appDisplayPictureResizeUri;
 }
 
-const string_t& xbox_user_profile::game_display_name() const
+const xsapi_internal_string& xbox_user_profile_internal::game_display_name() const
 {
     return m_gameDisplayName;
 }
 
-const web::uri& xbox_user_profile::game_display_picture_resize_uri() const
+const web::uri& xbox_user_profile_internal::game_display_picture_resize_uri() const
 {
     return m_gameDisplayPictureResizeUri;
 }
 
-const string_t& xbox_user_profile::gamerscore() const
+const xsapi_internal_string& xbox_user_profile_internal::gamerscore() const
 {
     return m_gamerscore;
 }
 
-const string_t& xbox_user_profile::gamertag() const
+const xsapi_internal_string& xbox_user_profile_internal::gamertag() const
 {
     return m_gamertag;
 }
 
-const string_t& xbox_user_profile::xbox_user_id() const
+const xsapi_internal_string& xbox_user_profile_internal::xbox_user_id() const
 {
     return m_xboxUserId;
 }
 
-xbox_live_result<xbox_user_profile>
-xbox_user_profile::_Deserialize(
+xbox_live_result<std::shared_ptr<xbox_user_profile_internal>>
+xbox_user_profile_internal::deserialize(
     _In_ const web::json::value& json
     )
 {
-    if (json.is_null()) return xbox_live_result<xbox_user_profile>();
+    if (json.is_null()) return xbox_live_result<std::shared_ptr<xbox_user_profile_internal>>();
 
     std::error_code errc = xbox_live_error_code::no_error;
     web::json::value jsonSettings = utils::extract_json_field(json, _T("settings"), errc, true);
 
     web::json::array setttings = jsonSettings.as_array();
 
-    string_t appDisplayName;
+    xsapi_internal_string appDisplayName;
     web::uri appDisplayPictureResizeUri;
-    string_t gameDisplayName;
+    xsapi_internal_string gameDisplayName;
     web::uri gameDisplayPictureResizeUri;
-    string_t gamerscore;
-    string_t gamertag;
-    string_t xboxUserId = utils::extract_json_string(json, _T("id"), errc, true);
+    xsapi_internal_string gamerscore;
+    xsapi_internal_string gamertag;
+    xsapi_internal_string xboxUserId = utils::extract_json_string(json, "id", errc, true);
 
     for (const auto& setting : setttings)
     {
-        string_t name = utils::extract_json_string(setting, _T("id"), errc, true);
-        string_t stringValue = utils::extract_json_string(setting, _T("value"), errc, true);
+        xsapi_internal_string name = utils::extract_json_string(setting, "id", errc, true);
+        xsapi_internal_string stringValue = utils::extract_json_string(setting, "value", errc, true);
 
-        if (name == _T("AppDisplayName"))
+        if (name == "AppDisplayName")
         {
             appDisplayName = std::move(stringValue);
         }
-        else if (name == _T("AppDisplayPicRaw"))
+        else if (name == "AppDisplayPicRaw")
         {
-            appDisplayPictureResizeUri = std::move(stringValue);
+            appDisplayPictureResizeUri = utils::string_t_from_internal_string(stringValue);
         }
-        else if (name == _T("GameDisplayName"))
+        else if (name == "GameDisplayName")
         {
             gameDisplayName = std::move(stringValue);
         }
-        else if (name == _T("GameDisplayPicRaw"))
+        else if (name == "GameDisplayPicRaw")
         {
-            gameDisplayPictureResizeUri = std::move(stringValue);
+            gameDisplayPictureResizeUri = utils::string_t_from_internal_string(stringValue);
         }
-        else if (name == _T("Gamerscore"))
+        else if (name == "Gamerscore")
         {
             gamerscore = std::move(stringValue);
         }
-        else if (name == _T("Gamertag"))
+        else if (name == "Gamertag")
         {
             gamertag = std::move(stringValue);
         }
     }
 
-    auto result = xbox_user_profile(
+    auto result = xsapi_allocate_shared<xbox_user_profile_internal>(
         std::move(appDisplayName),
         std::move(appDisplayPictureResizeUri),
         std::move(gameDisplayName),
@@ -132,7 +147,7 @@ xbox_user_profile::_Deserialize(
         std::move(xboxUserId)
         );
 
-    return xbox_live_result<xbox_user_profile>(result, errc);
+    return xbox_live_result<std::shared_ptr<xbox_user_profile_internal>>(result, errc);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

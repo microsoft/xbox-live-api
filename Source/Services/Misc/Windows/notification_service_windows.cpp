@@ -22,9 +22,9 @@ notification_service_windows::subscribe_to_notifications(
 {
     {
         std::lock_guard<std::mutex> guard(get_xsapi_singleton()->m_singletonLock);
-        if (m_userContexts.find(userContext->xbox_user_id()) == m_userContexts.end())
+        if (m_userContexts.find(utils::string_t_from_internal_string(userContext->xbox_user_id())) == m_userContexts.end())
         {
-            m_userContexts.emplace(std::make_pair(userContext->xbox_user_id(), userContext));
+            m_userContexts.emplace(std::make_pair(utils::string_t_from_internal_string(userContext->xbox_user_id()), userContext));
         }
         else
         {
@@ -67,7 +67,7 @@ notification_service_windows::subscribe_to_notifications(
                 xbox_live_api::subscribe_to_notifications
                 );
 
-            auto applicationInstanceId = utils::create_guid(true);
+            string_t applicationInstanceId = utils::string_t_from_internal_string(utils::create_guid(true));
             auto family = Windows::System::Profile::AnalyticsInfo::VersionInfo->DeviceFamily;
             auto form = Windows::System::Profile::AnalyticsInfo::DeviceForm;
             auto version = Windows::System::Profile::AnalyticsInfo::VersionInfo->DeviceFamilyVersion;
@@ -90,7 +90,7 @@ notification_service_windows::subscribe_to_notifications(
             payload[_T("endpointUri")] = web::json::value::string(channel->Uri->Data());
             payload[_T("platform")] = web::json::value::string(platform);
             payload[_T("platformVersion")] = web::json::value::string(_T("10"));
-            payload[_T("locale")] = web::json::value::string(utils::get_locales());
+            payload[_T("locale")] = web::json::value::string(utils::string_t_from_internal_string(utils::get_locales()));
             payload[_T("titleId")] = web::json::value::string(std::to_wstring(appConfig->title_id()));
 
             httpCall->set_request_body(payload.serialize());
@@ -137,7 +137,7 @@ notification_service_windows::on_push_notification_received(
                 auto contextItor = m_userContexts.find(xuid);
                 if (contextItor != m_userContexts.end() && contextItor->second != nullptr && contextItor->second->user() != nullptr)
                 {
-                    contextItor->second->refresh_token();
+                    contextItor->second->refresh_token(get_xsapi_singleton()->m_asyncQueue, nullptr);
                 }
             }
         }

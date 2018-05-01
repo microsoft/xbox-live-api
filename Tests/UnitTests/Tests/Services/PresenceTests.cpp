@@ -304,7 +304,7 @@ public:
             );
 
         auto setPresenceJson = web::json::value::parse(setPresenceRequest);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto requestJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         VERIFY_IS_EQUAL_JSON(setPresenceJson, requestJson);
     }
 
@@ -314,7 +314,7 @@ public:
         auto responseJson = web::json::value::parse(defaultPresenceResponse);
 
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
         PresenceRecord^ result = create_task(
@@ -339,7 +339,7 @@ public:
         auto responseJson = web::json::value::parse(defaultMultiplePresenceResponse);
 
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         Platform::Collections::Vector<Platform::String^>^ users = ref new Platform::Collections::Vector<Platform::String^>();
         users->Append(L"12345");
@@ -360,7 +360,7 @@ public:
             );
 
         auto getPresenceForMultipleUsers = web::json::value::parse(getPresenceForMultipleUsersRequest);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto requestJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         VERIFY_IS_EQUAL_JSON(getPresenceForMultipleUsers, requestJson);
 
         web::json::array jsonArray = responseJson.as_array();
@@ -378,7 +378,7 @@ public:
         auto responseJson = web::json::value::parse(defaultMultiplePresenceResponse);
 
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         Platform::Collections::Vector<Platform::String^>^ users = ref new Platform::Collections::Vector<Platform::String^>();
         users->Append(L"12345");
@@ -412,7 +412,7 @@ public:
             );
 
         auto getPresenceForMultipleUsers = web::json::value::parse(getPresenceForMultipleUsersOverloadRequest);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto requestJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         VERIFY_IS_EQUAL_JSON(getPresenceForMultipleUsers, requestJson);
 
         web::json::array jsonArray = responseJson.as_array();
@@ -430,7 +430,7 @@ public:
         auto responseJson = web::json::value::parse(defaultMultiplePresenceResponse);
 
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
         Windows::Foundation::Collections::IVectorView<PresenceRecord^>^ result = create_task(
@@ -461,7 +461,7 @@ public:
         auto responseJson = web::json::value::parse(defaultMultiplePresenceResponse);
 
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         Platform::Collections::Vector<PresenceDeviceType>^ deviceTypes = ref new Platform::Collections::Vector<PresenceDeviceType>();
         deviceTypes->Append(PresenceDeviceType::PC);
@@ -492,7 +492,7 @@ public:
             );
 
         auto getPresenceForSocialGroup = web::json::value::parse(getPresenceForSocialGroupOverloadRequest);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto requestJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         VERIFY_IS_EQUAL_JSON(getPresenceForSocialGroup, requestJson);
 
         web::json::array jsonArray = responseJson.as_array();
@@ -586,10 +586,10 @@ public:
 
             if (!devicePresenceResponseJson.is_null())
             {
-                auto response = utils::string_split(devicePresenceResponseJson.as_string(), ':');
-                auto expected = presence_device_record::_Convert_string_to_presence_device_type(response[0]);
+                auto response = utils::string_split(utils::internal_string_from_string_t(devicePresenceResponseJson.as_string()), ':');
+                auto expected = presence_device_record_internal::convert_string_to_presence_device_type(response[0]);
                 VERIFY_ARE_EQUAL_INT(static_cast<uint32>(args->DeviceType), static_cast<uint32>(expected));
-                VERIFY_ARE_EQUAL(args->IsUserLoggedOnDevice.ToString()->Data(), response[1]);
+                VERIFY_ARE_EQUAL(args->IsUserLoggedOnDevice.ToString()->Data(), utils::string_t_from_internal_string(response[1]));
             }
             else
             {
@@ -631,12 +631,12 @@ public:
         DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestPresenceWriter);
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(L"");
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(L"");
         httpCall->set_custom_header(L"X-Heartbeat-After", L"60");
 
         pplx::event writeFinishEvent;
         int writeDelay = 0;
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay](int delay)
+        xbox::services::presence::presence_service_internal::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay](int delay)
         {
             writeDelay = delay;
             writeFinishEvent.set();
@@ -661,9 +661,9 @@ public:
         VERIFY_IS_TRUE(writeDelay == 1);
         VERIFY_IS_TRUE(httpCall->CallCounter == 1);
 
-        presenceWriter->stop_writer(xboxLiveContext->user()->XboxUserId->Data());
+        presenceWriter->stop_writer(utils::internal_string_from_string_t(xboxLiveContext->user()->XboxUserId->Data()));
         writeFinishEvent.wait();
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler(nullptr);
+        xbox::services::presence::presence_service_internal::set_presence_set_finished_handler(nullptr);
 
     }
 
@@ -672,7 +672,7 @@ public:
         DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestPresenceWriterNoHeartbeatAfter);
         pplx::event writeFinishEvent;
         int writeDelay = 0;
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay](int delay)
+        xbox::services::presence::presence_service_internal::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay](int delay)
         {
             writeDelay = delay;
             writeFinishEvent.set();
@@ -680,7 +680,7 @@ public:
          
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(L"");
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(L"");
         auto presenceWriter = xbox::services::presence::presence_writer::get_presence_writer_singleton();
         presenceWriter->start_writer(
             xboxLiveContext->presence_service()._Impl()
@@ -700,9 +700,9 @@ public:
 
         writeFinishEvent.reset();
 
-        presenceWriter->stop_writer(xboxLiveContext->user()->XboxUserId->Data());
+        presenceWriter->stop_writer(utils::internal_string_from_string_t(xboxLiveContext->user()->XboxUserId->Data()));
         writeFinishEvent.wait();
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler(nullptr);
+        xbox::services::presence::presence_service_internal::set_presence_set_finished_handler(nullptr);
     }
 
 
@@ -712,7 +712,7 @@ public:
         pplx::event writeFinishEvent;
         int writeDelay = 0;
         int eventExpecting = 2;
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay, &eventExpecting](int delay)
+        xbox::services::presence::presence_service_internal::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay, &eventExpecting](int delay)
         {
             writeDelay = delay;
             if (!--eventExpecting)
@@ -725,7 +725,7 @@ public:
         auto xboxLiveContext1 = GetMockXboxLiveContext_Cpp(L"TestUser1");
 
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(L"");
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(L"");
         httpCall->set_custom_header(L"X-Heartbeat-After", L"60");
         auto presenceWriter = xbox::services::presence::presence_writer::get_presence_writer_singleton();
         presenceWriter->start_writer(
@@ -748,10 +748,10 @@ public:
         writeFinishEvent.reset();
         eventExpecting = 2;
 
-        presenceWriter->stop_writer(xboxLiveContext->user()->XboxUserId->Data());
-        presenceWriter->stop_writer(xboxLiveContext1->user()->XboxUserId->Data());
+        presenceWriter->stop_writer(utils::internal_string_from_string_t(xboxLiveContext->user()->XboxUserId->Data()));
+        presenceWriter->stop_writer(utils::internal_string_from_string_t(xboxLiveContext1->user()->XboxUserId->Data()));
         writeFinishEvent.wait();
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler(nullptr);
+        xbox::services::presence::presence_service_internal::set_presence_set_finished_handler(nullptr);
     }
 
     DEFINE_TEST_CASE(TestMultiUserMultiContextPresenceWriter)
@@ -761,7 +761,7 @@ public:
         pplx::event writeFinishEvent;
         int writeDelay = 0;
         int eventExpecting = 2;
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay, &eventExpecting](int delay)
+        xbox::services::presence::presence_service_internal::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay, &eventExpecting](int delay)
         {
             writeDelay = delay;
             if (!--eventExpecting)
@@ -810,17 +810,17 @@ public:
         writeFinishEvent.reset();
         eventExpecting = 2;
 
-        presenceWriter->stop_writer(xboxLiveContext1_User1->User->XboxUserId->Data());
+        presenceWriter->stop_writer(utils::internal_string_from_string_t(xboxLiveContext1_User1->User->XboxUserId->Data()));
         VERIFY_ARE_EQUAL_UINT(1, presenceWriter->tracking_count());
-        presenceWriter->stop_writer(xboxLiveContext2_User1->User->XboxUserId->Data());
+        presenceWriter->stop_writer(utils::internal_string_from_string_t(xboxLiveContext2_User1->User->XboxUserId->Data()));
         VERIFY_ARE_EQUAL_UINT(1, presenceWriter->tracking_count());
-        presenceWriter->stop_writer(xboxLiveContext1_User2->User->XboxUserId->Data());
+        presenceWriter->stop_writer(utils::internal_string_from_string_t(xboxLiveContext1_User2->User->XboxUserId->Data()));
         VERIFY_ARE_EQUAL_UINT(0, presenceWriter->tracking_count());
-        presenceWriter->stop_writer(xboxLiveContext2_User2->User->XboxUserId->Data());
+        presenceWriter->stop_writer(utils::internal_string_from_string_t(xboxLiveContext2_User2->User->XboxUserId->Data()));
         VERIFY_ARE_EQUAL_UINT(0, presenceWriter->tracking_count());
 
         writeFinishEvent.wait();
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler(nullptr);
+        xbox::services::presence::presence_service_internal::set_presence_set_finished_handler(nullptr);
     }
 
     DEFINE_TEST_CASE(TestPresenceInvalidArgs)

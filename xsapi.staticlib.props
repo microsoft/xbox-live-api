@@ -4,12 +4,13 @@
     <XsapiRoot>$(MSBuildThisFileDirectory)</XsapiRoot>
     <XsapiInclde>$(XsapiRoot)include\</XsapiInclde>
     <CasablancaInclde>$(XsapiRoot)External\cpprestsdk\release\include\</CasablancaInclde>
+    <libHttpClientInclude>$(XsapiRoot)External\libHttpClient\Include\</libHttpClientInclude>
     <PackagesRoot>$(XsapiRoot)External\Packages\</PackagesRoot>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <PreprocessorDefinitions>XSAPI_CPP=1;_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(XsapiInclde);$(CasablancaInclde);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>XSAPI_CPP=1;_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XBL_API_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(XsapiInclde);$(CasablancaInclde);$(libHttpClientInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies Condition="'$(Platform)'!='Durango'">crypt32.lib;Winhttp.lib;Bcrypt.lib;pathcch.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>

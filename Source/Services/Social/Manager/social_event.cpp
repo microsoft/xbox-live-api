@@ -3,24 +3,47 @@
 
 #include "pch.h"
 #include "xsapi/social_manager.h"
+#include "social_manager_internal.h"
 #include "user_context.h"
 
 using namespace xbox::services;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
 
-social_event::social_event() :
-    m_eventType(social_event_type::unknown)
+social_event::social_event(
+    _In_ std::shared_ptr<social_event_internal> internalObj
+    ) :
+    m_internalObj(std::move(internalObj))
 {
 }
 
-social_event::social_event(
+DEFINE_GET_OBJECT(social_event, xbox_live_user_t, user);
+DEFINE_GET_ENUM_TYPE(social_event, social_event_type, event_type);
+DEFINE_GET_VECTOR(social_event, xbox_user_id_container, users_affected);
+
+std::shared_ptr<social_event_args> social_event::event_args() const
+{
+    switch (m_internalObj->event_type())
+    {
+    case social_event_type::social_user_group_loaded:
+        return xsapi_allocate_shared<social_user_group_loaded_event_args>(
+            std::dynamic_pointer_cast<social_user_group_loaded_event_args_internal>(m_internalObj->event_args())
+            );
+    default:
+        return nullptr;
+    }
+}
+
+DEFINE_GET_OBJECT_REF(social_event, std::error_code, err);
+DEFINE_GET_STD_STRING(social_event, err_message);
+
+social_event_internal::social_event_internal(
     _In_ xbox_live_user_t user,
     _In_ social_event_type eventType,
-    _In_ std::vector<xbox_user_id_container> usersAffected,
+    _In_ xsapi_internal_vector<xbox_user_id_container> usersAffected,
     _In_ std::shared_ptr<social_event_args> socialEventArgs,
     _In_ std::error_code errCode,
-    _In_ std::string errMessage
+    _In_ xsapi_internal_string errMessage
     ) :
     m_user(std::move(user)),
     m_eventType(eventType),
@@ -32,37 +55,37 @@ social_event::social_event(
 }
 
 xbox_live_user_t
-social_event::user() const
+social_event_internal::user() const
 {
     return m_user;
 }
 
 social_event_type
-social_event::event_type() const
+social_event_internal::event_type() const
 {
     return m_eventType;
 }
 
-const std::vector<xbox_user_id_container>&
-social_event::users_affected() const
+const xsapi_internal_vector<xbox_user_id_container>&
+social_event_internal::users_affected() const
 {
     return m_usersAffected;
 }
 
 const std::error_code&
-social_event::err() const
+social_event_internal::err() const
 {
     return m_errCode;
 }
 
-const std::string&
-social_event::err_message() const
+const xsapi_internal_string&
+social_event_internal::err_message() const
 {
     return m_errMessage;
 }
 
 const std::shared_ptr<social_event_args>&
-social_event::event_args() const
+social_event_internal::event_args() const
 {
     return m_eventArgs;
 }

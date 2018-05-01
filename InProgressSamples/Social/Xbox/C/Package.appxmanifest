@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:mx="http://schemas.microsoft.com/appx/2013/xbox/manifest" IgnorableNamespaces="mx">
+
+    <Identity Name="8e3fc51b-59af-4593-9183-39a9e9a08acb"
+              Publisher="CN=Publisher"
+              Version="1.0.0.0" />
+
+    <Properties>
+        <DisplayName>Xbox LIVE SDK Sample - Social</DisplayName>
+        <PublisherDisplayName>Microsoft</PublisherDisplayName>
+        <Logo>Assets\StoreLogo.png</Logo>
+        <Description>Social</Description>
+    </Properties>
+
+    <Prerequisites>
+        <OSMinVersion>6.2</OSMinVersion>
+        <OSMaxVersionTested>6.2</OSMaxVersionTested>
+    </Prerequisites>
+
+    <Resources>
+        <Resource Language="en-us"/>
+    </Resources>
+
+    <Applications>
+
+        <!--- Config -->
+        <!--- 'Id' is in the aumid returned from deploy  -->
+        <!--- 'Executable' must match the .exe produced by the build  -->
+        <Application Id="Social"
+            Executable="$targetnametoken$.exe"
+            EntryPoint="Social.App">
+            <!--- all fields except DisplayName not yet implemented -->
+            <VisualElements
+                DisplayName="Xbox LIVE SDK Sample - Social"
+                Logo="Assets\Logo.png"
+                SmallLogo="Assets\SmallLogo.png"
+                Description="Social"
+                ForegroundText="dark"
+                BackgroundColor="#000040">
+                <SplashScreen Image="Assets\SplashScreen.png" />
+                <DefaultTile WideLogo="Assets\WideLogo.png" />
+            </VisualElements>
+            <Extensions>
+                <mx:Extension Category="xbox.live">
+                    <mx:XboxLive TitleId="48BE58ED"
+                                 PrimaryServiceConfigId="4154ef41-e873-4c16-ad6a-e30a8b7cef06" />
+                </mx:Extension>
+            </Extensions>
+        </Application>
+
+    </Applications>
+    <Capabilities>
+        <Capability Name="internetClientServer" />
+    </Capabilities>
+</Package>

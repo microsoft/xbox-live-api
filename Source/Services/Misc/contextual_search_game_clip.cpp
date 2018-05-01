@@ -78,14 +78,14 @@ contextual_search_game_clip::_Deserialize(_In_ const web::json::value& inputJson
 
     contextual_search_game_clip result(
         utils::extract_json_string(inputJson, _T("clipName"), errc, false),
-        utils::extract_json_uint52(inputJson, _T("durationInSeconds"), errc, false),
+        utils::extract_json_uint52(inputJson, "durationInSeconds", errc, false),
         utils::extract_json_string(inputJson, _T("gameClipId"), errc, false),
         utils::extract_json_string(inputJson, _T("gameClipLocale"), errc, false),
         utils::extract_json_vector<contextual_search_game_clip_uri_info>(contextual_search_game_clip_uri_info::_Deserialize, inputJson, _T("gameClipUris"), errc, false),
         utils::extract_json_vector<contextual_search_game_clip_thumbnail>(contextual_search_game_clip_thumbnail::_Deserialize, inputJson, _T("thumbnails"), errc, false),
         convert_string_to_clip_type(utils::extract_json_string(inputJson, _T("type"), false)),
-        utils::extract_json_uint52(inputJson, _T("views"), errc, false),
-        convert_xuid_to_string(utils::extract_json_uint52(inputJson, _T("xuid"), errc, false), utils::extract_json_string(inputJson, _T("xboxUserId"), errc, false)),
+        utils::extract_json_uint52(inputJson, "views", errc, false),
+        convert_xuid_to_string(utils::extract_json_uint52(inputJson, "xuid", errc, false), utils::extract_json_string(inputJson, _T("xboxUserId"), errc, false)),
         utils::extract_json_vector<contextual_search_game_clip_stat>(contextual_search_game_clip_stat::_Deserialize, inputJson, _T("stats"), errc, false)
         );
 

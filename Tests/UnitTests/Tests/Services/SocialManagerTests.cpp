@@ -13,6 +13,7 @@
 #include "SocialUserGroupLoadedEventArgs_WinRT.h"
 #include "MockSocialManager.h"
 #include "SocialManagerHelper.h"
+#include "Event_WinRT.h"
 
 using namespace xbox::services;
 using namespace xbox::services::presence;
@@ -20,6 +21,7 @@ using namespace xbox::services::real_time_activity;
 using namespace xbox::services::social::manager;
 using namespace Microsoft::Xbox::Services::Social::Manager;
 using namespace Microsoft::Xbox::Services::Presence;
+using namespace Microsoft::Xbox::Services::System;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
@@ -271,10 +273,10 @@ public:
     {
         std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
         auto responseStruct = GetPresenceResponseStruct(devicePresenceResponse);
-        responseStruct->fRequestPostFunc = [](std::shared_ptr<http_call_response>& initialCallResponse, const string_t& requestBody)
+        responseStruct->fRequestPostFuncInternal = [](std::shared_ptr<http_call_response_internal>& initialCallResponse, const xsapi_internal_string& requestBody)
         {
             std::error_code errc;
-            auto jsonRequest = web::json::value::parse(requestBody, errc);
+            auto jsonRequest = web::json::value::parse(utils::string_t_from_internal_string(requestBody), errc);
             if (errc)
             {
                 return;
@@ -290,7 +292,7 @@ public:
                 newResponse[i] = responseTemplate;
             }
 
-            initialCallResponse->_Set_response_body(newResponse);
+            initialCallResponse->set_response_body(newResponse);
         };
         responses[_T("https://userpresence.mockenv.xboxlive.com")] = responseStruct;
         m_mockXboxSystemFactory->add_http_state_response(responses);
@@ -376,17 +378,17 @@ public:
     std::shared_ptr<HttpResponseStruct> GetPeoplehubResponseStruct(const web::json::value& initJSON, int errorNum = 200)
     {
         // Set up initial http responses
-        auto peoplehubResponse = StockMocks::CreateMockHttpCallResponse(initJSON, errorNum);
+        auto peoplehubResponse = StockMocks::CreateMockHttpCallResponseInternal(initJSON, errorNum);
         std::shared_ptr<HttpResponseStruct> peoplehubResponseStruct = std::make_shared<HttpResponseStruct>();
-        peoplehubResponseStruct->responseList = { peoplehubResponse };
+        peoplehubResponseStruct->responseListInternal = { peoplehubResponse };
         return peoplehubResponseStruct;
     }
 
     std::shared_ptr<HttpResponseStruct> GetPresenceResponseStruct(const web::json::value& initJSON, int errorNum = 200)
     {
-        auto presenceResponse = StockMocks::CreateMockHttpCallResponse(initJSON, errorNum);
+        auto presenceResponse = StockMocks::CreateMockHttpCallResponseInternal(initJSON, errorNum);
         std::shared_ptr<HttpResponseStruct> presenceResponseStruct = std::make_shared<HttpResponseStruct>();
-        presenceResponseStruct->responseList = { presenceResponse };
+        presenceResponseStruct->responseListInternal = { presenceResponse };
         return presenceResponseStruct;
     }
 
@@ -485,6 +487,7 @@ public:
 
         LOG_DEBUG("Subs initialized");
         socialManagerInitializationStruct.socialEvents.clear();
+        
         while (true)  // todo: find other way to confirm subs
         {
             AppendToPendingEvents(socialManagerInitializationStruct.socialManager->DoWork(), socialManagerInitializationStruct);
@@ -822,7 +825,7 @@ public:
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto xboxLiveContext1 = GetMockXboxLiveContext_Cpp();
-        xboxLiveContext1->user()->_User_impl()->_Set_xbox_user_id(L"T0");
+        xboxLiveContext1->user()->_User_impl()->_Set_xbox_user_id("T0");
         auto socialManagerInitializationStruct1 = Initialize(xboxLiveContext1, true);
         auto socialManagerCppMock = std::dynamic_pointer_cast<MockSocialManager>(socialManagerInitializationStruct1.socialManager->GetCppObj());
 
@@ -1005,7 +1008,7 @@ public:
         SetMultipleClientWebSocketRTAAutoResponser(mockSockets, rtaConnectionIdJson, -1, false);
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto xboxLiveContext1 = GetMockXboxLiveContext_Cpp();
-        xboxLiveContext1->user()->_User_impl()->_Set_xbox_user_id(L"T0");
+        xboxLiveContext1->user()->_User_impl()->_Set_xbox_user_id("T0");
         auto socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
         auto socialManagerInitializationStruct1 = Initialize(xboxLiveContext1, false);
         auto socialManagerCppMock = std::dynamic_pointer_cast<MockSocialManager>(socialManagerInitializationStruct1.socialManager->GetCppObj());
@@ -1211,9 +1214,9 @@ public:
         std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
         auto devicePresenceResponseCopy = devicePresenceResponse;
         devicePresenceResponseCopy[0][L"state"] = web::json::value::string(L"Offline");
-        auto presenceResponse = StockMocks::CreateMockHttpCallResponse(devicePresenceResponseCopy);
+        auto presenceResponse = StockMocks::CreateMockHttpCallResponseInternal(devicePresenceResponseCopy);
         auto presenceResponseStruct = std::make_shared<HttpResponseStruct>();
-        presenceResponseStruct->responseList = { presenceResponse };
+        presenceResponseStruct->responseListInternal = { presenceResponse };
 
         responses[_T("https://userpresence.mockenv.xboxlive.com")] = presenceResponseStruct;
 
@@ -1282,9 +1285,9 @@ public:
         web::json::value jsonArray = web::json::value::array();
         jsonArray[0] = defaultPeoplehubTemplate;
         returnObject[L"people"] = jsonArray;
-        auto relationshipAddedResponse = StockMocks::CreateMockHttpCallResponse(returnObject);
+        auto relationshipAddedResponse = StockMocks::CreateMockHttpCallResponseInternal(returnObject);
         auto relationshipAddedStruct = std::make_shared<HttpResponseStruct>();
-        relationshipAddedStruct->responseList = { relationshipAddedResponse };
+        relationshipAddedStruct->responseListInternal = { relationshipAddedResponse };
 
         responses[_T("https://peoplehub.mockenv.xboxlive.com")] = relationshipAddedStruct;
         m_mockXboxSystemFactory->add_http_state_response(responses, false);
@@ -1613,7 +1616,8 @@ public:
         auto peoplehubResponseJson = GenerateInitialPeoplehubJSON();
         auto responseStruct = GetPeoplehubResponseStruct(peoplehubResponseJson, 200);
         peoplehubResponseJson[L"people"][0][L"gamertag"] = web::json::value::string(testTag);
-        responseStruct->responseList[0]->_Set_response_body(peoplehubResponseJson);
+
+        responseStruct->responseListInternal[0]->set_response_body(peoplehubResponseJson);
 
         std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
 
@@ -2055,20 +2059,31 @@ public:
         DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerUserBufferHolder);
         auto peopleHubService = SocialManagerHelper::GetPeoplehubService();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubResponse));
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(web::json::value::parse(peoplehubResponse));
 
+
+        xsapi_internal_vector<xsapi_internal_string> xuids;
+        xuids.push_back("1");
+
+        Event^ callComplete = ref new Event();
         user_buffers_holder userBufferHolder;
+        size_t userGroupSize;
 
-        std::vector<string_t> xuids;
-        xuids.push_back(_T("1"));
-        auto userGroup = peopleHubService.get_social_graph(_T("TestXboxUserId"), social_manager_extra_detail_level::preferred_color_level, xuids).get();
-        VERIFY_IS_TRUE(!userGroup.err());
+        peopleHubService.get_social_graph("TestXboxUserId", social_manager_extra_detail_level::preferred_color_level, xuids, 0,
+            [&callComplete, &userBufferHolder, &userGroupSize](xbox_live_result<xsapi_internal_vector<xbox_social_user>> userGroup)
+        {
+            VERIFY_IS_TRUE(!userGroup.err());
 
-        userBufferHolder.initialize(userGroup.payload());
-        size_t userGroupSize = userGroup.payload().size();
+            userBufferHolder.initialize(userGroup.payload());
+            userGroupSize = userGroup.payload().size();
 
-        VERIFY_IS_TRUE(&userBufferHolder.user_buffer_a() == userBufferHolder.active_buffer());
-        VERIFY_IS_TRUE(&userBufferHolder.user_buffer_b() == userBufferHolder.inactive_buffer());
+            VERIFY_IS_TRUE(&userBufferHolder.user_buffer_a() == userBufferHolder.active_buffer());
+            VERIFY_IS_TRUE(&userBufferHolder.user_buffer_b() == userBufferHolder.inactive_buffer());
+
+            callComplete->Set();
+        });
+
+        callComplete->Wait();
 
         VerifyUserBuffer(userBufferHolder.user_buffer_a(), userGroupSize);
         VerifyUserBuffer(userBufferHolder.user_buffer_b(), userGroupSize);
@@ -2079,22 +2094,33 @@ public:
         DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerUserBufferAddUsersWithNoInit);
         auto peopleHubService = SocialManagerHelper::GetPeoplehubService();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubResponse));
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(web::json::value::parse(peoplehubResponse));
 
+        xsapi_internal_vector<xsapi_internal_string> xuids;
+        xuids.push_back("1");
+
+        Event^ callComplete = ref new Event();
         user_buffers_holder userBufferHolder;
+        size_t userGroupSize;
 
-        std::vector<string_t> xuids;
-        xuids.push_back(_T("1"));
-        auto userGroup = peopleHubService.get_social_graph(_T("TestXboxUserId"), social_manager_extra_detail_level::preferred_color_level, xuids).get();
-        VERIFY_IS_TRUE(!userGroup.err());
+        peopleHubService.get_social_graph("TestXboxUserId", social_manager_extra_detail_level::preferred_color_level, xuids, 0,
+            [&callComplete, &userBufferHolder, &userGroupSize](xbox_live_result<xsapi_internal_vector<xbox_social_user>> userGroup)
+        {
+            VERIFY_IS_TRUE(!userGroup.err());
 
-        userBufferHolder.initialize(std::vector<xbox_social_user>());
-        userBufferHolder.add_users_to_buffer(userGroup.payload(), *userBufferHolder.inactive_buffer());
-        userBufferHolder.add_users_to_buffer(userGroup.payload(), *userBufferHolder.active_buffer());
-        size_t userGroupSize = userGroup.payload().size();
+            userBufferHolder.initialize(xsapi_internal_vector<xbox_social_user>());
+            userBufferHolder.add_users_to_buffer(userGroup.payload(), *userBufferHolder.inactive_buffer());
+            userBufferHolder.add_users_to_buffer(userGroup.payload(), *userBufferHolder.active_buffer());
+            userGroupSize = userGroup.payload().size();
 
-        VERIFY_IS_TRUE(&userBufferHolder.user_buffer_a() == userBufferHolder.active_buffer());
-        VERIFY_IS_TRUE(&userBufferHolder.user_buffer_b() == userBufferHolder.inactive_buffer());
+            VERIFY_IS_TRUE(&userBufferHolder.user_buffer_a() == userBufferHolder.active_buffer());
+            VERIFY_IS_TRUE(&userBufferHolder.user_buffer_b() == userBufferHolder.inactive_buffer());
+
+            callComplete->Set();
+
+        });
+
+        callComplete->Wait();
 
         VerifyUserBuffer(userBufferHolder.user_buffer_a(), userGroupSize);
         VerifyUserBuffer(userBufferHolder.user_buffer_b(), userGroupSize);
@@ -2105,13 +2131,13 @@ public:
         DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerUserBufferAddUsersNoData);
         auto peopleHubService = SocialManagerHelper::GetPeoplehubService();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubResponse));
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(web::json::value::parse(peoplehubResponse));
 
         user_buffers_holder userBufferHolder;
 
-        userBufferHolder.initialize(std::vector<xbox_social_user>());
-        userBufferHolder.add_users_to_buffer(std::vector<xbox_social_user>(), *userBufferHolder.inactive_buffer());
-        userBufferHolder.add_users_to_buffer(std::vector<xbox_social_user>(), *userBufferHolder.active_buffer());
+        userBufferHolder.initialize(xsapi_internal_vector<xbox_social_user>());
+        userBufferHolder.add_users_to_buffer(xsapi_internal_vector<xbox_social_user>(), *userBufferHolder.inactive_buffer());
+        userBufferHolder.add_users_to_buffer(xsapi_internal_vector<xbox_social_user>(), *userBufferHolder.active_buffer());
 
         VERIFY_IS_TRUE(&userBufferHolder.user_buffer_a() == userBufferHolder.active_buffer());
         VERIFY_IS_TRUE(&userBufferHolder.user_buffer_b() == userBufferHolder.inactive_buffer());
@@ -2227,7 +2253,7 @@ public:
         {
             auto localGraphs = socialManagerCppMock->local_graphs();
             auto localGraph = localGraphs[_T("TestXboxUserId")];
-            std::vector<social_event> socialEvents;
+            xsapi_internal_vector<std::shared_ptr<social_event_internal>> socialEvents;
             auto changeStruct = localGraph->do_work(socialEvents);
             VERIFY_IS_TRUE(changeStruct.socialUsers->size() == 99);
         }
@@ -2318,7 +2344,7 @@ public:
         for (auto& ws : m_mockXboxSystemFactory->GetMockWebSocketClients())
         {
             ws->m_connectToFail = true;
-            ws->m_closeStatus = web::websockets::client::websocket_close_status::abnormal_close;
+            ws->m_closeStatus = HCWebSocketCloseStatus_AbnormalClose;
             ws->close();
         }
 
@@ -2391,9 +2417,9 @@ public:
         fullJSON[L"people"] = jsonArray;
 
 
-        auto peopleHubResponse = StockMocks::CreateMockHttpCallResponse(fullJSON);
+        auto peopleHubResponse = StockMocks::CreateMockHttpCallResponseInternal(fullJSON);
         std::shared_ptr<HttpResponseStruct> peopleHubResponseStruct = std::make_shared<HttpResponseStruct>();
-        peopleHubResponseStruct->responseList = { peopleHubResponse };
+        peopleHubResponseStruct->responseListInternal = { peopleHubResponse };
         std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
         // set up http response set
         responses[_T("https://peoplehub.mockenv.xboxlive.com")] = peopleHubResponseStruct;
@@ -2572,9 +2598,9 @@ public:
         );
 
         auto presenceJSON = GenerateInitialPresenceJSON(false);
-        auto presenceResponse = StockMocks::CreateMockHttpCallResponse(presenceJSON);
+        auto presenceResponse = StockMocks::CreateMockHttpCallResponseInternal(presenceJSON);
         std::shared_ptr<HttpResponseStruct> presenceResponseStruct = std::make_shared<HttpResponseStruct>();
-        presenceResponseStruct->responseList = { presenceResponse };
+        presenceResponseStruct->responseListInternal = { presenceResponse };
         std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
         // set up http response set
         responses[_T("https://userpresence.mockenv.xboxlive.com")] = presenceResponseStruct;
@@ -2606,9 +2632,9 @@ public:
         socialManagerInitializationStruct.socialManager->SetRichPresencePollingState(xboxLiveContext->user(), false);
 
         presenceJSON = GenerateInitialPresenceJSON(true);
-        presenceResponse = StockMocks::CreateMockHttpCallResponse(presenceJSON);
+        presenceResponse = StockMocks::CreateMockHttpCallResponseInternal(presenceJSON);
         presenceResponseStruct = std::make_shared<HttpResponseStruct>();
-        presenceResponseStruct->responseList = { presenceResponse };
+        presenceResponseStruct->responseListInternal = { presenceResponse };
         // set up http response set
         responses[_T("https://userpresence.mockenv.xboxlive.com")] = presenceResponseStruct;
 

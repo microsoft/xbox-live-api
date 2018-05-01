@@ -6,7 +6,6 @@
 #include "shared_macros.h"
 #include "xsapi/clubs.h"
 #include "utils.h"
-//#include <cpprest/ws_client.h>
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CLUBS_CPP_BEGIN
 

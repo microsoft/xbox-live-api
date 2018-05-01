@@ -13,28 +13,26 @@ class MockUser :public user_impl
 {
 public:
 
-    virtual pplx::task<xbox_live_result<sign_in_result>> sign_in_impl(
+    virtual void sign_in_impl(
         _In_ bool showUI,
-        _In_ bool forceRefresh
-        ) override;
-
-    virtual pplx::task<xbox_live_result<void>> sign_in_impl(
-        _In_ const string_t& userDelegationTicket,
-        _In_ bool forceRefresh
+        _In_ bool forceRefresh,
+        _In_ async_queue_handle_t queue,
+        _In_ xbox_live_callback<xbox_live_result<sign_in_result>> callback
         ) override;
 
     std::shared_ptr<xbox::services::system::auth_config> auth_config();
     std::shared_ptr<xbox::services::xbox_live_context_settings> xbox_live_context_settings();
 
-    virtual pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
-    internal_get_token_and_signature(
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& url,
-        _In_ const string_t& endpointForNsal,
-        _In_ const string_t& headers,
-        _In_ const std::vector<unsigned char>& bytes,
+    virtual void internal_get_token_and_signature(
+        _In_ const xsapi_internal_string& httpMethod,
+        _In_ const xsapi_internal_string& url,
+        _In_ const xsapi_internal_string& endpointForNsal,
+        _In_ const xsapi_internal_string& headers,
+        _In_ const xsapi_internal_vector<unsigned char>& bytes,
         _In_ bool promptForCredentialsIfNeeded,
-        _In_ bool forceRefresh
+        _In_ bool forceRefresh,
+        _In_ async_queue_handle_t queue,
+        _In_ token_and_signature_callback callback
         ) override;
 
     MockUser();

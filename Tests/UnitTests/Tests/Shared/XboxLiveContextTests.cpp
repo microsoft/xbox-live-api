@@ -111,7 +111,7 @@ public:
         auto user = SignInUserWithMocks_WinRT();
 
         xbox::services::user_context userContext(user);
-        VERIFY_ARE_EQUAL_STR(L"TestXboxUserId", userContext.xbox_user_id()); // StockMock results
+        VERIFY_ARE_EQUAL_STR("TestXboxUserId", userContext.xbox_user_id()); // StockMock results
         VERIFY_ARE_EQUAL(user->XboxUserId, userContext.user()->XboxUserId);
     }
 
@@ -277,7 +277,7 @@ public:
             );
 
         {
-            xsapi_internal_vector(uint32_t) vec;
+            xsapi_internal_vector<uint32_t> vec;
             vec.resize(10000);
             VERIFY_ARE_EQUAL_INT(0, g_MemFreeHookCalls);
             VERIFY_ARE_EQUAL_INT(2, g_MemAllocHookCalls);
@@ -299,7 +299,7 @@ public:
             );
 
         {
-            xsapi_internal_unordered_map(uint32_t, uint32_t) unorderedMap;
+            xsapi_internal_unordered_map<uint32_t, uint32_t> unorderedMap;
             for(int i=0; i<1000; i++)
             {
                 unorderedMap[i] = i * 1000;

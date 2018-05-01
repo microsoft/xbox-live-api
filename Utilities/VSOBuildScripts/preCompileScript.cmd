@@ -34,7 +34,7 @@ echo //>> %BUILD_VERSION_FILE%
 echo //*********************************************************>> %BUILD_VERSION_FILE%
 echo #pragma once>> %BUILD_VERSION_FILE%
 echo. >> %BUILD_VERSION_FILE%
-echo #define XBOX_SERVICES_API_VERSION_STRING _T("%NUGET_VERSION_NUMBER%") >> %BUILD_VERSION_FILE%
+echo #define XBOX_SERVICES_API_VERSION_STRING "%NUGET_VERSION_NUMBER%" >> %BUILD_VERSION_FILE%
 type %BUILD_VERSION_FILE%
 
 rem generate the .Ship. vcxprojs

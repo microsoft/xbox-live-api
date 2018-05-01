@@ -45,7 +45,7 @@ contextual_search_game_clip_thumbnail::_Deserialize(_In_ const web::json::value&
 
     contextual_search_game_clip_thumbnail result(
         utils::extract_json_string(inputJson, _T("Uri"), errc, false),
-        utils::extract_json_uint52(inputJson, _T("FileSize"), errc, false),
+        utils::extract_json_uint52(inputJson, "FileSize", errc, false),
         convert_string_to_thumbnail_type(utils::extract_json_string(inputJson, _T("ThumbnailType"), errc, false))
         );
 

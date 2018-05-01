@@ -2,12 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
+#include "shared_macros.h"
 #include "xsapi/achievements.h"
-#include "xbox_system_factory.h"
+#include "achievements_internal.h"
 #include "utils.h"
-#include "user_context.h"
-
-using namespace pplx;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_ACHIEVEMENTS_CPP_BEGIN
 
@@ -16,7 +14,18 @@ achievement_media_asset::achievement_media_asset()
 }
 
 achievement_media_asset::achievement_media_asset(
-    _In_ string_t name,
+    std::shared_ptr<achievement_media_asset_internal> internalObj
+    ) :
+    m_internalObj(std::move(internalObj))
+{
+}
+
+DEFINE_GET_STRING(achievement_media_asset, name);
+DEFINE_GET_OBJECT_REF(achievement_media_asset, achievement_media_asset_type, media_asset_type);
+DEFINE_GET_URI(achievement_media_asset, url);
+
+achievement_media_asset_internal::achievement_media_asset_internal(
+    _In_ xsapi_internal_string name,
     _In_ achievement_media_asset_type type,
     _In_ web::uri url
     ) :
@@ -26,26 +35,26 @@ achievement_media_asset::achievement_media_asset(
 {
 }
 
-const string_t&
-achievement_media_asset::name() const
+const xsapi_internal_string&
+achievement_media_asset_internal::name() const
 {
     return m_name;
 }
 
-achievement_media_asset_type
-achievement_media_asset::media_asset_type() const
+const achievement_media_asset_type&
+achievement_media_asset_internal::media_asset_type() const
 {
     return m_type;
 }
 
 const web::uri&
-achievement_media_asset::url() const
+achievement_media_asset_internal::url() const
 {
     return m_url;
 }
 
 achievement_media_asset_type
-achievement_media_asset::_Convert_string_to_media_asset_type(
+achievement_media_asset_internal::_Convert_string_to_media_asset_type(
     _In_ const string_t& value
     )
 {
@@ -61,21 +70,21 @@ achievement_media_asset::_Convert_string_to_media_asset_type(
     return achievement_media_asset_type::unknown;
 }
 
-xbox_live_result<achievement_media_asset>
-achievement_media_asset::_Deserialize(
+xbox_live_result<std::shared_ptr<achievement_media_asset_internal>>
+achievement_media_asset_internal::_Deserialize(
 _In_ const web::json::value& json
 )
 {
-    if (json.is_null()) return xbox_live_result<achievement_media_asset>();
+    if (json.is_null()) return xbox_live_result<std::shared_ptr<achievement_media_asset_internal>>();
 
     std::error_code errc = xbox_live_error_code::no_error;
-    auto achievementMediaAsset = achievement_media_asset(
-        utils::extract_json_string(json, _T("name"), errc, true),
+    auto achievementMediaAsset = xsapi_allocate_shared<achievement_media_asset_internal>(
+        utils::extract_json_string(json, "name", errc, true),
         _Convert_string_to_media_asset_type(utils::extract_json_string(json, _T("type"), errc, true)),
         utils::extract_json_string(json, _T("url"), errc, true)
         );
 
-    return xbox_live_result<achievement_media_asset>(achievementMediaAsset, errc);
+    return xbox_live_result<std::shared_ptr<achievement_media_asset_internal>>(achievementMediaAsset, errc);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_ACHIEVEMENTS_CPP_END

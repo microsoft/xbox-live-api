@@ -85,7 +85,8 @@
     void VerifyEqualStr(Platform::String^ expected, std::wstring actual, std::wstring actualName, const WEX::TestExecution::ErrorInfo& errorInfo);
     void VerifyEqualStr(Platform::String^ expected, Platform::String^ actual, std::wstring actualName, const WEX::TestExecution::ErrorInfo& errorInfo);
     void VerifyEqualStr(std::wstring expected, std::wstring actual, std::wstring actualName, const WEX::TestExecution::ErrorInfo& errorInfo);
-    #define VERIFY_ARE_EQUAL_STR(__expected, __actual) VerifyEqualStr((__expected), (__actual), (L#__actual), PRIVATE_VERIFY_ERROR_INFO)
+    void VerifyEqualStr(xsapi_internal_string expected, xsapi_internal_string actual, std::wstring actualName, const WEX::TestExecution::ErrorInfo& errorInfo);
+#define VERIFY_ARE_EQUAL_STR(__expected, __actual) VerifyEqualStr((__expected), (__actual), (L#__actual), PRIVATE_VERIFY_ERROR_INFO)
 #else 
     #define DEFINE_TEST_CLASS(x) TEST_CLASS(x)
     #define DEFINE_TEST_CLASS_PROPS(x) std::shared_ptr<xbox::services::system::MockXboxSystemFactory> m_mockXboxSystemFactory;

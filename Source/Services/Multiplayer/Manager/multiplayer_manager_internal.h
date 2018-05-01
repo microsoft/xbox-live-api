@@ -302,7 +302,7 @@ public:
 
     void set_local_member_properties_to_remote_session(
         _In_ const std::shared_ptr<xbox::services::multiplayer::manager::multiplayer_local_user>& localUser,
-        _In_ const std::map<string_t, web::json::value>& localUserMap,
+        _In_ const std::map<string_t, web::json::value>& localUsersMap,
         _In_ const string_t& localUserConnectionAddress
         );
 

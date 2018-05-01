@@ -47,7 +47,7 @@ void service_call_logging_config::_Register_for_protocol_activation()
 void service_call_logging_config::_ReadLocalConfig()
 {
 #if !TV_API
-    if (local_config::get_local_config_singleton()->get_bool_from_config(_T("ServiceCallLogging"), false, false))
+    if (local_config::get_local_config_singleton()->get_bool_from_config("ServiceCallLogging", false, false))
     {
         enable();
     }

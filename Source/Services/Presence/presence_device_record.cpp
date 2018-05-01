@@ -3,15 +3,32 @@
 
 #include "pch.h"
 #include "xsapi/presence.h"
-#include "utils.h"
+#include "presence_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
 
-presence_device_record::presence_device_record()
+presence_device_record::presence_device_record(
+    _In_ std::shared_ptr<presence_device_record_internal> internalObj
+    ) :
+    m_internalObj(std::move(internalObj))
 {
 }
 
-presence_device_record::presence_device_record(
+DEFINE_GET_ENUM_TYPE(presence_device_record, presence_device_type, device_type);
+DEFINE_GET_VECTOR_INTERNAL_TYPE(presence_device_record, presence_title_record, presence_title_records);
+
+bool presence_device_record::operator!=(
+    _In_ const presence_device_record& rhs
+    )
+{
+    return *m_internalObj != *(rhs.m_internalObj);
+}
+
+presence_device_record_internal::presence_device_record_internal()
+{
+}
+
+presence_device_record_internal::presence_device_record_internal(
     _In_ presence_device_type deviceType
     ) :
     m_deviceType(deviceType)
@@ -19,19 +36,19 @@ presence_device_record::presence_device_record(
 }
 
 presence_device_type
-presence_device_record::device_type() const
+presence_device_record_internal::device_type() const
 {
     return m_deviceType;
 }
 
-const std::vector<presence_title_record>&
-presence_device_record::presence_title_records() const
+const xsapi_internal_vector<std::shared_ptr<presence_title_record_internal>>&
+presence_device_record_internal::presence_title_records() const
 {
     return m_presenceTitleRecords;
 }
 
-bool presence_device_record::operator!=(
-    _In_ const presence_device_record& rhs
+bool presence_device_record_internal::operator!=(
+    _In_ const presence_device_record_internal& rhs
     )
 {
     if (m_presenceTitleRecords.size() != rhs.m_presenceTitleRecords.size())
@@ -61,44 +78,44 @@ bool presence_device_record::operator!=(
 }
 
 presence_device_type
-presence_device_record::_Convert_string_to_presence_device_type(
-    _In_ const string_t& value
+presence_device_record_internal::convert_string_to_presence_device_type(
+    _In_ const xsapi_internal_string& value
     )
 {
-    if (utils::str_icmp(value, _T("WindowsPhone")) == 0)
+    if (utils::str_icmp(value, "WindowsPhone") == 0)
     {
         return presence_device_type::windows_phone;
     }
-    else if (utils::str_icmp(value, _T("WindowsPhone7")) == 0)
+    else if (utils::str_icmp(value, "WindowsPhone7") == 0)
     {
         return presence_device_type::windows_phone_7;
     }
-    else if (utils::str_icmp(value, _T("Web")) == 0)
+    else if (utils::str_icmp(value, "Web") == 0)
     {
         return presence_device_type::web;
     }
-    else if (utils::str_icmp(value, _T("Xbox360")) == 0)
+    else if (utils::str_icmp(value, "Xbox360") == 0)
     {
         return presence_device_type::xbox_360;
     }
-    else if (utils::str_icmp(value, _T("PC")) == 0)
+    else if (utils::str_icmp(value, "PC") == 0)
     {
         return presence_device_type::pc;
     }
-    else if (utils::str_icmp(value, _T("MoLive")) == 0)
+    else if (utils::str_icmp(value, "MoLive") == 0)
     {
         return presence_device_type::windows_8;
     }
-    else if (utils::str_icmp(value, _T("XboxOne")) == 0 ||
-        utils::str_icmp(value, _T("MCapensis")) == 0)
+    else if (utils::str_icmp(value, "XboxOne") == 0 ||
+        utils::str_icmp(value, "MCapensis") == 0)
     {
         return presence_device_type::xbox_one;
     }
-    else if (utils::str_icmp(value, _T("WindowsOneCore")) == 0)
+    else if (utils::str_icmp(value, "WindowsOneCore") == 0)
     {
         return presence_device_type::windows_one_core;
     }
-    else if (utils::str_icmp(value, _T("WindowsOneCoreMobile")) == 0)
+    else if (utils::str_icmp(value, "WindowsOneCoreMobile") == 0)
     {
         return presence_device_type::windows_one_core_mobile;
     }
@@ -106,92 +123,82 @@ presence_device_record::_Convert_string_to_presence_device_type(
     return presence_device_type::unknown;
 }
 
-string_t 
-presence_device_record::_Convert_presence_device_type_to_string(
+xsapi_internal_string
+presence_device_record_internal::convert_presence_device_type_to_string(
     _In_ presence_device_type deviceType
     )
 {
     switch (deviceType)
     {
     case presence_device_type::windows_phone:
-        return _T("WindowsPhone");
+        return "WindowsPhone";
 
     case presence_device_type::windows_phone_7:
-        return _T("WindowsPhone7");
+        return "WindowsPhone7";
 
     case presence_device_type::web:
-        return _T("Web");
+        return "Web";
 
     case presence_device_type::xbox_360:
-        return _T("Xbox360");
+        return "Xbox360";
 
     case presence_device_type::pc:
-        return _T("PC");
+        return "PC";
 
     case presence_device_type::windows_8:
-        return _T("MoLive");
+        return "MoLive";
 
     case presence_device_type::xbox_one:
-        return _T("XboxOne");
+        return "XboxOne";
 
     case presence_device_type::windows_one_core:
-        return _T("WindowsOneCore");
+        return "WindowsOneCore";
 
     case presence_device_type::windows_one_core_mobile:
-        return _T("WindowsOneCoreMobile");
+        return "WindowsOneCoreMobile";
         
     default:
-        return string_t();
+        return xsapi_internal_string();
     }
 }
 
-std::unordered_map<uint32_t, presence_title_record>
-presence_device_record::create_map_from_title_records(
-    _In_ const std::vector<presence_title_record>& titleRecords
+xsapi_internal_unordered_map<uint32_t, std::shared_ptr<presence_title_record_internal>>
+presence_device_record_internal::create_map_from_title_records(
+    _In_ const xsapi_internal_vector<std::shared_ptr<presence_title_record_internal>>& titleRecords
     ) const
 {
-    std::unordered_map<uint32_t, presence_title_record> returnMap;
+    xsapi_internal_unordered_map<uint32_t, std::shared_ptr<presence_title_record_internal>> returnMap;
     for (const auto& titleRecord : titleRecords)
     {
-        returnMap[titleRecord.title_id()] = titleRecord;
+        returnMap[titleRecord->title_id()] = titleRecord;
     }
 
     return returnMap;
 }
 
-void
-presence_device_record::_Add_title_record(
-    _In_ uint32_t titleId,
-    _In_ title_presence_state titlePresenceState
-    )
-{
-    presence_title_record presenceTitleRecord(titleId, titlePresenceState);
-    m_presenceTitleRecords.push_back(presenceTitleRecord);
-}
-
-xbox_live_result<presence_device_record>
-presence_device_record::_Deserialize(
+xbox_live_result<std::shared_ptr<presence_device_record_internal>>
+presence_device_record_internal::deserialize(
     _In_ const web::json::value& inputJson
     )
 {
-    presence_device_record returnObject;
-    if (inputJson.is_null()) return xbox_live_result<presence_device_record>(returnObject);
+    auto returnObject = xsapi_allocate_shared<presence_device_record_internal>();
+    if (inputJson.is_null()) return xbox_live_result<std::shared_ptr<presence_device_record_internal>>(returnObject);
     std::error_code errc = xbox_live_error_code::no_error;
 
-    presence_device_type type = _Convert_string_to_presence_device_type(
-        utils::extract_json_string(inputJson, _T("type"), errc)
+    presence_device_type type = convert_string_to_presence_device_type(
+        utils::extract_json_string(inputJson, "type", errc)
         );
 
-    returnObject.m_presenceTitleRecords = utils::extract_json_vector<presence_title_record>(
-        presence_title_record::_Deserialize,
+    returnObject->m_presenceTitleRecords = utils::extract_json_vector<std::shared_ptr<presence_title_record_internal>>(
+        presence_title_record_internal::deserialize,
         inputJson, 
-        _T("titles"),
+        "titles",
         errc,
         false
         );
 
-    returnObject.m_deviceType = type;
-    return xbox_live_result<presence_device_record>(returnObject, errc);
+    returnObject->m_deviceType = type;
+    return xbox_live_result<std::shared_ptr<presence_device_record_internal>>(returnObject, errc);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_END

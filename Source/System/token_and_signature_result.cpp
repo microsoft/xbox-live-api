@@ -5,24 +5,54 @@
 #include "utils.h"
 #include "shared_macros.h"
 #include "xsapi/system.h"
+#include "system_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
+token_and_signature_result::token_and_signature_result()
+{
+}
+
 token_and_signature_result::token_and_signature_result(
-    _In_ string_t token,
-    _In_ string_t signature,
-    _In_ string_t xuid,
-    _In_ string_t gamertag,
-    _In_ string_t userHash,
-    _In_ string_t ageGroup,
-    _In_ string_t privileges,
+    _In_ std::shared_ptr<token_and_signature_result_internal> internalObj
+    ) :
+    m_internalObj(std::move(internalObj))
+{
+}
+
+DEFINE_GET_STRING(token_and_signature_result, token);
+DEFINE_GET_STRING(token_and_signature_result, signature);
+DEFINE_GET_STRING(token_and_signature_result, xbox_user_id);
+DEFINE_GET_STRING(token_and_signature_result, gamertag);
+DEFINE_GET_STRING(token_and_signature_result, xbox_user_hash);
+DEFINE_GET_STRING(token_and_signature_result, reserved);
+DEFINE_GET_STRING(token_and_signature_result, age_group);
+DEFINE_GET_STRING(token_and_signature_result, privileges);
 #if XSAPI_U
-    _In_ string_t userSettingsRestrictions,
-    _In_ string_t userEnforcementRestrictions,
-    _In_ string_t userTitleRestrictions,
+DEFINE_GET_STRING(token_and_signature_result, user_settings_restrictions);
+DEFINE_GET_STRING(token_and_signature_result, user_enforcement_restrictions);
+DEFINE_GET_STRING(token_and_signature_result, user_title_restrictions);
 #endif
-    _In_ string_t webAccountId,
-    _In_ string_t reserved
+DEFINE_GET_STRING(token_and_signature_result, web_account_id);
+#if UWP_API
+DEFINE_GET_OBJECT(token_and_signature_result, Windows::Security::Authentication::Web::Core::WebTokenRequestResult^, token_request_result);
+#endif
+
+token_and_signature_result_internal::token_and_signature_result_internal(
+    _In_ xsapi_internal_string token,
+    _In_ xsapi_internal_string signature,
+    _In_ xsapi_internal_string xuid,
+    _In_ xsapi_internal_string gamertag,
+    _In_ xsapi_internal_string userHash,
+    _In_ xsapi_internal_string ageGroup,
+    _In_ xsapi_internal_string privileges,
+#if XSAPI_U
+    _In_ xsapi_internal_string userSettingsRestrictions,
+    _In_ xsapi_internal_string userEnforcementRestrictions,
+    _In_ xsapi_internal_string userTitleRestrictions,
+#endif
+    _In_ xsapi_internal_string webAccountId,
+    _In_ xsapi_internal_string reserved
     ) :
     m_token(std::move(token)), 
     m_signature(std::move(signature)), 
@@ -41,17 +71,17 @@ token_and_signature_result::token_and_signature_result(
 {
 }
 
-token_and_signature_result::token_and_signature_result()
+token_and_signature_result_internal::token_and_signature_result_internal()
 {
 }
 
 #ifndef DEFAULT_MOVE_ENABLED
-token_and_signature_result::token_and_signature_result(token_and_signature_result&& other)
+token_and_signature_result_internal::token_and_signature_result_internal(token_and_signature_result_internal&& other)
 {
     *this = std::move(other);
 }
 
-token_and_signature_result& token_and_signature_result::operator = (token_and_signature_result&& other)
+token_and_signature_result_internal& token_and_signature_result_internal::operator = (token_and_signature_result_internal&& other)
 {
     if (this != &other)
     {
@@ -75,70 +105,70 @@ token_and_signature_result& token_and_signature_result::operator = (token_and_si
 }
 #endif
 
-const string_t& token_and_signature_result::xbox_user_id() const
+const xsapi_internal_string& token_and_signature_result_internal::xbox_user_id() const
 {
     return m_xboxUserId;
 }
 
-const string_t& token_and_signature_result::token() const
+const xsapi_internal_string& token_and_signature_result_internal::token() const
 {
     return m_token;
 }
 
-const string_t& token_and_signature_result::signature() const
+const xsapi_internal_string& token_and_signature_result_internal::signature() const
 {
     return m_signature;
 }
 
-const string_t& token_and_signature_result::gamertag() const
+const xsapi_internal_string& token_and_signature_result_internal::gamertag() const
 {
     return m_gamerTag;
 }
 
-const string_t& token_and_signature_result::xbox_user_hash() const
+const xsapi_internal_string& token_and_signature_result_internal::xbox_user_hash() const
 {
     return m_xboxUserHash;
 }
 
-const string_t& token_and_signature_result::age_group() const
+const xsapi_internal_string& token_and_signature_result_internal::age_group() const
 {
     return m_ageGroup;
 }
 
-const string_t& token_and_signature_result::privileges() const
+const xsapi_internal_string& token_and_signature_result_internal::privileges() const
 {
     return m_privileges;
 }
 
 #if XSAPI_U
-const string_t& token_and_signature_result::user_settings_restrictions() const
+const xsapi_internal_string& token_and_signature_result_internal::user_settings_restrictions() const
 {
     return m_userSettingsRestrictions;
 }
 
-const string_t& token_and_signature_result::user_enforcement_restrictions() const
+const xsapi_internal_string& token_and_signature_result_internal::user_enforcement_restrictions() const
 {
     return m_userEnforcementRestrictions;
 }
 
-const string_t& token_and_signature_result::user_title_restrictions() const
+const xsapi_internal_string& token_and_signature_result_internal::user_title_restrictions() const
 {
     return m_userTitleRestrictions;
 }
 #endif
 
-const string_t& token_and_signature_result::reserved() const
+const xsapi_internal_string& token_and_signature_result_internal::reserved() const
 {
     return m_reserved;
 }
 
-const string_t& token_and_signature_result::web_account_id() const
+const xsapi_internal_string& token_and_signature_result_internal::web_account_id() const
 {
     return m_webAccountId;
 }
 
 #if UWP_API
-token_and_signature_result::token_and_signature_result(
+token_and_signature_result_internal::token_and_signature_result_internal(
     Windows::Security::Authentication::Web::Core::WebTokenRequestResult^ tokenResult
     ):
     m_tokenResult(tokenResult)
@@ -146,7 +176,7 @@ token_and_signature_result::token_and_signature_result(
 }
 
 Windows::Security::Authentication::Web::Core::WebTokenRequestResult^ 
-token_and_signature_result::token_request_result() const
+token_and_signature_result_internal::token_request_result() const
 {
     return m_tokenResult;
 }

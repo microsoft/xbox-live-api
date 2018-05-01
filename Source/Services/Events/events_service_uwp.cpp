@@ -43,7 +43,7 @@ events_service::events_service(
     m_userContext(std::move(userContext)),
     m_appConfig(std::move(appConfig))
 {
-    m_playSession = utils::create_guid(true).c_str();
+    m_playSession = utils::string_t_from_internal_string(utils::create_guid(true).c_str());
     m_loggingOptions = ref new LoggingOptions(XBOX_LIVE_LOGGING_OPTIONS);
     m_loggingOptions->Tags = XBOX_LIVE_LOGGING_TAGS;
 
@@ -94,10 +94,10 @@ events_service::write_in_game_event(
 
             service_call_logger_data logData(
                 m_userContext->xbox_user_id(),
-                eventName,
-                m_playSession,
-                dimensions.serialize(),
-                measurements.serialize(),
+                utils::internal_string_from_string_t(eventName),
+                utils::internal_string_from_string_t(m_playSession),
+                utils::internal_string_from_string_t(dimensions.serialize()),
+                utils::internal_string_from_string_t(measurements.serialize()),
                 chrono_clock_t::now()
             );
 
@@ -124,10 +124,10 @@ events_service::write_in_game_event(
 
 void events_service::add_common_logging_field(_In_ Windows::Foundation::Diagnostics::LoggingFields^ fields)
 {
-    fields->AddString("serviceConfigId", ref new String(m_appConfig->scid().c_str()));
-    fields->AddString("playerSessionId", ref new String(m_playSession.c_str()));
+    fields->AddString("serviceConfigId", PLATFORM_STRING_FROM_STRING_T(m_appConfig->scid()));
+    fields->AddString("playerSessionId", PLATFORM_STRING_FROM_STRING_T(m_playSession));
     fields->AddString("titleId", m_appConfig->title_id().ToString());
-    fields->AddString("userId", ref new String(m_userContext->xbox_user_id().c_str()));
+    fields->AddString("userId", PLATFORM_STRING_FROM_INTERNAL_STRING(m_userContext->xbox_user_id()));
     fields->AddUInt16("ver", 1);
 }
 
@@ -242,10 +242,10 @@ string_t events_service::load_app_insights_key()
         auto localConfig = xbox_system_factory::get_factory()->create_local_config();
 
         // 1. Check if app insight is disabled.
-        if (localConfig->get_value_from_config(_T("SendXboxEventsToAppInsights"), false, _T("1")) != _T("0"))
+        if (localConfig->get_value_from_config("SendXboxEventsToAppInsights", false, "1") != "0")
         {
             // 2. check if an alternate app insight key is provided
-            result = localConfig->get_value_from_config(_T("AlternateAppInsightsInstrumentationKey"), false, string_t());
+            result = utils::string_t_from_internal_string(localConfig->get_value_from_config("AlternateAppInsightsInstrumentationKey", false, xsapi_internal_string()));
 
             // 3. Load app insight key from ApplicationInsights.config
             if (result.empty())

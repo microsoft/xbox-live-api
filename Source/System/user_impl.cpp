@@ -4,7 +4,6 @@
 #include "pch.h"
 #include "utils.h"
 #include "user_impl.h"
-//#include "auth_manager.h"
 
 #if WINAPI_FAMILY==WINAPI_FAMILY_APP
 #if !XSAPI_CPP
@@ -50,79 +49,88 @@ user_impl::user_impl(
 #endif
 }
 
-pplx::task<xbox::services::xbox_live_result<token_and_signature_result>>
-user_impl::get_token_and_signature(
-    _In_ const string_t& httpMethod,
-    _In_ const string_t& url,
-    _In_ const string_t& headers
+void user_impl::get_token_and_signature(
+    _In_ const xsapi_internal_string& httpMethod,
+    _In_ const xsapi_internal_string& url,
+    _In_ const xsapi_internal_string& headers,
+    _In_ async_queue_handle_t queue,
+    _In_ token_and_signature_callback callback
     )
 {
-    return internal_get_token_and_signature(
-        httpMethod, 
-        url, 
+    internal_get_token_and_signature(
+        httpMethod,
+        url,
         url,
         headers,
-        std::vector<unsigned char>(),
+        xsapi_internal_vector<unsigned char>(),
         false,
-        false
+        false,
+        queue,
+        callback
         );
 }
 
-pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
-user_impl::get_token_and_signature(
-    _In_ const string_t& httpMethod,
-    _In_ const string_t& url,
-    _In_ const string_t& headers,
-    _In_ const string_t& requestBodyString
+void user_impl::get_token_and_signature(
+    _In_ const xsapi_internal_string& httpMethod,
+    _In_ const xsapi_internal_string& url,
+    _In_ const xsapi_internal_string& headers,
+    _In_ const xsapi_internal_string& requestBodyString,
+    _In_ async_queue_handle_t queue,
+    _In_ token_and_signature_callback callback
     )
-{ 
-    std::string utf8Body(utility::conversions::to_utf8string(requestBodyString));
-    std::vector<unsigned char> utf8Vec(utf8Body.begin(), utf8Body.end());
-    return internal_get_token_and_signature(
+{
+    xsapi_internal_vector<unsigned char> utf8Vec(requestBodyString.begin(), requestBodyString.end());
+
+    internal_get_token_and_signature(
         httpMethod,
         url,
         url,
         headers,
         utf8Vec,
         false,
-        false
+        false,
+        queue,
+        callback
         );
 }
 
-pplx::task<xbox::services::xbox_live_result<token_and_signature_result> >
-user_impl::get_token_and_signature_array(
-    _In_ const string_t& httpMethod,
-    _In_ const string_t& url,
-    _In_ const string_t& headers,
-    _In_ const std::vector<unsigned char>& requestBodyArray
+void user_impl::get_token_and_signature(
+    _In_ const xsapi_internal_string& httpMethod,
+    _In_ const xsapi_internal_string& url,
+    _In_ const xsapi_internal_string& headers,
+    _In_ const xsapi_internal_vector<unsigned char>& requestBodyArray,
+    _In_ async_queue_handle_t queue,
+    _In_ token_and_signature_callback callback
     )
 {
-    return internal_get_token_and_signature(
+    internal_get_token_and_signature(
         httpMethod,
         url,
         url,
         headers,
-        requestBodyArray, 
+        requestBodyArray,
         false,
-        false
+        false,
+        queue,
+        callback
         );
 }
 
 void
 user_impl::user_signed_in(
-    _In_ string_t xboxUserId,
-    _In_ string_t gamertag,
-    _In_ string_t ageGroup,
-    _In_ string_t privileges,
+    _In_ xsapi_internal_string xboxUserId,
+    _In_ xsapi_internal_string gamertag,
+    _In_ xsapi_internal_string ageGroup,
+    _In_ xsapi_internal_string privileges,
 #if XSAPI_U
-    _In_ string_t userSettingsRestrictions,
-    _In_ string_t userEnforcementRestrictions,
-    _In_ string_t userTitleRestrictions,
+    _In_ xsapi_internal_string userSettingsRestrictions,
+    _In_ xsapi_internal_string userEnforcementRestrictions,
+    _In_ xsapi_internal_string userTitleRestrictions,
 #endif
-    _In_ string_t webAccountId
+    _In_ xsapi_internal_string webAccountId
     )
 {
-    std::unordered_map<function_context, std::function<void(const string_t&)>> signInCompletedHandlersCopy;
+    std::unordered_map<function_context, xbox_live_callback<const xsapi_internal_string&>> signInCompletedHandlersCopy;
     {
         std::lock_guard<std::mutex> lock(m_lock.get());
 
@@ -158,7 +166,7 @@ user_impl::user_signed_in(
 
 function_context
 user_impl::add_sign_in_completed_handler(
-    _In_ std::function<void(const string_t&)> handler
+    _In_ xbox_live_callback<const xsapi_internal_string&> handler
     )
 {
     auto xsapiSingleton = get_xsapi_singleton();
@@ -185,7 +193,7 @@ user_impl::remove_sign_in_completed_handler(
 }
 
 function_context
-user_impl::add_sign_out_completed_handler(_In_ std::function<void(const sign_out_completed_event_args&)> handler)
+user_impl::add_sign_out_completed_handler(_In_ xbox_live_callback<const sign_out_completed_event_args&> handler)
 {
     auto xsapiSingleton = get_xsapi_singleton();
     std::lock_guard<std::mutex> lock(xsapiSingleton->m_trackingUsersLock);
@@ -213,7 +221,7 @@ user_impl::remove_sign_out_completed_handler(
 void user_impl::user_signed_out()
 {
     bool isSignedIn;
-    std::unordered_map<function_context, std::function<void(const sign_out_completed_event_args&)>> signOutHandlers;
+    std::unordered_map<function_context, xbox_live_callback<const sign_out_completed_event_args&>> signOutHandlers;
     {
         std::lock_guard<std::mutex> lock(m_lock.get());
         isSignedIn = m_isSignedIn;
@@ -271,12 +279,12 @@ void user_impl::set_user_pointer(_In_ std::shared_ptr<system::xbox_live_user> us
     m_weakUserPtr = user;
 }
 
-void user_impl::set_title_telemetry_session_id(_In_ const string_t& sessionId)
+void user_impl::set_title_telemetry_session_id(_In_ const xsapi_internal_string& sessionId)
 {
     m_titleTelemetrySessionId = sessionId;
 }
 
-const string_t& user_impl::title_telemetry_session_id()
+const xsapi_internal_string& user_impl::title_telemetry_session_id()
 {
     return m_titleTelemetrySessionId;
 }
