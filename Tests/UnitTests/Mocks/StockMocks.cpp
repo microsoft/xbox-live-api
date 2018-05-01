@@ -296,7 +296,8 @@ StockMocks::CreateMockHttpCallResponseInternal(
 
 void StockMocks::AddHttpMockResponse(
     _In_ const string_t& responseBody,
-    _In_ uint32_t statusCode
+    _In_ uint32_t statusCode,
+    _In_ const http_headers& responseHeaders
     )
 {
     // TODO move
@@ -310,6 +311,11 @@ void StockMocks::AddHttpMockResponse(
 
     HCMockResponseSetResponseString(mockCall, utf8body.data());
     HCMockResponseSetStatusCode(mockCall, statusCode);
+
+    for (const auto& pair : responseHeaders)
+    {
+        HCMockResponseSetHeader(mockCall, pair.first.data(), pair.second.data());
+    }
     HCMockAddMock(mockCall, nullptr, nullptr, nullptr, 0);
 }
 

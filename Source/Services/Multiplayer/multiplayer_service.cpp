@@ -202,7 +202,7 @@ multiplayer_service::write_session_using_subpath(
 
             if (multiplayerSession.err() && !response->err_code())
             {
-                response->_Set_error(xbox_live_error_code::json_error, "WriteSession failed due to deserialization error");
+                response->_Internal_response()->set_error_info(xbox_live_error_code::json_error, "WriteSession failed due to deserialization error");
             }
 
             xbox_live_result<std::shared_ptr<multiplayer_session>> multiplayerSessionShared(

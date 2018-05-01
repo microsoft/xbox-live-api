@@ -94,7 +94,7 @@ public:
 
         auto peoplehubService = SocialManagerHelper::GetPeoplehubService();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubResponse));
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(web::json::value::parse(peoplehubResponse));
 
         Event^ callComplete = ref new Event();
 
@@ -138,7 +138,7 @@ public:
         DEFINE_TEST_CASE_PROPERTIES(PeopleHubTestOverloadStrings);
         auto peoplehubService = SocialManagerHelper::GetPeoplehubService();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubOversizedResponse));
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(web::json::value::parse(peoplehubOversizedResponse));
         xsapi_internal_vector<xsapi_internal_string> xuids;
         xuids.push_back("1");
 

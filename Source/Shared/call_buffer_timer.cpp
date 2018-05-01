@@ -118,8 +118,7 @@ call_buffer_timer::fire(
         else if (op == AsyncOp_Cleanup)
         {
             utils::remove_shared_ptr<fire_context>(data->context);
-            delete data->async;
-            return S_OK;
+            xsapi_memory::mem_free(data->async);
         }
         return S_OK;
     });
@@ -146,7 +145,6 @@ call_buffer_timer::fire_helper(
         contextSharedPtr->delay = timeRemaining;
 
         AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
-        ZeroMemory(async, sizeof(async));
 
         BeginAsync(async, utils::store_shared_ptr(contextSharedPtr), nullptr, __FUNCTION__,
             [](AsyncOp op, const AsyncProviderData* data)
@@ -178,7 +176,7 @@ call_buffer_timer::fire_helper(
             }
             else if (op == AsyncOp_Cleanup)
             {
-                delete data->async;
+                xsapi_memory::mem_free(data->async);
             }
             return S_OK;
         });

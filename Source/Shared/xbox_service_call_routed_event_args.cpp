@@ -13,7 +13,7 @@ xbox_service_call_routed_event_args::xbox_service_call_routed_event_args(
     _In_ std::shared_ptr<xbox_service_call_routed_event_args_internal> internalObj
     ) :
     m_internalObj(std::move(internalObj)),
-    m_requestBody(&(internalObj->request_body()))
+    m_requestBody(&(m_internalObj->request_body()))
 {
 }
 
