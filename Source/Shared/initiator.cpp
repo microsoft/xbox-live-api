@@ -18,6 +18,25 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
+void XSAPI_HCTraceCallback(
+    _In_ UTF8CSTR areaName,
+    _In_ enum HCTraceLevel level,
+    _In_ uint32_t threadId,
+    _In_ uint64_t timestamp,
+    _In_ UTF8CSTR message
+    )
+{
+    switch (level)
+    {
+        case HCTraceLevel_Error: LOG_ERROR(message); break;
+        case HCTraceLevel_Warning: LOG_WARN(message); break;
+        case HCTraceLevel_Important: LOG_WARN(message); break;
+        case HCTraceLevel_Information: LOG_INFO(message); break;
+        case HCTraceLevel_Verbose: LOG_DEBUG(message); break;
+        default: break;
+    }
+}
+
 initiator::initiator()
 {
 #if defined(_WIN32_WINNT) && _WIN32_WINNT >= _WIN32_WINNT_WIN10
@@ -28,7 +47,10 @@ initiator::initiator()
     // Only enable logging on debug build by default, release version can 
     // turn it on at runtime
     logger::create_logger();
-    
+
+    HCTraceSetClientCallback(XSAPI_HCTraceCallback);
+    HCTraceSetTraceToDebugger(false);
+
 #if UNIT_TEST_SERVICES
     logger::get_logger()->set_log_level(log_level::debug);
     logger::get_logger()->add_log_output(std::make_shared<unittest_output>());
