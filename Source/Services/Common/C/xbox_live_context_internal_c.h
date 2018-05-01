@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "system_c.h"
 #include "xbox_live_context_impl.h"
 #if !XDK_API
+#include "system_c.h"
 #include "user_c.h"
 #include "user_impl.h"
 #endif
