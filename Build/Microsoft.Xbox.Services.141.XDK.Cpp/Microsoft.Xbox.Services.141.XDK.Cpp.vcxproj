@@ -412,7 +412,7 @@
     <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs15.xbox\casablanca141.Xbox.vcxproj">
       <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.141.UWP.C\libHttpClient.141.UWP.C.vcxproj">
+    <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.141.XDK.C\libHttpClient.141.XDK.C.vcxproj">
       <Project>{CF37BEB2-A66A-42BA-B348-1F07566F4865}</Project>
     </ProjectReference>
   </ItemGroup>

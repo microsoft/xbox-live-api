@@ -26,6 +26,9 @@ void XSAPI_HCTraceCallback(
     _In_ UTF8CSTR message
     )
 {
+    UNREFERENCED_PARAMETER(timestamp);
+    UNREFERENCED_PARAMETER(threadId);
+    UNREFERENCED_PARAMETER(areaName);
     switch (level)
     {
         case HCTraceLevel_Error: LOG_ERROR(message); break;
