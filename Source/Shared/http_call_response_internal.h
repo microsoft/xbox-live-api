@@ -16,6 +16,16 @@ class http_call_response_internal
 {
 public:
     http_call_response_internal(
+        _In_ const xsapi_internal_string& xboxUserId,
+        _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
+        _In_ const xsapi_internal_string& httpMethod,
+        _In_ const xsapi_internal_string& baseUrl,
+        _In_ const http_call_request_message_internal& requestBody,
+        _In_ xbox_live_api xboxLiveApi,
+        _In_ uint32_t responseStatusCode = 0
+        );
+
+    http_call_response_internal(
         _In_ const std::shared_ptr<http_call_data> callData
         );
 

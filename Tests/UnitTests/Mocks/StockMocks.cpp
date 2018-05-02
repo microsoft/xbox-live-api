@@ -309,7 +309,7 @@ void StockMocks::AddHttpMockResponse(
 
     auto utf8body = utils::internal_string_from_string_t(responseBody);
 
-    HCMockResponseSetResponseString(mockCall, utf8body.data());
+    HCMockResponseSetResponseBodyBytes(mockCall, (const uint8_t*)(utf8body.data()), static_cast<uint32_t>(utf8body.size()));
     HCMockResponseSetStatusCode(mockCall, statusCode);
 
     for (const auto& pair : responseHeaders)
