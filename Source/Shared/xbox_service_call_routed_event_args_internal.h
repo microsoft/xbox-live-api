@@ -57,7 +57,11 @@ public:
         _In_ uint32_t httpStatus,
         _In_ chrono_clock_t::time_point requestTime,
         _In_ chrono_clock_t::time_point responseTime
-    );
+        );
+
+    xbox_service_call_routed_event_args_internal(
+        _In_ hc_call_handle_t hcCallHandle
+        );
 
 private:
     xsapi_internal_string m_xboxUserId;

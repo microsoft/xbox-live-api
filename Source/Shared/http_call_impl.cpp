@@ -346,7 +346,7 @@ xbox_live_result<void> http_call_impl::internal_get_response_with_auth(
     {
         if (result.err())
         {
-            auto httpCallResponse = create_http_call_response(httpCallData);
+            auto httpCallResponse = xsapi_allocate_shared<http_call_response_internal>(httpCallData);
             httpCallResponse->set_error_info(static_cast<xbox_live_error_code>(result.err().value()), result.err_message().data());
             httpCallResponse->route_service_call();
             httpCallData->callback(httpCallResponse);
@@ -417,6 +417,7 @@ void http_call_impl::handle_unauthorized_error(
             {
                 // if getting a new token failed, then we need to just return the 401 upwards
                 utils::remove_shared_ptr<http_call_data>(context, true);
+                httpCallResponse->route_service_call();
                 httpCallData->callback(httpCallResponse);
             }
         });
@@ -436,63 +437,12 @@ void http_call_impl::internal_get_response(
     CreateNestedAsyncQueue(httpCallData->queue, &nestedQueue);
 
     AsyncBlock *asyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
-    ZeroMemory(asyncBlock, sizeof(AsyncBlock));
     asyncBlock->queue = nestedQueue;
     asyncBlock->context = utils::store_shared_ptr(httpCallData);
     asyncBlock->callback = [](_In_ AsyncBlock* asyncBlock)
     {
         auto httpCallData = utils::remove_shared_ptr<http_call_data>(asyncBlock->context, false);
-
-        HRESULT hr = S_OK;
-        uint32_t platformErrorCode = 0;
-        uint32_t statusCode = 0;
-        PCSTR responseBody = nullptr;
-
-        HCHttpCallResponseGetNetworkErrorCode(httpCallData->callHandle, &hr, &platformErrorCode);
-        HCHttpCallResponseGetStatusCode(httpCallData->callHandle, &statusCode);
-        HCHttpCallResponseGetResponseString(httpCallData->callHandle, &responseBody);
-
-        auto networkError = get_xbox_live_error_code_from_http_status(statusCode);
-        auto httpCallResponse = create_http_call_response(httpCallData, statusCode);
-
-        chrono_clock_t::time_point responseReceivedTime = chrono_clock_t::now();
-        httpCallResponse->set_timing(httpCallData->requestStartTime, responseReceivedTime);
-
-        if (FAILED(hr))
-        {
-            xsapi_internal_string errMessage;
-            if (responseBody != nullptr)
-            {
-                errMessage = " HTTP Response Body: " + xsapi_internal_string(responseBody);
-            }
-            httpCallResponse->set_error_info(std::make_error_code(static_cast<xbox_live_error_code>(hr)), responseBody);
-        }
-        else
-        {
-#pragma warning(suppress: 4244)
-            httpCallResponse->set_error_info(std::make_error_code(networkError));
-
-            web::json::value responseBodyJson;
-            std::error_code errCode;
-            switch (httpCallData->httpCallResponseBodyType)
-            {
-            case http_call_response_body_type::json_body:
-                responseBodyJson = web::json::value::parse(utils::string_t_from_internal_string(responseBody), errCode);
-                if (!errCode)
-                {
-                    httpCallResponse->set_response_body(responseBodyJson);
-                }
-                break;
-
-            case http_call_response_body_type::string_body:
-                httpCallResponse->set_response_body(responseBody);
-                break;
-
-            case http_call_response_body_type::vector_body:
-                // SHIPTODO
-                break;
-            }
-        }
+        auto httpCallResponse = xsapi_allocate_shared<http_call_response_internal>(httpCallData);
 
         CloseAsyncQueue(asyncBlock->queue);
         void* context = asyncBlock->context;
@@ -648,40 +598,6 @@ void http_call_impl::set_custom_header(
         headerName,
         headerValue
     );
-}
-
-xbox_live_error_code http_call_impl::get_xbox_live_error_code_from_http_status(
-    _In_ uint32_t statusCode
-    )
-{
-    if (statusCode < 300 || statusCode >= 600)
-    {
-        // Treat as success so 
-        //      if (!result.err()) 
-        // works properly which requires all non-errors to be 0.
-        return xbox_live_error_code::no_error;
-    }
-    else
-    {
-        return static_cast<xbox_live_error_code>(statusCode);
-    }
-}
-
-std::shared_ptr<http_call_response_internal> 
-http_call_impl::create_http_call_response(
-    _In_ const std::shared_ptr<http_call_data>& httpCallData,
-    _In_ uint32_t responseStatusCode
-    )
-{
-    return std::make_shared<http_call_response_internal>(
-        httpCallData->userContext != nullptr ? httpCallData->userContext->xbox_user_id() : xsapi_internal_string(),
-        httpCallData->xboxLiveContextSettings,
-        httpCallData->httpMethod,
-        httpCallData->serverName + utils::internal_string_from_string_t(httpCallData->pathQueryFragment.to_string()),
-        httpCallData->requestBody,
-        httpCallData->xboxLiveApi,
-        responseStatusCode
-        );
 }
 
 void http_call_impl::set_user_agent(

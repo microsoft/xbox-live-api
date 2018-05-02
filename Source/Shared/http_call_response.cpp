@@ -54,24 +54,77 @@ DEFINE_GET_STRING(http_call_response, response_date);
 DEFINE_GET_OBJECT_REF(http_call_response, std::chrono::seconds, retry_after);
 
 http_call_response_internal::http_call_response_internal(
-    _In_ const xsapi_internal_string& xboxUserId,
-    _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
-    _In_ const xsapi_internal_string& httpMethod,
-    _In_ const xsapi_internal_string& fullUrl,
-    _In_ const http_call_request_message_internal& requestBody,
-    _In_ xbox_live_api xboxLiveApi,
-    _In_ uint32_t responseStatusCode
-    ) :
-    m_httpCallResponseBodyType(http_call_response_body_type::string_body),
-    m_xboxUserId(xboxUserId),
-    m_xboxLiveContextSettings(xboxLiveContextSettings),
-    m_httpMethod(httpMethod),
-    m_fullUrl(fullUrl),
-    m_xboxLiveApi(xboxLiveApi),
-    m_requestBody(requestBody),
-    m_httpStatus(responseStatusCode)
+    _In_ const std::shared_ptr<http_call_data> httpCallData
+    )
 {
+    HRESULT hr = S_OK;
+    uint32_t platformErrorCode = 0;
+    HCHttpCallResponseGetNetworkErrorCode(httpCallData->callHandle, &hr, &platformErrorCode);
+    HCHttpCallResponseGetStatusCode(httpCallData->callHandle, &m_httpStatus);
+    
+    // TODO check if response should be binary and not string
+    PCSTR responseBody = nullptr;
+    HCHttpCallResponseGetResponseString(httpCallData->callHandle, &responseBody);
+
+    if (httpCallData->userContext != nullptr)
+    {
+        m_xboxUserId = httpCallData->userContext->xbox_user_id();
+    }
+    m_xboxLiveContextSettings = httpCallData->xboxLiveContextSettings;
+    m_httpMethod = httpCallData->httpMethod;
+    m_fullUrl = httpCallData->serverName + utils::internal_string_from_string_t(httpCallData->pathQueryFragment.to_string());
+    m_requestBody = httpCallData->requestBody;
+    m_xboxLiveApi = httpCallData->xboxLiveApi;
+    m_requestTime = httpCallData->requestStartTime;
+    m_responseTime = chrono_clock_t::now();
+
+    uint32_t numHeaders;
+    HCHttpCallResponseGetNumHeaders(httpCallData->callHandle, &numHeaders);
+    for (uint32_t i = 0; i < numHeaders; ++i)
+    {
+        UTF8CSTR headerName;
+        UTF8CSTR headerValue;
+        HCHttpCallResponseGetHeaderAtIndex(httpCallData->callHandle, i, &headerName, &headerValue);
+        m_responseHeaders[headerName] = headerValue;
+    }
+
+    if (FAILED(hr))
+    {
+        xsapi_internal_string errMessage;
+        m_errorCode = static_cast<xbox_live_error_code>(hr);
+        if (responseBody != nullptr)
+        {
+            m_errorMessage = " HTTP Response Body: " + xsapi_internal_string(responseBody);
+        }
+    }
+    else
+    {
+#pragma warning(suppress: 4244)
+        m_errorCode = get_xbox_live_error_code_from_http_status(m_httpStatus);
+
+        web::json::value responseBodyJson;
+        std::error_code errCode;
+        switch (httpCallData->httpCallResponseBodyType)
+        {
+        case http_call_response_body_type::json_body:
+            responseBodyJson = web::json::value::parse(utils::string_t_from_internal_string(responseBody), errCode);
+            if (!errCode)
+            {
+                set_response_body(responseBodyJson);
+            }
+            break;
+
+        case http_call_response_body_type::string_body:
+            set_response_body(responseBody);
+            break;
+
+        case http_call_response_body_type::vector_body:
+            // SHIPTODO
+            break;
+        }
+    }
 }
+
 
 #ifndef DEFAULT_MOVE_ENABLED
 http_call_response::http_call_response(http_call_response&& other)
@@ -365,6 +418,23 @@ xsapi_internal_string http_call_response_internal::get_throttling_error_message(
     }
 
     return "";
+}
+
+xbox_live_error_code http_call_response_internal::get_xbox_live_error_code_from_http_status(
+    _In_ uint32_t statusCode
+    )
+{
+    if (statusCode < 300 || statusCode >= 600)
+    {
+        // Treat as success so 
+        //      if (!result.err()) 
+        // works properly which requires all non-errors to be 0.
+        return xbox_live_error_code::no_error;
+    }
+    else
+    {
+        return static_cast<xbox_live_error_code>(statusCode);
+    }
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

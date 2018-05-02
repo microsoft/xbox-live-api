@@ -10,17 +10,13 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
+struct http_call_data;
+
 class http_call_response_internal
 {
 public:
     http_call_response_internal(
-        _In_ const xsapi_internal_string& xboxUserId,
-        _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
-        _In_ const xsapi_internal_string& httpMethod,
-        _In_ const xsapi_internal_string& baseUrl,
-        _In_ const http_call_request_message_internal& requestBody,
-        _In_ xbox_live_api xboxLiveApi,
-        _In_ uint32_t responseStatusCode = 0
+        _In_ const std::shared_ptr<http_call_data> callData
         );
 
 #ifndef DEFAULT_MOVE_ENABLED
@@ -88,6 +84,8 @@ private:
     void record_service_result() const;
     xsapi_internal_string get_throttling_error_message() const;
 
+    static xbox_live_error_code get_xbox_live_error_code_from_http_status(_In_ uint32_t statusCode);
+
     http_call_response_body_type m_httpCallResponseBodyType;
     xsapi_internal_vector<unsigned char> m_responseBodyVector;
     xsapi_internal_string m_responseBodyString;
@@ -112,15 +110,10 @@ private:
     xbox_live_api m_xboxLiveApi;
 
     xsapi_internal_string response_body_to_string() const;
-
-    static std::chrono::seconds extract_retry_after_from_header(
-        _In_ const http_headers& responseHeaders
-        );
 };
 
 template<typename T>
 xbox::services::xbox_live_result<T>
-
 get_xbl_result_from_response(_In_ std::shared_ptr<http_call_response> response, _In_ std::function<T(_In_ const web::json::value&)> deserializeFn)
 {
     if (response->response_body_json().size() != 0)

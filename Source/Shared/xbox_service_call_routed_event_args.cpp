@@ -67,6 +67,33 @@ xbox_service_call_routed_event_args_internal::xbox_service_call_routed_event_arg
     m_elapsedCallTime = std::chrono::duration_cast<std::chrono::milliseconds>(m_responseTime - m_requestTime);
 }
 
+xbox_service_call_routed_event_args_internal::xbox_service_call_routed_event_args_internal(
+    _In_ hc_call_handle_t hcCallHandle
+    )
+{
+    // Possible TODO. For intermediate call routed calls we don't have access to many of the
+    // fields. Could expose them in libHttpClient if they are needed.
+
+    UTF8CSTR responseBody;
+    HCHttpCallResponseGetResponseString(hcCallHandle, &responseBody);
+    m_responseBody = responseBody;
+
+    HCHttpCallResponseGetStatusCode(hcCallHandle, &m_httpStatus);
+
+    uint32_t numHeaders;
+    HCHttpCallResponseGetNumHeaders(hcCallHandle, &numHeaders);
+
+    xsapi_internal_stringstream ss;
+    for (uint32_t i = 0; i < numHeaders; ++i)
+    {
+        UTF8CSTR headerName;
+        UTF8CSTR headerValue;
+        HCHttpCallResponseGetHeaderAtIndex(hcCallHandle, i, &headerName, &headerValue);
+        ss << headerName << " : " << headerValue << "\r\n";
+    }
+    m_responseHeaders = ss.str();
+}
+
 xsapi_internal_string xbox_service_call_routed_event_args_internal::full_response_formatted() const
 {
     xsapi_internal_stringstream response;
