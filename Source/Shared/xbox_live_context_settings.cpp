@@ -5,6 +5,7 @@
 #include "shared_macros.h"
 #include "xsapi/system.h"
 #include "xbox_system_factory.h"
+#include "xbox_service_call_routed_event_args_internal.h"
 #if XSAPI_A
 #include "Logger/android/logcat_output.h"
 #else
@@ -69,7 +70,7 @@ xbox_live_context_settings::xbox_live_context_settings() :
 {
 }
 
-function_context xbox_live_context_settings::add_service_call_routed_handler(_In_ std::function<void(const xbox::services::xbox_service_call_routed_event_args&)> handler)
+function_context xbox_live_context_settings::add_service_call_routed_handler(_In_ std::function<void(const xbox_service_call_routed_event_args&)> handler)
 {
     std::lock_guard<std::mutex> lock(m_writeLock);
 
@@ -78,6 +79,14 @@ function_context xbox_live_context_settings::add_service_call_routed_handler(_In
     {
         context = ++m_serviceCallRoutedHandlersCounter;
         m_serviceCallRoutedHandlers[m_serviceCallRoutedHandlersCounter] = std::move(handler);
+
+        auto sharedPtrContext = xsapi_allocate_shared<std::function<void(const xbox_service_call_routed_event_args&)>>(handler);
+        HCAddCallRoutedHandler([](hc_call_handle_t call, void* context)
+        {
+            auto sharedPtrContext = utils::remove_shared_ptr<std::function<void(const xbox_service_call_routed_event_args&)>>(context);
+            (*sharedPtrContext)(xsapi_allocate_shared<xbox_service_call_routed_event_args_internal>(call));
+        }, 
+        utils::store_shared_ptr(sharedPtrContext));
     }
 
     return context;

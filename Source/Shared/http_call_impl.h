@@ -396,20 +396,6 @@ private:
         _In_ const std::shared_ptr<http_call_data>& httpCallData
         );
 
-    static std::shared_ptr<http_call_response_internal> create_http_call_response(
-        _In_ const std::shared_ptr<http_call_data>& httpCallData,
-        _In_ uint32_t responseStatusCode = 0
-        );
-
-    static xbox::services::xbox_live_error_code get_xbox_live_error_code_from_http_status(
-        _In_ uint32_t statusCode
-        );
-
-    static pplx::task<std::shared_ptr<http_call_response>> handle_fast_fail(
-        _In_ const http_retry_after_api_state& apiState,
-        _In_ const std::shared_ptr<http_call_data>& httpCallData
-        );
-
     static void set_http_timeout(
         _In_ const std::shared_ptr<http_call_data>& httpCallData
         );
