@@ -32,7 +32,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API xbl_user_handle XBL_CALLING_CONV
+STDAPI_(xbl_user_handle)
 XblUserDuplicateHandle(
     _In_ xbl_user_handle user
     ) XBL_NOEXCEPT
@@ -377,7 +377,7 @@ try
 }
 CATCH_RETURN()
 
-XBL_API function_context XBL_CALLING_CONV
+STDAPI_(function_context)
 XblUserAddSignOutCompletedHandler(
     _In_ XblSignOutCompletedHandler handler
     ) XBL_NOEXCEPT

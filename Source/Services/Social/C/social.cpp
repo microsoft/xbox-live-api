@@ -4,7 +4,9 @@
 #include "pch.h"
 #include "xsapi/social.h"
 #include "xsapi-c/social_c.h"
+#if !XDK_API
 #include "system_c.h"
+#endif
 #include "social_internal.h"
 #include "xbox_live_context_internal_c.h"
 #include "xbox_live_context_impl.h"

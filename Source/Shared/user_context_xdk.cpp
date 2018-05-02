@@ -182,11 +182,11 @@ void user_context::get_auth_result(
 // Console OS will auto refresh tokens, we don't need to do anything here.
 void user_context::refresh_token(
     _In_ async_queue_handle_t queue,
-    _In_ xbox_live_callback<xbox_live_result<void>> callback
+    _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox::services::system::token_and_signature_result_internal>>> callback
     )
 {
     UNREFERENCED_PARAMETER(queue);
-    callback(xbox_live_result<void>());
+    callback(xbox_live_result<std::shared_ptr<xbox::services::system::token_and_signature_result_internal>>());
 }
 
 bool user_context::is_signed_in() const
