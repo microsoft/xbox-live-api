@@ -112,7 +112,7 @@ xsapi_singleton::~xsapi_singleton()
 
     if (m_callbackContextPtrs.size() > 0)
     {
-        //XSAPI_ASSERT(false && "Context remaining in context store!");
+        XSAPI_ASSERT(false && "Context remaining in context store!");
         m_callbackContextPtrs.clear();
     }
 
