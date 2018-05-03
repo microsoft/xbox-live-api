@@ -318,25 +318,25 @@ void Game::Log(string_t log)
 }
 
 string_t
-ConvertEventTypeToString(XblSocialEventType eventType)
+ConvertEventTypeToString(XblSocialManagerEventType eventType)
 {
     switch (eventType)
     {
-    case XblSocialEventType_UsersAddedToSocialGraph: return _T("users_added");
-    case XblSocialEventType_UsersRemovedFromSocialGraph: return _T("users_removed");
-    case XblSocialEventType_PresenceChanged: return _T("presence_changed");
-    case XblSocialEventType_ProfilesChanged: return _T("profiles_changed");
-    case XblSocialEventType_SocialRelationshipsChanged: return _T("social_relationships_changed");
-    case XblSocialEventType_LocalUserAdded: return _T("local_user_added");
-    case XblSocialEventType_LocalUserRemoved: return _T("local user removed");
-    case XblSocialEventType_SocialUserGroupLoaded: return _T("social_user_group_loaded");
-    case XblSocialEventType_SocialUserGroupUpdated: return _T("social_user_group_updated");
+    case XblSocialManagerEventType_UsersAddedToSocialGraph: return _T("users_added");
+    case XblSocialManagerEventType_UsersRemovedFromSocialGraph: return _T("users_removed");
+    case XblSocialManagerEventType_PresenceChanged: return _T("presence_changed");
+    case XblSocialManagerEventType_ProfilesChanged: return _T("profiles_changed");
+    case XblSocialManagerEventType_SocialRelationshipsChanged: return _T("social_relationships_changed");
+    case XblSocialManagerEventType_LocalUserAdded: return _T("local_user_added");
+    case XblSocialManagerEventType_LocalUserRemoved: return _T("local user removed");
+    case XblSocialManagerEventType_SocialUserGroupLoaded: return _T("social_user_group_loaded");
+    case XblSocialManagerEventType_SocialUserGroupUpdated: return _T("social_user_group_updated");
     default: return _T("unknown");
     }
 }
 
 void
-Game::LogSocialEventList(XblSocialEvent* events, uint32_t eventCount)
+Game::LogSocialEventList(XblSocialManagerEvent* events, uint32_t eventCount)
 {
     for (uint32_t i = 0; i < eventCount; ++i)
     {
@@ -358,7 +358,7 @@ Game::LogSocialEventList(XblSocialEvent* events, uint32_t eventCount)
             {
                 std::vector<uint64_t> affectedUsers(socialEvent.usersAffectedCount);
 
-                XblSocialEventGetUsersAffected(&socialEvent, affectedUsers.data());
+                XblSocialManagerEventGetUsersAffected(&socialEvent, affectedUsers.data());
 
                 source << _T(" UserAffected: ");
                 for (uint32_t j = 0; j < socialEvent.usersAffectedCount; ++j)
@@ -495,16 +495,16 @@ void Game::RenderUI()
 
 std::wstring
 ConvertPresenceUserStateToString(
-    _In_ XblUserPresenceState presenceState
+    _In_ XblPresenceUserState presenceState
     )
 {
     switch (presenceState)
     {
-        case XblUserPresenceState_Away: return _T("away");
-        case XblUserPresenceState_Offline: return _T("offline");
-        case XblUserPresenceState_Online: return _T("online");
+        case XblPresenceUserState_Away: return _T("away");
+        case XblPresenceUserState_Offline: return _T("offline");
+        case XblPresenceUserState_Online: return _T("online");
         default:
-        case XblUserPresenceState_Unknown: return _T("unknown");
+        case XblPresenceUserState_Unknown: return _T("unknown");
     }
 }
 
@@ -569,8 +569,8 @@ Game::RenderSocialGroupList(
             verticalBaseOffset += fTextHeight;
         }
 
-        std::vector<XblXboxSocialUser> userList(group->usersCount);
-        XblXboxSocialUserGroupGetUsers(group, userList.data());
+        std::vector<XblSocialManagerUser> userList(group->usersCount);
+        XblSocialManagerUserGroupGetUsers(group, userList.data());
 
         for (uint32_t i = 0; i < group->usersCount; ++i)
         {

@@ -95,7 +95,7 @@ private:
     std::shared_ptr<UserController> m_userController;
 
     std::vector<uint64_t> m_xuidsInCustomSocialGroup;
-    std::vector<XblXboxSocialUserGroup*> m_socialGroups;
+    std::vector<XblSocialManagerUserGroup*> m_socialGroups;
     static std::mutex m_socialManagerLock;
 
     bool m_allFriends;
@@ -141,7 +141,7 @@ private:
         );
     void UpdateSocialManager();
     void LogSocialEventList(
-        XblSocialEvent* eventList,
+        XblSocialManagerEvent* eventList,
         uint32_t eventListCount
         );
     void CreateSocialGroupsBasedOnUI(

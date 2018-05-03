@@ -87,7 +87,7 @@ Game::CreateSocialGroupFromList(
 
     if( xuidList.size() > 0 )
     {
-        XblXboxSocialUserGroup *newGroup;
+        XblSocialManagerUserGroup *newGroup;
         auto hr = XblSocialManagerCreateSocialUserGroupFromList(user, xuidList.data(), (uint32_t)xuidList.size(), &newGroup);
         if (SUCCEEDED(hr))
         {
@@ -103,7 +103,7 @@ Game::CreateSocialGroupFromFilters(
     _In_ XblRelationshipFilter relationshipFilter
     )
 {
-    XblXboxSocialUserGroup *newGroup;
+    XblSocialManagerUserGroup *newGroup;
     auto hr = XblSocialManagerCreateSocialUserGroupFromFilters(user, presenceFilter, relationshipFilter, &newGroup);
 
     if (SUCCEEDED(hr))
@@ -171,7 +171,7 @@ Game::UpdateSocialManager()
     perfInstance->begin_capture(L"no_updates");
     perfInstance->begin_capture(L"updates");
 #endif
-    XblSocialEvent* events;
+    XblSocialManagerEvent* events;
     uint32_t eventCount;
     XblSocialManagerDoWork(&events, &eventCount);
 #if PERF_COUNTERS
