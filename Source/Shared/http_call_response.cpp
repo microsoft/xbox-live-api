@@ -54,6 +54,26 @@ DEFINE_GET_STRING(http_call_response, response_date);
 DEFINE_GET_OBJECT_REF(http_call_response, std::chrono::seconds, retry_after);
 
 http_call_response_internal::http_call_response_internal(
+    _In_ const xsapi_internal_string& xboxUserId,
+    _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
+    _In_ const xsapi_internal_string& httpMethod,
+    _In_ const xsapi_internal_string& fullUrl,
+    _In_ const http_call_request_message_internal& requestBody,
+    _In_ xbox_live_api xboxLiveApi,
+    _In_ uint32_t responseStatusCode
+    ) :
+    m_httpCallResponseBodyType(http_call_response_body_type::string_body),
+    m_xboxUserId(xboxUserId),
+    m_xboxLiveContextSettings(xboxLiveContextSettings),
+    m_httpMethod(httpMethod),
+    m_fullUrl(fullUrl),
+    m_xboxLiveApi(xboxLiveApi),
+    m_requestBody(requestBody),
+    m_httpStatus(responseStatusCode)
+{
+}
+
+http_call_response_internal::http_call_response_internal(
     _In_ const std::shared_ptr<http_call_data> httpCallData
     )
 {

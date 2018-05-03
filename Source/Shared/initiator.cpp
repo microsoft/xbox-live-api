@@ -21,11 +21,14 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 void XSAPI_HCTraceCallback(
     _In_ UTF8CSTR areaName,
     _In_ enum HCTraceLevel level,
-    _In_ uint32_t threadId,
+    _In_ uint64_t threadId,
     _In_ uint64_t timestamp,
     _In_ UTF8CSTR message
     )
 {
+    UNREFERENCED_PARAMETER(timestamp);
+    UNREFERENCED_PARAMETER(threadId);
+    UNREFERENCED_PARAMETER(areaName);
     switch (level)
     {
         case HCTraceLevel_Error: LOG_ERROR(message); break;

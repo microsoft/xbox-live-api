@@ -91,7 +91,7 @@ void user_impl_idp::sign_in_impl(
 
                     auto findProviderAsyncOp = WebAuthenticationCoreManager::FindAccountProviderAsync("https://login.microsoft.com", "consumers");
                     findProviderAsyncOp->Completed = ref new AsyncOperationCompletedHandler<WebAccountProvider^>(
-                    [&msaRequest, payload, localConfig, showUI, completeEvent, &account](IAsyncOperation<WebAccountProvider^>^ asyncOp, AsyncStatus status)
+                    [&msaRequest, payload, localConfig, showUI, completeEvent, &account](IAsyncOperation<WebAccountProvider^>^ asyncOp, Windows::Foundation::AsyncStatus status)
                     {
                         UNREFERENCED_PARAMETER(status);
                         auto provider = asyncOp->GetResults();
@@ -102,7 +102,7 @@ void user_impl_idp::sign_in_impl(
 
                         auto findAccountAsyncOp = WebAuthenticationCoreManager::FindAccountAsync(provider, PLATFORM_STRING_FROM_INTERNAL_STRING(payload.web_account_id()));
                         findAccountAsyncOp->Completed = ref new AsyncOperationCompletedHandler<WebAccount^>(
-                            [msaRequest, showUI, completeEvent, &account](IAsyncOperation<WebAccount^>^ asyncOp, AsyncStatus status)
+                            [msaRequest, showUI, completeEvent, &account](IAsyncOperation<WebAccount^>^ asyncOp, Windows::Foundation::AsyncStatus status)
                         {
                             UNREFERENCED_PARAMETER(status);
                             account = asyncOp->GetResults();
@@ -255,7 +255,7 @@ void user_impl_idp::initialize_provider(xbox_live_callback<void> callback)
     }
 
     asyncOp->Completed = ref new AsyncOperationCompletedHandler<WebAccountProvider^>(
-        [thisWeakPtr, callback](IAsyncOperation<WebAccountProvider^>^ asyncInfo, AsyncStatus status)
+        [thisWeakPtr, callback](IAsyncOperation<WebAccountProvider^>^ asyncInfo, Windows::Foundation::AsyncStatus status)
     {
         UNREFERENCED_PARAMETER(status);
         std::shared_ptr<user_impl_idp> pThis(thisWeakPtr.lock());
@@ -554,7 +554,7 @@ user_impl_idp::request_token_from_idp(
     Platform::Exception^ retException = nullptr;
 
     auto asyncOpCompletedHandler = ref new AsyncOperationCompletedHandler<WebTokenRequestResult^>(
-        [&tokenResult, &retException, completeEvent](IAsyncOperation<WebTokenRequestResult^>^ asyncOp, AsyncStatus status)
+        [&tokenResult, &retException, completeEvent](IAsyncOperation<WebTokenRequestResult^>^ asyncOp, Windows::Foundation::AsyncStatus status)
     {
         UNREFERENCED_PARAMETER(status);
         try
@@ -690,7 +690,7 @@ void user_impl_idp::check_user_signed_out()
             auto pThis = std::dynamic_pointer_cast<user_impl_idp>(shared_from_this());
 
             asyncOp->Completed = ref new AsyncOperationCompletedHandler<WebAccount^>(
-                [pThis](IAsyncOperation<WebAccount^>^ asyncOp, AsyncStatus status)
+                [pThis](IAsyncOperation<WebAccount^>^ asyncOp, Windows::Foundation::AsyncStatus status)
             {
                 UNREFERENCED_PARAMETER(status);
                 auto signedInAccount = asyncOp->GetResults();
