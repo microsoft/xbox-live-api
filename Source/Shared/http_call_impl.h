@@ -344,7 +344,6 @@ public:
     void set_add_default_headers(bool value) override;
     bool add_default_headers() const override;
 
-
     void set_long_http_call(_In_ bool value) override;
     bool long_http_call() const override;
 
@@ -384,6 +383,11 @@ private:
 
     static void handle_unauthorized_error(
         _In_ void* context,
+        _In_ const std::shared_ptr<http_call_response_internal>& httpCallResponse,
+        _In_ const std::shared_ptr<http_call_data>& httpCallData
+        );
+
+    static void handle_throttle_error(
         _In_ const std::shared_ptr<http_call_response_internal>& httpCallResponse,
         _In_ const std::shared_ptr<http_call_data>& httpCallData
         );

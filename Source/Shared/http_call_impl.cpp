@@ -395,6 +395,29 @@ xbox_live_result<void> http_call_impl::internal_get_response_with_auth(
     return xbox_live_result<void>();
 }
 
+void http_call_impl::handle_throttle_error(
+    _In_ const std::shared_ptr<http_call_response_internal>& httpCallResponse,
+    _In_ const std::shared_ptr<http_call_data>& httpCallData
+    )
+{
+    std::shared_ptr<xbox_live_app_config> appConfig = xbox::services::xbox_live_app_config::get_app_config_singleton();
+    if (utils::str_icmp(appConfig->sandbox(), _T("RETAIL")) != 0)
+    {
+        bool disableAsserts = httpCallResponse->context_settings()->_Is_disable_asserts_for_xbox_live_throttling_in_dev_sandboxes();
+        if (!disableAsserts)
+        {
+            std::stringstream msg;
+            LOGS_ERROR << "Xbox Live service call to " << httpCallData->fullUrl << " was throttled";
+            LOGS_ERROR << httpCallResponse->err_message();
+            LOGS_ERROR << "You can temporarily disable the assert by calling";
+            LOGS_ERROR << "xboxLiveContext->settings()->disable_asserts_for_xbox_live_throttling_in_dev_sandboxes()";
+            LOGS_ERROR << "Note that this will only disable this assert.  You will still be throttled in all sandboxes.";
+
+            XSAPI_ASSERT(false && "Xbox Live service call was throttled.  See Output for more detail");
+        }
+    }
+
+}
  
 void http_call_impl::handle_unauthorized_error(
     _In_ void* context,
@@ -455,8 +478,13 @@ void http_call_impl::internal_get_response(
         {
             handle_unauthorized_error(context, httpCallResponse, httpCallData);
         }
-        else
+        else 
         {
+            if (httpCallResponse->http_status() == static_cast<int>(xbox_live_error_code::http_status_429_too_many_requests))
+            {
+                handle_throttle_error(httpCallResponse, httpCallData);
+            }
+
             utils::remove_shared_ptr<http_call_data>(context, true);
             httpCallResponse->route_service_call();
             httpCallData->callback(httpCallResponse);
