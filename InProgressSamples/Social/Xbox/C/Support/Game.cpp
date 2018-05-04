@@ -569,21 +569,24 @@ Game::RenderSocialGroupList(
             verticalBaseOffset += fTextHeight;
         }
 
-        std::vector<XblSocialManagerUser> userList(group->usersCount);
-        XblSocialManagerUserGroupGetUsers(group, userList.data());
-
-        for (uint32_t i = 0; i < group->usersCount; ++i)
-        {
-            auto& user = userList[i];
-            m_font->DrawString(m_sprites.get(), utility::conversions::to_utf16string(user.gamertag).c_str(), XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-            m_font->DrawString(m_sprites.get(), ConvertPresenceUserStateToString(user.presenceRecord.userState).c_str(), XMFLOAT2(fGridXColumn2, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-
-            verticalBaseOffset += fTextHeight;
-        }
         if (group->usersCount == 0)
         {
             m_font->DrawString(m_sprites.get(), L"No friends found", XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
             verticalBaseOffset += fTextHeight;
+        }
+        else
+        {
+            std::vector<XblSocialManagerUser> userList(group->usersCount);
+            XblSocialManagerUserGroupGetUsers(group, userList.data());
+
+            for (uint32_t i = 0; i < group->usersCount; ++i)
+            {
+                auto& user = userList[i];
+                m_font->DrawString(m_sprites.get(), utility::conversions::to_utf16string(user.gamertag).c_str(), XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
+                m_font->DrawString(m_sprites.get(), ConvertPresenceUserStateToString(user.presenceRecord.userState).c_str(), XMFLOAT2(fGridXColumn2, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
+
+                verticalBaseOffset += fTextHeight;
+            }
         }
     }
 }
