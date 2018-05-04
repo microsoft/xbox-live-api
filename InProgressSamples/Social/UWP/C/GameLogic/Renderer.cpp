@@ -349,25 +349,28 @@ Renderer::RenderSocialGroupList(
             verticalBaseOffset += fTextHeight;
         }
 
-        std::vector<XblSocialManagerUser> userList(node->usersCount);
-        XblSocialManagerUserGroupGetUsers(node, userList.data());
-
-        for (const auto& user : userList)
-        {
-            stringstream_t titleCount;
-            titleCount << user.presenceRecord.presenceTitleRecordCount;
-            auto titleCountStr = titleCount.str();
-
-            m_font->DrawString(m_sprites.get(), utility::conversions::utf8_to_utf16(user.gamertag).data(), XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-            m_font->DrawString(m_sprites.get(), ConvertPresenceUserStateToString(user.presenceRecord.userState).c_str(), XMFLOAT2(fGridXColumn2, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-            m_font->DrawString(m_sprites.get(), titleCountStr.c_str(), XMFLOAT2(fGridXColumn3, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-
-            verticalBaseOffset += fTextHeight;
-        }
-        if (userList.size() == 0)
+        if (node->usersCount == 0)
         {
             m_font->DrawString(m_sprites.get(), L"No friends found", XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
             verticalBaseOffset += fTextHeight;
+        }
+        else
+        {
+            std::vector<XblSocialManagerUser> userList(node->usersCount);
+            XblSocialManagerUserGroupGetUsers(node, userList.data());
+
+            for (const auto& user : userList)
+            {
+                stringstream_t titleCount;
+                titleCount << user.presenceRecord.presenceTitleRecordCount;
+                auto titleCountStr = titleCount.str();
+
+                m_font->DrawString(m_sprites.get(), utility::conversions::utf8_to_utf16(user.gamertag).data(), XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
+                m_font->DrawString(m_sprites.get(), ConvertPresenceUserStateToString(user.presenceRecord.userState).c_str(), XMFLOAT2(fGridXColumn2, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
+                m_font->DrawString(m_sprites.get(), titleCountStr.c_str(), XMFLOAT2(fGridXColumn3, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
+
+                verticalBaseOffset += fTextHeight;
+            }
         }
     }
 }
