@@ -1968,13 +1968,13 @@ xsapi_internal_vector<uint32_t> utils::uint32_array_to_internal_vector(
 #ifdef _WIN32
 time_t utils::time_t_from_datetime(const utility::datetime& datetime)
 {
-    static const uint64_t _msTicks = static_cast<uint64_t>(10000);
-    static const uint64_t _secondTicks = 1000 * _msTicks;
-    static const uint64_t _minuteTicks = 60 * _secondTicks;
-    static const uint64_t _hourTicks = 60 * 60 * _secondTicks;
-    static const uint64_t _dayTicks = 24 * 60 * 60 * _secondTicks;
+    static const uint64_t ut_msTicks = static_cast<uint64_t>(10000);
+    static const uint64_t ut_secondTicks = 1000 * ut_msTicks;
+    static const uint64_t ut_minuteTicks = 60 * ut_secondTicks;
+    static const uint64_t ut_hourTicks = 60 * 60 * ut_secondTicks;
+    static const uint64_t ut_dayTicks = 24 * 60 * 60 * ut_secondTicks;
 
-    uint64_t seconds = datetime.to_interval() / _secondTicks;
+    uint64_t seconds = datetime.to_interval() / ut_secondTicks;
     if (seconds >= 11644473600LL)
     {
         return seconds - 11644473600LL;
