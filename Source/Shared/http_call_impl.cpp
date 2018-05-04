@@ -266,7 +266,6 @@ http_call_impl::get_response_with_auth(
     _In_ http_call_response_body_type httpCallResponseBodyType
     )
 {
-    // TODO: we need to rework this whole flow
     auto user = xbox_live_user::get_last_signed_in_user();
     if (user == nullptr)
     {

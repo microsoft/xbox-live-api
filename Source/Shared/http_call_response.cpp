@@ -82,7 +82,7 @@ http_call_response_internal::http_call_response_internal(
     HCHttpCallResponseGetNetworkErrorCode(httpCallData->callHandle, &hr, &platformErrorCode);
     HCHttpCallResponseGetStatusCode(httpCallData->callHandle, &m_httpStatus);
     
-    // TODO check if response should be binary and not string
+    // SHIPTODO check if response should be binary and not string
     PCSTR responseBody = nullptr;
     HCHttpCallResponseGetResponseString(httpCallData->callHandle, &responseBody);
 
