@@ -139,7 +139,11 @@ private:
 template<typename T, typename... Args>
 std::shared_ptr<T> xsapi_allocate_shared(Args&&... args)
 {
+#if XSAPI_U || _MSC_VER >= 1910
     return std::allocate_shared<T, xsapi_stl_allocator<T>>(xsapi_stl_allocator<T>(), std::forward<Args>(args)...);
+#else
+    return std::allocate_shared<T, std::allocator<T>>(std::allocator<T>(), std::forward<Args>(args)...);
+#endif
 }
 
 template<typename T, typename... Args>

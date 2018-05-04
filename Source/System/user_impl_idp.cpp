@@ -308,7 +308,6 @@ void user_impl_idp::internal_get_token_and_signature(
     UNREFERENCED_PARAMETER(endpointForNsal);
 
     auto context = xsapi_allocate_shared<get_token_and_signature_context>();
-    context->bytes = xsapi_internal_vector<unsigned char>();
     context->userImpl = shared_from_this();
     context->httpMethod = httpMethod;
     context->url = url;
