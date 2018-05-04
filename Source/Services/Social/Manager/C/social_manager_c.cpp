@@ -25,7 +25,7 @@ class xbl_social_manager
 public:
     XblSocialManagerUserGroup* create_social_user_group(
         _In_ std::shared_ptr<xbox_social_user_group_internal> internalGroup
-    )
+        )
     {
         xbl_user_handle userPtr;
 #if !XDK_API
@@ -69,6 +69,7 @@ std::shared_ptr<xbl_social_manager> get_xbl_social_manager()
     if (singleton->m_xblSocialManagerState == nullptr)
     {
         singleton->m_xblSocialManagerState = xsapi_allocate_shared<xbl_social_manager>();
+        singleton->m_xblSocialManagerState->socialUserGroupsMap = bimap<XblSocialManagerUserGroup*, std::shared_ptr<xbox_social_user_group_internal>>();
     }
     return singleton->m_xblSocialManagerState;
 }

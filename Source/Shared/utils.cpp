@@ -1968,18 +1968,25 @@ xsapi_internal_vector<uint32_t> utils::uint32_array_to_internal_vector(
 #ifdef _WIN32
 time_t utils::time_t_from_datetime(const utility::datetime& datetime)
 {
-    // todo we need to test if datetime.to_interval() is in seconds or miliseconds
-    return static_cast<time_t>(datetime.to_interval());
-}
+    static const uint64_t _msTicks = static_cast<uint64_t>(10000);
+    static const uint64_t _secondTicks = 1000 * _msTicks;
+    static const uint64_t _minuteTicks = 60 * _secondTicks;
+    static const uint64_t _hourTicks = 60 * 60 * _secondTicks;
+    static const uint64_t _dayTicks = 24 * 60 * 60 * _secondTicks;
 
-utility::datetime utils::datetime_from_time_t(const time_t* pTime)
-{
-    // todo we need to test if time_t is in seconds or miliseconds
-    return utility::datetime() + utility::datetime::from_seconds((unsigned int)(*pTime));
+    uint64_t seconds = datetime.to_interval() / _secondTicks;
+    if (seconds >= 11644473600LL)
+    {
+        return seconds - 11644473600LL;
+    }
+    else
+    {
+        return 0;
+    }
 }
 #endif // _WIN32
 
-#ifdef _WIN32 // TODO add implementations of these for non Windows platforms
+#ifdef _WIN32 
 
 xsapi_internal_string utils::internal_string_from_string_t(_In_ const string_t& externalString)
 {
