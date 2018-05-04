@@ -136,6 +136,8 @@ void populate_social_user_array(
         utils::utf8_from_char_t(internalUser->preferred_color().primary_color(), users[i].preferredColor.primaryColor, sizeof(users[i].preferredColor.primaryColor));
         utils::utf8_from_char_t(internalUser->preferred_color().secondary_color(), users[i].preferredColor.secondaryColor, sizeof(users[i].preferredColor.secondaryColor));
         utils::utf8_from_char_t(internalUser->preferred_color().tertiary_color(), users[i].preferredColor.tertiaryColor, sizeof(users[i].preferredColor.tertiaryColor));
+
+        i++;
     }
 }
 
