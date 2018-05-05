@@ -315,8 +315,10 @@ public:
     /// For example
     ///
     /// A title has stat1, stat2, and stat3 configured in the developer portal.
-    /// The user only has a value for stat2.
+    /// The user has previously set a value for stat2.
     /// get_stat_names() will only return "stat2".
+    /// 
+    /// Note that if the service can't be reached then this will return an empty list.
     /// </remarks>
     _XSAPIIMP xbox_live_result<void> get_stat_names(
         _In_ const xbox_live_user_t& user,
@@ -330,8 +332,9 @@ public:
     /// <param name="statName">The name of the statistic to retrieve.</param>
     /// <return>Whether or not the setting was successful along with updated stat.</return>
     /// <remarks>
-    /// The title is responsible for tracking user stats. This method will return the value
-    /// for a stat stored in the service; however, this value is subject to data loss and being out-of-date.
+    /// The title is responsible for tracking user stats. For example with connected storage.
+    /// This method will return the value for a stat stored in the service; however, this value 
+    /// returned will not be valid if the service couldn't be reached.
     /// </remarks>
     _XSAPIIMP xbox_live_result<stat_value> get_stat(
         _In_ const xbox_live_user_t& user,

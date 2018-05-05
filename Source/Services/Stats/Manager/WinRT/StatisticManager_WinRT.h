@@ -155,8 +155,10 @@ public:
     /// For example
     ///
     /// A title has stat1, stat2, and stat3 configured in the developer portal.
-    /// The user only has a value for stat2.
+    /// The user has previously set a value for stat2.
     /// GetStatisticNames() will only return "stat2".
+    /// 
+    /// Note that if the service can't be reached then this will return an empty list.
     /// </remarks>
     Windows::Foundation::Collections::IVectorView<Platform::String^>^ GetStatisticNames(
         _In_ XboxLiveUser_t user
@@ -169,8 +171,9 @@ public:
     /// <param name="name">The name of the statistic to retrieve.</param>
     /// <return>The updated stat</return>
     /// <remarks>
-    /// The title is responsible for tracking user stats. This method will return the value
-    /// for a stat stored in the service; however, this value is subject to data loss and being out-of-date.
+    /// The title is responsible for tracking user stats. For example with connected storage.
+    /// This method will return the value for a stat stored in the service; however, this value 
+    /// returned will not be valid if the service couldn't be reached.
     /// </remarks>
     StatisticValue^ GetStatistic(
         _In_ XboxLiveUser_t user,
