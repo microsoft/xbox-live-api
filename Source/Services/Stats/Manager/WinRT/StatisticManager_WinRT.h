@@ -148,6 +148,16 @@ public:
     /// </summary>
     /// <param name="user">The local user whose stats to access.</param>
     /// <return>The list of statistic names.</return>
+    /// <remarks>
+    /// These are the names for the stats that the user already has values for.
+    /// This call won't return all the stat names configured for the title.
+    ///
+    /// For example
+    ///
+    /// A title has stat1, stat2, and stat3 configured in the developer portal.
+    /// The user only has a value for stat2.
+    /// GetStatisticNames() will only return "stat2".
+    /// </remarks>
     Windows::Foundation::Collections::IVectorView<Platform::String^>^ GetStatisticNames(
         _In_ XboxLiveUser_t user
         );
@@ -158,6 +168,10 @@ public:
     /// <param name="user">The local user whose stats to access.</param>
     /// <param name="name">The name of the statistic to retrieve.</param>
     /// <return>The updated stat</return>
+    /// <remarks>
+    /// The title is responsible for tracking user stats. This method will return the value
+    /// for a stat stored in the service; however, this value is subject to data loss and being out-of-date.
+    /// </remarks>
     StatisticValue^ GetStatistic(
         _In_ XboxLiveUser_t user,
         _In_ Platform::String^ name

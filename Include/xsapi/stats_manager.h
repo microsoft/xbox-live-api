@@ -308,6 +308,16 @@ public:
     /// <param name="user">The local user whose stats to access.</param>
     /// <param name="statNameList">The list to fill with stat names</param>
     /// <return>Whether or not the setting was successful.</return>
+    /// <remarks>
+    /// These are the names for the stats that the user already has values for.
+    /// This call won't return all the stat names configured for the title.
+    ///
+    /// For example
+    ///
+    /// A title has stat1, stat2, and stat3 configured in the developer portal.
+    /// The user only has a value for stat2.
+    /// get_stat_names() will only return "stat2".
+    /// </remarks>
     _XSAPIIMP xbox_live_result<void> get_stat_names(
         _In_ const xbox_live_user_t& user,
         _Inout_ std::vector<string_t>& statNameList
@@ -319,6 +329,10 @@ public:
     /// <param name="user">The local user whose stats to access.</param>
     /// <param name="statName">The name of the statistic to retrieve.</param>
     /// <return>Whether or not the setting was successful along with updated stat.</return>
+    /// <remarks>
+    /// The title is responsible for tracking user stats. This method will return the value
+    /// for a stat stored in the service; however, this value is subject to data loss and being out-of-date.
+    /// </remarks>
     _XSAPIIMP xbox_live_result<stat_value> get_stat(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& statName
