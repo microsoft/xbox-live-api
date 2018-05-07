@@ -18,7 +18,8 @@ xbox_live_context::xbox_live_context(
     _In_ Windows::Xbox::System::User^ user
     )
 {
-    m_xboxLiveContextImpl = std::make_shared<xbox_live_context_impl>(user);
+    m_xboxLiveContextImpl = xsapi_allocate_shared<xbox_live_context_impl>(user);
+    m_xboxLiveContextImpl->user_context()->set_caller_api_type(xbox::services::caller_api_type::api_cpp);
     m_xboxLiveContextImpl->init();
 }
 
@@ -36,6 +37,7 @@ xbox_live_context::xbox_live_context(
 {
     user->_User_impl()->set_user_pointer(user);
     m_xboxLiveContextImpl = xsapi_allocate_shared<xbox_live_context_impl>(user);
+    m_xboxLiveContextImpl->user_context()->set_caller_api_type(xbox::services::caller_api_type::api_cpp);
     this->init();
 }
 
@@ -52,6 +54,7 @@ xbox_live_context::xbox_live_context(
     )
 {
     m_xboxLiveContextImpl = xsapi_allocate_shared<xbox_live_context_impl>(user);
+    m_xboxLiveContextImpl->user_context()->set_caller_api_type(xbox::services::caller_api_type::api_cpp);
     this->init();
 }
 

@@ -42,6 +42,16 @@ user_context::set_caller_context_type(xbox::services::caller_context_type contex
     {
         m_callerContext = "SocialManager";
     }
+    else if (context == caller_context_type::stats_manager)
+    {
+        m_callerContext = "StatManager";
+    }
+}
+
+void
+user_context::set_caller_api_type(xbox::services::caller_api_type apiType)
+{
+    m_apiType = apiType;
 }
 
 const xsapi_internal_string& user_context::xbox_user_id() const

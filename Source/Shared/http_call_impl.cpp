@@ -638,8 +638,25 @@ void http_call_impl::set_user_agent(
         {
             userAgent += " " + httpCallData->userContext->caller_context();
         }
+
+        if (httpCallData->userContext->api_type() != xbox::services::caller_api_type::api_unknown)
+        {
+            switch (httpCallData->userContext->api_type())
+            {
+                case xbox::services::caller_api_type::api_c: userAgent += " c"; break;
+                case xbox::services::caller_api_type::api_cpp: userAgent += " cpp"; break;
+                case xbox::services::caller_api_type::api_winrt: userAgent += " winrt"; break;
+            }
+        }
+
         add_header(httpCallData, "User-Agent", userAgent);
     }
+    else
+    {
+        xsapi_internal_string userAgent = DEFAULT_USER_AGENT;
+        add_header(httpCallData, "User-Agent", userAgent);
+    }
+
 }
 
 void http_call_impl::set_http_timeout(
