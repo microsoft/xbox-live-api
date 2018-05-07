@@ -30,6 +30,14 @@ enum class caller_context_type
     stats_manager
 };
 
+enum class caller_api_type
+{
+    api_unknown,
+    api_c,
+    api_cpp,
+    api_winrt
+};
+
 class user_context_auth_result
 {
 public:
@@ -51,12 +59,18 @@ private:
 class user_context
 {
 public:
-    user_context() {};
+    user_context() :
+        m_callerContextType(xbox::services::caller_context_type::title),
+        m_apiType(xbox::services::caller_api_type::api_unknown)
+    {};
+
     const xsapi_internal_string& xbox_user_id() const;
 
     const xsapi_internal_string& caller_context() const;
     caller_context_type caller_context_type() const;
+    caller_api_type api_type() const { return m_apiType; }
     void set_caller_context_type(xbox::services::caller_context_type context);
+    void set_caller_api_type(xbox::services::caller_api_type apiType);
 
     bool is_signed_in() const;
 
@@ -147,6 +161,7 @@ private:
 private:
     xsapi_internal_string m_xboxUserId;
     xsapi_internal_string m_callerContext;
+    xbox::services::caller_api_type m_apiType;
     xbox::services::caller_context_type m_callerContextType;
 };
 

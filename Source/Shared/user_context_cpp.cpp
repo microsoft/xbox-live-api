@@ -26,7 +26,8 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 user_context::user_context(_In_ std::shared_ptr< xbox::services::system::xbox_live_user > user) :
     m_user(user),
-    m_callerContextType(xbox::services::caller_context_type::title)
+    m_callerContextType(xbox::services::caller_context_type::title),
+    m_apiType(xbox::services::caller_api_type::api_unknown)
 {
     XSAPI_ASSERT(user != nullptr);
     m_xboxUserId = m_user->_User_impl()->xbox_user_id();

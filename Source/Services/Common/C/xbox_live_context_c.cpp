@@ -8,6 +8,7 @@
 #include "user_c.h"
 #endif
 #include "xbox_live_context_internal_c.h"
+#include "user_context.h"
 
 using namespace xbox::services;
 using namespace xbox::services::system;
@@ -25,6 +26,7 @@ try
 
     void *buffer = xsapi_memory::mem_alloc(sizeof(xbl_xbox_live_context));
     *context = new (buffer) xbl_xbox_live_context(user);
+    (*context)->contextImpl->user_context()->set_caller_api_type(xbox::services::caller_api_type::api_c);
 
     return S_OK;
 }
