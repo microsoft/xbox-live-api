@@ -219,9 +219,6 @@
     <None Include="..\..\..\..\..\InProgressSamples\Kits\Media\Fonts\XboxOneControllerSmall.spritefont">
       <Filter>Assets</Filter>
     </None>
-    <None Include="packages.config">
-      <Filter>Common</Filter>
-    </None>
     <None Include="ReadMe.docx">
       <Filter>Common</Filter>
     </None>

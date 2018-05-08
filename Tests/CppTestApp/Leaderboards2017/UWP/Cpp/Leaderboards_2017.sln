@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.Services.141
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpprestsdk141.uwp.static", "..\..\..\..\..\External\cpprestsdk\Release\src\build\vs15.uwp\cpprestsdk141.uwp.static.vcxproj", "{9AD285A2-301E-47A0-A299-14AD5D4F2758}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libHttpClient.141.UWP.C", "..\..\..\..\..\External\libHttpClient\Build\libHttpClient.141.UWP.C\libHttpClient.141.UWP.C.vcxproj", "{CF37BEB2-A66A-42BA-B348-1F07566F4865}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\..\..\..\..\External\cpprestsdk\Release\src\build\common.vcxitems*{9ad285a2-301e-47a0-a299-14ad5d4f2758}*SharedItemsImports = 4
@@ -78,8 +80,23 @@ Global
 		{9AD285A2-301E-47A0-A299-14AD5D4F2758}.Release|x64.Build.0 = Release|x64
 		{9AD285A2-301E-47A0-A299-14AD5D4F2758}.Release|x86.ActiveCfg = Release|Win32
 		{9AD285A2-301E-47A0-A299-14AD5D4F2758}.Release|x86.Build.0 = Release|Win32
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|ARM.ActiveCfg = Debug|ARM
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|ARM.Build.0 = Debug|ARM
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|x64.ActiveCfg = Debug|x64
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|x64.Build.0 = Debug|x64
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|x86.ActiveCfg = Debug|Win32
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|x86.Build.0 = Debug|Win32
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|ARM.ActiveCfg = Release|ARM
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|ARM.Build.0 = Release|ARM
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|x64.ActiveCfg = Release|x64
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|x64.Build.0 = Release|x64
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|x86.ActiveCfg = Release|Win32
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {655BC5C6-998D-4183-B527-B3D647A2D32C}
 	EndGlobalSection
 EndGlobal
