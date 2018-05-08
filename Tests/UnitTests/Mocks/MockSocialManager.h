@@ -13,7 +13,8 @@ public:
     MockSocialGraph(
         _In_ xbox_live_user_t user,
         _In_ social_manager_extra_detail_level socialManagerExtraDetailLevel,
-        _In_ std::function<void()> graphDestructionCompleteCallback
+        _In_ std::function<void()> graphDestructionCompleteCallback,
+        _In_ async_queue_handle_t queue
         );
     std::shared_ptr<xbox_live_context_impl> internal_xbox_live_context_impl() const;
     void add_state_handler(_In_ const std::function<void(_In_ xbox::services::real_time_activity::real_time_activity_connection_state state)>& stateRTAFunction);

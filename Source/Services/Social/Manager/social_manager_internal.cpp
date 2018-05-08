@@ -268,9 +268,7 @@ social_manager_internal::add_local_user(
                 pThis->m_eventQueue.push_back(userRemovedEvent);
             }
         }
-#if !UNIT_TEST_SERVICES
         , m_backgroundAsyncQueue
-#endif
         );
 
         m_localGraphs[userString] = newGraph;

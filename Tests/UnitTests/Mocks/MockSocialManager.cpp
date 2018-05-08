@@ -78,8 +78,9 @@ MockSocialManager::social_graph_event_queue_empty(
 MockSocialGraph::MockSocialGraph(
     _In_ xbox_live_user_t user,
     _In_ social_manager_extra_detail_level socialManagerExtraDetailLevel,
-    _In_ std::function<void()> graphDestructionCompleteCallback
-    ) : social_graph(user, socialManagerExtraDetailLevel, graphDestructionCompleteCallback)
+    _In_ std::function<void()> graphDestructionCompleteCallback,
+    _In_ async_queue_handle_t queue
+    ) : social_graph(user, socialManagerExtraDetailLevel, graphDestructionCompleteCallback, queue)
 {
 }
 

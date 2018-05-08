@@ -17,6 +17,10 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 Windows::UI::Core::CoreDispatcher^ xbox_live_context_settings::_s_dispatcher;
 #endif
 
+std::mutex xbox_live_context_settings::m_writeLock;
+std::unordered_map<function_context, std::function<void(xbox::services::xbox_service_call_routed_event_args)>> xbox_live_context_settings::m_serviceCallRoutedHandlers;
+function_context xbox_live_context_settings::m_serviceCallRoutedHandlersCounter = 0;
+
 #if UWP_API || UNIT_TEST_SERVICES
 void
 xbox_live_context_settings::_Set_dispatcher(
@@ -79,14 +83,16 @@ function_context xbox_live_context_settings::add_service_call_routed_handler(_In
     {
         context = ++m_serviceCallRoutedHandlersCounter;
         m_serviceCallRoutedHandlers[m_serviceCallRoutedHandlersCounter] = std::move(handler);
-
-        auto sharedPtrContext = xsapi_allocate_shared<std::function<void(const xbox_service_call_routed_event_args&)>>(handler);
         HCAddCallRoutedHandler([](hc_call_handle_t call, void* context)
         {
-            auto sharedPtrContext = utils::remove_shared_ptr<std::function<void(const xbox_service_call_routed_event_args&)>>(context);
-            (*sharedPtrContext)(xsapi_allocate_shared<xbox_service_call_routed_event_args_internal>(call));
-        }, 
-        utils::store_shared_ptr(sharedPtrContext));
+            std::lock_guard<std::mutex> lock(m_writeLock);
+            auto iter = m_serviceCallRoutedHandlers.find((function_context)(context));
+            if (iter != m_serviceCallRoutedHandlers.end())
+            {
+                (iter->second)(xsapi_allocate_shared<xbox_service_call_routed_event_args_internal>(call));
+            }
+        },
+        (void*)context);
     }
 
     return context;

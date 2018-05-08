@@ -36,7 +36,7 @@ public:
     void fire();
 
     void fire(
-        _In_ const xsapi_internal_vector<xsapi_internal_string>& xboxUserIds, 
+        _In_ const xsapi_internal_vector<xsapi_internal_string>& xboxUserIds,
         _In_ std::shared_ptr<call_buffer_timer_completion_context> usersAddedStruct = nullptr
         );
 
@@ -47,7 +47,6 @@ private:
 
     bool m_isTaskInProgress;
     bool m_queuedTask;
-    bool m_createThreads;
     const std::chrono::seconds m_bufferTimePerCall;
 #if _MSC_VER <= 1800 && !defined XSAPI_I
     std::chrono::system_clock::time_point m_previousTime;
