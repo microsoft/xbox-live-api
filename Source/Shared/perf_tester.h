@@ -46,16 +46,24 @@ public:
 
     void stop_timer(_In_ const xsapi_internal_string& logName, _In_ bool shouldReportAnyways = false)
     {
-    #if PERF_TESTING
-        std::chrono::nanoseconds totalTime = std::chrono::high_resolution_clock::now() - m_logNameToProcessTime[logName].previousTime;
-        float totalTimeMS = totalTime.count() / 1000000.f;
-
+#if PERF_TESTING
         std::lock_guard<std::mutex> lock(m_lock.get());
-        m_logNameToProcessTime[logName].totalTime = totalTimeMS;
-        if (totalTimeMS > PERF_THRESHOLD_MS || shouldReportAnyways)
+        auto iter = m_logNameToProcessTime.find(logName);
+        if (iter != m_logNameToProcessTime.end())
         {
-            LOGS_ERROR << m_ownerName << " processing took : " << totalTimeMS << " ms";
-            print();
+            std::chrono::nanoseconds totalTime = std::chrono::high_resolution_clock::now() - iter->second.previousTime;
+            float totalTimeMS = totalTime.count() / 1000000.f;
+
+            iter->second.totalTime = totalTimeMS;
+            if (totalTimeMS > PERF_THRESHOLD_MS || shouldReportAnyways)
+            {
+                LOGS_ERROR << m_ownerName << " processing took : " << totalTimeMS << " ms";
+                print();
+            }
+        }
+        else
+        {
+            LOGS_WARN << "Perf logs cleared mid perf calculation!";
         }
     #else
         UNREFERENCED_PARAMETER(logName);
