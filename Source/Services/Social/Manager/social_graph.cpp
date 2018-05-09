@@ -1711,69 +1711,64 @@ social_graph::remove_users(
 void
 social_graph::presence_refresh_callback()
 {
-    xsapi_internal_vector<xsapi_internal_string> userList;
-    {
-        std::lock_guard<std::recursive_mutex> socialGraphStateLock(m_socialGraphStateMutex);
-
-        if (m_userBuffer.inactive_buffer() != nullptr)
-        {
-            {
-                std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
-                std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
-                m_perfTester.start_timer("presence refresh state set");
-                set_state(social_graph_state::refresh);
-                m_perfTester.stop_timer("presence refresh state set");
-            }
-            userList.reserve(m_userBuffer.inactive_buffer()->socialUserGraph.size());
-            for (auto& user : m_userBuffer.inactive_buffer()->socialUserGraph)
-            {
-                if (user.second.socialUser != nullptr)
-                {
-                    userList.push_back(utils::internal_string_from_string_t(user.second.socialUser->xbox_user_id()));
-                }
-            }
-
-            m_presencePollingTimer->fire(userList);
-
-            {
-                std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
-                std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
-                m_perfTester.start_timer("presence refresh fire");
-                set_state(social_graph_state::normal);
-                m_perfTester.stop_timer("presence refresh fire");
-            }
-        }
-    }
-
 #if UWP_API || TV_API || UNIT_TEST_SERVICES
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
 
     AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
     async->queue = m_backgroundAsyncQueue;
+    async->context = utils::store_weak_ptr(thisWeakPtr);
     async->callback = [](AsyncBlock* async)
     {
         xsapi_memory::mem_free(async);
+        std::shared_ptr<social_graph> pThis(utils::remove_weak_ptr<social_graph>(async->context, true).lock());
+        if (pThis && !*(pThis->m_shouldCancel))
+        {
+            pThis->presence_refresh_callback();
+        }
     };
-    BeginAsync(async, utils::store_weak_ptr(thisWeakPtr), nullptr, __FUNCTION__,
+    BeginAsync(async, async->context, nullptr, __FUNCTION__,
         [](AsyncOp op, const AsyncProviderData* data)
     {
         if (op == AsyncOp_DoWork)
         {
-            std::shared_ptr<social_graph> pThis(utils::remove_weak_ptr<social_graph>(data->context).lock());
-            if (pThis)
+            std::shared_ptr<social_graph> pThis(utils::remove_weak_ptr<social_graph>(data->async->context, false).lock());
+            if (pThis && !*(pThis->m_shouldCancel))
             {
+                xsapi_internal_vector<xsapi_internal_string> userList;
                 {
                     std::lock_guard<std::recursive_mutex> socialGraphStateLock(pThis->m_socialGraphStateMutex);
-                    if (*pThis->m_shouldCancel)
+
+                    if (pThis->m_userBuffer.inactive_buffer() != nullptr)
                     {
-                        CancelAsync(data->async);
-                        return E_ABORT;
+                        {
+                            std::lock_guard<std::recursive_mutex> lock(pThis->m_socialGraphMutex);
+                            std::lock_guard<std::recursive_mutex> priorityLock(pThis->m_socialGraphPriorityMutex);
+                            pThis->m_perfTester.start_timer("presence refresh state set");
+                            pThis->set_state(social_graph_state::refresh);
+                            pThis->m_perfTester.stop_timer("presence refresh state set");
+                        }
+                        userList.reserve(pThis->m_userBuffer.inactive_buffer()->socialUserGraph.size());
+                        for (auto& user : pThis->m_userBuffer.inactive_buffer()->socialUserGraph)
+                        {
+                            if (user.second.socialUser != nullptr)
+                            {
+                                userList.push_back(utils::internal_string_from_string_t(user.second.socialUser->xbox_user_id()));
+                            }
+                        }
+
+                        pThis->m_presencePollingTimer->fire(userList);
+
+                        {
+                            std::lock_guard<std::recursive_mutex> lock(pThis->m_socialGraphMutex);
+                            std::lock_guard<std::recursive_mutex> priorityLock(pThis->m_socialGraphPriorityMutex);
+                            pThis->m_perfTester.start_timer("presence refresh fire");
+                            pThis->set_state(social_graph_state::normal);
+                            pThis->m_perfTester.stop_timer("presence refresh fire");
+                        }
                     }
                 }
-                pThis->presence_refresh_callback();
             }
             CompleteAsync(data->async, S_OK, 0);
-            return E_PENDING;
         }
         return S_OK;
     });
