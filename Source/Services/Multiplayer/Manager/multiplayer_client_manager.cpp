@@ -294,6 +294,7 @@ multiplayer_client_manager::join_lobby(
 
     // Check if the xuid matches with the sent users.
     bool invitedUserFound = false;
+    int invitedUserIndex = 0;
     for (auto& user: users)
     {
         if (utils::str_icmp(invitedXuid, utils::string_t_from_internal_string(user_context::get_user_id(user))) == 0)
@@ -301,6 +302,7 @@ multiplayer_client_manager::join_lobby(
             invitedUserFound = true;
             break;
         }
+        invitedUserIndex++;
     }
 
     if (!invitedUserFound)
@@ -321,6 +323,12 @@ multiplayer_client_manager::join_lobby(
         m_multiplayerEventQueue.push_back(multiplayerEvent);
 
         return xbox_live_result<void>(xbox_live_error_code::logic_error, "Pass in the invited user into join_lobby() API.");
+    }
+    else if (invitedUserFound && invitedUserIndex > 0)
+    {
+        auto invitedUser = users[0];
+        users[0] = users[invitedUserIndex];
+        users[invitedUserIndex] = invitedUser;
     }
 
     // This will also join any game that is associated with the lobby.
