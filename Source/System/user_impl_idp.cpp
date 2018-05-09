@@ -53,7 +53,9 @@ void user_impl_idp::sign_in_impl(
         }
     }
 
-    initialize_provider([thisWeakPtr, showUI, queue, callback](void)
+    initialize_provider(
+        queue,
+        [thisWeakPtr, showUI, queue, callback](void)
     {
         std::shared_ptr<user_impl_idp> pThis(thisWeakPtr.lock());
         if (pThis == nullptr)
@@ -225,54 +227,84 @@ void user_impl_idp::sign_in_impl(
 }
 
 
-void user_impl_idp::initialize_provider(xbox_live_callback<void> callback)
+void user_impl_idp::initialize_provider(
+    _In_ async_queue_handle_t queue,
+    _In_ xbox_live_callback<void> callback
+    )
 {
     std::weak_ptr<user_impl_idp> thisWeakPtr = std::dynamic_pointer_cast<user_impl_idp>(shared_from_this());
 
-    // If already found a provider, return.
-    if (m_provider != nullptr)
+    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    async->queue = queue;
+    async->context = utils::store_shared_ptr(xsapi_allocate_shared<xbox_live_callback<void>>(callback));
+    async->callback = [](AsyncBlock* async)
     {
-        callback();
-        return;
-    }
+        auto callbackPtr = utils::remove_shared_ptr<xbox_live_callback<void>>(async->context);
+        (*callbackPtr)();
+        xsapi_memory::mem_free(async);
+    };
 
-    // First time initialization. 
-    if (m_creationContext == nullptr && is_multi_user_application())
+    BeginAsync(async, utils::store_weak_ptr(thisWeakPtr), nullptr, __FUNCTION__,
+        [](AsyncOp op, const AsyncProviderData* data)
     {
-        std::string errorMsg = "Xbox Live User object is required to be constructed by a Windows::System::User object in the Multi-User environment.";
-        LOG_ERROR(errorMsg);
-        throw std::runtime_error(errorMsg);
-    }
-
-    IAsyncOperation<WebAccountProvider^>^ asyncOp;
-    if (m_creationContext == nullptr || !is_multi_user_application())
-    {
-        asyncOp = WebAuthenticationCoreManager::FindAccountProviderAsync("https://xsts.auth.xboxlive.com");
-    }
-    else
-    {
-        asyncOp = WebAuthenticationCoreManager::FindAccountProviderAsync("https://xsts.auth.xboxlive.com", "", m_creationContext);
-    }
-
-    asyncOp->Completed = ref new AsyncOperationCompletedHandler<WebAccountProvider^>(
-        [thisWeakPtr, callback](IAsyncOperation<WebAccountProvider^>^ asyncInfo, Windows::Foundation::AsyncStatus status)
-    {
-        UNREFERENCED_PARAMETER(status);
-        std::shared_ptr<user_impl_idp> pThis(thisWeakPtr.lock());
-        if (pThis == nullptr)
+        if (op == AsyncOp_DoWork)
         {
-            throw std::runtime_error("user_impl shutting down");
-        }
+            auto thisWeakPtr = utils::remove_weak_ptr<user_impl_idp>(data->context);
+            auto thisPtr = thisWeakPtr.lock();
 
-        auto provider = asyncInfo->GetResults();
-        if (provider == nullptr)
+            if (thisPtr == nullptr || thisPtr->m_provider != nullptr)
+            {
+                CompleteAsync(data->async, S_OK, 0);
+            }
+            else
+            {
+                // First time initialization. 
+                if (thisPtr->m_creationContext == nullptr && is_multi_user_application())
+                {
+                    std::string errorMsg = "Xbox Live User object is required to be constructed by a Windows::System::User object in the Multi-User environment.";
+                    LOG_ERROR(errorMsg);
+                    throw std::runtime_error(errorMsg);
+                }
+
+                IAsyncOperation<WebAccountProvider^>^ asyncOp;
+                if (thisPtr->m_creationContext == nullptr || !is_multi_user_application())
+                {
+                    asyncOp = WebAuthenticationCoreManager::FindAccountProviderAsync("https://xsts.auth.xboxlive.com");
+                }
+                else
+                {
+                    asyncOp = WebAuthenticationCoreManager::FindAccountProviderAsync("https://xsts.auth.xboxlive.com", "", thisPtr->m_creationContext);
+                }
+
+                AsyncBlock* async = data->async;
+                asyncOp->Completed = ref new AsyncOperationCompletedHandler<WebAccountProvider^>(
+                    [thisWeakPtr, async](IAsyncOperation<WebAccountProvider^>^ asyncInfo, Windows::Foundation::AsyncStatus status)
+                {
+                    UNREFERENCED_PARAMETER(status);
+                    std::shared_ptr<user_impl_idp> pThis(thisWeakPtr.lock());
+                    if (pThis == nullptr)
+                    {
+                        throw std::runtime_error("user_impl shutting down");
+                    }
+
+                    auto provider = asyncInfo->GetResults();
+                    if (provider == nullptr)
+                    {
+                        throw std::runtime_error("Xbox Live identity provider is not found");
+                    }
+
+                    pThis->m_provider = provider;
+                    CompleteAsync(async, S_OK, 0);
+                });
+            }
+            return E_PENDING;
+        }
+        else
         {
-            throw std::runtime_error("Xbox Live identity provider is not found");
+            return S_OK;
         }
-
-        pThis->m_provider = provider;
-        callback();
     });
+    ScheduleAsync(async, 0);
 }
 
 user_impl_idp::user_impl_idp(Windows::System::User^ systemUser) :

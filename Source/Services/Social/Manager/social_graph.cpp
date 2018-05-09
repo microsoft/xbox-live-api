@@ -181,6 +181,7 @@ void social_graph::initialize(xbox_live_callback<xbox_live_result<void>> callbac
             CompleteAsync(data->async, S_OK, 0);
             return E_PENDING;
         }
+        return S_OK;
     });
     ScheduleAsync(socialGraphRefreshAsync, (uint32_t)std::chrono::duration_cast<std::chrono::milliseconds>(REFRESH_TIME_MIN).count());
 #endif

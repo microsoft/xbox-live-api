@@ -84,13 +84,14 @@ function_context xbox_live_context_settings::add_service_call_routed_handler(_In
         {
             auto singleton = get_xsapi_singleton();
             std::lock_guard<std::mutex> lock(singleton->m_serviceCallRoutedHandlersLock);
-            auto iter = singleton->m_serviceCallRoutedHandlers.find((function_context)(context));
+
+            auto iter = singleton->m_serviceCallRoutedHandlers.find(static_cast<function_context>((int64)context));
             if (iter != singleton->m_serviceCallRoutedHandlers.end())
             {
                 (iter->second)(xsapi_allocate_shared<xbox_service_call_routed_event_args_internal>(call));
             }
         },
-        (void*)context);
+        (void*)((int64_t)context));
     }
 
     return context;
