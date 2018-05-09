@@ -1447,32 +1447,6 @@ void social_graph::social_graph_refresh_callback()
         }
         return S_OK;
     });
-
-    create_delayed_task(
-        REFRESH_TIME_MIN,
-        [thisWeakPtr]()
-    {
-        try
-        {
-            std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
-            if (pThis)
-            {
-                pThis->social_graph_refresh_callback();
-            }
-        }
-        catch (const std::exception& e)
-        {
-            LOGS_DEBUG_IF(social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose)
-                << "Exception in social_graph_refresh_callback " << e.what();
-        }
-        catch (...)
-        {
-            LOG_DEBUG_IF(
-                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose,
-                "Unknown std::exception in initialization"
-            );
-        }
-    });
 #endif
 
     refresh_graph();
