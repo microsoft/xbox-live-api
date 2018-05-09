@@ -490,7 +490,7 @@ void http_call_impl::internal_get_response(
         }
     };
 
-    HCHttpCallPerform(httpCallData->callHandle, asyncBlock);
+    HCHttpCallPerform(asyncBlock, httpCallData->callHandle);
 }
 
 string_t http_call_impl::server_name() const
