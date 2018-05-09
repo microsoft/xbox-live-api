@@ -487,7 +487,7 @@ public:
 
         LOG_DEBUG("Subs initialized");
         socialManagerInitializationStruct.socialEvents.clear();
-
+        
         while (true)  // todo: find other way to confirm subs
         {
             AppendToPendingEvents(socialManagerInitializationStruct.socialManager->DoWork(), socialManagerInitializationStruct);
@@ -1158,7 +1158,6 @@ public:
         shouldLoop = true;
         socialManagerInitializationStruct1.socialEvents.clear();
         socialManagerInitializationStruct1.socialEvents.clear();
-
         while (true)
         {
             AppendToPendingEvents(socialManagerInitializationStruct1.socialManager->DoWork(), socialManagerInitializationStruct1);
@@ -1499,7 +1498,6 @@ public:
         socialManagerInitializationStruct.socialEvents.clear();
         task_completion_event<void> tce;
         InitializeSubscriptions(stringVec, tce);
-
         while (true)
         {
             AppendToPendingEvents(socialManagerInitializationStruct.socialManager->DoWork(), socialManagerInitializationStruct);

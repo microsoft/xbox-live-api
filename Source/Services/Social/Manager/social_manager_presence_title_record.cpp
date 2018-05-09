@@ -75,9 +75,6 @@ social_manager_presence_title_record::_Deserialize(
 {
     if (json.is_null()) return social_manager_presence_title_record();
 
-    auto str = json.serialize();
-    LOG_DEBUG(utils::internal_string_from_string_t(str).data());
-
     social_manager_presence_title_record returnObject;
     std::error_code errc;
 
