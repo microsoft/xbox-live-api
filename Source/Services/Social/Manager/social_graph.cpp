@@ -1753,7 +1753,7 @@ social_graph::presence_refresh_callback()
     {
         xsapi_memory::mem_free(async);
     };
-    auto hr = BeginAsync(async, utils::store_weak_ptr(thisWeakPtr), nullptr, __FUNCTION__,
+    BeginAsync(async, utils::store_weak_ptr(thisWeakPtr), nullptr, __FUNCTION__,
         [](AsyncOp op, const AsyncProviderData* data)
     {
         if (op == AsyncOp_DoWork)

@@ -224,4 +224,12 @@ xbox_live_context::application_config()
     return m_xboxLiveContextImpl->application_config();
 }
 
+#if !XSAPI_CPP
+std::shared_ptr<user_context>
+xbox_live_context::_User_context() const
+{
+    return m_xboxLiveContextImpl->user_context();
+}
+#endif
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
