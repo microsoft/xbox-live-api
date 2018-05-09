@@ -329,6 +329,7 @@ social_graph::schedule_event_work(do_event_work_context* context)
         {
             CompleteAsync(context->outerAsyncBlock, S_OK, 0);
         }
+        xsapi_memory::mem_free(nestedAsync);
     };
 
     BeginAsync(nestedAsync, nestedAsync->context, nullptr, __FUNCTION__,
