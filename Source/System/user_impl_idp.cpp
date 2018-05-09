@@ -601,7 +601,7 @@ user_impl_idp::request_token_from_idp(
         }
     });
 
-    if (coreDispatcher != nullptr && !coreDispatcher->HasThreadAccess && promptForCredentialsIfNeeded)
+    if (coreDispatcher != nullptr && promptForCredentialsIfNeeded)
     {
         coreDispatcher->RunAsync(
             Windows::UI::Core::CoreDispatcherPriority::Normal,
