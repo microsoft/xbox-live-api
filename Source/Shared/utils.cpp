@@ -112,8 +112,9 @@ xsapi_singleton::~xsapi_singleton()
 
     if (m_callbackContextPtrs.size() > 0)
     {
-#pragma warning(suppress: 4297)
-        XSAPI_ASSERT(false && "Context remaining in context store!");
+#ifdef UNIT_TEST_SERVICES
+        assert(false && "Context remaining in context store!");
+#endif
         m_callbackContextPtrs.clear();
     }
 

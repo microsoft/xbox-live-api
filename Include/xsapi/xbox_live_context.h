@@ -219,6 +219,13 @@ public:
 
 #endif // !defined(XBOX_LIVE_CREATORS_SDK)
 
+#if !XSAPI_CPP
+    /// <summary>
+    /// Internal method
+    /// </summary>
+    std::shared_ptr<user_context> _User_context() const;
+#endif
+
 private:
     std::shared_ptr<xbox::services::xbox_live_context_impl> m_xboxLiveContextImpl;
 
