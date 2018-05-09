@@ -426,8 +426,8 @@ struct xsapi_singleton
 
 #if !TV_API
     // from System\user_impl.cpp
-    std::unordered_map<function_context, xbox_live_callback<const system::sign_out_completed_event_args&>> m_signOutCompletedHandlers;
-    std::unordered_map<function_context, xbox_live_callback<const xsapi_internal_string&>> m_signInCompletedHandlers;
+    xsapi_internal_unordered_map<function_context, xbox_live_callback<const system::sign_out_completed_event_args&>> m_signOutCompletedHandlers;
+    xsapi_internal_unordered_map<function_context, xbox_live_callback<const xsapi_internal_string&>> m_signInCompletedHandlers;
     function_context m_signOutCompletedHandlerIndexer;
     function_context m_signInCompletedHandlerIndexer;
     std::mutex m_trackingUsersLock;
@@ -435,8 +435,14 @@ struct xsapi_singleton
     std::unordered_map<std::shared_ptr<xbox::services::system::xbox_live_user>, xbl_user_handle> m_userHandlesMap;
 #endif
     
+    // from Shared\xbox_live_context_settings.cpp
+    std::mutex m_serviceCallRoutedHandlersLock;
+    xsapi_internal_unordered_map<function_context, xbox_live_callback<xbox::services::xbox_service_call_routed_event_args>> m_serviceCallRoutedHandlers;
+    function_context m_serviceCallRoutedHandlersCounter;
+
     std::mutex m_callbackContextsLock;
     xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_callbackContextPtrs;
+    xsapi_internal_unordered_map<void *, std::weak_ptr<void>> m_weakCallbackContextPtrs;
 
     async_queue_handle_t m_asyncQueue;
 };
@@ -1473,13 +1479,30 @@ public:
         );
     
     template<typename T>
-    static void *store_shared_ptr(std::shared_ptr<T> contextSharedPtr)
+    static void* store_shared_ptr(std::shared_ptr<T> contextSharedPtr)
     {
         auto singleton = get_xsapi_singleton();
         std::lock_guard<std::mutex> lock(singleton->m_callbackContextsLock);
         void *rawVoidPtr = contextSharedPtr.get();
         std::shared_ptr<void> voidSharedPtr(contextSharedPtr, rawVoidPtr);
         singleton->m_callbackContextPtrs.insert(std::make_pair(rawVoidPtr, voidSharedPtr));
+        return rawVoidPtr;
+    }
+
+    template<typename T>
+    static void* store_weak_ptr(std::weak_ptr<T> contextWeakPtr)
+    {
+        auto singleton = get_xsapi_singleton();
+        std::lock_guard<std::mutex> lock(singleton->m_callbackContextsLock);
+
+        void* rawVoidPtr = nullptr;
+        auto sharedPtr = contextWeakPtr.lock();
+        if (sharedPtr)
+        {
+            rawVoidPtr = sharedPtr.get();
+            std::weak_ptr<void> voidWeakPtr = std::shared_ptr<void>(sharedPtr, rawVoidPtr);
+            singleton->m_weakCallbackContextPtrs.insert(std::make_pair(rawVoidPtr, voidWeakPtr));
+        }
         return rawVoidPtr;
     }
 
@@ -1503,6 +1526,37 @@ public:
         {
             XSAPI_ASSERT(false && "Shared pointer not found!");
             return std::shared_ptr<T>();
+        }
+    }
+
+    template<typename T>
+    static std::weak_ptr<T> remove_weak_ptr(void *rawContextPtr, bool deleteWeak = true)
+    {
+        auto singleton = get_xsapi_singleton();
+        std::lock_guard<std::mutex> lock(singleton->m_callbackContextsLock);
+
+        auto iter = singleton->m_weakCallbackContextPtrs.find(rawContextPtr);
+        if (iter != singleton->m_weakCallbackContextPtrs.end())
+        {
+            auto sharedPtr = iter->second.lock();
+            if (sharedPtr)
+            {
+                auto returnPtr = std::shared_ptr<T>(sharedPtr, reinterpret_cast<T*>(sharedPtr.get()));
+                if (deleteWeak)
+                {
+                    singleton->m_weakCallbackContextPtrs.erase(iter);
+                }
+                return returnPtr;
+            }
+            else
+            {
+                return std::weak_ptr<T>();
+            }
+        }
+        else
+        {
+            // don't assert here since we never insert the pointer if it is already expired
+            return std::weak_ptr<T>();
         }
     }
 

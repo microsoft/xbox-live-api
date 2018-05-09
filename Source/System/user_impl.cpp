@@ -130,7 +130,7 @@ user_impl::user_signed_in(
     _In_ xsapi_internal_string webAccountId
     )
 {
-    std::unordered_map<function_context, xbox_live_callback<const xsapi_internal_string&>> signInCompletedHandlersCopy;
+    xsapi_internal_unordered_map<function_context, xbox_live_callback<const xsapi_internal_string&>> signInCompletedHandlersCopy;
     {
         std::lock_guard<std::mutex> lock(m_lock.get());
 
@@ -221,7 +221,7 @@ user_impl::remove_sign_out_completed_handler(
 void user_impl::user_signed_out()
 {
     bool isSignedIn;
-    std::unordered_map<function_context, xbox_live_callback<const sign_out_completed_event_args&>> signOutHandlers;
+    xsapi_internal_unordered_map<function_context, xbox_live_callback<const sign_out_completed_event_args&>> signOutHandlers;
     {
         std::lock_guard<std::mutex> lock(m_lock.get());
         isSignedIn = m_isSignedIn;

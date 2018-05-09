@@ -162,33 +162,44 @@ void social_graph::initialize(xbox_live_callback<xbox_live_result<void>> callbac
         );
 
 #if UWP_API || TV_API || UNIT_TEST_SERVICES
-    create_delayed_task(
-        REFRESH_TIME_MIN,
-        [thisWeakPtr]()
+    AsyncBlock* socialGraphRefreshAsync = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    socialGraphRefreshAsync->queue = m_backgroundAsyncQueue;
+    socialGraphRefreshAsync->callback = [](AsyncBlock* async)
     {
-        std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
-        if (pThis)
+        xsapi_memory::mem_free(async);
+    };
+    BeginAsync(socialGraphRefreshAsync, utils::store_weak_ptr(thisWeakPtr), nullptr, __FUNCTION__,
+        [](AsyncOp op, const AsyncProviderData* data)
+    {
+        if (op == AsyncOp_DoWork)
         {
-            pThis->social_graph_refresh_callback();
+            std::shared_ptr<social_graph> pThis(utils::remove_weak_ptr<social_graph>(data->context).lock());
+            if (pThis)
+            {
+                pThis->social_graph_refresh_callback();
+            }
+            CompleteAsync(data->async, S_OK, 0);
+            return E_PENDING;
         }
     });
+    ScheduleAsync(socialGraphRefreshAsync, (uint32_t)std::chrono::duration_cast<std::chrono::milliseconds>(REFRESH_TIME_MIN).count());
 #endif
 
-    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    AsyncBlock* eventWorkAsync = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
 
     auto context = xsapi_allocate_shared<do_event_work_context>();
     context->pThis = thisWeakPtr;
     context->hasRemainingEvent = true;
-    context->outerAsyncBlock = async;
-    async->queue = m_backgroundAsyncQueue;
-    async->context = utils::store_shared_ptr(context);
-    async->callback = [](AsyncBlock* async)
+    context->outerAsyncBlock = eventWorkAsync;
+    eventWorkAsync->queue = m_backgroundAsyncQueue;
+    eventWorkAsync->context = utils::store_shared_ptr(context);
+    eventWorkAsync->callback = [](AsyncBlock* async)
     {
         utils::remove_shared_ptr<do_event_work_context>(async->context);
         xsapi_memory::mem_free(async);
     };
 
-    auto hr = BeginAsync(async, async->context, nullptr, __FUNCTION__,
+    auto hr = BeginAsync(eventWorkAsync, eventWorkAsync->context, nullptr, __FUNCTION__,
         [](AsyncOp op, const AsyncProviderData* data)
     {
         if (op == AsyncOp_DoWork)
@@ -205,7 +216,7 @@ void social_graph::initialize(xbox_live_callback<xbox_live_result<void>> callbac
     });
     if (SUCCEEDED(hr))
     {
-        ScheduleAsync(async, 0);
+        ScheduleAsync(eventWorkAsync, 0);
     }
 
     m_peoplehubService.get_social_graph(
@@ -330,6 +341,8 @@ social_graph::schedule_event_work(do_event_work_context* context)
             {
                 context->hasRemainingEvent = pThis->do_event_work();
             }
+            CompleteAsync(data->async, S_OK, 0);
+            return E_PENDING;
         }
         return S_OK;
     });
@@ -1395,34 +1408,46 @@ social_graph::social_graph_timer_callback(
 
 void social_graph::social_graph_refresh_callback()
 {
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
 
-#if UWP_API || TV_API || UNIT_TEST_SERVICES
-    create_delayed_task(
-        REFRESH_TIME_MIN,
-        [thisWeakPtr]()
+    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    async->queue = m_backgroundAsyncQueue;
+    async->callback = [](AsyncBlock* async) 
     {
-        try
+        xsapi_memory::mem_free(async);
+    };
+    BeginAsync(async, utils::store_weak_ptr(thisWeakPtr), nullptr, __FUNCTION__,
+        [](AsyncOp op, const AsyncProviderData* data)
+    {
+        if (op == AsyncOp_DoWork)
         {
-            std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
-            if (pThis)
+            try
             {
-                pThis->social_graph_refresh_callback();
+                std::shared_ptr<social_graph> pThis(utils::remove_weak_ptr<social_graph>(data->context).lock());
+                if (pThis)
+                {
+                    pThis->social_graph_refresh_callback();
+                }
             }
+            catch (const std::exception& e)
+            {
+                LOGS_DEBUG_IF(social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose)
+                    << "Exception in social_graph_refresh_callback " << e.what();
+            }
+            catch (...)
+            {
+                LOG_DEBUG_IF(
+                    social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose,
+                    "Unknown std::exception in initialization"
+                );
+            }
+            CompleteAsync(data->async, S_OK, 0);
+            return E_PENDING;
         }
-        catch (const std::exception& e)
-        {
-            LOGS_DEBUG_IF(social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose)
-                << "Exception in social_graph_refresh_callback " << e.what();
-        }
-        catch (...)
-        {
-            LOG_DEBUG_IF(
-                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose,
-                "Unknown std::exception in initialization"
-            );
-        }
+        return S_OK;
     });
+    ScheduleAsync(async, (uint32_t)std::chrono::duration_cast<std::chrono::milliseconds>(REFRESH_TIME_MIN).count());
 #endif
 
     refresh_graph();
@@ -1720,25 +1745,37 @@ social_graph::presence_refresh_callback()
 
 #if UWP_API || TV_API || UNIT_TEST_SERVICES
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
-    create_delayed_task(
-        TIME_PER_CALL_SEC,
-        [thisWeakPtr]()
+
+    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    async->queue = m_backgroundAsyncQueue;
+    async->callback = [](AsyncBlock* async)
     {
-        std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
-
-        if (pThis)
+        xsapi_memory::mem_free(async);
+    };
+    auto hr = BeginAsync(async, utils::store_weak_ptr(thisWeakPtr), nullptr, __FUNCTION__,
+        [](AsyncOp op, const AsyncProviderData* data)
+    {
+        if (op == AsyncOp_DoWork)
         {
+            std::shared_ptr<social_graph> pThis(utils::remove_weak_ptr<social_graph>(data->context).lock());
+            if (pThis)
             {
-                std::lock_guard<std::recursive_mutex> socialGraphStateLock(pThis->m_socialGraphStateMutex);
-                if (*pThis->m_shouldCancel)
                 {
-                    return;
+                    std::lock_guard<std::recursive_mutex> socialGraphStateLock(pThis->m_socialGraphStateMutex);
+                    if (*pThis->m_shouldCancel)
+                    {
+                        CancelAsync(data->async);
+                        return E_ABORT;
+                    }
                 }
+                pThis->presence_refresh_callback();
             }
-
-            pThis->presence_refresh_callback();
+            CompleteAsync(data->async, S_OK, 0);
+            return E_PENDING;
         }
+        return S_OK;
     });
+    ScheduleAsync(async, (uint32_t)std::chrono::duration_cast<std::chrono::milliseconds>(TIME_PER_CALL_SEC).count());
 #endif
 }
 

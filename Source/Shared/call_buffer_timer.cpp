@@ -18,28 +18,24 @@ struct fire_context
     fire_context(
         _In_ std::weak_ptr<call_buffer_timer> _thisWeak,
         _In_ std::shared_ptr<call_buffer_timer_completion_context> _usersAddedStruct,
-        _In_ xsapi_internal_vector<xsapi_internal_string> _usersToCall = xsapi_internal_vector<xsapi_internal_string>(),
-        _In_ std::chrono::milliseconds _delay = std::chrono::milliseconds(0)
+        _In_ xsapi_internal_vector<xsapi_internal_string> _usersToCall = xsapi_internal_vector<xsapi_internal_string>()
         )
         : thisWeak(std::move(_thisWeak)),
         usersAddedStruct(std::move(_usersAddedStruct)),
-        usersToCall(std::move(_usersToCall)),
-        delay(std::move(_delay))
+        usersToCall(std::move(_usersToCall))
     {
     }
 
     std::weak_ptr<call_buffer_timer> thisWeak;
     std::shared_ptr<call_buffer_timer_completion_context> usersAddedStruct;
     xsapi_internal_vector<xsapi_internal_string> usersToCall;
-    std::chrono::milliseconds delay;
 };
 
 call_buffer_timer::call_buffer_timer() :
     m_bufferTimePerCall(30),
     m_previousTime(std::chrono::steady_clock::duration::zero()),
     m_isTaskInProgress(false),
-    m_queuedTask(false),
-    m_createThreads(false)
+    m_queuedTask(false)
 {
     m_queue = get_xsapi_singleton()->m_asyncQueue;
 }
@@ -94,35 +90,7 @@ call_buffer_timer::fire(
             m_usersToCallMap[xboxUserId] = true;
         }
     }
-
-    auto context = utils::store_shared_ptr(xsapi_allocate_shared<fire_context>(shared_from_this(), usersAddedStruct));
-
-    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
-    ZeroMemory(async, sizeof(async));
-    BeginAsync(async, context, nullptr, __FUNCTION__,
-        [](AsyncOp op, const AsyncProviderData* data)
-    {
-        if (op == AsyncOp_DoWork)
-        {
-            auto context = static_cast<fire_context*>(data->context);
-            std::shared_ptr<call_buffer_timer> pThis(context->thisWeak.lock());
-            if (pThis == nullptr)
-            {
-                return S_OK;
-            }
-
-            std::lock_guard<std::mutex> lock(pThis->m_timerLock);
-            pThis->fire_helper(context->usersAddedStruct);
-            return S_OK;
-        }
-        else if (op == AsyncOp_Cleanup)
-        {
-            utils::remove_shared_ptr<fire_context>(data->context);
-            xsapi_memory::mem_free(data->async);
-        }
-        return S_OK;
-    });
-    ScheduleAsync(async, 0);
+    fire_helper(usersAddedStruct);
 }
 
 void
@@ -130,67 +98,68 @@ call_buffer_timer::fire_helper(
     _In_ std::shared_ptr<call_buffer_timer_completion_context> usersAddedStruct
 )
 {
-    if (!m_isTaskInProgress)
+    if (m_isTaskInProgress)
+    {
+        m_queuedTask = true;
+    }
+    else
     {
 #if UWP_API || TV_API || UNIT_TEST_SERVICES
         std::chrono::milliseconds timeDiff = m_bufferTimePerCall - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_previousTime);
         std::chrono::milliseconds timeRemaining = std::max<std::chrono::milliseconds>(std::chrono::milliseconds::zero(), timeDiff);
-        auto& usersToCall = m_usersToCall;
 
         std::weak_ptr<call_buffer_timer> thisWeakPtr = shared_from_this();
         m_isTaskInProgress = true;
         m_previousTime = std::chrono::high_resolution_clock::now();
 
-        auto contextSharedPtr = xsapi_allocate_shared<fire_context>(shared_from_this(), usersAddedStruct, usersToCall);
-        contextSharedPtr->delay = timeRemaining;
-
+        auto contextSharedPtr = xsapi_allocate_shared<fire_context>(shared_from_this(), usersAddedStruct, m_usersToCall);
         AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+        async->queue = m_queue;
+        async->context = utils::store_shared_ptr(contextSharedPtr);
+        async->callback = [](AsyncBlock* async)
+        {
+            auto context = utils::remove_shared_ptr<fire_context>(async->context);
+            std::shared_ptr<call_buffer_timer> pThis(context->thisWeak.lock());
+            if (pThis != nullptr)
+            {
+                std::lock_guard<std::mutex> lock(pThis->m_timerLock);
+                pThis->m_isTaskInProgress = false;
 
-        BeginAsync(async, utils::store_shared_ptr(contextSharedPtr), nullptr, __FUNCTION__,
+                if (pThis->m_queuedTask)
+                {
+                    pThis->m_queuedTask = false;
+                    pThis->fire_helper();
+                }
+            }
+            xsapi_memory::mem_free(async);
+        };
+
+        BeginAsync(async, async->context, nullptr, __FUNCTION__,
             [](AsyncOp op, const AsyncProviderData* data)
         {
             if (op == AsyncOp_DoWork)
             {
-                auto context = utils::remove_shared_ptr<fire_context>(data->context);
+                auto context = static_cast<fire_context*>(data->context);
 
                 std::shared_ptr<call_buffer_timer> pThis(context->thisWeak.lock());
                 if (pThis != nullptr)
                 {
-                    {
-                        std::lock_guard<std::mutex> lock(pThis->m_timerLock);
-                        pThis->m_isTaskInProgress = false;
-                    }
-
                     // no lock around this since it is never set after construction and can cause deadlock
                     pThis->m_fCallback(context->usersToCall, context->usersAddedStruct);
-
-                    {
-                        std::lock_guard<std::mutex> lock(pThis->m_timerLock);
-                        if (pThis->m_queuedTask)
-                        {
-                            pThis->m_queuedTask = false;
-                            pThis->fire_helper();
-                        }
-                    }
                 }
-            }
-            else if (op == AsyncOp_Cleanup)
-            {
-                xsapi_memory::mem_free(data->async);
+                CompleteAsync(data->async, S_OK, 0);
+
+                // Have to return E_PENDING from AsyncOp_DoWork
+                return E_PENDING;
             }
             return S_OK;
         });
-        ScheduleAsync(async, static_cast<uint32_t>(contextSharedPtr->delay.count()));
+        ScheduleAsync(async, static_cast<uint32_t>(timeRemaining.count()));
 #else
         UNREFERENCED_PARAMETER(usersAddedStruct);
 #endif
-
         m_usersToCall.clear();
         m_usersToCallMap.clear();
-    }
-    else
-    {
-        m_queuedTask = true;
     }
 }
 
