@@ -300,10 +300,6 @@ private:
     std::chrono::seconds m_httpRetryDelay;
     std::chrono::seconds m_httpTimeoutWindow;
 
-    static std::mutex m_writeLock;
-    static std::unordered_map<function_context, std::function<void(xbox::services::xbox_service_call_routed_event_args)>> m_serviceCallRoutedHandlers;
-    static function_context m_serviceCallRoutedHandlersCounter;
-
     std::chrono::seconds m_websocketTimeoutWindow;
     bool m_useCoreDispatcherForEventRouting;
     bool m_disableAssertsForXboxLiveThrottlingInDevSandboxes;

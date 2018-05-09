@@ -426,8 +426,8 @@ struct xsapi_singleton
 
 #if !TV_API
     // from System\user_impl.cpp
-    std::unordered_map<function_context, xbox_live_callback<const system::sign_out_completed_event_args&>> m_signOutCompletedHandlers;
-    std::unordered_map<function_context, xbox_live_callback<const xsapi_internal_string&>> m_signInCompletedHandlers;
+    xsapi_internal_unordered_map<function_context, xbox_live_callback<const system::sign_out_completed_event_args&>> m_signOutCompletedHandlers;
+    xsapi_internal_unordered_map<function_context, xbox_live_callback<const xsapi_internal_string&>> m_signInCompletedHandlers;
     function_context m_signOutCompletedHandlerIndexer;
     function_context m_signInCompletedHandlerIndexer;
     std::mutex m_trackingUsersLock;
@@ -435,6 +435,11 @@ struct xsapi_singleton
     std::unordered_map<std::shared_ptr<xbox::services::system::xbox_live_user>, xbl_user_handle> m_userHandlesMap;
 #endif
     
+    // from Shared\xbox_live_context_settings.cpp
+    std::mutex m_serviceCallRoutedHandlersLock;
+    xsapi_internal_unordered_map<function_context, xbox_live_callback<xbox::services::xbox_service_call_routed_event_args>> m_serviceCallRoutedHandlers;
+    function_context m_serviceCallRoutedHandlersCounter;
+
     std::mutex m_callbackContextsLock;
     xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_callbackContextPtrs;
     xsapi_internal_unordered_map<void *, std::weak_ptr<void>> m_weakCallbackContextPtrs;
