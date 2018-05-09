@@ -584,13 +584,20 @@ multiplayer_lobby_client::do_work()
                 else
                 {
                     std::vector<string_t> xuidsInOrder;
+
                     if (lobbyStateIsJoin)
                     {
+                        // If users are joining from an invite than the first multiplayer_client_pending_request in processingQueue references was the invited user.
+                        // We want the invited user to join first since it is possible that users in the local graph might not meet the criteria
+                        // to join the invited session until the invited user joins. Imagine that the inviting session has the session privacy set to joinable_by_friends
+                        // and only the invited user is a friend of the inviting user. If any additional users attempt to join the inviting session before the invited user
+                        // than the join fails for the whole list of users.
                         for (auto pendingRequest : processingQueue)
                         {
                             xuidsInOrder.push_back(pendingRequest->local_user()->xbox_user_id());
                         }
                     }
+
                     asyncOp = commit_pending_lobby_changes(xuidsInOrder, joinByHandleId, teamSessionRef);
                 }
 
