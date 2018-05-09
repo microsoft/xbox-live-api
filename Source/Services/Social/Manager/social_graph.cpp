@@ -1447,6 +1447,7 @@ void social_graph::social_graph_refresh_callback()
         }
         return S_OK;
     });
+    ScheduleAsync(async, (uint32_t)std::chrono::duration_cast<std::chrono::milliseconds>(REFRESH_TIME_MIN).count());
 #endif
 
     refresh_graph();
