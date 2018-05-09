@@ -181,7 +181,10 @@ private:
 
     void check_user_signed_out();
 
-    void initialize_provider(xbox_live_callback<void> callback);
+    void initialize_provider(
+        _In_ async_queue_handle_t queue,
+        _In_ xbox_live_callback<void> callback
+        );
 
     // sync version of get internal_get_token_and_signature
     xbox::services::xbox_live_result<std::shared_ptr<token_and_signature_result_internal>>
