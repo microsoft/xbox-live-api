@@ -26,9 +26,9 @@ void copy_profile(
 }
 
 STDAPI XblProfileGetUserProfile(
+    _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ uint64_t xboxUserId,
-    _In_ AsyncBlock* async
+    _In_ uint64_t xboxUserId
     ) XBL_NOEXCEPT
 try
 {
@@ -87,10 +87,10 @@ try
 CATCH_RETURN()
 
 STDAPI XblProfileGetUserProfiles(
+    _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t* xboxUserIds,
-    _In_ size_t xboxUserIdsCount,
-    _In_ AsyncBlock* async
+    _In_ size_t xboxUserIdsCount
     ) XBL_NOEXCEPT
 try
 {
@@ -154,9 +154,9 @@ try
 CATCH_RETURN()
 
 STDAPI XblProfileGetUserProfilesForSocialGroup(
+    _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ UTF8CSTR socialGroup,
-    _In_ AsyncBlock* async
+    _In_ UTF8CSTR socialGroup
     ) XBL_NOEXCEPT
 try
 {

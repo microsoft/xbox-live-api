@@ -71,12 +71,12 @@ void copy_social_relationship_result(
 }
 
 STDAPI XblGetSocialRelationshipsHelper(
+    _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ XblSocialRelationshipFilter socialRelationshipFilter,
     _In_ uint32_t startIndex,
-    _In_ uint32_t maxItems,
-    _In_ AsyncBlock* async
+    _In_ uint32_t maxItems
     )
 {
     RETURN_C_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || async == nullptr);
@@ -142,38 +142,38 @@ STDAPI XblGetSocialRelationshipsHelper(
 }
 
 STDAPI XblSocialGetSocialRelationships(
+    _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
-    _In_ XblSocialRelationshipFilter socialRelationshipFilter,
-    _In_ AsyncBlock* async
+    _In_ XblSocialRelationshipFilter socialRelationshipFilter
     ) XBL_NOEXCEPT
 try
 {
     return XblGetSocialRelationshipsHelper(
+        async,
         xboxLiveContext,
         xboxUserId,
         socialRelationshipFilter,
         0,
-        0,
-        async
+        0
         );
 }
 CATCH_RETURN()
 
 STDAPI XblSocialRelationshipResultGetNext(
+    _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ CONST XblSocialRelationshipResult *socialRelationshipResult,
-    _In_ uint32_t maxItems,
-    _In_ AsyncBlock* async
+    _In_ uint32_t maxItems
     ) XBL_NOEXCEPT
 {
     return XblGetSocialRelationshipsHelper(
+        async,
         xboxLiveContext,
         xboxLiveContext->xboxUserId,
         socialRelationshipResult->filter,
         socialRelationshipResult->continuationSkip,
-        maxItems,
-        async
+        maxItems
         );
 }
 
@@ -272,13 +272,13 @@ try
 CATCH_RETURN_WITH(;)
 
 STDAPI XblSocialSubmitReputationFeedback(
+    _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ XblReputationFeedbackType reputationFeedbackType,
     _In_opt_ UTF8CSTR sessionName,
     _In_opt_ UTF8CSTR reasonMessage,
-    _In_opt_ UTF8CSTR evidenceResourceId,
-    _In_ AsyncBlock* async
+    _In_opt_ UTF8CSTR evidenceResourceId
     ) XBL_NOEXCEPT
 try
 {
@@ -343,10 +343,10 @@ try
 CATCH_RETURN()
 
 STDAPI XblSocialSubmitBatchReputationFeedback(
+    _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ XblReputationFeedbackItem* feedbackItems,
-    _In_ uint32_t feedbackItemsCount,
-    _In_ AsyncBlock* async
+    _In_ uint32_t feedbackItemsCount
     ) XBL_NOEXCEPT
 try
 {
