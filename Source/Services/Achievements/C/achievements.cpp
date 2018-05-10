@@ -369,10 +369,10 @@ CATCH_RETURN_WITH(false)
 
 STDAPI
 XblAchievementsResultGetNext(
+    _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ XblAchievementsResult* achievementsResult,
-    _In_ uint32_t maxItems,
-    _In_ AsyncBlock* async
+    _In_ uint32_t maxItems
     ) XBL_NOEXCEPT
 try
 {
@@ -437,13 +437,13 @@ try
 CATCH_RETURN()
 
 STDAPI XblAchievementsUpdateAchievement(
+    _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_opt_ uint32_t* titleId,
     _In_opt_ UTF8CSTR serviceConfigurationId,
     _In_ UTF8CSTR achievementId,
-    _In_ uint32_t percentComplete,
-    _In_ AsyncBlock* async
+    _In_ uint32_t percentComplete
     ) XBL_NOEXCEPT
 try
 {
@@ -529,6 +529,7 @@ try
 CATCH_RETURN()
 
 STDAPI XblAchievementsGetAchievementsForTitleId(
+    _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ uint32_t titleId,
@@ -536,8 +537,7 @@ STDAPI XblAchievementsGetAchievementsForTitleId(
     _In_ bool unlockedOnly,
     _In_ XblAchievementOrderBy orderBy,
     _In_ uint32_t skipItems,
-    _In_ uint32_t maxItems,
-    _In_ AsyncBlock* async
+    _In_ uint32_t maxItems
     ) XBL_NOEXCEPT
 try
 {
@@ -611,11 +611,11 @@ try
 CATCH_RETURN()
 
 STDAPI XblAchievementsGetAchievement(
+    _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ UTF8CSTR serviceConfigurationId,
-    _In_ UTF8CSTR achievementId,
-    _In_ AsyncBlock* async
+    _In_ UTF8CSTR achievementId
     ) XBL_NOEXCEPT
 try
 {

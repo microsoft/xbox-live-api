@@ -706,9 +706,9 @@ void Game::SignIn()
     };
 
     XblUserSignInWithCoreDispatcher(
-        m_user, 
-        Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->CoreWindow->Dispatcher,
-        asyncBlock
+        asyncBlock,
+        m_user,
+        Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->CoreWindow->Dispatcher
         );
 }
 
@@ -737,7 +737,7 @@ void Game::GetUserProfile()
 
         delete asyncBlock;
     };
-    XblProfileGetUserProfile(m_xboxLiveContext, m_xuid, asyncBlock);
+    XblProfileGetUserProfile(asyncBlock, m_xboxLiveContext, m_xuid);
 }
 
 
@@ -765,7 +765,7 @@ void Game::SignInSilently()
         delete asyncBlock;
     };
 
-    XblUserSignInSilently(m_user, asyncBlock);
+    XblUserSignInSilently(asyncBlock, m_user);
 }
 
 void Game::GetSocialRelationships()
@@ -805,7 +805,7 @@ void Game::GetSocialRelationships()
         }
     };
 
-    XblSocialGetSocialRelationships(m_xboxLiveContext, m_xuid, XblSocialRelationshipFilter_All, asyncBlock);
+    XblSocialGetSocialRelationships(asyncBlock, m_xboxLiveContext, m_xuid, XblSocialRelationshipFilter_All);
 }
 
 void Game::GetAchievmentsForTitle()
@@ -841,6 +841,7 @@ void Game::GetAchievmentsForTitle()
     };
 
     XblAchievementsGetAchievementsForTitleId(
+        asyncBlock,
         m_xboxLiveContext,
         m_xuid,
         m_config->titleId,
@@ -848,8 +849,7 @@ void Game::GetAchievmentsForTitle()
         false, 
         XblAchievementOrderBy_DefaultOrder, 
         0, 
-        1,
-        asyncBlock);
+        1);
 }
 
 void Game::AchievementResultsGetNext(XblAchievementsResult* result)
@@ -885,10 +885,10 @@ void Game::AchievementResultsGetNext(XblAchievementsResult* result)
         };
 
         XblAchievementsResultGetNext(
+            asyncBlock,
             m_xboxLiveContext,
             result,
-            1,
-            asyncBlock);
+            1);
     }
     else if (result->itemsCount > 0)
     {
@@ -927,11 +927,12 @@ void Game::GetAchievement(PCSTR scid, PCSTR achievementId)
     };
 
     XblAchievementsGetAchievement(
+        asyncBlock,
         m_xboxLiveContext,
         m_xuid,
         scid,
-        achievementId,
-        asyncBlock);
+        achievementId
+        );
 }
 
 void Game::UpdateAchievement(PCSTR scid, PCSTR achievementId)
@@ -962,13 +963,13 @@ void Game::UpdateAchievement(PCSTR scid, PCSTR achievementId)
 
     auto tid = m_config->titleId;
     XblAchievementsUpdateAchievement(
+        asyncBlock,
         m_xboxLiveContext,
         m_xuid,
         &tid,
         scid,
         achievementId,
-        10,
-        asyncBlock);
+        10);
 }
 
 void Game::HandleSignout(xbl_user_handle user)
