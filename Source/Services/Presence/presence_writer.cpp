@@ -205,7 +205,7 @@ presence_writer::set_active_in_title()
                 presenceService->set_presence(
                     true,
                     presence_data_internal(), 
-                    nullptr,
+                    get_xsapi_singleton()->m_asyncQueue,
                     [context, thisWeakPtr](xbox_live_result<uint32_t> result)
                 {
                     // only look at the last result

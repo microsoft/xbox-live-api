@@ -99,6 +99,11 @@ void xsapi_singleton::init()
     m_userEventBind = std::make_shared<Microsoft::Xbox::Services::System::UserEventBind>();
 #endif
 #endif
+
+#if UNIT_TEST_SERVICES
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+
     HCGlobalInitialize();
     m_initiator = std::make_shared<initiator>();
 

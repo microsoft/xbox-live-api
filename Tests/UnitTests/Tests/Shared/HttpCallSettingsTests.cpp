@@ -81,41 +81,6 @@ public:
         CallLogNode n(args, std::chrono::high_resolution_clock::now());
         g_callLog.push_back(n);
     }
-    
-    DEFINE_TEST_CASE(TestHttpTimeoutWithRetry)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestHttpTimeoutWithRetry);
-        g_callLog.clear();
-        auto responseJson = web::json::value::parse(defaultStringVerifyResult);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        auto requestString = std::wstring(L"xboxUserId");
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        xboxLiveContext->settings()->add_service_call_routed_handler(TraceFunction);
-        xboxLiveContext->settings()->set_enable_service_call_routed_events(true);
-
-        xboxLiveContext->settings()->disable_asserts_for_xbox_live_throttling_in_dev_sandboxes(
-            xbox_live_context_throttle_setting::this_code_needs_to_be_changed_to_avoid_throttling
-            );
-
-        m_mockXboxSystemFactory->setup_mock_for_http_client();
-        StockMocks::AddHttpMockResponse(responseJson.serialize(), 503);
-
-        xboxLiveContext->settings()->set_http_timeout_window(std::chrono::seconds(3));
-
-        auto timeStart = std::chrono::high_resolution_clock::now();
-        xboxLiveContext->string_service().verify_string(requestString)
-        .then([timeStart](xbox_live_result<verify_string_result> result)
-        {
-            VERIFY_IS_TRUE(result.err() == xbox_live_error_code::http_status_503_service_unavailable);
-            VERIFY_IS_TRUE(result.err() == xbox_live_error_condition::http);
-        }).wait();
-
-        LogCalls(timeStart);
-
-        VERIFY_ARE_EQUAL_INT(2, g_callLog.size());
-        VerifyDelay(g_callLog[0].m_time, timeStart, 0);
-        VerifyDelay(g_callLog[1].m_time, g_callLog[0].m_time, 2000);
-    }
 
     DEFINE_TEST_CASE(TestHttpTimeoutWithNoRetry)
     {
@@ -130,10 +95,7 @@ public:
         xboxLiveContext->settings()->set_http_timeout_window(std::chrono::seconds(0));
         m_mockXboxSystemFactory->setup_mock_for_http_client();
         StockMocks::AddHttpMockResponse(responseJson.serialize(), 503);
-
-        //httpCall->ResultValue->_Internal_response()->set_response_body(responseJson);
-        //httpCall->ResultValue->_Internal_response()->set_error_info(xbox_live_error_code::http_status_503_service_unavailable);
-
+        
         auto timeStart = std::chrono::high_resolution_clock::now();
         xboxLiveContext->string_service().verify_string(requestString)
         .then([timeStart](xbox_live_result<verify_string_result> result)
