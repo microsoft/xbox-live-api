@@ -85,7 +85,7 @@
 #define ARRAYSIZE(x) sizeof(x) / sizeof(x[0])
 #endif
 
-#if _DEBUG
+#if _DEBUG && UNIT_TEST_SERVICES
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
