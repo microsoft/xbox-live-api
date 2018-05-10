@@ -188,6 +188,9 @@
     <ProjectReference Include="..\..\..\..\External\cpprestsdk\Release\src\build\vs14.xbox\casablanca140.Xbox.vcxproj">
       <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\External\libHttpClient\Build\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.vcxproj">
+      <Project>{cf37beb2-a66a-42ba-b348-1f07566f4865}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\InProgressSamples\Kits\DirectXTK\DirectXTK_XboxOneXDK_2015.vcxproj">
       <Project>{4fdfdccd-ee2e-415c-b458-1e8fdb0d85f2}</Project>
     </ProjectReference>
