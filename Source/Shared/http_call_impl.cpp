@@ -455,9 +455,11 @@ void http_call_impl::internal_get_response(
     HCHttpCallRequestSetRetryAllowed(httpCallData->callHandle, httpCallData->retryAllowed);
     HCHttpCallRequestSetTimeout(httpCallData->callHandle, static_cast<uint32_t>(httpCallData->httpTimeout.count()));
 
-    async_queue_handle_t nestedQueue;
-    CreateNestedAsyncQueue(httpCallData->queue, &nestedQueue);
-
+    async_queue_handle_t nestedQueue = nullptr;
+    if (httpCallData->queue != nullptr)
+    {
+        CreateNestedAsyncQueue(httpCallData->queue, &nestedQueue);
+    }
     AsyncBlock *asyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
     asyncBlock->queue = nestedQueue;
     asyncBlock->context = utils::store_shared_ptr(httpCallData);
@@ -490,7 +492,7 @@ void http_call_impl::internal_get_response(
         }
     };
 
-    HCHttpCallPerform(httpCallData->callHandle, asyncBlock);
+    HCHttpCallPerform(asyncBlock, httpCallData->callHandle);
 }
 
 string_t http_call_impl::server_name() const

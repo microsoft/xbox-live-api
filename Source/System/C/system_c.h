@@ -184,8 +184,8 @@ XblUserIsSignedIn(
 /// </remarks>
 STDAPI
 XblUserSignIn(
-    _In_ xbl_user_handle user,
-    _In_ AsyncBlock* async
+    _In_ AsyncBlock* async,
+    _In_ xbl_user_handle user
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -201,8 +201,8 @@ XblUserSignIn(
 /// </remarks>
 STDAPI
 XblUserSignInSilently(
-    _In_ xbl_user_handle user,
-    _In_ AsyncBlock* async
+    _In_ AsyncBlock* async,
+    _In_ xbl_user_handle user
     ) XBL_NOEXCEPT;
 
 #if UWP_API
@@ -221,9 +221,9 @@ XblUserSignInSilently(
 /// </remarks>
 STDAPI
 XblUserSignInWithCoreDispatcher(
+    _In_ AsyncBlock* async,
     _In_ xbl_user_handle user,
-    _In_ Platform::Object^ coreDispatcherObj,
-    _In_ AsyncBlock* async
+    _In_ Platform::Object^ coreDispatcherObj
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -239,9 +239,9 @@ XblUserSignInWithCoreDispatcher(
 /// </remarks>
 STDAPI
 XblUserSignInSilentlyWithCoreDispatcher(
+    _In_ AsyncBlock* async,
     _In_ xbl_user_handle user,
-    _In_ Platform::Object^ coreDispatcherObj,
-    _In_ AsyncBlock* async
+    _In_ Platform::Object^ coreDispatcherObj
     ) XBL_NOEXCEPT;
 
 #endif
@@ -279,12 +279,12 @@ typedef void (STDAPIVCALLTYPE *XblGetTokenAndSignatureCallback)(
 /// </param>
 STDAPI
 XblUserGetTokenAndSignature(
+    _In_ AsyncBlock* async,
     _In_ xbl_user_handle user,
     _In_ UTF8CSTR httpMethod,
     _In_ UTF8CSTR url,
     _In_ UTF8CSTR headers,
     _In_ UTF8CSTR requestBodyString,
-    _In_ AsyncBlock* async,
     _In_ XblGetTokenAndSignatureCallback callback
     ) XBL_NOEXCEPT;
 

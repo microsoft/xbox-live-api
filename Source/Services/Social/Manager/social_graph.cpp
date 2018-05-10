@@ -228,7 +228,7 @@ void social_graph::initialize(xbox_live_callback<xbox_live_result<void>> callbac
 #endif
         m_detailLevel,
         m_backgroundAsyncQueue,
-    [thisWeakPtr, callback](xbox_live_result<xsapi_internal_vector<xbox_social_user>> socialUsersResult)
+        [thisWeakPtr, callback](xbox_live_result<xsapi_internal_vector<xbox_social_user>> socialUsersResult)
     {
         try
         {

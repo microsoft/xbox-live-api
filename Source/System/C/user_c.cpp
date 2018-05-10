@@ -192,10 +192,10 @@ struct SignInContext
 };
 
 HRESULT SignInHelper(
+    _In_ AsyncBlock* asyncBlock,
     _In_ xbl_user_handle user,
     _In_ Platform::Object^ coreDispatcher,
-    _In_ bool showUi,
-    _In_ AsyncBlock* asyncBlock
+    _In_ bool showUi
     )
 {
     RETURN_C_INVALIDARGUMENT_IF(user == nullptr || asyncBlock == nullptr);
@@ -253,47 +253,47 @@ HRESULT SignInHelper(
 
 STDAPI
 XblUserSignIn(
-    _In_ xbl_user_handle user,
-    _In_ AsyncBlock* async
+    _In_ AsyncBlock* async,
+    _In_ xbl_user_handle user
     ) XBL_NOEXCEPT
 try
 {
-    return SignInHelper(user, nullptr, true, async);
+    return SignInHelper(async, user, nullptr, true);
 }
 CATCH_RETURN()
 
 STDAPI
 XblUserSignInSilently(
-    _In_ xbl_user_handle user,
-    _In_ AsyncBlock* async
+    _In_ AsyncBlock* async,
+    _In_ xbl_user_handle user
     ) XBL_NOEXCEPT
 try
 {
-    return SignInHelper(user, nullptr, false, async);
+    return SignInHelper(async, user, nullptr, false);
 }
 CATCH_RETURN()
 
 STDAPI
 XblUserSignInWithCoreDispatcher(
+    _In_ AsyncBlock* async,
     _In_ xbl_user_handle user,
-    _In_ Platform::Object^ coreDispatcherObj,
-    _In_ AsyncBlock* async
+    _In_ Platform::Object^ coreDispatcherObj
     ) XBL_NOEXCEPT
 try
 {
-    return SignInHelper(user, coreDispatcherObj, true, async);
+    return SignInHelper(async, user, coreDispatcherObj, true);
 }
 CATCH_RETURN()
 
 STDAPI
 XblUserSignInSilentlyWithCoreDispatcher(
+    _In_ AsyncBlock* async,
     _In_ xbl_user_handle user,
-    _In_ Platform::Object^ coreDispatcherObj,
-    _In_ AsyncBlock* async
+    _In_ Platform::Object^ coreDispatcherObj
     ) XBL_NOEXCEPT
 try
 {
-    return SignInHelper(user, coreDispatcherObj, false, async);
+    return SignInHelper(async, user, coreDispatcherObj, false);
 }
 CATCH_RETURN()
 
@@ -319,12 +319,12 @@ struct GetTokenAndSignatureContext
 
 STDAPI
 XblUserGetTokenAndSignature(
+    _In_ AsyncBlock* async,
     _In_ xbl_user_handle user,
     _In_ UTF8CSTR httpMethod,
     _In_ UTF8CSTR url,
     _In_ UTF8CSTR headers,
     _In_ UTF8CSTR requestBodyString,
-    _In_ AsyncBlock* async,
     _In_ XblGetTokenAndSignatureCallback callback
     ) XBL_NOEXCEPT
 try
@@ -403,7 +403,7 @@ CATCH_RETURN_WITH(-1)
 XBL_API void XBL_CALLING_CONV
 RemoveSignOutCompletedHandler(
     _In_ function_context context
-) XBL_NOEXCEPT
+    ) XBL_NOEXCEPT
 try
 {
     verify_global_init();

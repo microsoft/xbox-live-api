@@ -438,11 +438,13 @@ public:
     bool is_request_in_progress();
 
     pplx::task<xbox_live_result<std::vector<multiplayer_event>>> commit_pending_lobby_changes(
+        _In_ std::vector<string_t> xuidsInOrder,
         _In_ bool joinByHandleId,
         _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef = xbox::services::multiplayer::multiplayer_session_reference()
         );
 
     pplx::task<xbox_live_result<std::vector<multiplayer_event>>> commit_lobby_changes(
+        _In_ std::vector<string_t> xuidsInOrder,
         _In_ std::shared_ptr<xbox::services::multiplayer::multiplayer_session> lobbySessionToCommit
         );
 
@@ -549,6 +551,7 @@ private:
         );
 
     xbox_live_result<std::vector<multiplayer_event>> commit_lobby_changes_helper(
+        _In_ std::vector<string_t> xuids,
         _In_ std::shared_ptr<xbox::services::multiplayer::multiplayer_session> lobbySessionToCommit
         );
 

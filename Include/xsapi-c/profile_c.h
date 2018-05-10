@@ -61,14 +61,14 @@ typedef struct XblUserProfile
 /// <summary>
 /// Gets a user profile for a specific Xbox user.
 /// </summary>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the user to get the profile for.</param>
-/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
 STDAPI XblProfileGetUserProfile(
+    _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ uint64_t xboxUserId,
-    _In_ AsyncBlock* async
+    _In_ uint64_t xboxUserId
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -84,22 +84,22 @@ STDAPI XblProfileGetUserProfileResult(
 /// <summary>
 /// Gets one or more user profiles for a collection of specified Xbox users.
 /// </summary>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserIds">C-style Array of Xbox User IDs of the users to get profiles for.</param>
 /// <param name="xboxUserIdsCount">The number of Xbox User IDs in the array.</param>
-/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
 STDAPI XblProfileGetUserProfiles(
+    _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t* xboxUserIds,
-    _In_ size_t xboxUserIdsCount,
-    _In_ AsyncBlock* async
+    _In_ size_t xboxUserIdsCount
     ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Get the number of profiles returned from a completed get XblProfileGetUserProfiles operation
 /// </summary>
-/// <param name="async">AsyncBlock from the get profile API.</param>
+/// <param name="async">AsyncBlock from XblProfileGetUserProfiles.</param>
 /// <param name="profileCount">Number of profiles returned.</param>
 STDAPI XblProfileGetUserProfilesResultCount(
     _In_ AsyncBlock* async,
@@ -110,7 +110,7 @@ STDAPI XblProfileGetUserProfilesResultCount(
 /// Get the result for a completed XblProfileGetUserProfiles operation.
 /// The number of profiles returned can be obtained with XblGetProfileResultCount.
 /// </summary>
-/// <param name="async">AsyncBlock from the get profile(s) API.</param>
+/// <param name="async">AsyncBlock from XblProfileGetUserProfilesResult.</param>
 /// <param name="profilesCount">Size of the profiles array.</param>
 /// <param name="profiles">Array of XblUserProfile objects to copy result into.</param>
 /// <param name="written">Actual number of profiles written to the array.</param>
@@ -124,14 +124,14 @@ STDAPI XblProfileGetUserProfilesResult(
 /// <summary>
 /// Gets profiles for users in a specified social group.
 /// </summary>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="socialGroup">The name of the social group of users to search. Options are "Favorites" and "People".</param>
-/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>Calls V2 GET /users/{userId}/profile/settings/people/{socialGroup}</remarks>
 STDAPI XblProfileGetUserProfilesForSocialGroup(
+    _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ UTF8CSTR socialGroup,
-    _In_ AsyncBlock* async
+    _In_ UTF8CSTR socialGroup
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -148,7 +148,7 @@ STDAPI XblProfileGetUserProfilesForSocialGroupResultCount(
 /// Get the result for a completed XblProfileGetUserProfilesForSocialGroup operation.
 /// The number of profiles returned can be obtained with XblGetProfileResultCount.
 /// </summary>
-/// <param name="async">AsyncBlock from the get profile(s) API.</param>
+/// <param name="async">AsyncBlock from XblProfileGetUserProfilesForSocialGroup.</param>
 /// <param name="profilesCount">Size of the profiles array.</param>
 /// <param name="profiles">Array of XblUserProfile objects to copy result into.</param>
 /// <param name="written">Actual number of profiles written to the array.</param>
