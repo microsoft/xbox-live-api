@@ -196,6 +196,9 @@
     <ProjectReference Include="..\..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.static.vcxproj">
       <Project>{9ad285a2-301e-47a0-a299-14ad5d4f2758}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\External\libHttpClient\Build\libHttpClient.140.UWP.C\libHttpClient.140.UWP.C.vcxproj">
+      <Project>{1b0dfb7f-2cd5-48de-80d4-5cc56c22aeee}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
