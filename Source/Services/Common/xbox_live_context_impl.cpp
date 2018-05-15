@@ -21,6 +21,8 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
+using namespace xbox::services::system;
+
 #if XSAPI_XDK_AUTH
 xbox_live_context_impl::xbox_live_context_impl(
     _In_ Windows::Xbox::System::User^ user
@@ -113,38 +115,54 @@ void xbox_live_context_impl::init()
     m_xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_settings>();
     init_real_time_activity_service_instance();
 
-#if UWP_API || TV_API 
-    auto dispatcher = xbox_live_context_settings::_s_dispatcher;
-    if (dispatcher == nullptr)
+#if UWP_API || TV_API
+    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    async->queue = get_xsapi_singleton()->m_asyncQueue;
+    async->callback = [](AsyncBlock* async)
     {
-        try
+        xsapi_memory::mem_free(async);
+    };
+
+    BeginAsync(async, nullptr, nullptr, __FUNCTION__,
+        [](AsyncOp op, const AsyncProviderData* data)
+    {
+        if (op == AsyncOp_DoWork)
         {
-            auto mainView = Windows::ApplicationModel::Core::CoreApplication::MainView;
-            if (mainView != nullptr)
+            auto dispatcher = xbox_live_context_settings::_s_dispatcher;
+            if (dispatcher == nullptr)
             {
-                auto coreWindow = mainView->CoreWindow;
-                if (coreWindow != nullptr)
+                try
                 {
-                    dispatcher = coreWindow->Dispatcher;
+                    auto mainView = Windows::ApplicationModel::Core::CoreApplication::MainView;
+                    if (mainView != nullptr)
+                    {
+                        auto coreWindow = mainView->CoreWindow;
+                        if (coreWindow != nullptr)
+                        {
+                            dispatcher = coreWindow->Dispatcher;
+                        }
+                    }
+                }
+                catch (...)
+                {
+                    LOG_ERROR("Protocol activation failed due to inability to acquire a CoreWindow");
+                }
+
+                if (dispatcher != nullptr)
+                {
+                    dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal,
+                        ref new Windows::UI::Core::DispatchedHandler([]()
+                    {
+                        xbox::services::service_call_logging_config::get_singleton_instance()->_Register_for_protocol_activation();
+                    }));
                 }
             }
+            xbox::services::service_call_logging_config::get_singleton_instance()->_ReadLocalConfig();
+            CompleteAsync(data->async, S_OK, 0);
         }
-        catch (...)
-        {
-            LOG_ERROR("Protocol activation failed due to inability to acquire a CoreWindow");
-        }
-
-        if (dispatcher != nullptr)
-        {
-            dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal,
-                ref new Windows::UI::Core::DispatchedHandler([]()
-            {
-                xbox::services::service_call_logging_config::get_singleton_instance()->_Register_for_protocol_activation();
-            }));
-        }
-    }
-
-    xbox::services::service_call_logging_config::get_singleton_instance()->_ReadLocalConfig();
+        return S_OK;
+    });
+    ScheduleAsync(async, 0);
 #endif
 
     std::weak_ptr<xbox_live_context_impl> thisWeakPtr = shared_from_this();
