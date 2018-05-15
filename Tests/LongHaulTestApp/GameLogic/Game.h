@@ -81,8 +81,8 @@ namespace LongHaulTestApp
         size_t m_previousDisplayQueueSize;
         static std::mutex m_displayEventQueueLock;
 
-        void Log(std::wstring log);
-        void Log(std::string log);
+        void Log(std::wstring log, bool showOnUI = true);
+        void Log(std::string log, bool showOnUI = true);
 
         xbl_user_handle GetUser() { return m_user; }
         string_t GetGamertag()
@@ -91,6 +91,10 @@ namespace LongHaulTestApp
             XblUserGetGamertag(m_user, GamertagMaxBytes, gamertag, nullptr);
             return utility::conversions::utf8_to_utf16(gamertag);
         }
+
+        Windows::System::Diagnostics::ProcessMemoryUsageReport^ m_initMemReport;
+        Windows::System::Diagnostics::ProcessMemoryUsageReport^ m_curMemReport;
+        unsigned long long m_lastDeltaMem;
 
     private:
         xbl_user_handle m_user;
@@ -111,6 +115,7 @@ namespace LongHaulTestApp
         Windows::Gaming::Input::IGamepad^ m_lastGamepadInputUsed;
         std::shared_ptr<GameData> m_gameData;
         Input^ m_input;
+        bool m_gotInitMemReport;
 
         Concurrency::critical_section m_stateLock;
 

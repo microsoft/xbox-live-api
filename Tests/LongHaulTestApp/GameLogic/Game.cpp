@@ -127,6 +127,7 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
     bInitialized(false)
 {
     g_sampleInstance = this;
+    m_lastDeltaMem = 0; 
 
     // Register to be notified if the Device is lost or recreated
     m_deviceResources->RegisterDeviceNotify(this);

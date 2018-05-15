@@ -5,14 +5,14 @@ using namespace LongHaulTestApp;
 using namespace xbox::services;
 using namespace xbox::services::system;
 
-#define TEST_DELAY 15
+#define TEST_DELAY 2
 
 void Game::InitializeTestFramework()
 {
     // m_logFileName =
     time_t rawTime;
-    struct tm* timeInfo;
-    char buffer[30];
+    //struct tm* timeInfo;
+    //char buffer[30];
 
     time(&rawTime);
     // timeInfo = localtime_s(&rawTime);
@@ -37,6 +37,7 @@ void Game::InitializeTestFramework()
         pThis->Log("[" + pThis->TaceLevelToString(traceLevel) + "][" + category + "] " + message);
     });
 
+    PrintMemoryUsage();
     Log("Starting Tests");
 }
 
@@ -56,12 +57,12 @@ void Game::HandleTests()
     {
         switch (m_testArea)
         {
-        case TestArea::Achievements:
-        case TestArea::Profile:
-        case TestArea::Social:
-            break;
+            case TestArea::Achievements:
+            case TestArea::Profile:
+            case TestArea::Social:
+                break;
         
-        case TestArea::SocialManger: SocialManagerIntegrationUpdate(); break;
+            //case TestArea::SocialManger: SocialManagerIntegrationUpdate(); break;
         }
     }
 }
@@ -72,10 +73,10 @@ void Game::HandleTests()
 
      switch (m_testArea)
      {
-     case TestArea::Achievements: TestAchievementsFlow(); break;
-     case TestArea::Profile: TestProfileFlow(); break;
-     case TestArea::Social: TestSocialFlow(); break;
-     case TestArea::SocialManger: TestSocialManagerFlow(); break;
+         case TestArea::Achievements: TestAchievementsFlow(); break;
+         case TestArea::Profile: TestProfileFlow(); break;
+         case TestArea::Social: TestSocialFlow(); break;
+         case TestArea::SocialManger: EndTest(); break;// TestSocialManagerFlow(); break;
      }
  }
 
@@ -90,7 +91,7 @@ void Game::EndTest()
         m_time = time(NULL);
         newTestArea = 0;
 
-        if (m_testsRun % 5 == 0)
+        if (m_testsRun % 1 == 0)
         {
             PrintMemoryUsage();
         }
@@ -98,13 +99,16 @@ void Game::EndTest()
     m_testArea = (TestArea)newTestArea;
 }
 
-void Game::Log(std::wstring log)
+void Game::Log(std::wstring log, bool showOnUI)
 {
     std::lock_guard<std::mutex> guard(m_displayEventQueueLock);
-    m_displayEventQueue.push_back(log);
-    if (m_displayEventQueue.size() > 15)
+    if (showOnUI)
     {
-        m_displayEventQueue.erase(m_displayEventQueue.begin());
+        m_displayEventQueue.push_back(log);
+        if (m_displayEventQueue.size() > 30)
+        {
+            m_displayEventQueue.erase(m_displayEventQueue.begin());
+        }
     }
 
     if (!m_logFileName.empty())
@@ -116,15 +120,25 @@ void Game::Log(std::wstring log)
     }
 }
 
-void Game::Log(std::string log)
+void Game::Log(std::string log, bool showOnUI)
 {
-    Log(utility::conversions::to_utf16string(log));
+    Log(utility::conversions::to_utf16string(log), showOnUI);
 }
 
 void Game::PrintMemoryUsage()
 {
     auto process = Windows::System::Diagnostics::ProcessDiagnosticInfo::GetForCurrentProcess();
     auto report = process->MemoryUsage->GetReport();
+    if (!m_gotInitMemReport)
+    {
+        m_initMemReport = report;
+        m_curMemReport = report;
+        m_gotInitMemReport = true;
+    }
+    else
+    {
+        m_curMemReport = report;
+    }
 
     stringstream_t stream;
 
@@ -148,7 +162,7 @@ void Game::PrintMemoryUsage()
         << "WorkingSetSizeInBytes: " << report->WorkingSetSizeInBytes
         << "\n\n\n";
 
-    Log(stream.str());
+    Log(stream.str(), false);
 }
 
 string Game::TaceLevelToString(xbox_services_diagnostics_trace_level traceLevel)
