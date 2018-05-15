@@ -205,7 +205,8 @@ public:
 
     virtual void set_custom_header(
         _In_ const xsapi_internal_string& headerName,
-        _In_ const xsapi_internal_string& headerValue
+        _In_ const xsapi_internal_string& headerValue,
+        _In_ bool allowTracing
         ) = 0;
 
 #if XSAPI_U
@@ -369,7 +370,8 @@ public:
 
     void set_custom_header(
         _In_ const xsapi_internal_string& headerName,
-        _In_ const xsapi_internal_string& headerValue
+        _In_ const xsapi_internal_string& headerValue,
+        _In_ bool allowTracing
         ) override;
 
 private:
@@ -411,7 +413,8 @@ private:
     static void add_header(
         _In_ const std::shared_ptr<http_call_data>& httpCallData,
         _In_ const xsapi_internal_string& headerName,
-        _In_ const xsapi_internal_string& headerValue
+        _In_ const xsapi_internal_string& headerValue,
+        _In_ bool allowTracing
         );
 };
 
