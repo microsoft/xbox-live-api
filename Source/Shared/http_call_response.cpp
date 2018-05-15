@@ -105,7 +105,7 @@ http_call_response_internal::http_call_response_internal(
         UTF8CSTR headerName;
         UTF8CSTR headerValue;
         HCHttpCallResponseGetHeaderAtIndex(httpCallData->callHandle, i, &headerName, &headerValue);
-        m_responseHeaders[headerName] = headerValue;
+        add_response_header(headerName, headerValue);
     }
 
     if (FAILED(hr))
