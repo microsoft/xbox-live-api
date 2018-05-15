@@ -67,23 +67,29 @@ void Game::CreateSocialUserGroup()
 
 void Game::TestSocialUserGroup()
 {
-    Log("XblSocialManagerUserGroupGetUsersTrackedByGroup");
-    std::vector<uint64_t> xuids(m_socialUserGroup->trackedUsersCount);
-    XblSocialManagerUserGroupGetUsersTrackedByGroup(m_socialUserGroup, xuids.data());
-
-    Log("XblSocialManagerUserGroupGetUsersFromXboxUserIds");
-    std::vector<XblSocialManagerUser> xboxSocialUsers(m_socialUserGroup->trackedUsersCount);
-    uint32_t size;
-    XblSocialManagerUserGroupGetUsersFromXboxUserIds(m_socialUserGroup, xuids.data(), (uint32_t)xuids.size(), xboxSocialUsers.data(), &size);
-
-    Log("XblSocialManagerUserGroupGetUsers");
-    std::vector<XblSocialManagerUser> users(m_socialUserGroup->usersCount);
-    XblSocialManagerUserGroupGetUsers(m_socialUserGroup, users.data());
-
-    Log("XblSocialManagerPresenceRecordIsUserPlayingTitle");
-    for (auto user : users)
+    if (m_socialUserGroup->trackedUsersCount > 0)
     {
-        XblSocialManagerPresenceRecordIsUserPlayingTitle(&(user.presenceRecord), m_config->titleId);
+        Log("XblSocialManagerUserGroupGetUsersTrackedByGroup");
+        std::vector<uint64_t> xuids(m_socialUserGroup->trackedUsersCount);
+        XblSocialManagerUserGroupGetUsersTrackedByGroup(m_socialUserGroup, xuids.data());
+
+        Log("XblSocialManagerUserGroupGetUsersFromXboxUserIds");
+        std::vector<XblSocialManagerUser> xboxSocialUsers(m_socialUserGroup->trackedUsersCount);
+        uint32_t size;
+        XblSocialManagerUserGroupGetUsersFromXboxUserIds(m_socialUserGroup, xuids.data(), (uint32_t)xuids.size(), xboxSocialUsers.data(), &size);
+    }
+
+    if (m_socialUserGroup->usersCount > 0)
+    {
+        Log("XblSocialManagerUserGroupGetUsers");
+        std::vector<XblSocialManagerUser> users(m_socialUserGroup->usersCount);
+        XblSocialManagerUserGroupGetUsers(m_socialUserGroup, users.data());
+
+        Log("XblSocialManagerPresenceRecordIsUserPlayingTitle");
+        for (auto user : users)
+        {
+            XblSocialManagerPresenceRecordIsUserPlayingTitle(&(user.presenceRecord), m_config->titleId);
+        }
     }
 
     Log("XblSocialManagerDestroySocialUserGroup");
