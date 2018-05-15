@@ -310,15 +310,18 @@ void MockHttpCall::set_custom_header(
     )
 {
     set_custom_header(utils::internal_string_from_string_t(headerName),
-        utils::internal_string_from_string_t(headerValue)
+        utils::internal_string_from_string_t(headerValue),
+        false
         );
 }
 
 void MockHttpCall::set_custom_header(
     _In_ const xsapi_internal_string& headerName,
-    _In_ const xsapi_internal_string& headerValue
+    _In_ const xsapi_internal_string& headerValue,
+    _In_ bool allowTracing
     )
 {
+    UNREFERENCED_PARAMETER(allowTracing);
 #if UNIT_TEST_SERVICES
     ResultValueInternal->add_response_header(headerName, headerValue);
 #endif
