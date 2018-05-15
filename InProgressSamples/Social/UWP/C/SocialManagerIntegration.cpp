@@ -6,6 +6,7 @@
 #include "Common\DirectXHelper.h"
 #include "Utils\PerformanceCounters.h"
 #include "httpClient\httpClient.h"
+#include "xsapi\services.h"
 
 using namespace Sample;
 using namespace Windows::Foundation;
@@ -21,6 +22,7 @@ void Game::AddUserToSocialManager(xbl_user_handle user)
     Log(source.str());
 
     XblSocialManagerAddLocalUser(user, XblSocialManagerExtraDetailLevel_All);
+    xbox::services::system::xbox_live_services_settings::get_singleton_instance()->set_diagnostics_trace_level(xbox::services::xbox_services_diagnostics_trace_level::verbose);
 
     CreateSocialGroupsBasedOnUI(user);
 }

@@ -92,7 +92,7 @@ try
     size_t requiredSize = user->userImpl->gamertag().size() + 1;
     if (gamertagBufferSize < requiredSize)
     {
-        return E_INSUFFICIENT_BUFFER;
+        return E_NOT_SUFFICIENT_BUFFER;
     }
     CopyMemory(gamertagBuffer, user->userImpl->gamertag().data(), requiredSize);
     if (written != nullptr)
@@ -159,7 +159,7 @@ try
     size_t requiredSize = user->userImpl->privileges().size() + 1;
     if (privilegesSize < requiredSize)
     {
-        return E_INSUFFICIENT_BUFFER;
+        return E_NOT_SUFFICIENT_BUFFER;
     }
 
     CopyMemory(privileges, user->userImpl->privileges().data(), requiredSize);

@@ -164,10 +164,10 @@ void user_impl_idp::sign_in_impl(
                     httpCall->set_retry_allowed(false);
                     httpCall->set_request_body(utils::internal_string_from_string_t(request.serialize().serialize()));
                     httpCall->set_xbox_contract_version_header_value(_T("3"));
-                    httpCall->set_custom_header("Authorization", payload.token());
+                    httpCall->set_custom_header("Authorization", payload.token(), false);
                     if (!payload.signature().empty())
                     {
-                        httpCall->set_custom_header("Signature", payload.signature());
+                        httpCall->set_custom_header("Signature", payload.signature(), false);
                     }
 
                     httpCall->get_response(http_call_response_body_type::json_body, queue,
@@ -492,13 +492,6 @@ user_impl_idp::convert_web_token_request_result(
         }
 
         auto response = tokenResult->ResponseData->GetAt(0);
-
-        LOG_DEBUG("Token result properties:");
-        // print out the whole property bag returned from idp
-        for (auto property : response->Properties)
-        {
-            LOGS_DEBUG << property->Key->Data() << " : " << property->Value->Data();
-        }
 
         // Get the guaranteed properties
         xsapi_internal_string xuid = utils::internal_string_from_utf16(response->Properties->Lookup("XboxUserId")->Data());

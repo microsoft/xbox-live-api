@@ -154,7 +154,7 @@ http_call_impl::get_response(
 
     for (const auto& header : httpRequest.headers())
     {
-        add_header(m_httpCallData, utils::internal_string_from_string_t(header.first), utils::internal_string_from_string_t(header.second));
+        add_header(m_httpCallData, utils::internal_string_from_string_t(header.first), utils::internal_string_from_string_t(header.second), true);
     }
 
     auto body = utils::internal_string_from_string_t(httpRequest.extract_string().get());
@@ -355,12 +355,12 @@ xbox_live_result<void> http_call_impl::internal_get_response_with_auth(
         const auto& authResult = result.payload();
         if (!authResult.token().empty())
         {
-            add_header(httpCallData, AUTH_HEADER, authResult.token());
+            add_header(httpCallData, AUTH_HEADER, authResult.token(), false);
         }
 
         if (!authResult.signature().empty())
         {
-            add_header(httpCallData, SIG_HEADER, authResult.signature());
+            add_header(httpCallData, SIG_HEADER, authResult.signature(), false);
         }
 
         internal_get_response(httpCallData);
@@ -613,20 +613,23 @@ void http_call_impl::set_custom_header(
     add_header(
         m_httpCallData,
         utils::internal_string_from_string_t(headerName).data(),
-        utils::internal_string_from_string_t(headerValue).data()
+        utils::internal_string_from_string_t(headerValue).data(),
+        true
         );
 }
 
 void http_call_impl::set_custom_header(
     _In_ const xsapi_internal_string& headerName,
-    _In_ const xsapi_internal_string& headerValue
+    _In_ const xsapi_internal_string& headerValue,
+    _In_ bool allowTracing
     )
 {
     add_header(
         m_httpCallData,
         headerName,
-        headerValue
-    );
+        headerValue,
+        allowTracing
+        );
 }
 
 void http_call_impl::set_user_agent(
@@ -651,12 +654,12 @@ void http_call_impl::set_user_agent(
             }
         }
 
-        add_header(httpCallData, "User-Agent", userAgent);
+        add_header(httpCallData, "User-Agent", userAgent, true);
     }
     else
     {
         xsapi_internal_string userAgent = DEFAULT_USER_AGENT;
-        add_header(httpCallData, "User-Agent", userAgent);
+        add_header(httpCallData, "User-Agent", userAgent, true);
     }
 
 }
@@ -688,20 +691,21 @@ void http_call_impl::add_default_headers_if_needed(
 {
     if (httpCallData->addDefaultHeaders)
     {
-        add_header(httpCallData, "x-xbl-contract-version", httpCallData->xboxContractVersionHeaderValue);
-        add_header(httpCallData, "Content-Type", httpCallData->contentTypeHeaderValue);
-        add_header(httpCallData, "Accept-Language", utils::get_locales());
+        add_header(httpCallData, "x-xbl-contract-version", httpCallData->xboxContractVersionHeaderValue, true);
+        add_header(httpCallData, "Content-Type", httpCallData->contentTypeHeaderValue, true);
+        add_header(httpCallData, "Accept-Language", utils::get_locales(), true);
     }
 }
 
 void http_call_impl::add_header(
     _In_ const std::shared_ptr<http_call_data>& httpCallData,
     _In_ const xsapi_internal_string& headerName,
-    _In_ const xsapi_internal_string& headerValue
+    _In_ const xsapi_internal_string& headerValue,
+    _In_ bool allowTracing
     )
 {
     httpCallData->requestHeaders[headerName] = headerValue;
-    HCHttpCallRequestSetHeader(httpCallData->callHandle, headerName.data(), headerValue.data(), true);
+    HCHttpCallRequestSetHeader(httpCallData->callHandle, headerName.data(), headerValue.data(), allowTracing);
 }
 
 std::shared_ptr<http_retry_after_manager>
