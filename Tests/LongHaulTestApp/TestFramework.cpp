@@ -5,19 +5,10 @@ using namespace LongHaulTestApp;
 using namespace xbox::services;
 using namespace xbox::services::system;
 
-#define TEST_DELAY 2
+#define TEST_DELAY 15
 
 void Game::InitializeTestFramework()
 {
-    // m_logFileName =
-    time_t rawTime;
-    //struct tm* timeInfo;
-    //char buffer[30];
-
-    time(&rawTime);
-    // timeInfo = localtime_s(&rawTime);
-
-    // strftime(buffer, 30, "long_haul_logs_%F.txt", timeInfo);
     Platform::String^ localfolder = Windows::Storage::ApplicationData::Current->LocalFolder->Path;
     std::wstring localFolderW(localfolder->Begin());
     std::string localFolderA(localFolderW.begin(), localFolderW.end());
@@ -62,7 +53,7 @@ void Game::HandleTests()
             case TestArea::Social:
                 break;
         
-            //case TestArea::SocialManger: SocialManagerIntegrationUpdate(); break;
+            case TestArea::SocialManger: SocialManagerIntegrationUpdate(); break;
         }
     }
 }
@@ -76,7 +67,7 @@ void Game::HandleTests()
          case TestArea::Achievements: TestAchievementsFlow(); break;
          case TestArea::Profile: TestProfileFlow(); break;
          case TestArea::Social: TestSocialFlow(); break;
-         case TestArea::SocialManger: EndTest(); break;// TestSocialManagerFlow(); break;
+         case TestArea::SocialManger: EndTest(); TestSocialManagerFlow(); break;
      }
  }
 
