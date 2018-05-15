@@ -106,7 +106,8 @@ public:
 
     virtual void set_custom_header(
         _In_ const xsapi_internal_string& headerName,
-        _In_ const xsapi_internal_string& headerValue
+        _In_ const xsapi_internal_string& headerValue,
+        _In_ bool allowTracing
         ) override;
 
     void remove_custom_header(
