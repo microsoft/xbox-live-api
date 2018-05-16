@@ -94,28 +94,25 @@ extern "C" {
 
 #include "httpClient/pal.h"
 
-#define XBL_ERROR_CODE_START 0x5200
-#define MAKE_E_XBL(offset)                      MAKE_HRESULT(1, FACILITY_XBOX, (XBL_ERROR_CODE_START + offset))
+// FACILITY_XBOX + 0x5200 + offset
+#define E_XBL_RUNTIME_ERROR                     _HRESULT_TYPEDEF_(0x89235200)
+#define E_XBL_RTA_GENERIC_ERROR                 _HRESULT_TYPEDEF_(0x89235201)
+#define E_XBL_RTA_SUBSCRIPTION_LIMIT_REACHED    _HRESULT_TYPEDEF_(0x89235202)
+#define E_XBL_RTA_ACCESS_DENIED                 _HRESULT_TYPEDEF_(0x89235203)
+#define E_XBL_AUTH_UNKNOWN_ERROR                _HRESULT_TYPEDEF_(0x89235204)
+#define E_XBL_AUTH_RUNTIME_ERROR                _HRESULT_TYPEDEF_(0x89235205)
+#define E_XBL_AUTH_NO_TOKEN                     _HRESULT_TYPEDEF_(0x89235206)
+#define E_XBL_ALREADY_INITIALISED               _HRESULT_TYPEDEF_(0x89235207)
 
-#define E_XBL_RUNTIME_ERROR                     MAKE_E_XBL(0)
-#define E_XBL_RTA_GENERIC_ERROR                 MAKE_E_XBL(1)
-#define E_XBL_RTA_SUBSCRIPTION_LIMIT_REACHED    MAKE_E_XBL(2)
-#define E_XBL_RTA_ACCESS_DENIED                 MAKE_E_XBL(3)
-#define E_XBL_AUTH_UNKNOWN_ERROR                MAKE_E_XBL(4)
-#define E_XBL_AUTH_RUNTIME_ERROR                MAKE_E_XBL(5)
-#define E_XBL_AUTH_NO_TOKEN                     MAKE_E_XBL(6)
-#define E_XBL_ALREADY_INITIALISED               MAKE_E_XBL(7)
-
-// SHIPTODO: WCHAR -> UTF8 isn't 1:1 for bytes
-#define XBL_COLOR_CHAR_SIZE 7
-#define XBL_DISPLAY_NAME_CHAR_SIZE 30
-#define XBL_DISPLAY_PIC_URL_RAW_CHAR_SIZE 225
-#define XBL_GAMERSCORE_CHAR_SIZE 16
-#define XBL_GAMERTAG_CHAR_SIZE 16
-#define XBL_NUM_PRESENCE_RECORDS 6
-#define XBL_REAL_NAME_CHAR_SIZE 255
-#define XBL_RICH_PRESENCE_CHAR_SIZE 100
-#define XBL_XBOX_USER_ID_CHAR_SIZE 21
+const int XBL_COLOR_CHAR_SIZE = 7 * 3;
+const int XBL_DISPLAY_NAME_CHAR_SIZE = 30 * 3;
+const int XBL_DISPLAY_PIC_URL_RAW_CHAR_SIZE = 225 * 3;
+const int XBL_GAMERSCORE_CHAR_SIZE = 16 * 3;
+const int XBL_GAMERTAG_CHAR_SIZE = 16 * 3;
+const int XBL_NUM_PRESENCE_RECORDS = 6 * 3;
+const int XBL_REAL_NAME_CHAR_SIZE = 255 * 3;
+const int XBL_RICH_PRESENCE_CHAR_SIZE = 100 * 3;
+const int XBL_XBOX_USER_ID_CHAR_SIZE = 21 * 3;
 
 typedef int32_t function_context;
 typedef struct xbl_xbox_live_context* xbl_context_handle;

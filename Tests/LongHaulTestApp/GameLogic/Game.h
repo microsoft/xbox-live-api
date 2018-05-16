@@ -29,7 +29,8 @@ enum ButtonPress
     GetUserProfile,
     GetFriends,
     GetAchievementsForTitle,
-    StartTests
+    StartTests,
+    StartTestsFast
 };
 
 #define NUM_OF_TEST_AREAS 4
@@ -94,7 +95,9 @@ namespace LongHaulTestApp
 
         Windows::System::Diagnostics::ProcessMemoryUsageReport^ m_initMemReport;
         Windows::System::Diagnostics::ProcessMemoryUsageReport^ m_curMemReport;
+        unsigned long long m_curDeltaMem;
         unsigned long long m_lastDeltaMem;
+        uint32_t m_testDelay;
 
     private:
         xbl_user_handle m_user;
