@@ -64,12 +64,8 @@ void web_socket_connection::retry_until_connected(retry_context* context)
 {
     AsyncBlock* nestedAsyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
     nestedAsyncBlock->context = context;
-    if (context->outerAsyncBlock->queue != nullptr)
-    {
-        // TODO since we are never setting the outer async queue
-        CreateNestedAsyncQueue(context->outerAsyncBlock->queue, &nestedAsyncBlock->queue); 
-    }
-
+    CreateNestedAsyncQueue(context->asyncProviderData->queue, &nestedAsyncBlock->queue);
+    
     nestedAsyncBlock->callback = [](AsyncBlock* async)
     {
         retry_context* retryContext = static_cast<retry_context*>(async->context);
@@ -112,6 +108,8 @@ void web_socket_connection::retry_until_connected(retry_context* context)
                 CompleteAsync(retryContext->outerAsyncBlock, E_FAIL, 0);
             }
         }
+
+        CloseAsyncQueue(async->queue);
         xsapi_memory::mem_free(async);
     };
 
@@ -160,6 +158,7 @@ void web_socket_connection::ensure_connected()
         [](_In_ AsyncOp op, _In_ const AsyncProviderData* data)
     {
         auto context = utils::remove_shared_ptr<retry_context>(data->context, op == AsyncOp_Cleanup);
+        context->asyncProviderData = data;
 
         switch (op)
         {
