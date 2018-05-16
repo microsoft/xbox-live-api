@@ -10,7 +10,7 @@ using namespace xbox::services;
 STDAPI
 XblContextSettingsDisableAssertsForXboxLiveThrottlingInDevSandboxes(
     _In_ xbl_context_handle context,
-    _In_ XblContextThrottleSetting setting
+    _In_ XblContextSetting setting
     ) XBL_NOEXCEPT
 try
 {
@@ -24,7 +24,7 @@ CATCH_RETURN()
 STDAPI
 XblContextSettingsDisableAssertsForMaximumNumberOfWebsocketsActivated(
     _In_ xbl_context_handle context,
-    _In_ XblContextRecommendedSetting setting
+    _In_ XblContextSetting setting
     ) XBL_NOEXCEPT
 try
 {

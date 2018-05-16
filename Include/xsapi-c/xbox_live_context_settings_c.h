@@ -4,31 +4,19 @@
 #pragma once
 #include "pal.h"
 
-#define MAXIMUM_WEBSOCKETS_ACTIVATIONS_ALLOWED_PER_USER (5)
+const uint32_t XBL_MAXIMUM_WEBSOCKETS_ACTIVATIONS_ALLOWED_PER_USER = 5;
 
 /// <summary>
 /// Enum used with disable_asserts_for_xbox_live_throttling_in_dev_sandboxes()
 /// </summary>
-typedef enum XblContextThrottleSetting
+typedef enum XblContextSetting
 {
     /// <summary>
-    /// Passed to XblContextSettingsDisableAssertsForXboxLiveThrottlingInDevSandboxes
-    /// to warn code reviewers that there's an outstanding Xbox Live calling pattern issue that needs to be addressed.
+    /// Only passed to XblContextSettings API's to warn code reviewers that there's an outstanding Xbox Live calling 
+    /// pattern issue that needs to be addressed.
     /// </summary>
-    XblContextThrottleSetting_ThisCodeNeedsToBeChangedToAvoidThrottling
-} XblContextThrottleSetting;
-
-/// <summary>
-/// Enum used with disable_asserts_ APIs
-/// </summary>
-typedef enum XblContextRecommendedSetting
-{
-    /// <summary>
-    /// Passed to xboxLiveContext->settings()->disable_asserts_ APIs
-    /// to warn code reviewers that there's an outstanding calling pattern issue that needs to be addressed.
-    /// </summary>
-    XblContextRecommendedSetting_ThisCodeNeedsToBeChangedToFollowBestPractices
-} XblContextRecommendedSetting;
+    XblContextSetting_ThisCodeNeedsToBeChanged
+} XblContextSetting;
 
 /// <summary>
 /// Disables asserts for Xbox Live throttling in dev sandboxes.
@@ -39,19 +27,19 @@ typedef enum XblContextRecommendedSetting
 STDAPI
 XblContextSettingsDisableAssertsForXboxLiveThrottlingInDevSandboxes(
     _In_ xbl_context_handle context,
-    _In_ XblContextThrottleSetting setting
+    _In_ XblContextSetting setting
     ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Disables asserts for having maximum number of websockets being activated 
-/// i.e. MAXIMUM_WEBSOCKETS_ACTIVATIONS_ALLOWED_PER_USER (5) per user per title instance.
+/// i.e. XBL_MAXIMUM_WEBSOCKETS_ACTIVATIONS_ALLOWED_PER_USER (5) per user per title instance.
 /// It is best practice to not call this API, and instead adjust the calling pattern but this is provided
 /// as a temporary way to get unblocked while in early stages of game development.
 /// </summary>
 STDAPI
 XblContextSettingsDisableAssertsForMaximumNumberOfWebsocketsActivated(
     _In_ xbl_context_handle context,
-    _In_ XblContextRecommendedSetting setting
+    _In_ XblContextSetting setting
     ) XBL_NOEXCEPT;
 
 
