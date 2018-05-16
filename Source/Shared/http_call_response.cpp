@@ -81,10 +81,6 @@ http_call_response_internal::http_call_response_internal(
     uint32_t platformErrorCode = 0;
     HCHttpCallResponseGetNetworkErrorCode(httpCallData->callHandle, &hr, &platformErrorCode);
     HCHttpCallResponseGetStatusCode(httpCallData->callHandle, &m_httpStatus);
-    
-    // SHIPTODO check if response should be binary and not string
-    PCSTR responseBody = nullptr;
-    HCHttpCallResponseGetResponseString(httpCallData->callHandle, &responseBody);
 
     if (httpCallData->userContext != nullptr)
     {
@@ -108,13 +104,14 @@ http_call_response_internal::http_call_response_internal(
         add_response_header(headerName, headerValue);
     }
 
+    PCSTR responseBody = nullptr;
     if (FAILED(hr))
     {
-        xsapi_internal_string errMessage;
         m_errorCode = static_cast<xbox_live_error_code>(hr);
+        HCHttpCallResponseGetResponseString(httpCallData->callHandle, &responseBody);
         if (responseBody != nullptr)
         {
-            m_errorMessage = " HTTP Response Body: " + xsapi_internal_string(responseBody);
+            m_errorMessage = "HTTP Response Body: " + xsapi_internal_string(responseBody);
         }
     }
     else
@@ -122,25 +119,32 @@ http_call_response_internal::http_call_response_internal(
 #pragma warning(suppress: 4244)
         m_errorCode = get_xbox_live_error_code_from_http_status(m_httpStatus);
 
-        web::json::value responseBodyJson;
-        std::error_code errCode;
-        switch (httpCallData->httpCallResponseBodyType)
+        if (httpCallData->httpCallResponseBodyType == http_call_response_body_type::vector_body)
         {
-        case http_call_response_body_type::json_body:
-            responseBodyJson = web::json::value::parse(utils::string_t_from_internal_string(responseBody), errCode);
-            if (!errCode)
+            size_t responseSize;
+            HCHttpCallResponseGetResponseBodyBytesSize(httpCallData->callHandle, &responseSize);
+
+            xsapi_internal_vector<uint8_t> responseBodyVector(responseSize);
+            HCHttpCallResponseGetResponseBodyBytes(httpCallData->callHandle, responseSize, &responseBodyVector[0], nullptr);
+
+            set_response_body(responseBodyVector);
+        }
+        else
+        {
+            HCHttpCallResponseGetResponseString(httpCallData->callHandle, &responseBody);
+            if (httpCallData->httpCallResponseBodyType == http_call_response_body_type::json_body)
             {
-                set_response_body(responseBodyJson);
+                web::json::value responseBodyJson;
+                responseBodyJson = web::json::value::parse(utils::string_t_from_internal_string(responseBody), m_errorCode);
+                if (!m_errorCode)
+                {
+                    set_response_body(responseBodyJson);
+                }
             }
-            break;
-
-        case http_call_response_body_type::string_body:
-            set_response_body(responseBody);
-            break;
-
-        case http_call_response_body_type::vector_body:
-            // SHIPTODO
-            break;
+            else if (httpCallData->httpCallResponseBodyType == http_call_response_body_type::string_body)
+            {
+                set_response_body(responseBody);
+            }
         }
     }
 }

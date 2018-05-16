@@ -6,6 +6,10 @@
 using namespace xbox::services;
 using namespace xbox::services::system;
 
+#ifndef MAKE_HTTP_HRESULT
+#define MAKE_HTTP_HRESULT(code) MAKE_HRESULT(1, 0x019, code)
+#endif
+
 STDAPI
 XblMemSetFunctions(
     _In_opt_ XblMemAllocFunction memAllocFunc,
@@ -78,7 +82,21 @@ XblGetErrorCondition(
     }
     else if (HRESULT_FACILITY(hr) == FACILITY_HTTP)
     {
-        return XblErrorCondition_Http;
+        switch (hr)
+        {
+        case HTTP_E_STATUS_NOT_FOUND:
+            return XblErrorCondition_Http404NotFound;
+        case HTTP_E_STATUS_PRECOND_FAILED:
+            return XblErrorCondition_Http412PreconditionFailed;
+        case MAKE_HTTP_HRESULT(429):
+            return XblErrorCondition_Http429TooManyRequests;
+        case HTTP_E_STATUS_REQUEST_TIMEOUT:
+        case HTTP_E_STATUS_SERVICE_UNAVAIL:
+        case HTTP_E_STATUS_GATEWAY_TIMEOUT:
+            return XblErrorCondition_HttpServiceTimeout;
+        default:
+            return XblErrorCondition_HttpGeneric;
+        }
     }
     else if (HRESULT_FACILITY(hr) == FACILITY_INTERNET)
     {
