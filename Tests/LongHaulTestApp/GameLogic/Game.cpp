@@ -15,6 +15,10 @@ using namespace Concurrency;
 Game* g_sampleInstance = nullptr;
 std::mutex Game::m_displayEventQueueLock;
 
+#define TEST_DELAY_SLOW 15
+#define TEST_DELAY_FAST 2
+
+
 class win32_handle
 {
 public:
@@ -128,6 +132,8 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 {
     g_sampleInstance = this;
     m_lastDeltaMem = 0; 
+    m_curDeltaMem = 0;
+    m_testDelay = 0;
 
     // Register to be notified if the Device is lost or recreated
     m_deviceResources->RegisterDeviceNotify(this);
@@ -157,6 +163,7 @@ void Game::RegisterInputKeys()
     m_input->RegisterKey(Windows::System::VirtualKey::P, ButtonPress::GetUserProfile);
     m_input->RegisterKey(Windows::System::VirtualKey::F, ButtonPress::GetFriends);
     m_input->RegisterKey(Windows::System::VirtualKey::T, ButtonPress::StartTests);
+    m_input->RegisterKey(Windows::System::VirtualKey::R, ButtonPress::StartTestsFast);
     m_input->RegisterKey(Windows::System::VirtualKey::A, ButtonPress::GetAchievementsForTitle);
     m_input->RegisterKey(Windows::System::VirtualKey::Number1, ButtonPress::ToggleSocialGroup1);
     m_input->RegisterKey(Windows::System::VirtualKey::Number2, ButtonPress::ToggleSocialGroup2);
@@ -254,9 +261,17 @@ void Game::OnGameUpdate()
             if (m_input->IsKeyDown(ButtonPress::StartTests))
             {
                 InitializeTestFramework();
+                m_testDelay = TEST_DELAY_SLOW;
                 m_testsStarted = true;
             }
             
+            if (m_input->IsKeyDown(ButtonPress::StartTestsFast))
+            {
+                InitializeTestFramework();
+                m_testDelay = TEST_DELAY_FAST;
+                m_testsStarted = true;
+            }
+
             try
             {
                 if (m_testsStarted)

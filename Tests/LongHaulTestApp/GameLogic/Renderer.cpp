@@ -168,8 +168,10 @@ void Renderer::RenderEventLog(
 
     swprintf_s(text, 128, L"Press S to start tests");
     m_font->DrawString(m_sprites.get(), text, XMFLOAT2(1 * fGridXColumn1, 1 * fTextHeight), Colors::White, 0.0f, XMFLOAT2(0, 0), scale);
-    swprintf_s(text, 128, L"Press T to start tests");
+    swprintf_s(text, 128, L"Press T to start tests with normal delay");
     m_font->DrawString(m_sprites.get(), text, XMFLOAT2(1 * fGridXColumn1, 2 * fTextHeight), Colors::White, 0.0f, XMFLOAT2(0, 0), scale);
+    swprintf_s(text, 128, L"Press R to start tests with short delay");
+    m_font->DrawString(m_sprites.get(), text, XMFLOAT2(1 * fGridXColumn1, 3 * fTextHeight), Colors::White, 0.0f, XMFLOAT2(0, 0), scale);
 
     fGridY -= 50;
 
@@ -192,22 +194,13 @@ void Renderer::RenderEventLog(
     }
 
 
-    auto initMem = g_sampleInstance->m_initMemReport;
-    auto curMem = g_sampleInstance->m_curMemReport;
-    if (initMem != nullptr && curMem != nullptr)
-    {
-        unsigned long long curDeltaMem = curMem->PeakVirtualMemorySizeInBytes - initMem->PeakVirtualMemorySizeInBytes;
+    stringstream_t stream;
+    stream << "Cur PeakVirtualMemorySizeInBytes: " << g_sampleInstance->m_curDeltaMem;
+    m_font->DrawString(m_sprites.get(), stream.str().c_str(), XMFLOAT2(15 * fGridXColumn1, 2 * fTextHeight), Colors::White, 0.0f, XMFLOAT2(0, 0), scale);
 
-        stringstream_t stream;
-        stream << "N PeakVirtualMemorySizeInBytes: " << curDeltaMem;
-        m_font->DrawString(m_sprites.get(), stream.str().c_str(), XMFLOAT2(15 * fGridXColumn1, 2 * fTextHeight), Colors::White, 0.0f, XMFLOAT2(0, 0), scale);
-
-        stringstream_t stream2;
-        stream2 << "N-1 PeakVirtualMemorySizeInBytes: " << g_sampleInstance->m_lastDeltaMem;
-        m_font->DrawString(m_sprites.get(), stream2.str().c_str(), XMFLOAT2(15 * fGridXColumn1, 3 * fTextHeight), Colors::White, 0.0f, XMFLOAT2(0, 0), scale);
-
-        g_sampleInstance->m_lastDeltaMem = curDeltaMem;
-    }
+    stringstream_t stream2;
+    stream2 << "Prev PeakVirtualMemorySizeInBytes: " << g_sampleInstance->m_lastDeltaMem;
+    m_font->DrawString(m_sprites.get(), stream2.str().c_str(), XMFLOAT2(15 * fGridXColumn1, 3 * fTextHeight), Colors::White, 0.0f, XMFLOAT2(0, 0), scale);
 }
 
 void Renderer::RenderPerfCounters(

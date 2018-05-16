@@ -5,8 +5,6 @@ using namespace LongHaulTestApp;
 using namespace xbox::services;
 using namespace xbox::services::system;
 
-#define TEST_DELAY 15
-
 void Game::InitializeTestFramework()
 {
     Platform::String^ localfolder = Windows::Storage::ApplicationData::Current->LocalFolder->Path;
@@ -39,7 +37,7 @@ void Game::InitializeTests()
 
 void Game::HandleTests()
 {
-    if (!m_testing && (time(NULL) - m_time) > TEST_DELAY)
+    if (!m_testing && (time(NULL) - m_time) > m_testDelay)
     {
         BeginTest();
     }
@@ -129,6 +127,8 @@ void Game::PrintMemoryUsage()
     else
     {
         m_curMemReport = report;
+        g_sampleInstance->m_lastDeltaMem = g_sampleInstance->m_curDeltaMem;
+        g_sampleInstance->m_curDeltaMem = m_curMemReport->PeakVirtualMemorySizeInBytes - m_initMemReport->PeakVirtualMemorySizeInBytes;
     }
 
     stringstream_t stream;
