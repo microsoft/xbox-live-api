@@ -42,6 +42,7 @@ private:
 
     struct retry_context
     {
+        const AsyncProviderData* asyncProviderData;
         AsyncBlock* outerAsyncBlock;
         uint32_t delay;
         std::chrono::time_point<std::chrono::steady_clock> startTime;
