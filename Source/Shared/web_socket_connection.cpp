@@ -108,6 +108,8 @@ void web_socket_connection::retry_until_connected(retry_context* context)
                 CompleteAsync(retryContext->outerAsyncBlock, E_FAIL, 0);
             }
         }
+
+        CloseAsyncQueue(async->queue);
         xsapi_memory::mem_free(async);
     };
 
