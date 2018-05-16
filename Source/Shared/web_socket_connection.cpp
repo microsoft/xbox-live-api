@@ -64,11 +64,7 @@ void web_socket_connection::retry_until_connected(retry_context* context)
 {
     AsyncBlock* nestedAsyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
     nestedAsyncBlock->context = context;
-    if (context->outerAsyncBlock->queue != nullptr)
-    {
-        // TODO since we are never setting the outer async queue
-        CreateNestedAsyncQueue(context->outerAsyncBlock->queue, &nestedAsyncBlock->queue); 
-    }
+    nestedAsyncBlock->queue = context->outerAsyncBlock->queue;
 
     nestedAsyncBlock->callback = [](AsyncBlock* async)
     {

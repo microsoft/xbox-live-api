@@ -115,7 +115,7 @@ http_call_impl::get_response(
     
     get_response(
         httpCallResponseBodyType,
-        nullptr,
+        get_xsapi_singleton()->m_asyncQueue,
         [tce](std::shared_ptr<http_call_response_internal> response)
         {
             tce.set(std::make_shared<http_call_response>(response));
@@ -455,20 +455,14 @@ void http_call_impl::internal_get_response(
     HCHttpCallRequestSetRetryAllowed(httpCallData->callHandle, httpCallData->retryAllowed);
     HCHttpCallRequestSetTimeout(httpCallData->callHandle, static_cast<uint32_t>(httpCallData->httpTimeout.count()));
 
-    async_queue_handle_t nestedQueue = nullptr;
-    if (httpCallData->queue != nullptr)
-    {
-        CreateNestedAsyncQueue(httpCallData->queue, &nestedQueue);
-    }
     AsyncBlock *asyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
-    asyncBlock->queue = nestedQueue;
+    asyncBlock->queue = httpCallData->queue;
     asyncBlock->context = utils::store_shared_ptr(httpCallData);
     asyncBlock->callback = [](_In_ AsyncBlock* asyncBlock)
     {
         auto httpCallData = utils::remove_shared_ptr<http_call_data>(asyncBlock->context, false);
         auto httpCallResponse = xsapi_allocate_shared<http_call_response_internal>(httpCallData);
 
-        CloseAsyncQueue(asyncBlock->queue);
         void* context = asyncBlock->context;
         xsapi_memory::mem_free(asyncBlock);
 
