@@ -135,6 +135,7 @@ set(Public_Source_Files_C
     ../../include/xsapi-c/pal.h
     ../../include/xsapi-c/xbox_live_app_config_c.h
     ../../include/xsapi-c/xbox_live_context_c.h
+    ../../include/xsapi-c/xbox_live_context_settings_c.h
     ../../include/xsapi-c/xbox_live_global_c.h
     )
 
@@ -615,6 +616,7 @@ set(UWP_System_Source_Files_C
 
 set(Shared_Source_Files_C
     ../../Source/Shared/C/xbox_live_app_config_c.cpp
+    ../../Source/Shared/C/xbox_live_context_settings_c.cpp
     )
 
 set(Common_Source_Files_C
