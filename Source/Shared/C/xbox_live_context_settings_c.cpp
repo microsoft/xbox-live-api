@@ -14,6 +14,7 @@ XblContextSettingsDisableAssertsForXboxLiveThrottlingInDevSandboxes(
     ) XBL_NOEXCEPT
 try
 {
+    UNREFERENCED_PARAMETER(setting);
     RETURN_C_INVALIDARGUMENT_IF(context == nullptr);
     context->contextImpl->settings()->disable_asserts_for_xbox_live_throttling_in_dev_sandboxes(xbox_live_context_throttle_setting::this_code_needs_to_be_changed_to_avoid_throttling);
     return S_OK;
@@ -27,6 +28,7 @@ XblContextSettingsDisableAssertsForMaximumNumberOfWebsocketsActivated(
     ) XBL_NOEXCEPT
 try
 {
+    UNREFERENCED_PARAMETER(setting);
     RETURN_C_INVALIDARGUMENT_IF(context == nullptr);
     context->contextImpl->settings()->disable_asserts_for_maximum_number_of_websockets_activated(xbox_live_context_recommended_setting::this_code_needs_to_be_changed_to_follow_best_practices);
     return S_OK;
