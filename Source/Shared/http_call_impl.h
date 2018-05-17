@@ -187,7 +187,7 @@ public:
 
     virtual xbox_live_result<void> get_response(
         _In_ http_call_response_body_type httpCallResponseBodyType,
-        _In_ async_queue_handle_t queue,
+        _In_opt_ async_queue_handle_t queue,
         _In_ http_call_callback callback
         ) = 0;
 
@@ -195,7 +195,7 @@ public:
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired,
-        _In_ async_queue_handle_t queue,
+        _In_opt_ async_queue_handle_t queue,
         _In_ http_call_callback callback
         ) = 0;
 
@@ -311,8 +311,8 @@ public:
 
     xbox_live_result<void> get_response(
         _In_ http_call_response_body_type httpCallResponseBodyType,
-        _In_ async_queue_handle_t queue,
-        _In_ http_call_callback callback
+        _In_opt_ async_queue_handle_t queue,
+        _In_opt_ http_call_callback callback
         ) override;
 
     pplx::task<std::shared_ptr<http_call_response>> get_response(
@@ -330,7 +330,7 @@ public:
         _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
         _In_ http_call_response_body_type httpCallResponseBodyType,
         _In_ bool allUsersAuthRequired,
-        _In_ async_queue_handle_t queue,
+        _In_opt_ async_queue_handle_t queue,
         _In_ http_call_callback callback
         ) override;
 
@@ -342,7 +342,7 @@ public:
     const web::uri& path_query_fragment() const override;
     string_t http_method() const override;
 
-    void set_add_default_headers(bool value) override;
+    void set_add_default_headers(_In_ bool value) override;
     bool add_default_headers() const override;
 
     void set_long_http_call(_In_ bool value) override;

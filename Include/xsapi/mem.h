@@ -87,7 +87,10 @@ public:
 
     void deallocate(_In_opt_ void* p, size_type)
     {
-        xbox::services::system::xsapi_memory::mem_free(p);
+        if (p != nullptr)
+        {
+            xbox::services::system::xsapi_memory::mem_free(p);
+        }
     }
 
     char* _Charalloc(size_type n)

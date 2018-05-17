@@ -1009,7 +1009,7 @@ xsapi_internal_string utils::escape_special_characters(const xsapi_internal_stri
 
 uint32_t
 utils::char_t_copy(
-    _In_reads_bytes_(size) char_t* destinationCharArr,
+    _In_reads_bytes_(sizeInWords) char_t* destinationCharArr,
     _In_ size_t sizeInWords,
     _In_ const char_t* sourceCharArr
     )

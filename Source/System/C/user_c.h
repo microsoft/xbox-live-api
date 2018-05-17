@@ -5,7 +5,7 @@
 
 struct xbl_xbox_live_user
 {
-    xbl_xbox_live_user(_In_ Windows::System::User^ creationContext)
+    xbl_xbox_live_user(_In_opt_ Windows::System::User^ creationContext)
         : refCount(1)
     {
         internalUser = creationContext == nullptr ?

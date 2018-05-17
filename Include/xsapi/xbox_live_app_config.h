@@ -47,7 +47,7 @@ public:
     _XSAPIIMP string_t sandbox() const;
 
 private:
-    xbox_live_app_config(std::shared_ptr<xbox_live_app_config_internal> internalObj);
+    xbox_live_app_config(_In_ std::shared_ptr<xbox_live_app_config_internal> internalObj);
     std::shared_ptr<xbox_live_app_config_internal> m_internalObj;
 };
 

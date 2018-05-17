@@ -526,7 +526,7 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    xbox_user_id_container(const char_t* xboxUserId);
+    xbox_user_id_container(_In_ const char_t* xboxUserId);
 
 private:
     char_t m_xboxUserId[XBOX_USER_ID_CHAR_SIZE];

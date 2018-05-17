@@ -49,7 +49,7 @@ public:
 
     xbox_live_result<void> get_next(
         _In_ uint32_t maxItems,
-        _In_ async_queue_handle_t queue,
+        _In_opt_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>> callback
         );
 
@@ -152,7 +152,7 @@ public:
         _In_ xbox_social_relationship_filter socialRelationshipFilter,
         _In_ uint32_t startIndex,
         _In_ uint32_t maxItems,
-        _In_ async_queue_handle_t queue,
+        _In_opt_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>> callback
         );
 
@@ -161,7 +161,7 @@ public:
         _In_ xbox_social_relationship_filter filter,
         _In_ uint32_t startIndex,
         _In_ uint32_t maxItems,
-        _In_ async_queue_handle_t queue,
+        _In_opt_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>> callback
         );
 
@@ -264,7 +264,7 @@ public:
     _XSAPIIMP xbox_live_result<void> submit_reputation_feedback(
         _In_ const xsapi_internal_string& xboxUserId,
         _In_ reputation_feedback_type reputationFeedbackType,
-        _In_ async_queue_handle_t queue,
+        _In_opt_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<void>> callback,
         _In_ const xsapi_internal_string& sessionName = xsapi_internal_string(),
         _In_ const xsapi_internal_string& reasonMessage = xsapi_internal_string(),
@@ -273,7 +273,7 @@ public:
 
     _XSAPIIMP xbox_live_result<void> submit_batch_reputation_feedback(
         _In_ const xsapi_internal_vector<reputation_feedback_item_internal>& feedbackItems,
-        _In_ async_queue_handle_t queue,
+        _In_opt_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<void>> callback
         );
 

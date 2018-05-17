@@ -55,7 +55,7 @@ public:
     /// Internal function
     /// </summary>
     http_call_response(
-        std::shared_ptr<http_call_response_internal> internalObj
+        _In_ std::shared_ptr<http_call_response_internal> internalObj
         );
 
 #ifndef DEFAULT_MOVE_ENABLED

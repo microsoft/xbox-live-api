@@ -211,6 +211,10 @@ try
     {
         *subscriptionHandle = static_cast<void*>(result.payload().get());
     }
+    else
+    {
+        *subscriptionHandle = nullptr;
+    }
     return utils::convert_xbox_live_error_code_to_hresult(result.err());
 }
 CATCH_RETURN()
@@ -246,6 +250,7 @@ try
 
         XblSocialRelationshipChangeEventArgs* args = static_cast<XblSocialRelationshipChangeEventArgs*>(xsapi_memory::mem_alloc(
             FIELD_OFFSET(XblSocialRelationshipChangeEventArgs, xboxUserIds[xuids.size()])));
+        if (args == nullptr) return;
 
         args->callerXboxUserId = atoi(eventArgs->caller_xbox_user_id().data());
         args->socialNotification = static_cast<XblSocialNotificationType>(eventArgs->social_notification());

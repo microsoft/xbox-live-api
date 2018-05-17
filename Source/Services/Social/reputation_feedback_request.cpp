@@ -199,7 +199,7 @@ reputation_feedback_item::evidence_resource_id() const
 
 
 reputation_feedback_item_internal::reputation_feedback_item_internal(
-    const reputation_feedback_item& legacyCppObj
+    _In_ const reputation_feedback_item& legacyCppObj
     ) :
     m_xboxUserId(utils::internal_string_from_string_t(legacyCppObj.xbox_user_id())),
     m_reputationFeedbackType(legacyCppObj.feedback_type()),

@@ -426,7 +426,7 @@ STDAPI XblSocialManagerDoWork(
 /// <param name="usersAffected">Array of afftected users to populate.</param>
 STDAPI XblSocialManagerEventGetUsersAffected(
     _In_ XblSocialManagerEvent* socialEvent,
-    _Out_writes_(socialEvent->affectedUsersCount) uint64_t* usersAffected
+    _Out_writes_(socialEvent->usersAffectedCount) uint64_t* usersAffected
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -511,5 +511,5 @@ STDAPI XblSocialManagerSetRichPresencePollingStatus(
 /// </summary>
 /// <param name="queue">async_queue_handle_t to be used for Social Manager background work.</param>
 STDAPI_(void) XblSocialManagerSetBackgroundWorkAsyncQueue(
-    _In_ async_queue_handle_t queue
+    _In_opt_ async_queue_handle_t queue
     ) XBL_NOEXCEPT;

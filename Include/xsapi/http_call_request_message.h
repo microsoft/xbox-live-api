@@ -37,7 +37,7 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    http_call_request_message(const http_call_request_message_internal* internalObj);
+    http_call_request_message(_In_ const http_call_request_message_internal* internalObj);
 
     /// <summary>
     /// The http request message if it is a string type.

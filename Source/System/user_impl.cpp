@@ -53,7 +53,7 @@ void user_impl::get_token_and_signature(
     _In_ const xsapi_internal_string& httpMethod,
     _In_ const xsapi_internal_string& url,
     _In_ const xsapi_internal_string& headers,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ token_and_signature_callback callback
     )
 {
@@ -75,7 +75,7 @@ void user_impl::get_token_and_signature(
     _In_ const xsapi_internal_string& url,
     _In_ const xsapi_internal_string& headers,
     _In_ const xsapi_internal_string& requestBodyString,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ token_and_signature_callback callback
     )
 {
@@ -99,7 +99,7 @@ void user_impl::get_token_and_signature(
     _In_ const xsapi_internal_string& url,
     _In_ const xsapi_internal_string& headers,
     _In_ const xsapi_internal_vector<unsigned char>& requestBodyArray,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ token_and_signature_callback callback
     )
 {

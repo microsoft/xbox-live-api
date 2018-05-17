@@ -127,8 +127,8 @@ http_call_impl::get_response(
 xbox_live_result<void> 
 http_call_impl::get_response(
     _In_ http_call_response_body_type httpCallResponseBodyType,
-    _In_ async_queue_handle_t queue,
-    _In_ http_call_callback callback
+    _In_opt_ async_queue_handle_t queue,
+    _In_opt_ http_call_callback callback
     )
 {
     m_httpCallData->httpCallResponseBodyType = httpCallResponseBodyType;
@@ -234,7 +234,7 @@ xbox_live_result<void> http_call_impl::get_response_with_auth(
     _In_ const std::shared_ptr<xbox::services::user_context>& userContext,
     _In_ http_call_response_body_type httpCallResponseBodyType,
     _In_ bool allUsersAuthRequired,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ http_call_callback callback
     )
 {

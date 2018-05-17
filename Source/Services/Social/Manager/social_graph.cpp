@@ -1874,7 +1874,7 @@ void user_buffers_holder::buffer_init(
     )
 {
     userBuffer.freeData = xsapi_internal_queue<byte*>();
-    size_t allocatedSize;
+    size_t allocatedSize = 0;
     auto buffer = buffer_alloc(users.size(), allocatedSize, freeSpaceRequired);
     if (buffer == nullptr)
     {
@@ -1905,12 +1905,13 @@ void user_buffers_holder::buffer_init(
 byte*
 user_buffers_holder::buffer_alloc(
     _In_ size_t numUsers,
-    _Inout_ size_t& allocatedSize,
+    _Out_ size_t& allocatedSize,
     _In_ size_t freeSpaceRequired
     )
 {
     if (numUsers == 0 && freeSpaceRequired == 0)
     {
+        allocatedSize = 0;
         return nullptr;
     }
 
