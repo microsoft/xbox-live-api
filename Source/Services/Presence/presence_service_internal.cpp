@@ -65,7 +65,7 @@ xbox_live_result<void>
 presence_service_internal::set_presence(
     _In_ bool isUserActiveInTitle,
     _In_ presence_data_internal presenceData,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<uint32_t>> callback
     )
 {
@@ -311,7 +311,7 @@ presence_service_internal::unsubscribe_from_title_presence_change(
 xbox_live_result<void>
 presence_service_internal::get_presence(
     _In_ const xsapi_internal_string& xboxUserId,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<presence_record_internal>>> callback
     )
 {
@@ -350,7 +350,7 @@ presence_service_internal::get_presence(
 xbox_live_result<void>
 presence_service_internal::get_presence_for_multiple_users(
     _In_ const xsapi_internal_vector<xsapi_internal_string>& xboxUserIds,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>> callback
     )
 {
@@ -412,7 +412,7 @@ presence_service_internal::get_presence_for_multiple_users(
     _In_ presence_detail_level presenceDetailLevel,
     _In_ bool onlineOnly,
     _In_ bool broadcastingOnly,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>> callback
     )
 {
@@ -470,7 +470,7 @@ presence_service_internal::get_presence_for_multiple_users(
 xbox_live_result<void>
 presence_service_internal::get_presence_for_social_group(
     _In_ const xsapi_internal_string& socialGroup,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>> callback
     )
 {
@@ -524,7 +524,7 @@ presence_service_internal::get_presence_for_social_group(
     _In_ presence_detail_level peoplehubDetailLevel,
     _In_ bool onlineOnly,
     _In_ bool broadcastingOnly,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>>> callback
     )
 {

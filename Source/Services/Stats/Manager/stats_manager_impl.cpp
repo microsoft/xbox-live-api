@@ -496,7 +496,10 @@ stats_manager_impl::delete_stat(
     return userIter->second.statValueDocument.delete_stat(name.c_str());
 }
 
-xbox_live_result<void> stats_manager_impl::get_leaderboard(const xbox_live_user_t& user, const string_t& statName, leaderboard::leaderboard_query query)
+xbox_live_result<void> stats_manager_impl::get_leaderboard(
+    _In_ const xbox_live_user_t& user, 
+    _In_ const string_t& statName, 
+    _In_ leaderboard::leaderboard_query query)
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
     string_t userStr = utils::string_t_from_internal_string(user_context::get_user_id(user));
@@ -542,7 +545,11 @@ xbox_live_result<void> stats_manager_impl::get_leaderboard(const xbox_live_user_
     return xbox_live_result<void>();
 }
 
-xbox_live_result<void> stats_manager_impl::get_social_leaderboard(const xbox_live_user_t& user, const string_t& statName, const string_t& socialGroup, leaderboard::leaderboard_query query)
+xbox_live_result<void> stats_manager_impl::get_social_leaderboard(
+    _In_ const xbox_live_user_t& user,
+    _In_ const string_t& statName,
+    _In_ const string_t& socialGroup,
+    _In_ leaderboard::leaderboard_query query)
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
     string_t userStr = utils::string_t_from_internal_string(user_context::get_user_id(user));

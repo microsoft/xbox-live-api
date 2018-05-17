@@ -7,6 +7,7 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
+_Ret_maybenull_ _Post_writable_byte_size_(dwSize) 
 void* xsapi_memory::mem_alloc(
     _In_ size_t dwSize
     )

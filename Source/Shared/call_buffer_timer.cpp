@@ -43,7 +43,7 @@ call_buffer_timer::call_buffer_timer() :
 call_buffer_timer::call_buffer_timer(
     _In_ xbox_live_callback<const xsapi_internal_vector<xsapi_internal_string>&, std::shared_ptr<call_buffer_timer_completion_context>> callback,
     _In_ std::chrono::seconds bufferTimePerCall,
-    _In_ async_queue_handle_t queue
+    _In_opt_ async_queue_handle_t queue
     ) :
     m_fCallback(std::move(callback)),
     m_bufferTimePerCall(std::move(bufferTimePerCall)),

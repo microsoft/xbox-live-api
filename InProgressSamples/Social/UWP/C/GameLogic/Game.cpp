@@ -912,10 +912,13 @@ void Game::GetAchievement(PCSTR scid, PCSTR achievementId)
         {
             pThis->Log(L"Successfully got achievement!");
 
-            XblAchievement* achievement = (XblAchievement*)malloc(size);
-            XblAchievementsGetAchievementResult(asyncBlock, size, achievement, nullptr);
+            XblAchievement* achievement = static_cast<XblAchievement*>(malloc(size));
+            if (achievement != nullptr)
+            {
+                XblAchievementsGetAchievementResult(asyncBlock, size, achievement, nullptr);
 
-            pThis->UpdateAchievement(achievement->serviceConfigurationId, achievement->id);
+                pThis->UpdateAchievement(achievement->serviceConfigurationId, achievement->id);
+            }
         }
         else
         {

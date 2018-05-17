@@ -93,7 +93,7 @@ achievements_result::get_next(
 
 _XSAPIIMP xbox_live_result<void> achievements_result_internal::get_next(
     _In_ uint32_t maxItems,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<achievements_result_internal>>> callback
     )
 {

@@ -72,7 +72,7 @@ XblUserCreateHandle(
 /// <returns>Result code for this API operation.</returns>
 STDAPI
 XblUserCreateHandleFromSystemUser(
-    _In_ Windows::System::User^ creationContext,
+    _In_opt_ Windows::System::User^ creationContext,
     _Out_ xbl_user_handle* user
     ) XBL_NOEXCEPT;
 

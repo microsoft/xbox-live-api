@@ -436,7 +436,7 @@ public:
     /// Internal function
     /// </summary>
     device_presence_change_event_args(
-        std::shared_ptr<device_presence_change_event_args_internal> internalObj
+        _In_ std::shared_ptr<device_presence_change_event_args_internal> internalObj
         );
 
 private:

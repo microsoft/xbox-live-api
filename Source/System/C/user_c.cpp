@@ -11,7 +11,7 @@ using namespace xbox::services::system;
 
 STDAPI
 XblUserCreateHandleFromSystemUser(
-    _In_ Windows::System::User^ creationContext,
+    _In_opt_ Windows::System::User^ creationContext,
     _Out_ xbl_user_handle* user
     ) XBL_NOEXCEPT
 try
@@ -194,7 +194,7 @@ struct SignInContext
 HRESULT SignInHelper(
     _In_ AsyncBlock* asyncBlock,
     _In_ xbl_user_handle user,
-    _In_ Platform::Object^ coreDispatcher,
+    _In_opt_ Platform::Object^ coreDispatcher,
     _In_ bool showUi
     )
 {

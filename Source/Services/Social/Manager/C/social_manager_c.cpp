@@ -339,7 +339,7 @@ CATCH_RETURN()
 
 STDAPI XblSocialManagerEventGetUsersAffected(
     _In_ XblSocialManagerEvent* socialEvent,
-    _Out_writes_(socialEvent->affectedUsersCount) uint64_t* usersAffected
+    _Out_writes_(socialEvent->usersAffectedCount) uint64_t* usersAffected
     ) XBL_NOEXCEPT
 try
 {
@@ -376,6 +376,10 @@ try
     if (!result.err())
     {
         *group = state->create_social_user_group(result.payload());
+    }
+    else
+    {
+        *group = nullptr;
     }
     return utils::convert_xbox_live_error_code_to_hresult(result.err());
 }
@@ -491,7 +495,7 @@ CATCH_RETURN()
 
 
 STDAPI_(void) XblSocialManagerSetBackgroundWorkAsyncQueue(
-    _In_ async_queue_handle_t queue
+    _In_opt_ async_queue_handle_t queue
     ) XBL_NOEXCEPT
 try
 {

@@ -301,7 +301,7 @@ protected:
 
     byte* buffer_alloc(
         _In_ size_t numUsers,
-        _Inout_ size_t& allocatedSize,
+        _Out_ size_t& allocatedSize,
         _In_ size_t freeSpaceRequired
         );
 
@@ -358,7 +358,7 @@ public:
     void get_social_graph(
         _In_ const xsapi_internal_string& callerXboxUserId,
         _In_ social_manager_extra_detail_level decorations,
-        _In_ async_queue_handle_t queue,
+        _In_opt_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
         );
 
@@ -366,14 +366,14 @@ public:
         _In_ const xsapi_internal_string& callerXboxUserId,
         _In_ social_manager_extra_detail_level decorations,
         _In_ const xsapi_internal_vector<xsapi_internal_string> xboxLiveUsers,
-        _In_ async_queue_handle_t queue,
+        _In_opt_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
         );
 
     void get_suggested_friends(
         _In_ const xsapi_internal_string& xboxUserId,
         _In_ social_manager_extra_detail_level decorations,
-        _In_ async_queue_handle_t queue,
+        _In_opt_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
         );
 
@@ -384,7 +384,7 @@ private:
         _In_ const xsapi_internal_string& relationshipType,
         _In_ const xsapi_internal_vector<xsapi_internal_string> xboxLiveUsers,
         _In_ bool isBatch,
-        _In_ async_queue_handle_t queue,
+        _In_opt_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
         );
 

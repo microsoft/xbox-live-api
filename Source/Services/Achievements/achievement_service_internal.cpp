@@ -90,7 +90,7 @@ achievement_service_internal::update_achievement(
     _In_ const xsapi_internal_string& xboxUserId,
     _In_ const xsapi_internal_string& achievementId,
     _In_ uint32_t percentComplete,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<void>> callback
     )
 {
@@ -112,7 +112,7 @@ achievement_service_internal::update_achievement(
     _In_ const xsapi_internal_string& serviceConfigurationId,
     _In_ const xsapi_internal_string& achievementId,
     _In_ uint32_t percentComplete,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<void>> callback
     )
 {
@@ -300,7 +300,7 @@ achievement_service_internal::get_achievements_for_title_id(
     _In_ achievement_order_by orderBy,
     _In_ uint32_t skipItems,
     _In_ uint32_t maxItems,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<achievements_result_internal>>> callback
     )
 {
@@ -328,7 +328,7 @@ achievement_service_internal::get_achievement(
     _In_ const xsapi_internal_string& xboxUserId,
     _In_ const xsapi_internal_string& serviceConfigurationId,
     _In_ const xsapi_internal_string& achievementId,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<achievement_internal>>> callback
     )
 {
@@ -401,7 +401,7 @@ achievement_service_internal::get_achievements(
     _In_ uint32_t skipItems,
     _In_ uint32_t maxItems,
     _In_ const xsapi_internal_string& continuationToken,
-    _In_ async_queue_handle_t queue,
+    _In_opt_ async_queue_handle_t queue,
     _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<achievements_result_internal>>> callback
 )
 {

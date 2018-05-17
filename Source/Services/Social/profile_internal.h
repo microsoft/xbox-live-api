@@ -60,19 +60,19 @@ public:
 
     _XSAPIIMP xbox::services::xbox_live_result<void> get_user_profile(
         _In_ xsapi_internal_string xboxUserId,
-        _In_ async_queue_handle_t queue,
+        _In_opt_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<std::shared_ptr<xbox_user_profile_internal>>> callback
         );
 
     _XSAPIIMP xbox::services::xbox_live_result<void> get_user_profiles(
         _In_ const xsapi_internal_vector<xsapi_internal_string>& xboxUserIds,
-        _In_ async_queue_handle_t queue,
+        _In_opt_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>> callback
         );
 
     _XSAPIIMP xbox::services::xbox_live_result<void> get_user_profiles_for_social_group(
         _In_ const xsapi_internal_string& socialGroup,
-        _In_ async_queue_handle_t queue,
+        _In_opt_ async_queue_handle_t queue,
         _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>>> callback
         );
 

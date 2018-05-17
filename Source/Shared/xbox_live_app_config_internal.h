@@ -85,8 +85,8 @@ public:
     _XSAPIIMP void set_environment(_In_ const string_t& environment);
 private:
 #else
-    void set_sandbox(const xsapi_internal_string& sandbox);
-    void set_environment(const xsapi_internal_string& environment);
+    void set_sandbox(_In_ const xsapi_internal_string& sandbox);
+    void set_environment(_In_ const xsapi_internal_string& environment);
 #endif
 
 #if XSAPI_U
