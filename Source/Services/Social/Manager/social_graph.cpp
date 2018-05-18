@@ -1349,7 +1349,7 @@ social_graph::do_work(
         socialEvents.reserve(socialEvents.size() + m_socialEventQueue.social_event_list().size());
         for (auto& evt : m_socialEventQueue.social_event_list())
         {
-            socialEvents.push_back(evt);    
+            socialEvents.push_back(evt);
         }
         m_socialEventQueue.clear();
         m_perfTester.stop_timer("do_work: social event push_back");
