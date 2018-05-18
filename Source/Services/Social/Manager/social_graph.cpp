@@ -190,7 +190,6 @@ void social_graph::initialize(xbox_live_callback<xbox_live_result<void>> callbac
 
     auto context = xsapi_allocate_shared<do_event_work_context>();
     context->pThis = thisWeakPtr;
-    context->hasRemainingEvent = true;
     context->outerAsyncBlock = eventWorkAsync;
     eventWorkAsync->queue = m_backgroundAsyncQueue;
     eventWorkAsync->context = utils::store_shared_ptr(context);
@@ -341,14 +340,17 @@ social_graph::schedule_event_work(do_event_work_context* context)
             auto pThis = context->pThis.lock();
             if (pThis)
             {
-                context->hasRemainingEvent = pThis->do_event_work();
+                bool hasRemainingEvent = false;
+                do
+                {
+                    hasRemainingEvent = pThis->do_event_work();
+                } while (hasRemainingEvent);
             }
             CompleteAsync(data->async, S_OK, 0);
-            return E_PENDING;
         }
         return S_OK;
     });
-    ScheduleAsync(nestedAsync, context->hasRemainingEvent ? 0 : 30);
+    ScheduleAsync(nestedAsync, 30);
 }
 
 bool
@@ -1347,7 +1349,7 @@ social_graph::do_work(
         socialEvents.reserve(socialEvents.size() + m_socialEventQueue.social_event_list().size());
         for (auto& evt : m_socialEventQueue.social_event_list())
         {
-            socialEvents.push_back(evt);
+            socialEvents.push_back(evt);    
         }
         m_socialEventQueue.clear();
         m_perfTester.stop_timer("do_work: social event push_back");

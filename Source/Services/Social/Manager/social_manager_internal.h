@@ -480,7 +480,6 @@ protected:
     {
         std::weak_ptr<social_graph> pThis;
         AsyncBlock* outerAsyncBlock;
-        bool hasRemainingEvent;
     };
 
     void schedule_event_work(do_event_work_context* context);

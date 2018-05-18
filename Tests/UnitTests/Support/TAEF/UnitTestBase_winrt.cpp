@@ -36,7 +36,6 @@ XboxLiveUser^ SignInUserWithMocks_WinRT(const string_t& id)
 Microsoft::Xbox::Services::XboxLiveContext^ GetMockXboxLiveContext_WinRT(const string_t& id)
 {
     auto user = SignInUserWithMocks_WinRT(id);
-    xbox::services::user_context userContext(user);
     Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext = ref new Microsoft::Xbox::Services::XboxLiveContext(user);
     return xboxLiveContext;
 }
@@ -44,7 +43,6 @@ Microsoft::Xbox::Services::XboxLiveContext^ GetMockXboxLiveContext_WinRT(const s
 std::shared_ptr<xbox::services::xbox_live_context> GetMockXboxLiveContext_Cpp(const string_t& id)
 {
     auto user = SignInUserWithMocks_WinRT(id);
-    xbox::services::user_context userContext(user);
     Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext = ref new Microsoft::Xbox::Services::XboxLiveContext(user);
     return xboxLiveContext->GetCppObj();
 }
