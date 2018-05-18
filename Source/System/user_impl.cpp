@@ -38,7 +38,7 @@ user_impl::user_impl(
     UNREFERENCED_PARAMETER(initConfig);
     m_localConfig = xbox_system_factory::get_factory()->create_local_config();
 
-    m_authConfig = std::make_shared<auth_config>(
+    m_authConfig = xsapi_allocate_shared<auth_config>(
         m_localConfig->sandbox(),
         m_localConfig->environment_prefix(),
         m_localConfig->environment(),

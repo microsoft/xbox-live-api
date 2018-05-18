@@ -100,7 +100,7 @@ void xsapi_singleton::init()
 #endif
 #endif
 
-#if UNIT_TEST_SERVICES
+#if _DEBUG && UNIT_TEST_SERVICES
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
@@ -117,7 +117,7 @@ xsapi_singleton::~xsapi_singleton()
 
     if (m_callbackContextPtrs.size() > 0)
     {
-#ifdef UNIT_TEST_SERVICES
+#if _DEBUG && UNIT_TEST_SERVICES
         assert(false && "Context remaining in context store!");
 #endif
         m_callbackContextPtrs.clear();
