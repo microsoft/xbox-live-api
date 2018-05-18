@@ -102,14 +102,14 @@ void Sample::SetupUI()
     // Join Lobby
     m_ui->FindControl<ImageButton>(c_mainMenuPanelId, c_joinLobbyBtn)->SetCallback([this](IPanel*, IControl*)
     {
-        m_appState = APPSTATE::APP_GET_TOURNAMENTS;
+        m_appState = APPSTATE::APP_CREATE_LOBBY;
         ChangeAppStates();
     });
 
     // Join Custom Game
     m_ui->FindControl<ImageButton>(c_mainMenuPanelId, c_joinCustomGameBtn)->SetCallback([this](IPanel*, IControl*)
     {
-        m_appState = APPSTATE::APP_GET_TEAMS;
+        m_appState = APPSTATE::APP_JOIN_GAME;
         ChangeAppStates();
     });
 
@@ -200,14 +200,6 @@ void Sample::ChangeAppStates()
         m_mainMenuPanel->Close();
         m_sessionDetailsPanel->Show();
         JoinGame();
-        break;
-
-    case APP_GET_TOURNAMENTS:
-        GetTournaments();
-        break;
-
-    case APP_GET_TEAMS:
-        GetTeams();
         break;
 
     case APP_SHOW_FRIEND_GAMES:
