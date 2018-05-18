@@ -9,6 +9,11 @@
 typedef struct XblUserProfile
 {
     /// <summary>
+    /// The user's Xbox user ID.
+    /// </summary>
+    uint64_t xboxUserId;
+    
+    /// <summary>
     /// The user's display name to be used in application UI.  This value is privacy gated and could
     /// be a user's real name or their Gamertag.
     /// </summary>
@@ -51,11 +56,6 @@ typedef struct XblUserProfile
     /// The user's Gamertag.
     /// </summary>
     char gamertag[XBL_GAMERTAG_CHAR_SIZE];
-
-    /// <summary>
-    /// The user's Xbox user ID.
-    /// </summary>
-    uint64_t xboxUserId;
 } XblUserProfile;
 
 /// <summary>
