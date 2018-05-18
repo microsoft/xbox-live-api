@@ -29,6 +29,12 @@ bool ModuleSetup()
     CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     WEX::Common::String strOpt;
 
+    if (!IsDebuggerPresent())
+    {
+        _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
+        _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+    }
+
     return true;
 }
 
