@@ -135,8 +135,9 @@ http_call_response_internal::http_call_response_internal(
             if (httpCallData->httpCallResponseBodyType == http_call_response_body_type::json_body)
             {
                 web::json::value responseBodyJson;
-                responseBodyJson = web::json::value::parse(utils::string_t_from_internal_string(responseBody), m_errorCode);
-                if (!m_errorCode)
+                std::error_code errCode;
+                responseBodyJson = web::json::value::parse(utils::string_t_from_internal_string(responseBody), errCode);
+                if (!errCode)
                 {
                     set_response_body(responseBodyJson);
                 }
