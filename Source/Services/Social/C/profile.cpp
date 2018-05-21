@@ -247,7 +247,7 @@ STDAPI XblProfileGetUserProfileResult(
 STDAPI XblProfileGetUserProfilesResult(
     _In_ AsyncBlock* async,
     _In_ uint32_t profilesCount,
-    _Out_writes_to_(profilesCount, written) XblUserProfile* profiles,
+    _Out_writes_to_(profilesCount, *written) XblUserProfile* profiles,
     _Out_opt_ uint32_t* written
     ) XBL_NOEXCEPT
 {
@@ -276,7 +276,7 @@ STDAPI XblProfileGetUserProfilesForSocialGroupResultCount(
 STDAPI XblProfileGetUserProfilesForSocialGroupResult(
     _In_ AsyncBlock* async,
     _In_ uint32_t profilesCount,
-    _Out_writes_to_(profilesCount, written) XblUserProfile* profiles,
+    _Out_writes_to_(profilesCount, *written) XblUserProfile* profiles,
     _Out_opt_ uint32_t* written
     ) XBL_NOEXCEPT
 {

@@ -464,7 +464,10 @@ try
     context->xboxLiveContext = xboxLiveContext;
     context->xboxUserId = utils::uint64_to_internal_string(xboxUserId);
     context->titleId = titleId;
-    context->serviceConfigurationId = serviceConfigurationId;
+    if (serviceConfigurationId != nullptr)
+    {
+        context->serviceConfigurationId = serviceConfigurationId;
+    }
     context->achievementId = achievementId;
     context->percentComplete = percentComplete;
 

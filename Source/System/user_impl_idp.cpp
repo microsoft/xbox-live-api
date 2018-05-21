@@ -122,25 +122,25 @@ void user_impl_idp::sign_in_impl(
                         LOGS_DEBUG << property->Key->Data() << " : " << property->Value->Data();
                     }
 
-                    WebTokenRequestResult^ patnerTokenResult = request_token_from_idp(
+                    WebTokenRequestResult^ partnerTokenResult = request_token_from_idp(
                         xbox_live_context_settings::_s_dispatcher,
                         showUI,
                         msaRequest,
                         account);
 
-                    if (patnerTokenResult != nullptr && patnerTokenResult->ResponseStatus == WebTokenRequestStatus::ProviderError)
+                    if (partnerTokenResult != nullptr && partnerTokenResult->ResponseStatus == WebTokenRequestStatus::ProviderError)
                     {
-                        std::string providerErrorMsg = utility::conversions::to_utf8string(patnerTokenResult->ResponseError->ErrorMessage->Data());
+                        std::string providerErrorMsg = utility::conversions::to_utf8string(partnerTokenResult->ResponseError->ErrorMessage->Data());
                         std::stringstream msg;
-                        msg << " MSA Provider error: " << providerErrorMsg << ", Error Code: 0x" << std::hex << patnerTokenResult->ResponseError->ErrorCode;
+                        msg << " MSA Provider error: " << providerErrorMsg << ", Error Code: 0x" << std::hex << partnerTokenResult->ResponseError->ErrorCode;
 
-                        std::error_code error = xbox_live_error_code(patnerTokenResult->ResponseError->ErrorCode);
+                        std::error_code error = xbox_live_error_code(partnerTokenResult->ResponseError->ErrorCode);
                         callback(xbox_live_result<sign_in_result>(error, msg.str()));
                         return;
                     }
-                    else if (patnerTokenResult == nullptr || patnerTokenResult->ResponseStatus != WebTokenRequestStatus::Success) //other error 
+                    else if (partnerTokenResult == nullptr || partnerTokenResult->ResponseStatus != WebTokenRequestStatus::Success) //other error 
                     {
-                        callback(xbox_live_result<sign_in_result>(convert_web_token_request_status(patnerTokenResult)));
+                        callback(xbox_live_result<sign_in_result>(convert_web_token_request_status(partnerTokenResult)));
                         return;
                     }
                 }
@@ -466,10 +466,10 @@ user_impl_idp::internal_get_token_and_signature_helper(
 
 sign_in_result
 user_impl_idp::convert_web_token_request_status(
-    _In_ WebTokenRequestResult^ tokenResult
+    _In_opt_ WebTokenRequestResult^ tokenResult
     )
 {
-    if (tokenResult->ResponseStatus == WebTokenRequestStatus::UserCancel)
+    if (tokenResult != nullptr && tokenResult->ResponseStatus == WebTokenRequestStatus::UserCancel)
     {
         return sign_in_result(sign_in_status::user_cancel);
     }

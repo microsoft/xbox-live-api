@@ -212,7 +212,7 @@ private:
 
     static sign_in_result
     convert_web_token_request_status(
-        _In_ Windows::Security::Authentication::Web::Core::WebTokenRequestResult^ tokenResult
+        _In_opt_ Windows::Security::Authentication::Web::Core::WebTokenRequestResult^ tokenResult
         );
 
     static bool is_multi_user_application();

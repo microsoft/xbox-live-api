@@ -441,7 +441,7 @@ STDAPI XblSocialManagerCreateSocialUserGroupFromFilters(
     _In_ xbl_user_handle user,
     _In_ XblPresenceFilter presenceDetailLevel,
     _In_ XblRelationshipFilter filter,
-    _Outptr_ XblSocialManagerUserGroup** group
+    _Outptr_result_maybenull_ XblSocialManagerUserGroup** group
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -457,7 +457,7 @@ STDAPI XblSocialManagerCreateSocialUserGroupFromList(
     _In_ xbl_user_handle user,
     _In_ uint64_t* xboxUserIdList,
     _In_ uint32_t xboxUserIdListCount,
-    _Outptr_ XblSocialManagerUserGroup** group
+    _Outptr_result_maybenull_ XblSocialManagerUserGroup** group
     ) XBL_NOEXCEPT;
 
 /// <summary>
