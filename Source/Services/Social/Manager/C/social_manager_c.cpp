@@ -97,6 +97,7 @@ void populate_social_user_array(
     _Out_ XblSocialManagerUser* users
     )
 {
+    *users = {0};
     uint32_t i = 0;
     for (auto internalUser : internalXboxSocialUsers)
     {
@@ -113,7 +114,7 @@ void populate_social_user_array(
 
         // presence record
         users[i].presenceRecord.userState = static_cast<XblPresenceUserState>(internalUser->presence_record().user_state());
-        
+
         uint8_t j = 0;
         for (auto& internalTitleRecord : internalUser->presence_record().presence_title_records())
         {
@@ -136,7 +137,7 @@ void populate_social_user_array(
         utils::utf8_from_char_t(internalUser->preferred_color().primary_color(), users[i].preferredColor.primaryColor, sizeof(users[i].preferredColor.primaryColor));
         utils::utf8_from_char_t(internalUser->preferred_color().secondary_color(), users[i].preferredColor.secondaryColor, sizeof(users[i].preferredColor.secondaryColor));
         utils::utf8_from_char_t(internalUser->preferred_color().tertiary_color(), users[i].preferredColor.tertiaryColor, sizeof(users[i].preferredColor.tertiaryColor));
-
+    
         i++;
     }
 }
@@ -360,7 +361,7 @@ STDAPI XblSocialManagerCreateSocialUserGroupFromFilters(
     _In_ xbl_user_handle user,
     _In_ XblPresenceFilter presenceDetailLevel,
     _In_ XblRelationshipFilter filter,
-    _Outptr_ XblSocialManagerUserGroup** group
+    _Outptr_result_maybenull_ XblSocialManagerUserGroup** group
     ) XBL_NOEXCEPT
 try
 {
@@ -389,7 +390,7 @@ STDAPI XblSocialManagerCreateSocialUserGroupFromList(
     _In_ xbl_user_handle user,
     _In_ uint64_t* xboxUserIdList,
     _In_ uint32_t xboxUserIdListCount,
-    _Outptr_ XblSocialManagerUserGroup** group
+    _Outptr_result_maybenull_ XblSocialManagerUserGroup** group
     ) XBL_NOEXCEPT
 try
 {
@@ -407,6 +408,11 @@ try
     {
         *group = state->create_social_user_group(result.payload());
     }
+    else
+    {
+        *group = nullptr;
+    }
+
     return utils::convert_xbox_live_error_code_to_hresult(result.err());
 }
 CATCH_RETURN()

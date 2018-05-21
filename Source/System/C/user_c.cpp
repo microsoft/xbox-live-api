@@ -94,7 +94,9 @@ try
     {
         return E_NOT_SUFFICIENT_BUFFER;
     }
-    CopyMemory(gamertagBuffer, user->userImpl->gamertag().data(), requiredSize);
+
+    gamertagBuffer[0] = '\0';
+    CopyMemory(gamertagBuffer, user->userImpl->gamertag().c_str(), requiredSize);
     if (written != nullptr)
     {
         *written = requiredSize;
@@ -162,7 +164,8 @@ try
         return E_NOT_SUFFICIENT_BUFFER;
     }
 
-    CopyMemory(privileges, user->userImpl->privileges().data(), requiredSize);
+    privileges[0] = '\0';
+    CopyMemory(privileges, user->userImpl->privileges().c_str(), requiredSize);
     if (written != nullptr)
     {
         *written = requiredSize;

@@ -177,7 +177,11 @@ void xbox_live_services_settings::_Raise_logging_event(_In_ xbox_services_diagno
     }
 }
 
-void xbox_live_services_settings::_Raise_wns_event(_In_ const string_t& xbox_user_id, _In_ const string_t& notification_type, const string_t& content)
+void xbox_live_services_settings::_Raise_wns_event(
+    _In_ const string_t& xbox_user_id, 
+    _In_ const string_t& notification_type, 
+    _In_ const string_t& content
+)
 {
     std::lock_guard<std::mutex> lock(m_wnsEventLock);
 
