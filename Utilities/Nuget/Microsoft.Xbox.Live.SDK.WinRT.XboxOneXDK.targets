@@ -7,10 +7,10 @@
     <NugetConfiguration>Release</NugetConfiguration>
   </PropertyGroup>
   
-  <ItemGroup Label="Durango and (v110 or v140)" Condition="'$(Platform.ToLower())' == 'durango' And ( $(PlatformToolset.ToLower().IndexOf('v110')) &gt; -1 Or $(PlatformToolset.ToLower().IndexOf('v140')) &gt; -1 Or '$(PlatformToolset.ToLower())' == 'windowskernelmodedriver8.0' Or '$(PlatformToolset.ToLower())' == 'windowsapplicationfordrivers8.0' Or '$(PlatformToolset.ToLower())' == 'windowsusermodedriver8.0' ) ">
-    <CopyToOutput Include="$(MSBuildThisFileDirectory)references\Durango\v110\$(NugetConfiguration)\Microsoft.Xbox.Services.dll" />
-    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)references\Durango\v110\$(NugetConfiguration)\Microsoft.Xbox.Services.dll" />
-    <Reference Include="$(MSBuildThisFileDirectory)references\Durango\v110\$(NugetConfiguration)\Microsoft.Xbox.Services.winmd">
+  <ItemGroup Label="Durango and (v110 or v140)" Condition="'$(Platform.ToLower())' == 'durango' And ( $(PlatformToolset.ToLower().IndexOf('v110')) &gt; -1 Or $(PlatformToolset.ToLower().IndexOf('v140')) &gt; -1 Or $(PlatformToolset.ToLower().IndexOf('v141')) &gt; -1 Or '$(PlatformToolset.ToLower())' == 'windowskernelmodedriver8.0' Or '$(PlatformToolset.ToLower())' == 'windowsapplicationfordrivers8.0' Or '$(PlatformToolset.ToLower())' == 'windowsusermodedriver8.0' ) ">
+    <CopyToOutput Include="$(MSBuildThisFileDirectory)references\Durango\v141\$(NugetConfiguration)\Microsoft.Xbox.Services.dll" />
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)references\Durango\v141\$(NugetConfiguration)\Microsoft.Xbox.Services.dll" />
+    <Reference Include="$(MSBuildThisFileDirectory)references\Durango\v141\$(NugetConfiguration)\Microsoft.Xbox.Services.winmd">
       <IsWinMDFile>true</IsWinMDFile>
       <CopyLocal>true</CopyLocal>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>

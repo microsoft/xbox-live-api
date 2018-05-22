@@ -43,10 +43,10 @@ Jump to the guide that matches the platform and API type you are using:
   \External\cpprestsdk\Release\src\build\vs14.xbox\casablanca140.Xbox.vcxproj
 ```
 
-  - For Visual Studio 2012:
+  - For Visual Studio 2017:
 ```
-  \Build\Microsoft.Xbox.Services.110.XDK.Cpp\Microsoft.Xbox.Services.110.XDK.Cpp.vcxproj
-  \External\cpprestsdk\Release\src\build\vs11.xbox\casablanca110.Xbox.vcxproj
+  \Build\Microsoft.Xbox.Services.141.XDK.Cpp\Microsoft.Xbox.Services.141.XDK.Cpp.vcxproj
+  \External\cpprestsdk\Release\src\build\vs15.xbox\casablanca141.Xbox.vcxproj
 ```
 - Add the source projects as a reference by choosing Project->References... and select "Add Reference". Under "Solution->Projects", check the entries for both projects above then click OK.
 - Add the props file to your project by clicking "View->Other Windows->Property Manager", right clicking on your project, selecting "Add Existing Property Sheet", then finally selecting the xsapi.staticlib.props file in the SDK source root.
@@ -82,8 +82,8 @@ In Visual Studio 2015, right click on project and choose "Manage NuGet Packages.
 - In Visual Studio, choose "File->Add->Existing Project..." in Visual Studio to add the following two projects to your application's solution. The vcxproj files will be located in the folder you extracted the source to.
 
 ```
-\Build\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.110.XDK.WinRT.vcxproj
-\External\cpprestsdk\Release\src\build\vs11.xbox\casablanca110.Xbox.vcxproj
+\Build\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.141.XDK.WinRT.vcxproj
+\External\cpprestsdk\Release\src\build\vs15.xbox\casablanca141.Xbox.vcxproj
 ```
 
 - In Visual Studio add the references:
