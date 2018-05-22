@@ -436,7 +436,9 @@ title_storage_service::download_blob(
 
                     startByte += static_cast<uint32_t>(responseByteLength);
 
-                    if (!isBinaryData || responseByteLength < preferredDownloadBlockSize)
+                    if (!isBinaryData || 
+                        responseByteLength < preferredDownloadBlockSize || 
+                        startByte == resultBlobMetadata.length())
                     {
                         isDownloading = false;
                         resultBlobMetadata._Set_e_tag_and_length(
