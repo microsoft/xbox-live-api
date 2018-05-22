@@ -486,7 +486,7 @@ void http_call_impl::internal_get_response(
         }
     };
 
-    HCHttpCallPerform(asyncBlock, httpCallData->callHandle);
+    HCHttpCallPerformAsync(asyncBlock, httpCallData->callHandle);
 }
 
 string_t http_call_impl::server_name() const
