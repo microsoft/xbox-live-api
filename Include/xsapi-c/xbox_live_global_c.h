@@ -102,5 +102,6 @@ STDAPI XblGlobalInitialize() XBL_NOEXCEPT;
 /// <summary>
 /// Immediately reclaims all resources associated with the library.
 /// If you called XblMemSetFunctions(), call this before shutting down your app's memory manager.
+/// It is the responsibility of the game to wait for any outstanding Async calls to complete before calling XblGlobalCleanup.
 /// </summary>
 STDAPI_(void) XblGlobalCleanup() XBL_NOEXCEPT;

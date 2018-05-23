@@ -114,13 +114,13 @@ public:
 
     const xsapi_internal_string& value() const;
 
-    const achievement_reward_type& reward_type() const;
+    achievement_reward_type reward_type() const;
 
     const xsapi_internal_string& value_type() const;
 
     const achievement_media_asset& media_asset() const;
 
-    const std::shared_ptr<achievement_media_asset_internal>& media_asset_internal() const;
+    std::shared_ptr<achievement_media_asset_internal> media_asset_internal() const;
 
     static xbox_live_result<std::shared_ptr<achievement_reward_internal>> _Deserialize(_In_ const web::json::value& json);
 
@@ -173,11 +173,11 @@ public:
 
     const xsapi_internal_vector<std::shared_ptr<achievement_title_association_internal>>& title_associations() const;
 
-    const achievement_progress_state& progress_state() const;
+    achievement_progress_state progress_state() const;
 
     const achievement_progression& progression() const;
 
-    const std::shared_ptr<achievement_progression_internal>& progression_internal() const;
+    std::shared_ptr<achievement_progression_internal> progression_internal() const;
 
     const xsapi_internal_vector<std::shared_ptr<achievement_media_asset_internal>>& media_assets() const;
 
@@ -191,9 +191,9 @@ public:
 
     const xsapi_internal_string& product_id() const;
 
-    const achievement_type& type() const;
+    achievement_type type() const;
 
-    const achievement_participation_type& participation_type() const;
+    achievement_participation_type participation_type() const;
 
     const achievement_time_window& available() const;
 
@@ -250,8 +250,8 @@ public:
         _In_ achievement_order_by orderBy
     );
 
-    xsapi_internal_vector<std::shared_ptr<achievement_internal>> items() const;
-    
+    const xsapi_internal_vector<std::shared_ptr<achievement_internal>>& items() const;
+
     bool has_next() const;
 
     _XSAPIIMP  xbox_live_result<void> get_next(

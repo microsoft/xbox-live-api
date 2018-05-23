@@ -173,9 +173,9 @@ namespace Sample
 
         // Achievement Tests
         void GetAchievmentsForTitle();
-        void AchievementResultsGetNext(XblAchievementsResult* result);
-        void GetAchievement(PCSTR scid, PCSTR achievementId);
-        void UpdateAchievement(PCSTR scid, PCSTR achievementId);
+        void AchievementResultsGetNext(xbl_achievement_result_handle resultHandle);
+        void GetAchievement(std::string scid, std::string achievementId);
+        void UpdateAchievement(std::string scid, std::string achievementId);
 
         HANDLE m_hBackgroundThread;
     };
