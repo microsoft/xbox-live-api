@@ -36,6 +36,27 @@ public:
         );
 
     /// <summary>
+    /// Attempts to update achievement progress and unlock achievements.
+    /// This API will work even when offline. On PC and Xbox One, updates will be 
+    /// posted by the system when connection is re-established even if the title isn't running.
+    /// </summary>
+    /// <param name="xboxUserId">The Xbox User ID of the player.</param>
+    /// <param name="achievementId">The achievement ID as defined by XDP or Dev Center.</param>
+    /// <param name="percentComplete">The completion percentage of the achievement to indicate progress.
+    /// Valid values are from 1 to 100. Set to 100 to unlock the achievement.
+    /// Progress will be set by the server to the highest value sent</param>
+    /// <remarks>
+    /// Returns the HRESULT if an error occured.
+    ///
+    /// This method calls V2 POST /users/xuid({xuid})/achievements/{scid}/update
+    /// </remarks>
+    Windows::Foundation::IAsyncOperation<int32>^ TryUpdateAchievementAsync(
+        _In_ Platform::String^ xboxUserId,
+        _In_ Platform::String^ achievementId,
+        _In_ uint32 percentComplete
+        );
+
+    /// <summary>
     /// Allow achievement progress to be updated and achievements to be unlocked.
     /// This API will work even when offline. On PC and Xbox One, updates will be 
     /// posted by the system when connection is re-established even if the title isn't running.
@@ -53,6 +74,31 @@ public:
     /// This method calls V2 POST /users/xuid({xuid})/achievements/{scid}/update
     /// </remarks>
     Windows::Foundation::IAsyncAction^ UpdateAchievementAsync(
+        _In_ Platform::String^ xboxUserId,
+        _In_ uint32 titleId,
+        _In_ Platform::String^ serviceConfigurationId,
+        _In_ Platform::String^ achievementId,
+        _In_ uint32 percentComplete
+        );
+
+    /// <summary>
+    /// Attempts to update achievement progress and unlock achievements.
+    /// This API will work even when offline. On PC and Xbox One, updates will be 
+    /// posted by the system when connection is re-established even if the title isn't running.
+    /// </summary>
+    /// <param name="xboxUserId">The Xbox User ID of the player.</param>
+    /// <param name="titleId">The title ID.</param>
+    /// <param name="serviceConfigurationId">The service configuration ID (SCID) for the title.</param>
+    /// <param name="achievementId">The achievement ID as defined by XDP or Dev Center.</param>
+    /// <param name="percentComplete">The completion percentage of the achievement to indicate progress.
+    /// Valid values are from 1 to 100. Set to 100 to unlock the achievement.
+    /// Progress will be set by the server to the highest value sent</param>
+    /// <remarks>
+    /// Returns the HRESULT if an error occured.
+    ///
+    /// This method calls V2 POST /users/xuid({xuid})/achievements/{scid}/update
+    /// </remarks>
+    Windows::Foundation::IAsyncOperation<int32>^ TryUpdateAchievementAsync(
         _In_ Platform::String^ xboxUserId,
         _In_ uint32 titleId,
         _In_ Platform::String^ serviceConfigurationId,

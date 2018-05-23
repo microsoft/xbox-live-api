@@ -487,7 +487,9 @@ multiplayer_session_constants::_Set_measurement_server_addresses(
         web::json::value qosServerJson;
         qosServerJson[_T("secureDeviceAddress")] = web::json::value::string(address.secure_device_address_base64());
         auto targetLocationKey = address.target_location();
-        std::transform(targetLocationKey.begin(), targetLocationKey.end(), targetLocationKey.begin(), ::tolower);
+        std::transform(targetLocationKey.begin(), targetLocationKey.end(), targetLocationKey.begin(), [](utility::char_t c) {
+            return (utility::char_t)tolower(c);
+        });
         m_measurementServerAddressesJson[targetLocationKey] = qosServerJson;
     }
     
