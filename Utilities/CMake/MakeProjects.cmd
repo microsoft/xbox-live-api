@@ -22,6 +22,7 @@ copy %NEW_FOLDER%\Microsoft.Xbox.Services.140.UWP.WinRT.vcxproj* %OLD_FOLDER%\Mi
 copy %NEW_FOLDER%\Microsoft.Xbox.Services.140.XDK.Cpp.vcxproj* %OLD_FOLDER%\Microsoft.Xbox.Services.140.XDK.Cpp
 copy %NEW_FOLDER%\Microsoft.Xbox.Services.141.UWP.Cpp.vcxproj* %OLD_FOLDER%\Microsoft.Xbox.Services.141.UWP.Cpp
 copy %NEW_FOLDER%\Microsoft.Xbox.Services.141.XDK.Cpp.vcxproj* %OLD_FOLDER%\Microsoft.Xbox.Services.141.XDK.Cpp
+copy %NEW_FOLDER%\Microsoft.Xbox.Services.140.XDK.WinRT.vcxproj* %OLD_FOLDER%\Microsoft.Xbox.Services.140.XDK.WinRT
 copy %NEW_FOLDER%\Microsoft.Xbox.Services.141.XDK.WinRT.vcxproj* %OLD_FOLDER%\Microsoft.Xbox.Services.141.XDK.WinRT
 copy %NEW_FOLDER%\Microsoft.Xbox.Services.UnitTest.140.TAEF.vcxproj* %OLD_FOLDER%\Microsoft.Xbox.Services.UnitTest.140.TAEF
 copy %NEW_FOLDER%\Microsoft.Xbox.Services.UnitTest.140.TE.vcxproj* %OLD_FOLDER%\Microsoft.Xbox.Services.UnitTest.140.TE
