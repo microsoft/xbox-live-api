@@ -50,7 +50,7 @@ public:
     ///
     /// This method calls V2 POST /users/xuid({xuid})/achievements/{scid}/update
     /// </remarks>
-    Windows::Foundation::IAsyncOperation<HRESULT>^ TryUpdateAchievementAsync(
+    Windows::Foundation::IAsyncOperation<int32>^ TryUpdateAchievementAsync(
         _In_ Platform::String^ xboxUserId,
         _In_ Platform::String^ achievementId,
         _In_ uint32 percentComplete
@@ -98,7 +98,7 @@ public:
     ///
     /// This method calls V2 POST /users/xuid({xuid})/achievements/{scid}/update
     /// </remarks>
-    Windows::Foundation::IAsyncOperation<HRESULT>^ TryUpdateAchievementAsync(
+    Windows::Foundation::IAsyncOperation<int32>^ TryUpdateAchievementAsync(
         _In_ Platform::String^ xboxUserId,
         _In_ uint32 titleId,
         _In_ Platform::String^ serviceConfigurationId,

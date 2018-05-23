@@ -41,7 +41,7 @@ AchievementService::UpdateAchievementAsync(
     return ASYNC_FROM_TASK(task);
 }
 
-Windows::Foundation::IAsyncOperation<HRESULT>^
+Windows::Foundation::IAsyncOperation<int32>^
 AchievementService::TryUpdateAchievementAsync(
     _In_ Platform::String^ xboxUserId,
     _In_ Platform::String^ achievementId,
@@ -54,7 +54,7 @@ AchievementService::TryUpdateAchievementAsync(
         percentComplete)
     .then([](xbox_live_result<void> cppResult)
     {
-        return xbox::services::utils::convert_xbox_live_error_code_to_hresult(cppResult.err());
+        return (int32)xbox::services::utils::convert_xbox_live_error_code_to_hresult(cppResult.err());
     });
 
     return ASYNC_FROM_TASK(task);
@@ -83,7 +83,7 @@ AchievementService::UpdateAchievementAsync(
     return ASYNC_FROM_TASK(task);
 }
 
-Windows::Foundation::IAsyncOperation<HRESULT>^
+Windows::Foundation::IAsyncOperation<int32>^
 AchievementService::TryUpdateAchievementAsync(
     _In_ Platform::String^ xboxUserId,
     _In_ uint32 titleId,
@@ -100,7 +100,7 @@ AchievementService::TryUpdateAchievementAsync(
         percentComplete)
     .then([](xbox_live_result<void> cppResult)
     {
-        return xbox::services::utils::convert_xbox_live_error_code_to_hresult(cppResult.err());
+        return (int32)xbox::services::utils::convert_xbox_live_error_code_to_hresult(cppResult.err());
     });
 
     return ASYNC_FROM_TASK(task);
