@@ -410,7 +410,7 @@ STDAPI XblSocialManagerRemoveLocalUser(
 /// <param name="socialEvents">
 /// Pointer to the array of social events that have occurred since the last call to do_work. This array is
 /// only valid until the next call to XblSocialManagerDoWork. The internal array will automatically be cleaned
-/// up when XblGlobalCleanup is called.
+/// up when XblCleanup is called.
 /// </param>
 /// <param name="socialEventsCount">The number of events in the returned array.</param>
 STDAPI XblSocialManagerDoWork(

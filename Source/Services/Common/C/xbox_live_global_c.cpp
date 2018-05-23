@@ -55,7 +55,7 @@ XblMemGetFunctions(
 }
 
 STDAPI
-XblGlobalInitialize() XBL_NOEXCEPT
+XblInitialize() XBL_NOEXCEPT
 try
 {
     (void) get_xsapi_singleton();
@@ -64,7 +64,7 @@ try
 CATCH_RETURN()
 
 STDAPI_(void)
-XblGlobalCleanup() XBL_NOEXCEPT
+XblCleanup() XBL_NOEXCEPT
 try
 {
     HCGlobalCleanup();
