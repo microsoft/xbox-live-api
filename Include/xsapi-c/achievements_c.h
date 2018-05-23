@@ -145,7 +145,7 @@ typedef struct XblAchievementProgression
     /// <summary>
     /// The actions and conditions that are required to unlock the achievement.
     /// </summary>
-    XblAchievementRequirement** requirements;
+    XblAchievementRequirement* requirements;
 
     /// <summary>
     /// The size of <ref>requirements</ref>.
@@ -259,7 +259,7 @@ typedef struct XblAchievement
     /// <summary>
     /// The game/app titles associated with the achievement.
     /// </summary>
-    XblAchievementTitleAssociation** titleAssociations;
+    XblAchievementTitleAssociation* titleAssociations;
 
     /// <summary>
     /// The size of <ref>titleAssociations</ref>.
@@ -275,12 +275,12 @@ typedef struct XblAchievement
     /// The progression object containing progress details about the achievement,
     /// including requirements.
     /// </summary>
-    XblAchievementProgression* progression;
+    XblAchievementProgression progression;
 
     /// <summary>
     /// The media assets associated with the achievement, such as image IDs.
     /// </summary>
-    XblAchievementMediaAsset** mediaAssets;
+    XblAchievementMediaAsset* mediaAssets;
 
     /// <summary>
     /// The size of <ref>mediaAssets</ref>.
@@ -331,12 +331,12 @@ typedef struct XblAchievement
     /// <summary>
     /// The time window during which the achievement is available. Applies to Challenges.
     /// </summary>
-    XblAchievementTimeWindow* available;
+    XblAchievementTimeWindow available;
 
     /// <summary>
     /// The collection of rewards that the player earns when the achievement is unlocked.
     /// </summary>
-    XblAchievementReward** rewards;
+    XblAchievementReward* rewards;
 
     /// <summary>
     /// The size of <ref>rewards</ref>.
@@ -361,92 +361,106 @@ typedef struct XblAchievement
 } XblAchievement;
 
 /// <summary>
-/// Represents a collection of Achievement class objects returned by a request.
+/// A handle to an achievement result. This handle is used by other APIs to get the achievement objects
+/// and to get the next page of achievements from the service if there is is one. The handle must be closed
+/// using XblAchievementsResultCloseHandle when the result is no longer needed.
 /// </summary>
-typedef struct XblAchievementsResult
-{
-    /// <summary>
-    /// The collection of achievement objects returned by a request.
-    /// </summary>
-    XblAchievement** items;
+typedef struct xbl_achievement_result* xbl_achievement_result_handle;
 
-    /// <summary>
-    /// The size of <ref>items</ref>.
-    /// </summary>
-    uint32_t itemsCount;
+/// <summary>
+/// Returns an XblAchievementsResult object containing the first page of achievements
+/// for a player of the specified title.
+/// </summary>
+/// <param name="async">Caller allocated AsyncBlock.</param>
+/// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
+/// <param name="xboxUserId">The Xbox User ID of the player.</param>
+/// <param name="titleId">The title ID.</param>
+/// <param name="type">The achievement type to retrieve.</param>
+/// <param name="unlockedOnly">Indicates whether to return unlocked achievements only.</param>
+/// <param name="orderby">Controls how the list of achievements is ordered.</param>
+/// <param name="skipItems">The number of achievements to skip.</param>
+/// <param name="maxItems">The maximum number of achievements the result can contain.  Pass 0 to attempt
+/// to retrieve all items.</param>
+/// <remarks>
+/// See XblAchievementsResultGetNextAsync to page in the next set of results.
+///
+/// This method calls V2 GET /users/xuid({xuid})/achievements
+/// </remarks>
+STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
+    _In_ AsyncBlock* async,
+    _In_ xbl_context_handle xboxLiveContext,
+    _In_ uint64_t xboxUserId,
+    _In_ uint32_t titleId,
+    _In_ XblAchievementType type,
+    _In_ bool unlockedOnly,
+    _In_ XblAchievementOrderBy orderBy,
+    _In_ uint32_t skipItems,
+    _In_ uint32_t maxItems
+    ) XBL_NOEXCEPT;
 
-    /// <summary>
-    /// A boolean value that indicates if there are more pages of achievements to retrieve.
-    /// </summary>
-    bool hasNext;
+/// <summary>
+/// Get the result from an XblAchievementsGetAchievementsForTitleIdAsync call.
+/// <summary>
+/// <param name="async">The async block that was used on the asyncronous call.</param>
+/// <param name="resultHandle">Acheivement result handle.</param>
+STDAPI XblAchievementsGetAchievementsForTitleIdResult(
+    _In_ AsyncBlock* async,
+    _Out_ xbl_achievement_result_handle* result
+    ) XBL_NOEXCEPT;
 
-    /// <summary>
-    /// Internal use only
-    /// </summary>
-    uint64_t xboxUserId;
+/// <summary>
+/// Get the actual achievement objects from an xbl_achievement_result_handle.
+/// The returned achievements are owned by XSAPI and will be cleaned up when the the xbl_achievement_result_handle
+/// is closed.
+/// <summary>
+/// <param name="resultHandle">Acheivement result handle.</param>
+/// <param name="achievements">Pointer to an array of XblAchievement objects.</param>
+/// <param name="achievementsCount">The count of objects in the returned array.</param>
+STDAPI XblAchievementsResultGetAchievements(
+    _In_ xbl_achievement_result_handle resultHandle,
+    _Out_ XblAchievement** achievements,
+    _Out_ uint32_t* achievementsCount
+    ) XBL_NOEXCEPT;
 
-    /// <summary>
-    /// Internal use only
-    /// </summary>
-    uint32_t* titleIds;
-
-    /// <summary>
-    /// Internal use only
-    /// </summary>
-    uint32_t titleIdsCount;
-
-    /// <summary>
-    /// Internal use only
-    /// </summary>
-    XblAchievementType type;
-
-    /// <summary>
-    /// Internal use only
-    /// </summary>
-    bool unlockedOnly;
-
-    /// <summary>
-    /// Internal use only
-    /// </summary>
-    XblAchievementOrderBy orderBy;
-
-    /// <summary>
-    /// Internal use only
-    /// </summary>
-    UTF8CSTR continuationToken;
-} XblAchievementsResult;
+/// <summary>
+/// Checks if there are more pages of achiements to retrieve from the service.
+/// </summary>
+/// <param name="resultHandle">Acheivement result handle.</param>
+/// <param name="hasNext">Return value. True if there are more results to retrieve, false otherwise.</param>
+STDAPI XblAchievementsResultHasNext(
+    _In_ xbl_achievement_result_handle resultHandle,
+    _Out_ bool* hasNext
+    ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Returns a XblAchievementsResult object that contains the next page of achievements.
 /// </summary>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
-/// <param name="achievementsResult">The XblAchievementsResult to check.</param>
-/// <param name="maxItems">The maximum number of items that the result can contain.  Pass 0 to attempt
+/// <param name="resultHandle">Handle to the achievement result.</param>
+/// <param name="maxItems">The maximum number of items that the result can contain. Pass 0 to attempt
 /// to retrieve all items.</param>
 /// <remarks>
 /// This method calls V2 GET /users/xuid({xuid})/achievements.
 /// </remarks>
-STDAPI XblAchievementsResultGetNext(
+STDAPI XblAchievementsResultGetNextAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ XblAchievementsResult* achievementsResult,
+    _In_ xbl_achievement_result_handle resultHandle,
     _In_ uint32_t maxItems
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Get the result from an XblAchievementsResultGetNext call.
-/// The required buffer size should first be obtained from GetAsyncResultSize.
+/// Get the result from an XblAchievementsResultGetNextAsync call.
 /// <summary>
 /// <param name="async">The async block that was used on the asyncronous call.</param>
-/// <param name="resultSize">The size of the provided buffer.</param>
-/// <param name="result">The buffer to be written to.</param>
-/// <param name="bufferUser">The actual number of bytes written to the buffer.</param>
+/// <param name="resultHandle">
+/// Returns the next achievement result handle. Note that this is a seperate handle than the one passed to the
+/// XblAchievementsResultGetNextAsync API. Each result handle must be closed seperately.
+/// </param>
 STDAPI XblAchievementsResultGetNextResult(
     _In_ AsyncBlock* async,
-    _In_ size_t resultSize,
-    _Out_writes_bytes_to_opt_(resultSize, *bufferUsed) XblAchievementsResult* result,
-    _Out_opt_ size_t* bufferUsed
+    _Out_ xbl_achievement_result_handle* result
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -467,7 +481,7 @@ STDAPI XblAchievementsResultGetNextResult(
 /// <remarks>
 /// This method calls V2 POST /users/xuid({xuid})/achievements/{scid}/update
 /// </remarks>
-STDAPI XblAchievementsUpdateAchievement(
+STDAPI XblAchievementsUpdateAchievementAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
@@ -475,52 +489,6 @@ STDAPI XblAchievementsUpdateAchievement(
     _In_opt_ UTF8CSTR serviceConfigurationId,
     _In_ UTF8CSTR achievementId,
     _In_ uint32_t percentComplete
-    ) XBL_NOEXCEPT;
-
-/// <summary>
-/// Returns an XblAchievementsResult object containing the first page of achievements
-/// for a player of the specified title.
-/// </summary>
-/// <param name="async">Caller allocated AsyncBlock.</param>
-/// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
-/// <param name="xboxUserId">The Xbox User ID of the player.</param>
-/// <param name="titleId">The title ID.</param>
-/// <param name="type">The achievement type to retrieve.</param>
-/// <param name="unlockedOnly">Indicates whether to return unlocked achievements only.</param>
-/// <param name="orderby">Controls how the list of achievements is ordered.</param>
-/// <param name="skipItems">The number of achievements to skip.</param>
-/// <param name="maxItems">The maximum number of achievements the result can contain.  Pass 0 to attempt
-/// to retrieve all items.</param>
-/// <remarks>
-/// See XblAchievementsResultGetNext to page in the next set of results.
-///
-/// This method calls V2 GET /users/xuid({xuid})/achievements
-/// </remarks>
-STDAPI XblAchievementsGetAchievementsForTitleId(
-    _In_ AsyncBlock* async,
-    _In_ xbl_context_handle xboxLiveContext,
-    _In_ uint64_t xboxUserId,
-    _In_ uint32_t titleId,
-    _In_ XblAchievementType type,
-    _In_ bool unlockedOnly,
-    _In_ XblAchievementOrderBy orderBy,
-    _In_ uint32_t skipItems,
-    _In_ uint32_t maxItems
-    ) XBL_NOEXCEPT;
-
-/// <summary>
-/// Get the result from an XblAchievementsGetAchievementsForTitleId call.
-/// The required buffer size should first be obtained from GetAsyncResultSize.
-/// <summary>
-/// <param name="async">The async block that was used on the asyncronous call.</param>
-/// <param name="resultSize">The size of the provided buffer.</param>
-/// <param name="result">The buffer to be written to.</param>
-/// <param name="bufferUser">The actual number of bytes written to the buffer.</param>
-STDAPI XblAchievementsGetAchievementsForTitleIdResult(
-    _In_ AsyncBlock* async,
-    _In_ size_t resultSize,
-    _Out_writes_bytes_to_opt_(resultSize, *bufferUsed) XblAchievementsResult* result,
-    _Out_opt_ size_t* bufferUsed
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -535,7 +503,7 @@ STDAPI XblAchievementsGetAchievementsForTitleIdResult(
 /// <remarks>
 /// This method calls V2 GET /users/xuid({xuid})/achievements/{scid}/{achievementId}.
 /// </remarks>
-STDAPI XblAchievementsGetAchievement(
+STDAPI XblAchievementsGetAchievementAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
@@ -544,16 +512,33 @@ STDAPI XblAchievementsGetAchievement(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Get the result from an XblAchievementsGetAchievement call.
-/// The required buffer size should first be obtained from GetAsyncResultSize.
+/// Get the result handle from an XblAchievementsGetAchievementAsync call.
 /// <summary>
 /// <param name="async">The async block that was used on the asyncronous call.</param>
-/// <param name="resultSize">The size of the provided buffer.</param>
-/// <param name="result">The buffer to be written to.</param>
-/// <param name="bufferUser">The actual number of bytes written to the buffer.</param>
+/// <param name="resultHandle">
+/// The achievement result handle. This handle is used by other APIs to get the achievement objects
+/// and to get the next page of achievements from the service if there is is one. The handle must be closed
+/// using XblAchievementsResultCloseHandle when the result is no longer needed.
+/// </param>
 STDAPI XblAchievementsGetAchievementResult(
     _In_ AsyncBlock* async,
-    _In_ size_t resultSize,
-    _Out_writes_bytes_to_opt_(resultSize, *bufferUsed) XblAchievement* result,
-    _Out_opt_ size_t* bufferUsed
+    _Out_ xbl_achievement_result_handle* result
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Increments the reference count of an xbl_achievement_result_handle.
+/// </summary>
+/// <param name="handle">The xbl_achievement_result_handle to duplicate.</param>
+/// <returns>Returns the duplicated handle.</returns>
+STDAPI_(xbl_achievement_result_handle) XblAchievementsResultDuplicateHandle(
+    _In_ xbl_achievement_result_handle handle
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Decrement the reference count for an xbl_achievement_result_handle.
+/// When the reference count for reaches 0, the memory associated with the achievement result will be freed.
+/// </summary>
+/// <param name="handle">The xbl_achievement_result_handle to close.</param>
+STDAPI_(void) XblAchievementsResultCloseHandle(
+    _In_ xbl_achievement_result_handle handle
     ) XBL_NOEXCEPT;

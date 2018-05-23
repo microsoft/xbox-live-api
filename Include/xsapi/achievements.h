@@ -319,7 +319,7 @@ public:
     /// <summary>
     /// The reward type.
     /// </summary>
-    _XSAPIIMP const achievement_reward_type& reward_type() const;
+    _XSAPIIMP achievement_reward_type reward_type() const;
 
     /// <summary>
     /// The property type of the reward value string.

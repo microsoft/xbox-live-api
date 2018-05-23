@@ -25,7 +25,7 @@ void copy_profile(
     profile->xboxUserId = utils::internal_string_to_uint64(internal->xbox_user_id());
 }
 
-STDAPI XblProfileGetUserProfile(
+STDAPI XblProfileGetUserProfileAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId
@@ -86,7 +86,7 @@ try
 }
 CATCH_RETURN()
 
-STDAPI XblProfileGetUserProfiles(
+STDAPI XblProfileGetUserProfilesAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t* xboxUserIds,
@@ -153,7 +153,7 @@ try
 }
 CATCH_RETURN()
 
-STDAPI XblProfileGetUserProfilesForSocialGroup(
+STDAPI XblProfileGetUserProfilesForSocialGroupAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ UTF8CSTR socialGroup
@@ -247,8 +247,7 @@ STDAPI XblProfileGetUserProfileResult(
 STDAPI XblProfileGetUserProfilesResult(
     _In_ AsyncBlock* async,
     _In_ uint32_t profilesCount,
-    _Out_writes_to_(profilesCount, written) XblUserProfile* profiles,
-    _Out_opt_ uint32_t* written
+    _Out_writes_(profilesCount) XblUserProfile* profiles
     ) XBL_NOEXCEPT
 {
     RETURN_C_INVALIDARGUMENT_IF_NULL(async);
@@ -258,10 +257,6 @@ STDAPI XblProfileGetUserProfilesResult(
     RETURN_C_INVALIDARGUMENT_IF(actualProfilesCount > profilesCount);
 
     hr = GetAsyncResult(async, nullptr, profilesCount * sizeof(XblUserProfile), profiles, nullptr);
-    if (SUCCEEDED(hr) && written != nullptr)
-    {
-        *written = actualProfilesCount;
-    }
     return hr;
 }
 
@@ -276,9 +271,8 @@ STDAPI XblProfileGetUserProfilesForSocialGroupResultCount(
 STDAPI XblProfileGetUserProfilesForSocialGroupResult(
     _In_ AsyncBlock* async,
     _In_ uint32_t profilesCount,
-    _Out_writes_to_(profilesCount, written) XblUserProfile* profiles,
-    _Out_opt_ uint32_t* written
+    _Out_writes_(profilesCount) XblUserProfile* profiles
     ) XBL_NOEXCEPT
 {
-    return XblProfileGetUserProfilesResult(async, profilesCount, profiles, written);
+    return XblProfileGetUserProfilesResult(async, profilesCount, profiles);
 }

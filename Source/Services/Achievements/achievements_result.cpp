@@ -57,7 +57,7 @@ void achievements_result_internal::_Init_next_page_info(
     m_orderBy = orderBy;
 }
 
-xsapi_internal_vector<std::shared_ptr<achievement_internal>>
+const xsapi_internal_vector<std::shared_ptr<achievement_internal>>&
 achievements_result_internal::items() const
 {
     return m_items;

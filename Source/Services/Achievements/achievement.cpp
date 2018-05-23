@@ -184,19 +184,19 @@ achievement_internal::title_associations() const
     return m_titleAssociations;
 }
 
-const achievement_progress_state& 
+achievement_progress_state
 achievement_internal::progress_state() const
 {
     return m_progressState;
 }
 
-const achievement_progression& 
+const achievement_progression&
 achievement_internal::progression() const
 {
     return m_progression;
 }
 
-const std::shared_ptr<achievement_progression_internal>& 
+std::shared_ptr<achievement_progression_internal>
 achievement_internal::progression_internal() const
 {
     return m_progressionInternal;
@@ -238,13 +238,13 @@ achievement_internal::product_id() const
     return m_productId;
 }
 
-const achievement_type& 
+achievement_type
 achievement_internal::type() const
 {
     return m_achievementType;
 }
 
-const achievement_participation_type& 
+achievement_participation_type 
 achievement_internal::participation_type() const
 {
     return m_participationType;

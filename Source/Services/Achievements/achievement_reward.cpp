@@ -22,7 +22,7 @@ achievement_reward::achievement_reward(
 DEFINE_GET_STRING(achievement_reward, name);
 DEFINE_GET_STRING(achievement_reward, description);
 DEFINE_GET_STRING(achievement_reward, value);
-DEFINE_GET_OBJECT_REF(achievement_reward, achievement_reward_type, reward_type);
+DEFINE_GET_ENUM_TYPE(achievement_reward, achievement_reward_type, reward_type);
 DEFINE_GET_STRING(achievement_reward, value_type);
 DEFINE_GET_OBJECT_REF(achievement_reward, achievement_media_asset, media_asset);
 
@@ -62,7 +62,7 @@ achievement_reward_internal::value() const
     return m_value;
 }
 
-const achievement_reward_type&
+achievement_reward_type
 achievement_reward_internal::reward_type() const
 {
     return m_rewardType;
@@ -80,8 +80,8 @@ achievement_reward_internal::media_asset() const
     return m_mediaAsset;
 }
 
-const std::shared_ptr<achievement_media_asset_internal>&
-achievement_reward_internal::media_asset_internal () const
+std::shared_ptr<achievement_media_asset_internal>
+achievement_reward_internal::media_asset_internal() const
 {
     return m_mediaAssetInternal;
 }
