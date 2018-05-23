@@ -636,6 +636,8 @@ set(Social_Manager_Source_Files_C
 
 set(Achievements_Source_Files_C
     ../../Source/Services/Achievements/C/achievements.cpp
+    ../../Source/Services/Achievements/C/achievements_internal_c.h
+    ../../Source/Services/Achievements/C/achievements_internal_c.cpp
     )
 
 

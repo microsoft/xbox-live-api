@@ -1,0 +1,16 @@
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#include "achievements/achievements_internal.h"
+
+struct xbl_achievement_result
+{
+    xbl_achievement_result(std::shared_ptr<xbox::services::achievements::achievements_result_internal> _internalResult);
+    xbl_achievement_result(std::shared_ptr<xbox::services::achievements::achievement_internal> _internalAchievement);
+    virtual ~xbl_achievement_result();
+
+    xsapi_internal_vector<XblAchievement> items;
+    std::shared_ptr<xbox::services::achievements::achievements_result_internal> internalResult;
+    std::shared_ptr<xbox::services::achievements::achievement_internal> internalAchievement;
+    std::atomic<int> refCount;
+};

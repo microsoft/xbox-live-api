@@ -1124,7 +1124,7 @@ utils::convert_xbox_live_error_code_to_hresult(
     {
         return __HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND);
     }
-    else if (err >= 400 && err <= 505)
+    else if (err >= 300 && err <= 505)
     {
         return convert_http_status_to_hresult(err);
     }

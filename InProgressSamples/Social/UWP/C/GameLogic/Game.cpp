@@ -136,7 +136,7 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
     g_workReadyHandle.set(CreateEvent(nullptr, false, false, nullptr));
     g_completionReadyHandle.set(CreateEvent(nullptr, false, false, nullptr));
 
-    XblGlobalInitialize();
+    XblInitialize();
     uint32_t sharedAsyncQueueId = 0;
     CreateSharedAsyncQueue(
         sharedAsyncQueueId,
@@ -179,7 +179,7 @@ Game::~Game()
     RemoveAsyncQueueCallbackSubmitted(m_queue, m_callbackToken);
     CloseAsyncQueue(m_queue);
 
-    XblGlobalCleanup();
+    XblCleanup();
 }
 
 // Updates application state when the window size changes (e.g. device orientation change)
@@ -737,7 +737,7 @@ void Game::GetUserProfile()
 
         delete asyncBlock;
     };
-    XblProfileGetUserProfile(asyncBlock, m_xboxLiveContext, m_xuid);
+    XblProfileGetUserProfileAsync(asyncBlock, m_xboxLiveContext, m_xuid);
 }
 
 
@@ -777,27 +777,27 @@ void Game::GetSocialRelationships()
     {
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-        size_t size;
-        auto hr = GetAsyncResultSize(asyncBlock, &size);
+        xbl_social_relationship_result_handle resultHandle;
+        auto hr = XblSocialGetSocialRelationshipsResult(asyncBlock, &resultHandle);
 
         if (SUCCEEDED(hr))
         {
-            auto result = (XblSocialRelationshipResult*) malloc(size);
-
-            XblSocialGetSocialRelationshipsResult(asyncBlock, size, result, nullptr);
+            XblSocialRelationship* relationships;
+            uint32_t relationshipCount;
+            XblSocialRelationshipResultGetRelationships(resultHandle, &relationships, &relationshipCount);
 
             std::stringstream ss;
-            ss << "Got social relationships. User has " << result->itemsCount << " relationships:";
+            ss << "Got social relationships. User has " << relationshipCount << " relationships:";
             pThis->Log(ss.str());
 
-            for (unsigned i = 0; i < result->itemsCount; ++i)
+            for (unsigned i = 0; i < relationshipCount; ++i)
             {
                 std::stringstream ss;
-                ss << "Xuid: " << result->items[i].xboxUserId << " isFollowing: " << result->items[i].isFollowingCaller;
-                ss << " isFavorite: " << result->items[i].isFavorite;
+                ss << "Xuid: " << relationships[i].xboxUserId << " isFollowing: " << relationships[i].isFollowingCaller;
+                ss << " isFavorite: " << relationships[i].isFavorite;
                 pThis->Log(ss.str());
             }
-            free(result);
+            XblSocialRelationshipResultCloseHandle(resultHandle);
         }
         else
         {
@@ -805,7 +805,7 @@ void Game::GetSocialRelationships()
         }
     };
 
-    XblSocialGetSocialRelationships(asyncBlock, m_xboxLiveContext, m_xuid, XblSocialRelationshipFilter_All);
+    XblSocialGetSocialRelationshipsAsync(asyncBlock, m_xboxLiveContext, m_xuid, XblSocialRelationshipFilter_All);
 }
 
 void Game::GetAchievmentsForTitle()
@@ -819,17 +819,30 @@ void Game::GetAchievmentsForTitle()
     {
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-        size_t size = 0;
-        auto result = GetAsyncResultSize(asyncBlock, &size);
+        xbl_achievement_result_handle resultHandle;
+        auto hr = XblAchievementsGetAchievementsForTitleIdResult(asyncBlock, &resultHandle);
 
-        if (SUCCEEDED(result))
+        if (SUCCEEDED(hr))
         {
             pThis->Log(L"Successfully got achievements for this title!");
 
-            XblAchievementsResult* achievementsResult = (XblAchievementsResult*)malloc(size);
-            XblAchievementsGetAchievementsForTitleIdResult(asyncBlock, size, achievementsResult, nullptr);
+            XblAchievement* achievements;
+            uint32_t achievementsCount;
+            XblAchievementsResultGetAchievements(resultHandle, &achievements, &achievementsCount);
 
-            pThis->AchievementResultsGetNext(achievementsResult);
+            // Just get/update the first achievement as an example
+            pThis->GetAchievement(achievements[0].serviceConfigurationId, achievements[0].id);
+
+            bool hasNext = false;
+            XblAchievementsResultHasNext(resultHandle, &hasNext);
+            if (hasNext)
+            {
+                pThis->AchievementResultsGetNext(resultHandle);
+            }
+            else
+            {
+                XblAchievementsResultCloseHandle(resultHandle);
+            }
         }
         else
         {
@@ -840,7 +853,7 @@ void Game::GetAchievmentsForTitle()
         delete asyncBlock;
     };
 
-    XblAchievementsGetAchievementsForTitleId(
+    XblAchievementsGetAchievementsForTitleIdAsync(
         asyncBlock,
         m_xboxLiveContext,
         m_xuid,
@@ -852,51 +865,47 @@ void Game::GetAchievmentsForTitle()
         1);
 }
 
-void Game::AchievementResultsGetNext(XblAchievementsResult* result)
+void Game::AchievementResultsGetNext(xbl_achievement_result_handle resultHandle)
 {
-    if (result->hasNext)
+    struct context_t
     {
-        AsyncBlock* asyncBlock = new AsyncBlock{};
-        asyncBlock->queue = m_queue;
-        asyncBlock->context = this;
-        asyncBlock->callback = [](AsyncBlock* asyncBlock)
+        Game* pThis;
+        xbl_achievement_result_handle resultHandle;
+    };
+
+    AsyncBlock* asyncBlock = new AsyncBlock{};
+    asyncBlock->queue = m_queue;
+    asyncBlock->context = new context_t{ this, resultHandle };
+    asyncBlock->callback = [](AsyncBlock* asyncBlock)
+    {
+        auto context = reinterpret_cast<context_t*>(asyncBlock->context);
+        
+        xbl_achievement_result_handle nextResultHandle;
+        auto hr = XblAchievementsResultGetNextResult(asyncBlock, &nextResultHandle);
+
+        if (SUCCEEDED(hr))
         {
-            Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
+            context->pThis->Log(L"Successfully got next page of achievements!");
+            context->pThis->AchievementResultsGetNext(nextResultHandle);
+            XblAchievementsResultCloseHandle(context->resultHandle);
+        }
+        else
+        {
+            context->pThis->Log(L"Failed getting next page of achievements.");
+        }
 
-            size_t size = 0;
-            auto result = GetAsyncResultSize(asyncBlock, &size);
+        delete asyncBlock->context;
+        delete asyncBlock;
+    };
 
-            if (SUCCEEDED(result))
-            {
-                pThis->Log(L"Successfully got next page of achievements!");
-
-                XblAchievementsResult* achievementsResult = (XblAchievementsResult*)malloc(size);
-                XblAchievementsResultGetNextResult(asyncBlock, size, achievementsResult, nullptr);
-
-                pThis->AchievementResultsGetNext(achievementsResult);
-            }
-            else
-            {
-                pThis->Log(L"Failed getting next page of achievements.");
-                return;
-            }
-
-            delete asyncBlock;
-        };
-
-        XblAchievementsResultGetNext(
-            asyncBlock,
-            m_xboxLiveContext,
-            result,
-            1);
-    }
-    else if (result->itemsCount > 0)
-    {
-        GetAchievement(result->items[0]->serviceConfigurationId, result->items[0]->id);
-    }
+    XblAchievementsResultGetNextAsync(
+        asyncBlock,
+        m_xboxLiveContext,
+        resultHandle,
+        1);
 }
 
-void Game::GetAchievement(PCSTR scid, PCSTR achievementId)
+void Game::GetAchievement(std::string scid, std::string achievementId)
 {
     AsyncBlock* asyncBlock = new AsyncBlock{};
     asyncBlock->queue = m_queue;
@@ -904,21 +913,21 @@ void Game::GetAchievement(PCSTR scid, PCSTR achievementId)
     asyncBlock->callback = [](AsyncBlock* asyncBlock)
     {
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
-        
-        size_t size = 0;
-        auto result = GetAsyncResultSize(asyncBlock, &size);
 
-        if (SUCCEEDED(result))
+        xbl_achievement_result_handle resultHandle;
+        auto hr = XblAchievementsGetAchievementResult(asyncBlock, &resultHandle);
+
+        if (SUCCEEDED(hr))
         {
             pThis->Log(L"Successfully got achievement!");
 
-            XblAchievement* achievement = static_cast<XblAchievement*>(malloc(size));
-            if (achievement != nullptr)
-            {
-                XblAchievementsGetAchievementResult(asyncBlock, size, achievement, nullptr);
+            XblAchievement* achievements;
+            uint32_t achievementsCount;
+            XblAchievementsResultGetAchievements(resultHandle, &achievements, &achievementsCount);
+            assert(achievementsCount == 1);
+            pThis->UpdateAchievement(achievements[0].serviceConfigurationId, achievements[0].id);
 
-                pThis->UpdateAchievement(achievement->serviceConfigurationId, achievement->id);
-            }
+            XblAchievementsResultCloseHandle(resultHandle);
         }
         else
         {
@@ -929,16 +938,16 @@ void Game::GetAchievement(PCSTR scid, PCSTR achievementId)
         delete asyncBlock;
     };
 
-    XblAchievementsGetAchievement(
+    XblAchievementsGetAchievementAsync(
         asyncBlock,
         m_xboxLiveContext,
         m_xuid,
-        scid,
-        achievementId
+        scid.data(),
+        achievementId.data()
         );
 }
 
-void Game::UpdateAchievement(PCSTR scid, PCSTR achievementId)
+void Game::UpdateAchievement(std::string scid, std::string achievementId)
 {
     AsyncBlock* asyncBlock = new AsyncBlock{};
     asyncBlock->queue = m_queue;
@@ -965,13 +974,13 @@ void Game::UpdateAchievement(PCSTR scid, PCSTR achievementId)
     };
 
     auto tid = m_config->titleId;
-    XblAchievementsUpdateAchievement(
+    XblAchievementsUpdateAchievementAsync(
         asyncBlock,
         m_xboxLiveContext,
         m_xuid,
         &tid,
-        scid,
-        achievementId,
+        scid.data(),
+        achievementId.data(),
         10);
 }
 

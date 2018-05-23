@@ -200,39 +200,6 @@ typedef struct XblSocialRelationship
     uint32_t socialNetworksCount;
 } XblSocialRelationship;
 
-typedef struct XblSocialRelationshipResult
-{
-    /// <summary>
-    /// Collection of XboxSocialRelationship objects returned by a request.
-    /// </summary>
-    XblSocialRelationship* items;
-
-    /// <summary>
-    /// The count of XboxSocialRelationship objects in items array.
-    /// </summary>
-    uint32_t itemsCount;
-
-    /// <summary>
-    /// The total number of XboxSocialRelationship objects that can be requested.
-    /// </summary>
-    uint32_t totalCount;
-
-    /// <summary>
-    /// Returns a boolean value that indicates if there are more pages of social relationships to retrieve.
-    /// </summary>
-    bool hasNext;
-
-    /// <summary>
-    /// Internal
-    /// </summary>
-    XblSocialRelationshipFilter filter;
-
-    /// <summary>
-    /// Internal
-    /// </summary>
-    uint32_t continuationSkip;
-} XblSocialRelationshipResult;
-
 typedef struct XblSocialRelationshipChangeEventArgs
 {
     /// <summary>
@@ -257,6 +224,13 @@ typedef struct XblSocialRelationshipChangeEventArgs
 } XblSocialRelationshipChangeEventArgs;
 
 /// <summary>
+/// A handle to a social relationship result. This handle is used by other APIs to get the social relationship objects
+/// and to get the next page of results from the service if there is is one. The handle must be closed
+/// using XblSocialRelationshipResultCloseHandle when the result is no longer needed.
+/// </summary>
+typedef struct xbl_social_relationship_result* xbl_social_relationship_result_handle;
+
+/// <summary>
 /// Gets a XblSocialRelationshipResult containing a the list of people that the caller is connected to.
 /// </summary>
 /// <param name="async">Caller allocated AsyncBlock.</param>
@@ -264,7 +238,7 @@ typedef struct XblSocialRelationshipChangeEventArgs
 /// <param name="xboxUserId">The Xbox User Id to get the social relationships for.</param>
 /// <param name="socialRelationshipFilter">Controls how the list is filtered.</param>
 /// <remarks>Calls V1 GET /users/{ownerId}/people?view={view}&amp;startIndex={startIndex}&amp;maxItems={maxItems}</remarks>
-STDAPI XblSocialGetSocialRelationships(
+STDAPI XblSocialGetSocialRelationshipsAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
@@ -272,18 +246,37 @@ STDAPI XblSocialGetSocialRelationships(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Get the result from an XblSocialGetSocialRelationships API call.
-/// The required buffer size should first be obtained with GetAsyncResultSize.
+/// Get the result handle from an XblSocialGetSocialRelationshipsAsync API call.
 /// <summary>
 /// <param name="async">The async block that was used on the asyncronous call.</param>
-/// <param name="resultSize">The size of the provided buffer.</param>
-/// <param name="result">The buffer to be written to.</param>
-/// <param name="bufferUser">The actual number of bytes written to the buffer.</param>
+/// <param name="handle">Returns a aocial relationship result handle.</param>
 STDAPI XblSocialGetSocialRelationshipsResult(
     _In_ AsyncBlock* async,
-    _In_ size_t bufferSize,
-    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblSocialRelationshipResult* buffer,
-    _Out_opt_ size_t* bufferUsed
+    _Out_ xbl_social_relationship_result_handle* handle
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Get the actual social relationship objects from an xbl_social_relationship_result_handle.
+/// The returned XblSocialRelationship objects are owned by XSAPI and will be cleaned up when the the xbl_social_relationship_result_handle
+/// is closed.
+/// <summary>
+/// <param name="resultHandle">Social relationship result handle.</param>
+/// <param name="relationships">Pointer to returned array of XblSocialRelationship objects.</param>
+/// <param name="relationshipsCount">Returns the number of items in the relationships array.</param>
+STDAPI XblSocialRelationshipResultGetRelationships(
+    _In_ xbl_social_relationship_result_handle resultHandle,
+    _Out_ XblSocialRelationship** relationships,
+    _Out_ uint32_t* relationshipsCount
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Checks if there are more pages of social relationships to retrieve from the service.
+/// </summary>
+/// <param name="resultHandle">Social relationship result handle.</param>
+/// <param name="hasNext">Return value. True if there are more results to retrieve, false otherwise.</param>
+STDAPI XblSocialRelationshipResultHasNext(
+    _In_ xbl_social_relationship_result_handle resultHandle,
+    _Out_ bool* hasNext
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -291,30 +284,47 @@ STDAPI XblSocialGetSocialRelationshipsResult(
 /// </summary>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
-/// <param name="socialRelationshipResult">Result returned from a previous call to XblGetSocialRelations*.</param>
+/// <param name="resultHandle">Social relationship result handle.</param>
 /// <param name="maxItems">Controls the number of XblSocialRelationship objects to get. 0 will return as many as possible</param>
 /// <remarks>Calls V1 GET /users/{ownerId}/people</remarks>
-STDAPI XblSocialRelationshipResultGetNext(
+STDAPI XblSocialRelationshipResultGetNextAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ const XblSocialRelationshipResult* socialRelationshipResult,
+    _In_ xbl_social_relationship_result_handle resultHandle,
     _In_ uint32_t maxItems
     ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Get the result from an XblSocialRelationshipResultGetNextResult API call.
-/// The required buffer size should first be obtained with GetAsyncResultSize.
 /// <summary>
 /// <param name="async">The async block that was used on the asyncronous call.</param>
-/// <param name="resultSize">The size of the provided buffer.</param>
-/// <param name="result">The buffer to be written to.</param>
-/// <param name="bufferUser">The actual number of bytes written to the buffer.</param>
+/// <param name="handle">
+/// Returns a new social relationship result handle. Note that this a seperate handle than the one passed to
+/// XblSocialRelationshipResultGetNextAsync. Each handle must be closed seperately.
+/// </param>
 STDAPI XblSocialRelationshipResultGetNextResult(
     _In_ AsyncBlock* async,
-    _In_ size_t bufferSize,
-    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblSocialRelationshipResult* buffer,
-    _Out_opt_ size_t* bufferUsed
+    _Out_ xbl_social_relationship_result_handle* handle
     ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Increments the reference count of an xbl_social_relationship_result_handle.
+/// </summary>
+/// <param name="handle">The xbl_social_relationship_result_handle to duplicate.</param>
+/// <returns>Returns the duplicated handle.</returns>
+STDAPI_(xbl_social_relationship_result_handle) XblSocialRelationshipResultDuplicateHandle(
+    _In_ xbl_social_relationship_result_handle handle
+    ) XBL_NOEXCEPT;
+
+/// <summary>
+/// Decrement the reference count for an xbl_social_relationship_result_handle.
+/// When the reference count for reaches 0, the memory associated with the social relationship result will be freed.
+/// </summary>
+/// <param name="handle">The xbl_social_relationship_result_handle to close.</param>
+STDAPI_(void) XblSocialRelationshipResultCloseHandle(
+    _In_ xbl_social_relationship_result_handle handle
+    ) XBL_NOEXCEPT;
+
 
 typedef void* xbl_social_relationship_change_subscription_handle;
 
@@ -414,7 +424,7 @@ typedef struct XblReputationFeedbackItem
 /// <param name="reasonMessage">User supplied text added to explain the reason for the feedback. (Optional)</param>
 /// <param name="evidenceResourceId">The Id of a resource that can be used as evidence for the feedback. Example: the Id of a video file. (Optional)</param>
 /// <remarks>Calls V100 POST /users/xuid({xuid})/feedback</remarks>
-STDAPI XblSocialSubmitReputationFeedback(
+STDAPI XblSocialSubmitReputationFeedbackAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
@@ -434,7 +444,7 @@ STDAPI XblSocialSubmitReputationFeedback(
 /// <param name="feedbackItemsCount">The count of items in the feedbackItems array.</param>
 /// <returns>Result code for this API operation. The result of the asynchronous operation is returned via the callback parameters.</returns>
 /// <remarks>Calls V101 POST /users/batchfeedback</remarks>
-STDAPI XblSocialSubmitBatchReputationFeedback(
+STDAPI XblSocialSubmitBatchReputationFeedbackAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ XblReputationFeedbackItem* feedbackItems,

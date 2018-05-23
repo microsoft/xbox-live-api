@@ -319,7 +319,7 @@ public:
     /// <summary>
     /// The reward type.
     /// </summary>
-    _XSAPIIMP const achievement_reward_type& reward_type() const;
+    _XSAPIIMP achievement_reward_type reward_type() const;
 
     /// <summary>
     /// The property type of the reward value string.
@@ -378,7 +378,7 @@ public:
     /// <summary>
     /// The state of a user's progress towards the earning of the achievement.
     /// </summary>
-    _XSAPIIMP const achievement_progress_state& progress_state() const;
+    _XSAPIIMP achievement_progress_state progress_state() const;
 
     /// <summary>
     /// The progression object containing progress details about the achievement,
@@ -420,12 +420,12 @@ public:
     /// <summary>
     /// The type of achievement, such as a challenge achievement.
     /// </summary>
-    _XSAPIIMP const achievement_type& type() const;
+    _XSAPIIMP achievement_type type() const;
 
     /// <summary>
     /// The participation type for the achievement, such as group or individual.
     /// </summary>
-    _XSAPIIMP const achievement_participation_type& participation_type() const;
+    _XSAPIIMP achievement_participation_type participation_type() const;
 
     /// <summary>
     /// The time window during which the achievement is available. Applies to Challenges.

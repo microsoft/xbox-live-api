@@ -94,13 +94,14 @@ STDAPI XblMemGetFunctions(
 /// <summary>
 /// Initializes the library instance.
 /// This must be called before any other method, except for XblMemSetFunctions() and XblMemGetFunctions()
-/// Should have a corresponding call to XblGlobalCleanup().
+/// Should have a corresponding call to XblCleanup().
 /// </summary>
 /// <returns>Result code for this API operation.</returns>
-STDAPI XblGlobalInitialize() XBL_NOEXCEPT;
+STDAPI XblInitialize() XBL_NOEXCEPT;
 
 /// <summary>
 /// Immediately reclaims all resources associated with the library.
 /// If you called XblMemSetFunctions(), call this before shutting down your app's memory manager.
+/// It is the responsibility of the game to wait for any outstanding Async calls to complete before calling XblCleanup.
 /// </summary>
-STDAPI_(void) XblGlobalCleanup() XBL_NOEXCEPT;
+STDAPI_(void) XblCleanup() XBL_NOEXCEPT;

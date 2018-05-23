@@ -92,7 +92,7 @@ DEFINE_GET_STRING(achievement, id);
 DEFINE_GET_STRING(achievement, service_configuration_id);
 DEFINE_GET_STRING(achievement, name);
 DEFINE_GET_VECTOR_INTERNAL_TYPE(achievement, achievement_title_association, title_associations);
-DEFINE_GET_OBJECT_REF(achievement, achievement_progress_state, progress_state);
+DEFINE_GET_ENUM_TYPE(achievement, achievement_progress_state, progress_state);
 DEFINE_GET_OBJECT_REF(achievement, achievement_progression, progression);
 DEFINE_GET_VECTOR_INTERNAL_TYPE(achievement, achievement_media_asset, media_assets);
 DEFINE_GET_STRING_VECTOR(achievement, platforms_available_on);
@@ -100,8 +100,8 @@ DEFINE_GET_BOOL(achievement, is_secret);
 DEFINE_GET_STRING(achievement, unlocked_description);
 DEFINE_GET_STRING(achievement, locked_description);
 DEFINE_GET_STRING(achievement, product_id);
-DEFINE_GET_OBJECT_REF(achievement, achievement_type, type);
-DEFINE_GET_OBJECT_REF(achievement, achievement_participation_type, participation_type);
+DEFINE_GET_ENUM_TYPE(achievement, achievement_type, type);
+DEFINE_GET_ENUM_TYPE(achievement, achievement_participation_type, participation_type);
 DEFINE_GET_OBJECT_REF(achievement, achievement_time_window, available);
 DEFINE_GET_VECTOR_INTERNAL_TYPE(achievement, achievement_reward, rewards);
 DEFINE_GET_OBJECT_REF(achievement, std::chrono::seconds, estimated_unlock_time);
@@ -184,19 +184,19 @@ achievement_internal::title_associations() const
     return m_titleAssociations;
 }
 
-const achievement_progress_state& 
+achievement_progress_state
 achievement_internal::progress_state() const
 {
     return m_progressState;
 }
 
-const achievement_progression& 
+const achievement_progression&
 achievement_internal::progression() const
 {
     return m_progression;
 }
 
-const std::shared_ptr<achievement_progression_internal>& 
+std::shared_ptr<achievement_progression_internal>
 achievement_internal::progression_internal() const
 {
     return m_progressionInternal;
@@ -238,13 +238,13 @@ achievement_internal::product_id() const
     return m_productId;
 }
 
-const achievement_type& 
+achievement_type
 achievement_internal::type() const
 {
     return m_achievementType;
 }
 
-const achievement_participation_type& 
+achievement_participation_type 
 achievement_internal::participation_type() const
 {
     return m_participationType;

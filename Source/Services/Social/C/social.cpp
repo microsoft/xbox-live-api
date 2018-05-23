@@ -15,60 +15,42 @@ using namespace xbox::services;
 using namespace xbox::services::system;
 using namespace xbox::services::social;
 
-size_t calculate_social_relationship_result_size(
-    std::shared_ptr<xbox_social_relationship_result_internal> internalResult
-    )
+struct xbl_social_relationship_result
 {
-    size_t requiredSize = sizeof(XblSocialRelationshipResult);
-
-    for (const auto& relationship : internalResult->items())
+    xbl_social_relationship_result(std::shared_ptr<xbox_social_relationship_result_internal> _internalResult)
+        : internalResult(std::move(_internalResult)),
+        refCount(1)
     {
-        requiredSize += sizeof(XblSocialRelationship);
-        for (const auto& socialNetwork : relationship->social_networks())
+        auto& internalItems = internalResult->items();
+        items = xsapi_internal_vector<XblSocialRelationship>(internalItems.size());
+
+        for (uint32_t i = 0; i < items.size(); ++i)
         {
-            requiredSize += sizeof(UTF8CSTR);
-            requiredSize += (socialNetwork.length() + 1);
+            items[i].xboxUserId = utils::internal_string_to_uint64(internalItems[i]->xbox_user_id());
+            items[i].isFavorite = internalItems[i]->is_favorite();
+            items[i].isFollowingCaller = internalItems[i]->is_following_caller();
+            items[i].socialNetworksCount = static_cast<uint32_t>(internalItems[i]->social_networks().size());
+
+            items[i].socialNetworks = (UTF8CSTR*)xsapi_memory::mem_alloc(sizeof(UTF8CSTR) * items[i].socialNetworksCount);
+            for (uint32_t j = 0; j < items[i].socialNetworksCount; ++j)
+            {
+                items[i].socialNetworks[j] = internalItems[i]->social_networks()[j].data();
+            }
         }
     }
-    return requiredSize;
-}
 
-void copy_social_relationship_result(
-    _In_ std::shared_ptr<xbox_social_relationship_result_internal> internal,
-    _In_ size_t bufferSize,
-    _Out_ XblSocialRelationshipResult* buffer
-    )
-{
-    buffer_allocator allocator(buffer, bufferSize);
-
-    auto result = allocator.alloc<XblSocialRelationshipResult>();
-    result->itemsCount = (uint32_t)internal->items().size();
-    result->totalCount = internal->total_count();
-    result->hasNext = internal->has_next();
-    result->filter = static_cast<XblSocialRelationshipFilter>(internal->filter());
-    result->continuationSkip = internal->continuation_skip();
-    result->items = allocator.alloc_array<XblSocialRelationship>((uint32_t)internal->items().size());
-
-    // populate the relationships
-    uint32_t i = 0;
-    for (const auto& relationship : internal->items())
+    virtual ~xbl_social_relationship_result()
     {
-        result->items[i].isFavorite = relationship->is_favorite();
-        result->items[i].isFollowingCaller = relationship->is_following_caller();
-        result->items[i].socialNetworksCount = (uint32_t)relationship->social_networks().size();
-        result->items[i].xboxUserId = utils::internal_string_to_uint64(relationship->xbox_user_id());
-        result->items[i].socialNetworks = allocator.alloc_array<UTF8CSTR>(result->items[i].socialNetworksCount);
-
-        for (uint32_t j = 0; j < result->items[i].socialNetworksCount; ++j)
+        for (auto& item : items)
         {
-            auto& socialNetwork = relationship->social_networks()[j];
-            auto length = socialNetwork.length() + 1;
-            result->items[i].socialNetworks[j] = (UTF8CSTR)allocator.alloc(length);
-            memcpy((void*)result->items[i].socialNetworks[j], socialNetwork.data(), length);
+            xsapi_memory::mem_free(item.socialNetworks);
         }
-        i++;
     }
-}
+
+    xsapi_internal_vector<XblSocialRelationship> items;
+    std::shared_ptr<xbox_social_relationship_result_internal> internalResult;
+    std::atomic<int> refCount;
+};
 
 STDAPI XblGetSocialRelationshipsHelper(
     _In_ AsyncBlock* async,
@@ -88,7 +70,7 @@ STDAPI XblGetSocialRelationshipsHelper(
         XblSocialRelationshipFilter filter;
         uint32_t startIndex;
         uint32_t maxItems;
-        std::shared_ptr<xbox_social_relationship_result_internal> result;
+        xbl_social_relationship_result_handle resultHandle;
     };
 
     auto context = new (xsapi_memory::mem_alloc(sizeof(Context))) Context
@@ -116,14 +98,17 @@ STDAPI XblGetSocialRelationshipsHelper(
                 data->async->queue,
                 [data, context](xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>> result)
             {
-                context->result = result.payload();
                 auto hr = utils::convert_xbox_live_error_code_to_hresult(result.err());
-                CompleteAsync(data->async, hr, calculate_social_relationship_result_size(context->result));
+                if (SUCCEEDED(hr))
+                {
+                    context->resultHandle = new (xsapi_memory::mem_alloc(sizeof(xbl_social_relationship_result))) xbl_social_relationship_result(result.payload());
+                }
+                CompleteAsync(data->async, hr, sizeof(xbl_social_relationship_result_handle));
             });
             return E_PENDING;
 
         case AsyncOp_GetResult:
-            copy_social_relationship_result(context->result, data->bufferSize, static_cast<XblSocialRelationshipResult*>(data->buffer));
+            memcpy(data->buffer, &context->resultHandle, sizeof(xbl_social_relationship_result_handle));
             break;
 
         case AsyncOp_Cleanup:
@@ -141,7 +126,7 @@ STDAPI XblGetSocialRelationshipsHelper(
     return ScheduleAsync(async, 0);
 }
 
-STDAPI XblSocialGetSocialRelationships(
+STDAPI XblSocialGetSocialRelationshipsAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
@@ -160,42 +145,102 @@ try
 }
 CATCH_RETURN()
 
+STDAPI XblSocialRelationshipResultGetRelationships(
+    _In_ xbl_social_relationship_result_handle resultHandle,
+    _Out_ XblSocialRelationship** relationships,
+    _Out_ uint32_t* relationshipsCount
+    ) XBL_NOEXCEPT
+try
+{
+    RETURN_C_INVALIDARGUMENT_IF(resultHandle == nullptr || relationships == nullptr || relationshipsCount == nullptr);
+    verify_global_init();
+
+    *relationshipsCount = static_cast<uint32_t>(resultHandle->items.size());
+    *relationships = resultHandle->items.data();
+    return S_OK;
+}
+CATCH_RETURN()
+
+STDAPI XblSocialRelationshipResultHasNext(
+    _In_ xbl_social_relationship_result_handle resultHandle,
+    _Out_ bool* hasNext
+    ) XBL_NOEXCEPT
+try
+{
+    RETURN_C_INVALIDARGUMENT_IF(resultHandle == nullptr || hasNext == nullptr);
+    verify_global_init();
+    return resultHandle->internalResult->has_next();
+}
+CATCH_RETURN()
+
 STDAPI XblSocialRelationshipResultGetNext(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ CONST XblSocialRelationshipResult *socialRelationshipResult,
+    _In_ xbl_social_relationship_result_handle resultHandle,
     _In_ uint32_t maxItems
     ) XBL_NOEXCEPT
+try
 {
     return XblGetSocialRelationshipsHelper(
         async,
         xboxLiveContext,
         xboxLiveContext->xboxUserId,
-        socialRelationshipResult->filter,
-        socialRelationshipResult->continuationSkip,
+        static_cast<XblSocialRelationshipFilter>(resultHandle->internalResult->filter()),
+        resultHandle->internalResult->continuation_skip(),
         maxItems
         );
 }
+CATCH_RETURN()
 
 STDAPI XblSocialGetSocialRelationshipsResult(
     _In_ AsyncBlock* async,
-    _In_ size_t bufferSize,
-    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblSocialRelationshipResult* buffer,
-    _Out_opt_ size_t* bufferUsed
+    _Out_ xbl_social_relationship_result_handle* handle
     ) XBL_NOEXCEPT
+try
 {
-    return GetAsyncResult(async, nullptr, bufferSize, buffer, bufferUsed);
+    return GetAsyncResult(async, nullptr, sizeof(xbl_social_relationship_result_handle), handle, nullptr);
 }
+CATCH_RETURN()
 
 STDAPI XblSocialRelationshipResultGetNextResult(
     _In_ AsyncBlock* async,
-    _In_ size_t bufferSize,
-    _Out_writes_bytes_to_opt_(bufferSize, *bufferUsed) XblSocialRelationshipResult* buffer,
-    _Out_opt_ size_t* bufferUsed
+    _Out_ xbl_social_relationship_result_handle* handle
     ) XBL_NOEXCEPT
+try
 {
-    return GetAsyncResult(async, nullptr, bufferSize, buffer, bufferUsed);
+    return GetAsyncResult(async, nullptr, sizeof(xbl_social_relationship_result_handle), handle, nullptr);
 }
+CATCH_RETURN()
+
+STDAPI_(xbl_social_relationship_result_handle) XblSocialRelationshipResultDuplicateHandle(
+    _In_ xbl_social_relationship_result_handle handle
+    ) XBL_NOEXCEPT
+try
+{
+    if (handle == nullptr)
+    {
+        return nullptr;
+    }
+
+    handle->refCount++;
+    return handle;
+}
+CATCH_RETURN_WITH(nullptr)
+
+STDAPI_(void) XblSocialRelationshipResultCloseHandle(
+    _In_ xbl_social_relationship_result_handle handle
+    ) XBL_NOEXCEPT
+try
+{
+    int refCount = --handle->refCount;
+    if (refCount <= 0)
+    {
+        assert(refCount == 0);
+        handle->~xbl_social_relationship_result();
+        xsapi_memory::mem_free(handle);
+    }
+}
+CATCH_RETURN_WITH(;)
 
 STDAPI XblSocialSubscribeToSocialRelationshipChange(
     _In_ xbl_context_handle xboxLiveContext,

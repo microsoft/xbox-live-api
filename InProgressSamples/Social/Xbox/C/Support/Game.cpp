@@ -150,7 +150,7 @@ Game::Game() :
     g_workReadyHandle.set(CreateEvent(nullptr, false, false, nullptr));
     g_completionReadyHandle.set(CreateEvent(nullptr, false, false, nullptr));
 
-    XblGlobalInitialize();
+    XblInitialize();
     uint32_t sharedAsyncQueueId = 0;
     CreateSharedAsyncQueue(
         sharedAsyncQueueId,
