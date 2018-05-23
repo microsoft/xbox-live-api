@@ -108,7 +108,6 @@ STDAPI XblGetSocialRelationshipsHelper(
             return E_PENDING;
 
         case AsyncOp_GetResult:
-            XSAPI_ASSERT(data->bufferSize == sizeof(xbl_social_relationship_result_handle));
             memcpy(data->buffer, &context->resultHandle, sizeof(xbl_social_relationship_result_handle));
             break;
 
