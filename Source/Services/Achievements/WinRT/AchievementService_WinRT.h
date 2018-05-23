@@ -36,7 +36,7 @@ public:
         );
 
     /// <summary>
-    /// Allow achievement progress to be updated and achievements to be unlocked.
+    /// Attempts to update achievement progress and unlock achievements.
     /// This API will work even when offline. On PC and Xbox One, updates will be 
     /// posted by the system when connection is re-established even if the title isn't running.
     /// </summary>
