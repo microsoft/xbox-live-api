@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#pragma once
+
 #include "achievements/achievements_internal.h"
 
 struct xbl_achievement_result
