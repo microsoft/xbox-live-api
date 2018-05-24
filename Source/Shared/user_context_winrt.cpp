@@ -101,6 +101,15 @@ void get_auth_result(
                     context->byteArray
                 );
             }
+            else
+            {
+                asyncOp = context->user->GetTokenAndSignatureAsync(
+                    context->httpMethod,
+                    context->url,
+                    context->headers,
+                    ""
+                );
+            }
 
             XSAPI_ASSERT(asyncOp != nullptr);
             asyncOp->Completed = ref new AsyncOperationCompletedHandler<GetTokenAndSignatureResult^>(

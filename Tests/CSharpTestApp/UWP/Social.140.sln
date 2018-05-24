@@ -12,6 +12,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpprestsdk140.uwp", "..\..\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Social.140", "Social.140.csproj", "{E77C4EA5-1810-4120-A348-93BB4A7B2B24}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libHttpClient.140.UWP.C", "..\..\..\External\libHttpClient\Build\libHttpClient.140.UWP.C\libHttpClient.140.UWP.C.vcxproj", "{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\..\..\External\cpprestsdk\Release\src\build\common.vcxitems*{8ee38792-ffd4-4897-bb32-308a4ddcf0c5}*SharedItemsImports = 4
@@ -72,6 +74,18 @@ Global
 		{E77C4EA5-1810-4120-A348-93BB4A7B2B24}.Release|x86.ActiveCfg = Release|x86
 		{E77C4EA5-1810-4120-A348-93BB4A7B2B24}.Release|x86.Build.0 = Release|x86
 		{E77C4EA5-1810-4120-A348-93BB4A7B2B24}.Release|x86.Deploy.0 = Release|x86
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|ARM.ActiveCfg = Debug|ARM
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|ARM.Build.0 = Debug|ARM
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|x64.ActiveCfg = Debug|x64
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|x64.Build.0 = Debug|x64
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|x86.ActiveCfg = Debug|Win32
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|x86.Build.0 = Debug|Win32
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|ARM.ActiveCfg = Release|ARM
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|ARM.Build.0 = Release|ARM
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|x64.ActiveCfg = Release|x64
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|x64.Build.0 = Release|x64
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|x86.ActiveCfg = Release|Win32
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
