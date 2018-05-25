@@ -67,7 +67,7 @@ STDAPI_(void)
 XblCleanup() XBL_NOEXCEPT
 try
 {
-    HCGlobalCleanup();
+    HCCleanup();
 }
 CATCH_RETURN_WITH(;)
 
