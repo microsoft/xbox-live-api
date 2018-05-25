@@ -36,7 +36,7 @@ try
         XblAchievementOrderBy orderBy;
         uint32_t skipItems;
         uint32_t maxItems;
-        xbl_achievement_result_handle resultHandle;
+        xbl_achievements_result_handle resultHandle;
     };
     auto context = new (xsapi_memory::mem_alloc(sizeof(Context))) Context{};
     context->xboxLiveContext = xboxLiveContext;
@@ -70,14 +70,14 @@ try
                 auto hr = utils::convert_xbox_live_error_code_to_hresult(result.err());
                 if (SUCCEEDED(hr))
                 {
-                    context->resultHandle = new (xsapi_memory::mem_alloc(sizeof(xbl_achievement_result))) xbl_achievement_result(result.payload());
+                    context->resultHandle = new (xsapi_memory::mem_alloc(sizeof(xbl_achievements_result))) xbl_achievements_result(result.payload());
                 }
-                CompleteAsync(data->async, hr, sizeof(xbl_achievement_result_handle));
+                CompleteAsync(data->async, hr, sizeof(xbl_achievements_result_handle));
             });
             return E_PENDING;
 
         case AsyncOp_GetResult:
-            memcpy(data->buffer, &context->resultHandle, sizeof(xbl_achievement_result_handle));
+            memcpy(data->buffer, &context->resultHandle, sizeof(xbl_achievements_result_handle));
             break;
 
         case AsyncOp_Cleanup:
@@ -98,16 +98,16 @@ CATCH_RETURN()
 
 STDAPI XblAchievementsGetAchievementsForTitleIdResult(
     _In_ AsyncBlock* async,
-    _Out_ xbl_achievement_result_handle* result
+    _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT
 try
 {
-    return GetAsyncResult(async, nullptr, sizeof(xbl_achievement_result_handle), result, nullptr);
+    return GetAsyncResult(async, nullptr, sizeof(xbl_achievements_result_handle), result, nullptr);
 }
 CATCH_RETURN()
 
 STDAPI XblAchievementsResultGetAchievements(
-    _In_ xbl_achievement_result_handle resultHandle,
+    _In_ xbl_achievements_result_handle resultHandle,
     _Out_ XblAchievement** achievements,
     _Out_ uint32_t* achievementsCount
     ) XBL_NOEXCEPT
@@ -123,7 +123,7 @@ try
 CATCH_RETURN()
 
 STDAPI XblAchievementsResultHasNext(
-    _In_ xbl_achievement_result_handle resultHandle,
+    _In_ xbl_achievements_result_handle resultHandle,
     _Out_ bool* hasNext
     ) XBL_NOEXCEPT
 try
@@ -138,7 +138,7 @@ STDAPI
 XblAchievementsResultGetNextAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ xbl_achievement_result_handle resultHandle,
+    _In_ xbl_achievements_result_handle resultHandle,
     _In_ uint32_t maxItems
     ) XBL_NOEXCEPT
 try
@@ -147,10 +147,10 @@ try
 
     struct Context
     {
-        xbl_achievement_result_handle inputResultHandle;
+        xbl_achievements_result_handle inputResultHandle;
         xbl_context_handle xboxLiveContext;
         uint32_t maxItems;
-        xbl_achievement_result_handle outputResultHandle;
+        xbl_achievements_result_handle outputResultHandle;
     };
     auto context = new (xsapi_memory::mem_alloc(sizeof(Context))) Context{};
     context->xboxLiveContext = xboxLiveContext;
@@ -171,14 +171,14 @@ try
                 auto hr = utils::convert_xbox_live_error_code_to_hresult(result.err());
                 if (SUCCEEDED(hr))
                 {
-                    context->outputResultHandle = new (xsapi_memory::mem_alloc(sizeof(xbl_achievement_result))) xbl_achievement_result(result.payload());
+                    context->outputResultHandle = new (xsapi_memory::mem_alloc(sizeof(xbl_achievements_result))) xbl_achievements_result(result.payload());
                 }
-                CompleteAsync(data->async, hr, sizeof(xbl_achievement_result_handle));
+                CompleteAsync(data->async, hr, sizeof(xbl_achievements_result_handle));
             });
             return E_PENDING;
 
         case AsyncOp_GetResult:
-            memcpy(data->buffer, &context->outputResultHandle, sizeof(xbl_achievement_result_handle));
+            memcpy(data->buffer, &context->outputResultHandle, sizeof(xbl_achievements_result_handle));
             break;
 
         case AsyncOp_Cleanup:
@@ -199,10 +199,10 @@ CATCH_RETURN()
 
 STDAPI XblAchievementsResultGetNextResult(
     _In_ AsyncBlock* async,
-    _Out_ xbl_achievement_result_handle* result
+    _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT
 {
-    return GetAsyncResult(async, nullptr, sizeof(xbl_achievement_result_handle), result, nullptr);
+    return GetAsyncResult(async, nullptr, sizeof(xbl_achievements_result_handle), result, nullptr);
 }
 
 STDAPI XblAchievementsUpdateAchievementAsync(
@@ -308,7 +308,7 @@ try
         xsapi_internal_string xboxUserId;
         xsapi_internal_string serviceConfigurationId;
         xsapi_internal_string achievementId;
-        xbl_achievement_result_handle resultHandle;
+        xbl_achievements_result_handle resultHandle;
     };
     auto context = new (xsapi_memory::mem_alloc(sizeof(Context))) Context{};
     context->xboxLiveContext = xboxLiveContext;
@@ -334,15 +334,15 @@ try
                 auto hr = utils::convert_xbox_live_error_code_to_hresult(result.err());
                 if (SUCCEEDED(hr))
                 {
-                    context->resultHandle = new (xsapi_memory::mem_alloc(sizeof(xbl_achievement_result))) xbl_achievement_result(result.payload());
+                    context->resultHandle = new (xsapi_memory::mem_alloc(sizeof(xbl_achievements_result))) xbl_achievements_result(result.payload());
                 }
-                CompleteAsync(data->async, hr, sizeof(xbl_achievement_result_handle));
+                CompleteAsync(data->async, hr, sizeof(xbl_achievements_result_handle));
             });
             return E_PENDING;
 
         case AsyncOp_GetResult:
-            XSAPI_ASSERT(data->bufferSize == sizeof(xbl_achievement_result_handle));
-            memcpy(data->buffer, &context->resultHandle, sizeof(xbl_achievement_result_handle));
+            XSAPI_ASSERT(data->bufferSize == sizeof(xbl_achievements_result_handle));
+            memcpy(data->buffer, &context->resultHandle, sizeof(xbl_achievements_result_handle));
             break;
 
         case AsyncOp_Cleanup:
@@ -363,16 +363,16 @@ CATCH_RETURN()
 
 STDAPI XblAchievementsGetAchievementResult(
     _In_ AsyncBlock* async,
-    _Out_ xbl_achievement_result_handle* result
+    _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT
 try
 {
-    return GetAsyncResult(async, nullptr, sizeof(xbl_achievement_result_handle), result, nullptr);
+    return GetAsyncResult(async, nullptr, sizeof(xbl_achievements_result_handle), result, nullptr);
 }
 CATCH_RETURN()
 
-STDAPI_(xbl_achievement_result_handle) XblAchievementsResultDuplicateHandle(
-    _In_ xbl_achievement_result_handle handle
+STDAPI_(xbl_achievements_result_handle) XblAchievementsResultDuplicateHandle(
+    _In_ xbl_achievements_result_handle handle
     ) XBL_NOEXCEPT
 try
 {
@@ -387,7 +387,7 @@ try
 CATCH_RETURN_WITH(nullptr)
 
 STDAPI_(void) XblAchievementsResultCloseHandle(
-    _In_ xbl_achievement_result_handle handle
+    _In_ xbl_achievements_result_handle handle
     ) XBL_NOEXCEPT
 try
 {
@@ -395,7 +395,7 @@ try
     if (refCount <= 0)
     {
         assert(refCount == 0);
-        handle->~xbl_achievement_result();
+        handle->~xbl_achievements_result();
         xsapi_memory::mem_free(handle);
     }
 }

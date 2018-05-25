@@ -96,7 +96,7 @@ void create_xbl_achievement(
     lhs.isRevoked = rhs->is_revoked();
 }
 
-xbl_achievement_result::xbl_achievement_result(std::shared_ptr<achievements_result_internal> _internalResult)
+xbl_achievements_result::xbl_achievements_result(std::shared_ptr<achievements_result_internal> _internalResult)
     : internalResult(std::move(_internalResult)),
     internalAchievement(nullptr),
     refCount(1)
@@ -110,7 +110,7 @@ xbl_achievement_result::xbl_achievement_result(std::shared_ptr<achievements_resu
     }
 }
 
-xbl_achievement_result::xbl_achievement_result(std::shared_ptr<achievement_internal> _internalAchievement)
+xbl_achievements_result::xbl_achievements_result(std::shared_ptr<achievement_internal> _internalAchievement)
     : internalResult(nullptr),
     internalAchievement(std::move(_internalAchievement)),
     refCount(1)
@@ -119,7 +119,7 @@ xbl_achievement_result::xbl_achievement_result(std::shared_ptr<achievement_inter
     create_xbl_achievement(internalAchievement, items[0]);
 }
 
-xbl_achievement_result::~xbl_achievement_result()
+xbl_achievements_result::~xbl_achievements_result()
 {
     for (auto& item : items)
     {

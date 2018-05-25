@@ -365,7 +365,7 @@ typedef struct XblAchievement
 /// and to get the next page of achievements from the service if there is is one. The handle must be closed
 /// using XblAchievementsResultCloseHandle when the result is no longer needed.
 /// </summary>
-typedef struct xbl_achievement_result* xbl_achievement_result_handle;
+typedef struct xbl_achievements_result* xbl_achievements_result_handle;
 
 /// <summary>
 /// Returns an XblAchievementsResult object containing the first page of achievements
@@ -405,19 +405,19 @@ STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
 /// <param name="resultHandle">Acheivement result handle.</param>
 STDAPI XblAchievementsGetAchievementsForTitleIdResult(
     _In_ AsyncBlock* async,
-    _Out_ xbl_achievement_result_handle* result
+    _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Get the actual achievement objects from an xbl_achievement_result_handle.
-/// The returned achievements are owned by XSAPI and will be cleaned up when the the xbl_achievement_result_handle
+/// Get the actual achievement objects from an xbl_achievements_result_handle.
+/// The returned achievements are owned by XSAPI and will be cleaned up when the the xbl_achievements_result_handle
 /// is closed.
 /// <summary>
 /// <param name="resultHandle">Acheivement result handle.</param>
 /// <param name="achievements">Pointer to an array of XblAchievement objects.</param>
 /// <param name="achievementsCount">The count of objects in the returned array.</param>
 STDAPI XblAchievementsResultGetAchievements(
-    _In_ xbl_achievement_result_handle resultHandle,
+    _In_ xbl_achievements_result_handle resultHandle,
     _Out_ XblAchievement** achievements,
     _Out_ uint32_t* achievementsCount
     ) XBL_NOEXCEPT;
@@ -428,7 +428,7 @@ STDAPI XblAchievementsResultGetAchievements(
 /// <param name="resultHandle">Acheivement result handle.</param>
 /// <param name="hasNext">Return value. True if there are more results to retrieve, false otherwise.</param>
 STDAPI XblAchievementsResultHasNext(
-    _In_ xbl_achievement_result_handle resultHandle,
+    _In_ xbl_achievements_result_handle resultHandle,
     _Out_ bool* hasNext
     ) XBL_NOEXCEPT;
 
@@ -446,7 +446,7 @@ STDAPI XblAchievementsResultHasNext(
 STDAPI XblAchievementsResultGetNextAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ xbl_achievement_result_handle resultHandle,
+    _In_ xbl_achievements_result_handle resultHandle,
     _In_ uint32_t maxItems
     ) XBL_NOEXCEPT;
 
@@ -460,7 +460,7 @@ STDAPI XblAchievementsResultGetNextAsync(
 /// </param>
 STDAPI XblAchievementsResultGetNextResult(
     _In_ AsyncBlock* async,
-    _Out_ xbl_achievement_result_handle* result
+    _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -522,23 +522,23 @@ STDAPI XblAchievementsGetAchievementAsync(
 /// </param>
 STDAPI XblAchievementsGetAchievementResult(
     _In_ AsyncBlock* async,
-    _Out_ xbl_achievement_result_handle* result
+    _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Increments the reference count of an xbl_achievement_result_handle.
+/// Increments the reference count of an xbl_achievements_result_handle.
 /// </summary>
-/// <param name="handle">The xbl_achievement_result_handle to duplicate.</param>
+/// <param name="handle">The xbl_achievements_result_handle to duplicate.</param>
 /// <returns>Returns the duplicated handle.</returns>
-STDAPI_(xbl_achievement_result_handle) XblAchievementsResultDuplicateHandle(
-    _In_ xbl_achievement_result_handle handle
+STDAPI_(xbl_achievements_result_handle) XblAchievementsResultDuplicateHandle(
+    _In_ xbl_achievements_result_handle handle
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Decrement the reference count for an xbl_achievement_result_handle.
+/// Decrement the reference count for an xbl_achievements_result_handle.
 /// When the reference count for reaches 0, the memory associated with the achievement result will be freed.
 /// </summary>
-/// <param name="handle">The xbl_achievement_result_handle to close.</param>
+/// <param name="handle">The xbl_achievements_result_handle to close.</param>
 STDAPI_(void) XblAchievementsResultCloseHandle(
-    _In_ xbl_achievement_result_handle handle
+    _In_ xbl_achievements_result_handle handle
     ) XBL_NOEXCEPT;

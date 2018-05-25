@@ -5,11 +5,11 @@
 
 #include "achievements/achievements_internal.h"
 
-struct xbl_achievement_result
+struct xbl_achievements_result
 {
-    xbl_achievement_result(std::shared_ptr<xbox::services::achievements::achievements_result_internal> _internalResult);
-    xbl_achievement_result(std::shared_ptr<xbox::services::achievements::achievement_internal> _internalAchievement);
-    virtual ~xbl_achievement_result();
+    xbl_achievements_result(std::shared_ptr<xbox::services::achievements::achievements_result_internal> _internalResult);
+    xbl_achievements_result(std::shared_ptr<xbox::services::achievements::achievement_internal> _internalAchievement);
+    virtual ~xbl_achievements_result();
 
     xsapi_internal_vector<XblAchievement> items;
     std::shared_ptr<xbox::services::achievements::achievements_result_internal> internalResult;
