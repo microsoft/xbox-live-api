@@ -819,7 +819,7 @@ void Game::GetAchievmentsForTitle()
     {
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-        xbl_achievement_result_handle resultHandle;
+        xbl_achievements_result_handle resultHandle;
         auto hr = XblAchievementsGetAchievementsForTitleIdResult(asyncBlock, &resultHandle);
 
         if (SUCCEEDED(hr))
@@ -865,12 +865,12 @@ void Game::GetAchievmentsForTitle()
         1);
 }
 
-void Game::AchievementResultsGetNext(xbl_achievement_result_handle resultHandle)
+void Game::AchievementResultsGetNext(xbl_achievements_result_handle resultHandle)
 {
     struct context_t
     {
         Game* pThis;
-        xbl_achievement_result_handle resultHandle;
+        xbl_achievements_result_handle resultHandle;
     };
 
     AsyncBlock* asyncBlock = new AsyncBlock{};
@@ -880,7 +880,7 @@ void Game::AchievementResultsGetNext(xbl_achievement_result_handle resultHandle)
     {
         auto context = reinterpret_cast<context_t*>(asyncBlock->context);
         
-        xbl_achievement_result_handle nextResultHandle;
+        xbl_achievements_result_handle nextResultHandle;
         auto hr = XblAchievementsResultGetNextResult(asyncBlock, &nextResultHandle);
 
         if (SUCCEEDED(hr))
@@ -914,7 +914,7 @@ void Game::GetAchievement(std::string scid, std::string achievementId)
     {
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-        xbl_achievement_result_handle resultHandle;
+        xbl_achievements_result_handle resultHandle;
         auto hr = XblAchievementsGetAchievementResult(asyncBlock, &resultHandle);
 
         if (SUCCEEDED(hr))
