@@ -104,7 +104,7 @@ void xsapi_singleton::init()
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    HCGlobalInitialize();
+    HCInitialize(nullptr);
     m_initiator = std::make_shared<initiator>();
 
     CreateAsyncQueue(AsyncQueueDispatchMode_ThreadPool, AsyncQueueDispatchMode_ThreadPool, &m_asyncQueue);
@@ -123,7 +123,7 @@ xsapi_singleton::~xsapi_singleton()
         m_callbackContextPtrs.clear();
     }
 
-    HCGlobalCleanup();
+    HCCleanup();
 
     CloseAsyncQueue(m_asyncQueue);
 }
