@@ -301,7 +301,7 @@ void StockMocks::AddHttpMockResponse(
     )
 {
     // TODO move
-    HCGlobalInitialize();
+    HCInitialize();
 
     hc_mock_call_handle mockCall;
 
