@@ -173,7 +173,7 @@ namespace Sample
 
         // Achievement Tests
         void GetAchievmentsForTitle();
-        void AchievementResultsGetNext(xbl_achievement_result_handle resultHandle);
+        void AchievementResultsGetNext(xbl_achievements_result_handle resultHandle);
         void GetAchievement(std::string scid, std::string achievementId);
         void UpdateAchievement(std::string scid, std::string achievementId);
 
