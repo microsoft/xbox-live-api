@@ -115,14 +115,6 @@ xsapi_singleton::~xsapi_singleton()
     std::lock_guard<std::mutex> guard(s_xsapiSingletonLock);
     s_xsapiSingleton = nullptr;
 
-    if (m_callbackContextPtrs.size() > 0)
-    {
-#if _DEBUG && UNIT_TEST_SERVICES
-        assert(false && "Context remaining in context store!");
-#endif
-        m_callbackContextPtrs.clear();
-    }
-
     HCCleanup();
 
     CloseAsyncQueue(m_asyncQueue);

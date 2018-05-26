@@ -239,7 +239,7 @@ void user_impl_idp::initialize_provider(
     async->context = utils::store_shared_ptr(xsapi_allocate_shared<xbox_live_callback<void>>(callback));
     async->callback = [](AsyncBlock* async)
     {
-        auto callbackPtr = utils::remove_shared_ptr<xbox_live_callback<void>>(async->context);
+        auto callbackPtr = utils::get_shared_ptr<xbox_live_callback<void>>(async->context);
         (*callbackPtr)();
         xsapi_memory::mem_free(async);
     };
@@ -249,9 +249,7 @@ void user_impl_idp::initialize_provider(
     {
         if (op == AsyncOp_DoWork)
         {
-            auto thisWeakPtr = utils::remove_weak_ptr<user_impl_idp>(data->context);
-            auto thisPtr = thisWeakPtr.lock();
-
+            auto thisPtr = utils::get_shared_ptr<user_impl_idp>(data->context);
             if (thisPtr == nullptr || thisPtr->m_provider != nullptr)
             {
                 CompleteAsync(data->async, S_OK, 0);
@@ -354,7 +352,7 @@ void user_impl_idp::internal_get_token_and_signature(
     internalAsyncBlock->queue = queue;
     internalAsyncBlock->callback = [](_In_ struct AsyncBlock* asyncBlock)
     {
-        auto context = utils::remove_shared_ptr<get_token_and_signature_context>(asyncBlock->context, true);
+        auto context = utils::get_shared_ptr<get_token_and_signature_context>(asyncBlock->context, true);
         context->callback(context->result);
         xsapi_memory::mem_free(asyncBlock);
     };
@@ -368,7 +366,7 @@ void user_impl_idp::internal_get_token_and_signature(
         switch (op)
         {
         case AsyncOp_DoWork:
-            context = utils::remove_shared_ptr<get_token_and_signature_context>(data->context, false);
+            context = utils::get_shared_ptr<get_token_and_signature_context>(data->context, false);
             pThis = std::dynamic_pointer_cast<user_impl_idp>(context->userImpl);
 
             context->result = pThis->internal_get_token_and_signature_helper(

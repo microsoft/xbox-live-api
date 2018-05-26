@@ -68,7 +68,7 @@ void get_auth_result(
     async->context = utils::store_shared_ptr(context);
     async->callback = [](AsyncBlock* async)
     {
-        auto context = utils::remove_shared_ptr<auth_context>(async->context);
+        auto context = utils::get_shared_ptr<auth_context>(async->context);
         context->callback(context->result);
         xsapi_memory::mem_free(async);
     };
@@ -82,7 +82,7 @@ void get_auth_result(
         switch (op)
         {
         case AsyncOp_DoWork:
-            context = utils::remove_shared_ptr<auth_context>(data->context, false);
+            context = utils::get_shared_ptr<auth_context>(data->context, false);
             if (context->requestBodyString != nullptr)
             {
                 asyncOp = context->user->GetTokenAndSignatureAsync(

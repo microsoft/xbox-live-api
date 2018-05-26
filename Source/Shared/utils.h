@@ -440,10 +440,6 @@ struct xsapi_singleton
     xsapi_internal_unordered_map<function_context, xbox_live_callback<xbox::services::xbox_service_call_routed_event_args>> m_serviceCallRoutedHandlers;
     function_context m_serviceCallRoutedHandlersCounter;
 
-    std::mutex m_callbackContextsLock;
-    xsapi_internal_unordered_map<void *, std::shared_ptr<void>> m_callbackContextPtrs;
-    xsapi_internal_unordered_map<void *, std::weak_ptr<void>> m_weakCallbackContextPtrs;
-
     async_queue_handle_t m_asyncQueue;
 };
 
@@ -1477,87 +1473,74 @@ public:
         uint32_t* intArray,
         size_t intArrayCount
         );
-    
+
+private:
+    template<typename T>
+    struct smart_ptr_container
+    {
+        virtual ~smart_ptr_container() {}
+        virtual std::shared_ptr<T> get_shared() const = 0;
+    };
+
+    template<typename T>
+    struct shared_ptr_container : public smart_ptr_container<T>
+    {
+        shared_ptr_container(std::shared_ptr<T> sharedPtr) : m_sharedPtr(std::move(sharedPtr)) {}
+
+        std::shared_ptr<T> get_shared() const override
+        {
+            return m_sharedPtr;
+        }
+    private:
+        std::shared_ptr<T> m_sharedPtr;
+    };
+
+    template<typename T>
+    struct weak_ptr_container : smart_ptr_container<T>
+    {
+        weak_ptr_container(std::weak_ptr<T> weakPtr) : m_weakPtr(std::move(weakPtr)) {}
+
+        std::shared_ptr<T> get_shared() const override
+        {
+            return m_weakPtr.lock();
+        }
+    private:
+        std::weak_ptr<T> m_weakPtr;
+    };
+
+public:
+
+    // Returns a handle that can be used to later retrieve the stored shared_ptr.
+    // Used when an asynchronous flat-C API requires a shared_ptr as its context.
     template<typename T>
     static void* store_shared_ptr(std::shared_ptr<T> contextSharedPtr)
     {
-        auto singleton = get_xsapi_singleton();
-        std::lock_guard<std::mutex> lock(singleton->m_callbackContextsLock);
-        void *rawVoidPtr = contextSharedPtr.get();
-        std::shared_ptr<void> voidSharedPtr(contextSharedPtr, rawVoidPtr);
-        singleton->m_callbackContextPtrs.insert(std::make_pair(rawVoidPtr, voidSharedPtr));
-        return rawVoidPtr;
+        auto buffer = xbox::services::system::xsapi_memory::mem_alloc(sizeof(shared_ptr_container<T>));
+        return new (buffer) shared_ptr_container<T>(contextSharedPtr);
     }
 
+    // Returns a handle that can be used to later retrieve the stored weak_ptr (as a shared_ptr, so
+    // it will be null if the object has since been cleaned up).
     template<typename T>
     static void* store_weak_ptr(std::weak_ptr<T> contextWeakPtr)
     {
-        auto singleton = get_xsapi_singleton();
-        std::lock_guard<std::mutex> lock(singleton->m_callbackContextsLock);
-
-        void* rawVoidPtr = nullptr;
-        auto sharedPtr = contextWeakPtr.lock();
-        if (sharedPtr)
-        {
-            rawVoidPtr = sharedPtr.get();
-            std::weak_ptr<void> voidWeakPtr = std::shared_ptr<void>(sharedPtr, rawVoidPtr);
-            singleton->m_weakCallbackContextPtrs.insert(std::make_pair(rawVoidPtr, voidWeakPtr));
-        }
-        return rawVoidPtr;
+        auto buffer = xbox::services::system::xsapi_memory::mem_alloc(sizeof(weak_ptr_container<T>));
+        return new (buffer) weak_ptr_container<T>(contextWeakPtr);
     }
 
+    // Retrieves a shared previouly stored with store_shared_ptr or store_weak_ptr. If releaseContext is true
+    // the copy of the smart pointer stored internally is deleted.
     template<typename T>
-    static std::shared_ptr<T> remove_shared_ptr(void *rawContextPtr, bool deleteShared = true)
+    static std::shared_ptr<T> get_shared_ptr(void* context, bool releaseContext = true)
     {
-        auto singleton = get_xsapi_singleton();
-        std::lock_guard<std::mutex> lock(singleton->m_callbackContextsLock);
-
-        auto iter = singleton->m_callbackContextPtrs.find(rawContextPtr);
-        if (iter != singleton->m_callbackContextPtrs.end())
+        auto smartPtrContainer = reinterpret_cast<smart_ptr_container<T>*>(context);
+        auto sharedPtr = smartPtrContainer->get_shared();
+        if (releaseContext)
         {
-            auto returnPtr = std::shared_ptr<T>(iter->second, reinterpret_cast<T*>(iter->second.get()));
-            if (deleteShared)
-            {
-                singleton->m_callbackContextPtrs.erase(iter);
-            }
-            return returnPtr;
+            smartPtrContainer->~smart_ptr_container();
+            xbox::services::system::xsapi_memory::mem_free(context);
         }
-        else
-        {
-            XSAPI_ASSERT(false && "Shared pointer not found!");
-            return std::shared_ptr<T>();
-        }
-    }
-
-    template<typename T>
-    static std::weak_ptr<T> remove_weak_ptr(void *rawContextPtr, bool deleteWeak = true)
-    {
-        auto singleton = get_xsapi_singleton();
-        std::lock_guard<std::mutex> lock(singleton->m_callbackContextsLock);
-
-        auto iter = singleton->m_weakCallbackContextPtrs.find(rawContextPtr);
-        if (iter != singleton->m_weakCallbackContextPtrs.end())
-        {
-            auto sharedPtr = iter->second.lock();
-            if (sharedPtr)
-            {
-                auto returnPtr = std::shared_ptr<T>(sharedPtr, reinterpret_cast<T*>(sharedPtr.get()));
-                if (deleteWeak)
-                {
-                    singleton->m_weakCallbackContextPtrs.erase(iter);
-                }
-                return returnPtr;
-            }
-            else
-            {
-                return std::weak_ptr<T>();
-            }
-        }
-        else
-        {
-            // don't assert here since we never insert the pointer if it is already expired
-            return std::weak_ptr<T>();
-        }
+        return sharedPtr;
     }
 
     static time_t time_t_from_datetime(const utility::datetime& datetime);

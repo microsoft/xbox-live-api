@@ -118,7 +118,7 @@ call_buffer_timer::fire_helper(
         async->context = utils::store_shared_ptr(contextSharedPtr);
         async->callback = [](AsyncBlock* async)
         {
-            auto context = utils::remove_shared_ptr<fire_context>(async->context);
+            auto context = utils::get_shared_ptr<fire_context>(async->context);
             std::shared_ptr<call_buffer_timer> pThis(context->thisWeak.lock());
             if (pThis != nullptr)
             {
@@ -139,7 +139,7 @@ call_buffer_timer::fire_helper(
         {
             if (op == AsyncOp_DoWork)
             {
-                auto context = static_cast<fire_context*>(data->context);
+                auto context = utils::get_shared_ptr<fire_context>(data->context, false);
 
                 std::shared_ptr<call_buffer_timer> pThis(context->thisWeak.lock());
                 if (pThis != nullptr)

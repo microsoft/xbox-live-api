@@ -438,7 +438,7 @@ void http_call_impl::handle_unauthorized_error(
             else
             {
                 // if getting a new token failed, then we need to just return the 401 upwards
-                utils::remove_shared_ptr<http_call_data>(context, true);
+                utils::get_shared_ptr<http_call_data>(context, true);
                 httpCallResponse->route_service_call();
                 httpCallData->callback(httpCallResponse);
             }
@@ -460,7 +460,7 @@ void http_call_impl::internal_get_response(
     asyncBlock->context = utils::store_shared_ptr(httpCallData);
     asyncBlock->callback = [](_In_ AsyncBlock* asyncBlock)
     {
-        auto httpCallData = utils::remove_shared_ptr<http_call_data>(asyncBlock->context, false);
+        auto httpCallData = utils::get_shared_ptr<http_call_data>(asyncBlock->context, false);
         auto httpCallResponse = xsapi_allocate_shared<http_call_response_internal>(httpCallData);
 
         void* context = asyncBlock->context;
@@ -480,7 +480,7 @@ void http_call_impl::internal_get_response(
                 handle_throttle_error(httpCallResponse, httpCallData);
             }
 
-            utils::remove_shared_ptr<http_call_data>(context, true);
+            utils::get_shared_ptr<http_call_data>(context, true);
             httpCallResponse->route_service_call();
             httpCallData->callback(httpCallResponse);
         }

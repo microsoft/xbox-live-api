@@ -121,7 +121,7 @@ void xbox_web_socket_client::connect(
         {
             WebSocketCompletionResult result = {};
             HCGetWebSocketConnectResult(asyncBlock, &result);
-            auto callback = utils::remove_shared_ptr<xbox_live_callback<WebSocketCompletionResult>>(asyncBlock->context);
+            auto callback = utils::get_shared_ptr<xbox_live_callback<WebSocketCompletionResult>>(asyncBlock->context);
             (*callback)(result);
             xsapi_memory::mem_free(asyncBlock);
         };
@@ -141,7 +141,7 @@ void xbox_web_socket_client::send(
     {
         WebSocketCompletionResult result = {};
         HCGetWebSocketSendMessageResult(asyncBlock, &result);
-        auto callback = utils::remove_shared_ptr<xbox_live_callback<WebSocketCompletionResult>>(asyncBlock->context);
+        auto callback = utils::get_shared_ptr<xbox_live_callback<WebSocketCompletionResult>>(asyncBlock->context);
         (*callback)(result);
         xsapi_memory::mem_free(asyncBlock);
     };

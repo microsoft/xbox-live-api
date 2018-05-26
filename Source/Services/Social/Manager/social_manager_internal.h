@@ -472,17 +472,11 @@ protected:
 
     void initialize_social_buffers(_In_ const xsapi_internal_vector<xbox_social_user>& socialUsers);
 
-    void social_graph_refresh_callback();
+    void schedule_social_graph_refresh();
 
-    void presence_refresh_callback();
+    void schedule_presence_refresh();
 
-    struct do_event_work_context
-    {
-        std::weak_ptr<social_graph> pThis;
-        AsyncBlock* outerAsyncBlock;
-    };
-
-    void schedule_event_work(do_event_work_context* context);
+    void schedule_event_work();
     bool do_event_work();
 
     void presence_timer_callback(
@@ -568,22 +562,22 @@ protected:
         context->result = result;
         context->callback = callback;
 
-        AsyncBlock* async = new (xbox::services::system::xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock;
-        ZeroMemory(async, sizeof(AsyncBlock));
+        AsyncBlock* async = new (xbox::services::system::xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+        async->queue = m_backgroundAsyncQueue;
+        async->callback = [](AsyncBlock* asyncBlock)
+        {
+            xsapi_memory::mem_free(asyncBlock);
+        };
 
         BeginAsync(async, utils::store_shared_ptr(context), nullptr, __FUNCTION__,
             [](AsyncOp op, const AsyncProviderData* data)
         {
-            auto context = utils::remove_shared_ptr<invoke_callback_context>(data->context);
-            switch (op)
+            if (op == AsyncOp_DoWork)
             {
-                case AsyncOp_DoWork:
-                    context->callback(context->result);
-                    return S_OK;
-
-                case AsyncOp_Cleanup:
-                    delete data->async;
-                    return S_OK;
+                auto context = utils::get_shared_ptr<invoke_callback_context>(data->context);
+                context->callback(context->result);
+                CompleteAsync(data->async, S_OK, 0);
+                return E_PENDING;
             }
             return S_OK;
         });
@@ -609,7 +603,7 @@ protected:
     social_graph_state m_socialGraphState;
 
     xbox_live_user_t m_user;
-    std::unique_ptr<bool> m_shouldCancel;
+    std::atomic<bool> m_shouldCancel;
     std::shared_ptr<xbox_live_context_impl> m_xboxLiveContextImpl;
     std::shared_ptr<call_buffer_timer> m_presenceRefreshTimer;
     std::shared_ptr<call_buffer_timer> m_presencePollingTimer;
