@@ -143,7 +143,7 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
     g_workReadyHandle.set(CreateEvent(nullptr, false, false, nullptr));
     g_completionReadyHandle.set(CreateEvent(nullptr, false, false, nullptr));
 
-    XblGlobalInitialize();
+    XblInitialize();
     uint32_t sharedAsyncQueueId = 0;
     CreateSharedAsyncQueue(
         sharedAsyncQueueId,
@@ -188,7 +188,7 @@ Game::~Game()
     RemoveAsyncQueueCallbackSubmitted(m_queue, m_callbackToken);
     CloseAsyncQueue(m_queue);
 
-    XblGlobalCleanup();
+    XblCleanup();
 }
 
 // Updates application state when the window size changes (e.g. device orientation change)

@@ -48,7 +48,7 @@ void Game::RemoveLocalUserFromSocialManager()
 
     Game* pThis = this;
     WaitForSocialEvent(XblSocialManagerEventType::XblSocialManagerEventType_LocalUserRemoved, [pThis](XblSocialManagerEvent e) {
-        pThis->Log("[Test] Ending TestSocialManagerFlow");
+        pThis->Log("===== Finished TestSocialManagerFlow =====");
         pThis->EndTest();
     });
 }

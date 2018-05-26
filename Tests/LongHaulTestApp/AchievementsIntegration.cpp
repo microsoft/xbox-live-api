@@ -30,16 +30,13 @@ void Game::GetAchievmentsForTitle()
     {
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-        size_t size = 0;
-        auto result = GetAsyncResultSize(asyncBlock, &size);
-
+        pThis->Log("XblAchievementsGetAchievementsForTitleIdResult");
+        xbl_achievements_result_handle achievementsResult;
+        auto result = XblAchievementsGetAchievementsForTitleIdResult(asyncBlock, &achievementsResult);
+        
         if (SUCCEEDED(result))
         {
             pThis->Log(L"[Test] Successfully got achievements for this title!");
-
-            pThis->Log("XblAchievementsGetAchievementsForTitleIdResult");
-            XblAchievementsResult* achievementsResult = (XblAchievementsResult*)malloc(size);
-            XblAchievementsGetAchievementsForTitleIdResult(asyncBlock, size, achievementsResult, nullptr);
 
             pThis->AchievementResultsGetNext(achievementsResult);
         }
@@ -51,8 +48,8 @@ void Game::GetAchievmentsForTitle()
         delete asyncBlock;
     };
 
-    Log("XblAchievementsGetAchievementsForTitleId");
-    XblAchievementsGetAchievementsForTitleId(
+    Log("XblAchievementsGetAchievementsForTitleIdAsync");
+    XblAchievementsGetAchievementsForTitleIdAsync(
         asyncBlock,
         m_xboxLiveContext,
         m_xuid,
@@ -64,48 +61,63 @@ void Game::GetAchievmentsForTitle()
         1);
 }
 
-void Game::AchievementResultsGetNext(XblAchievementsResult* result)
+void Game::AchievementResultsGetNext(xbl_achievements_result_handle result)
 {
-    if (result->hasNext)
+    struct context_t
+    {
+        Game* pThis;
+        xbl_achievements_result_handle resultHandle;
+    };
+
+    bool hasNext;
+    XblAchievementsResultHasNext(result, &hasNext);
+
+    XblAchievement* achievements;
+    uint32_t achievementsCount;
+    XblAchievementsResultGetAchievements(result, &achievements, &achievementsCount);
+
+    if (hasNext)
     {
         AsyncBlock* asyncBlock = new AsyncBlock{};
         asyncBlock->queue = m_queue;
-        asyncBlock->context = this;
+        asyncBlock->context = new context_t{ this, result };
         asyncBlock->callback = [](AsyncBlock* asyncBlock)
         {
-            Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
+            auto context = reinterpret_cast<context_t*>(asyncBlock->context);
+            auto pThis = context->pThis;
 
-            size_t size = 0;
-            auto result = GetAsyncResultSize(asyncBlock, &size);
+            pThis->Log("XblAchievementsResultGetNextResult");
+            xbl_achievements_result_handle achievementsResult;
+            auto result = XblAchievementsResultGetNextResult(asyncBlock, &achievementsResult);
 
             if (SUCCEEDED(result))
             {
                 pThis->Log(L"[Test] Successfully got next page of achievements!");
 
-                pThis->Log("XblAchievementsResultGetNextResult");
-                XblAchievementsResult* achievementsResult = (XblAchievementsResult*)malloc(size);
-                XblAchievementsResultGetNextResult(asyncBlock, size, achievementsResult, nullptr);
-
                 pThis->AchievementResultsGetNext(achievementsResult);
+
+                XblAchievementsResultCloseHandle(context->resultHandle);
             }
             else
             {
                 pThis->Log(L"[Test] Failed getting next page of achievements.");
             }
 
+            delete asyncBlock->context;
             delete asyncBlock;
         };
 
-        Log("XblAchievementsResultGetNext");
-        XblAchievementsResultGetNext(
+        Log("XblAchievementsResultGetNextAsync");
+        XblAchievementsResultGetNextAsync(
             asyncBlock,
             m_xboxLiveContext,
             result,
             1);
     }
-    else if (result->itemsCount > 0)
+    else if (achievementsCount > 0)
     {
-        GetAchievement(result->items[0]->serviceConfigurationId, result->items[0]->id);
+        GetAchievement(achievements[0].serviceConfigurationId, achievements[0].id);
+        XblAchievementsResultCloseHandle(result);
     }
 }
 
@@ -118,18 +130,21 @@ void Game::GetAchievement(PCSTR scid, PCSTR achievementId)
     {
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-        size_t size = 0;
-        auto result = GetAsyncResultSize(asyncBlock, &size);
-
+        pThis->Log("XblAchievementsGetAchievementResult");
+        xbl_achievements_result_handle achievementsResult;
+        auto result = XblAchievementsGetAchievementResult(asyncBlock, &achievementsResult);
+        
         if (SUCCEEDED(result))
         {
+            pThis->Log("XblAchievementsResultGetAchievements");
+            XblAchievement* achievement;
+            uint32_t achievementCount;
+            XblAchievementsResultGetAchievements(achievementsResult, &achievement, &achievementCount);
+            
             pThis->Log(L"[Test] Successfully got achievement!");
-
-            pThis->Log("XblAchievementsGetAchievementResult");
-            XblAchievement* achievement = (XblAchievement*)malloc(size);
-            XblAchievementsGetAchievementResult(asyncBlock, size, achievement, nullptr);
-
             pThis->UpdateAchievement(achievement->serviceConfigurationId, achievement->id);
+
+            XblAchievementsResultCloseHandle(achievementsResult);
         }
         else
         {
@@ -139,8 +154,8 @@ void Game::GetAchievement(PCSTR scid, PCSTR achievementId)
         delete asyncBlock;
     };
 
-    Log("XblAchievementsGetAchievement");
-    XblAchievementsGetAchievement(
+    Log("XblAchievementsGetAchievementAsync");
+    XblAchievementsGetAchievementAsync(
         asyncBlock,
         m_xboxLiveContext,
         m_xuid,
@@ -173,14 +188,13 @@ void Game::UpdateAchievement(PCSTR scid, PCSTR achievementId)
 
         delete asyncBlock;
 
-
         pThis->Log("===== Finished TestAchievementFlow =====");
         pThis->EndTest();
     };
 
     Log("XblAchievementsUpdateAchievement");
     auto tid = m_config->titleId;
-    XblAchievementsUpdateAchievement(
+    XblAchievementsUpdateAchievementAsync(
         asyncBlock,
         m_xboxLiveContext,
         m_xuid,

@@ -169,11 +169,12 @@ try
 {
     RETURN_C_INVALIDARGUMENT_IF(resultHandle == nullptr || hasNext == nullptr);
     verify_global_init();
-    return resultHandle->internalResult->has_next();
+    *hasNext = resultHandle->internalResult->has_next();
+    return S_OK;
 }
 CATCH_RETURN()
 
-STDAPI XblSocialRelationshipResultGetNext(
+STDAPI XblSocialRelationshipResultGetNextAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ xbl_social_relationship_result_handle resultHandle,
@@ -321,7 +322,7 @@ try
 }
 CATCH_RETURN_WITH(;)
 
-STDAPI XblSocialSubmitReputationFeedback(
+STDAPI XblSocialSubmitReputationFeedbackAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,

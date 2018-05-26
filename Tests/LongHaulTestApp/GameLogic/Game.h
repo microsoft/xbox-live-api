@@ -161,7 +161,7 @@ namespace LongHaulTestApp
 
         // Utils
         void GetAchievmentsForTitle();
-        void AchievementResultsGetNext(XblAchievementsResult* result);
+        void AchievementResultsGetNext(xbl_achievements_result_handle result);
         void GetAchievement(PCSTR scid, PCSTR achievementId);
         void UpdateAchievement(PCSTR scid, PCSTR achievementId);
 
@@ -192,7 +192,7 @@ namespace LongHaulTestApp
 
         // Utils
         void GetSocialRelationship();
-        void SocialRelationshipGetNext(XblSocialRelationshipResult* relationshipResult);
+        void SocialRelationshipGetNext(xbl_social_relationship_result_handle relationshipResult);
         void TestResputationFeedback();
         
         ///////////////////////////////////////
