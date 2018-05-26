@@ -49,7 +49,7 @@ social_graph::social_graph(
     m_wasDisconnected(false),
     m_numEventsThisFrame(0),
     m_userAddedContext(0),
-    m_shouldCancel(utility::details::make_unique<bool>(false)),
+    m_shouldCancel(false),
     m_isPollingRichPresence(false),
     m_backgroundAsyncQueue(backgroundAsyncQueue)
 {
@@ -162,62 +162,9 @@ void social_graph::initialize(xbox_live_callback<xbox_live_result<void>> callbac
         );
 
 #if UWP_API || TV_API || UNIT_TEST_SERVICES
-    AsyncBlock* socialGraphRefreshAsync = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
-    socialGraphRefreshAsync->queue = m_backgroundAsyncQueue;
-    socialGraphRefreshAsync->callback = [](AsyncBlock* async)
-    {
-        xsapi_memory::mem_free(async);
-    };
-    BeginAsync(socialGraphRefreshAsync, utils::store_weak_ptr(thisWeakPtr), nullptr, __FUNCTION__,
-        [](AsyncOp op, const AsyncProviderData* data)
-    {
-        if (op == AsyncOp_DoWork)
-        {
-            std::shared_ptr<social_graph> pThis(utils::remove_weak_ptr<social_graph>(data->context).lock());
-            if (pThis)
-            {
-                pThis->social_graph_refresh_callback();
-            }
-            CompleteAsync(data->async, S_OK, 0);
-            return E_PENDING;
-        }
-        return S_OK;
-    });
-    ScheduleAsync(socialGraphRefreshAsync, (uint32_t)std::chrono::duration_cast<std::chrono::milliseconds>(REFRESH_TIME_MIN).count());
+    schedule_social_graph_refresh();
 #endif
-
-    AsyncBlock* eventWorkAsync = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
-
-    auto context = xsapi_allocate_shared<do_event_work_context>();
-    context->pThis = thisWeakPtr;
-    context->outerAsyncBlock = eventWorkAsync;
-    eventWorkAsync->queue = m_backgroundAsyncQueue;
-    eventWorkAsync->context = utils::store_shared_ptr(context);
-    eventWorkAsync->callback = [](AsyncBlock* async)
-    {
-        utils::remove_shared_ptr<do_event_work_context>(async->context);
-        xsapi_memory::mem_free(async);
-    };
-
-    auto hr = BeginAsync(eventWorkAsync, eventWorkAsync->context, nullptr, __FUNCTION__,
-        [](AsyncOp op, const AsyncProviderData* data)
-    {
-        if (op == AsyncOp_DoWork)
-        {
-            auto context = static_cast<do_event_work_context*>(data->context);
-            auto pThis = context->pThis.lock();
-            if (pThis)
-            {
-                pThis->schedule_event_work(context);
-                return E_PENDING;
-            }
-        }
-        return S_OK;
-    });
-    if (SUCCEEDED(hr))
-    {
-        ScheduleAsync(eventWorkAsync, 0);
-    }
+    schedule_event_work();
 
     m_peoplehubService.get_social_graph(
 #if TV_API || UNIT_TEST_SERVICES || !XSAPI_CPP
@@ -311,33 +258,29 @@ social_graph::set_background_async_queue(async_queue_handle_t queue)
 }
 
 void 
-social_graph::schedule_event_work(do_event_work_context* context)
+social_graph::schedule_event_work()
 {
-    AsyncBlock* nestedAsync = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
-    nestedAsync->context = static_cast<void*>(context);
-    nestedAsync->queue = m_backgroundAsyncQueue;
-    nestedAsync->callback = [](AsyncBlock* nestedAsync)
+    std::weak_ptr<social_graph> thisWeak = shared_from_this();
+
+    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    async->context = utils::store_weak_ptr(thisWeak);
+    async->queue = m_backgroundAsyncQueue;
+    async->callback = [](AsyncBlock* async)
     {
-        auto context = static_cast<do_event_work_context*>(nestedAsync->context);
-        auto pThis = context->pThis.lock();
+        auto pThis = utils::get_shared_ptr<social_graph>(async->context);
         if (pThis)
         {
-            pThis->schedule_event_work(context);
+            pThis->schedule_event_work();
         }
-        else
-        {
-            CompleteAsync(context->outerAsyncBlock, S_OK, 0);
-        }
-        xsapi_memory::mem_free(nestedAsync);
+        xsapi_memory::mem_free(async);
     };
 
-    BeginAsync(nestedAsync, nestedAsync->context, nullptr, __FUNCTION__,
+    BeginAsync(async, utils::store_weak_ptr(thisWeak), nullptr, __FUNCTION__,
         [](AsyncOp op, const AsyncProviderData* data)
     {
         if (op == AsyncOp_DoWork)
         {
-            auto context = static_cast<do_event_work_context*>(data->context);
-            auto pThis = context->pThis.lock();
+            auto pThis = utils::get_shared_ptr<social_graph>(data->context);
             if (pThis)
             {
                 bool hasRemainingEvent = false;
@@ -350,7 +293,7 @@ social_graph::schedule_event_work(do_event_work_context* context)
         }
         return S_OK;
     });
-    ScheduleAsync(nestedAsync, 30);
+    ScheduleAsync(async, 30);
 }
 
 bool
@@ -1054,25 +997,24 @@ social_graph::setup_device_and_presence_subscriptions(
 {
     AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
     async->queue = m_backgroundAsyncQueue;
+    async->callback = [](AsyncBlock* asyncBlock)
+    {
+        xsapi_memory::mem_free(asyncBlock);
+    };
 
     auto context = utils::store_shared_ptr(xsapi_allocate_shared<social_graph_context>(users, shared_from_this()));
-
     BeginAsync(async, context, nullptr, __FUNCTION__,
         [](AsyncOp op, const AsyncProviderData* data)
     {   
         if (op == AsyncOp_DoWork)
         {
-            auto context = utils::remove_shared_ptr<social_graph_context>(data->context);
+            auto context = utils::get_shared_ptr<social_graph_context>(data->context);
             std::shared_ptr<social_graph> pThis(context->pThis.lock());
 
             if (pThis != nullptr)
             {
                 pThis->setup_device_and_presence_subscriptions_helper(context->users);
             }
-        }
-        else if (op == AsyncOp_Cleanup)
-        {
-            delete data->async;
         }
         return S_OK;
     });
@@ -1086,6 +1028,11 @@ social_graph::unsubscribe_users(
 {
     AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
     async->queue = m_backgroundAsyncQueue;
+    async->callback = [](AsyncBlock* asyncBlock)
+    {
+        xsapi_memory::mem_free(asyncBlock);
+    };
+
     auto context = utils::store_shared_ptr(xsapi_allocate_shared<social_graph_context>(users, shared_from_this()));
 
     BeginAsync(async, context, nullptr, __FUNCTION__,
@@ -1093,7 +1040,7 @@ social_graph::unsubscribe_users(
     {
         if (op == AsyncOp_DoWork)
         {
-            auto context = utils::remove_shared_ptr<social_graph_context>(data->context);
+            auto context = utils::get_shared_ptr<social_graph_context>(data->context);
 
             std::shared_ptr<social_graph> pThis(context->pThis.lock());
             if (pThis != nullptr)
@@ -1110,10 +1057,10 @@ social_graph::unsubscribe_users(
                     pThis->m_perfTester.stop_timer("unsubscribe_users");
                 }
             }
-        }
-        else if (op == AsyncOp_Cleanup)
-        {
-            delete data->async;
+            CompleteAsync(data->async, S_OK, 0);
+
+            // Have to return E_PENDING from AsyncOp_DoWork
+            return E_PENDING;
         }
         return S_OK;
     });
@@ -1410,15 +1357,21 @@ social_graph::social_graph_timer_callback(
     });
 }
 
-void social_graph::social_graph_refresh_callback()
+void social_graph::schedule_social_graph_refresh()
 {
 #if UWP_API || TV_API || UNIT_TEST_SERVICES
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
 
     AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
     async->queue = m_backgroundAsyncQueue;
+    async->context = utils::store_weak_ptr(thisWeakPtr);
     async->callback = [](AsyncBlock* async) 
     {
+        auto pThis = utils::get_shared_ptr<social_graph>(async->context);
+        if (pThis)
+        {
+            pThis->schedule_social_graph_refresh();
+        }
         xsapi_memory::mem_free(async);
     };
     BeginAsync(async, utils::store_weak_ptr(thisWeakPtr), nullptr, __FUNCTION__,
@@ -1428,10 +1381,10 @@ void social_graph::social_graph_refresh_callback()
         {
             try
             {
-                std::shared_ptr<social_graph> pThis(utils::remove_weak_ptr<social_graph>(data->context).lock());
+                auto pThis = utils::get_shared_ptr<social_graph>(data->context);
                 if (pThis)
                 {
-                    pThis->social_graph_refresh_callback();
+                    pThis->refresh_graph();
                 }
             }
             catch (const std::exception& e)
@@ -1453,8 +1406,6 @@ void social_graph::social_graph_refresh_callback()
     });
     ScheduleAsync(async, (uint32_t)std::chrono::duration_cast<std::chrono::milliseconds>(REFRESH_TIME_MIN).count());
 #endif
-
-    refresh_graph();
 }
 
 void
@@ -1711,7 +1662,7 @@ social_graph::remove_users(
 }
 
 void
-social_graph::presence_refresh_callback()
+social_graph::schedule_presence_refresh()
 {
 #if UWP_API || TV_API || UNIT_TEST_SERVICES
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
@@ -1721,20 +1672,20 @@ social_graph::presence_refresh_callback()
     async->context = utils::store_weak_ptr(thisWeakPtr);
     async->callback = [](AsyncBlock* async)
     {
-        xsapi_memory::mem_free(async);
-        std::shared_ptr<social_graph> pThis(utils::remove_weak_ptr<social_graph>(async->context, true).lock());
-        if (pThis && !*(pThis->m_shouldCancel))
+        auto pThis = utils::get_shared_ptr<social_graph>(async->context);
+        if (pThis && !pThis->m_shouldCancel)
         {
-            pThis->presence_refresh_callback();
+            pThis->schedule_presence_refresh();
         }
+        xsapi_memory::mem_free(async);
     };
-    BeginAsync(async, async->context, nullptr, __FUNCTION__,
+    BeginAsync(async, utils::store_weak_ptr(thisWeakPtr), nullptr, __FUNCTION__,
         [](AsyncOp op, const AsyncProviderData* data)
     {
         if (op == AsyncOp_DoWork)
         {
-            std::shared_ptr<social_graph> pThis(utils::remove_weak_ptr<social_graph>(data->async->context, false).lock());
-            if (pThis && !*(pThis->m_shouldCancel))
+            auto pThis = utils::get_shared_ptr<social_graph>(data->context);
+            if (pThis && !pThis->m_shouldCancel)
             {
                 xsapi_internal_vector<xsapi_internal_string> userList;
                 {
@@ -1795,14 +1746,14 @@ social_graph::enable_rich_presence_polling(
     {
         {
             std::lock_guard<std::recursive_mutex> socialGraphStateLock(m_socialGraphStateMutex);
-            *m_shouldCancel = false;
+            m_shouldCancel = false;
         }
-        presence_refresh_callback();
+        schedule_presence_refresh();
     }
     else if(!shouldEnablePolling)
     {
         std::lock_guard<std::recursive_mutex> socialGraphStateLock(m_socialGraphStateMutex);
-        *m_shouldCancel = true;
+        m_shouldCancel = true;
     }
 }
 

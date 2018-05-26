@@ -157,7 +157,7 @@ void web_socket_connection::ensure_connected()
     BeginAsync(outerAsync, utils::store_shared_ptr(retryContext), nullptr, __FUNCTION__,
         [](_In_ AsyncOp op, _In_ const AsyncProviderData* data)
     {
-        auto context = utils::remove_shared_ptr<retry_context>(data->context, op == AsyncOp_Cleanup);
+        auto context = utils::get_shared_ptr<retry_context>(data->context, op == AsyncOp_Cleanup);
         context->asyncProviderData = data;
 
         switch (op)
