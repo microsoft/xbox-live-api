@@ -65,7 +65,7 @@ void Game::HandleTests()
          case TestArea::Achievements: TestAchievementsFlow(); break;
          case TestArea::Profile: TestProfileFlow(); break;
          case TestArea::Social: TestSocialFlow(); break;
-         case TestArea::SocialManger: EndTest(); TestSocialManagerFlow(); break;
+         case TestArea::SocialManger: TestSocialManagerFlow(); break;
      }
  }
 

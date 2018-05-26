@@ -55,8 +55,8 @@ void Game::TestGetUserProfile()
             pThis->Log(L"[Test] Successfully got the user profile!");
 
             pThis->Log(L"XblProfileGetUserProfileResult");
-            XblUserProfile* profile = (XblUserProfile*)malloc(size);
-            auto result = XblProfileGetUserProfileResult(asyncBlock, profile);
+            XblUserProfile profile;
+            auto result = XblProfileGetUserProfileResult(asyncBlock, &profile);
 
             pThis->TestProfileFlow();
         }
@@ -69,7 +69,7 @@ void Game::TestGetUserProfile()
     };
 
     Log(L"XblProfileGetUserProfile");
-    XblProfileGetUserProfile(
+    XblProfileGetUserProfileAsync(
         asyncBlock,
         m_xboxLiveContext,
         m_xuid
@@ -85,21 +85,17 @@ void Game::TestGetUserProfiles()
     {
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-        size_t size = 0;
-        auto result = GetAsyncResultSize(asyncBlock, &size);
+        pThis->Log(L"XblProfileGetUserProfilesResult");
+        uint32_t profilesCount;
+        XblProfileGetUserProfilesResultCount(asyncBlock, &profilesCount);
+
+        pThis->Log(L"XblProfileGetUserProfilesResult");
+        XblUserProfile* profiles = (XblUserProfile*)malloc(sizeof(XblUserProfile) * profilesCount);
+        auto result = XblProfileGetUserProfilesResult(asyncBlock, profilesCount, profiles);
 
         if (SUCCEEDED(result))
         {
             pThis->Log(L"[Test] Successfully got user profiles!");
-
-            uint32_t profilesCount, profilesWritten;
-
-            pThis->Log(L"XblProfileGetUserProfilesResultCount");
-            XblProfileGetUserProfilesResultCount(asyncBlock, &profilesCount);
-
-            pThis->Log(L"XblProfileGetUserProfilesResult");
-            XblUserProfile* profiles = (XblUserProfile*)malloc(size);
-            auto result = XblProfileGetUserProfilesResult(asyncBlock, profilesCount, profiles, &profilesWritten);
 
             pThis->TestProfileFlow();
         }
@@ -108,13 +104,14 @@ void Game::TestGetUserProfiles()
             pThis->Log(L"[Test] Failed getting user profiles.");
         }
 
+        free(profiles);
         delete asyncBlock;
     };
 
     Log(L"XblProfileGetUserProfiles");
     std::vector<uint64_t> xuids;
     xuids.push_back(m_xuid);
-    XblProfileGetUserProfiles(
+    XblProfileGetUserProfilesAsync(
         asyncBlock,
         m_xboxLiveContext,
         xuids.data(),
@@ -131,34 +128,32 @@ void Game::TestGetUserProfilesForSocialGroup()
     {
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-        size_t size = 0;
-        auto result = GetAsyncResultSize(asyncBlock, &size);
+        uint32_t profilesCount;
+
+        pThis->Log(L"XblProfileGetUserProfilesForSocialGroupResultCount");
+        XblProfileGetUserProfilesForSocialGroupResultCount(asyncBlock, &profilesCount);
+
+        pThis->Log(L"XblProfileGetUserProfilesForSocialGroupResult");
+        XblUserProfile* profiles = (XblUserProfile*)malloc(profilesCount * sizeof(XblUserProfile));
+        auto result = XblProfileGetUserProfilesForSocialGroupResult(asyncBlock, profilesCount, profiles);
 
         if (SUCCEEDED(result))
         {
-            pThis->Log(L"[Test] Successfully got achievements for this title!");
-
-            uint32_t profilesCount, profilesWritten;
-
-            pThis->Log(L"XblProfileGetUserProfilesForSocialGroupResultCount");
-            XblProfileGetUserProfilesForSocialGroupResultCount(asyncBlock, &profilesCount);
-
-            pThis->Log(L"XblProfileGetUserProfilesForSocialGroupResult");
-            XblUserProfile* profiles = (XblUserProfile*)malloc(size);
-            auto result = XblProfileGetUserProfilesForSocialGroupResult(asyncBlock, profilesCount, profiles, &profilesWritten);
+            pThis->Log(L"[Test] Successfully got profiles for this title!");
 
             pThis->TestProfileFlow();
         }
         else
         {
-            pThis->Log(L"[Test] Failed getting achievements for this title.");
+            pThis->Log(L"[Test] Failed getting profiles for this title.");
         }
 
+        free(profiles);
         delete asyncBlock;
     };
 
     Log(L"XblProfileGetUserProfilesForSocialGroup");
-    XblProfileGetUserProfilesForSocialGroup(
+    XblProfileGetUserProfilesForSocialGroupAsync(
         asyncBlock,
         m_xboxLiveContext,
         "People"

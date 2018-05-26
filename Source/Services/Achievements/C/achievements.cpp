@@ -130,7 +130,8 @@ try
 {
     RETURN_C_INVALIDARGUMENT_IF(resultHandle == nullptr || hasNext == nullptr);
     verify_global_init();
-    return resultHandle->internalResult != nullptr && resultHandle->internalResult->has_next();
+    *hasNext = resultHandle->internalResult != nullptr && resultHandle->internalResult->has_next();
+    return S_OK;
 }
 CATCH_RETURN_WITH(false)
 

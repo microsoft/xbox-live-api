@@ -25,19 +25,17 @@ void Game::GetSocialRelationship()
     {
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-        size_t size = 0;
-        auto result = GetAsyncResultSize(asyncBlock, &size);
+        pThis->Log(L"XblSocialGetSocialRelationshipsResult");
+        xbl_social_relationship_result_handle relationshipResult;
+        auto result = XblSocialGetSocialRelationshipsResult(asyncBlock, &relationshipResult);
 
         if (SUCCEEDED(result))
         {
             pThis->Log(L"[Test] Successfully got the social relationship!");
 
-            pThis->Log(L"XblSocialGetSocialRelationshipsResult");
-            size_t bytesWritten;
-            XblSocialRelationshipResult* relationshipResult = (XblSocialRelationshipResult*)malloc(size);
-            auto result = XblSocialGetSocialRelationshipsResult(asyncBlock, size, relationshipResult, &bytesWritten);
-            
             pThis->SocialRelationshipGetNext(relationshipResult);
+
+            XblSocialRelationshipResultCloseHandle(relationshipResult);
         }
         else
         {
@@ -48,7 +46,7 @@ void Game::GetSocialRelationship()
     };
 
     Log(L"XblSocialGetSocialRelationships");
-    XblSocialGetSocialRelationships(
+    XblSocialGetSocialRelationshipsAsync(
         asyncBlock,
         m_xboxLiveContext,
         m_xuid,
@@ -56,9 +54,12 @@ void Game::GetSocialRelationship()
     );
 }
 
-void Game::SocialRelationshipGetNext(XblSocialRelationshipResult* relationshipResult)
+void Game::SocialRelationshipGetNext(xbl_social_relationship_result_handle relationshipResult)
 {
-    if (relationshipResult->hasNext)
+    bool hasNext;
+    XblSocialRelationshipResultHasNext(relationshipResult, &hasNext);
+
+    if (hasNext)
     {
         AsyncBlock* asyncBlock = new AsyncBlock{};
         asyncBlock->queue = m_queue;
@@ -67,18 +68,17 @@ void Game::SocialRelationshipGetNext(XblSocialRelationshipResult* relationshipRe
         {
             Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-            size_t size = 0;
-            auto result = GetAsyncResultSize(asyncBlock, &size);
-
+            pThis->Log("XblSocialRelationshipResultGetNextResult");
+            xbl_social_relationship_result_handle relationship;
+            auto result = XblSocialRelationshipResultGetNextResult(asyncBlock, &relationship);
+            
             if (SUCCEEDED(result))
             {
                 pThis->Log(L"[Test] Successfully got next page of relationships!");
 
-                pThis->Log("XblSocialRelationshipResultGetNextResult");
-                XblSocialRelationshipResult* relationship = (XblSocialRelationshipResult*)malloc(size);
-                XblSocialRelationshipResultGetNextResult(asyncBlock, size, relationship, nullptr);
-
                 pThis->SocialRelationshipGetNext(relationship);
+
+                XblSocialRelationshipResultCloseHandle(relationship);
             }
             else
             {
@@ -89,7 +89,7 @@ void Game::SocialRelationshipGetNext(XblSocialRelationshipResult* relationshipRe
         };
 
         Log("XblSocialRelationshipResultGetNext");
-        XblSocialRelationshipResultGetNext(
+        XblSocialRelationshipResultGetNextAsync(
             asyncBlock,
             m_xboxLiveContext,
             relationshipResult,
@@ -128,7 +128,7 @@ void Game::TestResputationFeedback()
     };
 
     Log(L"XblSocialSubmitReputationFeedback");
-    XblSocialSubmitReputationFeedback(
+    XblSocialSubmitReputationFeedbackAsync(
         asyncBlock,
         m_xboxLiveContext,
         m_xuid,

@@ -97,6 +97,16 @@ STDAPI XblProfileGetUserProfilesAsync(
     ) XBL_NOEXCEPT;
 
 /// <summary>
+/// Get the number of profiles returned from a completed get XblProfileGetUserProfilesAsync operation
+/// </summary>
+/// <param name="async">AsyncBlock from the get profile API.</param>
+/// <param name="profileCount">Number of profiles returned.</param>
+STDAPI XblProfileGetUserProfilesResultCount(
+    _In_ AsyncBlock* async,
+    _Out_ uint32_t* profileCount
+    ) XBL_NOEXCEPT;
+
+/// <summary>
 /// Get the result for a completed XblProfileGetUserProfilesAsync operation.
 /// The number of profiles returned can be obtained with XblGetProfileResultCount.
 /// </summary>
