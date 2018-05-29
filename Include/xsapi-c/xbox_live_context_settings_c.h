@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
-#include "pal.h"
 
 const uint32_t XBL_MAXIMUM_WEBSOCKETS_ACTIVATIONS_ALLOWED_PER_USER = 5;
 

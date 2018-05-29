@@ -3,10 +3,6 @@
 
 #pragma once
 
-#include "pal.h"
-#include "xsapi-c/errors_c.h"
-#include "xsapi-c/presence_c.h"
-
 typedef enum XblSocialManagerExtraDetailLevel 
 {
     /// <summary>Only get default PeopleHub information (presence, profile)</summary>

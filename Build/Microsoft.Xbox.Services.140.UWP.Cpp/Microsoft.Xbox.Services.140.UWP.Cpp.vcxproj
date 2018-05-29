@@ -435,7 +435,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\system_c.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_c.cpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_c.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_internal_c.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_internal_c.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\auth_config.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\auth_config.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\ppltasks_extra.h" />

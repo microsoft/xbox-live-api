@@ -231,7 +231,7 @@ if( UNITTEST )
         Shared_Logger_Source_Files	
         ../../Source/Shared/Logger/console_output.cpp
         ../../Source/Shared/Logger/console_output.h
-        )		
+        )
 endif()
 
 set(UWP_Shared_Source_Files
@@ -610,8 +610,12 @@ set(Clubs_Source_Files
 
 set(UWP_System_Source_Files_C
     ../../Source/System/C/system_c.h
-    ../../Source/System/C/user_c.h
     ../../Source/System/C/user_c.cpp
+    )
+
+set(System_Source_Files_C
+    ../../Source/System/C/user_internal_c.h
+    ../../Source/System/C/user_internal_c.cpp
     )
 
 set(Shared_Source_Files_C
@@ -1286,6 +1290,7 @@ else()
 		source_group("C++ Source\\Services\\Tournaments\\WinRT" FILES ${Tournaments_WinRT_Source_Files})
         source_group("C++ Source\\Services\\Clubs\\WinRT" FILES ${Clubs_WinRT_Source_Files})
     else()
+        source_group("C++ Source\\System\\C" FILES ${System_Source_Files_C})
         source_group("C++ Source\\Shared\\C" FILES ${Shared_Source_Files_C})
         source_group("C++ Source\\Services\\Achievements\\C" FILES ${Achievements_Source_Files_C})
         source_group("C++ Source\\Services\\Common\\C" FILES ${Common_Source_Files_C})

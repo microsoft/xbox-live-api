@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
-#include "pal.h"
 
 /// <summary>
 /// Enumeration values that define the Xbox Live API error conditions.

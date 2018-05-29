@@ -355,6 +355,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_service_call_routed_event_args_internal.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_internal_c.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_internal_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\ppltasks_extra.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\system_internal.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\xbox_live_mutex.cpp" />
@@ -458,6 +460,7 @@
       $(ProjectDir)..\..\Source\Services\GameServerPlatform;
       $(ProjectDir)..\..\Source\Shared;
       $(ProjectDir)..\..\Source\System;
+      $(ProjectDir)..\..\Source\System\C;
       $(ProjectDir)..\..\Source\;
       $(ProjectDir)..\..\Include;
       $(ProjectDir)..\..\External\cpprestsdk\Release\include;

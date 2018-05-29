@@ -97,6 +97,7 @@
       $(ProjectDir)..\..\Source\Services\Clubs;
       $(ProjectDir)..\..\Source\Shared;
       $(ProjectDir)..\..\Source\System;
+      $(ProjectDir)..\..\Source\System\C;
       $(ProjectDir)..\..\Source\;
       $(ProjectDir)..\..\Include;
       $(ProjectDir)..\..\External\cpprestsdk\Release\include;

@@ -2,21 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
+#include "xsapi-c/presence_c.h"
 #include "xsapi-c/social_manager_c.h"
-#if !XDK_API
-#include "user_c.h"
-#endif
+#include "user_internal_c.h"
 #include "social_manager_internal.h"
 
 using namespace xbox::services;
 using namespace xbox::services::system;
 using namespace xbox::services::social::manager;
-
-#if XDK_API
-#define GET_INTERNAL_USER(user) user
-#else
-#define GET_INTERNAL_USER(user) user->internalUser
-#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
 
@@ -35,7 +28,7 @@ public:
         XSAPI_ASSERT(userIter != singleton->m_userHandlesMap.end());
         userPtr = userIter->second;
 #else
-        userPtr = internalGroup->local_user();
+        userPtr = get_user_handle_from_user(internalGroup->local_user());
 #endif
 
         auto buffer = xbox::services::system::xsapi_memory::mem_alloc(sizeof(XblSocialManagerUserGroup));
@@ -53,9 +46,7 @@ public:
         return socialUserGroup;
     }
 
-#if !XDK_API
     xsapi_internal_vector<xbl_user_handle> localUsersVector;
-#endif
     bimap<XblSocialManagerUserGroup*, std::shared_ptr<xbox_social_user_group_internal>> socialUserGroupsMap;
     xsapi_internal_vector<XblSocialManagerEvent> socialEvents;
     xsapi_internal_vector<std::shared_ptr<social_event_internal>> internalSocialEvents;
@@ -227,17 +218,15 @@ try
     verify_global_init();
 
     auto result = social_manager_internal::get_singleton_instance()->add_local_user(
-        GET_INTERNAL_USER(user),
+        get_user_from_user_handle(user),
         static_cast<social_manager_extra_detail_level>(extraLevelDetail)
         );
 
-#if !XDK_API
     if (!result.err())
     {
         auto state = get_xbl_social_manager();
         state->localUsersVector.push_back(user);
     }
-#endif
     return utils::convert_xbox_live_error_code_to_hresult(result.err());
 }
 CATCH_RETURN()
@@ -249,8 +238,7 @@ try
 {
     verify_global_init();
 
-    auto result = social_manager_internal::get_singleton_instance()->remove_local_user(GET_INTERNAL_USER(user));
-#if !XDK_API
+    auto result = social_manager_internal::get_singleton_instance()->remove_local_user(get_user_from_user_handle(user));
     if (!result.err())
     {
         auto state = get_xbl_social_manager();
@@ -264,7 +252,6 @@ try
             }
         }
     }
-#endif
     return utils::convert_xbox_live_error_code_to_hresult(result.err());
 }
 CATCH_RETURN()
@@ -296,7 +283,7 @@ try
                 userHandle = userIter->second;
             }
 #else
-            userHandle = internalEvent->user();
+            userHandle = get_user_handle_from_user(internalEvent->user());
 #endif
             XblSocialManagerUserGroup* loadedGroup = nullptr;
             if (internalEvent->event_type() == social_event_type::social_user_group_loaded)
@@ -369,7 +356,7 @@ try
     auto state = get_xbl_social_manager();
 
     auto result = social_manager_internal::get_singleton_instance()->create_social_user_group_from_filters(
-        GET_INTERNAL_USER(user),
+        get_user_from_user_handle(user),
         static_cast<presence_filter>(presenceDetailLevel),
         static_cast<relationship_filter>(filter)
         );
@@ -400,7 +387,7 @@ try
     auto xboxUserIdVector = utils::xuid_array_to_internal_string_vector(xboxUserIdList, xboxUserIdListCount);
 
     auto result = social_manager_internal::get_singleton_instance()->create_social_user_group_from_list(
-        GET_INTERNAL_USER(user),
+        get_user_from_user_handle(user),
         xboxUserIdVector
         );
 
@@ -446,13 +433,9 @@ STDAPI XblSocialManagerGetLocalUsers(
     ) XBL_NOEXCEPT
 {
     RETURN_C_INVALIDARGUMENT_IF(users == nullptr || userCount == nullptr);
-#if XDK_API
-    auto& usersVector = social_manager_internal::get_singleton_instance()->local_users();
-    *users = const_cast<xbl_user_handle*>(usersVector.data());
-#else
+
     auto& usersVector = get_xbl_social_manager()->localUsersVector;
     *users = usersVector.data();
-#endif
     *userCount = static_cast<uint32_t>(usersVector.size());
 
     return S_OK;
@@ -491,7 +474,7 @@ try
     verify_global_init();
 
     auto result = social_manager_internal::get_singleton_instance()->set_rich_presence_polling_status(
-        GET_INTERNAL_USER(user),
+        get_user_from_user_handle(user),
         shouldEnablePolling
         );
    

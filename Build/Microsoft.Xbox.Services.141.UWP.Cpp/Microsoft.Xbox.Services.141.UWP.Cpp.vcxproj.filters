@@ -766,6 +766,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_c.cpp">
       <Filter>C++ Source\System\C</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_internal_c.cpp">
+      <Filter>C++ Source\System\C</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\token_and_signature_result.cpp">
       <Filter>C++ Source\System</Filter>
     </ClCompile>
@@ -1068,7 +1071,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\system_c.h">
       <Filter>C++ Source\System\C</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_c.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_internal_c.h">
       <Filter>C++ Source\System\C</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\ppltasks_extra.h">

@@ -167,7 +167,6 @@ private:
         _In_ Windows::Xbox::System::User^ user,
         _In_ bool toggle
         );
-
 };
 
 extern Game* g_sampleInstance;

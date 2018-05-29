@@ -4,9 +4,9 @@
 #pragma once
 
 #include "xbox_live_context_impl.h"
+#include "user_internal_c.h"
 #if !XDK_API
 #include "system_c.h"
-#include "user_c.h"
 #include "user_impl.h"
 #endif
 
@@ -18,8 +18,9 @@ struct xbl_xbox_live_context
         contextImpl(nullptr)
     {
 #if XDK_API
-        xboxUserIdString = xbox::services::utils::internal_string_from_utf16(user->XboxUserId->Data());
-        contextImpl = xsapi_allocate_shared<xbox::services::xbox_live_context_impl>(_user);
+        userInternal = get_user_from_user_handle(user);
+        xboxUserIdString = xbox::services::utils::internal_string_from_utf16(userInternal->XboxUserId->Data());
+        contextImpl = xsapi_allocate_shared<xbox::services::xbox_live_context_impl>(userInternal);
 #else
         xboxUserIdString = user->userImpl->xbox_user_id();
         contextImpl = xsapi_allocate_shared<xbox::services::xbox_live_context_impl>(user->internalUser);
@@ -28,8 +29,12 @@ struct xbl_xbox_live_context
         contextImpl->init();
     }
 
-
-    xbl_user_handle user;
+#if XDK_API
+    IInspectable* user;
+    Windows::Xbox::System::User^ userInternal;
+#else
+    xbl_xbox_live_user* user;
+#endif
     std::shared_ptr<xbox::services::xbox_live_context_impl> contextImpl;
     xsapi_internal_string xboxUserIdString;
     uint64_t xboxUserId;
