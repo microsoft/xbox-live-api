@@ -396,7 +396,7 @@ void Game::UpdateSocialGroupForAllUsers(
 }
 
 void Game::UpdateSocialGroup(
-    _In_ xbl_user_handle user,
+    _In_ Windows::Xbox::System::User^ user,
     _In_ bool toggle,
     _In_ XblPresenceFilter presenceFilter,
     _In_ XblRelationshipFilter relationshipFilter

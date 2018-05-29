@@ -35,7 +35,7 @@ Game::AddUserToSocialManager(
         source << _T(" to SocialManager");
         Log(source.str());
 
-        XblSocialManagerAddLocalUser(user, XblSocialManagerExtraDetailLevel_All);
+        XblSocialManagerAddLocalUser(AsInspectable(user), XblSocialManagerExtraDetailLevel_All);
         m_userAdded = true;
     }
 
@@ -55,10 +55,12 @@ Game::RemoveUserFromSocialManager(
     source << _T(" from SocialManager");
     Log(source.str());
 
+    auto inspectable = AsInspectable(user);
+
     auto it = m_socialGroups.begin();
     while (it != m_socialGroups.end()) 
     {
-        if (wcscmp((*it)->localUser->XboxUserId->Data(), user->XboxUserId->Data()))
+        if ((*it)->localUser == inspectable)
         {
             it = m_socialGroups.erase(it);
         }
@@ -67,7 +69,7 @@ Game::RemoveUserFromSocialManager(
             ++it;
         }
     }
-    XblSocialManagerRemoveLocalUser(user);
+    XblSocialManagerRemoveLocalUser(inspectable);
 }
 
 void 
@@ -78,7 +80,7 @@ Game::CreateSocialGroupFromList(
 {
     for (auto group : m_socialGroups)
     {
-        if (group->socialUserGroupType == XblSocialUserGroupType_UserListType && group->localUser == user)
+        if (group->socialUserGroupType == XblSocialUserGroupType_UserListType && group->localUser == AsInspectable(user))
         {
             XblSocialManagerUpdateSocialUserGroup(group, xuidList.data(), (uint32_t)xuidList.size());
             return;
@@ -88,7 +90,7 @@ Game::CreateSocialGroupFromList(
     if( xuidList.size() > 0 )
     {
         XblSocialManagerUserGroup *newGroup;
-        auto hr = XblSocialManagerCreateSocialUserGroupFromList(user, xuidList.data(), (uint32_t)xuidList.size(), &newGroup);
+        auto hr = XblSocialManagerCreateSocialUserGroupFromList(AsInspectable(user), xuidList.data(), (uint32_t)xuidList.size(), &newGroup);
         if (SUCCEEDED(hr))
         {
             m_socialGroups.push_back(newGroup);
@@ -104,7 +106,7 @@ Game::CreateSocialGroupFromFilters(
     )
 {
     XblSocialManagerUserGroup *newGroup;
-    auto hr = XblSocialManagerCreateSocialUserGroupFromFilters(user, presenceFilter, relationshipFilter, &newGroup);
+    auto hr = XblSocialManagerCreateSocialUserGroupFromFilters(AsInspectable(user), presenceFilter, relationshipFilter, &newGroup);
 
     if (SUCCEEDED(hr))
     {
@@ -122,7 +124,7 @@ Game::DestorySocialGroup(
     auto it = m_socialGroups.begin();
     while (it != m_socialGroups.end())
     {
-        if ((*it)->localUser == user && (*it)->socialUserGroupType == XblSocialUserGroupType_UserListType)
+        if ((*it)->localUser == AsInspectable(user) && (*it)->socialUserGroupType == XblSocialUserGroupType_UserListType)
         {
             XblSocialManagerDestroySocialUserGroup(*it);
             it = m_socialGroups.erase(it);
@@ -147,7 +149,7 @@ Game::DestroySocialGroup(
     while (it != m_socialGroups.end())
     {
         auto group = *it;
-        if (group->localUser == user &&
+        if (group->localUser == AsInspectable(user) &&
             group->presenceFilterOfGroup == presenceFilter &&
             group->relationshipFilterOfGroup == relationshipFilter)
         {

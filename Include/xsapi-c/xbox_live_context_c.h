@@ -2,14 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
-#include "pal.h"
 
 struct XblAppConfig;
 
 /// <summary>
 /// Creates an xbl_context_handle used to access Xbox Live services.
 /// </summary>
-/// <param name="user">The Xbox Live user associated with this context.</param>
+/// <param name="user">
+/// The Xbox Live user associated with this context. For XDK this should be an IInspectable pointer
+/// to a Windows::Xbox::System::User.
+/// </param>
 /// <param name="context">The returned Xbox Live context handle.</param>
 /// <returns>Result code for this API operation.</returns>
 STDAPI XblContextCreateHandle(

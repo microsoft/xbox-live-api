@@ -4,9 +4,7 @@
 #include "pch.h"
 #include "xsapi-c/xbox_live_app_config_c.h"
 #include "xsapi-c/xbox_live_context_c.h"
-#if !XDK_API
-#include "user_c.h"
-#endif
+#include "user_internal_c.h"
 #include "xbox_live_context_internal_c.h"
 #include "user_context.h"
 

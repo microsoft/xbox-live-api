@@ -3,9 +3,6 @@
 
 #pragma once
 
-#include "pal.h"
-#include "xsapi-c/errors_c.h"
-
 /// <summary>Defines values used to indicate the device type associate with an XblSocialManagerPresenceTitleRecord.</summary>
 typedef enum XblPresenceDeviceType
 {

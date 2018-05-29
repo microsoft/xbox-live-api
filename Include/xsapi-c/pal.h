@@ -118,7 +118,7 @@ typedef int32_t function_context;
 typedef struct xbl_xbox_live_context* xbl_context_handle;
 
 #if XDK_API
-typedef Windows::Xbox::System::User^ xbl_user_handle;
+typedef struct IInspectable* xbl_user_handle;
 #else
 typedef struct xbl_xbox_live_user* xbl_user_handle;
 #endif

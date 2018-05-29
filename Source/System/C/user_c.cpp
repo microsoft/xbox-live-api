@@ -4,11 +4,12 @@
 #include "pch.h"
 #include "system_c.h"
 #include "user_impl.h"
-#include "user_c.h"
+#include "user_internal_c.h"
 
 using namespace xbox::services;
 using namespace xbox::services::system;
 
+#if !XDK_API
 STDAPI
 XblUserCreateHandleFromSystemUser(
     _In_opt_ Windows::System::User^ creationContext,
@@ -413,3 +414,4 @@ try
     xbox_live_user::remove_sign_out_completed_handler(context);
 }
 CATCH_RETURN_WITH(;)
+#endif // !XDK_API

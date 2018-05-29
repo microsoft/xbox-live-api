@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
-#include <stdint.h>
-#include "pal.h"
 
 /// <summary>
 /// Represents the configuration of an Xbox Live application.
