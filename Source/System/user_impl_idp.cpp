@@ -275,6 +275,7 @@ void user_impl_idp::initialize_provider(
                 }
 
                 AsyncBlock* async = data->async;
+                std::weak_ptr<user_impl_idp> thisWeakPtr(thisPtr);
                 asyncOp->Completed = ref new AsyncOperationCompletedHandler<WebAccountProvider^>(
                     [thisPtr, async](IAsyncOperation<WebAccountProvider^>^ asyncInfo, Windows::Foundation::AsyncStatus status)
                 {
