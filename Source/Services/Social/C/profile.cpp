@@ -61,7 +61,7 @@ try
                 [data, context](xbox_live_result<std::shared_ptr<xbox_user_profile_internal>> result)
             {
                 context->result = std::move(result);
-                auto hr = utils::convert_xbox_live_error_code_to_hresult(result.err());
+                auto hr = utils::convert_xbox_live_error_code_to_hresult(context->result.err());
                 CompleteAsync(data->async, hr, sizeof(XblUserProfile));
             });
             return E_PENDING;
@@ -124,8 +124,8 @@ try
                 [data, context](xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>> result)
             {
                 context->result = std::move(result);
-                auto hr = utils::convert_xbox_live_error_code_to_hresult(result.err());
-                CompleteAsync(data->async, hr, sizeof(XblUserProfile) * result.payload().size());
+                auto hr = utils::convert_xbox_live_error_code_to_hresult(context->result.err());
+                CompleteAsync(data->async, hr, sizeof(XblUserProfile) * context->result.payload().size());
             });
             return E_PENDING;
 
@@ -190,8 +190,8 @@ try
                 [data, context](xbox_live_result<xsapi_internal_vector<std::shared_ptr<xbox_user_profile_internal>>> result)
             {
                 context->result = std::move(result);
-                auto hr = utils::convert_xbox_live_error_code_to_hresult(result.err());
-                CompleteAsync(data->async, hr, sizeof(XblUserProfile) * result.payload().size());
+                auto hr = utils::convert_xbox_live_error_code_to_hresult(context->result.err());
+                CompleteAsync(data->async, hr, sizeof(XblUserProfile) * context->result.payload().size());
             });
             return E_PENDING;
 
