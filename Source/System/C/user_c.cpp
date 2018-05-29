@@ -223,7 +223,7 @@ HRESULT SignInHelper(
         switch (op)
         {
         case AsyncOp_DoWork:
-            context = utils::remove_shared_ptr<SignInContext>(data->context, false);
+            context = utils::get_shared_ptr<SignInContext>(data->context, false);
 
             context->user->userImpl->sign_in_impl(context->showUi, false, data->async->queue,
                 [data, context](xbox_live_result<sign_in_result> result)
@@ -235,13 +235,13 @@ HRESULT SignInHelper(
             return E_PENDING;
 
         case AsyncOp_GetResult:
-            context = utils::remove_shared_ptr<SignInContext>(data->context, false);
+            context = utils::get_shared_ptr<SignInContext>(data->context, false);
             result.status = static_cast<XblSignInStatus>(context->result.payload().status());
             CopyMemory(data->buffer, &result, sizeof(XblSignInResult));
             break;
 
         case AsyncOp_Cleanup:
-            utils::remove_shared_ptr<SignInContext>(data->context);
+            utils::get_shared_ptr<SignInContext>(data->context);
             break;
         }
         return S_OK;
@@ -346,7 +346,7 @@ try
         switch (op)
         {
         case AsyncOp_DoWork:
-            std::shared_ptr<GetTokenAndSignatureContext> context = utils::remove_shared_ptr<GetTokenAndSignatureContext>(data->context);
+            std::shared_ptr<GetTokenAndSignatureContext> context = utils::get_shared_ptr<GetTokenAndSignatureContext>(data->context);
 
             context->user->userImpl->get_token_and_signature(context->httpMethod, 
                 context->url, 
