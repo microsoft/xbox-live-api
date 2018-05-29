@@ -7,14 +7,14 @@ using namespace LongHaulTestApp;
 //////            Tests          //////
 ///////////////////////////////////////
 
-void Game::TestProfileFlow()
+void Game::TestProfileFlow(task_completion_event<void> profileTask)
 {
+    m_profileTask = profileTask;
     if (m_test == 0)
     {
         Log("===== Starting TestProfileFlow =====");
         TestGetUserProfile();
         m_test++;
-        m_test = 3; // todo remove
     }
     else if (m_test == 1)
     {
@@ -30,7 +30,7 @@ void Game::TestProfileFlow()
     {
         m_test = 0;
         Log("===== Finished TestProfileFlow =====");
-        EndTest();
+        m_profileTask.set();
     }
 }
 
@@ -58,7 +58,7 @@ void Game::TestGetUserProfile()
             XblUserProfile profile;
             auto result = XblProfileGetUserProfileResult(asyncBlock, &profile);
 
-            pThis->TestProfileFlow();
+            pThis->TestProfileFlow(pThis->m_profileTask);
         }
         else
         {
@@ -97,7 +97,7 @@ void Game::TestGetUserProfiles()
         {
             pThis->Log(L"[Test] Successfully got user profiles!");
 
-            pThis->TestProfileFlow();
+            pThis->TestProfileFlow(pThis->m_profileTask);
         }
         else
         {
@@ -141,7 +141,7 @@ void Game::TestGetUserProfilesForSocialGroup()
         {
             pThis->Log(L"[Test] Successfully got profiles for this title!");
 
-            pThis->TestProfileFlow();
+            pThis->TestProfileFlow(pThis->m_profileTask);
         }
         else
         {

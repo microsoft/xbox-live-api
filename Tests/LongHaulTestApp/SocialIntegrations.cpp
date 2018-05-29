@@ -6,8 +6,10 @@ using namespace LongHaulTestApp;
 ///////////////////////////////////////
 //////            Tests          //////
 ///////////////////////////////////////
-void Game::TestSocialFlow()
+void Game::TestSocialFlow(task_completion_event<void> socialTask)
 {
+    m_socialTask = socialTask;
+
     Log("===== Starting TestSocialFlow =====");
     GetSocialRelationship();
 }
@@ -117,7 +119,7 @@ void Game::TestResputationFeedback()
             pThis->Log(L"[Test] Successfully got the social relationship!");
 
             pThis->Log("===== Finished TestSocialFlow =====");
-            pThis->EndTest();
+            pThis->m_socialTask.set();
         }
         else
         {
