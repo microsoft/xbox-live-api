@@ -277,10 +277,11 @@ void user_impl_idp::initialize_provider(
                 AsyncBlock* async = data->async;
                 std::weak_ptr<user_impl_idp> thisWeakPtr(thisPtr);
                 asyncOp->Completed = ref new AsyncOperationCompletedHandler<WebAccountProvider^>(
-                    [thisPtr, async](IAsyncOperation<WebAccountProvider^>^ asyncInfo, Windows::Foundation::AsyncStatus status)
+                    [thisWeakPtr, async](IAsyncOperation<WebAccountProvider^>^ asyncInfo, Windows::Foundation::AsyncStatus status)
                 {
                     UNREFERENCED_PARAMETER(status);
-                    if (thisPtr == nullptr)
+                    std::shared_ptr<user_impl_idp> pThis(thisWeakPtr.lock());
+                    if (pThis == nullptr)
                     {
                         throw std::runtime_error("user_impl shutting down");
                     }
@@ -291,7 +292,7 @@ void user_impl_idp::initialize_provider(
                         throw std::runtime_error("Xbox Live identity provider is not found");
                     }
 
-                    thisPtr->m_provider = provider;
+                    pThis->m_provider = provider;
                     CompleteAsync(async, S_OK, 0);
                 });
             }
