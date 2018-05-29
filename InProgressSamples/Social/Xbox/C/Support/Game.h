@@ -167,11 +167,6 @@ private:
         _In_ Windows::Xbox::System::User^ user,
         _In_ bool toggle
         );
-
-    IInspectable* AsInspectable(Platform::Object^ object)
-    {
-        return reinterpret_cast<IInspectable*>(object);
-    }
 };
 
 extern Game* g_sampleInstance;

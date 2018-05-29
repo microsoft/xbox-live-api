@@ -12,6 +12,11 @@ using namespace Windows::Foundation;
 using namespace xbox::services;
 using namespace xbox::services::social::manager;
 
+IInspectable* AsInspectable(Platform::Object^ object)
+{
+    return reinterpret_cast<IInspectable*>(object);
+}
+
 void
 Game::InitializeSocialManager(Windows::Foundation::Collections::IVectorView<Windows::Xbox::System::User^>^ userList)
 {
