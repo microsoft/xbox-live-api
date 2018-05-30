@@ -13,9 +13,8 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 using namespace xbox::services::system;
 
 xbox_web_socket_client::xbox_web_socket_client()
+    : m_websocket(nullptr)
 {
-    HCWebSocketCreate(&m_websocket);
-    get_xsapi_singleton()->m_websocketHandles[m_websocket] = this;
 }
 
 xbox_web_socket_client::~xbox_web_socket_client()
@@ -25,7 +24,10 @@ xbox_web_socket_client::~xbox_web_socket_client()
     {
         singleton->m_websocketHandles.erase(m_websocket);
     }
-    HCWebSocketCloseHandle(m_websocket);
+    if (m_websocket != nullptr)
+    {
+        HCWebSocketCloseHandle(m_websocket);
+    }
 }
 
 void xbox_web_socket_client::connect(
@@ -38,6 +40,9 @@ void xbox_web_socket_client::connect(
     THROW_CPP_INVALIDARGUMENT_IF_NULL(userContext);
 
     std::weak_ptr<xbox_web_socket_client> thisWeakPtr = shared_from_this();
+
+    HCWebSocketCreate(&m_websocket);
+    get_xsapi_singleton()->m_websocketHandles[m_websocket] = thisWeakPtr;
 
     xsapi_internal_string callerContext = userContext->caller_context();
     userContext->get_auth_result("GET", uri, xsapi_internal_string(), xsapi_internal_string(), false, get_xsapi_singleton()->m_asyncQueue, 
@@ -81,7 +86,11 @@ void xbox_web_socket_client::connect(
                 auto iter = singleton->m_websocketHandles.find(websocket);
                 if (iter != singleton->m_websocketHandles.end())
                 {
-                    iter->second->m_receiveHandler(incomingBodyString);
+                    auto pThis = iter->second.lock();
+                    if (pThis != nullptr)
+                    {
+                        pThis->m_receiveHandler(incomingBodyString);
+                    }
                 }
                 else
                 {
@@ -103,7 +112,11 @@ void xbox_web_socket_client::connect(
                 auto iter = singleton->m_websocketHandles.find(websocket);
                 if (iter != singleton->m_websocketHandles.end())
                 {
-                    iter->second->m_closeHandler(closeStatus);
+                    auto pThis = iter->second.lock();
+                    if (pThis != nullptr)
+                    {
+                        pThis->m_closeHandler(closeStatus);
+                    }
                 }
                 else
                 {
@@ -114,7 +127,7 @@ void xbox_web_socket_client::connect(
             }
             catch (...)
             {
-                LOG_ERROR("Exception happened in web socket receiving handler.");
+                LOG_ERROR("Exception happened in web socket close handler.");
             }
         });
 
@@ -154,7 +167,7 @@ void xbox_web_socket_client::send(
 
 void xbox_web_socket_client::close()
 {
-    HCWebSocketCloseHandle(m_websocket);
+    HCWebSocketDisconnect(m_websocket);
 }
 
 void xbox_web_socket_client::set_received_handler(

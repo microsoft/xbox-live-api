@@ -52,7 +52,7 @@ initiator::initiator()
     logger::create_logger();
 
     HCTraceSetClientCallback(XSAPI_HCTraceCallback);
-    HCTraceSetTraceToDebugger(false);
+    HCTraceSetTraceToDebugger(true);
 
 #if UNIT_TEST_SERVICES
     logger::get_logger()->set_log_level(log_level::debug);
