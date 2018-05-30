@@ -98,6 +98,7 @@ namespace LongHaulTestApp
         unsigned long long m_curDeltaMem;
         unsigned long long m_lastDeltaMem;
         uint32_t m_testDelay;
+        uint64_t m_testsRun;
 
     private:
         xbl_user_handle m_user;
@@ -143,8 +144,6 @@ namespace LongHaulTestApp
         string TaceLevelToString(xbox::services::xbox_services_diagnostics_trace_level traceLevel);
 
         // Vars
-        uint64_t m_testsRun;
-
         TestArea m_testArea;
         bool m_testing;
         time_t m_time;

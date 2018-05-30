@@ -13,7 +13,7 @@ using namespace LongHaulTestApp;
 
 void Game::TestSocialManagerFlow()
 {
-    // todo remove m_testGroupType = (XblSocialUserGroupType)(((int)m_testGroupType + 1) % NUM_OF_USER_GROUP_TYPES);
+    m_testGroupType = (XblSocialUserGroupType)(((int)m_testGroupType + 1) % NUM_OF_USER_GROUP_TYPES);
 
     Log("===== Starting TestSocialManagerFlow =====");
     Log("[Test] " + GroupTypeToString() + " group type");
@@ -55,9 +55,21 @@ void Game::RemoveLocalUserFromSocialManager()
 
 void Game::CreateSocialUserGroup()
 {
-    Log("[Test] Creating social user group with combination " + PresenceFilterToString() + ", " + RelationshipFilterToString());
-    Log("XblSocialManagerCreateSocialUserGroupFromFilters");
-    XblSocialManagerCreateSocialUserGroupFromFilters(m_user, m_presenceFilter, m_relationshipFilter, &m_socialUserGroup);
+    if (m_testGroupType == XblSocialUserGroupType::XblSocialUserGroupType_FilterType)
+    {
+        Log("[Test] Creating social user group with combination " + PresenceFilterToString() + ", " + RelationshipFilterToString());
+        Log("XblSocialManagerCreateSocialUserGroupFromFilters");
+        XblSocialManagerCreateSocialUserGroupFromFilters(m_user, m_presenceFilter, m_relationshipFilter, &m_socialUserGroup);
+    }
+    else
+    {
+        std::vector<uint64_t> xuids;
+        xuids.push_back(m_xuid);
+
+        Log("XblSocialManagerCreateSocialUserGroupFromList");
+        XblSocialManagerCreateSocialUserGroupFromList(m_user, xuids.data(), (uint32_t)xuids.size(), &m_socialUserGroup);
+    }
+
 
     Game* pThis = this;
     WaitForSocialEvent(XblSocialManagerEventType::XblSocialManagerEventType_SocialUserGroupLoaded, [pThis](XblSocialManagerEvent e) {
