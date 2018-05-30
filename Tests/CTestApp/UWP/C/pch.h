@@ -23,4 +23,4 @@
 #define XBOX_LIVE_CREATORS_SDK
 #include "xsapi\services.h"
 #include "xsapi-c\services_c.h"
-#include "system_c.h"
+#include "system_c.h"  // This sample is using an internal header.  UWP isn't officially supported by the C API yet since this isn't the final design
