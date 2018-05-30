@@ -14,7 +14,6 @@ void Game::TestProfileFlow()
         Log("===== Starting TestProfileFlow =====");
         TestGetUserProfile();
         m_test++;
-        m_test = 3; // todo remove
     }
     else if (m_test == 1)
     {
@@ -47,16 +46,13 @@ void Game::TestGetUserProfile()
     {
         Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
 
-        size_t size = 0;
-        auto result = GetAsyncResultSize(asyncBlock, &size);
+        pThis->Log(L"XblProfileGetUserProfileResult");
+        XblUserProfile profile;
+        auto result = XblProfileGetUserProfileResult(asyncBlock, &profile);
 
         if (SUCCEEDED(result))
         {
             pThis->Log(L"[Test] Successfully got the user profile!");
-
-            pThis->Log(L"XblProfileGetUserProfileResult");
-            XblUserProfile profile;
-            auto result = XblProfileGetUserProfileResult(asyncBlock, &profile);
 
             pThis->TestProfileFlow();
         }

@@ -166,7 +166,7 @@ void Renderer::RenderEventLog(
     WCHAR text[1024];
     FXMVECTOR TITLE_COLOR = Colors::White;
 
-    swprintf_s(text, 128, L"Press S to start tests");
+    swprintf_s(text, 128, L"Press S to sign in");
     m_font->DrawString(m_sprites.get(), text, XMFLOAT2(1 * fGridXColumn1, 1 * fTextHeight), Colors::White, 0.0f, XMFLOAT2(0, 0), scale);
     swprintf_s(text, 128, L"Press T to start tests with normal delay");
     m_font->DrawString(m_sprites.get(), text, XMFLOAT2(1 * fGridXColumn1, 2 * fTextHeight), Colors::White, 0.0f, XMFLOAT2(0, 0), scale);
@@ -195,12 +195,16 @@ void Renderer::RenderEventLog(
 
 
     stringstream_t stream;
-    stream << "Cur PeakVirtualMemorySizeInBytes: " << g_sampleInstance->m_curDeltaMem;
+    stream << "Cur PeakVirtualMemorySizeInBytes:  " << g_sampleInstance->m_curDeltaMem;
     m_font->DrawString(m_sprites.get(), stream.str().c_str(), XMFLOAT2(15 * fGridXColumn1, 2 * fTextHeight), Colors::White, 0.0f, XMFLOAT2(0, 0), scale);
 
     stringstream_t stream2;
     stream2 << "Prev PeakVirtualMemorySizeInBytes: " << g_sampleInstance->m_lastDeltaMem;
     m_font->DrawString(m_sprites.get(), stream2.str().c_str(), XMFLOAT2(15 * fGridXColumn1, 3 * fTextHeight), Colors::White, 0.0f, XMFLOAT2(0, 0), scale);
+    
+    stringstream_t stream3;
+    stream3 << "Tests ran: " << g_sampleInstance->m_testsRun;
+    m_font->DrawString(m_sprites.get(), stream3.str().c_str(), XMFLOAT2(15 * fGridXColumn1, 6 * fTextHeight), Colors::White, 0.0f, XMFLOAT2(0, 0), scale);
 }
 
 void Renderer::RenderPerfCounters(
@@ -255,107 +259,5 @@ void Renderer::RenderPerfCounters(
         m_font->DrawString(m_sprites.get(), text, XMFLOAT2(fGridXColumn1 + 450.0f, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
 
         verticalBaseOffset += fTextHeight;
-    }
-}
-
-std::wstring
-ConvertPresenceUserStateToString(
-    _In_ XblPresenceUserState presenceState
-)
-{
-    switch (presenceState)
-    {
-    case XblPresenceUserState_Away: return _T("away");
-    case XblPresenceUserState_Offline: return _T("offline");
-    case XblPresenceUserState_Online: return _T("online");
-    default:
-    case XblPresenceUserState_Unknown: return _T("unknown");
-    }
-}
-
-std::wstring
-ConvertPresenceFilterToString(XblPresenceFilter presenceFilter)
-{
-    switch (presenceFilter)
-    {
-    case XblPresenceFilter_Unknown: return _T("unknown");
-    case XblPresenceFilter_TitleOnline: return _T("title_online");
-    case XblPresenceFilter_TitleOffline: return _T("title_offline");
-    case XblPresenceFilter_AllOnline: return _T("all_online");
-    case XblPresenceFilter_AllOffline: return _T("all_offline");
-    case XblPresenceFilter_AllTitle: return _T("all_title");
-    default:
-    case XblPresenceFilter_All: return _T("all");
-    }
-}
-
-std::wstring
-ConvertRelationshipFilterToString(_In_ XblRelationshipFilter relationshipFilter)
-{
-    switch (relationshipFilter)
-    {
-    case XblRelationshipFilter_Favorite: return _T("favorite");
-    default:
-    case XblRelationshipFilter_Friends: return _T("friends");
-    }
-}
-
-void
-Renderer::RenderSocialGroupList(
-    FLOAT fGridXColumn1,
-    FLOAT fGridXColumn2,
-    FLOAT fGridXColumn3,
-    FLOAT fGridY,
-    FLOAT fTextHeight,
-    FLOAT scale,
-    const DirectX::XMVECTORF32& TEXT_COLOR,
-    std::vector<XblSocialManagerUserGroup*> nodeList
-)
-{
-    WCHAR text[1024];
-    float verticalBaseOffset = 2 * fTextHeight;
-
-    for (auto node : nodeList)
-    {
-        m_font->DrawString(m_sprites.get(), L"_________________________________________", XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-        verticalBaseOffset += fTextHeight;
-        if (node->socialUserGroupType == XblSocialUserGroupType_FilterType)
-        {
-            swprintf_s(text, ARRAYSIZE(text), L"Group from filter: %s %s",
-                ConvertPresenceFilterToString(node->presenceFilterOfGroup).c_str(),
-                ConvertRelationshipFilterToString(node->relationshipFilterOfGroup).c_str()
-            );
-            m_font->DrawString(m_sprites.get(), text, XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-            verticalBaseOffset += fTextHeight;
-        }
-        else
-        {
-            m_font->DrawString(m_sprites.get(), L"Group from custom list", XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-            verticalBaseOffset += fTextHeight;
-        }
-
-        if (node->usersCount == 0)
-        {
-            m_font->DrawString(m_sprites.get(), L"No friends found", XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-            verticalBaseOffset += fTextHeight;
-        }
-        else
-        {
-            std::vector<XblSocialManagerUser> userList(node->usersCount);
-            XblSocialManagerUserGroupGetUsers(node, userList.data());
-
-            for (const auto& user : userList)
-            {
-                stringstream_t titleCount;
-                titleCount << user.presenceRecord.presenceTitleRecordCount;
-                auto titleCountStr = titleCount.str();
-
-                m_font->DrawString(m_sprites.get(), utility::conversions::utf8_to_utf16(user.gamertag).data(), XMFLOAT2(fGridXColumn1, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-                m_font->DrawString(m_sprites.get(), ConvertPresenceUserStateToString(user.presenceRecord.userState).c_str(), XMFLOAT2(fGridXColumn2, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-                m_font->DrawString(m_sprites.get(), titleCountStr.c_str(), XMFLOAT2(fGridXColumn3, fGridY + verticalBaseOffset), TEXT_COLOR, 0.0f, XMFLOAT2(0, 0), scale);
-
-                verticalBaseOffset += fTextHeight;
-            }
-        }
     }
 }
