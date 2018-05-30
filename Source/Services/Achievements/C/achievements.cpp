@@ -133,7 +133,7 @@ try
     *hasNext = resultHandle->internalResult != nullptr && resultHandle->internalResult->has_next();
     return S_OK;
 }
-CATCH_RETURN_WITH(false)
+CATCH_RETURN()
 
 STDAPI
 XblAchievementsResultGetNextAsync(

@@ -402,7 +402,7 @@ typedef struct XblReputationFeedbackItem
     XblReputationFeedbackType feedbackType;
 
     /// <summary>
-    /// UTF-8 encoded User supplied text added to explain the reason for the feedback.
+    /// UTF-8 encoded user supplied text added to explain the reason for the feedback.
     /// </summary>
     _Field_z_ const char* reasonMessage;
 

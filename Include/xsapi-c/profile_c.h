@@ -14,7 +14,7 @@ typedef struct XblUserProfile
     uint64_t xboxUserId;
     
     /// <summary>
-    /// The UTF-8 user's display name to be used in application UI.  This value is privacy gated and could
+    /// The UTF-8 encoded user's display name to be used in application UI.  This value is privacy gated and could
     /// be a user's real name or their Gamertag.
     /// </summary>
     char appDisplayName[XBL_DISPLAY_NAME_CHAR_SIZE];

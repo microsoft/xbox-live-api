@@ -470,8 +470,8 @@ STDAPI XblAchievementsResultGetNextResult(
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>
 /// <param name="titleId">The title ID.</param>
-/// <param name="serviceConfigurationId">The UTF-8 service configuration ID (SCID) for the title.</param>
-/// <param name="achievementId">The UTF-8 achievement ID as defined by XDP or Dev Center.</param>
+/// <param name="serviceConfigurationId">The UTF-8 encoded service configuration ID (SCID) for the title.</param>
+/// <param name="achievementId">The UTF-8 encoded achievement ID as defined by XDP or Dev Center.</param>
 /// <param name="percentComplete">The completion percentage of the achievement to indicate progress.
 /// Valid values are from 1 to 100. Set to 100 to unlock the achievement.
 /// Progress will be set by the server to the highest value sent</param>
