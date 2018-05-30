@@ -325,10 +325,10 @@ STDAPI
 XblUserGetTokenAndSignature(
     _In_ AsyncBlock* async,
     _In_ xbl_user_handle user,
-    _In_ UTF8CSTR httpMethod,
-    _In_ UTF8CSTR url,
-    _In_ UTF8CSTR headers,
-    _In_ UTF8CSTR requestBodyString,
+    _In_z_ const char* httpMethod,
+    _In_z_ const char* url,
+    _In_z_ const char* headers,
+    _In_z_ const char* requestBodyString,
     _In_ XblGetTokenAndSignatureCallback callback
     ) XBL_NOEXCEPT
 try

@@ -14,19 +14,19 @@ typedef struct XblAppConfig
     uint32_t titleId;
 
     /// <summary>
-    /// Service config id of the app.
+    /// UTF-8 encoded service config id of the app.
     /// </summary>
-    UTF8CSTR scid;
+    _Field_z_ const char* scid;
 
     /// <summary>
-    /// Xbox Live environment being used, it is empty before you sign in or using production.
+    /// UTF-8 encoded Xbox Live environment being used, it is empty before you sign in or using production.
     /// </summary>
-    UTF8CSTR environment;
+    _Field_z_ const char* environment;
 
     /// <summary>
-    /// The sandbox such as "XDKS.1", it is empty until you sign in.
+    /// The UTF-8 encoded sandbox such as "XDKS.1", it is empty until you sign in.
     /// </summary>
-    UTF8CSTR sandbox;
+    _Field_z_ const char* sandbox;
 } XblAppConfig;
 
 /// <summary>

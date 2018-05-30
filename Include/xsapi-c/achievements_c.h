@@ -101,9 +101,9 @@ typedef enum XblAchievementRewardType
 typedef struct XblAchievementTitleAssociation
 {
     /// <summary>
-    /// The localized name of the title.
+    /// The UTF-8 encoded localized name of the title
     /// </summary>
-    UTF8CSTR name;
+    _Field_z_ const char* name;
 
     /// <summary>
     /// The title ID.
@@ -117,21 +117,21 @@ typedef struct XblAchievementTitleAssociation
 typedef struct XblAchievementRequirement
 {
     /// <summary>
-    /// The achievement requirement ID.
+    /// The UTF-8 encoded achievement requirement ID.
     /// </summary>
-    UTF8CSTR id;
+    _Field_z_ const char* id;
 
     /// <summary>
-    /// A value that indicates the current progress of the player towards meeting
+    /// A UTF-8 encoded value that indicates the current progress of the player towards meeting
     /// the requirement.
     /// </summary>
-    UTF8CSTR currentProgressValue;
+    _Field_z_ const char* currentProgressValue;
 
     /// <summary>
-    /// The target progress value that the player must reach in order to meet
+    /// The UTF-8 encoded target progress value that the player must reach in order to meet
     /// the requirement.
     /// </summary>
-    UTF8CSTR targetProgressValue;
+    _Field_z_ const char* targetProgressValue;
 } XblAchievementRequirement;
 
 /// <summary>
@@ -178,9 +178,9 @@ typedef struct XblAchievementTimeWindow
 typedef struct XblAchievementMediaAsset
 {
     /// <summary>
-    /// The name of the media asset, such as "tile01".
+    /// The UTF-8 encoded name of the media asset, such as "tile01".
     /// </summary>
-    UTF8CSTR name;
+    _Field_z_ const char* name;
 
     /// <summary>
     /// The type of media asset.
@@ -188,9 +188,9 @@ typedef struct XblAchievementMediaAsset
     XblAchievementMediaAssetType mediaAssetType;
 
     /// <summary>
-    /// The URL of the media asset.
+    /// The UTF-8 encoded URL of the media asset.
     /// </summary>
-    UTF8CSTR url;
+    _Field_z_ const char* url;
 } XblAchievementMediaAsset;
 
 /// <summary>
@@ -199,19 +199,19 @@ typedef struct XblAchievementMediaAsset
 typedef struct XblAchievementReward
 {
     /// <summary>
-    /// The localized reward name.
+    /// The UTF-8 encoded localized reward name.
     /// </summary>
-    UTF8CSTR name;
+    _Field_z_ const char* name;
 
     /// <summary>
-    /// The description of the reward.
+    /// The UTF-8 encoded description of the reward.
     /// </summary>
-    UTF8CSTR description;
+    _Field_z_ const char* description;
 
     /// <summary>
-    /// The title-defined reward value (data type and content varies by reward type).
+    /// The UTF-8 encoded title-defined reward value (data type and content varies by reward type).
     /// </summary>
-    UTF8CSTR value;
+    _Field_z_ const char* value;
 
     /// <summary>
     /// The reward type.
@@ -219,9 +219,9 @@ typedef struct XblAchievementReward
     XblAchievementRewardType rewardType;
 
     /// <summary>
-    /// The property type of the reward value string.
+    /// The UTF-8 encoded property type of the reward value string.
     /// </summary>
-    UTF8CSTR valueType;
+    _Field_z_ const char* valueType;
 
     /// <summary>
     /// The media asset associated with the reward.
@@ -239,19 +239,19 @@ typedef struct XblAchievementReward
 typedef struct XblAchievement
 {
     /// <summary>
-    /// The achievement ID. Can be a uint or a guid.
+    /// The UTF-8 encoded achievement ID. Can be a uint or a guid.
     /// </summary>
-    UTF8CSTR id;
+    _Field_z_ const char* id;
 
     /// <summary>
-    /// The ID of the service configuration set associated with the achievement.
+    /// The UTF-8 encoded ID of the service configuration set associated with the achievement.
     /// </summary>
-    UTF8CSTR serviceConfigurationId;
+    _Field_z_ const char* serviceConfigurationId;
 
     /// <summary>
-    /// The localized achievement name.
+    /// The UTF-8 encoded localized achievement name.
     /// </summary>
-    UTF8CSTR name;
+    _Field_z_ const char* name;
 
     /// <summary>
     /// The game/app titles associated with the achievement.
@@ -285,9 +285,9 @@ typedef struct XblAchievement
     uint32_t mediaAssetsCount;
 
     /// <summary>
-    /// The collection of platforms that the achievement is available on.
+    /// The UTF-8 encoded collection of platforms that the achievement is available on.
     /// </summary>
-    UTF8CSTR* platformsAvailableOn;
+    _Field_z_ const char** platformsAvailableOn;
 
     /// <summary>
     /// The size of <ref>platformsAvailableOn</ref>.
@@ -300,20 +300,20 @@ typedef struct XblAchievement
     bool isSecret;
 
     /// <summary>
-    /// The description of the unlocked achievement.
+    /// The UTF-8 encoded description of the unlocked achievement.
     /// </summary>
-    UTF8CSTR unlockedDescription;
+    _Field_z_ const char* unlockedDescription;
 
     /// <summary>
-    /// The description of the locked achievement.
+    /// The UTF-8 encoded description of the locked achievement.
     /// </summary>
-    UTF8CSTR lockedDescription;
+    _Field_z_ const char* lockedDescription;
 
     /// <summary>
-    /// The product_id the achievement was released with. This is a globally unique identifier that
+    /// The UTF-8 encoded product_id the achievement was released with. This is a globally unique identifier that
     /// may correspond to an application, downloadable content, etc.
     /// </summary>
-    UTF8CSTR productId;
+    _Field_z_ const char* productId;
 
     /// <summary>
     /// The type of achievement, such as a challenge achievement.
@@ -346,10 +346,10 @@ typedef struct XblAchievement
     uint64_t estimatedUnlockTime;
 
     /// <summary>
-    /// A deeplink for clients that enables the title to launch at a desired starting point
+    /// A UTF-8 encoded deeplink for clients that enables the title to launch at a desired starting point
     /// for the achievement.
     /// </summary>
-    UTF8CSTR deepLink;
+    _Field_z_ const char* deepLink;
 
     /// <summary>
     /// A value that indicates whether or not the achievement is revoked by enforcement.
@@ -470,8 +470,8 @@ STDAPI XblAchievementsResultGetNextResult(
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>
 /// <param name="titleId">The title ID.</param>
-/// <param name="serviceConfigurationId">The service configuration ID (SCID) for the title.</param>
-/// <param name="achievementId">The achievement ID as defined by XDP or Dev Center.</param>
+/// <param name="serviceConfigurationId">The UTF-8 encoded service configuration ID (SCID) for the title.</param>
+/// <param name="achievementId">The UTF-8 encoded achievement ID as defined by XDP or Dev Center.</param>
 /// <param name="percentComplete">The completion percentage of the achievement to indicate progress.
 /// Valid values are from 1 to 100. Set to 100 to unlock the achievement.
 /// Progress will be set by the server to the highest value sent</param>
@@ -483,8 +483,8 @@ STDAPI XblAchievementsUpdateAchievementAsync(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_opt_ uint32_t* titleId,
-    _In_opt_ UTF8CSTR serviceConfigurationId,
-    _In_ UTF8CSTR achievementId,
+    _In_opt_z_ const char* serviceConfigurationId,
+    _In_z_ const char* achievementId,
     _In_ uint32_t percentComplete
     ) XBL_NOEXCEPT;
 
@@ -494,8 +494,8 @@ STDAPI XblAchievementsUpdateAchievementAsync(
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>
-/// <param name="serviceConfigurationId">The service configuration ID (SCID) for the title.</param>
-/// <param name="achievementId">The unique identifier of the Achievement as defined by XDP or Dev Center.</param>
+/// <param name="serviceConfigurationId">The UTF-8 encoded service configuration ID (SCID) for the title.</param>
+/// <param name="achievementId">The UTF-8 encoded unique identifier of the Achievement as defined by XDP or Dev Center.</param>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>
 /// This method calls V2 GET /users/xuid({xuid})/achievements/{scid}/{achievementId}.
@@ -504,8 +504,8 @@ STDAPI XblAchievementsGetAchievementAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
-    _In_ UTF8CSTR serviceConfigurationId,
-    _In_ UTF8CSTR achievementId
+    _In_z_ const char* serviceConfigurationId,
+    _In_z_ const char* achievementId
     ) XBL_NOEXCEPT;
 
 /// <summary>

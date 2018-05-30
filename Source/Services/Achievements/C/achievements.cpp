@@ -133,7 +133,7 @@ try
     *hasNext = resultHandle->internalResult != nullptr && resultHandle->internalResult->has_next();
     return S_OK;
 }
-CATCH_RETURN_WITH(false)
+CATCH_RETURN()
 
 STDAPI
 XblAchievementsResultGetNextAsync(
@@ -211,8 +211,8 @@ STDAPI XblAchievementsUpdateAchievementAsync(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_opt_ uint32_t* titleId,
-    _In_opt_ UTF8CSTR serviceConfigurationId,
-    _In_ UTF8CSTR achievementId,
+    _In_opt_z_ const char* serviceConfigurationId,
+    _In_ const char* achievementId,
     _In_ uint32_t percentComplete
     ) XBL_NOEXCEPT
 try
@@ -296,8 +296,8 @@ STDAPI XblAchievementsGetAchievementAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
-    _In_ UTF8CSTR serviceConfigurationId,
-    _In_ UTF8CSTR achievementId
+    _In_ const char* serviceConfigurationId,
+    _In_ const char* achievementId
     ) XBL_NOEXCEPT
 try
 {

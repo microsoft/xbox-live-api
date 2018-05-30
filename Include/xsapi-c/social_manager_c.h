@@ -110,17 +110,17 @@ typedef struct XblTitleHistory
 typedef struct XblPreferredColor
 {
     /// <summary>
-    /// Users primary color
+    /// UTF-8 encoded user's primary color
     /// </summary>
     char primaryColor[XBL_COLOR_CHAR_SIZE];
 
     /// <summary>
-    /// Users secondary color
+    /// UTF-8 encoded user's secondary color
     /// </summary>
     char secondaryColor[XBL_COLOR_CHAR_SIZE];
 
     /// <summary>
-    /// Users tertiary color
+    /// UTF-8 encoded user's tertiary color
     /// </summary>
     char tertiaryColor[XBL_COLOR_CHAR_SIZE];
 } XblPreferredColor;
@@ -138,7 +138,7 @@ typedef struct XblSocialManagerPresenceTitleRecord
     bool isTitleActive;
 
     /// <summary>
-    /// The formatted and localized presence string.
+    /// The UTF-8 encoded formatted and localized presence string.
     /// </summary>
     char presenceText[XBL_RICH_PRESENCE_CHAR_SIZE];
 
@@ -200,17 +200,17 @@ typedef struct XblSocialManagerUser
     bool isFollowedByCaller;
 
     /// <summary>
-    /// The display name
+    /// The UTF-8 encoded display name
     /// </summary>
     char displayName[XBL_DISPLAY_NAME_CHAR_SIZE];
 
     /// <summary>
-    /// The real name
+    /// The UTF-8 encoded real name
     /// </summary>
     char realName[XBL_REAL_NAME_CHAR_SIZE];
 
     /// <summary>
-    /// The display pic uri
+    /// The UTF-8 encoded display pic uri
     /// </summary>
     char displayPicUrlRaw[XBL_DISPLAY_PIC_URL_RAW_CHAR_SIZE];
 
@@ -220,12 +220,12 @@ typedef struct XblSocialManagerUser
     bool useAvatar;
 
     /// <summary>
-    /// Players gamerscore
+    /// UTF-8 encoded player's gamerscore
     /// </summary>
     char gamerscore[XBL_GAMERSCORE_CHAR_SIZE];
 
     /// <summary>
-    /// Players gamertag
+    /// UTF-8 encoded player's gamertag
     /// </summary>
     char gamertag[XBL_GAMERTAG_CHAR_SIZE];
 

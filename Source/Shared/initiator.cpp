@@ -19,11 +19,11 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 void XSAPI_HCTraceCallback(
-    _In_ UTF8CSTR areaName,
+    _In_ const char* areaName,
     _In_ enum HCTraceLevel level,
     _In_ uint64_t threadId,
     _In_ uint64_t timestamp,
-    _In_ UTF8CSTR message
+    _In_ const char* message
     )
 {
     UNREFERENCED_PARAMETER(timestamp);

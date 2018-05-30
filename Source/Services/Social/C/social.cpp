@@ -31,7 +31,7 @@ struct xbl_social_relationship_result
             items[i].isFollowingCaller = internalItems[i]->is_following_caller();
             items[i].socialNetworksCount = static_cast<uint32_t>(internalItems[i]->social_networks().size());
 
-            items[i].socialNetworks = (UTF8CSTR*)xsapi_memory::mem_alloc(sizeof(UTF8CSTR) * items[i].socialNetworksCount);
+            items[i].socialNetworks = (const char**)xsapi_memory::mem_alloc(sizeof(const char*) * items[i].socialNetworksCount);
             for (uint32_t j = 0; j < items[i].socialNetworksCount; ++j)
             {
                 items[i].socialNetworks[j] = internalItems[i]->social_networks()[j].data();
@@ -327,9 +327,9 @@ STDAPI XblSocialSubmitReputationFeedbackAsync(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ XblReputationFeedbackType reputationFeedbackType,
-    _In_opt_ UTF8CSTR sessionName,
-    _In_opt_ UTF8CSTR reasonMessage,
-    _In_opt_ UTF8CSTR evidenceResourceId
+    _In_opt_z_ const char* sessionName,
+    _In_opt_z_ const char* reasonMessage,
+    _In_opt_z_ const char* evidenceResourceId
     ) XBL_NOEXCEPT
 try
 {
