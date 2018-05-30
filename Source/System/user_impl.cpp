@@ -12,7 +12,6 @@
 #endif
 
 using namespace std;
-using namespace pplx;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
