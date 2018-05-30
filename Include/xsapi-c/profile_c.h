@@ -14,13 +14,13 @@ typedef struct XblUserProfile
     uint64_t xboxUserId;
     
     /// <summary>
-    /// The user's display name to be used in application UI.  This value is privacy gated and could
+    /// The UTF-8 user's display name to be used in application UI.  This value is privacy gated and could
     /// be a user's real name or their Gamertag.
     /// </summary>
     char appDisplayName[XBL_DISPLAY_NAME_CHAR_SIZE];
 
     /// <summary>
-    /// Encoded Uri for the user's display picture to be used in application UI.
+    /// UTF-8 encoded Uri for the user's display picture to be used in application UI.
     /// The Uri is a resizable Uri. It can be used to specify one of the following sizes and formats by appending &apos;&amp;format={format}&amp;w={width}&amp;h={height}:
     /// Format: png
     /// Width   Height
@@ -31,13 +31,13 @@ typedef struct XblUserProfile
     char appDisplayPictureResizeUri[XBL_DISPLAY_PIC_URL_RAW_CHAR_SIZE];
 
     /// <summary>
-    /// The user's display name to be used in game UI.  This value is privacy gated and could
+    /// The UTF-8 encoded user's display name to be used in game UI.  This value is privacy gated and could
     /// be a user's real name or their Gamertag.
     /// </summary>
     char gameDisplayName[XBL_DISPLAY_NAME_CHAR_SIZE];
 
     /// <summary>
-    /// Encoded Uri for the user's display picture to be used in games.
+    /// UTF-8 encoded Uri for the user's display picture to be used in games.
     /// The Uri is a resizable Uri. It can be used to specify one of the following sizes and formats by appending &apos;&amp;format={format}&amp;w={width}&amp;h={height}:
     /// Format: png
     /// Width   Height
@@ -48,12 +48,12 @@ typedef struct XblUserProfile
     char gameDisplayPictureResizeUri[XBL_DISPLAY_PIC_URL_RAW_CHAR_SIZE];
 
     /// <summary>
-    /// The user's Gamerscore.
+    /// The UTF-8 encoded user's Gamerscore.
     /// </summary>
     char gamerscore[XBL_GAMERSCORE_CHAR_SIZE];
 
     /// <summary>
-    /// The user's Gamertag.
+    /// The UTF-8 encoded user's Gamertag.
     /// </summary>
     char gamertag[XBL_GAMERTAG_CHAR_SIZE];
 } XblUserProfile;
@@ -124,12 +124,12 @@ STDAPI XblProfileGetUserProfilesResult(
 /// </summary>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
-/// <param name="socialGroup">The name of the social group of users to search. Options are "Favorites" and "People".</param>
+/// <param name="socialGroup">The UTF-8 encoded name of the social group of users to search. Options are "Favorites" and "People".</param>
 /// <remarks>Calls V2 GET /users/{userId}/profile/settings/people/{socialGroup}</remarks>
 STDAPI XblProfileGetUserProfilesForSocialGroupAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ UTF8CSTR socialGroup
+    _In_z_ const char* socialGroup
     ) XBL_NOEXCEPT;
 
 /// <summary>

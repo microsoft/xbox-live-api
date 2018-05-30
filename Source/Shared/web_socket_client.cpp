@@ -73,7 +73,7 @@ void xbox_web_socket_client::connect(
         }
         HCWebSocketSetHeader(pThis->m_websocket, "User-Agent", userAgent.data());
 
-        HCWebSocketSetFunctions([](hc_websocket_handle_t websocket, UTF8CSTR incomingBodyString)
+        HCWebSocketSetFunctions([](hc_websocket_handle_t websocket, _In_z_ const char* incomingBodyString)
         {
             try
             {

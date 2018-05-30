@@ -74,7 +74,7 @@ xbox_service_call_routed_event_args_internal::xbox_service_call_routed_event_arg
     // Possible TODO. For intermediate call routed calls we don't have access to many of the
     // fields. Could expose them in libHttpClient if they are needed.
 
-    UTF8CSTR responseBody;
+    const char* responseBody;
     HCHttpCallResponseGetResponseString(hcCallHandle, &responseBody);
     m_responseBody = responseBody;
 
@@ -86,8 +86,8 @@ xbox_service_call_routed_event_args_internal::xbox_service_call_routed_event_arg
     xsapi_internal_stringstream ss;
     for (uint32_t i = 0; i < numHeaders; ++i)
     {
-        UTF8CSTR headerName;
-        UTF8CSTR headerValue;
+        const char* headerName;
+        const char* headerValue;
         HCHttpCallResponseGetHeaderAtIndex(hcCallHandle, i, &headerName, &headerValue);
         ss << headerName << " : " << headerValue << "\r\n";
     }

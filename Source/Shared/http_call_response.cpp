@@ -98,8 +98,8 @@ http_call_response_internal::http_call_response_internal(
     HCHttpCallResponseGetNumHeaders(httpCallData->callHandle, &numHeaders);
     for (uint32_t i = 0; i < numHeaders; ++i)
     {
-        UTF8CSTR headerName;
-        UTF8CSTR headerValue;
+        const char* headerName;
+        const char* headerValue;
         HCHttpCallResponseGetHeaderAtIndex(httpCallData->callHandle, i, &headerName, &headerValue);
         add_response_header(headerName, headerValue);
     }

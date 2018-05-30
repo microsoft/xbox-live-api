@@ -190,9 +190,9 @@ typedef struct XblSocialRelationship
     bool isFollowingCaller;
 
     /// <summary>
-    /// A collection of strings indicating which social networks this person has a relationship with. 
+    /// A UTF-8 encoded collection of strings indicating which social networks this person has a relationship with. 
     /// </summary>
-    UTF8CSTR* socialNetworks;
+    _Field_z_ const char** socialNetworks;
 
     /// <summary>
     /// The count of string in socialNetworks array
@@ -402,14 +402,14 @@ typedef struct XblReputationFeedbackItem
     XblReputationFeedbackType feedbackType;
 
     /// <summary>
-    /// User supplied text added to explain the reason for the feedback.
+    /// UTF-8 encoded User supplied text added to explain the reason for the feedback.
     /// </summary>
-    UTF8CSTR reasonMessage;
+    _Field_z_ const char* reasonMessage;
 
     /// <summary>
-    /// The Id of a resource that can be used as evidence for the feedback. Example: the Id of a video file.
+    /// The UTF-8 encoded id of a resource that can be used as evidence for the feedback. Example: the Id of a video file.
     /// </summary>
-    UTF8CSTR evidenceResourceId;
+    _Field_z_ const char* evidenceResourceId;
 } XblReputationFeedbackItem;
 
 /// <summary>
@@ -420,18 +420,18 @@ typedef struct XblReputationFeedbackItem
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the user that reputation feedback is being submitted on.</param>
 /// <param name="reputationFeedbackType">The reputation feedback type being submitted.</param>
-/// <param name="sessionName">The name of the multiplayer session directory session the user is sending feedback from. (Optional)</param>
-/// <param name="reasonMessage">User supplied text added to explain the reason for the feedback. (Optional)</param>
-/// <param name="evidenceResourceId">The Id of a resource that can be used as evidence for the feedback. Example: the Id of a video file. (Optional)</param>
+/// <param name="sessionName">The UTF-8 encoded name of the multiplayer session directory session the user is sending feedback from. (Optional)</param>
+/// <param name="reasonMessage">User supplied text in UTF-8 encoded added to explain the reason for the feedback. (Optional)</param>
+/// <param name="evidenceResourceId">The UTF-8 encoded id of a resource that can be used as evidence for the feedback. Example: the Id of a video file. (Optional)</param>
 /// <remarks>Calls V100 POST /users/xuid({xuid})/feedback</remarks>
 STDAPI XblSocialSubmitReputationFeedbackAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ XblReputationFeedbackType reputationFeedbackType,
-    _In_opt_ UTF8CSTR sessionName,
-    _In_opt_ UTF8CSTR reasonMessage,
-    _In_opt_ UTF8CSTR evidenceResourceId
+    _In_opt_z_ const char* sessionName,
+    _In_opt_z_ const char* reasonMessage,
+    _In_opt_z_ const char* evidenceResourceId
     ) XBL_NOEXCEPT;
 
 /// <summary>

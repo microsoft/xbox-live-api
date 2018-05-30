@@ -10,10 +10,10 @@ using namespace xbox::services;
 using namespace xbox::services::system;
 using namespace xbox::services::achievements;
 
-UTF8STR alloc_and_copy_string(string_t src)
+_Null_terminated_ char* alloc_and_copy_string(string_t src)
 {
     auto utf8 = utils::internal_string_from_string_t(src);
-    auto copy = static_cast<UTF8STR>(xsapi_memory::mem_alloc(utf8.size() + 1));
+    auto copy = static_cast<char*>(xsapi_memory::mem_alloc(utf8.size() + 1));
     strcpy_s(copy, utf8.size() + 1, utf8.data());
     return copy;
 }
@@ -55,7 +55,7 @@ void create_xbl_achievement(
     }
 
     lhs.platformsAvailableOnCount = static_cast<uint32_t>(rhs->platforms_available_on().size());
-    lhs.platformsAvailableOn = static_cast<UTF8CSTR*>(xsapi_memory::mem_alloc(sizeof(UTF8CSTR) * lhs.platformsAvailableOnCount));
+    lhs.platformsAvailableOn = static_cast<const char**>(xsapi_memory::mem_alloc(sizeof(const char*) * lhs.platformsAvailableOnCount));
     for (uint32_t j = 0; j < lhs.platformsAvailableOnCount; ++j)
     {
         lhs.platformsAvailableOn[j] = rhs->platforms_available_on()[j].data();

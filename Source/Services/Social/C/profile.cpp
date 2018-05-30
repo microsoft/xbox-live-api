@@ -156,7 +156,7 @@ CATCH_RETURN()
 STDAPI XblProfileGetUserProfilesForSocialGroupAsync(
     _In_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ UTF8CSTR socialGroup
+    _In_ const char* socialGroup
     ) XBL_NOEXCEPT
 try
 {
