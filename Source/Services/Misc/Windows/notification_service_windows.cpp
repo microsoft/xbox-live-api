@@ -32,16 +32,17 @@ notification_service_windows::subscribe_to_notifications(
         }
     }
 
-    auto asyncOp = Windows::Networking::PushNotifications::PushNotificationChannelManager::CreatePushNotificationChannelForApplicationAsync();
-
     std::weak_ptr<notification_service_windows> thisShared = std::dynamic_pointer_cast<notification_service_windows>(shared_from_this());
+    auto queue = get_xsapi_singleton()->m_asyncQueue;
 
-    create_task(asyncOp)
-    .then([thisShared, userContext, xboxLiveContextSettings, appConfig](task<Windows::Networking::PushNotifications::PushNotificationChannel^> t)
-    {
+    auto notificationChannelAsyncOp = Windows::Networking::PushNotifications::PushNotificationChannelManager::CreatePushNotificationChannelForApplicationAsync();
+    notificationChannelAsyncOp->Completed = ref new Windows::Foundation::AsyncOperationCompletedHandler<Windows::Networking::PushNotifications::PushNotificationChannel ^>(
+    [thisShared, xboxLiveContextSettings, appConfig, userContext, queue](Windows::Foundation::IAsyncOperation<Windows::Networking::PushNotifications::PushNotificationChannel^>^ asyncOp, Windows::Foundation::AsyncStatus status) {
+        UNREFERENCED_PARAMETER(status);
+
         try
         {
-            auto channel = t.get();
+            auto channel = asyncOp->GetResults();
             channel->PushNotificationReceived += ref new Windows::Foundation::TypedEventHandler<Windows::Networking::PushNotifications::PushNotificationChannel ^, Windows::Networking::PushNotifications::PushNotificationReceivedEventArgs ^>(
             [thisShared](Windows::Networking::PushNotifications::PushNotificationChannel ^ channel, Windows::Networking::PushNotifications::PushNotificationReceivedEventArgs^ args)
             {
@@ -58,11 +59,11 @@ notification_service_windows::subscribe_to_notifications(
                     }
                 }
             });
-            
-            std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
+
+            std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call(
                 xboxLiveContextSettings,
-                _T("POST"),
-                L"https://notify.xboxlive.com/",
+                "POST",
+                "https://notify.xboxlive.com/",
                 L"system/notifications/endpoints",
                 xbox_live_api::subscribe_to_notifications
                 );
@@ -84,7 +85,7 @@ notification_service_windows::subscribe_to_notifications(
             {
                 platform = _T("WindowsOneCore");
             }
-            
+
             web::json::value payload;
             payload[_T("systemId")] = web::json::value::string(applicationInstanceId);
             payload[_T("endpointUri")] = web::json::value::string(channel->Uri->Data());
@@ -93,15 +94,16 @@ notification_service_windows::subscribe_to_notifications(
             payload[_T("locale")] = web::json::value::string(utils::string_t_from_internal_string(utils::get_locales()));
             payload[_T("titleId")] = web::json::value::string(std::to_wstring(appConfig->title_id()));
 
-            httpCall->set_request_body(payload.serialize());
-            httpCall->get_response_with_auth(userContext).get();
+            httpCall->set_request_body(utils::internal_string_from_string_t(payload.serialize()));
+            httpCall->get_response_with_auth(userContext, http_call_response_body_type::json_body, false, queue, 
+                [](std::shared_ptr<http_call_response_internal> response){});
 
         }
         catch (...)
         {
             LOG_ERROR("Failed to successfully register with notification service");
         }
-    }, pplx::task_continuation_context::use_arbitrary());
+    });
 
     return pplx::task<xbox_live_result<void>>();
 }

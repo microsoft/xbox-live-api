@@ -16,7 +16,6 @@
 #include "presence_internal.h"
 #include "xbox_live_app_config_internal.h"
 
-using namespace pplx;
 using namespace Platform;
 using namespace Windows::Security::Authentication::Web::Core;
 using namespace Windows::Security::Credentials;

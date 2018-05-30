@@ -8,8 +8,6 @@
 #include "utils.h"
 #include "user_context.h"
 
-using namespace pplx;
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_ACHIEVEMENTS_CPP_BEGIN
 
 static achievement_progress_state convert_string_to_progress_state(

@@ -6,8 +6,6 @@
 #include "social_internal.h"
 #include "utils.h"
 
-using namespace pplx;
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
 xbox_social_relationship::xbox_social_relationship(
