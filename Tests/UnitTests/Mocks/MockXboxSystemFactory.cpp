@@ -247,7 +247,6 @@ void MockXboxSystemFactory::SetupNextWebsocketResponsesForAllClients()
 {
     while (m_websocketResponses.size() > 0)
     {
-        size_t size = m_websocketResponses.size();
         auto requestToSend = m_websocketResponses.front();
         m_websocketResponses.pop();
         for (auto webSocketClient : m_mockWebSocketClients)

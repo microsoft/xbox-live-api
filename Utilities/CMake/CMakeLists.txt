@@ -1289,7 +1289,9 @@ else()
 		source_group("C++ Source\\Services\\TitleStorage\\WinRT" FILES ${TitleStorage_WinRT_Source_Files})
 		source_group("C++ Source\\Services\\Tournaments\\WinRT" FILES ${Tournaments_WinRT_Source_Files})
         source_group("C++ Source\\Services\\Clubs\\WinRT" FILES ${Clubs_WinRT_Source_Files})
-    else()
+	endif()
+
+	if( NOT WINRT OR UNITTEST )
         source_group("C++ Source\\System\\C" FILES ${System_Source_Files_C})
         source_group("C++ Source\\Shared\\C" FILES ${Shared_Source_Files_C})
         source_group("C++ Source\\Services\\Achievements\\C" FILES ${Achievements_Source_Files_C})
@@ -1297,7 +1299,7 @@ else()
         source_group("C++ Source\\Services\\Social\\C" FILES ${Social_Source_Files_C})
         source_group("C++ Source\\Services\\Social\\Manager\\C" FILES ${Social_Manager_Source_Files_C})
         
-        if( NOT XDK )
+        if( NOT XDK AND NOT UNITTEST )
             source_group("C++ Source\\System\\C" FILES ${UWP_System_Source_Files_C})
         endif()
 	endif()
@@ -1351,7 +1353,9 @@ else()
 			${Shared_WinRT_Source_Files}
             ${Clubs_WinRT_Source_Files}
 			)
-    else()
+	endif()
+
+	if( NOT WINRT OR UNITTEST )
         message(STATUS "Adding flat C source")
         list(APPEND
             SOURCE_FILES
@@ -1364,7 +1368,7 @@ else()
             ${System_Source_Files_C}
             )
         
-        if( NOT XDK )
+        if( NOT XDK AND NOT UNITTEST )
             list(APPEND
                 SOURCE_FILES
                 ${UWP_System_Source_Files_C}

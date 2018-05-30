@@ -31,6 +31,7 @@ MockHttpCall::get_response(
     _In_ http_call_response_body_type httpCallResponseBodyType
     )
 {
+    UNREFERENCED_PARAMETER(httpCallResponseBodyType);
     if (FAILED(ResultHR))
     {
         throw ResultHR;
@@ -64,6 +65,8 @@ MockHttpCall::get_response_with_auth(
     _In_ bool allUsersAuthRequired
 )
 {
+    UNREFERENCED_PARAMETER(httpCallResponseBodyType);
+    UNREFERENCED_PARAMETER(allUsersAuthRequired);
     if (FAILED(ResultHR))
     {
         throw ResultHR;
@@ -81,6 +84,8 @@ MockHttpCall::get_response_with_auth(
     _In_ bool allUsersAuthRequired
     )
 {
+    UNREFERENCED_PARAMETER(httpCallResponseBodyType);
+    UNREFERENCED_PARAMETER(allUsersAuthRequired);
     if (FAILED(ResultHR))
     {
         throw ResultHR;
@@ -96,6 +101,8 @@ MockHttpCall::get_response(
     _In_ const web::http::http_request& httpRequest
     )
 {
+    UNREFERENCED_PARAMETER(httpCallResponseBodyType);
+    UNREFERENCED_PARAMETER(httpRequest);
     if (FAILED(ResultHR))
     {
         throw ResultHR;
@@ -111,6 +118,8 @@ MockHttpCall::get_response(
     _In_ http_call_callback callback
     )
 {
+    UNREFERENCED_PARAMETER(queue);
+    UNREFERENCED_PARAMETER(httpCallResponseBodyType);
     if (FAILED(ResultHR))
     {
         throw ResultHR;
@@ -131,6 +140,7 @@ pplx::task<std::shared_ptr<http_call_response>> MockHttpCall::get_response_with_
     _In_ http_call_response_body_type httpCallResponseBodyType
 )
 {
+    UNREFERENCED_PARAMETER(httpCallResponseBodyType);
     if (FAILED(ResultHR))
     {
         throw ResultHR;
@@ -150,6 +160,9 @@ MockHttpCall::get_response_with_auth(
     _In_ bool allUsersAuthRequired
     ) 
 {
+    UNREFERENCED_PARAMETER(userContext);
+    UNREFERENCED_PARAMETER(httpCallResponseBodyType);
+    UNREFERENCED_PARAMETER(allUsersAuthRequired);
     if (FAILED(ResultHR))
     {
         throw ResultHR;
@@ -172,6 +185,10 @@ xbox_live_result<void> MockHttpCall::get_response_with_auth(
     _In_ xbox_live_callback<std::shared_ptr<http_call_response_internal>> callback
     )
 {
+    UNREFERENCED_PARAMETER(userContext);
+    UNREFERENCED_PARAMETER(queue);
+    UNREFERENCED_PARAMETER(httpCallResponseBodyType);
+    UNREFERENCED_PARAMETER(allUsersAuthRequired);
     if (FAILED(ResultHR))
     {
         throw ResultHR;
@@ -195,6 +212,9 @@ MockHttpCall::_Internal_get_response_with_auth(
     _In_ bool allUsersAuthRequired
 )
 {
+    UNREFERENCED_PARAMETER(userContext);
+    UNREFERENCED_PARAMETER(httpCallResponseBodyType);
+    UNREFERENCED_PARAMETER(allUsersAuthRequired);
     if (FAILED(ResultHR))
     {
         throw ResultHR;
@@ -221,6 +241,7 @@ std::wstring MockHttpCall::http_method() const
 void MockHttpCall::set_retry_allowed(
     _In_ bool value)
 {
+    UNREFERENCED_PARAMETER(value);
 }
 
 bool MockHttpCall::retry_allowed() const
@@ -231,6 +252,7 @@ bool MockHttpCall::retry_allowed() const
 void MockHttpCall::set_long_http_call(
     _In_ bool value)
 {
+    UNREFERENCED_PARAMETER(value);
 }
 
 bool MockHttpCall::long_http_call() const
@@ -276,6 +298,7 @@ const http_call_request_message_internal& MockHttpCall::request_body() const
 void MockHttpCall::set_content_type_header_value(
     _In_ const std::wstring& value)
 {
+    UNREFERENCED_PARAMETER(value);
 }
 
 std::wstring MockHttpCall::content_type_header_value() const
@@ -287,6 +310,7 @@ std::wstring MockHttpCall::content_type_header_value() const
 void MockHttpCall::set_xbox_contract_version_header_value(
     _In_ const std::wstring& value)
 {
+    UNREFERENCED_PARAMETER(value);
 }
 
 std::wstring MockHttpCall::xbox_contract_version_header_value() const
@@ -297,6 +321,7 @@ std::wstring MockHttpCall::xbox_contract_version_header_value() const
 
 void MockHttpCall::set_add_default_headers(bool value)
 {
+    UNREFERENCED_PARAMETER(value);
 }
 
 bool MockHttpCall::add_default_headers() const

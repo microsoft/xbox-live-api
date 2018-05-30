@@ -3,9 +3,6 @@
 
 #pragma once
 
-#include "pal.h"
-#include "xsapi-c/errors_c.h"
-
 /// <summary>Enumeration values that indicate the achievement type.</summary>
 typedef enum XblAchievementType
 {

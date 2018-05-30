@@ -1448,6 +1448,7 @@ public:
 
     void TryWriteSessionAsyncHelper(MultiplayerSession^ currentSession, bool shouldSucceed, int32_t httpStatus, bool returnEmpty = false)
     {
+        UNREFERENCED_PARAMETER(returnEmpty);
         auto responseJson = web::json::value::parse(defaultMultiplayerResponse);
 
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
@@ -3552,10 +3553,10 @@ public:
         {
             VERIFY_IS_NOT_NULL(member->Results);
             VERIFY_IS_TRUE(member->Results->Size == 2);
-            for (auto result : member->Results)
+            for (auto result2 : member->Results)
             {
-                Platform::String^ key = result->Key;
-                TournamentTeamResult^ teamResult = result->Value;
+                Platform::String^ key = result2->Key;
+                TournamentTeamResult^ teamResult = result2->Value;
                 VERIFY_IS_TRUE(key->Equals("team1") || key->Equals("team2"));
                 VERIFY_IS_TRUE(teamResult->State == TournamentGameResultState::Rank);
                 VERIFY_IS_TRUE(teamResult->Ranking == 3 || teamResult->Ranking == 2);

@@ -4,9 +4,9 @@
 
 #pragma warning(disable: 4062)
 
-#ifdef _WIN32
-    #include <windows.h>
+#include <stdint.h>
 
+#ifdef _WIN32
     #ifndef _WIN32_WINNT_WIN10
     #define _WIN32_WINNT_WIN10 0x0A00
     #endif

@@ -222,8 +222,8 @@ public:
             xbox::services::system::xsapi_memory_buffer buf(1000);
             VERIFY_ARE_EQUAL_INT(0, g_MemFreeHookCalls);
             VERIFY_ARE_EQUAL_INT(1, g_MemAllocHookCalls);
-            void* t = buf.get();
-            VERIFY_IS_NOT_NULL(t);
+            void* tBuffer = buf.get();
+            VERIFY_IS_NOT_NULL(tBuffer);
         }
         VERIFY_ARE_EQUAL_INT(1, g_MemFreeHookCalls);
         VERIFY_ARE_EQUAL_INT(1, g_MemAllocHookCalls);
@@ -240,8 +240,8 @@ public:
             xbox::services::system::xsapi_memory_buffer buf(1000);
             VERIFY_ARE_EQUAL_INT(0, g_MemFreeHookCalls);
             VERIFY_ARE_EQUAL_INT(0, g_MemAllocHookCalls);
-            void* t = buf.get();
-            VERIFY_IS_NOT_NULL(t);
+            void* tBuffer = buf.get();
+            VERIFY_IS_NOT_NULL(tBuffer);
         }
         VERIFY_ARE_EQUAL_INT(0, g_MemFreeHookCalls);
         VERIFY_ARE_EQUAL_INT(0, g_MemAllocHookCalls);

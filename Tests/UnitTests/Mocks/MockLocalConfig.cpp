@@ -34,6 +34,9 @@ xbox_live_result<void> MockLocalConfig::read()
 
 xsapi_internal_string MockLocalConfig::get_value_from_config(_In_ const xsapi_internal_string& name, _In_ bool required, _In_ const xsapi_internal_string& defaultValue)
 {
+    UNREFERENCED_PARAMETER(defaultValue);
+    UNREFERENCED_PARAMETER(required);
+    UNREFERENCED_PARAMETER(name);
     xsapi_internal_string val = ResultValue;
     return val;
 }
@@ -43,29 +46,39 @@ uint64_t MockLocalConfig::get_uint64_from_config(
     _In_ bool required,
     _In_ uint64_t defaultValue)
 {
+    UNREFERENCED_PARAMETER(defaultValue);
+    UNREFERENCED_PARAMETER(required);
+    UNREFERENCED_PARAMETER(name);
     uint64_t val = ResultValue64;
     return val;
 }
 
 bool MockLocalConfig::get_bool_from_config(_In_ const xsapi_internal_string& name, _In_ bool required, _In_ bool defaultValue)
 {
+    UNREFERENCED_PARAMETER(defaultValue);
+    UNREFERENCED_PARAMETER(required);
+    UNREFERENCED_PARAMETER(name);
     bool val = ResultValueBool;
     return val;
 }
 
 xsapi_internal_string MockLocalConfig::get_value_from_local_storage(_In_ const xsapi_internal_string& name)
 {
+    UNREFERENCED_PARAMETER(name);
     xsapi_internal_string val = ResultValue;
     return val;
 }
 
 xbox_live_result<void> MockLocalConfig::write_value_to_local_storage(_In_ const xsapi_internal_string& name, _In_ const xsapi_internal_string& value)
 {
+    UNREFERENCED_PARAMETER(value);
+    UNREFERENCED_PARAMETER(name);
     return xbox_live_result<void>();
 }
 
 xbox_live_result<void> MockLocalConfig::delete_value_from_local_storage(_In_ const xsapi_internal_string& name)
 {
+    UNREFERENCED_PARAMETER(name);
     return xbox_live_result<void>();
 }
 

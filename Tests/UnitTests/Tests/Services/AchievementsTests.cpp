@@ -515,7 +515,6 @@ public:
         DEFINE_TEST_CASE_PROPERTIES(TestUpdateAchievementInvalidArgs);
 
         Platform::String^ xboxUserId = L"1";
-        uint32 titleId = 2;
         Platform::String^ serviceConfigurationId = L"3";
         Platform::String^ achievementId = L"4";
         uint32 percentComplete = 5;

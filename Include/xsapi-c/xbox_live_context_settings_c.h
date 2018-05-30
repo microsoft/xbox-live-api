@@ -3,7 +3,7 @@
 
 #pragma once
 
-const uint32_t XBL_MAXIMUM_WEBSOCKETS_ACTIVATIONS_ALLOWED_PER_USER = 5;
+#define XBL_MAXIMUM_WEBSOCKETS_ACTIVATIONS_ALLOWED_PER_USER 5
 
 /// <summary>
 /// Enum used with disable_asserts_for_xbox_live_throttling_in_dev_sandboxes()

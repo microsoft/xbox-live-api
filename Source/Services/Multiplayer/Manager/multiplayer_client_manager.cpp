@@ -532,6 +532,7 @@ multiplayer_client_manager::invite_friends(
         }
     });
 #else
+    UNREFERENCED_PARAMETER(contextStringId);
     UNREFERENCED_PARAMETER(customActivationContext);
 #if !UNIT_TEST_SERVICES
 
