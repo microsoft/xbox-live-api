@@ -671,7 +671,7 @@ public:
     {
         DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestPresenceWriterNoHeartbeatAfter);
         pplx::event writeFinishEvent;
-        int writeDelay = 0;
+        uint32_t writeDelay = 0;
         xbox::services::presence::presence_service_internal::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay](int delay)
         {
             writeDelay = delay;

@@ -75,7 +75,7 @@ StockMocks::InitializeResponse(
     response.headers().add(L"ETag", L"MockETag");
     response.headers().add(L"Retry-After", L"1");
     response.headers().add(L"Content-Location", L"/serviceconfigs/MockScid/sessiontemplates/MockSessionTemplateName/sessions/MockSessionName");
-    response.set_status_code(statusCode);
+    response.set_status_code(static_cast<web::http::status_code>(statusCode));
 }
 
 http_headers 
@@ -230,7 +230,7 @@ StockMocks::CreateMockHttpCallResponseInternal(
     }
 
     httpCallResponse->set_response_body(responseBodyJson);
-    httpCallResponse->set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(statusCode)));
+    httpCallResponse->set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(static_cast<web::http::status_code>(statusCode))));
     return httpCallResponse;
 }
 
@@ -260,7 +260,7 @@ StockMocks::CreateMockHttpCallResponseInternal(
     }
 
     httpCallResponse->set_response_body(utils::internal_string_from_string_t(responseString));
-    httpCallResponse->set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(statusCode)));
+    httpCallResponse->set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(static_cast<web::http::status_code>(statusCode))));
     return httpCallResponse;
 }
 
@@ -290,7 +290,7 @@ StockMocks::CreateMockHttpCallResponseInternal(
     }
 
     httpCallResponse->set_response_body(xsapi_internal_vector<unsigned char>(responseVector.begin(), responseVector.end()));
-    httpCallResponse->set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(statusCode)));
+    httpCallResponse->set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(static_cast<web::http::status_code>(statusCode))));
     return httpCallResponse;
 }
 

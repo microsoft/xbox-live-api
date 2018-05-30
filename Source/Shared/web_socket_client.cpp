@@ -85,7 +85,9 @@ void xbox_web_socket_client::connect(
                 }
                 else
                 {
+#ifndef UNIT_TEST_SERVICES
                     XSAPI_ASSERT(false && "Could not find web_socket_client associated with HC_WEBSOCKET_HANDLER");
+#endif
                 }
             }
             catch (...)
@@ -105,7 +107,9 @@ void xbox_web_socket_client::connect(
                 }
                 else
                 {
+#ifndef UNIT_TEST_SERVICES
                     XSAPI_ASSERT(false && "Could not find web_socket_client associated with HC_WEBSOCKET_HANDLER");
+#endif
                 }
             }
             catch (...)

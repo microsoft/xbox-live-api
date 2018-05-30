@@ -412,7 +412,9 @@ void http_call_impl::handle_throttle_error(
             LOGS_ERROR << "xboxLiveContext->settings()->disable_asserts_for_xbox_live_throttling_in_dev_sandboxes()";
             LOGS_ERROR << "Note that this will only disable this assert.  You will still be throttled in all sandboxes.";
 
+#ifndef UNIT_TEST_SERVICES
             XSAPI_ASSERT(false && "Xbox Live service call was throttled.  See Output for more detail");
+#endif
         }
     }
 

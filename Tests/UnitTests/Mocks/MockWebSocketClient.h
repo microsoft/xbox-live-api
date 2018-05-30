@@ -18,6 +18,9 @@ public:
         _In_ xbox::services::xbox_live_callback<WebSocketCompletionResult> callback
         ) override
     {
+        UNREFERENCED_PARAMETER(subProtocol);
+        UNREFERENCED_PARAMETER(uri);
+        UNREFERENCED_PARAMETER(userContext);
         if (m_waitForSignal)
         {
             m_connectEvent.wait();
