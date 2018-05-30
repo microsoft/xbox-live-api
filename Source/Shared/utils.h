@@ -385,7 +385,7 @@ struct xsapi_singleton
     std::shared_ptr<xbox::services::stats::manager::stats_manager> m_statsManagerInstance;
 
     // from Shared\web_socket_client.cpp
-    xsapi_internal_unordered_map<hc_websocket_handle_t, xbox_web_socket_client*> m_websocketHandles;
+    xsapi_internal_unordered_map<hc_websocket_handle_t, std::weak_ptr<xbox_web_socket_client>> m_websocketHandles;
 
     // from Services\RealTimeActivity\real_time_activity_service_factory.cpp
     std::shared_ptr<real_time_activity::real_time_activity_service_factory> m_rtaFactoryInstance;

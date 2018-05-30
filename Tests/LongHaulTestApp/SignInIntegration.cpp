@@ -91,6 +91,11 @@ void Game::HandleSignInResult(XblSignInResult signInResult)
         XblContextCreateHandle(m_user, &m_xboxLiveContext);
         XblContextGetXboxUserId(m_xboxLiveContext, &m_xuid);
 
+        XblContextSettingsDisableAssertsForXboxLiveThrottlingInDevSandboxes(
+            m_xboxLiveContext,
+            XblContextSetting_ThisCodeNeedsToBeChanged
+            );
+
         duplicateHandle = XblContextDuplicateHandle(m_xboxLiveContext);
         XblContextCloseHandle(duplicateHandle);
 
