@@ -342,7 +342,7 @@ Renderer::RenderSocialGroupList(
         else
         {
             std::vector<XblSocialManagerUser> userList(node->usersCount);
-            XblSocialManagerUserGroupGetUsers(node, userList.data());
+            XblSocialManagerUserGroupGetUsers(node, node->usersCount, userList.data());
 
             for (const auto& user : userList)
             {

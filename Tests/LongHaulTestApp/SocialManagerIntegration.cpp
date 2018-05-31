@@ -71,7 +71,7 @@ void Game::TestSocialUserGroup()
     {
         Log("XblSocialManagerUserGroupGetUsersTrackedByGroup");
         std::vector<uint64_t> xuids(m_socialUserGroup->trackedUsersCount);
-        XblSocialManagerUserGroupGetUsersTrackedByGroup(m_socialUserGroup, xuids.data());
+        XblSocialManagerUserGroupGetUsersTrackedByGroup(m_socialUserGroup, m_socialUserGroup->trackedUsersCount, xuids.data());
 
         Log("XblSocialManagerUserGroupGetUsersFromXboxUserIds");
         std::vector<XblSocialManagerUser> xboxSocialUsers(m_socialUserGroup->trackedUsersCount);
@@ -83,7 +83,7 @@ void Game::TestSocialUserGroup()
     {
         Log("XblSocialManagerUserGroupGetUsers");
         std::vector<XblSocialManagerUser> users(m_socialUserGroup->usersCount);
-        XblSocialManagerUserGroupGetUsers(m_socialUserGroup, users.data());
+        XblSocialManagerUserGroupGetUsers(m_socialUserGroup, m_socialUserGroup->usersCount, users.data());
 
         Log("XblSocialManagerPresenceRecordIsUserPlayingTitle");
         for (auto user : users)
