@@ -134,7 +134,7 @@ void xbox_web_socket_client::connect(
         AsyncBlock *asyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
         // TODO should have some way to set the queue here
         asyncBlock->context = utils::store_shared_ptr(xsapi_allocate_shared<xbox_live_callback<WebSocketCompletionResult>>(callback));
-        asyncBlock->callback = [](_In_ AsyncBlock* asyncBlock)
+        asyncBlock->callback = [](_Inout_ AsyncBlock* asyncBlock)
         {
             WebSocketCompletionResult result = {};
             HCGetWebSocketConnectResult(asyncBlock, &result);
@@ -154,7 +154,7 @@ void xbox_web_socket_client::send(
 {
     AsyncBlock* asyncBlock = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
     asyncBlock->context = utils::store_shared_ptr(xsapi_allocate_shared<xbox_live_callback<WebSocketCompletionResult>>(callback));
-    asyncBlock->callback = [](_In_ AsyncBlock* asyncBlock)
+    asyncBlock->callback = [](_Inout_ AsyncBlock* asyncBlock)
     {
         WebSocketCompletionResult result = {};
         HCGetWebSocketSendMessageResult(asyncBlock, &result);

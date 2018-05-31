@@ -184,7 +184,7 @@ XblUserIsSignedIn(
 /// </remarks>
 STDAPI
 XblUserSignIn(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_user_handle user
     ) XBL_NOEXCEPT;
 
@@ -201,7 +201,7 @@ XblUserSignIn(
 /// </remarks>
 STDAPI
 XblUserSignInSilently(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_user_handle user
     ) XBL_NOEXCEPT;
 
@@ -221,7 +221,7 @@ XblUserSignInSilently(
 /// </remarks>
 STDAPI
 XblUserSignInWithCoreDispatcher(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_user_handle user,
     _In_ Platform::Object^ coreDispatcherObj
     ) XBL_NOEXCEPT;
@@ -239,7 +239,7 @@ XblUserSignInWithCoreDispatcher(
 /// </remarks>
 STDAPI
 XblUserSignInSilentlyWithCoreDispatcher(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_user_handle user,
     _In_ Platform::Object^ coreDispatcherObj
     ) XBL_NOEXCEPT;
@@ -253,7 +253,7 @@ XblUserSignInSilentlyWithCoreDispatcher(
 /// <param name="signInResult">Caller allocated object to write results into.</param>
 STDAPI
 XblUserGetSignInResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ XblSignInResult* signInResult
     ) XBL_NOEXCEPT;
 
@@ -279,7 +279,7 @@ typedef void (STDAPIVCALLTYPE *XblGetTokenAndSignatureCallback)(
 /// </param>
 STDAPI
 XblUserGetTokenAndSignature(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_user_handle user,
     _In_z_ const char* httpMethod,
     _In_z_ const char* url,
