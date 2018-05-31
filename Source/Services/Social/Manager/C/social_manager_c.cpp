@@ -85,7 +85,8 @@ CATCH_RETURN_WITH(false);
 
 void populate_social_user_array(
     _In_ xsapi_internal_vector<xbox_social_user*> internalXboxSocialUsers,
-    _Out_ XblSocialManagerUser* users
+    _In_ uint32_t usersCount,
+    _Out_writes_(usersCount) XblSocialManagerUser* users
     )
 {
     *users = {0};
@@ -130,16 +131,24 @@ void populate_social_user_array(
         utils::utf8_from_char_t(internalUser->preferred_color().tertiary_color(), users[i].preferredColor.tertiaryColor, sizeof(users[i].preferredColor.tertiaryColor));
     
         i++;
+
+        if (i >= usersCount) break;
     }
 }
 
 STDAPI XblSocialManagerUserGroupGetUsers(
     _In_ XblSocialManagerUserGroup* group,
-    _Out_writes_all_(group->usersCount) XblSocialManagerUser* xboxSocialUsers
+    _In_ uint32_t xboxSocialUsersCount,
+    _Out_writes_(xboxSocialUsersCount) XblSocialManagerUser* xboxSocialUsers
     ) XBL_NOEXCEPT
 try
 {
     RETURN_C_INVALIDARGUMENT_IF(group == nullptr || xboxSocialUsers == nullptr)
+
+    if (xboxSocialUsersCount < group->usersCount)
+    {
+        return E_INVALIDARG;
+    }
 
     verify_global_init();
     auto state = get_xbl_social_manager();
@@ -147,7 +156,7 @@ try
     auto groupIter = state->socialUserGroupsMap.find(group);
     XSAPI_ASSERT(groupIter != state->socialUserGroupsMap.end());
 
-    populate_social_user_array(groupIter->second->users(), xboxSocialUsers);
+    populate_social_user_array(groupIter->second->users(), xboxSocialUsersCount, xboxSocialUsers);
     return S_OK;
 }
 CATCH_RETURN()
@@ -177,7 +186,7 @@ try
 
     auto result = groupIter->second->get_users_from_xbox_user_ids(userIdsVector);
 
-    populate_social_user_array(result, xboxSocialUsers);
+    populate_social_user_array(result, xboxUserIdsCount, xboxSocialUsers);
     if (xboxSocialUsersCount != nullptr)
     {
         *xboxSocialUsersCount = static_cast<uint32_t>(result.size());
@@ -188,11 +197,17 @@ CATCH_RETURN()
 
 STDAPI XblSocialManagerUserGroupGetUsersTrackedByGroup(
     _In_ XblSocialManagerUserGroup* group,
-    _Out_writes_all_(group->trackedUsersCount) uint64_t* trackedUsers
+    _In_ uint32_t trackedUsersCount,
+    _Out_writes_(trackedUsersCount) uint64_t* trackedUsers
     ) XBL_NOEXCEPT
 try
 {
     RETURN_C_INVALIDARGUMENT_IF(group == nullptr || trackedUsers == nullptr);
+
+    if (trackedUsersCount < group->trackedUsersCount)
+    {
+        return E_INVALIDARG;
+    }
 
     verify_global_init();
 
@@ -203,7 +218,9 @@ try
     uint32_t count = 0;
     for (auto& internalContainer : groupIter->second->users_tracked_by_social_user_group())
     {
-        trackedUsers[count++] = utils::string_t_to_uint64(internalContainer.xbox_user_id());
+        trackedUsers[count] = utils::string_t_to_uint64(internalContainer.xbox_user_id());
+        count++;
+        if (count >= trackedUsersCount) break;
     }
     return S_OK;
 }
