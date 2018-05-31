@@ -346,7 +346,7 @@ typedef struct XblAchievement
     uint64_t estimatedUnlockTime;
 
     /// <summary>
-    /// A UTF-8 encoded deeplink for clients that enables the title to launch at a desired starting point
+    /// A UTF-8 encoded deep link for clients that enables the title to launch at a desired starting point
     /// for the achievement.
     /// </summary>
     _Field_z_ const char* deepLink;
@@ -399,7 +399,7 @@ STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
 /// Get xbl_achievements_result_handle from an XblAchievementsGetAchievementsForTitleIdAsync call.
 /// Use XblAchievementsResultGetAchievements to get the list.
 /// <summary>
-/// <param name="async">The async block that was used on the asyncronous call.</param>
+/// <param name="async">The same AsyncBlock that passed to XblAchievementsGetAchievementsForTitleIdAsync.</param>
 /// <param name="resultHandle">Acheivement result handle.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsGetAchievementsForTitleIdResult(
@@ -457,7 +457,7 @@ STDAPI XblAchievementsResultGetNextAsync(
 /// <summary>
 /// Get xbl_achievements_result_handle from an XblAchievementsResultGetNextAsync call.
 /// <summary>
-/// <param name="async">Caller allocated AsyncBlock.</param>
+/// <param name="async">The same AsyncBlock that passed to XblAchievementsResultGetNextAsync.</param>
 /// <param name="result">
 /// Returns the next achievement result handle. Note that this is a separate handle than the one passed to the
 /// XblAchievementsResultGetNextAsync API. Each result handle must be closed separately.
@@ -523,7 +523,7 @@ STDAPI XblAchievementsGetAchievementAsync(
 /// <summary>
 /// Get the result handle from an XblAchievementsGetAchievementAsync call.
 /// <summary>
-/// <param name="async">The async block that was used on the asyncronous call.</param>
+/// <param name="async">The same AsyncBlock that passed to XblAchievementsGetAchievementAsync.</param>
 /// <param name="resultHandle">
 /// The achievement result handle. This handle is used by other APIs to get the achievement objects
 /// and to get the next page of achievements from the service if there is is one. The handle must be closed
