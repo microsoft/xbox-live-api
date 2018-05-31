@@ -42,7 +42,7 @@ namespace GenSDKBuildCppFile
                 // for all builds, skip certain files/folders
                 if (
                     line.Contains(@"\WinRT") ||
-                    (line.Contains(@"Source\System\") && !line.Contains(@"Source\System\xbox_live_mutex.cpp")) ||
+                    (line.Contains(@"Source\System\") && !(line.Contains(@"Source\System\xbox_live_mutex.cpp") || line.Contains(@"Source\System\C\user_internal_c.cpp"))) ||
                     line.Contains(@"\Common\Server\")  || line.Contains(@"\a\") || line.Contains(@"\Unix\") || line.ToLower().Contains(@"\android\") ||
                     line.Contains(@"\u\") || line.Contains(@"\i\") ||
                     line.Contains(@"\iOS\")
