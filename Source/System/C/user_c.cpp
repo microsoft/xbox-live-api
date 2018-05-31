@@ -196,7 +196,7 @@ struct SignInContext
 };
 
 HRESULT SignInHelper(
-    _In_ AsyncBlock* asyncBlock,
+    _Inout_ AsyncBlock* asyncBlock,
     _In_ xbl_user_handle user,
     _In_opt_ Platform::Object^ coreDispatcher,
     _In_ bool showUi
@@ -257,7 +257,7 @@ HRESULT SignInHelper(
 
 STDAPI
 XblUserSignIn(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_user_handle user
     ) XBL_NOEXCEPT
 try
@@ -268,7 +268,7 @@ CATCH_RETURN()
 
 STDAPI
 XblUserSignInSilently(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_user_handle user
     ) XBL_NOEXCEPT
 try
@@ -279,7 +279,7 @@ CATCH_RETURN()
 
 STDAPI
 XblUserSignInWithCoreDispatcher(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_user_handle user,
     _In_ Platform::Object^ coreDispatcherObj
     ) XBL_NOEXCEPT
@@ -291,7 +291,7 @@ CATCH_RETURN()
 
 STDAPI
 XblUserSignInSilentlyWithCoreDispatcher(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_user_handle user,
     _In_ Platform::Object^ coreDispatcherObj
     ) XBL_NOEXCEPT
@@ -303,7 +303,7 @@ CATCH_RETURN()
 
 STDAPI
 XblUserGetSignInResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ XblSignInResult* signInResult
     ) XBL_NOEXCEPT
 {
@@ -323,7 +323,7 @@ struct GetTokenAndSignatureContext
 
 STDAPI
 XblUserGetTokenAndSignature(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_user_handle user,
     _In_z_ const char* httpMethod,
     _In_z_ const char* url,

@@ -66,7 +66,7 @@ typedef struct XblUserProfile
 /// <param name="xboxUserId">The Xbox User ID of the user to get the profile for.</param>
 /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
 STDAPI XblProfileGetUserProfileAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId
     ) XBL_NOEXCEPT;
@@ -77,7 +77,7 @@ STDAPI XblProfileGetUserProfileAsync(
 /// <param name="async">AsyncBlock from the XblProfileGetUserProfileAsync API.</param>
 /// <param name="profile">Profile object to write result to.</param>
 STDAPI XblProfileGetUserProfileResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ XblUserProfile* profile
     ) XBL_NOEXCEPT;
 
@@ -90,7 +90,7 @@ STDAPI XblProfileGetUserProfileResult(
 /// <param name="xboxUserIdsCount">The number of Xbox User IDs in the array.</param>
 /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
 STDAPI XblProfileGetUserProfilesAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t* xboxUserIds,
     _In_ size_t xboxUserIdsCount
@@ -102,7 +102,7 @@ STDAPI XblProfileGetUserProfilesAsync(
 /// <param name="async">AsyncBlock from the get profile API.</param>
 /// <param name="profileCount">Number of profiles returned.</param>
 STDAPI XblProfileGetUserProfilesResultCount(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ uint32_t* profileCount
     ) XBL_NOEXCEPT;
 
@@ -114,7 +114,7 @@ STDAPI XblProfileGetUserProfilesResultCount(
 /// <param name="profilesCount">Size of the profiles array.</param>
 /// <param name="profiles">Array of XblUserProfile objects to copy result into.</param>
 STDAPI XblProfileGetUserProfilesResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ uint32_t profilesCount,
     _Out_writes_(profilesCount) XblUserProfile* profiles
     ) XBL_NOEXCEPT;
@@ -127,7 +127,7 @@ STDAPI XblProfileGetUserProfilesResult(
 /// <param name="socialGroup">The UTF-8 encoded name of the social group of users to search. Options are "Favorites" and "People".</param>
 /// <remarks>Calls V2 GET /users/{userId}/profile/settings/people/{socialGroup}</remarks>
 STDAPI XblProfileGetUserProfilesForSocialGroupAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_z_ const char* socialGroup
     ) XBL_NOEXCEPT;
@@ -138,7 +138,7 @@ STDAPI XblProfileGetUserProfilesForSocialGroupAsync(
 /// <param name="async">AsyncBlock from the get profile API.</param>
 /// <param name="profileCount">Number of profiles returned.</param>
 STDAPI XblProfileGetUserProfilesForSocialGroupResultCount(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ uint32_t* profileCount
     ) XBL_NOEXCEPT;
 
@@ -150,7 +150,7 @@ STDAPI XblProfileGetUserProfilesForSocialGroupResultCount(
 /// <param name="profilesCount">Size of the profiles array.</param>
 /// <param name="profiles">Array of XblUserProfile objects to copy result into.</param>
 STDAPI XblProfileGetUserProfilesForSocialGroupResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ uint32_t profilesCount,
     _Out_writes_(profilesCount) XblUserProfile* profiles
     ) XBL_NOEXCEPT;

@@ -384,7 +384,7 @@ typedef struct xbl_achievements_result* xbl_achievements_result_handle;
 /// This method calls V2 GET /users/xuid({xuid})/achievements
 /// </remarks>
 STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ uint32_t titleId,
@@ -401,7 +401,7 @@ STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
 /// <param name="async">The async block that was used on the asyncronous call.</param>
 /// <param name="resultHandle">Acheivement result handle.</param>
 STDAPI XblAchievementsGetAchievementsForTitleIdResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT;
 
@@ -441,7 +441,7 @@ STDAPI XblAchievementsResultHasNext(
 /// This method calls V2 GET /users/xuid({xuid})/achievements.
 /// </remarks>
 STDAPI XblAchievementsResultGetNextAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ xbl_achievements_result_handle resultHandle,
     _In_ uint32_t maxItems
@@ -452,11 +452,11 @@ STDAPI XblAchievementsResultGetNextAsync(
 /// <summary>
 /// <param name="async">The async block that was used on the asyncronous call.</param>
 /// <param name="resultHandle">
-/// Returns the next achievement result handle. Note that this is a seperate handle than the one passed to the
-/// XblAchievementsResultGetNextAsync API. Each result handle must be closed seperately.
+/// Returns the next achievement result handle. Note that this is a separate handle than the one passed to the
+/// XblAchievementsResultGetNextAsync API. Each result handle must be closed separately.
 /// </param>
 STDAPI XblAchievementsResultGetNextResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT;
 
@@ -479,7 +479,7 @@ STDAPI XblAchievementsResultGetNextResult(
 /// This method calls V2 POST /users/xuid({xuid})/achievements/{scid}/update
 /// </remarks>
 STDAPI XblAchievementsUpdateAchievementAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_opt_ uint32_t* titleId,
@@ -501,7 +501,7 @@ STDAPI XblAchievementsUpdateAchievementAsync(
 /// This method calls V2 GET /users/xuid({xuid})/achievements/{scid}/{achievementId}.
 /// </remarks>
 STDAPI XblAchievementsGetAchievementAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_z_ const char* serviceConfigurationId,
@@ -518,7 +518,7 @@ STDAPI XblAchievementsGetAchievementAsync(
 /// using XblAchievementsResultCloseHandle when the result is no longer needed.
 /// </param>
 STDAPI XblAchievementsGetAchievementResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT;
 

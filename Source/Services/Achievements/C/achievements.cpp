@@ -12,7 +12,7 @@ using namespace xbox::services::achievements;
 using namespace xbox::services::system;
 
 STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ uint32_t titleId,
@@ -97,7 +97,7 @@ try
 CATCH_RETURN()
 
 STDAPI XblAchievementsGetAchievementsForTitleIdResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT
 try
@@ -137,7 +137,7 @@ CATCH_RETURN()
 
 STDAPI
 XblAchievementsResultGetNextAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ xbl_achievements_result_handle resultHandle,
     _In_ uint32_t maxItems
@@ -199,7 +199,7 @@ try
 CATCH_RETURN()
 
 STDAPI XblAchievementsResultGetNextResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT
 {
@@ -207,7 +207,7 @@ STDAPI XblAchievementsResultGetNextResult(
 }
 
 STDAPI XblAchievementsUpdateAchievementAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_opt_ uint32_t* titleId,
@@ -293,7 +293,7 @@ try
 CATCH_RETURN()
 
 STDAPI XblAchievementsGetAchievementAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_z_ const char* serviceConfigurationId,
@@ -363,7 +363,7 @@ try
 CATCH_RETURN()
 
 STDAPI XblAchievementsGetAchievementResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT
 try

@@ -53,7 +53,7 @@ struct xbl_social_relationship_result
 };
 
 STDAPI XblGetSocialRelationshipsHelper(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ XblSocialRelationshipFilter socialRelationshipFilter,
@@ -127,7 +127,7 @@ STDAPI XblGetSocialRelationshipsHelper(
 }
 
 STDAPI XblSocialGetSocialRelationshipsAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ XblSocialRelationshipFilter socialRelationshipFilter
@@ -175,7 +175,7 @@ try
 CATCH_RETURN()
 
 STDAPI XblSocialRelationshipResultGetNextAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ xbl_social_relationship_result_handle resultHandle,
     _In_ uint32_t maxItems
@@ -194,7 +194,7 @@ try
 CATCH_RETURN()
 
 STDAPI XblSocialGetSocialRelationshipsResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ xbl_social_relationship_result_handle* handle
     ) XBL_NOEXCEPT
 try
@@ -204,7 +204,7 @@ try
 CATCH_RETURN()
 
 STDAPI XblSocialRelationshipResultGetNextResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ xbl_social_relationship_result_handle* handle
     ) XBL_NOEXCEPT
 try
@@ -323,7 +323,7 @@ try
 CATCH_RETURN_WITH(;)
 
 STDAPI XblSocialSubmitReputationFeedbackAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ XblReputationFeedbackType reputationFeedbackType,
@@ -394,7 +394,7 @@ try
 CATCH_RETURN()
 
 STDAPI XblSocialSubmitBatchReputationFeedback(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ XblReputationFeedbackItem* feedbackItems,
     _In_ uint32_t feedbackItemsCount
