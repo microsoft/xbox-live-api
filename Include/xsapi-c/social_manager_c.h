@@ -340,10 +340,12 @@ STDAPI_(bool) XblSocialManagerPresenceRecordIsUserPlayingTitle(
 /// by the value of the "usersCount" property of the group.
 /// </summary>
 /// <param name="group">The group from which to get users.</param>
+/// <param name="xboxSocialUsersCount">The size of the xboxSocialUsers array passed in.  Should be at least as large as group->usersCount.</param>
 /// <param name="xboxSocialUsers">User provided array to populate.</param>
 STDAPI XblSocialManagerUserGroupGetUsers(
     _In_ XblSocialManagerUserGroup* group,
-    _Out_writes_all_(group->usersCount) XblSocialManagerUser* xboxSocialUsers
+    _In_ uint32_t xboxSocialUsersCount,
+    _Out_writes_(xboxSocialUsersCount) XblSocialManagerUser* xboxSocialUsers
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -373,10 +375,12 @@ STDAPI XblSocialManagerUserGroupGetUsersFromXboxUserIds(
 /// The provided array must be large enough to hold all of the users, as indicated by the value of the "trackedUsersCount" property of the group.
 /// </summary>
 /// <param name="group">The group from which to get users.</param>
+/// <param name="trackedUsersCount">The size of the trackedUsers array passed in.  Should be at least as large as group->trackedUsersCount.</param>
 /// <param name="trackedUsers">User provided array to populate.</param>
 STDAPI XblSocialManagerUserGroupGetUsersTrackedByGroup(
     _In_ XblSocialManagerUserGroup* group,
-    _Out_writes_all_(group->trackedUsersCount) uint64_t* trackedUsers
+    _In_ uint32_t trackedUsersCount,
+    _Out_writes_(trackedUsersCount) uint64_t* trackedUsers
     ) XBL_NOEXCEPT;
 
 /// <summary>
