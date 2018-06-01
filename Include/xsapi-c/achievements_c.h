@@ -398,7 +398,7 @@ STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
 /// <summary>
 /// Get xbl_achievements_result_handle from an XblAchievementsGetAchievementsForTitleIdAsync call.
 /// Use XblAchievementsResultGetAchievements to get the list.
-/// <summary>
+/// </summary>
 /// <param name="async">The same AsyncBlock that passed to XblAchievementsGetAchievementsForTitleIdAsync.</param>
 /// <param name="resultHandle">Acheivement result handle.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
@@ -411,7 +411,7 @@ STDAPI XblAchievementsGetAchievementsForTitleIdResult(
 /// Get a list of XblAchievement objects.
 /// This memory of the list is freed when the xbl_achievements_result_handle is closed 
 /// with XblAchievementsResultCloseHandle
-/// <summary>
+/// </summary>
 /// <param name="resultHandle">Achievement result handle.</param>
 /// <param name="achievements">Pointer to an array of XblAchievement objects.</param>
 /// <param name="achievementsCount">The count of objects in the returned array.</param>
@@ -456,7 +456,7 @@ STDAPI XblAchievementsResultGetNextAsync(
 
 /// <summary>
 /// Get xbl_achievements_result_handle from an XblAchievementsResultGetNextAsync call.
-/// <summary>
+/// </summary>
 /// <param name="async">The same AsyncBlock that passed to XblAchievementsResultGetNextAsync.</param>
 /// <param name="result">
 /// Returns the next achievement result handle. Note that this is a separate handle than the one passed to the
@@ -522,7 +522,7 @@ STDAPI XblAchievementsGetAchievementAsync(
 
 /// <summary>
 /// Get the result handle from an XblAchievementsGetAchievementAsync call.
-/// <summary>
+/// </summary>
 /// <param name="async">The same AsyncBlock that passed to XblAchievementsGetAchievementAsync.</param>
 /// <param name="resultHandle">
 /// The achievement result handle. This handle is used by other APIs to get the achievement objects
@@ -545,8 +545,8 @@ STDAPI_(xbl_achievements_result_handle) XblAchievementsResultDuplicateHandle(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Decrement an internal reference count for an xbl_achievements_result_handle.
-/// When the reference count for reaches 0, the memory associated with the achievement result will be freed.
+/// Close the xbl_achievements_result_handle.
+/// When all outstanding handles have been closed, the memory associated with the achievement result will be freed.
 /// </summary>
 /// <param name="handle">The xbl_achievements_result_handle to close.</param>
 STDAPI_(void) XblAchievementsResultCloseHandle(

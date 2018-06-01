@@ -13,7 +13,7 @@ struct XblAppConfig;
 /// to a Windows::Xbox::System::User.
 /// </param>
 /// <param name="context">The returned Xbox Live context handle.</param>
-/// <returns>Result code for this API operation.</returns>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblContextCreateHandle(
     _In_ xbl_user_handle user,
     _Out_ xbl_context_handle* context
@@ -21,7 +21,7 @@ STDAPI XblContextCreateHandle(
 
 /// <summary>
 /// Increments the reference count of an xbl_context_handle. Use this method rather than creating
-/// a new context with the same user if the conext is needed by multiple threads.
+/// a new context with the same user if the context is needed by multiple threads.
 /// </summary>
 /// <param name="xboxLiveContextHandle">The Xbox Live context handle.</param>
 /// <returns>Returns the duplicated handle.</returns>
@@ -35,7 +35,6 @@ XblContextDuplicateHandle(
 /// When the ref count reaches 0, XblContextCloseHandle() will free the memory associated with the handle.
 /// </summary>
 /// <param name="xboxLiveContextHandle">The Xbox Live context handle.</param>
-/// <returns>Result code for this API operation.</returns>
 STDAPI_(void)
 XblContextCloseHandle(
     _In_ xbl_context_handle xboxLiveContextHandle
@@ -46,7 +45,7 @@ XblContextCloseHandle(
 /// </summary>
 /// <param name="context">The Xbox Live context handle.</param>
 /// <param name="user">The returned Xbox Live user handle.</param>
-/// <returns>Result code for this API operation.</returns>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI
 XblContextGetUser(
     _In_ xbl_context_handle context,
@@ -59,7 +58,7 @@ XblContextGetUser(
 /// </summary>
 /// <param name="context">The Xbox Live context handle.</param>
 /// <param name="xboxUserId">The returned xbox user ID.</param>
-/// <returns>Result code for this API operation.</returns>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI
 XblContextGetXboxUserId(
     _In_ xbl_context_handle context,
