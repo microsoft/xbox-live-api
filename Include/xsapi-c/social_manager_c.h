@@ -446,9 +446,9 @@ STDAPI XblSocialManagerEventGetUsersAffected(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Constructs a social Xbox Social User Group, which is a collection of users with social information
+/// Constructs a XblSocialManagerUserGroup, which is a collection of users with social information
 /// The result of a user group being loaded will be triggered through the 
-/// XblSocialManagerEventType_SocialUserGroupLoaded event in XblSocialManagerDoWork
+/// XblSocialManagerEventType_SocialUserGroupLoaded event in XblSocialManagerDoWork.
 /// </summary>
 /// <param name="user">Xbox Live User</param>
 /// <param name="presenceDetailLevel">The restriction of users based on their presence and title activity</param>
@@ -463,9 +463,9 @@ STDAPI XblSocialManagerCreateSocialUserGroupFromFilters(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Constructs a social Xbox Social User Group, which is a collection of users with social information
+/// Constructs a social XblSocialManagerUserGroup, which is a collection of users with social information
 /// The result of a user group being loaded will be triggered through the 
-/// XblSocialManagerEventType_SocialUserGroupLoaded event in XblSocialManagerDoWork
+/// XblSocialManagerEventType_SocialUserGroupLoaded event in XblSocialManagerDoWork.
 /// </summary>
 /// <param name="user">Xbox Live User</param>
 /// <param name="xboxUserIdList">List of users to populate the Xbox Social User Group with. This is currently capped at 100 users total.</param>
@@ -482,7 +482,7 @@ STDAPI XblSocialManagerCreateSocialUserGroupFromList(
 /// <summary>
 /// Destroys a created social Xbox Social User Group
 /// This will stop updating the Xbox Social User Group and remove tracking for any users 
-/// the Xbox Social User Group holds
+/// the XblSocialManagerUserGroup holds.
 /// </summary>
 /// <param name="group">The social Xbox Social User Group to destroy and stop tracking</param>
 /// <returns>HRESULT return code for this API operation.</returns>
@@ -491,7 +491,7 @@ STDAPI XblSocialManagerDestroySocialUserGroup(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns all local users who have been added to the social manager
+/// Returns all local users who have been added to the social manager.
 /// </summary>
 /// <param name="users">Array of handles for users that have been added to social manager.</param>
 /// <param name="userCount">The number of items in the returned array</param>
@@ -504,7 +504,7 @@ STDAPI XblSocialManagerGetLocalUsers(
 /// <summary>
 /// Updates specified social user group to new group of users
 /// Does a diff to see which users have been added or removed from
-/// The result of a user group being updated will be triggered through the XblSocialManagerEventType_SocialUserGroupUpdated event in XblSocialManagerDoWork
+/// The result of a user group being updated will be triggered through the XblSocialManagerEventType_SocialUserGroupUpdated event in XblSocialManagerDoWork.
 /// </summary>
 /// <param name="group">The xbox social user group to add users to.</param>
 /// <param name="users">List of users to add to the xbox social user group. Total number of users not in social graph is limited at 100.</param>
@@ -517,7 +517,7 @@ STDAPI XblSocialManagerUpdateSocialUserGroup(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Whether to enable social manager to poll every 30 seconds from the presence service 
+/// Whether to enable social manager to poll every 30 seconds from the presence service.
 /// </summary>
 /// <param name="user">Xbox Live User</param>
 /// <param name="shouldEnablePolling">Whether or not polling should enabled</param>

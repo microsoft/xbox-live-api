@@ -78,7 +78,7 @@ STDAPI XblProfileGetUserProfileAsync(
 /// Get the result for a completed XblProfileGetUserProfileAsync operation
 /// </summary>
 /// <param name="async">The same AsyncBlock that passed to XblProfileGetUserProfileAsync.</param>
-/// <param name="profile">Profile object to write result to.</param>
+/// <param name="profile">A caller allocated profile object to write result to.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblProfileGetUserProfileResult(
     _Inout_ AsyncBlock* async,
@@ -120,8 +120,8 @@ STDAPI XblProfileGetUserProfilesResultCount(
 /// The number of profiles returned can be obtained with XblGetProfileResultCount.
 /// </summary>
 /// <param name="async">The same AsyncBlock that passed to XblProfileGetUserProfilesAsync.</param>
-/// <param name="profilesCount">Size of the profiles array.</param>
-/// <param name="profiles">Array of XblUserProfile objects to copy result into.</param>
+/// <param name="profilesCount">Size of the caller allocated profiles array.</param>
+/// <param name="profiles">A caller allocated array of XblUserProfile objects to copy result into.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblProfileGetUserProfilesResult(
     _Inout_ AsyncBlock* async,
@@ -162,8 +162,8 @@ STDAPI XblProfileGetUserProfilesForSocialGroupResultCount(
 /// The number of profiles returned can be obtained with XblGetProfileResultCount.
 /// </summary>
 /// <param name="async">The same AsyncBlock that passed to XblProfileGetUserProfilesForSocialGroupAsync.</param>
-/// <param name="profilesCount">Size of the profiles array.</param>
-/// <param name="profiles">Array of XblUserProfile objects to copy result into.</param>
+/// <param name="profilesCount">Size of the caller allocated profiles array.</param>
+/// <param name="profiles">A caller allocated array of XblUserProfile objects to copy result into.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblProfileGetUserProfilesForSocialGroupResult(
     _Inout_ AsyncBlock* async,

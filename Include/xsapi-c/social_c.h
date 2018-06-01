@@ -328,7 +328,7 @@ STDAPI_(xbl_social_relationship_result_handle) XblSocialRelationshipResultDuplic
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Close the xbl_social_relationship_result_handle.
+/// Closes the xbl_social_relationship_result_handle.
 /// When all outstanding handles have been closed, the memory associated with the social relationship result will be freed.
 /// </summary>
 /// <param name="handle">The xbl_social_relationship_result_handle to close.</param>
@@ -464,3 +464,4 @@ STDAPI XblSocialSubmitBatchReputationFeedbackAsync(
     _In_ XblReputationFeedbackItem* feedbackItems,
     _In_ uint32_t feedbackItemsCount
     ) XBL_NOEXCEPT;
+

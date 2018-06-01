@@ -33,7 +33,6 @@ typedef struct XblAppConfig
 /// Gets the Xbox Live app config 
 /// </summary>
 /// <returns>HRESULT return code for this API operation.</returns>
-STDAPI
-XblGetXboxLiveAppConfig(
+STDAPI XblGetXboxLiveAppConfig(
     _Out_ const XblAppConfig** appConfig
     );

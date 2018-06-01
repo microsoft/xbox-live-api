@@ -400,7 +400,7 @@ STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
 /// Use XblAchievementsResultGetAchievements to get the list.
 /// </summary>
 /// <param name="async">The same AsyncBlock that passed to XblAchievementsGetAchievementsForTitleIdAsync.</param>
-/// <param name="resultHandle">Acheivement result handle.</param>
+/// <param name="resultHandle">Achievement result handle.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsGetAchievementsForTitleIdResult(
     _Inout_ AsyncBlock* async,
@@ -545,10 +545,11 @@ STDAPI_(xbl_achievements_result_handle) XblAchievementsResultDuplicateHandle(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Close the xbl_achievements_result_handle.
+/// Closes the xbl_achievements_result_handle.
 /// When all outstanding handles have been closed, the memory associated with the achievement result will be freed.
 /// </summary>
 /// <param name="handle">The xbl_achievements_result_handle to close.</param>
 STDAPI_(void) XblAchievementsResultCloseHandle(
     _In_ xbl_achievements_result_handle handle
     ) XBL_NOEXCEPT;
+

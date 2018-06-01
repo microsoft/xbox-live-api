@@ -45,8 +45,7 @@ typedef _Ret_maybenull_ _Post_writable_byte_size_(size) void*
 /// never be a null pointer.</param>
 /// <param name="memoryType">An opaque identifier representing the internal category of 
 /// memory being allocated.</param>
-typedef void
-(STDAPIVCALLTYPE* XblMemFreeFunction)(
+typedef void (STDAPIVCALLTYPE* XblMemFreeFunction)(
     _In_ _Post_invalid_ void* pointer,
     _In_ hc_memory_type memoryType
     );
