@@ -121,7 +121,7 @@ STDAPI XblProfileGetUserProfilesResultCount(
 /// </summary>
 /// <param name="async">The same AsyncBlock that passed to XblProfileGetUserProfilesAsync.</param>
 /// <param name="profilesCount">Size of the caller allocated profiles array.</param>
-/// <param name="profiles">A caller allocated array of XblUserProfile objects to copy result into.</param>
+/// <param name="profiles">A caller allocated array of XblUserProfile objects to copy the result into.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblProfileGetUserProfilesResult(
     _Inout_ AsyncBlock* async,
@@ -163,7 +163,7 @@ STDAPI XblProfileGetUserProfilesForSocialGroupResultCount(
 /// </summary>
 /// <param name="async">The same AsyncBlock that passed to XblProfileGetUserProfilesForSocialGroupAsync.</param>
 /// <param name="profilesCount">Size of the caller allocated profiles array.</param>
-/// <param name="profiles">A caller allocated array of XblUserProfile objects to copy result into.</param>
+/// <param name="profiles">A caller allocated array of XblUserProfile objects to copy the result into.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblProfileGetUserProfilesForSocialGroupResult(
     _Inout_ AsyncBlock* async,
