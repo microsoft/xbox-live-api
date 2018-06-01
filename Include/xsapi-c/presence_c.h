@@ -129,3 +129,4 @@ typedef enum XblPresenceTitleState
     /// </summary>
     XblPresenceTitleState_Ended
 } XblPresenceTitleState;
+

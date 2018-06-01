@@ -6,13 +6,13 @@
 #define XBL_MAXIMUM_WEBSOCKETS_ACTIVATIONS_ALLOWED_PER_USER 5
 
 /// <summary>
-/// Enum used with disable_asserts_for_xbox_live_throttling_in_dev_sandboxes()
+/// Enum used with XblContextSettings APIs
 /// </summary>
 typedef enum XblContextSetting
 {
     /// <summary>
-    /// Only passed to XblContextSettings API's to warn code reviewers that there's an outstanding Xbox Live calling 
-    /// pattern issue that needs to be addressed.
+    /// Only passed to XblContextSettings API's to warn code reviewers that 
+    /// there's an outstanding Xbox Live calling pattern issue that needs to be addressed.
     /// </summary>
     XblContextSetting_ThisCodeNeedsToBeChanged
 } XblContextSetting;
@@ -23,8 +23,8 @@ typedef enum XblContextSetting
 /// It is best practice to not call this API, and instead adjust the calling pattern but this is provided
 /// as a temporary way to get unblocked while in early stages of game development.
 /// </summary>
-STDAPI
-XblContextSettingsDisableAssertsForXboxLiveThrottlingInDevSandboxes(
+/// <returns>HRESULT return code for this API operation.</returns>
+STDAPI XblContextSettingsDisableAssertsForXboxLiveThrottlingInDevSandboxes(
     _In_ xbl_context_handle context,
     _In_ XblContextSetting setting
     ) XBL_NOEXCEPT;
@@ -35,8 +35,8 @@ XblContextSettingsDisableAssertsForXboxLiveThrottlingInDevSandboxes(
 /// It is best practice to not call this API, and instead adjust the calling pattern but this is provided
 /// as a temporary way to get unblocked while in early stages of game development.
 /// </summary>
-STDAPI
-XblContextSettingsDisableAssertsForMaximumNumberOfWebsocketsActivated(
+/// <returns>HRESULT return code for this API operation.</returns>
+STDAPI XblContextSettingsDisableAssertsForMaximumNumberOfWebsocketsActivated(
     _In_ xbl_context_handle context,
     _In_ XblContextSetting setting
     ) XBL_NOEXCEPT;
@@ -63,8 +63,8 @@ XblContextSettingsDisableAssertsForMaximumNumberOfWebsocketsActivated(
 /// 503 (Service Unavailable)
 /// 504 (Gateway Timeout)
 /// </summary>
-STDAPI
-XblContextSettingsGetHttpRetryDelay(
+/// <returns>HRESULT return code for this API operation.</returns>
+STDAPI XblContextSettingsGetHttpRetryDelay(
     _In_ xbl_context_handle context,
     _Out_ uint64_t* delayInSeconds
     ) XBL_NOEXCEPT;
@@ -90,8 +90,8 @@ XblContextSettingsGetHttpRetryDelay(
 /// 503 (Service Unavailable)
 /// 504 (Gateway Timeout)
 /// </summary>
-STDAPI
-XblContextSettingsSetHttpRetryDelay(
+/// <returns>HRESULT return code for this API operation.</returns>
+STDAPI XblContextSettingsSetHttpRetryDelay(
     _In_ xbl_context_handle context,
     _In_ uint64_t delayInSeconds
     ) XBL_NOEXCEPT;
@@ -110,8 +110,8 @@ XblContextSettingsSetHttpRetryDelay(
 /// 503 (Service Unavailable)
 /// 504 (Gateway Timeout)
 /// </summary>
-STDAPI
-XblContextSettingsGetHttpTimeoutWindow(
+/// <returns>HRESULT return code for this API operation.</returns>
+STDAPI XblContextSettingsGetHttpTimeoutWindow(
     _In_ xbl_context_handle context,
     _Out_ uint64_t* timeoutWindowInSeconds
     ) XBL_NOEXCEPT;
@@ -130,8 +130,8 @@ XblContextSettingsGetHttpTimeoutWindow(
 /// 503 (Service Unavailable)
 /// 504 (Gateway Timeout)
 /// </summary>
-STDAPI
-XblContextSettingsSetHttpTimeoutWindow(
+/// <returns>HRESULT return code for this API operation.</returns>
+STDAPI XblContextSettingsSetHttpTimeoutWindow(
     _In_ xbl_context_handle context,
     _In_ uint64_t timeoutWindowInSeconds
     ) XBL_NOEXCEPT;
@@ -139,8 +139,8 @@ XblContextSettingsSetHttpTimeoutWindow(
 /// <summary>
 /// Gets the web socket timeout window in seconds.
 /// </summary>
-STDAPI
-XblContextSettingsGetWebsocketTimeoutWindow(
+/// <returns>HRESULT return code for this API operation.</returns>
+STDAPI XblContextSettingsGetWebsocketTimeoutWindow(
     _In_ xbl_context_handle context,
     _Out_ uint64_t* timeoutWindowInSeconds
     ) XBL_NOEXCEPT;
@@ -150,8 +150,8 @@ XblContextSettingsGetWebsocketTimeoutWindow(
 /// Controls how long to spend attempting to retry establishing a websocket connection before failing. 
 /// Default is 300 seconds.  Set to 0 to turn off retry.
 /// </summary>
-STDAPI
-XblContextSettingsSetWebsocketTimeoutWindow(
+/// <returns>HRESULT return code for this API operation.</returns>
+STDAPI XblContextSettingsSetWebsocketTimeoutWindow(
     _In_ xbl_context_handle context,
     _In_ uint64_t timeoutWindowInSeconds
     ) XBL_NOEXCEPT;

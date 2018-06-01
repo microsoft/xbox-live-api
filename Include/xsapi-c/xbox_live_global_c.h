@@ -45,8 +45,7 @@ typedef _Ret_maybenull_ _Post_writable_byte_size_(size) void*
 /// never be a null pointer.</param>
 /// <param name="memoryType">An opaque identifier representing the internal category of 
 /// memory being allocated.</param>
-typedef void
-(STDAPIVCALLTYPE* XblMemFreeFunction)(
+typedef void (STDAPIVCALLTYPE* XblMemFreeFunction)(
     _In_ _Post_invalid_ void* pointer,
     _In_ hc_memory_type memoryType
     );
@@ -67,6 +66,7 @@ typedef void
 /// pointer to restore the default.</param>
 /// <param name="memFreeFunc">A pointer to the custom freeing callback to use, or a null 
 /// pointer to restore the default.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMemSetFunctions(
     _In_opt_ XblMemAllocFunction memAllocFunc,
     _In_opt_ XblMemFreeFunction memFreeFunc
@@ -81,7 +81,7 @@ STDAPI XblMemSetFunctions(
 /// if not previously set</param>
 /// <param name="memFreeFunc">Set to the to the current memory free callback.  Returns the default 
 /// routine if not previously set</param>
-/// <returns>Result code for this API operation.  Possible values are XBL_RESULT_OK, XBL_RESULT_E_HC_INVALIDARG, or XBL_RESULT_E_HC_FAIL.</returns>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMemGetFunctions(
     _Out_ XblMemAllocFunction* memAllocFunc,
     _Out_ XblMemFreeFunction* memFreeFunc
@@ -96,7 +96,7 @@ STDAPI XblMemGetFunctions(
 /// This must be called before any other method, except for XblMemSetFunctions() and XblMemGetFunctions()
 /// Should have a corresponding call to XblCleanup().
 /// </summary>
-/// <returns>Result code for this API operation.</returns>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblInitialize() XBL_NOEXCEPT;
 
 /// <summary>

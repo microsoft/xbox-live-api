@@ -346,7 +346,7 @@ typedef struct XblAchievement
     uint64_t estimatedUnlockTime;
 
     /// <summary>
-    /// A UTF-8 encoded deeplink for clients that enables the title to launch at a desired starting point
+    /// A UTF-8 encoded deep link for clients that enables the title to launch at a desired starting point
     /// for the achievement.
     /// </summary>
     _Field_z_ const char* deepLink;
@@ -365,8 +365,9 @@ typedef struct XblAchievement
 typedef struct xbl_achievements_result* xbl_achievements_result_handle;
 
 /// <summary>
-/// Returns an XblAchievementsResult object containing the first page of achievements
-/// for a player of the specified title.
+/// Gets the first page of achievements for a player of the specified title.
+/// To get the result, call XblAchievementsGetAchievementsForTitleIdResult inside the AsyncBlock callback
+/// or after the AsyncBlock is complete.
 /// </summary>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
@@ -378,9 +379,8 @@ typedef struct xbl_achievements_result* xbl_achievements_result_handle;
 /// <param name="skipItems">The number of achievements to skip.</param>
 /// <param name="maxItems">The maximum number of achievements the result can contain.  Pass 0 to attempt
 /// to retrieve all items.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// See XblAchievementsResultGetNextAsync to page in the next set of results.
-///
 /// This method calls V2 GET /users/xuid({xuid})/achievements
 /// </remarks>
 STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
@@ -396,23 +396,26 @@ STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Get the result from an XblAchievementsGetAchievementsForTitleIdAsync call.
-/// <summary>
-/// <param name="async">The async block that was used on the asyncronous call.</param>
-/// <param name="resultHandle">Acheivement result handle.</param>
+/// Get xbl_achievements_result_handle from an XblAchievementsGetAchievementsForTitleIdAsync call.
+/// Use XblAchievementsResultGetAchievements to get the list.
+/// </summary>
+/// <param name="async">The same AsyncBlock that passed to XblAchievementsGetAchievementsForTitleIdAsync.</param>
+/// <param name="resultHandle">Achievement result handle.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsGetAchievementsForTitleIdResult(
     _Inout_ AsyncBlock* async,
     _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Get the actual achievement objects from an xbl_achievements_result_handle.
-/// The returned achievements are owned by XSAPI and will be cleaned up when the the xbl_achievements_result_handle
-/// is closed.
-/// <summary>
-/// <param name="resultHandle">Acheivement result handle.</param>
+/// Get a list of XblAchievement objects.
+/// This memory of the list is freed when the xbl_achievements_result_handle is closed 
+/// with XblAchievementsResultCloseHandle
+/// </summary>
+/// <param name="resultHandle">Achievement result handle.</param>
 /// <param name="achievements">Pointer to an array of XblAchievement objects.</param>
 /// <param name="achievementsCount">The count of objects in the returned array.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsResultGetAchievements(
     _In_ xbl_achievements_result_handle resultHandle,
     _Out_ XblAchievement** achievements,
@@ -420,17 +423,20 @@ STDAPI XblAchievementsResultGetAchievements(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Checks if there are more pages of achiements to retrieve from the service.
+/// Checks if there are more pages of achievements to retrieve from the service.
 /// </summary>
-/// <param name="resultHandle">Acheivement result handle.</param>
+/// <param name="resultHandle">Achievement result handle.</param>
 /// <param name="hasNext">Return value. True if there are more results to retrieve, false otherwise.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsResultHasNext(
     _In_ xbl_achievements_result_handle resultHandle,
     _Out_ bool* hasNext
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns a XblAchievementsResult object that contains the next page of achievements.
+/// Gets the result of next page of achievements for a player of the specified title.
+/// To get the result, call XblAchievementsResultGetNextResult inside the AsyncBlock callback
+/// or after the AsyncBlock is complete.
 /// </summary>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
@@ -440,6 +446,7 @@ STDAPI XblAchievementsResultHasNext(
 /// <remarks>
 /// This method calls V2 GET /users/xuid({xuid})/achievements.
 /// </remarks>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsResultGetNextAsync(
     _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
@@ -448,13 +455,14 @@ STDAPI XblAchievementsResultGetNextAsync(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Get the result from an XblAchievementsResultGetNextAsync call.
-/// <summary>
-/// <param name="async">The async block that was used on the asyncronous call.</param>
-/// <param name="resultHandle">
+/// Get xbl_achievements_result_handle from an XblAchievementsResultGetNextAsync call.
+/// </summary>
+/// <param name="async">The same AsyncBlock that passed to XblAchievementsResultGetNextAsync.</param>
+/// <param name="result">
 /// Returns the next achievement result handle. Note that this is a separate handle than the one passed to the
 /// XblAchievementsResultGetNextAsync API. Each result handle must be closed separately.
 /// </param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsResultGetNextResult(
     _Inout_ AsyncBlock* async,
     _Out_ xbl_achievements_result_handle* result
@@ -464,7 +472,8 @@ STDAPI XblAchievementsResultGetNextResult(
 /// Allow achievement progress to be updated and achievements to be unlocked.
 /// This API will work even when offline on PC and Xbox One. Offline updates will be 
 /// posted by the system when connection is re-established even if the title isn't running.
-/// The result of the asyncronous operation can be obtained with GetAsyncStatus.
+/// The result of the asynchronous operation can be obtained by calling GetAsyncStatus
+/// inside the AsyncBlock callback or after the AsyncBlock is complete
 /// </summary>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
@@ -475,6 +484,7 @@ STDAPI XblAchievementsResultGetNextResult(
 /// <param name="percentComplete">The completion percentage of the achievement to indicate progress.
 /// Valid values are from 1 to 100. Set to 100 to unlock the achievement.
 /// Progress will be set by the server to the highest value sent</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
 /// This method calls V2 POST /users/xuid({xuid})/achievements/{scid}/update
 /// </remarks>
@@ -489,14 +499,16 @@ STDAPI XblAchievementsUpdateAchievementAsync(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns a XblAchievement object for a specified player.
-/// If the achievement does not exist, the method returns E_FAIL.
+/// Gets an achievement for a player with a specific achievement ID.
+/// To get the result, call XblAchievementsGetAchievementResult inside the AsyncBlock callback
+/// or after the AsyncBlock is complete.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>
 /// <param name="serviceConfigurationId">The UTF-8 encoded service configuration ID (SCID) for the title.</param>
 /// <param name="achievementId">The UTF-8 encoded unique identifier of the Achievement as defined by XDP or Dev Center.</param>
 /// <param name="async">Caller allocated AsyncBlock.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
 /// This method calls V2 GET /users/xuid({xuid})/achievements/{scid}/{achievementId}.
 /// </remarks>
@@ -510,20 +522,21 @@ STDAPI XblAchievementsGetAchievementAsync(
 
 /// <summary>
 /// Get the result handle from an XblAchievementsGetAchievementAsync call.
-/// <summary>
-/// <param name="async">The async block that was used on the asyncronous call.</param>
+/// </summary>
+/// <param name="async">The same AsyncBlock that passed to XblAchievementsGetAchievementAsync.</param>
 /// <param name="resultHandle">
 /// The achievement result handle. This handle is used by other APIs to get the achievement objects
 /// and to get the next page of achievements from the service if there is is one. The handle must be closed
 /// using XblAchievementsResultCloseHandle when the result is no longer needed.
 /// </param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsGetAchievementResult(
     _Inout_ AsyncBlock* async,
     _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Increments the reference count of an xbl_achievements_result_handle.
+/// Duplicates a xbl_achievements_result_handle
 /// </summary>
 /// <param name="handle">The xbl_achievements_result_handle to duplicate.</param>
 /// <returns>Returns the duplicated handle.</returns>
@@ -532,10 +545,11 @@ STDAPI_(xbl_achievements_result_handle) XblAchievementsResultDuplicateHandle(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Decrement the reference count for an xbl_achievements_result_handle.
-/// When the reference count for reaches 0, the memory associated with the achievement result will be freed.
+/// Closes the xbl_achievements_result_handle.
+/// When all outstanding handles have been closed, the memory associated with the achievement result will be freed.
 /// </summary>
 /// <param name="handle">The xbl_achievements_result_handle to close.</param>
 STDAPI_(void) XblAchievementsResultCloseHandle(
     _In_ xbl_achievements_result_handle handle
     ) XBL_NOEXCEPT;
+
