@@ -14,10 +14,12 @@ struct XblAppConfig;
 /// 
 /// With C++/CX, you can use this helper function to convert a Windows::Xbox::System::User^ to a IInspectable*
 ///
+/// <code>
 /// IInspectable* AsInspectable(Platform::Object^ object)
 /// {
-///     return reinterpret_cast &gt IInspectable* &lt (object);
+///     return reinterpret_cast<IInspectable*>(object);
 /// }
+/// </code>
 /// </param>
 /// <param name="context">The returned Xbox Live context handle.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
