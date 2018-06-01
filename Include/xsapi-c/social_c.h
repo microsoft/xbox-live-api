@@ -147,6 +147,9 @@ typedef enum XblReputationFeedbackType
     XblReputationFeedbackType_FairPlayLeaderboardCheater
 } XblReputationFeedbackType;
 
+/// <summary>
+/// Defines values used to identify the type of social notification.
+/// </summary>
 typedef enum XblSocialNotificationType
 {
     /// <summary>
@@ -170,6 +173,9 @@ typedef enum XblSocialNotificationType
     XblSocialNotificationType_Removed
 } XblSocialNotificationType;
 
+/// <summary>
+/// Represents the relationship between the user and another Xbox user.
+/// </summary>
 typedef struct XblSocialRelationship
 {
     /// <summary>
@@ -200,6 +206,9 @@ typedef struct XblSocialRelationship
     uint32_t socialNetworksCount;
 } XblSocialRelationship;
 
+/// <summary>
+/// Event arguments for a social relationship change.
+/// </summary>
 typedef struct XblSocialRelationshipChangeEventArgs
 {
     /// <summary>
@@ -336,7 +345,9 @@ STDAPI_(void) XblSocialRelationshipResultCloseHandle(
     _In_ xbl_social_relationship_result_handle handle
     ) XBL_NOEXCEPT;
 
-
+/// <summary>
+/// A handle to the subscription.
+/// </summary>
 typedef void* xbl_social_relationship_change_subscription_handle;
 
 /// <summary>
@@ -356,7 +367,7 @@ STDAPI XblSocialSubscribeToSocialRelationshipChange(
 /// Un-subscribes a previously created social relationship change subscription.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
-/// <param name="subscription">The subscription handle to unsubscribe</param>
+/// <param name="subscriptionHandle">The subscription handle to unsubscribe</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblSocialUnsubscribeFromSocialRelationshipChange(
     _In_ xbl_context_handle xboxLiveContext,
@@ -394,12 +405,15 @@ STDAPI_(function_context) XblSocialAddSocialRelationshipChangedHandler(
 /// Removes a social relationship change handler.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
-/// <param name="handlerContext">Context for the handler to remove.</param>
+/// <param name="handlerFunctionContext">Context for the handler to remove.</param>
 STDAPI_(void) XblSocialRemoveSocialRelationshipChangedHandler(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ function_context handlerFunctionContext
     ) XBL_NOEXCEPT;
 
+/// <summary>
+/// Represents the parameters for submitting reputation feedback on a user.
+/// </summary>
 typedef struct XblReputationFeedbackItem
 {
     /// <summary>
