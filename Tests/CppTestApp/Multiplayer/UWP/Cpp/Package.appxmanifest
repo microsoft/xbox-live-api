@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="38133JasonSandlin.NetrumbleArenaEdition" Publisher="CN=21A176D6-65FC-40A6-A44A-7DC730DA0070" Version="1.7.0.0" />
+  <Identity Name="38133JasonSandlin.Tournaments-XboxLiveSDKCSample" Publisher="CN=21A176D6-65FC-40A6-A44A-7DC730DA0070" Version="1.7.0.0" />
   <mp:PhoneIdentity PhoneProductId="997b70fc-d78e-48b7-ac75-4e3ed52d945a" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
   <Properties>
     <DisplayName>Xbox LIVE SDK Sample - Multiplayer</DisplayName>
@@ -25,7 +25,7 @@
           <uap:Protocol Name="ms-xbl-multiplayer" />
         </uap:Extension>
         <uap:Extension Category="windows.protocol">
-          <uap:Protocol Name="ms-xbl-00d3bb69" />
+          <uap:Protocol Name="ms-xbl-169056cf" />
         </uap:Extension>
       </Extensions>
     </Application>

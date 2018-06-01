@@ -72,7 +72,7 @@ pplx::task<xbox_live_result<clubs_owned_result>> clubs_service_impl::get_clubs_o
     auto task = make_clubs_http_call(
         _T("GET"),
         _T("clubaccounts"),
-        clubaccounts_users_subpath(m_userContext->xbox_user_id()),
+        clubaccounts_users_subpath(utils::string_t_from_internal_string(m_userContext->xbox_user_id())),
         xbox_live_api::get_clubs_owned
         )
     .then([](std::shared_ptr<http_call_response> response)
@@ -147,7 +147,7 @@ pplx::task<xbox_live_result<void>> clubs_service_impl::delete_club(
 
 pplx::task<xbox_live_result<std::vector<club>>> clubs_service_impl::get_club_associations()
 {
-    return get_club_associations(m_userContext->xbox_user_id());
+    return get_club_associations(utils::string_t_from_internal_string(m_userContext->xbox_user_id()));
 }
 
 pplx::task<xbox_live_result<std::vector<club>>> clubs_service_impl::get_club_associations(
@@ -182,7 +182,7 @@ pplx::task<xbox_live_result<std::vector<club_recommendation_t>>> clubs_service_i
     auto task = make_clubs_http_call(
         _T("POST"),
         _T("clubhub"),
-        _T("/clubs/recommendations/decoration/settings"),
+        _T("/clubs/recommendations"),
         xbox_live_api::recommend_clubs
         )
     .then([sharedThis](std::shared_ptr<http_call_response> response)
@@ -190,7 +190,7 @@ pplx::task<xbox_live_result<std::vector<club_recommendation_t>>> clubs_service_i
         return clubs_serializers::generate_xbox_live_result<std::vector<club_recommendation_t>>(
             clubs_serializers::deserialize_recommendations_from_clubhub_response(response->response_body_json(), sharedThis),
             response
-            );            
+            );
     });
 
     return utils::create_exception_free_task(task);

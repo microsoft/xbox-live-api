@@ -42,6 +42,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 // Forward declaration
 class sign_out_completed_event_args;
 class user_impl;
+class token_and_signature_result_internal;
 class user_factory;
 class xbox_live_server_impl;
 class auth_config;
@@ -136,7 +137,7 @@ public:
     /// Sets the level of debug messages to send to the debugger's Output window.
     /// </summary>
     _XSAPIIMP void set_diagnostics_trace_level(_In_ xbox_services_diagnostics_trace_level value);
-
+    
     /// <summary>
     /// Registers to receive Windows Push Notification Service(WNS) events.  Event handlers will receive the xbox user id and notification type.
     /// </summary>
@@ -170,8 +171,8 @@ public:
 private:
     xbox_live_services_settings();
 
-    std::function<_Ret_maybenull_ _Post_writable_byte_size_(dwSize) void*(_In_ size_t dwSize)> m_pMemAllocHook;
-    std::function<void(_In_ void* pAddress)> m_pMemFreeHook;
+    std::function<_Ret_maybenull_ _Post_writable_byte_size_(dwSize) void*(_In_ size_t dwSize)> m_pCustomMemAllocHook;
+    std::function<void(_In_ void* pAddress)> m_pCustomMemFreeHook;
 
     void set_log_level_from_diagnostics_trace_level();
 
@@ -185,6 +186,8 @@ private:
     function_context m_wnsHandlersCounter;
 
     friend class xsapi_memory;
+    friend void *custom_mem_alloc_wrapper(_In_ size_t size, _In_ uint32_t memoryType);
+    friend void custom_mem_free_wrapper(_In_ void *pointer, _In_ uint32_t memoryType);
 };
 
 
@@ -205,117 +208,77 @@ public:
     /// Internal function
     /// </summary>
     token_and_signature_result(
-        _In_ string_t token,
-        _In_ string_t signature,
-        _In_ string_t xuid,
-        _In_ string_t gamertag,
-        _In_ string_t userHash,
-        _In_ string_t ageGroup,
-        _In_ string_t privileges,
-#if XSAPI_U
-        _In_ string_t userSettingsRestrictions,
-        _In_ string_t userEnforcementRestrictions,
-        _In_ string_t userTitleRestrictions,
-#endif
-        _In_ string_t webAccountId,
-        _In_ string_t reserved
+        _In_ std::shared_ptr<token_and_signature_result_internal> internalObj
         );
-
-#ifndef DEFAULT_MOVE_ENABLED
-    _XSAPIIMP token_and_signature_result(token_and_signature_result&& other);
-    _XSAPIIMP token_and_signature_result& operator=(token_and_signature_result&& other);
-#endif
 
     /// <summary>
     /// The authorization token for the HTTP request.
     /// </summary>
-    _XSAPIIMP const string_t& token() const;
+    _XSAPIIMP string_t token() const;
 
     /// <summary>
     /// The digital signature for the HTTP request.
     /// </summary>
-    _XSAPIIMP const string_t& signature() const;
+    _XSAPIIMP string_t signature() const;
 
     /// <summary>
     /// The unique ID tied to the Xbox user's account.
     /// </summary>
-    _XSAPIIMP const string_t& xbox_user_id() const;
+    _XSAPIIMP string_t xbox_user_id() const;
 
     /// <summary>
     /// The gamertag name associated with the Xbox user's account.
     /// </summary>
-    _XSAPIIMP const string_t& gamertag() const;
+    _XSAPIIMP string_t gamertag() const;
 
     /// <summary>
     /// The hashcode that identifies the user. This value is used for HTTP calls.
     /// </summary>
-    _XSAPIIMP const string_t& xbox_user_hash() const;
+    _XSAPIIMP string_t xbox_user_hash() const;
 
     /// <summary>
     /// Internal function
     /// </summary>
-    _XSAPIIMP const string_t& reserved() const;
+    _XSAPIIMP string_t reserved() const;
 
     /// <summary>
     /// The age group
     /// </summary>
-    _XSAPIIMP const string_t& age_group() const;
+    _XSAPIIMP string_t age_group() const;
     
     /// <summary>
     /// The privileges
     /// </summary>
-    _XSAPIIMP const string_t& privileges() const;
+    _XSAPIIMP string_t privileges() const;
     
 #if XSAPI_U
     /// <summary>
     /// The settings related user restrictions.
     /// </summary>
-    _XSAPIIMP const string_t& user_settings_restrictions() const;
+    _XSAPIIMP string_t user_settings_restrictions() const;
     
     /// <summary>
     /// The enforcement related user restrictions.
     /// </summary>
-    _XSAPIIMP const string_t& user_enforcement_restrictions() const;
+    _XSAPIIMP string_t user_enforcement_restrictions() const;
     
     /// <summary>
     /// The title related user restrictions.
     /// </summary>
-    _XSAPIIMP const string_t& user_title_restrictions() const;
+    _XSAPIIMP string_t user_title_restrictions() const;
 #endif
 
     /// <summary>
     /// The web account id
     /// </summary>
-    _XSAPIIMP const string_t& web_account_id() const;
-
-private:
-
-    string_t m_token;
-    string_t m_signature;
-    string_t m_xboxUserId;
-    string_t m_gamerTag;
-    string_t m_xboxUserHash;
-    string_t m_ageGroup;
-    string_t m_privileges;
-#if XSAPI_U
-    string_t m_userSettingsRestrictions;
-    string_t m_userEnforcementRestrictions;
-    string_t m_userTitleRestrictions;
-#endif
-    string_t m_webAccountId;
-    string_t m_reserved;
+    _XSAPIIMP string_t web_account_id() const;
 
 #if UWP_API
-public:
-    token_and_signature_result(
-        Windows::Security::Authentication::Web::Core::WebTokenRequestResult^ tokenResult
-        );
-
     Windows::Security::Authentication::Web::Core::WebTokenRequestResult^ token_request_result() const;
+#endif
 
 private:
-    Windows::Security::Authentication::Web::Core::WebTokenRequestResult^ m_tokenResult;
-#endif 
+    std::shared_ptr<token_and_signature_result_internal> m_internalObj;
 };
 
 /// <summary>
@@ -464,7 +427,7 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    _XSAPIIMP const string_t& _Title_telemetry_session_id();
+    _XSAPIIMP string_t _Title_telemetry_session_id();
     
 #if XSAPI_U
     _XSAPIIMP static std::shared_ptr<xbox_live_user> get_last_signed_in_user();
@@ -519,22 +482,22 @@ public:
     /// <summary>
     /// Gets a unique ID that is tied to the user's account which persists across multiple devices.
     /// </summary>
-    _XSAPIIMP const string_t& xbox_user_id() const;
+    _XSAPIIMP string_t xbox_user_id() const;
 
     /// <summary>
     /// The Xbox Live public gamertag name associated with the user.
     /// </summary>
-    _XSAPIIMP const string_t& gamertag() const;
+    _XSAPIIMP string_t gamertag() const;
 
     /// <summary>
     /// Gets the age group of the user.
     /// </summary>
-    _XSAPIIMP const string_t& age_group() const;
+    _XSAPIIMP string_t age_group() const;
     
     /// <summary>
     /// Gets the privileges of the user.
     /// </summary>
-    _XSAPIIMP const string_t& privileges() const;
+    _XSAPIIMP string_t privileges() const;
     
 #if XSAPI_U
     /// <summary>
@@ -568,7 +531,7 @@ public:
     /// Check https://msdn.microsoft.com/en-us/library/windows/apps/windows.security.credentials.webaccount.aspx
     /// for more information about WebAccount
     /// </remarks>
-    _XSAPIIMP const string_t& web_account_id() const;
+    _XSAPIIMP string_t web_account_id() const;
 
     /// <summary>
     /// The Windows System NT user associated with the Xbox Live User, only available in Multi-User application.
@@ -648,7 +611,6 @@ public:
     /// Unregisters an event handler for sign-out completion notifications.
     /// </summary>
     /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
-    /// <param name="handler">The callback function that receives notifications.</param>
     _XSAPIIMP static void remove_sign_out_completed_handler(_In_ function_context context);
 
     std::shared_ptr<user_impl> _User_impl() { return m_user_impl; }
@@ -656,6 +618,8 @@ public:
 protected:
     std::shared_ptr<user_impl> m_user_impl;
 
+private:
+    pplx::task<xbox_live_result<sign_in_result>> signin_helper(bool showUI, bool forceRefresh);
 };
 
 

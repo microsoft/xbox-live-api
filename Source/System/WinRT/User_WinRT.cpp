@@ -15,6 +15,8 @@ using namespace Windows::Foundation::Collections;
 using namespace Microsoft::Xbox::Services::System;
 using namespace xbox::services::system;
 using namespace xbox::services;
+using namespace pplx;
+using namespace concurrency;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_BEGIN
 
@@ -91,15 +93,17 @@ XboxLiveUser::SignInAsync(
     )
 {
     xbox_live_context_settings::_Set_dispatcher(coreDispatcherObj);
+    task_completion_event<SignInResult^> tce;
 
-    auto task = _User_impl()->sign_in_impl(true, false)
-    .then([](xbox_live_result<sign_in_result> t)
+    _User_impl()->sign_in_impl(true, false, get_xsapi_singleton()->m_asyncQueue, 
+        [tce](xbox_live_result<sign_in_result> t)
     {
         THROW_IF_ERR(t);
-        return ref new SignInResult(t.payload());
+        tce.set(ref new SignInResult(t.payload()));
     });
 
-    return ASYNC_FROM_TASK(task);
+    auto t = task<SignInResult^>(tce);
+    return ASYNC_FROM_TASK(t);
 }
 
 IAsyncOperation<SignInResult^>^
@@ -108,28 +112,17 @@ XboxLiveUser::SignInSilentlyAsync(
     )
 {
     xbox_live_context_settings::_Set_dispatcher(coreDispatcherObj);
+    task_completion_event<SignInResult^> tce;
 
-    auto task = _User_impl()->sign_in_impl(false, false)
-    .then([](xbox_live_result<sign_in_result> t)
+    _User_impl()->sign_in_impl(false, false, get_xsapi_singleton()->m_asyncQueue,
+        [tce](xbox_live_result<sign_in_result> t)
     {
         THROW_IF_ERR(t);
-        return ref new SignInResult(t.payload());
+        tce.set(ref new SignInResult(t.payload()));
     });
 
-    return ASYNC_FROM_TASK(task);
-}
-
-IAsyncOperation<GetTokenAndSignatureResult^>^
-wrap_result(_In_ pplx::task<xbox::services::xbox_live_result<token_and_signature_result>> inner)
-{
-    auto task = inner
-    .then([](xbox::services::xbox_live_result<token_and_signature_result> result)
-    {
-        THROW_IF_ERR(result);
-        return ref new GetTokenAndSignatureResult(result.payload());
-    });
-
-    return ASYNC_FROM_TASK(task);
+    auto t = task<SignInResult^>(tce);
+    return ASYNC_FROM_TASK(t);
 }
 
 IAsyncOperation<GetTokenAndSignatureResult^>^
@@ -139,14 +132,25 @@ XboxLiveUser::GetTokenAndSignatureAsync(
     _In_ Platform::String^ headers
     )
 {
-    return wrap_result(m_cppObj->internal_get_token_and_signature(
-        STRING_T_FROM_PLATFORM_STRING(httpMethod),
-        STRING_T_FROM_PLATFORM_STRING(url),
-        STRING_T_FROM_PLATFORM_STRING(url),
-        STRING_T_FROM_PLATFORM_STRING(headers),
-        std::vector<unsigned char>(),
+    task_completion_event<GetTokenAndSignatureResult^> tce;
+
+    m_cppObj->internal_get_token_and_signature(
+        INTERNAL_STRING_FROM_PLATFORM_STRING(httpMethod),
+        INTERNAL_STRING_FROM_PLATFORM_STRING(url),
+        INTERNAL_STRING_FROM_PLATFORM_STRING(url),
+        INTERNAL_STRING_FROM_PLATFORM_STRING(headers),
+        xsapi_internal_vector<unsigned char>(),
         false,
-        false));
+        false,
+        get_xsapi_singleton()->m_asyncQueue,
+        [tce](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
+    {
+        THROW_IF_ERR(result);
+        tce.set(ref new GetTokenAndSignatureResult(result.payload()));
+    });
+    
+    auto t = task<GetTokenAndSignatureResult^>(tce);
+    return ASYNC_FROM_TASK(t);
 }
 
 IAsyncOperation<GetTokenAndSignatureResult^>^
@@ -157,20 +161,30 @@ XboxLiveUser::GetTokenAndSignatureArrayAsync(
     _In_opt_ const Array<byte>^ requestBodyArray
     )
 {
-    std::vector<unsigned char> vec;
+    xsapi_internal_vector<unsigned char> vec;
     if (requestBodyArray != nullptr && requestBodyArray->Length > 0)
     {
-        vec = std::vector<unsigned char>(requestBodyArray->begin(), requestBodyArray->end());
+        vec = xsapi_internal_vector<unsigned char>(requestBodyArray->begin(), requestBodyArray->end());
     }
 
-    return wrap_result(m_cppObj->internal_get_token_and_signature(
-        STRING_T_FROM_PLATFORM_STRING(httpMethod),
-        STRING_T_FROM_PLATFORM_STRING(url),
-        STRING_T_FROM_PLATFORM_STRING(url),
-        STRING_T_FROM_PLATFORM_STRING(headers),
+    task_completion_event<GetTokenAndSignatureResult^> tce;
+    m_cppObj->internal_get_token_and_signature(
+        INTERNAL_STRING_FROM_PLATFORM_STRING(httpMethod),
+        INTERNAL_STRING_FROM_PLATFORM_STRING(url),
+        INTERNAL_STRING_FROM_PLATFORM_STRING(url),
+        INTERNAL_STRING_FROM_PLATFORM_STRING(headers),
         vec,
         false,
-        false));
+        false,
+        get_xsapi_singleton()->m_asyncQueue,
+        [tce](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
+    {
+        THROW_IF_ERR(result);
+        tce.set(ref new GetTokenAndSignatureResult(result.payload()));
+    });
+
+    auto t = task<GetTokenAndSignatureResult^>(tce);
+    return ASYNC_FROM_TASK(t);
 }
 
 IAsyncOperation<GetTokenAndSignatureResult^>^
@@ -181,12 +195,21 @@ XboxLiveUser::GetTokenAndSignatureAsync(
     _In_ String^ body
     )
 {
-    return wrap_result(m_cppObj->get_token_and_signature(
-        STRING_T_FROM_PLATFORM_STRING(httpMethod),
-        STRING_T_FROM_PLATFORM_STRING(url),
-        STRING_T_FROM_PLATFORM_STRING(headers),
-        STRING_T_FROM_PLATFORM_STRING(body)
-        ));
+    task_completion_event<GetTokenAndSignatureResult^> tce;
+    m_cppObj->get_token_and_signature(
+        INTERNAL_STRING_FROM_PLATFORM_STRING(httpMethod),
+        INTERNAL_STRING_FROM_PLATFORM_STRING(url),
+        INTERNAL_STRING_FROM_PLATFORM_STRING(headers),
+        INTERNAL_STRING_FROM_PLATFORM_STRING(body),
+        get_xsapi_singleton()->m_asyncQueue,
+        [tce](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
+    {
+        THROW_IF_ERR(result);
+        tce.set(ref new GetTokenAndSignatureResult(result.payload()));
+    });
+
+    auto t = task<GetTokenAndSignatureResult^>(tce);
+    return ASYNC_FROM_TASK(t);
 }
 
 void 

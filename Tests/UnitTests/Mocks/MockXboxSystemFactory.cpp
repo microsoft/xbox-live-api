@@ -11,7 +11,6 @@ MockXboxSystemFactory::MockXboxSystemFactory() :
     m_webSocketClientCounter(0)
 {
     m_mockHttpCall = std::make_shared<MockHttpCall>();
-    m_mockHttpClient = std::make_shared<MockHttpClient>();
     m_mockLocalConfig = std::make_shared<MockLocalConfig>();
     m_mockWebSocketClients = std::vector<std::shared_ptr<MockWebSocketClient>>();
 }
@@ -57,7 +56,6 @@ void MockXboxSystemFactory::reinit()
     m_httpStateResponses.clear();
     m_httpApiStateResponses.clear();
     m_mockHttpCall->reinit();
-    m_mockHttpClient->reinit();
     m_mockLocalConfig->reinit();
     m_mockWebSocketClients.clear();
     m_webSocketClientCounter = 0;
@@ -100,6 +98,7 @@ std::shared_ptr<http_call> MockXboxSystemFactory::create_http_call(
             m_mockHttpCall->ServerName = serverName;
             m_mockHttpCall->ResultValue = std::make_shared<http_call_response>(*httpStateResponses->responseList[httpStateResponses->counter]);
             m_mockHttpCall->fRequestPostFunc = httpStateResponses->fRequestPostFunc;
+
             if (httpStateResponses->counter + 1 < httpStateResponses->responseList.size())
             {
                 ++httpStateResponses->counter;
@@ -118,17 +117,58 @@ std::shared_ptr<http_call> MockXboxSystemFactory::create_http_call(
     return m_mockHttpCall;
 }
 
-std::shared_ptr<http_call_internal> MockXboxSystemFactory::create_http_call_internal(
+std::shared_ptr<http_call_internal> MockXboxSystemFactory::create_http_call(
     _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
-    _In_ const string_t& httpMethod,
-    _In_ const string_t& serverName,
-    _In_ const web::uri& pathQueryFragment
+    _In_ const xsapi_internal_string& httpMethod,
+    _In_ const xsapi_internal_string& serverName,
+    _In_ const web::uri& pathQueryFragment,
+    _In_ xbox_live_api xboxLiveApi
     ) 
 {
     std::lock_guard<std::mutex> lock(m_httpLock.get());
-    m_mockHttpCall->HttpMethod = httpMethod;
-    m_mockHttpCall->ServerName = serverName;
+    if (m_setupMockForHttpClient)
+    {
+        return xbox_system_factory::create_http_call(xboxLiveContextSettings, httpMethod, serverName, pathQueryFragment, xboxLiveApi);
+    }
+
+    if (m_httpStateResponses.size() > 0 || m_httpApiStateResponses.size() > 0)
+    {
+        m_mockHttpCall = std::make_shared<MockHttpCall>();
+
+        auto pathQuery = pathQueryFragment.to_string();
+
+        auto httpStateResponses = m_httpApiStateResponses[xboxLiveApi];
+        if (httpStateResponses == nullptr)
+        {
+            httpStateResponses = m_httpStateResponses[pathQuery];
+        }
+
+        if (httpStateResponses == nullptr)
+        {
+            httpStateResponses = m_httpStateResponses[utils::string_t_from_internal_string(serverName)];
+        }
+
+        if (httpStateResponses != nullptr && httpStateResponses->responseListInternal.size() > 0)
+        {
+            m_mockHttpCall->ServerName = utils::string_t_from_internal_string(serverName);
+            m_mockHttpCall->ResultValueInternal = std::make_shared<http_call_response_internal>(*httpStateResponses->responseListInternal[httpStateResponses->counter]);
+            m_mockHttpCall->fRequestPostFuncInternal = httpStateResponses->fRequestPostFuncInternal;
+
+            if (httpStateResponses->counter + 1 < httpStateResponses->responseListInternal.size())
+            {
+                ++httpStateResponses->counter;
+            }
+
+            return m_mockHttpCall;
+        }
+    }
+
+    m_mockHttpCall->fRequestPostFuncInternal = nullptr;
+    m_mockHttpCall->HttpMethod = utils::string_t_from_internal_string(httpMethod);
+    m_mockHttpCall->ServerName = utils::string_t_from_internal_string(serverName);
     m_mockHttpCall->PathQueryFragment = pathQueryFragment;
+    m_mockHttpCall->XboxLiveApi = xboxLiveApi;
+
     return m_mockHttpCall;
 }
 
@@ -207,7 +247,6 @@ void MockXboxSystemFactory::SetupNextWebsocketResponsesForAllClients()
 {
     while (m_websocketResponses.size() > 0)
     {
-        size_t size = m_websocketResponses.size();
         auto requestToSend = m_websocketResponses.front();
         m_websocketResponses.pop();
         for (auto webSocketClient : m_mockWebSocketClients)

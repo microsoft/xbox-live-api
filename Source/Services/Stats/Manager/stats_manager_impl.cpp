@@ -49,23 +49,23 @@ stats_manager_impl::initialize()
     std::weak_ptr<stats_manager_impl> thisWeakPtr = shared_from_this();
 
     m_statNormalPriTimer = std::make_shared<call_buffer_timer>(
-        [thisWeakPtr](std::vector<string_t> eventArgs, const call_buffer_timer_completion_context&)
+        [thisWeakPtr](xsapi_internal_vector<xsapi_internal_string> eventArgs, std::shared_ptr<call_buffer_timer_completion_context>)
         {
             std::shared_ptr<stats_manager_impl> pThis(thisWeakPtr.lock());
             if (pThis != nullptr && !eventArgs.empty())
             {
-                pThis->request_flush_to_service_callback(eventArgs[0]);
+                pThis->request_flush_to_service_callback(utils::string_t_from_internal_string(eventArgs[0]));
             }
         },
         TIME_PER_CALL_SEC);
 
     m_statHighPriTimer = std::make_shared<call_buffer_timer>(
-        [thisWeakPtr](std::vector<string_t> eventArgs, const call_buffer_timer_completion_context&)
+        [thisWeakPtr](xsapi_internal_vector<xsapi_internal_string> eventArgs, std::shared_ptr<call_buffer_timer_completion_context>)
         {
             std::shared_ptr<stats_manager_impl> pThis(thisWeakPtr.lock());
             if (pThis != nullptr && !eventArgs.empty())
             {
-                pThis->request_flush_to_service_callback(eventArgs[0]);
+                pThis->request_flush_to_service_callback(utils::string_t_from_internal_string(eventArgs[0]));
             }
         },
         TIME_PER_CALL_SEC);
@@ -154,7 +154,7 @@ stats_manager_impl::add_local_user(
     )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user_context::get_user_id(user);
+    string_t userStr = utils::string_t_from_internal_string(user_context::get_user_id(user));
     auto userIter = m_users.find(userStr);
     if (userIter != m_users.end())
     {
@@ -212,7 +212,7 @@ stats_manager_impl::remove_local_user(
 )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user_context::get_user_id(user);
+    string_t userStr = utils::string_t_from_internal_string(user_context::get_user_id(user));
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -261,7 +261,7 @@ stats_manager_impl::request_flush_to_service(
     )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user_context::get_user_id(user);
+    string_t userStr = utils::string_t_from_internal_string(user_context::get_user_id(user));
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -271,13 +271,14 @@ stats_manager_impl::request_flush_to_service(
     std::vector<string_t> userVec;
     userVec.push_back(userStr);
 
+    auto internalUserVec = utils::internal_string_vector_from_std_string_vector(userVec);
     if (isHighPriority)
     {
-        m_statHighPriTimer->fire(userVec);
+        m_statHighPriTimer->fire(internalUserVec);
     }
     else
     {
-        m_statNormalPriTimer->fire(userVec);
+        m_statNormalPriTimer->fire(internalUserVec);
     }
 
     return xbox_live_result<void>();
@@ -295,7 +296,7 @@ stats_manager_impl::flush_to_service(
         return;
     }
 
-    auto userStr = user_context::get_user_id(statsUserContext.xboxLiveUser);
+    auto userStr = utils::string_t_from_internal_string(user_context::get_user_id(statsUserContext.xboxLiveUser));
     auto& svd = statsUserContext.statValueDocument;
     svd.clear_dirty_state();
 
@@ -348,7 +349,7 @@ stats_manager_impl::update_stats_value_document(_In_ stats_user_context& statsUs
         return;
     }
 
-    auto userStr = user_context::get_user_id(user);
+    auto userStr = utils::string_t_from_internal_string(user_context::get_user_id(user));
 
     statsUserContext.simplifiedStatsService.update_stats_value_document(statsUserContext.statValueDocument)
     .then([thisWeak, user, userStr](xbox_live_result<void> updateSVDResult)
@@ -413,7 +414,7 @@ stats_manager_impl::set_stat(
     )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user_context::get_user_id(user);
+    string_t userStr = utils::string_t_from_internal_string(user_context::get_user_id(user));
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -431,7 +432,7 @@ stats_manager_impl::set_stat(
 )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user_context::get_user_id(user);
+    string_t userStr = utils::string_t_from_internal_string(user_context::get_user_id(user));
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -449,7 +450,7 @@ stats_manager_impl::get_stat(
     )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user_context::get_user_id(user);
+    string_t userStr = utils::string_t_from_internal_string(user_context::get_user_id(user));
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -466,7 +467,7 @@ stats_manager_impl::get_stat_names(
     )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user_context::get_user_id(user);
+    string_t userStr = utils::string_t_from_internal_string(user_context::get_user_id(user));
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -485,7 +486,7 @@ stats_manager_impl::delete_stat(
     )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user_context::get_user_id(user);
+    string_t userStr = utils::string_t_from_internal_string(user_context::get_user_id(user));
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -495,10 +496,13 @@ stats_manager_impl::delete_stat(
     return userIter->second.statValueDocument.delete_stat(name.c_str());
 }
 
-xbox_live_result<void> stats_manager_impl::get_leaderboard(const xbox_live_user_t& user, const string_t& statName, leaderboard::leaderboard_query query)
+xbox_live_result<void> stats_manager_impl::get_leaderboard(
+    _In_ const xbox_live_user_t& user, 
+    _In_ const string_t& statName, 
+    _In_ leaderboard::leaderboard_query query)
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user_context::get_user_id(user);
+    string_t userStr = utils::string_t_from_internal_string(user_context::get_user_id(user));
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -507,7 +511,7 @@ xbox_live_result<void> stats_manager_impl::get_leaderboard(const xbox_live_user_
     string_t xuid;
     if (query.skip_result_to_me())
     {
-        xuid = user_context::get_user_id(user);
+        xuid = utils::string_t_from_internal_string(user_context::get_user_id(user));
     }
     std::weak_ptr<stats_manager_impl> weakThisPtr = shared_from_this();
     auto context = userIter->second.xboxLiveContextImpl;
@@ -517,7 +521,7 @@ xbox_live_result<void> stats_manager_impl::get_leaderboard(const xbox_live_user_
         statName,
         query.skip_result_to_rank(),
         xuid,
-        user_context::get_user_id(user),
+        utils::string_t_from_internal_string(user_context::get_user_id(user)),
         _T(""),
         query.max_items(),
         query._Continuation_token(),
@@ -541,10 +545,14 @@ xbox_live_result<void> stats_manager_impl::get_leaderboard(const xbox_live_user_
     return xbox_live_result<void>();
 }
 
-xbox_live_result<void> stats_manager_impl::get_social_leaderboard(const xbox_live_user_t& user, const string_t& statName, const string_t& socialGroup, leaderboard::leaderboard_query query)
+xbox_live_result<void> stats_manager_impl::get_social_leaderboard(
+    _In_ const xbox_live_user_t& user,
+    _In_ const string_t& statName,
+    _In_ const string_t& socialGroup,
+    _In_ leaderboard::leaderboard_query query)
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user_context::get_user_id(user);
+    string_t userStr = utils::string_t_from_internal_string(user_context::get_user_id(user));
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {
@@ -554,7 +562,7 @@ xbox_live_result<void> stats_manager_impl::get_social_leaderboard(const xbox_liv
     string_t xuid;
     if (query.skip_result_to_me())
     {
-        xuid = user_context::get_user_id(user);
+        xuid = utils::string_t_from_internal_string(user_context::get_user_id(user));
     }
     string_t order;
     if (query.order() == leaderboard::sort_order::ascending)
@@ -569,7 +577,7 @@ xbox_live_result<void> stats_manager_impl::get_social_leaderboard(const xbox_liv
     std::weak_ptr<stats_manager_impl> weakThisPtr = shared_from_this();
     auto context = userIter->second.xboxLiveContextImpl;
     context->leaderboard_service().get_leaderboard_for_social_group_internal(
-        user_context::get_user_id(user),
+        utils::string_t_from_internal_string(user_context::get_user_id(user)),
         context->application_config()->scid(),
         statName,
         socialGroup,
@@ -602,7 +610,7 @@ void stats_manager_impl::add_leaderboard_result(
 )
 {
     std::lock_guard<std::mutex> guard(m_statsServiceMutex);
-    string_t userStr = user_context::get_user_id(user);
+    string_t userStr = utils::string_t_from_internal_string(user_context::get_user_id(user));
     auto userIter = m_users.find(userStr);
     if (userIter == m_users.end())
     {

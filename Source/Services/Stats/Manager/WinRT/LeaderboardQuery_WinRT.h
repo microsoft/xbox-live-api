@@ -34,35 +34,35 @@ public:
     DEFINE_PROP_GETSET_OBJ(SkipResultToMe, skip_result_to_me, bool);
 
     /// <summary>
-    /// Gets/Sets Which rank the resulting leaderboard will start at
+    /// Gets/Sets Which rank the resulting leaderboard will start at.
     /// </summary>
     DEFINE_PROP_GETSET_OBJ(SkipResultToRank, skip_result_to_rank, uint32_t);
 
     /// <summary>
-    /// Gets/Sets maximum items that the resulting leaderboard will contain
+    /// Gets/Sets maximum items that the resulting leaderboard will contain.
     /// </summary>
     DEFINE_PROP_GETSET_OBJ(MaxItems, max_items, uint32_t);
 
     /// <summary>
-    /// Gets/Sets sort order for the resulting leaderboard
+    /// Gets/Sets sort order for the resulting leaderboard.
     /// </summary>
     DEFINE_PROP_GETSET_ENUM_OBJ(Order, order, SortOrder, xbox::services::leaderboard::sort_order);
 
     /// <summary>
-    /// Gets the stat name of the previous query. This property will only be set if its a query 
-    /// gotten from get_next_query
+    /// Gets the stat name of the previous query. This property will only be set if it is a query 
+    /// gotten from GetNextQuery.
     /// </summary>
     DEFINE_PROP_GET_STR_OBJ(StatName, stat_name);
 
     /// <summary>
     /// Gets the social group of the previous query. This property will only be set if its a query 
-    /// gotten from get_next_query and the previous query was a social query
+    /// gotten from GetNextQuery and the previous query was a social query.
     /// </summary>
     DEFINE_PROP_GET_STR_OBJ(SocialGroup, social_group);
 
     /// <summary>
-    /// True if there is more data in the leaderboard
-    /// If this is true then you can pass this object into the GetLeaderboard call
+    /// True if there is more data in the leaderboard.
+    /// If this is true then you can pass this object into the GetLeaderboard call.
     /// </summary>
     DEFINE_PROP_GET_OBJ(HasNext, has_next, bool);
 

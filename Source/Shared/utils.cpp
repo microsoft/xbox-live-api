@@ -4,11 +4,10 @@
 #include "pch.h"
 #include "utils.h"
 #include "local_config.h"
-#include "xsapi/xbox_live_app_config.h"
+#include "xbox_live_app_config_internal.h"
 #include <iomanip>
 #include <chrono>
 #include <time.h>
-#include <cpprest/ws_client.h>
 #if XSAPI_U
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid.hpp>
@@ -17,18 +16,17 @@
 #elif XSAPI_CPP || defined _WIN32
 #include <objbase.h>
 #endif
-#include "http_call_response.h"
 #include "xsapi/presence.h"
 #include "xsapi/system.h"
 #include "presence_internal.h"
 #include "initiator.h"
+#include "httpClient/httpClient.h"
 
 #if UWP_API
 #ifdef _WINRT_DLL
 #include "WinRT/User_WinRT.h"
 #endif
 #endif
-
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -53,7 +51,7 @@ xsapi_singleton::xsapi_singleton()
     memset(&m_eventPlayerSessionId, 0, sizeof(m_eventPlayerSessionId));
 #endif
 
-    m_locales = _T("en-US");
+    m_locales = "en-US";
     m_custom_locale_override = false;
     m_loggerId = 0;
     m_responseCount = 0;
@@ -69,6 +67,31 @@ xsapi_singleton::xsapi_singleton()
 #endif
 }
 
+XblMemAllocFunction g_pMemAllocHook = nullptr;
+XblMemFreeFunction g_pMemFreeHook = nullptr;
+
+void init_mem_hooks()
+{
+    if (g_pMemAllocHook == nullptr || g_pMemFreeHook == nullptr)
+    {
+        g_pMemAllocHook = [](size_t size, hc_memory_type memoryType)
+        {
+            UNREFERENCED_PARAMETER(memoryType);
+            if (size > 0)
+            {
+                return malloc(size);
+            }
+            return static_cast<void*>(nullptr);
+        };
+
+        g_pMemFreeHook = [](void *pointer, hc_memory_type memoryType)
+        {
+            UNREFERENCED_PARAMETER(memoryType);
+            free(pointer);
+        };
+    }
+}
+
 void xsapi_singleton::init()
 {
 #if UWP_API
@@ -77,13 +100,24 @@ void xsapi_singleton::init()
 #endif
 #endif
 
+#if _DEBUG && UNIT_TEST_SERVICES
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+
+    HCInitialize(nullptr);
     m_initiator = std::make_shared<initiator>();
+
+    CreateAsyncQueue(AsyncQueueDispatchMode_ThreadPool, AsyncQueueDispatchMode_ThreadPool, &m_asyncQueue);
 }
 
 xsapi_singleton::~xsapi_singleton()
 {
     std::lock_guard<std::mutex> guard(s_xsapiSingletonLock);
     s_xsapiSingleton = nullptr;
+
+    HCCleanup();
+
+    CloseAsyncQueue(m_asyncQueue);
 }
 
 std::shared_ptr<xsapi_singleton>
@@ -102,6 +136,14 @@ get_xsapi_singleton(_In_ bool createIfRequired)
     return s_xsapiSingleton;
 }
 
+void verify_global_init()
+{
+    std::lock_guard<std::mutex> guard(s_xsapiSingletonLock);
+    if (s_xsapiSingleton == nullptr)
+    {
+        assert(s_xsapiSingleton != nullptr);
+    }
+}
 
 web::json::value utils::extract_json_field(
     _In_ const web::json::value& json, 
@@ -114,6 +156,31 @@ web::json::value utils::extract_json_field(
     {
         auto& jsonObj = json.as_object();
         auto it = jsonObj.find(name);
+        if (it != jsonObj.end())
+        {
+            return it->second;
+        }
+    }
+
+    if (required)
+    {
+        error = xbox_live_error_code::json_error;
+    }
+
+    return web::json::value::null();
+}
+
+web::json::value utils::extract_json_field(
+    _In_ const web::json::value& json,
+    _In_ const xsapi_internal_string& name,
+    _Inout_ std::error_code& error,
+    _In_ bool required
+    )
+{
+    if (json.is_object())
+    {
+        auto& jsonObj = json.as_object();
+        auto it = jsonObj.find(utils::string_t_from_internal_string(name));
         if (it != jsonObj.end())
         {
             return it->second;
@@ -154,6 +221,34 @@ web::json::value utils::extract_json_field(
 
     return web::json::value::null();
 }
+
+web::json::value utils::extract_json_field(
+    _In_ const web::json::value& json,
+    _In_ const xsapi_internal_string& name,
+    _In_ bool required
+    )
+{
+    if (json.is_object())
+    {
+        auto& jsonObj = json.as_object();
+        auto it = jsonObj.find(utils::string_t_from_internal_string(name));
+        if (it != jsonObj.end())
+        {
+            return it->second;
+        }
+    }
+
+    if (required)
+    {
+        xsapi_internal_stringstream ss;
+        ss << name;
+        ss << " not found";
+        throw web::json::json_exception(utils::string_t_from_internal_string(ss.str()).c_str());
+    }
+
+    return web::json::value::null();
+}
+
 
 std::vector<string_t> utils::extract_json_string_vector(
     _In_ const web::json::value& json,
@@ -261,9 +356,24 @@ xbox_live_result<string_t> utils::json_string_extractor(_In_ const web::json::va
     return xbox_live_result<string_t>(json.as_string());
 }
 
+xbox_live_result<xsapi_internal_string> utils::json_internal_string_extractor(_In_ const web::json::value& json)
+{
+    if (!json.is_string())
+    {
+        return xbox_live_result<xsapi_internal_string>(xbox_live_error_code::json_error, "JSON being deserialized is not a string");
+    }
+    return xbox_live_result<xsapi_internal_string>(utils::internal_string_from_string_t(json.as_string()));
+}
+
 web::json::value utils::json_string_serializer(_In_ const string_t& value)
 {
     return web::json::value::string(value);
+}
+
+web::json::value utils::json_internal_string_serializer(_In_ const xsapi_internal_string& value)
+{
+    auto v = utils::string_t_from_internal_string(value);
+    return web::json::value::string(v);
 }
 
 xbox_live_result<int>
@@ -293,6 +403,19 @@ string_t utils::extract_json_string(
     web::json::value field(utils::extract_json_field(jsonValue, stringName, error, required));
     if ((!field.is_string() && !required) || field.is_null()) { return defaultValue; }
     return field.as_string();
+}
+
+xsapi_internal_string utils::extract_json_string(
+    _In_ const web::json::value& jsonValue,
+    _In_ const xsapi_internal_string& stringName,
+    _Inout_ std::error_code& error,
+    _In_ bool required,
+    _In_ const xsapi_internal_string& defaultValue
+    )
+{
+    web::json::value field(utils::extract_json_field(jsonValue, stringName, error, required));
+    if ((!field.is_string() && !required) || field.is_null()) { return defaultValue; }
+    return utils::internal_string_from_string_t(field.as_string());
 }
 
 void
@@ -329,6 +452,18 @@ string_t utils::extract_json_string(
     web::json::value field(utils::extract_json_field(jsonValue, stringName, required));
     if ((!field.is_string() && !required) || field.is_null()) { return defaultValue; }
     return field.as_string();
+}
+
+xsapi_internal_string utils::extract_json_string(
+    _In_ const web::json::value& jsonValue,
+    _In_ const xsapi_internal_string& stringName,
+    _In_ bool required,
+    _In_ const xsapi_internal_string& defaultValue
+    )
+{
+    web::json::value field(utils::extract_json_field(jsonValue, stringName, required));
+    if ((!field.is_string() && !required) || field.is_null()) { return defaultValue; }
+    return internal_string_from_string_t(field.as_string());
 }
 
 web::json::array utils::extract_json_array(
@@ -388,6 +523,19 @@ bool utils::extract_json_bool(
 
 bool utils::extract_json_bool(
     _In_ const web::json::value& jsonValue,
+    _In_ const xsapi_internal_string& stringName,
+    _Inout_ std::error_code& error,
+    _In_ bool required,
+    _In_ bool defaultValue
+    )
+{
+    web::json::value field(utils::extract_json_field(jsonValue, stringName, error, required));
+    if (!field.is_boolean() && !required) { return defaultValue; }
+    return field.as_bool();
+}
+
+bool utils::extract_json_bool(
+    _In_ const web::json::value& jsonValue,
     _In_ const string_t& stringName,
     _In_ bool required,
     _In_ bool defaultValue
@@ -401,6 +549,19 @@ bool utils::extract_json_bool(
 int utils::extract_json_int(
     _In_ const web::json::value& jsonValue,
     _In_ const string_t& name,
+    _Inout_ std::error_code& error,
+    _In_ bool required,
+    _In_ int defaultValue
+    )
+{
+    web::json::value field(extract_json_field(jsonValue, name, error, required));
+    if ((!field.is_integer() && !required) || error) { return defaultValue; }
+    return field.as_integer();
+}
+
+int utils::extract_json_int(
+    _In_ const web::json::value& jsonValue,
+    _In_ const xsapi_internal_string& name,
     _Inout_ std::error_code& error,
     _In_ bool required,
     _In_ int defaultValue
@@ -450,7 +611,7 @@ uint64_t utils::extract_json_string_to_uint64(
 
 uint64_t utils::extract_json_uint52(
     _In_ const web::json::value& jsonValue,
-    _In_ const string_t& name,
+    _In_ const xsapi_internal_string& name,
     _Inout_ std::error_code& error,
     _In_ bool required,
     _In_ uint64_t defaultValue
@@ -463,7 +624,7 @@ uint64_t utils::extract_json_uint52(
 
 uint64_t utils::extract_json_uint52(
     _In_ const web::json::value& jsonValue,
-    _In_ const string_t& name,
+    _In_ const xsapi_internal_string& name,
     _In_ bool required,
     _In_ uint64_t defaultValue
     )
@@ -501,6 +662,25 @@ utility::datetime utils::extract_json_time(
     result = utility::datetime::from_string(field.as_string(), utility::datetime::date_format::ISO_8601);
 
     return result;
+}
+
+utility::datetime utils::extract_json_time(
+    _In_ const web::json::value& jsonValue,
+    _In_ const xsapi_internal_string& name,
+    _Inout_ std::error_code& error,
+    _In_ bool required
+    )
+{
+    return extract_json_time(jsonValue, utils::string_t_from_internal_string(name), error, required);
+}
+
+utility::datetime utils::extract_json_time(
+    _In_ const web::json::value& jsonValue,
+    _In_ const xsapi_internal_string& name,
+    _In_ bool required
+    )
+{
+    return extract_json_time(jsonValue, utils::string_t_from_internal_string(name), required);
 }
 
 std::chrono::seconds utils::extract_json_string_timespan_in_seconds(
@@ -577,15 +757,15 @@ string_t utils::base64_url_encode(
     return base64;
 }
 
-string_t utils::headers_to_string(
-    _In_ const web::http::http_headers& headers
+xsapi_internal_string utils::headers_to_string(
+    _In_ const http_headers& headers
     )
 {
-    stringstream_t ss;
+    xsapi_internal_stringstream ss;
 
     for (const auto& header : headers)
     {
-        ss << header.first << _T(": ") << header.second << _T("\r\n");
+        ss << header.first << ": " << header.second << "\r\n";
     }
 
     return ss.str();
@@ -765,12 +945,12 @@ std::time_t utils::convert_timepoint_to_time(
 #endif
 }
 
-string_t utils::convert_timepoint_to_string(
+xsapi_internal_string utils::convert_timepoint_to_string(
     _In_ const chrono_clock_t::time_point& time_point
     )
 {
-    string_t result;
-    string_t::value_type buff[FILENAME_MAX];
+    xsapi_internal_string result;
+    xsapi_internal_string::value_type buff[FILENAME_MAX];
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(time_point.time_since_epoch());
     time_t t = utils::convert_timepoint_to_time(time_point);
     std::tm time;
@@ -780,7 +960,7 @@ string_t utils::convert_timepoint_to_string(
     {
         return result;
     }
-    swprintf_s(buff, _T("%04d-%02d-%02dT%02d:%02d:%02d.%03dZ"),
+    sprintf_s(buff, "%04d-%02d-%02dT%02d:%02d:%02d.%03dZ",
         time.tm_year + 1900, time.tm_mon + 1, time.tm_mday,
         time.tm_hour, time.tm_min, time.tm_sec, static_cast<int>(ms.count() % 1000));
 #else
@@ -799,20 +979,20 @@ string_t utils::convert_timepoint_to_string(
     return result;
 }
 
-string_t utils::escape_special_characters(const string_t& str)
+xsapi_internal_string utils::escape_special_characters(const xsapi_internal_string& str)
 {
-    string_t result = str;
+    xsapi_internal_string result = str;
     for (auto iter = result.begin(); iter != result.end(); ++iter)
     {
-        if (*iter == _T('\r') || *iter == _T('\n'))
+        if (*iter == '\r' || *iter == '\n')
         {
-            iter = result.insert(iter, _T(' '));
+            iter = result.insert(iter, ' ');
             iter = result.erase(iter + 1);
             --iter;
         }
-        else if (*iter == _T('\"'))
+        else if (*iter == '\"')
         {
-            iter = result.insert(iter, _T('\"'));
+            iter = result.insert(iter, '\"');
             ++iter;
         }
     }
@@ -821,7 +1001,7 @@ string_t utils::escape_special_characters(const string_t& str)
 
 uint32_t
 utils::char_t_copy(
-    _In_reads_bytes_(size) char_t* destinationCharArr,
+    _In_reads_bytes_(sizeInWords) char_t* destinationCharArr,
     _In_ size_t sizeInWords,
     _In_ const char_t* sourceCharArr
     )
@@ -936,7 +1116,7 @@ utils::convert_xbox_live_error_code_to_hresult(
     {
         return __HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND);
     }
-    else if (err >= 400 && err <= 505)
+    else if (err >= 300 && err <= 505)
     {
         return convert_http_status_to_hresult(err);
     }
@@ -946,7 +1126,7 @@ utils::convert_xbox_live_error_code_to_hresult(
         {
             case xbox_live_error_code::bad_alloc: return E_OUTOFMEMORY;
             case xbox_live_error_code::invalid_argument: return E_INVALIDARG;
-            case xbox_live_error_code::runtime_error: return E_FAIL;
+            case xbox_live_error_code::runtime_error: return E_XBL_RUNTIME_ERROR;
             case xbox_live_error_code::length_error: return __HRESULT_FROM_WIN32(ERROR_BAD_LENGTH);
             case xbox_live_error_code::out_of_range: return E_BOUNDS;
             case xbox_live_error_code::range_error: return E_BOUNDS;
@@ -956,12 +1136,12 @@ utils::convert_xbox_live_error_code_to_hresult(
             case xbox_live_error_code::uri_error: return WEB_E_UNEXPECTED_CONTENT;
             case xbox_live_error_code::websocket_error: return WEB_E_UNEXPECTED_CONTENT;
             case xbox_live_error_code::auth_user_interaction_required: return ONL_E_ACTION_REQUIRED;
-            case xbox_live_error_code::rta_generic_error: return E_FAIL;
-            case xbox_live_error_code::rta_subscription_limit_reached: return E_FAIL;
-            case xbox_live_error_code::rta_access_denied: return E_FAIL;
-            case xbox_live_error_code::auth_unknown_error: return E_FAIL;
-            case xbox_live_error_code::auth_runtime_error: return E_FAIL;
-            case xbox_live_error_code::auth_no_token_error: return E_FAIL;
+            case xbox_live_error_code::rta_generic_error: return E_XBL_RTA_GENERIC_ERROR;
+            case xbox_live_error_code::rta_subscription_limit_reached: return E_XBL_RTA_SUBSCRIPTION_LIMIT_REACHED;
+            case xbox_live_error_code::rta_access_denied: return E_XBL_RTA_ACCESS_DENIED;
+            case xbox_live_error_code::auth_unknown_error: return E_XBL_AUTH_UNKNOWN_ERROR;
+            case xbox_live_error_code::auth_runtime_error: return E_XBL_AUTH_RUNTIME_ERROR;
+            case xbox_live_error_code::auth_no_token_error: return E_XBL_AUTH_NO_TOKEN;
             case xbox_live_error_code::auth_user_not_signed_in: return __HRESULT_FROM_WIN32(ERROR_NO_SUCH_USER);
             case xbox_live_error_code::auth_user_cancel: return __HRESULT_FROM_WIN32(ERROR_CANCELLED);
             case xbox_live_error_code::auth_user_switched: return __HRESULT_FROM_WIN32(ERROR_NO_SUCH_USER);
@@ -1058,162 +1238,162 @@ long utils::convert_http_status_to_hresult(_In_ uint32_t httpStatusCode)
     return hr;
 }
 
-string_t utils::convert_hresult_to_error_name(_In_ long hr)
+xsapi_internal_string utils::convert_hresult_to_error_name(_In_ long hr)
 {
     switch (hr)
     {
         // Generic errors
-    case S_OK: return _T("S_OK");
-    case S_FALSE: return _T("S_FALSE");
-    case E_OUTOFMEMORY: return _T("E_OUTOFMEMORY");
-    case E_ACCESSDENIED: return _T("E_ACCESSDENIED");
-    case E_INVALIDARG: return _T("E_INVALIDARG");
-    case E_UNEXPECTED: return _T("E_UNEXPECTED");
-    case E_ABORT: return _T("E_ABORT");
-    case E_FAIL: return _T("E_FAIL");
-    case E_NOTIMPL: return _T("E_NOTIMPL");
-    case E_ILLEGAL_METHOD_CALL: return _T("E_ILLEGAL_METHOD_CALL");
+    case S_OK: return "S_OK";
+    case S_FALSE: return "S_FALSE";
+    case E_OUTOFMEMORY: return "E_OUTOFMEMORY";
+    case E_ACCESSDENIED: return "E_ACCESSDENIED";
+    case E_INVALIDARG: return "E_INVALIDARG";
+    case E_UNEXPECTED: return "E_UNEXPECTED";
+    case E_ABORT: return "E_ABORT";
+    case E_FAIL: return "E_FAIL";
+    case E_NOTIMPL: return "E_NOTIMPL";
+    case E_ILLEGAL_METHOD_CALL: return "E_ILLEGAL_METHOD_CALL";
 
         // Authentication specific errors
-    case 0x87DD0003: return _T("AM_E_XASD_UNEXPECTED");
-    case 0x87DD0004: return _T("AM_E_XASU_UNEXPECTED");
-    case 0x87DD0005: return _T("AM_E_XAST_UNEXPECTED");
-    case 0x87DD0006: return _T("AM_E_XSTS_UNEXPECTED");
-    case 0x87DD0007: return _T("AM_E_XDEVICE_UNEXPECTED");
-    case 0x87DD0008: return _T("AM_E_DEVMODE_NOT_AUTHORIZED");
-    case 0x87DD0009: return _T("AM_E_NOT_AUTHORIZED");
-    case 0x87DD000A: return _T("AM_E_FORBIDDEN");
-    case 0x87DD000B: return _T("AM_E_UNKNOWN_TARGET");
-    case 0x87DD000C: return _T("AM_E_INVALID_NSAL_DATA");
-    case 0x87DD000D: return _T("AM_E_TITLE_NOT_AUTHENTICATED");
-    case 0x87DD000E: return _T("AM_E_TITLE_NOT_AUTHORIZED");
-    case 0x87DD000F: return _T("AM_E_DEVICE_NOT_AUTHENTICATED");
-    case 0x87DD0010: return _T("AM_E_INVALID_USER_INDEX");
+    case 0x87DD0003: return "AM_E_XASD_UNEXPECTED";
+    case 0x87DD0004: return "AM_E_XASU_UNEXPECTED";
+    case 0x87DD0005: return "AM_E_XAST_UNEXPECTED";
+    case 0x87DD0006: return "AM_E_XSTS_UNEXPECTED";
+    case 0x87DD0007: return "AM_E_XDEVICE_UNEXPECTED";
+    case 0x87DD0008: return "AM_E_DEVMODE_NOT_AUTHORIZED";
+    case 0x87DD0009: return "AM_E_NOT_AUTHORIZED";
+    case 0x87DD000A: return "AM_E_FORBIDDEN";
+    case 0x87DD000B: return "AM_E_UNKNOWN_TARGET";
+    case 0x87DD000C: return "AM_E_INVALID_NSAL_DATA";
+    case 0x87DD000D: return "AM_E_TITLE_NOT_AUTHENTICATED";
+    case 0x87DD000E: return "AM_E_TITLE_NOT_AUTHORIZED";
+    case 0x87DD000F: return "AM_E_DEVICE_NOT_AUTHENTICATED";
+    case 0x87DD0010: return "AM_E_INVALID_USER_INDEX";
 
-    case 0x8015DC00: return _T("XO_E_DEVMODE_NOT_AUTHORIZED");
-    case 0x8015DC01: return _T("XO_E_SYSTEM_UPDATE_REQUIRED");
-    case 0x8015DC02: return _T("XO_E_CONTENT_UPDATE_REQUIRED");
-    case 0x8015DC03: return _T("XO_E_ENFORCEMENT_BAN");
-    case 0x8015DC04: return _T("XO_E_THIRD_PARTY_BAN");
-    case 0x8015DC05: return _T("XO_E_ACCOUNT_PARENTALLY_RESTRICTED");
-    case 0x8015DC06: return _T("XO_E_DEVICE_SUBSCRIPTION_NOT_ACTIVATED");
-    case 0x8015DC08: return _T("XO_E_ACCOUNT_BILLING_MAINTENANCE_REQUIRED");
-    case 0x8015DC09: return _T("XO_E_ACCOUNT_CREATION_REQUIRED");
-    case 0x8015DC0A: return _T("XO_E_ACCOUNT_TERMS_OF_USE_NOT_ACCEPTED");
-    case 0x8015DC0B: return _T("XO_E_ACCOUNT_COUNTRY_NOT_AUTHORIZED");
-    case 0x8015DC0C: return _T("XO_E_ACCOUNT_AGE_VERIFICATION_REQUIRED");
-    case 0x8015DC0D: return _T("XO_E_ACCOUNT_CURFEW");
-    case 0x8015DC0E: return _T("XO_E_ACCOUNT_CHILD_NOT_IN_FAMILY");
-    case 0x8015DC0F: return _T("XO_E_ACCOUNT_CSV_TRANSITION_REQUIRED");
-    case 0x8015DC10: return _T("XO_E_ACCOUNT_MAINTENANCE_REQUIRED");
-    case 0x8015DC11: return _T("XO_E_ACCOUNT_TYPE_NOT_ALLOWED"); // dev account on retail box
-    case 0x8015DC12: return _T("XO_E_CONTENT_ISOLATION (Verify SCID / Sandbox)");
-    case 0x8015DC13: return _T("XO_E_ACCOUNT_NAME_CHANGE_REQUIRED");
-    case 0x8015DC14: return _T("XO_E_DEVICE_CHALLENGE_REQUIRED");
+    case 0x8015DC00: return "XO_E_DEVMODE_NOT_AUTHORIZED";
+    case 0x8015DC01: return "XO_E_SYSTEM_UPDATE_REQUIRED";
+    case 0x8015DC02: return "XO_E_CONTENT_UPDATE_REQUIRED";
+    case 0x8015DC03: return "XO_E_ENFORCEMENT_BAN";
+    case 0x8015DC04: return "XO_E_THIRD_PARTY_BAN";
+    case 0x8015DC05: return "XO_E_ACCOUNT_PARENTALLY_RESTRICTED";
+    case 0x8015DC06: return "XO_E_DEVICE_SUBSCRIPTION_NOT_ACTIVATED";
+    case 0x8015DC08: return "XO_E_ACCOUNT_BILLING_MAINTENANCE_REQUIRED";
+    case 0x8015DC09: return "XO_E_ACCOUNT_CREATION_REQUIRED";
+    case 0x8015DC0A: return "XO_E_ACCOUNT_TERMS_OF_USE_NOT_ACCEPTED";
+    case 0x8015DC0B: return "XO_E_ACCOUNT_COUNTRY_NOT_AUTHORIZED";
+    case 0x8015DC0C: return "XO_E_ACCOUNT_AGE_VERIFICATION_REQUIRED";
+    case 0x8015DC0D: return "XO_E_ACCOUNT_CURFEW";
+    case 0x8015DC0E: return "XO_E_ACCOUNT_CHILD_NOT_IN_FAMILY";
+    case 0x8015DC0F: return "XO_E_ACCOUNT_CSV_TRANSITION_REQUIRED";
+    case 0x8015DC10: return "XO_E_ACCOUNT_MAINTENANCE_REQUIRED";
+    case 0x8015DC11: return "XO_E_ACCOUNT_TYPE_NOT_ALLOWED"; // dev account on retail box
+    case 0x8015DC12: return "XO_E_CONTENT_ISOLATION (Verify SCID / Sandbox)";
+    case 0x8015DC13: return "XO_E_ACCOUNT_NAME_CHANGE_REQUIRED";
+    case 0x8015DC14: return "XO_E_DEVICE_CHALLENGE_REQUIRED";
         // case 0x8015DC15: synthetic device type not allowed - does not apply to consoles
-    case 0x8015DC16: return _T("XO_E_SIGNIN_COUNT_BY_DEVICE_TYPE_EXCEEDED");
-    case 0x8015DC17: return _T("XO_E_PIN_CHALLENGE_REQUIRED");
-    case 0x8015DC18: return _T("XO_E_RETAIL_ACCOUNT_NOT_ALLOWED"); // RETAIL account on devkit
-    case 0x8015DC19: return _T("XO_E_SANDBOX_NOT_ALLOWED");
-    case 0x8015DC1A: return _T("XO_E_ACCOUNT_SERVICE_UNAVAILABLE_UNKNOWN_USER");
-    case 0x8015DC1B: return _T("XO_E_GREEN_SIGNED_CONTENT_NOT_AUTHORIZED");
-    case 0x8015DC1C: return _T("XO_E_CONTENT_NOT_AUTHORIZED");
+    case 0x8015DC16: return "XO_E_SIGNIN_COUNT_BY_DEVICE_TYPE_EXCEEDED";
+    case 0x8015DC17: return "XO_E_PIN_CHALLENGE_REQUIRED";
+    case 0x8015DC18: return "XO_E_RETAIL_ACCOUNT_NOT_ALLOWED"; // RETAIL account on devkit
+    case 0x8015DC19: return "XO_E_SANDBOX_NOT_ALLOWED";
+    case 0x8015DC1A: return "XO_E_ACCOUNT_SERVICE_UNAVAILABLE_UNKNOWN_USER";
+    case 0x8015DC1B: return "XO_E_GREEN_SIGNED_CONTENT_NOT_AUTHORIZED";
+    case 0x8015DC1C: return "XO_E_CONTENT_NOT_AUTHORIZED";
 
-    case 0x8015DC20: return _T("XO_E_EXPIRED_DEVICE_TOKEN");
-    case 0x8015DC21: return _T("XO_E_EXPIRED_TITLE_TOKEN");
-    case 0x8015DC22: return _T("XO_E_EXPIRED_USER_TOKEN");
-    case 0x8015DC23: return _T("XO_E_INVALID_DEVICE_TOKEN");
-    case 0x8015DC24: return _T("XO_E_INVALID_TITLE_TOKEN");
-    case 0x8015DC25: return _T("XO_E_INVALID_USER_TOKEN");
+    case 0x8015DC20: return "XO_E_EXPIRED_DEVICE_TOKEN";
+    case 0x8015DC21: return "XO_E_EXPIRED_TITLE_TOKEN";
+    case 0x8015DC22: return "XO_E_EXPIRED_USER_TOKEN";
+    case 0x8015DC23: return "XO_E_INVALID_DEVICE_TOKEN";
+    case 0x8015DC24: return "XO_E_INVALID_TITLE_TOKEN";
+    case 0x8015DC25: return "XO_E_INVALID_USER_TOKEN";
 
         // HTTP specific errors
-    case WEB_E_UNSUPPORTED_FORMAT: return _T("WEB_E_UNSUPPORTED_FORMAT");
-    case WEB_E_INVALID_XML: return _T("WEB_E_INVALID_XML");
-    case WEB_E_MISSING_REQUIRED_ELEMENT: return _T("WEB_E_MISSING_REQUIRED_ELEMENT");
-    case WEB_E_MISSING_REQUIRED_ATTRIBUTE: return _T("WEB_E_MISSING_REQUIRED_ATTRIBUTE");
-    case WEB_E_UNEXPECTED_CONTENT: return _T("WEB_E_UNEXPECTED_CONTENT");
-    case WEB_E_RESOURCE_TOO_LARGE: return _T("WEB_E_RESOURCE_TOO_LARGE");
-    case WEB_E_INVALID_JSON_STRING: return _T("WEB_E_INVALID_JSON_STRING");
-    case WEB_E_INVALID_JSON_NUMBER: return _T("WEB_E_INVALID_JSON_NUMBER");
-    case WEB_E_JSON_VALUE_NOT_FOUND: return _T("WEB_E_JSON_VALUE_NOT_FOUND");
-    case ERROR_RESOURCE_DATA_NOT_FOUND: return _T("ERROR_RESOURCE_DATA_NOT_FOUND");
+    case WEB_E_UNSUPPORTED_FORMAT: return "WEB_E_UNSUPPORTED_FORMAT";
+    case WEB_E_INVALID_XML: return "WEB_E_INVALID_XML";
+    case WEB_E_MISSING_REQUIRED_ELEMENT: return "WEB_E_MISSING_REQUIRED_ELEMENT";
+    case WEB_E_MISSING_REQUIRED_ATTRIBUTE: return "WEB_E_MISSING_REQUIRED_ATTRIBUTE";
+    case WEB_E_UNEXPECTED_CONTENT: return "WEB_E_UNEXPECTED_CONTENT";
+    case WEB_E_RESOURCE_TOO_LARGE: return "WEB_E_RESOURCE_TOO_LARGE";
+    case WEB_E_INVALID_JSON_STRING: return "WEB_E_INVALID_JSON_STRING";
+    case WEB_E_INVALID_JSON_NUMBER: return "WEB_E_INVALID_JSON_NUMBER";
+    case WEB_E_JSON_VALUE_NOT_FOUND: return "WEB_E_JSON_VALUE_NOT_FOUND";
+    case ERROR_RESOURCE_DATA_NOT_FOUND: return "ERROR_RESOURCE_DATA_NOT_FOUND";
 
-    case HTTP_E_STATUS_UNEXPECTED: return _T("HTTP_E_STATUS_UNEXPECTED");
-    case HTTP_E_STATUS_UNEXPECTED_REDIRECTION: return _T("HTTP_E_STATUS_UNEXPECTED_REDIRECTION");
-    case HTTP_E_STATUS_UNEXPECTED_CLIENT_ERROR: return _T("HTTP_E_STATUS_UNEXPECTED_CLIENT_ERROR");
-    case HTTP_E_STATUS_UNEXPECTED_SERVER_ERROR: return _T("HTTP_E_STATUS_UNEXPECTED_SERVER_ERROR");
-    case HTTP_E_STATUS_AMBIGUOUS: return _T("HTTP_E_STATUS_AMBIGUOUS");
-    case HTTP_E_STATUS_MOVED: return _T("HTTP_E_STATUS_MOVED");
-    case HTTP_E_STATUS_REDIRECT: return _T("HTTP_E_STATUS_REDIRECT");
-    case HTTP_E_STATUS_REDIRECT_METHOD: return _T("HTTP_E_STATUS_REDIRECT_METHOD");
-    case HTTP_E_STATUS_NOT_MODIFIED: return _T("HTTP_E_STATUS_NOT_MODIFIED");
-    case HTTP_E_STATUS_USE_PROXY: return _T("HTTP_E_STATUS_USE_PROXY");
-    case HTTP_E_STATUS_REDIRECT_KEEP_VERB: return _T("HTTP_E_STATUS_REDIRECT_KEEP_VERB");
-    case HTTP_E_STATUS_BAD_REQUEST: return _T("HTTP_E_STATUS_BAD_REQUEST");
-    case HTTP_E_STATUS_DENIED: return _T("HTTP_E_STATUS_DENIED");
-    case HTTP_E_STATUS_PAYMENT_REQ: return _T("HTTP_E_STATUS_PAYMENT_REQ");
-    case HTTP_E_STATUS_FORBIDDEN: return _T("HTTP_E_STATUS_FORBIDDEN");
-    case HTTP_E_STATUS_NOT_FOUND: return _T("HTTP_E_STATUS_NOT_FOUND");
-    case HTTP_E_STATUS_BAD_METHOD: return _T("HTTP_E_STATUS_BAD_METHOD");
-    case HTTP_E_STATUS_NONE_ACCEPTABLE: return _T("HTTP_E_STATUS_NONE_ACCEPTABLE");
-    case HTTP_E_STATUS_PROXY_AUTH_REQ: return _T("HTTP_E_STATUS_PROXY_AUTH_REQ");
-    case HTTP_E_STATUS_REQUEST_TIMEOUT: return _T("HTTP_E_STATUS_REQUEST_TIMEOUT");
-    case HTTP_E_STATUS_CONFLICT: return _T("HTTP_E_STATUS_CONFLICT");
-    case HTTP_E_STATUS_GONE: return _T("HTTP_E_STATUS_GONE");
-    case HTTP_E_STATUS_LENGTH_REQUIRED: return _T("HTTP_E_STATUS_LENGTH_REQUIRED");
-    case HTTP_E_STATUS_PRECOND_FAILED: return _T("HTTP_E_STATUS_PRECOND_FAILED");
-    case HTTP_E_STATUS_REQUEST_TOO_LARGE: return _T("HTTP_E_STATUS_REQUEST_TOO_LARGE");
-    case HTTP_E_STATUS_URI_TOO_LONG: return _T("HTTP_E_STATUS_URI_TOO_LONG");
-    case HTTP_E_STATUS_UNSUPPORTED_MEDIA: return _T("HTTP_E_STATUS_UNSUPPORTED_MEDIA");
-    case HTTP_E_STATUS_RANGE_NOT_SATISFIABLE: return _T("HTTP_E_STATUS_RANGE_NOT_SATISFIABLE");
-    case HTTP_E_STATUS_EXPECTATION_FAILED: return _T("HTTP_E_STATUS_EXPECTATION_FAILED");
+    case HTTP_E_STATUS_UNEXPECTED: return "HTTP_E_STATUS_UNEXPECTED";
+    case HTTP_E_STATUS_UNEXPECTED_REDIRECTION: return "HTTP_E_STATUS_UNEXPECTED_REDIRECTION";
+    case HTTP_E_STATUS_UNEXPECTED_CLIENT_ERROR: return "HTTP_E_STATUS_UNEXPECTED_CLIENT_ERROR";
+    case HTTP_E_STATUS_UNEXPECTED_SERVER_ERROR: return "HTTP_E_STATUS_UNEXPECTED_SERVER_ERROR";
+    case HTTP_E_STATUS_AMBIGUOUS: return "HTTP_E_STATUS_AMBIGUOUS";
+    case HTTP_E_STATUS_MOVED: return "HTTP_E_STATUS_MOVED";
+    case HTTP_E_STATUS_REDIRECT: return "HTTP_E_STATUS_REDIRECT";
+    case HTTP_E_STATUS_REDIRECT_METHOD: return "HTTP_E_STATUS_REDIRECT_METHOD";
+    case HTTP_E_STATUS_NOT_MODIFIED: return "HTTP_E_STATUS_NOT_MODIFIED";
+    case HTTP_E_STATUS_USE_PROXY: return "HTTP_E_STATUS_USE_PROXY";
+    case HTTP_E_STATUS_REDIRECT_KEEP_VERB: return "HTTP_E_STATUS_REDIRECT_KEEP_VERB";
+    case HTTP_E_STATUS_BAD_REQUEST: return "HTTP_E_STATUS_BAD_REQUEST";
+    case HTTP_E_STATUS_DENIED: return "HTTP_E_STATUS_DENIED";
+    case HTTP_E_STATUS_PAYMENT_REQ: return "HTTP_E_STATUS_PAYMENT_REQ";
+    case HTTP_E_STATUS_FORBIDDEN: return "HTTP_E_STATUS_FORBIDDEN";
+    case HTTP_E_STATUS_NOT_FOUND: return "HTTP_E_STATUS_NOT_FOUND";
+    case HTTP_E_STATUS_BAD_METHOD: return "HTTP_E_STATUS_BAD_METHOD";
+    case HTTP_E_STATUS_NONE_ACCEPTABLE: return "HTTP_E_STATUS_NONE_ACCEPTABLE";
+    case HTTP_E_STATUS_PROXY_AUTH_REQ: return "HTTP_E_STATUS_PROXY_AUTH_REQ";
+    case HTTP_E_STATUS_REQUEST_TIMEOUT: return "HTTP_E_STATUS_REQUEST_TIMEOUT";
+    case HTTP_E_STATUS_CONFLICT: return "HTTP_E_STATUS_CONFLICT";
+    case HTTP_E_STATUS_GONE: return "HTTP_E_STATUS_GONE";
+    case HTTP_E_STATUS_LENGTH_REQUIRED: return "HTTP_E_STATUS_LENGTH_REQUIRED";
+    case HTTP_E_STATUS_PRECOND_FAILED: return "HTTP_E_STATUS_PRECOND_FAILED";
+    case HTTP_E_STATUS_REQUEST_TOO_LARGE: return "HTTP_E_STATUS_REQUEST_TOO_LARGE";
+    case HTTP_E_STATUS_URI_TOO_LONG: return "HTTP_E_STATUS_URI_TOO_LONG";
+    case HTTP_E_STATUS_UNSUPPORTED_MEDIA: return "HTTP_E_STATUS_UNSUPPORTED_MEDIA";
+    case HTTP_E_STATUS_RANGE_NOT_SATISFIABLE: return "HTTP_E_STATUS_RANGE_NOT_SATISFIABLE";
+    case HTTP_E_STATUS_EXPECTATION_FAILED: return "HTTP_E_STATUS_EXPECTATION_FAILED";
 
-    case MAKE_HTTP_HRESULT(421): return _T("HTTP_E_STATUS_421_MISDIRECTED_REQUEST");
-    case MAKE_HTTP_HRESULT(422): return _T("HTTP_E_STATUS_422_UNPROCESSABLE_ENTITY");
-    case MAKE_HTTP_HRESULT(423): return _T("HTTP_E_STATUS_423_LOCKED");
-    case MAKE_HTTP_HRESULT(424): return _T("HTTP_E_STATUS_424_FAILED_DEPENDENCY");
-    case MAKE_HTTP_HRESULT(426): return _T("HTTP_E_STATUS_426_UPGRADE_REQUIRED");
-    case MAKE_HTTP_HRESULT(428): return _T("HTTP_E_STATUS_428_PRECONDITION_REQUIRED");
-    case MAKE_HTTP_HRESULT(429): return _T("HTTP_E_STATUS_429_TOO_MANY_REQUESTS");
-    case MAKE_HTTP_HRESULT(431): return _T("HTTP_E_STATUS_431_REQUEST_HEADER_FIELDS_TOO_LARGE");
-    case MAKE_HTTP_HRESULT(449): return _T("HTTP_E_STATUS_449_RETRY_WITH");
-    case MAKE_HTTP_HRESULT(451): return _T("HTTP_E_STATUS_451_UNAVAILABLE_FOR_LEGAL_REASONS");
+    case MAKE_HTTP_HRESULT(421): return "HTTP_E_STATUS_421_MISDIRECTED_REQUEST";
+    case MAKE_HTTP_HRESULT(422): return "HTTP_E_STATUS_422_UNPROCESSABLE_ENTITY";
+    case MAKE_HTTP_HRESULT(423): return "HTTP_E_STATUS_423_LOCKED";
+    case MAKE_HTTP_HRESULT(424): return "HTTP_E_STATUS_424_FAILED_DEPENDENCY";
+    case MAKE_HTTP_HRESULT(426): return "HTTP_E_STATUS_426_UPGRADE_REQUIRED";
+    case MAKE_HTTP_HRESULT(428): return "HTTP_E_STATUS_428_PRECONDITION_REQUIRED";
+    case MAKE_HTTP_HRESULT(429): return "HTTP_E_STATUS_429_TOO_MANY_REQUESTS";
+    case MAKE_HTTP_HRESULT(431): return "HTTP_E_STATUS_431_REQUEST_HEADER_FIELDS_TOO_LARGE";
+    case MAKE_HTTP_HRESULT(449): return "HTTP_E_STATUS_449_RETRY_WITH";
+    case MAKE_HTTP_HRESULT(451): return "HTTP_E_STATUS_451_UNAVAILABLE_FOR_LEGAL_REASONS";
 
-    case HTTP_E_STATUS_SERVER_ERROR: return _T("HTTP_E_STATUS_SERVER_ERROR");
-    case HTTP_E_STATUS_NOT_SUPPORTED: return _T("HTTP_E_STATUS_NOT_SUPPORTED");
-    case HTTP_E_STATUS_BAD_GATEWAY: return _T("HTTP_E_STATUS_BAD_GATEWAY");
-    case HTTP_E_STATUS_SERVICE_UNAVAIL: return _T("HTTP_E_STATUS_SERVICE_UNAVAIL");
-    case HTTP_E_STATUS_GATEWAY_TIMEOUT: return _T("HTTP_E_STATUS_GATEWAY_TIMEOUT");
-    case HTTP_E_STATUS_VERSION_NOT_SUP: return _T("HTTP_E_STATUS_VERSION_NOT_SUP");
+    case HTTP_E_STATUS_SERVER_ERROR: return "HTTP_E_STATUS_SERVER_ERROR";
+    case HTTP_E_STATUS_NOT_SUPPORTED: return "HTTP_E_STATUS_NOT_SUPPORTED";
+    case HTTP_E_STATUS_BAD_GATEWAY: return "HTTP_E_STATUS_BAD_GATEWAY";
+    case HTTP_E_STATUS_SERVICE_UNAVAIL: return "HTTP_E_STATUS_SERVICE_UNAVAIL";
+    case HTTP_E_STATUS_GATEWAY_TIMEOUT: return "HTTP_E_STATUS_GATEWAY_TIMEOUT";
+    case HTTP_E_STATUS_VERSION_NOT_SUP: return "HTTP_E_STATUS_VERSION_NOT_SUP";
 
-    case MAKE_HTTP_HRESULT(506): return _T("HTTP_E_STATUS_506_VARIANT_ALSO_NEGOTIATES");
-    case MAKE_HTTP_HRESULT(507): return _T("HTTP_E_STATUS_507_INSUFFICIENT_STORAGE");
-    case MAKE_HTTP_HRESULT(508): return _T("HTTP_E_STATUS_508_LOOP_DETECTED");
-    case MAKE_HTTP_HRESULT(510): return _T("HTTP_E_STATUS_510_NOT_EXTENDED");
-    case MAKE_HTTP_HRESULT(511): return _T("HTTP_E_STATUS_511_NETWORK_AUTHENTICATION_REQUIRED");
+    case MAKE_HTTP_HRESULT(506): return "HTTP_E_STATUS_506_VARIANT_ALSO_NEGOTIATES";
+    case MAKE_HTTP_HRESULT(507): return "HTTP_E_STATUS_507_INSUFFICIENT_STORAGE";
+    case MAKE_HTTP_HRESULT(508): return "HTTP_E_STATUS_508_LOOP_DETECTED";
+    case MAKE_HTTP_HRESULT(510): return "HTTP_E_STATUS_510_NOT_EXTENDED";
+    case MAKE_HTTP_HRESULT(511): return "HTTP_E_STATUS_511_NETWORK_AUTHENTICATION_REQUIRED";
 
         // WinINet specific errors
-    case INET_E_INVALID_URL: return _T("INET_E_INVALID_URL");
-    case INET_E_NO_SESSION: return _T("INET_E_NO_SESSION");
-    case INET_E_CANNOT_CONNECT: return _T("INET_E_CANNOT_CONNECT");
-    case INET_E_RESOURCE_NOT_FOUND: return _T("INET_E_RESOURCE_NOT_FOUND");
-    case INET_E_OBJECT_NOT_FOUND: return _T("INET_E_OBJECT_NOT_FOUND");
-    case INET_E_DATA_NOT_AVAILABLE: return _T("INET_E_DATA_NOT_AVAILABLE");
-    case INET_E_DOWNLOAD_FAILURE: return _T("INET_E_DOWNLOAD_FAILURE");
-    case INET_E_AUTHENTICATION_REQUIRED: return _T("INET_E_AUTHENTICATION_REQUIRED");
-    case INET_E_NO_VALID_MEDIA: return _T("INET_E_NO_VALID_MEDIA");
-    case INET_E_CONNECTION_TIMEOUT: return _T("INET_E_CONNECTION_TIMEOUT");
-    case INET_E_INVALID_REQUEST: return _T("INET_E_INVALID_REQUEST");
-    case INET_E_UNKNOWN_PROTOCOL: return _T("INET_E_UNKNOWN_PROTOCOL");
-    case INET_E_SECURITY_PROBLEM: return _T("INET_E_SECURITY_PROBLEM");
-    case INET_E_CANNOT_LOAD_DATA: return _T("INET_E_CANNOT_LOAD_DATA");
-    case INET_E_CANNOT_INSTANTIATE_OBJECT: return _T("INET_E_CANNOT_INSTANTIATE_OBJECT");
-    case INET_E_INVALID_CERTIFICATE: return _T("INET_E_INVALID_CERTIFICATE");
-    case INET_E_REDIRECT_FAILED: return _T("INET_E_REDIRECT_FAILED");
-    case INET_E_REDIRECT_TO_DIR: return _T("INET_E_REDIRECT_TO_DIR");
+    case INET_E_INVALID_URL: return "INET_E_INVALID_URL";
+    case INET_E_NO_SESSION: return "INET_E_NO_SESSION";
+    case INET_E_CANNOT_CONNECT: return "INET_E_CANNOT_CONNECT";
+    case INET_E_RESOURCE_NOT_FOUND: return "INET_E_RESOURCE_NOT_FOUND";
+    case INET_E_OBJECT_NOT_FOUND: return "INET_E_OBJECT_NOT_FOUND";
+    case INET_E_DATA_NOT_AVAILABLE: return "INET_E_DATA_NOT_AVAILABLE";
+    case INET_E_DOWNLOAD_FAILURE: return "INET_E_DOWNLOAD_FAILURE";
+    case INET_E_AUTHENTICATION_REQUIRED: return "INET_E_AUTHENTICATION_REQUIRED";
+    case INET_E_NO_VALID_MEDIA: return "INET_E_NO_VALID_MEDIA";
+    case INET_E_CONNECTION_TIMEOUT: return "INET_E_CONNECTION_TIMEOUT";
+    case INET_E_INVALID_REQUEST: return "INET_E_INVALID_REQUEST";
+    case INET_E_UNKNOWN_PROTOCOL: return "INET_E_UNKNOWN_PROTOCOL";
+    case INET_E_SECURITY_PROBLEM: return "INET_E_SECURITY_PROBLEM";
+    case INET_E_CANNOT_LOAD_DATA: return "INET_E_CANNOT_LOAD_DATA";
+    case INET_E_CANNOT_INSTANTIATE_OBJECT: return "INET_E_CANNOT_INSTANTIATE_OBJECT";
+    case INET_E_INVALID_CERTIFICATE: return "INET_E_INVALID_CERTIFICATE";
+    case INET_E_REDIRECT_FAILED: return "INET_E_REDIRECT_FAILED";
+    case INET_E_REDIRECT_TO_DIR: return "INET_E_REDIRECT_TO_DIR";
     }
 
-    return _T("Unknown error");
+    return "Unknown error";
 }
 #endif
 
@@ -1267,10 +1447,6 @@ utils::convert_exception_to_xbox_live_error_code()
     catch (const web::json::json_exception&) // is an exception
     {
         errCode = xbox_live_error_code::json_error;
-    }
-    catch (const web::websockets::client::websocket_exception&) // is an exception
-    {
-        errCode = xbox_live_error_code::websocket_error;
     }
     catch (const web::http::http_exception& ex) // is an exception
     {
@@ -1336,7 +1512,7 @@ std::error_code utils::guid_from_string(
 }
 #endif
 
-string_t utils::create_guid(_In_ bool removeBraces)
+xsapi_internal_string utils::create_guid(_In_ bool removeBraces)
 {
 #ifdef _WIN32
     GUID guid = {0};
@@ -1349,7 +1525,7 @@ string_t utils::create_guid(_In_ bool removeBraces)
         ARRAYSIZE(wszGuid)
         )), "");
 
-    string_t strGuid = wszGuid;
+    xsapi_internal_string strGuid = utils::internal_string_from_utf16(wszGuid);
 #elif XSAPI_U
     boost::uuids::uuid uuid;
     auto uuidGenerator = boost::uuids::random_generator();
@@ -1378,22 +1554,6 @@ string_t utils::create_guid(_In_ bool removeBraces)
     return strGuid;
 }
 
-string_t utils::extract_header_value(
-    _In_ const web::http::http_headers& responseHeaders,
-    _In_ const string_t& name,
-    _In_ const string_t& defaultValue
-    )
-{
-    auto iter = responseHeaders.find(name);
-    if (iter != responseHeaders.end())
-    {
-        string_t value = iter->second;
-        return value;
-    }
-
-    return defaultValue;
-}
-
 std::vector<string_t>
 utils::string_split(
     _In_ const string_t& string,
@@ -1406,6 +1566,38 @@ utils::string_split(
     {
         size_t posStart = 0, posFound = 0;
         while (posFound != string_t::npos && posStart < string.length())
+        {
+            posFound = string.find(seperator, posStart);
+            if (posFound != string_t::npos)
+            {
+                if (posFound != posStart)
+                {
+                    // this substring is not empty
+                    vSubStrings.push_back(string.substr(posStart, posFound - posStart));
+                }
+                posStart = posFound + 1;
+            }
+            else
+            {
+                vSubStrings.push_back(string.substr(posStart));
+            }
+        }
+    }
+
+    return vSubStrings;
+}
+
+xsapi_internal_vector<xsapi_internal_string> utils::string_split(
+    _In_ const xsapi_internal_string& string,
+    _In_ xsapi_internal_string::value_type seperator
+    )
+{
+    xsapi_internal_vector<xsapi_internal_string> vSubStrings;
+
+    if (!string.empty())
+    {
+        size_t posStart = 0, posFound = 0;
+        while (posFound != xsapi_internal_string::npos && posStart < string.length())
         {
             posFound = string.find(seperator, posStart);
             if (posFound != string_t::npos)
@@ -1463,6 +1655,28 @@ string_t utils::create_xboxlive_endpoint(
     UNREFERENCED_PARAMETER(appConfig);    
 #endif
     source << _T(".xboxlive.com");
+    return source.str();
+}
+
+xsapi_internal_string utils::create_xboxlive_endpoint(
+    _In_ const xsapi_internal_string& subpath,
+    _In_ const std::shared_ptr<xbox_live_app_config_internal>& appConfig,
+    _In_ const xsapi_internal_string& protocol
+    )
+{
+    xsapi_internal_stringstream source;
+    source << protocol; // eg. https or wss
+    source << "://";
+    source << subpath; // eg. "achievements"
+#if !TV_API
+    if (appConfig)
+    {
+        source << appConfig->environment(); // eg. "" or ".dnet"
+    }
+#else
+    UNREFERENCED_PARAMETER(appConfig);
+#endif
+    source << ".xboxlive.com";
     return source.str();
 }
 
@@ -1632,21 +1846,21 @@ string_t utils::datetime_to_string(
 uint32_t
 utils::try_get_master_title_id()
 {
-    auto titleId = xbox::services::xbox_live_app_config::get_app_config_singleton()->_Override_title_id_for_multiplayer();
+    auto titleId = xbox::services::xbox_live_app_config_internal::get_app_config_singleton()->override_title_id_for_multiplayer();
     if (titleId == 0)
     {
-        titleId = xbox::services::xbox_live_app_config::get_app_config_singleton()->title_id();
+        titleId = xbox::services::xbox_live_app_config_internal::get_app_config_singleton()->title_id();
     }
     return titleId;
 }
 
-string_t
+xsapi_internal_string
 utils::try_get_override_scid()
 {
-    auto scid = xbox::services::xbox_live_app_config::get_app_config_singleton()->_Override_scid_for_multiplayer();
+    auto scid = xbox::services::xbox_live_app_config_internal::get_app_config_singleton()->override_scid_for_multiplayer();
     if (scid.empty())
     {
-        scid = xbox::services::xbox_live_app_config::get_app_config_singleton()->scid();
+        scid = xbox::services::xbox_live_app_config_internal::get_app_config_singleton()->scid();
     }
     return scid;
 }
@@ -1694,5 +1908,188 @@ utils::read_test_response_file(_In_ const string_t& filePath)
     return jsonResponse;
 }
 #endif
+
+std::vector<string_t> utils::string_array_to_string_vector(
+    PCSTR *stringArray,
+    size_t stringArrayCount
+    )
+{
+    std::vector<utility::string_t> stringVector;
+    for (size_t i = 0; i < stringArrayCount; ++i)
+    {
+        stringVector.push_back(string_t_from_utf8(stringArray[i]));
+    }
+    return stringVector;
+}
+
+xsapi_internal_vector<xsapi_internal_string> utils::string_array_to_internal_string_vector(
+    PCSTR* stringArray,
+    size_t stringArrayCount
+    )
+{
+    xsapi_internal_vector<xsapi_internal_string> stringVector;
+    stringVector.reserve(stringArrayCount);
+    for (size_t i = 0; i < stringArrayCount; ++i)
+    {
+        stringVector.push_back(stringArray[i]);
+    }
+    return stringVector;
+}
+
+xsapi_internal_vector<xsapi_internal_string> utils::xuid_array_to_internal_string_vector(
+    uint64_t* xuidArray,
+    size_t xuidArrayCount
+    )
+{
+    xsapi_internal_vector<xsapi_internal_string> stringVector;
+    stringVector.reserve(xuidArrayCount);
+    for (size_t i = 0; i < xuidArrayCount; ++i)
+    {
+        stringVector.push_back(utils::uint64_to_internal_string(xuidArray[i]));
+    }
+    return stringVector;
+}
+
+xsapi_internal_vector<uint32_t> utils::uint32_array_to_internal_vector(
+    uint32_t* intArray,
+    size_t intArrayCount
+    )
+{
+    xsapi_internal_vector<uint32_t> vector;
+    vector.reserve(intArrayCount);
+    for (size_t i = 0; i < intArrayCount; ++i)
+    {
+        vector.push_back(intArray[i]);
+    }
+    return vector;
+}
+
+#ifdef _WIN32
+time_t utils::time_t_from_datetime(const utility::datetime& datetime)
+{
+    static const uint64_t ut_msTicks = static_cast<uint64_t>(10000);
+    static const uint64_t ut_secondTicks = 1000 * ut_msTicks;
+    static const uint64_t ut_minuteTicks = 60 * ut_secondTicks;
+    static const uint64_t ut_hourTicks = 60 * 60 * ut_secondTicks;
+    static const uint64_t ut_dayTicks = 24 * 60 * 60 * ut_secondTicks;
+
+    uint64_t seconds = datetime.to_interval() / ut_secondTicks;
+    if (seconds >= 11644473600LL)
+    {
+        return seconds - 11644473600LL;
+    }
+    else
+    {
+        return 0;
+    }
+}
+#endif // _WIN32
+
+#ifdef _WIN32 
+
+xsapi_internal_string utils::internal_string_from_string_t(_In_ const string_t& externalString)
+{
+    return internal_string_from_utf16(externalString.c_str());
+}
+
+xsapi_internal_string utils::internal_string_from_utf16(_In_z_ PCWSTR utf16)
+{
+    return internal_string_from_char_t(utf16);
+}
+
+xsapi_internal_string utils::internal_string_from_char_t(_In_ const char_t* char_t)
+{
+    auto cchOutString = utf8_from_char_t(char_t, nullptr, 0);
+    xsapi_internal_string out(cchOutString - 1, '\0');
+    utf8_from_char_t(char_t, &out[0], cchOutString);
+    return out;
+}
+
+string_t utils::string_t_from_internal_string(_In_ const xsapi_internal_string& internalString)
+{
+    return string_t_from_utf8(internalString.data());
+}
+
+string_t utils::string_t_from_utf8(_In_z_ PCSTR utf8)
+{
+    auto cchOutString = char_t_from_utf8(utf8, nullptr, 0);
+    string_t out(cchOutString - 1, '\0');
+    char_t_from_utf8(utf8, &out[0], cchOutString);
+    return out;
+}
+
+int utils::utf8_from_char_t(
+    _In_z_ const char_t* inArray, 
+    _Out_writes_z_(cchOutArray) char* outArray,
+    _In_ int cchOutArray
+    )
+{
+    // query for the buffer size
+    auto queryResult = WideCharToMultiByte(
+        CP_UTF8, WC_ERR_INVALID_CHARS,
+        inArray, -1,
+        nullptr, 0,
+        nullptr, nullptr
+    );
+
+    if (queryResult > cchOutArray && cchOutArray == 0)
+    {
+        return queryResult;
+    }
+    else if (queryResult == 0 || queryResult > cchOutArray)
+    {
+        throw std::exception("utf8_from_char_t failed");
+    }
+
+    auto conversionResult = WideCharToMultiByte(
+        CP_UTF8, WC_ERR_INVALID_CHARS,
+        inArray, -1,
+        outArray, cchOutArray,
+        nullptr, nullptr
+    );
+    if (conversionResult == 0)
+    {
+        throw std::exception("utf8_from_char_t failed");
+    }
+
+    return conversionResult;
+}
+
+int utils::char_t_from_utf8(
+    _In_z_ const char* inArray,
+    _Out_writes_z_(cchOutArray) char_t* outArray,
+    _In_ int cchOutArray
+    )
+{
+    // query for the buffer size
+    auto queryResult = MultiByteToWideChar(
+        CP_UTF8, MB_ERR_INVALID_CHARS,
+        inArray, -1,
+        nullptr, 0
+    );
+
+    if (queryResult > cchOutArray && cchOutArray == 0)
+    {
+        return queryResult;
+    }
+    else if (queryResult == 0 || queryResult > cchOutArray)
+    {
+        throw std::exception("char_t_from_utf8 failed");
+    }
+
+    auto conversionResult = MultiByteToWideChar(
+        CP_UTF8, MB_ERR_INVALID_CHARS,
+        inArray, -1,
+        outArray, cchOutArray
+    );
+    if (conversionResult == 0)
+    {
+        throw std::exception("char_t_from_utf8 failed");
+    }
+
+    return conversionResult;
+}
+
+#endif // _WIN32
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

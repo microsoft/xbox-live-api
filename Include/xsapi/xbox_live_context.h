@@ -33,7 +33,7 @@ class xbox_live_context_server_impl;
 /// </summary>
 class xbox_live_context
 {
-public:    
+public:
 
 #if XSAPI_XDK_AUTH
     /// <summary>
@@ -95,7 +95,7 @@ public:
     /// <summary>
     /// Returns the current user's Xbox Live User ID.
     /// </summary>
-    _XSAPIIMP const string_t& xbox_live_user_id();
+    _XSAPIIMP string_t xbox_live_user_id();
 
     /// <summary>
     /// Returns an object containing settings that apply to all REST calls made such as retry and diagnostic settings.
@@ -219,8 +219,23 @@ public:
 
 #endif // !defined(XBOX_LIVE_CREATORS_SDK)
 
+#if !XSAPI_CPP
+    /// <summary>
+    /// Internal method
+    /// </summary>
+    std::shared_ptr<user_context> _User_context() const;
+#endif
+
 private:
     std::shared_ptr<xbox::services::xbox_live_context_impl> m_xboxLiveContextImpl;
+
+    void init();
+
+    achievements::achievement_service m_achievementService;
+    social::profile_service m_profileService;
+    social::social_service m_socialService;
+    social::reputation_service m_reputationService;
+    presence::presence_service m_presenceService;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

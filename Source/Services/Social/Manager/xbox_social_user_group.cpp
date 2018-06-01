@@ -6,12 +6,53 @@
 #include "social_manager_internal.h"
 #include "xsapi/presence.h"
 
-using namespace xbox::services::presence;
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
 
+using namespace xbox::services::presence;
+using namespace xbox::services::system;
+
 xbox_social_user_group::xbox_social_user_group(
-    _In_ string_t viewHash,
+    _In_ std::shared_ptr<xbox_social_user_group_internal> internalObj
+    ) :
+    m_internalObj(std::move(internalObj))
+{
+}
+
+DEFINE_GET_VECTOR(xbox_social_user_group, xbox_social_user*, users);
+DEFINE_GET_ENUM_TYPE(xbox_social_user_group, social_user_group_type, social_user_group_type);
+DEFINE_GET_VECTOR(xbox_social_user_group, xbox_user_id_container, users_tracked_by_social_user_group);
+DEFINE_GET_OBJECT_REF(xbox_social_user_group, xbox_live_user_t, local_user);
+DEFINE_GET_ENUM_TYPE(xbox_social_user_group, presence_filter, presence_filter_of_group);
+DEFINE_GET_ENUM_TYPE(xbox_social_user_group, relationship_filter, relationship_filter_of_group);
+
+xbox_live_result<void>
+xbox_social_user_group::get_copy_of_users(
+    _Inout_ std::vector<xbox_social_user>& socialUserVector
+    )
+{
+    socialUserVector.clear();
+    auto internalVector = m_internalObj->get_copy_of_users();
+    socialUserVector.reserve(internalVector.size());
+    for (auto& user : internalVector)
+    {
+        socialUserVector.push_back(std::move(user));
+    }
+    return xbox_live_result<void>();
+}
+
+std::vector<xbox_social_user*> 
+xbox_social_user_group::get_users_from_xbox_user_ids(
+    _In_ const std::vector<xbox_user_id_container>& xboxUserIds
+    )
+{
+    return utils::std_vector_from_internal_vector(
+        m_internalObj->get_users_from_xbox_user_ids(xsapi_internal_vector<xbox_user_id_container>(xboxUserIds.begin(), xboxUserIds.end()))
+        );
+}
+
+
+xbox_social_user_group_internal::xbox_social_user_group_internal(
+    _In_ xsapi_internal_string viewHash,
     _In_ presence_filter presenceFilter,
     _In_ relationship_filter relationshipFilter,
     _In_ uint32_t titleId,
@@ -28,9 +69,9 @@ xbox_social_user_group::xbox_social_user_group(
 {
 }
 
-xbox_social_user_group::xbox_social_user_group(
-    _In_ string_t viewHash,
-    _In_ std::vector<string_t> userList,
+xbox_social_user_group_internal::xbox_social_user_group_internal(
+    _In_ xsapi_internal_string viewHash,
+    _In_ xsapi_internal_vector<xsapi_internal_string> userList,
     _In_ xbox_live_user_t xboxLiveUser
     ) :
     m_viewHash(std::move(viewHash)),
@@ -44,57 +85,60 @@ xbox_social_user_group::xbox_social_user_group(
 {
     for (auto& user : userList)
     {
-        uint64_t id = utils::string_t_to_uint64(user.c_str());
+        uint64_t id = utils::internal_string_to_uint64(user);
         if (id == 0)
         {
-            LOG_ERROR("Invalid user");
+            LOG_ERROR_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                "Invalid user"
+            );
             continue;
         }
 
-        m_userUpdateListString.push_back(user.c_str());
+        m_userUpdateListString.push_back(utils::string_t_from_internal_string(user).c_str());
         m_userUpdateListInt.push_back(id);
     }
 }
 
 social_user_group_type
-xbox_social_user_group::social_user_group_type()
+xbox_social_user_group_internal::social_user_group_type()
 {
     std::lock_guard<std::mutex> lock(m_groupMutex);
     return m_userGroupType;
 }
 
-const std::vector<xbox_user_id_container>&
-xbox_social_user_group::users_tracked_by_social_user_group()
+const xsapi_internal_vector<xbox_user_id_container>&
+xbox_social_user_group_internal::users_tracked_by_social_user_group()
 {
     std::lock_guard<std::mutex> lock(m_groupMutex);
     return m_userUpdateListString;
 }
 
 const xbox_live_user_t&
-xbox_social_user_group::local_user()
+xbox_social_user_group_internal::local_user()
 {
     std::lock_guard<std::mutex> lock(m_groupMutex);
     return m_xboxLiveUser;
 }
 
 void
-xbox_social_user_group::destroy()
+xbox_social_user_group_internal::destroy()
 {
     m_userUpdateListInt.clear();
     m_userGroupVector.clear();
     m_userUpdateListString.clear();
 }
 
-const std::vector<uint64_t>&
-xbox_social_user_group::tracking_users()
+const xsapi_internal_vector<uint64_t>&
+xbox_social_user_group_internal::tracking_users()
 {
     std::lock_guard<std::mutex> lock(m_groupMutex);
     return m_userUpdateListInt;
 }
 
-void xbox_social_user_group::update_view(
-    _In_ const xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)& snapshotList,
-    _In_ const std::vector<social_event>& socialEvents
+void xbox_social_user_group_internal::update_view(
+    _In_ const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>& snapshotList,
+    _In_ const xsapi_internal_vector<std::shared_ptr<social_event_internal>>& socialEvents
     )
 {
     std::lock_guard<std::mutex> lock(m_groupMutex);
@@ -144,12 +188,11 @@ void xbox_social_user_group::update_view(
 }
 
 void
-xbox_social_user_group::initialize_filter_list(
-    _In_ const xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)& users
+xbox_social_user_group_internal::initialize_filter_list(
+    _In_ const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>& users
     )
 {
     std::lock_guard<std::mutex> lock(m_groupMutex);
-    std::vector<uint64_t> resultVec;
     for (auto& userPairMap : users)
     {
         auto user = userPairMap.second.socialUser;
@@ -178,8 +221,8 @@ xbox_social_user_group::initialize_filter_list(
 }
 
 void
-xbox_social_user_group::remove_users(
-    _In_ const std::vector<xbox_removal_struct>& usersToRemove
+xbox_social_user_group_internal::remove_users(
+    _In_ const xsapi_internal_vector<xbox_removal_struct>& usersToRemove
     )
 {
     for (auto& userRemovalStruct : usersToRemove)
@@ -215,30 +258,30 @@ xbox_social_user_group::remove_users(
 }
 
 void
-xbox_social_user_group::filter_list(
-    _In_ const xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)& snapshotList,
-    _In_ const std::vector<social_event>& socialEvents
+xbox_social_user_group_internal::filter_list(
+    _In_ const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>& snapshotList,
+    _In_ const xsapi_internal_vector<std::shared_ptr<social_event_internal>>& socialEvents
     )
 {
-    std::vector<xbox_user_id_container> refilterList;
-    std::vector<xbox_user_id_container> addedList;
-    std::vector<xbox_user_id_container> removeList;
-    std::vector<xbox_removal_struct> removalStructList;
+    xsapi_internal_vector<xbox_user_id_container> refilterList;
+    xsapi_internal_vector<xbox_user_id_container> addedList;
+    xsapi_internal_vector<xbox_user_id_container> removeList;
+    xsapi_internal_vector<xbox_removal_struct> removalStructList;
 
     for (auto& evt : socialEvents)
     {
-        switch (evt.event_type())
+        switch (evt->event_type())
         {
         case social_event_type::presence_changed:
         case social_event_type::profiles_changed:
         case social_event_type::social_relationships_changed:
-            refilterList.insert(refilterList.end(), evt.users_affected().begin(), evt.users_affected().end());
+            refilterList.insert(refilterList.end(), evt->users_affected().begin(), evt->users_affected().end());
             break;
         case social_event_type::users_added_to_social_graph:
-            addedList.insert(addedList.end(), evt.users_affected().begin(), evt.users_affected().end());
+            addedList.insert(addedList.end(), evt->users_affected().begin(), evt->users_affected().end());
             break;
         case social_event_type::users_removed_from_social_graph:
-            removeList.insert(removeList.end(), evt.users_affected().begin(), evt.users_affected().end());
+            removeList.insert(removeList.end(), evt->users_affected().begin(), evt->users_affected().end());
             break;
         }
     }
@@ -356,30 +399,33 @@ xbox_social_user_group::filter_list(
     }
 }
 
-const std::vector<xbox_social_user*>&
-xbox_social_user_group::users()
+const xsapi_internal_vector<xbox_social_user*>&
+xbox_social_user_group_internal::users()
 {
     std::lock_guard<std::mutex> lock(m_groupMutex);
     return m_userGroupVector;
 }
 
 user_group_status_change
-xbox_social_user_group::_Update_users_in_group(
-    _In_ const std::vector<string_t>& userList
+xbox_social_user_group_internal::update_users_in_group(
+    _In_ const xsapi_internal_vector<xsapi_internal_string>& userList
     )
 {
-    xsapi_internal_unordered_map(uint64_t, uint32_t) changeMap;
-    xsapi_internal_vector(uint64_t) userIdList;
+    xsapi_internal_unordered_map<int64_t, uint32_t> changeMap;
+    xsapi_internal_vector<uint64_t> userIdList;
     userIdList.reserve(userList.size());
 
     user_group_status_change changeGroups;
     for (auto& user : userList)
     {
-        uint64_t id = utils::string_t_to_uint64(user.c_str());
-        
+        uint64_t id = utils::internal_string_to_uint64(user);
+
         if (id == 0)
         {
-            LOG_ERROR("Invalid user");
+            LOG_ERROR_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                "Invalid user"
+            );
             continue;
         }
 
@@ -401,10 +447,10 @@ xbox_social_user_group::_Update_users_in_group(
         changeGroups.addGroup.push_back(user);
         m_userUpdateListInt.push_back(id);
 
-        m_userUpdateListString.push_back(user.c_str());
+        m_userUpdateListString.push_back(utils::string_t_from_internal_string(user).c_str());
     }
 
-    std::vector<uint64_t> userCompareList(m_userUpdateListInt);
+    xsapi_internal_vector<uint64_t> userCompareList(m_userUpdateListInt);
     for (auto updateUser : userCompareList)
     {
         bool wasFound = false;
@@ -449,39 +495,36 @@ xbox_social_user_group::_Update_users_in_group(
     return changeGroups;
 }
 
-const string_t&
-xbox_social_user_group::hash() const
+const xsapi_internal_string&
+xbox_social_user_group_internal::hash() const
 {
     return m_viewHash;
 }
 
 bool
-xbox_social_user_group::needs_update()
+xbox_social_user_group_internal::needs_update()
 {
     std::lock_guard<std::mutex> lock(m_groupMutex);
     return m_needsUpdate;
 }
 
-xbox_live_result<void>
-xbox_social_user_group::get_copy_of_users(
-    _Inout_ std::vector<xbox_social_user>& socialUserVector
-    )
+xsapi_internal_vector<xbox_social_user>
+xbox_social_user_group_internal::get_copy_of_users()
 {
-    std::lock_guard<std::mutex> lock(social_manager::get_singleton_instance()->m_socialMangerLock);
+    std::lock_guard<std::recursive_mutex> lock(social_manager_internal::get_singleton_instance()->m_socialMangerLock);
     std::lock_guard<std::mutex> socialGroupLock(m_groupMutex);
 
-    socialUserVector.clear();
+    xsapi_internal_vector<xbox_social_user> socialUserVector;
     socialUserVector.reserve(m_userGroupVector.size());
     for (auto& user : m_userGroupVector)
     {
         socialUserVector.push_back(*user);
     }
-
-    return xbox_live_result<void>();
+    return socialUserVector;
 }
 
 bool
-xbox_social_user_group::get_presence_filter_result(
+xbox_social_user_group_internal::get_presence_filter_result(
     _In_ const xbox_social_user* user,
     _In_ presence_filter presenceFilter
     ) const
@@ -505,12 +548,12 @@ xbox_social_user_group::get_presence_filter_result(
     }
 }
 
-std::vector<xbox_social_user*>
-xbox_social_user_group::get_users_from_xbox_user_ids(
-    _In_ const std::vector<xbox_user_id_container>& xboxUserIds
+xsapi_internal_vector<xbox_social_user*>
+xbox_social_user_group_internal::get_users_from_xbox_user_ids(
+    _In_ const xsapi_internal_vector<xbox_user_id_container>& xboxUserIds
     )
 {
-    std::vector<xbox_social_user*> returnVec;
+    xsapi_internal_vector<xbox_social_user*> returnVec;
     std::lock_guard<std::mutex> lock(m_groupMutex);
     for (auto& user : m_userGroupVector)
     {

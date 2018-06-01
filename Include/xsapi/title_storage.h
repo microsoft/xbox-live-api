@@ -35,7 +35,7 @@ enum class title_storage_type
     json_storage,
 
     /// <summary>
-    /// Global data storage.  This storage type is only writable via the Xbox Developer Portal (XDP).
+    /// Global data storage.  This storage type is only writable via title configuration sites or Xbox Live developer tools.
     /// Any platform may read from this storage type. Data could be rosters, maps, challenges, art resources, etc.
     /// </summary>
     global_storage,
@@ -443,7 +443,7 @@ public:
     /// <returns>title_storage_blob_metadata_result object for the next page.</returns>
     _XSAPIIMP pplx::task<xbox_live_result<title_storage_blob_metadata_result>> get_next(
         _In_ uint32_t maxItems
-        );
+        ) const;
 
     /// <summary>
     /// Indicates if there is additional data to retrieve from a get_next call

@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Durango">
+      <Configuration>Debug</Configuration>
+      <Platform>Durango</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Durango">
+      <Configuration>Release</Configuration>
+      <Platform>Durango</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <!-- This property is set 'title' for XDK, remove it when you need to build for ADK -->
+    <ApplicationEnvironment>title</ApplicationEnvironment>
+    <ProjectGuid>{9BF96BF1-7E60-49B7-A137-E6C961A28336}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectName>Microsoft.Xbox.Services</ProjectName>
+    <RootNamespace>Microsoft.Xbox.Services</RootNamespace>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <AppContainerApplication Condition="'$(Platform)'!='Durango'">true</AppContainerApplication>
+    <ConsumeWinRT>true</ConsumeWinRT>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <GenerateManifest>false</GenerateManifest>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+    <CharacterSet>Unicode</CharacterSet>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Durango'">
+    <WindowsAppContainer>false</WindowsAppContainer>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\External\libHttpClient\libHttpClient.props" />
+  </ImportGroup>
+****INSERTFILES****
+  <ItemGroup>
+    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs15.xbox\casablanca141.Xbox.vcxproj">
+      <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.141.XDK.C\libHttpClient.141.XDK.C.vcxproj">
+      <Project>{CF37BEB2-A66A-42BA-B348-1F07566F4865}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Source\Shared\Logger\ERA_ETW.man" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\Source\Shared\Logger\era_etw.rc" />
+  </ItemGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PreprocessorDefinitions>_VARIADIC_MAX=10;_WINRT_DLL;ENABLE_INTSAFE_SIGNED_FUNCTIONS;_NO_XSAPIIMP;_NO_ASYNCRTIMP;_NO_PPLXIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
+      <AdditionalUsingDirectories>$(WindowsSDK_WindowsMetadata);$(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+      <AdditionalOptions>/bigobj /Zm250 /Wv:18 %(AdditionalOptions)</AdditionalOptions>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'">true</TreatWarningAsError>
+      <MinimalRebuild>false</MinimalRebuild>
+      <CompileAsWinRT>true</CompileAsWinRT>
+      <AdditionalIncludeDirectories>
+      $(ProjectDir);
+      $(ProjectDir)\..\..\Source\Services;
+      $(ProjectDir)\..\..\Source\Services\Common;
+      $(ProjectDir)\..\..\Source\Services\Common\WinRT;
+      $(ProjectDir)\..\..\Source\Services\Tournaments;
+      $(ProjectDir)\..\..\Source\Services\Tournaments\WinRT;
+      $(ProjectDir)\..\..\Source\Services\Common\Durango;
+      $(ProjectDir)\..\..\Source\Services\Social;
+      $(ProjectDir)\..\..\Source\Services\Social\Manager;
+      $(ProjectDir)\..\..\Source\Services\Social\WinRT;
+      $(ProjectDir)\..\..\Source\Services\Achievements;
+      $(ProjectDir)\..\..\Source\Services\Achievements\WinRT;
+      $(ProjectDir)\..\..\Source\Services\EntertainmentProfile;
+      $(ProjectDir)\..\..\Source\Services\EntertainmentProfile\WinRT;
+      $(ProjectDir)\..\..\Source\Services\Leaderboard;
+      $(ProjectDir)\..\..\Source\Services\Leaderboard\WinRT;
+      $(ProjectDir)\..\..\Source\Services\Stats;
+      $(ProjectDir)\..\..\Source\Services\Stats\WinRT;
+      $(ProjectDir)\..\..\Source\Services\Misc;
+      $(ProjectDir)\..\..\Source\Services\Misc\WinRT;
+      $(ProjectDir)\..\..\Source\Services\Multiplayer;
+      $(ProjectDir)\..\..\Source\Services\Multiplayer\WinRT;
+      $(ProjectDir)\..\..\Source\Services\Matchmaking;
+      $(ProjectDir)\..\..\Source\Services\Matchmaking\WinRT;
+      $(ProjectDir)\..\..\Source\Services\RealTimeActivity;
+      $(ProjectDir)\..\..\Source\Services\RealTimeActivity\WinRT;
+      $(ProjectDir)\..\..\Source\Services\GameServerPlatform;
+      $(ProjectDir)\..\..\Source\Services\GameServerPlatform\WinRT;
+      $(ProjectDir)\..\..\Source\Shared;
+      $(ProjectDir)\..\..\Source\System;
+      $(ProjectDir)\..\..\Source\Shared\WinRT;
+      $(ProjectDir)\..\..\Source\;
+      $(ProjectDir)\..\..\Include;
+      $(ProjectDir)\..\..\External\cpprestsdk\Release\include;
+      $(ProjectDir)\..\..\Source\Services\Presence;
+      $(ProjectDir)\..\..\Source\Services\Presence\WinRT;
+      $(ProjectDir)\..\..\Source\Services\TitleStorage;
+      $(ProjectDir)\..\..\Source\Services\TitleStorage\WinRT;
+      $(ProjectDir)\..\..\Source\Services\Privacy;
+      $(ProjectDir)\..\..\Source\Services\Privacy\WinRT;
+      $(ProjectDir)\..\..\Source\Services\Marketplace;
+      $(ProjectDir)\..\..\Source\Services\Marketplace\WinRT;
+      $(ProjectDir)\..\..\Source\Services\Events;
+      $(ProjectDir)\..\..\Source\Services\Events\WinRT;
+      $(ProjectDir)\..\..\Source\Services\Clubs;
+      $(ProjectDir)\..\..\Source\Services\Clubs\WinRT;
+      %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/DEBUGTYPE:CV,FIXUP %(AdditionalOptions)</AdditionalOptions>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="Build.$(Platform).Cpp.props" Condition="exists('Build.$(Platform).Cpp.props')" />
+</Project>

@@ -14,17 +14,17 @@ MockLocalConfig::MockLocalConfig()
 
 void MockLocalConfig::reinit()
 {
-    ResultValue = string_t();
+    ResultValue = xsapi_internal_string();
     ResultValue64 = 0;
     ResultValueBool = false;
     MockTitleId = 1234;
     MockOverrideTitleId = 12345;
-    MockScid = _T("MockScid");
-    MockOverrideScid = _T("");
-    MockEnvironment = _T(".mockenv");
-    MockEnvironmentPrefix = _T("");
-    MockSandbox = _T("MockSandbox");
-    MockClientSecret = _T("");
+    MockScid = "MockScid";
+    MockOverrideScid = "";
+    MockEnvironment = ".mockenv";
+    MockEnvironmentPrefix = "";
+    MockSandbox = "MockSandbox";
+    MockClientSecret = "";
 }
 
 xbox_live_result<void> MockLocalConfig::read()
@@ -32,40 +32,53 @@ xbox_live_result<void> MockLocalConfig::read()
     return xbox_live_result<void>();
 }
 
-string_t MockLocalConfig::get_value_from_config(_In_ const string_t& name, _In_ bool required, _In_ const string_t& defaultValue)
+xsapi_internal_string MockLocalConfig::get_value_from_config(_In_ const xsapi_internal_string& name, _In_ bool required, _In_ const xsapi_internal_string& defaultValue)
 {
-    string_t val = ResultValue;
+    UNREFERENCED_PARAMETER(defaultValue);
+    UNREFERENCED_PARAMETER(required);
+    UNREFERENCED_PARAMETER(name);
+    xsapi_internal_string val = ResultValue;
     return val;
 }
 
 uint64_t MockLocalConfig::get_uint64_from_config(
-    _In_ const string_t& name,
+    _In_ const xsapi_internal_string& name,
     _In_ bool required,
     _In_ uint64_t defaultValue)
 {
+    UNREFERENCED_PARAMETER(defaultValue);
+    UNREFERENCED_PARAMETER(required);
+    UNREFERENCED_PARAMETER(name);
     uint64_t val = ResultValue64;
     return val;
 }
 
-bool MockLocalConfig::get_bool_from_config(_In_ const string_t& name, _In_ bool required, _In_ bool defaultValue)
+bool MockLocalConfig::get_bool_from_config(_In_ const xsapi_internal_string& name, _In_ bool required, _In_ bool defaultValue)
 {
+    UNREFERENCED_PARAMETER(defaultValue);
+    UNREFERENCED_PARAMETER(required);
+    UNREFERENCED_PARAMETER(name);
     bool val = ResultValueBool;
     return val;
 }
 
-string_t MockLocalConfig::get_value_from_local_storage(_In_ const string_t& name)
+xsapi_internal_string MockLocalConfig::get_value_from_local_storage(_In_ const xsapi_internal_string& name)
 {
-    string_t val = ResultValue;
+    UNREFERENCED_PARAMETER(name);
+    xsapi_internal_string val = ResultValue;
     return val;
 }
 
-xbox_live_result<void> MockLocalConfig::write_value_to_local_storage(_In_ const string_t& name, _In_ const string_t& value)
+xbox_live_result<void> MockLocalConfig::write_value_to_local_storage(_In_ const xsapi_internal_string& name, _In_ const xsapi_internal_string& value)
 {
+    UNREFERENCED_PARAMETER(value);
+    UNREFERENCED_PARAMETER(name);
     return xbox_live_result<void>();
 }
 
-xbox_live_result<void> MockLocalConfig::delete_value_from_local_storage(_In_ const string_t& name)
+xbox_live_result<void> MockLocalConfig::delete_value_from_local_storage(_In_ const xsapi_internal_string& name)
 {
+    UNREFERENCED_PARAMETER(name);
     return xbox_live_result<void>();
 }
 
@@ -79,32 +92,32 @@ uint32_t MockLocalConfig::override_title_id()
     return MockOverrideTitleId;
 }
 
-string_t MockLocalConfig::scid()
+xsapi_internal_string MockLocalConfig::scid()
 {
     return MockScid;
 }
 
-string_t MockLocalConfig::override_scid()
+xsapi_internal_string MockLocalConfig::override_scid()
 {
     return MockOverrideScid;
 }
 
-string_t MockLocalConfig::environment_prefix()
+xsapi_internal_string MockLocalConfig::environment_prefix()
 {
     return MockEnvironmentPrefix;
 }
 
-string_t MockLocalConfig::environment()
+xsapi_internal_string MockLocalConfig::environment()
 {
     return MockEnvironment;
 }
 
-string_t MockLocalConfig::sandbox() 
+xsapi_internal_string MockLocalConfig::sandbox()
 {
     return MockSandbox;
 }
 
-string_t MockLocalConfig::client_secret()
+xsapi_internal_string MockLocalConfig::client_secret()
 {
     return MockClientSecret;
 }

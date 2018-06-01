@@ -550,8 +550,8 @@ title_callable_ui::_Get_gaming_privilege_scope_policy(
         localConfig->scope()
         );
 
-    scope = ref new Platform::String(authConfig.rps_ticket_service().c_str());
-    policy = ref new Platform::String(authConfig.rps_ticket_policy().c_str());
+    scope = PLATFORM_STRING_FROM_INTERNAL_STRING(authConfig.rps_ticket_service());
+    policy = PLATFORM_STRING_FROM_INTERNAL_STRING(authConfig.rps_ticket_policy());
 }
 
 xbox::services::xbox_live_result<bool>

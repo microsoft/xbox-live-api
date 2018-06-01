@@ -1,0 +1,2524 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_media_asset.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_progression.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_requirement.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_reward.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_service.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_service_internal.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_time_window.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_title_association.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_result.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\Achievement_WinRT.cpp">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementProgression_WinRT.cpp">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementService_WinRT.cpp">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementsResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\MediaAsset_WinRT.cpp">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\Reward_WinRT.cpp">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\TimeWindow_WinRT.cpp">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club.cpp">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_action_settings.cpp">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_presence_counts.cpp">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_profile.cpp">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_role_record.cpp">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_roster.cpp">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_search_auto_complete.cpp">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_search_facet_result.cpp">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_user_presence_record.cpp">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_owned_result.cpp">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_search_result.cpp">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_serializers.cpp">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service.cpp">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.cpp">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\Club_WinRT.cpp">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubActionSettings_WinRT.cpp">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubPresenceCounts_WinRT.cpp">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubProfile_WinRT.cpp">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubRecommendation_WinRT.cpp">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubRoleRecord_WinRT.cpp">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubRoster_WinRT.cpp">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubSearchAutoComplete_WinRT.cpp">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubSearchFacetResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubSetting_WinRT.cpp">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubsOwnedResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubsSearchResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubsService_WinRT.cpp">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubUserPresenceRecord_WinRT.cpp">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\pch.cpp">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\XboxLiveContext_WinRT.cpp">
+      <Filter>C++ Source\Services\Common\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context.cpp">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_impl.cpp">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\entertainment_profile.cpp">
+      <Filter>C++ Source\Services\EntertainmentProfile</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\entertainment_profile_list_contains_item_result.cpp">
+      <Filter>C++ Source\Services\EntertainmentProfile</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\entertainment_profile_list_xbox_one_pins.cpp">
+      <Filter>C++ Source\Services\EntertainmentProfile</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\WinRT\EntertainmentProfileListContainsItemResult_WinRT.cpp">
+      <Filter>C++ Source\Services\EntertainmentProfile\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\WinRT\EntertainmentProfileListService_WinRT.cpp">
+      <Filter>C++ Source\Services\EntertainmentProfile\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\WinRT\EntertainmentProfileListVideoQueue_WinRT.cpp">
+      <Filter>C++ Source\Services\EntertainmentProfile\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\allocation_result.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\cluster_result.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\game_server_image_set.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\game_server_metadata_result.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\game_server_platform_service.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\game_server_port_mapping.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\game_server_ticket_status.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\game_variant.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\game_variant_schema.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\quality_of_service_server.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\AllocationResult_WinRT.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\ClusterResult_WinRT.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameServerImageSet_WinRT.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameServerMetadataResult_WinRT.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameServerPlatformService_WinRT.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameServerPortMapping_WinRT.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameServerTicketStatus_WinRT.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameVariant_WinRT.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameVariantSchema_WinRT.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\QualityOfServiceServer_WinRT.cpp">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_column.cpp">
+      <Filter>C++ Source\Services\Leaderboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_result.cpp">
+      <Filter>C++ Source\Services\Leaderboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_row.cpp">
+      <Filter>C++ Source\Services\Leaderboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_serializers.cpp">
+      <Filter>C++ Source\Services\Leaderboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_service.cpp">
+      <Filter>C++ Source\Services\Leaderboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\WinRT\LeaderboardColumn.cpp">
+      <Filter>C++ Source\Services\Leaderboard\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\WinRT\LeaderboardResult.cpp">
+      <Filter>C++ Source\Services\Leaderboard\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\WinRT\LeaderboardRow.cpp">
+      <Filter>C++ Source\Services\Leaderboard\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\WinRT\LeaderboardService.cpp">
+      <Filter>C++ Source\Services\Leaderboard\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\browse_catalog_result.cpp">
+      <Filter>C++ Source\Services\Marketplace</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\catalog_item.cpp">
+      <Filter>C++ Source\Services\Marketplace</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\catalog_item_availability.cpp">
+      <Filter>C++ Source\Services\Marketplace</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\catalog_item_details.cpp">
+      <Filter>C++ Source\Services\Marketplace</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\catalog_item_image.cpp">
+      <Filter>C++ Source\Services\Marketplace</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\catalog_service.cpp">
+      <Filter>C++ Source\Services\Marketplace</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\catalog_total.cpp">
+      <Filter>C++ Source\Services\Marketplace</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\consume_inventory_item_request.cpp">
+      <Filter>C++ Source\Services\Marketplace</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\consume_inventory_item_result.cpp">
+      <Filter>C++ Source\Services\Marketplace</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\inventory_item.cpp">
+      <Filter>C++ Source\Services\Marketplace</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\inventory_items_result.cpp">
+      <Filter>C++ Source\Services\Marketplace</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\inventory_service.cpp">
+      <Filter>C++ Source\Services\Marketplace</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\BrowseCatalogResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\CatalogItem_WinRT.cpp">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\CatalogItemAvailability_WinRT.cpp">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\CatalogItemDetails_WinRT.cpp">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\CatalogItemImage_WinRT.cpp">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\CatalogService_WinRT.cpp">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\CatalogTotal_WinRT.cpp">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\ConsumeInventoryItemResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\InventoryItem_WinRT.cpp">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\InventoryItemsResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\InventoryService_WinRT.cpp">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\create_match_ticket_response.cpp">
+      <Filter>C++ Source\Services\Matchmaking</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\hopper_statistics_response.cpp">
+      <Filter>C++ Source\Services\Matchmaking</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\match_ticket_details_response.cpp">
+      <Filter>C++ Source\Services\Matchmaking</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\matchmaking_service.cpp">
+      <Filter>C++ Source\Services\Matchmaking</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\WinRT\MatchmakingService_WinRT.cpp">
+      <Filter>C++ Source\Services\Matchmaking\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\WinRT\MatchTicketDetailsResponse_WinRT.cpp">
+      <Filter>C++ Source\Services\Matchmaking\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_config_result.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_broadcast.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_configured_stat.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_game_clip.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_game_clip_stat.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_game_clip_thumbnail.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_game_clip_uri_info.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_game_clips_result.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_service.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\string_service.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\verify_string_result.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchBroadcast_WinRT.cpp">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchConfiguredStat_WinRT.cpp">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchGameClip_WinRT.cpp">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchGameClipsResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchGameClipStat_WinRT.cpp">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchGameClipThumbnail_WinRT.cpp">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchGameClipUriInfo_WinRT.cpp">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchService_WinRT.cpp">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\StringService_WinRT.cpp">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\XboxLiveHttpCall_WinRT.cpp">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\find_match_completed_event_args.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\host_changed_event_args.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\join_lobby_completed_event_args.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\member_joined_event_args.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\member_left_event_args.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\member_property_changed_event_args.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_client_manager.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_client_pending_reader.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_client_pending_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_event.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_game_client.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_game_session.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_lobby_client.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_lobby_session.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_local_user.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_local_user_manager.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_manager.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_manager_utils.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_match_client.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_member.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_session_writer.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\perform_qos_measurements_event_args.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\session_property_changed_event_args.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\tournament_game_session_ready_event_args.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\tournament_registration_state_changed_event_args.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\user_added_event_args.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\user_removed_event_args.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\FindMatchCompletedEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\HostChangedEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\JoinLobbyCompletedEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MemberJoinedEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MemberLeftEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MemberPropertyChangedEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MultiplayerEvent_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MultiplayerGameSession_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MultiplayerLobbySession_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MultiplayerManager_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MultiplayerMember_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\PerformQosMeasurementsEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\SessionPropertyChangedEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\TournamentGameSessionReadyEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\TournamentRegistrationStateChangedEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\UserAddedEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\UserRemovedEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_activity_details.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_activity_handle_post_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_activity_query_post_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_get_sessions_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_invite.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_invite_handle_post_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_managed_initialization.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_member_initialization.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_peer_to_host_requirements.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_peer_to_peer_requirements.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_quality_of_service_measurement.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_query_search_handle_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_role_info.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_role_type.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_search_handle_details.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_search_handle_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_service.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_service_impl.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_arbitration_server.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_capabilities.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_change_event_args.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_constants.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_matchmaking_server.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_member.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_member_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_properties.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_reference.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_role_types.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_states.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_tournaments_server.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_subscription.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_transfer_handle_post_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerActivityDetails_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerGetSessionsRequest_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerManagedInitialization_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerMemberInitialization_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerPeerToHostRequirements_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerPeerToPeerRequirements_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerQualityOfServiceMeasurements_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerQuerySearchHandleRequest_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerRoleInfo_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerRoleType_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSearchHandleDetails_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSearchHandleRequest_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerService_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerServiceMatchmakingServer_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSession_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionArbitrationServer_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionCapabilities_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionChangeEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionConstants_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionMember_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionProperties_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionReference_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionRoleTypes_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionStates_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionTournamentsServer_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSubscriptionLostEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\WriteSessionResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\device_presence_change_event_args.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\device_presence_change_subscription.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\media_presence_data.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_activity_data.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_broadcast_record.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_data.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_device_record.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_media_record.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_record.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_service.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_service_internal.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_title_record.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_title_request.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_user_batch_request.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\title_presence_change_event_args.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\title_presence_change_subscription.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\DevicePresenceChangeEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\DevicePresenceChangeSubscription_WinRT.cpp">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceBroadcastRecord_WinRT.cpp">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceData_WinRT.cpp">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceDeviceRecord_WinRT.cpp">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceMediaRecord_WinRT.cpp">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceRecord_WinRT.cpp">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceService_WinRT.cpp">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceTitleRecord_WinRT.cpp">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\TitlePresenceChangeEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\TitlePresenceChangeSubscription_WinRT.cpp">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\multiple_permissions_check_result.cpp">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\permission_check_result.cpp">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\permission_deny_reason.cpp">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\privacy_service.cpp">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\WinRT\MultiplePermissionsCheckResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Privacy\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\WinRT\PermissionCheckResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Privacy\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\WinRT\PermissionDenyReason_WinRT.cpp">
+      <Filter>C++ Source\Services\Privacy\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\WinRT\PermissionIdConstants_WinRT.cpp">
+      <Filter>C++ Source\Services\Privacy\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\WinRT\PrivacyService_WinRT.cpp">
+      <Filter>C++ Source\Services\Privacy\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\real_time_activity_service.cpp">
+      <Filter>C++ Source\Services\RTA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\real_time_activity_service_factory.cpp">
+      <Filter>C++ Source\Services\RTA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\real_time_activity_subscription.cpp">
+      <Filter>C++ Source\Services\RTA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\real_time_activity_subscription_error_event_args.cpp">
+      <Filter>C++ Source\Services\RTA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\WinRT\RealTimeActivityResyncEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\RTA\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\WinRT\RealTimeActivityService_WinRT.cpp">
+      <Filter>C++ Source\Services\RTA\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\WinRT\RealTimeActivitySubscriptionErrorEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\RTA\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\internal_social_event.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\peoplehub_service.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\preferred_color.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_event.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_graph.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_internal.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_presence_record.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_presence_title_record.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_user_group_loaded_event_args.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\title_history.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\PreferredColor_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\SocialEvent_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\SocialManager_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\SocialManagerPresenceRecord_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\SocialManagerPresenceTitleRecord_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\SocialUserGroupLoadedEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\TitleHistory_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\XboxSocialUser_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\XboxSocialUserGroup_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\xbox_social_user.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\xbox_social_user_group.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\xbox_user_id_container.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service_impl.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_feedback_request.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_service.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_service_impl.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_relationship_change_event_args.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_relationship_change_subscription.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_service.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_service_impl.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\ProfileService_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\ReputationService_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\SocialRelationshipChangeEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\SocialRelationshipChangeSubscription_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\SocialService_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxSocialRelationship_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxSocialRelationshipResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxUserProfile_WinRT.cpp">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_social_relationship.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_social_relationship_result.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_user_profile.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\leaderboard_query.cpp">
+      <Filter>C++ Source\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\leaderboard_result_event_args.cpp">
+      <Filter>C++ Source\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stat_event.cpp">
+      <Filter>C++ Source\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stat_value.cpp">
+      <Filter>C++ Source\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_manager.cpp">
+      <Filter>C++ Source\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_manager_impl.cpp">
+      <Filter>C++ Source\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_service.cpp">
+      <Filter>C++ Source\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_value_document.cpp">
+      <Filter>C++ Source\Services\Stats\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\LeaderboardQuery_WinRT.cpp">
+      <Filter>C++ Source\Services\Stats\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\LeaderboardResultEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Stats\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticEvent_WinRT.cpp">
+      <Filter>C++ Source\Services\Stats\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticManager_WinRT.cpp">
+      <Filter>C++ Source\Services\Stats\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticValue_WinRT.cpp">
+      <Filter>C++ Source\Services\Stats\Manager\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\requested_statistics.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\service_configuration_statistic.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\statistic.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\statistic_change_event_args.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\statistic_change_subscription.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\user_statistics_result.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\user_statistics_service.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\user_statistics_service_impl.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\RequestedStatistics_WinRT.cpp">
+      <Filter>C++ Source\Services\Stats\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\ServiceConfigurationStatistic_WinRT.cpp">
+      <Filter>C++ Source\Services\Stats\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\Statistic_WinRT.cpp">
+      <Filter>C++ Source\Services\Stats\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\StatisticChangeEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Stats\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\StatisticChangeSubscription_WinRT.cpp">
+      <Filter>C++ Source\Services\Stats\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\UserStatisticsResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Stats\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\UserStatisticsService_WinRT.cpp">
+      <Filter>C++ Source\Services\Stats\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\title_storage_blob_metadata.cpp">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\title_storage_blob_metadata_result.cpp">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\title_storage_blob_result.cpp">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\title_storage_quota.cpp">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\title_storage_service.cpp">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\WinRT\TitleStorageBlobMetadata_WinRT.cpp">
+      <Filter>C++ Source\Services\TitleStorage\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\WinRT\TitleStorageBlobMetadataResult_WinRT.cpp">
+      <Filter>C++ Source\Services\TitleStorage\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\WinRT\TitleStorageBlobResult_WinRT.cpp">
+      <Filter>C++ Source\Services\TitleStorage\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\WinRT\TitleStorageQuota_WinRT.cpp">
+      <Filter>C++ Source\Services\TitleStorage\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\WinRT\TitleStorageService_WinRT.cpp">
+      <Filter>C++ Source\Services\TitleStorage\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\current_match_metadata.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\match_metadata.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\previous_match_metadata.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\team_change_event_args.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\team_change_subscription.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\team_info.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\team_request.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\team_request_result.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\team_summary.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_change_event_args.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_change_subscription.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_reference.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_request.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_request_result.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_service.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_service_impl.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_team_result.cpp">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\CurrentMatchMetadata_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\MatchMetadata_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\PreviousMatchMetadata_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamChangeEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamChangeSubscription_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamInfo_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamRequest_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamRequestResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamSummary_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\Tournament_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentChangeEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentChangeSubscription_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentReference_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentRequest_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentRequestResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentService_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentTeamResult_WinRT.cpp">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\call_buffer_timer.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\errors.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_impl.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_request_message.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\initiator.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\local_config.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\custom_output.cpp">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\debug_output.cpp">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\etw_output.cpp">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\log.cpp">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\log_entry.cpp">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\log_output.cpp">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\mem.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_data.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_protocol.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logging_config.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context_xdk.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils_locales.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_client.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_connection.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\AppConfiguration_WinRT.cpp">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\Event_WinRT.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\HttpCallRequestMessage_WinRT.cpp">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\local_config_winrt.cpp">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\ServiceCallLoggingConfig_WinRT.cpp">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\Utils_WinRT.cpp">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxLiveContextSettings_WinRT.cpp">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxLiveLogCallEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxLiveServicesSettings_WinRT.cpp">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxServiceCallRoutedEventArgs_WinRT.cpp">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_app_config.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_context_settings.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_services_settings.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_service_call_routed_event_args.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\xbox_live_mutex.cpp">
+      <Filter>C++ Source\System</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\achievements.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\clubs.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\contextual_search_service.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\entertainment_profile.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\errors.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\game_server_platform.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\http_call.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\http_call_request_message.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\leaderboard.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\marketplace.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\matchmaking.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\mem.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\multiplayer.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\multiplayer_manager.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\presence.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\privacy.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\profile.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\real_time_activity.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\service_call_logging_config.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\services.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\social.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\social_manager.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\stats_manager.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\system.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\title_storage.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\tournaments.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\types.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\user_statistics.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_cll.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_app_config.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_context.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_live_context_settings.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\xbox_service_call_routed_event_args.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_internal.h">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\Achievement_WinRT.h">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementMediaAssetType_WinRT.h">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementOrderBy_WinRT.h">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementProgression_WinRT.h">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementRequirement_WinRT.h">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementRewardType_WinRT.h">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementService_WinRT.h">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementsResult_WinRT.h">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\AchievementType_WinRT.h">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\MediaAsset_WinRT.h">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\ParticipationType_WinRT.h">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\ProgressState_WinRT.h">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\Reward_WinRT.h">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\TimeWindow_WinRT.h">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\WinRT\TitleAssociation_WinRT.h">
+      <Filter>C++ Source\Services\Achievements\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_serializers.h">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.h">
+      <Filter>C++ Source\Services\Clubs</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\Club_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubActionSettings_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubPresenceCounts_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubProfile_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubRecommendation_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubRole_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubRoleRecord_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubRoster_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubSearchAutoComplete_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubSearchFacetResult_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubSetting_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubsOwnedResult_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubsSearchResult_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubsService_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubType_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubUserPresence_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\WinRT\ClubUserPresenceRecord_WinRT.h">
+      <Filter>C++ Source\Services\Clubs\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\pch_common.h">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\pch.h">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\WinRT\XboxLiveContext_WinRT.h">
+      <Filter>C++ Source\Services\Common\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_impl.h">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\WinRT\EntertainmentProfileListContainsItemResult_WinRT.h">
+      <Filter>C++ Source\Services\EntertainmentProfile\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\WinRT\EntertainmentProfileListService_WinRT.h">
+      <Filter>C++ Source\Services\EntertainmentProfile\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\WinRT\EntertainmentProfileListVideoQueue_WinRT.h">
+      <Filter>C++ Source\Services\EntertainmentProfile\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\AllocationResult_WinRT.h">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\ClusterResult_WinRT.h">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameServerFulfillmentState_WinRT.h">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameServerHostStatus_WinRT.h">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameServerImageSet_WinRT.h">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameServerMetadataResult_WinRT.h">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameServerPlatformService_WinRT.h">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameServerPortMapping_WinRT.h">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameServerTicketStatus_WinRT.h">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameVariant_WinRT.h">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\GameVariantSchema_WinRT.h">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\QualityOfServiceServer_WinRT.h">
+      <Filter>C++ Source\Services\GameServerPlatform\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_query.h">
+      <Filter>C++ Source\Services\Leaderboard</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_serializers.h">
+      <Filter>C++ Source\Services\Leaderboard</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\WinRT\LeaderboardColumn.h">
+      <Filter>C++ Source\Services\Leaderboard\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\WinRT\LeaderboardResult.h">
+      <Filter>C++ Source\Services\Leaderboard\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\WinRT\LeaderboardRow.h">
+      <Filter>C++ Source\Services\Leaderboard\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\WinRT\LeaderboardService.h">
+      <Filter>C++ Source\Services\Leaderboard\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\BrowseCatalogResult_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\BundleRelationshipType_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\CatalogItem_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\CatalogItemAvailability_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\CatalogItemDetails_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\CatalogItemImage_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\CatalogService_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\CatalogSortOrder_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\CatalogTotal_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\ConsumeInventoryItemResult_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\InventoryItem_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\InventoryItemAvailability_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\InventoryItemsResult_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\InventoryItemState_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\InventoryService_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Marketplace\WinRT\MediaItemType_WinRT.h">
+      <Filter>C++ Source\Services\Marketplace\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\WinRT\CreateMatchTicketResponse_WinRT.h">
+      <Filter>C++ Source\Services\Matchmaking\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\WinRT\HopperStatisticsResponse_WinRT.h">
+      <Filter>C++ Source\Services\Matchmaking\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\WinRT\MatchmakingService_WinRT.h">
+      <Filter>C++ Source\Services\Matchmaking\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\WinRT\MatchTicketDetailsResponse_WinRT.h">
+      <Filter>C++ Source\Services\Matchmaking\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\WinRT\PreserveSessionMode_WinRT.h">
+      <Filter>C++ Source\Services\Matchmaking\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\WinRT\TicketStatus_WinRT.h">
+      <Filter>C++ Source\Services\Matchmaking\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_config_result.h">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchBroadcast_WinRT.h">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchConfiguredStat_WinRT.h">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchFilterOperator_WinRT.h">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchGameClip_WinRT.h">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchGameClipsResult_WinRT.h">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchGameClipStat_WinRT.h">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchGameClipThumbnail_WinRT.h">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchGameClipUriInfo_WinRT.h">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchService_WinRT.h">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchStatDisplayType_WinRT.h">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchStatVisibility_WinRT.h">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\StringService_WinRT.h">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\VerifyStringResult_WinRT.h">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\VerifyStringResultCode_WinRT.h">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\XboxLiveHttpCall_WinRT.h">
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_manager_internal.h">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\FindMatchCompletedEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\HostChangedEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\JoinInProgressState_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\JoinLobbyCompletedEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MatchStatus_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MemberJoinedEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MemberLeftEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MemberPropertyChangedEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MultiplayerEvent_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MultiplayerEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MultiplayerEventType_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MultiplayerGameSession_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MultiplayerLobbySession_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MultiplayerManager_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MultiplayerMember_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\MultiplayerSessionType_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\PerformQosMeasurementsEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\SessionPropertyChangedEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\TournamentGameSessionReadyEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\TournamentRegistrationStateChangedEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\UserAddedEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\UserRemovedEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_internal.h">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MatchmakingStatus_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerActivityDetails_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerGetSessionsRequest_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerInitializationStage_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerManagedInitialization_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerMeasurementFailure_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerMemberInitialization_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerPeerToHostRequirements_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerPeerToPeerRequirements_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerQualityOfServiceMeasurements_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerQuerySearchHandleRequest_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerRoleInfo_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerRoleType_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSearchHandleDetails_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSearchHandleRequest_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerService_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerServiceMatchmakingServer_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSession_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionArbitrationServer_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionCapabilities_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionChangeEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionChangeTypes.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionConstants_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionMember_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionMemberStatus_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionProperties_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionReference_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionRestriction_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionRoleTypes_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionStates_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionStatus_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionTournamentsServer_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionVisibility_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSessionWriteMode_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayerSubscriptionLostEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MultiplayMetrics_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\MutableRoleSetting_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\NetworkAddressTranslationSetting_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\WriteSessionResult_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\WinRT\WriteSessionStatus_WinRT.h">
+      <Filter>C++ Source\Services\Multiplayer\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_internal.h">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\DevicePresenceChangeEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\DevicePresenceChangeSubscription_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceBroadcastRecord_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceData_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceDetailLevel_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceDeviceRecord_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceDeviceType_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceMediaIdType_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceMediaRecord_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceRecord_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceService_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceTitleRecord_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\PresenceTitleViewState_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\TitlePresenceChangeEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\TitlePresenceChangeSubscription_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\TitlePresenceState_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\WinRT\UserPresenceState_WinRT.h">
+      <Filter>C++ Source\Services\Presence\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\WinRT\MultiplePermissionsCheckResult_WinRT.h">
+      <Filter>C++ Source\Services\Privacy\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\WinRT\PermissionCheckResult_WinRT.h">
+      <Filter>C++ Source\Services\Privacy\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\WinRT\PermissionDenyReason_WinRT.h">
+      <Filter>C++ Source\Services\Privacy\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\WinRT\PermissionIdConstants_WinRT.h">
+      <Filter>C++ Source\Services\Privacy\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\WinRT\PrivacyService_WinRT.h">
+      <Filter>C++ Source\Services\Privacy\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\real_time_activity_internal.h">
+      <Filter>C++ Source\Services\RTA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\WinRT\RealTimeActivityConnectionState_WinRT.h">
+      <Filter>C++ Source\Services\RTA\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\WinRT\RealTimeActivityResyncEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\RTA\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\WinRT\RealTimeActivityService_WinRT.h">
+      <Filter>C++ Source\Services\RTA\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\WinRT\RealTimeActivitySubscriptionError_WinRT.h">
+      <Filter>C++ Source\Services\RTA\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\WinRT\RealTimeActivitySubscriptionErrorEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\RTA\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\WinRT\RealTimeActivitySubscriptionState_WinRT.h">
+      <Filter>C++ Source\Services\RTA\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_internal.h">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\PreferredColor_WinRT.h">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\SocialEvent_WinRT.h">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\SocialEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\SocialEventType_WinRT.h">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\SocialManager_WinRT.h">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\SocialManagerExtraDetailLevel_WinRT.h">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\SocialManagerPresenceRecord_WinRT.h">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\SocialManagerPresenceTitleRecord_WinRT.h">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\SocialUserGroupLoadedEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\SocialUserGroupType_WinRT.h">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\TitleHistory_WinRT.h">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\XboxSocialUser_WinRT.h">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\WinRT\XboxSocialUserGroup_WinRT.h">
+      <Filter>C++ Source\Services\Social\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_internal.h">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_internal.h">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\PresenceFilter_WinRT.h">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\ProfileService_WinRT.h">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\RelationshipFilter_WinRT.h">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\ReputationFeedbackType_WinRT.h">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\ReputationService_WinRT.h">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\SocialGroupConstants_WinRT.h">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\SocialNotificationType_WinRT.h">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\SocialRelationship_WinRT.h">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\SocialRelationshipChangeEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\SocialRelationshipChangeSubscription_WinRT.h">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\SocialService_WinRT.h">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxSocialRelationship_WinRT.h">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxSocialRelationshipResult_WinRT.h">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\WinRT\XboxUserProfile_WinRT.h">
+      <Filter>C++ Source\Services\Social\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\stats_manager_internal.h">
+      <Filter>C++ Source\Services\Stats\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\LeaderboardQuery_WinRT.h">
+      <Filter>C++ Source\Services\Stats\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\LeaderboardResultEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Stats\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\SortOrder_WinRT.h">
+      <Filter>C++ Source\Services\Stats\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticDataType_WinRT.h">
+      <Filter>C++ Source\Services\Stats\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticEvent_WinRT.h">
+      <Filter>C++ Source\Services\Stats\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Stats\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticEventType_WinRT.h">
+      <Filter>C++ Source\Services\Stats\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticManager_WinRT.h">
+      <Filter>C++ Source\Services\Stats\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\Manager\WinRT\StatisticValue_WinRT.h">
+      <Filter>C++ Source\Services\Stats\Manager\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\user_statistics_internal.h">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\RequestedStatistics_WinRT.h">
+      <Filter>C++ Source\Services\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\ServiceConfigurationStatistic_WinRT.h">
+      <Filter>C++ Source\Services\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\Statistic_WinRT.h">
+      <Filter>C++ Source\Services\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\StatisticChangeEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\StatisticChangeSubscription_WinRT.h">
+      <Filter>C++ Source\Services\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\UserStatisticsResult_WinRT.h">
+      <Filter>C++ Source\Services\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\WinRT\UserStatisticsService_WinRT.h">
+      <Filter>C++ Source\Services\Stats\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\WinRT\TitleStorageBlobMetadata_WinRT.h">
+      <Filter>C++ Source\Services\TitleStorage\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\WinRT\TitleStorageBlobMetadataResult_WinRT.h">
+      <Filter>C++ Source\Services\TitleStorage\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\WinRT\TitleStorageBlobResult_WinRT.h">
+      <Filter>C++ Source\Services\TitleStorage\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\WinRT\TitleStorageBlobType_WinRT.h">
+      <Filter>C++ Source\Services\TitleStorage\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\WinRT\TitleStorageETagMatchCondition_WinRT.h">
+      <Filter>C++ Source\Services\TitleStorage\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\WinRT\TitleStorageQuota_WinRT.h">
+      <Filter>C++ Source\Services\TitleStorage\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\WinRT\TitleStorageService_WinRT.h">
+      <Filter>C++ Source\Services\TitleStorage\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\WinRT\TitleStorageType_WinRT.h">
+      <Filter>C++ Source\Services\TitleStorage\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_service_internal.h">
+      <Filter>C++ Source\Services\Tournaments</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\CurrentMatchMetadata_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\MatchMetadata_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\PreviousMatchMetadata_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamChangeEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamChangeSubscription_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamCompletedReason_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamInfo_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamOrderBy_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamRequest_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamRequestResult_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamState_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TeamSummary_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\Tournament_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentArbitrationState_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentArbitrationStatus_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentChangeEventArgs_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentChangeSubscription_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentGameResultSource_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentGameResultState_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentOrderBy_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentReference_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentRegistrationReason_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentRegistrationState_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentRequest_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentRequestResult_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentService_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentSortOrder_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentState_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\WinRT\TournamentTeamResult_WinRT.h">
+      <Filter>C++ Source\Services\Tournaments\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\build_version.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\call_buffer_timer.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_impl.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_request_message_internal.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response_internal.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_headers.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\initiator.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\local_config.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\custom_output.h">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\debug_output.h">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\etw_output.h">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\log.h">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\perf_tester.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_data.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_protocol.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\shared_macros.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_client.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_connection.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_connection_state.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\AppConfiguration_WinRT.h">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\Event_WinRT.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\HttpCallRequestMessage_WinRT.h">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\HttpRequestMessageType_WinRT.h">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\Macros_WinRT.h">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\ServiceCallLoggingConfig_WinRT.h">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\Utils_WinRT.h">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxLiveContextSettings_WinRT.h">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxLiveLogCallEventArgs_WinRT.h">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxLiveServicesSettings_WinRT.h">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxServiceCallRoutedEventArgs_WinRT.h">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\XboxServicesDiagnosticsTraceLevel_WinRT.h">
+      <Filter>C++ Source\Shared\WinRT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_app_config_internal.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_service_call_routed_event_args_internal.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\ppltasks_extra.h">
+      <Filter>C++ Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\system_internal.h">
+      <Filter>C++ Source\System</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="C++ Public Includes">
+      <UniqueIdentifier>{3DE8CCA4-8E4A-3583-A3BE-7A6401156977}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source">
+      <UniqueIdentifier>{AFCC838D-D7FF-37A0-A511-3F4CB2127DCB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services">
+      <UniqueIdentifier>{7AD88441-A4AD-368B-AF0C-5AF02B604837}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Achievements">
+      <UniqueIdentifier>{8FC7F5B8-D8DB-32F1-BE20-8B7E608F529E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Achievements\WinRT">
+      <UniqueIdentifier>{A2F8B26F-ECE9-3465-8792-7642143BEB21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Clubs">
+      <UniqueIdentifier>{4DDFC8A5-0A32-33A3-B56A-EF057C1E8BCE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Clubs\WinRT">
+      <UniqueIdentifier>{CE6EF1ED-7054-3DA7-9944-C0027A467544}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Common">
+      <UniqueIdentifier>{72F9FCDF-3BCF-3EC0-AF83-57BBB2FBB5BD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Common\WinRT">
+      <UniqueIdentifier>{77048C85-EAFA-38DB-AB69-AA0F15A7ECF0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\EntertainmentProfile">
+      <UniqueIdentifier>{87B22C65-826B-35A5-940A-B54044DB6E24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\EntertainmentProfile\WinRT">
+      <UniqueIdentifier>{3209EEF6-060A-3D4C-8181-023E64860A69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\GameServerPlatform">
+      <UniqueIdentifier>{693D54D5-5339-359C-8609-79662C786C85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\GameServerPlatform\WinRT">
+      <UniqueIdentifier>{3B7CEEE3-C2E2-37AC-AFAC-1C8F09221C0B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Leaderboard">
+      <UniqueIdentifier>{B0CF46AB-1659-31A6-8C02-83B4564E3819}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Leaderboard\WinRT">
+      <UniqueIdentifier>{5781FE07-781B-30BF-A1BD-98E12CF0F0B8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Marketplace">
+      <UniqueIdentifier>{02DEA4D2-1C94-399C-B9B0-54E4C2A38014}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Marketplace\WinRT">
+      <UniqueIdentifier>{A6E26631-9EB6-32DD-B2E8-18FABC0A60D2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Matchmaking">
+      <UniqueIdentifier>{271EFB0E-1724-31AF-9899-817AEF07EC87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Matchmaking\WinRT">
+      <UniqueIdentifier>{DD72A891-968F-3527-80DB-AA153B82A1C8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Misc">
+      <UniqueIdentifier>{49DC8300-5A37-3137-B6FA-783A9DCB5BD2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Misc\WinRT">
+      <UniqueIdentifier>{F5C3962D-9676-3111-A9D8-592C596F06D7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Multiplayer">
+      <UniqueIdentifier>{A504F8B9-CC91-32AB-88AC-D74B4FB97B0A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Multiplayer\Manager">
+      <UniqueIdentifier>{AC112783-E43F-3E4D-B710-D206C3058EFC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Multiplayer\Manager\WinRT">
+      <UniqueIdentifier>{BD58092C-206A-3C8B-8DA5-B5E4B01F1CA4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Multiplayer\WinRT">
+      <UniqueIdentifier>{BD1F8F68-774C-3470-9038-2C9A0EA30F12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Presence">
+      <UniqueIdentifier>{24F9FA17-9826-3C02-9CA4-B67E07024D09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Presence\WinRT">
+      <UniqueIdentifier>{8F27C59D-8BCB-32AE-B8E1-308D5AC15ECB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Privacy">
+      <UniqueIdentifier>{CF9F3F58-E7B3-30D1-9819-AB77E10A84FA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Privacy\WinRT">
+      <UniqueIdentifier>{FDB309FF-81AF-3C94-9140-2DFD09A2F202}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\RTA">
+      <UniqueIdentifier>{A7557710-5DA2-3B35-B64E-6057FB400A84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\RTA\WinRT">
+      <UniqueIdentifier>{304F598A-63C3-3A8D-AF10-E1CF6595C6A1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Social">
+      <UniqueIdentifier>{AA84E8CC-7F03-3DB0-9298-91F25994A8A8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Social\Manager">
+      <UniqueIdentifier>{0311E669-4A78-3C49-A288-9B2EEB0CEE0A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Social\Manager\WinRT">
+      <UniqueIdentifier>{EFEAD5CC-4871-3576-8299-23BA737AB25C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Social\WinRT">
+      <UniqueIdentifier>{7884D36F-E4C3-39DE-8DB4-0F7D0397A9E8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Stats">
+      <UniqueIdentifier>{DD13831D-24DF-3B79-B767-37AEFB76D89A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Stats\Manager">
+      <UniqueIdentifier>{3268C79E-5C62-32E6-B85E-E72BA5A0A251}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Stats\Manager\WinRT">
+      <UniqueIdentifier>{238C7C7A-1BE0-30B3-8A2A-ACC6864DCE94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Stats\WinRT">
+      <UniqueIdentifier>{D5192824-85D7-3035-A427-C82C3504848A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\TitleStorage">
+      <UniqueIdentifier>{2344B338-A5E4-3667-A052-7EAD0AC11FC5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\TitleStorage\WinRT">
+      <UniqueIdentifier>{49B0BE95-2699-3BCF-85C2-92269AC9624C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Tournaments">
+      <UniqueIdentifier>{35CE6E19-6E09-3D12-B275-D3D6DB6097BF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Tournaments\WinRT">
+      <UniqueIdentifier>{595707F3-7EC8-3652-A7D4-0EC90AFFF5A0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Shared">
+      <UniqueIdentifier>{4B225209-5709-3A59-81F9-27B50CED1B10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Shared\Logger">
+      <UniqueIdentifier>{6356990A-FB32-312F-BDA4-177C7F312F3B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Shared\WinRT">
+      <UniqueIdentifier>{0BDEF81A-5EA8-31DE-9C02-320FA1D36334}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\System">
+      <UniqueIdentifier>{726C90DE-90DC-36A6-B559-090139CBCAD4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Source\Shared\Logger\ERA_ETW.man">
+      <Filter>C++ source\Shared\Logger</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\Source\Shared\Logger\ERA_ETW.rc">
+      <Filter>C++ source\Shared\Logger</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

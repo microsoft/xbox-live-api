@@ -44,6 +44,8 @@ xcopy %TFS_SourcesDirectory%\Utilities\Nuget\* %TFS_DropLocation%\Nuget\ /s /e /
 rem goto skipCopy
 robocopy /NJS /NJH /MT:16 /S /NP %TFS_SourcesDirectory%\Include %TFS_DropLocation%\Include
 robocopy /NJS /NJH /MT:16 /S /NP %TFS_SourcesDirectory%\External\cpprestsdk\Release\include %TFS_DropLocation%\include
+robocopy /NJS /NJH /MT:16 /S /NP %TFS_SourcesDirectory%\External\libHttpClient\Include %TFS_DropLocation%\include
+rmdir /s /q %TFS_DropLocation%\include\json_cpp
 
 rem setup folders for XDK drop
 set XDK_BINARIES_DROP=%TFS_DropLocation%\xdkservicesapi
@@ -52,15 +54,13 @@ set XDK_BUILD_SHARE=%TFS_DropLocation%
 
 set XDK_BIN_BUILD_SHARE_RELEA=%XDK_BUILD_SHARE%\Release\x64
 set XDK_BIN_BUILD_SHARE_DEBUG=%XDK_BUILD_SHARE%\Debug\x64
-set UWP_BIN_BUILD_SHARE_RELEA=%UWP_BUILD_SHARE%\Release\x64
-set UWP_BIN_BUILD_SHARE_DEBUG=%UWP_BUILD_SHARE%\Debug\x64
 
 mkdir %XDK_BINARIES_DROP%
 
 rem copy NuGetPackages to build output folder
 
 rem copy includes to build output folder
-robocopy /NJS /NJH /MT:16 /S /NP %UWP_BUILD_SHARE%\Include %XDK_BINARIES_DROP%\cpp\include
+robocopy /NJS /NJH /MT:16 /S /NP %XDK_BUILD_SHARE%\Include %XDK_BINARIES_DROP%\cpp\include
 
 rem copy binaries to build output folder
 mkdir %XDK_BINARIES_DROP%
@@ -79,22 +79,27 @@ copy %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\XDK\Readme.txt %XDK_BINARI
 echo set MAJOR_VERSION=%SDK_RELEASE_NAME% > %XDK_BINARIES_DROP%\setver.cmd
 echo set MINOR_VERSION=%MINOR_VERSION_NUMBER% >> %XDK_BINARIES_DROP%\setver.cmd
 
-copy %XDK_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.dll %XDK_BINARIES_DROP%\winrt\binaries\CommonConfiguration\Microsoft.Xbox.Services.dll
-copy %XDK_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.dll %XDK_BINARIES_DROP%\winrt\binaries\Debug\Microsoft.Xbox.Services.dll
-copy %XDK_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.winmd %XDK_BINARIES_DROP%\winrt\binaries\CommonConfiguration\
-copy %XDK_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.winmd %XDK_BINARIES_DROP%\winrt\binaries\Debug\
-copy %XDK_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.pdb %XDK_BINARIES_DROP%\winrt\binaries\Debug\Microsoft.Xbox.Services.pdb
-copy %XDK_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.pdb %XDK_BINARIES_DROP%\winrt\binaries\CommonConfiguration\Microsoft.Xbox.Services.pdb
+copy %XDK_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.dll %XDK_BINARIES_DROP%\winrt\binaries\CommonConfiguration\Microsoft.Xbox.Services.dll
+copy %XDK_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.dll %XDK_BINARIES_DROP%\winrt\binaries\Debug\Microsoft.Xbox.Services.dll
+copy %XDK_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.winmd %XDK_BINARIES_DROP%\winrt\binaries\CommonConfiguration\
+copy %XDK_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.winmd %XDK_BINARIES_DROP%\winrt\binaries\Debug\
+copy %XDK_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.pdb %XDK_BINARIES_DROP%\winrt\binaries\Debug\Microsoft.Xbox.Services.pdb
+copy %XDK_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.pdb %XDK_BINARIES_DROP%\winrt\binaries\CommonConfiguration\Microsoft.Xbox.Services.pdb
 
-copy %UWP_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib %XDK_BINARIES_DROP%\cpp\binaries\release\v140\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib.remove
-copy %UWP_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib %XDK_BINARIES_DROP%\cpp\binaries\debug\v140\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib.remove
-copy %UWP_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb %XDK_BINARIES_DROP%\cpp\binaries\release\v140\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb
-copy %UWP_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb %XDK_BINARIES_DROP%\cpp\binaries\debug\v140\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb
+copy %XDK_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib %XDK_BINARIES_DROP%\cpp\binaries\release\v140\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib.remove
+copy %XDK_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib %XDK_BINARIES_DROP%\cpp\binaries\debug\v140\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib.remove
+copy %XDK_BIN_BUILD_SHARE_RELEA%\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb %XDK_BINARIES_DROP%\cpp\binaries\release\v140\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb
+copy %XDK_BIN_BUILD_SHARE_DEBUG%\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb %XDK_BINARIES_DROP%\cpp\binaries\debug\v140\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb
 
-copy %UWP_BIN_BUILD_SHARE_RELEA%\casablanca140.Xbox\casablanca140.xbox.lib %XDK_BINARIES_DROP%\cpp\binaries\release\v140\casablanca140.xbox.lib.remove
-copy %UWP_BIN_BUILD_SHARE_DEBUG%\casablanca140.Xbox\casablanca140.xbox.lib %XDK_BINARIES_DROP%\cpp\binaries\debug\v140\casablanca140.xbox.lib.remove
-copy %UWP_BIN_BUILD_SHARE_RELEA%\casablanca140.Xbox\casablanca140.xbox.pdb %XDK_BINARIES_DROP%\cpp\binaries\release\v140\casablanca140.xbox.pdb
-copy %UWP_BIN_BUILD_SHARE_DEBUG%\casablanca140.Xbox\casablanca140.xbox.pdb %XDK_BINARIES_DROP%\cpp\binaries\debug\v140\casablanca140.xbox.pdb
+copy %XDK_BIN_BUILD_SHARE_RELEA%\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.lib %XDK_BINARIES_DROP%\cpp\binaries\release\v140\libHttpClient.140.XDK.C.lib.remove
+copy %XDK_BIN_BUILD_SHARE_DEBUG%\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.lib %XDK_BINARIES_DROP%\cpp\binaries\debug\v140\libHttpClient.140.XDK.C.lib.remove
+copy %XDK_BIN_BUILD_SHARE_RELEA%\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.pdb %XDK_BINARIES_DROP%\cpp\binaries\release\v140
+copy %XDK_BIN_BUILD_SHARE_DEBUG%\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.pdb %XDK_BINARIES_DROP%\cpp\binaries\debug\v140
+
+copy %XDK_BIN_BUILD_SHARE_RELEA%\casablanca140.Xbox\casablanca140.xbox.lib %XDK_BINARIES_DROP%\cpp\binaries\release\v140\casablanca140.xbox.lib.remove
+copy %XDK_BIN_BUILD_SHARE_DEBUG%\casablanca140.Xbox\casablanca140.xbox.lib %XDK_BINARIES_DROP%\cpp\binaries\debug\v140\casablanca140.xbox.lib.remove
+copy %XDK_BIN_BUILD_SHARE_RELEA%\casablanca140.Xbox\casablanca140.xbox.pdb %XDK_BINARIES_DROP%\cpp\binaries\release\v140\casablanca140.xbox.pdb
+copy %XDK_BIN_BUILD_SHARE_DEBUG%\casablanca140.Xbox\casablanca140.xbox.pdb %XDK_BINARIES_DROP%\cpp\binaries\debug\v140\casablanca140.xbox.pdb
 
 rem laying out the 141 binaries
 set RELEASESHARE=%TFS_DropLocation%
@@ -109,12 +114,16 @@ copy %RELEASESHARE%\%TYPE%\x64\Microsoft.Xbox.Services.141.XDK.Ship.Cpp\Microsof
 copy %RELEASESHARE%\%TYPE%\x64\Microsoft.Xbox.Services.141.XDK.Ship.Cpp\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.lib %PATH_XDK_CPP%\binaries\%TYPE%\v141\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.lib.remove
 copy %RELEASESHARE%\%TYPE%\x64\casablanca141.Xbox\casablanca141.xbox.pdb %PATH_XDK_CPP%\binaries\%TYPE%\v141
 copy %RELEASESHARE%\%TYPE%\x64\casablanca141.Xbox\casablanca141.xbox.lib %PATH_XDK_CPP%\binaries\%TYPE%\v141\casablanca141.xbox.lib.remove
+copy %RELEASESHARE%\%TYPE%\x64\libHttpClient.141.XDK.C\libHttpClient.141.XDK.C.pdb %PATH_XDK_CPP%\binaries\%TYPE%\v141
+copy %RELEASESHARE%\%TYPE%\x64\libHttpClient.141.XDK.C\libHttpClient.141.XDK.C.lib %PATH_XDK_CPP%\binaries\%TYPE%\v141\libHttpClient.141.XDK.C.lib.remove
 
 set TYPE=debug
 copy %RELEASESHARE%\%TYPE%\x64\Microsoft.Xbox.Services.141.XDK.Ship.Cpp\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.pdb %PATH_XDK_CPP%\binaries\%TYPE%\v141
 copy %RELEASESHARE%\%TYPE%\x64\Microsoft.Xbox.Services.141.XDK.Ship.Cpp\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.lib %PATH_XDK_CPP%\binaries\%TYPE%\v141\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.lib.remove
 copy %RELEASESHARE%\%TYPE%\x64\casablanca141.Xbox\casablanca141.xbox.pdb %PATH_XDK_CPP%\binaries\%TYPE%\v141
 copy %RELEASESHARE%\%TYPE%\x64\casablanca141.Xbox\casablanca141.xbox.lib %PATH_XDK_CPP%\binaries\%TYPE%\v141\casablanca141.xbox.lib.remove
+copy %RELEASESHARE%\%TYPE%\x64\libHttpClient.141.XDK.C\libHttpClient.141.XDK.C.pdb %PATH_XDK_CPP%\binaries\%TYPE%\v141
+copy %RELEASESHARE%\%TYPE%\x64\libHttpClient.141.XDK.C\libHttpClient.141.XDK.C.lib %PATH_XDK_CPP%\binaries\%TYPE%\v141\libHttpClient.141.XDK.C.lib.remove
 
 copy %PATH_XDK_WINRT%\binaries\Debug\Microsoft.Xbox.Services.dll %PATH_XDK_WINRT%\binaries\Debug\d_Microsoft.Xbox.Services.dll 
 copy %PATH_XDK_WINRT%\binaries\Debug\Microsoft.Xbox.Services.pdb %PATH_XDK_WINRT%\binaries\Debug\d_Microsoft.Xbox.Services.pdb
@@ -125,7 +134,7 @@ del %PATH_XDK_WINRT%\binaries\Debug\Microsoft.Xbox.Services.winmd
 
 robocopy /NJS /NJH /MT:16 /S /NP %TFS_DropLocation%\ABI\include %XDK_BINARIES_DROP%\winrt\include\abi
 if "%1" == "local" goto skipsrccopy
-robocopy /NJS /NJH /MT:16 /S /NP %TFS_SourcesDirectory% %XDK_BINARIES_DROP%\source /XD .git
+rem robocopy /NJS /NJH /MT:16 /S /NP %TFS_SourcesDirectory% %XDK_BINARIES_DROP%\source /XD .git
 :skipsrccopy
 rmdir /s /q %XDK_BINARIES_DROP%\source\.git
 rmdir /s /q %XDK_BINARIES_DROP%\source\External\cpprestsdk\Intermediate

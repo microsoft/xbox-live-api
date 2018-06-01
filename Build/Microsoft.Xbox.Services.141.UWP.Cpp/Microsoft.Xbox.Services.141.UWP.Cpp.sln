@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 14.0.25420.1
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.Services.141.UWP.Cpp", "Microsoft.Xbox.Services.141.UWP.Cpp.vcxproj", "{8F96710E-5169-4917-8874-7DE248F4D243}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libHttpClient.141.UWP.C", "..\..\External\libHttpClient\Build\libHttpClient.141.UWP.C\libHttpClient.141.UWP.C.vcxproj", "{CF37BEB2-A66A-42BA-B348-1F07566F4865}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpprestsdk141.uwp.static", "..\..\External\cpprestsdk\Release\src\build\vs15.uwp\cpprestsdk141.uwp.static.vcxproj", "{9AD285A2-301E-47A0-A299-14AD5D4F2758}"
 EndProject
@@ -33,6 +35,18 @@ Global
 		{8F96710E-5169-4917-8874-7DE248F4D243}.Release|x64.Build.0 = Release|x64
 		{8F96710E-5169-4917-8874-7DE248F4D243}.Release|x86.ActiveCfg = Release|Win32
 		{8F96710E-5169-4917-8874-7DE248F4D243}.Release|x86.Build.0 = Release|Win32
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|ARM.ActiveCfg = Debug|ARM
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|ARM.Build.0 = Debug|ARM
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|x64.ActiveCfg = Debug|x64
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|x64.Build.0 = Debug|x64
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|x86.ActiveCfg = Debug|Win32
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|x86.Build.0 = Debug|Win32
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|ARM.ActiveCfg = Release|ARM
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|ARM.Build.0 = Release|ARM
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|x64.ActiveCfg = Release|x64
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|x64.Build.0 = Release|x64
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|x86.ActiveCfg = Release|Win32
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|x86.Build.0 = Release|Win32
 		{9AD285A2-301E-47A0-A299-14AD5D4F2758}.Debug|ARM.ActiveCfg = Debug|ARM
 		{9AD285A2-301E-47A0-A299-14AD5D4F2758}.Debug|ARM.Build.0 = Debug|ARM
 		{9AD285A2-301E-47A0-A299-14AD5D4F2758}.Debug|x64.ActiveCfg = Debug|x64
@@ -48,5 +62,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {622BB9B5-938F-41A2-BC8B-B7B3A64A73B5}
 	EndGlobalSection
 EndGlobal

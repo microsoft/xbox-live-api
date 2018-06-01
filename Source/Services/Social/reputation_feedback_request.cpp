@@ -12,9 +12,9 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
 reputation_feedback_request::reputation_feedback_request(
     _In_ reputation_feedback_type feedbackType,
-    _In_ string_t sessionName,
-    _In_ string_t reasonMessage,
-    _In_ string_t evidenceResourceId
+    _In_ xsapi_internal_string sessionName,
+    _In_ xsapi_internal_string reasonMessage,
+    _In_ xsapi_internal_string evidenceResourceId
     ) :
     m_feedbackType(feedbackType),
     m_sessionName(std::move(sessionName)),
@@ -25,7 +25,7 @@ reputation_feedback_request::reputation_feedback_request(
 
 web::json::value
 reputation_feedback_request::serialize_batch_feedback_request(
-    _In_ const std::vector< reputation_feedback_item >& feedbackItems,
+    _In_ const xsapi_internal_vector<reputation_feedback_item_internal>& feedbackItems,
     _Out_ std::error_code& err
     )
 {
@@ -49,7 +49,7 @@ reputation_feedback_request::serialize_batch_feedback_request(
         // "textReason" : "Killed 19 team members in a single session",
         // "evidenceId" : null
 
-        xbox_live_result<string_t> feedbackTypeToString = convert_reputation_feedback_type_to_string(feedbackItem.feedback_type());
+        xbox_live_result<xsapi_internal_string> feedbackTypeToString = convert_reputation_feedback_type_to_string(feedbackItem.feedback_type());
         err = feedbackTypeToString.err();
         if (err)
         {
@@ -57,7 +57,7 @@ reputation_feedback_request::serialize_batch_feedback_request(
         }
 
         web::json::value itemJson;
-        itemJson[_T("targetXuid")] = web::json::value::string(feedbackItem.xbox_user_id());
+        itemJson[_T("targetXuid")] = web::json::value::string(utils::string_t_from_internal_string(feedbackItem.xbox_user_id()));
         itemJson[_T("titleId")] = web::json::value::null();
 
         web::json::value sessionRefJson;
@@ -73,11 +73,11 @@ reputation_feedback_request::serialize_batch_feedback_request(
             itemJson[_T("sessionRef")] = web::json::value::null();
         }
 
-        itemJson[_T("feedbackType")] = web::json::value::string(feedbackTypeToString.payload());
-        itemJson[_T("textReason")] = web::json::value::string(feedbackItem.reason_message());
+        itemJson[_T("feedbackType")] = web::json::value::string(utils::string_t_from_internal_string(feedbackTypeToString.payload()));
+        itemJson[_T("textReason")] = web::json::value::string(utils::string_t_from_internal_string(feedbackItem.reason_message()));
         if (!feedbackItem.evidence_resource_id().empty())
         {
-            itemJson[_T("evidenceId")] = web::json::value::string(feedbackItem.evidence_resource_id());
+            itemJson[_T("evidenceId")] = web::json::value::string(utils::string_t_from_internal_string(feedbackItem.evidence_resource_id()));
         }
         else
         {
@@ -96,15 +96,15 @@ web::json::value
 reputation_feedback_request::serialize_feedback_request()
 {
     web::json::value request;
-    xbox_live_result<string_t> feedbackTypeToString = convert_reputation_feedback_type_to_string(m_feedbackType);
+    xbox_live_result<xsapi_internal_string> feedbackTypeToString = convert_reputation_feedback_type_to_string(m_feedbackType);
     if (!feedbackTypeToString.err())
     {
-        request[_T("sessionName")] = web::json::value::string(m_sessionName);
-        request[_T("feedbackType")] = web::json::value::string(feedbackTypeToString.payload());
-        request[_T("textReason")] = web::json::value::string(m_reasonMessage);
+        request[_T("sessionName")] = web::json::value::string(utils::string_t_from_internal_string(m_sessionName));
+        request[_T("feedbackType")] = web::json::value::string(utils::string_t_from_internal_string(feedbackTypeToString.payload()));
+        request[_T("textReason")] = web::json::value::string(utils::string_t_from_internal_string(m_reasonMessage));
         if (!m_evidenceResourceId.empty())
         {
-            request[_T("evidenceId")] = web::json::value::string(m_evidenceResourceId);
+            request[_T("evidenceId")] = web::json::value::string(utils::string_t_from_internal_string(m_evidenceResourceId));
         }
         else
         {
@@ -115,41 +115,40 @@ reputation_feedback_request::serialize_feedback_request()
     return request;
 }
 
-const xbox_live_result<string_t>
+const xbox_live_result<xsapi_internal_string>
 reputation_feedback_request::convert_reputation_feedback_type_to_string(reputation_feedback_type feedbackType)
 {
     switch (feedbackType)
     {
-        case reputation_feedback_type::fair_play_kills_teammates: return xbox_live_result<string_t>(_T("FairPlayKillsTemmates"));
-        case reputation_feedback_type::fair_play_cheater: return xbox_live_result<string_t>(_T("FairPlayCheater"));
-        case reputation_feedback_type::fair_play_tampering: return xbox_live_result<string_t>(_T("FairPlayTampering"));
-        case reputation_feedback_type::fair_play_quitter: return xbox_live_result<string_t>(_T("FairPlayQuitter"));
-        case reputation_feedback_type::fair_play_kicked: return xbox_live_result<string_t>(_T("FairPlayKicked"));
-        case reputation_feedback_type::communications_inappropiate_video: return xbox_live_result<string_t>(_T("CommsInappropriateVideo"));
-        case reputation_feedback_type::communications_abusive_voice: return xbox_live_result<string_t>(_T("CommsAbusiveVoice"));
-        case reputation_feedback_type::inappropiate_user_generated_content: return xbox_live_result<string_t>(_T("UserContentInappropriateUGC"));
-        case reputation_feedback_type::positive_skilled_player: return xbox_live_result<string_t>(_T("PositiveSkilledPlayer"));
-        case reputation_feedback_type::positive_helpful_player: return xbox_live_result<string_t>(_T("PositiveHelpfulPlayer"));
-        case reputation_feedback_type::positive_high_quality_user_generated_content: return xbox_live_result<string_t>(_T("PositiveHighQualityUGC"));
-        case reputation_feedback_type::comms_phishing: return xbox_live_result<string_t>(_T("CommsPhishing"));
-        case reputation_feedback_type::comms_picture_message: return xbox_live_result<string_t>(_T("CommsPictureMessage"));
-        case reputation_feedback_type::comms_spam: return xbox_live_result<string_t>(_T("CommsSpam"));
-        case reputation_feedback_type::comms_text_message: return xbox_live_result<string_t>(_T("CommsTextMessage"));
-        case reputation_feedback_type::comms_voice_message: return xbox_live_result<string_t>(_T("CommsVoiceMessage"));
-        case reputation_feedback_type::fair_play_console_ban_request: return xbox_live_result<string_t>(_T("FairPlayConsoleBanRequest"));
-        case reputation_feedback_type::fair_play_idler: return xbox_live_result<string_t>(_T("FairPlayIdler"));
-        case reputation_feedback_type::fair_play_user_ban_request: return xbox_live_result<string_t>(_T("FairPlayUserBanRequest"));
-        case reputation_feedback_type::user_content_gamerpic: return xbox_live_result<string_t>(_T("UserContentGamertag"));
-        case reputation_feedback_type::user_content_personalinfo: return xbox_live_result<string_t>(_T("UserContentPersonalInfo"));
-        case reputation_feedback_type::fair_play_unsporting: return xbox_live_result<string_t>(_T("FairplayUnsporting"));
-        case reputation_feedback_type::fair_play_leaderboard_cheater: return xbox_live_result<string_t>(_T("FairplayLeaderboardCheater"));
+        case reputation_feedback_type::fair_play_kills_teammates: return xbox_live_result<xsapi_internal_string>("FairPlayKillsTemmates");
+        case reputation_feedback_type::fair_play_cheater: return xbox_live_result<xsapi_internal_string>("FairPlayCheater");
+        case reputation_feedback_type::fair_play_tampering: return xbox_live_result<xsapi_internal_string>("FairPlayTampering");
+        case reputation_feedback_type::fair_play_quitter: return xbox_live_result<xsapi_internal_string>("FairPlayQuitter");
+        case reputation_feedback_type::fair_play_kicked: return xbox_live_result<xsapi_internal_string>("FairPlayKicked");
+        case reputation_feedback_type::communications_inappropiate_video: return xbox_live_result<xsapi_internal_string>("CommsInappropriateVideo");
+        case reputation_feedback_type::communications_abusive_voice: return xbox_live_result<xsapi_internal_string>("CommsAbusiveVoice");
+        case reputation_feedback_type::inappropiate_user_generated_content: return xbox_live_result<xsapi_internal_string>("UserContentInappropriateUGC");
+        case reputation_feedback_type::positive_skilled_player: return xbox_live_result<xsapi_internal_string>("PositiveSkilledPlayer");
+        case reputation_feedback_type::positive_helpful_player: return xbox_live_result<xsapi_internal_string>("PositiveHelpfulPlayer");
+        case reputation_feedback_type::positive_high_quality_user_generated_content: return xbox_live_result<xsapi_internal_string>("PositiveHighQualityUGC");
+        case reputation_feedback_type::comms_phishing: return xbox_live_result<xsapi_internal_string>("CommsPhishing");
+        case reputation_feedback_type::comms_picture_message: return xbox_live_result<xsapi_internal_string>("CommsPictureMessage");
+        case reputation_feedback_type::comms_spam: return xbox_live_result<xsapi_internal_string>("CommsSpam");
+        case reputation_feedback_type::comms_text_message: return xbox_live_result<xsapi_internal_string>("CommsTextMessage");
+        case reputation_feedback_type::comms_voice_message: return xbox_live_result<xsapi_internal_string>("CommsVoiceMessage");
+        case reputation_feedback_type::fair_play_console_ban_request: return xbox_live_result<xsapi_internal_string>("FairPlayConsoleBanRequest");
+        case reputation_feedback_type::fair_play_idler: return xbox_live_result<xsapi_internal_string>("FairPlayIdler");
+        case reputation_feedback_type::fair_play_user_ban_request: return xbox_live_result<xsapi_internal_string>("FairPlayUserBanRequest");
+        case reputation_feedback_type::user_content_gamerpic: return xbox_live_result<xsapi_internal_string>("UserContentGamertag");
+        case reputation_feedback_type::user_content_personalinfo: return xbox_live_result<xsapi_internal_string>("UserContentPersonalInfo");
+        case reputation_feedback_type::fair_play_unsporting: return xbox_live_result<xsapi_internal_string>("FairplayUnsporting");
+        case reputation_feedback_type::fair_play_leaderboard_cheater: return xbox_live_result<xsapi_internal_string>("FairplayLeaderboardCheater");
 
-        default: return xbox_live_result<string_t>(xbox_live_error_code::invalid_argument, "Enum out of range");
+        default: return xbox_live_result<xsapi_internal_string>(xbox_live_error_code::invalid_argument, "Enum out of range");
     }
 }
 
-reputation_feedback_item::reputation_feedback_item() :
-    m_reputationFeedbackType(reputation_feedback_type::fair_play_kills_teammates)
+reputation_feedback_item::reputation_feedback_item()
 {
 }
 
@@ -159,8 +158,8 @@ reputation_feedback_item::reputation_feedback_item(
     _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef,
     _In_ string_t reasonMessage,
     _In_ string_t evidenceResourceId
-    ) : 
-    m_xboxUserId(std::move(xboxUserId)), 
+    ) :
+    m_xboxUserId(std::move(xboxUserId)),
     m_reputationFeedbackType(reputationFeedbackType),
     m_sessionRef(std::move(sessionRef)),
     m_reasonMessage(std::move(reasonMessage)),
@@ -168,32 +167,89 @@ reputation_feedback_item::reputation_feedback_item(
 {
 }
 
-const string_t& 
+const string_t&
 reputation_feedback_item::xbox_user_id() const
 {
     return m_xboxUserId;
 }
 
-reputation_feedback_type 
+reputation_feedback_type
 reputation_feedback_item::feedback_type() const
 {
     return m_reputationFeedbackType;
 }
 
-const xbox::services::multiplayer::multiplayer_session_reference& 
+const xbox::services::multiplayer::multiplayer_session_reference&
 reputation_feedback_item::session_reference() const
 {
     return m_sessionRef;
 }
 
-const string_t& 
+const string_t&
 reputation_feedback_item::reason_message() const
 {
     return m_reasonMessage;
 }
 
-const string_t& 
+const string_t&
 reputation_feedback_item::evidence_resource_id() const
+{
+    return m_evidenceResourceId;
+}
+
+
+reputation_feedback_item_internal::reputation_feedback_item_internal(
+    _In_ const reputation_feedback_item& legacyCppObj
+    ) :
+    m_xboxUserId(utils::internal_string_from_string_t(legacyCppObj.xbox_user_id())),
+    m_reputationFeedbackType(legacyCppObj.feedback_type()),
+    m_sessionRef(legacyCppObj.session_reference()),
+    m_reasonMessage(utils::internal_string_from_string_t(legacyCppObj.reason_message())),
+    m_evidenceResourceId(utils::internal_string_from_string_t(legacyCppObj.evidence_resource_id()))
+{
+}
+
+reputation_feedback_item_internal::reputation_feedback_item_internal(
+    _In_ xsapi_internal_string xboxUserId,
+    _In_ reputation_feedback_type reputationFeedbackType,
+    _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef,
+    _In_ xsapi_internal_string reasonMessage,
+    _In_ xsapi_internal_string evidenceResourceId
+    ) :
+    m_xboxUserId(std::move(xboxUserId)),
+    m_reputationFeedbackType(reputationFeedbackType),
+    m_sessionRef(std::move(sessionRef)),
+    m_reasonMessage(std::move(reasonMessage)),
+    m_evidenceResourceId(std::move(evidenceResourceId))
+{
+}
+
+const xsapi_internal_string&
+reputation_feedback_item_internal::xbox_user_id() const
+{
+    return m_xboxUserId;
+}
+
+reputation_feedback_type
+reputation_feedback_item_internal::feedback_type() const
+{
+    return m_reputationFeedbackType;
+}
+
+const xbox::services::multiplayer::multiplayer_session_reference& 
+reputation_feedback_item_internal::session_reference() const
+{
+    return m_sessionRef;
+}
+
+const xsapi_internal_string&
+reputation_feedback_item_internal::reason_message() const
+{
+    return m_reasonMessage;
+}
+
+const xsapi_internal_string&
+reputation_feedback_item_internal::evidence_resource_id() const
 {
     return m_evidenceResourceId;
 }

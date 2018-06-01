@@ -10,6 +10,7 @@
 #include "xbox_system_factory.h"
 #include "xsapi/multiplayer.h"
 #include "xsapi/mem.h"
+#include "xsapi/xbox_live_context.h"
 
 using namespace Microsoft::Xbox::Services;
 
@@ -111,7 +112,7 @@ public:
         auto user = SignInUserWithMocks_WinRT();
 
         xbox::services::user_context userContext(user);
-        VERIFY_ARE_EQUAL_STR(L"TestXboxUserId", userContext.xbox_user_id()); // StockMock results
+        VERIFY_ARE_EQUAL_STR("TestXboxUserId", userContext.xbox_user_id()); // StockMock results
         VERIFY_ARE_EQUAL(user->XboxUserId, userContext.user()->XboxUserId);
     }
 
@@ -152,7 +153,7 @@ public:
         auto achievementToVerify = responseJson.as_object()[L"achievements"].as_array()[0];
 
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson,200, web::http::http_response(), xboxLiveContext->Settings->GetCppObj());
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson, 200, http_headers(), xboxLiveContext->Settings->GetCppObj());
 
         auto result = pplx::create_task(xboxLiveContext->AchievementService->GetAchievementAsync(
             "xboxUserId",
@@ -160,24 +161,6 @@ public:
             "achievementId"
             )).get();
         pplx::create_task(tce).wait();
-    }
-
-    DEFINE_TEST_CASE(TestUserContext2)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestUserContext2);
-        // TODO (878285): Figure out user_context resolution
-        //User^ user = SignInUserWithMocks_WinRT();
-
-        //auto userContext = std::make_shared<xbox::services::user_context>(user);
-        //auto xboxLiveContextSettings = std::make_shared<xbox::services::xbox_live_context_settings>();
-        //std::shared_ptr<xbox::services::local_config> localConfig = xbox::services::system::xbox_system_factory::get_factory()->create_local_config();
-
-        //XboxLiveContext^ xboxLiveContext = ref new XboxLiveContext(user);
-        //xbox::services::achievements::achievement_service achievementService(userContext, xboxLiveContextSettings, localConfig);
-        //xbox::services::multiplayer::multiplayer_service multiplayerService(userContext, xboxLiveContextSettings, localConfig);
-        //
-        //auto multiplayerShared = multiplayerService.get_user_context();
-        //VERIFY_ARE_EQUAL(multiplayerShared->xbox_user_id().c_str(), userContext.xbox_user_id().c_str());
     }
 
     DEFINE_TEST_CASE(StressTestXboxLiveContext)
@@ -239,8 +222,8 @@ public:
             xbox::services::system::xsapi_memory_buffer buf(1000);
             VERIFY_ARE_EQUAL_INT(0, g_MemFreeHookCalls);
             VERIFY_ARE_EQUAL_INT(1, g_MemAllocHookCalls);
-            void* t = buf.get();
-            VERIFY_IS_NOT_NULL(t);
+            void* tBuffer = buf.get();
+            VERIFY_IS_NOT_NULL(tBuffer);
         }
         VERIFY_ARE_EQUAL_INT(1, g_MemFreeHookCalls);
         VERIFY_ARE_EQUAL_INT(1, g_MemAllocHookCalls);
@@ -257,8 +240,8 @@ public:
             xbox::services::system::xsapi_memory_buffer buf(1000);
             VERIFY_ARE_EQUAL_INT(0, g_MemFreeHookCalls);
             VERIFY_ARE_EQUAL_INT(0, g_MemAllocHookCalls);
-            void* t = buf.get();
-            VERIFY_IS_NOT_NULL(t);
+            void* tBuffer = buf.get();
+            VERIFY_IS_NOT_NULL(tBuffer);
         }
         VERIFY_ARE_EQUAL_INT(0, g_MemFreeHookCalls);
         VERIFY_ARE_EQUAL_INT(0, g_MemAllocHookCalls);
@@ -277,7 +260,7 @@ public:
             );
 
         {
-            xsapi_internal_vector(uint32_t) vec;
+            xsapi_internal_vector<uint32_t> vec;
             vec.resize(10000);
             VERIFY_ARE_EQUAL_INT(0, g_MemFreeHookCalls);
             VERIFY_ARE_EQUAL_INT(2, g_MemAllocHookCalls);
@@ -299,7 +282,7 @@ public:
             );
 
         {
-            xsapi_internal_unordered_map(uint32_t, uint32_t) unorderedMap;
+            xsapi_internal_unordered_map<uint32_t, uint32_t> unorderedMap;
             for(int i=0; i<1000; i++)
             {
                 unorderedMap[i] = i * 1000;

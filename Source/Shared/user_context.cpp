@@ -16,10 +16,9 @@ using namespace Microsoft::Xbox::Services::System;
 
 using namespace xbox::services::system;
 
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-const string_t&
+const xsapi_internal_string&
 user_context::caller_context() const
 {
     return m_callerContext;
@@ -37,15 +36,25 @@ user_context::set_caller_context_type(xbox::services::caller_context_type contex
     m_callerContextType = context;
     if (context == caller_context_type::multiplayer_manager)
     {
-        m_callerContext = _T("MultiplayerManager");
+        m_callerContext = "MultiplayerManager";
     }
     else if (context == caller_context_type::social_manager)
     {
-        m_callerContext = _T("SocialManager");
+        m_callerContext = "SocialManager";
+    }
+    else if (context == caller_context_type::stats_manager)
+    {
+        m_callerContext = "StatManager";
     }
 }
 
-const string_t& user_context::xbox_user_id() const
+void
+user_context::set_caller_api_type(xbox::services::caller_api_type apiType)
+{
+    m_apiType = apiType;
+}
+
+const xsapi_internal_string& user_context::xbox_user_id() const
 {
     return m_xboxUserId;
 }
@@ -55,19 +64,19 @@ user_context_auth_result::user_context_auth_result()
 }
 
 user_context_auth_result::user_context_auth_result(
-    _In_ string_t token,
-    _In_ string_t signature) :
+    _In_ xsapi_internal_string token,
+    _In_ xsapi_internal_string signature) :
     m_token(std::move(token)),
     m_signature(std::move(signature))
 {
 }
 
-const string_t& user_context_auth_result::token() const
+const xsapi_internal_string& user_context_auth_result::token() const
 {
     return m_token;
 }
 
-const string_t& user_context_auth_result::signature() const
+const xsapi_internal_string& user_context_auth_result::signature() const
 {
     return m_signature;
 }

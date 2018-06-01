@@ -22,6 +22,7 @@ private:
     template<UCHAR LEVEL>
     void add_log_t(_In_ const log_entry& entry)
     {
+#pragma warning(suppress: 6386)
         TraceLoggingWrite(
             g_hUnitTestTraceLoggingProvider,
             "XSAPI",

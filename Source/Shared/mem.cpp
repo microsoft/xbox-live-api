@@ -7,35 +7,20 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-
-static bool using_custom_mem_alloc = false;
-
+_Ret_maybenull_ _Post_writable_byte_size_(dwSize) 
 void* xsapi_memory::mem_alloc(
     _In_ size_t dwSize
     )
 {
-    std::function<_Ret_maybenull_ _Post_writable_byte_size_(dwSize) void*(_In_ size_t dwSize)> pMemAlloc;
-    auto xboxLiveServiceSettings = xbox::services::system::xbox_live_services_settings::get_singleton_instance();
-    if (xboxLiveServiceSettings != nullptr)
+    try
     {
-        pMemAlloc = xbox::services::system::xbox_live_services_settings::get_singleton_instance()->m_pMemAllocHook;
+        init_mem_hooks();
+        return g_pMemAllocHook(dwSize, 0);
     }
-    if (pMemAlloc == nullptr)
+    catch (...)
     {
-        return malloc(dwSize);
-    }
-    else
-    {
-        try
-        {
-            using_custom_mem_alloc = true;
-            return pMemAlloc(dwSize);
-        }
-        catch (...)
-        {
-            LOG_ERROR("mem_alloc callback failed.");
-            return nullptr;
-        }
+        LOG_ERROR("mem_alloc callback failed.");
+        return nullptr;
     }
 }
 
@@ -43,33 +28,17 @@ void xsapi_memory::mem_free(
     _In_ void* pAddress
     )
 {
-    std::function<void(_In_ void* pAddress)> pMemFreeHook = nullptr;
-    auto xboxLiveServiceSettings = xbox::services::system::xbox_live_services_settings::get_singleton_instance(false);
-    if (xboxLiveServiceSettings != nullptr)
+    try
     {
-        pMemFreeHook = xboxLiveServiceSettings->m_pMemFreeHook;
-        if (pMemFreeHook == nullptr)
+        init_mem_hooks();
+        if (pAddress)
         {
-            free(pAddress);
-        }
-        else
-        {
-            try
-            {
-                return pMemFreeHook(pAddress);
-            }
-            catch (...)
-            {
-                LOG_ERROR("mem_free callback failed.");
-            }
+            g_pMemFreeHook(pAddress, 0);
         }
     }
-    else
+    catch (...)
     {
-        if (!using_custom_mem_alloc)
-        {
-            delete[] pAddress;
-        }
+        LOG_ERROR("mem_alloc callback failed.");
     }
 }
 

@@ -166,9 +166,9 @@ stats_manager::delete_stat(
 }
 
 xbox_live_result<void> stats_manager::get_leaderboard(
-    const xbox_live_user_t& user, 
-    const string_t& statName, 
-    leaderboard::leaderboard_query query
+    _In_ const xbox_live_user_t& user,
+    _In_ const string_t& statName,
+    _In_ leaderboard::leaderboard_query query
     )
 {
     LOGS_INFO << "stats_manager::get_leaderboard. XUID: " << xbox_user_id_from_user(user) << " statName:" << statName;
@@ -181,10 +181,10 @@ xbox_live_result<void> stats_manager::get_leaderboard(
 }
 
 xbox_live_result<void> stats_manager::get_social_leaderboard(
-    const xbox_live_user_t& user, 
-    const string_t& statName, 
-    const string_t& socialGroup, 
-    leaderboard::leaderboard_query query
+    _In_ const xbox_live_user_t& user,
+    _In_ const string_t& statName,
+    _In_ const string_t& socialGroup,
+    _In_ leaderboard::leaderboard_query query
     )
 {
     LOGS_INFO << "stats_manager::get_social_leaderboard. XUID: " << xbox_user_id_from_user(user) << " statName:" << statName << " socialGroup:" << socialGroup;

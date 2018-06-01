@@ -9,6 +9,9 @@
 #include "xbox_live_context_impl.h"
 #include "system_internal.h"
 #include "xbox_system_factory.h"
+#include "social_internal.h"
+#include "xbox_live_app_config_internal.h"
+#include "presence_internal.h"
 
 using namespace xbox::services;
 using namespace xbox::services::system;
@@ -32,7 +35,8 @@ const uint32_t social_graph::NUM_EVENTS_PER_FRAME = 5;
 social_graph::social_graph(
     _In_ xbox_live_user_t user,
     _In_ social_manager_extra_detail_level socialManagerExtraDetailLevel,
-    _In_ std::function<void()> graphDestructionCompleteCallback
+    _In_ xbox_live_callback<void> graphDestructionCompleteCallback,
+    _In_ async_queue_handle_t backgroundAsyncQueue
     ) :
     m_detailLevel(socialManagerExtraDetailLevel),
     m_xboxLiveContextImpl(new xbox_live_context_impl(m_user)),
@@ -41,22 +45,26 @@ social_graph::social_graph(
     m_isInitialized(false),
     m_socialGraphState(social_graph_state::normal),
     m_stateRTAFunction(nullptr),
-    m_perfTester(_T("social_graph")),
+    m_perfTester("social_graph"),
     m_wasDisconnected(false),
     m_numEventsThisFrame(0),
     m_userAddedContext(0),
-    m_shouldCancel(utility::details::make_unique<bool>(false)),
-    m_isPollingRichPresence(false)
+    m_shouldCancel(false),
+    m_isPollingRichPresence(false),
+    m_backgroundAsyncQueue(backgroundAsyncQueue)
 {
     m_xboxLiveContextImpl->user_context()->set_caller_context_type(caller_context_type::social_manager);
     m_xboxLiveContextImpl->init();
     m_peoplehubService = peoplehub_service(
         m_xboxLiveContextImpl->user_context(),
         m_xboxLiveContextImpl->settings(),
-        m_xboxLiveContextImpl->application_config()
+        xbox_live_app_config_internal::get_app_config_singleton()
         );
 
-    LOG_DEBUG("social_graph created");
+    LOG_DEBUG_IF(
+        social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose,
+        "social_graph created"
+    );
 }
 
 social_graph::~social_graph()
@@ -65,7 +73,7 @@ social_graph::~social_graph()
     std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
     m_xboxLiveContextImpl->real_time_activity_service()->deactivate();
 
-    m_perfTester.start_timer(_T("~social_graph"));
+    m_perfTester.start_timer("~social_graph");
     try
     {
         if (m_graphDestructionCompleteCallback != nullptr)
@@ -75,22 +83,27 @@ social_graph::~social_graph()
     }
     catch (...)
     {
-        LOG_ERROR("Exception happened during graph destruction complete callback");
+        LOG_ERROR_IF(
+            social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+            "Exception happened during graph destruction complete callback"
+        );
     }
 
-    LOG_DEBUG("social_graph destroyed");
+    LOG_DEBUG_IF(
+        social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose,
+        "social_graph destroyed"
+    );
 
-    m_perfTester.stop_timer(_T("~social_graph"));
+    m_perfTester.stop_timer("~social_graph");
 }
 
-pplx::task<xbox_live_result<void>>
-social_graph::initialize()
+void social_graph::initialize(xbox_live_callback<xbox_live_result<void>> callback) 
 {
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
     setup_rta();
 
-    m_presenceRefreshTimer = std::make_shared<call_buffer_timer>(
-    [thisWeakPtr](std::vector<string_t> eventArgs, const call_buffer_timer_completion_context&)
+    m_presenceRefreshTimer = xsapi_allocate_shared<call_buffer_timer>(
+    [thisWeakPtr](const xsapi_internal_vector<xsapi_internal_string>& eventArgs, std::shared_ptr<call_buffer_timer_completion_context>)
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
         if (pThis)
@@ -100,11 +113,12 @@ social_graph::initialize()
             );
         }
     },
-        TIME_PER_CALL_SEC
+        TIME_PER_CALL_SEC,
+        m_backgroundAsyncQueue
         );
 
-    m_presencePollingTimer = std::make_shared<call_buffer_timer>(
-    [thisWeakPtr](std::vector<string_t> eventArgs, const call_buffer_timer_completion_context&)
+    m_presencePollingTimer = xsapi_allocate_shared<call_buffer_timer>(
+    [thisWeakPtr](const xsapi_internal_vector<xsapi_internal_string> eventArgs, std::shared_ptr<call_buffer_timer_completion_context>)
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
         if (pThis)
@@ -114,11 +128,12 @@ social_graph::initialize()
             );
         }
     },
-        TIME_PER_CALL_SEC
+        TIME_PER_CALL_SEC,
+        m_backgroundAsyncQueue
         );
 
-    m_socialGraphRefreshTimer = std::make_shared<call_buffer_timer>(
-    [thisWeakPtr](std::vector<string_t> eventArgs, const call_buffer_timer_completion_context& completionContext)
+    m_socialGraphRefreshTimer = xsapi_allocate_shared<call_buffer_timer>(
+    [thisWeakPtr](const xsapi_internal_vector<xsapi_internal_string> eventArgs, std::shared_ptr<call_buffer_timer_completion_context> completionContext)
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
         if (pThis)
@@ -129,79 +144,37 @@ social_graph::initialize()
                 );
         }
     },
-        TIME_PER_CALL_SEC
+        TIME_PER_CALL_SEC,
+        m_backgroundAsyncQueue
         );
 
-    m_resyncRefreshTimer = std::make_shared<call_buffer_timer>(
-    [thisWeakPtr](std::vector<string_t> eventArgs, const call_buffer_timer_completion_context&)
+    m_resyncRefreshTimer = xsapi_allocate_shared<call_buffer_timer>(
+    [thisWeakPtr](xsapi_internal_vector<xsapi_internal_string>, std::shared_ptr<call_buffer_timer_completion_context>)
     {
-        UNREFERENCED_PARAMETER(eventArgs);
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
         if (pThis)
         {
             pThis->refresh_graph();
         }
     },
-        TIME_PER_CALL_SEC
+        TIME_PER_CALL_SEC,
+        m_backgroundAsyncQueue
         );
 
 #if UWP_API || TV_API || UNIT_TEST_SERVICES
-    create_delayed_task(
-        REFRESH_TIME_MIN,
-        [thisWeakPtr]()
-    {
-        std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
-        if (pThis)
-        {
-            pThis->social_graph_refresh_callback();
-        }
-    });
+    schedule_social_graph_refresh();
 #endif
+    schedule_event_work();
 
-    pplx::create_task([thisWeakPtr]()
-    {
-        try
-        {
-            static const std::chrono::milliseconds sleepTime(30);
-            while (true)
-            {
-                bool hasRemainingEvent = false;
-                {
-                    std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
-                    if (pThis)
-                    {
-                        hasRemainingEvent = pThis->do_event_work();
-                    }
-                    else
-                    {
-                        LOG_DEBUG("exiting event processing loop");
-                        return;
-                    }
-                }
-                if (!hasRemainingEvent)
-                {
-                    std::this_thread::sleep_for(sleepTime);
-                }
-            }
-        }
-        catch (const std::exception& e)
-        {
-            LOGS_DEBUG << "Exception in event processing " << e.what();
-        }
-        catch (...)
-        {
-            LOG_DEBUG("Unknown std::exception in event processing");
-        }
-    });
-
-    return m_peoplehubService.get_social_graph(
+    m_peoplehubService.get_social_graph(
 #if TV_API || UNIT_TEST_SERVICES || !XSAPI_CPP
-        m_xboxLiveContextImpl->user()->XboxUserId->Data(),
+        utils::internal_string_from_string_t(m_xboxLiveContextImpl->user()->XboxUserId->Data()),
 #else
-        m_xboxLiveContextImpl->user()->xbox_user_id(),
+        utils::internal_string_from_string_t(m_xboxLiveContextImpl->user()->xbox_user_id()),
 #endif
-        m_detailLevel
-        ).then([thisWeakPtr](xbox_live_result<std::vector<xbox_social_user>> socialUsersResult)
+        m_detailLevel,
+        m_backgroundAsyncQueue,
+        [thisWeakPtr, callback](xbox_live_result<xsapi_internal_vector<xbox_social_user>> socialUsersResult)
     {
         try
         {
@@ -210,64 +183,117 @@ social_graph::initialize()
             {
                 if (socialUsersResult.err())
                 {
-                    return xbox_live_result<void>(socialUsersResult.err(), socialUsersResult.err_message());
+                    callback(xbox_live_result<void>(socialUsersResult.err(), socialUsersResult.err_message()));
+                    return;
                 }
-                
+
                 pThis->initialize_social_buffers(socialUsersResult.payload());
                 auto& inactiveBufferSocialGraph = pThis->m_userBuffer.inactive_buffer()->socialUserGraph;
                 for (auto& user : inactiveBufferSocialGraph)
                 {
                     if (user.second.socialUser == nullptr)
                         continue;
-                    auto devicePresenceSubResult = pThis->m_xboxLiveContextImpl->presence_service().subscribe_to_device_presence_change(user.second.socialUser->xbox_user_id());
-                    auto titlePresenceSubResult = pThis->m_xboxLiveContextImpl->presence_service().subscribe_to_title_presence_change(
-                        user.second.socialUser->xbox_user_id(),
+
+                    auto devicePresenceSubResult = pThis->m_xboxLiveContextImpl->presence_service()->subscribe_to_device_presence_change(utils::internal_string_from_string_t(user.second.socialUser->xbox_user_id()));
+                    auto titlePresenceSubResult = pThis->m_xboxLiveContextImpl->presence_service()->subscribe_to_title_presence_change(
+                        utils::internal_string_from_char_t(user.second.socialUser->xbox_user_id()),
                         pThis->m_xboxLiveContextImpl->application_config()->title_id()
                         );
 
                     if (devicePresenceSubResult.err() || titlePresenceSubResult.err())
                     {
-                        return xbox_live_result<void>(xbox_live_error_code::runtime_error, "subscription initialization failed");
+                        callback(xbox_live_result<void>(xbox_live_error_code::runtime_error, "subscription initialization failed"));
+                        return;
                     }
 
                     std::lock_guard<std::recursive_mutex> lock(pThis->m_socialGraphMutex);
                     std::lock_guard<std::recursive_mutex> priorityLock(pThis->m_socialGraphPriorityMutex);
-                    pThis->m_perfTester.start_timer(_T("sub"));
+                    pThis->m_perfTester.start_timer("sub");
                     pThis->m_socialUserSubscriptions[user.first].devicePresenceChangeSubscription = devicePresenceSubResult.payload();
                     pThis->m_socialUserSubscriptions[user.first].titlePresenceChangeSubscription = titlePresenceSubResult.payload();
-                    pThis->m_perfTester.stop_timer(_T("sub"));
+                    pThis->m_perfTester.stop_timer("sub");
                 }
 
 
                 std::lock_guard<std::recursive_mutex> lock(pThis->m_socialGraphMutex);
                 std::lock_guard<std::recursive_mutex> priorityLock(pThis->m_socialGraphPriorityMutex);
-                pThis->m_perfTester.start_timer(_T("m_isInitialized"));
+                pThis->m_perfTester.start_timer("m_isInitialized");
                 pThis->m_isInitialized = true;
-                pThis->m_perfTester.stop_timer(_T("m_isInitialized"));
+                pThis->m_perfTester.stop_timer("m_isInitialized");
             }
             else
             {
-                return xbox_live_result<void>(xbox_live_error_code::runtime_error);
+                callback(xbox_live_result<void>(xbox_live_error_code::runtime_error));
+                return;
             }
         }
         catch (const std::exception& e)
         {
-            LOGS_DEBUG << "Exception in get_social_graph " << e.what();
+            LOGS_DEBUG_IF(social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose) 
+                << "Exception in get_social_graph " << e.what();
         }
         catch (...)
         {
-            LOG_DEBUG("Unknown std::exception in initialization");
+            LOG_DEBUG_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose,
+                "Unknown std::exception in initialization"
+            );
         }
-        return xbox_live_result<void>();
+        callback(xbox_live_result<void>());
     });
 }
 
-const xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)*
+const xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>*
 social_graph::active_buffer_social_graph()
 {
     std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
     std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
     return &m_userBuffer.active_buffer()->socialUserGraph;
+}
+
+void
+social_graph::set_background_async_queue(async_queue_handle_t queue)
+{
+    m_backgroundAsyncQueue = queue;
+}
+
+void 
+social_graph::schedule_event_work()
+{
+    std::weak_ptr<social_graph> thisWeak = shared_from_this();
+
+    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    async->context = utils::store_weak_ptr(thisWeak);
+    async->queue = m_backgroundAsyncQueue;
+    async->callback = [](AsyncBlock* async)
+    {
+        auto pThis = utils::get_shared_ptr<social_graph>(async->context);
+        if (pThis)
+        {
+            pThis->schedule_event_work();
+        }
+        xsapi_memory::mem_free(async);
+    };
+
+    BeginAsync(async, utils::store_weak_ptr(thisWeak), nullptr, __FUNCTION__,
+        [](AsyncOp op, const AsyncProviderData* data)
+    {
+        if (op == AsyncOp_DoWork)
+        {
+            auto pThis = utils::get_shared_ptr<social_graph>(data->context);
+            if (pThis)
+            {
+                bool hasRemainingEvent = false;
+                do
+                {
+                    hasRemainingEvent = pThis->do_event_work();
+                } while (hasRemainingEvent);
+            }
+            CompleteAsync(data->async, S_OK, 0);
+        }
+        return S_OK;
+    });
+    ScheduleAsync(async, 30);
 }
 
 bool
@@ -282,17 +308,20 @@ social_graph::do_event_work()
             std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
             set_state(social_graph_state::event_processing);
 
-            m_perfTester.start_timer(_T("do_event_work: event_processing"));
-            m_perfTester.start_timer(_T("do_event_work: has_cached_events"));
+            m_perfTester.start_timer("do_event_work: event_processing");
+            m_perfTester.start_timer("do_event_work: has_cached_events");
             hasCachedEvents = m_isInitialized && m_userBuffer.inactive_buffer() && !m_userBuffer.inactive_buffer()->socialUserEventQueue.empty(true);
-            m_perfTester.stop_timer(_T("do_event_work: has_cached_events"));
+            m_perfTester.stop_timer("do_event_work: has_cached_events");
             if (hasCachedEvents)
             {
-                m_perfTester.start_timer(_T("do_event_work: set_state"));
-                LOG_INFO("set state: event_processing");
-                m_perfTester.stop_timer(_T("do_event_work: set_state"));
+                m_perfTester.start_timer("do_event_work: set_state");
+                LOG_INFO_IF(
+                    social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::info,
+                    "set state: event_processing"
+                );
+                m_perfTester.stop_timer("do_event_work: set_state");
             }
-            m_perfTester.stop_timer(_T("do_event_work: event_processing"));
+            m_perfTester.stop_timer("do_event_work: event_processing");
         }
         if (hasCachedEvents)
         {
@@ -303,19 +332,19 @@ social_graph::do_event_work()
         {
             std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
             std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
-            m_perfTester.start_timer(_T("do_event_work: process_events"));
+            m_perfTester.start_timer("do_event_work: process_events");
             set_state(social_graph_state::normal);
             hasRemainingEvent = process_events(); //effectively a coroutine here so that each event yields when it is done processing
-            m_perfTester.stop_timer(_T("do_event_work: process_events"));
+            m_perfTester.stop_timer("do_event_work: process_events");
         }
         else
         {
             std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
             std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
 
-            m_perfTester.start_timer(_T("set_state: normal"));
+            m_perfTester.start_timer("set_state: normal");
             set_state(social_graph_state::normal);
-            m_perfTester.stop_timer(_T("set_state: normal"));
+            m_perfTester.stop_timer("set_state: normal");
         }
     }
 
@@ -323,7 +352,7 @@ social_graph::do_event_work()
 }
 
 void social_graph::initialize_social_buffers(
-    _In_ const std::vector<xbox_social_user>& socialUsers
+    _In_ const xsapi_internal_vector<xbox_social_user>& socialUsers
     )
 {
     m_userBuffer.initialize(socialUsers);
@@ -359,11 +388,11 @@ social_graph::process_cached_events()
 bool
 social_graph::process_events()
 {
-    bool shouldApplyEvent = !m_internalEventQueue.empty() && m_numEventsThisFrame < NUM_EVENTS_PER_FRAME;
+    bool shouldApplyEvent = !m_unprocessedEventQueue.empty() && m_numEventsThisFrame < NUM_EVENTS_PER_FRAME;
     if(shouldApplyEvent)
     {
         ++m_numEventsThisFrame;
-        auto evt = m_internalEventQueue.pop();
+        auto evt = m_unprocessedEventQueue.pop();
         apply_event(evt, true);
         m_userBuffer.add_event(evt);
     }
@@ -373,78 +402,105 @@ social_graph::process_events()
 
 void
 social_graph::apply_event(
-    _In_ const internal_social_event& evt,
+    _In_ const unprocessed_social_event& evt,
     _In_ bool isFreshEvent
     )
 {
     const auto& inactiveBuffer = m_userBuffer.inactive_buffer();
     if (inactiveBuffer == nullptr)
     {
-        LOG_ERROR("In active buffer null in event processing");
+        LOG_ERROR_IF(
+            social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+            "In active buffer null in event processing"
+        );
         return;
     }
 
     social_event_type eventType = social_event_type::unknown;
     switch (evt.event_type())
     {
-        case internal_social_event_type::users_added:
+        case unprocessed_social_event_type::users_added:
         {
-            LOG_INFO("Applying internal events: users_added");
+            LOG_INFO_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::info, 
+                "Applying internal events: users_added"
+            );
             apply_users_added_event(evt, inactiveBuffer, isFreshEvent);
             break;
         }
-        case internal_social_event_type::users_changed:
+        case unprocessed_social_event_type::users_changed:
         {
-            LOG_INFO("Applying internal events: users_changed");
+            LOG_INFO_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::info,
+                "Applying internal events: users_changed"
+            );
             apply_users_change_event(evt, inactiveBuffer, isFreshEvent);
             break;
         }
-        case internal_social_event_type::users_removed:
+        case unprocessed_social_event_type::users_removed:
         {
-            LOG_INFO("Applying internal events: users_removed");
+            LOG_INFO_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::info,
+                "Applying internal events: users_removed"
+            );
             apply_users_removed_event(evt, inactiveBuffer, eventType, isFreshEvent);
             break;
         }
-        case internal_social_event_type::device_presence_changed:
+        case unprocessed_social_event_type::device_presence_changed:
         {
-            LOG_INFO("Applying internal events: device_presence_changed");
+            LOG_INFO_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::info,
+                "Applying internal events: device_presence_changed"
+            );
 
             apply_device_presence_changed_event(evt, inactiveBuffer, isFreshEvent, eventType);
             break;
         }
-        case internal_social_event_type::title_presence_changed:
+        case unprocessed_social_event_type::title_presence_changed:
         {
-            LOG_INFO("Applying internal events: title_presence_changed");
-            auto& titlePresenceChanged = evt.title_presence_args();
-            auto xuid = utils::string_t_to_uint64(titlePresenceChanged.xbox_user_id());
+            LOG_INFO_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::info, 
+                "Applying internal events: title_presence_changed"
+            );
+            auto titlePresenceChanged = evt.title_presence_args();
+            auto xuid = utils::internal_string_to_uint64(titlePresenceChanged->xbox_user_id());
             auto xuidIter = inactiveBuffer->socialUserGraph.find(xuid);
             if (xuidIter == inactiveBuffer->socialUserGraph.end() || (xuidIter != inactiveBuffer->socialUserGraph.end() && xuidIter->second.socialUser == nullptr))
             {
-                LOG_ERROR("social graph: social user not found in title presence change");
+                LOG_ERROR_IF(
+                    social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                    "social graph: social user not found in title presence change"
+                );
                 break;
             }
             auto& userPresenceRecord = inactiveBuffer->socialUserGraph.at(xuid).socialUser->m_presenceRecord;
-            if (titlePresenceChanged.title_state() == xbox::services::presence::title_presence_state::ended)
+            if (titlePresenceChanged->title_state() == xbox::services::presence::title_presence_state::ended)
             {
                 userPresenceRecord._Remove_title(
-                    titlePresenceChanged.title_id()
+                    titlePresenceChanged->title_id()
                 );
             }
 
             eventType = social_event_type::presence_changed;
             break;
         }
-        case internal_social_event_type::presence_changed:
+        case unprocessed_social_event_type::presence_changed:
         {
-            LOG_INFO("Applying internal events: presence_changed");
+            LOG_INFO_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::info,
+                "Applying internal events: presence_changed"
+            );
             apply_presence_changed_event(evt, inactiveBuffer, isFreshEvent);
             break;
         }
-        case internal_social_event_type::social_relationships_changed:
-        case internal_social_event_type::profiles_changed:
+        case unprocessed_social_event_type::social_relationships_changed:
+        case unprocessed_social_event_type::profiles_changed:
         {
-            LOG_INFO("Applying internal events: social_relationships_changed or profiles_changed");
-            m_perfTester.start_timer(_T("profiles_changed"));
+            LOG_INFO_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::info,
+                "Applying internal events: social_relationships_changed or profiles_changed"
+            );
+            m_perfTester.start_timer("profiles_changed");
             for (auto& user : evt.users_affected())
             {
                 auto userIterator = inactiveBuffer->socialUserGraph.find(user._Xbox_user_id_as_integer());
@@ -455,13 +511,16 @@ social_graph::apply_event(
             }
 
             eventType = social_event_type::profiles_changed;
-            m_perfTester.stop_timer(_T("profiles_changed"));
+            m_perfTester.stop_timer("profiles_changed");
             break;
         }
-        case internal_social_event_type::unknown:
+        case unprocessed_social_event_type::unknown:
         default:
         {
-            LOG_ERROR("unknown event in process_events");
+            LOG_ERROR_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                "unknown event in process_events"
+            );
         }
     }
 
@@ -472,39 +531,37 @@ social_graph::apply_event(
 }
 
 void social_graph::apply_users_added_event(
-    _In_ const internal_social_event& evt,
+    _In_ const unprocessed_social_event& evt,
     _In_ user_buffer* inactiveBuffer,
     _In_ bool isFreshEvent
     )
 {
-    m_perfTester.start_timer(_T("apply_users_added_event"));
-    std::vector<string_t> usersToAdd;
+    m_perfTester.start_timer("apply_users_added_event");
+    xsapi_internal_vector<xsapi_internal_string> usersToAdd;
     for (auto& user : evt.users_affected_as_string_vec())
     {
-        string_t addUser(user.c_str());
-        auto userIter = inactiveBuffer->socialUserGraph.find(utils::string_t_to_uint64(addUser));
+        auto userIter = inactiveBuffer->socialUserGraph.find(utils::internal_string_to_uint64(user));
         if (userIter != inactiveBuffer->socialUserGraph.end())
         {
             ++userIter->second.refCount;
         }
         else
         {
-            usersToAdd.push_back(addUser);
+            usersToAdd.push_back(user);
         }
     }
 
     if (usersToAdd.empty())
     {
-        evt.tce().set(xbox_live_result<void>());
+        invoke_callback(evt.callback, xbox_live_result<void>());
     }
     else
     {
-        call_buffer_timer_completion_context usersAddedStruct;
-
-        usersAddedStruct.isNull = false;
-        usersAddedStruct.context = ++m_userAddedContext;
-        usersAddedStruct.numObjects = usersToAdd.size();
-        usersAddedStruct.tce = std::move(evt.tce());
+        auto usersAddedStruct = xsapi_allocate_shared<call_buffer_timer_completion_context>(
+            ++m_userAddedContext,
+            usersToAdd.size(),
+            evt.callback
+            );
 
         if (isFreshEvent)
         {
@@ -513,25 +570,25 @@ void social_graph::apply_users_added_event(
 
         for (auto& user : usersToAdd)
         {
-            auto userAsInt = utils::string_t_to_uint64(user);
+            auto userAsInt = utils::internal_string_to_uint64(user);
             inactiveBuffer->socialUserGraph[userAsInt].socialUser = nullptr;
             inactiveBuffer->socialUserGraph[userAsInt].refCount = 1;
         }
     }
-    m_perfTester.stop_timer(_T("apply_users_added_event"));
+    m_perfTester.stop_timer("apply_users_added_event");
 }
 
 void
 social_graph::apply_users_removed_event(
-    _In_ const internal_social_event& evt,
+    _In_ const unprocessed_social_event& evt,
     _In_ user_buffer* inactiveBuffer,
     _Inout_ social_event_type& eventType,
     _In_ bool isFreshEvent
     )
 {
-    m_perfTester.start_timer(_T("removing_users"));
+    m_perfTester.start_timer("removing_users");
     auto usersAffected = evt.users_to_remove();
-    std::vector<uint64_t> removeUsers;
+    xsapi_internal_vector<uint64_t> removeUsers;
     for (auto& user : usersAffected)
     {
         --inactiveBuffer->socialUserGraph[user].refCount;
@@ -555,22 +612,23 @@ social_graph::apply_users_removed_event(
     {
         unsubscribe_users(removeUsers);
     }
-    m_perfTester.stop_timer(_T("removing_users"));
+    m_perfTester.stop_timer("removing_users");
 }
 
 void
 social_graph::apply_users_change_event(
-    _In_ const internal_social_event& evt,
+    _In_ const unprocessed_social_event& evt,
     _In_ user_buffer* inactiveBuffer,
     _In_ bool isFreshEvent
     )
 {
-    m_perfTester.start_timer(_T("apply_users_change_event"));
-    std::vector<xbox_social_user> usersToAdd;
-    std::vector<xbox_social_user> usersChanged;
-    if (!evt.completion_context().isNull)
+    m_perfTester.start_timer("apply_users_change_event");
+    xsapi_internal_vector<xbox_social_user> usersToAdd;
+    xsapi_internal_vector<xbox_social_user> usersChanged;
+    if (evt.completion_context() != nullptr)
     {
-        evt.completion_context().tce.set(evt.error());
+        // delay callback invocation to avoid deadlock
+        invoke_callback(evt.completion_context()->callback, evt.error());
     }
 
     auto result = evt.error();
@@ -599,9 +657,10 @@ social_graph::apply_users_change_event(
 
     if (!usersToAdd.empty())
     {
-        m_userBuffer.add_users_to_buffer(usersToAdd, *inactiveBuffer, evt.completion_context().numObjects);
+        auto numObjects = evt.completion_context() != nullptr ? evt.completion_context()->numObjects : 0;
+        m_userBuffer.add_users_to_buffer(usersToAdd, *inactiveBuffer, numObjects);
 
-        std::vector<uint64_t> usersList;
+        xsapi_internal_vector<uint64_t> usersList;
         for (auto& user : usersToAdd)
         {
             usersList.push_back(user._Xbox_user_id_as_integer());
@@ -609,30 +668,30 @@ social_graph::apply_users_change_event(
         if (isFreshEvent)
         {
             setup_device_and_presence_subscriptions(usersList);
-            internal_social_event internalSocialUsersAddedEvent(internal_social_event_type::users_added, utils::std_vector_to_xsapi_vector(usersToAdd));
+            unprocessed_social_event internalSocialUsersAddedEvent(unprocessed_social_event_type::users_added, usersToAdd);
             m_socialEventQueue.push(internalSocialUsersAddedEvent, m_user, social_event_type::users_added_to_social_graph);
         }
     }
 
     if (!usersChanged.empty() && isFreshEvent)
     {
-        internal_social_event internalSocialProfileChangedEvent(internal_social_event_type::profiles_changed, utils::std_vector_to_xsapi_vector(usersChanged));
+        unprocessed_social_event internalSocialProfileChangedEvent(unprocessed_social_event_type::profiles_changed, usersChanged);
         m_socialEventQueue.push(internalSocialProfileChangedEvent, m_user, social_event_type::profiles_changed);
     }
 
-    m_perfTester.stop_timer(_T("apply_users_change_event"));
+    m_perfTester.stop_timer("apply_users_change_event");
 }
 
 void social_graph::apply_device_presence_changed_event(
-    _In_ const internal_social_event& evt,
+    _In_ const unprocessed_social_event& evt,
     _In_ user_buffer* inactiveBuffer,
     _In_ bool isFreshEvent,
     _Inout_ social_event_type& eventType
     )
 {
-    m_perfTester.start_timer(_T("apply_device_presence_changed_event"));
-    auto& devicePresenceChangedArgs = evt.device_presence_args();
-    auto xuid = utils::string_t_to_uint64(devicePresenceChangedArgs.xbox_user_id());
+    m_perfTester.start_timer("apply_device_presence_changed_event");
+    auto devicePresenceChangedArgs = evt.device_presence_args();
+    auto xuid = utils::internal_string_to_uint64(devicePresenceChangedArgs->xbox_user_id());
 
     bool fireCallbackTimer = false;
     auto mapIter = m_userBuffer.inactive_buffer()->socialUserGraph.find(xuid);
@@ -640,23 +699,28 @@ void social_graph::apply_device_presence_changed_event(
     {
         if (mapIter->second.socialUser == nullptr)
         {
-            LOG_ERROR("social graph: social user null in apply_device_presence_changed_event");
+            LOG_ERROR_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                "social graph: social user null in apply_device_presence_changed_event"
+            );
             return;
         }
         auto& userPresenceRecord = mapIter->second.socialUser->presence_record();
         auto deviceRecordSize = userPresenceRecord.presence_title_records().size();
-        fireCallbackTimer = deviceRecordSize > 1 || devicePresenceChangedArgs.is_user_logged_on_device();
+        fireCallbackTimer = deviceRecordSize > 1 || devicePresenceChangedArgs->is_user_logged_on_device();
     }
     else
     {
-        LOG_ERROR("device presence record received for user not in graph");
+        LOG_ERROR_IF(
+            social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+            "device presence record received for user not in graph"
+        );
         return;
     }
 
     if (fireCallbackTimer && isFreshEvent)
     {
-        std::vector<string_t> entryVec(1);
-        entryVec[0] = devicePresenceChangedArgs.xbox_user_id();
+        xsapi_internal_vector<xsapi_internal_string> entryVec(1, devicePresenceChangedArgs->xbox_user_id());
         m_presenceRefreshTimer->fire(entryVec);
     }
     else if (!fireCallbackTimer)
@@ -664,35 +728,41 @@ void social_graph::apply_device_presence_changed_event(
         auto xuidIter = inactiveBuffer->socialUserGraph.find(xuid);
         if (xuidIter == inactiveBuffer->socialUserGraph.end() || (xuidIter != inactiveBuffer->socialUserGraph.end() && xuidIter->second.socialUser == nullptr))
         {
-            LOG_ERROR("social graph: social user null in inactiveBuffer");
+            LOG_ERROR_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                "social graph: social user null in inactiveBuffer"
+            );
             return;
         }
         auto& userPresenceRecord = xuidIter->second.socialUser->m_presenceRecord;
         userPresenceRecord._Update_device(
-            devicePresenceChangedArgs.device_type(),
-            devicePresenceChangedArgs.is_user_logged_on_device()
+            devicePresenceChangedArgs->device_type(),
+            devicePresenceChangedArgs->is_user_logged_on_device()
         );
 
         eventType = social_event_type::presence_changed;
     }
-    m_perfTester.stop_timer(_T("apply_device_presence_changed_event"));
+    m_perfTester.stop_timer("apply_device_presence_changed_event");
 }
 
 void social_graph::apply_presence_changed_event(
-    _In_ const internal_social_event& evt,
+    _In_ const unprocessed_social_event& evt,
     _In_ user_buffer* inactiveBuffer,
     _In_ bool isFreshEvent
     )
 {
-    m_perfTester.start_timer(_T("apply_presence_changed_event"));
-    xsapi_internal_vector(uint64_t) userAddedVec;
+    m_perfTester.start_timer("apply_presence_changed_event");
+    xsapi_internal_vector<uint64_t> userAddedVec;
     auto& presenceRecords = evt.presence_records();
     for (auto& presenceRecord : presenceRecords)
     {
         uint64_t index = presenceRecord._Xbox_user_id();
         if (index == 0)
         {
-            LOG_ERROR("social_graph: Invalid user in apply_presence_changed_event");
+            LOG_ERROR_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                "social_graph: Invalid user in apply_presence_changed_event"
+            );
             continue;
         }
 
@@ -702,7 +772,10 @@ void social_graph::apply_presence_changed_event(
             auto socialUser = userPresenceRecordIter->second.socialUser;
             if (socialUser == nullptr)
             {
-                LOG_ERROR("social_graph: User not found in updating presence");
+                LOG_ERROR_IF(
+                    social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                    "social_graph: User not found in updating presence"
+                );
                 continue;
             }
             auto userPresenceRecord = socialUser->presence_record();
@@ -711,7 +784,10 @@ void social_graph::apply_presence_changed_event(
                 auto socialUserGraphUser = inactiveBuffer->socialUserGraph.at(presenceRecord._Xbox_user_id()).socialUser;
                 if (socialUserGraphUser == nullptr)
                 {
-                    LOG_ERROR("social_graph: User not found in social user graph");
+                    LOG_ERROR_IF(
+                        social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                        "social_graph: User not found in social user graph"
+                    );
                     continue;
                 }
                 socialUserGraphUser->_Set_presence_record(presenceRecord);
@@ -722,11 +798,11 @@ void social_graph::apply_presence_changed_event(
 
     if (isFreshEvent && !userAddedVec.empty())
     {
-        internal_social_event internalPresenceChangedEvent(internal_social_event_type::presence_changed, userAddedVec);
+        unprocessed_social_event internalPresenceChangedEvent(unprocessed_social_event_type::presence_changed, userAddedVec);
         m_socialEventQueue.push(internalPresenceChangedEvent, m_user, social_event_type::presence_changed);
     }
 
-    m_perfTester.stop_timer(_T("apply_presence_changed_event"));
+    m_perfTester.stop_timer("apply_presence_changed_event");
 }
 
 void
@@ -744,8 +820,8 @@ social_graph::setup_rta()
 
     setup_rta_subscriptions();
 
-    m_devicePresenceContext = m_xboxLiveContextImpl->presence_service().add_device_presence_changed_handler(
-        [thisWeakPtr](device_presence_change_event_args eventArgs)
+    m_devicePresenceContext = m_xboxLiveContextImpl->presence_service()->add_device_presence_changed_handler(
+        [thisWeakPtr](std::shared_ptr<device_presence_change_event_args_internal> eventArgs)
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
         if (pThis)
@@ -756,8 +832,8 @@ social_graph::setup_rta()
         }
     });
 
-    m_titlePresenceContext = m_xboxLiveContextImpl->presence_service().add_title_presence_changed_handler(
-        [thisWeakPtr](title_presence_change_event_args eventArgs)
+    m_titlePresenceContext = m_xboxLiveContextImpl->presence_service()->add_title_presence_changed_handler(
+        [thisWeakPtr](std::shared_ptr<title_presence_change_event_args_internal> eventArgs)
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
         if (pThis)
@@ -768,8 +844,8 @@ social_graph::setup_rta()
         }
     });
 
-    m_socialRelationshipContext = m_xboxLiveContextImpl->social_service().add_social_relationship_changed_handler(
-        [thisWeakPtr](social_relationship_change_event_args eventArgs)
+    m_socialRelationshipContext = m_xboxLiveContextImpl->social_service_impl()->add_social_relationship_changed_handler(
+        [thisWeakPtr](std::shared_ptr<social_relationship_change_event_args_internal> eventArgs)
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
         if (pThis)
@@ -788,15 +864,16 @@ social_graph::setup_rta_subscriptions(
 {
     std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
     std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
-    m_perfTester.start_timer(_T("setup_rta_subscriptions"));
+    m_perfTester.start_timer("setup_rta_subscriptions");
     m_xboxLiveContextImpl->real_time_activity_service()->activate();
-    auto socialRelationshipChangeResult = m_xboxLiveContextImpl->social_service().subscribe_to_social_relationship_change(
+    auto socialRelationshipChangeResult = m_xboxLiveContextImpl->social_service_impl()->subscribe_to_social_relationship_change(
         m_xboxLiveContextImpl->xbox_live_user_id()
         );
 
     if (socialRelationshipChangeResult.err())
     {
-        LOGS_ERROR << "Social relationship change error " << socialRelationshipChangeResult.err().message() << " message: " << socialRelationshipChangeResult.err_message();
+        LOGS_ERROR_IF(social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error)
+            << "Social relationship change error " << socialRelationshipChangeResult.err().message() << " message: " << socialRelationshipChangeResult.err_message();
     }
     else
     {
@@ -807,16 +884,22 @@ social_graph::setup_rta_subscriptions(
     {
         if (m_userBuffer.inactive_buffer() == nullptr)
         {
-            LOG_ERROR("Failed to reinitialize rta subs");
+            LOG_ERROR_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                "Failed to reinitialize rta subs"
+            );
             return;
         }
-        std::vector<uint64_t> users;
+        xsapi_internal_vector<uint64_t> users;
         for (auto& userPair : m_userBuffer.inactive_buffer()->socialUserGraph)
         {
             auto user = userPair.second.socialUser;
             if (user == nullptr)
             {
-                LOG_ERROR("social_graph: setup_rta_subscriptions get users");
+                LOG_ERROR_IF(
+                    social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                    "social_graph: setup_rta_subscriptions get users"
+                );
                 continue;
             }
 
@@ -857,88 +940,134 @@ social_graph::setup_rta_subscriptions(
         }
     });
 
-    m_perfTester.stop_timer(_T("setup_rta_subscriptions"));
+    m_perfTester.stop_timer("setup_rta_subscriptions");
 }
 
 void
 social_graph::setup_device_and_presence_subscriptions_helper(
-    _In_ const std::vector<uint64_t>& users
+    _In_ const xsapi_internal_vector<uint64_t>& users
     )
 {
     for (auto xuid : users)
     {
-        stringstream_t str;
+        xsapi_internal_stringstream str;
         str << xuid;
         auto xuidStr = str.str();
 
-        auto devicePresenceSubResult = m_xboxLiveContextImpl->presence_service().subscribe_to_device_presence_change(xuidStr);
-        auto titlePresenceSubResult = m_xboxLiveContextImpl->presence_service().subscribe_to_title_presence_change(
+        auto devicePresenceSubResult = m_xboxLiveContextImpl->presence_service()->subscribe_to_device_presence_change(xuidStr);
+        auto titlePresenceSubResult = m_xboxLiveContextImpl->presence_service()->subscribe_to_title_presence_change(
             xuidStr,
             m_xboxLiveContextImpl->application_config()->title_id()
             );
 
         if (devicePresenceSubResult.err() || titlePresenceSubResult.err())
         {
-            LOG_ERROR("presence subscription failed in social manager");
+            LOG_ERROR_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                "presence subscription failed in social manager"
+            );
         }
 
 
         std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
         std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
 
-        m_perfTester.start_timer(_T("setup_device_and_presence_subscriptions"));
+        m_perfTester.start_timer("setup_device_and_presence_subscriptions");
         m_socialUserSubscriptions[xuid].devicePresenceChangeSubscription = devicePresenceSubResult.payload();
         m_socialUserSubscriptions[xuid].titlePresenceChangeSubscription = titlePresenceSubResult.payload();
-        m_perfTester.stop_timer(_T("setup_device_and_presence_subscriptions"));
+        m_perfTester.stop_timer("setup_device_and_presence_subscriptions");
     }
 }
 
+struct social_graph_context
+{
+    social_graph_context(xsapi_internal_vector<uint64_t> _users, std::weak_ptr<social_graph> _pThis)
+        : users(std::move(_users)),
+        pThis(std::move(_pThis))
+    {
+    }
+    xsapi_internal_vector<uint64_t> users;
+    std::weak_ptr<social_graph> pThis;
+};
+
 void
 social_graph::setup_device_and_presence_subscriptions(
-    _In_ const std::vector<uint64_t>& users
-    )
+    _In_ const xsapi_internal_vector<uint64_t>& users
+)
 {
-    std::weak_ptr<social_graph> thisWeak = shared_from_this();
-    pplx::create_task([users, thisWeak]()
+    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    async->queue = m_backgroundAsyncQueue;
+    async->callback = [](AsyncBlock* asyncBlock)
     {
-        std::shared_ptr<social_graph> pThis(thisWeak.lock());
-        if (pThis == nullptr)
-        {
-            return;
-        }
+        xsapi_memory::mem_free(asyncBlock);
+    };
 
-        pThis->setup_device_and_presence_subscriptions_helper(users);
+    auto context = utils::store_shared_ptr(xsapi_allocate_shared<social_graph_context>(users, shared_from_this()));
+    BeginAsync(async, context, nullptr, __FUNCTION__,
+        [](AsyncOp op, const AsyncProviderData* data)
+    {   
+        if (op == AsyncOp_DoWork)
+        {
+            auto context = utils::get_shared_ptr<social_graph_context>(data->context);
+            std::shared_ptr<social_graph> pThis(context->pThis.lock());
+
+            if (pThis != nullptr)
+            {
+                pThis->setup_device_and_presence_subscriptions_helper(context->users);
+            }
+        }
+        return S_OK;
     });
+    ScheduleAsync(async, 0);
 }
 
 void
 social_graph::unsubscribe_users(
-    _In_ const std::vector<uint64_t>& users
+    _In_ const xsapi_internal_vector<uint64_t>& users
     )
 {
-    std::weak_ptr<social_graph> thisWeakPtr;
-    pplx::create_task([thisWeakPtr, users]()
+    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    async->queue = m_backgroundAsyncQueue;
+    async->callback = [](AsyncBlock* asyncBlock)
     {
-        std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
-        if (pThis == nullptr)
+        xsapi_memory::mem_free(asyncBlock);
+    };
+
+    auto context = utils::store_shared_ptr(xsapi_allocate_shared<social_graph_context>(users, shared_from_this()));
+
+    BeginAsync(async, context, nullptr, __FUNCTION__,
+        [](AsyncOp op, const AsyncProviderData* data)
+    {
+        if (op == AsyncOp_DoWork)
         {
-            return;
+            auto context = utils::get_shared_ptr<social_graph_context>(data->context);
+
+            std::shared_ptr<social_graph> pThis(context->pThis.lock());
+            if (pThis != nullptr)
+            {
+                for (auto& user : context->users)
+                {
+                    std::lock_guard<std::recursive_mutex> lock(pThis->m_socialGraphMutex);
+                    std::lock_guard<std::recursive_mutex> priorityLock(pThis->m_socialGraphPriorityMutex);
+                    pThis->m_perfTester.start_timer("unsubscribe_users");
+                    auto subscriptions = pThis->m_socialUserSubscriptions[user];
+                    pThis->m_xboxLiveContextImpl->presence_service()->unsubscribe_from_device_presence_change(subscriptions.devicePresenceChangeSubscription);
+                    pThis->m_xboxLiveContextImpl->presence_service()->unsubscribe_from_title_presence_change(subscriptions.titlePresenceChangeSubscription);
+                    pThis->m_socialUserSubscriptions.erase(user);
+                    pThis->m_perfTester.stop_timer("unsubscribe_users");
+                }
+            }
+            CompleteAsync(data->async, S_OK, 0);
+
+            // Have to return E_PENDING from AsyncOp_DoWork
+            return E_PENDING;
         }
-        for (auto& user : users)
-        {
-            std::lock_guard<std::recursive_mutex> lock(pThis->m_socialGraphMutex);
-            std::lock_guard<std::recursive_mutex> priorityLock(pThis->m_socialGraphPriorityMutex);
-            pThis->m_perfTester.start_timer(_T("unsubscribe_users"));
-            auto subscriptions = pThis->m_socialUserSubscriptions[user];
-            pThis->m_xboxLiveContextImpl->presence_service().unsubscribe_from_device_presence_change(subscriptions.devicePresenceChangeSubscription);
-            pThis->m_xboxLiveContextImpl->presence_service().unsubscribe_from_title_presence_change(subscriptions.titlePresenceChangeSubscription);
-            pThis->m_socialUserSubscriptions.erase(user);
-            pThis->m_perfTester.stop_timer(_T("unsubscribe_users"));
-        }
+        return S_OK;
     });
+    ScheduleAsync(async, 0);
 }
 
-void social_graph::refresh_graph_helper(std::vector<uint64_t>& userRefreshList)
+void social_graph::refresh_graph_helper(xsapi_internal_vector<uint64_t>& userRefreshList)
 {
     auto inactiveBuffer = m_userBuffer.inactive_buffer();
     if (inactiveBuffer == nullptr)
@@ -950,7 +1079,10 @@ void social_graph::refresh_graph_helper(std::vector<uint64_t>& userRefreshList)
         auto socialUser = user.second.socialUser;
         if (socialUser == nullptr)
         {
-            LOG_ERROR("social graph: no user found in refresh_graph_helper");
+            LOG_ERROR_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                "social graph: no user found in refresh_graph_helper"
+            );
             continue;
         }
         if (!socialUser->is_followed_by_caller())
@@ -963,32 +1095,32 @@ void social_graph::refresh_graph_helper(std::vector<uint64_t>& userRefreshList)
 void
 social_graph::refresh_graph()
 {
-    std::vector<uint64_t> userRefreshList;
+    xsapi_internal_vector<uint64_t> userRefreshList;
     {
         std::lock_guard<std::recursive_mutex> socialGraphStateLock(m_socialGraphStateMutex);
         {
             std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
             std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
 
-            m_perfTester.start_timer(_T("refresh_graph"));
+            m_perfTester.start_timer("refresh_graph");
             set_state(social_graph_state::refresh);
-            m_perfTester.stop_timer(_T("refresh_graph"));
+            m_perfTester.stop_timer("refresh_graph");
         }
         refresh_graph_helper(userRefreshList);
         {
             std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
             std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
 
-            m_perfTester.start_timer(_T("refresh_graph stop"));
+            m_perfTester.start_timer("refresh_graph stop");
             set_state(social_graph_state::normal);
-            m_perfTester.stop_timer(_T("rrefresh_graph stop"));
+            m_perfTester.stop_timer("rrefresh_graph stop");
         }
     }
 
-    std::vector<string_t> userRefreshListStr;
+    xsapi_internal_vector<xsapi_internal_string> userRefreshListStr;
     for (auto& user : userRefreshList)
     {
-        stringstream_t str;
+        xsapi_internal_stringstream str;
         str << user;
         userRefreshListStr.push_back(str.str());
     }
@@ -998,13 +1130,13 @@ social_graph::refresh_graph()
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
     m_peoplehubService.get_social_graph(
 #if TV_API || UNIT_TEST_SERVICES || !XSAPI_CPP
-        m_xboxLiveContextImpl->user()->XboxUserId->Data(),
+        utils::internal_string_from_string_t(m_xboxLiveContextImpl->user()->XboxUserId->Data()),
 #else
-        m_xboxLiveContextImpl->user()->xbox_user_id(),
+        utils::internal_string_from_string_t(m_xboxLiveContextImpl->user()->xbox_user_id()),
 #endif
-        m_detailLevel
-    )
-    .then([thisWeakPtr](xbox_live_result<std::vector<xbox_social_user>> socialListResult)
+        m_detailLevel,
+        m_backgroundAsyncQueue,
+        [thisWeakPtr](xbox_live_result<xsapi_internal_vector<xbox_social_user>> socialListResult)
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
         if (pThis)
@@ -1012,7 +1144,7 @@ social_graph::refresh_graph()
             if (!socialListResult.err())
             {
                 auto& socialList = socialListResult.payload();
-                xsapi_internal_unordered_map(uint64_t, xbox_social_user) socialMap;
+                xsapi_internal_unordered_map<uint64_t, xbox_social_user> socialMap;
                 for (auto& user : socialList)
                 {
                     socialMap[user._Xbox_user_id_as_integer()] = user;
@@ -1022,7 +1154,8 @@ social_graph::refresh_graph()
             }
             else
             {
-                LOGS_ERROR << "social_graph: refresh_graph call failed with error: " << socialListResult.err() << " " << socialListResult.err_message();
+                LOGS_ERROR_IF(social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error)
+                    << "social_graph: refresh_graph call failed with error: " << socialListResult.err() << " " << socialListResult.err_message();
             }
         }
     });
@@ -1030,32 +1163,35 @@ social_graph::refresh_graph()
 
 void
 social_graph::perform_diff(
-    _In_ const xsapi_internal_unordered_map(uint64_t, xbox_social_user)& xboxSocialUsers
+    _In_ const xsapi_internal_unordered_map<uint64_t, xbox_social_user>& xboxSocialUsers
     )
 {
     std::lock_guard<std::recursive_mutex> socialGraphStateLock(m_socialGraphStateMutex);
     {
         std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
         std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
-        m_perfTester.start_timer(_T("set_state"));
+        m_perfTester.start_timer("set_state");
         if (m_userBuffer.inactive_buffer() == nullptr)
         {
-            LOG_ERROR("Diff cannot happening with null buffer");
+            LOG_ERROR_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                "Diff cannot happening with null buffer"
+            );
             return;
         }
         set_state(social_graph_state::diff);
-        m_perfTester.stop_timer(_T("set_state"));
+        m_perfTester.stop_timer("set_state");
     }
 
-    xsapi_internal_vector(xbox_social_user) usersAddedList;
-    xsapi_internal_vector(uint64_t) usersRemovedList;
-    xsapi_internal_vector(social_manager_presence_record) presenceChangeList;
-    xsapi_internal_vector(xbox_social_user) socialRelationshipChangeList;
-    xsapi_internal_vector(xbox_social_user) profileChangeList;
+    xsapi_internal_vector<xbox_social_user> usersAddedList;
+    xsapi_internal_vector<uint64_t> usersRemovedList;
+    xsapi_internal_vector<social_manager_presence_record> presenceChangeList;
+    xsapi_internal_vector<xbox_social_user> socialRelationshipChangeList;
+    xsapi_internal_vector<xbox_social_user> profileChangeList;
 
     for (auto& currentUserPair : xboxSocialUsers)
     {
-        m_perfTester.start_timer(_T("perform_diff: start"));
+        m_perfTester.start_timer("perform_diff: start");
         auto inactiveBufferUserGraph = m_userBuffer.inactive_buffer()->socialUserGraph;
         if (inactiveBufferUserGraph.find(currentUserPair.first) == inactiveBufferUserGraph.end())
         {
@@ -1093,31 +1229,31 @@ social_graph::perform_diff(
 
     if (usersAddedList.size() > 0)
     {
-        m_internalEventQueue.push(internal_social_event_type::users_changed, usersAddedList);
+        m_unprocessedEventQueue.push(unprocessed_social_event_type::users_changed, usersAddedList);
     }
     if (usersRemovedList.size() > 0)
     {
-        m_internalEventQueue.push(internal_social_event_type::users_removed, usersRemovedList);
+        m_unprocessedEventQueue.push(unprocessed_social_event_type::users_removed, usersRemovedList);
     }
     if (presenceChangeList.size() > 0)
     {
-        m_internalEventQueue.push(internal_social_event_type::presence_changed, presenceChangeList);
+        m_unprocessedEventQueue.push(unprocessed_social_event_type::presence_changed, presenceChangeList);
     }
     if (profileChangeList.size() > 0)
     {
-        m_internalEventQueue.push(internal_social_event_type::profiles_changed, profileChangeList);
+        m_unprocessedEventQueue.push(unprocessed_social_event_type::profiles_changed, profileChangeList);
     }
     if (socialRelationshipChangeList.size() > 0)
     {
-        m_internalEventQueue.push(internal_social_event_type::social_relationships_changed, socialRelationshipChangeList);
+        m_unprocessedEventQueue.push(unprocessed_social_event_type::social_relationships_changed, socialRelationshipChangeList);
     }
 
     {
         std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
         std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
-        m_perfTester.start_timer(_T("set_state normal"));
+        m_perfTester.start_timer("set_state normal");
         set_state(social_graph_state::normal);
-        m_perfTester.stop_timer(_T("set_state normal"));
+        m_perfTester.stop_timer("set_state normal");
     }
 }
 
@@ -1129,61 +1265,63 @@ social_graph::title_id()
 
 change_struct
 social_graph::do_work(
-    _Inout_ std::vector<social_event>& socialEvents
+    _Inout_ xsapi_internal_vector<std::shared_ptr<social_event_internal>>& socialEvents
     )
 {
-    m_perfTester.start_timer(_T("do_work"));
-    m_perfTester.start_timer(_T("do_work locktime"));
+    m_perfTester.start_timer("do_work");
+    m_perfTester.start_timer("do_work locktime");
     std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
-    m_perfTester.stop_timer(_T("do_work locktime"));
+    m_perfTester.stop_timer("do_work locktime");
     m_numEventsThisFrame = 0;
     change_struct changeStruct;
     changeStruct.socialUsers = nullptr;
-    m_perfTester.start_timer(_T("social_graph_state_check"));
+    m_perfTester.start_timer("social_graph_state_check");
     if (m_socialGraphState == social_graph_state::normal && m_userBuffer.inactive_buffer() != nullptr && m_userBuffer.inactive_buffer()->socialUserEventQueue.empty())
     {
-        m_perfTester.start_timer(_T("user buffer swap"));
+        m_perfTester.start_timer("user buffer swap");
         m_userBuffer.swap();
-        m_perfTester.stop_timer(_T("user buffer swap"));
+        m_perfTester.stop_timer("user buffer swap");
     }
-    m_perfTester.stop_timer(_T("social_graph_state_check"));
-    m_perfTester.start_timer(_T("assign active buffer"));
+    m_perfTester.stop_timer("social_graph_state_check");
+    m_perfTester.start_timer("assign active buffer");
     if (m_userBuffer.active_buffer() != nullptr)
     {
         changeStruct.socialUsers = &m_userBuffer.active_buffer()->socialUserGraph;
     }
-    m_perfTester.stop_timer(_T("assign active buffer"));
-    m_perfTester.start_timer(_T("!m_socialEventQueue.empty()"));
+    m_perfTester.stop_timer("assign active buffer");
+    m_perfTester.start_timer("!m_socialEventQueue.empty()");
     if (!m_socialEventQueue.empty() && m_socialGraphState == social_graph_state::normal)
     {
-        m_perfTester.start_timer(_T("do_work: social event push_back"));
+        m_perfTester.start_timer("do_work: social event push_back");
         socialEvents.reserve(socialEvents.size() + m_socialEventQueue.social_event_list().size());
         for (auto& evt : m_socialEventQueue.social_event_list())
         {
             socialEvents.push_back(evt);
         }
         m_socialEventQueue.clear();
-        m_perfTester.stop_timer(_T("do_work: social event push_back"));
+        m_perfTester.stop_timer("do_work: social event push_back");
     }
-    m_perfTester.stop_timer(_T("!m_socialEventQueue.empty()"));
-    m_perfTester.stop_timer(_T("do_work"));
+    m_perfTester.stop_timer("!m_socialEventQueue.empty()");
+    m_perfTester.stop_timer("do_work");
     m_perfTester.clear();
     return changeStruct;
 }
 
-pplx::task<xbox_live_result<std::vector<xbox_social_user>>>
+void
 social_graph::social_graph_timer_callback(
-    _In_ const std::vector<string_t>& users,
-    _In_ const call_buffer_timer_completion_context& completionContext
+    _In_ const xsapi_internal_vector<xsapi_internal_string>& users,
+    _In_ std::shared_ptr<call_buffer_timer_completion_context> completionContext
     )
 {
+    auto stdUsers = utils::std_string_vector_from_internal_string_vector(users);
+
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
-    return m_peoplehubService.get_social_graph(
+    m_peoplehubService.get_social_graph(
         m_xboxLiveContextImpl->xbox_live_user_id(),
         m_detailLevel,
-        users
-        )
-    .then([thisWeakPtr, users, completionContext](xbox_live_result<std::vector<xbox_social_user>> socialListResult)
+        users,
+        m_backgroundAsyncQueue,
+    [thisWeakPtr, users, completionContext](xbox_live_result<xsapi_internal_vector<xbox_social_user>> socialListResult)
     {
         try
         {
@@ -1192,129 +1330,147 @@ social_graph::social_graph_timer_callback(
             {
                 if (!socialListResult.err())
                 {
-                    pThis->m_internalEventQueue.push(internal_social_event_type::users_changed, utils::std_vector_to_xsapi_vector(socialListResult.payload()), completionContext);
+                    pThis->m_unprocessedEventQueue.push(unprocessed_social_event_type::users_changed, socialListResult.payload(), completionContext);
                 }
                 else
                 {
-                    xsapi_internal_vector(xsapi_internal_string) xsapiStrVec;
+                    xsapi_internal_vector<xsapi_internal_string> xsapiStrVec;
                     for (auto user : users)
                     {
                         xsapiStrVec.push_back(user.c_str());
                     }
-                    internal_social_event evt(internal_social_event_type::users_changed, xbox_live_result<void>(socialListResult.err(), socialListResult.err_message()), xsapiStrVec);
+                    unprocessed_social_event evt(unprocessed_social_event_type::users_changed, xbox_live_result<void>(socialListResult.err(), socialListResult.err_message()), xsapiStrVec);
                     evt.set_completion_context(completionContext);
-                    pThis->m_internalEventQueue.push(evt);
+                    pThis->m_unprocessedEventQueue.push(evt);
                 }
             }
         }
         catch (const std::exception& e)
         {
-            LOGS_DEBUG << "Exception in social_graph_timer_callback " << e.what();
+            LOGS_DEBUG_IF(social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose) 
+                << "Exception in social_graph_timer_callback " << e.what();
         }
         catch (...)
         {
-            LOG_DEBUG("Unknown std::exception in initialization");
+            LOG_DEBUG_IF(social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose, "Unknown std::exception in initialization");
         }
-
-        return socialListResult;
     });
 }
 
-void social_graph::social_graph_refresh_callback()
+void social_graph::schedule_social_graph_refresh()
 {
+#if UWP_API || TV_API || UNIT_TEST_SERVICES
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
 
-#if UWP_API || TV_API || UNIT_TEST_SERVICES
-    auto task = create_delayed_task(
-        REFRESH_TIME_MIN,
-        [thisWeakPtr]()
+    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    async->queue = m_backgroundAsyncQueue;
+    async->context = utils::store_weak_ptr(thisWeakPtr);
+    async->callback = [](AsyncBlock* async) 
     {
-        try
+        auto pThis = utils::get_shared_ptr<social_graph>(async->context);
+        if (pThis)
         {
-            std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
-            if (pThis)
+            pThis->schedule_social_graph_refresh();
+        }
+        xsapi_memory::mem_free(async);
+    };
+    BeginAsync(async, utils::store_weak_ptr(thisWeakPtr), nullptr, __FUNCTION__,
+        [](AsyncOp op, const AsyncProviderData* data)
+    {
+        if (op == AsyncOp_DoWork)
+        {
+            try
             {
-                pThis->social_graph_refresh_callback();
+                auto pThis = utils::get_shared_ptr<social_graph>(data->context);
+                if (pThis)
+                {
+                    pThis->refresh_graph();
+                }
             }
+            catch (const std::exception& e)
+            {
+                LOGS_DEBUG_IF(social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose)
+                    << "Exception in social_graph_refresh_callback " << e.what();
+            }
+            catch (...)
+            {
+                LOG_DEBUG_IF(
+                    social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose,
+                    "Unknown std::exception in initialization"
+                );
+            }
+            CompleteAsync(data->async, S_OK, 0);
+            return E_PENDING;
         }
-        catch (const std::exception& e)
-        {
-            LOGS_DEBUG << "Exception in social_graph_refresh_callback " << e.what();
-        }
-        catch (...)
-        {
-            LOG_DEBUG("Unknown std::exception in initialization");
-        }
+        return S_OK;
     });
+    ScheduleAsync(async, (uint32_t)std::chrono::duration_cast<std::chrono::milliseconds>(REFRESH_TIME_MIN).count());
 #endif
-
-    refresh_graph();
 }
 
 void
 social_graph::handle_device_presence_change(
-    _In_ xbox::services::presence::device_presence_change_event_args devicePresenceChanged
+    _In_ std::shared_ptr<device_presence_change_event_args_internal> devicePresenceChanged
     )
 {
-    uint64_t id = utils::string_t_to_uint64(devicePresenceChanged.xbox_user_id().c_str());
+    uint64_t id = utils::internal_string_to_uint64(devicePresenceChanged->xbox_user_id());
     if (id == 0)
     {
-        LOG_ERROR("Invalid user");
+        LOG_ERROR_IF(
+            social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+            "Invalid user"
+        );
         return;
     }
 
-    m_internalEventQueue.push(internal_social_event(internal_social_event_type::device_presence_changed, devicePresenceChanged));
+    m_unprocessedEventQueue.push(unprocessed_social_event(unprocessed_social_event_type::device_presence_changed, devicePresenceChanged));
 }
 
 void
 social_graph::handle_title_presence_change(
-    _In_ xbox::services::presence::title_presence_change_event_args titlePresenceChanged
+    _In_ std::shared_ptr<xbox::services::presence::title_presence_change_event_args_internal> titlePresenceChanged
     )
 {
-    if (titlePresenceChanged.title_state() == title_presence_state::started)
+    if (titlePresenceChanged->title_state() == title_presence_state::started)
     {
-        std::vector<string_t> presenceVec(1);
-        presenceVec[0] = titlePresenceChanged.xbox_user_id();
+        xsapi_internal_vector<xsapi_internal_string> presenceVec(1, titlePresenceChanged->xbox_user_id());
         m_presenceRefreshTimer->fire(presenceVec);
     }
     else
     {
-        internal_social_event titlePresenceChangeEvent(internal_social_event_type::title_presence_changed, titlePresenceChanged);
-        m_internalEventQueue.push(titlePresenceChangeEvent);
+        unprocessed_social_event titlePresenceChangeEvent(unprocessed_social_event_type::title_presence_changed, titlePresenceChanged);
+        m_unprocessedEventQueue.push(titlePresenceChangeEvent);
     }
 }
 
 void
 social_graph::handle_social_relationship_change(
-    _In_ xbox::services::social::social_relationship_change_event_args socialRelationshipChanged
+    _In_ std::shared_ptr<xbox::services::social::social_relationship_change_event_args_internal> socialRelationshipChanged
     )
 {
-    auto socialNotification = socialRelationshipChanged.social_notification();
+    auto socialNotification = socialRelationshipChanged->social_notification();
     if (socialNotification == social_notification_type::added)
     {
-        xsapi_internal_vector(xsapi_internal_string) xsapiStrVec;
-        for (auto user : socialRelationshipChanged.xbox_user_ids())
-        {
-            xsapiStrVec.push_back(user.c_str());
-        }
-
-        m_internalEventQueue.push(internal_social_event_type::users_added, xsapiStrVec);
+        m_unprocessedEventQueue.push(unprocessed_social_event_type::users_added, socialRelationshipChanged->xbox_user_ids());
     }
     else if (socialNotification == social_notification_type::changed)
     {
-        m_socialGraphRefreshTimer->fire(socialRelationshipChanged.xbox_user_ids());
+        m_socialGraphRefreshTimer->fire(socialRelationshipChanged->xbox_user_ids());
     }
-    else if (socialRelationshipChanged.social_notification() == social_notification_type::removed)
+    else if (socialNotification == social_notification_type::removed)
     {
-        std::vector<uint64_t> xboxUserIdsAsInt;
-        xboxUserIdsAsInt.reserve(socialRelationshipChanged.xbox_user_ids().size());
+        xsapi_internal_vector<uint64_t> xboxUserIdsAsInt;
+        xboxUserIdsAsInt.reserve(socialRelationshipChanged->xbox_user_ids().size());
 
-        for (auto& xuid : socialRelationshipChanged.xbox_user_ids())
+        for (auto& xuid : socialRelationshipChanged->xbox_user_ids())
         {
-            uint64_t id = utils::string_t_to_uint64(xuid.c_str());
+            uint64_t id = utils::internal_string_to_uint64(xuid);
             if (id == 0)
             {
-                LOG_ERROR("Invalid user");
+                LOG_ERROR_IF(
+                    social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                    "Invalid user"
+                );
                 continue;
             }
             xboxUserIdsAsInt.push_back(id);
@@ -1329,7 +1485,8 @@ social_graph::handle_rta_subscription_error(
     _In_ xbox::services::real_time_activity::real_time_activity_subscription_error_event_args& rtaErrorEventArgs
     )
 {
-    LOGS_ERROR << "RTA subscription error occurred in social manager: " << rtaErrorEventArgs.err().message() << " " << rtaErrorEventArgs.err_message();
+    LOGS_ERROR_IF(social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error)
+        << "RTA subscription error occurred in social manager: " << rtaErrorEventArgs.err().message() << " " << rtaErrorEventArgs.err_message();
 }
 
 void
@@ -1341,18 +1498,18 @@ social_graph::handle_rta_connection_state_change(
     {
         std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
         std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
-        m_perfTester.start_timer(_T("handle_rta_connection_state_change:disconnected_check"));
+        m_perfTester.start_timer("handle_rta_connection_state_change:disconnected_check");
         wasDisconnected = m_wasDisconnected;
-        m_perfTester.stop_timer(_T("handle_rta_connection_state_change:disconnected_check"));
+        m_perfTester.stop_timer("handle_rta_connection_state_change:disconnected_check");
     }
     if(rtaState == real_time_activity_connection_state::disconnected)
     {
         {
             std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
             std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex); 
-            m_perfTester.start_timer(_T("handle_rta_connection_state_change: disconnected received"));
+            m_perfTester.start_timer("handle_rta_connection_state_change: disconnected received");
             m_wasDisconnected = true;
-            m_perfTester.stop_timer(_T("handle_rta_connection_state_change: disconnected received"));
+            m_perfTester.stop_timer("handle_rta_connection_state_change: disconnected received");
         }
     }
     else if (wasDisconnected)
@@ -1360,9 +1517,9 @@ social_graph::handle_rta_connection_state_change(
         {
             std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
             std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
-            m_perfTester.start_timer(_T("handle_rta_connection_state_change: disconnected check false"));
+            m_perfTester.start_timer("handle_rta_connection_state_change: disconnected check false");
             m_wasDisconnected = false;
-            m_perfTester.stop_timer(_T("handle_rta_connection_state_change: disconnected check false"));
+            m_perfTester.stop_timer("handle_rta_connection_state_change: disconnected check false");
         }
         setup_rta_subscriptions(true);
     }
@@ -1383,7 +1540,7 @@ social_graph::_Trigger_rta_connection_state_change_event(
 
 void
 social_graph::presence_timer_callback(
-    _In_ const std::vector<string_t>& users
+    _In_ const xsapi_internal_vector<xsapi_internal_string>& users
     )
 {
     if (users.empty())
@@ -1392,15 +1549,15 @@ social_graph::presence_timer_callback(
     }
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
 
-    m_xboxLiveContextImpl->presence_service().get_presence_for_multiple_users(
+    m_xboxLiveContextImpl->presence_service()->get_presence_for_multiple_users(
         users,
-        std::vector<presence_device_type>(),
-        std::vector<uint32_t>(),
+        xsapi_internal_vector<presence_device_type>(),
+        xsapi_internal_vector<uint32_t>(),
         presence_detail_level::all,
         false,
-        false
-        )
-    .then([thisWeakPtr](xbox_live_result<std::vector<presence_record>> presenceRecordsResult)
+        false,
+        m_backgroundAsyncQueue,
+        [thisWeakPtr](xbox_live_result<xsapi_internal_vector<std::shared_ptr<presence_record_internal>>> presenceRecordsResult)
     {
         std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
         if (pThis != nullptr)
@@ -1411,18 +1568,21 @@ social_graph::presence_timer_callback(
                 {
                     std::lock_guard<std::recursive_mutex> lock(pThis->m_socialGraphMutex);
                     std::lock_guard<std::recursive_mutex> priorityLock(pThis->m_socialGraphPriorityMutex);
-                    pThis->m_perfTester.start_timer(_T("social graph refresh state set"));
+                    pThis->m_perfTester.start_timer("social graph refresh state set");
                     if (pThis->m_userBuffer.inactive_buffer() == nullptr)
                     {
-                        LOG_ERROR("Cannot update presence when user buffer is null");
+                        LOG_ERROR_IF(
+                            social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                            "Cannot update presence when user buffer is null"
+                        );
                         return;
                     }
                     pThis->set_state(social_graph_state::refresh);
-                    pThis->m_perfTester.start_timer(_T("social graph refresh state set"));
+                    pThis->m_perfTester.start_timer("social graph refresh state set");
                 }
 
                 auto presenceRecordReturnVec = presenceRecordsResult.payload();
-                xsapi_internal_vector(social_manager_presence_record) socialManagerPresenceVec;
+                xsapi_internal_vector<social_manager_presence_record> socialManagerPresenceVec;
                 socialManagerPresenceVec.reserve(presenceRecordReturnVec.size());
                 for (auto& presenceRecord : presenceRecordReturnVec)
                 {
@@ -1449,22 +1609,25 @@ social_graph::presence_timer_callback(
                     }
                 }
 
-                pThis->m_internalEventQueue.push(
-                    internal_social_event_type::presence_changed,
+                pThis->m_unprocessedEventQueue.push(
+                    unprocessed_social_event_type::presence_changed,
                     socialManagerPresenceVec
                     );
 
                 {
                     std::lock_guard<std::recursive_mutex> lock(pThis->m_socialGraphMutex);
                     std::lock_guard<std::recursive_mutex> priorityLock(pThis->m_socialGraphPriorityMutex);
-                    pThis->m_perfTester.start_timer(_T("social graph refresh state set normal"));
+                    pThis->m_perfTester.start_timer("social graph refresh state set normal");
                     pThis->set_state(social_graph_state::normal);
-                    pThis->m_perfTester.stop_timer(_T("social graph refresh state set normal"));
+                    pThis->m_perfTester.stop_timer("social graph refresh state set normal");
                 }
             }
             else
             {
-                LOG_ERROR("social_graph: presence record update failed");
+                LOG_ERROR_IF(
+                    social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                    "social_graph: presence record update failed"
+                );
             }
         }
     });
@@ -1475,87 +1638,94 @@ social_graph::are_events_empty()
 {
     std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
     std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
-    m_perfTester.start_timer(_T("are_events_empty"));
+    m_perfTester.start_timer("are_events_empty");
     auto result =  m_userBuffer.user_buffer_a().socialUserEventQueue.empty() && m_userBuffer.user_buffer_b().socialUserEventQueue.empty();
-    m_perfTester.stop_timer(_T("are_events_empty"));
+    m_perfTester.stop_timer("are_events_empty");
     return result;
 }
 
 void
 social_graph::add_users(
-    _In_ const std::vector<string_t>& users,
-    _In_ const pplx::task_completion_event<xbox_live_result<void>>& tce
+    _In_ const xsapi_internal_vector<xsapi_internal_string>& users,
+    _In_ xbox_live_callback<xbox_live_result<void>> callback
     )
 {
-    m_internalEventQueue.push(internal_social_event(internal_social_event_type::users_added, utils::std_vector_string_to_xsapi_vector_internal_string(users), tce));    // this is fine to be n-sized because it will generate 0 events
+    m_unprocessedEventQueue.push(unprocessed_social_event(unprocessed_social_event_type::users_added, users, callback));    // this is fine to be n-sized because it will generate 0 events
 }
 
 void
 social_graph::remove_users(
-    _In_ const std::vector<uint64_t>& users
+    _In_ const xsapi_internal_vector<uint64_t>& users
     )
 {
-    m_internalEventQueue.push(internal_social_event_type::users_removed, utils::std_vector_to_xsapi_vector(users));
+    m_unprocessedEventQueue.push(unprocessed_social_event_type::users_removed, users);
 }
 
 void
-social_graph::presence_refresh_callback()
+social_graph::schedule_presence_refresh()
 {
-    std::vector<string_t> userList;
-    {
-        std::lock_guard<std::recursive_mutex> socialGraphStateLock(m_socialGraphStateMutex);
-
-        if (m_userBuffer.inactive_buffer() != nullptr)
-        {
-            {
-                std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
-                std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
-                m_perfTester.start_timer(_T("presence refresh state set"));
-                set_state(social_graph_state::refresh);
-                m_perfTester.stop_timer(_T("presence refresh state set"));
-            }
-            userList.reserve(m_userBuffer.inactive_buffer()->socialUserGraph.size());
-            for (auto& user : m_userBuffer.inactive_buffer()->socialUserGraph)
-            {
-                if (user.second.socialUser != nullptr)
-                {
-                    userList.push_back(user.second.socialUser->xbox_user_id());
-                }
-            }
-
-            m_presencePollingTimer->fire(userList);
-
-            {
-                std::lock_guard<std::recursive_mutex> lock(m_socialGraphMutex);
-                std::lock_guard<std::recursive_mutex> priorityLock(m_socialGraphPriorityMutex);
-                m_perfTester.start_timer(_T("presence refresh fire"));
-                set_state(social_graph_state::normal);
-                m_perfTester.stop_timer(_T("presence refresh fire"));
-            }
-        }
-    }
-
 #if UWP_API || TV_API || UNIT_TEST_SERVICES
     std::weak_ptr<social_graph> thisWeakPtr = shared_from_this();
-    create_delayed_task(
-        TIME_PER_CALL_SEC,
-        [thisWeakPtr]()
-    {
-        std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
 
-        if (pThis)
+    AsyncBlock* async = new (xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
+    async->queue = m_backgroundAsyncQueue;
+    async->context = utils::store_weak_ptr(thisWeakPtr);
+    async->callback = [](AsyncBlock* async)
+    {
+        auto pThis = utils::get_shared_ptr<social_graph>(async->context);
+        if (pThis && !pThis->m_shouldCancel)
         {
+            pThis->schedule_presence_refresh();
+        }
+        xsapi_memory::mem_free(async);
+    };
+    BeginAsync(async, utils::store_weak_ptr(thisWeakPtr), nullptr, __FUNCTION__,
+        [](AsyncOp op, const AsyncProviderData* data)
+    {
+        if (op == AsyncOp_DoWork)
+        {
+            auto pThis = utils::get_shared_ptr<social_graph>(data->context);
+            if (pThis && !pThis->m_shouldCancel)
             {
-                std::lock_guard<std::recursive_mutex> socialGraphStateLock(pThis->m_socialGraphStateMutex);
-                if (*pThis->m_shouldCancel)
+                xsapi_internal_vector<xsapi_internal_string> userList;
                 {
-                    return;
+                    std::lock_guard<std::recursive_mutex> socialGraphStateLock(pThis->m_socialGraphStateMutex);
+
+                    if (pThis->m_userBuffer.inactive_buffer() != nullptr)
+                    {
+                        {
+                            std::lock_guard<std::recursive_mutex> lock(pThis->m_socialGraphMutex);
+                            std::lock_guard<std::recursive_mutex> priorityLock(pThis->m_socialGraphPriorityMutex);
+                            pThis->m_perfTester.start_timer("presence refresh state set");
+                            pThis->set_state(social_graph_state::refresh);
+                            pThis->m_perfTester.stop_timer("presence refresh state set");
+                        }
+                        userList.reserve(pThis->m_userBuffer.inactive_buffer()->socialUserGraph.size());
+                        for (auto& user : pThis->m_userBuffer.inactive_buffer()->socialUserGraph)
+                        {
+                            if (user.second.socialUser != nullptr)
+                            {
+                                userList.push_back(utils::internal_string_from_string_t(user.second.socialUser->xbox_user_id()));
+                            }
+                        }
+
+                        pThis->m_presencePollingTimer->fire(userList);
+
+                        {
+                            std::lock_guard<std::recursive_mutex> lock(pThis->m_socialGraphMutex);
+                            std::lock_guard<std::recursive_mutex> priorityLock(pThis->m_socialGraphPriorityMutex);
+                            pThis->m_perfTester.start_timer("presence refresh fire");
+                            pThis->set_state(social_graph_state::normal);
+                            pThis->m_perfTester.stop_timer("presence refresh fire");
+                        }
+                    }
                 }
             }
-
-            pThis->presence_refresh_callback();
+            CompleteAsync(data->async, S_OK, 0);
         }
+        return S_OK;
     });
+    ScheduleAsync(async, (uint32_t)std::chrono::duration_cast<std::chrono::milliseconds>(TIME_PER_CALL_SEC).count());
 #endif
 }
 
@@ -1576,14 +1746,14 @@ social_graph::enable_rich_presence_polling(
     {
         {
             std::lock_guard<std::recursive_mutex> socialGraphStateLock(m_socialGraphStateMutex);
-            *m_shouldCancel = false;
+            m_shouldCancel = false;
         }
-        presence_refresh_callback();
+        schedule_presence_refresh();
     }
     else if(!shouldEnablePolling)
     {
         std::lock_guard<std::recursive_mutex> socialGraphStateLock(m_socialGraphStateMutex);
-        *m_shouldCancel = true;
+        m_shouldCancel = true;
     }
 }
 
@@ -1603,7 +1773,7 @@ user_buffers_holder::user_buffers_holder() : m_activeBuffer(nullptr), m_inactive
 
 user_buffers_holder::~user_buffers_holder()
 {
-    LOG_DEBUG("destroying user buffer holder");
+    LOG_DEBUG_IF(social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose, "destroying user buffer holder");
 
     if (m_userBufferA.buffer != nullptr)
     {
@@ -1618,7 +1788,7 @@ user_buffers_holder::~user_buffers_holder()
 
 void
 user_buffers_holder::initialize(
-    _In_ const std::vector<xbox_social_user>& users
+    _In_ const xsapi_internal_vector<xbox_social_user>& users
     )
 {
     initialize_buffer(m_userBufferA, users);
@@ -1641,7 +1811,7 @@ user_buffer& user_buffers_holder::user_buffer_b()
 void
 user_buffers_holder::initialize_buffer(
     _Inout_ user_buffer& userBuffer,
-    _In_ const std::vector<xbox_social_user>& users,
+    _In_ const xsapi_internal_vector<xbox_social_user>& users,
     _In_ size_t freeSpaceRequired
     )
 {
@@ -1652,12 +1822,12 @@ user_buffers_holder::initialize_buffer(
 
 void user_buffers_holder::buffer_init(
     _Inout_ user_buffer& userBuffer,
-    _In_ const std::vector<xbox_social_user>& users,
+    _In_ const xsapi_internal_vector<xbox_social_user>& users,
     _In_ size_t freeSpaceRequired
     )
 {
-    userBuffer.freeData = std::queue<byte*>();
-    size_t allocatedSize;
+    userBuffer.freeData = xsapi_internal_queue<byte*>();
+    size_t allocatedSize = 0;
     auto buffer = buffer_alloc(users.size(), allocatedSize, freeSpaceRequired);
     if (buffer == nullptr)
     {
@@ -1688,12 +1858,13 @@ void user_buffers_holder::buffer_init(
 byte*
 user_buffers_holder::buffer_alloc(
     _In_ size_t numUsers,
-    _Inout_ size_t& allocatedSize,
+    _Out_ size_t& allocatedSize,
     _In_ size_t freeSpaceRequired
     )
 {
     if (numUsers == 0 && freeSpaceRequired == 0)
     {
+        allocatedSize = 0;
         return nullptr;
     }
 
@@ -1712,7 +1883,7 @@ user_buffers_holder::initialize_users_in_map(
     _In_ size_t bufferOffset
     )
 {
-    xsapi_internal_unordered_map(uint64_t, xbox_social_user_context)& socialUserGraph = userBuffer.socialUserGraph;
+    xsapi_internal_unordered_map<uint64_t, xbox_social_user_context>& socialUserGraph = userBuffer.socialUserGraph;
     auto buffer = userBuffer.buffer + bufferOffset;
     for (uint32_t i = 0; i < numUsers; ++i)
     {
@@ -1737,7 +1908,7 @@ user_buffers_holder::initialize_users_in_map(
 
 void
 user_buffers_holder::add_users_to_buffer(
-    _In_ const std::vector<xbox_social_user>& users,
+    _In_ const xsapi_internal_vector<xbox_social_user>& users,
     _Inout_ user_buffer& userBufferInactive,
     _In_ size_t finalSize
     )
@@ -1754,7 +1925,7 @@ user_buffers_holder::add_users_to_buffer(
             }
         }
 
-        std::vector<xbox_social_user> socialVec(size);
+        xsapi_internal_vector<xbox_social_user> socialVec(size);
         if (size > 0)
         {
 #if _WIN32
@@ -1781,7 +1952,7 @@ user_buffers_holder::add_users_to_buffer(
 
 void
 user_buffers_holder::remove_users_from_buffer(
-    _In_ const std::vector<uint64_t>& users,
+    _In_ const xsapi_internal_vector<uint64_t>& users,
     _Inout_ user_buffer& userBufferInactive
     )
 {
@@ -1796,7 +1967,10 @@ user_buffers_holder::remove_users_from_buffer(
         }
         else
         {
-            LOG_ERROR("user_buffers_holder: user not found in buffer");
+            LOG_ERROR_IF(
+                social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
+                "user_buffers_holder: user not found in buffer"
+            );
         }
     }
 }
@@ -1829,7 +2003,7 @@ user_buffers_holder::inactive_buffer()
 
 void
 user_buffers_holder::add_event(
-    _In_ const internal_social_event& internalSocialEvent
+    _In_ const unprocessed_social_event& internalSocialEvent
     )
 {
     m_activeBuffer->socialUserEventQueue.push(internalSocialEvent);
@@ -1850,7 +2024,7 @@ event_queue::event_queue(
 {
 }
 
-const std::vector<social_event>&
+const xsapi_internal_vector<std::shared_ptr<social_event_internal>>&
 event_queue::social_event_list()
 {
     std::lock_guard<std::mutex> lock(m_eventGraphMutex.get());
@@ -1860,7 +2034,7 @@ event_queue::social_event_list()
 
 void
 event_queue::push(
-    _In_ const internal_social_event& socialEvent,
+    _In_ const unprocessed_social_event& socialEvent,
     _In_ xbox_live_user_t user,
     _In_ social_event_type socialEventType,
     _In_ xbox_live_result<void> error
@@ -1871,18 +2045,18 @@ event_queue::push(
         return;
     }
 
-    std::vector<xbox_user_id_container> usersAffected;
+    xsapi_internal_vector<xbox_user_id_container> usersAffected;
     usersAffected.reserve(socialEvent.users_affected_as_string_vec().size());
     for (auto& affectedUser : socialEvent.users_affected_as_string_vec())
     {
-        usersAffected.push_back(affectedUser.c_str());
+        usersAffected.push_back(utils::string_t_from_internal_string(affectedUser).data());
     }
 
     std::lock_guard<std::mutex> lock(m_eventGraphMutex.get());
-    social_event selectedEvt;
 
-    selectedEvt = social_event(user, socialEventType, usersAffected, nullptr, error.err(), error.err_message());
-    m_socialEventList.push_back(selectedEvt);
+    m_socialEventList.push_back(xsapi_allocate_shared<social_event_internal>(
+            user, socialEventType, usersAffected, nullptr, error.err(), error.err_message().data()
+            ));
 
     m_eventState = event_state::ready_to_read;
 }

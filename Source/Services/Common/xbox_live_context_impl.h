@@ -45,22 +45,22 @@ public:
     /// <summary>
     /// Returns the current user's Xbox Live User ID.
     /// </summary>
-    const string_t& xbox_live_user_id();
+    xsapi_internal_string xbox_live_user_id();
 
     /// <summary>
     /// A service for managing user profiles.
     /// </summary>
-    social::profile_service& profile_service();
+    std::shared_ptr<social::profile_service_impl> profile_service_impl();
 
     /// <summary>
     /// A service for managing social networking links.
     /// </summary>
-    social::social_service& social_service();
+    std::shared_ptr<social::social_service_impl> social_service_impl();
 
     /// <summary>
     /// A service for managing reputation reports.
     /// </summary>
-    social::reputation_service& reputation_service();
+    std::shared_ptr<social::reputation_service_impl> reputation_service_impl();
 
     /// <summary>
     /// A service for managing leaderboards.
@@ -70,7 +70,7 @@ public:
     /// <summary>
     /// A service for managing achievements.
     /// </summary>
-    achievements::achievement_service& achievement_service();
+    std::shared_ptr<achievements::achievement_service_internal>& achievement_service_internal();
 
     /// <summary>
     /// A service for managing user statistics.
@@ -105,7 +105,7 @@ public:
     /// <summary>
     /// A service for managing Rich Presence.
     /// </summary>
-    presence::presence_service& presence_service();
+    std::shared_ptr<presence::presence_service_internal> presence_service();
 
     /// <summary>
     /// A service for storing data in the cloud.
@@ -172,19 +172,20 @@ public:
 private:
     std::shared_ptr<xbox::services::user_context> m_userContext;
     std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
-    std::shared_ptr<xbox_live_app_config> m_appConfig;
+    std::shared_ptr<xbox_live_app_config> m_appConfig; // Remove after migrating all services
+    std::shared_ptr<xbox_live_app_config_internal> m_appConfigInternal;
 
-    social::profile_service m_profileService;
-    social::social_service m_socialService;
-    social::reputation_service m_reputationService;
+    std::shared_ptr<achievements::achievement_service_internal> m_achievementServiceInternal;
+    std::shared_ptr<social::profile_service_impl> m_profileServiceImpl;
+    std::shared_ptr<social::reputation_service_impl> m_reputationServiceImpl;
+    std::shared_ptr<social::social_service_impl> m_socialServiceImpl;
     leaderboard::leaderboard_service m_leaderboardService;
-    achievements::achievement_service m_achievementService;
     user_statistics::user_statistics_service m_userStatisticsService;
     multiplayer::multiplayer_service m_multiplayerService;
     matchmaking::matchmaking_service m_matchmakingService;
     tournaments::tournament_service m_tournamentService;
     std::shared_ptr<real_time_activity::real_time_activity_service> m_realTimeActivityService;
-    presence::presence_service m_presenceService;
+    std::shared_ptr<presence::presence_service_internal> m_presenceService;
     game_server_platform::game_server_platform_service m_gameServerPlatformService;
     title_storage::title_storage_service m_titleStorageService;
     privacy::privacy_service m_privacyService;

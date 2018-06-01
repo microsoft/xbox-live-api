@@ -31,17 +31,25 @@ void MainPage::buttonSignInSilent_Click(Platform::Object^ sender, Windows::UI::X
 {
 	textBox->Text = ref new Platform::String(L"buttonSignInSilent_Click called");
 
+    auto coreDispatcher = Windows::UI::Core::CoreWindow::GetForCurrentThread()->Dispatcher;
 	auto task = m_user.signin_silently();
 
 	pplx::create_task(task)
-	.then([this](pplx::task<xbox::services::xbox_live_result<xbox::services::system::sign_in_result>> t)
+	.then([this, coreDispatcher](pplx::task<xbox::services::xbox_live_result<xbox::services::system::sign_in_result>> t)
 	{
 		auto result = t.get();
 		std::wstringstream ss;
 		ss << L"buttonSignInSilent_Click called\r\n";
 		ss << L"Status: ";
 		ss << result.payload().status();
-		textBox->Text = ref new Platform::String(ss.str().c_str());
+
+        auto str = ss.str();
+        coreDispatcher->RunAsync(
+            Windows::UI::Core::CoreDispatcherPriority::Normal,
+            ref new Windows::UI::Core::DispatchedHandler([this, str]()
+        {
+            textBox->Text = ref new Platform::String(str.c_str());
+        }));
 	});
 }
 
@@ -50,16 +58,24 @@ void MainPage::buttonSignIn_Click(Platform::Object^ sender, Windows::UI::Xaml::R
 {
 	textBox->Text = ref new Platform::String(L"buttonSignIn_Click called");
 
+    auto coreDispatcher = Windows::UI::Core::CoreWindow::GetForCurrentThread()->Dispatcher;
 	auto task = m_user.signin(Windows::UI::Core::CoreWindow::GetForCurrentThread()->Dispatcher);
 
 	pplx::create_task(task)
-	.then([this](pplx::task<xbox::services::xbox_live_result<xbox::services::system::sign_in_result>> t)
+	.then([this, coreDispatcher](pplx::task<xbox::services::xbox_live_result<xbox::services::system::sign_in_result>> t)
 	{
 		auto result = t.get();
 		std::wstringstream ss;
 		ss << L"buttonSignIn_Click called\r\n";
 		ss << L"Status: ";
 		ss << result.payload().status();
-		textBox->Text = ref new Platform::String(ss.str().c_str());
+
+        auto str = ss.str();
+        coreDispatcher->RunAsync(
+            Windows::UI::Core::CoreDispatcherPriority::Normal,
+            ref new Windows::UI::Core::DispatchedHandler([this, str]()
+        {
+            textBox->Text = ref new Platform::String(str.c_str());
+        }));
 	});
 }

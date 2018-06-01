@@ -525,7 +525,7 @@ namespace xbox {
                 logic_error,
 
                 /// <summary>
-                /// <b>0x80004005</b>
+                /// <b>0x89235200</b>
                 /// xbox_live_error_code 1007
                 /// Runtime error
                 /// </summary>
@@ -563,21 +563,21 @@ namespace xbox {
                 // RTA errors
                 //////////////////////////////////////////////////////////////////////////
                 /// <summary>
-                /// <b>0x80004005</b>
+                /// <b>0x89235201</b>
                 /// xbox_live_error_code 1500
                 /// RTA generic error
                 /// </summary>
                 rta_generic_error = 1500,
 
                 /// <summary>
-                /// <b>0x80004005</b>
+                /// <b>0x89235202</b>
                 /// xbox_live_error_code 1501
                 /// RTA subscription limit reached
                 /// </summary>
                 rta_subscription_limit_reached,
 
                 /// <summary>
-                /// <b>0x80004005</b>
+                /// <b>0x89235203</b>
                 /// xbox_live_error_code 1502
                 /// RTA access denied
                 /// </summary>
@@ -588,7 +588,7 @@ namespace xbox {
                 //////////////////////////////////////////////////////////////////////////
 
                 /// <summary>
-                /// <b>0x80004005</b>
+                /// <b>0x89235204</b>
                 /// xbox_live_error_code 2000
                 /// Unknown auth error
                 /// </summary>
@@ -623,14 +623,14 @@ namespace xbox {
                 auth_user_not_signed_in,
 
                 /// <summary>
-                /// <b>0x80004005</b>
+                /// <b>0x89235205</b>
                 /// xbox_live_error_code 2005
                 /// Auth runtime error
                 /// </summary>
                 auth_runtime_error,
 
                 /// <summary>
-                /// <b>0x80070525</b>
+                /// <b>0x89235206</b>
                 /// xbox_live_error_code 2006
                 /// Auth no token error
                 /// </summary>
@@ -1361,7 +1361,7 @@ public:
     /// For more detail about std::error_code vs std::error_condition, see 
     /// http://en.cppreference.com/w/cpp/error/error_condition
     /// </summary>
-    _XSAPIIMP const std::error_code& err()
+    _XSAPIIMP const std::error_code& err() const
     {
         return m_errorCode;
     }
@@ -1370,7 +1370,7 @@ public:
     /// Returns call specific debug information.  
     /// It is not localized, so only use for debugging purposes.
     /// </summary>
-    _XSAPIIMP const std::string& err_message()
+    _XSAPIIMP const std::string& err_message() const
     {
         return m_errorMessage;
     }

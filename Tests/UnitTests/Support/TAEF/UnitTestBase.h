@@ -190,6 +190,13 @@ inline void VERIFY_IS_EQUAL_JSON_HELPER_FROM_STRINGS(std::wstring expected, std:
     return VERIFY_IS_EQUAL_JSON_HELPER(expectedJson, actualJson, pszParamName, errorInfo);
 }
 
+inline void VERIFY_IS_EQUAL_JSON_HELPER_FROM_STRINGS(std::wstring expected, xsapi_internal_string actual, const wchar_t* pszParamName, const WEX::TestExecution::ErrorInfo& errorInfo)
+{
+    web::json::value expectedJson = web::json::value::parse(expected);
+    web::json::value actualJson = web::json::value::parse(xbox::services::utils::string_t_from_internal_string(actual));
+    return VERIFY_IS_EQUAL_JSON_HELPER(expectedJson, actualJson, pszParamName, errorInfo);
+}
+
 #define VERIFY_THROWS_HR(__operation, __hr)                                                                                                                                     \
 {                                                                                                                                                                               \
     bool __exceptionHit = false;                                                                                                                                                \

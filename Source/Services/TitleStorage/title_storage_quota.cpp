@@ -84,8 +84,8 @@ title_storage_quota::_Deserialize(
 
     if (!quotaInfoJson.is_null())
     {
-        returnObject.m_usedBytes = utils::extract_json_uint52(quotaInfoJson, _T("usedBytes"), errc);
-        returnObject.m_quotaBytes = utils::extract_json_uint52(quotaInfoJson, _T("quotaBytes"), errc);
+        returnObject.m_usedBytes = utils::extract_json_uint52(quotaInfoJson, "usedBytes", errc);
+        returnObject.m_quotaBytes = utils::extract_json_uint52(quotaInfoJson, "quotaBytes", errc);
     }
 
     return xbox_live_result<title_storage_quota>(returnObject, errc);

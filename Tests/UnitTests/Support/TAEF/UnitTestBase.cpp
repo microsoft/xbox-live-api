@@ -29,6 +29,12 @@ bool ModuleSetup()
     CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     WEX::Common::String strOpt;
 
+    if (!IsDebuggerPresent())
+    {
+        _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
+        _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+    }
+
     return true;
 }
 
@@ -133,6 +139,21 @@ void VerifyEqualStr(
     )
 {
     VERIFY_IS_EQUAL_STR_HELPER(expected, actual, actualName.c_str(), errorInfo);
+}
+
+void VerifyEqualStr(
+    xsapi_internal_string expected,
+    xsapi_internal_string actual,
+    std::wstring actualName,
+    const WEX::TestExecution::ErrorInfo& errorInfo
+    )
+{
+    VERIFY_IS_EQUAL_STR_HELPER(
+        xbox::services::utils::string_t_from_internal_string(expected),
+        xbox::services::utils::string_t_from_internal_string(actual),
+        actualName.c_str(),
+        errorInfo
+    );
 }
 
 #endif

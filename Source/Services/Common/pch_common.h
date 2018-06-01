@@ -31,6 +31,11 @@
 // STL includes
 #include <string>
 #include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <deque>
+#include <queue>
 #include <vector>
 #include <memory>
 #include <stdint.h>
@@ -38,24 +43,35 @@
 #include <mutex>
 #include <atomic>
 #include <cstdint>
+#include <limits>
+#include <assert.h>
 
 #include "xsapi/types.h"
+#include "xsapi/mem.h"
+#include "xsapi-c/pal.h"
+#include "xsapi-c/errors_c.h"
+#include "xsapi-c/xbox_live_global_c.h"
 
-#include <cpprest/http_client.h>
-#include <cpprest/filestream.h>
-#include <cpprest/http_listener.h>              // HTTP server
-#include <cpprest/json.h>                       // JSON library
-#include <cpprest/uri.h>                        // URI library
+#include "httpClient/pal.h"
+#include "httpClient/httpClient.h"
+#include "httpClient/async.h"
+#include "httpClient/asyncProvider.h"
+#include "httpClient/asyncQueue.h"
+
+#include "http_headers.h"
+#include "cpprest/json.h"
+#include "cpprest/http_msg.h"
+#include "cpprest/uri.h"
+
+#include "xsapi/errors.h"
+#include "utils.h"
+#include "xbox_live_async.h"
+#include "Logger/Log.h"
 
 #include "shared_macros.h"
 #if UWP_API
 #include <collection.h>
 #endif
-
-#include "xsapi/errors.h"
-#include "utils.h"
-#include "Logger/Log.h"
-
 
 #ifndef _WIN32
 #define UNREFERENCED_PARAMETER(args)
@@ -67,4 +83,10 @@
 
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(x) sizeof(x) / sizeof(x[0])
+#endif
+
+#if _DEBUG && UNIT_TEST_SERVICES
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
 #endif

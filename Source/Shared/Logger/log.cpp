@@ -19,6 +19,17 @@ void logger::set_log_level(log_level level)
 {
     m_logLevel = level;
 
+    HCTraceLevel traceLevel = HCTraceLevel::HCTraceLevel_Off;
+    switch (level)
+    {
+        case log_level::off: traceLevel = HCTraceLevel::HCTraceLevel_Off; break;
+        case log_level::error: traceLevel = HCTraceLevel::HCTraceLevel_Error; break;
+        case log_level::warn: traceLevel = HCTraceLevel::HCTraceLevel_Warning; break;
+        case log_level::info: traceLevel = HCTraceLevel::HCTraceLevel_Information; break;
+        case log_level::debug: traceLevel = HCTraceLevel::HCTraceLevel_Verbose; break;
+    }
+    HCSettingsSetTraceLevel(traceLevel);
+
     for (const auto& output : m_log_outputs)
     {
         if (output->level_setting() == log_output_level_setting::use_logger_setting)

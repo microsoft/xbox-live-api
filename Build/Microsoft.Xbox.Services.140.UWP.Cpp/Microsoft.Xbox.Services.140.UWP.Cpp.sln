@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.Services.140.UWP.Cpp", "Microsoft.Xbox.Services.140.UWP.Cpp.vcxproj", "{8F96710E-5169-4917-8874-7DE248F4D243}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libHttpClient.140.UWP.C", "..\..\External\libHttpClient\Build\libHttpClient.140.UWP.C\libHttpClient.140.UWP.C.vcxproj", "{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpprestsdk140.uwp.static", "..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.static.vcxproj", "{9AD285A2-301E-47A0-A299-14AD5D4F2758}"
 EndProject
 Global
@@ -33,6 +35,18 @@ Global
 		{8F96710E-5169-4917-8874-7DE248F4D243}.Release|x64.Build.0 = Release|x64
 		{8F96710E-5169-4917-8874-7DE248F4D243}.Release|x86.ActiveCfg = Release|Win32
 		{8F96710E-5169-4917-8874-7DE248F4D243}.Release|x86.Build.0 = Release|Win32
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|ARM.ActiveCfg = Debug|ARM
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|ARM.Build.0 = Debug|ARM
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|x64.ActiveCfg = Debug|x64
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|x64.Build.0 = Debug|x64
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|x86.ActiveCfg = Debug|Win32
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Debug|x86.Build.0 = Debug|Win32
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|ARM.ActiveCfg = Release|ARM
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|ARM.Build.0 = Release|ARM
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|x64.ActiveCfg = Release|x64
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|x64.Build.0 = Release|x64
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|x86.ActiveCfg = Release|Win32
+		{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}.Release|x86.Build.0 = Release|Win32
 		{9AD285A2-301E-47A0-A299-14AD5D4F2758}.Debug|ARM.ActiveCfg = Debug|ARM
 		{9AD285A2-301E-47A0-A299-14AD5D4F2758}.Debug|ARM.Build.0 = Debug|ARM
 		{9AD285A2-301E-47A0-A299-14AD5D4F2758}.Debug|x64.ActiveCfg = Debug|x64

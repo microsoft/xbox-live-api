@@ -139,12 +139,20 @@ namespace ProjectFileProcessor
                 output = @"Microsoft.Xbox.Services.140.XDK.Cpp.vcxproj",
             });
 
-            //Microsoft.Xbox.Services.110.XDK.WinRT
+            //Microsoft.Xbox.Services.141.XDK.WinRT
             fileNodes.Add(new FileNode
             {
                 cmake_vcxproj = @"Microsoft.Xbox.Services.XDK.WinRT.vcxproj",
-                template = @"template-Microsoft.Xbox.Services.110.XDK.WinRT.vcxproj",
-                output = @"Microsoft.Xbox.Services.110.XDK.WinRT.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.141.XDK.WinRT.vcxproj",
+                output = @"Microsoft.Xbox.Services.141.XDK.WinRT.vcxproj",
+            });
+
+            //Microsoft.Xbox.Services.140.XDK.WinRT
+            fileNodes.Add(new FileNode
+            {
+                cmake_vcxproj = @"Microsoft.Xbox.Services.XDK.WinRT.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.140.XDK.WinRT.vcxproj",
+                output = @"Microsoft.Xbox.Services.140.XDK.WinRT.vcxproj",
             });
 
             //Microsoft.Xbox.Services.140.UWP.WinRT

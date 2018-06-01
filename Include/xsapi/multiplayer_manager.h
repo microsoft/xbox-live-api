@@ -7,13 +7,6 @@
 #include "xsapi/services.h"
 #include "xsapi/types.h"
 
-namespace xbox { namespace services {
-
-    namespace system {
-        class xbox_live_user;
-    }
-}}
-
 #if XSAPI_CPP
 typedef const void* context_t;
 #else

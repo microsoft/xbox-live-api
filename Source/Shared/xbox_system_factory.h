@@ -2,10 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
-#include <cpprest/ws_client.h>
 #include "shared_macros.h"
 #include "xsapi/system.h"
-#include "http_client.h"
 
 #if XSAPI_U
 #include "xsts_token_service.h"
@@ -45,13 +43,9 @@ public:
     virtual std::shared_ptr<xtitle_service> create_xtitle_service();
 #endif
 
-    virtual std::shared_ptr<xbox_http_client> create_http_client(
-        _In_ const web::http::uri& base_uri,
-        _In_ const web::http::client::http_client_config& client_config
-        );
-
     virtual std::shared_ptr<local_config> create_local_config();
 
+    // TODO delete this version
     virtual std::shared_ptr<http_call> create_http_call(
         _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
         _In_ const string_t& httpMethod,
@@ -60,11 +54,12 @@ public:
         _In_ xbox_live_api xboxLiveApi
         );
 
-    virtual std::shared_ptr<http_call_internal> create_http_call_internal(
+    virtual std::shared_ptr<http_call_internal> create_http_call(
         _In_ const std::shared_ptr<xbox_live_context_settings>& xboxLiveContextSettings,
-        _In_ const string_t& httpMethod,
-        _In_ const string_t& serverName,
-        _In_ const web::uri& pathQueryFragment
+        _In_ const xsapi_internal_string& httpMethod,
+        _In_ const xsapi_internal_string& serverName,
+        _In_ const web::uri& pathQueryFragment,
+        _In_ xbox_live_api xboxLiveApi
         );
 
     virtual std::shared_ptr<user_impl> create_user_impl(user_creation_context userCreationContext);

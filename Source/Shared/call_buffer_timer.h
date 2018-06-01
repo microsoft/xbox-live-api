@@ -9,11 +9,17 @@ namespace xbox { namespace services {
 
 struct call_buffer_timer_completion_context
 {
-    call_buffer_timer_completion_context() : isNull(true), context(0), numObjects(0) {}
-    bool isNull;
+    call_buffer_timer_completion_context(
+        _In_ uint32_t _context,
+        _In_ size_t _numObjects,
+        _In_ xbox_live_callback<xbox_live_result<void>> _callback = xbox_live_callback<xbox_live_result<void>>(nullptr)
+        )
+        : context(_context), numObjects(_numObjects), callback(std::move(_callback))
+    {
+    }
     uint32_t context;
     size_t numObjects;
-    pplx::task_completion_event<xbox_live_result<void>> tce;
+    xbox_live_callback<xbox_live_result<void>> callback;
 };
 
 class call_buffer_timer : public std::enable_shared_from_this<call_buffer_timer>
@@ -22,15 +28,22 @@ public:
     call_buffer_timer();
 
     call_buffer_timer(
-        _In_ std::function<void(const std::vector<string_t>&, const call_buffer_timer_completion_context&)> callback,
-        _In_ std::chrono::seconds bufferTimePerCall
+        _In_ xbox_live_callback<const xsapi_internal_vector<xsapi_internal_string>&, std::shared_ptr<call_buffer_timer_completion_context>> callback,
+        _In_ std::chrono::seconds bufferTimePerCall,
+        _In_opt_ async_queue_handle_t queue = nullptr
         );
 
     void fire();
-    void fire(_In_ const std::vector<string_t>& xboxUserIds, _In_ const call_buffer_timer_completion_context& usersAddedStruct = call_buffer_timer_completion_context());
+
+    void fire(
+        _In_ const xsapi_internal_vector<xsapi_internal_string>& xboxUserIds,
+        _In_ std::shared_ptr<call_buffer_timer_completion_context> usersAddedStruct = nullptr
+        );
 
 private:
-    void fire_helper(_In_ const call_buffer_timer_completion_context& usersAddedStruct = call_buffer_timer_completion_context());
+    void fire_helper(
+        _In_ std::shared_ptr<call_buffer_timer_completion_context> usersAddedStruct = nullptr
+        );
 
     bool m_isTaskInProgress;
     bool m_queuedTask;
@@ -40,10 +53,11 @@ private:
 #else
     std::chrono::time_point<std::chrono::steady_clock> m_previousTime;
 #endif
-    std::vector<string_t> m_usersToCall;
-    std::unordered_map<string_t, bool> m_usersToCallMap;    // duplicating data to make lookup faster. SHould be a better way to do this
-    std::function<void(const std::vector<string_t>&, const call_buffer_timer_completion_context&)> m_fCallback;
+    xsapi_internal_vector<xsapi_internal_string> m_usersToCall;
+    xsapi_internal_unordered_map<xsapi_internal_string, bool> m_usersToCallMap;    // duplicating data to make lookup faster. SHould be a better way to do this
+    xbox_live_callback<const xsapi_internal_vector<xsapi_internal_string>&, std::shared_ptr<call_buffer_timer_completion_context>> m_fCallback;
     std::mutex m_timerLock;
+    async_queue_handle_t m_queue;
 };
 
 } }

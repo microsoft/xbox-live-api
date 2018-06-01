@@ -13,21 +13,18 @@ using namespace pplx;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
 social_service::social_service(
-    _In_ std::shared_ptr<xbox::services::user_context> userContext,
-    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
-    _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> realTimeActivityService
+    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> contextSettings,
+    _In_ std::shared_ptr<social_service_impl> serviceImpl
     ) :
-    m_userContext(userContext),
-    m_xboxLiveContextSettings(xboxLiveContextSettings),
-    m_socialServiceImpl(std::make_shared<social_service_impl>(userContext, xboxLiveContextSettings, appConfig, realTimeActivityService))
+    m_xboxLiveContextSettings(std::move(contextSettings)),
+    m_socialServiceImpl(std::move(serviceImpl))
 {
 }
 
 pplx::task<xbox_live_result<xbox_social_relationship_result>> 
 social_service::get_social_relationships()
 {
-    return get_social_relationships(m_userContext->xbox_user_id(), xbox_social_relationship_filter::all, 0, 0);
+    return get_social_relationships(xbox_social_relationship_filter::all, 0, 0);
 }
 
 pplx::task<xbox_live_result<xbox_social_relationship_result>>
@@ -43,21 +40,33 @@ social_service::get_social_relationships(
     _In_ xbox_social_relationship_filter socialRelationshipFilter
     )
 {
-    return get_social_relationships(m_userContext->xbox_user_id(), socialRelationshipFilter, 0, 0);
+    return get_social_relationships(socialRelationshipFilter, 0, 0);
 }
 
 pplx::task<xbox_live_result<xbox_social_relationship_result>>
 social_service::get_social_relationships(
     _In_ xbox_social_relationship_filter filter,
-    _In_ unsigned int startIndex,
-    _In_ unsigned int maxItems
+    _In_ uint32_t startIndex,
+    _In_ uint32_t maxItems
     )
 {
-    return m_socialServiceImpl->get_social_relationships(
+    task_completion_event<xbox_live_result<xbox_social_relationship_result>> tce;
+
+    auto result = m_socialServiceImpl->get_social_relationships(
         filter,
         startIndex,
-        maxItems
-        );
+        maxItems,
+        get_xsapi_singleton()->m_asyncQueue,
+        [tce](xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>> result)
+        {
+            tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(xbox_social_relationship_result, result));
+        });
+
+    if (result.err())
+    {
+        return pplx::task_from_result(xbox_live_result<xbox_social_relationship_result>(result.err(), result.err_message()));
+    }
+    return pplx::task<xbox_live_result<xbox_social_relationship_result>>(tce);
 }
 
 pplx::task<xbox_live_result<xbox_social_relationship_result>>
@@ -68,12 +77,24 @@ social_service::get_social_relationships(
     _In_ unsigned int maxItems
     )
 {
-    return m_socialServiceImpl->get_social_relationships(
-        xboxUserId,
+    task_completion_event<xbox_live_result<xbox_social_relationship_result>> tce;
+
+    auto result = m_socialServiceImpl->get_social_relationships(
+        utils::internal_string_from_string_t(xboxUserId),
         filter,
         startIndex,
-        maxItems
-        );
+        maxItems,
+        get_xsapi_singleton()->m_asyncQueue,
+        [tce](xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>> result)
+        {
+            tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(xbox_social_relationship_result, result));
+        });
+
+    if (result.err())
+    {
+        return pplx::task_from_result(xbox_live_result<xbox_social_relationship_result>(result.err(), result.err_message()));
+    }
+    return pplx::task<xbox_live_result<xbox_social_relationship_result>>(tce);
 }
 
 xbox_live_result<std::shared_ptr<social_relationship_change_subscription>>
@@ -81,8 +102,16 @@ social_service::subscribe_to_social_relationship_change(
     _In_ const string_t& xboxUserId
     )
 {
-    return m_socialServiceImpl->subscribe_to_social_relationship_change(
-        xboxUserId
+    auto result = m_socialServiceImpl->subscribe_to_social_relationship_change(
+        utils::internal_string_from_string_t(xboxUserId)
+        );
+
+    if (result.err())
+    {
+        return xbox_live_result<std::shared_ptr<social_relationship_change_subscription>>(result.err(), result.err_message());
+    }
+    return xbox_live_result<std::shared_ptr<social_relationship_change_subscription>>(
+        xsapi_allocate_shared<social_relationship_change_subscription>(result.payload())
         );
 }
 
@@ -92,7 +121,7 @@ social_service::unsubscribe_from_social_relationship_change(
     )
 {
     return m_socialServiceImpl->unsubscribe_from_social_relationship_change(
-        subscription
+        subscription->m_internalObj
         );
 }
 
@@ -102,8 +131,10 @@ social_service::add_social_relationship_changed_handler(
     )
 {
     return m_socialServiceImpl->add_social_relationship_changed_handler(
-        std::move(handler)
-        );
+        [handler](std::shared_ptr<social_relationship_change_event_args_internal> internalArgs)
+    {
+        handler(social_relationship_change_event_args(internalArgs));
+    });
 }
 
 void

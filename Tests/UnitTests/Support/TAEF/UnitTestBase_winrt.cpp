@@ -27,7 +27,7 @@ XboxLiveUser^ SignInUserWithMocks_WinRT(const string_t& id)
     VERIFY_NO_THROW(pplx::create_task(asyncOp).wait());
     if (!id.empty())
     {
-        user->_User_impl()->_Set_xbox_user_id(id);
+        user->_User_impl()->_Set_xbox_user_id(xbox::services::utils::internal_string_from_string_t(id));
     }
 
     return user;
@@ -36,7 +36,6 @@ XboxLiveUser^ SignInUserWithMocks_WinRT(const string_t& id)
 Microsoft::Xbox::Services::XboxLiveContext^ GetMockXboxLiveContext_WinRT(const string_t& id)
 {
     auto user = SignInUserWithMocks_WinRT(id);
-    xbox::services::user_context userContext(user);
     Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext = ref new Microsoft::Xbox::Services::XboxLiveContext(user);
     return xboxLiveContext;
 }
@@ -44,7 +43,6 @@ Microsoft::Xbox::Services::XboxLiveContext^ GetMockXboxLiveContext_WinRT(const s
 std::shared_ptr<xbox::services::xbox_live_context> GetMockXboxLiveContext_Cpp(const string_t& id)
 {
     auto user = SignInUserWithMocks_WinRT(id);
-    xbox::services::user_context userContext(user);
     Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext = ref new Microsoft::Xbox::Services::XboxLiveContext(user);
     return xboxLiveContext->GetCppObj();
 }

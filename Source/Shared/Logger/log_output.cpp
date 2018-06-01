@@ -39,15 +39,19 @@ log_output::format_log(_In_ const log_entry& entry)
     localtime_r(&t, &tm_snapshot); // POSIX  
 #endif
 
-    // format : "<time> [<thread id>] <level> <category> - <msg>"
+    // format : "<time> [<thread id>] <level> <category>: <msg>"
 #if !XSAPI_A // TODO: Why put_time isn't found
-    stream << std::put_time(&tm_snapshot, "%c") << " [" << std::this_thread::get_id() << "] ";
+    stream << std::put_time(&tm_snapshot, "%c") << " [" << std::setfill('0') << std::setw(6) << std::this_thread::get_id() << "] ";
 #endif
-    stream << entry.level_to_string() << " " << entry.category() << " - ";
+    stream << entry.level_to_string();
+    if (!entry.category().empty())
+    {
+        stream << " " << entry.category();
+    }
+    stream << ": ";
     stream << entry.msg_stream().str() << std::endl;
 
     return stream.str();
-
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

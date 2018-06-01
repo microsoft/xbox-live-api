@@ -38,7 +38,7 @@ public:
     web::json::value testResponseJsonFromFile = utils::read_test_response_file(filePath);
     
     const string_t emptyJson = testResponseJsonFromFile[L"emptyJson"].serialize();
-    const string_t propertiesJson = testResponseJsonFromFile[L"propertiesJson"].serialize();
+    const string_t classPropertiesJson = testResponseJsonFromFile[L"propertiesJson"].serialize();
     const string_t syncPropertiesJson = testResponseJsonFromFile[L"syncPropertiesJson"].serialize();
     const string_t propertiesNoTransferHandleJson = testResponseJsonFromFile[L"propertiesNoTransferHandleJson"].serialize();
     const string_t defaultLobbySessionResponse = testResponseJsonFromFile[L"defaultLobbySessionResponse"].serialize();
@@ -206,7 +206,7 @@ public:
         responses[defaultMpsdUri] = lobbyResponseStruct;
         m_mockXboxSystemFactory->add_http_state_response(responses);
 
-        int userRemoved = 0;
+        size_t userRemoved = 0;
         for (auto xboxLiveContext : xboxLiveContexts)
         {
             try { mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User); }
@@ -480,8 +480,8 @@ public:
             multiplayerManagerInstance->LobbySession->SetLocalMemberConnectionAddress(xboxLiveContext->User, L"AQDXfbIj/QDRr2aLF5vWnwEEAiABSJgA2BES8XsFOdf6/FICIAEAAEE3nnYsBQQNfJRgQwEKfMU7", (Platform::Object^) 3);
         }
         
-        int usersAdded = 0;
-        int localUserPropWritten = 0;
+        size_t usersAdded = 0;
+        size_t localUserPropWritten = 0;
         while (usersAdded != xboxLiveContexts->Size || localUserPropWritten != (xboxLiveContexts->Size * 3) )
         {
             auto events = multiplayerManagerInstance->DoWork();
@@ -554,11 +554,11 @@ public:
         std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
 
         // Set up initial http responses
-        auto lobbyNoHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyNoHandleResponseJson, DefaultLobbyHttpResponse());
+        auto tlobbyNoHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyNoHandleResponseJson, DefaultLobbyHttpResponse());
         std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
         lobbyResponseStruct->responseList =
         {
-            lobbyNoHandleResponse
+            tlobbyNoHandleResponse
         };
 
         // set up http response set
@@ -649,7 +649,7 @@ public:
         AddLocalUserHelperWithSyncUpdate(xboxLiveContext);
 
         // Set up initial http responses
-        auto lobbyNoHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyNoHandleResponseJson, DefaultLobbyHttpResponse());
+        auto tlobbyNoHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyNoHandleResponseJson, DefaultLobbyHttpResponse());
         std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
         lobbyResponseStruct->responseList = { defaultLobbyNoCustomMemberPropsResponseJson };
 
@@ -969,11 +969,11 @@ public:
         std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
 
         // Set up initial http responses
-        auto lobbyNoHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyNoHandleResponseJson, 404, DefaultLobbyHttpResponse());
+        auto tlobbyNoHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyNoHandleResponseJson, 404, DefaultLobbyHttpResponse());
         std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
         lobbyResponseStruct->responseList =
         {
-            lobbyNoHandleResponse
+            tlobbyNoHandleResponse
         };
 
         // set up http response set
@@ -1010,14 +1010,14 @@ public:
         std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
 
         // Set up initial http responses
-        auto lobbyCompletedHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyCompletedHandleResponseJson, DefaultLobbyHttpResponse());
+        auto tlobbyCompletedHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyCompletedHandleResponseJson, DefaultLobbyHttpResponse());
         auto gameSessionResponse = StockMocks::CreateMockHttpCallResponse(defaultGameSessionResponseJson, DefaultGameHttpResponse());
 
         std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
         lobbyResponseStruct->responseList =
         {
-            lobbyCompletedHandleResponse,       // commit_lobby_changes_helper (join via handleId)
-            lobbyCompletedHandleResponse,       // commit_lobby_changes_helper (set_activity)
+            tlobbyCompletedHandleResponse,       // commit_lobby_changes_helper (join via handleId)
+            tlobbyCompletedHandleResponse,       // commit_lobby_changes_helper (set_activity)
         };
 
         std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
@@ -1068,14 +1068,14 @@ public:
 
         // Set up initial http responses
         
-        auto lobbyCompletedHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyCompletedHandleResponseJson, DefaultLobbyHttpResponse());
+        auto tlobbyCompletedHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyCompletedHandleResponseJson, DefaultLobbyHttpResponse());
         auto gameSessionResponse404 = StockMocks::CreateMockHttpCallResponse(defaultGameSessionResponseJson, 404, DefaultGameHttpResponse());
         
         std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
         lobbyResponseStruct->responseList =
         {
-            lobbyCompletedHandleResponse,       // commit_lobby_changes_helper (join via handleId)
-            lobbyCompletedHandleResponse,       // commit_lobby_changes_helper (set_activity)
+            tlobbyCompletedHandleResponse,       // commit_lobby_changes_helper (join via handleId)
+            tlobbyCompletedHandleResponse,       // commit_lobby_changes_helper (set_activity)
             updatedLobbyNoHandleResponse        // clear_game_session_from_lobby
         };
 
@@ -1226,7 +1226,7 @@ public:
         InitializeManager(2);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_2");
 
         Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
         xboxLiveContexts->Append(xboxLiveContext);
@@ -1276,7 +1276,7 @@ public:
 
         bool isGameJoined = false;
         bool isAdvertisingGameDone = false;
-        auto propertyJson = web::json::value::parse(propertiesJson);
+        auto propertyJson = web::json::value::parse(classPropertiesJson);
         auto customPropertyJson = propertyJson[L"properties"];
         while (!isGameJoined || !isAdvertisingGameDone)
         {
@@ -1326,7 +1326,7 @@ public:
 
         bool isDone = false;
         bool isAdvertisingGameDone = false;
-        auto propertyJson = web::json::value::parse(propertiesJson);
+        auto propertyJson = web::json::value::parse(classPropertiesJson);
         auto customPropertyJson = propertyJson[L"properties"];
         while (!isDone || !isAdvertisingGameDone)
         {
@@ -1414,8 +1414,8 @@ public:
         auto gameSessionResponse = StockMocks::CreateMockHttpCallResponse(gameSessionResponseJson, DefaultGameHttpResponse());
         auto gameSessionWithXuidsResponseJson = defaultGameSessionWithXuidsResponseJson;
         auto gameSessionWithXuidsResponse = StockMocks::CreateMockHttpCallResponse(gameSessionWithXuidsResponseJson, DefaultGameHttpResponse());
-        auto lobbyNoHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyNoHandleResponseJson, DefaultLobbyHttpResponse());
-        auto lobbyCompletedHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyCompletedHandleResponseJson, DefaultLobbyHttpResponse());
+        auto tlobbyNoHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyNoHandleResponseJson, DefaultLobbyHttpResponse());
+        auto tlobbyCompletedHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyCompletedHandleResponseJson, DefaultLobbyHttpResponse());
 
         /*
             join_game_helper -> join_game_for_all_local_members
@@ -1447,9 +1447,9 @@ public:
         std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
         lobbyResponseStruct->responseList =
         {
-            lobbyNoHandleResponse,              // advertise_game_session -> commit_pending_lobby_changes -> commit_lobby_changes_helper (write_session)
-            lobbyNoHandleResponse,              // commit_lobby_changes_helper (set_activity)
-            lobbyNoHandleResponse,              // advertise_game_session -> set_transfer_handle
+            tlobbyNoHandleResponse,              // advertise_game_session -> commit_pending_lobby_changes -> commit_lobby_changes_helper (write_session)
+            tlobbyNoHandleResponse,              // commit_lobby_changes_helper (set_activity)
+            tlobbyNoHandleResponse,              // advertise_game_session -> set_transfer_handle
             lobbyCompletedHandleResponse        // advertise_game_session -> write_session (transfer handle)
         };
 
@@ -1475,7 +1475,7 @@ public:
             mpInstance->JoinGame(ref new Platform::String(L"MockGameSessionName"), GAME_SESSION_TEMPLATE_NAME, nullptr);
         }
 
-        auto propertyJson = web::json::value::parse(propertiesJson);
+        auto propertyJson = web::json::value::parse(classPropertiesJson);
         auto customPropertyJson = propertyJson[L"properties"];
         bool lobbyJoined = false;
         bool gameJoined = false;
@@ -1730,7 +1730,7 @@ public:
         InitializeManager(2);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_2");
 
         Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
         xboxLiveContexts->Append(xboxLiveContext);
@@ -1773,9 +1773,9 @@ public:
         InitializeManager(3);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_2");
         auto xboxLiveContext3 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext3->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_3");
+        xboxLiveContext3->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_3");
 
         Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
         xboxLiveContexts->Append(xboxLiveContext);
@@ -1845,13 +1845,13 @@ public:
         InitializeManager(5);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_2");
         auto xboxLiveContext3 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext3->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_3");
+        xboxLiveContext3->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_3");
         auto xboxLiveContext4 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext4->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_4");
+        xboxLiveContext4->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_4");
         auto xboxLiveContext5 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext5->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_5");
+        xboxLiveContext5->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_5");
 
         Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
         xboxLiveContexts->Append(xboxLiveContext);
@@ -2916,7 +2916,7 @@ public:
         else
             primaryContext = clientManager->latest_pending_read()->game_client()->session_writer()->get_primary_context();
 
-        auto mpsdSession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id());
+        auto mpsdSession = std::make_shared<multiplayer_session>(utils::string_t_from_internal_string(primaryContext->xbox_live_user_id()));
 
         for (uint32_t count = 1; count <= 3; ++count)
         {
@@ -2985,7 +2985,7 @@ public:
         InitializeManager(2);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_2");
         AddLocalUserHelper(xboxLiveContext);
 
         auto mpInstance = MultiplayerManager::SingletonInstance;
@@ -3065,7 +3065,7 @@ public:
         auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
         auto primaryContext = clientManager->latest_pending_read()->game_client()->session_writer()->get_primary_context();
 
-        auto mpsdSession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id());
+        auto mpsdSession = std::make_shared<multiplayer_session>(utils::string_t_from_internal_string(primaryContext->xbox_live_user_id()));
         auto result = primaryContext->multiplayer_service().write_session(mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
         clientManager->latest_pending_read()->game_client()->update_session(result.payload());
         mpInstance->DoWork();
@@ -3073,7 +3073,7 @@ public:
 
         clientManager->latest_pending_read()->lobby_client()->advertise_game_session();
 
-        auto propertyJson = web::json::value::parse(propertiesJson);
+        auto propertyJson = web::json::value::parse(classPropertiesJson);
         auto customPropertyJson = propertyJson[L"properties"];
         bool isAdvertisingGameDone = false;
         while (!isAdvertisingGameDone )
@@ -3099,12 +3099,12 @@ public:
 
         auto gameSessionResponseJson = defaultGameSessionResponseJson;
         auto gameSessionResponse = StockMocks::CreateMockHttpCallResponse(gameSessionResponseJson, DefaultGameHttpResponse());
-        auto gameSessionResponseDiffXuid = StockMocks::CreateMockHttpCallResponse(gameSessionResponseDiffXuidJson, DefaultGameHttpResponse());
+        auto tgameSessionResponseDiffXuid = StockMocks::CreateMockHttpCallResponse(gameSessionResponseDiffXuidJson, DefaultGameHttpResponse());
         std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
         lobbyResponseStruct->responseList =
         {
             gameSessionResponse,                // to create the game session below
-            gameSessionResponseDiffXuid,        // to create the game session below
+            tgameSessionResponseDiffXuid,        // to create the game session below
             updatedLobbyNoHandleResponse        // clear_game_session_from_lobby
         };
 
@@ -3120,13 +3120,13 @@ public:
         auto mpInstance = MultiplayerManager::SingletonInstance;
         auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
         auto primaryContext = clientManager->latest_pending_read()->game_client()->session_writer()->get_primary_context();
-        auto mpsdSession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id());
+        auto mpsdSession = std::make_shared<multiplayer_session>(utils::string_t_from_internal_string(primaryContext->xbox_live_user_id()));
         
         
         // Should not clear the game session as you are not the last person to leave the session.
         auto result = primaryContext->multiplayer_service().write_session(mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
         clientManager->latest_pending_read()->lobby_client()->stop_advertising_game_session(result);
-        auto propertyJson = web::json::value::parse(propertiesJson);
+        auto propertyJson = web::json::value::parse(classPropertiesJson);
         auto customPropertyJson = propertyJson[L"properties"];
         VERIFY_IS_TRUE(utils::str_icmp(mpInstance->LobbySession->Properties->Data(), customPropertyJson[L"custom"].serialize()) == 0);
 
@@ -3172,9 +3172,9 @@ public:
         auto lobbyClient = clientManager->latest_pending_read()->lobby_client();
 
         auto xboxLiveContextMap = lobbyClient->get_local_user_map();
-        for (auto xboxLiveContext : xboxLiveContextMap)
+        for (auto xboxLiveContext2 : xboxLiveContextMap)
         {
-            auto localUser = xboxLiveContext.second;
+            auto localUser = xboxLiveContext2.second;
             if (localUser != nullptr)
             {
                 localUser->set_lobby_state(multiplayer_local_user_lobby_state::remove);
@@ -3213,7 +3213,7 @@ public:
         auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
         auto lobbyClient = clientManager->latest_pending_read()->lobby_client();
         auto primaryContext = lobbyClient->session_writer()->get_primary_context();
-        auto mpsdSession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id());
+        auto mpsdSession = std::make_shared<multiplayer_session>(utils::string_t_from_internal_string(primaryContext->xbox_live_user_id()));
 
         VERIFY_IS_TRUE(lobbyClient->is_transfer_handle_state(_T("completed")));
         VERIFY_IS_TRUE(utils::str_icmp(lobbyClient->get_transfer_handle(), _T("TestGameSessionTransferHandle")) == 0);
@@ -3342,9 +3342,9 @@ public:
         if (removeStaleUsers)
         {
             auto xboxLiveContextMap = lobbyClient->get_local_user_map();
-            for (auto xboxLiveContext : xboxLiveContextMap)
+            for (auto xboxLiveContext2 : xboxLiveContextMap)
             {
-                auto localUser = xboxLiveContext.second;
+                auto localUser = xboxLiveContext2.second;
                 if (localUser != nullptr)
                 {
                     localUser->set_lobby_state(multiplayer_local_user_lobby_state::remove);
@@ -3383,7 +3383,7 @@ public:
         InitializeManager(2);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_2");
 
         Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
         xboxLiveContexts->Append(xboxLiveContext);
@@ -3413,9 +3413,9 @@ public:
         m_mockXboxSystemFactory->add_http_state_response(responses);
 
         auto xboxLiveContextMap = lobbyClient->get_local_user_map();
-        for (auto xboxLiveContext : xboxLiveContextMap)
+        for (auto xboxLiveContext3 : xboxLiveContextMap)
         {
-            auto localUser = xboxLiveContext.second;
+            auto localUser = xboxLiveContext3.second;
             if (localUser != nullptr)
             {
                 localUser->set_lobby_state(multiplayer_local_user_lobby_state::remove);
@@ -3445,7 +3445,7 @@ public:
         InitializeManager(2);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id("TestXboxUserId_2");
 
         Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
         xboxLiveContexts->Append(xboxLiveContext);
@@ -3743,7 +3743,7 @@ public:
 
         clientManager->match_client()->disable_next_timer(true); // force the timer to avoid getting into expiry state.
 
-        auto propertyJson = web::json::value::parse(propertiesJson);
+        auto propertyJson = web::json::value::parse(classPropertiesJson);
         auto customPropertyJson = propertyJson[L"properties"];
         bool matchFound = false, isAdvertisingGameDone = false, searchingTapTriggered = false, foundTapTriggered = false, waitingForClientsTapTriggered = false;
         while (!matchFound || !isAdvertisingGameDone)
@@ -3889,7 +3889,7 @@ public:
 
         clientManager->match_client()->disable_next_timer(true); // force the timer to avoid getting into expiry state.
 
-        auto propertyJson = web::json::value::parse(propertiesJson);
+        auto propertyJson = web::json::value::parse(classPropertiesJson);
         auto customPropertyJson = propertyJson[L"properties"];
         bool matchFound = false, isAdvertisingGameDone = false, searchingTapTriggered = false, foundTapTriggered = false, waitingForClientsToJoinTapTriggered = false, waitingForClientsToUploadQoSTapTriggered = false;
         while (!matchFound || !isAdvertisingGameDone)
@@ -4062,7 +4062,7 @@ public:
         // Create Transfer handle
         // LB: PUT Transfer handle
 
-        auto propertyJson = web::json::value::parse(propertiesJson);
+        auto propertyJson = web::json::value::parse(classPropertiesJson);
         auto customPropertyJson = propertyJson[L"properties"];
         bool matchFound = false, isAdvertisingGameDone = false, searchingTapTriggered = false, foundTapTriggered = false, waitingForClientsTapTriggered = false;
         while (!matchFound || !isAdvertisingGameDone)

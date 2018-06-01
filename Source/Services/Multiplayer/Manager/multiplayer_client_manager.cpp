@@ -294,13 +294,15 @@ multiplayer_client_manager::join_lobby(
 
     // Check if the xuid matches with the sent users.
     bool invitedUserFound = false;
+    int invitedUserIndex = 0;
     for (auto& user: users)
     {
-        if (utils::str_icmp(invitedXuid, user_context::get_user_id(user)) == 0)
+        if (utils::str_icmp(invitedXuid, utils::string_t_from_internal_string(user_context::get_user_id(user))) == 0)
         {
             invitedUserFound = true;
             break;
         }
+        invitedUserIndex++;
     }
 
     if (!invitedUserFound)
@@ -321,6 +323,12 @@ multiplayer_client_manager::join_lobby(
         m_multiplayerEventQueue.push_back(multiplayerEvent);
 
         return xbox_live_result<void>(xbox_live_error_code::logic_error, "Pass in the invited user into join_lobby() API.");
+    }
+    else if (invitedUserFound && invitedUserIndex > 0)
+    {
+        auto invitedUser = users[0];
+        users[0] = users[invitedUserIndex];
+        users[invitedUserIndex] = invitedUser;
     }
 
     // This will also join any game that is associated with the lobby.
@@ -394,9 +402,9 @@ multiplayer_client_manager::join_game(
         if (xboxUserIds.size() > 0)
         {
             // Create a session with reservations.
-            multiplayer_session_reference gameSessionRef(utils::try_get_override_scid(), sessionTemplateName, sessionName);
+            multiplayer_session_reference gameSessionRef(utils::string_t_from_internal_string(utils::try_get_override_scid()), sessionTemplateName, sessionName);
             auto gameSession = std::make_shared<multiplayer_session>(
-                primaryContext->xbox_live_user_id(),
+                utils::string_t_from_internal_string(primaryContext->xbox_live_user_id()),
                 gameSessionRef,
                 xboxUserIds
                 );
@@ -404,7 +412,7 @@ multiplayer_client_manager::join_game(
             gameSession->join(web::json::value::null(), false);
             for (const auto& memberXuid : xboxUserIds)
             {
-                if (utils::str_icmp(memberXuid, primaryContext->xbox_live_user_id()) != 0)
+                if (utils::str_icmp(utils::internal_string_from_string_t(memberXuid), primaryContext->xbox_live_user_id()) != 0)
                 {
                     gameSession->add_member_reservation(memberXuid);
                 }
@@ -470,7 +478,7 @@ multiplayer_client_manager::get_activities_for_social_group(
     RETURN_TASK_CPP_INVALIDARGUMENT_IF(user == nullptr, std::vector<multiplayer_activity_details>, "Invalid xboxLiveContext argument passed.");
 
     return get_multiplayer_service(user).get_activities_for_social_group(
-        utils::try_get_override_scid(),
+        utils::string_t_from_internal_string(utils::try_get_override_scid()),
         multiplayer_manager_utils::get_local_user_xbox_user_id(user),
         socialGroup);
 }
@@ -524,6 +532,7 @@ multiplayer_client_manager::invite_friends(
         }
     });
 #else
+    UNREFERENCED_PARAMETER(contextStringId);
     UNREFERENCED_PARAMETER(customActivationContext);
 #if !UNIT_TEST_SERVICES
 
@@ -1061,11 +1070,11 @@ multiplayer_client_manager::handle_member_properties_changed(
     if (memberPropertiesChanged.size() > 0)
     {
         std::vector<std::shared_ptr<multiplayer_member>> gameMembers;
-        const auto& localUserMap = m_multiplayerLocalUserManager->get_local_user_map();
+        const auto& localUsersMap = m_multiplayerLocalUserManager->get_local_user_map();
         for (const auto& member : memberPropertiesChanged)
         {
-            auto iter = localUserMap.find(member->xbox_user_id());
-            if (iter != localUserMap.end())
+            auto iter = localUsersMap.find(member->xbox_user_id());
+            if (iter != localUsersMap.end())
             {
                 // Don't trigger member property changed events for local users.
                 continue;

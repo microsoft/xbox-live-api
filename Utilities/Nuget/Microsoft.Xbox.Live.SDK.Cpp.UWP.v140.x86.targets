@@ -2,12 +2,12 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemDefinitionGroup Condition="'$(Configuration)' == 'Debug' AND '$(PlatformToolset)' == 'v140' AND '$(Platform)' == 'Win32'">
     <Link>
-      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(Platform)\v140\$(Configuration)\cpprest140d_uwp_2_9.lib;$(MSBuildThisFileDirectory)lib\$(Platform)\v140\$(Configuration)\Microsoft.Xbox.Services.140.UWP.Ship.Cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(Platform)\v140\$(Configuration)\libHttpClient.140.UWP.C.lib;$(MSBuildThisFileDirectory)lib\$(Platform)\v140\$(Configuration)\cpprest140d_uwp_2_9.lib;$(MSBuildThisFileDirectory)lib\$(Platform)\v140\$(Configuration)\Microsoft.Xbox.Services.140.UWP.Ship.Cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)' != 'Debug' AND '$(PlatformToolset)' == 'v140' AND '$(Platform)' == 'Win32'">
     <Link>
-      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(Platform)\v140\Release\cpprest140_uwp_2_9.lib;$(MSBuildThisFileDirectory)lib\$(Platform)\v140\Release\Microsoft.Xbox.Services.140.UWP.Ship.Cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(Platform)\v140\Release\libHttpClient.140.UWP.C.lib;$(MSBuildThisFileDirectory)lib\$(Platform)\v140\Release\cpprest140_uwp_2_9.lib;$(MSBuildThisFileDirectory)lib\$(Platform)\v140\Release\Microsoft.Xbox.Services.140.UWP.Ship.Cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
 </Project>

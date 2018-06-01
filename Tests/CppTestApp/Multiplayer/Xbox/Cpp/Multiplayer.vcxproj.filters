@@ -58,6 +58,7 @@
     <ClInclude Include="pch.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="...\..\..\..\..\InProgressSamples\Kits\ATGTK\ATGColors.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MultiplayerManagerIntegration.cpp" />

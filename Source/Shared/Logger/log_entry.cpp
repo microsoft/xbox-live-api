@@ -24,14 +24,10 @@ std::string log_entry::level_to_string() const
 {
     switch (m_logLevel)
     {
-    case log_level::error:
-        return "error";
-    case log_level::warn:
-        return "warn";
-    case log_level::info:
-        return "info";
-    case log_level::debug:
-        return "debug";
+        case log_level::error: return "L1";
+        case log_level::warn: return "L2";
+        case log_level::info: return "L3";
+        case log_level::debug: return "L4";
     }
 
     return "";

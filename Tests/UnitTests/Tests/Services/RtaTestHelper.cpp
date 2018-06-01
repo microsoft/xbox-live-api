@@ -21,9 +21,9 @@ void SetMultipleClientWebSocketRTAAutoResponser(std::vector<std::shared_ptr<Mock
 
 void SetWebSocketRTAAutoResponser(std::shared_ptr<MockWebSocketClient> ws, string_t subscriptionInitData, int subId, bool useAutoReply)
 {
-    ws->set_send_handler([ws, subscriptionInitData, subId, useAutoReply](string_t msg)
+    ws->set_send_handler([ws, subscriptionInitData, subId, useAutoReply](xsapi_internal_string msg)
     {
-        auto msgJson = web::json::value::parse(msg);
+        auto msgJson = web::json::value::parse(xbox::services::utils::string_t_from_internal_string(msg).data());
         int apiId = msgJson[0].as_integer();
 
         if (useAutoReply)

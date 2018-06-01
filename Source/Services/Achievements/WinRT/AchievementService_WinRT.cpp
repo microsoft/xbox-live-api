@@ -22,7 +22,7 @@ AchievementService::AchievementService(
 {
 }
 
-Windows::Foundation::IAsyncAction^ 
+Windows::Foundation::IAsyncAction^
 AchievementService::UpdateAchievementAsync(
     _In_ Platform::String^ xboxUserId,
     _In_ Platform::String^ achievementId,
@@ -41,7 +41,26 @@ AchievementService::UpdateAchievementAsync(
     return ASYNC_FROM_TASK(task);
 }
 
-Windows::Foundation::IAsyncAction^ 
+Windows::Foundation::IAsyncOperation<int32>^
+AchievementService::TryUpdateAchievementAsync(
+    _In_ Platform::String^ xboxUserId,
+    _In_ Platform::String^ achievementId,
+    _In_ uint32 percentComplete
+    )
+{
+    auto task = m_cppObj.update_achievement(
+        STRING_T_FROM_PLATFORM_STRING(xboxUserId),
+        STRING_T_FROM_PLATFORM_STRING(achievementId),
+        percentComplete)
+    .then([](xbox_live_result<void> cppResult)
+    {
+        return (int32)xbox::services::utils::convert_xbox_live_error_code_to_hresult(cppResult.err());
+    });
+
+    return ASYNC_FROM_TASK(task);
+}
+
+Windows::Foundation::IAsyncAction^
 AchievementService::UpdateAchievementAsync(
     _In_ Platform::String^ xboxUserId,
     _In_ uint32 titleId,
@@ -59,6 +78,29 @@ AchievementService::UpdateAchievementAsync(
     .then([](xbox_live_result<void> cppResult)
     {
         THROW_IF_ERR(cppResult);
+    });
+
+    return ASYNC_FROM_TASK(task);
+}
+
+Windows::Foundation::IAsyncOperation<int32>^
+AchievementService::TryUpdateAchievementAsync(
+    _In_ Platform::String^ xboxUserId,
+    _In_ uint32 titleId,
+    _In_ Platform::String^ serviceConfigurationId,
+    _In_ Platform::String^ achievementId,
+    _In_ uint32 percentComplete
+    )
+{
+    auto task = m_cppObj.update_achievement(
+        STRING_T_FROM_PLATFORM_STRING(xboxUserId),
+        titleId,
+        STRING_T_FROM_PLATFORM_STRING(serviceConfigurationId),
+        STRING_T_FROM_PLATFORM_STRING(achievementId),
+        percentComplete)
+    .then([](xbox_live_result<void> cppResult)
+    {
+        return (int32)xbox::services::utils::convert_xbox_live_error_code_to_hresult(cppResult.err());
     });
 
     return ASYNC_FROM_TASK(task);

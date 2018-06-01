@@ -26,6 +26,8 @@ enum http_request_message_type
     vector_message
 };
 
+class http_call_request_message_internal;
+
 /// <summary>
 /// Represents an http request message.
 /// </summary>
@@ -35,18 +37,8 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    http_call_request_message();
+    http_call_request_message(_In_ const http_call_request_message_internal* internalObj);
 
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    http_call_request_message(_In_ string_t messageString);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    http_call_request_message(_In_ std::vector<unsigned char> messageVector);
-    
     /// <summary>
     /// The http request message if it is a string type.
     /// </summary>

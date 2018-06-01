@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Durango">
@@ -41,17 +41,23 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\External\libHttpClient\libHttpClient.props" />
   </ImportGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_result.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\C\achievements.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\C\achievements_internal_c.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\C\achievements_internal_c.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_media_asset.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_progression.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_requirement.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_reward.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_service_internal.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_time_window.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_title_association.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_internal.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_action_settings.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\club_presence_counts.cpp" />
@@ -68,7 +74,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Clubs\clubs_service_impl.h" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp" >
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\xbox_live_context_c.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\xbox_live_context_internal_c.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\C\xbox_live_global_c.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Desktop\pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -199,7 +208,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_media_record.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_record.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_service.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_service_impl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_service_internal.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_title_record.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_title_request.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_user_batch_request.cpp" />
@@ -214,9 +223,13 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\real_time_activity_service_factory.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\real_time_activity_subscription.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivity\real_time_activity_subscription_error_event_args.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\profile.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\C\social.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\C\social_manager_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_event.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_graph.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_internal.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_internal.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_presence_record.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_presence_title_record.cpp" />
@@ -228,14 +241,17 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\xbox_social_user.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\xbox_social_user_group.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\xbox_user_id_container.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_service.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_internal.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service_impl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_feedback_request.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_service_impl.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_internal.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_relationship_change_event_args.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_relationship_change_subscription.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_service.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_service_impl.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_feedback_request.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_service.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_social_relationship.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_social_relationship_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\xbox_user_profile.cpp" />
@@ -281,6 +297,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_service_impl.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_service_internal.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Tournaments\tournament_team_result.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\C\xbox_live_app_config_c.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\C\xbox_live_context_settings_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\custom_output.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\custom_output.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\debug_output.cpp" />
@@ -301,10 +319,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_impl.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_impl.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_request_message.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_request_message_internal.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.cpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response.h" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_client.cpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_client.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_response_internal.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_headers.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\initiator.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\initiator.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\local_config.cpp" />
@@ -330,14 +348,30 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_connection.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket_connection_state.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_app_config.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_app_config_internal.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_context_settings.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_services_settings.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_service_call_routed_event_args.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_service_call_routed_event_args_internal.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_internal_c.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_internal_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\ppltasks_extra.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\system_internal.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\xbox_live_mutex.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\achievements_c.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\errors_c.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\pal.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\presence_c.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\profile_c.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\services_c.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_c.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_manager_c.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_app_config_c.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_context_c.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_context_settings_c.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_global_c.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\achievements.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\clubs.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi\contextual_search_service.h" />
@@ -384,6 +418,9 @@
     <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.xbox\casablanca140.Xbox.vcxproj">
       <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.vcxproj">
+      <Project>{cf37beb2-a66a-42ba-b348-1f07566f4865}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <ProjectFolder>$(MSBuildProjectName)</ProjectFolder>
@@ -393,8 +430,8 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XBL_API_NONE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;XBL_API_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions>_VARIADIC_MAX=10;ENABLE_INTSAFE_SIGNED_FUNCTIONS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
@@ -406,28 +443,33 @@
       <CompileAsWinRT>true</CompileAsWinRT>
       <AdditionalIncludeDirectories>
       $(ProjectDir);
-      $(ProjectDir)\..\..\Source\Services;
-      $(ProjectDir)\..\..\Source\Services\Common;
-      $(ProjectDir)\..\..\Source\Services\Common\Desktop;
-      $(ProjectDir)\..\..\Source\Services\Common\Durango;
-      $(ProjectDir)\..\..\Source\Services\Social;
-      $(ProjectDir)\..\..\Source\Services\Social\Manager;
-      $(ProjectDir)\..\..\Source\Services\Achievements;
-      $(ProjectDir)\..\..\Source\Services\Leaderboard;
-      $(ProjectDir)\..\..\Source\Services\Stats;
-      $(ProjectDir)\..\..\Source\Services\Multiplayer;
-      $(ProjectDir)\..\..\Source\Services\Matchmaking;
-      $(ProjectDir)\..\..\Source\Services\RealTimeActivity;
-      $(ProjectDir)\..\..\Source\Services\GameServerPlatform;
-      $(ProjectDir)\..\..\Source\Services\Clubs;
-      $(ProjectDir)\..\..\Source\Shared;
-      $(ProjectDir)\..\..\Source\System;
-      $(ProjectDir)\..\..\Source\;
-      $(ProjectDir)\..\..\Include;
-      $(ProjectDir)\..\..\External\cpprestsdk\Release\include;
-      $(ProjectDir)\..\..\Source\Services\Presence;
-      $(ProjectDir)\..\..\Source\Services\TitleStorage;
-      %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      $(ProjectDir)..\..\Source\Services;
+      $(ProjectDir)..\..\Source\Services\Common;
+      $(ProjectDir)..\..\Source\Services\Common\C;
+      $(ProjectDir)..\..\Source\Services\Common\Desktop;
+      $(ProjectDir)..\..\Source\Services\Common\Durango;
+      $(ProjectDir)..\..\Source\Services\Social;
+      $(ProjectDir)..\..\Source\Services\Social\Manager;
+      $(ProjectDir)..\..\Source\Services\Social\C;
+      $(ProjectDir)..\..\Source\Services\Achievements;
+      $(ProjectDir)..\..\Source\Services\Leaderboard;
+      $(ProjectDir)..\..\Source\Services\Stats;
+      $(ProjectDir)..\..\Source\Services\Multiplayer;
+      $(ProjectDir)..\..\Source\Services\Matchmaking;
+      $(ProjectDir)..\..\Source\Services\RealTimeActivity;
+      $(ProjectDir)..\..\Source\Services\GameServerPlatform;
+      $(ProjectDir)..\..\Source\Services\Clubs;
+      $(ProjectDir)..\..\Source\Shared;
+      $(ProjectDir)..\..\Source\System;
+      $(ProjectDir)..\..\Source\System\C;
+      $(ProjectDir)..\..\Source\;
+      $(ProjectDir)..\..\Include;
+      $(ProjectDir)..\..\External\cpprestsdk\Release\include;
+      $(ProjectDir)..\..\Source\Services\Presence;
+      $(ProjectDir)..\..\Source\Services\TitleStorage;
+      %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <GenerateXMLDocumentationFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'">true</GenerateXMLDocumentationFiles>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

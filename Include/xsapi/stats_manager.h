@@ -220,20 +220,26 @@ public:
         _In_ const xbox_live_user_t& user
         );
 
-    /// <summary> 
-    /// Stats will be sent to the service automatically every 5 minutes or you can call 
-    /// request_flush_to_service() if you want to update the service with the latest stats sooner
-    /// such as when a match or round ends.
-    /// 
-    /// This will cause the current stat values to be uploaded to the service with
-    /// a maximum rate of once every 30 seconds.  Set isHighPriority to true when your title 
-    /// is getting suspended as this will try to update the stats even if it hasn't been 30 seconds 
-    /// since the last flush. However requests to flush with isHighPriority=true are still limited 
-    /// to a maximum rate of once every 30 seconds so it can't be used to flood the service.
-    ///
-    /// Note that you may still be throttled when calling the stats service such if you are 
-    /// relaunching the title over and over and send stats at every launch.
-    /// </summary>
+	/// <summary> 
+	/// Requests that stats_manager sends the stats to the service immediately,
+	/// with a maximum rate of once every 30 seconds. If you do not call this method, stats
+	/// are automatically sent to the service every 5 minutes.
+	/// </summary>
+	/// <param name="user">The user to flush the stat for.</param>
+	/// <param name="isHighPriority">Indicates if the flush is a high priority, typically when the game is getting suspended.</param>
+	/// <remarks>
+	/// Stats are automatically sent to the service every 5 minutes. You can call this method 
+	/// if you want to update the service with the latest stats sooner such as when a match or round ends.
+	/// 
+	/// This causes the current stat values to be uploaded to the service with
+	/// a maximum rate of once every 30 seconds.  Set isHighPriority to true when your title 
+	/// is getting suspended as this will try to update the stats even if it hasn't been 30 seconds 
+	/// since the last flush. However requests to flush with isHighPriority=true are still limited 
+	/// to a maximum rate of once every 30 seconds so it can't be used to flood the service.
+	///
+	/// Note that you may still be throttled when calling the stats service such as if you are 
+	/// relaunching the title over and over and send stats at every launch.
+	/// </remarks>
     _XSAPIIMP xbox_live_result<void> request_flush_to_service(
         _In_ const xbox_live_user_t& user,
         _In_ bool isHighPriority = false
@@ -299,31 +305,48 @@ public:
     /// <summary> 
     /// Gets all stat names in the stat document.
     /// </summary>
-    /// <param name="user">The local user whose stats to access</param>
+    /// <param name="user">The local user whose stats to access.</param>
     /// <param name="statNameList">The list to fill with stat names</param>
     /// <return>Whether or not the setting was successful.</return>
+    /// <remarks>
+    /// These are the names for the stats that the user already has values for.
+    /// This call won't return all the stat names configured for the title.
+    ///
+    /// For example
+    ///
+    /// A title has stat1, stat2, and stat3 configured in the developer portal.
+    /// The user has previously set a value for stat2.
+    /// get_stat_names() will only return "stat2".
+    /// 
+    /// Note that if the service can't be reached then this will return an empty list.
+    /// </remarks>
     _XSAPIIMP xbox_live_result<void> get_stat_names(
         _In_ const xbox_live_user_t& user,
         _Inout_ std::vector<string_t>& statNameList
         );
 
     /// <summary> 
-    /// Gets a stat value
+    /// Gets a stat value.
     /// </summary>
-    /// <param name="user">The local user whose stats to access</param>
-    /// <param name="statName">The name of the statistic to modify</param>
-    /// <return>Whether or not the setting was successful along with updated stat</return>
+    /// <param name="user">The local user whose stats to access.</param>
+    /// <param name="statName">The name of the statistic to retrieve.</param>
+    /// <return>Whether or not the setting was successful along with updated stat.</return>
+    /// <remarks>
+    /// The title is responsible for tracking user stats. For example with connected storage.
+    /// This method will return the value for a stat stored in the service; however, this value 
+    /// returned will not be valid if the service couldn't be reached.
+    /// </remarks>
     _XSAPIIMP xbox_live_result<stat_value> get_stat(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& statName
         );
 
     /// <summary> 
-    /// Deletes a stat. Will clear stat from service and social leaderboard information
+    /// Deletes a stat. Will clear stat from service and social leaderboard information.
     /// </summary>
-    /// <param name="user">The local user whose stats to access</param>
-    /// <param name="statName">The name of the statistic to delete</param>
-    /// <return>Whether or not the stat deletion was successful</return>
+    /// <param name="user">The local user whose stats to access.</param>
+    /// <param name="statName">The name of the statistic to delete.</param>
+    /// <return>Whether or not the stat deletion was successful.</return>
     _XSAPIIMP xbox_live_result<void> delete_stat(
         _In_ const xbox_live_user_t& user,
         _In_ const string_t& statName

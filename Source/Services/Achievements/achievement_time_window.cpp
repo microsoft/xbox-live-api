@@ -7,8 +7,6 @@
 #include "utils.h"
 #include "user_context.h"
 
-using namespace pplx;
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_ACHIEVEMENTS_CPP_BEGIN
 
 achievement_time_window::achievement_time_window()
@@ -24,12 +22,14 @@ achievement_time_window::achievement_time_window(
 {
 }
 
-const utility::datetime& achievement_time_window::start_date() const
+const utility::datetime&
+achievement_time_window::start_date() const
 {
     return m_startDate;
 }
 
-const utility::datetime& achievement_time_window::end_date() const
+const utility::datetime& 
+achievement_time_window::end_date() const
 {
     return m_endDate;
 }

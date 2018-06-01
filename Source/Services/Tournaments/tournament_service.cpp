@@ -272,16 +272,17 @@ tournament_service::tournament_sub_path_url(
     )
 {
     web::uri_builder subPathBuilder;
+    string_t xuid = utils::string_t_from_internal_string(m_userContext->xbox_user_id());
 
     stringstream_t path;
     path << _T("/tournaments");
     subPathBuilder.set_path(path.str());
 
     subPathBuilder.append_query(_T("titleId"), m_appConfig->title_id());
-    subPathBuilder.append_query(_T("teamForMember"), m_userContext->xbox_user_id());
+    subPathBuilder.append_query(_T("teamForMember"), xuid);
     if (request.filter_results_for_user())
     {
-        subPathBuilder.append_query(_T("memberId"), m_userContext->xbox_user_id());
+        subPathBuilder.append_query(_T("memberId"), xuid);
     }
 
     if (!request.organizer_id().empty())
@@ -334,7 +335,7 @@ tournament_service::team_sub_path_url(
 
     if (request.filter_results_for_user())
     {
-        subPathBuilder.append_query(_T("memberId"), m_userContext->xbox_user_id());
+        subPathBuilder.append_query(_T("memberId"), utils::string_t_from_internal_string(m_userContext->xbox_user_id()));
     }
 
     if (request.max_items() > 0)

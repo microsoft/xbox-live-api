@@ -18,8 +18,9 @@ xbox_live_context::xbox_live_context(
     _In_ Windows::Xbox::System::User^ user
     )
 {
-    m_xboxLiveContextImpl = std::make_shared<xbox_live_context_impl>(user);
-    m_xboxLiveContextImpl->init();
+    m_xboxLiveContextImpl = xsapi_allocate_shared<xbox_live_context_impl>(user);
+    m_xboxLiveContextImpl->user_context()->set_caller_api_type(xbox::services::caller_api_type::api_cpp);
+    init();
 }
 
 Windows::Xbox::System::User^
@@ -35,8 +36,9 @@ xbox_live_context::xbox_live_context(
     )
 {
     user->_User_impl()->set_user_pointer(user);
-    m_xboxLiveContextImpl = std::make_shared<xbox_live_context_impl>(user);
-    m_xboxLiveContextImpl->init();
+    m_xboxLiveContextImpl = xsapi_allocate_shared<xbox_live_context_impl>(user);
+    m_xboxLiveContextImpl->user_context()->set_caller_api_type(xbox::services::caller_api_type::api_cpp);
+    this->init();
 }
 
 std::shared_ptr<system::xbox_live_user>
@@ -51,8 +53,9 @@ xbox_live_context::xbox_live_context(
     _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user
     )
 {
-    m_xboxLiveContextImpl = std::make_shared<xbox_live_context_impl>(user);
-    m_xboxLiveContextImpl->init();
+    m_xboxLiveContextImpl = xsapi_allocate_shared<xbox_live_context_impl>(user);
+    m_xboxLiveContextImpl->user_context()->set_caller_api_type(xbox::services::caller_api_type::api_cpp);
+    this->init();
 }
 
 Microsoft::Xbox::Services::System::XboxLiveUser^
@@ -63,27 +66,38 @@ xbox_live_context::user()
 
 #endif
 
-const string_t& xbox_live_context::xbox_live_user_id()
+void xbox_live_context::init()
 {
-    return m_xboxLiveContextImpl->xbox_live_user_id();
+    m_xboxLiveContextImpl->init();
+
+	m_achievementService = achievements::achievement_service(m_xboxLiveContextImpl->achievement_service_internal());
+    m_profileService = social::profile_service(m_xboxLiveContextImpl->profile_service_impl());
+    m_socialService = social::social_service(settings(), m_xboxLiveContextImpl->social_service_impl());
+    m_reputationService = social::reputation_service(m_xboxLiveContextImpl->reputation_service_impl());
+    m_presenceService = presence::presence_service(m_xboxLiveContextImpl->presence_service());
+}
+
+string_t xbox_live_context::xbox_live_user_id()
+{
+    return utils::string_t_from_internal_string(m_xboxLiveContextImpl->xbox_live_user_id());
 }
 
 social::profile_service&
 xbox_live_context::profile_service()
 {
-    return m_xboxLiveContextImpl->profile_service();
+    return m_profileService;
 }
 
 social::social_service&
 xbox_live_context::social_service()
 {
-    return m_xboxLiveContextImpl->social_service();
+    return m_socialService;
 }
 
 social::reputation_service&
 xbox_live_context::reputation_service()
 {
-    return m_xboxLiveContextImpl->reputation_service();
+    return m_reputationService;
 }
 
 leaderboard::leaderboard_service&
@@ -95,7 +109,7 @@ xbox_live_context::leaderboard_service()
 achievements::achievement_service&
 xbox_live_context::achievement_service()
 {
-    return m_xboxLiveContextImpl->achievement_service();
+    return m_achievementService;
 }
 
 multiplayer::multiplayer_service&
@@ -131,7 +145,7 @@ xbox_live_context::real_time_activity_service()
 presence::presence_service&
 xbox_live_context::presence_service()
 {
-    return m_xboxLiveContextImpl->presence_service();
+    return m_presenceService;
 }
 
 game_server_platform::game_server_platform_service&
@@ -209,5 +223,13 @@ xbox_live_context::application_config()
 {
     return m_xboxLiveContextImpl->application_config();
 }
+
+#if !XSAPI_CPP
+std::shared_ptr<user_context>
+xbox_live_context::_User_context() const
+{
+    return m_xboxLiveContextImpl->user_context();
+}
+#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

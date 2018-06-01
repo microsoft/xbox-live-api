@@ -43,7 +43,7 @@ title_storage_service::get_quota(
     )
 {
     RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(serviceConfigurationId, title_storage_quota, "Service configuration id is empty");
-    string_t xboxUserId = m_userContext->xbox_user_id();
+    string_t xboxUserId = utils::string_t_from_internal_string(m_userContext->xbox_user_id());
     xbox_live_result<string_t> subpathAndQueryResult = title_storage_quota_subpath(
         storageType,
         serviceConfigurationId,
@@ -164,7 +164,7 @@ title_storage_service::get_blob_metadata(
 
     if ((storageType == title_storage_type::trusted_platform_storage || storageType == title_storage_type::json_storage) && xboxUserId.empty())
     {
-        xboxUserId = m_userContext->xbox_user_id();
+        xboxUserId = utils::string_t_from_internal_string(m_userContext->xbox_user_id());
     }
 
     return internal_get_blob_metadata(
@@ -436,7 +436,9 @@ title_storage_service::download_blob(
 
                     startByte += static_cast<uint32_t>(responseByteLength);
 
-                    if (!isBinaryData || responseByteLength < preferredDownloadBlockSize)
+                    if (!isBinaryData || 
+                        responseByteLength < preferredDownloadBlockSize || 
+                        startByte == resultBlobMetadata.length())
                     {
                         isDownloading = false;
                         resultBlobMetadata._Set_e_tag_and_length(

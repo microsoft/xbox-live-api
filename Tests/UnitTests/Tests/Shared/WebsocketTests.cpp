@@ -46,6 +46,7 @@ public:
 
         connection->set_connection_state_change_handler([helper](web_socket_connection_state oldState, web_socket_connection_state newState)
         {
+            UNREFERENCED_PARAMETER(oldState);
             if (newState == web_socket_connection_state::disconnected)
             {
                 ++helper->disconnected;
@@ -77,8 +78,8 @@ public:
 
         std::shared_ptr<web_socket_connection> connection = std::make_shared<web_socket_connection>(
             userContext,
-            web::uri(L"wss://rta.xboxlive.com/connect"),
-            L"rta.xboxlive.com",
+            "wss://rta.xboxlive.com/connect",
+            "rta.xboxlive.com",
             GetDefaultHttpSetting()
             );
 
@@ -100,25 +101,22 @@ public:
         VERIFY_ARE_EQUAL_INT(stateChangeHelper->connecting, 1);
 
         // send test
-        string_t sendMessage = L"[0, 1, 1]";
-        mockSocket->set_send_handler([sendMessage](string_t msg)
+        xsapi_internal_string sendMessage = "[0, 1, 1]";
+        mockSocket->set_send_handler([sendMessage](xsapi_internal_string msg)
         {
             VERIFY_ARE_EQUAL(sendMessage, msg);
         });
         connection->send(sendMessage);
 
         // receive test
-        string_t receiveMessage = L"message receive";
-        connection->set_received_handler([receiveMessage](string_t msg)
+        xsapi_internal_string receiveMessage = "message receive";
+        connection->set_received_handler([receiveMessage](xsapi_internal_string msg)
         {
             VERIFY_ARE_EQUAL(msg, receiveMessage);
         });
         mockSocket->m_receiveHandler(receiveMessage);
 
         connection->close();
-
-        // make sure the connection task will quit, and we cleanup in the end.
-        connection->connection_task().wait();
     }
 
     DEFINE_TEST_CASE(ConnectFail)
@@ -130,8 +128,8 @@ public:
 
         std::shared_ptr<web_socket_connection> connection = std::make_shared<web_socket_connection>(
             userContext,
-            web::uri(L"wss://rta.xboxlive.com/connect"),
-            L"rta.xboxlive.com",
+            "wss://rta.xboxlive.com/connect",
+            "rta.xboxlive.com",
             GetDefaultHttpSetting()
             );
         auto stateChangeHelper = SetupStateChangeHelper(connection);
@@ -151,9 +149,6 @@ public:
         VERIFY_ARE_EQUAL_INT(stateChangeHelper->connecting, 1);
 
         connection->close();
-
-        // Make sure connection taks will finish.
-        connection->connection_task().wait();
     }
 
     DEFINE_TEST_CASE(MultiConnecting)
@@ -165,8 +160,8 @@ public:
 
         std::shared_ptr<web_socket_connection> connection = std::make_shared<web_socket_connection>(
             userContext,
-            web::uri(L"wss://rta.xboxlive.com/connect"),
-            L"rta.xboxlive.com",
+            "wss://rta.xboxlive.com/connect",
+            "rta.xboxlive.com",
             GetDefaultHttpSetting()
             );
         // setup state change callback
@@ -199,9 +194,6 @@ public:
         VERIFY_ARE_EQUAL_INT(stateChangeHelper->connecting, 1);
 
         connection->close();
-
-        // make sure the connection task will quit, and we cleanup in the end.
-        connection->connection_task().wait();
     }
 
     DEFINE_TEST_CASE(ConnectThenClientCloseThenConnect)
@@ -213,8 +205,8 @@ public:
 
         std::shared_ptr<web_socket_connection> connection = std::make_shared<web_socket_connection>(
             userContext,
-            web::uri(L"wss://rta.xboxlive.com/connect"),
-            L"rta.xboxlive.com",
+            "wss://rta.xboxlive.com/connect",
+            "rta.xboxlive.com",
             GetDefaultHttpSetting()
             );
 
@@ -228,7 +220,9 @@ public:
         stateChangeHelper->connectedEvent.wait();
         VERIFY_ARE_EQUAL_INT(connection->state(), web_socket_connection_state::connected);
 
-        create_task(connection->close()).wait();
+
+        connection->close();
+        stateChangeHelper->disconnectedEvent.wait();
         VERIFY_ARE_EQUAL_INT(connection->state(), web_socket_connection_state::disconnected);
 
         stateChangeHelper->reset_events();
@@ -241,9 +235,6 @@ public:
         VERIFY_ARE_EQUAL_INT(stateChangeHelper->connecting, 2);
 
         connection->close();
-
-        // make sure the connection task will quit, and we cleanup in the end.
-        connection->connection_task().wait();
     }
 
     DEFINE_TEST_CASE(ConnectThenServiceCloseThenConnect)
@@ -255,8 +246,8 @@ public:
 
         std::shared_ptr<web_socket_connection> connection = std::make_shared<web_socket_connection>(
             userContext,
-            web::uri(L"wss://rta.xboxlive.com/connect"),
-            L"rta.xboxlive.com",
+            "wss://rta.xboxlive.com/connect",
+            "rta.xboxlive.com",
             GetDefaultHttpSetting()
             );
         auto stateChangeHelper = SetupStateChangeHelper(connection);
@@ -272,7 +263,7 @@ public:
 
         // 2 connecting, 2 connected
         stateChangeHelper->reset_events();
-        mockSocket->m_closeHandler(1001, L"");
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
         stateChangeHelper->connectedEvent.wait();
         VERIFY_ARE_EQUAL_INT(connection->state(), web_socket_connection_state::connected);
 
@@ -284,9 +275,6 @@ public:
         VERIFY_ARE_EQUAL_INT(stateChangeHelper->connecting, 2);
 
         connection->close();
-
-        // make sure the connection task will quit, and we cleanup in the end.
-        connection->connection_task().wait();
     }
 
     DEFINE_TEST_CASE(ConnectRetry)
@@ -302,8 +290,8 @@ public:
 
         std::shared_ptr<web_socket_connection> connection = std::make_shared<web_socket_connection>(
             userContext,
-            web::uri(L"wss://rta.xboxlive.com/connect"),
-            L"rta.xboxlive.com",
+            "wss://rta.xboxlive.com/connect",
+            "rta.xboxlive.com",
             httpSetting
             );
 
@@ -335,9 +323,6 @@ public:
         VERIFY_ARE_EQUAL_INT(stateChangeHelper->connecting, 1);
 
         connection->close();
-
-        // make sure the connection task will quit, and we cleanup in the end.
-        connection->connection_task().wait();
     }
 
     DEFINE_TEST_CASE(ConnectRetryFail)
@@ -353,8 +338,8 @@ public:
 
         std::shared_ptr<web_socket_connection> connection = std::make_shared<web_socket_connection>(
             userContext,
-            web::uri(L"wss://rta.xboxlive.com/connect"),
-            L"rta.xboxlive.com",
+            "wss://rta.xboxlive.com/connect",
+            "rta.xboxlive.com",
             httpSetting
             );
 
@@ -391,9 +376,6 @@ public:
         VERIFY_ARE_EQUAL_INT(stateChangeHelper->connecting, 1);
 
         connection->close();
-
-        // make sure the connection task will quit, and we cleanup in the end.
-        connection->connection_task().wait();
     }
 };
 

@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.Services", "Microsoft.Xbox.Services.141.XDK.WinRT.vcxproj", "{9BF96BF1-7E60-49B7-A137-E6C961A28336}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "casablanca141.xbox", "..\..\External\cpprestsdk\Release\src\build\vs15.xbox\casablanca141.Xbox.vcxproj", "{E621C269-D177-4C1B-80EA-C0A274B7A151}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libHttpClient.141.XDK.C", "..\..\External\libHttpClient\Build\libHttpClient.141.XDK.C\libHttpClient.141.XDK.C.vcxproj", "{CF37BEB2-A66A-42BA-B348-1F07566F4865}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Durango = Debug|Durango
+		Release|Durango = Release|Durango
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9BF96BF1-7E60-49B7-A137-E6C961A28336}.Debug|Durango.ActiveCfg = Debug|Durango
+		{9BF96BF1-7E60-49B7-A137-E6C961A28336}.Debug|Durango.Build.0 = Debug|Durango
+		{9BF96BF1-7E60-49B7-A137-E6C961A28336}.Release|Durango.ActiveCfg = Release|Durango
+		{9BF96BF1-7E60-49B7-A137-E6C961A28336}.Release|Durango.Build.0 = Release|Durango
+		{E621C269-D177-4C1B-80EA-C0A274B7A151}.Debug|Durango.ActiveCfg = Debug|Durango
+		{E621C269-D177-4C1B-80EA-C0A274B7A151}.Debug|Durango.Build.0 = Debug|Durango
+		{E621C269-D177-4C1B-80EA-C0A274B7A151}.Release|Durango.ActiveCfg = Release|Durango
+		{E621C269-D177-4C1B-80EA-C0A274B7A151}.Release|Durango.Build.0 = Release|Durango
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|Durango.ActiveCfg = Debug|Durango
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|Durango.Build.0 = Debug|Durango
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|Durango.ActiveCfg = Release|Durango
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|Durango.Build.0 = Release|Durango
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {15B9CA56-21DD-407F-BAD8-9ACEA0D2108C}
+	EndGlobalSection
+EndGlobal

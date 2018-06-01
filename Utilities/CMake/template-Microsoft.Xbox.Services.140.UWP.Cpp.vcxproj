@@ -58,35 +58,39 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\External\libHttpClient\libHttpClient.props" />
   </ImportGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XSAPI_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XSAPI_BUILD;XBL_API_NONE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;XBL_API_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalOptions>/bigobj /Zm300 %(AdditionalOptions)</AdditionalOptions>
       <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories> 
        $(ProjectDir);
-       $(ProjectDir)\..\..\Source\Services;
-       $(ProjectDir)\..\..\Source\Services\Common;
-       $(ProjectDir)\..\..\Source\Services\Common\Desktop;
-       $(ProjectDir)\..\..\Source\Services\Social;
-       $(ProjectDir)\..\..\Source\Services\Multiplayer;
-       $(ProjectDir)\..\..\Source\Services\Presence;
-       $(ProjectDir)\..\..\Source\Services\Misc;
-       $(ProjectDir)\..\..\Source\Services\Social\Manager;
-       $(ProjectDir)\..\..\Source\Services\RealTimeActivity;
-       $(ProjectDir)\..\..\Source\Services\Clubs;
-       $(ProjectDir)\..\..\Source\Shared;
-       $(ProjectDir)\..\..\Source\Shared\WinRT;
-       $(ProjectDir)\..\..\Include;
-       ..\..\External\cpprestsdk\Release\include;
-       $(ProjectDir)\..\..\Source\System\WinRT;
-       $(ProjectDir)\..\..\Source\System;
+       $(ProjectDir)..\..\Source\Services;
+       $(ProjectDir)..\..\Source\Services\Common;
+       $(ProjectDir)..\..\Source\Services\Common\C;
+       $(ProjectDir)..\..\Source\Services\Common\Desktop;
+       $(ProjectDir)..\..\Source\Services\Social;
+       $(ProjectDir)..\..\Source\Services\Multiplayer;
+       $(ProjectDir)..\..\Source\Services\Presence;
+       $(ProjectDir)..\..\Source\Services\Misc;
+       $(ProjectDir)..\..\Source\Services\Social\Manager;
+       $(ProjectDir)..\..\Source\Services\Social\C;
+       $(ProjectDir)..\..\Source\Services\RealTimeActivity;
+       $(ProjectDir)..\..\Source\Services\Clubs;
+       $(ProjectDir)..\..\Source\Shared;
+       $(ProjectDir)..\..\Source\Shared\WinRT;
+       $(ProjectDir)..\..\Include;
+       $(ProjectDir)..\..\External\cpprestsdk\Release\include;
+       $(ProjectDir)..\..\Source\System\WinRT;
+       $(ProjectDir)..\..\Source\System;
+       $(ProjectDir)..\..\Source\System\C;
        %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
       <CompileAsWinRT>true</CompileAsWinRT>
@@ -128,9 +132,9 @@
     <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs14.uwp\cpprestsdk140.uwp.static.vcxproj">
       <Project>{9ad285a2-301e-47a0-a299-14ad5d4f2758}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\External\libHttpClient\Build\libHttpClient.140.UWP.C\libHttpClient.140.UWP.C.vcxproj">
+      <Project>{1B0DFB7F-2CD5-48DE-80D4-5CC56C22AEEE}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
-
-
-

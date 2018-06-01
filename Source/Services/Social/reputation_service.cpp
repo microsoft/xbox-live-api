@@ -3,9 +3,6 @@
 
 #include "pch.h"
 #include "xsapi/social.h"
-#include "user_context.h"
-#include "utils.h"
-#include "xbox_system_factory.h"
 #include "social_internal.h"
 
 using namespace pplx;
@@ -13,13 +10,9 @@ using namespace pplx;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
 reputation_service::reputation_service(
-    _In_ std::shared_ptr<xbox::services::user_context> userContext,
-    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+    _In_ std::shared_ptr<reputation_service_impl> serviceImpl
     ) :
-    m_userContext(std::move(userContext)),
-    m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
-    m_appConfig(std::move(appConfig))
+    m_serviceImpl(std::move(serviceImpl))
 {
 }
 
@@ -28,42 +21,21 @@ reputation_service::submit_batch_reputation_feedback(
     _In_ const std::vector< reputation_feedback_item >& feedbackItems
     )
 {
-    for (auto& feedbackItem : feedbackItems)
+    task_completion_event<xbox_live_result<void>> tce;
+
+    auto result = m_serviceImpl->submit_batch_reputation_feedback(
+        utils::internal_vector_from_std_vector<reputation_feedback_item_internal, reputation_feedback_item>(feedbackItems),
+        nullptr,
+        [tce](xbox_live_result<void> result) 
+        {
+            tce.set(result); 
+        });
+
+    if (result.err())
     {
-        RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(feedbackItem.xbox_user_id(), void, "Xbox user id is empty");
-        RETURN_TASK_CPP_INVALIDARGUMENT_IF(
-            feedbackItem.feedback_type() < reputation_feedback_type::fair_play_kills_teammates ||
-            feedbackItem.feedback_type() > reputation_feedback_type::fair_play_leaderboard_cheater,
-            void,
-            "Reputation feedback type is out of range"
-            );
+        return pplx::task_from_result(result);
     }
-    
-    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("POST"),
-        utils::create_xboxlive_endpoint(_T("reputation"), m_appConfig),
-        _T("/users/batchtitlefeedback"),
-        xbox_live_api::submit_batch_reputation_feedback
-        );
-
-    httpCall->set_retry_allowed(false);
-    httpCall->set_xbox_contract_version_header_value(_T("101"));
-
-    std::error_code err;
-    web::json::value request = reputation_feedback_request::serialize_batch_feedback_request(feedbackItems, err);
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(err, void, "Invalid reputation_feedback_item");
-    httpCall->set_request_body(request.serialize());
-
-    auto task = httpCall->get_response_with_auth(m_userContext, http_call_response_body_type::string_body)
-    .then([](std::shared_ptr<http_call_response> response)
-    {
-        return xbox_live_result<void>(response->err_code(), response->err_message());
-    });
-
-    return utils::create_exception_free_task<void>(
-        task
-        );
+    return pplx::task<xbox_live_result<void>>(tce);
 }
 
 
@@ -76,59 +48,26 @@ reputation_service::submit_reputation_feedback(
     _In_ const string_t& evidenceResourceId
     )
 {
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(xboxUserId, void, "Xbox user id is empty");
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(
-        reputationFeedbackType < reputation_feedback_type::fair_play_kills_teammates ||
-        reputationFeedbackType > reputation_feedback_type::fair_play_leaderboard_cheater,
-        void,
-        "Reputation feedback type is out of range"
-        );
-    
-    string_t pathAndQuery = reputation_feedback_subpath(xboxUserId);
-    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("POST"),
-        utils::create_xboxlive_endpoint(_T("reputation"), m_appConfig),
-        pathAndQuery,
-        xbox_live_api::submit_reputation_feedback
-        );
+    task_completion_event<xbox_live_result<void>> tce;
 
-    httpCall->set_retry_allowed(false);
-    httpCall->set_xbox_contract_version_header_value(_T("100"));
-
-    reputation_feedback_request reputationFeedbackRequest(
+    auto result = m_serviceImpl->submit_reputation_feedback(
+        utils::internal_string_from_string_t(xboxUserId),
         reputationFeedbackType,
-        sessionName,
-        reasonMessage,
-        evidenceResourceId
+        nullptr,
+        [tce](xbox_live_result<void> result) 
+        {
+            tce.set(result); 
+        },
+        utils::internal_string_from_string_t(sessionName),
+        utils::internal_string_from_string_t(reasonMessage),
+        utils::internal_string_from_string_t(evidenceResourceId)
         );
 
-    web::json::value request = reputationFeedbackRequest.serialize_feedback_request();
-    httpCall->set_request_body(request.serialize());
-
-    auto task = httpCall->get_response_with_auth(m_userContext, http_call_response_body_type::string_body)
-    .then([](std::shared_ptr<http_call_response> response)
+    if (result.err())
     {
-        return xbox_live_result<void>(response->err_code(), response->err_message());
-    });
-
-    return utils::create_exception_free_task<void>(
-        task
-        );
+        return pplx::task_from_result(result);
+    }
+    return pplx::task<xbox_live_result<void>>(tce);
 }
-
-string_t
-reputation_service::reputation_feedback_subpath(
-    _In_ const string_t& xboxUserId
-)
-{
-    stringstream_t source;
-    source << _T("/users/xuid(");
-    source << xboxUserId;
-    source << _T(")/feedback");
-
-    return source.str();
-}
-
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

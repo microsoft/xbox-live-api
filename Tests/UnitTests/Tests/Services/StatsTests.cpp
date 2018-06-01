@@ -147,6 +147,7 @@ public:
 
     void VerifyStats(Statistic^ stat, web::json::value statToVerify, bool isSingleUser)
     {
+        UNREFERENCED_PARAMETER(isSingleUser);
         VERIFY_ARE_EQUAL(stat->StatisticName->Data(), statToVerify[L"statname"].as_string());
         VERIFY_ARE_EQUAL(stat->Value->Data(), statToVerify[L"value"].as_string());
         if (stat->StatisticType == PropertyType::Int64)
@@ -261,7 +262,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://userstats.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(L"/batch?operation=read", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_STR(LR"({"requestedscids":[{"requestedstats":["namename"],"scid":"serviceConfigId"}],"requestedusers":["123"]})", httpCall->request_body().request_message_string());
+        VERIFY_ARE_EQUAL_STR(R"({"requestedscids":[{"requestedstats":["namename"],"scid":"serviceConfigId"}],"requestedusers":["123"]})", httpCall->request_body().request_message_string());
 
         VERIFY_IS_NOT_NULL(result);
 
@@ -300,7 +301,7 @@ public:
         VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
         VERIFY_ARE_EQUAL_STR(L"https://userstats.mockenv.xboxlive.com", httpCall->ServerName);
         VERIFY_ARE_EQUAL_STR(L"/batch?operation=read", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_STR(LR"({"requestedscids":[{"requestedstats":["namename"],"scid":"serviceConfigId"}],"requestedusers":["123"]})", httpCall->request_body().request_message_string());
+        VERIFY_ARE_EQUAL_STR(R"({"requestedscids":[{"requestedstats":["namename"],"scid":"serviceConfigId"}],"requestedusers":["123"]})", httpCall->request_body().request_message_string());
 
         VERIFY_IS_NOT_NULL(result);
 

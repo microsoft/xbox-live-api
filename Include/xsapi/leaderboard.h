@@ -191,6 +191,16 @@ public:
     void set_order(_In_ sort_order order);
 
     /// <summary>
+    /// Set the callback ID when this is used by stats_manager
+    /// </summary>
+    void set_callback_id(_In_ uint64_t callbackId);
+
+    /// <summary>
+    /// Set the callback ID when this is used by stats_manager
+    /// </summary>
+    uint64_t callback_id() const;
+
+    /// <summary>
     /// Gets whether or not the resulting leaderboard will start with the 
     /// user that requested the leaderboard.
     /// </summary>
@@ -257,6 +267,7 @@ private:
     string_t m_continuationToken;
     string_t m_statName;
     string_t m_socialGroup;
+    uint64_t m_callbackId;
 };
 
 /// <summary>

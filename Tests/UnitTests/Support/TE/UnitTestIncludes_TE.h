@@ -93,6 +93,11 @@ public:
     {
         Assert::IsTrue(expected == actual);
     }
+
+    static void AreEqual(xsapi_internal_string expected, xsapi_internal_string actual)
+    {
+        Assert::AreEqual(expected.data(), actual.data(), false, nullptr, LINE_INFO());
+    }
 };
 
 #define VERIFY_ARE_EQUAL_UINT(expected, actual) \
@@ -236,6 +241,13 @@ inline void VERIFY_IS_EQUAL_JSON_HELPER_FROM_STRINGS(std::wstring expected, std:
 {
     web::json::value expectedJson = web::json::value::parse(expected);
     web::json::value actualJson = web::json::value::parse(actual);
+    return VERIFY_IS_EQUAL_JSON_HELPER(expectedJson, actualJson, pszParamName);
+}
+
+inline void VERIFY_IS_EQUAL_JSON_HELPER_FROM_STRINGS(std::wstring expected, xsapi_internal_string actual, const wchar_t* pszParamName)
+{
+    web::json::value expectedJson = web::json::value::parse(expected);
+    web::json::value actualJson = web::json::value::parse(xbox::services::utils::string_t_from_internal_string(actual));
     return VERIFY_IS_EQUAL_JSON_HELPER(expectedJson, actualJson, pszParamName);
 }
 

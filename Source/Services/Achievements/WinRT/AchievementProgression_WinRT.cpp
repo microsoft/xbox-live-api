@@ -20,7 +20,7 @@ AchievementProgression::AchievementProgression(
     m_cppObj(std::move(cppObj))
 {
     m_requirements = ref new Vector<AchievementRequirement^>();
-    auto& cppRequirements = m_cppObj.requirements();
+    auto cppRequirements = m_cppObj.requirements();
     for (const auto& requirement : cppRequirements)
     {
         m_requirements->Append(ref new AchievementRequirement(requirement));

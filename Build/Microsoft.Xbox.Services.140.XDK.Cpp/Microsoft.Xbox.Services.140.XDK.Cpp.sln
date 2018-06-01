@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Xbox.Services.140.XDK.Cpp", "Microsoft.Xbox.Services.140.XDK.Cpp.vcxproj", "{8A112040-CDA1-4490-B518-62DFCC451FA7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libHttpClient.140.XDK.C", "..\..\External\libHttpClient\Build\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.vcxproj", "{CF37BEB2-A66A-42BA-B348-1F07566F4865}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "casablanca140.xbox", "..\..\External\cpprestsdk\Release\src\build\vs14.xbox\casablanca140.Xbox.vcxproj", "{E621C269-D177-4C1B-80EA-C0A274B7A151}"
 EndProject
@@ -17,6 +19,10 @@ Global
 		{8A112040-CDA1-4490-B518-62DFCC451FA7}.Debug|Durango.Build.0 = Debug|Durango
 		{8A112040-CDA1-4490-B518-62DFCC451FA7}.Release|Durango.ActiveCfg = Release|Durango
 		{8A112040-CDA1-4490-B518-62DFCC451FA7}.Release|Durango.Build.0 = Release|Durango
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|Durango.ActiveCfg = Debug|Durango
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Debug|Durango.Build.0 = Debug|Durango
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|Durango.ActiveCfg = Release|Durango
+		{CF37BEB2-A66A-42BA-B348-1F07566F4865}.Release|Durango.Build.0 = Release|Durango
 		{E621C269-D177-4C1B-80EA-C0A274B7A151}.Debug|Durango.ActiveCfg = Debug|Durango
 		{E621C269-D177-4C1B-80EA-C0A274B7A151}.Debug|Durango.Build.0 = Debug|Durango
 		{E621C269-D177-4C1B-80EA-C0A274B7A151}.Release|Durango.ActiveCfg = Release|Durango

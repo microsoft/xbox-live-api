@@ -5,6 +5,7 @@
 #include "social_manager_internal.h"
 #include "http_call_impl.h"
 #include "xbox_system_factory.h"
+#include "xbox_live_app_config_internal.h"
 
 using namespace xbox::services;
 
@@ -13,7 +14,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
 peoplehub_service::peoplehub_service(
     _In_ std::shared_ptr<xbox::services::user_context> userContext,
     _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> httpCallSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+    _In_ std::shared_ptr<xbox::services::xbox_live_app_config_internal> appConfig
     ) :
     m_userContext(std::move(userContext)),
     m_httpCallSettings(std::move(httpCallSettings)),
@@ -21,47 +22,54 @@ peoplehub_service::peoplehub_service(
 {
 }
 
-pplx::task<xbox_live_result<std::vector<xbox_social_user>>>
-peoplehub_service::get_social_graph(
-    _In_ const string_t& callerXboxUserId,
-    _In_ social_manager_extra_detail_level decorations
+void peoplehub_service::get_social_graph(
+    _In_ const xsapi_internal_string& callerXboxUserId,
+    _In_ social_manager_extra_detail_level decorations,
+    _In_opt_ async_queue_handle_t queue,
+    _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
     )
 {
     return get_social_graph(
         callerXboxUserId,
         decorations,
-        _T("social"),
-        std::vector<string_t>(),
-        false
+        "social",
+        xsapi_internal_vector<xsapi_internal_string>(),
+        false,
+        queue,
+        callback
         );
 }
 
-pplx::task<xbox_live_result<std::vector<xbox_social_user>>>
-peoplehub_service::get_social_graph(
-    _In_ const string_t& callerXboxUserId,
+void peoplehub_service::get_social_graph(
+    _In_ const xsapi_internal_string& callerXboxUserId,
     _In_ social_manager_extra_detail_level decorations,
-    _In_ const std::vector<string_t> xboxLiveUsers
+    _In_ const xsapi_internal_vector<xsapi_internal_string> xboxLiveUsers,
+    _In_opt_ async_queue_handle_t queue,
+    _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
     )
 {
     return get_social_graph(
         callerXboxUserId,
         decorations,
-        _T(""),
+        "",
         xboxLiveUsers,
-        true
+        true,
+        queue,
+        callback
         );
 }
 
-pplx::task<xbox_live_result<std::vector<xbox_social_user>>>
-peoplehub_service::get_social_graph(
-    _In_ const string_t& callerXboxUserId,
+void peoplehub_service::get_social_graph(
+    _In_ const xsapi_internal_string& callerXboxUserId,
     _In_ social_manager_extra_detail_level decorations,
-    _In_ const string_t& relationshipType,
-    _In_ const std::vector<string_t> xboxLiveUsers,
-    _In_ bool isBatch
+    _In_ const xsapi_internal_string& relationshipType,
+    _In_ const xsapi_internal_vector<xsapi_internal_string> xboxLiveUsers,
+    _In_ bool isBatch,
+    _In_opt_ async_queue_handle_t queue,
+    _In_ xbox_live_callback<xbox_live_result<xsapi_internal_vector<xbox_social_user>>> callback
     )
 {
-    string_t pathAndQuery = social_graph_subpath(
+    xsapi_internal_string pathAndQuery = social_graph_subpath(
         callerXboxUserId,
         decorations,
         relationshipType,
@@ -69,11 +77,11 @@ peoplehub_service::get_social_graph(
         isBatch
         );
 
-    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_httpCallSettings,
-        isBatch ? _T("POST") : _T("GET"),
-        utils::create_xboxlive_endpoint(_T("peoplehub"), m_appConfig),
-        pathAndQuery,
+        isBatch ? "POST" : "GET",
+        utils::create_xboxlive_endpoint("peoplehub", m_appConfig),
+        utils::string_t_from_internal_string(pathAndQuery),
         xbox_live_api::get_social_graph
         );
 
@@ -83,106 +91,99 @@ peoplehub_service::get_social_graph(
         web::json::value xuidJSON = web::json::value::array();
         for (uint32_t i = 0; i < xboxLiveUsers.size(); ++i)
         {
-            xuidJSON[i] = web::json::value::string(xboxLiveUsers[i]);
+            xuidJSON[i] = web::json::value::string(utils::string_t_from_internal_string(xboxLiveUsers[i]));
         }
 
         postJSON[_T("xuids")] = xuidJSON;
-        httpCall->set_request_body(postJSON);
+        httpCall->set_request_body(utils::internal_string_from_string_t(postJSON.serialize()));
     }
 
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([](std::shared_ptr<http_call_response> response)
+    auto task = httpCall->get_response_with_auth(m_userContext,
+        http_call_response_body_type::json_body,
+        false,
+        queue,
+        [callback](std::shared_ptr<http_call_response_internal> response)
     {
         std::error_code errc;
         web::json::value peopleArray = utils::extract_json_field(
             response->response_body_json(),
-            _T("people"),
+            "people",
             errc,
             false
             );
 
         if (errc)
         {
-            return xbox_live_result<std::vector<xbox_social_user>>(
+            callback(xbox_live_result<xsapi_internal_vector<xbox_social_user>>(
                 response->err_code(),
-                response->err_message()
-                );
+                response->err_message().data()
+                ));
+            return;
         }
 
-        std::vector<xbox_social_user> socialUserVec = utils::extract_json_vector<xbox_social_user>(
+        xsapi_internal_vector<xbox_social_user> socialUserVec = utils::extract_json_vector_internal<xbox_social_user>(
             xbox_social_user::_Deserialize,
             peopleArray,
             errc,
             false
             );
 
-        std::vector<xbox_social_user> socialUser;
-        socialUser.reserve(socialUserVec.size());
-        for (auto& user : socialUserVec)
-        {
-            socialUser.push_back(user);
-        }
-
-        auto socialUserResult = xbox_live_result<std::vector<xbox_social_user>>(socialUser, errc);
-
-        return utils::generate_xbox_live_result<std::vector<xbox_social_user>>(
-            socialUserResult,
+        auto result = utils::generate_xbox_live_result<xsapi_internal_vector<xbox_social_user>>(
+            xbox_live_result<xsapi_internal_vector<xbox_social_user>>(socialUserVec, errc),
             response
             );
-    });
 
-    return utils::create_exception_free_task<std::vector<xbox_social_user>>(
-        task
-        );
+        callback(result);
+    });
 }
 
-string_t peoplehub_service::social_graph_subpath(
-    _In_ const string_t& xboxUserId,
+xsapi_internal_string peoplehub_service::social_graph_subpath(
+    _In_ const xsapi_internal_string& xboxUserId,
     _In_ social_manager_extra_detail_level decorations,
-    _In_ const string_t& relationshipType,
-    _In_ const std::vector<string_t> xboxLiveUsers,
+    _In_ const xsapi_internal_string& relationshipType,
+    _In_ const xsapi_internal_vector<xsapi_internal_string> xboxLiveUsers,
     _In_ bool isBatch
     ) const
 {
-    stringstream_t source;
-    source << _T("/users/xuid(");
+    xsapi_internal_stringstream source;
+    source << "/users/xuid(";
     source << xboxUserId;
-    source << _T(")/people");
+    source << ")/people";
     if (!relationshipType.empty())
     {
-        source << _T("/") << relationshipType;
+        source << "/" << relationshipType;
     }
 
     if (isBatch)
     {
-        source << _T("/batch");
+        source << "/batch";
     }
 
     if ((decorations | social_manager_extra_detail_level::no_extra_detail) != social_manager_extra_detail_level::no_extra_detail)
     {
-        source << _T("/decoration/");
-        std::vector<string_t> decorationList;
+        source << "/decoration/";
+        xsapi_internal_vector<xsapi_internal_string> decorationList;
         if ((decorations & social_manager_extra_detail_level::title_history_level) == social_manager_extra_detail_level::title_history_level)
         {
-            stringstream_t titleStream;
-            titleStream << _T("titlehistory(");
+            xsapi_internal_stringstream titleStream;
+            titleStream << "titlehistory(";
             titleStream << m_appConfig->title_id();
-            titleStream << _T(")");
-            string_t decorationString = titleStream.str();
+            titleStream << ")";
+            xsapi_internal_string decorationString = titleStream.str();
             decorationList.push_back(decorationString);
         }
         if ((decorations & social_manager_extra_detail_level::preferred_color_level) == social_manager_extra_detail_level::preferred_color_level)
         {
-            decorationList.push_back(_T("preferredcolor"));
+            decorationList.push_back("preferredcolor");
         }
 
-        decorationList.push_back(_T("presenceDetail"));
+        decorationList.push_back("presenceDetail");
         uint32_t i = 0;
         for (const auto& str : decorationList)
         {
             if (i != 0)
             {
-                source << _T(",");
+                source << ",";
             }
             source << str;
             ++i;

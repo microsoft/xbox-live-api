@@ -141,7 +141,7 @@ public:
         }
         auto jsonResponse = BuildSocialJsonArray(socialList);
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(jsonResponse);
+        httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(jsonResponse);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
 
@@ -377,7 +377,7 @@ public:
 
         string_t jsonString = LR"({"items":[{"evidenceId":"3","feedbackType":"FairPlayCheater","sessionRef":null,"targetXuid":"1","textReason":"2","titleId":null}]})";
 
-        TEST_LOG(httpCall->request_body().request_message_string().c_str());
+        TEST_LOG(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()).c_str());
         VERIFY_IS_EQUAL_JSON_FROM_STRINGS(jsonString, httpCall->request_body().request_message_string());
         create_task(async).get();
     }

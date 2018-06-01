@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>85106196-b876-4b42-b740-33874d03ee0a</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets">
+      <UniqueIdentifier>f0539363-cb47-4e66-9231-72f4efdae97a</UniqueIdentifier>
+      <Extensions>bmp;dds;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
+    </Filter>
+    <Filter Include="ATG Tool Kit">
+      <UniqueIdentifier>{55f4c930-67b6-4760-9fdb-c1c23a04fc3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameLogic">
+      <UniqueIdentifier>{00f670a6-fb76-4781-b7bc-b6f65a8e9fc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{bcb86c68-62e4-4315-8788-f31a3b14edec}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Common\StepTimer.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\DeviceResources.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="GameLogic\Multiplayer.h">
+      <Filter>GameLogic</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\PerformanceCounters.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\SessionListView.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="LiveResources.h">
+      <Filter>ATG Tool Kit</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\InProgressSamples\Kits\ATGTK\ATGColors.h" />
+    <ClInclude Include="..\..\..\..\..\InProgressSamples\Kits\ATGTK\ControllerFont.h" />
+    <ClInclude Include="..\..\..\..\..\InProgressSamples\Kits\ATGTK\CSVReader.h" />
+    <ClInclude Include="..\..\..\..\..\InProgressSamples\Kits\ATGTK\SampleGUI.h" />
+    <ClInclude Include="..\..\..\..\..\InProgressSamples\Kits\ATGTK\TextConsole.h" />
+    <ClInclude Include="..\..\..\..\..\InProgressSamples\Kits\ATGTK\Texture.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Common\DeviceResources.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiplayerManagerIntegration.cpp" />
+    <ClCompile Include="GameLogic\Main.cpp">
+      <Filter>GameLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="GameLogic\Multiplayer.cpp">
+      <Filter>GameLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="GameLogic\Renderer.cpp">
+      <Filter>GameLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Utils.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\PerformanceCounters.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\SessionListView.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="LiveResources.cpp">
+      <Filter>ATG Tool Kit</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\InProgressSamples\Kits\ATGTK\SampleGUI.cpp" />
+    <ClCompile Include="..\..\..\..\..\InProgressSamples\Kits\ATGTK\TextConsole.cpp" />
+    <ClCompile Include="..\..\..\..\..\InProgressSamples\Kits\ATGTK\Texture.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Logo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SmallLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\WideLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\GamerPic.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Background.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\LS_bg.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\GS_bg.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\gamerpic_icon.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\dbug_bg.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\host_icon.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\MM_btnBG.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\btnCreateCustomGameON.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\btnCreateLobbyON.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\btnJoin.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\btnBecomeGameHostON.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\btnBecomeLobbyHostON.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\btnWriteGamePropertiesON.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\btnWriteLobbyPropertiesON.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\btnInviteFriendsON.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\btnChangeInviteStatusON.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\btnExitON.png">
+      <Filter>Assets</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Layout.csv">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="Assets\LiveInfoHUD.csv">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="ReadMe.docx">
+      <Filter>Common</Filter>
+    </None>
+    <None Include="xboxservices.config">
+      <Filter>Common</Filter>
+    </None>
+    <None Include="packages.config" />
+    <None Include="..\..\..\..\..\InProgressSamples\Kits\Media\Fonts\Courier_16.spritefont" />
+    <None Include="..\..\..\..\..\InProgressSamples\Kits\Media\Fonts\SegoeUI_18.spritefont" />
+    <None Include="..\..\..\..\..\InProgressSamples\Kits\Media\Fonts\SegoeUI_18_Bold.spritefont" />
+    <None Include="..\..\..\..\..\InProgressSamples\Kits\Media\Fonts\SegoeUI_18_Italic.spritefont" />
+    <None Include="..\..\..\..\..\InProgressSamples\Kits\Media\Fonts\SegoeUI_22.spritefont" />
+    <None Include="..\..\..\..\..\InProgressSamples\Kits\Media\Fonts\SegoeUI_22_Bold.spritefont" />
+    <None Include="..\..\..\..\..\InProgressSamples\Kits\Media\Fonts\SegoeUI_22_Italic.spritefont" />
+    <None Include="..\..\..\..\..\InProgressSamples\Kits\Media\Fonts\SegoeUI_36.spritefont" />
+    <None Include="..\..\..\..\..\InProgressSamples\Kits\Media\Fonts\SegoeUI_36_Bold.spritefont" />
+    <None Include="..\..\..\..\..\InProgressSamples\Kits\Media\Fonts\SegoeUI_36_Italic.spritefont" />
+    <None Include="..\..\..\..\..\InProgressSamples\Kits\Media\Fonts\XboxOneController.spritefont" />
+    <None Include="..\..\..\..\..\InProgressSamples\Kits\Media\Fonts\XboxOneControllerLegend.spritefont" />
+    <None Include="..\..\..\..\..\InProgressSamples\Kits\Media\Fonts\XboxOneControllerLegendSmall.spritefont" />
+    <None Include="..\..\..\..\..\InProgressSamples\Kits\Media\Fonts\XboxOneControllerSmall.spritefont" />
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <Filter>Common</Filter>
+    </AppxManifest>
+  </ItemGroup>
+</Project>

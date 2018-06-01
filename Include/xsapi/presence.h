@@ -5,14 +5,23 @@
 #include "xsapi/real_time_activity.h"
 
 namespace xbox { namespace services {
-    class xbox_live_context_impl;
+    class xbox_live_context;
     /// <summary>
     /// Contains classes and enumerations that let you retrieve
     /// information about player's online presence on Xbox Live.
     /// </summary>
     namespace presence {
 
-class presence_service_impl;
+class presence_service_internal;
+class presence_broadcast_record_internal;
+class presence_title_record_internal;
+class presence_device_record_internal;
+class presence_media_record_internal;
+class presence_record_internal;
+class device_presence_change_subscription_internal;
+class device_presence_change_event_args_internal;
+class title_presence_change_subscription_internal;
+class title_presence_change_event_args_internal;
 
 /// <summary>Defines values used to indicate the device type associate with a PresenceTitleRecord.</summary>
 enum class presence_device_type
@@ -215,17 +224,17 @@ public:
     /// <summary>
     /// Id for this broadcast as defined by the broadcasting service.
     /// </summary>
-    _XSAPIIMP const string_t& broadcast_id() const;
+    _XSAPIIMP string_t broadcast_id() const;
 
     /// <summary>
     /// The GUID uniquely identifying the broadcasting session. 
     /// </summary>
-    _XSAPIIMP const string_t& session() const;
+    _XSAPIIMP string_t session() const;
 
     /// <summary>
     /// Name of the streaming provider.
     /// </summary>
-    _XSAPIIMP const string_t& provider() const;
+    _XSAPIIMP string_t provider() const;
 
     /// <summary>
     /// Approximate number of current viewers. 
@@ -240,24 +249,17 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    presence_broadcast_record();
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
     bool operator!=(_In_ const presence_broadcast_record& rhs) const;
 
     /// <summary>
     /// Internal function
     /// </summary>
-    static xbox_live_result<presence_broadcast_record> _Deserialize(_In_ const web::json::value& inputJson);
+    presence_broadcast_record(
+        _In_ std::shared_ptr<presence_broadcast_record_internal> internalObj
+        );
 
 private:
-    string_t m_broadcastId;
-    string_t m_session;
-    string_t m_provider;
-    uint32_t m_viewerCount;
-    utility::datetime m_startTime;
+    std::shared_ptr<presence_broadcast_record_internal> m_internalObj;
 };
 
 class presence_title_record
@@ -272,12 +274,12 @@ public:
     /// <summary>
     /// The title name.
     /// </summary>
-    _XSAPIIMP const string_t& title_name() const;
+    _XSAPIIMP string_t title_name() const;
 
     /// <summary>
     /// The UTC timestamp when the record was last updated.
     /// </summary>
-    _XSAPIIMP const utility::datetime last_modified_date() const;
+    _XSAPIIMP const utility::datetime& last_modified_date() const;
 
     /// <summary>
     /// The active state for the title.
@@ -287,7 +289,7 @@ public:
     /// <summary>
     /// The formatted and localized presence string.
     /// </summary>
-    _XSAPIIMP const string_t& presence() const;
+    _XSAPIIMP string_t presence() const;
 
     /// <summary>
     /// The title view state.
@@ -297,50 +299,18 @@ public:
     /// <summary>
     /// The broadcast information of what the user is broadcasting. 
     /// </summary>
-    _XSAPIIMP const presence_broadcast_record& broadcast_record() const;
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    presence_title_record();
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    presence_title_record(
-        _In_ uint32_t titleId,
-        _In_ title_presence_state titlePresenceState
-        );
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    void _Set_title_state(
-        _In_ title_presence_state state
-        );
+    _XSAPIIMP presence_broadcast_record broadcast_record() const;
 
     bool operator!=(_In_ const presence_title_record& rhs) const;
 
     /// <summary>
     /// Internal function
     /// </summary>
-    static xbox_live_result<presence_title_record> _Deserialize(_In_ const web::json::value& json);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static presence_title_view_state _Convert_string_to_presence_title_view_state(
-        _In_ const string_t& value
-        );
+    presence_title_record(_In_ std::shared_ptr<presence_title_record_internal> internalObj);
 
 private:
-    uint32_t m_titleId;
-    string_t m_titleName;
-    utility::datetime m_lastModifiedDate;
-    bool m_isTitleActive;
-    string_t m_presence;
-    presence_title_view_state m_titleViewState;
-    presence_broadcast_record m_broadcastRecord;
+
+    std::shared_ptr<presence_title_record_internal> m_internalObj;
 };
 
 class presence_device_record
@@ -354,19 +324,7 @@ public:
     /// <summary>
     /// The record containing title presence data.
     /// </summary>
-    _XSAPIIMP const std::vector<presence_title_record>& presence_title_records() const;
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    presence_device_record();
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    presence_device_record(
-        _In_ presence_device_type deviceType
-        );
+    _XSAPIIMP std::vector<presence_title_record> presence_title_records() const;
 
     /// <summary>
     /// Internal function
@@ -376,33 +334,12 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    static presence_device_type _Convert_string_to_presence_device_type(_In_ const string_t& value);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static string_t _Convert_presence_device_type_to_string(_In_ presence_device_type deviceType);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    void _Add_title_record(
-        _In_ uint32_t titleId,
-        _In_ title_presence_state titlePresenceState
+    presence_device_record(
+        _In_ std::shared_ptr<presence_device_record_internal> internalObj
         );
 
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static xbox_live_result<presence_device_record> _Deserialize(_In_ const web::json::value& inputJson);
-
 private:
-    std::unordered_map<uint32_t, presence_title_record> create_map_from_title_records(
-        _In_ const std::vector<presence_title_record>& titleRecords
-        ) const;
-
-    std::vector<presence_title_record> m_presenceTitleRecords;
-    presence_device_type m_deviceType;
+    std::shared_ptr<presence_device_record_internal> m_internalObj;
 };
 
 class presence_media_record
@@ -411,7 +348,7 @@ public:
     /// <summary>
     /// ID of the media used by the Bing catalog or the provider catalog. 
     /// </summary>
-    _XSAPIIMP const string_t& media_id() const;
+    _XSAPIIMP string_t media_id() const;
 
     /// <summary>
     /// The ID type of the media.
@@ -421,43 +358,24 @@ public:
     /// <summary>
     /// Localized name of the media content.
     /// </summary>
-    _XSAPIIMP const string_t& name() const;
+    _XSAPIIMP string_t name() const;
 
     /// <summary>
     /// Internal function
     /// </summary>
-    presence_media_record();
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static xbox_live_result<presence_media_record> _Deserialize(_In_ const web::json::value& inputJson);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static presence_media_id_type _Convert_string_to_media_id_type(
-        _In_ const string_t& value
-        );
+    presence_media_record(_In_ std::shared_ptr<presence_media_record_internal> internalObj);
 
 private:
-    string_t m_mediaId;
-    presence_media_id_type m_mediaIdType;
-    string_t m_name;
+    std::shared_ptr<presence_media_record_internal> m_internalObj;
 };
 
 class presence_record
 {
 public:
     /// <summary>
-    /// Initializes a new presence record object.
-    /// </summary>
-    _XSAPIIMP presence_record();
-
-    /// <summary>
     /// The Xbox user ID.
     /// </summary>
-    _XSAPIIMP const string_t& xbox_user_id() const;
+    _XSAPIIMP string_t xbox_user_id() const;
 
     /// <summary>
     /// The user's presence state.
@@ -467,7 +385,7 @@ public:
     /// <summary>
     /// Collection of PresenceDeviceRecord objects returned by a request.
     /// </summary>
-    _XSAPIIMP const std::vector<presence_device_record>& presence_device_records() const;
+    _XSAPIIMP std::vector<presence_device_record> presence_device_records() const;
 
     /// <summary>
     /// Returns whether the user is playing this title id
@@ -475,37 +393,17 @@ public:
     _XSAPIIMP bool is_user_playing_title(_In_ uint32_t titleId) const;
 
     /// <summary>
-    /// Internal function
+    /// Initializes a new presence record object.
     /// </summary>
-    void _Update_title(
-        _In_ uint32_t titleId,
-        _In_ title_presence_state state
-        );
-
+    _XSAPIIMP presence_record(_In_ std::shared_ptr<presence_record_internal> internalObj);
+    
     /// <summary>
     /// Internal function
     /// </summary>
-    void _Update_device(
-        _In_ presence_device_type deviceType,
-        _In_ bool isUserLoggedIn
-        );
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static xbox_live_result<presence_record> _Deserialize(_In_ const web::json::value& json);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    static user_presence_state _Convert_string_to_user_presence_state(_In_ const string_t& value);
+    _XSAPIIMP presence_record() {}
 
 private:
-    static std::unordered_map<presence_device_type, presence_device_record> create_map_from_device_list(_In_ const std::vector<presence_device_record>& deviceRecords);
-
-    string_t m_xboxUserId;
-    user_presence_state m_userState;
-    std::vector<presence_device_record> m_presenceDeviceRecords;
+    std::shared_ptr<presence_record_internal> m_internalObj;
 };
 
 /// <summary> 
@@ -517,7 +415,7 @@ public:
     /// <summary>
     /// The Xbox user ID.
     /// </summary>
-    _XSAPIIMP const string_t& xbox_user_id() const;
+    _XSAPIIMP string_t xbox_user_id() const;
 
     /// <summary>
     /// The type of device.
@@ -532,21 +430,17 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    device_presence_change_event_args();
+    device_presence_change_event_args() {}
 
     /// <summary>
     /// Internal function
     /// </summary>
     device_presence_change_event_args(
-        _In_ string_t xboxUserId,
-        _In_ presence_device_type deviceType,
-        _In_ bool isUserLoggedOnDevice
+        _In_ std::shared_ptr<device_presence_change_event_args_internal> internalObj
         );
 
 private:
-    string_t m_xboxUserId;
-    presence_device_type m_deviceType;
-    bool m_isUserLoggedOnDevice;
+    std::shared_ptr<device_presence_change_event_args_internal> m_internalObj;
 };
 
 /// <summary>
@@ -558,28 +452,29 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    device_presence_change_subscription();
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
     device_presence_change_subscription(
-        _In_ string_t xboxUserId,
-        _In_ std::function<void(const device_presence_change_event_args&)> handler,
-        _In_ std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)> subscriptionErrorHandler
+        _In_ std::shared_ptr<device_presence_change_subscription_internal> internalObj
         );
+
     /// <summary>
     /// The Xbox user ID.
     /// </summary>
-    _XSAPIIMP const string_t& xbox_user_id() const;
+    _XSAPIIMP string_t xbox_user_id() const;
 
-protected:
-    void on_subscription_created(_In_ uint32_t id, _In_ const web::json::value& data) override;
-    void on_event_received(_In_ const web::json::value& data) override;
+    // TODO remove these after migrating real time activity service
+    /// <summary>The state of the subscription request.</summary>
+    _XSAPIIMP virtual xbox::services::real_time_activity::real_time_activity_subscription_state state() const override;
+
+    /// <summary>The resource uri for the request.</summary>
+    _XSAPIIMP virtual const string_t& resource_uri() const override;
+
+    /// <summary>The unique subscription id for the request.</summary>
+    _XSAPIIMP virtual uint32_t subscription_id() const override;
 
 private:
-    string_t m_xboxUserId;
-    std::function<void(const device_presence_change_event_args&)> m_devicePresenceChangeHandler;
+    std::shared_ptr<device_presence_change_subscription_internal> m_internalObj;
+
+    friend class presence_service;
 };
 
 /// <summary>
@@ -591,7 +486,7 @@ public:
     /// <summary> 
     /// The Xbox user ID.
     /// </summary> 
-    _XSAPIIMP const string_t& xbox_user_id() const;
+    _XSAPIIMP string_t xbox_user_id() const;
 
     /// <summary>
     /// The title ID.
@@ -606,21 +501,15 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    title_presence_change_event_args();
+    title_presence_change_event_args() {}
 
     /// <summary>
     /// Internal function
     /// </summary>
-    title_presence_change_event_args(
-        _In_ string_t xboxUserId,
-        _In_ uint32_t titleId,
-        _In_ title_presence_state titleState
-        );
+    title_presence_change_event_args(_In_ std::shared_ptr<title_presence_change_event_args_internal> internalObj);
 
 private:
-    string_t m_xboxUserId;
-    uint32_t m_titleId;
-    title_presence_state m_titleState;
+    std::shared_ptr<title_presence_change_event_args_internal> m_internalObj;
 };
 
 /// <summary>
@@ -632,31 +521,34 @@ public:
     /// <summary>
     /// The Xbox user ID.
     /// </summary>
-    _XSAPIIMP const string_t& xbox_user_id() const;
+    _XSAPIIMP string_t xbox_user_id() const;
 
     /// <summary>
     /// The title ID.
     /// </summary>
     _XSAPIIMP uint32_t title_id() const;
 
+    // TODO remove these after migrating real time activity service
+    /// <summary>The state of the subscription request.</summary>
+    _XSAPIIMP virtual xbox::services::real_time_activity::real_time_activity_subscription_state state() const override;
+
+    /// <summary>The resource uri for the request.</summary>
+    _XSAPIIMP virtual const string_t& resource_uri() const override;
+
+    /// <summary>The unique subscription id for the request.</summary>
+    _XSAPIIMP virtual uint32_t subscription_id() const override;
+
     /// <summary>
     /// Internal function
     /// </summary>
     title_presence_change_subscription(
-        _In_ string_t xboxUserId,
-        _In_ uint32_t titleId,
-        _In_ std::function<void(const title_presence_change_event_args&)> handler,
-        _In_ std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)> subscriptionErrorHandler
+        _In_ std::shared_ptr<title_presence_change_subscription_internal> internalObj
         );
 
-protected:
-    void on_subscription_created(_In_ uint32_t id, _In_ const web::json::value& data) override;
-    void on_event_received(_In_ const web::json::value& data) override;
-
 private:
-    string_t m_xboxUserId;
-    uint32_t m_titleId;
-    std::function<void(const title_presence_change_event_args&)> m_handler;
+    std::shared_ptr<title_presence_change_subscription_internal> m_internalObj;
+
+    friend class presence_service;
 };
 
 class presence_writer;
@@ -837,28 +729,18 @@ public:
     /// <summary>
     /// Internal function
     /// </summary>
-    std::shared_ptr<presence_service_impl> _Impl() const { return m_presenceServiceImpl; }
+    std::shared_ptr<presence_service_internal> _Impl() const { return m_presenceServiceInternal; }
 
 private:
-    presence_service();
+    presence_service() {}
 
     presence_service(
-        _In_ std::shared_ptr<xbox::services::user_context> userContext,
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
-        _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> realTimeActivityService
+        _In_ std::shared_ptr<presence_service_internal> internalService
         );
 
-    static string_t set_presence_sub_path(_In_ const string_t& xboxUserId);
-    static string_t get_presence_sub_path(_In_ const string_t& xboxUserId);
-    static string_t get_presence_user_batch_subpath();
-    static string_t get_presence_for_social_group_subpath(_In_ const string_t& xboxUserId, _In_ const string_t& socialGroup);
+    std::shared_ptr<presence_service_internal> m_presenceServiceInternal;
 
-    pplx::task<xbox_live_result<uint32_t>> set_presence_helper(_In_ bool isUserActive, _In_ presence_data presenceData);
-
-    std::shared_ptr<presence_service_impl> m_presenceServiceImpl;
-
-    friend xbox_live_context_impl;
+    friend class xbox_live_context;
 };
 
 }}}

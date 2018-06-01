@@ -30,7 +30,8 @@ XboxLiveContext::XboxLiveContext(
     ) 
 {
     m_cppObj = std::make_shared<xbox::services::xbox_live_context>(user);
-    
+    m_cppObj->_User_context()->set_caller_api_type(xbox::services::caller_api_type::api_winrt);
+
     Initialize();
 }
 
@@ -47,6 +48,7 @@ XboxLiveContext::XboxLiveContext(
     ) 
 {
     m_cppObj = std::make_shared<xbox::services::xbox_live_context>(user);
+    m_cppObj->_User_context()->set_caller_api_type(xbox::services::caller_api_type::api_winrt);
 
     Initialize();
 }

@@ -24,7 +24,7 @@ public enum class TitleStorageType
     JsonStorage = xbox::services::title_storage::title_storage_type::json_storage,
 
     /// <summary>
-    /// Global data storage.  This storage type is only writable by the Windows Developer Dashboard or the Xbox Developer Portal (XDP).
+    /// Global data storage.  This storage type is only writable via title configuration sites or Xbox Live developer tools.
     /// Any platform may read from this storage type. Data can be rosters, maps, challenges, art resources, etc.
     ///</summary>
     GlobalStorage = xbox::services::title_storage::title_storage_type::global_storage,

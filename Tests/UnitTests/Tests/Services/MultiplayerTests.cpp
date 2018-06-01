@@ -1390,7 +1390,7 @@ public:
             );
 
         auto actualJson = web::json::value::parse(actualJsonString);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto requestJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
 
         VERIFY_IS_EQUAL_JSON(requestJson, actualJson);
         uint32 counter = 0;
@@ -1441,13 +1441,14 @@ public:
         ).get();
 
         auto writeJson = web::json::value::parse(expectedJson);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        TEST_LOG(httpCall->request_body().request_message_string().c_str());
+        auto requestJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
+        TEST_LOG(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()).c_str());
         VERIFY_IS_EQUAL_JSON(writeJson, requestJson);
     }
 
     void TryWriteSessionAsyncHelper(MultiplayerSession^ currentSession, bool shouldSucceed, int32_t httpStatus, bool returnEmpty = false)
     {
+        UNREFERENCED_PARAMETER(returnEmpty);
         auto responseJson = web::json::value::parse(defaultMultiplayerResponse);
 
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
@@ -1673,7 +1674,7 @@ public:
 
         const string_t defaultJsonWrite = testResponseJsonFromFile[L"defaultJsonWrite"].serialize();
         auto writeJson = web::json::value::parse(defaultJsonWrite);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto requestJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         VERIFY_IS_EQUAL_JSON(writeJson, requestJson);
     }
 
@@ -2455,7 +2456,7 @@ public:
             );
 
         auto writeJson = web::json::value::parse(activityJson);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto requestJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         VERIFY_IS_EQUAL_JSON(writeJson, requestJson);
     }
 
@@ -2515,7 +2516,7 @@ public:
             );
 
         auto writeJson = web::json::value::parse(transferHandleJson);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto requestJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         VERIFY_IS_EQUAL_JSON(writeJson, requestJson);
 
         web::json::value id = web::json::value::parse(transferHandleResponseJson)[_T("id")];
@@ -2545,7 +2546,7 @@ public:
         ).get();
 
         auto expectedJson = web::json::value::parse(searchHandlesRequestJson);
-        auto actualJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto actualJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         VERIFY_ARE_EQUAL(expectedJson.serialize(), actualJson.serialize());
 
         auto resultJson = web::json::value::parse(searchHandlesResponseJson);
@@ -2583,7 +2584,7 @@ public:
             ).get();
 
         auto expectedJson = web::json::value::parse(searchHandlesRequestJson);
-        auto actualJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto actualJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         VERIFY_ARE_EQUAL(expectedJson.serialize(), actualJson.serialize());
 
         auto resultJson = web::json::value::parse(searchHandlesResponseJson);
@@ -2622,7 +2623,7 @@ public:
         ).get();
 
         auto expectedJson = web::json::value::parse(searchHandlesWithSocialGroupRequestJson);
-        auto actualJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto actualJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         VERIFY_ARE_EQUAL(expectedJson.serialize(), actualJson.serialize());
 
         auto resultJson = web::json::value::parse(searchHandlesResponseJson);
@@ -2674,7 +2675,7 @@ public:
         );
 
         auto writeJson = web::json::value::parse(searchHandleJson);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto requestJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()).data());
         VERIFY_IS_EQUAL_JSON(writeJson, requestJson);
     }
 
@@ -2725,7 +2726,7 @@ public:
             ).get();
 
         auto expectedJson = web::json::value::parse(inviteRequestJson);
-        auto actualJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto actualJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
 
         VERIFY_IS_EQUAL_JSON(expectedJson, actualJson);
 
@@ -2756,7 +2757,7 @@ public:
             ).get();
         
         auto expectedJson = web::json::value::parse(activitiesForUserRequestJson);
-        auto actualJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto actualJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         VERIFY_ARE_EQUAL(expectedJson.serialize(), actualJson.serialize());
 
         auto resultJson = web::json::value::parse(activitiesForUserResponseJson);
@@ -2789,7 +2790,7 @@ public:
             ).get();
 
         auto expectedJson = web::json::value::parse(activitiesForSocialGroupRequestJson);
-        auto actualJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto actualJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         VERIFY_ARE_EQUAL(expectedJson.serialize(), actualJson.serialize());
     }
 
@@ -2897,7 +2898,7 @@ public:
         // Verify it should fail before RTA activated
         VERIFY_THROWS_HR_CX(
             create_task(xboxLiveContext->MultiplayerService->WriteSessionAsync(session, MultiplayerSessionWriteMode::CreateNew)).get(),
-            E_FAIL
+            E_XBL_RUNTIME_ERROR
             );
 
         // Connect RTA
@@ -2911,7 +2912,7 @@ public:
         //Make websocket auto reconnect
         // Write session on connection, make sure it can finish once connected
         mockSocket->m_waitForSignal = true;
-        mockSocket->m_closeHandler(1001, L"");
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
         helper->connectingEvent.wait();
         TEST_LOG(L"Auto-reconnecting event triggered");
 
@@ -2970,7 +2971,7 @@ public:
             }
         });
 
-        mockSocket->m_closeHandler(1001, L"");
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
         helper->connectingEvent.wait();
         helper->connectedEvent.wait();
         create_task(xboxLiveContext->MultiplayerService->WriteSessionAsync(session,MultiplayerSessionWriteMode::CreateNew)).get();
@@ -2984,7 +2985,7 @@ public:
         didFire = false;
         mockSocket->m_waitForSignal = false;
         mockSocket->m_connectToFail = true;
-        mockSocket->m_closeHandler(1001, L"");
+        mockSocket->m_closeHandler(HCWebSocketCloseStatus_GoingAway);
         helper->disconnectedEvent.wait();
 
         // should not be able to receive 
@@ -3000,7 +3001,7 @@ public:
         mockSocket->receive_rta_event(subId, rtaSessionUpdateJson);
         VERIFY_IS_FALSE(didFire);
 
-        mockSocket->close().wait();
+        mockSocket->close();
         VERIFY_IS_TRUE(didLostFire);
     }
 
@@ -3082,7 +3083,7 @@ public:
             ).get();
 
         auto writeJson = web::json::value::parse(setSessionChangeTypesJson);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+        auto requestJson = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
         requestJson[_T("members")][_T("me")][_T("properties")][_T("system")][_T("subscription")][_T("id")] = web::json::value::null();    // Can't test the id is a GUID
         VERIFY_IS_EQUAL_JSON(writeJson, requestJson);
     }
@@ -3399,7 +3400,7 @@ public:
                 session,
                 MultiplayerSessionWriteMode::UpdateOrCreateNew
                 )).get(),
-            E_FAIL
+            E_XBL_RUNTIME_ERROR
             );
 
         TEST_LOG(L"TestRTAConnectionFailed: Already enabled");
@@ -3552,10 +3553,10 @@ public:
         {
             VERIFY_IS_NOT_NULL(member->Results);
             VERIFY_IS_TRUE(member->Results->Size == 2);
-            for (auto result : member->Results)
+            for (auto result2 : member->Results)
             {
-                Platform::String^ key = result->Key;
-                TournamentTeamResult^ teamResult = result->Value;
+                Platform::String^ key = result2->Key;
+                TournamentTeamResult^ teamResult = result2->Value;
                 VERIFY_IS_TRUE(key->Equals("team1") || key->Equals("team2"));
                 VERIFY_IS_TRUE(teamResult->State == TournamentGameResultState::Rank);
                 VERIFY_IS_TRUE(teamResult->Ranking == 3 || teamResult->Ranking == 2);

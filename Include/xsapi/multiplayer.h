@@ -3,7 +3,6 @@
 
 #pragma once
 #include <mutex>
-#include <cpprest/ws_client.h>
 #include "xsapi/real_time_activity.h"
 #include "xsapi/game_server_platform.h"
 
