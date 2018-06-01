@@ -145,7 +145,7 @@ typedef struct XblAchievementProgression
     XblAchievementRequirement* requirements;
 
     /// <summary>
-    /// The size of <ref>requirements</ref>.
+    /// The size of <see cref="requirements"/>.
     /// </summary>
     uint32_t requirementsCount;
 
@@ -259,7 +259,7 @@ typedef struct XblAchievement
     XblAchievementTitleAssociation* titleAssociations;
 
     /// <summary>
-    /// The size of <ref>titleAssociations</ref>.
+    /// The size of <see cref="titleAssociations"/>.
     /// </summary>
     uint32_t titleAssociationsCount;
 
@@ -280,7 +280,7 @@ typedef struct XblAchievement
     XblAchievementMediaAsset* mediaAssets;
 
     /// <summary>
-    /// The size of <ref>mediaAssets</ref>.
+    /// The size of <see cref="mediaAssets"/>.
     /// </summary>
     uint32_t mediaAssetsCount;
 
@@ -290,7 +290,7 @@ typedef struct XblAchievement
     _Field_z_ const char** platformsAvailableOn;
 
     /// <summary>
-    /// The size of <ref>platformsAvailableOn</ref>.
+    /// The size of <see cref="platformsAvailableOn"/>.
     /// </summary>
     uint32_t platformsAvailableOnCount;
 
@@ -336,7 +336,7 @@ typedef struct XblAchievement
     XblAchievementReward* rewards;
 
     /// <summary>
-    /// The size of <ref>rewards</ref>.
+    /// The size of <see cref="rewards"/>.
     /// </summary>
     uint32_t rewardsCount;
 
@@ -375,7 +375,7 @@ typedef struct xbl_achievements_result* xbl_achievements_result_handle;
 /// <param name="titleId">The title ID.</param>
 /// <param name="type">The achievement type to retrieve.</param>
 /// <param name="unlockedOnly">Indicates whether to return unlocked achievements only.</param>
-/// <param name="orderby">Controls how the list of achievements is ordered.</param>
+/// <param name="orderBy">Controls how the list of achievements is ordered.</param>
 /// <param name="skipItems">The number of achievements to skip.</param>
 /// <param name="maxItems">The maximum number of achievements the result can contain.  Pass 0 to attempt
 /// to retrieve all items.</param>
@@ -400,7 +400,7 @@ STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
 /// Use XblAchievementsResultGetAchievements to get the list.
 /// </summary>
 /// <param name="async">The same AsyncBlock that passed to XblAchievementsGetAchievementsForTitleIdAsync.</param>
-/// <param name="resultHandle">Achievement result handle.</param>
+/// <param name="result">Achievement result handle.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsGetAchievementsForTitleIdResult(
     _Inout_ AsyncBlock* async,
@@ -503,11 +503,11 @@ STDAPI XblAchievementsUpdateAchievementAsync(
 /// To get the result, call XblAchievementsGetAchievementResult inside the AsyncBlock callback
 /// or after the AsyncBlock is complete.
 /// </summary>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>
 /// <param name="serviceConfigurationId">The UTF-8 encoded service configuration ID (SCID) for the title.</param>
 /// <param name="achievementId">The UTF-8 encoded unique identifier of the Achievement as defined by XDP or Dev Center.</param>
-/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
 /// This method calls V2 GET /users/xuid({xuid})/achievements/{scid}/{achievementId}.
@@ -524,7 +524,7 @@ STDAPI XblAchievementsGetAchievementAsync(
 /// Get the result handle from an XblAchievementsGetAchievementAsync call.
 /// </summary>
 /// <param name="async">The same AsyncBlock that passed to XblAchievementsGetAchievementAsync.</param>
-/// <param name="resultHandle">
+/// <param name="result">
 /// The achievement result handle. This handle is used by other APIs to get the achievement objects
 /// and to get the next page of achievements from the service if there is is one. The handle must be closed
 /// using XblAchievementsResultCloseHandle when the result is no longer needed.

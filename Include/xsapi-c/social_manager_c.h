@@ -4,6 +4,10 @@
 #pragma once
 #include <xsapi-c/presence_c.h>
 
+/// <summary>
+/// Detail level controls how much information is exposed in each xbox_live_social_graph_user
+/// Detail level can only be set on construction of social_manager
+/// </summary>
 typedef enum XblSocialManagerExtraDetailLevel 
 {
     /// <summary>Only get default PeopleHub information (presence, profile)</summary>
@@ -19,6 +23,10 @@ typedef enum XblSocialManagerExtraDetailLevel
     XblSocialManagerExtraDetailLevel_All = 0x3,
 } XblSocialManagerExtraDetailLevel;
 
+/// <summary>
+/// The filter level of information
+/// Title will only show users associated with a particular title
+/// </summary>
 typedef enum XblPresenceFilter
 {
     /// <summary>Unknown</summary>
@@ -43,6 +51,9 @@ typedef enum XblPresenceFilter
     XblPresenceFilter_All
 } XblPresenceFilter;
 
+/// <summary>
+/// The types of possible social manager events
+/// </summary>
 typedef enum XblSocialManagerEventType
 {
     /// <summary>Users added to social graph</summary>
@@ -76,6 +87,9 @@ typedef enum XblSocialManagerEventType
     XblSocialManagerEventType_UnknownEvent
 } XblSocialManagerEventType;
 
+/// <summary>
+/// Possible relationship types to filter by
+/// </summary>
 typedef enum XblRelationshipFilter 
 {
     /// <summary>Friends of the user (user is following)</summary>
@@ -85,6 +99,9 @@ typedef enum XblRelationshipFilter
     XblRelationshipFilter_Favorite
 } XblRelationshipFilter;
 
+/// <summary>
+/// Identifies type of social user group created
+/// </summary>
 typedef enum XblSocialUserGroupType 
 {
     /// <summary>Social user group based off of filters</summary>
@@ -94,6 +111,9 @@ typedef enum XblSocialUserGroupType
     XblSocialUserGroupType_UserListType
 } XblSocialUserGroupType;
 
+/// <summary>
+/// Data about whether the user has played the title
+/// </summary>
 typedef struct XblTitleHistory
 {
     /// <summary>
@@ -107,6 +127,9 @@ typedef struct XblTitleHistory
     time_t lastTimeUserPlayed;
 } XblTitleHistory;
 
+/// <summary>
+/// Preferred color for the user. Set via the shell. 
+/// </summary>
 typedef struct XblPreferredColor
 {
     /// <summary>
@@ -125,6 +148,10 @@ typedef struct XblPreferredColor
     char tertiaryColor[XBL_COLOR_CHAR_SIZE];
 } XblPreferredColor;
 
+/// <summary>
+/// Social manager version of the presence title record
+/// Gives information about different titles presence information
+/// </summary>
 typedef struct XblSocialManagerPresenceTitleRecord
 {
     /// <summary>
@@ -397,7 +424,7 @@ STDAPI XblSocialManagerUserGroupGetUsersTrackedByGroup(
 /// The result of a local user being added will be triggered through the XblSocialManagerEventType_LocalUserAdded event in XblSocialManagerDoWork
 /// </summary>
 /// <param name="user">Xbox Live User</param>
-/// <param name="extraDetailLevel">The level of verbosity that should be in the xbox_social_user</param>
+/// <param name="extraLevelDetail">The level of verbosity that should be in the xbox_social_user</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblSocialManagerAddLocalUser(
     _In_ xbl_user_handle user,
