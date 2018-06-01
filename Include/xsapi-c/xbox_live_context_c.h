@@ -16,7 +16,7 @@ struct XblAppConfig;
 ///
 /// IInspectable* AsInspectable(Platform::Object^ object)
 /// {
-///     return reinterpret_cast<IInspectable*>(object);
+///     return reinterpret_cast &gt IInspectable* &lt (object);
 /// }
 /// </param>
 /// <param name="context">The returned Xbox Live context handle.</param>
