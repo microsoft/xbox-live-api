@@ -7,13 +7,11 @@ using namespace LongHaulTestApp;
 //////            Tests          //////
 ///////////////////////////////////////
 
-void Game::TestAchievementsFlow(task_completion_event<void> achievementsTask)
+void Game::TestAchievementsFlow()
 {
     Log("===== Starting TestAchievementFlow =====");
     GetAchievmentsForTitle();
     m_progress = (m_progress + 1) % 101;
-
-    m_achievementsTask = achievementsTask;
 }
 
 ///////////////////////////////////////
@@ -191,7 +189,6 @@ void Game::UpdateAchievement(PCSTR scid, PCSTR achievementId)
         delete asyncBlock;
 
         pThis->Log("===== Finished TestAchievementFlow =====");
-        pThis->m_achievementsTask.set();
     };
 
     Log("XblAchievementsUpdateAchievement");

@@ -21,28 +21,11 @@ using namespace pplx;
 enum ButtonPress
 {
     SignIn,
-    ToggleSocialGroup1,
-    ToggleSocialGroup2,
-    ToggleSocialGroup3,
-    ToggleSocialGroup4,
-    ToggleSocialGroup5,
-    ImportCustomList,
-    GetUserProfile,
-    GetFriends,
-    GetAchievementsForTitle,
     StartTests,
     StartTestsFast
 };
 
-#define NUM_OF_TEST_AREAS 4
-enum TestArea
-{
-    Achievements,
-    Profile,
-    Social,
-    SocialManger
-};
-
+#define BACKGROUND_THREADS 4
 #define PERF_COUNTERS 0    // Enable this for capturing performance counters
 
 namespace LongHaulTestApp
@@ -121,9 +104,20 @@ namespace LongHaulTestApp
 
         Concurrency::critical_section m_stateLock;
 
-        HANDLE m_hBackgroundThread;
+        ///////////////////////////////////////
+        //////           Threads         //////
+        ///////////////////////////////////////
 
-        bool m_testsStarted;
+        // Methods
+        void InitializeAsync();
+
+        // Vars
+        std::vector<HANDLE> m_testThreads;
+        std::vector<HANDLE> m_backgroundThreads;
+
+        uint32_t GENERAL_THREAD = 0;
+        uint32_t ALL_TEST_THREAD = 1;
+        uint32_t SCENARIO_TEST_THREAD = 2;
 
         ///////////////////////////////////////
         //////       Test Framework      //////
@@ -133,20 +127,16 @@ namespace LongHaulTestApp
         void InitializeTestFramework();
 
         void HandleTests();
-        void BeginTest();
-        void EndTest();
+        void RunTests();
 
         void PrintMemoryUsage();
 
         string TaceLevelToString(xbox::services::xbox_services_diagnostics_trace_level traceLevel);
 
         // Vars
+        bool m_testsStarted;
         uint32_t m_testDelay;
         uint64_t m_testsRun;
-        uint32_t m_testsFinished;
-
-        TestArea m_testArea;
-        bool m_testing;
         time_t m_time;
 
         ofstream m_logFile;
@@ -157,7 +147,7 @@ namespace LongHaulTestApp
         ///////////////////////////////////////
 
         // Tests
-        void TestAchievementsFlow(task_completion_event<void> achievementsTask);
+        void TestAchievementsFlow();
 
         // Utils
         void GetAchievmentsForTitle();
@@ -167,14 +157,13 @@ namespace LongHaulTestApp
 
         // Vars
         uint32_t m_progress;
-        task_completion_event<void> m_achievementsTask;
 
         ///////////////////////////////////////
         //////           Profile         //////
         ///////////////////////////////////////
 
         // Tests
-        void TestProfileFlow(task_completion_event<void> profileTask);
+        void TestProfileFlow();
 
         // Utils
         void TestGetUserProfile();
@@ -182,7 +171,6 @@ namespace LongHaulTestApp
         void TestGetUserProfilesForSocialGroup();
 
         // Vars
-        task_completion_event<void> m_profileTask;
         uint32_t m_test;
 
         ///////////////////////////////////////
@@ -190,22 +178,19 @@ namespace LongHaulTestApp
         ///////////////////////////////////////
 
         // Tests
-        void TestSocialFlow(task_completion_event<void> socialTask);
+        void TestSocialFlow();
 
         // Utils
         void GetSocialRelationship();
         void SocialRelationshipGetNext(xbl_social_relationship_result_handle relationshipResult);
         void TestResputationFeedback();
-
-        // Vars
-        task_completion_event<void> m_socialTask;
         
         ///////////////////////////////////////
         //////       Soclal Manager      //////
         ///////////////////////////////////////
 
         // Tests
-        void TestSocialManagerFlow(task_completion_event<void> socialManagerTask);
+        void TestSocialManagerFlow();
 
         // Test Utils
         void AddLocalUserToSocialManager();
@@ -226,7 +211,6 @@ namespace LongHaulTestApp
         string RelationshipFilterToString();
 
         // Vars
-        task_completion_event<void> m_socialManagerTask;
         XblSocialUserGroupType m_testGroupType;
 
         XblPresenceFilter m_presenceFilter = XblPresenceFilter_TitleOnline;

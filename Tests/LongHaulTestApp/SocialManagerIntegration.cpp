@@ -11,9 +11,8 @@ using namespace LongHaulTestApp;
 //////            Tests          //////
 ///////////////////////////////////////
 
-void Game::TestSocialManagerFlow(task_completion_event<void> socialManagerTask)
+void Game::TestSocialManagerFlow()
 {
-    m_socialManagerTask = socialManagerTask;
     m_testGroupType = (XblSocialUserGroupType)(((int)m_testGroupType + 1) % NUM_OF_USER_GROUP_TYPES);
 
     Log("===== Starting TestSocialManagerFlow =====");
@@ -50,7 +49,6 @@ void Game::RemoveLocalUserFromSocialManager()
     Game* pThis = this;
     WaitForSocialEvent(XblSocialManagerEventType::XblSocialManagerEventType_LocalUserRemoved, [pThis](XblSocialManagerEvent e) {
         pThis->Log("===== Finished TestSocialManagerFlow =====");
-        pThis->m_socialManagerTask.set();
     });
 }
 

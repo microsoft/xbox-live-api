@@ -212,6 +212,7 @@
   <ItemGroup>
     <ClCompile Include="AchievementsIntegration.cpp" />
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="AsyncIntegration.cpp" />
     <ClCompile Include="Common\DeviceResources.cpp" />
     <ClCompile Include="GameLogic\Game.cpp" />
     <ClCompile Include="GameLogic\GameData.cpp" />

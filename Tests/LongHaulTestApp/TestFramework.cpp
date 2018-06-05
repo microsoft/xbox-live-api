@@ -32,89 +32,27 @@ void Game::InitializeTestFramework()
 
 void Game::HandleTests()
 {
-    if (!m_testing && (time(NULL) - m_time) > m_testDelay)
+    if ((time(NULL) - m_time) > m_testDelay)
     {
-        BeginTest();
+        RunTests();
     }
 }
 
-void Game::BeginTest()
+void Game::RunTests()
 {
-    m_testing = true;
+    m_time = time(NULL);
+    m_testsRun++;
 
-    std::weak_ptr<Game> thisWeakPtr = shared_from_this();
+    TestAchievementsFlow();
 
-    task_completion_event<void> achievementsTask;
-    auto achievementsAsync = pplx::create_async([thisWeakPtr, achievementsTask]()
-    {
-        std::shared_ptr<Game> pThis = thisWeakPtr.lock();
-        pThis->TestAchievementsFlow(achievementsTask);
-    });
-    pplx::task<void>(achievementsTask).then([thisWeakPtr, achievementsAsync]()
-    {
-        achievementsAsync->Cancel();
+    TestProfileFlow();
 
-        std::shared_ptr<Game> pThis = thisWeakPtr.lock();
-        pThis->EndTest();
-    });
+    TestSocialFlow();
 
-    task_completion_event<void> profileTask;
-    TestProfileFlow(profileTask);
-    auto profileAsync = pplx::create_async([thisWeakPtr, profileTask]()
-    {
-        std::shared_ptr<Game> pThis = thisWeakPtr.lock();
-        pThis->TestProfileFlow(profileTask);
-    });
-    pplx::task<void>(profileTask).then([thisWeakPtr, profileAsync]()
-    {
-        profileAsync->Cancel();
+    TestSocialManagerFlow();
 
-        std::shared_ptr<Game> pThis = thisWeakPtr.lock();
-        pThis->EndTest();
-    });
-
-    task_completion_event<void> socialTask;
-    auto socialAsync = pplx::create_async([thisWeakPtr, socialTask]()
-    {
-        std::shared_ptr<Game> pThis = thisWeakPtr.lock();
-        pThis->TestSocialFlow(socialTask);
-    });
-    pplx::task<void>(socialTask).then([thisWeakPtr, socialAsync]()
-    {
-        socialAsync->Cancel();
-
-        std::shared_ptr<Game> pThis = thisWeakPtr.lock();
-        pThis->EndTest();
-    });
-
-    task_completion_event<void> socialManagerTask;
-    auto socialManagerAsync = pplx::create_async([thisWeakPtr, socialManagerTask]()
-    {
-        std::shared_ptr<Game> pThis = thisWeakPtr.lock();
-        pThis->TestSocialManagerFlow(socialManagerTask);
-    });
-    pplx::task<void>(socialManagerTask).then([thisWeakPtr, socialManagerAsync]()
-    {
-        socialManagerAsync->Cancel();
-
-        std::shared_ptr<Game> pThis = thisWeakPtr.lock();
-        pThis->EndTest();
-    });
+    PrintMemoryUsage();
  }
-
-void Game::EndTest()
-{
-    m_testsFinished++;
-    
-    if (m_testsFinished >= NUM_OF_TEST_AREAS)
-    {
-        m_time = time(NULL);
-        m_testsFinished = 0;
-        m_testing = false;
-        m_testsRun++;
-        PrintMemoryUsage();
-    }
-}
 
 void Game::Log(std::wstring log, bool showOnUI)
 {
