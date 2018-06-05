@@ -53,7 +53,7 @@ void CALLBACK HandleAsyncQueueCallback(
 }
 
 
-DWORD WINAPI general_test_thread_proc(LPVOID lpParam)
+DWORD WINAPI game_thread_proc(LPVOID lpParam)
 {
     HANDLE hEvents[2] =
     {
@@ -72,22 +72,22 @@ DWORD WINAPI general_test_thread_proc(LPVOID lpParam)
     bool stop = false;
     while (!stop)
     {
-        DWORD dwResult = WaitForMultipleObjectsEx(2, hEvents, false, INFINITE, false);
-        switch (dwResult)
+        // Game Work
+        try
         {
-        case WAIT_OBJECT_0: // completed 
-            DispatchAsyncQueue(queue, AsyncQueueCallbackType_Completion, 0);
-
-            if (!IsAsyncQueueEmpty(queue, AsyncQueueCallbackType_Completion))
+            if (g_sampleInstance->m_testsStarted)
             {
-                // If there's more pending completions, then set the event to process them
-                SetEvent(g_completionReadyHandle.get());
+                g_sampleInstance->HandleTests();
             }
-            break;
+        }
+        catch (const std::exception& e)
+        {
+            g_sampleInstance->Log("[Error] " + std::string(e.what()));
+        }
 
-        default:
-            stop = true;
-            break;
+        while(!IsAsyncQueueEmpty(queue, AsyncQueueCallbackType_Completion))
+        {
+            DispatchAsyncQueue(queue, AsyncQueueCallbackType_Completion, 0);
         }
     }
 
@@ -206,6 +206,6 @@ void Game::InitializeAsync()
     AddAsyncQueueCallbackSubmitted(m_queue, nullptr, HandleAsyncQueueCallback, &m_callbackToken);
     
     //m_backgroundThreads.push_back(CreateThread(nullptr, 0, background_thread_proc, nullptr, 0, nullptr));
-    m_backgroundThreads.push_back(CreateThread(nullptr, 0, general_test_thread_proc, &ALL_TEST_THREAD, 0, nullptr));
+    m_backgroundThreads.push_back(CreateThread(nullptr, 0, game_thread_proc, &ALL_TEST_THREAD, 0, nullptr));
     m_backgroundThreads.push_back(CreateThread(nullptr, 0, background_test_thread_proc, &ALL_TEST_THREAD, 0, nullptr));
 }

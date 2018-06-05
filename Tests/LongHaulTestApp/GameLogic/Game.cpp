@@ -145,19 +145,6 @@ void Game::OnGameUpdate()
                 m_testsStarted = true;
             }
         }
-
-        // Game Work
-        try
-        {
-            if (m_testsStarted)
-            {
-                HandleTests();
-            }
-        }
-        catch (const std::exception& e)
-        {
-            Log("[Error] " + std::string(e.what()));
-        }
     }
     break;
 
