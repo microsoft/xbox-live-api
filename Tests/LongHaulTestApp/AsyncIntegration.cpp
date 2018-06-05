@@ -3,6 +3,8 @@
 
 using namespace LongHaulTestApp;
 
+#define MAX_SEM_COUNT 10
+
 class win32_handle
 {
 public:
@@ -42,7 +44,7 @@ void CALLBACK HandleAsyncQueueCallback(
     switch (type)
     {
     case AsyncQueueCallbackType::AsyncQueueCallbackType_Work:
-        SetEvent(g_workReadyHandle.get());
+        ReleaseSemaphore(g_workReadyHandle.get(), 1, nullptr);
         break;
     }
 }
@@ -74,7 +76,7 @@ DWORD WINAPI game_thread_proc(LPVOID lpParam)
             g_sampleInstance->Log("[Error] " + std::string(e.what()));
         }
 
-        // Thread work
+        // Dispatching async completions on game thread
         while(!IsAsyncQueueEmpty(queue, AsyncQueueCallbackType_Completion))
         {
             DispatchAsyncQueue(queue, AsyncQueueCallbackType_Completion, 0);
@@ -109,12 +111,6 @@ DWORD WINAPI work_thread_proc(LPVOID lpParam)
         {
         case WAIT_OBJECT_0: // work ready
             DispatchAsyncQueue(queue, AsyncQueueCallbackType_Work, 0);
-
-            if (!IsAsyncQueueEmpty(queue, AsyncQueueCallbackType_Work))
-            {
-                // If there's more pending work, then set the event to process them
-                SetEvent(g_workReadyHandle.get());
-            }
             break;
 
         default:
@@ -130,7 +126,7 @@ DWORD WINAPI work_thread_proc(LPVOID lpParam)
 void Game::InitializeAsync()
 {
     g_stopRequestedHandle.set(CreateEvent(nullptr, true, false, nullptr));
-    g_workReadyHandle.set(CreateEvent(nullptr, false, false, nullptr));
+    g_workReadyHandle.set(CreateSemaphore(nullptr, 0, MAX_SEM_COUNT, nullptr));
 
     CreateSharedAsyncQueue(
         ALL_TEST_THREAD,

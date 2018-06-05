@@ -9,7 +9,7 @@ using namespace LongHaulTestApp;
 
 void Game::TestProfileFlow()
 {
-        m_test++;
+    m_test++;
     if (m_test == 1)
     {
         Log("===== Starting TestProfileFlow =====");
