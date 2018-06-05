@@ -3,8 +3,6 @@
 
 using namespace LongHaulTestApp;
 
-#define MAX_SEM_COUNT 10
-
 class win32_handle
 {
 public:
@@ -123,18 +121,20 @@ DWORD WINAPI work_thread_proc(LPVOID lpParam)
     return 0;
 }
 
+uint32_t QUEUE_ID = 1;
+
 void Game::InitializeAsync()
 {
     g_stopRequestedHandle.set(CreateEvent(nullptr, true, false, nullptr));
-    g_workReadyHandle.set(CreateSemaphore(nullptr, 0, MAX_SEM_COUNT, nullptr));
+    g_workReadyHandle.set(CreateSemaphore(nullptr, 0, LONG_MAX, nullptr));
 
     CreateSharedAsyncQueue(
-        ALL_TEST_THREAD,
+        QUEUE_ID,
         AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
         AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
         &m_queue);
     AddAsyncQueueCallbackSubmitted(m_queue, nullptr, HandleAsyncQueueCallback, &m_callbackToken);
     
-    m_backgroundThreads.push_back(CreateThread(nullptr, 0, game_thread_proc, &ALL_TEST_THREAD, 0, nullptr));
-    m_backgroundThreads.push_back(CreateThread(nullptr, 0, work_thread_proc, &ALL_TEST_THREAD, 0, nullptr));
+    m_backgroundThreads.push_back(CreateThread(nullptr, 0, game_thread_proc, &QUEUE_ID, 0, nullptr));
+    m_backgroundThreads.push_back(CreateThread(nullptr, 0, work_thread_proc, &QUEUE_ID, 0, nullptr));
 }

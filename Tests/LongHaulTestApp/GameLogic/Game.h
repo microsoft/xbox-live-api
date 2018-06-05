@@ -115,10 +115,6 @@ namespace LongHaulTestApp
         std::vector<HANDLE> m_testThreads;
         std::vector<HANDLE> m_backgroundThreads;
 
-        uint32_t GENERAL_THREAD = 0;
-        uint32_t ALL_TEST_THREAD = 1;
-        uint32_t SCENARIO_TEST_THREAD = 2;
-
         ///////////////////////////////////////
         //////       Test Framework      //////
         ///////////////////////////////////////
