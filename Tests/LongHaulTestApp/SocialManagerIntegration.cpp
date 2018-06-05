@@ -49,7 +49,6 @@ void Game::RemoveLocalUserFromSocialManager()
     Game* pThis = this;
     WaitForSocialEvent(XblSocialManagerEventType::XblSocialManagerEventType_LocalUserRemoved, [pThis](XblSocialManagerEvent e) {
         pThis->Log("===== Finished TestSocialManagerFlow =====");
-        pThis->EndTest();
     });
 }
 
@@ -69,7 +68,6 @@ void Game::CreateSocialUserGroup()
         Log("XblSocialManagerCreateSocialUserGroupFromList");
         XblSocialManagerCreateSocialUserGroupFromList(m_user, xuids.data(), (uint32_t)xuids.size(), &m_socialUserGroup);
     }
-
 
     Game* pThis = this;
     WaitForSocialEvent(XblSocialManagerEventType::XblSocialManagerEventType_SocialUserGroupLoaded, [pThis](XblSocialManagerEvent e) {
@@ -153,6 +151,17 @@ void Game::WaitForSocialEvent(XblSocialManagerEventType eventType, std::function
     m_waitingForEvent = true;
     m_eventType = eventType;
     m_eventTypeCallback = callback;
+
+    bool m_update = true;
+    while (m_waitingForEvent)
+    {
+        if (m_update)
+        {
+            SocialManagerIntegrationUpdate();
+        }
+
+        m_update = !m_update;
+    }
 }
 
 void Game::PrintSocialManagerDoWork(XblSocialManagerEvent* events, uint32_t size)

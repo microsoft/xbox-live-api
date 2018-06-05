@@ -195,13 +195,13 @@ void Renderer::RenderEventLog(
 
 
     stringstream_t stream;
-    stream << "Cur PeakVirtualMemorySizeInBytes:  " << g_sampleInstance->m_curDeltaMem;
+    stream  << "Cur PeakVirtualMemorySizeInBytes:  " << g_sampleInstance->m_curDeltaMem;
     m_font->DrawString(m_sprites.get(), stream.str().c_str(), XMFLOAT2(15 * fGridXColumn1, 2 * fTextHeight), Colors::White, 0.0f, XMFLOAT2(0, 0), scale);
 
     stringstream_t stream2;
     stream2 << "Prev PeakVirtualMemorySizeInBytes: " << g_sampleInstance->m_lastDeltaMem;
     m_font->DrawString(m_sprites.get(), stream2.str().c_str(), XMFLOAT2(15 * fGridXColumn1, 3 * fTextHeight), Colors::White, 0.0f, XMFLOAT2(0, 0), scale);
-    
+
     stringstream_t stream3;
     stream3 << "Tests ran: " << g_sampleInstance->m_testsRun;
     m_font->DrawString(m_sprites.get(), stream3.str().c_str(), XMFLOAT2(15 * fGridXColumn1, 6 * fTextHeight), Colors::White, 0.0f, XMFLOAT2(0, 0), scale);

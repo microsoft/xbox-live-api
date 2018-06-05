@@ -189,7 +189,6 @@ void Game::UpdateAchievement(PCSTR scid, PCSTR achievementId)
         delete asyncBlock;
 
         pThis->Log("===== Finished TestAchievementFlow =====");
-        pThis->EndTest();
     };
 
     Log("XblAchievementsUpdateAchievement");

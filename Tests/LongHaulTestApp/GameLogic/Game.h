@@ -13,6 +13,7 @@
 #include <fstream>
 
 using namespace std;
+using namespace pplx;
 
 // ----------------------------------------------------------------------------
 // Constants
@@ -20,28 +21,11 @@ using namespace std;
 enum ButtonPress
 {
     SignIn,
-    ToggleSocialGroup1,
-    ToggleSocialGroup2,
-    ToggleSocialGroup3,
-    ToggleSocialGroup4,
-    ToggleSocialGroup5,
-    ImportCustomList,
-    GetUserProfile,
-    GetFriends,
-    GetAchievementsForTitle,
     StartTests,
     StartTestsFast
 };
 
-#define NUM_OF_TEST_AREAS 4
-enum TestArea
-{
-    Achievements,
-    Profile,
-    Social,
-    SocialManger
-};
-
+#define BACKGROUND_THREADS 4
 #define PERF_COUNTERS 0    // Enable this for capturing performance counters
 
 namespace LongHaulTestApp
@@ -97,10 +81,7 @@ namespace LongHaulTestApp
         Windows::System::Diagnostics::ProcessMemoryUsageReport^ m_curMemReport;
         unsigned long long m_curDeltaMem;
         unsigned long long m_lastDeltaMem;
-        uint32_t m_testDelay;
-        uint64_t m_testsRun;
 
-    private:
         xbl_user_handle m_user;
         uint64_t m_xuid;
         xbl_context_handle m_xboxLiveContext;
@@ -123,9 +104,16 @@ namespace LongHaulTestApp
 
         Concurrency::critical_section m_stateLock;
 
-        HANDLE m_hBackgroundThread;
+        ///////////////////////////////////////
+        //////           Threads         //////
+        ///////////////////////////////////////
 
-        bool m_testsStarted;
+        // Methods
+        void InitializeAsync();
+
+        // Vars
+        std::vector<HANDLE> m_testThreads;
+        std::vector<HANDLE> m_backgroundThreads;
 
         ///////////////////////////////////////
         //////       Test Framework      //////
@@ -133,19 +121,18 @@ namespace LongHaulTestApp
         
         // Methods
         void InitializeTestFramework();
-        void InitializeTests();
 
         void HandleTests();
-        void BeginTest();
-        void EndTest();
+        void RunTests();
 
         void PrintMemoryUsage();
 
         string TaceLevelToString(xbox::services::xbox_services_diagnostics_trace_level traceLevel);
 
         // Vars
-        TestArea m_testArea;
-        bool m_testing;
+        bool m_testsStarted;
+        uint32_t m_testDelay;
+        uint64_t m_testsRun;
         time_t m_time;
 
         ofstream m_logFile;

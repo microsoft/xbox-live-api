@@ -117,7 +117,6 @@ void Game::TestResputationFeedback()
             pThis->Log(L"[Test] Successfully got the social relationship!");
 
             pThis->Log("===== Finished TestSocialFlow =====");
-            pThis->EndTest();
         }
         else
         {

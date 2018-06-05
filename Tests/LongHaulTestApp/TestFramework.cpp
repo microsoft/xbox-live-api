@@ -30,63 +30,29 @@ void Game::InitializeTestFramework()
     Log("Starting Tests");
 }
 
-void Game::InitializeTests()
-{
-
-}
-
 void Game::HandleTests()
 {
-    if (!m_testing && (time(NULL) - m_time) > m_testDelay)
+    if ((time(NULL) - m_time) > m_testDelay)
     {
-        BeginTest();
-    }
-
-    if (m_testing)
-    {
-        switch (m_testArea)
-        {
-            case TestArea::Achievements:
-            case TestArea::Profile:
-            case TestArea::Social:
-                break;
-        
-            case TestArea::SocialManger: SocialManagerIntegrationUpdate(); break;
-        }
+        RunTests();
     }
 }
 
- void Game::BeginTest()
- {
-     m_testing = true;
-
-     switch (m_testArea)
-     {
-         case TestArea::Achievements: TestAchievementsFlow(); break;
-         case TestArea::Profile: TestProfileFlow(); break;
-         case TestArea::Social: TestSocialFlow(); break;
-         case TestArea::SocialManger: TestSocialManagerFlow(); break;
-     }
- }
-
-void Game::EndTest()
+void Game::RunTests()
 {
-    m_testing = false;
+    m_time = time(NULL);
+    m_testsRun++;
 
-    int newTestArea = m_testArea + 1;
-    if (newTestArea >= NUM_OF_TEST_AREAS)
-    {
-        m_testsRun++;
-        m_time = time(NULL);
-        newTestArea = 0;
+    TestAchievementsFlow();
 
-        if (m_testsRun % 1 == 0)
-        {
-            PrintMemoryUsage();
-        }
-    }
-    m_testArea = (TestArea)newTestArea;
-}
+    TestProfileFlow();
+
+    TestSocialFlow();
+
+    TestSocialManagerFlow();
+
+    PrintMemoryUsage();
+ }
 
 void Game::Log(std::wstring log, bool showOnUI)
 {

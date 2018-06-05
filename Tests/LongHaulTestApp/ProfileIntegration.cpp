@@ -9,27 +9,18 @@ using namespace LongHaulTestApp;
 
 void Game::TestProfileFlow()
 {
-    if (m_test == 0)
+    m_test++;
+    if (m_test == 1)
     {
         Log("===== Starting TestProfileFlow =====");
         TestGetUserProfile();
-        m_test++;
-    }
-    else if (m_test == 1)
-    {
         TestGetUserProfiles();
-        m_test++;
-    }
-    else if (m_test == 2)
-    {
         TestGetUserProfilesForSocialGroup();
-        m_test++;
     }
-    else if (m_test == 3)
+    else if (m_test >= 4)
     {
         m_test = 0;
         Log("===== Finished TestProfileFlow =====");
-        EndTest();
     }
 }
 
