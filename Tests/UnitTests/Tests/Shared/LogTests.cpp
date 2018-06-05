@@ -248,6 +248,7 @@ public:
 
     static void TraceFunction(_In_ xbox_services_diagnostics_trace_level level, _In_ const std::string& category, _In_ const std::string& message)
     {
+        UNREFERENCED_PARAMETER(category);
         xbox_services_diagnostics_trace_level currentLevel = xbox_live_services_settings::get_singleton_instance()->diagnostics_trace_level();
         g_haslogged = true;
         VERIFY_IS_TRUE(level <= currentLevel);

@@ -2,7 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
+#include <xsapi-c/presence_c.h>
 
+/// <summary>
+/// Detail level controls how much information is exposed in each xbox_live_social_graph_user
+/// Detail level can only be set on construction of social_manager
+/// </summary>
 typedef enum XblSocialManagerExtraDetailLevel 
 {
     /// <summary>Only get default PeopleHub information (presence, profile)</summary>
@@ -18,6 +23,10 @@ typedef enum XblSocialManagerExtraDetailLevel
     XblSocialManagerExtraDetailLevel_All = 0x3,
 } XblSocialManagerExtraDetailLevel;
 
+/// <summary>
+/// The filter level of information
+/// Title will only show users associated with a particular title
+/// </summary>
 typedef enum XblPresenceFilter
 {
     /// <summary>Unknown</summary>
@@ -42,6 +51,9 @@ typedef enum XblPresenceFilter
     XblPresenceFilter_All
 } XblPresenceFilter;
 
+/// <summary>
+/// The types of possible social manager events
+/// </summary>
 typedef enum XblSocialManagerEventType
 {
     /// <summary>Users added to social graph</summary>
@@ -75,6 +87,9 @@ typedef enum XblSocialManagerEventType
     XblSocialManagerEventType_UnknownEvent
 } XblSocialManagerEventType;
 
+/// <summary>
+/// Possible relationship types to filter by
+/// </summary>
 typedef enum XblRelationshipFilter 
 {
     /// <summary>Friends of the user (user is following)</summary>
@@ -84,6 +99,9 @@ typedef enum XblRelationshipFilter
     XblRelationshipFilter_Favorite
 } XblRelationshipFilter;
 
+/// <summary>
+/// Identifies type of social user group created
+/// </summary>
 typedef enum XblSocialUserGroupType 
 {
     /// <summary>Social user group based off of filters</summary>
@@ -93,6 +111,9 @@ typedef enum XblSocialUserGroupType
     XblSocialUserGroupType_UserListType
 } XblSocialUserGroupType;
 
+/// <summary>
+/// Data about whether the user has played the title
+/// </summary>
 typedef struct XblTitleHistory
 {
     /// <summary>
@@ -106,24 +127,31 @@ typedef struct XblTitleHistory
     time_t lastTimeUserPlayed;
 } XblTitleHistory;
 
+/// <summary>
+/// Preferred color for the user. Set via the shell. 
+/// </summary>
 typedef struct XblPreferredColor
 {
     /// <summary>
-    /// Users primary color
+    /// UTF-8 encoded user's primary color
     /// </summary>
     char primaryColor[XBL_COLOR_CHAR_SIZE];
 
     /// <summary>
-    /// Users secondary color
+    /// UTF-8 encoded user's secondary color
     /// </summary>
     char secondaryColor[XBL_COLOR_CHAR_SIZE];
 
     /// <summary>
-    /// Users tertiary color
+    /// UTF-8 encoded user's tertiary color
     /// </summary>
     char tertiaryColor[XBL_COLOR_CHAR_SIZE];
 } XblPreferredColor;
 
+/// <summary>
+/// Social manager version of the presence title record
+/// Gives information about different titles presence information
+/// </summary>
 typedef struct XblSocialManagerPresenceTitleRecord
 {
     /// <summary>
@@ -137,7 +165,7 @@ typedef struct XblSocialManagerPresenceTitleRecord
     bool isTitleActive;
 
     /// <summary>
-    /// The formatted and localized presence string.
+    /// The UTF-8 encoded formatted and localized presence string.
     /// </summary>
     char presenceText[XBL_RICH_PRESENCE_CHAR_SIZE];
 
@@ -199,17 +227,17 @@ typedef struct XblSocialManagerUser
     bool isFollowedByCaller;
 
     /// <summary>
-    /// The display name
+    /// The UTF-8 encoded display name
     /// </summary>
     char displayName[XBL_DISPLAY_NAME_CHAR_SIZE];
 
     /// <summary>
-    /// The real name
+    /// The UTF-8 encoded real name
     /// </summary>
     char realName[XBL_REAL_NAME_CHAR_SIZE];
 
     /// <summary>
-    /// The display pic uri
+    /// The UTF-8 encoded display pic uri
     /// </summary>
     char displayPicUrlRaw[XBL_DISPLAY_PIC_URL_RAW_CHAR_SIZE];
 
@@ -219,12 +247,12 @@ typedef struct XblSocialManagerUser
     bool useAvatar;
 
     /// <summary>
-    /// Players gamerscore
+    /// UTF-8 encoded player's gamerscore
     /// </summary>
     char gamerscore[XBL_GAMERSCORE_CHAR_SIZE];
 
     /// <summary>
-    /// Players gamertag
+    /// UTF-8 encoded player's gamertag
     /// </summary>
     char gamertag[XBL_GAMERTAG_CHAR_SIZE];
 
@@ -334,20 +362,27 @@ STDAPI_(bool) XblSocialManagerPresenceRecordIsUserPlayingTitle(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Populates a users provided array of XblSocialManagerUser objects. Returned data may be stale after future calls
-/// to XblSocialManagerDoWork. The provided array must be large enough to hold all of the users, as indicated
+/// Populates the provided array with XblSocialManagerUser objects.
+/// The returned data is a deep copy and still accessible after XblSocialManagerDoWork,
+/// however the data may become stale.
+/// The provided array must be large enough to hold all of the users, as indicated
 /// by the value of the "usersCount" property of the group.
 /// </summary>
 /// <param name="group">The group from which to get users.</param>
+/// <param name="xboxSocialUsersCount">The size of the xboxSocialUsers array passed in.  Should be at least as large as group->usersCount.</param>
 /// <param name="xboxSocialUsers">User provided array to populate.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblSocialManagerUserGroupGetUsers(
     _In_ XblSocialManagerUserGroup* group,
-    _Out_writes_all_(group->usersCount) XblSocialManagerUser* xboxSocialUsers
+    _In_ uint32_t xboxSocialUsersCount,
+    _Out_writes_(xboxSocialUsersCount) XblSocialManagerUser* xboxSocialUsers
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Populates a user provided array of XblSocialManagerUser objects. Returned data may be stale after future calls
-/// to XblSocialManagerDoWork. If the provided array is not large enough, XBL_RESULT_INVALID_ARG will be returned and
+/// Populates a user provided array of XblSocialManagerUser objects. 
+/// The returned data is a deep copy and still accessible after XblSocialManagerDoWork,
+/// however the data may become stale.
+/// If the provided array is not large enough, XBL_RESULT_INVALID_ARG will be returned and
 /// xboxSocialUsersCount will be set to the required number of elements.
 /// </summary>
 /// <param name="group">The group the users are a part of.</param>
@@ -358,6 +393,7 @@ STDAPI XblSocialManagerUserGroupGetUsers(
 /// The actual number of users written to the xboxSocialUsers array. If all of the xuids provided are members of the group,
 /// this will be equal to the 'xboxUserIdsCount'.
 /// </param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblSocialManagerUserGroupGetUsersFromXboxUserIds(
     _In_ XblSocialManagerUserGroup* group,
     _In_ const uint64_t* xboxUserIds,
@@ -369,13 +405,18 @@ STDAPI XblSocialManagerUserGroupGetUsersFromXboxUserIds(
 /// <summary>
 /// Populates a user provided array of uint64s. For groups created from a list, the set of tracked users
 /// is static, but for groups created from a filter this may change with each call to XblSocialManagerDoWork. 
+/// The returned data is a deep copy and still accessible after XblSocialManagerDoWork,
+/// however the data may become stale.
 /// The provided array must be large enough to hold all of the users, as indicated by the value of the "trackedUsersCount" property of the group.
 /// </summary>
 /// <param name="group">The group from which to get users.</param>
+/// <param name="trackedUsersCount">The size of the trackedUsers array passed in.  Should be at least as large as group->trackedUsersCount.</param>
 /// <param name="trackedUsers">User provided array to populate.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblSocialManagerUserGroupGetUsersTrackedByGroup(
     _In_ XblSocialManagerUserGroup* group,
-    _Out_writes_all_(group->trackedUsersCount) uint64_t* trackedUsers
+    _In_ uint32_t trackedUsersCount,
+    _Out_writes_(trackedUsersCount) uint64_t* trackedUsers
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -383,7 +424,8 @@ STDAPI XblSocialManagerUserGroupGetUsersTrackedByGroup(
 /// The result of a local user being added will be triggered through the XblSocialManagerEventType_LocalUserAdded event in XblSocialManagerDoWork
 /// </summary>
 /// <param name="user">Xbox Live User</param>
-/// <param name="extraDetailLevel">The level of verbosity that should be in the xbox_social_user</param>
+/// <param name="extraLevelDetail">The level of verbosity that should be in the xbox_social_user</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblSocialManagerAddLocalUser(
     _In_ xbl_user_handle user,
     _In_ XblSocialManagerExtraDetailLevel extraLevelDetail
@@ -391,16 +433,19 @@ STDAPI XblSocialManagerAddLocalUser(
 
 /// <summary>
 /// Removes a social graph for the specified local user
-/// The result of a local user being added will be triggered through the XblSocialManagerEventType_LocalUserRemoved event in XblSocialManagerDoWork
+/// The result of a local user being added will be triggered through the 
+/// XblSocialManagerEventType_LocalUserRemoved event in XblSocialManagerDoWork
 /// </summary>
 /// <param name="user">Xbox Live User</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblSocialManagerRemoveLocalUser(
     _In_ xbl_user_handle user
     ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Called whenever the title wants to update the social graph and get list of change events
-/// Must be called every frame for data to be up to date. The returned array of events is only valid until the next
+/// Must be called every frame for data to be up to date. 
+/// The returned array of events is only valid until the next
 /// call to XblSocialManagerDoWork.
 /// </summary>
 /// <param name="socialEvents">
@@ -409,6 +454,7 @@ STDAPI XblSocialManagerRemoveLocalUser(
 /// up when XblCleanup is called.
 /// </param>
 /// <param name="socialEventsCount">The number of events in the returned array.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblSocialManagerDoWork(
     _Outptr_ XblSocialManagerEvent** socialEvents,
     _Out_ uint32_t* socialEventsCount
@@ -420,19 +466,22 @@ STDAPI XblSocialManagerDoWork(
 /// </summary>
 /// <param name="socialEvent">The social event, returned from XblSocialManagerDoWork.</param>
 /// <param name="usersAffected">Array of afftected users to populate.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblSocialManagerEventGetUsersAffected(
     _In_ XblSocialManagerEvent* socialEvent,
     _Out_writes_(socialEvent->usersAffectedCount) uint64_t* usersAffected
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Constructs a social Xbox Social User Group, which is a collection of users with social information
-/// The result of a user group being loaded will be triggered through the XblSocialManagerEventType_SocialUserGroupLoaded event in XblSocialManagerDoWork
+/// Constructs a XblSocialManagerUserGroup, which is a collection of users with social information
+/// The result of a user group being loaded will be triggered through the 
+/// XblSocialManagerEventType_SocialUserGroupLoaded event in XblSocialManagerDoWork.
 /// </summary>
 /// <param name="user">Xbox Live User</param>
 /// <param name="presenceDetailLevel">The restriction of users based on their presence and title activity</param>
 /// <param name="filter">The restriction of users based on their relationship to the calling user</param>
 /// <param name="group">A pointer to the created group. This group must later be cleaned up with XblSocialManagerDestroySocialUserGroup.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblSocialManagerCreateSocialUserGroupFromFilters(
     _In_ xbl_user_handle user,
     _In_ XblPresenceFilter presenceDetailLevel,
@@ -441,14 +490,15 @@ STDAPI XblSocialManagerCreateSocialUserGroupFromFilters(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Constructs a social Xbox Social User Group, which is a collection of users with social information
-/// The result of a user group being loaded will be triggered through the XblSocialManagerEventType_SocialUserGroupLoaded event in XblSocialManagerDoWork
+/// Constructs a social XblSocialManagerUserGroup, which is a collection of users with social information
+/// The result of a user group being loaded will be triggered through the 
+/// XblSocialManagerEventType_SocialUserGroupLoaded event in XblSocialManagerDoWork.
 /// </summary>
 /// <param name="user">Xbox Live User</param>
 /// <param name="xboxUserIdList">List of users to populate the Xbox Social User Group with. This is currently capped at 100 users total.</param>
 /// <param name="xboxUserIdListCount">The number of items in the xboxUserIdList.</param>
 /// <param name="group">A pointer to the created group. This group must later be cleaned up with XblSocialManagerDestroySocialUserGroup.</param>
-/// <returns>An XBL_RESULT to report any errors.</returns>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblSocialManagerCreateSocialUserGroupFromList(
     _In_ xbl_user_handle user,
     _In_ uint64_t* xboxUserIdList,
@@ -458,20 +508,21 @@ STDAPI XblSocialManagerCreateSocialUserGroupFromList(
 
 /// <summary>
 /// Destroys a created social Xbox Social User Group
-/// This will stop updating the Xbox Social User Group and remove tracking for any users the Xbox Social User Group holds
+/// This will stop updating the Xbox Social User Group and remove tracking for any users 
+/// the XblSocialManagerUserGroup holds.
 /// </summary>
 /// <param name="group">The social Xbox Social User Group to destroy and stop tracking</param>
-/// <returns>An XBL_RESULT to report any potential error</returns>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblSocialManagerDestroySocialUserGroup(
     _In_ XblSocialManagerUserGroup* group
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns all local users who have been added to the social manager
+/// Returns all local users who have been added to the social manager.
 /// </summary>
 /// <param name="users">Array of handles for users that have been added to social manager.</param>
 /// <param name="userCount">The number of items in the returned array</param>
-/// <returns>Array of XBL_XBOX_LIVE_USER objects that are managed by social manager.</returns>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblSocialManagerGetLocalUsers(
     _Outptr_ xbl_user_handle** users,
     _Out_ uint32_t* userCount
@@ -480,11 +531,12 @@ STDAPI XblSocialManagerGetLocalUsers(
 /// <summary>
 /// Updates specified social user group to new group of users
 /// Does a diff to see which users have been added or removed from
-/// The result of a user group being updated will be triggered through the XblSocialManagerEventType_SocialUserGroupUpdated event in XblSocialManagerDoWork
+/// The result of a user group being updated will be triggered through the XblSocialManagerEventType_SocialUserGroupUpdated event in XblSocialManagerDoWork.
 /// </summary>
 /// <param name="group">The xbox social user group to add users to.</param>
 /// <param name="users">List of users to add to the xbox social user group. Total number of users not in social graph is limited at 100.</param>
 /// <param name="usersCount">Number of items in the users array.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblSocialManagerUpdateSocialUserGroup(
     _In_ XblSocialManagerUserGroup* group,
     _In_ uint64_t* users,
@@ -492,11 +544,11 @@ STDAPI XblSocialManagerUpdateSocialUserGroup(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Whether to enable social manager to poll every 30 seconds from the presence service 
+/// Whether to enable social manager to poll every 30 seconds from the presence service.
 /// </summary>
 /// <param name="user">Xbox Live User</param>
 /// <param name="shouldEnablePolling">Whether or not polling should enabled</param>
-/// <returns>An XBL_RESULT representing the success enabling polling</returns>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblSocialManagerSetRichPresencePollingStatus(
     _In_ xbl_user_handle user,
     _In_ bool shouldEnablePolling

@@ -3,9 +3,6 @@
 
 #pragma once
 
-#include "pal.h"
-#include "xsapi-c/errors_c.h"
-
 /// <summary>Enumeration values that indicate the achievement type.</summary>
 typedef enum XblAchievementType
 {
@@ -104,9 +101,9 @@ typedef enum XblAchievementRewardType
 typedef struct XblAchievementTitleAssociation
 {
     /// <summary>
-    /// The localized name of the title.
+    /// The UTF-8 encoded localized name of the title
     /// </summary>
-    UTF8CSTR name;
+    _Field_z_ const char* name;
 
     /// <summary>
     /// The title ID.
@@ -120,21 +117,21 @@ typedef struct XblAchievementTitleAssociation
 typedef struct XblAchievementRequirement
 {
     /// <summary>
-    /// The achievement requirement ID.
+    /// The UTF-8 encoded achievement requirement ID.
     /// </summary>
-    UTF8CSTR id;
+    _Field_z_ const char* id;
 
     /// <summary>
-    /// A value that indicates the current progress of the player towards meeting
+    /// A UTF-8 encoded value that indicates the current progress of the player towards meeting
     /// the requirement.
     /// </summary>
-    UTF8CSTR currentProgressValue;
+    _Field_z_ const char* currentProgressValue;
 
     /// <summary>
-    /// The target progress value that the player must reach in order to meet
+    /// The UTF-8 encoded target progress value that the player must reach in order to meet
     /// the requirement.
     /// </summary>
-    UTF8CSTR targetProgressValue;
+    _Field_z_ const char* targetProgressValue;
 } XblAchievementRequirement;
 
 /// <summary>
@@ -148,7 +145,7 @@ typedef struct XblAchievementProgression
     XblAchievementRequirement* requirements;
 
     /// <summary>
-    /// The size of <ref>requirements</ref>.
+    /// The size of <see cref="requirements"/>.
     /// </summary>
     uint32_t requirementsCount;
 
@@ -181,9 +178,9 @@ typedef struct XblAchievementTimeWindow
 typedef struct XblAchievementMediaAsset
 {
     /// <summary>
-    /// The name of the media asset, such as "tile01".
+    /// The UTF-8 encoded name of the media asset, such as "tile01".
     /// </summary>
-    UTF8CSTR name;
+    _Field_z_ const char* name;
 
     /// <summary>
     /// The type of media asset.
@@ -191,9 +188,9 @@ typedef struct XblAchievementMediaAsset
     XblAchievementMediaAssetType mediaAssetType;
 
     /// <summary>
-    /// The URL of the media asset.
+    /// The UTF-8 encoded URL of the media asset.
     /// </summary>
-    UTF8CSTR url;
+    _Field_z_ const char* url;
 } XblAchievementMediaAsset;
 
 /// <summary>
@@ -202,19 +199,19 @@ typedef struct XblAchievementMediaAsset
 typedef struct XblAchievementReward
 {
     /// <summary>
-    /// The localized reward name.
+    /// The UTF-8 encoded localized reward name.
     /// </summary>
-    UTF8CSTR name;
+    _Field_z_ const char* name;
 
     /// <summary>
-    /// The description of the reward.
+    /// The UTF-8 encoded description of the reward.
     /// </summary>
-    UTF8CSTR description;
+    _Field_z_ const char* description;
 
     /// <summary>
-    /// The title-defined reward value (data type and content varies by reward type).
+    /// The UTF-8 encoded title-defined reward value (data type and content varies by reward type).
     /// </summary>
-    UTF8CSTR value;
+    _Field_z_ const char* value;
 
     /// <summary>
     /// The reward type.
@@ -222,9 +219,9 @@ typedef struct XblAchievementReward
     XblAchievementRewardType rewardType;
 
     /// <summary>
-    /// The property type of the reward value string.
+    /// The UTF-8 encoded property type of the reward value string.
     /// </summary>
-    UTF8CSTR valueType;
+    _Field_z_ const char* valueType;
 
     /// <summary>
     /// The media asset associated with the reward.
@@ -242,19 +239,19 @@ typedef struct XblAchievementReward
 typedef struct XblAchievement
 {
     /// <summary>
-    /// The achievement ID. Can be a uint or a guid.
+    /// The UTF-8 encoded achievement ID. Can be a uint or a guid.
     /// </summary>
-    UTF8CSTR id;
+    _Field_z_ const char* id;
 
     /// <summary>
-    /// The ID of the service configuration set associated with the achievement.
+    /// The UTF-8 encoded ID of the service configuration set associated with the achievement.
     /// </summary>
-    UTF8CSTR serviceConfigurationId;
+    _Field_z_ const char* serviceConfigurationId;
 
     /// <summary>
-    /// The localized achievement name.
+    /// The UTF-8 encoded localized achievement name.
     /// </summary>
-    UTF8CSTR name;
+    _Field_z_ const char* name;
 
     /// <summary>
     /// The game/app titles associated with the achievement.
@@ -262,7 +259,7 @@ typedef struct XblAchievement
     XblAchievementTitleAssociation* titleAssociations;
 
     /// <summary>
-    /// The size of <ref>titleAssociations</ref>.
+    /// The size of <see cref="titleAssociations"/>.
     /// </summary>
     uint32_t titleAssociationsCount;
 
@@ -283,17 +280,17 @@ typedef struct XblAchievement
     XblAchievementMediaAsset* mediaAssets;
 
     /// <summary>
-    /// The size of <ref>mediaAssets</ref>.
+    /// The size of <see cref="mediaAssets"/>.
     /// </summary>
     uint32_t mediaAssetsCount;
 
     /// <summary>
-    /// The collection of platforms that the achievement is available on.
+    /// The UTF-8 encoded collection of platforms that the achievement is available on.
     /// </summary>
-    UTF8CSTR* platformsAvailableOn;
+    _Field_z_ const char** platformsAvailableOn;
 
     /// <summary>
-    /// The size of <ref>platformsAvailableOn</ref>.
+    /// The size of <see cref="platformsAvailableOn"/>.
     /// </summary>
     uint32_t platformsAvailableOnCount;
 
@@ -303,20 +300,20 @@ typedef struct XblAchievement
     bool isSecret;
 
     /// <summary>
-    /// The description of the unlocked achievement.
+    /// The UTF-8 encoded description of the unlocked achievement.
     /// </summary>
-    UTF8CSTR unlockedDescription;
+    _Field_z_ const char* unlockedDescription;
 
     /// <summary>
-    /// The description of the locked achievement.
+    /// The UTF-8 encoded description of the locked achievement.
     /// </summary>
-    UTF8CSTR lockedDescription;
+    _Field_z_ const char* lockedDescription;
 
     /// <summary>
-    /// The product_id the achievement was released with. This is a globally unique identifier that
+    /// The UTF-8 encoded product_id the achievement was released with. This is a globally unique identifier that
     /// may correspond to an application, downloadable content, etc.
     /// </summary>
-    UTF8CSTR productId;
+    _Field_z_ const char* productId;
 
     /// <summary>
     /// The type of achievement, such as a challenge achievement.
@@ -339,7 +336,7 @@ typedef struct XblAchievement
     XblAchievementReward* rewards;
 
     /// <summary>
-    /// The size of <ref>rewards</ref>.
+    /// The size of <see cref="rewards"/>.
     /// </summary>
     uint32_t rewardsCount;
 
@@ -349,10 +346,10 @@ typedef struct XblAchievement
     uint64_t estimatedUnlockTime;
 
     /// <summary>
-    /// A deeplink for clients that enables the title to launch at a desired starting point
+    /// A UTF-8 encoded deep link for clients that enables the title to launch at a desired starting point
     /// for the achievement.
     /// </summary>
-    UTF8CSTR deepLink;
+    _Field_z_ const char* deepLink;
 
     /// <summary>
     /// A value that indicates whether or not the achievement is revoked by enforcement.
@@ -368,8 +365,9 @@ typedef struct XblAchievement
 typedef struct xbl_achievements_result* xbl_achievements_result_handle;
 
 /// <summary>
-/// Returns an XblAchievementsResult object containing the first page of achievements
-/// for a player of the specified title.
+/// Gets the first page of achievements for a player of the specified title.
+/// To get the result, call XblAchievementsGetAchievementsForTitleIdResult inside the AsyncBlock callback
+/// or after the AsyncBlock is complete.
 /// </summary>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
@@ -377,17 +375,16 @@ typedef struct xbl_achievements_result* xbl_achievements_result_handle;
 /// <param name="titleId">The title ID.</param>
 /// <param name="type">The achievement type to retrieve.</param>
 /// <param name="unlockedOnly">Indicates whether to return unlocked achievements only.</param>
-/// <param name="orderby">Controls how the list of achievements is ordered.</param>
+/// <param name="orderBy">Controls how the list of achievements is ordered.</param>
 /// <param name="skipItems">The number of achievements to skip.</param>
 /// <param name="maxItems">The maximum number of achievements the result can contain.  Pass 0 to attempt
 /// to retrieve all items.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// See XblAchievementsResultGetNextAsync to page in the next set of results.
-///
 /// This method calls V2 GET /users/xuid({xuid})/achievements
 /// </remarks>
 STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ uint32_t titleId,
@@ -399,23 +396,26 @@ STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Get the result from an XblAchievementsGetAchievementsForTitleIdAsync call.
-/// <summary>
-/// <param name="async">The async block that was used on the asyncronous call.</param>
-/// <param name="resultHandle">Acheivement result handle.</param>
+/// Get xbl_achievements_result_handle from an XblAchievementsGetAchievementsForTitleIdAsync call.
+/// Use XblAchievementsResultGetAchievements to get the list.
+/// </summary>
+/// <param name="async">The same AsyncBlock that passed to XblAchievementsGetAchievementsForTitleIdAsync.</param>
+/// <param name="result">Achievement result handle.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsGetAchievementsForTitleIdResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Get the actual achievement objects from an xbl_achievements_result_handle.
-/// The returned achievements are owned by XSAPI and will be cleaned up when the the xbl_achievements_result_handle
-/// is closed.
-/// <summary>
-/// <param name="resultHandle">Acheivement result handle.</param>
+/// Get a list of XblAchievement objects.
+/// This memory of the list is freed when the xbl_achievements_result_handle is closed 
+/// with XblAchievementsResultCloseHandle
+/// </summary>
+/// <param name="resultHandle">Achievement result handle.</param>
 /// <param name="achievements">Pointer to an array of XblAchievement objects.</param>
 /// <param name="achievementsCount">The count of objects in the returned array.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsResultGetAchievements(
     _In_ xbl_achievements_result_handle resultHandle,
     _Out_ XblAchievement** achievements,
@@ -423,17 +423,20 @@ STDAPI XblAchievementsResultGetAchievements(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Checks if there are more pages of achiements to retrieve from the service.
+/// Checks if there are more pages of achievements to retrieve from the service.
 /// </summary>
-/// <param name="resultHandle">Acheivement result handle.</param>
+/// <param name="resultHandle">Achievement result handle.</param>
 /// <param name="hasNext">Return value. True if there are more results to retrieve, false otherwise.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsResultHasNext(
     _In_ xbl_achievements_result_handle resultHandle,
     _Out_ bool* hasNext
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns a XblAchievementsResult object that contains the next page of achievements.
+/// Gets the result of next page of achievements for a player of the specified title.
+/// To get the result, call XblAchievementsResultGetNextResult inside the AsyncBlock callback
+/// or after the AsyncBlock is complete.
 /// </summary>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
@@ -443,23 +446,25 @@ STDAPI XblAchievementsResultHasNext(
 /// <remarks>
 /// This method calls V2 GET /users/xuid({xuid})/achievements.
 /// </remarks>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsResultGetNextAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ xbl_achievements_result_handle resultHandle,
     _In_ uint32_t maxItems
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Get the result from an XblAchievementsResultGetNextAsync call.
-/// <summary>
-/// <param name="async">The async block that was used on the asyncronous call.</param>
-/// <param name="resultHandle">
-/// Returns the next achievement result handle. Note that this is a seperate handle than the one passed to the
-/// XblAchievementsResultGetNextAsync API. Each result handle must be closed seperately.
+/// Get xbl_achievements_result_handle from an XblAchievementsResultGetNextAsync call.
+/// </summary>
+/// <param name="async">The same AsyncBlock that passed to XblAchievementsResultGetNextAsync.</param>
+/// <param name="result">
+/// Returns the next achievement result handle. Note that this is a separate handle than the one passed to the
+/// XblAchievementsResultGetNextAsync API. Each result handle must be closed separately.
 /// </param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsResultGetNextResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT;
 
@@ -467,66 +472,71 @@ STDAPI XblAchievementsResultGetNextResult(
 /// Allow achievement progress to be updated and achievements to be unlocked.
 /// This API will work even when offline on PC and Xbox One. Offline updates will be 
 /// posted by the system when connection is re-established even if the title isn't running.
-/// The result of the asyncronous operation can be obtained with GetAsyncStatus.
+/// The result of the asynchronous operation can be obtained by calling GetAsyncStatus
+/// inside the AsyncBlock callback or after the AsyncBlock is complete
 /// </summary>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>
 /// <param name="titleId">The title ID.</param>
-/// <param name="serviceConfigurationId">The service configuration ID (SCID) for the title.</param>
-/// <param name="achievementId">The achievement ID as defined by XDP or Dev Center.</param>
+/// <param name="serviceConfigurationId">The UTF-8 encoded service configuration ID (SCID) for the title.</param>
+/// <param name="achievementId">The UTF-8 encoded achievement ID as defined by XDP or Dev Center.</param>
 /// <param name="percentComplete">The completion percentage of the achievement to indicate progress.
 /// Valid values are from 1 to 100. Set to 100 to unlock the achievement.
 /// Progress will be set by the server to the highest value sent</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
 /// This method calls V2 POST /users/xuid({xuid})/achievements/{scid}/update
 /// </remarks>
 STDAPI XblAchievementsUpdateAchievementAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_opt_ uint32_t* titleId,
-    _In_opt_ UTF8CSTR serviceConfigurationId,
-    _In_ UTF8CSTR achievementId,
+    _In_opt_z_ const char* serviceConfigurationId,
+    _In_z_ const char* achievementId,
     _In_ uint32_t percentComplete
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns a XblAchievement object for a specified player.
-/// If the achievement does not exist, the method returns E_FAIL.
+/// Gets an achievement for a player with a specific achievement ID.
+/// To get the result, call XblAchievementsGetAchievementResult inside the AsyncBlock callback
+/// or after the AsyncBlock is complete.
 /// </summary>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>
-/// <param name="serviceConfigurationId">The service configuration ID (SCID) for the title.</param>
-/// <param name="achievementId">The unique identifier of the Achievement as defined by XDP or Dev Center.</param>
-/// <param name="async">Caller allocated AsyncBlock.</param>
+/// <param name="serviceConfigurationId">The UTF-8 encoded service configuration ID (SCID) for the title.</param>
+/// <param name="achievementId">The UTF-8 encoded unique identifier of the Achievement as defined by XDP or Dev Center.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
 /// This method calls V2 GET /users/xuid({xuid})/achievements/{scid}/{achievementId}.
 /// </remarks>
 STDAPI XblAchievementsGetAchievementAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
-    _In_ UTF8CSTR serviceConfigurationId,
-    _In_ UTF8CSTR achievementId
+    _In_z_ const char* serviceConfigurationId,
+    _In_z_ const char* achievementId
     ) XBL_NOEXCEPT;
 
 /// <summary>
 /// Get the result handle from an XblAchievementsGetAchievementAsync call.
-/// <summary>
-/// <param name="async">The async block that was used on the asyncronous call.</param>
-/// <param name="resultHandle">
+/// </summary>
+/// <param name="async">The same AsyncBlock that passed to XblAchievementsGetAchievementAsync.</param>
+/// <param name="result">
 /// The achievement result handle. This handle is used by other APIs to get the achievement objects
 /// and to get the next page of achievements from the service if there is is one. The handle must be closed
 /// using XblAchievementsResultCloseHandle when the result is no longer needed.
 /// </param>
+/// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsGetAchievementResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ xbl_achievements_result_handle* result
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Increments the reference count of an xbl_achievements_result_handle.
+/// Duplicates a xbl_achievements_result_handle
 /// </summary>
 /// <param name="handle">The xbl_achievements_result_handle to duplicate.</param>
 /// <returns>Returns the duplicated handle.</returns>
@@ -535,10 +545,11 @@ STDAPI_(xbl_achievements_result_handle) XblAchievementsResultDuplicateHandle(
     ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Decrement the reference count for an xbl_achievements_result_handle.
-/// When the reference count for reaches 0, the memory associated with the achievement result will be freed.
+/// Closes the xbl_achievements_result_handle.
+/// When all outstanding handles have been closed, the memory associated with the achievement result will be freed.
 /// </summary>
 /// <param name="handle">The xbl_achievements_result_handle to close.</param>
 STDAPI_(void) XblAchievementsResultCloseHandle(
     _In_ xbl_achievements_result_handle handle
     ) XBL_NOEXCEPT;
+

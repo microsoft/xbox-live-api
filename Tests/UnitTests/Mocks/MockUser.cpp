@@ -21,6 +21,9 @@ void MockUser::sign_in_impl(
     _In_ xbox_live_callback<xbox_live_result<sign_in_result>> callback
     )
 {
+    UNREFERENCED_PARAMETER(queue);
+    UNREFERENCED_PARAMETER(forceRefresh);
+    UNREFERENCED_PARAMETER(showUI);
     user_signed_in(
         "TestXboxUserId",
         "TestGamerTag",
@@ -43,6 +46,14 @@ void MockUser::internal_get_token_and_signature(
     _In_ token_and_signature_callback callback
     )
 {
+    UNREFERENCED_PARAMETER(bytes);
+    UNREFERENCED_PARAMETER(headers);
+    UNREFERENCED_PARAMETER(endpointForNsal);
+    UNREFERENCED_PARAMETER(url);
+    UNREFERENCED_PARAMETER(httpMethod);
+    UNREFERENCED_PARAMETER(queue);
+    UNREFERENCED_PARAMETER(forceRefresh);
+    UNREFERENCED_PARAMETER(promptForCredentialsIfNeeded);
     HRESULT hr = ResultHR;
     if (FAILED(hr))
     {

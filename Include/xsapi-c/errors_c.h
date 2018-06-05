@@ -8,8 +8,6 @@
 /// </summary>
 /// <remarks>
 /// A best practice is to test the returned HRESULT against these error conditions using
-/// For more detail about std::error_code vs std::error_condition, see 
-/// http://en.cppreference.com/w/cpp/error/error_condition 
 /// </remarks>
 typedef enum XblErrorCondition
 {

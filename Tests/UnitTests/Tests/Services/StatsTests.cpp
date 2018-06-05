@@ -147,6 +147,7 @@ public:
 
     void VerifyStats(Statistic^ stat, web::json::value statToVerify, bool isSingleUser)
     {
+        UNREFERENCED_PARAMETER(isSingleUser);
         VERIFY_ARE_EQUAL(stat->StatisticName->Data(), statToVerify[L"statname"].as_string());
         VERIFY_ARE_EQUAL(stat->Value->Data(), statToVerify[L"value"].as_string());
         if (stat->StatisticType == PropertyType::Int64)

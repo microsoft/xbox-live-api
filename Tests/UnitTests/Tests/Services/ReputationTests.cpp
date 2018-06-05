@@ -73,7 +73,7 @@ public:
         httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(responseJson);
 
         XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto success = create_task(xboxLiveContext->ReputationService->SubmitReputationFeedbackAsync(
+        create_task(xboxLiveContext->ReputationService->SubmitReputationFeedbackAsync(
             "98052",
             reputationFeedback,
             sessionName,

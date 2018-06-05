@@ -119,7 +119,7 @@ STDAPI
 XblUserGetGamertag(
     _In_ xbl_user_handle user,
     _In_ size_t gamertagBufferSize,
-    _Out_writes_to_(gamertagBufferSize, *written) UTF8STR gamertagBuffer,
+    _Out_writes_to_(gamertagBufferSize, *written) char* gamertagBuffer,
     _Out_opt_ size_t* written
     ) XBL_NOEXCEPT;
 
@@ -156,7 +156,7 @@ STDAPI
 XblUserGetPrivileges(
     _In_ xbl_user_handle user,
     _In_ size_t privilegesSize,
-    _Out_writes_to_(privilegesSize, *written) UTF8STR privileges,
+    _Out_writes_to_(privilegesSize, *written) char* privileges,
     _Out_opt_ size_t* written
     ) XBL_NOEXCEPT;
 
@@ -184,7 +184,7 @@ XblUserIsSignedIn(
 /// </remarks>
 STDAPI
 XblUserSignIn(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_user_handle user
     ) XBL_NOEXCEPT;
 
@@ -201,7 +201,7 @@ XblUserSignIn(
 /// </remarks>
 STDAPI
 XblUserSignInSilently(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_user_handle user
     ) XBL_NOEXCEPT;
 
@@ -221,7 +221,7 @@ XblUserSignInSilently(
 /// </remarks>
 STDAPI
 XblUserSignInWithCoreDispatcher(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_user_handle user,
     _In_ Platform::Object^ coreDispatcherObj
     ) XBL_NOEXCEPT;
@@ -239,7 +239,7 @@ XblUserSignInWithCoreDispatcher(
 /// </remarks>
 STDAPI
 XblUserSignInSilentlyWithCoreDispatcher(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_user_handle user,
     _In_ Platform::Object^ coreDispatcherObj
     ) XBL_NOEXCEPT;
@@ -253,14 +253,14 @@ XblUserSignInSilentlyWithCoreDispatcher(
 /// <param name="signInResult">Caller allocated object to write results into.</param>
 STDAPI
 XblUserGetSignInResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ XblSignInResult* signInResult
     ) XBL_NOEXCEPT;
 
 typedef void (STDAPIVCALLTYPE *XblGetTokenAndSignatureCallback)(
     _In_ void* context,
-    _In_ UTF8CSTR token,
-    _In_ UTF8CSTR signature
+    _In_z_ const char* token,
+    _In_z_ const char* signature
     );
 
 /// <summary>
@@ -279,12 +279,12 @@ typedef void (STDAPIVCALLTYPE *XblGetTokenAndSignatureCallback)(
 /// </param>
 STDAPI
 XblUserGetTokenAndSignature(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_user_handle user,
-    _In_ UTF8CSTR httpMethod,
-    _In_ UTF8CSTR url,
-    _In_ UTF8CSTR headers,
-    _In_ UTF8CSTR requestBodyString,
+    _In_z_ const char* httpMethod,
+    _In_z_ const char* url,
+    _In_z_ const char* headers,
+    _In_z_ const char* requestBodyString,
     _In_ XblGetTokenAndSignatureCallback callback
     ) XBL_NOEXCEPT;
 

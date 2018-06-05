@@ -577,7 +577,7 @@ Game::RenderSocialGroupList(
         else
         {
             std::vector<XblSocialManagerUser> userList(group->usersCount);
-            XblSocialManagerUserGroupGetUsers(group, userList.data());
+            XblSocialManagerUserGroupGetUsers(group, group->usersCount, userList.data());
 
             for (uint32_t i = 0; i < group->usersCount; ++i)
             {

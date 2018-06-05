@@ -46,6 +46,7 @@ public:
 
         connection->set_connection_state_change_handler([helper](web_socket_connection_state oldState, web_socket_connection_state newState)
         {
+            UNREFERENCED_PARAMETER(oldState);
             if (newState == web_socket_connection_state::disconnected)
             {
                 ++helper->disconnected;

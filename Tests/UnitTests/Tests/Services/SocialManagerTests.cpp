@@ -340,7 +340,7 @@ public:
         m_mockXboxSystemFactory->add_websocket_state_responses_to_all_clients(websocketResponseQueue, tce);
     }
 
-    void TestDevicePresenceChange(const std::vector<Platform::String^> userList, const pplx::task_completion_event<void>& tce, const string_t& devicePresenceResponse)
+    void TestDevicePresenceChange(const std::vector<Platform::String^> userList, const pplx::task_completion_event<void>& tce, const string_t& tdevicePresenceResponse)
     {
         std::vector<Platform::String^> uriList;
         for (auto user : userList)
@@ -349,7 +349,7 @@ public:
             uriList.push_back(stream);
         }
 
-        auto mockEvents = GenerateMockEvents(uriList, devicePresenceResponse, real_time_activity_message_type::change_event);
+        auto mockEvents = GenerateMockEvents(uriList, tdevicePresenceResponse, real_time_activity_message_type::change_event);
         m_mockXboxSystemFactory->add_websocket_state_responses_to_all_clients(mockEvents, tce);
     }
 
@@ -378,9 +378,9 @@ public:
     std::shared_ptr<HttpResponseStruct> GetPeoplehubResponseStruct(const web::json::value& initJSON, int errorNum = 200)
     {
         // Set up initial http responses
-        auto peoplehubResponse = StockMocks::CreateMockHttpCallResponseInternal(initJSON, errorNum);
+        auto peoplehubResponse2 = StockMocks::CreateMockHttpCallResponseInternal(initJSON, errorNum);
         std::shared_ptr<HttpResponseStruct> peoplehubResponseStruct = std::make_shared<HttpResponseStruct>();
-        peoplehubResponseStruct->responseListInternal = { peoplehubResponse };
+        peoplehubResponseStruct->responseListInternal = { peoplehubResponse2 };
         return peoplehubResponseStruct;
     }
 
@@ -394,6 +394,7 @@ public:
 
     SocialManagerInitializationStruct InitializeSocialManager(const std::shared_ptr<xbox_live_context>& xboxLiveContext, bool initPresenceOnline)
     {
+        UNREFERENCED_PARAMETER(initPresenceOnline);
         std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
 
         auto peoplehubResponseJson = GenerateInitialPeoplehubJSON();
@@ -478,6 +479,7 @@ public:
 
     SocialManagerInitializationStruct Initialize(std::shared_ptr<xbox_live_context> xboxLiveContext, bool initPresenceOnline, int httpErrorCode = 200)
     {
+        UNREFERENCED_PARAMETER(httpErrorCode);
         LOG_DEBUG("Initalizing");
         auto socialManagerInitializationStruct = InitializeSocialManager(xboxLiveContext, initPresenceOnline);
 
@@ -1104,10 +1106,10 @@ public:
         counter = 0;
         do
         {
-            auto changeList = socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
+            auto changeList2 = socialManager->DoWork();
+            LogSocialManagerEvents(changeList2);
 
-            for (auto evt : changeList)
+            for (auto evt : changeList2)
             {
                 if (evt->EventType == SocialEventType::SocialUserGroupLoaded)
                 {
@@ -1474,7 +1476,7 @@ public:
                     for (auto user : evt->UsersAffected)
                     {
                         bool userFound = false;
-                        for (auto& stringUser : vec)
+                        for (const auto& stringUser : vec)
                         {
                             if (user == stringUser)
                             {
@@ -1563,7 +1565,7 @@ public:
 
                     VERIFY_ARE_EQUAL_UINT(vec->Size, socialUserGroupLoaded->SocialUserGroup->UsersTrackedBySocialUserGroup->Size);
                     //VERIFY_ARE_EQUAL(vec->Size, socialUserGroupLoaded->SocialUserGroup->Users->Size);
-                    for (auto& user : vec)
+                    for (const auto& user : vec)
                     {
                         bool userFound = false;
                         for (auto stringUser : socialUserGroupLoaded->SocialUserGroup->UsersTrackedBySocialUserGroup)

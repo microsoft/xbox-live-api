@@ -26,7 +26,7 @@ void copy_profile(
 }
 
 STDAPI XblProfileGetUserProfileAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId
     ) XBL_NOEXCEPT
@@ -87,7 +87,7 @@ try
 CATCH_RETURN()
 
 STDAPI XblProfileGetUserProfilesAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t* xboxUserIds,
     _In_ size_t xboxUserIdsCount
@@ -154,9 +154,9 @@ try
 CATCH_RETURN()
 
 STDAPI XblProfileGetUserProfilesForSocialGroupAsync(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
-    _In_ UTF8CSTR socialGroup
+    _In_z_ const char* socialGroup
     ) XBL_NOEXCEPT
 try
 {
@@ -220,7 +220,7 @@ try
 CATCH_RETURN()
 
 STDAPI XblProfileGetUserProfilesResultCount(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ uint32_t* profileCount
     ) XBL_NOEXCEPT
 {
@@ -237,7 +237,7 @@ STDAPI XblProfileGetUserProfilesResultCount(
 }
 
 STDAPI XblProfileGetUserProfileResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ XblUserProfile* profile
     ) XBL_NOEXCEPT
 {
@@ -245,7 +245,7 @@ STDAPI XblProfileGetUserProfileResult(
 }
 
 STDAPI XblProfileGetUserProfilesResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ uint32_t profilesCount,
     _Out_writes_(profilesCount) XblUserProfile* profiles
     ) XBL_NOEXCEPT
@@ -261,7 +261,7 @@ STDAPI XblProfileGetUserProfilesResult(
 }
 
 STDAPI XblProfileGetUserProfilesForSocialGroupResultCount(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _Out_ uint32_t* profileCount
     ) XBL_NOEXCEPT
 {
@@ -269,7 +269,7 @@ STDAPI XblProfileGetUserProfilesForSocialGroupResultCount(
 }
 
 STDAPI XblProfileGetUserProfilesForSocialGroupResult(
-    _In_ AsyncBlock* async,
+    _Inout_ AsyncBlock* async,
     _In_ uint32_t profilesCount,
     _Out_writes_(profilesCount) XblUserProfile* profiles
     ) XBL_NOEXCEPT

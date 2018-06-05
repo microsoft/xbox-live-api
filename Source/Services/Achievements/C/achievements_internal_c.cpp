@@ -10,11 +10,14 @@ using namespace xbox::services;
 using namespace xbox::services::system;
 using namespace xbox::services::achievements;
 
-UTF8STR alloc_and_copy_string(string_t src)
+_Null_terminated_ char* alloc_and_copy_string(string_t src)
 {
     auto utf8 = utils::internal_string_from_string_t(src);
-    auto copy = static_cast<UTF8STR>(xsapi_memory::mem_alloc(utf8.size() + 1));
-    strcpy_s(copy, utf8.size() + 1, utf8.data());
+    auto copy = static_cast<char*>(xsapi_memory::mem_alloc(utf8.size() + 1));
+    if (copy != nullptr)
+    {
+        strcpy_s(copy, utf8.size() + 1, utf8.data());
+    }
     return copy;
 }
 
@@ -55,9 +58,10 @@ void create_xbl_achievement(
     }
 
     lhs.platformsAvailableOnCount = static_cast<uint32_t>(rhs->platforms_available_on().size());
-    lhs.platformsAvailableOn = static_cast<UTF8CSTR*>(xsapi_memory::mem_alloc(sizeof(UTF8CSTR) * lhs.platformsAvailableOnCount));
+    lhs.platformsAvailableOn = static_cast<const char**>(xsapi_memory::mem_alloc(sizeof(const char*) * lhs.platformsAvailableOnCount));
     for (uint32_t j = 0; j < lhs.platformsAvailableOnCount; ++j)
     {
+#pragma warning(suppress: 6386)
         lhs.platformsAvailableOn[j] = rhs->platforms_available_on()[j].data();
     }
     lhs.isSecret = rhs->is_secret();
@@ -71,23 +75,31 @@ void create_xbl_achievement(
 
     lhs.rewardsCount = static_cast<uint32_t>(rhs->rewards().size());
     lhs.rewards = static_cast<XblAchievementReward*>(xsapi_memory::mem_alloc(sizeof(XblAchievementReward) * lhs.rewardsCount));
-    for (uint32_t j = 0; j < lhs.rewardsCount; ++j)
+    if (lhs.rewards != nullptr)
     {
-        lhs.rewards[j].name = rhs->rewards()[j]->name().data();
-        lhs.rewards[j].description = rhs->rewards()[j]->description().data();
-        lhs.rewards[j].value = rhs->rewards()[j]->value().data();
-        lhs.rewards[j].rewardType = static_cast<XblAchievementRewardType>(rhs->rewards()[j]->reward_type());
-        lhs.rewards[j].valueType = rhs->rewards()[j]->value_type().data();
-        if (rhs->rewards()[j]->media_asset_internal() != nullptr)
+        for (uint32_t j = 0; j < lhs.rewardsCount; ++j)
         {
-            lhs.rewards[j].mediaAsset = static_cast<XblAchievementMediaAsset*>(xsapi_memory::mem_alloc(sizeof(XblAchievementMediaAsset)));
-            lhs.rewards[j].mediaAsset->url = alloc_and_copy_string(rhs->rewards()[j]->media_asset_internal()->url().to_string());
-            lhs.rewards[j].mediaAsset->mediaAssetType = static_cast<XblAchievementMediaAssetType>(rhs->rewards()[j]->media_asset_internal()->media_asset_type());
-            lhs.rewards[j].mediaAsset->name = rhs->rewards()[j]->media_asset_internal()->name().data();
-        }
-        else
-        {
-            lhs.rewards[j].mediaAsset = nullptr;
+#pragma warning(suppress: 6386)
+            lhs.rewards[j].name = rhs->rewards()[j]->name().data();
+            lhs.rewards[j].description = rhs->rewards()[j]->description().data();
+            lhs.rewards[j].value = rhs->rewards()[j]->value().data();
+            lhs.rewards[j].rewardType = static_cast<XblAchievementRewardType>(rhs->rewards()[j]->reward_type());
+            lhs.rewards[j].valueType = rhs->rewards()[j]->value_type().data();
+            if (rhs->rewards()[j]->media_asset_internal() != nullptr)
+            {
+                lhs.rewards[j].mediaAsset = static_cast<XblAchievementMediaAsset*>(xsapi_memory::mem_alloc(sizeof(XblAchievementMediaAsset)));
+#pragma warning(suppress: 6385)
+                if (lhs.rewards[j].mediaAsset != nullptr)
+                {
+                    lhs.rewards[j].mediaAsset->url = alloc_and_copy_string(rhs->rewards()[j]->media_asset_internal()->url().to_string());
+                    lhs.rewards[j].mediaAsset->mediaAssetType = static_cast<XblAchievementMediaAssetType>(rhs->rewards()[j]->media_asset_internal()->media_asset_type());
+                    lhs.rewards[j].mediaAsset->name = rhs->rewards()[j]->media_asset_internal()->name().data();
+                }
+            }
+            else
+            {
+                lhs.rewards[j].mediaAsset = nullptr;
+            }
         }
     }
 

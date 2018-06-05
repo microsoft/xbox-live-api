@@ -55,6 +55,7 @@ public:
 
     stats_value_document GetStatValueDocument(simplified_stats_service& simplifiedStatService, const std::shared_ptr<MockHttpCall>& httpCall, const string_t& jsonValue)
     {
+        UNREFERENCED_PARAMETER(jsonValue);
         httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(statValueDocumentResponse));
         auto statValueDocumentResult = simplifiedStatService.get_stats_value_document().get();
         VERIFY_IS_TRUE(!statValueDocumentResult.err());
@@ -70,7 +71,7 @@ public:
         auto statValueDocument = GetStatValueDocument(simplifiedStatService, httpCall, statValueDocumentResponse);
         auto statJSON = web::json::value::parse(statValueDocumentResponse);
 
-        auto revisionNum = statJSON[L"revision"].as_integer();
+        //auto revisionNum = statJSON[L"revision"].as_integer();
 
         auto statField = statJSON[L"stats"];
         auto titleStatsList = statField[L"title"].as_object();
@@ -80,7 +81,7 @@ public:
         VERIFY_IS_TRUE(titleStatsList.size() == statNames.size());
         for (auto& statName : statNames)
         {
-            auto& statValueResult = statValueDocument.get_stat(statName.c_str());
+            auto statValueResult = statValueDocument.get_stat(statName.c_str());
             VERIFY_IS_TRUE(!statValueResult.err());
             VerifyStatAreEqual(statName, statValueResult.payload(), titleStatsList);
         }
@@ -115,11 +116,11 @@ public:
         statsValueDoc.do_work();
         auto updateStatResult = simplifiedStatService.update_stats_value_document(statsValueDoc).get();
         VERIFY_IS_TRUE(!updateStatResult.err());
-        auto& serializedRequest = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
-        auto& compareValue = web::json::value::parse(statValueDocumentResponse);
+        auto serializedRequest = web::json::value::parse(utils::string_t_from_internal_string(httpCall->request_body().request_message_string()));
+        auto compareValue = web::json::value::parse(statValueDocumentResponse);
         
-        auto& versionField = serializedRequest[_T("revision")];
-        auto& compareVersion = compareValue[_T("revision")];
+        auto versionField = serializedRequest[_T("revision")];
+        //auto& compareVersion = compareValue[_T("revision")];
 
         auto verInt = versionField.as_number().to_uint64();
         VERIFY_IS_TRUE(verInt > 10000000000);
@@ -137,9 +138,9 @@ public:
         for (auto& titleKey : titleField)
         {
             bool isValid = false;
-            for (auto& titleFieldCompare : titleFieldCompare)
+            for (auto& titleFieldCompare2 : titleFieldCompare)
             {
-                if (titleKey.first == titleFieldCompare.first && VerifyStatJSON(titleKey.second, titleFieldCompare.second))
+                if (titleKey.first == titleFieldCompare2.first && VerifyStatJSON(titleKey.second, titleFieldCompare2.second))
                 {
                     isValid = true;
                     break;

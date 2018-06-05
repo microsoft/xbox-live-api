@@ -7,8 +7,6 @@
 #include "achievements_internal.h"
 #include "utils.h"
 
-using namespace pplx;
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_ACHIEVEMENTS_CPP_BEGIN
 
 achievement_title_association::achievement_title_association()
