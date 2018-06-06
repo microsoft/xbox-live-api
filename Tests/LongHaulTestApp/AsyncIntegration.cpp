@@ -53,6 +53,7 @@ void CleanupAsync(_In_ async_queue_handle_t queue, _In_ uint32_t callbackToken)
 {
     RemoveAsyncQueueCallbackSubmitted(queue, callbackToken);
     CloseAsyncQueue(queue);
+    SetEvent(g_stopRequestedHandle.get());
 }
 
 /// <summary>
@@ -119,7 +120,6 @@ bool DrainAsyncCompletionQueueWithTimeout(
         if (stopAfterMilliseconds < 0)
             break;
 
-        found = true;
     } while (found);
 
    return found;
@@ -175,6 +175,7 @@ DWORD WINAPI BackgroundWorkThreadProc(LPVOID lpParam)
             DispatchAsyncQueue(queue, AsyncQueueCallbackType_Work, 0);
             break;
 
+        case WAIT_OBJECT_0 + 1:
         default:
             stop = true;
             break;
