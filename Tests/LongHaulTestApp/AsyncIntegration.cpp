@@ -45,7 +45,7 @@ void InitializeAsync(_In_ async_queue_handle_t queue, _Out_ uint32_t* callbackTo
 
     AddAsyncQueueCallbackSubmitted(queue, nullptr, HandleAsyncQueueCallback, callbackToken);
 
-    ReferenceAsyncQueue(queue); // the BackgroundWorkThreadProc will call close
+    DuplicateAsyncQueueHandle(queue); // the BackgroundWorkThreadProc will call close
     g_hBackgroundWorkThread = CreateThread(nullptr, 0, BackgroundWorkThreadProc, queue, 0, nullptr);
 }
 
