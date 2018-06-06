@@ -342,7 +342,7 @@ struct xsapi_singleton
 
     // from Shared\xbox_live_app_config.cpp
     std::shared_ptr<xbox_live_app_config> m_appConfigSingleton;
-    std::shared_ptr<xbox_live_app_config_internal> m_internalAppConfigSinglton;
+    std::shared_ptr<xbox_live_app_config_internal> m_internalAppConfigSingleton;
 
     // from Shared\C\xbox_live_app_config.cpp
     std::shared_ptr<XblAppConfig> m_cAppConfigSingleton;

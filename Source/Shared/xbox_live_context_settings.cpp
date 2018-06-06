@@ -6,6 +6,7 @@
 #include "xsapi/system.h"
 #include "xbox_system_factory.h"
 #include "xbox_service_call_routed_event_args_internal.h"
+#include "xbox_live_app_config_internal.h"
 #if XSAPI_A
 #include "Logger/android/logcat_output.h"
 #else
@@ -64,9 +65,7 @@ xbox_live_context_settings::xbox_live_context_settings() :
     m_websocketTimeoutWindow(std::chrono::seconds(DEFAULT_WEBSOCKET_TIMEOUT_SECONDS)),
     m_httpRetryDelay(std::chrono::seconds(DEFAULT_RETRY_DELAY_SECONDS)),
     m_httpTimeoutWindow(std::chrono::seconds(DEFAULT_HTTP_RETRY_WINDOW_SECONDS)),
-    m_useCoreDispatcherForEventRouting(false),
-    m_disableAssertsForXboxLiveThrottlingInDevSandboxes(false),
-    m_disableAssertsForMaxNumberOfWebsocketsActivated(false)
+    m_useCoreDispatcherForEventRouting(false)
 {
 }
 
@@ -211,30 +210,14 @@ void xbox_live_context_settings::disable_asserts_for_xbox_live_throttling_in_dev
     _In_ xbox_live_context_throttle_setting setting
     )
 {
-    if (setting == xbox_live_context_throttle_setting::this_code_needs_to_be_changed_to_avoid_throttling)
-    {
-        m_disableAssertsForXboxLiveThrottlingInDevSandboxes = true;
-    }
-}
-
-bool xbox_live_context_settings::_Is_disable_asserts_for_xbox_live_throttling_in_dev_sandboxes()
-{
-    return m_disableAssertsForXboxLiveThrottlingInDevSandboxes;
+    xbox_live_app_config_internal::get_app_config_singleton()->disable_asserts_for_xbox_live_throttling_in_dev_sandboxes(setting);
 }
 
 void xbox_live_context_settings::disable_asserts_for_maximum_number_of_websockets_activated(
     _In_ xbox_live_context_recommended_setting setting
-)
+    )
 {
-    if (setting == xbox_live_context_recommended_setting::this_code_needs_to_be_changed_to_follow_best_practices)
-    {
-        m_disableAssertsForMaxNumberOfWebsocketsActivated = true;
-    }
-}
-
-bool xbox_live_context_settings::_Is_disable_asserts_for_max_number_of_websockets_activated()
-{
-    return m_disableAssertsForMaxNumberOfWebsocketsActivated;
+    xbox_live_app_config_internal::get_app_config_singleton()->disable_asserts_for_maximum_number_of_websockets_activated(setting);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
