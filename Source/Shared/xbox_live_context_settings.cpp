@@ -66,6 +66,11 @@ xbox_live_context_settings::xbox_live_context_settings() :
     m_httpRetryDelay(std::chrono::seconds(DEFAULT_RETRY_DELAY_SECONDS)),
     m_httpTimeoutWindow(std::chrono::seconds(DEFAULT_HTTP_RETRY_WINDOW_SECONDS)),
     m_useCoreDispatcherForEventRouting(false)
+#if TV_API
+	m_useXplatQosServer(false)
+#else
+	m_useXplatQosServer(true)
+#endif
 {
 }
 
@@ -218,6 +223,16 @@ void xbox_live_context_settings::disable_asserts_for_maximum_number_of_websocket
     )
 {
     xbox_live_app_config_internal::get_app_config_singleton()->disable_asserts_for_maximum_number_of_websockets_activated(setting);
+}
+
+bool xbox_live_context_settings::use_crossplatform_qos_servers() const
+{
+	return m_useXplatQosServer;
+}
+
+void xbox_live_context_settings::set_use_crossplatform_qos_servers(_In_ bool value)
+{
+	m_useXplatQosServer = value;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
