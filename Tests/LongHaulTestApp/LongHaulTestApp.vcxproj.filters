@@ -26,13 +26,8 @@
     <Filter Include="Utils">
       <UniqueIdentifier>{1a6c3783-a07e-49c3-b9d1-92ad02f23042}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Integrations">
-      <UniqueIdentifier>{261f84b4-b7dc-4fa1-99bc-78480e503a59}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="App.cpp" />
-    <ClCompile Include="pch.cpp" />
     <ClCompile Include="GameLogic\Game.cpp">
       <Filter>GameLogic</Filter>
     </ClCompile>
@@ -51,31 +46,21 @@
     <ClCompile Include="Utils\Utils.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="SocialManagerIntegration.cpp">
-      <Filter>Integrations</Filter>
+    <ClCompile Include="App.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="AchievementsIntegration.cpp">
-      <Filter>Integrations</Filter>
+    <ClCompile Include="pch.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="TestFramework.cpp">
-      <Filter>Integrations</Filter>
-    </ClCompile>
-    <ClCompile Include="SignInIntegration.cpp">
-      <Filter>Integrations</Filter>
-    </ClCompile>
-    <ClCompile Include="ProfileIntegration.cpp">
-      <Filter>Integrations</Filter>
-    </ClCompile>
-    <ClCompile Include="SocialIntegrations.cpp">
-      <Filter>Integrations</Filter>
-    </ClCompile>
-    <ClCompile Include="AsyncIntegration.cpp">
-      <Filter>Integrations</Filter>
-    </ClCompile>
+    <ClCompile Include="AchievementsIntegration.cpp" />
+    <ClCompile Include="AsyncIntegration.cpp" />
+    <ClCompile Include="ProfileIntegration.cpp" />
+    <ClCompile Include="SignInIntegration.cpp" />
+    <ClCompile Include="SocialIntegrations.cpp" />
+    <ClCompile Include="SocialManagerIntegration.cpp" />
+    <ClCompile Include="TestFramework.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="App.h" />
-    <ClInclude Include="pch.h" />
     <ClInclude Include="GameLogic\Game.h">
       <Filter>GameLogic</Filter>
     </ClInclude>
@@ -94,9 +79,13 @@
     <ClInclude Include="Utils\Utils.h">
       <Filter>Utils</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <AppxManifest Include="Package.appxmanifest" />
+    <ClInclude Include="App.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="AsyncIntegration.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\background.jpg">
@@ -125,6 +114,13 @@
     <None Include="Assets\italic.spritefont">
       <Filter>Assets</Filter>
     </None>
-    <None Include="xboxservices.config" />
+    <None Include="xboxservices.config">
+      <Filter>Common</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <Filter>Common</Filter>
+    </AppxManifest>
   </ItemGroup>
 </Project>

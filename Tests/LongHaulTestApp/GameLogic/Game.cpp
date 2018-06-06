@@ -6,6 +6,7 @@
 #include "Common\DirectXHelper.h"
 #include "Utils\PerformanceCounters.h"
 #include "httpClient\httpClient.h"
+#include "AsyncIntegration.h"
 
 using namespace LongHaulTestApp;
 using namespace Windows::Foundation;
@@ -31,10 +32,17 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 
     // Register to be notified if the Device is lost or recreated
     m_deviceResources->RegisterDeviceNotify(this);
-    m_sceneRenderer = std::unique_ptr<Renderer>(new Renderer(m_deviceResources));
-    
+    m_sceneRenderer = std::unique_ptr<Renderer>(new Renderer(m_deviceResources)); 
+
+    uint32_t sharedAsyncQueueId = 1;
+    CreateSharedAsyncQueue(
+        sharedAsyncQueueId,
+        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
+        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
+        &m_queue);
+
     XblInitialize();
-    InitializeAsync();
+    InitializeAsync(m_queue, &m_asyncQueueCallbackToken);
 
     XblUserCreateHandle(&m_user);
 }
@@ -58,8 +66,7 @@ Game::~Game()
     {
         XblContextCloseHandle(m_xboxLiveContext);
     }
-    RemoveAsyncQueueCallbackSubmitted(m_queue, m_callbackToken);
-    CloseAsyncQueue(m_queue);
+    CleanupAsync(m_queue, m_asyncQueueCallbackToken);
 
     XblCleanup();
 }
@@ -83,18 +90,7 @@ void Game::Update()
     {
         m_input->Update();
 
-        // todo UpdateSocialManager();
-
-        switch (m_gameData->GetAppState())
-        {
-        case APP_IN_GAME:
-            OnGameUpdate();
-            break;
-
-        case APP_CRITICAL_ERROR:
-            break;
-        }
-
+        OnGameUpdate();
         m_sceneRenderer->Update(m_timer);
 
         // Since the KeyUp event could take a few frames to trigger, 
@@ -120,36 +116,46 @@ void Game::OnMainMenu()
 
 void Game::OnGameUpdate()
 {
-    switch (m_gameData->GetGameState())
-    {
-    case GAME_PLAY:
-    {
-        if (m_input != nullptr)
-        {
-            if (m_input->IsKeyDown(ButtonPress::SignIn))
-            {
-                SignIn();
-            }
+    // Call one of the DrainAsyncCompletionQueue* helper functions
+    // For example: 
+    // DrainAsyncCompletionQueue(m_queue, 5);
+    // DrainAsyncCompletionQueueUntilEmpty(m_queue);
+    double timeoutMilliseconds = 0.5f;
+    DrainAsyncCompletionQueueWithTimeout(m_queue, timeoutMilliseconds);
 
-            if (m_input->IsKeyDown(ButtonPress::StartTests))
-            {
-                InitializeTestFramework();
-                m_testDelay = TEST_DELAY_SLOW;
-                m_testsStarted = true;
-            }
-            
-            if (m_input->IsKeyDown(ButtonPress::StartTestsFast))
-            {
-                InitializeTestFramework();
-                m_testDelay = TEST_DELAY_FAST;
-                m_testsStarted = true;
-            }
+    // Game Work
+    try
+    {
+        if (g_sampleInstance->m_testsStarted)
+        {
+            g_sampleInstance->HandleTests();
         }
     }
-    break;
+    catch (const std::exception& e)
+    {
+        g_sampleInstance->Log("[Error] " + std::string(e.what()));
+    }
 
-    default:
-        break;
+    if (m_input != nullptr)
+    {
+        if (m_input->IsKeyDown(ButtonPress::SignIn))
+        {
+            SignIn();
+        }
+
+        if (m_input->IsKeyDown(ButtonPress::StartTests))
+        {
+            InitializeTestFramework();
+            m_testDelay = TEST_DELAY_SLOW;
+            m_testsStarted = true;
+        }
+            
+        if (m_input->IsKeyDown(ButtonPress::StartTestsFast))
+        {
+            InitializeTestFramework();
+            m_testDelay = TEST_DELAY_FAST;
+            m_testsStarted = true;
+        }
     }
 }
 

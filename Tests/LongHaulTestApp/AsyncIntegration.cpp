@@ -1,7 +1,6 @@
 #include "pch.h"
-#include "GameLogic\Game.h"
-
-using namespace LongHaulTestApp;
+#include "AsyncIntegration.h"
+#include "Utils/PerformanceCounters.h"
 
 class win32_handle
 {
@@ -27,14 +26,121 @@ private:
     HANDLE m_handle;
 };
 
+
+// Forwards
+void CALLBACK HandleAsyncQueueCallback(
+    _In_ void* context,
+    _In_ async_queue_handle_t queue,
+    _In_ AsyncQueueCallbackType type);
+DWORD WINAPI BackgroundWorkThreadProc(LPVOID lpParam);
+
 win32_handle g_stopRequestedHandle;
 win32_handle g_workReadyHandle;
+HANDLE g_hBackgroundWorkThread;
 
+void InitializeAsync(_In_ async_queue_handle_t queue, _Out_ uint32_t* callbackToken)
+{
+    g_stopRequestedHandle.set(CreateEvent(nullptr, true, false, nullptr));
+    g_workReadyHandle.set(CreateSemaphore(nullptr, 0, LONG_MAX, nullptr));
+
+    AddAsyncQueueCallbackSubmitted(queue, nullptr, HandleAsyncQueueCallback, callbackToken);
+
+    ReferenceAsyncQueue(queue); // the BackgroundWorkThreadProc will call close
+    g_hBackgroundWorkThread = CreateThread(nullptr, 0, BackgroundWorkThreadProc, queue, 0, nullptr);
+}
+
+void CleanupAsync(_In_ async_queue_handle_t queue, _In_ uint32_t callbackToken)
+{
+    RemoveAsyncQueueCallbackSubmitted(queue, callbackToken);
+    CloseAsyncQueue(queue);
+}
+
+/// <summary>
+/// Call this on the thread you want to dispatch async completions on
+/// This will invoke the AsyncBlock's callback completion handler.
+/// </summary>
+void DrainAsyncCompletionQueueUntilEmpty(
+    _In_ async_queue_handle_t queue)
+{
+    bool found = false;
+    do
+    {
+        found = DispatchAsyncQueue(queue, AsyncQueueCallbackType_Completion, 0);
+    } while (found);
+}
+
+/// <summary>
+/// Call this on the thread you want to dispatch async completions on
+/// This will invoke the AsyncBlock's callback completion handler.
+///
+/// If there's no more completion are ready to dispatch, it will early exit and returns false
+/// otherwise it will dispatch up to maxItemsToDrain number of completions and returns true
+/// </summary>
+bool DrainAsyncCompletionQueue(
+    _In_ async_queue_handle_t queue,
+    _In_ uint32_t maxItemsToDrain)
+{
+    bool found = false;
+    for( uint32_t i = maxItemsToDrain; i>0; i-- )
+    {
+        found = DispatchAsyncQueue(queue, AsyncQueueCallbackType_Completion, 0);
+        if (!found)
+            break;
+    }
+
+    return found;
+}
+
+/// <summary>
+/// Call this on the thread you want to dispatch async completions on
+/// This will invoke the AsyncBlock's callback completion handler.
+///
+/// If there's no more completion are ready to dispatch, it will early exit and returns false
+/// otherwise it will dispatch until at least stopAfterMilliseconds has elapsed and returns true
+/// </summary>
+bool DrainAsyncCompletionQueueWithTimeout(
+    _In_ async_queue_handle_t queue,
+    _In_ double stopAfterMilliseconds)
+{
+    std::shared_ptr<performance_capture> timer = performance_counters::get_singleton_instance()->get_capture_instace(L"");
+    bool found = false;
+    do
+    {
+        timer->_Start();
+
+        found = DispatchAsyncQueue(queue, AsyncQueueCallbackType_Completion, 0);
+        if (!found)
+            break;
+
+        timer->_End();
+        double timeTaken = timer->max_time();
+        stopAfterMilliseconds -= timeTaken;
+
+        if (stopAfterMilliseconds < 0)
+            break;
+
+        found = true;
+    } while (found);
+
+   return found;
+}
+
+/// <summary>
+/// This callback will be invoked when background work of an async task is queued, 
+/// and will be called from the thread that kicked off the async operation.
+/// So it is best practice to not spend much time in this callback.  It is best to signal 
+/// another thread to can DispatchAsyncQueue() as shown below in BackgroundWorkThreadProc().
+/// 
+/// This callback will also be invoked when completion of async task is queued,
+/// from a background thread that handled the completion. 
+/// In this implementation, we don't process this message as the game thread is calling 
+/// DrainAsyncCompletionQueueUntilEmpty as part of of the game update loop.
+/// </summary>
 void CALLBACK HandleAsyncQueueCallback(
     _In_ void* context,
     _In_ async_queue_handle_t queue,
     _In_ AsyncQueueCallbackType type
-)
+    )
 {
     UNREFERENCED_PARAMETER(context);
     UNREFERENCED_PARAMETER(queue);
@@ -48,44 +154,7 @@ void CALLBACK HandleAsyncQueueCallback(
 }
 
 
-DWORD WINAPI game_thread_proc(LPVOID lpParam)
-{
-    async_queue_handle_t queue;
-    uint32_t sharedAsyncQueueId = *((uint32_t*)lpParam);
-    CreateSharedAsyncQueue(
-        sharedAsyncQueueId,
-        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
-        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
-        &queue);
-
-    bool stop = false;
-    while (!stop)
-    {
-        // Game Work
-        try
-        {
-            if (g_sampleInstance->m_testsStarted)
-            {
-                g_sampleInstance->HandleTests();
-            }
-        }
-        catch (const std::exception& e)
-        {
-            g_sampleInstance->Log("[Error] " + std::string(e.what()));
-        }
-
-        // Dispatching async completions on game thread
-        while(!IsAsyncQueueEmpty(queue, AsyncQueueCallbackType_Completion))
-        {
-            DispatchAsyncQueue(queue, AsyncQueueCallbackType_Completion, 0);
-        }
-    }
-
-    CloseAsyncQueue(queue);
-    return 0;
-}
-
-DWORD WINAPI work_thread_proc(LPVOID lpParam)
+DWORD WINAPI BackgroundWorkThreadProc(LPVOID lpParam)
 {
     HANDLE hEvents[2] =
     {
@@ -93,13 +162,7 @@ DWORD WINAPI work_thread_proc(LPVOID lpParam)
         g_stopRequestedHandle.get()
     };
 
-    async_queue_handle_t queue;
-    uint32_t sharedAsyncQueueId = *((uint32_t*)lpParam);
-    CreateSharedAsyncQueue(
-        sharedAsyncQueueId,
-        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
-        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
-        &queue);
+    async_queue_handle_t queue = static_cast<async_queue_handle_t>(lpParam);
 
     bool stop = false;
     while (!stop)
@@ -107,7 +170,8 @@ DWORD WINAPI work_thread_proc(LPVOID lpParam)
         DWORD dwResult = WaitForMultipleObjectsEx(2, hEvents, false, INFINITE, false);
         switch (dwResult)
         {
-        case WAIT_OBJECT_0: // work ready
+        case WAIT_OBJECT_0: 
+            // Background work is ready to be dispatched
             DispatchAsyncQueue(queue, AsyncQueueCallbackType_Work, 0);
             break;
 
@@ -121,20 +185,3 @@ DWORD WINAPI work_thread_proc(LPVOID lpParam)
     return 0;
 }
 
-uint32_t QUEUE_ID = 1;
-
-void Game::InitializeAsync()
-{
-    g_stopRequestedHandle.set(CreateEvent(nullptr, true, false, nullptr));
-    g_workReadyHandle.set(CreateSemaphore(nullptr, 0, LONG_MAX, nullptr));
-
-    CreateSharedAsyncQueue(
-        QUEUE_ID,
-        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
-        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
-        &m_queue);
-    AddAsyncQueueCallbackSubmitted(m_queue, nullptr, HandleAsyncQueueCallback, &m_callbackToken);
-    
-    m_backgroundThreads.push_back(CreateThread(nullptr, 0, game_thread_proc, &QUEUE_ID, 0, nullptr));
-    m_backgroundThreads.push_back(CreateThread(nullptr, 0, work_thread_proc, &QUEUE_ID, 0, nullptr));
-}
