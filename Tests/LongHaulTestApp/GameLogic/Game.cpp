@@ -36,6 +36,10 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
     XblInitialize();
     InitializeAsync();
 
+    XblDisableAssertsForXboxLiveThrottlingInDevSandboxes(
+        XblConfigSetting_ThisCodeNeedsToBeChanged
+        );
+
     XblUserCreateHandle(&m_user);
 }
 

@@ -39,6 +39,14 @@ public:
 
     _XSAPIIMP const xsapi_internal_string& title_telemetry_device_id() const;
 
+    void disable_asserts_for_xbox_live_throttling_in_dev_sandboxes(_In_ xbox_live_context_throttle_setting setting);
+
+    bool is_disable_asserts_for_xbox_live_throttling_in_dev_sandboxes() const;
+
+    void disable_asserts_for_maximum_number_of_websockets_activated(_In_ xbox_live_context_recommended_setting setting);
+
+    bool is_disable_asserts_for_maximum_number_of_websockets_activated() const;
+
 private:
     xbox_live_app_config_internal();
 
@@ -103,6 +111,8 @@ private:
     xsapi_internal_string m_overrideScid;
     web::uri m_proxy;
     xsapi_internal_string m_titleTelemetryDeviceId;
+    bool m_disableAssertsForXboxLiveThrottlingInDevSandboxes;
+    bool m_disableAssertsForMaxNumberOfWebsocketsActivated;
 
     friend class system::user_impl_idp;
 };

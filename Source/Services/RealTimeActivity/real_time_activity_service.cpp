@@ -65,10 +65,10 @@ real_time_activity_service::activate()
 
     if (activationCount > MAXIMUM_WEBSOCKETS_ACTIVATIONS_ALLOWED_PER_USER)
     {
-        std::shared_ptr<xbox_live_app_config> appConfig = xbox::services::xbox_live_app_config::get_app_config_singleton();
-        if (utils::str_icmp(appConfig->sandbox(), _T("RETAIL")) != 0)
+        auto appConfig = xbox::services::xbox_live_app_config_internal::get_app_config_singleton();
+        if (utils::str_icmp(appConfig->sandbox(), "RETAIL") != 0)
         {
-            bool disableAsserts = m_xboxLiveContextSettings->_Is_disable_asserts_for_max_number_of_websockets_activated();
+            bool disableAsserts = appConfig->is_disable_asserts_for_maximum_number_of_websockets_activated();
             if (!disableAsserts)
             {
 #if UNIT_TEST_SERVICES
