@@ -86,7 +86,7 @@ namespace LongHaulTestApp
         uint64_t m_xuid;
         xbl_context_handle m_xboxLiveContext;
         async_queue_handle_t m_queue;
-        uint32_t m_callbackToken;
+        uint32_t m_asyncQueueCallbackToken;
         const XblAppConfig* m_config;
 
         function_context m_signOutContext;
@@ -103,17 +103,6 @@ namespace LongHaulTestApp
         bool m_gotInitMemReport;
 
         Concurrency::critical_section m_stateLock;
-
-        ///////////////////////////////////////
-        //////           Threads         //////
-        ///////////////////////////////////////
-
-        // Methods
-        void InitializeAsync();
-
-        // Vars
-        std::vector<HANDLE> m_testThreads;
-        std::vector<HANDLE> m_backgroundThreads;
 
         ///////////////////////////////////////
         //////       Test Framework      //////
@@ -170,7 +159,7 @@ namespace LongHaulTestApp
         uint32_t m_test;
 
         ///////////////////////////////////////
-        //////           Soclal          //////
+        //////           Social          //////
         ///////////////////////////////////////
 
         // Tests
@@ -182,7 +171,7 @@ namespace LongHaulTestApp
         void TestResputationFeedback();
         
         ///////////////////////////////////////
-        //////       Soclal Manager      //////
+        //////       Social Manager      //////
         ///////////////////////////////////////
 
         // Tests
