@@ -312,7 +312,7 @@ private:
     std::chrono::seconds m_websocketTimeoutWindow;
     bool m_useCoreDispatcherForEventRouting;
 	
-	bool m_useXplatQosServer;
+    bool m_useXplatQosServer;
 };
 
 
