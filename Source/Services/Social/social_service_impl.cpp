@@ -188,22 +188,25 @@ social_service_impl::get_social_relationships(
         queue,
         [thisShared, startIndex, filter, callback](std::shared_ptr<http_call_response_internal> response)
     {
-        auto result = xbox_social_relationship_result_internal::deserialize(response->response_body_json());
-
-        auto socialRelationship = result.payload();
-        uint32_t itemSize = static_cast<uint32_t>(socialRelationship->items().size());
-        if (itemSize > 0)
+        auto result = xbox_live_result<std::shared_ptr<xbox_social_relationship_result_internal>>(response->err_code());
+        if (!result.err())
         {
-            unsigned continuationSkip = startIndex + itemSize;
+            result = xbox_social_relationship_result_internal::deserialize(response->response_body_json());
 
-            // Initialize the request params for get_next()
-            socialRelationship->init_next_page_info(
-                thisShared,
-                filter,
-                continuationSkip
-            );
+            auto socialRelationship = result.payload();
+            uint32_t itemSize = static_cast<uint32_t>(socialRelationship->items().size());
+            if (itemSize > 0)
+            {
+                unsigned continuationSkip = startIndex + itemSize;
+
+                // Initialize the request params for get_next()
+                socialRelationship->init_next_page_info(
+                    thisShared,
+                    filter,
+                    continuationSkip
+                );
+            }
         }
-
         callback(result);
     });
 

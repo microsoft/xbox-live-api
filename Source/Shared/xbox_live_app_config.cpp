@@ -49,13 +49,13 @@ xbox_live_app_config_internal::get_app_config_singleton()
     {
         auto buffer = xbox::services::system::xsapi_memory::mem_alloc(sizeof(xbox_live_app_config_internal));
 
-        xsapiSingleton->m_internalAppConfigSinglton = std::shared_ptr<xbox_live_app_config_internal>(
+        xsapiSingleton->m_internalAppConfigSingleton = std::shared_ptr<xbox_live_app_config_internal>(
             new (buffer) xbox_live_app_config_internal(),
             xsapi_alloc_deleter<xbox_live_app_config_internal>()
             );
     }
 
-    return xsapiSingleton->m_internalAppConfigSinglton;
+    return xsapiSingleton->m_internalAppConfigSingleton;
 }
 
 xbox_live_app_config_internal::xbox_live_app_config_internal() :
@@ -179,6 +179,40 @@ const xsapi_internal_string&
 xbox_live_app_config_internal::title_telemetry_device_id() const
 {
     return m_titleTelemetryDeviceId;
+}
+
+void
+xbox_live_app_config_internal::disable_asserts_for_xbox_live_throttling_in_dev_sandboxes(
+    _In_ xbox_live_context_throttle_setting setting
+    )
+{
+    if (setting == xbox_live_context_throttle_setting::this_code_needs_to_be_changed_to_avoid_throttling)
+    {
+        m_disableAssertsForXboxLiveThrottlingInDevSandboxes = true;
+    }
+}
+
+bool
+xbox_live_app_config_internal::is_disable_asserts_for_xbox_live_throttling_in_dev_sandboxes() const
+{
+    return m_disableAssertsForXboxLiveThrottlingInDevSandboxes;
+}
+
+void
+xbox_live_app_config_internal::disable_asserts_for_maximum_number_of_websockets_activated(
+    _In_ xbox_live_context_recommended_setting setting
+    )
+{
+    if (setting == xbox_live_context_recommended_setting::this_code_needs_to_be_changed_to_follow_best_practices)
+    {
+        m_disableAssertsForMaxNumberOfWebsocketsActivated = true;
+    }
+}
+
+bool
+xbox_live_app_config_internal::is_disable_asserts_for_maximum_number_of_websockets_activated() const
+{
+    return m_disableAssertsForMaxNumberOfWebsocketsActivated;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

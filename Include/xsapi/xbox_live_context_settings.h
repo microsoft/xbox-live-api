@@ -289,8 +289,6 @@ public:
 #endif
 
     void _Raise_service_call_routed_event(_In_ const xbox::services::xbox_service_call_routed_event_args& result);
-    bool _Is_disable_asserts_for_xbox_live_throttling_in_dev_sandboxes();
-    bool _Is_disable_asserts_for_max_number_of_websockets_activated();
 
 private:
 
@@ -302,8 +300,6 @@ private:
 
     std::chrono::seconds m_websocketTimeoutWindow;
     bool m_useCoreDispatcherForEventRouting;
-    bool m_disableAssertsForXboxLiveThrottlingInDevSandboxes;
-    bool m_disableAssertsForMaxNumberOfWebsocketsActivated;
 };
 
 
