@@ -6,6 +6,7 @@
 #include "Common\DirectXHelper.h"
 #include "Utils\PerformanceCounters.h"
 #include "httpClient\httpClient.h"
+#include "AsyncIntegration.h"
 
 using namespace Sample;
 using namespace Windows::Foundation;
@@ -14,113 +15,6 @@ using namespace Concurrency;
 
 Game* g_sampleInstance = nullptr;
 std::mutex Game::m_displayEventQueueLock;
-
-class win32_handle
-{
-public:
-    win32_handle() : m_handle(nullptr)
-    {
-    }
-
-    ~win32_handle()
-    {
-        if (m_handle != nullptr) CloseHandle(m_handle);
-        m_handle = nullptr;
-    }
-
-    void set(HANDLE handle)
-    {
-        m_handle = handle;
-    }
-
-    HANDLE get() { return m_handle; }
-
-private:
-    HANDLE m_handle;
-};
-
-win32_handle g_stopRequestedHandle;
-win32_handle g_workReadyHandle;
-win32_handle g_completionReadyHandle;
-
-void CALLBACK HandleAsyncQueueCallback(
-    _In_ void* context,
-    _In_ async_queue_handle_t queue,
-    _In_ AsyncQueueCallbackType type
-)
-{
-    UNREFERENCED_PARAMETER(context);
-    UNREFERENCED_PARAMETER(queue);
-
-    switch (type)
-    {
-    case AsyncQueueCallbackType::AsyncQueueCallbackType_Work:
-        SetEvent(g_workReadyHandle.get());
-        break;
-
-    case AsyncQueueCallbackType::AsyncQueueCallbackType_Completion:
-        SetEvent(g_completionReadyHandle.get());
-        break;
-    }
-}
-
-
-DWORD WINAPI background_thread_proc(LPVOID lpParam)
-{
-    UNREFERENCED_PARAMETER(lpParam);
-    HANDLE hEvents[3] =
-    {
-        g_workReadyHandle.get(),
-        g_completionReadyHandle.get(),
-        g_stopRequestedHandle.get()
-    };
-
-    async_queue_handle_t queue;
-    uint32_t sharedAsyncQueueId = 0;
-    CreateSharedAsyncQueue(
-        sharedAsyncQueueId,
-        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
-        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
-        &queue);
-
-    bool stop = false;
-    while (!stop)
-    {
-        DWORD dwResult = WaitForMultipleObjectsEx(3, hEvents, false, INFINITE, false);
-        switch (dwResult)
-        {
-        case WAIT_OBJECT_0: // work ready
-            DispatchAsyncQueue(queue, AsyncQueueCallbackType_Work, 0);
-
-            if (!IsAsyncQueueEmpty(queue, AsyncQueueCallbackType_Work))
-            {
-                // If there's more pending work, then set the event to process them
-                SetEvent(g_workReadyHandle.get());
-            }
-            break;
-
-        case WAIT_OBJECT_0 + 1: // completed 
-                                // Typically completions should be dispatched on the game thread, but
-                                // for this simple XAML app we're doing it here
-            DispatchAsyncQueue(queue, AsyncQueueCallbackType_Completion, 0);
-
-            if (!IsAsyncQueueEmpty(queue, AsyncQueueCallbackType_Completion))
-            {
-                // If there's more pending completions, then set the event to process them
-                SetEvent(g_completionReadyHandle.get());
-            }
-            break;
-
-        default:
-            stop = true;
-            break;
-        }
-    }
-
-    CloseAsyncQueue(queue);
-    return 0;
-}
-
 // Loads and initializes application assets when the application is loaded.
 Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
     m_deviceResources(deviceResources),
@@ -132,20 +26,15 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
     m_deviceResources->RegisterDeviceNotify(this);
     m_sceneRenderer = std::unique_ptr<Renderer>(new Renderer(m_deviceResources));
 
-    g_stopRequestedHandle.set(CreateEvent(nullptr, true, false, nullptr));
-    g_workReadyHandle.set(CreateEvent(nullptr, false, false, nullptr));
-    g_completionReadyHandle.set(CreateEvent(nullptr, false, false, nullptr));
-
-    XblInitialize();
     uint32_t sharedAsyncQueueId = 0;
     CreateSharedAsyncQueue(
         sharedAsyncQueueId,
         AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
         AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
         &m_queue);
-    AddAsyncQueueCallbackSubmitted(m_queue, nullptr, HandleAsyncQueueCallback, &m_callbackToken);
 
-    m_hBackgroundThread = CreateThread(nullptr, 0, background_thread_proc, nullptr, 0, nullptr);
+    XblInitialize();
+    InitializeAsync(m_queue, &m_asyncQueueCallbackToken);
 
     XblUserCreateHandle(&m_user);
 }
@@ -176,9 +65,7 @@ Game::~Game()
     {
         XblContextCloseHandle(m_xboxLiveContext);
     }
-    RemoveAsyncQueueCallbackSubmitted(m_queue, m_callbackToken);
-    CloseAsyncQueue(m_queue);
-
+    CleanupAsync(m_queue, m_asyncQueueCallbackToken);
     XblCleanup();
 }
 
@@ -203,15 +90,7 @@ void Game::Update()
 
         UpdateSocialManager();
 
-        switch (m_gameData->GetAppState())
-        {
-        case APP_IN_GAME:
-            OnGameUpdate();
-            break;
-
-        case APP_CRITICAL_ERROR:
-            break;
-        }
+        OnGameUpdate();
 
         m_sceneRenderer->Update(m_timer);
 
@@ -238,67 +117,64 @@ void Game::OnMainMenu()
 
 void Game::OnGameUpdate()
 {
-    switch (m_gameData->GetGameState())
+    // Call one of the DrainAsyncCompletionQueue* helper functions
+    // For example: 
+    // DrainAsyncCompletionQueue(m_queue, 5);
+    // DrainAsyncCompletionQueueUntilEmpty(m_queue);
+    double timeoutMilliseconds = 0.5f;
+    DrainAsyncCompletionQueueWithTimeout(m_queue, timeoutMilliseconds);
+
+    if (m_input != nullptr)
     {
-    case GAME_PLAY:
-    {
-        if (m_input != nullptr)
+        if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup1))
         {
-            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup1))
-            {
-                m_allFriends = !m_allFriends;
-                UpdateSocialGroupForAllUsers(m_allFriends, XblPresenceFilter_All, XblRelationshipFilter_Friends);
-            }
-
-            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup2))
-            {
-                m_onlineFriends = !m_onlineFriends;
-                UpdateSocialGroupForAllUsers(m_onlineFriends, XblPresenceFilter_AllOnline, XblRelationshipFilter_Friends);
-            }
-
-            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup3))
-            {
-                m_allFavs = !m_allFavs;
-                UpdateSocialGroupForAllUsers(m_allFavs, XblPresenceFilter_All, XblRelationshipFilter_Favorite);
-            }
-
-            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup4))
-            {
-                m_onlineInTitle = !m_onlineInTitle;
-                UpdateSocialGroupForAllUsers(m_onlineInTitle, XblPresenceFilter_TitleOnline, XblRelationshipFilter_Friends);
-            }
-
-            if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup5))
-            {
-                m_customList = !m_customList;
-                UpdateSocialGroupOfListForAllUsers(m_customList);
-            }
-
-            if (m_input->IsKeyDown(ButtonPress::SignIn))
-            {
-                SignIn();
-            }
-
-            if (m_input->IsKeyDown(ButtonPress::GetUserProfile))
-            {
-                GetUserProfile();
-            }
-
-            if (m_input->IsKeyDown(ButtonPress::GetFriends))
-            {
-                GetSocialRelationships();
-            }
-
-            if (m_input->IsKeyDown(ButtonPress::GetAchievementsForTitle))
-            {
-                GetAchievmentsForTitle();
-            }
+            m_allFriends = !m_allFriends;
+            UpdateSocialGroupForAllUsers(m_allFriends, XblPresenceFilter_All, XblRelationshipFilter_Friends);
         }
-    }
-    break;
 
-    default:
-        break;
+        if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup2))
+        {
+            m_onlineFriends = !m_onlineFriends;
+            UpdateSocialGroupForAllUsers(m_onlineFriends, XblPresenceFilter_AllOnline, XblRelationshipFilter_Friends);
+        }
+
+        if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup3))
+        {
+            m_allFavs = !m_allFavs;
+            UpdateSocialGroupForAllUsers(m_allFavs, XblPresenceFilter_All, XblRelationshipFilter_Favorite);
+        }
+
+        if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup4))
+        {
+            m_onlineInTitle = !m_onlineInTitle;
+            UpdateSocialGroupForAllUsers(m_onlineInTitle, XblPresenceFilter_TitleOnline, XblRelationshipFilter_Friends);
+        }
+
+        if (m_input->IsKeyDown(ButtonPress::ToggleSocialGroup5))
+        {
+            m_customList = !m_customList;
+            UpdateSocialGroupOfListForAllUsers(m_customList);
+        }
+
+        if (m_input->IsKeyDown(ButtonPress::SignIn))
+        {
+            SignIn();
+        }
+
+        if (m_input->IsKeyDown(ButtonPress::GetUserProfile))
+        {
+            GetUserProfile();
+        }
+
+        if (m_input->IsKeyDown(ButtonPress::GetFriends))
+        {
+            GetSocialRelationships();
+        }
+
+        if (m_input->IsKeyDown(ButtonPress::GetAchievementsForTitle))
+        {
+            GetAchievmentsForTitle();
+        }
     }
 }
 

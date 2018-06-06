@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "Utils/PerformanceCounters.h"
 #include "AsyncIntegration.h"
+#include "Utils/PerformanceCounters.h"
 
 class win32_handle
 {
@@ -36,8 +36,7 @@ DWORD WINAPI BackgroundWorkThreadProc(LPVOID lpParam);
 
 win32_handle g_stopRequestedHandle;
 win32_handle g_workReadyHandle;
-
-std::vector<HANDLE> g_backgroundThreads;
+HANDLE g_hBackgroundWorkThread;
 
 void InitializeAsync(_In_ async_queue_handle_t queue, _Out_ uint32_t* callbackToken)
 {
@@ -46,11 +45,8 @@ void InitializeAsync(_In_ async_queue_handle_t queue, _Out_ uint32_t* callbackTo
 
     AddAsyncQueueCallbackSubmitted(queue, nullptr, HandleAsyncQueueCallback, callbackToken);
 
-    for (size_t i = 0; i < 15; i++)
-    {
-        DuplicateAsyncQueueHandle(queue); // the BackgroundWorkThreadProc will call close
-        g_backgroundThreads.push_back(CreateThread(nullptr, 0, BackgroundWorkThreadProc, queue, 0, nullptr));
-    }
+    DuplicateAsyncQueueHandle(queue); // the BackgroundWorkThreadProc will call close
+    g_hBackgroundWorkThread = CreateThread(nullptr, 0, BackgroundWorkThreadProc, queue, 0, nullptr);
 }
 
 void CleanupAsync(_In_ async_queue_handle_t queue, _In_ uint32_t callbackToken)

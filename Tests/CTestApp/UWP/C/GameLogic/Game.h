@@ -90,7 +90,7 @@ namespace Sample
         uint64_t m_xuid;
         xbl_context_handle m_xboxLiveContext;
         async_queue_handle_t m_queue;
-        uint32_t m_callbackToken;
+        uint32_t m_asyncQueueCallbackToken;
         const XblAppConfig* m_config;
 
         function_context m_signOutContext;
@@ -176,8 +176,6 @@ namespace Sample
         void AchievementResultsGetNext(xbl_achievements_result_handle resultHandle);
         void GetAchievement(std::string scid, std::string achievementId);
         void UpdateAchievement(std::string scid, std::string achievementId);
-
-        HANDLE m_hBackgroundThread;
     };
 }
 

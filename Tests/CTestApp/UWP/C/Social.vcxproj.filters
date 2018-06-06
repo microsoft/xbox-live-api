@@ -49,6 +49,7 @@
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="SocialManagerIntegration.cpp" />
+    <ClCompile Include="AsyncIntegration.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -71,6 +72,7 @@
     <ClInclude Include="Utils\Utils.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="AsyncIntegration.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
