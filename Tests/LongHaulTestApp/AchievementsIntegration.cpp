@@ -1,13 +1,11 @@
 #include "pch.h"
-#include "GameLogic\Game.h"
-
-using namespace LongHaulTestApp;
+#include "Tests.h"
 
 ///////////////////////////////////////
 //////            Tests          //////
 ///////////////////////////////////////
 
-void Game::TestAchievementsFlow()
+void Tests::TestAchievementsFlow()
 {
     Log("===== Starting TestAchievementFlow =====");
     GetAchievmentsForTitle();
@@ -18,17 +16,14 @@ void Game::TestAchievementsFlow()
 //////            Utils          //////
 ///////////////////////////////////////
 
-void Game::GetAchievmentsForTitle()
+void Tests::GetAchievmentsForTitle()
 {
-    Log("XblGetXboxLiveAppConfig");
-    XblGetXboxLiveAppConfig(&m_config);
-
     AsyncBlock* asyncBlock = new AsyncBlock{};
     asyncBlock->queue = m_queue;
     asyncBlock->context = this;
     asyncBlock->callback = [](AsyncBlock* asyncBlock)
     {
-        Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
+        Tests *pThis = reinterpret_cast<Tests*>(asyncBlock->context);
 
         pThis->Log("XblAchievementsGetAchievementsForTitleIdResult");
         xbl_achievements_result_handle achievementsResult;
@@ -61,11 +56,11 @@ void Game::GetAchievmentsForTitle()
         1);
 }
 
-void Game::AchievementResultsGetNext(xbl_achievements_result_handle result)
+void Tests::AchievementResultsGetNext(xbl_achievements_result_handle result)
 {
     struct context_t
     {
-        Game* pThis;
+        Tests* pThis;
         xbl_achievements_result_handle resultHandle;
     };
 
@@ -121,14 +116,14 @@ void Game::AchievementResultsGetNext(xbl_achievements_result_handle result)
     }
 }
 
-void Game::GetAchievement(PCSTR scid, PCSTR achievementId)
+void Tests::GetAchievement(PCSTR scid, PCSTR achievementId)
 {
     AsyncBlock* asyncBlock = new AsyncBlock{};
     asyncBlock->queue = m_queue;
     asyncBlock->context = this;
     asyncBlock->callback = [](AsyncBlock* asyncBlock)
     {
-        Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
+        Tests *pThis = reinterpret_cast<Tests*>(asyncBlock->context);
 
         pThis->Log("XblAchievementsGetAchievementResult");
         xbl_achievements_result_handle achievementsResult;
@@ -163,14 +158,14 @@ void Game::GetAchievement(PCSTR scid, PCSTR achievementId)
         achievementId);
 }
 
-void Game::UpdateAchievement(PCSTR scid, PCSTR achievementId)
+void Tests::UpdateAchievement(PCSTR scid, PCSTR achievementId)
 {
     AsyncBlock* asyncBlock = new AsyncBlock{};
     asyncBlock->queue = m_queue;
     asyncBlock->context = this;
     asyncBlock->callback = [](AsyncBlock* asyncBlock)
     {
-        Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
+        Tests *pThis = reinterpret_cast<Tests*>(asyncBlock->context);
 
         auto result = GetAsyncStatus(asyncBlock, false);
         if (SUCCEEDED(result))

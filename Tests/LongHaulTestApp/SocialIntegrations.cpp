@@ -1,12 +1,10 @@
 #include "pch.h"
-#include "GameLogic\Game.h"
-
-using namespace LongHaulTestApp;
+#include "Tests.h"
 
 ///////////////////////////////////////
 //////            Tests          //////
 ///////////////////////////////////////
-void Game::TestSocialFlow()
+void Tests::TestSocialFlow()
 {
     Log("===== Starting TestSocialFlow =====");
     GetSocialRelationship();
@@ -16,14 +14,14 @@ void Game::TestSocialFlow()
 //////            Utils          //////
 ///////////////////////////////////////
 
-void Game::GetSocialRelationship()
+void Tests::GetSocialRelationship()
 {
     AsyncBlock* asyncBlock = new AsyncBlock{};
     asyncBlock->queue = m_queue;
     asyncBlock->context = this;
     asyncBlock->callback = [](AsyncBlock* asyncBlock)
     {
-        Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
+        Tests *pThis = reinterpret_cast<Tests*>(asyncBlock->context);
 
         pThis->Log(L"XblSocialGetSocialRelationshipsResult");
         xbl_social_relationship_result_handle relationshipResult;
@@ -54,7 +52,7 @@ void Game::GetSocialRelationship()
     );
 }
 
-void Game::SocialRelationshipGetNext(xbl_social_relationship_result_handle relationshipResult)
+void Tests::SocialRelationshipGetNext(xbl_social_relationship_result_handle relationshipResult)
 {
     bool hasNext;
     XblSocialRelationshipResultHasNext(relationshipResult, &hasNext);
@@ -66,7 +64,7 @@ void Game::SocialRelationshipGetNext(xbl_social_relationship_result_handle relat
         asyncBlock->context = this;
         asyncBlock->callback = [](AsyncBlock* asyncBlock)
         {
-            Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
+            Tests *pThis = reinterpret_cast<Tests*>(asyncBlock->context);
 
             pThis->Log("XblSocialRelationshipResultGetNextResult");
             xbl_social_relationship_result_handle relationship;
@@ -101,14 +99,14 @@ void Game::SocialRelationshipGetNext(xbl_social_relationship_result_handle relat
     }
 }
 
-void Game::TestResputationFeedback()
+void Tests::TestResputationFeedback()
 {
     AsyncBlock* asyncBlock = new AsyncBlock{};
     asyncBlock->queue = m_queue;
     asyncBlock->context = this;
     asyncBlock->callback = [](AsyncBlock* asyncBlock)
     {
-        Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
+        Tests *pThis = reinterpret_cast<Tests*>(asyncBlock->context);
 
         auto result = GetAsyncStatus(asyncBlock, false);
 

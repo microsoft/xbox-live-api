@@ -2,31 +2,6 @@
 #include "Utils/PerformanceCounters.h"
 #include "AsyncIntegration.h"
 
-class win32_handle
-{
-public:
-    win32_handle() : m_handle(nullptr)
-    {
-    }
-
-    ~win32_handle()
-    {
-        if (m_handle != nullptr) CloseHandle(m_handle);
-        m_handle = nullptr;
-    }
-
-    void set(HANDLE handle)
-    {
-        m_handle = handle;
-    }
-
-    HANDLE get() { return m_handle; }
-
-private:
-    HANDLE m_handle;
-};
-
-
 // Forwards
 void CALLBACK HandleAsyncQueueCallback(
     _In_ void* context,
@@ -34,30 +9,38 @@ void CALLBACK HandleAsyncQueueCallback(
     _In_ AsyncQueueCallbackType type);
 DWORD WINAPI BackgroundWorkThreadProc(LPVOID lpParam);
 
-win32_handle g_stopRequestedHandle;
-win32_handle g_workReadyHandle;
+std::map<async_queue_handle_t, win32_handle> g_stopRequestedHandles;
+std::map<async_queue_handle_t, win32_handle> g_workReadyHandles;
+std::map<async_queue_handle_t, std::vector<HANDLE>> g_threads;
 
-std::vector<HANDLE> g_backgroundThreads;
-
-void InitializeAsync(_In_ async_queue_handle_t queue, _Out_ uint32_t* callbackToken)
+HANDLE InitializeAsync(_In_ async_queue_handle_t queue, _Out_ uint32_t* callbackToken)
 {
-    g_stopRequestedHandle.set(CreateEvent(nullptr, true, false, nullptr));
-    g_workReadyHandle.set(CreateSemaphore(nullptr, 0, LONG_MAX, nullptr));
+    return InitializeAsync(queue, BackgroundWorkThreadProc, queue, callbackToken);
+}
 
-    AddAsyncQueueCallbackSubmitted(queue, nullptr, HandleAsyncQueueCallback, callbackToken);
-
-    for (size_t i = 0; i < 15; i++)
+HANDLE InitializeAsync(_In_ async_queue_handle_t queue, _In_ LPTHREAD_START_ROUTINE threadRoutine, _In_ LPVOID threadContext, _Out_ uint32_t* callbackToken)
+{
+    if (g_stopRequestedHandles.find(queue) == g_stopRequestedHandles.end())
     {
-        DuplicateAsyncQueueHandle(queue); // the BackgroundWorkThreadProc will call close
-        g_backgroundThreads.push_back(CreateThread(nullptr, 0, BackgroundWorkThreadProc, queue, 0, nullptr));
+        g_stopRequestedHandles[queue].set(CreateEvent(nullptr, true, false, nullptr));
+        g_workReadyHandles[queue].set(CreateSemaphore(nullptr, 0, LONG_MAX, nullptr));
+
+        AddAsyncQueueCallbackSubmitted(queue, nullptr, HandleAsyncQueueCallback, callbackToken);
     }
+    
+    DuplicateAsyncQueueHandle(queue); // the BackgroundWorkThreadProc will call close
+    auto thread = CreateThread(nullptr, 0, threadRoutine, threadContext, 0, nullptr);
+    g_threads[queue].push_back(thread);
+    return thread;
 }
 
 void CleanupAsync(_In_ async_queue_handle_t queue, _In_ uint32_t callbackToken)
 {
     RemoveAsyncQueueCallbackSubmitted(queue, callbackToken);
     CloseAsyncQueue(queue);
-    SetEvent(g_stopRequestedHandle.get());
+    SetEvent(g_stopRequestedHandles[queue].get());
+
+    WaitForMultipleObjects(g_threads[queue].size(), g_threads[queue].data(), true, INFINITE);
 }
 
 /// <summary>
@@ -152,21 +135,20 @@ void CALLBACK HandleAsyncQueueCallback(
     switch (type)
     {
     case AsyncQueueCallbackType::AsyncQueueCallbackType_Work:
-        ReleaseSemaphore(g_workReadyHandle.get(), 1, nullptr);
+        ReleaseSemaphore(g_workReadyHandles[queue].get(), 1, nullptr);
         break;
     }
 }
 
-
 DWORD WINAPI BackgroundWorkThreadProc(LPVOID lpParam)
 {
+    async_queue_handle_t queue = static_cast<async_queue_handle_t>(lpParam);
+
     HANDLE hEvents[2] =
     {
-        g_workReadyHandle.get(),
-        g_stopRequestedHandle.get()
+        g_workReadyHandles[queue].get(),
+        g_stopRequestedHandles[queue].get()
     };
-
-    async_queue_handle_t queue = static_cast<async_queue_handle_t>(lpParam);
 
     bool stop = false;
     while (!stop)
@@ -189,4 +171,3 @@ DWORD WINAPI BackgroundWorkThreadProc(LPVOID lpParam)
     CloseAsyncQueue(queue);
     return 0;
 }
-

@@ -48,10 +48,10 @@ void Game::SignIn()
 void Game::HandleSignout(xbl_user_handle user)
 {
     WCHAR text[1024];
-    char gamertag[GamertagMaxBytes];
-    XblUserGetGamertag(user, GamertagMaxBytes, gamertag, nullptr);
+    char Gamertag[GamertagMaxBytes];
+    XblUserGetGamertag(user, GamertagMaxBytes, Gamertag, nullptr);
 
-    swprintf_s(text, ARRAYSIZE(text), L"User %s signed out", utility::conversions::utf8_to_utf16(gamertag).data());
+    swprintf_s(text, ARRAYSIZE(text), L"User %s signed out", utility::conversions::utf8_to_utf16(Gamertag).data());
     g_sampleInstance->Log(text);
 }
 

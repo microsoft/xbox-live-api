@@ -7,18 +7,21 @@
 #include "Utils\PerformanceCounters.h"
 #include "httpClient\httpClient.h"
 #include "AsyncIntegration.h"
+#include "Tests.h"
 
 using namespace LongHaulTestApp;
 using namespace Windows::Foundation;
 using namespace Windows::System::Threading;
 using namespace Concurrency;
 
+using namespace xbox::services;
+using namespace xbox::services::system;
+
 Game* g_sampleInstance = nullptr;
 std::mutex Game::m_displayEventQueueLock;
 
 #define TEST_DELAY_SLOW 15
 #define TEST_DELAY_FAST 2
-
 
 // Loads and initializes application assets when the application is loaded.
 Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
@@ -28,19 +31,17 @@ Game::Game(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
     g_sampleInstance = this;
     m_lastDeltaMem = 0; 
     m_curDeltaMem = 0;
-    m_testDelay = 0;
-
+    
     // Register to be notified if the Device is lost or recreated
     m_deviceResources->RegisterDeviceNotify(this);
     m_sceneRenderer = std::unique_ptr<Renderer>(new Renderer(m_deviceResources)); 
 
-    uint32_t sharedAsyncQueueId = 1;
     CreateSharedAsyncQueue(
-        sharedAsyncQueueId,
+        0,
         AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
         AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
         &m_queue);
-
+    
     XblInitialize();
     InitializeAsync(m_queue, &m_asyncQueueCallbackToken);
 
@@ -126,20 +127,7 @@ void Game::OnGameUpdate()
     // DrainAsyncCompletionQueueUntilEmpty(m_queue);
     double timeoutMilliseconds = 0.5f;
     DrainAsyncCompletionQueueWithTimeout(m_queue, timeoutMilliseconds);
-
-    // Game Work
-    try
-    {
-        if (g_sampleInstance->m_testsStarted)
-        {
-            g_sampleInstance->HandleTests();
-        }
-    }
-    catch (const std::exception& e)
-    {
-        g_sampleInstance->Log("[Error] " + std::string(e.what()));
-    }
-
+    
     if (m_input != nullptr)
     {
         if (m_input->IsKeyDown(ButtonPress::SignIn))
@@ -149,16 +137,14 @@ void Game::OnGameUpdate()
 
         if (m_input->IsKeyDown(ButtonPress::StartTests))
         {
-            InitializeTestFramework();
-            m_testDelay = TEST_DELAY_SLOW;
-            m_testsStarted = true;
+            Tests::TestDelay = TEST_DELAY_SLOW;
+            m_testsManager.StartTests(m_xboxLiveContext);
         }
             
         if (m_input->IsKeyDown(ButtonPress::StartTestsFast))
         {
-            InitializeTestFramework();
-            m_testDelay = TEST_DELAY_FAST;
-            m_testsStarted = true;
+            Tests::TestDelay = TEST_DELAY_FAST;
+            m_testsManager.StartTests(m_xboxLiveContext);
         }
     }
 }
@@ -230,6 +216,28 @@ void Game::Init(Windows::UI::Core::CoreWindow^ window)
     XblUserAddSignOutCompletedHandler(Game::HandleSignout);
 
     SignInSilently();
+
+
+    Platform::String^ localfolder = Windows::Storage::ApplicationData::Current->LocalFolder->Path;
+    std::wstring localFolderW(localfolder->Begin());
+    std::string localFolderA(localFolderW.begin(), localFolderW.end());
+    m_logFileName = localFolderA + "\\long_haul_log.txt";
+
+    Windows::System::Launcher::LaunchFolderAsync(Windows::Storage::ApplicationData::Current->LocalFolder);
+
+    Game* pThis = this;
+    auto settings = xbox_live_services_settings::get_singleton_instance(true);
+    settings->set_diagnostics_trace_level(xbox_services_diagnostics_trace_level::off);
+    settings->add_logging_handler([pThis](
+        xbox_services_diagnostics_trace_level traceLevel,
+        const std::string& category,
+        const std::string& message
+        )
+    {
+        pThis->Log("[" + pThis->TaceLevelToString(traceLevel) + "][" + category + "] " + message);
+    });
+
+    PrintMemoryUsage();
 }
 
 // Renders the current frame according to the current application state.
@@ -273,4 +281,87 @@ void Game::OnDeviceRestored()
 {
     m_sceneRenderer->CreateDeviceDependentResources();
     CreateWindowSizeDependentResources();
+}
+
+void Game::Log(std::wstring log, bool showOnUI)
+{
+    std::lock_guard<std::mutex> guard(m_displayEventQueueLock);
+    if (showOnUI)
+    {
+        m_displayEventQueue.push_back(log);
+        if (m_displayEventQueue.size() > 30)
+        {
+            m_displayEventQueue.erase(m_displayEventQueue.begin());
+        }
+    }
+
+    if (!m_logFileName.empty())
+    {
+        m_logFile.open(m_logFileName, std::ofstream::out | std::ofstream::app);
+        m_logFile << utility::conversions::to_utf8string(log) << "\n";
+        m_logFile.flush();
+        m_logFile.close();
+    }
+}
+
+void Game::Log(std::string log, bool showOnUI)
+{
+    Log(utility::conversions::to_utf16string(log), showOnUI);
+}
+
+void Game::PrintMemoryUsage()
+{
+    auto process = Windows::System::Diagnostics::ProcessDiagnosticInfo::GetForCurrentProcess();
+    auto report = process->MemoryUsage->GetReport();
+    if (!m_gotInitMemReport)
+    {
+        m_initMemReport = report;
+        m_curMemReport = report;
+        m_gotInitMemReport = true;
+    }
+    else
+    {
+        m_curMemReport = report;
+        g_sampleInstance->m_lastDeltaMem = g_sampleInstance->m_curDeltaMem;
+        g_sampleInstance->m_curDeltaMem = m_curMemReport->PeakVirtualMemorySizeInBytes - m_initMemReport->PeakVirtualMemorySizeInBytes;
+    }
+
+    stringstream_t stream;
+
+    stream
+        << "\n\n\n"
+        << "=========================\n"
+        << "===   Memory Ussage   ===\n"
+        << "=========================\n\n\n"
+        << "Tests Run: " << Tests::TestsRun << "\n"
+        << "NonPagedPoolSizeInBytes: " << report->NonPagedPoolSizeInBytes << "\n"
+        << "PagedPoolSizeInBytes: " << report->PagedPoolSizeInBytes << "\n"
+        << "PageFaultCount: " << report->PageFaultCount << "\n"
+        << "PageFileSizeInBytes: " << report->PageFileSizeInBytes << "\n"
+        << "PeakNonPagedPoolSizeInBytes: " << report->PeakNonPagedPoolSizeInBytes << "\n"
+        << "PeakPagedPoolSizeInBytes: " << report->PeakPagedPoolSizeInBytes << "\n"
+        << "PeakPageFileSizeInBytes: " << report->PeakPageFileSizeInBytes << "\n"
+        << "PeakVirtualMemorySizeInBytes: " << report->PeakVirtualMemorySizeInBytes << "\n"
+        << "PeakWorkingSetSizeInBytes: " << report->PeakWorkingSetSizeInBytes << "\n"
+        << "PrivatePageCount: " << report->PrivatePageCount << "\n"
+        << "VirtualMemorySizeInBytes: " << report->VirtualMemorySizeInBytes << "\n"
+        << "WorkingSetSizeInBytes: " << report->WorkingSetSizeInBytes
+        << "\n\n\n";
+
+    Log(stream.str(), false);
+}
+
+string Game::TaceLevelToString(xbox_services_diagnostics_trace_level traceLevel)
+{
+    string level = "Unknown";
+
+    switch (traceLevel)
+    {
+    case xbox_services_diagnostics_trace_level::error: level = "Error"; break;
+    case xbox_services_diagnostics_trace_level::info: level = "Info"; break;
+    case xbox_services_diagnostics_trace_level::verbose: level = "Verbose"; break;
+    case xbox_services_diagnostics_trace_level::warning: level = "Warning"; break;
+    }
+
+    return level;
 }
