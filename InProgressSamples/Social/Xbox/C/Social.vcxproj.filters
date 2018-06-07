@@ -31,6 +31,7 @@
     <ClCompile Include="Support\Utils.cpp">
       <Filter>Support</Filter>
     </ClCompile>
+    <ClCompile Include="AsyncIntegration.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Logo.png">
@@ -79,6 +80,7 @@
     <ClInclude Include="Support\Utils.h">
       <Filter>Support</Filter>
     </ClInclude>
+    <ClInclude Include="AsyncIntegration.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\italic.spritefont">

@@ -119,7 +119,7 @@ public:
 private:
     xbl_context_handle m_xboxLiveContext;
     async_queue_handle_t m_queue;
-    uint32_t m_callbackToken;
+    uint32_t m_asyncQueueCallbackToken;
     HANDLE m_hBackgroundThread;
 
     void CreateSocialGroupFromList(
