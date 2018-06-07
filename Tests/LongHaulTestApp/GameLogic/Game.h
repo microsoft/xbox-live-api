@@ -8,6 +8,7 @@
 #include "Renderer.h"
 #include "Utils\Input.h"
 #include "GameLogic\GameData.h"
+#include "Tests.h"
 
 #include <iostream>
 #include <fstream>
@@ -66,8 +67,12 @@ namespace LongHaulTestApp
         size_t m_previousDisplayQueueSize;
         static std::mutex m_displayEventQueueLock;
 
+        ofstream m_logFile;
+        std::string m_logFileName;
         void Log(std::wstring log, bool showOnUI = true);
         void Log(std::string log, bool showOnUI = true);
+        string TaceLevelToString(xbox::services::xbox_services_diagnostics_trace_level traceLevel);
+        void PrintMemoryUsage();
 
         xbl_user_handle GetUser() { return m_user; }
         string_t GetGamertag()
@@ -104,107 +109,7 @@ namespace LongHaulTestApp
 
         Concurrency::critical_section m_stateLock;
 
-        ///////////////////////////////////////
-        //////       Test Framework      //////
-        ///////////////////////////////////////
-        
-        // Methods
-        void InitializeTestFramework();
-
-        void HandleTests();
-        void RunTests();
-
-        void PrintMemoryUsage();
-
-        string TaceLevelToString(xbox::services::xbox_services_diagnostics_trace_level traceLevel);
-
-        // Vars
-        bool m_testsStarted;
-        uint32_t m_testDelay;
-        uint64_t m_testsRun;
-        time_t m_time;
-
-        ofstream m_logFile;
-        std::string m_logFileName;
-
-        ///////////////////////////////////////
-        //////        Achievements       //////
-        ///////////////////////////////////////
-
-        // Tests
-        void TestAchievementsFlow();
-
-        // Utils
-        void GetAchievmentsForTitle();
-        void AchievementResultsGetNext(xbl_achievements_result_handle result);
-        void GetAchievement(PCSTR scid, PCSTR achievementId);
-        void UpdateAchievement(PCSTR scid, PCSTR achievementId);
-
-        // Vars
-        uint32_t m_progress;
-
-        ///////////////////////////////////////
-        //////           Profile         //////
-        ///////////////////////////////////////
-
-        // Tests
-        void TestProfileFlow();
-
-        // Utils
-        void TestGetUserProfile();
-        void TestGetUserProfiles();
-        void TestGetUserProfilesForSocialGroup();
-
-        // Vars
-        uint32_t m_test;
-
-        ///////////////////////////////////////
-        //////           Social          //////
-        ///////////////////////////////////////
-
-        // Tests
-        void TestSocialFlow();
-
-        // Utils
-        void GetSocialRelationship();
-        void SocialRelationshipGetNext(xbl_social_relationship_result_handle relationshipResult);
-        void TestResputationFeedback();
-        
-        ///////////////////////////////////////
-        //////       Social Manager      //////
-        ///////////////////////////////////////
-
-        // Tests
-        void TestSocialManagerFlow();
-
-        // Test Utils
-        void AddLocalUserToSocialManager();
-        void RemoveLocalUserFromSocialManager();
-        void CreateSocialUserGroup();
-        void TestSocialUserGroup();
-
-        // Manager Utils
-        void SocialManagerIntegrationUpdate();
-        void NextSocialManagerTestConfig();
-
-        void WaitForSocialEvent(XblSocialManagerEventType eventType, std::function<void(XblSocialManagerEvent)> callback);
-
-        void PrintSocialManagerDoWork(XblSocialManagerEvent* events, uint32_t size);
-        string GroupTypeToString();
-        string SocialEventTypeToString(XblSocialManagerEventType eventType);
-        string PresenceFilterToString();
-        string RelationshipFilterToString();
-
-        // Vars
-        XblSocialUserGroupType m_testGroupType;
-
-        XblPresenceFilter m_presenceFilter = XblPresenceFilter_TitleOnline;
-        XblRelationshipFilter m_relationshipFilter;
-        XblSocialManagerUserGroup* m_socialUserGroup;
-
-        bool m_waitingForEvent;
-        XblSocialManagerEventType m_eventType;
-        std::function<void(XblSocialManagerEvent)> m_eventTypeCallback;
+        TestsManager m_testsManager;
     };
 }
 

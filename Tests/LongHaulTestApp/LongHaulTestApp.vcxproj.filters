@@ -59,6 +59,7 @@
     <ClCompile Include="SocialIntegrations.cpp" />
     <ClCompile Include="SocialManagerIntegration.cpp" />
     <ClCompile Include="TestFramework.cpp" />
+    <ClCompile Include="TestsManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameLogic\Game.h">
@@ -86,6 +87,7 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="AsyncIntegration.h" />
+    <ClInclude Include="Tests.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\background.jpg">

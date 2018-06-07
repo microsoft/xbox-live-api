@@ -1,13 +1,11 @@
 #include "pch.h"
-#include "GameLogic\Game.h"
-
-using namespace LongHaulTestApp;
+#include "Tests.h"
 
 ///////////////////////////////////////
 //////            Tests          //////
 ///////////////////////////////////////
 
-void Game::TestProfileFlow()
+void Tests::TestProfileFlow()
 {
     m_test++;
     if (m_test == 1)
@@ -28,14 +26,14 @@ void Game::TestProfileFlow()
 //////            Utils          //////
 ///////////////////////////////////////
 
-void Game::TestGetUserProfile()
+void Tests::TestGetUserProfile()
 {
     AsyncBlock* asyncBlock = new AsyncBlock{};
     asyncBlock->queue = m_queue;
     asyncBlock->context = this;
     asyncBlock->callback = [](AsyncBlock* asyncBlock)
     {
-        Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
+        Tests *pThis = reinterpret_cast<Tests*>(asyncBlock->context);
 
         pThis->Log(L"XblProfileGetUserProfileResult");
         XblUserProfile profile;
@@ -63,14 +61,14 @@ void Game::TestGetUserProfile()
     );
 }
 
-void Game::TestGetUserProfiles()
+void Tests::TestGetUserProfiles()
 {
     AsyncBlock* asyncBlock = new AsyncBlock{};
     asyncBlock->queue = m_queue;
     asyncBlock->context = this;
     asyncBlock->callback = [](AsyncBlock* asyncBlock)
     {
-        Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
+        Tests *pThis = reinterpret_cast<Tests*>(asyncBlock->context);
 
         pThis->Log(L"XblProfileGetUserProfilesResult");
         uint32_t profilesCount;
@@ -106,14 +104,14 @@ void Game::TestGetUserProfiles()
     );
 }
 
-void Game::TestGetUserProfilesForSocialGroup()
+void Tests::TestGetUserProfilesForSocialGroup()
 {
     AsyncBlock* asyncBlock = new AsyncBlock{};
     asyncBlock->queue = m_queue;
     asyncBlock->context = this;
     asyncBlock->callback = [](AsyncBlock* asyncBlock)
     {
-        Game *pThis = reinterpret_cast<Game*>(asyncBlock->context);
+        Tests *pThis = reinterpret_cast<Tests*>(asyncBlock->context);
 
         uint32_t profilesCount;
 

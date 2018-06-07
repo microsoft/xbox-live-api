@@ -206,6 +206,7 @@
     <ClInclude Include="GameLogic\GameData.h" />
     <ClInclude Include="GameLogic\Renderer.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Tests.h" />
     <ClInclude Include="Utils\Input.h" />
     <ClInclude Include="Utils\PerformanceCounters.h" />
     <ClInclude Include="Utils\Utils.h" />
@@ -231,6 +232,7 @@
     <ClCompile Include="SocialIntegrations.cpp" />
     <ClCompile Include="SocialManagerIntegration.cpp" />
     <ClCompile Include="TestFramework.cpp" />
+    <ClCompile Include="TestsManager.cpp" />
     <ClCompile Include="Utils\Input.cpp" />
     <ClCompile Include="Utils\PerformanceCounters.cpp" />
     <ClCompile Include="Utils\Utils.cpp" />

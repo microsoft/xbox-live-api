@@ -1,7 +1,5 @@
 #include "pch.h"
-#include "GameLogic\Game.h"
-
-using namespace LongHaulTestApp;
+#include "Tests.h"
 
 #define NUM_OF_USER_GROUP_TYPES 2
 #define NUM_OF_PRESENCE_FILTERS 7
@@ -11,7 +9,7 @@ using namespace LongHaulTestApp;
 //////            Tests          //////
 ///////////////////////////////////////
 
-void Game::TestSocialManagerFlow()
+void Tests::TestSocialManagerFlow()
 {
     m_testGroupType = (XblSocialUserGroupType)(((int)m_testGroupType + 1) % NUM_OF_USER_GROUP_TYPES);
 
@@ -25,12 +23,12 @@ void Game::TestSocialManagerFlow()
 //////        Test Utils         //////
 ///////////////////////////////////////
 
-void Game::AddLocalUserToSocialManager()
+void Tests::AddLocalUserToSocialManager()
 {
     Log("XblSocialManagerAddLocalUser");
     XblSocialManagerAddLocalUser(m_user, XblSocialManagerExtraDetailLevel::XblSocialManagerExtraDetailLevel_All);
 
-    Game* pThis = this;
+    Tests* pThis = this;
     WaitForSocialEvent(XblSocialManagerEventType::XblSocialManagerEventType_LocalUserAdded, [pThis](XblSocialManagerEvent e) {
         pThis->Log("XblSocialManagerGetLocalUsers");
         xbl_user_handle* users;
@@ -41,18 +39,18 @@ void Game::AddLocalUserToSocialManager()
     });
 }
 
-void Game::RemoveLocalUserFromSocialManager()
+void Tests::RemoveLocalUserFromSocialManager()
 {
     Log("XblSocialManagerRemoveLocalUser");
     XblSocialManagerRemoveLocalUser(m_user);
 
-    Game* pThis = this;
+    Tests* pThis = this;
     WaitForSocialEvent(XblSocialManagerEventType::XblSocialManagerEventType_LocalUserRemoved, [pThis](XblSocialManagerEvent e) {
         pThis->Log("===== Finished TestSocialManagerFlow =====");
     });
 }
 
-void Game::CreateSocialUserGroup()
+void Tests::CreateSocialUserGroup()
 {
     if (m_testGroupType == XblSocialUserGroupType::XblSocialUserGroupType_FilterType)
     {
@@ -69,13 +67,13 @@ void Game::CreateSocialUserGroup()
         XblSocialManagerCreateSocialUserGroupFromList(m_user, xuids.data(), (uint32_t)xuids.size(), &m_socialUserGroup);
     }
 
-    Game* pThis = this;
+    Tests* pThis = this;
     WaitForSocialEvent(XblSocialManagerEventType::XblSocialManagerEventType_SocialUserGroupLoaded, [pThis](XblSocialManagerEvent e) {
         pThis->TestSocialUserGroup();
     });
 }
 
-void Game::TestSocialUserGroup()
+void Tests::TestSocialUserGroup()
 {
     if (m_socialUserGroup->trackedUsersCount > 0)
     {
@@ -111,7 +109,7 @@ void Game::TestSocialUserGroup()
 //////      Manager Utils        //////
 ///////////////////////////////////////
 
-void Game::NextSocialManagerTestConfig()
+void Tests::NextSocialManagerTestConfig()
 {
     if (m_relationshipFilter == XblRelationshipFilter_Friends)
     {
@@ -124,7 +122,7 @@ void Game::NextSocialManagerTestConfig()
     }
 }
 
-void Game::SocialManagerIntegrationUpdate()
+void Tests::SocialManagerIntegrationUpdate()
 {
     XblSocialManagerEvent* events;
     uint32_t eventsSize;
@@ -146,7 +144,7 @@ void Game::SocialManagerIntegrationUpdate()
     }
 }
 
-void Game::WaitForSocialEvent(XblSocialManagerEventType eventType, std::function<void(XblSocialManagerEvent)> callback)
+void Tests::WaitForSocialEvent(XblSocialManagerEventType eventType, std::function<void(XblSocialManagerEvent)> callback)
 {
     m_waitingForEvent = true;
     m_eventType = eventType;
@@ -164,7 +162,7 @@ void Game::WaitForSocialEvent(XblSocialManagerEventType eventType, std::function
     }
 }
 
-void Game::PrintSocialManagerDoWork(XblSocialManagerEvent* events, uint32_t size)
+void Tests::PrintSocialManagerDoWork(XblSocialManagerEvent* events, uint32_t size)
 {
     if (size > 0)
     {
@@ -196,7 +194,7 @@ void Game::PrintSocialManagerDoWork(XblSocialManagerEvent* events, uint32_t size
     }
 }
 
-string Game::GroupTypeToString() {
+string Tests::GroupTypeToString() {
     string type = "unknown";
 
     switch (m_testGroupType)
@@ -209,7 +207,7 @@ string Game::GroupTypeToString() {
 }
 
 
-string Game::SocialEventTypeToString(XblSocialManagerEventType eventType)
+string Tests::SocialEventTypeToString(XblSocialManagerEventType eventType)
 {
     string type = "Unknown";
 
@@ -230,7 +228,7 @@ string Game::SocialEventTypeToString(XblSocialManagerEventType eventType)
     return type;
 }
 
-string Game::PresenceFilterToString()
+string Tests::PresenceFilterToString()
 {
     string filter = "Unknown";
 
@@ -248,7 +246,7 @@ string Game::PresenceFilterToString()
     return filter;
 }
 
-string Game::RelationshipFilterToString()
+string Tests::RelationshipFilterToString()
 {
     string filter = "Unknown";
 
