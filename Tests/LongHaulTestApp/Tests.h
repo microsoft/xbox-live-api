@@ -15,6 +15,7 @@ public:
 
 private:
     async_queue_handle_t m_queue;
+    async_queue_handle_t m_queue2;
     uint32_t m_asyncQueueCallbackToken;
 
     struct ThreadContext
@@ -39,7 +40,7 @@ public:
     ///////////////////////////////////////
 
     // Methods
-    Tests(xbl_context_handle xboxLiveContext, async_queue_handle_t queue);
+    Tests(xbl_context_handle xboxLiveContext, async_queue_handle_t queue, bool runSocialManagerTests);
     ~Tests();
     void HandleTests();
 
@@ -58,6 +59,8 @@ private:
     xbl_context_handle m_xboxLiveContext;
     async_queue_handle_t m_queue;
     const XblAppConfig* m_config;
+
+    bool m_runSocialManagerTests;
     
     ///////////////////////////////////////
     //////        Achievements       //////

@@ -10,10 +10,12 @@ uint64_t Tests::TestsRun = 0;
 
 Tests::Tests(
     xbl_context_handle xboxLiveContext, 
-    async_queue_handle_t queue
+    async_queue_handle_t queue,
+    bool runSocialManagerTests
     ) : 
     m_xboxLiveContext(xboxLiveContext),
-    m_queue(queue)
+    m_queue(queue),
+    m_runSocialManagerTests(runSocialManagerTests)
 {
     XblContextDuplicateHandle(m_xboxLiveContext);
     XblContextGetUser(m_xboxLiveContext, &m_user);
@@ -47,7 +49,10 @@ void Tests::RunTests()
 
     TestSocialFlow();
 
-    TestSocialManagerFlow();
+    if (m_runSocialManagerTests)
+    {
+        TestSocialManagerFlow();
+    }
 
     g_sampleInstance->PrintMemoryUsage();
  }

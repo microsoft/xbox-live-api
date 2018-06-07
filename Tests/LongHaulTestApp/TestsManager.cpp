@@ -26,8 +26,18 @@ void TestsManager::StartTests(xbl_context_handle xboxContext)
     {
         InitializeAsync(m_queue, TestsThreadProc, m_context, &m_asyncQueueCallbackToken);
     }
+
+    CreateSharedAsyncQueue(
+        TEST_THREAD_ID + 1,
+        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
+        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
+        &m_queue2);
+
+    InitializeAsync(m_queue2, BackgroundWorkThreadProc, m_context, &m_asyncQueueCallbackToken);
+    InitializeAsync(m_queue2, TestsThreadProc, m_context, &m_asyncQueueCallbackToken);
 }
 
+bool g_runSocialManagerTests = true;
 DWORD WINAPI TestsManager::TestsThreadProc(LPVOID lpParam)
 {
     auto context = static_cast<ThreadContext*>(lpParam);
@@ -38,7 +48,10 @@ DWORD WINAPI TestsManager::TestsThreadProc(LPVOID lpParam)
         g_stopRequestedHandles[context->queue].get()
     };
 
-    Tests tests(context->xblContext, context->queue);
+    bool runSocialManagerTests = g_runSocialManagerTests;
+    g_runSocialManagerTests = false;
+
+    Tests tests(context->xblContext, context->queue, runSocialManagerTests);
 
     bool stop = false;
     while (!stop)
@@ -53,8 +66,8 @@ DWORD WINAPI TestsManager::TestsThreadProc(LPVOID lpParam)
         }
 
         DrainAsyncCompletionQueue(context->queue, 1);
-
-        // todo how to stop
+        
+        stop = WaitForSingleObject(g_stopRequestedHandles[context->queue].get(), 0) == WAIT_OBJECT_0;
     }
 
     CloseAsyncQueue(context->queue);
