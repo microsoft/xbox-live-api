@@ -186,7 +186,7 @@ copy %UWP_BUILD_SHARE%\Release\%TYPE%\Microsoft.Xbox.Services.140.UWP.WinRT\Micr
 copy %UWP_BUILD_SHARE%\Release\%TYPE%\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll %UNITY_ASSET_DEST%\Assets\XboxServicesAPI\Binaries\%TYPE%
 
 set UNITY_PACKAGE_NAME=%UNITY_ASSET_DEST%\XboxServicesAPI-%SDK_RELEASE_NAME%-%MINOR_VERSION_NUMBER%.unitypackage
-"C:\Program Files\Unity\Editor\Unity.exe" -ea SilentlyContinue -batchmode -logFile "%TFS_DropLocation%\unity\unity.log" -projectPath "%UNITY_ASSET_DEST%" -exportPackage "Assets\XboxServicesAPI" "%UNITY_PACKAGE_NAME%" -quit
+"C:\Program Files\Unity\Editor\Unity.exe" -ea SilentlyContinue -batchmode -logFile "%TFS_DropLocation%\unity\unity.log" -projectPath "%UNITY_ASSET_SRC%" -exportPackage "Assets\XboxServicesAPI" "%UNITY_PACKAGE_NAME%" -quit
 
 
 if "%skipNuget%" == "1" goto skipNuget
