@@ -276,6 +276,17 @@ public:
         _In_ xbox_live_context_recommended_setting setting
         );
 
+	/// <summary>
+	/// Gets whether to use the xplatqos server for qos calls.
+	/// </summary>
+	_XSAPIIMP bool use_crossplatform_qos_servers() const;
+
+	/// <summary>
+	/// Controls whether we use cross platform qos endpoints or not.
+	/// In some case if you are shipping with TV_API enabled, you want to be able to choose.
+	/// </summary>
+	_XSAPIIMP void set_use_crossplatform_qos_servers(_In_ bool value);
+
 public:
     // Internal public function
 #if UWP_API || UNIT_TEST_SERVICES
@@ -300,6 +311,8 @@ private:
 
     std::chrono::seconds m_websocketTimeoutWindow;
     bool m_useCoreDispatcherForEventRouting;
+	
+    bool m_useXplatQosServer;
 };
 
 

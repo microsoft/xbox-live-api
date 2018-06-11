@@ -253,15 +253,13 @@ game_server_platform_service::get_game_server_metadata(
 pplx::task<xbox::services::xbox_live_result<std::vector<quality_of_service_server>>>
 game_server_platform_service::get_quality_of_service_servers()
 {
+    const string_t path = m_xboxLiveContextSettings->use_crossplatform_qos_servers() ? _T("/xplatqosservers") : _T("/qosservers");
+
     std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
         m_xboxLiveContextSettings,
         _T("GET"),
         utils::create_xboxlive_endpoint(_T("gameserverds"), m_appConfig),
-#if TV_API
-        _T("/qosservers"),
-#else
-        _T("/xplatqosservers"),
-#endif
+        path,
         xbox_live_api::get_quality_of_service_servers
         );
 
