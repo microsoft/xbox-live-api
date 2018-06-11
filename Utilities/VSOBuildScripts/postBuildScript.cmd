@@ -165,28 +165,23 @@ if "%1" == "local" goto skipzip
 rem create unity package
 set UNITY_ASSET_DEST=%TFS_DropLocation%\unity
 set UNITY_ASSET_SRC=%TFS_SourcesDirectory%\Utilities\IDXboxUnityAssetLayout
-set UNITY_ASSET_BIN_SRC_X64_XS=%UWP_BUILD_SHARE%\Release\x64\Microsoft.Xbox.Services.140.UWP.WinRT
-set UNITY_ASSET_BIN_SRC_X64_CA=%UWP_BUILD_SHARE%\Release\x64\cpprestsdk140.uwp
-set UNITY_ASSET_BIN_SRC_ARM_XS=%UWP_BUILD_SHARE%\Release\ARM\Microsoft.Xbox.Services.140.UWP.WinRT
-set UNITY_ASSET_BIN_SRC_ARM_CA=%UWP_BUILD_SHARE%\Release\ARM\cpprestsdk140.uwp
-set UNITY_ASSET_BIN_SRC_X86_XS=%UWP_BUILD_SHARE%\Release\x86\Microsoft.Xbox.Services.140.UWP.WinRT
-set UNITY_ASSET_BIN_SRC_X86_CA=%UWP_BUILD_SHARE%\Release\x86\cpprestsdk140.uwp
+
+set TYPE=x64
+copy %UWP_BUILD_SHARE%\Release\%TYPE%\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll %UNITY_ASSET_SRC%\Assets\XboxServicesAPI\Binaries\%TYPE%
+copy %UWP_BUILD_SHARE%\Release\%TYPE%\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.winmd %UNITY_ASSET_SRC%\Assets\XboxServicesAPI\Binaries\WinMD
+copy %UWP_BUILD_SHARE%\Release\%TYPE%\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll %UNITY_ASSET_SRC%\Assets\XboxServicesAPI\Binaries\%TYPE%
+set TYPE=ARM
+copy %UWP_BUILD_SHARE%\Release\%TYPE%\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll %UNITY_ASSET_SRC%\Assets\XboxServicesAPI\Binaries\%TYPE%
+copy %UWP_BUILD_SHARE%\Release\%TYPE%\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll %UNITY_ASSET_SRC%\Assets\XboxServicesAPI\Binaries\%TYPE%
+set TYPE=x86
+copy %UWP_BUILD_SHARE%\Release\%TYPE%\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll %UNITY_ASSET_SRC%\Assets\XboxServicesAPI\Binaries\%TYPE%
+copy %UWP_BUILD_SHARE%\Release\%TYPE%\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll %UNITY_ASSET_SRC%\Assets\XboxServicesAPI\Binaries\%TYPE%
+
+set UNITY_PACKAGE_NAME=%UNITY_ASSET_SRC%\XboxServicesAPI-%SDK_RELEASE_NAME%-%MINOR_VERSION_NUMBER%.unitypackage
+"C:\Program Files\Unity\Editor\Unity.exe" -ea SilentlyContinue -batchmode -logFile "%UNITY_ASSET_SRC%\unity.log" -projectPath "%UNITY_ASSET_SRC%" -exportPackage "Assets\XboxServicesAPI" "%UNITY_PACKAGE_NAME%" -quit
 
 mkdir %UNITY_ASSET_DEST%
 robocopy /NJS /NJH /MT:16 /S /NP %UNITY_ASSET_SRC% %UNITY_ASSET_DEST%
-set TYPE=x64
-copy %UWP_BUILD_SHARE%\Release\%TYPE%\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll %UNITY_ASSET_DEST%\Assets\XboxServicesAPI\Binaries\%TYPE%
-copy %UWP_BUILD_SHARE%\Release\%TYPE%\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.winmd %UNITY_ASSET_DEST%\Assets\XboxServicesAPI\Binaries\WinMD
-copy %UWP_BUILD_SHARE%\Release\%TYPE%\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll %UNITY_ASSET_DEST%\Assets\XboxServicesAPI\Binaries\%TYPE%
-set TYPE=ARM
-copy %UWP_BUILD_SHARE%\Release\%TYPE%\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll %UNITY_ASSET_DEST%\Assets\XboxServicesAPI\Binaries\%TYPE%
-copy %UWP_BUILD_SHARE%\Release\%TYPE%\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll %UNITY_ASSET_DEST%\Assets\XboxServicesAPI\Binaries\%TYPE%
-set TYPE=x86
-copy %UWP_BUILD_SHARE%\Release\%TYPE%\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll %UNITY_ASSET_DEST%\Assets\XboxServicesAPI\Binaries\%TYPE%
-copy %UWP_BUILD_SHARE%\Release\%TYPE%\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll %UNITY_ASSET_DEST%\Assets\XboxServicesAPI\Binaries\%TYPE%
-
-set UNITY_PACKAGE_NAME=%UNITY_ASSET_DEST%\XboxServicesAPI-%SDK_RELEASE_NAME%-%MINOR_VERSION_NUMBER%.unitypackage
-"C:\Program Files\Unity\Editor\Unity.exe" -ea SilentlyContinue -batchmode -logFile "%TFS_DropLocation%\unity\unity.log" -projectPath "%UNITY_ASSET_SRC%" -exportPackage "Assets\XboxServicesAPI" "%UNITY_PACKAGE_NAME%" -quit
 
 
 if "%skipNuget%" == "1" goto skipNuget
