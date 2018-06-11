@@ -168,7 +168,7 @@ presence_writer::set_inactive_in_title(
     // Set the presence to be not in this title
     try
     {
-        presenceServiceImpl->set_presence(false, presence_data_internal(), nullptr, nullptr);
+        presenceServiceImpl->set_presence(false, presence_data_internal(), get_xsapi_singleton()->m_asyncQueue, nullptr);
     }
     catch (...)
     {
