@@ -220,26 +220,26 @@ public:
         _In_ const xbox_live_user_t& user
         );
 
-	/// <summary> 
-	/// Requests that stats_manager sends the stats to the service immediately,
-	/// with a maximum rate of once every 30 seconds. If you do not call this method, stats
-	/// are automatically sent to the service every 5 minutes.
-	/// </summary>
-	/// <param name="user">The user to flush the stat for.</param>
-	/// <param name="isHighPriority">Indicates if the flush is a high priority, typically when the game is getting suspended.</param>
-	/// <remarks>
-	/// Stats are automatically sent to the service every 5 minutes. You can call this method 
-	/// if you want to update the service with the latest stats sooner such as when a match or round ends.
-	/// 
-	/// This causes the current stat values to be uploaded to the service with
-	/// a maximum rate of once every 30 seconds.  Set isHighPriority to true when your title 
-	/// is getting suspended as this will try to update the stats even if it hasn't been 30 seconds 
-	/// since the last flush. However requests to flush with isHighPriority=true are still limited 
-	/// to a maximum rate of once every 30 seconds so it can't be used to flood the service.
-	///
-	/// Note that you may still be throttled when calling the stats service such as if you are 
-	/// relaunching the title over and over and send stats at every launch.
-	/// </remarks>
+    /// <summary> 
+    /// Requests that stats_manager sends the stats to the service immediately,
+    /// with a maximum rate of once every 30 seconds. If you do not call this method, stats
+    /// are automatically sent to the service every 5 minutes.
+    /// </summary>
+    /// <param name="user">The user to flush the stat for.</param>
+    /// <param name="isHighPriority">Indicates if the flush is a high priority, typically when the game is getting suspended.</param>
+    /// <remarks>
+    /// Stats are automatically sent to the service every 5 minutes. You can call this method 
+    /// if you want to update the service with the latest stats sooner such as when a match or round ends.
+    /// 
+    /// This causes the current stat values to be uploaded to the service with
+    /// a maximum rate of once every 30 seconds.  Set isHighPriority to true when your title 
+    /// is getting suspended as this will try to update the stats even if it hasn't been 30 seconds 
+    /// since the last flush. However requests to flush with isHighPriority=true are still limited 
+    /// to a maximum rate of once every 30 seconds so it can't be used to flood the service.
+    ///
+    /// Note that you may still be throttled when calling the stats service such as if you are 
+    /// relaunching the title over and over and send stats at every launch.
+    /// </remarks>
     _XSAPIIMP xbox_live_result<void> request_flush_to_service(
         _In_ const xbox_live_user_t& user,
         _In_ bool isHighPriority = false
