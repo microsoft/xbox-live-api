@@ -37,6 +37,7 @@ set SDK_RELEASE_NAME=%SDK_RELEASE_YEAR:~2,2%%SDK_RELEASE_MONTH%
 set LONG_SDK_RELEASE_NAME=%SDK_RELEASE_NAME%-%SDK_POINT_NAME_YEAR%%SDK_POINT_NAME_MONTH%%SDK_POINT_NAME_DAY%-%SDK_POINT_NAME_VER%
 set NUGET_VERSION_NUMBER=%SDK_RELEASE_YEAR%.%SDK_RELEASE_MONTH%.%SDK_POINT_NAME_YEAR%%SDK_POINT_NAME_MONTH%%SDK_POINT_NAME_DAY%.%SDK_POINT_NAME_VER%
 set MINOR_VERSION_NUMBER=%SDK_POINT_NAME_YEAR%%SDK_POINT_NAME_MONTH%%SDK_POINT_NAME_DAY%%SDK_POINT_NAME_VER%
+if "%NUGET_EXE%" == "" set NUGET_EXE=%AGENT_TOOLSDIRECTORY%\NuGet\4.5.0\x64\nuget.exe
 
 set
 
@@ -191,13 +192,13 @@ rem :skipCopy
 rem create Cpp.UWP nuget package
 rmdir /s /q %TFS_DropLocation%\include\winrt
 rmdir /s /q %TFS_DropLocation%\include\cppwinrt
-\\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
-\\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.ARM.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
-\\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x64.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER% 
-\\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x86.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER% 
-\\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.ARM.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
-\\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x64.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER% 
-\\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x86.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER% 
+%NUGET_EXE% pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
+%NUGET_EXE% pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.ARM.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
+%NUGET_EXE% pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x64.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER% 
+%NUGET_EXE% pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x86.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER% 
+%NUGET_EXE% pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.ARM.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
+%NUGET_EXE% pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x64.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER% 
+%NUGET_EXE% pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x86.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER% 
 
 rem create WinRT.UWP nuget package
 rmdir /s /q %TFS_DropLocation%\include\winrt
@@ -205,18 +206,18 @@ rmdir /s /q %TFS_DropLocation%\include\cppwinrt
 set WINSDK_OUTPUT_SRC=%TFS_DropLocation%\CppWinRT\XSAPI_WinSDK_Headers\winrt
 set WINSDK_OUTPUT_DEST=%TFS_DropLocation%\include\cppwinrt\winrt
 robocopy /NJS /NJH /MT:16 /S /NP %WINSDK_OUTPUT_SRC% %WINSDK_OUTPUT_DEST%
-\\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
-\\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Debug.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
-\\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Release.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
-\\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Debug.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
-\\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Release.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
+%NUGET_EXE% pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
+%NUGET_EXE% pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Debug.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
+%NUGET_EXE% pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Release.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
+%NUGET_EXE% pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Debug.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
+%NUGET_EXE% pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Release.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
 
 rmdir /s /q %WINSDK_OUTPUT_DEST%
 
 rem create Cpp.XDK nuget package
 rmdir /s /q %TFS_DropLocation%\include\winrt
 rmdir /s /q %TFS_DropLocation%\include\cppwinrt
-\\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
+%NUGET_EXE% pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
 
 rem create WinRT.XDK nuget package
 rmdir /s /q %TFS_DropLocation%\include\winrt
@@ -225,7 +226,7 @@ robocopy /NJS /NJH /MT:16 /S /NP %TFS_DropLocation%\ABI\include %XDK_BINARIES_DR
 set XDK_OUTPUT_SRC=%TFS_DropLocation%\CppWinRT\XSAPI_XDK_Headers\winrt
 set XDK_OUTPUT_DEST=%TFS_DropLocation%\include\cppwinrt\winrt
 robocopy /NJS /NJH /MT:16 /S /NP %XDK_OUTPUT_SRC% %XDK_OUTPUT_DEST%
-\\scratch2\scratch\jasonsa\tools\nuget pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.WinRT.XboxOneXDK.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
+%NUGET_EXE% pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.WinRT.XboxOneXDK.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
 rmdir /s /q %XDK_OUTPUT_DEST%
 
 mkdir %TFS_DropLocation%\NuGetBinaries
