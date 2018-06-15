@@ -224,7 +224,7 @@ STDAPI XblAchievementsUpdateAchievementAsync(
     _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
-    _In_opt_ uint32_t* titleId,
+    _In_opt_ const uint32_t* titleId,
     _In_opt_z_ const char* serviceConfigurationId,
     _In_z_ const char* achievementId,
     _In_ uint32_t percentComplete
@@ -237,7 +237,7 @@ try
     {
         xbl_context_handle xboxLiveContext;
         xsapi_internal_string xboxUserId;
-        uint32_t* titleId;
+        const uint32_t* titleId;
         xsapi_internal_string serviceConfigurationId;
         xsapi_internal_string achievementId;
         uint32_t percentComplete;
