@@ -24,6 +24,7 @@ class Game
 public:
 
     Game();
+    ~Game();
 
     // Initialization and management
     void Initialize(IUnknown* window);
@@ -48,10 +49,9 @@ private:
 
     void Update(DX::StepTimer const& timer);
     void RenderUI();
-
-    void RenderSocialGroupList(
+    
+    void RenderAchievements(
         FLOAT fGridXColumn1,
-        FLOAT fGridXColumn2,
         FLOAT fGridY,
         FLOAT fTextHeight,
         FLOAT scale,
@@ -93,79 +93,44 @@ private:
     std::unique_ptr<DirectX::SpriteFont>        m_font;
 
     std::shared_ptr<UserController> m_userController;
-
-    std::vector<uint64_t> m_xuidsInCustomSocialGroup;
-    std::vector<XblSocialManagerUserGroup*> m_socialGroups;
-    static std::mutex m_socialManagerLock;
-
-    bool m_allFriends;
-    bool m_onlineFriends;
-    bool m_allFavs;
-    bool m_onlineInTitle;
-    bool m_customList;
-    bool m_isInitialized;
-    bool m_userAdded;
-    std::vector<uint64_t> m_xuidList;
-
-private:
-    void InitializeSocialManager(Windows::Foundation::Collections::IVectorView<Windows::Xbox::System::User^>^ userList);
-public:
-    void AddUserToSocialManager(
-        _In_ Windows::Xbox::System::User^ user
-        );
-    void RemoveUserFromSocialManager(
-        _In_ Windows::Xbox::System::User^ user
-        );
+    
 private:
     async_queue_handle_t m_queue;
     uint32_t m_asyncQueueCallbackToken;
     HANDLE m_hBackgroundThread;
 
-    void CreateSocialGroupFromList(
-        _In_ Windows::Xbox::System::User^ user,
-        _In_ std::vector<uint64_t> xuidList
-        );
-    void DestorySocialGroup(
-        _In_ Windows::Xbox::System::User^ user
-        );
-    void CreateSocialGroupFromFilters(
-        _In_ Windows::Xbox::System::User^ user,
-        _In_ XblPresenceFilter presenceDetailLevel,
-        _In_ XblRelationshipFilter filter
-        );
-    void DestroySocialGroup(
-        _In_ Windows::Xbox::System::User^ user,
-        _In_ XblPresenceFilter presenceDetailLevel,
-        _In_ XblRelationshipFilter filter
-        );
-    void UpdateSocialManager();
-    void LogSocialEventList(
-        XblSocialManagerEvent* eventList,
-        uint32_t eventListCount
-        );
-    void CreateSocialGroupsBasedOnUI(
-        _In_ Windows::Xbox::System::User^ user
-        );
+    xbl_context_handle m_xboxLiveContext;
+    uint64_t m_xuid;
+    const XblAppConfig* m_config;
 
-    void UpdateSocialGroupForAllUsers(
-        _In_ bool toggle,
-        _In_ XblPresenceFilter presenceFilter,
-        _In_ XblRelationshipFilter relationshipFilter
-        );
-    void UpdateSocialGroup(
-        _In_ Windows::Xbox::System::User^ user,
-        _In_ bool toggle,
-        _In_ XblPresenceFilter presenceFilter,
-        _In_ XblRelationshipFilter relationshipFilter
-        );
+    void InitializeXboxLive();
+    void CleanupXboxLive();
 
-    void UpdateSocialGroupOfListForAllUsers(
-        _In_ bool toggle
-        );
-    void UpdateSocialGroupOfList(
-        _In_ Windows::Xbox::System::User^ user,
-        _In_ bool toggle
-        );
+private:
+    xbl_achievements_result_handle m_achievementsResult;
+    bool m_achievementsResultSet;
+    void SetAchievementsResult(
+        _In_ xbl_achievements_result_handle achievementsResult
+    );
+
+    void GetAchievementsForTitle(
+        _In_ uint32_t skipItems,
+        _In_ uint32_t maxItems
+    );
+
+    void AchievementResultsGetNext(
+        _In_ xbl_achievements_result_handle resultHandle,
+        _In_ uint32_t maxItems
+    );
+
+    void GetAchievement(
+        _In_ const char* achievementId
+    );
+
+    void UpdateAchievement(
+        _In_ const char* achievementId,
+        _In_ uint32_t percentComplete
+    );
 };
 
 extern Game* g_sampleInstance;

@@ -135,7 +135,7 @@ achievement_service_internal::update_achievement(
                 return xbox_live_result<void>(static_cast<xbox_live_error_code>(hr));
             }
             
-            string_t wScid;
+            string_t wScid = utils::string_t_from_internal_string(scid);
             std::error_code errC = utils::guid_from_string(wScid, const_cast<GUID*>(&XSAPI_Update_Achievement_Provider.Guid), false);
             if (errC)
             {
