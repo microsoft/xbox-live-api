@@ -56,7 +56,8 @@ try
         switch (op)
         {
         case AsyncOp_DoWork:
-            context->xboxLiveContext->contextImpl->achievement_service_internal()->get_achievements_for_title_id(
+        {
+            auto result = context->xboxLiveContext->contextImpl->achievement_service_internal()->get_achievements_for_title_id(
                 context->xboxUserId,
                 context->titleId,
                 static_cast<achievement_type>(context->type),
@@ -74,7 +75,13 @@ try
                 }
                 CompleteAsync(data->async, hr, sizeof(xbl_achievements_result_handle));
             });
+
+            if (result.err())
+            {
+                CompleteAsync(data->async, utils::convert_xbox_live_error_code_to_hresult(result.err()), 0);
+            }
             return E_PENDING;
+        }
 
         case AsyncOp_GetResult:
             memcpy(data->buffer, &context->resultHandle, sizeof(xbl_achievements_result_handle));
@@ -166,7 +173,8 @@ try
         switch (op)
         {
         case AsyncOp_DoWork:
-            context->inputResultHandle->internalResult->get_next(context->maxItems, data->async->queue,
+        {
+            auto result = context->inputResultHandle->internalResult->get_next(context->maxItems, data->async->queue,
                 [data, context](xbox_live_result<std::shared_ptr<achievements_result_internal>> result)
             {
                 auto hr = utils::convert_xbox_live_error_code_to_hresult(result.err());
@@ -176,7 +184,13 @@ try
                 }
                 CompleteAsync(data->async, hr, sizeof(xbl_achievements_result_handle));
             });
+
+            if (result.err())
+            {
+                CompleteAsync(data->async, utils::convert_xbox_live_error_code_to_hresult(result.err()), 0);
+            }
             return E_PENDING;
+        }
 
         case AsyncOp_GetResult:
             memcpy(data->buffer, &context->outputResultHandle, sizeof(xbl_achievements_result_handle));
@@ -248,21 +262,24 @@ try
         switch (op)
         {
         case AsyncOp_DoWork:
+        {
+            xbox_live_result<void> result;
+
             if (context->titleId == nullptr)
             {
-                context->xboxLiveContext->contextImpl->achievement_service_internal()->update_achievement(
+                result = context->xboxLiveContext->contextImpl->achievement_service_internal()->update_achievement(
                     context->xboxUserId,
                     context->achievementId,
                     context->percentComplete,
                     data->async->queue,
-                    [data, context](xbox_live_result<void> result) 
+                    [data, context](xbox_live_result<void> result)
                 {
                     CompleteAsync(data->async, utils::convert_xbox_live_error_code_to_hresult(result.err()), 0);
                 });
             }
             else
             {
-                context->xboxLiveContext->contextImpl->achievement_service_internal()->update_achievement(
+                result = context->xboxLiveContext->contextImpl->achievement_service_internal()->update_achievement(
                     context->xboxUserId,
                     *(context->titleId),
                     context->serviceConfigurationId,
@@ -274,7 +291,13 @@ try
                     CompleteAsync(data->async, utils::convert_xbox_live_error_code_to_hresult(result.err()), 0);
                 });
             }
+
+            if (result.err())
+            {
+                CompleteAsync(data->async, utils::convert_xbox_live_error_code_to_hresult(result.err()), 0);
+            }
             return E_PENDING;
+        }
 
         case AsyncOp_Cleanup:
             context->~Context();
@@ -325,12 +348,13 @@ try
         switch (op)
         {
         case AsyncOp_DoWork:
-            context->xboxLiveContext->contextImpl->achievement_service_internal()->get_achievement(
+        {
+            auto result = context->xboxLiveContext->contextImpl->achievement_service_internal()->get_achievement(
                 context->xboxUserId,
                 context->serviceConfigurationId,
                 context->achievementId,
                 data->async->queue,
-                [data, context](xbox_live_result<std::shared_ptr<achievement_internal>> result) 
+                [data, context](xbox_live_result<std::shared_ptr<achievement_internal>> result)
             {
                 auto hr = utils::convert_xbox_live_error_code_to_hresult(result.err());
                 if (SUCCEEDED(hr))
@@ -339,7 +363,13 @@ try
                 }
                 CompleteAsync(data->async, hr, sizeof(xbl_achievements_result_handle));
             });
+
+            if (result.err())
+            {
+                CompleteAsync(data->async, utils::convert_xbox_live_error_code_to_hresult(result.err()), 0);
+            }
             return E_PENDING;
+        }
 
         case AsyncOp_GetResult:
             XSAPI_ASSERT(data->bufferSize == sizeof(xbl_achievements_result_handle));
