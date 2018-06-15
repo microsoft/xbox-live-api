@@ -206,7 +206,8 @@ social_graph::initialize()
             std::shared_ptr<social_graph> pThis(thisWeakPtr.lock());
             if (pThis)
             {
-                if (socialUsersResult.err())
+                // Since this is initializing the social graph a 424 is allowed
+                if (socialUsersResult.err() != xbox_live_error_code::no_error && socialUsersResult.err() != xbox_live_error_code::http_status_424_failed_dependency)
                 {
                     return xbox_live_result<void>(socialUsersResult.err(), socialUsersResult.err_message());
                 }
