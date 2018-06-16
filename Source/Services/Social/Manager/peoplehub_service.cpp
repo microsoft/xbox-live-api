@@ -127,6 +127,14 @@ void peoplehub_service::get_social_graph(
             errc,
             false
             );
+        auto it = response->response_headers().find("x-xbl-servicedefault");
+        if (it != response->response_headers().end())
+        {
+            xsapi_internal_stringstream stream;
+            stream << "Peoplehub dependency failed to load: " << it->second;
+
+            response->set_error_info(xbox_live_error_code::http_status_424_failed_dependency, stream.str());
+        }
 
         auto result = utils::generate_xbox_live_result<xsapi_internal_vector<xbox_social_user>>(
             xbox_live_result<xsapi_internal_vector<xbox_social_user>>(socialUserVec, errc),
