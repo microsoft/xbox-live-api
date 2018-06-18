@@ -49,6 +49,11 @@ public:
     DEFINE_PROP_GETSET_ENUM_OBJ(Order, order, SortOrder, xbox::services::leaderboard::sort_order);
 
     /// <summary>
+    /// Gets/Set the callback ID when this is used by stats_manager
+    /// </summary>
+    DEFINE_PROP_GETSET_OBJ(CallbackId, callback_id, uint64_t);
+
+    /// <summary>
     /// Gets the stat name of the previous query. This property will only be set if it is a query 
     /// gotten from GetNextQuery.
     /// </summary>
