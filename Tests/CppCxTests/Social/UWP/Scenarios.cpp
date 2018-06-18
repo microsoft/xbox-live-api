@@ -214,6 +214,7 @@ void Scenarios::Scenario_GetLeaderboard(_In_ MainPage^ ui, Microsoft::Xbox::Serv
 
     String^ statName = L"HighScore";
     LeaderboardQuery^ Query = ref new LeaderboardQuery();
+    Query->CallbackId = 2;
 
     auto statValue = mgr->GetStatistic(xboxLiveContext->User, statName);
     Platform::String^ name = statValue->Name;

@@ -156,6 +156,8 @@ void MainPage::OnTick(Object^ sender, Object^ e)
                 LeaderboardResultEventArgs^ LbResultEventArgs = safe_cast<LeaderboardResultEventArgs^>(Event->EventArgs);
                 LeaderboardResult^ LbResult = LbResultEventArgs->Result;
 
+                uint64_t t = LbResult->GetNextQuery()->CallbackId;
+
                 Platform::String^ displayName = LbResult->DisplayName;
                 LogFormat(L"Leaderboard displayName: %s\n", displayName->Data());
 
