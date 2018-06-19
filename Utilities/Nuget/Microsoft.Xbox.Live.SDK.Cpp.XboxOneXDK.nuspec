@@ -17,35 +17,35 @@
         <tags>Microsoft Xbox Live Service XSAPI Cpp XboxOneXDK XboxOne Xbox One C++ One XDK</tags>
     </metadata>
     <files>
-        <file src="\Nuget\Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK.targets" target="build\native\Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK.targets" />
-        <file src="\include\" target="build\native\include\" />
+        <file src="Nuget\Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK.targets" target="build\native\Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK.targets" />
+        <file src="include\" target="build\native\include\" />
 
         <!-- v140 -->
-        <file src="\Debug\x64\casablanca140.Xbox\casablanca140.xbox.lib" target="build\native\lib\Durango\v140\Debug\casablanca140.xbox.lib" />
-        <file src="\Debug\x64\casablanca140.Xbox\casablanca140.xbox.pdb" target="build\native\lib\Durango\v140\Debug\casablanca140.xbox.pdb" />
-        <file src="\Debug\x64\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.lib" target="build\native\lib\Durango\v140\Debug\libHttpClient.140.XDK.C.lib" />
-        <file src="\Debug\x64\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.pdb" target="build\native\lib\Durango\v140\Debug\libHttpClient.140.XDK.C.pdb" />
-        <file src="\Debug\x64\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib" target="build\native\lib\Durango\v140\Debug\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib" />
-        <file src="\Debug\x64\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb" target="build\native\lib\Durango\v140\Debug\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb" />
-        <file src="\Release\x64\casablanca140.Xbox\casablanca140.xbox.lib" target="build\native\lib\Durango\v140\Release\casablanca140.xbox.lib" />
-        <file src="\Release\x64\casablanca140.Xbox\casablanca140.xbox.pdb" target="build\native\lib\Durango\v140\Release\casablanca140.xbox.pdb" />
-        <file src="\Release\x64\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.lib" target="build\native\lib\Durango\v140\Release\libHttpClient.140.XDK.C.lib" />
-        <file src="\Release\x64\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.pdb" target="build\native\lib\Durango\v140\Release\libHttpClient.140.XDK.C.pdb" />
-        <file src="\Release\x64\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib" target="build\native\lib\Durango\v140\Release\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib" />
-        <file src="\Release\x64\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb" target="build\native\lib\Durango\v140\Release\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb" />
+        <file src="Debug\x64\casablanca140.Xbox\casablanca140.xbox.lib" target="build\native\lib\Durango\v140\Debug\casablanca140.xbox.lib" />
+        <file src="Debug\x64\casablanca140.Xbox\casablanca140.xbox.pdb" target="build\native\lib\Durango\v140\Debug\casablanca140.xbox.pdb" />
+        <file src="Debug\x64\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.lib" target="build\native\lib\Durango\v140\Debug\libHttpClient.140.XDK.C.lib" />
+        <file src="Debug\x64\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.pdb" target="build\native\lib\Durango\v140\Debug\libHttpClient.140.XDK.C.pdb" />
+        <file src="Debug\x64\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib" target="build\native\lib\Durango\v140\Debug\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib" />
+        <file src="Debug\x64\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb" target="build\native\lib\Durango\v140\Debug\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb" />
+        <file src="Release\x64\casablanca140.Xbox\casablanca140.xbox.lib" target="build\native\lib\Durango\v140\Release\casablanca140.xbox.lib" />
+        <file src="Release\x64\casablanca140.Xbox\casablanca140.xbox.pdb" target="build\native\lib\Durango\v140\Release\casablanca140.xbox.pdb" />
+        <file src="Release\x64\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.lib" target="build\native\lib\Durango\v140\Release\libHttpClient.140.XDK.C.lib" />
+        <file src="Release\x64\libHttpClient.140.XDK.C\libHttpClient.140.XDK.C.pdb" target="build\native\lib\Durango\v140\Release\libHttpClient.140.XDK.C.pdb" />
+        <file src="Release\x64\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib" target="build\native\lib\Durango\v140\Release\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.lib" />
+        <file src="Release\x64\Microsoft.Xbox.Services.140.XDK.Ship.Cpp\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb" target="build\native\lib\Durango\v140\Release\Microsoft.Xbox.Services.140.XDK.Ship.Cpp.pdb" />
 
         <!-- v141 -->
-        <file src="\Debug\x64\casablanca141.Xbox\casablanca141.xbox.lib" target="build\native\lib\Durango\v141\Debug\casablanca141.xbox.lib" />
-        <file src="\Debug\x64\casablanca141.Xbox\casablanca141.xbox.pdb" target="build\native\lib\Durango\v141\Debug\casablanca141.xbox.pdb" />
-        <file src="\Debug\x64\libHttpClient.141.XDK.C\libHttpClient.141.XDK.C.lib" target="build\native\lib\Durango\v141\Debug\libHttpClient.141.XDK.C.lib" />
-        <file src="\Debug\x64\libHttpClient.141.XDK.C\libHttpClient.141.XDK.C.pdb" target="build\native\lib\Durango\v141\Debug\libHttpClient.141.XDK.C.pdb" />
-        <file src="\Debug\x64\Microsoft.Xbox.Services.141.XDK.Ship.Cpp\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.lib" target="build\native\lib\Durango\v141\Debug\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.lib" />
-        <file src="\Debug\x64\Microsoft.Xbox.Services.141.XDK.Ship.Cpp\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.pdb" target="build\native\lib\Durango\v141\Debug\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.pdb" />
-        <file src="\Release\x64\casablanca141.Xbox\casablanca141.xbox.lib" target="build\native\lib\Durango\v141\Release\casablanca141.xbox.lib" />
-        <file src="\Release\x64\casablanca141.Xbox\casablanca141.xbox.pdb" target="build\native\lib\Durango\v141\Release\casablanca141.xbox.pdb" />
-        <file src="\Release\x64\libHttpClient.141.XDK.C\libHttpClient.141.XDK.C.lib" target="build\native\lib\Durango\v141\Release\libHttpClient.141.XDK.C.lib" />
-        <file src="\Release\x64\libHttpClient.141.XDK.C\libHttpClient.141.XDK.C.pdb" target="build\native\lib\Durango\v141\Release\libHttpClient.141.XDK.C.pdb" />
-        <file src="\Release\x64\Microsoft.Xbox.Services.141.XDK.Ship.Cpp\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.lib" target="build\native\lib\Durango\v141\Release\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.lib" />
-        <file src="\Release\x64\Microsoft.Xbox.Services.141.XDK.Ship.Cpp\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.pdb" target="build\native\lib\Durango\v141\Release\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.pdb" />        
+        <file src="Debug\x64\casablanca141.Xbox\casablanca141.xbox.lib" target="build\native\lib\Durango\v141\Debug\casablanca141.xbox.lib" />
+        <file src="Debug\x64\casablanca141.Xbox\casablanca141.xbox.pdb" target="build\native\lib\Durango\v141\Debug\casablanca141.xbox.pdb" />
+        <file src="Debug\x64\libHttpClient.141.XDK.C\libHttpClient.141.XDK.C.lib" target="build\native\lib\Durango\v141\Debug\libHttpClient.141.XDK.C.lib" />
+        <file src="Debug\x64\libHttpClient.141.XDK.C\libHttpClient.141.XDK.C.pdb" target="build\native\lib\Durango\v141\Debug\libHttpClient.141.XDK.C.pdb" />
+        <file src="Debug\x64\Microsoft.Xbox.Services.141.XDK.Ship.Cpp\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.lib" target="build\native\lib\Durango\v141\Debug\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.lib" />
+        <file src="Debug\x64\Microsoft.Xbox.Services.141.XDK.Ship.Cpp\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.pdb" target="build\native\lib\Durango\v141\Debug\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.pdb" />
+        <file src="Release\x64\casablanca141.Xbox\casablanca141.xbox.lib" target="build\native\lib\Durango\v141\Release\casablanca141.xbox.lib" />
+        <file src="Release\x64\casablanca141.Xbox\casablanca141.xbox.pdb" target="build\native\lib\Durango\v141\Release\casablanca141.xbox.pdb" />
+        <file src="Release\x64\libHttpClient.141.XDK.C\libHttpClient.141.XDK.C.lib" target="build\native\lib\Durango\v141\Release\libHttpClient.141.XDK.C.lib" />
+        <file src="Release\x64\libHttpClient.141.XDK.C\libHttpClient.141.XDK.C.pdb" target="build\native\lib\Durango\v141\Release\libHttpClient.141.XDK.C.pdb" />
+        <file src="Release\x64\Microsoft.Xbox.Services.141.XDK.Ship.Cpp\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.lib" target="build\native\lib\Durango\v141\Release\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.lib" />
+        <file src="Release\x64\Microsoft.Xbox.Services.141.XDK.Ship.Cpp\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.pdb" target="build\native\lib\Durango\v141\Release\Microsoft.Xbox.Services.141.XDK.Ship.Cpp.pdb" />        
     </files>
 </package>
