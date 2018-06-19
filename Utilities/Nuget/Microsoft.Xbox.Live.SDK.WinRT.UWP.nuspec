@@ -23,11 +23,11 @@
         </dependencies>
     </metadata>
     <files>
-        <file src="\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.targets" target="build\netcore451\Microsoft.Xbox.Live.SDK.WinRT.UWP.targets" />
-        <file src="\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.targets" target="build\native\Microsoft.Xbox.Live.SDK.WinRT.UWP.targets" />
+        <file src="Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.targets" target="build\netcore451\Microsoft.Xbox.Live.SDK.WinRT.UWP.targets" />
+        <file src="Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.targets" target="build\native\Microsoft.Xbox.Live.SDK.WinRT.UWP.targets" />
 
-        <file src="\include\" target="build\netcore451\include\" />
-        <file src="\include\" target="build\native\include\" />
+        <file src="include\" target="build\netcore451\include\" />
+        <file src="include\" target="build\native\include\" />
         
     </files>
 </package>

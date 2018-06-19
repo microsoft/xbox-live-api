@@ -25,7 +25,7 @@
         </dependencies>      
     </metadata>
     <files>
-        <file src="\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.targets" target="build\native\Microsoft.Xbox.Live.SDK.Cpp.UWP.targets" />
-        <file src="\include\" target="build\native\include\" />
+        <file src="Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.targets" target="build\native\Microsoft.Xbox.Live.SDK.Cpp.UWP.targets" />
+        <file src="include\" target="build\native\include\" />
     </files>
 </package>

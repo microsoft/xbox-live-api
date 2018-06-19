@@ -17,21 +17,21 @@
         <tags>Microsoft Xbox Live Service XSAPI C++ UWP Windows Apps Cpp</tags>
     </metadata>
     <files>
-        <file src="\Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.ARM.targets" target="build\native\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.ARM.targets" />
+        <file src="Nuget\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.ARM.targets" target="build\native\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.ARM.targets" />
 
         <!-- v141 ARM -->
-        <file src="\Debug\ARM\cpprestsdk141.uwp.static\cpprest141d_uwp_2_9.lib" target="build\native\lib\ARM\v141\Debug\cpprest141d_uwp_2_9.lib" />
-        <file src="\Debug\ARM\cpprestsdk141.uwp.static\cpprest141d_uwp_2_9.pdb" target="build\native\lib\ARM\v141\Debug\cpprest141d_uwp_2_9.pdb" />
-        <file src="\Release\ARM\cpprestsdk141.uwp.static\cpprest141_uwp_2_9.lib" target="build\native\lib\ARM\v141\Release\cpprest141_uwp_2_9.lib" />
-        <file src="\Release\ARM\cpprestsdk141.uwp.static\cpprest141_uwp_2_9.pdb" target="build\native\lib\ARM\v141\Release\cpprest141_uwp_2_9.pdb" />
-        <file src="\Debug\ARM\libHttpClient.141.UWP.C\libHttpClient.141.UWP.C.lib" target="build\native\lib\ARM\v141\Debug\libHttpClient.141.UWP.C.lib" />
-        <file src="\Debug\ARM\libHttpClient.141.UWP.C\libHttpClient.141.UWP.C.pdb" target="build\native\lib\ARM\v141\Debug\libHttpClient.141.UWP.C.pdb" />
-        <file src="\Release\ARM\libHttpClient.141.UWP.C\libHttpClient.141.UWP.C.lib" target="build\native\lib\ARM\v141\Release\libHttpClient.141.UWP.C.lib" />
-        <file src="\Release\ARM\libHttpClient.141.UWP.C\libHttpClient.141.UWP.C.pdb" target="build\native\lib\ARM\v141\Release\libHttpClient.141.UWP.C.pdb" />
-        <file src="\Debug\ARM\Microsoft.Xbox.Services.141.UWP.Ship.Cpp\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.lib" target="build\native\lib\ARM\v141\Debug\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.lib" />
-        <file src="\Debug\ARM\Microsoft.Xbox.Services.141.UWP.Ship.Cpp\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.pdb" target="build\native\lib\ARM\v141\Debug\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.pdb" />        
-        <file src="\Release\ARM\Microsoft.Xbox.Services.141.UWP.Ship.Cpp\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.lib" target="build\native\lib\ARM\v141\Release\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.lib" />
-        <file src="\Release\ARM\Microsoft.Xbox.Services.141.UWP.Ship.Cpp\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.pdb" target="build\native\lib\ARM\v141\Release\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.pdb" />
+        <file src="Debug\ARM\cpprestsdk141.uwp.static\cpprest141d_uwp_2_9.lib" target="build\native\lib\ARM\v141\Debug\cpprest141d_uwp_2_9.lib" />
+        <file src="Debug\ARM\cpprestsdk141.uwp.static\cpprest141d_uwp_2_9.pdb" target="build\native\lib\ARM\v141\Debug\cpprest141d_uwp_2_9.pdb" />
+        <file src="Release\ARM\cpprestsdk141.uwp.static\cpprest141_uwp_2_9.lib" target="build\native\lib\ARM\v141\Release\cpprest141_uwp_2_9.lib" />
+        <file src="Release\ARM\cpprestsdk141.uwp.static\cpprest141_uwp_2_9.pdb" target="build\native\lib\ARM\v141\Release\cpprest141_uwp_2_9.pdb" />
+        <file src="Debug\ARM\libHttpClient.141.UWP.C\libHttpClient.141.UWP.C.lib" target="build\native\lib\ARM\v141\Debug\libHttpClient.141.UWP.C.lib" />
+        <file src="Debug\ARM\libHttpClient.141.UWP.C\libHttpClient.141.UWP.C.pdb" target="build\native\lib\ARM\v141\Debug\libHttpClient.141.UWP.C.pdb" />
+        <file src="Release\ARM\libHttpClient.141.UWP.C\libHttpClient.141.UWP.C.lib" target="build\native\lib\ARM\v141\Release\libHttpClient.141.UWP.C.lib" />
+        <file src="Release\ARM\libHttpClient.141.UWP.C\libHttpClient.141.UWP.C.pdb" target="build\native\lib\ARM\v141\Release\libHttpClient.141.UWP.C.pdb" />
+        <file src="Debug\ARM\Microsoft.Xbox.Services.141.UWP.Ship.Cpp\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.lib" target="build\native\lib\ARM\v141\Debug\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.lib" />
+        <file src="Debug\ARM\Microsoft.Xbox.Services.141.UWP.Ship.Cpp\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.pdb" target="build\native\lib\ARM\v141\Debug\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.pdb" />        
+        <file src="Release\ARM\Microsoft.Xbox.Services.141.UWP.Ship.Cpp\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.lib" target="build\native\lib\ARM\v141\Release\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.lib" />
+        <file src="Release\ARM\Microsoft.Xbox.Services.141.UWP.Ship.Cpp\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.pdb" target="build\native\lib\ARM\v141\Release\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.pdb" />
         
     </files>
 </package>
