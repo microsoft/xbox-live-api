@@ -1,7 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <SignConfigXML>
  
-  <job platform="$(BuildPlatform)" configuration="$(BuildConfiguration)">
+  <job platform="x86" configuration="Debug">
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.*.nupkg" signType="Nuget" />
+  </job>
+  
+  <job platform="x86" configuration="Release">
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.*.nupkg" signType="Nuget" />
+  </job>
+  
+  <job platform="x64" configuration="Debug">
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.*.nupkg" signType="Nuget" />
+  </job>
+  
+  <job platform="x64" configuration="Release">
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.*.nupkg" signType="Nuget" />
+  </job>
+  
+  <job platform="ARM" configuration="Debug">
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.*.nupkg" signType="Nuget" />
+  </job>
+  
+  <job platform="ARM" configuration="Release">
      <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.*.nupkg" signType="Nuget" />
   </job>
   
