@@ -24,6 +24,7 @@ class Game
 public:
 
     Game();
+    ~Game();
 
     // Initialization and management
     void Initialize(IUnknown* window);
@@ -106,8 +107,13 @@ private:
     bool m_isInitialized;
     bool m_userAdded;
     std::vector<uint64_t> m_xuidList;
+    
+private: // Async Integration
+    async_queue_handle_t m_queue;
+    uint32_t m_asyncQueueCallbackToken;
+    HANDLE m_hBackgroundThread;
 
-private:
+private: // Social Manager Integration
     void InitializeSocialManager(Windows::Foundation::Collections::IVectorView<Windows::Xbox::System::User^>^ userList);
 public:
     void AddUserToSocialManager(
@@ -117,9 +123,8 @@ public:
         _In_ Windows::Xbox::System::User^ user
         );
 private:
-    async_queue_handle_t m_queue;
-    uint32_t m_asyncQueueCallbackToken;
-    HANDLE m_hBackgroundThread;
+    void InitializeXboxLive();
+    void CleanupXboxLive();
 
     void CreateSocialGroupFromList(
         _In_ Windows::Xbox::System::User^ user,
@@ -139,6 +144,8 @@ private:
         _In_ XblRelationshipFilter filter
         );
     void UpdateSocialManager();
+    
+private: // Social Manager Helpers
     void LogSocialEventList(
         XblSocialManagerEvent* eventList,
         uint32_t eventListCount

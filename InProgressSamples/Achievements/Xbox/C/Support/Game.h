@@ -94,19 +94,20 @@ private:
 
     std::shared_ptr<UserController> m_userController;
     
-private:
-    async_queue_handle_t m_queue;
-    uint32_t m_asyncQueueCallbackToken;
-    HANDLE m_hBackgroundThread;
-
+private: // Xbox Live
     xbl_context_handle m_xboxLiveContext;
     uint64_t m_xuid;
     const XblAppConfig* m_config;
 
+private: // Async Integration
+    async_queue_handle_t m_queue;
+    uint32_t m_asyncQueueCallbackToken;
+    HANDLE m_hBackgroundThread;
+    
+private: // Achievements Integration
     void InitializeXboxLive();
     void CleanupXboxLive();
 
-private:
     xbl_achievements_result_handle m_achievementsResult;
     bool m_achievementsResultSet;
     void SetAchievementsResult(

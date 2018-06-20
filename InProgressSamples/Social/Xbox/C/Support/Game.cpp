@@ -40,16 +40,11 @@ Game::Game() :
     m_userController.reset(new UserController());
     m_userController->Initialize();
     m_deviceResources = std::make_shared<DX::DeviceResources>();
+}
 
-    uint32_t sharedAsyncQueueId = 0;
-    CreateSharedAsyncQueue(
-        sharedAsyncQueueId,
-        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
-        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
-        &m_queue);
-
-    XblInitialize();
-    InitializeAsync(m_queue, &m_asyncQueueCallbackToken);
+Game::~Game()
+{
+    CleanupXboxLive();
 }
 
 // Initialize the Direct3D resources required to run.
@@ -64,6 +59,8 @@ void Game::Initialize(IUnknown* window)
 
     m_deviceResources->CreateWindowSizeDependentResources();
     CreateWindowSizeDependentResources();
+
+    InitializeXboxLive();
 }
 
 void Game::Reset()
@@ -119,6 +116,12 @@ void Game::Update(DX::StepTimer const& timer)
 
 void Game::UpdateGame()
 {
+    // Call one of the DrainAsyncCompletionQueue* helper functions
+    // For example: 
+    // DrainAsyncCompletionQueue(m_queue, 5);
+    // DrainAsyncCompletionQueueUntilEmpty(m_queue);
+    double timeoutMilliseconds = 0.5f;
+    DrainAsyncCompletionQueueWithTimeout(m_queue, timeoutMilliseconds);
 
     UpdateSocialManager();
 
