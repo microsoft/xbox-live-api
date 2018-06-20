@@ -5,6 +5,7 @@
 #include <time.h>
 #include "Support\Game.h"
 #include "Support\PerformanceCounters.h"
+#include "AsyncIntegration.h"
 
 using namespace Concurrency;
 using namespace Windows::Foundation::Collections;
@@ -15,6 +16,28 @@ using namespace xbox::services::social::manager;
 IInspectable* AsInspectable(Platform::Object^ object)
 {
     return reinterpret_cast<IInspectable*>(object);
+}
+
+void
+Game::InitializeXboxLive()
+{
+    uint32_t sharedAsyncQueueId = 0;
+    CreateSharedAsyncQueue(
+        sharedAsyncQueueId,
+        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
+        AsyncQueueDispatchMode::AsyncQueueDispatchMode_Manual,
+        &m_queue);
+
+    XblInitialize();
+    InitializeAsync(m_queue, &m_asyncQueueCallbackToken);
+}
+
+void 
+Game::CleanupXboxLive()
+{
+    CleanupAsync(m_queue, m_asyncQueueCallbackToken);
+
+    XblCleanup();
 }
 
 void

@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Assets">
+      <UniqueIdentifier>{906941d2-c3e2-483e-9847-6ca66a4e703f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Support">
+      <UniqueIdentifier>{7ef3ac0f-0c9c-40c2-85f1-8352f8c042be}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Support\DeviceResources.cpp">
+      <Filter>Support</Filter>
+    </ClCompile>
+    <ClCompile Include="Support\Main.cpp">
+      <Filter>Support</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Support</Filter>
+    </ClCompile>
+    <ClCompile Include="Support\Game.cpp">
+      <Filter>Support</Filter>
+    </ClCompile>
+    <ClCompile Include="Support\PerformanceCounters.cpp">
+      <Filter>Support</Filter>
+    </ClCompile>
+    <ClCompile Include="Support\UserController.cpp">
+      <Filter>Support</Filter>
+    </ClCompile>
+    <ClCompile Include="Support\Utils.cpp">
+      <Filter>Support</Filter>
+    </ClCompile>
+    <ClCompile Include="AsyncIntegration.cpp" />
+    <ClCompile Include="AchievementsIntegration.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Logo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SmallLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\WideLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <Filter>Assets</Filter>
+    </AppxManifest>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Support\DeviceResources.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="Support\StepTimer.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="Support\Telemetry.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="Support\Game.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="Support\PerformanceCounters.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="Support\UserController.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="Support\Utils.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="AsyncIntegration.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\italic.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+  </ItemGroup>
+</Project>
