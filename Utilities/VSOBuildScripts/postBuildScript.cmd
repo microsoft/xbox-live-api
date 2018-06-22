@@ -229,8 +229,8 @@ robocopy /NJS /NJH /MT:16 /S /NP %XDK_OUTPUT_SRC% %XDK_OUTPUT_DEST%
 %NUGET_EXE% pack %TFS_DropLocation%\Nuget\Microsoft.Xbox.Live.SDK.WinRT.XboxOneXDK.nuspec -BasePath %TFS_DropLocation% -OutputDirectory %TFS_DropLocation% -Verbosity normal -version %NUGET_VERSION_NUMBER%
 rmdir /s /q %XDK_OUTPUT_DEST%
 
-mkdir %TFS_DropLocation%\NuGetBinaries
-move %TFS_DropLocation%\*.nupkg %TFS_DropLocation%\NuGetBinaries
+mkdir %TFS_DropLocation%\NuGetBinaries\%BUILDCONFIGURATION%\%BUILDPLATFORM%
+move %TFS_DropLocation%\*.nupkg %TFS_DropLocation%\NuGetBinaries\%BUILDCONFIGURATION%\%BUILDPLATFORM%
 :skipNuget
 
 :finalize
