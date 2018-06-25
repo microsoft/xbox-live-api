@@ -2,8 +2,7 @@
 
 The Microsoft Xbox Live Service API (XSAPI) enables game developers to access Xbox Live. To get access to the Xbox Live service, you can join the Xbox Live Creators Program at https://aka.ms/xblcp, or apply to the ID@Xbox program at http://www.xbox.com/en-us/Developers/id
 
-To learn more about these programs, please refer to the [developer program overview](
-https://developer.microsoft.com/en-us/games/xbox/docs/xboxlive/get-started/developer-program-overview).
+To learn more about these programs, please refer to the [developer program overview](https://docs.microsoft.com/en-us/windows/uwp/xbox-live/developer-program-overview
 
 ## What's in the API:
 
