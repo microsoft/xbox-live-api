@@ -110,7 +110,7 @@ private:
     
 private: // Async Integration
     async_queue_handle_t m_queue;
-    uint32_t m_asyncQueueCallbackToken;
+    registration_token_t m_asyncQueueCallbackToken;
     HANDLE m_hBackgroundThread;
 
 private: // Social Manager Integration

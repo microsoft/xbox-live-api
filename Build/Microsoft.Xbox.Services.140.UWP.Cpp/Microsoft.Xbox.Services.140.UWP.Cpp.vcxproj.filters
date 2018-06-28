@@ -94,6 +94,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_impl.cpp">
       <Filter>C++ Source\Services\Common</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\events_service_uwp.cpp">
+      <Filter>C++ Source\Services\Events</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\allocation_result.cpp">
       <Filter>C++ Source\Services\GameServerPlatform</Filter>
     </ClCompile>
@@ -176,6 +179,9 @@
       <Filter>C++ Source\Services\Misc</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_service.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\notification_service.cpp">
       <Filter>C++ Source\Services\Misc</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\string_service.cpp">
@@ -945,6 +951,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_config_result.h">
       <Filter>C++ Source\Services\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\notification_service.h">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_manager_internal.h">
       <Filter>C++ Source\Services\Multiplayer</Filter>
     </ClInclude>
@@ -1102,6 +1111,9 @@
     </Filter>
     <Filter Include="C++ Source\Services\Common\C">
       <UniqueIdentifier>{74AE9296-EF2C-3988-86D9-9AB6F1C870C4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Events">
+      <UniqueIdentifier>{E10444F6-DB5A-3ECA-A820-3A495A96E4D3}</UniqueIdentifier>
     </Filter>
     <Filter Include="C++ Source\Services\GameServerPlatform">
       <UniqueIdentifier>{693D54D5-5339-359C-8609-79662C786C85}</UniqueIdentifier>

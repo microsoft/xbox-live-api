@@ -338,9 +338,9 @@ set(Misc_Source_Files
 
 if ( NOT XDK )
     list(APPEND
-        Misc_Source_Files}
+        Misc_Source_Files
         ../../Source/Services/Misc/notification_service.cpp
-        ../../Source/Services/Misc/notification_service_impl.h
+        ../../Source/Services/Misc/notification_service.h
         )
 endif()
 
@@ -372,9 +372,9 @@ set(Achievements_Source_Files
     ../../Source/Services/Achievements/achievements_result.cpp
     )
 
-if( UWP )
+if( UWP OR UNITTEST )
     set(Events_Source_Files
-        ../../Source/Services/Events/UWP/events_service_uwp.cpp
+        ../../Source/Services/Events/events_service_uwp.cpp
         )
 endif()
 
@@ -1284,6 +1284,11 @@ else()
         source_group("C++ Source\\Services\\EntertainmentProfile" FILES ${EntertainmentProfile_Source_Files})
         source_group("C++ Source\\Services\\Marketplace" FILES ${Marketplace_Source_Files})
     endif()
+    
+    if ( NOT XDK )
+        message(STATUS "Non XDK source group")
+        source_group("C++ Source\\Services\\Events" FILES ${Events_Source_Files})
+    endif()
 
     if( WINRT OR UNITTEST )
         message(STATUS "WINRT source group")
@@ -1359,6 +1364,13 @@ else()
             SOURCE_FILES
             ${EntertainmentProfile_Source_Files}
             ${Marketplace_Source_Files}
+            )
+    endif()
+    
+    if( NOT XDK )
+        list(APPEND
+            SOURCE_FILES
+            ${Events_Source_Files}
             )
     endif()
 

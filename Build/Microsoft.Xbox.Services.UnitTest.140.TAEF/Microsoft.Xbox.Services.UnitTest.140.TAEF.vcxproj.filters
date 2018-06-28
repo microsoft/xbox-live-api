@@ -178,6 +178,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\WinRT\EntertainmentProfileListVideoQueue_WinRT.cpp">
       <Filter>C++ Source\Services\EntertainmentProfile\WinRT</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\events_service_uwp.cpp">
+      <Filter>C++ Source\Services\Events</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\WinRT\EventsService_WinRT.cpp">
       <Filter>C++ Source\Services\Events\WinRT</Filter>
     </ClCompile>
@@ -380,6 +383,9 @@
       <Filter>C++ Source\Services\Misc</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_service.cpp">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\notification_service.cpp">
       <Filter>C++ Source\Services\Misc</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\string_service.cpp">
@@ -1921,6 +1927,9 @@
       <Filter>C++ Source\Services\Matchmaking\WinRT</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_config_result.h">
+      <Filter>C++ Source\Services\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\notification_service.h">
       <Filter>C++ Source\Services\Misc</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchBroadcast_WinRT.h">

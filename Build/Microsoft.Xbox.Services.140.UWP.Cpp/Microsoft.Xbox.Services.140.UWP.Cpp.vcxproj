@@ -170,6 +170,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_impl.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_impl.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\events_service_uwp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\allocation_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\cluster_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\game_server_image_set.cpp" />
@@ -203,6 +204,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_game_clip_uri_info.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_game_clips_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_service.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\notification_service.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\notification_service.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\string_service.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\verify_string_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\find_match_completed_event_args.cpp" />
