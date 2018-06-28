@@ -275,7 +275,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\EntertainmentProfile\entertainment_profile_list_xbox_one_pins.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\WinRT\EventsService_WinRT.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\WinRT\EventsService_WinRT.h" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\events_service_uwp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\AllocationResult_WinRT.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\AllocationResult_WinRT.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\GameServerPlatform\WinRT\ClusterResult_WinRT.cpp" />
@@ -402,7 +401,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\VerifyStringResult_WinRT.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\XboxLiveHttpCall_WinRT.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\XboxLiveHttpCall_WinRT.h" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\Windows\notification_service_windows.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_config_result.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_config_result.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_broadcast.cpp" />
@@ -413,8 +411,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_game_clip_uri_info.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_game_clips_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_service.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\notification_service.cpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\notification_service.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\string_service.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\verify_string_result.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\WinRT\FindMatchCompletedEventArgs_WinRT.cpp" />
@@ -931,9 +927,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.h" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context_cpp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context_winrt.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context_xdk.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils_locales.cpp" />
@@ -950,6 +944,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_service_call_routed_event_args_internal.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\system_c.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_c.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_internal_c.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\C\user_internal_c.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\WinRT\GetTokenAndSignatureResult_WinRT.cpp" />
@@ -966,7 +962,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\user.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl.h" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\user_impl_idp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\xbox_live_mutex.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\MockHttpCall.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\MockHttpCall.h" />

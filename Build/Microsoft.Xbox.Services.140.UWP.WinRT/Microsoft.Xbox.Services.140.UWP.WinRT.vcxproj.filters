@@ -148,9 +148,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_impl.cpp">
       <Filter>C++ Source\Services\Common</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\events_service_uwp.cpp">
-      <Filter>C++ Source\Services\Events</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\WinRT\EventsService_WinRT.cpp">
       <Filter>C++ Source\Services\Events\WinRT</Filter>
     </ClCompile>
@@ -286,9 +283,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_search_service.cpp">
       <Filter>C++ Source\Services\Misc</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\notification_service.cpp">
-      <Filter>C++ Source\Services\Misc</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\string_service.cpp">
       <Filter>C++ Source\Services\Misc</Filter>
     </ClCompile>
@@ -329,7 +323,7 @@
       <Filter>C++ Source\Services\Misc\WinRT</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\TitleCallableUI_WinRT.cpp">
-      <Filter>C++ Source\Shared\WinRT</Filter>
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\XboxLiveHttpCall_WinRT.cpp">
       <Filter>C++ Source\Services\Misc\WinRT</Filter>
@@ -1189,9 +1183,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context_cpp.cpp">
-      <Filter>C++ Source\Shared</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context_winrt.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
@@ -1268,7 +1259,7 @@
       <Filter>C++ Source\System</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\WinRT\GetTokenAndSignatureResult_WinRT.cpp">
-      <Filter>C++ Source\Shared\WinRT</Filter>
+      <Filter>C++ Source\System\WinRT</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\WinRT\User_WinRT.cpp">
       <Filter>C++ Source\System\WinRT</Filter>
@@ -1569,9 +1560,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\contextual_config_result.h">
       <Filter>C++ Source\Services\Misc</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\notification_service.h">
-      <Filter>C++ Source\Services\Misc</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\ContextualSearchBroadcast_WinRT.h">
       <Filter>C++ Source\Services\Misc\WinRT</Filter>
     </ClInclude>
@@ -1609,7 +1597,7 @@
       <Filter>C++ Source\Services\Misc\WinRT</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\TitleCallableUI_WinRT.h">
-      <Filter>C++ Source\Shared\WinRT</Filter>
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\VerifyStringResult_WinRT.h">
       <Filter>C++ Source\Services\Misc\WinRT</Filter>
@@ -2290,7 +2278,7 @@
       <Filter>C++ Source\System</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\WinRT\GetTokenAndSignatureResult_WinRT.h">
-      <Filter>C++ Source\Shared\WinRT</Filter>
+      <Filter>C++ Source\System\WinRT</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\WinRT\SignInResult_WinRT.h">
       <Filter>C++ Source\System\WinRT</Filter>
