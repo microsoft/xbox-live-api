@@ -329,7 +329,7 @@
       <Filter>C++ Source\Services\Misc\WinRT</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\TitleCallableUI_WinRT.cpp">
-      <Filter>C++ Source\Shared\WinRT</Filter>
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\XboxLiveHttpCall_WinRT.cpp">
       <Filter>C++ Source\Services\Misc\WinRT</Filter>
@@ -1189,9 +1189,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context_cpp.cpp">
-      <Filter>C++ Source\Shared</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user_context_winrt.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
@@ -1268,7 +1265,7 @@
       <Filter>C++ Source\System</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\WinRT\GetTokenAndSignatureResult_WinRT.cpp">
-      <Filter>C++ Source\Shared\WinRT</Filter>
+      <Filter>C++ Source\System\WinRT</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\WinRT\User_WinRT.cpp">
       <Filter>C++ Source\System\WinRT</Filter>
@@ -1609,7 +1606,7 @@
       <Filter>C++ Source\Services\Misc\WinRT</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\TitleCallableUI_WinRT.h">
-      <Filter>C++ Source\Shared\WinRT</Filter>
+      <Filter>C++ Source\Services\Misc\WinRT</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Misc\WinRT\VerifyStringResult_WinRT.h">
       <Filter>C++ Source\Services\Misc\WinRT</Filter>
@@ -2290,7 +2287,7 @@
       <Filter>C++ Source\System</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\WinRT\GetTokenAndSignatureResult_WinRT.h">
-      <Filter>C++ Source\Shared\WinRT</Filter>
+      <Filter>C++ Source\System\WinRT</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\WinRT\SignInResult_WinRT.h">
       <Filter>C++ Source\System\WinRT</Filter>

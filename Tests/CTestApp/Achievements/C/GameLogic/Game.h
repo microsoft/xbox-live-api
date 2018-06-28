@@ -92,7 +92,7 @@ namespace Sample
     private:
         xbl_user_handle m_user;
         async_queue_handle_t m_queue;
-        uint32_t m_asyncQueueCallbackToken;
+        registration_token_t m_asyncQueueCallbackToken;
         HANDLE m_hBackgroundThread;
 
         xbl_context_handle m_xboxLiveContext;

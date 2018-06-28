@@ -7,8 +7,8 @@ set ROOT_FOLDER=%CD%
 set NEW_FOLDER=%ROOT_FOLDER%\Utilities\CMake\output
 set OLD_FOLDER=%ROOT_FOLDER%\Build
 
-call %ROOT_FOLDER%\Utilities\CMake\scripts\RunCMake.cmd 
-call %ROOT_FOLDER%\Utilities\CMake\scripts\RunCMake.cmd -DWINRT=TRUE
+call %ROOT_FOLDER%\Utilities\CMake\scripts\RunCMake.cmd -DUWP=TRUE
+call %ROOT_FOLDER%\Utilities\CMake\scripts\RunCMake.cmd -DUWP=TRUE -DWINRT=TRUE
 call %ROOT_FOLDER%\Utilities\CMake\scripts\RunCMake.cmd -DXDK=TRUE
 call %ROOT_FOLDER%\Utilities\CMake\scripts\RunCMake.cmd -DXDK=TRUE -DWINRT=TRUE
 call %ROOT_FOLDER%\Utilities\CMake\scripts\RunCMake.cmd -DUNITTEST=TRUE -DTAEF=TRUE

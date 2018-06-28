@@ -38,20 +38,20 @@ win32_handle g_stopRequestedHandle;
 win32_handle g_workReadyHandle;
 HANDLE g_hBackgroundWorkThread;
 
-void InitializeAsync(_In_ async_queue_handle_t queue, _Out_ uint32_t* callbackToken)
+void InitializeAsync(_In_ async_queue_handle_t queue, _Out_ registration_token_t* callbackToken)
 {
     g_stopRequestedHandle.set(CreateEvent(nullptr, true, false, nullptr));
     g_workReadyHandle.set(CreateSemaphore(nullptr, 0, LONG_MAX, nullptr));
 
-    AddAsyncQueueCallbackSubmitted(queue, nullptr, HandleAsyncQueueCallback, callbackToken);
+    RegisterAsyncQueueCallbackSubmitted(queue, nullptr, HandleAsyncQueueCallback, callbackToken);
 
     DuplicateAsyncQueueHandle(queue); // the BackgroundWorkThreadProc will call close
     g_hBackgroundWorkThread = CreateThread(nullptr, 0, BackgroundWorkThreadProc, queue, 0, nullptr);
 }
 
-void CleanupAsync(_In_ async_queue_handle_t queue, _In_ uint32_t callbackToken)
+void CleanupAsync(_In_ async_queue_handle_t queue, _In_ registration_token_t callbackToken)
 {
-    RemoveAsyncQueueCallbackSubmitted(queue, callbackToken);
+    UnregisterAsyncQueueCallbackSubmitted(queue, callbackToken);
     CloseAsyncQueue(queue);
     SetEvent(g_stopRequestedHandle.get());
 }
