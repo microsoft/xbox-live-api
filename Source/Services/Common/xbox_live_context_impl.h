@@ -65,7 +65,7 @@ public:
     /// <summary>
     /// A service for managing leaderboards.
     /// </summary>
-    leaderboard::leaderboard_service& leaderboard_service();
+    std::shared_ptr<leaderboard::leaderboard_service_impl> leaderboard_service_impl();
 
     /// <summary>
     /// A service for managing achievements.
@@ -179,7 +179,7 @@ private:
     std::shared_ptr<social::profile_service_impl> m_profileServiceImpl;
     std::shared_ptr<social::reputation_service_impl> m_reputationServiceImpl;
     std::shared_ptr<social::social_service_impl> m_socialServiceImpl;
-    leaderboard::leaderboard_service m_leaderboardService;
+    std::shared_ptr<leaderboard::leaderboard_service_impl> m_leaderboardServiceImpl;
     user_statistics::user_statistics_service m_userStatisticsService;
     multiplayer::multiplayer_service m_multiplayerService;
     matchmaking::matchmaking_service m_matchmakingService;

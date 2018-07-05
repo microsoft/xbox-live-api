@@ -3,30 +3,20 @@
 
 #include "pch.h"
 #include "xsapi-c/achievements_c.h"
-#include "achievements/achievements_internal.h"
+#include "achievements/achievement_service_internal.h"
 #include "achievements_internal_c.h"
 
 using namespace xbox::services;
 using namespace xbox::services::system;
 using namespace xbox::services::achievements;
 
-_Null_terminated_ char* alloc_and_copy_string(string_t src)
-{
-    auto utf8 = utils::internal_string_from_string_t(src);
-    auto copy = static_cast<char*>(xsapi_memory::mem_alloc(utf8.size() + 1));
-    if (copy != nullptr)
-    {
-        strcpy_s(copy, utf8.size() + 1, utf8.data());
-    }
-    return copy;
-}
 
 void create_xbl_achievement(
     _In_ std::shared_ptr<achievement_internal> rhs,
     _Out_ XblAchievement& lhs
     )
 {
-    ZeroMemory(&lhs, sizeof(XblAchievement));
+    memset(&lhs, 0, sizeof(XblAchievement));
     lhs.id = rhs->id().data();
     lhs.serviceConfigurationId = rhs->service_configuration_id().data();
     lhs.name = rhs->name().data();
@@ -54,7 +44,7 @@ void create_xbl_achievement(
     {
         lhs.mediaAssets[j].name = rhs->media_assets()[j]->name().data();
         lhs.mediaAssets[j].mediaAssetType = static_cast<XblAchievementMediaAssetType>(rhs->media_assets()[j]->media_asset_type());
-        lhs.mediaAssets[j].url = alloc_and_copy_string(rhs->media_assets()[j]->url().to_string());
+        lhs.mediaAssets[j].url = utils::alloc_and_copy_string(rhs->media_assets()[j]->url().to_string());
     }
 
     lhs.platformsAvailableOnCount = static_cast<uint32_t>(rhs->platforms_available_on().size());
@@ -91,7 +81,7 @@ void create_xbl_achievement(
 #pragma warning(suppress: 6385)
                 if (lhs.rewards[j].mediaAsset != nullptr)
                 {
-                    lhs.rewards[j].mediaAsset->url = alloc_and_copy_string(rhs->rewards()[j]->media_asset_internal()->url().to_string());
+                    lhs.rewards[j].mediaAsset->url = utils::alloc_and_copy_string(rhs->rewards()[j]->media_asset_internal()->url().to_string());
                     lhs.rewards[j].mediaAsset->mediaAssetType = static_cast<XblAchievementMediaAssetType>(rhs->rewards()[j]->media_asset_internal()->media_asset_type());
                     lhs.rewards[j].mediaAsset->name = rhs->rewards()[j]->media_asset_internal()->name().data();
                 }

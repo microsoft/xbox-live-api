@@ -5,26 +5,29 @@
 
 #include "shared_macros.h"
 #include "xsapi/types.h"
+#include "xsapi/leaderboard.h"
+#include "xsapi-c/leaderboard_c.h"
 #include <cstdint>
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_LEADERBOARD_CPP_BEGIN
 
 struct leaderboard_global_query
 {
-    string_t scid;
-    string_t name;
-    string_t xuid;
-    string_t socialGroup;
-    std::vector<string_t> columns;
+    xsapi_internal_string scid;
+    xsapi_internal_string name;
+    uint64_t xuid;
+    XblSocialGroupType socialGroup;
+    xsapi_internal_vector<xsapi_internal_string> columns;
 };
 
 struct leaderboard_social_query
 {
-    string_t xuid;
-    string_t scid;
-    string_t statName;
-    string_t socialGroup;
-    string_t sortOrder;
+    uint64_t xuid;
+    xsapi_internal_string scid;
+    xsapi_internal_string statName;
+    XblSocialGroupType socialGroup;
+    uint32_t skipToRank;
+    sort_order sortOrder;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_LEADERBOARD_CPP_END

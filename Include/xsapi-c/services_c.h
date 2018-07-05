@@ -15,3 +15,4 @@
 #include <xsapi-c/social_c.h>
 #include <xsapi-c/social_manager_c.h>
 #include <xsapi-c/achievements_c.h>
+#include <xsapi-c/leaderboard_c.h>

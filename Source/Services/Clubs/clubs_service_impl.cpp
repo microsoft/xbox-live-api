@@ -441,22 +441,22 @@ string_t clubs_service_impl::clubhub_search_subpath(
     _In_ uint32_t count
     )
 {
-    web::uri_builder builder;
-    builder.set_path(_T("/clubs/search/decoration/settings"));
-    builder.append_query(_T("q"), query);
+    xsapi_uri_builder builder;
+    builder.set_path("/clubs/search/decoration/settings");
+    builder.append_query("q", utils::internal_string_from_string_t(query));
 
     if (!titleIds.empty())
     {
-        builder.append_query(_T("titles"), utils::vector_join(titleIds, L','));
+        builder.append_query("titles", utils::internal_string_from_string_t(utils::vector_join(titleIds, L',')));
     }
     if (!tags.empty())
     {
-        builder.append_query(_T("tags"), utils::vector_join(tags, L','));
+        builder.append_query("tags", utils::internal_string_from_string_t(utils::vector_join(tags, L',')));
     }
 
-    builder.append_query(_T("count"), count);
+    builder.append_query("count", count);
 
-    return builder.to_string();
+    return utils::string_t_from_internal_string(builder.to_string());
 }
 
 string_t clubs_service_impl::clubhub_viewer_roles_subpath(

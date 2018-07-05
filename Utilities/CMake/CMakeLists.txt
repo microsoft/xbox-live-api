@@ -125,6 +125,7 @@ set(Public_Source_Files
 set(Public_Source_Files_C
     ../../include/xsapi-c/achievements_c.h
     ../../include/xsapi-c/errors_c.h
+    ../../include/xsapi-c/leaderboard_c.h
     ../../include/xsapi-c/presence_c.h
     ../../include/xsapi-c/profile_c.h
     ../../include/xsapi-c/services_c.h
@@ -366,9 +367,9 @@ set(Achievements_Source_Files
     ../../Source/Services/Achievements/achievement_reward.cpp
     ../../Source/Services/Achievements/achievement_service.cpp
     ../../Source/Services/Achievements/achievement_service_internal.cpp
+    ../../Source/Services/Achievements/achievement_service_internal.h
     ../../Source/Services/Achievements/achievement_time_window.cpp
     ../../Source/Services/Achievements/achievement_title_association.cpp
-    ../../Source/Services/Achievements/achievements_internal.h
     ../../Source/Services/Achievements/achievements_result.cpp
     )
 
@@ -386,6 +387,9 @@ set(Leaderboard_Source_Files
     ../../Source/Services/Leaderboard/Leaderboard_service.cpp
     ../../Source/Services/Leaderboard/Leaderboard_query.h
     ../../Source/Services/Leaderboard/Leaderboard_serializers.h
+    ../../Source/Services/Leaderboard/leaderboard_result_internal.cpp
+    ../../Source/Services/Leaderboard/leaderboard_service_impl.cpp
+    ../../Source/Services/Leaderboard/leaderboard_service_impl.h
     )
 
 set(Privacy_Source_Files
@@ -401,7 +405,6 @@ set(Presence_Source_Files
     ../../Source/Services/Presence/presence_internal.h
     ../../Source/Services/Presence/device_presence_change_event_args.cpp
     ../../Source/Services/Presence/device_presence_change_subscription.cpp
-    ../../Source/Services/Presence/presence_internal.h
     ../../Source/Services/Presence/media_presence_data.cpp
     ../../Source/Services/Presence/presence_activity_data.cpp
     ../../Source/Services/Presence/presence_broadcast_record.cpp
@@ -683,6 +686,12 @@ set(Social_Source_Files_C
 
 set(Social_Manager_Source_Files_C
     ../../Source/Services/Social/Manager/C/social_manager_c.cpp
+    )
+
+set(Leaderboard_Source_Files_C
+    ../../Source/Services/Leaderboard/C/leaderboard.cpp
+    ../../Source/Services/Leaderboard/C/leaderboard_internal_c.h
+    ../../Source/Services/Leaderboard/C/leaderboard_internal_c.cpp
     )
 
 set(Achievements_Source_Files_C
@@ -1332,6 +1341,7 @@ else()
         source_group("C++ Source\\Services\\Common\\C" FILES ${Common_Source_Files_C})
         source_group("C++ Source\\Services\\Social\\C" FILES ${Social_Source_Files_C})
         source_group("C++ Source\\Services\\Social\\Manager\\C" FILES ${Social_Manager_Source_Files_C})
+        source_group("C++ Source\\Services\\Leaderboard\\C" FILES ${Leaderboard_Source_Files_C})        
     endif()
 
     set( SOURCE_FILES
@@ -1422,6 +1432,7 @@ else()
             SOURCE_FILES
             ${Public_Source_Files_C}
             ${Achievements_Source_Files_C}
+            ${Leaderboard_Source_Files_C}
             ${Social_Manager_Source_Files_C}
             ${Social_Source_Files_C}
             ${Common_Source_Files_C}

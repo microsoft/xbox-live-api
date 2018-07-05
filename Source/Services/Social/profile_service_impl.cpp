@@ -73,11 +73,11 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles(
         RETURN_CPP_INVALIDARGUMENT_IF(s.empty(), void, "Found empty string in xbox user ids");
     }
 
-    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call_internal(
         m_xboxLiveContextSettings,
         "POST",
         utils::create_xboxlive_endpoint("profile", m_appConfig),
-        _T("/users/batch/profile/settings"),
+        "/users/batch/profile/settings",
         xbox_live_api::get_user_profiles
         );
     httpCall->set_xbox_contract_version_header_value(_T("2"));
@@ -114,11 +114,11 @@ _XSAPIIMP xbox_live_result<void> profile_service_impl::get_user_profiles_for_soc
         socialGroup
         );
 
-    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call_internal(
         m_xboxLiveContextSettings,
         "GET",
         utils::create_xboxlive_endpoint("profile", m_appConfig),
-        utils::string_t_from_internal_string(pathAndQuery), // TODO switch this after changing to internal uri impl
+        pathAndQuery, 
         xbox_live_api::get_user_profiles_for_social_group
         );
     httpCall->set_xbox_contract_version_header_value(_T("2"));
@@ -185,7 +185,7 @@ const xsapi_internal_string profile_service_impl::settings_query()
     uint32_t arraySize = ARRAYSIZE(SETTINGS_ARRAY);
     for (uint32_t i = 0; i < arraySize; ++i)
     {
-        source << utils::internal_string_from_string_t(web::http::uri::encode_uri(utils::string_t_from_internal_string(SETTINGS_ARRAY[i])));
+        source << utils::xsapi_encode_uri(SETTINGS_ARRAY[i]);
         if (i + 1 != arraySize)
         {
             source << ",";

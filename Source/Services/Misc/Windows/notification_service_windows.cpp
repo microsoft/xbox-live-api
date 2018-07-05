@@ -60,11 +60,11 @@ notification_service_windows::subscribe_to_notifications(
                 }
             });
 
-            std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call(
+            std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call_internal(
                 xboxLiveContextSettings,
                 "POST",
                 "https://notify.xboxlive.com/",
-                L"system/notifications/endpoints",
+                "system/notifications/endpoints",
                 xbox_live_api::subscribe_to_notifications
                 );
 

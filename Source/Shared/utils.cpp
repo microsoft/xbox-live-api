@@ -879,6 +879,33 @@ void utils::append_paging_info(
     }
 }
 
+void utils::append_paging_info_internal(
+    _In_ xsapi_uri_builder& uriBuilder,
+    _In_ unsigned int skipItems,
+    _In_ unsigned int maxItems,
+    _In_opt_ const xsapi_internal_string& continuationToken
+    )
+{
+    // add maxItem parameter
+    if (maxItems > 0)
+    {
+        uriBuilder.append_query("maxItems", maxItems);
+    }
+
+    if (continuationToken.empty())
+    {
+        // use skip items value if continuation token is empty
+        if (skipItems > 0)
+        {
+            uriBuilder.append_query("skipItems", skipItems);
+        }
+    }
+    else
+    {
+        uriBuilder.append_query("continuationToken", continuationToken);
+    }
+}
+
 #if defined(_WIN32) 
 uint32_t utils::convert_timespan_to_days(
     _In_ uint64_t timespan
@@ -1910,8 +1937,8 @@ utils::read_test_response_file(_In_ const string_t& filePath)
 #endif
 
 std::vector<string_t> utils::string_array_to_string_vector(
-    PCSTR *stringArray,
-    size_t stringArrayCount
+    _In_reads_(stringArrayCount) const char** stringArray,
+    _In_ size_t stringArrayCount
     )
 {
     std::vector<utility::string_t> stringVector;
@@ -1923,8 +1950,8 @@ std::vector<string_t> utils::string_array_to_string_vector(
 }
 
 xsapi_internal_vector<xsapi_internal_string> utils::string_array_to_internal_string_vector(
-    PCSTR* stringArray,
-    size_t stringArrayCount
+    _In_reads_(stringArrayCount) const char** stringArray,
+    _In_ size_t stringArrayCount
     )
 {
     xsapi_internal_vector<xsapi_internal_string> stringVector;
@@ -1937,8 +1964,8 @@ xsapi_internal_vector<xsapi_internal_string> utils::string_array_to_internal_str
 }
 
 xsapi_internal_vector<xsapi_internal_string> utils::xuid_array_to_internal_string_vector(
-    uint64_t* xuidArray,
-    size_t xuidArrayCount
+    _In_reads_(xuidArrayCount) uint64_t* xuidArray,
+    _In_ size_t xuidArrayCount
     )
 {
     xsapi_internal_vector<xsapi_internal_string> stringVector;
@@ -1951,8 +1978,8 @@ xsapi_internal_vector<xsapi_internal_string> utils::xuid_array_to_internal_strin
 }
 
 xsapi_internal_vector<uint32_t> utils::uint32_array_to_internal_vector(
-    uint32_t* intArray,
-    size_t intArrayCount
+    _In_reads_(intArrayCount) uint32_t* intArray,
+    _In_ size_t intArrayCount
     )
 {
     xsapi_internal_vector<uint32_t> vector;
@@ -2091,5 +2118,65 @@ int utils::char_t_from_utf8(
 }
 
 #endif // _WIN32
+
+_Null_terminated_ char* utils::alloc_and_copy_string(string_t src)
+{
+    auto utf8 = utils::internal_string_from_string_t(src);
+    auto copy = static_cast<char*>(xbox::services::system::xsapi_memory::mem_alloc(utf8.size() + 1));
+    if (copy != nullptr)
+    {
+        strcpy_s(copy, utf8.size() + 1, utf8.data());
+    }
+    return copy;
+}
+
+xsapi_internal_string utils::xsapi_encode_uri(_In_ const xsapi_internal_string& str)
+{
+    // TODO: change impl to avoid conversions
+    return utils::internal_string_from_string_t(
+        web::http::uri::encode_uri(utils::string_t_from_internal_string(str), web::uri::components::path)
+        );
+}
+
+void xsapi_uri_builder::set_path(_In_ const xsapi_internal_string& str)
+{
+    builder.set_path(utils::string_t_from_internal_string(str));
+}
+
+void xsapi_uri_builder::append_path(_In_ const xsapi_internal_string& name)
+{
+    builder.append_path(utils::string_t_from_internal_string(name));
+}
+
+void xsapi_uri_builder::append_query(
+    _In_ const xsapi_internal_string& name,
+    _In_ const xsapi_internal_string& value)
+{
+    builder.append_query(
+        utils::string_t_from_internal_string(name),
+        utils::string_t_from_internal_string(value)
+        );
+}
+
+void xsapi_uri_builder::append_query(
+    _In_ const xsapi_internal_string& name,
+    _In_ uint32_t value)
+{
+    builder.append_query(
+        utils::string_t_from_internal_string(name),
+        value
+        );
+}
+
+void xsapi_uri_builder::append_query(_In_ const xsapi_internal_string& name)
+{
+    builder.append_query(utils::string_t_from_internal_string(name));
+}
+
+xsapi_internal_string xsapi_uri_builder::to_string()
+{
+    return utils::internal_string_from_string_t(builder.to_string()); 
+}
+
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

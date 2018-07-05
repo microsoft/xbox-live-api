@@ -102,8 +102,8 @@ namespace social {
         /// </returns>
         /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
         _XSAPIIMP pplx::task<xbox::services::xbox_live_result<xbox_user_profile>> get_user_profile(
-        _In_ string_t xboxUserId
-        );
+            _In_ string_t xboxUserId
+            );
 
         /// <summary>
         /// Gets one or more user profiles for a collection of specified Xbox users.
@@ -115,8 +115,8 @@ namespace social {
         /// </returns>
         /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
         _XSAPIIMP pplx::task<xbox::services::xbox_live_result<std::vector<xbox_user_profile>>> get_user_profiles(
-        _In_ const std::vector<string_t>& xboxUserIds
-        );
+            _In_ const std::vector<string_t>& xboxUserIds
+            );
 
         /// <summary>
         /// Gets user profiles for users in a specified social group.
@@ -129,8 +129,8 @@ namespace social {
         /// </returns>
         /// <remarks>Calls V2 GET /users/{userId}/profile/settings/people/{socialGroup}</remarks>
         _XSAPIIMP pplx::task<xbox::services::xbox_live_result< std::vector< xbox_user_profile>>> get_user_profiles_for_social_group(
-        _In_ const string_t& socialGroup
-        );
+            _In_ const string_t& socialGroup
+            );
 
     private:
         profile_service() {};

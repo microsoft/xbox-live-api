@@ -5,6 +5,7 @@
 #include "shared_macros.h"
 #include "utils.h"
 #include "xsapi/leaderboard.h"
+#include "leaderboard_service_impl.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_LEADERBOARD_CPP_BEGIN
 namespace serializers {
@@ -74,30 +75,27 @@ deserialize_column(
         );
 }
 
-xbox_live_result<leaderboard_result>
+xbox_live_result<std::shared_ptr<leaderboard_result_internal>>
 deserialize_result(
     _In_ const web::json::value& json,
-    _In_ std::shared_ptr<xbox::services::user_context> userContext,
-    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
-    _In_ const string_t& version,
-    _In_ leaderboard_query query
+    _In_ std::shared_ptr<leaderboard_service_impl> leaderboardService,
+    _In_ leaderboard_version version
     )
 {
     std::error_code errc;
     web::json::value lb_info = utils::extract_json_field(json, _T("leaderboardInfo"), errc, true);
-    string_t displayName = utils::extract_json_string(lb_info, _T("displayName"), errc);
+    xsapi_internal_string displayName = utils::extract_json_string(lb_info, "displayName", errc);
     int totalCount = utils::extract_json_int(lb_info, _T("totalCount"), errc, true);
 
     web::json::value paging_info = utils::extract_json_field(json, _T("pagingInfo"), errc, false);
-    string_t continuationToken;
+    xsapi_internal_string continuationToken;
     if (!paging_info.is_null())
     {
-        continuationToken = utils::extract_json_string(paging_info, _T("continuationToken"), errc, false);
+        continuationToken = utils::extract_json_string(paging_info, "continuationToken", errc, false);
     }
 
     std::vector<leaderboard_column> columns;
-    if (version == _T("2017"))
+    if (version == leaderboard_version_2017)
     {
         web::json::array json_columns = utils::extract_json_as_array(
             utils::extract_json_field(lb_info, _T("columns"), errc, false),
@@ -127,24 +125,23 @@ deserialize_result(
         rows.push_back(deserialize_row(row, errc));
     }
 
-    auto result = leaderboard_result(
+    auto result = xsapi_allocate_shared<leaderboard_result_internal>(
         displayName,
         totalCount,
         continuationToken,
         std::move(columns),
         std::move(rows),
-        userContext, 
-        xboxLiveContextSettings,
-        appConfig
+        leaderboardService
         );
-
-    if (version == _T("2017"))
+   
+    if (version == leaderboard_version_2017)
     {
-        query._Set_continuation_token(continuationToken);
-        result._Set_next_query(query);
+        // TODO: jasonsa - query
+        //query._Set_continuation_token(continuationToken);
+        //result._Set_next_query(query);
     }
 
-    return xbox_live_result<leaderboard_result>(result, errc);
+    return xbox_live_result<std::shared_ptr<leaderboard_result_internal>>(result, errc);
 }
 
 }

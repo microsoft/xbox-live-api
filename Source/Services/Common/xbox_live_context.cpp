@@ -72,6 +72,7 @@ void xbox_live_context::init()
 
     m_achievementService = achievements::achievement_service(m_xboxLiveContextImpl->achievement_service_internal());
     m_profileService = social::profile_service(m_xboxLiveContextImpl->profile_service_impl());
+    m_leaderboardService = leaderboard::leaderboard_service(m_xboxLiveContextImpl->leaderboard_service_impl());
     m_socialService = social::social_service(settings(), m_xboxLiveContextImpl->social_service_impl());
     m_reputationService = social::reputation_service(m_xboxLiveContextImpl->reputation_service_impl());
     m_presenceService = presence::presence_service(m_xboxLiveContextImpl->presence_service());
@@ -103,7 +104,7 @@ xbox_live_context::reputation_service()
 leaderboard::leaderboard_service&
 xbox_live_context::leaderboard_service()
 {
-    return m_xboxLiveContextImpl->leaderboard_service();
+    return m_leaderboardService;
 }
 
 achievements::achievement_service&

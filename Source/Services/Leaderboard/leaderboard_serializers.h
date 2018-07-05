@@ -14,13 +14,10 @@ leaderboard_row deserialize_row(_In_ const web::json::value& json, _In_ std::err
 
 leaderboard_column deserialize_column(_In_ const web::json::value& json, _In_ std::error_code& errc);
 
-xbox_live_result<leaderboard_result> deserialize_result(
+xbox_live_result<std::shared_ptr<leaderboard_result_internal>> deserialize_result(
     _In_ const web::json::value& json,
-    _In_ std::shared_ptr<xbox::services::user_context> userContext,
-    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
-    _In_ const string_t& version = string_t(),
-    _In_ leaderboard_query query = leaderboard_query()
+    _In_ std::shared_ptr<leaderboard_service_impl> leaderboardService,
+    _In_ leaderboard_version version
     );
 
 }

@@ -4,7 +4,7 @@
 #include "pch.h"
 #include "shared_macros.h"
 #include "xsapi/achievements.h"
-#include "achievements_internal.h"
+#include "achievement_service_internal.h"
 #include "utils.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_ACHIEVEMENTS_CPP_BEGIN
