@@ -734,7 +734,7 @@ public:
 
     DEFINE_TEST_CASE(RTAMaxWebsocketTest_1)
     {
-        DEFINE_TEST_CASE_PROPERTIES(RTAMaxWebsocketTest_1);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(RTAMaxWebsocketTest_1);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto mockSocket = m_mockXboxSystemFactory->GetMockWebSocketClient();
         auto helper = SetupStateChangeHelper(xboxLiveContext->RealTimeActivityService);
@@ -814,7 +814,7 @@ public:
 
     DEFINE_TEST_CASE(RTAMaxWebsocketTest_2)
     {
-        DEFINE_TEST_CASE_PROPERTIES(RTAMaxWebsocketTest_2);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(RTAMaxWebsocketTest_2);
         auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
         auto mockSocket = m_mockXboxSystemFactory->GetMockWebSocketClient();
         auto helper = SetupStateChangeHelper(xboxLiveContext->RealTimeActivityService);

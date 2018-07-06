@@ -547,9 +547,9 @@ public:
         VERIFY_IS_TRUE(xblContext->real_time_activity_service()->_Subscription_Count() == 0);
     }
 
-    DEFINE_TEST_CASE(TestInitialize)
+    DEFINE_TEST_CASE(TestSocialManagerInitialize)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerInitialize);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerInitialize);
 
         //while (true)
         {
@@ -563,7 +563,7 @@ public:
     // Verifies that properties of multiple xbox social user are set correctly
     DEFINE_TEST_CASE(TestSocialManagerXboxSocialUser)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerXboxSocialUser);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerXboxSocialUser);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
@@ -629,7 +629,7 @@ public:
     // Tests all basic features of social manager. Initialization, destruction, verification of social user group, and changes to device presence and social graph changes
     DEFINE_TEST_CASE(TestSocialManagerInitialization)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerInitialization);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerInitialization);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
@@ -823,7 +823,7 @@ public:
     // Tests to verify that multiple local users can be added, initialized correctly, and do not conflict in data
     DEFINE_TEST_CASE(TestSocialManagerMultipleLocalUser)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerMultipleLocalUser);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerMultipleLocalUser);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto xboxLiveContext1 = GetMockXboxLiveContext_Cpp();
@@ -998,7 +998,7 @@ public:
     // Tests to verify that multiple local users can create groups and have groups update properly
     DEFINE_TEST_CASE(TestSocialManagerMultipleLocalUserWithGroups)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerMultipleLocalUserWithGroups);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerMultipleLocalUserWithGroups);
         m_mockXboxSystemFactory->reinit();
         auto mockSockets = m_mockXboxSystemFactory->AddMultipleMockWebSocketClients(2);
         const std::wstring rtaConnectionIdJson =
@@ -1189,7 +1189,7 @@ public:
     // Tests race condition in adding then removing a local user before adding is complete
     DEFINE_TEST_CASE(TestSocialManagerAddRemoveLocalUser)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerAddRemoveCallback);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerAddRemoveCallback);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
@@ -1204,7 +1204,7 @@ public:
     // Tests device presence change tap
     DEFINE_TEST_CASE(TestSocialManagerPresenceCallback)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerPresenceCallback);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerPresenceCallback);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
@@ -1277,7 +1277,7 @@ public:
     // Tests users added tap
     DEFINE_TEST_CASE(TestSocialManagerUsersAddedCallback)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerUsersAddedCallback);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerUsersAddedCallback);
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         m_mockXboxSystemFactory->reinit();
         auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
@@ -1362,7 +1362,7 @@ public:
     // Tests behavior of user group from filter
     DEFINE_TEST_CASE(TestSocialManagerSocialUserGroupFromFilter)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerSocialUserGroupFromFilter);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerSocialUserGroupFromFilter);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
 
@@ -1440,7 +1440,7 @@ public:
     // Tests behavior of user group from list
     DEFINE_TEST_CASE(TestSocialManagerSocialUserGroupFromList)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerSocialUserGroupFromList);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerSocialUserGroupFromList);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
 
@@ -1525,7 +1525,7 @@ public:
 
     DEFINE_TEST_CASE(TestSocialUserGroupFromListLarge)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialUserGroupFromListLarge);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialUserGroupFromListLarge);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
 
@@ -1596,7 +1596,7 @@ public:
     // Tests refresh for RTA resync
     DEFINE_TEST_CASE(TestSocialManagerResync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerResync);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerResync);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
 
@@ -1685,7 +1685,7 @@ public:
     // Tests updating a social user group that was already created from list
     DEFINE_TEST_CASE(TestSocialManagerUserUpdate)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerUserUpdate);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerUserUpdate);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
@@ -1858,7 +1858,7 @@ public:
 
     DEFINE_TEST_CASE(TestSocialManagerErrorWithInvalidArgs)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerErrorWithInvalidArgs);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerErrorWithInvalidArgs);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
 
@@ -1904,7 +1904,7 @@ public:
 
     DEFINE_TEST_CASE(TestSocialManagerErrorImproperCallingOrder)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerErrorImproperCallingOrder);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerErrorImproperCallingOrder);
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
 
         Platform::Collections::Vector<Platform::String^>^ socialUserList = ref new Platform::Collections::Vector<Platform::String^>({ _T("A"), _T("B"), _T("C") });
@@ -1926,7 +1926,7 @@ public:
 
     DEFINE_TEST_CASE(TestSocialManagerHTTPFailure)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerHTTPFailure);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerHTTPFailure);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
 
@@ -1964,7 +1964,7 @@ public:
     // Verifies internal values from internal social groups
     DEFINE_TEST_CASE(TestSocialManagerCreateDestroyGroup)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerCreateDestroyGroup);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerCreateDestroyGroup);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
@@ -2058,7 +2058,7 @@ public:
     // Make sure memory is alloced correctly for the user buffer holder internal structure
     DEFINE_TEST_CASE(TestSocialManagerUserBufferHolder)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerUserBufferHolder);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerUserBufferHolder);
         auto peopleHubService = SocialManagerHelper::GetPeoplehubService();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
         httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(web::json::value::parse(peoplehubResponse));
@@ -2093,7 +2093,7 @@ public:
 
     DEFINE_TEST_CASE(TestSocialManagerUserBufferAddUsersWithNoInit)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerUserBufferAddUsersWithNoInit);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerUserBufferAddUsersWithNoInit);
         auto peopleHubService = SocialManagerHelper::GetPeoplehubService();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
         httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(web::json::value::parse(peoplehubResponse));
@@ -2130,7 +2130,7 @@ public:
 
     DEFINE_TEST_CASE(TestSocialManagerUserBufferAddUsersNoData)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerUserBufferAddUsersNoData);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerUserBufferAddUsersNoData);
         auto peopleHubService = SocialManagerHelper::GetPeoplehubService();
         auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
         httpCall->ResultValueInternal = StockMocks::CreateMockHttpCallResponseInternal(web::json::value::parse(peoplehubResponse));
@@ -2154,7 +2154,7 @@ public:
     // Verifies that get_user_copy API (C++ only) works properly in copying the data
     DEFINE_TEST_CASE(TestSocialManagerUserGroupCopy)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerUserGroupCopy);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerUserGroupCopy);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
@@ -2210,7 +2210,7 @@ public:
     // Quickly creating and destroying a social user group from list
     DEFINE_TEST_CASE(TestSocialManagerAddRemoveUsersFromList)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerAddRemoveUsersFromList);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerAddRemoveUsersFromList);
 
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
@@ -2266,7 +2266,7 @@ public:
     // Verifies that changes recieved during initialization are handled properly
     DEFINE_TEST_CASE(TestSocialManagerMessageDuringInitialization)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerMessageDuringInitialization);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerMessageDuringInitialization);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
@@ -2317,7 +2317,7 @@ public:
     // Verifies that social manager will reconnect after an RTA disconnect is hit
     DEFINE_TEST_CASE(TestSocialManagerReinitializeRTA)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerReinitializeRTA);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerReinitializeRTA);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
@@ -2370,7 +2370,7 @@ public:
     // Tests all possible cases of filtering working properly
     DEFINE_TEST_CASE(TestSocialManagerFilters)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerFilters);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerFilters);
 
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
@@ -2566,7 +2566,7 @@ public:
 
     DEFINE_TEST_CASE(TestSocialManagerGetUsersFromXuidList)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerGetUsersFromXuidList);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerGetUsersFromXuidList);
 
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
@@ -2589,7 +2589,7 @@ public:
 
     DEFINE_TEST_CASE(TestSocialManagerRichPresencePolling)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerRichPresencePolling);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestSocialManagerRichPresencePolling);
         m_mockXboxSystemFactory->reinit();
         auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
         auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
