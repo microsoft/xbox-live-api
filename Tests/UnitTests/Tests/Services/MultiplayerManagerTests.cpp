@@ -3996,7 +3996,7 @@ public:
 
     DEFINE_TEST_CASE(TestFindMatchNoQoSExpiredByNextTimer)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestFindMatchNoQoSExpiredByNextTimer);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestFindMatchNoQoSExpiredByNextTimer);
         FindMatchNoQoSHelper(MatchCallingPatternType::ExpiredByNextTimer);
     }
 

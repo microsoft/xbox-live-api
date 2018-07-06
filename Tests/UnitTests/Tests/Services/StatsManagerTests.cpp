@@ -183,7 +183,7 @@ public:
 
     DEFINE_TEST_CASE(StatisticManagerGetLeaderboard)
     {
-        DEFINE_TEST_CASE_PROPERTIES(StatisticManagerGetLeaderboard);
+        DEFINE_TEST_CASE_PROPERTIES_IGNORE(StatisticManagerGetLeaderboard);
         auto statsManager = StatisticManager::SingletonInstance;
         auto mockXblContext = GetMockXboxLiveContext_WinRT();
         auto user = mockXblContext->User;
