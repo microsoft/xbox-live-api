@@ -77,11 +77,11 @@ void peoplehub_service::get_social_graph(
         isBatch
         );
 
-    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call_internal(
         m_httpCallSettings,
         isBatch ? "POST" : "GET",
         utils::create_xboxlive_endpoint("peoplehub", m_appConfig),
-        utils::string_t_from_internal_string(pathAndQuery),
+        pathAndQuery,
         xbox_live_api::get_social_graph
         );
 

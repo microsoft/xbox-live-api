@@ -3,7 +3,7 @@
 
 #include "pch.h"
 #include "xsapi-c/achievements_c.h"
-#include "achievements/achievements_internal.h"
+#include "achievements/achievement_service_internal.h"
 #include "xbox_live_context_internal_c.h"
 #include "achievements_internal_c.h"
 

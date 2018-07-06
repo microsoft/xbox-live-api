@@ -73,11 +73,11 @@ presence_service_internal::set_presence(
         m_userContext->xbox_user_id()
         );
 
-    std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call_internal(
         m_xboxLiveContextSettings,
         "POST",
         utils::create_xboxlive_endpoint("userpresence", m_appConfig),
-        utils::string_t_from_internal_string(pathAndQuery),
+        pathAndQuery,
         xbox_live_api::set_presence_helper
         );
 
@@ -321,11 +321,11 @@ presence_service_internal::get_presence(
         xboxUserId
         );
 
-    std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call_internal(
         m_xboxLiveContextSettings,
         "GET",
         utils::create_xboxlive_endpoint("userpresence", m_appConfig),
-        utils::string_t_from_internal_string(pathAndQuery),
+        pathAndQuery,
         xbox_live_api::get_presence
         );
     httpCall->set_xbox_contract_version_header_value(_T("3"));
@@ -358,11 +358,11 @@ presence_service_internal::get_presence_for_multiple_users(
 
     xsapi_internal_string pathAndQuery = get_presence_user_batch_subpath();
 
-    std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call_internal(
         m_xboxLiveContextSettings,
         "POST",
         utils::create_xboxlive_endpoint("userpresence", m_appConfig),
-        utils::string_t_from_internal_string(pathAndQuery),
+        pathAndQuery,
         xbox_live_api::get_presence_for_multiple_users
         );
 
@@ -420,11 +420,11 @@ presence_service_internal::get_presence_for_multiple_users(
 
     xsapi_internal_string pathAndQuery = get_presence_user_batch_subpath();
 
-    std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call_internal(
         m_xboxLiveContextSettings,
         "POST",
         utils::create_xboxlive_endpoint("userpresence", m_appConfig),
-        utils::string_t_from_internal_string(pathAndQuery),
+        pathAndQuery,
         xbox_live_api::get_presence_for_multiple_users
         );
 
@@ -481,11 +481,11 @@ presence_service_internal::get_presence_for_social_group(
         socialGroup
         );
 
-    std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call_internal(
         m_xboxLiveContextSettings,
         "GET",
         utils::create_xboxlive_endpoint("userpresence", m_appConfig),
-        utils::string_t_from_internal_string(pathAndQuery),
+        pathAndQuery,
         xbox_live_api::get_presence_for_social_group
         );
     httpCall->set_xbox_contract_version_header_value(_T("3"));
@@ -532,11 +532,11 @@ presence_service_internal::get_presence_for_social_group(
 
     xsapi_internal_string pathAndQuery = get_presence_user_batch_subpath();
 
-    std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call_internal(
         m_xboxLiveContextSettings,
         "POST",
         utils::create_xboxlive_endpoint("userpresence", m_appConfig),
-        utils::string_t_from_internal_string(pathAndQuery),
+        pathAndQuery,
         xbox_live_api::get_presence_for_social_group
         );
 

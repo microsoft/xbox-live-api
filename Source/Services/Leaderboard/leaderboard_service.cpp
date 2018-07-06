@@ -2,29 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "shared_macros.h"
-#include "xbox_system_factory.h"
-#include "leaderboard_serializers.h"
-#include "leaderboard_query.h"
 #include "xsapi/leaderboard.h"
+#include "leaderboard_service_impl.h"
 #include "utils.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_LEADERBOARD_CPP_BEGIN
 
-const string_t c_leaderboard_social_stat_name_contract_version = _T("1");
-const string_t c_leaderboard_with_metadata_contract_version = _T("3");
-const string_t c_leaderboard_with_stats_2017_version = _T("4");
-
 leaderboard_service::leaderboard_service(
-    _In_ std::shared_ptr<xbox::services::user_context> userContext,
-    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+    _In_ std::shared_ptr<leaderboard_service_impl> serviceImpl
     ) :
-    m_userContext(std::move(userContext)),
-    m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
-    m_appConfig(std::move(appConfig))
+    m_serviceImpl(std::move(serviceImpl))
 {
 }
+
 
 pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leaderboard(
     _In_ const string_t& scid,
@@ -41,7 +31,8 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
         NO_SOCIAL_GROUP,
         NO_MAX_ITEMS,
         NO_CONTINUATION,
-        additionalColumnNames);
+        additionalColumnNames,
+        leaderboard_version_2013);
 }
 
 pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leaderboard(
@@ -62,7 +53,8 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
         socialGroup,
         maxItems,
         NO_CONTINUATION,
-        additionalColumnNames);
+        additionalColumnNames,
+        leaderboard_version_2013);
 }
 
 pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leaderboard(
@@ -82,7 +74,8 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
         NO_SOCIAL_GROUP,
         maxItems,
         NO_CONTINUATION,
-        additionalColumnNames);
+        additionalColumnNames,
+        leaderboard_version_2013);
 }
 
 
@@ -105,7 +98,8 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
         socialGroup,
         maxItems,
         NO_CONTINUATION,
-        additionalColumnNames);
+        additionalColumnNames,
+        leaderboard_version_2013);
 }
 
 pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leaderboard_skip_to_xuid(
@@ -125,7 +119,8 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
         NO_SOCIAL_GROUP,
         maxItems,
         NO_CONTINUATION,
-        additionalColumnNames);
+        additionalColumnNames,
+        leaderboard_version_2013);
 }
 
 _XSAPIIMP pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leaderboard_skip_to_xuid(
@@ -147,7 +142,8 @@ _XSAPIIMP pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::
         socialGroup,
         maxItems,
         NO_CONTINUATION,
-        additionalColumnNames);
+        additionalColumnNames,
+        leaderboard_version_2013);
 }
 
 pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leaderboard_for_social_group(
@@ -167,7 +163,8 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
         NO_SKIP_XUID,
         NO_SORT_ORDER,
         maxItems,
-        NO_CONTINUATION);
+        NO_CONTINUATION,
+        leaderboard_version_2013);
 }
 
 pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leaderboard_for_social_group(
@@ -188,7 +185,8 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
         NO_SKIP_XUID,
         sortOrder,
         maxItems,
-        NO_CONTINUATION);
+        NO_CONTINUATION,
+        leaderboard_version_2013);
 }
 
 pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leaderboard_for_social_group_skip_to_rank(
@@ -210,7 +208,8 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
         NO_SKIP_XUID,
         sortOrder,
         maxItems,
-        NO_CONTINUATION);
+        NO_CONTINUATION,
+        leaderboard_version_2013);
 }
 
 pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leaderboard_for_social_group_skip_to_xuid(
@@ -232,89 +231,23 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
         skipToXuid,
         sortOrder,
         maxItems,
-        NO_CONTINUATION);
+        NO_CONTINUATION,
+        leaderboard_version_2013);
 }
 
-xbox_live_result<string_t> create_leaderboard_url(
-    _In_ const string_t& scid,
-    _In_ const string_t& name,
-    _In_ uint32_t skipToRank,
-    _In_ const string_t& skipToXuid,
-    _In_ uint32_t maxItems,
-    _In_ const string_t& continuationToken,
-    _In_ bool metadata,
-    _In_ const string_t& xuid = string_t(),
-    _In_ const string_t& socialGroup = string_t(),
-    _In_ const string_t& version = string_t()
-    )
+XblSocialGroupType string_to_social_group(_In_ const string_t& socialGroup)
 {
-    if (scid.empty())
-        return xbox_live_result<string_t>(xbox_live_error_code::invalid_argument, "scid is required for getting leaderboards");
-    if (name.empty())
-        return xbox_live_result<string_t>(xbox_live_error_code::invalid_argument, "name is required for getting leaderboards");
-
-    web::uri_builder builder;
-
-    stringstream_t path;
-    path << _T("/scids/");
-    path << web::uri::encode_uri(scid, web::uri::components::path);
-    if (version == _T("2017"))
+    if (utils::str_icmp(socialGroup, _T("People")) == 0)
     {
-        path << _T("/leaderboards/stat(");
-        path << web::uri::encode_uri(name, web::uri::components::path);
-        path << _T(")");
-        builder.set_path(path.str());
-    }
-    else
-    {
-        path << _T("/leaderboards/");
-        path << web::uri::encode_uri(name, web::uri::components::path);
-        builder.set_path(path.str());
+        return XblSocialGroupType_People;
     }
 
-    if (metadata)
+    if (utils::str_icmp(socialGroup, _T("Favorites")) == 0)
     {
-        builder.append_query(_T("include"), _T("valuemetadata"));
+        return XblSocialGroupType_Favorites;
     }
 
-    if (!xuid.empty())
-    {
-        builder.append_query(_T("xuid"), xuid);
-    }
-
-    if (maxItems > 0)
-    {
-        builder.append_query(_T("maxItems"), maxItems);
-    }
-
-    if (!skipToXuid.empty())
-    {
-        if (skipToRank > 0)
-        {
-            return xbox_live_result<string_t>(xbox_live_error_code::invalid_argument, "Cannot skip to XUID and rank");
-        }
-
-        builder.append_query(_T("skipToUser"), skipToXuid);
-    }
-    else
-    {
-        if (!continuationToken.empty())
-        {
-            builder.append_query(_T("continuationToken"), continuationToken);
-        }
-        else if (skipToRank > 0)
-        {
-            builder.append_query(_T("skipToRank"), skipToRank);
-        }
-    }
-
-    if (!socialGroup.empty())
-    {
-        builder.append_query(_T("view"), _T("People"));
-        builder.append_query(_T("viewTarget"), socialGroup);
-    }
-
-    return xbox_live_result<string_t>(builder.to_string());
+    return XblSocialGroupType_None;
 }
 
 pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leaderboard_internal(
@@ -327,144 +260,44 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
     _In_ uint32_t maxItems,
     _In_ const string_t& continuationToken,
     _In_ const std::vector<string_t>& additionalColumnNames,
-    _In_ const string_t& version,
-    _In_ leaderboard_query lbQuery
+    _In_ leaderboard_version version
     )
 {
-    xbox_live_result<string_t> url = create_leaderboard_url(
-        scid,
-        name,
+    pplx::task_completion_event<xbox_live_result<leaderboard_result>> tce;
+
+    auto hr = m_serviceImpl->get_leaderboard_internal(
+        utils::internal_string_from_string_t(scid),
+        utils::internal_string_from_string_t(name),
         skipToRank,
-        skipToXuid,
+        utils::string_t_to_uint64(skipToXuid),
+        utils::string_t_to_uint64(xuid),
+        string_to_social_group(socialGroup),
         maxItems,
-        continuationToken,
-        additionalColumnNames.size() != 0,
-        xuid,
-        socialGroup,
-        version
-        );
-
-    RETURN_TASK_CPP_IF_ERR(url, leaderboard_result);
-
-    std::shared_ptr<leaderboard_global_query> query = std::make_shared<leaderboard_global_query>();
-    query->scid = scid;
-    query->name = name;
-    query->xuid = xuid;
-    query->socialGroup = socialGroup;
-    query->columns = additionalColumnNames;
-
-    std::shared_ptr<http_call> http_call = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("GET"),
-        utils::create_xboxlive_endpoint(_T("leaderboards"), m_appConfig),
-        url.payload(),
-        xbox_live_api::get_leaderboard_internal
-        );
-    if (version == _T("2017"))
+        utils::internal_string_from_string_t(continuationToken),
+        utils::internal_string_vector_from_std_string_vector(additionalColumnNames),
+        version,
+        get_xsapi_singleton()->m_asyncQueue,
+        [tce](xbox_live_result<std::shared_ptr<leaderboard_result_internal>> result)
     {
-        http_call->set_xbox_contract_version_header_value(c_leaderboard_with_stats_2017_version);
-        lbQuery._Set_stat_name(name);
-    }
-    else
-    {
-        http_call->set_xbox_contract_version_header_value(c_leaderboard_with_metadata_contract_version);
-    }
-
-    auto userContext = m_userContext;
-    auto xboxLiveContextSettings = m_xboxLiveContextSettings;
-    auto appConfig = m_appConfig;
-
-    auto task = http_call->get_response_with_auth(m_userContext)
-    .then([userContext, xboxLiveContextSettings, appConfig, additionalColumnNames, version, lbQuery](std::shared_ptr<http_call_response> response)
-    {
-        return utils::generate_xbox_live_result<leaderboard_result>(
-            serializers::deserialize_result(
-                response->response_body_json(),
-                userContext,
-                xboxLiveContextSettings,
-                appConfig,
-                version,
-                lbQuery
-                ),
-            response
-            );
-
-    }).then([query, additionalColumnNames](xbox_live_result<leaderboard_result> lb)
-    {
-        leaderboard_result& lbRes = lb.payload();
-        lbRes._Set_next_query(query);
-        if (additionalColumnNames.size() > 0)
-        {
-            lbRes._Parse_additional_columns(additionalColumnNames);
-        }
-
-        return lb;
+        tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(leaderboard_result, result));
     });
 
-    return utils::create_exception_free_task<leaderboard_result>(
-        task
-        );
+    if (FAILED(hr))
+    {
+        std::error_code errorCode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        return pplx::task_from_result(xbox_live_result<leaderboard_result>(errorCode));
+    }
+    return pplx::task<xbox_live_result<leaderboard_result>>(tce);
 }
 
-xbox_live_result<string_t> create_leaderboard_for_social_group_url(
-    _In_ const string_t& xuid,
-    _In_ const string_t& scid,
-    _In_ const string_t& statName,
-    _In_ const string_t& socialGroup,
-    _In_ uint32_t skipToRank,
-    _In_ const string_t& skipToXuid,
-    _In_ const string_t& sortOrder,
-    _In_ uint32_t maxItems,
-    _In_ const string_t& continuationToken
-    )
+sort_order convert_sort_order_string_to_enum(_In_ const string_t& sortOrder)
 {
-    if (xuid.empty()) return xbox_live_result<string_t>(xbox_live_error_code::invalid_argument, "xuid is required for getting leaderboard for social group");
-    if (scid.empty()) return xbox_live_result<string_t>(xbox_live_error_code::invalid_argument, "scid is required for getting leaderboard for social group");
-    if (statName.empty()) return xbox_live_result<string_t>(xbox_live_error_code::invalid_argument, "statName is required for getting leaderboard for social group");
-    if (socialGroup.empty()) return xbox_live_result<string_t>(xbox_live_error_code::invalid_argument, "socialGroup is required for getting leaderboard for social group");
-
-    // "/users/xuid({xuid})/scids/{scid}/stats/{statname}/people/{group}"
-
-    web::uri_builder builder;
-
-    stringstream_t path;
-    path << _T("/users/xuid(");
-    path << web::uri::encode_uri(xuid, web::uri::components::path);
-    path << _T(")/scids/");
-    path << web::uri::encode_uri(scid, web::uri::components::path);
-    path << _T("/stats/");
-    path << web::uri::encode_uri(statName, web::uri::components::path);
-    path << _T("/people/");
-    path << web::uri::encode_uri(socialGroup, web::uri::components::path);
-    builder.set_path(path.str());
-
-    if (!sortOrder.empty())
+    if (utils::str_icmp(sortOrder, _T("ascending")) == 0)
     {
-        builder.append_query(_T("sort"), sortOrder);
+        return sort_order::ascending;
     }
 
-    if (maxItems > 0)
-    {
-        builder.append_query(_T("maxItems"), maxItems);
-    }
-
-    if (!skipToXuid.empty())
-    {
-        builder.append_query(_T("skipToUser"), skipToXuid);
-    }
-    else
-    {
-        if (!continuationToken.empty())
-        {
-            builder.append_query(_T("continuationToken"), continuationToken);
-        }
-        else if (skipToRank > 0)
-        {
-            builder.append_query(_T("skipToRank"), skipToRank);
-        }
-    }
-
-    return xbox_live_result<string_t>(builder.to_string());
+    return sort_order::descending;
 }
 
 pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leaderboard_for_social_group_internal(
@@ -477,88 +310,35 @@ pplx::task<xbox_live_result<leaderboard_result>> leaderboard_service::get_leader
     _In_ const string_t& sortOrder,
     _In_ uint32_t maxItems,
     _In_ const string_t& continuationToken,
-    _In_ const string_t& version,
-    _In_ leaderboard_query lbQuery
+    _In_ leaderboard_version version
     )
 {
-    // To align with People moniker support, we are mapping "People" to "all" until the
-    // leaderboard service can align with naming conventions.
-    string_t group = socialGroup;
-    if (utils::str_icmp(socialGroup, _T("People")) == 0)
-    {
-        group = _T("all");
-    }
+    pplx::task_completion_event<xbox_live_result<leaderboard_result>> tce;
 
-    xbox_live_result<string_t> url = create_leaderboard_for_social_group_url(
-        xuid,
-        scid,
-        statName,
-        group,
+    auto hr = m_serviceImpl->get_leaderboard_for_social_group_internal(
+        utils::string_t_to_uint64(xuid),
+        utils::internal_string_from_string_t(scid),
+        utils::internal_string_from_string_t(statName),
+        string_to_social_group(socialGroup),
         skipToRank,
-        skipToXuid,
-        sortOrder,
+        utils::string_t_to_uint64(skipToXuid),
+        convert_sort_order_string_to_enum(sortOrder),
         maxItems,
-        continuationToken);
-
-    if (url.err())
+        utils::internal_string_from_string_t(continuationToken),
+        version,
+        get_xsapi_singleton()->m_asyncQueue,
+        [tce](xbox_live_result<std::shared_ptr<leaderboard_result_internal>> result)
     {
-        return pplx::task_from_result(xbox_live_result<leaderboard_result>(url.err(), url.err_message()));
-    }
-    auto query = std::make_shared<leaderboard_social_query>();
-    query->xuid = xuid;
-    query->scid = scid;
-    query->statName = statName;
-    query->socialGroup = group;
-    query->sortOrder = sortOrder;
-
-    std::shared_ptr<http_call> http_call = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("GET"),
-        utils::create_xboxlive_endpoint(_T("leaderboards"), m_appConfig),
-        url.payload(),
-        xbox_live_api::get_leaderboard_for_social_group_internal
-        );
-    if (version == _T("2017"))
-    {
-        http_call->set_xbox_contract_version_header_value(c_leaderboard_with_stats_2017_version);
-        lbQuery._Set_stat_name(statName);
-        lbQuery._Set_social_group(socialGroup);
-    }
-    else
-    {
-        http_call->set_xbox_contract_version_header_value(c_leaderboard_social_stat_name_contract_version);
-    }
-
-    auto userContext = m_userContext;
-    auto xboxLiveContextSettings = m_xboxLiveContextSettings;
-    auto appConfig = m_appConfig;
-
-    auto task = http_call->get_response_with_auth(m_userContext)
-    .then([userContext, xboxLiveContextSettings, appConfig, version, lbQuery](std::shared_ptr<http_call_response> response)
-    {
-
-        return utils::generate_xbox_live_result<leaderboard_result>( 
-            serializers::deserialize_result(
-                response->response_body_json(),
-                userContext,
-                xboxLiveContextSettings,
-                appConfig,
-                version,
-                lbQuery
-                ),
-            response
-            );
-
-    }).then([query](xbox_live_result<leaderboard_result> lb)
-    {
-        auto leaderboardResult = lb.payload();
-        leaderboardResult._Set_next_query(query);
-        return xbox_live_result<leaderboard_result>(leaderboardResult, lb.err(), lb.err_message());
+        tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(leaderboard_result, result));
     });
 
-    return utils::create_exception_free_task<leaderboard_result>(
-        task
-        );
+    if (FAILED(hr))
+    {
+        std::error_code errorCode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        return pplx::task_from_result(xbox_live_result<leaderboard_result>(errorCode));
+    }
+    return pplx::task<xbox_live_result<leaderboard_result>>(tce);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_LEADERBOARD_CPP_END
+

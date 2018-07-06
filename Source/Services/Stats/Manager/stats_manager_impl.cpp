@@ -7,6 +7,7 @@
 #include "xsapi/services.h"
 #include "xsapi/system.h"
 #include "xbox_live_context_impl.h"
+#include "../Leaderboard/leaderboard_service_impl.h"
 
 #if XSAPI_U
     #include "ppltasks_extra_unix.h"
@@ -516,31 +517,32 @@ xbox_live_result<void> stats_manager_impl::get_leaderboard(
     std::weak_ptr<stats_manager_impl> weakThisPtr = shared_from_this();
     auto context = userIter->second.xboxLiveContextImpl;
 
-    context->leaderboard_service().get_leaderboard_internal(
-        context->application_config()->scid(),
-        statName,
-        query.skip_result_to_rank(),
-        xuid,
-        utils::string_t_from_internal_string(user_context::get_user_id(user)),
-        _T(""),
-        query.max_items(),
-        query._Continuation_token(),
-        std::vector<string_t>(),
-        _T("2017"),
-        query
-        )
-    .then([weakThisPtr, user](xbox::services::xbox_live_result<xbox::services::leaderboard::leaderboard_result> result)
-    {
-        auto pShared = weakThisPtr.lock();
-        if (pShared.get() == nullptr)
-        {
-            LOG_DEBUG("Could not successfully get stats_manager while retrieving a leaderboard");
-        }
-        else
-        {
-            pShared->add_leaderboard_result(user, result);
-        }
-    });
+    // TODO
+    //context->leaderboard_service_impl()->get_leaderboard_internal(
+    //    context->application_config()->scid(),
+    //    statName,
+    //    query.skip_result_to_rank(),
+    //    xuid,
+    //    utils::string_t_from_internal_string(user_context::get_user_id(user)),
+    //    _T(""),
+    //    query.max_items(),
+    //    query._Continuation_token(),
+    //    std::vector<string_t>(),
+    //    _T("2017"),
+    //    query
+    //    )
+    //.then([weakThisPtr, user](xbox::services::xbox_live_result<xbox::services::leaderboard::leaderboard_result> result)
+    //{
+    //    auto pShared = weakThisPtr.lock();
+    //    if (pShared.get() == nullptr)
+    //    {
+    //        LOG_DEBUG("Could not successfully get stats_manager while retrieving a leaderboard");
+    //    }
+    //    else
+    //    {
+    //        pShared->add_leaderboard_result(user, result);
+    //    }
+    //});
 
     return xbox_live_result<void>();
 }
@@ -576,30 +578,32 @@ xbox_live_result<void> stats_manager_impl::get_social_leaderboard(
 
     std::weak_ptr<stats_manager_impl> weakThisPtr = shared_from_this();
     auto context = userIter->second.xboxLiveContextImpl;
-    context->leaderboard_service().get_leaderboard_for_social_group_internal(
-        utils::string_t_from_internal_string(user_context::get_user_id(user)),
-        context->application_config()->scid(),
-        statName,
-        socialGroup,
-        query.skip_result_to_rank(),
-        xuid,
-        order,
-        query.max_items(),
-        query._Continuation_token(),
-        _T("2017"),
-        query)
-    .then([weakThisPtr, user](xbox::services::xbox_live_result<xbox::services::leaderboard::leaderboard_result> result)
-    {
-        auto pShared = weakThisPtr.lock();
-        if (pShared.get() == nullptr)
-        {
-            LOG_DEBUG("Could not successfully get stats_manager while retrieving a leaderboard");
-        }
-        else
-        {
-            pShared->add_leaderboard_result(user, result);
-        }
-    });
+
+    // TODO
+    //context->leaderboard_service_impl()->get_leaderboard_for_social_group_internal(
+    //    utils::string_t_from_internal_string(user_context::get_user_id(user)),
+    //    context->application_config()->scid(),
+    //    statName,
+    //    socialGroup,
+    //    query.skip_result_to_rank(),
+    //    xuid,
+    //    order,
+    //    query.max_items(),
+    //    query._Continuation_token(),
+    //    _T("2017"),
+    //    query)
+    //.then([weakThisPtr, user](xbox::services::xbox_live_result<xbox::services::leaderboard::leaderboard_result> result)
+    //{
+    //    auto pShared = weakThisPtr.lock();
+    //    if (pShared.get() == nullptr)
+    //    {
+    //        LOG_DEBUG("Could not successfully get stats_manager while retrieving a leaderboard");
+    //    }
+    //    else
+    //    {
+    //        pShared->add_leaderboard_result(user, result);
+    //    }
+    //});
 
     return xbox_live_result<void>();
 }

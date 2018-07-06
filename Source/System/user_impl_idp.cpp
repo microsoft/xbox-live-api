@@ -150,11 +150,11 @@ void user_impl_idp::sign_in_impl(
                     auto xboxUserId = payload.xbox_user_id();
                     auto pathAndQuery = presence_service_internal::set_presence_sub_path(xboxUserId);
 
-                    std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call(
+                    std::shared_ptr<http_call_internal> httpCall = xbox_system_factory::get_factory()->create_http_call_internal(
                         std::make_shared<xbox_live_context_settings>(),
                         "POST",
                         utils::create_xboxlive_endpoint("userpresence", xbox_live_app_config_internal::get_app_config_singleton()),
-                        utils::string_t_from_internal_string(pathAndQuery),
+                        pathAndQuery,
                         xbox_live_api::set_presence_helper
                     );
 

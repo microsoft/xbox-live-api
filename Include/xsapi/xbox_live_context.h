@@ -235,6 +235,7 @@ private:
     social::profile_service m_profileService;
     social::social_service m_socialService;
     social::reputation_service m_reputationService;
+    leaderboard::leaderboard_service m_leaderboardService;
     presence::presence_service m_presenceService;
 };
 

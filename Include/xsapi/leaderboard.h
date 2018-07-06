@@ -18,6 +18,7 @@
 
 
 namespace xbox { namespace services {
+    class xbox_live_context;
     class xbox_live_context_impl;
     namespace stats {
         namespace manager {
@@ -30,9 +31,12 @@ namespace xbox { namespace services {
     /// </summary>
     namespace leaderboard {
 
+class leaderboard_result_internal;
+class leaderboard_service_impl;
 struct leaderboard_global_query;
 struct leaderboard_social_query;
 class leaderboard_result;
+enum leaderboard_version;
 
 /// <summary>Enumerates the data type of a leaderboard statistic.</summary>
 enum class leaderboard_stat_type
@@ -159,6 +163,7 @@ private:
     web::json::value m_metadata;
 
     friend leaderboard_result;
+    friend leaderboard_result_internal;
 };
 
 class leaderboard_query
@@ -285,21 +290,14 @@ public:
     /// Internal function
     /// </summary>
     leaderboard_result(
-        _In_ string_t displayName,
-        _In_ uint32_t totalRowCount,
-        _In_ string_t continuationToken,
-        _In_ std::vector<leaderboard_column> columns,
-        _In_ std::vector<leaderboard_row> rows,
-        _In_ std::shared_ptr<xbox::services::user_context> userContext,
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
+        _In_ std::shared_ptr<leaderboard_result_internal> leaderboardResultInternal
         );
 
     /// <summary>
     /// DEPRECATED
     /// The display name of the leaderboard results.
     /// </summary>
-    _XSAPIIMP const string_t& display_name() const;
+    _XSAPIIMP string_t display_name() const;
 
     /// <summary>
     /// The total number of rows in the leaderboard results.
@@ -345,41 +343,8 @@ public:
     /// </summary>
     _XSAPIIMP xbox_live_result<leaderboard_query> get_next_query() const;
 
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    void _Set_next_query(std::shared_ptr<leaderboard_global_query> query);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    void _Set_next_query(std::shared_ptr<leaderboard_social_query> query);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    void _Set_next_query(const leaderboard_query& query);
-
-    /// <summary>
-    /// Internal function
-    /// </summary>
-    void _Parse_additional_columns(const std::vector<string_t>& additionalColumnNames);
-
 private:
-    string_t m_displayName;
-    uint32_t m_totalRowCount;
-    string_t m_continuationToken;
-    std::vector<leaderboard_column> m_columns;
-    std::vector<leaderboard_row> m_rows;
-
-    std::shared_ptr<xbox::services::user_context> m_userContext;
-    std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
-    std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
-
-    std::shared_ptr<leaderboard_global_query> m_globalQuery;
-    std::shared_ptr<leaderboard_social_query> m_socialQuery;
-    leaderboard_query m_nextQuery;
-    string_t m_version;
+    std::shared_ptr<leaderboard_result_internal> m_leaderboardResultInternal;
 };
 
 #if !defined(XBOX_LIVE_CREATORS_SDK)
@@ -531,8 +496,6 @@ public:
     /// <param name="socialGroup">The name of the group of users to get get leaderboard results for.
     /// See Microsoft::Xbox::Services::Social::SocialGroupConstants for the latest options.</param>
     /// <param name="skipToXuid">The Xbox user ID of the player to skip to before retrieving results.</param>
-    /// <param name="sortOrder">A value indicating the sort order for the returned leaderboard result.
-    /// The possible values are 'ascending' or 'descending', without quotes.</param>
     /// <param name="maxItems">The maximum number of items to retrieve. If this value is 0, the server defaults to 10. (Optional)</param>
     /// <param name="additionalColumnNames">The name of the stats for the additionalColumns. (Optional)</param>
     /// <returns>
@@ -679,12 +642,11 @@ public:
 
 private:
     leaderboard_service() {}
-
-    leaderboard_service(
-        _In_ std::shared_ptr<xbox::services::user_context> userContext,
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
-        );
+    leaderboard_service(_In_ std::shared_ptr<leaderboard_service_impl> serviceImpl);
+    std::shared_ptr<leaderboard_service_impl> m_serviceImpl;
+    friend xbox_live_context;
+    friend leaderboard_result;
+    friend leaderboard_result_internal;
 
     pplx::task<xbox_live_result<leaderboard_result>> get_leaderboard_for_social_group_internal(
         _In_ const string_t& xuid,
@@ -696,8 +658,7 @@ private:
         _In_ const string_t& sortOrder,
         _In_ uint32_t maxItems,
         _In_ const string_t& continuationToken,
-        _In_ const string_t& version = string_t(),
-        _In_ leaderboard_query lbQuery = leaderboard_query()
+        _In_ leaderboard_version version
         );
 
     pplx::task<xbox_live_result<leaderboard_result>> get_leaderboard_internal(
@@ -709,22 +670,10 @@ private:
         _In_ const string_t& socialGroup,
         _In_ uint32_t maxItems,
         _In_ const string_t& continuationToken,
-        _In_ const std::vector<string_t>& additionalColumnNames = std::vector<string_t>(),
-        _In_ const string_t& version = string_t(),
-        _In_ leaderboard_query lbQuery = leaderboard_query()
+        _In_ const std::vector<string_t>& additionalColumnNames,
+        _In_ leaderboard_version version
         );
-
-    pplx::task<xbox_live_result<leaderboard_result>> get_leaderboard_for_url(
-        _In_ string_t url
-        );
-
-    std::shared_ptr<xbox::services::user_context> m_userContext;
-    std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
-    std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
-
-    friend leaderboard_result;
-    friend stats::manager::stats_manager_impl;
-    friend xbox_live_context_impl;
 };
+
 #endif
 }}}

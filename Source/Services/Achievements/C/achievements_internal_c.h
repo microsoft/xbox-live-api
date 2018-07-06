@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "achievements/achievements_internal.h"
+#include "achievements/achievement_service_internal.h"
 
 struct xbl_achievements_result
 {

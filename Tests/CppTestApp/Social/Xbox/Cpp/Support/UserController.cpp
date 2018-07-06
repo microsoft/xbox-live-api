@@ -304,6 +304,8 @@ std::shared_ptr<xbox::services::xbox_live_context> UserController::GetXboxLiveCo
     }
 
     std::shared_ptr<xbox::services::xbox_live_context> xboxLiveContext = GetXboxLiveContext(user->XboxUserId);
+    xbl_context_handle userHandle;
+    XblContextCreateHandle(xboxLiveContext->user(), &userHandle);
     if (xboxLiveContext == nullptr && addIfMissing)
     {
         xboxLiveContext = std::make_shared<xbox_live_context>(user);

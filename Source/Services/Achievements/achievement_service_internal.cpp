@@ -4,7 +4,7 @@
 #include "pch.h"
 
 #include "xsapi/achievements.h"
-#include "achievements_internal.h"
+#include "achievement_service_internal.h"
 
 #include "http_call_impl.h"
 #include "user_context.h"
@@ -169,11 +169,11 @@ achievement_service_internal::update_achievement(
         serviceConfigurationId
     );
 
-    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call_internal(
         m_xboxLiveContextSettings,
         "POST",
         utils::create_xboxlive_endpoint("achievements", m_appConfig),
-        utils::string_t_from_internal_string(subPath),
+        subPath,
         xbox_live_api::update_achievement
     );
     httpCall->set_xbox_contract_version_header_value(_T("2"));
@@ -342,11 +342,11 @@ achievement_service_internal::get_achievement(
         achievementId
     );
 
-    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call_internal(
         m_xboxLiveContextSettings,
         "GET",
         utils::create_xboxlive_endpoint("achievements", m_appConfig),
-        utils::string_t_from_internal_string(subPath),
+        subPath,
         xbox_live_api::get_achievement
     );
     httpCall->set_xbox_contract_version_header_value(_T("2"));
@@ -421,11 +421,11 @@ achievement_service_internal::get_achievements(
         continuationToken
     );
 
-    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    std::shared_ptr<http_call_internal> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call_internal(
         m_xboxLiveContextSettings,
         "GET",
         utils::create_xboxlive_endpoint("achievements", m_appConfig),
-        utils::string_t_from_internal_string(subPath),
+        subPath,
         xbox_live_api::get_achievements
     );
     httpCall->set_xbox_contract_version_header_value(_T("2"));
@@ -528,13 +528,13 @@ achievement_service_internal::achievements_sub_path(
     _In_ const xsapi_internal_string& continuationToken
 )
 {
-    web::uri_builder subPathBuilder;
+    xsapi_uri_builder subPathBuilder;
     xsapi_internal_stringstream path;
     path << ("/users/xuid(");
     path << xboxUserId.c_str();
     path << (")/achievements");
 
-    subPathBuilder.append_path(utils::string_t_from_internal_string(path.str()));
+    subPathBuilder.append_path(path.str());
 
     xsapi_internal_stringstream titleQuery;
     auto &last = titleIds.back();
@@ -546,31 +546,30 @@ achievement_service_internal::achievements_sub_path(
             titleQuery << (",");
         }
     }
-    subPathBuilder.append_query(_T("titleId"), utils::string_t_from_internal_string(titleQuery.str()));
+    subPathBuilder.append_query("titleId", titleQuery.str());
 
     if (!type.empty())
     {
-        subPathBuilder.append_query(_T("types"), utils::string_t_from_internal_string(type));
+        subPathBuilder.append_query("types", type);
     }
 
     if (unlockedOnly)
     {
-        subPathBuilder.append_query(_T("unlockedOnly=true"));
+        subPathBuilder.append_query("unlockedOnly=true");
     }
 
     if (!orderBy.empty())
     {
-        subPathBuilder.append_query(_T("orderBy"), utils::string_t_from_internal_string(orderBy));
+        subPathBuilder.append_query("orderBy", orderBy);
     }
 
-    utils::append_paging_info(
+    utils::append_paging_info_internal(
         subPathBuilder,
         skipItems,
         maxItems,
-        utils::string_t_from_internal_string(continuationToken)
-    );
+        continuationToken);
 
-    return utils::internal_string_from_string_t(subPathBuilder.to_string());
+    return subPathBuilder.to_string();
 }
 
 const xsapi_internal_string

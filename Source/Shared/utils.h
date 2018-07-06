@@ -454,6 +454,20 @@ void verify_global_init();
 #define _In_reads_bytes_(s)
 #endif
 
+class xsapi_uri_builder
+{
+public:
+    void set_path(_In_ const xsapi_internal_string& str);
+    void append_path(_In_ const xsapi_internal_string& name);
+    void append_query(_In_ const xsapi_internal_string& name, _In_ const xsapi_internal_string& value);
+    void append_query(_In_ const xsapi_internal_string& name, _In_ uint32_t value);
+    void append_query(_In_ const xsapi_internal_string& name);
+    xsapi_internal_string to_string();
+
+private:
+    web::uri_builder builder;
+};
+
 class utils
 {
 public:
@@ -1059,6 +1073,13 @@ public:
         _In_opt_ string_t continuationToken
     );
 
+    static void append_paging_info_internal(
+        _In_ xsapi_uri_builder& uriBuilder,
+        _In_ unsigned int skipItems,
+        _In_ unsigned int maxItems,
+        _In_opt_ const xsapi_internal_string& continuationToken
+    );
+
     static uint32_t convert_timespan_to_days(
         _In_ uint64_t timespan
     );
@@ -1455,24 +1476,28 @@ public:
 #endif
 
     static std::vector<string_t> string_array_to_string_vector(
-        PCSTR *stringArray,
-        size_t stringArrayCount
+        _In_reads_(stringArrayCount) const char** stringArray,
+        _In_ size_t stringArrayCount
         );
 
     static xsapi_internal_vector<xsapi_internal_string> string_array_to_internal_string_vector(
-        PCSTR* stringArray,
-        size_t stringArrayCount
+        _In_reads_(stringArrayCount) const char** stringArray,
+        _In_ size_t stringArrayCount
         );
     
     static xsapi_internal_vector<xsapi_internal_string> xuid_array_to_internal_string_vector(
-        uint64_t* xuidArray,
-        size_t xuidArrayCount
+        _In_reads_(xuidArrayCount) uint64_t* xuidArray,
+        _In_ size_t xuidArrayCount
         );
 
     static xsapi_internal_vector<uint32_t> uint32_array_to_internal_vector(
-        uint32_t* intArray,
-        size_t intArrayCount
+        _In_reads_(intArrayCount) uint32_t* intArray,
+        _In_ size_t intArrayCount
         );
+
+    static _Null_terminated_ char* alloc_and_copy_string(string_t src);
+
+    static xsapi_internal_string xsapi_encode_uri(_In_ const xsapi_internal_string& str);
 
 private:
     template<typename T>
@@ -1605,5 +1630,6 @@ private:
     xsapi_internal_unordered_map<K, V> m_map;
     xsapi_internal_unordered_map<V, K> m_reverseMap;
 };
+
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
