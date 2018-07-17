@@ -1,4 +1,12 @@
 {
+    "addClubModeratorResponse": {
+        "userId":"2535458173220066",
+        "roles": [
+            "Follower",
+            "Member",
+            "Moderator"
+        ]
+    },
     "createClubResponse": {
         "name": "Sexy Title Club",
         "owner": "2535430935305105",

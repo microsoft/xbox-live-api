@@ -402,7 +402,7 @@ pplx::task<xbox_live_result<std::vector<club_role>>> club::set_users_club_roles(
     _In_ bool addRole
     )
 {
-    json::value requestBody;      
+    json::value requestBody;
     if (addRole)
     {
         std::vector<json::value> rolesArray;

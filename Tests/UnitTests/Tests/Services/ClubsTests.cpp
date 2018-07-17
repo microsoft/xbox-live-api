@@ -585,6 +585,36 @@ public:
             VerifyClubSearchAutoComplete(suggestion, *resultsIt++);
         }
     }
+
+    DEFINE_TEST_CASE(TestAddClubModerator)
+    {
+        DEFINE_TEST_CASE_PROPERTIES(TestSuggestClubs);
+
+        Club^ club = GetClub();
+
+        auto responseJson = testResponsesJsonFromFile[_T("addClubModeratorResponse")];
+        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
+        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+
+        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
+        auto result = create_task(club->AddClubModeratorAsync(_T("2535458173220066"))).get();
+
+        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
+        VERIFY_ARE_EQUAL_STR(L"https://clubroster.mockenv.xboxlive.com", httpCall->ServerName);
+        VERIFY_ARE_EQUAL_STR(L"/clubs/3379871642723170/users/xuid(2535458173220066)/roles", httpCall->PathQueryFragment.to_string());
+
+        VERIFY_ARE_EQUAL(result->Size, (unsigned int)3);
+        bool modFound = false;
+        for (const auto& role : result)
+        {
+            if (role == ClubRole::Moderator)
+            {
+                modFound = true;
+                break;
+            }
+        }
+        VERIFY_ARE_EQUAL(modFound, true);
+    }
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
