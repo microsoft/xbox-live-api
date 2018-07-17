@@ -529,7 +529,8 @@ string_t clubs_service_impl::clubroster_roles_subpath(
     _In_ const string_t& xuid
     )
 {
-    stringstream_t path(clubroster_subpath(clubId, xuid));
+    stringstream_t path;
+    path << clubroster_subpath(clubId, xuid);
     path << _T("/roles");
     return path.str();
 }
@@ -540,7 +541,8 @@ string_t clubs_service_impl::clubroster_roles_subpath(
     _In_ club_role role
     )
 {
-    stringstream_t path(clubroster_roles_subpath(clubId, xuid));
+    stringstream_t path;
+    path << clubroster_roles_subpath(clubId, xuid);
     path << _T("/") << convert_club_role_to_string(role);
     return path.str();
 }
