@@ -83,16 +83,16 @@ social_graph::~social_graph()
     }
     catch (...)
     {
-        LOG_ERROR_IF(
+        LOG_ERROR_IF(get_xsapi_singleton(false) && 
             social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::error,
             "Exception happened during graph destruction complete callback"
-        );
+            );
     }
 
-    LOG_DEBUG_IF(
+    LOG_DEBUG_IF(get_xsapi_singleton(false) &&
         social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose,
         "social_graph destroyed"
-    );
+        );
 
     m_perfTester.stop_timer("~social_graph");
 }
@@ -1774,7 +1774,7 @@ user_buffers_holder::user_buffers_holder() : m_activeBuffer(nullptr), m_inactive
 
 user_buffers_holder::~user_buffers_holder()
 {
-    LOG_DEBUG_IF(social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose, "destroying user buffer holder");
+    LOG_DEBUG_IF(get_xsapi_singleton(false) && social_manager_internal::get_singleton_instance()->diagnostics_trace_level() >= xbox_services_diagnostics_trace_level::verbose, "destroying user buffer holder");
 
     if (m_userBufferA.buffer != nullptr)
     {

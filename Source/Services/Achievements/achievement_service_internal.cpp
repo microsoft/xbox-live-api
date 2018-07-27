@@ -451,17 +451,20 @@ achievement_service_internal::get_achievements(
                     );
 
                 auto& achievement = achievementsResult.payload();
-                achievement->_Init_next_page_info(
-                    userContext,
-                    xboxLiveContextSettings,
-                    appConfig,
-                    xboxLiveContextImpl,
-                    xboxUserId,
-                    titleIds,
-                    type,
-                    unlockedOnly,
-                    orderBy
-                );
+                if (achievement != nullptr)
+                {
+                    achievement->_Init_next_page_info(
+                        userContext,
+                        xboxLiveContextSettings,
+                        appConfig,
+                        xboxLiveContextImpl,
+                        xboxUserId,
+                        titleIds,
+                        type,
+                        unlockedOnly,
+                        orderBy
+                    );
+                }
                 
                 callback(utils::generate_xbox_live_result<std::shared_ptr<achievements_result_internal>>(achievementsResult, response));
             }

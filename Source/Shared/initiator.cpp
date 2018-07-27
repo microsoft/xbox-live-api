@@ -77,6 +77,8 @@ initiator::~initiator()
     TraceLoggingUnregister(g_hTraceLoggingProvider);
 #endif
 
+    HCTraceSetClientCallback(nullptr);
+
     logger::release_logger();
 }
 
