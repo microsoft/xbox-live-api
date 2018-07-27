@@ -16,6 +16,7 @@
 
 struct XblAppConfig;
 
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
     class xbox_live_services_settings;
     class xbox_system_factory;
@@ -448,6 +449,7 @@ extern XblMemAllocFunction g_pMemAllocHook;
 extern XblMemFreeFunction g_pMemFreeHook;
 
 std::shared_ptr<xsapi_singleton> get_xsapi_singleton(_In_ bool createIfRequired = true);
+void cleanup_xsapi_singleton();
 void verify_global_init();
 
 #ifndef _In_reads_bytes_

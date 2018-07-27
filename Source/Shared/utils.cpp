@@ -28,6 +28,8 @@
 #endif
 #endif
 
+HC_DEFINE_TRACE_AREA(XSAPI, HCTraceLevel_Error);
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 #define MAKE_HTTP_HRESULT(code) MAKE_HRESULT(1, 0x019, code)
@@ -112,11 +114,6 @@ void xsapi_singleton::init()
 
 xsapi_singleton::~xsapi_singleton()
 {
-    std::lock_guard<std::mutex> guard(s_xsapiSingletonLock);
-    s_xsapiSingleton = nullptr;
-
-    HCCleanup();
-
     CloseAsyncQueue(m_asyncQueue);
 }
 
@@ -134,6 +131,32 @@ get_xsapi_singleton(_In_ bool createIfRequired)
     }
 
     return s_xsapiSingleton;
+}
+
+void cleanup_xsapi_singleton()
+{
+    {
+        std::lock_guard<std::mutex> guard(s_xsapiSingletonLock);
+        std::shared_ptr<xsapi_singleton> xsapiSingleton;
+        xsapiSingleton = std::atomic_exchange(&s_xsapiSingleton, xsapiSingleton);
+
+        if (xsapiSingleton != nullptr)
+        {
+            // Wait for all other references to the singleton to go away
+            // Note that the use count check here is only valid because we never create
+            // a weak_ptr to the singleton. If we did that could cause the use count
+            // to increase even though we are the only strong reference
+            while (xsapiSingleton.use_count() > 1)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds{ 10 });
+            }
+            // xsapiSingleton will be destroyed on this thread now
+        }
+    }
+
+    // Don't call HCCleanup until after singleton is destroyed since some of the singleton's
+    // state depends on HC state.
+    HCCleanup();
 }
 
 void verify_global_init()

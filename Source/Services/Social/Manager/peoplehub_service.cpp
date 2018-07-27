@@ -104,7 +104,7 @@ void peoplehub_service::get_social_graph(
         queue,
         [callback](std::shared_ptr<http_call_response_internal> response)
     {
-        std::error_code errc;
+        std::error_code errc = xbox_live_error_code::no_error;
         web::json::value peopleArray = utils::extract_json_field(
             response->response_body_json(),
             "people",
