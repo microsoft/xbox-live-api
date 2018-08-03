@@ -69,13 +69,13 @@ xbox_service_call_routed_event_args_internal::xbox_service_call_routed_event_arg
 
 xbox_service_call_routed_event_args_internal::xbox_service_call_routed_event_args_internal(
     _In_ hc_call_handle_t hcCallHandle
-    ) 
+    )
 {
     // Possible TODO. For intermediate call routed calls we don't have access to many of the
     // fields. Could expose them in libHttpClient if they are needed.
 
-	const char* url;
-	HCHttpCallGetRequestUrl(hcCallHandle, &url);
+    const char* url;
+    HCHttpCallGetRequestUrl(hcCallHandle, &url);
     m_uri = url;
 
     const char* responseBody;
