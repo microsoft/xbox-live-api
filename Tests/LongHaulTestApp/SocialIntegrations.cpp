@@ -45,11 +45,11 @@ void Tests::GetSocialRelationship()
 
     Log(L"XblSocialGetSocialRelationships");
     XblSocialGetSocialRelationshipsAsync(
-        asyncBlock,
         m_xboxLiveContext,
         m_xuid,
-        XblSocialRelationshipFilter::XblSocialRelationshipFilter_All
-    );
+        XblSocialRelationshipFilter::XblSocialRelationshipFilter_All,
+        asyncBlock
+        );
 }
 
 void Tests::SocialRelationshipGetNext(xbl_social_relationship_result_handle relationshipResult)
@@ -88,10 +88,11 @@ void Tests::SocialRelationshipGetNext(xbl_social_relationship_result_handle rela
 
         Log("XblSocialRelationshipResultGetNext");
         XblSocialRelationshipResultGetNextAsync(
-            asyncBlock,
             m_xboxLiveContext,
             relationshipResult,
-            1);
+            1,
+            asyncBlock
+            );
     }
     else
     {
@@ -126,12 +127,12 @@ void Tests::TestResputationFeedback()
 
     Log(L"XblSocialSubmitReputationFeedback");
     XblSocialSubmitReputationFeedbackAsync(
-        asyncBlock,
         m_xboxLiveContext,
         m_xuid,
         XblReputationFeedbackType_PositiveSkilledPlayer,
         nullptr,
         nullptr,
-        nullptr
-    );
+        nullptr,
+        asyncBlock
+        );
 }

@@ -369,7 +369,6 @@ typedef struct xbl_achievements_result* xbl_achievements_result_handle;
 /// To get the result, call XblAchievementsGetAchievementsForTitleIdResult inside the AsyncBlock callback
 /// or after the AsyncBlock is complete.
 /// </summary>
-/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>
 /// <param name="titleId">The title ID.</param>
@@ -378,13 +377,13 @@ typedef struct xbl_achievements_result* xbl_achievements_result_handle;
 /// <param name="orderBy">Controls how the list of achievements is ordered.</param>
 /// <param name="skipItems">The number of achievements to skip.</param>
 /// <param name="maxItems">The maximum number of achievements the result can contain.  Pass 0 to attempt
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// to retrieve all items.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
 /// This method calls V2 GET /users/xuid({xuid})/achievements
 /// </remarks>
 STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
-    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ uint32_t titleId,
@@ -392,7 +391,8 @@ STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
     _In_ bool unlockedOnly,
     _In_ XblAchievementOrderBy orderBy,
     _In_ uint32_t skipItems,
-    _In_ uint32_t maxItems
+    _In_ uint32_t maxItems,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -438,20 +438,20 @@ STDAPI XblAchievementsResultHasNext(
 /// To get the result, call XblAchievementsResultGetNextResult inside the AsyncBlock callback
 /// or after the AsyncBlock is complete.
 /// </summary>
-/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="resultHandle">Handle to the achievement result.</param>
 /// <param name="maxItems">The maximum number of items that the result can contain. Pass 0 to attempt
 /// to retrieve all items.</param>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <remarks>
 /// This method calls V2 GET /users/xuid({xuid})/achievements.
 /// </remarks>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsResultGetNextAsync(
-    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ xbl_achievements_result_handle resultHandle,
-    _In_ uint32_t maxItems
+    _In_ uint32_t maxItems,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -475,7 +475,6 @@ STDAPI XblAchievementsResultGetNextResult(
 /// The result of the asynchronous operation can be obtained by calling GetAsyncStatus
 /// inside the AsyncBlock callback or after the AsyncBlock is complete
 /// </summary>
-/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>
 /// <param name="titleId">The title ID.</param>
@@ -484,18 +483,19 @@ STDAPI XblAchievementsResultGetNextResult(
 /// <param name="percentComplete">The completion percentage of the achievement to indicate progress.
 /// Valid values are from 1 to 100. Set to 100 to unlock the achievement.
 /// Progress will be set by the server to the highest value sent</param>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
 /// This method calls V2 POST /users/xuid({xuid})/achievements/{scid}/update
 /// </remarks>
 STDAPI XblAchievementsUpdateAchievementAsync(
-    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_opt_ const uint32_t* titleId,
     _In_opt_z_ const char* serviceConfigurationId,
     _In_z_ const char* achievementId,
-    _In_ uint32_t percentComplete
+    _In_ uint32_t percentComplete,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -503,21 +503,21 @@ STDAPI XblAchievementsUpdateAchievementAsync(
 /// To get the result, call XblAchievementsGetAchievementResult inside the AsyncBlock callback
 /// or after the AsyncBlock is complete.
 /// </summary>
-/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>
 /// <param name="serviceConfigurationId">The UTF-8 encoded service configuration ID (SCID) for the title.</param>
 /// <param name="achievementId">The UTF-8 encoded unique identifier of the Achievement as defined by XDP or Dev Center.</param>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
 /// This method calls V2 GET /users/xuid({xuid})/achievements/{scid}/{achievementId}.
 /// </remarks>
 STDAPI XblAchievementsGetAchievementAsync(
-    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_z_ const char* serviceConfigurationId,
-    _In_z_ const char* achievementId
+    _In_z_ const char* achievementId,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 /// <summary>

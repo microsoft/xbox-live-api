@@ -12,7 +12,6 @@ using namespace xbox::services::achievements;
 using namespace xbox::services::system;
 
 STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
-    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ uint32_t titleId,
@@ -20,7 +19,8 @@ STDAPI XblAchievementsGetAchievementsForTitleIdAsync(
     _In_ bool unlockedOnly,
     _In_ XblAchievementOrderBy orderBy,
     _In_ uint32_t skipItems,
-    _In_ uint32_t maxItems
+    _In_ uint32_t maxItems,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT
 try
 {
@@ -144,10 +144,10 @@ CATCH_RETURN()
 
 STDAPI
 XblAchievementsResultGetNextAsync(
-    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ xbl_achievements_result_handle resultHandle,
-    _In_ uint32_t maxItems
+    _In_ uint32_t maxItems,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT
 try
 {
@@ -221,13 +221,13 @@ STDAPI XblAchievementsResultGetNextResult(
 }
 
 STDAPI XblAchievementsUpdateAchievementAsync(
-    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_opt_ const uint32_t* titleId,
     _In_opt_z_ const char* serviceConfigurationId,
     _In_z_ const char* achievementId,
-    _In_ uint32_t percentComplete
+    _In_ uint32_t percentComplete,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT
 try
 {
@@ -316,11 +316,11 @@ try
 CATCH_RETURN()
 
 STDAPI XblAchievementsGetAchievementAsync(
-    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_z_ const char* serviceConfigurationId,
-    _In_z_ const char* achievementId
+    _In_z_ const char* achievementId,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT
 try
 {

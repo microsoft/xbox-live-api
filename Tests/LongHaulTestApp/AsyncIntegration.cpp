@@ -13,19 +13,19 @@ std::map<async_queue_handle_t, win32_handle> g_stopRequestedHandles;
 std::map<async_queue_handle_t, win32_handle> g_workReadyHandles;
 std::map<async_queue_handle_t, std::vector<HANDLE>> g_threads;
 
-HANDLE InitializeAsync(_In_ async_queue_handle_t queue, _Out_ uint32_t* callbackToken)
+HANDLE InitializeAsync(_In_ async_queue_handle_t queue, _Out_ registration_token_t* callbackToken)
 {
     return InitializeAsync(queue, BackgroundWorkThreadProc, queue, callbackToken);
 }
 
-HANDLE InitializeAsync(_In_ async_queue_handle_t queue, _In_ LPTHREAD_START_ROUTINE threadRoutine, _In_ LPVOID threadContext, _Out_ uint32_t* callbackToken)
+HANDLE InitializeAsync(_In_ async_queue_handle_t queue, _In_ LPTHREAD_START_ROUTINE threadRoutine, _In_ LPVOID threadContext, _Out_ registration_token_t* callbackToken)
 {
     if (g_stopRequestedHandles.find(queue) == g_stopRequestedHandles.end())
     {
         g_stopRequestedHandles[queue].set(CreateEvent(nullptr, true, false, nullptr));
         g_workReadyHandles[queue].set(CreateSemaphore(nullptr, 0, LONG_MAX, nullptr));
 
-        AddAsyncQueueCallbackSubmitted(queue, nullptr, HandleAsyncQueueCallback, callbackToken);
+        RegisterAsyncQueueCallbackSubmitted(queue, nullptr, HandleAsyncQueueCallback, callbackToken);
     }
     
     DuplicateAsyncQueueHandle(queue); // the BackgroundWorkThreadProc will call close
@@ -34,9 +34,9 @@ HANDLE InitializeAsync(_In_ async_queue_handle_t queue, _In_ LPTHREAD_START_ROUT
     return thread;
 }
 
-void CleanupAsync(_In_ async_queue_handle_t queue, _In_ uint32_t callbackToken)
+void CleanupAsync(_In_ async_queue_handle_t queue, _In_ registration_token_t callbackToken)
 {
-    RemoveAsyncQueueCallbackSubmitted(queue, callbackToken);
+    UnregisterAsyncQueueCallbackSubmitted(queue, callbackToken);
     CloseAsyncQueue(queue);
     SetEvent(g_stopRequestedHandles[queue].get());
 

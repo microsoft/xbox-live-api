@@ -55,10 +55,10 @@ void Tests::TestGetUserProfile()
 
     Log(L"XblProfileGetUserProfile");
     XblProfileGetUserProfileAsync(
-        asyncBlock,
         m_xboxLiveContext,
-        m_xuid
-    );
+        m_xuid,
+        asyncBlock
+        );
 }
 
 void Tests::TestGetUserProfiles()
@@ -97,11 +97,11 @@ void Tests::TestGetUserProfiles()
     std::vector<uint64_t> xuids;
     xuids.push_back(m_xuid);
     XblProfileGetUserProfilesAsync(
-        asyncBlock,
         m_xboxLiveContext,
         xuids.data(),
-        xuids.size()
-    );
+        xuids.size(),
+        asyncBlock
+        );
 }
 
 void Tests::TestGetUserProfilesForSocialGroup()
@@ -139,8 +139,8 @@ void Tests::TestGetUserProfilesForSocialGroup()
 
     Log(L"XblProfileGetUserProfilesForSocialGroup");
     XblProfileGetUserProfilesForSocialGroupAsync(
-        asyncBlock,
         m_xboxLiveContext,
-        "People"
-    );
+        "People",
+        asyncBlock
+        );
 }
