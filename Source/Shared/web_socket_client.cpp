@@ -143,7 +143,7 @@ void xbox_web_socket_client::connect(
             xsapi_memory::mem_free(asyncBlock);
         };
 
-        HCWebSocketConnectAsync(asyncBlock, uri.data(), subProtocol.data(), pThis->m_websocket);
+        HCWebSocketConnectAsync(uri.data(), subProtocol.data(), pThis->m_websocket, asyncBlock);
     });
 }
 
@@ -162,7 +162,7 @@ void xbox_web_socket_client::send(
         (*callback)(result);
         xsapi_memory::mem_free(asyncBlock);
     };
-    HCWebSocketSendMessageAsync(asyncBlock, m_websocket, message.data());
+    HCWebSocketSendMessageAsync(m_websocket, message.data(), asyncBlock);
 }
 
 void xbox_web_socket_client::close()
