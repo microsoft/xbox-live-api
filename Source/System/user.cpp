@@ -171,7 +171,7 @@ xbox_live_user::get_token_and_signature(
         utils::internal_string_from_string_t(httpMethod),
         utils::internal_string_from_string_t(url),
         utils::internal_string_from_string_t(headers),
-        nullptr,
+        get_xsapi_singleton()->m_asyncQueue,
         [tce](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
     {
         tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(token_and_signature_result, result));
@@ -195,7 +195,7 @@ xbox_live_user::get_token_and_signature(
         utils::internal_string_from_string_t(url),
         utils::internal_string_from_string_t(headers),
         utils::internal_string_from_string_t(requestBodyString),
-        nullptr,
+        get_xsapi_singleton()->m_asyncQueue,
         [tce](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
     {
         tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(token_and_signature_result, result));
@@ -218,7 +218,7 @@ xbox_live_user::get_token_and_signature_array(
         utils::internal_string_from_string_t(url),
         utils::internal_string_from_string_t(headers),
         utils::internal_vector_from_std_vector(requestBodyArray),
-        nullptr,
+        get_xsapi_singleton()->m_asyncQueue,
         [tce](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
     {
         tce.set(CREATE_EXTERNAL_XBOX_LIVE_RESULT(token_and_signature_result, result));
