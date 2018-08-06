@@ -45,7 +45,6 @@ void Tests::GetAchievmentsForTitle()
 
     Log("XblAchievementsGetAchievementsForTitleIdAsync");
     XblAchievementsGetAchievementsForTitleIdAsync(
-        asyncBlock,
         m_xboxLiveContext,
         m_xuid,
         m_config->titleId,
@@ -53,7 +52,9 @@ void Tests::GetAchievmentsForTitle()
         false,
         XblAchievementOrderBy_DefaultOrder,
         0,
-        1);
+        1,
+        asyncBlock
+        );
 }
 
 void Tests::AchievementResultsGetNext(xbl_achievements_result_handle result)
@@ -104,10 +105,11 @@ void Tests::AchievementResultsGetNext(xbl_achievements_result_handle result)
 
         Log("XblAchievementsResultGetNextAsync");
         XblAchievementsResultGetNextAsync(
-            asyncBlock,
             m_xboxLiveContext,
             result,
-            1);
+            1,
+            asyncBlock
+            );
     }
     else if (achievementsCount > 0)
     {
@@ -151,11 +153,12 @@ void Tests::GetAchievement(PCSTR scid, PCSTR achievementId)
 
     Log("XblAchievementsGetAchievementAsync");
     XblAchievementsGetAchievementAsync(
-        asyncBlock,
         m_xboxLiveContext,
         m_xuid,
         scid,
-        achievementId);
+        achievementId,
+        asyncBlock
+        );
 }
 
 void Tests::UpdateAchievement(PCSTR scid, PCSTR achievementId)
@@ -189,11 +192,12 @@ void Tests::UpdateAchievement(PCSTR scid, PCSTR achievementId)
     Log("XblAchievementsUpdateAchievement");
     auto tid = m_config->titleId;
     XblAchievementsUpdateAchievementAsync(
-        asyncBlock,
         m_xboxLiveContext,
         m_xuid,
         &tid,
         scid,
         achievementId,
-        m_progress);
+        m_progress,
+        asyncBlock
+        );
 }

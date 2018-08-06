@@ -613,7 +613,7 @@ void Game::GetUserProfile()
 
         delete asyncBlock;
     };
-    XblProfileGetUserProfileAsync(asyncBlock, m_xboxLiveContext, m_xuid);
+    XblProfileGetUserProfileAsync(m_xboxLiveContext, m_xuid, asyncBlock);
 }
 
 
@@ -681,7 +681,7 @@ void Game::GetSocialRelationships()
         }
     };
 
-    XblSocialGetSocialRelationshipsAsync(asyncBlock, m_xboxLiveContext, m_xuid, XblSocialRelationshipFilter_All);
+    XblSocialGetSocialRelationshipsAsync(m_xboxLiveContext, m_xuid, XblSocialRelationshipFilter_All, asyncBlock);
 }
 
 void Game::GetAchievmentsForTitle()
@@ -730,7 +730,6 @@ void Game::GetAchievmentsForTitle()
     };
 
     XblAchievementsGetAchievementsForTitleIdAsync(
-        asyncBlock,
         m_xboxLiveContext,
         m_xuid,
         m_config->titleId,
@@ -738,7 +737,9 @@ void Game::GetAchievmentsForTitle()
         false, 
         XblAchievementOrderBy_DefaultOrder, 
         0, 
-        1);
+        1,
+        asyncBlock
+        );
 }
 
 void Game::AchievementResultsGetNext(xbl_achievements_result_handle resultHandle)
@@ -775,10 +776,11 @@ void Game::AchievementResultsGetNext(xbl_achievements_result_handle resultHandle
     };
 
     XblAchievementsResultGetNextAsync(
-        asyncBlock,
         m_xboxLiveContext,
         resultHandle,
-        1);
+        1,
+        asyncBlock
+        );
 }
 
 void Game::GetAchievement(std::string scid, std::string achievementId)
@@ -815,11 +817,11 @@ void Game::GetAchievement(std::string scid, std::string achievementId)
     };
 
     XblAchievementsGetAchievementAsync(
-        asyncBlock,
         m_xboxLiveContext,
         m_xuid,
         scid.data(),
-        achievementId.data()
+        achievementId.data(),
+        asyncBlock
         );
 }
 
@@ -851,13 +853,14 @@ void Game::UpdateAchievement(std::string scid, std::string achievementId)
 
     auto tid = m_config->titleId;
     XblAchievementsUpdateAchievementAsync(
-        asyncBlock,
         m_xboxLiveContext,
         m_xuid,
         &tid,
         scid.data(),
         achievementId.data(),
-        10);
+        10,
+        asyncBlock
+        );
 }
 
 void Game::HandleSignout(xbl_user_handle user)

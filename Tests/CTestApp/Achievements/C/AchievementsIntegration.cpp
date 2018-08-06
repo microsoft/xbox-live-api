@@ -86,7 +86,6 @@ void Game::GetAchievementsForTitle(
     };
 
     XblAchievementsGetAchievementsForTitleIdAsync(
-        asyncBlock,
         m_xboxLiveContext,
         m_xuid,
         m_config->titleId,
@@ -94,7 +93,9 @@ void Game::GetAchievementsForTitle(
         false,
         XblAchievementOrderBy_DefaultOrder,
         skipItems,
-        maxItems);
+        maxItems,
+        asyncBlock
+        );
 }
 
 void Game::AchievementResultsGetNext(
@@ -144,10 +145,11 @@ void Game::AchievementResultsGetNext(
     };
 
     XblAchievementsResultGetNextAsync(
-        asyncBlock,
         m_xboxLiveContext,
         resultHandle,
-        maxItems);
+        maxItems,
+        asyncBlock
+        );
 }
 
 void Game::GetAchievement(
@@ -180,12 +182,12 @@ void Game::GetAchievement(
     };
 
     XblAchievementsGetAchievementAsync(
-        asyncBlock,
         m_xboxLiveContext,
         m_xuid,
         m_config->scid,
-        achievementId
-    );
+        achievementId,
+        asyncBlock
+        );
 }
 
 void Game::UpdateAchievement(
@@ -218,11 +220,12 @@ void Game::UpdateAchievement(
     };
 
     XblAchievementsUpdateAchievementAsync(
-        asyncBlock,
         m_xboxLiveContext,
         m_xuid,
         &m_config->titleId,
         m_config->scid,
         achievementId,
-        percentComplete);
+        percentComplete,
+        asyncBlock
+        );
 }

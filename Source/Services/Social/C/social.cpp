@@ -127,10 +127,10 @@ STDAPI XblGetSocialRelationshipsHelper(
 }
 
 STDAPI XblSocialGetSocialRelationshipsAsync(
-    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
-    _In_ XblSocialRelationshipFilter socialRelationshipFilter
+    _In_ XblSocialRelationshipFilter socialRelationshipFilter,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT
 try
 {
@@ -175,10 +175,10 @@ try
 CATCH_RETURN()
 
 STDAPI XblSocialRelationshipResultGetNextAsync(
-    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ xbl_social_relationship_result_handle resultHandle,
-    _In_ uint32_t maxItems
+    _In_ uint32_t maxItems,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT
 try
 {
@@ -323,13 +323,13 @@ try
 CATCH_RETURN_WITH(;)
 
 STDAPI XblSocialSubmitReputationFeedbackAsync(
-    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ XblReputationFeedbackType reputationFeedbackType,
     _In_opt_z_ const char* sessionName,
     _In_opt_z_ const char* reasonMessage,
-    _In_opt_z_ const char* evidenceResourceId
+    _In_opt_z_ const char* evidenceResourceId,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT
 try
 {
@@ -393,11 +393,11 @@ try
 }
 CATCH_RETURN()
 
-STDAPI XblSocialSubmitBatchReputationFeedback(
-    _Inout_ AsyncBlock* async,
+STDAPI XblSocialSubmitBatchReputationFeedbackAsync(
     _In_ xbl_context_handle xboxLiveContext,
     _In_ XblReputationFeedbackItem* feedbackItems,
-    _In_ uint32_t feedbackItemsCount
+    _In_ uint32_t feedbackItemsCount,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT
 try
 {
@@ -442,6 +442,7 @@ try
             context->~Context();
             xsapi_memory::mem_free(context);
             return S_OK;
+
         default: 
             return S_OK;
         }

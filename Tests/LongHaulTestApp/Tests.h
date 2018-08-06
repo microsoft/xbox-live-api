@@ -16,7 +16,7 @@ public:
 private:
     async_queue_handle_t m_queue;
     async_queue_handle_t m_queue2;
-    uint32_t m_asyncQueueCallbackToken;
+    registration_token_t m_asyncQueueCallbackToken;
 
     struct ThreadContext
     {

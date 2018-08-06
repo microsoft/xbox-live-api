@@ -244,17 +244,17 @@ typedef struct xbl_social_relationship_result* xbl_social_relationship_result_ha
 /// To get the result, call XblSocialGetSocialRelationshipsResult inside the AsyncBlock callback
 /// or after the AsyncBlock is complete.
 /// </summary>
-/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User Id to get the social relationships for.</param>
 /// <param name="socialRelationshipFilter">Controls how the list is filtered.</param>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>Calls V1 GET /users/{ownerId}/people?view={view}&amp;startIndex={startIndex}&amp;maxItems={maxItems}</remarks>
 STDAPI XblSocialGetSocialRelationshipsAsync(
-    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
-    _In_ XblSocialRelationshipFilter socialRelationshipFilter
+    _In_ XblSocialRelationshipFilter socialRelationshipFilter,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -301,17 +301,17 @@ STDAPI XblSocialRelationshipResultHasNext(
 /// To get the result, call XblSocialRelationshipResultGetNextResult inside the AsyncBlock callback
 /// or after the AsyncBlock is complete.
 /// </summary>
-/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="resultHandle">Social relationship result handle from a previous call to XblSocialGetSocialRelationshipsAsync.</param>
 /// <param name="maxItems">Controls the number of XblSocialRelationship objects to get. 0 will return as many as possible</param>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>Calls V1 GET /users/{ownerId}/people</remarks>
 STDAPI XblSocialRelationshipResultGetNextAsync(
-    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ xbl_social_relationship_result_handle resultHandle,
-    _In_ uint32_t maxItems
+    _In_ uint32_t maxItems,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -442,23 +442,23 @@ typedef struct XblReputationFeedbackItem
 /// The result of the asynchronous operation can be obtained by calling GetAsyncStatus
 /// inside the AsyncBlock callback or after the AsyncBlock is complete
 /// </summary>
-/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the user that reputation feedback is being submitted on.</param>
 /// <param name="reputationFeedbackType">The reputation feedback type being submitted.</param>
 /// <param name="sessionName">The UTF-8 encoded name of the multiplayer session directory session the user is sending feedback from. (Optional)</param>
 /// <param name="reasonMessage">User supplied text in UTF-8 encoded added to explain the reason for the feedback. (Optional)</param>
 /// <param name="evidenceResourceId">The UTF-8 encoded id of a resource that can be used as evidence for the feedback. Example: the Id of a video file. (Optional)</param>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>Calls V100 POST /users/xuid({xuid})/feedback</remarks>
 STDAPI XblSocialSubmitReputationFeedbackAsync(
-    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ uint64_t xboxUserId,
     _In_ XblReputationFeedbackType reputationFeedbackType,
     _In_opt_z_ const char* sessionName,
     _In_opt_z_ const char* reasonMessage,
-    _In_opt_z_ const char* evidenceResourceId
+    _In_opt_z_ const char* evidenceResourceId,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
 /// <summary>
@@ -466,16 +466,16 @@ STDAPI XblSocialSubmitReputationFeedbackAsync(
 /// The result of the asynchronous operation can be obtained by calling GetAsyncStatus
 /// inside the AsyncBlock callback or after the AsyncBlock is complete
 /// </summary>
-/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="feedbackItems">An array of XblReputationFeedbackItem objects to submit reputation feedback on.</param>
 /// <param name="feedbackItemsCount">The count of items in the feedbackItems array.</param>
+/// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>Calls V101 POST /users/batchfeedback</remarks>
 STDAPI XblSocialSubmitBatchReputationFeedbackAsync(
-    _Inout_ AsyncBlock* async,
     _In_ xbl_context_handle xboxLiveContext,
     _In_ XblReputationFeedbackItem* feedbackItems,
-    _In_ uint32_t feedbackItemsCount
+    _In_ uint32_t feedbackItemsCount,
+    _Inout_ AsyncBlock* async
     ) XBL_NOEXCEPT;
 
