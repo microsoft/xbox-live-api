@@ -15,13 +15,13 @@ try
 {
     RETURN_C_INVALIDARGUMENT_IF_NULL(appConfig);
 
+    auto internalConfig = xbox_live_app_config_internal::get_app_config_singleton();
     auto singleton = get_xsapi_singleton();
     std::lock_guard<std::mutex> lock(singleton->m_singletonLock);
 
     if (singleton->m_cAppConfigSingleton == nullptr)
     {
         singleton->m_cAppConfigSingleton = xsapi_allocate_shared<XblAppConfig>();
-        auto internalConfig = xbox_live_app_config_internal::get_app_config_singleton();
 
         singleton->m_cAppConfigSingleton->environment = internalConfig->environment().data();
         singleton->m_cAppConfigSingleton->scid = internalConfig->scid().data();
