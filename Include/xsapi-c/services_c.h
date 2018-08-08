@@ -12,6 +12,7 @@
 #include <xsapi-c/xbox_live_app_config_c.h>
 #include <xsapi-c/presence_c.h>
 #include <xsapi-c/profile_c.h>
+#include <xsapi-c/real_time_activity_c.h>
 #include <xsapi-c/social_c.h>
 #include <xsapi-c/social_manager_c.h>
 #include <xsapi-c/achievements_c.h>
