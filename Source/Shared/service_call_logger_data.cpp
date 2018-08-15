@@ -99,9 +99,9 @@ xsapi_internal_string service_call_logger_data::to_string() const
     result << "\",";
 
     //multiplayer correlation id
-    result << _T('\"');
+    result << '\"';
     result << m_multiplayerCorrelationId;
-    result << _T("\",");
+    result << "\",";
 
     //requestHeader
     result << '\"';
@@ -124,9 +124,9 @@ xsapi_internal_string service_call_logger_data::to_string() const
     result << "\",";
 
     //httpStatusCode
-    result << _T('\"');
+    result << '\"';
     result << m_httpStatusCode;
-    result << _T("\",");
+    result << "\",";
 
     //ellapsedCalltime
     result << '\"';
