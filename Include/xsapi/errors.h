@@ -5,9 +5,7 @@
 #include <system_error>
 
 #ifndef _NOEXCEPT
-#ifdef XSAPI_U
 #define _NOEXCEPT noexcept
-#endif
 #endif
 
 namespace xbox {
