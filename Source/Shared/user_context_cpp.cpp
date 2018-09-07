@@ -79,9 +79,16 @@ void user_context::get_auth_result(
         m_user->_User_impl()->get_token_and_signature(httpMethod, url, headers, requestBodyVector, queue,
             [callback](xbox_live_result<std::shared_ptr<token_and_signature_result_internal>> result)
         {
-            const auto& tokenResult = result.payload();
-            user_context_auth_result userContextResult(tokenResult->token(), tokenResult->signature());
-            callback(xbox_live_result<user_context_auth_result>(userContextResult, result.err(), result.err_message()));
+            if (result.err())
+            {
+                callback(xbox_live_result<user_context_auth_result>(result.err(), result.err_message()));
+            }
+            else
+            {
+                const auto& tokenResult = result.payload();
+                user_context_auth_result userContextResult(tokenResult->token(), tokenResult->signature());
+                callback(xbox_live_result<user_context_auth_result>(userContextResult, result.err(), result.err_message()));
+            }
         });
     }
 }
