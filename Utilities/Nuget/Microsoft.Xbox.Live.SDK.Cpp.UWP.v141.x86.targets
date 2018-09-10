@@ -7,7 +7,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)' != 'Debug' AND '$(PlatformToolset)' == 'v141' AND '$(Platform)' == 'Win32'">
     <Link>
-      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(Platform)\v141\Release\libHttpClient.141.UWP.C;$(MSBuildThisFileDirectory)lib\$(Platform)\v141\Release\cpprest141_uwp_2_9.lib;$(MSBuildThisFileDirectory)lib\$(Platform)\v141\Release\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\$(Platform)\v141\Release\libHttpClient.141.UWP.C.lib;$(MSBuildThisFileDirectory)lib\$(Platform)\v141\Release\cpprest141_uwp_2_9.lib;$(MSBuildThisFileDirectory)lib\$(Platform)\v141\Release\Microsoft.Xbox.Services.141.UWP.Ship.Cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
 </Project>
