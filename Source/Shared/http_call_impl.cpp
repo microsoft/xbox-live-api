@@ -77,7 +77,11 @@ http_call_data::http_call_data(
     HCHttpCallRequestSetTimeoutWindow(callHandle, static_cast<uint32_t>(xboxLiveContextSettings->http_timeout_window().count()));
     HCHttpCallRequestSetRetryDelay(callHandle, static_cast<uint32_t>(xboxLiveContextSettings->http_retry_delay().count()));
 
-    fullUrl = serverName + utils::internal_string_from_string_t(pathQueryFragment.to_string());
+    fullUrl = serverName;
+    if (!pathQueryFragment.is_empty())
+    {
+        fullUrl += utils::internal_string_from_string_t(pathQueryFragment.to_string());
+    }
     HCHttpCallRequestSetUrl(callHandle, httpMethod.data(), fullUrl.data());
 }
 
