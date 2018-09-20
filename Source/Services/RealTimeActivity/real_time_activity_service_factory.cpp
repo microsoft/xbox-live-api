@@ -12,13 +12,20 @@ std::shared_ptr<real_time_activity_service_factory>
 real_time_activity_service_factory::get_singleton_instance()
 {
     auto xsapiSingleton = get_xsapi_singleton();
-    std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
-    if (xsapiSingleton->m_rtaFactoryInstance == nullptr)
+    if (xsapiSingleton != nullptr)
     {
-        xsapiSingleton->m_rtaFactoryInstance = std::make_shared<real_time_activity_service_factory>();
-    }
+        std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
+        if (xsapiSingleton->m_rtaFactoryInstance == nullptr)
+        {
+            xsapiSingleton->m_rtaFactoryInstance = std::make_shared<real_time_activity_service_factory>();
+        }
 
-    return xsapiSingleton->m_rtaFactoryInstance;
+        return xsapiSingleton->m_rtaFactoryInstance;
+    }
+    else
+    {
+        return nullptr;
+    }
 }
 
 real_time_activity_service_factory::real_time_activity_service_factory()

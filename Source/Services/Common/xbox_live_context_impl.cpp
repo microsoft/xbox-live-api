@@ -102,7 +102,11 @@ xbox_live_context_impl::~xbox_live_context_impl()
     }
 #endif
 
-    real_time_activity::real_time_activity_service_factory::get_singleton_instance()->remove_user_from_rta_map(m_userContext);
+    auto singleton = real_time_activity::real_time_activity_service_factory::get_singleton_instance();
+    if (singleton != nullptr)
+    {
+        singleton->remove_user_from_rta_map(m_userContext);
+    }
 }
 
 

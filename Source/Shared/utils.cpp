@@ -130,7 +130,8 @@ get_xsapi_singleton(_In_ bool createIfRequired)
         }
     }
 
-    return s_xsapiSingleton;
+    // Check if shared_ptr's ref count is 0 before return, to avoid destructor reentry.
+    return s_xsapiSingleton.use_count() == 0 ? nullptr : s_xsapiSingleton;
 }
 
 void cleanup_xsapi_singleton()
