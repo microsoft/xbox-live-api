@@ -509,6 +509,8 @@ xbox_social_user_group_internal::get_presence_filter_result(
         return user->presence_record().user_state() == user_presence_state::offline && user->title_history().has_user_played();
     case presence_filter::title_online:
         return user->presence_record().is_user_playing_title(m_titleId);
+    case presence_filter::title_online_outside_title:
+        return user->title_history().has_user_played() && user->presence_record().user_state() == user_presence_state::online && !user->presence_record().is_user_playing_title(m_titleId);
     default:
         return false;
     }
