@@ -81,6 +81,9 @@ enum class presence_filter
     /// <summary>Has played this title and is offline</summary>
     title_offline,
 
+    /// <summary>Has played this title, is online but not currently playing this title</summary>
+    title_online_outside_title,
+
     /// <summary>Everyone currently online</summary>
     all_online,
 
@@ -274,6 +277,11 @@ public:
     _XSAPIIMP xbox::services::presence::presence_device_type device_type() const;
 
     /// <summary>
+    /// Whether or not this is the primary primary presence record
+    /// </summary>
+    _XSAPIIMP bool is_primary() const;
+
+    /// <summary>
     /// Internal function
     /// </summary>
     social_manager_presence_title_record();
@@ -299,6 +307,7 @@ private:
     bool m_isNull;
     xbox::services::presence::presence_device_type m_deviceType;
     uint32_t m_titleId;
+    bool m_isPrimary;
     char_t m_presenceText[RICH_PRESENCE_CHAR_SIZE];
 };
 

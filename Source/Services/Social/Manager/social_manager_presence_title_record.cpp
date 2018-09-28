@@ -15,7 +15,8 @@ social_manager_presence_title_record::social_manager_presence_title_record() :
     m_isTitleActive(false),
     m_isBroadcasting(false),
     m_deviceType(presence_device_type::unknown),
-    m_isNull(true)
+    m_isNull(true),
+    m_isPrimary(false)
 {
     initialize_char_arr(m_presenceText);
 }
@@ -28,7 +29,8 @@ social_manager_presence_title_record::social_manager_presence_title_record(
     m_isBroadcasting(presenceTitleRecord.broadcast_record().start_time() != utility::datetime()),
     m_isTitleActive(presenceTitleRecord.is_title_active()),
     m_deviceType(deviceType),
-    m_isNull(false)
+    m_isNull(false),
+    m_isPrimary(false)
 {
     utils::char_t_copy(m_presenceText, ARRAYSIZE(m_presenceText), presenceTitleRecord.presence().c_str());
 }
@@ -62,6 +64,11 @@ social_manager_presence_title_record::device_type() const
     return m_deviceType;
 }
 
+bool social_manager_presence_title_record::is_primary() const
+{
+    return m_isPrimary;
+}
+
 bool
 social_manager_presence_title_record::_Is_null() const
 {
@@ -84,6 +91,7 @@ social_manager_presence_title_record::_Deserialize(
     auto state = utils::extract_json_string(json, _T("State"), errc);
     returnObject.m_isTitleActive = (!state.empty() && utils::str_icmp(state, _T("active")) == 0);
     returnObject.m_titleId = utils::string_t_to_uint32(utils::extract_json_string(json, _T("TitleId"), errc));
+    returnObject.m_isPrimary = utils::extract_json_bool(json, _T("IsPrimary"), errc);
     returnObject.m_isNull = false;
 
     return xbox_live_result<social_manager_presence_title_record>(returnObject, errc);
