@@ -401,19 +401,6 @@ private:
     std::shared_ptr<xbox::services::xbox_live_app_config_internal> m_appConfig;
 };
 
-class social_graph_snapshot
-{
-public:
-    social_graph_snapshot(
-        _In_ xsapi_internal_unordered_map<string_t, xbox_social_user_context> snapshot
-        );
-
-    const xsapi_internal_unordered_map<string_t, xbox_social_user_context>& snapshot();
-private:
-    xsapi_internal_unordered_map<string_t, xbox_social_user_context> m_socialUsers;
-};
-
-
 class social_graph : public std::enable_shared_from_this<social_graph>
 {
 public:
@@ -552,36 +539,19 @@ protected:
     template <typename T>
     void invoke_callback(xbox_live_callback<T> callback, T result)
     {
-        struct invoke_callback_context
-        {
-            T result;
-            xbox_live_callback<T> callback;
-        };
-
-        auto context = xsapi_allocate_shared<invoke_callback_context>();
-        context->result = result;
-        context->callback = callback;
-
         AsyncBlock* async = new (xbox::services::system::xsapi_memory::mem_alloc(sizeof(AsyncBlock))) AsyncBlock{};
         async->queue = m_backgroundAsyncQueue;
-        async->callback = [](AsyncBlock* asyncBlock)
+        async->context = utils::store_shared_ptr(xsapi_allocate_shared<std::pair<T, xbox_live_callback<T>>>(result, callback));
+        async->callback = [](AsyncBlock* async)
         {
-            xsapi_memory::mem_free(asyncBlock);
+            system::xsapi_memory::mem_free(async);
         };
-
-        BeginAsync(async, utils::store_shared_ptr(context), nullptr, __FUNCTION__,
-            [](AsyncOp op, const AsyncProviderData* data)
+        RunAsync(async, [](AsyncBlock* async)
         {
-            if (op == AsyncOp_DoWork)
-            {
-                auto context = utils::get_shared_ptr<invoke_callback_context>(data->context);
-                context->callback(context->result);
-                CompleteAsync(data->async, S_OK, 0);
-                return E_PENDING;
-            }
+            auto context = utils::get_shared_ptr<std::pair<T, xbox_live_callback<T>>>(async->context);
+            context->second(context->first);
             return S_OK;
         });
-        ScheduleAsync(async, 0);
     }
 
     bool m_isInitialized;
@@ -693,13 +663,10 @@ private:
         _In_ presence_filter presenceFilter
         ) const;
 
-    bool needs_update();
-
     void remove_users(_In_ const xsapi_internal_vector<xbox_removal_struct>& usersToRemove);
 
     user_group_status_change update_users_in_group(_In_ const xsapi_internal_vector<xsapi_internal_string>& userList);
 
-    bool m_needsUpdate;
     xbox::services::social::manager::social_user_group_type m_userGroupType;
     social_manager_extra_detail_level m_detailLevel;
     presence_filter m_presenceFilter;
