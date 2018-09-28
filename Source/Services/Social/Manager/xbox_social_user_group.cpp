@@ -64,8 +64,7 @@ xbox_social_user_group_internal::xbox_social_user_group_internal(
     m_titleId(titleId),
     m_xboxLiveUser(xboxLiveUser),
     m_userGroupType(social_user_group_type::filter_type),
-    m_detailLevel(social_manager_extra_detail_level::no_extra_detail),
-    m_needsUpdate(true)
+    m_detailLevel(social_manager_extra_detail_level::no_extra_detail)
 {
 }
 
@@ -80,8 +79,7 @@ xbox_social_user_group_internal::xbox_social_user_group_internal(
     m_presenceFilter(presence_filter::unknown),
     m_relationshipFilter(relationship_filter::friends),
     m_detailLevel(social_manager_extra_detail_level::no_extra_detail),
-    m_titleId(0),
-    m_needsUpdate(true)
+    m_titleId(0)
 {
     for (auto& user : userList)
     {
@@ -151,40 +149,19 @@ void xbox_social_user_group_internal::update_view(
     }
     else if (m_userGroupType == social_user_group_type::user_list_type)
     {
-        if (m_userGroupVector.empty() || m_userGroupVector.size() != m_userUpdateListInt.size() || m_needsUpdate)
+        m_userGroupVector.clear();
+        for (auto userUpdateInt : m_userUpdateListInt)
         {
-            m_userGroupVector.clear();
-            for (auto userUpdateInt : m_userUpdateListInt)
+            if (snapshotList.find(userUpdateInt) != snapshotList.end())
             {
-                if (snapshotList.find(userUpdateInt) != snapshotList.end())
+                auto socialUser = snapshotList.at(userUpdateInt).socialUser;
+                if (socialUser != nullptr)
                 {
-                    auto socialUser = snapshotList.at(userUpdateInt).socialUser;
-                    if (socialUser != nullptr)
-                    {
-                        m_userGroupVector.push_back(socialUser);
-                    }
-                }
-            }
-        }
-        else
-        {
-            for (auto i = m_userGroupVector.begin(); i < m_userGroupVector.end(); ++i)
-            {
-                if (*i == nullptr)
-                {
-                    continue;
-                }
-                auto user = *i;
-                auto userIter = snapshotList.find(user->_Xbox_user_id_as_integer());
-                if (userIter != snapshotList.end())
-                {
-                    *i = userIter->second.socialUser;
+                    m_userGroupVector.push_back(socialUser);
                 }
             }
         }
     }
-
-    m_needsUpdate = false;
 }
 
 void
@@ -488,10 +465,6 @@ xbox_social_user_group_internal::update_users_in_group(
         }
     }
 
-    if (!changeGroups.addGroup.empty() || !changeGroups.removeGroup.empty())
-    {
-        m_needsUpdate = true;
-    }
     return changeGroups;
 }
 
@@ -499,13 +472,6 @@ const xsapi_internal_string&
 xbox_social_user_group_internal::hash() const
 {
     return m_viewHash;
-}
-
-bool
-xbox_social_user_group_internal::needs_update()
-{
-    std::lock_guard<std::mutex> lock(m_groupMutex);
-    return m_needsUpdate;
 }
 
 xsapi_internal_vector<xbox_social_user>
