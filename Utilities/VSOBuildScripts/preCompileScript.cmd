@@ -55,8 +55,8 @@ dir %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.140.UWP.Cpp\build.cpp
 dir %TFS_SourcesDirectory%\Build\Microsoft.Xbox.Services.141.UWP.Cpp\build.cpp
 
 rem generate and compare against what's in git to see if any vcxproj is stale and email team if it is
-call %TFS_SourcesDirectory%\Utilities\CMake\MakeProjects.cmd %TFS_SourcesDirectory% skipCopy
-call %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\CompareBuildFiles.cmd %TFS_SourcesDirectory% emailfailures
+rem call %TFS_SourcesDirectory%\Utilities\CMake\MakeProjects.cmd %TFS_SourcesDirectory% skipCopy
+rem call %TFS_SourcesDirectory%\Utilities\VSOBuildScripts\CompareBuildFiles.cmd %TFS_SourcesDirectory% emailfailures
 
 echo Done preCompileScript.cmd
 :done
