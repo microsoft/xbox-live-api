@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<SignConfigXML>
+ 
+  <job platform="x86" configuration="Debug" dest="" jobname="XSAPI Nuget Sign" approvers="vigarg;gstolt">
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.20*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.ARM.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x64.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x86.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.ARM.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x64.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x86.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.20*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Debug.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Release.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Debug.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Release.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.XboxOneXDK.*.nupkg" signType="Nuget" />
+  </job>  
+
+  <job platform="x86" configuration="Release" dest="" jobname="XSAPI Nuget Sign" approvers="vigarg;gstolt">
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.20*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.ARM.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x64.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x86.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.ARM.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x64.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x86.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.20*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Debug.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Release.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Debug.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Release.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.XboxOneXDK.*.nupkg" signType="Nuget" />
+  </job>
+  
+  <job platform="x64" configuration="Debug" dest="" jobname="XSAPI Nuget Sign" approvers="vigarg;gstolt">
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.20*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.ARM.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x64.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x86.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.ARM.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x64.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x86.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.20*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Debug.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Release.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Debug.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Release.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.XboxOneXDK.*.nupkg" signType="Nuget" />
+  </job>
+  
+  <job platform="x64" configuration="Release" dest="" jobname="XSAPI Nuget Sign" approvers="vigarg;gstolt">
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.20*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.ARM.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x64.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x86.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.ARM.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x64.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x86.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.20*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Debug.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Release.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Debug.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Release.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.XboxOneXDK.*.nupkg" signType="Nuget" />
+  </job>
+  
+  <job platform="ARM" configuration="Debug" dest="" jobname="XSAPI Nuget Sign" approvers="vigarg;gstolt">
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.20*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.ARM.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x64.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x86.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.ARM.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x64.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x86.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.20*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Debug.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Release.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Debug.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Release.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.XboxOneXDK.*.nupkg" signType="Nuget" />
+  </job>
+  
+  <job platform="ARM" configuration="Release" dest="" jobname="XSAPI Nuget Sign" approvers="vigarg;gstolt">
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.20*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.ARM.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x64.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v140.x86.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.ARM.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x64.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.UWP.v141.x86.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.Cpp.XboxOneXDK.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.20*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Debug.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Release.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Debug.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.UWP.Netcore.Release.*.nupkg" signType="Nuget" />
+     <file src="__RELBINPATH__\Microsoft.Xbox.Live.SDK.WinRT.XboxOneXDK.*.nupkg" signType="Nuget" />
+  </job>
+  
+</SignConfigXML>
