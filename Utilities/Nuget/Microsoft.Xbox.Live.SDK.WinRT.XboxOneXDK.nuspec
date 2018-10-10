@@ -17,13 +17,13 @@
         <tags>Microsoft Xbox Live Service XSAPI WinRT XboxOneXDK XboxOne Xbox One XDK</tags>
     </metadata>
     <files>
-        <file src="\Nuget\Microsoft.Xbox.Live.SDK.WinRT.XboxOneXDK.targets" target="build\native\Microsoft.Xbox.Live.SDK.WinRT.XboxOneXDK.targets" />
-        <file src="\include\" target="build\native\include\" />
-        <file src="\Debug\x64\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.dll" target="build\native\references\Durango\v110\Debug\Microsoft.Xbox.Services.dll" />
-        <file src="\Debug\x64\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\bin\Durango\v110\Debug\Microsoft.Xbox.Services.pdb" />
-        <file src="\Debug\x64\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.winmd" target="build\native\references\Durango\v110\Debug\Microsoft.Xbox.Services.winmd" />
-        <file src="\Release\x64\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.dll" target="build\native\references\Durango\v110\Release\Microsoft.Xbox.Services.dll" />
-        <file src="\Release\x64\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\bin\Durango\v110\Release\Microsoft.Xbox.Services.pdb" />
-        <file src="\Release\x64\Microsoft.Xbox.Services.110.XDK.WinRT\Microsoft.Xbox.Services.winmd" target="build\native\references\Durango\v110\Release\Microsoft.Xbox.Services.winmd" />
+        <file src="Nuget\Microsoft.Xbox.Live.SDK.WinRT.XboxOneXDK.targets" target="build\native\Microsoft.Xbox.Live.SDK.WinRT.XboxOneXDK.targets" />
+        <file src="include\" target="build\native\include\" />
+        <file src="Debug\x64\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.dll" target="build\native\references\Durango\v141\Debug\Microsoft.Xbox.Services.dll" />
+        <file src="Debug\x64\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\bin\Durango\v141\Debug\Microsoft.Xbox.Services.pdb" />
+        <file src="Debug\x64\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.winmd" target="build\native\references\Durango\v141\Debug\Microsoft.Xbox.Services.winmd" />
+        <file src="Release\x64\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.dll" target="build\native\references\Durango\v141\Release\Microsoft.Xbox.Services.dll" />
+        <file src="Release\x64\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\bin\Durango\v141\Release\Microsoft.Xbox.Services.pdb" />
+        <file src="Release\x64\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.winmd" target="build\native\references\Durango\v141\Release\Microsoft.Xbox.Services.winmd" />
     </files>
 </package>
