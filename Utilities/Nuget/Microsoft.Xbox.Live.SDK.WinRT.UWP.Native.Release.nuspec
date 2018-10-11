@@ -17,32 +17,32 @@
         <tags>Microsoft Xbox Live Service XSAPI WinRT UWP Windows Apps</tags>
     </metadata>
     <files>
-        <file src="\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Blank.targets" target="build\netcore451\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Release.targets" />
-        <file src="\Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Release.targets" target="build\native\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Release.targets" />
+        <file src="Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Blank.targets" target="build\netcore451\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Release.targets" />
+        <file src="Nuget\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Release.targets" target="build\native\Microsoft.Xbox.Live.SDK.WinRT.UWP.Native.Release.targets" />
         
         <!-- x64 -->
-        <file src="\Release\x64\cpprestsdk140.uwp\cpprest140_uwp_2_9.lib" target="build\native\lib\x64\v140\Release\cpprest140_uwp_2_9.lib" />
-        <file src="\Release\x64\cpprestsdk140.uwp\cpprest140_uwp_2_9.pdb" target="build\native\lib\x64\v140\Release\cpprest140_uwp_2_9.pdb" />
-        <file src="\Release\x64\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" target="build\native\lib\x64\v140\Release\cpprest140_uwp_2_9.dll" />
-        <file src="\Release\x64\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" target="build\native\lib\x64\v140\Release\Microsoft.Xbox.Services.dll" />
-        <file src="\Release\x64\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\lib\x64\v140\Release\Microsoft.Xbox.Services.pdb" />
-        <file src="\Release\x64\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.winmd" target="build\native\lib\x64\v140\Release\Microsoft.Xbox.Services.winmd" />
+        <file src="Release\x64\cpprestsdk140.uwp\cpprest140_uwp_2_9.lib" target="build\native\lib\x64\v140\Release\cpprest140_uwp_2_9.lib" />
+        <file src="Release\x64\cpprestsdk140.uwp\cpprest140_uwp_2_9.pdb" target="build\native\lib\x64\v140\Release\cpprest140_uwp_2_9.pdb" />
+        <file src="Release\x64\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" target="build\native\lib\x64\v140\Release\cpprest140_uwp_2_9.dll" />
+        <file src="Release\x64\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" target="build\native\lib\x64\v140\Release\Microsoft.Xbox.Services.dll" />
+        <file src="Release\x64\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\lib\x64\v140\Release\Microsoft.Xbox.Services.pdb" />
+        <file src="Release\x64\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.winmd" target="build\native\lib\x64\v140\Release\Microsoft.Xbox.Services.winmd" />
 
         <!-- Win32 -->
-        <file src="\Release\x86\cpprestsdk140.uwp\cpprest140_uwp_2_9.lib" target="build\native\lib\Win32\v140\Release\cpprest140_uwp_2_9.lib" />
-        <file src="\Release\x86\cpprestsdk140.uwp\cpprest140_uwp_2_9.pdb" target="build\native\lib\Win32\v140\Release\cpprest140_uwp_2_9.pdb" />
-        <file src="\Release\x86\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" target="build\native\lib\Win32\v140\Release\cpprest140_uwp_2_9.dll" />
-        <file src="\Release\x86\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" target="build\native\lib\Win32\v140\Release\Microsoft.Xbox.Services.dll" />
-        <file src="\Release\x86\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\lib\Win32\v140\Release\Microsoft.Xbox.Services.pdb" />
-        <file src="\Release\x86\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.winmd" target="build\native\lib\Win32\v140\Release\Microsoft.Xbox.Services.winmd" />
+        <file src="Release\x86\cpprestsdk140.uwp\cpprest140_uwp_2_9.lib" target="build\native\lib\Win32\v140\Release\cpprest140_uwp_2_9.lib" />
+        <file src="Release\x86\cpprestsdk140.uwp\cpprest140_uwp_2_9.pdb" target="build\native\lib\Win32\v140\Release\cpprest140_uwp_2_9.pdb" />
+        <file src="Release\x86\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" target="build\native\lib\Win32\v140\Release\cpprest140_uwp_2_9.dll" />
+        <file src="Release\x86\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" target="build\native\lib\Win32\v140\Release\Microsoft.Xbox.Services.dll" />
+        <file src="Release\x86\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\lib\Win32\v140\Release\Microsoft.Xbox.Services.pdb" />
+        <file src="Release\x86\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.winmd" target="build\native\lib\Win32\v140\Release\Microsoft.Xbox.Services.winmd" />
       
         <!-- ARM -->
-        <file src="\Release\ARM\cpprestsdk140.uwp\cpprest140_uwp_2_9.lib" target="build\native\lib\ARM\v140\Release\cpprest140_uwp_2_9.lib" />
-        <file src="\Release\ARM\cpprestsdk140.uwp\cpprest140_uwp_2_9.pdb" target="build\native\lib\ARM\v140\Release\cpprest140_uwp_2_9.pdb" />
-        <file src="\Release\ARM\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" target="build\native\lib\ARM\v140\Release\cpprest140_uwp_2_9.dll" />
-        <file src="\Release\ARM\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" target="build\native\lib\ARM\v140\Release\Microsoft.Xbox.Services.dll" />
-        <file src="\Release\ARM\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\lib\ARM\v140\Release\Microsoft.Xbox.Services.pdb" />
-        <file src="\Release\ARM\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.winmd" target="build\native\lib\ARM\v140\Release\Microsoft.Xbox.Services.winmd" />
+        <file src="Release\ARM\cpprestsdk140.uwp\cpprest140_uwp_2_9.lib" target="build\native\lib\ARM\v140\Release\cpprest140_uwp_2_9.lib" />
+        <file src="Release\ARM\cpprestsdk140.uwp\cpprest140_uwp_2_9.pdb" target="build\native\lib\ARM\v140\Release\cpprest140_uwp_2_9.pdb" />
+        <file src="Release\ARM\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" target="build\native\lib\ARM\v140\Release\cpprest140_uwp_2_9.dll" />
+        <file src="Release\ARM\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" target="build\native\lib\ARM\v140\Release\Microsoft.Xbox.Services.dll" />
+        <file src="Release\ARM\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.pdb" target="build\native\lib\ARM\v140\Release\Microsoft.Xbox.Services.pdb" />
+        <file src="Release\ARM\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.winmd" target="build\native\lib\ARM\v140\Release\Microsoft.Xbox.Services.winmd" />
         
     </files>
 </package>
