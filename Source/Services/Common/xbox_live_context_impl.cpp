@@ -280,7 +280,8 @@ xbox_live_context_impl::init_real_time_activity_service_instance()
     {
         m_realTimeActivityService = std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service>(new xbox::services::real_time_activity::real_time_activity_service(m_userContext, m_xboxLiveContextSettings, m_appConfig));
     }
-    else
+    else if(m_userContext->caller_context_type() == caller_context_type::multiplayer_manager ||
+            m_userContext->caller_context_type() == caller_context_type::social_manager)
     {
         m_realTimeActivityService = real_time_activity::real_time_activity_service_factory::get_singleton_instance()->get_rta_instance(m_userContext, m_xboxLiveContextSettings, m_appConfig);
     }
