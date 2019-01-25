@@ -34,7 +34,8 @@ MatchmakingService::CreateMatchTicketAsync(
     _In_ String^ hopperName,
     _In_ TimeSpan ticketTimeout,
     _In_ PreserveSessionMode preserveSession,
-    _In_opt_ String^ ticketAttributesJson
+    _In_opt_ String^ ticketAttributesJson,
+	_In_ Platform::Boolean isSymmetric
     )
 {
     web::json::value ticketAttributes;
@@ -50,7 +51,8 @@ MatchmakingService::CreateMatchTicketAsync(
         STRING_T_FROM_PLATFORM_STRING(hopperName),
         UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(ticketTimeout),
         static_cast<preserve_session_mode>(preserveSession),
-        ticketAttributes
+        ticketAttributes,
+		isSymmetric
         )
     .then([](xbox_live_result<create_match_ticket_response> cppResult)
     {

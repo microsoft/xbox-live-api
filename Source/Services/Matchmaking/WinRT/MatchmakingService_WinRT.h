@@ -27,6 +27,7 @@ public:
     /// <param name="ticketTimeout">The maximum time to wait for players to join the session.</param>
     /// <param name="preserveSession">Indicates if the session should be preserved.</param>
     /// <param name="ticketAttributesJson">The ticket attributes for the session. (Optional)</param>
+	/// <param name="isSymmetric">Use symmetric evaluation (Bi-directional) of matchmaking tickets (Optional)</param>
     /// <returns>The async object for notifying when the operation is completed. With the handler, a new match ticket
     /// object is returned. The match ticket object contains server returned information such as ticket id and wait
     /// time, and also contains copies of the title specified data from the ticket data object.</returns>
@@ -37,7 +38,8 @@ public:
         _In_ Platform::String^ hopperName,
         _In_ Windows::Foundation::TimeSpan ticketTimeout,
         _In_ PreserveSessionMode preserveSession,
-        _In_opt_ Platform::String^ ticketAttributesJson
+        _In_opt_ Platform::String^ ticketAttributesJson,
+		_In_ Platform::Boolean isSymmetric
         );
 
     /// <summary>

@@ -239,7 +239,8 @@ public:
         _In_ const string_t& hopperName,
         _In_ const std::chrono::seconds& ticketTimeout,
         _In_ preserve_session_mode preserveSession,
-        _In_ const web::json::value& ticketAttributesJson = web::json::value()
+        _In_ const web::json::value& ticketAttributesJson = web::json::value(),
+        _In_ bool isSymmetric = false
         );
 
     /// <summary>

@@ -31,7 +31,8 @@ matchmaking_service::create_match_ticket(
     _In_ const string_t& hopperName,
     _In_ const std::chrono::seconds& ticketTimeout,
     _In_ preserve_session_mode preserveSession,
-    _In_ const web::json::value& ticketAttributesJson
+    _In_ const web::json::value& ticketAttributesJson,
+    _In_ bool isSymmetric
     )
 {
     RETURN_TASK_CPP_INVALIDARGUMENT_IF(ticketSessionReference.is_null(), create_match_ticket_response, "ticket session reference is null");
@@ -47,6 +48,7 @@ matchmaking_service::create_match_ticket(
     web::json::value request;
     request[_T("giveUpDuration")] = web::json::value::number(static_cast<int32_t>(ticketTimeout.count()));
     request[_T("preserveSession")] = web::json::value::string(convert_preserve_session_mode_to_string(preserveSession));
+    request[_T("isSymmetric")] = web::json::value::boolean(isSymmetric);
     request[_T("ticketSessionRef")] = ticketSessionReference._Serialize();
     if (!ticketAttributesJson.is_null())
     {
