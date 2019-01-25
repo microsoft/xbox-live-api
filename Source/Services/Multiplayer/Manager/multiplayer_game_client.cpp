@@ -389,6 +389,28 @@ multiplayer_game_client::is_request_in_progress()
     return m_pendingRequestQueue.size() > 0 || m_processingQueue.size() > 0 || m_multiplayerEventQueue.size() > 0;
 }
 
+xbox_live_result<void>
+multiplayer_game_client::set_local_member_properties(
+	_In_ xbox_live_user_t user,
+	_In_ string_t name,
+	_In_ web::json::value valueJson,
+	_In_opt_ context_t context
+)
+{
+	std::lock_guard<std::mutex> lock(m_clientRequestLock);
+
+	if (user == nullptr) return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "Invalid user argument passed");
+
+	auto localUser = m_multiplayerLocalUserManager->get_local_user_helper(user);
+	RETURN_CPP_IF(localUser == nullptr || localUser->context() == nullptr, void, xbox_live_error_code::logic_error, "Call add_local_user() before setting local member properties.");
+
+	auto pendingRequest = std::make_shared<multiplayer_client_pending_request>();
+	pendingRequest->set_local_user_properties(localUser, name, valueJson, context);
+	add_to_pending_queue(pendingRequest);
+
+	return xbox_live_result<void>();
+}
+
 void
 multiplayer_game_client::set_local_member_properties_to_remote_session(
     _In_ const std::shared_ptr<multiplayer_local_user>& localUser,

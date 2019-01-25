@@ -306,6 +306,13 @@ public:
         _In_ const string_t& localUserConnectionAddress
         );
 
+	xbox_live_result<void> set_local_member_properties(
+		_In_ xbox_live_user_t user,
+		_In_ string_t name,
+		_In_ web::json::value valueJson,
+		_In_opt_ context_t context
+		);
+
     xbox_live_result<void> join_game_helper(
         _In_ const string_t& sessionName
         );
@@ -891,6 +898,7 @@ public:
         );
 
     std::shared_ptr<multiplayer_match_client> match_client();
+    std::shared_ptr<multiplayer_game_client> game_client();
 
     xbox_live_result<void> find_match(
         _In_ const string_t& hopperName,

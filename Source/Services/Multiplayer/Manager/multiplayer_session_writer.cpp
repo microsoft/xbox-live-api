@@ -246,7 +246,7 @@ multiplayer_session_writer::commit_pending_changes(
     // Update any pending local user or lobby session properties.
     for (auto& request : processingQueue)
     {
-        request->append_pending_changes(sessionToCommit, nullptr, isGameInProgress);
+        request->append_pending_changes(sessionToCommit, request->local_user(), isGameInProgress);
     }
 
     std::weak_ptr<multiplayer_session_writer> thisWeakPtr = shared_from_this();
@@ -550,6 +550,26 @@ multiplayer_session_writer::handle_events(
                 eventQueue.push_back(multiplayerEvent);
             }
         }
+
+		// Fire events for each of the properties
+		if (sessionType == multiplayer_session_type::game_session)
+		{
+			for (const auto& prop : request->local_user_properties())
+			{
+				multiplayer_event multiplayerEvent(
+					errorCode,
+					errorMessage,
+					multiplayer_event_type::local_member_property_write_completed,
+					std::make_shared<multiplayer_event_args>(),
+					sessionType,
+					request->context()
+				);
+
+				UNREFERENCED_PARAMETER(prop);
+
+				eventQueue.push_back(multiplayerEvent);
+			}
+		}
     }
 
     return eventQueue;

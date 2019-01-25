@@ -620,7 +620,13 @@ multiplayer_client_manager::last_pending_read() const
 std::shared_ptr<multiplayer_lobby_client>
 multiplayer_client_manager::lobby_client() const
 {
-    return m_latestPendingRead->lobby_client();
+    auto latestPendingRead = latest_pending_read();
+    if (latestPendingRead == nullptr)
+    {
+        return nullptr;
+    }
+
+    return latestPendingRead->lobby_client();
 }
 
 bool
@@ -1229,6 +1235,18 @@ multiplayer_client_manager::match_client()
     }
 
     return latestPendingRead->match_client();
+}
+
+std::shared_ptr<multiplayer_game_client>
+multiplayer_client_manager::game_client()
+{
+    auto latestPendingRead = latest_pending_read();
+    if (latestPendingRead == nullptr)
+    {
+        return nullptr;
+    }
+
+    return latestPendingRead->game_client();
 }
 
 xbox_live_result<void>

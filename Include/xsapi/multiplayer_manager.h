@@ -903,6 +903,24 @@ public:
         _In_opt_ context_t context = nullptr
         );
 
+	/// <summary>
+	/// Set a custom property on the local member to the specified JSON string
+	/// Changes are batched and written to the service on the next do_work(). All session properties and members
+	/// contain updated response returned from the server upon calling do_work().
+	/// The result is delivered via multiplayer_event callback of type local_member_property_write_completed through do_work().
+	/// </summary>
+	/// <param name="user">The associated system User you want to set the property for.</param>
+	/// <param name="name">The name of the property to set.</param>
+	/// <param name="valueJson">The JSON value to assign to the property. (Optional)</param>
+	/// <param name="context">The application-defined data to correlate the multiplayer_event to the initiating call. (Optional)</param>
+	_XSAPIIMP xbox_live_result<void> set_local_member_properties(
+		_In_ xbox_live_user_t user,
+		_In_ const string_t& name,
+		_In_ const web::json::value& valueJson,
+		_In_opt_ context_t context = nullptr
+	);
+
+
     /// <summary>
     /// Sets a custom property to the specified JSON string using multiplayer_session_write_mode::synchronized_update.
     /// Use this method to resolve any conflicts between devices while trying to set properties to a shared portion that other 

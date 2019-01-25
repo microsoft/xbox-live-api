@@ -128,6 +128,18 @@ multiplayer_game_session::set_properties(
     RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->set_properties(m_sessionReference, name, valueJson, context), void);
 }
 
+xbox_live_result<void>
+multiplayer_game_session::set_local_member_properties(
+	_In_ xbox_live_user_t user,
+	_In_ const string_t& name,
+	_In_ const web::json::value& valueJson,
+	_In_opt_ context_t context
+)
+{
+	RETURN_CPP_IF(m_multiplayerClientManager->latest_pending_read() == nullptr, void, xbox_live_error_code::logic_error, "No user added. Call add_local_user() first.");
+	RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->game_client()->set_local_member_properties(user, std::move(name), std::move(valueJson), context), void);
+}
+
 bool
 multiplayer_game_session::is_host( 
     _In_ const string_t& xboxUserId
