@@ -389,6 +389,12 @@ public:
     /// </summary>
     _XSAPIIMP const string_t& team_id() const;
 
+	/// <summary>
+	/// Only applicable if you are using Team rules with Smart Match.
+	/// Initial team assignment suggested by Smart Match.
+	/// </summary>
+	_XSAPIIMP const string_t& initial_team() const;
+
     /// <summary>
     /// Xbox User ID of the member.
     /// </summary>
@@ -449,6 +455,7 @@ private:
     string_t m_xboxUserid;
     string_t m_gamertag;
     string_t m_deviceToken;
+	string_t m_initialTeam;
     bool m_isLocal;
     bool m_isGameHost;
     bool m_isLobbyHost;

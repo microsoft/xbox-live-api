@@ -2248,6 +2248,11 @@ public:
     /// </summary>
     _XSAPIIMP const string_t& team_id() const;
 
+	/// <summary>
+    /// Initial team assignment from SmartMatch
+    /// </summary>
+	_XSAPIIMP const string_t& initial_team() const;
+
     /// <summary>
     /// Arbitration Status of a member in a tournament
     /// </summary>
@@ -2545,6 +2550,7 @@ private:
     std::unordered_map<string_t, xbox::services::tournaments::tournament_team_result> m_results;
     multiplayer_session_reference m_tournamentTeamSessionRef;
     string_t m_teamId;
+	string_t m_initialTeam;
     xbox::services::tournaments::tournament_arbitration_status m_arbitrationStatus;
     
 

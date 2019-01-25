@@ -29,6 +29,7 @@ multiplayer_member::multiplayer_member(
     ):
     m_memberId(member->member_id()),
     m_teamId(member->team_id()),
+	m_initialTeam(member->initial_team()),
     m_xboxUserid(std::move(member->xbox_user_id())),
     m_gamertag(std::move(member->gamertag())),
     m_deviceToken(std::move(member->device_token())),
@@ -54,6 +55,12 @@ const string_t&
 multiplayer_member::team_id() const
 {
     return m_teamId;
+}
+
+const string_t&
+multiplayer_member::initial_team() const
+{
+	return m_initialTeam;
 }
 
 const string_t&
