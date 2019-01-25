@@ -137,6 +137,22 @@ public:
         _In_opt_ context_t context
         );
 
+	/// <summary>
+	/// Sets the local members groups to the specified list.
+	/// </summary>
+	/// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
+	/// <param name="name">The vector of groups the user belongs to.</param>
+	/// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
+	/// <remarks>
+	/// Changes are batched and written to the service on the next DoWork(). All session properties and members
+	/// contain updated response returned from the server upon calling DoWork().
+	/// </remarks>
+	void SetLocalMemberGroups(
+		_In_ XboxLiveUser_t user,
+		_In_ Windows::Foundation::Collections::IVectorView<Platform::String^>^ Groups,
+		_In_opt_ context_t context
+		);
+
     /// <summary>
     /// Delete a custom property on the local member.
     /// </summary>

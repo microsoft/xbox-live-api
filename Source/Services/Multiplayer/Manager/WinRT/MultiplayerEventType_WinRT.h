@@ -45,6 +45,13 @@ public enum class MultiplayerEventType
     /// </summary>
     LocalMemberPropertyWriteCompleted = xbox::services::multiplayer::manager::multiplayer_event_type::local_member_property_write_completed,
 
+	/// <summary>
+	/// Indicates that the set_local_member_groups() operation has completed.
+	/// Upon completion, the game can view the err() to see if the write succeeded.
+	/// A game can be write local member properties by calling the set_local_member_groups() operation.
+	/// </summary>
+	LocalMemberGroupWriteCompleted = xbox::services::multiplayer::manager::multiplayer_event_type::local_member_group_write_completed,
+
     /// <summary>
     /// Indicates that the SetLocalMemberConnectionAddress() operation has completed.
     /// Upon completion, the game can view the err() to see if the write succeeded.

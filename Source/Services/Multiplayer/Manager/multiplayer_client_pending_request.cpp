@@ -129,6 +129,24 @@ multiplayer_client_pending_request::set_local_user_properties(
     m_localUserProperties[name] = valueJson;
 }
 
+const std::vector<string_t>&
+multiplayer_client_pending_request::local_user_groups() const
+{
+	return m_localUserGroups;
+}
+
+void
+multiplayer_client_pending_request::set_local_user_groups(
+	_In_ std::shared_ptr<multiplayer_local_user> localUser,
+	_In_ const std::vector<string_t>& groups,
+	_In_opt_ context_t context
+)
+{
+	m_context = context;
+	m_localUser = localUser;
+	m_localUserGroups = groups;
+}
+
 // Session non-synchronized properties
 multiplayer::manager::joinability
 multiplayer_client_pending_request::joinability()
@@ -223,6 +241,11 @@ multiplayer_client_pending_request::append_pending_changes(
                 sessionToCommit->set_current_user_member_custom_property_json(prop.first, prop.second);
             }
         }
+
+		if (m_localUserGroups.size() > 0)
+		{
+			sessionToCommit->current_user()->set_groups(m_localUserGroups);
+		}
 
         localUser->set_write_changes_to_service(false);
     }

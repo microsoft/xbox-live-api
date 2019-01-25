@@ -98,6 +98,13 @@ public:
         _In_opt_ context_t context
         );
 
+	const std::vector<string_t>& local_user_groups() const;
+	void set_local_user_groups(
+		_In_ std::shared_ptr<multiplayer_local_user> localUser,
+		_In_ const std::vector<string_t>& groups,
+		_In_opt_ context_t context
+	);
+
     // Session non-synchronized properties
     multiplayer::manager::joinability joinability();
     void set_joinability(_In_ xbox::services::multiplayer::manager::joinability value, _In_opt_ context_t context);
@@ -128,6 +135,7 @@ private:
     std::shared_ptr<multiplayer_local_user> m_localUser;
     multiplayer_local_user_lobby_state m_localUserLobbyState;
     std::map<string_t, web::json::value> m_localUserProperties;
+	std::vector<string_t> m_localUserGroups;
     string_t m_localUserConnectionAddress;
     string_t m_lobbyHandleId;   // Only used while joining a friend's lobby
     xbox::services::multiplayer::multiplayer_session_reference m_teamSessionRef;   // Only used for Tournament MPM integration support.
@@ -313,6 +321,12 @@ public:
 		_In_opt_ context_t context
 		);
 
+	xbox_live_result<void> set_local_member_groups(
+		_In_ xbox_live_user_t user,
+		_In_ const std::vector<string_t>& groups,
+		_In_opt_ context_t context
+	);
+
     xbox_live_result<void> join_game_helper(
         _In_ const string_t& sessionName
         );
@@ -427,6 +441,12 @@ public:
         _In_ web::json::value valueJson,
         _In_opt_ context_t context
         );
+
+	xbox_live_result<void> set_local_member_groups(
+		_In_ xbox_live_user_t user,
+		_In_ const std::vector<string_t>& groups,
+		_In_opt_ context_t context
+	);
 
     xbox_live_result<void> delete_local_member_properties(
         _In_ xbox_live_user_t user,

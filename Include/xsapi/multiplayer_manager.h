@@ -206,6 +206,13 @@ enum class multiplayer_event_type
     /// </summary>
     local_member_property_write_completed,
 
+	/// <summary>
+	/// Indicates that the set_local_member_groups() operation has completed.
+	/// Upon completion, the game can view the err() to see if the write succeeded.
+	/// A game can be write local member properties by calling the set_local_member_groups() operation.
+	/// </summary>
+	local_member_group_write_completed,
+
     /// <summary>
     /// Indicates that the set_local_member_connection_address() operation has completed.
     /// Upon completion, the game can view the err() to see if the write succeeded.
@@ -551,6 +558,22 @@ public:
         _In_opt_ context_t context = nullptr
     );
 
+	/// <summary>
+	/// Sets the local members groups to the specified list.
+	/// </summary>
+	/// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
+	/// <param name="name">The vector of groups the user belongs to.</param>
+	/// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
+	/// <remarks>
+	/// Changes are batched and written to the service on the next DoWork(). All session properties and members
+	/// contain updated response returned from the server upon calling DoWork().
+	/// </remarks>
+	_XSAPIIMP xbox_live_result<void> set_local_member_groups(
+		_In_ xbox_live_user_t user,
+		_In_ const std::vector<string_t>& groups,
+		_In_opt_ context_t context = nullptr
+	);
+
     /// <summary>
     /// Delete a custom property on the local member
     /// Changes are batched and written to the service on the next do_work(). All session properties and members
@@ -740,6 +763,19 @@ public:
             );
     }
 
+	_XSAPIIMP xbox_live_result<void> set_local_member_groups(
+		_In_ winrt::Windows::Xbox::System::User user,
+		_In_ const std::vector<string_t>& groups,
+		_In_opt_ context_t context = nullptr
+	)
+	{
+		return set_local_member_groups(
+			convert_user_to_cppcx(user),
+			groups,
+			context
+		);
+	}
+
     _XSAPIIMP xbox_live_result<void> delete_local_member_properties(
         _In_ winrt::Windows::Xbox::System::User user,
         _In_ const string_t& name,
@@ -920,6 +956,21 @@ public:
 		_In_opt_ context_t context = nullptr
 	);
 
+	/// <summary>
+	/// Sets the local members groups to the specified list.
+	/// </summary>
+	/// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
+	/// <param name="name">The vector of groups the user belongs to.</param>
+	/// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
+	/// <remarks>
+	/// Changes are batched and written to the service on the next DoWork(). All session properties and members
+	/// contain updated response returned from the server upon calling DoWork().
+	/// </remarks>
+	_XSAPIIMP xbox_live_result<void> set_local_member_groups(
+		_In_ xbox_live_user_t user,
+		_In_ const std::vector<string_t>& groups,
+		_In_opt_ context_t context = nullptr
+	);
 
     /// <summary>
     /// Sets a custom property to the specified JSON string using multiplayer_session_write_mode::synchronized_update.

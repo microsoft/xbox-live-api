@@ -103,6 +103,17 @@ multiplayer_lobby_session::set_local_member_properties(
 }
 
 xbox_live_result<void>
+multiplayer_lobby_session::set_local_member_groups(
+	_In_ xbox_live_user_t user,
+	_In_ const std::vector<string_t>& groups,
+	_In_opt_ context_t context
+)
+{
+	RETURN_CPP_IF(m_multiplayerClientManager->latest_pending_read() == nullptr, void, xbox_live_error_code::logic_error, "No user added. Call add_local_user() first.");
+	RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->lobby_client()->set_local_member_groups(user, groups, context), void);
+}
+
+xbox_live_result<void>
 multiplayer_lobby_session::delete_local_member_properties(
     _In_ xbox_live_user_t user,
     _In_ const string_t& name,
