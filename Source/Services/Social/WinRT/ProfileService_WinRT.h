@@ -13,6 +13,16 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_BEGIN
 public ref class ProfileService sealed
 {
 public:
+	/// <summary>
+	/// Gets current user profile.
+	/// </summary>
+	/// <returns>
+	/// Returns an IAsyncOperation&lt;TResult&gt; object that represents the state of the asynchronous operation.
+	/// The result of the asynchronous operation is an XboxUserProfile object.
+	/// </returns>
+	/// <remarks>Calls V3 GET /users/me/profile/settings</remarks>
+	Windows::Foundation::IAsyncOperation<XboxUserProfile^>^ GetUserProfileAsync();
+
     /// <summary>
     /// Gets a user profile for a specific Xbox user.
     /// </summary>

@@ -63,6 +63,11 @@ public:
     /// </summary>
     DEFINE_PROP_GET_STR_OBJ(XboxUserId, xbox_user_id)
 
+	/// <summary>
+	/// Is narrator enabled.
+	/// </summary>
+	DEFINE_PROP_GET_OBJ(IsNarratorEnabled, narratorEnabled, bool)
+
 internal:
     XboxUserProfile(
         _In_ xbox::services::social::xbox_user_profile cppObj

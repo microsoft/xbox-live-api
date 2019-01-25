@@ -24,7 +24,8 @@ xbox_user_profile::xbox_user_profile(
     _In_ web::uri gameDisplayPictureResizeUri,
     _In_ string_t gamerscore,
     _In_ string_t gamertag,
-    _In_ string_t xboxUserId
+    _In_ string_t xboxUserId,
+	_In_ bool narratorEnabled
     ) :
     m_appDisplayName(std::move(appDisplayName)),
     m_appDisplayPictureResizeUri(std::move(appDisplayPictureResizeUri)),
@@ -32,7 +33,8 @@ xbox_user_profile::xbox_user_profile(
     m_gameDisplayPictureResizeUri(std::move(gameDisplayPictureResizeUri)),
     m_gamerscore(std::move(gamerscore)),
     m_gamertag(std::move(gamertag)),
-    m_xboxUserId(std::move(xboxUserId))
+    m_xboxUserId(std::move(xboxUserId)),
+	m_narratorEnabled(narratorEnabled)
 {
 }
 
@@ -71,6 +73,11 @@ const string_t& xbox_user_profile::xbox_user_id() const
     return m_xboxUserId;
 }
 
+bool xbox_user_profile::narratorEnabled() const
+{
+	return m_narratorEnabled;
+}
+
 xbox_live_result<xbox_user_profile>
 xbox_user_profile::_Deserialize(
     _In_ const web::json::value& json
@@ -90,6 +97,7 @@ xbox_user_profile::_Deserialize(
     string_t gamerscore;
     string_t gamertag;
     string_t xboxUserId = utils::extract_json_string(json, _T("id"), errc, true);
+	bool narratorEnabled = false;
 
     for (const auto& setting : setttings)
     {
@@ -120,6 +128,12 @@ xbox_user_profile::_Deserialize(
         {
             gamertag = std::move(stringValue);
         }
+		else if (name == _T("SpeechAccessibility") && !stringValue.empty())
+		{
+			web::json::value jsonAcessibilitySettings = web::json::value::parse(stringValue);
+
+			narratorEnabled = utils::extract_json_bool(jsonAcessibilitySettings, _T("GameTextSS"), errc, true);
+		}
     }
 
     auto result = xbox_user_profile(
@@ -129,7 +143,8 @@ xbox_user_profile::_Deserialize(
         std::move(gameDisplayPictureResizeUri),
         std::move(gamerscore),
         std::move(gamertag),
-        std::move(xboxUserId)
+        std::move(xboxUserId),
+		narratorEnabled
         );
 
     return xbox_live_result<xbox_user_profile>(result, errc);
