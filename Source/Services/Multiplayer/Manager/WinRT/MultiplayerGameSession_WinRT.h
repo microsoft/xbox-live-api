@@ -126,7 +126,7 @@ public:
 	/// Sets the local members groups to the specified list.
 	/// </summary>
 	/// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
-	/// <param name="name">The vector of groups the user belongs to.</param>
+	/// <param name="groups">The vector of groups the user belongs to.</param>
 	/// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
 	/// <remarks>
 	/// Changes are batched and written to the service on the next DoWork(). All session properties and members
