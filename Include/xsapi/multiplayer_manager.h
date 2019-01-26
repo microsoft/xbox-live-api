@@ -213,6 +213,13 @@ enum class multiplayer_event_type
 	/// </summary>
 	local_member_group_write_completed,
 
+	/// <summary>
+	/// Indicates that the set_local_member_server_qos_measurements() operation has completed.
+	/// Upon completion, the game can view the err() to see if the write succeeded.
+	/// A game can be write local member qos measurements by calling the set_local_member_server_qos_measurements() operation.
+	/// </summary>
+	local_member_server_qos_measurements_write_completed,
+
     /// <summary>
     /// Indicates that the set_local_member_connection_address() operation has completed.
     /// Upon completion, the game can view the err() to see if the write succeeded.
@@ -581,6 +588,22 @@ public:
 		_In_opt_ context_t context = nullptr
 	);
 
+	/// <summary>
+	/// Sets the QoS measurements for use with matchmaking and dedicated servers
+	/// </summary>
+	/// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
+	/// <param name="jsonValueString">The string representation of the QoS JSON Object.</param>
+	/// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
+	/// <remarks>
+	/// Changes are batched and written to the service on the next DoWork(). All session properties and members
+	/// contain updated response returned from the server upon calling DoWork().
+	/// </remarks>
+	_XSAPIIMP xbox_live_result<void> set_local_member_server_qos_measurements(
+		_In_ xbox_live_user_t user,
+		_In_ const web::json::value& valueJson,
+		_In_opt_ context_t context = nullptr
+	);
+
     /// <summary>
     /// Delete a custom property on the local member
     /// Changes are batched and written to the service on the next do_work(). All session properties and members
@@ -783,6 +806,19 @@ public:
 		);
 	}
 
+	_XSAPIIMP xbox_live_result<void> set_local_member_server_qos_measurements(
+		_In_ winrt::Windows::Xbox::System::User user,
+		_In_ const web::json::value& jsonValue,
+		_In_opt_ context_t context = nullptr
+	)
+	{
+		return set_local_member_server_qos_measurements(
+			convert_user_to_cppcx(user),
+			jsonValue,
+			context
+		);
+	}
+
     _XSAPIIMP xbox_live_result<void> delete_local_member_properties(
         _In_ winrt::Windows::Xbox::System::User user,
         _In_ const string_t& name,
@@ -976,6 +1012,22 @@ public:
 	_XSAPIIMP xbox_live_result<void> set_local_member_groups(
 		_In_ xbox_live_user_t user,
 		_In_ const std::vector<string_t>& groups,
+		_In_opt_ context_t context = nullptr
+	);
+
+	/// <summary>
+	/// Sets the QoS measurements for use with matchmaking and dedicated servers
+	/// </summary>
+	/// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
+	/// <param name="jsonValueString">The string representation of the QoS JSON Object.</param>
+	/// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
+	/// <remarks>
+	/// Changes are batched and written to the service on the next DoWork(). All session properties and members
+	/// contain updated response returned from the server upon calling DoWork().
+	/// </remarks>
+	_XSAPIIMP xbox_live_result<void> set_local_member_server_qos_measurements(
+		_In_ xbox_live_user_t user,
+		_In_ const web::json::value& valueJson,
 		_In_opt_ context_t context = nullptr
 	);
 

@@ -565,6 +565,20 @@ multiplayer_session_writer::handle_events(
 			eventQueue.push_back(multiplayerEvent);
 		}
 
+		if (request->local_user_server_qos_measurements().size() > 0)
+		{
+			multiplayer_event multiplayerEvent(
+				errorCode,
+				errorMessage,
+				multiplayer_event_type::local_member_server_qos_measurements_write_completed,
+				std::make_shared<multiplayer_event_args>(),
+				sessionType,
+				request->context()
+			);
+
+			eventQueue.push_back(multiplayerEvent);
+		}
+
 		// Fire events for each of the properties
 		for (const auto& prop : request->local_user_properties())
 		{

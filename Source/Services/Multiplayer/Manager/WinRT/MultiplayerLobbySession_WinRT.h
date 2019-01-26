@@ -153,6 +153,22 @@ public:
 		_In_opt_ context_t context
 		);
 
+	/// <summary>
+	/// Sets the QoS measurements for use with matchmaking and dedicated servers
+	/// </summary>
+	/// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
+	/// <param name="jsonValueString">The string representation of the QoS JSON Object.</param>
+	/// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
+	/// <remarks>
+	/// Changes are batched and written to the service on the next DoWork(). All session properties and members
+	/// contain updated response returned from the server upon calling DoWork().
+	/// </remarks>
+	void SetLocalMemberServerQoSMeasurements(
+		_In_ XboxLiveUser_t user,
+		_In_ Platform::String^ jsonValueString,
+		_In_opt_ context_t context
+	);
+
     /// <summary>
     /// Delete a custom property on the local member.
     /// </summary>

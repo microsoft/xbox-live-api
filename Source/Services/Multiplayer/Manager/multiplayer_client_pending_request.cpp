@@ -147,6 +147,24 @@ multiplayer_client_pending_request::set_local_user_groups(
 	m_localUserGroups = groups;
 }
 
+const web::json::value&
+multiplayer_client_pending_request::local_user_server_qos_measurements() const
+{
+	return m_localUserServerQoSMeasurements;
+}
+
+void
+multiplayer_client_pending_request::set_local_user_server_qos_measurements(
+	_In_ std::shared_ptr<multiplayer_local_user> localUser,
+	_In_ const web::json::value& jsonValue,
+	_In_opt_ context_t context
+)
+{
+	m_context = context;
+	m_localUser = localUser;
+	m_localUserServerQoSMeasurements = jsonValue;
+}
+
 // Session non-synchronized properties
 multiplayer::manager::joinability
 multiplayer_client_pending_request::joinability()
@@ -245,6 +263,11 @@ multiplayer_client_pending_request::append_pending_changes(
 		if (m_localUserGroups.size() > 0)
 		{
 			sessionToCommit->current_user()->set_groups(m_localUserGroups);
+		}
+
+		if (m_localUserServerQoSMeasurements.size() > 0)
+		{
+			sessionToCommit->set_current_user_quality_of_service_measurements_json(m_localUserServerQoSMeasurements);
 		}
 
         localUser->set_write_changes_to_service(false);

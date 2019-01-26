@@ -52,6 +52,13 @@ public enum class MultiplayerEventType
 	/// </summary>
 	LocalMemberGroupWriteCompleted = xbox::services::multiplayer::manager::multiplayer_event_type::local_member_group_write_completed,
 
+	/// <summary>
+	/// Indicates that the set_local_member_server_qos_measurements() operation has completed.
+	/// Upon completion, the game can view the err() to see if the write succeeded.
+	/// A game can be write local member qos measurements by calling the set_local_member_server_qos_measurements() operation.
+	/// </summary>
+	LocalMemberServerQoSWriteCompleted = xbox::services::multiplayer::manager::multiplayer_event_type::local_member_server_qos_measurements_write_completed,
+
     /// <summary>
     /// Indicates that the SetLocalMemberConnectionAddress() operation has completed.
     /// Upon completion, the game can view the err() to see if the write succeeded.
