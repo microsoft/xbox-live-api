@@ -25,6 +25,14 @@ public:
     /// </summary>
     DEFINE_PTR_PROP_GET_STR_OBJ(CorrelationId, correlation_id);
 
+
+    DEFINE_PTR_PROP_GET_STR_OBJ(ServerConnectionString, matchmaking_server_connection_string);
+
+    property Windows::Foundation::Collections::IVector<Platform::String^>^ ServerConnectionCandidates
+    {
+        Windows::Foundation::Collections::IVector<Platform::String^>^ get();
+    }
+
     /// <summary>
     /// Object containing identifying information for the session.
     /// </summary>

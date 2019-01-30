@@ -234,6 +234,22 @@ multiplayer_client_pending_request::set_synchronized_session_properties(
     m_synchronizedSessionProperties[name] = valueJson;
 }
 
+const string_t& 
+multiplayer_client_pending_request::server_connection_string(
+    ) const
+{
+    return m_serverConnectionString;
+}
+
+void multiplayer_client_pending_request::set_server_connection_string(
+    _In_ string_t connectionString,
+	_In_opt_ context_t context
+    )
+{
+	m_context = context;
+    m_serverConnectionString = connectionString;
+}
+
 void
 multiplayer_client_pending_request::append_pending_changes(
     _In_ std::shared_ptr<multiplayer_session> sessionToCommit,
@@ -268,6 +284,11 @@ multiplayer_client_pending_request::append_pending_changes(
 		if (m_localUserServerQoSMeasurements.size() > 0)
 		{
 			sessionToCommit->set_current_user_quality_of_service_measurements_json(m_localUserServerQoSMeasurements);
+		}
+		
+		if (!m_serverConnectionString.empty())
+		{
+            sessionToCommit->set_matchmaking_server_connection_path(m_serverConnectionString);
 		}
 
         localUser->set_write_changes_to_service(false);

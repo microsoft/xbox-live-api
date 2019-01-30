@@ -188,6 +188,25 @@ multiplayer_client_manager::set_synchronized_properties(
     return xbox_live_result<void>();
 }
 
+xbox_live_result<void>
+multiplayer_client_manager::set_server_connection_string(
+    _In_ const multiplayer_session_reference& sessionRef,
+    _In_ const string_t& connectionString,
+	_In_opt_ context_t context
+    )
+{
+    // Note: sessionRef can be empty for the lobby initially as we may have not created one yet.
+    RETURN_CPP_IF(connectionString.empty(), void, xbox_live_error_code::invalid_argument, "connectionString was empty");
+
+    std::lock_guard<std::mutex> guard(m_clientRequestLock);
+    auto latestPending = latest_pending_read();
+    RETURN_CPP_IF(latestPending == nullptr || get_xbox_live_context_map().size() == 0, void, xbox_live_error_code::logic_error, "Call add_local_user() before writing lobby properties.");
+
+    latestPending->set_server_connection_string(sessionRef, connectionString, context);
+    return xbox_live_result<void>();
+}
+
+
 void
 multiplayer_client_manager::synchronized_write_completed(
     _In_ std::error_code errorCode,

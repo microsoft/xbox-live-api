@@ -126,6 +126,9 @@ public:
     const std::map<string_t, web::json::value>& synchronized_session_properties() const;
     void set_synchronized_session_properties(_In_ string_t name, _In_ web::json::value valueJson, _In_opt_ context_t context);
 
+    const string_t& server_connection_string() const;
+    void set_server_connection_string(_In_ string_t connectionString, _In_opt_ context_t context);
+
     void append_pending_changes(
         _In_ std::shared_ptr<xbox::services::multiplayer::multiplayer_session> sessionToCommit, 
         _In_ std::shared_ptr<multiplayer_local_user> localUser, 
@@ -155,6 +158,7 @@ private:
     // Session synchronized properties
     string_t m_synchronizedHostDeviceToken;
     std::map<string_t, web::json::value> m_synchronizedSessionProperties;
+    string_t m_serverConnectionString;
 };
 
 
@@ -681,6 +685,12 @@ public:
         _In_opt_ context_t context
         );
 
+    xbox_live_result<void> set_server_connection_string(
+        _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef,
+        _In_ string_t connectionString,
+		_In_opt_ context_t context
+        );
+
     xbox_live_result<void> set_synchronized_host(
         _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef,
         _In_ const string_t& hostDeviceToken,
@@ -936,6 +946,12 @@ public:
         _In_ const web::json::value& valueJson,
         _In_opt_ context_t context
         );
+
+    xbox_live_result<void> set_server_connection_string(
+        _In_ const xbox::services::multiplayer::multiplayer_session_reference& sessionRef,
+        _In_ const string_t& connectionString,
+		_In_opt_ context_t context
+    );
 
     std::shared_ptr<multiplayer_match_client> match_client();
     std::shared_ptr<multiplayer_game_client> game_client();

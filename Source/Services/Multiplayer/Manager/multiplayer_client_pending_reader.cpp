@@ -317,6 +317,20 @@ multiplayer_client_pending_reader::set_synchronized_properties(
     return xbox_live_result<void>();
 }
 
+xbox_live_result<void>
+multiplayer_client_pending_reader::set_server_connection_string(
+    _In_ multiplayer_session_reference sessionRef,
+    _In_ string_t connectionString,
+	_In_opt_ context_t context
+)
+{
+    auto pendingRequest = std::make_shared<multiplayer_client_pending_request>();
+    pendingRequest->set_server_connection_string(connectionString, context);
+    add_to_pending_queue(sessionRef, pendingRequest);
+
+    return xbox_live_result<void>();
+}
+
 void
 multiplayer_client_pending_reader::add_to_pending_queue(
     _In_ multiplayer_session_reference sessionRef,

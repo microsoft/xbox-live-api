@@ -1063,6 +1063,30 @@ public:
         );
 
     /// <summary>
+    /// The ordered list of connection strings that the session could use to connect to a game server. Generally titles should use the first on
+    /// the list, but sophisticated titles could use a custom mechanism for choosing one of the others (e.g. based on load).
+    /// </summary>
+    _XSAPIIMP const std::vector<string_t>& server_connection_string_candidates() const;
+
+    /// <summary>
+    /// Force a specific connection string to be used.  This is useful for session in progress join scenarios.
+    /// </summary>
+    _XSAPIIMP const string_t& matchmaking_server_connection_string() const;
+
+    /// <summary>
+    /// Call multiplayer_service::write_session after this to write batched local changes to the service. 
+    /// If this is called without multiplayer_service::write_session, this will only change the local session object but does not commit it to the service.
+    /// The ordered list of case-insensitive connection strings that the session could use to connect to 
+    /// a game server. Generally titles should use the first on the list, but sophisticated titles could use 
+    /// a custom mechanism for choosing one of the others (e.g. based on load).
+    /// </summary>
+    /// <param name="serverConnectionStringCandidates">The collection of connection paths.</param>
+    _XSAPIIMP xbox_live_result<void> set_server_connection_string(
+        _In_ const string_t& serverConnectionStringCandidates,
+		_In_opt_ context_t context = nullptr
+    );
+
+    /// <summary>
     /// Internal function.
     /// </summary>
     uint64_t _Change_number() const;
@@ -1098,6 +1122,8 @@ private:
     web::json::value m_properties;
     std::shared_ptr<xbox::services::multiplayer::multiplayer_session_constants> m_sessionConstants;
     std::shared_ptr<multiplayer_client_manager> m_multiplayerClientManager;
+    std::vector<string_t> m_serverConnectionStringCandidates;
+    string_t m_serverConnectionString;
 };
 
 class multiplayer_event_args

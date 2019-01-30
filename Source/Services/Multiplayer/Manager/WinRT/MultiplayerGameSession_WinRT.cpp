@@ -199,4 +199,10 @@ MultiplayerGameSession::SetSynchronizedHost(
     THROW_IF_ERR(result);
 }
 
+Windows::Foundation::Collections::IVector<Platform::String^>^
+MultiplayerGameSession::ServerConnectionCandidates::get()
+{
+    return UtilsWinRT::CreatePlatformVectorFromStdVectorString(m_cppObj->server_connection_string_candidates());
+}
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_END
