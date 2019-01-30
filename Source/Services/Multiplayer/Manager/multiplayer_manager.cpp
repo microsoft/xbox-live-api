@@ -259,11 +259,12 @@ xbox_live_result<void>
 multiplayer_manager::find_match(
     _In_ const string_t& hopperName,
     _In_ const web::json::value& attributes,
-    _In_ const std::chrono::seconds& timeout
+    _In_ const std::chrono::seconds& timeout,
+	_In_opt_ bool useSymmetricTickets
     )
 {
     RETURN_CPP_IF(m_multiplayerClientManager == nullptr, void, xbox_live_error_code::logic_error, "Call multiplayer_manager::initialize() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->find_match(hopperName, attributes, timeout), void);
+    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->find_match(hopperName, attributes, timeout, useSymmetricTickets), void);
 }
 
 void

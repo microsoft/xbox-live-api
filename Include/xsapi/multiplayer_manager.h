@@ -1644,10 +1644,12 @@ public:
     /// <param name="hopperName">The name of the hopper.</param>
     /// <param name="attributes">The ticket attributes for the match. (Optional)</param>
     /// <param name="timeout">The maximum time to wait for members to join the match. (Optional)</param>
+	/// <param name="useSymmetricTickets">Forces bi-directional evaluation of matchmaking tickets. (Optional)</param>
     _XSAPIIMP xbox_live_result<void> find_match(
         _In_ const string_t& hopperName,
         _In_ const web::json::value& attributes = web::json::value(),
-        _In_ const std::chrono::seconds& timeout = std::chrono::seconds(60)
+        _In_ const std::chrono::seconds& timeout = std::chrono::seconds(60),
+		_In_opt_ bool useSymmetricTickets = false
         );
 
     /// <summary>

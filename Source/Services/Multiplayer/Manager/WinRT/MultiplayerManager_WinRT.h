@@ -45,10 +45,12 @@ public:
     /// <param name="hopperName">The name of the hopper.</param>
     /// <param name="attributes">The ticket attributes for the match. (Optional)</param>
     /// <param name="timeout">The maximum time to wait for members to join the match. (Optional)</param>
+	/// <param name="useSymmetricTickets">Forces bi-directional evaluation of matchmaking tickets. (Optional)</param>
     void FindMatch(
         _In_ Platform::String^ hopperName,
         _In_opt_ Platform::String^ attributes,
-        _In_opt_ Windows::Foundation::TimeSpan timeout
+        _In_opt_ Windows::Foundation::TimeSpan timeout,
+		_In_opt_ bool useSymmetricTickets
         );
 
     /// <summary>

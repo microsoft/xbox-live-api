@@ -1272,12 +1272,13 @@ xbox_live_result<void>
 multiplayer_client_manager::find_match(
     _In_ const string_t& hopperName,
     _In_ const web::json::value& attributes,
-    _In_ const std::chrono::seconds& timeout
+    _In_ const std::chrono::seconds& timeout,
+	bool useSymmetricTickets
 )
 {
     auto latestPendingRead = latest_pending_read();
     RETURN_CPP_IF(latestPendingRead == nullptr || latestPendingRead->lobby_client()->session() == nullptr, void, xbox_live_error_code::logic_error, "No local user added. Call add_local_user() first.");
-    return latestPendingRead->find_match(hopperName, attributes, timeout);
+    return latestPendingRead->find_match(hopperName, attributes, timeout, useSymmetricTickets);
 }
 
 void

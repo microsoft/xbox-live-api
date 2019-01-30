@@ -661,7 +661,8 @@ public:
     xbox_live_result<void> find_match(
         _In_ const string_t& hopperName,
         _In_ const web::json::value& attributes,
-        _In_ const std::chrono::seconds& timeout
+        _In_ const std::chrono::seconds& timeout,
+		_In_opt_ bool useSymmetricTickets
         );
 
     void set_auto_fill_members_during_matchmaking(_In_ bool autoFillMembers);
@@ -959,7 +960,8 @@ public:
     xbox_live_result<void> find_match(
         _In_ const string_t& hopperName,
         _In_ const web::json::value& attributes,
-        _In_ const std::chrono::seconds& timeout
+        _In_ const std::chrono::seconds& timeout,
+		_In_opt_ bool useSymmetricTickets
         );
 
     void set_auto_fill_members_during_matchmaking(_In_ bool autoFillMembers);
@@ -1107,7 +1109,8 @@ public:
         _In_ const web::json::value& attributes,
         _In_ const std::chrono::seconds& timeout,
         _In_ std::shared_ptr<xbox::services::multiplayer::multiplayer_session> session,
-        _In_ bool preserveSession = false
+        _In_ bool preserveSession = false,
+		_In_opt_ bool useSymmetricTickets = false
         );
 
     xbox_live_result<void> find_match(
@@ -1173,6 +1176,7 @@ private:
     web::json::value m_attributes;
     std::chrono::seconds m_timeout;
     bool m_preservingMatchmakingSession;
+	bool m_useSymmetricTickets;
     std::atomic<xbox::services::multiplayer::manager::match_status> m_matchStatus;
     mutable std::mutex m_multiplayerEventQueueLock;
     std::vector<multiplayer_event> m_multiplayerEventQueue;
