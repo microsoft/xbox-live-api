@@ -551,50 +551,50 @@ multiplayer_session_writer::handle_events(
             }
         }
 
-		if (request->local_user_groups().size() > 0)
-		{
-			multiplayer_event multiplayerEvent(
-				errorCode,
-				errorMessage,
-				multiplayer_event_type::local_member_group_write_completed,
-				std::make_shared<multiplayer_event_args>(),
-				sessionType,
-				request->context()
-			);
+        if (request->local_user_groups().size() > 0)
+        {
+            multiplayer_event multiplayerEvent(
+                errorCode,
+                errorMessage,
+                multiplayer_event_type::local_member_group_write_completed,
+                std::make_shared<multiplayer_event_args>(),
+                sessionType,
+                request->context()
+            );
 
-			eventQueue.push_back(multiplayerEvent);
-		}
+            eventQueue.push_back(multiplayerEvent);
+        }
 
-		if (request->local_user_server_qos_measurements().size() > 0)
-		{
-			multiplayer_event multiplayerEvent(
-				errorCode,
-				errorMessage,
-				multiplayer_event_type::local_member_server_qos_measurements_write_completed,
-				std::make_shared<multiplayer_event_args>(),
-				sessionType,
-				request->context()
-			);
+        if (request->local_user_server_qos_measurements().size() > 0)
+        {
+            multiplayer_event multiplayerEvent(
+                errorCode,
+                errorMessage,
+                multiplayer_event_type::local_member_server_qos_measurements_write_completed,
+                std::make_shared<multiplayer_event_args>(),
+                sessionType,
+                request->context()
+            );
 
-			eventQueue.push_back(multiplayerEvent);
-		}
+            eventQueue.push_back(multiplayerEvent);
+        }
 
 		// Fire events for each of the properties
-		for (const auto& prop : request->local_user_properties())
-		{
-			multiplayer_event multiplayerEvent(
-				errorCode,
-				errorMessage,
-				multiplayer_event_type::local_member_property_write_completed,
-				std::make_shared<multiplayer_event_args>(),
-				sessionType,
-				request->context()
-			);
+        for (const auto& prop : request->local_user_properties())
+        {
+            multiplayer_event multiplayerEvent(
+                errorCode,
+                errorMessage,
+                multiplayer_event_type::local_member_property_write_completed,
+                std::make_shared<multiplayer_event_args>(),
+                sessionType,
+                request->context()
+            );
 
-			UNREFERENCED_PARAMETER(prop);
+            UNREFERENCED_PARAMETER(prop);
 
-			eventQueue.push_back(multiplayerEvent);
-		}
+            eventQueue.push_back(multiplayerEvent);
+        }
     }
 
     return eventQueue;

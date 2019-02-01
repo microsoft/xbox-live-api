@@ -321,8 +321,8 @@ xbox_live_result<void>
 multiplayer_client_pending_reader::set_server_connection_string(
     _In_ multiplayer_session_reference sessionRef,
     _In_ string_t connectionString,
-	_In_opt_ context_t context
-)
+    _In_opt_ context_t context
+    )
 {
     auto pendingRequest = std::make_shared<multiplayer_client_pending_request>();
     pendingRequest->set_server_connection_string(connectionString, context);
@@ -444,7 +444,7 @@ multiplayer_client_pending_reader::find_match(
     _In_ const string_t& hopperName,
     _In_ const web::json::value& attributes,
     _In_ const std::chrono::seconds& timeout,
-	_In_opt_ bool useSymmetricTickets
+    _In_opt_ bool useSymmetricTickets
     )
 {
     RETURN_CPP_IF(!m_autoFillMembers && m_gameClient->session() != nullptr, void, xbox_live_error_code::logic_error, "A game already exists. Call leave_game() before you can start matchmaking.");

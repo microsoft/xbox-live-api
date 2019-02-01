@@ -366,7 +366,7 @@ multiplayer_match_client::find_match(
     _In_ const std::chrono::seconds& timeout,
     _In_ std::shared_ptr<multiplayer_session> session,
     _In_ bool preserveSession,
-	_In_opt_ bool useSymmetricTickets
+    _In_opt_ bool useSymmetricTickets
     )
 {
     std::shared_ptr<xbox_live_context_impl> primaryContext = m_multiplayerLocalUserManager->get_primary_context();
@@ -395,7 +395,7 @@ multiplayer_match_client::find_match(
     m_timeout = timeout;
     m_preservingMatchmakingSession = preserveSession;
     m_matchTicketSessionRef = session->session_reference();
-	m_useSymmetricTickets = useSymmetricTickets;
+    m_useSymmetricTickets = useSymmetricTickets;
 
     std::weak_ptr<multiplayer_match_client> thisWeakPtr = shared_from_this();
     primaryContext->matchmaking_service().create_match_ticket(
@@ -405,7 +405,7 @@ multiplayer_match_client::find_match(
         timeout,
         preserveSession ? preserve_session_mode::always : preserve_session_mode::never,
         attributes,
-		useSymmetricTickets
+        useSymmetricTickets
         )
     .then([thisWeakPtr, timeout](xbox_live_result<create_match_ticket_response> result)
     {

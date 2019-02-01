@@ -35,7 +35,7 @@ MatchmakingService::CreateMatchTicketAsync(
     _In_ TimeSpan ticketTimeout,
     _In_ PreserveSessionMode preserveSession,
     _In_opt_ String^ ticketAttributesJson,
-	_In_ Platform::Boolean isSymmetric
+    _In_ Platform::Boolean isSymmetric
     )
 {
     web::json::value ticketAttributes;
@@ -52,7 +52,7 @@ MatchmakingService::CreateMatchTicketAsync(
         UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(ticketTimeout),
         static_cast<preserve_session_mode>(preserveSession),
         ticketAttributes,
-		isSymmetric
+        isSymmetric
         )
     .then([](xbox_live_result<create_match_ticket_response> cppResult)
     {

@@ -26,14 +26,14 @@ ProfileService::ProfileService(
 IAsyncOperation<XboxUserProfile^>^
 ProfileService::GetUserProfileAsync()
 {
-	auto task = m_cppObj.get_user_profile()
-		.then([](xbox::services::xbox_live_result<xbox_user_profile> cppUserProfile)
-	{
-		THROW_HR_IF_ERR(cppUserProfile.err());
-		return ref new XboxUserProfile(cppUserProfile.payload());
-	});
+    auto task = m_cppObj.get_user_profile()
+        .then([](xbox::services::xbox_live_result<xbox_user_profile> cppUserProfile)
+    {
+        THROW_HR_IF_ERR(cppUserProfile.err());
+        return ref new XboxUserProfile(cppUserProfile.payload());
+    });
 
-	return ASYNC_FROM_TASK(task);
+    return ASYNC_FROM_TASK(task);
 }
 
 IAsyncOperation<XboxUserProfile^>^

@@ -26,6 +26,7 @@ namespace social {
         /// <param name="gamerscore">The user's Gamerscore.</param>
         /// <param name="gamertag">The user's Gamertag.</param>
         /// <param name="xboxUserId">The user's Xbox user ID.</param>
+        /// <param name="narratorEnabled">Wether or not the user has narrator/Let games read to me enabled</param>
         _XSAPIIMP xbox_user_profile(
         _In_ string_t appDisplayName,
         _In_ web::uri appDisplayPictureResizeUri,
@@ -34,7 +35,7 @@ namespace social {
         _In_ string_t gamerscore,
         _In_ string_t gamertag,
         _In_ string_t xboxUserId,
-		_In_ bool narratorEnabled
+        _In_ bool narratorEnabled
         );
 
         /// <summary>
@@ -91,10 +92,10 @@ namespace social {
         /// </summary>
         _XSAPIIMP const string_t& xbox_user_id() const;
 
-		/// <summary>
-		/// Is narrator enabled.
-		/// </summary>
-		_XSAPIIMP bool narratorEnabled() const;
+        /// <summary>
+        /// Is narrator enabled.
+        /// </summary>
+        _XSAPIIMP bool narratorEnabled() const;
 
         /// <summary>
         /// Internal function
@@ -109,7 +110,7 @@ namespace social {
         string_t m_gamerscore;
         string_t m_gamertag;
         string_t m_xboxUserId;
-		bool     m_narratorEnabled;
+        bool m_narratorEnabled;
 
     };
 
@@ -119,16 +120,15 @@ namespace social {
     class profile_service
     {
     public:
-		/// <summary>
-		/// Gets current user profile.
-		/// </summary>
-		/// <returns>
-		/// Returns a concurrency::task&lt;T&gt; object that represents the state of the asynchronous operation.
-		/// The result of the asynchronous operation is an xbox_user_profile object.
-		/// </returns>
-		/// <remarks>Calls V3 GET /users/me/profile/settings</remarks>
-		_XSAPIIMP pplx::task<xbox::services::xbox_live_result<xbox_user_profile>> get_user_profile();
-
+        /// <summary>
+        /// Gets current user profile.
+        /// </summary>
+        /// <returns>
+        /// Returns a concurrency::task&lt;T&gt; object that represents the state of the asynchronous operation.
+        /// The result of the asynchronous operation is an xbox_user_profile object.
+        /// </returns>
+        /// <remarks>Calls V3 GET /users/me/profile/settings</remarks>
+        _XSAPIIMP pplx::task<xbox::services::xbox_live_result<xbox_user_profile>> get_user_profile();
 
         /// <summary>
         /// Gets a user profile for a specific Xbox user.
@@ -138,7 +138,7 @@ namespace social {
         /// Returns a concurrency::task&lt;T&gt; object that represents the state of the asynchronous operation.
         /// The result of the asynchronous operation is an xbox_user_profile object.
         /// </returns>
-        /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
+        /// <remarks>Calls V3 GET /users/batch/profile/settings</remarks>
         _XSAPIIMP pplx::task<xbox::services::xbox_live_result<xbox_user_profile>> get_user_profile(
         _In_ string_t xboxUserId
         );
@@ -151,7 +151,7 @@ namespace social {
         /// Returns a concurrency::task&lt;T&gt; object that represents the state of the asynchronous operation.
         /// The result of the asynchronous operation is a collection of xbox_user_profile objects.
         /// </returns>
-        /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
+        /// <remarks>Calls V3 GET /users/batch/profile/settings</remarks>
         _XSAPIIMP pplx::task<xbox::services::xbox_live_result<std::vector<xbox_user_profile>>> get_user_profiles(
         _In_ const std::vector<string_t>& xboxUserIds
         );
@@ -165,7 +165,7 @@ namespace social {
         /// Returns a concurrency::task&lt;T&gt; object that represents the state of the asynchronous operation.
         /// The result of the asynchronous operation is a collection of xbox_user_profile objects.
         /// </returns>
-        /// <remarks>Calls V2 GET /users/{userId}/profile/settings/people/{socialGroup}</remarks>
+        /// <remarks>Calls V3 GET /users/{userId}/profile/settings/people/{socialGroup}</remarks>
         _XSAPIIMP pplx::task<xbox::services::xbox_live_result< std::vector< xbox_user_profile>>> get_user_profiles_for_social_group(
         _In_ const string_t& socialGroup
         );

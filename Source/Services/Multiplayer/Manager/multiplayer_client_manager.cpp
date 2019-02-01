@@ -192,7 +192,7 @@ xbox_live_result<void>
 multiplayer_client_manager::set_server_connection_string(
     _In_ const multiplayer_session_reference& sessionRef,
     _In_ const string_t& connectionString,
-	_In_opt_ context_t context
+    _In_opt_ context_t context
     )
 {
     // Note: sessionRef can be empty for the lobby initially as we may have not created one yet.
@@ -205,7 +205,6 @@ multiplayer_client_manager::set_server_connection_string(
     latestPending->set_server_connection_string(sessionRef, connectionString, context);
     return xbox_live_result<void>();
 }
-
 
 void
 multiplayer_client_manager::synchronized_write_completed(
@@ -1273,7 +1272,7 @@ multiplayer_client_manager::find_match(
     _In_ const string_t& hopperName,
     _In_ const web::json::value& attributes,
     _In_ const std::chrono::seconds& timeout,
-	bool useSymmetricTickets
+    bool useSymmetricTickets
 )
 {
     auto latestPendingRead = latest_pending_read();

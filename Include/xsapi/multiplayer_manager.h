@@ -206,19 +206,19 @@ enum class multiplayer_event_type
     /// </summary>
     local_member_property_write_completed,
 
-	/// <summary>
-	/// Indicates that the set_local_member_groups() operation has completed.
-	/// Upon completion, the game can view the err() to see if the write succeeded.
-	/// A game can be write local member properties by calling the set_local_member_groups() operation.
-	/// </summary>
-	local_member_group_write_completed,
+    /// <summary>
+    /// Indicates that the set_local_member_groups() operation has completed.
+    /// Upon completion, the game can view the err() to see if the write succeeded.
+    /// A game can be write local member properties by calling the set_local_member_groups() operation.
+    /// </summary>
+    local_member_group_write_completed,
 
-	/// <summary>
-	/// Indicates that the set_local_member_server_qos_measurements() operation has completed.
-	/// Upon completion, the game can view the err() to see if the write succeeded.
-	/// A game can be write local member qos measurements by calling the set_local_member_server_qos_measurements() operation.
-	/// </summary>
-	local_member_server_qos_measurements_write_completed,
+    /// <summary>
+    /// Indicates that the set_local_member_server_qos_measurements() operation has completed.
+    /// Upon completion, the game can view the err() to see if the write succeeded.
+    /// A game can be write local member qos measurements by calling the set_local_member_server_qos_measurements() operation.
+    /// </summary>
+    local_member_server_qos_measurements_write_completed,
 
     /// <summary>
     /// Indicates that the set_local_member_connection_address() operation has completed.
@@ -396,11 +396,11 @@ public:
     /// </summary>
     _XSAPIIMP const string_t& team_id() const;
 
-	/// <summary>
-	/// Only applicable if you are using Team rules with Smart Match.
-	/// Initial team assignment suggested by Smart Match.
-	/// </summary>
-	_XSAPIIMP const string_t& initial_team() const;
+    /// <summary>
+    /// Only applicable if you are using Team rules with Smart Match.
+    /// Initial team assignment suggested by Smart Match.
+    /// </summary>
+    _XSAPIIMP const string_t& initial_team() const;
 
     /// <summary>
     /// Xbox User ID of the member.
@@ -462,7 +462,7 @@ private:
     string_t m_xboxUserid;
     string_t m_gamertag;
     string_t m_deviceToken;
-	string_t m_initialTeam;
+    string_t m_initialTeam;
     bool m_isLocal;
     bool m_isGameHost;
     bool m_isLobbyHost;
@@ -572,37 +572,37 @@ public:
         _In_opt_ context_t context = nullptr
     );
 
-	/// <summary>
-	/// Sets the local members groups to the specified list.
-	/// </summary>
-	/// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
-	/// <param name="groups">The vector of groups the user belongs to.</param>
-	/// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
-	/// <remarks>
-	/// Changes are batched and written to the service on the next DoWork(). All session properties and members
-	/// contain updated response returned from the server upon calling DoWork().
-	/// </remarks>
-	_XSAPIIMP xbox_live_result<void> set_local_member_groups(
-		_In_ xbox_live_user_t user,
-		_In_ const std::vector<string_t>& groups,
-		_In_opt_ context_t context = nullptr
-	);
+    /// <summary>
+    /// Sets the local members groups to the specified list.
+    /// </summary>
+    /// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
+    /// <param name="groups">The vector of groups the user belongs to.</param>
+    /// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
+    /// <remarks>
+    /// Changes are batched and written to the service on the next DoWork(). All session properties and members
+    /// contain updated response returned from the server upon calling DoWork().
+    /// </remarks>
+    _XSAPIIMP xbox_live_result<void> set_local_member_groups(
+        _In_ xbox_live_user_t user,
+        _In_ const std::vector<string_t>& groups,
+        _In_opt_ context_t context = nullptr
+    );
 
-	/// <summary>
-	/// Sets the QoS measurements for use with matchmaking and dedicated servers
-	/// </summary>
-	/// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
-	/// <param name="jsonValueString">The string representation of the QoS JSON Object.</param>
-	/// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
-	/// <remarks>
-	/// Changes are batched and written to the service on the next DoWork(). All session properties and members
-	/// contain updated response returned from the server upon calling DoWork().
-	/// </remarks>
-	_XSAPIIMP xbox_live_result<void> set_local_member_server_qos_measurements(
-		_In_ xbox_live_user_t user,
-		_In_ const web::json::value& valueJson,
-		_In_opt_ context_t context = nullptr
-	);
+    /// <summary>
+    /// Sets the QoS measurements for use with matchmaking and dedicated servers
+    /// </summary>
+    /// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
+    /// <param name="jsonValueString">The string representation of the QoS JSON Object.</param>
+    /// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
+    /// <remarks>
+    /// Changes are batched and written to the service on the next DoWork(). All session properties and members
+    /// contain updated response returned from the server upon calling DoWork().
+    /// </remarks>
+    _XSAPIIMP xbox_live_result<void> set_local_member_server_qos_measurements(
+        _In_ xbox_live_user_t user,
+        _In_ const web::json::value& valueJson,
+        _In_opt_ context_t context = nullptr
+    );
 
     /// <summary>
     /// Delete a custom property on the local member
@@ -793,31 +793,31 @@ public:
             );
     }
 
-	_XSAPIIMP xbox_live_result<void> set_local_member_groups(
-		_In_ winrt::Windows::Xbox::System::User user,
-		_In_ const std::vector<string_t>& groups,
-		_In_opt_ context_t context = nullptr
-	)
-	{
-		return set_local_member_groups(
-			convert_user_to_cppcx(user),
-			groups,
-			context
-		);
-	}
+    _XSAPIIMP xbox_live_result<void> set_local_member_groups(
+        _In_ winrt::Windows::Xbox::System::User user,
+        _In_ const std::vector<string_t>& groups,
+        _In_opt_ context_t context = nullptr
+        )
+    {
+        return set_local_member_groups(
+            convert_user_to_cppcx(user),
+            groups,
+            context
+            );
+    }
 
-	_XSAPIIMP xbox_live_result<void> set_local_member_server_qos_measurements(
-		_In_ winrt::Windows::Xbox::System::User user,
-		_In_ const web::json::value& jsonValue,
-		_In_opt_ context_t context = nullptr
-	)
-	{
-		return set_local_member_server_qos_measurements(
-			convert_user_to_cppcx(user),
-			jsonValue,
-			context
-		);
-	}
+    _XSAPIIMP xbox_live_result<void> set_local_member_server_qos_measurements(
+        _In_ winrt::Windows::Xbox::System::User user,
+        _In_ const web::json::value& jsonValue,
+        _In_opt_ context_t context = nullptr
+        )
+    {
+        return set_local_member_server_qos_measurements(
+            convert_user_to_cppcx(user),
+            jsonValue,
+            context
+        );
+    }
 
     _XSAPIIMP xbox_live_result<void> delete_local_member_properties(
         _In_ winrt::Windows::Xbox::System::User user,
@@ -982,54 +982,54 @@ public:
         _In_opt_ context_t context = nullptr
         );
 
-	/// <summary>
-	/// Set a custom property on the local member to the specified JSON string
-	/// Changes are batched and written to the service on the next do_work(). All session properties and members
-	/// contain updated response returned from the server upon calling do_work().
-	/// The result is delivered via multiplayer_event callback of type local_member_property_write_completed through do_work().
-	/// </summary>
-	/// <param name="user">The associated system User you want to set the property for.</param>
-	/// <param name="name">The name of the property to set.</param>
-	/// <param name="valueJson">The JSON value to assign to the property. (Optional)</param>
-	/// <param name="context">The application-defined data to correlate the multiplayer_event to the initiating call. (Optional)</param>
-	_XSAPIIMP xbox_live_result<void> set_local_member_properties(
-		_In_ xbox_live_user_t user,
-		_In_ const string_t& name,
-		_In_ const web::json::value& valueJson,
-		_In_opt_ context_t context = nullptr
-	);
+    /// <summary>
+    /// Set a custom property on the local member to the specified JSON string
+    /// Changes are batched and written to the service on the next do_work(). All session properties and members
+    /// contain updated response returned from the server upon calling do_work().
+    /// The result is delivered via multiplayer_event callback of type local_member_property_write_completed through do_work().
+    /// </summary>
+    /// <param name="user">The associated system User you want to set the property for.</param>
+    /// <param name="name">The name of the property to set.</param>
+    /// <param name="valueJson">The JSON value to assign to the property. (Optional)</param>
+    /// <param name="context">The application-defined data to correlate the multiplayer_event to the initiating call. (Optional)</param>
+    _XSAPIIMP xbox_live_result<void> set_local_member_properties(
+        _In_ xbox_live_user_t user,
+        _In_ const string_t& name,
+        _In_ const web::json::value& valueJson,
+        _In_opt_ context_t context = nullptr
+        );
 
-	/// <summary>
-	/// Sets the local members groups to the specified list.
-	/// </summary>
-	/// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
-	/// <param name="groups">The vector of groups the user belongs to.</param>
-	/// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
-	/// <remarks>
-	/// Changes are batched and written to the service on the next DoWork(). All session properties and members
-	/// contain updated response returned from the server upon calling DoWork().
-	/// </remarks>
-	_XSAPIIMP xbox_live_result<void> set_local_member_groups(
-		_In_ xbox_live_user_t user,
-		_In_ const std::vector<string_t>& groups,
-		_In_opt_ context_t context = nullptr
-	);
+    /// <summary>
+    /// Sets the local members groups to the specified list.
+    /// </summary>
+    /// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
+    /// <param name="groups">The vector of groups the user belongs to.</param>
+    /// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
+    /// <remarks>
+    /// Changes are batched and written to the service on the next DoWork(). All session properties and members
+    /// contain updated response returned from the server upon calling DoWork().
+    /// </remarks>
+    _XSAPIIMP xbox_live_result<void> set_local_member_groups(
+        _In_ xbox_live_user_t user,
+        _In_ const std::vector<string_t>& groups,
+        _In_opt_ context_t context = nullptr
+        );
 
-	/// <summary>
-	/// Sets the QoS measurements for use with matchmaking and dedicated servers
-	/// </summary>
-	/// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
-	/// <param name="jsonValueString">The string representation of the QoS JSON Object.</param>
-	/// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
-	/// <remarks>
-	/// Changes are batched and written to the service on the next DoWork(). All session properties and members
-	/// contain updated response returned from the server upon calling DoWork().
-	/// </remarks>
-	_XSAPIIMP xbox_live_result<void> set_local_member_server_qos_measurements(
-		_In_ xbox_live_user_t user,
-		_In_ const web::json::value& valueJson,
-		_In_opt_ context_t context = nullptr
-	);
+    /// <summary>
+    /// Sets the QoS measurements for use with matchmaking and dedicated servers
+    /// </summary>
+    /// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
+    /// <param name="jsonValueString">The string representation of the QoS JSON Object.</param>
+    /// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
+    /// <remarks>
+    /// Changes are batched and written to the service on the next DoWork(). All session properties and members
+    /// contain updated response returned from the server upon calling DoWork().
+    /// </remarks>
+    _XSAPIIMP xbox_live_result<void> set_local_member_server_qos_measurements(
+        _In_ xbox_live_user_t user,
+        _In_ const web::json::value& valueJson,
+        _In_opt_ context_t context = nullptr
+        );
 
     /// <summary>
     /// Sets a custom property to the specified JSON string using multiplayer_session_write_mode::synchronized_update.
@@ -1083,8 +1083,8 @@ public:
     /// <param name="serverConnectionStringCandidates">The collection of connection paths.</param>
     _XSAPIIMP xbox_live_result<void> set_server_connection_string(
         _In_ const string_t& serverConnectionStringCandidates,
-		_In_opt_ context_t context = nullptr
-    );
+        _In_opt_ context_t context = nullptr
+        );
 
     /// <summary>
     /// Internal function.
@@ -1644,12 +1644,12 @@ public:
     /// <param name="hopperName">The name of the hopper.</param>
     /// <param name="attributes">The ticket attributes for the match. (Optional)</param>
     /// <param name="timeout">The maximum time to wait for members to join the match. (Optional)</param>
-	/// <param name="useSymmetricTickets">Forces bi-directional evaluation of matchmaking tickets. (Optional)</param>
+    /// <param name="useSymmetricTickets">Forces bi-directional evaluation of matchmaking tickets. (Optional)</param>
     _XSAPIIMP xbox_live_result<void> find_match(
         _In_ const string_t& hopperName,
         _In_ const web::json::value& attributes = web::json::value(),
         _In_ const std::chrono::seconds& timeout = std::chrono::seconds(60),
-		_In_opt_ bool useSymmetricTickets = false
+        _In_opt_ bool useSymmetricTickets = false
         );
 
     /// <summary>

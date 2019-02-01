@@ -63,10 +63,10 @@ public:
     /// </summary>
     DEFINE_PROP_GET_STR_OBJ(XboxUserId, xbox_user_id)
 
-	/// <summary>
-	/// Is narrator enabled.
-	/// </summary>
-	DEFINE_PROP_GET_OBJ(IsNarratorEnabled, narratorEnabled, bool)
+    /// <summary>
+    /// Is narrator enabled.
+    /// </summary>
+    DEFINE_PROP_GET_OBJ(IsNarratorEnabled, narratorEnabled, bool)
 
 internal:
     XboxUserProfile(

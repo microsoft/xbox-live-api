@@ -18,7 +18,7 @@ const string_t profile_service::SETTINGS_ARRAY[] = {
     _T("GameDisplayPicRaw"),
     _T("Gamerscore"),
     _T("Gamertag"),
-	_T("SpeechAccessibility")
+    _T("SpeechAccessibility")
 };
 
 const web::json::value profile_service::SETTINGS_SERIALIZED = serialize_settings_json();
@@ -39,47 +39,47 @@ profile_service::profile_service(
 pplx::task<xbox_live_result<xbox_user_profile>>
 profile_service::get_user_profile()
 {
-	std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
-		m_xboxLiveContextSettings,
-		_T("GET"),
-		utils::create_xboxlive_endpoint(_T("profile"), m_appConfig),
-		_T("/users/me/profile/settings?Settings=") + SETTINGS_QUERY,
-		xbox_live_api::get_user_profiles
-	);
-	httpCall->set_xbox_contract_version_header_value(_T("3"));
+    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+        m_xboxLiveContextSettings,
+        _T("GET"),
+        utils::create_xboxlive_endpoint(_T("profile"), m_appConfig),
+        _T("/users/me/profile/settings?Settings=") + SETTINGS_QUERY,
+        xbox_live_api::get_user_profiles
+    );
+    httpCall->set_xbox_contract_version_header_value(_T("3"));
 
-	auto task = httpCall->get_response_with_auth(m_userContext)
-		.then([](std::shared_ptr<http_call_response> response)
-	{
-		if (response->response_body_json().size() != 0)
-		{
-			std::error_code errc = xbox_live_error_code::no_error;
-			auto profileVector = utils::extract_xbox_live_result_json_vector<xbox_user_profile>(
-				xbox_user_profile::_Deserialize,
-				response->response_body_json(),
-				_T("profileUsers"),
-				errc,
-				true
-				);
+    auto task = httpCall->get_response_with_auth(m_userContext)
+        .then([](std::shared_ptr<http_call_response> response)
+    {
+        if (response->response_body_json().size() != 0)
+        {
+            std::error_code errc = xbox_live_error_code::no_error;
+            auto profileVector = utils::extract_xbox_live_result_json_vector<xbox_user_profile>(
+                xbox_user_profile::_Deserialize,
+                response->response_body_json(),
+                _T("profileUsers"),
+                errc,
+                true
+                );
 
-			if (profileVector.payload().size() == 1)
-			{
-				return xbox_live_result<xbox_user_profile>(profileVector.payload()[0], profileVector.err(), profileVector.err_message());
-			}
-			else
-			{
-				return xbox_live_result<xbox_user_profile>(profileVector.err(), profileVector.err_message());
-			}
-		}
-		else
-		{
-			return xbox_live_result<xbox_user_profile>(response->err_code(), response->err_message());
-		}
-	});
+            if (profileVector.payload().size() == 1)
+            {
+                return xbox_live_result<xbox_user_profile>(profileVector.payload()[0], profileVector.err(), profileVector.err_message());
+            }
+            else
+            {
+                return xbox_live_result<xbox_user_profile>(profileVector.err(), profileVector.err_message());
+            }
+        }
+        else
+        {
+            return xbox_live_result<xbox_user_profile>(response->err_code(), response->err_message());
+        }
+    });
 
-	return utils::create_exception_free_task<xbox_user_profile>(
-		task
-		);
+    return utils::create_exception_free_task<xbox_user_profile>(
+        task
+        );
 
 }
 

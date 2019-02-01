@@ -38,7 +38,7 @@ void multiplayer_session_member::deep_copy_from(
     m_encounters = other.m_encounters;
     m_subscribedChangeTypes = other.m_subscribedChangeTypes;
     m_teamId = other.m_teamId;
-	m_initialTeam = other.m_initialTeam;
+    m_initialTeam = other.m_initialTeam;
     m_arbitrationStatus = other.m_arbitrationStatus;
     m_results = other.m_results;
     m_registrationReason = other.m_registrationReason;
@@ -124,7 +124,7 @@ multiplayer_session_member::team_id() const
 const string_t&
 multiplayer_session_member::initial_team() const
 {
-	return m_initialTeam;
+    return m_initialTeam;
 }
 
 tournament_arbitration_status 
@@ -717,7 +717,7 @@ multiplayer_session_member::_Deserialize(
     returnResult.m_customPropertiesJson = utils::extract_json_field(propertiesJson, _T("custom"), errc, false);
     returnResult.m_customConstantsJson = utils::extract_json_field(constantsJson, _T("custom"), errc, false);
     returnResult.m_teamId = utils::extract_json_string(constantsSystemJson, _T("team"), errc);
-	returnResult.m_initialTeam = utils::extract_json_string(constantsSystemMatchmakingResultJson, _T("initialTeam"), errc);
+    returnResult.m_initialTeam = utils::extract_json_string(constantsSystemMatchmakingResultJson, _T("initialTeam"), errc);
     returnResult.m_arbitrationStatus = multiplayer_service::_Convert_string_to_arbitration_status(utils::extract_json_string(json, _T("arbitrationStatus"), errc));
     returnResult.m_gamertag = utils::extract_json_string(json, _T("gamertag"), errc);
     returnResult.m_deviceToken = utils::extract_json_string(json, _T("deviceToken"), errc);

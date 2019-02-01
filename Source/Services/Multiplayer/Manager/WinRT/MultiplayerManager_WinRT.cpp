@@ -66,7 +66,7 @@ MultiplayerManager::FindMatch(
     _In_ Platform::String^ hopperName,
     _In_opt_ Platform::String^ attributes,
     _In_opt_ Windows::Foundation::TimeSpan timeout,
-	_In_opt_ bool useSymmetricTickets
+    _In_opt_ bool useSymmetricTickets
     )
 {
     auto valueJsonString = UtilsWinRT::JsonValueFromPlatformString(attributes);
@@ -74,7 +74,7 @@ MultiplayerManager::FindMatch(
         STRING_T_FROM_PLATFORM_STRING(hopperName),
         valueJsonString,
         UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(timeout),
-		useSymmetricTickets
+        useSymmetricTickets
         );
 
     THROW_IF_ERR(result);

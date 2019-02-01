@@ -13,15 +13,15 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_BEGIN
 public ref class ProfileService sealed
 {
 public:
-	/// <summary>
-	/// Gets current user profile.
-	/// </summary>
-	/// <returns>
-	/// Returns an IAsyncOperation&lt;TResult&gt; object that represents the state of the asynchronous operation.
-	/// The result of the asynchronous operation is an XboxUserProfile object.
-	/// </returns>
-	/// <remarks>Calls V3 GET /users/me/profile/settings</remarks>
-	Windows::Foundation::IAsyncOperation<XboxUserProfile^>^ GetUserProfileAsync();
+    /// <summary>
+    /// Gets current user profile.
+    /// </summary>
+    /// <returns>
+    /// Returns an IAsyncOperation&lt;TResult&gt; object that represents the state of the asynchronous operation.
+    /// The result of the asynchronous operation is an XboxUserProfile object.
+    /// </returns>
+    /// <remarks>Calls V3 GET /users/me/profile/settings</remarks>
+    Windows::Foundation::IAsyncOperation<XboxUserProfile^>^ GetUserProfileAsync();
 
     /// <summary>
     /// Gets a user profile for a specific Xbox user.
@@ -31,7 +31,7 @@ public:
     /// Returns an IAsyncOperation&lt;TResult&gt; object that represents the state of the asynchronous operation.
     /// The result of the asynchronous operation is an XboxUserProfile object.
     /// </returns>
-    /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
+    /// <remarks>Calls V3 GET /users/batch/profile/settings</remarks>
     Windows::Foundation::IAsyncOperation<XboxUserProfile^>^ GetUserProfileAsync(
         _In_ Platform::String^ xboxUserId
         );
@@ -44,7 +44,7 @@ public:
     /// Returns an IAsyncOperation&lt;TResult&gt; object that represents the state of the asynchronous operation.
     /// The result of the asynchronous operation is a collection of XboxUserProfile objects.
     /// </returns>
-    /// <remarks>Calls V2 GET /users/batch/profile/settings</remarks>
+    /// <remarks>Calls V3 GET /users/batch/profile/settings</remarks>
     Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<XboxUserProfile^>^>^ GetUserProfilesAsync(
         _In_ Windows::Foundation::Collections::IVectorView<Platform::String^>^ xboxUserIds
         );
@@ -58,7 +58,7 @@ public:
     /// Returns an IAsyncOperation&lt;TResult&gt; object that represents the state of the asynchronous operation.
     /// The result of the asynchronous operation is a collection of XboxUserProfile objects.
     /// </returns>
-    /// <remarks>Calls V2 GET /users/{userId}/profile/settings/people/{socialGroup}</remarks>
+    /// <remarks>Calls V3 GET /users/{userId}/profile/settings/people/{socialGroup}</remarks>
     Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<XboxUserProfile^>^>^ GetUserProfilesForSocialGroupAsync(
         _In_ Platform::String^ socialGroup
         );

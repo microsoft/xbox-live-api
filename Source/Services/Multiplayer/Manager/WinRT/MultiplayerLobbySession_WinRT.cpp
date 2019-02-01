@@ -151,40 +151,40 @@ MultiplayerLobbySession::SetLocalMemberProperties(
 
 void
 MultiplayerLobbySession::SetLocalMemberGroups( 
-	_In_ XboxLiveUser_t user,
-	_In_ Windows::Foundation::Collections::IVectorView<Platform::String ^>^ Groups,
-	_In_opt_ context_t context
-)
+    _In_ XboxLiveUser_t user,
+    _In_ Windows::Foundation::Collections::IVectorView<Platform::String ^>^ Groups,
+    _In_opt_ context_t context
+    )
 {
-	THROW_INVALIDARGUMENT_IF_NULL(user);
+    THROW_INVALIDARGUMENT_IF_NULL(user);
 
-	auto groupsVector = UtilsWinRT::CovertVectorViewToStdVectorString(Groups);
-	auto result = m_cppObj->set_local_member_groups(
-		user_context::user_convert(user),
-		groupsVector,
-		context
-	);
+    auto groupsVector = UtilsWinRT::CovertVectorViewToStdVectorString(Groups);
+    auto result = m_cppObj->set_local_member_groups(
+        user_context::user_convert(user),
+        groupsVector,
+        context
+        );
 
-	THROW_IF_ERR(result);
+    THROW_IF_ERR(result);
 }
 
 void
 MultiplayerLobbySession::SetLocalMemberServerQoSMeasurements(
-	_In_ XboxLiveUser_t user,
-	_In_ Platform::String^ jsonValueString,
-	_In_opt_ context_t context
-)
+    _In_ XboxLiveUser_t user,
+    _In_ Platform::String^ jsonValueString,
+    _In_opt_ context_t context
+    )
 {
-	THROW_INVALIDARGUMENT_IF_NULL(user);
+    THROW_INVALIDARGUMENT_IF_NULL(user);
 
-	auto jsonValue = UtilsWinRT::JsonValueFromPlatformString(jsonValueString);
-	auto result = m_cppObj->set_local_member_server_qos_measurements(
-		user_context::user_convert(user),
-		jsonValue,
-		context
-	);
+    auto jsonValue = UtilsWinRT::JsonValueFromPlatformString(jsonValueString);
+    auto result = m_cppObj->set_local_member_server_qos_measurements(
+        user_context::user_convert(user),
+        jsonValue,
+        context
+        );
 
-	THROW_IF_ERR(result);
+    THROW_IF_ERR(result);
 }
 
 void

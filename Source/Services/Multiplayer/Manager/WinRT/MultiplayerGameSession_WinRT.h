@@ -25,9 +25,14 @@ public:
     /// </summary>
     DEFINE_PTR_PROP_GET_STR_OBJ(CorrelationId, correlation_id);
 
-
+    /// <summary>
+    /// This string value represents the the address for the dedicated server/region selected for the game session.
+    /// </summary>
     DEFINE_PTR_PROP_GET_STR_OBJ(ServerConnectionString, matchmaking_server_connection_string);
 
+    /// <summary>
+    /// A list returned by SmartMatch containing a latency-sorted list of preferred servers/regions for the game
+    /// </summary>
     property Windows::Foundation::Collections::IVector<Platform::String^>^ ServerConnectionCandidates
     {
         Windows::Foundation::Collections::IVector<Platform::String^>^ get();
@@ -112,55 +117,55 @@ public:
         _In_opt_ context_t context
         );
 
-	/// <summary>
-	/// Set a custom property on the local member to the specified JSON string.
-	/// </summary>
-	/// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
-	/// <param name="name">The name of the property to set.</param>
-	/// <param name="valueJson">The JSON value to assign to the property. (Optional)</param>
-	/// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
-	/// <remarks>
-	/// Changes are batched and written to the service on the next DoWork(). All session properties and members
-	/// contain updated response returned from the server upon calling DoWork().
-	/// </remarks>
-	void SetLocalMemberProperties(
-		_In_ XboxLiveUser_t user,
-		_In_ Platform::String^ name,
-		_In_opt_ Platform::String^ valueJson,
-		_In_opt_ context_t context
-	);
+    /// <summary>
+    /// Set a custom property on the local member to the specified JSON string.
+    /// </summary>
+    /// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
+    /// <param name="name">The name of the property to set.</param>
+    /// <param name="valueJson">The JSON value to assign to the property. (Optional)</param>
+    /// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
+    /// <remarks>
+    /// Changes are batched and written to the service on the next DoWork(). All session properties and members
+    /// contain updated response returned from the server upon calling DoWork().
+    /// </remarks>
+    void SetLocalMemberProperties(
+        _In_ XboxLiveUser_t user,
+        _In_ Platform::String^ name,
+        _In_opt_ Platform::String^ valueJson,
+        _In_opt_ context_t context
+        );
 
-	/// <summary>
-	/// Sets the local members groups to the specified list.
-	/// </summary>
-	/// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
-	/// <param name="groups">The vector of groups the user belongs to.</param>
-	/// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
-	/// <remarks>
-	/// Changes are batched and written to the service on the next DoWork(). All session properties and members
-	/// contain updated response returned from the server upon calling DoWork().
-	/// </remarks>
-	void SetLocalMemberGroups(
-		_In_ XboxLiveUser_t user,
-		_In_ Windows::Foundation::Collections::IVectorView<Platform::String^>^ Groups,
-		_In_opt_ context_t context
-	);
+    /// <summary>
+    /// Sets the local members groups to the specified list.
+    /// </summary>
+    /// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
+    /// <param name="groups">The vector of groups the user belongs to.</param>
+    /// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
+    /// <remarks>
+    /// Changes are batched and written to the service on the next DoWork(). All session properties and members
+    /// contain updated response returned from the server upon calling DoWork().
+    /// </remarks>
+    void SetLocalMemberGroups(
+        _In_ XboxLiveUser_t user,
+        _In_ Windows::Foundation::Collections::IVectorView<Platform::String^>^ Groups,
+        _In_opt_ context_t context
+        );
 
-	/// <summary>
-	/// Sets the QoS measurements for use with matchmaking and dedicated servers
-	/// </summary>
-	/// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
-	/// <param name="jsonValueString">The string representation of the QoS JSON Object.</param>
-	/// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
-	/// <remarks>
-	/// Changes are batched and written to the service on the next DoWork(). All session properties and members
-	/// contain updated response returned from the server upon calling DoWork().
-	/// </remarks>
-	void SetLocalMemberServerQoSMeasurements(
-		_In_ XboxLiveUser_t user,
-		_In_ Platform::String^ jsonValueString,
-		_In_opt_ context_t context
-	);
+    /// <summary>
+    /// Sets the QoS measurements for use with matchmaking and dedicated servers
+    /// </summary>
+    /// <param name="user">The associated XboxLiveContext for the User you want to set the property for.</param>
+    /// <param name="jsonValueString">The string representation of the QoS JSON Object.</param>
+    /// <param name="context">The application-defined data to correlate the MultiplayerEvent to the initiating call. (Optional)</param>
+    /// <remarks>
+    /// Changes are batched and written to the service on the next DoWork(). All session properties and members
+    /// contain updated response returned from the server upon calling DoWork().
+    /// </remarks>
+    void SetLocalMemberServerQoSMeasurements(
+        _In_ XboxLiveUser_t user,
+        _In_ Platform::String^ jsonValueString,
+        _In_opt_ context_t context
+        );
 
     /// <summary>
     /// Sets a custom property to the specified JSON string using MultiplayerSessionWriteMode::SynchronizedUpdate.
