@@ -165,7 +165,7 @@ namespace social {
         /// Returns a concurrency::task&lt;T&gt; object that represents the state of the asynchronous operation.
         /// The result of the asynchronous operation is a collection of xbox_user_profile objects.
         /// </returns>
-        /// <remarks>Calls V3 GET /users/{userId}/profile/settings/people/{socialGroup}</remarks>
+        /// <remarks>Calls V2 GET /users/{userId}/profile/settings/people/{socialGroup}</remarks>
         _XSAPIIMP pplx::task<xbox::services::xbox_live_result< std::vector< xbox_user_profile>>> get_user_profiles_for_social_group(
         _In_ const string_t& socialGroup
         );
