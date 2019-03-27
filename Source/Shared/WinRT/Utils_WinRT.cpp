@@ -61,6 +61,11 @@ UtilsWinRT::ConvertExceptionToHRESULT()
 Platform::Exception^
 UtilsWinRT::ConvertHRESULTToException(HRESULT hr, Platform::String^ message)
 {
+    if( message == nullptr ) 
+    {
+        message = L"n/a";
+    }
+
     Platform::Exception^ result;
     switch (hr)
     {
