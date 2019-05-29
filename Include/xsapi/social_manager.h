@@ -769,6 +769,8 @@ private:
 class social_manager : public std::enable_shared_from_this<social_manager>
 {
 public:
+    virtual ~social_manager() {}
+
     /// <summary>
     /// Gets the social_manager singleton instance
     /// </summary>
