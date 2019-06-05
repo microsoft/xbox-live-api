@@ -1207,33 +1207,21 @@ namespace xbox {
 };
 
 
-#if XSAPI_U
-    NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-    inline std::error_code make_error_code(xbox::services::xbox_live_error_code e)
-    {
-        return std::error_code(static_cast<int>(e), xbox::services::xbox_services_error_code_category());
-    }
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+inline std::error_code make_error_code(xbox::services::xbox_live_error_code e)
+{
+	return std::error_code(static_cast<int>(e), xbox::services::xbox_services_error_code_category());
+}
 
-    inline std::error_condition make_error_condition(xbox::services::xbox_live_error_condition e)
-    {
-        return std::error_condition(static_cast<int>(e), xbox::services::xbox_services_error_condition_category());
-    }
-    NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-#endif
+inline std::error_condition make_error_condition(xbox::services::xbox_live_error_condition e)
+{
+	return std::error_condition(static_cast<int>(e), xbox::services::xbox_services_error_condition_category());
+}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
 
 
 namespace std
 {
-    inline std::error_code make_error_code(xbox::services::xbox_live_error_code e)
-    {
-        return std::error_code(static_cast<int>(e), xbox::services::xbox_services_error_code_category());
-    }
-
-    inline std::error_condition make_error_condition(xbox::services::xbox_live_error_condition e)
-    {
-        return std::error_condition(static_cast<int>(e), xbox::services::xbox_services_error_condition_category());
-    }
-
     template <>
     struct is_error_code_enum<xbox::services::xbox_live_error_code> : public true_type{};
 
@@ -1315,7 +1303,7 @@ public:
     xbox_live_result()
         : m_errorMessage(std::string())
     {
-        m_errorCode = std::make_error_code(xbox_live_error_code::no_error);
+        m_errorCode = make_error_code(xbox_live_error_code::no_error);
     }
 
     xbox_live_result(_In_ std::error_code errorCode, _In_ std::string errorMessage = std::string()) :

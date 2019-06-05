@@ -163,7 +163,7 @@ struct http_retry_after_api_state
 {
     http_retry_after_api_state()
     {
-        errCode = std::make_error_code(xbox_live_error_code::no_error);
+        errCode = make_error_code(xbox_live_error_code::no_error);
     }
 
     http_retry_after_api_state(

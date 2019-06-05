@@ -348,7 +348,7 @@ http_call_impl::internal_get_response(
         }
 
         auto httpCallResponse = get_http_call_response(httpCallData, httpResponse);
-        httpCallResponse->_Set_error_info(std::make_error_code(get_xbox_live_error_code_from_http_status(httpResponse.status_code())), std::string());
+        httpCallResponse->_Set_error_info(make_error_code(get_xbox_live_error_code_from_http_status(httpResponse.status_code())), std::string());
         httpCallResponse->_Set_timing(requestStartTime, responseReceivedTime);
 
         auto shouldRetry = should_retry(httpCallResponse, httpCallData, networkError);
@@ -540,12 +540,12 @@ http_call_impl::handle_response_error(
     std::string errMessage;
     if (errFromStatus == xbox_live_error_code::no_error)
     {
-        errCode = std::make_error_code(errFromException);
+        errCode = make_error_code(errFromException);
         errMessage = errMessageFromException;
     }
     else
     {
-        errCode = std::make_error_code(errFromStatus);
+        errCode = make_error_code(errFromStatus);
         stringstream_t errorMessageHttp;
         errorMessageHttp << _T("http error: ") << errCode.message().c_str();
         errMessage = utility::conversions::to_utf8string(errorMessageHttp.str().c_str());

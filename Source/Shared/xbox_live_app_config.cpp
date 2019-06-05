@@ -64,7 +64,7 @@ xbox_live_result<void> xbox_live_app_config::read()
     if(m_titleId == 0)
     {
         return xbox_live_result<void>(
-            std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
+            make_error_code(xbox::services::xbox_live_error_code::invalid_config),
             "ERROR: Could not read \"titleId\" in xboxservices.config.  Must be a JSON number"
             );
     }
@@ -72,7 +72,7 @@ xbox_live_result<void> xbox_live_app_config::read()
     if(m_scid.empty())
     {
         return xbox_live_result<void>(
-            std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
+            make_error_code(xbox::services::xbox_live_error_code::invalid_config),
             "ERROR: Could not read \"PrimaryServiceConfigId\" in xboxservices.config.  Must be a JSON string"
             );
     }

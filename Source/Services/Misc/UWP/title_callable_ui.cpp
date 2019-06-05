@@ -245,7 +245,7 @@ title_callable_ui::show_player_picker_ui(
             }
         }
 
-        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        std::error_code errcode = make_error_code(static_cast<xbox_live_error_code>(hr));
 
         std::vector<string_t> payload = context.payload();
         return xbox_live_result<std::vector<string_t>>(payload, errcode);
@@ -355,7 +355,7 @@ title_callable_ui::show_game_invite_ui(
             }
         }
 
-        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        std::error_code errcode = make_error_code(static_cast<xbox_live_error_code>(hr));
         return xbox_live_result<void>(errcode);
     });
 
@@ -412,7 +412,7 @@ title_callable_ui::show_profile_card_ui(
             }
         }
 
-        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        std::error_code errcode = make_error_code(static_cast<xbox_live_error_code>(hr));
         return xbox_live_result<void>(errcode);
     });
 
@@ -469,7 +469,7 @@ title_callable_ui::show_change_friend_relationship_ui(
             }
         }
 
-        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        std::error_code errcode = make_error_code(static_cast<xbox_live_error_code>(hr));
         return xbox_live_result<void>(errcode);
     });
 
@@ -525,7 +525,7 @@ title_callable_ui::show_title_achievements_ui(
             }
         }
 
-        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        std::error_code errcode = make_error_code(static_cast<xbox_live_error_code>(hr));
         return xbox_live_result<void>(errcode);
     });
 
@@ -592,7 +592,7 @@ title_callable_ui::check_gaming_privilege_silently(
             );
     }
 
-    std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+    std::error_code errcode = make_error_code(static_cast<xbox_live_error_code>(hr));
     return xbox_live_result<bool>(hasPrivilege == TRUE, errcode);
 }
 
@@ -664,7 +664,7 @@ title_callable_ui::check_gaming_privilege_with_ui(
             }
         }
 
-        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        std::error_code errcode = make_error_code(static_cast<xbox_live_error_code>(hr));
         return xbox_live_result<bool>(hasPrivilege == TRUE, errcode);
     });
 
@@ -719,7 +719,7 @@ title_callable_ui::show_friend_finder_ui(
             }
         }
 
-        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        std::error_code errcode = make_error_code(static_cast<xbox_live_error_code>(hr));
         return xbox_live_result<void>(errcode);
     });
 
@@ -786,7 +786,7 @@ title_callable_ui::show_title_hub_ui(
             }
         }
 
-        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        std::error_code errcode = make_error_code(static_cast<xbox_live_error_code>(hr));
         return xbox_live_result<void>(errcode);
     });
 
@@ -839,7 +839,7 @@ title_callable_ui::show_user_settings_ui(
             }
         }
 
-        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        std::error_code errcode = make_error_code(static_cast<xbox_live_error_code>(hr));
         return xbox_live_result<void>(errcode);
     });
 
@@ -892,7 +892,7 @@ title_callable_ui::show_customize_user_profile_ui(
             }
         }
 
-        std::error_code errcode = std::make_error_code(static_cast<xbox_live_error_code>(hr));
+        std::error_code errcode = make_error_code(static_cast<xbox_live_error_code>(hr));
         return xbox_live_result<void>(errcode);
     });
 

@@ -43,7 +43,7 @@ xbox_live_result<void> local_config::read()
         else
         {
             return xbox_live_result<void>(
-                std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
+                make_error_code(xbox::services::xbox_live_error_code::invalid_config),
                 "Invalid config file"
                 );
         }
@@ -51,7 +51,7 @@ xbox_live_result<void> local_config::read()
     else
     {
         return xbox_live_result<void>(
-            std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
+            make_error_code(xbox::services::xbox_live_error_code::invalid_config),
             "ERROR: Could not find xboxservices.config"
             );
     }
