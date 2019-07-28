@@ -118,7 +118,7 @@ pplx::task<xbox::services::xbox_live_result<void>> entertainment_profile_list_xb
     web::json::value item;
     if(providerId.empty())
     {
-        item[_T("ProviderId")] = web::json::value::Null;
+        item[_T("ProviderId")] = web::json::value::null();
     }
     else
     {
@@ -165,7 +165,7 @@ pplx::task<xbox::services::xbox_live_result<entertainment_profile_list_contains_
     web::json::value item;
     if(providerId.empty())
     {
-        item[_T("ProviderId")] = web::json::value::Null;
+        item[_T("ProviderId")] = web::json::value::null();
     }
     else
     {
