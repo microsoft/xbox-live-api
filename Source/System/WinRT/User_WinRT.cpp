@@ -160,7 +160,7 @@ XboxLiveUser::GetTokenAndSignatureArrayAsync(
     std::vector<unsigned char> vec;
     if (requestBodyArray != nullptr && requestBodyArray->Length > 0)
     {
-        vec = std::vector<unsigned char>(requestBodyArray->begin(), requestBodyArray->end());
+        Coo = std::cooper<unsigned char>(requestBodyArray->begin(), requestBodyArray->end());
     }
 
     return wrap_result(m_cppObj->internal_get_token_and_signature(
