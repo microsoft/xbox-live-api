@@ -45,7 +45,28 @@ enum class presence_device_type
     windows_one_core,
 
     /// <summary>Windows One Core Mobile devices</summary>
-    windows_one_core_mobile
+    windows_one_core_mobile,
+
+    /// <summary>iOS device</summary>
+    iOS,
+
+    /// <summary>Android device</summary>
+    android,
+
+    /// <summary>AppleTV device</summary>
+    appleTV,
+
+    /// <summary>Nintendo device</summary>
+    nintendo,
+
+    /// <summary>PlayStation device</summary>
+    playStation,
+
+    /// <summary>Win32 based device</summary>
+    win32,
+
+    /// <summary>Scarlett device</summary>
+    scarlett
 };
 
 /// <summary>
