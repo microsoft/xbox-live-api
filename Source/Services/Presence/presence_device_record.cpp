@@ -102,6 +102,34 @@ presence_device_record::_Convert_string_to_presence_device_type(
     {
         return presence_device_type::windows_one_core_mobile;
     }
+    else if (utils::str_icmp(value, _T("iOS")) == 0)
+    {
+        return presence_device_type::iOS;
+    }
+    else if (utils::str_icmp(value, _T("Android")) == 0)
+    {
+        return presence_device_type::android;
+    }
+    else if (utils::str_icmp(value, _T("AppleTV")) == 0)
+    {
+        return presence_device_type::appleTV;
+    }
+    else if (utils::str_icmp(value, _T("Nintendo")) == 0)
+    {
+        return presence_device_type::nintendo;
+    }
+    else if (utils::str_icmp(value, _T("PlayStation")) == 0)
+    {
+        return presence_device_type::playStation;
+    }
+    else if (utils::str_icmp(value, _T("Win32")) == 0)
+    {
+        return presence_device_type::win32;
+    }
+    else if (utils::str_icmp(value, _T("Scarlett")) == 0)
+    {
+        return presence_device_type::scarlett;
+    }
 
     return presence_device_type::unknown;
 }
@@ -139,6 +167,27 @@ presence_device_record::_Convert_presence_device_type_to_string(
 
     case presence_device_type::windows_one_core_mobile:
         return _T("WindowsOneCoreMobile");
+
+    case presence_device_type::iOS:
+        return _T("iOS");
+
+    case presence_device_type::android:
+        return _T("Android");
+
+    case presence_device_type::appleTV:
+        return _T("AppleTV");
+
+    case presence_device_type::nintendo:
+        return _T("Nintendo");
+
+    case presence_device_type::playStation:
+        return _T("PlayStation");
+
+    case presence_device_type::win32:
+        return _T("Win32");
+
+    case presence_device_type::scarlett:
+        return _T("Scarlett");
         
     default:
         return string_t();
