@@ -2,37 +2,37 @@
 <SignConfigXML>
 
   <job platform="x86" configuration="Debug" dest="" jobname="XSAPI Sign" approvers="vigarg;gstolt">
-    <file src="__RELBINPATH__\cpprestsdk140.uwp\cpprest140d_uwp_2_9.dll" signType="Authenticode" dest="__RELBINPATH__\cpprestsdk140.uwp\cpprest140d_uwp_2_9.dll" />
-    <file src="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" signType="Authenticode" dest="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" />
+    <file src="__RELBINPATH__\cpprestsdk140.uwp\cpprest140d_uwp_2_9.dll" signType="AuthenticodeFormer" dest="__RELBINPATH__\cpprestsdk140.uwp\cpprest140d_uwp_2_9.dll" />
+    <file src="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" signType="AuthenticodeFormer" dest="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" />
   </job>
   
   <job platform="x86" configuration="Release" dest="" jobname="XSAPI Sign" approvers="vigarg;gstolt">
-    <file src="__RELBINPATH__\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" signType="Authenticode" dest="__RELBINPATH__\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" />
-    <file src="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" signType="Authenticode" dest="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" />
+    <file src="__RELBINPATH__\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" signType="AuthenticodeFormer" dest="__RELBINPATH__\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" />
+    <file src="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" signType="AuthenticodeFormer" dest="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" />
   </job>
   
   <job platform="x64" configuration="Debug" dest="" jobname="XSAPI Sign" approvers="vigarg;gstolt">
-    <file src="__RELBINPATH__\cpprestsdk140.uwp\cpprest140d_uwp_2_9.dll" signType="Authenticode" dest="__RELBINPATH__\cpprestsdk140.uwp\cpprest140d_uwp_2_9.dll" />
-    <file src="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" signType="Authenticode" dest="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" />
+    <file src="__RELBINPATH__\cpprestsdk140.uwp\cpprest140d_uwp_2_9.dll" signType="AuthenticodeFormer" dest="__RELBINPATH__\cpprestsdk140.uwp\cpprest140d_uwp_2_9.dll" />
+    <file src="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" signType="AuthenticodeFormer" dest="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" />
   </job>
   
   <job platform="x64" configuration="Release" dest="" jobname="XSAPI Sign" approvers="vigarg;gstolt">
-    <file src="__RELBINPATH__\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" signType="Authenticode" dest="__RELBINPATH__\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" />
-    <file src="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" signType="Authenticode" dest="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" />   
+    <file src="__RELBINPATH__\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" signType="AuthenticodeFormer" dest="__RELBINPATH__\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" />
+    <file src="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" signType="AuthenticodeFormer" dest="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" />   
   </job>
   
   <job platform="ARM" configuration="Debug" dest="" jobname="XSAPI Sign" approvers="vigarg;gstolt">
-    <file src="__RELBINPATH__\cpprestsdk140.uwp\cpprest140d_uwp_2_9.dll" signType="Authenticode" dest="__RELBINPATH__\cpprestsdk140.uwp\cpprest140d_uwp_2_9.dll" />
-    <file src="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" signType="Authenticode" dest="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" />
+    <file src="__RELBINPATH__\cpprestsdk140.uwp\cpprest140d_uwp_2_9.dll" signType="AuthenticodeFormer" dest="__RELBINPATH__\cpprestsdk140.uwp\cpprest140d_uwp_2_9.dll" />
+    <file src="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" signType="AuthenticodeFormer" dest="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" />
   </job>
   
   <job platform="ARM" configuration="Release" dest="" jobname="XSAPI Sign" approvers="vigarg;gstolt">
-    <file src="__RELBINPATH__\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" signType="Authenticode" dest="__RELBINPATH__\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" />
-    <file src="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" signType="Authenticode" dest="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" />
+    <file src="__RELBINPATH__\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" signType="AuthenticodeFormer" dest="__RELBINPATH__\cpprestsdk140.uwp\cpprest140_uwp_2_9.dll" />
+    <file src="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" signType="AuthenticodeFormer" dest="__RELBINPATH__\Microsoft.Xbox.Services.140.UWP.WinRT\Microsoft.Xbox.Services.dll" />
   </job>
   
   <job platform="x64" configuration="Release" dest="" jobname="XSAPI Sign" approvers="vigarg;gstolt">
-	<file src="__RELBINPATH__\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.dll" signType="Authenticode" dest="__RELBINPATH__\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.dll" />
+	<file src="__RELBINPATH__\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.dll" signType="AuthenticodeFormer" dest="__RELBINPATH__\Microsoft.Xbox.Services.141.XDK.WinRT\Microsoft.Xbox.Services.dll" />
   </job>
   
 </SignConfigXML>
