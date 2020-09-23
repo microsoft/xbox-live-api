@@ -559,7 +559,7 @@ multiplayer_session_constants::_Serialize()
 
     if (m_sessionCapabilities.crossplay())
     {
-        systemCapabilitiesJson[_T("crossplay")] = web::json::value::boolean(true);
+        systemCapabilitiesJson[_T("crossPlay")] = web::json::value::boolean(true);
     }
 
     if (m_sessionCapabilities.team())
@@ -689,7 +689,7 @@ multiplayer_session_constants::_Deserialize(
     bool large = utils::extract_json_bool(systemCapabilitiesJson, _T("large"), errc, false);
     bool connectionRequiredForActiveMembers = utils::extract_json_bool(systemCapabilitiesJson, _T("connectionRequiredForActiveMembers"), errc, false);
     bool userAuthorizationStyle = utils::extract_json_bool(systemCapabilitiesJson, _T("userAuthorizationStyle"), errc, false);
-    bool crossplay = utils::extract_json_bool(systemCapabilitiesJson, _T("crossplay"), errc, false);
+    bool crossplay = utils::extract_json_bool(systemCapabilitiesJson, _T("crossPlay"), errc, false);
     bool team = utils::extract_json_bool(systemCapabilitiesJson, _T("team"), errc, false);
     bool arbitration = utils::extract_json_bool(systemCapabilitiesJson, _T("arbitration"), errc, false);
     bool hasOwners = utils::extract_json_bool(systemCapabilitiesJson, _T("hasOwners"), errc, false);
