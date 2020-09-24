@@ -907,7 +907,7 @@ public:
         return create_social_user_group_from_list(convert_user_to_cppcx(user), xboxUserIdList);
     }
 
-    _XSAPIIMP const std::vector<winrt::Windows::Xbox::System::User>& local_users_cppwinrt() const
+    _XSAPIIMP std::vector<winrt::Windows::Xbox::System::User> local_users_cppwinrt() const
     {
         return convert_user_vector_to_cppwinrt(local_users());
     }
