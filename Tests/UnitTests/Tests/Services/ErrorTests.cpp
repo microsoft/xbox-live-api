@@ -50,7 +50,7 @@ LR"(
                 "gameplay": true,
                 "large": false,
                 "userAuthorizationStyle": true,
-                "crossplay": true,
+                "crossPlay": true,
                 "connectionRequiredForActiveMembers": true
             },
             "version": 1,

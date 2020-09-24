@@ -986,7 +986,7 @@ public:
         VERIFY_ARE_EQUAL(result->CapabilitiesGameplay, systemCapabilitiesJson[L"gameplay"].as_bool());
         VERIFY_ARE_EQUAL(result->CapabilitiesLarge, systemCapabilitiesJson[L"large"].as_bool());
         VERIFY_ARE_EQUAL(result->CapabilitiesConnectionRequiredForActiveMember, systemCapabilitiesJson[L"connectionRequiredForActiveMembers"].as_bool());
-        VERIFY_ARE_EQUAL(result->CapabilitiesCrossplay, systemCapabilitiesJson[L"crossplay"].as_bool());
+        VERIFY_ARE_EQUAL(result->CapabilitiesCrossplay, systemCapabilitiesJson[L"crossPlay"].as_bool());
         VERIFY_ARE_EQUAL(result->CapabilitiesUserAuthorizationStyle, systemCapabilitiesJson[L"userAuthorizationStyle"].as_bool());
         VERIFY_ARE_EQUAL(result->CapabilitiesSearchable, systemCapabilitiesJson[L"searchable"].as_bool());
 
