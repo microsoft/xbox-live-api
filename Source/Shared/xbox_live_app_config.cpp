@@ -50,19 +50,7 @@ xbox_live_result<void> xbox_live_app_config::read()
     m_sandbox = Windows::Xbox::Services::XboxLiveConfiguration::SandboxId->Data();
     m_scid = Windows::Xbox::Services::XboxLiveConfiguration::PrimaryServiceConfigId->Data();
     m_titleId = std::stoi(Windows::Xbox::Services::XboxLiveConfiguration::TitleId->Data());
-#else
-    std::shared_ptr<xbox::services::local_config> localConfig = xbox::services::system::xbox_system_factory::get_factory()->create_local_config();
-    m_titleId = localConfig->title_id();
-    m_scid = localConfig->scid();
-    m_environment = localConfig->environment();
-    m_overrideScid = localConfig->override_scid();
-    m_overrideTitleId = localConfig->override_title_id();
-#if XSAPI_I
-    m_apnsEnvironment = localConfig->apns_environment();
-#endif
 
-
-#if TV_API
     if(m_titleId == 0)
     {
         return xbox_live_result<void>(
@@ -79,6 +67,16 @@ xbox_live_result<void> xbox_live_app_config::read()
             );
     }
 #else
+    std::shared_ptr<xbox::services::local_config> localConfig = xbox::services::system::xbox_system_factory::get_factory()->create_local_config();
+    m_titleId = localConfig->title_id();
+    m_scid = localConfig->scid();
+    m_environment = localConfig->environment();
+    m_overrideScid = localConfig->override_scid();
+    m_overrideTitleId = localConfig->override_title_id();
+#if XSAPI_I
+    m_apnsEnvironment = localConfig->apns_environment();
+#endif
+
     if(m_titleId == 0)
     {
         return xbox_live_result<void>(
@@ -94,7 +92,6 @@ xbox_live_result<void> xbox_live_app_config::read()
             "ERROR: Could not read \"PrimaryServiceConfigId\" in xboxservices.config.  Must be a JSON string"
             );
     }
-#endif
 
 #if XSAPI_U
     m_sandbox = localConfig->sandbox();
