@@ -50,6 +50,22 @@ xbox_live_result<void> xbox_live_app_config::read()
     m_sandbox = Windows::Xbox::Services::XboxLiveConfiguration::SandboxId->Data();
     m_scid = Windows::Xbox::Services::XboxLiveConfiguration::PrimaryServiceConfigId->Data();
     m_titleId = std::stoi(Windows::Xbox::Services::XboxLiveConfiguration::TitleId->Data());
+
+    if(m_titleId == 0)
+    {
+        return xbox_live_result<void>(
+            std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
+            "ERROR: Could not read \"titleId\" in Package.appxmanifest"
+            );
+    }
+
+    if(m_scid.empty())
+    {
+        return xbox_live_result<void>(
+            std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
+            "ERROR: Could not read \"PrimaryServiceConfigId\" in Package.appxmanifest"
+            );
+    }
 #else
     std::shared_ptr<xbox::services::local_config> localConfig = xbox::services::system::xbox_system_factory::get_factory()->create_local_config();
     m_titleId = localConfig->title_id();
