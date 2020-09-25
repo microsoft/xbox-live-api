@@ -61,6 +61,24 @@ xbox_live_result<void> xbox_live_app_config::read()
     m_apnsEnvironment = localConfig->apns_environment();
 #endif
 
+
+#if TV_API
+    if(m_titleId == 0)
+    {
+        return xbox_live_result<void>(
+            std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
+            "ERROR: Could not read \"titleId\" in Package.appxmanifest"
+            );
+    }
+
+    if(m_scid.empty())
+    {
+        return xbox_live_result<void>(
+            std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
+            "ERROR: Could not read \"PrimaryServiceConfigId\" in Package.appxmanifest"
+            );
+    }
+#else
     if(m_titleId == 0)
     {
         return xbox_live_result<void>(
@@ -76,6 +94,7 @@ xbox_live_result<void> xbox_live_app_config::read()
             "ERROR: Could not read \"PrimaryServiceConfigId\" in xboxservices.config.  Must be a JSON string"
             );
     }
+#endif
 
 #if XSAPI_U
     m_sandbox = localConfig->sandbox();
