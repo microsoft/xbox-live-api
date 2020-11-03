@@ -37,6 +37,27 @@ public enum class PresenceDeviceType
 
     /// <summary>Windows One Core Mobile device</summary>
     WindowsOneCoreMobile = xbox::services::presence::presence_device_type::windows_one_core_mobile,
+
+    /// <summary>iOS device</summary>
+    IOS = xbox::services::presence::presence_device_type::iOS,
+
+    /// <summary>Android device</summary>
+    Android = xbox::services::presence::presence_device_type::android,
+
+    /// <summary>AppleTV device</summary>
+    AppleTV = xbox::services::presence::presence_device_type::appleTV,
+
+    /// <summary>Nintendo device</summary>
+    Nintendo = xbox::services::presence::presence_device_type::nintendo,
+
+    /// <summary>PlayStation device</summary>
+    PlayStation = xbox::services::presence::presence_device_type::playStation,
+
+    /// <summary>Win32 based device</summary>
+    Win32 = xbox::services::presence::presence_device_type::win32,
+
+    /// <summary>Scarlett device</summary>
+    Scarlett = xbox::services::presence::presence_device_type::scarlett
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_END
