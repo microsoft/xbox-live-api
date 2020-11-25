@@ -9,55 +9,55 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_BEGIN
 public enum class PresenceDeviceType
 {
     /// <summary>Unknown device</summary>
-    Unknown = xbox::services::presence::presence_device_type::unknown,
+    Unknown = xbox::services::presence::presence_device_type::Unknown,
 
     /// <summary>Windows Phone device</summary>
-    WindowsPhone = xbox::services::presence::presence_device_type::windows_phone,
+    WindowsPhone = xbox::services::presence::presence_device_type::Windows_Phone,
 
     /// <summary>Windows Phone 7 device</summary>
-    WindowsPhone7 = xbox::services::presence::presence_device_type::windows_phone_7,
+    WindowsPhone7 = xbox::services::presence::presence_device_type::Windows_Phone_7,
 
     /// <summary>Web device (like Xbox.com)</summary>
-    Web = xbox::services::presence::presence_device_type::web,
+    Web = xbox::services::presence::presence_device_type::Web,
 
     /// <summary>Xbox360 device</summary>
-    Xbox360 = xbox::services::presence::presence_device_type::xbox_360,
+    Xbox360 = xbox::services::presence::presence_device_type::Xbox_360,
 
     /// <summary>Games for Windows LIVE device</summary>
-    PC = xbox::services::presence::presence_device_type::pc,
+    PC = xbox::services::presence::presence_device_type::,PC
 
     /// <summary>Xbox LIVE for Windows device</summary>
-    Windows8 = xbox::services::presence::presence_device_type::windows_8,
+    Windows8 = xbox::services::presence::presence_device_type::Windows_8,
 
     /// <summary>Xbox One device</summary>
-    XboxOne = xbox::services::presence::presence_device_type::xbox_one,
+    XboxOne = xbox::services::presence::presence_device_type::Xbox_One,
 
     /// <summary>Windows One Core device</summary>
-    WindowsOneCore = xbox::services::presence::presence_device_type::windows_one_core,
+    WindowsOneCore = xbox::services::presence::presence_device_type::Windows_One_Core,
 
     /// <summary>Windows One Core Mobile device</summary>
-    WindowsOneCoreMobile = xbox::services::presence::presence_device_type::windows_one_core_mobile,
+    WindowsOneCoreMobile = xbox::services::presence::presence_device_type::Windows_One_Core_Mobile,
 
     /// <summary>iOS device</summary>
-    IOS = xbox::services::presence::presence_device_type::iOS,
+    IOS = xbox::services::presence::presence_device_type::IOS,
 
     /// <summary>Android device</summary>
-    Android = xbox::services::presence::presence_device_type::android,
+    Android = xbox::services::presence::presence_device_type::Android,
 
     /// <summary>AppleTV device</summary>
-    AppleTV = xbox::services::presence::presence_device_type::appleTV,
+    AppleTV = xbox::services::presence::presence_device_type::AppleTV,
 
     /// <summary>Nintendo device</summary>
-    Nintendo = xbox::services::presence::presence_device_type::nintendo,
+    Nintendo = xbox::services::presence::presence_device_type::Nintendo,
 
     /// <summary>PlayStation device</summary>
-    PlayStation = xbox::services::presence::presence_device_type::playStation,
+    PlayStation = xbox::services::presence::presence_device_type::PlayStation,
 
     /// <summary>Win32 based device</summary>
-    Win32 = xbox::services::presence::presence_device_type::win32,
+    Win32 = xbox::services::presence::presence_device_type::Win32,
 
     /// <summary>Scarlett device</summary>
-    Scarlett = xbox::services::presence::presence_device_type::scarlett
+    Scarlett = xbox::services::presence::presence_device_type::Scarlett
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_END
