@@ -13,7 +13,7 @@ public:
     SocialManager() noexcept;
 
     HRESULT AddLocalUser(
-        User&& user,
+        const User& user,
         XblSocialManagerExtraDetailLevel detailLevel,
         TaskQueue&& queue
     ) noexcept;

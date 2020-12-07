@@ -55,11 +55,11 @@ HRESULT RTANotificationService::RTANotificationService::UnregisterForEvents(std:
 }
 
 RTANotificationService::RTANotificationService(
-    _In_ User&& user,
+    _In_ User user,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings,
     _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaManager
 ) noexcept :
-    NotificationService(std::move(user), contextSettings),
+    NotificationService(user, contextSettings),
     m_rtaManager{ std::move(rtaManager) }
 {
 }
@@ -68,21 +68,9 @@ HRESULT RTANotificationService::RegisterForSpopNotificationEvents() noexcept
 {
     std::lock_guard<std::recursive_mutex> lock{ m_mutex };
 
-    auto copiedUserResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(copiedUserResult.Hresult());
-    m_rtaManager->Activate(copiedUserResult.ExtractPayload());
-
-    {
-        auto subscriptionUserCopyResult = m_user.Copy();
-        RETURN_HR_IF_FAILED(subscriptionUserCopyResult.Hresult());
-        m_spopNotificationSubscription = MakeShared<SpopKickSubscription>(subscriptionUserCopyResult.ExtractPayload(), AppConfig::Instance()->TitleId());
-    }
-
-    {
-        auto subscriptionUserCopyResult = m_user.Copy();
-        RETURN_HR_IF_FAILED(subscriptionUserCopyResult.Hresult());
-        RETURN_HR_IF_FAILED(m_rtaManager->AddSubscription(subscriptionUserCopyResult.ExtractPayload(), m_spopNotificationSubscription));
-    }
+    m_rtaManager->Activate(m_user);
+    m_spopNotificationSubscription = MakeShared<SpopKickSubscription>(m_user, AppConfig::Instance()->TitleId());
+    RETURN_HR_IF_FAILED(m_rtaManager->AddSubscription(m_user, m_spopNotificationSubscription));
 
     return RegisterWithNotificationService(
         m_spopNotificationSubscription->ResourceUri(),

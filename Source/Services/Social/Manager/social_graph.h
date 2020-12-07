@@ -49,8 +49,8 @@ struct TrackedUser
 class SocialGraph : public std::enable_shared_from_this<SocialGraph>
 {
 public:
-    static Result<std::shared_ptr<SocialGraph>> Make(
-        _In_ User&& localUser,
+    static std::shared_ptr<SocialGraph> Make(
+        _In_ const User& localUser,
         _In_ const XblSocialManagerExtraDetailLevel detailLevel,
         _In_ const TaskQueue& queue,
         _In_ std::shared_ptr<real_time_activity::RealTimeActivityManager> rtaManager
@@ -88,10 +88,9 @@ public:
     // runs it immediately.
     void SetRichPresencePolling(bool enabled) noexcept;
 
-    HRESULT Initialize() noexcept;
 private:
     SocialGraph(
-        _In_ User&& localUser,
+        _In_ const User& localUser,
         _In_ const TaskQueue& queue,
         _In_ std::shared_ptr<real_time_activity::RealTimeActivityManager> rtaManager
     ) noexcept;
@@ -139,7 +138,7 @@ private:
         std::shared_ptr<XblPresenceRecord> presenceRecord
     ) noexcept;
 
-    std::shared_ptr<User> m_user;
+    std::shared_ptr<User> const m_user;
     TaskQueue const m_queue;
 
     // Graph state

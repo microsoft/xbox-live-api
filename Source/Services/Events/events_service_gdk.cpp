@@ -12,7 +12,7 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_EVENTS_CPP_BEGIN
 
 EventsService::EventsService(
-    User&& user
+    _In_ User user
 ) :
     m_user{ std::move(user) },
     m_playSession{ utils::create_guid(true) }

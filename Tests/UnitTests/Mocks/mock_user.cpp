@@ -28,8 +28,7 @@ User CreateMockUser(
 {
     auto xalUserImpl = std::shared_ptr<XalUserImpl>{ new XalUserImpl{ xuid, gamertag, "", "", "", localId } };
     auto xalUser = std::unique_ptr<XalUser>{ new XalUser{ xalUserImpl } };
-    auto userResult = User::WrapHandle(xalUser.get());
-    return userResult.ExtractPayload();
+    return User{ xalUser.get() };
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

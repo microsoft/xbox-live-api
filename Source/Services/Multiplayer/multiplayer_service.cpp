@@ -19,7 +19,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_BEGIN
 #define MULTIPLAYER_SERVICE_CONTRACT_VERSION 107
 
 MultiplayerService::MultiplayerService(
-    _In_ User&& user,
+    _In_ User user,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
     _In_ std::shared_ptr<xbox::services::AppConfig> appConfig,
     _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> realTimeActivity
@@ -90,10 +90,7 @@ HRESULT MultiplayerService::GetCurrentSession(
         sessionReference.SessionName
     );
 
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     HRESULT hr = httpCall->Init(
         m_xboxLiveContextSettings,
         "GET",
@@ -152,10 +149,7 @@ HRESULT MultiplayerService::GetCurrentSessionByHandle(
     RETURN_HR_INVALIDARGUMENT_IF(handleId.empty());
     String pathAndQuery = MultiplayerSessionDirectoryCreateOrUpdateByHandleSubpath(handleId);
 
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     HRESULT hr = httpCall->Init(
         m_xboxLiveContextSettings,
         "GET",
@@ -340,10 +334,7 @@ HRESULT MultiplayerService::GetSessions(
     RETURN_HR_INVALIDARGUMENT_IF(getSessionsRequest.IncludeReservations && (getSessionsRequest.XuidFilters == nullptr || getSessionsRequest.XuidFiltersCount == 0));
     RETURN_HR_INVALIDARGUMENT_IF(getSessionsRequest.IncludeInactiveSessions && (getSessionsRequest.XuidFilters == nullptr || getSessionsRequest.XuidFiltersCount == 0));
 
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     HRESULT hr = httpCall->Init(
         m_xboxLiveContextSettings,
         getSessionsRequest.XuidFiltersCount > 1 ? "POST" : "GET",
@@ -406,10 +397,7 @@ HRESULT MultiplayerService::SetActivity(
 
     MultiplayerActivityHandlePostRequest request{ sessionReference };
 
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     HRESULT hr = httpCall->Init(
         m_xboxLiveContextSettings,
         "POST",
@@ -451,10 +439,7 @@ HRESULT MultiplayerService::SetTransferHandle(
 
     MultiplayerTransferHandlePostRequest request{ targetSessionReference, originSessionReference };
 
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "POST",
@@ -502,10 +487,7 @@ HRESULT MultiplayerService::CreateSearchHandle(
     _In_ AsyncContext<Result<std::shared_ptr<XblMultiplayerSearchHandleDetails>>> async
 ) const noexcept
 {
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "POST",
@@ -585,13 +567,7 @@ HRESULT MultiplayerService::ClearActivity(
             subPath << "/handles/" << activityDetails.at(0).HandleId;
         }
 
-        Result<User> userResult = m_user.Copy();
-        if (FAILED(userResult.Hresult()))
-        {
-            return async.Complete(userResult.Hresult());
-        }
-
-        auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+        auto httpCall = MakeShared<XblHttpCall>(m_user);
         HRESULT hr = httpCall->Init(
             m_xboxLiveContextSettings,
             "DELETE",
@@ -640,10 +616,7 @@ HRESULT MultiplayerService::DeleteSearchHandle(
 
     String handleStr = "/handles/" + handleId;
 
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "DELETE",
@@ -723,10 +696,7 @@ HRESULT MultiplayerService::SendInvites(
     private:
         HRESULT SendInvite(uint64_t xuid) noexcept
         {
-            Result<User> userResult = m_multiplayerService->m_user.Copy();
-            RETURN_HR_IF_FAILED(userResult.Hresult());
-
-            auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+            auto httpCall = MakeShared<XblHttpCall>(m_multiplayerService->m_user);
             RETURN_HR_IF_FAILED(httpCall->Init(
                 m_multiplayerService->m_xboxLiveContextSettings,
                 "POST",
@@ -804,10 +774,7 @@ HRESULT MultiplayerService::GetActivitiesForSocialGroup(
 
     MultiplayerActivityQueryPostRequest request{ scid, socialGroup, socialGroupOwnerXuid };
 
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "POST",
@@ -866,10 +833,7 @@ HRESULT MultiplayerService::GetActivitiesForUsers(
 
     MultiplayerActivityQueryPostRequest request{ scid, xuids };
 
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "POST",
@@ -924,10 +888,7 @@ HRESULT MultiplayerService::GetSearchHandles(
 {
     RETURN_HR_INVALIDARGUMENT_IF(searchHandleRequest.Scid().empty() || searchHandleRequest.SessionTemplateName().empty());
 
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "POST",
@@ -979,10 +940,7 @@ HRESULT MultiplayerService::WriteSessionUsingSubpath(
 {
     RETURN_HR_INVALIDARGUMENT_IF(subpathAndQuery.empty());
 
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "PUT",

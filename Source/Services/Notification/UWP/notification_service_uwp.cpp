@@ -9,10 +9,10 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_BEGIN
 
 UWPNotificationService::UWPNotificationService(
-    _In_ User&& user,
+    _In_ User user,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings
 ) noexcept :
-    NotificationService(std::move(user), contextSettings)
+    NotificationService(user, contextSettings)
 {
 }
 

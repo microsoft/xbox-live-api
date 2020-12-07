@@ -41,7 +41,7 @@ class TitleManagedStatisticsService: public std::enable_shared_from_this<TitleMa
 {
 public:
     TitleManagedStatisticsService(
-        _In_ User&& user,
+        _In_ User user,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings
     ) noexcept;
 

@@ -15,11 +15,7 @@ class Result
 {
 public:
     Result() = default;
-    Result(const Result&) = default;
-    Result(Result&& other) = default;
-    ~Result() = default;
-
-    Result& operator=(const Result& rhs) = default;
+    Result(const Result<T>&) = default;
 
     Result(HRESULT hr, String errorMessage = {}) : m_result{ hr }, m_errorMessage{ std::move(errorMessage) } {}
 

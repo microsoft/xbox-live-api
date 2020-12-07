@@ -11,7 +11,7 @@ class ProfileService : public std::enable_shared_from_this<ProfileService>
 {
 public:
     ProfileService(
-        _In_ User&& user,
+        _In_ User user,
         _In_ std::shared_ptr<XboxLiveContextSettings> xboxLiveContextSettings,
         _In_ std::shared_ptr<AppConfig> appConfig
     ) noexcept;

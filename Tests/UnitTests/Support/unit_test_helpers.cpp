@@ -132,7 +132,7 @@ std::shared_ptr<XblContext> TestEnvironment::CreateMockXboxLiveContext(
     const std::string& gamertag
 ) const noexcept
 {
-    auto context = XblContext::Make(std::move(CreateMockUser(xuid, gamertag)));
+    auto context = std::make_shared<XblContext>(CreateMockUser(xuid, gamertag));
     VERIFY_SUCCEEDED(context->Initialize(GlobalState::Get()->RTAManager()));
     return context;
 }
@@ -142,7 +142,7 @@ std::shared_ptr<xbox_live_context> TestEnvironment::CreateLegacyMockXboxLiveCont
     const std::string& gamertag
 ) const noexcept
 {
-    auto context = XblContext::Make(std::move(CreateMockUser(xuid, gamertag)));
+    auto context = std::make_shared<XblContext>(CreateMockUser(xuid, gamertag));
     VERIFY_SUCCEEDED(context->Initialize(GlobalState::Get()->RTAManager()));
     return std::make_shared<xbox_live_context>(context.get());
 }

@@ -36,7 +36,7 @@ class PrivacyService : public std::enable_shared_from_this<PrivacyService>
 {
 public:
     PrivacyService(
-        _In_ User&& user,
+        _In_ User user,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings
     ) noexcept;
 

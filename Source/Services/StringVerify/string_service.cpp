@@ -14,7 +14,7 @@ using namespace xbox::services::system;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
 StringService::StringService(
-    _In_ User&& user,
+    _In_ User user,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings
 ) :
     m_user{ std::move(user) },
@@ -40,10 +40,7 @@ HRESULT StringService::VerifyStrings(
     request.AddMember("stringsToVerify", stringsJson, request.GetAllocator());
 
     xsapi_internal_vector<VerifyStringResult> result;
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     HRESULT hr = httpCall->Init(
         m_contextSettings,
         "POST",

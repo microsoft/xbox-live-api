@@ -82,29 +82,21 @@ private:
 /// -----------------------------------------------------------------------------------------------
 
 SocialGraph::SocialGraph(
-    _In_ User&& localUser,
+    _In_ const User& localUser,
     _In_ const TaskQueue& queue,
     _In_ std::shared_ptr<real_time_activity::RealTimeActivityManager> rtaManager
-) noexcept : 
-    m_user{ std::make_shared<User>(std::move(localUser))},
+) noexcept :
+    m_user{ MakeShared<User>(localUser) },
     m_queue{ queue.DeriveWorkerQueue() },
     m_rtaManager{ std::move(rtaManager) }
 {
-}
+    assert(m_user);
 
+    m_xblContext = MakeShared<XblContext>(localUser);
+    m_xblContext->Initialize(m_rtaManager);
 
-HRESULT SocialGraph::Initialize() noexcept
-{
     // Maintain legacy RTA activation count.
     m_rtaManager->Activate(*m_user);
-
-    auto copiedUser = m_user->Copy();
-    RETURN_HR_IF_FAILED(copiedUser.Hresult());
-
-    m_xblContext = XblContext::Make(copiedUser.ExtractPayload());
-    RETURN_HR_IF_FAILED(m_xblContext->Initialize(m_rtaManager));
-
-    return S_OK;
 }
 
 SocialGraph::~SocialGraph()
@@ -132,30 +124,17 @@ SocialGraph::~SocialGraph()
     m_rtaManager->Deactivate(*m_user);
 }
 
-Result<std::shared_ptr<SocialGraph>> SocialGraph::Make(
-    _In_ User&& user,
+std::shared_ptr<SocialGraph> SocialGraph::Make(
+    _In_ const User& user,
     _In_ const XblSocialManagerExtraDetailLevel detailLevel,
     _In_ const TaskQueue& queue,
     _In_ std::shared_ptr<real_time_activity::RealTimeActivityManager> rtaManager
 ) noexcept
 {
-    Result<xbox::services::User> userResult = user.Copy();
-    if (userResult.Hresult())
-    {
-        return userResult.Hresult();
-    }
-
-    auto graph = std::shared_ptr<SocialGraph>(new (Alloc(sizeof(SocialGraph))) SocialGraph{ userResult.ExtractPayload(), queue, rtaManager });
-    auto hr = graph->Initialize();
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
+    auto graph = std::shared_ptr<SocialGraph>(new (Alloc(sizeof(SocialGraph))) SocialGraph{ user, queue, rtaManager });
     std::weak_ptr<SocialGraph> weakGraph{ graph };
 
-    auto peoplehubService = MakeShared<PeoplehubService>(std::move(user), graph->m_xblContext->Settings(), AppConfig::Instance()->TitleId());
-
+    auto peoplehubService = MakeShared<PeoplehubService>(user, graph->m_xblContext->Settings(), AppConfig::Instance()->TitleId());
     auto presenceService = graph->m_xblContext->PresenceService();
 
     auto peoplehubResultHandler = [weakGraph](Vector<XblSocialManagerUser>&& profiles)

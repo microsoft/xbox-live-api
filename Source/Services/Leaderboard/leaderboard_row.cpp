@@ -20,7 +20,6 @@ LeaderboardRow::LeaderboardRow(
     _In_ uint64_t xboxUserId,
     _In_ double percentile,
     _In_ uint32_t rank,
-    _In_ uint32_t globalRank,
     _In_ xsapi_internal_vector<xsapi_internal_string> columnValues,
     _In_ xsapi_internal_string metadata
 ) :
@@ -31,7 +30,6 @@ LeaderboardRow::LeaderboardRow(
     m_xuid{ xboxUserId },
     m_percentile{ percentile },
     m_rank{ rank },
-    m_globalRank{ globalRank },
     m_columnValues(std::move(columnValues))
 {
     if(!metadata.empty())
@@ -49,7 +47,6 @@ LeaderboardRow::LeaderboardRow(const LeaderboardRow& other)
     m_xuid = other.m_xuid;
     m_percentile = other.m_percentile;
     m_rank = other.m_rank;
-    m_globalRank = other.m_globalRank;
     m_columnValues = other.m_columnValues;
     m_columnValuesC = other.m_columnValuesC;
     JsonUtils::CopyFrom(m_metadata, other.m_metadata);
@@ -64,7 +61,6 @@ LeaderboardRow& LeaderboardRow::operator =(const LeaderboardRow& other)
     m_xuid = other.m_xuid;
     m_percentile = other.m_percentile;
     m_rank = other.m_rank;
-    m_globalRank = other.m_globalRank;
     m_columnValues = other.m_columnValues;
     m_columnValuesC = other.m_columnValuesC;
     JsonUtils::CopyFrom(m_metadata, other.m_metadata);
@@ -107,11 +103,6 @@ uint32_t LeaderboardRow::Rank() const
     return m_rank;
 }
 
-uint32_t LeaderboardRow::GlobalRank() const 
-{
-    return m_globalRank;
-}
-
 const xsapi_internal_vector<xsapi_internal_string>& LeaderboardRow::ColumnValues() const
 {
     return m_columnValues;
@@ -134,9 +125,7 @@ const xsapi_internal_vector<xsapi_internal_string>& LeaderboardRow::ColumnValues
     double percentile = 0.0;
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonDouble(json, "percentile", percentile, true));
     int rank = 0;
-    int globalRank = 0;
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonInt(json, "rank", rank, true));
-    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonInt(json, "globalrank", globalRank, true));
     xsapi_internal_vector<xsapi_internal_string> values;
     if (json.IsObject() && json.HasMember("value") && !json["value"].IsNull())
     {
@@ -159,7 +148,6 @@ const xsapi_internal_vector<xsapi_internal_string>& LeaderboardRow::ColumnValues
         xuid,
         percentile,
         rank,
-        globalRank,
         values,
         metadata
     );
@@ -187,7 +175,6 @@ char* LeaderboardRow::Serialize(XblLeaderboardRow* row, char* buffer)
     row->percentile = m_percentile;
 
     row->rank = m_rank;
-    row->globalRank = m_globalRank;
     row->xboxUserId = m_xuid;
 
     utils::strcpy(row->gamertag, sizeof(XblLeaderboardRow::gamertag), m_gamertag.c_str());

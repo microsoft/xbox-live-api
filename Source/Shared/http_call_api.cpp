@@ -19,10 +19,7 @@ STDAPI XblHttpCallCreate(
 {
     VERIFY_XBL_INITIALIZED();
 
-    auto userResult = xblContext->User().Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(xblContext->User());
     HRESULT hr = httpCall->Init(xblContext->Settings(), method, url, xbox_live_api::unspecified);
     if (SUCCEEDED(hr)) 
     {

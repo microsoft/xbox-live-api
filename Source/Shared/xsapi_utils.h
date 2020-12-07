@@ -560,9 +560,7 @@ public:
     static constexpr uint64_t TICKS_PER_MS = 10000;
     static constexpr uint64_t TICKS_PER_SEC = (1000 * TICKS_PER_MS);
     static constexpr uint64_t EPOCH_OFFSET = 11644473600LL;
-
-    static String ToLower(String str) noexcept;
-
+    
 private:
     template<typename T>
     struct SmartPointerContainer

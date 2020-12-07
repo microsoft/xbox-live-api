@@ -1295,16 +1295,6 @@ xsapi_internal_vector<uint32_t> utils::uint32_array_to_internal_vector(
     return vector;
 }
 
-String utils::ToLower(String str) noexcept
-{
-    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c)
-        {
-            return static_cast<char>(tolower(c));
-        });
-
-    return str;
-}
-
 XAsyncBlock* utils::MakeAsyncBlock(XTaskQueueHandle queue, void* context, XAsyncCompletionRoutine* callback)
 {
     auto async = Make<XAsyncBlock>();

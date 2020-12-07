@@ -90,7 +90,7 @@ STDAPI XblMemSetFunctions(
 /// </summary>
 /// <param name="memAllocFunc">Set to the current allocation callback.  
 /// Returns the default routine if not previously set.</param>
-/// <param name="memFreeFunc">Set to the current memory free callback.  
+/// <param name="memFreeFunc">Set to the to the current memory free callback.  
 /// Returns the default routine if not previously set.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
@@ -270,7 +270,7 @@ enum class XblConfigSetting : uint32_t
 /// <param name="setting">The config settings value to be passed down.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// The asserts will not fire in RETAIL sandbox, and this setting has no affect in RETAIL sandboxes.  
+/// The asserts will not fire in RETAIL sandbox, and this setting has has no affect in RETAIL sandboxes.  
 /// It is best practice to not call this API, and instead adjust the calling pattern but this is provided 
 /// as a temporary way to get unblocked while in early stages of game development.
 /// </remarks>

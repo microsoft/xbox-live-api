@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) Microsoft Corporation
+Copyright (c) 2017 Microsoft Corporation
 
 All rights reserved.
 

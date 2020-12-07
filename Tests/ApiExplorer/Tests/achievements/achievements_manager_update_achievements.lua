@@ -56,7 +56,7 @@ end
 
 function OnXblAchievementsManagerDoWork_LocalUserAddedEvent()
     print("OnXblAchievementsManagerDoWork_LocalUserAddedEvent")
-    handle, hr = XblAchievementsManagerGetAchievementsByState()
+    handle, hr = XblAchievementsManagerGetSortedAchievements()
     VerifySuccess(hr)
     count, hr = XblAchievementsManagerResultGetAchievements()
     VerifySuccess(hr)
@@ -89,7 +89,7 @@ end
 
 function OnXblAchievementsManagerDoWork_AchievementUnlockedEvent()
     print("OnXblAchievementsManagerDoWork_AchievementUnlockedEvent")
-    handle, hr = XblAchievementsManagerGetAchievementsByState()
+    handle, hr = XblAchievementsManagerGetSortedAchievements()
     VerifySuccess(hr)
     count, hr = XblAchievementsManagerResultGetAchievements()
     VerifySuccess(hr)

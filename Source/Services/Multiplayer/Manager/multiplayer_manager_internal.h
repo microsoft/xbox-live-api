@@ -1226,7 +1226,7 @@ class MultiplayerLocalUser
 public:
 
     MultiplayerLocalUser(
-        _In_ User&& user,
+        _In_ xbox_live_user_t user,
         _In_ uint64_t xboxUserId,
         _In_ bool isPrimary
         );
@@ -1298,7 +1298,7 @@ public:
         _In_ xbox_live_user_t user
     );
 
-    Result<const std::shared_ptr<MultiplayerLocalUser>> AddUserToXboxLiveContextToMap(_In_ xbox_live_user_t user);
+    const std::shared_ptr<MultiplayerLocalUser>& AddUserToXboxLiveContextToMap(_In_ xbox_live_user_t user);
     void RemoveStaleLocalUsersFromMap();
 
     void ActivateMultiplayerEvents(_In_ const std::shared_ptr<xbox::services::multiplayer::manager::MultiplayerLocalUser>& localuser);
@@ -1474,7 +1474,7 @@ private:
 
     void Destroy();
 
-    Result<std::shared_ptr<xbox::services::multiplayer::MultiplayerService>> GetMultiplayerService(
+    std::shared_ptr<xbox::services::multiplayer::MultiplayerService> GetMultiplayerService(
         _In_ xbox_live_user_t user
         );
 

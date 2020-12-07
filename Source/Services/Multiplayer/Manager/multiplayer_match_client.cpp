@@ -593,7 +593,7 @@ void MultiplayerMatchClient::HandleMatchFound(
         {
             // Perhaps its OK to call handle_session_joined() immediately here, but to maintain behavioral parody with
             // pplx code, differ that until the next do_work call
-            pThis->m_joinTargetSessionResult = std::move(result);
+            pThis->m_joinTargetSessionResult = result;
             pThis->m_joinTargetSessionComplete = true;
         }
     });

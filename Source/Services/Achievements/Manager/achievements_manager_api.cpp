@@ -85,10 +85,7 @@ try
     return ApiImpl([&](AchievementsManager& achievementsManager)
         {
             RETURN_HR_INVALIDARGUMENT_IF(user == nullptr);
-            auto wrapUserResult{ User::WrapHandle(user) };
-            RETURN_HR_IF_FAILED(wrapUserResult.Hresult());
-
-            return achievementsManager.AddLocalUser(wrapUserResult.ExtractPayload(), TaskQueue::DeriveWorkerQueue(queue));
+            return achievementsManager.AddLocalUser(user, TaskQueue::DeriveWorkerQueue(queue));
         });
 }
 CATCH_RETURN()
@@ -101,10 +98,7 @@ try
     return ApiImpl([&](AchievementsManager& achievementsManager)
         {
             RETURN_HR_INVALIDARGUMENT_IF_NULL(user);
-            auto wrapUserResult{ User::WrapHandle(user) };
-            RETURN_HR_IF_FAILED(wrapUserResult.Hresult());
-
-            return achievementsManager.RemoveLocalUser(wrapUserResult.Payload());
+            return achievementsManager.RemoveLocalUser(user);
         });
 }
 CATCH_RETURN()

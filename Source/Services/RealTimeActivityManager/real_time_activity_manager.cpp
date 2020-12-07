@@ -45,9 +45,8 @@ HRESULT RealTimeActivityManager::AddSubscription(
     RETURN_HR_INVALIDARGUMENT_IF_NULL(subscription);
 
     std::lock_guard<std::recursive_mutex> lock{ m_lock };
-    auto connectionResult{ GetConnection(user) };
-    RETURN_HR_IF_FAILED(connectionResult.Hresult());
-    return connectionResult.ExtractPayload()->AddSubscription(subscription, AsyncContext<Result<void>>{ m_queue });
+    auto connection{ GetConnection(user) };
+    return connection->AddSubscription(subscription, AsyncContext<Result<void>>{ m_queue });
 }
 
 HRESULT RealTimeActivityManager::RemoveSubscription(
@@ -187,7 +186,7 @@ void RealTimeActivityManager::Deactivate(
     }
 }
 
-Result<std::shared_ptr<Connection>> RealTimeActivityManager::GetConnection(
+std::shared_ptr<Connection> RealTimeActivityManager::GetConnection(
     const User& user
 ) noexcept
 {
@@ -240,19 +239,7 @@ Result<std::shared_ptr<Connection>> RealTimeActivityManager::GetConnection(
             }
         };
 
-        auto copyUserResult{ user.Copy() };
-        if (Failed(copyUserResult))
-        {
-            return copyUserResult.Hresult();
-        }
-
-        auto connectionResult = Connection::Make(copyUserResult.ExtractPayload(), m_queue, std::move(stateChangedHandler), std::move(resyncHandler));
-        if (Failed(connectionResult))
-        {
-            return connectionResult.Hresult();
-        }
-        
-        connection = connectionResult.ExtractPayload();
+        connection = Connection::Make(user, m_queue, std::move(stateChangedHandler), std::move(resyncHandler));
         m_rtaConnections[user.Xuid()] = connection;
     }
 

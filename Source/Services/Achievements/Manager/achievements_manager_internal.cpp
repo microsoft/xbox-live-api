@@ -60,17 +60,18 @@ std::shared_ptr<xbox::services::RefCounter> XblAchievementsManagerResult::GetSha
 NAMESPACE_MICROSOFT_XBOX_SERVICES_ACHIEVEMENTS_MANAGER_CPP_BEGIN
 
 AchievementsManagerUser::AchievementsManagerUser(
-    _In_ User&& localUser,
+    _In_ const User& localUser,
     _In_ const TaskQueue& queue
 ) noexcept :
     m_queue{ queue.DeriveWorkerQueue() },
     m_xuid{ localUser.Xuid() },
     m_rtaManager{ GlobalState::Get()->RTAManager() }
 {
+    m_xblContext = MakeShared<XblContext>(localUser);
+    m_xblContext->Initialize(m_rtaManager);
+
     // Maintain legacy RTA activation count.
     m_rtaManager->Activate(localUser);
-
-    m_xblContext = XblContext::Make(std::move(localUser));
 }
 
 AchievementsManagerUser::~AchievementsManagerUser()
@@ -106,9 +107,8 @@ Result<void> AchievementsManagerUser::Initialize(
 )
 {
     assert(!m_isInitialized);
-    RETURN_HR_IF_FAILED(m_xblContext->Initialize(m_rtaManager));
-
     std::weak_ptr<AchievementsManagerUser> weakThis{ shared_from_this() };
+
     m_achievementProgressToken = m_xblContext->AchievementsService()->AddAchievementProgressChangeHandler(
         [weakThis](const XblAchievementProgressChangeEventArgs& args)
         {
@@ -1212,20 +1212,19 @@ HRESULT AchievementsManager::CleanUpDeepCopyAchievement(XblAchievement& achievem
 }
 
 HRESULT AchievementsManager::AddLocalUser(
-    User&& user, 
+    const User & user, 
     TaskQueue && queue
 ) noexcept
 {
     std::lock_guard<std::mutex> lock{ m_mutex };
 
-    auto xuid{ user.Xuid() };
-    if (m_localUsers.find(xuid) != m_localUsers.end())
+    if (m_localUsers.find(user.Xuid()) != m_localUsers.end())
     {
-        LOGS_ERROR << "User " << xuid << " already added to AchievementsManager";
+        LOGS_ERROR << "User " << user.Xuid() << " already added to AchievementsManager";
         return E_UNEXPECTED;
     }
 
-    auto localUser = MakeShared<AchievementsManagerUser>(std::move(user), queue);
+    auto localUser = MakeShared<AchievementsManagerUser>(user, queue);
 
     Result<void> result = localUser->Initialize(AsyncContext<HRESULT>{
         [
@@ -1251,14 +1250,14 @@ HRESULT AchievementsManager::AddLocalUser(
 
     if (Succeeded(result))
     {
-        m_localUsers[xuid] = localUser;
+        m_localUsers[user.Xuid()] = localUser;
     }
 
     return result.Hresult();
 }
 
 HRESULT AchievementsManager::RemoveLocalUser(
-    const User& user
+    const User & user
 ) noexcept
 {
     std::lock_guard<std::mutex> lock{ m_mutex };

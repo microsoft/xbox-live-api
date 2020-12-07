@@ -38,7 +38,7 @@ class StringService : public std::enable_shared_from_this<StringService>
 
 public:
     StringService(
-        _In_ User&& user,
+        _In_ User user,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings
     );
 

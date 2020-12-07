@@ -41,7 +41,7 @@ class AchievementsService : public std::enable_shared_from_this<AchievementsServ
 {
 public:
     AchievementsService(
-        _In_ User&& user,
+        _In_ User user,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
         _In_ std::shared_ptr<AppConfig> appConfig,
         _In_ std::weak_ptr<::XblContext> xboxLiveContextImpl,
@@ -58,7 +58,7 @@ public:
     HRESULT UpdateAchievement(
         _In_ uint64_t xboxUserId,
         _In_ uint32_t titleId,
-        _In_ const String& serviceConfigurationId,
+        _In_ String serviceConfigurationId,
         _In_ const String& achievementId,
         _In_ uint32_t percentComplete,
         _In_ AsyncContext<Result<void>> async

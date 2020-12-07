@@ -8,10 +8,10 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_BEGIN
 
 SpopKickSubscription::SpopKickSubscription(
-    _In_ User&& user,
+    _In_ User user,
     _In_ uint32_t titleId
 ) noexcept : 
-    m_user(std::move(user))
+    m_user(user)
 {
     Stringstream ss;
     ss << "https://notify.xboxlive.com/users/xuid(" << m_user.Xuid() << ")/deviceId/current/titleId/" << titleId;

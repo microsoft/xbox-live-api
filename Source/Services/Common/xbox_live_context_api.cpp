@@ -20,10 +20,7 @@ try
         return E_XBL_NOT_INITIALIZED;
     }
 
-    auto wrapUserResult{ User::WrapHandle(user) };
-    RETURN_HR_IF_FAILED(wrapUserResult.Hresult());
-
-    auto xboxLiveContext = XblContext::Make(wrapUserResult.ExtractPayload());
+    auto xboxLiveContext = MakeShared<XblContext>(user);
 
     HRESULT hr = xboxLiveContext->Initialize(globalState->RTAManager());
     if (SUCCEEDED(hr))

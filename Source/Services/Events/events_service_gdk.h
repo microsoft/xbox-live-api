@@ -12,12 +12,12 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_EVENTS_CPP_BEGIN
 class EventsService : public IEventsService, public std::enable_shared_from_this<EventsService>
 {
 public:
-    EventsService(_In_ User&& user);
+    EventsService(_In_ User user);
     ~EventsService();
 
     HRESULT Initialize();
 
-    HRESULT WriteInGameEvent(   
+    HRESULT WriteInGameEvent(
         _In_z_ const char* eventName,
         _In_opt_z_ const char* dimensions,
         _In_opt_z_ const char* measurements

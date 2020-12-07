@@ -518,7 +518,7 @@ enum class XblMultiplayerSessionMemberStatus : uint32_t
     /// <summary>
     /// The member is inactive in the current title.  
     /// The member may be active in another title as specified by ActiveTitleId.  
-    /// If an inactive member doesn't mark themselves as Active within the MemberInactiveTimeout they will be removed from the session.
+    /// If a inactive member doesn't mark themselves as Active within the MemberInactiveTimeout they will be removed from the session.
     /// </summary>
     Inactive,
 
@@ -966,7 +966,7 @@ typedef struct XblMultiplayerSessionConstants
     uint64_t MemberReservedTimeout;
 
     /// <summary>
-    /// If an inactive member reservation does not become active within this timeout, then the inactive member is removed from the session.
+    /// If a inactive member reservation does not become active within this timeout, then inactive member is removed from the session.
     /// </summary>
     uint64_t MemberInactiveTimeout;
 
@@ -1792,7 +1792,7 @@ typedef struct XblMultiplayerSessionInfo
     time_t StartTime;
 
     /// <summary>
-    /// If any timeouts are in progress, this is the date when the next timer will fire.
+    /// If any timeouts are in progress, this is the date when the the next timer will fire.
     /// </summary>
     time_t NextTimer;
 
@@ -2141,7 +2141,7 @@ STDAPI_(XblMultiplayerSessionChangeTypes) XblMultiplayerSessionSubscribedChangeT
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Host candidates are an ordered list of device tokens, ordered by preference as specified by XblMultiplayerMetrics
+/// Host candidates are a ordered list of device tokens, ordered by preference as specified by XblMultiplayerMetrics
 /// in the session constants.
 /// </summary>
 /// <param name="handle">Handle to the multiplayer session.</param>
@@ -2784,7 +2784,7 @@ STDAPI XblMultiplayerSessionLeave(
 /// <param name="status">Indicates the current user status.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// You cannot set the user to reserved or ready in this manner.  
+/// You cannot set the the user to reserved or ready in this manner.  
 /// Use <see cref="XblMultiplayerSessionAddMemberReservation"/> to add a member reservation.
 /// </remarks>
 STDAPI XblMultiplayerSessionCurrentUserSetStatus(
@@ -3215,7 +3215,7 @@ STDAPI XblMultiplayerWriteSessionAsync(
 /// session object to be cleaned up immediately.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// Note that if you leave a session that you are the last member of and the sessionEmptyTimeout 
+/// Note that if you leave a session that you are the the last member of and the sessionEmptyTimeout 
 /// is equal to 0, then the session will be deleted immediately.
 /// </remarks>
 STDAPI XblMultiplayerWriteSessionResult(
@@ -3257,7 +3257,7 @@ STDAPI XblMultiplayerWriteSessionByHandleAsync(
 /// If the updated session object is not needed, passing nullptr will cause the new multiplayer session object to be cleaned up immediately.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// Note that if you leave a session that you are the last member of and the sessionEmptyTimeout
+/// Note that if you leave a session that you are the the last member of and the sessionEmptyTimeout
 /// is equal to 0, then the session will be deleted immediately and a nullptr will be returned.
 /// </remarks>
 STDAPI XblMultiplayerWriteSessionByHandleResult(
@@ -3595,7 +3595,7 @@ STDAPI XblMultiplayerSendInvitesAsync(
 /// </summary>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <param name="handlesCount">The number of handles in the handles array. Size should be equal to the number of invites requested.</param>
-/// <param name="handles">A caller allocated array to pass back the invite handle results.
+/// <param name="handles">A caller allocated array to pass back the invite handle results  
 /// The handle ID strings corresponding to the invites that have been sent.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMultiplayerSendInvitesResult(
@@ -3838,7 +3838,7 @@ typedef void CALLBACK XblMultiplayerSessionChangedHandler(
 
 /// <summary>
 /// Registers an event handler for notifications when a multiplayer session changes. If the RTA subscription has not
-/// been explicitly enabled with <see cref="XblMultiplayerSetSubscriptionsEnabled" />, adding session changed handlers will
+/// been explicitly enabled with <see cref="XblMultiplayerSetSubscriptionsEnabled">, adding session changed handlers will
 /// enable it automatically. Use the returned XblFunctionContext to unregister the handler.
 /// </summary>
 /// <param name="xblContext">Xbox live context for the local user.</param>

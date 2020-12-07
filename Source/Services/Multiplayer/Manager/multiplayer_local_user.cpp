@@ -10,7 +10,7 @@ using namespace xbox::services::multiplayer;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 
 MultiplayerLocalUser::MultiplayerLocalUser(
-    _In_ User&& user,
+    _In_ xbox_live_user_t user,
     _In_ uint64_t xuid,
     _In_ bool isPrimary
 ) :
@@ -21,11 +21,10 @@ MultiplayerLocalUser::MultiplayerLocalUser(
     m_xuid(xuid),
     m_lobbyState(MultiplayerLocalUserLobbyState::Unknown),
     m_gameState(MultiplayerLocalUserGameState::Unknown),
-    m_isPrimaryXboxLiveContext(isPrimary)
+    m_isPrimaryXboxLiveContext(isPrimary),
+    m_xboxLiveContextImpl(MakeShared<XblContext>(user))
 {
     // TODO parameterize RTAManager
-    m_xboxLiveContextImpl = XblContext::Make(std::move(user));
-
     m_xboxLiveContextImpl->Initialize(GlobalState::Get()->RTAManager());
 }
 

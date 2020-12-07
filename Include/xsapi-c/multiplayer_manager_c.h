@@ -542,7 +542,7 @@ STDAPI XblMultiplayerEventArgsMembers(
 /// </summary>
 /// <param name="argsHandle">The event args handle from the XblMultiplayerEvent.</param>
 /// <param name="member">Passes back a given member for the following event results:
-/// XblMultiplayerEventType::HostChanged - The new host member.  If an existing host leaves, there won't be a member to pass back so this function will return HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND).
+/// XblMultiplayerEventType::HostChanged - The new host member.  If an existing host leaves, argsHandle will be nullptr.  
 /// XblMultiplayerEventType::MemberPropertyChanged - The member whose property changed.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMultiplayerEventArgsMember(
@@ -977,7 +977,7 @@ STDAPI_(const char*) XblMultiplayerManagerGameSessionCorrelationId() XBL_NOEXCEP
 /// Object containing identifying information for the session.  
 /// Returns null if a game session has not yet been established.
 /// </summary>
-/// <returns>A pointer to the multiplayer session reference.  
+/// <returns>A pointer to the the multiplayer session reference.  
 /// The memory for the returned string pointer remains valid until the next call to XblMultiplayerManagerDoWork.</returns>
 STDAPI_(const XblMultiplayerSessionReference*) XblMultiplayerManagerGameSessionSessionReference() XBL_NOEXCEPT;
 

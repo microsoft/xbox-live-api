@@ -10,7 +10,7 @@ class MatchmakingService : public std::enable_shared_from_this<MatchmakingServic
 
 public:
     MatchmakingService(
-        _In_ User&& user,
+        _In_ User user,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings
     );
 

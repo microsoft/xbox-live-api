@@ -1663,9 +1663,7 @@ public:
         env.SetPeoplehubMock(false, true);
 
         uint64_t changedXuid{ 1 };
-
-        auto userResult = User::WrapHandle(user);
-        env.FireSocialGraphChangedRtaEvent(userResult.ExtractPayload(), XblSocialNotificationType::Changed, changedXuid);
+        env.FireSocialGraphChangedRtaEvent(user, XblSocialNotificationType::Changed, changedXuid);
 
         bool profileChanged{ false };
         bool presenceChanged{ false };
@@ -1864,8 +1862,8 @@ public:
         VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(groupHandle));
         {
             // Ensure the user in the event is valid even after destroying the group
-            auto userFromEventResult = User::WrapHandle(events[0]->user);
-            VERIFY_ARE_EQUAL_UINT(MOCK_XUID, userFromEventResult.ExtractPayload().Xuid());
+            User userFromEvent{ events[0]->user };
+            VERIFY_ARE_EQUAL_UINT(MOCK_XUID, userFromEvent.Xuid());
         }
 
         // Make a user go offline to trigger event
@@ -1901,8 +1899,8 @@ public:
 
         {
             // Ensure the user handle from the event is still valid after removing the user
-            auto userFromEventResult = User::WrapHandle(events[0]->user);
-            VERIFY_ARE_EQUAL_UINT(MOCK_XUID, userFromEventResult.ExtractPayload().Xuid());
+            User userFromEvent{ events[0]->user };
+            VERIFY_ARE_EQUAL_UINT(MOCK_XUID, userFromEvent.Xuid());
         }
     }
 
@@ -1911,6 +1909,7 @@ public:
         SMTestEnvironment env{};
         auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
         xbox_live_user_t userHandle = xboxLiveContext->user();
+        User localUser{ userHandle };
 
         auto socialManager{ social_manager::get_singleton_instance() };
 

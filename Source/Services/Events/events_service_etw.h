@@ -14,7 +14,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_EVENTS_CPP_BEGIN
 class EventsService : public IEventsService, public std::enable_shared_from_this<EventsService>
 {
 public:
-    EventsService(_In_ User&& user);
+    EventsService(_In_ User user);
     ~EventsService();
 
     HRESULT Initialize();

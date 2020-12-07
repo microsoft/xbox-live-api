@@ -21,7 +21,7 @@ static const char* s_settings[] = {
 };
 
 ProfileService::ProfileService(
-    _In_ User&& user,
+    _In_ User user,
     _In_ std::shared_ptr<XboxLiveContextSettings> xboxLiveContextSettings,
     _In_ std::shared_ptr<AppConfig> appConfig
 ) noexcept :
@@ -36,10 +36,7 @@ HRESULT ProfileService::GetUserProfiles(
     _In_ AsyncContext<Result<xsapi_internal_vector<XblUserProfile>>> async
 ) const noexcept
 {
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "POST",
@@ -98,10 +95,7 @@ HRESULT ProfileService::GetUserProfilesForSocialGroup(
         pathAndQuery << s_settings[i];
     }
 
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "GET",

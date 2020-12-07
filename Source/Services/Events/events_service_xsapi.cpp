@@ -20,6 +20,9 @@ EventsService::EventsService(
     m_queue{ queue.DeriveWorkerQueue() }
 {
     InitializeTenantSettings();
+
+    m_eventQueue = MakeShared<EventQueue>(m_user, m_tenantSettings);
+    m_eventQueue->Initialize();
 }
 
 EventsService::~EventsService()
@@ -30,10 +33,6 @@ EventsService::~EventsService()
 
 HRESULT EventsService::Initialize()
 {
-    auto copyUserResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(copyUserResult.Hresult());
-    m_eventQueue = MakeShared<EventQueue>(copyUserResult.ExtractPayload(), m_tenantSettings);
-    m_eventQueue->Initialize();
     return ScheduleUpload();
 }
 
@@ -198,14 +197,7 @@ HRESULT EventsService::UploadEventPayload(
         auto sharedThis{ weakThis.lock() };
         if (sharedThis && Succeeded(result))
         {
-
-            Result<User> userResult = sharedThis->m_user.Copy();
-            if (FAILED(userResult.Hresult()))
-            {
-                return async.Complete(userResult.Hresult());
-            }
-
-            auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+            auto httpCall = MakeShared<XblHttpCall>(sharedThis->m_user);
             auto hr = httpCall->Init(MakeShared<XboxLiveContextSettings>(), "POST", sharedThis->m_eventUploadUrl, xbox_live_api::events_upload);
             if (FAILED(hr))
             {

@@ -226,9 +226,8 @@ public:
         PeoplehubTestEnvironment() noexcept
             : XboxLiveContext{ CreateMockXboxLiveContext() }
         {
-            auto userResult = XboxLiveContext->User().Copy();
             PeoplehubService = std::make_shared<xbox::services::social::manager::PeoplehubService>(
-                userResult.ExtractPayload(),
+                XboxLiveContext->User(),
                 std::make_shared<XboxLiveContextSettings>(),
                 AppConfig::Instance()->TitleId()
             );

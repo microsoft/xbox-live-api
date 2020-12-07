@@ -261,7 +261,7 @@ typedef struct XblSocialManagerPresenceTitleRecord
     XblPresenceDeviceType deviceType;
 
     /// <summary>
-    /// Whether or not this is the primary presence record.
+    /// Whether or not this is the primary primary presence record.
     /// </summary>
     bool isPrimary;
 } XblSocialManagerPresenceTitleRecord;

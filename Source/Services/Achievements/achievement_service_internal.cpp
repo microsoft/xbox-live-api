@@ -67,13 +67,13 @@ EXTERN_C __declspec(selectany) ETX_PROVIDER_DESCRIPTOR XSAPI_Update_Achievement_
 #endif
 
 AchievementsService::AchievementsService(
-    _In_ User&& user,
+    _In_ User user,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
     _In_ std::shared_ptr<AppConfig> appConfig,
     _In_ std::weak_ptr<XblContext> xboxLiveContextImpl,
     _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaManager
-) :
-    m_user{ std::move(user) },
+    ) :
+    m_user(std::move(user)),
     m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
     m_appConfig(std::move(appConfig)),
     m_xboxLiveContextImpl(std::move(xboxLiveContextImpl)),
@@ -101,7 +101,7 @@ HRESULT AchievementsService::UpdateAchievement(
 HRESULT AchievementsService::UpdateAchievement(
     _In_ uint64_t xboxUserId,
     _In_ uint32_t titleId,
-    _In_ const String& scid,
+    _In_ String scid,
     _In_ const String& achievementId,
     _In_ uint32_t percentComplete,
     _In_ AsyncContext<Result<void>> async
@@ -111,9 +111,6 @@ HRESULT AchievementsService::UpdateAchievement(
     RETURN_HR_INVALIDARGUMENT_IF(scid.empty());
     RETURN_HR_INVALIDARGUMENT_IF(achievementId.empty());
     RETURN_HR_INVALIDARGUMENT_IF(percentComplete > 100);
-
-    // Achievements service is doing case sensitive comparison on scid and always expects it to be lower case
-    String lowercaseScid = utils::ToLower(scid);
 
 #if HC_PLATFORM == HC_PLATFORM_XDK
     {
@@ -131,12 +128,13 @@ HRESULT AchievementsService::UpdateAchievement(
                 return hr;
             }
             
-            string_t wScid = utils::string_t_from_internal_string(lowercaseScid);
+            string_t wScid = utils::string_t_from_internal_string(scid);
             std::error_code errC = utils::guid_from_string(wScid, const_cast<GUID*>(&XSAPI_Update_Achievement_Provider.Guid), false);
             if (errC)
             {
                 return utils::convert_xbox_live_error_code_to_hresult(errC);
             }
+            scid = utils::internal_string_from_string_t(wScid);
 
             CHAR strTitleId[16] = "";
             sprintf_s(strTitleId, "%0.8X", titleId);
@@ -160,12 +158,9 @@ HRESULT AchievementsService::UpdateAchievement(
 #endif
 
     Stringstream subPath;
-    subPath << ("/users/xuid(") << xboxUserId << (")/achievements/") << lowercaseScid << ("/update");
+    subPath << ("/users/xuid(") << xboxUserId << (")/achievements/") << scid << ("/update");
 
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     HRESULT hr = httpCall->Init(
         m_xboxLiveContextSettings,
         "POST",
@@ -187,7 +182,7 @@ HRESULT AchievementsService::UpdateAchievement(
     achievementsJson.PushBack(achievementJson, allocator);
 
     request.AddMember("action", "progressUpdate", allocator);
-    request.AddMember("serviceConfigId", JsonValue(lowercaseScid.c_str(), allocator).Move(), allocator);
+    request.AddMember("serviceConfigId", JsonValue(scid.c_str(), allocator).Move(), allocator);
     request.AddMember("titleId", titleId, allocator);
     request.AddMember("userId", JsonValue(utils::uint64_to_internal_string(xboxUserId).c_str(), allocator).Move(), allocator);
     request.AddMember("achievements", achievementsJson, allocator);
@@ -363,12 +358,9 @@ HRESULT AchievementsService::GetAchievement(
     RETURN_HR_INVALIDARGUMENT_IF(achievementId.empty());
 
     Stringstream subPath;
-    subPath << ("/users/xuid(") << xboxUserId << (")/achievements/") << utils::ToLower(serviceConfigurationId) << ("/") << achievementId;
+    subPath << ("/users/xuid(") << xboxUserId << (")/achievements/") << serviceConfigurationId << ("/") << achievementId;
 
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     HRESULT hr = httpCall->Init(
         m_xboxLiveContextSettings,
         "GET",
@@ -452,10 +444,7 @@ HRESULT AchievementsService::GetAchievements(
         continuationToken
     );
 
-    Result<User> userResult = m_user.Copy();
-    RETURN_HR_IF_FAILED(userResult.Hresult());
-
-    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
     HRESULT hr = httpCall->Init(
         m_xboxLiveContextSettings,
         "GET",

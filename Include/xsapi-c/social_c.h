@@ -264,7 +264,7 @@ typedef struct XblSocialRelationshipChangeEventArgs
 /// </summary>
 /// <remarks>
 /// This handle is used by other APIs to get the social relationship objects and to get 
-/// the next page of results from the service if there is one.  
+/// the next page of results from the service if there is is one.  
 /// The handle must be closed using <see cref="XblSocialRelationshipResultCloseHandle"/> when the result is no longer needed.
 /// </remarks>
 typedef struct XblSocialRelationshipResult* XblSocialRelationshipResultHandle;

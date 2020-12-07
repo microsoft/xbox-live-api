@@ -78,13 +78,12 @@ MultiplayerLocalUserManager::GetLocalUserHelper(
     _In_ xbox_live_user_t user
     )
 {
-    auto wrapUserResult{ User::WrapHandle(user) };
-    if (Failed(wrapUserResult))
+    if (user == nullptr)
     {
         return nullptr;
     }
 
-    return GetLocalUserHelper(wrapUserResult.Payload().Xuid());
+    return GetLocalUserHelper(User{ user }.Xuid());
 }
 
 std::shared_ptr<MultiplayerLocalUser>
@@ -160,32 +159,22 @@ MultiplayerLocalUserManager::IsLocalUserGameState(
     return true;
 }
 
-Result<const std::shared_ptr<MultiplayerLocalUser>>
+const std::shared_ptr<MultiplayerLocalUser>&
 MultiplayerLocalUserManager::AddUserToXboxLiveContextToMap(
     _In_ xbox_live_user_t user
     )
 {
-    auto wrapUserResult{ User::WrapHandle(user) };
-    if (Failed(wrapUserResult))
-    {
-        return wrapUserResult.Hresult();
-    }
+    XSAPI_ASSERT(user != nullptr);
 
-    uint64_t xboxUserId = wrapUserResult.Payload().Xuid();
+    uint64_t xboxUserId = User{ user }.Xuid();
 
     bool isPrimary = m_localUserRequestMap.size() == 0 ? true : false;
 
     auto iter = m_localUserRequestMap.find(xboxUserId);
     if (iter == m_localUserRequestMap.end())
     {
-        auto innerWrapUserResult{ User::WrapHandle(user) };
-        if (Failed(innerWrapUserResult))
-        {
-            return innerWrapUserResult.Hresult();
-        }
-
         auto localUser = std::make_shared<MultiplayerLocalUser>(
-            innerWrapUserResult.ExtractPayload(),
+            user,
             xboxUserId,
             isPrimary
             );

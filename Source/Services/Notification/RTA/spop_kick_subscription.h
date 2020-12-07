@@ -13,7 +13,7 @@ class SpopKickSubscription : public real_time_activity::Subscription
 {
 public:
     SpopKickSubscription(
-        User&& user,
+        User user,
         uint32_t titleId
     ) noexcept;
 
@@ -24,7 +24,7 @@ protected:
     void OnResync() noexcept override;
 
 private:
-    User m_user;
+    User m_user{ nullptr };
 };
 NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_END
 #endif

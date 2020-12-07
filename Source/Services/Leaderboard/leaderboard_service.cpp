@@ -26,15 +26,14 @@ constexpr const char* g_eventBasedStatsGlobalLeaderboardVersion{ "3.1" };
 constexpr const char* g_eventBasedStatsSocialLeaderboardVersion{ "1.1" };
 
 LeaderboardService::LeaderboardService(
-    _In_ User&& user,
+    _In_ User user,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
     _In_ std::shared_ptr<xbox::services::AppConfig> appConfig
-) :
-    m_user{ std::move(user) },
+    ) :
+    m_user(std::move(user)),
     m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
     m_appConfig(std::move(appConfig))
-{
-}
+{ }
 
 xbl_result<xsapi_internal_string> 
 CreateLeaderboardUrl(
@@ -172,10 +171,7 @@ LeaderboardService::GetLeaderboard(
         if (op == XAsyncOp::DoWork)
         {
 
-            Result<User> userResult = sharedThis->m_user.Copy();
-            RETURN_HR_IF_FAILED(userResult.Hresult());
-
-            auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+            auto httpCall = MakeShared<XblHttpCall>(sharedThis->m_user);
             HRESULT hr = httpCall->Init(
                 sharedThis->m_xboxLiveContextSettings,
                 "GET",
@@ -364,10 +360,7 @@ LeaderboardService::GetLeaderboardForSocialGroup(
     {
         if (op == XAsyncOp::DoWork)
         {
-            Result<User> userResult = sharedThis->m_user.Copy();
-            RETURN_HR_IF_FAILED(userResult.Hresult());
-
-            auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+            auto httpCall = MakeShared<XblHttpCall>(sharedThis->m_user);
             HRESULT hr = httpCall->Init(
                 sharedThis->m_xboxLiveContextSettings,
                 "GET",

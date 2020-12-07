@@ -716,7 +716,7 @@ HRESULT MultiplayerGameClient::JoinGameForAllLocalMembers(
                 if (joinResult.Hresult() == HTTP_E_STATUS_NOT_FOUND && !m_handleIdToJoin.empty())
                 {
                     // We tried to join an existing session but it didn't exist. Create a new game session
-                    // from the lobby and clear the existing handleId since it must be invalid.
+                    // from the lobby and clear the the existing handleId since it must be invalid.
                     if (m_createGameIfFailedToJoin)
                     {
                         m_callback(lobbyClient->CreateGameFromLobby());

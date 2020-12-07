@@ -173,7 +173,6 @@ public:
         VERIFY_ARE_EQUAL_INT(row->xboxUserId, strtoull(rowToVerify["xuid"].GetString(), nullptr, 0));
         VERIFY_ARE_EQUAL_DOUBLE(row->percentile, rowToVerify["percentile"].GetDouble());
         VERIFY_ARE_EQUAL_INT(row->rank, rowToVerify["rank"].GetUint());
-        VERIFY_ARE_EQUAL_INT(row->globalRank, rowToVerify["globalrank"].GetUint());
         
         if (!rowToVerify.HasMember("values"))
         {

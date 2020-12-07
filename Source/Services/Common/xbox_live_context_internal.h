@@ -30,10 +30,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_MATCHMAKING_CPP_END
 struct XblContext : public std::enable_shared_from_this<XblContext>, public xbox::services::RefCounter
 {
 public:
-    static std::shared_ptr<XblContext> Make(
-        _In_ xbox::services::User&&  user
-    ) noexcept;
-
+    XblContext(_In_ xbox::services::User user) noexcept;
     ~XblContext();
 
     const xbox::services::User& User() const noexcept;
@@ -140,9 +137,6 @@ public:
 
 protected:
     std::shared_ptr<xbox::services::RefCounter> GetSharedThis() override;
-    XblContext(_In_ xbox::services::User&& user) noexcept
-        : m_user{ std::move(user) }
-    {}
 
 private:
     std::shared_ptr<xbox::services::XboxLiveContextSettings> m_xboxLiveContextSettings;

@@ -1863,7 +1863,7 @@ private:
         ));
         VERIFY_SUCCEEDED(hr = XblAchievementsManagerResultGetAchievements(resultHandle, &achievement, &size));
         VERIFY_IS_TRUE(achievement->progressState == XblAchievementProgressState::Achieved);
-        VERIFY_ARE_EQUAL_STR(
+        VERIFY_ARE_EQUAL(
             achievement->progression.requirements[0].currentProgressValue,
             achievement->progression.requirements[0].targetProgressValue
         );
@@ -2832,7 +2832,7 @@ public:
             &size
         ));
         VERIFY_IS_TRUE(achievement->progressState == XblAchievementProgressState::Achieved);
-        VERIFY_ARE_EQUAL_STR(
+        VERIFY_ARE_EQUAL(
             achievement->progression.requirements[0].currentProgressValue,
             achievement->progression.requirements[0].targetProgressValue
         );
@@ -3007,7 +3007,7 @@ public:
         VERIFY_IS_TRUE(achievement->progressState == XblAchievementProgressState::Achieved);
         for (uint8_t i = 0; i < achievement->progression.requirementsCount; ++i)
         {
-            VERIFY_ARE_EQUAL_STR(
+            VERIFY_ARE_EQUAL(
                 achievement->progression.requirements[i].currentProgressValue,
                 achievement->progression.requirements[i].targetProgressValue
                 );

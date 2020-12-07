@@ -100,7 +100,7 @@ class AchievementsManagerUser : public std::enable_shared_from_this<Achievements
 {
 public:
     AchievementsManagerUser(
-        _In_ User&& localUser,
+        _In_ const User& localUser,
         _In_ const TaskQueue& queue
     ) noexcept;
     virtual ~AchievementsManagerUser();
@@ -192,7 +192,7 @@ public:
     static HRESULT CleanUpDeepCopyAchievement(_In_ XblAchievement& achievement);
     
     HRESULT AddLocalUser(
-        _In_ User&& user,
+        _In_ const User& user,
         _In_ TaskQueue&& queue
     ) noexcept;
 
