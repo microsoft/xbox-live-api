@@ -12,8 +12,12 @@
 #else 
 #include <CppUnitTestLogger.h>
 #endif
+#include "user.h"
+#include "xbox_live_context_internal.h"
 
 using namespace WEX::Logging;
+using namespace WEX::TestExecution;
+using namespace WEX::Common;
 
 BEGIN_MODULE()
     MODULE_PROPERTY(L"XtpAreaPath", L"XBox Live\\Client") 
@@ -29,6 +33,12 @@ bool ModuleSetup()
     CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     WEX::Common::String strOpt;
 
+    if (!IsDebuggerPresent())
+    {
+        _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
+        _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+    }
+
     return true;
 }
 
@@ -37,34 +47,6 @@ bool ModuleCleanup()
 {
     CoUninitialize();
     return true;
-}
-
-// 
-/// <summary>
-/// Adds the response logger subscription to help debug issues using the response and request data
-/// </summary>
-void UnitTestBase::StartResponseLogging()
-{
-    Log::Comment(L"Starting Response Logger");
-} 
-
-/// <summary>
-/// Removes the response logger subscription
-/// </summary>
-void UnitTestBase::RemoveResponseLogging()
-{
-    Log::Comment(L"Removing Response Logger");
-}
-
-UnitTestBaseProperties::UnitTestBaseProperties(LPCWSTR strMsg)
-{
-    m_strMsg = strMsg;
-    LogFormatString(FormatString(L"Start TestMethod: %s", m_strMsg).c_str());
-}
-
-UnitTestBaseProperties::~UnitTestBaseProperties()
-{
-    LogFormatString(FormatString(L"End TestMethod: %s", m_strMsg).c_str());
 }
 
 /// <summary>
@@ -106,24 +88,44 @@ void LogFormatString(LPCWSTR strMsg, ...)
 #ifdef USING_TAEF
 
 void VerifyEqualStr(
-    Platform::String^ expected,
+    const char* expected,
+    const char* actual,
+    std::wstring actualName,
+    const WEX::TestExecution::ErrorInfo& errorInfo
+)
+{
+    VERIFY_IS_EQUAL_STR_HELPER(
+        xbox::services::Utils::StringTFromUtf8(expected),
+        xbox::services::Utils::StringTFromUtf8(actual),
+        actualName.c_str(),
+        errorInfo
+    );
+}
+
+void VerifyEqualStr(
+    const std::string& expected,
+    const std::string& actual,
+    std::wstring actualName,
+    const WEX::TestExecution::ErrorInfo& errorInfo
+)
+{
+    VerifyEqualStr(expected.data(), actual.data(), std::move(actualName), errorInfo);
+}
+
+void VerifyEqualStr(
+    std::string expected,
     std::wstring actual,
     std::wstring actualName,
     const WEX::TestExecution::ErrorInfo& errorInfo
     )
 {
-    VERIFY_IS_EQUAL_STR_HELPER(expected->Data(), actual, actualName.c_str(), errorInfo);
+    VERIFY_IS_EQUAL_STR_HELPER(
+        xbox::services::utils::string_t_from_utf8(expected.c_str()),
+        actual, actualName.c_str(), errorInfo
+        );
 }
 
-void VerifyEqualStr(
-    Platform::String^ expected, 
-    Platform::String^ actual, 
-    std::wstring actualName, 
-    const WEX::TestExecution::ErrorInfo& errorInfo
-    )
-{
-    VERIFY_IS_EQUAL_STR_HELPER(expected->Data(), actual->Data(), actualName.c_str(), errorInfo);
-}
+
 
 void VerifyEqualStr(
     std::wstring expected, 
@@ -135,4 +137,15 @@ void VerifyEqualStr(
     VERIFY_IS_EQUAL_STR_HELPER(expected, actual, actualName.c_str(), errorInfo);
 }
 
+void VerifyEqualStr(
+    xsapi_internal_string expected,
+    xsapi_internal_string actual,
+    std::wstring actualName,
+    const WEX::TestExecution::ErrorInfo& errorInfo
+    )
+{
+    VerifyEqualStr(expected.data(), actual.data(), std::move(actualName), errorInfo);
+}
+
 #endif
+

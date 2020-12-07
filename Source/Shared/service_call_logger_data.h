@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <cpprest/json.h>
+#include "cpprest/json.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -13,51 +13,52 @@ class service_call_logger_data
 public:
 
     service_call_logger_data(
-        _In_ string_t host,
-        _In_ string_t uri,
-        _In_ string_t xboxUserId,
+        _In_ xsapi_internal_string host,
+        _In_ xsapi_internal_string uri,
+        _In_ uint64_t xuid,
         _In_ bool isGet,
         _In_ uint32_t httpStatusCode,
-        _In_ string_t requestHeader,
-        _In_ string_t requestBody,
-        _In_ string_t responseHeader,
-        _In_ string_t responseBody,
+        _In_ xsapi_internal_string requestHeader,
+        _In_ xsapi_internal_string requestBody,
+        _In_ xsapi_internal_string responseHeader,
+        _In_ xsapi_internal_string responseBody,
         _In_ std::chrono::milliseconds elapsedCallTime,
-        _In_ chrono_clock_t::time_point requestTime
+        _In_ chrono_clock_t::time_point requestTime,
+        _In_ xsapi_internal_string method
         );
 
     service_call_logger_data(
-        _In_ string_t xboxUserId,
-        _In_ string_t eventName,
-        _In_ string_t eventPlayerSessionId,
-        _In_ string_t eventDimensions,
-        _In_ string_t eventMeasurements,
+        _In_ uint64_t xuid,
+        _In_ xsapi_internal_string eventName,
+        _In_ xsapi_internal_string eventPlayerSessionId,
+        _In_ xsapi_internal_string eventDimensions,
+        _In_ xsapi_internal_string eventMeasurements,
         _In_ chrono_clock_t::time_point requestTime
     );
-    
+
     /// <summary>
     /// Output as multi-line string
     /// </summary>
-    string_t to_string() const;
+    xsapi_internal_string to_string() const;
 
-    static string_t get_csv_header();
+    static xsapi_internal_string get_csv_header();
 
 private:
 
     void init();
 
-    string_t m_host;
-    string_t m_uri;
+    xsapi_internal_string m_host;
+    xsapi_internal_string m_uri;
 
-    string_t m_xboxUserId;
+    uint64_t m_xuid;
 
-    string_t m_multiplayerCorrelationId;
+    xsapi_internal_string m_multiplayerCorrelationId;
 
-    string_t m_requestHeader;
-    string_t m_requestBody;
+    xsapi_internal_string m_requestHeader;
+    xsapi_internal_string m_requestBody;
 
-    string_t m_responseHeader;
-    string_t m_responseBody;
+    xsapi_internal_string m_responseHeader;
+    xsapi_internal_string m_responseBody;
 
     uint32_t m_httpStatusCode;
 
@@ -69,16 +70,17 @@ private:
 
     bool m_isShoulderTap;
     uint64_t m_changeNumber;
-    string_t m_sessionReferenceUriPath;
+    xsapi_internal_string m_sessionReferenceUriPath;
 
     bool m_isInGameEvent;
-    string_t m_eventName;
-    string_t m_playerSessionId;
+    xsapi_internal_string m_eventName;
+    xsapi_internal_string m_playerSessionId;
     uint16_t m_version;
-    string_t m_dimensions;
-    string_t m_measurements;
+    xsapi_internal_string m_dimensions;
+    xsapi_internal_string m_measurements;
+    xsapi_internal_string m_method;
 
-    string_t m_breadCrumb;
+    xsapi_internal_string m_breadCrumb;
 
     static const uint32_t s_invalidId = (uint32_t)-1;
 };

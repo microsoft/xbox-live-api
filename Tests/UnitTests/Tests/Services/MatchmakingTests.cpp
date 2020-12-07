@@ -1,24 +1,13 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 #include "pch.h"
-#define TEST_CLASS_OWNER L"adityat"
-#define TEST_CLASS_AREA L"Matchmaking"
 #include "UnitTestIncludes.h"
-#include "matchmakingservice_winrt.h"
 
-using namespace Microsoft::Xbox::Services;
-using namespace Microsoft::Xbox::Services::Matchmaking;
-using namespace Microsoft::Xbox::Services::Multiplayer;
-using namespace Platform;
-using namespace Platform::Collections;
-using namespace Windows::Foundation::Collections;
-
-#define DEFAULT_SCID L"FEEDFACE-0000-0000-0000-000000000001"
-#define DEFAULT_TEMPLATE_NAME L"TestTemplate"
-#define DEFAULT_SESSION_ID L"5E55104-0000-0000-0000-000000000001"
-#define DEFAULT_HOPPER_NAME L"TestHopper"
-#define DEFAULT_TICKET_ID L"0584338f-a2ff-4eb9-b167-c0e8ddecae72"
+#define DEFAULT_SCID "FEEDFACE-0000-0000-0000-000000000001"
+#define DEFAULT_TEMPLATE_NAME "TestTemplate"
+#define DEFAULT_SESSION_ID "5E55104-0000-0000-0000-000000000001"
+#define DEFAULT_HOPPER_NAME "TestHopper"
+#define DEFAULT_TICKET_ID "0584338f-a2ff-4eb9-b167-c0e8ddecae72"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
@@ -26,88 +15,137 @@ DEFINE_TEST_CLASS(MatchmakingTests)
 {
 public:
     DEFINE_TEST_CLASS_PROPS(MatchmakingTests);
-    const string_t filePath = _T("\\TestResponses\\Matchmaking.json");
-    web::json::value testResponseJsonFromFile = utils::read_test_response_file(filePath);
-    const string_t defaultMatchTicketResponse = testResponseJsonFromFile[L"defaultMatchTicketResponse"].serialize();
+    static const JsonDocument testResponseJsonFromFile;
+    const xsapi_internal_string defaultMatchTicketResponse = testResponseJsonFromFile.IsObject() && testResponseJsonFromFile.HasMember("defaultMatchTicketResponse") ? JsonUtils::SerializeJson(testResponseJsonFromFile["defaultMatchTicketResponse"]) : "";
 
     void VerifyTicket(
-        CreateMatchTicketResponse^ ticket,
-        Platform::String^ ticketIdToCheck,
-        TimeSpan waitTimeToCheck
+        XblCreateMatchTicketResponse* ticket,
+        xsapi_internal_string ticketIdToCheck,
+        int64_t waitTimeToCheck
         )
     {
-        VERIFY_ARE_EQUAL(ticket->MatchTicketId, ticketIdToCheck);
-        VERIFY_ARE_EQUAL_INT(ticket->EstimatedWaitTime.Duration, waitTimeToCheck.Duration);
+        VERIFY_ARE_EQUAL_STR(ticket->matchTicketId, ticketIdToCheck.c_str());
+        VERIFY_ARE_EQUAL_INT(ticket->estimatedWaitTime, waitTimeToCheck);
     }
 
     void VerifyMultiplayerSessionReference(
-        MultiplayerSessionReference^ result,
-        web::json::value resultToVerify
+        XblMultiplayerSessionReference* result,
+        const JsonValue& resultToVerify
         )
     {
-        VERIFY_ARE_EQUAL(result->ServiceConfigurationId->Data(), resultToVerify[L"scid"].as_string());
-        VERIFY_ARE_EQUAL(result->SessionTemplateName->Data(), resultToVerify[L"templateName"].as_string());
-        VERIFY_ARE_EQUAL(result->SessionName->Data(), resultToVerify[L"name"].as_string());
+        VERIFY_ARE_EQUAL_STR(result->Scid, resultToVerify["scid"].GetString());
+        VERIFY_ARE_EQUAL_STR(result->SessionTemplateName, resultToVerify["templateName"].GetString());
+        VERIFY_ARE_EQUAL_STR(result->SessionName, resultToVerify["name"].GetString());
+    }
+
+    char* ConvertMatchStatusToString(
+        XblTicketStatus ticketStatus
+        )
+    {
+        switch(ticketStatus)
+        {
+        case XblTicketStatus::Canceled:
+            return "Canceled";
+        case XblTicketStatus::Expired:
+            return "Expired";
+        case XblTicketStatus::Found:
+            return "Found";
+        case XblTicketStatus::Searching:
+            return "Searching";
+        case XblTicketStatus::Unknown:
+            return "Unknown";
+        default:
+            return "";
+        }
+    }
+
+    char* ConvertPerserveSessionModeToString(
+        XblPreserveSessionMode preserveSessionMode
+        )
+    {
+        switch (preserveSessionMode)
+        {
+        case XblPreserveSessionMode::Always:
+            return "always";
+        case XblPreserveSessionMode::Never:
+            return "never";
+        case XblPreserveSessionMode::Unknown:
+            return "unknown";
+        default:
+            return "";
+        }
     }
 
     void VerifyTicketDetails(
-        MatchTicketDetailsResponse^ ticket,
-        web::json::value json
+        XblMatchTicketDetailsResponse* ticket,
+        const JsonValue& json
         )
     {
-        VERIFY_ARE_EQUAL_INT(ticket->EstimatedWaitTime.Duration, json[L"waitTime"].as_integer() * TICKS_PER_SECOND);
-        VERIFY_ARE_EQUAL(ticket->MatchStatus.ToString()->Data(), json[L"ticketStatus"].as_string().c_str());
-        VERIFY_ARE_EQUAL_STR_IGNORE_CASE(ticket->PreserveSession.ToString()->Data(), json[L"preserveSession"].as_string().c_str());
+        VERIFY_ARE_EQUAL_INT(ticket->estimatedWaitTime, json["waitTime"].GetInt());
+        VERIFY_ARE_EQUAL_STR(ConvertMatchStatusToString(ticket->matchStatus),  json["ticketStatus"].GetString());
+        VERIFY_ARE_EQUAL_STR(ConvertPerserveSessionModeToString(ticket->preserveSession), json["preserveSession"].GetString());
 
-        VerifyMultiplayerSessionReference(ticket->TicketSession, json[L"ticketSessionRef"]);
-        VerifyMultiplayerSessionReference(ticket->TargetSession, json[L"targetSessionRef"]);
+        VerifyMultiplayerSessionReference(&ticket->ticketSession, json["ticketSessionRef"]);
+        VerifyMultiplayerSessionReference(&ticket->targetSession, json["targetSessionRef"]);
 
-        auto ticketAttrJson = web::json::value::parse(ticket->TicketAttributes->Data());
-        VERIFY_IS_EQUAL_JSON(ticketAttrJson, json[L"ticketAttributes"]);
+        JsonDocument ticketAttrJson;
+        ticketAttrJson.Parse(ticket->ticketAttributes);
+        VERIFY_IS_EQUAL_JSON(ticketAttrJson, json["ticketAttributes"]);
     }
 
     DEFINE_TEST_CASE(TestCreateMatchTicketAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestCreateMatchTicketAsync);
-        TimeSpan giveUpDuration;
-        giveUpDuration.Duration = 10 * TICKS_PER_SECOND; // 10 seconds
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        MultiplayerSessionReference^ sessionRef = ref new MultiplayerSessionReference(DEFAULT_SCID, DEFAULT_TEMPLATE_NAME, DEFAULT_SESSION_ID);
+        int64_t timeoutInSeconds = 10;
 
-        Platform::String^ ticketAttributes = ref new Platform::String(LR"({"desiredMap":"Hang 'em high", "desiredGameType" : "Crazy King"})");
+        XblMultiplayerSessionReference sessionRef{ DEFAULT_SCID, DEFAULT_TEMPLATE_NAME, DEFAULT_SESSION_ID };
 
-        std::wstring expectedRequest =
-            LR"({"giveUpDuration":10,"preserveSession":"never","ticketAttributes":{"desiredGameType":"Crazy King","desiredMap":"Hang 'em high"},"ticketSessionRef":{"name":"5E55104-0000-0000-0000-000000000001","scid":"FEEDFACE-0000-0000-0000-000000000001","templateName":"TestTemplate"}})";
+       char ticketAttributes[] = R"({"desiredMap":"Hang 'em high", "desiredGameType":"Crazy King"})";
 
-        std::wstring matchmakingUri = L"https://smartmatch.xboxlive.com/serviceconfigs/07617C5B-3423-4505-B6C6-10A16E1E5DDB/hoppers/DeathMatch";
+        char expectedRequest[] =
+            R"({"giveUpDuration":10,"preserveSession":"never","ticketAttributes":{"desiredGameType":"Crazy King","desiredMap":"Hang 'em high"},"ticketSessionRef":{"name":"5E55104-0000-0000-0000-000000000001","scid":"FEEDFACE-0000-0000-0000-000000000001","templateName":"TestTemplate"}})";
 
-        auto expecteResponse = web::json::value::parse(LR"({"ticketId":"0584338f-a2ff-4eb9-b167-c0e8ddecae72", "waitTime":60 })");
+        xsapi_internal_string matchmakingUri = "https://smartmatch.xboxlive.com/serviceconfigs/07617C5B-3423-4505-B6C6-10A16E1E5DDB/hoppers/DeathMatch";
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(expecteResponse);
+        JsonDocument expectedResponse; 
+        expectedResponse.Parse(R"({"ticketId":"0584338f-a2ff-4eb9-b167-c0e8ddecae72", "waitTime":60 })");
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
+        HttpMock mock{ "POST", matchmakingUri };
+        mock.SetResponseBody(expectedResponse);
 
-        auto ticket = create_task(xboxLiveContext->MatchmakingService->CreateMatchTicketAsync(
+        bool requestWellFormed { true };
+        mock.SetMockMatchedCallback(
+            [&](HttpMock* mock, std::string uri, std::string body)
+            {
+                UNREFERENCED_PARAMETER(mock);
+                UNREFERENCED_PARAMETER(uri);
+                requestWellFormed &= VerifyJson(expectedRequest, body.data());
+            });
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblMatchmakingCreateMatchTicketAsync(
+            xboxLiveContext.get(),
             sessionRef,
             "07617C5B-3423-4505-B6C6-10A16E1E5DDB", // serviceConfigurationId
             "DeathMatch", // hopperName
-            giveUpDuration, // GiveUpDuration
-            PreserveSessionMode::Never, // preserveSession
-            ticketAttributes
-            )).get();
+            timeoutInSeconds,
+            XblPreserveSessionMode::Never,
+            ticketAttributes,
+            &async
+        ));
 
-        VERIFY_IS_NOT_NULL(ticket);
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://smartmatch.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/serviceconfigs/07617C5B-3423-4505-B6C6-10A16E1E5DDB/hoppers/DeathMatch", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL(expectedRequest, httpCall->request_body().request_message_string());
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
 
-        TimeSpan giveUpDurationToVerify;
-        giveUpDurationToVerify.Duration = 60 * TICKS_PER_SECOND; // 60 seconds
+        XblCreateMatchTicketResponse ticket;
+        VERIFY_SUCCEEDED(XblMatchmakingCreateMatchTicketResult(&async, &ticket));
+
+        int64_t giveUpDurationToVerify = 60; // 60 seconds
 
         VerifyTicket(
-            ticket,
+            &ticket,
             "0584338f-a2ff-4eb9-b167-c0e8ddecae72", // ticketIdToCheck
             giveUpDurationToVerify // waitTimeToCheck
             );
@@ -115,152 +153,256 @@ public:
 
     DEFINE_TEST_CASE(TestCreateMatchTicketAsync_EmptyResult)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestCreateMatchTicketAsync_EmptyResult);
-        TimeSpan giveUpDuration;
-        giveUpDuration.Duration = 10 * TICKS_PER_SECOND; // 10 seconds
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        MultiplayerSessionReference^ sessionRef = ref new MultiplayerSessionReference(DEFAULT_SCID, DEFAULT_TEMPLATE_NAME, DEFAULT_SESSION_ID);
+        int64_t timeoutInSeconds = 10;
 
-        auto expecteResponse = web::json::value::parse(LR"({})");
+        XblMultiplayerSessionReference sessionRef{ DEFAULT_SCID, DEFAULT_TEMPLATE_NAME, DEFAULT_SESSION_ID };
 
-        std::wstring expectedRequest =
-            LR"({"giveUpDuration":10,"preserveSession":"always","ticketSessionRef":{"name":"5E55104-0000-0000-0000-000000000001","scid":"FEEDFACE-0000-0000-0000-000000000001","templateName":"TestTemplate"}})";
+        JsonDocument expectedResponse;
+        expectedResponse.Parse(R"({})");
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(expecteResponse);
+        char expectedRequest[] =
+            R"({"giveUpDuration":10,"preserveSession":"always","ticketSessionRef":{"name":"5E55104-0000-0000-0000-000000000001","scid":"FEEDFACE-0000-0000-0000-000000000001","templateName":"TestTemplate"}})";
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
+        xsapi_internal_string matchmakingUri = "https://smartmatch.xboxlive.com/serviceconfigs/07617C5B-3423-4505-B6C6-10A16E1E5DDB/hoppers/DeathMatch";
 
-        // should throw WEB_E_INVALID_JSON_STRING
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MatchmakingService->CreateMatchTicketAsync(
-                sessionRef,
-                "07617C5B-3423-4505-B6C6-10A16E1E5DDB", // serviceConfigurationId
-                "DeathMatch", // hopperName
-                giveUpDuration, // GiveUpDuration
-                PreserveSessionMode::Always, // preserveSession
-                nullptr
-                )).get(),
-            WEB_E_INVALID_JSON_STRING
-        )
+        HttpMock mock{ "POST", matchmakingUri };
+        mock.SetResponseBody(expectedResponse);
 
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://smartmatch.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/serviceconfigs/07617C5B-3423-4505-B6C6-10A16E1E5DDB/hoppers/DeathMatch", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_STR(expectedRequest, httpCall->request_body().request_message_string());
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&](HttpMock* mock, std::string uri, std::string body)
+            {
+                UNREFERENCED_PARAMETER(mock);
+                UNREFERENCED_PARAMETER(uri);
+                requestWellFormed &= VerifyJson(expectedRequest, body.data());
+            });
+
+        //should return E_INVALIDARG
+        XAsyncBlock async{};
+        HRESULT hr = XblMatchmakingCreateMatchTicketAsync(
+            xboxLiveContext.get(),
+            sessionRef,
+            "07617C5B-3423-4505-B6C6-10A16E1E5DDB", // serviceConfigurationId
+            "DeathMatch", // hopperName
+            timeoutInSeconds,
+            XblPreserveSessionMode::Always,
+            nullptr,
+            &async
+        );
+
+        VERIFY_ARE_EQUAL(hr, E_INVALIDARG);
+        VERIFY_IS_TRUE(requestWellFormed);
     }
 
     DEFINE_TEST_CASE(TestDeleteMatchTicketAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestDeleteMatchTicketAsync);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        create_task(xboxLiveContext->MatchmakingService->DeleteMatchTicketAsync(
+        xsapi_internal_string matchmakingUri = "https://smartmatch.xboxlive.com/serviceconfigs/FEEDFACE-0000-0000-0000-000000000001/hoppers/TestHopper/tickets/0584338f-a2ff-4eb9-b167-c0e8ddecae72";
+
+        HttpMock mock{ "DELETE", matchmakingUri };
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblMatchmakingDeleteMatchTicketAsync(
+            xboxLiveContext.get(),
             DEFAULT_SCID,
             DEFAULT_HOPPER_NAME,
-            DEFAULT_TICKET_ID
-            )).get();
+            DEFAULT_TICKET_ID,
+            &async
+        ));
 
-        VERIFY_ARE_EQUAL_STR(L"DELETE", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://smartmatch.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(std::wstring(L"/serviceconfigs/") + DEFAULT_SCID + L"/hoppers/" + DEFAULT_HOPPER_NAME + L"/tickets/" + DEFAULT_TICKET_ID, httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_STR(L"", httpCall->request_body().request_message_string());
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
     }
 
     DEFINE_TEST_CASE(TestGetMatchTicketAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestGetMatchTicketAsync);
-        auto expecteResponse = web::json::value::parse(defaultMatchTicketResponse);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(expecteResponse);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto ticket = create_task(xboxLiveContext->MatchmakingService->GetMatchTicketDetailsAsync(
+        JsonDocument expectedResponse;
+        expectedResponse.Parse(defaultMatchTicketResponse.c_str());
+
+        xsapi_internal_string matchmakingUri = "https://smartmatch.xboxlive.com/serviceconfigs/FEEDFACE-0000-0000-0000-000000000001/hoppers/TestHopper/tickets/0584338f-a2ff-4eb9-b167-c0e8ddecae72";
+
+        HttpMock mock{ "GET", matchmakingUri };
+        mock.SetResponseBody(expectedResponse);
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblMatchmakingGetMatchTicketDetailsAsync(
+            xboxLiveContext.get(),
             DEFAULT_SCID,
             DEFAULT_HOPPER_NAME,
-            DEFAULT_TICKET_ID
-            )).get();
+            DEFAULT_TICKET_ID,
+            &async
+        ));
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://smartmatch.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(std::wstring(L"/serviceconfigs/") + DEFAULT_SCID + L"/hoppers/" + DEFAULT_HOPPER_NAME + L"/tickets/" + DEFAULT_TICKET_ID, httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_STR(L"", httpCall->request_body().request_message_string());
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
 
-        VerifyTicketDetails(ticket, expecteResponse);
+        size_t resultSize = 0;
+        VERIFY_SUCCEEDED(XblMatchmakingGetMatchTicketDetailsResultSize(&async, &resultSize));
+        VERIFY_IS_TRUE(resultSize > 0);
+        std::vector<char> buffer(resultSize, 0);
+        XblMatchTicketDetailsResponse* ticketPtr;
+        VERIFY_SUCCEEDED(XblMatchmakingGetMatchTicketDetailsResult(&async, resultSize, buffer.data(), &ticketPtr, nullptr));
+
+        VerifyTicketDetails(ticketPtr, expectedResponse);
+    }
+
+    DEFINE_TEST_CASE(TestGetMatchTicketWithLargeBufferAsync)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        JsonDocument expectedResponse;
+        expectedResponse.Parse(defaultMatchTicketResponse.c_str());
+
+        xsapi_internal_string matchmakingUri = "https://smartmatch.xboxlive.com/serviceconfigs/FEEDFACE-0000-0000-0000-000000000001/hoppers/TestHopper/tickets/0584338f-a2ff-4eb9-b167-c0e8ddecae72";
+
+        HttpMock mock{ "GET", matchmakingUri };
+        mock.SetResponseBody(expectedResponse);
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblMatchmakingGetMatchTicketDetailsAsync(
+            xboxLiveContext.get(),
+            DEFAULT_SCID,
+            DEFAULT_HOPPER_NAME,
+            DEFAULT_TICKET_ID,
+            &async
+        ));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+
+        size_t resultSize{};
+        size_t bufferUsed{};
+        VERIFY_SUCCEEDED(XblMatchmakingGetMatchTicketDetailsResultSize(&async, &resultSize));
+        VERIFY_IS_TRUE(resultSize > 0);
+        std::vector<char> buffer(resultSize * 2, 0);
+        XblMatchTicketDetailsResponse* ticketPtr;
+        VERIFY_SUCCEEDED(XblMatchmakingGetMatchTicketDetailsResult(&async, resultSize * 2, buffer.data(), &ticketPtr, &bufferUsed));
+        VERIFY_ARE_EQUAL_UINT(resultSize, bufferUsed);
+
+        VerifyTicketDetails(ticketPtr, expectedResponse);
     }
 
     DEFINE_TEST_CASE(TestGetStatsForHopperAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetStatsForHopperAsync);
-        const std::wstring response = LR"({"name":"gameawesome2","waitTime":30,"population":1})";
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        auto expecteResponse = web::json::value::parse(response);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(expecteResponse);
+        const xsapi_internal_string response = R"({"name":"gameawesome2","waitTime":30,"population":1})";
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto hopper = create_task(xboxLiveContext->MatchmakingService->GetHopperStatisticsAsync(
+        JsonDocument expectedResponse;
+        expectedResponse.Parse(response.c_str());
+
+        xsapi_internal_string matchmakingUri = "https://smartmatch.xboxlive.com/serviceconfigs/FEEDFACE-0000-0000-0000-000000000001/hoppers/TestHopper/stats";
+
+        HttpMock mock{ "GET", matchmakingUri };
+        mock.SetResponseBody(expectedResponse);
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblMatchmakingGetHopperStatisticsAsync(
+            xboxLiveContext.get(),
             DEFAULT_SCID,
-            DEFAULT_HOPPER_NAME
-            )).get();
+            DEFAULT_HOPPER_NAME,
+            &async
+        ));
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://smartmatch.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(std::wstring(L"/serviceconfigs/") + DEFAULT_SCID + L"/hoppers/" + DEFAULT_HOPPER_NAME + L"/stats", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_STR(L"", httpCall->request_body().request_message_string());
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
 
-        VERIFY_ARE_EQUAL_STR(hopper->HopperName->Data(), L"gameawesome2");
-        VERIFY_ARE_EQUAL_INT(hopper->EstimatedWaitTime.Duration, (long long)(30 * TICKS_PER_SECOND)); // 30 seconds
-        VERIFY_ARE_EQUAL_INT(hopper->PlayersWaitingToMatch, 1U);
+        size_t resultSize = 0;
+        VERIFY_SUCCEEDED(XblMatchmakingGetHopperStatisticsResultSize(&async, &resultSize));
+        VERIFY_IS_TRUE(resultSize > 0);
+        std::vector<char> buffer(resultSize, 0);
+        XblHopperStatisticsResponse* hopper{};
+        VERIFY_SUCCEEDED(XblMatchmakingGetHopperStatisticsResult(&async, resultSize, buffer.data(), &hopper, nullptr));
+
+        VERIFY_ARE_EQUAL_STR(hopper->hopperName, "gameawesome2");
+        VERIFY_ARE_EQUAL_INT(hopper->estimatedWaitTime, 30); // 30 seconds
+        VERIFY_ARE_EQUAL_INT(hopper->playersWaitingToMatch, 1U);
+    }
+
+    DEFINE_TEST_CASE(TestGetStatsForHopperWithLargeBufferAsync)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        const xsapi_internal_string response = R"({"name":"gameawesome2","waitTime":30,"population":1})";
+
+        JsonDocument expectedResponse;
+        expectedResponse.Parse(response.c_str());
+
+        xsapi_internal_string matchmakingUri = "https://smartmatch.xboxlive.com/serviceconfigs/FEEDFACE-0000-0000-0000-000000000001/hoppers/TestHopper/stats";
+
+        HttpMock mock{ "GET", matchmakingUri };
+        mock.SetResponseBody(expectedResponse);
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblMatchmakingGetHopperStatisticsAsync(
+            xboxLiveContext.get(),
+            DEFAULT_SCID,
+            DEFAULT_HOPPER_NAME,
+            &async
+        ));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+
+        size_t resultSize{};
+        size_t bufferUsed{};
+        VERIFY_SUCCEEDED(XblMatchmakingGetHopperStatisticsResultSize(&async, &resultSize));
+        VERIFY_IS_TRUE(resultSize > 0);
+        std::vector<char> buffer(resultSize * 2, 0);
+        XblHopperStatisticsResponse* hopper{};
+        VERIFY_SUCCEEDED(XblMatchmakingGetHopperStatisticsResult(&async, resultSize * 2, buffer.data(), &hopper, &bufferUsed));
+        VERIFY_ARE_EQUAL_UINT(resultSize, bufferUsed); 
+
+        VERIFY_ARE_EQUAL_STR(hopper->hopperName, "gameawesome2");
+        VERIFY_ARE_EQUAL_INT(hopper->estimatedWaitTime, 30); // 30 seconds
+        VERIFY_ARE_EQUAL_INT(hopper->playersWaitingToMatch, 1U);
     }
 
     DEFINE_TEST_CASE(TestInvalidArgument)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestInvalidArgument);
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        TimeSpan ticketTimeout;
-        ticketTimeout.Duration = 0;
-        Platform::String^ ticketAttributes = ref new Platform::String();
-        MultiplayerSessionReference^ sessionRef = ref new MultiplayerSessionReference("scid", "tempname", "sessionid");
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->CreateMatchTicketAsync(nullptr, "configId", "hopperName", ticketTimeout, PreserveSessionMode::Always, ticketAttributes)).get(), InvalidArgumentException);
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->CreateMatchTicketAsync(sessionRef, nullptr, "hopperName", ticketTimeout, PreserveSessionMode::Always, ticketAttributes)).get(), InvalidArgumentException);
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->CreateMatchTicketAsync(sessionRef, "", "hopperName", ticketTimeout, PreserveSessionMode::Always, ticketAttributes)).get(), InvalidArgumentException);
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->CreateMatchTicketAsync(sessionRef, "configId", nullptr, ticketTimeout, PreserveSessionMode::Always, ticketAttributes)).get(), InvalidArgumentException);
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->CreateMatchTicketAsync(sessionRef, "configId", "", ticketTimeout, PreserveSessionMode::Always, ticketAttributes)).get(), InvalidArgumentException);
+        int64_t ticketTimeout = 0;
 
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->DeleteMatchTicketAsync("configId", "hopperName", nullptr)).get(), InvalidArgumentException);
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->DeleteMatchTicketAsync("configId", "hopperName", "")).get(), InvalidArgumentException);
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->DeleteMatchTicketAsync("configId", nullptr, "ticketId")).get(), InvalidArgumentException);
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->DeleteMatchTicketAsync("configId", "", "ticketId")).get(), InvalidArgumentException);
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->DeleteMatchTicketAsync(nullptr, "hopperName", "ticketId")).get(), InvalidArgumentException);
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->DeleteMatchTicketAsync("", "hopperName", "ticketId")).get(), InvalidArgumentException);
+        char ticketAttributes[] = "";
 
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->GetMatchTicketDetailsAsync("configId", "hopperName", nullptr)).get(), InvalidArgumentException);
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->GetMatchTicketDetailsAsync("configId", "hopperName", "")).get(), InvalidArgumentException);
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->GetMatchTicketDetailsAsync("configId", nullptr, "ticketId")).get(), InvalidArgumentException);
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->GetMatchTicketDetailsAsync("configId", "", "ticketId")).get(), InvalidArgumentException);
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->GetMatchTicketDetailsAsync(nullptr, "hopperName", "ticketId")).get(), InvalidArgumentException);
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->GetMatchTicketDetailsAsync("", "hopperName", "ticketId")).get(), InvalidArgumentException);
+        XblMultiplayerSessionReference sessionRef{ "scid", "tempname", "sessionid" };
 
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->GetHopperStatisticsAsync(nullptr, "hopperName")).get(), InvalidArgumentException);
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->GetHopperStatisticsAsync("", "hopperName")).get(), InvalidArgumentException);
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->GetHopperStatisticsAsync("configId", nullptr)).get(), InvalidArgumentException);
-        VERIFY_THROWS_CX(create_task(xboxLiveContext->MatchmakingService->GetHopperStatisticsAsync("configId", "")).get(), InvalidArgumentException);
+        XAsyncBlock async{};
+
+        VERIFY_ARE_EQUAL(XblMatchmakingCreateMatchTicketAsync(nullptr, sessionRef, "configId", "hopperName", ticketTimeout, XblPreserveSessionMode::Always, ticketAttributes, &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL(XblMatchmakingCreateMatchTicketAsync(xboxLiveContext.get(), sessionRef, nullptr, "hopperName", ticketTimeout, XblPreserveSessionMode::Always, ticketAttributes, &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL(XblMatchmakingCreateMatchTicketAsync(xboxLiveContext.get(), sessionRef, "configId", nullptr, ticketTimeout, XblPreserveSessionMode::Always, ticketAttributes, &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL(XblMatchmakingCreateMatchTicketAsync(xboxLiveContext.get(), sessionRef, "configId", "hopperName", ticketTimeout, XblPreserveSessionMode::Always, nullptr, &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL(XblMatchmakingCreateMatchTicketAsync(xboxLiveContext.get(), sessionRef, "configId", "hopperName", ticketTimeout, XblPreserveSessionMode::Always, ticketAttributes, nullptr), E_INVALIDARG);
+
+        VERIFY_ARE_EQUAL(XblMatchmakingDeleteMatchTicketAsync(nullptr, "configId", "hopperName", "ticketId", &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL(XblMatchmakingDeleteMatchTicketAsync(xboxLiveContext.get(), nullptr, "hopperName", "ticketId", &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL(XblMatchmakingDeleteMatchTicketAsync(xboxLiveContext.get(), "configId", nullptr, "ticketId", &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL(XblMatchmakingDeleteMatchTicketAsync(xboxLiveContext.get(), "configId", "hopperName", nullptr, &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL(XblMatchmakingDeleteMatchTicketAsync(xboxLiveContext.get(), "configId", "hopperName", "ticketId", nullptr), E_INVALIDARG);
+
+        VERIFY_ARE_EQUAL(XblMatchmakingGetMatchTicketDetailsAsync(nullptr, "configId", "hopperName", "ticketId", &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL(XblMatchmakingGetMatchTicketDetailsAsync(xboxLiveContext.get(), nullptr, "hopperName", "ticketId", &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL(XblMatchmakingGetMatchTicketDetailsAsync(xboxLiveContext.get(), "configId", nullptr, "ticketId", &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL(XblMatchmakingGetMatchTicketDetailsAsync(xboxLiveContext.get(), "configId", "hopperName", nullptr, &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL(XblMatchmakingGetMatchTicketDetailsAsync(xboxLiveContext.get(), "configId", "hopperName", "ticketId", nullptr), E_INVALIDARG);
+
+        VERIFY_ARE_EQUAL(XblMatchmakingGetHopperStatisticsAsync(nullptr, "configId", "hopperName", &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL(XblMatchmakingGetHopperStatisticsAsync(xboxLiveContext.get(), nullptr, "hopperName", &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL(XblMatchmakingGetHopperStatisticsAsync(xboxLiveContext.get(), "configId", nullptr, &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL(XblMatchmakingGetHopperStatisticsAsync(xboxLiveContext.get(), "configId", "hopperName", nullptr), E_INVALIDARG);
     }
 };
+
+const JsonDocument MatchmakingTests::testResponseJsonFromFile{ GetTestResponses("TestResponses\\Matchmaking.json") };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
 

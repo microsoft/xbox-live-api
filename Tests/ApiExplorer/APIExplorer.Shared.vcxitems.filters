@@ -1,0 +1,784 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\commands.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\utils.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_async.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xal.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\pch_apicommon.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\pch_common.h">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lapi.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lauxlib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lbaselib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lbitlib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lcode.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lcorolib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lctype.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\ldblib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\ldebug.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\ldo.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\ldump.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lfunc.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lgc.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\linit.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\liolib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\llex.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lmathlib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lmem.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\loadlib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lobject.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lopcodes.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\loslib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lparser.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lstate.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lstring.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lstrlib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\ltable.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\ltablib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\ltm.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lundump.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lutf8lib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lvm.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lzio.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\lua-include.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\pch_common.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_achievements.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_social_manager.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_profile.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_social.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_libhttp.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_multiplayer_manager.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_multiplayer.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_privacy.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_events.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_leaderboard.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_statistics.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_grts_gameinvite.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_presence.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_real_time_activity.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_xblhttp.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\log.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_stats2017.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_title_storage.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\log.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_gameinvite_notifications.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_stringVerify.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_grts.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\multidevice.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\api_xblc_multiplayer_activity.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_achievements.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_leaderboard.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_profile.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_privacy.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_stringverify.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_title_storage.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_achievement_unlock_notification.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_events.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_social.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_social_manager.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_presence.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_statistics.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_real_time_activity.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_docs.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_multiplayer.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_achievements_manager.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_achievements_progress_notification.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Shared">
+      <UniqueIdentifier>{1b3bad2e-684e-4774-b5c3-c898ff1fe82a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{a78b1f06-3ccf-4126-ab54-3f6d64ffee17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include">
+      <UniqueIdentifier>{461223d9-00e1-4edd-8e00-4ce6d2a1e08f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\achievements">
+      <UniqueIdentifier>{d029161e-3101-45c2-a911-1e7ea5272070}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\profile">
+      <UniqueIdentifier>{794ce350-68de-4521-bc2c-72a7e4a8ae52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LUA">
+      <UniqueIdentifier>{4b0ee3e5-31ef-4a67-a583-8c526eb8600d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\misc">
+      <UniqueIdentifier>{293c02c1-bd8d-43f2-a66a-5d8f14ace95e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\social">
+      <UniqueIdentifier>{8c17651b-4171-4478-b119-8a38277dcc92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APIs">
+      <UniqueIdentifier>{735bd0d7-b2eb-40b2-9b6a-8c7716b7f3ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\libHttp">
+      <UniqueIdentifier>{c7d6f82d-c973-49e4-9182-bfaf5f3d9f7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\xal">
+      <UniqueIdentifier>{ed76de34-56a5-4397-b48d-c025f3d0f77a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\multiplayerManager">
+      <UniqueIdentifier>{71e58020-fc08-4499-94ac-0a63526ee83a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\privacy">
+      <UniqueIdentifier>{4f077db1-539e-494b-8a09-5297b318d974}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\events">
+      <UniqueIdentifier>{47403098-99a3-4b9e-9e9a-bf77f814ade6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\leaderboard">
+      <UniqueIdentifier>{c7061bd9-a6c7-4e14-9781-8faf6deebab0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\stats">
+      <UniqueIdentifier>{61a364d7-b4ca-4d79-88d9-556e78b36357}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\mp">
+      <UniqueIdentifier>{568ef0b4-4d4e-49a6-a248-d895d558e529}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\gdk-gameinvite">
+      <UniqueIdentifier>{bf87e97f-bc1b-4d47-981a-0715c54ee9f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\presence">
+      <UniqueIdentifier>{bea3c22d-0bb2-4cde-bdb6-4ea78f13e2df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\_luasetup_">
+      <UniqueIdentifier>{4a5c870b-1540-4160-8ae8-46c8bb18bfe4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\_luasetup_\xal">
+      <UniqueIdentifier>{c9ea0c89-d604-46ab-8b52-972078a2f857}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\_luasetup_\uwp">
+      <UniqueIdentifier>{b3715910-a3cd-4f6f-83d5-077f0a6a7325}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\_luasetup_\u-test">
+      <UniqueIdentifier>{a67c0f51-6ded-4bda-b61b-7e032a7ae5a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\rta">
+      <UniqueIdentifier>{4b9ea591-072a-4fda-8fcb-dd9e20778fc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\xblHttp">
+      <UniqueIdentifier>{cc49c082-b80b-4362-9212-e5afcc83c21e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\stats2017">
+      <UniqueIdentifier>{e54673b6-05cd-4d00-83df-a74ba081a5d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\titleStorage">
+      <UniqueIdentifier>{16160a81-596f-4afb-ab5c-e7b0946714ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\notification">
+      <UniqueIdentifier>{a12769dd-fa4e-4f7e-ab94-7e339900e11f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\stringVerify">
+      <UniqueIdentifier>{f62f4642-5d6a-4c0d-ba9a-9f8bce53994d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\multiplayerActivity">
+      <UniqueIdentifier>{4cddcf8f-24ed-4308-9d6a-d5367a8920a9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shared\utils.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shared\pal.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Include\runner.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Include\api_explorer.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lapi.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lauxlib.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lcode.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lctype.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\ldebug.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\ldo.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lfunc.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lgc.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\llex.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\llimits.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lmem.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lobject.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lopcodes.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lparser.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lprefix.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lstate.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lstring.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\ltable.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\ltm.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lua.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lua.hpp">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\luaconf.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lualib.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lundump.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lvm.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lzio.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)APIs\apis.h">
+      <Filter>APIs</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Include\multidevice.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shared\apirunnercloudfns.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements.lua">
+      <Filter>Tests\achievements</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\misc\simpletest.lua">
+      <Filter>Tests\misc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\misc\xbox_live_context.lua">
+      <Filter>Tests\misc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_filter.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_list.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Shared\xboxservices.config">
+      <Filter>Shared</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfiles.lua">
+      <Filter>Tests\profile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfilesForSocialGroupAsync.lua">
+      <Filter>Tests\profile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfile.lua">
+      <Filter>Tests\profile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfiles.lua">
+      <Filter>Tests\profile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfilesForSocialGroupAsync.lua">
+      <Filter>Tests\profile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfile.lua">
+      <Filter>Tests\profile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfiles.lua">
+      <Filter>Tests\profile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfilesForSocialGroupAsync.lua">
+      <Filter>Tests\profile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfile.lua">
+      <Filter>Tests\profile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\httpHandle.lua">
+      <Filter>Tests\libHttp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\httpPerform.lua">
+      <Filter>Tests\libHttp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\privacy\privacy.lua">
+      <Filter>Tests\privacy</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\events\events.lua">
+      <Filter>Tests\events</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stats\stats.lua">
+      <Filter>Tests\stats</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\leaderboard\leaderboard.lua">
+      <Filter>Tests\leaderboard</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp.lua">
+      <Filter>Tests\mp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\presence\presence.lua">
+      <Filter>Tests\presence</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\tests.root">
+      <Filter>Tests</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\xal\addfirst.lua">
+      <Filter>Tests\xal</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\_luasetup_\u-test\u-test.lua">
+      <Filter>Tests\_luasetup_\u-test</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\_luasetup_\xal\common.lua">
+      <Filter>Tests\_luasetup_\xal</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\_luasetup_\xal\setup.lua">
+      <Filter>Tests\_luasetup_\xal</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\update-achievements.lua">
+      <Filter>Tests\achievements</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\rta\simpleRTA.lua">
+      <Filter>Tests\rta</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_1.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_2.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\xblHttp\XBLHttpCall.lua">
+      <Filter>Tests\xblHttp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\xblHttp\XBLHttpCallPerform.lua">
+      <Filter>Tests\xblHttp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\xal\signOut.lua">
+      <Filter>Tests\xal</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stats2017\stats2017.lua">
+      <Filter>Tests\stats2017</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\events\offline.lua">
+      <Filter>Tests\events</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\events\offline2.lua">
+      <Filter>Tests\events</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_remove_realloc.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\websocket_closehandle_while_connected.lua">
+      <Filter>Tests\libHttp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\websocket_disconnect_while_connecting.lua">
+      <Filter>Tests\libHttp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\titleStorage\title_storage.lua">
+      <Filter>Tests\titleStorage</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_search.lua">
+      <Filter>Tests\mp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_transfer.lua">
+      <Filter>Tests\mp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_search.lua">
+      <Filter>Tests\mp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_transfer.lua">
+      <Filter>Tests\mp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\cmds.json" />
+    <None Include="$(MSBuildThisFileDirectory)Tests\stats\stats-bvt.lua">
+      <Filter>Tests\stats</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\leaderboard\leaderboard-bvt.lua">
+      <Filter>Tests\leaderboard</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\websocket_send.lua">
+      <Filter>Tests\libHttp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\misc\global_state.lua">
+      <Filter>Tests\misc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\notification\gameinvitenotifications.lua">
+      <Filter>Tests\notification</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\reputation.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stringVerify\stringVerify.lua">
+      <Filter>Tests\stringVerify</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\reputation.lua" />
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_partial_invite_flow.lua">
+      <Filter>Tests\mp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\multiplayerManager\MPM_Invite.lua">
+      <Filter>Tests\multiplayerManager</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\multiplayerManager\MPM_Match.lua">
+      <Filter>Tests\multiplayerManager</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\multiplayerManager\MPM_InviteUI.lua">
+      <Filter>Tests\multiplayerManager</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\multiplayerManager\MPM_JoinLobbyViaActivity.lua">
+      <Filter>Tests\multiplayerManager</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\multiplayerManager\MPM_JoinFixedGameSession.lua">
+      <Filter>Tests\multiplayerManager</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\MP_JoinLobbyViaActivity.lua">
+      <Filter>Tests\mp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\MultiplayerActivity\send_invite.lua">
+      <Filter>Tests\multiplayerActivity</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\MultiplayerActivity\update_activity.lua">
+      <Filter>Tests\multiplayerActivity</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\MultiplayerActivity\update_recent_players.lua">
+      <Filter>Tests\multiplayerActivity</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\MultiplayerActivity\receive_invite_win32.lua">
+      <Filter>Tests\multiplayerActivity</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements-cpp.lua">
+      <Filter>Tests\achievements</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\update-achievements-cpp.lua">
+      <Filter>Tests\achievements</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\leaderboard\leaderboard-cpp.lua">
+      <Filter>Tests\leaderboard</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfile-cpp.lua">
+      <Filter>Tests\profile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfiles-cpp.lua">
+      <Filter>Tests\profile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfilesForSocialGroup-cpp.lua">
+      <Filter>Tests\profile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\privacy\privacy-cpp.lua">
+      <Filter>Tests\privacy</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stringVerify\stringVerify-cpp.lua">
+      <Filter>Tests\stringVerify</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\titleStorage\title_storage-cpp.lua">
+      <Filter>Tests\titleStorage</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\notification\achievement_unlock_notification.lua">
+      <Filter>Tests\notification</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\gdk-gameinvite\game-invite-listen.lua">
+      <Filter>Tests\gdk-gameinvite</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\gdk-gameinvite\game-invite-send.lua">
+      <Filter>Tests\gdk-gameinvite</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\rta\RTA_MP_SM.lua">
+      <Filter>Tests\rta</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stats\stats_legacy.lua">
+      <Filter>Tests\stats</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\presence\presence_rta.lua">
+      <Filter>Tests\presence</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_relationship_changed.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\rta\simpleRTA_legacy.lua">
+      <Filter>Tests\rta</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\rta\RTA_activation.lua">
+      <Filter>Tests\rta</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stats2017\stats2017-test429.lua">
+      <Filter>Tests\stats2017</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\matchmaking_single_device.lua">
+      <Filter>Tests\mp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\MultiplayerActivity\set_activity.lua">
+      <Filter>Tests\multiplayerActivity</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\MultiplayerActivity\receive_invite_gsdk.lua">
+      <Filter>Tests\multiplayerActivity</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stats2017\stats2017-test429.lua">
+      <Filter>Tests\stats2017</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social-cpp.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\reputation-cpp.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_1-cpp.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_2-cpp.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_filter-cpp.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_list-cpp.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_remove_realloc-cpp.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\presence\presence-cpp.lua">
+      <Filter>Tests\presence</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stats\stats-cpp.lua">
+      <Filter>Tests\stats</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\rta\simpleRTA-cpp.lua">
+      <Filter>Tests\rta</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp-cpp.lua">
+      <Filter>Tests\mp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\matchmaking_single_device-cpp.lua">
+      <Filter>Tests\mp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_search-cpp.lua">
+      <Filter>Tests\mp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_transfer-cpp.lua">
+      <Filter>Tests\mp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\leaderboard\leaderboard-2017.lua">
+      <Filter>Tests\leaderboard</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements_manager_performance_test.lua">
+      <Filter>Tests\achievements</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements_manager.lua">
+      <Filter>Tests\achievements</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\PerformanceTestMockResponse.json">
+      <Filter>Tests\achievements</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements_progress_notification.lua">
+      <Filter>Tests\achievements</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements_manager_update_achievements.lua">
+      <Filter>Tests\achievements</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\multiplayerManager\MPM_SingleDevice_JoinLeaveGame.lua">
+      <Filter>Tests\multiplayerManager</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\multiplayerManager\MPM_SingleDevice_SyncHostWrite.lua">
+      <Filter>Tests\multiplayerManager</Filter>
+    </None>
+  </ItemGroup>
+</Project>

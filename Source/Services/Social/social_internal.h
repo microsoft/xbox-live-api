@@ -2,109 +2,163 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
-#include "system_internal.h"
 
-namespace xbox { namespace services { namespace social {
+#include "xsapi-c/social_c.h"
+#include "real_time_activity_subscription.h"
+#include "string_array.h"
 
-/// <summary>
-/// Used to provide feedback within a game session.
-/// </summary>
-class reputation_feedback_request
-{
-    // Example:
-    //{
-    //    "evidenceId":"992399", 
-    //    "feedbackType" : "PositiveHighQualityUGC", 
-    //    "sessionName" : "Game", 
-    //    "textReason" : "Great level"
-    //}
-
-public:
-    /// <summary>
-    /// Sends a feedback report for a game session. 
-    /// </summary>
-    /// <param name="feedbackType">The type of report being made.</param>
-    /// <param name="sessionName">The name of the session in which the reported action occurred.</param>
-    /// <param name="reasonMessage">The user supplied reason the report is being made.</param>
-    /// <param name="evidenceResourceId">An identifier for the resource that shows evidance supporting the report.</param>
-    reputation_feedback_request(
-        _In_ reputation_feedback_type feedbackType,
-        _In_ string_t sessionName,
-        _In_ string_t reasonMessage,
-        _In_ string_t evidenceResourceId
-        );
-
-    web::json::value serialize_feedback_request();
-    static web::json::value serialize_batch_feedback_request(_In_ const std::vector< reputation_feedback_item >& feedbackItems, _Out_ std::error_code& err);
-    static const xbox_live_result<string_t> convert_reputation_feedback_type_to_string(reputation_feedback_type feedbackType);
-
-private:
-    reputation_feedback_type m_feedbackType;
-    string_t m_sessionName;
-    string_t m_reasonMessage;
-    string_t m_evidenceResourceId;
-};
-
-class social_service_impl : public std::enable_shared_from_this<social_service_impl>
+struct XblSocialRelationshipResult : public xbox::services::RefCounter, public std::enable_shared_from_this<XblSocialRelationshipResult>
 {
 public:
-    social_service_impl(
-        _In_ std::shared_ptr<xbox::services::user_context> userContext,
-        _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-        _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
-        _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> realTimeActivityService
-        );
+    XblSocialRelationshipResult() noexcept = default;
+    XblSocialRelationshipResult(const XblSocialRelationshipResult&) = delete;
+    XblSocialRelationshipResult& operator=(XblSocialRelationshipResult) = delete;
 
-    xbox_live_result<std::shared_ptr<social_relationship_change_subscription>> subscribe_to_social_relationship_change(
-        _In_ const string_t& xboxUserId
-        );
-    
-    xbox_live_result<void> unsubscribe_from_social_relationship_change(
-        _In_ std::shared_ptr<social_relationship_change_subscription> subscription
-        );
+    static xbox::services::Result<std::shared_ptr<XblSocialRelationshipResult>> Deserialize(const JsonValue& json);
 
-    function_context add_social_relationship_changed_handler(
-        _In_ std::function<void(social_relationship_change_event_args)> handler
-        );
+    const xsapi_internal_vector<XblSocialRelationship>& SocialRelationships() const noexcept;
 
-    void remove_social_relationship_changed_handler(
-        _In_ function_context context
-        );
-
-    pplx::task<xbox_live_result<xbox_social_relationship_result>> get_social_relationships(
-        _In_ xbox_social_relationship_filter socialRelationshipFilter,
-        _In_ uint32_t startIndex,
-        _In_ uint32_t maxItems
-        );
-
-    pplx::task<xbox_live_result<xbox_social_relationship_result>> get_social_relationships(
-        _In_ const string_t& xboxUserId,
-        _In_ xbox_social_relationship_filter filter,
-        _In_ unsigned int startIndex,
-        _In_ unsigned int maxItems
-        );
+    // Service paging metadata
+    bool HasNext() const noexcept;
+    size_t TotalCount() const noexcept;
+    size_t ContinuationSkip{ 0 };
+    XblSocialRelationshipFilter Filter{ XblSocialRelationshipFilter::All };
 
 private:
-    void social_relationship_changed(_In_ social_relationship_change_event_args eventArgs);
-    static string_t pathandquery_social_subpath(
-        _In_ const string_t& ownerId,
-        _In_ bool includeViewFilter,
-        _In_ const string_t& view,
-        _In_ uint64_t startIndex,
-        _In_ uint64_t maxItems
-        );
+    std::shared_ptr<RefCounter> GetSharedThis();
 
-    static const string_t xbox_social_relationship_filter_to_string(
-        _In_ xbox_social_relationship_filter xboxSocialRelationshipFilter
-        );
-
-    std::shared_ptr<xbox::services::user_context> m_userContext;
-    std::shared_ptr<xbox::services::xbox_live_context_settings> m_xboxLiveContextSettings;
-    std::shared_ptr<xbox::services::xbox_live_app_config> m_appConfig;
-    std::unordered_map<uint32_t, std::function<void(const social_relationship_change_event_args&)>> m_socialRelationshipChangeHandler;
-    function_context m_socialRelationshipChangeHandlerCounter;
-    xbox::services::system::xbox_live_mutex m_socialRelationshipChangeHandlerLock;
-    std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> m_realTimeActivityService;
+    size_t m_totalCount{ 0 };
+    xsapi_internal_vector<XblSocialRelationship> m_socialRelationships;
+    xsapi_internal_vector<xbox::services::UTF8StringArray> m_socialNetworks;
 };
 
-}}}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
+
+namespace legacy
+{
+    class social_group_constants
+    {
+    public:
+        /// <summary>
+        /// Returns Favorites constant string
+        /// </summary>
+        static const string_t favorite() { return _T("Favorites"); }
+
+        /// <summary>
+        /// Returns People constant string
+        /// </summary>
+        static const string_t people() { return _T("People"); }
+    };
+}
+
+typedef Callback<const XblSocialRelationshipChangeEventArgs&> SocialRelationshipChangedHandler;
+
+class SocialRelationshipChangeSubscription : public real_time_activity::Subscription
+{
+public:
+    SocialRelationshipChangeSubscription(_In_ uint64_t xuid) noexcept;
+
+    XblFunctionContext AddHandler(SocialRelationshipChangedHandler handler) noexcept;
+    size_t RemoveHandler(XblFunctionContext token) noexcept;
+
+protected:
+    void OnEvent(const JsonValue& data) noexcept override;
+    void OnResync() noexcept override;
+
+private:
+    uint64_t m_xuid;
+    Map<XblFunctionContext, SocialRelationshipChangedHandler> m_handlers;
+    XblFunctionContext m_nextHandlerToken{ 1 };
+    mutable std::mutex m_lock;
+};
+
+class SocialService : public std::enable_shared_from_this<SocialService>
+{
+public:
+    SocialService(
+        _In_ User&& user,
+        _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
+        _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaManager
+    ) noexcept;
+
+    ~SocialService() noexcept;
+
+    XblFunctionContext AddSocialRelationshipChangedHandler(
+        _In_ SocialRelationshipChangedHandler handler
+    ) noexcept;
+
+    void RemoveSocialRelationshipChangedHandler(
+        _In_ XblFunctionContext token
+    ) noexcept;
+
+    HRESULT GetSocialRelationships(
+        _In_ uint64_t xuid,
+        _In_ XblSocialRelationshipFilter filter,
+        _In_ size_t startIndex,
+        _In_ size_t maxItems,
+        _In_ AsyncContext<Result<std::shared_ptr<XblSocialRelationshipResult>>> async
+    ) const noexcept;
+
+private:
+    static xsapi_internal_string SocialRelationshipFilterToString(
+        _In_ XblSocialRelationshipFilter filter
+    ) noexcept;
+
+    User m_user;
+    std::shared_ptr<xbox::services::XboxLiveContextSettings> m_xboxLiveContextSettings;
+    std::shared_ptr<real_time_activity::RealTimeActivityManager> m_rtaManager;
+
+    std::shared_ptr<SocialRelationshipChangeSubscription> m_socialRelationshipChangedSubscription;
+    mutable std::mutex m_lock;
+};
+
+class ReputationFeedbackRequest
+{
+public:
+    ReputationFeedbackRequest(
+        _In_ uint64_t xuid,
+        _In_ XblReputationFeedbackType feedbackType,
+        _In_opt_ const XblMultiplayerSessionReference* sessionReference,
+        _In_z_ const char* reasonMessage,
+        _In_opt_z_ const char* evidenceResourceId
+    );
+
+    ReputationFeedbackRequest(
+        _In_ const XblReputationFeedbackItem* items,
+        _In_ size_t itemsCount
+    );
+
+    ReputationFeedbackRequest(const ReputationFeedbackRequest& other);
+
+    const xsapi_internal_string& PathAndQuery() const noexcept;
+
+    const JsonValue& Body() const noexcept;
+
+    static xsapi_internal_string ReputationFeedbackTypeToString(
+        XblReputationFeedbackType feedbackType
+    );
+
+private:
+    xsapi_internal_string m_pathAndQuery;
+    JsonDocument m_requestBody;
+};
+
+class ReputationService : public std::enable_shared_from_this<ReputationService>
+{
+public:
+    ReputationService(
+        _In_ User&& user,
+        _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings
+    ) noexcept;
+
+    HRESULT SubmitFeedback(
+        const ReputationFeedbackRequest& request,
+        AsyncContext<HRESULT> async
+    ) const noexcept;
+
+private:
+    User m_user;
+    std::shared_ptr<xbox::services::XboxLiveContextSettings> m_xboxLiveContextSettings;
+};
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

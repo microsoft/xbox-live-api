@@ -2,54 +2,177 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/privacy.h"
+#include "privacy_service_internal.h"
+
+constexpr auto XblPrivilegeValue = EnumValue<XblPrivilege, 205, 255>;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRIVACY_CPP_BEGIN
 
-permission_check_result::permission_check_result() :
-    m_isAllowed(false)
+PermissionCheckResult::PermissionCheckResult(
+    const PermissionCheckResult& other
+) noexcept
 {
+    *this = other;
 }
 
-void permission_check_result::initialize(
-    _In_ const string_t& permissionIdRequested
-    )
+PermissionCheckResult::PermissionCheckResult(
+    PermissionCheckResult&& other
+) noexcept :
+    m_reasons{ std::move(other.m_reasons) }
 {
-    m_permissionRequested = permissionIdRequested;
+    isAllowed = other.isAllowed;
+    targetXuid = other.targetXuid;
+    targetUserType = other.targetUserType;
+    permissionRequested = other.permissionRequested;
+    reasons = m_reasons.data();
+    reasonsCount = m_reasons.size();
 }
 
-bool
-permission_check_result::is_allowed() const
+PermissionCheckResult& PermissionCheckResult::operator=(
+    const PermissionCheckResult& other
+) noexcept
 {
-    return m_isAllowed;
+    m_reasons = other.m_reasons;
+    isAllowed = other.isAllowed;
+    targetXuid = other.targetXuid;
+    targetUserType = other.targetUserType;
+    permissionRequested = other.permissionRequested;
+    reasons = m_reasons.data();
+    reasonsCount = m_reasons.size();
+
+    return *this;
 }
 
-const string_t&
-permission_check_result::permission_requested() const
+Result<PermissionCheckResult> PermissionCheckResult::Deserialize(
+    _In_ const JsonValue& json,
+    _In_ XblPermission permissionRequested
+) noexcept
 {
-    return m_permissionRequested;
+    if (json.IsNull())
+    {
+        return WEB_E_INVALID_JSON_STRING;
+    }
+
+    PermissionCheckResult result{};
+    HRESULT errc = S_OK;
+
+    result.permissionRequested = permissionRequested;
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(json, "isAllowed", result.isAllowed, true));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonVector<XblPermissionDenyReasonDetails>(
+        [&errc](_In_ const JsonValue& json)
+        {
+            XblPermissionDenyReasonDetails result{};
+            String reasonString;
+            errc = JsonUtils::ExtractJsonString(json, "reason", reasonString, true);
+            result.reason = EnumValue<XblPermissionDenyReason>(reasonString.data());
+
+            if (SUCCEEDED(errc))
+            {
+                String restrictedSetting;
+                errc = JsonUtils::ExtractJsonString(json, "restrictedSetting", restrictedSetting, false);
+                switch (result.reason)
+                {
+                case XblPermissionDenyReason::MissingPrivilege: // intentional fallthrough
+                case XblPermissionDenyReason::PrivilegeRestrictsTarget:
+                {
+                    result.restrictedPrivilege = XblPrivilegeValue(restrictedSetting.data());
+                    break;
+                }
+                case XblPermissionDenyReason::PrivacySettingsRestrictsTarget:
+                {
+                    result.restrictedPrivacySetting = EnumValue<XblPrivacySetting>(restrictedSetting.data());
+                    break;
+                }
+                default: break;
+                }
+            }
+
+            return Result<XblPermissionDenyReasonDetails>(result, errc);
+        },
+        json, "reasons", result.m_reasons, false
+    ));
+
+    result.reasons = result.m_reasons.data();
+    result.reasonsCount = result.m_reasons.size();
+
+    if (errc)
+    {
+        return WEB_E_INVALID_JSON_STRING;
+    }
+
+    return result;
 }
 
-const std::vector<permission_deny_reason>&
-permission_check_result::deny_reasons() const
+Result<xsapi_internal_vector<PermissionCheckResult>> PermissionCheckResult::BatchDeserialize(
+    _In_ const JsonValue& json,
+    _In_ const xsapi_internal_vector<XblPermission>& permissionsRequested
+) noexcept
 {
-    return m_denyReasons;
+    if (json.IsNull())
+    {
+        return WEB_E_INVALID_JSON_STRING;
+    }
+
+    xsapi_internal_vector<PermissionCheckResult> result;
+
+    if (json.IsObject() && json.HasMember("responses"))
+    {
+        const JsonValue& responsesJsonArray = json["responses"];
+        if (responsesJsonArray.IsArray())
+        {
+            for (const JsonValue& userJson : responsesJsonArray.GetArray())
+            {
+                if (userJson.IsObject() && userJson.HasMember("user"))
+                {
+                    const JsonValue& userObj = userJson["user"];
+                    uint64_t xuid = 0;
+                    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonXuid(userObj, "xuid", xuid, false));
+                    String anonymousUserTypeString;
+                    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(userObj, "anonymousUser", anonymousUserTypeString, false));
+                    auto userType = EnumValue<XblAnonymousUserType>(anonymousUserTypeString.data());
+
+                    xsapi_internal_vector<PermissionCheckResult> userResults;
+                    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonVector<PermissionCheckResult>(
+                        [&xuid, &userType](const JsonValue& json)
+                        {
+                            auto result { Deserialize(json, XblPermission::Unknown) };
+                            auto& payload { result.Payload() };
+                            payload.targetXuid = xuid;
+                            payload.targetUserType = userType;
+                            return Result<PermissionCheckResult>(payload, result.Hresult());
+                        },
+                        userJson,
+                        "permissions",
+                        userResults,
+                        true
+                        ));
+
+                    if (userResults.size() != permissionsRequested.size())
+                    {
+                        LOG_DEBUG("The resulting number of items did not match the number of items requested!");
+                        return WEB_E_INVALID_JSON_STRING;
+                    }
+                    for (size_t i = 0; i < userResults.size(); ++i)
+                    {
+                        userResults[i].permissionRequested = permissionsRequested[i];
+                    }
+
+                    result.insert(result.end(), userResults.begin(), userResults.end());
+                }
+                else
+                {
+                    //required
+                    return WEB_E_INVALID_JSON_STRING;
+                }
+            }
+        }
+    }
+    return result;
 }
 
-xbox_live_result<permission_check_result>
-permission_check_result::_Deserializer(
-    _In_ const web::json::value& json
-    )
+size_t PermissionCheckResult::SizeOf() const noexcept
 {
-    if (json.is_null()) return xbox_live_result<permission_check_result>();
-
-    permission_check_result result;
-
-    std::error_code errc = xbox_live_error_code::no_error;
-    result.m_isAllowed = utils::extract_json_bool(json, _T("isAllowed"), errc, true);
-    result.m_denyReasons = utils::extract_json_vector<permission_deny_reason>(permission_deny_reason::_Deserializer, std::move(json), _T("reasons"), errc, false);
-
-    return xbox_live_result<permission_check_result>(result, errc);
+    return sizeof(XblPermissionCheckResult) + m_reasons.size() * sizeof(XblPermissionDenyReasonDetails);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRIVACY_CPP_END

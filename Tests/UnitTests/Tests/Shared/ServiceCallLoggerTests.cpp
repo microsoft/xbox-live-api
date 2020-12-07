@@ -2,15 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"jasonsa"
-#define TEST_CLASS_AREA L"ServiceCallLogger"
 #include "UnitTestIncludes.h"
-#include "Utils.h"
+#include "xsapi_utils.h"
 #include "service_call_logger.h"
 #include "service_call_logger_data.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
+#if 0
 DEFINE_TEST_CLASS(ServiceCallLoggerTests)
 {
 public:
@@ -18,16 +17,16 @@ public:
 
     bool LoggerFileExists(std::shared_ptr<xbox::services::service_call_logger> logger)
     {
-        char_t buff[MAX_PATH];
-        GetCurrentDirectory(MAX_PATH, buff);
-        string_t filePath(buff);
-        string_t fileName = logger->file_location();
+        char buff[MAX_PATH];
+        GetCurrentDirectoryA(MAX_PATH, buff);
+        xsapi_internal_string filePath(buff);
+        xsapi_internal_string fileName = logger->file_location();
         if (fileName.empty())
         {
             return false;
         }
-        filePath += _T("\\") + fileName;
-        std::ifstream stream(filePath);
+        filePath += "\\" + fileName;
+        std::ifstream stream(filePath.data());
         if (!stream)
         {
             return false;
@@ -46,7 +45,7 @@ public:
         Windows::Storage::StorageFolder^ appFolder = pplx::create_task(Windows::Storage::StorageFolder::GetFolderFromPathAsync(fileLocation)).get();
 
         // Get the items in the current folder; 
-        IVectorView<Windows::Storage::IStorageItem^>^ itemsInFolder = pplx::create_task(appFolder->GetItemsAsync()).get();
+        Windows::Foundation::Collections::IVectorView<Windows::Storage::IStorageItem^>^ itemsInFolder = pplx::create_task(appFolder->GetItemsAsync()).get();
         for (auto it = itemsInFolder->First(); it->HasCurrent; it->MoveNext())
         {
             Windows::Storage::IStorageItem^ item = it->Current;
@@ -60,7 +59,6 @@ public:
     
     DEFINE_TEST_CASE(TestEnabledStates)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestEnabledStates);
         std::shared_ptr<xbox::services::service_call_logger> logger = xbox::services::service_call_logger::get_singleton_instance();
         VERIFY_IS_NOT_NULL(logger.get());
         VERIFY_NO_THROW(
@@ -87,23 +85,23 @@ public:
 
     DEFINE_TEST_CASE(TestLogging)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestLogging);
         std::shared_ptr<xbox::services::service_call_logger> logger = xbox::services::service_call_logger::get_singleton_instance();
         VERIFY_IS_NOT_NULL(logger.get());
 
         //create mock data
         xbox::services::service_call_logger_data data(
-            _T("fake.endpoint.com"),
-            _T(""),
-            _T(""),
+            "fake.endpoint.com",
+            "",
+            0,
             false,
             0,
-            _T(""),
-            _T(""),
-            _T(""),
-            _T(""),
+            "",
+            "",
+            "",
+            "",
             std::chrono::milliseconds::zero(),
-            chrono_clock_t::now());
+            chrono_clock_t::now(),
+            "");
 
         //check logging when disabled
         logger->disable();
@@ -119,6 +117,7 @@ public:
         DeleteLoggerFiles();
     }
 };
+#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
 

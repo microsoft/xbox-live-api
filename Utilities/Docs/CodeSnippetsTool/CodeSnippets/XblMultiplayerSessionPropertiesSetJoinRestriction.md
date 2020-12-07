@@ -1,0 +1,5 @@
+```cpp
+XblMultiplayerSessionPropertiesSetJoinRestriction(
+    sessionHandle,
+    joinRestriction);
+```

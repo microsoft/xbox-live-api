@@ -1,0 +1,23 @@
+```cpp
+auto async = std::make_unique<XAsyncBlock>();
+async->queue = queue;
+async->callback = [](XAsyncBlock* async)
+{
+    std::unique_ptr<XAsyncBlock> asyncBlockPtr{ async }; // take ownership of XAsyncBlock
+    HRESULT hr = XAsyncGetStatus(async, false);
+};
+
+HRESULT hr = XblMultiplayerActivitySendInvitesAsync(
+    xblContext,
+    &xuid,
+    1,
+    false,
+    "dummyConnectionString",
+    async.get()
+);
+
+if (SUCCEEDED(hr))
+{
+    async.release();
+}
+```

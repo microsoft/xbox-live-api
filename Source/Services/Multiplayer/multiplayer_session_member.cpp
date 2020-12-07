@@ -2,791 +2,719 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "utils.h"
-#include "xsapi/multiplayer.h"
 #include "multiplayer_internal.h"
-
-using namespace xbox::services::tournaments;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_BEGIN
 
-std::shared_ptr<multiplayer_session_member> multiplayer_session_member::_Create_deep_copy()
-{
-    auto copy = std::make_shared<multiplayer_session_member>();
-    copy->deep_copy_from(*this);
-    return copy;
-}
-
-void multiplayer_session_member::deep_copy_from(
-    _In_ const multiplayer_session_member& other
-    )
-{
-    std::lock_guard<std::mutex> guard(get_xsapi_singleton()->m_mpsdMemberLock);
-    m_memberId = other.m_memberId;
-    m_customConstantsJson = other.m_customConstantsJson;
-    m_customPropertiesJson = other.m_customPropertiesJson;
-    m_gamertag = other.m_gamertag;
-    m_xboxUserId = other.m_xboxUserId;
-    m_isCurrentUser = other.m_isCurrentUser;
-    m_isTurnAvailable = other.m_isTurnAvailable;
-    m_isReserved = other.m_isReserved;
-    m_isActive = other.m_isActive;
-    m_isReady = other.m_isReady;
-    m_roles = other.m_roles;
-    m_secureDeviceAddressBase64 = other.m_secureDeviceAddressBase64;
-    m_groups = other.m_groups;
-    m_encounters = other.m_encounters;
-    m_subscribedChangeTypes = other.m_subscribedChangeTypes;
-    m_teamId = other.m_teamId;
-    m_arbitrationStatus = other.m_arbitrationStatus;
-    m_results = other.m_results;
-    m_registrationReason = other.m_registrationReason;
-    m_registrationState = other.m_registrationState;
-    m_tournamentTeamSessionRef = other.m_tournamentTeamSessionRef;
-
-    // QoS
-    m_deviceToken = other.m_deviceToken;
-    m_nat = other.m_nat;
-    m_activeTitleId = other.m_activeTitleId;
-    m_initializationEpisode = other.m_initializationEpisode;
-    m_joinTime = other.m_joinTime;
-    m_initializationFailure = other.m_initializationFailure;
-    m_initialize = other.m_initialize;
-    m_matchmakingResultServerMeasurementsJson = other.m_matchmakingResultServerMeasurementsJson;
-    m_memberServerMeasurementsJson = other.m_memberServerMeasurementsJson;
-    m_membersInGroup = other.m_membersInGroup;
-    m_memberMeasurementsJson = other.m_memberMeasurementsJson;
-    m_memberMeasurements = other.m_memberMeasurements;
-}
-
-multiplayer_session_member::multiplayer_session_member() :
-    m_memberId(0),
-    m_isCurrentUser(false),
-    m_isTurnAvailable(false),
-    m_isReserved(false),
-    m_isActive(false),
-    m_isReady(false),
-    m_nat(network_address_translation_setting::unknown),
-    m_activeTitleId(0),
-    m_initializationEpisode(0),
-    m_initializationFailure(multiplayer_measurement_failure::none),
-    m_initialize(false),
-    m_subscribedChangeTypes(multiplayer_session_change_types::none)
-{
-    m_memberServerMeasurementsJson = web::json::value::object();
-    m_matchmakingResultServerMeasurementsJson = web::json::value::object();
-    m_customConstantsJson = web::json::value::object();
-    m_customPropertiesJson = web::json::value::object();
-    m_memberMeasurements = std::make_shared<std::vector<multiplayer_quality_of_service_measurements>>();
-}
-
-multiplayer_session_member::multiplayer_session_member(
+XblMultiplayerSessionMember MultiplayerSessionMember::Construct(
     _In_ bool isCurrentUser,
-    _In_ uint32_t memberId,
-    _In_ string_t xboxUserId,
-    _In_ web::json::value customConstants
-    ) :
-    m_isCurrentUser(isCurrentUser),
-    m_memberId(memberId),
-    m_xboxUserId(std::move(xboxUserId)),
-    m_customConstantsJson(std::move(customConstants)),
-    m_isTurnAvailable(false),
-    m_isReserved(false),
-    m_isActive(false),
-    m_isReady(false),
-    m_nat(network_address_translation_setting::unknown),
-    m_activeTitleId(0),
-    m_initializationEpisode(0),
-    m_initializationFailure(multiplayer_measurement_failure::none),
-    m_initialize(false),
-    m_subscribedChangeTypes(multiplayer_session_change_types::none)
+    _In_ const xsapi_internal_string& memberIdToWrite,
+    _In_ uint64_t xuid,
+    _In_opt_z_ const char* customConstantsJson,
+    _In_ bool initializeRequested
+)
 {
-    m_memberServerMeasurementsJson = web::json::value::object();
-    m_matchmakingResultServerMeasurementsJson = web::json::value::object();
-    m_customConstantsJson = web::json::value::object();
-    m_customPropertiesJson = web::json::value::object();
-    m_memberMeasurements = std::make_shared<std::vector<multiplayer_quality_of_service_measurements>>();
+    XblMultiplayerSessionMember member{};
+
+    auto memberInternal = Make<MultiplayerSessionMember>(memberIdToWrite);
+    member.Internal = memberInternal;
+
+    member.Xuid = xuid;
+    member.IsCurrentUser = isCurrentUser;
+    if (customConstantsJson)
+    {
+        memberInternal->m_customConstantsJson = customConstantsJson;
+        member.CustomConstantsJson = memberInternal->m_customConstantsJson.data();
+    }
+    member.Nat = XblNetworkAddressTranslationSetting::Unknown;
+    member.InitializationFailureCause = XblMultiplayerMeasurementFailure::None;
+    memberInternal->m_subscribedChangeTypes = XblMultiplayerSessionChangeTypes::None;
+    member.InitializeRequested = initializeRequested;
+    return member;
 }
 
-uint32_t 
-multiplayer_session_member::member_id() const
+MultiplayerSessionMember::MultiplayerSessionMember(const xsapi_internal_string& memberIdToWrite)
+    : MultiplayerSessionMember()
 {
-    return m_memberId;
+    m_memberIdToWrite = memberIdToWrite;
+    m_newMember = true;
 }
 
-const string_t& 
-multiplayer_session_member::team_id() const
+MultiplayerSessionMember::MultiplayerSessionMember(const MultiplayerSessionMember& other) :
+    m_customConstantsJson(other.m_customConstantsJson),
+    m_customPropertiesString(other.m_customPropertiesString),
+    m_secureDeviceAddressBase64(other.m_secureDeviceAddressBase64),
+    m_roles(other.m_roles),
+    m_teamId(other.m_teamId),
+    m_initialTeam(other.m_initialTeam),
+    m_membersInGroupIds(other.m_membersInGroupIds),
+    m_subscribedChangeTypes(other.m_subscribedChangeTypes),
+    m_matchmakingResultServerMeasurementsJson(other.m_matchmakingResultServerMeasurementsJson),
+    m_serverMeasurementsJson(other.m_serverMeasurementsJson),
+    m_qosMeasurementsJson(other.m_qosMeasurementsJson),
+    m_subscriptionId(other.m_subscriptionId),
+    m_rtaConnectionId(other.m_rtaConnectionId),
+    m_memberIdToWrite(other.m_memberIdToWrite),
+    m_newMember(other.m_newMember),
+    m_writeConstants(other.m_writeConstants),
+    m_writeIsActive(other.m_writeIsActive),
+    m_writeRoleInfo(other.m_writeRoleInfo),
+    m_writeSecureDeviceAddressBase64(other.m_writeSecureDeviceAddressBase64),
+    m_writeQoSMeasurementsJson(other.m_writeQoSMeasurementsJson),
+    m_writeServerMeasurementsJson(other.m_writeServerMeasurementsJson),
+    m_writeMembersInGroup(other.m_writeMembersInGroup),
+    m_writeGroups(other.m_writeGroups),
+    m_writeEncounters(other.m_writeEncounters),
+    m_writeSubscribedChangeTypes(other.m_writeSubscribedChangeTypes),
+    m_writeResults(other.m_writeResults),
+    m_writeCustomPropertiesJson(other.m_writeCustomPropertiesJson)
 {
-    return m_teamId;
+    for (auto group : other.m_groups)
+    {
+        m_groups.push_back(Make(group));
+    }
+    for (auto encounter : other.m_encounters)
+    {
+        m_encounters.push_back(Make(encounter));
+    }
+    for (auto& role : m_roles)
+    {
+        role.roleName = Make(role.roleName);
+        role.roleTypeName = Make(role.roleTypeName);
+    }
+
+    JsonUtils::CopyFrom(m_customPropertiesJson, other.m_customPropertiesJson);
+    JsonUtils::CopyFrom(m_resultsJson, other.m_resultsJson);
 }
 
-tournament_arbitration_status 
-multiplayer_session_member::arbitration_status() const
+MultiplayerSessionMember::~MultiplayerSessionMember()
 {
-    return m_arbitrationStatus;
+    for (auto group : m_groups)
+    {
+        Delete(group);
+    }
+    for (auto encounter : m_encounters)
+    {
+        Delete(encounter);
+    }
+    for (auto& role : m_roles)
+    {
+        Delete(role.roleName);
+        Delete(role.roleTypeName);
+    }
 }
 
-void
-multiplayer_session_member::_Set_member_id(
-    _In_ uint32_t memberId
-    )
+xsapi_internal_string MultiplayerSessionMember::MemberId() const
 {
-    m_memberId = memberId;
-}
-
-const string_t&
-multiplayer_session_member::xbox_user_id() const
-{
-    return m_xboxUserId;
-}
-
-const web::json::value&
-multiplayer_session_member::member_custom_constants_json() const
-{
-    return m_customConstantsJson;
-}
-
-const string_t&
-multiplayer_session_member::secure_device_base_address64() const
-{
-    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdMemberLock);
-
-    return m_secureDeviceAddressBase64;
+    return m_member->IsCurrentUser ? "me" : m_memberIdToWrite;
 }
 
 void 
-multiplayer_session_member::_Set_secure_device_base_address64(
-    _In_ const string_t& deviceBaseAddress
-    )
+MultiplayerSessionMember::SetSecureDeviceBaseAddress64(_In_ const xsapi_internal_string& deviceBaseAddress)
 {
-    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdMemberLock);
-
-    m_secureDeviceAddressBase64 = std::move(deviceBaseAddress);
-    m_memberRequest->set_secure_device_address_base64(m_secureDeviceAddressBase64);
-    m_memberRequest->set_write_secure_device_address_base64(true);
-}
-
-const std::unordered_map<string_t, string_t>&
-multiplayer_session_member::roles() const
-{
-    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdMemberLock);
-    return m_roles;
+    std::lock_guard<std::recursive_mutex> lock{ m_lockMember };
+    m_secureDeviceAddressBase64 = deviceBaseAddress;
+    m_member->SecureDeviceBaseAddress64 = m_secureDeviceAddressBase64.data();
+    m_writeSecureDeviceAddressBase64 = true;
 }
 
 void
-multiplayer_session_member::_Set_role_info(
-    _In_ const std::unordered_map<string_t, string_t>& roleInfo
-    )
+MultiplayerSessionMember::SetRoles(_In_ const xsapi_internal_vector<XblMultiplayerSessionMemberRole>& roles)
 {
-    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdMemberLock);
+    std::lock_guard<std::recursive_mutex> lock{ m_lockMember };
 
-    m_roles = std::move(roleInfo);
-    m_memberRequest->set_role_info(m_roles);
-}
-
-const web::json::value&
-multiplayer_session_member::member_custom_properties_json() const
-{
-    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdMemberLock);
-
-    return m_customPropertiesJson;
-}
-
-const string_t&
-multiplayer_session_member::gamertag() const
-{
-    return m_gamertag;
-}
-
-multiplayer_session_member_status
-multiplayer_session_member::status() const
-{
-    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdMemberLock);
-
-    if (m_isActive)
+    for (auto& role : m_roles)
     {
-        return multiplayer_session_member_status::active;
+        Delete(role.roleName);
+        Delete(role.roleTypeName);
     }
-    else if (m_isReady)
+    m_roles = roles;
+    for (auto& role : m_roles)
     {
-        return multiplayer_session_member_status::ready;
+        role.roleName = Make(role.roleName);
+        role.roleTypeName = Make(role.roleTypeName);
     }
-    else if (m_isReserved)
-    {
-        return multiplayer_session_member_status::reserved;
-    }
-    else
-    {
-        return multiplayer_session_member_status::inactive;
-    }
+    m_member->Roles = m_roles.data();
+    m_member->RolesCount = m_roles.size();
+    m_writeRoleInfo = true;
 }
 
-const std::unordered_map<string_t, tournament_team_result>&
-multiplayer_session_member::results() const
-{
-    return m_results;
-}
-
-bool
-multiplayer_session_member::is_turn_available() const
-{
-    return m_isTurnAvailable;
-}
-
-bool
-multiplayer_session_member::is_current_user() const
-{
-    return m_isCurrentUser;
-}
-
-void
-multiplayer_session_member::_Set_is_current_user(
-    _In_ bool isCurrentUser
-    )
-{
-    m_isCurrentUser = isCurrentUser;
-}
-
-bool
-multiplayer_session_member::initialize_requested() const
-{
-    return m_initialize;
-}
-
-const web::json::value&
-multiplayer_session_member::matchmaking_result_server_measurements_json() const
-{
-    return m_matchmakingResultServerMeasurementsJson;
-}
-
-const web::json::value&
-multiplayer_session_member::member_server_measurements_json() const
-{
-    return m_memberServerMeasurementsJson;
-}
-
-const std::vector<std::shared_ptr<multiplayer_session_member>>&
-multiplayer_session_member::members_in_group() const
-{
-    return m_membersInGroup;
-}
-
-
-std::error_code
-multiplayer_session_member::set_members_list(
-    _In_ std::vector<std::shared_ptr<multiplayer_session_member>> members
-    )
-{
-    std::vector<std::shared_ptr<multiplayer_session_member>> membersInGroup;
-    for (const uint32_t memberIndex : m_membersInGroupIndices)
-    {
-        for (const auto& member : members)
-        {
-            if (member->member_id() == memberIndex)
-            {
-                membersInGroup.push_back(member);
-                break;
-            }
-        }
-    }
-
-    m_membersInGroup = membersInGroup;
-
-    return convert_measure_json_to_vector();
-}
-
-std::shared_ptr<std::vector<multiplayer_quality_of_service_measurements>>
-multiplayer_session_member::member_measurements() const
-{
-    return m_memberMeasurements;
-}
-
-const string_t&
-multiplayer_session_member::device_token() const
-{
-    return m_deviceToken;
-}
-
-network_address_translation_setting
-multiplayer_session_member::nat() const
-{
-    return m_nat;
-}
-
-uint32_t
-multiplayer_session_member::active_title_id() const
-{
-    return m_activeTitleId;
-}
-
-uint32_t
-multiplayer_session_member::initialization_episode() const
-{
-    return m_initializationEpisode;
-}
-
-const utility::datetime&
-multiplayer_session_member::join_time() const
-{
-    return m_joinTime;
-}
-
-multiplayer_measurement_failure
-multiplayer_session_member::initialization_failure_cause() const
-{
-    return m_initializationFailure;
-}
-
-const std::vector<string_t>&
-multiplayer_session_member::groups() const
+const xsapi_internal_vector<const char*>& MultiplayerSessionMember::GroupsUnsafe() const
 {
     return m_groups;
 }
 
-void
-multiplayer_session_member::set_groups(
-    _In_ std::vector<string_t> groups
+void MultiplayerSessionMember::SetGroups(
+    _In_reads_(groupsCount) const char** groups,
+    _In_ size_t groupsCount
     )
 {
-    m_groups = std::move(groups);
-    m_memberRequest->set_groups(m_groups);
+    std::lock_guard<std::recursive_mutex> lock{ m_lockMember };
+    for (auto& group : m_groups)
+    {
+        Delete(group);
+    }
+    m_groups.clear();
+    for (size_t i = 0; i < groupsCount; ++i)
+    {
+        m_groups.push_back(Make(groups[i]));
+    }
+    m_member->Groups = m_groups.data();
+    m_member->GroupsCount = m_groups.size();
+    m_writeGroups = true;
 }
 
-
-const std::vector<string_t>&
-multiplayer_session_member::encounters() const
+const xsapi_internal_vector<const char*>&
+MultiplayerSessionMember::EncountersUnSafe() const
 {
     return m_encounters;
 }
 
 void 
-multiplayer_session_member::set_encounters(
-    _In_ std::vector<string_t> encounters
-    )
+MultiplayerSessionMember::SetEncounters(
+    _In_reads_(encountersCount) const char** encounters,
+    _In_ size_t encountersCount
+)
 {
-    m_encounters = std::move(encounters);
-    m_memberRequest->set_encounters(m_encounters);
-}
-
-
-std::shared_ptr<multiplayer_session_request>
-multiplayer_session_member::_Session_request() const
-{
-    return m_sessionRequest;
-}
-
-void 
-multiplayer_session_member::_Set_session_request(
-    _In_ std::shared_ptr<multiplayer_session_request> sessionRequest
-    )
-{
-    m_sessionRequest = std::move(sessionRequest);
-}
-
-
-std::shared_ptr<multiplayer_session_member_request>
-multiplayer_session_member::_Member_request() const
-{
-    return m_memberRequest;
-}
-
-void
-multiplayer_session_member::_Set_member_request(
-    _In_ std::shared_ptr<multiplayer_session_member_request> multiplayerSessionMemberRequest
-    )
-{
-    m_memberRequest = multiplayerSessionMemberRequest;
-}
-
-std::error_code
-multiplayer_session_member::_Set_current_user_status(
-    _In_ multiplayer_session_member_status status
-    )
-{
-    XSAPI_ASSERT(m_isCurrentUser);
-    if (status != multiplayer_session_member_status::active && status != multiplayer_session_member_status::inactive)
+    std::lock_guard<std::recursive_mutex> lock{ m_lockMember };
+    for (auto& encounter : m_encounters)
     {
-        return xbox_live_error_code::invalid_argument;
+        Delete(encounter);
+    }
+    m_encounters.clear();
+    for (uint32_t i = 0; i < encountersCount; ++i)
+    {
+        m_encounters.push_back(Make(encounters[i]));
+    }
+    m_member->Encounters = m_encounters.data();
+    m_member->EncountersCount = m_encounters.size();
+    m_writeEncounters = true;
+}
+
+HRESULT MultiplayerSessionMember::SetStatus(
+    _In_ XblMultiplayerSessionMemberStatus status
+    )
+{
+    std::lock_guard<std::recursive_mutex> lock{ m_lockMember };
+    XSAPI_ASSERT(m_member->IsCurrentUser);
+    if (status != XblMultiplayerSessionMemberStatus::Active && status != XblMultiplayerSessionMemberStatus::Inactive)
+    {
+        return E_INVALIDARG;
     }
 
-    m_isActive = (status == multiplayer_session_member_status::active);
-    m_memberRequest->set_is_active(m_isActive);
-    m_memberRequest->set_write_is_active(true);
-
-    return xbox_live_error_code::no_error;
+    m_member->Status = status;
+    m_writeIsActive = true;
+    return S_OK;
 }
 
-void 
-multiplayer_session_member::_Set_current_user_members_in_group(
-    _In_ std::vector<std::shared_ptr<multiplayer_session_member>> membersInGroup
+void MultiplayerSessionMember::StateLock() const
+{
+    m_lockMember.lock();
+}
+
+void MultiplayerSessionMember::StateUnlock() const
+{
+    m_lockMember.unlock();
+}
+
+const xsapi_internal_vector<uint32_t>& MultiplayerSessionMember::MembersInGroupUnsafe() const
+{
+    return m_membersInGroupIds;
+}
+
+void MultiplayerSessionMember::SetMembersInGroup(
+    _In_ const xsapi_internal_vector<uint32_t>& membersInGroup
     )
 {
-    m_membersInGroupIndices.clear();
-    for (const auto& member : membersInGroup)
-    {
-        m_membersInGroupIndices.push_back(member->member_id());
-    }
-    m_membersInGroup = std::move(membersInGroup);
-    m_memberRequest->set_write_members_in_group(true);
-    m_memberRequest->set_members_in_group(m_membersInGroupIndices);
+    std::lock_guard<std::recursive_mutex> lock{ m_lockMember };
+    m_membersInGroupIds = membersInGroup;
+    m_member->MembersInGroupIds = m_membersInGroupIds.data();
+    m_member->MembersInGroupCount = static_cast<uint32_t>(m_membersInGroupIds.size());
+    m_writeMembersInGroup = true;
 }
 
-std::error_code
-multiplayer_session_member::_Set_member_custom_property_json(
-    _In_ const string_t& name,
-    _In_ const web::json::value& valueJson
-    )
+HRESULT
+MultiplayerSessionMember::SetCustomPropertyJson(
+    _In_ const xsapi_internal_string& name,
+    _In_ const JsonValue& valueJson
+)
 {
     if (name.empty())
     {
-        return xbox_live_error_code::invalid_argument;
+        return E_INVALIDARG;
     }
 
-    if (!m_isCurrentUser)
+    if (!m_member->IsCurrentUser)
     {
-        return xbox_live_error_code::logic_error;
+        return E_UNEXPECTED;
     }
 
-    std::lock_guard<std::mutex> lock(get_xsapi_singleton()->m_mpsdMemberLock);
+    std::lock_guard<std::recursive_mutex> lock{ m_lockMember };
 
-    web::json::value customProperty = web::json::value::null();
-    if (!valueJson.is_null())
+    auto hr = JsonUtils::SetMember(m_customPropertiesJson, name, valueJson);
+    if (SUCCEEDED(hr))
     {
-        customProperty = std::move(valueJson);
+        m_customPropertiesString = JsonUtils::SerializeJson(m_customPropertiesJson);
+        m_member->CustomPropertiesJson = m_customPropertiesString.data();
+        m_writeCustomPropertiesJson = true;
     }
 
-    if (m_memberRequest->custom_properties().is_null())
-    {
-        m_memberRequest->set_custom_properties(web::json::value::object());
-    }
-
-    m_memberRequest->set_custom_properties_property(name, customProperty);
-
-    return xbox_live_error_code::no_error;
+    return hr;
 }
 
 void 
-multiplayer_session_member::_Delete_custom_property_json(
-    _In_ const string_t& name
+MultiplayerSessionMember::DeleteCustomPropertyJson(
+    _In_ const xsapi_internal_string& name
     )
 {
-    _Set_member_custom_property_json(name, web::json::value::null());
+    SetCustomPropertyJson(name, JsonValue());
 }
 
-void 
-multiplayer_session_member::_Set_current_user_quality_of_service_measurements(
-    _In_ std::shared_ptr<std::vector<multiplayer_quality_of_service_measurements>> qualityOfServiceMeasurements
+HRESULT MultiplayerSessionMember::SetQosMeasurementsJson(
+    _In_ const xsapi_internal_string& qosMeasurementsJson
     )
 {
-    for (const auto& measurement : *qualityOfServiceMeasurements)
+    auto hr = JsonUtils::ValidateJson(qosMeasurementsJson.data());
+    if (SUCCEEDED(hr))
     {
-        web::json::value jsonMeasurement;
-        jsonMeasurement[_T("latency")] = measurement.latency().count();
-        jsonMeasurement[_T("bandwidthDown")] = measurement.bandwidth_down_in_kilobits_per_second();
-        jsonMeasurement[_T("bandwidthUp")] = measurement.bandwidth_up_in_kilobits_per_second();
-        jsonMeasurement[_T("custom")] = measurement.custom_json();
-
-        m_memberMeasurementsJson[measurement.member_device_token().c_str()] = jsonMeasurement;
+        std::lock_guard<std::recursive_mutex> lock{ m_lockMember };
+        m_qosMeasurementsJson = qosMeasurementsJson;
+        m_member->QosMeasurementsJson = m_qosMeasurementsJson.data();
+        m_writeQoSMeasurementsJson = true;
     }
-
-    m_memberMeasurements = qualityOfServiceMeasurements;
-    m_memberRequest->set_write_member_measurements_json(true);
-    m_memberRequest->set_member_measurements_json(m_memberMeasurementsJson);
+    return hr;
 }
 
-void 
-multiplayer_session_member::_Set_current_user_quality_of_service_server_measurements_json(
-    _In_ web::json::value serverMeasurementsJson
+HRESULT MultiplayerSessionMember::SetServerMeasurementsJson(
+    _In_ const xsapi_internal_string& serverMeasurementsJson
     )
 {
-    m_memberServerMeasurementsJson = serverMeasurementsJson;
-    m_memberRequest->set_write_member_server_measurements_json(true);
-    m_memberRequest->set_member_server_measurements_json(m_memberServerMeasurementsJson);
+    auto hr = JsonUtils::ValidateJson(serverMeasurementsJson.data());
+    if (SUCCEEDED(hr))
+    {
+        std::lock_guard<std::recursive_mutex> lock{ m_lockMember };
+        m_serverMeasurementsJson = serverMeasurementsJson;
+        m_member->ServerMeasurementsJson = m_serverMeasurementsJson.data();
+        m_writeServerMeasurementsJson = true;
+    }
+    return hr;
 }
 
-multiplayer_session_change_types 
-multiplayer_session_member::_Subscribed_change_types() const
+XblMultiplayerSessionChangeTypes 
+MultiplayerSessionMember::SubscribedChangeTypes() const
 {
     return m_subscribedChangeTypes;
 }
 
 void 
-multiplayer_session_member::_Set_session_change_subscription(
-    _In_ multiplayer_session_change_types changeTypes, 
-    _In_ const string_t& subscriptionId
+MultiplayerSessionMember::SetSessionChangeSubscription(
+    _In_ XblMultiplayerSessionChangeTypes changeTypes, 
+    _In_ const xsapi_internal_string& subscriptionId
     )
 {
+    std::lock_guard<std::recursive_mutex> lock{ m_lockMember };
     m_subscribedChangeTypes = changeTypes;
-    m_memberRequest->set_subscribed_change_types(changeTypes);
-    m_memberRequest->set_subscription_id(subscriptionId);
-    m_memberRequest->set_write_subscribed_change_types(true);
+    m_subscriptionId = subscriptionId;
+    m_writeSubscribedChangeTypes = true;
 }
 
-void 
-multiplayer_session_member::_Set_arbitration_results(
-    _In_ const std::unordered_map<string_t, tournament_team_result>& results
+const JsonValue& MultiplayerSessionMember::CustomPropertiesJsonUnsafe() const
+{
+    return m_customPropertiesJson;
+}
+
+void MultiplayerSessionMember::SetRtaConnectionId(
+    _In_ const xsapi_internal_string& rtaConnectionId
     )
 {
-    m_results = results;
-    m_memberRequest->set_results(results);
+    std::lock_guard<std::recursive_mutex> lock{ m_lockMember };
+    LOGS_DEBUG << "MultiplayerSessionMember::SetRtaConnectionId " << rtaConnectionId;
+    m_rtaConnectionId = rtaConnectionId;
 }
 
-void
-multiplayer_session_member::_Set_rta_connection_id(
-    _In_ const string_t& rtaConnectionId
-    )
+Result<XblMultiplayerSessionMember> MultiplayerSessionMember::Deserialize(
+    _In_ const JsonValue& json
+)
 {
-    m_memberRequest->set_rta_connection_id(std::move(rtaConnectionId));
-}
+    XblMultiplayerSessionMember returnResult{};
+    if (json.IsNull())
+    {
+        return returnResult;
+    }
+    auto returnResultInternal = Make<MultiplayerSessionMember>();
+    returnResult.Internal = returnResultInternal;
 
-const multiplayer_session_reference&
-multiplayer_session_member::tournament_team_session_reference() const
-{
-    return m_tournamentTeamSessionRef;
-}
+    bool reserved = false;
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(json, "reserved", reserved));
+    bool active = false;
+    bool ready = false;
 
-network_address_translation_setting
-multiplayer_session_member::_Convert_string_to_multiplayer_nat_setting(
-    _In_ const string_t& value
-    )
-{
-    if (value.empty())
-    {
-        return network_address_translation_setting::unknown;
-    }
-    else if (utils::str_icmp(value, _T("strict")) == 0)
-    {
-        return network_address_translation_setting::strict;
-    }
-    else if (utils::str_icmp(value, _T("moderate")) == 0)
-    {
-        return network_address_translation_setting::moderate;
-    }
-    else if (utils::str_icmp(value, _T("open")) == 0)
-    {
-        return network_address_translation_setting::open;
-    }
 
-    return network_address_translation_setting::unknown;
-}
+    returnResultInternal->m_customConstantsJson = "";
+    returnResult.Xuid = 0;
+    returnResult.InitializeRequested = false;
+    returnResultInternal->m_teamId = "";
+    returnResultInternal->m_initialTeam = "";
+    returnResultInternal->m_matchmakingResultServerMeasurementsJson = "";
 
-multiplayer_measurement_failure
-multiplayer_session_member::_Convert_string_to_multiplayer_metric_stage(
-    _In_ const string_t& value
-    )
-{
-    if (value.empty())
+    if (json.IsObject() && json.HasMember("constants"))
     {
-        return multiplayer_measurement_failure::none;
-    }
-    else if (utils::str_icmp(value, _T("bandwidthUp")) == 0)
-    {
-        return multiplayer_measurement_failure::bandwidth_up;
-    }
-    else if (utils::str_icmp(value, _T("bandwidthDown")) == 0)
-    {
-        return multiplayer_measurement_failure::bandwidth_down;
-    }
-    else if (utils::str_icmp(value, _T("latency")) == 0)
-    {
-        return multiplayer_measurement_failure::latency;
-    }
-    else if (utils::str_icmp(value, _T("timeout")) == 0)
-    {
-        return multiplayer_measurement_failure::timeout;
-    }
-    else if (utils::str_icmp(value, _T("group")) == 0)
-    {
-        return multiplayer_measurement_failure::group;
-    }
-    else if (utils::str_icmp(value, _T("network")) == 0)
-    {
-        return multiplayer_measurement_failure::network;
-    }
-    else if (utils::str_icmp(value, _T("episode")) == 0)
-    {
-        return multiplayer_measurement_failure::episode;
-    }
+        const JsonValue& constantsJson = json["constants"];
 
-    return multiplayer_measurement_failure::unknown;
-}
-
-std::error_code
-multiplayer_session_member::convert_measure_json_to_vector()
-{
-    m_memberMeasurements->clear();
-    if (!m_memberMeasurementsJson.is_null())
-    {
-        for (const auto& memberPair : m_memberMeasurementsJson.as_object())
+        RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonFieldAsString(constantsJson, "custom", returnResultInternal->m_customConstantsJson, false));
+        
+        if (constantsJson.IsObject() && constantsJson.HasMember("custom"))
         {
-            auto multiplayerQOSMeasurements = multiplayer_quality_of_service_measurements::_Deserialize(memberPair.second);
-            if (multiplayerQOSMeasurements.err()) return multiplayerQOSMeasurements.err();
-
-            multiplayer_quality_of_service_measurements measurements = multiplayerQOSMeasurements.payload();
-            measurements._Set_member_device_token(memberPair.first);
-            m_memberMeasurements->push_back(measurements);
-        }
-    }
-
-    return xbox_live_error_code::no_error;
-}
-
-multiplayer_session_change_types 
-multiplayer_session_member::_Convert_string_vector_to_change_types(
-    std::vector<string_t> changeTypeList
-    )
-{
-    uint32_t resultingChangeTypes = static_cast<uint32_t>(multiplayer_session_change_types::none);
-
-    for(auto& current : changeTypeList)
-    {
-        if (utils::str_icmp(current, _T("everything")) == 0)
-        {
-            resultingChangeTypes |= multiplayer_session_change_types::everything;
-        }
-        else if (utils::str_icmp(current, _T("host")) == 0)
-        {
-            resultingChangeTypes |= multiplayer_session_change_types::host_device_token_change;
-        }
-        else if (utils::str_icmp(current, _T("initialization")) == 0)
-        {
-            resultingChangeTypes |= multiplayer_session_change_types::initialization_state_change;
-        }
-        else if (utils::str_icmp(current, _T("matchmakingStatus")) == 0)
-        {
-            resultingChangeTypes |= multiplayer_session_change_types::matchmaking_status_change;
-        }
-        else if (utils::str_icmp(current, _T("membersList")) == 0)
-        {
-            resultingChangeTypes |= multiplayer_session_change_types::member_list_change;
-        }
-        else if (utils::str_icmp(current, _T("membersStatus")) == 0)
-        {
-            resultingChangeTypes |= multiplayer_session_change_types::member_status_change;
-        }
-        else if (utils::str_icmp(current, _T("joinability")) == 0)
-        {
-            resultingChangeTypes |= multiplayer_session_change_types::session_joinability_change;
-        }
-        else if (utils::str_icmp(current, _T("customProperty")) == 0)
-        {
-            resultingChangeTypes |= multiplayer_session_change_types::custom_property_change;
-        }
-        else if (utils::str_icmp(current, _T("membersCustomProperty")) == 0)
-        {
-            resultingChangeTypes |= multiplayer_session_change_types::member_custom_property_change;
-        }
-        else if (utils::str_icmp(current, _T("tournaments")) == 0)
-        {
-            resultingChangeTypes |= multiplayer_session_change_types::tournament_property_change;
-        }
-    }
-
-    return static_cast<multiplayer_session_change_types>(resultingChangeTypes);
-
-}
-
-xbox_live_result<multiplayer_session_member>
-multiplayer_session_member::_Deserialize(
-    _In_ const web::json::value& json
-    )
-{
-    multiplayer_session_member returnResult;
-    if (json.is_null()) return xbox_live_result<multiplayer_session_member>(returnResult);
-
-    std::error_code errc = xbox_live_error_code::no_error;
-
-    web::json::value constantsJson = utils::extract_json_field(json, _T("constants"), errc, true);
-    web::json::value constantsSystemJson = utils::extract_json_field(constantsJson, _T("system"), errc, true);
-    web::json::value constantsSystemMatchmakingResultJson = utils::extract_json_field(constantsSystemJson, _T("matchmakingResult"), errc, false);
-
-    web::json::value propertiesJson = utils::extract_json_field(json, _T("properties"), errc, true);
-    web::json::value propertiesSystemJson = utils::extract_json_field(propertiesJson, _T("system"), errc, true);
-    web::json::value propertiesSystemSubscriptionJson = utils::extract_json_field(propertiesSystemJson, _T("subscription"), errc, false);
-    
-    returnResult.m_isReserved = utils::extract_json_bool(json, _T("reserved"), errc);
-    returnResult.m_xboxUserId = utils::extract_json_string(constantsSystemJson, _T("xuid"), errc);
-    returnResult.m_initialize = utils::extract_json_bool(constantsSystemJson, _T("initialize"), errc);
-    returnResult.m_customPropertiesJson = utils::extract_json_field(propertiesJson, _T("custom"), errc, false);
-    returnResult.m_customConstantsJson = utils::extract_json_field(constantsJson, _T("custom"), errc, false);
-    returnResult.m_teamId = utils::extract_json_string(constantsSystemJson, _T("team"), errc);
-    returnResult.m_arbitrationStatus = multiplayer_service::_Convert_string_to_arbitration_status(utils::extract_json_string(json, _T("arbitrationStatus"), errc));
-    returnResult.m_gamertag = utils::extract_json_string(json, _T("gamertag"), errc);
-    returnResult.m_deviceToken = utils::extract_json_string(json, _T("deviceToken"), errc);
-    returnResult.m_nat = _Convert_string_to_multiplayer_nat_setting(utils::extract_json_string(json, _T("nat"), errc));
-    returnResult.m_isTurnAvailable = utils::extract_json_bool(json, _T("turn"), errc);
-    returnResult.m_isActive = utils::extract_json_bool(propertiesSystemJson, _T("active"), errc);
-    returnResult.m_isReady = utils::extract_json_bool(propertiesSystemJson, _T("ready"), errc);
-    returnResult.m_secureDeviceAddressBase64 = utils::extract_json_string(propertiesSystemJson, _T("secureDeviceAddress"), errc);
-    returnResult.m_subscribedChangeTypes = _Convert_string_vector_to_change_types(
-        utils::extract_json_vector<string_t>(utils::json_string_extractor, propertiesSystemSubscriptionJson, _T("changeTypes"), errc, false)
-        );
-
-    returnResult.m_memberServerMeasurementsJson = utils::extract_json_field(propertiesSystemJson, _T("serverMeasurements"), errc, false);
-    returnResult.m_memberMeasurementsJson = utils::extract_json_field(propertiesSystemJson, _T("measurements"), errc, false);
-    returnResult.m_membersInGroupIndices = utils::extract_json_vector<uint32_t>(utils::json_int_extractor, propertiesSystemJson, _T("initializationGroup"), errc, false);
-
-    web::json::value rolesJson = utils::extract_json_field(json, _T("roles"), errc, false);
-    if (!rolesJson.is_null() && rolesJson.is_object())
-    {
-        web::json::object rolesObj = rolesJson.as_object();
-        for (const auto& role : rolesObj)
-        {
-            returnResult.m_roles[role.first] = role.second.as_string();
-        }
-    }
-
-    web::json::value registrationJson = utils::extract_json_field(propertiesSystemJson, _T("registration"), errc, false);
-    if (!registrationJson.is_null())
-    {
-        returnResult.m_registrationState = multiplayer_session_tournaments_server::_Convert_string_to_registration_result(
-            utils::extract_json_string(registrationJson, _T("state"), errc)
-            );
-        returnResult.m_registrationReason = multiplayer_session_tournaments_server::_Convert_string_to_registration_reason(
-            utils::extract_json_string(registrationJson, _T("reason"), errc)
-            );
-    }
-
-    web::json::value arbitrationJson = utils::extract_json_field(propertiesSystemJson, _T("arbitration"), errc, false);
-    if (!arbitrationJson.is_null())
-    {
-        web::json::value resultsJson = utils::extract_json_field(arbitrationJson, _T("results"), errc, false);
-        if (!resultsJson.is_null() && resultsJson.is_object())
-        {
-            web::json::object resultsObj = resultsJson.as_object();
-            for (const auto& result : resultsObj)
+            const JsonValue& constantsCustomJson = constantsJson["custom"];
+            if (constantsCustomJson.IsObject() && constantsCustomJson.HasMember("matchmakingResult"))
             {
-                const auto& team = result.first;
-                auto tournamentTeamResult = tournament_team_result::_Deserialize(result.second);
-                if (tournamentTeamResult.err())
-                {
-                    errc = tournamentTeamResult.err();
-                }
-                returnResult.m_results[team] = tournamentTeamResult.payload();
+                const JsonValue& constantsCustomMatchmakingResultJson = constantsCustomJson["matchmakingResult"];
+                RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(constantsCustomMatchmakingResultJson, "initialTeam", returnResultInternal->m_initialTeam, false));                
             }
         }
-    }
 
-    auto teamJson = utils::extract_json_field(constantsSystemJson, _T("teamSessionRef"), errc, false);
-    auto teamSessionResult = multiplayer_session_reference::_Deserialize(teamJson);
-    if (teamSessionResult.err())
+        if (constantsJson.IsObject() && constantsJson.HasMember("system"))
+        {
+            const JsonValue& constantsSystemJson = constantsJson["system"];
+
+            xsapi_internal_string xuid;
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(constantsSystemJson, "xuid", xuid));
+            returnResult.Xuid = utils::internal_string_to_uint64(xuid);
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(constantsSystemJson, "initialize", returnResult.InitializeRequested));
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(constantsSystemJson, "team", returnResultInternal->m_teamId));
+            
+            if (constantsSystemJson.IsObject() && constantsSystemJson.HasMember("matchmakingResult"))
+            {
+                const JsonValue& constantsSystemMatchmakingResultJson = constantsSystemJson["matchmakingResult"];
+                RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonFieldAsString(constantsSystemMatchmakingResultJson, "serverMeasurements", returnResultInternal->m_matchmakingResultServerMeasurementsJson, false));
+            }
+        }
+        else
+        {
+            //required
+            return WEB_E_INVALID_JSON_STRING;
+        }
+    }
+    else
     {
-        errc = teamSessionResult.err();
+        //required
+        return WEB_E_INVALID_JSON_STRING;
     }
-    returnResult.m_tournamentTeamSessionRef = teamSessionResult.payload();
 
-    auto titleIdString = utils::extract_json_string(json, _T("activeTitleId"), errc);
+    returnResult.CustomConstantsJson = returnResultInternal->m_customConstantsJson.data();
+    returnResult.InitialTeam = returnResultInternal->m_initialTeam.data();
+    returnResult.MatchmakingResultServerMeasurementsJson = returnResultInternal->m_matchmakingResultServerMeasurementsJson.data();
+
+    returnResultInternal->m_secureDeviceAddressBase64 = "";
+    returnResultInternal->m_serverMeasurementsJson = "";
+    returnResultInternal->m_qosMeasurementsJson = "";
+    returnResultInternal->m_customPropertiesString = "";
+
+    if (json.IsObject() && json.HasMember("properties"))
+    {
+        const JsonValue& propertiesJson = json["properties"];
+        if (propertiesJson.IsObject() && propertiesJson.HasMember("custom"))
+        {
+            JsonUtils::CopyFrom(returnResultInternal->m_customPropertiesJson, propertiesJson["custom"]);
+            returnResultInternal->m_customPropertiesString = JsonUtils::SerializeJson(returnResultInternal->m_customPropertiesJson);
+        }
+
+        if (propertiesJson.IsObject() && propertiesJson.HasMember("system"))
+        {
+            const JsonValue& propertiesSystemJson = propertiesJson["system"];
+
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(propertiesSystemJson, "secureDeviceAddress", returnResultInternal->m_secureDeviceAddressBase64));
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonFieldAsString(propertiesSystemJson, "serverMeasurements", returnResultInternal->m_serverMeasurementsJson, false));
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonFieldAsString(propertiesSystemJson, "measurements", returnResultInternal->m_qosMeasurementsJson, false));
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonVector<uint32_t>(JsonUtils::JsonIntExtractor, propertiesSystemJson, "initializationGroup", returnResultInternal->m_membersInGroupIds, false));
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(propertiesSystemJson, "active", active));
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(propertiesSystemJson, "ready", ready));
+
+            if (propertiesSystemJson.IsObject() && propertiesSystemJson.HasMember("subscription"))
+            {
+                const JsonValue& propertiesSystemSubscriptionJson = propertiesSystemJson["subscription"];
+
+                xsapi_internal_vector<xsapi_internal_string> changeTypes;
+                RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonVector<xsapi_internal_string>(JsonUtils::JsonStringExtractor, propertiesSystemSubscriptionJson, "changeTypes", changeTypes, false));
+                returnResultInternal->m_subscribedChangeTypes = Serializers::MultiplayerSessionChangeTypesFromStringVector(changeTypes);
+            }
+        }
+        else
+        {
+            //required
+            return WEB_E_INVALID_JSON_STRING;
+        }
+    }
+    else
+    {
+        //required
+        return WEB_E_INVALID_JSON_STRING;
+    }
+
+    returnResult.SecureDeviceBaseAddress64 = returnResultInternal->m_secureDeviceAddressBase64.data();
+    returnResult.ServerMeasurementsJson = returnResultInternal->m_serverMeasurementsJson.data();
+    returnResult.QosMeasurementsJson = returnResultInternal->m_qosMeasurementsJson.data();
+    returnResult.MembersInGroupIds = returnResultInternal->m_membersInGroupIds.data();
+    returnResult.MembersInGroupCount = static_cast<uint32_t>(returnResultInternal->m_membersInGroupIds.size());
+    returnResult.CustomPropertiesJson = returnResultInternal->m_customPropertiesString.data();
+
+    if (active)
+    {
+        returnResult.Status = XblMultiplayerSessionMemberStatus::Active;
+    }
+    else if (ready)
+    {
+        returnResult.Status = XblMultiplayerSessionMemberStatus::Ready;
+    }
+    else if (reserved)
+    {
+        returnResult.Status = XblMultiplayerSessionMemberStatus::Reserved;
+    }
+    else
+    {
+        returnResult.Status = XblMultiplayerSessionMemberStatus::Inactive;
+    }
+    xsapi_internal_string gamertag, deviceToken, nat;
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "gamertag", gamertag));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "deviceToken", deviceToken));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "nat", nat));
+    utils::strcpy(returnResult.Gamertag, sizeof(returnResult.Gamertag), gamertag.c_str());
+    utils::strcpy(returnResult.DeviceToken.Value, sizeof(returnResult.DeviceToken.Value), deviceToken.c_str());
+    returnResult.Nat = Serializers::MultiplayerNatSettingFromString(nat);
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(json, "turn", returnResult.IsTurnAvailable));
+
+    if (json.IsObject() && json.HasMember("roles"))
+    {
+        const JsonValue& rolesJson = json["roles"];
+        if (!rolesJson.IsNull() && rolesJson.IsObject())
+        {
+            for (const auto& rolePair : rolesJson.GetObject())
+            {
+                XblMultiplayerSessionMemberRole role{};
+                role.roleTypeName = Make(rolePair.name.GetString());
+                role.roleName = Make(rolePair.value.GetString());
+                returnResultInternal->m_roles.push_back(std::move(role));
+            }
+            returnResult.Roles = returnResultInternal->m_roles.data();
+            returnResult.RolesCount = returnResultInternal->m_roles.size();
+        }
+    }
+
+    xsapi_internal_string titleIdString;
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "activeTitleId", titleIdString));
     if (!titleIdString.empty())
     {
-        returnResult.m_activeTitleId = utils::string_t_to_uint32(titleIdString);
+        returnResult.ActiveTitleId = utils::internal_string_to_uint32(titleIdString);
     }
 
-    returnResult.m_joinTime = utils::extract_json_time(json, _T("joinTime"), errc);
-    returnResult.m_initializationFailure = _Convert_string_to_multiplayer_metric_stage(utils::extract_json_string(json, _T("initializationFailure"), errc));
-    returnResult.m_initializationEpisode = utils::extract_json_int(json, _T("initializationEpisode"), errc);
-    returnResult.m_matchmakingResultServerMeasurementsJson = utils::extract_json_field(constantsSystemMatchmakingResultJson, _T("serverMeasurements"), errc, false);
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonTimeT(json, "joinTime", returnResult.JoinTime));
+    xsapi_internal_string initializationFailure;
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "initializationFailure", initializationFailure))
+    returnResult.InitializationFailureCause = Serializers::MultiplayerMeasurementFailureFromString(initializationFailure);
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonInt(json, "initializationEpisode", returnResult.InitializationEpisode));
 
     return returnResult;
+}
+
+xsapi_internal_vector<xsapi_internal_string> MultiplayerSessionMember::GetVectorViewForChangeTypes(
+    _In_ XblMultiplayerSessionChangeTypes changeTypes
+)
+{
+    xsapi_internal_vector<xsapi_internal_string> resultVector;
+    if ((changeTypes & XblMultiplayerSessionChangeTypes::Everything) == XblMultiplayerSessionChangeTypes::Everything)
+    {
+        resultVector.push_back("everything");
+    }
+    if ((changeTypes & XblMultiplayerSessionChangeTypes::HostDeviceTokenChange) == XblMultiplayerSessionChangeTypes::HostDeviceTokenChange)
+    {
+        resultVector.push_back("host");
+    }
+    if ((changeTypes & XblMultiplayerSessionChangeTypes::InitializationStateChange) == XblMultiplayerSessionChangeTypes::InitializationStateChange)
+    {
+        resultVector.push_back("initialization");
+    }
+    if ((changeTypes & XblMultiplayerSessionChangeTypes::MatchmakingStatusChange) == XblMultiplayerSessionChangeTypes::MatchmakingStatusChange)
+    {
+        resultVector.push_back("matchmakingStatus");
+    }
+    if ((changeTypes & XblMultiplayerSessionChangeTypes::MemberListChange) == XblMultiplayerSessionChangeTypes::MemberListChange)
+    {
+        resultVector.push_back("membersList");
+    }
+    if ((changeTypes & XblMultiplayerSessionChangeTypes::MemberStatusChange) == XblMultiplayerSessionChangeTypes::MemberStatusChange)
+    {
+        resultVector.push_back("membersStatus");
+    }
+    if ((changeTypes & XblMultiplayerSessionChangeTypes::SessionJoinabilityChange) == XblMultiplayerSessionChangeTypes::SessionJoinabilityChange)
+    {
+        resultVector.push_back("joinability");
+    }
+    if ((changeTypes & XblMultiplayerSessionChangeTypes::CustomPropertyChange) == XblMultiplayerSessionChangeTypes::CustomPropertyChange)
+    {
+        resultVector.push_back("customProperty");
+    }
+    if ((changeTypes & XblMultiplayerSessionChangeTypes::MemberCustomPropertyChange) == XblMultiplayerSessionChangeTypes::MemberCustomPropertyChange)
+    {
+        resultVector.push_back("membersCustomProperty");
+    }
+
+    return resultVector;
+}
+
+void MultiplayerSessionMember::Serialize(_Out_ JsonValue& json, _In_ JsonDocument::AllocatorType& allocator)
+{
+    std::lock_guard<std::recursive_mutex> lock{ m_lockMember };
+    json.SetObject();
+    if (m_newMember)
+    {
+        JsonValue systemConstantsJson(rapidjson::kObjectType);
+        systemConstantsJson.AddMember("xuid", JsonValue(utils::uint64_to_internal_string(m_member->Xuid).c_str(), allocator).Move(), allocator);
+        if (m_member->InitializeRequested)
+        {
+            systemConstantsJson.AddMember("initialize", m_member->InitializeRequested, allocator);
+        }
+
+        JsonValue constantsJson(rapidjson::kObjectType);
+        constantsJson.AddMember("system", systemConstantsJson, allocator);
+        if (!m_customConstantsJson.empty())
+        {
+            JsonDocument customJson{ &allocator };
+            customJson.Parse(m_customConstantsJson.data());
+            if (!customJson.IsNull())
+            {
+                constantsJson.AddMember("custom", customJson, allocator);
+            }
+        }
+        json.AddMember("constants", constantsJson, allocator);
+    }
+
+    if (m_newMember || m_member->IsCurrentUser)
+    {
+        JsonValue propertiesJson(rapidjson::kObjectType);
+        JsonValue systemPropertiesJson(rapidjson::kObjectType);
+
+        if (m_writeIsActive)
+        {
+            bool isActive = m_member->Status == XblMultiplayerSessionMemberStatus::Active;
+            systemPropertiesJson.AddMember("active", isActive, allocator);
+            if (!isActive)
+            {
+                systemPropertiesJson.AddMember("ready", isActive, allocator);
+            }
+            else
+            {
+                if (!m_rtaConnectionId.empty())
+                {
+                    systemPropertiesJson.AddMember("connection", JsonValue(m_rtaConnectionId.c_str(), allocator).Move(), allocator);
+                    LOGS_DEBUG << "MultiplayerSessionMember::Serialize " << m_rtaConnectionId << " for " << m_member->Xuid;
+                }
+            }
+        }
+
+        if (m_writeRoleInfo && m_member->RolesCount > 0)
+        {
+            JsonValue rolesJson(rapidjson::kObjectType);
+            for (uint32_t i = 0; i < m_member->RolesCount; ++i)
+            {
+                rolesJson.AddMember(JsonValue(m_member->Roles[i].roleTypeName, allocator).Move(), JsonValue(m_member->Roles[i].roleName, allocator).Move(), allocator);
+            }
+            json.AddMember("roles", rolesJson, allocator);
+        }
+
+        if (m_writeSubscribedChangeTypes)
+        {
+            JsonValue subscriptionJson(rapidjson::kObjectType);
+
+            subscriptionJson.AddMember("id", JsonValue(m_subscriptionId.c_str(), allocator).Move(), allocator);
+
+            JsonValue changeTypesJson;
+            JsonUtils::SerializeVector(JsonUtils::JsonStringSerializer, GetVectorViewForChangeTypes(m_subscribedChangeTypes), changeTypesJson, allocator);
+            subscriptionJson.AddMember("changeTypes", changeTypesJson, allocator);
+
+            systemPropertiesJson.AddMember("subscription", subscriptionJson, allocator);
+        }
+
+        if (m_writeSecureDeviceAddressBase64)
+        {
+            systemPropertiesJson.AddMember("secureDeviceAddress", JsonValue(m_member->SecureDeviceBaseAddress64, allocator).Move(), allocator);
+        }
+
+        if (m_writeMembersInGroup)
+        {
+            JsonValue initializationGroupJson(rapidjson::kArrayType);
+            JsonUtils::SerializeVector<uint32_t>(JsonUtils::JsonIntSerializer, m_membersInGroupIds, initializationGroupJson, allocator);
+            systemPropertiesJson.AddMember("initializationGroup", initializationGroupJson, allocator);
+        }
+
+        if (m_writeGroups)
+        {
+            JsonValue groupsJson(rapidjson::kArrayType);
+            JsonUtils::SerializeVector<const char*>(JsonUtils::JsonUtf8Serializer, m_groups, groupsJson, allocator);
+            systemPropertiesJson.AddMember("groups", groupsJson, allocator);
+        }
+
+        if (m_writeEncounters)
+        {
+            JsonValue encountersJson(rapidjson::kArrayType);
+            JsonUtils::SerializeVector<const char*>(JsonUtils::JsonUtf8Serializer, m_encounters, encountersJson, allocator);
+            systemPropertiesJson.AddMember("encounters", encountersJson, allocator);
+        }
+
+        if (m_writeQoSMeasurementsJson)
+        {
+            JsonDocument measurementsJson{ &allocator };
+            measurementsJson.Parse(m_qosMeasurementsJson.data());
+            systemPropertiesJson.AddMember("measurements", measurementsJson, allocator);
+        }
+
+        if (m_writeServerMeasurementsJson)
+        {
+            JsonDocument serverMeasurementsJson{ &allocator };
+            serverMeasurementsJson.Parse(m_serverMeasurementsJson.data());
+            systemPropertiesJson.AddMember("serverMeasurements", serverMeasurementsJson, allocator);
+        }
+
+        if (systemPropertiesJson.MemberCount())
+        {
+            propertiesJson.AddMember("system", systemPropertiesJson, allocator);
+        }
+
+        if (m_writeCustomPropertiesJson)
+        {
+            propertiesJson.AddMember("custom", JsonValue{}.CopyFrom(m_customPropertiesJson, allocator).Move(), allocator);
+        }
+
+        if (propertiesJson.MemberCount())
+        {
+            json.AddMember("properties", propertiesJson, allocator);
+        }
+    }
+}
+
+MultiplayerSessionMember* MultiplayerSessionMember::Get(const XblMultiplayerSessionMember* member)
+{
+    if (member == nullptr || member->Internal == nullptr)
+    {
+        XSAPI_ASSERT(false);
+    }
+    return static_cast<MultiplayerSessionMember*>(member->Internal);
+}
+
+void MultiplayerSessionMember::SetExternalMemberPointer(XblMultiplayerSessionMember& member)
+{
+    auto internalMember = Get(&member);
+    internalMember->m_member = &member;
+
+    member.CustomConstantsJson = internalMember->m_customConstantsJson.empty() ? nullptr :internalMember->m_customConstantsJson.data();
+    member.SecureDeviceBaseAddress64 = internalMember->m_secureDeviceAddressBase64.empty() ? nullptr : internalMember->m_secureDeviceAddressBase64.data();
+    member.CustomPropertiesJson = internalMember->m_customPropertiesString.empty() ? nullptr : internalMember->m_customPropertiesString.data();
+    member.MatchmakingResultServerMeasurementsJson = internalMember->m_matchmakingResultServerMeasurementsJson.empty() ? nullptr : internalMember->m_matchmakingResultServerMeasurementsJson.data();
+    member.ServerMeasurementsJson = internalMember->m_serverMeasurementsJson.empty() ? nullptr : internalMember->m_serverMeasurementsJson.data();
+    member.MembersInGroupIds = internalMember->m_membersInGroupIds.empty() ? nullptr : internalMember->m_membersInGroupIds.data();
+    member.QosMeasurementsJson = internalMember->m_qosMeasurementsJson.empty() ? nullptr : internalMember->m_qosMeasurementsJson.data();
+    member.Groups = internalMember->m_groups.empty() ? nullptr : internalMember->m_groups.data();
+    member.Encounters = internalMember->m_encounters.empty() ? nullptr : internalMember->m_encounters.data();
+    member.Roles = internalMember->m_roles.empty() ? nullptr : internalMember->m_roles.data();
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_END

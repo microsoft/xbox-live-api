@@ -3,291 +3,296 @@
 
 
 #include "pch.h"
-#include <atomic>
-#include "pplx/pplxtasks.h"
 #include "multiplayer_manager_internal.h"
-#include "xsapi/services.h"
-#include "user_context.h"
+#include "multiplayer_internal.h"
 
 using namespace xbox::services;
+using namespace xbox::services::legacy;
+using namespace xbox::services::system;
 using namespace xbox::services::multiplayer;
 using namespace xbox::services::matchmaking;
-using namespace xbox::services::real_time_activity;
-using namespace pplx;
-#if TV_API
+#if HC_PLATFORM == HC_PLATFORM_XDK
 using namespace Windows::Xbox::Networking;
 #endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 
-multiplayer_match_client::multiplayer_match_client(
-    _In_ std::shared_ptr<multiplayer_local_user_manager> localUserManager
-    ) :
-    m_multiplayerLocalUserManager(localUserManager),
-    m_matchStatus(match_status::none),
-    m_disableNextTimer(false),
-    m_preservingMatchmakingSession(false)
+MultiplayerMatchClient::MultiplayerMatchClient(
+    const TaskQueue& queue,
+    _In_ std::shared_ptr<MultiplayerLocalUserManager> localUserManager
+) noexcept :
+    m_queue{ queue.DeriveWorkerQueue() },
+    m_multiplayerLocalUserManager{ localUserManager }
 {
-    m_getSessionTask = pplx::create_task([]{});
 }
 
-void
-multiplayer_match_client::deep_copy_if_updated(
-    _In_ const multiplayer_match_client& other
-    )
+void MultiplayerMatchClient::deep_copy_if_updated(
+    _In_ const MultiplayerMatchClient& other
+)
 {
-    std::lock_guard<std::mutex> lock(m_lock.get());
+    std::lock_guard<std::mutex> lock(m_lock);
     if (other.m_matchSession == nullptr)
     {
         m_matchSession = nullptr;
     }
-    else if (m_matchSession == nullptr || other.m_matchSession->change_number() > m_matchSession->change_number())
+    else if (m_matchSession == nullptr || other.m_matchSession->SessionInfo().ChangeNumber > m_matchSession->SessionInfo().ChangeNumber)
     {
-        m_matchSession = other.m_matchSession->_Create_deep_copy();
+        m_matchSession = MakeShared<XblMultiplayerSession>(*other.m_matchSession);
     }
 }
 
-const std::vector<multiplayer_event>&
-multiplayer_match_client::multiplayer_event_queue()
+const MultiplayerEventQueue&
+MultiplayerMatchClient::EventQueue()
 {
     return m_multiplayerEventQueue;
 }
 
-std::vector<multiplayer_event>
-multiplayer_match_client::do_work()
+MultiplayerEventQueue
+MultiplayerMatchClient::DoWork()
 {
-    switch (static_cast<enum match_status>(m_matchStatus))
+    switch (static_cast<XblMultiplayerMatchStatus>(m_matchStatus))
     {
-        case match_status::none:
+        case XblMultiplayerMatchStatus::None:
         {
-            return std::vector<multiplayer_event>();
+            return MultiplayerEventQueue();
         }
 
-        case match_status::searching:
+        case XblMultiplayerMatchStatus::Searching:
         {
-            check_next_timer();
+            CheckNextTimer();
             break;
         }
 
-        case match_status::found:
-        case match_status::canceled:
+        case XblMultiplayerMatchStatus::Found:
+        case XblMultiplayerMatchStatus::Canceled:
         {
             // Nothing to do here. Wait for match_status_changed event.
             break;
         }
 
-        case match_status::joining:
+        case XblMultiplayerMatchStatus::Joining:
         {
-            if(m_joinTargetSessionTask.is_done())
+            if(m_joinTargetSessionComplete)
             {
-                handle_session_joined();
+                HandleSessionJoined();
             }
             break;
         }
 
-        case match_status::waiting_for_remote_clients_to_join:
-        case match_status::waiting_for_remote_clients_to_upload_qos:
+        case XblMultiplayerMatchStatus::WaitingForRemoteClientsToJoin:
+        case XblMultiplayerMatchStatus::WaitingForRemoteClientsToUploadQos:
         {
-            handle_initialization_state_changed(session());
+            HandleInitializationStateChanged(Session());
             break;
         }
 
-        case match_status::measuring:
+        case XblMultiplayerMatchStatus::Measuring:
         {
             // Waiting for title to perform qos and provide qos measurements (via set_quality_of_service_measurements)
-            handle_initialization_state_changed(session());
+            HandleInitializationStateChanged(Session());
             break;
         }
 
-        case match_status::evaluating:
+        case XblMultiplayerMatchStatus::Evaluating:
         {
             // Nothing to do here. Wait for initialization stage changed event.
             break;
         }
+            
+        default:
+            break;
     }
 
-    std::vector<multiplayer_event> eventQueue;
+    MultiplayerEventQueue eventQueue;
     {
         std::lock_guard<std::mutex> lock(m_multiplayerEventQueueLock);
         eventQueue = m_multiplayerEventQueue;
-        m_multiplayerEventQueue.clear();
+        m_multiplayerEventQueue.Clear();
     }
 
     return eventQueue;
 }
 
 void
-multiplayer_match_client::disable_next_timer(bool value)
+MultiplayerMatchClient::DisableNextTimer(bool value)
 {
     m_disableNextTimer = value;
 }
 
 void
-multiplayer_match_client::check_next_timer()
+MultiplayerMatchClient::CheckNextTimer()
 {
     if (m_disableNextTimer) return;     // Only used for Unit tests
 
-    int64_t delta = m_nextTimerToFetchSession.to_interval() - utility::datetime::utc_now().to_interval();
+    int64_t delta = m_nextTimerToFetchSession.to_interval() - xbox::services::datetime::utc_now().to_interval();
     if ( delta < 0)
     {
-        if (m_matchStatus == match_status::searching)
+        if (m_matchStatus == XblMultiplayerMatchStatus::Searching)
         {
-            std::shared_ptr<xbox_live_context_impl> primaryContext = m_multiplayerLocalUserManager->get_primary_context();
-            if (primaryContext == nullptr) return;
-            if (!m_getSessionTask.is_done()) return;
+            std::shared_ptr<XblContext> primaryContext = m_multiplayerLocalUserManager->GetPrimaryContext();
+            if (primaryContext == nullptr || m_getSessionInProgress)
+            {
+                return;
+            }
 
             // Fetch ticket session
-            std::weak_ptr<multiplayer_match_client> thisWeakPtr = shared_from_this();
-            m_getSessionTask = primaryContext->multiplayer_service().get_current_session(m_matchTicketSessionRef)
-            .then([thisWeakPtr](xbox_live_result<std::shared_ptr<multiplayer_session>> sessionResult)
+            std::weak_ptr<MultiplayerMatchClient> weakSessionWriter = shared_from_this();
+            m_getSessionInProgress = true;
+
+            primaryContext->MultiplayerService()->GetCurrentSession(m_matchTicketSessionRef, { m_queue,
+            [weakSessionWriter](Result<std::shared_ptr<XblMultiplayerSession>> sessionResult)
             {
-                if (!sessionResult.err())
+                std::shared_ptr<MultiplayerMatchClient> pThis(weakSessionWriter.lock());
+                if (pThis != nullptr)
                 {
-                    std::shared_ptr<multiplayer_match_client> pThis(thisWeakPtr.lock());
-                    if (pThis != nullptr)
+                    if (SUCCEEDED(sessionResult.Hresult()))
                     {
-                        pThis->handle_match_status_changed(sessionResult.payload());
+                        pThis->HandleMatchStatusChanged(sessionResult.Payload());
                     }
+                    pThis->m_getSessionInProgress = false;
                 }
+            }
             });
         }
         else
         {
-            get_latest_session();
+            GetLatestSession();
         }
     }
 }
 
 void
-multiplayer_match_client::handle_qos_measurements()
+MultiplayerMatchClient::HandleQosMeasurements()
 {
-    std::map<string_t, string_t> addressDeviceTokenMap;
-    for (const auto& member : session()->members())
+    std::shared_ptr<PerformQosMeasurementsEventArgs> performQosEventArgs = std::make_shared<PerformQosMeasurementsEventArgs>();
+
+    XblMultiplayerSessionReadLockGuard sessionSafe(Session());
+    for (const auto& member : sessionSafe.Members())
     {
-        if (!member->is_current_user())
+        if (!member.IsCurrentUser)
         {
-            std::vector<unsigned char> base64ConnectionAddress(utility::conversions::from_base64(std::move(member->secure_device_base_address64())));
-            const string_t& secureDeviceAddress = string_t(base64ConnectionAddress.begin(), base64ConnectionAddress.end());
+            std::vector<unsigned char> base64ConnectionAddress(xbox::services::convert::from_base64(utils::string_t_from_internal_string(member.SecureDeviceBaseAddress64)));
+            const xsapi_internal_string& secureDeviceAddress = xsapi_internal_string(base64ConnectionAddress.begin(), base64ConnectionAddress.end());
             if (!secureDeviceAddress.empty())
             {
-                addressDeviceTokenMap[secureDeviceAddress] = member->device_token();
+                performQosEventArgs->AddRemoteClient(secureDeviceAddress, member.DeviceToken.Value);
             }
         }
     }
 
-    if (addressDeviceTokenMap.size() > 0)
+    if (performQosEventArgs->remoteClients.size() > 0)
     {
-        m_matchStatus = match_status::measuring;
+        m_matchStatus = XblMultiplayerMatchStatus::Measuring;
 
-        std::shared_ptr<perform_qos_measurements_event_args> performQosEventArgs = std::make_shared<perform_qos_measurements_event_args>(addressDeviceTokenMap);
-        multiplayer_event multiplayerEvent(
-            xbox_live_error_code::no_error,
-            std::string(),
-            multiplayer_event_type::perform_qos_measurements,
-            std::dynamic_pointer_cast<perform_qos_measurements_event_args>(performQosEventArgs),
-            multiplayer_session_type::game_session
+        {
+            std::lock_guard<std::mutex> lock(m_multiplayerEventQueueLock);
+            m_multiplayerEventQueue.AddEvent(
+                XblMultiplayerEventType::PerformQosMeasurements,
+                XblMultiplayerSessionType::GameSession,
+                std::dynamic_pointer_cast<PerformQosMeasurementsEventArgs>(performQosEventArgs)
             );
-
-        std::lock_guard<std::mutex> lock(m_multiplayerEventQueueLock);
-        m_multiplayerEventQueue.push_back(multiplayerEvent);
+        }
     }
     else
     {
         // If clients fail to join, the stage advances to "measuring".
         // Wait until memberInitialization either succeeds or fails.
-        check_next_timer();
+        CheckNextTimer();
     }
 }
 
 void
-multiplayer_match_client::handle_find_match_completed(
-    _In_ std::error_code errorCode,
-    _In_ std::string errorMessage
+MultiplayerMatchClient::HandleFindMatchCompleted(
+    _In_ Result<void> error
     )
 {
-    multiplayer_measurement_failure failure = multiplayer_measurement_failure::unknown;
+    XblMultiplayerMeasurementFailure failure = XblMultiplayerMeasurementFailure::Unknown;
 
-    auto matchSession = session();
-    if (matchSession != nullptr && matchSession->current_user() != nullptr)
+    auto matchSession = Session();
+    XblMultiplayerSessionReadLockGuard matchSessionSafe(matchSession);
+    if (matchSession != nullptr && matchSessionSafe.CurrentUser() != nullptr)
     {
-        failure = matchSession->current_user()->initialization_failure_cause();
+        failure = matchSessionSafe.CurrentUser()->InitializationFailureCause;
     }
 
-    std::shared_ptr<find_match_completed_event_args> findMatchEventArgs = std::make_shared<find_match_completed_event_args>(
+    std::shared_ptr<FindMatchCompletedEventArgs> findMatchEventArgs = std::make_shared<FindMatchCompletedEventArgs>(
         m_matchStatus,
         failure
         );
 
-    multiplayer_event multiplayerEvent(
-        errorCode,
-        errorMessage,
-        multiplayer_event_type::find_match_completed,
-        std::dynamic_pointer_cast<find_match_completed_event_args>(findMatchEventArgs),
-        multiplayer_session_type::game_session
+    {
+        std::lock_guard<std::mutex> lock(m_multiplayerEventQueueLock);
+        m_multiplayerEventQueue.AddEvent(
+            XblMultiplayerEventType::FindMatchCompleted,
+            XblMultiplayerSessionType::GameSession,
+            std::dynamic_pointer_cast<FindMatchCompletedEventArgs>(findMatchEventArgs),
+            error
         );
-
-    std::lock_guard<std::mutex> lock(m_multiplayerEventQueueLock);
-    m_multiplayerEventQueue.push_back(multiplayerEvent);
+    }
 }
 
 void
-multiplayer_match_client::handle_match_status_changed(
-    _In_ std::shared_ptr<multiplayer_session> matchSession
+MultiplayerMatchClient::HandleMatchStatusChanged(
+    _In_ std::shared_ptr<XblMultiplayerSession> matchSession
     )
 {
-    matchmaking_status status = matchSession->matchmaking_server().status();
-    switch (status)
+    switch (matchSession->MatchmakingServer()->Status)
     {
-        case matchmaking_status::searching:
+        case XblMatchmakingStatus::Searching:
         {
-            xbox::services::multiplayer::manager::match_status expected = match_status::none;
-            if (m_matchStatus.compare_exchange_strong(expected, match_status::searching, std::memory_order_release))
+            XblMultiplayerMatchStatus expected = XblMultiplayerMatchStatus::None;
+            if (m_matchStatus.compare_exchange_strong(expected, XblMultiplayerMatchStatus::Searching, std::memory_order_release))
             {
                 // Wait for status to change on ticket session or fetch after 2 mins.
-                m_nextTimerToFetchSession = utility::datetime::utc_now() + utility::datetime::from_seconds(120);
+                m_nextTimerToFetchSession = xbox::services::datetime::utc_now() + xbox::services::datetime::from_seconds(120);
             }
             else 
             {
                 if (m_disableNextTimer) return;     // Only used for Unit tests
 
-                int64_t delta = m_nextTimerToFetchSession.to_interval() - utility::datetime::utc_now().to_interval();
+                int64_t delta = m_nextTimerToFetchSession.to_interval() - xbox::services::datetime::utc_now().to_interval();
                 if ( delta < 0)
                 {
                     // Delete the match ticket and let the title know that it failed.
-                    if (!m_hopperName.empty() && !m_matchTicketResponse.match_ticket_id().empty())
+                    if (!m_hopperName.empty() && m_matchTicketResponse.matchTicketId[0] != '\0')
                     {
                         // Only the host has the ticketId info. Since we aren't the host who started the match, we cannot cancel it either.
-                        std::shared_ptr<xbox_live_context_impl> primaryContext = m_multiplayerLocalUserManager->get_primary_context();
-                        if (primaryContext == nullptr) return;
+                        std::shared_ptr<XblContext> primaryContext = m_multiplayerLocalUserManager->GetPrimaryContext();
+                        if (primaryContext == nullptr)
+                        {
+                            return;
+                        }
 
-                        primaryContext->matchmaking_service().delete_match_ticket(
-                            xbox::services::xbox_live_app_config::get_app_config_singleton()->scid(),
+                        auto asyncBlock = utils::MakeDefaultAsyncBlock(m_queue.GetHandle());
+                        primaryContext->MatchmakingService()->DeleteMatchTicketAsync(
+                            AppConfig::Instance()->Scid(),
                             m_hopperName,
-                            m_matchTicketResponse.match_ticket_id()
+                            m_matchTicketResponse.matchTicketId,
+                            asyncBlock
                         );
                     }
 
-                    m_matchStatus = match_status::failed;
-                    handle_find_match_completed(xbox_live_error_code::generic_error, "Matchmaking request failed.");
+                    m_matchStatus = XblMultiplayerMatchStatus::Failed;
+                    HandleFindMatchCompleted({ xbl_error_code::generic_error, "Timer exceeded" });
                 }
             }
             break;
         }
-        case matchmaking_status::expired:
+        case XblMatchmakingStatus::Expired:
         {
-            m_matchStatus = match_status::expired;
-            handle_find_match_completed(xbox_live_error_code::generic_error, "Matchmaking request expired.");
+            m_matchStatus = XblMultiplayerMatchStatus::Expired;
+            HandleFindMatchCompleted({ xbl_error_code::generic_error, "Match status: Expired" });
             break;
         }
-        case matchmaking_status::canceled:
+        case XblMatchmakingStatus::Canceled:
         {
-            m_matchStatus = match_status::canceled;
-            handle_find_match_completed(xbox_live_error_code::generic_error, "Matchmaking request was canceled.");
+            m_matchStatus = XblMultiplayerMatchStatus::Canceled;
+            HandleFindMatchCompleted({ xbl_error_code::generic_error, "Match status: Canceled" });
             break;
         }
-        case matchmaking_status::found:
+        case XblMatchmakingStatus::Found:
         {
-            handle_match_found(matchSession);
+            HandleMatchFound(matchSession);
             break;
         }
         default:
@@ -296,422 +301,570 @@ multiplayer_match_client::handle_match_status_changed(
 }
 
 void
-multiplayer_match_client::handle_initialization_state_changed(
-    _In_ std::shared_ptr<multiplayer_session> matchSession
+MultiplayerMatchClient::HandleInitializationStateChanged(
+    _In_ std::shared_ptr<XblMultiplayerSession> matchSession
     )
 {
-    update_session(matchSession);
-    if (matchSession->intializing_episode() > 0)
+    UpdateSession(matchSession);
+    if (matchSession->InitializationInfo().Episode > 0)
     {
-        switch (matchSession->initialization_stage())
+        switch (matchSession->InitializationInfo().Stage)
         {
-            case multiplayer_initialization_stage::joining:
+            case XblMultiplayerInitializationStage::Joining:
             {
-                check_next_timer();
+                CheckNextTimer();
                 break;
             }
-
-            case multiplayer_initialization_stage::measuring:
+            case XblMultiplayerInitializationStage::Measuring:
             {
-                if (m_matchStatus == match_status::waiting_for_remote_clients_to_upload_qos ||
-                    m_matchStatus == match_status::measuring)
+                if (m_matchStatus == XblMultiplayerMatchStatus::WaitingForRemoteClientsToUploadQos ||
+                    m_matchStatus == XblMultiplayerMatchStatus::Measuring)
                 {
-                    check_next_timer();
+                    CheckNextTimer();
                 }
-                else if (m_matchStatus == match_status::waiting_for_remote_clients_to_join)
+                else if (m_matchStatus == XblMultiplayerMatchStatus::WaitingForRemoteClientsToJoin)
                 {
-                    handle_qos_measurements();
+                    HandleQosMeasurements();
                 }
                 break;
             }
-
-            case multiplayer_initialization_stage::failed:
+            case XblMultiplayerInitializationStage::Failed:
             {
-                m_matchStatus = match_status::failed;
-                handle_find_match_completed(xbox_live_error_code::generic_error, "multiplayer_initialization_stage failed");
+                m_matchStatus = XblMultiplayerMatchStatus::Failed;
+                HandleFindMatchCompleted({ xbl_error_code::generic_error, "Initialization failed" });
                 return;
             }
+                
+            default:
+                break;
         }
     }
     else
     {
-        if (matchSession->current_user()->initialization_failure_cause() == multiplayer_measurement_failure::none)
+        XblMultiplayerSessionReadLockGuard matchSessionSafe(matchSession);
+        if (matchSessionSafe.CurrentUser()->InitializationFailureCause == XblMultiplayerMeasurementFailure::None)
         {
             // QoS succeeded.
-            m_matchStatus = match_status::completed;
-            handle_find_match_completed(xbox_live_error_code::no_error, std::string());
+            m_matchStatus = XblMultiplayerMatchStatus::Completed;
+            HandleFindMatchCompleted({ xbl_error_code::no_error });
         }
         else
         {
             // Resubmit
-            m_matchStatus = match_status::resubmitting;
-            handle_find_match_completed(xbox_live_error_code::generic_error, "multiplayer_initialization_stage failed");
+            m_matchStatus = XblMultiplayerMatchStatus::Resubmitting;
+            HandleFindMatchCompleted({ xbl_error_code::generic_error, "Measurement failure" });
         }
     }
 }
 
-xbox_live_result<void>
-multiplayer_match_client::find_match(
-    _In_ std::shared_ptr<multiplayer_session> session,
+HRESULT
+MultiplayerMatchClient::FindMatch(
+    _In_ std::shared_ptr<XblMultiplayerSession> session,
     _In_ bool preserveSession
     )
 {
-    return find_match(m_hopperName, m_attributes, m_timeout, session, preserveSession);
+    return FindMatch(m_hopperName, m_attributes, m_timeout, session, preserveSession);
 }
 
-xbox_live_result<void>
-multiplayer_match_client::find_match(
-    _In_ const string_t& hopperName,
-    _In_ const web::json::value& attributes,
+HRESULT
+MultiplayerMatchClient::FindMatch(
+    _In_ const xsapi_internal_string& hopperName,
+    _In_ JsonValue& attributes,
     _In_ const std::chrono::seconds& timeout,
-    _In_ std::shared_ptr<multiplayer_session> session,
+    _In_ std::shared_ptr<XblMultiplayerSession> session,
     _In_ bool preserveSession
     )
 {
-    std::shared_ptr<xbox_live_context_impl> primaryContext = m_multiplayerLocalUserManager->get_primary_context();
-    if( primaryContext == nullptr || session == nullptr)
-    {
-        return xbox_live_result<void>(xbox_live_error_code::logic_error, "No local user added. Call add_local_user() first.");
-    }
+    std::shared_ptr<XblContext> primaryContext = m_multiplayerLocalUserManager->GetPrimaryContext();
+    RETURN_HR_IF_LOG_DEBUG(primaryContext == nullptr || session == nullptr, E_UNEXPECTED, "No local user added. Call add_local_user() first.");
 
-    xbox::services::multiplayer::manager::match_status expected = match_status::none;
-    if (!m_matchStatus.compare_exchange_strong(expected, match_status::submitting_match_ticket, std::memory_order_release))
-    {
-         return xbox_live_result<void>(xbox_live_error_code::logic_error, "Match search already in progress.");
-    }
+    XblMultiplayerMatchStatus expected = XblMultiplayerMatchStatus::None;
+    RETURN_HR_IF_LOG_DEBUG(!m_matchStatus.compare_exchange_strong(expected, XblMultiplayerMatchStatus::SubmittingMatchTicket, std::memory_order_release), E_UNEXPECTED, "Match search already in progress.");
 
     if (preserveSession)
     {
-        update_session(session);
+        UpdateSession(session);
     }
     else
     {
-        update_session(nullptr);
+        UpdateSession(nullptr);
     }
 
     m_hopperName = hopperName;
-    m_attributes = attributes;
+    JsonUtils::CopyFrom(m_attributes, attributes);
     m_timeout = timeout;
     m_preservingMatchmakingSession = preserveSession;
-    m_matchTicketSessionRef = session->session_reference();
+    m_matchTicketSessionRef = session->SessionReference();
 
-    std::weak_ptr<multiplayer_match_client> thisWeakPtr = shared_from_this();
-    primaryContext->matchmaking_service().create_match_ticket(
-        session->session_reference(),
-        session->session_reference().service_configuration_id(),
-        hopperName,
-        timeout,
-        preserveSession ? preserve_session_mode::always : preserve_session_mode::never,
-        attributes
-        )
-    .then([thisWeakPtr, timeout](xbox_live_result<create_match_ticket_response> result)
+    std::weak_ptr<MultiplayerMatchClient> thisWeakPtr = shared_from_this();
+
+    auto asyncBlock = utils::MakeAsyncBlock(
+        m_queue.GetHandle(),
+        utils::store_weak_ptr<MultiplayerMatchClient>(shared_from_this()),
+        [](XAsyncBlock* asyncBlock)
     {
-        std::shared_ptr<multiplayer_match_client> pThis(thisWeakPtr.lock());
+        auto pThis = utils::get_shared_ptr<MultiplayerMatchClient>(asyncBlock->context);
         if (pThis != nullptr)
         {
-            if (!result.err())
+            XblCreateMatchTicketResponse result;
+            auto hr = XblMatchmakingCreateMatchTicketResult(asyncBlock, &result);              
+            if (SUCCEEDED(hr))
             {
-                pThis->m_matchTicketResponse = result.payload();
-                pThis->m_matchStatus = match_status::searching;
-                pThis->m_nextTimerToFetchSession = utility::datetime::utc_now() 
-                    + utility::datetime::from_seconds(static_cast<int32_t>(timeout.count()))
-                    + utility::datetime::from_seconds(5);   // some extra delay to be safe
+                pThis->m_matchTicketResponse = result;
+                pThis->m_matchStatus = XblMultiplayerMatchStatus::Searching;
+                pThis->m_nextTimerToFetchSession = xbox::services::datetime::utc_now()
+                   + xbox::services::datetime::from_seconds(static_cast<int32_t>(pThis ->m_timeout.count()))
+                   + xbox::services::datetime::from_seconds(5);   // some extra delay to be safe
             }
-            else
+
+            if (FAILED(hr))
             {
-                pThis->m_matchStatus = match_status::failed;
-                pThis->handle_find_match_completed(result.err(), result.err_message());
+                pThis->m_matchStatus = XblMultiplayerMatchStatus::Failed;
+                pThis->HandleFindMatchCompleted({ hr, "MatchTicketResult failed" });
             }
         }
+        Delete(asyncBlock);
     });
 
-    return xbox_live_result<void>();
+    return primaryContext->MatchmakingService()->CreateMatchTicket(
+        session->SessionReference(),
+        session->SessionReference().Scid,
+        hopperName,
+        timeout,
+        preserveSession ? XblPreserveSessionMode::Always : XblPreserveSessionMode::Never,
+        attributes,
+        asyncBlock);
 }
 
 void
-multiplayer_match_client::cancel_match()
+MultiplayerMatchClient::CancelMatch()
 {
-    std::shared_ptr<xbox_live_context_impl> primaryContext = m_multiplayerLocalUserManager->get_primary_context();
+    std::shared_ptr<XblContext> primaryContext = m_multiplayerLocalUserManager->GetPrimaryContext();
     if (primaryContext == nullptr)
     {
          return;
     }
 
-    if (m_matchStatus == match_status::none || m_matchStatus == match_status::expired ||
-        m_matchStatus == match_status::canceled || m_matchStatus == match_status::failed)
+    if (m_matchStatus == XblMultiplayerMatchStatus::None || m_matchStatus == XblMultiplayerMatchStatus::Expired ||
+        m_matchStatus == XblMultiplayerMatchStatus::Canceled || m_matchStatus == XblMultiplayerMatchStatus::Failed)
     {
         return;
     }
 
-    if (m_hopperName.empty() || m_matchTicketResponse.match_ticket_id().empty())
+    if (m_hopperName.empty() && m_matchTicketResponse.matchTicketId[0] != '\0')
     {
         // Since we aren't the host who started the match, we cannot cancel it either.
         return;
     }
-    
-    m_matchStatus = match_status::canceling;
-    primaryContext->matchmaking_service().delete_match_ticket(
-        xbox::services::xbox_live_app_config::get_app_config_singleton()->scid(),
+
+    m_matchStatus = XblMultiplayerMatchStatus::Canceling;
+    auto asyncBlock = utils::MakeDefaultAsyncBlock(m_queue.GetHandle());
+    primaryContext->MatchmakingService()->DeleteMatchTicketAsync(
+        AppConfig::Instance()->Scid(),
         m_hopperName,
-        m_matchTicketResponse.match_ticket_id()
-        );
+        m_matchTicketResponse.matchTicketId,
+        asyncBlock
+    );
 }
 
-xbox::services::multiplayer::manager::match_status
-multiplayer_match_client::match_status() const
+XblMultiplayerMatchStatus
+MultiplayerMatchClient::MatchStatus() const
 {
     return m_matchStatus;
 }
 
 void
-multiplayer_match_client::set_match_status(
-    _In_ xbox::services::multiplayer::manager::match_status status
+MultiplayerMatchClient::SetMatchStatus(
+    _In_ XblMultiplayerMatchStatus status
     )
 {
     m_matchStatus = status;
 }
 
-std::chrono::seconds
-multiplayer_match_client::estimated_match_wait_time() const
+const std::chrono::seconds
+MultiplayerMatchClient::EstimatedMatchWaitTime() const
 {
-    return m_matchTicketResponse.estimated_wait_time(); 
+    return std::chrono::seconds(m_matchTicketResponse.estimatedWaitTime);
 }
 
 void
-multiplayer_match_client::on_session_changed(
-    _In_ const multiplayer_session_change_event_args& args
+MultiplayerMatchClient::OnSessionChanged(
+    _In_ const XblMultiplayerSessionChangeEventArgs& args
     )
 {
-    auto matchSession = session();
+    auto matchSession = Session();
     if (matchSession != nullptr &&
-        multiplayer_manager_utils::do_session_references_match(matchSession->session_reference(), args.session_reference()) &&
-        args.change_number() > matchSession->change_number())
+        matchSession->SessionReference() == args.SessionReference &&
+        args.ChangeNumber > matchSession->SessionInfo().ChangeNumber)
     {
-        get_latest_session();
+        GetLatestSession();
     }
 }
 
 void 
-multiplayer_match_client::update_session(
-    _In_ std::shared_ptr<multiplayer_session> session
+MultiplayerMatchClient::UpdateSession(
+    _In_ std::shared_ptr<XblMultiplayerSession> session
     )
 {
-    std::lock_guard<std::mutex> lock(m_lock.get());
+    std::lock_guard<std::mutex> lock(m_lock);
 
     if (m_matchSession == nullptr || session == nullptr)
     {
         m_matchSession = session;
     }
-    else if(multiplayer_manager_utils::do_sessions_match(m_matchSession, session) &&
-        session->change_number() > m_matchSession->change_number())
+    else if(XblMultiplayerSession::DoSessionsMatch(m_matchSession, session) &&
+        session->SessionInfo().ChangeNumber > m_matchSession->SessionInfo().ChangeNumber)
     {
         m_matchSession = session;
-        m_nextTimerToFetchSession = utility::datetime::utc_now() + utility::datetime::from_seconds(session->date_of_next_timer() - session->date_of_session());
+        m_nextTimerToFetchSession = xbox::services::datetime::utc_now() + xbox::services::datetime::from_seconds(static_cast<uint32_t>(session->SessionInfo().NextTimer - session->TimeOfSession()));
     }
 }
 
-std::shared_ptr<multiplayer_session> 
-multiplayer_match_client::session()
+std::shared_ptr<XblMultiplayerSession> 
+MultiplayerMatchClient::Session()
 {
-    std::lock_guard<std::mutex> lock(m_lock.get());
+    std::lock_guard<std::mutex> lock(m_lock);
     return m_matchSession;
 }
 
 void
-multiplayer_match_client::handle_session_joined()
+MultiplayerMatchClient::HandleSessionJoined()
 {
-    auto result = m_joinTargetSessionTask.get();
-    if (result.err())
+    if (FAILED(m_joinTargetSessionResult.Hresult()))
     {
-        m_matchStatus = match_status::failed;
-        handle_find_match_completed(result.err(), result.err_message());
+        m_matchStatus = XblMultiplayerMatchStatus::Failed;
+        HandleFindMatchCompleted({ m_joinTargetSessionResult.Hresult(), "JoinSession failed" });
         return;
     }
 
-    if (session()->intializing_episode() == 0)
+    if (Session()->InitializationInfo().Episode == 0)
     {
-        m_matchStatus = match_status::completed;
-        handle_find_match_completed(xbox_live_error_code::no_error, std::string());
+        m_matchStatus = XblMultiplayerMatchStatus::Completed;
+        HandleFindMatchCompleted({ xbl_error_code::no_error });
     }
     else
     {
-        m_matchStatus = match_status::waiting_for_remote_clients_to_join;
+        m_matchStatus = XblMultiplayerMatchStatus::WaitingForRemoteClientsToJoin;
     }
 }
 
-void
-multiplayer_match_client::handle_match_found(
-    _In_ std::shared_ptr<multiplayer_session> currentSession
-    )
+void MultiplayerMatchClient::HandleMatchFound(
+    _In_ std::shared_ptr<XblMultiplayerSession> currentSession
+) noexcept
 {
-    std::shared_ptr<xbox_live_context_impl> primaryXboxLiveContext = m_multiplayerLocalUserManager->get_primary_context();
+    std::shared_ptr<XblContext> primaryXboxLiveContext = m_multiplayerLocalUserManager->GetPrimaryContext();
     if(primaryXboxLiveContext == nullptr)
     {
-        m_matchStatus = match_status::failed;
-        handle_find_match_completed(xbox_live_error_code::runtime_error, "No primary xbox live context.");
+        m_matchStatus = XblMultiplayerMatchStatus::Failed;
+        // No primary xbox live context
+        HandleFindMatchCompleted({ xbl_error_code::runtime_error, "No primary xbox live context" });
         return;
     }
 
-    m_matchStatus = match_status::found;
-    auto targetSessionRef = currentSession->matchmaking_server().target_session_ref();
-    auto targetGameSession = std::make_shared<multiplayer_session>(
-        primaryXboxLiveContext->xbox_live_user_id(),
-        targetSessionRef
+    m_matchStatus = XblMultiplayerMatchStatus::Found;
+    auto& targetSessionRef = currentSession->MatchmakingServer()->TargetSessionRef;
+    auto targetGameSession = std::make_shared<XblMultiplayerSession>(
+        primaryXboxLiveContext->Xuid(),
+        &targetSessionRef,
+        nullptr
         );
 
-    auto gameClient = multiplayer_manager::get_singleton_instance()->_Game_client();
+    auto state{ GlobalState::Get() };
+    auto gameClient = state ? state->MultiplayerManager()->GameClient() : nullptr;
     if (m_preservingMatchmakingSession && gameClient != nullptr)
     {
-        auto gameSession = gameClient->session();
-        if (gameSession != nullptr && 
-            multiplayer_manager_utils::do_session_references_match(gameSession->session_reference(), targetSessionRef))
+        auto gameSession = gameClient->Session();
+        if (gameSession != nullptr && gameSession->SessionReference() == targetSessionRef)
         {
             targetGameSession = gameSession;
         }
     }
 
-    update_session(targetGameSession);
-    m_joinTargetSessionTask = join_session_helper(targetGameSession);
+    UpdateSession(targetGameSession);
+
+    JoinSession(targetGameSession,
+        [
+            weakThis = std::weak_ptr<MultiplayerMatchClient>{ shared_from_this() }
+        ]
+    (Result<std::shared_ptr<XblMultiplayerSession>> result)
+    {
+        auto pThis = weakThis.lock();
+        if (pThis)
+        {
+            // Perhaps its OK to call handle_session_joined() immediately here, but to maintain behavioral parody with
+            // pplx code, differ that until the next do_work call
+            pThis->m_joinTargetSessionResult = std::move(result);
+            pThis->m_joinTargetSessionComplete = true;
+        }
+    });
 }
 
-pplx::task<xbox_live_result<std::shared_ptr<multiplayer_session>>>
-multiplayer_match_client::join_session_helper(
-    _In_ std::shared_ptr<multiplayer_session> session
-    )
+HRESULT MultiplayerMatchClient::JoinSession(
+    _In_ std::shared_ptr<XblMultiplayerSession> session,
+    _In_ MultiplayerSessionCallback callback
+) noexcept
 {
-    std::weak_ptr<multiplayer_match_client> thisWeakPtr = shared_from_this();
-    auto task = pplx::create_task([thisWeakPtr, session]()
+    // Join Match session for each local user.
+    struct JoinSessionOperation : public std::enable_shared_from_this<JoinSessionOperation>
     {
-        std::shared_ptr<multiplayer_match_client> pThis(thisWeakPtr.lock());
-        RETURN_CPP_IF(pThis == nullptr, std::shared_ptr<multiplayer_session>, xbox_live_error_code::generic_error, "matchmaking_client_manager class was destroyed.");
-        
-        xbox_live_result<std::shared_ptr<multiplayer_session>> multiplayerSessionResult;
-        pThis->m_matchStatus = match_status::joining;
-        if (pThis->m_preservingMatchmakingSession)
+        JoinSessionOperation(
+            std::shared_ptr<MultiplayerMatchClient> matchClient,
+            std::shared_ptr<XblMultiplayerSession> session,
+            MultiplayerSessionCallback&& callback
+        ) noexcept :
+            m_matchClient{ std::move(matchClient) },
+            m_latestSession{ std::move(session) },
+            m_callback{ std::move(callback) }
         {
-            // Matchmaking session was preserved so we're already part of it
-            return xbox_live_result<std::shared_ptr<multiplayer_session>>(session);
-        }
-
-        auto xboxLiveContextMap = pThis->m_multiplayerLocalUserManager->get_local_user_map();
-        for(auto xboxLiveContext : xboxLiveContextMap)
-        {
-            auto localUser =  xboxLiveContext.second;
-            if (localUser != nullptr)
+            for (auto& pair : m_matchClient->m_multiplayerLocalUserManager->GetLocalUserMap())
             {
-                auto updatedSession = std::make_shared<multiplayer_session>(localUser->xbox_user_id(), session->session_reference());
-                updatedSession->join();
-                updatedSession->set_current_user_secure_device_address_base64(localUser->connection_address());
-                updatedSession->set_session_change_subscription(multiplayer_session_change_types::everything);
-                auto writeSessionResult = localUser->context()->multiplayer_service().write_session(updatedSession, multiplayer_session_write_mode::update_or_create_new).get();
-                if (writeSessionResult.err())
-                {
-                    return writeSessionResult;
-                }
-
-                multiplayerSessionResult = writeSessionResult;
+                m_users.push_back(pair.second);
             }
         }
 
-        auto matchSession = multiplayerSessionResult.payload();
-        pThis->update_session(matchSession);
-        return multiplayerSessionResult;
-    });
+        void Run() noexcept
+        {
+            m_matchClient->m_matchStatus = XblMultiplayerMatchStatus::Joining;
 
-    return utils::create_exception_free_task<std::shared_ptr<multiplayer_session>>(task);
+            if (m_matchClient->m_preservingMatchmakingSession)
+            {
+                // Matchmaking session was preserved so we're already part of it
+                Complete(m_latestSession);
+            }
+            else
+            {
+                JoinNextUser();
+            }
+        }
+
+    private:
+        void JoinNextUser() noexcept
+        {
+            if (m_users.empty())
+            {
+                Complete(m_latestSession);
+            }
+            else
+            {
+                auto user{ m_users.front() };
+                m_users.pop_front();
+                JoinSession(user);
+            }
+        }
+
+        void JoinSession(std::shared_ptr<MultiplayerLocalUser> user)
+        {
+            auto userSession = MakeShared<XblMultiplayerSession>(user->Xuid(), &m_latestSession->SessionReference(), nullptr);
+            userSession->Join();
+            // Ok to use 'unsafe' method here since we have the only instance
+            userSession->CurrentUserInternalUnsafe()->SetSecureDeviceBaseAddress64(user->ConnectionAddress());
+            userSession->SetSessionChangeSubscription(XblMultiplayerSessionChangeTypes::Everything);
+
+            HRESULT hr = user->Context()->MultiplayerService()->WriteSession(
+                userSession,
+                XblMultiplayerSessionWriteMode::UpdateOrCreateNew,
+                AsyncContext<Result<std::shared_ptr<XblMultiplayerSession>>>{ m_matchClient->m_queue,
+                [
+                    op{ shared_from_this() }
+                ]
+            (Result<std::shared_ptr<XblMultiplayerSession>> writeSessionResult)
+            {
+                if (Failed(writeSessionResult))
+                {
+                    op->Complete(std::move(writeSessionResult));
+                }
+                else
+                {
+                    op->m_latestSession = writeSessionResult.ExtractPayload();
+                    op->JoinNextUser();
+                }
+            }
+            });
+
+            if (FAILED(hr))
+            {
+                Complete(hr);
+            }
+        }
+
+        void Complete(Result<std::shared_ptr<XblMultiplayerSession>>&& result) noexcept
+        {
+            m_matchClient->m_queue.RunCompletion([op{shared_from_this()}, result]
+                {
+                    op->m_matchClient->UpdateSession(result.Payload());
+                    op->m_callback(std::move(result));
+                });
+        }
+
+        std::shared_ptr<MultiplayerMatchClient> m_matchClient;
+        std::shared_ptr<XblMultiplayerSession> m_latestSession;
+        List<std::shared_ptr<MultiplayerLocalUser>> m_users;
+        MultiplayerSessionCallback m_callback;
+    };
+
+    auto operation = MakeShared<JoinSessionOperation>(shared_from_this(), session, std::move(callback));
+    operation->Run();
+    return S_OK;
 }
 
 void
-multiplayer_match_client::get_latest_session()
+MultiplayerMatchClient::GetLatestSession()
 {
-    std::lock_guard<std::mutex> lock(m_getSessionLock.get());
-    if (session() == nullptr) return;
+    std::lock_guard<std::mutex> lock(m_getSessionLock);
+    if (Session() == nullptr) return;
 
-    std::shared_ptr<xbox_live_context_impl> primaryContext = m_multiplayerLocalUserManager->get_primary_context();
-    if (primaryContext == nullptr) return;
-    if (!m_getSessionTask.is_done()) return;
-
-    std::weak_ptr<multiplayer_match_client> thisWeakPtr = shared_from_this();
-    m_getSessionTask = primaryContext->multiplayer_service().get_current_session(session()->session_reference())
-    .then([thisWeakPtr](xbox_live_result<std::shared_ptr<multiplayer_session>> sessionResult)
+    std::shared_ptr<XblContext> primaryContext = m_multiplayerLocalUserManager->GetPrimaryContext();
+    if (primaryContext == nullptr || m_getSessionInProgress)
     {
-        if (!sessionResult.err())
+        return;
+    }
+
+    std::weak_ptr<MultiplayerMatchClient> weakSessionWriter = shared_from_this();
+    m_getSessionInProgress = true;
+    primaryContext->MultiplayerService()->GetCurrentSession(Session()->SessionReference(), { m_queue,
+    [weakSessionWriter](Result<std::shared_ptr<XblMultiplayerSession>> sessionResult)
+    {
+        if (SUCCEEDED(sessionResult.Hresult()))
         {
-            std::shared_ptr<multiplayer_match_client> pThis(thisWeakPtr.lock());
+            std::shared_ptr<MultiplayerMatchClient> pThis(weakSessionWriter.lock());
             if (pThis != nullptr)
             {
-                pThis->update_session(sessionResult.payload());
+                pThis->UpdateSession(sessionResult.Payload());
+                pThis->m_getSessionInProgress = false;
             }
         }
+    }
     });
 }
 
-void 
-multiplayer_match_client::set_quality_of_service_measurements(
-    _In_ std::shared_ptr<std::vector<multiplayer_quality_of_service_measurements>> measurements
-    )
+void MultiplayerMatchClient::SetQosMeasurements(
+    _In_ const JsonValue& measurements
+) noexcept
 {
-    std::shared_ptr<xbox_live_context_impl> primaryContext = m_multiplayerLocalUserManager->get_primary_context();
-    auto matchSession = session();
-    if (primaryContext == nullptr || matchSession == nullptr) return;
-
-    auto matchSessionRef = matchSession->session_reference();
-    std::weak_ptr<multiplayer_match_client> thisWeakPtr = shared_from_this();
-    auto task = pplx::create_task([thisWeakPtr, matchSessionRef, measurements]()
+    // Set QoS measurements for each local user.
+    // Result delivered by updating the latest session and updating the match status.
+    struct SetQosMeasurementsOperation : public std::enable_shared_from_this<SetQosMeasurementsOperation>
     {
-        std::shared_ptr<multiplayer_match_client> pThis(thisWeakPtr.lock());
-        if (pThis == nullptr) return;
-
-        pThis->m_matchStatus = match_status::uploading_qos_measurements;
-
-        xbox_live_result<std::shared_ptr<multiplayer_session>> matchSessionResult;
-        auto xboxLiveContextMap = pThis->m_multiplayerLocalUserManager->get_local_user_map();
-        for (auto xboxLiveContext : xboxLiveContextMap)
+        SetQosMeasurementsOperation(
+            std::shared_ptr<MultiplayerMatchClient> matchClient,
+            const JsonValue& measurements,
+            const XblMultiplayerSessionReference& matchSessionRef
+        ) noexcept :
+            m_matchClient{ std::move(matchClient) },
+            m_matchSessionRef{ matchSessionRef }
         {
-            auto localUser = xboxLiveContext.second;
-            if (localUser != nullptr)
+            JsonUtils::CopyFrom(m_measurements, measurements);
+            for (auto& pair : m_matchClient->m_multiplayerLocalUserManager->GetLocalUserMap())
             {
-                auto matchSession = std::make_shared<multiplayer_session>(localUser->xbox_user_id(), matchSessionRef);
-                matchSession->join();
-                matchSession->set_current_user_quality_of_service_measurements(measurements);
-                matchSessionResult = localUser->context()->multiplayer_service().write_session(matchSession, multiplayer_session_write_mode::update_existing).get();
-                if (matchSessionResult.err())
+                m_users.push_back(pair.second);
+            }
+        }
+
+        void Run() noexcept
+        {
+            m_matchClient->m_matchStatus = XblMultiplayerMatchStatus::UploadingQosMeasurements;
+            SetMeasurementsForNextUser();
+        }
+
+    private:
+        void SetMeasurementsForNextUser() noexcept
+        {
+            if (m_users.empty())
+            {
+                Complete(S_OK);
+            }
+            else
+            {
+                auto user{ m_users.front() };
+                m_users.pop_front();
+
+                auto session = MakeShared<XblMultiplayerSession>(user->Xuid(), &m_matchSessionRef, nullptr);
+                session->Join();
+                // Fine to use 'unsafe' method here since this is the only instance of the session
+                session->CurrentUserInternalUnsafe()->SetQosMeasurementsJson(JsonUtils::SerializeJson(m_measurements));
+
+                HRESULT hr = user->Context()->MultiplayerService()->WriteSession(
+                    session,
+                    XblMultiplayerSessionWriteMode::UpdateExisting,
+                    AsyncContext<Result<std::shared_ptr<XblMultiplayerSession>>>{ m_matchClient->m_queue,
+                    [
+                        op{ shared_from_this() }
+                    ]
+                (Result<std::shared_ptr<XblMultiplayerSession>> result)
                 {
-                    break;
+                    if (Failed(result))
+                    {
+                        op->Complete(result);
+                    }
+                    else
+                    {
+                        op->m_latestSession = result.ExtractPayload();
+                        op->SetMeasurementsForNextUser();
+                    }
+                }
+                });
+
+                if (FAILED(hr))
+                {
+                    Complete(hr);
                 }
             }
         }
 
-        pThis->update_session(matchSessionResult.payload());
-        pThis->m_matchStatus = match_status::waiting_for_remote_clients_to_upload_qos;
-    });
+        void Complete(Result<void>&& result)
+        {
+            LOGS_DEBUG << __FUNCTION__ << ": HRESULT=" << result.Hresult() << ", ErrorMessage=" << result.ErrorMessage();
+
+            m_matchClient->UpdateSession(m_latestSession);
+            m_matchClient->m_matchStatus = XblMultiplayerMatchStatus::WaitingForRemoteClientsToUploadQos;
+        }
+
+        std::shared_ptr<MultiplayerMatchClient> m_matchClient;
+        JsonDocument m_measurements;
+        std::shared_ptr<XblMultiplayerSession> m_latestSession;
+        List<std::shared_ptr<MultiplayerLocalUser>> m_users;
+        XblMultiplayerSessionReference m_matchSessionRef;
+    };
+
+    if (auto matchSession{ Session() })
+    {
+        auto operation = MakeShared<SetQosMeasurementsOperation>(shared_from_this(), measurements, matchSession->SessionReference());
+        operation->Run();
+    }
 }
 
 void
-multiplayer_match_client::resubmit_matchmaking(
-    _In_ std::shared_ptr<multiplayer_session> session
+MultiplayerMatchClient::ResubmitMatchmaking(
+    _In_ std::shared_ptr<XblMultiplayerSession> session
     )
 {
-    if (session == nullptr) return;
-
-    std::shared_ptr<xbox_live_context_impl> primaryContext = m_multiplayerLocalUserManager->get_primary_context();
-    if (primaryContext == nullptr) return;
-
-    m_matchStatus = match_status::resubmitting;
-    session->set_matchmaking_resubmit(true);
-    std::weak_ptr<multiplayer_match_client> thisWeakPtr = shared_from_this();
-    primaryContext->multiplayer_service().write_session(session, multiplayer_session_write_mode::update_existing)
-    .then([thisWeakPtr](xbox_live_result<std::shared_ptr<multiplayer_session>> sessionResult)
+    if (session == nullptr)
     {
-        if (sessionResult.err())
+        return;
+    }
+
+    std::shared_ptr<XblContext> primaryContext = m_multiplayerLocalUserManager->GetPrimaryContext();
+    if (primaryContext == nullptr)
+    {
+        return;
+    }
+
+    m_matchStatus = XblMultiplayerMatchStatus::Resubmitting;
+    session->SetMatchmakingResubmit(true);
+    std::weak_ptr<MultiplayerMatchClient> weakSessionWriter = shared_from_this();
+    primaryContext->MultiplayerService()->WriteSession(session, XblMultiplayerSessionWriteMode::UpdateExisting, { m_queue,
+    [weakSessionWriter](Result<std::shared_ptr<XblMultiplayerSession>> sessionResult)
+    {
+        if (FAILED(sessionResult.Hresult()))
         {
-            std::shared_ptr<multiplayer_match_client> pThis(thisWeakPtr.lock());
+            std::shared_ptr<MultiplayerMatchClient> pThis(weakSessionWriter.lock());
             if (pThis != nullptr)
             {
-                pThis->m_matchStatus = match_status::failed;
-                pThis->handle_find_match_completed(sessionResult.err(), sessionResult.err_message());
+                pThis->m_matchStatus = XblMultiplayerMatchStatus::Failed;
+                pThis->HandleFindMatchCompleted({ sessionResult.Hresult(), "Resubmit failed" });
             }
         }
+    }
     });
 }
 

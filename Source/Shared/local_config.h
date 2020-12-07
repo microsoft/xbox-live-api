@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation
+// Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
@@ -9,48 +9,75 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 class local_config
 {
 public:
-    static std::shared_ptr<local_config> get_local_config_singleton();
-
     local_config();
     NO_COPY_AND_ASSIGN(local_config);
 
-#if !TV_API
+#if !(HC_PLATFORM == HC_PLATFORM_XDK)
 
-    virtual string_t get_value_from_config(
-        _In_ const string_t& name,
+    virtual xsapi_internal_string get_value_from_config(
+        _In_ const xsapi_internal_string& name,
         _In_ bool required,
-        _In_ const string_t& defaultValue);
+        _In_ const xsapi_internal_string& defaultValue);
 
     virtual uint64_t get_uint64_from_config(
-        _In_ const string_t& name,
+        _In_ const xsapi_internal_string& name,
         _In_ bool required,
         _In_ uint64_t defaultValue);
     
     virtual bool get_bool_from_config(
-        _In_ const string_t& name,
+        _In_ const xsapi_internal_string& name,
         _In_ bool required,
         _In_ bool defaultValue);
 
     virtual uint32_t title_id();
     virtual uint32_t override_title_id();
-    virtual string_t scid();
-    virtual string_t override_scid();
-    virtual string_t environment_prefix();
-    virtual string_t environment();
-    virtual string_t sandbox();
-    virtual string_t client_secret();
+    virtual xsapi_internal_string scid();
+    virtual xsapi_internal_string override_scid();
+    virtual xsapi_internal_string environment_prefix();
+    virtual xsapi_internal_string environment();
+    virtual xsapi_internal_string sandbox();
+    virtual xsapi_internal_string client_secret();
     virtual bool use_first_party_token();
     virtual bool is_creators_title();
-    virtual string_t msa_sub_target();
-    virtual string_t scope();
+    virtual xsapi_internal_string msa_sub_target();
+    virtual xsapi_internal_string scope();
 
-    virtual string_t get_value_from_local_storage(_In_ const string_t& name);
-    virtual xbox_live_result<void> write_value_to_local_storage(_In_ const string_t& name, _In_ const string_t& value);
-    virtual xbox_live_result<void> delete_value_from_local_storage(_In_ const string_t& name);
+    virtual xsapi_internal_string get_value_from_local_storage(_In_ const xsapi_internal_string& name);
+    virtual xbl_result<void> write_value_to_local_storage(_In_ const xsapi_internal_string& name, _In_ const xsapi_internal_string& value);
+    virtual xbl_result<void> delete_value_from_local_storage(_In_ const xsapi_internal_string& name);
 
-#if XSAPI_I
-    virtual string_t apns_environment();
-#elif XSAPI_A
+    virtual xbl_result<void> read();
+
+#if !HC_PLATFORM_IS_MICROSOFT
+    /// <summary>
+    /// Reads a value from local storage that is part of a collection.
+    /// </summary>
+    virtual xsapi_internal_string get_value_from_local_storage_collection(_In_ const xsapi_internal_string& collectionName, _In_ const xsapi_internal_string& name);
+    
+    /// <summary>
+    /// Returns the list of keys that are in local storage in a given collection.
+    /// </summary>
+    virtual xsapi_internal_vector<xsapi_internal_string> get_keys_from_local_storage_collection(_In_ const xsapi_internal_string& collectionName);
+    
+    /// <summary>
+    /// Writes a value to local storage as part of a collection.
+    /// </summary>
+    virtual xbox_live_result<void> write_value_to_local_storage_collection(_In_ const xsapi_internal_string& collectionName, _In_ const xsapi_internal_string& name, _In_ const xsapi_internal_string& value);
+    
+    /// <summary>
+    /// Deletes a value from local storage that is part of a collection.
+    /// </summary>
+    virtual xbox_live_result<void> delete_value_from_local_storage_collection(_In_ const xsapi_internal_string& collectionName, _In_ const xsapi_internal_string& name);
+    
+    /// <summary>
+    /// Deletes an entire collection from local storage.
+    /// </summary>
+    virtual xbox_live_result<void> delete_local_storage_collection(_In_ const xsapi_internal_string& collectionName);
+#endif
+    
+#if HC_PLATFORM == HC_PLATFORM_IOS
+    virtual xsapi_internal_string APNSEnvironment();
+#elif HC_PLATFORM == HC_PLATFORM_ANDROID
     bool use_brokered_authorization();
     bool is_android_native_activity();
 #endif
@@ -58,25 +85,20 @@ public:
 #endif
 
 protected:
-#if !TV_API
-    web::json::value& read_config_file();
+#if !(HC_PLATFORM == HC_PLATFORM_XDK)
+    JsonDocument read_config_file();
     string_t get_registry_path();
 
-#endif
-
-#if XSAPI_I
-    string_t get_local_storage_folder();
-#endif
-
-#if !TV_API
-    virtual xbox_live_result<void> read();
-
-    web::json::value m_jsonConfig;
+    JsonDocument m_jsonConfig;
     std::mutex m_jsonConfigLock;
-#if XSAPI_U
-    web::json::value m_jsonLocalStorage;
-    std::mutex m_jsonLocalStorageLock;
 #endif
+    
+#if !HC_PLATFORM_IS_MICROSOFT
+    virtual void read_local_storage();
+    virtual string_t get_local_storage_folder();
+    
+    JsonDocument m_jsonLocalStorage;
+    std::mutex m_jsonLocalStorageLock;
 #endif
 };
 

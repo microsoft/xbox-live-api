@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Debug" Condition="'$(XblExtensionConfiguration)' == '' AND '$(Configuration.ToLower())' == 'debug'">
+    <XblExtensionConfiguration>Debug</XblExtensionConfiguration>
+  </PropertyGroup>
+  <PropertyGroup Label="Non_Debug" Condition="'$(XblExtensionConfiguration)' == '' AND '$(Configuration.ToLower())' != 'debug'">
+    <XblExtensionConfiguration>Release</XblExtensionConfiguration>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(XsapiBuildFromSource)' == ''">
+    <ExtensionPlatformToolset Condition="'$(ExtensionPlatformToolset)'==''">$(PlatformToolset)</ExtensionPlatformToolset>
+    <ExtensionPlatformToolset Condition="'$(ExtensionPlatformToolset)'=='v141'">141</ExtensionPlatformToolset>
+    <ExtensionPlatformToolset Condition="'$(ExtensionPlatformToolset)'=='v142'">142</ExtensionPlatformToolset>
+    <XsapiExtensionSdkPath Condition="'$(XsapiExtensionSdkPath)' == ''">$(MSBuildThisFileDirectory)</XsapiExtensionSdkPath>
+    <Console_SdkIncludeRoot>$(XsapiExtensionSdkPath)Include;$(Console_SdkIncludeRoot)</Console_SdkIncludeRoot>
+    <Console_SdkLibPath>$(XsapiExtensionSdkPath)Lib\$(XblExtensionConfiguration)\v$(ExtensionPlatformToolset);$(Console_SdkLibPath)</Console_SdkLibPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(XsapiBuildFromSource)' == ''">
+    <IncludePath>$(Console_SdkIncludeRoot);$(IncludePath)</IncludePath>
+    <LibraryPath>$(Console_SdkLibPath);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  
+  <ItemDefinitionGroup Condition="'$(XsapiBuildFromSource)' == ''">
+    <Link>
+      <AdditionalDependencies>Appnotify.lib;winhttp.lib;crypt32.lib;libHttpClient.$(ExtensionPlatformToolset).GDK.C.lib;Microsoft.Xbox.Services.$(ExtensionPlatformToolset).GDK.C.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <XboxExtensionsDependencies>Appnotify.lib;winhttp.lib;crypt32.lib;libHttpClient.$(ExtensionPlatformToolset).GDK.C.lib;Microsoft.Xbox.Services.$(ExtensionPlatformToolset).GDK.C.lib;%(XboxExtensionsDependencies)</XboxExtensionsDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>

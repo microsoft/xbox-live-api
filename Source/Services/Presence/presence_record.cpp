@@ -2,82 +2,45 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#if TV_API || UWP_API || UNIT_TEST_SERVICES
+#if HC_PLATFORM == HC_PLATFORM_UWP || HC_PLATFORM == HC_PLATFORM_XDK || XSAPI_UNIT_TESTS
 #include "social_manager_internal.h"
 #endif
-#include "xsapi/presence.h"
+#include "presence_internal.h"
 
-NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
+using namespace xbox::services;
+using namespace xbox::services::presence;
 
-presence_record::presence_record():
-    m_userState(user_presence_state::unknown)
+uint64_t XblPresenceRecord::Xuid() const
 {
+    return m_xuid;
 }
 
-const string_t& 
-presence_record::xbox_user_id() const
-{
-    return m_xboxUserId;
-}
-
-user_presence_state 
-presence_record::user_state() const
+XblPresenceUserState XblPresenceRecord::UserState() const
 {
     return m_userState;
 }
 
-const std::vector<presence_device_record>&
-presence_record::presence_device_records() const
+const xsapi_internal_vector<XblPresenceDeviceRecord>& XblPresenceRecord::DeviceRecords() const
 {
-    return m_presenceDeviceRecords;
+    return m_deviceRecords;
 }
 
-xbox_live_result<presence_record>
-presence_record::_Deserialize(
-    _In_ const web::json::value& json
-    )
-{
-    presence_record returnObject;
-    if (json.is_null()) return xbox_live_result<presence_record>(returnObject);
-
-    std::error_code errc = xbox_live_error_code::no_error;
-    returnObject.m_xboxUserId = utils::extract_json_string(json, _T("xuid"), errc);
-    returnObject.m_userState = _Convert_string_to_user_presence_state(
-        utils::extract_json_string(json, _T("state"), errc)
-        );
-
-    returnObject.m_presenceDeviceRecords = utils::extract_json_vector<presence_device_record>(
-        presence_device_record::_Deserialize,
-        json,
-        _T("devices"),
-        errc,
-        false
-        );
-    
-    return xbox_live_result<presence_record>(returnObject, errc);
-}
-
-bool
-presence_record::is_user_playing_title(
+bool XblPresenceRecord::IsUserPlayingTitle(
     _In_ uint32_t titleId
-    ) const
+) const
 {
-    if (m_userState == user_presence_state::offline || m_userState == user_presence_state::unknown)
+    if (m_userState == XblPresenceUserState::Offline || m_userState == XblPresenceUserState::Unknown)
     {
         return false;
     }
 
-    for (const auto& deviceRecord : m_presenceDeviceRecords)
+    for (const auto& deviceRecord : m_deviceRecordsInternal)
     {
-        for (const auto& titleRecord : deviceRecord.presence_title_records())
+        for (const auto& titleRecord : deviceRecord->TitleRecords())
         {
-            if (titleRecord.title_id() == titleId && titleRecord.is_title_active())
+            if (titleRecord.titleId == titleId)
             {
-                return true;
-            }
-            else if (titleRecord.title_id() == titleId)
-            {
-                return false;
+                return titleRecord.titleActive;
             }
         }
     }
@@ -85,25 +48,65 @@ presence_record::is_user_playing_title(
     return false;
 }
 
-user_presence_state 
-presence_record::_Convert_string_to_user_presence_state(
-    _In_ const string_t& value
-    )
+Result<std::shared_ptr<XblPresenceRecord>> XblPresenceRecord::Deserialize(
+    _In_ const JsonValue& json
+)
 {
-    if (utils::str_icmp(value, _T("Online")) == 0)
+    if (json.IsNull())
     {
-        return user_presence_state::online;
-    }
-    else if (utils::str_icmp(value, _T("Away")) == 0)
-    {
-        return user_presence_state::away;
-    }
-    else if (utils::str_icmp(value, _T("Offline")) == 0)
-    {
-        return user_presence_state::offline;
+        return Result<std::shared_ptr<XblPresenceRecord>>(nullptr);
     }
 
-    return user_presence_state::unknown;
+    auto presenceRecord = MakeShared<XblPresenceRecord>();
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonXuid(json, "xuid", presenceRecord->m_xuid));
+    xsapi_internal_string state;
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "state", state));
+    presenceRecord->m_userState = UserStateFromString(state);
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonVector<std::shared_ptr<DeviceRecord>>(
+        DeviceRecord::Deserialize,
+        json,
+        "devices",
+         presenceRecord->m_deviceRecordsInternal,
+        false
+    ));
+
+    for (const auto& deviceRecordInternal : presenceRecord->m_deviceRecordsInternal)
+    {
+        XblPresenceDeviceRecord deviceRecord
+        {
+            deviceRecordInternal->DeviceType(),
+            deviceRecordInternal->TitleRecords().data(),
+            deviceRecordInternal->TitleRecords().size()
+        };
+        presenceRecord->m_deviceRecords.push_back(std::move(deviceRecord));
+    }
+
+    return Result<std::shared_ptr<XblPresenceRecord>>(presenceRecord, S_OK);
 }
 
-NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_END
+XblPresenceUserState XblPresenceRecord::UserStateFromString(
+    _In_ const xsapi_internal_string& value
+    )
+{
+    if (utils::str_icmp_internal(value, "Online") == 0)
+    {
+        return XblPresenceUserState::Online;
+    }
+    else if (utils::str_icmp_internal(value, "Away") == 0)
+    {
+        return XblPresenceUserState::Away;
+    }
+    else if (utils::str_icmp_internal(value, "Offline") == 0)
+    {
+        return XblPresenceUserState::Offline;
+    }
+
+    return XblPresenceUserState::Unknown;
+}
+
+std::shared_ptr<RefCounter> XblPresenceRecord::GetSharedThis()
+{
+    return shared_from_this();
+}

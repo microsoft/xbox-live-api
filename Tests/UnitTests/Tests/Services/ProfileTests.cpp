@@ -2,347 +2,347 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"jasonsa"
-#define TEST_CLASS_AREA L"Profile"
 #include "UnitTestIncludes.h"
 
-#include "SocialGroupConstants_WinRT.h"
-
-using namespace Microsoft::Xbox::Services;
-using namespace Microsoft::Xbox::Services::Social;
-using namespace Platform;
-using namespace Platform::Collections;
-using namespace Windows::Foundation::Collections;
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
+
+// Request and response format from http://xboxwiki/wiki/Profile
 
 DEFINE_TEST_CLASS(ProfileTests)
 {
 public:
     DEFINE_TEST_CLASS_PROPS(ProfileTests);
 
-    struct XboxUserProfileTestValues
+    struct UserProfile
     {
-        Platform::String^ appDisplayName;
-        Platform::String^ appDisplayPictureResize;
-        Platform::String^ gameDisplayName;
-        Platform::String^ gameDisplayPictureResize;
-        Platform::String^ gamerscore;
-        Platform::String^ gamertag;
-        Platform::String^ xboxUserId;
+        UserProfile(uint64_t xuid_) noexcept
+            : xuid{ xuid_ }
+        {
+            auto xuidStr = Utils::StringFromUint64(xuid);
+
+            appDisplayName = "appDisplayName_" + xuidStr;
+            gameDisplayName = "gameDisplayName_" + xuidStr;
+
+            std::stringstream ss;
+            ss << "http://www.xbox.com/appDisplayPictureRaw?url=test_" << xuid << "&format=png";
+            appDisplayPictureResizeUri = ss.str();
+
+            ss.clear();
+            ss << "http://www.xbox.com/gameDisplayPictureRaw?url=test_" << xuid << "&format=png";
+            gameDisplayPictureResizeUri = ss.str();
+
+            gamerscore = "gamerscore_" + xuidStr;
+            gamertag = "gamertag" + xuidStr;
+            modernGamertag = "mgt" + xuidStr;
+            modernGamertagSuffix = Utils::StringFromUint64(nextSuffix++);
+            uniqueModernGamertag = modernGamertag + modernGamertagSuffix;
+
+            assert(gamertag.length() < XBL_GAMERTAG_CHAR_SIZE);
+            assert(modernGamertag.length() < XBL_MODERN_GAMERTAG_CHAR_SIZE);
+        }
+
+        static JsonDocument Serialize(const std::vector<UserProfile>& profiles) noexcept
+        {
+            JsonDocument d{ rapidjson::kObjectType };
+            auto& a{ d.GetAllocator() };
+
+            JsonValue profileUsersArray{ rapidjson::kArrayType };
+            for (auto& profile : profiles)
+            {
+                profileUsersArray.PushBack(profile.Serialize(a).Move(), a);
+            }
+            d.AddMember("profileUsers", profileUsersArray.Move(), a);
+
+            return d;
+        }
+
+        uint64_t xuid;
+        std::string appDisplayName;
+        std::string appDisplayPictureResizeUri;
+        std::string gameDisplayName;
+        std::string gameDisplayPictureResizeUri;
+        std::string gamerscore;
+        std::string gamertag;
+        std::string modernGamertag;
+        std::string modernGamertagSuffix;
+        std::string uniqueModernGamertag;
+
+    private:
+        JsonValue Serialize(_In_ JsonDocument::AllocatorType& a) const noexcept
+        {
+            JsonValue settingsArray{ rapidjson::kArrayType };
+
+            {
+                JsonValue setting{ rapidjson::kObjectType };
+                setting.AddMember("id", "AppDisplayName", a);
+                setting.AddMember("value", JsonValue{ appDisplayName.data(), a }.Move(), a);
+                settingsArray.PushBack(setting.Move(), a);
+            }
+
+            {
+                JsonValue setting{ rapidjson::kObjectType };
+                setting.AddMember("id", "AppDisplayPicRaw", a);
+                setting.AddMember("value", JsonValue{ appDisplayPictureResizeUri.data(), a }.Move(), a);
+                settingsArray.PushBack(setting.Move(), a);
+            }
+
+            {
+                JsonValue setting{ rapidjson::kObjectType };
+                setting.AddMember("id", "GameDisplayName", a);
+                setting.AddMember("value", JsonValue{ gameDisplayName.data(), a }.Move(), a);
+                settingsArray.PushBack(setting.Move(), a);
+            }
+
+            {
+                JsonValue setting{ rapidjson::kObjectType };
+                setting.AddMember("id", "GameDisplayPicRaw", a);
+                setting.AddMember("value", JsonValue{ gameDisplayPictureResizeUri.data(), a }.Move(), a);
+                settingsArray.PushBack(setting.Move(), a);
+            }
+
+            {
+                JsonValue setting{ rapidjson::kObjectType };
+                setting.AddMember("id", "Gamerscore", a);
+                setting.AddMember("value", JsonValue{ gamerscore.data(), a }.Move(), a);
+                settingsArray.PushBack(setting.Move(), a);
+            }
+
+            {
+                JsonValue setting{ rapidjson::kObjectType };
+                setting.AddMember("id", "Gamertag", a);
+                setting.AddMember("value", JsonValue{ gamertag.data(), a }.Move(), a);
+                settingsArray.PushBack(setting.Move(), a);
+            }
+
+            {
+                JsonValue setting{ rapidjson::kObjectType };
+                setting.AddMember("id", "ModernGamertag", a);
+                setting.AddMember("value", JsonValue{ modernGamertag.data(), a }.Move(), a);
+                settingsArray.PushBack(setting.Move(), a);
+            }
+
+            {
+                JsonValue setting{ rapidjson::kObjectType };
+                setting.AddMember("id", "ModernGamertagSuffix", a);
+                setting.AddMember("value", JsonValue{ modernGamertagSuffix.data(), a }.Move(), a);
+                settingsArray.PushBack(setting.Move(), a);
+            }
+
+            {
+                JsonValue setting{ rapidjson::kObjectType };
+                setting.AddMember("id", "UniqueModernGamertag", a);
+                setting.AddMember("value", JsonValue{ uniqueModernGamertag.data(), a }.Move(), a);
+                settingsArray.PushBack(setting.Move(), a);
+            }
+
+            JsonValue profile{ rapidjson::kObjectType };
+            profile.AddMember("id", JsonValue{ Utils::StringFromUint64(xuid).data(), a }.Move(), a);
+            profile.AddMember("settings", settingsArray, a);
+
+            return profile;
+        }
+
+        static uint8_t nextSuffix;
     };
 
-    XboxUserProfileTestValues
-    CreateXboxUserProfileTestValues(
-        _In_ uint64 seed
-        )
+    void VerifyUserProfile(
+        _In_ const XblUserProfile& actual,
+        _In_ const UserProfile& expected
+    )
     {
-        XboxUserProfileTestValues x;
-        x.appDisplayName = PLATFORM_STRING_FROM_STRING_T(FormatString(L"appDisplayName_%s", seed.ToString()->Data()));
-        x.appDisplayPictureResize = PLATFORM_STRING_FROM_STRING_T(FormatString(L"http://www.xbox.com/appDisplayPictureRaw?url=test_%s&format=png", seed.ToString()->Data()));
-        x.gameDisplayName = PLATFORM_STRING_FROM_STRING_T(FormatString(L"gameDisplayName_%s", seed.ToString()->Data()));
-        x.gameDisplayPictureResize = PLATFORM_STRING_FROM_STRING_T(FormatString(L"http://www.xbox.com/gameDisplayPictureRaw?url=test_%s&format=png", seed.ToString()->Data()));
-        x.gamerscore = PLATFORM_STRING_FROM_STRING_T(FormatString(L"gamerscore_%s", seed.ToString()->Data()));
-        x.gamertag = PLATFORM_STRING_FROM_STRING_T(FormatString(L"gamertag_%s", seed.ToString()->Data()));
-        x.xboxUserId = PLATFORM_STRING_FROM_STRING_T(FormatString(L"xboxUserId_%s", seed.ToString()->Data()));
-        return x;
+        VERIFY_ARE_EQUAL_INT(expected.xuid, actual.xboxUserId);
+        VERIFY_ARE_EQUAL_STR(expected.appDisplayName, actual.appDisplayName);
+        VERIFY_ARE_EQUAL_STR(expected.appDisplayPictureResizeUri, actual.appDisplayPictureResizeUri);
+        VERIFY_ARE_EQUAL_STR(expected.gameDisplayName, actual.gameDisplayName);
+        VERIFY_ARE_EQUAL_STR(expected.gameDisplayPictureResizeUri, actual.gameDisplayPictureResizeUri);
+        VERIFY_ARE_EQUAL_STR(expected.gamerscore, actual.gamerscore);
+        VERIFY_ARE_EQUAL_STR(expected.gamertag, actual.gamertag);
+        VERIFY_ARE_EQUAL_STR(expected.modernGamertag, actual.modernGamertag);
+        VERIFY_ARE_EQUAL_STR(expected.modernGamertagSuffix, actual.modernGamertagSuffix);
+        VERIFY_ARE_EQUAL_STR(expected.uniqueModernGamertag, actual.uniqueModernGamertag);
     }
 
-    web::json::value
-    BuildXboxUserProfileJson(
-        _In_ XboxUserProfileTestValues* val
-        )
+    // Validate that a batch request is well formed
+    bool VerifyBatchRequest(
+        _In_ const std::string& requestUri,
+        _In_ const std::string& requestBody,
+        _In_ const std::vector<uint64_t>& requestedXuids
+    )
     {
-        size_t arraySize = 0;
-        auto jsonSettingsArray = web::json::value::array();
+        bool requestWellFormed{ true };
 
+        requestWellFormed &= ("https://profile.xboxlive.com/users/batch/profile/settings" == requestUri);
+
+        std::stringstream expectedBody;
+        expectedBody << R"({"settings":["AppDisplayName","AppDisplayPicRaw","GameDisplayName","GameDisplayPicRaw","Gamerscore","Gamertag","ModernGamertag","ModernGamertagSuffix","UniqueModernGamertag"],"userIds":[)";
+        for (size_t i = 0; i < requestedXuids.size(); ++i)
         {
-            auto jsonSettingObject = web::json::value::object();
-            jsonSettingObject[L"id"] = web::json::value::string(L"AppDisplayName");
-            jsonSettingObject[L"value"] = web::json::value::string(val->appDisplayName->Data());
-            jsonSettingsArray[arraySize++] = jsonSettingObject;
+            if (i > 0)
+            {
+                expectedBody << ",";
+            }
+            expectedBody << "\"" << requestedXuids[i] << "\"";
         }
+        expectedBody << "]}";
+        requestWellFormed &= VerifyJson(expectedBody.str().data(), requestBody.data());
 
-        {
-            auto jsonSettingObject = web::json::value::object();
-            jsonSettingObject[L"id"] = web::json::value::string(L"AppDisplayPicRaw");
-            jsonSettingObject[L"value"] = web::json::value::string(val->appDisplayPictureResize->Data());
-            jsonSettingsArray[arraySize++] = jsonSettingObject;
-        }
-
-        {
-            auto jsonSettingObject = web::json::value::object();
-            jsonSettingObject[L"id"] = web::json::value::string(L"GameDisplayName");
-            jsonSettingObject[L"value"] = web::json::value::string(val->gameDisplayName->Data());
-            jsonSettingsArray[arraySize++] = jsonSettingObject;
-        }
-
-        {
-            auto jsonSettingObject = web::json::value::object();
-            jsonSettingObject[L"id"] = web::json::value::string(L"GameDisplayPicRaw");
-            jsonSettingObject[L"value"] = web::json::value::string(val->gameDisplayPictureResize->Data());
-            jsonSettingsArray[arraySize++] = jsonSettingObject;
-        }
-
-        {
-            auto jsonSettingObject = web::json::value::object();
-            jsonSettingObject[L"id"] = web::json::value::string(L"Gamerscore");
-            jsonSettingObject[L"value"] = web::json::value::string(val->gamerscore->Data());
-            jsonSettingsArray[arraySize++] = jsonSettingObject;
-        }
-
-        {
-            auto jsonSettingObject = web::json::value::object();
-            jsonSettingObject[L"id"] = web::json::value::string(L"Gamertag");
-            jsonSettingObject[L"value"] = web::json::value::string(val->gamertag->Data());
-            jsonSettingsArray[arraySize++] = jsonSettingObject;
-        }
-
-        // Prepare profileUser
-        auto jsonObject = web::json::value::object();
-        jsonObject[L"id"] = web::json::value::string(val->xboxUserId->Data());
-        jsonObject[L"settings"] = jsonSettingsArray;
-
-        return jsonObject;
-    }
-
-    web::json::value
-    BuildXboxUserProfilesResultJsonResponse(
-        _In_ std::vector<XboxUserProfileTestValues> profileList
-        )
-    {
-        auto jsonArray = web::json::value::array();
-        int i = 0;
-        for (XboxUserProfileTestValues x : profileList)
-        {
-            auto jsonResponse = BuildXboxUserProfileJson(&x);
-            jsonArray[i++] = jsonResponse;
-        }
-
-        auto jsonObject = web::json::value::object();
-        jsonObject[L"profileUsers"] = jsonArray;
-
-        return jsonObject;
-    }
-
-
-    void
-    VerifyXboxUserProfileProperties(
-        _In_ Microsoft::Xbox::Services::Social::XboxUserProfile^ profile,
-        _In_ const XboxUserProfileTestValues* testValues
-        )
-    {
-        VERIFY_IS_NOT_NULL(profile);
-
-        VERIFY_ARE_EQUAL_STR(
-            testValues->appDisplayName->Data(),
-            profile->ApplicationDisplayName->Data()
-            );
-
-        VERIFY_ARE_EQUAL_STR(
-            testValues->appDisplayPictureResize->Data(),
-            profile->ApplicationDisplayPictureResizeUri->AbsoluteUri->Data()
-            );
-
-        VERIFY_ARE_EQUAL_STR(
-            testValues->gameDisplayName->Data(),
-            profile->GameDisplayName->Data()
-            );
-
-        VERIFY_ARE_EQUAL_STR(
-            testValues->gameDisplayPictureResize->Data(),
-            profile->GameDisplayPictureResizeUri->AbsoluteUri->Data()
-            );
-
-        VERIFY_ARE_EQUAL_STR(
-            testValues->gamerscore->Data(),
-            profile->Gamerscore->Data()
-            );
-
-        VERIFY_ARE_EQUAL_STR(
-            testValues->gamertag->Data(),
-            profile->Gamertag->Data()
-            );
-
-        VERIFY_ARE_EQUAL_STR(
-            testValues->xboxUserId->Data(),
-            profile->XboxUserId->Data()
-            );
-
+        return requestWellFormed;
     }
 
     DEFINE_TEST_CASE(TestGetUserProfileAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetUserProfileAsync);
-        std::vector<XboxUserProfileTestValues> profileList;
-        XboxUserProfileTestValues x = CreateXboxUserProfileTestValues(0);
-        profileList.push_back(x);
-        web::json::value responseJson = BuildXboxUserProfilesResultJsonResponse(profileList);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto task = create_task(xboxLiveContext->ProfileService->GetUserProfileAsync(x.xboxUserId));
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://profile.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/batch/profile/settings", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_STR(LR"({"settings":["AppDisplayName","AppDisplayPicRaw","GameDisplayName","GameDisplayPicRaw","Gamerscore","Gamertag"],"userIds":["xboxUserId_0"]})", httpCall->request_body().request_message_string());
+        UserProfile expectedProfile{ 1 };
 
-        auto result = task.get();
-        VerifyXboxUserProfileProperties(result, &x);
+        HttpMock mock{ "", "https://profile.xboxlive.com" };
+        mock.SetResponseBody(UserProfile::Serialize({ expectedProfile }));
+
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&](HttpMock*, std::string requestUrl, std::string requestBody)
+            {
+                // XblProfileGetUserProfileResult just makes a batch request with 1 xuid
+                requestWellFormed = VerifyBatchRequest(requestUrl, requestBody, std::vector<uint64_t>{ expectedProfile.xuid });
+            }
+        );
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblProfileGetUserProfileAsync(xboxLiveContext.get(), expectedProfile.xuid, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+
+        XblUserProfile actualProfile{};
+        VERIFY_SUCCEEDED(XblProfileGetUserProfileResult(&async, &actualProfile));
+        VerifyUserProfile(actualProfile, expectedProfile);
     }
 
     DEFINE_TEST_CASE(TestGetUserProfilesAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetUserProfilesAsync);
-        uint64 seed;
-        std::vector<XboxUserProfileTestValues> profileList;
-        IVector<Platform::String^>^ xboxUserIds = ref new Vector <Platform::String^>();
-        for (seed = 0; seed < 4; seed++)
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        std::vector<UserProfile> expectedProfiles;
+        std::vector<uint64_t> xuids{ 1, 2, 3, 4, 5 };
+        for (auto& xuid : xuids)
         {
-            XboxUserProfileTestValues x = CreateXboxUserProfileTestValues(seed);
-            profileList.push_back(x);
-            xboxUserIds->Append(x.xboxUserId);
+            expectedProfiles.push_back(UserProfile{ xuid });
         }
 
-        web::json::value responseJson = BuildXboxUserProfilesResultJsonResponse(profileList);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        HttpMock mock{ "", "https://profile.xboxlive.com" };
+        mock.SetResponseBody(UserProfile::Serialize(expectedProfiles));
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto task = create_task(xboxLiveContext->ProfileService->GetUserProfilesAsync(xboxUserIds->GetView()));
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://profile.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/batch/profile/settings", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_STR(LR"({"settings":["AppDisplayName","AppDisplayPicRaw","GameDisplayName","GameDisplayPicRaw","Gamerscore","Gamertag"],"userIds":["xboxUserId_0","xboxUserId_1","xboxUserId_2","xboxUserId_3"]})", httpCall->request_body().request_message_string());
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&](HttpMock*, std::string requestUrl, std::string requestBody)
+            {
+                requestWellFormed = VerifyBatchRequest(requestUrl, requestBody, xuids);
+            }
+        );
+        
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblProfileGetUserProfilesAsync(xboxLiveContext.get(), xuids.data(), xuids.size(), &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
 
-        auto profiles = task.get();
-        int index = 0;
-        for (XboxUserProfile^ x : profiles)
+        size_t count{ 0 };
+        VERIFY_SUCCEEDED(XblProfileGetUserProfilesResultCount(&async, &count));
+        VERIFY_ARE_EQUAL_UINT(xuids.size(), count);
+
+        auto profiles{ new XblUserProfile[count] };
+        VERIFY_SUCCEEDED(XblProfileGetUserProfilesResult(&async, count, profiles));
+
+        for (size_t i = 0; i < count; ++i)
         {
-            VerifyXboxUserProfileProperties(x, &profileList[index++]);
+            VerifyUserProfile(profiles[i], expectedProfiles[i]);
         }
     }
 
     DEFINE_TEST_CASE(TestGetUserProfilesForSocialGroupAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetUserProfilesForSocialGroupAsync);
-        uint64 seed;
-        std::vector<XboxUserProfileTestValues> profileList;
-        IVector<Platform::String^>^ xboxUserIds = ref new Vector <Platform::String^>();
-        for (seed = 0; seed < 4; seed++)
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        std::vector<UserProfile> expectedProfiles;
+        std::vector<uint64_t> xuids{ 1, 2 };
+        const char* socialGroup{ "People" };
+        for (auto& xuid : xuids)
         {
-            XboxUserProfileTestValues x = CreateXboxUserProfileTestValues(seed);
-            profileList.push_back(x);
-            xboxUserIds->Append(x.xboxUserId);
+            expectedProfiles.push_back(UserProfile{ xuid });
         }
 
-        web::json::value responseJson = BuildXboxUserProfilesResultJsonResponse(profileList);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        HttpMock mock{ "", "https://profile.xboxlive.com" };
+        mock.SetResponseBody(UserProfile::Serialize(expectedProfiles));
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto task = create_task(xboxLiveContext->ProfileService->GetUserProfilesForSocialGroupAsync(SocialGroupConstants::People));
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://profile.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/me/profile/settings/people/People?settings=AppDisplayName,AppDisplayPicRaw,GameDisplayName,GameDisplayPicRaw,Gamerscore,Gamertag", httpCall->PathQueryFragment.to_string());
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&](HttpMock*, std::string requestUri, std::string requestBody)
+            {
+                std::stringstream expectedUri;
+                expectedUri << "https://profile.xboxlive.com/users/me/profile/settings/people/";
+                expectedUri << socialGroup;
+                expectedUri << "?settings=AppDisplayName,AppDisplayPicRaw,GameDisplayName,GameDisplayPicRaw,Gamerscore,Gamertag,ModernGamertag,ModernGamertagSuffix,UniqueModernGamertag";
 
-        auto profiles = task.get();
-        int index = 0;
-        for (XboxUserProfile^ x : profiles)
+                requestWellFormed &= (expectedUri.str() == requestUri);
+                requestWellFormed &= requestBody.empty();
+            }
+        );
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblProfileGetUserProfilesForSocialGroupAsync(xboxLiveContext.get(), socialGroup, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+
+        size_t count{ 0 };
+        VERIFY_SUCCEEDED(XblProfileGetUserProfilesForSocialGroupResultCount(&async, &count));
+        VERIFY_ARE_EQUAL_UINT(xuids.size(), count);
+
+        auto profiles{ new XblUserProfile[count] };
+        VERIFY_SUCCEEDED(XblProfileGetUserProfilesForSocialGroupResult(&async, count, profiles));
+
+        for (size_t i = 0; i < count; ++i)
         {
-            VerifyXboxUserProfileProperties(x, &profileList[index++]);
+            VerifyUserProfile(profiles[i], expectedProfiles[i]);
         }
     }
 
     DEFINE_TEST_CASE(TestProfileServiceInvalidArgs)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestProfileServiceInvalidArgs);
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        TEST_LOG(L"TestGetUserProfileAsyncInvalidArgs: Null xboxUserId param.");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->ProfileService->GetUserProfileAsync(
-            nullptr // Invalid
-            )).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestGetUserProfileAsyncInvalidArgs: Empty xboxUserId param.");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->ProfileService->GetUserProfileAsync(
-            L"" // Invalid
-            )).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestGetUserProfileAsyncInvalidArgs: Empty Platform::String^ xboxUserId param.");
-        Platform::String^ emptyXboxUserId;
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->ProfileService->GetUserProfileAsync(
-            emptyXboxUserId // Invalid
-            )).get(),
-            E_INVALIDARG
-            );
+        XAsyncBlock async{};
 
         TEST_LOG(L"TestGetUserProfilesAsyncInvalidArgs: Null xboxUserIds param.");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->ProfileService->GetUserProfilesAsync(
-            nullptr // Invalid
-            )).get(),
-            E_INVALIDARG
-            );
+        HRESULT hr = XblProfileGetUserProfilesAsync(
+            xboxLiveContext.get(),
+            nullptr, // invalid
+            1,
+            &async
+        );
+        VERIFY_ARE_EQUAL(E_INVALIDARG, hr);
 
-        TEST_LOG(L"TestGetUserProfilesAsyncInvalidArgs: Empty xboxUserIds param.");
-        IVector<Platform::String^>^ xboxUserIds = ref new Platform::Collections::Vector<Platform::String^>();
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->ProfileService->GetUserProfilesAsync(
-            xboxUserIds->GetView() // Invalid
-            )).get(),
-            E_INVALIDARG
-            );
+        TEST_LOG(L"TestGetUserProfilesAsyncInvalidArgs: xboxUserIdsCount = 0.");
+        uint64_t xuid{ 1 };
+        hr = XblProfileGetUserProfilesAsync(
+            xboxLiveContext.get(),
+            &xuid,
+            0, // invalid
+            &async
+        );
+        VERIFY_ARE_EQUAL(E_INVALIDARG, hr);
 
-        TEST_LOG(L"TestGetUserProfilesAsyncInvalidArgs: Empty Platform::String^ xboxUserId param in input vector.");
-        xboxUserIds->Append("12345");
-        xboxUserIds->Append(emptyXboxUserId);
-        xboxUserIds->Append("56789");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->ProfileService->GetUserProfilesAsync(
-            xboxUserIds->GetView() // Invalid
-            )).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestGetUserProfilesForSocialGroupAsyncInvalidArgs: Null socialGroup param.");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->ProfileService->GetUserProfilesForSocialGroupAsync(
-            nullptr // Invalid
-            )).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestGetUserProfilesForSocialGroupAsyncInvalidArgs: Empty socialGroup param.");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->ProfileService->GetUserProfilesForSocialGroupAsync(
-            L"" // Invalid
-            )).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestGetUserProfilesForSocialGroupAsyncInvalidArgs: Empty Platform::String^ socialGroup param.");
-        Platform::String^ emptySocialGroup;
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->ProfileService->GetUserProfilesForSocialGroupAsync(
-            emptySocialGroup // Invalid
-            )).get(),
-            E_INVALIDARG
-            );
+        TEST_LOG(L"TestGetUserProfilesAsyncInvalidArgs: null socialGroup");
+        hr = XblProfileGetUserProfilesForSocialGroupAsync(
+            xboxLiveContext.get(),
+            nullptr,
+            &async
+        );
+        VERIFY_ARE_EQUAL(E_INVALIDARG, hr);
     }
 };
+
+uint8_t ProfileTests::UserProfile::nextSuffix{ 1 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

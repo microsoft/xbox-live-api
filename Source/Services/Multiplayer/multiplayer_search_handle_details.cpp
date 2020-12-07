@@ -2,195 +2,241 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/multiplayer.h"
+#include "multiplayer_internal.h"
 
-NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_BEGIN
+using namespace xbox::services;
+using namespace xbox::services::multiplayer;
 
-multiplayer_search_handle_details::multiplayer_search_handle_details() :
-    m_visibility(multiplayer_session_visibility::unknown),
-    m_joinRestriction(multiplayer_session_restriction::unknown),
-    m_closed(false),
-    m_maxMembersCount(0),
-    m_membersCount(0)
+std::shared_ptr<RefCounter> XblMultiplayerSearchHandleDetails::GetSharedThis()
 {
+    return shared_from_this();
 }
 
-const multiplayer_session_reference&
-multiplayer_search_handle_details::session_reference() const
+const XblMultiplayerSessionReference&
+XblMultiplayerSearchHandleDetails::SessionReference() const
 {
     return m_sessionReference;
 }
 
-const string_t&
-multiplayer_search_handle_details::handle_id() const
+const xsapi_internal_string&
+XblMultiplayerSearchHandleDetails::HandleId() const
 {
     return m_handleId;
 }
 
-const std::vector<string_t>&
-multiplayer_search_handle_details::session_owner_xbox_user_ids() const
+const xsapi_internal_vector<uint64_t>&
+XblMultiplayerSearchHandleDetails::SessionOwnerXuids() const
 {
     return m_sessionOwners;
 }
 
-const std::unordered_map<string_t, multiplayer_role_type>&
-multiplayer_search_handle_details::role_types() const
+const RoleTypes&
+XblMultiplayerSearchHandleDetails::RoleTypes() const
 {
     return m_roleTypes;
 }
 
-const std::vector<string_t>&
-multiplayer_search_handle_details::tags() const
+const xsapi_internal_vector<XblMultiplayerSessionTag>&
+XblMultiplayerSearchHandleDetails::Tags() const
 {
     return m_tags;
 }
 
-const std::unordered_map<string_t, double>&
-multiplayer_search_handle_details::numbers_metadata() const
+const xsapi_internal_vector<XblMultiplayerSessionNumberAttribute>&
+XblMultiplayerSearchHandleDetails::NumberAttributes() const
 {
-    return m_numbersMetadata;
+    return m_numberAttributes;
 }
 
-const std::unordered_map<string_t, string_t>&
-multiplayer_search_handle_details::strings_metadata() const
+const xsapi_internal_vector<XblMultiplayerSessionStringAttribute>&
+XblMultiplayerSearchHandleDetails::StringAttributes() const
 {
-    return m_stringsMetadata;
+    return m_stringAttributes;
 }
 
-multiplayer_session_visibility
-multiplayer_search_handle_details::visibility() const
+XblMultiplayerSessionVisibility
+XblMultiplayerSearchHandleDetails::Visibility() const
 {
     return m_visibility;
 }
 
-multiplayer_session_restriction
-multiplayer_search_handle_details::join_restriction() const
+XblMultiplayerSessionRestriction
+XblMultiplayerSearchHandleDetails::JoinRestriction() const
 {
     return m_joinRestriction;
 }
 
 bool
-multiplayer_search_handle_details::closed() const
+XblMultiplayerSearchHandleDetails::Closed() const
 {
     return m_closed;
 }
 
-uint32_t
-multiplayer_search_handle_details::max_members_count() const
+size_t
+XblMultiplayerSearchHandleDetails::MaxMembersCount() const
 {
     return m_maxMembersCount;
 }
 
-uint32_t
-multiplayer_search_handle_details::members_count() const
+size_t
+XblMultiplayerSearchHandleDetails::MembersCount() const
 {
     return m_membersCount;
 }
 
-utility::datetime
-multiplayer_search_handle_details::handle_creation_time() const
+const xbox::services::datetime&
+XblMultiplayerSearchHandleDetails::HandleCreationTime() const
 {
     return m_handleCreationTime;
 }
 
-const web::json::value&
-multiplayer_search_handle_details::custom_session_properties_json() const
+const xsapi_internal_string&
+XblMultiplayerSearchHandleDetails::CustomSessionPropertiesJson() const
 {
     return m_customSessionPropertiesJson;
 }
 
-xbox_live_result<multiplayer_search_handle_details>
-multiplayer_search_handle_details::_Deserialize(
-    _In_ const web::json::value& json
-    )
+Result<std::shared_ptr<XblMultiplayerSearchHandleDetails>>
+XblMultiplayerSearchHandleDetails::Deserialize(
+    _In_ const JsonValue& json
+)
 {
-    multiplayer_search_handle_details returnResult;
-    if (json.is_null()) return xbox_live_result<multiplayer_search_handle_details>(returnResult);
-
-    std::error_code errc = xbox_live_error_code::no_error;
-    string_t type = utils::extract_json_string(json, _T("type"), errc);
-
-    if (utils::str_icmp(type, _T("search")) != 0)
+    if (json.IsNull())
     {
-        return xbox_live_result<multiplayer_search_handle_details>(xbox_live_error_code::json_error, "Unexpected content");
+        return Result<std::shared_ptr<XblMultiplayerSearchHandleDetails>>{ S_OK };
     }
 
-    returnResult.m_handleId = utils::extract_json_string(json, _T("id"), errc);
-    returnResult.m_handleCreationTime = utils::extract_json_time(json, _T("createTime"), errc);
-    auto sessionReference = multiplayer_session_reference::_Deserialize(utils::extract_json_field(json, _T("sessionRef"), errc, false));
-    if (sessionReference.err())
-    {
-        errc = sessionReference.err();
-    }
-    returnResult.m_sessionReference = sessionReference.payload();
+    auto returnResult{ MakeShared<XblMultiplayerSearchHandleDetails>() };
 
-    web::json::value customPropertiesObject = utils::extract_json_field(json, _T("customProperties"), errc, false);
-    if (!customPropertiesObject.is_null())
+    HRESULT errc = S_OK;
+
+    xsapi_internal_string type;
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "type", type));
+    if (utils::str_icmp_internal(type, "search") != 0)
     {
-        returnResult.m_customSessionPropertiesJson = customPropertiesObject;
+        return Result<std::shared_ptr<XblMultiplayerSearchHandleDetails>>{ E_UNEXPECTED };
     }
 
-    web::json::value searchAttributesObject = utils::extract_json_field(json, _T("searchAttributes"), errc, false);
-    if (!searchAttributesObject.is_null())
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "id", returnResult->m_handleId));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonTime(json, "createTime", returnResult->m_handleCreationTime));
+    if (json.IsObject() && json.HasMember("sessionRef"))
     {
-        returnResult.m_tags = utils::extract_json_vector<string_t>(utils::json_string_extractor, searchAttributesObject, _T("tags"), errc, false);
-        auto stringsMetadataJson = utils::extract_json_field(searchAttributesObject, _T("strings"), errc, false);
-        if (!stringsMetadataJson.is_null() && stringsMetadataJson.is_object())
+        returnResult->m_sessionReference = Serializers::DeserializeSessionReference(json["sessionRef"]).Payload();
+    }
+    else
+    {
+        returnResult->m_sessionReference = XblMultiplayerSessionReference();
+    }
+
+    if (json.IsObject() && json.HasMember("customProperties"))
+    {
+        const JsonValue& customPropertiesObject = json["customProperties"];
+        if (!customPropertiesObject.IsNull())
         {
-            web::json::object stringMetadataObj = stringsMetadataJson.as_object();
-            for (const auto& stringsMetadata : stringMetadataObj)
-            {
-                returnResult.m_stringsMetadata[stringsMetadata.first] = stringsMetadata.second.as_string();
-            }
-        }
-
-        auto numbersMetadataJson = utils::extract_json_field(searchAttributesObject, _T("numbers"), errc, false);
-        if (!numbersMetadataJson.is_null() && numbersMetadataJson.is_object())
-        {
-            web::json::object numberMetadataObj = numbersMetadataJson.as_object();
-            for (const auto& numbersMetadata : numberMetadataObj)
-            {
-                returnResult.m_numbersMetadata[numbersMetadata.first] = numbersMetadata.second.as_double();
-            }
+        returnResult->m_customSessionPropertiesJson = JsonUtils::SerializeJson(customPropertiesObject);
         }
     }
 
-    web::json::value relatedInfoObject = utils::extract_json_field(json, _T("relatedInfo"), errc, false);
-    if (!relatedInfoObject.is_null())
+    if (json.IsObject() && json.HasMember("searchAttributes"))
     {
-        returnResult.m_membersCount = utils::extract_json_int(relatedInfoObject, _T("membersCount"), errc, true);
-        returnResult.m_maxMembersCount = utils::extract_json_int(relatedInfoObject, _T("maxMembersCount"), errc, true);
-        returnResult.m_joinRestriction = multiplayer_session_states::_Convert_string_to_multiplayer_session_restriction(
-            utils::extract_json_string(relatedInfoObject, _T("joinRestriction"), errc)
-            );
-        returnResult.m_visibility = multiplayer_session_states::_Convert_string_to_session_visibility(
-            utils::extract_json_string(relatedInfoObject, _T("visibility"), errc)
-            );
-
-        returnResult.m_closed = utils::extract_json_bool(relatedInfoObject, _T("closed"), errc);
-        returnResult.m_sessionOwners = utils::extract_json_vector<string_t>(utils::json_string_extractor, relatedInfoObject, _T("sessionOwners"), errc, false);
-    }
-
-    auto roleInfo = utils::extract_json_field(json, _T("roleInfo"), errc, false);
-    if (!roleInfo.is_null())
-    {
-        auto roleTypes = utils::extract_json_field(roleInfo, _T("roleTypes"), errc, false);
-        if (!roleTypes.is_null() && roleTypes.is_object())
+        const JsonValue& searchAttributesObject = json["searchAttributes"];
+        if (!searchAttributesObject.IsNull())
         {
-            web::json::object roleTypesObj = roleTypes.as_object();
-            for (const auto& roleType : roleTypesObj)
+            if (searchAttributesObject.IsObject() && searchAttributesObject.HasMember("tags"))
             {
-                auto roleTypeResult = multiplayer_role_type::_Deserialize(roleType.second);
-                if (roleTypeResult.err())
+                const JsonValue& tagAttributesJson = searchAttributesObject["tags"];
+                if (!tagAttributesJson.IsNull() && tagAttributesJson.IsArray())
                 {
-                    errc = roleTypeResult.err();
+                    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonVector<XblMultiplayerSessionTag>(
+                        [](const JsonValue& json)
+                        {
+                            if (!json.IsString())
+                            {
+                                return Result<XblMultiplayerSessionTag>{ WEB_E_INVALID_JSON_STRING };
+                            }
+                            XblMultiplayerSessionTag tag{};
+                            utils::strcpy(tag.value, sizeof(tag.value), json.GetString());
+
+                            return Result<XblMultiplayerSessionTag>{ tag };
+                        },
+                        searchAttributesObject,
+                            "tags",
+                            returnResult->m_tags,
+                            false
+                            ));
                 }
-                returnResult.m_roleTypes[roleType.first] = roleTypeResult.payload();
+            }
+
+            if (searchAttributesObject.IsObject() && searchAttributesObject.HasMember("strings"))
+            {
+                const JsonValue& stringAttributesJson = searchAttributesObject["strings"];
+                if (!stringAttributesJson.IsNull() && stringAttributesJson.IsObject())
+                {
+                    for (const auto& stringsMetadata : stringAttributesJson.GetObject())
+                    {
+                        XblMultiplayerSessionStringAttribute attr{};
+                        utils::strcpy(attr.name, sizeof(attr.name), stringsMetadata.name.GetString());
+                        utils::strcpy(attr.value, sizeof(attr.name), stringsMetadata.value.GetString());
+
+                        returnResult->m_stringAttributes.push_back(std::move(attr));
+                    }
+                }
+            }
+
+            if (searchAttributesObject.IsObject() && searchAttributesObject.HasMember("numbers"))
+            {
+                const JsonValue& numbersMetadataJson = searchAttributesObject["numbers"];
+                if (!numbersMetadataJson.IsNull() && numbersMetadataJson.IsObject())
+                {
+                    for (const auto& numbersMetadata : numbersMetadataJson.GetObject())
+                    {
+                        XblMultiplayerSessionNumberAttribute attr{};
+                        utils::strcpy(attr.name, sizeof(attr.name), numbersMetadata.name.GetString());
+                        attr.value = numbersMetadata.value.GetDouble();
+
+                        returnResult->m_numberAttributes.push_back(std::move(attr));
+                    }
+                }
             }
         }
     }
 
-    return returnResult;
-}
+    if (json.IsObject() && json.HasMember("relatedInfo"))
+    {
+        const JsonValue& relatedInfoObject = json["relatedInfo"];
+        if (!relatedInfoObject.IsNull())
+        {
+            int membersCount = 0;
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonInt(relatedInfoObject, "membersCount", membersCount, true));
+            returnResult->m_membersCount = membersCount;
+            int maxMembersCount = 0;
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonInt(relatedInfoObject, "maxMembersCount", maxMembersCount, true));
+            returnResult->m_maxMembersCount = maxMembersCount;
+            xsapi_internal_string joinRestriction;
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(relatedInfoObject, "joinRestriction", joinRestriction));
+            returnResult->m_joinRestriction = Serializers::MultiplayerSessionRestrictionFromString(joinRestriction);
+            xsapi_internal_string visibility;
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(relatedInfoObject, "visibility", visibility));
+            returnResult->m_visibility = Serializers::MultiplayerSessionVisibilityFromString(visibility);
 
-NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_END
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(relatedInfoObject, "closed", returnResult->m_closed));
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonVector<uint64_t>(JsonUtils::JsonXuidExtractor, relatedInfoObject, "sessionOwners", returnResult->m_sessionOwners, false));
+        }
+    }
+
+    if (json.IsObject() && json.HasMember("roleInfo"))
+    {
+        const JsonValue& roleInfo = json["roleInfo"];
+        if (!roleInfo.IsNull())
+        {
+            if (roleInfo.IsObject() && roleInfo.HasMember("roleTypes"))
+            {
+                auto roleTypesResult{ RoleTypes::Deserialize(roleInfo["roleTypes"]) };
+                RETURN_HR_IF_FAILED(roleTypesResult.Hresult());
+                returnResult->m_roleTypes = roleTypesResult.ExtractPayload();
+            }
+        }
+    }
+
+    return Result<std::shared_ptr<XblMultiplayerSearchHandleDetails>>{ returnResult, errc };
+}

@@ -1,11 +1,6 @@
-[submodule "External/cpprestsdk"]
-	path = External/cpprestsdk
-	url = https://github.com/jasonsandlin/cpprestsdk.git
-[submodule "External/cppwinrt"]
-	path = External/cppwinrt
-	url = https://github.com/Microsoft/cppwinrt.git
-[submodule "InProgressSamples/Kits/DirectXTK"]
-
-	path = InProgressSamples/Kits/DirectXTK
-	
-	url = https://github.com/jasonsandlin/DirectXTK.git
+[submodule "External/Xal/External/libHttpClient"]
+	path = External/Xal/External/libHttpClient
+	url = https://github.com/microsoft/libHttpClient
+[submodule "External/rapidjson"]
+	path = External/rapidjson
+	url = https://github.com/jasonsandlin/rapidjson

@@ -2,101 +2,90 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/social.h"
+#include "social_internal.h"
 
-using namespace xbox::services::real_time_activity;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
-social_relationship_change_subscription::social_relationship_change_subscription(
-    _In_ string_t xboxUserId,
-    _In_ std::function<void(const social_relationship_change_event_args&)> handler,
-    _In_ std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)> subscriptionErrorHandler
-    ) :
-    real_time_activity_subscription(subscriptionErrorHandler),
-    m_xboxUserId(std::move(xboxUserId)),
-    m_handler(std::move(handler))
+SocialRelationshipChangeSubscription::SocialRelationshipChangeSubscription(
+    _In_ uint64_t xuid
+) noexcept
+    : m_xuid{ xuid }
 {
-    XSAPI_ASSERT(!m_xboxUserId.empty());
-    XSAPI_ASSERT(m_handler != nullptr); 
-
-    stringstream_t uri;
-    uri << _T("http://social.xboxlive.com/users/xuid(") << m_xboxUserId << _T(")/friends");
-
+    Stringstream uri;
+    uri << "http://social.xboxlive.com/users/xuid(" << m_xuid << ")/friends";
     m_resourceUri = uri.str();
 }
 
-const string_t&
-social_relationship_change_subscription::xbox_user_id() const
+XblFunctionContext SocialRelationshipChangeSubscription::AddHandler(
+    SocialRelationshipChangedHandler handler
+) noexcept
 {
-    return m_xboxUserId;
+    std::lock_guard<std::mutex> lock{ m_lock };
+    m_handlers[m_nextHandlerToken] = std::move(handler);
+    return m_nextHandlerToken++;
 }
 
-void
-social_relationship_change_subscription::on_subscription_created(
-    _In_ uint32_t id,
-    _In_ const web::json::value& data
-    )
+size_t SocialRelationshipChangeSubscription::RemoveHandler(
+    XblFunctionContext token
+) noexcept
 {
-    real_time_activity_subscription::on_subscription_created(id, data);
+    std::lock_guard<std::mutex> lock{ m_lock };
+    m_handlers.erase(token);
+    return m_handlers.size();
+}
 
-    if (!data.is_null())
+void SocialRelationshipChangeSubscription::OnEvent(
+    const JsonValue& data
+) noexcept
+{
+    // Payload format http://xboxwiki/wiki/RTA%3AEVENT#People
+    // [<API_ID>, <SUB_ID>, {"NotificationType":"Added","Xuids":["2533274964271787"]}]
+
+    String notificationType;
+    Vector<uint64_t> xuids;
+
+    HRESULT hr = JsonUtils::ExtractJsonString(data, "NotificationType", notificationType);
+    if (SUCCEEDED(hr))
     {
-        m_subscriptionErrorHandler(
-            real_time_activity::real_time_activity_subscription_error_event_args(
-                *this,
-                xbox_live_error_code::json_error,
-                "JSON Deserialization Failure"
-                )
-            );
+        hr = JsonUtils::ExtractJsonVector<uint64_t>(
+            JsonUtils::JsonXuidExtractor,
+            data,
+            "Xuids",
+            xuids,
+            true
+        );
     }
 
-}
-
-void
-social_relationship_change_subscription::on_event_received(_In_ const web::json::value& data)
-{
-    std::error_code errc;
-    auto notificationTypeString = utils::extract_json_string(data, _T("NotificationType"), errc);
-    auto notificationType = convert_string_type_to_notification_type(notificationTypeString);
-    auto xboxUserIds = utils::extract_json_vector<string_t>(
-        utils::json_string_extractor,
-        data,
-        _T("Xuids"),
-        errc,
-        false
-        );
-
-    if (errc || notificationType == social_notification_type::unknown)
+    if (SUCCEEDED(hr))
     {
-        m_subscriptionErrorHandler(
-            real_time_activity_subscription_error_event_args(
-                *this,
-                xbox_live_error_code::json_error,
-                "JSON Deserialization Failure"
-                )
-            );
+        XblSocialRelationshipChangeEventArgs args
+        {
+            m_xuid,
+            EnumValue<XblSocialNotificationType>(notificationType.data()),
+            xuids.data(),
+            xuids.size()
+        };
+
+        std::unique_lock<std::mutex> lock{ m_lock };
+        auto handlers{ m_handlers };
+        lock.unlock();
+
+        for (auto& handler : handlers)
+        {
+            handler.second(args);
+        }
     }
     else
     {
-        m_handler(
-            social_relationship_change_event_args(
-                m_xboxUserId,
-                notificationType,
-                xboxUserIds
-                )
-            );
+        LOGS_DEBUG << __FUNCTION__ << ": Ignoring malformed event";
     }
 }
 
-social_notification_type
-social_relationship_change_subscription::convert_string_type_to_notification_type(
-    _In_ const string_t& notificationTypeString
-    ) const
+void SocialRelationshipChangeSubscription::OnResync() noexcept
 {
-    if (utils::str_icmp(notificationTypeString, _T("added")) == 0) return social_notification_type::added;
-    else if (utils::str_icmp(notificationTypeString, _T("removed")) == 0) return social_notification_type::removed;
-    else if (utils::str_icmp(notificationTypeString, _T("changed")) == 0) return social_notification_type::changed;
-    else return social_notification_type::unknown;
+    // Can't easily tell what might have been missed without keeping track of a full
+    // SocialGraph locally. Log the service error and continue.
+    LOGS_DEBUG << __FUNCTION__ << ": Resync received, relationship changes may have been missed";
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

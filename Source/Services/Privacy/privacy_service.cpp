@@ -1,252 +1,180 @@
-﻿// Copyright (c) Microsoft Corporation
+// Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/privacy.h"
-#include "xbox_system_factory.h"
-#include "utils.h"
-#include "user_context.h"
+#include "privacy_service_internal.h"
+#include "xbox_live_context_internal.h"
 
+using namespace xbox::services;
+using namespace xbox::services::legacy;
+using namespace xbox::services::privacy;
+
+constexpr auto XblPermissionName = EnumName<XblPermission, 1000, 1025>;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRIVACY_CPP_BEGIN
 
-// Helper classes for serialization/deserialization
-class avoid_list_item
-{
-private:
-    static xbox_live_result<avoid_list_item> deserializer(_In_ const web::json::value& json)
-    {
-        if (json.is_null()) return xbox_live_result<avoid_list_item>(xbox_live_error_code::json_error, "Json is null or empty");
-
-        avoid_list_item result;
-
-        std::error_code errc = xbox_live_error_code::no_error;
-        result.m_xboxUserId = utils::extract_json_string(json, _T("xuid"), errc, true);
-
-        return xbox_live_result<avoid_list_item>(result, errc);
-    }
-
-    string_t m_xboxUserId;
-
-    friend class privacy_service;
-    friend class avoid_list;
-    template<class T> friend class xbox_live_result;
-};
-
-class avoid_list
-{
-private:
-    static xbox_live_result<avoid_list> deserializer(_In_ const web::json::value& json)
-    {
-        if (json.is_null()) return xbox_live_result<avoid_list>(xbox_live_error_code::json_error, "Json is null or empty");
-
-        avoid_list result;
-
-        std::error_code errc = xbox_live_error_code::no_error;
-        result.m_avoidList = utils::extract_json_vector<avoid_list_item>(avoid_list_item::deserializer, json, _T("users"), errc, true);
-
-        return xbox_live_result<avoid_list>(result, errc);
-    }
-
-    std::vector<avoid_list_item> m_avoidList;
-
-    friend class avoid_list_item;
-    friend class privacy_service;
-    template<class T> friend class xbox_live_result;
-};
-
-// Privacy service
-privacy_service::privacy_service( 
-    _In_ std::shared_ptr<xbox::services::user_context> userContext,
-    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
-    ) :
-    m_userContext(std::move(userContext)),
-    m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
-    m_appConfig(std::move(appConfig))
+PrivacyService::PrivacyService(
+    _In_ User&& user,
+    _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings
+) noexcept :
+    m_user{ std::move(user) },
+    m_contextSettings{ contextSettings }
 {
 }
 
-pplx::task<xbox_live_result<std::vector<string_t>>>
-privacy_service::get_avoid_list()
+HRESULT PrivacyService::GetAvoidList(
+    _In_ AsyncContext<Result<xsapi_internal_vector<uint64_t>>> async
+) const noexcept
 {
-    return get_avoid_or_mute_list(_T("avoid"));
+    return GetUserList(PrivacyListType::Avoid, async);
 }
 
-pplx::task<xbox_live_result<std::vector<string_t>>>
-privacy_service::get_mute_list()
+HRESULT PrivacyService::GetMuteList(
+    _In_ AsyncContext<Result<xsapi_internal_vector<uint64_t>>> async
+) const noexcept
 {
-    return get_avoid_or_mute_list(_T("mute"));
+    return GetUserList(PrivacyListType::Mute, async);
 }
 
-pplx::task<xbox_live_result<std::vector<string_t>>>
-privacy_service::get_avoid_or_mute_list(
-    _In_ const string_t& subPathName
-    )
+HRESULT PrivacyService::GetUserList(
+    _In_ PrivacyListType listType,
+    _In_ AsyncContext<Result<xsapi_internal_vector<uint64_t>>> async
+) const noexcept
 {
-    string_t xboxUserId = m_userContext->xbox_user_id();
-    string_t subPathAndQuery = avoid_mute_list_sub_path(xboxUserId, subPathName);
+    xsapi_internal_stringstream path;
+    path << "/users/xuid(" << m_user.Xuid() << ")/people/" << (listType == PrivacyListType::Mute ? "mute" : "avoid");
 
-    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("GET"),
-        utils::create_xboxlive_endpoint(_T("privacy"), m_appConfig),
-        subPathAndQuery,
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    RETURN_HR_IF_FAILED(httpCall->Init(
+        m_contextSettings,
+        "GET",
+        XblHttpCall::BuildUrl("privacy", path.str()),
         xbox_live_api::get_avoid_or_mute_list
-        );
+    ));
 
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([](std::shared_ptr<http_call_response> response)
-    {
-        auto result = avoid_list::deserializer(response->response_body_json());
-
-        std::vector<string_t> xuidVector;
-
-        for (auto& item : result.payload().m_avoidList)
+    return httpCall->Perform({
+        async.Queue().DeriveWorkerQueue(),
+        [
+            async
+        ]
+    (HttpResult httpResult)
         {
-            if (!item.m_xboxUserId.empty())
+            HRESULT hr{ Failed(httpResult) ? httpResult.Hresult() : httpResult.Payload()->Result() };
+            if (SUCCEEDED(hr))
             {
-                xuidVector.push_back(item.m_xboxUserId);
+                return async.Complete(DeserializeUserList(httpResult.Payload()->GetResponseBodyJson()));
             }
+            return async.Complete(hr);
         }
-
-        xbox_live_result<std::vector<string_t>> xuidVectorResult(
-            xuidVector,
-            result.err(),
-            result.err_message()
-            );
-
-        return utils::generate_xbox_live_result<std::vector<string_t>>(
-            xuidVectorResult,
-            response
-            );
-    });
-
-    return utils::create_exception_free_task<std::vector<string_t>>(
-        task
-        );
+        });
 }
 
-const string_t 
-privacy_service::avoid_mute_list_sub_path(
-    _In_ const string_t& xboxUserId,
-    _In_ const string_t& subPathName
-    )
-{
-    web::uri_builder subPathBuilder;
-    stringstream_t path;
-    path << _T("/users/xuid(");
-    path << xboxUserId;
-    path << _T(")/people/");
-    path << subPathName;
-
-    subPathBuilder.append_path(path.str());
-
-    return subPathBuilder.to_string();
-}
-
-const string_t 
-privacy_service::permission_validate_sub_path(
-    _In_ const string_t& xboxUserId,
-    _In_ const string_t& setting,
-    _In_ const string_t& targetXboxUserId
-    )
+HRESULT PrivacyService::CheckPermission(
+    _In_ XblPermission permission,
+    _In_ uint64_t targetXuid,
+    _In_ AsyncContext<Result<PermissionCheckResult>> async
+) const noexcept
 {
     // users/xuid({xuid})/permission/validate?setting={setting}&target=xuid({targetXuid})
+    Stringstream targetQuery;
+    targetQuery << "xuid(" << targetXuid << ")";
 
-    web::uri_builder subPathBuilder;
-    stringstream_t path;
-    path << _T("/users/xuid(");
-    path << xboxUserId;
-    path << _T(")/permission/validate");
-
-    subPathBuilder.append_path(path.str());
-    subPathBuilder.append_query(_T("setting"), setting);
-
-    stringstream_t xuidPath;
-    xuidPath << _T("xuid(");
-    xuidPath << targetXboxUserId;
-    xuidPath << _T(")");
-    subPathBuilder.append_query(_T("target"), xuidPath.str());
-
-    return subPathBuilder.to_string();
+    return CheckPermission(permission, targetQuery.str(), { async.Queue(),
+        [
+            targetXuid,
+            async
+        ]
+    (Result<PermissionCheckResult> result)
+        {
+            result.Payload().targetXuid = targetXuid;
+            async.Complete(result);
+        }
+        });
 }
 
-const string_t 
-privacy_service::permission_batch_validate_sub_path(
-    _In_ const string_t& xboxUserId
-    )
+HRESULT PrivacyService::CheckPermission(
+    _In_ XblPermission permission,
+    _In_ XblAnonymousUserType userType,
+    _In_ AsyncContext<Result<PermissionCheckResult>> async
+) const noexcept
+{
+    return CheckPermission(permission, EnumName(userType), { async.Queue(),
+        [
+            userType,
+            async
+        ]
+    (Result<PermissionCheckResult> result)
+        {
+            result.Payload().targetUserType = userType;
+            async.Complete(result);
+        }
+        });
+}
+
+HRESULT PrivacyService::CheckPermission(
+    _In_ XblPermission permission,
+    _In_ const String& targetQuery,
+    _In_ AsyncContext<Result<PermissionCheckResult>> async
+) const noexcept
+{
+    // users/xuid({xuid})/permission/validate?setting={setting}&target={target})
+    xbox::services::uri_builder subPathBuilder;
+    stringstream_t path;
+    path << _T("/users/xuid(") << m_user.Xuid() << _T(")/permission/validate");
+
+    subPathBuilder.append_path(path.str());
+    subPathBuilder.append_query(_T("setting"), StringTFromUtf8(XblPermissionName(permission).data()));
+    subPathBuilder.append_query(_T("target"), StringTFromUtf8(targetQuery.data()));
+
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    RETURN_HR_IF_FAILED(httpCall->Init(
+        m_contextSettings,
+        "GET",
+        XblHttpCall::BuildUrl("privacy", utils::internal_string_from_string_t(subPathBuilder.to_string())),
+        xbox_live_api::check_permission_with_target_user
+    ));
+
+    return httpCall->Perform({
+        async.Queue().DeriveWorkerQueue(),
+        [
+            async,
+            permission
+        ]
+    (HttpResult httpResult)
+        {
+            HRESULT hr{ Failed(httpResult) ? httpResult.Hresult() : httpResult.Payload()->Result() };
+            if (SUCCEEDED(hr))
+            {
+                return async.Complete(PermissionCheckResult::Deserialize(httpResult.Payload()->GetResponseBodyJson(), permission));
+            }
+            return async.Complete(hr);
+        }
+        });
+}
+
+HRESULT PrivacyService::BatchCheckPermission(
+    _In_ xsapi_internal_vector<XblPermission> permissions,
+    _In_ const xsapi_internal_vector<uint64_t>& targetXuids,
+    _In_ const xsapi_internal_vector<XblAnonymousUserType>& userTypes,
+    _In_ AsyncContext<Result<xsapi_internal_vector<PermissionCheckResult>>> async
+) const noexcept
 {
     // users/xuid({xuid})/permission/validate
-
-    web::uri_builder subPathBuilder;
-    stringstream_t path;
-    path << _T("/users/xuid(");
-    path << xboxUserId;
-    path << _T(")/permission/validate");
-
-    subPathBuilder.append_path(path.str());
-
-    return subPathBuilder.to_string();
-}
-
-pplx::task<xbox_live_result<permission_check_result>>
-privacy_service::check_permission_with_target_user(
-    _In_ const string_t& permissionId,
-    _In_ const string_t& targetXboxUserId
-    )
-{
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(permissionId, permission_check_result, "PermissionID is empty");
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(targetXboxUserId, permission_check_result, "Target Xbox User Id is empty");
-
-    string_t xboxUserId = m_userContext->xbox_user_id();
-    string_t subpathAndQuery = permission_validate_sub_path(xboxUserId, permissionId, targetXboxUserId);
-
-    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("GET"),
-        utils::create_xboxlive_endpoint(_T("privacy"), m_appConfig),
-        subpathAndQuery,
-        xbox_live_api::check_permission_with_target_user
-        );
-
-    auto task = httpCall->get_response_with_auth(m_userContext)
-		.then([permissionId](std::shared_ptr<http_call_response> response)
-    {
-        auto result = permission_check_result::_Deserializer(response->response_body_json());
-        auto permissionResult = result.payload();
-        permissionResult.initialize(permissionId);
-
-        return utils::generate_xbox_live_result<permission_check_result>(
-            permissionResult,
-            response
-			);
-	});
-
-    return utils::create_exception_free_task<permission_check_result>(
-        task
-        );
-}
-
-
-pplx::task<xbox_live_result<std::vector<multiple_permissions_check_result>>>
-privacy_service::check_multiple_permissions_with_multiple_target_users(
-    _In_ std::vector<string_t> permissionIds,
-    _In_ std::vector<string_t> targetXboxUserIds
-    )
-{
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(permissionIds.empty(), std::vector<multiple_permissions_check_result>, "Permission Ids are empty");
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(targetXboxUserIds.empty(), std::vector<multiple_permissions_check_result>, "Target Xbox User Ids are empty");
-
-    string_t xboxUserId = m_userContext->xbox_user_id();
-    web::uri subpathAndQuery = permission_batch_validate_sub_path(xboxUserId);
+    xsapi_internal_stringstream path;
+    path << "/users/xuid(" << m_user.Xuid() << ")/permission/validate";
 
     // Set request body to something like:
     //{
     //    "users":
     //    [
     //        {"xuid":"12345"},
-    //        {"xuid":"54321"}
+    //        {"anonymousUser":"crossNetworkUser"}
     //    ],
     //    "permissions":
     //    [
@@ -255,64 +183,100 @@ privacy_service::check_multiple_permissions_with_multiple_target_users(
     //    ]
     //}
 
-    web::json::value serializedObject;
+    JsonDocument requestBody(rapidjson::kObjectType);
+    JsonDocument::AllocatorType& allocator = requestBody.GetAllocator();
 
-    web::json::value privacyUsers;
-    for (uint32_t i = 0; i < targetXboxUserIds.size(); ++i)
+    JsonValue usersJson(rapidjson::kArrayType);
+    for (auto xuid : targetXuids)
     {
-        web::json::value userJson;
-        userJson[_T("xuid")] = web::json::value(targetXboxUserIds[i]);
-        privacyUsers[i] = userJson;
+        JsonValue userJson(rapidjson::kObjectType);
+        userJson.AddMember("xuid", JsonValue(utils::uint64_to_internal_string(xuid).c_str(), allocator).Move(), allocator);
+        usersJson.PushBack(userJson, allocator);
+    }
+    for (auto userType : userTypes)
+    {
+        JsonValue userJson(rapidjson::kObjectType);
+        userJson.AddMember("anonymousUser", JsonValue(EnumName(userType).data(), allocator).Move(), allocator);
+        usersJson.PushBack(userJson, allocator);
     }
 
-    serializedObject[_T("users")] = privacyUsers;
-    serializedObject[_T("permissions")] = utils::serialize_vector<string_t>(utils::json_string_serializer, permissionIds);
-
-    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("POST"),
-        utils::create_xboxlive_endpoint(_T("privacy"), m_appConfig),
-        subpathAndQuery,
-        xbox_live_api::check_multiple_permissions_with_multiple_target_users
-        );
-
-    httpCall->set_request_body(
-        serializedObject.serialize()
-        );
-
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([permissionIds](std::shared_ptr<http_call_response> response)
-    {
-        std::error_code errc = xbox_live_error_code::no_error;
-        auto results = utils::extract_json_vector<multiple_permissions_check_result>(multiple_permissions_check_result::_Deserializer, response->response_body_json(), _T("responses"), errc, true);
-
-        for (auto& result : results)
+    requestBody.AddMember("users", usersJson, allocator);
+    JsonValue permissionsJson(rapidjson::kArrayType);
+    JsonUtils::SerializeVector<XblPermission>(
+        [](XblPermission permission, JsonValue& outObj, JsonDocument::AllocatorType& allocator)
         {
-            auto permissionResults = result.items();
+            outObj.SetString(XblPermissionName(permission).data(), allocator);
+        },
+        permissions,
+        permissionsJson,
+        allocator
+    );
 
-            if (permissionResults.size() != permissionIds.size()) return xbox_live_result<std::vector<multiple_permissions_check_result>>(xbox_live_error_code::runtime_error, "The resulting number of items did not match the number of items requested!");
+    requestBody.AddMember("permissions", permissionsJson, allocator);
 
-            for (uint32_t i = 0; i < permissionResults.size(); i++)
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    RETURN_HR_IF_FAILED(httpCall->Init(
+        m_contextSettings,
+        "POST",
+        XblHttpCall::BuildUrl("privacy", path.str()),
+        xbox_live_api::check_multiple_permissions_with_multiple_target_users
+    ));
+
+    RETURN_HR_IF_FAILED(httpCall->SetRequestBody(requestBody));
+
+    return httpCall->Perform({
+        async.Queue().DeriveWorkerQueue(),
+        [
+            async,
+            permissionsRequested{ std::move(permissions) }
+        ]
+    (HttpResult httpResult)
+        {
+            HRESULT hr{ Failed(httpResult) ? httpResult.Hresult() : httpResult.Payload()->Result() };
+            if (SUCCEEDED(hr))
             {
-                result.initialize(i, permissionIds[i]);
+                return async.Complete(PermissionCheckResult::BatchDeserialize(httpResult.Payload()->GetResponseBodyJson(), permissionsRequested));
             }
+            return async.Complete(hr);
         }
+        });
+}
 
-        xbox_live_result<std::vector<multiple_permissions_check_result>> multiplePermissionResults(
-            results,
-            errc,
-            ""
-            );
+Result<xsapi_internal_vector<uint64_t>> PrivacyService::DeserializeUserList(
+    _In_ const JsonValue& json
+) noexcept
+{
+    HRESULT errc = S_OK;
+    xsapi_internal_vector<uint64_t> xuids;
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonVector<uint64_t>(
+        [&errc](_In_ const JsonValue& json)
+        {
+            if (json.IsNull())
+            {
+                return Result<uint64_t>(WEB_E_INVALID_JSON_STRING);
+            }
 
-        return utils::generate_xbox_live_result<std::vector<multiple_permissions_check_result>>(
-            multiplePermissionResults,
-            response
-            );
-    });
+            uint64_t xuid = 0;
+            HRESULT tempErr = JsonUtils::ExtractJsonXuid(json, "xuid", xuid, true);
+            if (tempErr)
+            {
+                errc = tempErr;
+            }
 
-    return utils::create_exception_free_task< std::vector<multiple_permissions_check_result> >(
-        task
-        );
+            return Result<uint64_t>(xuid, errc);
+        },
+        json, ("users"), xuids, true
+        ));
+
+    if (errc)
+    {
+        return WEB_E_INVALID_JSON_STRING;
+    }
+    
+    return xuids;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRIVACY_CPP_END

@@ -2,147 +2,88 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/presence.h"
+#include "presence_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
 
-device_presence_change_subscription::device_presence_change_subscription(
-    _In_ string_t xboxUserId,
-    _In_ std::function<void(const device_presence_change_event_args&)> handler,
-    _In_ std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)> subscriptionErrorHandler
-    ) :
-    real_time_activity_subscription(subscriptionErrorHandler),
-    m_xboxUserId(std::move(xboxUserId)),
-    m_devicePresenceChangeHandler(handler)
+DevicePresenceChangeSubscription::DevicePresenceChangeSubscription(
+    _In_ uint64_t xuid,
+    _In_ std::shared_ptr<PresenceService> presenceService
+) noexcept
+    : m_xuid{ xuid },
+    m_presenceService{ presenceService }
 {
-    XSAPI_ASSERT(!m_xboxUserId.empty());
-    XSAPI_ASSERT(handler != nullptr);
-
-    stringstream_t uri;
-    uri << _T("https://userpresence.xboxlive.com/users/xuid(") << m_xboxUserId << _T(")/devices");
-
+    Stringstream uri;
+    uri << "https://userpresence.xboxlive.com/users/xuid(" << m_xuid << ")/devices";
     m_resourceUri = uri.str();
 }
 
-void
-device_presence_change_subscription::on_subscription_created(
-    _In_ uint32_t id, 
-    _In_ const web::json::value& data
-    )
+void DevicePresenceChangeSubscription::OnSubscribe(
+    const JsonValue& data
+) noexcept
 {
-    real_time_activity_subscription::on_subscription_created(id, data);
-    xbox_live_result<device_presence_change_event_args> devicePresenceChangeArgs;
-
-    if (!data.is_null())
+    if (data.IsNull())
     {
-        auto initialPresenceRecord = presence_record::_Deserialize(data);
+        LOGS_ERROR << __FUNCTION__ << ": RTA payload unexpectedly null";
+        return;
+    }
 
-        if (!initialPresenceRecord.err())
+    auto presenceService{ m_presenceService.lock() };
+    if (presenceService)
+    {
+        auto deserializationResult = XblPresenceRecord::Deserialize(data);
+        if (Succeeded(deserializationResult))
         {
-            if (m_devicePresenceChangeHandler != nullptr)
+            for (const auto& deviceRecord : deserializationResult.Payload()->DeviceRecords())
             {
-                for (const auto& deviceRecord : initialPresenceRecord.payload().presence_device_records())
-                {
-                    auto deviceType = deviceRecord.device_type();
+                presenceService->HandleDevicePresenceChanged(m_xuid, deviceRecord.deviceType, true);
+            }
+        }
+    }
+}
 
-                    m_devicePresenceChangeHandler(
-                        device_presence_change_event_args(
-                            m_xboxUserId,
-                            deviceType,
-                            true
-                            )
-                        );
+void DevicePresenceChangeSubscription::OnEvent(
+    _In_ const JsonValue& data
+) noexcept
+{
+    auto presenceService{ m_presenceService.lock() };
+    if (presenceService && data.IsString())
+    {
+        auto devicePresenceValues = utils::string_split(String{ data.GetString() }, ':');
+        if (devicePresenceValues.size() == 2)
+        {
+            presenceService->HandleDevicePresenceChanged(
+                m_xuid,
+                DeviceRecord::DeviceTypeFromString(devicePresenceValues[0]),
+                utils::str_icmp_internal(devicePresenceValues[1], "true") == 0
+            );
+        }
+    }
+}
+
+void DevicePresenceChangeSubscription::OnResync() noexcept
+{
+    auto presenceService{ m_presenceService.lock() };
+    if (presenceService)
+    {
+        presenceService->GetPresence(m_xuid, {
+            [
+                sharedThis{ shared_from_this() },
+                presenceService
+            ]
+        (Result<std::shared_ptr<XblPresenceRecord>> result)
+            {
+                if (Succeeded(result))
+                {
+                    for (const auto& deviceRecord : result.Payload()->DeviceRecords())
+                    {
+                        presenceService->HandleDevicePresenceChanged(sharedThis->m_xuid, deviceRecord.deviceType, true);
+                    }
                 }
             }
-        }
-        else
-        {
-            if (m_subscriptionErrorHandler != nullptr)
-            {
-                m_subscriptionErrorHandler(
-                    xbox::services::real_time_activity::real_time_activity_subscription_error_event_args(
-                        *this,
-                        xbox_live_error_code::json_error,
-                        "JSON Deserialization Failure"
-                        )
-                    );
             }
-        }
+        );
     }
-    else
-    {
-        if (m_subscriptionErrorHandler != nullptr)
-        {
-            m_subscriptionErrorHandler(
-                xbox::services::real_time_activity::real_time_activity_subscription_error_event_args(
-                    *this,
-                    xbox_live_error_code::json_error,
-                    "JSON Not Found"
-                    )
-                );
-        }
-    }
-}
-
-void
-device_presence_change_subscription::on_event_received(
-    _In_ const web::json::value& data
-    )
-{
-    std::error_code errc;
-    auto dataAsString = utils::extract_json_as_string(data, errc);
-    xbox_live_result<device_presence_change_event_args> eventArgs;
-    if (!errc)
-    {
-        std::vector<string_t> devicePresenceValues = utils::string_split(dataAsString, ':');
-
-        if (devicePresenceValues.size() != 2)
-        {
-            if (m_subscriptionErrorHandler != nullptr)
-            {
-                m_subscriptionErrorHandler(
-                    xbox::services::real_time_activity::real_time_activity_subscription_error_event_args(
-                        *this,
-                        xbox_live_error_code::json_error,
-                        "JSON deserialization failed"
-                        )
-                    );
-            }
-            
-            return;
-        }
-
-        if (m_devicePresenceChangeHandler != nullptr)
-        {
-            m_devicePresenceChangeHandler(
-                device_presence_change_event_args(
-                    m_xboxUserId,
-                    presence_device_record::_Convert_string_to_presence_device_type(devicePresenceValues[0]),
-                    utils::str_icmp(devicePresenceValues[1], _T("true")) == 0
-                    )
-                );
-        }
-    }
-    else
-    {
-        if (m_subscriptionErrorHandler != nullptr)
-        {
-            LOG_DEBUG("device_presence_change_subscription error happened");
-            m_subscriptionErrorHandler(
-                xbox::services::real_time_activity::real_time_activity_subscription_error_event_args(
-                    *this,
-                    xbox_live_error_code::json_error,
-                    "JSON deserialization failed"
-                    )
-                );
-        }
-    }
-}
-
-const string_t&
-device_presence_change_subscription::xbox_user_id() const
-{
-    return m_xboxUserId;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_END

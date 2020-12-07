@@ -2,134 +2,137 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/multiplayer.h"
+#include "multiplayer_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_BEGIN
 
-multiplayer_query_search_handle_request::multiplayer_query_search_handle_request(
-    _In_ string_t serviceConfigurationId,
-    _In_ string_t sessionTemplateName,
-    _In_ string_t orderBy,
+MultiplayerQuerySearchHandleRequest::MultiplayerQuerySearchHandleRequest(
+    _In_ const xsapi_internal_string& scid,
+    _In_ const xsapi_internal_string& sessionTemplateName,
+    _In_ const xsapi_internal_string& orderBy,
     _In_ bool orderAscending,
-    _In_ string_t searchFilter
+    _In_ const xsapi_internal_string& searchFilter
     ) :
-    m_serviceConfigurationId(std::move(serviceConfigurationId)),
-    m_sessionTemplateName(std::move(sessionTemplateName)),
-    m_orderBy(std::move(orderBy)),
+    m_serviceConfigurationId(scid),
+    m_sessionTemplateName(sessionTemplateName),
+    m_orderBy(orderBy),
     m_orderAscending(orderAscending),
-    m_searchFilter(std::move(searchFilter))
+    m_searchFilter(searchFilter)
 {
 }
 
-multiplayer_query_search_handle_request::multiplayer_query_search_handle_request(
-    _In_ string_t serviceConfigurationId,
-    _In_ string_t sessionTemplateName
+MultiplayerQuerySearchHandleRequest::MultiplayerQuerySearchHandleRequest(
+    _In_ const xsapi_internal_string& scid,
+    _In_ const xsapi_internal_string& sessionTemplateName
     ) :
-    m_serviceConfigurationId(std::move(serviceConfigurationId)),
-    m_sessionTemplateName(std::move(sessionTemplateName)),
-    m_orderAscending(false)
+    m_serviceConfigurationId(scid),
+    m_sessionTemplateName(sessionTemplateName)
 {
 }
 
-const string_t&
-multiplayer_query_search_handle_request::service_configuration_id() const
+const xsapi_internal_string&
+MultiplayerQuerySearchHandleRequest::Scid() const
 {
     return m_serviceConfigurationId;
 }
 
-const string_t&
-multiplayer_query_search_handle_request::session_template_name() const
+const xsapi_internal_string&
+MultiplayerQuerySearchHandleRequest::SessionTemplateName() const
 {
     return m_sessionTemplateName;
 }
 
 bool
-multiplayer_query_search_handle_request::order_ascending()
+MultiplayerQuerySearchHandleRequest::OrderAscending()
 {
     return m_orderAscending;
 }
 
 void
-multiplayer_query_search_handle_request::set_order_ascending(_In_ bool orderAscending)
+MultiplayerQuerySearchHandleRequest::SetOrderAscending(_In_ bool orderAscending)
 {
     m_orderAscending = orderAscending;
 }
 
-const string_t&
-multiplayer_query_search_handle_request::order_by() const
+const xsapi_internal_string&
+MultiplayerQuerySearchHandleRequest::OrderBy() const
 {
     return m_orderBy;
 }
 
 void
-multiplayer_query_search_handle_request::set_order_by(_In_ const string_t& orderBy)
+MultiplayerQuerySearchHandleRequest::SetOrderBy(_In_ const xsapi_internal_string& orderBy)
 {
     m_orderBy = orderBy;
 }
 
-const string_t&
-multiplayer_query_search_handle_request::search_filter() const
+const xsapi_internal_string&
+MultiplayerQuerySearchHandleRequest::SearchFilter() const
 {
     return m_searchFilter;
 }
 
 void
-multiplayer_query_search_handle_request::set_search_filter(_In_ const string_t& searchFilter)
+MultiplayerQuerySearchHandleRequest::SetSearchFilter(_In_ const xsapi_internal_string& searchFilter)
 {
     m_searchFilter = searchFilter;
 }
 
-const string_t&
-multiplayer_query_search_handle_request::social_group() const
+const xsapi_internal_string&
+MultiplayerQuerySearchHandleRequest::SocialGroup() const
 {
     return m_socialGroup;
 }
 
 void
-multiplayer_query_search_handle_request::set_social_group(_In_ const string_t& socialGroup)
+MultiplayerQuerySearchHandleRequest::SetSocialGroup(_In_ const xsapi_internal_string& socialGroup)
 {
     m_socialGroup = socialGroup;
 }
 
-web::json::value
-multiplayer_query_search_handle_request::_Serialize(
-    _In_ const string_t& socialGroupXuid
-    ) const
+void
+MultiplayerQuerySearchHandleRequest::Serialize(
+    _In_ uint64_t socialGroupXuid,
+    _Out_ JsonValue& json,
+    _In_ JsonDocument::AllocatorType& allocator
+) const
 {
-    web::json::value serializedObject;
-    serializedObject[_T("type")] = web::json::value::string(_T("search"));
-    serializedObject[_T("scid")] = web::json::value::string(m_serviceConfigurationId);
-    serializedObject[_T("templateName")] = web::json::value::string(m_sessionTemplateName);
-    serializedObject[_T("filter")] = web::json::value::string(m_searchFilter);
-    serializedObject[_T("global")] = web::json::value::boolean(true);
+    json.SetObject();
+    json.AddMember("type", JsonValue("search", allocator).Move(), allocator);
+    json.AddMember("scid", JsonValue(m_serviceConfigurationId.c_str(), allocator).Move(), allocator);
+    json.AddMember("templateName", JsonValue(m_sessionTemplateName.c_str(), allocator).Move(), allocator);
+    json.AddMember("global", true, allocator);
+
+    if (!m_searchFilter.empty())
+    {
+        json.AddMember("filter", JsonValue(m_searchFilter.c_str(), allocator).Move(), allocator);
+    }
 
     if (!m_orderBy.empty())
     {
-        stringstream_t orderByQuery;
+        xsapi_internal_stringstream orderByQuery;
         orderByQuery << m_orderBy;
         if (m_orderAscending)
         {
-            orderByQuery << _T(" asc");
+            orderByQuery << " asc";
         }
         else
         {
-            orderByQuery << _T(" desc");
+            orderByQuery << " desc";
         }
-        serializedObject[_T("orderBy")] = web::json::value::string(orderByQuery.str());
+        json.AddMember("orderBy", JsonValue(orderByQuery.str().c_str(), allocator).Move(), allocator);
     }
 
     if (!m_socialGroup.empty())
     {
-        web::json::value ownerObject;
-        web::json::value peopleObject;
-        peopleObject[_T("moniker")] = web::json::value::string(m_socialGroup);
-        peopleObject[_T("monikerXuid")] = web::json::value::string(socialGroupXuid);
+        JsonValue ownerObject(rapidjson::kObjectType);
+        JsonValue peopleObject(rapidjson::kObjectType);
+        peopleObject.AddMember("moniker", JsonValue(m_socialGroup.c_str(), allocator).Move(), allocator);
+        peopleObject.AddMember("monikerXuid", JsonValue(utils::uint64_to_internal_string(socialGroupXuid).c_str(), allocator).Move(), allocator);
 
-        ownerObject[_T("people")] = std::move(peopleObject);
-        serializedObject[_T("sessionMembers")] = ownerObject;
+        ownerObject.AddMember("people", peopleObject, allocator);
+        json.AddMember("sessionMembers", ownerObject, allocator);
     }
-
-    return serializedObject;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_END

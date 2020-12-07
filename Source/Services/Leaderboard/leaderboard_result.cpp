@@ -2,195 +2,335 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "shared_macros.h"
-#include "leaderboard_query.h"
-#include "xsapi/leaderboard.h"
+#include "leaderboard_internal.h"
+#include "social_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_LEADERBOARD_CPP_BEGIN
 
-leaderboard_result::leaderboard_result() :
-    m_totalRowCount(0)
+LeaderboardResult::LeaderboardResult(
+    _In_ uint32_t totalRowCount,
+    _In_ String continuationToken,
+    _In_ Vector<LeaderboardColumn> columns,
+    _In_ Vector<LeaderboardRow> rows
+) :
+    m_totalRowCount{ totalRowCount },
+    m_continuationToken{ std::move(continuationToken) },
+    m_columns{ std::move(columns) },
+    m_rows{ std::move(rows) }
 {
 }
 
-leaderboard_result::leaderboard_result(
-    _In_ string_t display_name,
-    _In_ uint32_t total_row_count,
-    _In_ string_t continuationToken,
-    _In_ std::vector<leaderboard_column> columns,
-    _In_ std::vector<leaderboard_row> rows,
-    _In_ std::shared_ptr<xbox::services::user_context> userContext,
-    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
-    ) :
-    m_displayName(std::move(display_name)),
-    m_totalRowCount(total_row_count),
-    m_continuationToken(std::move(continuationToken)),
-    m_columns(std::move(columns)),
-    m_rows(std::move(rows)),
-    m_userContext(std::move(userContext)),
-    m_appConfig(std::move(appConfig)),
-    m_xboxLiveContextSettings(std::move(xboxLiveContextSettings))
-{
-}
-
-const string_t& leaderboard_result::display_name() const
-{
-    return m_displayName;
-}
-
-uint32_t leaderboard_result::total_row_count() const
+uint32_t 
+LeaderboardResult::TotalRowCount() const
 {
     return m_totalRowCount;
 }
 
-const std::vector<leaderboard_column>& leaderboard_result::columns() const
+const xsapi_internal_vector<LeaderboardColumn>& 
+LeaderboardResult::Columns() const
 {
     return m_columns;
 }
 
-const std::vector<leaderboard_row>& leaderboard_result::rows() const
+const xsapi_internal_vector<LeaderboardRow>& 
+LeaderboardResult::Rows() const
 {
     return m_rows;
 }
 
-void leaderboard_result::_Set_next_query(std::shared_ptr<leaderboard_global_query> query)
+void 
+LeaderboardResult::SetNextQuery(std::shared_ptr<LeaderboardGlobalQuery> query)
 {
     m_globalQuery = std::move(query);
 }
 
-void leaderboard_result::_Set_next_query(std::shared_ptr<leaderboard_social_query> query)
+void 
+LeaderboardResult::SetNextQuery(std::shared_ptr<LeaderboardSocialQuery> query)
 {
     m_socialQuery = std::move(query);
 }
 
-void leaderboard_result::_Set_next_query(const leaderboard_query& query)
+void 
+LeaderboardResult::ParseAdditionalColumns(const xsapi_internal_vector<xsapi_internal_string>& additionalColumnNames)
 {
-    m_version = _T("2017");
-    m_nextQuery = std::move(query);
-}
-
-void leaderboard_result::_Parse_additional_columns(const std::vector<string_t>& additionalColumnNames)
-{
-    std::vector<leaderboard_column> columns;
+    xsapi_internal_vector<LeaderboardColumn> columns;
     if (m_columns.size() == 0)
     {
         return;
     }
     columns.push_back(m_columns[0]);
 
-    std::unordered_map<string_t, leaderboard_stat_type> stats;
+    std::unordered_map<xsapi_internal_string, legacy::leaderboard_stat_type> stats;
 
     for (auto& row : m_rows)
     {
         for (uint32_t i = 0; i < additionalColumnNames.size(); ++i)
         {
-            const string_t& columnName = additionalColumnNames[i];
+            const xsapi_internal_string& columnName = additionalColumnNames[i];
             auto stat = stats.find(columnName);
-            const web::json::value& val = row.m_metadata[columnName];
-            if (stat == stats.end() || stat->second == leaderboard_stat_type::stat_other)
+            const JsonValue& val = row.m_metadata[columnName.c_str()];
+            if (stat == stats.end() || stat->second == legacy::leaderboard_stat_type::stat_other)
             {
-                if(val.is_boolean())
+                if(val.IsBool())
                 {
-                    stats[columnName] = leaderboard_stat_type::stat_boolean;
+                    stats[columnName] = legacy::leaderboard_stat_type::stat_boolean;
                 }
-                else if (val.is_number())
+                else if (val.IsNumber())
                 {
-                    stats[columnName] = leaderboard_stat_type::stat_double;
+                    stats[columnName] = legacy::leaderboard_stat_type::stat_double;
                 }
-                else if (val.is_string())
+                else if (val.IsString())
                 {
-                    stats[columnName] = leaderboard_stat_type::stat_string;
+                    stats[columnName] = legacy::leaderboard_stat_type::stat_string;
                 }
                 else
                 {
-                    stats[columnName] = leaderboard_stat_type::stat_other;
+                    stats[columnName] = legacy::leaderboard_stat_type::stat_other;
                 }
 
             }
+
+            auto columnValues = JsonUtils::SerializeJson(val);
             if (i >= row.m_columnValues.size() - 1)
             {
-                row.m_columnValues.push_back(val.serialize());
+                row.m_columnValues.push_back(columnValues);
             }
             else
             {
-                row.m_columnValues[i] = val.serialize();
+                row.m_columnValues[i] = columnValues;
             }
         }
     }
 
     for (const auto& columnName : additionalColumnNames)
     {
-        columns.push_back(leaderboard_column(columnName, columnName, stats[columnName]));
+        columns.push_back(LeaderboardColumn(columnName, stats[columnName]));
     }
     m_columns = columns;
 }
 
-bool leaderboard_result::has_next() const
+bool 
+LeaderboardResult::HasNext() const
 {
     return !m_continuationToken.empty();
 }
 
-pplx::task<xbox_live_result<leaderboard_result>> leaderboard_result::get_next(_In_ uint32_t maxItems) const
+Result<LeaderboardResult> LeaderboardResult::Deserialize(_In_ const JsonValue& json)
 {
-    if (m_version == _T("2017"))
+    if (!json.IsObject())
     {
-        return pplx::task_from_result(xbox_live_result<leaderboard_result>(xbox_live_error_code::unsupported, "This API is NOT supported for using leaderboards that are configured with stats 2017. Use get_next_query() instead."));
+        return WEB_E_INVALID_JSON_STRING;
     }
 
-    if (m_continuationToken.empty())
+    // Paging info
+    String continuationToken;
+    if (json.HasMember("pagingInfo"))
     {
-        return pplx::task_from_result(xbox_live_result<leaderboard_result>(xbox_live_error_code::out_of_range, "leadboard_result does not have a next page"));
-    }
-
-    leaderboard_service service(m_userContext, m_xboxLiveContextSettings, m_appConfig);
-
-    if (m_globalQuery != nullptr)
-    {
-        string_t& scid = m_globalQuery->scid;
-        string_t& name = m_globalQuery->name;
-        string_t& xuid = m_globalQuery->xuid;
-        string_t& socialGroup = m_globalQuery->socialGroup;
-        std::vector<string_t>& columns = m_globalQuery->columns;
-        return service.get_leaderboard_internal(
-            scid,
-            name,
-            NO_SKIP_RANK,
-            NO_SKIP_XUID,
-            xuid,
-            socialGroup,
-            maxItems,
-            m_continuationToken,
-            columns);
-    }
-    else if (m_socialQuery != nullptr)
-    {
-        return service.get_leaderboard_for_social_group_internal(
-            m_socialQuery->xuid,
-            m_socialQuery->scid,
-            m_socialQuery->statName,
-            m_socialQuery->socialGroup,
-            NO_SKIP_RANK,
-            NO_SKIP_XUID,
-            m_socialQuery->sortOrder,
-            maxItems,
-            m_continuationToken);
-    }
-
-    // This should never happen
-    return pplx::task_from_result(xbox_live_result<leaderboard_result>(xbox_live_error_code::runtime_error, "no query found to continue"));
-}
-
-xbox_live_result<leaderboard_query> leaderboard_result::get_next_query() const
-{
-    if (m_version == _T("2017"))
-    {
-        return xbox_live_result<leaderboard_query>(m_nextQuery);
+        const JsonValue& pagingInfo = json["pagingInfo"];
+        if (!pagingInfo.IsNull())
+        {
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(pagingInfo, "continuationToken", continuationToken, false));
+        }
     }
     else
     {
-        return xbox_live_result<leaderboard_query>(xbox_live_error_code::unsupported, "This API is only supported for using leaderboards that are configured with stats 2017. Use get_next() instead");
+        return WEB_E_INVALID_JSON_STRING;
     }
+
+    // Leaderboard metadata
+    uint32_t totalCount{ 0 };
+    Vector<LeaderboardColumn> columns;
+    if (json.HasMember("leaderboardInfo"))
+    {
+        const auto& leaderboardInfoJson{ json["leaderboardInfo"] };
+        if (!leaderboardInfoJson.IsObject())
+        {
+            return WEB_E_INVALID_JSON_STRING;
+        }
+
+        RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonInt(leaderboardInfoJson, "totalCount", totalCount));
+
+        if (leaderboardInfoJson.HasMember("columnDefinition"))
+        {
+            // This response schema is used by Global event based stat backed leaderboard queries
+            auto columnResult = LeaderboardColumn::Deserialize(leaderboardInfoJson["columnDefinition"]);
+            RETURN_HR_IF_FAILED(columnResult.Hresult());
+            columns.push_back(columnResult.ExtractPayload());
+        }
+        else if (leaderboardInfoJson.HasMember("columns") && leaderboardInfoJson["columns"].IsArray())
+        {
+            // These response schema is used by all other leaderboard queries
+            for (auto& columnJson : leaderboardInfoJson["columns"].GetArray())
+            {
+                auto columnResult = LeaderboardColumn::Deserialize(columnJson);
+                RETURN_HR_IF_FAILED(columnResult.Hresult());
+                columns.push_back(columnResult.ExtractPayload());
+            }
+        }
+        else
+        {
+            return WEB_E_INVALID_JSON_STRING;
+        }
+    }
+    else
+    {
+        return WEB_E_INVALID_JSON_STRING;
+    }
+
+    Vector<LeaderboardRow> rows;
+    if (json.HasMember("userList") && json["userList"].IsArray())
+    {
+        const auto& jsonRows = json["userList"].GetArray();
+        for (const auto& row : jsonRows)
+        {
+            auto rowResult = LeaderboardRow::Deserialize(row);
+            RETURN_HR_IF_FAILED(rowResult.Hresult());
+            rows.push_back(rowResult.ExtractPayload());
+        }
+    }
+    else if (json.HasMember("leaderboard"))
+    {
+
+    }
+    else
+    {
+        return WEB_E_INVALID_JSON_STRING;
+    }
+
+    return LeaderboardResult{ totalCount, continuationToken, std::move(columns), std::move(rows) };
+}
+
+size_t
+LeaderboardResult::SizeOfQuery()
+{
+    size_t size = m_continuationToken.size() + 1;
+    if (m_globalQuery)
+    {
+        size += m_globalQuery->name.size() + 1;
+        size += sizeof(char*) * m_globalQuery->columns.size();
+        for (auto column : m_globalQuery->columns)
+        {
+            size += column.size() + 1;
+        }
+    }
+    else if (m_socialQuery)
+    {
+        size += m_socialQuery->statName.size() + 1;
+    }
+    return size;
+}
+
+XblSocialGroupType 
+LeaderboardResult::ParseSocialGroup(xsapi_internal_string socialGroupStr)
+{
+    XblSocialGroupType socialGroup = XblSocialGroupType::None;
+
+    if (utils::str_icmp_internal(socialGroupStr, utils::internal_string_from_string_t(xbox::services::social::legacy::social_group_constants::people())) == 0)
+    {
+        socialGroup = XblSocialGroupType::People;
+    }
+    else if (utils::str_icmp_internal(socialGroupStr, utils::internal_string_from_string_t(xbox::services::social::legacy::social_group_constants::favorite())) == 0)
+    {
+        socialGroup = XblSocialGroupType::Favorites;
+    }
+
+    return socialGroup;
+}
+
+char*
+LeaderboardResult::SerializeQuery(XblLeaderboardQuery* query, char* buffer)
+{
+    utils::strcpy(buffer, m_continuationToken.size() + 1, m_continuationToken.c_str());
+    query->continuationToken = static_cast<char*>(buffer);
+    buffer += m_continuationToken.size() + 1;
+
+    if (m_globalQuery)
+    {
+        utils::strcpy(query->scid, m_globalQuery->scid.size() + 1, m_globalQuery->scid.c_str());
+        query->socialGroup = ParseSocialGroup(m_globalQuery->socialGroup);
+        query->xboxUserId = m_globalQuery->xuid.empty() ? 0 : utils::internal_string_to_uint64(m_globalQuery->xuid);
+
+        utils::strcpy(buffer, m_globalQuery->name.size() + 1, m_globalQuery->name.c_str());
+        query->leaderboardName = static_cast<char*>(buffer);
+        buffer += m_globalQuery->name.size() + 1;
+
+        m_additionalColumnleaderboardNamesC.resize(m_globalQuery->columns.size());
+        query->additionalColumnleaderboardNamesCount = m_globalQuery->columns.size();
+        query->additionalColumnleaderboardNames = reinterpret_cast<const char**>(buffer);
+        buffer += sizeof(char*) * m_globalQuery->columns.size();
+        for (size_t i = 0; i < m_globalQuery->columns.size(); i++)
+        {
+            m_additionalColumnleaderboardNamesC[i] = m_globalQuery->columns[i].c_str();
+
+            utils::strcpy(buffer, m_globalQuery->columns[i].size() + 1, m_additionalColumnleaderboardNamesC[i]);
+            query->additionalColumnleaderboardNames[i] = static_cast<char*>(buffer);
+            buffer += m_globalQuery->columns[i].size() + 1;
+        }
+        query->queryType = m_globalQuery->isTitleManaged ? XblLeaderboardQueryType::TitleManagedStatBackedGlobal : XblLeaderboardQueryType::UserStatBacked;
+    }
+    else if (m_socialQuery)
+    {
+        utils::strcpy(query->scid, m_socialQuery->scid.size() + 1, m_socialQuery->scid.c_str());
+        query->socialGroup = ParseSocialGroup(m_socialQuery->socialGroup);
+        query->xboxUserId = m_socialQuery->xuid.empty() ? 0 : utils::internal_string_to_uint64(m_socialQuery->xuid);
+
+        XblLeaderboardSortOrder sortOrder = XblLeaderboardSortOrder::Descending;
+        if (utils::str_icmp_internal(m_socialQuery->sortOrder, "ascending") == 0) sortOrder = XblLeaderboardSortOrder::Ascending;
+        query->order = sortOrder;
+
+        utils::strcpy(buffer, m_socialQuery->statName.size() + 1, m_socialQuery->statName.c_str());
+        query->statName = static_cast<char*>(buffer);
+        buffer += m_socialQuery->statName.size() + 1;
+        query->queryType = m_socialQuery->isTitleManaged ? XblLeaderboardQueryType::TitleManagedStatBackedSocial : XblLeaderboardQueryType::UserStatBacked;
+    }
+
+    return buffer;
+}
+
+size_t
+LeaderboardResult::SizeOf()
+{
+    size_t size = sizeof(XblLeaderboardResult);
+    for (auto column : m_columns)
+    {
+        size += column.SizeOf();
+    }
+    for (auto row : m_rows)
+    {
+        size += row.SizeOf();
+    }
+    
+    size += SizeOfQuery();
+
+    return size;
+}
+
+char*
+LeaderboardResult::Serialize(char* buffer)
+{
+    XblLeaderboardResult* result = reinterpret_cast<XblLeaderboardResult*>(buffer);
+    buffer += sizeof(XblLeaderboardResult);
+
+    result->hasNext = !m_continuationToken.empty();
+    result->totalRowCount = m_totalRowCount;
+
+    result->columnsCount = m_columns.size();
+    result->columns = reinterpret_cast<XblLeaderboardColumn*>(buffer);
+    buffer += sizeof(XblLeaderboardColumn) * m_columns.size();
+    for (size_t i = 0; i < m_columns.size(); i++)
+    {
+        buffer = m_columns[i].Serialize(&result->columns[i], buffer);
+    }
+
+    result->rowsCount = m_rows.size();
+    result->rows = reinterpret_cast<XblLeaderboardRow*>(buffer);
+    buffer += sizeof(XblLeaderboardRow) * m_rows.size();
+    for (size_t i = 0; i < m_rows.size(); i++)
+    {
+        buffer = m_rows[i].Serialize(&result->rows[i], buffer);
+    }
+
+    return SerializeQuery(&result->nextQuery, buffer);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_LEADERBOARD_CPP_END

@@ -2,3628 +2,2772 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include <fstream>
-#define TEST_CLASS_OWNER L"adityat"
-#define TEST_CLASS_AREA L"Multiplayer"
 #include "UnitTestIncludes.h"
-#include "xsapi/game_server_platform.h"
-#include "xsapi/multiplayer.h"
-#include "xsapi/matchmaking.h"
-#include "xsapi/xbox_live_context.h"
-#include "XboxLiveContext_WinRT.h"
-#include "utils.h"
-#include "Utils_WinRT.h"
-#include "MultiplayerSessionWriteMode_WinRT.h"
-#include "RtaTestHelper.h"
+#include "xsapi-cpp/multiplayer.h"
+#include "xsapi-cpp/xbox_live_context.h"
+#include "xsapi_utils.h"
 
-using namespace xbox::services;
-using namespace xbox::services::multiplayer;
+#pragma warning (disable : 26444)
 
-using namespace Microsoft::Xbox::Services;
-using namespace Microsoft::Xbox::Services::System;
-using namespace Microsoft::Xbox::Services::Multiplayer;
-using namespace Microsoft::Xbox::Services::Tournaments;
-using namespace Platform::Collections;
-using namespace Windows::Foundation::Collections;
+using xbox::services::multiplayer::Serializers;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-const uint32 DefaultLargeSessionMemberIndex = 1958;
-const uint32 DefaultLargeSessionNextMemberIndex = 7240;
-const uint32 DefaultLargeSessionMemberCount = 3400;
-const uint32 DefaultMaxMembersInSession = 50;
-const uint32 MaxMembersInLargeSession = 10000;
+#define MPSD_URI "https://sessiondirectory.xboxlive.com"
+#define MPSD_RTA_URI MPSD_URI "/connections/"
 
-struct MultiplayerSessionTestCreateInput
-{
-    MultiplayerSessionReference^ multiplayerSessionReference;
-    uint32 maxMembersInSession;
-    bool clientMatchmakingCapable;
-    bool isLargeSession;
-    MultiplayerSessionVisibility multiplayerSessionVisibility;
-    Windows::Foundation::Collections::IVectorView<Platform::String^>^ initiatorXboxUserIds;
-    Platform::String^ sessionCustomConstantsJson;
-
-    // SetTimeouts
-    Windows::Foundation::TimeSpan MemberReservedTimeout;
-    Windows::Foundation::TimeSpan MemberInactiveTimeout;
-    Windows::Foundation::TimeSpan MemberReadyTimeout;
-    Windows::Foundation::TimeSpan sessionEmpty;
-
-    // SetArbitrationTimeouts
-    Windows::Foundation::TimeSpan ArbitrationTimeout;
-    Windows::Foundation::TimeSpan ForfeitTimeout;
-
-    // SetQualityOfServiceConnectivityMetrics
-    bool EnableLatencyMetric;
-    bool EnableBandwidthDownMetric;
-    bool EnableBandwidthUpMetric;
-    bool EnableCustomMetric;
-
-    // SetManagedInitialization
-    Windows::Foundation::TimeSpan JoinTimeout;
-    Windows::Foundation::TimeSpan MeasurementTimeout;
-    Windows::Foundation::TimeSpan EvaluationTimeout;
-    bool AutoEvalute;
-    bool ExternalEvaluation;
-    uint32 MembersNeededToStart;
-
-    // SetPeerToPeerRequirements
-    Windows::Foundation::TimeSpan PeerToPeerRequirementsLatencyMaximum;
-    uint32 PeerToPeerRequirementsBandwidthMinimumInKilobitsPerSecond;
-
-    // SetPeerToHostRequirements
-    Windows::Foundation::TimeSpan PeerToHostRequirementsLatencyMaximum;
-    uint32 PeerToHostRequirementsBandwidthDownMinimumInKilobitsPerSecond;
-    uint32 PeerToHostRequirementsBandwidthUpMinimumInKilobitsPerSecond;
-    MultiplayMetrics PeerToHostRequirementsHostSelectionMetric;
-
-    // SetMeasurementServerAddresses
-    Windows::Foundation::Collections::IVectorView<Microsoft::Xbox::Services::GameServerPlatform::QualityOfServiceServer^>^ MeasurementServerAddresses;
-
-    // SetInitializationStatus
-    bool InitializationSucceeded;
-
-    // SetHostDeviceToken
-    Platform::String^ HostDeviceToken;
-
-    // SetMatchmakingServerConnectionPath
-    Platform::String^ MatchmakingServerConnectionPath;
-
-    // SetMatchmakingResubmit
-    bool MatchmakingMatchResubmit;
-
-    // ServerConnectionStringCandidates
-    Windows::Foundation::Collections::IVectorView<Platform::String^>^ ServerConnectionStringCandidates;
-
-    // SetCurrentUserQualityOfServiceMeasurements
-    Windows::Foundation::Collections::IVectorView<MultiplayerQualityOfServiceMeasurements^>^ Measurements;
-
-    // SetCurrentUserQualityOfServiceServerMeasurementsJson
-    Platform::String^ ServerMeasurementsJson;
-};
-
-struct MultiplayerSessionResponseMemberTestData
-{
-    Platform::String^ memberId;
-    uint32 constants_system_index;
-    Platform::String^ constants_system_xuid;
-    Platform::String^ constants_custom;
-    bool properties_system_active;
-    Platform::String^ properties_system_secureDeviceAddress;
-    unsigned int properties_system_group1;
-    unsigned int properties_system_group2;
-    Platform::String^ properties_custom;
-    Platform::String^ gamertag;
-    bool properties_system_reserved;
-    bool turn;
-    Platform::String^ next;
-
-    // 105 contract
-
-    uint32 activeTitleId;
-    Windows::Foundation::DateTime joinTime;
-    Platform::String^ failedMetric;
-    unsigned int initializationEpisode;
-    bool constants_system_initialize;
-    int constants_system_matchmakingResult_serverMeasurements_test1_latency;
-    bool properties_system_ready;
-    int properties_system_group_index1;
-    bool properties_system_measurements_index3_local;
-    int properties_system_measurements_index3_latency;
-    int properties_system_measurements_index3_bandwidthDown;
-    int properties_system_measurements_index3_bandwidthUp;
-    Platform::String^ properties_system_measurements_index3_custom;
-    int properties_system_serverMeasurements_test1_latency;
-    NetworkAddressTranslationSetting nat;
-    Platform::String^ deviceToken;
-    Platform::String^ initializationFailure;
-    int properties_system_measurements_test1_latency;
-    int properties_system_measurements_test1_bandwidthDown;
-    int properties_system_measurements_test1_bandwidthUp;
-    Platform::String^ properties_system_measurements_test1_custom;
-};
-
-struct MultiplayerSessionResponseTestData
-{
-    int contractVersion;
-    Platform::String^ multiplayerCorrelationId;
-
-    int constants_system_version;
-    unsigned int constants_system_maxMembersCount;
-    bool constants_system_capabilities_clientMatchmaking;
-    Platform::String^ constants_system_visibility;
-    Platform::String^ constants_system_initiators_array1;
-    Platform::String^ constants_system_initiators_array2;
-    Platform::String^ constants_custom;
-
-    Platform::String^ properties_system_keywords_array1;
-    Platform::String^ properties_system_keywords_array2;
-    Platform::String^ properties_system_host;
-    Platform::String^ properties_system_join_restriction;
-    unsigned int properties_system_turn_array1;
-    unsigned int properties_system_turn_array2;
-    Platform::String^ properties_system_matchmaking_clientResult_status;
-    Platform::String^ properties_system_matchmaking_clientResult_statusDetails;
-    int properties_system_matchmaking_clientResult_typicalWait;
-    Platform::String^ properties_system_matchmaking_clientResult_targetSessionRef_scid;
-    Platform::String^ properties_system_matchmaking_clientResult_targetSessionRef_templateName;
-    Platform::String^ properties_system_matchmaking_clientResult_targetSessionRef_name;
-    Platform::String^ properties_system_matchmaking_targetSessionConstants;
-    Platform::String^ properties_system_matchmaking_serverConnectionString;
-    Platform::String^ properties_custom;
-
-    MultiplayerSessionResponseMemberTestData member1;
-    MultiplayerSessionResponseMemberTestData member2;
-
-    int membersInfo_first;
-    int membersInfo_next;
-    unsigned int membersInfo_count;
-    unsigned int membersInfo_accepted;
-
-    Platform::String^ servers;
-
-    // 105 contract
-    Windows::Foundation::DateTime startTime;
-    Windows::Foundation::DateTime dateOfNextTimer;
-    Platform::String^ initialization_stage;
-    Windows::Foundation::DateTime initialization_stageStartTime;
-    unsigned int initialization_episode;
-    std::vector<std::wstring> hostCandidates;
-
-    bool constants_system_capabilities_connectivity;
-    bool constants_system_capabilities_suppressPresenceActivityCheck;
-    bool constants_system_capabilities_gameplay;
-    bool constants_system_capabilities_large;
-
-    int constants_system_timeouts_reserved;
-    int constants_system_timeouts_inactive;
-    int constants_system_timeouts_ready;
-    int constants_system_timeouts_sessionEmpty;
-    bool constants_system_metrics_latency;
-    bool constants_system_metrics_bandwidthDown;
-    bool constants_system_metrics_bandwidthUp;
-    bool constants_system_metrics_custom;
-    int constants_system_managedInitialization_joinTimeout;
-    int constants_system_managedInitialization_measurementTimeout;
-    int constants_system_managedInitialization_evaluationTimeout;
-    bool constants_system_managedInitialization_autoEvaluate;
-    unsigned int constants_system_managedInitialization_membersNeededToStart;
-    unsigned int constants_system_peerToPeerRequirements_latencyMaximum;
-    unsigned int constants_system_peerToPeerRequirements_bandwidthMinimum;
-    unsigned int constants_system_peerToHostRequirements_latencyMaximum;
-    unsigned int constants_system_peerToHostRequirements_bandwidthDownMinimum;
-    unsigned int constants_system_peerToHostRequirements_bandwidthUpMinimum;
-    Platform::String^ constants_system_peerToHostRequirements_hostSelectionMetric;
-    Platform::String^ constants_system_measurementServerAddresses_test1_secureDeviceAddress;
-    Platform::String^ constants_system_measurementServerAddresses_test2_secureDeviceAddress;
-    bool properties_system_initializationSucceeded;
-    bool properties_system_matchmaking_resubmit;
-    Platform::String^ properties_system_serverConnectionStringCandidates_1;
-    Platform::String^ properties_system_serverConnectionStringCandidates_2;
-};
-
-Platform::String^ TestDataToJson(_In_ Platform::String^ str)
-{
-    Platform::String^ output = "{ \"foo\": \"";
-    output += str;
-    output += "\" }";
-    return output;
-}
-
-MultiplayerSessionTestCreateInput GetDefaultMultiplayerSessionTestCreateInput(uint32 maxMembersInSession = 50)
-{
-    MultiplayerSessionTestCreateInput input;
-    input.multiplayerSessionReference = ref new MultiplayerSessionReference(
-        "361D0DAA-620E-4975-B64C-0C32500D41EF", // serviceConfigurationId
-        "MySessionTemplate", // sessionTemplateName
-        "32A53A76-9802-42C7-A28E-4FD483301D8B" // sessionName
-        );
-    input.maxMembersInSession = maxMembersInSession;
-    input.clientMatchmakingCapable = true;
-
-    if (maxMembersInSession > 100)
-    {
-        input.isLargeSession = true;
+// JSON Verification helpers for fields that may not be present (and are not required to be)
+#define VERIFY_JSON_UINT(json, fieldName, actualValue) \
+    { \
+        uint64_t expectedValue{}; \
+        VERIFY_SUCCEEDED(JsonUtils::ExtractJsonInt(json, fieldName, expectedValue)); \
+        VERIFY_ARE_EQUAL_UINT(expectedValue, static_cast<uint64_t>(actualValue)); \
     }
 
-    input.multiplayerSessionVisibility = MultiplayerSessionVisibility::Full;
-    Vector<Platform::String^>^ initiatorIds = ref new Vector<Platform::String^>();
-    initiatorIds->Append("12323");
-    input.initiatorXboxUserIds = initiatorIds->GetView();
-    input.sessionCustomConstantsJson = "test1010";
-
-    // SetTimeouts
-    input.MemberReservedTimeout = UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3001));
-    input.MemberInactiveTimeout = UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3002));
-    input.MemberReadyTimeout = UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3003));
-    input.sessionEmpty = UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3004));
-
-    // SetArbitrationTimeouts
-    input.ArbitrationTimeout = UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3001));
-    input.ForfeitTimeout = UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3002));
-
-    // SetQualityOfServiceConnectivityMetrics
-    input.EnableLatencyMetric = false;
-    input.EnableBandwidthDownMetric = true;
-    input.EnableBandwidthUpMetric = false;
-    input.EnableCustomMetric = true;
-
-    // SetManagedInitialization
-    input.JoinTimeout = UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(4001));
-    input.MeasurementTimeout = UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(4002));
-    input.EvaluationTimeout = UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(4003));
-    input.AutoEvalute = false;
-    input.ExternalEvaluation = true;
-    input.MembersNeededToStart = 4004;
-
-    // SetPeerToPeerRequirements
-    input.PeerToPeerRequirementsLatencyMaximum = UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::milliseconds(5001));
-    input.PeerToPeerRequirementsBandwidthMinimumInKilobitsPerSecond = 5002;
-
-    // SetPeerToHostRequirements
-    input.PeerToHostRequirementsLatencyMaximum = UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::milliseconds(6001));
-    input.PeerToHostRequirementsBandwidthDownMinimumInKilobitsPerSecond = 6002;
-    input.PeerToHostRequirementsBandwidthUpMinimumInKilobitsPerSecond = 6003;
-    input.PeerToHostRequirementsHostSelectionMetric = MultiplayMetrics::Bandwidth;
-
-    // SetMeasurementServerAddresses
-    Platform::Collections::Vector<Microsoft::Xbox::Services::GameServerPlatform::QualityOfServiceServer^>^ measurementServerAddresses =
-        ref new Platform::Collections::Vector<Microsoft::Xbox::Services::GameServerPlatform::QualityOfServiceServer^>();
-
-    auto qosServerCpp = xbox::services::game_server_platform::quality_of_service_server(
-        L"Test",
-        L"test1_sda",
-        L"TEST1_target"
-        );
-    Microsoft::Xbox::Services::GameServerPlatform::QualityOfServiceServer^ server = ref new Microsoft::Xbox::Services::GameServerPlatform::QualityOfServiceServer(qosServerCpp);
-    measurementServerAddresses->Append(server);
-
-    qosServerCpp = xbox::services::game_server_platform::quality_of_service_server(
-        L"Test",
-        L"test2_sda",
-        L"TEST2_target"
-        );
-    server = ref new Microsoft::Xbox::Services::GameServerPlatform::QualityOfServiceServer(qosServerCpp);
-    measurementServerAddresses->Append(server);
-
-    input.MeasurementServerAddresses = measurementServerAddresses->GetView();
-
-    // SetInitializationStatus
-    input.InitializationSucceeded = true;
-
-    // SetHostDeviceToken
-    input.HostDeviceToken = "7001";
-
-    // SetMatchmakingServerConnectionPath
-    input.MatchmakingServerConnectionPath = "8001";
-
-    // SetMatchmakingResubmit
-    input.MatchmakingMatchResubmit = true;
-
-    // ServerConnectionStringCandidates
-    Platform::Collections::Vector<Platform::String^>^ serverConnectionStringCandidates = ref new Platform::Collections::Vector<Platform::String^>();
-    serverConnectionStringCandidates->Append("9001");
-    serverConnectionStringCandidates->Append("9002");
-    serverConnectionStringCandidates->Append("9003");
-    input.ServerConnectionStringCandidates = serverConnectionStringCandidates->GetView();
-
-    // SetCurrentUserQualityOfServiceMeasurements    
-    Platform::Collections::Vector<MultiplayerQualityOfServiceMeasurements^>^ measurements = ref new Platform::Collections::Vector<MultiplayerQualityOfServiceMeasurements^>();
-    //measurements->Append(). TODO: test
-    input.Measurements = measurements->GetView();
-
-    // SetCurrentUserQualityOfServiceServerMeasurementsJson
-    input.ServerMeasurementsJson = "10001";
-
-    return input;
-}
-
-MultiplayerSessionResponseTestData GetDefaultMultiplayerSessionResponseTestData(unsigned int numHostCandidates, bool isLargeSession)
-{
-    MultiplayerSessionResponseTestData data;
-
-    //    {
-    //        "contractVersion": 105,
-    //        "correlationId": "0FE81338-EE96-46E3-A3B5-2DBBD6C41C3B",
-    //        "startTime": "2009-06-15T13:45:30.0900000Z",
-    //        "nextTimer": "2009-06-15T13:45:30.0900000Z",
-    //        "initializing": 
-    //        {
-    //            "stage": "measuring",
-    //            "stageStartTime": "2009-06-15T13:45:30.0900000Z",
-    //            "episode": 0
-    //        },
-    //        "hostCandidates": [ "ab90a362", "99582e67" ],
-    data.contractVersion = 105;
-    data.multiplayerCorrelationId = "0FE81338-EE96-46E3-A3B5-2DBBD6C41C3B";
-    data.startTime.UniversalTime = (int64)1233 * (int64)10000000;
-    data.dateOfNextTimer.UniversalTime = (int64)1234 * (int64)10000000;
-    data.initialization_stage = "measuring";
-    data.initialization_stageStartTime.UniversalTime = (int64)1235 * (int64)10000000;
-    data.initialization_episode = 102;
-
-    for (unsigned int i = 0; i < numHostCandidates; i++)
-    {
-        std::wstring hostCandidate = L"host_";
-        hostCandidate += i.ToString()->Data();
-        data.hostCandidates.push_back(hostCandidate);
+#define VERIFY_JSON_INT(json, fieldName, actualValue) \
+    { \
+        int64_t expectedValue{}; \
+        VERIFY_SUCCEEDED(JsonUtils::ExtractJsonInt(json, fieldName, expectedValue)); \
+        VERIFY_ARE_EQUAL_UINT(expectedValue, static_cast<int64_t>(actualValue)); \
     }
 
-    //    /constants/system 
-    //    {
-    //        "version": 1,
-    //        "maxMembersCount": 100,  // Defaults to 100 if not set on creation. Must be between 1 and 100.
-    //        "visibility": "private",  // Or "visible" or "open", defaults to "open" if not set on creation.
-    //        "initiators": [ "1234" ],  // If specified on a new session, the creator's xuid must be in the list (or the creator must be a server).
-    //        "inviteProtocol": "party",  // Optional URI scheme of the launch URI for invite toasts.
-    //        "capabilities": 
-    //        {
-    //            "clientMatchmaking": true,
-    //            "large" : false       // if true, connectivity must be false
-    //            "connectivity": true  // false if for large session
-    //        },
-    data.constants_system_version = 1;
-
-    if (isLargeSession)
-    {
-        data.constants_system_maxMembersCount = MaxMembersInLargeSession;
-    }
-    else
-    {
-        data.constants_system_maxMembersCount = 100;
-    }
-    data.constants_system_visibility = "private";
-    data.constants_system_initiators_array1 = "1234";
-    data.constants_system_initiators_array2 = "2345";
-    data.constants_system_capabilities_clientMatchmaking = true;
-
-    data.constants_system_capabilities_connectivity = !isLargeSession;  // large sessions must switch off the connectivity flag
-    data.constants_system_capabilities_large = isLargeSession;
-
-
-    //    /constants/system 
-    //    {
-    //        "reservedRemovalTimeout": 10000,  // Default is 10 seconds. Member is removed from the session.
-    //        "inactiveRemovalTimeout": 7200000,  // Default is two hours. Member is removed from the session.
-    //        "readyRemovalTimeout": 60000,  // Default is one minute. Member becomes inactive.
-    //        "sessionEmptyTimeout": 0,  // Default is zero. Session is deleted.
-    //
-    //        "metrics": 
-    //        {
-    //            "latency": true,
-    //            "bandwidthDown": true,
-    //            "bandwidthUp": true,
-    //            "custom": true
-    //        },
-    //        "memberInitialization": 
-    //        {
-    //            "joinTimeout": 4000,  // Milliseconds. Default is 4 seconds. Overrides "reservationTimeout" for the initial members.
-    //            "measurementTimeout": 5000,  // Milliseconds. Default is based on which of the metrics and/or server ping addresses are set.
-    //            "evaluationTimeout": 5000,  
-    //            "externalEvaluation": true,
-    //            "membersNeededToStart": 2  // Defaults to 2. Must be between 1 and maxMemberCount. Only applies to initialization episode zero.
-    //        },
-    data.constants_system_timeouts_reserved = 1001;
-    data.constants_system_timeouts_inactive = 1002;
-    data.constants_system_timeouts_ready = 1003;
-    data.constants_system_timeouts_sessionEmpty = 1004;
-    data.constants_system_metrics_latency = true;
-    data.constants_system_metrics_bandwidthDown = true;
-    data.constants_system_metrics_bandwidthUp = true;
-    data.constants_system_metrics_custom = true;
-
-    // managed initialization is only important for non large sessions... but since this is mock test data, it's okay to leave it in
-    data.constants_system_managedInitialization_joinTimeout = 2001;
-    data.constants_system_managedInitialization_measurementTimeout = 2002;
-    data.constants_system_managedInitialization_evaluationTimeout = 2004;
-    data.constants_system_managedInitialization_autoEvaluate = false;
-    data.constants_system_managedInitialization_membersNeededToStart = 2003;
-
-    //    /constants/system 
-    //    {
-    //        "peerToPeerRequirements": 
-    //        {
-    //            "latencyMaximum": 250,  // Milliseconds
-    //            "bandwidthDownMinimum": 10000  // Kilobits per second
-    //        },
-    //        "peerToHostRequirements": 
-    //        {
-    //            "latencyMaximum": 250,  // Milliseconds
-    //            "bandwidthDownMinimum": 100000,  // Kilobits per second
-    //            "bandwidthUpMinimum": 1000,  // Kilobits per second
-    //            "hostSelectionMetric": "bandwidthUp"  // Or "bandwidthDown" or "latency". Not specified is the same as "latency".
-    //        },
-    //        "measurementServerAddresses": 
-    //        {
-    //            "east.azure.com": 
-    //            {
-    //                "secureDeviceAddress": "r5Y="  // Base-64 encoded secure-device-address
-    //            },
-    //        }
-    //    }
-    data.constants_system_peerToPeerRequirements_latencyMaximum = 3001;
-    data.constants_system_peerToPeerRequirements_bandwidthMinimum = 3002;
-    data.constants_system_peerToHostRequirements_latencyMaximum = 3001;
-    data.constants_system_peerToHostRequirements_bandwidthDownMinimum = 3002;
-    data.constants_system_peerToHostRequirements_bandwidthUpMinimum = 3003;
-    data.constants_system_peerToHostRequirements_hostSelectionMetric = "bandwidthUp";
-    data.constants_system_measurementServerAddresses_test1_secureDeviceAddress = "test1_addr";
-    data.constants_system_measurementServerAddresses_test2_secureDeviceAddress = "test2_addr";
-
-    //    /properties/system 
-    //    {
-    //        "keywords": [ "hello" ],  // Optional array of case-insensitive strings. Cannot be set if the session's visibility is "private"
-    //        "turn": [ 0 ],  // Array of integer member indicies whose turn it is. Defaults to empty.
-    //        "joinRestriction": "local", //Restricts who can join "open" sessions. 
-    //        "host": "99e4c701",
-    //        "initializationSucceeded": true,
-    //        "serverConnectionStringCandidates": [ "west.azure.com", "east.azure.com" ],
-    //        "matchmaking": 
-    //        {
-    //            "clientResult": 
-    //            {  
-    //                // Requires the clientMatchmaking property.
-    //                "status": "searching",  // Or "expired", "found", "failed", or "canceled". 
-    //                "statusDetails": "Description",  // Default is empty string.
-    //                "typicalWait": 30,  // The expected number of seconds waiting as a non-negative integer.
-    //                "targetSessionRef": 
-    //                {
-    //                    "scid": "1ECFDB89-36EB-4E59-8901-11F7393689AE",
-    //                    "templateName": "capture-the-flag",
-    //                    "name": "2D58F65F-0E3C-4F1F-8277-2BC9873FDB23"
-    //                }
-    //            },
-    //            "targetSessionConstants": { },
-    //            "serverConnectionString": "west.azure.com"
-    //        },
-    //        "matchmakingResubmit": true
-    //    }
-    data.properties_system_keywords_array1 = "key1";
-    data.properties_system_keywords_array2 = "key2";
-    data.properties_system_join_restriction = "local";
-    data.properties_system_host = "99e4c701";
-    data.properties_system_turn_array1 = 3;
-    data.properties_system_turn_array2 = 0;
-    data.properties_system_initializationSucceeded = true;
-    data.properties_system_matchmaking_clientResult_status = "Searching";
-    data.properties_system_matchmaking_clientResult_statusDetails = "test1";
-    data.properties_system_matchmaking_clientResult_typicalWait = 30;
-    data.properties_system_matchmaking_clientResult_targetSessionRef_scid = "1ECFDB89-36EB-4E59-8901-11F7393689AE";
-    data.properties_system_matchmaking_clientResult_targetSessionRef_templateName = "capture";
-    data.properties_system_matchmaking_clientResult_targetSessionRef_name = "2D58F65F-0E3C-4F1F-8277-2BC9873FDB23";
-    data.properties_system_matchmaking_targetSessionConstants = "test1002";
-    data.properties_system_matchmaking_serverConnectionString = "serverConnectionString_test1";
-    data.properties_system_matchmaking_resubmit = true;
-    data.properties_system_serverConnectionStringCandidates_1 = "serverConnectionString_test2";
-    data.properties_system_serverConnectionStringCandidates_2 = "serverConnectionString_test3";
-    data.properties_custom = "test1004";
-
-    data.constants_custom = "test1001";
-
-    if (isLargeSession)
-    {
-        //        "members": 
-        //        {
-        //            "me": 
-        //            {
-        //                "constants": { /* Property Bag */ },
-        //                "properties": { /* Property Bag */ },
-        //                "gamertag" : "gamerTag1",
-        //                "deviceToken" : "9f4032ba7",
-        //                "nat" : "strict",
-        //                "reserved" : true,
-        //                "activeTitleId" : "8397267",
-        //                "joinTime" : "2009-06-15T13:45:30.0900000Z",
-        //                "turn" : true,
-        //                "initializationFailure" : "latency",
-        //                "initializationEpisode" : 1,
-        //                "next": 7448
-        //            },        
-        //        },
-        data.member1.memberId = "me";
-    }
-    else
-    {
-        //        "members": 
-        //        {
-        //            "3": 
-        //            {
-        //                "constants": { /* Property Bag */ },
-        //                "properties": { /* Property Bag */ },
-        //                "gamertag" : "stacy",
-        //                "deviceToken" : "9f4032ba7",
-        //                "nat" : "strict",
-        //                "reserved" : true,
-        //                "activeTitleId" : "8397267",
-        //                "joinTime" : "2009-06-15T13:45:30.0900000Z",
-        //                "turn" : true,
-        //                "initializationFailure" : "latency",
-        //                "initializationEpisode" : 1,
-        //                "next": 4
-        //            },
-        //            "4": { "next": 5 /* etc */ }
-        //        },
-        data.member1.memberId = "3";
+#define VERIFY_JSON_STRING(json, fieldName, actualValue) \
+    { \
+        String expectedValue{}; \
+        VERIFY_SUCCEEDED(JsonUtils::ExtractJsonString(json, fieldName, expectedValue)); \
+        if (!expectedValue.empty()) { \
+            VERIFY_ARE_EQUAL_STR_IGNORE_CASE(expectedValue.data(), actualValue); \
+        } \
     }
 
-    data.member1.gamertag = "gamerTag1";
-    data.member1.properties_system_reserved = true;
-    data.member1.activeTitleId = 8397267;
-    data.member1.joinTime.UniversalTime = (int64)1237 * (int64)10000000;
-    data.member1.turn = true;
-    data.member1.failedMetric = "latency";
-    data.member1.initializationEpisode = 5003;
-    data.member1.properties_system_measurements_index3_custom = "test1234";
-    data.member1.nat = NetworkAddressTranslationSetting::Strict;
-    data.member1.deviceToken = "test1_devtok";
-    data.member1.initializationFailure = "latency";
-    data.member1.next = nullptr;
-    data.member2.memberId = nullptr; // skip member2
-
-    //    /members/{index}/constants/system 
-    //    {
-    //        "index": 3
-    //        "xuid": "12345678",
-    //        "initialize": true,
-    //        "matchmakingResult": 
-    //        {
-    //            "serverMeasurements": 
-    //            {
-    //                "east.azure.com": 
-    //                {
-    //                    "latency": 233  // Milliseconds
-    //                }
-    //            }
-    //        }
-    //    }
-
-    data.member1.constants_system_index = isLargeSession ? DefaultLargeSessionMemberIndex : 3;
-    data.member1.constants_system_xuid = (Platform::String^)"1245";
-    data.member1.constants_system_initialize = true;
-    data.member1.constants_system_matchmakingResult_serverMeasurements_test1_latency = 6001;
-    data.member1.constants_custom = "test1005";
-
-    //    /members/{index}/properties/system 
-    //    {
-    //        "ready": true,
-    //        "active": false,
-    //        "secureDeviceAddress": "ryY=",
-    //        "initializationGroup": [ 5 ],
-    //        "measurements": 
-    //        {
-    //            "5": 
-    //            {
-    //                "latency": 5953,  // Milliseconds
-    //                "bandwidthDown": 19342,  // Kilobits per second
-    //                "bandwidthUp": 944,  // Kilobits per second
-    //                "custom": { }
-    //            }
-    //        },
-    //        "serverMeasurements": 
-    //        {
-    //            "east.azure.com": 
-    //            {
-    //                "latency": 233  // Milliseconds
-    //            }
-    //        }
-    //    }
-    data.member1.properties_system_ready = true;
-    data.member1.properties_system_active = true;
-    data.member1.properties_system_secureDeviceAddress = "ryY=";
-    data.member1.properties_system_group1 = 3;
-    data.member1.properties_system_group2 = 3;
-    data.member1.properties_system_group_index1 = 3;
-    data.member1.properties_system_measurements_index3_local = true;
-    data.member1.properties_system_measurements_index3_latency = 6001;
-    data.member1.properties_system_measurements_index3_bandwidthDown = 6001;
-    data.member1.properties_system_measurements_index3_bandwidthUp = 6002;
-    data.member1.properties_system_measurements_index3_custom = "test7007";
-    data.member1.properties_system_serverMeasurements_test1_latency = 233;
-    data.member1.properties_custom = "test1006";
-    data.member1.properties_system_measurements_test1_latency = 6003;
-    data.member1.properties_system_measurements_test1_bandwidthDown = 6004;
-    data.member1.properties_system_measurements_test1_bandwidthUp = 6005;
-    data.member1.properties_system_measurements_test1_custom = "test1007";
-
-    data.member1.gamertag = "gamerTag1";
-    data.member1.properties_system_active = false;
-    data.member1.properties_system_reserved = false;
-    data.member1.properties_system_ready = true;
-    data.member1.turn = true;
-    data.member1.next = nullptr;
-
-    //        "membersInfo": 
-    //        {
-    //            "first": 3,  // The first member's index.
-    //            "next": 5,  // The index that the next member added will get.
-    //            "count": 2,  // The number of members.
-    //            "accepted": 1  // The number of members that are no longer 'reserved'.
-    //        },
-
-    if (isLargeSession)
-    {
-        data.membersInfo_first = DefaultLargeSessionMemberIndex;
-        data.membersInfo_next = DefaultLargeSessionNextMemberIndex;
-        data.membersInfo_count = DefaultLargeSessionMemberCount;
-    }
-    else
-    {
-        data.membersInfo_first = 3;
-        data.membersInfo_next = 4;
-        data.membersInfo_count = 1;
+#define VERIFY_JSON_BOOL(json, fieldName, actualValue) \
+    { \
+        bool expectedValue{}; \
+        VERIFY_SUCCEEDED(JsonUtils::ExtractJsonBool(json, fieldName, expectedValue)); \
+        VERIFY_ARE_EQUAL(expectedValue, actualValue); \
     }
 
-    data.membersInfo_accepted = 1;
+#define VERIFY_JSON_TIME(json, fieldName, actualValue) \
+    { \
+        if (json.HasMember(fieldName)) { \
+            VERIFY_IS_TRUE(VerifyTime(actualValue, json[fieldName].GetString())); \
+        } else { \
+            VERIFY_ARE_EQUAL_UINT(0, actualValue); \
+        } \
+    }
 
-    //    /servers/{server-name}/constants/system 
-    //    {
-    //    }
-    //    /servers/{server-name}/properties/system 
-    //    {
-    //        "lockId": "opaque56789",  // If set, a matchmaking service is servicing this session.
-    //        "status": "searching",  // Or "expired", "found", "failed", or "canceled". Optional.
-    //        "statusDetails": "Description",  // Optional free-form text. Default is empty string.
-    //        "typicalWait": 30,  // Optional. The expected number of seconds waiting as a non-negative integer.
-    //        "targetSessionRef": 
-    //        {  
-    //            // Optional.
-    //            "scid": "1ECFDB89-36EB-4E59-8901-11F7393689AE",
-    //            "templateName": "capture-the-flag",
-    //            "name": "2D58F65F-0E3C-4F1F-8277-2BC9873FDB23"
-    //        }
-    //    }
-    data.servers = "test1007";
+#define VERIFY_JSON_FIELD(json, fieldName, jsonString) \
+    { \
+        if (json.HasMember(fieldName)) { \
+            VERIFY_IS_TRUE(VerifyJson(json[fieldName], jsonString)); \
+        } else { \
+            VERIFY_IS_NULL(jsonString); \
+        } \
+    }
 
-    return data;
-}
+#define VERIFY_JSON_FIELD_NOTNULL(json, fieldName, jsonString) \
+    { \
+        if (json.HasMember(fieldName)) { \
+            VERIFY_IS_TRUE(VerifyJson(json[fieldName], jsonString)); \
+        } else { \
+            VERIFY_IS_NOT_NULL(jsonString); \
+            VERIFY_IS_TRUE(jsonString[0] == 0); \
+        } \
+    }
 
-MultiplayerSession^ TestCreateSessionHelper(MultiplayerSessionTestCreateInput input, XboxLiveContext^ context)
-{
-    MultiplayerSession^ multiplayerSession = ref new MultiplayerSession(
-        context,
-        input.multiplayerSessionReference,
-        input.maxMembersInSession,
-        input.multiplayerSessionVisibility,
-        input.initiatorXboxUserIds,
-        input.sessionCustomConstantsJson->IsEmpty() ? nullptr : TestDataToJson(input.sessionCustomConstantsJson)
-        );
+#define VERIFY_JSON_INT_STRING(json, fieldName, actualIntValue) \
+    { \
+        uint64_t expectedValue{}; \
+        VERIFY_SUCCEEDED(JsonUtils::ExtractJsonStringToUInt64(json, fieldName, expectedValue)); \
+        VERIFY_ARE_EQUAL_UINT(expectedValue, actualIntValue); \
+    }
 
-    return multiplayerSession;
-}
-
-// TODO 781944: Add in additional phase 2 unit tests
 DEFINE_TEST_CLASS(MultiplayerTests)
 {
 public:
     DEFINE_TEST_CLASS_PROPS(MultiplayerTests)
 
-    const string_t filePath = _T("\\TestResponses\\Multiplayer.json");
-    web::json::value testResponseJsonFromFile = utils::read_test_response_file(filePath);
-    const string_t rtaConnectionIdJson = testResponseJsonFromFile[L"rtaConnectionIdJson"].serialize();
-    const string_t defaultMultiplayerResponse = testResponseJsonFromFile[L"defaultMultiplayerResponse"].serialize();
+    static const JsonDocument testJson;
+    static const JsonValue& defaultSessionJson;
+    static const XblMultiplayerSessionReference defaultSessionReference;
 
-    void VerifyMultiplayerSessionReference(MultiplayerSessionReference^ result, web::json::value resultToVerify)
+    class MPTestEnv : public TestEnvironment
     {
-        VERIFY_ARE_EQUAL(result->ServiceConfigurationId->Data(), resultToVerify[L"scid"].as_string());
-        VERIFY_ARE_EQUAL(result->SessionTemplateName->Data(), resultToVerify[L"templateName"].as_string());
-        VERIFY_ARE_EQUAL(result->SessionName->Data(), resultToVerify[L"name"].as_string());
-    }
-
-    void VerifyMultiplayerPeerToHostRequirements(MultiplayerPeerToHostRequirements^ result, web::json::value resultToVerify)
-    {
-        VERIFY_ARE_EQUAL_TIMESPAN_TO_MILLISECONDS(
-            result->LatencyMaximum,
-            resultToVerify[_T("latencyMaximum")].as_number().to_uint64()
-            );
-        VERIFY_ARE_EQUAL_UINT(
-            result->BandwidthDownMinimumInKilobitsPerSecond,
-            resultToVerify[L"bandwidthDownMinimum"].as_number().to_uint64()
-            );
-        VERIFY_ARE_EQUAL_UINT(
-            result->BandwidthUpMinimumInKilobitsPerSecond,
-            resultToVerify[L"bandwidthUpMinimum"].as_number().to_uint64()
-            );
-    }
-
-    void VerifyMultiplayerPeerToPeerRequirements(MultiplayerPeerToPeerRequirements^ result, web::json::value resultToVerify)
-    {
-        VERIFY_ARE_EQUAL_TIMESPAN_TO_MILLISECONDS(
-            result->LatencyMaximum,
-            resultToVerify[_T("latencyMaximum")].as_number().to_uint64()
-            );
-        VERIFY_ARE_EQUAL_UINT(
-            result->BandwidthMinimumInKilobitsPerSecond,
-            resultToVerify[L"bandwidthMinimum"].as_number().to_uint64()
-            );
-    }
-
-    void VerifyMultiplayerManagedInitialization(MultiplayerManagedInitialization^ result, web::json::value resultToVerify)
-    {
-        VERIFY_ARE_EQUAL_TIMESPAN_TO_MILLISECONDS(
-            result->JoinTimeout,
-            resultToVerify[_T("joinTimeout")].as_number().to_uint64()
-            );
-        VERIFY_ARE_EQUAL_TIMESPAN_TO_MILLISECONDS(
-            result->MeasurementTimeout,
-            resultToVerify[_T("measurementTimeout")].as_number().to_uint64()
-            );
-        VERIFY_ARE_EQUAL_TIMESPAN_TO_MILLISECONDS(
-            result->EvaluationTimeout,
-            resultToVerify[_T("evaluationTimeout")].as_number().to_uint64()
-            );
-        
-        VERIFY_ARE_EQUAL(result->AutoEvaluate, !resultToVerify[L"externalEvaluation"].as_bool());
-        VERIFY_ARE_EQUAL_INT(result->MembersNeededToStart, resultToVerify[L"membersNeededToStart"].as_integer());
-    }
-
-    void VerifyMultiplayerMemberInitialization(MultiplayerMemberInitialization^ result, web::json::value resultToVerify)
-    {
-        VERIFY_ARE_EQUAL_TIMESPAN_TO_MILLISECONDS(
-            result->JoinTimeout,
-            resultToVerify[_T("joinTimeout")].as_number().to_uint64()
-        );
-        VERIFY_ARE_EQUAL_TIMESPAN_TO_MILLISECONDS(
-            result->MeasurementTimeout,
-            resultToVerify[_T("measurementTimeout")].as_number().to_uint64()
-        );
-        VERIFY_ARE_EQUAL_TIMESPAN_TO_MILLISECONDS(
-            result->EvaluationTimeout,
-            resultToVerify[_T("evaluationTimeout")].as_number().to_uint64()
-        );
-
-        VERIFY_ARE_EQUAL(result->ExternalEvaluation, resultToVerify[L"externalEvaluation"].as_bool());
-        VERIFY_ARE_EQUAL_INT(result->MembersNeededToStart, resultToVerify[L"membersNeededToStart"].as_integer());
-    }
-
-    void VerifyMultiplayerSessionProperties(MultiplayerSessionProperties^ result, web::json::value resultToVerify)
-    {
-        web::json::value propertiesSystemJson = resultToVerify[L"system"];
-        web::json::value propertiesSystemMatchmakingJson = propertiesSystemJson[L"matchmaking"];
-        web::json::value propertiesSystemMatchmakingClientResultJson = propertiesSystemMatchmakingJson[L"clientResult"];
-
-        web::json::value closed = propertiesSystemJson[L"closed"];
-        VERIFY_ARE_EQUAL(result->Closed, closed.as_bool());
-        VERIFY_ARE_EQUAL(result->Locked, propertiesSystemJson[L"locked"].as_bool());
-        VERIFY_ARE_EQUAL(result->AllocateCloudCompute, propertiesSystemJson[L"allocateCloudCompute"].as_bool());
-
-        web::json::array keywords = propertiesSystemJson[L"keywords"].as_array();
-        uint32 counter = 0;
-        for (auto keyword : result->Keywords)
+    public:
+        MPTestEnv() noexcept : m_baseMock{ "", "" } 
         {
-            VERIFY_ARE_EQUAL(keyword->Data(), keywords[counter].as_string());
-            ++counter;
-        }
-
-        VERIFY_ARE_EQUAL(result->JoinRestriction.ToString()->Data(), propertiesSystemJson[L"joinRestriction"].as_string());
-
-        VERIFY_ARE_EQUAL(result->ReadRestriction.ToString()->Data(), propertiesSystemJson[L"readRestriction"].as_string());
-    
-        string_t resultCustomProperties = result->SessionCustomPropertiesJson->Data();
-        string_t systemJsonCustomProperties = resultToVerify[L"custom"].serialize();
-        VERIFY_ARE_EQUAL(resultCustomProperties, systemJsonCustomProperties);
-
-        VERIFY_ARE_EQUAL(result->HostDeviceToken->Data(), propertiesSystemJson[L"host"].as_string());
-        VERIFY_ARE_EQUAL(result->MatchmakingServerConnectionString->Data(), propertiesSystemMatchmakingJson[L"serverConnectionString"].as_string());
-        
-        web::json::array candidatesJson = propertiesSystemJson[L"serverConnectionStringCandidates"].as_array();
-        counter = 0;
-        for (auto candidate : result->ServerConnectionStringCandidates)
-        {
-            VERIFY_ARE_EQUAL(candidate->Data(), candidatesJson[counter].as_string());
-            ++counter;
-        }
-
-    }
-
-    void VerifyMultiplayerSessionMember(MultiplayerSessionMember^ result, web::json::value resultToVerify)
-    {
-        web::json::value constantsJson = resultToVerify[L"constants"];
-        web::json::value constantsSystemJson = constantsJson[L"system"];
-        web::json::value constantsSystemMatchmakingResultJson = constantsSystemJson[L"matchmakingResult"];
-        web::json::value propertiesJson = resultToVerify[L"properties"];
-        web::json::value rolesJson = resultToVerify[L"roles"];
-        web::json::value propertiesSystemJson = propertiesJson[L"system"];
-        web::json::value propertiesSystemSubscriptionJson = propertiesSystemJson[L"subscription"];
-
-        switch (result->Status)
-        {
-            case MultiplayerSessionMemberStatus::Active:
-                VERIFY_IS_TRUE(propertiesSystemJson[L"active"].as_bool());
-                break;
-            case MultiplayerSessionMemberStatus::Ready:
-                VERIFY_IS_TRUE(propertiesSystemJson[L"ready"].as_bool());
-                break;
-            case MultiplayerSessionMemberStatus::Reserved:
-                VERIFY_IS_TRUE(resultToVerify[L"reserved"].as_bool());
-                break;
-            case MultiplayerSessionMemberStatus::Inactive:
-                VERIFY_IS_FALSE(resultToVerify[L"reserved"].as_bool());
-                VERIFY_IS_FALSE(propertiesSystemJson[L"active"].as_bool());
-                VERIFY_IS_FALSE(propertiesSystemJson[L"ready"].as_bool());
-                break;
-            default:
-                throw std::invalid_argument("Enum value out of range");
-        }
-
-        VERIFY_ARE_EQUAL(result->XboxUserId->Data(), constantsSystemJson[L"xuid"].as_string());
-        VERIFY_ARE_EQUAL(result->InitializeRequested, constantsSystemJson[L"initialize"].as_bool());
-
-        string_t resultCustomProperties = result->MemberCustomPropertiesJson->Data();
-        string_t systemJsonCustomProperties = propertiesJson[L"custom"].serialize().c_str();
-        VERIFY_ARE_EQUAL(resultCustomProperties, systemJsonCustomProperties);
-
-        string_t resultCustomConstants = result->MemberCustomConstantsJson->Data();
-        string_t systemJsonCustomConstants = constantsJson[L"custom"].serialize().c_str();
-        VERIFY_ARE_EQUAL(resultCustomConstants, systemJsonCustomConstants);
-
-        VERIFY_ARE_EQUAL(result->Gamertag->Data(), resultToVerify[L"gamertag"].as_string());
-        VERIFY_ARE_EQUAL(result->DeviceToken->Data(), resultToVerify[L"deviceToken"].as_string());
-        VERIFY_ARE_EQUAL(result->Nat.ToString()->Data(), resultToVerify[L"nat"].as_string());
-        VERIFY_ARE_EQUAL(result->IsTurnAvailable, resultToVerify[L"turn"].as_bool());
-        VERIFY_ARE_EQUAL(result->SecureDeviceAddressBase64->Data(), propertiesSystemJson[L"secureDeviceAddress"].as_string());
-
-        if (!rolesJson.is_null())
-        {
-            web::json::object roleObj = rolesJson.as_object();
-            for (const auto& role : roleObj)
-            {
-                auto key = ref new Platform::String(role.first.c_str());
-                auto value = ref new Platform::String(role.second.as_string().c_str());
-                VERIFY_ARE_EQUAL(result->Roles->Lookup(key), value);
-            }
-        }
-
-        string_t resultServerMeasurements = result->MemberServerMeasurementsJson->Data();
-        string_t systemServerMeasurements = propertiesSystemJson[L"serverMeasurements"].serialize().c_str();
-        VERIFY_ARE_EQUAL(resultServerMeasurements, systemServerMeasurements);
-
-        VERIFY_ARE_EQUAL_INT(result->ActiveTitleId, std::stoul(resultToVerify[L"activeTitleId"].as_string()));
-
-        TEST_LOG(DateTimeToString(result->JoinTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str());
-        TEST_LOG(resultToVerify[L"joinTime"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str());
-
-        VERIFY_ARE_EQUAL(
-            DateTimeToString(result->JoinTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND), 
-            resultToVerify[L"joinTime"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND)
-            );
-        VERIFY_ARE_EQUAL(result->InitializationFailureCause.ToString()->Data(), resultToVerify[L"initializationFailure"].as_string());
-        VERIFY_ARE_EQUAL_INT(result->InitializationEpisode, resultToVerify[L"initializationEpisode"].as_integer());
-
-        string_t resultMatchmaking = result->MatchmakingResultServerMeasurementsJson->Data();
-        string_t systemMatchmaking = constantsSystemMatchmakingResultJson[L"serverMeasurements"].serialize().c_str();
-        TEST_LOG(resultMatchmaking.c_str());
-        TEST_LOG(systemMatchmaking.c_str());
-
-        VERIFY_ARE_EQUAL(resultMatchmaking, systemMatchmaking);
-
-        web::json::array changeTypes = propertiesSystemSubscriptionJson[L"changeTypes"].as_array();
-
-        uint32_t changeTypeEnum = result->GetCppObj()->_Subscribed_change_types();
-        for (auto changeType : changeTypes)
-        {
-            string_t changeTypeString = changeType.as_string();
-            if (utils::str_icmp(changeTypeString, _T("everything")) == 0)
-            {
-                VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(changeTypeEnum & static_cast<uint32_t>(MultiplayerSessionChangeTypes::Everything)) == MultiplayerSessionChangeTypes::Everything);
-            }
-            else if (utils::str_icmp(changeTypeString, _T("host")) == 0)
-            {
-                VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(changeTypeEnum & static_cast<uint32_t>(MultiplayerSessionChangeTypes::HostDeviceTokenChange)) == MultiplayerSessionChangeTypes::HostDeviceTokenChange);
-            }
-            else if (utils::str_icmp(changeTypeString, _T("initialization")) == 0)
-            {
-                VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(changeTypeEnum & static_cast<uint32_t>(MultiplayerSessionChangeTypes::InitializationStateChange)) == MultiplayerSessionChangeTypes::InitializationStateChange);
-            }
-            else if (utils::str_icmp(changeTypeString, _T("matchmakingStatus")) == 0)
-            {
-                VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(changeTypeEnum & static_cast<uint32_t>(MultiplayerSessionChangeTypes::MatchmakingStatusChange)) == MultiplayerSessionChangeTypes::MatchmakingStatusChange);
-            }
-            else if (utils::str_icmp(changeTypeString, _T("membersList")) == 0)
-            {
-                VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(changeTypeEnum & static_cast<uint32_t>(MultiplayerSessionChangeTypes::MemberListChange)) == MultiplayerSessionChangeTypes::MemberListChange);
-            }
-            else if (utils::str_icmp(changeTypeString, _T("membersStatus")) == 0)
-            {
-                VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(changeTypeEnum & static_cast<uint32_t>(MultiplayerSessionChangeTypes::MemberStatusChange)) == MultiplayerSessionChangeTypes::MemberStatusChange);
-            }
-            else if (utils::str_icmp(changeTypeString, _T("joinability")) == 0)
-            {
-                VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(changeTypeEnum & static_cast<uint32_t>(MultiplayerSessionChangeTypes::SessionJoinabilityChange)) == MultiplayerSessionChangeTypes::SessionJoinabilityChange);
-            }
-            else if (utils::str_icmp(changeTypeString, _T("customProperty")) == 0)
-            {
-                VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(changeTypeEnum & static_cast<uint32_t>(MultiplayerSessionChangeTypes::CustomPropertyChange)) == MultiplayerSessionChangeTypes::CustomPropertyChange);
-            }
-            else if (utils::str_icmp(changeTypeString, _T("membersCustomProperty")) == 0)
-            {
-                VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(changeTypeEnum & static_cast<uint32_t>(MultiplayerSessionChangeTypes::MemberCustomPropertyChange)) == MultiplayerSessionChangeTypes::MemberCustomPropertyChange);
-            }
-        }
-    }
-
-    void VerifyMultiplayerSessionConstants(MultiplayerSessionConstants^ result, web::json::value resultToVerify)
-    {
-        web::json::value systemJson = resultToVerify[L"system"];
-        VERIFY_ARE_EQUAL_INT(result->MaxMembersInSession, systemJson[L"maxMembersCount"].as_integer());
-        VERIFY_ARE_EQUAL(result->MultiplayerSessionVisibility.ToString()->Data(), systemJson[L"visibility"].as_string());
-
-        web::json::array initiatorsArray = systemJson[L"initiators"].as_array();
-        uint32 counter = 0;
-        for (auto initiators : result->InitiatorXboxUserIds)
-        {
-            VERIFY_ARE_EQUAL(initiators->Data(), initiatorsArray[counter].as_string());
-            ++counter;
-        }
-
-        string_t resultCustomConstants = result->CustomConstantsJson->Data();
-        string_t systemJsonCustomConstants = resultToVerify[L"custom"].serialize().c_str();
-        VERIFY_ARE_EQUAL(resultCustomConstants, systemJsonCustomConstants);
-
-        web::json::value systemCapabilitiesJson = systemJson[L"capabilities"];
-        VERIFY_ARE_EQUAL(result->CapabilitiesConnectivity, systemCapabilitiesJson[L"connectivity"].as_bool());
-        VERIFY_ARE_EQUAL(result->CapabilitiesSuppressPresenceActivityCheck, systemCapabilitiesJson[L"suppressPresenceActivityCheck"].as_bool());
-        VERIFY_ARE_EQUAL(result->CapabilitiesGameplay, systemCapabilitiesJson[L"gameplay"].as_bool());
-        VERIFY_ARE_EQUAL(result->CapabilitiesLarge, systemCapabilitiesJson[L"large"].as_bool());
-        VERIFY_ARE_EQUAL(result->CapabilitiesConnectionRequiredForActiveMember, systemCapabilitiesJson[L"connectionRequiredForActiveMembers"].as_bool());
-        VERIFY_ARE_EQUAL(result->CapabilitiesCrossplay, systemCapabilitiesJson[L"crossPlay"].as_bool());
-        VERIFY_ARE_EQUAL(result->CapabilitiesUserAuthorizationStyle, systemCapabilitiesJson[L"userAuthorizationStyle"].as_bool());
-        VERIFY_ARE_EQUAL(result->CapabilitiesSearchable, systemCapabilitiesJson[L"searchable"].as_bool());
-
-        TEST_LOG(result->MemberReservationTimeout.Duration.ToString()->Data());
-
-        VERIFY_ARE_EQUAL_TIMESPAN_TO_MILLISECONDS(
-            result->MemberReservationTimeout,
-            systemJson[_T("reservedRemovalTimeout")].as_number().to_uint64()
-            );
-        VERIFY_ARE_EQUAL_TIMESPAN_TO_MILLISECONDS(
-            result->MemberInactiveTimeout,
-            systemJson[_T("inactiveRemovalTimeout")].as_number().to_uint64()
-            );
-        VERIFY_ARE_EQUAL_TIMESPAN_TO_MILLISECONDS(
-            result->MemberReadyTimeout,
-            systemJson[_T("readyRemovalTimeout")].as_number().to_uint64()
-            );
-        VERIFY_ARE_EQUAL_TIMESPAN_TO_MILLISECONDS(
-            result->SessionEmptyTimeout,
-            systemJson[_T("sessionEmptyTimeout")].as_number().to_uint64()
-            );
-
-        web::json::value systemArbitrationTimeoutsJson = systemJson[L"arbitration"];
-        if (!systemArbitrationTimeoutsJson.is_null())
-        {
-            VERIFY_ARE_EQUAL_TIMESPAN_TO_MILLISECONDS(
-                result->ArbitrationTimeout,
-                systemArbitrationTimeoutsJson[_T("arbitrationTimeout")].as_number().to_uint64()
-                );
-            VERIFY_ARE_EQUAL_TIMESPAN_TO_MILLISECONDS(
-                result->ForfeitTimeout,
-                systemArbitrationTimeoutsJson[_T("forfeitTimeout")].as_number().to_uint64()
-                );
-        }
-
-        web::json::value systemMetricsJson = systemJson[L"metrics"];
-        VERIFY_ARE_EQUAL(result->EnableMetricsLatency, systemMetricsJson[L"latency"].as_bool());
-        VERIFY_ARE_EQUAL(result->EnableMetricsBandwidthDown, systemMetricsJson[L"bandwidthDown"].as_bool());
-        VERIFY_ARE_EQUAL(result->EnableMetricsBandwidthUp, systemMetricsJson[L"bandwidthUp"].as_bool());
-        VERIFY_ARE_EQUAL(result->EnableMetricsCustom, systemMetricsJson[L"custom"].as_bool());
-
-        VerifyMultiplayerManagedInitialization(result->ManagedInitialization, systemJson[L"memberInitialization"]);
-        VerifyMultiplayerMemberInitialization(result->MemberInitialization, systemJson[L"memberInitialization"]);
-
-        VerifyMultiplayerPeerToPeerRequirements(result->PeerToPeerRequirements, systemJson[L"peerToPeerRequirements"]);
-
-        VerifyMultiplayerPeerToHostRequirements(result->PeerToHostRequirements, systemJson[L"peerToHostRequirements"]);
-
-    }
-
-    void VerifyMultiplayerSessionRoleTypes(MultiplayerSessionRoleTypes^ result, web::json::value resultToVerify)
-    {
-        web::json::object roleTypesInfoJsonObj = resultToVerify[L"roleTypes"].as_object();
-        for (const auto& roleTypeJson : roleTypesInfoJsonObj)
-        {
-            auto key = ref new Platform::String(roleTypeJson.first.c_str());
-            VerifyMultiplayerRoleType(result->RoleTypes->Lookup(key), roleTypeJson.second);
-        }
-    }
-
-    void VerifyMultiplayerSession(MultiplayerSession^ result, web::json::value resultToVerify)
-    {
-        web::json::value initializingJson = utils::extract_json_field(resultToVerify, _T("initializing"), false);
-        web::json::value memberInfoJson = utils::extract_json_field(resultToVerify, _T("membersInfo"), false);
-
-        VERIFY_ARE_EQUAL(result->Branch->Data(), resultToVerify[L"branch"].as_string());
-        VERIFY_ARE_EQUAL_INT(result->ChangeNumber, resultToVerify[L"changeNumber"].as_integer());
-
-        VERIFY_ARE_EQUAL(result->MultiplayerCorrelationId->Data(), resultToVerify[L"correlationId"].as_string());
-        TEST_LOG(DateTimeToString(result->StartTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str());
-        TEST_LOG(resultToVerify[L"startTime"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str());
-
-        VERIFY_ARE_EQUAL(DateTimeToString(result->StartTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND),
-            resultToVerify[L"startTime"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
-
-        VERIFY_ARE_EQUAL(DateTimeToString(result->StartTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND),
-            resultToVerify[L"nextTimer"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
-
-        VerifyMultiplayerSessionRoleTypes(result->SessionRoleTypes, resultToVerify);
-
-        VerifyMultiplayerSessionConstants(result->SessionConstants, resultToVerify[L"constants"]);
-
-        TEST_LOG(result->InitializationStage.ToString()->Data());
-        TEST_LOG(initializingJson[L"stage"].as_string().c_str());
-        VERIFY_ARE_EQUAL(result->InitializationStage.ToString()->Data(), initializingJson[L"stage"].as_string());
-
-        TEST_LOG(DateTimeToString(result->InitializingStageStartTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str());
-        TEST_LOG(initializingJson[L"stageStartTime"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND).c_str());
-
-        VERIFY_ARE_EQUAL(DateTimeToString(result->InitializingStageStartTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND),
-            initializingJson[L"stageStartTime"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
-        VERIFY_ARE_EQUAL_INT(result->InitializingEpisode, initializingJson[L"episode"].as_integer());
-        
-        web::json::array hostCandidateJson = resultToVerify[L"hostCandidates"].as_array();
-        VERIFY_ARE_EQUAL_INT(result->HostCandidates->Size, hostCandidateJson.size());
-        TEST_LOG(hostCandidateJson.size().ToString()->Data());
-
-        uint32 counter = 0;
-        for (auto hostCandidate : result->HostCandidates)
-        {
-            VERIFY_ARE_EQUAL(hostCandidate->Data(), hostCandidateJson[counter].as_string());
-            ++counter;
-        }
-
-        web::json::value membersJson = resultToVerify[L"members"];
-        uint32 memberCount = memberInfoJson[L"count"].as_integer();
-        uint32 memberFirst = memberInfoJson[L"first"].as_integer();
-        for (uint32 i = memberFirst; i < memberCount; ++i)
-        {
-            stringstream_t stream;
-            stream << i;
-            VerifyMultiplayerSessionMember(result->Members->GetAt(i), membersJson[stream.str()]);
-        }
-
-        VerifyMultiplayerSessionProperties(result->SessionProperties, resultToVerify[L"properties"]);
-
-        VERIFY_ARE_EQUAL_INT(result->MembersAccepted, memberInfoJson[L"accepted"].as_integer());
-        TEST_LOG(resultToVerify[L"servers"].serialize().c_str());
-        TEST_LOG(result->ServersJson->Data());
-        string_t test0 = result->ServersJson->Data();
-        string_t test1 = resultToVerify[L"servers"].serialize().c_str();
-        VERIFY_ARE_EQUAL(test0, test1);
-    }
-
-    void VerifyMultiplayerSessionStates(MultiplayerSessionStates^ result, web::json::value resultToVerify)
-    {
-        web::json::value sessionRefJson = resultToVerify[L"sessionRef"];
-        VerifyMultiplayerSessionReference(result->SessionReference, sessionRefJson);
-
-        VERIFY_ARE_EQUAL(result->IsMyTurn, resultToVerify[L"myTurn"].as_bool());
-        VERIFY_ARE_EQUAL(result->Status.ToString()->Data(), resultToVerify[L"status"].as_string());
-        VERIFY_ARE_EQUAL(result->Visibility.ToString()->Data(), resultToVerify[L"visibility"].as_string());
-        VERIFY_ARE_EQUAL(result->JoinRestriction.ToString()->Data(), resultToVerify[L"joinRestriction"].as_string());
-        VERIFY_ARE_EQUAL(DateTimeToString(result->StartTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND),
-            resultToVerify[L"startTime"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
-        VERIFY_ARE_EQUAL(result->XboxUserId->Data(), resultToVerify[L"xuid"].as_string());
-        VERIFY_ARE_EQUAL_INT(result->AcceptedMemberCount, resultToVerify[L"accepted"].as_integer());
-        
-        web::json::array keywordsJson = resultToVerify[L"keywords"].as_array();
-        uint32 counter = 0;
-        for (auto keyword : result->Keywords)
-        {
-            VERIFY_ARE_EQUAL(keyword->Data(), keywordsJson[counter].as_string());
-            ++counter;
-        }
-    }
-
-    void VerifyActivityDetails(MultiplayerActivityDetails^ result, web::json::value resultToVerify)
-    {
-        web::json::value sessionRefJson = resultToVerify[L"sessionRef"];
-        VerifyMultiplayerSessionReference(result->SessionReference, sessionRefJson);
-
-        web::json::value relatedInfoJson = resultToVerify[L"relatedInfo"];
-
-        string_t titleId = resultToVerify[L"titleId"].as_string();
-        VERIFY_ARE_EQUAL_INT(result->TitleId, _wtoi(titleId.c_str()));
-        VERIFY_ARE_EQUAL(result->OwnerXboxUserId->Data(), resultToVerify[L"ownerXuid"].as_string());
-        VERIFY_ARE_EQUAL(result->JoinRestriction.ToString()->Data(), relatedInfoJson[L"joinRestriction"].as_string());
-        VERIFY_ARE_EQUAL(result->Closed, relatedInfoJson[L"closed"].as_bool());
-        VERIFY_ARE_EQUAL_INT(result->MaxMembersCount, relatedInfoJson[L"maxMembersCount"].as_integer());
-        VERIFY_ARE_EQUAL_INT(result->MembersCount, relatedInfoJson[L"membersCount"].as_integer());
-
-        web::json::value customPropertiesJson = resultToVerify[L"customProperties"];
-        if (!customPropertiesJson.is_null())
-        {
-            VERIFY_ARE_EQUAL(result->CustomSessionPropertiesJson->Data(), customPropertiesJson.serialize());
-        }
-    }
-
-    void VerifyMultiplayerRoleInfo(MultiplayerRoleInfo^ result, web::json::value resultToVerify)
-    {
-        VERIFY_ARE_EQUAL_INT(result->MaxMembersCount, resultToVerify[L"max"].as_integer());
-        VERIFY_ARE_EQUAL_INT(result->MembersCount, resultToVerify[L"count"].as_integer());
-
-        if(!resultToVerify[L"target"].is_null())
-        {
-            VERIFY_ARE_EQUAL_INT(result->TargetCount, resultToVerify[L"target"].as_integer());
-        }
-
-        if (!resultToVerify[L"memberXuids"].is_null())
-        {
-            web::json::array memberXuidsJson = resultToVerify[L"memberXuids"].as_array();
-            uint32 counter = 0;
-            for (const auto& xuid : result->MemberXboxUserIds)
-            {
-                VERIFY_ARE_EQUAL(xuid->Data(), memberXuidsJson[counter].as_string());
-                ++counter;
-            }
-        }
-    }
-
-    void VerifyMultiplayerRoleType(MultiplayerRoleType^ result, web::json::value resultToVerify)
-    {
-        if (!resultToVerify[L"ownerManaged"].is_null())
-        {
-            VERIFY_ARE_EQUAL(result->OwnerManaged, resultToVerify[L"ownerManaged"].as_bool());
-        }
-        
-        if (!resultToVerify[L"mutableRoleSettings"].is_null())
-        {
-            web::json::array mutableSettingsJson = resultToVerify[L"mutableRoleSettings"].as_array();
-            uint32 counter = 0;
-            for (const auto& setting : result->MutableRoleSettings)
-            {
-                switch (setting)
+            m_baseMock.SetMockMatchedCallback(
+                [](HttpMock* /*mock*/, std::string uri, std::string /*body*/)
                 {
-                case MutableRoleSetting::Max:
-                    VERIFY_ARE_EQUAL(L"max", mutableSettingsJson[counter].as_string());
-                    break;
-                case MutableRoleSetting::Target:
-                    VERIFY_ARE_EQUAL(L"target", mutableSettingsJson[counter].as_string());
-                    break;
-                default:
-                    throw std::invalid_argument("Enum value out of range");
+                    LOGS_DEBUG << "Unmocked HttpCall, uri=" << uri;
+                    assert(false);
                 }
-                ++counter;
-            }
+            );
+
+            // MPSD response expect local user's Xuid to be 1234
+            m_xboxLiveContext = CreateMockXboxLiveContext(1234);
         }
 
-        web::json::object rolesJsonObj = resultToVerify[L"roles"].as_object();
-        for (const auto& roleJson : rolesJsonObj)
+        XblContextHandle XboxLiveContext() const noexcept
         {
-            auto key = ref new Platform::String(roleJson.first.c_str());
-            VerifyMultiplayerRoleInfo(result->Roles->Lookup(key), roleJson.second);
+            return m_xboxLiveContext.get();
         }
-    }
 
-    void VerifySearchHandleDetails(MultiplayerSearchHandleDetails^ result, web::json::value resultToVerify)
+    private:
+        HttpMock m_baseMock;
+        std::shared_ptr<XblContext> m_xboxLiveContext;
+    };
+
+    // RAII wrapper for MPSD session
+    class MultiplayerSession
     {
-        web::json::value sessionRefJson = resultToVerify[L"sessionRef"];
-        VerifyMultiplayerSessionReference(result->SessionReference, sessionRefJson);
-        VERIFY_ARE_EQUAL(result->HandleId->Data(), resultToVerify[L"id"].as_string());
-        VERIFY_ARE_EQUAL(DateTimeToString(result->HandleCreationTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND),
-            resultToVerify[L"createTime"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND));
+    public:
+        // No public constructor. Create a session using MultiplayerSession::Create or MultiplayerSession::Get
 
-        web::json::value searchAttributesJson = resultToVerify[L"searchAttributes"];
-        web::json::array tagsJson = searchAttributesJson[L"tags"].as_array();
-        uint32 counter = 0;
-        for (const auto& tag : result->Tags)
+        MultiplayerSession(const MultiplayerSession& other) noexcept
         {
-            VERIFY_ARE_EQUAL(tag->Data(), tagsJson[counter].as_string());
-            ++counter;
+            VERIFY_SUCCEEDED(XblMultiplayerSessionDuplicateHandle(other.m_handle, &m_handle));
+            VERIFY_SUCCEEDED(XblContextDuplicateHandle(other.m_context, &m_context));
         }
 
-        web::json::object stringMetadataObj = searchAttributesJson[L"strings"].as_object();
-        for (const auto& stringsMetadata : stringMetadataObj)
+        MultiplayerSession& operator=(MultiplayerSession other) noexcept
         {
-            auto key = ref new Platform::String(stringsMetadata.first.c_str());
-            auto value = ref new Platform::String(stringsMetadata.second.as_string().c_str());
-            VERIFY_ARE_EQUAL(result->StringsMetadata->Lookup(key), value);
+            std::swap(m_handle, other.m_handle);
+            std::swap(m_context, other.m_context);
+            return *this;
         }
 
-        web::json::object numberMetadataObj = searchAttributesJson[L"numbers"].as_object();
-        for (const auto& numbersMetadata : numberMetadataObj)
+        ~MultiplayerSession() noexcept
         {
-            auto key = ref new Platform::String(numbersMetadata.first.c_str());
-            VERIFY_ARE_EQUAL(result->NumbersMetadata->Lookup(key), numbersMetadata.second.as_double());
+            XblMultiplayerSessionCloseHandle(m_handle);
+            XblContextCloseHandle(m_context);
         }
 
-        web::json::value customPropertiesJson = resultToVerify[L"customProperties"];
-        if (!customPropertiesJson.is_null())
+        static MultiplayerSession Create(
+            XblContextHandle xboxLiveContext,
+            const XblMultiplayerSessionReference* sessionReference = &MultiplayerTests::defaultSessionReference,
+            const XblMultiplayerSessionInitArgs* initArgs = nullptr
+        ) noexcept
         {
-            VERIFY_ARE_EQUAL(result->CustomSessionPropertiesJson->Data(), customPropertiesJson.serialize());
+            auto sessionHandle = XblMultiplayerSessionCreateHandle(xboxLiveContext->Xuid(), sessionReference, initArgs);
+            return MultiplayerSession{ sessionHandle, xboxLiveContext };
         }
 
-        web::json::value relatedInfoJson = resultToVerify[L"relatedInfo"];
-        VERIFY_ARE_EQUAL(result->JoinRestriction.ToString()->Data(), relatedInfoJson[L"joinRestriction"].as_string());
-        VERIFY_ARE_EQUAL(result->Closed, relatedInfoJson[L"closed"].as_bool());
-        VERIFY_ARE_EQUAL_INT(result->MaxMembersCount, relatedInfoJson[L"maxMembersCount"].as_integer());
-        VERIFY_ARE_EQUAL_INT(result->MembersCount, relatedInfoJson[L"membersCount"].as_integer());
-        web::json::array sessionOwnersJson = relatedInfoJson[L"sessionOwners"].as_array();
-        counter = 0;
-        for (const auto& tag : result->SessionOwnerXboxUserIds)
+        static MultiplayerSession Get(
+            XblContextHandle xboxLiveContext,
+            const XblMultiplayerSessionReference& sessionReference = MultiplayerTests::defaultSessionReference,
+            const JsonValue& response = MultiplayerTests::defaultSessionJson
+        ) noexcept
         {
-            VERIFY_ARE_EQUAL(tag->Data(), sessionOwnersJson[counter].as_string());
-            ++counter;
+            Stringstream mockUri;
+            mockUri << MPSD_URI;
+            mockUri << "/serviceconfigs/" << sessionReference.Scid;
+            mockUri << "/sessionTemplates/" << sessionReference.SessionTemplateName;
+            mockUri << "/sessions/" << sessionReference.SessionName;
+
+            HttpMock mock{ "GET", mockUri.str() };
+            mock.SetResponseBody(response);
+
+            XAsyncBlock async{};
+            VERIFY_SUCCEEDED(XblMultiplayerGetSessionAsync(xboxLiveContext, &sessionReference, &async));
+            VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+
+            XblMultiplayerSessionHandle sessionHandle{ nullptr };
+            VERIFY_SUCCEEDED(XblMultiplayerGetSessionResult(&async, &sessionHandle));
+
+            MultiplayerSession session{ sessionHandle, xboxLiveContext };
+            session.Verify(response);
+
+            return session;
         }
 
-        web::json::value roleInfoJson = resultToVerify[L"roleInfo"];
-        if (!roleInfoJson.is_null())
+        static MultiplayerSession Get(
+            XblContextHandle xboxLiveContext,
+            const std::string& handleId,
+            const JsonValue& response = MultiplayerTests::defaultSessionJson
+        ) noexcept
         {
-            web::json::object roleTypesInfoJsonObj = roleInfoJson[L"roleTypes"].as_object();
-            for (const auto& roleTypeJson : roleTypesInfoJsonObj)
+            Stringstream mockUri;
+            mockUri << MPSD_URI << "/handles/" << handleId.data() << "/session";
+
+            HttpMock mock{ "GET", mockUri.str() };
+            mock.SetResponseBody(response);
+
+            XblMultiplayerSessionReferenceUri sessionPath{};
+            VERIFY_SUCCEEDED(XblMultiplayerSessionReferenceToUriPath(&MultiplayerTests::defaultSessionReference, &sessionPath));
+            mock.SetResponseHeaders(HttpHeaders{ {"Content-Location", sessionPath.value } });
+
+            XAsyncBlock async{};
+            VERIFY_SUCCEEDED(XblMultiplayerGetSessionByHandleAsync(xboxLiveContext, handleId.data(), &async));
+            VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+
+            XblMultiplayerSessionHandle sessionHandle{ nullptr };
+            VERIFY_SUCCEEDED(XblMultiplayerGetSessionByHandleResult(&async, &sessionHandle));
+
+            MultiplayerSession session{ sessionHandle, xboxLiveContext };
+            session.Verify(response);
+
+            return session;
+        }
+
+        void Write(
+            const JsonValue& expectedRequestBody = JsonValue{ rapidjson::kObjectType },
+            const JsonValue& responseBody = MultiplayerTests::defaultSessionJson
+        ) noexcept
+        {
+            auto sessionReference{ Reference() };
+
+            Stringstream mockUri;
+            mockUri << MPSD_URI;
+            mockUri << "/serviceconfigs/" << sessionReference->Scid;
+            mockUri << "/sessionTemplates/" << sessionReference->SessionTemplateName;
+            mockUri << "/sessions/" << sessionReference->SessionName;
+
+            HttpMock mock{ "PUT", mockUri.str() };
+            mock.SetResponseBody(responseBody);
+
+            bool requestWellFormed{ true };
+            mock.SetMockMatchedCallback(
+                [&](HttpMock* /*mock*/, std::string /*uri*/, std::string body)
+                {
+                    requestWellFormed &= VerifyJson(expectedRequestBody, body.data());
+                }
+            );
+
+            XAsyncBlock async{};
+            VERIFY_SUCCEEDED(XblMultiplayerWriteSessionAsync(
+                m_context,
+                m_handle,
+                XblMultiplayerSessionWriteMode::UpdateOrCreateNew,
+                &async)
+            );
+
+            VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+            VERIFY_IS_TRUE(requestWellFormed);
+
+            XblMultiplayerSessionHandle updatedSessionHandle{ nullptr };
+            VERIFY_SUCCEEDED(XblMultiplayerWriteSessionResult(&async, &updatedSessionHandle));
+
+            MultiplayerSession updatedSession{ updatedSessionHandle, m_context };
+            updatedSession.Verify(responseBody);
+
+            // Update MultiplayerSession object in place since we are doing synchronous updates anyhow
+            *this = updatedSession;
+        }
+
+        XblMultiplayerSessionHandle Handle() const noexcept
+        {
+            return m_handle;
+        }
+
+        const XblMultiplayerSessionReference* Reference() const noexcept
+        {
+            return XblMultiplayerSessionSessionReference(m_handle);
+        }
+
+        const XblMultiplayerSessionConstants* Constants() const noexcept
+        {
+            return XblMultiplayerSessionSessionConstants(m_handle);
+        }
+
+        const XblMultiplayerSessionProperties* Properties() const noexcept
+        {
+            return XblMultiplayerSessionSessionProperties(m_handle);
+        }
+
+        std::unordered_map<uint32_t, const XblMultiplayerSessionMember*> Members() const noexcept
+        {
+            const XblMultiplayerSessionMember* members{ nullptr };
+            size_t membersCount{ 0 };
+            VERIFY_SUCCEEDED(XblMultiplayerSessionMembers(m_handle, &members, &membersCount));
+
+            std::unordered_map<uint32_t, const XblMultiplayerSessionMember*> map{};
+            for (size_t i = 0; i < membersCount; ++i)
             {
-                auto key = ref new Platform::String(roleTypeJson.first.c_str());
-                VerifyMultiplayerRoleType(result->RoleTypes->Lookup(key), roleTypeJson.second);
+                map[members[i].MemberId] = members + i;
+            }
+            return map;
+        }
+
+        std::vector<const XblMultiplayerRoleType*> RoleTypes() const noexcept
+        {
+            const XblMultiplayerRoleType* roles{ nullptr };
+            size_t roleCount{ 0 };
+            VERIFY_SUCCEEDED(XblMultiplayerSessionRoleTypes(m_handle, &roles, &roleCount));
+
+            return Utils::Transform<const XblMultiplayerRoleType*>(roles, roleCount, [](const XblMultiplayerRoleType& r) { return &r; });
+        }
+
+    private:
+        // Semantics are to take over ownership of an existing session handle. Caller should not call close.
+        MultiplayerSession(
+            XblMultiplayerSessionHandle sessionHandle,
+            XblContextHandle xblContextHandle
+        ) noexcept
+            : m_handle(sessionHandle)
+        {
+            VERIFY_IS_NOT_NULL(m_handle);
+            VERIFY_SUCCEEDED(XblContextDuplicateHandle(xblContextHandle, &m_context));
+        }
+
+        // Verify the session matches with an MPSD session document
+        void Verify(const JsonValue& json) const noexcept
+        {
+            VerifySessionInfo(json);
+            if (json.HasMember("initializing"))
+            {
+                VerifyInitializationInfo(json["initializing"]);
+            }
+            if (json.HasMember("hostCandidates"))
+            {
+                VerifyHostCandidates(json["hostCandidates"]);
+            }
+            if (json.HasMember("roleTypes"))
+            {
+                VerifyRoles(json["roleTypes"]);
+            }
+            else
+            {
+                VERIFY_ARE_EQUAL_UINT(0, RoleTypes().size());
+            }
+            VerifyConstants(json["constants"]);
+            VerifyProperties(json["properties"]);
+            VerifyServers(json["servers"]);
+            VerifyMembers(json["members"]);
+        }
+
+        void VerifySessionInfo(const JsonValue& json) const noexcept
+        {
+            const auto& i{ *XblMultiplayerSessionGetInfo(m_handle) };
+
+            VERIFY_JSON_INT(json, "contractVersion", i.ContractVersion);
+            VERIFY_JSON_STRING(json, "branch", i.Branch);
+            VERIFY_JSON_INT(json, "changeNumber", i.ChangeNumber);
+            VERIFY_JSON_STRING(json, "correlationId", i.CorrelationId);
+            VERIFY_JSON_TIME(json, "startTime", i.StartTime);
+            VERIFY_JSON_TIME(json, "nextTimer", i.NextTimer);
+        }
+
+        void VerifyInitializationInfo(const JsonValue& json) const noexcept
+        {
+            const auto& i{ *XblMultiplayerSessionGetInitializationInfo(m_handle) };
+            switch (i.Stage)
+            {
+            case XblMultiplayerInitializationStage::Evaluating:
+            {
+                VERIFY_ARE_EQUAL_STR_IGNORE_CASE(json["stage"].GetString(), "evaluating");
+                break;
+            }
+            case XblMultiplayerInitializationStage::Failed:
+            {
+                VERIFY_ARE_EQUAL_STR_IGNORE_CASE(json["stage"].GetString(), "failed");
+                break;
+            }
+            case XblMultiplayerInitializationStage::Joining:
+            {
+                VERIFY_ARE_EQUAL_STR_IGNORE_CASE(json["stage"].GetString(), "joining");
+                break;
+            }
+            case XblMultiplayerInitializationStage::Measuring:
+            {
+                VERIFY_ARE_EQUAL_STR_IGNORE_CASE(json["stage"].GetString(), "measuring");
+                break;
+            }
+            case XblMultiplayerInitializationStage::None:
+            case XblMultiplayerInitializationStage::Unknown:
+            default:
+            {
+                VERIFY_IS_TRUE(!json.HasMember("stage"));
+            }
+            }
+
+            VERIFY_JSON_TIME(json, "stageStartTime", i.StageStartTime);
+            VERIFY_JSON_UINT(json, "episode", i.Episode);
+        }
+
+        void VerifyHostCandidates(const JsonValue& json) const noexcept
+        {
+            const XblDeviceToken* hostCandidates{ nullptr };
+            size_t count{ 0 };
+            VERIFY_SUCCEEDED(XblMultiplayerSessionHostCandidates(m_handle, &hostCandidates, &count));
+            const auto& expectedHostCandidates{ json.GetArray() };
+            VERIFY_ARE_EQUAL_UINT(expectedHostCandidates.Size(), count);
+
+            for (uint32_t i = 0; i < count; ++i)
+            {
+                VERIFY_ARE_EQUAL_STR_IGNORE_CASE(expectedHostCandidates[i].GetString(), hostCandidates[i].Value);
             }
         }
+
+        void VerifyRoles(const JsonValue& json) const noexcept
+        {
+            auto rolesTypes{ RoleTypes() };
+
+            VERIFY_ARE_EQUAL_UINT(json.MemberCount(), rolesTypes.size());
+            for (auto roleType : rolesTypes)
+            {
+                VERIFY_IS_NOT_NULL(roleType);
+
+                VERIFY_IS_TRUE(json.HasMember(roleType->Name));
+                const auto& roleTypeJson{ json[roleType->Name] };
+                VERIFY_ARE_EQUAL(roleType->OwnerManaged, roleTypeJson["ownerManaged"].GetBool());
+
+                XblMutableRoleSettings expectedMutableSettings{ XblMutableRoleSettings::None };
+                const auto& mutableSettingsArray{ roleTypeJson["mutableRoleSettings"].GetArray() };
+                for (auto& setting : mutableSettingsArray)
+                {
+                    std::string settingString{ setting.GetString() };
+                    if (settingString == "max")
+                    {
+                        expectedMutableSettings |= XblMutableRoleSettings::Max;
+                    }
+                    else if (settingString == "target")
+                    {
+                        expectedMutableSettings |= XblMutableRoleSettings::Target;
+                    }
+                }
+
+                VERIFY_IS_TRUE(roleType->MutableRoleSettings == expectedMutableSettings);
+
+                const auto& rolesJson{ roleTypeJson["roles"] };
+                VERIFY_ARE_EQUAL_UINT(rolesJson.MemberCount(), roleType->RoleCount);
+                for (size_t i = 0; i < roleType->RoleCount; ++i)
+                {
+                    auto& role{ roleType->Roles[i] };
+                    VERIFY_IS_TRUE(rolesJson.HasMember(role.Name));
+                    const auto& roleJson{ rolesJson[role.Name] };
+
+                    VERIFY_ARE_EQUAL(roleType, role.RoleType);
+
+                    std::unordered_set<uint64_t> actualMemberXuids(role.MemberXuids, role.MemberXuids + role.MemberCount);
+                    const auto& expectedMemberXuids{ roleJson["memberXuids"].GetArray() };
+                    VERIFY_ARE_EQUAL_UINT(expectedMemberXuids.Size(), actualMemberXuids.size());
+                    for (auto& xuid : expectedMemberXuids)
+                    {
+                        VERIFY_IS_TRUE(actualMemberXuids.find(atol(xuid.GetString())) != actualMemberXuids.end());
+                    }
+
+                    VERIFY_ARE_EQUAL_UINT(roleJson["target"].GetUint(), role.TargetCount);
+                    VERIFY_ARE_EQUAL_UINT(roleJson["max"].GetUint(), role.MaxMemberCount);
+                }
+            }
+        }
+
+        void VerifyConstants(const JsonValue& json) const noexcept
+        {
+            auto& c{ *Constants() };
+
+            const auto& systemJson = json["system"];
+
+            VERIFY_JSON_UINT(systemJson, "maxMembersCount", c.MaxMembersInSession);
+            if (c.Visibility != XblMultiplayerSessionVisibility::Unknown)
+            {
+                VERIFY_IS_TRUE(multiplayer::Serializers::MultiplayerSessionVisibilityFromString(systemJson["visibility"].GetString()) == c.Visibility);
+            }
+
+            if (c.InitiatorXuidsCount)
+            {
+                std::unordered_set<uint64_t> actualInitiators{ c.InitiatorXuids, c.InitiatorXuids + c.InitiatorXuidsCount };
+                const auto& expectedInitiators{ systemJson["initiators"].GetArray() };
+                VERIFY_ARE_EQUAL_UINT(expectedInitiators.Size(), actualInitiators.size());
+                for (auto& xuid : expectedInitiators)
+                {
+                    VERIFY_IS_TRUE(actualInitiators.find(atol(xuid.GetString())) != actualInitiators.end());
+                }
+            }
+
+            VERIFY_JSON_FIELD_NOTNULL(systemJson, "cloudComputePackage", c.SessionCloudComputePackageConstantsJson);
+            VERIFY_JSON_UINT(systemJson, "reservedRemovalTimeout", c.MemberReservedTimeout);
+            VERIFY_JSON_UINT(systemJson, "inactiveRemovalTimeout", c.MemberInactiveTimeout);
+            VERIFY_JSON_UINT(systemJson, "readyRemovalTimeout", c.MemberReadyTimeout);
+            VERIFY_JSON_UINT(systemJson, "sessionEmptyTimeout", c.SessionEmptyTimeout);
+
+            if (systemJson.HasMember("metrics"))
+            {
+                VERIFY_JSON_BOOL(systemJson["metrics"], "latency", c.EnableMetricsLatency);
+                VERIFY_JSON_BOOL(systemJson["metrics"], "bandwidthDown", c.EnableMetricsBandwidthDown);
+                VERIFY_JSON_BOOL(systemJson["metrics"], "bandwidthUp", c.EnableMetricsBandwidthUp);
+                VERIFY_JSON_BOOL(systemJson["metrics"], "custom", c.EnableMetricsCustom);
+            }
+
+            if (systemJson.HasMember("memberInitialization"))
+            {
+                VERIFY_JSON_UINT(systemJson["memberInitialization"], "joinTimeout", c.MemberInitialization->JoinTimeout);
+                VERIFY_JSON_UINT(systemJson["memberInitialization"], "measurementTimeout", c.MemberInitialization->MeasurementTimeout);
+                VERIFY_JSON_UINT(systemJson["memberInitialization"], "evaluationTimeout", c.MemberInitialization->EvaluationTimeout);
+                VERIFY_JSON_BOOL(systemJson["memberInitialization"], "externalEvaluation", c.MemberInitialization->ExternalEvaluation);
+                VERIFY_JSON_UINT(systemJson["memberInitialization"], "membersNeededToStart", c.MemberInitialization->MembersNeededToStart);
+            }
+
+            if (systemJson.HasMember("peerToPeerRequirements"))
+            {
+                VERIFY_JSON_UINT(systemJson["peerToPeerRequirements"], "latencyMaximum", c.PeerToPeerRequirements.LatencyMaximum);
+                VERIFY_JSON_UINT(systemJson["peerToPeerRequirements"], "bandwidthMinimum", c.PeerToPeerRequirements.BandwidthMinimumInKbps);
+            }
+
+            if (systemJson.HasMember("peerToHostRequirements"))
+            {
+                VERIFY_JSON_UINT(systemJson["peerToHostRequirements"], "latencyMaximum", c.PeerToHostRequirements.LatencyMaximum);
+                VERIFY_JSON_UINT(systemJson["peerToHostRequirements"], "bandwidthDownMinimum", c.PeerToHostRequirements.BandwidthDownMinimumInKbps);
+                VERIFY_JSON_UINT(systemJson["peerToHostRequirements"], "bandwidthUpMinimum", c.PeerToHostRequirements.BandwidthUpMinimumInKbps);
+            }
+
+            VERIFY_JSON_FIELD_NOTNULL(systemJson, "measurementServerAddresses", c.MeasurementServerAddressesJson);
+
+            const auto& capabilitesJson = systemJson["capabilities"];
+            VERIFY_JSON_BOOL(capabilitesJson, "connectivity", c.SessionCapabilities.Connectivity);
+            VERIFY_JSON_BOOL(capabilitesJson, "suppressPresenceActivityCheck", c.SessionCapabilities.SuppressPresenceActivityCheck);
+            VERIFY_JSON_BOOL(capabilitesJson, "gameplay", c.SessionCapabilities.Gameplay);
+            VERIFY_JSON_BOOL(capabilitesJson, "large", c.SessionCapabilities.Large);
+            VERIFY_JSON_BOOL(capabilitesJson, "connectionRequiredForActiveMembers", c.SessionCapabilities.ConnectionRequiredForActiveMembers);
+            VERIFY_JSON_BOOL(capabilitesJson, "userAuthorizationStyle", c.SessionCapabilities.UserAuthorizationStyle);
+            VERIFY_JSON_BOOL(capabilitesJson, "crossPlay", c.SessionCapabilities.Crossplay);
+            VERIFY_JSON_BOOL(capabilitesJson, "searchable", c.SessionCapabilities.Searchable);
+            VERIFY_JSON_BOOL(capabilitesJson, "hasOwners", c.SessionCapabilities.HasOwners);
+
+            VERIFY_JSON_FIELD_NOTNULL(json, "custom", c.CustomJson);
+        }
+
+        void VerifyProperties(const JsonValue& json) const noexcept
+        {
+            auto& p{ *Properties() };
+            auto& systemJson{ json["system"] };
+
+            if (p.KeywordCount)
+            {
+                std::unordered_set<std::string> actualKeywords(p.Keywords, p.Keywords + p.KeywordCount);
+                const auto& expectedKeywords = systemJson["keywords"].GetArray();
+                VERIFY_ARE_EQUAL_UINT(expectedKeywords.Size(), actualKeywords.size());
+                for (auto& keyword : expectedKeywords)
+                {
+                    VERIFY_IS_TRUE(actualKeywords.find(keyword.GetString()) != actualKeywords.end());
+                }
+            }
+
+            if (p.JoinRestriction != XblMultiplayerSessionRestriction::Unknown)
+            {
+                VERIFY_IS_TRUE(p.JoinRestriction == multiplayer::Serializers::MultiplayerSessionRestrictionFromString(systemJson["joinRestriction"].GetString()));
+            }
+
+            if (p.ReadRestriction != XblMultiplayerSessionRestriction::Unknown)
+            {
+                VERIFY_IS_TRUE(p.ReadRestriction == multiplayer::Serializers::MultiplayerSessionRestrictionFromString(systemJson["readRestriction"].GetString()));
+            }
+
+            if (p.TurnCollectionCount)
+            {
+                std::unordered_set<uint32_t> actualTurns(p.TurnCollection, p.TurnCollection + p.TurnCollectionCount);
+                const auto& expectedTurns{ systemJson["turn"].GetArray() };
+                VERIFY_ARE_EQUAL_UINT(expectedTurns.Size(), actualTurns.size());
+                for (auto& turn : expectedTurns)
+                {
+                    VERIFY_IS_TRUE(actualTurns.find(turn.GetUint()) != actualTurns.end());
+                }
+            }
+
+            if (systemJson.HasMember("matchmaking"))
+            {
+                VERIFY_JSON_FIELD(systemJson["matchmaking"], "targetSessionConstants", p.MatchmakingTargetSessionConstantsJson);
+                VERIFY_JSON_STRING(systemJson["matchmaking"], "serverConnectionString", p.MatchmakingServerConnectionString);
+            }
+
+            if (p.ServerConnectionStringCandidatesCount)
+            {
+                std::unordered_set<std::string> actualServerCandidates(p.ServerConnectionStringCandidates, p.ServerConnectionStringCandidates + p.ServerConnectionStringCandidatesCount);
+                const auto& expectedServerCandidates{ systemJson["serverConnectionStringCandidates"].GetArray() };
+                VERIFY_ARE_EQUAL_UINT(expectedServerCandidates.Size(), actualServerCandidates.size());
+                for (auto& candidate : expectedServerCandidates)
+                {
+                    VERIFY_IS_TRUE(actualServerCandidates.find(candidate.GetString()) != actualServerCandidates.end());
+                }
+            }
+
+            if (p.SessionOwnerMemberIdsCount)
+            {
+                std::unordered_set<uint32_t> actualSessionOwners(p.SessionOwnerMemberIds, p.SessionOwnerMemberIds + p.SessionOwnerMemberIdsCount);
+                const auto& expectedSessionOwners{ systemJson["owners"].GetArray() };
+                VERIFY_ARE_EQUAL_UINT(expectedSessionOwners.Size(), actualSessionOwners.size());
+                for (auto& ownerId : expectedSessionOwners)
+                {
+                    VERIFY_IS_TRUE(actualSessionOwners.find(ownerId.GetUint()) != actualSessionOwners.end());
+                }
+            }
+
+            VERIFY_JSON_STRING(systemJson, "host", p.HostDeviceToken.Value);
+            VERIFY_JSON_BOOL(systemJson, "closed", p.Closed);
+            VERIFY_JSON_BOOL(systemJson, "locked", p.Locked);
+            VERIFY_JSON_BOOL(systemJson, "allocateCloudCompute", p.AllocateCloudCompute);
+            VERIFY_JSON_BOOL(systemJson, "matchmakingResubmit", p.MatchmakingResubmit);
+
+            VERIFY_JSON_FIELD_NOTNULL(json, "custom", p.SessionCustomPropertiesJson);
+        }
+
+        void VerifyServers(const JsonValue& json) const noexcept
+        {
+            auto jsonRawServers = XblMultiplayerSessionRawServersJson(m_handle);
+            VERIFY_IS_TRUE(VerifyJson(json, jsonRawServers));
+
+            // matchmaking server
+            if (json.HasMember("matchmaking"))
+            {
+                const auto& matchmakingJson{ json["matchmaking"]["properties"]["system"] };
+                auto m{ XblMultiplayerSessionMatchmakingServer(m_handle) };
+
+                switch (m->Status)
+                {
+                case XblMatchmakingStatus::Searching:
+                {
+                    VERIFY_ARE_EQUAL_STR_IGNORE_CASE("searching", matchmakingJson["status"].GetString());
+                    break;
+                }
+                default: break;
+                }
+
+                VERIFY_JSON_STRING(matchmakingJson, "statusDetails", m->StatusDetails);
+                VERIFY_JSON_INT(matchmakingJson, "typicalWait", m->TypicalWaitInSeconds);
+                VerifyMultiplayerSessionReference(m->TargetSessionRef, matchmakingJson["targetSessionRef"]);
+            }
+        }
+
+        void VerifyMembers(const JsonValue& json) const noexcept
+        {
+            auto members{ Members() };
+            VERIFY_ARE_EQUAL_UINT(json.MemberCount(), members.size());
+
+            for (auto iter = json.MemberBegin(); iter != json.MemberEnd(); ++iter)
+            {
+                if (std::string{ iter->name.GetString() } == "me")
+                {
+                    VERIFY_ARE_EQUAL_UINT(1u, members.size());
+                    VerifyMember(*members.begin()->second, iter->value);
+                }
+                else
+                {
+                    VerifyMember(*members[atoi(iter->name.GetString())], iter->value);
+                }
+            }
+        }
+
+        void VerifyMember(
+            const XblMultiplayerSessionMember& m,
+            const JsonValue& expected
+        ) const noexcept
+        {
+            // Member constants
+            auto& constantsSystemJson{ expected["constants"]["system"] };
+
+            if (constantsSystemJson.HasMember("xuid"))
+            {
+                VERIFY_ARE_EQUAL_UINT(m.Xuid, atol(constantsSystemJson["xuid"].GetString()));
+            }
+
+            auto currentUser{ XblMultiplayerSessionCurrentUser(m_handle) };
+            bool isCurrentUser{ currentUser ? m.Xuid == currentUser->Xuid : false };
+            VERIFY_IS_TRUE(m.IsCurrentUser == isCurrentUser);
+
+            VERIFY_JSON_BOOL(constantsSystemJson, "initialize", m.InitializeRequested);
+            if (constantsSystemJson.HasMember("matchmakingResult"))
+            {
+                VERIFY_IS_TRUE(VerifyJson(constantsSystemJson["matchmakingResult"]["serverMeasurements"], m.MatchmakingResultServerMeasurementsJson));
+            }
+
+            if (expected["constants"].HasMember("custom"))
+            {
+                VERIFY_IS_TRUE(VerifyJson(expected["constants"]["custom"], m.CustomConstantsJson));
+            }
+
+            // Member properties
+            auto& propertiesSystemJson{ expected["properties"]["system"] };
+
+            // Verify subscribed change types only for localUser
+            if (isCurrentUser && propertiesSystemJson.HasMember("subscription"))
+            {
+                Vector<String> expectedChangedTypesVector{};
+                VERIFY_SUCCEEDED(JsonUtils::ExtractJsonVector<String>(JsonUtils::JsonStringExtractor, propertiesSystemJson["subscription"]["changeTypes"], expectedChangedTypesVector));
+                auto expectedChangedTypes = multiplayer::Serializers::MultiplayerSessionChangeTypesFromStringVector(expectedChangedTypesVector);
+                VERIFY_IS_TRUE(expectedChangedTypes == XblMultiplayerSessionSubscribedChangeTypes(m_handle));
+            }
+
+            switch (m.Status)
+            {
+            case XblMultiplayerSessionMemberStatus::Active:
+            {
+                VERIFY_IS_TRUE(propertiesSystemJson["active"].GetBool());
+                break;
+            }
+            case XblMultiplayerSessionMemberStatus::Ready:
+            {
+                VERIFY_IS_TRUE(propertiesSystemJson["ready"].GetBool());
+                break;
+            }
+            case XblMultiplayerSessionMemberStatus::Reserved:
+            {
+                VERIFY_IS_TRUE(expected["reserved"].GetBool());
+                break;
+            }
+            case XblMultiplayerSessionMemberStatus::Inactive:
+            {
+                VERIFY_IS_TRUE(!expected.HasMember("reserved") || !expected["reserved"].GetBool());
+                VERIFY_IS_TRUE(!propertiesSystemJson.HasMember("active") || !propertiesSystemJson["active"].GetBool());
+                VERIFY_IS_TRUE(!propertiesSystemJson.HasMember("ready") || !propertiesSystemJson["ready"].GetBool());
+                break;
+            }
+            default:
+            {
+                assert(false);
+            }
+            }
+
+            VERIFY_JSON_STRING(propertiesSystemJson, "secureDeviceAddress", m.SecureDeviceBaseAddress64);
+
+            if (propertiesSystemJson.HasMember("initializationGroup"))
+            {
+                std::unordered_set<uint32_t> actualInitializationGroup(m.MembersInGroupIds, m.MembersInGroupIds + m.MembersInGroupCount);
+                const auto& expectedInitializationGroup{ propertiesSystemJson["initializationGroup"].GetArray() };
+                VERIFY_ARE_EQUAL_UINT(expectedInitializationGroup.Size(), actualInitializationGroup.size());
+                for (auto& id : expectedInitializationGroup)
+                {
+                    VERIFY_IS_TRUE(actualInitializationGroup.find(id.GetUint()) != actualInitializationGroup.end());
+                }
+            }
+
+            VERIFY_JSON_FIELD(propertiesSystemJson, "serverMeasurements", m.ServerMeasurementsJson);
+            VERIFY_JSON_FIELD(propertiesSystemJson, "measurements", m.QosMeasurementsJson);
+
+            VERIFY_JSON_FIELD(expected["properties"], "custom", m.CustomPropertiesJson);
+
+            // Root
+            VERIFY_JSON_STRING(expected, "gamertag", m.Gamertag);
+            VERIFY_JSON_STRING(expected, "deviceToken", m.DeviceToken.Value);
+            if (expected.HasMember("nat"))
+            {
+                VERIFY_IS_TRUE(multiplayer::Serializers::MultiplayerNatSettingFromString(expected["nat"].GetString()) == m.Nat);
+            }
+            VERIFY_JSON_INT_STRING(expected, "activeTitleId", m.ActiveTitleId);
+            VERIFY_JSON_TIME(expected, "joinTime", m.JoinTime);
+            VERIFY_JSON_BOOL(expected, "turn", m.IsTurnAvailable);
+            if (expected.HasMember("initializationFailure"))
+            {
+                VERIFY_IS_TRUE(multiplayer::Serializers::MultiplayerMeasurementFailureFromString(expected["initializationFailure"].GetString()) == m.InitializationFailureCause);
+            }
+            VERIFY_JSON_UINT(expected, "initializationEpisode", m.InitializationEpisode);
+
+            // Roles
+            if (m.Roles)
+            {
+                const auto& expectedRoles{ expected["roles"] };
+                VERIFY_ARE_EQUAL_UINT(expectedRoles.MemberCount(), m.RolesCount);
+                for (size_t i = 0; i < m.RolesCount; ++i)
+                {
+                    VERIFY_IS_TRUE(expectedRoles.HasMember(m.Roles[i].roleTypeName));
+                    VERIFY_ARE_EQUAL_STR(expectedRoles[m.Roles[i].roleTypeName].GetString(), m.Roles[i].roleName);
+                }
+            }
+        }
+
+        XblMultiplayerSessionHandle m_handle{ nullptr };
+        XblContextHandle m_context{ nullptr };
+    };
+
+    // RAII wrapper around XblMultiplayerSearchHandle
+    class MultiplayerSearchDetails
+    {
+    public:
+        // No public constructor. Create MultiplayerSearchDetails for a session using MultiplayerSearchDetails::Create,
+        // or query existing using MultiplayerSearchDetails::Query
+
+        MultiplayerSearchDetails(const MultiplayerSearchDetails& other) noexcept
+        {
+            VERIFY_SUCCEEDED(XblMultiplayerSearchHandleDuplicateHandle(other.m_handle, &m_handle));
+        }
+        MultiplayerSearchDetails& operator=(MultiplayerSearchDetails rhs) = delete;
+        ~MultiplayerSearchDetails() noexcept
+        {
+            XblMultiplayerSearchHandleCloseHandle(m_handle);
+        }
+
+        static MultiplayerSearchDetails Create(
+            XblContextHandle xboxLiveContext,
+            const XblMultiplayerSessionReference& sessionRef,
+            const std::vector<XblMultiplayerSessionTag>& tags = {},
+            const std::vector<XblMultiplayerSessionNumberAttribute>& numberAttributes = {},
+            const std::vector<XblMultiplayerSessionStringAttribute>& stringAttributes = {},
+            const JsonValue& responseJson = testJson["searchHandleJson"]
+        ) noexcept
+        {
+            HttpMock mock{ "POST", MPSD_URI "/handles" };
+            mock.SetResponseBody(responseJson);
+
+            bool requestWellFormed{ true };
+            mock.SetMockMatchedCallback(
+                [&](HttpMock* mock, std::string uri, std::string requestBody)
+                {
+                    UNREFERENCED_PARAMETER(mock);
+                    UNREFERENCED_PARAMETER(uri);
+                    requestWellFormed = VerifyJson(responseJson, requestBody.data());
+                });
+
+            XAsyncBlock async{};
+            VERIFY_SUCCEEDED(XblMultiplayerCreateSearchHandleAsync(
+                xboxLiveContext,
+                &sessionRef,
+                tags.data(),
+                tags.size(),
+                numberAttributes.data(),
+                numberAttributes.size(),
+                stringAttributes.data(),
+                stringAttributes.size(),
+                &async
+            ));
+
+            VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+
+            XblMultiplayerSearchHandle handle{ nullptr };
+            VERIFY_SUCCEEDED(XblMultiplayerCreateSearchHandleResult(&async, &handle));
+
+            MultiplayerSearchDetails result{ handle };
+            result.Verify(responseJson);
+
+            return result;
+        }
+
+        static std::vector<MultiplayerSearchDetails> Query(
+            XblContextHandle xboxLiveContext,
+            const char* scid,
+            const char* sessionTemplateName,
+            const char* orderByAttribute = nullptr,
+            bool orderAscending = true,
+            const char* searchFilter = nullptr,
+            const char* socialGroup = nullptr,
+            const JsonValue& expectedRequestBody = testJson["searchHandlesRequestJson"]
+        ) noexcept
+        {
+            const auto& responseBody{ testJson["searchHandlesResponseJson"] };
+
+            HttpMock mock{ "POST", MPSD_URI "/handles/query" };
+            mock.SetResponseBody(responseBody);
+
+            bool requestWellFormed{ true };
+            mock.SetMockMatchedCallback(
+                [&](HttpMock* mock, std::string uri, std::string body)
+                {
+                    UNREFERENCED_PARAMETER(mock);
+                    UNREFERENCED_PARAMETER(uri);
+                    requestWellFormed &= VerifyJson(expectedRequestBody, body.data());
+                }
+            );
+
+            XAsyncBlock async{};
+            VERIFY_SUCCEEDED(XblMultiplayerGetSearchHandlesAsync(
+                xboxLiveContext,
+                scid,
+                sessionTemplateName,
+                orderByAttribute,
+                orderAscending,
+                searchFilter,
+                socialGroup,
+                &async
+            ));
+
+            VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+            VERIFY_IS_TRUE(requestWellFormed);
+
+            size_t resultCount{};
+            VERIFY_SUCCEEDED(XblMultiplayerGetSearchHandlesResultCount(&async, &resultCount));
+            VERIFY_ARE_EQUAL_UINT(responseBody["results"].GetArray().Size(), resultCount);
+
+            std::vector<XblMultiplayerSearchHandle> resultHandles(resultCount, nullptr);
+            VERIFY_SUCCEEDED(XblMultiplayerGetSearchHandlesResult(&async, resultHandles.data(), resultCount));
+
+            std::vector<MultiplayerSearchDetails> results;
+            for (uint32_t i = 0; i < results.size(); ++i)
+            {
+                MultiplayerSearchDetails result{ resultHandles[i] };
+                result.Verify(responseBody["results"].GetArray()[i]);
+                results.push_back(result);
+            }
+
+            return results;
+        }
+
+        XblMultiplayerSearchHandle Handle() const noexcept
+        {
+            return m_handle;
+        }
+    private:
+        // Constructor takes ownership of the handle. Caller shouldn't close the handle
+        MultiplayerSearchDetails(XblMultiplayerSearchHandle handle) noexcept
+            : m_handle(handle)
+        {
+            VERIFY_IS_NOT_NULL(m_handle);
+        }
+
+        void Verify(const JsonValue& json) const noexcept
+        {
+            XblMultiplayerSessionReference ref{};
+            VERIFY_SUCCEEDED(XblMultiplayerSearchHandleGetSessionReference(m_handle, &ref));
+            VerifyMultiplayerSessionReference(ref, json["sessionRef"]);
+
+            const char* id{ nullptr };
+            XblMultiplayerSearchHandleGetId(m_handle, &id);
+            VERIFY_JSON_STRING(json, "id", id);
+
+            if (json.HasMember("createTime"))
+            {
+                time_t creationTime{};
+                VERIFY_SUCCEEDED(XblMultiplayerSearchHandleGetCreationTime(m_handle, &creationTime));
+                VERIFY_IS_TRUE(VerifyTime(creationTime, json["createTime"].GetString()));
+            }
+
+            const auto& attrJson{ json["searchAttributes"] };
+
+            const XblMultiplayerSessionTag* tags{ nullptr };
+            size_t tagCount{ 0 };
+            VERIFY_SUCCEEDED(XblMultiplayerSearchHandleGetTags(m_handle, &tags, &tagCount));
+            VERIFY_ARE_EQUAL_UINT(attrJson["tags"].GetArray().Size(), tagCount);
+            for (uint32_t i = 0; i < tagCount; ++i)
+            {
+                VERIFY_ARE_EQUAL_STR(attrJson["tags"].GetArray()[i].GetString(), tags[i].value);
+            }
+
+            const XblMultiplayerSessionStringAttribute* strings{ nullptr };
+            size_t stringCount{ 0 };
+            VERIFY_SUCCEEDED(XblMultiplayerSearchHandleGetStringAttributes(m_handle, &strings, &stringCount));
+            VERIFY_ARE_EQUAL_UINT(attrJson["strings"].MemberCount(), stringCount);
+            for (size_t i = 0; i < stringCount; ++i)
+            {
+                VERIFY_IS_TRUE(attrJson["strings"].HasMember(strings[i].name));
+                VERIFY_ARE_EQUAL_STR(attrJson["strings"][strings[i].name].GetString(), strings[i].value);
+            }
+
+            const XblMultiplayerSessionNumberAttribute* numbers{ nullptr };
+            size_t numberCount{ 0 };
+            VERIFY_SUCCEEDED(XblMultiplayerSearchHandleGetNumberAttributes(m_handle, &numbers, &numberCount));
+            VERIFY_ARE_EQUAL_UINT(attrJson["numbers"].MemberCount(), numberCount);
+            for (size_t i = 0; i < numberCount; ++i)
+            {
+                VERIFY_IS_TRUE(attrJson["numbers"].HasMember(numbers[i].name));
+                VERIFY_ARE_EQUAL_DOUBLE(attrJson["numbers"][numbers[i].name].GetDouble(), numbers[i].value);
+            }
+
+            const char* customPropertiesJson{ nullptr };
+            VERIFY_SUCCEEDED(XblMultiplayerSearchHandleGetCustomSessionPropertiesJson(m_handle, &customPropertiesJson));
+            VERIFY_JSON_FIELD(json, "customProperties", customPropertiesJson);
+
+            if (json.HasMember("relatedInfo"))
+            {
+                const auto& ri{ json["relatedInfo"] };
+
+                XblMultiplayerSessionRestriction joinRestriction{};
+                VERIFY_SUCCEEDED(XblMultiplayerSearchHandleGetJoinRestriction(m_handle, &joinRestriction));
+                VERIFY_IS_TRUE(multiplayer::Serializers::MultiplayerSessionRestrictionFromString(ri["joinRestriction"].GetString()) == joinRestriction);
+
+                bool closed{};
+                VERIFY_SUCCEEDED(XblMultiplayerSearchHandleGetSessionClosed(m_handle, &closed));
+                VERIFY_JSON_BOOL(ri, "closed", closed);
+
+                size_t maxMembers{}, memberCount{};
+                VERIFY_SUCCEEDED(XblMultiplayerSearchHandleGetMemberCounts(m_handle, &maxMembers, &memberCount));
+                VERIFY_JSON_INT(ri, "maxMembersCount", maxMembers);
+                VERIFY_JSON_INT(ri, "membersCount", maxMembers);
+
+                XblMultiplayerSessionVisibility visibility{};
+                VERIFY_SUCCEEDED(XblMultiplayerSearchHandleGetVisibility(m_handle, &visibility));
+                VERIFY_IS_TRUE(multiplayer::Serializers::MultiplayerSessionVisibilityFromString(ri["visibility"].GetString()) == visibility);
+
+                const uint64_t* xuids{ nullptr };
+                size_t xuidCount{};
+                VERIFY_SUCCEEDED(XblMultiplayerSearchHandleGetSessionOwnerXuids(m_handle, &xuids, &xuidCount));
+
+                const auto& xuidsJson{ ri["sessionOwners"].GetArray() };
+                VERIFY_ARE_EQUAL_UINT(xuidsJson.Size(), xuidCount);
+                for (uint32_t i = 0; i < xuidCount; ++i)
+                {
+                    VERIFY_ARE_EQUAL_UINT(atol(xuidsJson[i].GetString()), xuids[i]);
+                }
+            }
+
+            // TODO we have no public API exposing role types for search handles
+        }
+
+        XblMultiplayerSearchHandle m_handle;
+    };
+
+    static void VerifyMultiplayerSessionReference(
+        const XblMultiplayerSessionReference& sessionReference,
+        const JsonValue& json
+    )
+    {
+        VERIFY_ARE_EQUAL_STR(json["scid"].GetString(), sessionReference.Scid);
+        VERIFY_ARE_EQUAL_STR(json["templateName"].GetString(), sessionReference.SessionTemplateName);
+        VERIFY_ARE_EQUAL_STR(json["name"].GetString(), sessionReference.SessionName);
     }
 
-    void GetSessionsAsyncHelper(
-        _In_ Platform::String^ serviceConfigurationId,
-        _In_opt_ Platform::String^ sessionTemplateNameFilter,
-        _In_opt_ Platform::String^ xboxUserIdFilter,
-        _In_opt_ Platform::String^ keywordFilter,
-        _In_ MultiplayerSessionVisibility visibilityFilter,
-        _In_ uint32 contractVersionFilter,
-        _In_ bool includePrivateSessions,
-        _In_ bool includeReservations,
-        _In_ bool includeInactiveSessions,
-        _In_ uint32 maxItems,
-        _In_ string_t pathAndQueryString
-        )
+    static void VerifyMultiplayerSessionQueryResult(
+        const std::vector<XblMultiplayerSessionQueryResult>& result,
+        const JsonValue& json
+    )
     {
-        const string_t defaultMultiplayerStatesResponse = testResponseJsonFromFile[L"defaultMultiplayerStatesResponse"].serialize();
-        auto responseJson = web::json::value::parse(defaultMultiplayerStatesResponse);
+        const auto& expectedResults{ json["results"].GetArray() };
+        VERIFY_ARE_EQUAL_UINT(expectedResults.Size(), result.size());
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        auto getSessionsRequest = ref new MultiplayerGetSessionsRequest(
-            serviceConfigurationId,
-            maxItems
-            );
-
-#pragma warning(suppress: 6387)
-        getSessionsRequest->SessionTemplateNameFilter = sessionTemplateNameFilter;
-#pragma warning(suppress: 6387)
-        getSessionsRequest->XboxUserIdFilter = xboxUserIdFilter;
-#pragma warning(suppress: 6387)
-        getSessionsRequest->KeywordFilter = keywordFilter;
-        getSessionsRequest->VisibilityFilter = visibilityFilter;
-        getSessionsRequest->ContractVersionFilter = contractVersionFilter;
-        getSessionsRequest->IncludePrivateSessions = includePrivateSessions;
-        getSessionsRequest->IncludeReservations = includeReservations;
-        getSessionsRequest->IncludeInactiveSessions = includeInactiveSessions;
-
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto results = create_task(
-            xboxLiveContext->MultiplayerService->GetSessionsAsync(
-                getSessionsRequest
-                )
-            ).get();
-        
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://sessiondirectory.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            pathAndQueryString,
-            httpCall->PathQueryFragment.to_string()
-            );
-
-        uint32 counter = 0;
-        for (auto result : results)
+        for (uint32_t i = 0; i < result.size(); ++i)
         {
-            VerifyMultiplayerSessionStates(result, responseJson[L"results"][counter]);
-            ++counter;
+            const auto& a{ result[i] };
+            const auto& e{ expectedResults[i] };
+
+            VERIFY_ARE_EQUAL_UINT(atol(e["xuid"].GetString()), a.Xuid);
+            VERIFY_IS_TRUE(VerifyTime(a.StartTime, e["startTime"].GetString()));
+            
+            VerifyMultiplayerSessionReference(a.SessionReference, e["sessionRef"]);
+            VERIFY_ARE_EQUAL_UINT(e["accepted"].GetUint(), a.AcceptedMemberCount);
+            VERIFY_IS_TRUE(multiplayer::Serializers::MultiplayerSessionStatusFromString(e["status"].GetString()) == a.Status);
+            VERIFY_IS_TRUE(multiplayer::Serializers::MultiplayerSessionVisibilityFromString(e["visibility"].GetString()) == a.Visibility);
+            VERIFY_IS_TRUE(multiplayer::Serializers::MultiplayerSessionRestrictionFromString(e["joinRestriction"].GetString()) == a.JoinRestriction);
+            VERIFY_ARE_EQUAL(e["myTurn"].GetBool(), a.IsMyTurn);
         }
     }
 
-    void GetSessionsWithUsersFilterAsyncHelper(
-        _In_ Platform::String^ serviceConfigurationId,
-        _In_opt_ Platform::String^ sessionTemplateNameFilter,
-        _In_opt_ IVectorView<Platform::String^>^ xboxUserIds,
-        _In_opt_ Platform::String^ keywordFilter,
-        _In_ MultiplayerSessionVisibility visibilityFilter,
-        _In_ uint32 contractVersionFilter,
-        _In_ bool includePrivateSessions,
-        _In_ bool includeReservations,
-        _In_ bool includeInactiveSessions,
-        _In_ uint32 maxItems,
-        _In_ string_t actualJsonString,
-        _In_ string_t pathAndQueryString
-        )
+    std::vector<XblMultiplayerSessionQueryResult> QuerySessions(
+        XblContextHandle xboxLiveContext,
+        const XblMultiplayerSessionQuery* query,
+        const JsonValue& responseJson = testJson["defaultQuerySessionsResponse"]
+    ) noexcept
     {
-        const string_t defaultMultiplayerStatesResponse = testResponseJsonFromFile[L"defaultMultiplayerStatesResponse"].serialize();
-        auto responseJson = web::json::value::parse(defaultMultiplayerStatesResponse);
+        HttpMock mock{ "", "https://sessiondirectory.xboxlive.com" };
+        mock.SetResponseBody(responseJson);
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&](HttpMock* mock, std::string uri, std::string body)
+            {
+                UNREFERENCED_PARAMETER(mock);
+                bool batch{ query->XuidFiltersCount > 1 };
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
+                std::stringstream expectedPath;
+                expectedPath << "/serviceconfigs/" << query->Scid << "/sessiontemplates/" << query->SessionTemplateNameFilter;
+                if (batch)
+                {
+                    expectedPath << "/batch";
+                }
+                else
+                {
+                    expectedPath << "/sessions";
+                }
+                requestWellFormed &= expectedPath.str() == HttpMock::GetUriPath(uri);
 
-        auto getSessionsRequest = ref new MultiplayerGetSessionsRequest(
-            serviceConfigurationId,
-            maxItems
-            );
+                auto queryParams{ HttpMock::GetQueryParams(uri) };
+                if (query->MaxItems)
+                {
+                    requestWellFormed &= queryParams["take"].data() == Utils::StringFromUint64(query->MaxItems);
+                }
+                if (query->IncludePrivateSessions)
+                {
+                    requestWellFormed &= queryParams["private"] == "true";
+                }
+                if (query->IncludeReservations)
+                {
+                    requestWellFormed &= queryParams["reservations"] == "true";
+                }
+                if (query->IncludeInactiveSessions)
+                {
+                    requestWellFormed &= queryParams["inactive"] == "true";
+                }
+                if (query->KeywordFilter)
+                {
+                    requestWellFormed &= queryParams["keyword"] == query->KeywordFilter;
+                }
+                if (query->ContractVersionFilter)
+                {
+                    requestWellFormed &= queryParams["version"] == Utils::StringFromUint64(query->ContractVersionFilter);
+                }
+                switch (query->VisibilityFilter)
+                {
+                case XblMultiplayerSessionVisibility::Full:
+                {
+                    requestWellFormed &= queryParams["visibility"] == "full";
+                    break;
+                }
+                case XblMultiplayerSessionVisibility::Open:
+                {
+                    requestWellFormed &= queryParams["visibility"] == "open";
+                    break;
+                }
+                case XblMultiplayerSessionVisibility::PrivateSession:
+                {
+                    requestWellFormed &= queryParams["visibility"] == "private";
+                    break;
+                }
+                case XblMultiplayerSessionVisibility::Visible:
+                {
+                    requestWellFormed &= queryParams["visibility"] == "visibile";
+                    break;
+                }
+                default:
+                {
+                    break;
+                }
+                }
 
-#pragma warning(suppress: 6387)
-        getSessionsRequest->SessionTemplateNameFilter = sessionTemplateNameFilter;
-#pragma warning(suppress: 6387)
-        getSessionsRequest->XboxUserIdsFilter = xboxUserIds;
-#pragma warning(suppress: 6387)
-        getSessionsRequest->KeywordFilter = keywordFilter;
-        getSessionsRequest->VisibilityFilter = visibilityFilter;
-        getSessionsRequest->ContractVersionFilter = contractVersionFilter;
-        getSessionsRequest->IncludePrivateSessions = includePrivateSessions;
-        getSessionsRequest->IncludeReservations = includeReservations;
-        getSessionsRequest->IncludeInactiveSessions = includeInactiveSessions;
+                if (batch)
+                {
+                    requestWellFormed &= !body.empty();
 
-        auto results = create_task(
-            xboxLiveContext->MultiplayerService->GetSessionsAsync(
-                getSessionsRequest
-                )
-            ).get();
+                    JsonDocument bodyJson;
+                    bodyJson.Parse(body.data());
 
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://sessiondirectory.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            pathAndQueryString,
-            httpCall->PathQueryFragment.to_string()
-            );
+                    Vector<uint64_t> xuids{};
+                    JsonUtils::ExtractJsonVector(JsonUtils::JsonXuidExtractor, bodyJson, "xuids", xuids, false);
 
-        auto actualJson = web::json::value::parse(actualJsonString);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
+                    requestWellFormed &= xuids.size() == query->XuidFiltersCount;
 
-        VERIFY_IS_EQUAL_JSON(requestJson, actualJson);
-        uint32 counter = 0;
-        for (auto result : results)
-        {
-            VerifyMultiplayerSessionStates(result, responseJson[L"results"][counter]);
-            ++counter;
-        }
+                    std::unordered_set<uint64_t> unionSet(query->XuidFilters, query->XuidFilters + query->XuidFiltersCount);
+                    for (auto xuid : xuids)
+                    {
+                        unionSet.erase(xuid);
+                    }
+                    requestWellFormed &= unionSet.empty();
+                }
+                else
+                {
+                    requestWellFormed &= body.empty();
+                    if (query->XuidFiltersCount == 1)
+                    {
+                        requestWellFormed &= queryParams["xuid"] == Utils::StringFromUint64(query->XuidFilters[0]);
+                    }
+                }
+            }
+        );
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblMultiplayerQuerySessionsAsync(xboxLiveContext, query, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+
+        size_t resultCount{};
+        VERIFY_SUCCEEDED(XblMultiplayerQuerySessionsResultCount(&async, &resultCount));
+
+        std::vector<XblMultiplayerSessionQueryResult> results(resultCount);
+        VERIFY_SUCCEEDED(XblMultiplayerQuerySessionsResult(&async, resultCount, results.data()));
+        VerifyMultiplayerSessionQueryResult(results, responseJson);
+
+        return results;
     }
 
-    MultiplayerSession^ GetCurrentSessionAsyncHelper() { return GetCurrentSessionAsyncHelper(defaultMultiplayerResponse); };
-
-    MultiplayerSession^ GetCurrentSessionAsyncHelper(const string_t response)
+    DEFINE_TEST_CASE(TestGetSessionAsync)
     {
-        auto responseJson = web::json::value::parse(response);
-
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        MultiplayerSession^ result = create_task(
-            xboxLiveContext->MultiplayerService->GetCurrentSessionAsync(
-                ref new MultiplayerSessionReference(
-                    L"8d050174-412b-4d51-a29b-d55a34edfdb7",
-                    L"integration",
-                    L"19de0095d8bb41048f19edbbb6bc6b04"
-                    )
-                )
-            ).get();
-
-        return result;
+        MPTestEnv testEnv{};
+        MultiplayerSession::Get(testEnv.XboxLiveContext());
     }
 
-    void WriteSessionAsyncHelper(MultiplayerSession^ currentSession, const string_t& expectedJson)
+    DEFINE_TEST_CASE(TestGetSessionWithHandleAsync)
     {
-        auto responseJson = web::json::value::parse(defaultMultiplayerResponse);
-        
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        
-        auto result = create_task(
-        xboxLiveContext->MultiplayerService->WriteSessionAsync(
-            currentSession,
-            MultiplayerSessionWriteMode::UpdateExisting
-            )  
-        ).get();
-
-        auto writeJson = web::json::value::parse(expectedJson);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        TEST_LOG(httpCall->request_body().request_message_string().c_str());
-        VERIFY_IS_EQUAL_JSON(writeJson, requestJson);
+        MPTestEnv testEnv{};
+        MultiplayerSession::Get(testEnv.XboxLiveContext(), "testHandle");
     }
 
-    void TryWriteSessionAsyncHelper(MultiplayerSession^ currentSession, bool shouldSucceed, int32_t httpStatus, bool returnEmpty = false)
+    DEFINE_TEST_CASE(TestGetLargeSessionAsync)
     {
-        auto responseJson = web::json::value::parse(defaultMultiplayerResponse);
-
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson, httpStatus);
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-
-        auto result = create_task(
-            xboxLiveContext->MultiplayerService->TryWriteSessionAsync(
-                currentSession,
-                MultiplayerSessionWriteMode::UpdateExisting
-                )
-            ).get();
-
-
-        WriteSessionStatus status;
-        switch (httpStatus)
-        {
-        case 200:
-            status = WriteSessionStatus::Updated;
-            break;
-
-        case 201:
-            status = WriteSessionStatus::Created;
-            break;
-
-        case 204:
-            status = WriteSessionStatus::SessionDeleted;
-            break;
-
-        case 401:
-            status = WriteSessionStatus::AccessDenied;
-            break;
-
-        case 404:
-            status = WriteSessionStatus::HandleNotFound;
-            break;
-
-        case 409:
-            status = WriteSessionStatus::Conflict;
-            break;
-
-        case 412:
-            status = WriteSessionStatus::OutOfSync;
-            break;
-        }
-        
-        VERIFY_ARE_EQUAL_INT(result->Status, status);
-        VERIFY_ARE_EQUAL(result->Succeeded, shouldSucceed);
+        MPTestEnv testEnv{};
+        MultiplayerSession::Get(testEnv.XboxLiveContext(), defaultSessionReference, testJson["largeSessionDocument"]);
     }
 
-    DEFINE_TEST_CASE(TestGetCurrentSessionAsync)
+    DEFINE_TEST_CASE(TestQuerySessions)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetCurrentSessionAsync);
-        auto responseJson = web::json::value::parse(defaultMultiplayerResponse);
+        MPTestEnv env{};
+        std::vector<uint64_t> xuidFilters{ 1 };
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        MultiplayerSession^ result = create_task(
-            xboxLiveContext->MultiplayerService->GetCurrentSessionAsync(
-                ref new MultiplayerSessionReference(
-                    L"8d050174-412b-4d51-a29b-d55a34edfdb7",
-                    L"integration",
-                    L"19de0095d8bb41048f19edbbb6bc6b04"
-                    )
-                )
-            ).get();
-
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://sessiondirectory.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/serviceconfigs/8d050174-412b-4d51-a29b-d55a34edfdb7/sessionTemplates/integration/sessions/19de0095d8bb41048f19edbbb6bc6b04", 
-            httpCall->PathQueryFragment.to_string()
-            );
-        
-        VerifyMultiplayerSession(result, responseJson);
-    }
-
-    DEFINE_TEST_CASE(TestGetCurrentSessionWithHandleAsync)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetCurrentSessionWithHandleAsync);
-        auto responseJson = web::json::value::parse(defaultMultiplayerResponse);
-
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-        
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        MultiplayerSession^ result = create_task(
-            xboxLiveContext->MultiplayerService->GetCurrentSessionByHandleAsync(
-                L"testhandle"
-                )
-            ).get();
-
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://sessiondirectory.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/handles/testhandle/session", 
-            httpCall->PathQueryFragment.to_string()
-            );
-        
-        VerifyMultiplayerSession(result, responseJson);
-    }
-
-    DEFINE_TEST_CASE(TestGetSessionsAsync)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetSessionsAsync);
         // without keyword filter and without context version filter
-        GetSessionsAsyncHelper(
+        XblMultiplayerSessionQuery query
+        {
             "8d050174-412b-4d51-a29b-d55a34edfdb7",
-            "integration",
-            "12345678",
-            nullptr,
-            MultiplayerSessionVisibility::Full,
-            0,
-            true,
-            true,
-            true,
             100,
-            L"/serviceconfigs/8d050174-412b-4d51-a29b-d55a34edfdb7/sessiontemplates/integration/sessions?xuid=12345678&visibility=full&private=true&reservations=true&inactive=true&take=100"
-            );
+            true,
+            true,
+            true,
+            xuidFilters.data(),
+            xuidFilters.size(),
+            nullptr, // No keyword filter
+            "integration",
+            XblMultiplayerSessionVisibility::Full,
+            0 // No contract version filter
+        };
+
+        QuerySessions(env.XboxLiveContext(), &query);
 
         // without xbox user id filter and with all the include settings off
-        GetSessionsAsyncHelper(
+        query = XblMultiplayerSessionQuery
+        {
             "8d050174-412b-4d51-a29b-d55a34edfdb7",
-            "integration",
-            nullptr,
-            "hello",
-            MultiplayerSessionVisibility::Any,
-            5,
-            false,
-            false,
-            false,
             100,
-            L"/serviceconfigs/8d050174-412b-4d51-a29b-d55a34edfdb7/sessiontemplates/integration/sessions?keyword=hello&version=5&take=100"
-            );
-    }
-
-    DEFINE_TEST_CASE(TestGetSessionWithFiltersAsync)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetSessionWithFiltersAsync);
-
-        const string_t getSessionsWithUsersJson = testResponseJsonFromFile[L"getSessionsWithUsersJson"].serialize();
-        Vector<Platform::String^>^ xuids = ref new Vector<Platform::String^>();
-        xuids->Append("12345");
-        xuids->Append("67890");
-        // without keyword filter and without context version filter
-        GetSessionsWithUsersFilterAsyncHelper(
-            "8d050174-412b-4d51-a29b-d55a34edfdb7",
-            "integration",
-            xuids->GetView(),
-            nullptr,
-            MultiplayerSessionVisibility::Full,
+            false, // exclude private sesions
+            false, // exclude reservations
+            false, // exclude inactive sessions
+            nullptr, // no xuid filters
             0,
-            true,
-            true,
-            true,
+            "hello",
+            "integration",
+            XblMultiplayerSessionVisibility::Any,
+            5
+        };
+
+        QuerySessions(env.XboxLiveContext(), &query);
+
+        // with multiple xuid filters (batch query)
+        xuidFilters.clear();
+        xuidFilters = { 12345, 67890 };
+
+        query = XblMultiplayerSessionQuery
+        {
+            "8d050174-412b-4d51-a29b-d55a34edfdb7",
             100,
-            getSessionsWithUsersJson,
-            L"/serviceconfigs/8d050174-412b-4d51-a29b-d55a34edfdb7/sessiontemplates/integration/batch?visibility=full&private=true&reservations=true&inactive=true&take=100"
-            );
+            true,
+            true,
+            true,
+            xuidFilters.data(),
+            xuidFilters.size(),
+            nullptr,
+            "integration",
+            XblMultiplayerSessionVisibility::Full,
+            0
+        };
+
+        QuerySessions(env.XboxLiveContext(), &query);
     }
 
-    DEFINE_TEST_CASE(TestLargeMemberSessionAsync)
+    DEFINE_TEST_CASE(TestWriteNewSession)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestLargeMemberSessionAsync);
-        const string_t largeMultiplayerResponse = testResponseJsonFromFile[L"largeMultiplayerResponse"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper(largeMultiplayerResponse);
-        VERIFY_IS_NOT_NULL(currentSession->Members->GetAt(0)); // the deserialize_me function was called correctly
+        MPTestEnv env{};
+
+        auto session = MultiplayerSession::Create(env.XboxLiveContext());
+
+        VERIFY_SUCCEEDED(XblMultiplayerSessionJoin(session.Handle(), "\"Hello\"", true, true));
+        XblMultiplayerSessionCurrentUserSetStatus(session.Handle(), XblMultiplayerSessionMemberStatus::Active);
+        XblMultiplayerSessionConstantsSetVisibility(session.Handle(), XblMultiplayerSessionVisibility::PrivateSession);
+        XblMultiplayerSessionConstantsSetMaxMembersInSession(session.Handle(), 10);
+
+        const char* groups[] { "team-buzz", "posse.99" };
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetGroups(session.Handle(), groups, _countof(groups)));
+
+        const char* encounters[]{ "CoffeeShop-757093D8-E41F-49D0-BB13-17A49B20C6B9" };
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetEncounters(session.Handle(), encounters, _countof(encounters)));
+
+        XblMultiplayerSessionMemberRole roles[]
+        {
+            { "lfg", "friend" },
+            { "admin", "super" }
+        };
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetRoles(session.Handle(), roles, _countof(roles)));
+
+        // Verify local object is updated
+        auto currentUser{ XblMultiplayerSessionCurrentUser(session.Handle()) };
+        VERIFY_IS_NOT_NULL(currentUser);
+
+        VERIFY_IS_TRUE(currentUser->Status == XblMultiplayerSessionMemberStatus::Active);
+        VERIFY_IS_TRUE(session.Constants()->Visibility == XblMultiplayerSessionVisibility::PrivateSession);
+        VERIFY_ARE_EQUAL_UINT(10, session.Constants()->MaxMembersInSession);
+
+        VERIFY_ARE_EQUAL_UINT(_countof(groups), currentUser->GroupsCount);
+        for (size_t i = 0; i < _countof(groups); ++i)
+        {
+            VERIFY_ARE_EQUAL_STR(groups[i], currentUser->Groups[i]);
+        }
+
+        VERIFY_ARE_EQUAL_UINT(_countof(encounters), currentUser->EncountersCount);
+        for (size_t i = 0; i < _countof(encounters); ++i)
+        {
+            VERIFY_ARE_EQUAL_STR(encounters[i], currentUser->Encounters[i]);
+        }
+
+        VERIFY_ARE_EQUAL_UINT(_countof(roles), currentUser->RolesCount);
+        for (size_t i = 0; i < _countof(roles); ++i)
+        {
+            VERIFY_ARE_EQUAL_STR(roles[i].roleName, currentUser->Roles[i].roleName);
+            VERIFY_ARE_EQUAL_STR(roles[i].roleTypeName, currentUser->Roles[i].roleTypeName);
+        }
+
+        session.Write(testJson["defaultJsonWrite"]);
     }
 
-    DEFINE_TEST_CASE(TestCreateSessionAsync)
+    DEFINE_TEST_CASE(TestEmptyWrite)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestCreateSessionAsync);
-        auto responseJson = web::json::value::parse(defaultMultiplayerResponse);
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-
-        MultiplayerSession^ session = ref new MultiplayerSession(
-            xboxLiveContext,
-            ref new MultiplayerSessionReference(
-                L"8d050174-412b-4d51-a29b-d55a34edfdb7",
-                L"integration",
-                L"12345678"
-                )
-            );
-
-        session->Join("\"Hello\"", true, true);
-        session->SetCurrentUserStatus(MultiplayerSessionMemberStatus::Active);
-        session->SetVisibility(MultiplayerSessionVisibility::Private);
-        session->SetMaxMembersInSession(10);
-        Windows::Foundation::Collections::IVector<Platform::String^>^ sessionGroups = ref new Vector<Platform::String^>();
-        sessionGroups->Append("team-buzz");
-        sessionGroups->Append("posse.99");
-
-        session->CurrentUser->Groups = sessionGroups;
-
-        Windows::Foundation::Collections::IVector<Platform::String^>^ encounters = ref new Vector<Platform::String^>();
-        encounters->Append("CoffeeShop-757093D8-E41F-49D0-BB13-17A49B20C6B9");
-        session->CurrentUser->Encounters = encounters;
-
-        auto rolesMap = ref new Platform::Collections::Map<Platform::String^, Platform::String^>();
-        rolesMap->Insert(L"lfg", L"friend");
-        rolesMap->Insert(L"admin", L"super");
-        session->SetCurrentUserRoleInfo(rolesMap->GetView());
-
-        auto result = create_task(
-                xboxLiveContext->MultiplayerService->WriteSessionAsync(
-                session,
-                MultiplayerSessionWriteMode::CreateNew
-                )
-            ).get();
-
-        VERIFY_ARE_EQUAL_STR(L"PUT", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://sessiondirectory.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/serviceconfigs/8d050174-412b-4d51-a29b-d55a34edfdb7/sessionTemplates/integration/sessions/12345678",
-            httpCall->PathQueryFragment.to_string()
-            );
-
-        const string_t defaultJsonWrite = testResponseJsonFromFile[L"defaultJsonWrite"].serialize();
-        auto writeJson = web::json::value::parse(defaultJsonWrite);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        VERIFY_IS_EQUAL_JSON(writeJson, requestJson);
-    }
-
-    DEFINE_TEST_CASE(TestSynchronizedUpdateAsync)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSynchronizedUpdateAsync);
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        auto responseJson = web::json::value::parse(defaultMultiplayerResponse);
-
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-
-        auto result = create_task(
-            xboxLiveContext->MultiplayerService->WriteSessionAsync(
-            currentSession,
-            MultiplayerSessionWriteMode::SynchronizedUpdate
-            )
-            ).get();
+        // request body should be empty since we didn't change anything
+        session.Write(JsonValue{ rapidjson::kObjectType });
     }
 
     DEFINE_TEST_CASE(TestWriteSessionCapabilities)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionCapabilities);
-        MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
-        auto currentSession = ref new MultiplayerSession(GetMockXboxLiveContext_WinRT());
+        MPTestEnv env{};
 
-        MultiplayerSessionCapabilities^ capabilities = ref new MultiplayerSessionCapabilities();
-        capabilities->Connectivity = true;
-        capabilities->Gameplay = true;
-        capabilities->Large = true;
-        capabilities->SuppressPresenceActivityCheck = true;
-        capabilities->ConnectionRequiredForActiveMembers = true;
-        capabilities->Crossplay = true;
-        capabilities->UserAuthorizationStyle = true;
-        capabilities->HasOwners = true;
-        capabilities->Searchable = true;
+        auto session = MultiplayerSession::Create(env.XboxLiveContext());
 
-        currentSession->SetSessionCapabilities(
-            capabilities
-            );
-        const string_t sessionCapabilitiesJson = testResponseJsonFromFile[L"sessionCapabilitiesJson"].serialize();
-        WriteSessionAsyncHelper(currentSession, sessionCapabilitiesJson);
+        XblMultiplayerSessionCapabilities capabilities{};
+        capabilities.Connectivity = true;
+        capabilities.Gameplay = true;
+        capabilities.Large = true;
+        capabilities.SuppressPresenceActivityCheck = true;
+        capabilities.ConnectionRequiredForActiveMembers = true;
+        capabilities.Crossplay = true;
+        capabilities.UserAuthorizationStyle = true;
+        capabilities.HasOwners = true;
+        capabilities.Searchable = true;
+
+        VERIFY_SUCCEEDED(XblMultiplayerSessionConstantsSetCapabilities(session.Handle(), capabilities));
+
+        // Verify local object is updated
+        VERIFY_ARE_EQUAL_INT(0, memcmp(&capabilities, &session.Constants()->SessionCapabilities, sizeof(XblMultiplayerSessionCapabilities)));
+
+        session.Write(testJson["sessionCapabilitiesJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithServersJson)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithServersJson);
-        const string_t serversJson = testResponseJsonFromFile[L"serversJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->ServersJson = L"{ \"server\" : 100 }";
-        WriteSessionAsyncHelper(currentSession, serversJson);
+        MPTestEnv env{};
+
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
+
+        JsonDocument serversJson{ rapidjson::Type::kObjectType };
+        serversJson.AddMember("server", JsonValue{ 100 }, serversJson.GetAllocator());
+
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetRawServersJson(session.Handle(), JsonUtils::SerializeJson(serversJson).data()));
+
+        // Verify that the local session object is updated correctly
+        VERIFY_IS_TRUE(VerifyJson(serversJson, XblMultiplayerSessionRawServersJson(session.Handle())));
+
+        session.Write(testJson["serversJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetSessionCustomPropertyJson)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetSessionCustomPropertyJson);
-        const string_t writeCustomPropertyJson = testResponseJsonFromFile[L"writeCustomPropertyJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->SetSessionCustomPropertyJson(L"PropA", L"ValueA");
-        currentSession->SetSessionCustomPropertyJson(L"PropB", L"{\"ValueB\":5}");
+        MPTestEnv env{};
 
-        // Ensure that properties are not written to the local state
-        string_t sessionCustomProperties = currentSession->SessionProperties->SessionCustomPropertiesJson->Data();
-        VERIFY_ARE_EQUAL(sessionCustomProperties, L"{}");
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-        currentSession->SetSessionCustomPropertyJson(L"boolTrue", L"true");
-        currentSession->SetSessionCustomPropertyJson(L"boolFalse", L"false");
-        currentSession->SetSessionCustomPropertyJson(L"stringTrue", L"\"true\"");
-        currentSession->SetSessionCustomPropertyJson(L"stringFalse", L"\"false\"");
-        currentSession->SetSessionCustomPropertyJson(L"number42", L"42");
-        currentSession->SetSessionCustomPropertyJson(L"objectA", L"{\"name\":\"A\"}");
-        currentSession->SetSessionCustomPropertyJson(L"arrayA", L"[1,2,3,4]");
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetCustomPropertyJson(session.Handle(), "PropA", "\"ToBeReset\""));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetCustomPropertyJson(session.Handle(), "PropA", "\"ValueA\""));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetCustomPropertyJson(session.Handle(), "PropB", "{\"ValueB\":5}"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetCustomPropertyJson(session.Handle(), "boolTrue", "true"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetCustomPropertyJson(session.Handle(), "boolFalse", "false"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetCustomPropertyJson(session.Handle(), "stringTrue", "\"true\""));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetCustomPropertyJson(session.Handle(), "stringFalse", "\"false\""));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetCustomPropertyJson(session.Handle(), "number42", "42"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetCustomPropertyJson(session.Handle(), "objectA", "{\"name\":\"A\"}"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetCustomPropertyJson(session.Handle(), "arrayA", "[1,2,3,4]"));
 
-        WriteSessionAsyncHelper(currentSession, writeCustomPropertyJson);
+        const auto& expectedRequest{ testJson["writeCustomPropertyJson"] };
+        const auto& expectedPropertiesJson{ expectedRequest["properties"]["custom"] };
+
+        // Verify that the local object is updated correctly
+        VERIFY_IS_TRUE(VerifyJson(expectedPropertiesJson, session.Properties()->SessionCustomPropertiesJson));
+
+        session.Write(expectedRequest);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetMatchmakingProperties)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetMatchmakingProperties);
-        const string_t matchmakingPropertiesJson = testResponseJsonFromFile[L"matchmakingPropertiesJson"].serialize();
-        MultiplayerSessionResponseTestData data = GetDefaultMultiplayerSessionResponseTestData(0, false);
-        auto currentSession = ref new MultiplayerSession(GetMockXboxLiveContext_WinRT());
+        MPTestEnv env{};
 
-        currentSession->SetMatchmakingTargetSessionConstantsJson(
-            L"{\"foo\":\"test1002\"}"
-            );
+        auto session = MultiplayerSession::Create(env.XboxLiveContext());
 
-        WriteSessionAsyncHelper(currentSession, matchmakingPropertiesJson);
-    }
+        const char targetSessionConstants[] = "{\"foo\":\"test1002\"}";
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetMatchmakingTargetSessionConstantsJson(session.Handle(), targetSessionConstants));
 
-    DEFINE_TEST_CASE(WriteSessionAsyncWithSetMatchmakingConstantsJson)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(WriteSessionAsyncWithSetMatchmakingConstantsJson);
-        const string_t matchmakingSessionConstantsJson = testResponseJsonFromFile[L"matchmakingSessionConstantsJson"].serialize();
-        MultiplayerSessionResponseTestData data = GetDefaultMultiplayerSessionResponseTestData(0, false);
-        auto currentSession = GetCurrentSessionAsyncHelper();
+        // Verify local object
+        VERIFY_IS_TRUE(VerifyJson(targetSessionConstants, session.Properties()->MatchmakingTargetSessionConstantsJson));
 
-        currentSession->SetMatchmakingTargetSessionConstantsJson(
-            TestDataToJson(data.properties_system_matchmaking_targetSessionConstants)
-            );
-
-        WriteSessionAsyncHelper(currentSession, matchmakingSessionConstantsJson);
+        session.Write(testJson["matchmakingSessionConstantsJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithAddMemberReservation)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithAddMemberReservation);
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->AddMemberReservation(
-            L"1234",
-            L"{ \"skill\" : 100 }",
-            true
-            );
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-        currentSession->AddMemberReservation(
-            L"4567",
-            L"{ \"down\" : true }"
-            );
+        VERIFY_SUCCEEDED(XblMultiplayerSessionAddMemberReservation(session.Handle(), 1234, "{ \"skill\" : 100 }", true));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionAddMemberReservation(session.Handle(), 4567, "{ \"down\" : true }", false));
 
-        const string_t writeAddMemberJson = testResponseJsonFromFile[L"writeAddMemberJson"].serialize();
-        WriteSessionAsyncHelper(currentSession, writeAddMemberJson);
+        session.Write(testJson["writeAddMemberJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithDeleteSessionCustomPropertyJson)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithDeleteSessionCustomPropertyJson);
-        const string_t deleteCustomPropertyJson = testResponseJsonFromFile[L"deleteCustomPropertyJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->DeleteSessionCustomPropertyJson(L"PropA");
-        currentSession->DeleteSessionCustomPropertyJson(L"PropB");
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-        currentSession->DeleteSessionCustomPropertyJson(L"boolTrue");
-        currentSession->DeleteSessionCustomPropertyJson(L"boolFalse");
-        currentSession->DeleteSessionCustomPropertyJson(L"stringTrue");
-        currentSession->DeleteSessionCustomPropertyJson(L"stringFalse");
-        currentSession->DeleteSessionCustomPropertyJson(L"number42");
-        currentSession->DeleteSessionCustomPropertyJson(L"objectA");
-        currentSession->DeleteSessionCustomPropertyJson(L"arrayA");
+        VERIFY_SUCCEEDED(XblMultiplayerSessionDeleteCustomPropertyJson(session.Handle(), "PropA"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionDeleteCustomPropertyJson(session.Handle(), "PropB"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionDeleteCustomPropertyJson(session.Handle(), "boolTrue"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionDeleteCustomPropertyJson(session.Handle(), "boolFalse"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionDeleteCustomPropertyJson(session.Handle(), "stringTrue"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionDeleteCustomPropertyJson(session.Handle(), "stringFalse"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionDeleteCustomPropertyJson(session.Handle(), "number42"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionDeleteCustomPropertyJson(session.Handle(), "objectA"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionDeleteCustomPropertyJson(session.Handle(), "arrayA"));
 
-        WriteSessionAsyncHelper(currentSession, deleteCustomPropertyJson);
+        session.Write(testJson["deleteCustomPropertyJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithJoin1)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithJoin1);
-        const std::wstring joinJson =
-        LR"(
-        {
-            "members": {
-                "me": {
-                    "constants": {
-                        "system": {
-                            "xuid": "TestXboxUserId"
-                        }
-                    }
-                }
-            }
-        }
-        )";
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->Join();
-        WriteSessionAsyncHelper(currentSession, joinJson);
+        VERIFY_SUCCEEDED(XblMultiplayerSessionJoin(session.Handle(), nullptr, false, false));
+
+        session.Write(testJson["memberStatusInactiveJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithJoin2)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithJoin2);
-        const std::wstring joinJson =
-            LR"(
-        {
-            "members": {
-                "me": {
-                    "constants": {
-                        "system": {
-                            "xuid": "TestXboxUserId"
-                        },
-                        "custom": {
-                            "testValue": 100
-                        }
-                    }
-                }
-            }
-        }
-        )";
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->Join(L"{ \"testValue\" : 100 }");
-        WriteSessionAsyncHelper(currentSession, joinJson);
+        VERIFY_SUCCEEDED(XblMultiplayerSessionJoin(session.Handle(), "{ \"testValue\" : 100 }", false, false));
+
+        session.Write(testJson["memberStatusInactiveJson2"]);
     }
 
-    DEFINE_TEST_CASE(TestWriteSessionAsyncWithJoin4)
+    DEFINE_TEST_CASE(TestWriteSessionAsyncWithJoin3)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithJoin4);
-        const std::wstring joinJson =
-            LR"(
-        {
-            "members": {
-                "me": {
-                    "constants": {
-                        "system": {
-                            "xuid": "TestXboxUserId",
-                            "initialize": true
-                        },
-                        "custom": {
-                            "testValue": 100
-                        }
-                    },
-                    "properties": {
-                        "system": {
-                            "active": true
-                        }
-                    }
-                }
-            }
-        }
-        )";
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->Join(L"{ \"testValue\" : 100 }", true, true);
-        WriteSessionAsyncHelper(currentSession, joinJson);
+        VERIFY_SUCCEEDED(XblMultiplayerSessionJoin(session.Handle(), "{ \"testValue\" : 100 }", true, true));
+
+        session.Write(testJson["memberStatusInactiveJson3"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithLeave)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithLeave);
-        const string_t leaveJson = testResponseJsonFromFile[L"leaveJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->Leave();
-        WriteSessionAsyncHelper(currentSession, leaveJson);
-    }
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
+        VERIFY_SUCCEEDED(XblMultiplayerSessionLeave(session.Handle()));
+        session.Write(testJson["leaveJson"]);
+    }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserInactive)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetCurrentUserInactive);
-        const string_t memberStatusInactiveJson = testResponseJsonFromFile[L"memberStatusInactiveJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->Join();
-        currentSession->SetCurrentUserStatus(MultiplayerSessionMemberStatus::Inactive);
-        WriteSessionAsyncHelper(currentSession, memberStatusInactiveJson);
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
+
+        VERIFY_SUCCEEDED(XblMultiplayerSessionJoin(session.Handle(), nullptr, false, false));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetStatus(session.Handle(), XblMultiplayerSessionMemberStatus::Inactive));
+
+        session.Write(testJson["memberStatusActiveJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserActive)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetCurrentUserActive);
-        const string_t memberStatusActiveJson = testResponseJsonFromFile[L"memberStatusActiveJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->Join();
-        currentSession->SetCurrentUserStatus(MultiplayerSessionMemberStatus::Active);
-        WriteSessionAsyncHelper(currentSession, memberStatusActiveJson);
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
+
+        VERIFY_SUCCEEDED(XblMultiplayerSessionJoin(session.Handle(), nullptr, false, false));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetStatus(session.Handle(), XblMultiplayerSessionMemberStatus::Active));
+
+        session.Write(testJson["matchmakingPropertiesJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserSecureDeviceAddressBase64)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetCurrentUserSecureDeviceAddressBase64);
-        const string_t secureDeviceJson = testResponseJsonFromFile[L"secureDeviceJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->Join(nullptr, false, true);
-        currentSession->SetCurrentUserSecureDeviceAddressBase64(L"1234");
-        WriteSessionAsyncHelper(currentSession, secureDeviceJson);
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
+
+        VERIFY_SUCCEEDED(XblMultiplayerSessionJoin(session.Handle(), nullptr, false, true));
+        XblMultiplayerSessionCurrentUserSetSecureDeviceAddressBase64(session.Handle(), "1234");
+
+        session.Write(testJson["secureDeviceJson"]);
+    }
+
+    DEFINE_TEST_CASE(TestXblFormatSecureDeviceAddress)
+    {
+        String deviceId;
+        XblFormattedSecureDeviceAddress address{};
+        
+        deviceId = "12345678901234567890";
+        VERIFY_SUCCEEDED(XblFormatSecureDeviceAddress(deviceId.c_str(), &address));
+        VERIFY_ARE_EQUAL_STR(address.value, "QUFBQUFBQUExMjM0NTY3ODkwMTIzNDU2Nzg5MA==");
+
+        deviceId = "A1B2C3D4E5F6";
+        VERIFY_SUCCEEDED(XblFormatSecureDeviceAddress(deviceId.c_str(), &address));
+        VERIFY_ARE_EQUAL_STR(address.value, "QUFBQUFBQUFBMUIyQzNENEU1RjY=");
+
+        // Test nullptr
+        VERIFY_FAILED(XblFormatSecureDeviceAddress(nullptr, &address));
+        VERIFY_FAILED(XblFormatSecureDeviceAddress("", &address));
+        VERIFY_FAILED(XblFormatSecureDeviceAddress(deviceId.c_str(), nullptr));
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserMemberCustomPropertyJson)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetCurrentUserMemberCustomPropertyJson);
-        const string_t memberCustomJson = testResponseJsonFromFile[L"memberCustomJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->Join(nullptr, false, true);
-        currentSession->SetCurrentUserMemberCustomPropertyJson(L"health", L"4567");
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-        // Ensure that properties are not written to the local state
-        string_t currentUserCustomProperties = currentSession->CurrentUser->MemberCustomPropertiesJson->Data();
-        VERIFY_ARE_EQUAL(currentUserCustomProperties, L"{}");
+        VERIFY_SUCCEEDED(XblMultiplayerSessionJoin(session.Handle(), nullptr, false, true));
 
-        currentSession->SetCurrentUserMemberCustomPropertyJson(L"boolTrue", L"true");
-        currentSession->SetCurrentUserMemberCustomPropertyJson(L"boolFalse", L"false");
-        currentSession->SetCurrentUserMemberCustomPropertyJson(L"stringTrue", L"\"true\"");
-        currentSession->SetCurrentUserMemberCustomPropertyJson(L"stringFalse", L"\"false\"");
-        currentSession->SetCurrentUserMemberCustomPropertyJson(L"number42", L"42");
-        currentSession->SetCurrentUserMemberCustomPropertyJson(L"objectA", L"{\"name\":\"A\"}");
-        currentSession->SetCurrentUserMemberCustomPropertyJson(L"arrayA", L"[1,2,3,4]");
-        WriteSessionAsyncHelper(currentSession, memberCustomJson);
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetCustomPropertyJson(session.Handle(), "health", "\"toBeReset\""));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetCustomPropertyJson(session.Handle(), "health", "4567"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetCustomPropertyJson(session.Handle(), "boolTrue", "true"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetCustomPropertyJson(session.Handle(), "boolFalse", "false"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetCustomPropertyJson(session.Handle(), "stringTrue", "\"true\""));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetCustomPropertyJson(session.Handle(), "stringFalse", "\"false\""));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetCustomPropertyJson(session.Handle(), "number42", "42"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetCustomPropertyJson(session.Handle(), "objectA", "{\"name\":\"A\"}"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetCustomPropertyJson(session.Handle(), "arrayA", "[1,2,3,4]"));
+
+        const auto& expectedRequest{ testJson["memberCustomJson"] };
+        const auto& expectedPropertiesJson{ expectedRequest["members"]["me"]["properties"]["custom"] };
+
+        // Verify that the local User is updated correctly
+        auto currentUser{ XblMultiplayerSessionCurrentUser(session.Handle()) };
+        VERIFY_IS_TRUE(VerifyJson(expectedPropertiesJson, currentUser->CustomPropertiesJson));
+
+        session.Write(expectedRequest);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithDeleteCurrentUserMemberCustomPropertyJson)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithDeleteCurrentUserMemberCustomPropertyJson);
-        const string_t deleteMemberCustomJson = testResponseJsonFromFile[L"deleteMemberCustomJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->Join(nullptr, false, true);
-        currentSession->DeleteCurrentUserMemberCustomPropertyJson(L"health");
-        currentSession->DeleteCurrentUserMemberCustomPropertyJson(L"boolTrue");
-        currentSession->DeleteCurrentUserMemberCustomPropertyJson(L"boolFalse");
-        currentSession->DeleteCurrentUserMemberCustomPropertyJson(L"stringTrue");
-        currentSession->DeleteCurrentUserMemberCustomPropertyJson(L"stringFalse");
-        currentSession->DeleteCurrentUserMemberCustomPropertyJson(L"number42");
-        currentSession->DeleteCurrentUserMemberCustomPropertyJson(L"objectA");
-        currentSession->DeleteCurrentUserMemberCustomPropertyJson(L"arrayA");
-        WriteSessionAsyncHelper(currentSession, deleteMemberCustomJson);
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
+
+        VERIFY_SUCCEEDED(XblMultiplayerSessionJoin(session.Handle(), nullptr, false, true));
+
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserDeleteCustomPropertyJson(session.Handle(), "health"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserDeleteCustomPropertyJson(session.Handle(), "health"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserDeleteCustomPropertyJson(session.Handle(), "boolTrue"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserDeleteCustomPropertyJson(session.Handle(), "boolFalse"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserDeleteCustomPropertyJson(session.Handle(), "stringTrue"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserDeleteCustomPropertyJson(session.Handle(), "stringFalse"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserDeleteCustomPropertyJson(session.Handle(), "number42"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserDeleteCustomPropertyJson(session.Handle(), "objectA"));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserDeleteCustomPropertyJson(session.Handle(), "arrayA"));
+
+        session.Write(testJson["deleteMemberCustomJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithTurnCollection)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithTurnCollection);
-        const string_t turnJson = testResponseJsonFromFile[L"turnJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        Vector<MultiplayerSessionMember^>^ newTurnCollection = ref new Vector<MultiplayerSessionMember^>();
-        newTurnCollection->Append(currentSession->Members->GetAt(0));
-        currentSession->SessionProperties->TurnCollection = newTurnCollection->GetView();
-        WriteSessionAsyncHelper(currentSession, turnJson);
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
+
+        uint32_t turnCollection[] = { 0 };
+        VERIFY_SUCCEEDED(XblMultiplayerSessionPropertiesSetTurnCollection(session.Handle(), turnCollection, _countof(turnCollection)));
+
+        // Verify local object
+        VERIFY_ARE_EQUAL_UINT(_countof(turnCollection), session.Properties()->TurnCollectionCount);
+        VERIFY_ARE_EQUAL_UINT(turnCollection[0], session.Properties()->TurnCollection[0]);
+
+        session.Write(testJson["turnJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithKeywords)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithKeywords);
-        const string_t keywordsJson = testResponseJsonFromFile[L"keywordsJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        Vector<Platform::String^>^ newKeywords = ref new Vector<Platform::String^>();
-        newKeywords->Append(L"apple");
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-        currentSession->SessionProperties->Keywords = newKeywords->GetView();
-        WriteSessionAsyncHelper(currentSession, keywordsJson);
+        const char* keywords[] = { "apple" };
+        VERIFY_SUCCEEDED(XblMultiplayerSessionPropertiesSetKeywords(session.Handle(), keywords, _countof(keywords)));
+
+        // Verify local object
+        VERIFY_ARE_EQUAL_UINT(_countof(keywords), session.Properties()->KeywordCount);
+        VERIFY_ARE_EQUAL_STR(keywords[0], session.Properties()->Keywords[0]);
+
+        session.Write(testJson["keywordsJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithJoinRestriction)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithJoinRestriction);
-        const string_t joinRestrictionJson = testResponseJsonFromFile[L"joinRestrictionJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->SessionProperties->JoinRestriction = MultiplayerSessionRestriction::Followed;
-        WriteSessionAsyncHelper(currentSession, joinRestrictionJson);
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
+
+        // TODO why no HRESULT here?
+        XblMultiplayerSessionPropertiesSetJoinRestriction(session.Handle(), XblMultiplayerSessionRestriction::Followed);
+
+        // Verify local object
+        VERIFY_IS_TRUE(XblMultiplayerSessionRestriction::Followed == session.Properties()->JoinRestriction);
+
+        session.Write(testJson["joinRestrictionJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithReadRestriction)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithReadRestriction);
-        const string_t readRestrictionJson = testResponseJsonFromFile[L"readRestrictionJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->SessionProperties->ReadRestriction = MultiplayerSessionRestriction::Followed;
-        WriteSessionAsyncHelper(currentSession, readRestrictionJson);
-    }
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-    DEFINE_TEST_CASE(TestTryWriteSessionAsync)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestTryWriteSessionAsync);
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        TryWriteSessionAsyncHelper(currentSession, true, 204, true);
-        TryWriteSessionAsyncHelper(currentSession, true, 200);
-        TryWriteSessionAsyncHelper(currentSession, true, 201);
-        TryWriteSessionAsyncHelper(currentSession, false, 401, true);
-        TryWriteSessionAsyncHelper(currentSession, false, 409, true);
-        TryWriteSessionAsyncHelper(currentSession, false, 412, false);
-        TryWriteSessionAsyncHelper(currentSession, false, 404, true);
+        // TODO why no HRESULT here?
+        XblMultiplayerSessionPropertiesSetReadRestriction(session.Handle(), XblMultiplayerSessionRestriction::Followed);
+
+        // Verify local object
+        VERIFY_IS_TRUE(XblMultiplayerSessionRestriction::Followed == session.Properties()->ReadRestriction);
+
+        session.Write(testJson["TestWriteSessionAsyncWithReadRestrictionExpectedRequest"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetTimeouts)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetTimeouts);
-        const string_t timeoutsJson = testResponseJsonFromFile[L"timeoutsJson"].serialize();
-        MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
-        auto currentSession = ref new MultiplayerSession(GetMockXboxLiveContext_WinRT());
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Create(env.XboxLiveContext());
 
-        currentSession->SetTimeouts(
-            input.MemberReservedTimeout,
-            input.MemberInactiveTimeout,
-            input.MemberReadyTimeout,
-            input.sessionEmpty
-            );
-        WriteSessionAsyncHelper(currentSession, timeoutsJson);
+        VERIFY_SUCCEEDED(XblMultiplayerSessionConstantsSetTimeouts(session.Handle(), 3001000, 3002000, 3003000, 3004000));
+
+        // Verify local object
+        VERIFY_ARE_EQUAL_UINT(session.Constants()->MemberReservedTimeout, 3001000);
+        VERIFY_ARE_EQUAL_UINT(session.Constants()->MemberInactiveTimeout, 3002000);
+        VERIFY_ARE_EQUAL_UINT(session.Constants()->MemberReadyTimeout, 3003000);
+        VERIFY_ARE_EQUAL_UINT(session.Constants()->SessionEmptyTimeout, 3004000);
+
+        session.Write(testJson["timeoutsJson"]);
     }
-
-    DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetArbitrationTimeouts)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetArbitrationTimeouts);
-        const string_t arbitrationTimeoutsJson = testResponseJsonFromFile[L"arbitrationTimeoutsJson"].serialize();
-        MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
-        auto currentSession = ref new MultiplayerSession(GetMockXboxLiveContext_WinRT());
-
-        currentSession->SetArbitrationTimeouts(
-            input.ArbitrationTimeout,
-            input.ForfeitTimeout
-            );
-        WriteSessionAsyncHelper(currentSession, arbitrationTimeoutsJson);
-    }
-
+       
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetQualityOfServiceConnectivityMetrics)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetQualityOfServiceConnectivityMetrics);
-        const string_t qosMetricsJson = testResponseJsonFromFile[L"qosMetricsJson"].serialize();
-        MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
-        auto currentSession = ref new MultiplayerSession(GetMockXboxLiveContext_WinRT());
-        currentSession->SetQualityOfServiceConnectivityMetrics(
-            true,
-            true,
-            true,
-            true
-            );
-        WriteSessionAsyncHelper(currentSession, qosMetricsJson);
-    }
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Create(env.XboxLiveContext());
 
-    DEFINE_TEST_CASE(TestGetMeasurementServerAddresses)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetMeasurementServerAddresses);
-        const string_t measurementServerAddressJson = testResponseJsonFromFile[L"measurementServerAddressJson"].serialize();
-        MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
-        auto currentSession = ref new MultiplayerSession(GetMockXboxLiveContext_WinRT());
-        currentSession->SetMeasurementServerAddresses(
-            input.MeasurementServerAddresses
-            );
-        WriteSessionAsyncHelper(currentSession, measurementServerAddressJson);
+        VERIFY_SUCCEEDED(XblMultiplayerSessionConstantsSetQosConnectivityMetrics(session.Handle(), true, true, true, true));
+
+        // Verify local object
+        VERIFY_ARE_EQUAL(true, session.Constants()->EnableMetricsLatency);
+        VERIFY_ARE_EQUAL(true, session.Constants()->EnableMetricsBandwidthDown);
+        VERIFY_ARE_EQUAL(true, session.Constants()->EnableMetricsBandwidthUp);
+        VERIFY_ARE_EQUAL(true, session.Constants()->EnableMetricsCustom);
+
+        session.Write(testJson["qosMetricsJson"]);
     }
 
     DEFINE_TEST_CASE(TestGetCloudComputePackageJson)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetCloudComputePackageJson);
-        const string_t cloudComputePackageJson = testResponseJsonFromFile[L"cloudComputePackageJson"].serialize();
-        MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
-        auto currentSession = ref new MultiplayerSession(GetMockXboxLiveContext_WinRT());
-        currentSession->SetCloudComputePackageJson(
-            L"{\"crossSandbox\":true, \"titleId\":\"4567\", \"gsiSet\":\"128ce92a-45d0-4319-8a7e-bd8e940114ec\"}"
-            );
-        WriteSessionAsyncHelper(currentSession, cloudComputePackageJson);
-    }
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Create(env.XboxLiveContext());
 
-    DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetManagedInitialization)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetManagedInitialization);
-        const string_t managedInitializationJson = testResponseJsonFromFile[L"managedInitializationJson"].serialize();
-        MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
-        auto currentSession = ref new MultiplayerSession(GetMockXboxLiveContext_WinRT());
-#pragma warning(suppress: 4973)
-        currentSession->SetManagedInitialization(
-            input.JoinTimeout,
-            input.MeasurementTimeout,
-            input.EvaluationTimeout,
-            input.AutoEvalute,
-            input.MembersNeededToStart
-            );
+        const char json[] = "{\"crossSandbox\":true, \"titleId\":\"4567\", \"gsiSet\":\"128ce92a-45d0-4319-8a7e-bd8e940114ec\"}";
+        VERIFY_SUCCEEDED(XblMultiplayerSessionConstantsSetCloudComputePackageJson(session.Handle(), json));
 
-        WriteSessionAsyncHelper(currentSession, managedInitializationJson);
+        // Validate the local object is updated
+        VERIFY_IS_TRUE(VerifyJson(json, session.Constants()->SessionCloudComputePackageConstantsJson));
+
+        session.Write(testJson["cloudComputePackageJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetMemberInitialization)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetManagedInitialization);
-        const string_t managedInitializationJson = testResponseJsonFromFile[L"memberInitializationJson"].serialize();
-        MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
-        auto currentSession = ref new MultiplayerSession(GetMockXboxLiveContext_WinRT());
-        currentSession->SetMemberInitialization(
-            input.JoinTimeout,
-            input.MeasurementTimeout,
-            input.EvaluationTimeout,
-            input.ExternalEvaluation,
-            input.MembersNeededToStart
-            );
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Create(env.XboxLiveContext());
 
-        WriteSessionAsyncHelper(currentSession, managedInitializationJson);
+        XblMultiplayerMemberInitialization memberInitialization
+        {
+            4001000,
+            4002000,
+            4003000,
+            true,
+            4004
+        };
+        VERIFY_SUCCEEDED(XblMultiplayerSessionConstantsSetMemberInitialization(session.Handle(), memberInitialization));
+
+        // Verify the local object is updated
+        VERIFY_IS_NOT_NULL(session.Constants()->MemberInitialization);
+        VERIFY_ARE_EQUAL_UINT(memberInitialization.JoinTimeout, session.Constants()->MemberInitialization->JoinTimeout);
+        VERIFY_ARE_EQUAL_UINT(memberInitialization.MeasurementTimeout, session.Constants()->MemberInitialization->MeasurementTimeout);
+        VERIFY_ARE_EQUAL_UINT(memberInitialization.EvaluationTimeout, session.Constants()->MemberInitialization->EvaluationTimeout);
+        VERIFY_ARE_EQUAL(memberInitialization.ExternalEvaluation, session.Constants()->MemberInitialization->ExternalEvaluation);
+        VERIFY_ARE_EQUAL_UINT(memberInitialization.MembersNeededToStart, session.Constants()->MemberInitialization->MembersNeededToStart);
+
+        session.Write(testJson["memberInitializationJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetPeerToPeerRequirements)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetPeerToPeerRequirements);
-        const string_t peerToPeerJson = testResponseJsonFromFile[L"peerToPeerJson"].serialize();
-        MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
-        auto currentSession = ref new MultiplayerSession(GetMockXboxLiveContext_WinRT());
-        currentSession->SetPeerToPeerRequirements(
-            input.PeerToPeerRequirementsLatencyMaximum,
-            input.PeerToPeerRequirementsBandwidthMinimumInKilobitsPerSecond
-            );
-        WriteSessionAsyncHelper(currentSession, peerToPeerJson);
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Create(env.XboxLiveContext());
+
+        XblMultiplayerPeerToPeerRequirements reqs{ 5001, 5002 };
+        VERIFY_SUCCEEDED(XblMultiplayerSessionConstantsSetPeerToPeerRequirements(session.Handle(), reqs));
+
+        // ensure local object is updated
+        VERIFY_ARE_EQUAL_UINT(reqs.LatencyMaximum, session.Constants()->PeerToPeerRequirements.LatencyMaximum);
+        VERIFY_ARE_EQUAL_UINT(reqs.BandwidthMinimumInKbps, session.Constants()->PeerToPeerRequirements.BandwidthMinimumInKbps);
+
+        session.Write(testJson["peerToPeerJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetPeerToHostRequirements)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetPeerToHostRequirements);
-        const string_t peerToHostJson = testResponseJsonFromFile[L"peerToHostJson"].serialize();
-        MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
-        auto currentSession = ref new MultiplayerSession(GetMockXboxLiveContext_WinRT());
-        currentSession->SetPeerToHostRequirements(
-            input.PeerToHostRequirementsLatencyMaximum,
-            input.PeerToHostRequirementsBandwidthDownMinimumInKilobitsPerSecond,
-            input.PeerToHostRequirementsBandwidthUpMinimumInKilobitsPerSecond,
-            input.PeerToHostRequirementsHostSelectionMetric
-            );
-        WriteSessionAsyncHelper(currentSession, peerToHostJson);
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Create(env.XboxLiveContext());
+
+        XblMultiplayerPeerToHostRequirements reqs{ 6001, 6002, 6003, XblMultiplayerMetrics::Bandwidth };
+        VERIFY_SUCCEEDED(XblMultiplayerSessionConstantsSetPeerToHostRequirements(session.Handle(), reqs));
+
+        // ensure local object is updated
+        VERIFY_ARE_EQUAL_UINT(reqs.LatencyMaximum, session.Constants()->PeerToHostRequirements.LatencyMaximum);
+        VERIFY_ARE_EQUAL_UINT(reqs.BandwidthDownMinimumInKbps, session.Constants()->PeerToHostRequirements.BandwidthDownMinimumInKbps);
+        VERIFY_ARE_EQUAL_UINT(reqs.BandwidthUpMinimumInKbps, session.Constants()->PeerToHostRequirements.BandwidthUpMinimumInKbps);
+        VERIFY_IS_TRUE(reqs.HostSelectionMetric == session.Constants()->PeerToHostRequirements.HostSelectionMetric);
+
+        session.Write(testJson["peerToHostJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetInitializationStatus)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetInitializationStatus);
-        const string_t initializationStatusJson = testResponseJsonFromFile[L"initializationStatusJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->SetInitializationStatus(true);
-        WriteSessionAsyncHelper(currentSession, initializationStatusJson);
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Create(env.XboxLiveContext());
+
+        // TODO why no HRESULT here?
+        XblMultiplayerSessionSetInitializationSucceeded(session.Handle(), true);
+
+        session.Write(testJson["initializationStatusJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetHostDeviceToken)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetHostDeviceToken);
-        const string_t hostDeviceTokenJson = testResponseJsonFromFile[L"hostDeviceTokenJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->SetHostDeviceToken(L"1234");
-        WriteSessionAsyncHelper(currentSession, hostDeviceTokenJson);
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
+
+        // TODO why not XblMultiplayerDeviceToken?
+        // TODO why no HRESULT?
+        XblDeviceToken token{ "1234" };
+        XblMultiplayerSessionSetHostDeviceToken(session.Handle(), token);
+
+        // Verify local object
+        VERIFY_ARE_EQUAL_STR(token.Value, session.Properties()->HostDeviceToken.Value);
+
+        session.Write(testJson["hostDeviceTokenJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetMatchmakingServerConnectionPath)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetMatchmakingServerConnectionPath);
-        const string_t serverConnectionPathJson = testResponseJsonFromFile[L"serverConnectionPathJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->SetMatchmakingServerConnectionPath(
-            L"8001"
-            );
-        WriteSessionAsyncHelper(currentSession, serverConnectionPathJson);
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
+
+        // TODO why no HRESULT?
+        const char* connectionString{ "8001" };
+        XblMultiplayerSessionSetMatchmakingServerConnectionPath(session.Handle(), connectionString);
+        VERIFY_ARE_EQUAL_STR(connectionString, session.Properties()->MatchmakingServerConnectionString);
+
+        session.Write(testJson["serverConnectionPathJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetMatchmakingResubmit)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetMatchmakingResubmit);
-        const string_t matchmakingResubmitJson = testResponseJsonFromFile[L"matchmakingResubmitJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->SetMatchmakingResubmit(true);
-        WriteSessionAsyncHelper(currentSession, matchmakingResubmitJson);
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
+
+        // TODO HRESULT
+        XblMultiplayerSessionSetMatchmakingResubmit(session.Handle(), true);
+        VERIFY_IS_TRUE(session.Properties()->MatchmakingResubmit);
+
+        session.Write(testJson["matchmakingResubmitJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetServerConnectionStringCandidates)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetServerConnectionStringCandidates);
-        const string_t serverConnectionStringCandidatesJson = testResponseJsonFromFile[L"serverConnectionStringCandidatesJson"].serialize();
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-        MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->SetServerConnectionStringCandidates(input.ServerConnectionStringCandidates);
-        WriteSessionAsyncHelper(currentSession, serverConnectionStringCandidatesJson);
+        const char* candidates[] = { "9001", "9002", "9003" };
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetServerConnectionStringCandidates(session.Handle(), candidates, _countof(candidates)));
+
+VERIFY_ARE_EQUAL_UINT(_countof(candidates), session.Properties()->ServerConnectionStringCandidatesCount);
+for (size_t i = 0; i < _countof(candidates); ++i)
+{
+    VERIFY_ARE_EQUAL_STR(candidates[i], session.Properties()->ServerConnectionStringCandidates[i]);
+}
+
+session.Write(testJson["serverConnectionStringCandidatesJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserMembersInGroup)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetCurrentUserMembersInGroup);
-        const string_t membersInGroupJson = testResponseJsonFromFile[L"membersInGroupJson"].serialize();
-        auto currentSession = ref new MultiplayerSession(GetMockXboxLiveContext_WinRT());
-        currentSession->Join(nullptr, false, true);
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Create(env.XboxLiveContext());
 
-        Vector<MultiplayerSessionMember^>^ membersInGroup = ref new Vector<MultiplayerSessionMember^>();
-        membersInGroup->Append(currentSession->Members->GetAt(0));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionJoin(session.Handle(), nullptr, false, true));
 
-        currentSession->SetCurrentUserMembersInGroup(
-            membersInGroup->GetView()
-            );
+        uint32_t membersInGroup[] = { 0 };
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetMembersInGroup(session.Handle(), membersInGroup, _countof(membersInGroup)));
 
-        WriteSessionAsyncHelper(currentSession, membersInGroupJson);
-        auto membersList = currentSession->Members;
-        for (auto member : membersList)
+        auto currentUser{ XblMultiplayerSessionCurrentUser(session.Handle()) };
+        VERIFY_ARE_EQUAL_UINT(_countof(membersInGroup), currentUser->MembersInGroupCount);
+        for (size_t i = 0; i < _countof(membersInGroup); ++i)
         {
-            VERIFY_IS_TRUE(member->MembersInGroup->Size == 1);
+            VERIFY_ARE_EQUAL_UINT(membersInGroup[i], currentUser->MembersInGroupIds[i]);
         }
+
+        session.Write(testJson["membersInGroupJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithClosed)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithClosed);
-        const string_t closedJsonTrue = testResponseJsonFromFile[L"closedJsonTrue"].serialize();
-        const string_t closedJsonFalse = testResponseJsonFromFile[L"closedJsonFalse"].serialize();
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-        MultiplayerSession^ currentSession = GetCurrentSessionAsyncHelper();
+        // TODO should be XblMultiplayerSessionPropertiesSetClosed
+        // TODO return HRESULT
+        XblMultiplayerSessionSetClosed(session.Handle(), true);
+        VERIFY_ARE_EQUAL(true, session.Properties()->Closed);
 
-        // can be set to true of false -- test both
-        currentSession->SetClosed(true);
-        WriteSessionAsyncHelper(currentSession, closedJsonTrue);
-
-        currentSession->SetClosed(false);
-        WriteSessionAsyncHelper(currentSession, closedJsonFalse);
-
+        session.Write(testJson["closedJson"]);
     }
 
     TEST_METHOD(TestWriteSessionAsyncWithLocked)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithLocked);
-        const string_t lockedJsonTrue = testResponseJsonFromFile[L"lockedJsonTrue"].serialize();
-        const string_t lockedJsonFalse = testResponseJsonFromFile[L"lockedJsonFalse"].serialize();
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-        MultiplayerSession^ currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->SetLocked(true);
-        WriteSessionAsyncHelper(currentSession, lockedJsonTrue);
+        // TODO should be XblMultiplayerSessionPropertiesSetLocked
+        // TODO return HRESULT
+        XblMultiplayerSessionSetLocked(session.Handle(), true);
+        VERIFY_ARE_EQUAL(true, session.Properties()->Locked);
 
-        currentSession->SetLocked(false);
-        WriteSessionAsyncHelper(currentSession, lockedJsonFalse);
+        session.Write(testJson["lockedJson"]);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserQualityOfServiceMeasurements)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetCurrentUserQualityOfServiceMeasurements);
-        const string_t qosMeasurementsJson = testResponseJsonFromFile[L"qosMeasurementsJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        currentSession->Join();
-        MultiplayerQualityOfServiceMeasurements^ measurement = ref new MultiplayerQualityOfServiceMeasurements(
-            "test1_deviceToken",
-            UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::milliseconds(1001)),
-            1002,
-            1003,
-            L"{\"foo\":1004}"
-            );
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-        Vector<MultiplayerQualityOfServiceMeasurements^>^ measurements = ref new Vector<MultiplayerQualityOfServiceMeasurements^>();
-        measurements->Append(measurement);
+        const auto& expectedRequest{ testJson["qosMeasurementsJson"] };
+        const auto& qosJson = expectedRequest["members"]["me"]["properties"]["system"]["measurements"];
 
-        currentSession->SetCurrentUserQualityOfServiceMeasurements(
-            measurements->GetView()
-            );
-        WriteSessionAsyncHelper(currentSession, qosMeasurementsJson);
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetQosMeasurements(session.Handle(), JsonUtils::SerializeJson(qosJson).data()));
+        VERIFY_IS_TRUE(VerifyJson(qosJson, XblMultiplayerSessionCurrentUser(session.Handle())->QosMeasurementsJson));
+
+        session.Write(expectedRequest);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserQualityOfServiceServerMeasurementsJson)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetCurrentUserQualityOfServiceServerMeasurementsJson);
-        const string_t qosMeasurementsFromJsonJson = testResponseJsonFromFile[L"qosMeasurementsFromJsonJson"].serialize();
-        auto currentSession = ref new MultiplayerSession(GetMockXboxLiveContext_WinRT());
-        currentSession->Join(nullptr, false, true);
-        currentSession->SetCurrentUserQualityOfServiceServerMeasurementsJson(
-            L"{\"measurement\":1004}"
-            );
-        WriteSessionAsyncHelper(currentSession, qosMeasurementsFromJsonJson);
-    }
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-    DEFINE_TEST_CASE(TestDataIntegrity)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestDataIntegrity);
-        MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
-        auto currentSession = TestCreateSessionHelper(input, GetMockXboxLiveContext_WinRT());
-        currentSession->Join(nullptr, false, true);
-        currentSession->SetQualityOfServiceConnectivityMetrics(
-            true,
-            true,
-            true,
-            true
-            );
+        const auto& expectedRequest{ testJson["qosServerMeasurementsJson"] };
+        const auto& qosJson = expectedRequest["members"]["me"]["properties"]["system"]["serverMeasurements"];
 
-        VERIFY_ARE_EQUAL(currentSession->SessionConstants->EnableMetricsBandwidthDown, true);
-        VERIFY_ARE_EQUAL(currentSession->SessionConstants->EnableMetricsBandwidthUp, true);
-        VERIFY_ARE_EQUAL(currentSession->SessionConstants->EnableMetricsCustom, true);
-        VERIFY_ARE_EQUAL(currentSession->SessionConstants->EnableMetricsLatency, true);
+        VERIFY_SUCCEEDED(XblMultiplayerSessionCurrentUserSetServerQosMeasurements(session.Handle(), JsonUtils::SerializeJson(qosJson).data()));
+        VERIFY_IS_TRUE(VerifyJson(qosJson, XblMultiplayerSessionCurrentUser(session.Handle())->ServerMeasurementsJson));
 
-        currentSession->SetTimeouts(
-            UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3001)),
-            UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3002)),
-            UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3003)),
-            UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3004))
-            );
-
-        VERIFY_ARE_EQUAL_INT(UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(currentSession->SessionConstants->MemberReservationTimeout).count(), 3001);
-        VERIFY_ARE_EQUAL_INT(UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(currentSession->SessionConstants->MemberInactiveTimeout).count(), 3002);
-        VERIFY_ARE_EQUAL_INT(UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(currentSession->SessionConstants->MemberReadyTimeout).count(), 3003);
-        VERIFY_ARE_EQUAL_INT(UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(currentSession->SessionConstants->SessionEmptyTimeout).count(), 3004);
-        
-        currentSession->SetArbitrationTimeouts(
-            UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3001)),
-            UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3002))
-            );
-
-        VERIFY_ARE_EQUAL_INT(UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(currentSession->SessionConstants->ArbitrationTimeout).count(), 3001);
-        VERIFY_ARE_EQUAL_INT(UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(currentSession->SessionConstants->ForfeitTimeout).count(), 3002);
-
-        Platform::String^ matchmakingTargetSessionConstantsJson = ref new Platform::String(L"{\"measurement\":1004}");
-        currentSession->SetMatchmakingTargetSessionConstantsJson(
-            matchmakingTargetSessionConstantsJson
-            );
-
-        VERIFY_ARE_EQUAL(matchmakingTargetSessionConstantsJson, currentSession->SessionProperties->MatchmakingTargetSessionConstantsJson);
-    
-        currentSession->SetCurrentUserStatus(MultiplayerSessionMemberStatus::Inactive);
-
-        VERIFY_ARE_EQUAL_INT(currentSession->CurrentUser->Status, MultiplayerSessionMemberStatus::Inactive);
-
-        currentSession->SetPeerToPeerRequirements(
-            UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3001)),
-            100
-            );
-
-        VERIFY_ARE_EQUAL_INT(UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(currentSession->SessionConstants->PeerToPeerRequirements->LatencyMaximum).count(), 3001);
-        VERIFY_ARE_EQUAL_INT(currentSession->SessionConstants->PeerToPeerRequirements->BandwidthMinimumInKilobitsPerSecond, 100);
-        
-        currentSession->SetPeerToHostRequirements(
-            UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3001)),
-            100,
-            150,
-            MultiplayMetrics::Latency
-            );
-
-        VERIFY_ARE_EQUAL_INT(UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(currentSession->SessionConstants->PeerToHostRequirements->LatencyMaximum).count(), 3001);
-        VERIFY_ARE_EQUAL_INT(currentSession->SessionConstants->PeerToHostRequirements->BandwidthDownMinimumInKilobitsPerSecond, 100);
-        VERIFY_ARE_EQUAL_INT(currentSession->SessionConstants->PeerToHostRequirements->BandwidthUpMinimumInKilobitsPerSecond, 150);
-        VERIFY_ARE_EQUAL_INT(currentSession->SessionConstants->PeerToHostRequirements->HostSelectionMetric, MultiplayMetrics::Latency);
-
-#pragma warning(suppress: 4973)
-        currentSession->SetManagedInitialization(
-            UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3001)),
-            UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3002)),
-            UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3003)),
-            true,
-            1000
-            );
-
-        VERIFY_ARE_EQUAL_INT(UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(currentSession->SessionConstants->ManagedInitialization->JoinTimeout).count(), 3001);
-        VERIFY_ARE_EQUAL_INT(UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(currentSession->SessionConstants->ManagedInitialization->MeasurementTimeout).count(), 3002);
-        VERIFY_ARE_EQUAL_INT(UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(currentSession->SessionConstants->ManagedInitialization->EvaluationTimeout).count(), 3003);
-        VERIFY_ARE_EQUAL(currentSession->SessionConstants->ManagedInitialization->AutoEvaluate, true);
-        VERIFY_ARE_EQUAL_INT(currentSession->SessionConstants->ManagedInitialization->MembersNeededToStart, 1000);
-
-        currentSession->SetMemberInitialization(
-            UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3001)),
-            UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3002)),
-            UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3003)),
-            false,
-            1000
-            );
-
-        VERIFY_ARE_EQUAL_INT(UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(currentSession->SessionConstants->MemberInitialization->JoinTimeout).count(), 3001);
-        VERIFY_ARE_EQUAL_INT(UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(currentSession->SessionConstants->MemberInitialization->MeasurementTimeout).count(), 3002);
-        VERIFY_ARE_EQUAL_INT(UtilsWinRT::ConvertTimeSpanToSeconds<std::chrono::seconds>(currentSession->SessionConstants->MemberInitialization->EvaluationTimeout).count(), 3003);
-        VERIFY_ARE_EQUAL(currentSession->SessionConstants->MemberInitialization->ExternalEvaluation, false);
-        VERIFY_ARE_EQUAL_INT(currentSession->SessionConstants->MemberInitialization->MembersNeededToStart, 1000);
-
-        Vector<MultiplayerQualityOfServiceMeasurements^>^ qosVector = ref new Vector<MultiplayerQualityOfServiceMeasurements^>();
-        Platform::String^ testString = ref new Platform::String(L"test");
-        Platform::String^ measurementJsonString = ref new Platform::String(L"{\"measurement\":1004}");
-        qosVector->Append(
-            ref new MultiplayerQualityOfServiceMeasurements(
-                testString,
-                UtilsWinRT::ConvertSecondsToTimeSpan(std::chrono::seconds(3001)),
-                1000,
-                1001,
-                measurementJsonString
-                )
-            );
-
-        currentSession->SetCurrentUserQualityOfServiceMeasurements(
-            qosVector->GetView()
-            );
-
-        VERIFY_ARE_EQUAL_STR(currentSession->CurrentUser->MemberMeasurements->GetAt(0)->MemberDeviceToken, testString);
-        VERIFY_ARE_EQUAL_INT(currentSession->CurrentUser->MemberMeasurements->GetAt(0)->BandwidthDownInKilobitsPerSecond, 1000);
-        VERIFY_ARE_EQUAL_INT(currentSession->CurrentUser->MemberMeasurements->GetAt(0)->BandwidthUpInKilobitsPerSecond, 1001);
-        VERIFY_ARE_EQUAL_STR(currentSession->CurrentUser->MemberMeasurements->GetAt(0)->CustomJson, measurementJsonString);
-
-        MultiplayerSessionCapabilities^ sessionCapabilities = ref new MultiplayerSessionCapabilities();
-        sessionCapabilities->Gameplay = true;
-
-        currentSession->SetSessionCapabilities(sessionCapabilities);
-
-        VERIFY_ARE_EQUAL(currentSession->SessionConstants->CapabilitiesGameplay, true);
-    }
-
-    DEFINE_TEST_CASE(TestSetActivityAsync)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSetActivityAsync);
-        const string_t activityJson = testResponseJsonFromFile[L"activityJson"].serialize();
-        
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        create_task(
-            xboxLiveContext->MultiplayerService->SetActivityAsync(
-                ref new MultiplayerSessionReference(
-                        "MockScid", // serviceConfigurationId
-                        "MockSessionTemplateName", // sessionTemplateName
-                        "XWIN_7ce12e85-594a-4b3b-9dc3-33b9a4ea57ce" // sessionName
-                    )
-                )
-            );
-
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://sessiondirectory.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/handles",
-            httpCall->PathQueryFragment.to_string()
-            );
-
-        auto writeJson = web::json::value::parse(activityJson);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        VERIFY_IS_EQUAL_JSON(writeJson, requestJson);
-    }
-
-    DEFINE_TEST_CASE(TestClearActivityAsync)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestClearActivityAsync);
-        const string_t activitiesForUserResponseJson = testResponseJsonFromFile[L"activitiesForUserResponseJson"].serialize();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        auto responseJson = web::json::value::parse(activitiesForUserResponseJson);
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        create_task(
-            xboxLiveContext->MultiplayerService->ClearActivityAsync(
-                "MockScid" // serviceConfigurationId
-                )
-            ).wait();
-
-        VERIFY_ARE_EQUAL_STR(L"DELETE", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://sessiondirectory.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/handles/7a4d0a99-4e23-4eba-9894-5173cf123fb4",
-            httpCall->PathQueryFragment.to_string()
-            );
-    }
-
-    DEFINE_TEST_CASE(TestSetTransferHandleAsync)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSetTransferHandleAsync);
-        const string_t transferHandleJson = testResponseJsonFromFile[L"transferHandleJson"].serialize();
-        const string_t transferHandleResponseJson = testResponseJsonFromFile[L"transferHandleResponseJson"].serialize();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        auto responseJson = web::json::value::parse(transferHandleResponseJson);
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        Platform::String^ handleId = create_task(
-            xboxLiveContext->MultiplayerService->SetTransferHandleAsync(
-                ref new MultiplayerSessionReference(
-                        "MockScid", // serviceConfigurationId
-                        "MockSessionTemplateName", // sessionTemplateName
-                        "XWIN_7ce12e85-594a-4b3b-9dc3-33b9a4ea57ce" // sessionName
-                    ),
-                ref new MultiplayerSessionReference(
-                        "MockScid", // serviceConfigurationId
-                        "samplelobbytemplate107", // sessionTemplateName
-                        "bd6c41c3-01c3-468a-a3b5-3e0fe8133862" // sessionName
-                    )
-                )
-            ).get();
-
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://sessiondirectory.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/handles",
-            httpCall->PathQueryFragment.to_string()
-            );
-
-        auto writeJson = web::json::value::parse(transferHandleJson);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        VERIFY_IS_EQUAL_JSON(writeJson, requestJson);
-
-        web::json::value id = web::json::value::parse(transferHandleResponseJson)[_T("id")];
-        Platform::String^ testString = ref new Platform::String(id.as_string().c_str());
-        VERIFY_ARE_EQUAL_STR(handleId, testString);
-    }
-
-    DEFINE_TEST_CASE(TestGetSearchHandlesAsync_1)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetSearchHandlesAsync_1);
-        const string_t searchHandlesRequestJson = testResponseJsonFromFile[L"searchHandlesRequestJson"].serialize();
-        const string_t searchHandlesResponseJson = testResponseJsonFromFile[L"searchHandlesResponseJson"].serialize();
-
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        auto responseJson = web::json::value::parse(searchHandlesResponseJson);
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        auto searchHandles = create_task(
-            xboxLiveContext->MultiplayerService->GetSearchHandlesAsync(
-                ref new Platform::String(L"MockScid"),
-                ref new Platform::String(L"GlobalLFGTemplate"),
-                ref new Platform::String(L"OrderBy"),
-                true,
-                ref new Platform::String(L"SearchQuery")
-            )
-        ).get();
-
-        auto expectedJson = web::json::value::parse(searchHandlesRequestJson);
-        auto actualJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        VERIFY_ARE_EQUAL(expectedJson.serialize(), actualJson.serialize());
-
-        auto resultJson = web::json::value::parse(searchHandlesResponseJson);
-        web::json::array searchHandlesJson = resultJson[L"results"].as_array();
-        uint32 counter = 0;
-        for (auto handleDetails : searchHandles)
-        {
-            VerifySearchHandleDetails(handleDetails, searchHandlesJson[counter]);
-            ++counter;
-        }
-    }
-
-    DEFINE_TEST_CASE(TestGetSearchHandlesAsync_2)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetSearchHandlesAsync_2);
-        const string_t searchHandlesRequestJson = testResponseJsonFromFile[L"searchHandlesRequestJson"].serialize();
-        const string_t searchHandlesResponseJson = testResponseJsonFromFile[L"searchHandlesResponseJson"].serialize();
-
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        auto responseJson = web::json::value::parse(searchHandlesResponseJson);
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        auto searchHandleRequest = ref new MultiplayerQuerySearchHandleRequest(
-            ref new Platform::String(L"MockScid"),
-            ref new Platform::String(L"GlobalLFGTemplate")
-            );
-
-        searchHandleRequest->OrderBy = ref new Platform::String(L"OrderBy");
-        searchHandleRequest->OrderAscending = true;
-        searchHandleRequest->SearchFilter = ref new Platform::String(L"SearchQuery");
-
-        auto searchHandles = create_task(
-            xboxLiveContext->MultiplayerService->GetSearchHandlesAsync(searchHandleRequest)
-            ).get();
-
-        auto expectedJson = web::json::value::parse(searchHandlesRequestJson);
-        auto actualJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        VERIFY_ARE_EQUAL(expectedJson.serialize(), actualJson.serialize());
-
-        auto resultJson = web::json::value::parse(searchHandlesResponseJson);
-        web::json::array searchHandlesJson = resultJson[L"results"].as_array();
-        uint32 counter = 0;
-        for (auto handleDetails : searchHandles)
-        {
-            VerifySearchHandleDetails(handleDetails, searchHandlesJson[counter]);
-            ++counter;
-        }
-    }
-
-    DEFINE_TEST_CASE(TestGetSearchHandlesAsync_3)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetSearchHandlesAsync_3);
-        const string_t searchHandlesWithSocialGroupRequestJson = testResponseJsonFromFile[L"searchHandlesWithSocialGroupRequestJson"].serialize();
-        const string_t searchHandlesResponseJson = testResponseJsonFromFile[L"searchHandlesResponseJson"].serialize();
-
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        auto responseJson = web::json::value::parse(searchHandlesResponseJson);
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        auto searchHandleRequest = ref new MultiplayerQuerySearchHandleRequest(
-            ref new Platform::String(L"MockScid"),
-            ref new Platform::String(L"GlobalLFGTemplate")
-        );
-
-        searchHandleRequest->OrderBy = ref new Platform::String(L"OrderBy");
-        searchHandleRequest->OrderAscending = true;
-        searchHandleRequest->SearchFilter = ref new Platform::String(L"SearchQuery");
-        searchHandleRequest->SocialGroup = ref new Platform::String(L"favorites");
-
-        auto searchHandles = create_task(
-            xboxLiveContext->MultiplayerService->GetSearchHandlesAsync(searchHandleRequest)
-        ).get();
-
-        auto expectedJson = web::json::value::parse(searchHandlesWithSocialGroupRequestJson);
-        auto actualJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        VERIFY_ARE_EQUAL(expectedJson.serialize(), actualJson.serialize());
-
-        auto resultJson = web::json::value::parse(searchHandlesResponseJson);
-        web::json::array searchHandlesJson = resultJson[L"results"].as_array();
-        uint32 counter = 0;
-        for (auto handleDetails : searchHandles)
-        {
-            VerifySearchHandleDetails(handleDetails, searchHandlesJson[counter]);
-            ++counter;
-        }
-    }
-
-    DEFINE_TEST_CASE(TestSetSearchHandleAsync)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSetSearchHandleAsync);
-        const string_t searchHandleJson = testResponseJsonFromFile[L"searchHandleJson"].serialize();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-
-        auto mpSearchHandleRequest = ref new MultiplayerSearchHandleRequest(
-            ref new MultiplayerSessionReference(
-                "MockScid",
-                "GlobalLFGSessionTemplateName",
-                "LFGSession"
-            )
-        );
-
-        auto tags = ref new Vector<Platform::String^>();
-        tags->Append(L"micsrequired");
-        tags->Append(L"girlsonly");
-        mpSearchHandleRequest->Tags = tags->GetView();
-
-        auto numbersMetaMap = ref new Platform::Collections::Map<Platform::String^, double>();
-        numbersMetaMap->Insert(L"Skill_D", 10.145);
-        numbersMetaMap->Insert(L"Skill_I", 14);
-        mpSearchHandleRequest->NumbersMetadata = numbersMetaMap->GetView();
-
-        auto stringsMetaMap = ref new Platform::Collections::Map<Platform::String^, Platform::String^>();
-        stringsMetaMap->Insert(L"Class", L"A");
-        mpSearchHandleRequest->StringsMetadata = stringsMetaMap->GetView();
-
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        create_task(xboxLiveContext->MultiplayerService->SetSearchHandleAsync(mpSearchHandleRequest));
-
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://sessiondirectory.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/handles",
-            httpCall->PathQueryFragment.to_string()
-        );
-
-        auto writeJson = web::json::value::parse(searchHandleJson);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        VERIFY_IS_EQUAL_JSON(writeJson, requestJson);
-    }
-
-    DEFINE_TEST_CASE(TestClearSearchHandleAsync)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestClearActivityAsync);
-        const string_t searchHandleJson = testResponseJsonFromFile[L"searchHandleJson"].serialize();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        auto responseJson = web::json::value::parse(searchHandleJson);
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        create_task(xboxLiveContext->MultiplayerService->ClearSearchHandleAsync("TestHandleId")).wait();
-
-        VERIFY_ARE_EQUAL_STR(L"DELETE", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://sessiondirectory.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/handles/TestHandleId",
-            httpCall->PathQueryFragment.to_string()
-        );
-    }
-
-    DEFINE_TEST_CASE(TestSendInvitesAsync)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSendInvitesAsync);
-        const string_t inviteRequestJson = testResponseJsonFromFile[L"inviteRequestJson"].serialize();
-        const string_t inviteResponseJson = testResponseJsonFromFile[L"inviteResponseJson"].serialize();
-
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        auto responseJson = web::json::value::parse(inviteResponseJson);
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        Vector<Platform::String^>^ xuids = ref new Vector<Platform::String^>();
-        xuids->Append(L"1234");
-        xuids->Append(L"5678");
-
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        IVectorView<Platform::String^>^ invites = create_task(
-            xboxLiveContext->MultiplayerService->SendInvitesAsync(
-                ref new MultiplayerSessionReference(
-                    "MockScid", // serviceConfigurationId
-                    "MockSessionTemplateName", // sessionTemplateName
-                    "XWIN_7ce12e85-594a-4b3b-9dc3-33b9a4ea57ce" // sessionName
-                    ),
-                xuids->GetView(),
-                1018096776
-                )
-            ).get();
-
-        auto expectedJson = web::json::value::parse(inviteRequestJson);
-        auto actualJson = web::json::value::parse(httpCall->request_body().request_message_string());
-
-        VERIFY_IS_EQUAL_JSON(expectedJson, actualJson);
-
-        web::json::value id = web::json::value::parse(inviteResponseJson)[_T("id")];
-        Platform::String^ testString = ref new Platform::String(id.as_string().c_str());
-        VERIFY_ARE_EQUAL_STR(invites->GetAt(1), testString);
-    }
-
-    DEFINE_TEST_CASE(TestGetActivitiesForUsersAsync)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetActivitiesForUsersAsync);
-        const string_t activitiesForUserRequestJson = testResponseJsonFromFile[L"activitiesForUserRequestJson"].serialize();
-        const string_t activitiesForUserResponseJson = testResponseJsonFromFile[L"activitiesForUserResponseJson"].serialize();
-
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        auto responseJson = web::json::value::parse(activitiesForUserResponseJson);
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        Vector<Platform::String^>^ xuids = ref new Vector<Platform::String^>();
-        xuids->Append(L"TestXboxUserId");
-
-        auto activities = create_task(
-            xboxLiveContext->MultiplayerService->GetActivitiesForUsersAsync(
-                ref new Platform::String(L"MockScid"),
-                xuids->GetView()
-                )
-            ).get();
-        
-        auto expectedJson = web::json::value::parse(activitiesForUserRequestJson);
-        auto actualJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        VERIFY_ARE_EQUAL(expectedJson.serialize(), actualJson.serialize());
-
-        auto resultJson = web::json::value::parse(activitiesForUserResponseJson);
-        web::json::array keywordsJson = resultJson[L"results"].as_array();
-        uint32 counter = 0;
-        for (auto activity : activities)
-        {
-            VerifyActivityDetails(activity, keywordsJson[counter]);
-            ++counter;
-        }
-    }
-
-    DEFINE_TEST_CASE(TestGetActivitiesForSocialGroupAsync)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetActivitiesForSocialGroupAsync);
-        const string_t activitiesForSocialGroupRequestJson = testResponseJsonFromFile[L"activitiesForSocialGroupRequestJson"].serialize();
-        const string_t activitiesForSocialGroupResponseJson = testResponseJsonFromFile[L"activitiesForSocialGroupResponseJson"].serialize();
-
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        auto responseJson = web::json::value::parse(activitiesForSocialGroupResponseJson);
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-        
-        auto activities = create_task(
-            xboxLiveContext->MultiplayerService->GetActivitiesForSocialGroupAsync(
-                ref new Platform::String(L"MockScid"),
-                L"TestXboxUserId",
-                L"friends"
-                )
-            ).get();
-
-        auto expectedJson = web::json::value::parse(activitiesForSocialGroupRequestJson);
-        auto actualJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        VERIFY_ARE_EQUAL(expectedJson.serialize(), actualJson.serialize());
-    }
-
-    DEFINE_TEST_CASE(TestCompareMultiplayerSessions)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestCompareMultiplayerSessions);
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
-        auto oldSession = TestCreateSessionHelper(input, GetMockXboxLiveContext_WinRT());
-        oldSession->SetClosed(true);
-        oldSession->SetLocked(true);
-        oldSession->SetSessionCustomPropertyJson(L"hello", L"goodbye");
-        oldSession->Join();
-
-        input.HostDeviceToken = L"12345";
-        auto sessionResult = multiplayer_session::_Deserialize(
-            web::json::value::parse(defaultMultiplayerResponse)
-            );
-        VERIFY_IS_TRUE(!sessionResult.err());
-        auto currentSession = ref new MultiplayerSession(
-            std::make_shared<multiplayer_session>(
-                sessionResult.payload()
-                )
-            );
-
-        uint32 changeType = static_cast<uint32>(MultiplayerSession::CompareMultiplayerSessions(oldSession, currentSession));
-
-        VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::MemberListChange) & changeType) == MultiplayerSessionChangeTypes::MemberListChange);
-        VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::HostDeviceTokenChange) & changeType) == MultiplayerSessionChangeTypes::HostDeviceTokenChange);
-        VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::InitializationStateChange) & changeType) == MultiplayerSessionChangeTypes::InitializationStateChange);
-        VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::MatchmakingStatusChange) & changeType) == MultiplayerSessionChangeTypes::MatchmakingStatusChange);
-        VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::SessionJoinabilityChange) & changeType) == MultiplayerSessionChangeTypes::SessionJoinabilityChange);
-        VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::CustomPropertyChange) & changeType) != MultiplayerSessionChangeTypes::CustomPropertyChange);
-        
-        currentSession = TestCreateSessionHelper(input, GetMockXboxLiveContext_WinRT());
-        currentSession->Join();
-        oldSession->SetCurrentUserMemberCustomPropertyJson(L"hello", L"goodbye");
-        oldSession->SetCurrentUserStatus(MultiplayerSessionMemberStatus::Active);
-
-        changeType = static_cast<uint32>(MultiplayerSession::CompareMultiplayerSessions(oldSession, currentSession));
-        VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::MemberStatusChange) & changeType) == MultiplayerSessionChangeTypes::MemberStatusChange);
-        VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::MemberCustomPropertyChange) & changeType) != MultiplayerSessionChangeTypes::MemberCustomPropertyChange);
-    
-        oldSession = TestCreateSessionHelper(input, GetMockXboxLiveContext_WinRT());
-        oldSession->SetClosed(true);
-        VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::SessionJoinabilityChange) & changeType) != MultiplayerSessionChangeTypes::CustomPropertyChange);
-
-        oldSession = TestCreateSessionHelper(input, GetMockXboxLiveContext_WinRT());
-        oldSession->SetLocked(true);
-        VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::SessionJoinabilityChange) & changeType) != MultiplayerSessionChangeTypes::CustomPropertyChange);
-
-        oldSession = TestCreateSessionHelper(input, GetMockXboxLiveContext_WinRT());
-        currentSession = TestCreateSessionHelper(input, GetMockXboxLiveContext_WinRT());
-        changeType = static_cast<uint32>(MultiplayerSession::CompareMultiplayerSessions(oldSession, currentSession));
-
-        VERIFY_IS_FALSE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::MemberListChange) & changeType) == MultiplayerSessionChangeTypes::MemberListChange);
-        VERIFY_IS_FALSE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::HostDeviceTokenChange) & changeType) == MultiplayerSessionChangeTypes::HostDeviceTokenChange);
-        VERIFY_IS_FALSE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::InitializationStateChange) & changeType) == MultiplayerSessionChangeTypes::InitializationStateChange);
-        VERIFY_IS_FALSE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::MatchmakingStatusChange) & changeType) == MultiplayerSessionChangeTypes::MatchmakingStatusChange);
-        VERIFY_IS_FALSE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::SessionJoinabilityChange) & changeType) == MultiplayerSessionChangeTypes::SessionJoinabilityChange);
-        VERIFY_IS_FALSE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::CustomPropertyChange) & changeType) == MultiplayerSessionChangeTypes::CustomPropertyChange);
-        VERIFY_IS_FALSE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::MemberStatusChange) & changeType) == MultiplayerSessionChangeTypes::MemberStatusChange);
-        VERIFY_IS_FALSE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::MemberCustomPropertyChange) & changeType) == MultiplayerSessionChangeTypes::MemberCustomPropertyChange);
-
-        // Test MatchmakingStatusChange for different target session refs.
-        currentSession = ref new MultiplayerSession(
-            std::make_shared<multiplayer_session>(
-                sessionResult.payload()
-                )
-            );
-
-        const string_t responseForComparingSessions = testResponseJsonFromFile[L"MultiplayerResponseForComparingSessions"].serialize();
-        auto compareSessionResult = multiplayer_session::_Deserialize(
-            web::json::value::parse(responseForComparingSessions)
-            );
-        VERIFY_IS_TRUE(!compareSessionResult.err());
-        auto compareSession = ref new MultiplayerSession(
-            std::make_shared<multiplayer_session>(
-                compareSessionResult.payload()
-                )
-            );
-
-        changeType = static_cast<uint32>(MultiplayerSession::CompareMultiplayerSessions(currentSession, compareSession));
-        VERIFY_IS_TRUE(static_cast<MultiplayerSessionChangeTypes>(static_cast<uint32>(MultiplayerSessionChangeTypes::MatchmakingStatusChange) & changeType) == MultiplayerSessionChangeTypes::MatchmakingStatusChange);
-    }
-
-    DEFINE_TEST_CASE(TestRTAMultiplayer)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestRTAMultiplayer);
-
-        const int subId = 666;
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        TimeSpan ts;
-        ts.Duration = 1000;
-        xboxLiveContext->Settings->WebsocketTimeoutWindow = ts;
-        auto mockSocket = m_mockXboxSystemFactory->GetMockWebSocketClient();
-        SetWebSocketRTAAutoResponser(mockSocket, rtaConnectionIdJson, subId);
-
-        xboxLiveContext->MultiplayerService->EnableMultiplayerSubscriptions();
-        VERIFY_IS_TRUE(xboxLiveContext->MultiplayerService->MultiplayerSubscriptionsEnabled);
-
-        auto session = ref new MultiplayerSession(xboxLiveContext);
-        session->Join();
-
-        // Verify it should fail before RTA activated
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->WriteSessionAsync(session, MultiplayerSessionWriteMode::CreateNew)).get(),
-            E_FAIL
-            );
-
-        // Connect RTA
-        auto helper = SetupStateChangeHelper(xboxLiveContext->RealTimeActivityService);
-        xboxLiveContext->RealTimeActivityService->Activate();
-        helper->connectedEvent.wait();
-        TEST_LOG(L"Activate() connected event triggered");
-
-        bool didFire = false;
-
-        //Make websocket auto reconnect
-        // Write session on connection, make sure it can finish once connected
-        mockSocket->m_waitForSignal = true;
-        mockSocket->m_closeHandler(1001, L"");
-        helper->connectingEvent.wait();
-        TEST_LOG(L"Auto-reconnecting event triggered");
-
-        concurrency::event writeSessionEvent;
-        create_task(xboxLiveContext->MultiplayerService->WriteSessionAsync(session, MultiplayerSessionWriteMode::CreateNew))
-        .then([&writeSessionEvent](MultiplayerSession^)
-        {
-            writeSessionEvent.set();
-        });
-        mockSocket->m_connectEvent.set();
-        helper->connectedEvent.wait();
-        TEST_LOG(L"Auto-reconnected event triggered");
-        writeSessionEvent.wait();
-        TEST_LOG(L"writeSessionEvent triggered");
-
-        // Normal case when connected
-        create_task(xboxLiveContext->MultiplayerService->WriteSessionAsync(session,MultiplayerSessionWriteMode::CreateNew)).get();
-        // fire event, make sure received
-        didFire = false;
-        bool didLostFire = false;
-        const string_t rtaSessionUpdateJson = testResponseJsonFromFile[L"rtaSessionUpdateJson"].serialize();
-        auto parsedSessionChangedJson = web::json::value::parse(rtaSessionUpdateJson);
-        auto sessionChangeEvent = xboxLiveContext->MultiplayerService->MultiplayerSessionChanged +=
-            ref new Windows::Foundation::EventHandler<MultiplayerSessionChangeEventArgs^>([this, &didFire, &parsedSessionChangedJson](Platform::Object^, MultiplayerSessionChangeEventArgs^ args)
-        {
-            didFire = true;
-            auto splitString = utils::string_split(parsedSessionChangedJson[_T("shoulderTaps")].as_array()[0][_T("resource")].as_string(), '~');
-            
-            VERIFY_ARE_EQUAL(args->SessionReference->ServiceConfigurationId->Data(), splitString[0]);
-            VERIFY_ARE_EQUAL(args->SessionReference->SessionTemplateName->Data(), splitString[1]);
-            VERIFY_ARE_EQUAL(args->SessionReference->SessionName->Data(), splitString[2]);
-            VERIFY_ARE_EQUAL_INT(args->ChangeNumber, parsedSessionChangedJson[_T("shoulderTaps")].as_array()[0][_T("changeNumber")].as_integer());
-            VERIFY_ARE_EQUAL(args->Branch->Data(), parsedSessionChangedJson[_T("shoulderTaps")].as_array()[0][_T("branch")].as_string());
-        });
-
-        auto subscriptionLostEvent = xboxLiveContext->MultiplayerService->MultiplayerSubscriptionLost +=
-            ref new Windows::Foundation::EventHandler<MultiplayerSubscriptionLostEventArgs^>([&didLostFire](Platform::Object^, MultiplayerSubscriptionLostEventArgs^ args)
-        {
-            didLostFire = true;
-        });
-
-        mockSocket->receive_rta_event(subId, rtaSessionUpdateJson);
-        VERIFY_IS_TRUE(didFire);
-
-        //Make websocket auto reconnect
-        //force disconnect socket, should auto reconnect
-        didFire = false;
-
-        auto mockSubscription = m_mockXboxSystemFactory->GetMocckMultiplayerSubscription();
-        concurrency::event subscribedEvent;
-        mockSubscription->OnSetState([&subscribedEvent](real_time_activity_subscription_state state)
-        {
-            if (real_time_activity_subscription_state::subscribed == state)
-            {
-                subscribedEvent.set();
-            }
-        });
-
-        mockSocket->m_closeHandler(1001, L"");
-        helper->connectingEvent.wait();
-        helper->connectedEvent.wait();
-        create_task(xboxLiveContext->MultiplayerService->WriteSessionAsync(session,MultiplayerSessionWriteMode::CreateNew)).get();
-
-        // wait for subscription to be resubscribed.
-        subscribedEvent.wait();
-        mockSocket->receive_rta_event(subId, rtaSessionUpdateJson);
-        VERIFY_IS_TRUE(didFire);
-
-        //force disconnect socket
-        didFire = false;
-        mockSocket->m_waitForSignal = false;
-        mockSocket->m_connectToFail = true;
-        mockSocket->m_closeHandler(1001, L"");
-        helper->disconnectedEvent.wait();
-
-        // should not be able to receive 
-        mockSocket->receive_rta_event(subId, rtaSessionUpdateJson);
-        VERIFY_IS_FALSE(didFire);
-
-        // make it reconnect
-        helper->reset_events();
-        mockSocket->m_connectToFail = false;
-        helper->connectedEvent.wait();
-
-        // subscription should be dead, still not receiving 
-        mockSocket->receive_rta_event(subId, rtaSessionUpdateJson);
-        VERIFY_IS_FALSE(didFire);
-
-        mockSocket->close().wait();
-        VERIFY_IS_TRUE(didLostFire);
-    }
-
-    DEFINE_TEST_CASE(TestRTADisableMultiplayerSubscriptions)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestRTADisableMultiplayerSubscriptions);
-        const int subId = 666;
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        TimeSpan ts;
-        ts.Duration = 1000;
-        xboxLiveContext->Settings->WebsocketTimeoutWindow = ts;
-        auto mockSocket = m_mockXboxSystemFactory->GetMockWebSocketClient();
-        SetWebSocketRTAAutoResponser(mockSocket, rtaConnectionIdJson, subId);
-
-        auto session = ref new MultiplayerSession(xboxLiveContext);
-        session->Join();
-
-        auto helper = SetupStateChangeHelper(xboxLiveContext->RealTimeActivityService);
-        xboxLiveContext->RealTimeActivityService->Activate();
-        helper->connectedEvent.wait();
-
-        xboxLiveContext->MultiplayerService->EnableMultiplayerSubscriptions();
-        VERIFY_IS_TRUE(xboxLiveContext->MultiplayerService->MultiplayerSubscriptionsEnabled);
-
-        // fire event, make sure received
-        bool didLostFire = false;
-        concurrency::event fireEvent;
-        auto subscriptionLostEvent = xboxLiveContext->MultiplayerService->MultiplayerSubscriptionLost +=
-            ref new Windows::Foundation::EventHandler<MultiplayerSubscriptionLostEventArgs^>([&didLostFire, &fireEvent](Platform::Object^, MultiplayerSubscriptionLostEventArgs^ args)
-        {
-            didLostFire = true;
-            fireEvent.set();
-        });
-
-        xboxLiveContext->MultiplayerService->DisableMultiplayerSubscriptions();
-
-        fireEvent.wait();
-        VERIFY_IS_TRUE(didLostFire);
-    }
-
-    DEFINE_TEST_CASE(TestMultiplayerSubscribeChangeTypes)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestMultiplayerSubscribeChangeTypes);
-        const string_t setSessionChangeTypesJson = testResponseJsonFromFile[L"setSessionChangeTypesJson"].serialize();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-
-        auto session = ref new MultiplayerSession(xboxLiveContext);
-        VERIFY_ARE_EQUAL_INT(session->SubscribedChangeTypes, MultiplayerSessionChangeTypes::None);
-
-        session->Join();
-
-        VERIFY_ARE_EQUAL_INT(session->SubscribedChangeTypes, MultiplayerSessionChangeTypes::None);
-
-        auto changeSubscription = MultiplayerSessionChangeTypes::CustomPropertyChange |
-            MultiplayerSessionChangeTypes::HostDeviceTokenChange |
-            MultiplayerSessionChangeTypes::InitializationStateChange |
-            MultiplayerSessionChangeTypes::MatchmakingStatusChange |
-            MultiplayerSessionChangeTypes::MemberCustomPropertyChange |
-            MultiplayerSessionChangeTypes::MemberListChange |
-            MultiplayerSessionChangeTypes::MemberStatusChange |
-            MultiplayerSessionChangeTypes::SessionJoinabilityChange;
-
-        session->SetSessionChangeSubscription(
-            changeSubscription
-            );
-
-        VERIFY_ARE_EQUAL_INT(session->SubscribedChangeTypes, changeSubscription);
-
-        auto responseJson = web::json::value::parse(defaultMultiplayerResponse);
-
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        auto result = create_task(
-            xboxLiveContext->MultiplayerService->WriteSessionAsync(
-            session,
-            MultiplayerSessionWriteMode::UpdateExisting
-            )
-            ).get();
-
-        auto writeJson = web::json::value::parse(setSessionChangeTypesJson);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        requestJson[_T("members")][_T("me")][_T("properties")][_T("system")][_T("subscription")][_T("id")] = web::json::value::null();    // Can't test the id is a GUID
-        VERIFY_IS_EQUAL_JSON(writeJson, requestJson);
-    }
-
-    DEFINE_TEST_CASE(TestHttpCalls)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestHttpCalls);
-        const string_t emptyJson = testResponseJsonFromFile[L"emptyJson"].serialize();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-
-        auto session = ref new MultiplayerSession(xboxLiveContext);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(emptyJson), 204);
-
-        session->Join();
-
-        VERIFY_IS_NULL(
-            create_task(xboxLiveContext->MultiplayerService->WriteSessionAsync(
-                session,
-                MultiplayerSessionWriteMode::UpdateOrCreateNew
-                )).get()
-            );
-
-        VERIFY_THROWS_HR_CX(
-            create_task(
-                xboxLiveContext->MultiplayerService->GetCurrentSessionAsync(
-                    ref new MultiplayerSessionReference(
-                        L"8d050174-412b-4d51-a29b-d55a34edfdb7",
-                        L"integration",
-                        L"19de0095d8bb41048f19edbbb6bc6b04"
-                        )
-                    )
-                ).get(),
-            __HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND)
-        );
-    }
-
-    DEFINE_TEST_CASE(TestMultiplayerInvalidArgs)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestMultiplayerInvalidArgs);
-        MultiplayerSessionTestCreateInput input = GetDefaultMultiplayerSessionTestCreateInput();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        TEST_LOG(L"TestMultiplayerInvalidArgs: MultiplayerSession: Test invalid xboxLiveContext");
-        /*VERIFY_THROWS_HR_CX(
-            ref new MultiplayerSession(
-                nullptr,
-                input.multiplayerSessionReference,
-                input.maxMembersInSession,
-                input.clientMatchmakingCapable,
-                input.multiplayerSessionVisibility,
-                input.initiatorXboxUserIds,
-                TestDataToJson(input.sessionCustomConstantsJson)
-                ),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestMultiplayerInvalidArgs: MultiplayerSession: Test invalid sessionRef");
-        VERIFY_THROWS_HR_CX(
-            ref new MultiplayerSession(
-                xboxLiveContext,
-                nullptr,
-                input.maxMembersInSession,
-                input.clientMatchmakingCapable,
-                input.multiplayerSessionVisibility,
-                input.initiatorXboxUserIds,
-                TestDataToJson(input.sessionCustomConstantsJson)
-                ),
-            E_INVALIDARG
-            );*/
-
-        TEST_LOG(L"TestMultiplayerInvalidArgs: WriteSessionAsync: Test invalid session");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->WriteSessionAsync(nullptr, MultiplayerSessionWriteMode::CreateNew)).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestMultiplayerInvalidArgs: WriteSessionAsync: Test invalid write mode");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->WriteSessionAsync(
-                nullptr,
-                static_cast<MultiplayerSessionWriteMode>((int)MultiplayerSessionWriteMode::UpdateOrCreateNew + 1)   // invalid arg
-                )).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestMultiplayerInvalidArgs: GetCurrentSessionAsync: Test invalid sessionRef");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->GetCurrentSessionAsync(nullptr)).get(),
-            E_INVALIDARG
-            );
-
-        auto getSessionsRequest = ref new MultiplayerGetSessionsRequest(
-            "foo",
-            100
-            );
-
-        getSessionsRequest->SessionTemplateNameFilter = "bar";
-        getSessionsRequest->XboxUserIdFilter = "123456";
-        getSessionsRequest->VisibilityFilter = MultiplayerSessionVisibility::Unknown;   // visibility (should never be passed in as Unknown)
-        getSessionsRequest->IncludeInactiveSessions = true;
-        getSessionsRequest->IncludeReservations = true;
-        getSessionsRequest->IncludePrivateSessions = true;
-
-        TEST_LOG(L"TestMultiplayerInvalidArgs: GetSessionsAsync: Test invalid MultiplayerSessionVisibility");
-
-#pragma warning(suppress: 6387)
-        getSessionsRequest->XboxUserIdFilter = nullptr;// xuid (either xuid or keywords needed)
-#pragma warning(suppress: 6387)
-        getSessionsRequest->KeywordFilter = nullptr;
-        getSessionsRequest->VisibilityFilter = MultiplayerSessionVisibility::Any;   // visibility (should never be passed in as Unknown)
-
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->GetSessionsAsync(
-                getSessionsRequest
-                )).get(),
-            E_INVALIDARG
-            );
-
-        getSessionsRequest->KeywordFilter = "123456";
-        getSessionsRequest->IncludeInactiveSessions = true; // includeInactiveSessions (must have xuid)
-        getSessionsRequest->IncludeReservations = false;
-        getSessionsRequest->IncludePrivateSessions = false;
-        TEST_LOG(L"TestMultiplayerInvalidArgs: GetSessionsAsync: Test invalid includeInactiveSessions");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->GetSessionsAsync(
-                getSessionsRequest
-                )).get(),
-            E_INVALIDARG
-            );
-
-        getSessionsRequest->IncludeInactiveSessions = false;
-        getSessionsRequest->IncludeReservations = true; // includeReservedSessions (must have xuid)
-        getSessionsRequest->IncludePrivateSessions = false;
-        TEST_LOG(L"TestMultiplayerInvalidArgs: GetSessionsAsync: Test invalid includeReservedSessions");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->GetSessionsAsync(
-                getSessionsRequest
-                )).get(),
-            E_INVALIDARG
-            );
-
-        // GetSessionByHandle and WriteSessionByHandle
-        TEST_LOG(L"TestMultiplayerInvalidArgs: WriteSessionByHandleAsync: Test null session");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->WriteSessionByHandleAsync(
-                nullptr, 
-                MultiplayerSessionWriteMode::CreateNew, 
-                L"handle"
-                )).get(),
-                E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestMultiplayerInvalidArgs: WriteSessionByHandleAsync: Test invalid writemode");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->WriteSessionByHandleAsync(
-                ref new MultiplayerSession(xboxLiveContext), 
-                (MultiplayerSessionWriteMode)99, 
-                L"handle"
-                )).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestMultiplayerInvalidArgs: WriteSessionByHandleAsync: Test null handle");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->WriteSessionByHandleAsync(
-                ref new MultiplayerSession(xboxLiveContext),
-                (MultiplayerSessionWriteMode)99,
-                nullptr
-                )).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestMultiplayerInvalidArgs: WriteSessionByHandleAsync: Test empty handle");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->WriteSessionByHandleAsync(
-                ref new MultiplayerSession(xboxLiveContext),
-                (MultiplayerSessionWriteMode)99, 
-                L""
-                )).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestMultiplayerInvalidArgs: GetCurrentSessionByHandleAsync: Test null handleId");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->GetCurrentSessionByHandleAsync(
-                nullptr
-                )).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestMultiplayerInvalidArgs: GetCurrentSessionByHandleAsync: Test empty handleId");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->GetCurrentSessionByHandleAsync(
-                ""
-                )).get(),
-            E_INVALIDARG
-            );
-
-        Platform::String^ defaultScid = ref new Platform::String(L"1110");
-
-        auto xuidVector = ref new Vector<Platform::String^>();
-        xuidVector->Append("1234");
-
-        TEST_LOG(L"TestGetActivitiesForUsersInvalidArgs: null scid");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->GetActivitiesForUsersAsync(nullptr, xuidVector->GetView())).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestGetActivitiesForUsersInvalidArgs: empty scid");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->GetActivitiesForUsersAsync("", xuidVector->GetView())).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestGetActivitiesForUsersInvalidArgs: null xuids");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->GetActivitiesForUsersAsync(defaultScid, nullptr)).get(),
-            E_INVALIDARG
-            );
-
-        xuidVector = ref new Vector<Platform::String^>();
-        TEST_LOG(L"TestGetActivitiesForUsersInvalidArgs: empty xuids");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->GetActivitiesForUsersAsync(defaultScid, xuidVector->GetView())).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestGetActivitiesForSocialGroupInvalidArgs: null scid");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->SetActivityAsync(nullptr)).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestGetActivitiesForSocialGroupInvalidArgs: empty scid");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->ClearActivityAsync("")).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestClearActivityInvalidArgs: null scid");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->SetActivityAsync(nullptr)).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestClearActivityInvalidArgs: empty scid");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->ClearActivityAsync("")).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestSetActivityInvalidArgs: null sessionreference");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->SetActivityAsync(nullptr)).get(),
-            E_INVALIDARG
-            );
-
-        MultiplayerSessionReference^ testReference = ref new MultiplayerSessionReference(
-            "0001", 
-            "testTemplate", 
-            "testSessionName"
-            );
-        Vector<Platform::String^>^ xuidVectorEmpty = ref new Vector<Platform::String^>();
-
-        TEST_LOG(L"TestSendInvitesInvalidArgs: null xuids vector");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->SendInvitesAsync(testReference, nullptr, 1234)).get(),
-            E_INVALIDARG
-            );
-
-        TEST_LOG(L"TestSendInvitesInvalidArgs: empty xuids vector");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->SendInvitesAsync(testReference, xuidVectorEmpty->GetView(), 1234)).get(),
-            E_INVALIDARG
-            );
-
-        xuidVector->Append("4567");
-        TEST_LOG(L"TestSendInvitesInvalidArgs: null sessionref");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->SendInvitesAsync(nullptr, xuidVectorEmpty->GetView(), 1234)).get(),
-            E_INVALIDARG
-            );
-
-        auto session = ref new MultiplayerSession(xboxLiveContext);
-        session->Join();
-        auto timeSpan = Windows::Foundation::TimeSpan();
-        timeSpan.Duration = 10;
-
-        TimeSpan ts;
-        ts.Duration = 1000;
-
-        TEST_LOG(L"TestRTAConnectionFailed: uninitialized RTA");
-
-        const int subId = 666;
-        xboxLiveContext->Settings->WebsocketTimeoutWindow = ts;
-        auto mockSocket = m_mockXboxSystemFactory->GetMockWebSocketClient();
-        SetWebSocketRTAAutoResponser(mockSocket, rtaConnectionIdJson, subId);
-
-        xboxLiveContext->MultiplayerService->EnableMultiplayerSubscriptions();
-
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->MultiplayerService->WriteSessionAsync(
-                session,
-                MultiplayerSessionWriteMode::UpdateOrCreateNew
-                )).get(),
-            E_FAIL
-            );
-
-        TEST_LOG(L"TestRTAConnectionFailed: Already enabled");
-        VERIFY_THROWS_HR_CX(
-            xboxLiveContext->MultiplayerService->EnableMultiplayerSubscriptions(),
-            E_UNEXPECTED
-            );
-
-        TEST_LOG(L"Testing Setting Session Constants Post Write");
-        session = GetCurrentSessionAsyncHelper();
-
-        VERIFY_THROWS_HR_CX(
-            session->SetTimeouts(
-                timeSpan,
-                timeSpan,
-                timeSpan,
-                timeSpan
-                ),
-            E_UNEXPECTED
-            );
-
-        VERIFY_THROWS_HR_CX(
-            session->SetQualityOfServiceConnectivityMetrics(
-                true,
-                true,
-                true,
-                true
-                ),
-            E_UNEXPECTED
-            );
-
-        ts.Duration = 1;
-#pragma warning(suppress: 4973)
-        VERIFY_THROWS_HR_CX(
-            session->SetManagedInitialization(
-                ts,
-                ts,
-                ts,
-                false,
-                1
-                ),
-            E_UNEXPECTED
-            );
-
-        VERIFY_THROWS_HR_CX(
-            session->SetMemberInitialization(
-                ts,
-                ts,
-                ts,
-                false,
-                1
-                ),
-            E_UNEXPECTED
-            );
-
-        VERIFY_THROWS_HR_CX(
-            session->SetPeerToPeerRequirements(
-                ts,
-                1000
-                ),
-            E_UNEXPECTED
-            );
-
-        VERIFY_THROWS_HR_CX(
-            session->SetPeerToHostRequirements(
-                ts,
-                1000,
-                1000,
-                MultiplayMetrics::Bandwidth
-                ),
-            E_UNEXPECTED
-            );
-
-        auto qosList = ref new Vector<Microsoft::Xbox::Services::GameServerPlatform::QualityOfServiceServer^>();
-        qosList->Append(ref new Microsoft::Xbox::Services::GameServerPlatform::QualityOfServiceServer(
-            xbox::services::game_server_platform::quality_of_service_server(
-            _T("asdfasdf"),
-            _T("1234345346"),
-            _T("123421345")
-            )));
-
-        VERIFY_THROWS_HR_CX(
-            session->SetMeasurementServerAddresses(
-                qosList->GetView()
-                ),
-            E_UNEXPECTED
-            );
-
-        auto capabilites = ref new MultiplayerSessionCapabilities(xbox::services::multiplayer::multiplayer_session_capabilities());
-        VERIFY_THROWS_HR_CX(
-            session->SetSessionCapabilities(
-                capabilites
-                ),
-            E_UNEXPECTED
-            );
-
-        session->Join();
-
-        VERIFY_THROWS_HR_CX(
-            session->Leave(),
-            E_UNEXPECTED
-            );
-
-        VERIFY_THROWS_HR_CX(
-            session->Join(),
-            E_UNEXPECTED
-            );
-    }
-
-    DEFINE_TEST_CASE(TestTournamentSession)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestTournamentSession);
-        const string_t defaultTournamentSessionResponse = testResponseJsonFromFile[L"defaultTournamentSessionResponse"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper(defaultTournamentSessionResponse);
-        VERIFY_IS_TRUE(currentSession->ArbitrationStatus == TournamentArbitrationStatus::InProgress);
-
-        auto tournamentServer = currentSession->TournamentsServer;
-        VERIFY_IS_NOT_NULL(tournamentServer);
-        VERIFY_IS_TRUE(tournamentServer->RegistrationState == TournamentRegistrationState::Registered);
-        VERIFY_IS_TRUE(tournamentServer->RegistrationReason == TournamentRegistrationReason::TournamentCompleted);
-        VERIFY_IS_TRUE(tournamentServer->LastGameResultSource == TournamentGameResultSource::Arbitration);
-
-        VERIFY_IS_TRUE(tournamentServer->LastGameEndTime.UniversalTime != 0);
-        VERIFY_IS_TRUE(tournamentServer->NextGameStartTime.UniversalTime != 0);
-
-        auto arbitrationServer = currentSession->ArbitrationServer;
-        VERIFY_IS_NOT_NULL(arbitrationServer);
-
-        VERIFY_IS_TRUE(arbitrationServer->ArbitrationStartTime.UniversalTime != 0);
-        VERIFY_IS_TRUE(arbitrationServer->ResultState == TournamentArbitrationState::PartialResults);
-        VERIFY_IS_TRUE(arbitrationServer->ResultSource == TournamentGameResultSource::Adjusted);
-        VERIFY_IS_TRUE(arbitrationServer->ResultConfidenceLevel == 95);
-        VERIFY_IS_TRUE(arbitrationServer->Results->Size == 2);
-        VERIFY_IS_TRUE(arbitrationServer->Results->HasKey("team1"));
-        TournamentTeamResult^ result = arbitrationServer->Results->Lookup("team1");
-        VERIFY_IS_TRUE(result->State == TournamentGameResultState::Rank);
-        VERIFY_IS_TRUE(result->Ranking == 3);
-        VERIFY_IS_TRUE(arbitrationServer->Results->HasKey("team2"));
-        result = arbitrationServer->Results->Lookup("team2");
-        VERIFY_IS_TRUE(result->State == TournamentGameResultState::Rank);
-        VERIFY_IS_TRUE(result->Ranking == 2);
-
-        auto nextGameSessionRef = tournamentServer->NextGameSessionRef;
-        VERIFY_IS_NOT_NULL(nextGameSessionRef);
-        VERIFY_ARE_EQUAL_STR(nextGameSessionRef->ServiceConfigurationId, "foo");
-        VERIFY_ARE_EQUAL_STR(nextGameSessionRef->SessionTemplateName, "bar");
-        VERIFY_ARE_EQUAL_STR(nextGameSessionRef->SessionName, "session-seven");
-
-        for (const auto& member : currentSession->Members)
-        {
-            VERIFY_IS_NOT_NULL(member->Results);
-            VERIFY_IS_TRUE(member->Results->Size == 2);
-            for (auto result : member->Results)
-            {
-                Platform::String^ key = result->Key;
-                TournamentTeamResult^ teamResult = result->Value;
-                VERIFY_IS_TRUE(key->Equals("team1") || key->Equals("team2"));
-                VERIFY_IS_TRUE(teamResult->State == TournamentGameResultState::Rank);
-                VERIFY_IS_TRUE(teamResult->Ranking == 3 || teamResult->Ranking == 2);
-            }
-
-            VERIFY_IS_TRUE(member->ArbitrationStatus == TournamentArbitrationStatus::Joining);
-
-            auto teamSessionRef = member->TournamentTeamSessionRef;
-            VERIFY_IS_NOT_NULL(teamSessionRef);
-            VERIFY_ARE_EQUAL_STR(teamSessionRef->ServiceConfigurationId, "TestScid");
-            VERIFY_ARE_EQUAL_STR(teamSessionRef->SessionTemplateName, "TournamentGameSessionTest");
-            VERIFY_ARE_EQUAL_STR(teamSessionRef->SessionName, "TestName");
-        }
-    }
-
-    DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserArbitrationResult)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetCurrentUserArbitrationResult);
-        const string_t arbitrationResultRankJson = testResponseJsonFromFile[L"arbitrationResultRankJson"].serialize();
-        const string_t arbitrationResultJson = testResponseJsonFromFile[L"arbitrationResultJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        TournamentTeamResult^ resultRank = ref new TournamentTeamResult();
-        resultRank->Ranking = 3;
-        auto resultMap = ref new Platform::Collections::Map<Platform::String^, TournamentTeamResult^>();
-        resultMap->Insert(L"team1", resultRank);
-        currentSession->SetCurrentUserArbitrationResults(
-            resultMap->GetView()
-            );
-        WriteSessionAsyncHelper(currentSession, arbitrationResultRankJson);
-
-        TournamentTeamResult^ result = ref new TournamentTeamResult();
-        result->State = TournamentGameResultState::Loss;
-        resultMap->Insert(L"team1", result);
-        currentSession->SetCurrentUserArbitrationResults(
-            resultMap->GetView()
-            );
-        WriteSessionAsyncHelper(currentSession, arbitrationResultJson);
+        session.Write(expectedRequest);
     }
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetMutableRoleSettings)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionAsyncWithSetMutableRoleSettings);
-        const string_t roleTypesRequestJson = testResponseJsonFromFile[L"roleTypesRequestJson"].serialize();
-        auto currentSession = GetCurrentSessionAsyncHelper();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
+        MPTestEnv env{};
+        auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
-        MultiplayerRoleType^ lfgRoleType = ref new MultiplayerRoleType();
-        MultiplayerRoleType^ squadRoleType = ref new MultiplayerRoleType();
+        uint32_t max{ 1 }, target{ 1 };
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetMutableRoleSettings(session.Handle(), "lfg", "friend", &max, &target));
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetMutableRoleSettings(session.Handle(), "lfg", "other", &max, nullptr));
 
-        MultiplayerRoleInfo^ friendRole = ref new MultiplayerRoleInfo();
-        friendRole->MaxMembersCount = 5;
-        friendRole->TargetCount = 3;
-        MultiplayerRoleInfo^ otherRole = ref new MultiplayerRoleInfo();
-        otherRole->MaxMembersCount = 5;
+        auto roles{ session.RoleTypes() };
+        for (const auto& roleType : roles)
+        {
+            if (std::string{ roleType->Name } == "lfg")
+            {
+                for (size_t i = 0; i < roleType->RoleCount; ++i)
+                {
+                    if (std::string{ roleType->Roles[i].Name } == "friend")
+                    {
+                        VERIFY_ARE_EQUAL_UINT(max, roleType->Roles[i].MaxMemberCount);
+                        VERIFY_ARE_EQUAL_UINT(target, roleType->Roles[i].TargetCount);
+                    }
+                    else if (std::string{ roleType->Roles[i].Name } == "other")
+                    {
+                        VERIFY_ARE_EQUAL_UINT(max, roleType->Roles[i].MaxMemberCount);
+                    }
+                }
+            }
+        }
 
-        auto rolesMap = ref new Platform::Collections::Map<Platform::String^, MultiplayerRoleInfo^>();
-        rolesMap->Insert(L"friend", friendRole);
-        rolesMap->Insert(L"other", otherRole);
-        lfgRoleType->Roles = rolesMap->GetView();
-        squadRoleType->Roles = rolesMap->GetView();
-
-        auto roleTypesMap = ref new Platform::Collections::Map<Platform::String^, MultiplayerRoleType^>();
-        roleTypesMap->Insert(L"lfg", lfgRoleType);
-        roleTypesMap->Insert(L"squad", squadRoleType);
-
-        currentSession->SetMutableRoleSettings(roleTypesMap->GetView());
-        WriteSessionAsyncHelper(currentSession, roleTypesRequestJson);
+        session.Write(testJson["roleTypesRequestJson"]);
     }
+
+    DEFINE_TEST_CASE(TestSetActivityAsync)
+    {
+        MPTestEnv env{};
+        HttpMock mock{ "POST", MPSD_URI "/handles" };
+
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&](HttpMock*, std::string, std::string body)
+            {
+                requestWellFormed &= VerifyJson(testJson["activityJson"], body.data());
+            });
+
+        XblMultiplayerSessionReference activityRef
+        {
+            "MockScid", // serviceConfigurationId
+            "MockSessionTemplateName", // sessionTemplateName
+            "XWIN_7ce12e85-594a-4b3b-9dc3-33b9a4ea57ce" // sessionName
+        };
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblMultiplayerSetActivityAsync(env.XboxLiveContext(), &activityRef, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+    }
+
+    DEFINE_TEST_CASE(TestClearActivityAsync)
+    {
+        MPTestEnv env{};
+
+        // XblMultiplayerClearActivityAsync results in 2 service calls; first to query the activity, and then to clear it. Set up
+        // a mock for each endpoint
+        HttpMock queryActivityMock{ "POST", MPSD_URI };
+        queryActivityMock.SetResponseBody(testJson["activitiesForUserResponseJson"]);
+
+        HttpMock clearActivityMock{ "DELETE", MPSD_URI "/handles/7a4d0a99-4e23-4eba-9894-5173cf123fb4" };
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblMultiplayerClearActivityAsync(env.XboxLiveContext(), MOCK_SCID, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+    }
+
+    DEFINE_TEST_CASE(TestSetTransferHandleAsync)
+    {
+        MPTestEnv env{};
+
+        const auto& responseBody{ testJson["transferHandleResponseJson"] };
+        HttpMock mock{ "POST", MPSD_URI "/handles" };
+        mock.SetResponseBody(responseBody);
+
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&](HttpMock*, std::string, std::string body)
+            {
+                requestWellFormed &= VerifyJson(testJson["transferHandleJson"], body.data());
+            });
+
+        XblMultiplayerSessionReference target
+        {
+            "MockScid", // serviceConfigurationId
+            "MockSessionTemplateName", // sessionTemplateName
+            "XWIN_7ce12e85-594a-4b3b-9dc3-33b9a4ea57ce" // sessionName
+        };
+
+        XblMultiplayerSessionReference origin
+        {
+            "MockScid", // serviceConfigurationId
+            "samplelobbytemplate107", // sessionTemplateName
+            "bd6c41c3-01c3-468a-a3b5-3e0fe8133862" // sessionName
+        };
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblMultiplayerSetTransferHandleAsync(env.XboxLiveContext(), target, origin, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+
+        XblMultiplayerSessionHandleId handleId{};
+        VERIFY_SUCCEEDED(XblMultiplayerSetTransferHandleResult(&async, &handleId));
+        VERIFY_ARE_EQUAL_STR_IGNORE_CASE(responseBody["id"].GetString(), handleId.value);
+    }
+
+    DEFINE_TEST_CASE(TestGetSearchHandlesAsync_1)
+    {
+        MPTestEnv env{};
+
+        MultiplayerSearchDetails::Query(
+            env.XboxLiveContext(),
+            MOCK_SCID,
+            "GlobalLFGTemplate",
+            "OrderBy",
+            true,
+            "SearchQuery"
+        );
+    }
+
+    DEFINE_TEST_CASE(TestGetSearchHandlesAsync_2)
+    {
+        MPTestEnv env{};
+
+        MultiplayerSearchDetails::Query(
+            env.XboxLiveContext(),
+            MOCK_SCID,
+            "GlobalLFGTemplate",
+            "OrderBy",
+            true,
+            "SearchQuery",
+            "favorites",
+            testJson["searchHandlesWithSocialGroupRequestJson"]
+        );
+    }
+
+    DEFINE_TEST_CASE(TestSetSearchHandleAsync)
+    {
+        MPTestEnv env{};
+
+        XblMultiplayerSessionReference sessionRef
+        {
+            MOCK_SCID,
+            "GlobalLFGSessionTemplateName",
+            "LFGSession"
+        };
+
+        std::vector<XblMultiplayerSessionTag> tags{ { "micsrequired" }, { "girlsonly" } };
+        std::vector<XblMultiplayerSessionNumberAttribute> numberAttributes{ { "Skill_D", 10.145 }, { "Skill_I", 14 } };
+        std::vector<XblMultiplayerSessionStringAttribute> stringAttributes{ { "Class", "A" } };
+
+        MultiplayerSearchDetails::Create(
+            env.XboxLiveContext(),
+            sessionRef,
+            tags,
+            numberAttributes,
+            stringAttributes
+        );
+    }
+
+    DEFINE_TEST_CASE(TestClearSearchHandleAsync)
+    {
+        MPTestEnv env{};
+
+        HttpMock mock{"DELETE", MPSD_URI "/handles/TestHandleId" };
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblMultiplayerDeleteSearchHandleAsync(env.XboxLiveContext(), "TestHandleId", &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+    }
+
+    DEFINE_TEST_CASE(TestSendInvitesAsync)
+    {
+        MPTestEnv env{};
+
+        std::vector<uint64_t> xuids{ 1111, 2222 };
+
+        HttpMock mock{ "POST", MPSD_URI "/handles" };
+
+        // Inviting multiple Xuids results in multiple Http calls. Make sure the expected number of calls go out
+        size_t requestCount{ 0 };
+        bool requestsWellFormed{ true };
+        const char* responseIds[] = { "B8704EC5-95CD-408B-BD41-BAA7A2761CC2", "9D74C42E-87DE-47BA-B489-D3A264C9F994" };
+        const auto& expectedRequestBodyTemplate{ testJson["inviteRequestJson"] };
+        const auto& responseBodyTemplate{ testJson["inviteResponseJson"] };
+
+        mock.SetMockMatchedCallback(
+            [&](HttpMock* mock, std::string uri, std::string body)
+            {
+                UNREFERENCED_PARAMETER(uri);
+
+                if (requestCount < xuids.size())
+                {
+                    {
+                        JsonDocument expectedRequest;
+                        auto& a{ expectedRequest.GetAllocator() };
+                        expectedRequest.CopyFrom(expectedRequestBodyTemplate, a, false);
+                        JsonUtils::SetMember(expectedRequest, "invitedXuid", JsonValue{ Utils::StringFromUint64(xuids[requestCount]).data(), a });
+
+                        requestsWellFormed &= VerifyJson(expectedRequest, body.data());
+                    }
+                    {
+                        JsonDocument response;
+                        auto& a{ response.GetAllocator() };
+                        response.CopyFrom(responseBodyTemplate, a, false);
+                        JsonUtils::SetMember(response, "invitedXuid", JsonValue{ Utils::StringFromUint64(xuids[requestCount]).data(), a });
+                        JsonUtils::SetMember(response, "id", JsonValue{ responseIds[requestCount], a });
+
+                        mock->SetResponseBody(response);
+                    }
+                }
+                requestCount++;
+            }
+        );
+
+        XblMultiplayerSessionReference sessionRef
+        {
+            MOCK_SCID,
+            "MockSessionTemplateName",
+            "XWIN_7ce12e85-594a-4b3b-9dc3-33b9a4ea57ce"
+        };
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblMultiplayerSendInvitesAsync(
+            env.XboxLiveContext(),
+            &sessionRef,
+            xuids.data(),
+            xuids.size(),
+            MOCK_TITLEID,
+            nullptr,
+            nullptr,
+            &async
+        ));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_ARE_EQUAL_UINT(xuids.size(), requestCount);
+        VERIFY_IS_TRUE(requestsWellFormed);
+
+        std::vector<XblMultiplayerInviteHandle> inviteHandles(xuids.size());
+        VERIFY_SUCCEEDED(XblMultiplayerSendInvitesResult(&async, inviteHandles.size(), inviteHandles.data()));
+
+        for (size_t i = 0; i < inviteHandles.size(); ++i)
+        {
+            VERIFY_ARE_EQUAL_STR_IGNORE_CASE(responseIds[i], inviteHandles[i].Data);
+        }
+    }
+
+    void VerifyGetActivitiesForUsers(MPTestEnv& env, bool withProperties)
+    {
+        HttpMock mock{ "POST", MPSD_URI "/handles" };
+        mock.SetResponseBody(testJson["activitiesForUserResponseJson"]);
+
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback([&](HttpMock* mock, std::string uri, std::string body)
+        {
+            UNREFERENCED_PARAMETER(mock);
+            UNREFERENCED_PARAMETER(uri);
+            requestWellFormed &= VerifyJson(testJson["activitiesForUserRequestJson"], body.data());
+        });
+
+        XAsyncBlock async{};
+        uint64_t xuids[] = { 1234 };
+        if (withProperties)
+        {
+            VERIFY_SUCCEEDED(XblMultiplayerGetActivitiesWithPropertiesForUsersAsync(env.XboxLiveContext(), MOCK_SCID, xuids, _countof(xuids), &async));
+        }
+        else
+        {
+            VERIFY_SUCCEEDED(XblMultiplayerGetActivitiesForUsersAsync(env.XboxLiveContext(), MOCK_SCID, xuids, _countof(xuids), &async));
+        }
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+
+        const auto& resultsJson{ testJson["activitiesForUserResponseJson"]["results"].GetArray() };
+
+        size_t resultSize{};
+        size_t resultCount{};
+        if (withProperties)
+        {
+            VERIFY_SUCCEEDED(XblMultiplayerGetActivitiesWithPropertiesForUsersResultSize(&async, &resultSize));
+        }
+        else
+        {
+            VERIFY_SUCCEEDED(XblMultiplayerGetActivitiesForUsersResultCount(&async, &resultCount));
+            VERIFY_ARE_EQUAL_UINT(resultsJson.Size(), resultCount);
+        }
+
+        size_t count{ 0 };
+        std::vector<char> buffer(resultSize, 0);
+        std::vector<XblMultiplayerActivityDetails> activityDetailsVector{};
+        XblMultiplayerActivityDetails* activityDetails{};
+        if (withProperties)
+        {
+            VERIFY_SUCCEEDED(XblMultiplayerGetActivitiesWithPropertiesForUsersResult(&async, resultSize, buffer.data(), &activityDetails, &count, nullptr));
+            VERIFY_ARE_EQUAL_UINT(resultsJson.Size(), count);
+        }
+        else
+        {
+            count = resultCount;
+            activityDetailsVector = std::vector<XblMultiplayerActivityDetails>(resultCount);
+            VERIFY_SUCCEEDED(XblMultiplayerGetActivitiesForUsersResult(&async, resultCount, activityDetailsVector.data()));
+            activityDetails = activityDetailsVector.data();
+        }
+
+        for (uint32_t i = 0; i < count; ++i)
+        {
+            const auto& a{ activityDetails[i] };
+            const auto& e{ resultsJson[i] };
+
+            VerifyMultiplayerSessionReference(a.SessionReference, e["sessionRef"]);
+            VERIFY_ARE_EQUAL_STR_IGNORE_CASE(e["id"].GetString(), a.HandleId);
+            VERIFY_JSON_INT_STRING(e, "titleId", a.TitleId);
+            VERIFY_IS_TRUE(multiplayer::Serializers::MultiplayerSessionVisibilityFromString(e["relatedInfo"]["visibility"].GetString()) == a.Visibility);
+            VERIFY_IS_TRUE(multiplayer::Serializers::MultiplayerSessionRestrictionFromString(e["relatedInfo"]["joinRestriction"].GetString()) == a.JoinRestriction);
+            VERIFY_ARE_EQUAL(e["relatedInfo"]["closed"].GetBool(), a.Closed);
+            VERIFY_JSON_INT_STRING(e, "ownerXuid", a.OwnerXuid);
+            VERIFY_ARE_EQUAL_UINT(e["relatedInfo"]["maxMembersCount"].GetUint(), a.MaxMembersCount);
+            VERIFY_ARE_EQUAL_UINT(e["relatedInfo"]["membersCount"].GetUint(), a.MembersCount);
+        }
+    }
+
+    void VerifyGetActivitiesForSocialGroup(MPTestEnv& env, bool withProperties)
+    {
+        HttpMock mock{ "POST", MPSD_URI "/handles" };
+        mock.SetResponseBody(testJson["activitiesForSocialGroupResponseJson"]);
+
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback([&](HttpMock* mock, std::string uri, std::string body)
+        {
+            UNREFERENCED_PARAMETER(mock);
+            UNREFERENCED_PARAMETER(uri);
+            requestWellFormed &= VerifyJson(testJson["activitiesForSocialGroupRequestJson"], body.data());
+        });
+
+        XAsyncBlock async{};
+        if (withProperties)
+        {
+            VERIFY_SUCCEEDED(XblMultiplayerGetActivitiesWithPropertiesForSocialGroupAsync(
+                env.XboxLiveContext(),
+                MOCK_SCID,
+                env.XboxLiveContext()->Xuid(),
+                "friends",
+                &async
+            ));
+        }
+        else
+        {
+            VERIFY_SUCCEEDED(XblMultiplayerGetActivitiesForSocialGroupAsync(
+                env.XboxLiveContext(),
+                MOCK_SCID,
+                env.XboxLiveContext()->Xuid(),
+                "friends",
+                &async
+            ));
+        }
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+
+        if (withProperties)
+        {
+            size_t resultSize{};
+            VERIFY_SUCCEEDED(XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResultSize(&async, &resultSize));
+            VERIFY_ARE_EQUAL_UINT(0, resultSize);
+        }
+        else
+        {
+            size_t resultCount{};
+            VERIFY_SUCCEEDED(XblMultiplayerGetActivitiesForSocialGroupResultCount(&async, &resultCount));
+            VERIFY_ARE_EQUAL_UINT(0, resultCount);
+        }
+    }
+
+    DEFINE_TEST_CASE(TestGetActivitiesForUsersAsync)
+    {
+        MPTestEnv env{};
+
+        VerifyGetActivitiesForUsers(env, false);
+        VerifyGetActivitiesForUsers(env, true);
+    }
+
+    DEFINE_TEST_CASE(TestGetActivitiesForSocialGroupAsync)
+    {
+        MPTestEnv env{};
+
+        VerifyGetActivitiesForSocialGroup(env, false);
+        VerifyGetActivitiesForSocialGroup(env, true);
+    }
+
+    DEFINE_TEST_CASE(TestCompareMultiplayerSessions)
+    {
+        MPTestEnv env{};
+
+        {
+            XblMultiplayerSessionReference sessionRef
+            {
+                "361D0DAA-620E-4975-B64C-0C32500D41EF",
+                "MySessionTemplate",
+                "32A53A76-9802-42C7-A28E-4FD483301D8B"
+            };
+
+            const uint64_t initiators[] = { 12323 };
+            XblMultiplayerSessionInitArgs initArgs
+            {
+                50, // maxMembersInSession
+                XblMultiplayerSessionVisibility::Full,
+                initiators,
+                _countof(initiators),
+                nullptr
+            };
+
+            auto lhs = MultiplayerSession::Create(env.XboxLiveContext(), &sessionRef, &initArgs);
+            XblMultiplayerSessionSetClosed(lhs.Handle(), true);
+            XblMultiplayerSessionSetLocked(lhs.Handle(), true);
+            VERIFY_SUCCEEDED(XblMultiplayerSessionSetCustomPropertyJson(lhs.Handle(), "hello", "\"goodbye\""));
+            VERIFY_SUCCEEDED(XblMultiplayerSessionJoin(lhs.Handle(), nullptr, false, false));
+
+            auto rhs = MultiplayerSession::Get(env.XboxLiveContext());
+
+            XblMultiplayerSessionChangeTypes expectedChanges
+            {
+                XblMultiplayerSessionChangeTypes::MemberListChange |
+                XblMultiplayerSessionChangeTypes::HostDeviceTokenChange |
+                XblMultiplayerSessionChangeTypes::InitializationStateChange |
+                XblMultiplayerSessionChangeTypes::MatchmakingStatusChange |
+                XblMultiplayerSessionChangeTypes::SessionJoinabilityChange |
+                XblMultiplayerSessionChangeTypes::CustomPropertyChange |
+                XblMultiplayerSessionChangeTypes::MemberStatusChange // TODO what should member's default status be on join?
+            };
+            auto changes = XblMultiplayerSessionCompare(rhs.Handle(), lhs.Handle());
+            VERIFY_IS_TRUE(changes == expectedChanges);
+        }
+
+        {
+            // Test MatchmakingStatusChange for different target session refs.
+            auto lhs = MultiplayerSession::Create(env.XboxLiveContext());
+            auto rhs = MultiplayerSession::Get(env.XboxLiveContext(), defaultSessionReference, testJson["MultiplayerResponseForComparingSessions"]);
+
+            auto changes = XblMultiplayerSessionCompare(rhs.Handle(), lhs.Handle());
+            VERIFY_IS_TRUE(static_cast<XblMultiplayerSessionChangeTypes>(changes & XblMultiplayerSessionChangeTypes::MatchmakingStatusChange) == XblMultiplayerSessionChangeTypes::MatchmakingStatusChange);
+        }
+    }
+
+    // RAII wrapper for session changed RTA event handler
+    class SessionChangedHandler
+    {
+    public:
+        SessionChangedHandler(
+            XblContextHandle context,
+            std::function<void(const XblMultiplayerSessionChangeEventArgs&)> handler
+        ) noexcept
+            : m_handler{ std::move(handler) }
+        {
+            VERIFY_SUCCEEDED(XblContextDuplicateHandle(context, &m_context));
+            m_token = XblMultiplayerAddSessionChangedHandler(m_context,
+                [](void* context, XblMultiplayerSessionChangeEventArgs args)
+                {
+                    auto pThis{ static_cast<SessionChangedHandler*>(context) };
+                    pThis->m_handler(args);
+                }, this
+            );
+        }
+
+        ~SessionChangedHandler() noexcept
+        {
+            XblMultiplayerRemoveSessionChangedHandler(m_context, m_token);
+            XblContextCloseHandle(m_context);
+        }
+
+    private:
+        XblFunctionContext m_token{};
+        XblContextHandle m_context{ nullptr };
+        std::function<void(const XblMultiplayerSessionChangeEventArgs&)> m_handler;
+    };
+
+    // RAII wrapper for subscription lost handler
+    class SubscriptionLostHandler
+    {
+    public:
+        SubscriptionLostHandler(
+            XblContextHandle context,
+            std::function<void()> handler
+        ) noexcept
+            : m_handler{ std::move(handler) }
+        {
+            VERIFY_SUCCEEDED(XblContextDuplicateHandle(context, &m_context));
+            m_token = XblMultiplayerAddSubscriptionLostHandler(m_context,
+                [](void* context)
+                {
+                    auto pThis{ static_cast<SubscriptionLostHandler*>(context) };
+                    pThis->m_handler();
+                }, this
+            );
+        }
+
+        ~SubscriptionLostHandler() noexcept
+        {
+            XblMultiplayerRemoveSubscriptionLostHandler(m_context, m_token);
+            XblContextCloseHandle(m_context);
+        }
+
+    private:
+        XblFunctionContext m_token{};
+        XblContextHandle m_context{ nullptr };
+        std::function<void()> m_handler;
+    };
+
+    DEFINE_TEST_CASE(TestRTAMultiplayer)
+    {
+        MPTestEnv env{};
+        auto& mockRtaService{ MockRealTimeActivityService::Instance() };
+        
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        {
+            if (uri == MPSD_RTA_URI)
+            {
+                mockRtaService.CompleteSubscribeHandshake(n, JsonUtils::SerializeJson(testJson["rtaConnectionIdJson"]).data());
+            }
+        });
+
+        VERIFY_SUCCEEDED(XblMultiplayerSetSubscriptionsEnabled(env.XboxLiveContext(), true));
+
+        auto session = MultiplayerSession::Create(env.XboxLiveContext());
+        // Subscriptions are not relevant if we are not in the session
+        VERIFY_SUCCEEDED(XblMultiplayerSessionJoin(session.Handle(), nullptr, false, false));
+
+        HttpMock mock{ "PUT", MPSD_URI };
+        mock.SetResponseBody(defaultSessionJson);
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblMultiplayerWriteSessionAsync(
+            env.XboxLiveContext(),
+            session.Handle(),
+            XblMultiplayerSessionWriteMode::CreateNew,
+            &async
+        ));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_SUCCEEDED(XblMultiplayerWriteSessionResult(&async, nullptr));
+
+        Event sessionChanged{};
+        const JsonValue& rtaUpdateJson{ testJson["rtaSessionUpdateJson"] };
+
+        SessionChangedHandler sessionChangedHandler{ env.XboxLiveContext(),
+            [&](const XblMultiplayerSessionChangeEventArgs& args)
+        {
+            const auto& tap{ rtaUpdateJson["shoulderTaps"].GetArray()[0] };
+            auto resourceSplit{ utils::string_split(tap["resource"].GetString(), '~') };
+
+            VERIFY_ARE_EQUAL_STR(resourceSplit[0], args.SessionReference.Scid);
+            VERIFY_ARE_EQUAL_STR(resourceSplit[1], args.SessionReference.SessionTemplateName);
+            VERIFY_ARE_EQUAL_STR(resourceSplit[2], args.SessionReference.SessionName);
+            VERIFY_ARE_EQUAL_STR(tap["branch"].GetString(), args.Branch);
+            VERIFY_ARE_EQUAL_UINT(tap["changeNumber"].GetUint64(), args.ChangeNumber);
+
+            sessionChanged.Set();
+        }
+        };
+
+        Event subscriptionLost{};
+        SubscriptionLostHandler subLostHandler{ env.XboxLiveContext(), [&] { subscriptionLost.Set(); } };
+
+        // Send an rta event and wait until our session changed handler is invoked
+        mockRtaService.RaiseEvent(MPSD_RTA_URI, JsonUtils::SerializeJson(rtaUpdateJson).data());
+        sessionChanged.Wait();
+
+        // Disconnect socket and wait until our subscription lost handler is invoked
+        MockWebsocket::SetConnectHandler([] { return WebsocketResult{ E_FAIL }; });
+        mockRtaService.DisconnectClient(env.XboxLiveContext()->Xuid());
+        subscriptionLost.Wait();
+    }
+
+    DEFINE_TEST_CASE(TestRTADisableMultiplayerSubscriptions)
+    {
+        MPTestEnv env{};
+
+        // Auto confirm subscriptions
+        auto& mockRtaService{ MockRealTimeActivityService::Instance() };
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        {
+            if (uri == MPSD_RTA_URI)
+            {
+                mockRtaService.CompleteSubscribeHandshake(n, JsonUtils::SerializeJson(testJson["rtaConnectionIdJson"]).data());
+            }
+        });
+
+        VERIFY_SUCCEEDED(XblMultiplayerSetSubscriptionsEnabled(env.XboxLiveContext(), true));
+
+        Event subLost;
+        SubscriptionLostHandler handler{
+            env.XboxLiveContext(),
+            [&] { subLost.Set(); }
+        };
+
+        VERIFY_SUCCEEDED(XblMultiplayerSetSubscriptionsEnabled(env.XboxLiveContext(), false));
+        subLost.Wait();
+    }
+
+    DEFINE_TEST_CASE(TestMultiplayerSubscribeChangeTypes)
+    {
+        MPTestEnv env{};
+
+        auto session = MultiplayerSession::Create(env.XboxLiveContext());
+        VERIFY_SUCCEEDED(XblMultiplayerSessionJoin(session.Handle(), nullptr, false, false));
+
+        VERIFY_IS_TRUE(XblMultiplayerSessionSubscribedChangeTypes(session.Handle()) == XblMultiplayerSessionChangeTypes::None);
+
+        XblMultiplayerSessionChangeTypes changeTypes
+        {
+            XblMultiplayerSessionChangeTypes::CustomPropertyChange |
+            XblMultiplayerSessionChangeTypes::HostDeviceTokenChange |
+            XblMultiplayerSessionChangeTypes::InitializationStateChange |
+            XblMultiplayerSessionChangeTypes::MatchmakingStatusChange |
+            XblMultiplayerSessionChangeTypes::MemberCustomPropertyChange |
+            XblMultiplayerSessionChangeTypes::MemberListChange |
+            XblMultiplayerSessionChangeTypes::MemberStatusChange |
+            XblMultiplayerSessionChangeTypes::SessionJoinabilityChange
+        };
+
+        VERIFY_SUCCEEDED(XblMultiplayerSessionSetSessionChangeSubscription(session.Handle(), changeTypes));
+        VERIFY_IS_TRUE(XblMultiplayerSessionSubscribedChangeTypes(session.Handle()) == changeTypes);
+
+        HttpMock mock{ "PUT", MPSD_URI };
+        mock.SetResponseBody(defaultSessionJson);
+
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&](HttpMock* /*mock*/, std::string /*uri*/, std::string body)
+            {
+                // Skip verification of the subId since its a random GUID
+                JsonDocument bodyJson;
+                bodyJson.Parse(body.data());
+                if (bodyJson.HasMember("members") &&
+                    bodyJson["members"].HasMember("me") &&
+                    bodyJson["members"]["me"].HasMember("properties") &&
+                    bodyJson["members"]["me"]["properties"].HasMember("system") &&
+                    bodyJson["members"]["me"]["properties"]["system"].HasMember("subscription"))
+                {
+                    bodyJson["members"]["me"]["properties"]["system"]["subscription"].EraseMember("id");
+                }
+
+                requestWellFormed = (testJson["setSessionChangeTypesJson"] == bodyJson);
+            }
+        );
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblMultiplayerWriteSessionAsync(
+            env.XboxLiveContext(),
+            session.Handle(),
+            XblMultiplayerSessionWriteMode::UpdateOrCreateNew,
+            &async)
+        );
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+        VERIFY_SUCCEEDED(XblMultiplayerWriteSessionResult(&async, nullptr));
+    }
+
+    DEFINE_TEST_CASE(Test204Response)
+    {
+        MPTestEnv env{};
+
+        HttpMock mock{ "", MPSD_URI, 204 };
+        mock.SetResponseBody(JsonValue{ rapidjson::kObjectType });
+
+        {
+            auto session = MultiplayerSession::Create(env.XboxLiveContext());
+
+            XAsyncBlock async{};
+            VERIFY_SUCCEEDED(XblMultiplayerWriteSessionAsync(
+                env.XboxLiveContext(),
+                session.Handle(),
+                XblMultiplayerSessionWriteMode::CreateNew,
+                &async
+            ));
+
+            auto hr = XAsyncGetStatus(&async, true);
+            VERIFY_ARE_EQUAL(S_OK, hr);
+            hr = XblMultiplayerWriteSessionResult(&async, nullptr);
+            VERIFY_ARE_EQUAL(S_OK, hr);
+        }
+
+        {
+            XblMultiplayerSessionReference ref
+            {
+                "8d050174-412b-4d51-a29b-d55a34edfdb7",
+                "integration",
+                "19de0095d8bb41048f19edbbb6bc6b04"
+            };
+
+            XAsyncBlock async{};
+            VERIFY_SUCCEEDED(XblMultiplayerGetSessionAsync(env.XboxLiveContext(), &ref, &async));
+
+            auto hr = XAsyncGetStatus(&async, true);
+            VERIFY_ARE_EQUAL(S_OK, hr);
+
+            XblMultiplayerSessionHandle sessionHandle{ nullptr };
+            XblMultiplayerGetSessionResult(&async, &sessionHandle);
+            VERIFY_ARE_EQUAL(S_OK, hr);
+
+            if (sessionHandle)
+            {
+                XblMultiplayerSessionCloseHandle(sessionHandle);
+            }
+        }
+    }
+
+    DEFINE_TEST_CASE(TestMultiplayerInvalidArgs)
+    {
+#pragma warning(push)
+#pragma warning(disable : 6387)
+        MPTestEnv env{};
+        auto context{ env.XboxLiveContext() };
+        XAsyncBlock async{};
+        auto dummySession{ std::make_shared<XblMultiplayerSession>(context->Xuid()) };
+
+        // Create a session with an invalid SessionRef
+        // TODO there is no validation here right now
+        // TODO should XblMutliplayerSessionCreateHandle return an HR
+        //XblMultiplayerSessionReference ref{};
+        //XblMultiplayerSessionCreateHandle(context->Xuid(), &ref, nullptr);
+        //VERIFY_ARE_EQUAL(E_INVALIDARG, hr);
+
+        // Write null session
+        VERIFY_INVALIDARG(XblMultiplayerWriteSessionAsync(context, nullptr, XblMultiplayerSessionWriteMode::UpdateOrCreateNew, &async));
+
+        // Get session with null sessionRef
+        VERIFY_INVALIDARG(XblMultiplayerGetSessionAsync(context, nullptr, &async));
+
+        // Query sessions with invalid query params
+        XblMultiplayerSessionQuery query
+        {
+            MOCK_SCID,  // scid
+            100,    // maxItems
+            false,  // includePrivateSessions
+            false,  // includeReservations
+            false,  // includeInactiveSessions
+            nullptr,    // xuidFilters
+            0,  // xuidFiltersCount
+            "keyword",    // keywordFilter
+            "bar",  // sessionTemplateNameFilter
+            XblMultiplayerSessionVisibility::Unknown, // visibilityFilter (invalid, should never be Unknown)
+            0 // contractVersionFilter
+        };
+
+        VERIFY_INVALIDARG(XblMultiplayerQuerySessionsAsync(context, &query, &async));
+
+        query.VisibilityFilter = XblMultiplayerSessionVisibility::Any;
+        query.KeywordFilter = nullptr; // Must specify either Xuid filters or Keyword filters
+        VERIFY_INVALIDARG(XblMultiplayerQuerySessionsAsync(context, &query, &async));
+
+        query.IncludeReservations = true; // Must specify Xuid filter to use this
+        VERIFY_INVALIDARG(XblMultiplayerQuerySessionsAsync(context, &query, &async));
+
+        query.IncludeReservations = false;
+        query.IncludeInactiveSessions = true; // Must specify Xuid filter to use this
+        VERIFY_INVALIDARG(XblMultiplayerQuerySessionsAsync(context, &query, &async));
+
+        // Write by handle with null session
+        VERIFY_INVALIDARG(XblMultiplayerWriteSessionByHandleAsync(
+            context,
+            nullptr,
+            XblMultiplayerSessionWriteMode::CreateNew,
+            "handle",
+            &async
+        ));
+
+        // Write by handle with null handle
+        VERIFY_INVALIDARG(XblMultiplayerWriteSessionByHandleAsync(
+            context,
+            dummySession.get(),
+            XblMultiplayerSessionWriteMode::CreateNew,
+            nullptr,
+            &async
+        ));
+
+        // Get session with null handle
+        VERIFY_INVALIDARG(XblMultiplayerGetSessionByHandleAsync(context, nullptr, &async));
+
+        const uint64_t xuids[] = { 1234 };
+
+        // Get activities with null scid
+        VERIFY_INVALIDARG(XblMultiplayerGetActivitiesForUsersAsync(context, nullptr, xuids, _countof(xuids), &async));
+        VERIFY_INVALIDARG(XblMultiplayerGetActivitiesWithPropertiesForUsersAsync(context, nullptr, xuids, _countof(xuids), &async));
+
+        // Get activities with null xuids array
+        VERIFY_INVALIDARG(XblMultiplayerGetActivitiesForUsersAsync(context, MOCK_SCID, nullptr, _countof(xuids), &async));
+        VERIFY_INVALIDARG(XblMultiplayerGetActivitiesWithPropertiesForUsersAsync(context, MOCK_SCID, nullptr, _countof(xuids), &async));
+
+        // Get activities with empty xuids array
+        VERIFY_INVALIDARG(XblMultiplayerGetActivitiesForUsersAsync(context, MOCK_SCID, xuids, 0, &async));
+        VERIFY_INVALIDARG(XblMultiplayerGetActivitiesWithPropertiesForUsersAsync(context, MOCK_SCID, xuids, 0, &async));
+
+        // Set activity with null sessionRef
+        VERIFY_INVALIDARG(XblMultiplayerSetActivityAsync(context, nullptr, &async));
+
+        // Clear activity with null scid
+        VERIFY_INVALIDARG(XblMultiplayerClearActivityAsync(context, nullptr, &async));
+
+        XblMultiplayerSessionReference ref
+        {
+            "0001",
+            "testTemplate",
+            "testSessionName"
+        };
+
+        // Send invites with null xuids array
+        VERIFY_INVALIDARG(XblMultiplayerSendInvitesAsync(context, &ref, nullptr, _countof(xuids), MOCK_TITLEID, nullptr, nullptr, &async));
+
+        // Send invites with empty xuids array
+        VERIFY_INVALIDARG(XblMultiplayerSendInvitesAsync(context, &ref, xuids, 0, MOCK_TITLEID, nullptr, nullptr, &async));
+
+        // Send invites with null sessionRef
+        VERIFY_INVALIDARG(XblMultiplayerSendInvitesAsync(context, nullptr, xuids, _countof(xuids), MOCK_TITLEID, nullptr, nullptr, &async));
+
+        VERIFY_SUCCEEDED(XblMultiplayerSetSubscriptionsEnabled(context, true));
+
+        // Setting constants on an pre-existing session
+        auto session{ MultiplayerSession::Get(context) };
+
+        VERIFY_ARE_EQUAL(
+            E_UNEXPECTED,
+            XblMultiplayerSessionConstantsSetTimeouts(session.Handle(), 0, 0, 0, 0)
+        );
+
+        VERIFY_ARE_EQUAL(
+            E_UNEXPECTED,
+            XblMultiplayerSessionConstantsSetQosConnectivityMetrics(session.Handle(), true, true, true, true)
+        );
+
+        VERIFY_ARE_EQUAL(
+            E_UNEXPECTED,
+            XblMultiplayerSessionConstantsSetMemberInitialization(session.Handle(), XblMultiplayerMemberInitialization{})
+        );
+
+        VERIFY_ARE_EQUAL(
+            E_UNEXPECTED,
+            XblMultiplayerSessionConstantsSetPeerToPeerRequirements(session.Handle(), XblMultiplayerPeerToPeerRequirements{})
+        );
+
+        VERIFY_ARE_EQUAL(
+            E_UNEXPECTED,
+            XblMultiplayerSessionConstantsSetPeerToHostRequirements(session.Handle(), XblMultiplayerPeerToHostRequirements{})
+        );
+
+        VERIFY_ARE_EQUAL(
+            E_UNEXPECTED,
+            XblMultiplayerSessionConstantsSetCapabilities(session.Handle(), XblMultiplayerSessionCapabilities{})
+        );
+
+        VERIFY_SUCCEEDED(XblMultiplayerSessionJoin(session.Handle(), nullptr, false, false));
+        // Double join a session
+        VERIFY_ARE_EQUAL(
+            E_UNEXPECTED,
+            XblMultiplayerSessionJoin(session.Handle(), nullptr, false, false)
+        );
+        // Leave a session without being joined
+        // TODO should this really be an error? even though the join isn't written, this feels like it should be valid
+        VERIFY_ARE_EQUAL(
+            E_UNEXPECTED,
+            XblMultiplayerSessionLeave(session.Handle())
+        );
+#pragma warning(pop)
+    }
+
+    DEFINE_TEST_CASE(TestTournamentsDeprecated)
+    {
+        XBL_WARNING_PUSH;
+        XBL_WARNING_DISABLE_DEPRECATED;
+        XblTournamentReference xbltourref{};
+        memcpy(xbltourref.Scid, "1234", XBL_SCID_LENGTH);
+
+        HRESULT hr = XblMultiplayerSessionConstantsSetArbitrationTimeouts(nullptr, 0, 0);
+        VERIFY_ARE_EQUAL(hr, E_NOTIMPL);
+
+        auto result = XblMultiplayerSessionArbitrationServer(nullptr);
+        VERIFY_ARE_EQUAL(result, nullptr);
+
+        auto result2 = XblMultiplayerSessionTournamentsServer(nullptr);
+        VERIFY_ARE_EQUAL(result2, nullptr);
+
+        auto result3 = XblMultiplayerSessionArbitrationStatus(nullptr);
+        VERIFY_IS_TRUE(result3 == XblTournamentArbitrationStatus::Incomplete);
+
+        hr = XblMultiplayerEventArgsTournamentRegistrationStateChanged(nullptr, nullptr, nullptr);
+        VERIFY_ARE_EQUAL(hr, E_NOTIMPL);
+
+        hr = XblMultiplayerEventArgsTournamentGameSessionReady(nullptr, nullptr);
+        VERIFY_ARE_EQUAL(hr, E_NOTIMPL);
+
+        auto result4 = XblMultiplayerManagerLobbySessionLastTournamentTeamResult();
+        VERIFY_ARE_EQUAL(result4, nullptr);
+
+        XblMultiplayerSessionCapabilities cap{};
+        cap.Team = true;
+
+        XblMultiplayerTournamentsServer server{};
+        XBL_WARNING_POP;
+    }
+};
+
+const JsonDocument MultiplayerTests::testJson{ GetTestResponses("TestResponses\\Multiplayer.json") };
+const JsonValue& MultiplayerTests::defaultSessionJson{ testJson["defaultSessionDocument"] };
+
+const XblMultiplayerSessionReference MultiplayerTests::defaultSessionReference
+{
+    "8d050174-412b-4d51-a29b-d55a34edfdb7",
+    "integration",
+    "19de0095d8bb41048f19edbbb6bc6b04"
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

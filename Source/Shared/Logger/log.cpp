@@ -9,23 +9,24 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 void logger::add_log_output(std::shared_ptr<log_output> output)
 {
     m_log_outputs.emplace_back(output); 
-    if (output->level_setting() == log_output_level_setting::use_logger_setting)
-    {
-        output->set_log_level(m_logLevel);
-    }
 };
 
-void logger::set_log_level(log_level level)
+void logger::set_log_level(HCTraceLevel level)
 {
-    m_logLevel = level;
+    HCSettingsSetTraceLevel(level);
+}
 
+bool logger::is_log_enabled(HCTraceLevel level)
+{
     for (const auto& output : m_log_outputs)
     {
-        if (output->level_setting() == log_output_level_setting::use_logger_setting)
+        if (output->log_level_enabled(level))
         {
-            output->set_log_level(level);
+            return true;
         }
     }
+
+    return false;
 }
 
 void logger::add_log(const log_entry& logEntry)
