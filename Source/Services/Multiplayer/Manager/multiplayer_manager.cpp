@@ -2,138 +2,127 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/multiplayer.h"
-#include "xsapi/multiplayer_manager.h"
 #include "multiplayer_manager_internal.h"
 
-#if defined __cplusplus_winrt
-using namespace Platform;
-using namespace Windows::Foundation::Collections;
-#endif
 using namespace xbox::services;
+using namespace xbox::services::system;
 using namespace xbox::services::multiplayer;
+using namespace xbox::services::multiplayer::manager;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 
-multiplayer_manager::multiplayer_manager() :
-    m_joinability(joinability::none),
-    m_isDirty(false)
+MultiplayerManager::~MultiplayerManager()
 {
-}
-
-std::shared_ptr<multiplayer_manager>
-multiplayer_manager::get_singleton_instance()
-{
-    auto xsapiSingleton = get_xsapi_singleton();
-    std::lock_guard<std::mutex> guard(xsapiSingleton->m_singletonLock);
-    if (xsapiSingleton->m_multiplayerManagerInstance == nullptr)
+    if (m_queue)
     {
-        xsapiSingleton->m_multiplayerManagerInstance = std::shared_ptr<multiplayer_manager>(new multiplayer_manager());
+        XTaskQueueCloseHandle(m_queue);
     }
-
-    return xsapiSingleton->m_multiplayerManagerInstance;
 }
 
-void
-multiplayer_manager::initialize(
-    _In_ string_t lobbySessionTemplateName
-    )
+bool MultiplayerManager::IsInitialized()
+{
+    return m_multiplayerClientManager != nullptr;
+}
+
+void MultiplayerManager::Initialize(
+    _In_ const xsapi_internal_string& lobbySessionTemplateName,
+    _In_opt_ XTaskQueueHandle asyncQueue
+)
 {
     XSAPI_ASSERT(!lobbySessionTemplateName.empty());
+
+    if (asyncQueue)
+    {
+        XTaskQueueDuplicateHandle(asyncQueue, &m_queue);
+    }
 
     std::lock_guard<std::mutex> guard(m_lock);
     if(m_multiplayerClientManager != nullptr)
     {
-        m_multiplayerClientManager->shutdown();
+        m_multiplayerClientManager->Shutdown();
 
         m_multiplayerLobbySession = nullptr;
+        m_multiplayerGameSession = nullptr;
         m_multiplayerClientManager = nullptr;
     }
 
-    m_multiplayerClientManager = std::make_shared<multiplayer_client_manager>(
-        lobbySessionTemplateName
-        );
+    m_multiplayerClientManager = MakeShared<MultiplayerClientManager>(lobbySessionTemplateName, m_queue);
 
-    m_multiplayerClientManager->register_local_user_manager_events();
-    m_multiplayerLobbySession = std::make_shared<multiplayer_lobby_session>(m_multiplayerClientManager);
+    m_multiplayerClientManager->RegisterLocalUserManagerEvents();
+    m_multiplayerLobbySession = std::make_shared<MultiplayerLobbySession>(m_multiplayerClientManager);
 }
 
-bool
-multiplayer_manager::_Is_dirty()
+bool MultiplayerManager::IsDirty()
 {
     return m_isDirty;
 }
 
-std::vector<multiplayer_event>
-multiplayer_manager::do_work()
+const MultiplayerEventQueue& MultiplayerManager::DoWork()
 {
     std::lock_guard<std::mutex> guard(m_lock);
+    m_eventQueue.Clear();
 
-    if (m_multiplayerClientManager == nullptr)
+    if (!IsInitialized())
     {
-        m_isDirty = false;
-
         // The title hasn't called initialize() on the manager yet.
-        return std::vector<multiplayer_event>();
+        m_isDirty = false;
+        return m_eventQueue;
     }
-    else if (!m_multiplayerClientManager->is_update_avaialable())
+    else if (!m_multiplayerClientManager->IsUpdateAvailable())
     {
         m_isDirty = false;
 
         // To handle the scenario of returning InvitedXuid info in the join_lobby_completed event
-        std::vector<multiplayer_event> eventQueue; 
-        if (m_multiplayerClientManager->event_queue().size() > 0)
+        if (m_multiplayerClientManager->EventQueue().Size() > 0)
         {
-            eventQueue = m_multiplayerClientManager->event_queue();
-            m_multiplayerClientManager->clear_event_queue();
+            m_eventQueue = m_multiplayerClientManager->EventQueue();
+            m_multiplayerClientManager->ClearEventQueue();
         }
 
-        return eventQueue;
+        return m_eventQueue;
     }
 
-    std::vector<multiplayer_event> eventQueue;
-    
     try
     {
         m_isDirty = true;
-        eventQueue = m_multiplayerClientManager->do_work();
+        m_eventQueue = m_multiplayerClientManager->DoWork();
 
-        std::shared_ptr<multiplayer_client_pending_reader> clientRequest = m_multiplayerClientManager->last_pending_read();
+        std::shared_ptr<MultiplayerClientPendingReader> clientRequest = m_multiplayerClientManager->LastPendingRead();
         if (clientRequest != nullptr)
         {
-            m_joinability = clientRequest->lobby_client()->joinability();
-            set_multiplayer_game_session(clientRequest->game_client()->game());
-            set_multiplayer_lobby_session(clientRequest->lobby_client()->lobby());
+            m_joinability = clientRequest->LobbyClient()->Joinability();
+            SetMultiplayerGameSession(clientRequest->GameClient()->Game());
+            SetMultiplayerLobbySession(clientRequest->LobbyClient()->Lobby());
         }
         else
         {
-            m_joinability = joinability::none;
-            set_multiplayer_game_session(nullptr);
-            set_multiplayer_lobby_session(nullptr);
+            m_joinability = XblMultiplayerJoinability::None;
+            SetMultiplayerGameSession(nullptr);
+            SetMultiplayerLobbySession(nullptr);
         }
     }
     catch(...){}
 
-    return eventQueue;
+    return m_eventQueue;
 }
 
-std::shared_ptr<multiplayer_game_session>
-multiplayer_manager::game_session() const
+std::shared_ptr<MultiplayerGameSession>
+MultiplayerManager::GameSession() const
 {
     std::lock_guard<std::mutex> guard(m_lock);
     return m_multiplayerGameSession;
 }
 
-std::shared_ptr<multiplayer_lobby_session>
-multiplayer_manager::lobby_session() const
+std::shared_ptr<MultiplayerLobbySession>
+MultiplayerManager::LobbySession() const
 {
     std::lock_guard<std::mutex> guard(m_lock);
     return m_multiplayerLobbySession;
 }
 
 void
-multiplayer_manager::set_multiplayer_game_session(
-    _In_ std::shared_ptr<multiplayer_game_session> gameSession
+MultiplayerManager::SetMultiplayerGameSession(
+    _In_ std::shared_ptr<MultiplayerGameSession> gameSession
     ) 
 {
     // Note: This function does not require a lock as the functions that call this already has a m_lock.
@@ -145,13 +134,13 @@ multiplayer_manager::set_multiplayer_game_session(
     else
     {
         m_multiplayerGameSession = gameSession;
-        m_multiplayerGameSession->_Set_multiplayer_client_manager(m_multiplayerClientManager);
+        m_multiplayerGameSession->SetMultiplayerClientManager(m_multiplayerClientManager);
     }
 }
 
 void
-multiplayer_manager::set_multiplayer_lobby_session(
-    _In_ std::shared_ptr<multiplayer_lobby_session> multiplayerLobby
+MultiplayerManager::SetMultiplayerLobbySession(
+    _In_ std::shared_ptr<MultiplayerLobbySession> multiplayerLobby
     ) 
 {
     // Note: This function does not require a lock as the functions that call this already has a m_lock.
@@ -164,216 +153,187 @@ multiplayer_manager::set_multiplayer_lobby_session(
         }
 
         // Don't set the lobby to null so that the title can add local users whenever it chooses.
-        m_multiplayerLobbySession = std::make_shared<multiplayer_lobby_session>(m_multiplayerClientManager);
+        m_multiplayerLobbySession = std::make_shared<MultiplayerLobbySession>(m_multiplayerClientManager);
     }
     else
     {
         m_multiplayerLobbySession = multiplayerLobby;
-        m_multiplayerLobbySession->_Set_multiplayer_client_manager(m_multiplayerClientManager);
+        m_multiplayerLobbySession->SetMultiplayerClientManager(m_multiplayerClientManager);
     }
 }
 
-xbox_live_result<void>
-multiplayer_manager::join_lobby(
-    _In_ const string_t& handleId,
+HRESULT
+MultiplayerManager::JoinLobby(
+    _In_ const xsapi_internal_string& handleId,
     _In_ xbox_live_user_t user
     )
 {
-    RETURN_CPP_IF(m_multiplayerClientManager == nullptr, void, xbox_live_error_code::logic_error, "Call multiplayer_manager::initialize() first.");
+    RETURN_HR_IF_LOG_DEBUG(m_multiplayerClientManager == nullptr, E_UNEXPECTED, "Call multiplayer_manager::initialize() first.");
 
-    std::vector<xbox_live_user_t> users;
+    xsapi_internal_vector<xbox_live_user_t> users;
     users.push_back(user);
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->join_lobby_by_handle(handleId, users), void);
+    return m_multiplayerClientManager->JoinLobbyByHandle(handleId, users);
 }
 
-#if TV_API
-xbox_live_result<void>
-multiplayer_manager::join_lobby(
-    _In_ const string_t& handleId,
-    _In_ std::vector<Windows::Xbox::System::User^> users
-    )
-{
-    RETURN_CPP_IF(m_multiplayerClientManager == nullptr, void, xbox_live_error_code::logic_error, "Call multiplayer_manager::initialize() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->join_lobby_by_handle(handleId, users), void);
-}
-
-xbox_live_result<void>
-multiplayer_manager::join_lobby(
-    _In_ Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs^ eventArgs,
-    _In_ std::vector<Windows::Xbox::System::User^> users
-    )
-{
-    RETURN_CPP_IF(m_multiplayerClientManager == nullptr, void, xbox_live_error_code::logic_error, "Call multiplayer_manager::initialize() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->join_lobby(eventArgs, users), void);
-}
-
-void
-multiplayer_manager::invite_party_to_game()
-{
-}
-#endif
-
-#if (TV_API || UWP_API || UNIT_TEST_SERVICES)
-xbox_live_result<void>
-multiplayer_manager::join_lobby(
+#if HC_PLATFORM == HC_PLATFORM_UWP || HC_PLATFORM == HC_PLATFORM_XDK 
+HRESULT
+MultiplayerManager::JoinLobby(
     _In_ Windows::ApplicationModel::Activation::IProtocolActivatedEventArgs^ eventArgs,
     _In_ xbox_live_user_t user
     )
 {
-    RETURN_CPP_IF(m_multiplayerClientManager == nullptr, void, xbox_live_error_code::logic_error, "Call multiplayer_manager::initialize() first.");
+    RETURN_HR_IF_LOG_DEBUG(m_multiplayerClientManager == nullptr, E_UNEXPECTED, "Call multiplayer_manager::initialize() first.");
 
-    std::vector<xbox_live_user_t> users;
-    users.push_back(user);
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->join_lobby(eventArgs, users), void);
+    xsapi_internal_vector<xbox_live_user_t> users{ user };
+    return m_multiplayerClientManager->JoinLobby(eventArgs, users);
 }
 #endif
 
-xbox_live_result<void>
-multiplayer_manager::join_game_from_lobby(
-    _In_ const string_t& sessionTemplateName
+HRESULT
+MultiplayerManager::JoinGameFromLobby(
+    _In_ const xsapi_internal_string& sessionTemplateName
     )
 {
-    RETURN_CPP_IF(m_multiplayerClientManager == nullptr, void, xbox_live_error_code::logic_error, "Call multiplayer_manager::initialize() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->join_game_from_lobby(sessionTemplateName), void);
+    RETURN_HR_IF_LOG_DEBUG(m_multiplayerClientManager == nullptr, E_UNEXPECTED, "Call multiplayer_manager::initialize() first.");
+    return m_multiplayerClientManager->JoinGameFromLobby(sessionTemplateName);
 }
 
-xbox_live_result<void>
-multiplayer_manager::join_game(
-    _In_ const string_t& sessionName,
-    _In_ const string_t& sessionTemplateName,
-    _In_ const std::vector<string_t>& xboxUserIds
+HRESULT
+MultiplayerManager::JoinGame(
+    _In_ const xsapi_internal_string& sessionName,
+    _In_ const xsapi_internal_string& sessionTemplateName,
+    _In_ const xsapi_internal_vector<uint64_t>& xuids
     )
 {
-    RETURN_CPP_IF(m_multiplayerClientManager == nullptr, void, xbox_live_error_code::logic_error, "Call multiplayer_manager::initialize() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->join_game(sessionName, sessionTemplateName, xboxUserIds), void);
+    RETURN_HR_IF(m_multiplayerClientManager == nullptr, E_UNEXPECTED);
+    RETURN_EXCEPTION_FREE_HRESULT(m_multiplayerClientManager->JoinGame(sessionName, sessionTemplateName, xuids));
 }
 
-xbox_live_result<void>
-multiplayer_manager::leave_game()
+HRESULT
+MultiplayerManager::LeaveGame()
 {
-    RETURN_CPP_IF(m_multiplayerClientManager == nullptr, void, xbox_live_error_code::logic_error, "Call multiplayer_manager::initialize() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->leave_game(), void);
+    RETURN_HR_IF_LOG_DEBUG(m_multiplayerClientManager == nullptr, E_UNEXPECTED, "Call multiplayer_manager::initialize() first.");
+    return m_multiplayerClientManager->LeaveGame();
 }
 
-xbox_live_result<void>
-multiplayer_manager::find_match(
-    _In_ const string_t& hopperName,
-    _In_ const web::json::value& attributes,
+HRESULT
+MultiplayerManager::FindMatch(
+    _In_ const xsapi_internal_string& hopperName,
+    _In_ JsonValue& attributes,
     _In_ const std::chrono::seconds& timeout
     )
 {
-    RETURN_CPP_IF(m_multiplayerClientManager == nullptr, void, xbox_live_error_code::logic_error, "Call multiplayer_manager::initialize() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->find_match(hopperName, attributes, timeout), void);
+    RETURN_HR_IF_LOG_DEBUG(m_multiplayerClientManager == nullptr, E_UNEXPECTED, "Call multiplayer_manager::initialize() first.");
+    return m_multiplayerClientManager->FindMatch(hopperName, attributes, timeout);
 }
 
 void
-multiplayer_manager::cancel_match()
+MultiplayerManager::CancelMatch()
 {
-    if (m_multiplayerClientManager != nullptr && m_multiplayerClientManager->match_client() != nullptr)
+    if (m_multiplayerClientManager != nullptr && m_multiplayerClientManager->MatchClient() != nullptr)
     {
-        m_multiplayerClientManager->match_client()->cancel_match();
+        m_multiplayerClientManager->MatchClient()->CancelMatch();
     }
 }
 
-xbox::services::multiplayer::manager::match_status
-multiplayer_manager::match_status() const
+XblMultiplayerMatchStatus
+MultiplayerManager::MatchStatus() const
 {
-    if (m_multiplayerClientManager != nullptr && m_multiplayerClientManager->match_client() != nullptr)
+    if (m_multiplayerClientManager != nullptr && m_multiplayerClientManager->MatchClient() != nullptr)
     {
-        return m_multiplayerClientManager->match_client()->match_status();
+        return m_multiplayerClientManager->MatchClient()->MatchStatus();
     }
 
-    return match_status::none;
+    return XblMultiplayerMatchStatus::None;
 }
 
 std::chrono::seconds
-multiplayer_manager::estimated_match_wait_time() const
+MultiplayerManager::EstimatedMatchWaitTime() const
 {
-    if (m_multiplayerClientManager != nullptr && m_multiplayerClientManager->match_client() != nullptr)
+    if (m_multiplayerClientManager != nullptr && m_multiplayerClientManager->MatchClient() != nullptr)
     {
-        return m_multiplayerClientManager->match_client()->estimated_match_wait_time();
+        return m_multiplayerClientManager->MatchClient()->EstimatedMatchWaitTime();
     }
 
     return std::chrono::seconds(0);
 }
 
 void
-multiplayer_manager::set_quality_of_service_measurements(
-    _In_ std::shared_ptr<std::vector<multiplayer_quality_of_service_measurements>> measurements
+MultiplayerManager::SetQosMeasurements(
+    _In_ const JsonValue& measurements
     )
 {
-    if (m_multiplayerClientManager != nullptr && m_multiplayerClientManager->match_client() != nullptr)
+    if (m_multiplayerClientManager != nullptr && m_multiplayerClientManager->MatchClient() != nullptr)
     {
-        m_multiplayerClientManager->match_client()->set_quality_of_service_measurements(measurements);
+        m_multiplayerClientManager->MatchClient()->SetQosMeasurements(measurements);
     }
 }
 
 bool
-multiplayer_manager::auto_fill_members_during_matchmaking() const
+MultiplayerManager::AutoFillMembersDuringMatchmaking() const
 {
     return false;
 }
 
 void
-multiplayer_manager::set_auto_fill_members_during_matchmaking(
+MultiplayerManager::SetAutoFillMembersDuringMatchmaking(
     _In_ bool autoFillMembers
     )
 {
     if (m_multiplayerClientManager != nullptr)
     {
-        m_multiplayerClientManager->set_auto_fill_members_during_matchmaking(autoFillMembers);
+        m_multiplayerClientManager->SetAutoFillMembersDuringMatchmaking(autoFillMembers);
     }
 }
 
-xbox::services::multiplayer::manager::joinability
-multiplayer_manager::joinability() const
+XblMultiplayerJoinability
+MultiplayerManager::Joinability() const
 {
     return m_joinability;
 }
 
-xbox_live_result<void>
-multiplayer_manager::set_joinability(
-    _In_ xbox::services::multiplayer::manager::joinability value,
+HRESULT
+MultiplayerManager::SetJoinability(
+    _In_ XblMultiplayerJoinability value,
     _In_opt_ context_t context
     )
 {
-    RETURN_CPP_IF(m_multiplayerClientManager == nullptr, void, xbox_live_error_code::logic_error, "Call multiplayer_manager::initialize() first.");
-    
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->set_joinability(value, context), void);
+    RETURN_HR_IF_LOG_DEBUG(m_multiplayerClientManager == nullptr, E_UNEXPECTED, "Call multiplayer_manager::initialize() first.");
+    return m_multiplayerClientManager->SetJoinability(value, context);
 }
 
-std::shared_ptr<multiplayer_game_client>
-multiplayer_manager::_Game_client()
+std::shared_ptr<MultiplayerGameClient>
+MultiplayerManager::GameClient()
 {
     auto clientManger = m_multiplayerClientManager;
-    if (clientManger == nullptr || clientManger->latest_pending_read() == nullptr)
+    if (clientManger == nullptr || clientManger->LatestPendingRead() == nullptr)
     {
         return nullptr;
     }
-    return clientManger->latest_pending_read()->game_client();
+    return clientManger->LatestPendingRead()->GameClient();
 }
 
-std::shared_ptr<multiplayer_lobby_client>
-multiplayer_manager::_Lobby_client()
+std::shared_ptr<MultiplayerLobbyClient>
+MultiplayerManager::LobbyClient()
 {
     auto clientManger = m_multiplayerClientManager;
-    if (clientManger == nullptr || clientManger->latest_pending_read() == nullptr)
+    if (clientManger == nullptr || clientManger->LatestPendingRead() == nullptr)
     {
         return nullptr;
     }
-    return clientManger->latest_pending_read()->lobby_client();
+    return clientManger->LatestPendingRead()->LobbyClient();
 }
 
-#if UNIT_TEST_SERVICES
+#if XSAPI_UNIT_TESTS
 void
-multiplayer_manager::_Shutdown()
+MultiplayerManager::Shutdown()
 {
     auto clientManger = m_multiplayerClientManager;
-    if (clientManger == nullptr || clientManger->latest_pending_read() == nullptr)
+    if (clientManger == nullptr || clientManger->LatestPendingRead() == nullptr)
     {
         return;
     }
-    return clientManger->shutdown();
+    return clientManger->Shutdown();
 }
 #endif
 

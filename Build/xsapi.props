@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <XsapiImpl>true</XsapiImpl>
+  </PropertyGroup>
+  <Import Project="..\xsapi.staticlib.props" />
+  <Import Project="..\xsapi.paths.props"/>
+
+  <PropertyGroup>
+    <XsapiSource>$(XsapiRoot)Source\</XsapiSource>
+    <WinRTdll Condition="$(ProjectName.Contains('WinRT'))">true</WinRTdll>
+    <UnitTestProj Condition="$(ProjectName.Contains('UnitTest'))">true</UnitTestProj>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XBL_API_NONE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;XBL_API_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!--Exclude ppl from XSAPI lib on GDK-->
+      <PreprocessorDefinitions Condition="'$(XsapiPlatform)' == 'GDK'">XSAPI_NO_PPL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>
+        $(XsapiSource)Services;
+        $(XsapiSource)Services\Achievements;
+        $(XsapiSource)Services\Common;
+        $(XsapiSource)Services\Common\C;
+        $(XsapiSource)Services\Clubs;
+        $(XsapiSource)Services\Leaderboard;
+        $(XsapiSource)Services\Matchmaking;
+        $(XsapiSource)Services\MultiplayerActivity;
+        $(XsapiSource)Services\Multiplayer;
+        $(XsapiSource)Services\Multiplayer\Manager;
+        $(XsapiSource)Services\Notification;
+        $(XsapiSource)Services\Presence;
+        $(XsapiSource)Services\RealTimeActivityManager;
+        $(XsapiSource)Services\Social;
+        $(XsapiSource)Services\Social\C;
+        $(XsapiSource)Services\Social\Manager;
+        $(XsapiSource)Services\StringVerify;
+        $(XsapiSource)Services\TCUI;
+        $(XsapiSource)Services\TitleStorage;
+        $(XsapiSource)Services\Privacy;
+        $(XsapiSource)Services\Stats;
+        $(XsapiSource)Services\Events;
+        $(XsapiSource)Shared;
+        $(XsapiSource)Shared\WinRT;
+        $(XsapiSource)Shared\C;
+        $(XsapiSource)Shared\Logger;
+        $(XsapiSource)System;
+        $(XsapiSource)System\WinRT;
+        $(XsapiSource)System\C;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(XsapiPlatform)' == 'Android'">
+        $(XsapiSource)Services\Common\Unix;
+        $(XsapiSource)Shared\u;
+        $(XsapiSource)Shared\a;
+        $(XsapiSource)Shared\Logger\android;
+        $(HCBuildRoot)External\asio\asio\include;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(XsapiPlatform)' != 'Android'">
+        $(XsapiSource)Services\Common\Cpp;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(UnitTestProj)' == 'true'">
+        $(XsapiRoot)Tests\UnitTests;
+        $(XsapiRoot)Tests\UnitTests\Mocks;
+        $(XsapiRoot)Tests\UnitTests\Support;
+        $(XsapiRoot)Tests\UnitTests\Support\TAEF\inc;
+        $(WindowsSDKDir_10)Testing\Development\inc;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+    </ClCompile>	
+  </ItemDefinitionGroup>
+</Project>

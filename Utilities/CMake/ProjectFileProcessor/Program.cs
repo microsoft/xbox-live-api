@@ -139,52 +139,60 @@ namespace ProjectFileProcessor
                 output = @"Microsoft.Xbox.Services.140.XDK.Cpp.vcxproj",
             });
 
-            //Microsoft.Xbox.Services.110.XDK.WinRT
+            //Microsoft.Xbox.Services.141.XDK.WinRT
             fileNodes.Add(new FileNode
             {
                 cmake_vcxproj = @"Microsoft.Xbox.Services.XDK.WinRT.vcxproj",
-                template = @"template-Microsoft.Xbox.Services.110.XDK.WinRT.vcxproj",
-                output = @"Microsoft.Xbox.Services.110.XDK.WinRT.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.141.XDK.WinRT.vcxproj",
+                output = @"Microsoft.Xbox.Services.141.XDK.WinRT.vcxproj",
             });
 
-            //Microsoft.Xbox.Services.140.UWP.WinRT
+            //Microsoft.Xbox.Services.140.XDK.WinRT
+            fileNodes.Add(new FileNode
+            {
+                cmake_vcxproj = @"Microsoft.Xbox.Services.XDK.WinRT.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.140.XDK.WinRT.vcxproj",
+                output = @"Microsoft.Xbox.Services.140.XDK.WinRT.vcxproj",
+            });
+
+            //Microsoft.Xbox.Services.141.UWP.WinRT
             fileNodes.Add(new FileNode
             {
                 cmake_vcxproj = @"Microsoft.Xbox.Services.UWP.WinRT.vcxproj",
-                template = @"template-Microsoft.Xbox.Services.140.UWP.WinRT.vcxproj",
-                output = @"Microsoft.Xbox.Services.140.UWP.WinRT.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.141.UWP.WinRT.vcxproj",
+                output = @"Microsoft.Xbox.Services.141.UWP.WinRT.vcxproj",
             });
 
-            //Microsoft.Xbox.Services.110.XDK.Cpp
+            //Microsoft.Xbox.Services.UnitTest.141.TAEF
             fileNodes.Add(new FileNode
             {
-                cmake_vcxproj = @"Microsoft.Xbox.Services.XDK.Cpp.vcxproj",
-                template = @"template-Microsoft.Xbox.Services.110.XDK.Cpp.vcxproj",
-                output = @"Microsoft.Xbox.Services.110.XDK.Cpp.vcxproj",
+                cmake_vcxproj = @"Microsoft.Xbox.Services.UnitTest.141.TAEF.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.UnitTest.141.TAEF.vcxproj",
+                output = @"Microsoft.Xbox.Services.UnitTest.141.TAEF.vcxproj",
             });
 
-            //Microsoft.Xbox.Services.UnitTest.140.TAEF
+            //Microsoft.Xbox.Services.UnitTest.141.TE
             fileNodes.Add(new FileNode
             {
-                cmake_vcxproj = @"Microsoft.Xbox.Services.UnitTest.140.TAEF.vcxproj",
-                template = @"template-Microsoft.Xbox.Services.UnitTest.140.TAEF.vcxproj",
-                output = @"Microsoft.Xbox.Services.UnitTest.140.TAEF.vcxproj",
+                cmake_vcxproj = @"Microsoft.Xbox.Services.UnitTest.141.TE.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.UnitTest.141.TE.vcxproj",
+                output = @"Microsoft.Xbox.Services.UnitTest.141.TE.vcxproj",
             });
 
-            //Microsoft.Xbox.Services.UnitTest.140.TE
+            //Microsoft.Xbox.Services.UnitTest.142.TAEF
             fileNodes.Add(new FileNode
             {
-                cmake_vcxproj = @"Microsoft.Xbox.Services.UnitTest.140.TE.vcxproj",
-                template = @"template-Microsoft.Xbox.Services.UnitTest.140.TE.vcxproj",
-                output = @"Microsoft.Xbox.Services.UnitTest.140.TE.vcxproj",
+                cmake_vcxproj = @"Microsoft.Xbox.Services.UnitTest.141.TAEF.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.UnitTest.142.TAEF.vcxproj",
+                output = @"Microsoft.Xbox.Services.UnitTest.142.TAEF.vcxproj",
             });
 
-            //Microsoft.Xbox.Services.110.XDK.Ship.Cpp
+            //Microsoft.Xbox.Services.UnitTest.142.TE
             fileNodes.Add(new FileNode
             {
-                cmake_vcxproj = @"Microsoft.Xbox.Services.Ship.vcxproj",
-                template = @"template-Microsoft.Xbox.Services.110.XDK.Cpp.vcxproj",
-                output = @"Microsoft.Xbox.Services.110.XDK.Ship.Cpp.vcxproj",
+                cmake_vcxproj = @"Microsoft.Xbox.Services.UnitTest.141.TE.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.UnitTest.142.TE.vcxproj",
+                output = @"Microsoft.Xbox.Services.UnitTest.142.TE.vcxproj",
             });
 
             //Microsoft.Xbox.Services.140.XDK.Ship.Cpp
@@ -217,6 +225,86 @@ namespace ProjectFileProcessor
                 cmake_vcxproj = @"Microsoft.Xbox.Services.Ship.vcxproj",
                 template = @"template-Microsoft.Xbox.Services.141.UWP.Cpp.vcxproj",
                 output = @"Microsoft.Xbox.Services.141.UWP.Ship.Cpp.vcxproj",
+            });
+
+            //Microsoft.Xbox.Services.141.DesktopBridge.Cpp
+            fileNodes.Add(new FileNode
+            {
+                cmake_vcxproj = @"Microsoft.Xbox.Services.UWP.Cpp.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.141.DesktopBridge.Cpp.vcxproj",
+                output = @"Microsoft.Xbox.Services.141.DesktopBridge.Cpp.vcxproj",
+            });
+
+            //Microsoft.Xbox.Services.141.GDK.C
+            fileNodes.Add(new FileNode
+            {
+                cmake_vcxproj = @"Microsoft.Xbox.Services.GDK.C.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.141.GDK.C.vcxproj",
+                output = @"Microsoft.Xbox.Services.141.GDK.C.vcxproj",
+            });
+
+            //Microsoft.Xbox.Services.141.Win32.Cpp
+            fileNodes.Add(new FileNode
+            {
+                cmake_vcxproj = @"Microsoft.Xbox.Services.Win32.Cpp.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.141.Win32.Cpp.vcxproj",
+                output = @"Microsoft.Xbox.Services.141.Win32.Cpp.vcxproj",
+            });
+
+            //Microsoft.Xbox.Services.140.Win32.Cpp
+            fileNodes.Add(new FileNode
+            {
+                cmake_vcxproj = @"Microsoft.Xbox.Services.Win32.Cpp.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.140.Win32.Cpp.vcxproj",
+                output = @"Microsoft.Xbox.Services.140.Win32.Cpp.vcxproj",
+            });
+
+            //Microsoft.Xbox.Services.141.Android
+            fileNodes.Add(new FileNode
+            {
+                cmake_vcxproj = @"Microsoft.Xbox.Services.Android.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.141.Android.vcxproj",
+                output = @"Microsoft.Xbox.Services.141.Android.vcxproj",
+            });
+
+            //Microsoft.Xbox.Services.140.Android
+            fileNodes.Add(new FileNode
+            {
+                cmake_vcxproj = @"Microsoft.Xbox.Services.Android.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.140.Android.vcxproj",
+                output = @"Microsoft.Xbox.Services.140.Android.vcxproj",
+            });
+
+            //Microsoft.Xbox.Services.142.Win32.Cpp
+            fileNodes.Add(new FileNode
+            {
+                cmake_vcxproj = @"Microsoft.Xbox.Services.Win32.Cpp.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.142.Win32.Cpp.vcxproj",
+                output = @"Microsoft.Xbox.Services.142.Win32.Cpp.vcxproj",
+            });
+
+            //Microsoft.Xbox.Services.142.GDK.C
+            fileNodes.Add(new FileNode
+            {
+                cmake_vcxproj = @"Microsoft.Xbox.Services.GDK.C.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.142.GDK.C.vcxproj",
+                output = @"Microsoft.Xbox.Services.142.GDK.C.vcxproj",
+            });
+
+            //Microsoft.Xbox.Services.142.UWP.Cpp
+            fileNodes.Add(new FileNode
+            {
+                cmake_vcxproj = @"Microsoft.Xbox.Services.UWP.Cpp.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.142.UWP.Cpp.vcxproj",
+                output = @"Microsoft.Xbox.Services.142.UWP.Cpp.vcxproj",
+            });
+
+            //Microsoft.Xbox.Services.142.XDK.Cpp
+            fileNodes.Add(new FileNode
+            {
+                cmake_vcxproj = @"Microsoft.Xbox.Services.XDK.Cpp.vcxproj",
+                template = @"template-Microsoft.Xbox.Services.142.XDK.Cpp.vcxproj",
+                output = @"Microsoft.Xbox.Services.142.XDK.Cpp.vcxproj",
             });
 
             foreach (FileNode fn in fileNodes)
@@ -370,30 +458,8 @@ namespace ProjectFileProcessor
             {
                 string lineOutput = MakeFilePathRelative(line, rootFolder);
 
-                if(filePath.Contains(".110."))
-                {
-                    lineOutput = lineOutput.Replace("ToolsVersion=\"15.0\"", "ToolsVersion=\"4.0\"");
-                }
-
                 lineOutput = lineOutput.Replace("<Filter>Header Files</Filter>", "<Filter>C++ Public Includes</Filter>");
                 lineOutput = lineOutput.Replace("<Filter Include=\"Header Files\">", "<Filter Include=\"C++ Public Includes\">");
-
-                if (filePath.Contains(".XDK."))
-                {
-                    if (lineOutput.Contains("</Project>"))
-                    {
-                        lines_filtered.Add(@"  <ItemGroup>");
-                        lines_filtered.Add("    <None Include=\"..\\..\\Source\\Shared\\Logger\\ERA_ETW.man\">");
-                        lines_filtered.Add(@"      <Filter>C++ source\Shared\Logger</Filter>");
-                        lines_filtered.Add(@"    </None>");
-                        lines_filtered.Add(@"  </ItemGroup>");
-                        lines_filtered.Add(@"  <ItemGroup>");
-                        lines_filtered.Add("    <ResourceCompile Include=\"..\\..\\Source\\Shared\\Logger\\ERA_ETW.rc\">");
-                        lines_filtered.Add(@"      <Filter>C++ source\Shared\Logger</Filter>");
-                        lines_filtered.Add(@"    </ResourceCompile>");
-                        lines_filtered.Add(@"  </ItemGroup>");
-                    }
-                }
 
                 lines_filtered.Add(lineOutput);
             }

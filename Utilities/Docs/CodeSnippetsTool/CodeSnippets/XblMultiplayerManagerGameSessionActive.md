@@ -1,0 +1,3 @@
+```cpp
+bool isGameSessionAcive = XblMultiplayerManagerGameSessionActive();
+```

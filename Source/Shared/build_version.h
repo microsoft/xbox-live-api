@@ -1,6 +1,12 @@
-// Copyright (c) Microsoft Corporation
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
+//********************************************************* 
+//
+// Copyright (c) Microsoft. All rights reserved.
+// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+//
+//*********************************************************
 #pragma once
  
-#define XBOX_SERVICES_API_VERSION_STRING _T("2017.08.0.0");
+#define XBOX_SERVICES_API_VERSION_STRING "2020.11.20201117.0" 

@@ -1,172 +1,140 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 #include "pch.h"
-#include "xsapi/multiplayer.h"
 #include "multiplayer_internal.h"
-
-using namespace xbox::services::real_time_activity;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_BEGIN
 
-multiplayer_subscription::multiplayer_subscription(
-    _In_ const std::function<void(const multiplayer_session_change_event_args&)>& multiplayerSessionChangeHandler,
-    _In_ const std::function<void()>& multiplayerSubscriptionLostHandler,
-    _In_ const std::function<void(const xbox::services::real_time_activity::real_time_activity_subscription_error_event_args&)>& subscriptionErrorHandler
-    ) :
-    real_time_activity_subscription(subscriptionErrorHandler),
-    m_multiplayerSessionChangeHandler(multiplayerSessionChangeHandler),
-    m_multiplayerSubscriptionLostHandler(multiplayerSubscriptionLostHandler)
-{
-    XSAPI_ASSERT(m_multiplayerSessionChangeHandler != nullptr);
-    XSAPI_ASSERT(m_multiplayerSubscriptionLostHandler != nullptr);
+const char mp_default_resourceUri[] = "https://sessiondirectory.xboxlive.com/connections/";
 
-    m_resourceUri = _T("https://sessiondirectory.xboxlive.com/connections/");
+MultiplayerSubscription::MultiplayerSubscription() noexcept
+{
+    m_resourceUri = mp_default_resourceUri;
 }
 
-const string_t&
-multiplayer_subscription::rta_connection_id() const
+const String& MultiplayerSubscription::RtaConnectionId() const
 {
-    return m_mpConnectionId;
+    return m_connectionId;
 }
 
-void
-multiplayer_subscription::on_subscription_created(
-    _In_ uint32_t id, 
-    _In_ const web::json::value& data
-    )
+XblFunctionContext MultiplayerSubscription::AddSessionChangedHandler(
+    SessionChangedHandler handler
+) noexcept
 {
-    xbox_live_result<string_t> result;
-    if (!data.is_null())
-    {
-        real_time_activity_subscription::on_subscription_created(id, data);
-        std::error_code errc;
-
-        bool connectionWasEmpty = m_mpConnectionId.empty();
-        m_mpConnectionId = utils::extract_json_string(data, _T("ConnectionId"), errc, true);
-
-        result = xbox_live_result<string_t>(
-            m_mpConnectionId,
-            errc
-            );
-
-        if (errc)
-        {
-            result._Set_err_message("JSON deserialization failed");
-            return;
-        }
-
-        if (connectionWasEmpty)
-        {
-            m_resourceUri.append(m_mpConnectionId);
-        }
-    }
-    else
-    {
-        result = xbox_live_result<string_t>(
-            xbox_live_error_code::json_error,
-            "Data not found on subscription"
-            );
-    }
-
-    task.set(result);
+    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerSubscription };
+    m_sessionChangedHandlers[m_nextToken] = std::move(handler);
+    return m_nextToken++;
 }
 
-void
-multiplayer_subscription::on_event_received(
-    _In_ const web::json::value& data
-    )
+size_t MultiplayerSubscription::RemoveSessionChangedHandler(
+    XblFunctionContext token
+) noexcept
 {
-    std::error_code errc;
-    web::json::array shoulderTaps = utils::extract_json_as_array(utils::extract_json_field(data, _T("shoulderTaps"), errc, true), errc);
-    if (errc && m_subscriptionErrorHandler)
+    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerSubscription };
+    m_sessionChangedHandlers.erase(token);
+    return m_sessionChangedHandlers.size();
+}
+
+XblFunctionContext MultiplayerSubscription::AddConnectionIdChangedHandler(
+    ConnectionIdChangedHandler handler
+) noexcept
+{
+    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerSubscription };
+    m_connectionIdChangedHandlers[m_nextToken] = std::move(handler);
+    return m_nextToken++;
+}
+
+size_t MultiplayerSubscription::RemoveConnectionIdChangedHandler(
+    XblFunctionContext token
+) noexcept
+{
+    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerSubscription };
+    m_connectionIdChangedHandlers.erase(token);
+    return m_connectionIdChangedHandlers.size();
+}
+
+void MultiplayerSubscription::OnSubscribe(
+    _In_ const JsonValue& data
+) noexcept
+{
+    std::unique_lock<std::mutex> lock{ m_mutexMultiplayerSubscription };
+
+    HRESULT hr = JsonUtils::ExtractJsonString(data, "ConnectionId", m_connectionId, true);
+    if (FAILED(hr))
     {
-        m_subscriptionErrorHandler(
-            xbox::services::real_time_activity::real_time_activity_subscription_error_event_args(
-                *this,
-                xbox_live_error_code::json_error,
-                "JSON deserialization failure"
-                )
-            );
+        LOGS_ERROR << __FUNCTION__ << ": Ignoring malformed payload";
+        return;
     }
 
-    for (const auto& tapValue : shoulderTaps)
-    {
-        string_t resourceName = utils::extract_json_string(tapValue, _T("resource"), true);
-        std::vector<string_t> nameComponents = utils::string_split(resourceName, '~');
+    auto handlers{ m_connectionIdChangedHandlers };
+    lock.unlock();
 
-        if (nameComponents.size() != 3)
+    for (auto& handler : handlers)
+    {
+        handler.second(m_connectionId);
+    }
+}
+
+void MultiplayerSubscription::OnEvent(
+    _In_ const JsonValue& data
+) noexcept
+{
+    if (!data.IsObject() || !data.HasMember("shoulderTaps"))
+    {
+        LOGS_ERROR << __FUNCTION__ << ": Ignoring malformed payload";
+        return;
+    }
+
+    List<XblMultiplayerSessionChangeEventArgs> taps;
+
+    const JsonValue& shoulderTaps = data["shoulderTaps"];
+    if (shoulderTaps.IsArray())
+    {
+        for (const auto& tapValue : shoulderTaps.GetArray())
         {
-            if(m_subscriptionErrorHandler != nullptr)
+            String resourceName;
+            JsonUtils::ExtractJsonString(tapValue, "resource", resourceName, true);
+            Vector<String> nameComponents = utils::string_split(resourceName, '~');
+
+            if (nameComponents.size() != 3)
             {
-                m_subscriptionErrorHandler(
-                    xbox::services::real_time_activity::real_time_activity_subscription_error_event_args(
-                        *this,
-                        xbox_live_error_code::json_error,
-                        "Resource has too many values"
-                        )
-                    );
+                LOGS_ERROR << __FUNCTION__ << ": Resource has too many values";
+                continue;
             }
 
-            continue;
+            taps.emplace_back();
+            auto& tap{ taps.back() };
+
+            tap.SessionReference = XblMultiplayerSessionReferenceCreate(
+                nameComponents[0].data(),
+                nameComponents[1].data(),
+                nameComponents[2].data()
+            );
+            JsonUtils::ExtractJsonInt(tapValue, "changeNumber", tap.ChangeNumber, false);
+            JsonUtils::ExtractJsonStringToCharArray(tapValue, "branch", tap.Branch, sizeof(tap.Branch));
+
+            LOGS_DEBUG << __FUNCTION__ << ": Resource=" << resourceName;
         }
+    }
 
-        multiplayer_session_reference sessionRef(
-            nameComponents[0],
-            nameComponents[1],
-            nameComponents[2]
-            );
+    std::unique_lock<std::mutex> lock{ m_mutexMultiplayerSubscription };
+    auto handlers{ m_sessionChangedHandlers };
+    lock.unlock();
 
-        uint64_t changeNumber = utils::extract_json_int(tapValue, _T("changeNumber"), false);
-        string_t branch = utils::extract_json_string(tapValue, _T("branch"), false);
-
-        multiplayer_session_change_event_args changeEventArgs(
-            sessionRef,
-            branch,
-            changeNumber
-            );
-
-        if (m_multiplayerSessionChangeHandler != nullptr)
+    for (auto& handler : handlers)
+    {
+        for (auto& tap : taps)
         {
-            m_multiplayerSessionChangeHandler(changeEventArgs);
+            handler.second(tap);
         }
     }
 }
 
-void
-multiplayer_subscription::_Set_state(
-    _In_ real_time_activity_subscription_state newState
-    )
+void MultiplayerSubscription::OnResync() noexcept
 {
-    // if state is change from pending subscribe to closed, subscription failed.
-    if (m_state == real_time_activity_subscription_state::pending_subscribe && newState == real_time_activity_subscription_state::closed)
-    {
-        task.set(xbox_live_result<string_t>(xbox_live_error_code::runtime_error, "multiplayer subscription failure"));
-    }
-
-    if (m_state != real_time_activity_subscription_state::closed && newState == real_time_activity_subscription_state::closed)
-    {
-        // Because the title could disable subscriptions and destruct the XboxLiveContext right after, 
-        // multiplayer_service may no longer exist.
-        if (m_multiplayerSubscriptionLostHandler != nullptr)
-        {
-            auto subscriptionHandler = m_multiplayerSubscriptionLostHandler;
-            pplx::create_task([subscriptionHandler]()
-            {
-                try
-                {
-                    subscriptionHandler();
-                }
-                catch (...)
-                {
-                }
-            });
-        }
-    }
-
-    real_time_activity_subscription::_Set_state(newState);
+    // Since clients are manually managing sessions, they will need to resync them
+    LOGS_DEBUG << __FUNCTION__ << ": MPSD Session taps may have been missed";
 }
-
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_END

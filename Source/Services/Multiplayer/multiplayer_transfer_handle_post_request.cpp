@@ -2,58 +2,46 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/multiplayer.h"
 #include "multiplayer_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_BEGIN
 
-multiplayer_transfer_handle_post_request::multiplayer_transfer_handle_post_request() :
-    m_version(0)
-{
-}
-
-multiplayer_transfer_handle_post_request::multiplayer_transfer_handle_post_request(
-    _In_ multiplayer_session_reference targetSessionReference,
-    _In_ multiplayer_session_reference originSessionReference,
-    _In_ uint32_t version
-    ) :
-    m_targetSessionReference(std::move(targetSessionReference)),
+MultiplayerTransferHandlePostRequest::MultiplayerTransferHandlePostRequest(
+    _In_ XblMultiplayerSessionReference targetSessionReference,
+    _In_ XblMultiplayerSessionReference originSessionReference
+) :
     m_originSessionReference(std::move(originSessionReference)),
-    m_version(version)
+    m_targetSessionReference(std::move(targetSessionReference))
 {
-    XSAPI_ASSERT(!m_targetSessionReference.is_null());
-    XSAPI_ASSERT(!m_originSessionReference.is_null());
+    XSAPI_ASSERT(XblMultiplayerSessionReferenceIsValid(&m_targetSessionReference));
+    XSAPI_ASSERT(XblMultiplayerSessionReferenceIsValid(&m_originSessionReference));
 }
 
-const multiplayer_session_reference&
-multiplayer_transfer_handle_post_request::origin_session_reference() const
+const XblMultiplayerSessionReference&
+MultiplayerTransferHandlePostRequest::OriginSessionReference() const
 {
     return m_originSessionReference;
 }
 
-const multiplayer_session_reference&
-multiplayer_transfer_handle_post_request::target_session_reference() const
+const XblMultiplayerSessionReference&
+MultiplayerTransferHandlePostRequest::TargetSessionReference() const
 {
     return m_targetSessionReference;
 }
 
-uint32_t 
-multiplayer_transfer_handle_post_request::version() const
+void
+MultiplayerTransferHandlePostRequest::Serialize(_Out_ JsonValue& json, _In_ JsonDocument::AllocatorType& allocator) const
 {
-    return m_version;
-}
+    json.SetObject();
 
-web::json::value 
-multiplayer_transfer_handle_post_request::serialize() const
-{
-    web::json::value serializedObject;
-
-    serializedObject[_T("type")] = web::json::value::string(_T("transfer"));
-    serializedObject[_T("sessionRef")] = m_targetSessionReference._Serialize();
-    serializedObject[_T("version")] = web::json::value(m_version);
-    serializedObject[_T("originSessionRef")] = m_originSessionReference._Serialize();
-
-    return serializedObject;
+    json.AddMember("type", "transfer", allocator);
+    JsonValue targetSessionJson;
+    Serializers::SerializeSessionReference(m_targetSessionReference, targetSessionJson, allocator);
+    json.AddMember("sessionRef", targetSessionJson, allocator);
+    json.AddMember("version", MULTIPLAYER_HANDLE_VERSION, allocator);
+    JsonValue originSessionJson;
+    Serializers::SerializeSessionReference(m_originSessionReference, originSessionJson, allocator);
+    json.AddMember("originSessionRef", originSessionJson, allocator);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_END

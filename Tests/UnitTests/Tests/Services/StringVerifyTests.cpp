@@ -2,38 +2,29 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"jasonsa"
-#define TEST_CLASS_AREA L"StringVerify"
 #include "UnitTestIncludes.h"
-#include "XboxLiveContext_WinRT.h"
-#include "StringService_WinRT.h"
-
-using namespace Microsoft::Xbox::Services;
-using namespace Microsoft::Xbox::Services::System;
-using namespace Platform;
-using namespace Platform::Collections;
-using namespace Windows::Foundation::Collections;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-const std::wstring defaultStringVerifyResult =
-LR"(
-    {
-    "verifyStringResult":
-    [
-        {
-            "resultCode": 0
-        },
-        {
-            "resultCode": 1,
-            "offendingString":"sdfasdf"
-        },
-        {
-            "resultCode": 7,
-            "offendingString":"whatasfkjasl"
-        }
-    ]}
-    )";
+const char* url = "https://client-strings.xboxlive.com/system/strings/validate";
+
+const char* defaultStringVerifyResult =
+R"({
+        "verifyStringResult":
+        [
+            {
+                "resultCode": 0
+            },
+            {
+                "resultCode": 1,
+                "offendingString":"sdfasdf"
+            },
+            {
+                "resultCode": 7,
+                "offendingString":"whatasfkjasl"
+            }
+        ]
+})";
 
 DEFINE_TEST_CLASS(StringVerifyTests)
 {
@@ -42,71 +33,188 @@ public:
 
     DEFINE_TEST_CASE(TestVerifyString)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestVerifyString);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        //UnitTestHelpers::SetupFactoryHelper(m_mockXboxSystemFactory);
-        auto responseJson = web::json::value::parse(defaultStringVerifyResult);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        HttpMock mock("POST", url, 200);
+        mock.SetResponseBody(defaultStringVerifyResult);
 
-        auto requestString = ref new Platform::String(L"xboxUserId");
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto result = create_task(xboxLiveContext->StringService->VerifyStringAsync(requestString)).get();
-        VERIFY_IS_NOT_NULL(result);
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://client-strings.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/system/strings/validate", httpCall->PathQueryFragment.to_string());
+        auto requestStr = "xboxUserId";
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&requestWellFormed, requestStr](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                UNREFERENCED_PARAMETER(mock);
+                UNREFERENCED_PARAMETER(requestUrl);
 
-        //verify the request
-        auto& requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        auto& requestStringJson = requestJson[L"stringstoVerify"];
-        VERIFY_ARE_EQUAL_INT(requestStringJson.size(), 1);
-        VERIFY_ARE_EQUAL(requestStringJson[0].as_string(), requestString->Data());
+                JsonDocument requestJson;
+                requestJson.Parse(requestBody.c_str());
+                auto requestStrJson = requestJson["stringsToVerify"].GetArray();
 
-        //verify the result
-        VERIFY_ARE_EQUAL_INT(result->ResultCode, VerifyStringResultCode::Success);
-        VERIFY_IS_TRUE(result->FirstOffendingSubstring->IsEmpty());
+                requestWellFormed &= requestStrJson.Size() == 1;
+                requestWellFormed &= strcmp(requestStr, requestStrJson[0].GetString()) == 0;
+            }
+        );
+
+        XAsyncBlock async{};
+        size_t resultSize{};
+        VERIFY_SUCCEEDED(XblStringVerifyStringAsync(xboxLiveContext.get(), requestStr, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+        VERIFY_SUCCEEDED(XblStringVerifyStringResultSize(&async, &resultSize));
+        
+        std::shared_ptr<char> buffer(new char[resultSize], std::default_delete<char[]>());
+        XblVerifyStringResult* result{};
+        VERIFY_SUCCEEDED(XblStringVerifyStringResult(&async, resultSize, buffer.get(), &result, nullptr));
+        VERIFY_ARE_EQUAL_INT(XblVerifyStringResultCode::Success, result->resultCode);
+        VERIFY_IS_NULL(result->firstOffendingSubstring);
+    }
+
+    DEFINE_TEST_CASE(TestVerifyStringWithLargeBuffer)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        HttpMock mock("POST", url, 200);
+        mock.SetResponseBody(defaultStringVerifyResult);
+
+        auto requestStr = "xboxUserId";
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&requestWellFormed, requestStr](HttpMock* mock, std::string requestUrl, std::string requestBody)
+        {
+            UNREFERENCED_PARAMETER(mock);
+            UNREFERENCED_PARAMETER(requestUrl);
+
+            JsonDocument requestJson;
+            requestJson.Parse(requestBody.c_str());
+            auto requestStrJson = requestJson["stringsToVerify"].GetArray();
+
+            requestWellFormed &= requestStrJson.Size() == 1;
+            requestWellFormed &= strcmp(requestStr, requestStrJson[0].GetString()) == 0;
+        }
+        );
+
+        XAsyncBlock async{};
+        size_t resultSize{};
+        VERIFY_SUCCEEDED(XblStringVerifyStringAsync(xboxLiveContext.get(), requestStr, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+        VERIFY_SUCCEEDED(XblStringVerifyStringResultSize(&async, &resultSize));
+
+        size_t bufferUsed{};
+        std::shared_ptr<char> buffer(new char[resultSize * 2], std::default_delete<char[]>());
+        XblVerifyStringResult* result{};
+        VERIFY_SUCCEEDED(XblStringVerifyStringResult(&async, resultSize * 2, buffer.get(), &result, &bufferUsed));
+        VERIFY_ARE_EQUAL_UINT(resultSize, bufferUsed);
+        VERIFY_ARE_EQUAL_INT(XblVerifyStringResultCode::Success, result->resultCode);
+        VERIFY_IS_NULL(result->firstOffendingSubstring);
     }
 
     DEFINE_TEST_CASE(TestVerifyStrings)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestVerifyStrings);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        auto responseJson = web::json::value::parse(defaultStringVerifyResult);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        HttpMock mock("POST", url, 200);
+        mock.SetResponseBody(defaultStringVerifyResult);
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto requestStrings = ref new Vector<Platform::String^>();
-        requestStrings->Append("asdf");
-        requestStrings->Append("asdfasdf");
-        auto result = create_task(xboxLiveContext->StringService->VerifyStringsAsync(requestStrings->GetView())).get();
-        VERIFY_IS_NOT_NULL(result);
+        const size_t requestStrsCount{ 2 };
+        const char* requestStrs[requestStrsCount]{ "asdf", "asdfasdf" };
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&requestWellFormed, requestStrs, requestStrsCount](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                UNREFERENCED_PARAMETER(mock);
+                UNREFERENCED_PARAMETER(requestUrl);
 
-        //verify the request
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://client-strings.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/system/strings/validate", httpCall->PathQueryFragment.to_string());
-        auto& requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        auto& requestStringJson = requestJson[L"stringstoVerify"];
-        VERIFY_ARE_EQUAL_INT(requestStringJson.size(), 2);
-        VERIFY_ARE_EQUAL(requestStringJson[0].as_string(), requestStrings->GetAt(0)->Data());
-        VERIFY_ARE_EQUAL(requestStringJson[1].as_string(), requestStrings->GetAt(1)->Data());
+                JsonDocument requestJson;
+                requestJson.Parse(requestBody.c_str());
+                auto requestStrsJson = requestJson["stringsToVerify"].GetArray();
 
-        //verify the result
-        VERIFY_ARE_EQUAL_INT(result->Size, 3);
-        auto& resultArrryJson = responseJson[U("verifyStringResult")];
-        auto result0 = result->GetAt(0);
-        VERIFY_ARE_EQUAL_INT(result0->ResultCode, VerifyStringResultCode::Success);
-        VERIFY_IS_TRUE(result0->FirstOffendingSubstring->IsEmpty());
+                requestWellFormed &= requestStrsJson.Size() == requestStrsCount;
+                requestWellFormed &= strcmp(requestStrs[0], requestStrsJson[0].GetString()) == 0;
+                requestWellFormed &= strcmp(requestStrs[1], requestStrsJson[1].GetString()) == 0;
+            }
+        );
 
-        auto result1 = result->GetAt(1);
-        VERIFY_ARE_EQUAL_INT(result1->ResultCode, VerifyStringResultCode::Offensive);
-        VERIFY_ARE_EQUAL(result1->FirstOffendingSubstring->Data(), resultArrryJson[1][L"offendingString"].as_string());
+        XAsyncBlock async{};
+        size_t resultSize{};
+        VERIFY_SUCCEEDED(XblStringVerifyStringsAsync(xboxLiveContext.get(), requestStrs, requestStrsCount, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+        VERIFY_SUCCEEDED(XblStringVerifyStringsResultSize(&async, &resultSize));
 
-        auto result2 = result->GetAt(2);
-        VERIFY_ARE_EQUAL_INT(result2->ResultCode, resultArrryJson[2][L"resultCode"].as_integer());
-        VERIFY_ARE_EQUAL(result2->FirstOffendingSubstring->Data(), resultArrryJson[2][L"offendingString"].as_string());
+        size_t resultStrsCount{};
+        XblVerifyStringResult* results{};
+        std::shared_ptr<char> buffer(new char[resultSize], std::default_delete<char[]>());
+        VERIFY_SUCCEEDED(XblStringVerifyStringsResult(&async, resultSize, buffer.get(), &results, &resultStrsCount, nullptr));
+        VERIFY_ARE_EQUAL_INT(resultStrsCount, 3);
+        
+        JsonDocument responseJson;
+        responseJson.Parse(defaultStringVerifyResult);
+        auto resultsJson = responseJson["verifyStringResult"].GetArray();
+        VERIFY_ARE_EQUAL_INT(resultsJson[0]["resultCode"].GetInt(), results[0].resultCode);
+        VERIFY_ARE_EQUAL_INT(resultsJson[1]["resultCode"].GetInt(), results[1].resultCode);
+        VERIFY_ARE_EQUAL_INT(resultsJson[2]["resultCode"].GetInt(), results[2].resultCode);
+
+        VERIFY_IS_NULL(results[0].firstOffendingSubstring);
+        VERIFY_ARE_EQUAL_STR(resultsJson[1]["offendingString"].GetString(), results[1].firstOffendingSubstring);
+        VERIFY_ARE_EQUAL_STR(resultsJson[2]["offendingString"].GetString(), results[2].firstOffendingSubstring);
+    }
+
+    DEFINE_TEST_CASE(TestVerifyStringsWithLargeBuffer)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        HttpMock mock("POST", url, 200);
+        mock.SetResponseBody(defaultStringVerifyResult);
+
+        const size_t requestStrsCount{ 2 };
+        const char* requestStrs[requestStrsCount]{ "asdf", "asdfasdf" };
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&requestWellFormed, requestStrs, requestStrsCount](HttpMock* mock, std::string requestUrl, std::string requestBody)
+        {
+            UNREFERENCED_PARAMETER(mock);
+            UNREFERENCED_PARAMETER(requestUrl);
+
+            JsonDocument requestJson;
+            requestJson.Parse(requestBody.c_str());
+            auto requestStrsJson = requestJson["stringsToVerify"].GetArray();
+
+            requestWellFormed &= requestStrsJson.Size() == requestStrsCount;
+            requestWellFormed &= strcmp(requestStrs[0], requestStrsJson[0].GetString()) == 0;
+            requestWellFormed &= strcmp(requestStrs[1], requestStrsJson[1].GetString()) == 0;
+        }
+        );
+
+        XAsyncBlock async{};
+        size_t resultSize{};
+        VERIFY_SUCCEEDED(XblStringVerifyStringsAsync(xboxLiveContext.get(), requestStrs, requestStrsCount, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+        VERIFY_SUCCEEDED(XblStringVerifyStringsResultSize(&async, &resultSize));
+
+        size_t bufferUsed{};
+        size_t resultStrsCount{};
+        XblVerifyStringResult* results{};
+        std::shared_ptr<char> buffer(new char[resultSize * 2], std::default_delete<char[]>());
+        VERIFY_SUCCEEDED(XblStringVerifyStringsResult(&async, resultSize * 2, buffer.get(), &results, &resultStrsCount, &bufferUsed));
+        VERIFY_ARE_EQUAL_UINT(resultSize, bufferUsed);
+        VERIFY_ARE_EQUAL_INT(resultStrsCount, 3);
+
+        JsonDocument responseJson;
+        responseJson.Parse(defaultStringVerifyResult);
+        auto resultsJson = responseJson["verifyStringResult"].GetArray();
+        VERIFY_ARE_EQUAL_INT(resultsJson[0]["resultCode"].GetInt(), results[0].resultCode);
+        VERIFY_ARE_EQUAL_INT(resultsJson[1]["resultCode"].GetInt(), results[1].resultCode);
+        VERIFY_ARE_EQUAL_INT(resultsJson[2]["resultCode"].GetInt(), results[2].resultCode);
+
+        VERIFY_IS_NULL(results[0].firstOffendingSubstring);
+        VERIFY_ARE_EQUAL_STR(resultsJson[1]["offendingString"].GetString(), results[1].firstOffendingSubstring);
+        VERIFY_ARE_EQUAL_STR(resultsJson[2]["offendingString"].GetString(), results[2].firstOffendingSubstring);
     }
 };
 

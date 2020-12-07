@@ -1,136 +1,118 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 #include "pch.h"
-#include "xsapi/multiplayer_manager.h"
 #include "multiplayer_manager_internal.h"
-
-using namespace xbox::services::multiplayer;
-using namespace xbox::services::tournaments;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 
-std::shared_ptr<multiplayer_game_session> multiplayer_game_session::_Create_deep_copy()
-{
-    auto copy = std::make_shared<multiplayer_game_session>();
-    copy->deep_copy_from(*this);
-    return copy;
-}
-
-void multiplayer_game_session::deep_copy_from(
-    _In_ const multiplayer_game_session& other
-    )
-{
-    m_sessionReference = other.m_sessionReference;
-    m_host = other.m_host;
-    m_correlationId = other.m_correlationId;
-    m_changeNumber = other.m_changeNumber;
-    m_members = other.m_members;
-    m_properties = other.m_properties;
-    m_sessionConstants = other.m_sessionConstants;
-    m_multiplayerClientManager = other.m_multiplayerClientManager;
-    m_teams = other.m_teams;
-    m_tournamentTeamResults = other.m_tournamentTeamResults;
-}
-
-multiplayer_game_session::multiplayer_game_session():
-    m_changeNumber(0)
+MultiplayerGameSession::MultiplayerGameSession():
+    m_changeNumber(0),
+    m_sessionReference{},
+    m_sessionConstants{},
+    m_memberInitialization{}
 {
 }
 
-multiplayer_game_session::multiplayer_game_session(
-    _In_ std::shared_ptr<multiplayer_session> session,
-    _In_ std::shared_ptr<multiplayer_member> host,
-    _In_ std::vector<std::shared_ptr<multiplayer_member>> members
+MultiplayerGameSession::MultiplayerGameSession(_In_ const MultiplayerGameSession& other):
+    m_correlationId(other.m_correlationId),
+    m_changeNumber(other.m_changeNumber),
+    m_sessionReference(other.m_sessionReference),
+    m_host(other.m_host),
+    m_members(other.m_members),
+    m_properties(other.m_properties),
+    m_multiplayerClientManager(other.m_multiplayerClientManager),
+    m_sessionConstants {},
+    m_memberInitialization{}
+{
+    DeepCopyConstants(other.m_sessionConstants);
+}
+
+MultiplayerGameSession::MultiplayerGameSession(
+    _In_ std::shared_ptr<XblMultiplayerSession> session,
+    _In_ std::shared_ptr<MultiplayerMember> host,
+    _In_ xsapi_internal_vector<std::shared_ptr<MultiplayerMember>> members
     ):
-    m_sessionReference(session->session_reference()),
+    m_correlationId(session->SessionInfo().CorrelationId),
+    m_changeNumber(session->SessionInfo().ChangeNumber),
+    m_sessionReference(session->SessionReference()),
     m_host(std::move(host)),
-    m_correlationId(session->multiplayer_correlation_id()),
-    m_changeNumber(session->change_number()),
     m_members(std::move(members)),
-    m_properties(session->session_properties()->session_custom_properties_json()),
-    m_sessionConstants(session->session_constants()),
-    m_teams(session->tournaments_server().teams()),
-    m_tournamentTeamResults(session->arbitration_server().results())
+    m_sessionConstants{},
+    m_memberInitialization{}
 {
+    XblMultiplayerSessionReadLockGuard sessionSafe(session);
+    DeepCopyConstants(sessionSafe.SessionConstants());
+
+    if (sessionSafe.SessionProperties().SessionCustomPropertiesJson != nullptr)
+    {
+        m_properties = sessionSafe.SessionProperties().SessionCustomPropertiesJson;
+    }
 }
 
-const multiplayer_session_reference&
-multiplayer_game_session::session_reference() const
+const XblMultiplayerSessionReference&
+MultiplayerGameSession::SessionReference() const
 {
     return m_sessionReference;
 }
 
-const string_t&
-multiplayer_game_session::correlation_id() const
+const xsapi_internal_string&
+MultiplayerGameSession::CorrelationId() const
 {
     return m_correlationId;
 }
 
 uint64_t
-multiplayer_game_session::_Change_number() const
+MultiplayerGameSession::ChangeNumber() const
 {
     return m_changeNumber;
 }
 
-std::shared_ptr<multiplayer_member>
-multiplayer_game_session::host() const
+std::shared_ptr<MultiplayerMember>
+MultiplayerGameSession::Host() const
 {
     return m_host;
 }
 
 void
-multiplayer_game_session::_Set_host(
-    _In_ std::shared_ptr<multiplayer_member> hostMember
+MultiplayerGameSession::SetHost(
+    _In_ std::shared_ptr<MultiplayerMember> hostMember
     )
 {
     m_host = hostMember;
 }
 
-const std::vector<std::shared_ptr<multiplayer_member>>&
-multiplayer_game_session::members() const
+const xsapi_internal_vector<std::shared_ptr<MultiplayerMember>>&
+MultiplayerGameSession::Members() const
 {
     return m_members;
 }
 
-std::shared_ptr<multiplayer_session_constants>
-multiplayer_game_session::session_constants() const
+const XblMultiplayerSessionConstants&
+MultiplayerGameSession::SessionConstants() const
 {
     return m_sessionConstants;
 }
 
-const std::unordered_map<string_t, multiplayer_session_reference>& 
-multiplayer_game_session::tournament_teams() const
-{
-    return m_teams;
-}
-
-const std::unordered_map<string_t, tournament_team_result>&
-multiplayer_game_session::tournament_team_results() const
-{
-    return m_tournamentTeamResults;
-}
-
-const web::json::value&
-multiplayer_game_session::properties() const
+const xsapi_internal_string&
+MultiplayerGameSession::Properties() const
 {
     return m_properties;
 }
 
-xbox_live_result<void>
-multiplayer_game_session::set_properties(
-    _In_ const string_t& name,
-    _In_ const web::json::value& valueJson,
+HRESULT
+MultiplayerGameSession::SetProperties(
+    _In_ const xsapi_internal_string& name,
+    _In_ const JsonValue& valueJson,
     _In_opt_ context_t context
     )
 {
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->set_properties(m_sessionReference, name, valueJson, context), void);
+    return m_multiplayerClientManager->SetProperties(m_sessionReference, name, valueJson, context);
 }
 
 bool
-multiplayer_game_session::is_host( 
-    _In_ const string_t& xboxUserId
+MultiplayerGameSession::IsHost( 
+    _In_ uint64_t xuid
     )
 {
     if (m_host == nullptr || m_members.size() == 0)
@@ -138,36 +120,61 @@ multiplayer_game_session::is_host(
         return false;
     }
 
-    return utils::str_icmp(xboxUserId, m_host->xbox_user_id()) == 0;
+    return xuid == m_host->Xuid();
 }
 
-xbox_live_result<void>
-multiplayer_game_session::set_synchronized_host(
-    _In_ std::shared_ptr<multiplayer_member> gameHost,
+HRESULT
+MultiplayerGameSession::SetSynchronizedHost(
+    _In_ const xsapi_internal_string& deviceToken,
     _In_opt_ context_t context
     )
 {
-    RETURN_CPP_IF(gameHost == nullptr, void, xbox_live_error_code::invalid_argument, "GameHost was null.");
-
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->set_synchronized_host(m_sessionReference, gameHost->_Device_token(), context), void);
+    return m_multiplayerClientManager->SetSynchronizedHost(m_sessionReference, deviceToken, context);
 }
 
-xbox_live_result<void>
-multiplayer_game_session::set_synchronized_properties(
-    _In_ const string_t& name,
-    _In_ const web::json::value& valueJson,
+HRESULT
+MultiplayerGameSession::SetSynchronizedProperties(
+    _In_ const xsapi_internal_string& name,
+    _In_ const JsonValue& valueJson,
     _In_opt_ context_t context
     )
 {
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->set_synchronized_properties(m_sessionReference, name, valueJson, context), void);
+    return m_multiplayerClientManager->SetSynchronizedProperties(m_sessionReference, name, valueJson, context);
 }
 
 void
-multiplayer_game_session::_Set_multiplayer_client_manager(
-    _In_ std::shared_ptr<multiplayer_client_manager> clientManager
+MultiplayerGameSession::SetMultiplayerClientManager(
+    _In_ std::shared_ptr<MultiplayerClientManager> clientManager
     )
 {
     m_multiplayerClientManager = clientManager;
+}
+
+void MultiplayerGameSession::DeepCopyConstants(const XblMultiplayerSessionConstants& other)
+{
+    m_sessionConstants = other;
+    m_initiatorXuids = xsapi_internal_vector<uint64_t>(other.InitiatorXuids, other.InitiatorXuids + other.InitiatorXuidsCount);
+    m_sessionConstants.InitiatorXuids = m_initiatorXuids.data();
+    if (m_sessionConstants.MemberInitialization)
+    {
+        m_memberInitialization = *m_sessionConstants.MemberInitialization;
+        m_sessionConstants.MemberInitialization = &m_memberInitialization;
+    }
+    if (m_sessionConstants.CustomJson)
+    {
+        m_constantsCustomJson = m_sessionConstants.CustomJson;
+        m_sessionConstants.CustomJson = m_constantsCustomJson.data();
+    }
+    if (m_sessionConstants.SessionCloudComputePackageConstantsJson)
+    {
+        m_constantsCloudComputePackageJson = m_sessionConstants.SessionCloudComputePackageConstantsJson;
+        m_sessionConstants.SessionCloudComputePackageConstantsJson = m_constantsCloudComputePackageJson.data();
+    }
+    if (m_sessionConstants.MeasurementServerAddressesJson)
+    {
+        m_constantsMeasurementServerAddressesJson = m_sessionConstants.MeasurementServerAddressesJson;
+        m_sessionConstants.MeasurementServerAddressesJson = m_constantsMeasurementServerAddressesJson.data();
+    }
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_END

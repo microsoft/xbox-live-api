@@ -4,47 +4,35 @@
 
 #include "pch.h"
 #include "multiplayer_manager_internal.h"
-#if !XSAPI_U
-#include "ppltasks_extra.h"
-using namespace Concurrency::extras;
-#endif
 
-using namespace xbox::services::multiplayer;
+using namespace xbox::services::system;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 
-const std::chrono::milliseconds TIME_PER_CALL_MS =
-#if UNIT_TEST_SERVICES
-std::chrono::milliseconds(1 * 1000);
-#else
-std::chrono::milliseconds(30 * 1000);
+#if HC_PLATFORM == HC_PLATFORM_UWP || HC_PLATFORM == HC_PLATFORM_XDK
+#define TIME_PER_CALL_MS (1 * 1000)
+#elif XSAPI_UNIT_TESTS
+#define TIME_PER_CALL_MS (30 * 1000)
 #endif
 
-multiplayer_session_writer::multiplayer_session_writer() :
-    m_isTapReceived(false),
-    m_numOfWritesInProgress(0),
-    m_tapChangeNumber(0),
-    m_sessionUpdateEventHandlerCounter(0),
-    m_handleResyncEventCounter(0),
-    m_isTaskInProgress(false)
+MultiplayerSessionWriter::MultiplayerSessionWriter(
+    const TaskQueue& queue
+) noexcept :
+    m_queue{ queue.DeriveWorkerQueue() }
 {
 }
 
-multiplayer_session_writer::multiplayer_session_writer(
-    _In_ std::shared_ptr<multiplayer_local_user_manager> localUserManager
-    ) :
-    m_multiplayerLocalUserManager(localUserManager),
-    m_isTapReceived(false),
-    m_numOfWritesInProgress(0),
-    m_tapChangeNumber(0),
-    m_sessionUpdateEventHandlerCounter(0),
-    m_handleResyncEventCounter(0),
-    m_isTaskInProgress(false)
+MultiplayerSessionWriter::MultiplayerSessionWriter(
+    const TaskQueue& queue,
+    _In_ std::shared_ptr<MultiplayerLocalUserManager> localUserManager
+) noexcept :
+    m_queue{ queue.DeriveWorkerQueue() },
+    m_multiplayerLocalUserManager{ std::move(localUserManager) }
 {
 }
 
 void
-multiplayer_session_writer::destroy()
+MultiplayerSessionWriter::Destroy()
 {
     m_session = nullptr;
     m_isTapReceived = false;
@@ -52,26 +40,26 @@ multiplayer_session_writer::destroy()
     m_tapChangeNumber = 0;
 }
 
-std::shared_ptr<xbox_live_context_impl>
-multiplayer_session_writer::get_primary_context()
+std::shared_ptr<XblContext>
+MultiplayerSessionWriter::GetPrimaryContext()
 {
-    return m_multiplayerLocalUserManager->get_primary_context();
+    return m_multiplayerLocalUserManager->GetPrimaryContext();
 }
 
-const std::shared_ptr<multiplayer_session>&
-multiplayer_session_writer::session() const
+const std::shared_ptr<XblMultiplayerSession>&
+MultiplayerSessionWriter::Session() const
 {
     return m_session;
 }
 
 void
-multiplayer_session_writer::update_session(
-    _In_ const std::shared_ptr<multiplayer_session>& updatedSession
+MultiplayerSessionWriter::UpdateSession(
+    _In_ const std::shared_ptr<XblMultiplayerSession>& updatedSession
     )
 {
     if (updatedSession == nullptr)
     {
-        destroy();
+        Destroy();
     }
     else
     {
@@ -79,14 +67,14 @@ multiplayer_session_writer::update_session(
     }
 }
 
-function_context
-multiplayer_session_writer::add_multiplayer_session_updated_handler(
-    _In_ std::function<void(const std::shared_ptr<multiplayer_session>& )> handler
+XblFunctionContext
+MultiplayerSessionWriter::AddMultiplayerSessionUpdatedHandler(
+    _In_ Callback<const std::shared_ptr<XblMultiplayerSession>&> handler
     )
 {
-    std::lock_guard<std::mutex> lock(m_stateLock.get());
+    std::lock_guard<std::mutex> lock(m_stateLock);
 
-    function_context context = -1;
+    XblFunctionContext context = -1;
     if (handler != nullptr)
     {
         context = ++m_sessionUpdateEventHandlerCounter;
@@ -97,18 +85,18 @@ multiplayer_session_writer::add_multiplayer_session_updated_handler(
 }
 
 void
-multiplayer_session_writer::on_resync_message_received()
+MultiplayerSessionWriter::OnResyncMessageReceived()
 {
     m_handleResyncEventCounter++;
-    resync();
+    Resync();
 }
 
 void
-multiplayer_session_writer::on_session_updated(
-    _In_ const std::shared_ptr<multiplayer_session>& updatedSession
+MultiplayerSessionWriter::OnSessionUpdated(
+    _In_ const std::shared_ptr<XblMultiplayerSession>& updatedSession
     )
 {
-    std::lock_guard<std::mutex> lock(m_stateLock.get());
+    std::lock_guard<std::mutex> lock(m_stateLock);
 
     for (const auto& handler : m_sessionUpdateEventHandler)
     {
@@ -121,20 +109,20 @@ multiplayer_session_writer::on_session_updated(
             }
             catch (...)
             {
-                LOG_ERROR("multiplayer_session_writer::on_session_updated call threw an exception");
+                LOG_ERROR("MultiplayerSessionWriter::on_session_updated call threw an exception");
             }
         }
     }
 }
 
 bool
-multiplayer_session_writer::is_tap_received() const
+MultiplayerSessionWriter::IsTapReceived() const
 {
     return m_isTapReceived;
 }
 
 void
-multiplayer_session_writer::set_tap_received(
+MultiplayerSessionWriter::SetTapReceived(
     _In_ bool bReceived
     )
 {
@@ -142,13 +130,13 @@ multiplayer_session_writer::set_tap_received(
 }
 
 bool
-multiplayer_session_writer::is_write_in_progress() const
+MultiplayerSessionWriter::IsWriteInProgress() const
 {
     return m_numOfWritesInProgress > 0;
 }
 
 void
-multiplayer_session_writer::set_write_in_progress(
+MultiplayerSessionWriter::SetWriteInProgress(
     _In_ bool writeInProgress
     )
 {
@@ -163,395 +151,475 @@ multiplayer_session_writer::set_write_in_progress(
 }
 
 uint64_t
-multiplayer_session_writer::tap_change_number() const
+MultiplayerSessionWriter::TapChangeNumber() const
 {
     return m_tapChangeNumber;
 }
 
 void
-multiplayer_session_writer::set_tap_change_number(
+MultiplayerSessionWriter::SetTapChangeNumber(
     _In_ uint64_t changeNumber
     )
 {
     m_tapChangeNumber = changeNumber;
 }
 
-pplx::task<xbox_live_result<std::shared_ptr<multiplayer_session>>>
-multiplayer_session_writer::commit_synchronized_changes(
-    _In_ std::shared_ptr<multiplayer_session> sessionToCommit
-    )
+HRESULT MultiplayerSessionWriter::CommitSynchronizedChanges(
+    _In_ std::shared_ptr<XblMultiplayerSession> sessionToCommit,
+    _In_ MultiplayerSessionCallback callback
+) noexcept
 {
     // Retrieve the latest session and write the pending commit changes to it.
-    auto task = write_session(m_multiplayerLocalUserManager->get_primary_context(), sessionToCommit, multiplayer_session_write_mode::synchronized_update)
-    .then([](xbox_live_result<std::shared_ptr<multiplayer_session>> sessionResult)
-    {
-        return sessionResult;
-    });
-
-    return utils::create_exception_free_task<std::shared_ptr<multiplayer_session>>(task);
+    return WriteSession(
+        m_multiplayerLocalUserManager->GetPrimaryContext(),
+        sessionToCommit,
+        XblMultiplayerSessionWriteMode::SynchronizedUpdate,
+        true,
+        std::move(callback)
+    );
 }
 
-pplx::task<xbox_live_result<std::vector<multiplayer_event>>>
-multiplayer_session_writer::commit_pending_synchronized_changes(
-    _In_ std::vector<std::shared_ptr<multiplayer_client_pending_request>> processingQueue,
-    _In_ multiplayer_session_type sessionType
-    )
+HRESULT MultiplayerSessionWriter::CommitPendingSynchronizedChanges(
+    _In_ Vector<std::shared_ptr<MultiplayerClientPendingRequest>> processingQueue,
+    _In_ XblMultiplayerSessionType sessionType,
+    _In_ MultiplayerEventQueueCallback callback
+) noexcept
 {
     if (m_session == nullptr)
     {
-        auto eventQueue = handle_events(processingQueue, xbox_live_error_code::generic_error, "Session no longer exists.", sessionType);
-        return pplx::task_from_result(xbox_live_result<std::vector<multiplayer_event>>(eventQueue, xbox_live_error_code::generic_error, "Session no longer exists."));
+        auto eventQueue = HandleEvents(processingQueue, { E_FAIL, "Session null" }, sessionType);
+        // TODO this may need to be invoked on another thread
+        callback(Result<MultiplayerEventQueue>(eventQueue, xbl_error_code::generic_error));
+        return S_OK;
     }
-    
-    const auto& sessionToCommitCopy = m_session->_Create_deep_copy();
+
+    auto sessionToCommitCopy = MakeShared<XblMultiplayerSession>(*m_session);
 
     // Update any pending local user or lobby session properties.
     for (auto& request : processingQueue)
     {
-        request->append_pending_changes(sessionToCommitCopy, nullptr);
+        request->AppendPendingChanges(sessionToCommitCopy, nullptr);
     }
 
-    std::weak_ptr<multiplayer_session_writer> thisWeakPtr = shared_from_this();
-    auto task = write_session(get_primary_context(), sessionToCommitCopy, multiplayer_session_write_mode::synchronized_update)
-    .then([thisWeakPtr, processingQueue, sessionType](xbox_live_result<std::shared_ptr<multiplayer_session>> sessionResult)
+    return WriteSession(GetPrimaryContext(), sessionToCommitCopy, XblMultiplayerSessionWriteMode::SynchronizedUpdate, true,
+        [
+            weakThis = std::weak_ptr<MultiplayerSessionWriter>{ shared_from_this() },
+            processingQueue,
+            sessionType,
+            callback
+        ]
+    (Result<std::shared_ptr<XblMultiplayerSession>> sessionResult)
     {
-        std::shared_ptr<multiplayer_session_writer> pThis(thisWeakPtr.lock());
-        std::vector<multiplayer_event> eventQueue;
-        if (pThis != nullptr)
+        MultiplayerEventQueue eventQueue;
+        auto sharedThis{ weakThis.lock() };
+        if (sharedThis)
         {
-            std::lock_guard<std::mutex> lock(pThis->m_stateLock.get());
-            eventQueue = pThis->handle_events(processingQueue, sessionResult.err(), sessionResult.err_message(), sessionType);
+            std::lock_guard<std::mutex> lock(sharedThis->m_stateLock);
+            eventQueue = sharedThis->HandleEvents(processingQueue, sessionResult, sessionType);
         }
-        return xbox_live_result<std::vector<multiplayer_event>>(eventQueue, sessionResult.err(), sessionResult.err_message());
+        callback(Result<MultiplayerEventQueue>(eventQueue, sessionResult.Hresult()));
     });
-
-    return utils::create_exception_free_task<std::vector<multiplayer_event>>(task);
 }
 
-pplx::task<xbox_live_result<std::vector<multiplayer_event>>>
-multiplayer_session_writer::commit_pending_changes(
-    _In_ std::vector<std::shared_ptr<multiplayer_client_pending_request>> processingQueue,
-    _In_ multiplayer_session_type sessionType,
-    _In_ bool isGameInProgress /*= false */
-    )
+HRESULT MultiplayerSessionWriter::CommitPendingChanges(
+    _In_ Vector<std::shared_ptr<MultiplayerClientPendingRequest>> processingQueue,
+    _In_ XblMultiplayerSessionType sessionType,
+    _In_ bool isGameInProgress,
+    _In_ MultiplayerEventQueueCallback callback
+) noexcept
 {
     if (m_session == nullptr)
     {
-        auto eventQueue = handle_events(processingQueue, xbox_live_error_code::generic_error, "Session no longer exists.", sessionType);
-        return pplx::task_from_result(xbox_live_result<std::vector<multiplayer_event>>(eventQueue, xbox_live_error_code::generic_error, "Session no longer exists."));
+        auto eventQueue = HandleEvents(processingQueue, { E_FAIL, "Session is null" }, sessionType);
+        // TODO this may need to be invoked on another thread
+        callback(Result<MultiplayerEventQueue>(eventQueue, xbl_error_code::generic_error, "Session is null"));
+        return S_OK;
     }
 
-    std::shared_ptr<multiplayer_session> sessionToCommit = m_session->_Create_deep_copy();
+    std::shared_ptr<XblMultiplayerSession> sessionToCommitCopy = MakeShared<XblMultiplayerSession>(*m_session);
 
     // Update any pending local user or lobby session properties.
     for (auto& request : processingQueue)
     {
-        request->append_pending_changes(sessionToCommit, nullptr, isGameInProgress);
+        request->AppendPendingChanges(sessionToCommitCopy, nullptr, isGameInProgress);
     }
 
-    std::weak_ptr<multiplayer_session_writer> thisWeakPtr = shared_from_this();
-    auto task = write_session(m_multiplayerLocalUserManager->get_primary_context(), sessionToCommit, multiplayer_session_write_mode::update_existing)
-    .then([thisWeakPtr, processingQueue, sessionType](xbox_live_result<std::shared_ptr<multiplayer_session>> sessionResult)
+    return WriteSession(m_multiplayerLocalUserManager->GetPrimaryContext(), sessionToCommitCopy, XblMultiplayerSessionWriteMode::UpdateExisting, true,
+        [
+            weakThis = std::weak_ptr<MultiplayerSessionWriter>{ shared_from_this() },
+            processingQueue,
+            sessionType,
+            callback
+        ]
+    (Result<std::shared_ptr<XblMultiplayerSession>> sessionResult)
     {
-        std::shared_ptr<multiplayer_session_writer> pThis(thisWeakPtr.lock());
-        std::vector<multiplayer_event> eventQueue;
-        if (pThis != nullptr)
+        MultiplayerEventQueue eventQueue;
+        auto sharedThis{ weakThis.lock() };
+        if (sharedThis)
         {
-            std::lock_guard<std::mutex> lock(pThis->m_stateLock.get());
-            eventQueue = pThis->handle_events(processingQueue, sessionResult.err(), sessionResult.err_message(), sessionType);
+            std::lock_guard<std::mutex> lock(sharedThis->m_stateLock);
+            eventQueue = sharedThis->HandleEvents(processingQueue, sessionResult, sessionType);
         }
-        return xbox_live_result<std::vector<multiplayer_event>>(eventQueue, sessionResult.err(), sessionResult.err_message());
-    });
-
-    return utils::create_exception_free_task<std::vector<multiplayer_event>>(task);
-}
-
-pplx::task<xbox_live_result<std::shared_ptr<multiplayer_session>>>
-multiplayer_session_writer::write_session(
-    _In_ std::shared_ptr<xbox::services::xbox_live_context_impl> xboxLiveContext,
-    _In_ std::shared_ptr<multiplayer_session> session,
-    _In_ multiplayer_session_write_mode mode,
-    _In_ bool updateLatest
-    )
-{
-    RETURN_TASK_CPP_IF(xboxLiveContext == nullptr, std::shared_ptr<multiplayer_session>, "Call add_local_user() first.");
-
-    set_write_in_progress(true);
-    std::weak_ptr<multiplayer_session_writer> thisWeakPtr = shared_from_this();
-    return xboxLiveContext->multiplayer_service().write_session(session, mode)
-    .then([thisWeakPtr, updateLatest](xbox_live_result<std::shared_ptr<multiplayer_session>> sessionResult)
-    {
-        std::shared_ptr<multiplayer_session_writer> pThis(thisWeakPtr.lock());
-        RETURN_CPP_IF(pThis == nullptr, std::shared_ptr<multiplayer_session>, xbox_live_error_code::generic_error, "multiplayer_session_writer class was destroyed.");
-
-        return pThis->write_session_helper(sessionResult, updateLatest);
+        callback(Result<MultiplayerEventQueue>(eventQueue, sessionResult.Hresult(), sessionResult.ErrorMessage()));
     });
 }
 
-pplx::task<xbox_live_result<std::shared_ptr<multiplayer_session>>>
-multiplayer_session_writer::write_session_by_handle(
-    _In_ std::shared_ptr<xbox::services::xbox_live_context_impl> xboxLiveContext,
-    _In_ std::shared_ptr<multiplayer_session> session,
-    _In_ multiplayer_session_write_mode mode,
-    _In_ const string_t& handleId,
-    _In_ bool updateLatest
-    )
+HRESULT MultiplayerSessionWriter::WriteSession(
+    _In_ std::shared_ptr<XblContext> xboxLiveContext,
+    _In_ std::shared_ptr<XblMultiplayerSession> session,
+    _In_ XblMultiplayerSessionWriteMode mode,
+    _In_ bool updateLatest,
+    _In_ MultiplayerSessionCallback callback
+) noexcept
 {
-    RETURN_TASK_CPP_IF(xboxLiveContext == nullptr, std::shared_ptr<multiplayer_session>, "Call add_local_user() first.");
+    RETURN_HR_IF_LOG_DEBUG(xboxLiveContext == nullptr, E_UNEXPECTED, "Call add_local_user() first.");
 
-    set_write_in_progress(true);
-    std::weak_ptr<multiplayer_session_writer> thisWeakPtr = shared_from_this();
-    return xboxLiveContext->multiplayer_service().write_session_by_handle(session, mode, handleId)
-    .then([thisWeakPtr, updateLatest](xbox_live_result<std::shared_ptr<multiplayer_session>> sessionResult)
+    auto hr = xboxLiveContext->MultiplayerService()->WriteSession(
+        session,
+        mode,
+        AsyncContext<Result<std::shared_ptr<XblMultiplayerSession>>>{ m_queue,
+        [
+            weakThis = std::weak_ptr<MultiplayerSessionWriter>{ shared_from_this() },
+            updateLatest,
+            callback
+        ]
+    (Result<std::shared_ptr<XblMultiplayerSession>> sessionResult)
     {
-        std::shared_ptr<multiplayer_session_writer> pThis(thisWeakPtr.lock());
-        RETURN_CPP_IF(pThis == nullptr, std::shared_ptr<multiplayer_session>, xbox_live_error_code::generic_error, "multiplayer_session_writer class was destroyed.");
-
-        return pThis->write_session_helper(sessionResult, updateLatest);
+        if (auto sharedThis{ weakThis.lock() })
+        {
+            sharedThis->HandleWriteSessionResult(sessionResult, updateLatest, callback);
+        }
+        else
+        {
+            callback({ E_FAIL, "Session writer is null" });
+        }
+    }
     });
+
+    if (SUCCEEDED(hr))
+    {
+        SetWriteInProgress(true);
+    }
+    return hr;
 }
 
-xbox_live_result<std::shared_ptr<multiplayer_session>>
-multiplayer_session_writer::write_session_helper(
-    _In_ xbox_live_result<std::shared_ptr<multiplayer_session>> sessionResult,
-    _In_ bool updateLatest
-    )
+HRESULT MultiplayerSessionWriter::WriteSessionByHandle(
+    _In_ std::shared_ptr<XblContext> xboxLiveContext,
+    _In_ std::shared_ptr<XblMultiplayerSession> session,
+    _In_ XblMultiplayerSessionWriteMode mode,
+    _In_ const String& handleId,
+    _In_ bool updateLatest,
+    _In_ MultiplayerSessionCallback callback
+) noexcept
 {
-    std::lock_guard<std::mutex> guard(m_synchronizeWriteWithTapLock);
+    RETURN_HR_IF_LOG_DEBUG(xboxLiveContext == nullptr, E_UNEXPECTED, "Call add_local_user() first.");
 
-    xbox_live_result<std::shared_ptr<multiplayer_session>> xboxLiveResult = sessionResult;
-    if (!xboxLiveResult.err() || xboxLiveResult.err() == xbox_live_error_condition::http_412_precondition_failed)
+    auto hr = xboxLiveContext->MultiplayerService()->WriteSessionByHandle(
+        session,
+        mode,
+        handleId,
+        AsyncContext<Result<std::shared_ptr<XblMultiplayerSession>>>{ m_queue,
+        [
+            weakThis = std::weak_ptr<MultiplayerSessionWriter>{ shared_from_this() },
+            updateLatest,
+            callback
+        ]
+    (Result<std::shared_ptr<XblMultiplayerSession>> sessionResult)
     {
-        auto latestSession = xboxLiveResult.payload();
+        if (auto sharedThis{ weakThis.lock() })
+        {
+            sharedThis->HandleWriteSessionResult(sessionResult, updateLatest, callback);
+        }
+        else
+        {
+            callback({ E_FAIL, "Session writer is null" });
+        }
+    }
+    });
+
+    if (SUCCEEDED(hr))
+    {
+        SetWriteInProgress(true);
+    }
+    return hr;
+}
+
+void MultiplayerSessionWriter::HandleWriteSessionResult(
+    _In_ Result<std::shared_ptr<XblMultiplayerSession>> writeSessionResult,
+    _In_ bool updateLatest,
+    _In_ MultiplayerSessionCallback callback
+) noexcept
+{
+    std::lock_guard<std::mutex> guard{ m_synchronizeWriteWithTapLock };
+
+    if (Succeeded(writeSessionResult) || writeSessionResult.Hresult() == HTTP_E_STATUS_PRECOND_FAILED)
+    {
         if (updateLatest)
         {
-            on_session_updated(latestSession);
+            OnSessionUpdated(writeSessionResult.Payload());
         }
     }
 
-    set_write_in_progress(false);
-    if (is_tap_received())
+    SetWriteInProgress(false);
+    if (IsTapReceived())
     {
-        set_tap_received(false);
-        auto latestSession = session();  // always check against the latest session().
-        if(updateLatest && latestSession != nullptr && latestSession->change_number() < tap_change_number())
+        SetTapReceived(false);
+        auto latestSession = m_session;  // always check against the latest session().
+        if(updateLatest && latestSession != nullptr && latestSession->SessionInfo().ChangeNumber < TapChangeNumber())
         {
-            return get_current_session_helper(m_multiplayerLocalUserManager->get_primary_context(), latestSession->session_reference()).get();
+            GetCurrentSessionHelper(m_multiplayerLocalUserManager->GetPrimaryContext(), latestSession->SessionReference(), callback);
         }
-    }
-
-    return xboxLiveResult;
-}
-
-void
-multiplayer_session_writer::on_session_changed(
-    _In_ const multiplayer_session_change_event_args& args
-    )
-{
-    std::lock_guard<std::mutex> guard(m_synchronizeWriteWithTapLock);
-
-    multiplayer_session_reference sessionRef = args.session_reference();
-    uint64_t argsChangeNumber = args.change_number();
-    if (is_write_in_progress())
-    {
-        if (argsChangeNumber > tap_change_number())
+        else
         {
-            set_tap_received(true);
-            set_tap_change_number(argsChangeNumber);
+            callback(writeSessionResult);
         }
     }
     else
     {
-        auto latestSession = session();
-        if(latestSession != nullptr && argsChangeNumber > latestSession->change_number())
+        callback(writeSessionResult);
+    }
+}
+
+void MultiplayerSessionWriter::OnSessionChanged(
+    _In_ XblMultiplayerSessionChangeEventArgs args
+) noexcept
+{
+    std::lock_guard<std::mutex> guard(m_synchronizeWriteWithTapLock);
+
+    if (IsWriteInProgress())
+    {
+        if (args.ChangeNumber > TapChangeNumber())
         {
-            get_current_session_helper(m_multiplayerLocalUserManager->get_primary_context(), latestSession->session_reference());
+            SetTapReceived(true);
+            SetTapChangeNumber(args.ChangeNumber);
+        }
+    }
+    else
+    {
+        auto latestSession = Session();
+        if(latestSession != nullptr && args.ChangeNumber > latestSession->SessionInfo().ChangeNumber)
+        {
+            GetCurrentSessionHelper(m_multiplayerLocalUserManager->GetPrimaryContext(), latestSession->SessionReference(), nullptr);
         }
     }
 }
 
-pplx::task<xbox_live_result<std::shared_ptr<multiplayer_session>>>
-multiplayer_session_writer::get_current_session_helper(
-    _In_ std::shared_ptr<xbox::services::xbox_live_context_impl> xboxLiveContext,
-    _In_ const multiplayer_session_reference& sessionReference
-    )
+HRESULT MultiplayerSessionWriter::GetCurrentSessionHelper(
+    _In_ std::shared_ptr<XblContext> xboxLiveContext,
+    _In_ const XblMultiplayerSessionReference& sessionReference,
+    _In_ MultiplayerSessionCallback callback
+) noexcept
 {
-    RETURN_TASK_CPP_IF(xboxLiveContext == nullptr, std::shared_ptr<multiplayer_session>, "Call add_local_user() first.");
+    RETURN_HR_IF_LOG_DEBUG(xboxLiveContext == nullptr, E_UNEXPECTED, "Call add_local_user() first.");
 
-    std::weak_ptr<multiplayer_session_writer> thisWeakPtr = shared_from_this();
-    return xboxLiveContext->multiplayer_service().get_current_session(sessionReference)
-    .then([thisWeakPtr, sessionReference](xbox_live_result<std::shared_ptr<multiplayer_session>> sessionResult)
+    return xboxLiveContext->MultiplayerService()->GetCurrentSession(
+        sessionReference,
+        AsyncContext<Result<std::shared_ptr<XblMultiplayerSession>>>{ m_queue,
+        [
+            weakThis = std::weak_ptr<MultiplayerSessionWriter>{ shared_from_this() },
+            callback
+        ]
+    (Result<std::shared_ptr<XblMultiplayerSession>> sessionResult)
     {
-        if (!sessionResult.err() || sessionResult.err() == xbox_live_error_code::http_status_412_precondition_failed)
+        if (auto sharedThis{ weakThis.lock() })
         {
-            std::shared_ptr<multiplayer_session_writer> pThis(thisWeakPtr.lock());
-            RETURN_CPP_IF(pThis == nullptr, std::shared_ptr<multiplayer_session>, xbox_live_error_code::generic_error, "multiplayer_session_writer class was destroyed.");
-
-            pThis->on_session_updated(sessionResult.payload());
+            if (Succeeded(sessionResult) || sessionResult.Hresult() == HTTP_E_STATUS_PRECOND_FAILED)
+            {
+                sharedThis->OnSessionUpdated(sessionResult.Payload());
+            }
+            callback(sessionResult);
         }
-
-        return sessionResult;
+        else
+        {
+            callback({E_FAIL, "Session writer is null"});
+        }
+    }
     });
 }
 
-void
-multiplayer_session_writer::resync()
+void MultiplayerSessionWriter::Resync()
 {
-#if UWP_API || TV_API || UNIT_TEST_SERVICES
-    std::lock_guard<std::mutex> lock(m_resyncLock.get());
+#if HC_PLATFORM == HC_PLATFORM_UWP || HC_PLATFORM == HC_PLATFORM_XDK || XSAPI_UNIT_TESTS
+    std::lock_guard<std::mutex> lock(m_resyncLock);
 
-    auto cachedSession = session();
-    if (cachedSession != nullptr && !m_isTaskInProgress && m_handleResyncEventCounter > 0)
+    auto cachedSession = Session();
+    if (cachedSession != nullptr && !m_isResyncTaskInProgress && m_handleResyncEventCounter > 0)
     {
-        m_isTaskInProgress = true;
+        m_isResyncTaskInProgress = true;
         m_handleResyncEventCounter = 0;
-        multiplayer_session_change_event_args changeEventArgs(cachedSession->session_reference(), string_t(), cachedSession->change_number() + 1);
-        on_session_changed(changeEventArgs);
+        XblMultiplayerSessionChangeEventArgs changeEventArgs{ cachedSession->SessionReference(), "", cachedSession->SessionInfo().ChangeNumber + 1 };
+        OnSessionChanged(changeEventArgs);
 
-        // You could get multiple resync events. To avoid fetching the session too often, check back after TIME_PER_CALL_MS secs
-        std::weak_ptr<multiplayer_session_writer> thisWeakPtr = shared_from_this();
-        create_delayed_task(
-            TIME_PER_CALL_MS,
-            [thisWeakPtr]()
-        {
-            std::shared_ptr<multiplayer_session_writer> pThis(thisWeakPtr.lock());
-            if (pThis != nullptr)
+        // You could get multiple resync events. To avoid fetching the session too often, only check back after TIME_PER_CALL_MS secs
+        m_queue.RunWork([ weakThis = std::weak_ptr<MultiplayerSessionWriter>{ shared_from_this() }, this ]
             {
-                std::lock_guard<std::mutex> lock(pThis->m_resyncLock.get());
-                pThis->m_isTaskInProgress = false;
-
-                // Call resync from another task to avoid m_resyncLock from deadlocking.
-                pplx::create_task([thisWeakPtr]()
+                if (auto sharedThis{ weakThis.lock() })
                 {
-                    std::shared_ptr<multiplayer_session_writer> pThis2(thisWeakPtr.lock());
-                    if (pThis2 != nullptr)
-                    {
-                        pThis2->resync();
-                    }
-                });
-            }
-        });
+                    std::unique_lock<std::mutex> lock{ m_resyncLock };
+                    m_isResyncTaskInProgress = false;
+                    lock.unlock();
+
+                    Resync();
+                }
+            }, TIME_PER_CALL_MS);
     }
+#else
+    UNREFERENCED_PARAMETER(m_isResyncTaskInProgress);
 #endif
 }
 
-pplx::task<xbox_live_result<std::shared_ptr<multiplayer_session>>>
-multiplayer_session_writer::leave_remote_session(
-    _In_ std::shared_ptr<multiplayer_session> session
-    )
+HRESULT MultiplayerSessionWriter::LeaveRemoteSession(
+    _In_ std::shared_ptr<XblMultiplayerSession> session,
+    _In_ MultiplayerSessionCallback callback
+) noexcept
 {
-    RETURN_TASK_CPP_IF(session == nullptr, std::shared_ptr<multiplayer_session>, "Session is null");
+    RETURN_HR_IF_LOG_DEBUG(session == nullptr, E_UNEXPECTED, "Session is null");
 
-    auto sessionRefToCommit = session->session_reference();
-    std::weak_ptr<multiplayer_session_writer> thisWeakPtr = shared_from_this();
-    auto task = pplx::create_task([thisWeakPtr, sessionRefToCommit]()
+    // LeaveSessionOperation will leave the provided session for each local user.
+    // Because a User must leave the session on their own, this requires an MPSD call for each local user.
+    // To be consistent with 1806 XDK behavior, if any of these MPSD calls fail, the rest of the operation
+    // will be aborted and that failure will be returned.
+    struct LeaveSessionOperation : public std::enable_shared_from_this<LeaveSessionOperation>
     {
-        std::shared_ptr<multiplayer_session_writer> pThis(thisWeakPtr.lock());
-        RETURN_CPP_IF(pThis == nullptr, std::shared_ptr<multiplayer_session>, xbox_live_error_code::generic_error, "multiplayer_session_writer class was destroyed.");
-
-        xbox_live_result<std::shared_ptr<multiplayer_session>> multiplayerSessionResult;
-        auto xboxLiveContextMap = pThis->m_multiplayerLocalUserManager->get_local_user_map();
-        for (auto xboxLiveContext : xboxLiveContextMap)
+        LeaveSessionOperation(
+            std::shared_ptr<MultiplayerSessionWriter> sessionWriter,
+            const XblMultiplayerSessionReference& sessionRefToLeave,
+            MultiplayerSessionCallback&& callback
+        ) noexcept :
+            m_sessionWriter{ std::move(sessionWriter) },
+            m_sessionToLeaveRef{ sessionRefToLeave },
+            m_localUsers{ m_sessionWriter->m_multiplayerLocalUserManager->GetLocalUserMap() },
+            m_callback{ std::move(callback) }
         {
-            auto localUser = xboxLiveContext.second;
-            if (localUser != nullptr)
-            {
-                auto sessionToCommit = std::make_shared<multiplayer_session>(localUser->xbox_user_id(), sessionRefToCommit);
-                sessionToCommit->leave();
+        }
 
-                // Never update latest copy upon leaving.
-                multiplayerSessionResult = pThis->write_session(localUser->context(), sessionToCommit, multiplayer_session_write_mode::update_existing, false).get();
-                if (multiplayerSessionResult.err())
+        void Run() noexcept
+        {
+            if (m_localUsers.empty())
+            {
+                // Nothing left to do, return latest session
+                m_callback(m_latestSession);
+            }
+            else
+            {
+                auto userContext{ m_localUsers.begin()->second->Context() };
+                m_localUsers.erase(m_localUsers.begin());
+                HRESULT hr = LeaveSession(userContext);
+                if (FAILED(hr))
                 {
-                    break;
+                    m_callback(hr);
                 }
             }
         }
 
-        return multiplayerSessionResult;
-    });
-
-    return utils::create_exception_free_task<std::shared_ptr<multiplayer_session>>(task);
-}
-
-std::vector<multiplayer_event>
-multiplayer_session_writer::handle_events(
-    _In_ std::vector<std::shared_ptr<multiplayer_client_pending_request>> processingQueue,
-    _In_ const std::error_code& errorCode,
-    _In_ const std::string& errorMessage,
-    _In_ multiplayer_session_type sessionType
-    )
-{
-    std::vector<multiplayer_event> eventQueue;
-    for (auto& request : processingQueue)
-    {
-        if (request->joinability() != joinability::none)
+    private:
+        HRESULT LeaveSession(std::shared_ptr<XblContext> userContext) noexcept
         {
-            multiplayer_event multiplayerEvent(
-                errorCode,
-                errorMessage,
-                multiplayer_event_type::joinability_state_changed,
-                std::make_shared<multiplayer_event_args>(),
-                sessionType,
-                request->context()
-                );
+            auto sessionToCommit = MakeShared<XblMultiplayerSession>(userContext->Xuid(), &m_sessionToLeaveRef, nullptr);
+            RETURN_HR_IF_FAILED(sessionToCommit->Leave());
 
-            eventQueue.push_back(multiplayerEvent);
+            // Never update latest copy upon leaving.
+            return m_sessionWriter->WriteSession(
+                userContext,
+                sessionToCommit,
+                XblMultiplayerSessionWriteMode::UpdateExisting,
+                false,
+                [
+                    sharedThis{ shared_from_this() }, this
+                ]
+            (Result<std::shared_ptr<XblMultiplayerSession>> writeSessionResult)
+            {
+                if (Failed(writeSessionResult))
+                {
+                    m_callback(writeSessionResult);
+                }
+                else
+                {
+                    m_latestSession = writeSessionResult.ExtractPayload();
+                    sharedThis->Run();
+                }
+            });
         }
 
-        if (request->session_properties().size() > 0)
+        std::shared_ptr<MultiplayerSessionWriter> m_sessionWriter;
+        XblMultiplayerSessionReference m_sessionToLeaveRef;
+        Map<uint64_t, std::shared_ptr<MultiplayerLocalUser>> m_localUsers;
+        std::shared_ptr<XblMultiplayerSession> m_latestSession{ nullptr };
+        MultiplayerSessionCallback m_callback;
+    };
+
+    auto operation = MakeShared<LeaveSessionOperation>(
+        shared_from_this(),
+        session->SessionReference(),
+        std::move(callback)
+    );
+
+    operation->Run();
+    return S_OK;
+}
+
+MultiplayerEventQueue
+MultiplayerSessionWriter::HandleEvents(
+    _In_ xsapi_internal_vector<std::shared_ptr<MultiplayerClientPendingRequest>> processingQueue,
+    _In_ Result<void> error,
+    _In_ XblMultiplayerSessionType sessionType
+    )
+{
+    MultiplayerEventQueue eventQueue;
+    for (auto& request : processingQueue)
+    {
+        if (request->Joinability() != XblMultiplayerJoinability::None)
+        {
+            eventQueue.AddEvent(
+                XblMultiplayerEventType::JoinabilityStateChanged,
+                sessionType,
+                nullptr,
+                error,
+                request->Context()
+            );
+        }
+
+        if (request->SessionProperties().size() > 0)
         {
             // Fire events for each of the properties
-            auto iter = request->session_properties().begin();
-            for (iter; iter != request->session_properties().end(); ++iter)
+            for (auto iter = request->SessionProperties().begin(); iter != request->SessionProperties().end(); ++iter)
             {
-                multiplayer_event multiplayerEvent(
-                    errorCode,
-                    errorMessage,
-                    multiplayer_event_type::session_property_write_completed,
-                    std::make_shared<multiplayer_event_args>(),
+                eventQueue.AddEvent(
+                    XblMultiplayerEventType::SessionPropertyWriteCompleted,
                     sessionType,
-                    request->context()
-                    );
-
-                eventQueue.push_back(multiplayerEvent);
+                    nullptr,
+                    error,
+                    request->Context()
+                );
             }
         }
 
-        if (!request->synchronized_host_device_token().empty())
+        if (!request->SynchronizedHostDeviceToken().empty())
         {
-            multiplayer_event multiplayerEvent(
-                errorCode,
-                errorMessage,
-                multiplayer_event_type::synchronized_host_write_completed,
-                std::make_shared<multiplayer_event_args>(),
+            eventQueue.AddEvent(
+                XblMultiplayerEventType::SynchronizedHostWriteCompleted,
                 sessionType,
-                request->context()
-                );
-
-            eventQueue.push_back(multiplayerEvent);
+                std::make_shared<XblMultiplayerEventArgs>(),
+                error,
+                request->Context()
+            );
         }
 
-        if (request->synchronized_session_properties().size() > 0)
+        if (request->SynchronizedSessionProperties().size() > 0)
         {
             // Fire events for each of the properties
-            auto iter = request->synchronized_session_properties().begin();
-            for (iter; iter != request->synchronized_session_properties().end(); ++iter)
+            for (auto iter = request->SynchronizedSessionProperties().begin(); iter != request->SynchronizedSessionProperties().end(); ++iter)
             {
-                multiplayer_event multiplayerEvent(
-                    errorCode,
-                    errorMessage,
-                    multiplayer_event_type::session_synchronized_property_write_completed,
-                    std::make_shared<multiplayer_event_args>(),
+                eventQueue.AddEvent(
+                    XblMultiplayerEventType::SessionSynchronizedPropertyWriteCompleted,
                     sessionType,
-                    request->context()
-                    );
-
-                eventQueue.push_back(multiplayerEvent);
+                    nullptr,
+                    error,
+                    request->Context()
+                );
             }
         }
     }
-
     return eventQueue;
 }
 

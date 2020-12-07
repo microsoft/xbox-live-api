@@ -2,1062 +2,306 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/real_time_activity.h"
-#include "xsapi/multiplayer.h"
 #include "xbox_system_factory.h"
-#include "utils.h"
-#include "user_context.h"
 #include "multiplayer_internal.h"
+#include "xbox_live_context_internal.h"
+#include "real_time_activity_manager.h"
 
-using namespace pplx;
+using namespace xbox::services::multiplayer;
 using namespace xbox::services::system;
-using namespace xbox::services::real_time_activity;
-using namespace xbox::services::tournaments;
+using namespace xbox::services::legacy;
+using namespace xbox::services;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_BEGIN
-const uint32_t c_multiplayerHandleVersionValue = 1;
-const string_t c_getActivitiesSubpath = _T("/handles/query?include=relatedInfo,customProperties");
-const string_t c_getSearchHandlesSubpath = _T("/handles/query?include=relatedInfo,roleInfo,customProperties");
-const string_t c_multiplayerServiceContractHeaderValue = _T("107");
 
-multiplayer_service::multiplayer_service()
+#define GET_ACTIIVITIES_SUBPATH "/handles/query?include=relatedInfo,customProperties"
+#define GET_SEARCH_HANDLES_SUBPATH "/handles/query?include=relatedInfo,roleInfo,customProperties"
+#define MULTIPLAYER_SERVICE_CONTRACT_VERSION 107
+
+MultiplayerService::MultiplayerService(
+    _In_ User user,
+    _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
+    _In_ std::shared_ptr<xbox::services::AppConfig> appConfig,
+    _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> realTimeActivity
+) noexcept
+    : m_user{ std::move(user) },
+    m_xboxLiveContextSettings{ std::move(xboxLiveContextSettings) },
+    m_appConfig{ std::move(appConfig) },
+    m_rtaManager{ std::move(realTimeActivity) }
 {
 }
 
-multiplayer_service::multiplayer_service(
-    _In_ std::shared_ptr<xbox::services::user_context> userContext,
-    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
-    _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> realTimeActivity
-    ) : 
-    m_userContext(std::move(userContext)),
-    m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
-    m_appConfig(std::move(appConfig))
+MultiplayerService::~MultiplayerService() noexcept
 {
-    m_multiplayerServiceImpl = std::make_shared<multiplayer_service_impl>(realTimeActivity);
+    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerService };
+    UnsubscribeFromRta();
 }
 
-task<xbox_live_result<std::shared_ptr<multiplayer_session>>> 
-multiplayer_service::write_session(
-    _In_ std::shared_ptr<multiplayer_session> session,
-    _In_ multiplayer_session_write_mode mode
-    )
+HRESULT MultiplayerService::WriteSession(
+    _In_ std::shared_ptr<XblMultiplayerSession> session,
+    _In_ XblMultiplayerSessionWriteMode mode,
+    _In_ AsyncContext<Result<std::shared_ptr<XblMultiplayerSession>>> async
+) noexcept
 {
-    multiplayer_session_reference sessionReference = session->session_reference();
+    auto& sessionReference = session->SessionReference();
 
-    string_t pathAndQuery = multiplayer_session_directory_create_or_update_subpath(
-        sessionReference.service_configuration_id(),
-        sessionReference.session_template_name(),
-        sessionReference.session_name()
-        );
+    auto pathAndQuery = MultiplayerSessionDirectoryCreateOrUpdateSubpath(
+        sessionReference.Scid,
+        sessionReference.SessionTemplateName,
+        sessionReference.SessionName
+    );
 
-    return write_session_using_subpath(
+    return WriteSessionUsingSubpath(
         session,
         mode,
-        pathAndQuery
-        );
-}
-
-task<xbox_live_result<std::shared_ptr<multiplayer_session>>>
-multiplayer_service::write_session_by_handle(
-    _In_ std::shared_ptr<multiplayer_session> session,
-    _In_ multiplayer_session_write_mode mode,
-    _In_ const string_t& handleId
-    )
-{
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(handleId, std::shared_ptr<multiplayer_session>, "Handle id was empty");
-
-    string_t pathAndQuery = multiplayer_session_directory_create_or_update_by_handle_subpath(handleId);
-    return write_session_using_subpath(
-        session,
-        mode,
-        pathAndQuery
-        );
-}
-
-task<xbox_live_result<std::shared_ptr<multiplayer_session>>> 
-multiplayer_service::write_session_using_subpath(
-    _In_ std::shared_ptr<multiplayer_session> session,
-    _In_ multiplayer_session_write_mode mode,
-    _In_ const string_t& subpathAndQuery
-    )
-{
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(subpathAndQuery, std::shared_ptr<multiplayer_session>, "Subpath and query was empty");
-
-    std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("PUT"),
-        utils::create_xboxlive_endpoint(_T("sessiondirectory"), m_appConfig),
-        subpathAndQuery,
-        xbox_live_api::write_session_using_subpath
-        );
-
-    httpCall->set_retry_allowed(false);
-    httpCall->set_xbox_contract_version_header_value(c_multiplayerServiceContractHeaderValue);
-
-    switch (mode)
-    {
-        case multiplayer_session_write_mode::create_new:
-        {
-            httpCall->set_custom_header(_T("If-None-Match"), _T("*"));
-            break;
-        }
-        case multiplayer_session_write_mode::update_existing:
-        {
-            httpCall->set_custom_header(_T("If-Match"), _T("*"));
-            break;
-        }
-        case multiplayer_session_write_mode::update_or_create_new:
-        {
-            // No match header
-            break;
-        }
-        case multiplayer_session_write_mode::synchronized_update:
-        {
-            if (session->e_tag().empty())
-            {
-                httpCall->set_custom_header(_T("If-None-Match"), _T("*"));
-            }
-            else
-            {
-                httpCall->set_custom_header(_T("If-Match"), session->e_tag());
-            }
-            break;
-        }
-        default:
-        {
-            return pplx::task_from_result(xbox_live_result<std::shared_ptr<multiplayer_session>>(xbox_live_error_code::invalid_argument, "multiplayer session write mode is out of range"));
-        }
-    }
-
-    task<xbox_live_result<string_t>> subscriptionTask;
-    bool subscriptionsEnabled = m_multiplayerServiceImpl->subscriptions_enabled();
-    if (subscriptionsEnabled && session->current_user() != nullptr && session->current_user()->_Member_request() != nullptr)
-    {
-        subscriptionTask = m_multiplayerServiceImpl->ensure_multiplayer_subscription()
-        .then([httpCall, session](xbox_live_result<string_t> connectionId)
-        {
-            if (connectionId.err())
-            {
-                return xbox_live_result<string_t>(connectionId.err(), connectionId.err_message());
-            }
-            session->current_user()->_Set_rta_connection_id(connectionId.payload());
-            return xbox_live_result<string_t>(session->_Session_request()->serialize().serialize(), connectionId.err(), connectionId.err_message());
-        });
-    }
-    else
-    {
-        subscriptionTask = task_from_result(xbox_live_result<string_t>(session->_Session_request()->serialize().serialize()));
-    }
-
-    auto userContext = m_userContext;
-    multiplayer_session_reference sessionReference = session->session_reference();
-    auto task = subscriptionTask.then([httpCall, userContext](xbox_live_result<string_t> body)
-    {
-        if (body.err())
-        {
-            return task_from_result(xbox_live_result<std::shared_ptr<http_call_response>>(body.err(), body.err_message()));
-        }
-
-        httpCall->set_request_body(body.payload());
-        auto httpResponse = httpCall->get_response_with_auth(userContext);
-        return task_from_result(xbox_live_result<std::shared_ptr<http_call_response>>(httpResponse.get()));
-    }) 
-    .then([sessionReference, httpCall, userContext](xbox_live_result<std::shared_ptr<http_call_response>> responseResult)
-    {
-        auto& response = responseResult.payload();
-        if (responseResult.err())
-        {
-            return xbox_live_result<std::shared_ptr<multiplayer_session>>(responseResult.err(), responseResult.err_message());
-        }
-
-        auto& errCode = response->err_code();
-        if (errCode && errCode != xbox_live_error_code::http_status_412_precondition_failed)
-        {
-            auto errMessage = response->err_message();
-            if (errMessage.empty() && response->response_body_json().is_string())
-            {
-                string_t debugString = response->response_body_json().as_string();
-                if (!debugString.empty())
-                {
-                    errMessage = utility::conversions::to_utf8string(debugString);
-                }
-            }
-            return xbox_live_result<std::shared_ptr<multiplayer_session>>(response->err_code(), errMessage);
-        }
-
-        auto status = response->http_status();
-
-        if (status == 204)
-        {
-            return xbox_live_result<std::shared_ptr<multiplayer_session>>(nullptr);
-        }
-
-        xbox_live_result<std::shared_ptr<multiplayer_session>> multiplayerSessionResult = xbox_live_result<std::shared_ptr<multiplayer_session>>(response->err_code(), response->err_message());
-        if (response->response_body_json().size() > 0)
-        {
-            auto multiplayerSession = multiplayer_session::_Deserialize(
-                response->response_body_json()
-                );
-
-            if (multiplayerSession.err() && !response->err_code())
-            {
-                response->_Set_error(xbox_live_error_code::json_error, "WriteSession failed due to deserialization error");
-            }
-
-            xbox_live_result<std::shared_ptr<multiplayer_session>> multiplayerSessionShared(
-                std::make_shared<multiplayer_session>(multiplayerSession.payload()),
-                multiplayerSession.err(),
-                multiplayerSession.err_message()
-                );
-
-            multiplayerSessionResult = utils::generate_xbox_live_result<std::shared_ptr<multiplayer_session>>(
-                multiplayerSessionShared,
-                response
-                );
-
-            auto newSession = std::make_shared<multiplayer_session>(multiplayerSession.payload());
-
-            multiplayer_session_reference localSessionRef;
-            if (sessionReference.is_null())
-            {
-                web::http::http_headers header = response->response_headers();
-                web::http::http_headers::key_type contentKey(_T("Content-Location"));
-
-                localSessionRef = multiplayer_session_reference::parse_from_uri_path(
-                    header[contentKey]
-                );
-            }
-            else
-            {
-                localSessionRef = std::move(sessionReference);
-            }
-
-            newSession->_Initialize_after_deserialize(
-                response->e_tag(),
-                response->response_date(),
-                localSessionRef,
-                userContext->xbox_user_id()
-                );
-
-            newSession->_Set_write_session_status(
-                response->http_status()
-                );
-
-            multiplayerSessionResult.set_payload(newSession);
-        }
-
-        return multiplayerSessionResult;
-    });
-
-    return utils::create_exception_free_task<std::shared_ptr<multiplayer_session>>(
-        task
-        );
-}
-
-task<xbox_live_result<std::shared_ptr<multiplayer_session>>>
-multiplayer_service::get_current_session(
-    _In_ multiplayer_session_reference sessionReference
-    )
-{
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(sessionReference.is_null(), std::shared_ptr<multiplayer_session>, "Session reference is null");
-
-    string_t pathAndQuery = multiplayer_session_directory_create_or_update_subpath(
-        sessionReference.service_configuration_id(),
-        sessionReference.session_template_name(),
-        sessionReference.session_name()
-        );
-
-    std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("GET"),
-        utils::create_xboxlive_endpoint(_T("sessiondirectory"), m_appConfig),
         pathAndQuery,
+        std::move(async)
+    );
+}
+
+HRESULT MultiplayerService::WriteSessionByHandle(
+    _In_ std::shared_ptr<XblMultiplayerSession> session,
+    _In_ XblMultiplayerSessionWriteMode mode,
+    _In_ const String& handleId,
+    _In_ AsyncContext<Result<std::shared_ptr<XblMultiplayerSession>>> async
+) noexcept
+{
+    RETURN_HR_INVALIDARGUMENT_IF(handleId.empty());
+
+    auto pathAndQuery = MultiplayerSessionDirectoryCreateOrUpdateByHandleSubpath(handleId);
+    return WriteSessionUsingSubpath(
+        session,
+        mode,
+        pathAndQuery,
+        std::move(async)
+    );
+}
+
+HRESULT MultiplayerService::GetCurrentSession(
+    _In_ XblMultiplayerSessionReference sessionReference,
+    _In_ AsyncContext<Result<std::shared_ptr<XblMultiplayerSession>>> async
+) const noexcept
+{
+    RETURN_HR_INVALIDARGUMENT_IF_EMPTY_STRING(sessionReference.Scid);
+
+    String pathAndQuery = MultiplayerSessionDirectoryCreateOrUpdateSubpath(
+        sessionReference.Scid,
+        sessionReference.SessionTemplateName,
+        sessionReference.SessionName
+    );
+
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    HRESULT hr = httpCall->Init(
+        m_xboxLiveContextSettings,
+        "GET",
+        XblHttpCall::BuildUrl("sessiondirectory", pathAndQuery),
         xbox_live_api::get_current_session
-        );
+    );
+    RETURN_HR_IF_FAILED(hr);
+    RETURN_HR_IF_FAILED(httpCall->SetXblServiceContractVersion(MULTIPLAYER_SERVICE_CONTRACT_VERSION));
 
-    httpCall->set_xbox_contract_version_header_value(c_multiplayerServiceContractHeaderValue);
-
-    auto userContextShared = m_userContext;
-
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([sessionReference, userContextShared](std::shared_ptr<http_call_response> response)
+    return httpCall->Perform(AsyncContext<HttpResult>{ async.Queue().DeriveWorkerQueue(),
+        [
+            sessionReference,
+            xuid{ m_user.Xuid() },
+            async
+        ]
+    (HttpResult httpResult)
     {
-        if (response->http_status() == 204)
+        HRESULT hr = httpResult.Hresult();
+        if (FAILED(hr))
         {
-            return xbox_live_result<std::shared_ptr<multiplayer_session>>(xbox_live_error_code::http_status_204_resource_data_not_found, "Content not found on get_current_session");
+            return async.Complete(Result<std::shared_ptr<XblMultiplayerSession>>(hr, "Http call failed"));
         }
 
-        auto multiplayerSession = multiplayer_session::_Deserialize(
-            response->response_body_json()
-            );
+        hr = httpResult.Payload()->Result();
+        if (FAILED(hr))
+        {
+            const char* errorMessagePtr{};
+            std::unique_ptr<const char> errorMessage{ errorMessagePtr };
+            httpResult.Payload()->GetErrorMessage(&errorMessagePtr);
+            return async.Complete(Result<std::shared_ptr<XblMultiplayerSession>>(hr, errorMessagePtr));
+        }
+        else if (httpResult.Payload()->HttpStatus() == 204)
+        {
+            // Return a not found error when trying to get an non-existing session
+            return async.Complete(__HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND));
+        }
 
-        auto multiplayerSessionResult = utils::generate_xbox_live_result<multiplayer_session>(
-            multiplayerSession,
-            response
-            );
-
-        xbox_live_result<std::shared_ptr<multiplayer_session>> multiplayerSessionSharedResult(
-            std::make_shared<multiplayer_session>(multiplayerSessionResult.payload()), 
-            multiplayerSessionResult.err(), 
-            multiplayerSessionResult.err_message()
-            );
-
-        multiplayerSessionSharedResult.payload()->_Initialize_after_deserialize(
-            response->e_tag(), 
-            response->response_date(),
+        auto session = MakeShared<XblMultiplayerSession>(
+            xuid,
             sessionReference,
-            userContextShared->xbox_user_id()
-            );
-
-        return multiplayerSessionSharedResult;
-    });
-
-    return utils::create_exception_free_task<std::shared_ptr<multiplayer_session>>(
-        task
+            httpResult.Payload()->GetResponseHeader(ETAG_HEADER),
+            httpResult.Payload()->GetResponseHeader(DATE_HEADER),
+            httpResult.Payload()->GetResponseBodyJson()
         );
+
+        async.Complete(Result<std::shared_ptr<XblMultiplayerSession>>(session, session->DeserializationError(), "Deserialize error"));
+    }
+    });
 }
 
-task<xbox_live_result<std::shared_ptr<multiplayer_session>>>
-multiplayer_service::get_current_session_by_handle(
-    _In_ const string_t& handleId
-    )
+HRESULT MultiplayerService::GetCurrentSessionByHandle(
+    _In_ const String& handleId,
+    _In_ AsyncContext<Result<std::shared_ptr<XblMultiplayerSession>>> async
+) const noexcept
 {
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(handleId, std::shared_ptr<multiplayer_session>, "Handle id was empty");
-    string_t pathAndQuery = multiplayer_session_directory_create_or_update_by_handle_subpath(
-        handleId
-        );
+    RETURN_HR_INVALIDARGUMENT_IF(handleId.empty());
+    String pathAndQuery = MultiplayerSessionDirectoryCreateOrUpdateByHandleSubpath(handleId);
 
-    std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    HRESULT hr = httpCall->Init(
         m_xboxLiveContextSettings,
-        _T("GET"),
-        utils::create_xboxlive_endpoint(_T("sessiondirectory"), m_appConfig),
-        pathAndQuery,
+        "GET",
+        XblHttpCall::BuildUrl("sessiondirectory", pathAndQuery),
         xbox_live_api::get_current_session_by_handle
-        );
+    );
+    RETURN_HR_IF_FAILED(hr);
+    RETURN_HR_IF_FAILED(httpCall->SetXblServiceContractVersion(MULTIPLAYER_SERVICE_CONTRACT_VERSION));
 
-    httpCall->set_xbox_contract_version_header_value(c_multiplayerServiceContractHeaderValue);
-    auto userContextShared = m_userContext;
-
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([userContextShared](std::shared_ptr<http_call_response> response)
+    return httpCall->Perform(AsyncContext<HttpResult>{ async.Queue().DeriveWorkerQueue(),
+        [
+            xuid{ m_user.Xuid() },
+            async
+        ]
+    (HttpResult httpResult)
     {
-        if (response->http_status() == 204)
+        HRESULT hr = httpResult.Hresult();
+        if (FAILED(hr))
         {
-            return xbox_live_result<std::shared_ptr<multiplayer_session>>(xbox_live_error_code::http_status_204_resource_data_not_found, "Content not found on get_current_session");
+            return async.Complete(Result<std::shared_ptr<XblMultiplayerSession>>(hr));
         }
 
-        auto multiplayerSession = multiplayer_session::_Deserialize(
-            response->response_body_json()
-            );
+        hr = httpResult.Payload()->Result();
+        if (FAILED(hr))
+        {
+            return async.Complete(Result<std::shared_ptr<XblMultiplayerSession>>(hr));
+        }
+        else if (httpResult.Payload()->HttpStatus() == 204)
+        {
+            // Return a not found error when trying to get an non-existing session
+            return async.Complete(__HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND));
+        }
 
-        auto multiplayerSessionResult = utils::generate_xbox_live_result<multiplayer_session>(
-            multiplayerSession,
-            response
-            );
+        auto contentLocation = httpResult.Payload()->GetResponseHeader("Content-Location");
 
-        xbox_live_result<std::shared_ptr<multiplayer_session>> multiplayerSessionShared(    // TOOD: Implement a way to quit creating a new result object...
-            std::make_shared<multiplayer_session>(multiplayerSessionResult.payload()),
-            multiplayerSessionResult.err(),
-            multiplayerSessionResult.err_message()
-            );
+        XblMultiplayerSessionReference sessionReference;
+        hr = XblMultiplayerSessionReferenceParseFromUriPath(contentLocation.c_str(), &sessionReference);
+        if (FAILED(hr))
+        {
+            // Failed to parse session reference from URI
+            return async.Complete(Result<std::shared_ptr<XblMultiplayerSession>>(hr));
+        }
 
-        web::http::http_headers header = response->response_headers();
-        web::http::http_headers::key_type contentKey(_T("Content-Location"));
-
-        multiplayer_session_reference sessionReference = multiplayer_session_reference::parse_from_uri_path(
-            header[contentKey]
-            );
-
-        if (sessionReference.is_null()) return xbox_live_result<std::shared_ptr<multiplayer_session>>(response->err_code(), response->err_message());
-
-        multiplayerSessionShared.payload()->_Initialize_after_deserialize(
-            response->e_tag(), 
-            response->response_date(),
+        auto session = MakeShared<XblMultiplayerSession>(
+            xuid,
             sessionReference,
-            userContextShared->xbox_user_id()
-            );
-
-        return multiplayerSessionShared;
-    });
-
-    return utils::create_exception_free_task<std::shared_ptr<multiplayer_session>>(
-        task
+            httpResult.Payload()->GetResponseHeader(ETAG_HEADER),
+            httpResult.Payload()->GetResponseHeader(DATE_HEADER),
+            httpResult.Payload()->GetResponseBodyJson()
         );
+
+        async.Complete(Result<std::shared_ptr<XblMultiplayerSession>>(session, session->DeserializationError()));
+    }
+    });
 }
 
-task<xbox_live_result<std::vector<multiplayer_session_states>>>
-multiplayer_service::get_sessions(
-    _In_ multiplayer_get_sessions_request getSessionsRequest
-    )
+SessionQuery::SessionQuery(const XblMultiplayerSessionQuery* other) noexcept
+    : XblMultiplayerSessionQuery{ *other }
 {
-    auto filter = getSessionsRequest.visibility_filter();
-
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(getSessionsRequest.service_configuration_id(), std::vector<multiplayer_session_states>, "serviceConfigurationId was empty in request");
-
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(!getSessionsRequest.xbox_user_ids_filter().empty() && !getSessionsRequest.xbox_user_id_filter().empty(), std::vector<multiplayer_session_states>, "xboxUserIdsFilter and xboxUserIdFilter cannot both be set for request")
-
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(getSessionsRequest.xbox_user_id_filter().empty() && getSessionsRequest.keyword_filter().empty() && getSessionsRequest.xbox_user_ids_filter().empty(), std::vector<multiplayer_session_states>, "Must have xboxUserIdFilter, xboxUserIdsFilter, or keywordFilter set for request");
-
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(getSessionsRequest.include_reservations() && getSessionsRequest.xbox_user_id_filter().empty() && getSessionsRequest.xbox_user_ids_filter().empty(), std::vector<multiplayer_session_states>, "Cannot include reservations in request without xboxUserIdFilter or xboxUserIdsFilter");
-    
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(getSessionsRequest.include_inactive_sessions() && getSessionsRequest.xbox_user_id_filter().empty() && getSessionsRequest.xbox_user_ids_filter().empty(), std::vector<multiplayer_session_states>, "Cannot include inactive sessions in request without xboxUserIdFilter or xboxUserIdsFilter");
-
-    auto visibilityFilterToString = multiplayer_session_states::_Convert_multiplayer_session_visibility_to_string(filter);
-    RETURN_TASK_CPP_IF_ERR(visibilityFilterToString, std::vector<multiplayer_session_states>);
-
-    auto xboxUserIdFilters = getSessionsRequest.xbox_user_ids_filter();
-    bool hasXboxUserIdsFilter = !xboxUserIdFilters.empty();
-
-    string_t pathAndQuery = multiplayer_session_directory_get_sessions_sub_path(
-        getSessionsRequest.service_configuration_id(),
-        getSessionsRequest.session_template_name_filter(),
-        getSessionsRequest.xbox_user_id_filter(),
-        getSessionsRequest.keyword_filter(),
-        visibilityFilterToString.payload(),
-        getSessionsRequest.contract_version_filter(),
-        getSessionsRequest.include_private_sessions(),
-        getSessionsRequest.include_reservations(),
-        getSessionsRequest.include_inactive_sessions(),
-        hasXboxUserIdsFilter,
-        getSessionsRequest.max_items()
-        );
-
-    string_t requestType;
-    if (hasXboxUserIdsFilter)
+    // Deep copy xuid filters & keyword filter so that we own them
+    for (size_t i = 0; i < XuidFiltersCount; ++i)
     {
-        requestType = _T("POST");
+        m_xuidFilters.push_back(other->XuidFilters[i]);
+    }
+    XuidFilters = m_xuidFilters.data();
+
+    if (KeywordFilter)
+    {
+        m_keywordFilter = KeywordFilter;
+        KeywordFilter = m_keywordFilter.data();
+    }
+}
+
+SessionQuery::SessionQuery(const SessionQuery& other) noexcept
+    : SessionQuery{ &other }
+{
+}
+
+String SessionQuery::PathAndQuery() const noexcept
+{
+    Stringstream source;
+
+    source << "/serviceconfigs/";
+    source << Scid;
+    if (SessionTemplateNameFilter[0] != 0)
+    {
+        source << "/sessiontemplates/";
+        source << SessionTemplateNameFilter;
+    }
+
+    if (XuidFiltersCount > 1)
+    {
+        source << "/batch";
     }
     else
     {
-        requestType = _T("GET");
+        source << "/sessions";
     }
 
-    std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        requestType,
-        utils::create_xboxlive_endpoint(_T("sessiondirectory"), m_appConfig),
-        pathAndQuery,
-        xbox_live_api::get_sessions
-        );
-
-    httpCall->set_xbox_contract_version_header_value(c_multiplayerServiceContractHeaderValue);
-    if (hasXboxUserIdsFilter)
+    Vector<String> params;
+    if (XuidFiltersCount == 1)
     {
-        web::json::value xuidsJson;
-        xuidsJson[_T("xuids")] = utils::serialize_vector<string_t>(utils::json_string_serializer, xboxUserIdFilters);
-        httpCall->set_request_body(
-            xuidsJson.serialize()
-            );
-    }
-
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([](std::shared_ptr<http_call_response> response)
-    {
-        std::error_code errc = xbox_live_error_code::no_error;
-        auto sessionStates = utils::extract_xbox_live_result_json_vector<multiplayer_session_states>(
-            multiplayer_session_states::_Deserialize,
-            response->response_body_json(),
-            _T("results"),
-            errc,
-            true
-            );
-
-        return utils::generate_xbox_live_result<std::vector<multiplayer_session_states>>(
-            sessionStates,
-            response
-            );
-    });
-
-    return utils::create_exception_free_task<std::vector<multiplayer_session_states>>(
-        task
-        );
-}
-
-task<xbox_live_result<void>>
-multiplayer_service::set_activity(
-    _In_ multiplayer_session_reference sessionReference
-    )
-{
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(sessionReference.is_null(), void, "Session reference was not initialized properly");
-
-    multiplayer_activity_handle_post_request request(
-        std::move(sessionReference),
-        c_multiplayerHandleVersionValue
-        );
-
-    std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("POST"),
-        utils::create_xboxlive_endpoint(_T("sessiondirectory"), m_appConfig),
-        _T("/handles"),
-        xbox_live_api::set_activity
-        );
-
-    httpCall->set_xbox_contract_version_header_value(c_multiplayerServiceContractHeaderValue);
-    httpCall->set_request_body(
-        request.serialize().serialize()
-        );
-
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([](std::shared_ptr<http_call_response> response)
-    {
-        return xbox_live_result<void>(response->err_code(), response->err_message());
-    });
-
-    return utils::create_exception_free_task<void>(
-        task
-        );
-}
-
-task<xbox_live_result<void>> 
-multiplayer_service::clear_activity(
-    _In_ const string_t& serviceConfigurationId
-    )
-{
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(serviceConfigurationId, void, "Service configuration id is empty");
-
-    std::vector<string_t> xuidVector;
-    xuidVector.push_back(m_userContext->xbox_user_id());
-
-    auto sharedXboxLiveContextSettings = m_xboxLiveContextSettings;
-    auto appConfig = m_appConfig;
-    auto sharedUserContext = m_userContext;
-
-    auto getActivityTask = get_activities_for_users(serviceConfigurationId, xuidVector);
-    auto taskResult = getActivityTask.then([sharedXboxLiveContextSettings, appConfig, sharedUserContext](task<xbox_live_result<std::vector<multiplayer_activity_details>>> t)
-    {
-        auto response = t.get();
-        if (response.err()) return xbox_live_result<string_t>(response.err(), response.err_message());
-
-        auto activityDetails = response.payload();
-        string_t handleId;
-        size_t responseSize = activityDetails.size();
-        if (responseSize == 0)
-        {
-            return xbox_live_result<string_t>(xbox_live_error_code::invalid_argument, "There should be at least one activity per user");
-        }
-        else if (responseSize == 1)
-        {
-            handleId = activityDetails.at(0).handle_id();
-        }
-        else
-        {
-            return xbox_live_result<string_t>(xbox_live_error_code::invalid_argument, "There should only be one activity per user");
-        }
-
-        return xbox_live_result<string_t>(handleId);
-    }).then([sharedXboxLiveContextSettings, appConfig, sharedUserContext](xbox_live_result<string_t> handleResult)
-    {
-        RETURN_TASK_CPP_IF_ERR(handleResult, void);
-        auto handleId = handleResult.payload();
-        stringstream_t handleStream;
-        handleStream << "/handles/";
-        handleStream << handleId;
-
-        std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
-            sharedXboxLiveContextSettings,
-            _T("DELETE"),
-            utils::create_xboxlive_endpoint(_T("sessiondirectory"), appConfig),
-            handleStream.str(),
-            xbox_live_api::clear_activity
-            );
-
-        httpCall->set_xbox_contract_version_header_value(c_multiplayerServiceContractHeaderValue);
-        return httpCall->get_response_with_auth(sharedUserContext)
-        .then([](std::shared_ptr<http_call_response> response)
-        {
-            return xbox_live_result<void>(response->err_code(), response->err_message());
-        });
-    });
-
-    return utils::create_exception_free_task<void>(
-        taskResult
-        );
-}
-
-task<xbox_live_result<string_t>>
-multiplayer_service::set_transfer_handle(
-    _In_ multiplayer_session_reference targetSessionReference,
-    _In_ multiplayer_session_reference originSessionReference
-    )
-{
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(targetSessionReference.is_null(), string_t, "Session reference was not initialized properly");
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(originSessionReference.is_null(), string_t, "Session reference was not initialized properly");
-
-    multiplayer_transfer_handle_post_request request(
-        std::move(targetSessionReference),
-        std::move(originSessionReference),
-        c_multiplayerHandleVersionValue
-        );
-
-    std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("POST"),
-        utils::create_xboxlive_endpoint(_T("sessiondirectory"), m_appConfig),
-        _T("/handles"),
-        xbox_live_api::set_transfer_handle
-        );
-
-    httpCall->set_xbox_contract_version_header_value(c_multiplayerServiceContractHeaderValue);
-    httpCall->set_request_body(
-        request.serialize().serialize()
-        );
-
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([](std::shared_ptr<http_call_response> response)
-    {
-        auto multiplayerInvite = multiplayer_invite::deserialize(
-            response->response_body_json()
-            );
-
-        auto invite = utils::generate_xbox_live_result<multiplayer_invite>(
-            multiplayerInvite,
-            response
-            );
-
-        if (invite.err())
-        {
-            return xbox_live_result<string_t>(response->err_code(), response->err_message());
-        }
-
-        string_t handleId = invite.payload().handle_id();
-        return xbox_live_result<string_t>(handleId);
-    });
-
-    return utils::create_exception_free_task<string_t>(
-        task
-        );
-}
-
-pplx::task<xbox_live_result<void>>
-multiplayer_service::set_search_handle(
-    _In_ multiplayer_search_handle_request searchHandleRequest
-    )
-{
-    std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("POST"),
-        utils::create_xboxlive_endpoint(_T("sessiondirectory"), m_appConfig),
-        _T("/handles"),
-        xbox_live_api::set_search_handle
-        );
-
-    searchHandleRequest._Set_version(c_multiplayerHandleVersionValue);
-    httpCall->set_xbox_contract_version_header_value(c_multiplayerServiceContractHeaderValue);
-    httpCall->set_request_body(
-        searchHandleRequest._Serialize().serialize()
-        );
-
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([](std::shared_ptr<http_call_response> response)
-    {
-        return xbox_live_result<void>(response->err_code(), response->err_message());
-    });
-
-    return utils::create_exception_free_task<void>(task);
-}
-
-pplx::task<xbox_live_result<void>> 
-multiplayer_service::clear_search_handle(
-    _In_ const string_t& handleId
-    )
-{
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(handleId, void, "HandleId is empty");
-
-    string_t handleStr = _T("/handles/") + handleId;
-    std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("DELETE"),
-        utils::create_xboxlive_endpoint(_T("sessiondirectory"), m_appConfig),
-        handleStr,
-        xbox_live_api::clear_search_handle
-        );
-
-    httpCall->set_xbox_contract_version_header_value(c_multiplayerServiceContractHeaderValue);
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([](std::shared_ptr<http_call_response> response)
-    {
-        return xbox_live_result<void>(response->err_code(), response->err_message());
-    });
-
-    return utils::create_exception_free_task<void>(task);
-}
-
-task<xbox_live_result<std::vector<string_t>>>
-multiplayer_service::send_invites(
-    _In_ multiplayer_session_reference sessionReference,
-    _In_ const std::vector<string_t>& xboxUserIds,
-    _In_ uint32_t titleId
-    )
-{
-    return send_invites(
-        std::move(sessionReference),
-        xboxUserIds,
-        titleId,
-        _T(""),
-        _T("")
-        );
-}
-
-task<xbox_live_result<std::vector<string_t>>>
-multiplayer_service::send_invites(
-    _In_ multiplayer_session_reference sessionReference,
-    _In_ const std::vector<string_t>& xboxUserIds,
-    _In_ uint32_t titleId,
-    _In_ const string_t& contextStringId,
-    _In_ const string_t& customActivationContext
-    )
-{
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(sessionReference.is_null(), std::vector<string_t>, "sessionReference was not explicity constructed");
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(xboxUserIds, std::vector<string_t>, "xboxUserIds are empty");
-
-    auto sharedXboxLiveContextSettings = m_xboxLiveContextSettings;
-    auto appConfig = m_appConfig;
-    auto sharedUserContext = m_userContext;
-
-    auto task = create_task([sessionReference, xboxUserIds, titleId, contextStringId, customActivationContext, sharedXboxLiveContextSettings, appConfig, sharedUserContext]()
-    {
-        xbox_live_result<std::vector<string_t>> inviteHandles;
-        for (const auto& xuid : xboxUserIds)
-        {
-            multiplayer_invite_handle_post_request request(
-                std::move(sessionReference),
-                c_multiplayerHandleVersionValue,
-                xuid,
-                titleId,
-                contextStringId,
-                customActivationContext
-                );
-
-            std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
-                sharedXboxLiveContextSettings,
-                _T("POST"),
-                utils::create_xboxlive_endpoint(_T("sessiondirectory"), appConfig),
-                _T("/handles"),
-                xbox_live_api::send_invites
-                );
-
-            httpCall->set_retry_allowed(false);
-            httpCall->set_xbox_contract_version_header_value(c_multiplayerServiceContractHeaderValue);
-            httpCall->set_request_body(
-                request.serialize().serialize()
-                );
-
-            auto& inviteHandlePayload = inviteHandles.payload();
-            httpCall->get_response_with_auth(sharedUserContext)
-            .then([&inviteHandles, &inviteHandlePayload](std::shared_ptr<http_call_response> response)
-            {
-                auto multiplayerInvite = multiplayer_invite::deserialize(
-                    response->response_body_json()
-                    );
-
-                auto invite = utils::generate_xbox_live_result<multiplayer_invite>(
-                    multiplayerInvite,
-                    response
-                    );
-
-                if (invite.err())
-                {
-                    inviteHandles._Set_err(response->err_code());
-                    inviteHandles._Set_err_message(response->err_message());
-                    return;
-                }
-                string_t handleId = invite.payload().handle_id();
-                inviteHandlePayload.push_back(std::move(handleId));
-            }).wait();
-        }
-
-        return inviteHandles;
-    });
-
-    return utils::create_exception_free_task<std::vector<string_t>>(
-        task
-        );
-}
-
-task<xbox_live_result<std::vector<multiplayer_activity_details>>> 
-multiplayer_service::get_activities_for_social_group(
-    _In_ const string_t& serviceConfigurationId,
-    _In_ const string_t& socialGroupOwnerXboxUserId,
-    _In_ const string_t& socialGroup
-    )
-{
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(serviceConfigurationId, std::vector<multiplayer_activity_details>, "serviceConfigurationId is empty");
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(socialGroupOwnerXboxUserId, std::vector<multiplayer_activity_details>, "socialGroupOwnerXboxUserId is empty");
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(socialGroup, std::vector<multiplayer_activity_details>, "socialGroup is empty");
-
-    multiplayer_activity_query_post_request request(
-        serviceConfigurationId,
-        socialGroup,
-        socialGroupOwnerXboxUserId
-        );
-
-    std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("POST"),
-        utils::create_xboxlive_endpoint(_T("sessiondirectory"), m_appConfig),
-        c_getActivitiesSubpath,
-        xbox_live_api::get_activities_for_social_group
-        );
-
-    httpCall->set_xbox_contract_version_header_value(c_multiplayerServiceContractHeaderValue);
-    httpCall->set_request_body(
-        request.serialize().serialize()
-        );
-
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([](std::shared_ptr<http_call_response> response)
-    {
-        std::error_code errc = xbox_live_error_code::no_error;
-        auto activityDetails = utils::extract_xbox_live_result_json_vector<multiplayer_activity_details>(
-            multiplayer_activity_details::_Deserialize,
-            response->response_body_json(),
-            _T("results"),
-            errc,
-            true
-            );
-
-        return utils::generate_xbox_live_result<std::vector<multiplayer_activity_details>>(
-            activityDetails,
-            response
-            );
-    });
-
-    return utils::create_exception_free_task<std::vector<multiplayer_activity_details>>(
-        task
-        );
-}
-
-task<xbox_live_result<std::vector<multiplayer_activity_details>>>
-multiplayer_service::get_activities_for_users(
-    _In_ const string_t& serviceConfigurationId,
-    _In_ const std::vector<string_t>& xboxUserIds
-    )
-{
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(serviceConfigurationId, std::vector<multiplayer_activity_details>, "serviceConfigurationId is empty");
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(xboxUserIds.empty(), std::vector<multiplayer_activity_details>, "xboxUserIds are empty");
-
-    multiplayer_activity_query_post_request request(
-        std::move(serviceConfigurationId),
-        std::move(xboxUserIds)
-        );
-
-    std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("POST"),
-        utils::create_xboxlive_endpoint(_T("sessiondirectory"), m_appConfig),
-        c_getActivitiesSubpath,
-        xbox_live_api::get_activities_for_users
-        );
-
-    httpCall->set_xbox_contract_version_header_value(c_multiplayerServiceContractHeaderValue);
-    httpCall->set_request_body(
-        request.serialize().serialize()
-        );
-
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([](std::shared_ptr<http_call_response> response)
-    {
-        std::error_code errc = xbox_live_error_code::no_error;
-        auto activityDetails = utils::extract_xbox_live_result_json_vector<multiplayer_activity_details>(
-            multiplayer_activity_details::_Deserialize,
-            response->response_body_json(),
-            _T("results"),
-            errc,
-            true
-            );
-
-        return utils::generate_xbox_live_result<std::vector<multiplayer_activity_details>>(
-            activityDetails,
-            response
-            );
-    });
-
-    return utils::create_exception_free_task<std::vector<multiplayer_activity_details>>(
-        task
-        );
-}
-
-pplx::task<xbox_live_result<std::vector<multiplayer_search_handle_details>>>
-multiplayer_service::get_search_handles(
-    _In_ const string_t& serviceConfigurationId,
-    _In_ const string_t& sessionTemplateName,
-    _In_ const string_t& orderBy,
-    _In_ bool orderAscending,
-    _In_ const string_t& searchFilter
-    )
-{
-    multiplayer_query_search_handle_request searchHandleRequest(
-        serviceConfigurationId, 
-        sessionTemplateName,
-        orderBy,
-        orderAscending,
-        searchFilter);
-
-    return get_search_handles(searchHandleRequest);
-}
-
-pplx::task<xbox_live_result<std::vector<multiplayer_search_handle_details>>>
-multiplayer_service::get_search_handles(
-    _In_ const multiplayer_query_search_handle_request& searchHandleRequest
-    )
-{
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(searchHandleRequest.service_configuration_id(), std::vector<multiplayer_search_handle_details>, "serviceConfigurationId is empty");
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(searchHandleRequest.session_template_name(), std::vector<multiplayer_search_handle_details>, "sessionTemplateName is empty");
-
-    std::shared_ptr<http_call> httpCall = xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("POST"),
-        utils::create_xboxlive_endpoint(_T("sessiondirectory"), m_appConfig),
-        c_getSearchHandlesSubpath,
-        xbox_live_api::get_search_handles
-        );
-
-    httpCall->set_xbox_contract_version_header_value(c_multiplayerServiceContractHeaderValue);
-    httpCall->set_request_body(searchHandleRequest._Serialize(m_userContext->xbox_user_id()));
-
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([](std::shared_ptr<http_call_response> response)
-    {
-        std::error_code errc = xbox_live_error_code::no_error;
-        auto searchHandleDetails = utils::extract_xbox_live_result_json_vector<multiplayer_search_handle_details>(
-            multiplayer_search_handle_details::_Deserialize,
-            response->response_body_json(),
-            _T("results"),
-            errc,
-            true
-            );
-
-        return utils::generate_xbox_live_result<std::vector<multiplayer_search_handle_details>>(
-            searchHandleDetails,
-            response
-            );
-    });
-
-    return utils::create_exception_free_task<std::vector<multiplayer_search_handle_details>>(
-        task
-        );
-}
-
-string_t
-multiplayer_service::multiplayer_session_directory_create_or_update_subpath(
-    _In_ const string_t& serviceConfigurationId,
-    _In_ const string_t& sessionTemplateName,
-    _In_ const string_t& sessionName
-    )
-{
-    stringstream_t source;
-    source << _T("/serviceconfigs/");
-    source << serviceConfigurationId;
-    source << _T("/sessionTemplates/");
-    source << sessionTemplateName;
-    source << _T("/sessions/");
-    source << sessionName;
-    return source.str();
-}
-
-string_t 
-multiplayer_service::multiplayer_session_directory_create_or_update_by_handle_subpath(
-    _In_ const string_t& handleId
-    )
-{
-    stringstream_t source;
-    source << _T("/handles/");
-    source << handleId;
-    source << _T("/session");
-
-    return source.str();
-}
-
-string_t
-multiplayer_service::multiplayer_session_directory_get_sessions_sub_path(
-    _In_ const string_t& serviceConfigurationId,
-    _In_ const string_t& sessionTemplateNameFilter,
-    _In_ const string_t& xboxUserIdFilter,
-    _In_ const string_t& keywordFilter,
-    _In_ const string_t& visibilityFilter,
-    _In_ uint32_t contextVersionFilter,
-    _In_ bool includePrivateSessions,
-    _In_ bool includeReservations,
-    _In_ bool includeInactiveSessions,
-    _In_ bool isBatch,
-    _In_ uint32_t maxItems
-    )
-{
-    stringstream_t source;
-
-    source << _T("/serviceconfigs/");
-    source << serviceConfigurationId;
-    if (!sessionTemplateNameFilter.empty())
-    {
-        source << _T("/sessiontemplates/");
-        source << sessionTemplateNameFilter;
-    }
-
-    if (isBatch)
-    {
-        source << _T("/batch");
-    }
-    else
-    {
-        source << _T("/sessions");
-    }
-
-    std::vector<string_t> params;
-    if (!xboxUserIdFilter.empty())
-    {
-        stringstream_t param;
-        param << _T("xuid=");
-        param << web::uri::encode_uri(xboxUserIdFilter);
+        Stringstream param;
+        param << "xuid=";
+        param << utils::internal_string_from_string_t(xbox::services::uri::encode_uri(utils::uint64_to_string_t(XuidFilters[0])));
         params.push_back(param.str());
     }
 
-    if (!keywordFilter.empty())
+    if (!m_keywordFilter.empty())
     {
-        stringstream_t param;
-        param << _T("keyword=");
-        param << web::uri::encode_uri(keywordFilter);
+        Stringstream param;
+        param << "keyword=";
+        param << utils::internal_string_from_string_t(xbox::services::uri::encode_uri(utils::string_t_from_utf8(KeywordFilter)));
         params.push_back(param.str());
     }
 
-    if (!visibilityFilter.empty() && 
-        utils::str_icmp(visibilityFilter, _T("any")) != 0)
+    if (VisibilityFilter != XblMultiplayerSessionVisibility::Any)
     {
-        stringstream_t param;
-        param << _T("visibility=");
-        param << web::uri::encode_uri(visibilityFilter);
+        Stringstream param;
+        param << "visibility=";
+        param << utils::internal_string_from_string_t(xbox::services::uri::encode_uri(utils::string_t_from_internal_string(Serializers::StringFromMultiplayerSessionVisibility(VisibilityFilter))));
         params.push_back(param.str());
     }
 
-    if (contextVersionFilter != 0)
+    if (ContractVersionFilter != 0)
     {
-        stringstream_t param;
-        param << _T("version=");
-        param << contextVersionFilter;
+        Stringstream param;
+        param << "version=";
+        param << ContractVersionFilter;
         params.push_back(param.str());
     }
 
-    if (includePrivateSessions)
+    if (IncludePrivateSessions)
     {
-        params.push_back(_T("private=true"));
+        params.push_back("private=true");
     }
 
-    if (includeReservations)
+    if (IncludeReservations)
     {
-        params.push_back(_T("reservations=true"));
+        params.push_back("reservations=true");
     }
 
-    if (includeInactiveSessions)
+    if (IncludeInactiveSessions)
     {
-        params.push_back(_T("inactive=true"));
+        params.push_back("inactive=true");
     }
 
-    if (maxItems != 0)
+    if (MaxItems != 0)
     {
-        stringstream_t param;
-        param << _T("take=");
-        param << maxItems;
+        Stringstream param;
+        param << "take=";
+        param << MaxItems;
         params.push_back(param.str());
     }
 
@@ -1066,164 +310,1977 @@ multiplayer_service::multiplayer_session_directory_get_sessions_sub_path(
     return source.str();
 }
 
-std::error_code
-multiplayer_service::enable_multiplayer_subscriptions()
+JsonDocument SessionQuery::RequestBody() const noexcept
 {
-    return m_multiplayerServiceImpl->enable_multiplayer_subscriptions();
-}
- 
-bool
-multiplayer_service::subscriptions_enabled()
-{
-    return m_multiplayerServiceImpl->subscriptions_enabled();
-}
-
-void
-multiplayer_service::disable_multiplayer_subscriptions()
-{
-    return m_multiplayerServiceImpl->disable_multiplayer_subscriptions();
+    JsonDocument requestBody{ rapidjson::kNullType };
+    if (m_xuidFilters.size() > 1)
+    {
+        requestBody.SetObject();
+        JsonValue xuidsArrayJson{ rapidjson::kArrayType };
+        JsonUtils::SerializeVector(JsonUtils::JsonXuidSerializer, m_xuidFilters, xuidsArrayJson, requestBody.GetAllocator());
+        requestBody.AddMember("xuids", xuidsArrayJson, requestBody.GetAllocator());
+    }
+    return requestBody;
 }
 
-function_context
-multiplayer_service::add_multiplayer_session_changed_handler(
-    _In_ std::function<void(const multiplayer_session_change_event_args&)> handler
-    )
+HRESULT MultiplayerService::GetSessions(
+    _In_ const SessionQuery& getSessionsRequest,
+    _In_ AsyncContext<Result<Vector<XblMultiplayerSessionQueryResult>>> async
+) const noexcept
 {
-    return m_multiplayerServiceImpl->add_multiplayer_session_changed_handler(
-        std::move(handler)
+    RETURN_HR_INVALIDARGUMENT_IF_EMPTY_STRING(getSessionsRequest.Scid);
+    RETURN_HR_INVALIDARGUMENT_IF((getSessionsRequest.XuidFilters == nullptr || getSessionsRequest.XuidFiltersCount == 0) && 
+                                 (getSessionsRequest.KeywordFilter == nullptr || getSessionsRequest.KeywordFilter[0] == 0));
+    RETURN_HR_INVALIDARGUMENT_IF(getSessionsRequest.IncludeReservations && (getSessionsRequest.XuidFilters == nullptr || getSessionsRequest.XuidFiltersCount == 0));
+    RETURN_HR_INVALIDARGUMENT_IF(getSessionsRequest.IncludeInactiveSessions && (getSessionsRequest.XuidFilters == nullptr || getSessionsRequest.XuidFiltersCount == 0));
+
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    HRESULT hr = httpCall->Init(
+        m_xboxLiveContextSettings,
+        getSessionsRequest.XuidFiltersCount > 1 ? "POST" : "GET",
+        XblHttpCall::BuildUrl("sessiondirectory", getSessionsRequest.PathAndQuery()),
+        xbox_live_api::get_sessions
+    );
+    RETURN_HR_IF_FAILED(hr);
+    RETURN_HR_IF_FAILED(httpCall->SetXblServiceContractVersion(MULTIPLAYER_SERVICE_CONTRACT_VERSION));
+
+    auto requestBody{ getSessionsRequest.RequestBody() };
+    if (!requestBody.IsNull())
+    {
+        RETURN_HR_IF_FAILED(httpCall->SetRequestBody(requestBody));
+    }
+
+    return httpCall->Perform(AsyncContext<HttpResult>{ async.Queue().DeriveWorkerQueue(),
+        [
+            async
+        ]
+    (HttpResult httpResult)
+    {
+        if (FAILED(httpResult.Hresult()))
+        {
+            return async.Complete({ httpResult.Hresult(), "Http call failed" });
+        }
+
+        auto hr = httpResult.Payload()->Result();
+        if (FAILED(hr))
+        {
+            const char* errorMessagePtr{};
+            std::unique_ptr<const char> errorMessage{ errorMessagePtr };
+            httpResult.Payload()->GetErrorMessage(&errorMessagePtr);
+            return async.Complete({ hr, errorMessagePtr });
+        }
+
+        Vector<XblMultiplayerSessionQueryResult> sessionStates;
+        hr = JsonUtils::ExtractJsonVector<XblMultiplayerSessionQueryResult>(
+            Serializers::DeserializeMultiplayerSessionQueryResult,
+            httpResult.Payload()->GetResponseBodyJson(),
+            "results",
+            sessionStates,
+            true
         );
+        if (FAILED(hr))
+        {
+            return async.Complete(hr);
+        }
+        
+        return async.Complete(sessionStates);
+    }
+    });
 }
 
-void
-multiplayer_service::remove_multiplayer_session_changed_handler(
-    _In_ function_context context
-    )
+HRESULT MultiplayerService::SetActivity(
+    _In_ const XblMultiplayerSessionReference& sessionReference,
+    _In_ AsyncContext<Result<void>> async
+) const noexcept
 {
-    return m_multiplayerServiceImpl->remove_multiplayer_session_changed_handler(
-        context
+    RETURN_HR_INVALIDARGUMENT_IF_EMPTY_STRING(sessionReference.Scid);
+
+    MultiplayerActivityHandlePostRequest request{ sessionReference };
+
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    HRESULT hr = httpCall->Init(
+        m_xboxLiveContextSettings,
+        "POST",
+        XblHttpCall::BuildUrl("sessiondirectory", "/handles"),
+        xbox_live_api::set_activity
+    );
+    RETURN_HR_IF_FAILED(hr);
+    RETURN_HR_IF_FAILED(httpCall->SetXblServiceContractVersion(MULTIPLAYER_SERVICE_CONTRACT_VERSION));
+    JsonDocument requestJson;
+    request.Serialize(requestJson, requestJson.GetAllocator());
+    RETURN_HR_IF_FAILED(httpCall->SetRequestBody(JsonUtils::SerializeJson(requestJson)));
+
+    return httpCall->Perform(AsyncContext<HttpResult>{ async.Queue().DeriveWorkerQueue(),
+        [async](HttpResult httpResult)
+    {
+        if (FAILED(httpResult.Hresult()))
+        {
+            async.Complete({ httpResult.Hresult(), "Http call failed" });
+        }
+        else
+        {
+            const char* errorMessagePtr{};
+            std::unique_ptr<const char> errorMessage{ errorMessagePtr };
+            httpResult.Payload()->GetErrorMessage(&errorMessagePtr);
+            async.Complete({ httpResult.Payload()->Result(), errorMessagePtr });
+        }
+    }
+    });
+}
+
+HRESULT MultiplayerService::SetTransferHandle(
+    _In_ const XblMultiplayerSessionReference& targetSessionReference,
+    _In_ const XblMultiplayerSessionReference& originSessionReference,
+    _In_ AsyncContext<Result<String>> async
+) const noexcept
+{
+    RETURN_HR_INVALIDARGUMENT_IF_EMPTY_STRING(targetSessionReference.Scid);
+    RETURN_HR_INVALIDARGUMENT_IF_EMPTY_STRING(originSessionReference.Scid);
+
+    MultiplayerTransferHandlePostRequest request{ targetSessionReference, originSessionReference };
+
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    RETURN_HR_IF_FAILED(httpCall->Init(
+        m_xboxLiveContextSettings,
+        "POST",
+        XblHttpCall::BuildUrl("sessiondirectory", "/handles"),
+        xbox_live_api::set_transfer_handle
+    ));
+    RETURN_HR_IF_FAILED(httpCall->SetXblServiceContractVersion(MULTIPLAYER_SERVICE_CONTRACT_VERSION));
+    JsonDocument requestJson;
+    request.Serialize(requestJson, requestJson.GetAllocator());
+    RETURN_HR_IF_FAILED(httpCall->SetRequestBody(JsonUtils::SerializeJson(requestJson)));
+
+    return httpCall->Perform(AsyncContext<HttpResult>{ async.Queue().DeriveWorkerQueue(),
+        [async](HttpResult httpResult)
+    {
+        if (FAILED(httpResult.Hresult()))
+        {
+            return async.Complete({ httpResult.Hresult(), "Http call failed" });
+        }
+
+        auto hr = httpResult.Payload()->Result();
+        if (FAILED(hr))
+        {
+            const char* errorMessagePtr{};
+            std::unique_ptr<const char> errorMessage{ errorMessagePtr };
+            httpResult.Payload()->GetErrorMessage(&errorMessagePtr);
+            return async.Complete({ hr, errorMessagePtr });
+        }
+
+        auto result = Serializers::DeserializeMultiplayerInvite(httpResult.Payload()->GetResponseBodyJson());
+        auto multiplayerInvite = result.Payload();
+
+        if (result.Hresult())
+        {
+            return async.Complete(result.Hresult());
+        }
+        else
+        {
+            return async.Complete(String{ multiplayerInvite.Data });
+        }
+    }});
+}
+
+HRESULT MultiplayerService::CreateSearchHandle(
+    _In_ MultiplayerSearchHandleRequest searchHandleRequest,
+    _In_ AsyncContext<Result<std::shared_ptr<XblMultiplayerSearchHandleDetails>>> async
+) const noexcept
+{
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    RETURN_HR_IF_FAILED(httpCall->Init(
+        m_xboxLiveContextSettings,
+        "POST",
+        XblHttpCall::BuildUrl("sessiondirectory", "/handles"),
+        xbox_live_api::set_search_handle
+    ));
+    RETURN_HR_IF_FAILED(httpCall->SetXblServiceContractVersion(MULTIPLAYER_SERVICE_CONTRACT_VERSION));
+	JsonDocument searchHandleRequestJson;
+    searchHandleRequest.Serialize(searchHandleRequestJson, searchHandleRequestJson.GetAllocator());
+    RETURN_HR_IF_FAILED(httpCall->SetRequestBody(JsonUtils::SerializeJson(searchHandleRequestJson)));
+
+    return httpCall->Perform(AsyncContext<HttpResult>{ async.Queue().DeriveWorkerQueue(),
+        [async](HttpResult httpResult)
+    {
+        if (FAILED(httpResult.Hresult()))
+        {
+            return async.Complete({ httpResult.Hresult(), "Http call failed" });
+        }
+
+        auto hr = httpResult.Payload()->Result();
+        if (FAILED(hr))
+        {
+            const char* errorMessagePtr{};
+            std::unique_ptr<const char> errorMessage{ errorMessagePtr };
+            httpResult.Payload()->GetErrorMessage(&errorMessagePtr);
+            return async.Complete({ hr, errorMessagePtr });
+        }
+
+        auto result = XblMultiplayerSearchHandleDetails::Deserialize(httpResult.Payload()->GetResponseBodyJson());
+        async.Complete(result);
+    }});
+}
+
+HRESULT MultiplayerService::ClearActivity(
+    _In_ const String& scid,
+    _In_ AsyncContext<Result<void>> async
+) const noexcept
+{
+    RETURN_HR_INVALIDARGUMENT_IF(scid.empty());
+
+    return GetActivitiesForUsers(
+        scid, 
+        Vector<uint64_t>{ m_user.Xuid() },
+        AsyncContext<Result<Vector<XblMultiplayerActivityDetails>>>{ async.Queue().DeriveWorkerQueue(),
+        [
+            sharedThis{ shared_from_this() },
+            this,
+            async
+        ]
+    (Result<Vector<XblMultiplayerActivityDetails>> result)
+    {
+        if (FAILED(result.Hresult()))
+        {
+            return async.Complete(result.Hresult());
+        }
+
+        auto& activityDetails = result.Payload();
+        size_t responseSize = activityDetails.size();
+
+        Stringstream subPath;
+        if (responseSize == 0)
+        {
+            // There should be at least one activity per user
+            // Don't want to change behavior, but I think we should treat it as a success if there is no
+            // activity to clear.
+            return async.Complete(utils::convert_xbox_live_error_code_to_hresult(xbl_error_code::invalid_argument));
+        }
+        else if (responseSize > 1)
+        {
+            // There should only be one activity per user
+            // Don't want to change behavior, but it seems like this is an unexpected service response, so 
+            // we should return E_UNEXPECTED rather than E_INVALIDARG
+            return async.Complete(utils::convert_xbox_live_error_code_to_hresult(xbl_error_code::invalid_argument));
+        }
+        else
+        {
+            subPath << "/handles/" << activityDetails.at(0).HandleId;
+        }
+
+        auto httpCall = MakeShared<XblHttpCall>(m_user);
+        HRESULT hr = httpCall->Init(
+            m_xboxLiveContextSettings,
+            "DELETE",
+            XblHttpCall::BuildUrl("sessiondirectory", subPath.str()),
+            xbox_live_api::clear_activity
         );
+
+        if (FAILED(hr))
+        {
+            return async.Complete(hr);
+        }
+
+        hr = httpCall->SetXblServiceContractVersion(MULTIPLAYER_SERVICE_CONTRACT_VERSION);
+        if (FAILED(hr))
+        {
+            return async.Complete(hr);
+        }
+
+        hr = httpCall->Perform(AsyncContext<HttpResult>{ async.Queue().DeriveWorkerQueue(),
+            [async](HttpResult httpResult)
+        {
+            if (Failed(httpResult))
+            {
+                async.Complete(httpResult.Hresult());
+            }
+            else
+            {
+                async.Complete(httpResult.Payload()->Result());
+            }
+        }});
+
+        if (FAILED(hr))
+        {
+            async.Complete(hr);
+        }
+    }
+    });
 }
 
-function_context
-multiplayer_service::add_multiplayer_subscription_lost_handler(
-    _In_ std::function<void()> handler
-    )
+HRESULT MultiplayerService::DeleteSearchHandle(
+    _In_ const String& handleId,
+    _In_ AsyncContext<Result<void>> async
+) const noexcept
 {
-    return m_multiplayerServiceImpl->add_multiplayer_subscription_lost_handler(
-        std::move(handler)
+    RETURN_HR_INVALIDARGUMENT_IF(handleId.empty());
+
+    String handleStr = "/handles/" + handleId;
+
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    RETURN_HR_IF_FAILED(httpCall->Init(
+        m_xboxLiveContextSettings,
+        "DELETE",
+        XblHttpCall::BuildUrl("sessiondirectory", handleStr),
+        xbox_live_api::set_activity
+    ));
+
+    RETURN_HR_IF_FAILED(httpCall->SetXblServiceContractVersion(MULTIPLAYER_SERVICE_CONTRACT_VERSION));
+
+    return httpCall->Perform(AsyncContext<HttpResult>{ async.Queue().DeriveWorkerQueue(),
+        [async](HttpResult httpResult)
+    {
+        if (Failed(httpResult))
+        {
+            async.Complete(httpResult.Hresult());
+        }
+        else
+        {
+            async.Complete(httpResult.Payload()->Result());
+        }
+    }});
+}
+
+HRESULT MultiplayerService::SendInvites(
+    _In_ XblMultiplayerSessionReference sessionReference,
+    _In_ const Vector<uint64_t>& xuids,
+    _In_ uint32_t titleId,
+    _In_ const String& contextStringId,
+    _In_ const String& customActivationContext,
+    _In_ AsyncContext<Result<Vector<String>>> async
+) const noexcept
+{
+    RETURN_HR_INVALIDARGUMENT_IF(!XblMultiplayerSessionReferenceIsValid(&sessionReference) || xuids.empty());
+
+    // MPSD only allows creating a single invite handle at a time. SendInvitesOperation attempts
+    // to create an invite handle for each invited user. If creation of a single handle fails, the operation
+    // will continue, attempting to create the remaining handles. The result will contain all handles which
+    // were successfully created.
+    struct SendInvitesOperation : public std::enable_shared_from_this<SendInvitesOperation>
+    {
+        SendInvitesOperation(
+            std::shared_ptr<const MultiplayerService> multiplayerService,
+            const XblMultiplayerSessionReference& sessionReference,
+            const Vector<uint64_t>& xuidsToInvite,
+            uint32_t titleId,
+            const String& contextString,
+            const String& customActivationContext,
+            AsyncContext<Result<Vector<String>>> async
+        ) noexcept
+            : m_multiplayerService{ std::move(multiplayerService) },
+            m_requestBody{ sessionReference, 0, titleId, contextString, customActivationContext },
+            m_xuidsToInvite{ xuidsToInvite.rbegin(), xuidsToInvite.rend() },
+            m_async{ std::move(async) }
+        {
+        }
+
+        void Run() noexcept
+        {
+            if (m_xuidsToInvite.empty())
+            {
+                m_async.Complete(m_inviteHandles);
+            }
+            else
+            {
+                auto nextXuid{ m_xuidsToInvite.back() };
+                m_xuidsToInvite.pop_back();
+                HRESULT hr = SendInvite(nextXuid);
+                if (FAILED(hr))
+                {
+                    LOGS_ERROR << __FUNCTION__ << " Invite failed for user[" << nextXuid << "], hr=" << hr;
+                    LOGS_ERROR << __FUNCTION__ << " Continuing with remaining invited users.";
+                    this->Run();
+                }
+            }
+        }
+
+    private:
+        HRESULT SendInvite(uint64_t xuid) noexcept
+        {
+            auto httpCall = MakeShared<XblHttpCall>(m_multiplayerService->m_user);
+            RETURN_HR_IF_FAILED(httpCall->Init(
+                m_multiplayerService->m_xboxLiveContextSettings,
+                "POST",
+                XblHttpCall::BuildUrl("sessiondirectory", "/handles"),
+                xbox_live_api::send_invites
+            ));
+
+            RETURN_HR_IF_FAILED(httpCall->SetRetryAllowed(false));
+            RETURN_HR_IF_FAILED(httpCall->SetXblServiceContractVersion(MULTIPLAYER_SERVICE_CONTRACT_VERSION));
+
+            m_requestBody.SetInvitedXuid(xuid);
+            RETURN_HR_IF_FAILED(httpCall->SetRequestBody(m_requestBody.Json()));
+
+            return httpCall->Perform(AsyncContext<HttpResult>{ m_async.Queue().DeriveWorkerQueue(),
+                [
+                    sharedThis{ shared_from_this() },
+                    this,
+                    xuid
+                ]
+                (HttpResult httpResult)
+                {
+                    auto inviteHandleResult = HandleServiceResult(httpResult);
+                    if (Succeeded(inviteHandleResult))
+                    {
+                        m_inviteHandles.push_back(inviteHandleResult.ExtractPayload());
+                    }
+                    else
+                    {
+                        LOGS_ERROR << __FUNCTION__ << " Invite failed for user[" << xuid << "], hr=" << inviteHandleResult.Hresult();
+                        LOGS_ERROR << __FUNCTION__ << " Continuing with remaining invited users.";
+                    }
+                    Run();
+                }
+            });
+        }
+
+        Result<String> HandleServiceResult(HttpResult httpResult) noexcept
+        {
+            RETURN_HR_IF_FAILED(httpResult.Hresult());
+            RETURN_HR_IF_FAILED(httpResult.Payload()->Result());
+
+            auto deserializationResult = Serializers::DeserializeMultiplayerInvite(httpResult.Payload()->GetResponseBodyJson());
+            return Result<String>{ deserializationResult.Payload().Data, deserializationResult.Hresult() };
+        }
+
+        std::shared_ptr<const MultiplayerService> m_multiplayerService;
+        MultiplayerInviteHandlePostRequest m_requestBody;
+        Vector<uint64_t> m_xuidsToInvite;
+        Vector<String> m_inviteHandles;
+        AsyncContext<Result<Vector<String>>> m_async;
+    };
+
+    auto operation = MakeShared<SendInvitesOperation>(
+        shared_from_this(),
+        sessionReference,
+        xuids,
+        titleId,
+        contextStringId,
+        customActivationContext,
+        std::move(async)
+    );
+
+    operation->Run();
+    return S_OK;
+}
+
+HRESULT MultiplayerService::GetActivitiesForSocialGroup(
+    _In_ const String& scid,
+    _In_ uint64_t socialGroupOwnerXuid,
+    _In_ const String& socialGroup,
+    _In_ AsyncContext<Result<Vector<XblMultiplayerActivityDetails>>> async
+) const noexcept
+{
+    RETURN_HR_INVALIDARGUMENT_IF(scid.empty() || socialGroupOwnerXuid == 0 || socialGroup.empty());
+
+    MultiplayerActivityQueryPostRequest request{ scid, socialGroup, socialGroupOwnerXuid };
+
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    RETURN_HR_IF_FAILED(httpCall->Init(
+        m_xboxLiveContextSettings,
+        "POST",
+        XblHttpCall::BuildUrl("sessiondirectory", GET_ACTIIVITIES_SUBPATH),
+        xbox_live_api::get_activities_for_social_group
+    ));
+
+    RETURN_HR_IF_FAILED(httpCall->SetXblServiceContractVersion(MULTIPLAYER_SERVICE_CONTRACT_VERSION));
+	JsonDocument requestJson;
+    request.Serialize(requestJson, requestJson.GetAllocator());
+    RETURN_HR_IF_FAILED(httpCall->SetRequestBody(JsonUtils::SerializeJson(requestJson)));
+
+    return httpCall->Perform(AsyncContext<HttpResult>{ async.Queue().DeriveWorkerQueue(),
+        [async](HttpResult httpResult)
+    {
+        auto hr = httpResult.Hresult();
+        if (FAILED(hr))
+        {
+            return async.Complete({ hr, "Http call failed" });
+        }
+
+        hr = httpResult.Payload()->Result();
+        if (FAILED(hr))
+        {
+            const char* errorMessagePtr{};
+            std::unique_ptr<const char> errorMessage{ errorMessagePtr };
+            httpResult.Payload()->GetErrorMessage(&errorMessagePtr);
+            return async.Complete({ hr, errorMessagePtr });
+        }
+
+        Vector<XblMultiplayerActivityDetails> activityDetails;
+        hr = JsonUtils::ExtractJsonVector<XblMultiplayerActivityDetails>(
+            Serializers::DeserializeMultiplayerActivityDetails,
+            httpResult.Payload()->GetResponseBodyJson(),
+            "results",
+            activityDetails,
+            true
         );
+
+        if (FAILED(hr))
+        {
+            return async.Complete(hr);
+        }
+
+        async.Complete(activityDetails);
+    }});
 }
 
-void
-multiplayer_service::remove_multiplayer_subscription_lost_handler(
-    _In_ function_context context
-    )
+HRESULT MultiplayerService::GetActivitiesForUsers(
+    _In_ const String& scid,
+    _In_ const Vector<uint64_t>& xuids,
+    _In_ AsyncContext<Result<Vector<XblMultiplayerActivityDetails>>> async
+) const noexcept
 {
-    m_multiplayerServiceImpl->remove_multiplayer_subscription_lost_handler(
-        context
+    RETURN_HR_INVALIDARGUMENT_IF(scid.empty() || xuids.empty());
+
+    MultiplayerActivityQueryPostRequest request{ scid, xuids };
+
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    RETURN_HR_IF_FAILED(httpCall->Init(
+        m_xboxLiveContextSettings,
+        "POST",
+        XblHttpCall::BuildUrl("sessiondirectory", GET_ACTIIVITIES_SUBPATH),
+        xbox_live_api::get_activities_for_users
+    ));
+
+    RETURN_HR_IF_FAILED(httpCall->SetXblServiceContractVersion(MULTIPLAYER_SERVICE_CONTRACT_VERSION));
+    JsonDocument requestJson;
+    request.Serialize(requestJson, requestJson.GetAllocator());
+    RETURN_HR_IF_FAILED(httpCall->SetRequestBody(JsonUtils::SerializeJson(requestJson)));
+
+    return httpCall->Perform(AsyncContext<HttpResult>{ async.Queue().DeriveWorkerQueue(),
+        [async](HttpResult httpResult)
+    {
+        if (FAILED(httpResult.Hresult()))
+        {
+            return async.Complete({ httpResult.Hresult(), "Http call failed" });
+        }
+
+        auto hr = httpResult.Payload()->Result();
+        if (FAILED(hr))
+        {
+            const char* errorMessagePtr{};
+            std::unique_ptr<const char> errorMessage{ errorMessagePtr };
+            httpResult.Payload()->GetErrorMessage(&errorMessagePtr);
+            return async.Complete({ hr, errorMessagePtr });
+        }
+
+        Vector<XblMultiplayerActivityDetails> activityDetails;
+        hr = JsonUtils::ExtractJsonVector<XblMultiplayerActivityDetails>(
+            Serializers::DeserializeMultiplayerActivityDetails,
+            httpResult.Payload()->GetResponseBodyJson(),
+            "results",
+            activityDetails,
+            true
         );
+
+        if (FAILED(hr))
+        {
+            return async.Complete(hr);
+        }
+
+        async.Complete(activityDetails);
+    }});
 }
 
-tournament_game_result_state
-multiplayer_service::_Convert_string_to_game_result_state(_In_ const string_t& value)
+HRESULT MultiplayerService::GetSearchHandles(
+    _In_ const MultiplayerQuerySearchHandleRequest& searchHandleRequest,
+    _In_ AsyncContext<Result<Vector<std::shared_ptr<XblMultiplayerSearchHandleDetails>>>> async
+) const noexcept
 {
-    if (utils::str_icmp(value, _T("win")) == 0)
-    {
-        return tournament_game_result_state::win;
-    }
-    else if (utils::str_icmp(value, _T("loss")) == 0)
-    {
-        return tournament_game_result_state::loss;
-    }
-    else if (utils::str_icmp(value, _T("draw")) == 0)
-    {
-        return tournament_game_result_state::draw;
-    }
-    else if (utils::str_icmp(value, _T("rank")) == 0)
-    {
-        return tournament_game_result_state::rank;
-    }
-    else if (utils::str_icmp(value, _T("noShow")) == 0)
-    {
-        return tournament_game_result_state::no_show;
-    }
+    RETURN_HR_INVALIDARGUMENT_IF(searchHandleRequest.Scid().empty() || searchHandleRequest.SessionTemplateName().empty());
 
-    return tournament_game_result_state::no_contest;
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    RETURN_HR_IF_FAILED(httpCall->Init(
+        m_xboxLiveContextSettings,
+        "POST",
+        XblHttpCall::BuildUrl("sessiondirectory", GET_SEARCH_HANDLES_SUBPATH),
+        xbox_live_api::get_search_handles
+    ));
+
+    RETURN_HR_IF_FAILED(httpCall->SetXblServiceContractVersion(MULTIPLAYER_SERVICE_CONTRACT_VERSION));
+	JsonDocument searchHandleRequestJson;
+    searchHandleRequest.Serialize(m_user.Xuid(), searchHandleRequestJson, searchHandleRequestJson.GetAllocator());
+    RETURN_HR_IF_FAILED(httpCall->SetRequestBody(JsonUtils::SerializeJson(searchHandleRequestJson)));
+
+    return httpCall->Perform(AsyncContext<HttpResult>{ async.Queue().DeriveWorkerQueue(),
+        [async](HttpResult httpResult)
+    {
+        if (FAILED(httpResult.Hresult()))
+        {
+            return async.Complete({ httpResult.Hresult(), "Http call failed" });
+        }
+
+        auto hr = httpResult.Payload()->Result();
+        if (FAILED(hr))
+        {
+            const char* errorMessagePtr{};
+            std::unique_ptr<const char> errorMessage{ errorMessagePtr };
+            httpResult.Payload()->GetErrorMessage(&errorMessagePtr);
+            return async.Complete({ hr, errorMessagePtr });
+        }
+
+        Vector<std::shared_ptr<XblMultiplayerSearchHandleDetails>> searchHandleDetails;
+        hr = JsonUtils::ExtractJsonVector<std::shared_ptr<XblMultiplayerSearchHandleDetails>>(
+            XblMultiplayerSearchHandleDetails::Deserialize,
+            httpResult.Payload()->GetResponseBodyJson(),
+            "results",
+            searchHandleDetails,
+            true
+            );
+
+        async.Complete(Result<Vector<std::shared_ptr<XblMultiplayerSearchHandleDetails>>>{ searchHandleDetails, hr });
+    }});
 }
 
-string_t
-multiplayer_service::_Convert_game_result_state_to_string(_In_ tournament_game_result_state value)
+HRESULT MultiplayerService::WriteSessionUsingSubpath(
+    _In_ std::shared_ptr<XblMultiplayerSession> session,
+    _In_ XblMultiplayerSessionWriteMode mode,
+    _In_ const String& subpathAndQuery,
+    _In_ AsyncContext<Result<std::shared_ptr<XblMultiplayerSession>>> async
+) noexcept
 {
-    switch (value)
+    RETURN_HR_INVALIDARGUMENT_IF(subpathAndQuery.empty());
+
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    RETURN_HR_IF_FAILED(httpCall->Init(
+        m_xboxLiveContextSettings,
+        "PUT",
+        XblHttpCall::BuildUrl("sessiondirectory", subpathAndQuery),
+        xbox_live_api::write_session_using_subpath
+    ));
+
+    RETURN_HR_IF_FAILED(httpCall->SetRetryAllowed(false));
+    RETURN_HR_IF_FAILED(httpCall->SetXblServiceContractVersion(MULTIPLAYER_SERVICE_CONTRACT_VERSION));
+
+    switch (mode)
     {
-    case tournament_game_result_state::win:
-        return _T("win");
+    case XblMultiplayerSessionWriteMode::CreateNew:
+    {
+        RETURN_HR_IF_FAILED(httpCall->SetHeader("If-None-Match", "*"));
         break;
-    case tournament_game_result_state::loss:
-        return _T("loss");
+    }
+    case XblMultiplayerSessionWriteMode::UpdateExisting:
+    {
+        RETURN_HR_IF_FAILED(httpCall->SetHeader("If-Match", "*"));
         break;
-    case tournament_game_result_state::draw:
-        return _T("draw");
+    }
+    case XblMultiplayerSessionWriteMode::UpdateOrCreateNew:
+    {
+        // No match header
         break;
-    case tournament_game_result_state::no_show:
-        return _T("noShow");
+    }
+    case XblMultiplayerSessionWriteMode::SynchronizedUpdate:
+    {
+        if (session->ETag().empty())
+        {
+            RETURN_HR_IF_FAILED(httpCall->SetHeader("If-None-Match", "*"));
+        }
+        else
+        {
+            RETURN_HR_IF_FAILED(httpCall->SetHeader("If-Match", session->ETag()));
+        }
         break;
-    case tournament_game_result_state::rank:
-        return _T("rank");
-        break;
-    case tournament_game_result_state::no_contest:
+    }
     default:
-        return _T("noContest");
-        break;
+    {
+        return E_INVALIDARG;
+    }
+    }
+
+    // Set the ConnectionId for the session
+    TaskQueue derivedQueue{ async.Queue().DeriveWorkerQueue() };
+
+    return SetRtaConnectionId(session, AsyncContext<Result<void>>{ derivedQueue,
+        [
+            httpCall,
+            xuid{ m_user.Xuid() },
+            sessionReference{ session->SessionReference() },
+            session,
+            async{ std::move(async) }
+        ]
+    (Result<void> setConnectionIdResult)
+    {
+        if (Failed(setConnectionIdResult))
+        {
+            return async.Complete({ setConnectionIdResult.Hresult(), "Failed to establish MPSD RTA subscription" });
+        }
+
+        JsonDocument requestBody{ rapidjson::kObjectType };
+        session->Serialize(requestBody, requestBody.GetAllocator());
+
+        HRESULT hr = httpCall->SetRequestBody(requestBody);
+        if (FAILED(hr))
+        {
+            return async.Complete(hr);
+        }
+
+        hr = httpCall->Perform(AsyncContext<HttpResult>{ async.Queue().DeriveWorkerQueue(),
+            [
+                xuid,
+                sessionReference,
+                async
+            ]
+        (HttpResult httpResult)
+        {
+            HRESULT hr = httpResult.Hresult();
+            if (FAILED(hr))
+            {
+                return async.Complete({ hr, "Http call failed" });
+            }
+
+            hr = httpResult.Payload()->Result();
+            auto statusCode = httpResult.Payload()->HttpStatus();
+            if (FAILED(hr) && statusCode != 412)
+            {
+                return async.Complete(hr);
+            }
+            else if (statusCode == 204)
+            {
+                return async.Complete({ xbl_error_code::no_error });
+            }
+
+            auto responseJson = httpResult.Payload()->GetResponseBodyJson();
+            if (responseJson.IsNull())
+            {
+                return async.Complete(hr);
+            }
+
+            XblMultiplayerSessionReference localSessionRef;
+            if (sessionReference.Scid[0] == 0)
+            {
+                auto contentLocation = httpResult.Payload()->GetResponseHeader("Content-Location");
+
+                hr = XblMultiplayerSessionReferenceParseFromUriPath(contentLocation.c_str(), &localSessionRef);
+                if (FAILED(hr))
+                {
+                    return async.Complete({ E_FAIL, "Failed to parse session reference from URI" });
+                }
+            }
+            else
+            {
+                localSessionRef = sessionReference;
+            }
+
+            auto session = MakeShared<XblMultiplayerSession>(
+                xuid,
+                localSessionRef,
+                httpResult.Payload()->GetResponseHeader(ETAG_HEADER),
+                httpResult.Payload()->GetResponseHeader(DATE_HEADER),
+                httpResult.Payload()->GetResponseBodyJson()
+                );
+
+            if (session->DeserializationError() && SUCCEEDED(hr))
+            {
+                // WriteSession failed due to deserialization error
+                hr = session->DeserializationError();
+            }
+
+            session->SetWriteSessionStatus(
+                statusCode
+            );
+
+            return async.Complete(Result<std::shared_ptr<XblMultiplayerSession>>(session, hr));
+        }});
+
+        if (FAILED(hr))
+        {
+            return async.Complete(hr);
+        }
+    }
+    });
+}
+
+HRESULT MultiplayerService::SetRtaConnectionId(
+    _In_ std::shared_ptr<XblMultiplayerSession> session,
+    _In_ AsyncContext<Result<void>> async
+) noexcept
+{
+    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerService };
+    XblMultiplayerSessionReadLockGuard sessionSafe(session);
+    if (!m_subscription || !sessionSafe.CurrentUserInternal())
+    {
+        // If we don't have an active subscription or the current user is not in the session do nothing
+        async.Complete(S_OK);
+    }
+    else if (!m_subscription->RtaConnectionId().empty())
+    {
+        // If we already have a connectionId add it
+        sessionSafe.CurrentUserInternal()->SetRtaConnectionId(m_subscription->RtaConnectionId());
+        async.Complete(S_OK);
+    }
+    else
+    {
+        // Wait for subscription to be finalized and add connectionId then
+        m_sessionsAwaitingConnectionId.emplace_back(session, std::move(async));
+    }
+    return S_OK;
+}
+
+HRESULT MultiplayerService::SubscribeToRta() noexcept
+{
+    if (m_subscription == nullptr)
+    {
+        m_subscription = MakeShared<MultiplayerSubscription>();
+
+        m_subscription->AddConnectionIdChangedHandler(
+            [
+                weakThis = std::weak_ptr<MultiplayerService>{ shared_from_this() }
+            ]
+        (const String& connectionId)
+        {
+            if (auto sharedThis{ weakThis.lock() })
+            {
+                std::unique_lock<std::mutex> lock{ sharedThis->m_mutexMultiplayerService };
+                for (auto& pair : sharedThis->m_sessionsAwaitingConnectionId)
+                {
+                    // Make sure the current user is still in the session
+                    XblMultiplayerSessionReadLockGuard pairSafe(pair.first);
+                    if (pairSafe.CurrentUserInternal())
+                    {
+                        pairSafe.CurrentUserInternal()->SetRtaConnectionId(connectionId);
+                    }
+                    pair.second.Complete(S_OK);
+                }
+                sharedThis->m_sessionsAwaitingConnectionId.clear();
+
+                // Invoke client connectionId changed handlers as well
+                auto clientHandlers{ sharedThis->m_connectionIdChangedHandlers };
+                lock.unlock();
+
+                for (auto& handler : clientHandlers)
+                {
+                    handler.second(connectionId);
+                }
+            }
+        });
+
+        // To support title subscription lost events, add an RTA connection state changed handler
+        m_rtaConnectionStateChangedToken = m_rtaManager->AddStateChangedHandler(m_user, 
+            [
+                weakThis = std::weak_ptr<MultiplayerService>{ shared_from_this() }
+            ]
+        (XblRealTimeActivityConnectionState state)
+        {
+            auto sharedThis{ weakThis.lock() };
+            if (state == XblRealTimeActivityConnectionState::Disconnected && sharedThis)
+            {
+                std::unique_lock<std::mutex> lock{ sharedThis->m_mutexMultiplayerService };
+                auto handlers{ sharedThis->m_subscriptionLostHandlers };
+                lock.unlock();
+
+                for (auto& handler : handlers)
+                {
+                    handler.second();
+                }
+            }
+        });
+
+        return m_rtaManager->AddSubscription(m_user, m_subscription);
+    }
+    return S_OK;
+}
+
+HRESULT MultiplayerService::UnsubscribeFromRta() noexcept
+{
+    if (m_subscription != nullptr)
+    {
+        m_rtaManager->RemoveStateChangedHandler(m_user, m_rtaConnectionStateChangedToken);
+        m_rtaManager->RemoveSubscription(m_user, m_subscription);
+        m_subscription.reset();
+
+        // If there were sessions awaiting a connectionId, complete those AsyncContexts
+        for (auto& pair : m_sessionsAwaitingConnectionId)
+        {
+            pair.second.Complete(S_OK);
+        }
+        m_sessionsAwaitingConnectionId.clear();
+    }
+    return S_OK;
+}
+
+HRESULT MultiplayerService::EnableMultiplayerSubscriptions() noexcept
+{
+    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerService };
+    m_forceEnableRtaSubscription = true;
+    return SubscribeToRta();
+}
+
+HRESULT MultiplayerService::DisableMultiplayerSubscriptions() noexcept
+{
+    std::unique_lock<std::mutex> lock{ m_mutexMultiplayerService };
+    m_forceEnableRtaSubscription = false;
+    HRESULT hr = UnsubscribeFromRta();
+
+    // Maintain existing behavior and invoke subscription lost handler here
+    auto handlers{ m_subscriptionLostHandlers };
+    lock.unlock();
+
+    for (auto& handler : handlers)
+    {
+        handler.second();
+    }
+
+    return hr;
+}
+
+bool MultiplayerService::SubscriptionsEnabled() noexcept
+{
+    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerService };
+    return m_subscription != nullptr;
+}
+
+XblFunctionContext MultiplayerService::AddMultiplayerSessionChangedHandler(
+    _In_ MultiplayerSubscription::SessionChangedHandler handler
+) noexcept
+{
+    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerService };
+
+    SubscribeToRta();
+    assert(m_subscription);
+    return m_subscription->AddSessionChangedHandler(std::move(handler));
+}
+
+void MultiplayerService::RemoveMultiplayerSessionChangedHandler(
+    _In_ XblFunctionContext token
+) noexcept
+{
+    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerService };
+
+    if (m_subscription)
+    {
+        size_t remainingHandlers = m_subscription->RemoveSessionChangedHandler(token);
+        // If that was the last handler and the title hasn't force enabled the RTA subscription then unsubscribe
+        if (!remainingHandlers && !m_forceEnableRtaSubscription)
+        {
+            UnsubscribeFromRta();
+        }
     }
 }
 
-tournament_game_result_source
-multiplayer_service::_Convert_string_to_game_result_source(_In_ const string_t& value)
+XblFunctionContext MultiplayerService::AddMultiplayerSubscriptionLostHandler(
+    _In_ SubscriptionLostHandler handler
+) noexcept
 {
-    if (utils::str_icmp(value, _T("adjusted")) == 0)
-    {
-        return tournament_game_result_source::adjusted;
-    }
-    else if (utils::str_icmp(value, _T("arbitration")) == 0)
-    {
-        return tournament_game_result_source::arbitration;
-    }
-    else if (utils::str_icmp(value, _T("server")) == 0)
-    {
-        return tournament_game_result_source::server;
-    }
-
-    return tournament_game_result_source::none;
+    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerService };
+    m_subscriptionLostHandlers[m_nextClientToken] = std::move(handler);
+    return m_nextClientToken++;
 }
 
-tournament_arbitration_status
-multiplayer_service::_Convert_string_to_arbitration_status(
-    _In_ const string_t& value
-)
+void MultiplayerService::RemoveMultiplayerSubscriptionLostHandler(
+    _In_ XblFunctionContext token
+) noexcept
 {
-    if (utils::str_icmp(value, _T("waiting")) == 0)
-    {
-        return tournament_arbitration_status::waiting;
-    }
-    else if (utils::str_icmp(value, _T("inprogress")) == 0)
-    {
-        return tournament_arbitration_status::in_progress;
-    }
-    else if (utils::str_icmp(value, _T("complete")) == 0)
-    {
-        return tournament_arbitration_status::complete;
-    }
-    else if (utils::str_icmp(value, _T("playing")) == 0)
-    {
-        return tournament_arbitration_status::playing;
-    }
-    else if (utils::str_icmp(value, _T("joining")) == 0)
-    {
-        return tournament_arbitration_status::joining;
-    }
+    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerService };
+    m_subscriptionLostHandlers.erase(token);
+}
 
-    return tournament_arbitration_status::incomplete;
+XblFunctionContext MultiplayerService::AddMultiplayerConnectionIdChangedHandler(
+    MultiplayerSubscription::ConnectionIdChangedHandler handler
+) noexcept
+{
+    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerService };
+
+    // For legacy reasons, allow adding a connectionId changed handler even if subscriptions are not enabled
+    m_connectionIdChangedHandlers[m_nextClientToken] = std::move(handler);
+    return m_nextClientToken++;
+}
+
+void MultiplayerService::RemoveMultiplayerConnectionIdChangedHandler(
+    _In_ XblFunctionContext token
+) noexcept
+{
+    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerService };
+    m_connectionIdChangedHandlers.erase(token);
+}
+
+
+String MultiplayerService::MultiplayerSessionDirectoryCreateOrUpdateSubpath(
+    _In_ const String& serviceConfigurationId,
+    _In_ const String& sessionTemplateName,
+    _In_ const String& sessionName
+) noexcept
+{
+    Stringstream source;
+    source << "/serviceconfigs/";
+    source << serviceConfigurationId;
+    source << "/sessionTemplates/";
+    source << sessionTemplateName;
+    source << "/sessions/";
+    source << sessionName;
+    return source.str();
+}
+
+String MultiplayerService::MultiplayerSessionDirectoryCreateOrUpdateByHandleSubpath(
+    _In_ const String& handleId
+) noexcept
+{
+    Stringstream source;
+    source << "/handles/";
+    source << handleId;
+    source << "/session";
+
+    return source.str();
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_END
+
+STDAPI MultiplayerWriteSessionHelper(
+    _In_ XblContextHandle xblContextHandle,
+    _In_ XblMultiplayerSessionHandle multiplayerSession,
+    _In_ XblMultiplayerSessionWriteMode writeMode,
+    _In_opt_ const char* handleIdArg,
+    _Inout_ XAsyncBlock* async
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || multiplayerSession == nullptr || async == nullptr);
+
+    return RunAsync(async, __FUNCTION__,
+        [
+            xblContext{ xblContextHandle->shared_from_this() },
+            inputSession{ multiplayerSession->shared_from_this() },
+            writeMode,
+            handleId{ String{handleIdArg ? handleIdArg : ""} },
+            outputSession{ std::shared_ptr<XblMultiplayerSession>() }
+        ]
+    (XAsyncOp op, const XAsyncProviderData* data) mutable
+    {
+        switch (op)
+        {
+        case XAsyncOp::DoWork:
+        {
+            AsyncContext<Result<std::shared_ptr<XblMultiplayerSession>>> async{ data->async->queue,
+                [
+                    &outputSession,
+                    async{ data->async }
+                ]
+            (Result<std::shared_ptr<XblMultiplayerSession>> result)
+            {
+                outputSession = result.ExtractPayload();
+                auto hr = result.Hresult();
+
+                // Still must return latest session to allow retries
+                if (hr == HTTP_E_STATUS_PRECOND_FAILED)
+                {
+                    hr = S_OK;
+                }
+
+                XAsyncComplete(async, hr, sizeof(XblMultiplayerSessionHandle));
+            }
+            };
+
+            if (handleId.empty())
+            {
+                RETURN_HR_IF_FAILED(xblContext->MultiplayerService()->WriteSession(
+                    inputSession,
+                    writeMode,
+                    std::move(async)
+                ));
+            }
+            else
+            {
+                RETURN_HR_IF_FAILED(xblContext->MultiplayerService()->WriteSessionByHandle(
+                    inputSession,
+                    writeMode,
+                    handleId,
+                    std::move(async)
+                ));
+            }
+
+            return E_PENDING;
+        }
+        case XAsyncOp::GetResult:
+        {
+            auto handlePtr = static_cast<XblMultiplayerSessionHandle*>(data->buffer);
+            if (outputSession)
+            {
+                outputSession->AddRef();
+                *handlePtr = outputSession.get();
+            }
+            else
+            {
+                *handlePtr = nullptr;
+            }
+            return S_OK;
+        }
+        default:
+        {
+            return S_OK;
+        }
+        }
+    });
+}
+
+STDAPI XblMultiplayerWriteSessionAsync(
+    _In_ XblContextHandle xblContext,
+    _In_ XblMultiplayerSessionHandle multiplayerSession,
+    _In_ XblMultiplayerSessionWriteMode writeMode,
+    _Inout_ XAsyncBlock* async
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF_NULL(multiplayerSession);
+
+    if (!XblMultiplayerSessionReferenceIsValid(&multiplayerSession->SessionReference()))
+    {
+        LOGS_DEBUG << "XblMultiplayerWriteSessionAsync cannot be called on a session without a valid session reference";
+        return E_XBL_RUNTIME_ERROR;
+    }
+
+    return MultiplayerWriteSessionHelper(xblContext, multiplayerSession, writeMode, nullptr, async);
+}
+
+STDAPI XblMultiplayerWriteSessionResult(
+    _Inout_ XAsyncBlock* async,
+    _Out_ XblMultiplayerSessionHandle* handle
+) XBL_NOEXCEPT
+{
+    XblMultiplayerSessionHandle handleCopy = nullptr;
+    auto hr = XAsyncGetResult(async, nullptr, sizeof(XblMultiplayerSessionHandle), &handleCopy, nullptr);
+    if (handle != nullptr)
+    {
+        *handle = handleCopy;
+    }
+    else
+    {
+        XblMultiplayerSessionCloseHandle(handleCopy);
+    }
+    return hr;
+}
+
+STDAPI XblMultiplayerWriteSessionByHandleAsync(
+    _In_ XblContextHandle xblContext,
+    _In_ XblMultiplayerSessionHandle multiplayerSession,
+    _In_ XblMultiplayerSessionWriteMode writeMode,
+    _In_ const char* handleId,
+    _In_ XAsyncBlock* async
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF_NULL(handleId);
+
+    return MultiplayerWriteSessionHelper(xblContext, multiplayerSession, writeMode, handleId, async);
+}
+
+STDAPI XblMultiplayerWriteSessionByHandleResult(
+    _Inout_ XAsyncBlock* async,
+    _Out_ XblMultiplayerSessionHandle* handle
+) XBL_NOEXCEPT
+{
+    return XblMultiplayerWriteSessionResult(async, handle);
+}
+
+STDAPI MultiplayerGetSessionHelper(
+    _In_ XblContextHandle xblContextHandle,
+    _In_opt_ const XblMultiplayerSessionReference* sessionReferenceArg,
+    _In_opt_ const char* handleIdArg,
+    _In_ XAsyncBlock* async
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || async == nullptr);
+
+    return RunAsync(async, __FUNCTION__,
+        [
+            xblContext{ xblContextHandle->shared_from_this() },
+            sessionReference = sessionReferenceArg ? XblMultiplayerSessionReference{ *sessionReferenceArg } : XblMultiplayerSessionReference{},
+            handleId = handleIdArg ? String{ handleIdArg } : String{},
+            session = std::shared_ptr<XblMultiplayerSession>{ nullptr }
+        ]
+    (XAsyncOp op, const XAsyncProviderData* data) mutable
+    {
+        switch (op)
+        {
+        case XAsyncOp::DoWork:
+        {
+            AsyncContext<Result<std::shared_ptr<XblMultiplayerSession>>> async{ data->async->queue,
+                [
+                    &session,
+                    async{ data->async }
+                ]
+            (Result<std::shared_ptr<XblMultiplayerSession>> result)
+            {
+                session = result.ExtractPayload();
+                XAsyncComplete(async, result.Hresult(), sizeof(XblMultiplayerSessionHandle));
+            }
+            };
+
+            if (handleId.empty())
+            {
+                RETURN_HR_IF_FAILED(xblContext->MultiplayerService()->GetCurrentSession(sessionReference, std::move(async)));
+            }
+            else
+            {
+                RETURN_HR_IF_FAILED(xblContext->MultiplayerService()->GetCurrentSessionByHandle(handleId, std::move(async)));
+            }
+
+            return E_PENDING;
+        }
+        case XAsyncOp::GetResult:
+        {
+            auto handlePtr = static_cast<XblMultiplayerSessionHandle*>(data->buffer);
+            if (session)
+            {
+                session->AddRef();
+                *handlePtr = session.get();
+            }
+            else
+            {
+                *handlePtr = nullptr;
+            }
+            return S_OK;
+        }
+        default:
+        {
+            return S_OK;
+        }
+        }
+    });
+}
+
+STDAPI XblMultiplayerGetSessionAsync(
+    _In_ XblContextHandle xblContext,
+    _In_ const XblMultiplayerSessionReference* sessionReference,
+    _In_ XAsyncBlock* async
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF_NULL(sessionReference);
+    return MultiplayerGetSessionHelper(xblContext, sessionReference, nullptr, async);
+}
+
+STDAPI XblMultiplayerGetSessionResult(
+    _In_ XAsyncBlock* async,
+    _Out_ XblMultiplayerSessionHandle* handle
+) XBL_NOEXCEPT
+{
+    return XAsyncGetResult(async, nullptr, sizeof(XblMultiplayerSessionHandle), handle, nullptr);
+}
+
+STDAPI XblMultiplayerGetSessionByHandleAsync(
+    _In_ XblContextHandle xblContext,
+    _In_ const char* handleId,
+    _In_ XAsyncBlock* async
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF_NULL(handleId);
+    return MultiplayerGetSessionHelper(xblContext, nullptr, handleId, async);
+}
+
+STDAPI XblMultiplayerGetSessionByHandleResult(
+    _In_ XAsyncBlock* async,
+    _Out_ XblMultiplayerSessionHandle* handle
+) XBL_NOEXCEPT
+{
+    return XAsyncGetResult(async, nullptr, sizeof(XblMultiplayerSessionHandle), handle, nullptr);
+}
+
+STDAPI XblMultiplayerQuerySessionsAsync(
+    _In_ XblContextHandle xblContextHandle,
+    _In_ const XblMultiplayerSessionQuery* sessionQuery,
+    _In_ XAsyncBlock* async
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || sessionQuery == nullptr || async == nullptr);
+    RETURN_HR_INVALIDARGUMENT_IF_EMPTY_STRING(sessionQuery->Scid);
+    RETURN_HR_INVALIDARGUMENT_IF((sessionQuery->XuidFilters == nullptr || sessionQuery->XuidFiltersCount == 0) &&
+        (sessionQuery->KeywordFilter == nullptr || sessionQuery->KeywordFilter[0] == 0));
+    RETURN_HR_INVALIDARGUMENT_IF(sessionQuery->IncludeReservations && (sessionQuery->XuidFilters == nullptr || sessionQuery->XuidFiltersCount == 0));
+    RETURN_HR_INVALIDARGUMENT_IF(sessionQuery->IncludeInactiveSessions && (sessionQuery->XuidFilters == nullptr || sessionQuery->XuidFiltersCount == 0));
+    RETURN_HR_INVALIDARGUMENT_IF(sessionQuery->VisibilityFilter == XblMultiplayerSessionVisibility::Unknown);
+
+    return RunAsync(async, __FUNCTION__,
+        [
+            xblContext{ xblContextHandle->shared_from_this() },
+            query = SessionQuery{ sessionQuery },
+            sessions = Vector<XblMultiplayerSessionQueryResult>{}
+        ]
+    (XAsyncOp op, const XAsyncProviderData* data) mutable
+    {
+        switch (op)
+        {
+        case XAsyncOp::DoWork:
+        {
+            RETURN_HR_IF_FAILED(xblContext->MultiplayerService()->GetSessions(
+                query,
+                AsyncContext<Result<Vector<XblMultiplayerSessionQueryResult>>>{ data->async->queue,
+                [
+                    &sessions,
+                    async{ data->async }
+                ]
+            (Result<Vector<XblMultiplayerSessionQueryResult>> result)
+            {
+                sessions = result.ExtractPayload();
+                XAsyncComplete(async, result.Hresult(), sizeof(XblMultiplayerSessionQueryResult) * sessions.size());
+            }
+            }));
+
+            return E_PENDING;
+        }
+        case XAsyncOp::GetResult:
+        {
+            memcpy(data->buffer, sessions.data(), data->bufferSize);
+            return S_OK;
+        }
+        default:
+        {
+            return S_OK;
+        }
+        }
+    });
+}
+
+STDAPI XblMultiplayerQuerySessionsResultCount(
+    _In_ XAsyncBlock* async,
+    _Out_ size_t* sessionCount
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF(async == nullptr || sessionCount == nullptr);
+
+    size_t sizeInBytes;
+    auto hr = XAsyncGetResultSize(async, &sizeInBytes);
+    *sessionCount = sizeInBytes / sizeof(XblMultiplayerSessionQueryResult);
+    return hr;
+}
+
+STDAPI XblMultiplayerQuerySessionsResult(
+    _In_ XAsyncBlock* async,
+    _In_ size_t sessionCount,
+    _Out_writes_(sessionCount) XblMultiplayerSessionQueryResult* sessions
+) XBL_NOEXCEPT
+{
+    RETURN_HR_IF(sessionCount == 0, S_OK);
+    return XAsyncGetResult(async, nullptr, sessionCount * sizeof(XblMultiplayerSessionQueryResult), sessions, nullptr);
+}
+
+STDAPI XblMultiplayerSetActivityAsync(
+    _In_ XblContextHandle xblContextHandle,
+    _In_ const XblMultiplayerSessionReference* sessionReferenceArg,
+    _In_ XAsyncBlock* async
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || sessionReferenceArg == nullptr || async == nullptr);
+
+    return RunAsync(async, __FUNCTION__,
+        [
+            xblContext{ xblContextHandle->shared_from_this() },
+            sessionReference{ *sessionReferenceArg }
+        ]
+    (XAsyncOp op, const XAsyncProviderData* data)
+    {
+        switch (op)
+        {
+        case XAsyncOp::DoWork:
+        {
+            RETURN_HR_IF_FAILED(xblContext->MultiplayerService()->SetActivity(sessionReference, data->async));
+            return E_PENDING;
+        }
+        default:
+        {
+            return S_OK;
+        }
+        }
+    });
+}
+
+STDAPI XblMultiplayerClearActivityAsync(
+    _In_ XblContextHandle xblContextHandle,
+    _In_z_ const char* scidArg,
+    _In_ XAsyncBlock* async
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || scidArg == nullptr || async == nullptr);
+
+    return RunAsync(async, __FUNCTION__,
+        [
+            xblContext{ xblContextHandle->shared_from_this() },
+            scid = String{ scidArg }
+        ]
+    (XAsyncOp op, const XAsyncProviderData* data)
+    {
+        switch (op)
+        {
+        case XAsyncOp::DoWork:
+        {
+            RETURN_HR_IF_FAILED(xblContext->MultiplayerService()->ClearActivity(scid, data->async));
+            return E_PENDING;
+        }
+        default:
+        {
+            return S_OK;
+        }
+        }
+    });
+}
+
+STDAPI XblMultiplayerSendInvitesAsync(
+    _In_ XblContextHandle xblContextHandle,
+    _In_ const XblMultiplayerSessionReference* sessionReference,
+    _In_ const uint64_t* xuids,
+    _In_ size_t xuidsCount,
+    _In_ uint32_t titleId,
+    _In_opt_z_ const char* contextStringId,
+    _In_opt_z_ const char* customActivationContext,
+    _In_ XAsyncBlock* async
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || sessionReference == nullptr || xuids == nullptr || xuidsCount == 0 || async == nullptr);
+
+    return RunAsync(async, __FUNCTION__,
+        [
+            xblContext{ xblContextHandle->shared_from_this() },
+            sessionRef{ *sessionReference },
+            xuidsVector{ Vector<uint64_t>(xuids, xuids + xuidsCount) },
+            titleId,
+            contextString{ String{ contextStringId ? contextStringId : "" } },
+            activiationContext{ String{customActivationContext ? customActivationContext : ""} },
+            inviteHandles{ Vector<String>() }
+        ]
+    (XAsyncOp op, const XAsyncProviderData* data) mutable
+    {
+        switch (op)
+        {
+        case XAsyncOp::DoWork:
+        {
+            RETURN_HR_IF_FAILED(xblContext->MultiplayerService()->SendInvites(
+                sessionRef,
+                xuidsVector,
+                titleId,
+                contextString,
+                activiationContext,
+                AsyncContext<Result<Vector<String>>>{ data->async->queue,
+                [
+                    &inviteHandles,
+                    async{ data->async }
+                ]
+            (Result<Vector<String>> result)
+            {
+                if (Succeeded(result))
+                {
+                    inviteHandles = result.ExtractPayload();
+                }
+                XAsyncComplete(async, result.Hresult(), sizeof(XblMultiplayerInviteHandle) * inviteHandles.size());
+            }
+            }));
+
+            return E_PENDING;
+        }
+        case XAsyncOp::GetResult:
+        {
+            auto handlesArray = static_cast<XblMultiplayerInviteHandle*>(data->buffer);
+            for (uint32_t i = 0; i < inviteHandles.size(); ++i)
+            {
+                utils::strcpy(handlesArray[i].Data, sizeof(handlesArray[i].Data), inviteHandles[i].data());
+            }
+            return S_OK;
+        }
+        default:
+        {
+            return S_OK;
+        }
+        }
+    });
+}
+
+STDAPI XblMultiplayerSendInvitesResult(
+    _In_ XAsyncBlock* async,
+    _In_ size_t handlesCount,
+    _Out_writes_(handlesCount) XblMultiplayerInviteHandle* handles
+) XBL_NOEXCEPT
+{
+    RETURN_HR_IF(handlesCount == 0, S_OK);
+    return XAsyncGetResult(async, nullptr, sizeof(XblMultiplayerInviteHandle) * handlesCount, handles, nullptr);
+}
+
+STDAPI XblMultiplayerGetActivitiesForSocialGroupAsync(
+    _In_ XblContextHandle xblContextHandle,
+    _In_ const char* scidArg,
+    _In_ uint64_t socialGroupOwnerXuid,
+    _In_ const char* socialGroupArg,
+    _In_ XAsyncBlock* async
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || scidArg == nullptr || socialGroupOwnerXuid == 0 || socialGroupArg == nullptr || async == nullptr);
+
+    return RunAsync(async, __FUNCTION__,
+        [
+            xblContext{ xblContextHandle->shared_from_this() },
+            scid = String{ scidArg },
+            socialGroupOwnerXuid,
+            socialGroup = String{ socialGroupArg },
+            activityDetails = Vector<XblMultiplayerActivityDetails>{}
+        ]
+    (XAsyncOp op, const XAsyncProviderData* data) mutable
+    {
+        switch (op)
+        {
+        case XAsyncOp::DoWork:
+        {
+            RETURN_HR_IF_FAILED(xblContext->MultiplayerService()->GetActivitiesForSocialGroup(
+                scid,
+                socialGroupOwnerXuid,
+                socialGroup,
+                AsyncContext<Result<Vector<XblMultiplayerActivityDetails>>>{ data->async->queue,
+                [
+                    &activityDetails,
+                    async{ data->async }
+                ]
+            (Result<Vector<XblMultiplayerActivityDetails>> result)
+            {
+                activityDetails = result.ExtractPayload();
+                XAsyncComplete(async, result.Hresult(), sizeof(XblMultiplayerActivityDetails) * activityDetails.size());
+            }
+            }));
+            return E_PENDING;
+        }
+        case XAsyncOp::GetResult:
+        {
+            for (auto& activity : activityDetails)
+            {
+                Delete(activity.CustomSessionPropertiesJson);
+                activity.CustomSessionPropertiesJson = nullptr;
+            }
+
+            memcpy(data->buffer, activityDetails.data(), data->bufferSize);
+            return S_OK;
+        }
+        default:
+        {
+            return S_OK;
+        }
+        }
+    });
+}
+
+STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupAsync(
+    _In_ XblContextHandle xblContextHandle,
+    _In_ const char* scidArg,
+    _In_ uint64_t socialGroupOwnerXuid,
+    _In_ const char* socialGroupArg,
+    _In_ XAsyncBlock* async
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || scidArg == nullptr || socialGroupOwnerXuid == 0 || socialGroupArg == nullptr || async == nullptr);
+
+    return RunAsync(async, __FUNCTION__,
+        [
+            xblContext{ xblContextHandle->shared_from_this() },
+            scid = String{ scidArg },
+            socialGroupOwnerXuid,
+            socialGroup = String{ socialGroupArg },
+            activityDetails = Vector<XblMultiplayerActivityDetails>{}
+        ]
+    (XAsyncOp op, const XAsyncProviderData* data) mutable
+    {
+        switch (op)
+        {
+        case XAsyncOp::DoWork:
+        {
+            RETURN_HR_IF_FAILED(xblContext->MultiplayerService()->GetActivitiesForSocialGroup(
+                scid,
+                socialGroupOwnerXuid,
+                socialGroup,
+                AsyncContext<Result<Vector<XblMultiplayerActivityDetails>>>{ data->async->queue,
+                [
+                    &activityDetails,
+                    async{ data->async }
+                ]
+            (Result<Vector<XblMultiplayerActivityDetails>> result)
+            {
+                activityDetails = result.ExtractPayload();
+                auto hr = result.Hresult();
+
+                size_t jsonSize{};
+                for (auto& activity : activityDetails)
+                {
+                    jsonSize += strlen(activity.CustomSessionPropertiesJson) + 1;
+                }
+
+                size_t bufferSize = jsonSize + sizeof(XblMultiplayerActivityDetails) * activityDetails.size();
+                bufferSize = static_cast<size_t>((bufferSize + XBL_ALIGN_SIZE - 1) / XBL_ALIGN_SIZE) * XBL_ALIGN_SIZE;
+                XAsyncComplete(async, hr, bufferSize);
+            }
+            }));
+            return E_PENDING;
+        }
+        case XAsyncOp::GetResult:
+        {
+            auto activityPtr = reinterpret_cast<XblMultiplayerActivityDetails*>(data->buffer);
+            auto jsonPtr = reinterpret_cast<char*>(data->buffer) + sizeof(XblMultiplayerActivityDetails) * activityDetails.size();
+
+            for (auto& activity : activityDetails)
+            {
+                size_t len = strlen(activity.CustomSessionPropertiesJson) + 1;
+
+                *activityPtr = activity;
+                utils::strcpy(jsonPtr, len, activity.CustomSessionPropertiesJson);
+                activityPtr->CustomSessionPropertiesJson = jsonPtr;
+                Delete(activity.CustomSessionPropertiesJson);
+
+                jsonPtr += len;
+                ++activityPtr;
+            }
+
+            return S_OK;
+        }
+        default:
+        {
+            return S_OK;
+        }
+        }
+    });
+}
+
+STDAPI XblMultiplayerGetActivitiesForSocialGroupResultCount(
+    _In_ XAsyncBlock* async,
+    _Out_ size_t* activityCount
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF_NULL(activityCount);
+
+    size_t sizeInBytes;
+    auto hr = XAsyncGetResultSize(async, &sizeInBytes);
+    *activityCount = sizeInBytes / sizeof(XblMultiplayerActivityDetails);
+    return hr;
+}
+
+STDAPI XblMultiplayerGetActivitiesForSocialGroupResult(
+    _In_ XAsyncBlock* async,
+    _In_ size_t activityCount,
+    _Out_writes_(activityCount) XblMultiplayerActivityDetails* activities
+) XBL_NOEXCEPT
+{
+    RETURN_HR_IF(activityCount == 0, S_OK);
+    return XAsyncGetResult(async, nullptr, activityCount * sizeof(XblMultiplayerActivityDetails), activities, nullptr);
+}
+
+STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResultSize(
+    _In_ XAsyncBlock* async,
+    _Out_ size_t* resultSizeInBytes
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF_NULL(resultSizeInBytes);
+
+    return XAsyncGetResultSize(async, resultSizeInBytes);
+}
+
+STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResult(
+    _In_ XAsyncBlock* async,
+    _In_ size_t bufferSize,
+    _Out_writes_bytes_to_(bufferSize, *bufferUsed) void* buffer,
+    _Outptr_ XblMultiplayerActivityDetails** ptrToBuffer,
+    _Out_ size_t* ptrToBufferCount,
+    _Out_opt_ size_t* bufferUsed
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF(buffer == nullptr || ptrToBuffer == nullptr || ptrToBufferCount == nullptr);
+
+    size_t bufferUsedTemp{};
+    if (bufferUsed == nullptr)
+    {
+        bufferUsed = &bufferUsedTemp;
+    }
+
+    auto hr = XAsyncGetResult(async, nullptr, bufferSize, buffer, bufferUsed);
+    
+    if (SUCCEEDED(hr))
+    {
+        *ptrToBuffer = static_cast<XblMultiplayerActivityDetails*>(buffer);
+
+        size_t count{ 0 };
+        size_t verifiedSize{ 0 };
+        for (; verifiedSize < *bufferUsed - XBL_ALIGN_SIZE; ++count)
+        {
+            verifiedSize += sizeof(XblMultiplayerActivityDetails);
+            verifiedSize += strlen((*ptrToBuffer)[count].CustomSessionPropertiesJson) + 1;
+        }
+        verifiedSize = static_cast<size_t>((verifiedSize + XBL_ALIGN_SIZE - 1) / XBL_ALIGN_SIZE) * XBL_ALIGN_SIZE;
+        assert(verifiedSize == *bufferUsed);
+        *ptrToBufferCount = count;
+    }
+
+    return hr;
+}
+
+STDAPI XblMultiplayerGetActivitiesForUsersAsync(
+    _In_ XblContextHandle xblContextHandle,
+    _In_ const char* scidArg,
+    _In_reads_(xuidsCount) const uint64_t* xuidsArg,
+    _In_ size_t xuidsCount,
+    _In_ XAsyncBlock* async
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || scidArg == nullptr || xuidsArg == nullptr || xuidsCount == 0 || async == nullptr);
+
+    return RunAsync(async, __FUNCTION__,
+        [
+            xblContext{ xblContextHandle->shared_from_this() },
+            scid = String{ scidArg },
+            xuids = Vector<uint64_t>(xuidsArg, xuidsArg + xuidsCount),
+            activityDetails = Vector<XblMultiplayerActivityDetails>{}
+        ]
+    (XAsyncOp op, const XAsyncProviderData* data) mutable
+    {
+        switch (op)
+        {
+        case XAsyncOp::DoWork:
+        {
+            RETURN_HR_IF_FAILED(xblContext->MultiplayerService()->GetActivitiesForUsers(
+                scid,
+                xuids,
+                AsyncContext<Result<Vector<XblMultiplayerActivityDetails>>>{ data->async->queue,
+                [
+                    &activityDetails,
+                    async{ data->async }
+                ]
+            (Result<Vector<XblMultiplayerActivityDetails>> result)
+            {
+                activityDetails = result.ExtractPayload();
+                XAsyncComplete(async, result.Hresult(), sizeof(XblMultiplayerActivityDetails) * activityDetails.size());
+            }
+            }));
+            return E_PENDING;
+        }
+        case XAsyncOp::GetResult:
+        {
+            for (auto& activity : activityDetails)
+            {
+                Delete(activity.CustomSessionPropertiesJson);
+                activity.CustomSessionPropertiesJson = nullptr;
+            }
+
+            memcpy(data->buffer, activityDetails.data(), data->bufferSize);
+            return S_OK;
+        }
+        default:
+        {
+            return S_OK;
+        }
+        }
+    });
+}
+
+STDAPI XblMultiplayerGetActivitiesWithPropertiesForUsersAsync(
+    _In_ XblContextHandle xblContextHandle,
+    _In_ const char* scidArg,
+    _In_reads_(xuidsCount) const uint64_t* xuidsArg,
+    _In_ size_t xuidsCount,
+    _In_ XAsyncBlock* async
+) XBL_NOEXCEPT
+{
+    RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || scidArg == nullptr || xuidsArg == nullptr || xuidsCount == 0 || async == nullptr);
+
+    return RunAsync(async, __FUNCTION__,
+        [
+            xblContext{ xblContextHandle->shared_from_this() },
+            scid = String{ scidArg },
+            xuids = Vector<uint64_t>(xuidsArg, xuidsArg + xuidsCount),
+            activityDetails = Vector<XblMultiplayerActivityDetails>{}
+        ]
+    (XAsyncOp op, const XAsyncProviderData* data) mutable
+    {
+        switch (op)
+        {
+        case XAsyncOp::DoWork:
+        {
+            RETURN_HR_IF_FAILED(xblContext->MultiplayerService()->GetActivitiesForUsers(
+                scid,
+                xuids,
+                AsyncContext<Result<Vector<XblMultiplayerActivityDetails>>>{ data->async->queue,
+                [
+                    &activityDetails,
+                    async{ data->async }
+                ]
+            (Result<Vector<XblMultiplayerActivityDetails>> result)
+            {
+                activityDetails = result.ExtractPayload();
+                auto hr = result.Hresult();
+
+                size_t jsonSize{};
+                for (auto& activity : activityDetails)
+                {
+                    jsonSize += strlen(activity.CustomSessionPropertiesJson) + 1;
+                }
+
+                size_t bufferSize = jsonSize + sizeof(XblMultiplayerActivityDetails) * activityDetails.size();
+                bufferSize = static_cast<size_t>((bufferSize + XBL_ALIGN_SIZE - 1) / XBL_ALIGN_SIZE) * XBL_ALIGN_SIZE;
+                XAsyncComplete(async, hr, bufferSize);
+            }
+            }));
+            return E_PENDING;
+        }
+        case XAsyncOp::GetResult:
+        {
+            auto activityPtr = reinterpret_cast<XblMultiplayerActivityDetails*>(data->buffer);
+            auto jsonPtr = reinterpret_cast<char*>(data->buffer) + sizeof(XblMultiplayerActivityDetails) * activityDetails.size();
+
+            for (auto& activity : activityDetails)
+            {
+                size_t len = strlen(activity.CustomSessionPropertiesJson) + 1;
+
+                *activityPtr = activity;
+                utils::strcpy(jsonPtr, len, activity.CustomSessionPropertiesJson);
+                activityPtr->CustomSessionPropertiesJson = jsonPtr;
+                Delete(activity.CustomSessionPropertiesJson);
+
+                jsonPtr += len;
+                ++activityPtr;
+            }
+
+            return S_OK;
+        }
+        default:
+        {
+            return S_OK;
+        }
+        }
+    });
+}
+
+STDAPI XblMultiplayerGetActivitiesForUsersResultCount(
+    _In_ XAsyncBlock* async,
+    _Out_ size_t* activityCount
+) XBL_NOEXCEPT
+{
+    return XblMultiplayerGetActivitiesForSocialGroupResultCount(async, activityCount);
+}
+
+STDAPI XblMultiplayerGetActivitiesForUsersResult(
+    _In_ XAsyncBlock* async,
+    _In_ size_t activityCount,
+    _Out_writes_(activityCount) XblMultiplayerActivityDetails* activities
+) XBL_NOEXCEPT
+{
+    return XAsyncGetResult(async, nullptr, activityCount * sizeof(XblMultiplayerActivityDetails), activities, nullptr);
+}
+
+STDAPI XblMultiplayerGetActivitiesWithPropertiesForUsersResultSize(
+    _In_ XAsyncBlock* async,
+    _Out_ size_t* resultSizeInBytes
+) XBL_NOEXCEPT
+{
+    return XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResultSize(async, resultSizeInBytes);
+}
+
+STDAPI XblMultiplayerGetActivitiesWithPropertiesForUsersResult(
+    _In_ XAsyncBlock* async,
+    _In_ size_t bufferSize,
+    _Out_writes_bytes_to_(bufferSize, *bufferUsed) void* buffer,
+    _Outptr_ XblMultiplayerActivityDetails** ptrToBuffer,
+    _Out_ size_t* ptrToBufferCount,
+    _Out_opt_ size_t* bufferUsed
+) XBL_NOEXCEPT
+{
+    return XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResult(async, bufferSize, buffer, ptrToBuffer, ptrToBufferCount, bufferUsed);
+}
+
+STDAPI XblMultiplayerSetSubscriptionsEnabled(
+    _In_ XblContextHandle xblContext,
+    _In_ bool subscriptionsEnabled
+) XBL_NOEXCEPT
+{
+    if (subscriptionsEnabled)
+    {
+        return xblContext->MultiplayerService()->EnableMultiplayerSubscriptions();
+    }
+    else
+    {
+        return xblContext->MultiplayerService()->DisableMultiplayerSubscriptions();
+    }
+}
+
+STDAPI_(bool) XblMultiplayerSubscriptionsEnabled(
+    _In_ XblContextHandle xblContext
+) XBL_NOEXCEPT
+{
+    return xblContext->MultiplayerService()->SubscriptionsEnabled();
+}
+
+STDAPI_(XblFunctionContext) XblMultiplayerAddSessionChangedHandler(
+    _In_ XblContextHandle xblContext,
+    _In_ XblMultiplayerSessionChangedHandler* handler,
+    _In_opt_ void* context
+) XBL_NOEXCEPT
+{
+    return xblContext->MultiplayerService()->AddMultiplayerSessionChangedHandler(
+        [
+            handler,
+            context
+        ]
+    (const XblMultiplayerSessionChangeEventArgs& args)
+    {
+        try 
+        {
+            handler(context, args);
+        }
+        catch (...)
+        {
+            LOGS_ERROR << __FUNCTION__ << ": exception in client handler!";
+        }
+    });
+}
+
+STDAPI_(void) XblMultiplayerRemoveSessionChangedHandler(
+    _In_ XblContextHandle xblContext,
+    _In_ XblFunctionContext token
+) XBL_NOEXCEPT
+{
+    xblContext->MultiplayerService()->RemoveMultiplayerSessionChangedHandler(token);
+}
+
+STDAPI_(XblFunctionContext) XblMultiplayerAddSubscriptionLostHandler(
+    _In_ XblContextHandle xblContext,
+    _In_ XblMultiplayerSessionSubscriptionLostHandler* handler,
+    _In_opt_ void* context
+) XBL_NOEXCEPT
+{
+    return xblContext->MultiplayerService()->AddMultiplayerSubscriptionLostHandler(
+        [
+            handler,
+            context
+        ]
+    {
+        try
+        {
+            handler(context);
+        }
+        catch (...)
+        {
+            LOGS_ERROR << __FUNCTION__ << ": exception in client handler!";
+        }
+    });
+}
+
+STDAPI_(void) XblMultiplayerRemoveSubscriptionLostHandler(
+    _In_ XblContextHandle xblContext,
+    _In_ XblFunctionContext token
+) XBL_NOEXCEPT
+{
+    xblContext->MultiplayerService()->RemoveMultiplayerSubscriptionLostHandler(token);
+}
+
+STDAPI_(XblFunctionContext) XblMultiplayerAddConnectionIdChangedHandler(
+    _In_ XblContextHandle xblContext,
+    _In_ XblMultiplayerConnectionIdChangedHandler* handler,
+    _In_opt_ void* context
+) XBL_NOEXCEPT
+{
+    return xblContext->MultiplayerService()->AddMultiplayerConnectionIdChangedHandler(
+        [
+            handler,
+            context
+        ]
+    (const String&)
+    {
+        try
+        {
+            handler(context);
+        }
+        catch (...)
+        {
+            LOGS_ERROR << __FUNCTION__ << ": exception in client handler!";
+        }
+    });
+}
+
+STDAPI_(void) XblMultiplayerRemoveConnectionIdChangedHandler(
+    _In_ XblContextHandle xblContext,
+    _In_ XblFunctionContext token
+) XBL_NOEXCEPT
+{
+    xblContext->MultiplayerService()->RemoveMultiplayerConnectionIdChangedHandler(token);
+}

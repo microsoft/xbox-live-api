@@ -9,8 +9,8 @@ using namespace xbox::services::multiplayer;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 
-void multiplayer_client_pending_reader::deep_copy_if_updated(
-    _In_ const multiplayer_client_pending_reader& other
+void MultiplayerClientPendingReader::deep_copy_if_updated(
+    _In_ const MultiplayerClientPendingReader& other
     )
 {
     std::lock_guard<std::mutex> lock(other.m_clientRequestLock);
@@ -44,16 +44,16 @@ void multiplayer_client_pending_reader::deep_copy_if_updated(
     }
 }
 
-multiplayer_client_pending_reader::multiplayer_client_pending_reader() :
+MultiplayerClientPendingReader::MultiplayerClientPendingReader() :
     m_autoFillMembers(false)
 {
-    m_multiplayerLocalUserManager = std::make_shared<multiplayer_local_user_manager>();
-    m_lobbyClient = std::make_shared<multiplayer_lobby_client>();
-    m_gameClient = std::make_shared<multiplayer_game_client>();
-    m_matchClient = std::make_shared<manager::multiplayer_match_client>(m_multiplayerLocalUserManager);
+    m_multiplayerLocalUserManager = std::make_shared<MultiplayerLocalUserManager>();
+    m_lobbyClient = std::make_shared<MultiplayerLobbyClient>(get_xsapi_singleton_async_queue());
+    m_gameClient = std::make_shared<MultiplayerGameClient>(get_xsapi_singleton_async_queue());
+    m_matchClient = std::make_shared<manager::MultiplayerMatchClient>(get_xsapi_singleton_async_queue(), m_multiplayerLocalUserManager);
 }
 
-multiplayer_client_pending_reader::~multiplayer_client_pending_reader()
+MultiplayerClientPendingReader::~MultiplayerClientPendingReader()
 {
     m_lobbyClient.reset();
     m_gameClient.reset();
@@ -61,44 +61,44 @@ multiplayer_client_pending_reader::~multiplayer_client_pending_reader()
     m_multiplayerLocalUserManager.reset();
 }
 
-multiplayer_client_pending_reader::multiplayer_client_pending_reader(
-    _In_ string_t lobbySessionTemplateName,
-    _In_ std::shared_ptr<multiplayer_local_user_manager> localUserManager
+MultiplayerClientPendingReader::MultiplayerClientPendingReader(
+    _In_ const xsapi_internal_string& lobbySessionTemplateName,
+    _In_ std::shared_ptr<MultiplayerLocalUserManager> localUserManager
     ) :
-    m_multiplayerLocalUserManager(localUserManager),
-    m_autoFillMembers(false)
+    m_autoFillMembers(false),
+    m_multiplayerLocalUserManager(localUserManager)
 {
-    m_lobbyClient = std::make_shared<multiplayer_lobby_client>(lobbySessionTemplateName, m_multiplayerLocalUserManager);
-    m_gameClient = std::make_shared<multiplayer_game_client>(m_multiplayerLocalUserManager);
-    m_matchClient = std::make_shared<manager::multiplayer_match_client>(m_multiplayerLocalUserManager);
-    m_lobbyClient->initialize();
-    m_gameClient->initialize();
+    m_lobbyClient = std::make_shared<MultiplayerLobbyClient>(get_xsapi_singleton_async_queue(), lobbySessionTemplateName, m_multiplayerLocalUserManager);
+    m_gameClient = std::make_shared<MultiplayerGameClient>(get_xsapi_singleton_async_queue(), m_multiplayerLocalUserManager);
+    m_matchClient = std::make_shared<manager::MultiplayerMatchClient>(get_xsapi_singleton_async_queue(), m_multiplayerLocalUserManager);
+    m_lobbyClient->Initialize();
+    m_gameClient->Initialize();
 }
 
 bool
-multiplayer_client_pending_reader::is_update_avaialable(
-    _In_ const multiplayer_client_pending_reader& other
+MultiplayerClientPendingReader::IsUpdateAvailable(
+    _In_ const MultiplayerClientPendingReader& other
     )
 {
     std::lock_guard<std::mutex> lock(other.m_clientRequestLock);
 
-    if (other.m_lobbyClient->is_pending_lobby_changes() ||
-        other.m_gameClient->is_pending_game_changes())
+    if (other.m_lobbyClient->IsPendingLobbyChanges() ||
+        other.m_gameClient->IsPendingGameChanges())
     {
         return true;
     }
 
-    auto lobbySession = m_lobbyClient->session();
-    auto otherLobbySession = other.m_lobbyClient->session();
-    auto gameSession = m_gameClient->session();
-    auto otherGameSession = other.m_gameClient->session();
-    if ( !multiplayer_manager_utils::compare_sessions(lobbySession, otherLobbySession) ||
-         !multiplayer_manager_utils::compare_sessions(gameSession, otherGameSession) ||
-         !multiplayer_manager_utils::compare_sessions(m_matchClient->session(), other.m_matchClient->session()) ||
-         m_lobbyClient->multiplayer_event_queue().size() != other.m_lobbyClient->multiplayer_event_queue().size() ||
-         m_gameClient->multiplayer_event_queue().size() != other.m_gameClient->multiplayer_event_queue().size() ||
-         m_matchClient->multiplayer_event_queue().size() != other.m_matchClient->multiplayer_event_queue().size() ||
-         m_multiplayerEventQueue.size() != other.m_multiplayerEventQueue.size())
+    auto lobbySession = m_lobbyClient->Session();
+    auto otherLobbySession = other.m_lobbyClient->Session();
+    auto gameSession = m_gameClient->Session();
+    auto otherGameSession = other.m_gameClient->Session();
+    if ( !MultiplayerManagerUtils::CompareSessions(lobbySession, otherLobbySession) ||
+         !MultiplayerManagerUtils::CompareSessions(gameSession, otherGameSession) ||
+         !MultiplayerManagerUtils::CompareSessions(m_matchClient->Session(), other.m_matchClient->Session()) ||
+         m_lobbyClient->EventQueue().Size() != other.m_lobbyClient->EventQueue().Size() ||
+         m_gameClient->EventQueue().Size() != other.m_gameClient->EventQueue().Size() ||
+         m_matchClient->EventQueue().Size() != other.m_matchClient->EventQueue().Size() ||
+         m_multiplayerEventQueue.Size() != other.m_multiplayerEventQueue.Size())
     {
         return true;
     }
@@ -106,245 +106,250 @@ multiplayer_client_pending_reader::is_update_avaialable(
     return false;
 }
 
-std::shared_ptr<multiplayer_lobby_client>
-multiplayer_client_pending_reader::lobby_client()
+std::shared_ptr<MultiplayerLobbyClient>
+MultiplayerClientPendingReader::LobbyClient()
 {
     return m_lobbyClient;
 }
 
-std::shared_ptr<multiplayer_game_client>
-multiplayer_client_pending_reader::game_client()
+std::shared_ptr<MultiplayerGameClient>
+MultiplayerClientPendingReader::GameClient()
 {
     return m_gameClient;
 }
 
-std::shared_ptr<multiplayer_match_client>
-multiplayer_client_pending_reader::match_client()
+std::shared_ptr<MultiplayerMatchClient>
+MultiplayerClientPendingReader::MatchClient()
 {
     return m_matchClient;
 }
 
 void 
-multiplayer_client_pending_reader::update_session(
-    _In_ multiplayer_session_reference sessionRef,
-    _In_ std::shared_ptr<multiplayer_session> session
+MultiplayerClientPendingReader::UpdateSession(
+    _In_ XblMultiplayerSessionReference sessionRef,
+    _In_ std::shared_ptr<XblMultiplayerSession> session
     )
 {
     std::lock_guard<std::mutex> lock(m_clientRequestLock);
 
-    if (is_lobby(sessionRef))
+    if (IsLobby(sessionRef))
     {
-        m_lobbyClient->update_session(session);
+        m_lobbyClient->UpdateSession(session);
     }
-    else if(is_game(sessionRef))
+    else if(IsGame(sessionRef))
     {
-        m_gameClient->update_session(session);
+        m_gameClient->UpdateSession(session);
     }
 }
 
-std::shared_ptr<multiplayer_session>
-multiplayer_client_pending_reader::get_session(
-    _In_ multiplayer_session_reference sessionRef
+std::shared_ptr<XblMultiplayerSession>
+MultiplayerClientPendingReader::GetSession(
+    _In_ XblMultiplayerSessionReference sessionRef
     )
 {
-    if (is_lobby(sessionRef))
+    if (IsLobby(sessionRef))
     {
-        return m_lobbyClient->session();
+        return m_lobbyClient->Session();
     }
-    else if (is_game(sessionRef))
+    else if (IsGame(sessionRef))
     {
-        return m_gameClient->session();
+        return m_gameClient->Session();
     }
 
     return nullptr;
 }
 
 bool
-multiplayer_client_pending_reader::is_lobby(
-    _In_ multiplayer_session_reference sessionRef
+MultiplayerClientPendingReader::IsLobby(
+    _In_ XblMultiplayerSessionReference sessionRef
     )
 {
-    if (sessionRef.is_null() || m_lobbyClient == nullptr || m_lobbyClient->session() == nullptr)
+    if (!XblMultiplayerSessionReferenceIsValid(&sessionRef) || m_lobbyClient == nullptr || m_lobbyClient->Session() == nullptr)
     {
         return false;
     }
 
-    return multiplayer_manager_utils::do_session_references_match(sessionRef, m_lobbyClient->session()->session_reference());
+    return sessionRef == m_lobbyClient->Session()->SessionReference();
 }
 
 bool
-multiplayer_client_pending_reader::is_game(
-    _In_ multiplayer_session_reference sessionRef
+MultiplayerClientPendingReader::IsGame(
+    _In_ XblMultiplayerSessionReference sessionRef
     )
 {
-    if (sessionRef.is_null() || m_gameClient == nullptr || m_gameClient->session() == nullptr)
+    if (!XblMultiplayerSessionReferenceIsValid(&sessionRef) || m_gameClient == nullptr || m_gameClient->Session() == nullptr)
     {
         return false;
     }
 
-    return multiplayer_manager_utils::do_session_references_match(sessionRef, m_gameClient->session()->session_reference());
+    return sessionRef == m_gameClient->Session()->SessionReference();
 }
 
 bool
-multiplayer_client_pending_reader::is_match(
-    _In_ multiplayer_session_reference sessionRef
+MultiplayerClientPendingReader::IsMatch(
+    _In_ XblMultiplayerSessionReference sessionRef
 )
 {
-    if (sessionRef.is_null() || m_matchClient == nullptr || m_matchClient->session() == nullptr)
+    if (!XblMultiplayerSessionReferenceIsValid(&sessionRef) || m_matchClient == nullptr || m_matchClient->Session() == nullptr)
     {
         return false;
     }
 
-    return multiplayer_manager_utils::do_session_references_match(sessionRef, m_matchClient->session()->session_reference());
+    return sessionRef == m_matchClient->Session()->SessionReference();
 }
 
-std::vector<multiplayer_event>
-multiplayer_client_pending_reader::multiplayer_event_queue() const
+const MultiplayerEventQueue&
+MultiplayerClientPendingReader::EventQueue() const
 {
     return m_multiplayerEventQueue;
 }
 
 void
-multiplayer_client_pending_reader::add_to_multiplayer_event_queue(
-    _In_ multiplayer_event multiplayerEvent
-    )
+MultiplayerClientPendingReader::ClearEventQueue()
 {
-    std::lock_guard<std::mutex> lock(m_clientRequestLock);
-    m_multiplayerEventQueue.push_back(multiplayerEvent);
+    m_multiplayerEventQueue.Clear();
+}
+
+void MultiplayerClientPendingReader::AddEvent(
+    _In_ XblMultiplayerEventType eventType,
+    _In_ std::shared_ptr<XblMultiplayerEventArgs> eventArgs,
+    _In_ XblMultiplayerSessionType sessionType,
+    _In_ Result<void> error,
+    _In_opt_ context_t context
+)
+{
+    // TODO: add logging for error message
+    m_multiplayerEventQueue.AddEvent(eventType, sessionType, eventArgs, error, context);
 }
 
 void
-multiplayer_client_pending_reader::add_to_multiplayer_event_queue(
-    _In_ std::vector<multiplayer_event> multiplayerEventQueue
+MultiplayerClientPendingReader::AddEvent(
+    _In_ const XblMultiplayerEvent& multiplayerEvent
     )
 {
-    std::lock_guard<std::mutex> lock(m_clientRequestLock);
-    if (multiplayerEventQueue.size() > 0)
+    m_multiplayerEventQueue.AddEvent(multiplayerEvent);
+}
+
+void
+MultiplayerClientPendingReader::AddEvents(
+    _In_ const MultiplayerEventQueue& multiplayerEventQueue
+    )
+{
+    if (multiplayerEventQueue.Size() > 0)
     {
         for (const auto& multiplayerEvent : multiplayerEventQueue)
         {
-            m_multiplayerEventQueue.push_back(multiplayerEvent);
+            m_multiplayerEventQueue.AddEvent(multiplayerEvent);
         }
     }
 }
 
 void
-multiplayer_client_pending_reader::clear_multiplayer_event_queue()
+MultiplayerClientPendingReader::DoWork()
 {
-    std::lock_guard<std::mutex> lock(m_clientRequestLock);
-    m_multiplayerEventQueue.clear();
-}
+    std::shared_ptr<XblContext> primaryContext = m_multiplayerLocalUserManager->GetPrimaryContext();
 
-void
-multiplayer_client_pending_reader::do_work()
-{
-    std::shared_ptr<xbox_live_context_impl> primaryContext = m_multiplayerLocalUserManager->get_primary_context();
     if (primaryContext == nullptr && 
-        m_lobbyClient->multiplayer_event_queue().size() == 0 && 
-        m_gameClient->multiplayer_event_queue().size() == 0 &&
-        m_matchClient->multiplayer_event_queue().size() == 0 &&
-        m_multiplayerEventQueue.size() == 0)
+        m_lobbyClient->EventQueue().Size() == 0 && 
+        m_gameClient->EventQueue().Size() == 0 &&
+        m_matchClient->EventQueue().Size() == 0 &&
+        m_multiplayerEventQueue.Size() == 0)
     {
         // After the primaryContext has been deleted, the lobbyClient could have userRemoved event in the queue.
         // The pending reader will also fire a client_disconnected_from_multiplayer_service event.
         return;
     }
 
-    auto lobbySession = m_lobbyClient->session();
-    auto gameSession = m_gameClient->session();
-    m_lobbyClient->update_objects(lobbySession, gameSession);
-    m_gameClient->update_objects(gameSession, lobbySession);
+    auto lobbySession = m_lobbyClient->Session();
+    auto gameSession = m_gameClient->Session();
+    m_lobbyClient->UpdateObjects(lobbySession, gameSession);
+    m_gameClient->UpdateObjects(gameSession, lobbySession);
 
-    auto lobbyClientEventQueue = m_lobbyClient->do_work();
-    add_to_multiplayer_event_queue(lobbyClientEventQueue);
+    auto lobbyClientEventQueue = m_lobbyClient->DoWork();
+    AddEvents(lobbyClientEventQueue);
 
-    auto gameClientEventQueue = m_gameClient->do_work();
-    add_to_multiplayer_event_queue(gameClientEventQueue);
+    auto gameClientEventQueue = m_gameClient->DoWork();
+    AddEvents(gameClientEventQueue);
 
-    process_match_events();
+    ProcessMatchEvents();
 }
 
-xbox_live_result<void>
-multiplayer_client_pending_reader::set_joinability(
-    _In_ xbox::services::multiplayer::manager::joinability value,
+HRESULT
+MultiplayerClientPendingReader::SetJoinability(
+    _In_ XblMultiplayerJoinability value,
     _In_opt_ context_t context
     )
 {
-    return m_lobbyClient->set_joinability(value, context);
+    return m_lobbyClient->SetJoinability(value, context);
 }
 
-xbox_live_result<void>
-multiplayer_client_pending_reader::set_properties(
-    _In_ multiplayer_session_reference sessionRef,
-    _In_ string_t name,
-    _In_ web::json::value valueJson,
+HRESULT
+MultiplayerClientPendingReader::SetProperties(
+    _In_ const XblMultiplayerSessionReference& sessionRef,
+    _In_ const xsapi_internal_string& name,
+    _In_ const JsonValue& valueJson,
     _In_opt_ context_t context
     )
 {
-    auto pendingRequest = std::make_shared<multiplayer_client_pending_request>();
-    pendingRequest->set_session_properties(name, valueJson, context);
-    add_to_pending_queue(sessionRef, pendingRequest);
-    
-    return xbox_live_result<void>();
+    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    pendingRequest->SetSessionProperties(name, valueJson, context);
+    AddToPendingQueue(sessionRef, pendingRequest);
+    return S_OK;
 }
 
-xbox_live_result<void>
-multiplayer_client_pending_reader::set_synchronized_host(
-    _In_ multiplayer_session_reference sessionRef,
-    _In_ const string_t& hostDeviceToken,
+HRESULT
+MultiplayerClientPendingReader::SetSynchronizedHost(
+    _In_ const XblMultiplayerSessionReference& sessionRef,
+    _In_ const xsapi_internal_string& hostDeviceToken,
     _In_opt_ context_t context
     )
 {
-    auto pendingRequest = std::make_shared<multiplayer_client_pending_request>();
-    pendingRequest->set_synchronized_host_device_token(hostDeviceToken, context);
-    add_to_pending_queue(sessionRef, pendingRequest);
-
-    return xbox_live_result<void>();
+    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    pendingRequest->SetSynchronizedHostDeviceToken(hostDeviceToken, context);
+    AddToPendingQueue(sessionRef, pendingRequest);
+    return S_OK;
 }
 
-xbox_live_result<void>
-multiplayer_client_pending_reader::set_synchronized_properties(
-    _In_ multiplayer_session_reference sessionRef,
-    _In_ string_t name,
-    _In_ web::json::value valueJson,
+HRESULT
+MultiplayerClientPendingReader::SetSynchronizedProperties(
+    _In_ const XblMultiplayerSessionReference& sessionRef,
+    _In_ const xsapi_internal_string& name,
+    _In_ const JsonValue& valueJson,
     _In_opt_ context_t context
     )
 {
-    auto pendingRequest = std::make_shared<multiplayer_client_pending_request>();
-    pendingRequest->set_synchronized_session_properties(name, valueJson, context);
-    add_to_pending_queue(sessionRef, pendingRequest);
-
-    return xbox_live_result<void>();
+    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    pendingRequest->SetSynchronizedSessionProperties(name, valueJson, context);
+    AddToPendingQueue(sessionRef, pendingRequest);
+    return S_OK;
 }
 
 void
-multiplayer_client_pending_reader::add_to_pending_queue(
-    _In_ multiplayer_session_reference sessionRef,
-    _In_ std::shared_ptr<multiplayer_client_pending_request> pendingRequest
+MultiplayerClientPendingReader::AddToPendingQueue(
+    _In_ const XblMultiplayerSessionReference& sessionRef,
+    _In_ std::shared_ptr<MultiplayerClientPendingRequest> pendingRequest
     )
 {
-    if (sessionRef.session_name().empty() || is_lobby(sessionRef))
+    if (sessionRef.SessionName[0] == 0 || IsLobby(sessionRef))
     {
-        m_lobbyClient->add_to_pending_queue(pendingRequest);
+        m_lobbyClient->AddToPendingQueue(pendingRequest);
     }
-    else if (is_game(sessionRef))
+    else if (IsGame(sessionRef))
     {
-        m_gameClient->add_to_pending_queue(pendingRequest);
+        m_gameClient->AddToPendingQueue(pendingRequest);
     }
 }
 
 bool
-multiplayer_client_pending_reader::is_local(
-    _In_ const string_t& xboxUserId,
-    _In_ const std::map<string_t, std::shared_ptr<multiplayer_local_user>>& xboxLiveContextMap
+MultiplayerClientPendingReader::IsLocal(
+    _In_ uint64_t xuid,
+    _In_ const xsapi_internal_map<uint64_t, std::shared_ptr<MultiplayerLocalUser>>& xboxLiveContextMap
     )
 {
-    if(xboxUserId.empty()) return false;
-
     for(auto& xboxLiveContext : xboxLiveContextMap)
     {
-        std::shared_ptr<multiplayer_local_user> localUser =  xboxLiveContext.second;
-        if (localUser != nullptr && utils::str_icmp(xboxUserId, localUser->xbox_user_id()) == 0)
+        std::shared_ptr<MultiplayerLocalUser> localUser =  xboxLiveContext.second;
+        if (localUser != nullptr && xuid == localUser->Xuid())
         {
             return true;
         }
@@ -353,98 +358,102 @@ multiplayer_client_pending_reader::is_local(
     return false;
 }
 
-std::shared_ptr<multiplayer_member>
-multiplayer_client_pending_reader::convert_to_game_member(
-    _In_ std::shared_ptr<multiplayer_session_member> member
+std::shared_ptr<MultiplayerMember>
+MultiplayerClientPendingReader::ConvertToGameMember(
+    _In_ const XblMultiplayerSessionMember* member
     )
 {
-    return multiplayer_manager_utils::convert_to_game_member(
+    return MultiplayerMember::CreateFromSessionMember(
         member,
-        m_lobbyClient->session(),
-        m_gameClient->session(),
-        m_multiplayerLocalUserManager->get_local_user_map()
+        m_lobbyClient->Session(),
+        m_gameClient->Session(),
+        m_multiplayerLocalUserManager->GetLocalUserMap()
         );
 }
 
 void
-multiplayer_client_pending_reader::process_match_events()
+MultiplayerClientPendingReader::ProcessMatchEvents()
 {
-    if (m_matchClient == nullptr || m_matchClient->match_status() == match_status::none) return;
-
-    auto matchEventQueue = m_matchClient->do_work();
-    auto matchSession = m_matchClient->session();
-
-    if (matchEventQueue.size() > 0)
+    if (m_matchClient == nullptr || m_matchClient->MatchStatus() == XblMultiplayerMatchStatus::None)
     {
-        for (uint32_t i = 0; i < matchEventQueue.size(); i++)
-        {
-            multiplayer_event multiplayerEvent = matchEventQueue.at(i);
-            add_to_multiplayer_event_queue(multiplayerEvent);
+        return;
+    }
 
-            if (multiplayerEvent.event_type() == multiplayer_event_type::find_match_completed)
+    auto matchEventQueue = m_matchClient->DoWork();
+    auto matchSession = m_matchClient->Session();
+
+    if (matchEventQueue.Size() > 0)
+    {
+        for (const auto& multiplayerEvent : matchEventQueue)
+        {
+            AddEvent(multiplayerEvent);
+
+            if (multiplayerEvent.EventType == XblMultiplayerEventType::FindMatchCompleted)
             {
-                auto matchStatus = m_matchClient->match_status();
-                if (multiplayerEvent.err())
+                auto matchStatus = m_matchClient->MatchStatus();
+                if (FAILED(multiplayerEvent.Result))
                 {
-                    if (!multiplayer_manager_utils::do_sessions_match(m_gameClient->session(), matchSession) &&
-                        !multiplayer_manager_utils::do_sessions_match(m_lobbyClient->session(), matchSession))
+                    if (!XblMultiplayerSession::DoSessionsMatch(m_gameClient->Session(), matchSession) &&
+                        !XblMultiplayerSession::DoSessionsMatch(m_lobbyClient->Session(), matchSession))
                     {
-                        m_lobbyClient->session_writer()->leave_remote_session(matchSession);
+                        // TODO should be able to control the async queue here
+                        m_lobbyClient->SessionWriter()->LeaveRemoteSession(matchSession, nullptr);
                     }
                 }
 
-                if (matchStatus == match_status::resubmitting)
+                if (matchStatus == XblMultiplayerMatchStatus::Resubmitting)
                 {
-                    auto lobbySessionCopy = m_lobbyClient->session()->_Create_deep_copy();
-                    m_matchClient->resubmit_matchmaking(lobbySessionCopy);
+                    auto lobbySessionCopy = MakeShared<XblMultiplayerSession>(*m_lobbyClient->Session());
+                    m_matchClient->ResubmitMatchmaking(lobbySessionCopy);
                     break;
                 }
 
-                if (matchStatus == match_status::completed)
+                if (matchStatus == XblMultiplayerMatchStatus::Completed)
                 {
-                    m_gameClient->update_game_session(matchSession);
-                    m_gameClient->update_objects(matchSession, m_lobbyClient->session());
-                    m_lobbyClient->advertise_game_session();
+                    m_gameClient->UpdateGameSession(matchSession);
+                    m_gameClient->UpdateObjects(matchSession, m_lobbyClient->Session());
+                    m_lobbyClient->AdvertiseGameSession();
                 }
 
+                XblMultiplayerSessionReadLockGuard matchSessionSafe(matchSession);
                 if (m_autoFillMembers && matchSession != nullptr &&
-                    matchSession->members().size() < matchSession->session_constants()->max_members_in_session() &&
-                    (matchStatus == match_status::completed || matchStatus == match_status::expired))
+                    matchSessionSafe.Members().size() < matchSessionSafe.SessionConstants().MaxMembersInSession &&
+                    (matchStatus == XblMultiplayerMatchStatus::Completed || matchStatus == XblMultiplayerMatchStatus::Expired))
                 {
                     // Continue looking for more players
-                    m_matchClient->set_match_status(match_status::none);
-                    m_matchClient->find_match(matchSession, true);
+                    m_matchClient->SetMatchStatus(XblMultiplayerMatchStatus::None);
+                    m_matchClient->FindMatch(matchSession, true);
                     break;
                 }
 
-                m_matchClient->set_match_status(match_status::none);
-                m_matchClient->update_session(nullptr);
+                m_matchClient->SetMatchStatus(XblMultiplayerMatchStatus::None);
+                m_matchClient->UpdateSession(nullptr);
                 break;
             }
         }
     }
 }
 
-xbox_live_result<void>
-multiplayer_client_pending_reader::find_match(
-    _In_ const string_t& hopperName,
-    _In_ const web::json::value& attributes,
+HRESULT
+MultiplayerClientPendingReader::FindMatch(
+    _In_ const xsapi_internal_string& hopperName,
+    _In_ JsonValue& attributes,
     _In_ const std::chrono::seconds& timeout
     )
 {
-    RETURN_CPP_IF(!m_autoFillMembers && m_gameClient->session() != nullptr, void, xbox_live_error_code::logic_error, "A game already exists. Call leave_game() before you can start matchmaking.");
-    RETURN_CPP_IF(!m_autoFillMembers && !m_lobbyClient->get_transfer_handle().empty(), void, xbox_live_error_code::logic_error, "A game already exists for your Lobby. Call leave_game() for all Lobby members before you can start matchmaking.");
+    RETURN_HR_IF_LOG_DEBUG(!m_autoFillMembers && m_gameClient->Session() != nullptr, E_UNEXPECTED, "A game already exists. Call leave_game() before you can start matchmaking.");
+    RETURN_HR_IF_LOG_DEBUG(!m_autoFillMembers && !m_lobbyClient->GetTransferHandle().empty(), E_UNEXPECTED, "A game already exists for your Lobby. Call leave_game() for all Lobby members before you can start matchmaking.");
 
-    if (m_autoFillMembers && m_gameClient->session() != nullptr)
+    if (m_autoFillMembers && m_gameClient->Session() != nullptr)
     {
-        return m_matchClient->find_match(hopperName, attributes, timeout, m_gameClient->session(), true);
+        return m_matchClient->FindMatch(hopperName, attributes, timeout, m_gameClient->Session(), true);
     }
 
-    return m_matchClient->find_match(hopperName, attributes, timeout, m_lobbyClient->session(), false);
+    return m_matchClient->FindMatch(hopperName, attributes, timeout, m_lobbyClient->Session(), false);
 }
 
 void
-multiplayer_client_pending_reader::set_auto_fill_members_during_matchmaking(
+MultiplayerClientPendingReader::SetAutoFillMembersDuringMatchmaking(
     _In_ bool autoFillMembers
     )
 {

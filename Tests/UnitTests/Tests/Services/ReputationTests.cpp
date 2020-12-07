@@ -2,195 +2,264 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"jasonsa"
-#define TEST_CLASS_AREA L"Reputation"
 #include "UnitTestIncludes.h"
 
-#include "Utils_WinRT.h"
-#include "WinRT/ReputationFeedbackType_WinRT.h"
-#include "xsapi\social.h"
-#include "social_internal.h"
-
-// TODO 718292: HTTP error handling
-using namespace Microsoft::Xbox::Services;
-using namespace Microsoft::Xbox::Services::System;
-using namespace xbox::services::system;
 using namespace xbox::services::social;
-using namespace Microsoft::Xbox::Services::Social;
+using namespace xbox::services::multiplayer;
+
+// response sample from http://xboxwiki/wiki/Reputation#Submit_Feedback
+const char expectedBatchRequestBody[] = R"({
+    "items" :
+    [
+        {
+            "targetXuid": "33445566778899",
+            "titleId" : null,
+            "sessionRef":
+            {
+                "scid": "372D829B-FA8E-471F-B696-07B61F09EC20",
+                "templateName": "CaptureFlag5",
+                "name": "Halo556932"
+            },
+            "feedbackType": "FairPlayKillsTeammates",
+            "textReason": "Title detected this player killing team members 19 times in this session",
+            "evidenceId": null
+        },
+        {
+            "targetXuid": "33445566778899",
+            "titleId" : null,
+            "sessionRef":
+            {
+                "scid": "372D829B-FA8E-471F-B696-07B61F09EC20",
+                "templateName": "CaptureFlag5",
+                "name": "Halo556932"
+            },
+            "feedbackType": "FairPlayQuitter",
+            "textReason": "Title detected quitting before the session was over",
+            "evidenceId": null
+        }
+    ]
+})";
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-
-struct ReputationTestValues
-{
-    Platform::String^ xboxUserId;
-    Windows::Foundation::DateTime dateCreated;
-    uint32 overallReputation;
-    uint32 fairplayReputation;
-    uint32 commsReputation;
-    uint32 ugcReputation;
-};
-
-const std::wstring defaultUserReputationData = 
-LR"(
-{
-    "items":
-    [
-    { 
-        "xuid" : "98052",
-        "dateCreated" : "2012-06-13T16:22:21Z", 
-        "overallReputation" : 3, 
-        "fairplayReputation" : 5, 
-        "commsReputation" : 2,
-        "ugcReputation" : 1
-    },
-    {
-        "xuid" : "98052",
-        "dateCreated" : "2012-06-15T21:15:07Z", 
-        "overallReputation" : 9, 
-        "fairplayReputation" : 8, 
-        "commsReputation" : 0,
-        "ugcReputation" : 1
-    }
-    ]
-
-}
-)";
 
 DEFINE_TEST_CLASS(ReputationTests)
 {
 public:
-    DEFINE_TEST_CLASS_PROPS(ReputationTests)
-
-    void TestSubmitReputationFeedback(
-        ReputationFeedbackType reputationFeedback, 
-        Platform::String^ sessionName, 
-        Platform::String^ reasonMessage, 
-        Platform::String^ evidenceResourceId
-        )
-    {
-        auto responseJson = web::json::value::parse(defaultUserReputationData);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto success = create_task(xboxLiveContext->ReputationService->SubmitReputationFeedbackAsync(
-            "98052",
-            reputationFeedback,
-            sessionName,
-            reasonMessage,
-            evidenceResourceId
-            )
-            ).wait();
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://reputation.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/xuid(98052)/feedback", httpCall->PathQueryFragment.to_string());
-
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        auto feedbackRequest = reputation_feedback_request::convert_reputation_feedback_type_to_string(static_cast<reputation_feedback_type>(reputationFeedback));
-        VERIFY_IS_TRUE(!feedbackRequest.err() && !feedbackRequest.payload().empty());
-        if (!sessionName->IsEmpty())
-        {
-            VERIFY_ARE_EQUAL_STR(sessionName->Data(), requestJson[L"sessionName"].as_string());
-        }
-        if (!reasonMessage->IsEmpty())
-        {
-            VERIFY_ARE_EQUAL_STR(reasonMessage->Data(), requestJson[L"textReason"].as_string());
-        }
-        if (!evidenceResourceId->IsEmpty())
-        {
-            VERIFY_ARE_EQUAL_STR(evidenceResourceId->Data(), requestJson[L"evidenceId"].as_string());
-        }
-    }
+    DEFINE_TEST_CLASS_PROPS(ReputationTests);
 
     DEFINE_TEST_CASE(TestSubmitReputationFeedbackAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSubmitReputationFeedbackAsync);
-        Platform::String^ sessionName = L"SecretSession";
-        Platform::String^ reasonMessage = L"Yelled Loudly";
-        Platform::String^ evidenceResourceId= L"99991999";
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        TestSubmitReputationFeedback(ReputationFeedbackType::CommunicationsAbusiveVoice, sessionName, reasonMessage, evidenceResourceId);
-        TestSubmitReputationFeedback(ReputationFeedbackType::CommunicationsInappropriateVideo, nullptr, reasonMessage, evidenceResourceId);
-        TestSubmitReputationFeedback(ReputationFeedbackType::FairPlayCheater, sessionName, nullptr, evidenceResourceId);
-        TestSubmitReputationFeedback(ReputationFeedbackType::FairPlayKicked, sessionName, reasonMessage, nullptr);
-        TestSubmitReputationFeedback(ReputationFeedbackType::FairPlayKillsTeammates, nullptr, nullptr, evidenceResourceId);
-        TestSubmitReputationFeedback(ReputationFeedbackType::FairPlayQuitter, nullptr, reasonMessage, nullptr);
-        TestSubmitReputationFeedback(ReputationFeedbackType::FairPlayTampering, sessionName, nullptr, nullptr);
-        TestSubmitReputationFeedback(ReputationFeedbackType::InappropriateUserGeneratedContent, nullptr, nullptr, nullptr);
-        TestSubmitReputationFeedback(ReputationFeedbackType::PositiveHelpfulPlayer, sessionName, reasonMessage, evidenceResourceId);
-        TestSubmitReputationFeedback(ReputationFeedbackType::PositiveHighQualityUserGeneratedContent, sessionName, nullptr, evidenceResourceId);
-        TestSubmitReputationFeedback(ReputationFeedbackType::PositiveSkilledPlayer, sessionName, reasonMessage, evidenceResourceId);
+        HttpMock reputationMock{ "POST", "https://reputation.xboxlive.com", 202 };
+
+        bool requestWellFormed{ true };
+        reputationMock.SetMockMatchedCallback(
+            [&](HttpMock*, std::string url, std::string requestBody)
+            {
+                requestWellFormed &= url == "https://reputation.xboxlive.com/users/xuid(1)/feedback";
+
+                // response sample from http://xboxwiki/wiki/Reputation#Submit_Feedback
+                auto expectedBody = R"({
+                    "sessionRef":
+                    {
+                        "scid": "372D829B-FA8E-471F-B696-07B61F09EC20",
+                        "templateName": "CaptureFlag5",
+                        "name": "Halo556932"
+                    },
+                    "feedbackType": "CommsAbusiveVoice",
+                    "textReason": "They called me a doodoo-head!",
+                    "evidenceId": null
+                })";
+
+                JsonDocument expectedBodyJson;
+                JsonDocument requestBodyJson;
+                expectedBodyJson.Parse(expectedBody);
+                requestBodyJson.Parse(requestBody.c_str());
+
+                requestWellFormed &= expectedBodyJson == requestBodyJson;
+            });
+
+        XAsyncBlock async{};
+        XblMultiplayerSessionReference sessionRef{ "372D829B-FA8E-471F-B696-07B61F09EC20", "CaptureFlag5", "Halo556932" };
+
+        XblSocialSubmitReputationFeedbackAsync(
+            xboxLiveContext.get(),
+            1,
+            XblReputationFeedbackType::CommunicationsAbusiveVoice,
+            &sessionRef,
+            "They called me a doodoo-head!",
+            nullptr,
+            &async
+        );
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+    }
+
+    DEFINE_TEST_CASE(CppTestSubmitReputationFeedback)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
+
+        HttpMock reputationMock{ "POST", "https://reputation.xboxlive.com", 202 };
+
+        bool requestWellFormed{ true };
+
+        reputationMock.SetMockMatchedCallback(
+            [&](HttpMock*, std::string url, std::string requestBody)
+            {
+                requestWellFormed &= url == "https://reputation.xboxlive.com/users/xuid(1)/feedback";
+
+                // response sample from http://xboxwiki/wiki/Reputation#Submit_Feedback
+                auto expectedBody = R"({
+                    "sessionRef": null,
+                    "feedbackType": "CommsAbusiveVoice",
+                    "textReason": "They called me a doodoo-head!",
+                    "evidenceId": null
+                })";
+
+                JsonDocument expectedBodyJson;
+                JsonDocument requestBodyJson;
+                expectedBodyJson.Parse(expectedBody);
+                requestBodyJson.Parse(requestBody.c_str());
+
+                requestWellFormed &= expectedBodyJson == requestBodyJson;
+            });
+
+        auto task = xboxLiveContext->reputation_service().submit_reputation_feedback(
+            _T("1"),
+            reputation_feedback_type::communications_abusive_voice,
+            string_t{},
+            _T("They called me a doodoo-head!")
+        );
+
+        VERIFY_IS_TRUE(!task.get().err());
+        VERIFY_IS_TRUE(requestWellFormed);
+    }
+
+    DEFINE_TEST_CASE(TestSubmitBatchReputationFeedbackAsync)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        HttpMock reputationMock{ "POST", "https://reputation.xboxlive.com", 202 };
+
+        bool requestWellFormed{ true };
+        reputationMock.SetMockMatchedCallback(
+            [&](HttpMock*, std::string url, std::string requestBody)
+            {
+                requestWellFormed &= url == "https://reputation.xboxlive.com/users/batchtitlefeedback";
+                JsonDocument expectedBodyJson;
+                JsonDocument requestBodyJson;
+                expectedBodyJson.Parse(expectedBatchRequestBody);
+                requestBodyJson.Parse(requestBody.c_str());
+
+                requestWellFormed &= expectedBodyJson == requestBodyJson;
+            });
+
+        XAsyncBlock async{};
+        XblMultiplayerSessionReference sessionRef{ "372D829B-FA8E-471F-B696-07B61F09EC20", "CaptureFlag5", "Halo556932" };
+
+        std::vector<XblReputationFeedbackItem> feedbackItems;
+        feedbackItems.push_back(XblReputationFeedbackItem{
+            33445566778899,
+            XblReputationFeedbackType::FairPlayKillsTeammates,
+            &sessionRef,
+            "Title detected this player killing team members 19 times in this session",
+            nullptr
+        });
+        feedbackItems.push_back(XblReputationFeedbackItem{
+            33445566778899,
+            XblReputationFeedbackType::FairPlayQuitter,
+            &sessionRef,
+            "Title detected quitting before the session was over",
+            nullptr
+        });
+
+        XblSocialSubmitBatchReputationFeedbackAsync(
+            xboxLiveContext.get(),
+            feedbackItems.data(),
+            feedbackItems.size(),
+            &async
+        );
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+    }
+
+    DEFINE_TEST_CASE(CppTestSubmitBatchReputationFeedback)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
+
+        HttpMock reputationMock{ "POST", "https://reputation.xboxlive.com", 202 };
+
+        bool requestWellFormed{ true };
+        reputationMock.SetMockMatchedCallback(
+            [&](HttpMock*, std::string url, std::string requestBody)
+            {
+                requestWellFormed &= url == "https://reputation.xboxlive.com/users/batchtitlefeedback";
+                JsonDocument expectedBodyJson;
+                JsonDocument requestBodyJson;
+                expectedBodyJson.Parse(expectedBatchRequestBody);
+                requestBodyJson.Parse(requestBody.c_str());
+
+                requestWellFormed &= expectedBodyJson == requestBodyJson;
+            });
+
+        multiplayer_session_reference sessionRef{ _T("372D829B-FA8E-471F-B696-07B61F09EC20"), _T("CaptureFlag5"), _T("Halo556932") };
+
+        std::vector<reputation_feedback_item> feedbackItems;
+        feedbackItems.push_back(reputation_feedback_item{
+            _T("33445566778899"),
+            reputation_feedback_type::fair_play_kills_teammates,
+            sessionRef,
+            _T("Title detected this player killing team members 19 times in this session"),
+        });
+        feedbackItems.push_back(reputation_feedback_item{
+            _T("33445566778899"),
+            reputation_feedback_type::fair_play_quitter,
+            sessionRef,
+            _T("Title detected quitting before the session was over"),
+        });
+
+        auto task = xboxLiveContext->reputation_service().submit_batch_reputation_feedback(feedbackItems);
+
+        VERIFY_IS_TRUE(!task.get().err());
+        VERIFY_IS_TRUE(requestWellFormed);
     }
 
     DEFINE_TEST_CASE(TestSubmitReputationFeedbackAsyncInvalidArgs)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSubmitReputationFeedbackAsyncInvalidArgs);
-        auto responseJson = web::json::value::parse(defaultUserReputationData);
-        m_mockXboxSystemFactory->GetMockHttpCall()->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
+        XAsyncBlock async{};
+        auto hr = XblSocialSubmitReputationFeedbackAsync(
+            xboxLiveContext.get(),
+            1,
+            XblReputationFeedbackType::FairPlayCheater,
+            nullptr,
+            nullptr, // Invalid arg
+            nullptr,
+            &async
+        );
+        VERIFY_ARE_EQUAL(E_INVALIDARG, hr);
 
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->ReputationService->SubmitReputationFeedbackAsync(
-                nullptr,    // invalid arg
-                ReputationFeedbackType::FairPlayCheater,
-                nullptr,
-                nullptr,
-                nullptr
-            )).get(),
-            E_INVALIDARG
-        )
-
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->ReputationService->SubmitReputationFeedbackAsync(
-                L"",    // invalid arg
-                ReputationFeedbackType::FairPlayCheater,
-                nullptr,
-                nullptr,
-                nullptr
-            )).get(),
-            E_INVALIDARG
-        )
-        
-        Platform::String^ emptyXboxUserId;
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->ReputationService->SubmitReputationFeedbackAsync(
-                emptyXboxUserId,    // invalid arg
-                ReputationFeedbackType::FairPlayCheater,
-                nullptr,
-                nullptr,
-                nullptr
-            )).get(),
-            E_INVALIDARG
-        )
-
-        Platform::String^ xuid = L"98052";
-
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->ReputationService->SubmitReputationFeedbackAsync(
-                xuid,
-                static_cast<ReputationFeedbackType>((int)ReputationFeedbackType::FairPlayKillsTeammates - 1),   // invalid arg
-                nullptr,
-                nullptr,
-                nullptr
-            )).get(),
-            E_INVALIDARG
-        )
-
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->ReputationService->SubmitReputationFeedbackAsync(
-                xuid,
-                static_cast<ReputationFeedbackType>((int)ReputationFeedbackType::FairPlayLeaderboardCheater + 1),  // invalid arg
-                nullptr,
-                nullptr,
-                nullptr
-            )).get(),
-            E_INVALIDARG
-        )
+        hr = XblSocialSubmitReputationFeedbackAsync(
+            xboxLiveContext.get(),
+            1,
+            XblReputationFeedbackType::FairPlayCheater,
+            nullptr,
+            "Reason message",
+            nullptr,
+            nullptr // Invalid arg
+        );
+        VERIFY_ARE_EQUAL(E_INVALIDARG, hr);
     }
-
 };
+
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

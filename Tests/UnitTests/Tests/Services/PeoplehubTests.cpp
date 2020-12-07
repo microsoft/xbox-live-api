@@ -2,140 +2,462 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"jasonsa"
-#define TEST_CLASS_AREA L"PeopleHub"
 #include "UnitTestIncludes.h"
-#include "social_manager_internal.h"
-#include "xsapi/services.h"
-#include "xbox_live_context_impl.h"
-#include "SocialManagerHelper.h"
+#include "peoplehub_service.h"
 
 using namespace xbox::services;
 using namespace xbox::services::social::manager;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
+const char peoplehubResponse[] =
+R"(
+{
+    "people": [
+        {
+            "xuid": "2814664990767463",
+            "isFavorite": true,
+            "isFollowingCaller": true,
+            "isFollowedByCaller": true,
+            "isIdentityShared": false,
+            "displayName": "2 Dev 123410299",
+            "realName": "Dev Account",
+            "displayPicRaw": "http://images-eds.xboxlive.com/image?url=z951ykn43p4FqWbbFvR2Ec.8vbDhj8G2Xe7JngaTToBrrCmIEEXHC9UNrdJ6P7KIwuPiuIs6TLDV4WsQAGzSwnTHQB9h_UfPa19pe4OAgFTWAPsXVneopydpL6qncU1N&format=png",
+            "useAvatar": true,
+            "gamertag": "2 Dev 123410299",
+            "modernGamertag": "2 Dev 123410299",
+            "modernGamertagSuffix": "",
+            "uniqueModernGamertag": "2 Dev 123410299",
+            "gamerScore": "0",
+            "xboxOneRep": "GoodPlayer",
+            "presenceState": "Offline",
+            "presenceText": "Offline",
+            "presenceDevices": null,
+            "isBroadcasting": false,
+            "suggestion": null,
+            "titleHistory": null,
+            "multiplayerSummary": {
+                "InMultiplayerSession": 0,
+                "InParty": 0
+            },
+            "recentPlayer": null,
+            "follower": null,
+            "preferredColor": {
+                "primaryColor": "107c10",
+                "secondaryColor": "05d21e",
+                "tertiaryColor": "299c10"
+            },
+            "titlePresence": null,
+            "titleSummaries": null,
+            "presenceTitleIds": null,
+            "detail": null,
+            "presenceDetails": [{
+                "IsBroadcasting": false,
+                "Device": "PC",
+                "PresenceText": "Home",
+                "State": "Active",
+                "TitleId": "1234"
+            }]
+        },
+        {
+            "xuid": "2814654081790887",
+            "isFavorite": true,
+            "isFollowingCaller": false,
+            "isFollowedByCaller": true,
+            "isIdentityShared": false,
+            "displayName": "2 Dev 554865546",
+            "realName": "",
+            "displayPicRaw": "http://images-eds.xboxlive.com/image?url=z951ykn43p4FqWbbFvR2Ec.8vbDhj8G2Xe7JngaTToBrrCmIEEXHC9UNrdJ6P7KI6TRSO7kB1LAmJSmUVW5wJqn2n6xd9r5UHGMgD0o0KoOwHN61vlgC862huSRkTjhm&background=0xababab&mode=Padding&format=png",
+            "useAvatar": true,
+            "gamertag": "2 Dev 554865546",
+            "modernGamertag": "2 Dev 554865546",
+            "modernGamertagSuffix": "",
+            "uniqueModernGamertag": "2 Dev 554865546",
+            "gamerScore": "0",
+            "xboxOneRep": "GoodPlayer",
+            "presenceState": "Offline",
+            "presenceText": "Offline",
+            "presenceDevices": null,
+            "isBroadcasting": false,
+            "suggestion": null,
+            "titleHistory": null,
+            "multiplayerSummary": {
+                "InMultiplayerSession": 0,
+                "InParty": 0
+            },
+            "recentPlayer": null,
+            "follower": null,
+            "preferredColor": {
+                "primaryColor": "107c10",
+                "secondaryColor": "05d21e",
+                "tertiaryColor": "299c10"
+            },
+            "titlePresence": null,
+            "titleSummaries": null,
+            "presenceTitleIds": null,
+            "detail": null,
+            "presenceDetails": [{
+                "IsBroadcasting": false,
+                "Device": "PC",
+                "PresenceText": "Home",
+                "State": "Active",
+                "TitleId": "1234"
+            }]
+        },
+        {
+            "xuid": "2814613569642996",
+            "isFavorite": false,
+            "isFollowingCaller": false,
+            "isFollowedByCaller": true,
+            "isIdentityShared": false,
+            "displayName": "2 Dev 417471033",
+            "realName": "",
+            "displayPicRaw": "http://images-eds.xboxlive.com/image?url=z951ykn43p4FqWbbFvR2Ec.8vbDhj8G2Xe7JngaTToBrrCmIEEXHC9UNrdJ6P7KI6TRSO7kB1LAmJSmUVW5wJqn2n6xd9r5UHGMgD0o0KoOwHN61vlgC862huSRkTjhm&background=0xababab&mode=Padding&format=png",
+            "useAvatar": true,
+            "gamertag": "2 Dev 417471033",
+            "modernGamertag": "2 Dev 417471033",
+            "modernGamertagSuffix": "",
+            "uniqueModernGamertag": "2 Dev 417471033",
+            "gamerScore": "0",
+            "xboxOneRep": "InDanger",
+            "presenceState": "Offline",
+            "presenceText": "Offline",
+            "presenceDevices": null,
+            "isBroadcasting": false,
+            "suggestion": null,
+            "titleHistory": null,
+            "multiplayerSummary": {
+                "InMultiplayerSession": 0,
+                "InParty": 0
+            },
+            "recentPlayer": null,
+            "follower": null,
+            "preferredColor": {
+                "primaryColor": "107c10",
+                "secondaryColor": "05d21e",
+                "tertiaryColor": "299c10"
+            },
+            "titlePresence": null,
+            "titleSummaries": null,
+            "presenceTitleIds": null,
+            "detail": null,
+            "presenceDetails": [{
+                "IsBroadcasting": false,
+                "Device": "PC",
+                "PresenceText": "Home",
+                "State": "Active",
+                "TitleId": "1234"
+            }]
+        },
+        {
+            "xuid": "2814671404555632",
+            "isFavorite": false,
+            "isFollowingCaller": true,
+            "isFollowedByCaller": true,
+            "isIdentityShared": false,
+            "displayName": "2 Dev 766909125",
+            "realName": "",
+            "displayPicRaw": "http://images-eds.xboxlive.com/image?url=z951ykn43p4FqWbbFvR2Ec.8vbDhj8G2Xe7JngaTToBrrCmIEEXHC9UNrdJ6P7KI6TRSO7kB1LAmJSmUVW5wJqn2n6xd9r5UHGMgD0o0KoOwHN61vlgC862huSRkTjhm&background=0xababab&mode=Padding&format=png",
+            "useAvatar": true,
+            "gamertag": "2 Dev 766909125",
+            "modernGamertag": "2 Dev 766909125",
+            "modernGamertagSuffix": "",
+            "uniqueModernGamertag": "2 Dev 766909125",
+            "gamerScore": "0",
+            "xboxOneRep": "AvoidMe",
+            "presenceState": "Offline",
+            "presenceText": "Offline",
+            "presenceDevices": null,
+            "isBroadcasting": false,
+            "suggestion": null,
+            "titleHistory": {
+                "TitleName": "Forza Horizon 2",
+                "TitleId": "446059611",
+                "LastTimePlayed": "2015-01-26T22:54:54.6630000Z"
+            },
+            "multiplayerSummary": {
+                "InMultiplayerSession": 0,
+                "InParty": 0
+            },
+            "recentPlayer": null,
+            "follower": null,
+            "preferredColor": {
+                "primaryColor": "107c10",
+                "secondaryColor": "05d21e",
+                "tertiaryColor": "299c10"
+            },
+            "titlePresence": null,
+            "titleSummaries": null,
+            "presenceTitleIds": null,
+            "detail": null,
+            "presenceDetails": [{
+                "IsBroadcasting": false,
+                "Device": "PC",
+                "PresenceText": "Home",
+                "State": "Active",
+                "TitleId": "1234"
+            },{
+                "IsBroadcasting": false,
+                "Device": "Xbox",
+                "PresenceText": "Home",
+                "State": "Active",
+                "TitleId": "1234"
+            }]
+        }
+    ]
+})";
+
+const char peoplehubInvalid[] =
+R"(
+{
+    "people": [
+        {
+        }
+    ]
+})";
+
 DEFINE_TEST_CLASS(PeoplehubTests)
 {
 public:
-    DEFINE_TEST_CLASS_PROPS(PeoplehubTests)
+    DEFINE_TEST_CLASS_PROPS(PeoplehubTests);
 
-    void VerifyPresenceRecord(social_manager_presence_record presenceRecord, web::json::value response)
+    struct PeoplehubTestEnvironment : public TestEnvironment
     {
-        VERIFY_IS_TRUE(presenceRecord.presence_title_records().size() == response.size());
-        for (uint32_t i = 0; i < response.size(); ++i)
+        PeoplehubTestEnvironment() noexcept
+            : XboxLiveContext{ CreateMockXboxLiveContext() }
         {
-            auto jsonEntry = response[i];
-            auto titleEntry = presenceRecord.presence_title_records()[i];
-
-            VERIFY_ARE_EQUAL(jsonEntry[L"IsBroadcasting"].as_bool(), titleEntry.is_broadcasting());
-            VERIFY_IS_TRUE(xbox::services::presence::presence_device_record::_Convert_string_to_presence_device_type(jsonEntry[L"Device"].as_string()) == titleEntry.device_type());
-            auto state = jsonEntry[L"State"].as_string();
-            auto presenceState = (!state.empty() && utils::str_icmp(state, _T("active")) == 0);
-            VERIFY_ARE_EQUAL(presenceState, titleEntry.is_title_active());
-            VERIFY_IS_TRUE(utils::string_t_to_uint32(jsonEntry[L"TitleId"].as_string()) == titleEntry.title_id());
-            VERIFY_ARE_EQUAL_STR(jsonEntry[L"PresenceText"].as_string(), titleEntry.presence_text());
-        }
-    }
-    void VerifyTitleHistory(title_history titleHistory, web::json::value response)
-    {
-        if (response.is_null())
-        {
-            VERIFY_IS_FALSE(titleHistory.has_user_played());
-        }
-        else
-        {
-            VERIFY_IS_TRUE(titleHistory.has_user_played());
-            DateTime dt;
-            dt.UniversalTime = utils::extract_json_time(response, L"LastTimePlayed").to_interval();
-            VERIFY_ARE_EQUAL_UINT(titleHistory.last_time_user_played().to_interval(), dt.UniversalTime);
-        }
-    }
-
-    void VerifyPreferredColor(const preferred_color& preferredColor, web::json::value response)
-    {
-        if (response.is_null())
-        {
-            VERIFY_ARE_EQUAL(preferredColor.primary_color(), _T(""));
-            VERIFY_ARE_EQUAL(preferredColor.secondary_color(), _T(""));
-            VERIFY_ARE_EQUAL(preferredColor.tertiary_color(), _T(""));
-        }
-        else
-        {
-            VERIFY_ARE_EQUAL(preferredColor.primary_color(), response[L"primaryColor"].as_string());
-            VERIFY_ARE_EQUAL(preferredColor.secondary_color(), response[L"secondaryColor"].as_string());
-            VERIFY_ARE_EQUAL(preferredColor.tertiary_color(), response[L"tertiaryColor"].as_string());
-        }
-    }
-
-    void VerifyXboxSocialUser(const xbox_social_user& xboxSocialUser, web::json::value& people)
-    {
-        VERIFY_ARE_EQUAL(xboxSocialUser.is_favorite(), people[L"isFavorite"].as_bool());
-        VERIFY_ARE_EQUAL(xboxSocialUser.is_following_user(), people[L"isFollowingCaller"].as_bool());
-        VERIFY_ARE_EQUAL(xboxSocialUser.is_followed_by_caller(), people[L"isFollowedByCaller"].as_bool());
-        VERIFY_ARE_EQUAL(xboxSocialUser.display_name(), people[L"displayName"].as_string());
-        VERIFY_ARE_EQUAL(xboxSocialUser.real_name(), people[L"realName"].as_string());
-        VERIFY_ARE_EQUAL(xboxSocialUser.display_pic_url_raw(), people[L"displayPicRaw"].as_string());
-        VERIFY_ARE_EQUAL(xboxSocialUser.use_avatar(), people[L"useAvatar"].as_bool());
-        VERIFY_ARE_EQUAL(xboxSocialUser.gamertag(), people[L"gamertag"].as_string());
-        VERIFY_ARE_EQUAL(xboxSocialUser.gamerscore(), people[L"gamerScore"].as_string());
-        VerifyTitleHistory(xboxSocialUser.title_history(), people[L"titleHistory"]);
-        VerifyPreferredColor(xboxSocialUser.preferred_color(), people[L"preferredColor"]);
-        VerifyPresenceRecord(xboxSocialUser.presence_record(), people[L"presenceDetails"]);
-    }
-
-    DEFINE_TEST_CASE(PeopleHubTestGetSocialGraph)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(PeopleHubTestGetSocialGraph);
-        std::vector<string_t> xuids;
-        xuids.push_back(_T("1"));
-
-        auto peoplehubService = SocialManagerHelper::GetPeoplehubService();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubResponse));
-        auto userGroup = peoplehubService.get_social_graph(_T("TestXboxUserId"), social_manager_extra_detail_level::preferred_color_level, xuids).get();
-        VERIFY_IS_TRUE(!userGroup.err());
-        web::json::array userGroupArr = web::json::value::parse(peoplehubResponse)[_T("people")].as_array();
-
-        uint32_t counter = 0;
-        for (auto& socialUsers : userGroup.payload())
-        {
-            web::json::value socialUserJson = userGroupArr[counter];
-            VerifyXboxSocialUser(socialUsers, socialUserJson);
-            ++counter;
-        }
-
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://peoplehub.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/users/xuid(TestXboxUserId)/people/batch/decoration/preferredcolor,presenceDetail",
-            httpCall->PathQueryFragment.to_string()
+            PeoplehubService = std::make_shared<xbox::services::social::manager::PeoplehubService>(
+                XboxLiveContext->User(),
+                std::make_shared<XboxLiveContextSettings>(),
+                AppConfig::Instance()->TitleId()
             );
+        }
+
+        std::shared_ptr<XblContext> XboxLiveContext;
+        std::shared_ptr<PeoplehubService> PeoplehubService;
+    };
+
+    static void VerifyPresenceRecord(const XblSocialManagerPresenceRecord & presenceRecord, JsonValue& response)
+    {
+        VERIFY_IS_TRUE(presenceRecord.presenceTitleRecordCount == response.Size());
+        for (uint32_t i = 0; i < response.Size(); ++i)
+        {
+            auto& jsonEntry = response[i];
+            auto& titleEntry = presenceRecord.presenceTitleRecords[i];
+
+            VERIFY_ARE_EQUAL(jsonEntry["IsBroadcasting"].GetBool(), titleEntry.isBroadcasting);
+            VERIFY_IS_TRUE(xbox::services::presence::DeviceRecord::DeviceTypeFromString(jsonEntry["Device"].GetString()) == static_cast<XblPresenceDeviceType>(titleEntry.deviceType));
+            auto state = jsonEntry["State"].GetString();
+            auto presenceState = (utils::str_icmp(state, "active") == 0);
+            VERIFY_ARE_EQUAL(presenceState, titleEntry.isTitleActive);
+            VERIFY_IS_TRUE(utils::internal_string_to_uint32(jsonEntry["TitleId"].GetString()) == titleEntry.titleId);
+            VERIFY_ARE_EQUAL_STR(jsonEntry["PresenceText"].GetString(), titleEntry.presenceText);
+        }
     }
 
-    DEFINE_TEST_CASE(PeopleHubTestGetSocialGraphWithDecorations)
+    static void VerifyTitleHistory(const XblTitleHistory& titleHistory, JsonValue& response)
     {
-        DEFINE_TEST_CASE_PROPERTIES(GetSocialGraphWithDecorations);
-        auto peoplehubService = SocialManagerHelper::GetPeoplehubService();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubResponse));
+        if (response.IsNull())
+        {
+            VERIFY_IS_FALSE(titleHistory.hasUserPlayed);
+        }
+        else
+        {
+            if (response.HasMember("LastTimePlayed") && response["LastTimePlayed"].IsString())
+            {
+                time_t jsonTime;
+                JsonUtils::ExtractJsonTimeT(response, "LastTimePlayed", jsonTime);
+                VERIFY_ARE_EQUAL_UINT(titleHistory.lastTimeUserPlayed, jsonTime);
+            }
+        }
     }
 
-    DEFINE_TEST_CASE(PeopleHubTestOverloadStrings)
+    static void VerifyPreferredColor(const XblPreferredColor & preferredColor, JsonValue& response)
     {
-        DEFINE_TEST_CASE_PROPERTIES(PeopleHubTestOverloadStrings);
-        auto peoplehubService = SocialManagerHelper::GetPeoplehubService();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubOversizedResponse));
-        std::vector<string_t> xuids;
-        xuids.push_back(_T("1"));
-        auto userGroupResult = peoplehubService.get_social_graph(_T("TestXboxUserId"), social_manager_extra_detail_level::preferred_color_level, xuids).get();
-        VERIFY_IS_TRUE(!userGroupResult.err());
-        auto xboxUserId = web::json::value::parse(peoplehubOversizedResponse)[_T("people")][0][_T("xuid")];
-        auto user = userGroupResult.payload()[0];
-        auto compareUser = xboxUserId.serialize().substr(0, 21);
-        wchar_t* compareUserChar = &compareUser[1];
-        VERIFY_IS_TRUE(utils::str_icmp(user.xbox_user_id(), compareUserChar) == 0);
+        if (response.IsNull())
+        {
+            VERIFY_IS_TRUE(strlen(preferredColor.primaryColor) == 0);
+            VERIFY_IS_TRUE(strlen(preferredColor.secondaryColor) == 0);
+            VERIFY_IS_TRUE(strlen(preferredColor.tertiaryColor) == 0);
+        }
+        else
+        {
+            VERIFY_ARE_EQUAL_STR(preferredColor.primaryColor, response["primaryColor"].GetString());
+            VERIFY_ARE_EQUAL_STR(preferredColor.secondaryColor, response["secondaryColor"].GetString());
+            VERIFY_ARE_EQUAL_STR(preferredColor.tertiaryColor, response["tertiaryColor"].GetString());
+        }
+    }
+
+    static void VerifyXboxSocialUser(const XblSocialManagerUser & xboxSocialUser, JsonValue& jsonUser)
+    {
+        VERIFY_ARE_EQUAL(xboxSocialUser.isFavorite, jsonUser["isFavorite"].GetBool());
+        VERIFY_ARE_EQUAL(xboxSocialUser.isFollowingUser, jsonUser["isFollowingCaller"].GetBool());
+        VERIFY_ARE_EQUAL(xboxSocialUser.isFollowedByCaller, jsonUser["isFollowedByCaller"].GetBool());
+        VERIFY_ARE_EQUAL_STR(xboxSocialUser.displayName, jsonUser["displayName"].GetString());
+        std::cout << xboxSocialUser.realName << " : " << jsonUser["realName"].GetString() << std::endl;
+        VERIFY_ARE_EQUAL_STR(xboxSocialUser.realName, jsonUser["realName"].GetString());
+        VERIFY_ARE_EQUAL_STR(xboxSocialUser.displayPicUrlRaw, jsonUser["displayPicRaw"].GetString());
+        VERIFY_ARE_EQUAL(xboxSocialUser.useAvatar, jsonUser["useAvatar"].GetBool());
+        VERIFY_ARE_EQUAL_STR(xboxSocialUser.gamertag, jsonUser["gamertag"].GetString());
+        VERIFY_ARE_EQUAL_STR(xboxSocialUser.modernGamertag, jsonUser["modernGamertag"].GetString());
+        VERIFY_ARE_EQUAL_STR(xboxSocialUser.modernGamertagSuffix, jsonUser["modernGamertagSuffix"].GetString());
+        VERIFY_ARE_EQUAL_STR(xboxSocialUser.uniqueModernGamertag, jsonUser["uniqueModernGamertag"].GetString());
+        VERIFY_ARE_EQUAL_STR(xboxSocialUser.gamerscore, jsonUser["gamerScore"].GetString());
+        VerifyTitleHistory(xboxSocialUser.titleHistory, jsonUser["titleHistory"]);
+        VerifyPreferredColor(xboxSocialUser.preferredColor, jsonUser["preferredColor"]);
+        VerifyPresenceRecord(xboxSocialUser.presenceRecord, jsonUser["presenceDetails"]);
+    }
+
+    DEFINE_TEST_CASE(TestGetSocialUsers)
+    {
+        PeoplehubTestEnvironment env{};
+
+        JsonDocument jsonResponse;
+        jsonResponse.Parse(peoplehubResponse);
+
+        xsapi_internal_stringstream url;
+        url << "https://peoplehub.xboxlive.com/users/xuid(" << env.XboxLiveContext->Xuid() << ")/people/batch/decoration/presenceDetail,preferredcolor";
+
+        auto peoplehubMock = std::make_shared<HttpMock>(
+            "POST",
+            url.str(),
+            200,
+            jsonResponse
+            );
+
+        Event callComplete;
+        Result<Vector<XblSocialManagerUser>> result;
+
+        env.PeoplehubService->GetSocialUsers(env.XboxLiveContext->Xuid(), XblSocialManagerExtraDetailLevel::PreferredColorLevel, { 1 }, {
+            [&] (Result<Vector<XblSocialManagerUser>> temp)
+            {
+                result = temp;
+                callComplete.Set();
+            }
+            });
+
+        callComplete.Wait();
+
+        VERIFY_SUCCEEDED(result.Hresult());
+        JsonValue& userGroupArr = jsonResponse["people"];
+        VERIFY_ARE_EQUAL(result.Payload().size(), userGroupArr.Size());
+
+        uint64_t counter{ 0 };
+        for (auto& user : result.Payload())
+        {
+            VerifyXboxSocialUser(user, userGroupArr[counter++]);
+        }
+    }
+
+    DEFINE_TEST_CASE(TestGetSocialGraph)
+    {
+        PeoplehubTestEnvironment env{};
+
+        JsonDocument jsonResponse;
+        jsonResponse.Parse(peoplehubResponse);
+
+        xsapi_internal_stringstream url;
+        url << "https://peoplehub.xboxlive.com/users/xuid(" << env.XboxLiveContext->Xuid() << ")/people/social/decoration/presenceDetail";
+
+        auto peoplehubMock = std::make_shared<HttpMock>(
+            "GET",
+            url.str(),
+            200,
+            jsonResponse
+            );
+
+        Event callComplete;
+        Result<Vector<XblSocialManagerUser>> result;
+
+        env.PeoplehubService->GetSocialGraph(env.XboxLiveContext->Xuid(), XblSocialManagerExtraDetailLevel::NoExtraDetail, {
+            [&] (Result<Vector<XblSocialManagerUser>> temp)
+            {
+                result = temp;
+                callComplete.Set();
+            }
+            });
+
+        callComplete.Wait();
+
+        VERIFY_SUCCEEDED(result.Hresult());
+        JsonValue& userGroupArr = jsonResponse["people"];
+        VERIFY_ARE_EQUAL(result.Payload().size(), userGroupArr.Size());
+
+        uint64_t counter{ 0 };
+        for (auto& user : result.Payload())
+        {
+            VerifyXboxSocialUser(user, userGroupArr[counter++]);
+        }
+    }
+
+    DEFINE_TEST_CASE(TestInvalidResponse)
+    {
+        PeoplehubTestEnvironment env{};
+
+        JsonDocument peoplehubInvalidJson;
+        peoplehubInvalidJson.Parse(peoplehubInvalid);
+        auto peoplehubMock = std::make_shared<HttpMock>(
+            "",
+            "https://peoplehub.xboxlive.com",
+            200,
+            peoplehubInvalidJson
+            );
+
+        Event callComplete;
+        Result<Vector<XblSocialManagerUser>> result;
+
+        env.PeoplehubService->GetSocialGraph(env.XboxLiveContext->Xuid(), XblSocialManagerExtraDetailLevel::PreferredColorLevel, {
+            [&] (Result<Vector<XblSocialManagerUser>> temp)
+            {
+                result = temp;
+                callComplete.Set();
+            }
+            });
+
+        callComplete.Wait();
+        VERIFY_FAILED(result.Hresult());
+        VERIFY_IS_TRUE(result.Payload().empty());
+    }
+
+    DEFINE_TEST_CASE(TestPartialTitleHistory)
+    {
+        // In some cases PeopleHub service returns a TitleHistory object that isn't fully populated. By design we should
+        // deserialize the provided fields and ignore those that are "null"
+
+        PeoplehubTestEnvironment env{};
+
+        JsonDocument jsonResponse;
+        jsonResponse.Parse(peoplehubResponse);
+
+        JsonValue titleHistory{ rapidjson::kObjectType };
+        titleHistory.AddMember("LastTimePlayed", JsonValue{ rapidjson::kNullType }, jsonResponse.GetAllocator());
+        jsonResponse["people"][0]["titleHistory"] = titleHistory.Move();
+
+        HttpMock peopleHubMock{ "GET", "https://peoplehub.xboxlive.com/", 200, jsonResponse };
+
+        Event callComplete;
+        Result<Vector<XblSocialManagerUser>> result;
+
+        env.PeoplehubService->GetSocialGraph(env.XboxLiveContext->Xuid(), XblSocialManagerExtraDetailLevel::NoExtraDetail, {
+            [&](Result<Vector<XblSocialManagerUser>> temp)
+            {
+                result = temp;
+                callComplete.Set();
+            }
+            });
+
+        callComplete.Wait();
+
+        VERIFY_SUCCEEDED(result.Hresult());
+        JsonValue& userGroupArr = jsonResponse["people"];
+        VERIFY_ARE_EQUAL(result.Payload().size(), userGroupArr.Size());
+
+        uint64_t counter{ 0 };
+        for (auto& user : result.Payload())
+        {
+            VerifyXboxSocialUser(user, userGroupArr[counter++]);
+        }
+
     }
 };
 

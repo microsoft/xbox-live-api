@@ -4,14 +4,14 @@ set OUTPUT_FOLDER=%1
 set TAEF_EXE="C:\Program Files (x86)\Windows Kits\10\Testing\Runtimes\TAEF\x64\TE.exe"
 set TEST_NAME=%2
 set MYPATH=%~dp0
-set TE_DLL=%MYPATH:~0,-1%\..\..\..\Binaries\Debug\x64\Microsoft.Xbox.Services.UnitTest.140.TAEF\Microsoft.Xbox.Services.UnitTest.140.TAEF.dll 
+set TE_DLL=%MYPATH:~0,-1%\..\..\..\Bins\Binaries\Debug\x64\Microsoft.Xbox.Services.UnitTest.141.TAEF\Microsoft.Xbox.Services.UnitTest.141.TAEF.dll 
 mkdir %OUTPUT_FOLDER%
 set /A X=1
 
 :loop
 set /A X=X+1
 "C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\wpr.exe" -start ETWProfile.wprp
-%TAEF_EXE% /labMode /sessionTimeout:0:15 /testTimeout:0:5 %TE_DLL% /select:@name='*%TEST_NAME%' > %OUTPUT_FOLDER%\test%x%.txt
+%TAEF_EXE% /sessionTimeout:0:15 /testTimeout:0:5 %TE_DLL% /select:@name='*%TEST_NAME%' > %OUTPUT_FOLDER%\test%x%.txt
 set TAEF_ERROR=%ERRORLEVEL%
 
 "C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\wpr.exe" -stop %OUTPUT_FOLDER%\test%x%.etl "XSAPI UnitTest Diagnostic Trace"

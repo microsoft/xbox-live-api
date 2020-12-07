@@ -3,211 +3,205 @@
 
 #include "pch.h"
 #include "shared_macros.h"
-#include "xsapi/services.h"
-#include "user_context.h"
 #include "xbox_system_factory.h"
-#include "xbox_live_context_impl.h"
-#if !TV_API && !UNIT_TEST_SERVICES && !XSAPI_U
-#include "Misc/notification_service.h"
+#include "xbox_live_context_internal.h"
+#include "presence_internal.h"
+
+#include "Achievements/achievements_internal.h"
+#include "profile_internal.h"
+#include "social_internal.h"
+#include "string_service_internal.h"
+#include "multiplayer_internal.h"
+#include "xbox_live_app_config_internal.h"
+#include "xbox_live_context_settings_internal.h"
+#include "title_storage_internal.h"
+#include "notification_internal.h"
+
+using namespace xbox::services;
+using namespace xbox::services::system;
+
+XblContext::XblContext(_In_ xbox::services::User user) noexcept
+    : m_user{ std::move(user) }
+{
+}
+
+const xbox::services::User& XblContext::User() const noexcept
+{
+    return m_user;
+}
+
+XblContext::~XblContext()
+{
+    if (m_userChangeEventToken)
+    {
+        User::UnregisterChangeEventHandle(m_userChangeEventToken);
+    }
+}
+
+std::shared_ptr<xbox::services::RefCounter> XblContext::GetSharedThis()
+{
+    return shared_from_this();
+}
+
+HRESULT XblContext::Initialize(
+    std::shared_ptr<real_time_activity::RealTimeActivityManager> rtaManager
+)
+{
+    m_xboxLiveContextSettings = MakeShared<xbox::services::XboxLiveContextSettings>();
+
+    std::weak_ptr<XblContext> thisWeakPtr = shared_from_this();
+
+    m_achievementService = MakeShared<xbox::services::achievements::AchievementsService>(m_user, m_xboxLiveContextSettings, AppConfig::Instance(), thisWeakPtr, rtaManager);
+    m_profileService = MakeShared<xbox::services::social::ProfileService>(m_user, m_xboxLiveContextSettings, AppConfig::Instance());
+    m_reputationServiceImpl = MakeShared<xbox::services::social::ReputationService>(m_user, m_xboxLiveContextSettings);
+    m_presenceService = MakeShared<xbox::services::presence::PresenceService>(m_user, m_xboxLiveContextSettings, rtaManager);
+    m_socialService = MakeShared<xbox::services::social::SocialService>(m_user, m_xboxLiveContextSettings, rtaManager);
+    m_stringService = MakeShared<xbox::services::system::StringService>(m_user, m_xboxLiveContextSettings);
+    m_multiplayerService = MakeShared<xbox::services::multiplayer::MultiplayerService>(m_user, m_xboxLiveContextSettings, AppConfig::Instance(), rtaManager);
+    m_privacyService = MakeShared<privacy::PrivacyService>(m_user, m_xboxLiveContextSettings);
+    m_titleManagedStatisticsService = MakeShared<xbox::services::user_statistics::TitleManagedStatisticsService>(m_user, m_xboxLiveContextSettings);
+    m_userStatisticsService = MakeShared<xbox::services::user_statistics::UserStatisticsService>(m_user, m_xboxLiveContextSettings, rtaManager);
+    m_leaderboardService = MakeShared<xbox::services::leaderboard::LeaderboardService>(m_user, m_xboxLiveContextSettings, AppConfig::Instance());
+    m_matchmakingService = MakeShared<xbox::services::matchmaking::MatchmakingService>(m_user, m_xboxLiveContextSettings);
+    m_titleStorageService = MakeShared<xbox::services::title_storage::TitleStorageService>(m_user, m_xboxLiveContextSettings);
+    m_multiplayerActivityService = MakeShared<multiplayer_activity::MultiplayerActivityService>(m_user, get_xsapi_singleton_async_queue(), m_xboxLiveContextSettings);
+
+#if XSAPI_EVENTS_SERVICE
+    m_eventsService = MakeShared<events::EventsService>(
+        m_user
+#if XSAPI_INTERNAL_EVENTS_SERVICE
+        , get_xsapi_singleton_async_queue()
 #endif
-NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-
-
-#if XSAPI_XDK_AUTH
-xbox_live_context::xbox_live_context(
-    _In_ Windows::Xbox::System::User^ user
-    )
-{
-    m_xboxLiveContextImpl = std::make_shared<xbox_live_context_impl>(user);
-    m_xboxLiveContextImpl->init();
-}
-
-Windows::Xbox::System::User^
-xbox_live_context::user()
-{
-    return m_xboxLiveContextImpl->user();
-}
-#endif
-
-#if XSAPI_NONXDK_CPP_AUTH && !UNIT_TEST_SERVICES
-xbox_live_context::xbox_live_context(
-    _In_ std::shared_ptr<system::xbox_live_user> user
-    )
-{
-    user->_User_impl()->set_user_pointer(user);
-    m_xboxLiveContextImpl = std::make_shared<xbox_live_context_impl>(user);
-    m_xboxLiveContextImpl->init();
-}
-
-std::shared_ptr<system::xbox_live_user>
-xbox_live_context::user()
-{
-    return m_xboxLiveContextImpl->user();
-}
-#endif
-
-#if XSAPI_NONXDK_WINRT_AUTH
-xbox_live_context::xbox_live_context(
-    _In_ Microsoft::Xbox::Services::System::XboxLiveUser^ user
-    )
-{
-    m_xboxLiveContextImpl = std::make_shared<xbox_live_context_impl>(user);
-    m_xboxLiveContextImpl->init();
-}
-
-Microsoft::Xbox::Services::System::XboxLiveUser^
-xbox_live_context::user()
-{
-    return m_xboxLiveContextImpl->user();
-}
-
-#endif
-
-const string_t& xbox_live_context::xbox_live_user_id()
-{
-    return m_xboxLiveContextImpl->xbox_live_user_id();
-}
-
-social::profile_service&
-xbox_live_context::profile_service()
-{
-    return m_xboxLiveContextImpl->profile_service();
-}
-
-social::social_service&
-xbox_live_context::social_service()
-{
-    return m_xboxLiveContextImpl->social_service();
-}
-
-social::reputation_service&
-xbox_live_context::reputation_service()
-{
-    return m_xboxLiveContextImpl->reputation_service();
-}
-
-leaderboard::leaderboard_service&
-xbox_live_context::leaderboard_service()
-{
-    return m_xboxLiveContextImpl->leaderboard_service();
-}
-
-achievements::achievement_service&
-xbox_live_context::achievement_service()
-{
-    return m_xboxLiveContextImpl->achievement_service();
-}
-
-multiplayer::multiplayer_service&
-xbox_live_context::multiplayer_service()
-{
-    return m_xboxLiveContextImpl->multiplayer_service();
-}
-
-matchmaking::matchmaking_service&
-xbox_live_context::matchmaking_service()
-{
-    return m_xboxLiveContextImpl->matchmaking_service();
-}
-
-tournaments::tournament_service&
-xbox_live_context::tournament_service()
-{
-    return m_xboxLiveContextImpl->tournament_service();
-}
-
-user_statistics::user_statistics_service&
-xbox_live_context::user_statistics_service()
-{
-    return m_xboxLiveContextImpl->user_statistics_service();
-}
-
-const std::shared_ptr<real_time_activity::real_time_activity_service>&
-xbox_live_context::real_time_activity_service()
-{
-    return m_xboxLiveContextImpl->real_time_activity_service();
-}
-
-presence::presence_service&
-xbox_live_context::presence_service()
-{
-    return m_xboxLiveContextImpl->presence_service();
-}
-
-game_server_platform::game_server_platform_service&
-xbox_live_context::game_server_platform_service()
-{
-    return m_xboxLiveContextImpl->game_server_platform_service();
-}
-
-title_storage::title_storage_service&
-xbox_live_context::title_storage_service()
-{
-    return m_xboxLiveContextImpl->title_storage_service();
-}
-
-privacy::privacy_service&
-xbox_live_context::privacy_service()
-{
-    return m_xboxLiveContextImpl->privacy_service();
-}
-
-system::string_service&
-xbox_live_context::string_service()
-{
-    return m_xboxLiveContextImpl->string_service();
-}
-
-contextual_search::contextual_search_service&
-xbox_live_context::contextual_search_service()
-{
-    return m_xboxLiveContextImpl->contextual_search_service();
-}
-
-clubs::clubs_service&
-xbox_live_context::clubs_service()
-{
-    return m_xboxLiveContextImpl->clubs_service();
-}
-
-#if UWP_API || XSAPI_U
-events::events_service&
-xbox_live_context::events_service()
-{
-    return m_xboxLiveContextImpl->events_service();
-}
+    );
+    HRESULT hr = m_eventsService->Initialize();
+    RETURN_HR_IF_FAILED(hr);
 #endif
 
-#if TV_API || UNIT_TEST_SERVICES
-marketplace::catalog_service&
-xbox_live_context::catalog_service()
-{
-    return m_xboxLiveContextImpl->catalog_service();
-}
-
-marketplace::inventory_service&
-    xbox_live_context::inventory_service()
-{
-    return m_xboxLiveContextImpl->inventory_service();
-}
-
-entertainment_profile::entertainment_profile_list_service&
-xbox_live_context::entertainment_profile_list_service()
-{
-    return m_xboxLiveContextImpl->entertainment_profile_list_service();
-}
+#if XSAPI_NOTIFICATION_SERVICE
+#if !XSAPI_UNIT_TESTS && (HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM_IS_EXTERNAL)
+	m_notificationService = MakeShared<xbox::services::notification::RTANotificationService>(m_user, m_xboxLiveContextSettings, rtaManager);
+    m_notificationService->RegisterForSpopNotificationEvents();
+#elif HC_PLATFORM == HC_PLATFORM_ANDROID || HC_PLATFORM == HC_PLATFORM_IOS
+	m_notificationService = MakeShared<xbox::services::notification::MobileNotificationService>(m_user, m_xboxLiveContextSettings);
+#elif HC_PLATFORM == HC_PLATFORM_UWP
+	m_notificationService = MakeShared<xbox::services::notification::UWPNotificationService>(m_user, m_xboxLiveContextSettings);
+	m_notificationService->RegisterWithNotificationService(AsyncContext<HRESULT>{TaskQueue{ get_xsapi_singleton_async_queue() }});
+#endif
 #endif
 
-std::shared_ptr<xbox_live_context_settings> 
-xbox_live_context::settings()
-{
-    return m_xboxLiveContextImpl->settings();
+    auto userChangedRegistrationResult = User::RegisterChangeEventHandler(
+        [
+            thisWeakPtr
+        ]
+    (UserLocalId localId, UserChangeType changeType)
+    {
+        auto sharedThis{ thisWeakPtr.lock() };
+        if (sharedThis)
+        {
+            if (sharedThis->m_user.LocalId() == localId.value && changeType == XalUserChange_SignedOut)
+            {
+#if XSAPI_NOTIFICATION_SERVICE
+                sharedThis->NotificationService()->UnregisterFromNotificationService(
+                    AsyncContext<HRESULT> 
+                    { 
+                        TaskQueue{ get_xsapi_singleton_async_queue() }
+                    });
+#endif
+            }
+        }
+    });
+
+    return userChangedRegistrationResult.Hresult();
 }
 
-std::shared_ptr<xbox_live_app_config> 
-xbox_live_context::application_config()
+uint64_t XblContext::Xuid() const
 {
-    return m_xboxLiveContextImpl->application_config();
+    return m_user.Xuid();
 }
 
-NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+std::shared_ptr<social::ProfileService> XblContext::ProfileService()
+{
+    return m_profileService;
+}
+
+std::shared_ptr<social::SocialService> XblContext::SocialService()
+{
+    return m_socialService;
+}
+
+std::shared_ptr<social::ReputationService> XblContext::ReputationService()
+{
+    return m_reputationServiceImpl;
+}
+
+std::shared_ptr<achievements::AchievementsService> XblContext::AchievementsService()
+{
+    return m_achievementService;
+}
+
+std::shared_ptr<multiplayer::MultiplayerService> XblContext::MultiplayerService()
+{
+    return m_multiplayerService;
+}
+
+std::shared_ptr<xbox::services::system::StringService> XblContext::StringService()
+{
+    return m_stringService;
+}
+
+std::shared_ptr<matchmaking::MatchmakingService> XblContext::MatchmakingService()
+{
+    return m_matchmakingService;
+}
+
+std::shared_ptr<privacy::PrivacyService> XblContext::PrivacyService()
+{
+    return m_privacyService;
+}
+
+std::shared_ptr<user_statistics::TitleManagedStatisticsService> XblContext::TitleManagedStatisticsService()
+{
+    return m_titleManagedStatisticsService;
+}
+
+std::shared_ptr<user_statistics::UserStatisticsService> XblContext::UserStatisticsService()
+{
+    return m_userStatisticsService;
+}
+
+std::shared_ptr<leaderboard::LeaderboardService> XblContext::LeaderboardService()
+{
+    return m_leaderboardService;
+}
+
+std::shared_ptr<title_storage::TitleStorageService> XblContext::TitleStorageService()
+{
+    return m_titleStorageService;
+}
+
+#if XSAPI_EVENTS_SERVICE
+std::shared_ptr<events::IEventsService> XblContext::EventsService()
+{
+    return m_eventsService;
+}
+#endif 
+
+std::shared_ptr<presence::PresenceService> XblContext::PresenceService()
+{
+    return m_presenceService;
+}
+
+std::shared_ptr<notification::NotificationService> XblContext::NotificationService()
+{
+    return m_notificationService;
+}
+
+std::shared_ptr<multiplayer_activity::MultiplayerActivityService> XblContext::MultiplayerActivityService() noexcept
+{
+    return m_multiplayerActivityService;
+}
+
+std::shared_ptr<XboxLiveContextSettings> XblContext::Settings()
+{
+    return m_xboxLiveContextSettings;
+}

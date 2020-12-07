@@ -2,53 +2,30 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "utils.h"
-#include "xsapi/multiplayer.h"
-#include "xsapi/matchmaking.h"
+#include "matchmaking_internal.h"
 
 using namespace xbox::services::multiplayer;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MATCHMAKING_CPP_BEGIN
-
-create_match_ticket_response::create_match_ticket_response()
-{
-}
-
-create_match_ticket_response::create_match_ticket_response(
-    _In_ string_t matchTicketId,
-    _In_ std::chrono::seconds estimatedWaitTime
-    ) :
-    m_matchTicketId(std::move(matchTicketId)),
-    m_estimatedWaitTime(std::move(estimatedWaitTime))
-{
-}
-
-const string_t&
-create_match_ticket_response::match_ticket_id() const
+const xsapi_internal_string& CreateMatchTicketResponse::MatchTicketId() const
 {
     return m_matchTicketId;
 }
 
-const std::chrono::seconds&
-create_match_ticket_response::estimated_wait_time() const
+const std::chrono::seconds& CreateMatchTicketResponse::EstimatedWaitTime() const
 {
     return m_estimatedWaitTime;
 }
 
-xbox_live_result<create_match_ticket_response>
-create_match_ticket_response::_Deserialize(
-    _In_ const web::json::value& json
-    )
-{
-    if (json.is_null()) return xbox_live_result<create_match_ticket_response>();
+CreateMatchTicketResponse::CreateMatchTicketResponse()
+{}
 
-    std::error_code errc = xbox_live_error_code::no_error;
-    auto response = create_match_ticket_response(
-        utils::extract_json_string(json, _T("ticketId"), errc, true),
-        std::chrono::seconds(utils::extract_json_int(json, _T("waitTime"), errc))
-        );
-
-    return xbox_live_result<create_match_ticket_response>(response, errc);
-}
+CreateMatchTicketResponse::CreateMatchTicketResponse(
+    _In_ const xsapi_internal_string matchTicketId,
+    _In_ std::chrono::seconds estimatedWaitTime
+)
+    : m_matchTicketId(matchTicketId), 
+    m_estimatedWaitTime(estimatedWaitTime)
+{}
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MATCHMAKING_CPP_END

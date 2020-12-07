@@ -3,112 +3,109 @@
 
 
 #include "pch.h"
-#include "xsapi/services.h"
 #include "multiplayer_manager_internal.h"
 
 using namespace xbox::services::multiplayer;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 
-multiplayer_local_user::multiplayer_local_user(
+MultiplayerLocalUser::MultiplayerLocalUser(
     _In_ xbox_live_user_t user,
-    _In_ string_t xboxUserId,
+    _In_ uint64_t xuid,
     _In_ bool isPrimary
-    ) :
-    m_xboxLiveContextImpl(std::make_shared<xbox_live_context_impl>(user)),
-    m_xboxUserId(std::move(xboxUserId)),
-    m_isPrimaryXboxLiveContext(isPrimary),
-    m_writeChangesToService(false),
-    m_writeConnectionAddress(false),
-    m_lobbyState(multiplayer_local_user_lobby_state::unknown),
-    m_gameState(multiplayer_local_user_game_state::unknown),
-    m_rtaStateChangedContext(0),
+) :
     m_sessionChangedContext(0),
     m_subscriptionLostContext(0),
-    m_rtaResyncContext(0)
+    m_rtaResyncContext(0),
+    m_writeChangesToService(false),
+    m_xuid(xuid),
+    m_lobbyState(MultiplayerLocalUserLobbyState::Unknown),
+    m_gameState(MultiplayerLocalUserGameState::Unknown),
+    m_isPrimaryXboxLiveContext(isPrimary),
+    m_xboxLiveContextImpl(MakeShared<XblContext>(user))
 {
-    m_xboxLiveContextImpl->user_context()->set_caller_context_type(caller_context_type::multiplayer_manager);
-    m_xboxLiveContextImpl->init();
+    // TODO parameterize RTAManager
+    m_xboxLiveContextImpl->Initialize(GlobalState::Get()->RTAManager());
 }
 
-multiplayer_local_user::~multiplayer_local_user()
+MultiplayerLocalUser::~MultiplayerLocalUser()
 {
     m_xboxLiveContextImpl.reset();
 }
 
-string_t
-multiplayer_local_user::xbox_user_id() const
+uint64_t
+MultiplayerLocalUser::Xuid() const
 {
-    return m_xboxUserId;
+    return m_xuid;
 }
 
-multiplayer_local_user_lobby_state
-multiplayer_local_user::lobby_state() const
+MultiplayerLocalUserLobbyState
+MultiplayerLocalUser::LobbyState() const
 {
     return m_lobbyState;
 }
 
 void
-multiplayer_local_user::set_lobby_state(
-    _In_ multiplayer_local_user_lobby_state userState
+MultiplayerLocalUser::SetLobbyState(
+    _In_ MultiplayerLocalUserLobbyState userState
     )
 {
     m_lobbyState = userState;
 
-    if (userState == multiplayer_local_user_lobby_state::add ||
-        userState == multiplayer_local_user_lobby_state::join ||
-        userState == multiplayer_local_user_lobby_state::leave )
+    if (userState == MultiplayerLocalUserLobbyState::Add ||
+        userState == MultiplayerLocalUserLobbyState::Join ||
+        userState == MultiplayerLocalUserLobbyState::Leave )
     {
         m_writeChangesToService = true;
     }
 }
 
-multiplayer_local_user_game_state
-multiplayer_local_user::game_state() const
+MultiplayerLocalUserGameState
+MultiplayerLocalUser::GameState() const
 {
     return m_gameState;
 }
 
 void
-multiplayer_local_user::set_game_state(
-    _In_ multiplayer_local_user_game_state userState
+MultiplayerLocalUser::SetGameState(
+    _In_ MultiplayerLocalUserGameState userState
     )
 {
     m_gameState = userState;
 }
 
-const string_t&
-multiplayer_local_user::lobby_handle_id() const
+const xsapi_internal_string&
+MultiplayerLocalUser::LobbyHandleId() const
 {
     return m_lobbyHandleId;
 }
 
 void
-multiplayer_local_user::set_lobby_handle_id(_In_ const string_t& handleId)
+MultiplayerLocalUser::SetLobbyHandleId(_In_ const xsapi_internal_string& handleId)
 {
     m_lobbyHandleId = handleId;
 }
 
-string_t
-multiplayer_local_user::connection_address() const
+const xsapi_internal_string&
+MultiplayerLocalUser::ConnectionAddress() const
 {
     return m_connectionAddress;
 }
 
 void
-multiplayer_local_user::set_connection_address(_In_ string_t address)
+MultiplayerLocalUser::SetConnectionAddress(_In_ const xsapi_internal_string& address)
 {
     m_connectionAddress = address;
 }
 
 bool
-multiplayer_local_user::is_primary_xbox_live_context() const
+MultiplayerLocalUser::IsPrimaryXboxLiveContext() const
 {
     return m_isPrimaryXboxLiveContext;
 }
 
 void
-multiplayer_local_user::set_is_primary_xbox_live_context(
+MultiplayerLocalUser::SetIsPrimaryXboxLiveContext(
     _In_ bool isPrimary
     )
 {
@@ -116,74 +113,74 @@ multiplayer_local_user::set_is_primary_xbox_live_context(
 }
 
 bool
-multiplayer_local_user::write_changes_to_service() const
+MultiplayerLocalUser::WriteChangesToService() const
 {
     return m_writeChangesToService;
 }
 
 void
-multiplayer_local_user::set_write_changes_to_service(_In_ bool value)
+MultiplayerLocalUser::SetWriteChangesToService(_In_ bool value)
 {
     m_writeChangesToService = value;
 }
 
-std::shared_ptr<xbox::services::xbox_live_context_impl>
-multiplayer_local_user::context() const
+std::shared_ptr<XblContext>
+MultiplayerLocalUser::Context() const
 {
     return m_xboxLiveContextImpl;
 }
 
-function_context
-multiplayer_local_user::rta_state_changed_context() const
-{
-    return m_rtaStateChangedContext;
-}
-
-void
-multiplayer_local_user::set_rta_state_changed_context(
-    _In_ function_context functionContext
-    )
-{
-    m_rtaStateChangedContext = functionContext;
-}
-
-function_context
-multiplayer_local_user::session_changed_context() const
+XblFunctionContext
+MultiplayerLocalUser::SessionChangedContext() const
 {
     return m_sessionChangedContext;
 }
 
 void
-multiplayer_local_user::set_session_changed_context(
-    _In_ function_context functionContext
+MultiplayerLocalUser::SetSessionChangedContext(
+    _In_ XblFunctionContext functionContext
     )
 {
     m_sessionChangedContext = functionContext;
 }
 
-function_context
-multiplayer_local_user::subscription_lost_context() const
+XblFunctionContext
+MultiplayerLocalUser::ConnectionIdChangedContext() const
+{
+    return m_connectionIdChangedContext;
+}
+
+void
+MultiplayerLocalUser::SetConnectionIdChangedContext(
+    _In_ XblFunctionContext functionContext
+)
+{
+    m_connectionIdChangedContext = functionContext;
+}
+
+XblFunctionContext
+MultiplayerLocalUser::SubscriptionLostContext() const
 {
     return m_subscriptionLostContext;
 }
 
 void
-multiplayer_local_user::set_subscription_lost_context(
-    _In_ function_context functionContext
+MultiplayerLocalUser::SetSubscriptionLostContext(
+    _In_ XblFunctionContext functionContext
     )
 {
     m_subscriptionLostContext = functionContext;
 }
 
-function_context
-multiplayer_local_user::rta_resync_context() const
+XblFunctionContext
+MultiplayerLocalUser::RtaResyncContext() const
 {
     return m_rtaResyncContext;
 }
 
 void
-multiplayer_local_user::set_rta_resync_context(
-    _In_ function_context functionContext
+MultiplayerLocalUser::SetRtaResyncContext(
+    _In_ XblFunctionContext functionContext
     )
 {
     m_rtaResyncContext = functionContext;

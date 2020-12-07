@@ -2,142 +2,85 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "utils.h"
-#include "xsapi/multiplayer.h"
-#include "xsapi/matchmaking.h"
+#include "matchmaking_internal.h"
 
 using namespace xbox::services::multiplayer;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MATCHMAKING_CPP_BEGIN
-
-match_ticket_details_response::match_ticket_details_response() :
-    m_matchStatus(ticket_status::unknown),
-    m_preserveSession(preserve_session_mode::unknown)
-{
-}
-
-match_ticket_details_response::match_ticket_details_response(
-    _In_ ticket_status matchStatus,
-    _In_ std::chrono::seconds estimatedWaitTime,
-    _In_ preserve_session_mode preserveSession,
-    _In_ multiplayer_session_reference ticketSession,
-    _In_ multiplayer_session_reference targetSession,
-    _In_ web::json::value ticketAttributes
-    ) :
-    m_matchStatus(matchStatus),
-    m_estimatedWaitTime(std::move(estimatedWaitTime)),
-    m_preserveSession(preserveSession),
-    m_ticketSession(std::move(ticketSession)),
-    m_targetSession(std::move(targetSession)),
-    m_ticketAttributes(std::move(ticketAttributes))
-{
-}
-
-ticket_status
-match_ticket_details_response::match_status() const
+const XblTicketStatus MatchTicketDetailsResponse::MatchStatus() const
 {
     return m_matchStatus;
 }
 
-const std::chrono::seconds&
-match_ticket_details_response::estimated_wait_time() const
+const std::chrono::seconds& MatchTicketDetailsResponse::EstimatedWaitTime() const
 {
     return m_estimatedWaitTime;
 }
 
-preserve_session_mode
-match_ticket_details_response::preserve_session() const
+const XblPreserveSessionMode MatchTicketDetailsResponse::PreserveSession() const
 {
     return m_preserveSession;
 }
 
-const multiplayer_session_reference&
-match_ticket_details_response::ticket_session() const
+const XblMultiplayerSessionReference MatchTicketDetailsResponse::TicketSession() const
 {
     return m_ticketSession;
 }
 
-const multiplayer_session_reference&
-match_ticket_details_response::target_session() const
+const XblMultiplayerSessionReference MatchTicketDetailsResponse::TargetSession() const
 {
     return m_targetSession;
 }
 
-const web::json::value&
-match_ticket_details_response::ticket_attributes() const
+const JsonValue& MatchTicketDetailsResponse::TicketAttributes() const
 {
     return m_ticketAttributes;
 }
 
-xbox_live_result<match_ticket_details_response>
-match_ticket_details_response::_Deserialize(
-    _In_ const web::json::value& json
-    )
+MatchTicketDetailsResponse::MatchTicketDetailsResponse()
 {
-    if (json.is_null()) return xbox_live_result<match_ticket_details_response>();
-
-    std::error_code errc = xbox_live_error_code::no_error;
-
-    auto ticketSessionRef = multiplayer_session_reference::_Deserialize(utils::extract_json_field(json, _T("ticketSessionRef"), errc, false));
-    auto targetSessionRef = multiplayer_session_reference::_Deserialize(utils::extract_json_field(json, _T("targetSessionRef"), errc, false));
-
-    auto result = match_ticket_details_response(
-        convert_string_to_ticket_status(utils::extract_json_string(json, _T("ticketStatus"), errc, true)),
-        std::chrono::seconds(utils::extract_json_int(json, _T("waitTime"), errc)),
-        convert_string_to_preserve_session_mode(utils::extract_json_string(json, _T("preserveSession"), errc, false)),
-        ticketSessionRef.payload(),
-        targetSessionRef.payload(),
-        utils::extract_json_field(json, _T("ticketAttributes"), errc, false)
-        );
-
-    return xbox_live_result<match_ticket_details_response>(result, errc);
 }
 
-ticket_status match_ticket_details_response::convert_string_to_ticket_status(
-    _In_ const string_t& value
-    )
+MatchTicketDetailsResponse::MatchTicketDetailsResponse(
+    _In_ XblTicketStatus matchStatus,
+    _In_ std::chrono::seconds estimatedWaitTime,
+    _In_ XblPreserveSessionMode preserveSession,
+    _In_ XblMultiplayerSessionReference ticketSession,
+    _In_ XblMultiplayerSessionReference targetSession,
+    _In_ const JsonValue& ticketAttributes
+) :
+    m_matchStatus(matchStatus),
+    m_estimatedWaitTime(estimatedWaitTime),
+    m_preserveSession(preserveSession),
+    m_ticketSession(ticketSession),
+    m_targetSession(targetSession)
 {
-    ticket_status ticketStatus = ticket_status::unknown;
-    if (!value.empty())
-    {
-        if (utils::str_icmp(value, _T("expired")) == 0)
-        {
-            ticketStatus = ticket_status::expired;
-        }
-        else if (utils::str_icmp(value, _T("searching")) == 0)
-        {
-            ticketStatus = ticket_status::searching;
-        }
-        else if (utils::str_icmp(value, _T("found")) == 0)
-        {
-            ticketStatus = ticket_status::found;
-        }
-        else if (utils::str_icmp(value, _T("canceled")) == 0)
-        {
-            ticketStatus = ticket_status::canceled;
-        }
-    }
-
-    return ticketStatus;
+    JsonUtils::CopyFrom(m_ticketAttributes, ticketAttributes);
 }
 
-preserve_session_mode match_ticket_details_response::convert_string_to_preserve_session_mode(
-    _In_ const string_t& value
-    )
+MatchTicketDetailsResponse::MatchTicketDetailsResponse(const MatchTicketDetailsResponse& other)
+    :
+    m_matchStatus(other.m_matchStatus),
+    m_estimatedWaitTime(other.m_estimatedWaitTime),
+    m_preserveSession(other.m_preserveSession),
+    m_ticketSession(other.m_ticketSession),
+    m_targetSession(other.m_targetSession)
 {
-    preserve_session_mode preserve_session_mode = preserve_session_mode::unknown;
-    if (!value.empty())
+    JsonUtils::CopyFrom(m_ticketAttributes, other.m_ticketAttributes);
+}
+
+MatchTicketDetailsResponse& MatchTicketDetailsResponse::operator =(const MatchTicketDetailsResponse& other)
+{
+    if (this != &other)
     {
-        if (utils::str_icmp(value, _T("always")) == 0)
-        {
-            preserve_session_mode = preserve_session_mode::always;
-        }
-        else if (utils::str_icmp(value, _T("never")) == 0)
-        {
-            preserve_session_mode = preserve_session_mode::never;
-        }
+        m_matchStatus = other.m_matchStatus;
+        m_estimatedWaitTime = other.m_estimatedWaitTime;
+        m_preserveSession = other.m_preserveSession;
+        m_ticketSession = other.m_ticketSession;
+        m_targetSession = other.m_targetSession;
+        JsonUtils::CopyFrom(m_ticketAttributes, other.m_ticketAttributes);
     }
-    return preserve_session_mode;
+    return *this;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MATCHMAKING_CPP_END

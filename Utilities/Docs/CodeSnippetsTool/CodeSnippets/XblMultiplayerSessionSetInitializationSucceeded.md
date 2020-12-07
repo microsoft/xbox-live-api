@@ -1,0 +1,3 @@
+```cpp
+XblMultiplayerSessionSetInitializationSucceeded(sessionHandle, initSucceded);
+```

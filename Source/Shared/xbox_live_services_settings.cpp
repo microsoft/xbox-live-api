@@ -2,22 +2,24 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/system.h"
-#if XSAPI_A
-#include "Logger/android/logcat_output.h"
-#else
-#include "Logger/debug_output.h"
-#endif
-#include "Logger/custom_output.h"
+#include "xbox_live_services_settings.h"
+#include "Logger/log_hc_output.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
+std::function<_Ret_maybenull_ _Post_writable_byte_size_(dwSize) void*(_In_ size_t dwSize)> g_pCppMemAllocHook = nullptr;
+std::function<void(_In_ void* pAddress)> g_pCppMemFreeHook = nullptr;
+
 std::shared_ptr<xbox_live_services_settings> xbox_live_services_settings::get_singleton_instance(_In_ bool createIfRequired)
 {
-    std::shared_ptr<xsapi_singleton> xsapiSingleton = get_xsapi_singleton(createIfRequired);
+    UNREFERENCED_PARAMETER(createIfRequired);
+
+    std::shared_ptr<xsapi_singleton> xsapiSingleton = get_xsapi_singleton();
     if (xsapiSingleton == nullptr)
+    {
         return nullptr;
-    
+    }
+
     {
         std::lock_guard<std::mutex> guard(xsapiSingleton->m_serviceSettingsLock);
         if (xsapiSingleton->m_xboxServiceSettingsSingleton == nullptr)
@@ -29,12 +31,53 @@ std::shared_ptr<xbox_live_services_settings> xbox_live_services_settings::get_si
 }
 
 xbox_live_services_settings::xbox_live_services_settings() :
-    m_pMemAllocHook(nullptr),
-    m_pMemFreeHook(nullptr),
+    m_traceLevel(xbox_services_diagnostics_trace_level::off),
     m_loggingHandlersCounter(0),
-    m_wnsHandlersCounter(0),
-    m_traceLevel(xbox_services_diagnostics_trace_level::off)
+    m_wnsHandlersCounter(0)
 {
+}
+
+void *custom_mem_alloc_wrapper(_In_ size_t size, _In_ uint32_t memoryType)
+{
+    UNREFERENCED_PARAMETER(memoryType);
+    if (g_pCppMemAllocHook == nullptr)
+    {
+        XSAPI_ASSERT(true && L"Custom mem hook function not set!");
+        return nullptr;
+    }
+    else
+    {
+        try
+        {
+            return g_pCppMemAllocHook(size);
+        }
+        catch (...)
+        {
+            LOG_ERROR("mem_alloc callback failed.");
+            return nullptr;
+        }
+    }
+}
+
+void custom_mem_free_wrapper(_In_ void *pointer, _In_ uint32_t memoryType)
+{
+    UNREFERENCED_PARAMETER(memoryType);
+    if (g_pCppMemFreeHook == nullptr)
+    {
+        XSAPI_ASSERT(true && L"Custom mem hook function not set!");
+        return;
+    }
+    else
+    {
+        try
+        {
+            return g_pCppMemFreeHook(pointer);
+        }
+        catch (...)
+        {
+            LOG_ERROR("mem_free callback failed.");
+        }
+    }
 }
 
 void xbox_live_services_settings::set_memory_allocation_hooks(
@@ -48,18 +91,23 @@ void xbox_live_services_settings::set_memory_allocation_hooks(
         THROW_CPP_INVALIDARGUMENT_IF(memAllocHandler == nullptr || memFreeHandler == nullptr);
     }
 
-    m_pMemAllocHook = memAllocHandler;
-    m_pMemFreeHook = memFreeHandler;
+    g_pCppMemAllocHook = memAllocHandler;
+    g_pCppMemFreeHook = memFreeHandler;
+
+    g_pMemAllocHook = (g_pCppMemAllocHook == nullptr) ? nullptr : custom_mem_alloc_wrapper;
+    g_pMemFreeHook = (g_pCppMemFreeHook == nullptr) ? nullptr : custom_mem_free_wrapper;
+
+    HCMemSetFunctions(g_pMemAllocHook, g_pMemFreeHook);
 }
 
 function_context xbox_live_services_settings::add_logging_handler(_In_ std::function<void(xbox_services_diagnostics_trace_level, const std::string&, const std::string&)> handler)
 {
     std::lock_guard<std::mutex> lock(m_loggingWriteLock);
 
-    function_context context = -1;
+    function_context context = 0;
     if (handler != nullptr)
     {
-        context = ++m_loggingHandlersCounter;
+        context = (function_context)(uint64_t)(++m_loggingHandlersCounter);
         m_loggingHandlers[m_loggingHandlersCounter] = std::move(handler);
     }
 
@@ -69,16 +117,16 @@ function_context xbox_live_services_settings::add_logging_handler(_In_ std::func
 void xbox_live_services_settings::remove_logging_handler(_In_ function_context context)
 {
     std::lock_guard<std::mutex> lock(m_loggingWriteLock);
-    m_loggingHandlers.erase(context);
+    m_loggingHandlers.erase((uint32_t)(uint64_t)context);
 }
 
 function_context xbox_live_services_settings::add_wns_handler(_In_ const std::function<void(const xbox_live_wns_event_args&)>& handler)
 {
 
-    function_context context = -1;
+    function_context context = 0;
     if (handler != nullptr)
     {
-        context = ++m_wnsHandlersCounter;
+        context = (function_context)(uint64_t)(++m_wnsHandlersCounter);
         m_wnsHandlers[m_wnsHandlersCounter] = handler;
     }
 
@@ -88,7 +136,7 @@ function_context xbox_live_services_settings::add_wns_handler(_In_ const std::fu
 void xbox_live_services_settings::remove_wns_handler(_In_ function_context context)
 {
     std::lock_guard<std::mutex> lock(m_wnsEventLock);
-    m_wnsHandlers.erase(context);
+    m_wnsHandlers.erase((uint32_t)(uint64_t)context);
 }
 
 xbox_services_diagnostics_trace_level xbox_live_services_settings::diagnostics_trace_level() const
@@ -123,7 +171,11 @@ void xbox_live_services_settings::_Raise_logging_event(_In_ xbox_services_diagno
     }
 }
 
-void xbox_live_services_settings::_Raise_wns_event(_In_ const string_t& xbox_user_id, _In_ const string_t& notification_type, const string_t& content)
+void xbox_live_services_settings::_Raise_wns_event(
+    _In_ const string_t& xbox_user_id, 
+    _In_ const string_t& notification_type, 
+    _In_ const string_t& content
+)
 {
     std::lock_guard<std::mutex> lock(m_wnsEventLock);
 
@@ -152,30 +204,14 @@ bool xbox_live_services_settings::_Is_at_diagnostics_trace_level(_In_ xbox_servi
 
 void xbox_live_services_settings::set_log_level_from_diagnostics_trace_level()
 {
-    if (m_traceLevel == xbox_services_diagnostics_trace_level::off)
-    {
-        logger::release_logger();
-        return;
-    }
-    else if (logger::get_logger() == nullptr)
-    {
-        logger::create_logger();
-#if XSAPI_A
-        logger::get_logger()->add_log_output(std::make_shared<logcat_output>());
-#else
-        logger::get_logger()->add_log_output(std::make_shared<debug_output>());
-#endif
-        logger::get_logger()->add_log_output(std::make_shared<custom_output>());
-    }
-
-    log_level logLevel = log_level::off;
+    HCTraceLevel logLevel = HCTraceLevel::Off;
     switch (m_traceLevel)
     {
-    case xbox_services_diagnostics_trace_level::off: logLevel = log_level::off; break;
-    case xbox_services_diagnostics_trace_level::error: logLevel = log_level::error; break;
-    case xbox_services_diagnostics_trace_level::warning: logLevel = log_level::warn; break;
-    case xbox_services_diagnostics_trace_level::info: logLevel = log_level::info; break;
-    case xbox_services_diagnostics_trace_level::verbose: logLevel = log_level::debug; break;
+    case xbox_services_diagnostics_trace_level::off: logLevel = HCTraceLevel::Off; break;
+    case xbox_services_diagnostics_trace_level::error: logLevel = HCTraceLevel::Error; break;
+    case xbox_services_diagnostics_trace_level::warning: logLevel = HCTraceLevel::Warning; break;
+    case xbox_services_diagnostics_trace_level::info: logLevel = HCTraceLevel::Information; break;
+    case xbox_services_diagnostics_trace_level::verbose: logLevel = HCTraceLevel::Verbose; break;
     }
     logger::get_logger()->set_log_level(logLevel);
 }

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Gaming.Desktop.x64">
+      <Configuration>Debug</Configuration>
+      <Platform>Gaming.Desktop.x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Gaming.Desktop.x64">
+      <Configuration>Release</Configuration>
+      <Platform>Gaming.Desktop.x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dll\dllmain.cpp" />
+    <ClCompile Include="dll\pch.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dll\Microsoft.Xbox.Services.141.GDK.C.Thunks.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dll\pch.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{e538394b-68cb-4597-87ad-7b6841cc1278}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+    <GenerateManifest>false</GenerateManifest>
+    <TargetName>Microsoft_Xbox_Services_141_GDK_C_Thunks</TargetName>
+    <RootNamespace>Microsoft.Xbox.Services</RootNamespace>
+    <XsapiPlatform>GDK</XsapiPlatform>
+    <XsapiBuildFromSource>1</XsapiBuildFromSource>
+  </PropertyGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), xsapi.gdk.bwoi.props))\xsapi.gdk.bwoi.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
+    <UseDebugLibraries Condition="'$(Configuration)'=='Release'">false</UseDebugLibraries>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup>
+    <XsapiPropsFile>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), xsapi.staticlib.props))\xsapi.staticlib.props</XsapiPropsFile>
+  </PropertyGroup>
+  <Import Project="$(XsapiPropsFile)" Condition="Exists($(XsapiPropsFile))" />
+  <PropertyGroup>
+    <XsapiPathsFile>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), xsapi.paths.props))\xsapi.paths.props</XsapiPathsFile>
+  </PropertyGroup>
+  <Import Project="$(XsapiPathsFile)" Condition="Exists($(XsapiPathsFile))" />
+  <PropertyGroup>
+    <LibraryPath>$(Console_SdkLibPath);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(Console_SdkIncludeRoot);$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalOptions>/permissive- /Zc:twoPhase- %(AdditionalOptions)</AdditionalOptions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalOptions>/bigobj /Zm300 %(AdditionalOptions)</AdditionalOptions>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ShowIncludes>
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</MinimalRebuild>
+      <AdditionalOptions>/permissive- /Zc:twoPhase- %(AdditionalOptions)</AdditionalOptions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <SupportJustMyCode>false</SupportJustMyCode>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalUsingDirectories>$(Console_SdkPackagesRoot);$(Console_SdkWindowsMetadataPath);%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>%(XboxExtensionsDependencies)Appnotify.lib;crypt32.lib;xgameruntime.lib;WINHTTP.LIB;RUNTIMEOBJECT.LIB;ADVAPI32.LIB;ole32.lib;</AdditionalDependencies>
+      <ModuleDefinitionFile>$(ProjectDir)dll\Microsoft.Xbox.Services.141.GDK.C.Thunks.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Gaming.Desktop.x64'">$(XsapiInclude)..\Build\Unity\Dll;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4820;4668;4365;5039;4623;4626;5027;4626</DisableSpecificWarnings>
+      <ControlFlowGuard Condition="'$(Configuration)|$(Platform)'=='Debug|Gaming.Desktop.x64'">Guard</ControlFlowGuard>
+    </ClCompile>
+    <Link>
+      <ProgramDatabaseFile Condition="'$(Configuration)|$(Platform)'=='Debug|Gaming.Desktop.x64'">$(OutDir)$(TargetName)Linker.pdb</ProgramDatabaseFile>
+      <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Gaming.Desktop.x64'">C:\PROGRAM FILES (X86)\WINDOWS KITS\10\LIB\10.0.19041.0\UM\X64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <DisableSpecificWarnings>4820;4668;4365;5039;4623;4626;5027;4626</DisableSpecificWarnings>
+      <ControlFlowGuard Condition="'$(Configuration)|$(Platform)'=='Release|Gaming.Desktop.x64'">Guard</ControlFlowGuard>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

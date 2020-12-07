@@ -2,38 +2,49 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/presence.h"
-#include "utils.h"
 #include "presence_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
 
-presence_title_request::presence_title_request(
+TitleRequest::TitleRequest(
     _In_ bool isUserActive,
-    _In_ presence_data presenceData,
-    _In_ media_presence_data mediaPresenceData
-    ) :
-    m_isUserActive(isUserActive)
+    _In_opt_ const XblPresenceRichPresenceIds* richPresenceIds
+) :
+    m_isUserActive{ isUserActive }
 {
-    m_presenceActivityData = presence_activity_data(
-        std::move(presenceData),
-        std::move(mediaPresenceData)
-        );
+    if (richPresenceIds)
+    {
+        m_scid = richPresenceIds->scid;
+        m_presenceId = richPresenceIds->presenceId;
+
+        for (auto i = 0u; i < richPresenceIds->presenceTokenIdsCount; ++i)
+        {
+            m_presenceTokenIds.push_back(richPresenceIds->presenceTokenIds[i]);
+        }
+    }
 }
 
-web::json::value 
-presence_title_request::serialize()
+void TitleRequest::Serialize(_Out_ JsonValue& serializedObject, _In_ JsonDocument::AllocatorType& allocator)
 {
-    web::json::value serializedObject;
-    string_t state = m_isUserActive ? _T("active") : _T("inactive");
-    serializedObject[_T("state")] = web::json::value::string(state);
+    serializedObject.SetObject();
+    xsapi_internal_string state = m_isUserActive ? "active" : "inactive";
+    serializedObject.AddMember("state", JsonValue(state.c_str(), allocator).Move(), allocator);
 
-    if (m_presenceActivityData.should_serialize())
+    if (!m_scid.empty() && !m_presenceId.empty())
     {
-        serializedObject[_T("activity")] = m_presenceActivityData.serialize();
-    }
+        JsonValue richPresenceJson(rapidjson::kObjectType);
 
-    return serializedObject;
+        richPresenceJson.AddMember("id", JsonValue(m_presenceId.c_str(), allocator).Move(), allocator);
+        richPresenceJson.AddMember("scid", JsonValue(m_scid.c_str(), allocator).Move(), allocator);
+        if (!m_presenceTokenIds.empty())
+        {
+            JsonValue presenceTokenIDsJson(rapidjson::kArrayType);
+            JsonUtils::SerializeVector(JsonUtils::JsonStringSerializer, m_presenceTokenIds, presenceTokenIDsJson, allocator);
+            serializedObject.AddMember("params", presenceTokenIDsJson, allocator);
+        }
+
+        serializedObject.AddMember("activity", JsonValue(rapidjson::kObjectType).AddMember("richPresence", richPresenceJson, allocator).Move(), allocator);
+    }
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_END

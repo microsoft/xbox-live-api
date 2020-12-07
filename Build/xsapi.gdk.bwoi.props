@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--
+  ****************************************************************************************************
+  Properties for Gaming.*.x64
+  ****************************************************************************************************
+  -->
+  <PropertyGroup Condition="'$(GDKUseBWOI)' == 'true'">
+    <DurangoXdkInstallPath>$(GameDK)</DurangoXdkInstallPath>
+    <GamingWindowsSDKDir>$(GameDKLatest)WindowsSDK\</GamingWindowsSDKDir>
+  </PropertyGroup>
+
+  <!--
+  ****************************************************************************************************
+  _PlatformFolder build (MSBuild 15 / VS 2017 only)
+  ****************************************************************************************************
+  -->
+  <PropertyGroup Condition="'$(GDKUseBWOI)' == 'true' and ('$(Platform)' == 'Gaming.Xbox.XboxOne.x64' and '$(VisualStudioVersion)' == '15.0')">
+    <_PlatformFolder>$(GameDKLatest)GXDK\VS2017\flatDeployment\Common7\IDE\VC\VCTargets\Platforms\$(Platform)\</_PlatformFolder>
+    <DefaultXdkEditionRootVS2017>$(_PlatformFolder)</DefaultXdkEditionRootVS2017>
+    <XdkEditionRootVS2017>$(_PlatformFolder)</XdkEditionRootVS2017>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GDKUseBWOI)' == 'true' and ('$(Platform)' == 'Gaming.Xbox.Scarlett.x64' and '$(VisualStudioVersion)' == '15.0')">
+    <_PlatformFolder>$(GameDKLatest)GXDK\VS2017\flatDeployment\Common7\IDE\VC\VCTargets\Platforms\$(Platform)\</_PlatformFolder>
+    <DefaultXdkEditionRootVS2017>$(_PlatformFolder)</DefaultXdkEditionRootVS2017>
+    <XdkEditionRootVS2017>$(_PlatformFolder)</XdkEditionRootVS2017>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GDKUseBWOI)' == 'true' and ('$(Platform)' == 'Gaming.Desktop.x64' and '$(VisualStudioVersion)' == '15.0')">
+    <_PlatformFolder>$(GameDKLatest)GRDK\VS2017\flatDeployment\Common7\IDE\VC\VCTargets\Platforms\$(Platform)\</_PlatformFolder>
+    <DefaultXdkEditionRootVS2017>$(_PlatformFolder)</DefaultXdkEditionRootVS2017>
+    <XdkEditionRootVS2017>$(_PlatformFolder)</XdkEditionRootVS2017>
+  </PropertyGroup>
+
+  <!--
+  ****************************************************************************************************
+  VCTargetsPath redirection (VS 2019)
+  For VS 2019, we have to copy the contents of 
+	C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Microsoft\VC\v160  
+  to a temp location, then xcopy in the files from 
+	C:\Program Files (x86)\Microsoft GDK\200400\GXDK\VS2019\flatDeployment\MSBuild\Microsoft\VC\v160 
+  and 
+    C:\Program Files (x86)\Microsoft GDK\200400\GRDK\VS2019\flatDeployment\MSBuild\Microsoft\VC\v160
+  and do the same for the v150 for v141 downlevel
+  ****************************************************************************************************
+  -->
+  <PropertyGroup Condition="'$(GDKUseBWOI)' == 'true'">
+    <_AlternativeVCTargetsPath160>$(GDKMSBuildForVS2019)v160\</_AlternativeVCTargetsPath160>
+    <_AlternativeVCTargetsPath150>$(GDKMSBuildForVS2019)v150\</_AlternativeVCTargetsPath150>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GDKUseBWOI)' == 'true' and ('$(Platform)' == 'Gaming.Xbox.XboxOne.x64' and '$(VisualStudioVersion)' == '16.0')">
+    <VCTargetsPath>$(_AlternativeVCTargetsPath160)</VCTargetsPath>
+    <VCTargetsPath15 Condition="'$(_AlternativeVCTargetsPath150)'!=''">$(_AlternativeVCTargetsPath150)</VCTargetsPath15>
+    <VCTargetsPath16>$(_AlternativeVCTargetsPath160)</VCTargetsPath16>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GDKUseBWOI)' == 'true' and ('$(Platform)' == 'Gaming.Xbox.Scarlett.x64' and '$(VisualStudioVersion)' == '16.0')">
+    <VCTargetsPath>$(_AlternativeVCTargetsPath160)</VCTargetsPath>
+    <VCTargetsPath15 Condition="'$(_AlternativeVCTargetsPath150)'!=''">$(_AlternativeVCTargetsPath150)</VCTargetsPath15>
+    <VCTargetsPath16>$(_AlternativeVCTargetsPath160)</VCTargetsPath16>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GDKUseBWOI)' == 'true' and ('$(Platform)' == 'Gaming.Desktop.x64' and '$(VisualStudioVersion)' == '16.0')">
+    <VCTargetsPath>$(_AlternativeVCTargetsPath160)</VCTargetsPath>
+    <VCTargetsPath15 Condition="'$(_AlternativeVCTargetsPath150)'!=''">$(_AlternativeVCTargetsPath150)</VCTargetsPath15>
+    <VCTargetsPath16>$(_AlternativeVCTargetsPath160)</VCTargetsPath16>
+  </PropertyGroup>
+
+  <!--
+  ****************************************************************************************************
+  Debugging
+   Condition="'$(GDKUseBWOI)' == 'true' and '$(GDKUseBWOIDebug)' == 'true'"
+  ****************************************************************************************************
+  -->
+  <Target Name="XblGDKBWOIDebug" BeforeTargets="InitializeBuildStatus">
+    <Message Importance="High" Text="XblBuildDebug" />
+    <Message Importance="High" Text="    ProjectName                  = '$(ProjectName)'" />
+    <Message Importance="High" Text="    Configuration                = '$(Configuration)'" />
+    <Message Importance="High" Text="    Platform                     = '$(Platform)'" />
+    <Message Importance="High" Text="    ConfigurationType            = '$(ConfigurationType)'" />
+    <Message Importance="High" Text="    PlatformToolset              = '$(PlatformToolset)'" />
+    <Message Importance="High" Text=" " />
+    <Message Importance="High" Text="    GameDKLatest                 = '$(GameDKLatest)'" />
+    <Message Importance="High" Text="    _PlatformFolder              = '$(_PlatformFolder)'" />
+    <Message Importance="High" Text="    DefaultXdkEditionRootVS2017  = '$(DefaultXdkEditionRootVS2017)'" />
+    <Message Importance="High" Text="    XdkEditionRootVS2017         = '$(XdkEditionRootVS2017)'" />
+    <Message Importance="High" Text="    VCTargetsPath                = '$(VCTargetsPath)'" />
+    <Message Importance="High" Text="    VCTargetsPath15              = '$(VCTargetsPath15)'" />
+    <Message Importance="High" Text="    VCTargetsPath16              = '$(VCTargetsPath16)'" />
+    <Message Importance="High" Text="    DurangoXdkInstallPath        = '$(DurangoXdkInstallPath)'" />
+    <Message Importance="High" Text="    GamingWindowsSDKDir          = '$(GamingWindowsSDKDir)'" />
+    <Message Importance="High" Text="    LibraryPath          	      = '$(LibraryPath)'" />
+    <Message Importance="High" Text="    IncludePath                  = '$(IncludePath)'" />
+    <Message Importance="High" Text="    ExecutablePath               = '$(ExecutablePath)'" />
+    <Message Importance="High" Text=" " />
+  </Target>
+
+</Project>

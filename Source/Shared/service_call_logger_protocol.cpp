@@ -6,6 +6,8 @@
 #include "service_call_logger_protocol.h"
 #include "service_call_logger.h"
 #include "service_call_logger_data.h"
+
+#if HC_PLATFORM == HC_PLATFORM_UWP || HC_PLATFORM == HC_PLATFORM_XDK 
 #include <collection.h>
 
 using namespace pplx;
@@ -14,6 +16,7 @@ using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::Foundation;
+#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -30,14 +33,14 @@ std::shared_ptr<service_call_logger_protocol> service_call_logger_protocol::get_
 
 service_call_logger_protocol::service_call_logger_protocol()
 {
-#if UWP_API || TV_API || UNIT_TEST_SERVICES
+#if HC_PLATFORM == HC_PLATFORM_UWP || HC_PLATFORM == HC_PLATFORM_XDK
     m_onActivatedToken.Value = 0;
 #endif
 }
 
 void service_call_logger_protocol::register_for_protocol_activation()
 {
-#if UWP_API || TV_API || UNIT_TEST_SERVICES
+#if HC_PLATFORM == HC_PLATFORM_UWP || HC_PLATFORM == HC_PLATFORM_XDK
     if (m_onActivatedToken.Value != 0)
     {
         return;
@@ -49,7 +52,7 @@ void service_call_logger_protocol::register_for_protocol_activation()
             return;
         }
     }
-    catch(Exception^ ex)
+    catch(Platform::Exception^ ex)
     {
         LOG_ERROR("Exception on CoreApplication::GetCurrentView()!");
         return;
@@ -80,41 +83,49 @@ void service_call_logger_protocol::register_for_protocol_activation()
     {
         m_onActivatedToken = CoreApplication::GetCurrentView()->Activated += activatedEvent;
     }
-    catch (Exception^ ex)
+    catch (Platform::Exception^ ex)
     {
         std::string exMsg("Exception on CoreApplication::GetCurrentView()->Activated");
-        exMsg += utility::conversions::to_utf8string(ex->Message->Data());
+        exMsg += xbox::services::convert::to_utf8string(ex->Message->Data());
         LOG_ERROR(exMsg);
         return;
     }
 #endif
 }
 
-#if UWP_API || TV_API || UNIT_TEST_SERVICES
+#if HC_PLATFORM == HC_PLATFORM_UWP || HC_PLATFORM == HC_PLATFORM_XDK
 void service_call_logger_protocol::process_service_call_tracking_activation_uri(_In_ Windows::Foundation::Uri^ activationUri)
 {
-    WwwFormUrlDecoder^ decoder = activationUri->QueryParsed;
-    if (decoder->Size == 0)
+    auto serviceCallLogger{ service_call_logger::get_singleton_instance() };
+    if (serviceCallLogger)
     {
-        return;
-    }
-
-    // Check activationUri for relevant query arguments
-    for (auto entry : decoder)
-    {
-        if ((utils::str_icmp(entry->Name->Data(), _T("state")) == 0))
+        WwwFormUrlDecoder^ decoder = activationUri->QueryParsed;
+        if (decoder->Size == 0)
         {
-            if (utils::str_icmp(entry->Value->Data(), _T("start")) == 0)
+            return;
+        }
+
+        // Check activationUri for relevant query arguments
+        for (auto entry : decoder)
+        {
+            if ((utils::str_icmp(entry->Name->Data(), _T("state")) == 0))
             {
-                service_call_logger::get_singleton_instance()->enable();
-                set_state_bread_crumb(true);
-            }
-            else if (utils::str_icmp(entry->Value->Data(), _T("stop")) == 0)
-            {
-                service_call_logger::get_singleton_instance()->disable();
-                set_state_bread_crumb(false);
+                if (utils::str_icmp(entry->Value->Data(), _T("start")) == 0)
+                {
+                    serviceCallLogger->enable();
+                    set_state_bread_crumb(true);
+                }
+                else if (utils::str_icmp(entry->Value->Data(), _T("stop")) == 0)
+                {
+                    serviceCallLogger->disable();
+                    set_state_bread_crumb(false);
+                }
             }
         }
+    }
+    else
+    {
+        LOGS_WARN << "Got service call logger protocol activiation but XSAPI was not initializated.";
     }
 }
 #endif
@@ -123,7 +134,7 @@ void service_call_logger_protocol::set_state_bread_crumb(_In_ bool isTracking)
 {
     // IMPORTANT: xbTrace app depends on this filename, so please talk to xbTrace owner before
     // considering any changes to this name
-#if TV_API
+#if HC_PLATFORM == HC_PLATFORM_XDK || XSAPI_UNIT_TESTS
     string_t filePath = _T("d:\\callHistoryJson.tmp");
 #else
     Windows::Storage::ApplicationData^ currentAppData = Windows::Storage::ApplicationData::Current;

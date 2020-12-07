@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation
+// Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
@@ -6,84 +6,85 @@
  
 
 #define DEFAULT_LOGGER xbox::services::logger::get_logger()
-#define IF_LOGGER_ENABLED(logger) if(logger != nullptr)
 
-#define LOG(logger, level, category, msg) IF_LOGGER_ENABLED(logger) logger->add_log(xbox::services::log_entry(level, category, msg))
-#define LOGS(logger, level, category) IF_LOGGER_ENABLED(logger) *logger += xbox::services::log_entry(level, category)
+#if HC_PLATFORM_IS_MICROSOFT
+    #define LOG(logger, level, category, msg)  \
+        __pragma(warning( push )) \
+        __pragma(warning( disable : 26444 )) \
+        { auto logInst = logger; if (logInst) { logInst->add_log({ level, category, msg }); } } \
+        __pragma(warning( pop ))
+#else
+    #define LOG(logger, level, category, msg) \
+        { auto logInst = logger; if (logInst) { logInst->add_log({ level, category, msg }); } }
+#endif
+
+#define LOGS(level, category) xbox::services::logger_raii() += xbox::services::log_entry(level, category)
 
 // default logging macro
 const char defaultCategory[] = "";
-#define IF_LOG_ERROR() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, xbox::services::log_level::error)
-#define LOG_ERROR(msg) LOG(DEFAULT_LOGGER, xbox::services::log_level::error, defaultCategory, msg)
+#define IF_LOG_ERROR_ENABLED(x) { auto logger = DEFAULT_LOGGER; if (logger && logger->is_log_enabled(HCTraceLevel::Error)) { x; } }
+#define LOG_ERROR(msg) LOG(DEFAULT_LOGGER, HCTraceLevel::Error, defaultCategory, msg)
 #define LOG_ERROR_IF(boolean_expression, msg) if(boolean_expression) LOG_ERROR(msg)
-#define LOGS_ERROR LOGS(DEFAULT_LOGGER, xbox::services::log_level::error, defaultCategory)
+#define LOGS_ERROR LOGS(HCTraceLevel::Error, defaultCategory)
 #define LOGS_ERROR_IF(boolean_expression) if(boolean_expression) LOGS_ERROR
 
-#define IF_LOG_WARN() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, xbox::services::log_level::warn)
-#define LOG_WARN(msg) LOG(DEFAULT_LOGGER, xbox::services::log_level::warn, defaultCategory, msg)
+#define IF_LOG_WARN_ENABLED(x) { auto logger = DEFAULT_LOGGER; if (logger && logger->is_log_enabled(HCTraceLevel::Warning)) { x; } }
+#define LOG_WARN(msg) LOG(DEFAULT_LOGGER, HCTraceLevel::Warning, defaultCategory, msg)
 #define LOG_WARN_IF(boolean_expression, msg) if(boolean_expression) LOG_WARN(msg)
-#define LOGS_WARN LOGS(DEFAULT_LOGGER, xbox::services::log_level::warn, defaultCategory)
+#define LOGS_WARN LOGS(HCTraceLevel::Warning, defaultCategory)
 #define LOGS_WARN_IF(boolean_expression) if(boolean_expression) LOGS_WARN
 
-#define IF_LOG_INFO() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, xbox::services::log_level::info)
-#define LOG_INFO(msg) LOG(DEFAULT_LOGGER, xbox::services::log_level::info, defaultCategory, msg)
+#define IF_LOG_INFO_ENABLED(x) { auto logger = DEFAULT_LOGGER; if (logger && logger->is_log_enabled(HCTraceLevel::Information)) { x; } }
+#define LOG_INFO(msg) LOG(DEFAULT_LOGGER, HCTraceLevel::Information, defaultCategory, msg)
 #define LOG_INFO_IF(boolean_expression, msg) if(boolean_expression) LOG_INFO(msg)
-#define LOGS_INFO LOGS(DEFAULT_LOGGER, xbox::services::log_level::info, defaultCategory)
+#define LOGS_INFO LOGS(HCTraceLevel::Information, defaultCategory)
 #define LOGS_INFO_IF(boolean_expression) if(boolean_expression) LOGS_INFO
 
-#define IF_LOG_DEBUG() IF_LOG_LEVEL_ENABLED(DEFAULT_LOGGER, xbox::services::log_level::debug)
-#define LOG_DEBUG(msg) LOG(DEFAULT_LOGGER, xbox::services::log_level::debug, defaultCategory, msg)
+#define IF_LOG_DEBUG_ENABLED(x) { auto logger = DEFAULT_LOGGER; if (logger && logger->is_log_enabled(HCTraceLevel::Verbose)) { x; } }
+#define LOG_DEBUG(msg) LOG(DEFAULT_LOGGER, HCTraceLevel::Verbose, defaultCategory, msg)
 #define LOG_DEBUG_IF(boolean_expression, msg) if(boolean_expression) LOG_DEBUG(msg)
-#define LOGS_DEBUG LOGS(DEFAULT_LOGGER, xbox::services::log_level::debug, defaultCategory)
+#define LOGS_DEBUG LOGS(HCTraceLevel::Verbose, defaultCategory)
 #define LOGS_DEBUG_IF(boolean_expression) if(boolean_expression) LOGS_DEBUG
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-enum class log_level
-{
-    off,
-    error,
-    warn,
-    info,
-    debug
-};
-
 class log_entry
 {
 public:
-    log_entry(log_level level, std::string category);
+    log_entry(HCTraceLevel level, std::string category);
 
-    log_entry(log_level level, std::string category, std::string msg);
+    log_entry(HCTraceLevel level, std::string category, std::string msg);
 
     std::string level_to_string() const;
 
     const std::stringstream& msg_stream() const { return m_message; }
 
     const std::string& category() const { return m_category; }
-    log_level get_log_level() const { return m_logLevel;  }
+
+    HCTraceLevel get_log_level() const { return m_logLevel; }
 
     log_entry& operator<<(const char* data)
     {
-        m_message << utility::conversions::to_utf8string(data);
+        m_message << xbox::services::convert::to_utf8string(data);
         return *this;
     }
 
     log_entry& operator<<(const std::string& data)
     {
-        m_message << utility::conversions::to_utf8string(data);
+        m_message << xbox::services::convert::to_utf8string(data);
         return *this;
     }
 
-#if !XSAPI_U
+#if HC_PLATFORM_IS_MICROSOFT
     log_entry& operator<<(const wchar_t* data)
     {
-        m_message << utility::conversions::to_utf8string(data);
+        m_message << xbox::services::convert::to_utf8string(data);
         return *this;
     }
 
     log_entry& operator<<(const std::wstring& data)
     {
-        m_message << utility::conversions::to_utf8string(data);
+        m_message << xbox::services::convert::to_utf8string(data);
         return *this;
     }
 #endif
@@ -96,67 +97,94 @@ public:
     }
 
 private:
-    log_level m_logLevel;
+    HCTraceLevel m_logLevel;
     std::string m_category;
     std::stringstream m_message;
-};
-
-enum log_output_level_setting
-{
-    use_logger_setting,
-    use_own_setting
 };
 
 class log_output
 {
 public:
-    // When log_output_type is set to use_logger_setting, the level parameter will be ignored.
-    log_output(log_output_level_setting type, log_level level);
+    log_output();
 
     virtual void add_log(_In_ const log_entry& entry);
 
-    log_output_level_setting level_setting() const { return m_levelSetting; }
+    bool log_level_enabled(HCTraceLevel level) const { return get_log_level() >= level; }
 
-    bool log_level_enabled(log_level level) const { return level <= m_logLevel; }
+    HCTraceLevel get_log_level() const
+    {
+        HCTraceLevel traceLevel = HCTraceLevel::Off;
+        HCSettingsGetTraceLevel(&traceLevel);
+        return traceLevel;
+    }
 
-    void set_log_level(log_level level) { m_logLevel = level; }
+    virtual ~log_output() = default;
 
 protected:
     // This function is to write the string to the final output, don't need to be thread safe.
-    virtual void write(_In_ const std::string& msg);
+    virtual void write(_In_ HCTraceLevel level, _In_ const std::string& msg);
 
     virtual std::string format_log(_In_ const log_entry& entry);
 
 private:
-    log_output_level_setting m_levelSetting;
-    log_level m_logLevel;
     mutable std::mutex m_mutex;
 };
 
 class logger
 {
 public:
-    logger() : m_logLevel(log_level::warn) {}
+    logger() {}
 
-    static void create_logger() { get_xsapi_singleton()->m_logger = std::make_shared<logger>();  }
-    static void release_logger() 
+    static std::shared_ptr<logger> get_logger()
     { 
-        auto singleton = get_xsapi_singleton(false);
-        if( singleton ) singleton->m_logger = nullptr;
+        auto singleton = get_xsapi_singleton();
+        if (singleton) 
+            return singleton->m_logger;
+        else
+            return nullptr;
     }
-    static const std::shared_ptr<logger>& get_logger() { return get_xsapi_singleton()->m_logger; }
 
-    void set_log_level(log_level level);
-
+    void set_log_level(HCTraceLevel level);
     void add_log_output(std::shared_ptr<log_output> output);
 
     void add_log(const log_entry& entry);
+    bool is_log_enabled(HCTraceLevel level);
     void operator+=(const log_entry& record);
-
 
 private:
     std::vector<std::shared_ptr<log_output>> m_log_outputs;
-    log_level m_logLevel;
+};
+
+class logger_raii
+{
+public:
+    logger_raii()
+    {
+        m_logger = xbox::services::logger::get_logger();
+    }
+
+    void set_log_level(HCTraceLevel level)
+    {
+        if (m_logger) m_logger->set_log_level(level);
+    }
+
+    void add_log_output(std::shared_ptr<log_output> output)
+    {
+        if (m_logger) m_logger->add_log_output(output);
+    }
+
+    void add_log(const log_entry& entry)
+    {
+        if (m_logger) m_logger->add_log(entry);
+    }
+
+    void operator+=(const log_entry& record)
+    {
+        add_log(record);
+    }
+
+private:
+    std::shared_ptr<logger> m_logger;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

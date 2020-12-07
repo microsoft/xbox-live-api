@@ -2,42 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"adityat"
-#define TEST_CLASS_AREA L"Privacy"
 #include "UnitTestIncludes.h"
 
-using namespace Microsoft::Xbox::Services;
-using namespace Microsoft::Xbox::Services::Privacy;
-using namespace Platform::Collections;
-using namespace Windows::Foundation::Collections;
+using namespace xbox::services::privacy;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-const std::wstring defaultMuteListResponse =
-LR"(
-{
-    "users":
-    [{
-        "xuid":"2814680291986301"
-    },
-    {
-        "xuid":"2814614899724406"
-    }]
-}
-)";
-
-const std::wstring defaultAvoidListResponse =
-LR"(
-{
-    "users":
-    [{ 
-        "xuid":"2814680291986301"
-    }]
-}
-)";
-
-const std::wstring defaultCheckPermissionsResponse =
-LR"(
+const char defaultCheckPermissionsResponse[] = R"(
 { 
     "isAllowed":false,
     "reasons" :
@@ -50,14 +21,13 @@ LR"(
 }
 )";
 
-const std::wstring defaultCheckMultiplePermissionsResponse =
-LR"(
+const char defaultCheckMultiplePermissionsResponse[] = R"(
 {
     "responses":
     [{
         "user":
         {
-            "xuid":"2814634309691161"
+            "xuid":"1"
         }, 
         "permissions" : 
         [{
@@ -73,7 +43,7 @@ LR"(
     { 
         "user":
         {
-            "xuid":"2814680291986301"
+            "anonymousUser":"crossNetworkUser"
         },
         "permissions" : 
         [{
@@ -103,258 +73,542 @@ LR"(
 DEFINE_TEST_CLASS(PrivacyTests)
 {
 public:
-    DEFINE_TEST_CLASS_PROPS(PrivacyTests)
+    DEFINE_TEST_CLASS_PROPS(PrivacyTests);
+
+    std::shared_ptr<HttpMock> CreatePrivacyListMock(
+        const std::vector<uint64_t>& xuids
+    )
+    {
+        auto mock = std::make_shared<HttpMock>("GET", "https://privacy.xboxlive.com/users");
+
+        mock->SetMockMatchedCallback(
+            [
+                &xuids
+            ]
+        (HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                UNREFERENCED_PARAMETER(requestUrl);
+                VERIFY_IS_TRUE(requestBody.empty());
+
+                // Response sample:
+                //{
+                //    "users":
+                //    [
+                //        { "xuid":"12345" },
+                //        { "xuid":"23456" }
+                //    ]
+                //}
+
+                JsonDocument response(rapidjson::kObjectType);
+                JsonValue usersJson(rapidjson::kArrayType);
+
+                for (size_t i = 0; i < xuids.size(); ++i)
+                {
+                    JsonValue user(rapidjson::kObjectType);
+                    user.AddMember("xuid", JsonValue(Utils::StringFromUint64(xuids[i]).c_str(), response.GetAllocator()).Move(), response.GetAllocator());
+                    usersJson.PushBack(user, response.GetAllocator());
+                }
+                response.AddMember("users", usersJson, response.GetAllocator());
+
+                mock->SetResponseBody(response);
+            }
+        );
+
+        return mock;
+    }
 
     void VerifyPermissionCheckResult(
-        Privacy::PermissionCheckResult^ result,
-        web::json::value permissionCheckResultToVerify
-        )
+        const XblPermissionCheckResult& result,
+        uint64_t expectedXuid,
+        XblAnonymousUserType expectedUserType,
+        JsonValue& responseJson
+    )
     {
-        VERIFY_ARE_EQUAL(result->IsAllowed, permissionCheckResultToVerify[L"isAllowed"].as_bool());
-        if (!result->IsAllowed)
+        VERIFY_ARE_EQUAL(result.isAllowed, responseJson["isAllowed"].GetBool());
+        VERIFY_ARE_EQUAL_INT(result.targetXuid, expectedXuid);
+        VERIFY_IS_TRUE(result.targetUserType == expectedUserType);
+        if (!result.isAllowed)
         {
-            VERIFY_ARE_EQUAL_INT(result->DenyReasons->Size, permissionCheckResultToVerify[L"reasons"].as_array().size());
-            int index = 0;
-            for (Privacy::PermissionDenyReason^ reason : result->DenyReasons)
+            JsonValue& reasonsArray{ responseJson["reasons"]};
+            VERIFY_ARE_EQUAL_INT(result.reasonsCount, reasonsArray.Size());
+            for (uint64_t i = 0; i < result.reasonsCount; ++i)
             {
-                auto reasonJson = permissionCheckResultToVerify[L"reasons"].as_array()[index];
-                VERIFY_ARE_EQUAL(reason->Reason->Data(), reasonJson[L"reason"].as_string());
-                index++;
+                auto expectedReason{ reasonsArray[i]["reason"].GetString() };
+                VERIFY_ARE_EQUAL_STR(utils::internal_string_from_string_t(permission_deny_reason{ result.reasons[i] }.reason()), expectedReason);
             }
         }
     }
 
-    void VerifyDefaultMultiplePermissionsCheckResult(
-        Privacy::MultiplePermissionsCheckResult^ result,
-        web::json::value multiplePermissionsCheckResultToVerify
-        )
+    void VerifyBatchPermissionsCheckResult(
+        std::vector<XblPermissionCheckResult>&& batchResult,
+        JsonValue& responseJson
+    )
     {
-        VERIFY_ARE_EQUAL_INT(result->Items->Size, multiplePermissionsCheckResultToVerify[L"permissions"].as_array().size());
-        auto userJson = multiplePermissionsCheckResultToVerify[L"user"];
-        VERIFY_ARE_EQUAL(result->XboxUserId->Data(), userJson[L"xuid"].as_string());
+        JsonValue& responsesArray = responseJson["responses"];
+        uint64_t userCount = responsesArray.Size();
+        uint64_t permissionCount = responsesArray[0]["permissions"].Size();
+        VERIFY_ARE_EQUAL_INT(batchResult.size(), userCount * permissionCount);
 
-        int index = 0;
-        for (Privacy::PermissionCheckResult^ checkResult : result->Items)
+        for (uint64_t userIndex = 0; userIndex < userCount; ++userIndex)
         {
-            auto reasonJson = multiplePermissionsCheckResultToVerify[L"permissions"].as_array()[index];
-            VerifyPermissionCheckResult(checkResult, reasonJson);
-            index++;
+            JsonValue& userJson = responsesArray[userIndex]["user"];
+
+            uint64_t expectedXuid{ 0 };
+            if (userJson.HasMember("xuid") && userJson["xuid"].IsString())
+            {
+                expectedXuid = utils::internal_string_to_uint64(userJson["xuid"].GetString());
+            }
+            XblAnonymousUserType expectedUserType{ XblAnonymousUserType::Unknown };
+            if (userJson.HasMember("anonymousUser") && userJson["anonymousUser"].IsString())
+            {
+                expectedUserType = EnumValue<XblAnonymousUserType>(userJson["anonymousUser"].GetString());
+            }
+            JsonValue& permissionsArray = responsesArray[userIndex]["permissions"];
+
+            for (uint64_t permissionIndex = 0; permissionIndex < permissionCount; ++permissionIndex)
+            {
+                VerifyPermissionCheckResult(batchResult[userIndex * permissionCount + permissionIndex], expectedXuid, expectedUserType, permissionsArray[permissionIndex]);
+            }
         }
     }
 
     DEFINE_TEST_CASE(TestCheckAvoidList)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestCheckAvoidList);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        auto responseJson = web::json::value::parse(defaultAvoidListResponse);
+        std::vector<uint64_t> avoidXuids{ 1, 2, 3, 4, 5 };
+        auto mock = CreatePrivacyListMock(avoidXuids);
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblPrivacyGetAvoidListAsync(xboxLiveContext.get(), &async));
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        IVectorView<Platform::String^>^ results =
-            create_task(xboxLiveContext->PrivacyService->GetAvoidListAsync()).get();
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        
+        size_t xuidCount{ 0 };
+        VERIFY_SUCCEEDED(XblPrivacyGetAvoidListResultCount(&async, &xuidCount));
+        VERIFY_IS_TRUE(avoidXuids.size() == xuidCount);
 
-        VERIFY_IS_NOT_NULL(results);
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://privacy.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/xuid(TestXboxUserId)/people/avoid", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_INT(results->Size, responseJson.as_object()[L"users"].as_array().size());
+        std::vector<uint64_t> resultXuids(xuidCount);
+        VERIFY_SUCCEEDED(XblPrivacyGetAvoidListResult(&async, xuidCount, &resultXuids[0]));
 
-        int index = 0;
-        for (Platform::String^ avoidMember : results)
+        for (size_t i = 0; i < avoidXuids.size(); ++i)
         {
-            auto avoidMemberJson = responseJson.as_object()[L"users"].as_array()[index];
-            VERIFY_ARE_EQUAL(avoidMember->Data(), avoidMemberJson[L"xuid"].as_string());
-            index++;
+            VERIFY_ARE_EQUAL_INT(avoidXuids[i], resultXuids[i]);
         }
     }
 
     DEFINE_TEST_CASE(TestCheckMuteList)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestCheckMuteList);
-        auto responseJson = web::json::value::parse(defaultMuteListResponse);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        std::vector<uint64_t> muteXuids{ };
+        auto mock = CreatePrivacyListMock(muteXuids);
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        IVectorView<Platform::String^>^ results =
-            create_task(xboxLiveContext->PrivacyService->GetMuteListAsync()).get();
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblPrivacyGetMuteListAsync(xboxLiveContext.get(), &async));
 
-        VERIFY_IS_NOT_NULL(results);
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://privacy.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/xuid(TestXboxUserId)/people/mute", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_INT(results->Size, responseJson.as_object()[L"users"].as_array().size());
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
 
-        int index = 0;
-        for (Platform::String^ avoidMember : results)
+        size_t xuidCount{ 0 };
+        VERIFY_SUCCEEDED(XblPrivacyGetMuteListResultCount(&async, &xuidCount));
+        VERIFY_IS_TRUE(muteXuids.size() == xuidCount);
+
+        std::vector<uint64_t> resultXuids(xuidCount);
+        VERIFY_SUCCEEDED(XblPrivacyGetMuteListResult(&async, xuidCount, resultXuids.data()));
+    }
+
+    DEFINE_TEST_CASE(TestCheckPermissionAsync)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        JsonDocument defaultCheckPermissionsResponseJson;
+        defaultCheckPermissionsResponseJson.Parse(defaultCheckPermissionsResponse);
+        HttpMock mock{ "GET", "https://privacy.xboxlive.com", 200, defaultCheckPermissionsResponseJson };
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblPrivacyCheckPermissionAsync(xboxLiveContext.get(), XblPermission::CommunicateUsingVoice, 1, &async));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+
+        size_t resultSize{ 0 };
+        VERIFY_SUCCEEDED(XblPrivacyCheckPermissionResultSize(&async, &resultSize));
+        
+        std::vector<uint8_t> buffer(resultSize);
+        XblPermissionCheckResult* result{ nullptr };
+        VERIFY_SUCCEEDED(XblPrivacyCheckPermissionResult(&async, resultSize, buffer.data(), &result, nullptr));
+
+        VerifyPermissionCheckResult(*result, 1, XblAnonymousUserType::Unknown, defaultCheckPermissionsResponseJson);
+    }
+
+    DEFINE_TEST_CASE(TestCheckPermissionWithLargeBufferAsync)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        JsonDocument defaultCheckPermissionsResponseJson;
+        defaultCheckPermissionsResponseJson.Parse(defaultCheckPermissionsResponse);
+        HttpMock mock{ "GET", "https://privacy.xboxlive.com", 200, defaultCheckPermissionsResponseJson };
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblPrivacyCheckPermissionAsync(xboxLiveContext.get(), XblPermission::CommunicateUsingVoice, 1, &async));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+
+        size_t resultSize{ 0 };
+        VERIFY_SUCCEEDED(XblPrivacyCheckPermissionResultSize(&async, &resultSize));
+
+        size_t bufferUsed{};
+        std::vector<uint8_t> buffer(resultSize * 2);
+        XblPermissionCheckResult* result{ nullptr };
+        VERIFY_SUCCEEDED(XblPrivacyCheckPermissionResult(&async, resultSize * 2, buffer.data(), &result, &bufferUsed));
+        VERIFY_ARE_EQUAL_UINT(resultSize, bufferUsed);
+
+        VerifyPermissionCheckResult(*result, 1, XblAnonymousUserType::Unknown, defaultCheckPermissionsResponseJson);
+    }
+
+    DEFINE_TEST_CASE(TestCheckPermissionForAnonymousUserAsync)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        JsonDocument defaultCheckPermissionsResponseJson;
+        defaultCheckPermissionsResponseJson.Parse(defaultCheckPermissionsResponse);
+        HttpMock mock{ "GET", "https://privacy.xboxlive.com", 200, defaultCheckPermissionsResponseJson };
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblPrivacyCheckPermissionForAnonymousUserAsync(
+            xboxLiveContext.get(),
+            XblPermission::PlayMultiplayer,
+            XblAnonymousUserType::CrossNetworkUser,
+            &async
+        ));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+
+        size_t resultSize{ 0 };
+        VERIFY_SUCCEEDED(XblPrivacyCheckPermissionForAnonymousUserResultSize(&async, &resultSize));
+
+        std::vector<uint8_t> buffer(resultSize);
+        XblPermissionCheckResult* result{ nullptr };
+        VERIFY_SUCCEEDED(XblPrivacyCheckPermissionForAnonymousUserResult(&async, resultSize, buffer.data(), &result, nullptr));
+
+        VerifyPermissionCheckResult(*result, 0, XblAnonymousUserType::CrossNetworkUser, defaultCheckPermissionsResponseJson);
+    }
+
+    DEFINE_TEST_CASE(TestCheckPermissionForAnonymousUserWithLargeBufferAsync)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        JsonDocument defaultCheckPermissionsResponseJson;
+        defaultCheckPermissionsResponseJson.Parse(defaultCheckPermissionsResponse);
+        HttpMock mock{ "GET", "https://privacy.xboxlive.com", 200, defaultCheckPermissionsResponseJson };
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblPrivacyCheckPermissionForAnonymousUserAsync(
+            xboxLiveContext.get(),
+            XblPermission::PlayMultiplayer,
+            XblAnonymousUserType::CrossNetworkUser,
+            &async
+        ));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+
+        size_t resultSize{ 0 };
+        VERIFY_SUCCEEDED(XblPrivacyCheckPermissionForAnonymousUserResultSize(&async, &resultSize));
+
+        size_t bufferUsed{};
+        std::vector<uint8_t> buffer(resultSize * 2);
+        XblPermissionCheckResult* result{ nullptr };
+        VERIFY_SUCCEEDED(XblPrivacyCheckPermissionForAnonymousUserResult(&async, resultSize, buffer.data(), &result, &bufferUsed));
+        VERIFY_ARE_EQUAL_UINT(resultSize, bufferUsed);
+
+        VerifyPermissionCheckResult(*result, 0, XblAnonymousUserType::CrossNetworkUser, defaultCheckPermissionsResponseJson);
+    }
+
+    DEFINE_TEST_CASE(TestBatchCheckPermissionAsync)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        JsonDocument defaultCheckMultiplePermissionsResponseJson;
+        defaultCheckMultiplePermissionsResponseJson.Parse(defaultCheckMultiplePermissionsResponse);
+        HttpMock mock{ "POST", "https://privacy.xboxlive.com", 200, defaultCheckMultiplePermissionsResponseJson };
+
+        std::vector<uint64_t> xuidsToCheck{ 1 };
+        std::vector<XblAnonymousUserType> userTypesToCheck{ XblAnonymousUserType::CrossNetworkUser };
+        std::vector<XblPermission> permissionsToCheck{ XblPermission::PlayMultiplayer, XblPermission::CommunicateUsingVoice, XblPermission::CommunicateUsingText };
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblPrivacyBatchCheckPermissionAsync(
+            xboxLiveContext.get(),
+            permissionsToCheck.data(),
+            permissionsToCheck.size(),
+            xuidsToCheck.data(),
+            xuidsToCheck.size(),
+            userTypesToCheck.data(),
+            userTypesToCheck.size(),
+            &async
+        ));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+
+        size_t bufferSize{ 0 };
+        VERIFY_SUCCEEDED(XblPrivacyBatchCheckPermissionResultSize(&async, &bufferSize));
+
+        std::vector<uint8_t> vectorBuffer(bufferSize);
+        XblPermissionCheckResult* results;
+        size_t resultsCount{ 0 };
+        VERIFY_SUCCEEDED(XblPrivacyBatchCheckPermissionResult(&async, bufferSize, vectorBuffer.data(), &results, &resultsCount, nullptr));
+
+        VerifyBatchPermissionsCheckResult({ results, results + resultsCount }, defaultCheckMultiplePermissionsResponseJson);
+    }
+
+    DEFINE_TEST_CASE(TestBatchCheckPermissionWithLargeBufferAsync)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        JsonDocument defaultCheckMultiplePermissionsResponseJson;
+        defaultCheckMultiplePermissionsResponseJson.Parse(defaultCheckMultiplePermissionsResponse);
+        HttpMock mock{ "POST", "https://privacy.xboxlive.com", 200, defaultCheckMultiplePermissionsResponseJson };
+
+        std::vector<uint64_t> xuidsToCheck{ 1 };
+        std::vector<XblAnonymousUserType> userTypesToCheck{ XblAnonymousUserType::CrossNetworkUser };
+        std::vector<XblPermission> permissionsToCheck{ XblPermission::PlayMultiplayer, XblPermission::CommunicateUsingVoice, XblPermission::CommunicateUsingText };
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblPrivacyBatchCheckPermissionAsync(
+            xboxLiveContext.get(),
+            permissionsToCheck.data(),
+            permissionsToCheck.size(),
+            xuidsToCheck.data(),
+            xuidsToCheck.size(),
+            userTypesToCheck.data(),
+            userTypesToCheck.size(),
+            &async
+        ));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+
+        size_t bufferSize{ 0 };
+        VERIFY_SUCCEEDED(XblPrivacyBatchCheckPermissionResultSize(&async, &bufferSize));
+
+        size_t bufferUsed{};
+        std::vector<uint8_t> vectorBuffer(bufferSize * 2);
+        XblPermissionCheckResult* results;
+        size_t resultsCount{ 0 };
+        VERIFY_SUCCEEDED(XblPrivacyBatchCheckPermissionResult(&async, bufferSize * 2, vectorBuffer.data(), &results, &resultsCount, &bufferUsed));
+        VERIFY_ARE_EQUAL_UINT(bufferSize, bufferUsed);
+
+        VerifyBatchPermissionsCheckResult({ results, results + resultsCount }, defaultCheckMultiplePermissionsResponseJson);
+    }
+
+    DEFINE_TEST_CASE(TestInvalidArgs)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        std::vector<uint64_t> xuidsToCheck{ 1 };
+        std::vector<XblAnonymousUserType> userTypesToCheck{ XblAnonymousUserType::CrossNetworkUser };
+        std::vector<XblPermission> permissionsToCheck{ XblPermission::PlayMultiplayer };
+        
+        XAsyncBlock async{};
+        VERIFY_FAILED(XblPrivacyBatchCheckPermissionAsync(
+            xboxLiveContext.get(),
+            nullptr, // invalid
+            permissionsToCheck.size(),
+            xuidsToCheck.data(),
+            xuidsToCheck.size(),
+            userTypesToCheck.data(),
+            userTypesToCheck.size(),
+            &async
+        ));
+
+        VERIFY_FAILED(XblPrivacyBatchCheckPermissionAsync(
+            xboxLiveContext.get(),
+            permissionsToCheck.data(),
+            0, // invalid
+            xuidsToCheck.data(),
+            xuidsToCheck.size(),
+            userTypesToCheck.data(),
+            userTypesToCheck.size(),
+            &async
+        ));
+
+
+        VERIFY_FAILED(XblPrivacyBatchCheckPermissionAsync(
+            xboxLiveContext.get(),
+            permissionsToCheck.data(),
+            permissionsToCheck.size(),
+            nullptr, // invalid
+            xuidsToCheck.size(),
+            userTypesToCheck.data(),
+            userTypesToCheck.size(),
+            &async
+        ));
+
+        VERIFY_FAILED(XblPrivacyBatchCheckPermissionAsync(
+            xboxLiveContext.get(),
+            permissionsToCheck.data(),
+            permissionsToCheck.size(),
+            xuidsToCheck.data(),
+            xuidsToCheck.size(),
+            nullptr, // invalid
+            userTypesToCheck.size(),
+            &async
+        ));
+
+        VERIFY_FAILED(XblPrivacyBatchCheckPermissionAsync(
+            xboxLiveContext.get(),
+            permissionsToCheck.data(),
+            permissionsToCheck.size(),
+            nullptr,
+            0,
+            nullptr,
+            0,
+            &async
+        ));
+    }
+
+    DEFINE_TEST_CASE(CppTestCheckAvoidList)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
+
+        std::vector<uint64_t> avoidXuids{ 1, 2, 3, 4, 5 };
+        auto mock = CreatePrivacyListMock(avoidXuids);
+
+        auto task = xboxLiveContext->privacy_service().get_avoid_list();
+
+        auto result{ task.get() };
+        VERIFY_IS_TRUE(!result.err());
+
+        auto& payload{ result.payload() };
+        VERIFY_IS_TRUE(avoidXuids.size() == payload.size());
+
+        for (size_t i = 0; i < avoidXuids.size(); ++i)
         {
-            auto avoidMemberJson = responseJson.as_object()[L"users"].as_array()[index];
-            VERIFY_ARE_EQUAL(avoidMember->Data(), avoidMemberJson[L"xuid"].as_string());
-            index++;
+            VERIFY_IS_TRUE(avoidXuids[i] == Utils::Uint64FromStringT(payload[i]));
         }
     }
 
-    DEFINE_TEST_CASE(TestCheckPermissionWithTargetUser)
+    DEFINE_TEST_CASE(CppTestCheckMuteList)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestCheckPermissionWithTargetUser);
-        auto responseJson = web::json::value::parse(defaultCheckPermissionsResponse);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        std::vector<uint64_t> muteXuids{ };
+        auto mock = CreatePrivacyListMock(muteXuids);
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        Privacy::PermissionCheckResult^ result =
-            create_task(xboxLiveContext->PrivacyService->CheckPermissionWithTargetUserAsync(
-            L"CommunicateUsingVoice",
-            L"2814680291986301"
-            )).get();
+        auto task = xboxLiveContext->privacy_service().get_mute_list();
 
-        VERIFY_IS_NOT_NULL(result);
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://privacy.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/xuid(TestXboxUserId)/permission/validate?setting=CommunicateUsingVoice&target=xuid(2814680291986301)", httpCall->PathQueryFragment.to_string());
+        auto result{ task.get() };
+        VERIFY_IS_TRUE(!result.err());
 
-        VerifyPermissionCheckResult(result, responseJson);
+        auto& payload{ result.payload() };
+        VERIFY_IS_TRUE(muteXuids.size() == payload.size());
     }
 
-    DEFINE_TEST_CASE(TestCheckMultiplePermissionsWithMultipleTargetUsers)
+    void VerifyPermissionCheckResultCpp(
+        const permission_check_result& result,
+        JsonValue& responseJson
+    )
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestCheckMultiplePermissionsWithMultipleTargetUsers);
-        auto responseJson = web::json::value::parse(defaultCheckMultiplePermissionsResponse);
-
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        Vector<Platform::String^>^ permissionIds = ref new Vector<Platform::String^>();
-        permissionIds->Append("PlayMultiplayer");
-        permissionIds->Append("CommunicateUsingVoice");
-        permissionIds->Append("CommunicateUsingText");
-
-        Vector<Platform::String^>^ targetXboxUserIds = ref new Vector<Platform::String^>();
-        targetXboxUserIds->Append("2814634309691161");
-        targetXboxUserIds->Append("2814680291986301");
-
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        IVectorView<Privacy::MultiplePermissionsCheckResult^>^ results = create_task(
-            xboxLiveContext->PrivacyService->CheckMultiplePermissionsWithMultipleTargetUsersAsync(
-                permissionIds->GetView(),
-                targetXboxUserIds->GetView()
-                )
-            ).get();
-
-        VERIFY_IS_NOT_NULL(results);
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://privacy.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/xuid(TestXboxUserId)/permission/validate", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_INT(results->Size, responseJson.as_object()[L"responses"].as_array().size());
-        
-        int index = 0;
-        for (Privacy::MultiplePermissionsCheckResult^ checkResult: results)
+        VERIFY_ARE_EQUAL(result.is_allowed(), responseJson["isAllowed"].GetBool());
+        if (!result.is_allowed())
         {
-            auto checkPermissionsJson = responseJson.as_object()[L"responses"].as_array()[index];
-            VerifyDefaultMultiplePermissionsCheckResult(checkResult, checkPermissionsJson);
-            index++;
-        }        
+            auto& reasonsArray{ responseJson["reasons"] };
+            auto& actualReasons{ result.deny_reasons() };
+            VERIFY_ARE_EQUAL_INT(actualReasons.size() , reasonsArray.Size());
+            for (uint64_t i = 0; i < actualReasons.size(); ++i)
+            {
+                auto expectedReason{ reasonsArray[i]["reason"].GetString() };
+                VERIFY_ARE_EQUAL_STR(utils::internal_string_from_string_t(actualReasons[i].reason()), expectedReason);
+            }
+        }
     }
 
-    DEFINE_TEST_CASE(TestCheckPermissionWithTargetUserInvalidArgs)
+    void VerifyBatchPermissionsCheckResultCpp(
+        const std::vector<multiple_permissions_check_result>& result,
+       JsonValue& responseJson
+    )
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestCheckPermissionWithTargetUserInvalidArgs);
-        auto responseJson = web::json::value::parse(defaultCheckPermissionsResponse);
+        JsonValue& responsesArray = responseJson["responses"];
+        uint64_t userCount = responsesArray.Size();
+        uint64_t permissionCount = responsesArray[0]["permissions"].Size();
+        VERIFY_ARE_EQUAL_INT(result.size(), userCount);
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
+        for (uint64_t userIndex = 0; userIndex < userCount; ++userIndex)
+        {
+            JsonValue& userJson = responsesArray[userIndex]["user"];
 
-        TEST_LOG(L"TestCheckPermissionWithTargetUserInvalidArgs: Empty permissionId param.");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->PrivacyService->CheckPermissionWithTargetUserAsync(
-            L"",    // Invalid
-            L"2814680291986301"
-            )).get(),
-            E_INVALIDARG);
+            xsapi_internal_string target;
+            if (userJson.HasMember("xuid") && userJson["xuid"].IsString())
+            {
+                target = userJson["xuid"].GetString();
+            }
+            else if (userJson.HasMember("anonymousUser") && userJson["anonymousUser"].IsString())
+            {
+                target = userJson["anonymousUser"].GetString();
+            }
+            VERIFY_ARE_EQUAL_STR(utils::internal_string_from_string_t(result[userIndex].xbox_user_id()), target);
+            JsonValue& permissionsArray = responsesArray[userIndex]["permissions"];
 
-        TEST_LOG(L"TestCheckPermissionWithTargetUserInvalidArgs: Empty targetXboxUserId param.");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->PrivacyService->CheckPermissionWithTargetUserAsync(
-            L"CommunicateUsingVoice",
-            L""     // Invalid
-            )).get(),
-            E_INVALIDARG);
-
-        TEST_LOG(L"TestCheckPermissionWithTargetUserInvalidArgs: Null permissionId param.");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->PrivacyService->CheckPermissionWithTargetUserAsync(
-            nullptr,    // Invalid
-            L"2814680291986301"
-            )).get(),
-            E_INVALIDARG);
-
-        TEST_LOG(L"TestCheckPermissionWithTargetUserInvalidArgs: Null targetXboxUserId param.");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->PrivacyService->CheckPermissionWithTargetUserAsync(
-            L"CommunicateUsingVoice",
-            nullptr     // Invalid
-            )).get(),
-            E_INVALIDARG);
+            for (uint64_t permissionIndex = 0; permissionIndex < permissionCount; ++permissionIndex)
+            {
+                VerifyPermissionCheckResultCpp(result[userIndex].items()[permissionIndex], permissionsArray[permissionIndex]);
+            }
+        }
     }
 
-    DEFINE_TEST_CASE(TestCheckMultiplePermissionsWithMultipleTargetUsersInvalidArgs)
+    DEFINE_TEST_CASE(CppTestCheckPermissionWithTargetUser)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestCheckMultiplePermissionsWithMultipleTargetUsersInvalidArgs);
-        auto responseJson = web::json::value::parse(defaultCheckPermissionsResponse);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
+        JsonDocument defaultCheckPermissionsResponseJson;
+        defaultCheckPermissionsResponseJson.Parse(defaultCheckPermissionsResponse);
+        HttpMock mock{ "GET", "https://privacy.xboxlive.com", 200, defaultCheckPermissionsResponseJson };
 
-        Vector<Platform::String^>^ permissionIds = ref new Vector<Platform::String^>();
-        permissionIds->Append("PlayMultiplayer");
-        permissionIds->Append("CommunicateUsingVoice");
-        permissionIds->Append("CommunicateUsingText");
+        auto task = xboxLiveContext->privacy_service().check_permission_with_target_user(permission_id_constants::communicate_using_voice(), _T("1"));
 
-        Vector<Platform::String^>^ targetXboxUserIds = ref new Vector<Platform::String^>();
-        targetXboxUserIds->Append("2814634309691161");
-        targetXboxUserIds->Append("2814680291986301");
+        auto result{ task.get() };
+        VERIFY_IS_TRUE(!result.err());
 
-        TEST_LOG(L"TestCheckMultiplePermissionsWithMultipleTargetUsersInvalidArgs: Empty permissionIds param.");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->PrivacyService->CheckMultiplePermissionsWithMultipleTargetUsersAsync(
-            {},    // empty
-            targetXboxUserIds->GetView()
-            )).get(),
-            E_INVALIDARG);
+        VerifyPermissionCheckResultCpp(result.payload(), defaultCheckPermissionsResponseJson);
+    }
 
-        TEST_LOG(L"TestCheckMultiplePermissionsWithMultipleTargetUsersInvalidArgs: Empty targetXboxUserIds param.");
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->PrivacyService->CheckMultiplePermissionsWithMultipleTargetUsersAsync(
-            permissionIds->GetView(),
-            {}     // empty
-            )).get(),
-            E_INVALIDARG);
+    DEFINE_TEST_CASE(CppTestCheckMultiplePermissionsWithMultipleTargetUsers)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
 
-        TEST_LOG(L"TestCheckMultiplePermissionsWithMultipleTargetUsersInvalidArgs: Null permissionIds param.");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->PrivacyService->CheckMultiplePermissionsWithMultipleTargetUsersAsync(
-            nullptr,    // Invalid
-            targetXboxUserIds->GetView()
-            )).get(),
-            E_INVALIDARG);
+        JsonDocument defaultCheckMultiplePermissionsResponseJson;
+        defaultCheckMultiplePermissionsResponseJson.Parse(defaultCheckMultiplePermissionsResponse);
+        HttpMock mock{ "POST", "https://privacy.xboxlive.com", 200, defaultCheckMultiplePermissionsResponseJson };
 
-        TEST_LOG(L"TestCheckMultiplePermissionsWithMultipleTargetUsersInvalidArgs: Null targetXboxUserIds param.");
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->PrivacyService->CheckMultiplePermissionsWithMultipleTargetUsersAsync(
-            permissionIds->GetView(),
-            nullptr     // Invalid
-            )).get(),
-            E_INVALIDARG);
+        std::vector<string_t> permissionsToCheck{
+            permission_id_constants::play_multiplayer(),
+            permission_id_constants::communicate_using_voice(),
+            permission_id_constants::communicate_using_text()
+        };
+
+        std::vector<string_t> targets
+        {
+            _T("1"),
+            anonymous_user_type_constants::cross_network_user()
+        };
+
+        auto task = xboxLiveContext->privacy_service().check_multiple_permissions_with_multiple_target_users(permissionsToCheck, targets);
+
+        auto result{ task.get() };
+        VERIFY_IS_TRUE(!result.err());
+
+        VerifyBatchPermissionsCheckResultCpp(result.payload(), defaultCheckMultiplePermissionsResponseJson);
     }
 };
 

@@ -2,210 +2,218 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/profile.h"
-#include "utils.h"
-#include "user_context.h"
-#include "xbox_system_factory.h"
-
-using namespace pplx;
+#include "profile_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
-const string_t profile_service::SETTINGS_ARRAY[] = {
-    _T("AppDisplayName"),
-    _T("AppDisplayPicRaw"),
-    _T("GameDisplayName"),
-    _T("GameDisplayPicRaw"),
-    _T("Gamerscore"),
-    _T("Gamertag")
+using namespace xbox::services;
+
+static const char* s_settings[] = {
+    "AppDisplayName",
+    "AppDisplayPicRaw",
+    "GameDisplayName",
+    "GameDisplayPicRaw",
+    "Gamerscore",
+    "Gamertag",
+    "ModernGamertag",
+    "ModernGamertagSuffix",
+    "UniqueModernGamertag"
 };
 
-const web::json::value profile_service::SETTINGS_SERIALIZED = serialize_settings_json();
-
-const string_t profile_service::SETTINGS_QUERY = settings_query();
-
-profile_service::profile_service(
-    _In_ std::shared_ptr<user_context> userContext,
-    _In_ std::shared_ptr<xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox_live_app_config> appConfig
-    ) :
-    m_userContext(std::move(userContext)),
-    m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
-    m_appConfig(std::move(appConfig))
+ProfileService::ProfileService(
+    _In_ User user,
+    _In_ std::shared_ptr<XboxLiveContextSettings> xboxLiveContextSettings,
+    _In_ std::shared_ptr<AppConfig> appConfig
+) noexcept :
+    m_user{ std::move(user) },
+    m_xboxLiveContextSettings{ std::move(xboxLiveContextSettings) },
+    m_appConfig{ std::move(appConfig) }
 {
 }
 
-pplx::task<xbox_live_result<xbox_user_profile>>
-profile_service::get_user_profile(
-    _In_ string_t xboxUserId
-    )
+HRESULT ProfileService::GetUserProfiles(
+    _In_ xsapi_internal_vector<uint64_t>&& xuids,
+    _In_ AsyncContext<Result<xsapi_internal_vector<XblUserProfile>>> async
+) const noexcept
 {
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(xboxUserId.empty(), xbox_user_profile, "xboxUserId is empty");
-    std::vector< string_t> xboxUserIds;
-    xboxUserIds.push_back(std::move(xboxUserId));
-
-    auto task = get_user_profiles(xboxUserIds)
-    .then([](xbox_live_result<std::vector<xbox_user_profile>> result)
-    {
-        if (result.payload().size() == 1)
-        {
-            return xbox_live_result<xbox_user_profile>(result.payload()[0], result.err(), result.err_message());
-        }
-        else
-        {
-            return xbox_live_result<xbox_user_profile>(result.err(), result.err_message());
-        }
-    });
-    
-    return utils::create_exception_free_task<xbox_user_profile>(
-        task
-        );
-}
-
-
-pplx::task<xbox_live_result<std::vector<xbox_user_profile>>>
-profile_service::get_user_profiles(
-    _In_ const std::vector< string_t >& xboxUserIds
-    )
-{
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(xboxUserIds.size() == 0, std::vector<xbox_user_profile>, "xbox user ids size is 0");
-    for (string_t s : xboxUserIds)
-    {
-        RETURN_TASK_CPP_INVALIDARGUMENT_IF(s.empty(), std::vector<xbox_user_profile>, "Found empty string in xbox user ids");
-    }
-
-    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
-        _T("POST"),
-        utils::create_xboxlive_endpoint(_T("profile"), m_appConfig),
-        _T("/users/batch/profile/settings"),
+        "POST",
+        XblHttpCall::BuildUrl("profile", "/users/batch/profile/settings"),
         xbox_live_api::get_user_profiles
-        );
-    httpCall->set_xbox_contract_version_header_value(_T("2"));
+    ));
 
-    web::json::value request;
-    request[_T("userIds")] = utils::serialize_vector<string_t>(utils::json_string_serializer, xboxUserIds);
-    request[_T("settings")] = SETTINGS_SERIALIZED;
+    httpCall->SetHeader(CONTRACT_VERSION_HEADER, "2");
 
-    httpCall->set_request_body(request.serialize());
+    JsonDocument request(rapidjson::kObjectType);
+    JsonValue userIdsJson(rapidjson::kArrayType);
+    JsonUtils::SerializeVector<uint64_t>(JsonUtils::JsonXuidSerializer, xuids, userIdsJson, request.GetAllocator());
+    request.AddMember("userIds", userIdsJson, request.GetAllocator());
 
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([](std::shared_ptr<http_call_response> response) 
+    JsonValue settingsArray(rapidjson::kArrayType);
+    for (size_t i = 0; i < ARRAYSIZE(s_settings); ++i)
     {
-        if (response->response_body_json().size() != 0)
-        {
-            std::error_code errc = xbox_live_error_code::no_error;
-            auto profileVector = utils::extract_xbox_live_result_json_vector<xbox_user_profile>(
-                xbox_user_profile::_Deserialize,
-                response->response_body_json(), 
-                _T("profileUsers"),
-                errc,
-                true
-                );
+        settingsArray.PushBack(JsonValue(s_settings[i], request.GetAllocator()).Move(), request.GetAllocator());
+    }
+    request.AddMember("settings", settingsArray, request.GetAllocator());
 
-            return utils::generate_xbox_live_result<std::vector<xbox_user_profile>>(
-                profileVector,
-                response
-                );
-        }
-        else
-        {
-            return xbox_live_result<std::vector<xbox_user_profile>>(response->err_code(), response->err_message());
-        }
-    });
+    httpCall->SetRequestBody(request);
 
-    return utils::create_exception_free_task<std::vector<xbox_user_profile>>(
-        task
-        );
+    return httpCall->Perform({
+        async.Queue(),
+        [
+            async
+        ]
+    (HttpResult result)
+    {
+        HRESULT hr{ Failed(result) ? result.Hresult() : result.Payload()->Result() };
+        if (FAILED(hr))
+        {
+            return async.Complete(hr);
+        }
+        return async.Complete(DeserializeUserProfiles(result.Payload()->GetResponseBodyJson()));
+    } });
 }
 
-pplx::task<xbox_live_result<std::vector<xbox_user_profile>>> 
-profile_service::get_user_profiles_for_social_group(
-    _In_ const string_t& socialGroup
-    )
+HRESULT ProfileService::GetUserProfilesForSocialGroup(
+    _In_ xsapi_internal_string&& socialGroup,
+    _In_ AsyncContext<Result<xsapi_internal_vector<XblUserProfile>>> async
+) const noexcept
 {
-    RETURN_TASK_CPP_INVALIDARGUMENT_IF(socialGroup.empty(), std::vector<xbox_user_profile>, "socialGroup is empty");
+    xsapi_internal_stringstream pathAndQuery;
+    pathAndQuery << "/users/me/profile/settings/people/";
+    pathAndQuery << socialGroup;
+    pathAndQuery << "?settings=";
 
-    string_t pathAndQuery = pathandquery_user_profiles_for_social_group(
-        socialGroup
-        );
-
-    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
-        m_xboxLiveContextSettings,
-        _T("GET"),
-        utils::create_xboxlive_endpoint(_T("profile"), m_appConfig),
-        pathAndQuery,
-        xbox_live_api::get_user_profiles_for_social_group
-        );
-    httpCall->set_xbox_contract_version_header_value(_T("2"));
-
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([](std::shared_ptr<http_call_response> response)
+    for (uint32_t i = 0; i < ARRAYSIZE(s_settings); ++i)
     {
-        if (response->response_body_json().size() != 0) // I don't think this is possible with this call?
+        if (i > 0)
         {
-            std::error_code errc = xbox_live_error_code::no_error;
-            auto profileVector = utils::extract_xbox_live_result_json_vector<xbox_user_profile>(
-                xbox_user_profile::_Deserialize,
-                response->response_body_json(),
-                _T("profileUsers"),
-                errc,
-                true
-                );
-
-            return utils::generate_xbox_live_result<std::vector<xbox_user_profile>>(
-                profileVector,
-                response
-                );
+            pathAndQuery << ",";
         }
-        else
-        {
-            return xbox_live_result<std::vector<xbox_user_profile>>(response->err_code(), response->err_message());
-        }
-    });
-
-    return utils::create_exception_free_task<std::vector<xbox_user_profile>>(
-        task
-        );
-}
-
-const string_t
-profile_service::pathandquery_user_profiles_for_social_group(
-    _In_ const string_t& socialGroup
-    )
-{
-    stringstream_t source;
-    source << _T("/users/me/profile/settings/people/");
-    source << socialGroup;
-    source << _T("?settings=");
-    source << SETTINGS_QUERY;
-
-    return source.str();
-}
-
-const string_t
-profile_service::settings_query()
-{
-    stringstream_t source;
-    uint32_t arraySize = ARRAYSIZE(SETTINGS_ARRAY);
-    for (uint32_t i = 0; i < arraySize; ++i)
-    {
-        const string_t& setting = SETTINGS_ARRAY[i];
-        source << web::http::uri::encode_uri(setting);
-        if (i + 1 != arraySize)
-        {
-            source << _T(",");
-        }
+        pathAndQuery << s_settings[i];
     }
 
-    return source.str();
+    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    RETURN_HR_IF_FAILED(httpCall->Init(
+        m_xboxLiveContextSettings,
+        "GET",
+        XblHttpCall::BuildUrl("profile", pathAndQuery.str()),
+        xbox_live_api::get_user_profiles_for_social_group
+    ));
+
+    httpCall->SetHeader(CONTRACT_VERSION_HEADER, "2");
+
+    return httpCall->Perform({
+        async.Queue(),
+        [
+            async
+        ]
+    (HttpResult result)
+    {
+        HRESULT hr{ Failed(result) ? result.Hresult() : result.Payload()->Result() };
+        if (FAILED(hr))
+        {
+            return async.Complete(hr);
+        }
+        return async.Complete(DeserializeUserProfiles(result.Payload()->GetResponseBodyJson()));
+    } });
 }
 
-web::json::value
-profile_service::serialize_settings_json()
+Result<xsapi_internal_vector<XblUserProfile>> ProfileService::DeserializeUserProfiles(
+    _In_ const JsonValue& json
+) noexcept
 {
-    std::vector<string_t> settingsVector(SETTINGS_ARRAY, SETTINGS_ARRAY + sizeof(SETTINGS_ARRAY) / sizeof(SETTINGS_ARRAY[0]));
-    return utils::serialize_vector<string_t>(utils::json_string_serializer, settingsVector);
+    if (json.IsNull())
+    {
+        return WEB_E_INVALID_JSON_STRING;
+    }
+
+    HRESULT errc = S_OK;
+    xsapi_internal_vector<XblUserProfile> profilesVector;
+    RETURN_HR_IF_FAILED( JsonUtils::ExtractJsonVector<XblUserProfile>(
+        DeserializeUserProfile,
+        json,
+        "profileUsers",
+        profilesVector,
+        true
+        ));
+
+    return Result<xsapi_internal_vector<XblUserProfile>>{ profilesVector, errc };
+}
+
+Result<XblUserProfile> ProfileService::DeserializeUserProfile(
+    _In_ const JsonValue& json
+) noexcept
+{
+    if (json.IsNull())
+    {
+        return WEB_E_INVALID_JSON_STRING;
+    }
+
+    XblUserProfile profile{};
+
+    HRESULT errc = S_OK;
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonXuid(json, "id", profile.xboxUserId, true));
+
+    if (json.IsObject() && json.HasMember("settings"))
+    {
+        const JsonValue& settingsJson = json["settings"];
+        if(settingsJson.IsArray())
+        for (const auto& setting : settingsJson.GetArray())
+        {
+            xsapi_internal_string id;
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(setting, "id", id, true));
+            xsapi_internal_string value;
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(setting, "value", value, true));
+
+            if (id == "AppDisplayName")
+            {
+                utils::strcpy(profile.appDisplayName, sizeof(profile.appDisplayName), value.data());
+            }
+            else if (id == "AppDisplayPicRaw")
+            {
+                utils::strcpy(profile.appDisplayPictureResizeUri, sizeof(profile.appDisplayPictureResizeUri), value.data());
+            }
+            else if (id == "GameDisplayName")
+            {
+                utils::strcpy(profile.gameDisplayName, sizeof(profile.gameDisplayName), value.data());
+            }
+            else if (id == "GameDisplayPicRaw")
+            {
+                utils::strcpy(profile.gameDisplayPictureResizeUri, sizeof(profile.gameDisplayPictureResizeUri), value.data());
+            }
+            else if (id == "Gamerscore")
+            {
+                utils::strcpy(profile.gamerscore, sizeof(profile.gamerscore), value.data());
+            }
+            else if (id == "Gamertag")
+            {
+                utils::strcpy(profile.gamertag, sizeof(profile.gamertag), value.data());
+            }
+            else if (id == "ModernGamertag")
+            {
+                utils::strcpy(profile.modernGamertag, sizeof(profile.modernGamertag), value.data());
+            }
+            else if (id == "ModernGamertagSuffix")
+            {
+                utils::strcpy(profile.modernGamertagSuffix, sizeof(profile.modernGamertagSuffix), value.data());
+            }
+            else if (id == "UniqueModernGamertag")
+            {
+                utils::strcpy(profile.uniqueModernGamertag, sizeof(profile.uniqueModernGamertag), value.data());
+            }
+        }
+    }
+    else
+    {
+        //required
+        return WEB_E_INVALID_JSON_STRING;
+    }
+
+    return Result<XblUserProfile>{ std::move(profile), errc };
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

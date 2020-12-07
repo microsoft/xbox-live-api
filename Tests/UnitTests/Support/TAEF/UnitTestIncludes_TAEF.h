@@ -3,7 +3,8 @@
 
 #pragma once
 #include "UnitTestBase.h"
-#include "UnitTestBase_winrt.h"
 #include "DefineTestMacros.h"
-#include "StockMocks.h"
 #include "WexTestClass.h"
+
+#define VERIFY_INVALIDARG(x) \
+    VERIFY_ARE_EQUAL(E_INVALIDARG, x);

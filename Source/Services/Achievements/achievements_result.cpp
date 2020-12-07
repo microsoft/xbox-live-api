@@ -2,102 +2,112 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/achievements.h"
-#include "xbox_system_factory.h"
-#include "utils.h"
-#include "user_context.h"
+#include "achievements_internal.h"
+#include "xsapi_utils.h"
 
-using namespace pplx;
+using namespace xbox::services;
+using namespace xbox::services::achievements;
 
-NAMESPACE_MICROSOFT_XBOX_SERVICES_ACHIEVEMENTS_CPP_BEGIN
+XblAchievementsResult::~XblAchievementsResult()
+{
+    for (auto& achievement : m_achievements)
+    {
+        AchievementsService::CleanupAchievement(achievement);
+    }
+}
 
-achievements_result::achievements_result()
+Result<std::shared_ptr<XblAchievementsResult>> XblAchievementsResult::Deserialize(
+    _In_ const JsonDocument& json,
+    _In_ std::shared_ptr<const xbox::services::achievements::AchievementsService> service)
+{
+    if (json.IsNull())
+    {
+        return WEB_E_INVALID_JSON_STRING;
+    }
+
+    auto achievementResult = MakeShared<XblAchievementsResult>(service);
+
+    HRESULT errCode = S_OK;
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonVector<XblAchievement>(
+        AchievementsService::DeserializeAchievement,
+        json, "achievements", achievementResult->m_achievements, true
+        ));
+
+    if (json.IsObject() && json.HasMember("pagingInfo"))
+    {
+        const JsonValue& pageInfoJson = json["pagingInfo"];
+        if (!pageInfoJson.IsNull())
+        {
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(pageInfoJson, "continuationToken", achievementResult->m_continuationToken, true));
+        }
+    }
+
+    if (errCode)
+    {
+        return Result<std::shared_ptr<XblAchievementsResult>>{ errCode };
+    }
+    return Result<std::shared_ptr<XblAchievementsResult>>{ achievementResult };
+}
+
+XblAchievementsResult::XblAchievementsResult(
+    _In_ std::shared_ptr<const xbox::services::achievements::AchievementsService> service
+) : 
+    m_serviceWeakPointer{ service }
 {
 }
 
-void achievements_result::_Init_next_page_info(
-    _In_ std::shared_ptr<xbox::services::user_context> userContext,
-    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
-    _In_ std::weak_ptr<xbox_live_context_impl> xboxLiveContextImpl,
-    _In_ string_t xboxUserId,
-    _In_ std::vector<uint32_t> titleIds,
-    _In_ achievement_type type,
-    _In_ bool unlockedOnly,
-    _In_ achievement_order_by orderBy
-    )
+const xsapi_internal_vector<XblAchievement>& XblAchievementsResult::Achievements() const
 {
-    m_userContext = std::move(userContext);
-    m_xboxLiveContextSettings = std::move(xboxLiveContextSettings);
-    m_appConfig = std::move(appConfig);
-    m_xboxLiveContextImpl = std::move(xboxLiveContextImpl);
-    m_xboxUserId = std::move(xboxUserId);
-    m_titleIds = std::move(titleIds);
-    m_achievementType = type;
-    m_unlockedOnly = unlockedOnly;
-    m_orderBy = orderBy;
+    return m_achievements;
 }
 
-const std::vector<achievement>&
-achievements_result::items() const
+std::shared_ptr<xbox::services::RefCounter> XblAchievementsResult::GetSharedThis()
 {
-    return m_items;
+    return shared_from_this();
 }
 
-bool
-achievements_result::has_next()
+bool XblAchievementsResult::HasNext() const
 {
     return !m_continuationToken.empty();
 }
 
-pplx::task<xbox::services::xbox_live_result<achievements_result>>
-achievements_result::get_next(
-    _In_ uint32_t maxItems
-    )
+HRESULT XblAchievementsResult::GetNext(
+    _In_ uint32_t maxItems,
+    _In_ AsyncContext<xbox::services::Result<std::shared_ptr<XblAchievementsResult>>> async
+) const noexcept
 {
-    if (m_continuationToken.empty())
+    auto service{ m_serviceWeakPointer.lock() };
+
+    if (m_continuationToken.empty() || service == nullptr)
     {
-        xbox_live_result<achievements_result> results(xbox_live_error_code::out_of_range, "achievements_result doesn't have next page");
-        return pplx::task_from_result<xbox::services::xbox_live_result<achievements_result>>(results);
+        return E_UNEXPECTED;
     }
 
-    return achievement_service(
-            m_userContext, 
-            m_xboxLiveContextSettings, 
-            m_appConfig, 
-            m_xboxLiveContextImpl).get_achievements(
-        m_xboxUserId,
+    return service->GetAchievements(
+        m_xuid,
         m_titleIds,
         m_achievementType,
         m_unlockedOnly,
         m_orderBy,
         0, // use continuationToken, ignore skipItems.
         maxItems,
-        m_continuationToken
-        );
+        m_continuationToken,
+        std::move(async)
+    );
 }
 
-xbox_live_result<achievements_result>
-achievements_result::_Deserialize(
-    _In_ const web::json::value& json
-    )
+void XblAchievementsResult::SetNextPageQueryParameters(
+    _In_ uint64_t xuid,
+    _In_ const xsapi_internal_vector<uint32_t>& titleIds,
+    _In_ XblAchievementType type,
+    _In_ bool unlockedOnly,
+    _In_ XblAchievementOrderBy orderBy
+)
 {
-    if (json.is_null()) return xbox_live_result<achievements_result>();
-
-    achievements_result result;
-
-    std::error_code errCode = xbox_live_error_code::no_error;
-
-    result.m_items = utils::extract_json_vector<achievement>(achievement::_Deserialize, json, _T("achievements"), errCode, true);
-    auto pageInfoJson = utils::extract_json_field(json, _T("pagingInfo"), errCode, false);
-    if (!pageInfoJson.is_null())
-    {
-        result.m_continuationToken = utils::extract_json_string(pageInfoJson, _T("continuationToken"), errCode, true);
-    }
-
-    return xbox_live_result<achievements_result>(result, errCode);
+    m_xuid = xuid;
+    m_titleIds = titleIds;
+    m_achievementType = type;
+    m_unlockedOnly = unlockedOnly;
+    m_orderBy = orderBy;
 }
-
-
-
-NAMESPACE_MICROSOFT_XBOX_SERVICES_ACHIEVEMENTS_CPP_END

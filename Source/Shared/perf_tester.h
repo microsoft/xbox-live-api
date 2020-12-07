@@ -2,89 +2,85 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
-#if UNIT_TEST_SERVICES
-#define PERF_TESTING 0
-#else
-#define PERF_TESTING 0
-#endif
 
-#define PERF_THRESHOLD_MS .5f
-#include "xsapi/system.h"
+#include <mutex>
+#include <map>
+#include <chrono>
 
-NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+#define ENABLE_PERF_PROFILING 0
 
-struct perf_counter
+#if ENABLE_PERF_PROFILING
+#define PERF_START() xbox::services::detail::PerfTester::Instance().Start(__FUNCTION__)
+#define PERF_STOP() xbox::services::detail::PerfTester::Instance().Stop(__FUNCTION__)
+#define PERF_START_AREA(area) xbox::services::detail::PerfTester::Instance().Start(area)
+#define PERF_STOP_AREA(area) xbox::services::detail::PerfTester::Instance().Stop(area)
+
+namespace xbox{
+namespace services{
+namespace detail{
+
+struct PerfTester
 {
-    float totalTime;
-    std::chrono::time_point<std::chrono::high_resolution_clock> previousTime;
-};
-
-class perf_tester
-{
-
-public:
-    perf_tester() { }
-
-    perf_tester(_In_ string_t ownerName) :
-        m_ownerName(std::move(ownerName))
+    static PerfTester& Instance()
     {
+        static PerfTester instance;
+        return instance;
     }
 
-    void start_timer(_In_ const string_t& logName)
+    void Start(const char* area)
     {
-    #if PERF_TESTING
-        perf_counter counter;
-        counter.totalTime = 0.0f;
-
-        std::lock_guard<std::mutex> lock(m_lock.get());
-        counter.previousTime = std::chrono::high_resolution_clock::now();
-        m_logNameToProcessTime[logName] = counter;
-    #else
-        UNREFERENCED_PARAMETER(logName);
-    #endif
+        std::lock_guard<std::mutex> lock{ m_mutex };
+        m_stats[area].StartTime = std::chrono::high_resolution_clock::now();
     }
 
-    void stop_timer(_In_ const string_t& logName, _In_ bool shouldReportAnyways = false)
+    void Stop(const char* area)
     {
-    #if PERF_TESTING
-        std::chrono::nanoseconds totalTime = std::chrono::high_resolution_clock::now() - m_logNameToProcessTime[logName].previousTime;
-        float totalTimeMS = totalTime.count() / 1000000.f;
+        std::lock_guard<std::mutex> lock{ m_mutex };
+        auto& stats{ m_stats[area] };
 
-        std::lock_guard<std::mutex> lock(m_lock.get());
-        m_logNameToProcessTime[logName].totalTime = totalTimeMS;
-        if (totalTimeMS > PERF_THRESHOLD_MS || shouldReportAnyways)
+        ++stats.Count;
+        auto duration{ std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - stats.StartTime).count() };
+        stats.AverageTime = static_cast<uint64_t>(stats.AverageTime * ((double)(stats.Count - 1) / stats.Count) + duration * (1 / (double)stats.Count));
+        if (duration > stats.MaxTime)
         {
-            LOGS_ERROR << m_ownerName << " processing took : " << totalTimeMS << " ms";
-            print();
+            stats.MaxTime = duration;
         }
-    #else
-        UNREFERENCED_PARAMETER(logName);
-        UNREFERENCED_PARAMETER(shouldReportAnyways);
-    #endif
     }
 
-    void clear()
+    std::string FormatStats() const
     {
-    #if PERF_TESTING
-        std::lock_guard<std::mutex> lock(m_lock.get());
-        m_logNameToProcessTime.clear();
-    #endif
-    }
-
-    void print()
-    {
-        LOG_ERROR("dumping logs");
-        for (auto& log : m_logNameToProcessTime)
+        std::stringstream ss;
+        ss << __FUNCTION__ << std::endl;
+        for (auto& entry : m_stats)
         {
-            LOGS_ERROR << log.first << ": " << log.second.totalTime << "ms";
+            auto& s{ entry.second };
+            ss << "Area:" << entry.first << " Count:" << s.Count << " MaxTime:" << s.MaxTime << " AverageTime:" << s.AverageTime << std::endl;
         }
-        LOG_ERROR("");
+        return ss.str();
     }
 
 private:
-    string_t m_ownerName;
-    std::map<string_t, perf_counter> m_logNameToProcessTime;
-    xbox::services::system::xbox_live_mutex m_lock;
+    PerfTester() = default;
+
+    struct Stats
+    {
+        int64_t Count{ 0 };
+        int64_t MaxTime{ 0 };
+        int64_t AverageTime{ 0 };
+        std::chrono::time_point<std::chrono::high_resolution_clock> StartTime{};
+    };
+
+    mutable std::mutex m_mutex;
+    std::map<std::string, Stats> m_stats;
 };
 
-NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
+}
+}
+}
+
+#else
+#define PERF_START()
+#define PERF_STOP()
+#define PERF_START_AREA(area)
+#define PERF_STOP_AREA(area)
+#endif

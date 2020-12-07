@@ -2,23 +2,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"jasonsa"
-#define TEST_CLASS_AREA L"Leaderboard"
 #include "UnitTestIncludes.h"
 
-#include "Utils_WinRT.h"
-#include "xsapi/leaderboard.h"
-#include "leaderboard_serializers.h"
-
-using namespace Windows::Foundation;
-using namespace xbox::services::leaderboard;
-using namespace Microsoft::Xbox::Services;
-using namespace Microsoft::Xbox::Services::System;
-using namespace Microsoft::Xbox::Services::Leaderboard;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-const std::wstring defaultLeaderboardData =
-LR"({
+const char* scid{ "c4060100-4951-4a51-a630-dce26c15b8c5" };
+const char* leaderboardName{ "lbEncodedRecordHoleId101RecordTypeId1" };
+const char* statName{ "EncodedRecordMax.HoleId.108.RecordTypeId.3" };
+const char* server{ "https://leaderboards.xboxlive.com/" };
+const uint64_t xuid{ 2814613569642996 };
+
+const char* defaultLeaderboardData =
+R"({
     "pagingInfo": {
         "continuationToken": "6",
         "totalItems": 218
@@ -33,6 +28,9 @@ LR"({
     "userList": [
         {
             "gamertag": "NSC FaceRocker",
+            "moderngamertag": "Modern FaceRocker",
+            "moderngamertagsuffix": "1234",
+            "uniquemoderngamertag": "Modern FaceRocker#1234",
             "xuid": "2533275015216241",
             "percentile": 0.9954,
             "rank": 1,
@@ -42,15 +40,21 @@ LR"({
         },
         {
             "gamertag": "isspmarkbou",
+            "moderngamertag": "Modern isspmarkbou",
+            "moderngamertagsuffix": "2345",
+            "uniquemoderngamertag": "Modern isspmarkbou#2345",
             "xuid": "2533275024657260",
             "percentile": 0.9908,
             "rank": 2,
             "globalrank": 2,
             "value": "2208",
-            "valuemetadata": "{\"HasSkull\": false, \"Level\": \"Hardcake\", \"Empty\": null}"
+            "valuemetadata": "{\"HasSkull\": false, \"Kills\": 11, \"Level\": \"Hardcake\", \"Empty\": null}"
         },
         {
             "gamertag": "UnloosedLeech",
+            "moderngamertag": "Modern UnloosedLeech",
+            "moderngamertagsuffix": "3456",
+            "uniquemoderngamertag": "Modern UnloosedLeech#3456",
             "xuid": "2535449359478292",
             "percentile": 0.9862,
             "rank": 3,
@@ -60,6 +64,9 @@ LR"({
         },
         {
             "gamertag": "MSFT JEFFSHI 00",
+            "moderngamertag": "Modern JEFFSHI",
+            "moderngamertagsuffix": "4567",
+            "uniquemoderngamertag": "Modern JEFFSHI#4567",
             "xuid": "2814662167029838",
             "percentile": 0.9817,
             "rank": 4,
@@ -69,6 +76,9 @@ LR"({
         },
         {
             "gamertag": "ProfittMan",
+            "moderngamertag": "Modern ProfittMan",
+            "moderngamertagsuffix": "5678",
+            "uniquemoderngamertag": "Modern ProfittMan#5678",
             "xuid": "2533274998970959",
             "percentile": 0.9771,
             "rank": 5,
@@ -78,8 +88,9 @@ LR"({
         }
     ]
 })";
-const std::wstring defaultV1LeaderboardData =
-LR"({
+
+const char* defaultV1LeaderboardData =
+R"({
     "pagingInfo": {
         "continuationToken": "6",
         "totalItems": 218
@@ -94,6 +105,9 @@ LR"({
     "userList": [
         {
             "gamertag": "NSC FaceRocker",
+            "moderngamertag": "Modern FaceRocker",
+            "moderngamertagsuffix": "1234",
+            "uniquemoderngamertag": "Modern FaceRocker#1234",
             "xuid": "2533275015216241",
             "percentile": 0.9954,
             "rank": 1,
@@ -102,6 +116,9 @@ LR"({
         },
         {
             "gamertag": "isspmarkbou",
+            "moderngamertag": "Modern isspmarkbou",
+            "moderngamertagsuffix": "2345",
+            "uniquemoderngamertag": "Modern isspmarkbou#2345",
             "xuid": "2533275024657260",
             "percentile": 0.9908,
             "rank": 2,
@@ -111,513 +128,529 @@ LR"({
     ]
 })";
 
-DEFINE_TEST_CLASS(leaderboard_serializer_tests)
+DEFINE_TEST_CLASS(LeaderboardTests)
 {
 public:
-    DEFINE_TEST_CLASS_PROPS(leaderboard_serializer_tests)
+    DEFINE_TEST_CLASS_PROPS(LeaderboardTests);
 
-    void VerifyLeaderboardColumn(LeaderboardColumn^ column, web::json::value columnToVerify)
+    void VerifyLeaderboardColumn(XblLeaderboardColumn* column, JsonValue columnToVerify)
     {
         VERIFY_IS_NOT_NULL(column);
+        VERIFY_ARE_EQUAL_STR(column->statName, columnToVerify["statName"].GetString());
 
-        VERIFY_ARE_EQUAL(column->StatisticName->Data(), columnToVerify[L"statName"].as_string());
-        if (column->StatisticType == PropertyType::UInt64)
+        if (column->statType == XblLeaderboardStatType::Uint64)
         {
-            VERIFY_ARE_EQUAL_STR(L"Integer", columnToVerify[L"type"].as_string());
+            VERIFY_ARE_EQUAL_STR("Integer", columnToVerify["type"].GetString());
         }
-        else if (column->StatisticType == PropertyType::OtherType)
+        else if (column->statType == XblLeaderboardStatType::Other)
         {
             // do nothing, the returned string is not going to match the JSON
         }
         else
         {
-            VERIFY_ARE_EQUAL(column->StatisticType.ToString()->Data(), columnToVerify[L"type"].as_string());
+            const char* typeStr{};
+            switch (column->statType)
+            {
+                case XblLeaderboardStatType::Boolean:
+                    typeStr = "Boolean";
+                    break;
+                case XblLeaderboardStatType::Double:
+                    typeStr = "Double";
+                    break;
+                case XblLeaderboardStatType::String:
+                    typeStr = "String";
+                    break;
+            }
+
+            VERIFY_ARE_EQUAL_STR(typeStr, columnToVerify["type"].GetString());
         }
     }
 
-    void VerifyLeaderboardRow(LeaderboardRow^ row, web::json::value rowToVerify, const std::vector<string_t>& columns)
+    void VerifyLeaderboardRow(XblLeaderboardRow* row, JsonValue rowToVerify, const std::vector<char*>& columns)
     {
         VERIFY_IS_NOT_NULL(row);
-
-        VERIFY_ARE_EQUAL(row->Gamertag->Data(), rowToVerify[L"gamertag"].as_string());
-        VERIFY_ARE_EQUAL(row->XboxUserId->Data(), rowToVerify[L"xuid"].as_string());
-        VERIFY_ARE_EQUAL(row->Percentile, rowToVerify[L"percentile"].as_double());
-        VERIFY_ARE_EQUAL_INT(row->Rank, rowToVerify[L"rank"].as_integer());
+        VERIFY_ARE_EQUAL_STR(row->gamertag, rowToVerify["gamertag"].GetString());
+        VERIFY_ARE_EQUAL_INT(row->xboxUserId, strtoull(rowToVerify["xuid"].GetString(), nullptr, 0));
+        VERIFY_ARE_EQUAL_DOUBLE(row->percentile, rowToVerify["percentile"].GetDouble());
+        VERIFY_ARE_EQUAL_INT(row->rank, rowToVerify["rank"].GetUint());
         
-        if (!rowToVerify[L"values"].is_null())
+        if (!rowToVerify.HasMember("values"))
         {
+            JsonDocument metadataJson;
+            metadataJson.Parse(rowToVerify["valuemetadata"].GetString());
 
-        }
-        else
-        {
-
-            web::json::object metadataJson = web::json::value::parse(rowToVerify[L"valuemetadata"].as_string()).as_object();
-
-            for (uint32_t i = 0; i < row->Values->Size; ++i)
+            for (uint32_t i = 0; i < row->columnValuesCount; ++i)
             {
-                string_t actual;
-                string_t expected;
+                std::string actual;
+                std::string expected;
                 if (i == 0)
                 {
-                    expected = rowToVerify[L"value"].as_string();
-                    actual = row->Values->GetAt(i)->Data();
+                    expected = rowToVerify["value"].GetString();
+                    actual = row->columnValues[i];
                 }
                 else if (columns.size() > 0)
                 {
-                    expected = metadataJson[columns[i - 1]].serialize();
-                    actual = web::json::value::parse(row->Values->GetAt(i)->Data()).serialize();
+                    xsapi_internal_stringstream stream;
+                    rapidjson::StringBuffer json;
+                    rapidjson::Writer<rapidjson::StringBuffer> writer(json);
+                    metadataJson[columns[i - 1]].Accept(writer);
+                    expected = json.GetString();
+                    actual = row->columnValues[i];
                 }
-                VERIFY_ARE_EQUAL(expected, actual);
+
+                VERIFY_ARE_EQUAL_STR(expected, actual);
             }
-
         }
-
     }
 
-    void VerifyLeadershipResult(LeaderboardResult^ result, web::json::value resultToVerify, const std::vector<string_t>& columns = std::vector<string_t>())
+    void VerifyLeadershipResult(XblLeaderboardResult* result, JsonValue& resultToVerify, const std::vector<char*>& columns = std::vector<char*>())
     {
         VERIFY_IS_NOT_NULL(result);
 
-        auto leaderboardInfoJson = resultToVerify[L"leaderboardInfo"];
-        VERIFY_ARE_EQUAL_INT(result->TotalRowCount, (leaderboardInfoJson[L"totalCount"]).as_integer());
+        auto leaderboardInfoJson = resultToVerify["leaderboardInfo"].GetObjectW();
+        VERIFY_ARE_EQUAL_INT(result->totalRowCount, leaderboardInfoJson["totalCount"].GetUint());
 
-        auto jsonColumn = leaderboardInfoJson[L"columnDefinition"];
-        VerifyLeaderboardColumn(result->Columns->GetAt(0), jsonColumn);
+        VerifyLeaderboardColumn(&result->columns[0], leaderboardInfoJson["columnDefinition"].GetObjectW());
 
-        auto jsonRows = resultToVerify[L"userList"].as_array();
-        int index = 0;
-        for (auto row : jsonRows)
+        int index{ 0 };
+        for (auto& row : resultToVerify["userList"].GetArray())
         {
-            VerifyLeaderboardRow(result->Rows->GetAt(index++), row, columns);
+            VerifyLeaderboardRow(&result->rows[index], row.GetObjectW(), columns);
+            ++index;
         }
+    }
+
+    XblLeaderboardResult* TestAndGetLeaderboardResult(XblContextHandle xblContextHandle, XblLeaderboardQuery query, const char* responseStr, uint32_t bufferSizeMultiplier, const std::vector<char*>& columns = std::vector<char*>())
+    {
+        XAsyncBlock async{};
+        size_t resultSize{};
+        VERIFY_SUCCEEDED(XblLeaderboardGetLeaderboardAsync(xblContextHandle, query, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_SUCCEEDED(XblLeaderboardGetLeaderboardResultSize(&async, &resultSize));
+
+        size_t bufferUsed{};
+        XblLeaderboardResult* result{};
+        std::shared_ptr<char> buffer(new char[resultSize * bufferSizeMultiplier], std::default_delete<char[]>());
+        VERIFY_SUCCEEDED(XblLeaderboardGetLeaderboardResult(&async, resultSize * bufferSizeMultiplier, buffer.get(), &result, &bufferUsed));
+        VERIFY_ARE_EQUAL_UINT(resultSize, bufferUsed);
+
+        JsonDocument responseJson;
+        responseJson.Parse(responseStr);
+        VerifyLeadershipResult(result, responseJson, columns);
+
+        return result;
+    }
+
+    XblLeaderboardQuery MakeDefaultQuery()
+    {
+        XblLeaderboardQuery query{};
+        strcpy_s(query.scid, scid);
+        query.xboxUserId = 0;
+        query.leaderboardName = leaderboardName;
+        query.statName = "";
+        query.maxItems = 0;
+        query.skipToXboxUserId = 0;
+        query.skipResultToRank = 0;
+        query.socialGroup = XblSocialGroupType::None;
+        query.order = XblLeaderboardSortOrder::Descending;
+
+        return query;
     }
 
     DEFINE_TEST_CASE(TestGetLeaderboardAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetLeaderboardAsync);
-        auto responseJson = web::json::value::parse(defaultLeaderboardData);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        TestEnvironment env{};
 
-        std::vector<string_t> columns;
+        const char* token = "6";
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardAsync(
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "lbEncodedRecordHoleId101RecordTypeId1"
-            )).get();
+        xsapi_internal_stringstream url;
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName;
+        HttpMock mock0("GET", url.str(), 200);
+        mock0.SetResponseBody(defaultLeaderboardData);
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/scids/c4060100-4951-4a51-a630-dce26c15b8c5/leaderboards/lbEncodedRecordHoleId101RecordTypeId1", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseJson, columns);
+        XAsyncBlock async{};
+        size_t resultSize{};
+        XblLeaderboardQuery query{ MakeDefaultQuery() };
+        VERIFY_SUCCEEDED(XblLeaderboardGetLeaderboardAsync(xboxLiveContext.get(), query, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_SUCCEEDED(XblLeaderboardGetLeaderboardResultSize(&async, &resultSize));
 
-        VERIFY_IS_TRUE( result->HasNext );
-        auto nextResult = create_task(result->GetNextAsync(100)).get();
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/scids/c4060100-4951-4a51-a630-dce26c15b8c5/leaderboards/lbEncodedRecordHoleId101RecordTypeId1?maxItems=100&continuationToken=6", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(nextResult, responseJson, columns);
+        XblLeaderboardResult* result{};
+        std::shared_ptr<char> buffer(new char[resultSize], std::default_delete<char[]>());
+        VERIFY_SUCCEEDED(XblLeaderboardGetLeaderboardResult(&async, resultSize, buffer.get(), &result, nullptr));
 
-        columns.push_back(_T("HasSkull"));
-        columns.push_back(_T("Level"));
+        JsonDocument responseJson;
+        responseJson.Parse(defaultLeaderboardData);
+        VerifyLeadershipResult(result, responseJson);
 
-        result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardWithAdditionalColumnsAsync(
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "lbEncodedRecordHoleId101RecordTypeId1",
-            UtilsWinRT::CreatePlatformVectorFromStdVectorString(columns)->GetView()
-            )).get();
+        VERIFY_IS_TRUE(result->hasNext);
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/scids/c4060100-4951-4a51-a630-dce26c15b8c5/leaderboards/lbEncodedRecordHoleId101RecordTypeId1?include=valuemetadata", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseJson, columns);
+        const uint32_t maxItems{ 100 };
+        url.str("");
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?maxItems=" << maxItems << "&continuationToken=" << token;
+        HCMockClearMocks();
+        HttpMock mock1("GET", url.str(), 200);
+        mock1.SetResponseBody(defaultLeaderboardData);
 
-        columns.push_back(_T("Kills"));
-        columns.push_back(_T("Empty"));
-        VERIFY_IS_TRUE(result->HasNext);
-        nextResult = create_task(result->GetNextAsync(100)).get();
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/scids/c4060100-4951-4a51-a630-dce26c15b8c5/leaderboards/lbEncodedRecordHoleId101RecordTypeId1?include=valuemetadata&maxItems=100&continuationToken=6", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(nextResult, responseJson, columns);
+        XblLeaderboardQuery nextQuery{ MakeDefaultQuery() };
+        nextQuery.maxItems = maxItems;
+        nextQuery.continuationToken = token;
+        result->nextQuery = nextQuery;
+        VERIFY_SUCCEEDED(XblLeaderboardResultGetNextAsync(xboxLiveContext.get(), result, maxItems, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_SUCCEEDED(XblLeaderboardResultGetNextResultSize(&async, &resultSize));
+
+        XblLeaderboardResult* nextResult{};
+        std::shared_ptr<char> nextBuffer(new char[resultSize], std::default_delete<char[]>());
+        VERIFY_SUCCEEDED(XblLeaderboardResultGetNextResult(&async, resultSize, nextBuffer.get(), &nextResult, nullptr));
+
+        responseJson.Parse(defaultLeaderboardData);
+        VerifyLeadershipResult(nextResult, responseJson);
+
+        url.str("");
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?include=valuemetadata";
+        HCMockClearMocks();
+        HttpMock mock2("GET", url.str(), 200);
+        mock2.SetResponseBody(defaultLeaderboardData);
+
+        std::vector<char*> vecColumns{ "HasSkull", "Level" };
+        const char* columns2[2] = { vecColumns[0], vecColumns[1] };
+        query.additionalColumnleaderboardNamesCount = 2;
+        query.additionalColumnleaderboardNames = columns2;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultLeaderboardData, 1, vecColumns);
+
+        url.str("");
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?include=valuemetadata&maxItems=" << maxItems << "&continuationToken=6";
+        HCMockClearMocks();
+        HttpMock mock3("GET", url.str(), 200);
+        mock3.SetResponseBody(defaultLeaderboardData);
+
+        vecColumns.push_back("Kills");
+        vecColumns.push_back("Empty");
+        const char* columns4[4] = { vecColumns[0], vecColumns[1], vecColumns[2], vecColumns[3] };
+        nextQuery.additionalColumnleaderboardNamesCount = 4;
+        nextQuery.additionalColumnleaderboardNames = columns4;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), nextQuery, defaultLeaderboardData, 1, vecColumns);
+    }
+
+    DEFINE_TEST_CASE(TestGetLeaderboardWithLargeBufferAsync)
+    {
+        TestEnvironment env{};
+
+        const char* token = "6";
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        xsapi_internal_stringstream url;
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName;
+        HttpMock mock0("GET", url.str(), 200);
+        mock0.SetResponseBody(defaultLeaderboardData);
+
+        XAsyncBlock async{};
+        size_t resultSize{};
+        XblLeaderboardQuery query{ MakeDefaultQuery() };
+        VERIFY_SUCCEEDED(XblLeaderboardGetLeaderboardAsync(xboxLiveContext.get(), query, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_SUCCEEDED(XblLeaderboardGetLeaderboardResultSize(&async, &resultSize));
+
+        size_t bufferUsed{};
+        XblLeaderboardResult* result{};
+        std::shared_ptr<char> buffer(new char[resultSize * 2], std::default_delete<char[]>());
+        VERIFY_SUCCEEDED(XblLeaderboardGetLeaderboardResult(&async, resultSize * 2, buffer.get(), &result, &bufferUsed));
+        VERIFY_ARE_EQUAL_UINT(resultSize, bufferUsed);
+
+        JsonDocument responseJson;
+        responseJson.Parse(defaultLeaderboardData);
+        VerifyLeadershipResult(result, responseJson);
+
+        VERIFY_IS_TRUE(result->hasNext);
+
+        const uint32_t maxItems{ 100 };
+        url.str("");
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?maxItems=" << maxItems << "&continuationToken=" << token;
+        HCMockClearMocks();
+        HttpMock mock1("GET", url.str(), 200);
+        mock1.SetResponseBody(defaultLeaderboardData);
+
+        XblLeaderboardQuery nextQuery{ MakeDefaultQuery() };
+        nextQuery.maxItems = maxItems;
+        nextQuery.continuationToken = token;
+        result->nextQuery = nextQuery;
+        VERIFY_SUCCEEDED(XblLeaderboardResultGetNextAsync(xboxLiveContext.get(), result, maxItems, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_SUCCEEDED(XblLeaderboardResultGetNextResultSize(&async, &resultSize));
+
+        XblLeaderboardResult* nextResult{};
+        std::shared_ptr<char> nextBuffer(new char[resultSize * 2], std::default_delete<char[]>());
+        VERIFY_SUCCEEDED(XblLeaderboardResultGetNextResult(&async, resultSize * 2, nextBuffer.get(), &nextResult, &bufferUsed));
+        VERIFY_ARE_EQUAL_UINT(resultSize, bufferUsed);
+
+        responseJson.Parse(defaultLeaderboardData);
+        VerifyLeadershipResult(nextResult, responseJson);
+
+        url.str("");
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?include=valuemetadata";
+        HCMockClearMocks();
+        HttpMock mock2("GET", url.str(), 200);
+        mock2.SetResponseBody(defaultLeaderboardData);
+
+        std::vector<char*> vecColumns{ "HasSkull", "Level" };
+        const char* columns2[2] = { vecColumns[0], vecColumns[1] };
+        query.additionalColumnleaderboardNamesCount = 2;
+        query.additionalColumnleaderboardNames = columns2;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultLeaderboardData, 2, vecColumns);
+
+        url.str("");
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?include=valuemetadata&maxItems=" << maxItems << "&continuationToken=6";
+        HCMockClearMocks();
+        HttpMock mock3("GET", url.str(), 200);
+        mock3.SetResponseBody(defaultLeaderboardData);
+
+        vecColumns.push_back("Kills");
+        vecColumns.push_back("Empty");
+        const char* columns4[4] = { vecColumns[0], vecColumns[1], vecColumns[2], vecColumns[3] };
+        nextQuery.additionalColumnleaderboardNamesCount = 4;
+        nextQuery.additionalColumnleaderboardNames = columns4;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), nextQuery, defaultLeaderboardData, 2, vecColumns);
     }
 
     DEFINE_TEST_CASE(TestGetLeaderboardWitSkipToRankAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetLeaderboardWitSkipToRankAsync);
-        auto responseJson = web::json::value::parse(defaultLeaderboardData);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        TestEnvironment env{};
 
-        std::vector<string_t> columns;
+        const int rank{ 100 };
+        const int maxItems{ 10 };
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardAsync(
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "lbEncodedRecordHoleId101RecordTypeId1",
-            100,
-            10
-            )).get();
+        xsapi_internal_stringstream url;
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?maxItems=" << maxItems << "&skipToRank=" << rank;
+        HttpMock mock0("GET", url.str(), 200);
+        mock0.SetResponseBody(defaultLeaderboardData);
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/scids/c4060100-4951-4a51-a630-dce26c15b8c5/leaderboards/lbEncodedRecordHoleId101RecordTypeId1?maxItems=10&skipToRank=100", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseJson, columns);
+        XblLeaderboardQuery query{ MakeDefaultQuery() };
+        query.maxItems = maxItems;
+        query.skipResultToRank = rank;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultLeaderboardData, 1);
 
-        columns.push_back(_T("HasSkull"));
-        columns.push_back(_T("Kills"));
-        columns.push_back(_T("Level"));
-        columns.push_back(_T("Empty"));
-
-        result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardWithAdditionalColumnsAsync(
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "lbEncodedRecordHoleId101RecordTypeId1",
-            100,
-            UtilsWinRT::CreatePlatformVectorFromStdVectorString(columns)->GetView(),
-            10
-            )).get();
-
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/scids/c4060100-4951-4a51-a630-dce26c15b8c5/leaderboards/lbEncodedRecordHoleId101RecordTypeId1?include=valuemetadata&maxItems=10&skipToRank=100", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseJson, columns);
+        url.str("");
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?include=valuemetadata&maxItems=" << maxItems << "&skipToRank=" << rank;
+        HCMockClearMocks();
+        HttpMock mock1("GET", url.str(), 200);
+        mock1.SetResponseBody(defaultLeaderboardData);
+        
+        std::vector<char*> vecColumns{ "HasSkull", "Kills", "Level", "Empty" };
+        const char* columns[4] = { vecColumns[0], vecColumns[1], vecColumns[2], vecColumns[3] };
+        query.additionalColumnleaderboardNamesCount = 4;
+        query.additionalColumnleaderboardNames = columns;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultLeaderboardData, 1, vecColumns);
     }
 
     DEFINE_TEST_CASE(TestGetLearderboardSkipToUserAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetLearderboardSkipToUserAsync);
-        auto responseJson = web::json::value::parse(defaultLeaderboardData);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        TestEnvironment env{};
 
-        std::vector<string_t> columns;
+        const uint64_t user{ 2533274896500838 };
+        const uint32_t maxItems{ 20 };
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardWithSkipToUserAsync(
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "lbEncodedRecordHoleId101RecordTypeId1",
-            "2533274896500838",
-            20
-            )).get();
+        xsapi_internal_stringstream url;
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?maxItems=" << maxItems << "&skipToUser=" << user;
+        HttpMock mock0("GET", url.str(), 200);
+        mock0.SetResponseBody(defaultLeaderboardData);
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/scids/c4060100-4951-4a51-a630-dce26c15b8c5/leaderboards/lbEncodedRecordHoleId101RecordTypeId1?maxItems=20&skipToUser=2533274896500838", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseJson, columns);
+        XblLeaderboardQuery query{ MakeDefaultQuery() };
+        query.maxItems = maxItems;
+        query.skipToXboxUserId = user;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultLeaderboardData, 1);
 
-        columns.push_back(_T("HasSkull"));
-        columns.push_back(_T("Kills"));
-        columns.push_back(_T("Level"));
-        columns.push_back(_T("Empty"));
+        url.str("");
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?include=valuemetadata&maxItems=" << maxItems << "&skipToUser=" << user;
+        HCMockClearMocks();
+        HttpMock mock1("GET", url.str(), 200);
+        mock1.SetResponseBody(defaultLeaderboardData);
 
-        result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardWithSkipToUserWithAdditionalColumnsAsync(
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "lbEncodedRecordHoleId101RecordTypeId1",
-            "2533274896500838",
-            UtilsWinRT::CreatePlatformVectorFromStdVectorString(columns)->GetView(),
-            20
-            )).get();
-
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/scids/c4060100-4951-4a51-a630-dce26c15b8c5/leaderboards/lbEncodedRecordHoleId101RecordTypeId1?include=valuemetadata&maxItems=20&skipToUser=2533274896500838", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseJson, columns);
+        std::vector<char*> vecColumns{ "HasSkull", "Kills", "Level", "Empty" };
+        const char* columns4[4] = { vecColumns[0], vecColumns[1], vecColumns[2], vecColumns[3] };
+        query.additionalColumnleaderboardNamesCount = 4;
+        query.additionalColumnleaderboardNames = columns4;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultLeaderboardData, 1, vecColumns);
     }
 
     DEFINE_TEST_CASE(TestGetLeaderboardForSocialGroupAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetLeaderboardForSocialGroupAsync);
-        auto responseJson = web::json::value::parse(defaultLeaderboardData);
-        auto responseV1Json = web::json::value::parse(defaultV1LeaderboardData);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseV1Json);
+        TestEnvironment env{};
 
-        std::vector<string_t> columns;
+        const uint32_t maxItems{ 20 };
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardForSocialGroupAsync(
-            "98052",
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "EncodedRecordMax.HoleId.108.RecordTypeId.3",
-            "All",
-            20
-            )).get();
+        xsapi_internal_stringstream url;
+        url << server << "users/xuid(" << xuid << ")/scids/" << scid << "/stats/" << statName << "/people/all?sort=descending&maxItems=" << maxItems;
+        HttpMock mock0("GET", url.str(), 200);
+        mock0.SetResponseBody(defaultV1LeaderboardData);
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/xuid(98052)/scids/c4060100-4951-4a51-a630-dce26c15b8c5/stats/EncodedRecordMax.HoleId.108.RecordTypeId.3/people/All?maxItems=20", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseV1Json);
+        XblLeaderboardQuery query{ MakeDefaultQuery() };
+        query.xboxUserId = xuid;
+        query.leaderboardName = nullptr;
+        query.statName = statName;
+        query.maxItems = maxItems;
+        query.socialGroup = XblSocialGroupType::People;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultV1LeaderboardData, 1);
 
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        mock0.SetResponseBody(defaultLeaderboardData);
 
-        result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardAsync(
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "lbEncodedRecordHoleId101RecordTypeId1",
-            "98052",
-            "All",
-            20
-            )).get();
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultLeaderboardData, 1);
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/scids/c4060100-4951-4a51-a630-dce26c15b8c5/leaderboards/lbEncodedRecordHoleId101RecordTypeId1?xuid=98052&maxItems=20&view=People&viewTarget=All", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseJson);
+        url.str("");
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?xuid=" << xuid << "&maxItems=" << maxItems << "&view=People&viewTarget=People";
+        HCMockClearMocks();
+        HttpMock mock1("GET", url.str(), 200);
+        mock1.SetResponseBody(defaultLeaderboardData);
 
-        columns.push_back(_T("HasSkull"));
-        columns.push_back(_T("Kills"));
-        columns.push_back(_T("Level"));
-        columns.push_back(_T("Empty"));
+        query.statName = "";
+        query.leaderboardName = leaderboardName;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultLeaderboardData, 1);
 
-        result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardWithAdditionalColumnsAsync(
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "lbEncodedRecordHoleId101RecordTypeId1",
-            "98052",
-            "All",
-            UtilsWinRT::CreatePlatformVectorFromStdVectorString(columns)->GetView(),
-            20
-            )).get();
+        url.str("");
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?include=valuemetadata&xuid=" << xuid << "&maxItems=" << maxItems << "&view=People&viewTarget=People";
+        HCMockClearMocks();
+        HttpMock mock2("GET", url.str(), 200);
+        mock2.SetResponseBody(defaultLeaderboardData);
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/scids/c4060100-4951-4a51-a630-dce26c15b8c5/leaderboards/lbEncodedRecordHoleId101RecordTypeId1?include=valuemetadata&xuid=98052&maxItems=20&view=People&viewTarget=All", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseJson);
+        std::vector<char*> vecColumns{ "HasSkull", "Kills", "Level", "Empty" };
+        const char* columns[4] = { vecColumns[0], vecColumns[1], vecColumns[2], vecColumns[3] };
+        query.additionalColumnleaderboardNamesCount = 4;
+        query.additionalColumnleaderboardNames = columns;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultLeaderboardData, 1);
     }
 
     DEFINE_TEST_CASE(TestGetLeaderboardForSocialGroupWithSortAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetLeaderboardForSocialGroupWithSortAsync);
-        auto responseJson = web::json::value::parse(defaultLeaderboardData);
-        auto responseV1Json = web::json::value::parse(defaultV1LeaderboardData);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseV1Json);
+        TestEnvironment env{};
 
-        std::vector<string_t> columns;
+        const uint32_t maxItems{ 20 };
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardForSocialGroupAsync(
-            "98052",
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "EncodedRecordMax.HoleId.108.RecordTypeId.3",
-            "All",
-            "descending",
-            20
-            )).get();
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/xuid(98052)/scids/c4060100-4951-4a51-a630-dce26c15b8c5/stats/EncodedRecordMax.HoleId.108.RecordTypeId.3/people/All?sort=descending&maxItems=20", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseV1Json);
+        xsapi_internal_stringstream url;
+        url << server << "users/xuid(" << xuid << ")/scids/" << scid << "/stats/" << statName << "/people/all?sort=descending&maxItems=" << maxItems;
+        HttpMock mock0("GET", url.str(), 200);
+        mock0.SetResponseBody(defaultV1LeaderboardData);
+        
+        XblLeaderboardQuery query{ MakeDefaultQuery() };
+        query.xboxUserId = xuid;
+        query.leaderboardName = nullptr;
+        query.statName = statName;
+        query.maxItems = maxItems;
+        query.socialGroup = XblSocialGroupType::People;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultV1LeaderboardData, 1);
     }
 
     DEFINE_TEST_CASE(TestGetLeaderboardForSocialGroupWithSkipToRankAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetLeaderboardForSocialGroupWithSkipToRankAsync);
-        auto responseJson = web::json::value::parse(defaultLeaderboardData);
-        auto responseV1Json = web::json::value::parse(defaultV1LeaderboardData);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseV1Json);
+        TestEnvironment env{};
 
-        std::vector<string_t> columns;
+        const uint32_t rank{ 2 };
+        const uint32_t maxItems{ 20 };
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardForSocialGroupWithSkipToRankAsync(
-            "98052",
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "EncodedRecordMax.HoleId.108.RecordTypeId.3",
-            "All",
-            2,
-            "descending",
-            20
-            )).get();
+        xsapi_internal_stringstream url;
+        url << server << "users/xuid(" << xuid << ")/scids/" << scid << "/stats/" << statName << "/people/all?sort=descending&maxItems=" << maxItems << "&skipToRank=" << rank;
+        HttpMock mock0("GET", url.str(), 200);
+        mock0.SetResponseBody(defaultV1LeaderboardData);
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/xuid(98052)/scids/c4060100-4951-4a51-a630-dce26c15b8c5/stats/EncodedRecordMax.HoleId.108.RecordTypeId.3/people/All?sort=descending&maxItems=20&skipToRank=2", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseV1Json);
+        XblLeaderboardQuery query{ MakeDefaultQuery() };
+        query.xboxUserId = xuid;
+        query.leaderboardName = nullptr;
+        query.statName = statName;
+        query.maxItems = maxItems;
+        query.skipResultToRank = rank;
+        query.socialGroup = XblSocialGroupType::People;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultV1LeaderboardData, 1);
 
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        url.str("");
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?xuid=" << xuid << "&maxItems=" << maxItems << "&skipToRank=" << rank << "&view=People&viewTarget=People";
+        HCMockClearMocks();
+        HttpMock mock1("GET", url.str(), 200);
+        mock1.SetResponseBody(defaultLeaderboardData);
 
-        result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardAsync(
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "lbEncodedRecordHoleId101RecordTypeId1",
-            "98052",
-            "All",
-            2,
-            20
-            )).get();
+        query.statName = "";
+        query.leaderboardName = leaderboardName;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultLeaderboardData, 1);
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/scids/c4060100-4951-4a51-a630-dce26c15b8c5/leaderboards/lbEncodedRecordHoleId101RecordTypeId1?xuid=98052&maxItems=20&skipToRank=2&view=People&viewTarget=All", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseJson);
-
-        columns.push_back(_T("HasSkull"));
-        columns.push_back(_T("Kills"));
-        columns.push_back(_T("Level"));
-        columns.push_back(_T("Empty"));
-
-        result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardWithAdditionalColumnsAsync(
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "lbEncodedRecordHoleId101RecordTypeId1",
-            "98052",
-            "All",
-            2,
-            UtilsWinRT::CreatePlatformVectorFromStdVectorString(columns)->GetView(),
-            20
-            )).get();
-
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/scids/c4060100-4951-4a51-a630-dce26c15b8c5/leaderboards/lbEncodedRecordHoleId101RecordTypeId1?include=valuemetadata&xuid=98052&maxItems=20&skipToRank=2&view=People&viewTarget=All", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseJson);
+        url.str("");
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?include=valuemetadata&xuid=" << xuid << "&maxItems=" << maxItems << "&skipToRank=" << rank << "&view=People&viewTarget=People";
+        HCMockClearMocks();
+        HttpMock mock2("GET", url.str(), 200);
+        mock2.SetResponseBody(defaultLeaderboardData);
+        
+        std::vector<char*> vecColumns{ "HasSkull", "Kills", "Level", "Empty" };
+        const char* columns4[4] = { vecColumns[0], vecColumns[1], vecColumns[2], vecColumns[3] };
+        query.additionalColumnleaderboardNamesCount = 4;
+        query.additionalColumnleaderboardNames = columns4;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultLeaderboardData, 1, vecColumns);
     }
 
     DEFINE_TEST_CASE(TestGetLeaderboardForSocialGroupWithSkipToUserAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetLeaderboardForSocialGroupWithSkipToUserAsync);
-        auto responseJson = web::json::value::parse(defaultLeaderboardData);
-        auto responseV1Json = web::json::value::parse(defaultV1LeaderboardData);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseV1Json);
+        TestEnvironment env{};
 
-        std::vector<string_t> columns;
+        const uint64_t user{ 2533274896500838 };
+        const uint32_t maxItems{ 20 };
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardForSocialGroupWithSkipToUserAsync(
-            "98052",
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "EncodedRecordMax.HoleId.108.RecordTypeId.3",
-            "All",
-            "2533274896500838",
-            "ascending",
-            20
-            )).get();
+        xsapi_internal_stringstream url;
+        url << server << "users/xuid(" << xuid << ")/scids/" << scid << "/stats/" << statName << "/people/all?sort=ascending&maxItems=" << maxItems << "&skipToUser=" << user;
+        HttpMock mock0("GET", url.str(), 200);
+        mock0.SetResponseBody(defaultV1LeaderboardData);
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/xuid(98052)/scids/c4060100-4951-4a51-a630-dce26c15b8c5/stats/EncodedRecordMax.HoleId.108.RecordTypeId.3/people/All?sort=ascending&maxItems=20&skipToUser=2533274896500838", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseV1Json);
+        XblLeaderboardQuery query{ MakeDefaultQuery() };
+        query.xboxUserId = xuid;
+        query.leaderboardName = nullptr;
+        query.statName = statName;
+        query.maxItems = maxItems;
+        query.skipToXboxUserId = user;
+        query.socialGroup = XblSocialGroupType::People;
+        query.order = XblLeaderboardSortOrder::Ascending;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultV1LeaderboardData, 1);
 
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        mock0.SetResponseBody(defaultLeaderboardData);
 
-        result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardWithSkipToUserAsync(
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "lbEncodedRecordHoleId101RecordTypeId1",
-            "98052",
-            "All",
-            "2533274896500838",
-            20
-            )).get();
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultV1LeaderboardData, 1);
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/scids/c4060100-4951-4a51-a630-dce26c15b8c5/leaderboards/lbEncodedRecordHoleId101RecordTypeId1?xuid=98052&maxItems=20&skipToUser=2533274896500838&view=People&viewTarget=All", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseJson);
-        columns.push_back(_T("HasSkull"));
-        columns.push_back(_T("Kills"));
-        columns.push_back(_T("Level"));
-        columns.push_back(_T("Empty"));
+        url.str("");
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?xuid=" << xuid << "&maxItems=" << maxItems << "&skipToUser=" << user << "&view=People&viewTarget=People";
+        HCMockClearMocks();
+        HttpMock mock1("GET", url.str(), 200);
+        mock1.SetResponseBody(defaultLeaderboardData);
 
-        result = create_task(xboxLiveContext->LeaderboardService->GetLeaderboardWithSkipToUserWithAdditionalColumnsAsync(
-            "c4060100-4951-4a51-a630-dce26c15b8c5",
-            "lbEncodedRecordHoleId101RecordTypeId1",
-            "98052",
-            "All",
-            "2533274896500838",
-            UtilsWinRT::CreatePlatformVectorFromStdVectorString(columns)->GetView(),
-            20
-            )).get();
+        query.statName = "";
+        query.leaderboardName = leaderboardName;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultLeaderboardData, 1);
+        
+        url.str("");
+        url << server << "scids/" << scid << "/leaderboards/" << leaderboardName << "?include=valuemetadata&xuid=" << xuid << "&maxItems=" << maxItems << "&skipToUser=" << user << "&view=People&viewTarget=People";
+        HCMockClearMocks();
+        HttpMock mock2("GET", url.str(), 200);
+        mock2.SetResponseBody(defaultLeaderboardData);
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://leaderboards.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/scids/c4060100-4951-4a51-a630-dce26c15b8c5/leaderboards/lbEncodedRecordHoleId101RecordTypeId1?include=valuemetadata&xuid=98052&maxItems=20&skipToUser=2533274896500838&view=People&viewTarget=All", httpCall->PathQueryFragment.to_string());
-        VerifyLeadershipResult(result, responseJson);
+        std::vector<char*> vecColumns{ "HasSkull", "Kills", "Level", "Empty" };
+        const char* columns4[4] = { vecColumns[0], vecColumns[1], vecColumns[2], vecColumns[3] };
+        query.additionalColumnleaderboardNamesCount = 4;
+        query.additionalColumnleaderboardNames = columns4;
+        TestAndGetLeaderboardResult(xboxLiveContext.get(), query, defaultLeaderboardData, 1, vecColumns);
     }
 
     DEFINE_TEST_CASE(TestGetLeaderboardAsyncInvalidArgs)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetLeaderboardAsyncInvalidArgs);
-        auto responseJson = web::json::value::parse(defaultLeaderboardData);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
+        TestEnvironment env{};
         
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->LeaderboardService->GetLeaderboardAsync(
-                nullptr,    // invalid arg
-                "lbEncodedRecordHoleId101RecordTypeId1"
-            )).get(), 
-            E_INVALIDARG
-        )
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        XAsyncBlock async{};
+        XblLeaderboardQuery query{};
 
 #pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->LeaderboardService->GetLeaderboardAsync(
-                "c4060100 - 4951 - 4a51 - a630 - dce26c15b8c5",
-                nullptr     // invalid arg
-            )).get(),
-            E_INVALIDARG
-        )
-    }
-
-    DEFINE_TEST_CASE(TestGetLeaderboardForSocialGroupAsyncWithInvalidArgs)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetLeaderboardForSocialGroupAsyncWithInvalidArgs);
-        auto responseJson = web::json::value::parse(defaultLeaderboardData);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->LeaderboardService->GetLeaderboardForSocialGroupAsync(
-                nullptr,
-                "c4060100-4951-4a51-a630-dce26c15b8c5",
-                "EncodedRecordMax.HoleId.108.RecordTypeId.3",
-                "All",
-                20
-            )).get(),
-            E_INVALIDARG
-        )
-
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->LeaderboardService->GetLeaderboardForSocialGroupAsync(
-                "98052",
-                nullptr,
-                "EncodedRecordMax.HoleId.108.RecordTypeId.3",
-                "All",
-                20
-            )).get(),
-            E_INVALIDARG
-        )
-
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->LeaderboardService->GetLeaderboardForSocialGroupAsync(
-                "98052",
-                "c4060100-4951-4a51-a630-dce26c15b8c5",
-                nullptr,
-                "All",
-                20
-            )).get(),
-            E_INVALIDARG
-        )
-
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->LeaderboardService->GetLeaderboardForSocialGroupAsync(
-                "98052",
-                "c4060100-4951-4a51-a630-dce26c15b8c5",
-                "EncodedRecordMax.HoleId.108.RecordTypeId.3",
-                nullptr,
-                20
-            )).get(),
-            E_INVALIDARG
-        )
+        VERIFY_ARE_EQUAL_INT(XblLeaderboardGetLeaderboardAsync(nullptr, query, &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL_INT(XblLeaderboardGetLeaderboardAsync(xboxLiveContext.get(), query, nullptr), E_INVALIDARG);
     }
 };
 

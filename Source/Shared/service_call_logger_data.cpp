@@ -11,21 +11,22 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 // service_call_logger_data
 
 service_call_logger_data::service_call_logger_data(
-    _In_ string_t host,
-    _In_ string_t uri,
-    _In_ string_t xboxUserId,
+    _In_ xsapi_internal_string host,
+    _In_ xsapi_internal_string uri,
+    _In_ uint64_t xuid,
     _In_ bool isGet,
     _In_ uint32_t httpStatusCode,
-    _In_ string_t requestHeader,
-    _In_ string_t requestBody,
-    _In_ string_t responseHeader,
-    _In_ string_t responseBody,
+    _In_ xsapi_internal_string requestHeader,
+    _In_ xsapi_internal_string requestBody,
+    _In_ xsapi_internal_string responseHeader,
+    _In_ xsapi_internal_string responseBody,
     _In_ std::chrono::milliseconds elapsedCallTime,
-    _In_ chrono_clock_t::time_point requestTime
+    _In_ chrono_clock_t::time_point requestTime,
+    _In_ xsapi_internal_string method
     ) :
     m_host(std::move(host)),
     m_uri(std::move(uri)),
-    m_xboxUserId(std::move(xboxUserId)),
+    m_xuid(xuid),
     m_isGet(std::move(isGet)),
     m_requestHeader(std::move(requestHeader)),
     m_requestBody(std::move(requestBody)),
@@ -37,22 +38,23 @@ service_call_logger_data::service_call_logger_data(
     m_isShoulderTap(false),
     m_isInGameEvent(false),
     m_changeNumber(0),
-    m_version(0)
+    m_version(0),
+    m_method(std::move(method))
 {
     init();
 }
 
 service_call_logger_data::service_call_logger_data(
-    _In_ string_t xboxUserId,
-    _In_ string_t eventName,
-    _In_ string_t eventPlayerSessionId,
-    _In_ string_t eventDimensions,
-    _In_ string_t eventMeasurements,
+    _In_ uint64_t xuid,
+    _In_ xsapi_internal_string eventName,
+    _In_ xsapi_internal_string eventPlayerSessionId,
+    _In_ xsapi_internal_string eventDimensions,
+    _In_ xsapi_internal_string eventMeasurements,
     _In_ chrono_clock_t::time_point requestTime
     ) :
-    m_xboxUserId(std::move(xboxUserId)),
-    m_host(_T("inGameEvents")),
-    m_uri(_T("inGameEvents")),
+    m_xuid(xuid),
+    m_host("inGameEvents"),
+    m_uri("inGameEvents"),
     m_requestTime(std::move(requestTime)),
     m_eventName(std::move(eventName)),
     m_playerSessionId(std::move(eventPlayerSessionId)),
@@ -71,190 +73,205 @@ service_call_logger_data::service_call_logger_data(
 
 void service_call_logger_data::init()
 {
-    m_id = ++get_xsapi_singleton()->m_loggerId;
-    m_breadCrumb = utils::create_guid(true).c_str();
+    auto singleton = get_xsapi_singleton();
+    if (singleton)
+    {
+        m_id = ++singleton->m_loggerId;
+    }
+    else
+    {
+        m_id = 0;
+    }
+    m_breadCrumb = utils::create_guid(true);
 }
 
-string_t service_call_logger_data::to_string() const
+xsapi_internal_string service_call_logger_data::to_string() const
 {
-    stringstream_t result;
+    xsapi_internal_stringstream result;
     
     //Writing properties to string in a csv format. Order matters.
 
     //host
-    result << _T('\"');
+    result << '\"';
     result << m_host;
-    result << _T("\",");
+    result << "\",";
 
     //uri
-    result << _T('\"');
+    result << '\"';
     result << m_uri;
-    result << _T("\",");
+    result << "\",";
 
     //xboxUserId
-    result << _T('\"');
-    result << m_xboxUserId;
-    result << _T("\",");
+    result << '\"';
+    result << m_xuid;
+    result << "\",";
 
     //multiplayer correlation id
-    result << _T('\"');
+    result << '\"';
     result << m_multiplayerCorrelationId;
-    result << _T("\",");
+    result << "\",";
 
     //requestHeader
-    result << _T('\"');
+    result << '\"';
     result << utils::escape_special_characters(m_requestHeader);
-    result << _T("\",");
+    result << "\",";
 
     //requestBody
-    result << _T('\"');
+    result << '\"';
     result << utils::escape_special_characters(m_requestBody);
-    result << _T("\",");
+    result << "\",";
 
     //responseHeader
-    result << _T('\"');
+    result << '\"';
     result << utils::escape_special_characters(m_responseHeader);
-    result << _T("\",");
+    result << "\",";
 
     //responseBody
-    result << _T('\"');
+    result << '\"';
     result << utils::escape_special_characters(m_responseBody);
-    result << _T("\",");
+    result << "\",";
 
     //httpStatusCode
-    result << _T('\"');
+    result << '\"';
     result << m_httpStatusCode;
-    result << _T("\",");
+    result << "\",";
 
     //ellapsedCalltime
-    result << _T('\"');
+    result << '\"';
     result << m_elapsedCallTime.count();
-    result << _T("\",");
+    result << "\",";
 
     //requestTime
-    result << _T('\"');
+    result << '\"';
     result << utils::convert_timepoint_to_string(m_requestTime);
-    result << _T("\",");
+    result << "\",";
 
     //isGet
-    result << _T('\"');
-    result << ((m_isGet) ? _T("true"): _T("false"));
-    result << _T("\",");
+    result << '\"';
+    result << ((m_isGet) ? "true": "false");
+    result << "\",";
 
     //id
-    result << _T('\"');
+    result << '\"';
     result << m_id;
-    result << _T("\",");
+    result << "\",";
 
     //isShoulderTap
-    result << _T('\"');
-    result << ((m_isShoulderTap) ? _T("true") : _T("false"));
-    result << _T("\",");
+    result << '\"';
+    result << ((m_isShoulderTap) ? "true" : "false");
+    result << "\",";
 
     //changeNumber
-    result << _T('\"');
+    result << '\"';
     result << m_changeNumber;
-    result << _T("\",");
+    result << "\",";
 
     //sessionReferenceUriPath
-    result << _T('\"');
+    result << '\"';
     result << m_sessionReferenceUriPath;
-    result << _T("\",");
+    result << "\",";
 
     //isInGameEvent
-    result << _T('\"');
-    result << ((m_isInGameEvent) ? _T("true") : _T("false"));
-    result << _T("\",");
+    result << '\"';
+    result << ((m_isInGameEvent) ? "true" : "false");
+    result << "\",";
 
     //eventName
-    result << _T('\"');
+    result << '\"';
     result << m_eventName;
-    result << _T("\",");
+    result << "\",";
 
     //playerSessionId
-    result << _T('\"');
+    result << '\"';
     result << m_playerSessionId;
-    result << _T("\",");
+    result << "\",";
 
     //version
-    result << _T('\"');
+    result << '\"';
     result << m_version;
-    result << _T("\",");
+    result << "\",";
 
     //dimensions
-    result << _T('\"');
+    result << '\"';
     result << utils::escape_special_characters(m_dimensions);
-    result << _T("\",");
+    result << "\",";
 
     //measurements
-    result << _T('\"');
+    result << '\"';
     result << utils::escape_special_characters(m_measurements);
-    result << _T("\",");
+    result << "\",";
 
     //breadCrumb
-    result << _T('\"');
+    result << '\"';
     result << m_breadCrumb;
-    result << _T("\"");
+    result << "\",";
 
-    result << _T("\n");
+    //breadCrumb
+    result << '\"';
+    result << m_method;
+    result << "\"";
+
+    result << "\n";
 
     return result.str();
 }
 
-string_t service_call_logger_data::get_csv_header()
+xsapi_internal_string service_call_logger_data::get_csv_header()
 {
-    stringstream_t result;
+    xsapi_internal_stringstream result;
 
     //headers
-    result << _T("v1510\n");
+    result << "v1510\n";
 
-    result << _T("\"Host\",");
+    result << "\"Host\",";
     
-    result << _T("\"Uri\",");
+    result << "\"Uri\",";
     
-    result << _T("\"XboxUserId\",");
+    result << "\"XboxUserId\",";
     
-    result << _T("\"MultiplayerCorrelationId\",");
+    result << "\"MultiplayerCorrelationId\",";
 
-    result << _T("\"RequestHeaders\",");
+    result << "\"RequestHeaders\",";
 
-    result << _T("\"RequestBody\",");
+    result << "\"RequestBody\",";
 
-    result << _T("\"ResponseHeaders\",");
+    result << "\"ResponseHeaders\",";
 
-    result << _T("\"ResponseBody\",");
+    result << "\"ResponseBody\",";
 
-    result << _T("\"HttpStatusCode\",");
+    result << "\"HttpStatusCode\",";
 
-    result << _T("\"EllapsedCallTimeMs\",");
+    result << "\"EllapsedCallTimeMs\",";
 
-    result << _T("\"ReqTimeUTC\",");
+    result << "\"ReqTimeUTC\",";
 
-    result << _T("\"IsGet\",");
+    result << "\"IsGet\",";
 
-    result << _T("\"LoggerId\",");
+    result << "\"LoggerId\",";
 
-    result << _T("\"IsShoulderTap\",");
+    result << "\"IsShoulderTap\",";
 
-    result << _T("\"ChangeNumber\",");
+    result << "\"ChangeNumber\",";
 
-    result << _T("\"SessionReferenceUriPath\",");
+    result << "\"SessionReferenceUriPath\",";
 
-    result << _T("\"IsInGameEvent\",");
+    result << "\"IsInGameEvent\",";
 
-    result << _T("\"EventName\",");
+    result << "\"EventName\",";
 
-    result << _T("\"EventPlayerSessionId\",");
+    result << "\"EventPlayerSessionId\",";
 
-    result << _T("\"EventVersion\",");
+    result << "\"EventVersion\",";
 
-    result << _T("\"EventDimensionData\",");
+    result << "\"EventDimensionData\",";
 
-    result << _T("\"EventMeasurementData\",");
+    result << "\"EventMeasurementData\",";
 
-    result << _T("\"BreadCrumb\"");
+    result << "\"BreadCrumb\",";
 
-    result << _T("\n");
+    result << "\"Method\"";
+
+    result << "\n";
 
     return result.str();
 }

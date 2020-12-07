@@ -1,165 +1,246 @@
-﻿// Copyright (c) Microsoft Corporation
+// Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
 #include "shared_macros.h"
-#include "xsapi/xbox_live_app_config.h"
+#include "xbox_live_app_config_internal.h"
+#if HC_PLATFORM == HC_PLATFORM_UWP
 #include "local_config.h"
 #include "xbox_system_factory.h"
+#endif
+
+using namespace xbox::services;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-std::shared_ptr<xbox_live_app_config> 
-xbox_live_app_config::get_app_config_singleton()
+std::shared_ptr<AppConfig> AppConfig::Instance()
 {
-    auto xsapiSingleton = xbox::services::get_xsapi_singleton();
-    std::lock_guard<std::mutex> guard(xsapiSingleton->m_appConfigLock);
-    if (xsapiSingleton->m_appConfigSingleton == nullptr)
+    auto xsapiSingleton{ xbox::services::get_xsapi_singleton() };
+    if (xsapiSingleton)
     {
-        xsapiSingleton->m_appConfigSingleton = std::shared_ptr<xbox_live_app_config>(new xbox_live_app_config());
+        return xsapiSingleton->m_appConfigSingleton;
     }
-
-    return xsapiSingleton->m_appConfigSingleton;
+    else
+    {
+        return nullptr;
+    }
 }
 
-
-xbox_live_app_config::xbox_live_app_config() :
-    m_titleId(0),
-    m_overrideTitleId(0)
+#if HC_PLATFORM == HC_PLATFORM_UWP 
+HRESULT AppConfig::Initialize()
 {
-    auto servicesConfigFileReadResult = read();
-
-    if (servicesConfigFileReadResult.err())
+    m_localConfig = MakeShared<local_config>();
+    auto readResult = m_localConfig->read();
+    if (readResult.err())
     {
-        LOG_ERROR(servicesConfigFileReadResult.err_message());
-#if !defined(XSAPI_U) 
-        assert(!servicesConfigFileReadResult.err());
-#endif
+        LOGS_ERROR << "Loading local config file error : " << readResult.err() << ", msg : " << readResult.err_message();
+        return utils::convert_xbox_live_error_code_to_hresult(readResult.err());
     }
 
-#if XSAPI_U
-    m_proxy = get_proxy_string();
-#endif
+    m_titleId = m_localConfig->title_id();
+    m_scid = m_localConfig->scid();
+    m_overrideScid = m_localConfig->override_scid();
+    m_overrideTitleId = m_localConfig->override_title_id();
+
+    if (m_titleId == 0)
+    {
+        LOGS_ERROR << "ERROR: Could not read \"titleId\" in xboxservices.config.  Must be a JSON number";
+        return E_FAIL;
+    }
+
+    if (m_scid.empty())
+    {
+        LOGS_ERROR << "ERROR: Could not read \"PrimaryServiceConfigId\" in xboxservices.config.  Must be a JSON string";
+        return E_FAIL;
+    }
+    return S_OK;
 }
 
-xbox_live_result<void> xbox_live_app_config::read()
+#elif HC_PLATFORM == HC_PLATFORM_XDK
+HRESULT AppConfig::Initialize()
 {
-    xbox::services::system::xbox_system_factory::get_factory();
-
-#if TV_API
-    m_sandbox = Windows::Xbox::Services::XboxLiveConfiguration::SandboxId->Data();
-    m_scid = Windows::Xbox::Services::XboxLiveConfiguration::PrimaryServiceConfigId->Data();
+    m_sandbox = utils::internal_string_from_utf16(Windows::Xbox::Services::XboxLiveConfiguration::SandboxId->Data());
     m_titleId = std::stoi(Windows::Xbox::Services::XboxLiveConfiguration::TitleId->Data());
+    m_scid = utils::internal_string_from_utf16(Windows::Xbox::Services::XboxLiveConfiguration::PrimaryServiceConfigId->Data());
 
-    if(m_titleId == 0)
-    {
-        return xbox_live_result<void>(
-            std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
-            "ERROR: Could not read \"titleId\" in Package.appxmanifest"
-            );
-    }
-
-    if(m_scid.empty())
-    {
-        return xbox_live_result<void>(
-            std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
-            "ERROR: Could not read \"PrimaryServiceConfigId\" in Package.appxmanifest"
-            );
-    }
-#else
-    std::shared_ptr<xbox::services::local_config> localConfig = xbox::services::system::xbox_system_factory::get_factory()->create_local_config();
-    m_titleId = localConfig->title_id();
-    m_scid = localConfig->scid();
-    m_environment = localConfig->environment();
-    m_overrideScid = localConfig->override_scid();
-    m_overrideTitleId = localConfig->override_title_id();
-#if XSAPI_I
-    m_apnsEnvironment = localConfig->apns_environment();
-#endif
-
-    if(m_titleId == 0)
-    {
-        return xbox_live_result<void>(
-            std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
-            "ERROR: Could not read \"titleId\" in xboxservices.config.  Must be a JSON number"
-            );
-    }
-
-    if(m_scid.empty())
-    {
-        return xbox_live_result<void>(
-            std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
-            "ERROR: Could not read \"PrimaryServiceConfigId\" in xboxservices.config.  Must be a JSON string"
-            );
-    }
-
-#if XSAPI_U
-    m_sandbox = localConfig->sandbox();
-#endif
-
-#endif
-
-    return xbox_live_result<void>();
+    return S_OK;
 }
+#else
 
-uint32_t xbox_live_app_config::title_id()
+HRESULT AppConfig::Initialize(
+    xsapi_internal_string scid
+)
+{
+    HRESULT hr = XalGetTitleId(&m_titleId);
+
+    size_t sandboxSize = XalGetSandboxSize();
+    char* sandbox = MakeArray<char>(sandboxSize);
+
+    hr = XalGetSandbox(sandboxSize, sandbox, nullptr);
+    if (SUCCEEDED(hr))
+    {
+        m_sandbox = sandbox;
+    }
+    DeleteArray(sandbox, sandboxSize);
+
+    m_scid = std::move(scid);
+
+    return hr;
+}
+#endif
+
+uint32_t AppConfig::TitleId()
 {
     return m_titleId;
 }
 
-uint32_t xbox_live_app_config::_Override_title_id_for_multiplayer() const
+uint32_t AppConfig::OverrideTitleId() const
 {
+    if (m_overrideTitleId == 0)
+    {
+        return m_titleId;
+    }
     return m_overrideTitleId;
 }
 
-string_t xbox_live_app_config::scid()
+void AppConfig::SetOverrideTitleId(uint32_t overrideTitleId)
+{
+    m_overrideTitleId = overrideTitleId;
+}
+
+const xsapi_internal_string& AppConfig::Scid() const
 {
     return m_scid;
 }
 
-const string_t& xbox_live_app_config::_Override_scid_for_multiplayer() const
+const xsapi_internal_string& AppConfig::OverrideScid() const
 {
+    if (m_overrideScid.empty())
+    {
+        return m_scid;
+    }
     return m_overrideScid;
 }
 
-const string_t& xbox_live_app_config::environment() const
+void AppConfig::SetOverrideScid(const xsapi_internal_string& overrideScid)
 {
-    return m_environment;
+    m_overrideScid = overrideScid;
 }
 
-void xbox_live_app_config::set_environment(_In_ const string_t& environment)
-{
-    m_environment = environment;
-}
-
-const string_t& xbox_live_app_config::sandbox() const
+const xsapi_internal_string& AppConfig::Sandbox() const
 {
     return m_sandbox;
 }
 
-void xbox_live_app_config::set_sandbox(_In_ const string_t& sandbox)
+#if HC_PLATFORM == HC_PLATFORM_UWP
+void AppConfig::SetSandbox(const xsapi_internal_string& sandbox)
 {
     m_sandbox = sandbox;
 }
+#endif
 
-const web::uri&
-xbox_live_app_config::_Proxy() const
+const xsapi_internal_string& AppConfig::EndpointId() const
 {
-    return m_proxy;
+    return m_endpointId;
 }
 
-void
-xbox_live_app_config::set_title_telemetry_device_id(
-    _In_ const string_t& deviceId
-    )
+void AppConfig::SetEndpointId(const xsapi_internal_string& endpointId)
 {
-    m_titleTelemetryDeviceId = deviceId;
+    m_endpointId = endpointId;
 }
 
-const string_t&
-xbox_live_app_config::title_telemetry_device_id() const
+void AppConfig::DisableAssertsForXboxLiveThrottlingInDevSandboxes()
 {
-    return m_titleTelemetryDeviceId;
+    m_disableAssertsForXboxLiveThrottlingInDevSandboxes = true;
 }
+
+bool AppConfig::IsDisableAssertsForXboxLiveThrottlingInDevSandboxes() const
+{
+    return m_disableAssertsForXboxLiveThrottlingInDevSandboxes;
+}
+
+#if HC_PLATFORM == HC_PLATFORM_IOS
+const xsapi_internal_string& AppConfig::APNSEnvironment() const
+{
+    return m_apnsEnvironment;
+}
+
+void AppConfig::SetAPNSEnvironment(const xsapi_internal_string& apnsEnvironment)
+{
+    m_apnsEnvironment = apnsEnvironment;
+}
+#endif
+
+#if HC_PLATFORM_IS_EXTERNAL
+xsapi_internal_string const& AppConfig::AppId() const
+{
+    return m_telemetryAppId;
+}
+
+xsapi_internal_string const& AppConfig::AppVer() const
+{
+    return m_telemetryAppVer;
+}
+
+xsapi_internal_string const& AppConfig::OsName() const
+{
+    return m_telemetryOsName;
+}
+
+xsapi_internal_string const& AppConfig::OsLocale() const
+{
+    return m_telemetryOsLocale;
+}
+
+xsapi_internal_string const& AppConfig::OsVersion() const
+{
+    return m_telemetryOsVersion;
+}
+
+xsapi_internal_string const& AppConfig::DeviceClass() const
+{
+    return m_telemetryDeviceClass;
+}
+
+xsapi_internal_string const& AppConfig::DeviceId() const
+{
+    return m_telemetryDeviceId;
+}
+
+void AppConfig::SetAppId(xsapi_internal_string&& v)
+{
+    m_telemetryAppId = std::move(v);
+}
+
+void AppConfig::SetAppVer(xsapi_internal_string&& v)
+{
+    m_telemetryAppVer = std::move(v);
+}
+
+void AppConfig::SetOsName(xsapi_internal_string&& v)
+{
+    m_telemetryOsName = std::move(v);
+}
+
+void AppConfig::SetOsLocale(xsapi_internal_string&& v)
+{
+    m_telemetryOsLocale = std::move(v);
+}
+
+void AppConfig::SetOsVersion(xsapi_internal_string&& v)
+{
+    m_telemetryOsVersion = std::move(v);
+}
+
+void AppConfig::SetDeviceClass(xsapi_internal_string&& v)
+{
+    m_telemetryDeviceClass = std::move(v);
+}
+
+void AppConfig::SetDeviceId(xsapi_internal_string&& v)
+{
+    m_telemetryDeviceId = std::move(v);
+}
+#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

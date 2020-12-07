@@ -1,0 +1,986 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievement_service_internal.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_api.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_result.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_subscription.cpp">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\Manager\achievements_manager_api.cpp">
+      <Filter>C++ Source\Services\Achievements\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\Manager\achievements_manager_internal.cpp">
+      <Filter>C++ Source\Services\Achievements\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Cpp\pch.cpp">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context.cpp">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_api.cpp">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_settings.cpp">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_global_api.cpp">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_column.cpp">
+      <Filter>C++ Source\Services\Leaderboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_result.cpp">
+      <Filter>C++ Source\Services\Leaderboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_row.cpp">
+      <Filter>C++ Source\Services\Leaderboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_service.cpp">
+      <Filter>C++ Source\Services\Leaderboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\hopper_statistics_response.cpp">
+      <Filter>C++ Source\Services\Matchmaking</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\match_ticket_details_response.cpp">
+      <Filter>C++ Source\Services\Matchmaking</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\matchmaking_service.cpp">
+      <Filter>C++ Source\Services\Matchmaking</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_client_manager.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_client_pending_reader.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_client_pending_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_event_args.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_event_queue.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_game_client.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_game_session.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_lobby_client.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_lobby_session.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_local_user.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_local_user_manager.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_manager.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_manager_api.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_manager_utils.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_match_client.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_member.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_session_writer.cpp">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_activity_handle_post_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_activity_query_post_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_api.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_invite_handle_post_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_query_search_handle_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_search_handle_details.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_search_handle_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_serializers.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_service.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_member.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_session_reference.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_subscription.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_transfer_handle_post_request.cpp">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\MultiplayerActivity\multiplayer_activity_api.cpp">
+      <Filter>C++ Source\Services\MultiplayerActivity</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\MultiplayerActivity\multiplayer_activity_info.cpp">
+      <Filter>C++ Source\Services\MultiplayerActivity</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\MultiplayerActivity\multiplayer_activity_service.cpp">
+      <Filter>C++ Source\Services\MultiplayerActivity</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\device_presence_change_subscription.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_api.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_device_record.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_record.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_service.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_title_request.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_user_batch_request.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\title_presence_change_subscription.cpp">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\permission_check_result.cpp">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\privacy_api.cpp">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\privacy_service.cpp">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivityManager\real_time_activity_api.cpp">
+      <Filter>C++ Source\Services\RealTimeActivityManager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivityManager\real_time_activity_connection.cpp">
+      <Filter>C++ Source\Services\RealTimeActivityManager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivityManager\real_time_activity_manager.cpp">
+      <Filter>C++ Source\Services\RealTimeActivityManager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\peoplehub_service.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_graph.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_api.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_user_group.cpp">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_api.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_service.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_feedback_request.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\reputation_service.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_api.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_relationship_change_subscription.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_relationship_result.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_service.cpp">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\requested_statistics.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\service_configuration_statistic.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\statistic.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\statistic_change_subscription.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\title_managed_statistics_api.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\title_managed_statistics_service.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\user_statistics_api.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\user_statistics_result.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\user_statistics_service.cpp">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\StringVerify\string_service.cpp">
+      <Filter>C++ Source\Services\StringVerify</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\StringVerify\verify_string_result.cpp">
+      <Filter>C++ Source\Services\StringVerify</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\title_storage_api.cpp">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\title_storage_blob_metadata_result.cpp">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\title_storage_service.cpp">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\async_helpers.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\errors.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\global_state.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_api.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_legacy.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_request_message.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_wrapper_internal.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_utils.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\internal_mem.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\log.cpp">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\log_entry.cpp">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\log_hc_output.cpp">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\log_output.cpp">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\public_utils_legacy.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\ref_counter.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_data.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_protocol.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logging_config.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_routed_handler.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\utils_locales.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\WinRT\local_config_winrt.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_app_config.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_services_settings.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xsapi_json_utils.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xsapi_utils.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\auth_config.cpp">
+      <Filter>C++ Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\local_storage.cpp">
+      <Filter>C++ Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\platform_api.cpp">
+      <Filter>C++ Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\Win32\local_storage_win32.cpp">
+      <Filter>C++ Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\http_mock.cpp">
+      <Filter>C++ Source\UnitTests\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\mock_rta_service.cpp">
+      <Filter>C++ Source\UnitTests\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\mock_user.cpp">
+      <Filter>C++ Source\UnitTests\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\mock_web_socket.cpp">
+      <Filter>C++ Source\UnitTests\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\xal_mocks.cpp">
+      <Filter>C++ Source\UnitTests\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\event.cpp">
+      <Filter>C++ Source\UnitTests\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\iso8601.cpp">
+      <Filter>C++ Source\UnitTests\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\TE\UnitTestHelpers_TE.cpp">
+      <Filter>C++ Source\UnitTests\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\unit_test_helpers.cpp">
+      <Filter>C++ Source\UnitTests\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\AchievementsManagerTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\AchievementsTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\ErrorTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\LeaderboardTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\MatchmakingTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\MultiplayerActivityTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\MultiplayerManagerTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\MultiplayerTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\PeoplehubTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\PresenceTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\PrivacyTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\ProfileTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\RealTimeActivityManagerTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\ReputationTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\SocialManagerTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\SocialTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\StatsTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\StringVerifyTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\TitleManagedStatsTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\TitleStorageTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\GlobalTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\HttpCallSettingsTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\HttpCallTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\LogTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\PlatformTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\ServiceCallLoggerTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\XboxLiveCallbackTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\XboxLiveContextTests.cpp">
+      <Filter>C++ Source\UnitTests\Tests</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\achievements_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\achievements_manager_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\errors_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\events_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\game_invite_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\http_call_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\leaderboard_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\matchmaking_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\multiplayer_activity_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\multiplayer_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\multiplayer_manager_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\notification_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\pal.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\platform_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\presence_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\privacy_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\profile_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\real_time_activity_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\services_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\social_manager_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\string_verify_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\title_managed_statistics_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\title_storage_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\types_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\user_statistics_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_context_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_context_settings_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-c\xbox_live_global_c.h">
+      <Filter>C Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\achievements.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\errors.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\events.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\http_call.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\http_call_request_message.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\leaderboard.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\matchmaking.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\mem.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\multiplayer.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\multiplayer_manager.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\presence.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\privacy.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\profile.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\real_time_activity.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\service_call_logging_config.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\services.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\social.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\social_manager.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\string_verify.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\system.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\title_callable_ui.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\title_storage.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\types.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\user_statistics.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\xbox_live_app_config.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\xbox_live_context.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\xbox_live_context_settings.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\xbox_service_call_routed_event_args.h">
+      <Filter>C++ Public Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\achievements_internal.h">
+      <Filter>C++ Source\Services\Achievements</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Achievements\Manager\achievements_manager_internal.h">
+      <Filter>C++ Source\Services\Achievements\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\Cpp\pch.h">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\pch_common.h">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_internal.h">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Common\xbox_live_context_settings_internal.h">
+      <Filter>C++ Source\Services\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Leaderboard\leaderboard_internal.h">
+      <Filter>C++ Source\Services\Leaderboard</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Matchmaking\matchmaking_internal.h">
+      <Filter>C++ Source\Services\Matchmaking</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\Manager\multiplayer_manager_internal.h">
+      <Filter>C++ Source\Services\Multiplayer\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Multiplayer\multiplayer_internal.h">
+      <Filter>C++ Source\Services\Multiplayer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\MultiplayerActivity\multiplayer_activity_internal.h">
+      <Filter>C++ Source\Services\MultiplayerActivity</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_internal.h">
+      <Filter>C++ Source\Services\Presence</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\privacy_service_internal.h">
+      <Filter>C++ Source\Services\Privacy</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivityManager\real_time_activity_connection.h">
+      <Filter>C++ Source\Services\RealTimeActivityManager</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivityManager\real_time_activity_manager.h">
+      <Filter>C++ Source\Services\RealTimeActivityManager</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\RealTimeActivityManager\real_time_activity_subscription.h">
+      <Filter>C++ Source\Services\RealTimeActivityManager</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\peoplehub_service.h">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_graph.h">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_internal.h">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\Manager\social_manager_user_group.h">
+      <Filter>C++ Source\Services\Social\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\profile_internal.h">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Social\social_internal.h">
+      <Filter>C++ Source\Services\Social</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\title_managed_statistics_internal.h">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Stats\user_statistics_internal.h">
+      <Filter>C++ Source\Services\Stats</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\StringVerify\string_service_internal.h">
+      <Filter>C++ Source\Services\StringVerify</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\TitleStorage\title_storage_internal.h">
+      <Filter>C++ Source\Services\TitleStorage</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\async_helpers.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\build_version.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\enum_traits.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\errors_legacy.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\global_state.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_legacy.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_request_message_internal.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_wrapper_internal.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_headers.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_utils.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\internal_errors.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\internal_mem.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\internal_types.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\log.h">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\Logger\log_hc_output.h">
+      <Filter>C++ Source\Shared\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\perf_tester.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\public_utils_legacy.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\ref_counter.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_data.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_protocol.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logging_config.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_routed_handler.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\shared_macros.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\string_array.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\web_socket.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_app_config_internal.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_services_settings.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xsapi_json_utils.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xsapi_utils.h">
+      <Filter>C++ Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\auth_config.h">
+      <Filter>C++ Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\client_operation.h">
+      <Filter>C++ Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\local_storage.h">
+      <Filter>C++ Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\ppltasks_extra.h">
+      <Filter>C++ Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\http_mock.h">
+      <Filter>C++ Source\UnitTests\Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\mock_rta_service.h">
+      <Filter>C++ Source\UnitTests\Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\mock_web_socket.h">
+      <Filter>C++ Source\UnitTests\Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\DefineTestMacros.h">
+      <Filter>C++ Source\UnitTests\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\event.h">
+      <Filter>C++ Source\UnitTests\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\iso8601.h">
+      <Filter>C++ Source\UnitTests\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\TE\UnitTestHelpers_TE.h">
+      <Filter>C++ Source\UnitTests\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\TE\UnitTestIncludes_TE.h">
+      <Filter>C++ Source\UnitTests\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\unit_test_helpers.h">
+      <Filter>C++ Source\UnitTests\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\UnitTestIncludes.h">
+      <Filter>C++ Source\UnitTests\Support</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\TestResponses\Matchmaking.json">
+      <Filter>C++ Source\UnitTests\Tests\TestResponses</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\TestResponses\Multiplayer.json">
+      <Filter>C++ Source\UnitTests\Tests\TestResponses</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\TestResponses\MultiplayerManager.json">
+      <Filter>C++ Source\UnitTests\Tests\TestResponses</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="C Public Includes">
+      <UniqueIdentifier>{B5E7182D-4B68-3D0E-8396-75EB963113DC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Public Includes">
+      <UniqueIdentifier>{65282AFC-B98F-3D15-8424-BCBFDC783AAD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source">
+      <UniqueIdentifier>{05B12EF7-9605-3CAE-A0F7-1A50510E873C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services">
+      <UniqueIdentifier>{4AC55A32-AF68-3723-8ACD-1A932637D3B6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Achievements">
+      <UniqueIdentifier>{77A54872-842B-3113-A732-5FE05611310D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Achievements\Manager">
+      <UniqueIdentifier>{706892CB-8EC2-3B30-A8F8-79F2798BD675}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Common">
+      <UniqueIdentifier>{C56DAD6A-AC82-3BC1-93E4-5AD3E1AA5DBB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Leaderboard">
+      <UniqueIdentifier>{C4B95D7E-9C44-3AC9-AB40-E97F3964A25D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Matchmaking">
+      <UniqueIdentifier>{32DFED89-0079-3201-9027-A4BC245A357F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Multiplayer">
+      <UniqueIdentifier>{D9D3E88E-F7BB-3839-98A4-4134F8E9142F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Multiplayer\Manager">
+      <UniqueIdentifier>{8F22AB09-C0C1-36FF-832B-C8B5C9E1739D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\MultiplayerActivity">
+      <UniqueIdentifier>{EFA8F948-CA04-3349-8540-6F26CFE4DF4D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Presence">
+      <UniqueIdentifier>{76E48B77-67FF-35C6-A4A4-42ACBF551563}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Privacy">
+      <UniqueIdentifier>{EC8410BD-61C7-3E62-BD43-14D2B3505D85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\RealTimeActivityManager">
+      <UniqueIdentifier>{3F7FEA4B-D2BA-326E-80BF-7C92D4E785CF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Social">
+      <UniqueIdentifier>{439F3254-D2C8-3B65-8D46-B105D9BC7D75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Social\Manager">
+      <UniqueIdentifier>{99177179-A422-3DA4-B4BA-B2405C7B160E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\Stats">
+      <UniqueIdentifier>{A7796729-C9DF-3BE0-BDF3-63AD1B674F30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\StringVerify">
+      <UniqueIdentifier>{1A31270E-238E-3355-A2D5-F730294B95D1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Services\TitleStorage">
+      <UniqueIdentifier>{EA1A2025-85A4-3995-B238-E4A52FE341B0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Shared">
+      <UniqueIdentifier>{54CDBE34-F25E-3236-B34E-CBF85754D524}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\Shared\Logger">
+      <UniqueIdentifier>{5900A206-8B74-39A9-8DC3-8A6DC4D0E51F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\System">
+      <UniqueIdentifier>{4302C83F-ACBD-3C81-9574-1DC15AD098C4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\UnitTests">
+      <UniqueIdentifier>{9F50039E-397F-3AE8-8D1F-4E8D44E32125}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\UnitTests\Mocks">
+      <UniqueIdentifier>{17828278-A996-374A-9FB3-0A8535FCA7DD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\UnitTests\Support">
+      <UniqueIdentifier>{40B93B2C-D575-3EA6-9314-BC60753A8EAD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\UnitTests\Tests">
+      <UniqueIdentifier>{16089FCA-DE0A-3756-A966-4755A52B0272}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C++ Source\UnitTests\Tests\TestResponses">
+      <UniqueIdentifier>{B9981520-090B-344A-A820-0E560BE345A1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

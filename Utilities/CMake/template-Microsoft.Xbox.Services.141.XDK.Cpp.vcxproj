@@ -41,62 +41,26 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), xsapi.props))\xsapi.props" />
   </ImportGroup>
 ****INSERTFILES****
-  <ItemGroup>
-    <None Include="..\..\Source\Shared\Logger\ERA_ETW.man" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="..\..\Source\Shared\Logger\ERA_ETW.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\External\cpprestsdk\Release\src\build\vs15.xbox\casablanca141.Xbox.vcxproj">
-      <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <PropertyGroup>
-    <ProjectFolder>$(MSBuildProjectName)</ProjectFolder>
-    <OutDir>$(ProjectDir)..\..\Binaries\$(Configuration)\$(Platform)\$(ProjectFolder)\</OutDir>
-    <IntDir>$(ProjectDir)..\..\Obj\$(Configuration)\$(Platform)\$(ProjectFolder)\</IntDir>
-  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XBL_API_NONE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">_XSAPIIMP_EXPORT;XBL_API_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions>_VARIADIC_MAX=10;ENABLE_INTSAFE_SIGNED_FUNCTIONS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
       <AdditionalUsingDirectories>$(WindowsSDK_WindowsMetadata);$(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <AdditionalOptions>/bigobj /Zm250 %(AdditionalOptions)</AdditionalOptions>
       <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'">Level4</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
       <MinimalRebuild>false</MinimalRebuild>
       <CompileAsWinRT>true</CompileAsWinRT>
-      <AdditionalIncludeDirectories>
-      $(ProjectDir);
-      $(ProjectDir)\..\..\Source\Services;
-      $(ProjectDir)\..\..\Source\Services\Common;
-      $(ProjectDir)\..\..\Source\Services\Common\Desktop;
-      $(ProjectDir)\..\..\Source\Services\Common\Durango;
-      $(ProjectDir)\..\..\Source\Services\Social;
-      $(ProjectDir)\..\..\Source\Services\Social\Manager;
-      $(ProjectDir)\..\..\Source\Services\Achievements;
-      $(ProjectDir)\..\..\Source\Services\Leaderboard;
-      $(ProjectDir)\..\..\Source\Services\Stats;
-      $(ProjectDir)\..\..\Source\Services\Multiplayer;
-      $(ProjectDir)\..\..\Source\Services\Matchmaking;
-      $(ProjectDir)\..\..\Source\Services\RealTimeActivity;
-      $(ProjectDir)\..\..\Source\Services\GameServerPlatform;
-      $(ProjectDir)\..\..\Source\Shared;
-      $(ProjectDir)\..\..\Source\System;
-      $(ProjectDir)\..\..\Source\;
-      $(ProjectDir)\..\..\Include;
-      $(ProjectDir)\..\..\External\cpprestsdk\Release\include;
-      $(ProjectDir)\..\..\Source\Services\Presence;
-      $(ProjectDir)\..\..\Source\Services\TitleStorage;
-      $(ProjectDir)\..\..\Source\Services\Clubs
-      %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <SupportJustMyCode>false</SupportJustMyCode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -1,0 +1,8 @@
+<Package>
+  <Chunk Id="1000" Marker="Launch">
+    <FileGroup DestinationPath="\" SourcePath="C:\git\vso\sdk.xsapi.internal\Bins\Binaries\Debug\Gaming.Xbox.x64\APIRunner.GDK.Src\" Include="*.*"/>
+    <FileGroup DestinationPath="\Assets" SourcePath="C:\git\vso\sdk.xsapi.internal\Bins\Binaries\Debug\Gaming.Xbox.x64\APIRunner.GDK.Src\Assets" Include="*.*"/>
+    <FileGroup DestinationPath="\Media\Fonts" SourcePath="C:\git\vso\sdk.xsapi.internal\Bins\Binaries\Debug\Gaming.Xbox.x64\APIRunner.GDK.Src\Fonts" Include="*.*"/>
+    <FileGroup DestinationPath="\Media\Textures" SourcePath="C:\git\vso\sdk.xsapi.internal\Bins\Binaries\Debug\Gaming.Xbox.x64\APIRunner.GDK.Src\Textures" Include="*.*"/>
+  </Chunk>
+</Package>

@@ -2,381 +2,652 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"jicailiu"
-#define TEST_CLASS_AREA L"Stats"
 #include "UnitTestIncludes.h"
-
-#include "Utils_WinRT.h"
-#include "RtaTestHelper.h"
-
-using namespace Microsoft::Xbox::Services;
-using namespace Microsoft::Xbox::Services::System;
-using namespace Microsoft::Xbox::Services::UserStatistics;
-using namespace Platform;
-using namespace Platform::Collections;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-#define DEFAULT_STAT_NAME L"Stat"
-#define DEFAULT_STAT(name, value) \
-L"{ \
-    \"name\": \"" name "\", \
-    \"type\": \"Integer\", \
-    \"value\": \"" value "\" \
-}"
+const char* statsServer = "https://userstats.xboxlive.com";
+const char* batchUrl = "https://userstats.xboxlive.com/batch?operation=read";
+const uint64_t xuid{ 2533274792693551 };
 
-const std::wstring defaultRTAStat = DEFAULT_STAT(DEFAULT_STAT_NAME, "31");
+const char* defaultRtaStat =
+R"({
+        "name": "Stat",
+        "type": "Integer",
+        "value": "31"
+    })";
 
-const std::wstring updatedRTAStat = DEFAULT_STAT(DEFAULT_STAT_NAME, "32");
+const char* updatedRtaStat =
+R"({
+        "name": "Stat",
+        "type": "Integer",
+        "value": "32"
+    })";
 
-const std::wstring defaultSingleUserStatsResponse = 
-LR"(
-{
-    "xuid":"2533274792693551",
-    "scids":
-    [
-        {
-            "scid":"7492baca-c1b4-440d-a391-b7ef364a8d40",
-            "stats":
-            [
-                {
-                    "statname":"OverallReputation",
-                    "type":"Integer",
-                    "value":"66"
-                },
-                {
-                    "statname":"FairplayReputation",
-                    "type":"Integer",
-                    "value":"72"
-                }
-            ]
-        },
-        {
-            "scid":"7492baca-c1b4-440d-a391-b7ef364a8d41",
-            "stats":
-            [
-                {
-                    "statname":"CommsReputation",
-                    "type":"Integer",
-                    "value":"66"
-                },
-                {
-                    "statname":"UserContentReputation",
-                    "type":"Integer",
-                    "value":"75"
-                }
-            ]
-        }
-    ]
-}
-)";
+const char* defaultSingleUserStatsResponse =
+R"({
+        "xuid":"2533274792693551",
+        "scids":
+        [
+            {
+                "scid":"7492baca-c1b4-440d-a391-b7ef364a8d40",
+                "stats":
+                [
+                    {
+                        "statname":"OverallReputation",
+                        "type":"Integer",
+                        "value":"66"
+                    },
+                    {
+                        "statname":"FairplayReputation",
+                        "type":"Integer",
+                        "value":"72"
+                    }
+                ]
+            },
+            {
+                "scid":"7492baca-c1b4-440d-a391-b7ef364a8d41",
+                "stats":
+                [
+                    {
+                        "statname":"CommsReputation",
+                        "type":"Integer",
+                        "value":"66"
+                    },
+                    {
+                        "statname":"UserContentReputation",
+                        "type":"Integer",
+                        "value":"75"
+                    }
+                ]
+            }
+        ]
+    })";
 
-const std::wstring defaultBatchUsersStatsResponse =
-LR"(
-{
-    "users":
-    [
-        {
-            "xuid":"2533274792693551",
-            "scids":
-            [
-                {
-                    "scid":"7492baca-c1b4-440d-a391-b7ef364a8d40",
-                    "stats":
-                    [
-                        {
-                            "statname":"OverallReputation",
-                            "type":"Integer",
-                            "value":"66"
-                        },
-                        {
-                            "statname":"FairplayReputation",
-                            "type":"Integer",
-                            "value":"72"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "xuid":"2533274792693552",
-            "scids":
-            [
-                {
-                    "scid":"7492baca-c1b4-440d-a391-b7ef364a8d40",
-                    "stats":
-                    [
-                        {
-                            "statname":"OverallReputation",
-                            "type":"Integer",
-                            "value":"66"
-                        },
-                        {
-                            "statname":"FairplayReputation",
-                            "type":"Integer",
-                            "value":"72"
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
-}
-)";
+const char* defaultBatchUsersStatsResponse =
+R"({
+        "users":
+        [
+            {
+                "xuid":"2533274792693551",
+                "scids":
+                [
+                    {
+                        "scid":"7492baca-c1b4-440d-a391-b7ef364a8d40",
+                        "stats":
+                        [
+                            {
+                                "statname":"OverallReputation",
+                                "type":"Integer",
+                                "value":"66"
+                            },
+                            {
+                                "statname":"FairplayReputation",
+                                "type":"Integer",
+                                "value":"72"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "xuid":"2533274792693552",
+                "scids":
+                [
+                    {
+                        "scid":"7492baca-c1b4-440d-a391-b7ef364a8d40",
+                        "stats":
+                        [
+                            {
+                                "statname":"OverallReputation",
+                                "type":"Integer",
+                                "value":"66"
+                            },
+                            {
+                                "statname":"FairplayReputation",
+                                "type":"Integer",
+                                "value":"72"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    })";
 
 DEFINE_TEST_CLASS(UserStatsTests)
 {
 public:
     DEFINE_TEST_CLASS_PROPS(UserStatsTests);
 
-    void VerifyRTAStat(Statistic^ stat, web::json::value statToVerify)
-    {
-        VERIFY_ARE_EQUAL(stat->StatisticName->Data(), statToVerify[L"name"].as_string());
+    const char* rtaScid{ "12345" };
+    Event rtaMessageReceived{};
+    bool rtaMessageWellFormed{ true };
+    char rtaResultName[8]{};
+    char rtaResultValue[8]{};
+    char rtaResultType[8]{};
 
-        string_t statValue = statToVerify[L"value"].as_string();
-        VERIFY_ARE_EQUAL(stat->Value->Data(), statValue);
-        if (stat->StatisticType == PropertyType::Int64)
-        {
-            VERIFY_ARE_EQUAL(statToVerify[L"type"].as_string(), L"Integer");
-        }
-        else
-        {
-            VERIFY_ARE_EQUAL(statToVerify[L"type"].as_string(), stat->StatisticType.ToString()->Data());
-        }
+    void VerifyStat(XblStatistic stat, JsonValue statToVerify, bool isRta)
+    {
+        const char* name = isRta ? "name" : "statname";
+        VERIFY_ARE_EQUAL_STR(stat.statisticName, statToVerify[name].GetString());
+        VERIFY_ARE_EQUAL_STR(stat.value, statToVerify["value"].GetString());
+        VERIFY_ARE_EQUAL_STR(stat.statisticType, statToVerify["type"].GetString());
     }
 
-    void VerifyStats(Statistic^ stat, web::json::value statToVerify, bool isSingleUser)
-    {
-        VERIFY_ARE_EQUAL(stat->StatisticName->Data(), statToVerify[L"statname"].as_string());
-        VERIFY_ARE_EQUAL(stat->Value->Data(), statToVerify[L"value"].as_string());
-        if (stat->StatisticType == PropertyType::Int64)
-        {
-            VERIFY_ARE_EQUAL(statToVerify[L"type"].as_string(), L"Integer");
-        }
-        else
-        {
-            VERIFY_ARE_EQUAL(statToVerify[L"type"].as_string(), stat->StatisticType.ToString()->Data());
-        }
-    }
-
-    void VerifyServiceConfigurationStatistic(ServiceConfigurationStatistic^ scid, web::json::value scidToVerify, bool isSingleUser)
-    {
+    void VerifyServiceConfigurationStatistic(XblServiceConfigurationStatistic scid, JsonValue scidToVerify, bool isSingleUser)
+    {   
         if (!isSingleUser)
         {
-            VERIFY_ARE_EQUAL(scid->ServiceConfigurationId->Data(), scidToVerify[L"scid"].as_string());
+            VERIFY_ARE_EQUAL_STR(scid.serviceConfigurationId, scidToVerify["scid"].GetString());
         }
 
-        auto stats = scid->Statistics;
-        auto statsJson = scidToVerify[L"stats"].as_array();
-        VERIFY_ARE_EQUAL_INT(stats->Size, statsJson.size());
+        auto statsJson = scidToVerify["stats"].GetArray();
+        VERIFY_ARE_EQUAL_UINT(scid.statisticsCount, statsJson.Size());
 
         // scids/*/stats/*
-        int i = 0;
-        for (auto stat : stats)
+        uint32_t i{ 0 };
+        for (auto& statJson : statsJson)
         {
-            VerifyStats(stat, statsJson[i++], isSingleUser);
+            VerifyStat(scid.statistics[i], statJson.GetObjectW(), false);
+            ++i;
         }
     }
 
-    void VerifyUserStatisticsResult(UserStatisticsResult^ result, web::json::value resultToVerify, bool isSingleUser)
+    void VerifyUserStatisticsResult(XblUserStatisticsResult* result, JsonValue resultJson, bool isSingleUser)
     {
-        VERIFY_ARE_EQUAL(result->XboxUserId->Data(), resultToVerify[L"xuid"].as_string());
+        VERIFY_IS_NOT_NULL(result);
+        VERIFY_ARE_EQUAL_STR(Utils::StringFromUint64(result->xboxUserId), resultJson["xuid"].GetString());
 
         // scids
-        auto scids = result->ServiceConfigurationStatistics;
-        auto scidsJson = resultToVerify[L"scids"].as_array();
-        VERIFY_ARE_EQUAL_INT(scids->Size, scidsJson.size());
+        auto scids = result->serviceConfigStatistics;
+        auto scidsJson = resultJson["scids"].GetArray();
+        VERIFY_ARE_EQUAL_UINT(result->serviceConfigStatisticsCount, scidsJson.Size());
 
-        int i = 0;
-        for (auto scid : scids)
+        uint32_t i{ 0 };
+        for (auto& scidJson : scidsJson)
         {
-            VerifyServiceConfigurationStatistic(scid, scidsJson[i++], isSingleUser);
+            VerifyServiceConfigurationStatistic(scids[i], scidJson.GetObjectW(), isSingleUser);
+            ++i;
         }
+    }
+
+    XblRequestedStatistics CreateRequestedStat(char* scid, const char** statNames, uint32_t statCount)
+    {
+        XblRequestedStatistics requestedStat{};
+        requestedStat.statistics = statNames;
+        requestedStat.statisticsCount = statCount;
+        strcpy_s(requestedStat.serviceConfigurationId, scid);
+
+        return requestedStat;
+    }
+
+    void TestSingleUserStat(const char* scid, const char* statName, uint32_t bufferSizeMultiplier)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        xsapi_internal_stringstream url;
+        url << statsServer << "/users/xuid(" << xuid << ")/scids/" << scid << "/stats/" << statName;
+        HttpMock mock("GET", url.str(), 200);
+        mock.SetResponseBody(defaultSingleUserStatsResponse);
+
+        XAsyncBlock async{};
+        size_t resultSize{};
+        VERIFY_SUCCEEDED(XblUserStatisticsGetSingleUserStatisticAsync(xboxLiveContext.get(), xuid, scid, statName, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_SUCCEEDED(XblUserStatisticsGetSingleUserStatisticResultSize(&async, &resultSize));
+
+        size_t bufferUsed{};
+        XblUserStatisticsResult* result{};
+        std::shared_ptr<char> buffer(new char[resultSize * bufferSizeMultiplier], std::default_delete<char[]>());
+        VERIFY_SUCCEEDED(XblUserStatisticsGetSingleUserStatisticResult(&async, resultSize * bufferSizeMultiplier, buffer.get(), &result, &bufferUsed));
+        VERIFY_ARE_EQUAL_UINT(resultSize, bufferUsed);
+
+        JsonDocument responseJson;
+        responseJson.Parse(defaultSingleUserStatsResponse);
+        VerifyUserStatisticsResult(result, responseJson.GetObjectW(), true);
     }
 
     DEFINE_TEST_CASE(TestGetSingleUserStatistics1)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetSingleUserStatistics1);
-        auto responseJson = web::json::value::parse(defaultSingleUserStatsResponse);
+        const char* scid{ "7492baca-c1b4-440d-a391-b7ef364a8d40" };
+        const char* statName{ "OverallReputation" };
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto result = create_task(xboxLiveContext->UserStatisticsService->GetSingleUserStatisticsAsync(
-            "xboxUserId",
-            "serviceConfigurationId",
-            "statisticName"
-            )).get();
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://userstats.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/xuid(xboxUserId)/scids/serviceConfigurationId/stats/statisticName", httpCall->PathQueryFragment.to_string());
-
-        VERIFY_IS_NOT_NULL(result);
-
-        VerifyUserStatisticsResult(result, responseJson, true);
+        TestSingleUserStat(scid, statName, 1);
     }
 
     DEFINE_TEST_CASE(TestGetSingleUserStatistics2)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetSingleUserStatistics2);
-        auto responseJson = web::json::value::parse(defaultSingleUserStatsResponse);
+        const char* scid{ "7492baca-c1b4-440d-a391-b7ef364a8d41" };
+        const char* statName{ "UserContentReputation" };
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
-
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto statNames = ref new Platform::Collections::Vector<Platform::String^>();
-        statNames->Append("namename");
-        auto result = create_task(xboxLiveContext->UserStatisticsService->GetSingleUserStatisticsAsync(
-            "xboxUserId",
-            "serviceConfigId",
-            statNames->GetView()
-            )).get();
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://userstats.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/xuid(xboxUserId)/scids/serviceConfigId/stats/namename", httpCall->PathQueryFragment.to_string());
-
-        VerifyUserStatisticsResult(result, responseJson, true);
+        TestSingleUserStat(scid, statName, 1);
     }
 
-    DEFINE_TEST_CASE(TestGetBatchUserStatistics1)
+    DEFINE_TEST_CASE(TestGetSingleUserStatisticsWithLargeBuffer1)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetBatchUserStatistics1);
-        auto responseJson = web::json::value::parse(defaultBatchUsersStatsResponse);
+        const char* scid{ "7492baca-c1b4-440d-a391-b7ef364a8d40" };
+        const char* statName{ "OverallReputation" };
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        TestSingleUserStat(scid, statName, 2);
+    }
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        Vector<Platform::String^>^ userNames = ref new Vector<Platform::String^>();
-        userNames->Append("123");
-        auto statNames = ref new Platform::Collections::Vector<Platform::String^>();
-        statNames->Append("namename");
-        auto result = create_task(xboxLiveContext->UserStatisticsService->GetMultipleUserStatisticsAsync(
-            userNames->GetView(),
-            "serviceConfigId",
-            statNames->GetView()
-            )).get();
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://userstats.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/batch?operation=read", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_STR(LR"({"requestedscids":[{"requestedstats":["namename"],"scid":"serviceConfigId"}],"requestedusers":["123"]})", httpCall->request_body().request_message_string());
+    DEFINE_TEST_CASE(TestGetSingleUserStatisticsWithLargeBuffer2)
+    {
+        const char* scid{ "7492baca-c1b4-440d-a391-b7ef364a8d41" };
+        const char* statName{ "UserContentReputation" };
 
-        VERIFY_IS_NOT_NULL(result);
+        TestSingleUserStat(scid, statName, 2);
+    }
 
-        VERIFY_ARE_EQUAL_INT(result->Size, responseJson[L"users"].size());
+    void TestSingleUserStats(const char* scid, std::vector<const char*> statNames, uint32_t bufferSizeMultiplier)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        for (uint32_t i = 0; i < result->Size; i++)
+        char delimiter{};
+        xsapi_internal_stringstream url;
+        url << statsServer << "/users/xuid(" << xuid << ")/scids/" << scid << "/stats/";
+        for (auto stat : statNames)
         {
-            VerifyUserStatisticsResult(result->GetAt(i), responseJson[L"users"][i], false);
+            url << delimiter << stat;
+            delimiter = ',';
+        }
+        HttpMock mock("GET", url.str(), 200);
+        mock.SetResponseBody(defaultSingleUserStatsResponse);
+
+        XAsyncBlock async{};
+        size_t resultSize{};
+        VERIFY_SUCCEEDED(XblUserStatisticsGetSingleUserStatisticsAsync(xboxLiveContext.get(), xuid, scid, statNames.data(), 1, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_SUCCEEDED(XblUserStatisticsGetSingleUserStatisticsResultSize(&async, &resultSize));
+
+        size_t bufferUsed{};
+        XblUserStatisticsResult* result{};
+        std::shared_ptr<char> buffer(new char[resultSize * bufferSizeMultiplier], std::default_delete<char[]>());
+        VERIFY_SUCCEEDED(XblUserStatisticsGetSingleUserStatisticsResult(&async, resultSize * bufferSizeMultiplier, buffer.get(), &result, &bufferUsed));
+        VERIFY_ARE_EQUAL_UINT(resultSize, bufferUsed);
+
+        JsonDocument responseJson;
+        responseJson.Parse(defaultSingleUserStatsResponse);
+        VerifyUserStatisticsResult(result, responseJson.GetObjectW(), true);
+    }
+
+    DEFINE_TEST_CASE(TestGetSingleUserStatistics)
+    {
+        const char* scid{ "7492baca-c1b4-440d-a391-b7ef364a8d40" };
+        std::vector<const char*> statNames{ "OverallReputation", "UserContentReputation" };
+
+        TestSingleUserStats(scid, statNames, 1);
+    }
+
+    DEFINE_TEST_CASE(TestGetSingleUserStatisticsWithLargeBuffer)
+    {
+        const char* scid{ "7492baca-c1b4-440d-a391-b7ef364a8d40" };
+        std::vector<const char*> statNames{ "OverallReputation", "UserContentReputation" };
+
+        TestSingleUserStats(scid, statNames, 2);
+    }
+
+    DEFINE_TEST_CASE(TestGetBatchUserStatistics)
+    {
+        TestEnvironment env{};
+
+        const uint32_t xuidCount{ 2 };
+        const uint32_t nameCount{ 1 };
+        const char* scid{ "serviceConfigId" };
+        uint64_t xuids[xuidCount]{ 2533274792693551, 2533274792693552 };
+        const char* statNames[nameCount]{ "namename" };
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        HttpMock mock("POST", batchUrl, 200);
+        mock.SetResponseBody(defaultBatchUsersStatsResponse);
+        
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&requestWellFormed, xuids, scid, statNames](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                UNREFERENCED_PARAMETER(mock);
+                UNREFERENCED_PARAMETER(requestUrl);
+
+                JsonDocument requestJson;
+                requestJson.Parse(requestBody.c_str());
+
+                int userIndex{ 0 };
+                for (auto& requestXuid : requestJson["requestedusers"].GetArray())
+                {
+                    requestWellFormed &= strcmp(Utils::StringFromUint64(xuids[userIndex]).c_str(), requestXuid.GetString()) == 0;
+                    ++userIndex;
+                }
+
+                auto& requestScid = requestJson["requestedscids"].GetArray()[0];
+                requestWellFormed &= strcmp(scid, requestScid["scid"].GetString()) == 0;
+
+                int nameIndex{ 0 };
+                for (auto& requestStatName : requestScid["requestedstats"].GetArray())
+                {
+                    requestWellFormed &= strcmp(statNames[nameIndex], requestStatName.GetString()) == 0;
+                    ++nameIndex;
+                }
+            }
+        );
+
+        XAsyncBlock async{};
+        size_t resultSize{};
+        VERIFY_SUCCEEDED(XblUserStatisticsGetMultipleUserStatisticsAsync(xboxLiveContext.get(), xuids, xuidCount, scid, statNames, nameCount, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+        VERIFY_SUCCEEDED(XblUserStatisticsGetMultipleUserStatisticsResultSize(&async, &resultSize));
+
+        size_t resultCount{};
+        XblUserStatisticsResult* results{};
+        std::shared_ptr<char> buffer(new char[resultSize], std::default_delete<char[]>());
+        VERIFY_SUCCEEDED(XblUserStatisticsGetMultipleUserStatisticsResult(&async, resultSize, buffer.get(), &results, &resultCount, nullptr));
+        VERIFY_IS_NOT_NULL(results);
+
+        JsonDocument responseJson;
+        responseJson.Parse(defaultBatchUsersStatsResponse);
+        VERIFY_ARE_EQUAL_INT(resultCount, responseJson["users"].Size());
+
+        uint32_t i{ 0 };
+        for (auto& userJson : responseJson["users"].GetArray())
+        {
+            VerifyUserStatisticsResult(&results[i], userJson.GetObjectW(), false);
+            ++i;
         }
     }
 
-    DEFINE_TEST_CASE(TestGetBatchUserStatistics2)
+    DEFINE_TEST_CASE(TestGetBatchUserStatisticsWithLargeBuffer)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetBatchUserStatistics2);
-        auto responseJson = web::json::value::parse(defaultBatchUsersStatsResponse);
+        TestEnvironment env{};
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        const uint32_t xuidCount{ 2 };
+        const uint32_t nameCount{ 1 };
+        const char* scid{ "serviceConfigId" };
+        uint64_t xuids[xuidCount]{ 2533274792693551, 2533274792693552 };
+        const char* statNames[nameCount]{ "namename" };
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto userNames = ref new Vector<Platform::String^>();
-        userNames->Append("123");
-        auto statNames = ref new Vector<Platform::String^>();
-        statNames->Append("namename");
+        HttpMock mock("POST", batchUrl, 200);
+        mock.SetResponseBody(defaultBatchUsersStatsResponse);
 
-        Vector<RequestedStatistics^>^ requests = ref new Vector<RequestedStatistics^>();
-        auto request = ref new RequestedStatistics(
-            "serviceConfigId",
-            statNames->GetView()
-            );
-        requests->Append(request);
-        auto result = create_task(xboxLiveContext->UserStatisticsService->GetMultipleUserStatisticsForMultipleServiceConfigurationsAsync(
-            userNames->GetView(),
-            requests->GetView()
-            )).get();
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://userstats.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/batch?operation=read", httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_STR(LR"({"requestedscids":[{"requestedstats":["namename"],"scid":"serviceConfigId"}],"requestedusers":["123"]})", httpCall->request_body().request_message_string());
-
-        VERIFY_IS_NOT_NULL(result);
-
-        VERIFY_ARE_EQUAL_INT(result->Size, responseJson[L"users"].size());
-
-        for (uint32_t i = 0; i < result->Size; i++)
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&requestWellFormed, xuids, scid, statNames](HttpMock* mock, std::string requestUrl, std::string requestBody)
         {
-            VerifyUserStatisticsResult(result->GetAt(i), responseJson[L"users"][i], false);
+            UNREFERENCED_PARAMETER(mock);
+            UNREFERENCED_PARAMETER(requestUrl);
+
+            JsonDocument requestJson;
+            requestJson.Parse(requestBody.c_str());
+
+            int userIndex{ 0 };
+            for (auto& requestXuid : requestJson["requestedusers"].GetArray())
+            {
+                requestWellFormed &= strcmp(Utils::StringFromUint64(xuids[userIndex]).c_str(), requestXuid.GetString()) == 0;
+                ++userIndex;
+            }
+
+            auto& requestScid = requestJson["requestedscids"].GetArray()[0];
+            requestWellFormed &= strcmp(scid, requestScid["scid"].GetString()) == 0;
+
+            int nameIndex{ 0 };
+            for (auto& requestStatName : requestScid["requestedstats"].GetArray())
+            {
+                requestWellFormed &= strcmp(statNames[nameIndex], requestStatName.GetString()) == 0;
+                ++nameIndex;
+            }
+        }
+        );
+
+        XAsyncBlock async{};
+        size_t resultSize{};
+        VERIFY_SUCCEEDED(XblUserStatisticsGetMultipleUserStatisticsAsync(xboxLiveContext.get(), xuids, xuidCount, scid, statNames, nameCount, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+        VERIFY_SUCCEEDED(XblUserStatisticsGetMultipleUserStatisticsResultSize(&async, &resultSize));
+
+        size_t bufferUsed{};
+        size_t resultCount{};
+        XblUserStatisticsResult* results{};
+        std::shared_ptr<char> buffer(new char[resultSize * 2], std::default_delete<char[]>());
+        VERIFY_SUCCEEDED(XblUserStatisticsGetMultipleUserStatisticsResult(&async, resultSize * 2, buffer.get(), &results, &resultCount, &bufferUsed));
+        VERIFY_IS_NOT_NULL(results);
+        VERIFY_ARE_EQUAL_UINT(resultSize, bufferUsed);
+
+        JsonDocument responseJson;
+        responseJson.Parse(defaultBatchUsersStatsResponse);
+        VERIFY_ARE_EQUAL_INT(resultCount, responseJson["users"].Size());
+
+        uint32_t i{ 0 };
+        for (auto& userJson : responseJson["users"].GetArray())
+        {
+            VerifyUserStatisticsResult(&results[i], userJson.GetObjectW(), false);
+            ++i;
+        }
+    }
+
+    DEFINE_TEST_CASE(TestGetBatchUserStatisticsForMultipleServiceConfigs)
+    {
+        TestEnvironment env{};
+
+        const uint32_t xuidCount{ 1 };
+        const uint32_t nameCount{ 1 };
+        const uint32_t requestedStatCount{ 2 };
+        uint64_t xuids[xuidCount]{ 2533274792693551 };
+        const char* statNames[nameCount]{ "namename" };
+        XblRequestedStatistics requestedStats[requestedStatCount]
+        {
+            CreateRequestedStat("serviceConfigId1", statNames, nameCount),
+            CreateRequestedStat("serviceConfigId2", statNames, nameCount)
+        };
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        HttpMock mock("POST", batchUrl, 200);
+        mock.SetResponseBody(defaultBatchUsersStatsResponse);
+
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&requestWellFormed, xuids, requestedStats](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                UNREFERENCED_PARAMETER(mock);
+                UNREFERENCED_PARAMETER(requestUrl);
+
+                JsonDocument requestJson;
+                requestJson.Parse(requestBody.c_str());
+
+                int userIndex{ 0 };
+                for (auto& requestXuid : requestJson["requestedusers"].GetArray())
+                {
+                    requestWellFormed &= strcmp(Utils::StringFromUint64(xuids[userIndex]).c_str(), requestXuid.GetString()) == 0;
+                    ++userIndex;
+                }
+
+                int requestedStatIndex{ 0 };
+                for (auto& requestScid : requestJson["requestedscids"].GetArray())
+                {
+                    auto stat = requestedStats[requestedStatIndex];
+                    requestWellFormed &= strcmp(stat.serviceConfigurationId, requestScid["scid"].GetString()) == 0;
+                    ++requestedStatIndex;
+
+                    int statIndex{ 0 };
+                    for (auto& requestStatName : requestScid["requestedstats"].GetArray())
+                    {
+                        requestWellFormed &= strcmp(stat.statistics[statIndex], requestStatName.GetString()) == 0;
+                        ++statIndex;
+                    }
+                }
+            }
+        );
+
+        XAsyncBlock async{};
+        size_t resultSize{};
+        VERIFY_SUCCEEDED(XblUserStatisticsGetMultipleUserStatisticsForMultipleServiceConfigurationsAsync(xboxLiveContext.get(), xuids, xuidCount, requestedStats, requestedStatCount, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+        VERIFY_SUCCEEDED(XblUserStatisticsGetMultipleUserStatisticsForMultipleServiceConfigurationsResultSize(&async, &resultSize));
+
+        size_t resultCount{};
+        XblUserStatisticsResult* results{};
+        std::shared_ptr<char> buffer(new char[resultSize], std::default_delete<char[]>());
+        VERIFY_SUCCEEDED(XblUserStatisticsGetMultipleUserStatisticsForMultipleServiceConfigurationsResult(&async, resultSize, buffer.get(), &results, &resultCount, nullptr));
+        VERIFY_IS_NOT_NULL(results);
+
+        JsonDocument responseJson;
+        responseJson.Parse(defaultBatchUsersStatsResponse);
+        VERIFY_ARE_EQUAL_INT(resultCount, responseJson["users"].Size());
+
+        uint32_t i{ 0 };
+        for (auto& userJson : responseJson["users"].GetArray())
+        {
+            VerifyUserStatisticsResult(&results[i], userJson.GetObjectW(), false);
+            ++i;
+        }
+    }
+
+    DEFINE_TEST_CASE(TestGetBatchUserStatisticsForMultipleServiceConfigsWithLargeBuffer)
+    {
+        TestEnvironment env{};
+
+        const uint32_t xuidCount{ 1 };
+        const uint32_t nameCount{ 1 };
+        const uint32_t requestedStatCount{ 2 };
+        uint64_t xuids[xuidCount]{ 2533274792693551 };
+        const char* statNames[nameCount]{ "namename" };
+        XblRequestedStatistics requestedStats[requestedStatCount]
+        {
+            CreateRequestedStat("serviceConfigId1", statNames, nameCount),
+            CreateRequestedStat("serviceConfigId2", statNames, nameCount)
+        };
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        HttpMock mock("POST", batchUrl, 200);
+        mock.SetResponseBody(defaultBatchUsersStatsResponse);
+
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&requestWellFormed, xuids, requestedStats](HttpMock* mock, std::string requestUrl, std::string requestBody)
+        {
+            UNREFERENCED_PARAMETER(mock);
+            UNREFERENCED_PARAMETER(requestUrl);
+
+            JsonDocument requestJson;
+            requestJson.Parse(requestBody.c_str());
+
+            int userIndex{ 0 };
+            for (auto& requestXuid : requestJson["requestedusers"].GetArray())
+            {
+                requestWellFormed &= strcmp(Utils::StringFromUint64(xuids[userIndex]).c_str(), requestXuid.GetString()) == 0;
+                ++userIndex;
+            }
+
+            int requestedStatIndex{ 0 };
+            for (auto& requestScid : requestJson["requestedscids"].GetArray())
+            {
+                auto stat = requestedStats[requestedStatIndex];
+                requestWellFormed &= strcmp(stat.serviceConfigurationId, requestScid["scid"].GetString()) == 0;
+                ++requestedStatIndex;
+
+                int statIndex{ 0 };
+                for (auto& requestStatName : requestScid["requestedstats"].GetArray())
+                {
+                    requestWellFormed &= strcmp(stat.statistics[statIndex], requestStatName.GetString()) == 0;
+                    ++statIndex;
+                }
+            }
+        }
+        );
+
+        XAsyncBlock async{};
+        size_t resultSize{};
+        VERIFY_SUCCEEDED(XblUserStatisticsGetMultipleUserStatisticsForMultipleServiceConfigurationsAsync(xboxLiveContext.get(), xuids, xuidCount, requestedStats, requestedStatCount, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+        VERIFY_SUCCEEDED(XblUserStatisticsGetMultipleUserStatisticsForMultipleServiceConfigurationsResultSize(&async, &resultSize));
+
+        size_t bufferUsed{};
+        size_t resultCount{};
+        XblUserStatisticsResult* results{};
+        std::shared_ptr<char> buffer(new char[resultSize * 2], std::default_delete<char[]>());
+        VERIFY_SUCCEEDED(XblUserStatisticsGetMultipleUserStatisticsForMultipleServiceConfigurationsResult(&async, resultSize * 2, buffer.get(), &results, &resultCount, &bufferUsed));
+        VERIFY_IS_NOT_NULL(results);
+        VERIFY_ARE_EQUAL_UINT(resultSize, bufferUsed);
+
+        JsonDocument responseJson;
+        responseJson.Parse(defaultBatchUsersStatsResponse);
+        VERIFY_ARE_EQUAL_INT(resultCount, responseJson["users"].Size());
+
+        uint32_t i{ 0 };
+        for (auto& userJson : responseJson["users"].GetArray())
+        {
+            VerifyUserStatisticsResult(&results[i], userJson.GetObjectW(), false);
+            ++i;
         }
     }
 
     DEFINE_TEST_CASE(TestRTAStatistics)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestRTAStatistics);
-        const int subId = 321;
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto mockSocket = m_mockXboxSystemFactory->GetMockWebSocketClient();
-        SetWebSocketRTAAutoResponser(mockSocket, defaultRTAStat, subId);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(xuid);
+        auto& mockRtaService{ MockRealTimeActivityService::Instance() };
 
-        auto helper = SetupStateChangeHelper(xboxLiveContext->RealTimeActivityService);
-        xboxLiveContext->RealTimeActivityService->Activate();
-        helper->connectedEvent.wait();
+        const uint32_t subId{ 321 };
+        const char* statName{ "Stat" };
+        std::stringstream statsRtaUri;
+        statsRtaUri << statsServer << "/users/xuid(" << xuid << ")/scids/" << rtaScid << "/stats/" << statName;
 
-        auto expectedValue = web::json::value::parse(defaultRTAStat);
-        concurrency::event fireEvent;
-        bool didFire = false;
-        const string_t testUser = _T("TestUser");
-        const string_t scid = _T("12345");
-        const string_t statName = DEFAULT_STAT_NAME;
-
-        auto statisticInitializeHandler = xboxLiveContext->UserStatisticsService->StatisticChanged += 
-            ref new Windows::Foundation::EventHandler<StatisticChangeEventArgs^>([this, &fireEvent, &didFire, &expectedValue, testUser, scid](Platform::Object^, StatisticChangeEventArgs^ args)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
         {
-            didFire = true;
-            VERIFY_ARE_EQUAL(args->XboxUserId->Data(), testUser);
-            VERIFY_ARE_EQUAL(args->ServiceConfigurationId->Data(), scid);
-            VerifyRTAStat(args->LatestStatistic, expectedValue);
-            fireEvent.set();
+            if (uri == statsRtaUri.str())
+            {
+                mockRtaService.CompleteSubscribeHandshake(n, defaultRtaStat);
+            }
         });
 
-        auto subscription = xboxLiveContext->UserStatisticsService->SubscribeToStatisticChange(
-            ref new Platform::String(testUser.c_str()),
-            ref new Platform::String(scid.c_str()),
-            ref new Platform::String(statName.c_str())
-            );
+        VERIFY_SUCCEEDED(XblUserStatisticsTrackStatistics(xboxLiveContext.get(), &xuid, 1, rtaScid, &statName, 1));
 
-        auto msg = FormatString(L"Subscription %s created, name: %s", statName.c_str(), subscription->StatisticName->Data());
-        TEST_LOG(msg.c_str());
+        auto handlerToken = XblUserStatisticsAddStatisticChangedHandler(xboxLiveContext.get(),
+            [](XblStatisticChangeEventArgs args, void* context)
+            {
+                auto testsContext = static_cast<UserStatsTests*>(context);
 
-        string_t statSubUri = subscription->ResourceUri->Data();
-        VERIFY_ARE_EQUAL(statSubUri, L"https://userstats.xboxlive.com/users/xuid(TestUser)/scids/12345/stats/Stat");
-        TEST_LOG(L"Wait for StatisticChanged event for initial stat");
-        fireEvent.wait();
-        fireEvent.reset();
+                testsContext->rtaMessageWellFormed &= xuid == args.xboxUserId;
+                testsContext->rtaMessageWellFormed &= strcmp(testsContext->rtaScid, args.serviceConfigurationId) == 0;
 
-        uint32_t testNumber = 32;
-        auto updatedValue = web::json::value(testNumber);
-        expectedValue = web::json::value::parse(updatedRTAStat);
+                auto stat = args.latestStatistic;
+                strcpy_s(testsContext->rtaResultName, stat.statisticName);
+                strcpy_s(testsContext->rtaResultType, stat.statisticType);
+                strcpy_s(testsContext->rtaResultValue, stat.value);
 
-        mockSocket->receive_rta_event(subId, updatedValue.serialize());
-        VERIFY_IS_TRUE(subscription->State == Microsoft::Xbox::Services::RealTimeActivity::RealTimeActivitySubscriptionState::Subscribed);
-        VERIFY_ARE_EQUAL_STR(subscription->ResourceUri->Data(), L"https://userstats.xboxlive.com/users/xuid(TestUser)/scids/12345/stats/Stat");
-        VERIFY_ARE_EQUAL(subscription->XboxUserId->Data(), testUser);
-        VERIFY_ARE_EQUAL(subscription->ServiceConfigurationId->Data(), scid);
-        VERIFY_ARE_EQUAL(subscription->StatisticName->Data(), statName);
-        VERIFY_ARE_EQUAL_INT(subscription->SubscriptionId, 321);
-        TEST_LOG(L"Wait for StatisticChanged event for updated stat");
-        fireEvent.wait();
-        fireEvent.reset();
+                testsContext->rtaMessageReceived.Set();
+            }
+        , this);
 
-        didFire = false;
-        xboxLiveContext->UserStatisticsService->UnsubscribeFromStatisticChange(
-            subscription
-            );
-        mockSocket->receive_rta_event(subId, updatedValue.serialize());
-        VERIFY_IS_FALSE(didFire);
+        rtaMessageReceived.Wait();
+        VERIFY_IS_TRUE(rtaMessageWellFormed);
+
+        XblStatistic resultStat{};
+        resultStat.statisticName = rtaResultName;
+        resultStat.statisticType = rtaResultType;
+        resultStat.value = rtaResultValue;
+        JsonDocument resultJson;
+        resultJson.Parse(defaultRtaStat);
+        VerifyStat(resultStat, resultJson.GetObjectW(), true);
+
+        mockRtaService.RaiseEvent(statsRtaUri.str(), "32");
+        rtaMessageReceived.Wait();
+        VERIFY_IS_TRUE(rtaMessageWellFormed);
+
+        XblStatistic updatedStat{};
+        updatedStat.statisticName = rtaResultName;
+        updatedStat.statisticType = rtaResultType;
+        updatedStat.value = rtaResultValue;
+        JsonDocument updatedJson;
+        updatedJson.Parse(updatedRtaStat);
+        VerifyStat(updatedStat, updatedJson.GetObjectW(), true);
+
+        XblUserStatisticsRemoveStatisticChangedHandler(xboxLiveContext.get(), handlerToken);
     }
 };
 
