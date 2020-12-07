@@ -1,0 +1,3 @@
+```cpp
+XblMultiplayerSessionSetLocked(sessionHandle, locked);
+```

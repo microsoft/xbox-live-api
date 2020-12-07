@@ -1,0 +1,6 @@
+```cpp
+XblUserStatisticsRemoveStatisticChangedHandler(
+        xboxLiveContext,
+        statisticChangedFunctionContext
+    );
+```

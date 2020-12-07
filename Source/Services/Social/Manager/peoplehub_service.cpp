@@ -2,194 +2,330 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "social_manager_internal.h"
-#include "http_call_impl.h"
-#include "xbox_system_factory.h"
-
-using namespace xbox::services;
+#include "peoplehub_service.h"
+#include "presence_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
 
-peoplehub_service::peoplehub_service(
-    _In_ std::shared_ptr<xbox::services::user_context> userContext,
-    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> httpCallSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig
-    ) :
-    m_userContext(std::move(userContext)),
-    m_httpCallSettings(std::move(httpCallSettings)),
-    m_appConfig(std::move(appConfig))
+PeoplehubService::PeoplehubService(
+    _In_ User&& user,
+    _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> httpCallSettings,
+    _In_ uint32_t titleId
+) noexcept :
+    m_user{ std::move(user) },
+    m_httpSettings{ std::move(httpCallSettings) },
+    m_titleId{ titleId }
 {
 }
 
-pplx::task<xbox_live_result<std::vector<xbox_social_user>>>
-peoplehub_service::get_social_graph(
-    _In_ const string_t& callerXboxUserId,
-    _In_ social_manager_extra_detail_level decorations
-    )
+HRESULT PeoplehubService::GetSocialGraph(
+    _In_ uint64_t xuid,
+    _In_ XblSocialManagerExtraDetailLevel decorations,
+    _In_ AsyncContext<Result<Vector<XblSocialManagerUser>>> async
+) const noexcept
 {
-    return get_social_graph(
-        callerXboxUserId,
-        decorations,
-        _T("social"),
-        std::vector<string_t>(),
-        false
-        );
+    return MakeServiceCall(xuid, decorations, RelationshipType::Social, Vector<uint64_t>{}, async);
 }
 
-pplx::task<xbox_live_result<std::vector<xbox_social_user>>>
-peoplehub_service::get_social_graph(
-    _In_ const string_t& callerXboxUserId,
-    _In_ social_manager_extra_detail_level decorations,
-    _In_ const std::vector<string_t> xboxLiveUsers
-    )
+HRESULT PeoplehubService::GetSocialUsers(
+    _In_ uint64_t xuid,
+    _In_ XblSocialManagerExtraDetailLevel decorations,
+    _In_ const Vector<uint64_t>& xuids,
+    _In_ AsyncContext<Result<Vector<XblSocialManagerUser>>> async
+) const noexcept
 {
-    return get_social_graph(
-        callerXboxUserId,
-        decorations,
-        _T(""),
-        xboxLiveUsers,
-        true
-        );
+    return MakeServiceCall(xuid, decorations, RelationshipType::Batch, xuids, async);
 }
 
-pplx::task<xbox_live_result<std::vector<xbox_social_user>>>
-peoplehub_service::get_social_graph(
-    _In_ const string_t& callerXboxUserId,
-    _In_ social_manager_extra_detail_level decorations,
-    _In_ const string_t& relationshipType,
-    _In_ const std::vector<string_t> xboxLiveUsers,
-    _In_ bool isBatch
-    )
+HRESULT PeoplehubService::MakeServiceCall(
+    _In_ uint64_t xuid,
+    _In_ XblSocialManagerExtraDetailLevel decorations,
+    _In_ RelationshipType relationshipType,
+    _In_opt_ const Vector<uint64_t>& batchUsers,
+    _In_ AsyncContext<Result<Vector<XblSocialManagerUser>>> async
+) const noexcept
 {
-    string_t pathAndQuery = social_graph_subpath(
-        callerXboxUserId,
-        decorations,
-        relationshipType,
-        xboxLiveUsers,
-        isBatch
-        );
+    Stringstream subpath;
+    JsonDocument bodyJson;
 
-    std::shared_ptr<http_call> httpCall = xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
-        m_httpCallSettings,
-        isBatch ? _T("POST") : _T("GET"),
-        utils::create_xboxlive_endpoint(_T("peoplehub"), m_appConfig),
-        pathAndQuery,
-        xbox_live_api::get_social_graph
-        );
+    subpath << "/users/xuid(" << xuid << ")/people/";
 
-    if (isBatch)
+    switch (relationshipType)
     {
-        web::json::value postJSON;
-        web::json::value xuidJSON = web::json::value::array();
-        for (uint32_t i = 0; i < xboxLiveUsers.size(); ++i)
+    case RelationshipType::Social:
+    {
+        subpath << "social";
+        break;
+    }
+    case RelationshipType::Batch:
+    {
+        subpath << "batch";
+
+        JsonValue xuidJson = JsonValue(rapidjson::kArrayType);
+        for (size_t i = 0; i < batchUsers.size(); ++i)
         {
-            xuidJSON[i] = web::json::value::string(xboxLiveUsers[i]);
+            xuidJson.PushBack(JsonValue(utils::uint64_to_internal_string(batchUsers[i]).c_str(), bodyJson.GetAllocator()).Move(), bodyJson.GetAllocator());
         }
 
-        postJSON[_T("xuids")] = xuidJSON;
-        httpCall->set_request_body(postJSON);
+        bodyJson.SetObject();
+        bodyJson.AddMember("xuids", xuidJson, bodyJson.GetAllocator());
+        break;
+    }
     }
 
-    auto task = httpCall->get_response_with_auth(m_userContext)
-    .then([](std::shared_ptr<http_call_response> response)
+    // Always include the presenceDetail decoration
+    subpath << "/decoration/presenceDetail";
+
+    if (decorations != XblSocialManagerExtraDetailLevel::NoExtraDetail)
     {
-        std::error_code errc;
-        web::json::value peopleArray = utils::extract_json_field(
-            response->response_body_json(),
-            _T("people"),
-            errc,
+        if ((decorations & XblSocialManagerExtraDetailLevel::TitleHistoryLevel) == XblSocialManagerExtraDetailLevel::TitleHistoryLevel)
+        {
+            subpath << ",titlehistory(" << m_titleId << ")";
+        }
+        if ((decorations & XblSocialManagerExtraDetailLevel::PreferredColorLevel) == XblSocialManagerExtraDetailLevel::PreferredColorLevel)
+        {
+            subpath << ",preferredcolor";
+        }
+    }
+
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    RETURN_HR_IF_FAILED(httpCall->Init(
+        m_httpSettings,
+        relationshipType == RelationshipType::Batch ? "POST" : "GET",
+        XblHttpCall::BuildUrl("peoplehub", subpath.str()),
+        xbox_live_api::get_social_graph,
+        HttpCallAgent::SocialManager
+    ));
+
+    httpCall->SetXblServiceContractVersion(3);
+
+    if (!bodyJson.IsNull())
+    {
+        httpCall->SetRequestBody(bodyJson);
+    }
+
+    return httpCall->Perform({
+        async.Queue(),
+        [
+            async
+        ]
+    (HttpResult httpResult)
+    {
+        HRESULT hr{ Failed(httpResult) ? httpResult.Hresult() : httpResult.Payload()->Result() };
+        if (FAILED(hr))
+        {
+            return async.Complete(hr);
+        }
+
+        auto httpCall{ httpResult.ExtractPayload() };
+
+        auto header = httpCall->GetResponseHeader("x-xbl-servicedefault");
+        if (!header.empty())
+        {
+            LOGS_ERROR << "Peoplehub dependency failed to load: " << header;
+            return async.Complete({ utils::convert_xbox_live_error_code_to_hresult(xbl_error_code::http_status_424_failed_dependency) });
+        }
+
+        Vector<XblSocialManagerUser> users;
+
+        JsonDocument responseBodyJson = httpCall->GetResponseBodyJson();
+        auto peopleJsonArray = JsonUtils::ExtractJsonArray(
+            responseBodyJson,
+            "people",
             false
-            );
-
-        if (errc)
-        {
-            return xbox_live_result<std::vector<xbox_social_user>>(
-                response->err_code(),
-                response->err_message()
-                );
-        }
-
-        std::vector<xbox_social_user> socialUserVec = utils::extract_json_vector<xbox_social_user>(
-            xbox_social_user::_Deserialize,
-            peopleArray,
-            errc,
-            false
-            );
-
-        std::vector<xbox_social_user> socialUser;
-        socialUser.reserve(socialUserVec.size());
-        for (auto& user : socialUserVec)
-        {
-            socialUser.push_back(user);
-        }
-
-        auto socialUserResult = xbox_live_result<std::vector<xbox_social_user>>(socialUser, errc);
-
-        return utils::generate_xbox_live_result<std::vector<xbox_social_user>>(
-            socialUserResult,
-            response
-            );
-    });
-
-    return utils::create_exception_free_task<std::vector<xbox_social_user>>(
-        task
         );
-}
 
-string_t peoplehub_service::social_graph_subpath(
-    _In_ const string_t& xboxUserId,
-    _In_ social_manager_extra_detail_level decorations,
-    _In_ const string_t& relationshipType,
-    _In_ const std::vector<string_t> xboxLiveUsers,
-    _In_ bool isBatch
-    ) const
-{
-    stringstream_t source;
-    source << _T("/users/xuid(");
-    source << xboxUserId;
-    source << _T(")/people");
-    if (!relationshipType.empty())
-    {
-        source << _T("/") << relationshipType;
-    }
-
-    if (isBatch)
-    {
-        source << _T("/batch");
-    }
-
-    if ((decorations | social_manager_extra_detail_level::no_extra_detail) != social_manager_extra_detail_level::no_extra_detail)
-    {
-        source << _T("/decoration/");
-        std::vector<string_t> decorationList;
-        if ((decorations & social_manager_extra_detail_level::title_history_level) == social_manager_extra_detail_level::title_history_level)
+        for (auto& user : peopleJsonArray)
         {
-            stringstream_t titleStream;
-            titleStream << _T("titlehistory(");
-            titleStream << m_appConfig->title_id();
-            titleStream << _T(")");
-            string_t decorationString = titleStream.str();
-            decorationList.push_back(decorationString);
-        }
-        if ((decorations & social_manager_extra_detail_level::preferred_color_level) == social_manager_extra_detail_level::preferred_color_level)
-        {
-            decorationList.push_back(_T("preferredcolor"));
-        }
-
-        decorationList.push_back(_T("presenceDetail"));
-        uint32_t i = 0;
-        for (const auto& str : decorationList)
-        {
-            if (i != 0)
+            auto result{ DeserializeUser(user) };
+            if (Succeeded(result))
             {
-                source << _T(",");
+                users.push_back(result.ExtractPayload());
             }
-            source << str;
-            ++i;
+            else
+            {
+                return async.Complete({ result.Hresult() });
+            }
+        }
+
+        return async.Complete(users);
+    } });
+}
+
+Result<XblSocialManagerUser> PeoplehubService::DeserializeUser(
+    const JsonValue& json
+)
+{
+    XblSocialManagerUser user{};
+
+    if (!json.IsObject())
+    {
+        return user;
+    }
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonXuid(json, "xuid", user.xboxUserId, true));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(json, "isFavorite", user.isFavorite));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(json, "isFollowedByCaller", user.isFollowedByCaller));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(json, "isFollowingCaller", user.isFollowingUser));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "displayName", user.displayName, sizeof(user.displayName)));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "realName", user.realName, sizeof(user.realName)));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "displayPicRaw", user.displayPicUrlRaw, sizeof(user.displayPicUrlRaw)));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(json, "useAvatar", user.useAvatar));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "gamertag", user.gamertag, sizeof(user.gamertag)));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "modernGamertag", user.modernGamertag, sizeof(user.modernGamertag)));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "modernGamertagSuffix", user.modernGamertagSuffix, sizeof(user.modernGamertagSuffix)));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "uniqueModernGamertag", user.uniqueModernGamertag, sizeof(user.uniqueModernGamertag)));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "gamerScore", user.gamerscore, sizeof(user.gamerscore)));
+
+    auto presenceRecordResult = DeserializePresenceRecord(json);
+    if (Succeeded(presenceRecordResult))
+    {
+        user.presenceRecord = presenceRecordResult.ExtractPayload();
+    }
+    else
+    {
+        return { presenceRecordResult.Hresult() };
+    }
+
+    if (json.IsObject() && json.HasMember("titleHistory"))
+    {
+        auto titleHistoryResult = DeserializeTitleHistory(json["titleHistory"]);
+        if (Succeeded(titleHistoryResult))
+        {
+            user.titleHistory = titleHistoryResult.ExtractPayload();
+        }
+        else
+        {
+            return { titleHistoryResult.Hresult() };
         }
     }
 
-    return source.str();
+    if (json.IsObject() && json.HasMember("preferredColor"))
+    {
+        auto preferredColorResult = DeserializePreferredColor(json["preferredColor"]);
+        if (Succeeded(preferredColorResult))
+        {
+            user.preferredColor = preferredColorResult.ExtractPayload();
+        }
+        else
+        {
+            return { preferredColorResult.Hresult() };
+        }
+    }
+
+    return Result<XblSocialManagerUser>{ user };
+}
+
+Result<XblSocialManagerPresenceRecord> PeoplehubService::DeserializePresenceRecord(
+    const JsonValue& json
+)
+{
+    XblSocialManagerPresenceRecord record{};
+
+    if (!json.IsObject())
+    {
+        return record;
+    }
+
+    String presenceState;
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "presenceState", presenceState));
+    record.userState = XblPresenceRecord::UserStateFromString(presenceState);
+
+    auto presenceDetailsJson = JsonUtils::ExtractJsonArray(
+        json,
+        "presenceDetails",
+        false
+    );
+
+    for (const auto& titleRecordJson : presenceDetailsJson)
+    {
+        auto titleRecordResult = DeserializePresenceTitleRecord(titleRecordJson);
+        if (Succeeded(titleRecordResult))
+        {
+            record.presenceTitleRecords[record.presenceTitleRecordCount++] = titleRecordResult.ExtractPayload();
+        }
+
+        if (record.presenceTitleRecordCount >= XBL_NUM_PRESENCE_RECORDS)
+        {
+            break;
+        }
+    }
+
+    return Result<XblSocialManagerPresenceRecord>{ record };
+}
+
+Result<XblSocialManagerPresenceTitleRecord> PeoplehubService::DeserializePresenceTitleRecord(
+    const JsonValue& json
+)
+{
+    XblSocialManagerPresenceTitleRecord record{};
+
+    if (!json.IsObject())
+    {
+        return { record };
+    }
+
+    String device, state, titleId;
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "Device", device));
+    record.deviceType = presence::DeviceRecord::DeviceTypeFromString(device);
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "PresenceText", record.presenceText, sizeof(record.presenceText)));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "State", state));
+    record.isTitleActive = utils::str_icmp_internal(state, "active") == 0;
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "TitleId", titleId));
+    record.titleId = utils::internal_string_to_uint32(titleId);
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(json, "IsPrimary", record.isPrimary));
+
+    return Result<XblSocialManagerPresenceTitleRecord>{ record };
+}
+
+Result<XblPreferredColor> PeoplehubService::DeserializePreferredColor(
+    const JsonValue& json
+)
+{
+    XblPreferredColor color{};
+
+    if (!json.IsObject())
+    {
+        return { color };
+    }
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "primaryColor", color.primaryColor, sizeof(color.primaryColor)));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "secondaryColor", color.secondaryColor, sizeof(color.secondaryColor)));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "tertiaryColor", color.tertiaryColor, sizeof(color.tertiaryColor)));
+
+    return Result<XblPreferredColor>{ color };
+}
+
+Result<XblTitleHistory> PeoplehubService::DeserializeTitleHistory(
+    const JsonValue& json
+)
+{
+    XblTitleHistory titleHistory{};
+
+    if (!json.IsObject())
+    {
+        return titleHistory;
+    }
+
+    // If PeopleHub service fails to query TitleHistory, the "LastTimePlayed" field may be null.
+    // We don't want to fail deserialization in this case, so just return that the user has not played
+    constexpr const char* lastTimePlayedKey{ "LastTimePlayed" };
+    if (json.HasMember(lastTimePlayedKey) && json[lastTimePlayedKey].IsString())
+    {
+        RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonTimeT(
+            json,
+            lastTimePlayedKey,
+            titleHistory.lastTimeUserPlayed,
+            true
+        ));
+    }
+
+    titleHistory.hasUserPlayed = titleHistory.lastTimeUserPlayed != 0;
+
+    return Result<XblTitleHistory>{ titleHistory };
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_END

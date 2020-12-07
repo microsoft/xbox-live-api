@@ -1,0 +1,3 @@
+```cpp
+XblMultiplayerSessionSetAllocateCloudCompute(sessionHandle, allocate);
+```

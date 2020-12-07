@@ -2,384 +2,426 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"jasonsa"
-#define TEST_CLASS_AREA L"Social"
 #include "UnitTestIncludes.h"
 
-#include "SocialGroupConstants_WinRT.h"
-#include "RtaTestHelper.h"
-#include "MultiplayerSessionReference_WinRT.h"
+#pragma warning(disable : 4996)
 
-using namespace Microsoft::Xbox::Services;
-using namespace Microsoft::Xbox::Services::Social;
-using namespace Platform;
-using namespace Platform::Collections;
-using namespace Windows::Foundation::Collections;
+using namespace xbox::services::social;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-
-const std::wstring socialRelationshipChangedResponse =
-LR"(
-{
-    "NotificationType": "Removed",
-    "Xuids": [
-        "2814662829937614"
-    ]
-})";
 
 DEFINE_TEST_CLASS(SocialTests)
 {
 public:
-    DEFINE_TEST_CLASS_PROPS(SocialTests)
+    DEFINE_TEST_CLASS_PROPS(SocialTests);
 
-    struct SocialTestValues
+private:
+    struct SocialRelationship
     {
-        Platform::String^ xuid;
-        bool isFavorite;
-        bool isFollowingCaller;
-        Platform::String^ socialNetwork1;
-        Platform::String^ socialNetwork2;
+        uint64_t xuid{ 1 };
+        bool isFollowingCaller{ true };
+        bool isFavorite{ false };
+        std::vector<std::wstring> socialNetworks;
     };
 
-    struct SocialTestCaseInput
+    std::shared_ptr<HttpMock> CreateSocialMock(
+        const std::vector<SocialRelationship>& people
+    )
     {
-        SocialRelationship inputApiPersonView;
-        int inputApiStartIndex;
-        int inputApiMaxItems;
-    };
+        auto mock = std::make_shared<HttpMock>("GET", "https://social.xboxlive.com");
 
-    SocialTestCaseInput GetDefaultSocialInputData()
-    {
-        SocialTestCaseInput input;
-        input.inputApiPersonView = SocialRelationship::All;
-        input.inputApiStartIndex = 0;
-        input.inputApiMaxItems = 0;
+        mock->SetMockMatchedCallback(
+            [
+                &people
+            ]
+        (HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                assert(requestBody.empty());
 
-        return input;
+                xbox::services::uri url(Utils::StringTFromUtf8(requestUrl.data()).data());
+                auto queryParams = url.split_query(url.query());
+
+                size_t startIndex{ 0 };
+                size_t maxItems{ people.size() };
+                std::wstring view{ L"All" };
+
+                if (queryParams.find(L"startIndex") != queryParams.end())
+                {
+                    startIndex = Utils::Uint64FromStringT(queryParams[L"startIndex"]);
+                }
+                if (queryParams.find(L"maxItems") != queryParams.end())
+                {
+                    maxItems = Utils::Uint64FromStringT(queryParams[L"maxItems"]);
+                }
+                if (queryParams.find(L"view") != queryParams.end())
+                {
+                    view = queryParams[L"view"];
+                }
+
+                std::vector<SocialRelationship> filteredPeople;
+                std::copy_if(people.begin(), people.end(), std::back_inserter(filteredPeople),
+                    [&](const SocialRelationship& person)
+                    {
+                        if (Utils::Stricmp(L"favorite", view) == 0)
+                        {
+                            return person.isFavorite;
+                        }
+                        else if (Utils::Stricmp(L"LegacyXboxLiveFriends", view) == 0)
+                        {
+                            auto iter = std::find_if(person.socialNetworks.begin(), person.socialNetworks.end(),
+                                [](const std::wstring& s)
+                                {
+                                    return Utils::Stricmp(s, L"LegacyXboxLive") == 0;
+                                });
+                            return iter != person.socialNetworks.end();
+                        }
+                        else
+                        {
+                            assert(Utils::Stricmp(L"All", view) == 0);
+                            return true;
+                        }
+                    });
+                JsonDocument responseJson(rapidjson::kObjectType);
+                JsonDocument::AllocatorType& allocator = responseJson.GetAllocator();
+                JsonValue peopleJson(rapidjson::kArrayType);
+                for (size_t i = startIndex; i < startIndex + maxItems && i < filteredPeople.size(); ++i)
+                {
+                    auto& person{ filteredPeople[i] };
+                    JsonValue personJson(rapidjson::kObjectType);
+
+                    personJson.AddMember("xuid", JsonValue(utils::uint64_to_internal_string(person.xuid).c_str(), allocator).Move(), allocator);
+                    personJson.AddMember("isFavorite", person.isFavorite, allocator);
+                    personJson.AddMember("isFollowingCaller", person.isFollowingCaller, allocator);
+
+                    JsonValue socialNetworksJson(rapidjson::kArrayType);
+                    for (auto& socialNetwork : person.socialNetworks)
+                    {
+                        socialNetworksJson.PushBack(JsonValue(utils::internal_string_from_string_t(socialNetwork).c_str(), allocator).Move(), allocator);
+                    }
+                    if (socialNetworksJson.Size() > 0)
+                    {
+                        personJson.AddMember("socialNetworks", socialNetworksJson, allocator);
+                    }
+
+                    peopleJson.PushBack(personJson, allocator);
+                }
+
+                responseJson.AddMember("people", peopleJson, allocator);
+                responseJson.AddMember("totalCount", static_cast<uint64_t>(filteredPeople.size()), allocator);
+                mock->SetResponseBody(responseJson);
+            }
+        );
+
+        return mock;
     }
 
-    SocialTestValues CreatePerson(
-        _In_ int tagNum,
-        _In_ std::wstring strTag
-        )
+    void ValidateSocialRelationshipResult(
+        XblSocialRelationshipResultHandle resultHandle,
+        size_t expectedTotalCount,
+        bool expectedHasNext,
+        const std::vector<SocialRelationship>& expectedSocialRelationships
+    )
     {
-        SocialTestValues p;
-        p.socialNetwork1 = L"social_test1";
-        p.isFavorite = ((tagNum % 2) == 0);
-        p.isFollowingCaller = ((tagNum % 3) == 0);
-        uint64 xuid = 0x20000 + tagNum;
-        p.xuid = xuid.ToString();
-        return p;
-    }
+        size_t totalCount{ 0 };
+        VERIFY_SUCCEEDED(XblSocialRelationshipResultGetTotalCount(resultHandle, &totalCount));
+        VERIFY_ARE_EQUAL_INT(totalCount, expectedTotalCount);
 
-    web::json::value BuildPersonJson(
-        _In_ SocialTestValues* social
-        )
-    {
-        web::json::value jsonObject = web::json::value::object();
-        jsonObject[L"xuid"] = web::json::value::string(social->xuid->Data());
-        jsonObject[L"isFavorite"] = web::json::value::boolean(social->isFavorite);
-        jsonObject[L"isFollowingCaller"] = web::json::value::boolean(social->isFollowingCaller);
+        bool hasNext{ false };
+        VERIFY_SUCCEEDED(XblSocialRelationshipResultHasNext(resultHandle, &hasNext));
+        VERIFY_ARE_EQUAL(hasNext, expectedHasNext);
 
-        if (social->socialNetwork1 != nullptr ||
-            social->socialNetwork2 != nullptr)
+        const XblSocialRelationship* socialRelationships{ nullptr };
+        size_t socialRelationshipsCount{ 0 };
+        VERIFY_SUCCEEDED(XblSocialRelationshipResultGetRelationships(resultHandle, &socialRelationships, &socialRelationshipsCount));
+        VERIFY_ARE_EQUAL_INT(socialRelationshipsCount, expectedSocialRelationships.size());
+
+        for (size_t i = 0; i < socialRelationshipsCount; ++i)
         {
-            web::json::value jsonSocialNetworkArray = web::json::value::array();
-            int i = 0;
-            if (social->socialNetwork1 != nullptr)
+            auto& r{ socialRelationships[i] };
+
+            auto iter = std::find_if(expectedSocialRelationships.begin(), expectedSocialRelationships.end(), 
+                [&r](const SocialRelationship& expectedRelationship)
+                {
+                    return expectedRelationship.xuid == r.xboxUserId;
+                });
+            VERIFY_IS_TRUE(iter != expectedSocialRelationships.end());
+            VERIFY_ARE_EQUAL(iter->isFavorite, r.isFavorite);
+            VERIFY_ARE_EQUAL(iter->isFollowingCaller, r.isFollowingCaller);
+            VERIFY_ARE_EQUAL(iter->socialNetworks.size(), r.socialNetworksCount);
+
+            for (size_t j = 0; j < r.socialNetworksCount; ++j)
             {
-                jsonSocialNetworkArray[i++] = web::json::value::string(social->socialNetwork1->Data());
-            }
-            if (social->socialNetwork2 != nullptr)
-            {
-                jsonSocialNetworkArray[i++] = web::json::value::string(social->socialNetwork2->Data());
-            }
-
-            jsonObject[L"socialNetworks"] = jsonSocialNetworkArray;
-        }
-
-        return jsonObject;
-    }
-
-    web::json::value BuildSocialJsonArray(
-        _In_ std::vector<SocialTestValues> socialList
-        )
-    {
-        auto jsonArray = web::json::value::array();
-        int i = 0;
-        for (SocialTestValues p : socialList)
-        {
-            auto jsonResponse = BuildPersonJson(&p);
-            jsonArray[i++] = jsonResponse;
-        }
-
-        auto jsonObject = web::json::value::object();
-        jsonObject[L"people"] = jsonArray;
-        jsonObject[L"totalCount"] = web::json::value::number(static_cast<double>(jsonArray.size()));
-        return jsonObject;
-    }
-
-    void VerifyPersonMatch(
-        _In_ XboxSocialRelationship^ xboxPersonRelationship,
-        _In_ const SocialTestValues* p
-        )
-    {
-        VERIFY_ARE_EQUAL(p->isFavorite, xboxPersonRelationship->IsFavorite);
-        VERIFY_ARE_EQUAL(p->isFollowingCaller, xboxPersonRelationship->IsFollowingCaller);
-        VERIFY_ARE_EQUAL_STR(p->xuid->Data(), xboxPersonRelationship->XboxUserId->Data());
-    }
-
-    void TestGetSocialAsyncByTestCase(
-        _In_ SocialTestCaseInput inputData
-        )
-    {
-        std::vector<SocialTestValues> socialList;
-        for (int tag = 1; tag<3; tag++)
-        {
-            SocialTestValues p = CreatePerson(tag, FormatString(L"%d", tag));
-            socialList.push_back(p);
-        }
-        auto jsonResponse = BuildSocialJsonArray(socialList);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(jsonResponse);
-
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-
-        {
-            auto async = xboxLiveContext->SocialService->GetSocialRelationshipsAsync();
-            VERIFY_IS_NOT_NULL(async);
-            VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-            VERIFY_ARE_EQUAL_STR(L"https://social.mockenv.xboxlive.com", httpCall->ServerName);
-            VERIFY_ARE_EQUAL_STR(L"/users/xuid(TestXboxUserId)/people", httpCall->PathQueryFragment.to_string());
-
-            auto result = create_task(async).get();
-            IVectorView<XboxSocialRelationship^>^ list = result->Items;
-            VERIFY_IS_NOT_NULL(list);
-
-            int index = 0;
-            for (XboxSocialRelationship^ xboxPersonRelationship : list)
-            {
-                VerifyPersonMatch(xboxPersonRelationship, &socialList[index++]);
-            }
-        }
-
-       {
-            auto async = xboxLiveContext->SocialService->GetSocialRelationshipsAsync(
-                inputData.inputApiPersonView
-                );
-            VERIFY_IS_NOT_NULL(async);
-            VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-            VERIFY_ARE_EQUAL_STR(L"https://social.mockenv.xboxlive.com", httpCall->ServerName);
-            if (inputData.inputApiPersonView == SocialRelationship::All)
-            {
-                VERIFY_ARE_EQUAL_STR(L"/users/xuid(TestXboxUserId)/people", httpCall->PathQueryFragment.to_string());
-            }
-            else if(inputData.inputApiPersonView == SocialRelationship::Favorite)
-            {
-                VERIFY_ARE_EQUAL_STR(L"/users/xuid(TestXboxUserId)/people?view=Favorite", httpCall->PathQueryFragment.to_string());
-            }
-            else if (inputData.inputApiPersonView == SocialRelationship::LegacyXboxLiveFriends)
-            {
-                VERIFY_ARE_EQUAL_STR(L"/users/xuid(TestXboxUserId)/people?view=LegacyXboxLiveFriends", httpCall->PathQueryFragment.to_string());
-            }
-            else
-            {
-                throw ref new Platform::Exception(E_FAIL, "uncovered relationship");
-            }
-
-
-            auto result = create_task(async).get();
-            IVectorView<XboxSocialRelationship^>^ list = result->Items;
-            VERIFY_IS_NOT_NULL(list);
-
-            int index = 0;
-            for (XboxSocialRelationship^ xboxPersonRelationship : list)
-            {
-                VerifyPersonMatch(xboxPersonRelationship, &socialList[index++]);
-            }
-        }
-
-        {
-            auto async = xboxLiveContext->SocialService->GetSocialRelationshipsAsync(
-                inputData.inputApiPersonView,
-                inputData.inputApiStartIndex,
-                inputData.inputApiMaxItems
-                );
-            VERIFY_IS_NOT_NULL(async);
-            VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-            VERIFY_ARE_EQUAL_STR(L"https://social.mockenv.xboxlive.com", httpCall->ServerName);
-            if (inputData.inputApiPersonView == SocialRelationship::All)
-            {
-                VERIFY_ARE_EQUAL_STR(L"/users/xuid(TestXboxUserId)/people?startIndex=20&maxItems=100", httpCall->PathQueryFragment.to_string());
-            }
-            else if (inputData.inputApiPersonView == SocialRelationship::Favorite)
-            {
-                VERIFY_ARE_EQUAL_STR(L"/users/xuid(TestXboxUserId)/people?view=Favorite&startIndex=20&maxItems=100", httpCall->PathQueryFragment.to_string());
-            }
-            else if (inputData.inputApiPersonView == SocialRelationship::LegacyXboxLiveFriends)
-            {
-                VERIFY_ARE_EQUAL_STR(L"/users/xuid(TestXboxUserId)/people?view=LegacyXboxLiveFriends&startIndex=20&maxItems=100", httpCall->PathQueryFragment.to_string());
-            }
-            else
-            {
-                throw ref new Platform::Exception(E_FAIL, "uncovered relationship");
-            }
-
-            auto result = create_task(async).get();
-            IVectorView<XboxSocialRelationship^>^ list = result->Items;
-            VERIFY_IS_NOT_NULL(list);
-
-            int index = 0;
-            for (XboxSocialRelationship^ xboxPersonRelationship : list)
-            {
-                VerifyPersonMatch(xboxPersonRelationship, &socialList[index++]);
+                VERIFY_IS_TRUE(Utils::Stricmp(Utils::StringTFromUtf8(r.socialNetworks[j]), iter->socialNetworks[j]) == 0);
             }
         }
     }
 
-    DEFINE_TEST_CASE(TestGetSocialAsync)
+    DEFINE_TEST_CASE(TestGetSocialRelationshipsAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetSocialAsync);
-        SocialTestCaseInput input = GetDefaultSocialInputData();
-        input.inputApiMaxItems = 100;
-        input.inputApiStartIndex = 20;
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        // SocialRelationship::All
-        TestGetSocialAsyncByTestCase(input);
+        std::vector<SocialRelationship> socialRelationships(100);
+        uint64_t friendXuid{ 1 };
+        for (auto& person : socialRelationships)
+        {
+            person.xuid = friendXuid++;
+        }
 
-        // SocialRelationship::Favorite
-        input.inputApiPersonView = SocialRelationship::Favorite;
-        TestGetSocialAsyncByTestCase(input);
+        // Add a couple of favorites
+        socialRelationships[0].isFavorite = true;
+        socialRelationships[1].isFavorite = true;
 
-        // SocialRelationship::LegacyXboxLiveFriends
-        input.inputApiPersonView = SocialRelationship::LegacyXboxLiveFriends;
-        TestGetSocialAsyncByTestCase(input);
+        // Add a LegacyFriend
+        socialRelationships[2].socialNetworks.push_back(L"LegacyXboxLive");
+
+        auto socialMock{ CreateSocialMock(socialRelationships) };
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblSocialGetSocialRelationshipsAsync(
+            xboxLiveContext.get(),
+            xboxLiveContext->Xuid(),
+            XblSocialRelationshipFilter::All,
+            0,
+            0,
+            &async
+        ));
+
+        XblSocialRelationshipResultHandle resultHandle{ nullptr };
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_SUCCEEDED(XblSocialGetSocialRelationshipsResult(&async, &resultHandle));
+        ValidateSocialRelationshipResult(
+            resultHandle,
+            socialRelationships.size(),
+            false,
+            socialRelationships
+        );
+        XblSocialRelationshipResultCloseHandle(resultHandle);
+
+        ZeroMemory(async.internal, sizeof(async.internal));
+        VERIFY_SUCCEEDED(XblSocialGetSocialRelationshipsAsync(
+            xboxLiveContext.get(),
+            xboxLiveContext->Xuid(),
+            XblSocialRelationshipFilter::Favorite,
+            0,
+            0,
+            &async
+        ));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_SUCCEEDED(XblSocialGetSocialRelationshipsResult(&async, &resultHandle));
+        ValidateSocialRelationshipResult(
+            resultHandle,
+            2,
+            false,
+            std::vector<SocialRelationship>(socialRelationships.begin(), socialRelationships.begin() + 2)
+        );
+        XblSocialRelationshipResultCloseHandle(resultHandle);
+
+        ZeroMemory(async.internal, sizeof(async.internal));
+        VERIFY_SUCCEEDED(XblSocialGetSocialRelationshipsAsync(
+            xboxLiveContext.get(),
+            xboxLiveContext->Xuid(),
+            XblSocialRelationshipFilter::LegacyXboxLiveFriends,
+            0,
+            0,
+            &async
+        ));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_SUCCEEDED(XblSocialGetSocialRelationshipsResult(&async, &resultHandle));
+        ValidateSocialRelationshipResult(
+            resultHandle,
+            1,
+            false,
+            std::vector<SocialRelationship>(1, socialRelationships[2])
+        );
+        XblSocialRelationshipResultCloseHandle(resultHandle);
+    }
+
+    DEFINE_TEST_CASE(TestGetSocialRelationshipsResultPaging)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        std::vector<SocialRelationship> socialRelationships(15);
+        uint64_t friendXuid{ 1 };
+        for (auto& person : socialRelationships)
+        {
+            person.xuid = friendXuid++;
+        }
+
+        auto socialMock{ CreateSocialMock(socialRelationships) };
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblSocialGetSocialRelationshipsAsync(
+            xboxLiveContext.get(),
+            xboxLiveContext->Xuid(),
+            XblSocialRelationshipFilter::All,
+            0,
+            10,
+            &async
+        ));
+
+        XblSocialRelationshipResultHandle resultHandle{ nullptr };
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_SUCCEEDED(XblSocialGetSocialRelationshipsResult(&async, &resultHandle));
+        ValidateSocialRelationshipResult(
+            resultHandle,
+            15,
+            true,
+            std::vector<SocialRelationship>(socialRelationships.begin(), socialRelationships.begin() + 10)
+        );
+
+        VERIFY_SUCCEEDED(XblSocialRelationshipResultGetNextAsync(
+            xboxLiveContext.get(),
+            resultHandle,
+            10,
+            &async
+        ));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        XblSocialRelationshipResultCloseHandle(resultHandle);
+        VERIFY_SUCCEEDED(XblSocialGetSocialRelationshipsResult(&async, &resultHandle));
+        ValidateSocialRelationshipResult(
+            resultHandle,
+            15,
+            false,
+            std::vector<SocialRelationship>(socialRelationships.begin() + 10, socialRelationships.end())
+        );
+        XblSocialRelationshipResultCloseHandle(resultHandle);
     }
 
     DEFINE_TEST_CASE(TestRTASocialRelationshipChange)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestRTASocialRelationshipChange);
-        const int subId = 321;
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto mockSocket = m_mockXboxSystemFactory->GetMockWebSocketClient();
-        SetWebSocketRTAAutoResponser(mockSocket, web::json::value::null().serialize(), subId);
-        
-        auto helper = SetupStateChangeHelper(xboxLiveContext->RealTimeActivityService);
-        xboxLiveContext->RealTimeActivityService->Activate();
-        LOG_INFO("RTA activate");
-        helper->connectedEvent.wait();
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        auto& mockRtaService{ MockRealTimeActivityService::Instance() };
 
-        bool didFire = false;
-
-        concurrency::event fireEvent;
-        auto sessionChangeEvent = xboxLiveContext->SocialService->SocialRelationshipChanged += 
-        ref new Windows::Foundation::EventHandler<SocialRelationshipChangeEventArgs^>([this, &fireEvent, &didFire](Platform::Object^, SocialRelationshipChangeEventArgs^ args)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
         {
-            didFire = true;
-            VERIFY_ARE_EQUAL(args->CallerXboxUserId->Data(), string_t(L"TestUser"));
-            VERIFY_ARE_EQUAL(args->SocialNotification.ToString()->Data(), string_t(L"removed"));
-            VERIFY_ARE_EQUAL(args->XboxUserIds->GetAt(0)->Data(), string_t(L"2814662829937614"));
-            fireEvent.set();
+            std::stringstream expectedUri;
+            expectedUri << "http://social.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/friends";
+            VERIFY_ARE_EQUAL_STR(uri, expectedUri.str());
+
+            mockRtaService.CompleteSubscribeHandshake(n);
+
+            // Immediately raise an event
+            mockRtaService.RaiseEvent(uri, R"({ "NotificationType": "Removed", "Xuids": [ "2" ] })");
         });
 
-        auto socialRelationshipSubscription = xboxLiveContext->SocialService->SubscribeToSocialRelationshipChange(
-            ref new Platform::String(_T("TestUser"))
-            );
+        struct HandlerContext
+        {
+            Event notificationReceived;
+            uint64_t xuid{ 0 };
+            XblSocialNotificationType notificationType{ XblSocialNotificationType::Unknown };
+            std::vector<uint64_t> affectedXuids;
+        } context;
 
-        string_t socialSubUri = socialRelationshipSubscription->ResourceUri->Data();
-        VERIFY_ARE_EQUAL(socialSubUri, L"http://social.xboxlive.com/users/xuid(TestUser)/friends");
+        auto handlerToken = XblSocialAddSocialRelationshipChangedHandler(xboxLiveContext.get(),
+            [](const XblSocialRelationshipChangeEventArgs* args, void* context)
+            {
+                auto c{ static_cast<HandlerContext*>(context) };
+                
+                c->xuid = args->callerXboxUserId;
+                c->notificationType = args->socialNotification;
+                c->affectedXuids = std::vector<uint64_t>(args->xboxUserIds, args->xboxUserIds + args->xboxUserIdsCount);
+                c->notificationReceived.Set();
+            },
+            &context
+        );
 
-        TEST_LOG(L"Calling receive_rta_event");
-        mockSocket->receive_rta_event(subId, web::json::value::parse(socialRelationshipChangedResponse).serialize());
-        LOG_INFO("Fire event");
-        fireEvent.wait();
-        TEST_LOG(L"Done calling receive_rta_event");
+        context.notificationReceived.Wait();
 
-        VERIFY_IS_TRUE(socialRelationshipSubscription->State == Microsoft::Xbox::Services::RealTimeActivity::RealTimeActivitySubscriptionState::Subscribed);
-        VERIFY_ARE_EQUAL_STR(socialRelationshipSubscription->ResourceUri->Data(), L"http://social.xboxlive.com/users/xuid(TestUser)/friends");
-        VERIFY_ARE_EQUAL_STR(socialRelationshipSubscription->XboxUserId->Data(), L"TestUser");
-        VERIFY_ARE_EQUAL_INT(socialRelationshipSubscription->SubscriptionId, 321);
+        VERIFY_ARE_EQUAL_INT(xboxLiveContext->Xuid(), context.xuid);
+        VERIFY_IS_TRUE(context.notificationType == XblSocialNotificationType::Removed);
+        VERIFY_ARE_EQUAL_INT(1u, context.affectedXuids.size());
+        VERIFY_ARE_EQUAL_INT(2, context.affectedXuids[0]);
 
-        fireEvent.reset();
-
-        TEST_LOG(L"Calling UnsubscribeFromSocialRelationshipChange");
-        didFire = false;
-        xboxLiveContext->SocialService->UnsubscribeFromSocialRelationshipChange(
-            socialRelationshipSubscription
-            );
-        TEST_LOG(L"Done calling UnsubscribeFromSocialRelationshipChange");
-
-        TEST_LOG(L"Calling receive_rta_event");
-        mockSocket->receive_rta_event(subId, web::json::value::parse(socialRelationshipChangedResponse).serialize());
-        TEST_LOG(L"Done calling receive_rta_event");
-        VERIFY_IS_FALSE(didFire);
+        VERIFY_SUCCEEDED(XblSocialRemoveSocialRelationshipChangedHandler(xboxLiveContext.get(), handlerToken));
     }
 
-    DEFINE_TEST_CASE(TestSubmitReputationFeedbackAsync)
+    DEFINE_TEST_CASE(CppTestGetSocialRelationships)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSubmitReputationFeedbackAsync);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
 
-        Platform::String^ xboxUserId = L"1";
-        ReputationFeedbackType reputationFeedbackType = ReputationFeedbackType::FairPlayCheater;
-        Platform::String^ sessionName = L"2";
-        Platform::String^ reasonMessage = L"3";
-        Platform::String^ evidenceResourceId = L"4";
+        std::vector<SocialRelationship> socialRelationships(100);
+        uint64_t friendXuid{ 1 };
+        for (auto& person : socialRelationships)
+        {
+            person.xuid = friendXuid++;
+        }
 
-        auto async = xboxLiveContext->ReputationService->SubmitReputationFeedbackAsync(
-            xboxUserId,
-            reputationFeedbackType,
-            sessionName,
-            reasonMessage,
-            evidenceResourceId
-            );
+        auto socialMock{ CreateSocialMock(socialRelationships) };
 
-        VERIFY_IS_NOT_NULL(async);
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://reputation.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/xuid(1)/feedback", httpCall->PathQueryFragment.to_string());
-        string_t jsonString = LR"({"evidenceId":"4","feedbackType":"FairPlayCheater","sessionName":"2","textReason":"3"})";
-        VERIFY_IS_EQUAL_JSON_FROM_STRINGS(jsonString, httpCall->request_body().request_message_string());
-        create_task(async).get();
+        auto task = xboxLiveContext->social_service().get_social_relationships();
+
+        auto result{ task.get() };
+        VERIFY_IS_TRUE(!result.err());
+
+        auto& payload{ result.payload() };
+        VERIFY_IS_TRUE(payload.has_next() == false);
+        VERIFY_IS_TRUE(payload.total_count() == socialRelationships.size());
+        auto items{ payload.items() };
+        VERIFY_IS_TRUE(items.size() == socialRelationships.size());
+
+        for (auto& item : items)
+        {
+            auto iter = std::find_if(socialRelationships.begin(), socialRelationships.end(),
+                [&item](const SocialRelationship& expectedRelationship)
+                {
+                    return expectedRelationship.xuid == Utils::Uint64FromStringT(item.xbox_user_id());
+                });
+            VERIFY_IS_TRUE(iter != socialRelationships.end());
+            VERIFY_ARE_EQUAL(iter->isFavorite, item.is_favorite());
+            VERIFY_ARE_EQUAL(iter->isFollowingCaller, item.is_following_caller());
+            VERIFY_ARE_EQUAL(iter->socialNetworks.size(), item.social_networks().size());
+
+            for (size_t i = 0; i < item.social_networks().size(); ++i)
+            {
+                VERIFY_IS_TRUE(Utils::Stricmp(item.social_networks()[i], iter->socialNetworks[i]) == 0);
+            }
+        }
     }
 
-    DEFINE_TEST_CASE(TestSubmitBatchReputationFeedbackAsync)
+    DEFINE_TEST_CASE(CppTestRTASocialRelationshipChange)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSubmitBatchReputationFeedbackAsync);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
+        TestEnvironment env{};
+        auto& mockRtaService{ MockRealTimeActivityService::Instance() };
+        auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext(1);
 
-        Platform::String^ xboxUserId = L"1";
-        ReputationFeedbackType reputationFeedbackType = ReputationFeedbackType::FairPlayCheater;
-        Microsoft::Xbox::Services::Multiplayer::MultiplayerSessionReference^ sessionRef = nullptr;
-        Platform::String^ reasonMessage = L"2";
-        Platform::String^ evidenceResourceId = L"3";
+        xboxLiveContext->real_time_activity_service()->activate();
 
-        Platform::Collections::Vector<ReputationFeedbackItem^>^ feedbackItems = ref new Platform::Collections::Vector<ReputationFeedbackItem^>();
-#pragma warning(suppress: 6387)
-        ReputationFeedbackItem^ feedbackItem = ref new ReputationFeedbackItem(
-            xboxUserId, 
-            reputationFeedbackType, 
-            sessionRef, 
-            reasonMessage, 
-            evidenceResourceId
-            );
-        feedbackItems->Append(feedbackItem);
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        {
+            mockRtaService.CompleteSubscribeHandshake(n);
 
-        auto async = xboxLiveContext->ReputationService->SubmitBatchReputationFeedbackAsync(
-            feedbackItems->GetView()
-            );
-        VERIFY_IS_NOT_NULL(async);
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://reputation.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/users/batchtitlefeedback", httpCall->PathQueryFragment.to_string());
+            // Immediately raise an event
+            mockRtaService.RaiseEvent(uri, R"({ "NotificationType": "Removed", "Xuids": [ "2" ] })");
+        });
 
-        string_t jsonString = LR"({"items":[{"evidenceId":"3","feedbackType":"FairPlayCheater","sessionRef":null,"targetXuid":"1","textReason":"2","titleId":null}]})";
+        auto subscriptionResult = xboxLiveContext->social_service().subscribe_to_social_relationship_change(xboxLiveContext->xbox_live_user_id());
+        VERIFY_IS_TRUE(!subscriptionResult.err());
 
-        TEST_LOG(httpCall->request_body().request_message_string().c_str());
-        VERIFY_IS_EQUAL_JSON_FROM_STRINGS(jsonString, httpCall->request_body().request_message_string());
-        create_task(async).get();
+        Event rtaMessageReceived;
+
+        auto handlerToken = xboxLiveContext->social_service().add_social_relationship_changed_handler(
+            [&rtaMessageReceived](social_relationship_change_event_args args)
+            {
+                VERIFY_IS_TRUE(args.caller_xbox_user_id() == _T("1"));
+                VERIFY_IS_TRUE(args.social_notification() == social_notification_type::removed);
+                VERIFY_ARE_EQUAL_INT(args.xbox_user_ids().size(), 1);
+                VERIFY_IS_TRUE(args.xbox_user_ids()[0] == _T("2"));
+
+                rtaMessageReceived.Set();
+            });
+
+        rtaMessageReceived.Wait();
+
+        xboxLiveContext->social_service().remove_social_relationship_changed_handler(handlerToken);
+        auto unsubscribeResult = xboxLiveContext->social_service().unsubscribe_from_social_relationship_change(subscriptionResult.payload());
+        VERIFY_IS_TRUE(!unsubscribeResult.err());
     }
 };
 

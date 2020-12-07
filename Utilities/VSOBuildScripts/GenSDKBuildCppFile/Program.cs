@@ -42,7 +42,7 @@ namespace GenSDKBuildCppFile
                 // for all builds, skip certain files/folders
                 if (
                     line.Contains(@"\WinRT") ||
-                    (line.Contains(@"Source\System\") && !line.Contains(@"Source\System\xbox_live_mutex.cpp")) ||
+                    (line.Contains(@"Source\System\") && !(line.Contains(@"Source\System\xbox_live_mutex.cpp") || line.Contains(@"Source\System\C\user_internal_c.cpp"))) ||
                     line.Contains(@"\Common\Server\")  || line.Contains(@"\a\") || line.Contains(@"\Unix\") || line.ToLower().Contains(@"\android\") ||
                     line.Contains(@"\u\") || line.Contains(@"\i\") ||
                     line.Contains(@"\iOS\")
@@ -60,7 +60,8 @@ namespace GenSDKBuildCppFile
                         line.Contains(@"Misc\notification_service.cpp") ||
                         line.Contains(@"Misc\Windows\notification_service_windows.cpp") ||
                         line.Contains(@"Misc\UWP\title_callable_ui.cpp") ||
-                        line.Contains(@"Presence\presence_writer.cpp")
+                        line.Contains(@"Presence\presence_writer.cpp") ||
+                        line.Contains(@"Source\Services\Misc\UWP\notification_service_uwp.cpp")
                         )
                     )
                 {
@@ -72,7 +73,8 @@ namespace GenSDKBuildCppFile
                         (
                         (line.Contains(@"\Common\Desktop\") && !line.Contains(@"Common\Desktop\XboxLiveContext_Desktop.cpp") && !line.Contains(@"Common\Desktop\pch.cpp")) ||
                         line.Contains(@"\Services\Marketplace") ||
-                        line.Contains(@"Source\Shared\Desktop\local_config_desktop.cpp")
+                        line.Contains(@"Source\Shared\Desktop\local_config_desktop.cpp") ||
+                        line.Contains(@"Source\Services\Events\Win32\events_service_win32.cpp")
                         )
                     )
                 {

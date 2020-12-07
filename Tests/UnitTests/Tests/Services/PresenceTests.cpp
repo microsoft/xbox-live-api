@@ -3,28 +3,15 @@
 
 #include "pch.h"
 #include "UnitTestIncludes.h"
-#define TEST_CLASS_OWNER L"jasonsa"
-#define TEST_CLASS_AREA L"Presence"
-#include "UnitTestIncludes.h"
 
-#include "RtaTestHelper.h"
+#pragma warning(disable:4996)
 
-#include "xsapi/presence.h"
-#include "presence_internal.h"
-#include "xsapi/xbox_live_context.h"
-
-using namespace xbox::services::presence;
-using namespace Microsoft::Xbox::Services;
-using namespace Microsoft::Xbox::Services::Presence;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-const std::wstring titlePresenceStartedResponse = _T("Started");
+const char* titlePresenceEndedResponse = "\"Ended\"";
+const char* devicePresenceResponse = "\"MoLive:false\"";
 
-const std::wstring titlePresenceEndedResponse = _T("Ended");
-
-const std::wstring devicePresenceResponse = _T("MoLive:false");
-
-const std::wstring richPresenceResponse = LR"(
+const char* richPresenceResponse = R"(
 {
     "devicetype": "WindowsOneCore",
     "titleid": 85494077,
@@ -33,7 +20,7 @@ const std::wstring richPresenceResponse = LR"(
 }
 )";
 
-const std::wstring setPresenceRequest = LR"(
+const char* setPresenceRequest = R"(
 {
     "state": "active",
     "activity": {
@@ -45,7 +32,7 @@ const std::wstring setPresenceRequest = LR"(
 }
 )";
 
-const std::wstring getPresenceForMultipleUsersRequest = LR"(
+const char* getPresenceForMultipleUsersRequest = R"(
 {
     "users": [
         "12345",
@@ -56,7 +43,7 @@ const std::wstring getPresenceForMultipleUsersRequest = LR"(
 }
 )";
 
-const std::wstring getPresenceForMultipleUsersOverloadRequest= LR"(
+const char* getPresenceForMultipleUsersOverloadRequest= R"(
 {
     "users": [
         "12345",
@@ -76,7 +63,7 @@ const std::wstring getPresenceForMultipleUsersOverloadRequest= LR"(
 }
 )";
 
-const std::wstring getPresenceForSocialGroupOverloadRequest = LR"(
+const char* getPresenceForSocialGroupOverloadRequest = R"(
 {
     "group": "testGroup",
     "groupXuid": "12345",
@@ -94,7 +81,7 @@ const std::wstring getPresenceForSocialGroupOverloadRequest = LR"(
 }
 )";
 
-const std::wstring defaultPresenceResponse = LR"(
+const char* defaultPresenceResponse = R"(
 {
     "xuid": "2814671404555632",
     "state": "Online",
@@ -107,15 +94,15 @@ const std::wstring defaultPresenceResponse = LR"(
                     "name": "DefaultTitle",
                     "placement": "Full",
                     "state": "Active",
-                    "lastModified": "2015-01-21T23:19:21.4740585Z",
+                    "lastModified": "2015-01-21T23:19:21Z",
                     "activity": {
                         "richPresence": "yes",
                         "broadcast": {
                             "id": "12345",
                             "session": "test0",
-                            "provider": "temp",
+                            "provider": "twitch",
                             "viewers": 10,
-                            "started": "2013-02-01T00:00:00Z"
+                            "started": "2013-02-01T16:00:00Z"
                         }
                     }
                 }
@@ -125,7 +112,7 @@ const std::wstring defaultPresenceResponse = LR"(
 }
 )";
 
-const std::wstring defaultMultiplePresenceResponse = LR"(
+const char* defaultMultiplePresenceResponse = R"(
 [
     {
         "xuid": "12345",
@@ -137,7 +124,7 @@ const std::wstring defaultMultiplePresenceResponse = LR"(
                     {
                         "id": "99467",
                         "name": "awesomeGame",
-                        "lastModified": "2013-02-01T00:00:00Z",
+                        "lastModified": "2013-01-31T16:00:00Z",
                         "state": "active",
                         "placement": "Full",
                         "activity": {
@@ -145,9 +132,9 @@ const std::wstring defaultMultiplePresenceResponse = LR"(
                             "broadcast": {
                                 "id": "12345",
                                 "session": "test0",
-                                "provider": "temp",
+                                "provider": "twitch",
                                 "viewers": 10,
-                                "started": "2013-02-01T00:00:00Z"
+                                "started": "2013-01-31T16:00:00Z"
                             }
                         }
                     }
@@ -156,7 +143,7 @@ const std::wstring defaultMultiplePresenceResponse = LR"(
         ]
     },
     {
-        "xuid": "12345",
+        "xuid": "56789",
         "state": "Online",
         "devices": [
             {
@@ -165,7 +152,7 @@ const std::wstring defaultMultiplePresenceResponse = LR"(
                     {
                         "id": "99467",
                         "name": "awesomeGame",
-                        "lastModified": "2013-02-01T00:00:00Z",
+                        "lastModified": "2013-01-31T16:00:00Z",
                         "state": "active",
                         "placement": "Full",
                         "activity": {
@@ -173,9 +160,9 @@ const std::wstring defaultMultiplePresenceResponse = LR"(
                             "broadcast": {
                                 "id": "12345",
                                 "session": "test0",
-                                "provider": "temp",
+                                "provider": "twitch",
                                 "viewers": 10,
-                                "started": "2013-02-01T00:00:00Z"
+                                "started": "2013-01-31T16:00:00Z"
                             }
                         }
                     }
@@ -186,728 +173,636 @@ const std::wstring defaultMultiplePresenceResponse = LR"(
 ]
 )";
 
-// TODO: Need better code coverage
 DEFINE_TEST_CLASS(PresenceTests)
 {
 public:
-    DEFINE_TEST_CLASS_PROPS(PresenceTests)
+    DEFINE_TEST_CLASS_PROPS(PresenceTests);
 
-    void VerifyBroadcastRecord(PresenceBroadcastRecord^ broadcastRecord, web::json::value resultToVerify)
+    void VerifyBroadcastRecord(XblPresenceBroadcastRecord* broadcastRecord, JsonValue resultToVerify)
     {
-        VERIFY_ARE_EQUAL(broadcastRecord->BroadcastId->Data(), resultToVerify[L"id"].as_string());
-        VERIFY_ARE_EQUAL(broadcastRecord->Session->Data(), resultToVerify[L"session"].as_string());
-        VERIFY_ARE_EQUAL(broadcastRecord->Provider->Data(), resultToVerify[L"provider"].as_string());
-        VERIFY_ARE_EQUAL_INT(broadcastRecord->ViewerCount, resultToVerify[L"viewers"].as_number().to_uint32());
-        VERIFY_ARE_EQUAL(
-            DateTimeToString(broadcastRecord->StartTime).substr(0, DATETIME_STRING_LENGTH_TO_SECOND),
-            resultToVerify[L"started"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND)
-            );
+        const char* provider = broadcastRecord->provider == XblPresenceBroadcastProvider::Twitch ? "twitch" : "unknown";
+        xbox::services::string_t resultStr = Utils::StringTFromUtf8(resultToVerify["started"].GetString());
+        xbox::services::datetime resultDatetime = xbox::services::datetime::from_string(resultStr, xbox::services::datetime::date_format::ISO_8601);
+
+        VERIFY_ARE_EQUAL_STR(provider, resultToVerify["provider"].GetString());
+        VERIFY_ARE_EQUAL_STR(broadcastRecord->broadcastId, resultToVerify["id"].GetString());
+        VERIFY_ARE_EQUAL_STR(broadcastRecord->session, resultToVerify["session"].GetString());
+        VERIFY_ARE_EQUAL_INT(broadcastRecord->viewerCount, resultToVerify["viewers"].GetInt());
+        VERIFY_ARE_EQUAL_INT(broadcastRecord->startTime, utils::TimeTFromDatetime(resultDatetime));
     }
 
-    void VerifyPresenceTitleRecord(PresenceTitleRecord^ record, web::json::value resultToVerify)
+    void VerifyPresenceTitleRecord(XblPresenceTitleRecord* record, JsonValue resultToVerify)
     {
-        web::json::value activityJson = utils::extract_json_field(resultToVerify, L"activity", true);
-
-        VERIFY_ARE_EQUAL_INT(record->TitleId, std::stoi(resultToVerify[L"id"].as_string()));
-        VERIFY_ARE_EQUAL(record->TitleName->Data(), resultToVerify[L"name"].as_string());
-
-        auto str = DateTimeToString(record->LastModifiedDate);
-        VERIFY_ARE_EQUAL(
-            DateTimeToString(record->LastModifiedDate).substr(0, DATETIME_STRING_LENGTH_TO_SECOND),
-            resultToVerify[L"lastModified"].as_string().substr(0, DATETIME_STRING_LENGTH_TO_SECOND)
-            );
-
-        string_t stateString = resultToVerify[L"state"].as_string();
-        if (utils::str_icmp(stateString, L"active") == 0)
+        xbox::services::string_t resultStr = Utils::StringTFromUtf8(resultToVerify["lastModified"].GetString());
+        xbox::services::datetime resultDatetime = xbox::services::datetime::from_string(resultStr, xbox::services::datetime::date_format::ISO_8601);
+        string_t expectedStr = utils::DatetimeFromTimeT(record->lastModified).to_string(xbox::services::datetime::date_format::ISO_8601);
+        UNREFERENCED_PARAMETER(expectedStr);
+        VERIFY_ARE_EQUAL_INT(record->titleId, std::stoi(resultToVerify["id"].GetString()));
+        VERIFY_ARE_EQUAL_STR(record->titleName, resultToVerify["name"].GetString());
+        VERIFY_ARE_EQUAL_INT(record->lastModified, utils::TimeTFromDatetime(resultDatetime));
+        
+        const char* stateString = resultToVerify["state"].GetString();
+        if (utils::str_icmp(stateString, "active") == 0)
         {
-            VERIFY_IS_TRUE(record->IsTitleActive);
+            VERIFY_IS_TRUE(record->titleActive);
         }
         else
         {
-            VERIFY_IS_FALSE(record->IsTitleActive);
+            VERIFY_IS_FALSE(record->titleActive);
         }
 
-        string_t recordToString;
-        switch (record->TitleViewState)
+        const char* recordPlacement{ nullptr };
+        switch (record->viewState)
         {
-            case PresenceTitleViewState::FullScreen:
-                recordToString = L"Full";
+            case XblPresenceTitleViewState::FullScreen:
+                recordPlacement = "Full";
                 break;
-            case PresenceTitleViewState::Filled:
-                recordToString = L"Fill";
+            case XblPresenceTitleViewState::Filled:
+                recordPlacement = "Fill";
                 break;
-            case PresenceTitleViewState::Snapped:
-                recordToString = L"Snapped";
+            case XblPresenceTitleViewState::Snapped:
+                recordPlacement = "Snapped";
                 break;
-            case PresenceTitleViewState::Background:
-                recordToString = L"Background";
+            case XblPresenceTitleViewState::Background:
+                recordPlacement = "Background";
                 break;
             default:
-                recordToString = L"Unknown";
+                recordPlacement = "Unknown";
         }
 
-        string_t resultToString = resultToVerify[L"placement"].as_string();
-        VERIFY_ARE_EQUAL(recordToString, resultToString);
-        
-        VERIFY_ARE_EQUAL(record->Presence->Data(), activityJson[L"richPresence"].as_string());
+        VERIFY_ARE_EQUAL_STR(recordPlacement, resultToVerify["placement"].GetString());
+        VERIFY_ARE_EQUAL_STR(record->richPresenceString, resultToVerify["activity"]["richPresence"].GetString());
 
-        VerifyBroadcastRecord(record->BroadcastRecord, utils::extract_json_field(activityJson, L"broadcast", true));
+        VerifyBroadcastRecord(record->broadcastRecord, resultToVerify["activity"]["broadcast"].GetObjectW());
     }
 
-    void VerifyPresenceRecord(PresenceRecord^ record, web::json::value resultToVerify)
+    void VerifyAndClosePresenceRecord(XblPresenceRecord* record, JsonValue resultToVerify)
     {
-        VERIFY_ARE_EQUAL(record->XboxUserId->Data(), resultToVerify[L"xuid"].as_string());
-        VERIFY_ARE_EQUAL(record->UserState.ToString()->Data(), resultToVerify[L"state"].as_string());
-
-        web::json::array deviceArray = resultToVerify[L"devices"].as_array();
-
-        uint32_t deviceCounter = 0;
-        for (auto &devices : deviceArray)
+        const char* userStateStr{ nullptr };
+        switch (record->UserState())
         {
-            web::json::array titleArray = devices[L"titles"].as_array();
-            auto deviceRecord = record->PresenceDeviceRecords->GetAt(deviceCounter);
-            uint32_t titleCounter = 0;
-            string_t deviceRecordToString = deviceRecord->DeviceType.ToString()->Data();
-            string_t jsonToString = devices[L"type"].as_string();
-            VERIFY_ARE_EQUAL(deviceRecordToString, jsonToString);
-            for (auto &titleValue : titleArray)
+            case XblPresenceUserState::Online:
+                userStateStr = "Online";
+                break;
+            case XblPresenceUserState::Away:
+                userStateStr = "Away";
+                break;
+            case XblPresenceUserState::Offline:
+                userStateStr = "Offline";
+                break;
+            case XblPresenceUserState::Unknown:
+            default:
+                userStateStr = "Unknown";
+                break;
+        }
+
+        VERIFY_ARE_EQUAL_UINT(record->Xuid(), atoll(resultToVerify["xuid"].GetString()));
+        VERIFY_ARE_EQUAL_STR(userStateStr, resultToVerify["state"].GetString());
+        
+        uint32_t deviceCounter = 0;
+        for (auto& device : resultToVerify["devices"].GetArray())
+        {
+            auto deviceRecord = record->DeviceRecords()[deviceCounter];
+            
+            const char* deviceTypeStr{ nullptr };
+            switch (deviceRecord.deviceType)
             {
-                auto presenceTitleRecord = deviceRecord->PresenceTitleRecords->GetAt(titleCounter);
-                VerifyPresenceTitleRecord(presenceTitleRecord, titleValue);
+                case XblPresenceDeviceType::WindowsPhone:
+                    deviceTypeStr = "WindowsPhone";
+                    break;
+                case XblPresenceDeviceType::WindowsPhone7:
+                    deviceTypeStr = "WindowsPhone7";
+                    break;
+                case XblPresenceDeviceType::Web:
+                    deviceTypeStr = "Web";
+                    break;
+                case XblPresenceDeviceType::Xbox360:
+                    deviceTypeStr = "Xbox360";
+                    break;
+                case XblPresenceDeviceType::PC:
+                    deviceTypeStr = "PC";
+                    break;
+                case XblPresenceDeviceType::Windows8:
+                    deviceTypeStr = "Windows8";
+                    break;
+                case XblPresenceDeviceType::XboxOne:
+                    deviceTypeStr = "XboxOne";
+                    break;
+                case XblPresenceDeviceType::WindowsOneCore:
+                    deviceTypeStr = "WindowsOneCore";
+                    break;
+                case XblPresenceDeviceType::WindowsOneCoreMobile:
+                    deviceTypeStr = "WindowsOneCoreMobile";
+                    break;
+                case XblPresenceDeviceType::Unknown:
+                default:
+                    deviceTypeStr = "Unknown";
+                    break;
+            }
+
+            VERIFY_ARE_EQUAL_STR(deviceTypeStr, device["type"].GetString());
+
+            uint32_t titleCounter = 0;
+            for (auto& titleValue : device["titles"].GetArray())
+            {
+                auto presenceTitleRecord = deviceRecord.titleRecords[titleCounter];
+                VerifyPresenceTitleRecord(&presenceTitleRecord, titleValue.GetObjectW());
                 ++titleCounter;
             }
             ++deviceCounter;
         }
+
+        XblPresenceRecordCloseHandle(record);
+    }
+
+    void VerifyAndCloseRecords(XblPresenceRecordHandle* records)
+    {
+        uint32_t counter{ 0 };
+        JsonDocument document;
+        document.Parse(defaultMultiplePresenceResponse);
+        for (auto& result : document.GetArray())
+        {
+            VerifyAndClosePresenceRecord(records[counter], result.GetObjectW());
+            ++counter;
+        }
+    }
+
+    std::shared_ptr<HttpMock> CreatePresenceMock(
+        std::string titleId
+    )
+    {
+        auto presenceMock = std::make_shared<HttpMock>("GET", "https://userpresence.xboxlive.com");
+
+        presenceMock->SetMockMatchedCallback(
+            [titleId](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                UNREFERENCED_PARAMETER(requestUrl);
+
+                JsonDocument jsonRequest;
+                jsonRequest.Parse(requestBody.c_str());
+
+                JsonValue response;
+                response.SetArray();
+                JsonDocument defaultPresence;
+                defaultPresence.Parse(defaultPresenceResponse);
+                uint32_t i{ 0 };
+                for (auto& user : jsonRequest["users"].GetArray())
+                {
+                    response[i] = defaultPresence.GetObjectW();
+                    response[i]["devices"][0]["titles"][0]["id"] = rapidjson::StringRef(titleId.c_str());
+                    response[i]["xuid"] = user;
+                    ++i;
+                }
+
+                mock->SetResponseBody(response);
+            });
+
+        return presenceMock;
     }
 
     DEFINE_TEST_CASE(TestSetPresenceAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSetPresenceAsync);
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        create_task(
-            xboxLiveContext->PresenceService->SetPresenceAsync(
-                true,
-                ref new PresenceData(
-                    L"12345675467",
-                    L"20"
-                    )
-                )
-            ).get();
+        xsapi_internal_stringstream url;
+        url << "https://userpresence.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/devices/current/titles/current";
+        HttpMock mock("POST", url.str(), 200);
 
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/users/xuid(TestXboxUserId)/devices/current/titles/current",
-            httpCall->PathQueryFragment.to_string()
-            );
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&requestWellFormed](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                UNREFERENCED_PARAMETER(mock);
+                UNREFERENCED_PARAMETER(requestUrl);
 
-        auto setPresenceJson = web::json::value::parse(setPresenceRequest);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        VERIFY_IS_EQUAL_JSON(setPresenceJson, requestJson);
+                JsonDocument expectedJson, requestJson;
+                expectedJson.Parse(setPresenceRequest);
+                requestJson.Parse(requestBody.c_str());
+                auto& expectedRich = expectedJson["activity"]["richPresence"];
+                auto& requestRich = requestJson["activity"]["richPresence"];
+
+                requestWellFormed &= strcmp(expectedJson["state"].GetString(), requestJson["state"].GetString()) == 0;
+                requestWellFormed &= strcmp(expectedRich["scid"].GetString(), requestRich["scid"].GetString()) == 0;
+                requestWellFormed &= strcmp(expectedRich["id"].GetString(), requestRich["id"].GetString()) == 0;
+            }
+        );
+
+        XAsyncBlock async{};
+        const char* ids[]{""};
+        XblPresenceRichPresenceIds presence{ "12345675467", "20", ids, 1};
+        VERIFY_SUCCEEDED(XblPresenceSetPresenceAsync(xboxLiveContext.get(), true, &presence, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
     }
 
     DEFINE_TEST_CASE(TestGetPresenceAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetPresenceAsync);
-        auto responseJson = web::json::value::parse(defaultPresenceResponse);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        xsapi_internal_stringstream url;
+        url << "https://userpresence.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")?level=all";
+        HttpMock mock("GET", url.str(), 200);
+        mock.SetResponseBody(defaultPresenceResponse);
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        PresenceRecord^ result = create_task(
-            xboxLiveContext->PresenceService->GetPresenceAsync(
-                ref new Platform::String(L"12345")
-                )
-            ).get();
-
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/users/xuid(12345)?level=all",
-            httpCall->PathQueryFragment.to_string()
-            );
-
-        VerifyPresenceRecord(result, responseJson);
+        XAsyncBlock async{};
+        XblPresenceRecordHandle recordHandle{};
+        VERIFY_SUCCEEDED(XblPresenceGetPresenceAsync(xboxLiveContext.get(), xboxLiveContext->Xuid(), &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_SUCCEEDED(XblPresenceGetPresenceResult(&async, &recordHandle));
+        
+        JsonDocument document;
+        document.Parse(defaultPresenceResponse);
+        VerifyAndClosePresenceRecord(recordHandle, document.GetObjectW());
     }
 
     DEFINE_TEST_CASE(TestGetPresenceForMultipleUsersAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetPresenceForMultipleUsersAsync);
-        auto responseJson = web::json::value::parse(defaultMultiplePresenceResponse);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        xsapi_internal_string url{ "https://userpresence.xboxlive.com/users/batch" };
+        HttpMock mock("GET", url, 200);
+        mock.SetResponseBody(defaultMultiplePresenceResponse);
 
-        Platform::Collections::Vector<Platform::String^>^ users = ref new Platform::Collections::Vector<Platform::String^>();
-        users->Append(L"12345");
-        users->Append(L"56789");
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&requestWellFormed](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                UNREFERENCED_PARAMETER(mock);
+                UNREFERENCED_PARAMETER(requestUrl);
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        Windows::Foundation::Collections::IVectorView<PresenceRecord^>^ result = create_task(
-            xboxLiveContext->PresenceService->GetPresenceForMultipleUsersAsync(
-                users->GetView()
-                )
-            ).get();
+                JsonDocument expectedJson, requestJson;
+                expectedJson.Parse(getPresenceForMultipleUsersRequest);
+                requestJson.Parse(requestBody.c_str());
 
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/users/batch",
-            httpCall->PathQueryFragment.to_string()
-            );
+                requestWellFormed &= expectedJson["onlineOnly"].GetBool() == expectedJson["onlineOnly"].GetBool();
+                requestWellFormed &= expectedJson["broadcastingOnly"].GetBool() == expectedJson["broadcastingOnly"].GetBool();
 
-        auto getPresenceForMultipleUsers = web::json::value::parse(getPresenceForMultipleUsersRequest);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        VERIFY_IS_EQUAL_JSON(getPresenceForMultipleUsers, requestJson);
+                auto counter{ 0 };
+                auto requestXuids = requestJson["users"].GetArray();
+                for (auto& xuid : expectedJson["users"].GetArray())
+                {
+                    requestWellFormed &= strcmp(xuid.GetString(), requestXuids[counter].GetString()) == 0;
+                    ++counter;
+                }
+            }
+        );
 
-        web::json::array jsonArray = responseJson.as_array();
-        uint32 counter = 0;
-        for (auto user : result)
-        {
-            VerifyPresenceRecord(user, jsonArray[counter]);
-            ++counter;
-        }
+        XAsyncBlock async{};
+        uint64_t xuids[]{ 12345, 56789 };
+        size_t recordCount{};
+        XblPresenceRecordHandle recordHandles[2];
+        VERIFY_SUCCEEDED(XblPresenceGetPresenceForMultipleUsersAsync(xboxLiveContext.get(), xuids, 2, nullptr, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+        VERIFY_SUCCEEDED(XblPresenceGetPresenceForMultipleUsersResultCount(&async, &recordCount));
+        VERIFY_SUCCEEDED(XblPresenceGetPresenceForMultipleUsersResult(&async, recordHandles, recordCount));
+
+        VerifyAndCloseRecords(recordHandles);
     }
 
     DEFINE_TEST_CASE(TestGetPresenceForMultipleUsersOverloadAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetPresenceForMultipleUsersOverloadAsync);
-        auto responseJson = web::json::value::parse(defaultMultiplePresenceResponse);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        xsapi_internal_string url{ "https://userpresence.xboxlive.com/users/batch" };
+        HttpMock mock("POST", url, 200);
+        mock.SetResponseBody(defaultMultiplePresenceResponse);
 
-        Platform::Collections::Vector<Platform::String^>^ users = ref new Platform::Collections::Vector<Platform::String^>();
-        users->Append(L"12345");
-        users->Append(L"56789");
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&requestWellFormed](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                UNREFERENCED_PARAMETER(mock);
+                UNREFERENCED_PARAMETER(requestUrl);
 
-        Platform::Collections::Vector<PresenceDeviceType>^ deviceTypes = ref new Platform::Collections::Vector<PresenceDeviceType>();
-        deviceTypes->Append(PresenceDeviceType::PC);
-        deviceTypes->Append(PresenceDeviceType::Windows8);
+                JsonDocument expectedJson, requestJson;
+                expectedJson.Parse(getPresenceForMultipleUsersRequest);
+                requestJson.Parse(requestBody.c_str());
 
-        Platform::Collections::Vector<uint32>^ titleIds = ref new Platform::Collections::Vector<uint32>();
-        titleIds->Append(0);
-        titleIds->Append(1);
+                requestWellFormed &= expectedJson["onlineOnly"].GetBool() == requestJson["onlineOnly"].GetBool();
+                requestWellFormed &= expectedJson["broadcastingOnly"].GetBool() == requestJson["broadcastingOnly"].GetBool();
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        Windows::Foundation::Collections::IVectorView<PresenceRecord^>^ result = create_task(
-            xboxLiveContext->PresenceService->GetPresenceForMultipleUsersAsync(
-                users->GetView(),
-                deviceTypes->GetView(),
-                titleIds->GetView(),
-                PresenceDetailLevel::All,
-                true,
-                true
-                )
-            ).get();
+                auto counter{ 0 };
+                auto requestXuids = requestJson["users"].GetArray();
+                for (auto& xuid : expectedJson["users"].GetArray())
+                {
+                    requestWellFormed &= strcmp(xuid.GetString(), requestXuids[counter].GetString()) == 0;
+                    ++counter;
+                }
+            }
+        );
+        
+        XAsyncBlock async{};
+        uint64_t xuids[]{ 12345, 56789 };
+        uint64_t titles[]{ 0, 1 };
+        size_t recordCount{};
+        XblPresenceRecordHandle recordHandles[2];
+        VERIFY_SUCCEEDED(XblPresenceGetPresenceForMultipleUsersAsync(xboxLiveContext.get(), xuids, 2, nullptr, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+        VERIFY_SUCCEEDED(XblPresenceGetPresenceForMultipleUsersResultCount(&async, &recordCount));
+        VERIFY_SUCCEEDED(XblPresenceGetPresenceForMultipleUsersResult(&async, recordHandles, recordCount));
 
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/users/batch",
-            httpCall->PathQueryFragment.to_string()
-            );
-
-        auto getPresenceForMultipleUsers = web::json::value::parse(getPresenceForMultipleUsersOverloadRequest);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        VERIFY_IS_EQUAL_JSON(getPresenceForMultipleUsers, requestJson);
-
-        web::json::array jsonArray = responseJson.as_array();
-        uint32 counter = 0;
-        for (auto user : result)
-        {
-            VerifyPresenceRecord(user, jsonArray[counter]);
-            ++counter;
-        }
+        VerifyAndCloseRecords(recordHandles);
     }
 
     DEFINE_TEST_CASE(TestGetPresenceForSocialGroupAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetPresenceForSocialGroupAsync);
-        auto responseJson = web::json::value::parse(defaultMultiplePresenceResponse);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        xsapi_internal_stringstream url;
+        url << "https://userpresence.xboxlive.com/users/batch";
+        HttpMock mock("GET", url.str(), 200);
+        mock.SetResponseBody(defaultMultiplePresenceResponse);
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        Windows::Foundation::Collections::IVectorView<PresenceRecord^>^ result = create_task(
-            xboxLiveContext->PresenceService->GetPresenceForSocialGroupAsync(
-                    ref new Platform::String(L"testGroup")
-                )
-            ).get();
+        XAsyncBlock async{};
+        uint64_t ownerXuid = 12345;
+        size_t recordCount{};
+        XblPresenceRecordHandle recordHandles[2];
+        VERIFY_SUCCEEDED(XblPresenceGetPresenceForSocialGroupAsync(xboxLiveContext.get(), "testGroup", &ownerXuid, nullptr, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_SUCCEEDED(XblPresenceGetPresenceForSocialGroupResultCount(&async, &recordCount));
+        VERIFY_SUCCEEDED(XblPresenceGetPresenceForSocialGroupResult(&async, recordHandles, recordCount));
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/users/xuid(TestXboxUserId)/groups/testGroup?level=all",
-            httpCall->PathQueryFragment.to_string()
-            );
-
-        web::json::array jsonArray = responseJson.as_array();
-        uint32 counter = 0;
-        for (auto user : result)
-        {
-            VerifyPresenceRecord(user, jsonArray[counter]);
-            ++counter;
-        }
+        VerifyAndCloseRecords(recordHandles);
     }
 
     DEFINE_TEST_CASE(TestGetPresenceForSocialGroupOverloadAsync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestGetPresenceForSocialGroupOverloadAsync);
-        auto responseJson = web::json::value::parse(defaultMultiplePresenceResponse);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(responseJson);
+        xsapi_internal_string url{ "https://userpresence.xboxlive.com/users/batch" };
+        HttpMock mock("POST", url, 200);
+        mock.SetResponseBody(defaultMultiplePresenceResponse);
 
-        Platform::Collections::Vector<PresenceDeviceType>^ deviceTypes = ref new Platform::Collections::Vector<PresenceDeviceType>();
-        deviceTypes->Append(PresenceDeviceType::PC);
-        deviceTypes->Append(PresenceDeviceType::Windows8);
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&requestWellFormed](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                UNREFERENCED_PARAMETER(mock);
+                UNREFERENCED_PARAMETER(requestUrl);
 
-        Platform::Collections::Vector<uint32>^ titleIds = ref new Platform::Collections::Vector<uint32>();
-        titleIds->Append(0);
-        titleIds->Append(1);
+                JsonDocument expectedJson, requestJson;
+                expectedJson.Parse(getPresenceForMultipleUsersRequest);
+                requestJson.Parse(requestBody.c_str());
 
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        Windows::Foundation::Collections::IVectorView<PresenceRecord^>^ result = create_task(
-            xboxLiveContext->PresenceService->GetPresenceForSocialGroupAsync(
-                L"testGroup", 
-                L"12345",
-                deviceTypes->GetView(),
-                titleIds->GetView(),
-                PresenceDetailLevel::All,
-                true,
-                false
-                )
-            ).get();
+                requestWellFormed &= expectedJson["onlineOnly"].GetBool() == requestJson["onlineOnly"].GetBool();
+                requestWellFormed &= expectedJson["broadcastingOnly"].GetBool() == requestJson["broadcastingOnly"].GetBool();
+            }
+        );
 
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/users/batch",
-            httpCall->PathQueryFragment.to_string()
-            );
+        XAsyncBlock async{};
+        uint64_t ownerXuid = 12345;
+        size_t recordCount{};
+        XblPresenceRecordHandle recordHandles[2];
+        VERIFY_SUCCEEDED(XblPresenceGetPresenceForSocialGroupAsync(xboxLiveContext.get(), "testGroup", &ownerXuid, nullptr, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+        VERIFY_SUCCEEDED(XblPresenceGetPresenceForSocialGroupResultCount(&async, &recordCount));
+        VERIFY_SUCCEEDED(XblPresenceGetPresenceForSocialGroupResult(&async, recordHandles, recordCount));
 
-        auto getPresenceForSocialGroup = web::json::value::parse(getPresenceForSocialGroupOverloadRequest);
-        auto requestJson = web::json::value::parse(httpCall->request_body().request_message_string());
-        VERIFY_IS_EQUAL_JSON(getPresenceForSocialGroup, requestJson);
-
-        web::json::array jsonArray = responseJson.as_array();
-        uint32 counter = 0;
-        for (auto user : result)
-        {
-            VerifyPresenceRecord(user, jsonArray[counter]);
-            ++counter;
-        }
+        VerifyAndCloseRecords(recordHandles);
     }
+
+    struct TitlePresenceChangedHandler
+    {
+        TitlePresenceChangedHandler(std::shared_ptr<XblContext> xblContext) noexcept
+            : m_xblContext{ std::move(xblContext) }
+        {
+            m_token = XblPresenceAddTitlePresenceChangedHandler(m_xblContext.get(), func, this);
+            VERIFY_ARE_NOT_EQUAL(0, m_token);
+        };
+
+        ~TitlePresenceChangedHandler() noexcept
+        {
+            VERIFY_SUCCEEDED(XblPresenceRemoveTitlePresenceChangedHandler(m_xblContext.get(), m_token));
+        }
+
+        Event rtaTapReceived;
+        uint64_t xuid{ 0 };
+        uint32_t titleId{ 0 };
+        XblPresenceTitleState state{ XblPresenceTitleState::Unknown };
+
+    private:
+        static void CALLBACK func(void* context, uint64_t xuid, uint32_t titleId, XblPresenceTitleState titleState)
+        {
+            auto pThis{ static_cast<TitlePresenceChangedHandler*>(context) };
+            pThis->xuid = xuid;
+            pThis->titleId = titleId;
+            pThis->state = titleState;
+            pThis->rtaTapReceived.Set();
+        }
+    
+        std::shared_ptr<XblContext> m_xblContext;
+        XblFunctionContext m_token;
+    };
 
     DEFINE_TEST_CASE(TestRTATitlePresence)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestRTATitlePresence);
-        const int subId = 321;
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto mockSocket = m_mockXboxSystemFactory->GetMockWebSocketClient();
-        SetWebSocketRTAAutoResponser(mockSocket, defaultPresenceResponse, subId);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        auto& mockRtaService{ MockRealTimeActivityService::Instance() };
 
-        auto helper = SetupStateChangeHelper(xboxLiveContext->RealTimeActivityService);
-        xboxLiveContext->RealTimeActivityService->Activate();
-        helper->connectedEvent.wait();
+        const uint64_t xuid = 1234;
+        const uint32_t titleId = 1563044810;
+        const char titlePresenceUri[]{ "https://userpresence.xboxlive.com/users/xuid(1234)/titles/1563044810" };
 
-        bool didFire = false;
-        concurrency::event fireEvent;
-        auto sessionChangeEvent = xboxLiveContext->PresenceService->TitlePresenceChanged += 
-        ref new Windows::Foundation::EventHandler<TitlePresenceChangeEventArgs^>([this, &fireEvent, &didFire](Platform::Object^, TitlePresenceChangeEventArgs^ args)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
         {
-            didFire = true;
-            VERIFY_ARE_EQUAL(args->XboxUserId->Data(), string_t(L"TestUser"));
-            VERIFY_ARE_EQUAL_INT(args->TitleId, 1563044810);
-
-            VERIFY_IS_TRUE(args->TitleState == TitlePresenceState::Started);
-            fireEvent.set();
+            if (uri == titlePresenceUri)
+            {
+                mockRtaService.CompleteSubscribeHandshake(n, defaultPresenceResponse);
+            }
         });
 
-        auto titlePresenceSubscription = xboxLiveContext->PresenceService->SubscribeToTitlePresenceChange(
-            ref new Platform::String(_T("TestUser")),
-            1563044810
-            );
+        VERIFY_SUCCEEDED(XblPresenceTrackUsers(xboxLiveContext.get(), &xuid, 1));
+        VERIFY_SUCCEEDED(XblPresenceTrackAdditionalTitles(xboxLiveContext.get(), &titleId, 1));
 
-        fireEvent.wait();
-        fireEvent.reset();
+        TitlePresenceChangedHandler handler{ xboxLiveContext };
+        // Wait for subscription complete before sending change event
+        handler.rtaTapReceived.Wait();
 
-        mockSocket->receive_rta_event(subId, web::json::value::string(titlePresenceStartedResponse).serialize());
+        mockRtaService.RaiseEvent(titlePresenceUri, titlePresenceEndedResponse);
+        handler.rtaTapReceived.Wait();
 
-        string_t titleSubUri = titlePresenceSubscription->ResourceUri->Data();
-        VERIFY_ARE_EQUAL(titleSubUri, L"https://userpresence.xboxlive.com/users/xuid(TestUser)/titles/1563044810");
-        fireEvent.wait();
-
-        VERIFY_IS_TRUE(titlePresenceSubscription->State == Microsoft::Xbox::Services::RealTimeActivity::RealTimeActivitySubscriptionState::Subscribed);
-        VERIFY_ARE_EQUAL_STR(titlePresenceSubscription->ResourceUri->Data(), L"https://userpresence.xboxlive.com/users/xuid(TestUser)/titles/1563044810");
-        VERIFY_ARE_EQUAL_STR(titlePresenceSubscription->XboxUserId->Data(), L"TestUser");
-        VERIFY_ARE_EQUAL_INT(titlePresenceSubscription->SubscriptionId, 321);
-
-        fireEvent.reset();
-
-        didFire = false;
-        xboxLiveContext->PresenceService->UnsubscribeFromTitlePresenceChange(
-            titlePresenceSubscription
-            );
-
-        mockSocket->receive_rta_event(subId, web::json::value::string(titlePresenceStartedResponse).serialize());
-        VERIFY_IS_FALSE(didFire);
+        VERIFY_ARE_EQUAL_INT(xuid, handler.xuid);
+        VERIFY_ARE_EQUAL_INT(titleId, handler.titleId);
+        VERIFY_IS_TRUE(handler.state == XblPresenceTitleState::Ended);
     }
+
+    struct DevicePresenceChangedHandler
+    {
+        DevicePresenceChangedHandler(std::shared_ptr<XblContext> xblContext) noexcept
+            : m_xblContext{ std::move(xblContext) }
+        {
+            m_token = XblPresenceAddDevicePresenceChangedHandler(m_xblContext.get(), func, this);
+            VERIFY_ARE_NOT_EQUAL(0, m_token);
+        };
+
+        ~DevicePresenceChangedHandler() noexcept
+        {
+            VERIFY_SUCCEEDED(XblPresenceRemoveDevicePresenceChangedHandler(m_xblContext.get(), m_token));
+        }
+
+        Event rtaTapReceived;
+        uint64_t xuid{ 0 };
+        XblPresenceDeviceType deviceType{ XblPresenceDeviceType::Unknown };
+        bool isUserLoggedOnDevice{ false };
+
+    private:
+        static void CALLBACK func(void* context, uint64_t xuid, XblPresenceDeviceType deviceType, bool isUserLoggedOnDevice)
+        {
+            auto pThis{ static_cast<DevicePresenceChangedHandler*>(context) };
+            pThis->xuid = xuid;
+            pThis->deviceType = deviceType;
+            pThis->isUserLoggedOnDevice = isUserLoggedOnDevice;
+            pThis->rtaTapReceived.Set();
+        }
+
+        std::shared_ptr<XblContext> m_xblContext;
+        XblFunctionContext m_token;
+    };
 
     DEFINE_TEST_CASE(TestRTADevicePresence)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestRTADevicePresence);
-        const int subId = 321;
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto mockSocket = m_mockXboxSystemFactory->GetMockWebSocketClient();
-        SetWebSocketRTAAutoResponser(mockSocket, defaultPresenceResponse, subId);
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        auto& mockRtaService{ MockRealTimeActivityService::Instance() };
 
-        auto helper = SetupStateChangeHelper(xboxLiveContext->RealTimeActivityService);
-        xboxLiveContext->RealTimeActivityService->Activate();
-        helper->connectedEvent.wait();
+        const uint64_t xuid = 1234;
+        const std::string devicePresenceUri{ "https://userpresence.xboxlive.com/users/xuid(1234)/devices" };
 
-        web::json::value devicePresenceResponseJson;
-
-        string_t testString(L"TestUser");
-
-        bool didFire = false;
-        concurrency::event fireEvent;
-
-        auto sessionChangeEvent = xboxLiveContext->PresenceService->DevicePresenceChanged += 
-            ref new Windows::Foundation::EventHandler<DevicePresenceChangeEventArgs^>([this, &fireEvent, &didFire, &devicePresenceResponseJson](Platform::Object^, DevicePresenceChangeEventArgs^ args)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
         {
-            didFire = true;
-            VERIFY_ARE_EQUAL(args->XboxUserId->Data(), string_t(L"TestUser"));
-
-            if (!devicePresenceResponseJson.is_null())
+            if (uri == devicePresenceUri)
             {
-                auto response = utils::string_split(devicePresenceResponseJson.as_string(), ':');
-                auto expected = presence_device_record::_Convert_string_to_presence_device_type(response[0]);
-                VERIFY_ARE_EQUAL_INT(static_cast<uint32>(args->DeviceType), static_cast<uint32>(expected));
-                VERIFY_ARE_EQUAL(args->IsUserLoggedOnDevice.ToString()->Data(), response[1]);
-            }
-            else
-            {
-                VERIFY_IS_TRUE(args->IsUserLoggedOnDevice);    // we set to false if uninitialized
-            }
-            fireEvent.set();
-        });
-
-        auto devicePresenceSubscription = xboxLiveContext->PresenceService->SubscribeToDevicePresenceChange(
-            ref new Platform::String(_T("TestUser"))
-            );
-
-        fireEvent.wait();
-        fireEvent.reset();
-
-        devicePresenceResponseJson = web::json::value::string(devicePresenceResponse);
-        mockSocket->receive_rta_event(subId, devicePresenceResponseJson.serialize());
-        fireEvent.wait();
-
-        VERIFY_IS_TRUE(devicePresenceSubscription->State == Microsoft::Xbox::Services::RealTimeActivity::RealTimeActivitySubscriptionState::Subscribed);
-        VERIFY_ARE_EQUAL_STR(devicePresenceSubscription->ResourceUri, L"https://userpresence.xboxlive.com/users/xuid(TestUser)/devices");
-        VERIFY_ARE_EQUAL_STR(devicePresenceSubscription->XboxUserId, L"TestUser");
-        VERIFY_ARE_EQUAL_INT(devicePresenceSubscription->SubscriptionId, 321);
-
-        fireEvent.reset();
-        string_t deviceSubUri = devicePresenceSubscription->ResourceUri->Data();
-        VERIFY_ARE_EQUAL(deviceSubUri, L"https://userpresence.xboxlive.com/users/xuid(TestUser)/devices");
-        didFire = false;
-        xboxLiveContext->PresenceService->UnsubscribeFromDevicePresenceChange(
-            devicePresenceSubscription
-            );
-
-        mockSocket->receive_rta_event(subId, devicePresenceResponseJson.serialize());
-        VERIFY_IS_FALSE(didFire);
-    }
-
-    DEFINE_TEST_CASE(TestPresenceWriter)
-    {
-        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestPresenceWriter);
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(L"");
-        httpCall->set_custom_header(L"X-Heartbeat-After", L"60");
-
-        pplx::event writeFinishEvent;
-        int writeDelay = 0;
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay](int delay)
-        {
-            writeDelay = delay;
-            writeFinishEvent.set();
-        });
-
-        auto presenceWriter = xbox::services::presence::presence_writer::get_presence_writer_singleton();
-        presenceWriter->start_writer(
-            xboxLiveContext->presence_service()._Impl()
-        );
-
-        writeFinishEvent.wait();
-        writeFinishEvent.reset();
-
-
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/users/xuid(TestXboxUserId)/devices/current/titles/current",
-            httpCall->PathQueryFragment.to_string()
-            );
-
-        VERIFY_IS_TRUE(writeDelay == 1);
-        VERIFY_IS_TRUE(httpCall->CallCounter == 1);
-
-        presenceWriter->stop_writer(xboxLiveContext->user()->XboxUserId->Data());
-        writeFinishEvent.wait();
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler(nullptr);
-
-    }
-
-    DEFINE_TEST_CASE(TestPresenceWriterNoHeartbeatAfter)
-    {
-        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestPresenceWriterNoHeartbeatAfter);
-        pplx::event writeFinishEvent;
-        int writeDelay = 0;
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay](int delay)
-        {
-            writeDelay = delay;
-            writeFinishEvent.set();
-        });
-         
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(L"");
-        auto presenceWriter = xbox::services::presence::presence_writer::get_presence_writer_singleton();
-        presenceWriter->start_writer(
-            xboxLiveContext->presence_service()._Impl()
-            );
-
-        writeFinishEvent.wait();
-
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(
-            L"/users/xuid(TestXboxUserId)/devices/current/titles/current",
-            httpCall->PathQueryFragment.to_string()
-            );
-
-        VERIFY_IS_TRUE(writeDelay == presenceWriter->s_defaultHeartBeatDelayInMins);
-        VERIFY_IS_TRUE(httpCall->CallCounter == 1);
-
-        writeFinishEvent.reset();
-
-        presenceWriter->stop_writer(xboxLiveContext->user()->XboxUserId->Data());
-        writeFinishEvent.wait();
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler(nullptr);
-    }
-
-
-    DEFINE_TEST_CASE(TestMultiUserPresenceWriter)
-    {
-        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestMultiUserPresenceWriter);
-        pplx::event writeFinishEvent;
-        int writeDelay = 0;
-        int eventExpecting = 2;
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay, &eventExpecting](int delay)
-        {
-            writeDelay = delay;
-            if (!--eventExpecting)
-            {
-                writeFinishEvent.set();
+                mockRtaService.CompleteSubscribeHandshake(n, defaultPresenceResponse);
             }
         });
 
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto xboxLiveContext1 = GetMockXboxLiveContext_Cpp(L"TestUser1");
+        VERIFY_SUCCEEDED(XblPresenceTrackUsers(xboxLiveContext.get(), &xuid, 1));
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(L"");
-        httpCall->set_custom_header(L"X-Heartbeat-After", L"60");
-        auto presenceWriter = xbox::services::presence::presence_writer::get_presence_writer_singleton();
-        presenceWriter->start_writer(
-            xboxLiveContext->presence_service()._Impl()
-        );
+        DevicePresenceChangedHandler handler{ xboxLiveContext };
+        // Wait for subscription complete event
+        handler.rtaTapReceived.Wait();
 
-        presenceWriter->start_writer(
-            xboxLiveContext1->presence_service()._Impl()
-        );
+        mockRtaService.RaiseEvent(devicePresenceUri, devicePresenceResponse);
+        handler.rtaTapReceived.Wait();
 
-        writeFinishEvent.wait();
+        JsonDocument deviceResponseJson{};
+        deviceResponseJson.Parse(devicePresenceResponse);
 
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
-
-        VERIFY_IS_TRUE(writeDelay == 1);
-        VERIFY_ARE_EQUAL_UINT(2, httpCall->CallCounter);
-        VERIFY_ARE_EQUAL_UINT(2, presenceWriter->tracking_count()); 
-
-        writeFinishEvent.reset();
-        eventExpecting = 2;
-
-        presenceWriter->stop_writer(xboxLiveContext->user()->XboxUserId->Data());
-        presenceWriter->stop_writer(xboxLiveContext1->user()->XboxUserId->Data());
-        writeFinishEvent.wait();
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler(nullptr);
+        auto response = utils::string_split(deviceResponseJson.GetString(), ':');
+        VERIFY_ARE_EQUAL_INT(xuid, handler.xuid);
+        VERIFY_IS_TRUE(xbox::services::presence::DeviceRecord::DeviceTypeFromString(response[0]) == handler.deviceType);
+        VERIFY_ARE_EQUAL(response[1] == "true", handler.isUserLoggedOnDevice);
     }
 
-    DEFINE_TEST_CASE(TestMultiUserMultiContextPresenceWriter)
+    DEFINE_TEST_CASE(TestSubscriptionManagement)
     {
-        DEFINE_TEST_CASE_PROPERTIES_IGNORE(TestMultiUserMultiContextPresenceWriter);
+        TestEnvironment env{};
 
-        pplx::event writeFinishEvent;
-        int writeDelay = 0;
-        int eventExpecting = 2;
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler([&writeFinishEvent, &writeDelay, &eventExpecting](int delay)
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        auto& mockRtaService{ MockRealTimeActivityService::Instance() };
+
+        const uint64_t xuid1{ 1 };
+        const uint64_t xuid2{ 2 };
+        std::map<uint64_t, Event> subAddedEvents;
+
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
         {
-            writeDelay = delay;
-            if (!--eventExpecting)
-            {
-                writeFinishEvent.set();
-            }
+            mockRtaService.CompleteSubscribeHandshake(n, defaultPresenceResponse);
+
+            const char xuidPrefix[]{ "xuid(" };
+            const char* p{ &uri[uri.find(xuidPrefix) + _countof(xuidPrefix) - 1] };
+            uint64_t xuid = strtoull(p, nullptr, 0);
+            subAddedEvents[xuid].Set();
         });
 
-        auto xboxLiveContext1_User1 = GetMockXboxLiveContext_WinRT();
-        auto xboxLiveContext2_User1 = ref new Microsoft::Xbox::Services::XboxLiveContext(xboxLiveContext1_User1->User);
+        {
+            DevicePresenceChangedHandler handler{ xboxLiveContext };
 
-        auto xboxLiveContext1_User2 = GetMockXboxLiveContext_WinRT(L"TestUser1");
-        auto xboxLiveContext2_User2 = ref new Microsoft::Xbox::Services::XboxLiveContext(xboxLiveContext1_User1->User);
+            VERIFY_SUCCEEDED(XblPresenceTrackUsers(xboxLiveContext.get(), &xuid1, 1));
+            subAddedEvents[xuid1].Wait();
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(L"");
-        httpCall->set_custom_header(L"X-Heartbeat-After", L"60");
-        auto presenceWriter = xbox::services::presence::presence_writer::get_presence_writer_singleton();
-        presenceWriter->start_writer(
-            xboxLiveContext1_User1->PresenceService->GetCppObj()._Impl()
-        );
+            VERIFY_SUCCEEDED(XblPresenceTrackUsers(xboxLiveContext.get(), &xuid2, 1));
+            subAddedEvents[xuid2].Wait();
 
-        presenceWriter->start_writer(
-            xboxLiveContext2_User1->PresenceService->GetCppObj()._Impl()
-        );
-        VERIFY_ARE_EQUAL_UINT(1, presenceWriter->tracking_count());
+            // Subs should be removed along with the handler
+        }
 
-        presenceWriter->start_writer(
-            xboxLiveContext1_User2->PresenceService->GetCppObj()._Impl()
-        );
-        presenceWriter->start_writer(
-            xboxLiveContext2_User2->PresenceService->GetCppObj()._Impl()
-        );
-        VERIFY_ARE_EQUAL_UINT(2, presenceWriter->tracking_count());
+        {
+            // Subs should be re-added automatically if a handler is re-added
+            DevicePresenceChangedHandler handler{ xboxLiveContext };
+            subAddedEvents[xuid1].Wait();
+            subAddedEvents[xuid2].Wait();
+        }
+    }
 
-        writeFinishEvent.wait();
+    DEFINE_TEST_CASE(TestLegacySubscriptions)
+    {
+        TestEnvironment env{};
 
-        VERIFY_ARE_EQUAL_UINT(2, presenceWriter->tracking_count());
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        auto& mockRtaService{ MockRealTimeActivityService::Instance() };
 
-        VERIFY_ARE_EQUAL_STR(L"POST", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://userpresence.mockenv.xboxlive.com", httpCall->ServerName);
+        uint32_t subCount{ 0 };
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        {
+            mockRtaService.CompleteSubscribeHandshake(n, defaultPresenceResponse);
+            subCount++;
+        });
 
-        VERIFY_IS_TRUE(writeDelay == 1);
-        VERIFY_IS_TRUE(httpCall->CallCounter == 2);
+        TitlePresenceChangedHandler titlePresenceHandler{ xboxLiveContext };
+        DevicePresenceChangedHandler devicePresenceHandler{ xboxLiveContext };
 
-        writeFinishEvent.reset();
-        eventExpecting = 2;
+        XblRealTimeActivitySubscriptionHandle titlePresenceSub{ nullptr };
+        VERIFY_SUCCEEDED(XblPresenceSubscribeToTitlePresenceChange(xboxLiveContext.get(), 1, 1, &titlePresenceSub));
 
-        presenceWriter->stop_writer(xboxLiveContext1_User1->User->XboxUserId->Data());
-        VERIFY_ARE_EQUAL_UINT(1, presenceWriter->tracking_count());
-        presenceWriter->stop_writer(xboxLiveContext2_User1->User->XboxUserId->Data());
-        VERIFY_ARE_EQUAL_UINT(1, presenceWriter->tracking_count());
-        presenceWriter->stop_writer(xboxLiveContext1_User2->User->XboxUserId->Data());
-        VERIFY_ARE_EQUAL_UINT(0, presenceWriter->tracking_count());
-        presenceWriter->stop_writer(xboxLiveContext2_User2->User->XboxUserId->Data());
-        VERIFY_ARE_EQUAL_UINT(0, presenceWriter->tracking_count());
+        // Both handlers should be invoked since title presence subscription tracks the user and the title
+        titlePresenceHandler.rtaTapReceived.Wait();
+        devicePresenceHandler.rtaTapReceived.Wait();
 
-        writeFinishEvent.wait();
-        xbox::services::presence::presence_service_impl::set_presence_set_finished_handler(nullptr);
+        // Since we are already tracking Xuid "1", this shouldn't result in any new subs
+        XblRealTimeActivitySubscriptionHandle devicePresenceSub{ nullptr };
+        VERIFY_SUCCEEDED(XblPresenceSubscribeToDevicePresenceChange(xboxLiveContext.get(), 1, &devicePresenceSub));
+
+        VERIFY_SUCCEEDED(XblPresenceUnsubscribeFromTitlePresenceChange(xboxLiveContext.get(), titlePresenceSub));
+
+        // Ensure we continue to receive device presence changed notification
+        mockRtaService.RaiseEvent("https://userpresence.xboxlive.com/users/xuid(1)/devices", devicePresenceResponse);
+        devicePresenceHandler.rtaTapReceived.Wait();
+
+        VERIFY_SUCCEEDED(XblPresenceUnsubscribeFromDevicePresenceChange(xboxLiveContext.get(), devicePresenceSub));
     }
 
     DEFINE_TEST_CASE(TestPresenceInvalidArgs)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestPresenceInvalidArgs);
-        XboxLiveContext^ xboxLiveContext = GetMockXboxLiveContext_WinRT();
+        TestEnvironment env{};
 
-        VERIFY_THROWS_HR_CX(
-            ref new PresenceData(ref new Platform::String(L""), ref new Platform::String(L"")),
-            E_INVALIDARG
-            );
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        XAsyncBlock async{};
+        uint64_t xuid{};
+        const char name{};
+        XblPresenceQueryFilters* filters{ nullptr };
 
-        VERIFY_THROWS_HR_CX(
-            ref new PresenceData(ref new Platform::String(L"test"), ref new Platform::String(L"")),
-            E_INVALIDARG
-            );
-
-        Platform::Collections::Vector<Platform::String^>^ tokenIds = ref new Platform::Collections::Vector<Platform::String^>();
-        VERIFY_THROWS_HR_CX(
-            ref new PresenceData(
-                ref new Platform::String(L"test"), 
-                ref new Platform::String(L"test1"),
-                tokenIds->GetView()
-                ),
-            E_INVALIDARG
-            );
-
-        tokenIds->Append(ref new Platform::String(L"test"));
-        tokenIds->Append(ref new Platform::String(L"test1"));
-        tokenIds->Append(ref new Platform::String(L""));
-
-        VERIFY_THROWS_HR_CX(
-            ref new PresenceData(
-                ref new Platform::String(L"test"),
-                ref new Platform::String(L"test1"),
-                tokenIds->GetView()
-                ),
-            E_INVALIDARG
-            );
-
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->PresenceService->GetPresenceAsync(
-                ref new Platform::String(L"")
-                )).get(),
-                E_INVALIDARG
-            );
+        VERIFY_ARE_EQUAL_INT(XblPresenceGetPresenceAsync(nullptr, 1, &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL_INT(XblPresenceGetPresenceAsync(xboxLiveContext.get(), 1, nullptr), E_INVALIDARG);
 
 #pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->PresenceService->GetPresenceForMultipleUsersAsync(
-                nullptr,
-                nullptr,
-                nullptr,
-                PresenceDetailLevel::All,
-                true,
-                true
-                )).get(),
-                E_INVALIDARG
-            );
+        VERIFY_ARE_EQUAL_INT(XblPresenceGetPresenceForMultipleUsersAsync(nullptr, &xuid, 0, filters, &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL_INT(XblPresenceGetPresenceForMultipleUsersAsync(xboxLiveContext.get(), nullptr, 0, filters, &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL_INT(XblPresenceGetPresenceForMultipleUsersAsync(xboxLiveContext.get(), &xuid, 0, filters, nullptr), E_INVALIDARG);
 
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->PresenceService->GetPresenceForMultipleUsersAsync(
-                nullptr
-                )).get(),
-            E_INVALIDARG
-            );
-
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->PresenceService->GetPresenceForSocialGroupAsync(
-                ref new Platform::String(L"")
-                )).get(),
-            E_INVALIDARG
-            );
-
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->PresenceService->GetPresenceForSocialGroupAsync(
-                ref new Platform::String(L""),
-                ref new Platform::String(L""),
-                nullptr,
-                nullptr,
-                PresenceDetailLevel::All,
-                true,
-                true
-                )).get(),
-            E_INVALIDARG
-            );
+        VERIFY_ARE_EQUAL_INT(XblPresenceGetPresenceForSocialGroupAsync(nullptr, &name, &xuid, filters, &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL_INT(XblPresenceGetPresenceForSocialGroupAsync(xboxLiveContext.get(), nullptr, &xuid, filters, &async), E_INVALIDARG);
+        VERIFY_ARE_EQUAL_INT(XblPresenceGetPresenceForSocialGroupAsync(xboxLiveContext.get(), &name, &xuid, filters, nullptr), E_INVALIDARG);
     }
 };
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

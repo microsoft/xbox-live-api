@@ -4,183 +4,184 @@
 
 #include "pch.h"
 #include "multiplayer_manager_internal.h"
+#include "xbox_live_app_config_internal.h"
 
 using namespace xbox::services::multiplayer;
+using namespace xbox::services::system;
+using namespace xbox::services::legacy;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
-const string_t multiplayer_lobby_client::c_transferHandlePropertyName = _T("GameSessionTransferHandle");
-const string_t multiplayer_lobby_client::c_joinabilityPropertyName = _T("Joinability");
-#if UNIT_TEST_SERVICES
-const std::chrono::seconds RETRY_LENGTH(0);
+
+#if XSAPI_UNIT_TESTS
+#define RETRY_DELAY_MS 0
 #else
-const std::chrono::seconds RETRY_LENGTH(1);
+#define RETRY_DELAY_MS 1000
 #endif
-const int MAX_CONNECTION_ATTEMPTS = 3;
+#define MAX_CONNECTION_ATTEMPTS 3
 
-multiplayer_lobby_client::multiplayer_lobby_client() :
-    m_pendingCommitInProgress(false),
-    m_updateNumber(0),
-    m_joinability(joinability::none)
+MultiplayerLobbyClient::MultiplayerLobbyClient(
+    _In_ const TaskQueue& queue
+) noexcept :
+    m_queue{ queue.DeriveWorkerQueue() },
+    m_sessionWriter{ MakeShared<MultiplayerSessionWriter>(queue) }
 {
-    m_sessionWriter = std::make_shared<multiplayer_session_writer>();
 }
 
-multiplayer_lobby_client::multiplayer_lobby_client(
-    _In_ string_t lobbySessionTemplateName,
-    _In_ std::shared_ptr<multiplayer_local_user_manager> localUserManager
-    ) :
-    m_lobbySessionTemplateName(std::move(lobbySessionTemplateName)),
-    m_multiplayerLocalUserManager(localUserManager),
-    m_pendingCommitInProgress(false),
-    m_updateNumber(0),
-    m_joinability(joinability::none)
+MultiplayerLobbyClient::MultiplayerLobbyClient(
+    _In_ const TaskQueue& queue,
+    _In_ String lobbySessionTemplateName,
+    _In_ std::shared_ptr<MultiplayerLocalUserManager> localUserManager
+) noexcept :
+    m_queue{ queue.DeriveWorkerQueue() },
+    m_lobbySessionTemplateName{ std::move(lobbySessionTemplateName) },
+    m_sessionWriter{ MakeShared<MultiplayerSessionWriter>(queue, localUserManager) },
+    m_multiplayerLocalUserManager{ std::move(localUserManager) }
 {
-    m_sessionWriter = std::make_shared<multiplayer_session_writer>(localUserManager);
 }
 
-multiplayer_lobby_client::~multiplayer_lobby_client()
+MultiplayerLobbyClient::~MultiplayerLobbyClient() noexcept
 {
     m_sessionWriter.reset();
 }
 
 void
-multiplayer_lobby_client::initialize()
+MultiplayerLobbyClient::Initialize()
 {
-    std::weak_ptr<multiplayer_lobby_client> thisWeakPtr = shared_from_this();
-    m_sessionWriter->add_multiplayer_session_updated_handler([thisWeakPtr](_In_ const std::shared_ptr<multiplayer_session>& updatedSession)
+    std::weak_ptr<MultiplayerLobbyClient> weakThis = shared_from_this();
+    m_sessionWriter->AddMultiplayerSessionUpdatedHandler([weakThis](_In_ const std::shared_ptr<XblMultiplayerSession>& updatedSession)
     {
-        std::shared_ptr<multiplayer_lobby_client> pThis(thisWeakPtr.lock());
+        std::shared_ptr<MultiplayerLobbyClient> pThis(weakThis.lock());
         if (pThis != nullptr)
         {
-            pThis->update_session(updatedSession);
+            pThis->UpdateSession(updatedSession);
         }
     });
 }
 
-void multiplayer_lobby_client::deep_copy_if_updated(
-    _In_ const multiplayer_lobby_client& other
+void MultiplayerLobbyClient::deep_copy_if_updated(
+    _In_ const MultiplayerLobbyClient& other
     )
 {
     std::lock_guard<std::mutex> lock(other.m_clientRequestLock);
 
     m_joinability = other.m_joinability;
-    if (other.m_sessionWriter->session() == nullptr)
+    if (other.m_sessionWriter->Session() == nullptr)
     {
-        m_sessionWriter->update_session(nullptr);
+        m_sessionWriter->UpdateSession(nullptr);
         m_multiplayerLobby = nullptr;
     }
     else if (other.m_multiplayerLobby == nullptr)
     {
         m_multiplayerLobby = nullptr;
     }
-    else if (m_sessionWriter->session() == nullptr ||
-            other.m_sessionWriter->session()->change_number() > m_sessionWriter->session()->change_number() ||
-            other.m_sessionWriter->session()->e_tag() > m_sessionWriter->session()->e_tag())
+    else if (m_sessionWriter->Session() == nullptr ||
+            other.m_sessionWriter->Session()->SessionInfo().ChangeNumber > m_sessionWriter->Session()->SessionInfo().ChangeNumber ||
+            other.m_sessionWriter->Session()->ETag() > m_sessionWriter->Session()->ETag())
     {
-        m_sessionWriter->update_session(other.m_sessionWriter->session()->_Create_deep_copy());
-        m_multiplayerLobby = other.m_multiplayerLobby->_Create_deep_copy();
+        m_sessionWriter->UpdateSession(MakeShared<XblMultiplayerSession>(*other.m_sessionWriter->Session()));
+        m_multiplayerLobby = MakeShared<MultiplayerLobbySession>(*other.m_multiplayerLobby);
     }
     else if (m_updateNumber != other.m_updateNumber)
     {
-        m_multiplayerLobby = other.m_multiplayerLobby->_Create_deep_copy();
+        m_multiplayerLobby = MakeShared<MultiplayerLobbySession>(*other.m_multiplayerLobby);
     }
 }
 
-std::shared_ptr<multiplayer_game_client>
-multiplayer_lobby_client::game_client()
+std::shared_ptr<MultiplayerGameClient>
+MultiplayerLobbyClient::GameClient()
 {
-    return multiplayer_manager::get_singleton_instance()->_Game_client();
+    // TODO this should be changed such that nothing here needs to depend on the GlobalState.
+    // For now just try to get the global state and return null (which is handled by callers) if
+    // it that fails.
+    auto state{ GlobalState::Get() };
+    return state ? state->MultiplayerManager()->GameClient() : nullptr;
 }
 
-std::shared_ptr<multiplayer_session>
-multiplayer_lobby_client::game_session()
+std::shared_ptr<XblMultiplayerSession>
+MultiplayerLobbyClient::GameSession()
 {
-    auto mpInstance = multiplayer_manager::get_singleton_instance();
-    if (mpInstance->_Game_client() == nullptr)
-    {
-        return nullptr;
-    }
-
-    return mpInstance->_Game_client()->session();
+    auto gameClient{ GameClient() };
+    return gameClient ? gameClient->Session() : nullptr;
 }
 
-const std::shared_ptr<multiplayer_session_writer>&
-multiplayer_lobby_client::session_writer() const
+const std::shared_ptr<MultiplayerSessionWriter>&
+MultiplayerLobbyClient::SessionWriter() const
 {
     return m_sessionWriter;
 }
 
-const std::shared_ptr<multiplayer_lobby_session>&
-multiplayer_lobby_client::lobby() const
+const std::shared_ptr<MultiplayerLobbySession>&
+MultiplayerLobbyClient::Lobby() const
 {
     return m_multiplayerLobby;
 }
 
 void
-multiplayer_lobby_client::update_lobby(
-    _In_ std::shared_ptr<multiplayer_lobby_session> multiplayerLobby
+MultiplayerLobbyClient::UpdateLobby(
+    _In_ std::shared_ptr<MultiplayerLobbySession> multiplayerLobby
     )
 {
     ++m_updateNumber;
     m_multiplayerLobby = multiplayerLobby;
 }
 
-const std::shared_ptr<multiplayer_session>&
-multiplayer_lobby_client::session() const
+const std::shared_ptr<XblMultiplayerSession>&
+MultiplayerLobbyClient::Session() const
 {
     std::lock_guard<std::mutex> lock(m_clientRequestLock);
-    return m_sessionWriter->session();
+    return m_sessionWriter->Session();
 }
 
 void
-multiplayer_lobby_client::update_session(
-    _In_ const std::shared_ptr<multiplayer_session>& updatedSession
+MultiplayerLobbyClient::UpdateSession(
+    _In_ const std::shared_ptr<XblMultiplayerSession>& updatedSession
     )
 {
-    auto cachedSession = session();
+    auto cachedSession = Session();
     if (updatedSession == nullptr || cachedSession == nullptr ||
-        updatedSession->change_number() > cachedSession->change_number() ||
-        updatedSession->e_tag() != cachedSession->e_tag())
+        updatedSession->SessionInfo().ChangeNumber > cachedSession->SessionInfo().ChangeNumber ||
+        updatedSession->ETag() != cachedSession->ETag())
     {
-        update_lobby_session(updatedSession);
+        UpdateLobbySession(updatedSession);
     }
 }
 
 void 
-multiplayer_lobby_client::update_lobby_session(
-    _In_ const std::shared_ptr<multiplayer_session>& updatedSession
+MultiplayerLobbyClient::UpdateLobbySession(
+    _In_ const std::shared_ptr<XblMultiplayerSession>& updatedSession
     )
 {
     std::lock_guard<std::mutex> lock(m_clientRequestLock);
-    m_sessionWriter->update_session(updatedSession);
+    m_sessionWriter->UpdateSession(updatedSession);
 }
 
 void
-multiplayer_lobby_client::update_objects(
-    const std::shared_ptr<multiplayer_session>& updatedSession, 
-    const std::shared_ptr<multiplayer_session>& gameSession
+MultiplayerLobbyClient::UpdateObjects(
+    const std::shared_ptr<XblMultiplayerSession>& updatedSession, 
+    const std::shared_ptr<XblMultiplayerSession>& gameSession
     )
 {
     std::lock_guard<std::mutex> lock(m_clientRequestLock);
     if (updatedSession == nullptr)
     {
-        update_lobby(nullptr);
+        UpdateLobby(nullptr);
         m_localLobbyMembers.clear();
-        m_joinability = joinability::none;
+        m_joinability = XblMultiplayerJoinability::None;
     }
     else
     {
-        update_local_lobby_members(updatedSession, gameSession);
-        auto multiplayerLobby = convert_to_multiplayer_lobby(updatedSession, gameSession);
-        update_lobby(multiplayerLobby);
-        m_joinability = multiplayer_manager_utils::get_joinability(updatedSession->session_properties());
+        UpdateLocalLobbyMembers(updatedSession, gameSession);
+        auto multiplayerLobby = ConvertToMultiplayerLobby(updatedSession, gameSession);
+        UpdateLobby(multiplayerLobby);
+        XblMultiplayerSessionReadLockGuard updatedSessionSafe(updatedSession);
+        m_joinability = MultiplayerManagerUtils::GetJoinability(updatedSessionSafe.SessionProperties());
     }
 }
 
 void
-multiplayer_lobby_client::update_local_lobby_members(
-    _In_ const std::shared_ptr<multiplayer_session>& updatedLobbySession,
-    _In_ const std::shared_ptr<multiplayer_session>& gameSession
+MultiplayerLobbyClient::UpdateLocalLobbyMembers(
+    _In_ const std::shared_ptr<XblMultiplayerSession>& updatedLobbySession,
+    _In_ const std::shared_ptr<XblMultiplayerSession>& gameSession
     )
 {
     m_localLobbyMembers.clear();
@@ -189,18 +190,18 @@ multiplayer_lobby_client::update_local_lobby_members(
         return;
     }
 
-    std::vector<std::shared_ptr<multiplayer_member>> localLobbyGameMembers = std::vector<std::shared_ptr<multiplayer_member>>();
-    
-    auto xboxLiveContextMap = m_multiplayerLocalUserManager->get_local_user_map();
+    auto localLobbyGameMembers = xsapi_internal_vector<std::shared_ptr<MultiplayerMember>>();
+
+    auto xboxLiveContextMap = m_multiplayerLocalUserManager->GetLocalUserMap();
     for(auto xboxLiveContext : xboxLiveContextMap)
     {
         auto localUser =  xboxLiveContext.second;
         if (localUser != nullptr)
         {
-            std::shared_ptr<multiplayer_session_member> member = multiplayer_manager_utils::get_player_in_session(localUser->xbox_user_id(), updatedLobbySession);
+            auto member = XblMultiplayerSession::GetPlayerInSession(localUser->Xuid(), updatedLobbySession);
             if (member != nullptr)
             {
-                auto localMember = multiplayer_manager_utils::convert_to_game_member(member, updatedLobbySession, gameSession, true);
+                auto localMember = MultiplayerMember::CreateFromSessionMember(member, updatedLobbySession, gameSession, true);
                 localLobbyGameMembers.push_back(localMember);
             }
         }
@@ -209,10 +210,10 @@ multiplayer_lobby_client::update_local_lobby_members(
     m_localLobbyMembers = localLobbyGameMembers;
 }
 
-std::shared_ptr<multiplayer_lobby_session>
-multiplayer_lobby_client::convert_to_multiplayer_lobby(
-    _In_ const  std::shared_ptr<multiplayer_session>& sessionToConvert,
-    _In_ const  std::shared_ptr<multiplayer_session>& gameSession
+std::shared_ptr<MultiplayerLobbySession>
+MultiplayerLobbyClient::ConvertToMultiplayerLobby(
+    _In_ const  std::shared_ptr<XblMultiplayerSession>& sessionToConvert,
+    _In_ const  std::shared_ptr<XblMultiplayerSession>& gameSession
     )
 {
     if (sessionToConvert == nullptr)
@@ -220,18 +221,18 @@ multiplayer_lobby_client::convert_to_multiplayer_lobby(
         return nullptr;
     }
 
-    std::shared_ptr<multiplayer_member> hostMember = nullptr;
-    std::vector<std::shared_ptr<multiplayer_member>> gameMembers;
-    for (const auto& member : sessionToConvert->members())
+    std::shared_ptr<MultiplayerMember> hostMember = nullptr;
+    xsapi_internal_vector<std::shared_ptr<MultiplayerMember>> gameMembers;
+    XblMultiplayerSessionReadLockGuard sessionToConvertSafe(sessionToConvert);
+    for (const auto& member : sessionToConvertSafe.Members())
     {
-        auto gameMember = multiplayer_manager_utils::convert_to_game_member(
-            member, 
+        auto gameMember = MultiplayerMember::CreateFromSessionMember(
+            &member, 
             sessionToConvert,
             gameSession,
-            m_multiplayerLocalUserManager->get_local_user_map()
+            m_multiplayerLocalUserManager->GetLocalUserMap()
             );
-        if (!member->device_token().empty() && 
-            utils::str_icmp(member->device_token(), sessionToConvert->session_properties()->host_device_token()) == 0)
+        if (member.DeviceToken.Value[0] != 0 && utils::str_icmp(member.DeviceToken.Value, sessionToConvertSafe.SessionProperties().HostDeviceToken.Value) == 0)
         {
             hostMember = gameMember;
         }
@@ -239,7 +240,7 @@ multiplayer_lobby_client::convert_to_multiplayer_lobby(
         gameMembers.push_back(gameMember);
     }
 
-    return std::make_shared<multiplayer_lobby_session>(
+    return std::make_shared<MultiplayerLobbySession>(
         sessionToConvert,
         hostMember,
         gameMembers,
@@ -247,21 +248,21 @@ multiplayer_lobby_client::convert_to_multiplayer_lobby(
         );
 }
 
-multiplayer::manager::joinability
-multiplayer_lobby_client::joinability()
+XblMultiplayerJoinability
+MultiplayerLobbyClient::Joinability()
 {
     return m_joinability;
 }
 
-const std::vector<multiplayer_event>&
-multiplayer_lobby_client::multiplayer_event_queue()
+const MultiplayerEventQueue&
+MultiplayerLobbyClient::EventQueue()
 {
     // Don't require a lock as STL is multithread read safe
     return m_multiplayerEventQueue;
 }
 
 void
-multiplayer_lobby_client::clear_pending_queue()
+MultiplayerLobbyClient::ClearPendingQueue()
 {
     std::lock_guard<std::mutex> lock(m_clientRequestLock);
     while (!m_pendingRequestQueue.empty())
@@ -271,8 +272,8 @@ multiplayer_lobby_client::clear_pending_queue()
 }
 
 void
-multiplayer_lobby_client::add_to_pending_queue(
-    _In_ std::shared_ptr<multiplayer_client_pending_request> pendingRequest
+MultiplayerLobbyClient::AddToPendingQueue(
+    _In_ std::shared_ptr<MultiplayerClientPendingRequest> pendingRequest
     )
 {
     // No lock required. Methods that call this already has a lock
@@ -280,8 +281,8 @@ multiplayer_lobby_client::add_to_pending_queue(
 }
 
 void
-multiplayer_lobby_client::add_to_processing_queue(
-    _In_ std::vector<std::shared_ptr<multiplayer_client_pending_request>> processingQueue
+MultiplayerLobbyClient::AddToProcessingQueue(
+    _In_ xsapi_internal_vector<std::shared_ptr<MultiplayerClientPendingRequest>> processingQueue
     )
 {
     for (const auto& request : processingQueue)
@@ -291,13 +292,13 @@ multiplayer_lobby_client::add_to_processing_queue(
 }
 
 void
-multiplayer_lobby_client::remove_from_processing_queue(
+MultiplayerLobbyClient::RemoveFromProcessingQueue(
     _In_ uint32_t identifier
     )
 {
     for (auto request = m_processingQueue.begin(); request != m_processingQueue.end(); ++request)
     {
-        if ((*request)->identifier() == identifier)
+        if ((*request)->Identifier() == identifier)
         {
             m_processingQueue.erase(request);
             break;
@@ -305,208 +306,200 @@ multiplayer_lobby_client::remove_from_processing_queue(
     }
 }
 
-std::vector<std::shared_ptr<multiplayer_client_pending_request>>
-multiplayer_lobby_client::get_processing_queue()
+xsapi_internal_vector<std::shared_ptr<MultiplayerClientPendingRequest>>
+MultiplayerLobbyClient::GetProcessingQueue()
 {
     return m_processingQueue;
 }
 
-xbox_live_result<void>
-multiplayer_lobby_client::add_local_user(
+HRESULT
+MultiplayerLobbyClient::AddLocalUser(
     _In_ xbox_live_user_t user,
-    _In_ multiplayer_local_user_lobby_state userState,
-    _In_ const string_t& handleId,
-    _In_ const xbox::services::multiplayer::multiplayer_session_reference& sessionRef
+    _In_ MultiplayerLocalUserLobbyState userState,
+    _In_ const xsapi_internal_string& handleId
     )
 {
     std::lock_guard<std::mutex> lock(m_clientRequestLock);
 
-    if (user == nullptr) return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "Invalid user argument passed");
+    RETURN_HR_INVALIDARGUMENT_IF(user == nullptr);
+    auto localUser = m_multiplayerLocalUserManager->GetLocalUserHelper(user);
+    RETURN_HR_IF_LOG_DEBUG(localUser != nullptr && userState == MultiplayerLocalUserLobbyState::Add, E_UNEXPECTED, "User already added.");
 
-    auto localUser = m_multiplayerLocalUserManager->get_local_user_helper(user);
-    RETURN_CPP_IF(localUser != nullptr && userState == multiplayer_local_user_lobby_state::add, void, xbox_live_error_code::logic_error, "User already added.");
-    
     if (localUser == nullptr)
     {
-        localUser = m_multiplayerLocalUserManager->add_user_to_xbox_live_context_to_map(user);
+        auto localUserResult = m_multiplayerLocalUserManager->AddUserToXboxLiveContextToMap(user);
+        RETURN_HR_IF_FAILED(localUserResult.Hresult());
+
+        localUser = localUserResult.ExtractPayload();
     }
 
-    auto pendingRequest = std::make_shared<multiplayer_client_pending_request>();
-    pendingRequest->set_local_user(localUser);
-    pendingRequest->set_lobby_state(userState);
-    if (userState == multiplayer_local_user_lobby_state::join)
+    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    pendingRequest->SetLocalUser(localUser);
+    pendingRequest->SetLobbyState(userState);
+    if (userState == MultiplayerLocalUserLobbyState::Join)
     {
         if (!handleId.empty())
         {
-            pendingRequest->set_lobby_handle_id(handleId);
-        }
-        else if(!sessionRef.is_null())
-        {
-            pendingRequest->set_team_session_reference(sessionRef);
+            pendingRequest->SetLobbyHandleId(handleId);
         }
     }
-    add_to_pending_queue(pendingRequest);
+    AddToPendingQueue(pendingRequest);
 
-    return xbox_live_result<void>();
+    return S_OK;
 }
 
 void
-multiplayer_lobby_client::add_local_users(
-    _In_ std::vector<xbox_live_user_t> users,
-    _In_ const string_t& handleId
+MultiplayerLobbyClient::AddLocalUsers(
+    _In_ xsapi_internal_vector<xbox_live_user_t> users,
+    _In_ const xsapi_internal_string& handleId
     )
 {
     for (const auto& user : users)
     {
-        add_local_user(user, multiplayer_local_user_lobby_state::join, handleId);
+        AddLocalUser(user, MultiplayerLocalUserLobbyState::Join, handleId);
     }
 }
 
+
 void
-multiplayer_lobby_client::add_local_users(
-    _In_ std::vector<xbox_live_user_t> users,
-    _In_ const multiplayer_session_reference& sessionRef
+MultiplayerLobbyClient::AddLocalUsers(
+    _In_ xsapi_internal_vector<xbox_live_user_t> users
     )
 {
     for (const auto& user : users)
     {
-        add_local_user(user, multiplayer_local_user_lobby_state::join, string_t(), sessionRef);
+        AddLocalUser(user, MultiplayerLocalUserLobbyState::Join, xsapi_internal_string());
     }
 }
 
-xbox_live_result<void>
-multiplayer_lobby_client::remove_local_user(
+HRESULT
+MultiplayerLobbyClient::RemoveLocalUser(
     _In_ xbox_live_user_t user
     )
 {
     std::lock_guard<std::mutex> lock(m_clientRequestLock);
+    RETURN_HR_INVALIDARGUMENT_IF(user == nullptr);
 
-    if (user == nullptr) return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "Invalid user argument passed");
+    auto localUser = m_multiplayerLocalUserManager->GetLocalUserHelper(user);
+    RETURN_HR_IF_LOG_DEBUG(localUser == nullptr || localUser->Context() == nullptr, E_UNEXPECTED, "Call add_local_user() first.");
 
-    auto localUser = m_multiplayerLocalUserManager->get_local_user_helper(user);
-    RETURN_CPP_IF(localUser == nullptr || localUser->context() == nullptr, void, xbox_live_error_code::logic_error, "Call add_local_user() first.");
+    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    pendingRequest->SetLocalUser(localUser);
+    pendingRequest->SetLobbyState(MultiplayerLocalUserLobbyState::Leave);
+    AddToPendingQueue(pendingRequest);
 
-    auto pendingRequest = std::make_shared<multiplayer_client_pending_request>();
-    pendingRequest->set_local_user(localUser);
-    pendingRequest->set_lobby_state(multiplayer_local_user_lobby_state::leave);
-    add_to_pending_queue(pendingRequest);
-
-    return xbox_live_result<void>();
+    return S_OK;
 }
 
 void
-multiplayer_lobby_client::remove_all_local_users()
+MultiplayerLobbyClient::RemoveAllLocalUsers()
 {
     std::lock_guard<std::mutex> lock(m_clientRequestLock);
 
-    if (m_multiplayerLocalUserManager == nullptr) return;
-
-    const auto& xboxLiveContextMap = m_multiplayerLocalUserManager->get_local_user_map();
-    for (auto xboxLiveContext : xboxLiveContextMap)
+    if (m_multiplayerLocalUserManager != nullptr)
     {
-        const auto& localUser = xboxLiveContext.second;
-        if (localUser != nullptr)
+        const auto& xboxLiveContextMap = m_multiplayerLocalUserManager->GetLocalUserMap();
+        for (auto xboxLiveContext : xboxLiveContextMap)
         {
-            auto pendingRequest = std::make_shared<multiplayer_client_pending_request>();
-            pendingRequest->set_local_user(localUser);
-            pendingRequest->set_lobby_state(multiplayer_local_user_lobby_state::leave);
-            add_to_pending_queue(pendingRequest);
+            const auto& localUser = xboxLiveContext.second;
+            if (localUser != nullptr)
+            {
+                auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+                pendingRequest->SetLocalUser(localUser);
+                pendingRequest->SetLobbyState(MultiplayerLocalUserLobbyState::Leave);
+                AddToPendingQueue(pendingRequest);
+            }
         }
     }
 }
 
-xbox_live_result<void>
-multiplayer_lobby_client::set_local_member_properties(
+HRESULT
+MultiplayerLobbyClient::SetLocalMemberProperties(
     _In_ xbox_live_user_t user,
-    _In_ string_t name,
-    _In_ web::json::value valueJson,
+    _In_ const xsapi_internal_string& name,
+    _In_ const JsonValue& valueJson,
     _In_opt_ context_t context
     )
 {
     std::lock_guard<std::mutex> lock(m_clientRequestLock);
+    RETURN_HR_INVALIDARGUMENT_IF(user == nullptr);
 
-    if (user == nullptr) return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "Invalid user argument passed");
+    auto localUser = m_multiplayerLocalUserManager->GetLocalUserHelper(user);
+    RETURN_HR_IF_LOG_DEBUG(localUser == nullptr || localUser->Context() == nullptr, E_UNEXPECTED, "Call add_local_user() before setting local member properties.");
 
-    auto localUser = m_multiplayerLocalUserManager->get_local_user_helper(user);
-    RETURN_CPP_IF(localUser == nullptr || localUser->context() == nullptr, void, xbox_live_error_code::logic_error, "Call add_local_user() before setting local member properties.");
+    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    pendingRequest->SetLocalUserProperties(localUser, name, valueJson, context);
+    AddToPendingQueue(pendingRequest);
 
-    auto pendingRequest = std::make_shared<multiplayer_client_pending_request>();
-    pendingRequest->set_local_user_properties(localUser, name, valueJson, context);
-    add_to_pending_queue(pendingRequest);
-
-    return xbox_live_result<void>();
+    return S_OK;
 }
 
-xbox_live_result<void>
-multiplayer_lobby_client::delete_local_member_properties(
+HRESULT
+MultiplayerLobbyClient::DeleteLocalMemberProperties(
     _In_ xbox_live_user_t user,
-    _In_ const string_t& name,
+    _In_ const xsapi_internal_string& name,
     _In_opt_ context_t context
     )
 {
     std::lock_guard<std::mutex> lock(m_clientRequestLock);
+    RETURN_HR_INVALIDARGUMENT_IF(user == nullptr);
 
-    if (user == nullptr) return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "Invalid user argument passed");
+    auto localUser = m_multiplayerLocalUserManager->GetLocalUserHelper(user);
+    RETURN_HR_IF_LOG_DEBUG(localUser == nullptr || localUser->Context() == nullptr, E_UNEXPECTED, "Call add_local_user() before deleting local member properties.");
 
-    auto localUser = m_multiplayerLocalUserManager->get_local_user_helper(user);
-    RETURN_CPP_IF(localUser == nullptr || localUser->context() == nullptr, void, xbox_live_error_code::logic_error, "Call add_local_user() before deleting local member properties.");
+    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    pendingRequest->SetLocalUserProperties(localUser, name, JsonValue(), context);
+    AddToPendingQueue(pendingRequest);
 
-    auto pendingRequest = std::make_shared<multiplayer_client_pending_request>();
-    pendingRequest->set_local_user_properties(localUser, name, web::json::value::null(), context);
-    add_to_pending_queue(pendingRequest);
-
-    return xbox_live_result<void>();
+    return S_OK;
 }
 
-xbox_live_result<void>
-multiplayer_lobby_client::set_local_member_connection_address(
+HRESULT
+MultiplayerLobbyClient::SetLocalMemberConnectionAddress(
     _In_ xbox_live_user_t user,
-    _In_ string_t address,
+    _In_ const xsapi_internal_string& address,
     _In_opt_ context_t context
     )
 {
     std::lock_guard<std::mutex> lock(m_clientRequestLock);
+    RETURN_HR_INVALIDARGUMENT_IF(user == nullptr);
 
-    if (user == nullptr) return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "Invalid user argument passed");
+    auto localUser = m_multiplayerLocalUserManager->GetLocalUserHelper(user);
+    RETURN_HR_IF_LOG_DEBUG(localUser == nullptr || localUser->Context() == nullptr, E_UNEXPECTED, "Call add_local_user() before setting local member connection address.");
 
-    auto localUser = m_multiplayerLocalUserManager->get_local_user_helper(user);
-    RETURN_CPP_IF(localUser == nullptr || localUser->context() == nullptr, void, xbox_live_error_code::logic_error, "Call add_local_user() before setting local member connection address.");
+    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    pendingRequest->SetLocalUserConnectionAddress(localUser, address, context);
+    AddToPendingQueue(pendingRequest);
 
-    auto pendingRequest = std::make_shared<multiplayer_client_pending_request>();
-    pendingRequest->set_local_user_connection_address(localUser, address, context);
-    add_to_pending_queue(pendingRequest);
-
-    return xbox_live_result<void>();
+    return S_OK;
 }
 
-xbox_live_result<void> multiplayer_lobby_client::set_joinability(
-    _In_ xbox::services::multiplayer::manager::joinability value,
+HRESULT MultiplayerLobbyClient::SetJoinability(
+    _In_ XblMultiplayerJoinability value,
     _In_opt_ context_t context
     )
 {
-    if (value < joinability::joinable_by_friends || value > joinability::closed)
-    {
-        return xbox_live_result<void>(xbox_live_error_code::invalid_argument, "Join restriction enum out of range");
-    }
+    RETURN_HR_INVALIDARGUMENT_IF(value < XblMultiplayerJoinability::JoinableByFriends || value > XblMultiplayerJoinability::Closed);
 
-    auto pendingRequest = std::make_shared<multiplayer_client_pending_request>();
-    pendingRequest->set_joinability(value, context);
-    add_to_pending_queue(pendingRequest);
+    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    pendingRequest->SetJoinability(value, context);
+    AddToPendingQueue(pendingRequest);
 
-    return xbox_live_result<void>();
+    return S_OK;
 }
 
-std::vector<multiplayer_event>
-multiplayer_lobby_client::do_work()
+MultiplayerEventQueue
+MultiplayerLobbyClient::DoWork()
 {
     bool expected = false;
     if (m_pendingCommitInProgress.compare_exchange_strong(expected, true))
     {
         if (m_pendingRequestQueue.size() > 0)
         {
-            std::vector<std::shared_ptr<multiplayer_client_pending_request>> processingQueue;
-            multiplayer_session_reference teamSessionRef;
+            xsapi_internal_vector<std::shared_ptr<MultiplayerClientPendingRequest>> processingQueue;
+            XblMultiplayerSessionReference teamSessionRef{};
             bool applySynchronizedChanges = false;
+            bool lobbyStateIsJoin = false;
             bool joinByHandleId = false;
             bool doneProcessing = false;
             do
@@ -519,51 +512,49 @@ multiplayer_lobby_client::do_work()
 
                     if (m_pendingRequestQueue.size() > 0)
                     {
-                        if (pendingRequest->request_type() != m_pendingRequestQueue.front()->request_type())
+                        if (pendingRequest->RequestType() != m_pendingRequestQueue.front()->RequestType())
                         {
                             doneProcessing = true;
                         }
                     }
 
-                    if (!applySynchronizedChanges && pendingRequest->request_type() == pending_request_type::synchronized_changes)
+                    if (!applySynchronizedChanges && pendingRequest->RequestType() == PendingRequestType::SynchronizedChanges)
                     {
                         applySynchronizedChanges = true;
                     }
 
-                    if (pendingRequest->local_user() != nullptr)
+                    if (pendingRequest->LocalUser() != nullptr)
                     {
-                        auto lobbyState = pendingRequest->lobby_state();
-                        if (lobbyState == multiplayer_local_user_lobby_state::join)
+                        auto lobbyState = pendingRequest->LobbyState();
+                        if (lobbyState == MultiplayerLocalUserLobbyState::Join)
                         {
+                            lobbyStateIsJoin = true;
+
                             // Leave existing lobby without updating the latest as the leave may comeback after the actual join and overwrite it.
-                            auto latestSession = m_sessionWriter->session();
+                            auto latestSession = m_sessionWriter->Session();
                             if (latestSession != nullptr)
                             {
-                                leave_remote_session(latestSession);
+                                LeaveRemoteSession(latestSession);
                             }
 
-                            m_sessionWriter->update_session(nullptr);
-                            update_lobby(nullptr);
+                            m_sessionWriter->UpdateSession(nullptr);
+                            UpdateLobby(nullptr);
                             m_localLobbyMembers.clear();
-                            m_joinability = joinability::none;
+                            m_joinability = XblMultiplayerJoinability::None;
 
-                            if (!pendingRequest->lobby_handle_id().empty())
+                            if (!pendingRequest->LobbyHandleId().empty())
                             {
-                                pendingRequest->local_user()->set_lobby_handle_id(pendingRequest->lobby_handle_id());
+                                pendingRequest->LocalUser()->SetLobbyHandleId(pendingRequest->LobbyHandleId());
                                 joinByHandleId = true;
                             }
-                            else if (!pendingRequest->team_session_reference().is_null())
-                            {
-                                teamSessionRef = pendingRequest->team_session_reference();
-                            }
                         }
 
-                        if (lobbyState != multiplayer_local_user_lobby_state::unknown)
+                        if (lobbyState != MultiplayerLocalUserLobbyState::Unknown)
                         {
-                            pendingRequest->local_user()->set_lobby_state(lobbyState);
+                            pendingRequest->LocalUser()->SetLobbyState(lobbyState);
                         }
                         
-                        pendingRequest->local_user()->set_write_changes_to_service(true);
+                        pendingRequest->LocalUser()->SetWriteChangesToService(true);
                     }
                 }
 
@@ -571,42 +562,58 @@ multiplayer_lobby_client::do_work()
 
             if (processingQueue.size() > 0)
             {
-                add_to_processing_queue(processingQueue);
-                pplx::task<xbox_live_result<std::vector<multiplayer_event>>> asyncOp;
-                if (applySynchronizedChanges)
-                {
-                    asyncOp = m_sessionWriter->commit_pending_synchronized_changes(processingQueue, multiplayer_session_type::lobby_session);
-                }
-                else
-                {
-                    asyncOp = commit_pending_lobby_changes(joinByHandleId, teamSessionRef);
-                }
+                AddToProcessingQueue(processingQueue);
 
-                std::weak_ptr<multiplayer_lobby_client> thisWeakPtr = shared_from_this();
+                std::weak_ptr<MultiplayerLobbyClient> weakThis = shared_from_this();
 
-                create_task(asyncOp)
-                .then([thisWeakPtr, processingQueue](xbox_live_result<std::vector<multiplayer_event>> result)
+                MultiplayerEventQueueCallback callback = [weakThis, processingQueue](Result<MultiplayerEventQueue> result)
                 {
-                    std::shared_ptr<multiplayer_lobby_client> pThis(thisWeakPtr.lock());
+                    std::shared_ptr<MultiplayerLobbyClient> pThis(weakThis.lock());
                     if (pThis != nullptr)
                     {
                         std::lock_guard<std::mutex> lock(pThis->m_clientRequestLock);
                         {
-                            auto eventQueue = result.payload();
+                            auto eventQueue = result.Payload();
                             for (const auto& ev : eventQueue)
                             {
-                                pThis->m_multiplayerEventQueue.push_back(ev);
+                                pThis->m_multiplayerEventQueue.AddEvent(ev);
                             }
                         }
 
                         for (const auto& processingRequest : processingQueue)
                         {
-                            pThis->remove_from_processing_queue(processingRequest->identifier());
+                            pThis->RemoveFromProcessingQueue(processingRequest->Identifier());
                         }
 
                         pThis->m_pendingCommitInProgress.store(false);
                     }
-                });
+                };
+
+                if (applySynchronizedChanges)
+                {
+                    m_sessionWriter->CommitPendingSynchronizedChanges(processingQueue, XblMultiplayerSessionType::LobbySession, callback);
+                }
+                else
+                {
+                    Vector<uint64_t> xuidsInOrder;
+
+                    if (lobbyStateIsJoin)
+                    {
+                        // If users are joining from an invite than the first multiplayer_client_pending_request in processingQueue references was the invited user.
+                        // We want the invited user to join first since it is possible that users in the local graph might not meet the criteria
+                        // to join the invited session until the invited user joins. Imagine that the inviting session has the session privacy set to joinable_by_friends
+                        // and only the invited user is a friend of the inviting user. If any additional users attempt to join the inviting session before the invited user
+                        // than the join fails for the whole list of users.
+                        for (auto pendingRequest : processingQueue)
+                        {
+                            xuidsInOrder.push_back(pendingRequest->LocalUser()->Xuid());
+                        }
+                    }
+
+                    CommitPendingLobbyChanges(xuidsInOrder, joinByHandleId, teamSessionRef, callback);
+                }
+
+
             }
             else
             {
@@ -619,31 +626,31 @@ multiplayer_lobby_client::do_work()
         }
     }
 
-    std::vector<multiplayer_event> eventQueue;
+    MultiplayerEventQueue eventQueue;
     {
         std::lock_guard<std::mutex> lock(m_clientRequestLock);
         eventQueue = m_multiplayerEventQueue;
-        m_multiplayerEventQueue.clear();
+        m_multiplayerEventQueue.Clear();
     }
 
     return eventQueue;
 }
 
 bool
-multiplayer_lobby_client::is_pending_lobby_changes()
+MultiplayerLobbyClient::IsPendingLobbyChanges()
 {
     std::lock_guard<std::mutex> lock(m_clientRequestLock);
-    if (m_pendingRequestQueue.size() > 0 || is_pending_lobby_local_user_changes())
+    if (m_pendingRequestQueue.size() > 0 || IsPendingLobbyLocalUserChanges())
     {
         return true;
     }
 
     if (m_sessionWriter != nullptr)
     {
-        auto latestSession = m_sessionWriter->session();
+        auto latestSession = m_sessionWriter->Session();
         if (latestSession != nullptr &&
             m_multiplayerLobby != nullptr &&
-            latestSession->change_number() != m_multiplayerLobby->_Change_number())
+            latestSession->SessionInfo().ChangeNumber != m_multiplayerLobby->ChangeNumber())
         {
             return true;
         }
@@ -653,19 +660,19 @@ multiplayer_lobby_client::is_pending_lobby_changes()
 }
 
 bool
-multiplayer_lobby_client::is_request_in_progress()
+MultiplayerLobbyClient::IsRequestInProgress()
 {
-    return m_pendingRequestQueue.size() > 0 || m_processingQueue.size() > 0 || m_multiplayerEventQueue.size() > 0;
+    return m_pendingRequestQueue.size() > 0 || m_processingQueue.size() > 0 || m_multiplayerEventQueue.Size() > 0;
 }
 
 bool
-multiplayer_lobby_client::is_pending_lobby_local_user_changes()
+MultiplayerLobbyClient::IsPendingLobbyLocalUserChanges()
 {
-    const auto& xboxLiveContextMap = m_multiplayerLocalUserManager->get_local_user_map();
+    const auto& xboxLiveContextMap = m_multiplayerLocalUserManager->GetLocalUserMap();
     for (auto xboxLiveContext : xboxLiveContextMap)
     {
         const auto& localUser = xboxLiveContext.second;
-        if (localUser != nullptr && localUser->write_changes_to_service())
+        if (localUser != nullptr && localUser->WriteChangesToService())
         {
             return true;
         }
@@ -674,426 +681,809 @@ multiplayer_lobby_client::is_pending_lobby_local_user_changes()
     return false;
 }
 
-pplx::task<xbox_live_result<std::vector<multiplayer_event>>>
-multiplayer_lobby_client::commit_pending_lobby_changes(
+HRESULT MultiplayerLobbyClient::CommitPendingLobbyChanges(
+    _In_ const Vector<uint64_t>& xuidsInOrder,
     _In_ bool joinByHandleId,
-    _In_ xbox::services::multiplayer::multiplayer_session_reference sessionRef
-    )
+    _In_ XblMultiplayerSessionReference sessionRef,
+    _In_ MultiplayerEventQueueCallback callback
+) noexcept
 {
-    if (is_pending_lobby_local_user_changes())
+    if (IsPendingLobbyLocalUserChanges())
     {
         // All local member changes always happen on the lobby session.
-        std::shared_ptr<multiplayer_session> latestLobbySession;
-        auto lobbySession = session();
+        std::shared_ptr<XblMultiplayerSession> latestLobbySession;
+        auto lobbySession = Session();
         if (lobbySession == nullptr)
         {
-            auto primaryContext  = m_multiplayerLocalUserManager->get_primary_context();
+            auto primaryContext  = m_multiplayerLocalUserManager->GetPrimaryContext();
             if (joinByHandleId)
             {
-                latestLobbySession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id());
+                latestLobbySession = MakeShared<XblMultiplayerSession>(primaryContext->Xuid(), nullptr, nullptr);
             }
             else
             {
-                if (sessionRef.is_null())
+                if (sessionRef.Scid[0] == 0)
                 {
-                    string_t sessionName = utils::create_guid(true);
-                    sessionRef = multiplayer_session_reference(
-                        utils::try_get_override_scid(),
-                        m_lobbySessionTemplateName,
-                        sessionName
-                        );
+                    String sessionName = utils::create_guid(true);
+                    sessionRef = XblMultiplayerSessionReferenceCreate(
+                        AppConfig::Instance()->OverrideScid().data(),
+                        m_lobbySessionTemplateName.data(),
+                        sessionName.data()
+                    );
                 }
 
-                latestLobbySession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id(), sessionRef);
+                latestLobbySession = MakeShared<XblMultiplayerSession>(primaryContext->Xuid(), &sessionRef, nullptr);
             }
         }
         else
         {
-            latestLobbySession = lobbySession->_Create_deep_copy();
+            latestLobbySession = MakeShared<XblMultiplayerSession>(*lobbySession);
         }
 
         // Committing  local user changes will also update any pending lobby properties.
-        return commit_lobby_changes(latestLobbySession);
-    }
-
-    bool isGameInProgress = game_session() != nullptr;
-    return m_sessionWriter->commit_pending_changes(get_processing_queue(), multiplayer_session_type::lobby_session, isGameInProgress);
-}
-
-pplx::task<xbox_live_result<std::vector<multiplayer_event>>>
-multiplayer_lobby_client::commit_lobby_changes(
-    _In_ std::shared_ptr<multiplayer_session> lobbySessionToCommit
-    )
-{
-    std::weak_ptr<multiplayer_lobby_client> thisWeakPtr = shared_from_this();
-    auto task = pplx::create_task([thisWeakPtr, lobbySessionToCommit]()
-    {
-        std::shared_ptr<multiplayer_lobby_client> pThis(thisWeakPtr.lock());
-        RETURN_CPP_IF(pThis == nullptr, std::vector<multiplayer_event>, xbox_live_error_code::generic_error, "multiplayer_lobby_client class was destroyed.");
-
-        return pThis->commit_lobby_changes_helper(lobbySessionToCommit);
-    });
-
-    return utils::create_exception_free_task<std::vector<multiplayer_event>>(task);
-}
-
-xbox_live_result<std::vector<multiplayer_event>>
-multiplayer_lobby_client::commit_lobby_changes_helper(
-    _In_ std::shared_ptr<multiplayer_session> lobbySession
-    )
-{
-    auto sessionRefToCommit = lobbySession->session_reference();
-
-    uint32_t count = 0;
-    bool removeStaleUsers = false;
-    auto xboxLiveContextMap = m_multiplayerLocalUserManager->get_local_user_map();
-    for(auto xboxLiveContext : xboxLiveContextMap)
-    {
-        auto localUser =  xboxLiveContext.second;
-        if (localUser != nullptr && localUser->write_changes_to_service())
+        return CommitLobbyChanges(xuidsInOrder, latestLobbySession, [callback](Result<void> result)
         {
-            auto lobbySessionToCommit = std::make_shared<multiplayer_session>(localUser->xbox_user_id(), sessionRefToCommit);
-            switch (localUser->lobby_state())
+            callback(Result<MultiplayerEventQueue>{ result.Hresult(), result.ErrorMessage() });
+        });
+    }
+    else
+    {
+        bool isGameInProgress = GameSession() != nullptr;
+        return m_sessionWriter->CommitPendingChanges(GetProcessingQueue(), XblMultiplayerSessionType::LobbySession, isGameInProgress, callback);
+    }
+}
+
+HRESULT MultiplayerLobbyClient::CommitLobbyChanges(
+    _In_ const Vector<uint64_t>& xuidsInOrder,
+    _In_ std::shared_ptr<XblMultiplayerSession> lobbySessionToCommit,
+    _In_ Callback<Result<void>> callback
+) noexcept
+{
+    // For each User in xuidsInOrder, prepare an XblMultiplayerSession with their pending lobby changes
+    // and write it to MPSD. Will also update the user's multiplayer activity & set the session host token
+    // as neeeded. Consistent with 1806 XDK behavior, if any individual MPSD call fails unexpectedly,
+    // we abort the entire operation and return that result.
+    struct CommitLobbyChangesOperation : public std::enable_shared_from_this<CommitLobbyChangesOperation>
+    {
+        CommitLobbyChangesOperation(
+            std::shared_ptr<MultiplayerLobbyClient> lobbyClient,
+            const Vector<uint64_t>& xuidsInOrder,
+            std::shared_ptr<XblMultiplayerSession> lobbySessionToCommit,
+            Callback<Result<void>>&& callback
+        ) noexcept :
+            m_lobbyClient{ std::move(lobbyClient) },
+            m_lobbySessionToCommit{ std::move(lobbySessionToCommit) },
+            m_callback{ std::move(callback) }
+        {
+            auto& localUsers{ m_lobbyClient->GetLocalUserMap() };
+            if (xuidsInOrder.empty())
             {
-            case multiplayer_local_user_lobby_state::add:
+                for (auto pair : localUsers)
                 {
-                    lobbySessionToCommit->join();
-                    lobbySessionToCommit->set_current_user_secure_device_address_base64(localUser->connection_address());
-                    lobbySessionToCommit->set_session_change_subscription(multiplayer_session_change_types::everything);
-
-                    // Only set this for the first user. Could cause a race condition if joinability was changed during the second write.
-                    if (count == 0)
-                    {
-                        count++;
-                        lobbySessionToCommit->session_properties()->set_join_restriction(multiplayer_session_restriction::followed);
-                        lobbySessionToCommit->session_properties()->set_read_restriction(multiplayer_session_restriction::followed);
-
-                        string_t jsonValueStr = multiplayer_manager_utils::convert_joinability_to_string(joinability::joinable_by_friends);
-                        lobbySessionToCommit->set_session_custom_property_json(c_joinabilityPropertyName, web::json::value::string(jsonValueStr));
-                        break;
-                    }
+                    m_users.push_back(pair.second);
                 }
-
-            case multiplayer_local_user_lobby_state::join:
-                {
-                    lobbySessionToCommit->join();
-
-                    lobbySessionToCommit->set_current_user_secure_device_address_base64(localUser->connection_address());
-                    lobbySessionToCommit->set_session_change_subscription(multiplayer_session_change_types::everything);
-                    break;
-                }
-
-            case multiplayer_local_user_lobby_state::in_session:
-                {
-                    // Forces to set the current user to yourself.
-                    lobbySessionToCommit->join();
-                    break;
-                }
-            case multiplayer_local_user_lobby_state::leave:
-                {
-                    if(multiplayer_manager_utils::is_player_in_session(localUser->xbox_user_id(), lobbySession))
-                    {
-                        lobbySessionToCommit->leave();
-                    }
-                    else
-                    {
-                        // In a scenario where the user was removed before he could have been added.
-                        user_state_changed(xbox_live_error_code::logic_error, "User was removed before he could be added", multiplayer_local_user_lobby_state::add, localUser->xbox_user_id());
-                        user_state_changed(xbox_live_error_code::no_error, std::string(), multiplayer_local_user_lobby_state::leave, localUser->xbox_user_id());
-
-                        removeStaleUsers = true;
-                        localUser->set_lobby_state(multiplayer_local_user_lobby_state::remove);
-                        continue;
-                    }
-                    break;
-                }
-
-            default:
-                break;
-            }
-
-            bool isGameInProgress = game_session() != nullptr;
-
-            // Update any pending local user or lobby session properties.
-            auto processingQueue = get_processing_queue();
-            for(auto& request : processingQueue)
-            {
-                request->append_pending_changes(lobbySessionToCommit, localUser, isGameInProgress);
-            }
-
-            std::weak_ptr<multiplayer_lobby_client> thisWeakPtr = shared_from_this();
-            pplx::task<xbox_live_result<std::shared_ptr<multiplayer_session>>> writeSessionOp;
-
-            if (localUser->lobby_handle_id().empty())
-            {
-                writeSessionOp = m_sessionWriter->write_session(localUser->context(), lobbySessionToCommit, multiplayer_session_write_mode::update_or_create_new);
             }
             else
             {
-                writeSessionOp = m_sessionWriter->write_session_by_handle(localUser->context(), lobbySessionToCommit, multiplayer_session_write_mode::update_or_create_new, localUser->lobby_handle_id());
-                localUser->set_lobby_handle_id(string_t());
+                for (auto xuid : xuidsInOrder)
+                {
+                    auto iter = localUsers.find(xuid);
+                    if (iter != localUsers.end())
+                    {
+                        m_users.push_back(iter->second);
+                    }
+                }
             }
+        }
 
-            auto writeSessionTask = pplx::create_task(writeSessionOp)
-            .then([thisWeakPtr, localUser, sessionRefToCommit, processingQueue, &removeStaleUsers](xbox_live_result<std::shared_ptr<multiplayer_session>> sessionResult)
-            {
-                std::shared_ptr<multiplayer_lobby_client> pThis(thisWeakPtr.lock());
-                RETURN_CPP_IF(pThis == nullptr, std::vector<multiplayer_event>, xbox_live_error_code::generic_error, "multiplayer_lobby_client class was destroyed.");
-
-                pThis->user_state_changed(sessionResult.err(), sessionResult.err_message(), localUser->lobby_state(), localUser->xbox_user_id());
-                pThis->handle_lobby_change_events(sessionResult.err(), sessionResult.err_message(), localUser, processingQueue);
-                
-                if (sessionResult.err())
-                {
-                    pThis->join_lobby_completed(sessionResult.err(), sessionResult.err_message(), string_t());
-                    return xbox_live_result<std::vector<multiplayer_event>>(sessionResult.err(), sessionResult.err_message());
-                }
-
-                if (localUser->lobby_state() == multiplayer_local_user_lobby_state::add ||
-                    localUser->lobby_state() == multiplayer_local_user_lobby_state::join)
-                {
-                    auto updatedSession = sessionResult.payload();
-                    pThis->update_session(updatedSession);
-                    auto lobbyState = localUser->lobby_state();
-                    localUser->set_lobby_state(multiplayer_local_user_lobby_state::in_session);
-
-                    if (lobbyState == multiplayer_local_user_lobby_state::join)
-                    {
-                        pThis->handle_join_lobby_completed(sessionResult.err(), sessionResult.err_message());
-                    }
-
-                    auto setActivityResult = localUser->context()->multiplayer_service().set_activity(updatedSession->session_reference()).get();
-                    if (setActivityResult.err())
-                    {
-                        return xbox_live_result<std::vector<multiplayer_event>>(setActivityResult.err(), setActivityResult.err_message());
-                    }
-
-                    if (lobbyState == multiplayer_local_user_lobby_state::add &&
-                        pThis->should_update_host_token(localUser, updatedSession))
-                    {
-                        updatedSession->set_host_device_token(updatedSession->current_user()->device_token());
-                        auto writeHostTokenResult = pThis->m_sessionWriter->write_session(localUser->context(), updatedSession, multiplayer_session_write_mode::update_existing).get();
-                        if (writeHostTokenResult.err())
-                        {
-                            return xbox_live_result<std::vector<multiplayer_event>>(writeHostTokenResult.err(), writeHostTokenResult.err_message());
-                        }
-                    }
-                }
-                else if (localUser->lobby_state() == multiplayer_local_user_lobby_state::leave)
-                {
-                    removeStaleUsers = true;
-
-                    // If you leave the session you were advertising, you don't need to clear the activity.
-                    localUser->set_lobby_state(multiplayer_local_user_lobby_state::remove);
-                }
-
-                return xbox_live_result<std::vector<multiplayer_event>>();
-
-            }).get();  // write_session
-
-            if (writeSessionTask.err())
-            {
-                return xbox_live_result<std::vector<multiplayer_event>>(writeSessionTask.err(), writeSessionTask.err_message());
-            }
-        }   // end if
-    }   // end for
-
-    if (removeStaleUsers)
-    {
-        remove_stale_xbox_live_context_from_map();
-    }
-
-    return xbox_live_result<std::vector<multiplayer_event>>();
-}
-
-void
-multiplayer_lobby_client::remove_stale_xbox_live_context_from_map()
-{
-    auto gameClient = game_client();
-    if (gameClient != nullptr)
-    {
-        gameClient->remove_stale_users_from_remote_session();
-    }
-
-    // Remove stale context, switch primary context and re-activate multiplayer events.
-    m_multiplayerLocalUserManager->remove_stale_local_users_from_map();
-}
-
-std::map<string_t, std::shared_ptr<multiplayer_local_user>>
-multiplayer_lobby_client::get_local_user_map()
-{
-    return m_multiplayerLocalUserManager->get_local_user_map();
-}
-
-std::shared_ptr<xbox_live_context_impl>
-multiplayer_lobby_client::get_primary_context()
-{
-    return m_multiplayerLocalUserManager->get_primary_context();
-}
-
-xbox_live_result<void>
-multiplayer_lobby_client::create_game_from_lobby()
-{
-    auto lobbySession = session();
-    RETURN_CPP_IF(lobbySession == nullptr, void, xbox_live_error_code::logic_error, "No lobby session exists. Call add_local_user() to create a lobby first");
-
-    std::shared_ptr<xbox_live_context_impl> primaryContext = m_multiplayerLocalUserManager->get_primary_context();
-    RETURN_CPP_IF(primaryContext == nullptr, void, xbox_live_error_code::logic_error, "Call add_local_user() before joining.");
-
-    std::weak_ptr<multiplayer_lobby_client> thisWeakPtr = shared_from_this();
-    pplx::create_task([thisWeakPtr, lobbySession, primaryContext]()
-    {
-        std::shared_ptr<multiplayer_lobby_client> pThis(thisWeakPtr.lock());
-        RETURN_CPP_IF(pThis == nullptr, void, xbox_live_error_code::generic_error, "multiplayer_lobby_client class was destroyed.");
-
-        // Try to write transfer handle to the lobby as pending state
-        // If succeeded, then create the game session, set the transfer handle, and advertise the game session.
-        // If failed, wait for the property changed event.
-
-        int attempts = 0;
-        xbox_live_result<std::shared_ptr<multiplayer_session>> commitResult;
-        auto sessionToCommitCopy  = lobbySession->_Create_deep_copy();
-        while (attempts < MAX_CONNECTION_ATTEMPTS)
+        void Run() noexcept
         {
-            string_t jsonValue;
-            jsonValue = _T("pending~") + primaryContext->xbox_live_user_id();
-            sessionToCommitCopy->set_session_custom_property_json(multiplayer_lobby_client::c_transferHandlePropertyName, web::json::value::string(jsonValue));
+            CommitChangesForNextUser();
+        }
 
-            commitResult = pThis->m_sessionWriter->commit_synchronized_changes(sessionToCommitCopy).get();
-            auto gameClient = pThis->game_client();
-            RETURN_CPP_IF(gameClient == nullptr, void, xbox_live_error_code::generic_error, "multiplayer_game_client class was destroyed.");
-
-            if (commitResult.err() == xbox_live_error_condition::http_412_precondition_failed)
+    private:
+        void CommitChangesForNextUser() noexcept
+        {
+            if (m_users.empty())
             {
-                if (pThis->is_transfer_handle_state(_T("completed")) || pThis->is_transfer_handle_state(_T("pending")))
+                Complete(S_OK);
+            }
+            else
+            {
+                auto user{ m_users.front() };
+                m_users.pop_front();
+                CommitChangesForUser(user);
+            }
+        }
+
+        void CommitChangesForUser(
+            std::shared_ptr<MultiplayerLocalUser> user
+        ) noexcept
+        {
+            // Prepare a session with changes specific to this user.
+            // Ok to use MPSD 'unsafe' methods here since we created the session locally, thus it is the only reference
+            auto session = MakeShared<XblMultiplayerSession>(user->Xuid(), &m_lobbySessionToCommit->SessionReference(), nullptr);
+
+            switch (user->LobbyState())
+            {
+            case MultiplayerLocalUserLobbyState::Add:
+            {
+                session->Join();
+                if (!user->ConnectionAddress().empty())
                 {
-                    return gameClient->join_game_from_lobby_helper();
+                    session->CurrentUserInternalUnsafe()->SetSecureDeviceBaseAddress64(user->ConnectionAddress());
+                }
+                session->SetSessionChangeSubscription(XblMultiplayerSessionChangeTypes::Everything);
+
+                // Only set this for the first user. Could cause a race condition if XblMultiplayerJoinability was changed during the second write.
+                if (m_setJoinability)
+                {
+                    m_setJoinability = false;
+                    session->SetJoinRestriction(XblMultiplayerSessionRestriction::Followed);
+                    session->SetReadRestriction(XblMultiplayerSessionRestriction::Followed);
+
+                    String jsonValueStr = MultiplayerManagerUtils::ConvertJoinabilityToString(XblMultiplayerJoinability::JoinableByFriends);
+                    JsonDocument jsonValue;
+                    jsonValue.SetString(jsonValueStr.c_str(), jsonValue.GetAllocator());
+                    session->SetSessionCustomPropertyJson(MultiplayerLobbyClient_JoinabilityPropertyName, jsonValue);
+                }
+                break;
+            }
+            case MultiplayerLocalUserLobbyState::Join:
+            {
+                session->Join();
+
+                if (!user->ConnectionAddress().empty())
+                {
+                    session->CurrentUserInternalUnsafe()->SetSecureDeviceBaseAddress64(user->ConnectionAddress());
+                }
+                session->SetSessionChangeSubscription(XblMultiplayerSessionChangeTypes::Everything);
+                break;
+            }
+            case MultiplayerLocalUserLobbyState::InSession:
+            {
+                // Forces to set the current user to yourself.
+                session->Join();
+                break;
+            }
+            case MultiplayerLocalUserLobbyState::Leave:
+            {
+                if (XblMultiplayerSession::IsPlayerInSession(user->Xuid(), m_lobbySessionToCommit))
+                {
+                    session->Leave();
                 }
                 else
                 {
-                    attempts++;
-                    sessionToCommitCopy = commitResult.payload();
-                    std::this_thread::sleep_for(RETRY_LENGTH);
-                    continue;
+                    // In a scenario where the user was removed before he could have been added.
+                    m_lobbyClient->UserStateChanged({ xbl_error_code::logic_error, "The user was removed before they could be added" }, MultiplayerLocalUserLobbyState::Add, user->Xuid());
+                    m_lobbyClient->UserStateChanged({ xbl_error_code::no_error }, MultiplayerLocalUserLobbyState::Leave, user->Xuid());
+
+                    m_removeStaleUsers = true;
+                    user->SetLobbyState(MultiplayerLocalUserLobbyState::Remove);
+
+                    // Since the user has been removed, no work to be done for this user
+                    this->CommitChangesForNextUser();
+                    return;
                 }
+                break;
+            }
+            default:
+            {
+                break;
+            }
             }
 
-            auto sessionName = utils::create_guid(true);
-            RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(gameClient->join_game_helper(sessionName), void);
+            bool isGameInProgress = m_lobbyClient->GameSession() != nullptr;
+
+            // Update any pending local user or lobby session properties.
+            for (auto& request : m_lobbyClient->m_processingQueue)
+            {
+                request->AppendPendingChanges(session, user, isGameInProgress);
+            }
+
+            // Now write the session to MPSD
+            HRESULT hr{ S_OK };
+            if (user->LobbyHandleId().empty())
+            {
+                hr = m_lobbyClient->m_sessionWriter->WriteSession(
+                    user->Context(),
+                    session,
+                    XblMultiplayerSessionWriteMode::UpdateOrCreateNew,
+                    true,
+                    [
+                        op{ shared_from_this() },
+                        user
+                    ]
+                (Result<std::shared_ptr<XblMultiplayerSession>> result)
+                {
+                    op->HandleWriteSessionResult(user, std::move(result));
+                });
+            }
+            else
+            {
+                hr = m_lobbyClient->m_sessionWriter->WriteSessionByHandle(
+                    user->Context(),
+                    session,
+                    XblMultiplayerSessionWriteMode::UpdateOrCreateNew,
+                    user->LobbyHandleId(),
+                    true,
+                    [
+                        op{ shared_from_this() },
+                        user
+                    ]
+                (Result<std::shared_ptr<XblMultiplayerSession>> result)
+                {
+                    op->HandleWriteSessionResult(user, std::move(result));
+                });
+
+                user->SetLobbyHandleId(String{});
+            }
+            if (FAILED(hr))
+            {
+                Complete(hr);
+            }
         }
 
-        pThis->update_session(sessionToCommitCopy);
-        pThis->join_lobby_completed(commitResult.err(), commitResult.err_message(), string_t());
-        return xbox_live_result<void>(commitResult.err(), commitResult.err_message());
-    });
+        void HandleWriteSessionResult(
+            std::shared_ptr<MultiplayerLocalUser> user,
+            Result<std::shared_ptr<XblMultiplayerSession>>&& sessionResult
+        ) noexcept
+        {
+            m_lobbyClient->UserStateChanged(sessionResult, user->LobbyState(), user->Xuid());
+            m_lobbyClient->HandleLobbyChangeEvents(sessionResult, user, m_lobbyClient->m_processingQueue);
 
-    return xbox_live_result<void>();
+            if (Failed(sessionResult))
+            {
+                m_lobbyClient->JoinLobbyCompleted(sessionResult, user->Xuid());
+
+                // If we failed to join the lobby, make sure the local user context is cleaned up
+                switch (user->LobbyState())
+                {
+                case MultiplayerLocalUserLobbyState::Add:
+                case MultiplayerLocalUserLobbyState::Join:
+                {
+                    m_removeStaleUsers = true;
+                    user->SetLobbyState(MultiplayerLocalUserLobbyState::Remove);
+                }
+                default:
+                {
+                    break;
+                }
+                }
+
+                Complete(sessionResult);
+                return;
+            }
+
+            switch (user->LobbyState())
+            {
+            case MultiplayerLocalUserLobbyState::Add:
+            case MultiplayerLocalUserLobbyState::Join:
+            {
+                auto updatedSession = sessionResult.ExtractPayload();
+                m_lobbyClient->UpdateSession(updatedSession);
+                auto oldLobbyState = user->LobbyState();
+                user->SetLobbyState(MultiplayerLocalUserLobbyState::InSession);
+
+                if (oldLobbyState == MultiplayerLocalUserLobbyState::Join)
+                {
+                    m_lobbyClient->HandleJoinLobbyCompleted(sessionResult, user->Xuid());
+                }
+
+                if (oldLobbyState == MultiplayerLocalUserLobbyState::Add && m_lobbyClient->ShouldUpdateHostToken(user, updatedSession))
+                {
+                    UpdateHostDeviceToken(user, updatedSession);
+                }
+                else
+                {
+                    SetActivityForUser(user, updatedSession);
+                }
+                return;
+            }
+            case MultiplayerLocalUserLobbyState::Leave:
+            {
+                m_removeStaleUsers = true;
+
+                // If you leave the session you were advertising, you don't need to clear the activity.
+                user->SetLobbyState(MultiplayerLocalUserLobbyState::Remove);
+
+                // Intentional fallthrough
+            }
+            default:
+            {
+                // Work done for this user, continue operation
+                CommitChangesForNextUser();
+                return;
+            }
+            }
+        }
+
+        void UpdateHostDeviceToken(
+            std::shared_ptr<MultiplayerLocalUser> user,
+            std::shared_ptr<XblMultiplayerSession> session
+        ) noexcept
+        {
+            XblMultiplayerSessionReadLockGuard sessionSafe{ session };
+            session->SetHostDeviceToken(sessionSafe.CurrentUser()->DeviceToken);
+
+            auto hr = m_lobbyClient->m_sessionWriter->WriteSession(
+                user->Context(),
+                session,
+                XblMultiplayerSessionWriteMode::UpdateExisting,
+                true,
+                [
+                    op{ shared_from_this() },
+                    user
+                ]
+            (Result<std::shared_ptr<XblMultiplayerSession>> writeHostTokenResult)
+            {
+                if (Failed(writeHostTokenResult))
+                {
+                    op->Complete(writeHostTokenResult);
+                }
+                else
+                {
+                    op->SetActivityForUser(user, writeHostTokenResult.ExtractPayload());
+                }
+            });
+
+            if (FAILED(hr))
+            {
+                Complete(hr);
+            }
+        }
+
+        void SetActivityForUser(
+            std::shared_ptr<MultiplayerLocalUser> user,
+            std::shared_ptr<XblMultiplayerSession> session
+        ) noexcept
+        {
+            auto hr = user->Context()->MultiplayerService()->SetActivity(
+                session->SessionReference(),
+                AsyncContext<Result<void>>{ m_lobbyClient->m_queue,
+                [
+                    op{ shared_from_this() }
+                ]
+            (Result<void> setActivityResult)
+            {
+                if (Failed(setActivityResult))
+                {
+                    op->Complete(std::move(setActivityResult));
+                }
+                else
+                {
+                    op->CommitChangesForNextUser();
+                }
+            }
+            });
+
+            if (FAILED(hr))
+            {
+                Complete(hr);
+            }
+        }
+
+        void Complete(Result<void>&& result)
+        {
+            LOGS_DEBUG << __FUNCTION__ << ": HRESULT=" << result.Hresult() << ", ErrorMessage=" << result.ErrorMessage();
+
+            if (m_removeStaleUsers)
+            {
+                m_lobbyClient->RemoveStaleXboxLiveContextFromMap();
+            }
+            m_callback(result);
+        }
+
+        std::shared_ptr<MultiplayerLobbyClient> m_lobbyClient;
+        List<std::shared_ptr<MultiplayerLocalUser>> m_users;
+        std::shared_ptr<XblMultiplayerSession> m_lobbySessionToCommit;
+        bool m_setJoinability{ true };
+        bool m_removeStaleUsers{ false };
+        Callback<Result<void>> m_callback;
+    };
+
+    auto operation = MakeShared<CommitLobbyChangesOperation>(
+        shared_from_this(),
+        xuidsInOrder,
+        lobbySessionToCommit,
+        std::move(callback)
+    );
+
+    operation->Run();
+    return S_OK;
 }
 
 void
-multiplayer_lobby_client::advertise_game_session()
+MultiplayerLobbyClient::RemoveStaleXboxLiveContextFromMap()
 {
-    std::shared_ptr<xbox_live_context_impl> primaryContext = m_multiplayerLocalUserManager->get_primary_context();
-    if (primaryContext == nullptr || game_session() == nullptr)
+    auto gameClient = GameClient();
+    if (gameClient != nullptr)
+    {
+        gameClient->RemoveStaleUsersFromRemoteSession();
+    }
+
+    // Remove stale context, switch primary context and re-activate multiplayer events.
+    m_multiplayerLocalUserManager->RemoveStaleLocalUsersFromMap();
+}
+
+const xsapi_internal_map<uint64_t, std::shared_ptr<MultiplayerLocalUser>>&
+MultiplayerLobbyClient::GetLocalUserMap()
+{
+    return m_multiplayerLocalUserManager->GetLocalUserMap();
+}
+
+std::shared_ptr<XblContext>
+MultiplayerLobbyClient::GetPrimaryContext()
+{
+    return m_multiplayerLocalUserManager->GetPrimaryContext();
+}
+
+HRESULT MultiplayerLobbyClient::CreateGameFromLobby() noexcept
+{
+    auto lobbySession = Session();
+    RETURN_HR_IF_LOG_DEBUG(lobbySession == nullptr, E_UNEXPECTED, "No lobby session exists. Call add_local_user() to create a lobby first");
+
+    std::shared_ptr<XblContext> primaryContext = m_multiplayerLocalUserManager->GetPrimaryContext();
+    RETURN_HR_IF_LOG_DEBUG(primaryContext == nullptr, E_UNEXPECTED, "Call add_local_user() before joining.");
+
+    // Try to write transfer handle to the lobby as pending state
+    // If succeeded, then create the game session, and join it. The game session will later be advertised.
+    // If failed, complete the operation. The game session will later be joined when we get a SessionPropertyChanged event
+    struct CreateGameOperation : public std::enable_shared_from_this<CreateGameOperation>
+    {
+        CreateGameOperation(
+            std::shared_ptr<MultiplayerLobbyClient> lobbyClient,
+            std::shared_ptr<XblMultiplayerSession> lobbySession,
+            uint64_t primaryXuid
+        ) noexcept :
+            m_lobbyClient{ std::move(lobbyClient) },
+            m_sessionToCommit{ MakeShared<XblMultiplayerSession>(*lobbySession) },
+            m_primaryXuid{ primaryXuid }
+        {
+        }
+
+        void Run() noexcept
+        {
+            SetTransferHandleToPending();
+        }
+
+    private:
+        void SetTransferHandleToPending()
+        {
+            // Add transfer handle property to lobby session
+            Stringstream jsonValue;
+            jsonValue << "pending~" << m_primaryXuid;
+            JsonDocument value;
+            value.SetString(jsonValue.str().data(), value.GetAllocator());
+            m_sessionToCommit->SetSessionCustomPropertyJson(MultiplayerLobbyClient_TransferHandlePropertyName, value);
+
+            auto hr = m_lobbyClient->m_sessionWriter->CommitSynchronizedChanges(m_sessionToCommit,
+                [
+                    sharedThis{ shared_from_this() }
+                ]
+            (Result<std::shared_ptr<XblMultiplayerSession>> result)
+            {
+                sharedThis->HandleWriteSessionResult(std::move(result));
+            });
+
+            if (FAILED(hr))
+            {
+                Complete(hr);
+            }
+        }
+
+        void HandleWriteSessionResult(Result<std::shared_ptr<XblMultiplayerSession>>&& writeSessionResult)
+        {
+            auto op{ shared_from_this() };
+            auto gameClient = m_lobbyClient->GameClient();
+
+            if (gameClient == nullptr)
+            {
+                op->Complete(Result<void>{ E_FAIL, "MultiplayerGameClient destroyed" });
+            }
+            else if (writeSessionResult.Hresult() == HTTP_E_STATUS_PRECOND_FAILED)
+            {
+                if (m_lobbyClient->IsTransferHandleState("completed") || m_lobbyClient->IsTransferHandleState("pending"))
+                {
+                    // We couldn't set transfer handle, but a game session already exists. Join that instead
+                    HRESULT hr = gameClient->JoinGameFromLobbyHelper([op](Result<std::shared_ptr<XblMultiplayerSession>> result)
+                    {
+                        op->Complete(result);
+                    });
+
+                    if (FAILED(hr))
+                    {
+                        Complete(hr);
+                    }
+                }
+                else if(m_setTransferHandleAttempt++ < MAX_CONNECTION_ATTEMPTS)
+                {
+                    m_sessionToCommit = writeSessionResult.ExtractPayload();
+                    // Retry setting transfer handle after a small delay
+                    HRESULT hr = m_lobbyClient->m_queue.RunWork([op] {
+                        op->SetTransferHandleToPending();
+                    }, RETRY_DELAY_MS);
+
+                    if (FAILED(hr))
+                    {
+                        op->Complete(hr);
+                    }
+                }
+                else
+                {
+                    // We were unable to set the transfer handle after MAX_CONNECTION_ATTEMPTS
+                    m_lobbyClient->UpdateSession(m_sessionToCommit);
+
+                    Result<void> opResult{ writeSessionResult.Hresult(), "Max connection attempts exceeded" };
+                    m_lobbyClient->JoinLobbyCompleted(
+                        opResult,
+                        m_primaryXuid
+                    );
+
+                    op->Complete(std::move(opResult));
+                }
+            }
+            else 
+            {
+                // Should we not check for WriteSession failures other than 412?
+                // 1806 XDK assumes the transfer handle was successfully set, creates a game session, and joins it
+
+                auto sessionName = utils::create_guid(true);
+                HRESULT hr = gameClient->JoinGameHelper(sessionName, [op](Result<void> result)
+                {
+                    op->Complete(std::move(result));
+                });
+
+                if (FAILED(hr))
+                {
+                    op->Complete(hr);
+                }
+            }
+        }
+
+        void Complete(Result<void>&& result) noexcept
+        {
+            // This operation is strange in that nothing directly looks at the result.
+            // The result is exposed to title via events, but MPM doesn't seem to handle failures.
+            // Trying to keep the purpose of each operation as consistent with 1806 XDK as possible, so leaving as is for now.
+
+            LOGS_DEBUG << __FUNCTION__ << ": HRESULT=" << result.Hresult() << ", ErrorMessage=" << result.ErrorMessage();
+        }
+
+        std::shared_ptr<MultiplayerLobbyClient> m_lobbyClient;
+        std::shared_ptr<XblMultiplayerSession> m_sessionToCommit;
+        uint64_t const m_primaryXuid;
+        uint8_t m_setTransferHandleAttempt{ 0 };
+    };
+
+    auto operation = MakeShared<CreateGameOperation>(
+        shared_from_this(),
+        lobbySession,
+        primaryContext->Xuid()
+    );
+
+    operation->Run();
+    return S_OK;
+}
+
+void MultiplayerLobbyClient::AdvertiseGameSession() noexcept
+{
+    std::shared_ptr<XblContext> primaryContext = m_multiplayerLocalUserManager->GetPrimaryContext();
+    if (primaryContext == nullptr || GameSession() == nullptr)
     {
         return;
     }
 
-    std::weak_ptr<multiplayer_lobby_client> thisWeakPtr = shared_from_this();
-    pplx::create_task([thisWeakPtr, primaryContext]()
+    // This operation performs several sub-steps as follows:
+    // 1. If a pending commit is currently in progress, wait until it is completed
+    // 2. Establish a lobby session & commit any pending lobby changes
+    // 3. Create an MPSD transfer handle from the lobby session to the game session
+    // 4. Update the lobby session properties (custom transfer handle & joinability)
+    struct AdvertiseGameSessionOperation : public std::enable_shared_from_this<AdvertiseGameSessionOperation>
     {
-        std::shared_ptr<multiplayer_lobby_client> pThis(thisWeakPtr.lock());
-        if (pThis == nullptr) return;
-
-        bool expected = false;
-        while (!pThis->m_pendingCommitInProgress.compare_exchange_strong(expected, true))
+        AdvertiseGameSessionOperation(
+            std::shared_ptr<MultiplayerLobbyClient> lobbyClient,
+            std::shared_ptr<XblContext> primaryContext
+        ) noexcept
+            : m_lobbyClient{ std::move(lobbyClient) },
+            m_primaryContext{ std::move(primaryContext) }
         {
-            expected = false;
-            utils::sleep(0);
         }
 
-        auto lobbySession = pThis->session();
-        if (pThis->game_session() == nullptr) return;
-
-        // If the advertising fails, we simply eat the error as it isn't actionable for the title.
-        if (lobbySession == nullptr)
+        void Run() noexcept
         {
-            if (pThis->m_multiplayerLocalUserManager->get_local_user_map().size() == 0)
+            bool expected{ false };
+            if (!m_lobbyClient->m_pendingCommitInProgress.compare_exchange_strong(expected, true))
             {
-                return;
-            }
+                // Wait until there isn't commit in progress before continuing.
+                // Reschedule op with no delay (1806 XDK behavior)
+                HRESULT hr = m_lobbyClient->m_queue.RunWork([op{ shared_from_this() }]
+                    {
+                        op->Run();
+                    });
 
-            pThis->m_multiplayerLocalUserManager->change_all_local_user_lobby_state(multiplayer_local_user_lobby_state::add);
-            auto joinLobbyResult = pThis->commit_pending_lobby_changes(false).get();
-
-            pThis->m_pendingCommitInProgress = false;
-            pThis->join_lobby_completed(joinLobbyResult.err(), joinLobbyResult.err_message(), string_t());
-            if (joinLobbyResult.err())
-            {
-                return;
-            }
-
-            lobbySession = pThis->session();
-        }
-        else
-        {
-            pThis->m_pendingCommitInProgress = false;
-        }
-
-        auto lobbyProperties = lobbySession->session_properties()->session_custom_properties_json();
-        if (!lobbyProperties.has_field(c_transferHandlePropertyName) ||
-            (pThis->is_transfer_handle_state(_T("pending")) && pThis->get_transfer_handle() == primaryContext->xbox_live_user_id()))
-        {
-            auto gameSession = pThis->game_session();
-            if (gameSession == nullptr) return;
-
-            auto result = primaryContext->multiplayer_service().set_transfer_handle(gameSession->session_reference(), lobbySession->session_reference()).get();
-            if (!result.err())
-            {
-                auto handleId = result.payload();
-                auto lobbySessionCopy = lobbySession->_Create_deep_copy();
-
-                if (pThis->m_joinability == joinability::disable_while_game_in_progress)
+                if (FAILED(hr))
                 {
-                    lobbySessionCopy->set_closed(true);
+                    Complete(hr);
+                }
+            }
+            else
+            {
+                EstablishLobbySession();
+            }
+        }
+
+    private:
+        void EstablishLobbySession() noexcept
+        {
+            auto lobbySession{ m_lobbyClient->Session() };
+            if (!lobbySession)
+            {
+                if (m_lobbyClient->m_multiplayerLocalUserManager->GetLocalUserMap().empty())
+                {
+                    // There are no remaining local users. Complete the operation
+                    return Complete(S_OK);
                 }
 
-                stringstream_t jsonHandleValue;
-                jsonHandleValue << "completed~";
-                jsonHandleValue << handleId;
-                lobbySessionCopy->set_session_custom_property_json(c_transferHandlePropertyName, web::json::value::string(jsonHandleValue.str()));
-                pThis->m_sessionWriter->write_session(primaryContext, lobbySessionCopy, multiplayer_session_write_mode::update_existing);
+                m_lobbyClient->m_multiplayerLocalUserManager->ChangeAllLocalUserLobbyState(MultiplayerLocalUserLobbyState::Add);
+                auto hr = m_lobbyClient->CommitPendingLobbyChanges(Vector<uint64_t>{}, false, XblMultiplayerSessionReference{},
+                    [
+                        op{ shared_from_this() }
+                    ]
+                (Result<MultiplayerEventQueue> joinLobbyResult)
+                {
+                    op->m_lobbyClient->m_pendingCommitInProgress = false;
+                    op->m_lobbyClient->JoinLobbyCompleted(joinLobbyResult, op->m_primaryContext->Xuid());
+                    if (Failed(joinLobbyResult))
+                    {
+                        op->Complete(joinLobbyResult);
+                    }
+                    else
+                    {
+                        op->CreateTransferHandle(op->m_lobbyClient->Session());
+                    }
+                });
+
+                if (FAILED(hr))
+                {
+                    Complete(hr);
+                }
             }
-            else if (result.err() == xbox_live_error_code::http_status_403_forbidden)
+            else
             {
-                // By MPSD design, if the game session doesn't exist on transfer handle creation, it throws a 403.
-                pThis->clear_game_session_from_lobby();
+                m_lobbyClient->m_pendingCommitInProgress = false;
+                CreateTransferHandle(lobbySession);
             }
         }
-    });
+
+        void CreateTransferHandle(std::shared_ptr<XblMultiplayerSession> lobbySession) noexcept
+        {
+            rapidjson::Document lobbyProperties;
+            {
+                XblMultiplayerSessionReadLockGuard lobbySessionSafe(lobbySession);
+                lobbyProperties.Parse(lobbySessionSafe.SessionProperties().SessionCustomPropertiesJson);
+            }
+
+            if (!lobbyProperties.HasMember(MultiplayerLobbyClient_TransferHandlePropertyName) ||
+                (m_lobbyClient->IsTransferHandleState("pending") && m_lobbyClient->GetTransferHandle() == utils::uint64_to_internal_string(m_primaryContext->Xuid())))
+            {
+                auto gameSession{ m_lobbyClient->GameSession() };
+                if (!gameSession)
+                {
+                    return Complete(Result<void>{E_ABORT, "GameSession null"});
+                }
+
+                auto hr = m_primaryContext->MultiplayerService()->SetTransferHandle(
+                    gameSession->SessionReference(),
+                    lobbySession->SessionReference(),
+                    AsyncContext<Result<String>>{ m_lobbyClient->m_queue,
+                    [
+                        op{ shared_from_this() },
+                        lobbySession
+                    ]
+                (Result<String> result)
+                {
+                    if (Succeeded(result))
+                    {
+                        op->UpdateLobbySession(MakeShared<XblMultiplayerSession>(*lobbySession), result.ExtractPayload());
+                    }
+                    else
+                    {
+                        if (result.Hresult() == HTTP_E_STATUS_FORBIDDEN)
+                        {
+                            // By MPSD design, if the game session doesn't exist on transfer handle creation, it throws a 403.
+                            op->m_lobbyClient->ClearGameSessionFromLobby();
+                        }
+                        op->Complete(result);
+                    }
+                }
+                });
+
+                if (FAILED(hr))
+                {
+                    return Complete(hr);
+                }
+            }
+        }
+
+        void UpdateLobbySession(
+            std::shared_ptr<XblMultiplayerSession> lobbySession,
+            String&& transferHandle
+        ) noexcept
+        {
+            if (m_lobbyClient->m_joinability == XblMultiplayerJoinability::DisableWhileGameInProgress)
+            {
+                lobbySession->SetClosed(true);
+            }
+
+            Stringstream jsonHandleValue;
+            jsonHandleValue << "completed~" << transferHandle;
+
+            JsonDocument jsonValue;
+            jsonValue.SetString(jsonHandleValue.str().data(), jsonValue.GetAllocator());
+            lobbySession->SetSessionCustomPropertyJson(
+                MultiplayerLobbyClient_TransferHandlePropertyName,
+                jsonValue
+            );
+
+            HRESULT hr = m_lobbyClient->m_sessionWriter->WriteSession(
+                m_primaryContext,
+                lobbySession,
+                XblMultiplayerSessionWriteMode::UpdateExisting,
+                true,
+                [
+                    op{ shared_from_this() }
+                ]
+            (Result<std::shared_ptr<XblMultiplayerSession>> result)
+            {
+                op->Complete(result);
+            });
+
+            if (FAILED(hr))
+            {
+                Complete(hr);
+            }
+        }
+
+        void Complete(Result<void>&& result)
+        {
+            // This operation is strange in that nothing directly looks at the result.
+            // The result is exposed to title via events, but MPM doesn't seem to handle failures.
+            // Trying to keep the purpose of each operation as consistent with 1806 XDK as possible, so leaving as is for now.
+
+            LOGS_DEBUG << __FUNCTION__ << ": HRESULT=" << result.Hresult() << ", ErrorMessage=" << result.ErrorMessage();
+        }
+
+        std::shared_ptr<MultiplayerLobbyClient> m_lobbyClient;
+        std::shared_ptr<XblContext> m_primaryContext;
+    };
+
+    auto operation = MakeShared<AdvertiseGameSessionOperation>(shared_from_this(), primaryContext);
+    operation->Run();
 }
 
 void
-multiplayer_lobby_client::stop_advertising_game_session(
-    _In_ xbox_live_result<std::shared_ptr<multiplayer_session>> result
+MultiplayerLobbyClient::StopAdvertisingGameSession(
+    _In_ Result<std::shared_ptr<XblMultiplayerSession>> result
     )
 {
     bool bClearGameSession = false;
-    auto lobbySession = session();
-    if (!result.err() && result.payload() == nullptr)
+    auto lobbySession = Session();
+    XblMultiplayerSessionReadLockGuard lobbySessionSafe(lobbySession);
+    if (SUCCEEDED(result.Hresult()) && result.Payload() == nullptr)
     {
         // When you are the last person to leave the session (handling err 204).
         bClearGameSession = true;
     }
-    else if (result.payload() != nullptr && lobbySession != nullptr)
+    else if (result.Payload() != nullptr && lobbySession != nullptr)
     {
-        auto latestGameSession = result.payload();
+        auto latestGameSession = result.Payload();
 
         bool found = false;
-        auto members = lobbySession->members();
+        auto members = lobbySessionSafe.Members();
         for (const auto& member : members)
         {
-            if (multiplayer_manager_utils::is_player_in_session(member->xbox_user_id(), latestGameSession))
+            if (XblMultiplayerSession::IsPlayerInSession(member.Xuid, latestGameSession))
             {
                 found = true;
                 break;
@@ -1108,48 +1498,51 @@ multiplayer_lobby_client::stop_advertising_game_session(
 
     if (bClearGameSession)
     {
-        clear_game_session_from_lobby();
+        ClearGameSessionFromLobby();
     }
 }
 
 void
-multiplayer_lobby_client::clear_game_session_from_lobby()
+MultiplayerLobbyClient::ClearGameSessionFromLobby()
 {
-    auto lobbySession = session();
+    auto lobbySession = Session();
     if (lobbySession != nullptr)
     {
-        auto lobbySessionCopy = lobbySession->_Create_deep_copy();
+        auto lobbySessionCopy = MakeShared<XblMultiplayerSession>(*lobbySession);
 
-        if (m_joinability == joinability::disable_while_game_in_progress)
+        if (m_joinability == XblMultiplayerJoinability::DisableWhileGameInProgress)
         {
             // Re-open the lobby to be joinable when leaving the game session.
-            lobbySessionCopy->set_closed(false);
+            lobbySessionCopy->SetClosed(false);
         }
 
-        lobbySessionCopy->delete_session_custom_property_json(c_transferHandlePropertyName);
-        m_sessionWriter->write_session(m_multiplayerLocalUserManager->get_primary_context(), lobbySessionCopy, multiplayer_session_write_mode::update_existing);
+        lobbySessionCopy->DeleteSessionCustomPropertyJson(MultiplayerLobbyClient_TransferHandlePropertyName);
+        m_sessionWriter->WriteSession(m_multiplayerLocalUserManager->GetPrimaryContext(), lobbySessionCopy, XblMultiplayerSessionWriteMode::UpdateExisting, true, nullptr);
     }
 }
 
 bool
-multiplayer_lobby_client::is_transfer_handle_state(
-    _In_ const string_t& state
+MultiplayerLobbyClient::IsTransferHandleState(
+    _In_ const xsapi_internal_string& state
     )
 {
-    auto lobbySession = session();
+    auto lobbySession = Session();
     if (lobbySession == nullptr)
     {
         return false;
     }
 
-    auto lobbyProperties = lobbySession->session_properties()->session_custom_properties_json();
-    if (lobbyProperties.has_field(c_transferHandlePropertyName))
+    XblMultiplayerSessionReadLockGuard lobbySessionSafe(lobbySession);
+    auto lobbyProperties = ParseJson(lobbySessionSafe.SessionProperties().SessionCustomPropertiesJson);
+    auto propertyName = utils::string_t_from_internal_string(MultiplayerLobbyClient_TransferHandlePropertyName);
+
+    if (lobbyProperties.has_field(propertyName))
     {
-        auto transferHandleProp = lobbyProperties.at(c_transferHandlePropertyName).as_string();
-        std::vector<string_t> transferHandleSplit = utils::string_split(transferHandleProp, '~');
+        auto transferHandleProp = utils::internal_string_from_string_t(lobbyProperties.at(propertyName).as_string());
+        xsapi_internal_vector<xsapi_internal_string> transferHandleSplit = utils::string_split(transferHandleProp, '~');
 
         if (transferHandleSplit.size() > 0 &&
-            utils::str_icmp(transferHandleSplit[0], state) == 0)
+            utils::str_icmp_internal(transferHandleSplit[0], state) == 0)
         {
             return true;
         }
@@ -1158,20 +1551,23 @@ multiplayer_lobby_client::is_transfer_handle_state(
     return false;
 }
 
-string_t
-multiplayer_lobby_client::get_transfer_handle()
+xsapi_internal_string
+MultiplayerLobbyClient::GetTransferHandle()
 {
-    auto lobbySession = session();
+    auto lobbySession = Session();
     if (lobbySession == nullptr)
     {
-        return string_t();
+        return xsapi_internal_string();
     }
 
-    auto lobbyProperties = lobbySession->session_properties()->session_custom_properties_json();
-    if (lobbyProperties.has_field(c_transferHandlePropertyName))
+    XblMultiplayerSessionReadLockGuard lobbySessionSafe(lobbySession);
+    auto lobbyProperties = ParseJson(lobbySessionSafe.SessionProperties().SessionCustomPropertiesJson);
+    auto propertyName = utils::string_t_from_internal_string(MultiplayerLobbyClient_TransferHandlePropertyName);
+
+    if (lobbyProperties.has_field(propertyName))
     {
-        auto transferHandleProp = lobbyProperties.at(c_transferHandlePropertyName).as_string();
-        std::vector<string_t> transferHandleSplit = utils::string_split(transferHandleProp, '~');
+        auto transferHandleProp = utils::internal_string_from_string_t(lobbyProperties.at(propertyName).as_string());
+        xsapi_internal_vector<xsapi_internal_string> transferHandleSplit = utils::string_split(transferHandleProp, '~');
 
         if (transferHandleSplit.size() == 2)
         {
@@ -1179,34 +1575,34 @@ multiplayer_lobby_client::get_transfer_handle()
         }
     }
 
-    return string_t();
+    return xsapi_internal_string();
 }
 void
-multiplayer_lobby_client::leave_remote_session(
-    _In_ std::shared_ptr<multiplayer_session> session
+MultiplayerLobbyClient::LeaveRemoteSession(
+    _In_ std::shared_ptr<XblMultiplayerSession> session
     )
 {
-    m_sessionWriter->leave_remote_session(session);
+    m_sessionWriter->LeaveRemoteSession(session, nullptr);
 }
 
 bool
-multiplayer_lobby_client::should_update_host_token(
-    _In_ std::shared_ptr<multiplayer_local_user> localUser,
-    _In_ std::shared_ptr<multiplayer_session> session
+MultiplayerLobbyClient::ShouldUpdateHostToken(
+    _In_ std::shared_ptr<MultiplayerLocalUser> localUser,
+    _In_ std::shared_ptr<XblMultiplayerSession> session
     )
 {
-    if(multiplayer_manager_utils::host_member(session) != nullptr)
+    if(XblMultiplayerSession::HostMember(session) != nullptr)
     {
         return false;
     }
 
-    if(!localUser->is_primary_xbox_live_context())
+    if(!localUser->IsPrimaryXboxLiveContext())
     {
         return false;
     }
 
     // If the local user is already the host, skip it.
-    if (multiplayer_manager_utils::is_host(localUser->xbox_user_id(), session))
+    if (XblMultiplayerSession::IsHost(utils::uint64_to_internal_string(localUser->Xuid()), session))
     {
         return false;
     }
@@ -1215,32 +1611,31 @@ multiplayer_lobby_client::should_update_host_token(
 }
 
 void
-multiplayer_lobby_client::user_state_changed(
-    _In_ const std::error_code& errorCode,
-    _In_ const std::string& errorMessage,
-    _In_ multiplayer_local_user_lobby_state localUserLobbyState,
-    _In_ string_t xboxUserId
+MultiplayerLobbyClient::UserStateChanged(
+    _In_ Result<void> error,
+    _In_ MultiplayerLocalUserLobbyState localUserLobbyState,
+    _In_ uint64_t xboxUserId
     )
 {
-    if (localUserLobbyState != multiplayer_local_user_lobby_state::add &&
-        localUserLobbyState != multiplayer_local_user_lobby_state::leave)
+    if (localUserLobbyState != MultiplayerLocalUserLobbyState::Add &&
+        localUserLobbyState != MultiplayerLocalUserLobbyState::Leave)
     {
         return;
     }
 
-    std::shared_ptr<multiplayer_event_args> eventArgs;
-    multiplayer_event_type eventType = multiplayer_event_type::user_added;
-    if (localUserLobbyState == multiplayer_local_user_lobby_state::add)
+    std::shared_ptr<XblMultiplayerEventArgs> eventArgs;
+    XblMultiplayerEventType eventType = XblMultiplayerEventType::UserAdded;
+    if (localUserLobbyState == MultiplayerLocalUserLobbyState::Add)
     {
-        eventType = multiplayer_event_type::user_added;
-        std::shared_ptr<user_added_event_args> userAddedEventArgs = std::make_shared<user_added_event_args>(xboxUserId);
-        eventArgs = std::dynamic_pointer_cast<user_added_event_args>(userAddedEventArgs);
+        eventType = XblMultiplayerEventType::UserAdded;
+        std::shared_ptr<UserAddedEventArgs> userAddedEventArgs = MakeShared<UserAddedEventArgs>(xboxUserId);
+        eventArgs = std::dynamic_pointer_cast<UserAddedEventArgs>(userAddedEventArgs);
     }
-    else if (localUserLobbyState == multiplayer_local_user_lobby_state::leave)
+    else if (localUserLobbyState == MultiplayerLocalUserLobbyState::Leave)
     {
-        eventType = multiplayer_event_type::user_removed;
-        std::shared_ptr<user_removed_event_args> userRemovedEventArgs = std::make_shared<user_removed_event_args>(xboxUserId);
-        eventArgs = std::dynamic_pointer_cast<user_removed_event_args>(userRemovedEventArgs);
+        eventType = XblMultiplayerEventType::UserRemoved;
+        std::shared_ptr<UserRemovedEventArgs> userRemovedEventArgs = MakeShared<UserRemovedEventArgs>(xboxUserId);
+        eventArgs = std::dynamic_pointer_cast<UserRemovedEventArgs>(userRemovedEventArgs);
     }
     else
     {
@@ -1248,109 +1643,102 @@ multiplayer_lobby_client::user_state_changed(
         return;
     }
 
-    add_multiplayer_event_helper(errorCode, errorMessage, eventType, eventArgs);
+    AddEvent(eventType, eventArgs, error);
 }
 
 void
-multiplayer_lobby_client::handle_lobby_change_events(
-    _In_ const std::error_code& errorCode,
-    _In_ const std::string& errorMessage,
-    _In_ std::shared_ptr<multiplayer_local_user> localUser,
-    _In_ const std::vector<std::shared_ptr<multiplayer_client_pending_request>>& processingQueue
+MultiplayerLobbyClient::HandleLobbyChangeEvents(
+    _In_ Result<void> error,
+    _In_ std::shared_ptr<MultiplayerLocalUser> localUser,
+    _In_ const xsapi_internal_vector<std::shared_ptr<MultiplayerClientPendingRequest>>& processingQueue
     )
 {
-    std::map<string_t, web::json::value> localUserMap;
-    string_t localUserConnectionAddress;
+    xsapi_internal_map<xsapi_internal_string, JsonDocument> localUsersMap;
+    xsapi_internal_string localUserSecureDeviceAddress;
     for (auto& request : processingQueue)
     {
         // Handle local user change events
-        if (localUser != nullptr && request->local_user() != nullptr &&
-            utils::str_icmp(localUser->xbox_user_id(), request->local_user()->xbox_user_id()) == 0)
+        if (localUser != nullptr && request->LocalUser() != nullptr && localUser->Xuid() == request->LocalUser()->Xuid())
         {
-            if (!request->local_user_connection_address().empty())
+            if (!request->LocalUserSecureDeivceAddress().empty())
             {
-                add_multiplayer_event_helper(
-                    errorCode,
-                    errorMessage,
-                    multiplayer_event_type::local_member_connection_address_write_completed,
-                    std::make_shared<multiplayer_event_args>(),
-                    request->context()
-                    );
+                AddEvent(
+                    XblMultiplayerEventType::LocalMemberConnectionAddressWriteCompleted,
+                    nullptr,
+                    error,
+                    request->Context()
+                );
 
-                localUserConnectionAddress = request->local_user_connection_address();
+                localUserSecureDeviceAddress = request->LocalUserSecureDeivceAddress();
             }
 
             // Fire events for each of the properties
-            for (const auto& prop : request->local_user_properties())
+            for (const auto& prop : request->LocalUserProperties())
             {
-                add_multiplayer_event_helper(
-                    errorCode,
-                    errorMessage,
-                    multiplayer_event_type::local_member_property_write_completed,
-                    std::make_shared<multiplayer_event_args>(),
-                    request->context()
-                    );
+                AddEvent(
+                    XblMultiplayerEventType::LocalMemberPropertyWriteCompleted,
+                    nullptr,
+                    error,
+                    request->Context()
+                );
 
-                localUserMap[prop.first] = prop.second;
+                localUsersMap[prop.first] = JsonDocument();
+                JsonUtils::CopyFrom(localUsersMap[prop.first], prop.second);
             }
         }
     }
 
     // Handle lobby change events (session properties, etc)
-    auto eventQueue = m_sessionWriter->handle_events(processingQueue, errorCode, errorMessage, multiplayer_session_type::lobby_session);
-    if (eventQueue.size() > 0)
+    auto eventQueue = m_sessionWriter->HandleEvents(processingQueue, error, XblMultiplayerSessionType::LobbySession);
+    if (eventQueue.Size() > 0)
     {
         std::lock_guard<std::mutex> lock(m_clientRequestLock);
         for (auto& ev : eventQueue)
         {
-            m_multiplayerEventQueue.push_back(ev);
+            m_multiplayerEventQueue.AddEvent(ev);
         }
     }
 
-    if (localUserMap.size() != 0 || !localUserConnectionAddress.empty())
+    if (localUsersMap.size() != 0 || !localUserSecureDeviceAddress.empty())
     {
         // write member properties to the game session.
-        auto gameClient = game_client();
+        auto gameClient = GameClient();
         if (gameClient != nullptr)
         {
-            gameClient->set_local_member_properties_to_remote_session(localUser, localUserMap, localUserConnectionAddress);
+            gameClient->SetLocalMemberPropertiesToRemoteSession(localUser, localUsersMap, localUserSecureDeviceAddress);
         }
     }
 }
 
 void
-multiplayer_lobby_client::handle_join_lobby_completed(
-    _In_ const std::error_code& errorCode,
-    _In_ const std::string& errorMessage
+MultiplayerLobbyClient::HandleJoinLobbyCompleted(
+    _In_ Result<void> error,
+    _In_ uint64_t joinedXuid
     )
 {
-    join_lobby_completed(errorCode, errorMessage, string_t());
-    if (!errorCode)
+    JoinLobbyCompleted(error, joinedXuid);
+    if (FAILED(error.Hresult()))
     {
         // If joining the lobby succeeded, check if it has a game session associated with it to join.
 
-        auto gameClient = game_client();
-        if (gameClient == nullptr) return;
-
-        auto lobbySession = session();
-
-        // If its a team session and it already has a GameSession ready to join
-        if (lobbySession->session_constants()->capabilities_team() &&
-            !lobbySession->tournaments_server().next_game_session_reference().is_null())
+        auto gameClient = GameClient();
+        if (gameClient == nullptr)
         {
-            handle_game_session_ready_event(lobbySession);
             return;
         }
 
+        auto lobbySession = Session();
+
         // Join game via the transfer handle.
-        auto lobbyProperties = lobbySession->session_properties()->session_custom_properties_json();
+        XblMultiplayerSessionReadLockGuard lobbySessionSafe(lobbySession);
+        auto lobbyProperties = ParseJson(lobbySessionSafe.SessionProperties().SessionCustomPropertiesJson);
         if (lobbyProperties.size() > 0)
         {
-            string_t transferHandle;
+            xsapi_internal_string transferHandle;
 
-            if (is_transfer_handle_state(_T("completed")))
+            if (IsTransferHandleState("completed"))
             {
-                transferHandle = get_transfer_handle();
+                transferHandle = GetTransferHandle();
             }
             else
             {
@@ -1358,75 +1746,44 @@ multiplayer_lobby_client::handle_join_lobby_completed(
                 return;
             }
 
-            gameClient->join_game_by_handle(transferHandle, false);
+            gameClient->JoinGameByHandle(transferHandle, false, nullptr);
         }
     }
 }
 
 void
-multiplayer_lobby_client::join_lobby_completed(
-    _In_ const std::error_code& errorCode,
-    _In_ const std::string& errorMessage,
-    _In_ const string_t& invitedXboxUserId
+MultiplayerLobbyClient::JoinLobbyCompleted(
+    _In_ Result<void> error,
+    _In_ uint64_t invitedXboxUserId
     )
 {
-    std::shared_ptr<join_lobby_completed_event_args> joinLobbyEventArgs = std::make_shared<join_lobby_completed_event_args>(
+    std::shared_ptr<JoinLobbyCompletedEventArgs> joinLobbyEventArgs = std::make_shared<JoinLobbyCompletedEventArgs>(
         invitedXboxUserId
         );
 
-    add_multiplayer_event_helper(
-        errorCode,
-        errorMessage,
-        multiplayer_event_type::join_lobby_completed,
-        std::dynamic_pointer_cast<join_lobby_completed_event_args>(joinLobbyEventArgs)
-        );
-}
-
-void
-multiplayer_lobby_client::handle_game_session_ready_event(
-    _In_ const  std::shared_ptr<xbox::services::multiplayer::multiplayer_session>& lobbySession
-    )
-{
-    auto lobbyTournamentsServer = lobbySession->tournaments_server();
-    auto localStartTime = utility::datetime::utc_now() + utility::datetime::from_seconds(lobbyTournamentsServer.next_game_start_time() - lobbySession->date_of_session());
-    auto gameSessionReadyEventArgs = std::make_shared<tournament_game_session_ready_event_args>(
-        localStartTime
-        );
-
-    add_multiplayer_event_helper(
-        xbox_live_error_code::no_error,
-        std::string(),
-        multiplayer_event_type::tournament_game_session_ready,
-        gameSessionReadyEventArgs
+    AddEvent(
+        XblMultiplayerEventType::JoinLobbyCompleted,
+        std::dynamic_pointer_cast<JoinLobbyCompletedEventArgs>(joinLobbyEventArgs),
+        error
     );
-
-    auto gameClient = game_client();
-    if (gameClient != nullptr)
-    {
-        gameClient->join_game_by_session_reference(lobbyTournamentsServer.next_game_session_reference());
-    }
 }
 
-void
-multiplayer_lobby_client::add_multiplayer_event_helper(
-    _In_ const std::error_code& errorCode,
-    _In_ const std::string& errorMessage,
-    _In_ multiplayer_event_type eventType,
-    _In_ std::shared_ptr<multiplayer_event_args> eventArgs,
+// TODO remove this and add locking to event queue class
+void 
+MultiplayerLobbyClient::AddEvent(
+    _In_ XblMultiplayerEventType eventType,
+    _In_opt_ std::shared_ptr<XblMultiplayerEventArgs> eventArgs,
+    _In_opt_ Result<void> error,
     _In_opt_ context_t context
-    )
+)
 {
     std::lock_guard<std::mutex> lock(m_clientRequestLock);
-
-    multiplayer_event multiplayerEvent(
-        errorCode,
-        errorMessage,
-        eventType,
+    m_multiplayerEventQueue.AddEvent(eventType,
+        XblMultiplayerSessionType::LobbySession,
         eventArgs,
-        multiplayer_session_type::lobby_session,
+        error,
         context
-        );
-
-    m_multiplayerEventQueue.push_back(multiplayerEvent);
+    );
 }
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_END

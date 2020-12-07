@@ -2,31 +2,20 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"jasonsa"
-#define TEST_CLASS_AREA L"SocialManager"
 #include "UnitTestIncludes.h"
-#include "RtaTestHelper.h"
-
+#include "xsapi-c/social_manager_c.h"
+#include "xsapi-cpp/social_manager.h"
 #include "social_manager_internal.h"
-#include "xsapi/services.h"
-#include "SocialManager_WinRT.h"
-#include "SocialUserGroupLoadedEventArgs_WinRT.h"
-#include "MockSocialManager.h"
-#include "SocialManagerHelper.h"
 
-using namespace xbox::services;
 using namespace xbox::services::presence;
 using namespace xbox::services::real_time_activity;
 using namespace xbox::services::social::manager;
-using namespace Microsoft::Xbox::Services::Social::Manager;
-using namespace Microsoft::Xbox::Services::Presence;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-const web::json::value defaultPeoplehubTemplate =
-web::json::value::parse(LR"(
+const char defaultPeoplehubTemplate[] = R"(
 {
-    "xuid": "10000",
+    "xuid": "1",
     "isFavorite": false,
     "isFollowingCaller": true,
     "isFollowedByCaller": true,
@@ -36,9 +25,11 @@ web::json::value::parse(LR"(
     "displayPicRaw": "http://images-eds.xboxlive.com/image?url=mHGRD8KXEf2sp2LC58XhBQKNl2IWRp.J.q8mSURKUUeiPPf0Y7Kl7zLN7rafayiPptVaX_XIUmNOPotNmNubbx4bHmf6It7Oj1ChU5UAo9k-&background=0xababab&mode=Padding&format=png",
     "useAvatar": false,
     "gamertag": "TestGamerTag",
+    "modernGamertag": "TestGamerTag",
+    "modernGamertagSuffix": "",
+    "uniqueModernGamertag": "TestGamerTag",
     "gamerScore": "9001",
-    "presenceState": "Offline",
-    "presenceText": "Offline",
+    "presenceState": "Online",
     "presenceDevices": null,
     "isBroadcasting": false,
     "titleHistory": 
@@ -65,49 +56,14 @@ web::json::value::parse(LR"(
         "IsBroadcasting": false,
         "Device": "PC",
         "State": "Active",
-        "TitleId": "1234"
+        "TitleId": "1234",
+        "PresenceText": "Home"
     }]
     }
-)");
+)";
 
-const web::json::value peoplehubOnlinePresenceTemplate =
-web::json::value::parse(LR"(
+const char onlinePresenceResponseTemplate[] = R"(
 {
-    "xuid": "2533274810838148",
-    "state": "Online",
-    "devices": [
-        {
-            "type": "PC",
-            "titles": [
-                {
-                    "id": "1234",
-                    "name": "awesomeGame",
-                    "lastModified": "2013-02-01T00:00:00Z",
-                    "state": "active",
-                    "placement": "Full",
-                    "activity": {
-                        "richPresence": "Home"
-                    }
-                }
-            ]
-        }
-    ]
-}
-)");
-
-const web::json::value peoplehubOfflinePresenceTemplate =
-web::json::value::parse(LR"(
-{
-    "xuid": "2533274810838148",
-    "state": "Offline",
-    "devices": []
-}
-)");
-
-
-const web::json::value devicePresenceResponse =
-web::json::value::parse(LR"(
-[{
     "xuid": "1",
     "state": "Online",
     "devices": [
@@ -127,2495 +83,1948 @@ web::json::value::parse(LR"(
             ]
         }
     ]
-}])");
+})";
 
-const std::wstring presenceOnlineRtaMessageSubscribeComplete = LR"({"xuid":"2814613569642996","state":"Online","devices":[{"type":"MCapensis","titles":[{"id":"1234","name":"Default Title","placement":"Full","state":"Active", "activity": {"richPresence":"Home"}, "lastModified":"2016-09-30T00:15:35.5994615Z"}]}]})";
-const std::wstring presenceOfflineRtaMessageSubscribeComplete = LR"({"xuid":"2814613569642996","state":"Offline"})";
-
-const std::wstring devicePresenceRtaMessageEvent = LR"(PC:false)";
-const std::wstring devicePresenceRtaMessagePCEvent = LR"(PC:true)";
-const std::wstring devicePresenceRtaMessageXboxEvent = LR"(MCapensis:true)";
-const std::wstring devicePresenceOfflineRtaMessageXboxEvent = LR"(MCapensis:false)";
-
-const std::wstring titlePresenceMessage = LR"(ended)";
-
-const std::wstring socialRelationshipAddedMessage = LR"({"NotificationType":"Added","Xuids":["10000"]})";
-const std::wstring socialRelationshipRemovedMessage = LR"({"NotificationType":"Removed","Xuids":["1"]})";
-const std::wstring socialRelationshipChangedMessage = LR"({"NotificationType":"Changed","Xuids":["1"]})";
-
-const std::wstring errorString = LR"(3)";
-
-const string_t rtaResyncMessage = LR"(
-    [4]
+const char offlinePresenceResponseTemplate[] = R"(
+{
+    "xuid": "1",
+    "state": "Offline",
+    "devices": []
+}
 )";
 
-const uint32_t m_numUsers = 100;
-struct SocialManagerInitializationStruct
-{
-    web::json::value initialPeoplehubJson;
-    SocialManager^ socialManager;
-    std::vector<SocialEvent^> socialEvents;
-};
+const char* presenceOnlineRtaMessageSubscribeComplete = R"({"xuid":"2814613569642996","state":"Online","devices":[{"type":"MCapensis","titles":[{"id":"1234","name":"Default Title","placement":"Full","state":"Active", "activity": {"richPresence":"Home"}, "lastModified":"2016-09-30T00:15:35.5994615Z"}]}]})";
+const char* presenceOfflineRtaMessageSubscribeComplete = R"({"xuid":"2814613569642996","state":"Offline"})";
 
-string_t EventTypeToString(SocialEventType eventType)
-{
-    switch (eventType)
-    {
-    case SocialEventType::UsersAddedToSocialGraph: return _T("UsersAddedToSocialGraph");
-    case SocialEventType::UsersRemovedFromSocialGraph: return _T("UsersRemovedFromSocialGraph");
-    case SocialEventType::PresenceChanged: return _T("PresenceChanged");
-    case SocialEventType::ProfilesChanged: return _T("ProfilesChanged");
-    case SocialEventType::SocialRelationshipsChanged: return _T("SocialRelationshipsChanged");
-    case SocialEventType::SocialUserGroupUpdated: return _T("SocialUserGroupUpdated");
-    case SocialEventType::LocalUserAdded: return _T("LocalUserAdded");
-    case SocialEventType::LocalUserRemoved: return _T("LocalUserRemoved");
-    case SocialEventType::SocialUserGroupLoaded: return _T("SocialUserGroupLoaded");
-    default: return _T("Unknown");
-    }
-
-    return _T("");
-}
-
-void LogSocialManagerEvents(_In_ Windows::Foundation::Collections::IVectorView<SocialEvent^>^ changeList)
-{
-    int i = 1;
-    for (auto evt : changeList)
-    {
-        std::wstringstream ss;
-        ss << L"SocialManager Event [" << i << L"]: ";
-        ss << EventTypeToString(evt->EventType);
-        TEST_LOG(ss.str().c_str());
-        i++;
-    }
-}
-
-void AppendToPendingEvents(
-    _In_ Windows::Foundation::Collections::IVectorView<SocialEvent^>^ changeList,
-    _In_ SocialManagerInitializationStruct& socialManagerInitializationStruct
-)
-{
-    for (auto evt : changeList)
-    {
-        socialManagerInitializationStruct.socialEvents.push_back(evt);
-    }
-}
+#define NUM_USERS 100
 
 DEFINE_TEST_CLASS(SocialManagerTests)
 {
 public:
-    DEFINE_TEST_CLASS_PROPS(SocialManagerTests)
+    DEFINE_TEST_CLASS_PROPS(SocialManagerTests);
 
-    static std::vector<Platform::String^> GenerateUserList()
+private:
+    // RAII class for basic SocialManager Test Setup/teardown including relevant mocks
+    class SMTestEnvironment : public TestEnvironment
     {
-        std::vector<Platform::String^> userList;
-        userList.reserve(1000);
-        for (uint32_t i = 1; i < m_numUsers; ++i)
+    public:
+        SMTestEnvironment() noexcept
         {
-            Platform::String^ stream;
-            stream += i;
-            userList.push_back(stream);
-        }
-
-        return userList;
-    }
-
-    std::vector<Platform::String^> USER_LIST = GenerateUserList();
-
-    web::json::value GenerateInitialPeoplehubJSON()
-    {
-        web::json::value jsonArray = web::json::value::array();
-        for (uint32_t i = 1; i < m_numUsers; ++i)
-        {
-            stringstream_t stream;
-            stream << i;
-            auto jsonBlob = defaultPeoplehubTemplate;
-            jsonBlob[L"xuid"] = web::json::value::string(stream.str());
-            jsonArray[i - 1] = jsonBlob;
-        }
-
-        web::json::value returnObject;
-        returnObject[L"people"] = jsonArray;
-        return returnObject;
-    }
-
-    web::json::value GenerateInitialPresenceJSON(bool useOnline)
-    {
-        web::json::value jsonArray = web::json::value::array();
-        for (uint32_t i = 1; i < m_numUsers; ++i)
-        {
-            stringstream_t stream;
-            stream << i;
-            auto jsonBlob = useOnline ? peoplehubOnlinePresenceTemplate : peoplehubOfflinePresenceTemplate;
-            jsonBlob[L"xuid"] = web::json::value::string(stream.str());
-            jsonArray[i - 1] = jsonBlob;
-        }
-
-        web::json::value returnObject;
-        returnObject = jsonArray;
-        return returnObject;
-    }
-
-    std::queue<WebsocketMockResponse> GenerateMockEvents(const std::vector<Platform::String^>& uriList, const string_t& presenceWebsocketResponse, real_time_activity_message_type eventType)
-    {
-        std::queue<WebsocketMockResponse> responseQueue;
-        for (auto uri : uriList)
-        {
-            WebsocketMockResponse mockResponse = { uri->Data(), presenceWebsocketResponse, eventType, false };
-            responseQueue.push(mockResponse);
-        }
-
-        return responseQueue;
-    }
-
-    void SetDevicePresenceHTTPMock()
-    {
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        auto responseStruct = GetPresenceResponseStruct(devicePresenceResponse);
-        responseStruct->fRequestPostFunc = [](std::shared_ptr<http_call_response>& initialCallResponse, const string_t& requestBody)
-        {
-            std::error_code errc;
-            auto jsonRequest = web::json::value::parse(requestBody, errc);
-            if (errc)
+            FollowedXuids.reserve(NUM_USERS);
+            for (uint64_t i = 0; i < NUM_USERS; ++i)
             {
-                return;
-            }
-            auto userArr = jsonRequest[L"users"];
-            web::json::value newResponse = web::json::value::array();
-            auto jsonResponseTemplate = initialCallResponse->response_body_json();
-            for (uint32_t i = 0; i < userArr.size(); ++i)
-            {
-                auto user = userArr[i];
-                auto responseTemplate = jsonResponseTemplate[0];
-                responseTemplate[L"xuid"] = user;
-                newResponse[i] = responseTemplate;
+                FollowedXuids.push_back(i + 1);
             }
 
-            initialCallResponse->_Set_response_body(newResponse);
-        };
-        responses[_T("https://userpresence.mockenv.xboxlive.com")] = responseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-    }
+            MockRtaService().SetSubscribeHandler(RTASubscribeHandler);
 
-    void InitializeSubscriptions(const std::vector<Platform::String^> userList, const pplx::task_completion_event<void>& tce)
-    {
-        SetDevicePresenceHTTPMock();
-
-        std::vector<Platform::String^> uriList;
-        for (auto user : userList)
-        {
-            user = L"https://userpresence.xboxlive.com/users/xuid(" + user + L")/devices";
-            uriList.push_back(user);
+            // Setup default presence and peoplehub mocks
+            SetPeoplehubMock();
+            SetPresenceMock();
         }
 
-        for (auto user : userList)
+        ~SMTestEnvironment() noexcept
         {
-            Platform::String^ stream = L"https://userpresence.xboxlive.com/users/xuid(" + user + L")/titles/1234";
-            uriList.push_back(stream);
-        }
-        auto websocketResponseQueue = GenerateMockEvents(uriList, presenceOnlineRtaMessageSubscribeComplete, real_time_activity_message_type::subscribe);
-        WebsocketMockResponse mockResponse = { L"http://social.xboxlive.com/users/xuid(TestXboxUserId)/friends", web::json::value::null().serialize(), real_time_activity_message_type::subscribe, false };
-        websocketResponseQueue.push(mockResponse);
-        m_mockXboxSystemFactory->add_websocket_state_responses_to_all_clients(websocketResponseQueue, tce);
-    }
+            // Remove all local users
+            size_t userCount = XblSocialManagerGetLocalUserCount();
+            auto users{ new XblUserHandle[userCount] };
+            VERIFY_SUCCEEDED(XblSocialManagerGetLocalUsers(userCount, users));
 
-    void InitializeSubscriptionsWithErrors(const std::vector<Platform::String^> userList, const pplx::task_completion_event<void>& tce)
-    {
-        std::vector<Platform::String^> uriList;
-        for (auto user : userList)
-        {
-            user = L"https://userpresence.xboxlive.com/users/xuid(" + user + L")/devices";
-            uriList.push_back(user);
-        }
-
-        for (auto user : userList)
-        {
-            Platform::String^ stream = L"https://userpresence.xboxlive.com/users/xuid(" + user + L")/titles/1234";
-            uriList.push_back(stream);
-        }
-        auto websocketResponseQueue = GenerateMockEvents(uriList, errorString, real_time_activity_message_type::subscribe);
-        WebsocketMockResponse mockResponse = { L"http://social.xboxlive.com/users/xuid(TestXboxUserId)/friends", _T("3"), real_time_activity_message_type::subscribe, true };
-        websocketResponseQueue.push(mockResponse);
-        m_mockXboxSystemFactory->add_websocket_state_responses_to_all_clients(websocketResponseQueue, tce);
-    }
-
-    void TestDevicePresenceChange(const std::vector<Platform::String^> userList, const pplx::task_completion_event<void>& tce, const string_t& devicePresenceResponse)
-    {
-        std::vector<Platform::String^> uriList;
-        for (auto user : userList)
-        {
-            Platform::String^ stream = L"https://userpresence.xboxlive.com/users/xuid(" + user + L")/devices";
-            uriList.push_back(stream);
-        }
-
-        auto mockEvents = GenerateMockEvents(uriList, devicePresenceResponse, real_time_activity_message_type::change_event);
-        m_mockXboxSystemFactory->add_websocket_state_responses_to_all_clients(mockEvents, tce);
-    }
-
-    void TestTitlePresenceChange(const std::vector<Platform::String^> userList, const pplx::task_completion_event<void>& tce)
-    {
-        std::vector<Platform::String^> uriList;
-        for (auto& user : userList)
-        {
-            Platform::String^ stream = L"https://userpresence.xboxlive.com/users/xuid(" + user + L")/titles/1234";
-            uriList.push_back(stream);
-        }
-
-        auto mockEvents = GenerateMockEvents(uriList, web::json ::value::string(titlePresenceMessage).serialize(), real_time_activity_message_type::change_event);
-        m_mockXboxSystemFactory->add_websocket_state_responses_to_all_clients(mockEvents, tce);
-    }
-
-    void TestSocialGraphChange(const std::vector<Platform::String^> userList, const pplx::task_completion_event<void>& tce)
-    {
-        std::queue<WebsocketMockResponse> responseQueue;
-        auto jsonVal = web::json::value::parse(socialRelationshipRemovedMessage);
-
-        responseQueue.push({ L"http://social.xboxlive.com/users/xuid(TestXboxUserId)/friends", socialRelationshipRemovedMessage, real_time_activity_message_type::change_event, false });
-        m_mockXboxSystemFactory->add_websocket_state_responses_to_all_clients(responseQueue, tce);
-    }
-
-    std::shared_ptr<HttpResponseStruct> GetPeoplehubResponseStruct(const web::json::value& initJSON, int errorNum = 200)
-    {
-        // Set up initial http responses
-        auto peoplehubResponse = StockMocks::CreateMockHttpCallResponse(initJSON, errorNum);
-        std::shared_ptr<HttpResponseStruct> peoplehubResponseStruct = std::make_shared<HttpResponseStruct>();
-        peoplehubResponseStruct->responseList = { peoplehubResponse };
-        return peoplehubResponseStruct;
-    }
-
-    std::shared_ptr<HttpResponseStruct> GetPresenceResponseStruct(const web::json::value& initJSON, int errorNum = 200)
-    {
-        auto presenceResponse = StockMocks::CreateMockHttpCallResponse(initJSON, errorNum);
-        std::shared_ptr<HttpResponseStruct> presenceResponseStruct = std::make_shared<HttpResponseStruct>();
-        presenceResponseStruct->responseList = { presenceResponse };
-        return presenceResponseStruct;
-    }
-
-    SocialManagerInitializationStruct InitializeSocialManager(const std::shared_ptr<xbox_live_context>& xboxLiveContext, bool initPresenceOnline)
-    {
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-
-        auto peoplehubResponseJson = GenerateInitialPeoplehubJSON();
-
-        auto peoplehubResponseStruct = GetPeoplehubResponseStruct(peoplehubResponseJson);
-
-        // set up http response set
-        responses[_T("https://peoplehub.mockenv.xboxlive.com")] = peoplehubResponseStruct;
-
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-
-        auto socialManager = SocialManager::SingletonInstance;
-        socialManager->LogState();
-        socialManager->AddLocalUser(xboxLiveContext->user(), SocialManagerExtraDetailLevel::NoExtraDetail);
-
-        std::vector<SocialEvent^> socialEvents;
-
-        TEST_LOG(L"Calling socialManager->AddLocalUser");
-        TEST_LOG(L"Looking for LocalUserAdded");
-        bool shouldLoop = true;
-        do
-        {
-            auto changeList = socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            for (auto evt : changeList)
+            for (size_t i = 0; i < userCount; ++i)
             {
-                socialEvents.push_back(evt);
+                VERIFY_SUCCEEDED(XblSocialManagerRemoveLocalUser(users[i]));
+            }
 
-                if (evt->EventType == SocialEventType::LocalUserAdded)
+#if ENABLE_PERF_PROFILING
+            TEST_LOG(Utils::StringTFromUtf8(detail::PerfTester::Instance().FormatStats().data()).data());
+#endif
+        }
+
+        // CPP helpers wrapping SocialManager APIs
+
+        // Add local user and validate the expected events are received
+        void AddLocalUser(const User& user) const noexcept
+        {
+            LOGS_DEBUG << "Adding User to SocialManager and awaiting LocalUserAdded and RTA subscriptions";
+
+            // As a testing convenience, await sub handshakes to complete so that tests can fire
+            // RTA events and be sure that the social graph is prepared to respond to them
+            struct RTASubResponder
+            {
+                RTASubResponder(size_t followeeCount)
                 {
-                    TEST_LOG(L"Found LocalUserAdded");
-                    shouldLoop = false;
-                    break;
+                    auto& rtaService{ system::MockRealTimeActivityService::Instance() };
+                    rtaService.SetSubscribeHandler([=](uint32_t n, std::string uri)
+                    {
+                        SMTestEnvironment::RTASubscribeHandler(n, uri);
+                        if (uri.find("https://userpresence.xboxlive.com") != std::string::npos)
+                        {
+                            ++presenceSubsComplete;
+                        }
+                        else if (uri.find("http://social.xboxlive.com") != std::string::npos)
+                        {
+                            socialRelationshipSubComplete = true;
+                        }
+
+                        // Graph will create two presence subscriptions for each followed User (Device & title presence)
+                        if (presenceSubsComplete >= followeeCount * 2 && socialRelationshipSubComplete)
+                        {
+                            complete.Set();
+                        }
+                    });
+                }
+
+                ~RTASubResponder()
+                {
+                    // Reset to default handler
+                    system::MockRealTimeActivityService::Instance().SetSubscribeHandler(SMTestEnvironment::RTASubscribeHandler);
+                }
+
+                size_t presenceSubsComplete{ 0 };
+                bool socialRelationshipSubComplete{ false };
+                Event complete{};
+            } rtaResponder{ FollowedXuids.size() };
+
+            VERIFY_SUCCEEDED(XblSocialManagerAddLocalUser(user.Handle(), XblSocialManagerExtraDetailLevel::NoExtraDetail, nullptr));
+            AwaitEvents({ {XblSocialManagerEventType::LocalUserAdded, 1} });
+            rtaResponder.complete.Wait();
+        }
+
+        std::vector<const XblSocialManagerEvent*> DoWork() const noexcept
+        {
+            const XblSocialManagerEvent* events{ nullptr };
+            size_t eventCount{ 0 };
+            HRESULT hr = XblSocialManagerDoWork(&events, &eventCount);
+            if (FAILED(hr))
+            {
+                VERIFY_FAIL(); // avoiding log spam
+            }
+
+            auto eventsVector = Utils::Transform<const XblSocialManagerEvent*>(events, eventCount, [](const XblSocialManagerEvent& e) { return &e; });
+            LogEvents(eventsVector);
+            return eventsVector;
+        }
+
+        // DoWork until the specified events happen.
+        void AwaitEvents(std::map<XblSocialManagerEventType, size_t> expectedEvents) const noexcept
+        {
+            while (!expectedEvents.empty())
+            {
+                auto events{ DoWork() };
+                for (auto event : events)
+                {
+                    auto iter{ expectedEvents.find(event->eventType) };
+                    if (iter == expectedEvents.end())
+                    {
+                        LOGS_DEBUG << "Unexpected SocialManager Event";
+                        VERIFY_FAIL();
+                    }
+                    else if(--iter->second == 0)
+                    {
+                        expectedEvents.erase(iter);
+                    }
                 }
             }
-        } while (shouldLoop);
+        }
 
-        SocialManagerInitializationStruct socialManagerInitializationStruct = { peoplehubResponseJson, socialManager, socialEvents };
-        return socialManagerInitializationStruct;
-    }
-
-    SocialManagerInitializationStruct InitializeSocialManagerWithError(const std::shared_ptr<xbox_live_context>& xboxLiveContext)
-    {
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-
-        auto peoplehubResponseJson = GenerateInitialPeoplehubJSON();
-
-        auto peoplehubResponseStruct = GetPeoplehubResponseStruct(peoplehubResponseJson, 404);
-
-        // set up http response set
-        responses[_T("https://peoplehub.mockenv.xboxlive.com")] = peoplehubResponseStruct;
-
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-
-        auto socialManager = SocialManager::SingletonInstance;
-        socialManager->AddLocalUser(xboxLiveContext->user(), SocialManagerExtraDetailLevel::NoExtraDetail);
-
-        std::vector<SocialEvent^> socialEvents;
-
-        bool shouldLoop = true;
-        do
+        std::vector<const XblSocialManagerUser*> GetUsers(
+            XblSocialManagerUserGroupHandle group
+        ) const noexcept
         {
-            auto changeList = socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
+            const XblSocialManagerUser* const* users{ nullptr };
+            size_t userCount{ 0 };
+            VERIFY_SUCCEEDED(XblSocialManagerUserGroupGetUsers(group, &users, &userCount));
+            return std::vector<const XblSocialManagerUser*>(users, users + userCount);
+        }
 
-            for (auto evt : changeList)
-            {
-                socialEvents.push_back(evt);
-
-                if (evt->EventType == SocialEventType::LocalUserAdded)
-                {
-                    shouldLoop = false;
-                    VERIFY_ARE_EQUAL_INT(evt->ErrorCode, xbox::services::utils::convert_xbox_live_error_code_to_hresult(xbox_live_error_code::http_status_404_not_found));
-                    break;
-                }
-            }
-        } while (shouldLoop);
-
-        SocialManagerInitializationStruct socialManagerInitializationStruct = { peoplehubResponseJson, socialManager, socialEvents };
-        return socialManagerInitializationStruct;
-    }
-
-    SocialManagerInitializationStruct Initialize(std::shared_ptr<xbox_live_context> xboxLiveContext, bool initPresenceOnline, int httpErrorCode = 200)
-    {
-        LOG_DEBUG("Initalizing");
-        auto socialManagerInitializationStruct = InitializeSocialManager(xboxLiveContext, initPresenceOnline);
-
-        pplx::task_completion_event<void> tce;
-        InitializeSubscriptions(USER_LIST, tce);
-        create_task(tce).wait();
-
-        LOG_DEBUG("Subs initialized");
-        socialManagerInitializationStruct.socialEvents.clear();
-        while (true)  // todo: find other way to confirm subs
+        size_t GetUsersCount(
+            XblSocialManagerUserGroupHandle group
+        ) const noexcept
         {
-            AppendToPendingEvents(socialManagerInitializationStruct.socialManager->DoWork(), socialManagerInitializationStruct);
-            size_t totalSize = 0;
-            size_t numEvents = 0;
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::PresenceChanged)
-                {
-                    assert(evt->UsersAffected->Size != 0);
-                    totalSize += evt->UsersAffected->Size;
-                    ++numEvents;
-                }
-            }
+            const XblSocialManagerUser* const* users{ nullptr };
+            size_t userCount{ 0 };
+            VERIFY_SUCCEEDED(XblSocialManagerUserGroupGetUsers(group, &users, &userCount));
+            return userCount;
+        }
 
-            if (totalSize == USER_LIST.size())
+        size_t GetTrackedUsersCount(
+            XblSocialManagerUserGroupHandle group
+        ) const noexcept
+        {
+            const uint64_t* trackedUsers{ nullptr };
+            size_t userCount{ 0 };
+            VERIFY_SUCCEEDED(XblSocialManagerUserGroupGetUsersTrackedByGroup(group, &trackedUsers, &userCount));
+            return userCount;
+        }
+
+        // Configure Mocks used by SocialManager
+        void SetPeoplehubMock(
+            bool online = true,
+            bool isFavorite = false,
+            bool isFollowedByCaller = true
+        ) noexcept
+        {
+            // No HTTP method so it matches both batch and get friends calls
+            m_peoplehubMock = std::make_shared<HttpMock>("", "https://peoplehub.xboxlive.com");
+
+            m_peoplehubMock->SetMockMatchedCallback(
+                [
+                    this,
+                    online,
+                    isFavorite,
+                    isFollowedByCaller
+                ]
+            (HttpMock* mock, std::string requestUrl, std::string requestBody)
+                {
+                    std::vector<uint64_t> xuids;
+
+                    auto jsonRequest = Utils::ParseJson(requestBody.data());
+                    if (jsonRequest.is_null())
+                    {
+                        xuids = this->FollowedXuids;
+                    }
+                    else
+                    {
+                        auto xuidArray = jsonRequest[L"xuids"];
+                        for (size_t i = 0; i < xuidArray.size(); ++i)
+                        {
+                            xuids.push_back(Utils::Uint64FromStringT(xuidArray[i].as_string()));
+                        }
+                    }
+
+                    JsonDocument responseBody(rapidjson::kObjectType);
+                    JsonDocument::AllocatorType& allocator = responseBody.GetAllocator();
+
+                    JsonValue peopleArray(rapidjson::kArrayType);
+                    for (auto& xuid : xuids)
+                    {
+                        JsonDocument jsonBlob(&allocator);
+                        jsonBlob.Parse(defaultPeoplehubTemplate);
+                        JsonUtils::SetMember(jsonBlob, "xuid", JsonValue(utils::uint64_to_internal_string(xuid).c_str(), allocator));
+                        JsonUtils::SetMember(jsonBlob, "presenceState", JsonValue((online ? "Online" : "Offline"), allocator));
+                        JsonUtils::SetMember(jsonBlob, "isFavorite", JsonValue(isFavorite));
+                        JsonUtils::SetMember(jsonBlob, "isFollowedByCaller", JsonValue(isFollowedByCaller));
+                        peopleArray.PushBack(jsonBlob, allocator);
+                    }
+
+                    
+                    responseBody.AddMember("people", peopleArray, allocator);
+                    mock->SetResponseBody(responseBody);
+                });
+        }
+
+        // Presence service will respond that all users are online except for those specified in offlineXuids
+        void SetPresenceMock(
+            const std::vector<uint64_t>& offlineXuids = {},
+            uint32_t titleId = MOCK_TITLEID
+        ) noexcept
+        {
+            m_presenceMock = std::make_shared<HttpMock>("GET", "https://userpresence.xboxlive.com");
+
+            m_presenceMock->SetMockMatchedCallback(
+                [
+                    offlineXuids = std::unordered_set<uint64_t>{ offlineXuids.begin(), offlineXuids.end() },
+                    titleId
+                ]
+            (HttpMock* mock, std::string requestUrl, std::string requestBody) mutable
+                {
+                    SetPresenceResponse(mock, requestUrl, requestBody, std::move(offlineXuids), titleId);
+                });
+        }
+
+        void FireDevicePresenceChangeRtaEvent(
+            const std::vector<uint64_t>& userList,
+            bool online = false
+        ) const noexcept
+        {
+            for (auto xuid : userList)
             {
-                break;
+                std::stringstream uri;
+                uri << "https://userpresence.xboxlive.com/users/xuid(" << xuid << ")/devices";
+
+                MockRealTimeActivityService::Instance().RaiseEvent(uri.str(), online ? R"("PC:true")" : R"("PC:false")");
             }
         }
 
-        socialManagerInitializationStruct.socialEvents.clear();
-        LOG_DEBUG("Ending Initalizion");
-        return socialManagerInitializationStruct;
-    }
+        void FireTitlePresenceChangeRtaEvent(
+            const std::vector<uint64_t>& userList,
+            bool ended = true
+        ) const noexcept
+        {
+            for (auto xuid : userList)
+            {
+                std::stringstream uri;
+                uri << "https://userpresence.xboxlive.com/users/xuid(" << xuid << ")/titles/1234";
 
-    void Cleanup(
-        _In_ SocialManagerInitializationStruct& socialManagerInitializationStruct,
-        _In_ const std::shared_ptr<xbox_live_context>& xblContext,
-        _In_ uint32_t overrideCount = 0
+                MockRealTimeActivityService::Instance().RaiseEvent(uri.str(), ended ? R"("ended")" : R"("started")");
+            }
+        }
+
+        void FireSocialGraphChangedRtaEvent(
+            const User& localUser,
+            XblSocialNotificationType notificationType,
+            uint64_t affectedXuid
+        ) const noexcept
+        {
+            std::stringstream uri;
+            uri << "http://social.xboxlive.com/users/xuid(" << localUser.Xuid() << ")/friends";
+
+            rapidjson::Document eventData{ rapidjson::kObjectType };
+            auto& a{ eventData.GetAllocator() };
+
+            eventData.AddMember("NotificationType", rapidjson::Value{ EnumName(notificationType).data(), a }, a);
+            rapidjson::Value eventDataXuids{ rapidjson::kArrayType };
+            eventDataXuids.PushBack(rapidjson::Value{ Utils::StringFromUint64(affectedXuid).c_str(), a }.Move(), a);
+            eventData.AddMember("Xuids", eventDataXuids.Move(), a);
+
+            MockRealTimeActivityService::Instance().RaiseEvent(uri.str(), eventData);
+        }
+
+        // Xuids Local Users follow
+        std::vector<uint64_t> FollowedXuids;
+
+    private:
+        static void RTASubscribeHandler(uint32_t n, std::string uri)
+        {
+            auto& rtaService{ system::MockRealTimeActivityService::Instance() };
+            if (uri.find("https://userpresence.xboxlive.com") != std::string::npos)
+            {
+                rtaService.CompleteSubscribeHandshake(n, presenceOnlineRtaMessageSubscribeComplete);
+            }
+            else if (uri.find("http://social.xboxlive.com") != std::string::npos)
+            {
+                rtaService.CompleteSubscribeHandshake(n);
+            }
+        }
+
+        static size_t SetPresenceResponse(
+            HttpMock* mock,
+            const std::string& requestUrl,
+            const std::string& requestBody,
+            std::unordered_set<uint64_t>&& offlineXuids = {},
+            uint32_t titleId = MOCK_TITLEID
         )
-    {
-        TEST_LOG(L"Cleanup");
-        socialManagerInitializationStruct.socialEvents.clear();
-        socialManagerInitializationStruct.socialManager->RemoveLocalUser(xblContext->user());
-        VERIFY_IS_TRUE(socialManagerInitializationStruct.socialManager->LocalUsers->Size == overrideCount);
-        bool shouldLoop = true;
-        do
         {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
+            JsonDocument userArr{};
+            if (requestUrl.find("batch") != std::string::npos)
             {
-                if (evt->EventType == SocialEventType::LocalUserRemoved)
-                {
-                    TEST_LOG(L"Found LocalUserRemoved");
-                    shouldLoop = false;
-                    break;
-                }
+                // for batch requests the user list is in the request body
+                JsonDocument jsonRequest{ rapidjson::kObjectType };
+                jsonRequest.Parse(requestBody.data());
+                userArr.CopyFrom(jsonRequest["users"], userArr.GetAllocator());
+                assert(userArr.IsArray());
+            }
+            else
+            {
+                assert(requestBody.empty());
+                userArr.SetArray();
+                auto beginIndex{ requestUrl.find("(") };
+                auto endIndex{ requestUrl.find(")") };
+                userArr.PushBack(JsonValue{ requestUrl.substr(beginIndex + 1, endIndex - beginIndex - 1).data(), userArr.GetAllocator() }, userArr.GetAllocator());
             }
 
-        } while (shouldLoop);
-        Sleep(100);
-        VERIFY_IS_TRUE(xblContext->real_time_activity_service()->_Subscription_Count() == 0);
-    }
+            JsonDocument response(rapidjson::kArrayType);
+            JsonDocument::AllocatorType& allocator = response.GetAllocator();
+            for (uint32_t i = 0; i < userArr.Size(); ++i)
+            {
+                if (offlineXuids.find(utils::internal_string_to_uint64(userArr[i].GetString())) == offlineXuids.end())
+                {
+                    JsonDocument onlinePresenceResponseTemplateJson(&allocator);
+                    onlinePresenceResponseTemplateJson.Parse(onlinePresenceResponseTemplate);
+                    response.PushBack(onlinePresenceResponseTemplateJson, allocator);
+                    JsonUtils::SetMember(response[i]["devices"][0]["titles"][0], allocator, "id", JsonValue(utils::uint32_to_internal_string(titleId).c_str(), allocator));
+                }
+                else
+                {
+                    JsonDocument offlinePresenceResponseTemplateJson(&allocator);
+                    offlinePresenceResponseTemplateJson.Parse(offlinePresenceResponseTemplate);
+                    response.PushBack(offlinePresenceResponseTemplateJson, allocator);
+                }
+                JsonUtils::SetMember(response[i], allocator, "xuid", userArr[i]);
+            }
 
-    DEFINE_TEST_CASE(TestInitialize)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerInitialize);
+            mock->SetResponseBody(response);
 
-        //while (true)
-        {
-            m_mockXboxSystemFactory->reinit();
-            auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-            auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
-            Cleanup(socialManagerInitializationStruct, xboxLiveContext);
+            return userArr.Size();
         }
+
+        void LogEvents(
+            const std::vector<const XblSocialManagerEvent*>& events
+        ) const noexcept
+        {
+            static std::unordered_map<XblSocialManagerEventType, std::string> eventTypesMap
+            {
+                { XblSocialManagerEventType::UsersAddedToSocialGraph, "UsersAddedToSocialGraph" },
+                { XblSocialManagerEventType::UsersRemovedFromSocialGraph, "UsersRemovedFromSocialGraph" },
+                { XblSocialManagerEventType::PresenceChanged, "PresenceChanged" },
+                { XblSocialManagerEventType::ProfilesChanged, "ProfilesChanged" },
+                { XblSocialManagerEventType::SocialRelationshipsChanged, "SocialRelationshipsChanged" },
+                { XblSocialManagerEventType::LocalUserAdded, "LocalUserAdded" },
+                { XblSocialManagerEventType::SocialUserGroupLoaded, "SocialUserGroupLoaded" },
+                { XblSocialManagerEventType::SocialUserGroupUpdated, "SocialUserGroupUpdated" },
+                { XblSocialManagerEventType::UnknownEvent, "UnknownEvent" }
+            };
+
+            for (auto& event : events)
+            {
+                std::stringstream ss;
+                ss << "SocialManager Event: " << eventTypesMap[event->eventType] << std::endl;
+                for (uint32_t i = 0; i < XBL_SOCIAL_MANAGER_MAX_AFFECTED_USERS_PER_EVENT; i++)
+                {
+                    if (event->usersAffected[i] != nullptr)
+                    {
+                        if (i == 0)
+                        {
+                            ss << "Users affected: " << std::endl;
+                        }
+                        ss << "\t" << event->usersAffected[i]->xboxUserId << std::endl;
+                    }
+                }
+                LOGS_DEBUG << ss.str();
+            }
+        }
+
+        // Default mocks used by SocialManager
+        std::shared_ptr<HttpMock> m_peoplehubMock;
+        std::shared_ptr<HttpMock> m_presenceMock;
+    };
+
+public:
+    DEFINE_TEST_CASE(TestAddLocalUser)
+    {
+        SMTestEnvironment env{};
+        auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
+        env.AddLocalUser(xboxLiveContext->User());
     }
 
-    // Verifies that properties of multiple xbox social user are set correctly
-    DEFINE_TEST_CASE(TestSocialManagerXboxSocialUser)
+    DEFINE_TEST_CASE(TestBasicCreateFilterGroup)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerXboxSocialUser);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
+        SMTestEnvironment env{};
+        auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
+        env.AddLocalUser(xboxLiveContext->User());
 
-        auto socialUserGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-        );
+        XblSocialManagerUserGroupHandle filterGroup{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(
+            xboxLiveContext->User().Handle(),
+            XblPresenceFilter::All,
+            XblRelationshipFilter::Friends,
+            &filterGroup
+        ));
 
-        bool wasFound = false;
-        do
+        bool groupLoaded{ false };
+        while (!groupLoaded)
         {
-            auto events = socialManagerInitializationStruct.socialManager->DoWork();
-            LogSocialManagerEvents(events);
-            AppendToPendingEvents(events, socialManagerInitializationStruct);
-
-            for (auto evt : events)
+            auto events{ env.DoWork() };
+            for (auto event : events)
             {
-                if (evt->EventType == SocialEventType::SocialUserGroupLoaded)
+                switch (event->eventType)
                 {
-                    wasFound = true;
+                case XblSocialManagerEventType::SocialUserGroupLoaded:
+                {
+                    VERIFY_IS_TRUE(event->groupAffected == filterGroup);
+                    groupLoaded = true;
                     break;
                 }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
             }
-        } while (!wasFound);
+        }
 
-        for (auto user : socialUserGroup->Users)
+        auto users{ env.GetUsers(filterGroup) };
+        VERIFY_ARE_EQUAL(env.GetTrackedUsersCount(filterGroup), users.size());
+
+        for (auto user : users)
         {
             // profile tests
-            VERIFY_ARE_EQUAL_STR(L"TestGamerTag", user->DisplayName);
-            VERIFY_ARE_EQUAL_STR(L"http://images-eds.xboxlive.com/image?url=mHGRD8KXEf2sp2LC58XhBQKNl2IWRp.J.q8mSURKUUeiPPf0Y7Kl7zLN7rafayiPptVaX_XIUmNOPotNmNubbx4bHmf6It7Oj1ChU5UAo9k-&background=0xababab&mode=Padding&format=png", user->DisplayPicUrlRaw);
-            VERIFY_IS_TRUE(user->IsFollowedByCaller);
-            VERIFY_IS_TRUE(user->IsFollowingUser);
-            VERIFY_ARE_EQUAL_STR(L"9001", user->Gamerscore);
-            VERIFY_ARE_EQUAL_STR(L"TestGamerTag", user->Gamertag);
-            VERIFY_IS_FALSE(user->IsFavorite);
-            VERIFY_IS_FALSE(user->UseAvatar);
+            LOGS_DEBUG << "Validating user " << user->xboxUserId;
+            VERIFY_ARE_EQUAL_STR("TestGamerTag", user->displayName);
+            VERIFY_ARE_EQUAL_STR("http://images-eds.xboxlive.com/image?url=mHGRD8KXEf2sp2LC58XhBQKNl2IWRp.J.q8mSURKUUeiPPf0Y7Kl7zLN7rafayiPptVaX_XIUmNOPotNmNubbx4bHmf6It7Oj1ChU5UAo9k-&background=0xababab&mode=Padding&format=png", user->displayPicUrlRaw);
+            VERIFY_IS_TRUE(user->isFollowedByCaller);
+            VERIFY_IS_TRUE(user->isFollowingUser);
+            VERIFY_ARE_EQUAL_STR("9001", user->gamerscore);
+            VERIFY_ARE_EQUAL_STR("TestGamerTag", user->gamertag);
+            VERIFY_ARE_EQUAL_STR("TestGamerTag", user->modernGamertag);
+            VERIFY_ARE_EQUAL_STR("", user->modernGamertagSuffix);
+            VERIFY_ARE_EQUAL_STR("TestGamerTag", user->uniqueModernGamertag);
+            VERIFY_IS_FALSE(user->isFavorite);
+            VERIFY_IS_FALSE(user->useAvatar);
 
             // preferred color tests
-            VERIFY_ARE_EQUAL_STR(L"193e91", user->PreferredColor->PrimaryColor);
-            VERIFY_ARE_EQUAL_STR(L"2458cf", user->PreferredColor->SecondaryColor);
-            VERIFY_ARE_EQUAL_STR(L"122e6b", user->PreferredColor->TertiaryColor);
+            VERIFY_ARE_EQUAL_STR("193e91", user->preferredColor.primaryColor);
+            VERIFY_ARE_EQUAL_STR("2458cf", user->preferredColor.secondaryColor);
+            VERIFY_ARE_EQUAL_STR("122e6b", user->preferredColor.tertiaryColor);
 
             // presence record tests
-            VERIFY_IS_TRUE(user->PresenceRecord->PresenceTitleRecords->Size == 1);
-            VERIFY_IS_TRUE(user->PresenceRecord->UserState == UserPresenceState::Online);
-            VERIFY_IS_TRUE(user->PresenceRecord->IsUserPlayingTitle(1234));
-            VERIFY_IS_TRUE(user->PresenceRecord->PresenceTitleRecords->GetAt(0)->IsTitleActive);
-            VERIFY_IS_TRUE(!user->PresenceRecord->PresenceTitleRecords->GetAt(0)->IsBroadcasting);
-            VERIFY_IS_TRUE(user->PresenceRecord->PresenceTitleRecords->GetAt(0)->DeviceType == PresenceDeviceType::PC);
-            VERIFY_ARE_EQUAL_STR(L"Home", user->PresenceRecord->PresenceTitleRecords->GetAt(0)->PresenceText);
-            
+            VERIFY_IS_TRUE(user->presenceRecord.presenceTitleRecordCount == 1);
+            VERIFY_IS_TRUE(user->presenceRecord.userState == XblPresenceUserState::Online);
+            VERIFY_IS_TRUE(XblSocialManagerPresenceRecordIsUserPlayingTitle(&user->presenceRecord, 1234));
+            VERIFY_IS_TRUE(user->presenceRecord.presenceTitleRecords[0].isTitleActive);
+            VERIFY_IS_TRUE(!user->presenceRecord.presenceTitleRecords[0].isBroadcasting);
+            VERIFY_IS_TRUE(user->presenceRecord.presenceTitleRecords[0].deviceType == XblPresenceDeviceType::PC);
+            VERIFY_ARE_EQUAL_STR("Home", user->presenceRecord.presenceTitleRecords[0].presenceText);
+
             // title history tests
-            VERIFY_IS_TRUE(user->TitleHistory->HasUserPlayed);
-            auto str = DateTimeToString(user->TitleHistory->LastTimeUserPlayed);
-            VERIFY_IS_TRUE(utils::str_icmp(str, L"2015-01-26T22:54:54.6630Z") == 0);
+            VERIFY_IS_TRUE(user->titleHistory.hasUserPlayed);
+            VERIFY_IS_TRUE(VerifyTime(user->titleHistory.lastTimeUserPlayed, "2015-01-26T22:54:54.6630Z"));
         }
 
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(filterGroup));
     }
 
-    // Tests all basic features of social manager. Initialization, destruction, verification of social user group, and changes to device presence and social graph changes
-    DEFINE_TEST_CASE(TestSocialManagerInitialization)
+    DEFINE_TEST_CASE(TestPresenceRtaUpdates)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerInitialization);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
-        auto socialManagerCppMock = std::dynamic_pointer_cast<MockSocialManager>(socialManagerInitializationStruct.socialManager->GetCppObj());
-
-        socialManagerInitializationStruct.socialManager->DoWork();
-        auto group = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-        );
-        auto events = socialManagerInitializationStruct.socialManager->DoWork();
-        LogSocialManagerEvents(events);
-        AppendToPendingEvents(events, socialManagerInitializationStruct);
-
-        bool wasFound = false;
-        for (auto evt : socialManagerInitializationStruct.socialEvents)
-        {
-            if (evt->EventType == SocialEventType::SocialUserGroupLoaded)
-            {
-                wasFound = true;
-
-                auto socialUserGroupLoaded = static_cast<SocialUserGroupLoadedEventArgs^>(evt->EventArgs);
-                VERIFY_IS_TRUE(socialUserGroupLoaded->SocialUserGroup->SocialUserGroupType == SocialUserGroupType::FilterType);
-                VERIFY_ARE_EQUAL_STR_IGNORE_CASE(socialUserGroupLoaded->SocialUserGroup->LocalUser->XboxUserId->Data(), xboxLiveContext->xbox_live_user_id().c_str());
-
-            }
-        }
-
-        VERIFY_IS_TRUE(wasFound);
-
-        auto socialUsers = group->Users;
-        while (socialUsers->Size != socialManagerInitializationStruct.initialPeoplehubJson[L"people"].as_array().size())
-        {
-            socialManagerInitializationStruct.socialManager->DoWork();
-        }
-        VERIFY_ARE_EQUAL_INT(socialManagerInitializationStruct.initialPeoplehubJson[L"people"].as_array().size(), socialUsers->Size);
-
-        for (auto& userStr : USER_LIST)
-        {
-            for (auto user : socialUsers)
-            {
-                if (userStr == user->XboxUserId)
-                {
-                    VERIFY_IS_TRUE(user->PresenceRecord->UserState == UserPresenceState::Online);
-                }
-
-            }
-        }
-
-        auto& localGraph = socialManagerCppMock->local_graphs().at(_T("TestXboxUserId"));
-        localGraph->print_debug_info();
-        localGraph->clear_debug_counters();
-
-        pplx::task_completion_event<void> tce;
-
-        TestTitlePresenceChange(USER_LIST, tce);
-
-        create_task(tce).wait();
-        tce = pplx::task_completion_event<void>();
-
-        group = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-        );
-
-        while (true)
-        {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-            size_t currSize = 0;
-            for (auto& evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::PresenceChanged)
-                {
-                    currSize += evt->UsersAffected->Size;
-                }
-            }
-
-            localGraph->print_debug_info();
-            if (currSize == group->UsersTrackedBySocialUserGroup->Size)
-            {
-                break;
-            }
-        }
-
-        socialUsers = group->Users;
-        socialManagerInitializationStruct.socialManager->DestroySocialUserGroup(group);
-        group = nullptr;
-
-        for (auto& userStr : USER_LIST)
-        {
-            for (auto user : socialUsers)
-            {
-                if (userStr == user->XboxUserId)
-                {
-                    VERIFY_IS_FALSE(user->PresenceRecord->IsUserPlayingTitle(1234));
-                }
-
-            }
-        }
-
-        TestDevicePresenceChange(USER_LIST, tce, web::json::value::string(devicePresenceRtaMessageEvent).serialize());
-
-        create_task(tce).wait();
-        tce = pplx::task_completion_event<void>();
-
-        group = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-        );
-
-        socialManagerInitializationStruct.socialEvents.clear();
-        std::unordered_map<Platform::String^, uint32_t> userMap;
-        while (true)
-        {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-            size_t currSize = 0;
-            for (auto evt : changeList)
-            {
-                if (evt->EventType == SocialEventType::PresenceChanged)
-                {
-                    currSize += evt->UsersAffected->Size;
-                    for (auto user : evt->UsersAffected)
-                    {
-                        auto iter = userMap.find(user);
-                        if (iter != userMap.end())
-                        {
-                            ++iter->second;
-                        }
-                        else
-                        {
-                            userMap[user] = 0;
-                        }
-
-                        for (auto userEntry : group->Users)
-                        {
-                            if (user == userEntry->XboxUserId)
-                            {
-                                VERIFY_IS_TRUE(userEntry->PresenceRecord->UserState == UserPresenceState::Offline);
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (userMap.size() == group->UsersTrackedBySocialUserGroup->Size)
-            {
-                break;
-            }
-        }
-
-        socialUsers = group->Users;
-        socialManagerInitializationStruct.socialManager->DestroySocialUserGroup(group);
-        group = nullptr;
-
-        for (auto& userStr : USER_LIST)
-        {
-            for (auto user : socialUsers)
-            {
-                if (userStr == user->XboxUserId)
-                {
-                    VERIFY_ARE_EQUAL_INT(user->PresenceRecord->UserState, UserPresenceState::Offline);
-                }
-            }
-        }
-
-        TestSocialGraphChange(USER_LIST, tce);
-
-        create_task(tce).wait();
-        tce = pplx::task_completion_event<void>();
-
-        socialManagerInitializationStruct.socialManager->DoWork();
-        group = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-        );
-
-        socialManagerInitializationStruct.socialManager->DoWork();
-        socialUsers = group->Users;
-        socialManagerInitializationStruct.socialManager->DestroySocialUserGroup(group);
-        group = nullptr;
-
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
-    }
-
-    // Tests to verify that multiple local users can be added, initialized correctly, and do not conflict in data
-    DEFINE_TEST_CASE(TestSocialManagerMultipleLocalUser)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerMultipleLocalUser);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto xboxLiveContext1 = GetMockXboxLiveContext_Cpp();
-        xboxLiveContext1->user()->_User_impl()->_Set_xbox_user_id(L"T0");
-        auto socialManagerInitializationStruct1 = Initialize(xboxLiveContext1, true);
-        auto socialManagerCppMock = std::dynamic_pointer_cast<MockSocialManager>(socialManagerInitializationStruct1.socialManager->GetCppObj());
-
-        VERIFY_IS_TRUE(socialManagerInitializationStruct1.socialManager->LocalUsers->Size == 1);
-        VERIFY_IS_TRUE(socialManagerCppMock->local_user_list().size() == 1);
-        VERIFY_IS_TRUE(socialManagerCppMock->user_to_view_map().size() == 1);
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
-
-        VERIFY_IS_TRUE(socialManagerInitializationStruct.socialManager->LocalUsers->Size == 2);
-        VERIFY_IS_TRUE(socialManagerCppMock->local_user_list().size() == 2);
-        VERIFY_IS_TRUE(socialManagerCppMock->user_to_view_map().size() == 2);
-
-        socialManagerInitializationStruct.socialManager->DoWork();
-        auto group = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-            );
-        socialManagerInitializationStruct.socialManager->DoWork();
-        auto socialUsers = group->Users;
-        socialManagerInitializationStruct.socialManager->DestroySocialUserGroup(group);
-        group = nullptr;
-
-        VERIFY_ARE_EQUAL_INT(socialManagerInitializationStruct.initialPeoplehubJson[L"people"].as_array().size(), socialUsers->Size);
-
-        for (auto& userStr : USER_LIST)
-        {
-            for (auto user : socialUsers)
-            {
-                if (userStr == user->XboxUserId)
-                {
-                    VERIFY_IS_TRUE(user->PresenceRecord->UserState == UserPresenceState::Online);
-                }
-            }
-        }
-
-        group = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-        );
-
-        pplx::task_completion_event<void> tce;
-
-        socialManagerInitializationStruct.socialEvents.clear();
-        TestTitlePresenceChange(USER_LIST, tce);
-
-        while (true)
-        {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-            size_t currSize = 0;
-            for (auto& evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::PresenceChanged)
-                {
-                    currSize += evt->UsersAffected->Size;
-                }
-            }
-
-            if (currSize == group->UsersTrackedBySocialUserGroup->Size)
-            {
-                break;
-            }
-        }
-        create_task(tce).wait();
-        tce = pplx::task_completion_event<void>();
-
-        socialManagerInitializationStruct.socialManager->DoWork();
-        socialUsers = group->Users;
-        socialManagerInitializationStruct.socialManager->DestroySocialUserGroup(group);
-        group = nullptr;
-
-        for (auto& userStr : USER_LIST)
-        {
-            for (auto user : socialUsers)
-            {
-                if (userStr == user->XboxUserId)
-                {
-                    VERIFY_IS_FALSE(user->PresenceRecord->IsUserPlayingTitle(1234));
-                }
-
-            }
-        }
-
-        socialManagerInitializationStruct.socialEvents.clear();
-        TestDevicePresenceChange(USER_LIST, tce, web::json::value::string(devicePresenceRtaMessageEvent).serialize());
-        group = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-            );
-        while (true)
-        {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-            size_t currSize = 0;
-            for (auto& evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::PresenceChanged)
-                {
-                    currSize += evt->UsersAffected->Size;
-                }
-            }
-
-            if (currSize == group->UsersTrackedBySocialUserGroup->Size)
-            {
-                break;
-            }
-        }
-
-        create_task(tce).wait();
-        tce = pplx::task_completion_event<void>();
-
-        group = socialManagerInitializationStruct1.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-            );
-
-        socialManagerInitializationStruct.socialEvents.clear();
-        socialUsers = group->Users;
-        socialManagerInitializationStruct.socialManager->DestroySocialUserGroup(group);
-        group = nullptr;
-
-        for (auto& userStr : USER_LIST)
-        {
-            for (auto user : socialUsers)
-            {
-                if (userStr == user->XboxUserId)
-                {
-                    VERIFY_ARE_EQUAL_INT(user->PresenceRecord->UserState, UserPresenceState::Offline);
-                }
-
-            }
-        }
-        socialManagerInitializationStruct.socialEvents.clear();
-        tce = pplx::task_completion_event<void>();
-        TestSocialGraphChange(USER_LIST, tce);
-        create_task(tce).wait();
-
-        bool isFound = false;
-        while (!isFound)
-        {
-            AppendToPendingEvents(socialManagerInitializationStruct.socialManager->DoWork(), socialManagerInitializationStruct);
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::UsersRemovedFromSocialGraph)
-                {
-                    isFound = true;
-                }
-            }
-        }
-
-        socialManagerInitializationStruct.socialManager->DoWork();
-        group = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-            );
-
-        VERIFY_ARE_EQUAL_UINT(group->Users->Size, USER_LIST.size() - 1);
-
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext, 1);
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext1);
-    }
-
-    // Tests to verify that multiple local users can create groups and have groups update properly
-    DEFINE_TEST_CASE(TestSocialManagerMultipleLocalUserWithGroups)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerMultipleLocalUserWithGroups);
-        m_mockXboxSystemFactory->reinit();
-        auto mockSockets = m_mockXboxSystemFactory->AddMultipleMockWebSocketClients(2);
-        const std::wstring rtaConnectionIdJson =
-        LR"(
-        {
-            "ConnectionId": "d01a8c1b-2f83-4e03-9278-3048b480928f"
-        }
-        )";
-        SetMultipleClientWebSocketRTAAutoResponser(mockSockets, rtaConnectionIdJson, -1, false);
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto xboxLiveContext1 = GetMockXboxLiveContext_Cpp();
-        xboxLiveContext1->user()->_User_impl()->_Set_xbox_user_id(L"T0");
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
-        auto socialManagerInitializationStruct1 = Initialize(xboxLiveContext1, false);
-        auto socialManagerCppMock = std::dynamic_pointer_cast<MockSocialManager>(socialManagerInitializationStruct1.socialManager->GetCppObj());
-        std::vector<Platform::String^> stdVec = { _T("1"), _T("2"), _T("3") };
-        Platform::Collections::Vector<Platform::String^>^ vec = ref new Platform::Collections::Vector<Platform::String^>({ _T("1"), _T("2"), _T("3") });
-        Platform::Collections::Vector<Platform::String^>^ vec1 = ref new Platform::Collections::Vector<Platform::String^>({ _T("4"), _T("5"), _T("6") });
-        auto socialManager = socialManagerInitializationStruct.socialManager;
-        auto groupA = socialManager->CreateSocialUserGroupFromList(
-            xboxLiveContext->user(),
-            vec->GetView()
-            );
-
-        auto groupB = socialManager->CreateSocialUserGroupFromList(
-            xboxLiveContext1->user(),
-            vec1->GetView()
-            );
-
-        bool shouldLoop = true;
-        uint32_t counter = 0;
-        do
-        {
-            auto changeList = socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-
-            for (auto evt : changeList)
-            {
-                if (evt->EventType == SocialEventType::SocialUserGroupLoaded)
-                {
-                    ++counter;
-                    if (counter == 2)
-                    {
-                        shouldLoop = false;
-                    }
-                }
-            }
-        } while (shouldLoop);
-        
-        VERIFY_IS_TRUE(socialManagerInitializationStruct.socialManager->LocalUsers->Size == 2);
-        VERIFY_IS_TRUE(socialManagerCppMock->local_user_list().size() == 2);
-        VERIFY_IS_TRUE(socialManagerCppMock->user_to_view_map().size() == 2);
-        VERIFY_IS_TRUE(socialManagerCppMock->xbox_social_user_groups().size() == 2);
-
-        uint32_t i = 0;
-        for (auto user : groupA->Users)
-        {
-            VERIFY_IS_TRUE(utils::str_icmp(user->XboxUserId->Data(), vec->GetAt(i)->Data()) == 0);
-            ++i;
-        }
-
-        i = 0;
-        for (auto user : groupB->Users)
-        {
-            VERIFY_IS_TRUE(utils::str_icmp(user->XboxUserId->Data(), vec1->GetAt(i)->Data()) == 0);
-            ++i;
-        }
-        
-        VERIFY_IS_TRUE(groupB->Users->Size == 3);
-        socialManager->DestroySocialUserGroup(groupB);
-        VERIFY_IS_TRUE(socialManagerInitializationStruct.socialManager->LocalUsers->Size == 2);
-        VERIFY_IS_TRUE(socialManagerCppMock->local_user_list().size() == 2);
-        VERIFY_IS_TRUE(socialManagerCppMock->user_to_view_map().size() == 2);
-        VERIFY_IS_TRUE(socialManagerCppMock->xbox_social_user_groups().size() == 1);
-        auto changeList = socialManager->DoWork();
-        
-        i = 0;
-        VERIFY_IS_TRUE(groupB->Users->Size == 0);
-        groupB = nullptr;
-        for (auto user : groupA->Users)
-        {
-            VERIFY_IS_TRUE(utils::str_icmp(user->XboxUserId->Data(), vec->GetAt(i)->Data()) == 0);
-            ++i;
-        }
-
-        VERIFY_IS_TRUE(groupA->Users->Size == 3);
-        socialManager->DestroySocialUserGroup(groupA);
-        VERIFY_IS_TRUE(groupA->Users->Size == 0);
-        VERIFY_IS_TRUE(socialManagerInitializationStruct.socialManager->LocalUsers->Size == 2);
-        VERIFY_IS_TRUE(socialManagerCppMock->local_user_list().size() == 2);
-        VERIFY_IS_TRUE(socialManagerCppMock->user_to_view_map().size() == 2);
-        VERIFY_IS_TRUE(socialManagerCppMock->xbox_social_user_groups().size() == 0);
-
-        groupA = socialManager->CreateSocialUserGroupFromList(
-            xboxLiveContext->user(),
-            vec->GetView()
-            );
-
-        groupB = socialManager->CreateSocialUserGroupFromList(
-            xboxLiveContext1->user(),
-            vec->GetView()
-            );
-
-        shouldLoop = true;
-        counter = 0;
-        do
-        {
-            auto changeList = socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-
-            for (auto evt : changeList)
-            {
-                if (evt->EventType == SocialEventType::SocialUserGroupLoaded)
-                {
-                    ++counter;
-                    if (counter == 2)
-                    {
-                        shouldLoop = false;
-                    }
-                }
-            }
-        } while (shouldLoop);
-
-        VERIFY_IS_TRUE(socialManagerInitializationStruct.socialManager->LocalUsers->Size == 2);
-        VERIFY_IS_TRUE(socialManagerCppMock->local_user_list().size() == 2);
-        VERIFY_IS_TRUE(socialManagerCppMock->user_to_view_map().size() == 2);
-        VERIFY_IS_TRUE(socialManagerCppMock->xbox_social_user_groups().size() == 2);
-        VERIFY_IS_TRUE(groupA->Users->Size == 3);
-        socialManager->DestroySocialUserGroup(groupB);
-        VERIFY_IS_TRUE(socialManagerCppMock->xbox_social_user_groups().size() == 1);
-
-        VERIFY_IS_TRUE(groupB->Users->Size == 0);
-        VERIFY_IS_TRUE(groupA->Users->Size == 3);
-        i = 0;
-        for (auto user : groupA->Users)
-        {
-            VERIFY_IS_TRUE(utils::str_icmp(user->XboxUserId->Data(), vec->GetAt(i)->Data()) == 0);
-            VERIFY_IS_TRUE(user->PresenceRecord->PresenceTitleRecords->Size == 1);
-            ++i;
-        }
-
-        i = 0;
-        for (auto user : groupB->Users)
-        {
-            VERIFY_IS_TRUE(utils::str_icmp(user->XboxUserId->Data(), vec->GetAt(i)->Data()) == 0);
-            VERIFY_IS_TRUE(user->PresenceRecord->PresenceTitleRecords->Size == 1);
-            ++i;
-        }
-        
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext, 1);
-        groupB = socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext1->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-            );
-        pplx::task_completion_event<void> tce;
-        TestDevicePresenceChange(USER_LIST, tce, web::json::value::string(devicePresenceRtaMessageEvent).serialize());
-        create_task(tce).wait();
-        shouldLoop = true;
-        socialManagerInitializationStruct1.socialEvents.clear();
-        socialManagerInitializationStruct1.socialEvents.clear();
-        while (true)
-        {
-            AppendToPendingEvents(socialManagerInitializationStruct1.socialManager->DoWork(), socialManagerInitializationStruct1);
-            size_t totalSize = 0;
-            size_t numEvents = 0;
-            for (auto evt : socialManagerInitializationStruct1.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::PresenceChanged)
-                {
-                    VERIFY_IS_TRUE(utils::str_icmp(evt->User->XboxUserId->Data(), xboxLiveContext1->user()->XboxUserId->Data()) == 0);
-                    totalSize += evt->UsersAffected->Size;
-                    ++numEvents;
-                }
-            }
-
-            if (totalSize == USER_LIST.size())
-            {
-                break;
-            }
-        }
-
-        VERIFY_IS_TRUE(groupB->Users->GetAt(0)->PresenceRecord->PresenceTitleRecords->Size == 0);
-
-        Cleanup(socialManagerInitializationStruct1, xboxLiveContext1);
-    }
-
-    // Tests race condition in adding then removing a local user before adding is complete
-    DEFINE_TEST_CASE(TestSocialManagerAddRemoveLocalUser)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerAddRemoveCallback);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
-        socialManagerInitializationStruct.socialManager->RemoveLocalUser(xboxLiveContext->user());
-        VERIFY_IS_TRUE(socialManagerInitializationStruct.socialManager->LocalUsers->Size == 0);
-        socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
-        VERIFY_IS_TRUE(socialManagerInitializationStruct.socialManager->LocalUsers->Size == 1);
-
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
-    }
-
-    // Tests device presence change tap
-    DEFINE_TEST_CASE(TestSocialManagerPresenceCallback)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerPresenceCallback);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
-
-        std::queue<WebsocketMockResponse> responseQueue;
-        responseQueue.push({ L"https://userpresence.xboxlive.com/users/xuid(1)/devices", web::json::value::string(devicePresenceRtaMessagePCEvent).serialize(), real_time_activity_message_type::change_event, false });
-        pplx::task_completion_event<void> tce;
-
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        auto devicePresenceResponseCopy = devicePresenceResponse;
-        devicePresenceResponseCopy[0][L"state"] = web::json::value::string(L"Offline");
-        auto presenceResponse = StockMocks::CreateMockHttpCallResponse(devicePresenceResponseCopy);
-        auto presenceResponseStruct = std::make_shared<HttpResponseStruct>();
-        presenceResponseStruct->responseList = { presenceResponse };
-
-        responses[_T("https://userpresence.mockenv.xboxlive.com")] = presenceResponseStruct;
-
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-
-        m_mockXboxSystemFactory->add_websocket_state_responses_to_all_clients(responseQueue, tce);
-
-        create_task(tce).wait();
-        socialManagerInitializationStruct.socialEvents.clear();
-        bool shouldLoop = true;
-        do
-        {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::PresenceChanged)
-                {
-                    shouldLoop = false;
-                    break;
-                }
-            }
-        } while (shouldLoop);
-
-        std::list<PresenceDeviceType> deviceTypeList = { PresenceDeviceType::XboxOne, PresenceDeviceType::PC };
-        auto coreSocialUserGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::AllOnline,
-            RelationshipFilter::Friends
-            );
-        socialManagerInitializationStruct.socialManager->DoWork();
-        for (auto user : coreSocialUserGroup->Users)
-        {
-            for (auto presenceTitleRecord : user->PresenceRecord->PresenceTitleRecords)
-            {
-                for (auto& deviceType : deviceTypeList)
-                {
-                    if (deviceType == presenceTitleRecord->DeviceType)
-                    {
-                        deviceTypeList.remove(deviceType);
-                        break;
-                    }
-                }
-            }
-        }
-
-        VERIFY_IS_TRUE(deviceTypeList.size() == 1);
-        socialManagerInitializationStruct.socialManager->DestroySocialUserGroup(coreSocialUserGroup);
-        coreSocialUserGroup = nullptr;
-
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
-    }
-
-    // Tests users added tap
-    DEFINE_TEST_CASE(TestSocialManagerUsersAddedCallback)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerUsersAddedCallback);
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        m_mockXboxSystemFactory->reinit();
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
-
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        web::json::value returnObject;
-        web::json::value jsonArray = web::json::value::array();
-        jsonArray[0] = defaultPeoplehubTemplate;
-        returnObject[L"people"] = jsonArray;
-        auto relationshipAddedResponse = StockMocks::CreateMockHttpCallResponse(returnObject);
-        auto relationshipAddedStruct = std::make_shared<HttpResponseStruct>();
-        relationshipAddedStruct->responseList = { relationshipAddedResponse };
-
-        responses[_T("https://peoplehub.mockenv.xboxlive.com")] = relationshipAddedStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses, false);
-
-        pplx::task_completion_event<void> tce;
-        std::queue<WebsocketMockResponse> responseQueue;
-        responseQueue.push({ L"http://social.xboxlive.com/users/xuid(TestXboxUserId)/friends", socialRelationshipAddedMessage, real_time_activity_message_type::change_event, false });
-        TEST_LOG(L"PreRTA");
-        m_mockXboxSystemFactory->add_websocket_state_responses_to_all_clients(responseQueue, tce);
-        create_task(tce).wait();
-        TEST_LOG(L"PostRTA");
-
-        bool shouldLoop = true;
-        std::chrono::milliseconds maxDeltaTime(std::chrono::milliseconds(2500));
-        auto startTime = std::chrono::system_clock::now();
-
-        TEST_LOG(L"Looking for UsersAddedToSocialGraph");
-        do
-        {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::UsersAddedToSocialGraph)
-                {
-                    TEST_LOG(L"Found UsersAddedToSocialGraph");
-                    shouldLoop = false;
-                    break;
-                }
-            }
-
-            auto currentTime = std::chrono::system_clock::now();
-            auto curDeltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime);
-            if (curDeltaTime.count() > maxDeltaTime.count())
-            {
-                TEST_LOG(L"Abort - test took too long");
-                VERIFY_IS_TRUE(false);
-            }
-
-        } while (shouldLoop);
-
-        TEST_LOG(L"clear_states");
-        m_mockXboxSystemFactory->clear_states();
-        auto coreGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-            );
-        socialManagerInitializationStruct.socialManager->DoWork();
-
-        bool isInGraph = false;
-        for (auto users : coreGroup->Users)
-        {
-            if (users->XboxUserId == _T("9"))
-            {
-                isInGraph = true;
-            }
-        }
-        VERIFY_IS_TRUE(isInGraph);
-
-        TEST_LOG(L"DestroySocialUserGroup");
-        socialManagerInitializationStruct.socialManager->DestroySocialUserGroup(coreGroup);
-        coreGroup = nullptr;
-
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
-    }
-
-    // Tests behavior of user group from filter
-    DEFINE_TEST_CASE(TestSocialManagerSocialUserGroupFromFilter)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerSocialUserGroupFromFilter);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
-
-        auto socialUserGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(xboxLiveContext->user(), PresenceFilter::AllOnline, RelationshipFilter::Friends);
-        auto users = socialUserGroup->Users;
-        socialManagerInitializationStruct.socialManager->DestroySocialUserGroup(socialUserGroup);
-        socialUserGroup = nullptr;
-
-        socialManagerInitializationStruct.socialManager->DoWork();
+        SMTestEnvironment env{};
+        auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
+        env.AddLocalUser(xboxLiveContext->User());
+
+        XblSocialManagerUserGroupHandle group{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(
+            xboxLiveContext->User().Handle(),
+            XblPresenceFilter::All,
+            XblRelationshipFilter::Friends,
+            &group
+        ));
+
+        env.AwaitEvents({ {XblSocialManagerEventType::SocialUserGroupLoaded, 1} });
+
+        auto users{ env.GetUsers(group) };
+        VERIFY_ARE_EQUAL_INT(users.size(), env.FollowedXuids.size());
+
+        // Verify initial presence
         for (auto user : users)
         {
-            VERIFY_IS_TRUE(user->IsFollowedByCaller);
-            VERIFY_IS_TRUE(user->PresenceRecord->UserState == UserPresenceState::Online);
+            VERIFY_IS_TRUE(XblSocialManagerPresenceRecordIsUserPlayingTitle(&user->presenceRecord, 1234));
+            VERIFY_IS_TRUE(user->presenceRecord.userState == XblPresenceUserState::Online);
         }
 
-        socialManagerInitializationStruct.socialEvents.clear();
+        // Test title presence changed event
+        auto presenceChangeXuids{ env.FollowedXuids };
+        env.SetPresenceMock({}, 4321);
+        env.FireTitlePresenceChangeRtaEvent(presenceChangeXuids);
 
-        socialUserGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(xboxLiveContext->user(), PresenceFilter::TitleOnline, RelationshipFilter::Friends);
-        socialManagerInitializationStruct.socialManager->DoWork();
-        users = socialUserGroup->Users;
-        for (auto user : users)
+        size_t presenceChangedEvents{ 0 };
+        while (presenceChangedEvents < presenceChangeXuids.size())
         {
-            VERIFY_IS_TRUE(user->IsFollowedByCaller);
-            VERIFY_IS_TRUE(user->PresenceRecord->UserState == UserPresenceState::Online);
-        }
-
-        socialManagerInitializationStruct.socialEvents.clear();
-        pplx::task_completion_event<void> tce;
-        TestDevicePresenceChange(USER_LIST, tce, web::json::value::string(devicePresenceRtaMessageEvent).serialize());
-        create_task(tce).wait();
-
-        std::unordered_map<Platform::String^, Platform::String^> map;
-        while (true)
-        {
-            AppendToPendingEvents(socialManagerInitializationStruct.socialManager->DoWork(), socialManagerInitializationStruct);
-            for (auto& evt : socialManagerInitializationStruct.socialEvents)
+            auto events = env.DoWork();
+            for (auto event : events)
             {
-                if (evt->EventType == SocialEventType::PresenceChanged)
+                switch (event->eventType)
                 {
-                    for (auto user : evt->UsersAffected)
-                    {
-                        map[user] = user;
-                    }
-                }
-            }
-
-            if (map.size() == USER_LIST.size())
-            {
-                break;
-            }
-        }
-        users = socialUserGroup->Users;
-        VERIFY_IS_TRUE(users->Size == 0);
-
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
-    }
-
-    std::shared_ptr<HttpResponseStruct> CreateSocialGroupFromListResponse(Platform::Collections::Vector<Platform::String^>^ vec, int errorCode = 200)
-    {
-        web::json::value jsonArray = web::json::value::array();
-        for (uint32_t i = 0; i < vec->Size; ++i)
-        {
-            auto jsonBlob = defaultPeoplehubTemplate;
-            jsonBlob[L"xuid"] = web::json::value::string(vec->GetAt(i)->Data());
-            jsonArray[i] = jsonBlob;
-        }
-
-        web::json::value returnObject;
-        returnObject[L"people"] = jsonArray;
-        return GetPeoplehubResponseStruct(returnObject, errorCode);
-    }
-
-    // Tests behavior of user group from list
-    DEFINE_TEST_CASE(TestSocialManagerSocialUserGroupFromList)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerSocialUserGroupFromList);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
-        std::vector<Platform::String^> stringVec = { _T("100001"), _T("100002"), _T("100003") };
-        Platform::Collections::Vector<Platform::String^>^ vec = ref new Platform::Collections::Vector<Platform::String^>(stringVec);
-        
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[_T("https://peoplehub.mockenv.xboxlive.com")] = CreateSocialGroupFromListResponse(vec);
-        responses[_T("https://userpresence.mockenv.xboxlive.com")] = GetPresenceResponseStruct(peoplehubOnlinePresenceTemplate);
-
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-        auto socialUserGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromList(xboxLiveContext->user(), vec->GetView());
-
-        socialManagerInitializationStruct.socialEvents.clear();
-        TEST_LOG(L"Looking for SocialUserGroupLoaded");
-        bool shouldLoop = true;
-        do
-        {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::SocialUserGroupLoaded)
+                case XblSocialManagerEventType::PresenceChanged:
                 {
-                    TEST_LOG(L"Found SocialUserGroupLoaded");
-                    auto socialUserGroupLoaded = static_cast<SocialUserGroupLoadedEventArgs^>(evt->EventArgs);
-                    VERIFY_IS_TRUE(socialUserGroupLoaded->SocialUserGroup->SocialUserGroupType == SocialUserGroupType::UserListType);
-                    VERIFY_ARE_EQUAL_STR_IGNORE_CASE(socialUserGroupLoaded->SocialUserGroup->LocalUser->XboxUserId->Data(), xboxLiveContext->xbox_live_user_id().c_str());
-
-                    for (auto user : evt->UsersAffected)
+                    for (auto affectedUser : event->usersAffected)
                     {
-                        bool userFound = false;
-                        for (auto& stringUser : vec)
+                        if (affectedUser)
                         {
-                            if (user == stringUser)
-                            {
-                                userFound = true;
-                            }
+                            VERIFY_IS_FALSE(XblSocialManagerPresenceRecordIsUserPlayingTitle(&affectedUser->presenceRecord, 1234));
+                            presenceChangedEvents++;
                         }
-
-                        VERIFY_IS_TRUE(userFound);
                     }
-
-                    shouldLoop = false;
                     break;
                 }
-            }
-        } while (shouldLoop);
-
-        VERIFY_IS_TRUE(socialUserGroup->UsersTrackedBySocialUserGroup->Size == vec->Size);
-        auto users = socialUserGroup->Users;
-
-        VERIFY_ARE_EQUAL_INT(vec->Size, users->Size);
-        socialManagerInitializationStruct.socialEvents.clear();
-        task_completion_event<void> tce;
-        InitializeSubscriptions(stringVec, tce);
-        while (true)
-        {
-            AppendToPendingEvents(socialManagerInitializationStruct.socialManager->DoWork(), socialManagerInitializationStruct);
-            size_t totalSize = 0;
-            size_t numEvents = 0;
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::PresenceChanged)
+                default:
                 {
-                    totalSize += evt->UsersAffected->Size;
-                    ++numEvents;
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
                 }
             }
+        }
+        VERIFY_ARE_EQUAL(presenceChangedEvents, presenceChangeXuids.size());
 
-            if (totalSize == stringVec.size()) // todo: fix
+        // Verify the group view is updated as well
+        for (auto user : env.GetUsers(group))
+        {
+            VERIFY_IS_FALSE(XblSocialManagerPresenceRecordIsUserPlayingTitle(&user->presenceRecord, 1234));
+        }
+
+        // Test device presence changed event
+        env.SetPresenceMock(presenceChangeXuids);
+        env.FireDevicePresenceChangeRtaEvent(presenceChangeXuids);
+
+        presenceChangedEvents = 0;
+        while (presenceChangedEvents < presenceChangeXuids.size())
+        {
+            auto events = env.DoWork();
+            for (auto event : events)
             {
-                break;
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::PresenceChanged:
+                {
+                    for (auto affectedUser : event->usersAffected)
+                    {
+                        if (affectedUser)
+                        {
+                            VERIFY_IS_TRUE(affectedUser->presenceRecord.userState == XblPresenceUserState::Offline);
+                            presenceChangedEvents++;
+                        }
+                    }
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+        VERIFY_ARE_EQUAL(presenceChangedEvents, presenceChangeXuids.size());
+
+        // Verify the group view is updated as well
+        for (auto user : env.GetUsers(group))
+        {
+            VERIFY_IS_TRUE(user->presenceRecord.userState == XblPresenceUserState::Offline);
+        }
+
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(group));
+    }
+
+    DEFINE_TEST_CASE(TestMultipleLocalUsers)
+    {
+        SMTestEnvironment env{};
+        auto xboxLiveContext1 = env.CreateMockXboxLiveContext();
+        auto xboxLiveContext2 = env.CreateMockXboxLiveContext(202020202020, "MockLocalUser2");
+
+        env.AddLocalUser(xboxLiveContext1->User());
+        VERIFY_IS_TRUE(XblSocialManagerGetLocalUserCount() == 1);
+
+        env.AddLocalUser(xboxLiveContext2->User());
+        VERIFY_IS_TRUE(XblSocialManagerGetLocalUserCount() == 2);
+
+        XblSocialManagerUserGroupHandle user1Group{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(
+            xboxLiveContext1->User().Handle(),
+            XblPresenceFilter::All,
+            XblRelationshipFilter::Friends,
+            &user1Group
+        ));
+
+        // Create a list group that is a subset of user1Group
+        std::vector<uint64_t> group2TrackedUsers{ 1, 2, 3, 4, 5 };
+
+        XblSocialManagerUserGroupHandle user2Group{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromList(
+            xboxLiveContext2->User().Handle(),
+            group2TrackedUsers.data(),
+            group2TrackedUsers.size(),
+            &user2Group
+        ));
+
+        size_t groupsLoaded{ 0 };
+        while (groupsLoaded < 2)
+        {
+            auto events{ env.DoWork() };
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::SocialUserGroupLoaded:
+                {
+                    VERIFY_IS_TRUE(event->groupAffected == user1Group || event->groupAffected == user2Group);
+                    groupsLoaded++;
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
             }
         }
 
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
+        VERIFY_IS_TRUE(groupsLoaded == 2);
+        auto group1Users{ env.GetUsers(user1Group) };
+        auto group2Users{ env.GetUsers(user2Group) };
+        VERIFY_ARE_EQUAL(group1Users.size(), env.FollowedXuids.size());
+        VERIFY_ARE_EQUAL(group2Users.size(), group2TrackedUsers.size());
+
+        // Verify initial presence
+        for (auto& user : group1Users)
+        {
+            VERIFY_IS_TRUE(user->presenceRecord.userState == XblPresenceUserState::Online);
+        }
+        for (auto& user : group2Users)
+        {
+            VERIFY_IS_TRUE(user->presenceRecord.userState == XblPresenceUserState::Online);
+        }
+
+        // Validate presence change propogates to both user's groups and make sure we get presence
+        // changed events for each local user
+        env.SetPresenceMock(group2TrackedUsers);
+        env.FireDevicePresenceChangeRtaEvent(group2TrackedUsers);
+
+        size_t presenceChangedEvents{ 0 };
+        size_t expectedEvents{ group2TrackedUsers.size() * 2 };
+
+        while (presenceChangedEvents < expectedEvents)
+        {
+            auto events{ env.DoWork() };
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::PresenceChanged:
+                {
+                    for (auto affectedUser : event->usersAffected)
+                    {
+                        if (affectedUser)
+                        {
+                            LOGS_DEBUG << affectedUser->xboxUserId;
+                            VERIFY_IS_TRUE(affectedUser->presenceRecord.userState == XblPresenceUserState::Offline);
+                            presenceChangedEvents++;
+                        }
+                    }
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+        VERIFY_ARE_EQUAL(presenceChangedEvents, expectedEvents);
+
+        std::set<uint64_t> updatedXuids{ group2TrackedUsers.begin(), group2TrackedUsers.end() };
+
+        // Verify both group views are updated as well
+        for (auto& user : env.GetUsers(user1Group))
+        {
+            if (updatedXuids.find(user->xboxUserId) == updatedXuids.end())
+            {
+                VERIFY_IS_TRUE(user->presenceRecord.userState == XblPresenceUserState::Online);
+            }
+            else
+            {
+                VERIFY_IS_TRUE(user->presenceRecord.userState == XblPresenceUserState::Offline);
+            }
+        }
+        for (auto& user : env.GetUsers(user2Group))
+        {
+            VERIFY_IS_TRUE(user->presenceRecord.userState == XblPresenceUserState::Offline);
+        }
+
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(user1Group));
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(user2Group));
+    }
+
+    DEFINE_TEST_CASE(TestAddRemoveLocalUser)
+    {
+        SMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        // Tests race condition in adding then removing a local user before adding is complete
+        VERIFY_SUCCEEDED(XblSocialManagerAddLocalUser(xboxLiveContext->User().Handle(), XblSocialManagerExtraDetailLevel::NoExtraDetail, nullptr));
+        VERIFY_SUCCEEDED(XblSocialManagerRemoveLocalUser(xboxLiveContext->User().Handle()));
+        VERIFY_ARE_EQUAL(XblSocialManagerGetLocalUserCount(), 0u);
+        env.AddLocalUser(xboxLiveContext->User());
+        VERIFY_ARE_EQUAL(XblSocialManagerGetLocalUserCount(), 1u);
+    }
+
+    DEFINE_TEST_CASE(TestSocialRelationshipChangedRtaUpdate)
+    {
+        SMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        env.AddLocalUser(xboxLiveContext->User());
+
+        XblSocialManagerUserGroupHandle group{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(
+            xboxLiveContext->User().Handle(),
+            XblPresenceFilter::All,
+            XblRelationshipFilter::Friends,
+            &group
+        ));
+
+        size_t expectedGroupSize{ env.FollowedXuids.size() };
+
+        env.AwaitEvents({ {XblSocialManagerEventType::SocialUserGroupLoaded, 1} });
+        VERIFY_ARE_EQUAL_INT(expectedGroupSize, env.GetUsersCount(group));
+
+        // Fire social relationship added event. Expected group size should grow by 1.
+        uint64_t addedXuid{ 101 };
+        env.FireSocialGraphChangedRtaEvent(xboxLiveContext->User(), XblSocialNotificationType::Added, addedXuid);
+        expectedGroupSize++;
+
+        bool userAddedToGraph{ false };
+        while (!userAddedToGraph)
+        {
+            auto events = env.DoWork();
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::UsersAddedToSocialGraph:
+                {
+                    VERIFY_ARE_EQUAL_INT(event->usersAffected[0]->xboxUserId, addedXuid);
+                    VERIFY_IS_TRUE(event->usersAffected[1] == nullptr);
+                    userAddedToGraph = true;
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        VERIFY_ARE_EQUAL(expectedGroupSize, env.GetUsersCount(group));
+
+        uint64_t changedXuid{ 1 };
+        env.SetPeoplehubMock(true, true);
+        env.FireSocialGraphChangedRtaEvent(xboxLiveContext->User(), XblSocialNotificationType::Changed, changedXuid);
+
+        auto relationshipChangedEventFound{ false };
+        while (!relationshipChangedEventFound)
+        {
+            auto events = env.DoWork();
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::SocialRelationshipsChanged:
+                {
+                    VERIFY_ARE_EQUAL_INT(event->usersAffected[0]->xboxUserId, changedXuid);
+                    VERIFY_IS_TRUE(event->usersAffected[1] == nullptr);
+                    relationshipChangedEventFound = true;
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        VERIFY_ARE_EQUAL(expectedGroupSize, env.GetUsersCount(group));
+
+        // Fire social relationship removed event. Expected group size should decrease by 1.
+        uint64_t removedXuid{ 2 };
+        env.FireSocialGraphChangedRtaEvent(xboxLiveContext->User(), XblSocialNotificationType::Removed, removedXuid);
+        expectedGroupSize--;
+
+        bool userRemovedFromGraph{ false };
+
+        // Since the user is being removed from the graph, there will never be social relationship changed event in this case.
+        // If the user was removed as a friend but was remaining in the graph (i.e. they are tracked by a list group), we would
+        // receive the social relationship changed event instead.
+        while (!userRemovedFromGraph)
+        {
+            auto events = env.DoWork();
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::UsersRemovedFromSocialGraph:
+                {
+                    // User should be removed from graph if they are removed as a friend
+                    VERIFY_ARE_EQUAL_INT(event->usersAffected[0]->xboxUserId, removedXuid);
+                    VERIFY_IS_TRUE(event->usersAffected[1] == nullptr);
+                    userRemovedFromGraph = true;
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        VERIFY_ARE_EQUAL(expectedGroupSize, env.GetUsersCount(group));
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(group));
+    }
+
+    DEFINE_TEST_CASE(TestListGroupWithSocialRelationshipChanged)
+    {
+        SMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        env.AddLocalUser(xboxLiveContext->User());
+
+        XblSocialManagerUserGroupHandle friendsGroup{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(
+            xboxLiveContext->User().Handle(),
+            XblPresenceFilter::All,
+            XblRelationshipFilter::Friends,
+            &friendsGroup
+        ));
+
+        // Create a list group with a user who we aren't friends with
+        uint64_t listXuid{ 101 };
+        env.SetPeoplehubMock(true, false, false);
+
+        XblSocialManagerUserGroupHandle listGroup{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromList(
+            xboxLiveContext->User().Handle(),
+            &listXuid,
+            1,
+            &listGroup
+        ));
+
+        size_t groupsLoaded{ 0 };
+        while (groupsLoaded < 2)
+        {
+            auto events{ env.DoWork() };
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::SocialUserGroupLoaded:
+                {
+                    VERIFY_IS_TRUE(event->groupAffected == friendsGroup || event->groupAffected == listGroup);
+                    groupsLoaded++;
+                    break;
+                }
+                case XblSocialManagerEventType::UsersAddedToSocialGraph:
+                {
+                    VERIFY_ARE_EQUAL_INT(event->usersAffected[0]->xboxUserId, listXuid);
+                    VERIFY_IS_TRUE(event->usersAffected[1] == nullptr);
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        auto expectedFriendsSize{ env.FollowedXuids.size() };
+
+        VERIFY_ARE_EQUAL(2u, groupsLoaded);
+        VERIFY_ARE_EQUAL(1u, env.GetUsersCount(listGroup));
+        VERIFY_ARE_EQUAL(expectedFriendsSize, env.GetUsersCount(friendsGroup));
+
+        // Fire social relationship added event. Friends group size should grow by 1.
+        env.SetPeoplehubMock(true, false, true);
+        env.FireSocialGraphChangedRtaEvent(xboxLiveContext->User(), XblSocialNotificationType::Added, listXuid);
+        expectedFriendsSize++;
+
+        bool relationshipChanged{ false };
+        while (!relationshipChanged)
+        {
+            auto events{ env.DoWork() };
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::SocialRelationshipsChanged:
+                {
+                    VERIFY_ARE_EQUAL_INT(event->usersAffected[0]->xboxUserId, listXuid);
+                    VERIFY_IS_TRUE(event->usersAffected[0]->isFollowedByCaller == true);
+                    VERIFY_IS_TRUE(event->usersAffected[1] == nullptr);
+                    relationshipChanged = true;
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        VERIFY_ARE_EQUAL(expectedFriendsSize, env.GetUsersCount(friendsGroup));
+
+        // Fire social relationship removed event. Expected group size should decrease by 1.
+        env.SetPeoplehubMock(true, false, false);
+        env.FireSocialGraphChangedRtaEvent(xboxLiveContext->User(), XblSocialNotificationType::Removed, listXuid);
+        expectedFriendsSize--;
+
+        relationshipChanged = false;
+        while (!relationshipChanged)
+        {
+            auto events{ env.DoWork() };
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::SocialRelationshipsChanged:
+                {
+                    VERIFY_ARE_EQUAL_INT(event->usersAffected[0]->xboxUserId, listXuid);
+                    VERIFY_IS_TRUE(event->usersAffected[0]->isFollowedByCaller == false);
+                    VERIFY_IS_TRUE(event->usersAffected[1] == nullptr);
+                    relationshipChanged = true;
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        VERIFY_ARE_EQUAL(expectedFriendsSize, env.GetUsersCount(friendsGroup));
+
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(friendsGroup));
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(listGroup));
+    }
+
+    DEFINE_TEST_CASE(TestFilterGroupChanges)
+    {
+        SMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        env.AddLocalUser(xboxLiveContext->User());
+
+        XblSocialManagerUserGroupHandle group{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(
+            xboxLiveContext->User().Handle(),
+            XblPresenceFilter::TitleOnline,
+            XblRelationshipFilter::Friends,
+            &group
+        ));
+
+        env.AwaitEvents({ {XblSocialManagerEventType::SocialUserGroupLoaded, 1} });
+
+        auto expectedGroupSize{ env.FollowedXuids.size() };
+        VERIFY_ARE_EQUAL_INT(expectedGroupSize, env.GetUsersCount(group));
+
+        // Make half the users go offline
+        std::vector<uint64_t> usersToGoOffline{ env.FollowedXuids.begin(), env.FollowedXuids.begin() + env.FollowedXuids.size() / 2 };
+        env.SetPresenceMock(usersToGoOffline);
+
+        env.FireDevicePresenceChangeRtaEvent(usersToGoOffline);
+        expectedGroupSize -= usersToGoOffline.size();
+
+        size_t presenceChangedEvents{ 0 };
+        size_t expectedEvents{ usersToGoOffline.size() };
+
+        while (presenceChangedEvents < expectedEvents)
+        {
+            auto events = env.DoWork();
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::PresenceChanged:
+                {
+                    for (auto affectedUser : event->usersAffected)
+                    {
+                        if (affectedUser)
+                        {
+                            VERIFY_IS_TRUE(affectedUser->presenceRecord.userState == XblPresenceUserState::Offline);
+                            presenceChangedEvents++;
+                        }
+                    }
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        VERIFY_ARE_EQUAL(expectedEvents, presenceChangedEvents);
+        VERIFY_ARE_EQUAL(expectedGroupSize, env.GetUsersCount(group));
+        VERIFY_ARE_EQUAL(expectedGroupSize, env.GetTrackedUsersCount(group));
+    }
+
+    DEFINE_TEST_CASE(TestMultipleListGroups)
+    {
+        SMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        env.AddLocalUser(xboxLiveContext->User());
+
+        // Set mock for non-friends
+        env.SetPeoplehubMock(true, false, false);
+
+        // Create a list group that doesn't overlap with our friends at all. Five new users should be added to the graph
+        std::set<uint64_t> trackedXuids1{ 101, 102, 103, 104, 105 };
+
+        XblSocialManagerUserGroupHandle group1{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromList(
+            xboxLiveContext->User().Handle(),
+            std::vector<uint64_t>{ trackedXuids1.begin(), trackedXuids1.end() }.data(),
+            trackedXuids1.size(),
+            &group1
+        ));
+
+        VERIFY_ARE_EQUAL(trackedXuids1.size(), env.GetTrackedUsersCount(group1));
+
+        auto groupLoaded{ false };
+        size_t usersAddedToGraph{ 0 };
+        while (!groupLoaded || usersAddedToGraph < trackedXuids1.size())
+        {
+            auto events{ env.DoWork() };
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::SocialUserGroupLoaded:
+                {
+                    VERIFY_IS_TRUE(event->groupAffected == group1);
+                    groupLoaded = true;
+                    break;
+                }
+                case XblSocialManagerEventType::UsersAddedToSocialGraph:
+                {
+                    for (auto affectedUser : event->usersAffected)
+                    {
+                        if (affectedUser)
+                        {
+                            VERIFY_IS_TRUE(trackedXuids1.find(affectedUser->xboxUserId) != trackedXuids1.end());
+                            VERIFY_IS_TRUE(affectedUser->isFollowedByCaller == false);
+                            usersAddedToGraph++;
+                        }
+                    }
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        VERIFY_ARE_EQUAL(trackedXuids1.size(), env.GetUsersCount(group1));
+
+        // Create a second group with partial graph overlap. No new users should be added to graph.
+        std::vector<uint64_t> trackedXuids2{ 1, 2, 3, 4, 5, 101, 102, 103, 104, 105 };
+
+        XblSocialManagerUserGroupHandle group2{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromList(
+            xboxLiveContext->User().Handle(),
+            trackedXuids2.data(),
+            trackedXuids2.size(),
+            &group2
+        ));
+
+        groupLoaded = false;
+        while (!groupLoaded)
+        {
+            auto events{ env.DoWork() };
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::SocialUserGroupLoaded:
+                {
+                    VERIFY_IS_TRUE(event->groupAffected == group2);
+                    groupLoaded = true;
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        VERIFY_ARE_EQUAL(trackedXuids2.size(), env.GetUsersCount(group2));
+
+        // Validate that users remain in graph after their social status changes, until the list group is also
+        // destroyed (they are also part of list group1).
+
+        // Fire social relationship removed event.
+        uint64_t removedXuid{ 1 };
+        env.FireSocialGraphChangedRtaEvent(xboxLiveContext->User(), XblSocialNotificationType::Removed, removedXuid);
+
+        bool socialRelationshipChanged{ false };
+        while (!socialRelationshipChanged)
+        {
+            auto events{ env.DoWork() };
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::SocialRelationshipsChanged:
+                {
+                    VERIFY_IS_TRUE(event->usersAffected[0]->xboxUserId == removedXuid);
+                    VERIFY_IS_TRUE(event->usersAffected[0]->isFollowedByCaller == false);
+                    VERIFY_IS_TRUE(event->usersAffected[1] == nullptr);
+                    socialRelationshipChanged = true;
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        // Destroying group2 should cause 1 user to new be removed from the graph (the remainder are either
+        // friends or part of group1 as well)
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(group2));
+
+        size_t usersRemoved{ 0 };
+        while (usersRemoved < 1)
+        {
+            auto events{ env.DoWork() };
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::UsersRemovedFromSocialGraph:
+                {
+                    // User should be removed from graph if they are removed as a friend
+                    VERIFY_ARE_EQUAL_INT(event->usersAffected[0]->xboxUserId, removedXuid);
+                    VERIFY_IS_TRUE(event->usersAffected[1] == nullptr);
+                    usersRemoved++;
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        // Test updating group1. This should cause the previous tracked users to be removed from the graph and the new ones to be added.
+        std::set<uint64_t> newTrackedXuids1{ 106, 107 };
+        VERIFY_SUCCEEDED(XblSocialManagerUpdateSocialUserGroup(
+            group1,
+            std::vector<uint64_t>{ newTrackedXuids1.begin(), newTrackedXuids1.end() }.data(),
+            newTrackedXuids1.size()
+        ));
+        VERIFY_ARE_EQUAL(newTrackedXuids1.size(), env.GetTrackedUsersCount(group1));
+
+        auto groupUpdated{ false };
+        size_t usersRemovedFromGraph{ 0 };
+        usersAddedToGraph = 0;
+
+        while (!groupUpdated || usersAddedToGraph < newTrackedXuids1.size() || usersRemovedFromGraph < trackedXuids1.size())
+        {
+            auto events{ env.DoWork() };
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::SocialUserGroupUpdated:
+                {
+                    VERIFY_IS_TRUE(event->groupAffected == group1);
+                    groupUpdated = true;
+                    break;
+                }
+                case XblSocialManagerEventType::UsersAddedToSocialGraph:
+                {
+                    for (auto affectedUser : event->usersAffected)
+                    {
+                        if (affectedUser)
+                        {
+                            VERIFY_IS_TRUE(newTrackedXuids1.find(affectedUser->xboxUserId) != newTrackedXuids1.end());
+                            usersAddedToGraph++;
+                        }
+                    }
+                    break;
+                }
+                case XblSocialManagerEventType::UsersRemovedFromSocialGraph:
+                {
+                    for (auto affectedUser : event->usersAffected)
+                    {
+                        if (affectedUser)
+                        {
+                            VERIFY_IS_TRUE(trackedXuids1.find(affectedUser->xboxUserId) != trackedXuids1.end());
+                            usersRemovedFromGraph++;
+                        }
+                    }
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        VERIFY_ARE_EQUAL(newTrackedXuids1.size(), env.GetUsersCount(group1));
+
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(group1));
     }
 
     DEFINE_TEST_CASE(TestSocialUserGroupFromListLarge)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialUserGroupFromListLarge);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
+        SMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        env.AddLocalUser(xboxLiveContext->User());
 
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
-        std::vector<Platform::String^> stringVec;
-        for (uint32_t i = 0; i < 100; ++i)
+        std::vector<uint64_t> trackedXuids;
+        for (uint64_t xuid = 0; xuid < XBL_SOCIAL_MANAGER_MAX_USERS_FROM_LIST; ++xuid)
         {
-            stringstream_t str;
-            str << _T("10000") << i;
-            auto cStr = str.str();
-            stringVec.push_back(ref new Platform::String(cStr.c_str()));
+            trackedXuids.push_back(xuid + 101); // Offset to make unique from our friends
         }
 
-        Platform::Collections::Vector<Platform::String^>^ vec = ref new Platform::Collections::Vector<Platform::String^>(stringVec);
+        XblSocialManagerUserGroupHandle group{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromList(
+            xboxLiveContext->User().Handle(),
+            trackedXuids.data(),
+            trackedXuids.size(),
+            &group
+        ));
 
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[_T("https://peoplehub.mockenv.xboxlive.com")] = CreateSocialGroupFromListResponse(vec);
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-        auto socialUserGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromList(xboxLiveContext->user(), vec->GetView());
+        VERIFY_ARE_EQUAL(trackedXuids.size(), env.GetTrackedUsersCount(group));
 
-        bool shouldLoop = true;
-        socialManagerInitializationStruct.socialEvents.clear();
-        do
+        std::set<uint64_t> trackedXuidsSet{ trackedXuids.begin(), trackedXuids.end() };
+
+        auto groupLoaded{ false };
+        size_t usersAddedToGraph{ 0 };
+        while (!groupLoaded || usersAddedToGraph < trackedXuids.size())
         {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
+            auto events{ env.DoWork() };
+            for (auto event : events)
             {
-                if (evt->EventType == SocialEventType::SocialUserGroupLoaded)
+                switch (event->eventType)
                 {
-                    TEST_LOG(L"Found SocialUserGroupLoaded");
-                    auto socialUserGroupLoaded = static_cast<SocialUserGroupLoadedEventArgs^>(evt->EventArgs);
-                    VERIFY_IS_TRUE(socialUserGroupLoaded->SocialUserGroup->SocialUserGroupType == SocialUserGroupType::UserListType);
-                    VERIFY_ARE_EQUAL_STR_IGNORE_CASE(socialUserGroupLoaded->SocialUserGroup->LocalUser->XboxUserId->Data(), xboxLiveContext->xbox_live_user_id().c_str());
-
-                    VERIFY_ARE_EQUAL_UINT(vec->Size, socialUserGroupLoaded->SocialUserGroup->UsersTrackedBySocialUserGroup->Size);
-                    //VERIFY_ARE_EQUAL(vec->Size, socialUserGroupLoaded->SocialUserGroup->Users->Size);
-                    for (auto& user : vec)
+                case XblSocialManagerEventType::SocialUserGroupLoaded:
+                {
+                    VERIFY_IS_TRUE(event->groupAffected == group);
+                    groupLoaded = true;
+                    break;
+                }
+                case XblSocialManagerEventType::UsersAddedToSocialGraph:
+                {
+                    for (auto affectedUser : event->usersAffected)
                     {
-                        bool userFound = false;
-                        for (auto stringUser : socialUserGroupLoaded->SocialUserGroup->UsersTrackedBySocialUserGroup)
+                        if (affectedUser)
                         {
-                            if (user == stringUser)
-                            {
-                                userFound = true;
-                            }
+                            VERIFY_IS_TRUE(trackedXuidsSet.find(affectedUser->xboxUserId) != trackedXuidsSet.end());
+                            usersAddedToGraph++;
                         }
-
-                        VERIFY_IS_TRUE(userFound);
-                    }
-
-                    shouldLoop = false;
-
-                    for (auto user : socialUserGroupLoaded->SocialUserGroup->Users)
-                    {
-                        VERIFY_ARE_EQUAL_STR(user->Gamertag, _T("TestGamerTag"));
                     }
                     break;
                 }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
             }
-        } while (shouldLoop);
+        }
 
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
+        VERIFY_ARE_EQUAL(trackedXuids.size(), env.GetUsersCount(group));
+
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(group));
     }
 
     // Tests refresh for RTA resync
-    DEFINE_TEST_CASE(TestSocialManagerResync)
+    DEFINE_TEST_CASE(TestRtaResync)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerResync);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
+        SMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        env.AddLocalUser(xboxLiveContext->User());
+        XblSocialManagerUserGroupHandle group{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(
+            xboxLiveContext->User().Handle(),
+            XblPresenceFilter::All,
+            XblRelationshipFilter::Friends,
+            &group
+        ));
 
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
+        env.AwaitEvents({ {XblSocialManagerEventType::SocialUserGroupLoaded, 1} });
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size(), env.GetUsersCount(group));
 
-        auto group = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-            );
-        socialManagerInitializationStruct.socialManager->DoWork();
-        auto coreUserGroup = group->Users;
-        VERIFY_ARE_EQUAL_INT(group->UsersTrackedBySocialUserGroup->Size, group->Users->Size);
-        string_t gamertagStr = coreUserGroup->GetAt(0)->Gamertag->Data();
-        auto testStr = _T("TestGamerTag");
-        VERIFY_IS_TRUE(utils::str_icmp(gamertagStr, testStr) == 0);
-        string_t testTag = _T("TagChanged");
-
-        auto peoplehubResponseJson = GenerateInitialPeoplehubJSON();
-        auto responseStruct = GetPeoplehubResponseStruct(peoplehubResponseJson, 200);
-        peoplehubResponseJson[L"people"][0][L"gamertag"] = web::json::value::string(testTag);
-        responseStruct->responseList[0]->_Set_response_body(peoplehubResponseJson);
-
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-
-        responses[_T("https://peoplehub.mockenv.xboxlive.com")] = responseStruct;
-
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-
-        m_mockXboxSystemFactory->GetMockWebSocketClient()->recieve_message(rtaResyncMessage);
-        VERIFY_IS_TRUE(group->Users->GetAt(0)->PresenceRecord->PresenceTitleRecords->GetAt(0)->PresenceText == L"Home");
-
-        bool shouldLoop = true;
-        bool foundProfileChange = false;
-        bool foundPresenceChange = false;
-        do
+        // Make a slight change so we know that the users were refreshed
+        env.SetPeoplehubMock(true, true);
+        MockRealTimeActivityService::Instance().RaiseResync();
+        size_t profileChangesEvents{ 0 };
+        while (profileChangesEvents < env.FollowedXuids.size())
         {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
+            auto events = env.DoWork();
+            for (auto event : events)
             {
-                if (evt->EventType == SocialEventType::ProfilesChanged)
+                switch (event->eventType)
                 {
-                    foundProfileChange = true;
-                }
-                else if (evt->EventType == SocialEventType::PresenceChanged)
+                case XblSocialManagerEventType::SocialRelationshipsChanged:
                 {
-                    foundPresenceChange = true;
-                    VERIFY_IS_TRUE(group->Users->GetAt(0)->PresenceRecord->PresenceTitleRecords->GetAt(0)->PresenceText->IsEmpty());
-                }
-
-                if (foundProfileChange && foundPresenceChange)
-                {
-                    shouldLoop = false;
-                }
-            }
-        } while (shouldLoop);
-
-        socialManagerInitializationStruct.socialManager->DestroySocialUserGroup(group);
-        group = nullptr;
-
-        group = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-            );
-        socialManagerInitializationStruct.socialManager->DoWork();
-        coreUserGroup = group->Users;
-
-        for (auto user : coreUserGroup)
-        {
-            if (user->Gamertag == _T("0"))
-            {
-                VERIFY_ARE_EQUAL(user->Gamertag->Data(), _T("TagChanged"));
-            }
-        }
-        socialManagerInitializationStruct.socialManager->DestroySocialUserGroup(group);
-        group = nullptr;
-
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
-    }
-
-    // Tests updating a social user group that was already created from list
-    DEFINE_TEST_CASE(TestSocialManagerUserUpdate)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerUserUpdate);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
-        Platform::Collections::Vector<Platform::String^>^ vec = ref new Platform::Collections::Vector<Platform::String^>({ _T("100001"), _T("100002"), _T("100003") });
-
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[_T("https://peoplehub.mockenv.xboxlive.com")] = CreateSocialGroupFromListResponse(vec);
-
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-        auto socialUserGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromList(xboxLiveContext->user(), vec->GetView());
-
-        TEST_LOG(L"Looking for SocialUserGroupLoaded");
-        bool shouldLoop = true;
-        do
-        {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::SocialUserGroupLoaded)
-                {
-                    shouldLoop = false;
-                }
-            }
-        } while (shouldLoop);
-        socialManagerInitializationStruct.socialEvents.clear();
-        Platform::Collections::Vector<Platform::String^>^ updateVec = ref new Platform::Collections::Vector<Platform::String^>({ _T("100001"), _T("100002"), _T("100004") });
-
-        responses[_T("https://peoplehub.mockenv.xboxlive.com")] = CreateSocialGroupFromListResponse(updateVec);
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-        socialManagerInitializationStruct.socialManager->UpdateSocialUserGroup(
-            socialUserGroup,
-            updateVec->GetView()
-            );
-
-        shouldLoop = true;
-        byte foundEvents = 0;
-        do
-        {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::SocialUserGroupUpdated)
-                {
-                    foundEvents |= 0b001;
-                    for (auto user : evt->UsersAffected)
+                    for (auto affectedUser : event->usersAffected)
                     {
-                        bool wasFound = false;
-                        for (auto compareUser : updateVec)
+                        if (affectedUser)
                         {
-                            if (compareUser == user)
-                            {
-                                wasFound = true;
-                                break;
-                            }
+                            VERIFY_ARE_EQUAL(affectedUser->isFavorite, true);
+                            profileChangesEvents++;
                         }
-                        VERIFY_IS_TRUE(wasFound);
                     }
-                }
-                else if(evt->EventType == SocialEventType::UsersAddedToSocialGraph)
-                {
-                    foundEvents |= 0b010;
-                    for (auto user : evt->UsersAffected)
-                    {
-                        bool wasFound = false;
-                        for (auto compareUser : updateVec)
-                        {
-                            if (utils::str_icmp(compareUser->Data(), _T("100004")) == 0)
-                            {
-                                wasFound = true;
-                                break;
-                            }
-                        }
-                        VERIFY_IS_TRUE(wasFound);
-                    }
-                }
-                else if (evt->EventType == SocialEventType::UsersRemovedFromSocialGraph)
-                {
-                    foundEvents |= 0b100;
-                    for (auto user : evt->UsersAffected)
-                    {
-                        bool wasFound = true;
-                        for (auto compareUser : updateVec)
-                        {
-                            if (utils::str_icmp(compareUser->Data(), _T("100003")) == 0)
-                            {
-                                wasFound = false;
-                                break;
-                            }
-                        }
-                        VERIFY_IS_TRUE(wasFound);
-                    }
-                }
-            }
-        } while (foundEvents != 0b111);
-        for (auto user : socialUserGroup->Users)
-        {
-            bool wasFound = false;
-            for (auto compareUser : updateVec)
-            {
-                if (compareUser == user->XboxUserId)
-                {
-                    wasFound = true;
                     break;
                 }
-            }
-
-            VERIFY_IS_TRUE(wasFound);
-        }
-        for (auto user : socialUserGroup->UsersTrackedBySocialUserGroup)
-        {
-            bool wasFound = false;
-            for (auto compareUser : updateVec)
-            {
-                if (compareUser == user)
+                default:
                 {
-                    wasFound = true;
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(group));
+    }
+
+    DEFINE_TEST_CASE(TestInvalidArgs)
+    {
+        SMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        env.AddLocalUser(xboxLiveContext->User());
+
+        XblUserHandle dummyHandle{ (XblUserHandle)0xFFFFFFFFFFFFFFFF };
+        XblSocialManagerUserGroupHandle groupHandle{ nullptr };
+
+#pragma warning( push )
+#pragma warning( disable : 6387 )
+        VERIFY_FAILED(XblSocialManagerAddLocalUser(nullptr, XblSocialManagerExtraDetailLevel::NoExtraDetail, nullptr));
+        VERIFY_FAILED(XblSocialManagerRemoveLocalUser(nullptr));
+        VERIFY_FAILED(XblSocialManagerCreateSocialUserGroupFromFilters(nullptr, XblPresenceFilter::All, XblRelationshipFilter::Friends, &groupHandle));
+        VERIFY_FAILED(XblSocialManagerCreateSocialUserGroupFromFilters(dummyHandle, XblPresenceFilter::All, XblRelationshipFilter::Friends, nullptr));
+        VERIFY_FAILED(XblSocialManagerCreateSocialUserGroupFromList(nullptr, std::vector<uint64_t>{ 0, 1, 2 }.data(), 3, & groupHandle));
+        VERIFY_FAILED(XblSocialManagerCreateSocialUserGroupFromList(dummyHandle, nullptr, 0, &groupHandle));
+        VERIFY_FAILED(XblSocialManagerCreateSocialUserGroupFromList(dummyHandle, std::vector<uint64_t>{ 0, 1, 2 }.data(), 3, nullptr));
+        VERIFY_FAILED(XblSocialManagerCreateSocialUserGroupFromList(dummyHandle, std::vector<uint64_t>(XBL_SOCIAL_MANAGER_MAX_USERS_FROM_LIST + 1, 0).data(), XBL_SOCIAL_MANAGER_MAX_USERS_FROM_LIST + 1, &groupHandle));
+        VERIFY_FAILED(XblSocialManagerDestroySocialUserGroup(nullptr));
+        VERIFY_FAILED(XblSocialManagerDoWork(nullptr, nullptr));
+#pragma warning( pop )
+
+        XblSocialManagerUserGroupHandle group{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(
+            xboxLiveContext->User().Handle(),
+            XblPresenceFilter::All,
+            XblRelationshipFilter::Friends,
+            &group
+        ));
+
+        env.AwaitEvents({ {XblSocialManagerEventType::SocialUserGroupLoaded, 1} });
+
+        VERIFY_FAILED(XblSocialManagerUpdateSocialUserGroup(group, std::vector<uint64_t>{ 0, 1, 2 }.data(), 3));
+
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(group));
+    }
+
+#if 0
+    DEFINE_TEST_CASE(TestImproperCallingPattern)
+    {
+        SMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        XblSocialManagerUserGroupHandle group{ nullptr };
+        VERIFY_FAILED(XblSocialManagerCreateSocialUserGroupFromFilters(xboxLiveContext->User().Handle(), XblPresenceFilter::All, XblRelationshipFilter::Friends, &group));
+
+        VERIFY_FAILED(XblSocialManagerCreateSocialUserGroupFromList(xboxLiveContext->User().Handle(), std::vector<uint64_t>{ 0, 1, 2 }.data(), 3, & group));
+
+        VERIFY_SUCCEEDED(XblSocialManagerAddLocalUser(xboxLiveContext->User().Handle(), XblSocialManagerExtraDetailLevel::All, nullptr));
+        VERIFY_FAILED(XblSocialManagerAddLocalUser(xboxLiveContext->User().Handle(), XblSocialManagerExtraDetailLevel::All, nullptr));
+
+        VERIFY_SUCCEEDED(XblSocialManagerRemoveLocalUser(xboxLiveContext->User().Handle()));
+        VERIFY_FAILED(XblSocialManagerRemoveLocalUser(xboxLiveContext->User().Handle()));
+    }
+#endif
+
+    DEFINE_TEST_CASE(TestCreateGroupBeforeUserAddedCompletes)
+    {
+        SMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        // Add user, and before local user is added, create and destroy a group
+        VERIFY_SUCCEEDED(XblSocialManagerAddLocalUser(xboxLiveContext->User().Handle(), XblSocialManagerExtraDetailLevel::NoExtraDetail, nullptr));
+
+        XblSocialManagerUserGroupHandle group{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromList(xboxLiveContext->User().Handle(), std::vector<uint64_t>{ 101, 102 }.data(), 2, & group));
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(group));
+
+        bool localUserAdded{ false };
+        while (!localUserAdded)
+        {
+            auto events{ env.DoWork() };
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::LocalUserAdded:
+                {
+                    localUserAdded = true;
                     break;
                 }
-            }
-
-            VERIFY_IS_TRUE(wasFound);
-        }
-        socialManagerInitializationStruct.socialEvents.clear();
-        Platform::Collections::Vector<Platform::String^>^ updateVecSingle = ref new Platform::Collections::Vector<Platform::String^>({ _T("100004") });
-        responses[_T("https://peoplehub.mockenv.xboxlive.com")] = CreateSocialGroupFromListResponse(updateVecSingle);
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-        socialManagerInitializationStruct.socialManager->UpdateSocialUserGroup(
-            socialUserGroup,
-            updateVecSingle->GetView()
-            );
-
-        shouldLoop = true;
-        do
-        {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::SocialUserGroupUpdated)
+                default:
                 {
-                    shouldLoop = false;
-                    for (auto user : evt->UsersAffected)
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        VERIFY_SUCCEEDED(XblSocialManagerRemoveLocalUser(xboxLiveContext->User().Handle()));
+    }
+
+    DEFINE_TEST_CASE(TestSocialRelationshipChangedDuringInitialization)
+    {
+        SMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        // Add user, and before local user is added, receive a social relationship changed notification
+        uint64_t xuidAdded{ 101 };
+        env.FollowedXuids.push_back(xuidAdded);
+
+        VERIFY_SUCCEEDED(XblSocialManagerAddLocalUser(xboxLiveContext->User().Handle(), XblSocialManagerExtraDetailLevel::NoExtraDetail, nullptr));
+
+        XblSocialManagerUserGroupHandle friendsGroup{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(xboxLiveContext->User().Handle(), XblPresenceFilter::All, XblRelationshipFilter::Friends, &friendsGroup));
+
+        env.FireSocialGraphChangedRtaEvent(xboxLiveContext->User(), XblSocialNotificationType::Added, xuidAdded);
+
+        bool localUserAdded{ false };
+        bool userAddedToGraph{ false };
+        while (!localUserAdded || !userAddedToGraph)
+        {
+            auto events{ env.DoWork() };
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::LocalUserAdded:
+                {
+                    localUserAdded = true;
+                    break;
+                }
+                // There are two possible orderings in this scenario: if the rta event is processed before the
+                // graph initialization completes, by design, we won't get a UsersAddedToSocialGraph event. However,
+                // in that case, the new user should already be in the friends group when it is loaded.
+                case XblSocialManagerEventType::UsersAddedToSocialGraph:
+                {
+                    VERIFY_IS_TRUE(event->usersAffected[0]->xboxUserId == xuidAdded);
+                    VERIFY_IS_TRUE(event->usersAffected[1] == nullptr);
+                    userAddedToGraph = true;
+                    break;
+                }
+                case XblSocialManagerEventType::SocialUserGroupLoaded:
+                {
+                    VERIFY_IS_TRUE(event->groupAffected == friendsGroup);
+                    if (env.GetUsersCount(friendsGroup) == env.FollowedXuids.size())
                     {
-                        bool wasFound = false;
-                        for (auto compareUser : updateVec)
-                        {
-                            if (compareUser == user)
-                            {
-                                wasFound = true;
-                            }
-                        }
-                        VERIFY_IS_TRUE(wasFound);
+                        userAddedToGraph = true;
                     }
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
                 }
             }
-        } while (shouldLoop);
-        VERIFY_IS_TRUE(socialUserGroup->Users->Size == 1);
-        VERIFY_IS_TRUE(socialUserGroup->Users->GetAt(0)->XboxUserId == updateVecSingle->GetAt(0));
-
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
-    }
-
-    DEFINE_TEST_CASE(TestSocialManagerErrorWithInvalidArgs)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerErrorWithInvalidArgs);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
-        Platform::Collections::Vector<Platform::String^>^ socialUserList = ref new Platform::Collections::Vector<Platform::String^>({ _T("A"), _T("B"), _T("C") });
-        Platform::Collections::Vector<Platform::String^>^ socialUserListLarge = ref new Platform::Collections::Vector<Platform::String^>();
-        for (int i = 0; i < 101; ++i)
-        {
-            stringstream_t str;
-            str << i;
-
-            socialUserListLarge->Append(ref new Platform::String(str.str().c_str()));
         }
-        Platform::Collections::Vector<Platform::String^>^ socialUserListEmpty = ref new Platform::Collections::Vector<Platform::String^>();
 
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(socialManagerInitializationStruct.socialManager->AddLocalUser(nullptr, SocialManagerExtraDetailLevel::PreferredColorLevel), E_INVALIDARG);
-
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(socialManagerInitializationStruct.socialManager->RemoveLocalUser(nullptr), E_INVALIDARG);
-
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(nullptr, PresenceFilter::All, RelationshipFilter::Favorite), E_INVALIDARG);
-
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromList(nullptr, socialUserList->GetView()), E_INVALIDARG);
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromList(xboxLiveContext->user(), nullptr), E_INVALIDARG);
-        VERIFY_THROWS_HR_CX(socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromList(xboxLiveContext->user(), socialUserListEmpty->GetView()), E_INVALIDARG);
-        VERIFY_THROWS_HR_CX(socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromList(xboxLiveContext->user(), socialUserListLarge->GetView()), E_INVALIDARG);
-        auto groupList = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromList(xboxLiveContext->user(), socialUserList->GetView());
-        auto groupFilter = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(xboxLiveContext->user(), PresenceFilter::All, RelationshipFilter::Friends);
-        VERIFY_THROWS_HR_CX(socialManagerInitializationStruct.socialManager->UpdateSocialUserGroup(nullptr, socialUserList->GetView()), E_INVALIDARG);
-        VERIFY_THROWS_HR_CX(socialManagerInitializationStruct.socialManager->UpdateSocialUserGroup(groupList, socialUserListLarge->GetView()), E_INVALIDARG);
-        VERIFY_THROWS_HR_CX(socialManagerInitializationStruct.socialManager->UpdateSocialUserGroup(groupFilter, socialUserListLarge->GetView()), E_INVALIDARG);
-
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(socialManagerInitializationStruct.socialManager->DestroySocialUserGroup(nullptr), E_INVALIDARG);
-
-        socialManagerInitializationStruct.socialManager->RemoveLocalUser(xboxLiveContext->user());
-        VERIFY_IS_TRUE(socialManagerInitializationStruct.socialManager->LocalUsers->Size == 0);
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(friendsGroup));
     }
 
-    DEFINE_TEST_CASE(TestSocialManagerErrorImproperCallingOrder)
+    DEFINE_TEST_CASE(TestFilters)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerErrorImproperCallingOrder);
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
+        SMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        env.AddLocalUser(xboxLiveContext->User());
+        auto user{ xboxLiveContext->User().Handle() };
 
-        Platform::Collections::Vector<Platform::String^>^ socialUserList = ref new Platform::Collections::Vector<Platform::String^>({ _T("A"), _T("B"), _T("C") });
+        XblSocialManagerUserGroupHandle allFriends, titleOnlineFriends, allFavorites, allOfflineFriends, titleOfflineFriends, allOnlineFriends, allTitleFriends;
 
-        VERIFY_THROWS_HR_CX(SocialManager::SingletonInstance->CreateSocialUserGroupFromFilters(xboxLiveContext->user(), PresenceFilter::All, RelationshipFilter::Favorite), E_UNEXPECTED);
-        VERIFY_THROWS_HR_CX(SocialManager::SingletonInstance->CreateSocialUserGroupFromList(xboxLiveContext->user(), socialUserList->GetView()), E_UNEXPECTED);
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(user, XblPresenceFilter::All, XblRelationshipFilter::Friends, &allFriends));
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(user, XblPresenceFilter::TitleOnline, XblRelationshipFilter::Friends, &titleOnlineFriends));
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(user, XblPresenceFilter::All, XblRelationshipFilter::Favorite, &allFavorites));
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(user, XblPresenceFilter::AllOffline, XblRelationshipFilter::Friends, &allOfflineFriends));
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(user, XblPresenceFilter::TitleOffline, XblRelationshipFilter::Friends, &titleOfflineFriends));
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(user, XblPresenceFilter::AllOnline, XblRelationshipFilter::Friends, &allOnlineFriends));
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(user, XblPresenceFilter::AllTitle, XblRelationshipFilter::Friends, &allTitleFriends));
 
-        SocialManager::SingletonInstance->AddLocalUser(xboxLiveContext->user(), SocialManagerExtraDetailLevel::NoExtraDetail);
-        VERIFY_THROWS_HR_CX(SocialManager::SingletonInstance->AddLocalUser(xboxLiveContext->user(), SocialManagerExtraDetailLevel::NoExtraDetail), E_UNEXPECTED);
-        auto userGroup = SocialManager::SingletonInstance->CreateSocialUserGroupFromFilters(xboxLiveContext->user(), PresenceFilter::All, RelationshipFilter::Friends);
-        SocialManager::SingletonInstance->DestroySocialUserGroup(userGroup);
-        VERIFY_THROWS_HR_CX(SocialManager::SingletonInstance->DestroySocialUserGroup(userGroup), E_INVALIDARG);
+        env.AwaitEvents({ {XblSocialManagerEventType::SocialUserGroupLoaded, 7} });
 
-        SocialManager::SingletonInstance->RemoveLocalUser(xboxLiveContext->user());
-        VERIFY_THROWS_HR_CX(SocialManager::SingletonInstance->RemoveLocalUser(xboxLiveContext->user()), E_UNEXPECTED);
+        // Verify initial user sizes
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size(), env.GetUsersCount(allFriends));
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size(), env.GetUsersCount(titleOnlineFriends));
+        VERIFY_ARE_EQUAL_INT(0, env.GetUsersCount(allFavorites));
+        VERIFY_ARE_EQUAL_INT(0, env.GetUsersCount(allOfflineFriends));
+        VERIFY_ARE_EQUAL_INT(0, env.GetUsersCount(titleOfflineFriends));
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size(), env.GetUsersCount(allOnlineFriends));
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size(), env.GetUsersCount(allTitleFriends));
 
-        SocialManager::SingletonInstance->DoWork();     // clear out any events that may be in the queue
-    }
+        // Setup a mock that will affect multiple groups: Online->Offline && Followed->Favorite
+        env.SetPeoplehubMock(false, true);
 
-    DEFINE_TEST_CASE(TestSocialManagerHTTPFailure)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerHTTPFailure);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
+        uint64_t changedXuid{ 1 };
 
-        auto socialManagerInitializationStruct = InitializeSocialManagerWithError(xboxLiveContext);
+        auto userResult = User::WrapHandle(user);
+        env.FireSocialGraphChangedRtaEvent(userResult.ExtractPayload(), XblSocialNotificationType::Changed, changedXuid);
 
-        SocialManager::SingletonInstance->RemoveLocalUser(xboxLiveContext->user());
-        socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
-        Platform::Collections::Vector<Platform::String^>^ vec = ref new Platform::Collections::Vector<Platform::String^>({ _T("5001"), _T("5002"), _T("5003") });
-
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[_T("https://peoplehub.mockenv.xboxlive.com")] = CreateSocialGroupFromListResponse(vec, 401);
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-        auto socialUserGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromList(xboxLiveContext->user(), vec->GetView());
-        bool shouldLoop = true;
-        do
+        bool profileChanged{ false };
+        bool presenceChanged{ false };
+        while (!profileChanged || !presenceChanged)
         {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
+            auto events = env.DoWork();
+            for (auto event : events)
             {
-                if (evt->EventType == SocialEventType::SocialUserGroupLoaded)
+                switch (event->eventType)
                 {
-                    shouldLoop = false;
-                    // TODO: ?
-                    //VERIFY_ARE_EQUAL(evt->ErrorCode, xbox::services::utils::convert_xbox_live_error_code_to_hresult(xbox_live_error_code::http_status_401_unauthorized));
+                case XblSocialManagerEventType::SocialRelationshipsChanged:
+                {
+                    VERIFY_IS_TRUE(event->usersAffected[0]->xboxUserId == changedXuid);
+                    VERIFY_IS_TRUE(event->usersAffected[0]->isFavorite == true);
+                    VERIFY_IS_TRUE(event->usersAffected[1] == nullptr);
+                    profileChanged = true;
+                    break;
+                }
+                case XblSocialManagerEventType::PresenceChanged:
+                {
+                    VERIFY_IS_TRUE(event->usersAffected[0]->xboxUserId == changedXuid);
+                    VERIFY_IS_TRUE(event->usersAffected[0]->presenceRecord.userState == XblPresenceUserState::Offline);
+                    VERIFY_IS_TRUE(event->usersAffected[1] == nullptr);
+                    presenceChanged = true;
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
                 }
             }
-        } while (shouldLoop);
+        }
 
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
-    }
+        // verify groups are affected as expected
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size(), env.GetUsersCount(allFriends));
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size() - 1, env.GetUsersCount(titleOnlineFriends));
+        VERIFY_ARE_EQUAL_INT(1, env.GetUsersCount(allFavorites));
+        VERIFY_ARE_EQUAL_INT(1, env.GetUsersCount(allOfflineFriends));
+        VERIFY_ARE_EQUAL_INT(1, env.GetUsersCount(titleOfflineFriends));
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size() - 1, env.GetUsersCount(allOnlineFriends));
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size(), env.GetUsersCount(allTitleFriends));
 
-    // Verifies internal values from internal social groups
-    DEFINE_TEST_CASE(TestSocialManagerCreateDestroyGroup)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerCreateDestroyGroup);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
-        auto socialManager = socialManagerInitializationStruct.socialManager;
-        auto socialUserGroupFilter = socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-            );
+        std::vector<uint64_t> offlineXuids{ 1, 2, 3, 4, 5 };
+        env.SetPresenceMock(offlineXuids);
+        env.FireDevicePresenceChangeRtaEvent(offlineXuids);
 
-        bool shouldLoop = true;
-        do
+        size_t presenceChangedEvents{ 0 };
+        while (presenceChangedEvents < offlineXuids.size())
         {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
+            auto events = env.DoWork();
+            for (auto event : events)
             {
-                if (evt->EventType == SocialEventType::SocialUserGroupLoaded)
+                switch (event->eventType)
                 {
-                    shouldLoop = false;
+                case XblSocialManagerEventType::PresenceChanged:
+                {
+                    for (auto affectedUser : event->usersAffected)
+                    {
+                        if (affectedUser)
+                        {
+                            VERIFY_IS_TRUE(affectedUser->xboxUserId > 0 && affectedUser->xboxUserId < 6);
+                            ++presenceChangedEvents;
+                        }
+                    }
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
                 }
             }
-        } while (shouldLoop);
-        auto socialManagerCppMock = std::dynamic_pointer_cast<MockSocialManager>(socialManager->GetCppObj());
-        socialManagerCppMock->_Log_state();
-        string_t xuid = socialManager->LocalUsers->GetAt(0)->XboxUserId->ToString()->Data();
-        VERIFY_IS_TRUE(socialManagerCppMock != nullptr);
-        VERIFY_IS_TRUE(socialManagerCppMock->user_to_view_map().at(xuid).size() == 1);
-        VERIFY_IS_TRUE(socialManagerCppMock->local_graphs().size() == 1);
-        VERIFY_IS_TRUE(socialManagerCppMock->xbox_social_user_groups().size() == 1);
-        socialManager->DestroySocialUserGroup(socialUserGroupFilter);
-        socialManagerCppMock->_Log_state();
-        VERIFY_IS_TRUE(socialManagerCppMock->user_to_view_map().at(xuid).size() == 0);
-        VERIFY_IS_TRUE(socialManagerCppMock->xbox_social_user_groups().size() == 0);
-        socialUserGroupFilter = socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
+        }
+
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size(), env.GetUsersCount(allFriends));
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size() - offlineXuids.size(), env.GetUsersCount(titleOnlineFriends));
+        VERIFY_ARE_EQUAL_INT(1, env.GetUsersCount(allFavorites));
+        VERIFY_ARE_EQUAL_INT(offlineXuids.size(), env.GetUsersCount(allOfflineFriends));
+        VERIFY_ARE_EQUAL_INT(offlineXuids.size(), env.GetUsersCount(titleOfflineFriends));
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size() - offlineXuids.size(), env.GetUsersCount(allOnlineFriends));
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size(), env.GetUsersCount(allTitleFriends));
+
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(allFriends));
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(titleOnlineFriends));
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(allFavorites));
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(allOfflineFriends));
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(titleOfflineFriends));
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(allOnlineFriends));
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(allTitleFriends));
+    }
+
+    DEFINE_TEST_CASE(TestRichPresencePolling)
+    {
+        SMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        env.AddLocalUser(xboxLiveContext->User());
+
+        XblSocialManagerUserGroupHandle onlineFriends{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(
+            xboxLiveContext->User().Handle(),
+            XblPresenceFilter::AllOnline,
+            XblRelationshipFilter::Friends,
+            &onlineFriends
+        ));
+
+        env.AwaitEvents({ {XblSocialManagerEventType::SocialUserGroupLoaded, 1} });
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size(), env.GetUsersCount(onlineFriends));
+
+        // Change presence mock so we get a PresenceChanged event when it is polled
+        std::vector<uint64_t> offlineUsers{ 1, 2, 3 };
+        env.SetPresenceMock(offlineUsers);
+        VERIFY_SUCCEEDED(XblSocialManagerSetRichPresencePollingStatus(xboxLiveContext->User().Handle(), true));
+
+        size_t presenceChangedEvents{ 0 };
+        while (presenceChangedEvents < offlineUsers.size())
+        {
+            auto events = env.DoWork();
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::PresenceChanged:
+                {
+                    for (auto affectedUser : event->usersAffected)
+                    {
+                        if (affectedUser)
+                        {
+                            ++presenceChangedEvents;
+                        }
+                    }
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        VERIFY_ARE_EQUAL_INT(offlineUsers.size(), presenceChangedEvents);
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size() - offlineUsers.size(), env.GetUsersCount(onlineFriends));
+
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(onlineFriends));
+    }
+
+    DEFINE_TEST_CASE(TestEventUserHandleLifetime)
+    {
+        SMTestEnvironment env{};
+
+        uint64_t const presenceChangedXuid{ 1 };
+        std::vector<const XblSocialManagerEvent*> events{};
+
+        XblSocialManagerUserGroupHandle groupHandle{ nullptr };
+
+        {
+            // Add a user to SocialManager and create a user group but don't hang on to the user handle. 
+            // Ensure the user handles returned in all SM events remain valid until the next DoWork call
+            User user{ CreateMockUser(MOCK_XUID) };
+            env.AddLocalUser(user);
+
+            VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(
+                user.Handle(),
+                XblPresenceFilter::AllOnline,
+                XblRelationshipFilter::Friends,
+                &groupHandle
+            ));
+        }
+
+        bool groupLoaded{ false };
+        while (!groupLoaded)
+        {
+            events = env.DoWork();
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::SocialUserGroupLoaded:
+                {
+                    groupLoaded = true;
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(groupHandle));
+        {
+            // Ensure the user in the event is valid even after destroying the group
+            auto userFromEventResult = User::WrapHandle(events[0]->user);
+            VERIFY_ARE_EQUAL_UINT(MOCK_XUID, userFromEventResult.ExtractPayload().Xuid());
+        }
+
+        // Make a user go offline to trigger event
+        env.SetPresenceMock({ presenceChangedXuid });
+        env.FireDevicePresenceChangeRtaEvent({ presenceChangedXuid }, false);
+
+        bool presenceChanged{ false };
+        while (!presenceChanged)
+        {
+            events = env.DoWork();
+            for (auto event : events)
+            {
+                switch (event->eventType)
+                {
+                case XblSocialManagerEventType::PresenceChanged:
+                {
+                    VERIFY_ARE_EQUAL_UINT(presenceChangedXuid, event->usersAffected[0]->xboxUserId);
+                    presenceChanged = true;
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
+                }
+            }
+        }
+
+        XblUserHandle userHandle{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerGetLocalUsers(1, &userHandle));
+        VERIFY_SUCCEEDED(XblSocialManagerRemoveLocalUser(userHandle));
+
+        {
+            // Ensure the user handle from the event is still valid after removing the user
+            auto userFromEventResult = User::WrapHandle(events[0]->user);
+            VERIFY_ARE_EQUAL_UINT(MOCK_XUID, userFromEventResult.ExtractPayload().Xuid());
+        }
+    }
+
+    DEFINE_TEST_CASE(CppTestBasicCreateFilterGroup)
+    {
+        SMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
+        xbox_live_user_t userHandle = xboxLiveContext->user();
+
+        auto socialManager{ social_manager::get_singleton_instance() };
+
+        auto addUserResult = socialManager->add_local_user(
+            userHandle,
+            social_manager_extra_detail_level::no_extra_detail
         );
-        shouldLoop = true;
-        do
-        {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
+        VERIFY_IS_TRUE(!addUserResult.err());
 
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
+        {
+            // Wait until we get the local_user_added event
+            bool localUserAdded{ false };
+            while (!localUserAdded)
             {
-                if (evt->EventType == SocialEventType::SocialUserGroupLoaded)
+                auto events{ socialManager->do_work() };
+                for (auto event : events)
                 {
-                    shouldLoop = false;
+                    switch (event.event_type())
+                    {
+                    case social_event_type::local_user_added:
+                    {
+                        localUserAdded = true;
+                        break;
+                    }
+                    default:
+                    {
+                        LOGS_DEBUG << "Unexpected SocialManager Event";
+                        VERIFY_FAIL();
+                    }
+                    }
                 }
             }
-        } while (shouldLoop);
-        socialManagerCppMock->_Log_state();
-        VERIFY_IS_TRUE(socialManagerCppMock->user_to_view_map().at(xuid).size() == 1);
-        VERIFY_IS_TRUE(socialManagerCppMock->local_graphs().size() == 1);
-        VERIFY_IS_TRUE(socialManagerCppMock->xbox_social_user_groups().size() == 1);
-        socialManager->DestroySocialUserGroup(socialUserGroupFilter);
-        socialManagerCppMock->_Log_state();
-        VERIFY_IS_TRUE(socialManagerCppMock->user_to_view_map().at(xuid).size() == 0);
-        VERIFY_IS_TRUE(socialManagerCppMock->xbox_social_user_groups().size() == 0);
-        VERIFY_IS_TRUE(socialManagerCppMock->local_user_list().size() == 1);
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
-
-        socialManagerCppMock->_Log_state();
-        VERIFY_IS_TRUE(socialManagerCppMock->user_to_view_map().size() == 0);
-        VERIFY_IS_TRUE(socialManagerCppMock->local_graphs().size() == 0);
-        VERIFY_IS_TRUE(socialManagerCppMock->xbox_social_user_groups().size() == 0);
-        VERIFY_IS_TRUE(socialManagerCppMock->local_user_list().size() == 0);
-    }
-
-    void VerifyUserBuffer(user_buffer& userBuffer, size_t userGroupSize)
-    {
-        auto xboxSocialUserSize = sizeof(xbox_social_user);
-        byte* endPos = userBuffer.buffer + xboxSocialUserSize * userGroupSize;
-        for (uint32_t i = 0; i < 5; ++i)
-        {
-            byte* freeData = userBuffer.freeData.front();
-            const byte* endData = endPos + i * xboxSocialUserSize;
-            VERIFY_IS_TRUE(freeData == endData);
-            userBuffer.freeData.pop();
         }
 
-        VERIFY_IS_TRUE(userBuffer.socialUserEventQueue.size() == 0);
-        VERIFY_IS_TRUE(userBuffer.socialUserGraph.size() == userGroupSize);
-    }
+        auto createGroupResult = socialManager->create_social_user_group_from_filters(
+            userHandle,
+            presence_filter::all,
+            relationship_filter::friends
+        );
 
-    // Make sure memory is alloced correctly for the user buffer holder internal structure
-    DEFINE_TEST_CASE(TestSocialManagerUserBufferHolder)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerUserBufferHolder);
-        auto peopleHubService = SocialManagerHelper::GetPeoplehubService();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubResponse));
+        VERIFY_IS_TRUE(!createGroupResult.err());
+        auto group = createGroupResult.payload();
 
-        user_buffers_holder userBufferHolder;
-
-        std::vector<string_t> xuids;
-        xuids.push_back(_T("1"));
-        auto userGroup = peopleHubService.get_social_graph(_T("TestXboxUserId"), social_manager_extra_detail_level::preferred_color_level, xuids).get();
-        VERIFY_IS_TRUE(!userGroup.err());
-
-        userBufferHolder.initialize(userGroup.payload());
-        size_t userGroupSize = userGroup.payload().size();
-
-        VERIFY_IS_TRUE(&userBufferHolder.user_buffer_a() == userBufferHolder.active_buffer());
-        VERIFY_IS_TRUE(&userBufferHolder.user_buffer_b() == userBufferHolder.inactive_buffer());
-
-        VerifyUserBuffer(userBufferHolder.user_buffer_a(), userGroupSize);
-        VerifyUserBuffer(userBufferHolder.user_buffer_b(), userGroupSize);
-    }
-
-    DEFINE_TEST_CASE(TestSocialManagerUserBufferAddUsersWithNoInit)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerUserBufferAddUsersWithNoInit);
-        auto peopleHubService = SocialManagerHelper::GetPeoplehubService();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubResponse));
-
-        user_buffers_holder userBufferHolder;
-
-        std::vector<string_t> xuids;
-        xuids.push_back(_T("1"));
-        auto userGroup = peopleHubService.get_social_graph(_T("TestXboxUserId"), social_manager_extra_detail_level::preferred_color_level, xuids).get();
-        VERIFY_IS_TRUE(!userGroup.err());
-
-        userBufferHolder.initialize(std::vector<xbox_social_user>());
-        userBufferHolder.add_users_to_buffer(userGroup.payload(), *userBufferHolder.inactive_buffer());
-        userBufferHolder.add_users_to_buffer(userGroup.payload(), *userBufferHolder.active_buffer());
-        size_t userGroupSize = userGroup.payload().size();
-
-        VERIFY_IS_TRUE(&userBufferHolder.user_buffer_a() == userBufferHolder.active_buffer());
-        VERIFY_IS_TRUE(&userBufferHolder.user_buffer_b() == userBufferHolder.inactive_buffer());
-
-        VerifyUserBuffer(userBufferHolder.user_buffer_a(), userGroupSize);
-        VerifyUserBuffer(userBufferHolder.user_buffer_b(), userGroupSize);
-    }
-
-    DEFINE_TEST_CASE(TestSocialManagerUserBufferAddUsersNoData)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerUserBufferAddUsersNoData);
-        auto peopleHubService = SocialManagerHelper::GetPeoplehubService();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(peoplehubResponse));
-
-        user_buffers_holder userBufferHolder;
-
-        userBufferHolder.initialize(std::vector<xbox_social_user>());
-        userBufferHolder.add_users_to_buffer(std::vector<xbox_social_user>(), *userBufferHolder.inactive_buffer());
-        userBufferHolder.add_users_to_buffer(std::vector<xbox_social_user>(), *userBufferHolder.active_buffer());
-
-        VERIFY_IS_TRUE(&userBufferHolder.user_buffer_a() == userBufferHolder.active_buffer());
-        VERIFY_IS_TRUE(&userBufferHolder.user_buffer_b() == userBufferHolder.inactive_buffer());
-
-        VERIFY_IS_TRUE(userBufferHolder.user_buffer_a().socialUserGraph.size() == 0);
-        VERIFY_IS_TRUE(userBufferHolder.user_buffer_b().socialUserGraph.size() == 0);
-
-        VERIFY_IS_TRUE(userBufferHolder.user_buffer_a().freeData.size() == 0);
-        VERIFY_IS_TRUE(userBufferHolder.user_buffer_b().freeData.size() == 0);
-    }
-
-    // Verifies that get_user_copy API (C++ only) works properly in copying the data
-    DEFINE_TEST_CASE(TestSocialManagerUserGroupCopy)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerUserGroupCopy);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
-        auto socialManager = socialManagerInitializationStruct.socialManager;
-        auto socialUserGroupFilter = socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-            );
-
-        bool shouldLoop = true;
-        do
+        bool groupLoaded{ false };
+        while (!groupLoaded)
         {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
+            auto events{ socialManager->do_work() };
+            for (auto event : events)
             {
-                if (evt->EventType == SocialEventType::SocialUserGroupLoaded)
+                switch (event.event_type())
                 {
-                    shouldLoop = false;
+                case social_event_type::social_user_group_loaded:
+                {
+                    auto groupLoadedArgs = static_cast<social_user_group_loaded_event_args*>(event.event_args().get());
+                    VERIFY_IS_TRUE(group == groupLoadedArgs->social_user_group());
+                    groupLoaded = true;
+                    break;
+                }
+                default:
+                {
+                    LOGS_DEBUG << "Unexpected SocialManager Event";
+                    VERIFY_FAIL();
+                }
                 }
             }
-        } while (shouldLoop);
+        }
 
-        auto cppObj = socialUserGroupFilter->GetCppObj();
-        std::vector<xbox_social_user> users;
-        auto result = cppObj->get_copy_of_users(users);
-        VERIFY_IS_TRUE(!result.err());
+        auto users{ group->users() };
+        VERIFY_ARE_EQUAL(group->users_tracked_by_social_user_group().size(), users.size());
+
         for (auto user : users)
         {
-            VERIFY_ARE_EQUAL_STR(L"TestGamerTag", user.display_name());
-            VERIFY_ARE_EQUAL_STR(L"http://images-eds.xboxlive.com/image?url=mHGRD8KXEf2sp2LC58XhBQKNl2IWRp.J.q8mSURKUUeiPPf0Y7Kl7zLN7rafayiPptVaX_XIUmNOPotNmNubbx4bHmf6It7Oj1ChU5UAo9k-&background=0xababab&mode=Padding&format=png", user.display_pic_url_raw());
-            VERIFY_IS_TRUE(user.is_followed_by_caller());
-            VERIFY_IS_TRUE(user.is_following_user());
-            VERIFY_ARE_EQUAL_STR(L"9001", user.gamerscore());
-            VERIFY_ARE_EQUAL_STR(L"TestGamerTag", user.gamertag());
-            VERIFY_IS_FALSE(user.is_favorite());
-            VERIFY_ARE_EQUAL_STR(L"193e91", user.preferred_color().primary_color());
-            VERIFY_ARE_EQUAL_STR(L"2458cf", user.preferred_color().secondary_color());
-            VERIFY_ARE_EQUAL_STR(L"122e6b", user.preferred_color().tertiary_color());
-            VERIFY_IS_TRUE(user.presence_record().presence_title_records().size() == 1);
-            VERIFY_IS_FALSE(user.use_avatar());
-            VERIFY_IS_TRUE(user.title_history().has_user_played());
-            auto str = user.title_history().last_time_user_played().to_string(utility::datetime::date_format::ISO_8601);
-            VERIFY_IS_TRUE(utils::str_icmp(str, L"2015-01-26T22:54:54.663Z") == 0);
+            // profile tests
+            LOGS_DEBUG << "Validating user " << user->xbox_user_id();
+            VERIFY_ARE_EQUAL_STR("TestGamerTag", user->display_name());
+            VERIFY_ARE_EQUAL_STR("http://images-eds.xboxlive.com/image?url=mHGRD8KXEf2sp2LC58XhBQKNl2IWRp.J.q8mSURKUUeiPPf0Y7Kl7zLN7rafayiPptVaX_XIUmNOPotNmNubbx4bHmf6It7Oj1ChU5UAo9k-&background=0xababab&mode=Padding&format=png", user->display_pic_url_raw());
+            VERIFY_IS_TRUE(user->is_followed_by_caller());
+            VERIFY_IS_TRUE(user->is_following_user());
+            VERIFY_ARE_EQUAL_STR("9001", user->gamerscore());
+            VERIFY_ARE_EQUAL_STR("TestGamerTag", user->gamertag());
+            VERIFY_ARE_EQUAL_STR("TestGamerTag", user->modern_gamertag());
+            VERIFY_ARE_EQUAL_STR("", user->modern_gamertag_suffix());
+            VERIFY_ARE_EQUAL_STR("TestGamerTag", user->unique_modern_gamertag());
+            VERIFY_IS_FALSE(user->is_favorite());
+            VERIFY_IS_FALSE(user->use_avatar());
+
+            // preferred color tests
+            VERIFY_ARE_EQUAL_STR("193e91", user->preferred_color().primary_color());
+            VERIFY_ARE_EQUAL_STR("2458cf", user->preferred_color().secondary_color());
+            VERIFY_ARE_EQUAL_STR("122e6b", user->preferred_color().tertiary_color());
+
+            // presence record tests
+            VERIFY_IS_TRUE(user->presence_record().presence_title_records().size());
+            VERIFY_IS_TRUE(user->presence_record().user_state() == user_presence_state::online);
+            VERIFY_IS_TRUE(user->presence_record().is_user_playing_title(1234));
+            VERIFY_IS_TRUE(user->presence_record().presence_title_records()[0].is_title_active());
+            VERIFY_IS_TRUE(!user->presence_record().presence_title_records()[0].is_broadcasting());
+            VERIFY_IS_TRUE(user->presence_record().presence_title_records()[0].device_type() == presence_device_type::pc);
+            VERIFY_ARE_EQUAL_STR("Home", user->presence_record().presence_title_records()[0].presence_text());
+
+            // title history tests
+            VERIFY_IS_TRUE(user->title_history().has_user_played());
+            VERIFY_IS_TRUE(Utils::TimeTFromDatetime(user->title_history().last_time_user_played()) == utils::TimeTFromDatetime(xbox::services::datetime::from_string(_T("2015-01-26T22:54:54.6630Z"), xbox::services::datetime::date_format::ISO_8601)));
         }
 
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
-    }
-
-    // Quickly creating and destroying a social user group from list
-    DEFINE_TEST_CASE(TestSocialManagerAddRemoveUsersFromList)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerAddRemoveUsersFromList);
-
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
-        auto socialManagerCppMock = std::dynamic_pointer_cast<MockSocialManager>(socialManagerInitializationStruct.socialManager->GetCppObj());
-        Platform::Collections::Vector<Platform::String^>^ vec = ref new Platform::Collections::Vector<Platform::String^>({ _T("100001"), _T("100002"), _T("100003") });
-
-
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[_T("https://peoplehub.mockenv.xboxlive.com")] = CreateSocialGroupFromListResponse(vec);
-
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-
-        auto userGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromList(
-            xboxLiveContext->user(),
-            vec->GetView()
-        );
-
-        socialManagerInitializationStruct.socialManager->DestroySocialUserGroup(userGroup);
-
-        bool usersRemovedFound = false;
-        bool usersAddedFound = false;
-        do
-        {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::UsersRemovedFromSocialGraph)
-                {
-                    usersRemovedFound = true;
-                }
-                else if (evt->EventType == SocialEventType::SocialUserGroupLoaded)
-                {
-                    usersAddedFound = true;
-                }
-            }
-        } while (!(usersRemovedFound && usersAddedFound));
-
-        {
-            auto localGraphs = socialManagerCppMock->local_graphs();
-            auto localGraph = localGraphs[_T("TestXboxUserId")];
-            std::vector<social_event> socialEvents;
-            auto changeStruct = localGraph->do_work(socialEvents);
-            VERIFY_IS_TRUE(changeStruct.socialUsers->size() == 99);
-        }
-
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
-    }
-
-    // Verifies that changes recieved during initialization are handled properly
-    DEFINE_TEST_CASE(TestSocialManagerMessageDuringInitialization)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerMessageDuringInitialization);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-
-        auto peoplehubResponseJson = GenerateInitialPeoplehubJSON();
-
-        auto peoplehubResponseStruct = GetPeoplehubResponseStruct(peoplehubResponseJson);
-
-        // set up http response set
-        responses[_T("https://peoplehub.mockenv.xboxlive.com")] = peoplehubResponseStruct;
-
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-
-        auto socialManager = SocialManager::SingletonInstance;
-        socialManager->LogState();
-        socialManager->AddLocalUser(xboxLiveContext->user(), SocialManagerExtraDetailLevel::NoExtraDetail);
-        std::vector<Platform::String^> userList = { "10001" };
-        pplx::task_completion_event<void> tce;
-        TestSocialGraphChange(userList, tce);
-        create_task(tce).wait();
-        std::vector<SocialEvent^> socialEvents;
-
-        TEST_LOG(L"Calling socialManager->AddLocalUser");
-        TEST_LOG(L"Looking for LocalUserAdded");
-        bool shouldLoop = true;
-        do
-        {
-            auto changeList = socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            for (auto evt : changeList)
-            {
-                socialEvents.push_back(evt);
-
-                if (evt->EventType == SocialEventType::LocalUserAdded)
-                {
-                    TEST_LOG(L"Found LocalUserAdded");
-                    shouldLoop = false;
-                    break;
-                }
-            }
-        } while (shouldLoop);
-        
-        SocialManagerInitializationStruct initStruct;
-        initStruct.socialManager = socialManager;
-        Cleanup(initStruct, xboxLiveContext);
-    }
-
-    // Verifies that social manager will reconnect after an RTA disconnect is hit
-    DEFINE_TEST_CASE(TestSocialManagerReinitializeRTA)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerReinitializeRTA);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, false);
-        auto socialManagerCppMock = std::dynamic_pointer_cast<MockSocialManager>(socialManagerInitializationStruct.socialManager->GetCppObj());
-        socialManagerCppMock->local_graphs().begin()->second->internal_xbox_live_context_impl()->settings()->set_websocket_timeout_window(std::chrono::seconds(1));
-        pplx::task_completion_event<void> disconnectTce;
-        pplx::task_completion_event<void> reconnectedTce;
-        for (auto& graph : socialManagerCppMock->local_graphs())
-        {
-            graph.second->add_state_handler(
-            [&disconnectTce, &reconnectedTce](real_time_activity_connection_state state)
-            {
-                static bool wasDisconnected = false;
-                if (state == real_time_activity_connection_state::disconnected)
-                {
-                    wasDisconnected = true;
-                    disconnectTce.set();
-                }
-                else if (state == real_time_activity_connection_state::connected && wasDisconnected)
-                {
-                    reconnectedTce.set();
-                }
-            });
-        }
-
-        for (auto& ws : m_mockXboxSystemFactory->GetMockWebSocketClients())
-        {
-            ws->m_connectToFail = true;
-            ws->m_closeStatus = web::websockets::client::websocket_close_status::abnormal_close;
-            ws->close();
-        }
-
-        pplx::create_task(disconnectTce).wait();
-
-        for (auto& ws : m_mockXboxSystemFactory->GetMockWebSocketClients())
-        {
-            ws->m_connectToFail = false;
-        }
-
-        pplx::create_task(reconnectedTce).wait();
-
-        pplx::task_completion_event<void> tce;
-        InitializeSubscriptions(USER_LIST, tce);
-        create_task(tce).wait();
-        socialManagerInitializationStruct.socialEvents.clear();
-
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
-    }
-
-    // Tests all possible cases of filtering working properly
-    DEFINE_TEST_CASE(TestSocialManagerFilters)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerFilters);
-
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
-
-        auto socialUserGroupAll = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-            );
-
-        // test title online friends
-        VERIFY_IS_TRUE(socialUserGroupAll->Users->Size == USER_LIST.size());
-
-        auto titleOnlineSocialUserGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::TitleOnline,
-            RelationshipFilter::Friends
-            );
-
-        socialManagerInitializationStruct.socialManager->DoWork();
-
-        VERIFY_IS_TRUE(titleOnlineSocialUserGroup->Users->Size == USER_LIST.size());
-        for (auto user : titleOnlineSocialUserGroup->Users)
-        {
-            VERIFY_IS_TRUE(user->PresenceRecord->UserState == UserPresenceState::Online);
-        }
-
-        // test title online favorites
-        auto favoriteTitleOnlineSocialUserGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::TitleOnline,
-            RelationshipFilter::Favorite
-            );
-
-        socialManagerInitializationStruct.socialManager->DoWork();
-        VERIFY_IS_TRUE(favoriteTitleOnlineSocialUserGroup->Users->Size == 0);
-
-        // update to have one favorite in graph
-        web::json::value jsonArray = web::json::value::array();
-        auto blob = defaultPeoplehubTemplate;
-        blob[L"xuid"] = web::json::value::string(_T("1"));
-        blob[L"isFavorite"] = web::json::value::boolean(true);
-        jsonArray[0] = blob;
-        web::json::value fullJSON;
-        fullJSON[L"people"] = jsonArray;
-
-
-        auto peopleHubResponse = StockMocks::CreateMockHttpCallResponse(fullJSON);
-        std::shared_ptr<HttpResponseStruct> peopleHubResponseStruct = std::make_shared<HttpResponseStruct>();
-        peopleHubResponseStruct->responseList = { peopleHubResponse };
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        // set up http response set
-        responses[_T("https://peoplehub.mockenv.xboxlive.com")] = peopleHubResponseStruct;
-
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-
-        // update friend to favorite
-        pplx::task_completion_event<void> tce;
-        std::queue<WebsocketMockResponse> responseQueue;
-        responseQueue.push({ L"http://social.xboxlive.com/users/xuid(TestXboxUserId)/friends", socialRelationshipChangedMessage, real_time_activity_message_type::change_event, false });
-        m_mockXboxSystemFactory->add_websocket_state_responses_to_all_clients(responseQueue, tce);
-        create_task(tce).wait();
-
-        socialManagerInitializationStruct.socialEvents.clear();
-        bool shouldLoop = true;
-        do
-        {
-            auto changeList = socialManagerInitializationStruct.socialManager->DoWork();
-            LogSocialManagerEvents(changeList);
-            AppendToPendingEvents(changeList, socialManagerInitializationStruct);
-
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::ProfilesChanged)
-                {
-                    VERIFY_IS_TRUE(evt->UsersAffected->Size == 1);
-                    VERIFY_IS_TRUE(evt->UsersAffected->GetAt(0) == L"1");
-                    shouldLoop = false;
-                    break;
-                }
-            }
-        } while (shouldLoop);
-
-        VERIFY_IS_TRUE(favoriteTitleOnlineSocialUserGroup->Users->Size == 1);
-
-        // all offline social user group
-        auto offlineSocialUserGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::AllOffline,
-            RelationshipFilter::Friends
-            );
-
-        VERIFY_IS_TRUE(offlineSocialUserGroup->Users->Size == 0);
-
-        socialManagerInitializationStruct.socialEvents.clear();
-        tce = pplx::task_completion_event<void>();
-        TestDevicePresenceChange(USER_LIST, tce, web::json::value::string(devicePresenceRtaMessageEvent).serialize());
-        create_task(tce).wait();
-
-        size_t totalSize = 0;
-        do
-        {
-            totalSize = 0;
-            AppendToPendingEvents(socialManagerInitializationStruct.socialManager->DoWork(), socialManagerInitializationStruct);
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::PresenceChanged)
-                {
-                    totalSize += evt->UsersAffected->Size;
-                    for (auto userStr : evt->UsersAffected)
-                    {
-                        for (auto user : socialUserGroupAll->Users)
-                        {
-                            if (utils::str_icmp(user->XboxUserId->Data(), userStr->Data()) == 0)
-                            {
-                                VERIFY_IS_TRUE(user->PresenceRecord->UserState == UserPresenceState::Offline);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        } while (totalSize != USER_LIST.size());
-
-        VERIFY_IS_TRUE(offlineSocialUserGroup->Users->Size == USER_LIST.size());
-        VERIFY_IS_TRUE(favoriteTitleOnlineSocialUserGroup->Users->Size == 0 && titleOnlineSocialUserGroup->Users->Size == 0);
-
-        // title offline social user group
-        auto titleOfflineSocialUserGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::TitleOffline,
-            RelationshipFilter::Friends
-            );
-
-        socialManagerInitializationStruct.socialManager->DoWork();
-        VERIFY_IS_TRUE(titleOfflineSocialUserGroup->Users->Size == USER_LIST.size());
-        VERIFY_IS_TRUE(favoriteTitleOnlineSocialUserGroup->Users->Size == 0);
-        // all online social user group
-        auto allOnlineSocialUserGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::AllOnline,
-            RelationshipFilter::Friends
-            );
-
-        SetDevicePresenceHTTPMock();
-        socialManagerInitializationStruct.socialManager->DoWork();
-        VERIFY_IS_TRUE(allOnlineSocialUserGroup->Users->Size == 0);
-        TestDevicePresenceChange(USER_LIST, tce, web::json::value::string(devicePresenceRtaMessagePCEvent).serialize());
-        create_task(tce).wait();
-
-        socialManagerInitializationStruct.socialEvents.clear();
-        totalSize = 0;
-        do
-        {
-            totalSize = 0;
-            AppendToPendingEvents(socialManagerInitializationStruct.socialManager->DoWork(), socialManagerInitializationStruct);
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::PresenceChanged)
-                {
-                    totalSize += evt->UsersAffected->Size;
-                    for (auto userStr : evt->UsersAffected)
-                    {
-                        for (auto user : socialUserGroupAll->Users)
-                        {
-                            if (utils::str_icmp(user->XboxUserId->Data(), userStr->Data()) == 0)
-                            {
-                                VERIFY_IS_TRUE(user->PresenceRecord->UserState == UserPresenceState::Online);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        } while (totalSize != USER_LIST.size());
-
-        VERIFY_IS_TRUE(allOnlineSocialUserGroup->Users->Size == USER_LIST.size());
-        VERIFY_IS_TRUE(titleOfflineSocialUserGroup->Users->Size == 0);
-        VERIFY_IS_TRUE(favoriteTitleOnlineSocialUserGroup->Users->Size == 1);
-        VERIFY_IS_TRUE(offlineSocialUserGroup->Users->Size == 0);
-
-        auto allTitleSocialUserGroup = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::AllTitle,
-            RelationshipFilter::Friends
-            );
-
-        VERIFY_IS_TRUE(allTitleSocialUserGroup->Users->Size == USER_LIST.size());
-
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
-    }
-
-    DEFINE_TEST_CASE(TestSocialManagerGetUsersFromXuidList)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerGetUsersFromXuidList);
-
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
-
-        auto socialUserGroupAll = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-            );
-
-        socialManagerInitializationStruct.socialManager->DoWork();
-
-        Platform::Collections::Vector<Platform::String^>^ vec = ref new Platform::Collections::Vector<Platform::String^>({ _T("1"), _T("2"), _T("3") });
-        auto users = socialUserGroupAll->GetUsersFromXboxUserIds(vec->GetView());
-        VERIFY_IS_TRUE(vec->Size == users->Size);
-
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
-    }
-
-    DEFINE_TEST_CASE(TestSocialManagerRichPresencePolling)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestSocialManagerRichPresencePolling);
-        m_mockXboxSystemFactory->reinit();
-        auto xboxLiveContext = GetMockXboxLiveContext_Cpp();
-        auto socialManagerInitializationStruct = Initialize(xboxLiveContext, true);
-        auto socialUserGroupAll = socialManagerInitializationStruct.socialManager->CreateSocialUserGroupFromFilters(
-            xboxLiveContext->user(),
-            PresenceFilter::All,
-            RelationshipFilter::Friends
-        );
-
-        auto presenceJSON = GenerateInitialPresenceJSON(false);
-        auto presenceResponse = StockMocks::CreateMockHttpCallResponse(presenceJSON);
-        std::shared_ptr<HttpResponseStruct> presenceResponseStruct = std::make_shared<HttpResponseStruct>();
-        presenceResponseStruct->responseList = { presenceResponse };
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        // set up http response set
-        responses[_T("https://userpresence.mockenv.xboxlive.com")] = presenceResponseStruct;
-
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-        VERIFY_IS_TRUE(socialUserGroupAll->Users->GetAt(0)->PresenceRecord->UserState == UserPresenceState::Online);
-
-        socialManagerInitializationStruct.socialManager->SetRichPresencePollingState(xboxLiveContext->user(), true);
-        while (true)
-        {
-            auto userCount = 0;
-            AppendToPendingEvents(socialManagerInitializationStruct.socialManager->DoWork(), socialManagerInitializationStruct);
-            for (auto evt : socialManagerInitializationStruct.socialEvents)
-            {
-                if (evt->EventType == SocialEventType::PresenceChanged)
-                {
-                    userCount += evt->UsersAffected->Size;
-                }
-            }
-
-            if (userCount == USER_LIST.size())
-            {
-                break;
-            }
-        }
-
-        VERIFY_IS_TRUE(socialUserGroupAll->Users->GetAt(0)->PresenceRecord->UserState == UserPresenceState::Offline);
-
-        socialManagerInitializationStruct.socialManager->SetRichPresencePollingState(xboxLiveContext->user(), false);
-
-        presenceJSON = GenerateInitialPresenceJSON(true);
-        presenceResponse = StockMocks::CreateMockHttpCallResponse(presenceJSON);
-        presenceResponseStruct = std::make_shared<HttpResponseStruct>();
-        presenceResponseStruct->responseList = { presenceResponse };
-        // set up http response set
-        responses[_T("https://userpresence.mockenv.xboxlive.com")] = presenceResponseStruct;
-
-        socialManagerInitializationStruct.socialManager->DoWork();
-        VERIFY_IS_TRUE(socialUserGroupAll->Users->GetAt(0)->PresenceRecord->UserState == UserPresenceState::Offline);
-
-        Cleanup(socialManagerInitializationStruct, xboxLiveContext);
+        auto destroyGroupResult = socialManager->destroy_social_user_group(group);
+        VERIFY_IS_TRUE(!destroyGroupResult.err());
+
+        auto removeUserResult = socialManager->remove_local_user(userHandle);
+        VERIFY_IS_TRUE(!removeUserResult.err());
+
+        auto events{ socialManager->do_work() };
+        VERIFY_ARE_EQUAL_INT(events.size(), 1);
+        VERIFY_IS_TRUE(events[0].event_type() == social_event_type::local_user_removed);
     }
 };
 

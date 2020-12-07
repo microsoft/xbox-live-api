@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
-#include "system_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -21,7 +20,7 @@ public:
     void register_for_protocol_activation();
 
 private:
-#if UWP_API || TV_API || UNIT_TEST_SERVICES
+#if HC_PLATFORM == HC_PLATFORM_UWP || HC_PLATFORM == HC_PLATFORM_XDK 
     void process_service_call_tracking_activation_uri(_In_ Windows::Foundation::Uri^ activationUri);
     Windows::Foundation::EventRegistrationToken m_onActivatedToken;
 #endif

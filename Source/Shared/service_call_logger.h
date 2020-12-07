@@ -3,7 +3,6 @@
 
 
 #pragma once
-#include "system_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -33,25 +32,27 @@ public:
 
     ~service_call_logger();
 
-    void log(_In_ const string_t& item);
+    void log(_In_ const xsapi_internal_string& item);
 
-    string_t file_location();
+    xsapi_internal_string file_location();
 
 private:
 
+#if HC_PLATFORM_IS_MICROSOFT
     void create_log_file();
-    void add_data_to_file(_In_ const string_t& data);
+#endif
+    void add_data_to_file(_In_ const xsapi_internal_string& data);
 
     service_call_logger();
     service_call_logger(const service_call_logger&);
     void operator=(const service_call_logger&);
 
     std::ofstream m_fileStream;
-    string_t m_fileLocation;
+    xsapi_internal_string m_fileLocation;
     bool m_isEnabled;
     bool m_firstWrite;
 
-    xbox::services::system::xbox_live_mutex m_writeLock;
+    std::mutex m_writeLock;
 
 };
 

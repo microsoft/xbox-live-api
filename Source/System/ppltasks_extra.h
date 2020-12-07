@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
+#if !XSAPI_NO_PPL
 
 #include <ppltasks.h>
 #include <agents.h>
@@ -107,3 +108,5 @@ namespace Concurrency
     }
 }
 
+
+#endif

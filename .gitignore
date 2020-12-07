@@ -1,6 +1,9 @@
 .gitconfig
 .git-credentials
 
+# Ignore iOS Framework binarie
+Frameworks/
+
 # Ignore OpenSSL and Boost build files for iOS
 
 .gitk
@@ -21,10 +24,28 @@ External/Packages/*
 
 #mobile
 External/sdk.mobile
+.gradle/
 
-# Xcode
-
+# Xcode - from github
+## User settings
 xcuserdata
+
+## compatibility with Xcode 8 and earlier (ignoring not required starting Xcode 9)
+*.xcscmblueprint
+*.xccheckout
+
+## compatibility with Xcode 3 and earlier (ignoring not required starting Xcode 4)
+build/
+DerivedData/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
 
 # Mac
 
@@ -53,6 +74,9 @@ xcuserdata
 **/*.coveragexml
 
 **/Durango/
+**/Gaming.Xbox.Desktop.x64/
+**/Gaming.Xbox.XboxOne.x64/
+**/Gaming.Xbox.Scarlett.x64/
 **/XboxOne.x64/
 Samples/**/bin/
 Samples/**/Debug/
@@ -81,6 +105,7 @@ tests/**/Release/
 Tools/**/bin/
 Tools/**/obj/
 **/*.classpath
+APIExplorer.Win32.PrebuiltBins.sln
 
 **/local.properties
 
@@ -101,7 +126,6 @@ TestResults/
 Casablanca/Intermediate/
 Obj/
 Binaries/
-Win32/
 Debug/
 Release/
 ARM/
@@ -110,11 +134,27 @@ ARM/
 !/Build
 !/Casablanca
 
-!TAEF/**
 
 **/.vs/
 
-TAEF
 xbox-live-samples/
 Tests/StressUnitTest/
 *.pdb
+
+Maven/
+output/
+ClockSkew.json
+
+.idea
+*.iml
+.externalNativeBuild
+
+**/XblEvents*.json
+**/XblEvents*.dir
+
+Tests/AndroidTestApp/MavenBinary/*
+Tests/APIExplorer/XDK/Kits/DirectXTK/Src/Shaders/Compiled/*
+
+Microsoft.Xbox.Services.*.sln.log
+Microsoft.Xbox.Services.*.sln.out
+**/apirunner-log.txt

@@ -2,118 +2,162 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/social.h"
-#include "xbox_system_factory.h"
-#include "utils.h"
-#include "user_context.h"
 #include "social_internal.h"
-
-using namespace pplx;
+#include "real_time_activity_manager.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
-social_service::social_service(
-    _In_ std::shared_ptr<xbox::services::user_context> userContext,
-    _In_ std::shared_ptr<xbox::services::xbox_live_context_settings> xboxLiveContextSettings,
-    _In_ std::shared_ptr<xbox::services::xbox_live_app_config> appConfig,
-    _In_ std::shared_ptr<xbox::services::real_time_activity::real_time_activity_service> realTimeActivityService
-    ) :
-    m_userContext(userContext),
-    m_xboxLiveContextSettings(xboxLiveContextSettings),
-    m_socialServiceImpl(std::make_shared<social_service_impl>(userContext, xboxLiveContextSettings, appConfig, realTimeActivityService))
+SocialService::SocialService(
+    _In_ User&& user,
+    _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
+    _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaManager
+) noexcept :
+    m_user{ std::move(user) },
+    m_xboxLiveContextSettings{ std::move(xboxLiveContextSettings) },
+    m_rtaManager{ std::move(rtaManager) }
 {
 }
 
-pplx::task<xbox_live_result<xbox_social_relationship_result>> 
-social_service::get_social_relationships()
+SocialService::~SocialService() noexcept
 {
-    return get_social_relationships(m_userContext->xbox_user_id(), xbox_social_relationship_filter::all, 0, 0);
+    if (m_socialRelationshipChangedSubscription)
+    {
+        m_rtaManager->RemoveSubscription(m_user, m_socialRelationshipChangedSubscription);
+    }
 }
 
-pplx::task<xbox_live_result<xbox_social_relationship_result>>
-social_service::get_social_relationships(
-    _In_ const string_t& xboxUserId
-    )
+XblFunctionContext SocialService::AddSocialRelationshipChangedHandler(
+    _In_ SocialRelationshipChangedHandler handler
+) noexcept
 {
-    return get_social_relationships(xboxUserId, xbox_social_relationship_filter::all, 0, 0);
+    std::lock_guard<std::mutex> lock{ m_lock };
+
+    if (!m_socialRelationshipChangedSubscription)
+    {
+        m_socialRelationshipChangedSubscription = MakeShared<SocialRelationshipChangeSubscription>(m_user.Xuid());
+        m_rtaManager->AddSubscription(m_user, m_socialRelationshipChangedSubscription);
+    }
+    return m_socialRelationshipChangedSubscription->AddHandler(std::move(handler));
 }
 
-pplx::task<xbox_live_result<xbox_social_relationship_result>> 
-social_service::get_social_relationships(
-    _In_ xbox_social_relationship_filter socialRelationshipFilter
-    )
+void SocialService::RemoveSocialRelationshipChangedHandler(
+    _In_ XblFunctionContext token
+) noexcept
 {
-    return get_social_relationships(m_userContext->xbox_user_id(), socialRelationshipFilter, 0, 0);
+    std::lock_guard<std::mutex> lock{ m_lock };
+
+    if (m_socialRelationshipChangedSubscription)
+    {
+        if (m_socialRelationshipChangedSubscription->RemoveHandler(token) == 0)
+        {
+            m_rtaManager->RemoveSubscription(m_user, m_socialRelationshipChangedSubscription);
+            m_socialRelationshipChangedSubscription.reset();
+        }
+    }
 }
 
-pplx::task<xbox_live_result<xbox_social_relationship_result>>
-social_service::get_social_relationships(
-    _In_ xbox_social_relationship_filter filter,
-    _In_ unsigned int startIndex,
-    _In_ unsigned int maxItems
-    )
+HRESULT SocialService::GetSocialRelationships(
+    _In_ uint64_t xuid,
+    _In_ XblSocialRelationshipFilter filter,
+    _In_ size_t startIndex,
+    _In_ size_t maxItems,
+    _In_ AsyncContext<Result<std::shared_ptr<XblSocialRelationshipResult>>> async
+) const noexcept
 {
-    return m_socialServiceImpl->get_social_relationships(
-        filter,
-        startIndex,
-        maxItems
-        );
+    bool includeViewFilter = filter != XblSocialRelationshipFilter::All;
+
+    xsapi_internal_stringstream subpath;
+    subpath << "/users/xuid(";
+    subpath << xuid;
+    subpath << ")/people";
+
+    xsapi_internal_string nextDelimiter = "?";
+
+    if (includeViewFilter)
+    {
+        subpath << nextDelimiter;
+        subpath << "view=";
+        subpath << SocialRelationshipFilterToString(filter);
+        nextDelimiter = "&";
+    }
+
+    if (startIndex > 0)
+    {
+        subpath << nextDelimiter;
+        subpath << "startIndex=";
+        subpath << startIndex;
+        nextDelimiter = "&";
+    }
+
+    if (maxItems > 0)
+    {
+        subpath << nextDelimiter;
+        subpath << "maxItems=";
+        subpath << maxItems;
+        nextDelimiter = "&";
+    }
+
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
+    RETURN_HR_IF_FAILED(httpCall->Init(
+        m_xboxLiveContextSettings,
+        "GET",
+        XblHttpCall::BuildUrl("social", subpath.str()),
+        xbox_live_api::get_social_relationships
+    ));
+
+    return httpCall->Perform({
+        async.Queue(),
+        [
+            async,
+            filter,
+            startIndex
+        ]
+    (HttpResult httpResult)
+    {
+        HRESULT hr{ Failed(httpResult) ? httpResult.Hresult() : httpResult.Payload()->Result() };
+        if (FAILED(hr))
+        {
+            return async.Complete(hr);
+        }
+        else
+        {
+            auto result{ XblSocialRelationshipResult::Deserialize(httpResult.Payload()->GetResponseBodyJson()) };
+
+            if (Succeeded(result))
+            {
+                result.Payload()->ContinuationSkip = startIndex + result.Payload()->SocialRelationships().size();
+                result.Payload()->Filter = filter;
+            }
+
+            return async.Complete(result);
+        }
+    } });
 }
 
-pplx::task<xbox_live_result<xbox_social_relationship_result>>
-social_service::get_social_relationships(
-    _In_ const string_t& xboxUserId,
-    _In_ xbox_social_relationship_filter filter,
-    _In_ unsigned int startIndex,
-    _In_ unsigned int maxItems
-    )
+xsapi_internal_string SocialService::SocialRelationshipFilterToString(
+    _In_ XblSocialRelationshipFilter filter
+) noexcept
 {
-    return m_socialServiceImpl->get_social_relationships(
-        xboxUserId,
-        filter,
-        startIndex,
-        maxItems
-        );
-}
+    switch (filter)
+    {
+    case XblSocialRelationshipFilter::Favorite:
+    {
+        return "Favorite";
+    }
+    case XblSocialRelationshipFilter::LegacyXboxLiveFriends:
+    {
+        return "LegacyXboxLiveFriends";
+    }
 
-xbox_live_result<std::shared_ptr<social_relationship_change_subscription>>
-social_service::subscribe_to_social_relationship_change(
-    _In_ const string_t& xboxUserId
-    )
-{
-    return m_socialServiceImpl->subscribe_to_social_relationship_change(
-        xboxUserId
-        );
-}
-
-xbox_live_result<void>
-social_service::unsubscribe_from_social_relationship_change(
-    _In_ std::shared_ptr<social_relationship_change_subscription> subscription
-    )
-{
-    return m_socialServiceImpl->unsubscribe_from_social_relationship_change(
-        subscription
-        );
-}
-
-function_context
-social_service::add_social_relationship_changed_handler(
-    _In_ std::function<void(social_relationship_change_event_args)> handler
-    )
-{
-    return m_socialServiceImpl->add_social_relationship_changed_handler(
-        std::move(handler)
-        );
-}
-
-void
-social_service::remove_social_relationship_changed_handler(
-    _In_ function_context context
-    )
-{
-    m_socialServiceImpl->remove_social_relationship_changed_handler(
-        context
-        );
+    case XblSocialRelationshipFilter::All:
+    default:
+    {
+        return xsapi_internal_string{};
+    }
+    }
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

@@ -17,3 +17,26 @@ TRACELOGGING_DECLARE_PROVIDER(g_hUnitTestTraceLoggingProvider);
 #define TraceLoggingRegister(hProvider) void(0)
 
 #endif
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
+
+class xsapi_telemetry
+{
+public:
+    static std::shared_ptr<xsapi_telemetry> get_singleton();
+
+    void write_event(xbox_live_user_t user, xsapi_internal_string eventName, xsapi_internal_string jsonPayload, bool isRealtimeEvent = false);
+
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+    static void write_event_jni(JNIEnv *, jclass, jstring jsonPayload);
+
+    static bool register_natives(JNIEnv *env, jobject clsLoader, jmethodID loadClass);
+#endif
+private:
+    xsapi_telemetry();
+
+    xsapi_internal_string m_iKey;
+    static std::atomic<uint32_t> s_ticketId;
+};
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

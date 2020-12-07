@@ -1,0 +1,3 @@
+```cpp
+XblMultiplayerSessionConstantsSetVisibility(sessionHandle, visibility);
+```

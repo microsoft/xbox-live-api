@@ -2,84 +2,83 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/multiplayer.h"
 #include "multiplayer_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_BEGIN
 
-multiplayer_activity_query_post_request::multiplayer_activity_query_post_request()
+MultiplayerActivityQueryPostRequest::MultiplayerActivityQueryPostRequest()
 {
 }
 
-multiplayer_activity_query_post_request::multiplayer_activity_query_post_request(
-    _In_ string_t scid, 
-    _In_ std::vector<string_t> xuids
+MultiplayerActivityQueryPostRequest::MultiplayerActivityQueryPostRequest(
+    _In_ const xsapi_internal_string& scid,
+    _In_ const xsapi_internal_vector<uint64_t>& xuids
     ) :
-    m_scid(std::move(scid)),
-    m_xuids(std::move(xuids))
+    m_scid(scid),
+    m_xuids(xuids)
 {
 }
 
-multiplayer_activity_query_post_request::multiplayer_activity_query_post_request(
-    _In_ string_t scid, 
-    _In_ string_t socialGroup, 
-    _In_ string_t socialGroupXuid
+MultiplayerActivityQueryPostRequest::MultiplayerActivityQueryPostRequest(
+    _In_ const xsapi_internal_string& scid,
+    _In_ const xsapi_internal_string& socialGroup,
+    _In_ uint64_t socialGroupXuid
     ) :
-    m_scid(std::move(scid)),
-    m_socialGroup(std::move(socialGroup)),
-    m_socialGroupXuid(std::move(socialGroupXuid))
+    m_scid(scid),
+    m_socialGroupXuid(socialGroupXuid),
+    m_socialGroup(socialGroup)
 {
 }
 
-const string_t& 
-multiplayer_activity_query_post_request::scid() const
+const xsapi_internal_string&
+MultiplayerActivityQueryPostRequest::Scid() const
 {
     return m_scid;
 }
 
-const std::vector<string_t>& 
-multiplayer_activity_query_post_request::xuids() const
+const xsapi_internal_vector<uint64_t>&
+MultiplayerActivityQueryPostRequest::Xuids() const
 {
     return m_xuids;
 }
-const string_t& 
-multiplayer_activity_query_post_request::social_group() const
+const xsapi_internal_string&
+MultiplayerActivityQueryPostRequest::SocialGroup() const
 {
     return m_socialGroup;
 }
 
-const string_t& 
-multiplayer_activity_query_post_request::social_group_xuid() const
+uint64_t
+MultiplayerActivityQueryPostRequest::SocialGroupXuid() const
 {
     return m_socialGroupXuid;
 }
 
-web::json::value 
-multiplayer_activity_query_post_request::serialize()
+void
+MultiplayerActivityQueryPostRequest::Serialize(_Out_ JsonValue& json, JsonDocument::AllocatorType& allocator)
 {
     XSAPI_ASSERT(m_socialGroup.empty() || m_xuids.empty());
     XSAPI_ASSERT(!m_socialGroup.empty() || !m_xuids.empty());
 
-    web::json::value serializedObject;
-    serializedObject[_T("type")] = web::json::value::string(_T("activity"));
-    serializedObject[_T("scid")] = web::json::value::string(m_scid);
+    json.SetObject();
+    json.AddMember("type", "activity", allocator);
+    json.AddMember("scid", JsonValue(m_scid.c_str(), allocator).Move(), allocator);
 
-    web::json::value ownerObject;
+    JsonValue ownerObject(rapidjson::kObjectType);
     if (!m_xuids.empty())
     {
-        ownerObject[_T("xuids")] = utils::serialize_vector<string_t>(utils::json_string_serializer, m_xuids);
+        JsonValue xuidsJson;
+        JsonUtils::SerializeVector<uint64_t>(JsonUtils::JsonXuidSerializer, m_xuids, xuidsJson, allocator);
+        ownerObject.AddMember("xuids", xuidsJson, allocator);
     }
     else
     {
-        web::json::value peopleObject;
-        peopleObject[_T("moniker")] = web::json::value::string(m_socialGroup);
-        peopleObject[_T("monikerXuid")] = web::json::value::string(m_socialGroupXuid);
-        ownerObject[_T("people")] = std::move(peopleObject);
+        JsonValue peopleObject(rapidjson::kObjectType);
+        peopleObject.AddMember("moniker", JsonValue(m_socialGroup.c_str(), allocator).Move(), allocator);
+        peopleObject.AddMember("monikerXuid", JsonValue(utils::uint64_to_internal_string(m_socialGroupXuid).c_str(), allocator).Move(), allocator);
+        ownerObject.AddMember("people", peopleObject, allocator);
     }
 
-    serializedObject[_T("owners")] = ownerObject;
-
-    return serializedObject;
+    json.AddMember("owners", ownerObject, allocator);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_END

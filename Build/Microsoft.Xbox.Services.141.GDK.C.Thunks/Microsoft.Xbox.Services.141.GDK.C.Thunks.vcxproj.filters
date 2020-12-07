@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="dll\dllmain.cpp" />
+    <ClCompile Include="dll\pch.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dll\Microsoft.Xbox.Services.141.GDK.C.Thunks.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dll\pch.h" />
+  </ItemGroup>
+</Project>

@@ -2,885 +2,3879 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"adityat"
-#define TEST_CLASS_AREA L"MultiplayerManager"
-#include "UnitTestIncludes.h"
-#include "MultiplayerManager_WinRT.h"
-#include "RtaTestHelper.h"
 #include "multiplayer_manager_internal.h"
-#include "FindMatchCompletedEventArgs_WinRT.h"
-#include "JoinLobbyCompletedEventArgs_WinRT.h"
+#include "UnitTestIncludes.h"
 
-using namespace Microsoft::Xbox::Services;
-using namespace Microsoft::Xbox::Services::Multiplayer;
-using namespace Microsoft::Xbox::Services::Multiplayer::Manager;
-using namespace Windows::ApplicationModel::Activation;
-using namespace xbox::services::multiplayer;
-using namespace xbox::services::multiplayer::manager;
-using namespace Platform::Collections;
-using namespace Windows::Foundation::Collections;
+#pragma warning(disable:4996)
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-#define TITLE_ID                            0x116ACB82
-#define GAME_SERVICE_CONFIG_ID              L"MockScid"
-#define GAME_SESSION_TEMPLATE_NAME          L"MockGameSessionTemplateName"
-#define LOBBY_TEMPLATE_NAME                 L"MockLobbySessionTemplateName"
-#define HOPPER_NAME_NO_QOS                  L"PlayerSkillNoQoS"
-#define HOPPER_NAME_WITH_QOS                L"PlayerSkill"
+#define GAME_SESSION_NAME    "MockGameSessionName"
+#define LOBBY_SESSION_NAME   "MockLobbySessionName"
+#define GAME_TEMPLATE_NAME   "MockGameSessionTemplateName"
+#define LOBBY_TEMPLATE_NAME  "MockLobbySessionTemplateName"
+#define HOPPER_NAME_NO_QOS   "PlayerSkillNoQoS"
+#define HOPPER_NAME_WITH_QOS "PlayerSkill"
+#define CONNECTION_ADDR      "AQDXfbIj/QDRr2aLF5vWnwEEAiABSJgA2BES8XsFOdf6/FICIAEAAEE3nnYsBQQNfJRgQwEKfMU7"
+#define POST                 "POST"
+#define GET                  "GET"
+
+#define MPSD_URI "https://sessiondirectory.xboxlive.com"
+#define MPSD_RTA_URI MPSD_URI "/connections/"
+
+static concurrency::event g_sessionEvent;
+static xbox_live_callback<xbox_live_result<std::shared_ptr<XblMultiplayerSession>>> g_setSessionEvent = [](xbox_live_result<std::shared_ptr<XblMultiplayerSession>>)
+{
+    g_sessionEvent.set();
+};
+
+const char* defaultGameHttpHeaderUri = "/serviceconfigs/MockScid/sessionTemplates/MockGameSessionTemplateName/sessions/MockGameSessionName";
+const char* defaultMpsdUri = "https://sessiondirectory.xboxlive.com";
+const char* connectionsUri = "https://sessiondirectory.xboxlive.com/connections";
+const char* defaultGameUri = "https://sessiondirectory.xboxlive.com/serviceconfigs/MockScid/sessionTemplates/MockGameSessionTemplateName/sessions/MockGameSessionName";
+const char* defaultLobbyUri = "https://sessiondirectory.xboxlive.com/serviceconfigs/MockScid/sessionTemplates/MockLobbySessionTemplateName/sessions/MockLobbySessionName";
+const char* transferHandleUri = "https://sessiondirectory.xboxlive.com/handles/TestGameSessionTransferHandle/session";
+const char* matchTicketUri = "https://smartmatch.xboxlive.com/serviceconfigs/MockScid/hoppers/PlayerSkillNoQoS";
+const xsapi_internal_http_headers defaultGameHttpResponseHeaders = { { "ETag", "MockETag" }, { "Retry-After", "1" }, { "Content-Location", "/serviceconfigs/MockScid/sessionTemplates/MockGameSessionTemplateName/sessions/MockGameSessionName" } };
+const xsapi_internal_http_headers defaultLobbyHttpResponseHeaders = { { "ETag", "MockETag" },{ "Retry-After", "1" }, { "Content-Location", "/serviceconfigs/MockScid/sessionTemplates/MockLobbySessionTemplateName/sessions/MockLobbySessionName" } };
+
+const char* defaultLobbySessionResponse = R"({  
+       "membersInfo":{
+            "accepted":0,
+            "active":0,  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"default-lobby-session-corrId",
+       "changeNumber":1
+    })";
+
+const char* rtaConnectionId = R"({
+        "ConnectionId": "d01a8c1b-2f83-4e03-9278-3048b480928f"
+    })";
 
 DEFINE_TEST_CLASS(MultiplayerManagerTests)
 {
 public:
     DEFINE_TEST_CLASS_PROPS(MultiplayerManagerTests)
 
-    const string_t filePath = _T("\\TestResponses\\MultiplayerManager.json");
-    web::json::value testResponseJsonFromFile = utils::read_test_response_file(filePath);
-    
-    const string_t emptyJson = testResponseJsonFromFile[L"emptyJson"].serialize();
-    const string_t propertiesJson = testResponseJsonFromFile[L"propertiesJson"].serialize();
-    const string_t syncPropertiesJson = testResponseJsonFromFile[L"syncPropertiesJson"].serialize();
-    const string_t propertiesNoTransferHandleJson = testResponseJsonFromFile[L"propertiesNoTransferHandleJson"].serialize();
-    const string_t defaultLobbySessionResponse = testResponseJsonFromFile[L"defaultLobbySessionResponse"].serialize();
-    const string_t defaultLobbySessionNoCustomMemberPropsResponse = testResponseJsonFromFile[L"defaultLobbySessionNoCustomMemberPropsResponse"].serialize();
-    const string_t defaultMultipleLocalUsersLobbyResponse = testResponseJsonFromFile[L"defaultMultipleLocalUsersLobbyResponse"].serialize();
-    const string_t multipleLocalUsersLobbyResponse = testResponseJsonFromFile[L"multipleLocalUsersLobbyResponse"].serialize();
-    const string_t lobbyWithNoTransferHandleResponse = testResponseJsonFromFile[L"lobbyWithNoTransferHandleResponse"].serialize();
-    const string_t updatedLobbyWithNoTransferHandleResponse = testResponseJsonFromFile[L"updatedLobbyWithNoTransferHandleResponse"].serialize();
-    const string_t updatedMultipleLocalUsersLobbyWithNoTransferHandleResponse = testResponseJsonFromFile[L"updatedMultipleLocalUsersLobbyWithNoTransferHandleResponse"].serialize();
-    const string_t lobbyWithPendingTransferHandleResponse = testResponseJsonFromFile[L"lobbyWithPendingTransferHandleResponse"].serialize();
-    const string_t lobbyWithCompletedTransferHandleResponse = testResponseJsonFromFile[L"lobbyWithCompletedTransferHandleResponse"].serialize();
-    const string_t defaultGameSessionResponse = testResponseJsonFromFile[L"defaultGameSessionResponse"].serialize();
-    const string_t defaultGameSessionWithXuidsResponse = testResponseJsonFromFile[L"defaultGameSessionWithXuidsResponse"].serialize();
-    const string_t defaultMultipleLocalUsersGameResponse = testResponseJsonFromFile[L"defaultMultipleLocalUsersGameResponse"].serialize();
-    const string_t gameSessionResponseDiffXuid = testResponseJsonFromFile[L"gameSessionResponseDiffXuid"].serialize();
-    const string_t sessionChangeNum2 = testResponseJsonFromFile[L"sessionChangeNum2"].serialize();
-    const string_t sessionChangeNum3 = testResponseJsonFromFile[L"sessionChangeNum3"].serialize();
-    const string_t sessionChangeNum4 = testResponseJsonFromFile[L"sessionChangeNum4"].serialize();
-    const string_t sessionChangeNum5 = testResponseJsonFromFile[L"sessionChangeNum5"].serialize();
-    const string_t sessionChangeNum6 = testResponseJsonFromFile[L"sessionChangeNum6"].serialize();
-    const string_t sessionChangeNum8 = testResponseJsonFromFile[L"sessionChangeNum8"].serialize();
-    const string_t matchTicket = testResponseJsonFromFile[L"matchTicket"].serialize();
-    const string_t transferHandle = testResponseJsonFromFile[L"transferHandle"].serialize();
-    const string_t lobbyMatchStatusSearching = testResponseJsonFromFile[L"lobbyMatchStatusSearching"].serialize();
-    const string_t lobbyMatchStatusExpiredByService = testResponseJsonFromFile[L"lobbyMatchStatusExpiredByService"].serialize();
-    const string_t lobbyMatchStatusFound = testResponseJsonFromFile[L"lobbyMatchStatusFound"].serialize();
-    const string_t lobbyMatchStatusFoundWithTransHandle = testResponseJsonFromFile[L"lobbyMatchStatusFoundWithTransHandle"].serialize();
-    const string_t matchSessionJoin_1 = testResponseJsonFromFile[L"matchSessionJoin_1"].serialize();
-    const string_t matchSessionJoin_2 = testResponseJsonFromFile[L"matchSessionJoin_2"].serialize();
-    const string_t matchSessionRemoteClientFailedToJoin = testResponseJsonFromFile[L"matchSessionRemoteClientFailedToJoin"].serialize();
-    const string_t matchSessionMeasuring = testResponseJsonFromFile[L"matchSessionMeasuring"].serialize();
-    const string_t matchSessionMeasuringWithQoS = testResponseJsonFromFile[L"matchSessionMeasuringWithQoS"].serialize();
-    const string_t matchSessionMeasuringWithQoSComplete = testResponseJsonFromFile[L"matchSessionMeasuringWithQoSComplete"].serialize();
-    const string_t matchRemoteClientFailedToUploadQoS = testResponseJsonFromFile[L"matchRemoteClientFailedToUploadQoS"].serialize();
-    const string_t lobbyMatchStatusCanceledByService = testResponseJsonFromFile[L"lobbyMatchStatusCanceledByService"].serialize();
+    const char* emptyResponse = R"({})";
+    const char* badResponse = R"({
+        "badResponse": null
+    })";
+    const char* classProperties = R"({
+        "properties":{  
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       }
+    })";
+    const char* syncProperties = R"({
+        "properties":{  
+          "custom":{  
+             "Map":"MyTestMap",
+             "GameMode":"MyTestGameMode",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       }
+    })";
+    const char* propertiesNoTransferHandle = R"({
+        "properties":{  
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle"
+          }
+       }
+    })";
 
-    web::json::value defaultLobbySessionResponseJson = web::json::value::parse(defaultLobbySessionResponse);
-    web::json::value defaultLobbySessionNoCustomMemberPropsResponseJson = web::json::value::parse(defaultLobbySessionNoCustomMemberPropsResponse);
-    web::json::value defaultGameSessionResponseJson = web::json::value::parse(defaultGameSessionResponse);
-    web::json::value defaultGameSessionWithXuidsResponseJson = web::json::value::parse(defaultGameSessionWithXuidsResponse); 
-    web::json::value defaultMultipleLocalUsersGameResponseJson = web::json::value::parse(defaultMultipleLocalUsersGameResponse);
-    web::json::value gameSessionResponseDiffXuidJson = web::json::value::parse(gameSessionResponseDiffXuid);
-    web::json::value lobbyNoHandleResponseJson = web::json::value::parse(lobbyWithNoTransferHandleResponse);
-    web::json::value updatedLobbyNoHandleResponseJson = web::json::value::parse(updatedLobbyWithNoTransferHandleResponse);
-    web::json::value updatedMultipleLocalUsersLobbyWithNoTransferHandleResponseJson = web::json::value::parse(updatedMultipleLocalUsersLobbyWithNoTransferHandleResponse);
-    web::json::value lobbyCompletedHandleResponseJson = web::json::value::parse(lobbyWithCompletedTransferHandleResponse);
-    web::json::value defaultMultipleLocalUsersLobbyResponseJson = web::json::value::parse(defaultMultipleLocalUsersLobbyResponse);
-    std::shared_ptr<http_call_response> defaultLobbyResponse = StockMocks::CreateMockHttpCallResponse(defaultLobbySessionResponseJson);
-    std::shared_ptr<http_call_response> defaultLobbyNoCustomMemberPropsResponseJson = StockMocks::CreateMockHttpCallResponse(defaultLobbySessionNoCustomMemberPropsResponseJson);
-    std::shared_ptr<http_call_response> lobbyNoHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyNoHandleResponseJson);
-    std::shared_ptr<http_call_response> lobbyWithPendingHandleResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(lobbyWithPendingTransferHandleResponse));
-    std::shared_ptr<http_call_response> lobbyCompletedHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyCompletedHandleResponseJson);
-    std::shared_ptr<http_call_response> updatedLobbyNoHandleResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(updatedLobbyWithNoTransferHandleResponse));
-    std::shared_ptr<http_call_response> updatedMultipleLocalUsersLobbyNoHandleResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(updatedMultipleLocalUsersLobbyWithNoTransferHandleResponse));
-    std::shared_ptr<http_call_response> defaultGameSessionHttpCallResponse = StockMocks::CreateMockHttpCallResponse(defaultGameSessionResponseJson);
-    std::shared_ptr<http_call_response> gameSessionEmptyJsonResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(emptyJson), DefaultGameHttpResponse());
-    std::shared_ptr<http_call_response> lobbySessionEmptyJsonResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(emptyJson), DefaultLobbyHttpResponse());
-    std::shared_ptr<http_call_response> gameSessionDiffXuidResponse = StockMocks::CreateMockHttpCallResponse(gameSessionResponseDiffXuidJson);
+    const char* defaultLobbySessionNoCustomMemberPropsResponse = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
 
-    std::shared_ptr<http_call_response> sessionChangeNum2Response = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(sessionChangeNum2));
-    std::shared_ptr<http_call_response> sessionChangeNum3Response = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(sessionChangeNum3));
-    std::shared_ptr<http_call_response> sessionChangeNum4Response = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(sessionChangeNum4));
-    std::shared_ptr<http_call_response> sessionChangeNum5Response = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(sessionChangeNum5));
-    std::shared_ptr<http_call_response> sessionChangeNum6Response = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(sessionChangeNum6));
-    std::shared_ptr<http_call_response> sessionChangeNum8Response = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(sessionChangeNum8));
+       "constants":{  
+          "system":{},
 
-    std::shared_ptr<http_call_response> matchTicketResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(matchTicket));
-    std::shared_ptr<http_call_response> transferHandleResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(transferHandle));
-    std::shared_ptr<http_call_response> matchStatusSearchingResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(lobbyMatchStatusSearching));
-    std::shared_ptr<http_call_response> matchStatusExpiredByServiceResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(lobbyMatchStatusExpiredByService));
-    std::shared_ptr<http_call_response> matchStatusCanceledByServiceResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(lobbyMatchStatusCanceledByService));
-    std::shared_ptr<http_call_response> matchStatusFoundResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(lobbyMatchStatusFound));
-    std::shared_ptr<http_call_response> matchStatusFoundWithTransHandleResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(lobbyMatchStatusFoundWithTransHandle));
-    std::shared_ptr<http_call_response> matchJoin_1_Response = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(matchSessionJoin_1));
-    std::shared_ptr<http_call_response> matchJoin_2_Response = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(matchSessionJoin_2));
-    std::shared_ptr<http_call_response> matchRemoteClientFailedToJoin_Response = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(matchSessionRemoteClientFailedToJoin));
-    std::shared_ptr<http_call_response> matchMeasuringResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(matchSessionMeasuring));
-    std::shared_ptr<http_call_response> matchMeasuringWithQoSResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(matchSessionMeasuringWithQoS));
-    std::shared_ptr<http_call_response> matchMeasuringWithQoSCompleteResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(matchSessionMeasuringWithQoSComplete));
-    std::shared_ptr<http_call_response> matchRemoteClientFailedToUploadQoSResponse = StockMocks::CreateMockHttpCallResponse(web::json::value::parse(matchRemoteClientFailedToUploadQoS));
+          "custom":{}
+       },
 
-    const string_t defaultGameHttpHeaderUri = _T("/serviceconfigs/MockScid/sessionTemplates/MockGameSessionTemplateName/sessions/MockGameSessionName");
-    const string_t defaultMpsdUri = _T("https://sessiondirectory.mockenv.xboxlive.com");
-    web::http::http_response DefaultGameHttpResponse()
+       "properties":{  
+          "system":{
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{ 
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{}
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"default-lobby-session-corrId",
+       "changeNumber":2
+    })";
+    const char* defaultMultipleLocalUsersLobbyResponse = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":2,
+          "count":2
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{  
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "1":{  
+             "next":2,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"2345",
+                   "index":1
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"TestGamertag_2",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"default-multi-user-lobby-session-corrId",
+       "changeNumber":1
+    })";
+    const char* multipleLocalUsersLobbyResponse = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":2,
+          "count":2
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{  
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "1":{  
+             "next":2,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"3456",
+                   "index":1
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"TestGamertag_3",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"default-lobby-session-corrId",
+       "changeNumber":2
+    })";
+    const char* lobbyWithNoTransferHandleResponse = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{  
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"lobby-no-trans-handle-corrId",
+       "changeNumber":1
+    })";
+    const char* updatedLobbyWithNoTransferHandleResponse = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{  
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"updated-lobby-no-trans-handle-corrId",
+       "changeNumber":4
+    })";
+    const char* updatedMultipleLocalUsersLobbyWithNoTransferHandleResponse = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":2,
+          "count":2
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{  
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "1":{  
+             "next":2,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"2345",
+                   "index":1
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"TestGamertag_2",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"no-trans-handle",
+       "changeNumber":4
+    })";
+    const char* lobbyWithPendingTransferHandleResponse = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{  
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"pending~1234"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"lobby-pending-trans-handle-corrId",
+       "changeNumber":2
+    })";
+    const char* lobbyWithCompletedTransferHandleResponse = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{  
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"lobby-completed-trans-handle-corrId",
+       "changeNumber":3
+    })";
+    const char* defaultGameSessionResponse = R"({
+       "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "custom":{},
+
+          "system":{}
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"default-game-session-corrId",
+       "changeNumber":1
+    })";
+    const char* defaultGameSessionWithXuidsResponse = R"({
+       "membersInfo":{  
+          "first":0,
+          "next":3,
+          "count":3
+       },
+
+       "constants":{
+          "system":{
+            "initiators": [
+                "TestXboxUserId_1",
+                "2345",
+                "3456"
+            ],
+            "version": 1
+          },
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "custom":{},
+
+          "system":{}
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "1":{  
+             "next":2,
+             "constants":{  
+                "system":{  
+                   "xuid":"2345",
+                   "index":1
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{},
+
+                "custom":{}
+             },
+
+             "reserved":true
+          },
+
+          "2":{  
+             "next":3,
+             "constants":{  
+                "system":{  
+                   "xuid":"3456",
+                   "index":2
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{},
+
+                "custom":{}
+             },
+
+             "reserved":true
+          }
+       },
+
+       "correlationId":"default-game-session-corrId",
+       "changeNumber":2
+    })";
+    const char* defaultMultipleLocalUsersGameResponse = R"({
+       "membersInfo":{  
+          "first":0,
+          "next":2,
+          "count":2
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "custom":{},
+
+          "system":{}
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "1":{  
+             "next":2,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"2345",
+                   "index":1
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"TestGamertag_2",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"default-multi-user-game-session-corrId",
+       "changeNumber":1
+    })";
+    const char* gameSessionResponseDiffXuid = R"({
+       "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "custom":{},
+
+          "system":{}
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"2345",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"game-session-diff-xuid-corrId",
+       "changeNumber":2
+    })";
+    const char* sessionChangeNum2 = R"({  
+        "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "next":1,
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"sessionChangeNum2-session-corrId",
+       "changeNumber":2
+    })";
+    const char* sessionChangeNum3 = R"({  
+        "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "next":1,
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"sessionChangeNum3-session-corrId",
+       "changeNumber":3
+    })";
+
+    const char* sessionChangeNum4 = R"({  
+        "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{
+             "host":"TestHostDeviceToken"
+          },
+
+          "custom":{  
+             "Map":"MyTestMap",
+             "GameMode":"MyTestGameMode",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"TestHostDeviceToken",
+             "next":1
+          }
+       },
+
+       "correlationId":"sessionChangeNum4-session-corrId",
+       "changeNumber":4
+    })";
+
+    const char* sessionChangeNum5 = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "next":1,
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"sessionChangeNum5-session-corrId",
+       "changeNumber":5
+    })";
+
+    const char* sessionChangeNum6 = R"({  
+        "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "next":1,
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"sessionChangeNum6-session-corrId",
+       "changeNumber":6
+    })";
+
+    const char* sessionChangeNum8 = R"({  
+        "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "next":1,
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"sessionChangeNum8-session-corrId",
+       "changeNumber":8
+    })";
+    const char* matchTicketResponse = R"({
+        "ticketId":"ad721649-569f-4151-b519-827244df9f91",
+        "waitTime":502967
+    })";
+
+    const char* transferHandleResponse = R"({
+        "type": "transfer",
+        "sessionRef": {
+            "scid": "MockScid",
+            "templateName": "MockSessionTemplateName",
+            "name": "XWIN_7ce12e85-594a-4b3b-9dc3-33b9a4ea57ce"
+        },
+
+        "originSessionRef": {
+            "scid": "MockScid",
+            "templateName": "samplelobbytemplate107",
+            "name": "bd6c41c3-01c3-468a-a3b5-3e0fe8133862"
+        },
+
+        "version": 1
+    })";
+
+    const char* lobbyMatchStatusSearching = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle"
+          }
+       },
+
+       "servers":{  
+          "matchmaking":{  
+             "constants":{  
+                "system":{},
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "status":"searching"
+                },
+
+                "custom":{  
+                   "ticketScid":"097d0100-e05c-4d37-8420-46f1169056cf",
+                   "ticketHopperName":"PlayerSkillNoQoS",
+                   "ticketId":"ad721649-569f-4151-b519-827244df9f91"
+                }
+             }
+          }
+       },
+
+       "members":{  
+          "0":{  
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"lobbyMatchStatusSearching_corrId",
+       "changeNumber":4
+    })";
+
+    const char* lobbyMatchStatusExpiredByService = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle"
+          }
+       },
+
+       "servers":{  
+          "matchmaking":{  
+             "constants":{  
+                "system":{},
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "status":"expired"
+                },
+
+                "custom":{  
+                   "ticketScid":"097d0100-e05c-4d37-8420-46f1169056cf",
+                   "ticketHopperName":"PlayerSkillNoQoS",
+                   "ticketId":"ad721649-569f-4151-b519-827244df9f91"
+                }
+             }
+          }
+       },
+
+       "members":{  
+          "0":{  
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"lobbyMatchStatusSearching_corrId",
+       "changeNumber":5
+    })";
+
+    const char* lobbyMatchStatusFound = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle"
+          }
+       },
+
+       "servers":{  
+          "matchmaking":{  
+             "constants":{  
+                "system":{},
+
+                "custom":{}
+             },
+
+            "properties":{  
+                "system":{  
+                   "status":"found",
+                   "targetSessionRef":{  
+                        "scid":"MockScid",
+                        "templateName":"MockGameSessionTemplateName",
+                        "name":"MockGameSessionName"
+                    }
+                },
+
+                "custom":{  
+                   "ticketScid":"097d0100-e05c-4d37-8420-46f1169056cf",
+                   "ticketHopperName":"PlayerSkillNoQoS",
+                   "ticketId":"ad721649-569f-4151-b519-827244df9f91"
+                }
+             }
+          }
+       },
+
+       "members":{  
+          "0":{  
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "next":1,
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"lobbyMatchStatusFound_corrId",
+       "changeNumber":6
+    })";
+
+    const char* lobbyMatchStatusFoundWithTransHandle = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "servers":{  
+          "matchmaking":{  
+             "constants":{  
+                "system":{},
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "status":"found",
+                "targetSessionRef":{  
+                      "scid":"MockScid",
+                      "templateName":"MockGameSessionTemplateName",
+                      "name":"MockGameSessionName"
+                },
+
+                "custom":{  
+                   "ticketScid":"097d0100-e05c-4d37-8420-46f1169056cf",
+                   "ticketHopperName":"PlayerSkillNoQoS",
+                   "ticketId":"ad721649-569f-4151-b519-827244df9f91"
+                }
+             }
+          }
+       },
+
+       "members":{  
+          "0":{  
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "next":1,
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"lobbyMatchStatusFoundWithTransHandle",
+       "changeNumber":7
+    })";
+
+    const char* matchSessionJoin_1 = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":2,
+          "count":2,
+          "accepted":1,
+          "active":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{  
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "initializing":{
+          "stage":"joining",
+          "stageStartTime":"2016-06-08T17:03:19.5578022Z",
+          "episode":1
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{
+                   "matchmakingResult":{
+                      "playerAttrs":{
+                         "OverallReputation":"71",
+                         "OverallReputationIsBad":"0"
+                      },
+
+                      "ticketAttrs":{}
+                   }
+                }
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "initializationEpisode":1,
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "1":{  
+             "next":2,
+             "reserved":true,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"2345",
+                   "index":1
+                },
+
+                "custom":{
+                   "matchmakingResult":{
+                      "playerAttrs":{
+                         "OverallReputation":"71",
+                         "OverallReputationIsBad":"0"
+                      },
+
+                      "ticketAttrs":{}
+                   }
+                }
+             },
+
+             "properties":{  
+                "system":{},
+
+                "custom":{}
+             },
+
+             "initializationEpisode":1
+          }
+       },
+
+       "correlationId":"matchSessionJoin_1_corrId",
+       "changeNumber":2
+    })";
+
+    const char* matchSessionJoin_2 = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":2,
+          "count":2,
+          "accepted":2,
+          "active":2
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{  
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{
+                   "matchmakingResult":{
+                      "playerAttrs":{
+                         "OverallReputation":"71",
+                         "OverallReputationIsBad":"0"
+                      },
+
+                      "ticketAttrs":{}
+                   }
+                }
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "1":{  
+             "next":2,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"2345",
+                   "index":1
+                },
+
+                "custom":{
+                   "matchmakingResult":{
+                      "playerAttrs":{
+                         "OverallReputation":"71",
+                         "OverallReputationIsBad":"0"
+                      },
+
+                      "ticketAttrs":{}
+                   }
+                }
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"TestGamertag_2",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"matchSessionJoin_2_corrId",
+       "changeNumber":4
+    })";
+
+    const char* matchSessionRemoteClientFailedToJoin = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1,
+          "accepted":1,
+          "active":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{  
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "initializing":{  
+          "stage":"failed",
+          "stageStartTime":"2016-06-09T18:43:46.0518732Z",
+          "episode":1
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{
+                   "matchmakingResult":{
+                      "playerAttrs":{
+                         "OverallReputation":"71",
+                         "OverallReputationIsBad":"0"
+                      },
+
+                      "ticketAttrs":{}
+                   }
+                }
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"matchSessionFailedToJoin_corrId",
+       "changeNumber":4
+    })";
+
+    const char* matchSessionMeasuring = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":2,
+          "count":2,
+          "accepted":2,
+          "active":2
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{  
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "initializing":{
+          "stage":"measuring",
+          "stageStartTime":"2016-06-08T17:03:19.5578022Z",
+          "episode":1
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{
+                   "matchmakingResult":{
+                      "playerAttrs":{
+                         "OverallReputation":"71",
+                         "OverallReputationIsBad":"0"
+                      },
+
+                      "ticketAttrs":{}
+                   }
+                }
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "1":{  
+             "next":2,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"2345",
+                   "index":1
+                },
+
+                "custom":{
+                   "matchmakingResult":{
+                      "playerAttrs":{
+                         "OverallReputation":"71",
+                         "OverallReputationIsBad":"0"
+                      },
+
+                      "ticketAttrs":{}
+                   }
+                }
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"TestGamertag_2",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"matchSessionMeasuring_corrId",
+       "changeNumber":3
+    })";
+
+    const char* matchSessionMeasuringWithQoS = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":2,
+          "count":2,
+          "accepted":2,
+          "active":2
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{  
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "initializing":{
+          "stage":"measuring",
+          "stageStartTime":"2016-06-08T17:03:19.5578022Z",
+          "episode":1
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{
+                   "matchmakingResult":{
+                      "playerAttrs":{
+                         "OverallReputation":"71",
+                         "OverallReputationIsBad":"0"
+                      },
+
+                      "ticketAttrs":{}
+                   }
+                }
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true,
+                    "measurements":{  
+                      "cd5a3922ca9fcfb22dc5b8c634d4a754":{  
+                         "bandwidthDown":27752,
+                         "bandwidthUp":7794,
+                         "custom":{  
+
+                         },
+
+                         "latency":7
+                      }
+                   }
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "1":{  
+             "next":2,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"2345",
+                   "index":1
+                },
+
+                "custom":{
+                   "matchmakingResult":{
+                      "playerAttrs":{
+                         "OverallReputation":"71",
+                         "OverallReputationIsBad":"0"
+                      },
+
+                      "ticketAttrs":{}
+                   }
+                }
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"TestGamertag_2",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"matchSessionMeasuringWithQoS_corrId",
+       "changeNumber":4
+    })";
+
+    const char* matchSessionMeasuringWithQoSComplete = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":2,
+          "count":2,
+          "accepted":2,
+          "active":2
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{  
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{
+                   "matchmakingResult":{
+                      "playerAttrs":{
+                         "OverallReputation":"71",
+                         "OverallReputationIsBad":"0"
+                      },
+
+                      "ticketAttrs":{}
+                   }
+                }
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true,
+                    "measurements":{  
+                      "cd5a3922ca9fcfb22dc5b8c634d4a754":{  
+                         "bandwidthDown":27752,
+                         "bandwidthUp":7794,
+                         "custom":{  
+
+                         },
+
+                         "latency":7
+                      }
+                   }
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "1":{  
+             "next":2,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"2345",
+                   "index":1
+                },
+
+                "custom":{
+                   "matchmakingResult":{
+                      "playerAttrs":{
+                         "OverallReputation":"71",
+                         "OverallReputationIsBad":"0"
+                      },
+
+                      "ticketAttrs":{}
+                   }
+                }
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true,
+                   "measurements":{  
+                      "cd5a3922ca9fcfb22dc5b8c634d4a754":{  
+                         "bandwidthDown":27752,
+                         "bandwidthUp":7794,
+                         "custom":{  
+
+                         },
+
+                         "latency":7
+                      }
+                   }
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"TestGamertag_2",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"matchSessionMeasuringWithQoSComplete",
+       "changeNumber":6
+    })";
+
+    const char* matchRemoteClientFailedToUploadQoS = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":2,
+          "count":2,
+          "accepted":2,
+          "active":2
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{  
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle",
+             "GameSessionTransferHandle":"completed~TestGameSessionTransferHandle"
+          }
+       },
+
+       "initializing":{
+          "stage":"failed",
+          "stageStartTime":"2016-06-08T17:03:19.5578022Z",
+          "episode":1
+       },
+
+       "servers":{},
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{
+                   "matchmakingResult":{
+                      "playerAttrs":{
+                         "OverallReputation":"71",
+                         "OverallReputationIsBad":"0"
+                      },
+
+                      "ticketAttrs":{}
+                   }
+                }
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true,
+                    "measurements":{  
+                      "cd5a3922ca9fcfb22dc5b8c634d4a754":{  
+                         "bandwidthDown":27752,
+                         "bandwidthUp":7794,
+                         "custom":{  
+
+                         },
+
+                         "latency":7
+                      }
+                   }
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "1":{  
+             "next":2,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"2345",
+                   "index":1
+                },
+
+                "custom":{
+                   "matchmakingResult":{
+                      "playerAttrs":{
+                         "OverallReputation":"71",
+                         "OverallReputationIsBad":"0"
+                      },
+
+                      "ticketAttrs":{}
+                   }
+                }
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"TestGamertag_2",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"matchSessionMeasuringWithQoS_corrId",
+       "changeNumber":6
+    })";
+
+    const char* lobbyMatchStatusCanceledByService = R"({  
+       "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
+
+       "constants":{  
+          "system":{},
+
+          "custom":{}
+       },
+
+       "properties":{  
+          "system":{
+             "host":"e7c221cbe5228043c39865281047b178"
+          },
+
+          "custom":{  
+             "Map":"Helmand Valley",
+             "GameMode":"Team Battle"
+          }
+       },
+
+       "servers":{  
+          "matchmaking":{  
+             "constants":{  
+                "system":{},
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "status":"canceled"
+                },
+
+                "custom":{  
+                   "ticketScid":"097d0100-e05c-4d37-8420-46f1169056cf",
+                   "ticketHopperName":"PlayerSkillNoQoS",
+                   "ticketId":"ad721649-569f-4151-b519-827244df9f91"
+                }
+             }
+          }
+       },
+
+       "members":{  
+          "0":{  
+             "next":1,
+             "constants":{  
+                "system":{  
+                   "initialize":true,
+                   "xuid":"1234",
+                   "index":0
+                },
+
+                "custom":{}
+             },
+
+             "properties":{  
+                "system":{  
+                   "secureDeviceAddress":"QVFEWGZiSWovUURScjJhTEY1dldud0VFQWlBQlNKZ0EyQkVTOFhzRk9kZjYvRklDSUFFQUFFRTNubllzQlFRTmZKUmdRd0VLZk1VNw==",
+                   "active":true
+                },
+
+                "custom":{  
+                   "Health":89,
+                   "Skill":17
+                }
+             },
+
+             "gamertag":"2 Dev 246876529",
+             "deviceToken":"e7c221cbe5228043c39865281047b178"
+          }
+       },
+
+       "correlationId":"lobbyMatchStatusCanceled_corrId",
+       "changeNumber":8
+    })";
+
+    JsonDocument emptyJson()
     {
-        web::http::http_response httpGameResponse;
-        httpGameResponse.headers().add(L"ETag", L"MockETag");
-        httpGameResponse.headers().add(L"Retry-After", L"1");
-        httpGameResponse.headers().add(L"Content-Location", L"/serviceconfigs/MockScid/sessionTemplates/MockGameSessionTemplateName/sessions/MockGameSessionName");
-        return httpGameResponse;
+        JsonDocument json;
+        json.Parse(emptyResponse);
+        return json;
     }
 
-    web::http::http_response DefaultLobbyHttpResponse()
+    JsonDocument badResponseJson()
     {
-        web::http::http_response httpLobbyResponse;
-        httpLobbyResponse.headers().add(L"ETag", L"MockETag");
-        httpLobbyResponse.headers().add(L"Retry-After", L"1");
-        httpLobbyResponse.headers().add(L"Content-Location", L"/serviceconfigs/MockScid/sessionTemplates/MockLobbySessionTemplateName/sessions/MockLobbySessionName");
-        return httpLobbyResponse;
+        JsonDocument json;
+        json.Parse(badResponse);
+        return json;
     }
 
-    bool IsGameHost( Platform::String^ memberDeviceToken, MultiplayerGameSession^ gameSession)
+    JsonDocument rtaConnectionIdJson()
     {
-        if (memberDeviceToken->IsEmpty()) return false;
-        if (gameSession == nullptr || gameSession->Host == nullptr) return false;
-
-        return utils::str_icmp(memberDeviceToken->Data(), gameSession->Host->_DeviceToken->Data()) == 0;
+        JsonDocument json;
+        json.Parse(rtaConnectionId);
+        return json;
     }
 
-    bool IsLobbyHost(Platform::String^ memberDeviceToken, MultiplayerLobbySession^ lobbySession)
+    JsonDocument matchTicketJson()
     {
-        if (memberDeviceToken->IsEmpty()) return false;
-        if (lobbySession == nullptr || lobbySession->Host == nullptr) return false;
-
-        return utils::str_icmp(memberDeviceToken->Data(), lobbySession->Host->_DeviceToken->Data()) == 0;
+        JsonDocument json;
+        json.Parse(matchTicketResponse);
+        return json;
     }
 
-    bool IsPlayerInLobby(Platform::String^ xboxUserId, MultiplayerLobbySession^ lobbySession)
+    JsonDocument matchSessionJoin_1Json()
     {
-        if (xboxUserId->IsEmpty()) return false;
-        if (lobbySession == nullptr) return false;
+        JsonDocument json;
+        json.Parse(matchSessionJoin_1);
+        return json;
+    }
 
-        for each (auto member in lobbySession->Members)
+    JsonDocument matchSessionJoin_2Json()
+    {
+        JsonDocument json;
+        json.Parse(matchSessionJoin_2);
+        return json;
+    }
+
+    JsonDocument matchSessionMeasuringJson()
+    {
+        JsonDocument json;
+        json.Parse(matchSessionMeasuring);
+        return json;
+    }
+
+    JsonDocument matchSessionMeasuringWithQoSJson()
+    {
+        JsonDocument json;
+        json.Parse(matchSessionMeasuringWithQoS);
+        return json;
+    }
+
+    JsonDocument matchSessionMeasuringWithQoSCompleteJson()
+    {
+        JsonDocument json;
+        json.Parse(matchSessionMeasuringWithQoSComplete);
+        return json;
+    }
+
+    JsonDocument matchRemoteClientFailedToUploadQoSJson()
+    {
+        JsonDocument json;
+        json.Parse(matchRemoteClientFailedToUploadQoS);
+        return json;
+    }
+
+    JsonDocument matchSessionRemoteClientFailedToJoinJson()
+    {
+        JsonDocument json;
+        json.Parse(matchSessionRemoteClientFailedToJoin);
+        return json;
+    }
+
+    JsonDocument transferHandleJson()
+    {
+        JsonDocument json;
+        json.Parse(transferHandleResponse);
+        return json;
+    }
+
+    JsonDocument classPropertiesJson()
+    {
+        JsonDocument json;
+        json.Parse(classProperties);
+        return json;
+    }
+
+    JsonDocument propertiesNoTransferHandleJson()
+    {
+        JsonDocument json;
+        json.Parse(propertiesNoTransferHandle);
+        return json;
+    }
+
+    JsonDocument syncPropertiesJson()
+    {
+        JsonDocument json;
+        json.Parse(syncProperties);
+        return json;
+    }
+
+    JsonDocument defaultLobbySessionResponseJson()
+    {
+        JsonDocument json;
+        json.Parse(defaultLobbySessionResponse);
+        return json;
+    }
+
+    JsonDocument defaultLobbySessionNoCustomMemberPropsResponseJson()
+    {
+        JsonDocument json;
+        json.Parse(defaultLobbySessionNoCustomMemberPropsResponse);
+        return json;
+    }
+
+    JsonDocument defaultGameSessionResponseJson()
+    {
+        JsonDocument json;
+        json.Parse(defaultGameSessionResponse);
+        return json;
+    }
+
+    JsonDocument defaultGameSessionWithXuidsResponseJson()
+    {
+        JsonDocument json;
+        json.Parse(defaultGameSessionWithXuidsResponse);
+        return json;
+    }
+
+    JsonDocument defaultMultipleLocalUsersGameResponseJson()
+    {
+        JsonDocument json;
+        json.Parse(defaultMultipleLocalUsersGameResponse);
+        return json;
+    }
+
+    JsonDocument gameSessionResponseDiffXuidJson()
+    {
+        JsonDocument json;
+        json.Parse(gameSessionResponseDiffXuid);
+        return json;
+    }
+
+    JsonDocument sessionChangeNum2Json()
+    {
+        JsonDocument json;
+        json.Parse(sessionChangeNum2);
+        return json;
+    }
+
+    JsonDocument sessionChangeNum3Json()
+    {
+        JsonDocument json;
+        json.Parse(sessionChangeNum3);
+        return json;
+    }
+
+    JsonDocument sessionChangeNum4Json()
+    {
+        JsonDocument json;
+        json.Parse(sessionChangeNum4);
+        return json;
+    }
+
+    JsonDocument sessionChangeNum5Json()
+    {
+        JsonDocument json;
+        json.Parse(sessionChangeNum5);
+        return json;
+    }
+
+    JsonDocument sessionChangeNum6Json()
+    {
+        JsonDocument json;
+        json.Parse(sessionChangeNum6);
+        return json;
+    }
+
+    JsonDocument sessionChangeNum8Json()
+    {
+        JsonDocument json;
+        json.Parse(sessionChangeNum8);
+        return json;
+    }
+
+    JsonDocument lobbyMatchStatusSearchingJson()
+    {
+        JsonDocument json;
+        json.Parse(lobbyMatchStatusSearching);
+        return json;
+    }
+
+    JsonDocument lobbyMatchStatusFoundJson()
+    {
+        JsonDocument json;
+        json.Parse(lobbyMatchStatusFound);
+        return json;
+    }
+
+    JsonDocument lobbyMatchStatusFoundWithTransHandleJson()
+    {
+        JsonDocument json;
+        json.Parse(lobbyMatchStatusFoundWithTransHandle);
+        return json;
+    }
+
+    JsonDocument lobbyMatchStatusExpiredByServiceJson()
+    {
+        JsonDocument json;
+        json.Parse(lobbyMatchStatusExpiredByService);
+        return json;
+    }
+
+    JsonDocument lobbyMatchStatusCanceledByServiceJson()
+    {
+        JsonDocument json;
+        json.Parse(lobbyMatchStatusCanceledByService);
+        return json;
+    }
+
+    JsonDocument lobbyNoHandleResponseJson()
+    {
+        JsonDocument json;
+        json.Parse(lobbyWithNoTransferHandleResponse);
+        return json;
+    }
+
+    JsonDocument lobbyPendingTransferHandleResponseJson()
+    {
+        JsonDocument json;
+        json.Parse(lobbyWithPendingTransferHandleResponse);
+        return json;
+    }
+
+    JsonDocument multipleLocalUsersLobbyResponseJson()
+    {
+        JsonDocument json;
+        json.Parse(multipleLocalUsersLobbyResponse);
+        return json;
+    }
+
+    JsonDocument updatedLobbyNoHandleResponseJson()
+    {
+        JsonDocument json;
+        json.Parse(updatedLobbyWithNoTransferHandleResponse);
+        return json;
+    }
+
+    JsonDocument updatedMultipleLocalUsersLobbyWithNoTransferHandleResponseJson()
+    {
+        JsonDocument json;
+        json.Parse(updatedMultipleLocalUsersLobbyWithNoTransferHandleResponse);
+        return json;
+    }
+
+    JsonDocument lobbyCompletedHandleResponseJson()
+    {
+        JsonDocument json;
+        json.Parse(lobbyWithCompletedTransferHandleResponse);
+        return json;
+    }
+
+    JsonDocument defaultMultipleLocalUsersLobbyResponseJson()
+    {
+        JsonDocument json;
+        json.Parse(defaultMultipleLocalUsersLobbyResponse);
+        return json;
+    }
+
+    const char* defaultLobbyResponseHeaders = R"({ 
+        "ETag":"MockETag",
+        "Retry-After":"1",
+        "Content-Location":"/serviceconfigs/MockScid/sessionTemplates/MockLobbySessionTemplateName/sessions/MockLobbySessionName"
+    })";
+
+    private:
+        class MPMTestEnvironment : public TestEnvironment
         {
-            if (utils::str_icmp(xboxUserId->Data(), member->XboxUserId->Data()) == 0)
+        public:
+            MPMTestEnvironment() noexcept
             {
-                return true;
+                auto& mockRtaService{ MockRealTimeActivityService::Instance() };
+                mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+                {
+                    if (uri.find("sessiondirectory") != std::string::npos)
+                    {
+                        mockRtaService.CompleteSubscribeHandshake(n, rtaConnectionId);
+                    }
+                });
             }
+
+            ~MPMTestEnvironment() noexcept
+            {
+                HttpMock mock(POST, defaultMpsdUri, 201);
+                mock.SetResponseBody(defaultLobbySessionResponse);
+                mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+
+                size_t userRemoved = 0;
+                auto remaining = GlobalState::Get()->MultiplayerManager()->LobbySession()->LocalMembers();
+
+                // Possible all users were removed during a test
+                if (remaining.size() == 0)
+                {
+                    VERIFY_IS_FALSE(XblMultiplayerManagerGameSessionActive());
+                    
+                    m_xboxLiveContexts.clear();
+                    return;
+                }
+
+                for (auto xboxLiveContext : m_xboxLiveContexts)
+                {
+                    // Possible some users were removed during a test
+                    bool isLobbyMember{ false };
+                    for (auto member : remaining)
+                    {
+                        if (member->Xuid() == xboxLiveContext->User().Xuid())
+                        {
+                            isLobbyMember = true;
+                            break;
+                        }
+                    }
+
+                    if (isLobbyMember)
+                    {
+                        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionRemoveLocalUser(xboxLiveContext->User().Handle()));
+                    }
+                    else
+                    {
+                        ++userRemoved;
+                    }
+                }
+
+                int count{ 0 };
+                bool clientDisconnected{ false };
+                while (userRemoved != m_xboxLiveContexts.size() || !clientDisconnected)
+                {
+                    if (++count > 500) break;
+
+                    size_t eventsCount{};
+                    const XblMultiplayerEvent* events{};
+                    XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+                    for (uint32_t i = 0; i < eventsCount; ++i)
+                    {
+                        if (events[i].EventType == XblMultiplayerEventType::UserRemoved)
+                        {
+                            userRemoved++;
+                        }
+                        else if (events[i].EventType == XblMultiplayerEventType::ClientDisconnectedFromMultiplayerService)
+                        {
+                            VERIFY_IS_FALSE(clientDisconnected);
+                            clientDisconnected = true;
+                        }
+                    }
+
+                    Sleep(10);
+                }
+
+                VERIFY_IS_TRUE(userRemoved == m_xboxLiveContexts.size() && clientDisconnected);
+                VERIFY_IS_FALSE(XblMultiplayerManagerGameSessionActive());
+                VERIFY_ARE_EQUAL_UINT(0, XblMultiplayerManagerLobbySessionLocalMembersCount());
+
+                m_xboxLiveContexts.clear();
+            }
+
+            std::shared_ptr<XblContext> CreateMockXboxLiveContext(uint64_t xuid = MOCK_XUID)
+            {
+                auto context = TestEnvironment::CreateMockXboxLiveContext(xuid);
+                m_xboxLiveContexts.push_back(context);
+                
+                return context;
+            }
+
+        private:
+            std::vector<std::shared_ptr<XblContext>> m_xboxLiveContexts;
+        };
+
+    public:
+
+    bool IsPlayerInLobby(uint64_t xboxUserId)
+    {
+        auto count = XblMultiplayerManagerLobbySessionMembersCount();
+        std::vector<XblMultiplayerManagerMember> members(count);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionMembers(count, members.data()));
+
+        for (auto member : members)
+        {
+            if (xboxUserId == member.Xuid) return true;
         }
 
         return false;
     }
 
-    void InitializeManager(uint32_t numberOfWebSocketClientsToInit = 1)
+    void DestructManager(XblContextHandle xboxLiveContext)
     {
-        const int subId = 666;
-        m_mockXboxSystemFactory->reinit();
-        auto mockSockets = m_mockXboxSystemFactory->AddMultipleMockWebSocketClients(numberOfWebSocketClientsToInit);
-        const string_t rtaConnectionIdJson = testResponseJsonFromFile[L"rtaConnectionIdJson"].serialize();
-        SetMultipleClientWebSocketRTAAutoResponser(mockSockets, rtaConnectionIdJson, subId);
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        mpInstance->Initialize(LOBBY_TEMPLATE_NAME);
+        std::vector<XblContextHandle> xboxLiveContexts{ xboxLiveContext };
+        DestructManager(xboxLiveContexts);
     }
 
-    void DestructManager(Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext, bool forceShutdhow =  false)
+    void DestructManager(std::vector<XblContextHandle> xboxLiveContexts)
     {
-        Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
-        xboxLiveContexts->Append(xboxLiveContext);
-        DestructManager(xboxLiveContexts->GetView(), forceShutdhow);
-    }
+        HttpMock mock(POST, defaultMpsdUri, 201);
+        mock.SetResponseBody(defaultLobbySessionResponse);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-    void DestructManager(IVectorView<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts, bool forceShutdhow = false)
-    {
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        if (mpInstance->LobbySession->LocalMembers->Size == 0 || forceShutdhow)
-        {
-            mpInstance->_Shutdown();
-            return;
-        };
-
-        m_mockXboxSystemFactory->clear_states();
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList = { lobbySessionEmptyJsonResponse };
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-
-        int userRemoved = 0;
+        size_t userRemoved = 0;
         for (auto xboxLiveContext : xboxLiveContexts)
         {
-            try { mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User); }
-            catch (Platform::Exception^ ex) { userRemoved++; }
+            VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionRemoveLocalUser(xboxLiveContext->User().Handle()));
         }
 
-        bool clientDisconnected = false;
-        while (userRemoved != xboxLiveContexts->Size || !clientDisconnected)
+        int count{ 0 };
+        bool clientDisconnected{ false };
+        while (userRemoved != xboxLiveContexts.size() || !clientDisconnected)
         {
-            auto events = mpInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+            
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::UserRemoved)
+                if (events[i].EventType == XblMultiplayerEventType::UserRemoved)
                 {
                     userRemoved++;
                 }
-
-                if (ev->EventType == MultiplayerEventType::ClientDisconnectedFromMultiplayerService)
+                else if (events[i].EventType == XblMultiplayerEventType::ClientDisconnectedFromMultiplayerService)
                 {
-                    VERIFY_IS_TRUE(!clientDisconnected);
-                    clientDisconnected  = true;
+                    VERIFY_IS_FALSE(clientDisconnected);
+                    clientDisconnected = true;
                 }
+            }
+
+            Sleep(10);
+        }
+        
+        VERIFY_IS_TRUE(userRemoved == xboxLiveContexts.size() && clientDisconnected);
+        VERIFY_IS_FALSE(XblMultiplayerManagerGameSessionActive());
+        VERIFY_ARE_EQUAL_UINT(0, XblMultiplayerManagerLobbySessionLocalMembersCount());
+    }
+
+    void VerifyMultiplayerMember(XblMultiplayerManagerMember member, JsonValue resultToVerify)
+    {
+        auto str = JsonUtils::SerializeJson(resultToVerify);
+        UNREFERENCED_PARAMETER(str);
+        JsonValue constantsSystemJson = resultToVerify["constants"]["system"].GetObject();
+        
+        VERIFY_ARE_EQUAL_UINT(constantsSystemJson["index"].GetUint(), member.MemberId);
+        VERIFY_ARE_EQUAL_UINT(strtoull(constantsSystemJson["xuid"].GetString(), nullptr, 0), member.Xuid);
+
+        if (member.Status != XblMultiplayerSessionMemberStatus::Reserved)
+        {
+            VERIFY_ARE_EQUAL_STR(resultToVerify["gamertag"].GetString(), member.DebugGamertag);
+            VERIFY_ARE_EQUAL_STR(CONNECTION_ADDR, member.ConnectionAddress);
+        }
+
+        VERIFY_ARE_EQUAL(IsPlayerInLobby(member.Xuid), member.IsInLobby);
+
+        JsonValue propertiesJson = resultToVerify["properties"].GetObject();
+        JsonValue propertiesSystemJson = propertiesJson["system"].GetObject();
+        switch (member.Status)
+        {
+            case XblMultiplayerSessionMemberStatus::Active:
+                VERIFY_IS_TRUE(propertiesSystemJson["active"].GetBool());
+                break;
+            case XblMultiplayerSessionMemberStatus::Ready:
+                VERIFY_IS_TRUE(propertiesSystemJson["ready"].GetBool());
+                break;
+            case XblMultiplayerSessionMemberStatus::Reserved:
+                VERIFY_IS_TRUE(resultToVerify["reserved"].GetBool());
+                break;
+            case XblMultiplayerSessionMemberStatus::Inactive:
+                VERIFY_IS_FALSE(resultToVerify["reserved"].GetBool());
+                VERIFY_IS_FALSE(propertiesSystemJson["active"].GetBool());
+                VERIFY_IS_FALSE(propertiesSystemJson["ready"].GetBool());
+                break;
+            default:
+                throw std::invalid_argument("Enum value out of range");
+        }
+
+        VERIFY_ARE_EQUAL_STR(JsonUtils::SerializeJson(propertiesJson["custom"]), member.PropertiesJson);
+    }
+
+    void VerifyLobby(JsonValue resultToVerify)
+    {
+        JsonValue membersJson = resultToVerify["members"].GetObject();
+        JsonValue memberInfoJson = resultToVerify["membersInfo"].GetObject();
+        
+        uint32_t memberCount = memberInfoJson["count"].GetInt();
+        uint32_t memberFirst = memberInfoJson["first"].GetInt();
+
+        auto lobbyMemberCount = XblMultiplayerManagerLobbySessionMembersCount();
+        auto lobbyLocalMemberCount = XblMultiplayerManagerLobbySessionLocalMembersCount();
+        std::vector<XblMultiplayerManagerMember> lobbyMembers(lobbyMemberCount);
+        std::vector<XblMultiplayerManagerMember> lobbyLocalMembers(lobbyLocalMemberCount);
+        
+        if (lobbyMemberCount > 0)
+        {
+            VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionMembers(lobbyMemberCount, lobbyMembers.data()));
+        }
+        if (lobbyLocalMemberCount > 0)
+        {
+            VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionLocalMembers(lobbyLocalMemberCount, lobbyLocalMembers.data()));
+        }
+
+        for (uint32_t i = memberFirst; i < memberCount; ++i)
+        {
+            xsapi_internal_stringstream stream;
+            stream << i;
+
+            if (i < lobbyLocalMemberCount)
+            {
+                VerifyMultiplayerMember(lobbyLocalMembers[i], membersJson[stream.str().data()].GetObject());
+            }
+            else
+            {
+                VerifyMultiplayerMember(lobbyMembers[i], membersJson[stream.str().data()].GetObject());
             }
         }
 
-        VERIFY_IS_TRUE(mpInstance->GameSession == nullptr);
-        VERIFY_IS_TRUE(mpInstance->LobbySession->LocalMembers->Size == 0);
+        // Session name is dynamically created by the Manager and not returned back in the service response.
+        XblMultiplayerSessionReference lobbyRef{};
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSessionReference(&lobbyRef));
+        VERIFY_ARE_EQUAL_STR(MOCK_SCID, lobbyRef.Scid);
+        VERIFY_ARE_EQUAL_STR(LOBBY_TEMPLATE_NAME, lobbyRef.SessionTemplateName);
+
+        XblGuid corrId{};
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionCorrelationId(&corrId));
+        auto s = resultToVerify["correlationId"].GetString();
+        VERIFY_ARE_EQUAL_STR(s, corrId.value);
+
+        auto lobbyProperties = XblMultiplayerManagerLobbySessionPropertiesJson();
+        VERIFY_ARE_EQUAL_STR(JsonUtils::SerializeJson(resultToVerify["properties"]["custom"]), lobbyProperties);
     }
 
-    void VerifyMultiplayerMember(MultiplayerMember^ member, web::json::value resultToVerify)
+    void VerifyGame(JsonValue resultToVerify)
     {
-        web::json::value constantsJson = resultToVerify[L"constants"];
-        web::json::value constantsSystemJson = constantsJson[L"system"];
+        JsonValue membersJson = resultToVerify["members"].GetObject();
+        JsonValue memberInfoJson = resultToVerify["membersInfo"].GetObject();
 
-        VERIFY_ARE_EQUAL_INT(member->MemberId, constantsSystemJson[L"index"].as_integer());
-        VERIFY_ARE_EQUAL(member->XboxUserId->Data(), constantsSystemJson[L"xuid"].as_string());
-        if (member->Status != MultiplayerSessionMemberStatus::Reserved)
+        uint32_t memberCount = memberInfoJson["count"].GetInt();
+        uint32_t memberFirst = memberInfoJson["first"].GetInt();
+
+        auto gameMemberCount = XblMultiplayerManagerGameSessionMembersCount();
+        std::vector<XblMultiplayerManagerMember> gameMembers(gameMemberCount);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerGameSessionMembers(gameMemberCount, gameMembers.data()));
+
+        for (uint32_t i = memberFirst; i < memberCount; ++i)
         {
-            VERIFY_ARE_EQUAL(member->DebugGamertag->Data(), resultToVerify[L"gamertag"].as_string());
-            VERIFY_ARE_EQUAL(member->_DeviceToken->Data(), resultToVerify[L"deviceToken"].as_string());
-            VERIFY_ARE_EQUAL(member->IsLocal, true);
-            VERIFY_ARE_EQUAL_STR(member->ConnectionAddress, "AQDXfbIj/QDRr2aLF5vWnwEEAiABSJgA2BES8XsFOdf6/FICIAEAAEE3nnYsBQQNfJRgQwEKfMU7");
+            xsapi_internal_stringstream stream;
+            stream << i;
+
+            VerifyMultiplayerMember(gameMembers[i], membersJson[stream.str().c_str()].GetObject());
         }
 
-        VERIFY_ARE_EQUAL(member->IsInLobby, IsPlayerInLobby(member->XboxUserId, MultiplayerManager::SingletonInstance->LobbySession));
+        auto gameRef = XblMultiplayerManagerGameSessionSessionReference();
+        VERIFY_ARE_EQUAL_STR(MOCK_SCID, gameRef->Scid);
+        VERIFY_ARE_EQUAL_STR(GAME_TEMPLATE_NAME, gameRef->SessionTemplateName);
 
-        web::json::value propertiesJson = resultToVerify[L"properties"];
-        web::json::value propertiesSystemJson = propertiesJson[L"system"];
-        switch (member->Status)
+        auto corrId = XblMultiplayerManagerGameSessionCorrelationId();
+        VERIFY_ARE_EQUAL_STR(resultToVerify["correlationId"].GetString(), corrId);
+
+        auto gameProperties = XblMultiplayerManagerGameSessionPropertiesJson();
+        VERIFY_ARE_EQUAL_STR(JsonUtils::SerializeJson(resultToVerify["properties"]["custom"]), gameProperties);
+    }
+
+    void VerifyMultiplayerMember(multiplayer::manager::MultiplayerMember* member, JsonValue resultToVerify)
+    {
+        auto str = JsonUtils::SerializeJson(resultToVerify);
+        UNREFERENCED_PARAMETER(str);
+        JsonValue constantsSystemJson = resultToVerify["constants"]["system"].GetObject();
+
+        VERIFY_ARE_EQUAL_UINT(constantsSystemJson["index"].GetUint(), member->MemberId());
+        VERIFY_ARE_EQUAL_UINT(strtoull(constantsSystemJson["xuid"].GetString(), nullptr, 0), member->Xuid());
+
+        if (member->Status() != XblMultiplayerSessionMemberStatus::Reserved)
         {
-        case MultiplayerSessionMemberStatus::Active:
-            VERIFY_IS_TRUE(propertiesSystemJson[L"active"].as_bool());
+            VERIFY_ARE_EQUAL_STR(resultToVerify["gamertag"].GetString(), member->DebugGamertag());
+            VERIFY_ARE_EQUAL_STR(CONNECTION_ADDR, member->ConnectionAddress());
+        }
+
+        VERIFY_ARE_EQUAL(IsPlayerInLobby(member->Xuid()), member->IsInLobby());
+
+        JsonValue propertiesJson = resultToVerify["properties"].GetObject();
+        JsonValue propertiesSystemJson = propertiesJson["system"].GetObject();
+        switch (member->Status())
+        {
+        case XblMultiplayerSessionMemberStatus::Active:
+            VERIFY_IS_TRUE(propertiesSystemJson["active"].GetBool());
             break;
-        case MultiplayerSessionMemberStatus::Ready:
-            VERIFY_IS_TRUE(propertiesSystemJson[L"ready"].as_bool());
+        case XblMultiplayerSessionMemberStatus::Ready:
+            VERIFY_IS_TRUE(propertiesSystemJson["ready"].GetBool());
             break;
-        case MultiplayerSessionMemberStatus::Reserved:
-            VERIFY_IS_TRUE(resultToVerify[L"reserved"].as_bool());
+        case XblMultiplayerSessionMemberStatus::Reserved:
+            VERIFY_IS_TRUE(resultToVerify["reserved"].GetBool());
             break;
-        case MultiplayerSessionMemberStatus::Inactive:
-            VERIFY_IS_FALSE(resultToVerify[L"reserved"].as_bool());
-            VERIFY_IS_FALSE(propertiesSystemJson[L"active"].as_bool());
-            VERIFY_IS_FALSE(propertiesSystemJson[L"ready"].as_bool());
+        case XblMultiplayerSessionMemberStatus::Inactive:
+            VERIFY_IS_FALSE(resultToVerify["reserved"].GetBool());
+            VERIFY_IS_FALSE(propertiesSystemJson["active"].GetBool());
+            VERIFY_IS_FALSE(propertiesSystemJson["ready"].GetBool());
             break;
         default:
             throw std::invalid_argument("Enum value out of range");
         }
 
-        VERIFY_ARE_EQUAL(member->Properties->Data(), propertiesJson[L"custom"].serialize());
+        VERIFY_ARE_EQUAL_STR(JsonUtils::SerializeJson(propertiesJson["custom"]), member->CustomPropertiesJson());
     }
 
-    void VerifyLobby(MultiplayerLobbySession^ lobbySession, web::json::value resultToVerify)
+    void VerifyLobby(JsonValue resultToVerify, multiplayer::manager::MultiplayerLobbySession* lobbySession)
     {
-        web::json::value memberInfoJson = utils::extract_json_field(resultToVerify, _T("membersInfo"), false);
-        web::json::value propertiesJson = resultToVerify[L"properties"];
-        web::json::value propertiesSystemJson = propertiesJson[L"system"];
+        JsonValue membersJson = resultToVerify["members"].GetObject();
+        JsonValue memberInfoJson = resultToVerify["membersInfo"].GetObject();
 
-        web::json::value membersJson = resultToVerify[L"members"];
-        uint32 memberCount = memberInfoJson[L"count"].as_integer();
-        uint32 memberFirst = memberInfoJson[L"first"].as_integer();
-        for (uint32 i = memberFirst; i < memberCount; ++i)
+        uint32_t memberCount = memberInfoJson["count"].GetInt();
+        uint32_t memberFirst = memberInfoJson["first"].GetInt();
+
+        for (uint32_t i = memberFirst; i < memberCount; ++i)
         {
-            stringstream_t stream;
+            xsapi_internal_stringstream stream;
             stream << i;
-            VerifyMultiplayerMember(lobbySession->LocalMembers->GetAt(i), membersJson[stream.str()]);
-            VerifyMultiplayerMember(lobbySession->Members->GetAt(i), membersJson[stream.str()]);
-        }
 
-        // Session name is dynamically created by the Manager and not returned back in the service response.
-        VERIFY_ARE_EQUAL_STR(lobbySession->SessionReference->ServiceConfigurationId, ref new Platform::String(L"MockScid"));
-        VERIFY_ARE_EQUAL_STR(lobbySession->SessionReference->SessionTemplateName, ref new Platform::String(L"MockLobbySessionTemplateName"));
-
-        VERIFY_ARE_EQUAL(lobbySession->CorrelationId->Data(), resultToVerify[L"correlationId"].as_string());
-        if (lobbySession->Host != nullptr)
-        {
-            VERIFY_ARE_EQUAL(lobbySession->Host->_DeviceToken->Data(), propertiesSystemJson[L"host"].as_string());
-        }
-        VERIFY_ARE_EQUAL(lobbySession->Properties->Data(), propertiesJson[L"custom"].serialize());
-    }
-
-    void VerifyGame(MultiplayerGameSession^ gameSession, web::json::value resultToVerify)
-    {
-        web::json::value memberInfoJson = utils::extract_json_field(resultToVerify, _T("membersInfo"), false);
-        web::json::value propertiesJson = resultToVerify[L"properties"];
-        web::json::value propertiesSystemJson = propertiesJson[L"system"];
-
-        web::json::value membersJson = resultToVerify[L"members"];
-        uint32 memberCount = memberInfoJson[L"count"].as_integer();
-        uint32 memberFirst = memberInfoJson[L"first"].as_integer();
-        for (uint32 i = memberFirst; i < memberCount; ++i)
-        {
-            stringstream_t stream;
-            stream << i;
-            VerifyMultiplayerMember(gameSession->Members->GetAt(i), membersJson[stream.str()]);
-        }
-
-        VERIFY_ARE_EQUAL_STR(gameSession->SessionReference->ServiceConfigurationId, ref new Platform::String(L"MockScid"));
-        VERIFY_ARE_EQUAL_STR(gameSession->SessionReference->SessionTemplateName, ref new Platform::String(L"MockGameSessionTemplateName"));
-
-        VERIFY_ARE_EQUAL(gameSession->CorrelationId->Data(), resultToVerify[L"correlationId"].as_string());
-        if (gameSession->Host != nullptr)
-        {
-            VERIFY_ARE_EQUAL(gameSession->Host->_DeviceToken->Data(), propertiesSystemJson[L"host"].as_string());
-        }
-        VERIFY_ARE_EQUAL(gameSession->Properties->Data(), propertiesJson[L"custom"].serialize());
-    }
-
-    void AddLocalUserHelper(Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext)
-    {
-        AddLocalUserHelper(xboxLiveContext, defaultLobbySessionResponse);
-    }
-
-    void AddLocalUserHelper(Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext, const string_t jsonLobbySessionResponse)
-    {
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        auto jsonResponse = web::json::value::parse(jsonLobbySessionResponse);
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(jsonResponse);
-
-        auto multiplayerManagerInstance = MultiplayerManager::SingletonInstance;
-        multiplayerManagerInstance->LobbySession->AddLocalUser(xboxLiveContext->User);
-        multiplayerManagerInstance->LobbySession->SetLocalMemberProperties(xboxLiveContext->User, L"Health", L"89", (Platform::Object^) 1);
-        multiplayerManagerInstance->LobbySession->SetLocalMemberProperties(xboxLiveContext->User, L"Skill", L"17", (Platform::Object^) 2);
-        multiplayerManagerInstance->LobbySession->SetLocalMemberConnectionAddress(xboxLiveContext->User, L"AQDXfbIj/QDRr2aLF5vWnwEEAiABSJgA2BES8XsFOdf6/FICIAEAAEE3nnYsBQQNfJRgQwEKfMU7", (Platform::Object^) 3);
-
-        bool userAdded = false;
-        int localUserPropWritten = 0;
-        while (!userAdded || localUserPropWritten != 3)
-        {
-            auto events = multiplayerManagerInstance->DoWork();
-            for (auto ev : events)
+            if (i < lobbySession->LocalMembers().size())
             {
-                if (ev->EventType == MultiplayerEventType::UserAdded)
-                {
-                    userAdded = true;
-                }
-
-                if (ev->EventType == MultiplayerEventType::LocalMemberPropertyWriteCompleted)
-                {
-                    int pContext = safe_cast<int>(ev->Context);
-                    VERIFY_IS_TRUE(pContext == 1 || pContext == 2);
-                    localUserPropWritten++;
-                }
-
-                if (ev->EventType == MultiplayerEventType::LocalMemberConnectionAddressWriteCompleted)
-                {
-                    int pContext = safe_cast<int>(ev->Context);
-                    VERIFY_IS_TRUE(pContext == 3 );
-                    localUserPropWritten++;
-                }
+                VerifyMultiplayerMember(lobbySession->LocalMembers()[i].get(), membersJson[stream.str().data()].GetObject());
+            }
+            else
+            {
+                VerifyMultiplayerMember(lobbySession->LocalMembers()[i].get(), membersJson[stream.str().data()].GetObject());
             }
         }
 
-        VerifyLobby(multiplayerManagerInstance->LobbySession, jsonResponse);
+        // Session name is dynamically created by the Manager and not returned back in the service response.
+        VERIFY_ARE_EQUAL_STR(MOCK_SCID, lobbySession->SessionReference().Scid);
+        VERIFY_ARE_EQUAL_STR(LOBBY_TEMPLATE_NAME, lobbySession->SessionReference().SessionTemplateName);
+        VERIFY_ARE_EQUAL_STR(resultToVerify["correlationId"].GetString(), lobbySession->CorrelationId().c_str());
+        VERIFY_ARE_EQUAL_STR(JsonUtils::SerializeJson(resultToVerify["properties"]["custom"]), lobbySession->CustomPropertiesJson().c_str());
     }
 
-    void AddLocalUserHelperWithSyncUpdate(Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext)
+    void VerifyGame(JsonValue resultToVerify, multiplayer::manager::MultiplayerGameSession* gameSession)
+    {
+        JsonValue membersJson = resultToVerify["members"].GetObject();
+        JsonValue memberInfoJson = resultToVerify["membersInfo"].GetObject();
+
+        uint32_t memberCount = memberInfoJson["count"].GetInt();
+        uint32_t memberFirst = memberInfoJson["first"].GetInt();
+
+        for (uint32_t i = memberFirst; i < memberCount; ++i)
+        {
+            xsapi_internal_stringstream stream;
+            stream << i;
+
+            VerifyMultiplayerMember(gameSession->Members()[i].get(), membersJson[stream.str().c_str()].GetObject());
+        }
+
+        VERIFY_ARE_EQUAL_STR(MOCK_SCID, gameSession->SessionReference().Scid);
+        VERIFY_ARE_EQUAL_STR(GAME_TEMPLATE_NAME, gameSession->SessionReference().SessionTemplateName);
+        VERIFY_ARE_EQUAL_STR(resultToVerify["correlationId"].GetString(), gameSession->CorrelationId().c_str());
+        VERIFY_ARE_EQUAL_STR(JsonUtils::SerializeJson(resultToVerify["properties"]["custom"]), gameSession->Properties().c_str());
+    }
+
+    void VerifyContext12AndIncrement(XblMultiplayerEvent event, uint32_t* counter)
+    {
+        auto pContext = *static_cast<uint32_t*>(event.Context);
+        VERIFY_IS_TRUE(pContext == 1 || pContext == 2);
+        ++*counter;
+    }
+
+    void VerifyContext3AndIncrement(XblMultiplayerEvent event, uint32_t* counter)
+    {
+        auto pContext = *static_cast<uint32_t*>(event.Context);
+        VERIFY_ARE_EQUAL_UINT(3, pContext);
+        ++*counter;
+    }
+
+    std::shared_ptr<XblMultiplayerSession> GetSession(bool isGame)
+    {
+        auto latestPendingRead = GlobalState::Get()->MultiplayerManager()->GetMultiplayerClientManager()->LatestPendingRead();
+
+        if (isGame)
+        {
+            return latestPendingRead->GameClient()->Session();
+        }
+        else
+        {
+            return latestPendingRead->LobbyClient()->Session();
+        }
+    }
+
+    const std::shared_ptr<xbox::services::multiplayer::manager::MultiplayerSessionWriter> GetSessionWriter(bool isGame)
+    {
+        auto latestPendingRead = GlobalState::Get()->MultiplayerManager()->GetMultiplayerClientManager()->LatestPendingRead();
+
+        if (isGame)
+        {
+            return latestPendingRead->LobbyClient()->SessionWriter();
+        }
+        else
+        {
+            return latestPendingRead->LobbyClient()->SessionWriter();
+        }
+    }
+
+    void AddLocalUserHelper(XblContextHandle xboxLiveContext, XTaskQueueHandle queue = {})
+    {
+        AddLocalUserHelper(xboxLiveContext, defaultLobbySessionResponse, queue);
+    }
+
+    void AddLocalUserHelper(XblContextHandle xboxLiveContext, const char* jsonLobbySessionResponse, XTaskQueueHandle queue = {})
+    {
+        VERIFY_SUCCEEDED(XblMultiplayerManagerInitialize(LOBBY_TEMPLATE_NAME, queue));
+        VERIFY_SUCCEEDED(XblRealTimeActivityActivate(xboxLiveContext));
+
+        HttpMock mock("PUT", defaultMpsdUri, 201);
+        mock.SetResponseBody(jsonLobbySessionResponse);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+
+        uint32_t contextIds[3]{ 1,2,3 };
+        XblUserHandle userHandle = xboxLiveContext->User().Handle();
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionAddLocalUser(userHandle));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetLocalMemberProperties(userHandle, "Health", "89", &contextIds[0]));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetLocalMemberProperties(userHandle, "Skill", "17", &contextIds[1]));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetLocalMemberConnectionAddress(userHandle, CONNECTION_ADDR, &contextIds[2]));
+
+        int count{ 0 };
+        bool userAdded{ false };
+        uint32_t localUserPropWritten{ 0 };
+        while (!userAdded || localUserPropWritten != 3)
+        {
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
+            {
+                switch (events[i].EventType)
+                {
+                    case XblMultiplayerEventType::UserAdded:
+                        userAdded = true;
+                        break;
+                    case XblMultiplayerEventType::LocalMemberPropertyWriteCompleted:
+                        VerifyContext12AndIncrement(events[i], &localUserPropWritten);
+                        break;
+                    case XblMultiplayerEventType::LocalMemberConnectionAddressWriteCompleted:
+                        VerifyContext3AndIncrement(events[i], &localUserPropWritten);
+                        break;
+                }
+            }
+
+            Sleep(10);
+        }
+
+        VERIFY_IS_FALSE(!userAdded || localUserPropWritten != 3);
+        JsonDocument responseJson;
+        responseJson.Parse(jsonLobbySessionResponse);
+        VerifyLobby(responseJson.GetObject());
+    }
+
+    void AddLocalUserHelperWithSyncUpdate(XblContextHandle xboxLiveContext)
     {
         AddLocalUserHelperWithSyncUpdate(xboxLiveContext, defaultLobbySessionResponse);
     }
 
-    void AddLocalUserHelperWithSyncUpdate(Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext, const string_t jsonLobbySessionResponse)
+    void AddLocalUserHelperWithSyncUpdate(XblContextHandle xboxLiveContext, const char* jsonLobbySessionResponse)
     {
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        auto jsonResponse = web::json::value::parse(jsonLobbySessionResponse);
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(jsonResponse);
+        XTaskQueueHandle queue{};
+        VERIFY_SUCCEEDED(XblMultiplayerManagerInitialize(LOBBY_TEMPLATE_NAME, queue));
+        VERIFY_SUCCEEDED(XblRealTimeActivityActivate(xboxLiveContext));
+        
+        HttpMock mock(POST, defaultMpsdUri, 200);
+        mock.SetResponseBody(jsonLobbySessionResponse);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        mpInstance->LobbySession->AddLocalUser(xboxLiveContext->User);
-        mpInstance->LobbySession->SetLocalMemberProperties(xboxLiveContext->User, L"Health", L"89", (Platform::Object^) 1);
-        mpInstance->LobbySession->SetLocalMemberProperties(xboxLiveContext->User, L"Skill", L"17", (Platform::Object^) 2);
-        mpInstance->LobbySession->SetLocalMemberConnectionAddress(xboxLiveContext->User, L"AQDXfbIj/QDRr2aLF5vWnwEEAiABSJgA2BES8XsFOdf6/FICIAEAAEE3nnYsBQQNfJRgQwEKfMU7", (Platform::Object^) 3);
-        mpInstance->LobbySession->SetProperties(L"Map", L"1", (Platform::Object^) 4);
-        mpInstance->LobbySession->SetSynchronizedProperties(L"Map", L"2", (Platform::Object^) 5);
+        // Ids to correlate with event number
+        uint32_t contextId = 0;
+        uint32_t contextIds[11]{ 1,2,3,4,5,6,7,8,9,10,11 };
+        XblUserHandle userHandle = xboxLiveContext->User().Handle();
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionAddLocalUser(userHandle));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetLocalMemberProperties(userHandle, "Health", "89", &contextIds[contextId++]));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetLocalMemberProperties(userHandle, "Skill", "17", &contextIds[contextId++]));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetLocalMemberConnectionAddress(userHandle, CONNECTION_ADDR, &contextIds[contextId++]));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetProperties("Map", "1", &contextIds[contextId++]));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetSynchronizedProperties("Map", "2", &contextIds[contextId++]));
 
-        bool userAdded = false;
-        int localUserPropWritten = 0, propWritten = 0, syncPropWritten = 0, eventValue = 0;
-        int contextId = 6;
+        int count{ 0 };
+        bool userAdded{ false };
+        uint32_t localUserPropWritten = 0, propWritten = 0, syncPropWritten = 0, eventValue = 0;
         while (!userAdded || localUserPropWritten != 3 || propWritten != 4 || syncPropWritten != 4)
         {
-            auto events = mpInstance->DoWork();
-            if (contextId < 12)
+            if (++count > 500) break;
+
+            if (contextId < 10)
             {
-                mpInstance->LobbySession->SetProperties(L"Map", L"3", (Platform::Object^) contextId++);
-                mpInstance->LobbySession->SetSynchronizedProperties(L"Map", L"4", (Platform::Object^) contextId++);
+                VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetProperties("Map", "3", &contextIds[contextId++]));
+                VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetSynchronizedProperties("Map", "4", &contextIds[contextId++]));
             }
 
-            for (auto ev : events)
-            {
-                VERIFY_IS_TRUE(ev->SessionType == MultiplayerSessionType::LobbySession);
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            VERIFY_SUCCEEDED(XblMultiplayerManagerDoWork(&events, &eventsCount));
 
-                if (ev->Context != nullptr)
+            for (uint32_t i = 0; i < eventsCount; ++i)
+            {
+                VERIFY_ARE_EQUAL_UINT(XblMultiplayerSessionType::LobbySession, events[i].SessionType);
+
+                if (events[i].Context != nullptr)
                 {
-                    int context = safe_cast<int>(ev->Context);
-                    TEST_LOG(FormatString(L" [MPM] AddLocalUserHelperWithSyncUpdate - Event type: %s - Context: eventValue = %s:%s", ev->EventType.ToString()->Data(), context.ToString()->Data(), eventValue.ToString()->Data()).c_str());
-                    VERIFY_IS_TRUE(context == eventValue);
+                    uint32_t context = *static_cast<uint32_t*>(events[i].Context);
+                    
+                    TEST_LOG(FormatString(L" [MPM] AddLocalUserHelperWithSyncUpdate - Event type: %d - Context: eventValue = %d:%d", events[i].EventType, context, eventValue).c_str());
+                    VERIFY_ARE_EQUAL_UINT(eventValue, context);
                 }
                 else
                 {
-                    TEST_LOG(FormatString(L" [MPM] AddLocalUserHelperWithSyncUpdate - Event type: %s - EventValue = %s", ev->EventType.ToString()->Data(), eventValue.ToString()->Data()).c_str());
+                    TEST_LOG(FormatString(L" [MPM] AddLocalUserHelperWithSyncUpdate - Event type: %d - EventValue = %d", events[i].EventType, eventValue).c_str());
                 }
 
-                if (ev->EventType == MultiplayerEventType::UserAdded)
+                switch (events[i].EventType)
                 {
-                    userAdded = true;
-                }
-
-                if (ev->EventType == MultiplayerEventType::LocalMemberPropertyWriteCompleted)
-                {
-                    localUserPropWritten++;
-                }
-
-                if (ev->EventType == MultiplayerEventType::LocalMemberConnectionAddressWriteCompleted)
-                {
-                    localUserPropWritten++;
-                }
-
-                if (ev->EventType == MultiplayerEventType::SessionPropertyWriteCompleted)
-                {
-                    propWritten++;
-                }
-
-                if (ev->EventType == MultiplayerEventType::SessionSynchronizedPropertyWriteCompleted)
-                {
-                    syncPropWritten++;
+                    case XblMultiplayerEventType::UserAdded:
+                        userAdded = true;
+                        break;
+                    case XblMultiplayerEventType::LocalMemberPropertyWriteCompleted:
+                    case XblMultiplayerEventType::LocalMemberConnectionAddressWriteCompleted:
+                        localUserPropWritten++;
+                        break;
+                    case XblMultiplayerEventType::SessionPropertyWriteCompleted:
+                        propWritten++;
+                        break;
+                    case XblMultiplayerEventType::SessionSynchronizedPropertyWriteCompleted:
+                        syncPropWritten++;
+                        break;
                 }
 
                 eventValue++;
             }
+
+            Sleep(10);
         }
 
-        VerifyLobby(mpInstance->LobbySession, jsonResponse);
+        VERIFY_IS_FALSE(!userAdded || localUserPropWritten != 3 || propWritten != 4 || syncPropWritten != 4);
+        JsonDocument responseJson;
+        responseJson.Parse(jsonLobbySessionResponse);
+        VerifyLobby(responseJson.GetObject());
     }
 
-    void AddMultipleLocalUserHelper(IVectorView<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts)
+    void AddMultipleLocalUserHelper(std::vector<XblContextHandle> xboxLiveContexts)
     {
         AddMultipleLocalUserHelper(xboxLiveContexts, defaultMultipleLocalUsersLobbyResponse);
     }
 
-    void AddMultipleLocalUserHelper(IVectorView<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts, const string_t jsonLobbySessionResponse)
+    void AddMultipleLocalUserHelper(std::vector<XblContextHandle> xboxLiveContexts, const char* jsonLobbySessionResponse)
     {
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        auto jsonResponse = web::json::value::parse(jsonLobbySessionResponse);
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(jsonResponse);
+        XTaskQueueHandle queue{};
+        VERIFY_SUCCEEDED(XblMultiplayerManagerInitialize(LOBBY_TEMPLATE_NAME, queue));
+        
+        JsonDocument responseJson;
+        responseJson.Parse(jsonLobbySessionResponse);
 
-        auto multiplayerManagerInstance = MultiplayerManager::SingletonInstance;
+        HttpMock mock(POST, defaultMpsdUri, 201);
+        mock.SetResponseBody(jsonLobbySessionResponse);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+
+        uint32_t contextIds[3]{ 1,2,3 };
         for (auto xboxLiveContext : xboxLiveContexts)
         {
-            multiplayerManagerInstance->LobbySession->AddLocalUser(xboxLiveContext->User);
-            multiplayerManagerInstance->LobbySession->SetLocalMemberProperties(xboxLiveContext->User, L"Health", L"89", (Platform::Object^) 1);
-            multiplayerManagerInstance->LobbySession->SetLocalMemberProperties(xboxLiveContext->User, L"Skill", L"17", (Platform::Object^) 2);
-            multiplayerManagerInstance->LobbySession->SetLocalMemberConnectionAddress(xboxLiveContext->User, L"AQDXfbIj/QDRr2aLF5vWnwEEAiABSJgA2BES8XsFOdf6/FICIAEAAEE3nnYsBQQNfJRgQwEKfMU7", (Platform::Object^) 3);
+            XblUserHandle userHandle = xboxLiveContext->User().Handle();
+            VERIFY_SUCCEEDED(XblRealTimeActivityActivate(xboxLiveContext));
+            VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionAddLocalUser(userHandle));
+            VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetLocalMemberProperties(userHandle, "Health", "89", &contextIds[0]));
+            VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetLocalMemberProperties(userHandle, "Skill", "17", &contextIds[1]));
+            VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetLocalMemberConnectionAddress(userHandle, CONNECTION_ADDR, &contextIds[2]));
         }
-        
-        int usersAdded = 0;
-        int localUserPropWritten = 0;
-        while (usersAdded != xboxLiveContexts->Size || localUserPropWritten != (xboxLiveContexts->Size * 3) )
+
+        int count{ 0 };
+        size_t usersAdded = 0;
+        uint32_t localUserPropWritten = 0;
+        while (usersAdded != xboxLiveContexts.size() || localUserPropWritten != (xboxLiveContexts.size() * 3))
         {
-            auto events = multiplayerManagerInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::UserAdded)
+                switch (events[i].EventType)
                 {
-                    usersAdded++;
-                }
-
-                if (ev->EventType == MultiplayerEventType::LocalMemberPropertyWriteCompleted)
-                {
-                    int pContext = safe_cast<int>(ev->Context);
-                    VERIFY_IS_TRUE(pContext == 1 || pContext == 2);
-                    localUserPropWritten++;
-                }
-
-                if (ev->EventType == MultiplayerEventType::LocalMemberConnectionAddressWriteCompleted)
-                {
-                    int pContext = safe_cast<int>(ev->Context);
-                    VERIFY_IS_TRUE(pContext == 3);
-                    localUserPropWritten++;
+                    case XblMultiplayerEventType::UserAdded:
+                        usersAdded++;
+                        break;
+                    case XblMultiplayerEventType::LocalMemberPropertyWriteCompleted:
+                        VerifyContext12AndIncrement(events[i], &localUserPropWritten);
+                        break;
+                    case XblMultiplayerEventType::LocalMemberConnectionAddressWriteCompleted:
+                        VerifyContext3AndIncrement(events[i], &localUserPropWritten);
+                        break;
                 }
             }
+
+            Sleep(10);
         }
 
-        VerifyLobby(multiplayerManagerInstance->LobbySession, jsonResponse);
+        VERIFY_IS_FALSE(usersAdded != xboxLiveContexts.size() || localUserPropWritten != (xboxLiveContexts.size() * 3));
+        VerifyLobby(responseJson.GetObject());
     }
 
-    void RemoveLocalUserHelper(Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext)
+    void RemoveLocalUserHelper(XblContextHandle xboxLiveContext)
     {
         AddLocalUserHelperWithSyncUpdate(xboxLiveContext);
 
-        auto multiplayerManagerInstance = MultiplayerManager::SingletonInstance;
-        auto jsonResponse = web::json::value::parse(emptyJson);
-        m_mockXboxSystemFactory->GetMockHttpCall()->ResultValue = StockMocks::CreateMockHttpCallResponse(jsonResponse);
-        multiplayerManagerInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User);
+        HttpMock mock(POST, defaultMpsdUri, 201);
+        mock.SetResponseBody(emptyResponse);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionRemoveLocalUser(xboxLiveContext->User().Handle()));
+
+        int count{ 0 };
         bool userRemoved = false, clientDisconnected = false;
         while (!userRemoved || !clientDisconnected)
         {
-            auto events = multiplayerManagerInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                TEST_LOG(FormatString(L" [MPM] RemoveLocalUserHelper - Event type: %s", ev->EventType.ToString()->Data()).c_str());
-                if (ev->EventType == MultiplayerEventType::UserRemoved)
+                TEST_LOG(FormatString(L" [MPM] RemoveLocalUserHelper - Event type: %d", events[i].EventType).c_str());
+                if (events[i].EventType == XblMultiplayerEventType::UserRemoved)
                 {
                     userRemoved = true;
                 }
-
-                if (ev->EventType == MultiplayerEventType::ClientDisconnectedFromMultiplayerService)
+                else if (events[i].EventType == XblMultiplayerEventType::ClientDisconnectedFromMultiplayerService)
                 {
-                    VERIFY_IS_TRUE(!clientDisconnected);
+                    VERIFY_IS_FALSE(clientDisconnected);
                     clientDisconnected = true;
-                    
                 }
             }
+
+            Sleep(10);
         }
-
-        VERIFY_IS_TRUE(multiplayerManagerInstance->LobbySession->LocalMembers->Size == 0);
-        VERIFY_IS_TRUE(multiplayerManagerInstance->GameSession == nullptr);
-    }
-
-    void JoinLobbyWithValidHandleId(
-        Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext,
-        Windows::Foundation::Uri^ url = nullptr,
-        bool checkForInvalidArg = false,
-        bool checkForLogicErr = false)
-    {
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-
-        // Set up initial http responses
-        auto lobbyNoHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyNoHandleResponseJson, DefaultLobbyHttpResponse());
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList =
-        {
-            lobbyNoHandleResponse
-        };
-
-        // set up http response set
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-
-        auto multiplayerManagerInstance = MultiplayerManager::SingletonInstance;
-        if (url != nullptr)
-        {
-            // This is a way to bypass the ProtocolActivation URL
-            std::vector<xbox_live_user_t> users;
-            users.push_back(user_context::user_convert(xboxLiveContext->User));
-            auto clientManager = multiplayerManagerInstance->GetCppObj()->_Get_multiplayer_client_manager();
-            auto result = clientManager->join_lobby(url, users);
-            if (checkForInvalidArg)
-            {
-                VERIFY_IS_TRUE(result.err() == xbox_live_error_code::invalid_argument);
-                return;
-            }
-            else if (checkForLogicErr)
-                VERIFY_IS_TRUE(result.err() == xbox_live_error_code::logic_error);
-            else
-                VERIFY_IS_TRUE(result.err() == xbox_live_error_code::no_error);
-        }
-        else
-        {
-            multiplayerManagerInstance->JoinLobby(ref new Platform::String(L"TestHandleId"), xboxLiveContext->User);
-        }
-
-        bool lobbyJoined = false;
-        while (!lobbyJoined)
-        {
-            auto events = MultiplayerManager::SingletonInstance->DoWork();
-            for (auto ev : events)
-            {
-                if (ev->EventType == MultiplayerEventType::JoinLobbyCompleted)
-                {
-                    lobbyJoined = true;
-                    if (checkForLogicErr)
-                    {
-                        VERIFY_IS_TRUE(ev->ErrorCode == E_UNEXPECTED);
-
-                        auto joinLobbyEventArgs = static_cast<JoinLobbyCompletedEventArgs^>(ev->EventArgs);
-                        VERIFY_ARE_EQUAL_STR(joinLobbyEventArgs->InvitedXboxUserId->Data(), L"Xuid");
-                        return;
-                    }
-                }
-            }
-        }
-
-        VerifyLobby(multiplayerManagerInstance->LobbySession, lobbyNoHandleResponseJson);
-        VERIFY_IS_TRUE(multiplayerManagerInstance->GameSession == nullptr);
+        
+        VERIFY_IS_FALSE(!userRemoved || !clientDisconnected);
+        VERIFY_ARE_EQUAL_UINT(0, XblMultiplayerManagerLobbySessionLocalMembersCount());
+        VERIFY_IS_FALSE(XblMultiplayerManagerGameSessionActive());
     }
 
     DEFINE_TEST_CASE(TestAddLocalUser)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestAddLocalUser);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelperWithSyncUpdate(xboxLiveContext);
-        DestructManager(xboxLiveContext);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+
+        AddLocalUserHelperWithSyncUpdate(xboxLiveContext.get());
     }
 
     DEFINE_TEST_CASE(TestRemoveLocalUser)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestRemoveLocalUser);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        RemoveLocalUserHelper(xboxLiveContext);
-        DestructManager(xboxLiveContext, true);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+
+        RemoveLocalUserHelper(xboxLiveContext.get());
     }
 
     DEFINE_TEST_CASE(TestReAddAfterRemovingLocalUser)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestReAddAfterRemovingLocalUser);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        RemoveLocalUserHelper(xboxLiveContext);
-        AddLocalUserHelperWithSyncUpdate(xboxLiveContext);
-        DestructManager(xboxLiveContext, true);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+
+        RemoveLocalUserHelper(xboxLiveContext.get());
+        AddLocalUserHelperWithSyncUpdate(xboxLiveContext.get());
     }
 
     DEFINE_TEST_CASE(TestDeleteLocalMemberProperties)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestDeleteLocalMemberProperties);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelperWithSyncUpdate(xboxLiveContext);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
-        // Set up initial http responses
-        auto lobbyNoHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyNoHandleResponseJson, DefaultLobbyHttpResponse());
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList = { defaultLobbyNoCustomMemberPropsResponseJson };
+        AddLocalUserHelperWithSyncUpdate(xboxLiveContext.get());
 
-        // set up http response set
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        HttpMock mock(POST, defaultMpsdUri, 200);
+        mock.SetResponseBody(defaultLobbySessionNoCustomMemberPropsResponseJson());
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
+        XblUserHandle hostHandle{ xboxLiveContext->User().Handle() };
+        uint32_t contextIds[2]{ 1,2 };
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionDeleteLocalMemberProperties(hostHandle, "Health", &contextIds[0]));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionDeleteLocalMemberProperties(hostHandle, "Skill", &contextIds[1]));
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        mpInstance->LobbySession->DeleteLocalMemberProperties(xboxLiveContext->User, L"Health", (Platform::Object^) 1);
-        mpInstance->LobbySession->DeleteLocalMemberProperties(xboxLiveContext->User, L"Skill", (Platform::Object^) 2);
-
-        int localUserPropWritten = 0, eventValue = 1;
+        int count{ 0 };
+        uint32_t localUserPropWritten = 0, eventValue = 1;
         while (localUserPropWritten != 2)
         {
-            auto events = mpInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::LocalMemberPropertyWriteCompleted)
+                if (events[i].EventType == XblMultiplayerEventType::LocalMemberPropertyWriteCompleted)
                 {
-                    int context = safe_cast<int>(ev->Context);
-                    VERIFY_IS_TRUE(context == eventValue);
+                    uint32_t context = *static_cast<uint32_t*>(events[i].Context);
+                    VERIFY_ARE_EQUAL_UINT(eventValue++, context);
                     localUserPropWritten++;
                 }
-                eventValue++;
             }
+
+            Sleep(10);
         }
 
-        auto member = mpInstance->LobbySession->Members->GetAt(0);
-        VERIFY_ARE_EQUAL_STR(member->Properties, "{}");
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_FALSE(localUserPropWritten != 2);
+        auto lobbyMemberCount = XblMultiplayerManagerLobbySessionMembersCount();
+        XblMultiplayerManagerMember lobbyMember{};
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionMembers(lobbyMemberCount, &lobbyMember));
+        VERIFY_ARE_EQUAL_STR("{}", lobbyMember.PropertiesJson);
     }
 
     DEFINE_TEST_CASE(TestSetSynchronizedLobbyProperties)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSetSynchronizedLobbyProperties);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelperWithSyncUpdate(xboxLiveContext);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        AddLocalUserHelperWithSyncUpdate(xboxLiveContext.get());
 
         // Set up initial http responses
-        std::shared_ptr<HttpResponseStruct> writeResponseStruct = std::make_shared<HttpResponseStruct>();
-        writeResponseStruct->responseList =
+        std::vector<const char*> writeResponses
         {
-            sessionChangeNum4Response,       // change #4
-            sessionChangeNum6Response        // change #6
+            sessionChangeNum4, // change #4
+            sessionChangeNum6  // change #6
         };
 
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[xbox_live_api::write_session_using_subpath] = writeResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(responses);
+        HttpMock mockWrite(POST, defaultMpsdUri, 201);
+        mockWrite.SetResponseBody(writeResponses[0]);
+        mockWrite.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        mpInstance->LobbySession->SetSynchronizedProperties(L"Map", L"MyTestMap", (Platform::Object^) 1);
-        mpInstance->LobbySession->SetSynchronizedProperties(L"GameMode", L"MyTestGameMode", (Platform::Object^) 2);
-        mpInstance->LobbySession->GetCppObj()->_Set_host(nullptr);
-        mpInstance->LobbySession->SetSynchronizedHost(mpInstance->LobbySession->LocalMembers->GetAt(0), (Platform::Object^) 3);
+        XblMultiplayerManagerMember member;
+        uint32_t contextIds[3]{ 1,2,3 };
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetSynchronizedProperties("Map", "\"MyTestMap\"", &contextIds[0]));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetSynchronizedProperties("GameMode", "\"MyTestGameMode\"", &contextIds[1]));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionMembers(1, &member));
+        
+        mockWrite.SetResponseBody(writeResponses[1]);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetSynchronizedHost(member.DeviceToken, &contextIds[2]));
 
-        int syncPropWritten = 0;
-        int syncHostWritten = 0;
+        int count{ 0 };
+        uint32_t syncPropWritten{ 0 };
+        uint32_t syncHostWritten{ 0 };
         while (syncPropWritten != 2 || syncHostWritten != 1)
         {
-            auto events = mpInstance->DoWork();
-            for (auto ev : events)
-            {
-                VERIFY_IS_TRUE(ev->SessionType == MultiplayerSessionType::LobbySession);
-                if (ev->EventType == MultiplayerEventType::SessionSynchronizedPropertyWriteCompleted)
-                {
-                    int pContext = safe_cast<int>(ev->Context);
-                    VERIFY_IS_TRUE(pContext == 1 || pContext == 2);
-                    syncPropWritten++;
-                }
+            if (++count > 500) break;
 
-                if (ev->EventType == MultiplayerEventType::SynchronizedHostWriteCompleted)
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
+            {
+                VERIFY_ARE_EQUAL_UINT(XblMultiplayerSessionType::LobbySession, events[i].SessionType);
+                
+                if (events[i].EventType == XblMultiplayerEventType::SessionSynchronizedPropertyWriteCompleted)
                 {
-                    int pContext = safe_cast<int>(ev->Context);
-                    VERIFY_IS_TRUE(pContext == 3);
-                    syncHostWritten++;
+                    VerifyContext12AndIncrement(events[i], &syncPropWritten);
+                }
+                else if (events[i].EventType == XblMultiplayerEventType::SynchronizedHostWriteCompleted)
+                {
+                    VerifyContext3AndIncrement(events[i], &syncHostWritten);
                 }
             }
+
+            Sleep(10);
         }
 
-        VERIFY_IS_TRUE(mpInstance->LobbySession->GetCppObj()->_Change_number() == 4);
-
-        auto writeJson = web::json::value::parse(syncPropertiesJson);
-        web::json::value propertyJson = writeJson[L"properties"];
-        VERIFY_ARE_EQUAL(mpInstance->LobbySession->Properties->Data(), propertyJson[L"custom"].serialize());
-        VERIFY_ARE_EQUAL_STR(mpInstance->LobbySession->Host->_DeviceToken->Data(), L"TestHostDeviceToken");
-
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_FALSE(syncPropWritten != 2 || syncHostWritten != 1);
+        VERIFY_ARE_EQUAL_UINT(6, GlobalState::Get()->MultiplayerManager()->LobbySession()->ChangeNumber());
+        VERIFY_ARE_EQUAL_STR(JsonUtils::SerializeJson(classPropertiesJson()["properties"]["custom"]), XblMultiplayerManagerLobbySessionPropertiesJson());
     }
 
     DEFINE_TEST_CASE(TestSetSynchronizedGameProperties)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSetSynchronizedGameProperties);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        JoinGameHelper(xboxLiveContext);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        JoinGameHelper(xboxLiveContext.get());
 
         // Set up initial http responses
-        std::shared_ptr<HttpResponseStruct> writeResponseStruct = std::make_shared<HttpResponseStruct>();
-        writeResponseStruct->responseList =
+        std::vector<const char*> writeResponses
         {
-            sessionChangeNum4Response,       // change #4
-            sessionChangeNum6Response        // change #6
+            sessionChangeNum4, // change #4
+            sessionChangeNum6  // change #6
         };
 
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[xbox_live_api::write_session_using_subpath] = writeResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(responses);
+        HttpMock writeMock(POST, defaultMpsdUri, 201);
+        writeMock.SetResponseBody(writeResponses[0]);
+        writeMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        mpInstance->GameSession->SetSynchronizedProperties(L"Map", L"MyTestMap", (Platform::Object^) 1);
-        mpInstance->GameSession->SetSynchronizedProperties(L"GameMode", L"MyTestGameMode", (Platform::Object^) 2);
-        mpInstance->GameSession->GetCppObj()->_Set_host(nullptr);
-        mpInstance->GameSession->SetSynchronizedHost(mpInstance->GameSession->Members->GetAt(0), (Platform::Object^) 3);
+        XblMultiplayerManagerMember member;
+        uint32_t contextIds[3]{ 1,2,3 };
+        VERIFY_SUCCEEDED(XblMultiplayerManagerGameSessionSetSynchronizedProperties("Map", "\"MyTestMap\"", &contextIds[0]));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerGameSessionSetSynchronizedProperties("GameMode", "\"MyTestGameMode\"", &contextIds[1]));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerGameSessionMembers(1, &member));
 
-        int syncPropWritten = 0;
-        int syncHostWritten = 0;
+        writeMock.SetResponseBody(writeResponses[1]);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerGameSessionSetSynchronizedHost(member.DeviceToken, &contextIds[2]));
+
+        int count{ 0 };
+        uint32_t syncPropWritten{ 0 };
+        uint32_t syncHostWritten{ 0 };
         while (syncPropWritten != 2 || syncHostWritten != 1)
         {
-            auto events = mpInstance->DoWork();
-            for (auto ev : events)
-            {
-                if (ev->EventType == MultiplayerEventType::SessionSynchronizedPropertyWriteCompleted)
-                {
-                    int pContext = safe_cast<int>(ev->Context);
-                    VERIFY_IS_TRUE(pContext == 1 || pContext == 2);
-                    VERIFY_IS_TRUE(ev->SessionType == MultiplayerSessionType::GameSession);
-                    syncPropWritten++;
-                }
+            if (++count > 500) break;
 
-                if (ev->EventType == MultiplayerEventType::SynchronizedHostWriteCompleted)
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
+            {
+                if (events[i].EventType == XblMultiplayerEventType::SessionSynchronizedPropertyWriteCompleted)
                 {
-                    int pContext = safe_cast<int>(ev->Context);
-                    VERIFY_IS_TRUE(pContext == 3);
-                    VERIFY_IS_TRUE(ev->SessionType == MultiplayerSessionType::GameSession);
-                    syncHostWritten++;
+                    VerifyContext12AndIncrement(events[i], &syncPropWritten);
+                    VERIFY_ARE_EQUAL_UINT(XblMultiplayerSessionType::GameSession, events[i].SessionType);
+                }
+                else if (events[i].EventType == XblMultiplayerEventType::SynchronizedHostWriteCompleted)
+                {
+                    VerifyContext3AndIncrement(events[i], &syncHostWritten);
+                    VERIFY_ARE_EQUAL_UINT(XblMultiplayerSessionType::GameSession, events[i].SessionType);
                 }
             }
+
+            Sleep(10);
         }
 
-        VERIFY_IS_TRUE(mpInstance->GameSession->GetCppObj()->_Change_number() == 4);
-
-        auto writeJson = web::json::value::parse(syncPropertiesJson);
-        web::json::value propertyJson = writeJson[L"properties"];
-        VERIFY_ARE_EQUAL(mpInstance->GameSession->Properties->Data(), propertyJson[L"custom"].serialize());
-        VERIFY_ARE_EQUAL_STR(mpInstance->GameSession->Host->_DeviceToken, "TestHostDeviceToken");
-
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_FALSE(syncPropWritten != 2 || syncHostWritten != 1);
+        VERIFY_ARE_EQUAL_UINT(6, GlobalState::Get()->MultiplayerManager()->GameSession()->ChangeNumber());
+        VERIFY_ARE_EQUAL_STR(JsonUtils::SerializeJson(classPropertiesJson()["properties"]["custom"]).c_str(), XblMultiplayerManagerGameSessionPropertiesJson());
     }
 
     DEFINE_TEST_CASE(TestLeaveGame)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestLeaveGame);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        JoinGameHelper(xboxLiveContext);
-        
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList =
-        {
-            updatedLobbyNoHandleResponse        // clear_game_session_from_lobby
-        }; 
-        
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList = { gameSessionEmptyJsonResponse };
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        JoinGameHelper(xboxLiveContext.get());
 
-        // set up http response set
-        responses[defaultGameHttpHeaderUri] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        HttpMock lobbyMock(GET, defaultMpsdUri, 200);
+        lobbyMock.SetResponseBody(updatedLobbyWithNoTransferHandleResponse);
+        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        mpInstance->LeaveGame();
+        HttpMock gameMock(POST, defaultGameHttpHeaderUri, 201);
+        gameMock.SetResponseBody(emptyResponse);
+        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
 
-        auto propertyJson = web::json::value::parse(propertiesNoTransferHandleJson);
-        auto customPropertyJson = propertyJson[L"properties"];
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLeaveGame());
+
+        int count{ 0 };
         bool leaveGameCompleted = false, isStopAdvertisingGameDone = false; 
+        auto customProps{ JsonUtils::SerializeJson(propertiesNoTransferHandleJson()["properties"]["custom"]) };
         while (!leaveGameCompleted || !isStopAdvertisingGameDone)
         {
-            auto events = mpInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::LeaveGameCompleted)
+                if (events[i].EventType == XblMultiplayerEventType::LeaveGameCompleted)
                 {
+                    VERIFY_IS_FALSE(leaveGameCompleted);
                     leaveGameCompleted = true;
+
+                    GetSessionWriter(false)->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ GetSession(false)->SessionReference(), "", 4 });
                 }
             }
 
-            if (utils::str_icmp(mpInstance->LobbySession->Properties->Data(), customPropertyJson[L"custom"].serialize()) == 0)
+            auto props{ XblMultiplayerManagerLobbySessionPropertiesJson() };
+            if (props != nullptr &&
+                utils::str_icmp(props, customProps.c_str()) == 0)
             {
                 isStopAdvertisingGameDone = true;
             }
+
+            Sleep(10);
         }
 
-        VerifyLobby(mpInstance->LobbySession, updatedLobbyNoHandleResponseJson);
-        VERIFY_IS_TRUE(mpInstance->GameSession == nullptr);
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_FALSE(!leaveGameCompleted || !isStopAdvertisingGameDone);
+        VerifyLobby(updatedLobbyNoHandleResponseJson().GetObject());
+        VERIFY_IS_FALSE(XblMultiplayerManagerGameSessionActive());
     }
 
     DEFINE_TEST_CASE(TestInviteUsers)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestInviteUsers);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelperWithSyncUpdate(xboxLiveContext);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        AddLocalUserHelperWithSyncUpdate(xboxLiveContext.get());
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        Vector<Platform::String^>^ xuids = ref new Vector<Platform::String^>();
-        xuids->Append(L"1234");
-        xuids->Append(L"5678");
+        HttpMock mock{ "POST", MPSD_URI "/handles" };
+        std::vector<uint64_t> xuids{ 1234, 5678 };
 #pragma warning(suppress: 6387)
-        mpInstance->LobbySession->InviteUsers(xboxLiveContext->User, xuids->GetView(), nullptr, nullptr);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionInviteUsers(xboxLiveContext->User().Handle(), xuids.data(), xuids.size(), nullptr, nullptr));
 
-        bool inviteSent = false;
+        int count{ 0 };
+        bool inviteSent{ false };
         while (!inviteSent)
         {
-            auto events = mpInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount && !inviteSent; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::InviteSent)
+                if (events[i].EventType == XblMultiplayerEventType::InviteSent)
                 {
                     inviteSent = true;
                 }
             }
+
+            Sleep(10);
         }
 
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_TRUE(inviteSent);
+    }
+
+    void JoinLobbyWithValidHandleIdAndContext(
+        XblContextHandle xboxLiveContext,
+        const char* handleId = nullptr,
+        XblUserHandle userHandle = nullptr,
+        bool checkForInvalidArg = false)
+    {
+        XTaskQueueHandle queue{};
+        VERIFY_SUCCEEDED(XblMultiplayerManagerInitialize(LOBBY_TEMPLATE_NAME, queue));
+        VERIFY_SUCCEEDED(XblRealTimeActivityActivate(xboxLiveContext));
+
+        HttpMock mock(POST, defaultMpsdUri, 201);
+        mock.SetResponseBody(lobbyWithNoTransferHandleResponse);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+
+        if (handleId != nullptr)
+        {
+            xsapi_internal_vector<XblUserHandle> users{};
+            
+            if (userHandle)
+            {
+                users.push_back(userHandle);
+            }
+            
+            auto hr = GlobalState::Get()->MultiplayerManager()->GetMultiplayerClientManager()->JoinLobbyByHandle(handleId, users);
+
+            if (checkForInvalidArg)
+            {
+                VERIFY_ARE_EQUAL_INT(E_INVALIDARG, hr);
+                return;
+            }
+            else
+            {
+                VERIFY_ARE_EQUAL_INT(S_OK, hr);
+            }
+        }
+        else
+        {
+            VERIFY_SUCCEEDED(XblMultiplayerManagerJoinLobby("TestHandleId", xboxLiveContext->User().Handle()));
+        }
+
+        int count{ 0 };
+        bool lobbyJoined{ false };
+        while (!lobbyJoined)
+        {
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
+            {
+                if (events[i].EventType == XblMultiplayerEventType::JoinLobbyCompleted)
+                {
+                    lobbyJoined = true;
+                }
+            }
+
+            Sleep(10);
+        }
+
+        VERIFY_IS_TRUE(lobbyJoined);
+        VerifyLobby(lobbyNoHandleResponseJson().GetObject());
+        VERIFY_IS_FALSE(XblMultiplayerManagerGameSessionActive());
     }
 
     /*  Join Lobby Tests:
@@ -892,249 +3886,194 @@ public:
     */
     DEFINE_TEST_CASE(TestJoinLobbyWithValidHandleId)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinLobbyWithValidHandleId);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        JoinLobbyWithValidHandleId(xboxLiveContext);
-        DestructManager(xboxLiveContext);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+
+        JoinLobbyWithValidHandleIdAndContext(xboxLiveContext.get());
     }
 
-    DEFINE_TEST_CASE(TestJoinLobbyWithValidHandleIdWithEventArgs_1)
+    DEFINE_TEST_CASE(TestJoinLobbyWithValidHandleIdWithEventArgs)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinLobbyWithValidHandleIdWithEventArgs_1);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto url = ref new Windows::Foundation::Uri(ref new Platform::String(L"ms-xbl-multiplayer://inviteHandleAccept?invitedXuid=TestXboxUserId&handle=TestHandleId"));
-        JoinLobbyWithValidHandleId(xboxLiveContext, url);
-        DestructManager(xboxLiveContext);
-    }
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
-    DEFINE_TEST_CASE(TestJoinLobbyWithValidHandleIdWithEventArgs_2)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinLobbyWithValidHandleIdWithEventArgs_2);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto url = ref new Windows::Foundation::Uri(ref new Platform::String(L"ms-xbl-multiplayer://activityHandleJoin?joinerXuid=TestXboxUserId&handle=TestHandleId"));
-        JoinLobbyWithValidHandleId(xboxLiveContext, url);
-        DestructManager(xboxLiveContext);
+        JoinLobbyWithValidHandleIdAndContext(xboxLiveContext.get(), "TestHandleId", xboxLiveContext->User().Handle());
     }
 
     DEFINE_TEST_CASE(TestJoinLobbyWithInvalidArgs_1)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinLobbyWithInvalidArgs_1);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto url = ref new Windows::Foundation::Uri(ref new Platform::String(L"ms-xbl-multiplayer://inviteHandleAccept?invitedXuid=Xuid&handle=TestHandleId"));
-        JoinLobbyWithValidHandleId(xboxLiveContext, url, false, true);
-        DestructManager(xboxLiveContext);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+
+        JoinLobbyWithValidHandleIdAndContext(xboxLiveContext.get(), "", xboxLiveContext->User().Handle(), true);
     }
 
     DEFINE_TEST_CASE(TestJoinLobbyWithInvalidArgs_2)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinLobbyWithInvalidArgs_2);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto url = ref new Windows::Foundation::Uri(ref new Platform::String(L"ms-xbl-multiplayer://activityHandleJoin?joinerXuid=Xuid&handle=TestHandleId"));
-        JoinLobbyWithValidHandleId(xboxLiveContext, url, false, true);
-        DestructManager(xboxLiveContext);
-    }
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
-    DEFINE_TEST_CASE(TestJoinLobbyWithTournamentSessionRef_1)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinLobbyWithTournamentSessionRef_1);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto url = ref new Windows::Foundation::Uri(ref new Platform::String(L"ms-xbl-multiplayer://tournament?action=joinGame&joinerXuid=TestXboxUserId&scid=MockScid&templateName=MockLobbySessionTemplateName&name=MockSessionName"));
-        JoinLobbyWithValidHandleId(xboxLiveContext, url, false, false);
-        DestructManager(xboxLiveContext);
-    }
-
-    DEFINE_TEST_CASE(TestJoinLobbyWithTournamentSessionRef_2)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinLobbyWithTournamentSessionRef_2);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto url = ref new Windows::Foundation::Uri(ref new Platform::String(L"ms-xbl-multiplayer://tournament?action=testAction&joinerXuid=TestXboxUserId&scid=MockScid&templateName=MockLobbySessionTemplateName&name=MockSessionName"));
-        JoinLobbyWithValidHandleId(xboxLiveContext, url, true, false);       // wrong action param passed
-        DestructManager(xboxLiveContext);
+        JoinLobbyWithValidHandleIdAndContext(xboxLiveContext.get(), "TestHandleId", nullptr, true);
     }
 
     DEFINE_TEST_CASE(TestJoinLobbyWithInvalidHandleId)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinLobbyWithInvalidHandleId);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto multiplayerManagerInstance = MultiplayerManager::SingletonInstance;
+        MPMTestEnvironment env{};
+        XTaskQueueHandle queue{};
 
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerInitialize(LOBBY_TEMPLATE_NAME, queue));
+        VERIFY_SUCCEEDED(XblRealTimeActivityActivate(xboxLiveContext.get()));
 
-        // Set up initial http responses
-        auto lobbyNoHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyNoHandleResponseJson, 404, DefaultLobbyHttpResponse());
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList =
-        {
-            lobbyNoHandleResponse
-        };
+        HttpMock lobbyMock(POST, defaultMpsdUri, 404);
+        lobbyMock.SetResponseBody(lobbyWithNoTransferHandleResponse);
+        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        // set up http response set
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerJoinLobby("TestHandleId", xboxLiveContext->User().Handle()));
 
-        multiplayerManagerInstance->JoinLobby(ref new Platform::String(L"TestHandleId"), xboxLiveContext->User);
-
-        bool lobbyJoined = false;
+        int count{ 0 };
+        bool lobbyJoined{ false };
         while (!lobbyJoined)
         {
-            auto events = MultiplayerManager::SingletonInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::JoinLobbyCompleted)
+                if (events[i].EventType == XblMultiplayerEventType::JoinLobbyCompleted)
                 {
                     lobbyJoined = true;
-                    VERIFY_IS_TRUE(ev->ErrorCode == HTTP_E_STATUS_NOT_FOUND);
+                    VERIFY_ARE_EQUAL_INT(HTTP_E_STATUS_NOT_FOUND, events[i].Result);
                 }
             }
+
+            Sleep(10);
         }
 
-        VERIFY_IS_TRUE(multiplayerManagerInstance->LobbySession->LocalMembers->Size == 0);
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_TRUE(lobbyJoined);
+        VERIFY_ARE_EQUAL_UINT(0, XblMultiplayerManagerLobbySessionLocalMembersCount());
     }
 
     DEFINE_TEST_CASE(TestJoinLobbyWithValidTransferHandle)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinLobbyWithValidTransferHandle);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto multiplayerManagerInstance = MultiplayerManager::SingletonInstance;
+        MPMTestEnvironment env{};
+        XTaskQueueHandle queue{};
 
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerInitialize(LOBBY_TEMPLATE_NAME, queue));
+        VERIFY_SUCCEEDED(XblRealTimeActivityActivate(xboxLiveContext.get()));
 
-        // Set up initial http responses
-        auto lobbyCompletedHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyCompletedHandleResponseJson, DefaultLobbyHttpResponse());
-        auto gameSessionResponse = StockMocks::CreateMockHttpCallResponse(defaultGameSessionResponseJson, DefaultGameHttpResponse());
+        HttpMock lobbyMock(POST, defaultMpsdUri, 201);
+        lobbyMock.SetResponseBody(lobbyWithCompletedTransferHandleResponse);
+        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList =
-        {
-            lobbyCompletedHandleResponse,       // commit_lobby_changes_helper (join via handleId)
-            lobbyCompletedHandleResponse,       // commit_lobby_changes_helper (set_activity)
-        };
+        HttpMock gameMock(POST, transferHandleUri, 201);
+        gameMock.SetResponseBody(defaultGameSessionResponse);
+        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
 
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList =
-        {
-            gameSessionResponse                 // join_game_for_all_local_members_helper
-        };
+        VERIFY_SUCCEEDED(XblMultiplayerManagerJoinLobby("TestHandleId", xboxLiveContext->User().Handle()));
 
-        // set up http response set
-        responses[_T("/handles/TestGameSessionTransferHandle/session")] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-
-        multiplayerManagerInstance->JoinLobby(ref new Platform::String(L"TestHandleId"), xboxLiveContext->User);
-
-        bool lobbyJoined = false;
-        bool gameJoined = false;
+        int count{ 0 };
+        bool lobbyJoined = false, gameJoined = false;
         while (!lobbyJoined || !gameJoined)
         {
-            auto events = MultiplayerManager::SingletonInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::JoinLobbyCompleted)
+                if (events[i].EventType == XblMultiplayerEventType::JoinLobbyCompleted)
                 {
                     lobbyJoined = true;
+                    VERIFY_SUCCEEDED(XblMultiplayerManagerJoinGameFromLobby(GAME_TEMPLATE_NAME));
                 }
-
-                if (ev->EventType == MultiplayerEventType::JoinGameCompleted)
+                else if (events[i].EventType == XblMultiplayerEventType::JoinGameCompleted)
                 {
                     gameJoined = true;
                 }
             }
+
+            Sleep(10);
         }
 
-        VerifyLobby(multiplayerManagerInstance->LobbySession, lobbyCompletedHandleResponseJson);
-        VerifyGame(multiplayerManagerInstance->GameSession, defaultGameSessionResponseJson);
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_FALSE(!lobbyJoined || !gameJoined);
+        VerifyLobby(lobbyCompletedHandleResponseJson().GetObject());
+        VerifyGame(defaultGameSessionResponseJson().GetObject());
     }
 
     DEFINE_TEST_CASE(TestJoinLobbyWithInvalidTransferHandle)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinLobbyWithInvalidTransferHandle);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto multiplayerManagerInstance = MultiplayerManager::SingletonInstance;
+        MPMTestEnvironment env{};
+        XTaskQueueHandle queue{};
 
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerInitialize(LOBBY_TEMPLATE_NAME, queue));
+        VERIFY_SUCCEEDED(XblRealTimeActivityActivate(xboxLiveContext.get()));
 
-        // Set up initial http responses
-        
-        auto lobbyCompletedHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyCompletedHandleResponseJson, DefaultLobbyHttpResponse());
-        auto gameSessionResponse404 = StockMocks::CreateMockHttpCallResponse(defaultGameSessionResponseJson, 404, DefaultGameHttpResponse());
-        
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList =
+        std::vector<const char*> lobbyResponses
         {
-            lobbyCompletedHandleResponse,       // commit_lobby_changes_helper (join via handleId)
-            lobbyCompletedHandleResponse,       // commit_lobby_changes_helper (set_activity)
-            updatedLobbyNoHandleResponse        // clear_game_session_from_lobby
+            lobbyWithCompletedTransferHandleResponse,
+            updatedLobbyWithNoTransferHandleResponse
         };
 
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList =
+        std::vector<uint32_t> lobbyStatuses{ 201, 404 };
+
+        HttpMock lobbyMock(POST, defaultMpsdUri, lobbyStatuses[0]);
+        lobbyMock.SetResponseBody(lobbyResponses[0]);
+        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+
+        VERIFY_SUCCEEDED(XblMultiplayerManagerJoinLobby("TestHandleId", xboxLiveContext->User().Handle()));
+
+        int count{ 0 };
+        bool lobbyJoined = false, gameJoined = false;
+        auto customProps = JsonUtils::SerializeJson(propertiesNoTransferHandleJson()["properties"]["custom"]);
+        while (!lobbyJoined || !gameJoined)
         {
-            gameSessionResponse404,             // join_game_for_all_local_members_helper
-        };
+            if (++count > 500) break;
 
-        // set up http response set
-        responses[_T("/handles/TestGameSessionTransferHandle/session")] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
 
-        multiplayerManagerInstance->JoinLobby(ref new Platform::String(L"TestHandleId"), xboxLiveContext->User);
-
-        bool lobbyJoined = false;
-        bool gameJoined = false;
-        bool isStopAdvertisingGameDone = false;
-        auto propertyJson = web::json::value::parse(propertiesNoTransferHandleJson);
-        auto customPropertyJson = propertyJson[L"properties"];
-        while (!lobbyJoined || !gameJoined || !isStopAdvertisingGameDone)
-        {
-            auto events = MultiplayerManager::SingletonInstance->DoWork();
-            for (auto ev : events)
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::JoinLobbyCompleted)
+                if (events[i].EventType == XblMultiplayerEventType::JoinLobbyCompleted)
                 {
                     lobbyJoined = true;
-                }
 
-                if (ev->EventType == MultiplayerEventType::JoinGameCompleted)
+                    lobbyMock.SetResponseBody(lobbyResponses[1]);
+                    lobbyMock.SetResponseHttpStatus(lobbyStatuses[1]);
+                    VERIFY_SUCCEEDED(XblMultiplayerManagerJoinGameFromLobby(GAME_TEMPLATE_NAME));
+                }
+                else if (events[i].EventType == XblMultiplayerEventType::JoinGameCompleted)
                 {
                     gameJoined = true;
-                    VERIFY_IS_TRUE(ev->ErrorCode == HTTP_E_STATUS_NOT_FOUND);
+                    VERIFY_ARE_EQUAL_INT(HTTP_E_STATUS_NOT_FOUND, events[i].Result);
                 }
             }
 
-            if (utils::str_icmp(multiplayerManagerInstance->LobbySession->Properties->Data(), customPropertyJson[L"custom"].serialize()) == 0)
-            {
-                isStopAdvertisingGameDone = true;
-            }
+            Sleep(10);
         }
 
-        VerifyLobby(multiplayerManagerInstance->LobbySession, updatedLobbyNoHandleResponseJson);
-        VERIFY_IS_TRUE(multiplayerManagerInstance->GameSession == nullptr);
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_FALSE(!lobbyJoined || !gameJoined);
+        VerifyLobby(lobbyCompletedHandleResponseJson().GetObject());
+        VERIFY_IS_FALSE(XblMultiplayerManagerGameSessionActive());
     }
 
     DEFINE_TEST_CASE(TestSwitchingLobbies)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSwitchingLobbies);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelperWithSyncUpdate(xboxLiveContext);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        AddLocalUserHelperWithSyncUpdate(xboxLiveContext.get());
 
         // Join a new lobby
-        JoinLobbyWithValidHandleId(xboxLiveContext);
-        DestructManager(xboxLiveContext);
+        JoinLobbyWithValidHandleIdAndContext(xboxLiveContext.get());
     }
 
     /*
@@ -1146,411 +4085,409 @@ public:
         6. Test without transfer handle - failed to write "pending~" with 412 with no transfer handle written (TODO)
             : retry writing, or both clients will end up creating it's own session.
     */
-
-    void JoinGameFromLobbyMultipleUsersHelper(IVectorView<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts)
+    void JoinGameFromLobbyMultipleUsersHelper(std::vector<XblContextHandle> xboxLiveContexts)
     {
         AddMultipleLocalUserHelper(xboxLiveContexts);
 
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        auto gameSessionResponse = StockMocks::CreateMockHttpCallResponse(defaultMultipleLocalUsersGameResponseJson, DefaultGameHttpResponse());
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList = { gameSessionResponse /* join_game_for_all_local_members */ };
+        HttpMock mock(POST, transferHandleUri, 201);
+        mock.SetResponseBody(defaultMultipleLocalUsersGameResponse);
+        mock.SetResponseHeaders(defaultGameHttpResponseHeaders);
 
-        // set up http response set
-        responses[_T("/handles/TestGameSessionTransferHandle/session")] = gameResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerJoinGameFromLobby(GAME_TEMPLATE_NAME));
 
-        auto multiplayerManagerInstance = MultiplayerManager::SingletonInstance;
-        multiplayerManagerInstance->JoinGameFromLobby(GAME_SESSION_TEMPLATE_NAME);
-
-        bool isDone = false;
+        int count{ 0 };
+        bool isDone{ false };
         while (!isDone)
         {
-            auto events = MultiplayerManager::SingletonInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount && !isDone; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::JoinGameCompleted)
+                if (events[i].EventType == XblMultiplayerEventType::JoinGameCompleted)
                 {
                     isDone = true;
                 }
             }
+
+            Sleep(10);
         }
 
-        VerifyLobby(multiplayerManagerInstance->LobbySession, defaultMultipleLocalUsersLobbyResponseJson);
-        VerifyGame(multiplayerManagerInstance->GameSession, defaultMultipleLocalUsersGameResponseJson);
+        VERIFY_IS_TRUE(isDone);
+        VerifyLobby(defaultMultipleLocalUsersLobbyResponseJson().GetObject());
+        VerifyGame(defaultMultipleLocalUsersGameResponseJson().GetObject());
     }
 
     DEFINE_TEST_CASE(TestJoinGameFromLobbyWithTransferHandle)
     {
-        DEFINE_TEST_CASE_PROPERTIES_FAILING(TestJoinGameFromLobbyWithTransferHandle);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext, lobbyWithCompletedTransferHandleResponse);
+        MPMTestEnvironment env{};
+        XTaskQueueHandle queue{};
 
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerInitialize(LOBBY_TEMPLATE_NAME, queue));
+        VERIFY_SUCCEEDED(XblRealTimeActivityActivate(xboxLiveContext.get()));
 
-        // Set up initial http responses
-        auto gameSessionResponse = StockMocks::CreateMockHttpCallResponse(defaultGameSessionResponseJson, DefaultGameHttpResponse());
+        AddLocalUserHelper(xboxLiveContext.get(), lobbyWithCompletedTransferHandleResponse);
 
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList = { gameSessionResponse /* join_game_for_all_local_members */ };
+        HttpMock gameMock(POST, transferHandleUri, 201);
+        gameMock.SetResponseBody(defaultGameSessionResponse);
+        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
 
-        // set up http response set
-        responses[_T("/handles/TestGameSessionTransferHandle/session")] = gameResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerJoinGameFromLobby(GAME_TEMPLATE_NAME));
 
-        auto multiplayerManagerInstance = MultiplayerManager::SingletonInstance;
-        multiplayerManagerInstance->JoinGameFromLobby(GAME_SESSION_TEMPLATE_NAME);
-
-        bool isDone = false;
+        int count{ 0 };
+        bool isDone{ false };
         while (!isDone)
         {
-            auto events = MultiplayerManager::SingletonInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount && !isDone; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::JoinGameCompleted)
+                if (events[i].EventType == XblMultiplayerEventType::JoinGameCompleted)
                 {
                     isDone = true;
                 }
             }
+
+            Sleep(10);
         }
 
-        VerifyLobby(multiplayerManagerInstance->LobbySession, lobbyCompletedHandleResponseJson);
-        VerifyGame(multiplayerManagerInstance->GameSession, defaultGameSessionResponseJson);
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_TRUE(isDone);
+        VerifyLobby(lobbyCompletedHandleResponseJson().GetObject());
+        VerifyGame(defaultGameSessionResponseJson().GetObject());
     }
 
     DEFINE_TEST_CASE(TestJoinGameFromLobbyWithTransferHandleMultipleUsers)
     {
-        DEFINE_TEST_CASE_PROPERTIES_FAILING(TestJoinGameFromLobbyWithTransferHandleMultipleUsers);
-        InitializeManager(2);
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        MPMTestEnvironment env{};
+        auto xboxLiveContext1 = env.CreateMockXboxLiveContext(1234);
+        auto xboxLiveContext2 = env.CreateMockXboxLiveContext(2345);
 
-        Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
-        xboxLiveContexts->Append(xboxLiveContext);
-        xboxLiveContexts->Append(xboxLiveContext2);
+        std::vector<XblContextHandle> xboxLiveContexts
+        {
+            xboxLiveContext1.get(),
+            xboxLiveContext2.get(),
+        };
 
-        JoinGameFromLobbyMultipleUsersHelper(xboxLiveContexts->GetView());
-        DestructManager(xboxLiveContexts->GetView());
+        JoinGameFromLobbyMultipleUsersHelper(xboxLiveContexts);
     }
 
     DEFINE_TEST_CASE(TestJoinGameFromLobbyFailedToJoin)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinGameFromLobbyFailedToJoin);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext, defaultLobbySessionResponse);
+        MPMTestEnvironment env{};
+        XTaskQueueHandle queue{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
+        VERIFY_SUCCEEDED(XblMultiplayerManagerInitialize(LOBBY_TEMPLATE_NAME, queue));
+        VERIFY_SUCCEEDED(XblRealTimeActivityActivate(xboxLiveContext.get()));
 
-        // Set up initial http responses
-        auto gameSessionResponseJson = defaultGameSessionResponseJson;
-        auto gameSessionResponse404 = StockMocks::CreateMockHttpCallResponse(gameSessionResponseJson, 404, DefaultGameHttpResponse());
-        auto gameSessionResponse = StockMocks::CreateMockHttpCallResponse(gameSessionResponseJson, DefaultGameHttpResponse());
+        AddLocalUserHelper(xboxLiveContext.get());
 
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList =
+        std::vector<const char*> lobbyResponses
         {
-            gameSessionResponse404,                 // Failed to join game via transfer handle
-            gameSessionResponse                     // join_game_helper -> join_game_for_all_local_members
+            lobbyWithPendingTransferHandleResponse,
+            defaultGameSessionResponse,
+            lobbyWithCompletedTransferHandleResponse
         };
 
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList =
-        {
-            lobbyWithPendingHandleResponse,         // create_game_from_lobby
-            gameSessionResponse,                    // join_game_helper -> join_game_for_all_local_members (because it creates a new guid)
-            lobbyCompletedHandleResponse            // advertise_game_session
-        };
+        HttpMock lobbyMock(POST, defaultMpsdUri, 201);
+        lobbyMock.SetResponseBody(lobbyResponses[2]);
+        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        // set up http response set
-        responses[_T("/handles/TestGameSessionTransferHandle/session")] = gameResponseStruct;
-        responses[defaultGameHttpHeaderUri] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        HttpMock gameMock(POST, defaultGameHttpHeaderUri, 404);
+        gameMock.SetResponseBody(defaultGameSessionResponse);
+        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
+        
+        HttpMock transferMock(POST, transferHandleUri, 404);
+        transferMock.SetResponseBody(defaultGameSessionResponse);
+        transferMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
 
-        auto multiplayerManagerInstance = MultiplayerManager::SingletonInstance;
-        multiplayerManagerInstance->JoinGameFromLobby(GAME_SESSION_TEMPLATE_NAME);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerJoinGameFromLobby(GAME_TEMPLATE_NAME));
 
-        bool isGameJoined = false;
-        bool isAdvertisingGameDone = false;
-        auto propertyJson = web::json::value::parse(propertiesJson);
-        auto customPropertyJson = propertyJson[L"properties"];
+        int count{ 0 };
+        bool isGameJoined = false, isAdvertisingGameDone = false;
+        auto customProps = JsonUtils::SerializeJson(classPropertiesJson()["properties"]["custom"]);
         while (!isGameJoined || !isAdvertisingGameDone)
         {
-            auto events = MultiplayerManager::SingletonInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount && !isGameJoined; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::JoinGameCompleted)
+                if (events[i].EventType == XblMultiplayerEventType::JoinGameCompleted)
                 {
                     isGameJoined = true;
                 }
             }
 
-            if (isGameJoined && utils::str_icmp(multiplayerManagerInstance->LobbySession->Properties->Data(), customPropertyJson[L"custom"].serialize()) == 0)
+            auto props{ XblMultiplayerManagerLobbySessionPropertiesJson() };
+            if (isGameJoined && 
+                props != nullptr &&
+                utils::str_icmp(props, customProps.c_str()) == 0)
             {
                 isAdvertisingGameDone = true;
             }
+
+            Sleep(10);
         }
 
-        VerifyLobby(multiplayerManagerInstance->LobbySession, lobbyCompletedHandleResponseJson);
-        VerifyGame(multiplayerManagerInstance->GameSession, gameSessionResponseJson);
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_FALSE(!isGameJoined || !isAdvertisingGameDone);
+        VerifyLobby(lobbyCompletedHandleResponseJson().GetObject());
+        VerifyGame(lobbyCompletedHandleResponseJson().GetObject());
     }
 
     DEFINE_TEST_CASE(TestJoinGameFromLobbyNoHandleCreateNewGame)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinGameFromLobbyNoHandleCreateNewGame);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext, lobbyWithNoTransferHandleResponse);
+        MPMTestEnvironment env{};
+        XTaskQueueHandle queue{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        auto gameSessionResponse = StockMocks::CreateMockHttpCallResponse(defaultGameSessionResponseJson);
-        std::shared_ptr<HttpResponseStruct> joinLobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        joinLobbyResponseStruct->responseList = 
-        { 
-            lobbyWithPendingHandleResponse,     // create_game_from_lobby
-            gameSessionResponse,                // join_game_helper -> join_game_for_all_local_members
-            lobbyCompletedHandleResponse        // advertise_game_session
+        VERIFY_SUCCEEDED(XblMultiplayerManagerInitialize(LOBBY_TEMPLATE_NAME, queue));
+        VERIFY_SUCCEEDED(XblRealTimeActivityActivate(xboxLiveContext.get()));
+
+        AddLocalUserHelper(xboxLiveContext.get(), lobbyWithNoTransferHandleResponse);
+
+        std::vector<const char*> lobbyResponses
+        {
+            lobbyWithPendingTransferHandleResponse,
+            defaultGameSessionResponse,
+            lobbyWithCompletedTransferHandleResponse
         };
 
-        // set up http response set
-        responses[defaultMpsdUri] = joinLobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        HttpMock lobbyMock(POST, defaultMpsdUri, 200);
+        lobbyMock.SetResponseBody(lobbyResponses[2]);
+        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        auto multiplayerManagerInstance = MultiplayerManager::SingletonInstance;
-        multiplayerManagerInstance->JoinGameFromLobby(GAME_SESSION_TEMPLATE_NAME);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerJoinGameFromLobby(GAME_TEMPLATE_NAME));
 
-        bool isDone = false;
-        bool isAdvertisingGameDone = false;
-        auto propertyJson = web::json::value::parse(propertiesJson);
-        auto customPropertyJson = propertyJson[L"properties"];
+        int count{ 0 };
+        bool isDone = false, isAdvertisingGameDone = false;
+        auto customProps = JsonUtils::SerializeJson(classPropertiesJson()["properties"]["custom"]);
         while (!isDone || !isAdvertisingGameDone)
         {
-            auto events = MultiplayerManager::SingletonInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount && !isDone; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::JoinGameCompleted)
+                if (events[i].EventType == XblMultiplayerEventType::JoinGameCompleted)
                 {
                     isDone = true;
                 }
             }
-
-            if (utils::str_icmp(multiplayerManagerInstance->LobbySession->Properties->Data(), customPropertyJson[L"custom"].serialize()) == 0)
+            
+            auto props{ XblMultiplayerManagerLobbySessionPropertiesJson() };
+            if (props != nullptr &&
+                utils::str_icmp(props, customProps.c_str()) == 0)
             {
                 isAdvertisingGameDone = true;
             }
+
+            Sleep(10);
         }
 
-        VerifyLobby(multiplayerManagerInstance->LobbySession, lobbyCompletedHandleResponseJson);
-        VerifyGame(multiplayerManagerInstance->GameSession, defaultGameSessionResponseJson);
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_FALSE(!isDone || !isAdvertisingGameDone);
+        VerifyLobby(lobbyCompletedHandleResponseJson().GetObject());
+        VerifyGame(lobbyCompletedHandleResponseJson().GetObject());
     }
 
     DEFINE_TEST_CASE(TestJoinGameFromLobbyNoHandleFailedToCreateNewGame)
     {
-        // When MPM fails to create a new game, it simply reports the failure back to the title.
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinGameFromLobbyNoHandleFailedToCreateNewGame);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext, lobbyWithNoTransferHandleResponse);
+        MPMTestEnvironment env{};
+        XTaskQueueHandle queue{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        auto gameSessionResponse404 = StockMocks::CreateMockHttpCallResponse(defaultGameSessionResponseJson, 404, DefaultGameHttpResponse());
+        VERIFY_SUCCEEDED(XblMultiplayerManagerInitialize(LOBBY_TEMPLATE_NAME, queue));
+        VERIFY_SUCCEEDED(XblRealTimeActivityActivate(xboxLiveContext.get()));
 
-        std::shared_ptr<HttpResponseStruct> joinLobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        joinLobbyResponseStruct->responseList =
+        AddLocalUserHelper(xboxLiveContext.get(), lobbyWithNoTransferHandleResponse);
+
+        std::vector<const char*> gameResponses
         {
-            lobbyWithPendingHandleResponse,      // create_game_from_lobby
-            gameSessionResponse404,              // join_game_for_all_local_members_helper
-            updatedLobbyNoHandleResponse         // clear_game_session_from_lobby
+            lobbyWithPendingTransferHandleResponse,
+            defaultGameSessionResponse,
+            updatedLobbyWithNoTransferHandleResponse
         };
 
-        // set up http response set
-        responses[defaultMpsdUri] = joinLobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        HttpMock gameMock(POST, defaultMpsdUri, 404);
+        gameMock.SetResponseBody(gameResponses[2]);
+        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        mpInstance->JoinGameFromLobby(GAME_SESSION_TEMPLATE_NAME);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerJoinGameFromLobby(GAME_TEMPLATE_NAME));
 
+        int count{ 0 };
         bool isDone = false, isStopAdvertisingGameDone = false;
-        auto propertyJson = web::json::value::parse(propertiesNoTransferHandleJson);
-        auto customPropertyJson = propertyJson[L"properties"];
+        auto customProps = JsonUtils::SerializeJson(propertiesNoTransferHandleJson()["properties"]["custom"]);
         while (!isDone || !isStopAdvertisingGameDone)
         {
-            auto events = mpInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::JoinGameCompleted)
+                if (events[i].EventType == XblMultiplayerEventType::JoinGameCompleted)
                 {
                     isDone = true;
-                    VERIFY_IS_TRUE(ev->ErrorCode == HTTP_E_STATUS_NOT_FOUND);
+                    VERIFY_ARE_EQUAL_INT(HTTP_E_STATUS_NOT_FOUND, events[i].Result);
                 }
             }
 
-            if (isDone && utils::str_icmp(mpInstance->LobbySession->Properties->Data(), customPropertyJson[L"custom"].serialize()) == 0)
+            auto props{ XblMultiplayerManagerLobbySessionPropertiesJson() };
+            if (isDone &&
+                props != nullptr &&
+                utils::str_icmp(props, customProps.c_str()) == 0)
             {
                 isStopAdvertisingGameDone = true;
             }
+
+            Sleep(10);
         }
 
-        VerifyLobby(mpInstance->LobbySession, updatedLobbyNoHandleResponseJson);
-        VERIFY_IS_TRUE(mpInstance->GameSession == nullptr);
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_FALSE(!isDone || !isStopAdvertisingGameDone);
+        VerifyLobby(lobbyNoHandleResponseJson().GetObject());
+        VERIFY_IS_FALSE(XblMultiplayerManagerGameSessionActive());
     }
 
     void JoinGameHelper(
-        Microsoft::Xbox::Services::XboxLiveContext^ xboxLiveContext,
-        Windows::Foundation::Collections::IVector<Platform::String^>^ xboxUserIds = nullptr
+        XblContextHandle xboxLiveContext,
+        std::vector<uint64_t> xboxUserIds = {}
         )
     {
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-
-        // Set up initial http responses
-        auto gameSessionResponseJson = defaultGameSessionResponseJson;
-        auto gameSessionResponse = StockMocks::CreateMockHttpCallResponse(gameSessionResponseJson, DefaultGameHttpResponse());
-        auto gameSessionWithXuidsResponseJson = defaultGameSessionWithXuidsResponseJson;
-        auto gameSessionWithXuidsResponse = StockMocks::CreateMockHttpCallResponse(gameSessionWithXuidsResponseJson, DefaultGameHttpResponse());
-        auto lobbyNoHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyNoHandleResponseJson, DefaultLobbyHttpResponse());
-        auto lobbyCompletedHandleResponse = StockMocks::CreateMockHttpCallResponse(lobbyCompletedHandleResponseJson, DefaultLobbyHttpResponse());
-
         /*
             join_game_helper -> join_game_for_all_local_members
-            advertise_game_session -> commit_pending_lobby_changes -> commit_lobby_changes_helper (write_session)
+            AdvertiseGameSession -> commit_pending_lobby_changes -> commit_lobby_changes_helper (write_session)
             set_local_member_properties_to_remote_session
             commit_lobby_changes_helper (set_activity)
-            advertise_game_session -> set_transfer_handle
-            advertise_game_session -> write_session (transfer handle)
+            AdvertiseGameSession -> set_transfer_handle
+            AdvertiseGameSession -> write_session (transfer handle)
         */
 
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        if (xboxUserIds != nullptr)
-        {
-            gameResponseStruct->responseList =
-            {
-                gameSessionWithXuidsResponse,     // join_game_helper -> join_game_for_all_local_members
-                gameSessionWithXuidsResponse      // set_local_member_properties_to_remote_session
-            };
-        }
-        else
-        {
-            gameResponseStruct->responseList =
-            {
-                gameSessionResponse,                // join_game_helper -> join_game_for_all_local_members
-                gameSessionResponse                 // set_local_member_properties_to_remote_session
-            };
-        }
+        XTaskQueueHandle queue{};
+        VERIFY_SUCCEEDED(XblMultiplayerManagerInitialize(LOBBY_TEMPLATE_NAME, queue));
+        VERIFY_SUCCEEDED(XblRealTimeActivityActivate(xboxLiveContext));
 
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList =
+        auto gameResponse{ xboxUserIds.size() > 0 ? defaultGameSessionWithXuidsResponse
+                                                  : defaultGameSessionResponse };
+
+        std::vector<const char*> lobbyResponses
         {
-            lobbyNoHandleResponse,              // advertise_game_session -> commit_pending_lobby_changes -> commit_lobby_changes_helper (write_session)
-            lobbyNoHandleResponse,              // commit_lobby_changes_helper (set_activity)
-            lobbyNoHandleResponse,              // advertise_game_session -> set_transfer_handle
-            lobbyCompletedHandleResponse        // advertise_game_session -> write_session (transfer handle)
+            lobbyWithNoTransferHandleResponse,
+            lobbyWithCompletedTransferHandleResponse
         };
 
-        // set up http response set
-        responses[defaultGameHttpHeaderUri] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        HttpMock lobbyMock(POST, defaultMpsdUri, 201);
+        lobbyMock.SetResponseBody(lobbyResponses[0]);
+        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
+        HttpMock gameMock(POST, defaultGameUri, 201);
+        gameMock.SetResponseBody(gameResponse);
+        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
 
-        mpInstance->LobbySession->AddLocalUser(xboxLiveContext->User);
+        uint32_t contextIds[3]{ 1,2,3 };
+        XblUserHandle userHandle = xboxLiveContext->User().Handle();
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionAddLocalUser(userHandle));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetLocalMemberProperties(userHandle, "Health", "89", &contextIds[0]));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetLocalMemberProperties(userHandle, "Skill", "17", &contextIds[1]));
 
-        mpInstance->LobbySession->SetLocalMemberProperties(xboxLiveContext->User, L"Health", L"89", (Platform::Object^) 1);
-        mpInstance->LobbySession->SetLocalMemberProperties(xboxLiveContext->User, L"Skill", L"17", (Platform::Object^) 2);
-        mpInstance->LobbySession->SetLocalMemberConnectionAddress(xboxLiveContext->User, L"AQDXfbIj/QDRr2aLF5vWnwEEAiABSJgA2BES8XsFOdf6/FICIAEAAEE3nnYsBQQNfJRgQwEKfMU7", (Platform::Object^) 3);
-        if (xboxUserIds != nullptr)
+        lobbyMock.SetResponseBody(lobbyResponses[1]);
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetLocalMemberConnectionAddress(userHandle, CONNECTION_ADDR, &contextIds[2]));
+        
+        if (xboxUserIds.size() > 0)
         {
-            mpInstance->JoinGame(ref new Platform::String(L"MockGameSessionName"), GAME_SESSION_TEMPLATE_NAME, xboxUserIds->GetView());
+            VERIFY_SUCCEEDED(XblMultiplayerManagerJoinGame(GAME_SESSION_NAME, GAME_TEMPLATE_NAME, xboxUserIds.data(), xboxUserIds.size()));
         }
         else
         {
 #pragma warning(suppress: 6387)
-            mpInstance->JoinGame(ref new Platform::String(L"MockGameSessionName"), GAME_SESSION_TEMPLATE_NAME, nullptr);
+            VERIFY_SUCCEEDED(XblMultiplayerManagerJoinGame(GAME_SESSION_NAME, GAME_TEMPLATE_NAME, nullptr, 0));
         }
 
-        auto propertyJson = web::json::value::parse(propertiesJson);
-        auto customPropertyJson = propertyJson[L"properties"];
-        bool lobbyJoined = false;
-        bool gameJoined = false;
-        bool isAdvertisingGameDone = false;
-        int localUserPropWritten = 0;
+        int count{ 0 };
+        bool lobbyJoined{ false };
+        bool gameJoined{ false };
+        bool isAdvertisingGameDone{ false };
+        uint32_t localUserPropWritten{ 0 };
+        auto customProps = JsonUtils::SerializeJson(classPropertiesJson()["properties"]["custom"]);
         while (!lobbyJoined || !gameJoined || !isAdvertisingGameDone || localUserPropWritten != 3)
         {
-            auto events = MultiplayerManager::SingletonInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::UserAdded)
+                switch (events[i].EventType)
                 {
-                    lobbyJoined = true;
-                }
-
-                if (ev->EventType == MultiplayerEventType::LocalMemberPropertyWriteCompleted)
-                {
-                    int pContext = safe_cast<int>(ev->Context);
-                    VERIFY_IS_TRUE(pContext == 1 || pContext == 2);
-                    localUserPropWritten++;
-                }
-
-                if (ev->EventType == MultiplayerEventType::LocalMemberConnectionAddressWriteCompleted)
-                {
-                    int pContext = safe_cast<int>(ev->Context);
-                    VERIFY_IS_TRUE(pContext == 3);
-                    localUserPropWritten++;
-                }
-
-                if (ev->EventType == MultiplayerEventType::JoinGameCompleted)
-                {
-                    gameJoined = true;
+                    case XblMultiplayerEventType::UserAdded:
+                        lobbyJoined = true;
+                        break;
+                    case XblMultiplayerEventType::LocalMemberPropertyWriteCompleted:
+                        VerifyContext12AndIncrement(events[i], &localUserPropWritten);
+                        break;
+                    case XblMultiplayerEventType::LocalMemberConnectionAddressWriteCompleted:
+                        VerifyContext3AndIncrement(events[i], &localUserPropWritten);
+                        break;
+                    case XblMultiplayerEventType::JoinGameCompleted:
+                        gameJoined = true;
+                        break;
                 }
             }
 
-            if (utils::str_icmp(mpInstance->LobbySession->Properties->Data(), customPropertyJson[L"custom"].serialize()) == 0)
+            auto propertiesStr = XblMultiplayerManagerLobbySessionPropertiesJson();
+            if (propertiesStr != nullptr && utils::str_icmp(propertiesStr, customProps.c_str()) == 0)
             {
                 isAdvertisingGameDone = true;
             }
+
+            Sleep(10);
         }
 
-        VerifyLobby(mpInstance->LobbySession, lobbyCompletedHandleResponseJson);
-        if (xboxUserIds != nullptr)
+        VERIFY_IS_FALSE(!lobbyJoined || !gameJoined || !isAdvertisingGameDone || localUserPropWritten != 3);
+        VerifyLobby(lobbyCompletedHandleResponseJson().GetObject());
+
+        if (xboxUserIds.size() > 0)
         {
-            VerifyGame(mpInstance->GameSession, gameSessionWithXuidsResponseJson);
+            VerifyGame(defaultGameSessionWithXuidsResponseJson().GetObject());
         }
         else
         {
-            VerifyGame(mpInstance->GameSession, gameSessionResponseJson);
+            VerifyGame(defaultGameSessionResponseJson().GetObject());
         }
-
-        m_mockXboxSystemFactory->reinit();
     }
 
     DEFINE_TEST_CASE(TestJoinGame)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinGame);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        JoinGameHelper(xboxLiveContext);
-        DestructManager(xboxLiveContext);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+
+        JoinGameHelper(xboxLiveContext.get());
     }
 
     DEFINE_TEST_CASE(TestJoinGameWithXuids)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinGame);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
-        Vector<Platform::String^>^ initiatorIds = ref new Vector<Platform::String^>();
-        initiatorIds->Append("TestXboxUserId");
-        initiatorIds->Append("TestXboxUserId_2");
-        initiatorIds->Append("TestXboxUserId_3");
-        JoinGameHelper(xboxLiveContext, initiatorIds);
-        DestructManager(xboxLiveContext);
+        std::vector<uint64_t> initiatorIds{ 1234, 2345, 3456 };
+        JoinGameHelper(xboxLiveContext.get(), initiatorIds);
     }
 
     enum class CallingPatternType
@@ -1563,708 +4500,707 @@ public:
         ReverseCombination
     };
 
+    void AsyncRemoveLocalUser(XblContextHandle xboxLiveContext, XAsyncBlock* async)
+    {
+        auto uri{ defaultMpsdUri };
+        auto rtaId{ rtaConnectionId };
+        auto response{ defaultLobbySessionResponse };
+        auto headers{ defaultLobbyHttpResponseHeaders };
+
+        RunAsync(async, __FUNCTION__,
+            [xboxLiveContext, rtaId, uri, response, headers](XAsyncOp op, const XAsyncProviderData* data)
+            {
+                UNREFERENCED_PARAMETER(data);
+                switch (op)
+                {
+                    case XAsyncOp::DoWork:
+                    {
+                        HttpMock lobbyMock(POST, uri, 201);
+                        lobbyMock.SetResponseBody(response);
+                        lobbyMock.SetResponseHeaders(headers);
+
+                        return XblMultiplayerManagerLobbySessionRemoveLocalUser(xboxLiveContext->User().Handle());
+                    }
+                    default:
+                        return S_OK;
+                }
+            });
+    }
+
+    void AsyncJoinGame(XblContextHandle xboxLiveContext, XAsyncBlock* async)
+    {
+        auto uri{ defaultGameUri };
+        auto rtaUri{ defaultMpsdUri };
+        auto rtaId{ rtaConnectionId };
+        auto response{ defaultGameSessionResponse };
+        auto headers{ defaultGameHttpResponseHeaders };
+
+        RunAsync(async, __FUNCTION__,
+            [xboxLiveContext, rtaUri, rtaId, uri, response, headers](XAsyncOp op, const XAsyncProviderData* data)
+            {
+                UNREFERENCED_PARAMETER(data);
+                switch (op)
+                {
+                    case XAsyncOp::DoWork:
+                    {
+                        HttpMock gameMock(POST, uri, 201);
+                        gameMock.SetResponseBody(response);
+                        gameMock.SetResponseHeaders(headers);
+
+#pragma warning(suppress: 6387)
+                        return XblMultiplayerManagerJoinGame(GAME_SESSION_NAME, GAME_TEMPLATE_NAME, nullptr, 0);
+                    }
+                    default:
+                        return S_OK;
+                }
+            });
+    }
+
+    void AsyncLeaveGame(bool& leaveGameCompleted, XAsyncBlock* async)
+    {
+        RunAsync(async, __FUNCTION__,
+            [&leaveGameCompleted](XAsyncOp op, const XAsyncProviderData* data)
+            {
+                UNREFERENCED_PARAMETER(data);
+                switch (op)
+                {
+                    case XAsyncOp::DoWork:
+                    {
+                        auto hr = XblMultiplayerManagerLeaveGame();
+                        if (FAILED(hr))
+                        {
+                            leaveGameCompleted = true;
+                        }
+
+                        return hr;
+                    }
+                    default:
+                        return S_OK;
+                }
+            });
+    }
+
     void TestLeaveMultiplayerHelper(CallingPatternType type)
     {
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        JoinGameHelper(xboxLiveContext);
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList = { gameSessionEmptyJsonResponse };
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList = { lobbySessionEmptyJsonResponse };
+        JoinGameHelper(xboxLiveContext.get());
 
-        // set up http response set
-        responses[defaultGameHttpHeaderUri] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        HttpMock gameMock(GET, defaultGameHttpHeaderUri, 200);
+        gameMock.SetResponseBody(emptyResponse);
+        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        bool leaveGameCompleted = false;
+        HttpMock lobbyMock(GET, defaultMpsdUri, 200);
+        lobbyMock.SetResponseBody(emptyResponse);
+        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        if (type == CallingPatternType::Sync)
+        XAsyncBlock asyncLeave{};
+        XAsyncBlock asyncRemove{};
+        bool leaveGameCompleted{ false };
+
+        switch (type)
         {
-            mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User);
-            try { mpInstance->LeaveGame(); } catch(Platform::Exception^ ex) { leaveGameCompleted = true; }
-        }
-        else if (type == CallingPatternType::ReverseSync)
-        {
-            try { mpInstance->LeaveGame(); } catch(Platform::Exception^ ex) { leaveGameCompleted = true; }
-            mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User);
-        }
-        else if (type == CallingPatternType::Async)
-        {
-            create_task([mpInstance, xboxLiveContext]()
+            case CallingPatternType::Sync:
             {
-                mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User);
-            });
-
-            create_task([mpInstance, &leaveGameCompleted]()
+                VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionRemoveLocalUser(xboxLiveContext->User().Handle()));
+                VERIFY_SUCCEEDED(XblMultiplayerManagerLeaveGame());
+                break;
+            }
+            case CallingPatternType::ReverseSync:
             {
-                try { mpInstance->LeaveGame(); } catch(Platform::Exception^ ex) { leaveGameCompleted = true; }
-            });
-        }
-        else if (type == CallingPatternType::ReverseAsync)
-        {
-            create_task([mpInstance, &leaveGameCompleted]()
+                VERIFY_SUCCEEDED(XblMultiplayerManagerLeaveGame());
+                VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionRemoveLocalUser(xboxLiveContext->User().Handle()));
+                break;
+            }
+            case CallingPatternType::Async:
             {
-                try { mpInstance->LeaveGame(); } catch(Platform::Exception^ ex) { leaveGameCompleted = true; }
-            });
-            create_task([mpInstance, xboxLiveContext]()
+                AsyncRemoveLocalUser(xboxLiveContext.get(), &asyncRemove);
+                AsyncLeaveGame(leaveGameCompleted, &asyncLeave);
+                break;
+            }
+            case CallingPatternType::ReverseAsync:
             {
-                mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User);
-            });
-        }
-        else if(type == CallingPatternType::Combination)
-        {
-            mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User);
-            create_task([mpInstance, &leaveGameCompleted]()
+                AsyncLeaveGame(leaveGameCompleted, &asyncLeave);
+                AsyncRemoveLocalUser(xboxLiveContext.get(), &asyncRemove);
+                break;
+            }
+            case CallingPatternType::Combination:
             {
-                try { mpInstance->LeaveGame(); } catch(Platform::Exception^ ex) { leaveGameCompleted = true; }
-            });
-        }
-        else
-        {
-            try { mpInstance->LeaveGame(); } catch(Platform::Exception^ ex) { leaveGameCompleted = true; }
-            create_task([mpInstance, xboxLiveContext]()
+                VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionRemoveLocalUser(xboxLiveContext->User().Handle()));
+                AsyncLeaveGame(leaveGameCompleted, &asyncLeave);
+                break;
+            }
+            case CallingPatternType::ReverseCombination:
             {
-                mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User);
-            });
-        }
-
-        bool userRemoved = false, clientDisconnected = false;
-        while (!userRemoved || !leaveGameCompleted || !clientDisconnected)
-        {
-            auto events = mpInstance->DoWork();
-            for (auto ev : events)
-            {
-                if (ev->EventType == MultiplayerEventType::UserRemoved)
-                {
-                    userRemoved = true;
-                    TEST_LOG(L"TestLeaveMultiplayerHelper - user removed.");
-                }
-
-                if (ev->EventType == MultiplayerEventType::LeaveGameCompleted)
-                {
-                    leaveGameCompleted = true;
-                    TEST_LOG(L"TestLeaveMultiplayerHelper - leave game completed.");
-                }
-
-                if (ev->EventType == MultiplayerEventType::ClientDisconnectedFromMultiplayerService)
-                {
-                    VERIFY_IS_TRUE(!clientDisconnected);
-                    clientDisconnected = true;
-                    TEST_LOG(L"TestLeaveMultiplayerHelper - client disconnected from multiplayer service.");
-                }
+                VERIFY_SUCCEEDED(XblMultiplayerManagerLeaveGame());
+                AsyncRemoveLocalUser(xboxLiveContext.get(), &asyncRemove);
+                break;
             }
         }
 
-        VERIFY_IS_TRUE(mpInstance->LobbySession->LocalMembers->Size == 0);
-        VERIFY_IS_TRUE(mpInstance->LobbySession->Members->Size == 0);
-        VERIFY_IS_TRUE(mpInstance->GameSession == nullptr);
-        DestructManager(xboxLiveContext, true);
-    }
-
-    DEFINE_TEST_CASE(TestLeaveMultiplayer_Master)
-    {
-        DEFINE_TEST_CASE_PROPERTIES_FAILING(TestLeaveMultiplayer_Master);
+        int count{ 0 };
+        bool userRemoved{ false }, clientDisconnected{ false };
+        while (!userRemoved || !leaveGameCompleted || !clientDisconnected)
         {
-            TEST_LOG(L"TestLeaveMultiplayerHelper - Sync.");
-            TestLeaveMultiplayerHelper(CallingPatternType::Sync);
+            if (++count > 500) break;
 
-            TEST_LOG(L"TestLeaveMultiplayerHelper - Async.");
-            TestLeaveMultiplayerHelper(CallingPatternType::Async);
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
 
-            TEST_LOG(L"TestLeaveMultiplayerHelper - Combination.");
-            TestLeaveMultiplayerHelper(CallingPatternType::Combination);
+            for (uint32_t i = 0; i < eventsCount; ++i)
+            {
+                switch (events[i].EventType)
+                {
+                    case XblMultiplayerEventType::UserRemoved:
+                        userRemoved = true;
+                        TEST_LOG(L"TestLeaveMultiplayerHelper - user removed.");
+                        break;
+                    case XblMultiplayerEventType::LeaveGameCompleted:
+                        leaveGameCompleted = true;
+                        TEST_LOG(L"TestLeaveMultiplayerHelper - leave game completed.");
+                        break;
+                    case XblMultiplayerEventType::ClientDisconnectedFromMultiplayerService:
+                        VERIFY_IS_FALSE(clientDisconnected);
+                        clientDisconnected = true;
+                        TEST_LOG(L"TestLeaveMultiplayerHelper - client disconnected from multiplayer service.");
+                        break;
+                }
+            }
 
-            TEST_LOG(L"TestLeaveMultiplayerHelper - ReverseSync.");
-            TestLeaveMultiplayerHelper(CallingPatternType::ReverseSync);
-
-            TEST_LOG(L"TestLeaveMultiplayerHelper - ReverseAsync.");
-            TestLeaveMultiplayerHelper(CallingPatternType::ReverseAsync);
-
-            TEST_LOG(L"TestLeaveMultiplayerHelper - ReverseCombination.");
-            TestLeaveMultiplayerHelper(CallingPatternType::ReverseCombination);
+            Sleep(10);
         }
+
+        VERIFY_IS_FALSE(!userRemoved || !leaveGameCompleted || !clientDisconnected);
+        XAsyncGetStatus(&asyncLeave, true);
+        XAsyncGetStatus(&asyncRemove, true);
+
+        VERIFY_ARE_EQUAL_UINT(0, XblMultiplayerManagerLobbySessionLocalMembersCount());
+        VERIFY_ARE_EQUAL_UINT(0, XblMultiplayerManagerLobbySessionMembersCount());
+        VERIFY_IS_FALSE(XblMultiplayerManagerGameSessionActive());
     }
 
     DEFINE_TEST_CASE(TestLeaveMultiplayer_1)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestLeaveMultiplayer_1);
         TestLeaveMultiplayerHelper(CallingPatternType::Sync);
     }
 
     DEFINE_TEST_CASE(TestLeaveMultiplayer_2)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestLeaveMultiplayer_2);
         TestLeaveMultiplayerHelper(CallingPatternType::Async);
     }
 
-     DEFINE_TEST_CASE(TestLeaveMultiplayer_3)
-     {
-         DEFINE_TEST_CASE_PROPERTIES(TestLeaveMultiplayer_3);
-         TestLeaveMultiplayerHelper(CallingPatternType::Combination);
-     }
+    DEFINE_TEST_CASE(TestLeaveMultiplayer_3)
+    {
+        TestLeaveMultiplayerHelper(CallingPatternType::Combination);
+    }
 
     DEFINE_TEST_CASE(TestLeaveMultiplayer_4)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestLeaveMultiplayer_4);
         TestLeaveMultiplayerHelper(CallingPatternType::ReverseSync);
     }
+
     DEFINE_TEST_CASE(TestLeaveMultiplayer_5)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestLeaveMultiplayer_5);
         TestLeaveMultiplayerHelper(CallingPatternType::ReverseAsync);
     }
+
     DEFINE_TEST_CASE(TestLeaveMultiplayer_6)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestLeaveMultiplayer_6);
         TestLeaveMultiplayerHelper(CallingPatternType::ReverseCombination);
     }
 
     DEFINE_TEST_CASE(TestMultipleLocalUsers_1)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestMultipleLocalUsers_1);
-        InitializeManager(2);
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        MPMTestEnvironment env{};
+        auto xboxLiveContext1 = env.CreateMockXboxLiveContext(1234);
+        auto xboxLiveContext2 = env.CreateMockXboxLiveContext(2345);
 
-        Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
-        xboxLiveContexts->Append(xboxLiveContext);
-        xboxLiveContexts->Append(xboxLiveContext2);
-        AddMultipleLocalUserHelper(xboxLiveContexts->GetView());
+        std::vector<XblContextHandle> xboxLiveContexts{ xboxLiveContext1.get(), xboxLiveContext2.get() };
+        AddMultipleLocalUserHelper(xboxLiveContexts);
 
-        auto multiplayerManagerInstance = MultiplayerManager::SingletonInstance;
-        create_task([multiplayerManagerInstance, xboxLiveContext2]()
-        {
-            multiplayerManagerInstance->LobbySession->RemoveLocalUser(xboxLiveContext2->User);
-        });
+        HttpMock mock(POST, defaultMpsdUri, 201);
+        mock.SetResponseBody(defaultLobbySessionResponse);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        bool userRemoved = false;
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionRemoveLocalUser(xboxLiveContext2.get()->User().Handle()));
+
+        int count{ 0 };
+        bool userRemoved{ false };
         while (!userRemoved)
         {
-            auto events = multiplayerManagerInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::UserRemoved)
+                if (events[i].EventType == XblMultiplayerEventType::UserRemoved)
                 {
                     userRemoved = true;
                 }
-
-                if (ev->EventType == MultiplayerEventType::ClientDisconnectedFromMultiplayerService)
+                else if (events[i].EventType == XblMultiplayerEventType::ClientDisconnectedFromMultiplayerService)
                 {
                     // Should not have fired as we still have one more user.
                     VERIFY_IS_TRUE(false);
                 }
             }
+
+            Sleep(10);
         }
 
-        VerifyLobby(multiplayerManagerInstance->LobbySession, web::json::value::parse(defaultMultipleLocalUsersLobbyResponse));
-        DestructManager(xboxLiveContexts->GetView());
+        VERIFY_IS_TRUE(userRemoved);
+        VerifyLobby(defaultMultipleLocalUsersLobbyResponseJson().GetObject());
     }
 
     // Add multiple users while removing a user (on diff threads)
     DEFINE_TEST_CASE(TestMultipleLocalUsers_2)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestMultipleLocalUsers_2);
-        InitializeManager(3);
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
-        auto xboxLiveContext3 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext3->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_3");
+        MPMTestEnvironment env{};
+        auto xboxLiveContext1 = env.CreateMockXboxLiveContext(1234);
+        auto xboxLiveContext2 = env.CreateMockXboxLiveContext(2345);
+        auto xboxLiveContext3 = env.CreateMockXboxLiveContext(3456);
 
-        Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
-        xboxLiveContexts->Append(xboxLiveContext);
-        xboxLiveContexts->Append(xboxLiveContext2);
-        AddMultipleLocalUserHelper(xboxLiveContexts->GetView());
+        std::vector<XblContextHandle> xboxLiveContexts{ xboxLiveContext1.get(), xboxLiveContext2.get() };
+        AddMultipleLocalUserHelper(xboxLiveContexts);
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        auto jsonResponse = web::json::value::parse(multipleLocalUsersLobbyResponse);
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(jsonResponse);
+        HttpMock mock(GET, defaultMpsdUri, 200);
+        mock.SetResponseBody(multipleLocalUsersLobbyResponse);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        create_task([mpInstance, xboxLiveContext3]()
-        {
-            mpInstance->LobbySession->AddLocalUser(xboxLiveContext3->User);
-            mpInstance->LobbySession->SetLocalMemberProperties(xboxLiveContext3->User, L"Health", L"89", (Platform::Object^) 1);
-            mpInstance->LobbySession->SetLocalMemberProperties(xboxLiveContext3->User, L"Skill", L"17", (Platform::Object^) 2);
-        });
+        uint32_t contextIds[2]{ 1,2 };
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionAddLocalUser(xboxLiveContext3->User().Handle()));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetLocalMemberProperties(xboxLiveContext3->User().Handle(), "Health", "89", &contextIds[0]));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionSetLocalMemberProperties(xboxLiveContext3->User().Handle(), "Skill", "17", &contextIds[1]));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionRemoveLocalUser(xboxLiveContext2.get()->User().Handle()));
 
-        create_task([mpInstance, xboxLiveContext2]()
-        {
-            mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext2->User);
-        });
-
-        bool userRemoved = false;
-        bool userAdded = false;
-        int localUserPropWritten = 0;
+        int count{ 0 };
+        bool userRemoved = false, userAdded = false;
+        uint32_t localUserPropWritten = 0;
         while (!userRemoved || !userAdded || localUserPropWritten != 2)
         {
-            auto events = mpInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::UserAdded)
+                switch (events[i].EventType)
                 {
-                    userAdded = true;
-                }
-
-                if (ev->EventType == MultiplayerEventType::LocalMemberPropertyWriteCompleted)
-                {
-                    int pContext = safe_cast<int>(ev->Context);
-                    VERIFY_IS_TRUE(pContext == 1 || pContext == 2);
-                    localUserPropWritten++;
-                }
-
-                if (ev->EventType == MultiplayerEventType::UserRemoved)
-                {
-                    userRemoved = true;
-                }
-
-                if (ev->EventType == MultiplayerEventType::ClientDisconnectedFromMultiplayerService)
-                {
-                    // Should not have fired as we still have one more user.
-                    VERIFY_IS_TRUE(false);
+                    case XblMultiplayerEventType::UserAdded:
+                        userAdded = true;
+                        break;
+                    case XblMultiplayerEventType::LocalMemberPropertyWriteCompleted:
+                        VerifyContext12AndIncrement(events[i], &localUserPropWritten);
+                        break;
+                    case XblMultiplayerEventType::UserRemoved:
+                        userRemoved = true;
+                        break;
+                    case XblMultiplayerEventType::ClientDisconnectedFromMultiplayerService:
+                        // Should not have fired as we still have one more user.
+                        VERIFY_IS_TRUE(false);
+                        break;
                 }
             }
+
+            Sleep(10);
         }
 
-        VerifyLobby(mpInstance->LobbySession, web::json::value::parse(multipleLocalUsersLobbyResponse));
-
-        xboxLiveContexts->Append(xboxLiveContext3);
-        DestructManager(xboxLiveContexts->GetView());
+        VERIFY_IS_FALSE(!userRemoved || !userAdded || localUserPropWritten != 2);
+        VerifyLobby(multipleLocalUsersLobbyResponseJson().GetObject());
     }
 
     // Constantly add/remove users
     DEFINE_TEST_CASE(TestMultipleLocalUsers_3)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestMultipleLocalUsers_3);
-        InitializeManager(5);
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
-        auto xboxLiveContext3 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext3->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_3");
-        auto xboxLiveContext4 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext4->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_4");
-        auto xboxLiveContext5 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext5->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_5");
+        MPMTestEnvironment env{};
+        auto xboxLiveContext1 = env.CreateMockXboxLiveContext(1234);
+        auto xboxLiveContext2 = env.CreateMockXboxLiveContext(2345);
+        auto xboxLiveContext3 = env.CreateMockXboxLiveContext(3456);
+        auto xboxLiveContext4 = env.CreateMockXboxLiveContext(4567);
+        auto xboxLiveContext5 = env.CreateMockXboxLiveContext(5678);
 
-        Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
-        xboxLiveContexts->Append(xboxLiveContext);
-        xboxLiveContexts->Append(xboxLiveContext2);
-        AddMultipleLocalUserHelper(xboxLiveContexts->GetView());
+        std::vector<XblContextHandle> xboxLiveContexts{ xboxLiveContext1.get(), xboxLiveContext2.get() };
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        auto jsonResponse = web::json::value::parse(multipleLocalUsersLobbyResponse);
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(jsonResponse);
+        AddMultipleLocalUserHelper(xboxLiveContexts);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        create_task([mpInstance, xboxLiveContext3, xboxLiveContext4]()
-        {
-            mpInstance->LobbySession->AddLocalUser(xboxLiveContext3->User);
-            mpInstance->LobbySession->AddLocalUser(xboxLiveContext4->User);
-        });
+        HttpMock mock(GET, defaultMpsdUri, 200);
+        mock.SetResponseBody(multipleLocalUsersLobbyResponse);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        create_task([mpInstance, xboxLiveContext2]()
-        {
-            mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext2->User);
-        });
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionAddLocalUser(xboxLiveContext3->User().Handle()));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionAddLocalUser(xboxLiveContext4->User().Handle()));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionRemoveLocalUser(xboxLiveContext2.get()->User().Handle()));
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionAddLocalUser(xboxLiveContext5->User().Handle()));
 
-        create_task([mpInstance, xboxLiveContext5]()
-        {
-            mpInstance->LobbySession->AddLocalUser(xboxLiveContext5->User);
-        });
-
-        int userRemoved = 0, userAdded = 0, eventCount = 0;
-
+        int count{ 0 };
+        uint32_t userRemoved = 0, userAdded = 0, eventCount = 0;
         // Since the mocked session only has 2 members, you will get into a scenario where the user was removed before he could have been added,
         // giving you 2 extra added events. However, due to a race between adding & removing (being called on diff threads) this happens only sometimes.
         while (userRemoved != 3 || userAdded < 3)   
         {
-            auto events = mpInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
                 if (eventCount == 0)
                 {
                     eventCount++;
-                    create_task([mpInstance, xboxLiveContext4]()
-                    {
-                        mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext4->User);
-                    });
+                    VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionRemoveLocalUser(xboxLiveContext4.get()->User().Handle()));
                 }
                 else if (eventCount == 1)
                 {
                     eventCount++;
-                    create_task([mpInstance, xboxLiveContext5]()
-                    {
-                        mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext5->User);
-                    });
+                    VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionRemoveLocalUser(xboxLiveContext5.get()->User().Handle()));
                 }
 
-                if (ev->EventType == MultiplayerEventType::UserAdded)
+                switch (events[i].EventType)
                 {
-                    userAdded++;
-                }
-
-                if (ev->EventType == MultiplayerEventType::UserRemoved)
-                {
-                    userRemoved++;
-                }
-
-                if (ev->EventType == MultiplayerEventType::ClientDisconnectedFromMultiplayerService)
-                {
-                    // Should not have fired as we still have one more user.
-                    VERIFY_IS_TRUE(false);
+                    case XblMultiplayerEventType::UserAdded:
+                        userAdded++;
+                        break;
+                    case XblMultiplayerEventType::UserRemoved:
+                        userRemoved++;
+                        break;
+                    case XblMultiplayerEventType::ClientDisconnectedFromMultiplayerService:
+                        // Should not have fired as we still have one more user.
+                        VERIFY_IS_TRUE(false);
+                        break;
                 }
             }
+
+            Sleep(10);
         }
 
-        VerifyLobby(mpInstance->LobbySession, web::json::value::parse(multipleLocalUsersLobbyResponse));
-
-        xboxLiveContexts->Append(xboxLiveContext3);
-        xboxLiveContexts->Append(xboxLiveContext4);
-        xboxLiveContexts->Append(xboxLiveContext5);
-        DestructManager(xboxLiveContexts->GetView());
+        VERIFY_IS_FALSE(userRemoved != 3 || userAdded < 3);
+        VerifyLobby(multipleLocalUsersLobbyResponseJson().GetObject());
     }
 
     void TestJoinGameWhileRemovingLocalUserHelper(CallingPatternType type)
     {
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext);
-        
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        auto gameSessionResponseJson = defaultGameSessionResponseJson;
-        auto gameSessionResponse = StockMocks::CreateMockHttpCallResponse(gameSessionResponseJson, DefaultGameHttpResponse());
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        AddLocalUserHelper(xboxLiveContext.get());
 
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList = { gameSessionResponse };
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList = { lobbySessionEmptyJsonResponse };
+        HttpMock gameMock(POST, defaultGameUri, 201);
+        gameMock.SetResponseBody(defaultGameSessionResponse);
+        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
 
-        // set up http response set
-        responses[defaultGameHttpHeaderUri] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        HttpMock lobbyMock(POST, defaultMpsdUri, 201);
+        lobbyMock.SetResponseBody(defaultLobbySessionResponse);
+        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        if (type == CallingPatternType::Sync)
+        VERIFY_SUCCEEDED(XblRealTimeActivityActivate(xboxLiveContext.get()));
+
+        XAsyncBlock asyncJoin{};
+        XAsyncBlock asyncRemove{};
+
+        switch (type)
         {
-            mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User);
-            try { mpInstance->JoinGame(ref new Platform::String(L"MockGameSessionName"), GAME_SESSION_TEMPLATE_NAME, nullptr); }
-            catch (Platform::Exception^ ex) { TEST_LOG(L"JoinGame exception thrown."); }
-        }
-        else if (type == CallingPatternType::ReverseSync)
-        {
-            try { mpInstance->JoinGame(ref new Platform::String(L"MockGameSessionName"), GAME_SESSION_TEMPLATE_NAME, nullptr); }
-            catch (Platform::Exception^ ex) { TEST_LOG(L"JoinGame exception thrown."); }
-            mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User);
-        }
-        else if (type == CallingPatternType::Async)
-        {
-            create_task([mpInstance, xboxLiveContext]()
+            case CallingPatternType::Sync:
             {
-                mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User);
-            });
-
-            create_task([mpInstance]()
+                VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionRemoveLocalUser(xboxLiveContext->User().Handle()));
+                VERIFY_SUCCEEDED(XblMultiplayerManagerJoinGame(GAME_SESSION_NAME, GAME_TEMPLATE_NAME, nullptr, 0));
+                break;
+            }
+            case CallingPatternType::ReverseSync:
+            {
+                VERIFY_SUCCEEDED(XblMultiplayerManagerJoinGame(GAME_SESSION_NAME, GAME_TEMPLATE_NAME, nullptr, 0));
+                VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionRemoveLocalUser(xboxLiveContext->User().Handle()));
+                break;
+            }
+            case CallingPatternType::Async:
+            {
+                AsyncRemoveLocalUser(xboxLiveContext.get(), &asyncRemove);
+                AsyncJoinGame(xboxLiveContext.get(), &asyncJoin);
+                break;
+            }
+            case CallingPatternType::ReverseAsync:
+            {
+                AsyncJoinGame(xboxLiveContext.get(), &asyncJoin);
+                AsyncRemoveLocalUser(xboxLiveContext.get(), &asyncRemove);
+                break;
+            }
+            case CallingPatternType::Combination:
+            {
+                VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionRemoveLocalUser(xboxLiveContext->User().Handle()));
+                AsyncJoinGame(xboxLiveContext.get(), &asyncJoin);
+                break;
+            }
+            case CallingPatternType::ReverseCombination:
             {
 #pragma warning(suppress: 6387)
-                try { mpInstance->JoinGame(ref new Platform::String(L"MockGameSessionName"), GAME_SESSION_TEMPLATE_NAME, nullptr); }
-                catch (Platform::Exception^ ex) { TEST_LOG(L"JoinGame exception thrown."); }
-            });
-        }
-        else if (type == CallingPatternType::ReverseAsync)
-        {
-            create_task([mpInstance]()
-            {
-#pragma warning(suppress: 6387)
-                try { mpInstance->JoinGame(ref new Platform::String(L"MockGameSessionName"), GAME_SESSION_TEMPLATE_NAME, nullptr); }
-                catch (Platform::Exception^ ex) { TEST_LOG(L"JoinGame exception thrown."); }
-            });
-            create_task([mpInstance, xboxLiveContext]()
-            {
-                mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User);
-            });
-        }
-        else if (type == CallingPatternType::Combination)
-        {
-            mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User);
-            create_task([mpInstance]()
-            {
-#pragma warning(suppress: 6387)
-                try { mpInstance->JoinGame(ref new Platform::String(L"MockGameSessionName"), GAME_SESSION_TEMPLATE_NAME, nullptr); }
-                catch (Platform::Exception^ ex) { TEST_LOG(L"JoinGame exception thrown."); }
-            });
-        }
-        else
-        {
-#pragma warning(suppress: 6387)
-            try { mpInstance->JoinGame(ref new Platform::String(L"MockGameSessionName"), GAME_SESSION_TEMPLATE_NAME, nullptr); }
-            catch (Platform::Exception^ ex) { TEST_LOG(L"JoinGame exception thrown."); }
-            create_task([mpInstance, xboxLiveContext]()
-            {
-                Sleep(10);
-                mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User);
-            });
-        }
-
-        bool userRemoved = false, clientDisconnected = false;
-        while (!userRemoved || !clientDisconnected)
-        {
-            auto events = mpInstance->DoWork();
-            for (auto ev : events)
-            {
-                if (ev->EventType == MultiplayerEventType::UserRemoved)
-                {
-                    userRemoved = true;
-                }
-
-                if (ev->EventType == MultiplayerEventType::ClientDisconnectedFromMultiplayerService)
-                {
-                    VERIFY_IS_TRUE(!clientDisconnected);
-                    clientDisconnected = true;
-                }
+                VERIFY_SUCCEEDED(XblMultiplayerManagerJoinGame(GAME_SESSION_NAME, GAME_TEMPLATE_NAME, nullptr, 0));
+                AsyncRemoveLocalUser(xboxLiveContext.get(), &asyncRemove);
+                break;
             }
         }
 
-        VERIFY_IS_TRUE(mpInstance->LobbySession->LocalMembers->Size == 0);
-        VERIFY_IS_TRUE(mpInstance->LobbySession->Members->Size == 0);
-        DestructManager(xboxLiveContext, true);
+        int count{ 0 };
+        bool userRemoved = false, clientDisconnected = false;
+        while (!userRemoved || !clientDisconnected)
+        {
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
+            {
+                if (events[i].EventType == XblMultiplayerEventType::UserRemoved)
+                {
+                    userRemoved = true;
+                }
+                else if (events[i].EventType == XblMultiplayerEventType::ClientDisconnectedFromMultiplayerService)
+                {
+                    VERIFY_IS_FALSE(clientDisconnected);
+                    clientDisconnected = true;
+                }
+            }
+
+            Sleep(10);
+        }
+
+        VERIFY_IS_FALSE(!userRemoved || !clientDisconnected);
+        VERIFY_ARE_EQUAL_UINT(0, XblMultiplayerManagerLobbySessionLocalMembersCount());
+        VERIFY_ARE_EQUAL_UINT(0, XblMultiplayerManagerLobbySessionMembersCount());
     }
 
     DEFINE_TEST_CASE(TestJoinGameWhileRemovingLocalUser_1)
     {
-        DEFINE_TEST_CASE_PROPERTIES_FAILING(TestJoinGameWhileRemovingLocalUser_1);
         TestJoinGameWhileRemovingLocalUserHelper(CallingPatternType::Sync);
     }
 
     DEFINE_TEST_CASE(TestJoinGameWhileRemovingLocalUser_2)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinGameWhileRemovingLocalUser_2);
         TestJoinGameWhileRemovingLocalUserHelper(CallingPatternType::Async);
     }
 
     DEFINE_TEST_CASE(TestJoinGameWhileRemovingLocalUser_3)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinGameWhileRemovingLocalUser_3);
         TestJoinGameWhileRemovingLocalUserHelper(CallingPatternType::Combination);
     }
 
     DEFINE_TEST_CASE(TestJoinGameWhileRemovingLocalUser_4)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinGameWhileRemovingLocalUser_4);
         TestJoinGameWhileRemovingLocalUserHelper(CallingPatternType::ReverseSync);
     }
 
     DEFINE_TEST_CASE(TestJoinGameWhileRemovingLocalUser_5)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinGameWhileRemovingLocalUser_5);
         TestJoinGameWhileRemovingLocalUserHelper(CallingPatternType::ReverseAsync);
     }
 
     DEFINE_TEST_CASE(TestJoinGameWhileRemovingLocalUser_6)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestJoinGameWhileRemovingLocalUser_6);
         TestJoinGameWhileRemovingLocalUserHelper(CallingPatternType::ReverseCombination);
     }
 
-    DEFINE_TEST_CASE(TestSubscsriptionLostEvent)
+    DEFINE_TEST_CASE(TestSubscriptionsLostEvent)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSubscsriptionLostEvent);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        AddLocalUserHelperWithSyncUpdate(xboxLiveContext.get());
 
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelperWithSyncUpdate(xboxLiveContext);
+        HttpMock mock(POST, defaultMpsdUri, 201);
+        mock.SetResponseBody(emptyResponse);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto jsonResponse = web::json::value::parse(emptyJson);
-        m_mockXboxSystemFactory->GetMockHttpCall()->ResultValue = StockMocks::CreateMockHttpCallResponse(jsonResponse);
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        clientManager->on_multiplayer_subscriptions_lost();
+        GlobalState::Get()->MultiplayerManager()->GetMultiplayerClientManager()->OnMultiplayerSubscriptionsLost();
 
+        int count{ 0 };
         bool userRemoved = false, clientDisconnected = false;
         while (!userRemoved || !clientDisconnected)
         {
-            auto events = mpInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            VERIFY_SUCCEEDED(XblMultiplayerManagerDoWork(&events, &eventsCount));
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                TEST_LOG(FormatString(L" [MPM] RemoveLocalUserHelper - Event type: %s", ev->EventType.ToString()->Data()).c_str());
-                if (ev->EventType == MultiplayerEventType::UserRemoved)
+                TEST_LOG(FormatString(L" [MPM] RemoveLocalUserHelper - Event type: %d", events[i].EventType).c_str());
+                
+                if (events[i].EventType == XblMultiplayerEventType::UserRemoved)
                 {
                     userRemoved = true;
                 }
-
-                if (ev->EventType == MultiplayerEventType::ClientDisconnectedFromMultiplayerService)
+                else if (events[i].EventType == XblMultiplayerEventType::ClientDisconnectedFromMultiplayerService)
                 {
-                    VERIFY_IS_TRUE(!clientDisconnected);
+                    VERIFY_IS_FALSE(clientDisconnected);
                     clientDisconnected = true;
-
                 }
             }
-        }
 
-        VERIFY_IS_TRUE(mpInstance->LobbySession->LocalMembers->Size == 0);
-        VERIFY_IS_TRUE(mpInstance->GameSession == nullptr);
+            Sleep(10);
+        }
+        
+        VERIFY_IS_FALSE(!userRemoved || !clientDisconnected);
+        VERIFY_ARE_EQUAL_UINT(0, XblMultiplayerManagerLobbySessionLocalMembersCount());
+        VERIFY_IS_FALSE(XblMultiplayerManagerGameSessionActive());
     }
 
     /*
         multiplayer_session_writer: Back-to-back session writes
-        1. Write change #1 followed with chagne # 2 == final result #2
-        2. Write change #2 followed with chagne # 1 == final result #2
+        1. Write change #1 followed with change # 2 == final result #2
+        2. Write change #2 followed with change # 1 == final result #2
     */
 
-    void TestBackToBackSessionWriteLogicHelper(std::shared_ptr<HttpResponseStruct> responseStruct, uint64_t maxChangeNumber)
+    void TestBackToBackSessionWriteLogicHelper(std::vector<const char*> responses, uint64_t maxChangeNumber)
     {
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext);
+        MPMTestEnvironment env{};
 
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[defaultMpsdUri] = responseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        AddLocalUserHelper(xboxLiveContext.get());
+        
+        HttpMock mock(POST, defaultMpsdUri, 201);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto mpsdLobbySession = clientManager->latest_pending_read()->lobby_client()->session();
-        auto sessionWriter = clientManager->latest_pending_read()->lobby_client()->session_writer();
-        auto primaryContext = sessionWriter->get_primary_context();
+        auto session = GetSession(false);
+        auto sessionWriter = GetSessionWriter(false);
+        auto mpmInstance = GlobalState::Get()->MultiplayerManager();
 
-        sessionWriter->write_session(primaryContext, mpsdLobbySession, multiplayer::multiplayer_session_write_mode::update_existing);
-        sessionWriter->write_session(primaryContext, mpsdLobbySession, multiplayer::multiplayer_session_write_mode::update_existing);
-        sessionWriter->write_session(primaryContext, mpsdLobbySession, multiplayer::multiplayer_session_write_mode::update_existing);
-
-        int isDone = 0;
+        Event sessionEvent;
+        auto callback = [&sessionEvent](Result<std::shared_ptr<XblMultiplayerSession>> result)
+        {
+            sessionEvent.Set();
+        };
+        
+        mock.SetResponseBody(responses[0]);
+        VERIFY_SUCCEEDED(sessionWriter->WriteSession(xboxLiveContext, session, XblMultiplayerSessionWriteMode::UpdateExisting, true, callback));
+        sessionEvent.Wait();
+        mock.SetResponseBody(responses[1]);
+        VERIFY_SUCCEEDED(sessionWriter->WriteSession(xboxLiveContext, session, XblMultiplayerSessionWriteMode::UpdateExisting, true, callback));
+        sessionEvent.Wait();
+        mock.SetResponseBody(responses[2]);
+        VERIFY_SUCCEEDED(sessionWriter->WriteSession(xboxLiveContext, session, XblMultiplayerSessionWriteMode::UpdateExisting, true, callback));
+        
+        auto isDone = 0;
         while (isDone < 10)
         {
-            mpInstance->DoWork();
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
             Sleep(10);
             isDone++;
         }
 
-        VERIFY_IS_TRUE(mpInstance->LobbySession->GetCppObj()->_Change_number() == maxChangeNumber);
-        VerifyLobby(mpInstance->LobbySession, lobbyCompletedHandleResponseJson);
-        DestructManager(xboxLiveContext);
+        VERIFY_ARE_EQUAL_UINT(maxChangeNumber, mpmInstance->LobbySession()->ChangeNumber());
+
+        VerifyLobby(lobbyCompletedHandleResponseJson().GetObject());
     }
 
     DEFINE_TEST_CASE(TestBackToBackSessionWriteLogic_1)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestBackToBackSessionWriteLogic_1);
-
-        std::shared_ptr<HttpResponseStruct> responseStruct = std::make_shared<HttpResponseStruct>();
-        responseStruct->responseList =
+        std::vector<const char*> responses
         {
-            defaultLobbyResponse,               // change #1
-            lobbyWithPendingHandleResponse,     // change #2
-            lobbyCompletedHandleResponse        // change #3
+            defaultLobbySessionResponse,             // change #1
+            lobbyWithPendingTransferHandleResponse,  // change #2
+            lobbyWithCompletedTransferHandleResponse // change #3
         };
 
-        TestBackToBackSessionWriteLogicHelper(responseStruct, 3);
+        TestBackToBackSessionWriteLogicHelper(responses, 3);
     }
 
     DEFINE_TEST_CASE(TestBackToBackSessionWriteLogic_2)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestBackToBackSessionWriteLogic_2);
-
-        std::shared_ptr<HttpResponseStruct> responseStruct = std::make_shared<HttpResponseStruct>();
-        responseStruct->responseList =
+        std::vector<const char*> responses
         {
-            lobbyCompletedHandleResponse,       // change #3
-            lobbyWithPendingHandleResponse,     // change #2
-            defaultLobbyResponse                // change #1
+            lobbyWithCompletedTransferHandleResponse, // change #3
+            lobbyWithPendingTransferHandleResponse,   // change #2
+            defaultLobbySessionResponse               // change #1
         };
 
-        TestBackToBackSessionWriteLogicHelper(responseStruct, 3);
+        TestBackToBackSessionWriteLogicHelper(responses, 3);
     }
 
-    /*
-        multiplayer_session_writer: Multiple Taps:
-        (fix existing code such that you do only 1 GET for multiple changed events)
-        1. call multiple on_session_changed with same change #s (#3, #2, #1, etc); ensure we only do 1 GET
-        2. call multiple on_session_changed with updated change #s (#1, #2, #3, etc); ensure we do multiple GETs
-    */
-
-    void LogSessionWriterState(const std::shared_ptr<multiplayer_session_writer>& sessionWriter, uint64_t sessionChangeNum, multiplayer_session_change_event_args eventArgs)
+    void MultipleTapsHelper(std::vector<const char*> getResponses, std::vector<uint32_t> getStatuses, std::vector<uint64_t> changeNumbers, uint64_t maxChangeNumber)
     {
-        LOGS_DEBUG << "[MPM] LogSessionWriterState: "
-            << " Writes in progress: " << sessionWriter->is_write_in_progress()
-            << " Sess change #: " << sessionChangeNum
-            << " Taps change #: " << sessionWriter->tap_change_number()
-            << " Args change #: " << eventArgs.change_number();
-    }
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        AddLocalUserHelper(xboxLiveContext.get());
 
-    void MultipleTapsHelper(std::shared_ptr<HttpResponseStruct> getResponseStruct, std::vector<uint64_t> tapChangeNumberList, uint64_t maxTapChangeNumber)
-    {
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext);
-
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[xbox_live_api::get_current_session] = getResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(responses);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto mpsdLobbySession = clientManager->latest_pending_read()->lobby_client()->session();
-        auto sessionWriter = clientManager->latest_pending_read()->lobby_client()->session_writer();
-
-        multiplayer_session_change_event_args eventArgs;
-        for (auto changeNumber : tapChangeNumberList)
+        uint32_t mockCount{ 0 };
+        HttpMock mock(GET, defaultMpsdUri);
+        mock.SetResponseBody(getResponses[0]);
+        mock.SetResponseHttpStatus(getStatuses[0]);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+        mock.SetMockMatchedCallback([getResponses, getStatuses, &mockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
         {
-            eventArgs = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", changeNumber);
-            LogSessionWriterState(sessionWriter, mpsdLobbySession->change_number(), eventArgs);
-            sessionWriter->on_session_changed(eventArgs);
+            if (mockCount < getResponses.size())
+            {
+                matchedMock->SetResponseBody(getResponses[mockCount]);
+                matchedMock->SetResponseHttpStatus(getStatuses[mockCount]);
+                ++mockCount;
+            }
+        });
+
+        auto session = GetSession(false);
+        auto sessionWriter = GetSessionWriter(false);
+        auto mpmInstance = GlobalState::Get()->MultiplayerManager();
+        
+        for (uint32_t i = 0; i < getResponses.size(); ++i)
+        {
+            sessionWriter->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ session->SessionReference(), "", changeNumbers[i] });
         }
 
-        int isDone = 0;
-        while (isDone < 10)
+        int count{ 0 };
+        while (mpmInstance->LobbySession()->ChangeNumber() != maxChangeNumber)
         {
-            mpInstance->DoWork();
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
             Sleep(10);
-            isDone++;
         }
 
-        VERIFY_IS_TRUE(mpInstance->LobbySession->GetCppObj()->_Change_number() == maxTapChangeNumber);
-        VerifyLobby(mpInstance->LobbySession, lobbyCompletedHandleResponseJson);
-        DestructManager(xboxLiveContext);
+        VERIFY_ARE_EQUAL_UINT(maxChangeNumber, mpmInstance->LobbySession()->ChangeNumber());
+
+        VerifyLobby(lobbyCompletedHandleResponseJson().GetObject());
     }
 
     DEFINE_TEST_CASE(TestMultipleTaps_1)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestMultipleTaps_1);
-
         // Set up initial http responses
-        auto defaultLobbyResponse404 = StockMocks::CreateMockHttpCallResponse(defaultLobbySessionResponseJson, 404, DefaultLobbyHttpResponse());
-
-        std::shared_ptr<HttpResponseStruct> getResponseStruct = std::make_shared<HttpResponseStruct>();
-        getResponseStruct->responseList =
+        std::vector<const char*> getResponses
         {
-            lobbyCompletedHandleResponse,       // change #3
-            lobbyWithPendingHandleResponse,     // change #2
-            defaultLobbyResponse404             // change #1
+            lobbyWithCompletedTransferHandleResponse, // change #3
+            lobbyWithPendingTransferHandleResponse,   // change #2
+            defaultLobbySessionResponse               // change #1
         };
 
-        std::vector<uint64_t> tapChangeNUmberList = {3, 2, 1};
-        MultipleTapsHelper(getResponseStruct, tapChangeNUmberList, 3);
+        std::vector<uint32_t> getStatuses{ 200,200,404 };
+        std::vector<uint64_t> changeNumbers{ 3,2,1 };
+
+        MultipleTapsHelper(getResponses, getStatuses, changeNumbers, 3);
     }
 
     DEFINE_TEST_CASE(TestMultipleTaps_2)
     {
-        DEFINE_TEST_CASE_PROPERTIES_FAILING(TestMultipleTaps_2);
-
-        std::shared_ptr<HttpResponseStruct> getResponseStruct = std::make_shared<HttpResponseStruct>();
-        getResponseStruct->responseList =
+        std::vector<const char*> getResponses
         {
-            lobbyWithPendingHandleResponse,     // change #2
-            lobbyCompletedHandleResponse        // change #3
+            lobbyWithPendingTransferHandleResponse,   // change #2
+            lobbyWithCompletedTransferHandleResponse, // change #3
         };
 
-        std::vector<uint64_t> tapChangeNUmberList = {1, 2, 3};
-        MultipleTapsHelper(getResponseStruct, tapChangeNUmberList, 3);
+        std::vector<uint32_t> getStatuses{ 200,200 };
+        std::vector<uint64_t> changeNumbers{ 2,3 };
+
+        MultipleTapsHelper(getResponses, getStatuses, changeNumbers, 3);
     }
 
     /*
@@ -2275,1387 +5211,660 @@ public:
         2. call write (ch. #6) followed with multiple different writes with shoulder taps; ensure that GET is never called.
         3. call write (ch. #2, #4) followed with shoulder tap (ch. #6); ensure that GET is called.
     */
+
     void TestMultipleWriteSessionWithTapsHelper(
-        std::shared_ptr<HttpResponseStruct> writeResponseStruct,
-        std::shared_ptr<HttpResponseStruct> getResponseStruct,
-        uint64_t maxChangeNumberToTest,
-        string_t handleId = string_t()
+        std::vector<const char*> writeResponses,
+        std::vector<const char*> getResponses,
+        uint64_t maxChangeNumber,
+        xsapi_internal_string handleId = xsapi_internal_string()
         )
     {
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        AddLocalUserHelper(xboxLiveContext.get());
 
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[xbox_live_api::write_session_using_subpath] = writeResponseStruct;
-        responses[xbox_live_api::get_current_session] = getResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(responses);
+        HttpMock mockGet(GET, defaultMpsdUri, 200);
+        mockGet.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto mpsdLobbySession = clientManager->latest_pending_read()->lobby_client()->session();
-        auto sessionWriter = clientManager->latest_pending_read()->lobby_client()->session_writer();
-        auto primaryContext = sessionWriter->get_primary_context();
+        HttpMock mockWrite(POST, defaultMpsdUri, 201);
+        mockWrite.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        auto eventArgs = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", 2);
-        LogSessionWriterState(sessionWriter, mpsdLobbySession->change_number(), eventArgs);
-        sessionWriter->on_session_changed(eventArgs);
-        pplx::task<xbox_live_result<std::shared_ptr<multiplayer_session>>> asyncOp;
-        if (handleId.empty())
-        {
-            asyncOp = sessionWriter->write_session(primaryContext, mpsdLobbySession, multiplayer::multiplayer_session_write_mode::update_existing);
-        }
-        else
-        {
-            asyncOp = sessionWriter->write_session_by_handle(primaryContext, mpsdLobbySession, multiplayer::multiplayer_session_write_mode::update_existing, handleId);
-        }
+        auto session = GetSession(false);
+        auto sessionWriter = GetSessionWriter(false);
+        auto mpmInstance = GlobalState::Get()->MultiplayerManager();
 
-        auto eventArgs2 = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", 3);
-        LogSessionWriterState(sessionWriter, mpsdLobbySession->change_number(), eventArgs);
-        sessionWriter->on_session_changed(eventArgs2);
-        if (handleId.empty())
+        Event sessionEvent;
+        auto callback = [&sessionEvent](Result<std::shared_ptr<XblMultiplayerSession>> result)
         {
-            asyncOp = sessionWriter->write_session(primaryContext, mpsdLobbySession, multiplayer::multiplayer_session_write_mode::update_existing);
-        }
-        else
+            sessionEvent.Set();
+        };
+
+        for (auto writeResponse : writeResponses)
         {
-            asyncOp = sessionWriter->write_session_by_handle(primaryContext, mpsdLobbySession, multiplayer::multiplayer_session_write_mode::update_existing, handleId);
+            mockWrite.SetResponseBody(writeResponse);
+
+            if (handleId.empty())
+            {
+                VERIFY_SUCCEEDED(sessionWriter->WriteSession(xboxLiveContext, session, XblMultiplayerSessionWriteMode::UpdateExisting, true, callback));
+            }
+            else
+            {
+                VERIFY_SUCCEEDED(sessionWriter->WriteSessionByHandle(xboxLiveContext, session, XblMultiplayerSessionWriteMode::UpdateExisting, handleId, true, callback));
+            }
+
+            sessionEvent.Wait();
         }
 
-        auto eventArgs3 = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", 5);
-        LogSessionWriterState(sessionWriter, mpsdLobbySession->change_number(), eventArgs);
-        sessionWriter->on_session_changed(eventArgs3);
-        if (handleId.empty())
-        {
-            asyncOp = sessionWriter->write_session(primaryContext, mpsdLobbySession, multiplayer::multiplayer_session_write_mode::update_existing);
-        }
-        else
-        {
-            asyncOp = sessionWriter->write_session_by_handle(primaryContext, mpsdLobbySession, multiplayer::multiplayer_session_write_mode::update_existing, handleId);
-        }
-
-        int isDone = 0;
+        auto isDone = 0;
         while (isDone < 10)
         {
-            mpInstance->DoWork();
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
             Sleep(10);
             isDone++;
         }
 
-        LOGS_DEBUG_IF(mpInstance->LobbySession->GetCppObj()->_Change_number() != maxChangeNumberToTest)
-            << "[MPM] maxChangeNumberToTest: " << maxChangeNumberToTest
-            << " curr change #: " << mpInstance->LobbySession->GetCppObj()->_Change_number();
-
-        VERIFY_IS_TRUE(mpInstance->LobbySession->GetCppObj()->_Change_number() == maxChangeNumberToTest);
-        DestructManager(xboxLiveContext);
+        VERIFY_ARE_EQUAL_UINT(maxChangeNumber, mpmInstance->LobbySession()->ChangeNumber());
     }
 
     DEFINE_TEST_CASE(TestWriteSessionWithTaps_1)
     {
-        DEFINE_TEST_CASE_PROPERTIES_FAILING(TestWriteSessionWithTaps_1);
-        
         // Set up initial http responses
-        std::shared_ptr<HttpResponseStruct> writeResponseStruct = std::make_shared<HttpResponseStruct>();
-        writeResponseStruct->responseList =
+        std::vector<const char*> writeResponses
         {
-            lobbyWithPendingHandleResponse,  // change #2
-            sessionChangeNum4Response,       // change #4
-            sessionChangeNum6Response        // change #6
+            lobbyWithPendingTransferHandleResponse, // change #2
+            sessionChangeNum4,                      // change #4
+            sessionChangeNum6                       // change #6
         };
 
-        std::shared_ptr<HttpResponseStruct> getResponseStruct = std::make_shared<HttpResponseStruct>();
-        getResponseStruct->responseList =
+        std::vector<const char*> getResponses
         {
-            sessionChangeNum3Response,       // change #3
-            sessionChangeNum5Response        // change #5
+            sessionChangeNum3, // change #3
+            sessionChangeNum5  // change #5
         };
 
-        TestMultipleWriteSessionWithTapsHelper(writeResponseStruct, getResponseStruct, 6);
-        // Test write_session_by_handle
-        m_mockXboxSystemFactory->reinit();
-        writeResponseStruct->counter = 0;
-        getResponseStruct->counter = 0;
-
-        TestMultipleWriteSessionWithTapsHelper(writeResponseStruct, getResponseStruct, 6, _T("TestHandleId"));
-        m_mockXboxSystemFactory->reinit();
-        writeResponseStruct->counter = 0;
-        getResponseStruct->counter = 0;
+        TestMultipleWriteSessionWithTapsHelper(writeResponses, getResponses, 6);
+        TestMultipleWriteSessionWithTapsHelper(writeResponses, getResponses, 6, "TestHandleId");
     }
 
     // The getResponseStruct is used for shoulderTaps.
     void TestWriteSessionWithTapsHelper(
-        std::shared_ptr<HttpResponseStruct> writeResponseStruct, 
-        std::shared_ptr<HttpResponseStruct> getResponseStruct,
+        std::vector<const char*> writeResponses, 
+        const char* getResponse,
         uint64_t maxChangeNumberForTap,
         uint64_t maxChangeNumberToTest,
         bool waitForFirstWriteToFinish,
-        string_t handleId = string_t()
+        xsapi_internal_string handleId = xsapi_internal_string()
         )
     {
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        AddLocalUserHelper(xboxLiveContext.get());
 
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[xbox_live_api::write_session_using_subpath] = writeResponseStruct;
-        responses[xbox_live_api::get_current_session] = getResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(responses);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto mpsdLobbySession = clientManager->latest_pending_read()->lobby_client()->session();
-        auto sessionWriter = clientManager->latest_pending_read()->lobby_client()->session_writer();
-        auto primaryContext = sessionWriter->get_primary_context();
-
-        pplx::task<xbox_live_result<std::shared_ptr<multiplayer_session>>> asyncOp;
-        if (handleId.empty())
+        uint32_t mockCount{ 0 };
+        HttpMock mock(POST, defaultMpsdUri, 201);
+        mock.SetResponseBody(writeResponses[0]);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+        mock.SetMockMatchedCallback([writeResponses, &mockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
         {
-            asyncOp = sessionWriter->write_session(primaryContext, mpsdLobbySession, multiplayer::multiplayer_session_write_mode::update_existing);
-        }
-        else
-        {
-            asyncOp = sessionWriter->write_session_by_handle(primaryContext, mpsdLobbySession, multiplayer::multiplayer_session_write_mode::update_existing, handleId);
-        }
-
-        if (waitForFirstWriteToFinish)
-            asyncOp.get();
-        else
-            asyncOp;
-        
-        auto eventArgs = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", 2);
-        LogSessionWriterState(sessionWriter, mpsdLobbySession->change_number(), eventArgs);
-        sessionWriter->on_session_changed(eventArgs);
-
-        if (handleId.empty())
-        {
-            asyncOp = sessionWriter->write_session(primaryContext, mpsdLobbySession, multiplayer::multiplayer_session_write_mode::update_existing);
-        }
-        else
-        {
-            asyncOp = sessionWriter->write_session_by_handle(primaryContext, mpsdLobbySession, multiplayer::multiplayer_session_write_mode::update_existing, handleId);
-        }
-
-        auto eventArgs2 = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", 3);
-        LogSessionWriterState(sessionWriter, mpsdLobbySession->change_number(), eventArgs);
-        sessionWriter->on_session_changed(eventArgs2);
-
-        if (handleId.empty())
-        {
-            asyncOp = sessionWriter->write_session(primaryContext, mpsdLobbySession, multiplayer::multiplayer_session_write_mode::update_existing);
-        }
-        else
-        {
-            asyncOp = sessionWriter->write_session_by_handle(primaryContext, mpsdLobbySession, multiplayer::multiplayer_session_write_mode::update_existing, handleId);
-        }
-
-        concurrency::event fireEvent;
-        create_task([this, sessionWriter, mpsdLobbySession, maxChangeNumberForTap, &fireEvent]()
-        {
-            auto eventArgs = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", maxChangeNumberForTap);
-            LogSessionWriterState(sessionWriter, mpsdLobbySession->change_number(), eventArgs);
-            sessionWriter->on_session_changed(eventArgs);
-            fireEvent.set();
+            if (mockCount < writeResponses.size())
+            {
+                matchedMock->SetResponseBody(writeResponses[mockCount]);
+                ++mockCount;
+            }
         });
 
-        int doWorkCount = 0;
-        while (doWorkCount < 10)
+        Event sessionEvent;
+        auto callback = [&sessionEvent](Result<std::shared_ptr<XblMultiplayerSession>> result)
         {
-            mpInstance->DoWork();
-            Sleep(10);
-            doWorkCount++;
-            if (doWorkCount == 5)
-            {
-                // If it hasn't fired yet, wait for it.
-                fireEvent.wait();
-            }
+            sessionEvent.Set();
+        };
+
+        auto session = GetSession(false);
+        auto sessionWriter = GetSessionWriter(false);
+        auto mpmInstance = GlobalState::Get()->MultiplayerManager();
+
+        if (handleId.empty())
+        {
+            VERIFY_SUCCEEDED(sessionWriter->WriteSession(xboxLiveContext, session, XblMultiplayerSessionWriteMode::UpdateExisting, true, callback));
+        }
+        else
+        {
+            VERIFY_SUCCEEDED(sessionWriter->WriteSessionByHandle(xboxLiveContext, session, XblMultiplayerSessionWriteMode::UpdateExisting, handleId, true, callback));
         }
 
-        LOGS_DEBUG_IF(mpInstance->LobbySession->GetCppObj()->_Change_number() != maxChangeNumberToTest) 
-            << "[MPM] maxChangeNumberToTest: " << maxChangeNumberToTest
-            << " curr change #: " << mpInstance->LobbySession->GetCppObj()->_Change_number();
+        // Wait before OnSessionChanged or not
+        if (waitForFirstWriteToFinish)
+        {
+            sessionEvent.Wait();
+        }
 
-        VERIFY_IS_TRUE(mpInstance->LobbySession->GetCppObj()->_Change_number() == maxChangeNumberToTest);
-        DestructManager(xboxLiveContext);
+        auto eventArgs = XblMultiplayerSessionChangeEventArgs{ session->SessionReference(), "", 3 };
+        sessionWriter->OnSessionChanged(eventArgs);
+
+        if (!waitForFirstWriteToFinish)
+        {
+            sessionEvent.Wait();
+        }
+
+        if (handleId.empty())
+        {
+            VERIFY_SUCCEEDED(sessionWriter->WriteSession(xboxLiveContext, session, XblMultiplayerSessionWriteMode::UpdateExisting, true, callback));
+        }
+        else
+        {
+            VERIFY_SUCCEEDED(sessionWriter->WriteSessionByHandle(xboxLiveContext, session, XblMultiplayerSessionWriteMode::UpdateExisting, handleId, true, callback));
+        }
+
+        sessionEvent.Wait();
+        auto eventArgs2 = XblMultiplayerSessionChangeEventArgs{ session->SessionReference(), "", 3 };
+        sessionWriter->OnSessionChanged(eventArgs2);
+
+        if (handleId.empty())
+        {
+            VERIFY_SUCCEEDED(sessionWriter->WriteSession(xboxLiveContext, session, XblMultiplayerSessionWriteMode::UpdateExisting, true, callback));
+        }
+        else
+        {
+            VERIFY_SUCCEEDED(sessionWriter->WriteSessionByHandle(xboxLiveContext, session, XblMultiplayerSessionWriteMode::UpdateExisting, handleId, true, callback));
+        }
+
+        sessionEvent.Wait();
+        XAsyncBlock async{};
+        mock.SetResponseBody(getResponse);
+        RunAsync(&async, __FUNCTION__,
+            [maxChangeNumberForTap, &sessionEvent, session, sessionWriter](XAsyncOp op, const XAsyncProviderData* data)
+            {
+                UNREFERENCED_PARAMETER(data);
+                switch (op)
+                {
+                case XAsyncOp::DoWork:
+                {
+                    sessionWriter->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ session->SessionReference(), "", maxChangeNumberForTap });
+
+                    sessionEvent.Set();
+                }
+                default:
+                    return S_OK;
+                }
+            });
+
+        auto isDone = 0;
+        while (isDone < 10)
+        {
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            Sleep(10);
+            isDone++;
+
+            if (isDone == 5)
+            {
+                sessionEvent.Wait();
+            }
+        }
+        
+        VERIFY_ARE_EQUAL_UINT(maxChangeNumberToTest, mpmInstance->LobbySession()->ChangeNumber());
     }
 
     DEFINE_TEST_CASE(TestWriteSessionWithTaps_2)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionWithTaps_2);
-        std::shared_ptr<HttpResponseStruct> writeResponseStruct = std::make_shared<HttpResponseStruct>();
-        writeResponseStruct->responseList =
+        std::vector<const char*> writeResponses
         {
-            sessionChangeNum6Response,        // change #6
-            sessionChangeNum4Response,        // change #4
-            lobbyWithPendingHandleResponse    // change #2
+            sessionChangeNum6,                     // change #6
+            sessionChangeNum4,                     // change #4
+            lobbyWithPendingTransferHandleResponse // change #2
         };
 
-        std::shared_ptr<HttpResponseStruct> getResponseStruct = std::make_shared<HttpResponseStruct>();
-        getResponseStruct->responseList =
-        {
-            sessionChangeNum8Response       // change #8
-        };
+        const char* getResponse{ sessionChangeNum8 };
 
-        TestWriteSessionWithTapsHelper(writeResponseStruct, getResponseStruct, 5, 6, true);
-        // Test write_session_by_handle
-        m_mockXboxSystemFactory->reinit();
-        writeResponseStruct->counter = 0;
-        getResponseStruct->counter = 0;
-
-        TestWriteSessionWithTapsHelper(writeResponseStruct, getResponseStruct, 5, 6, true, _T("TestHandleId"));
-        m_mockXboxSystemFactory->reinit();
-        writeResponseStruct->counter = 0;
-        getResponseStruct->counter = 0;
+        TestWriteSessionWithTapsHelper(writeResponses, getResponse, 5, 6, true);
+        TestWriteSessionWithTapsHelper(writeResponses, getResponse, 5, 6, true, "TestHandleId");
     }
 
     DEFINE_TEST_CASE(TestWriteSessionWithTaps_3)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestWriteSessionWithTaps_3);
-        std::shared_ptr<HttpResponseStruct> writeResponseStruct = std::make_shared<HttpResponseStruct>();
-        writeResponseStruct->responseList =
+        std::vector<const char*> writeResponses
         {
-            sessionChangeNum6Response,        // change #6
-            sessionChangeNum4Response,        // change #4
-            lobbyWithPendingHandleResponse    // change #2
+            sessionChangeNum6,                     // change #6
+            sessionChangeNum4,                     // change #4
+            lobbyWithPendingTransferHandleResponse // change #2
         };
 
-        std::shared_ptr<HttpResponseStruct> getResponseStruct = std::make_shared<HttpResponseStruct>();
-        getResponseStruct->responseList =
-        {
-            sessionChangeNum8Response       // change #8
-        };
+        const char* getResponse{ sessionChangeNum8 };
 
-        TestWriteSessionWithTapsHelper(writeResponseStruct, getResponseStruct, 8, 8, false);
-        // Test write_session_by_handle
-        m_mockXboxSystemFactory->reinit();
-        writeResponseStruct->counter = 0;
-        getResponseStruct->counter = 0;
-
-        TestWriteSessionWithTapsHelper(writeResponseStruct, getResponseStruct, 8, 8, false, _T("TestHandleId"));
-        m_mockXboxSystemFactory->reinit();
-        writeResponseStruct->counter = 0;
-        getResponseStruct->counter = 0;
-    }
-
-    // multiplayer_session_writer:
-    // Fire multiple resync events; ensure the session is correctly updated;
-    DEFINE_TEST_CASE(TestResync)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestResync);
-        InitializeManager();
-
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto mpsdLobbySession = clientManager->latest_pending_read()->lobby_client()->session();
-        auto sessionWriter = clientManager->latest_pending_read()->lobby_client()->session_writer();
-        auto primaryContext = sessionWriter->get_primary_context();
-
-        VERIFY_IS_TRUE(mpInstance->LobbySession->GetCppObj()->_Change_number() == 1);
-
-        std::shared_ptr<HttpResponseStruct> getResponseStruct = std::make_shared<HttpResponseStruct>();
-        getResponseStruct->responseList =
-        {
-            lobbyWithPendingHandleResponse,     // change #2
-            sessionChangeNum3Response,          // change #3
-            sessionChangeNum5Response           // change #5
-        };
-
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[xbox_live_api::get_current_session] = getResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(responses);
-
-        int isDone = 0;
-        // Fire multiple resync events every few secs
-        while (isDone < 5)
-        {
-            sessionWriter->on_resync_message_received();
-            Sleep(10);
-            isDone++;
-        }
-
-        // Sleep for a multiplayer_session_writer::TIME_PER_CALL_MS
-        Sleep(1000);
-        
-        isDone = 0;
-        while (isDone < 10)
-        {
-            mpInstance->DoWork();
-            Sleep(10);
-            isDone++;
-        }
-
-        VERIFY_IS_TRUE(mpInstance->LobbySession->GetCppObj()->_Change_number() == 3);
-        DestructManager(xboxLiveContext);
+        TestWriteSessionWithTapsHelper(writeResponses, getResponse, 8, 8, false);
+        TestWriteSessionWithTapsHelper(writeResponses, getResponse, 8, 8, false, "TestHandleId");
     }
 
     // multiplayer_session_writer:
     DEFINE_TEST_CASE(TestSessionWriterLeaveRemoteSession)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestSessionWriterLeaveRemoteSession);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        JoinGameHelper(xboxLiveContext);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        JoinGameHelper(xboxLiveContext.get());
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto mpsdGameSession = clientManager->latest_pending_read()->game_client()->session();
-        auto gameClientSessionWriter = clientManager->latest_pending_read()->game_client()->session_writer();
-        auto primaryContext = gameClientSessionWriter->get_primary_context();
+        auto mpmInstance = GlobalState::Get()->MultiplayerManager();
+        auto num = mpmInstance->LobbySession()->ChangeNumber();
+        VERIFY_ARE_EQUAL_UINT(3, num);
 
-        VERIFY_IS_TRUE(mpInstance->GameSession->GetCppObj()->_Change_number() == 1);
+        HttpMock writeSessionMock{ POST, MPSD_URI, 200 };
+        writeSessionMock.SetResponseBody(sessionChangeNum5);
 
-        std::shared_ptr<HttpResponseStruct> writeResponseStruct = std::make_shared<HttpResponseStruct>();
-        writeResponseStruct->responseList =
+        auto session = GetSession(false);
+        auto sessionWriter = GetSessionWriter(false);
+
+        Event sessionEvent;
+        auto callback = [&sessionEvent](Result<std::shared_ptr<XblMultiplayerSession>> joinResult)
         {
-            sessionChangeNum3Response,          // change #3
-            sessionChangeNum5Response,          // change #5
-            gameSessionEmptyJsonResponse
+            sessionEvent.Set();
         };
 
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[xbox_live_api::write_session_using_subpath] = writeResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(responses);
+        VERIFY_SUCCEEDED(sessionWriter->LeaveRemoteSession(session, callback));
+        sessionEvent.Wait();
 
-        gameClientSessionWriter->leave_remote_session(mpsdGameSession).get();
-        int isDone = 0;
+        uint32_t isDone = 0;
         while (isDone < 10)
         {
-            mpInstance->DoWork();
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
             Sleep(10);
             isDone++;
         }
 
         // Since updateLatest is false, this should not update the latest session.
-        VERIFY_IS_TRUE(mpInstance->GameSession->GetCppObj()->_Change_number() == 1);
-        DestructManager(xboxLiveContext, true);
-    }
-
-    void TestDeepCopyIfUpdated_1(bool isLobbyTest)
-    {
-        // Set up initial http responses
-        std::shared_ptr<HttpResponseStruct> writeResponseStruct = std::make_shared<HttpResponseStruct>();
-        if (isLobbyTest)
-        {
-            writeResponseStruct->responseList =
-            {
-                lobbyWithPendingHandleResponse,  // change #2
-                sessionChangeNum4Response,       // change #4
-                sessionChangeNum6Response        // change #6
-            };
-        }
-        else
-        {
-            writeResponseStruct->responseList =
-            {
-                sessionChangeNum2Response,      // change #2
-                sessionChangeNum4Response,      // change #4
-                sessionChangeNum6Response       // change #6
-            };
-        }
-
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[xbox_live_api::write_session_using_subpath] = writeResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(responses);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        std::shared_ptr<multiplayer_session> mpsdSession;
-        std::shared_ptr<multiplayer_session_writer> sessionWriter;
-        std::shared_ptr<xbox_live_context_impl> primaryContext;
-
-        if (isLobbyTest)
-        {
-            mpsdSession = clientManager->latest_pending_read()->lobby_client()->session();
-            sessionWriter = clientManager->latest_pending_read()->lobby_client()->session_writer();
-            primaryContext = sessionWriter->get_primary_context();
-        }
-        else
-        {
-            mpsdSession = clientManager->latest_pending_read()->game_client()->session();
-            sessionWriter = clientManager->latest_pending_read()->game_client()->session_writer();
-            primaryContext = sessionWriter->get_primary_context();
-        }
-
-        sessionWriter->write_session(primaryContext, mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-
-        // Because I have not called DoWork() yet, it should not update the MM instances.
-        if (isLobbyTest)
-            VERIFY_IS_TRUE(mpInstance->LobbySession->GetCppObj()->_Change_number() == 1);
-        else
-            VERIFY_IS_TRUE(mpInstance->GameSession->GetCppObj()->_Change_number() == 1);
-
-        // Test deep_copy_if_updated
-        clientManager->last_pending_read()->deep_copy_if_updated(*clientManager->latest_pending_read());
-        if (isLobbyTest)
-        {
-            VERIFY_IS_TRUE(clientManager->last_pending_read()->lobby_client()->lobby()->_Change_number() == 1);     // no DoWork() so the actual lobby obj is still stale
-            VERIFY_IS_TRUE(sessionWriter->session()->change_number() == 2);
-        }
-        else
-        {
-            VERIFY_IS_TRUE(clientManager->last_pending_read()->game_client()->game()->_Change_number() == 1);     // no DoWork() so the actual lobby obj is still stale
-            VERIFY_IS_TRUE(sessionWriter->session()->change_number() == 2);
-        }
-
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-
-        // Because I have not called DoWork() yet, it should not update the MM instances.
-        if (isLobbyTest)
-            VERIFY_IS_TRUE(mpInstance->LobbySession->GetCppObj()->_Change_number() == 1);
-        else
-            VERIFY_IS_TRUE(mpInstance->GameSession->GetCppObj()->_Change_number() == 1);
-
-        sessionWriter->write_session(primaryContext, mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-        mpInstance->DoWork();
-        if (isLobbyTest)
-        {
-            VERIFY_IS_TRUE(clientManager->last_pending_read()->lobby_client()->lobby()->_Change_number() == 4);     // called DoWork(), should update
-            VERIFY_IS_TRUE(mpInstance->LobbySession->GetCppObj()->_Change_number() == 4);
-        }
-        else
-        {
-            VERIFY_IS_TRUE(clientManager->last_pending_read()->game_client()->game()->_Change_number() == 4);       // called DoWork(), should update
-            VERIFY_IS_TRUE(mpInstance->GameSession->GetCppObj()->_Change_number() == 4);
-        }
-    }
-
-    void TestDeepCopyIfUpdated_2(bool isLobbyTest)
-    {
-        // Set up initial http responses
-        std::shared_ptr<HttpResponseStruct> writeResponseStruct = std::make_shared<HttpResponseStruct>();
-        if (isLobbyTest)
-        {
-            writeResponseStruct->responseList =
-            {
-                lobbyWithPendingHandleResponse,  // change #2
-                sessionChangeNum4Response,       // change #4
-                sessionChangeNum6Response        // change #6
-            };
-        }
-        else
-        {
-            writeResponseStruct->responseList =
-            {
-                sessionChangeNum2Response,      // change #2
-                sessionChangeNum4Response,      // change #4
-                sessionChangeNum6Response       // change #6
-            };
-        }
-
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[xbox_live_api::write_session_using_subpath] = writeResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(responses);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        std::shared_ptr<multiplayer_session> mpsdSession;
-        std::shared_ptr<multiplayer_session_writer> sessionWriter;
-        std::shared_ptr<xbox_live_context_impl> primaryContext;
-
-        if (isLobbyTest)
-        {
-            mpsdSession = clientManager->latest_pending_read()->lobby_client()->session();
-            sessionWriter = clientManager->latest_pending_read()->lobby_client()->session_writer();
-            primaryContext = sessionWriter->get_primary_context();
-        }
-        else
-        {
-            mpsdSession = clientManager->latest_pending_read()->game_client()->session();
-            sessionWriter = clientManager->latest_pending_read()->game_client()->session_writer();
-            primaryContext = sessionWriter->get_primary_context();
-        }
-
-        for (uint32_t count = 1; count <= 3; ++count)
-        {
-            sessionWriter->write_session(primaryContext, mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
-            VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-            mpInstance->DoWork();
-            if (isLobbyTest)
-                VERIFY_IS_TRUE(mpInstance->LobbySession->GetCppObj()->_Change_number() == (count * 2));
-            else
-                VERIFY_IS_TRUE(mpInstance->GameSession->GetCppObj()->_Change_number() == (count * 2));
-
-            VERIFY_IS_TRUE(!clientManager->is_update_avaialable());
-        }
-
-        sessionWriter->write_session(primaryContext, mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
-        VERIFY_IS_TRUE(!clientManager->is_update_avaialable());
-    }
-
-    void TestDeepCopyIfUpdated_3(bool isLobbyTest)
-    {
-        // Set up initial http responses
-        std::shared_ptr<HttpResponseStruct> writeResponseStruct = std::make_shared<HttpResponseStruct>();
-        if (isLobbyTest)
-        {
-            writeResponseStruct->responseList =
-            {
-                lobbyWithPendingHandleResponse,  // change #2
-                sessionChangeNum4Response,       // change #4
-                sessionChangeNum6Response,       // change #6
-                sessionChangeNum6Response        // change #6
-            };
-        }
-        else
-        {
-            writeResponseStruct->responseList =
-            {
-                sessionChangeNum2Response,      // change #2
-                sessionChangeNum4Response,      // change #4
-                sessionChangeNum6Response,      // change #6
-                sessionChangeNum6Response       // change #6
-            };
-        }
-
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[xbox_live_api::write_session_using_subpath] = writeResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(responses);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        std::shared_ptr<multiplayer_session> mpsdSession;
-        std::shared_ptr<multiplayer_session_writer> sessionWriter;
-        std::shared_ptr<xbox_live_context_impl> primaryContext;
-
-        if (isLobbyTest)
-        {
-            mpsdSession = clientManager->latest_pending_read()->lobby_client()->session();
-            sessionWriter = clientManager->latest_pending_read()->lobby_client()->session_writer();
-            primaryContext = sessionWriter->get_primary_context();
-        }
-        else
-        {
-            mpsdSession = clientManager->latest_pending_read()->game_client()->session();
-            sessionWriter = clientManager->latest_pending_read()->game_client()->session_writer();
-            primaryContext = sessionWriter->get_primary_context();
-        }
-
-        sessionWriter->write_session(primaryContext, mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
-        sessionWriter->write_session(primaryContext, mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-        mpInstance->DoWork();
-        if (isLobbyTest)
-        {
-            VERIFY_IS_TRUE(clientManager->last_pending_read()->lobby_client()->lobby()->_Change_number() == 4);
-            VERIFY_IS_TRUE(mpInstance->LobbySession->GetCppObj()->_Change_number() == 4);
-        }
-        else
-        {
-            VERIFY_IS_TRUE(clientManager->last_pending_read()->game_client()->game()->_Change_number() == 4);
-            VERIFY_IS_TRUE(mpInstance->GameSession->GetCppObj()->_Change_number() == 4);
-        }
-
-        sessionWriter->write_session(primaryContext, mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-        clientManager->last_pending_read()->deep_copy_if_updated(*clientManager->latest_pending_read());
-        if (isLobbyTest)
-        {
-            VERIFY_IS_TRUE(clientManager->last_pending_read()->lobby_client()->lobby()->_Change_number() == 4);     // no DoWork() so the actual lobby obj is still stale
-            VERIFY_IS_TRUE(sessionWriter->session()->change_number() == 6);
-        }
-        else
-        {
-            VERIFY_IS_TRUE(clientManager->last_pending_read()->game_client()->game()->_Change_number() == 4);     // no DoWork() so the actual lobby obj is still stale
-            VERIFY_IS_TRUE(sessionWriter->session()->change_number() == 6);
-        }
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-
-        // Even though I manually deep copied the objects, this will update the MPM session objects as is_update_avaialable() will return true.
-        mpInstance->DoWork();
-        if (isLobbyTest)
-            VERIFY_IS_TRUE(mpInstance->LobbySession->GetCppObj()->_Change_number() == 6);
-        else
-            VERIFY_IS_TRUE(mpInstance->GameSession->GetCppObj()->_Change_number() == 6);
-
-        sessionWriter->write_session(primaryContext, mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
-        VERIFY_IS_TRUE(!clientManager->is_update_avaialable());     // should not update as the session change # was the same
-        mpInstance->DoWork();
-        if (isLobbyTest)
-            VERIFY_IS_TRUE(mpInstance->LobbySession->GetCppObj()->_Change_number() == 6);
-        else
-            VERIFY_IS_TRUE(mpInstance->GameSession->GetCppObj()->_Change_number() == 6);
-    }
-
-    void TestUpdateSession(bool isLobbyTest)
-    {
-        // Set up initial http responses
-        std::shared_ptr<HttpResponseStruct> writeResponseStruct = std::make_shared<HttpResponseStruct>();
-        if (isLobbyTest)
-        {
-            writeResponseStruct->responseList =
-            {
-                lobbyWithPendingHandleResponse,  // change #2
-                sessionChangeNum4Response,       // change #4
-                sessionChangeNum6Response        // change #6
-            };
-        }
-        else
-        {
-            writeResponseStruct->responseList =
-            {
-                sessionChangeNum2Response,      // change #2
-                sessionChangeNum4Response,      // change #4
-                sessionChangeNum6Response       // change #6
-            };
-        }
-
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[xbox_live_api::write_session_using_subpath] = writeResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(responses);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        std::shared_ptr<xbox_live_context_impl> primaryContext;
-
-        if (isLobbyTest)
-            primaryContext = clientManager->latest_pending_read()->lobby_client()->session_writer()->get_primary_context();
-        else
-            primaryContext = clientManager->latest_pending_read()->game_client()->session_writer()->get_primary_context();
-
-        auto mpsdSession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id());
-
-        for (uint32_t count = 1; count <= 3; ++count)
-        {
-            auto result = primaryContext->multiplayer_service().write_session(mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
-            if (isLobbyTest)
-                clientManager->latest_pending_read()->lobby_client()->update_session(result.payload());
-            else
-                clientManager->latest_pending_read()->game_client()->update_session(result.payload());
-            VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-            mpInstance->DoWork();
-            if (isLobbyTest)
-                VERIFY_IS_TRUE(mpInstance->LobbySession->GetCppObj()->_Change_number() == (count * 2));
-            else
-                VERIFY_IS_TRUE(mpInstance->GameSession->GetCppObj()->_Change_number() == (count * 2));
-
-            VERIFY_IS_TRUE(!clientManager->is_update_avaialable());
-        }
-    }
-
-    /*
-        multiplayer_lobby_client:
-    */
-    DEFINE_TEST_CASE(TestLobbyDeepCopyIfUpdated_1)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestLobbyDeepCopyIfUpdated_1);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext);
-        TestDeepCopyIfUpdated_1(true);
-        DestructManager(xboxLiveContext, true);
-    }
-
-    DEFINE_TEST_CASE(TestLobbyDeepCopyIfUpdated_2)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestLobbyDeepCopyIfUpdated_2);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext);
-        TestDeepCopyIfUpdated_2(true);
-        DestructManager(xboxLiveContext, true);
-    }
-
-    DEFINE_TEST_CASE(TestLobbyDeepCopyIfUpdated_3)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestLobbyDeepCopyIfUpdated_3);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext);
-        TestDeepCopyIfUpdated_3(true);
-        DestructManager(xboxLiveContext, true);
-    }
-
-    DEFINE_TEST_CASE(TestLobbyUpdateSession)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestLobbyUpdateSession);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext);
-        TestUpdateSession(true);
-        DestructManager(xboxLiveContext);
-    }
-
-    DEFINE_TEST_CASE(TestPendingLobbyChanges)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestPendingLobbyChanges);
-        InitializeManager(2);
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
-        AddLocalUserHelper(xboxLiveContext);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto lobbyClient = clientManager->latest_pending_read()->lobby_client();
-        auto sessionWriter = lobbyClient->session_writer();
-        auto primaryContext = sessionWriter->get_primary_context();
-
-        mpInstance->LobbySession->AddLocalUser(xboxLiveContext2->User);
-        VERIFY_IS_TRUE(lobbyClient->is_pending_lobby_changes());
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-        lobbyClient->clear_pending_queue();
-
-        mpInstance->LobbySession->RemoveLocalUser(primaryContext->user());
-        VERIFY_IS_TRUE(lobbyClient->is_pending_lobby_changes());
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-        lobbyClient->clear_pending_queue();
-
-        mpInstance->LobbySession->SetLocalMemberProperties(primaryContext->user(), L"Health", L"89", (Platform::Object^) 1);
-        VERIFY_IS_TRUE(lobbyClient->is_pending_lobby_changes());
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-        lobbyClient->clear_pending_queue();
-
-        mpInstance->LobbySession->SetLocalMemberConnectionAddress(primaryContext->user(), L"TestConnectionAddress", (Platform::Object^) 1);
-        VERIFY_IS_TRUE(lobbyClient->is_pending_lobby_changes());
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-        lobbyClient->clear_pending_queue();
-
-        mpInstance->LobbySession->DeleteLocalMemberProperties(primaryContext->user(), L"Health", (Platform::Object^) 1);
-        VERIFY_IS_TRUE(lobbyClient->is_pending_lobby_changes());
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-        lobbyClient->clear_pending_queue();
-
-        mpInstance->LobbySession->SetSynchronizedHost(mpInstance->LobbySession->LocalMembers->GetAt(0), (Platform::Object^) 1);
-        VERIFY_IS_TRUE(lobbyClient->is_pending_lobby_changes());
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-        lobbyClient->clear_pending_queue();
-
-        mpInstance->SetJoinInProgress(Joinability::JoinableByFriends);
-        VERIFY_IS_TRUE(lobbyClient->is_pending_lobby_changes());
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-        lobbyClient->clear_pending_queue();
-
-        Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
-        xboxLiveContexts->Append(xboxLiveContext);
-        xboxLiveContexts->Append(xboxLiveContext2);
-        DestructManager(xboxLiveContexts->GetView());
-    }
-
-    DEFINE_TEST_CASE(TestAdvertiseGameSession)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestAdvertiseGameSession);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext, lobbyWithNoTransferHandleResponse);
-
-        auto gameSessionResponseJson = defaultGameSessionResponseJson;
-        auto gameSessionResponse = StockMocks::CreateMockHttpCallResponse(gameSessionResponseJson, DefaultGameHttpResponse());
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList = { gameSessionResponse };
-
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList =
-        {
-            gameSessionResponse,                // to create the game session below
-            lobbyNoHandleResponse,              // advertise_game_session -> set_transfer_handle
-            lobbyCompletedHandleResponse        // advertise_game_session -> write_session (transfer handle)
-        };
-
-        // set up http response set
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[defaultGameHttpHeaderUri] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto primaryContext = clientManager->latest_pending_read()->game_client()->session_writer()->get_primary_context();
-
-        auto mpsdSession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id());
-        auto result = primaryContext->multiplayer_service().write_session(mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
-        clientManager->latest_pending_read()->game_client()->update_session(result.payload());
-        mpInstance->DoWork();
-        VERIFY_IS_TRUE(mpInstance->GameSession != nullptr);
-
-        clientManager->latest_pending_read()->lobby_client()->advertise_game_session();
-
-        auto propertyJson = web::json::value::parse(propertiesJson);
-        auto customPropertyJson = propertyJson[L"properties"];
-        bool isAdvertisingGameDone = false;
-        while (!isAdvertisingGameDone )
-        {
-            auto events = MultiplayerManager::SingletonInstance->DoWork();
-            if (utils::str_icmp(mpInstance->LobbySession->Properties->Data(), customPropertyJson[L"custom"].serialize()) == 0)
-            {
-                isAdvertisingGameDone = true;
-            }
-        }
-
-        VerifyLobby(mpInstance->LobbySession, lobbyCompletedHandleResponseJson);
-        VerifyGame(mpInstance->GameSession, gameSessionResponseJson);
-        DestructManager(xboxLiveContext);
-    }
-
-    DEFINE_TEST_CASE(TestStopAdvertisingGameSession)
-    {
-        DEFINE_TEST_CASE_PROPERTIES_FAILING(TestStopAdvertisingGameSession);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        JoinGameHelper(xboxLiveContext);
-
-        auto gameSessionResponseJson = defaultGameSessionResponseJson;
-        auto gameSessionResponse = StockMocks::CreateMockHttpCallResponse(gameSessionResponseJson, DefaultGameHttpResponse());
-        auto gameSessionResponseDiffXuid = StockMocks::CreateMockHttpCallResponse(gameSessionResponseDiffXuidJson, DefaultGameHttpResponse());
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList =
-        {
-            gameSessionResponse,                // to create the game session below
-            gameSessionResponseDiffXuid,        // to create the game session below
-            updatedLobbyNoHandleResponse        // clear_game_session_from_lobby
-        };
-
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList = { gameSessionEmptyJsonResponse };
-
-        // set up http response set
-        responses[defaultGameHttpHeaderUri] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto primaryContext = clientManager->latest_pending_read()->game_client()->session_writer()->get_primary_context();
-        auto mpsdSession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id());
-        
-        
-        // Should not clear the game session as you are not the last person to leave the session.
-        auto result = primaryContext->multiplayer_service().write_session(mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
-        clientManager->latest_pending_read()->lobby_client()->stop_advertising_game_session(result);
-        auto propertyJson = web::json::value::parse(propertiesJson);
-        auto customPropertyJson = propertyJson[L"properties"];
-        VERIFY_IS_TRUE(utils::str_icmp(mpInstance->LobbySession->Properties->Data(), customPropertyJson[L"custom"].serialize()) == 0);
-
-        // Should clear the game session as no lobby members exist in the game.
-        result = primaryContext->multiplayer_service().write_session(mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
-        clientManager->latest_pending_read()->lobby_client()->stop_advertising_game_session(result);
-        propertyJson = web::json::value::parse(propertiesNoTransferHandleJson);
-        customPropertyJson = propertyJson[L"properties"];
-        bool isStopAdvertisingGameDone = false;
-        while (!isStopAdvertisingGameDone)
-        {
-            auto events = mpInstance->DoWork();
-            if (utils::str_icmp(mpInstance->LobbySession->Properties->Data(), customPropertyJson[L"custom"].serialize()) == 0)
-            {
-                isStopAdvertisingGameDone = true;
-            }
-        }
-
-        VerifyLobby(mpInstance->LobbySession, updatedLobbyNoHandleResponseJson);
-        DestructManager(xboxLiveContext);
-    }
-
-    DEFINE_TEST_CASE(TestRemoveStaleXboxLiveContextFromMap)
-    {
-        DEFINE_TEST_CASE_PROPERTIES_FAILING(TestRemoveStaleXboxLiveContextFromMap);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        JoinGameHelper(xboxLiveContext);
-
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList = { gameSessionEmptyJsonResponse };
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList = { lobbySessionEmptyJsonResponse };
-
-        // set up http response set
-        responses[defaultGameHttpHeaderUri] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto lobbyClient = clientManager->latest_pending_read()->lobby_client();
-
-        auto xboxLiveContextMap = lobbyClient->get_local_user_map();
-        for (auto xboxLiveContext : xboxLiveContextMap)
-        {
-            auto localUser = xboxLiveContext.second;
-            if (localUser != nullptr)
-            {
-                localUser->set_lobby_state(multiplayer_local_user_lobby_state::remove);
-            }
-        }
-        lobbyClient->remove_stale_xbox_live_context_from_map();
-        VERIFY_IS_TRUE(lobbyClient->get_local_user_map().size() == 0);
-        VERIFY_IS_TRUE(lobbyClient->get_primary_context() == nullptr);
-        DestructManager(xboxLiveContext);
-
-        // Since you are accessing low level funs directly, is_update_avaialable returns false and the local objects fail updating.
-        // No need to check GameSession/LobbySession == nullptr
+        VERIFY_ARE_EQUAL_UINT(3, mpmInstance->LobbySession()->ChangeNumber());
     }
 
     DEFINE_TEST_CASE(TestTransferHandleState)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestTransferHandleState);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        JoinGameHelper(xboxLiveContext.get());
 
         // Set up initial http responses
-        std::shared_ptr<HttpResponseStruct> writeResponseStruct = std::make_shared<HttpResponseStruct>();
-        writeResponseStruct->responseList =
+        std::vector<const char*> writeResponses
         {
-            lobbyWithPendingHandleResponse,     // change #2
-            lobbyCompletedHandleResponse,       // change #3
-            updatedLobbyNoHandleResponse        // clear_game_session_from_lobby
+            lobbyWithPendingTransferHandleResponse,                    // change #2
+            lobbyWithCompletedTransferHandleResponse,                  // change #3
+            updatedMultipleLocalUsersLobbyWithNoTransferHandleResponse // clear_game_session_from_lobby
         };
 
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[xbox_live_api::write_session_using_subpath] = writeResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(responses);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto lobbyClient = clientManager->latest_pending_read()->lobby_client();
-        auto primaryContext = lobbyClient->session_writer()->get_primary_context();
-        auto mpsdSession = std::make_shared<multiplayer_session>(primaryContext->xbox_live_user_id());
-
-        VERIFY_IS_TRUE(lobbyClient->is_transfer_handle_state(_T("completed")));
-        VERIFY_IS_TRUE(utils::str_icmp(lobbyClient->get_transfer_handle(), _T("TestGameSessionTransferHandle")) == 0);
-
-        auto result = primaryContext->multiplayer_service().write_session(mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
-        clientManager->latest_pending_read()->lobby_client()->update_session(result.payload());
-        VERIFY_IS_TRUE(lobbyClient->is_transfer_handle_state(_T("pending")));
-        VERIFY_IS_TRUE(utils::str_icmp(lobbyClient->get_transfer_handle(), _T("TestXboxUserId")) == 0);
-
-        result = primaryContext->multiplayer_service().write_session(mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
-        clientManager->latest_pending_read()->lobby_client()->update_session(result.payload());
-        VERIFY_IS_TRUE(lobbyClient->is_transfer_handle_state(_T("completed")));
-        VERIFY_IS_TRUE(utils::str_icmp(lobbyClient->get_transfer_handle(), _T("TestGameSessionTransferHandle")) == 0);
-
-        result = primaryContext->multiplayer_service().write_session(mpsdSession, multiplayer::multiplayer_session_write_mode::update_existing).get();
-        clientManager->latest_pending_read()->lobby_client()->update_session(result.payload());
-        VERIFY_IS_TRUE(!lobbyClient->is_transfer_handle_state(_T("completed")));
-        VERIFY_IS_TRUE(!lobbyClient->is_transfer_handle_state(_T("pending")));
-        VERIFY_IS_TRUE(utils::str_icmp(lobbyClient->get_transfer_handle(), string_t()) == 0);
-        DestructManager(xboxLiveContext);
-    }
-
-    /*
-        multiplayer_game_client:
-    */
-    DEFINE_TEST_CASE(TestGameDeepCopyIfUpdated_1)
-    {
-        DEFINE_TEST_CASE_PROPERTIES_FAILING(TestGameDeepCopyIfUpdated_1);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        JoinGameHelper(xboxLiveContext);
-        TestDeepCopyIfUpdated_1(false);
-        DestructManager(xboxLiveContext, true);
-    }
-
-    DEFINE_TEST_CASE(TestGameDeepCopyIfUpdated_2)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestGameDeepCopyIfUpdated_2);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        JoinGameHelper(xboxLiveContext);
-        TestDeepCopyIfUpdated_2(false);
-        DestructManager(xboxLiveContext, true);
-    }
-
-    DEFINE_TEST_CASE(TestGameDeepCopyIfUpdated_3)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestGameDeepCopyIfUpdated_3);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        JoinGameHelper(xboxLiveContext);
-        TestDeepCopyIfUpdated_3(false);
-        DestructManager(xboxLiveContext, true);
-    }
-
-    DEFINE_TEST_CASE(TestGameUpdateSession)
-    {
-        DEFINE_TEST_CASE_PROPERTIES_FAILING(TestGameUpdateSession);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        JoinGameHelper(xboxLiveContext);
-        TestUpdateSession(false);
-        DestructManager(xboxLiveContext);
-    }
-
-    DEFINE_TEST_CASE(TestPendingGameChanges)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestPendingGameChanges);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        JoinGameHelper(xboxLiveContext);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto gameClient = clientManager->latest_pending_read()->game_client();
-        auto sessionWriter = gameClient->session_writer();
-        auto primaryContext = sessionWriter->get_primary_context();
-
-        mpInstance->GameSession->SetProperties(L"Map", L"1", (Platform::Object^) 1);
-        VERIFY_IS_TRUE(gameClient->is_pending_game_changes());
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-        gameClient->clear_pending_queue();
-
-        mpInstance->GameSession->SetSynchronizedProperties(L"Map", L"2", (Platform::Object^) 1);
-        VERIFY_IS_TRUE(gameClient->is_pending_game_changes());
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-        gameClient->clear_pending_queue();
-
-        mpInstance->GameSession->SetSynchronizedHost(mpInstance->LobbySession->LocalMembers->GetAt(0), (Platform::Object^) 1);
-        VERIFY_IS_TRUE(gameClient->is_pending_game_changes());
-        VERIFY_IS_TRUE(clientManager->is_update_avaialable());
-        gameClient->clear_pending_queue();
-        DestructManager(xboxLiveContext, true);
-    }
-
-    void TestLeaveRemoteSessionWithEmptyGameSession(std::shared_ptr<http_call_response> gameSessionResponse, bool removeStaleUsers)
-    {
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        JoinGameHelper(xboxLiveContext);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto lobbyClient = clientManager->latest_pending_read()->lobby_client();
-        auto gameClient = clientManager->latest_pending_read()->game_client();
-        auto mpsdGameSession = gameClient->session();
-        auto gameClientSessionWriter = gameClient->session_writer();
-        auto primaryContext = gameClientSessionWriter->get_primary_context();
-
-        VERIFY_IS_TRUE(mpInstance->GameSession->GetCppObj()->_Change_number() == 1);
-
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList = { gameSessionResponse };
-
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList =
+        std::vector<const char*> transferHandles
         {
-            updatedLobbyNoHandleResponse        // clear_game_session_from_lobby
+            "1234",
+            "TestGameSessionTransferHandle",
+            ""
         };
 
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[defaultGameHttpHeaderUri] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        HttpMock mock(GET, defaultMpsdUri, 200);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+
+        auto session = GetSession(false);
+        auto sessionWriter = GetSessionWriter(false);
+        auto clientManager = GlobalState::Get()->MultiplayerManager()->GetMultiplayerClientManager();
+        auto lobbyClient = clientManager->LatestPendingRead()->LobbyClient();
+        VERIFY_IS_TRUE(lobbyClient->IsTransferHandleState("completed"));
+        VERIFY_ARE_EQUAL_STR(transferHandles[1], lobbyClient->GetTransferHandle());
+
+        Event sessionEvent;
+        Result<std::shared_ptr<XblMultiplayerSession>> writeResult;
+        auto callback = [&writeResult, &sessionEvent](Result<std::shared_ptr<XblMultiplayerSession>> result)
+        {
+            writeResult = result;
+            sessionEvent.Set();
+        };
+
+        mock.SetResponseBody(writeResponses[0]);
+        VERIFY_SUCCEEDED(sessionWriter->WriteSession(xboxLiveContext, session, XblMultiplayerSessionWriteMode::UpdateExisting, true, callback));
+        sessionEvent.Wait();
+        clientManager->LatestPendingRead()->LobbyClient()->UpdateSession(writeResult.Payload());
+        VERIFY_IS_TRUE(lobbyClient->IsTransferHandleState("completed"));
+        VERIFY_ARE_EQUAL_STR(transferHandles[1], lobbyClient->GetTransferHandle());
+
+        mock.SetResponseBody(writeResponses[1]);
+        VERIFY_SUCCEEDED(sessionWriter->WriteSession(xboxLiveContext, session, XblMultiplayerSessionWriteMode::UpdateExisting, true, callback));
+        sessionEvent.Wait();
+        clientManager->LatestPendingRead()->LobbyClient()->UpdateSession(writeResult.Payload());
+        VERIFY_IS_TRUE(lobbyClient->IsTransferHandleState("completed"));
+        VERIFY_ARE_EQUAL_STR(transferHandles[1], lobbyClient->GetTransferHandle());
+
+        mock.SetResponseBody(writeResponses[2]);
+        VERIFY_SUCCEEDED(sessionWriter->WriteSession(xboxLiveContext, session, XblMultiplayerSessionWriteMode::UpdateExisting, true, callback));
+        sessionEvent.Wait();
+        clientManager->LatestPendingRead()->LobbyClient()->UpdateSession(writeResult.Payload());
+        VERIFY_IS_FALSE(lobbyClient->IsTransferHandleState("pending"));
+        VERIFY_IS_FALSE(lobbyClient->IsTransferHandleState("completed"));
+        VERIFY_ARE_EQUAL_STR(transferHandles[2], lobbyClient->GetTransferHandle());
+    }
+
+    void LeaveRemoteSessionWithEmptyGameSession(const char* gameSessionResponse, bool removeStaleUsers)
+    {
+        UNREFERENCED_PARAMETER(gameSessionResponse);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        JoinGameHelper(xboxLiveContext.get());
+
+        HttpMock mockWrite(POST, defaultMpsdUri, 201);
+        mockWrite.SetResponseBody(updatedLobbyWithNoTransferHandleResponse);
+        mockWrite.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+
+        auto lobbySession = GetSession(false);
+        auto gameSession = GetSession(true);
+        auto mpmInstance = GlobalState::Get()->MultiplayerManager();
+        auto clientManager = mpmInstance->GetMultiplayerClientManager();
+        auto lobbyClient = clientManager->LatestPendingRead()->LobbyClient();
+        auto gameClient = clientManager->LatestPendingRead()->GameClient();
+        
+        VERIFY_ARE_EQUAL_UINT(1, mpmInstance->GameSession()->ChangeNumber());
 
         if (removeStaleUsers)
         {
-            auto xboxLiveContextMap = lobbyClient->get_local_user_map();
-            for (auto xboxLiveContext : xboxLiveContextMap)
+            for (auto context : lobbyClient->GetLocalUserMap())
             {
-                auto localUser = xboxLiveContext.second;
-                if (localUser != nullptr)
+                auto user = context.second;
+                if (user != nullptr)
                 {
-                    localUser->set_lobby_state(multiplayer_local_user_lobby_state::remove);
+                    user->SetLobbyState(multiplayer::manager::MultiplayerLocalUserLobbyState::Remove);
                 }
             }
 
-            gameClient->remove_stale_users_from_remote_session();
+            gameClient->RemoveStaleUsersFromRemoteSession();
         }
         else
         {
-            gameClient->leave_remote_session(mpsdGameSession, true, true);
+            gameClient->LeaveRemoteSession(gameSession, true, true);
         }
-
-        bool isStopAdvertisingGameDone = false;
-        auto propertyJson = web::json::value::parse(propertiesNoTransferHandleJson);
-        auto customPropertyJson = propertyJson[L"properties"];
+        
+        int count{ 0 };
+        bool isStopAdvertisingGameDone{ false };
+        auto customProps = JsonUtils::SerializeJson(propertiesNoTransferHandleJson()["properties"]["custom"]);
         while (!isStopAdvertisingGameDone)
         {
-            mpInstance->DoWork();
-            if (utils::str_icmp(mpInstance->LobbySession->Properties->Data(), customPropertyJson[L"custom"].serialize()) == 0)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            XblMultiplayerSessionReadLockGuard lobbySessionSafe(lobbySession);
+            auto props{ lobbySessionSafe.SessionProperties().SessionCustomPropertiesJson };
+            if (utils::str_icmp(props, customProps.c_str()) == 0)
             {
                 isStopAdvertisingGameDone = true;
             }
+
+            Sleep(10);
         }
 
-        VerifyLobby(mpInstance->LobbySession, updatedLobbyNoHandleResponseJson);
-        VERIFY_IS_TRUE(mpInstance->GameSession == nullptr);
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_TRUE(isStopAdvertisingGameDone);
+        VerifyLobby(updatedLobbyNoHandleResponseJson().GetObject());
+        VERIFY_IS_FALSE(XblMultiplayerManagerGameSessionActive());
     }
 
     void RemoveStaleUsersFromRemoteSession(
-        std::shared_ptr<http_call_response> gameSessionResponse,
-        web::json::value gameSessionResultToVerify
+        const char* gameSessionResponse,
+        JsonValue gameSessionResultToVerify
         )
     {
-        InitializeManager(2);
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        MPMTestEnvironment env{};
+        auto xboxLiveContext1 = env.CreateMockXboxLiveContext(1234);
+        auto xboxLiveContext2 = env.CreateMockXboxLiveContext(2345);
 
-        Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
-        xboxLiveContexts->Append(xboxLiveContext);
-        xboxLiveContexts->Append(xboxLiveContext2);
+        std::vector<XblContextHandle> xboxLiveContexts{ xboxLiveContext1.get(), xboxLiveContext2.get() };
 
-        JoinGameFromLobbyMultipleUsersHelper(xboxLiveContexts->GetView());
+        JoinGameFromLobbyMultipleUsersHelper(xboxLiveContexts);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto lobbyClient = clientManager->latest_pending_read()->lobby_client();
-        auto gameClient = clientManager->latest_pending_read()->game_client();
-        auto mpsdGameSession = gameClient->session();
-        auto gameClientSessionWriter = gameClient->session_writer();
-        auto primaryContext = gameClientSessionWriter->get_primary_context();
+        auto mpmInstance = GlobalState::Get()->MultiplayerManager();
+        VERIFY_ARE_EQUAL_UINT(1, mpmInstance->GameSession()->ChangeNumber());
+        
+        HttpMock mock(GET, defaultMpsdUri, 200);
+        mock.SetResponseBody(updatedLobbyWithNoTransferHandleResponse);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        VERIFY_IS_TRUE(mpInstance->GameSession->GetCppObj()->_Change_number() == 1);
+        auto clientManager = mpmInstance->GetMultiplayerClientManager();
+        auto lobbyClient = clientManager->LatestPendingRead()->LobbyClient();
+        auto gameClient = clientManager->LatestPendingRead()->GameClient();
 
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList = { gameSessionResponse };
+        auto members = mpmInstance->GameSession()->Members();
 
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList = { updatedLobbyNoHandleResponse };
-
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[defaultGameHttpHeaderUri] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-
-        auto xboxLiveContextMap = lobbyClient->get_local_user_map();
-        for (auto xboxLiveContext : xboxLiveContextMap)
+        for (auto context : lobbyClient->GetLocalUserMap())
         {
-            auto localUser = xboxLiveContext.second;
-            if (localUser != nullptr)
+            auto user = context.second;
+            if (user != nullptr)
             {
-                localUser->set_lobby_state(multiplayer_local_user_lobby_state::remove);
-                break;
+                user->SetLobbyState(multiplayer::manager::MultiplayerLocalUserLobbyState::Remove);
             }
         }
 
-        gameClient->remove_stale_users_from_remote_session();
+        mock.SetResponseBody(gameSessionResponse);
+        gameClient->RemoveStaleUsersFromRemoteSession();
 
-        int isDone = 0;
+        uint32_t isDone = 0;
         while (isDone < 10)
         {
-            mpInstance->DoWork();
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
             Sleep(10);
             isDone++;
         }
 
-        VERIFY_IS_TRUE(mpInstance->LobbySession->LocalMembers->Size == 2);
-        VerifyLobby(mpInstance->LobbySession, defaultMultipleLocalUsersLobbyResponseJson);
-        VERIFY_IS_TRUE(mpInstance->GameSession->Members->Size == 1);
-        VerifyGame(mpInstance->GameSession, gameSessionResultToVerify);
-        DestructManager(xboxLiveContexts->GetView());
+        members = mpmInstance->GameSession()->Members();
+        VERIFY_ARE_EQUAL_UINT(2, mpmInstance->LobbySession()->LocalMembers().size());
+        VERIFY_ARE_EQUAL_UINT(1, mpmInstance->GameSession()->Members().size());
+
+        VerifyLobby(defaultMultipleLocalUsersLobbyResponseJson().GetObject());
+        VerifyGame(gameSessionResultToVerify.GetObject());
     }
 
     void LeaveRemoteSession()
     {
-        InitializeManager(2);
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto xboxLiveContext2 = GetMockXboxLiveContext_WinRT();
-        xboxLiveContext2->User->_User_impl()->_Set_xbox_user_id(L"TestXboxUserId_2");
+        MPMTestEnvironment env{};
+        auto xboxLiveContext1 = env.CreateMockXboxLiveContext(1234);
+        auto xboxLiveContext2 = env.CreateMockXboxLiveContext(2345);
 
-        Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>^ xboxLiveContexts = ref new Platform::Collections::Vector<Microsoft::Xbox::Services::XboxLiveContext^>();
-        xboxLiveContexts->Append(xboxLiveContext);
-        xboxLiveContexts->Append(xboxLiveContext2);
+        std::vector<XblContextHandle> xboxLiveContexts{ xboxLiveContext1.get(), xboxLiveContext2.get() };
 
-        JoinGameFromLobbyMultipleUsersHelper(xboxLiveContexts->GetView());
+        JoinGameFromLobbyMultipleUsersHelper(xboxLiveContexts);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto lobbyClient = clientManager->latest_pending_read()->lobby_client();
-        auto gameClient = clientManager->latest_pending_read()->game_client();
-        auto mpsdGameSession = gameClient->session();
-        auto gameClientSessionWriter = gameClient->session_writer();
-        auto primaryContext = gameClientSessionWriter->get_primary_context();
+        auto lobbySession = GetSession(false);
+        auto mpmInstance = GlobalState::Get()->MultiplayerManager();
+        auto gameClient = mpmInstance->GetMultiplayerClientManager()->LatestPendingRead()->GameClient();
 
-        VERIFY_IS_TRUE(mpInstance->GameSession->GetCppObj()->_Change_number() == 1);
+        VERIFY_ARE_EQUAL_UINT(1, mpmInstance->GameSession()->ChangeNumber());
 
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList = { gameSessionEmptyJsonResponse };
+        HttpMock mock(POST, defaultMpsdUri, 201);
+        mock.SetResponseBody(updatedMultipleLocalUsersLobbyWithNoTransferHandleResponse);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList = 
-        { 
-            updatedMultipleLocalUsersLobbyNoHandleResponse  // clear_game_session_from_lobby
-        };
+        HttpMock gamemock(POST, defaultGameUri, 201);
+        gamemock.SetResponseBody(emptyResponse);
+        gamemock.SetResponseHeaders(defaultGameHttpResponseHeaders);
 
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[defaultGameHttpHeaderUri] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        gameClient->LeaveRemoteSession(GetSession(true), true, true);
 
-        gameClient->leave_remote_session(mpsdGameSession, true, true);
-
-        auto propertyJson = web::json::value::parse(propertiesNoTransferHandleJson);
-        auto customPropertyJson = propertyJson[L"properties"];
+        int count{ 0 };
+        auto customProps = JsonUtils::SerializeJson(propertiesNoTransferHandleJson()["properties"]["custom"]);
         bool leaveGameCompleted = false, isStopAdvertisingGameDone = false;
         while (!leaveGameCompleted || !isStopAdvertisingGameDone)
         {
-            auto events = mpInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+            
+            if (!leaveGameCompleted)
             {
-                if (ev->EventType == MultiplayerEventType::LeaveGameCompleted)
+                for (uint32_t i = 0; i < eventsCount; ++i)
                 {
-                    leaveGameCompleted = true;
+                    if (events[i].EventType == XblMultiplayerEventType::LeaveGameCompleted)
+                    {
+                        leaveGameCompleted = true;
+                        break;
+                    }
                 }
             }
 
-            if (utils::str_icmp(mpInstance->LobbySession->Properties->Data(), customPropertyJson[L"custom"].serialize()) == 0)
+            JsonDocument props{};
+            props.Parse(XblMultiplayerManagerLobbySessionPropertiesJson());
+            if (utils::str_icmp(customProps.c_str(), JsonUtils::SerializeJson(props).c_str()) == 0)
             {
                 isStopAdvertisingGameDone = true;
             }
+
+            Sleep(10);
         }
 
-        VERIFY_IS_TRUE(mpInstance->LobbySession->LocalMembers->Size == 2);
-        VerifyLobby(mpInstance->LobbySession, updatedMultipleLocalUsersLobbyWithNoTransferHandleResponseJson);
-        VERIFY_IS_TRUE(mpInstance->GameSession == nullptr);
-        DestructManager(xboxLiveContexts->GetView());
+        VERIFY_IS_FALSE(!leaveGameCompleted || !isStopAdvertisingGameDone);
+        VERIFY_ARE_EQUAL_UINT(2, XblMultiplayerManagerLobbySessionLocalMembersCount());
+
+        VerifyLobby(updatedMultipleLocalUsersLobbyWithNoTransferHandleResponseJson().GetObject());
+        VERIFY_IS_FALSE(XblMultiplayerManagerGameSessionActive());
     }
 
     DEFINE_TEST_CASE(TestLeaveRemoteSession)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestLeaveRemoteSession);
         LeaveRemoteSession();
     }
 
     DEFINE_TEST_CASE(TestRemoveStaleUsersFromRemoteSession)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestRemoveStaleUsersFromRemoteSession);
-        RemoveStaleUsersFromRemoteSession(gameSessionDiffXuidResponse, gameSessionResponseDiffXuidJson);
-    }
-
-    /*
-        multiplayer_client_pending_reader:
-    */
-
-    DEFINE_TEST_CASE(TestClientPendingReaderHelperMethods)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(TestClientPendingReaderHelperMethods);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        JoinGameHelper(xboxLiveContext);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto lobbyClient = clientManager->latest_pending_read()->lobby_client();
-        auto gameClient = clientManager->latest_pending_read()->game_client();
-
-        VERIFY_IS_TRUE(clientManager->latest_pending_read()->is_lobby(lobbyClient->session()->session_reference()));
-        VERIFY_IS_TRUE(!clientManager->latest_pending_read()->is_lobby(multiplayer_session_reference()));
-        VERIFY_IS_TRUE(clientManager->latest_pending_read()->is_game(gameClient->session()->session_reference()));
-        VERIFY_IS_TRUE(!clientManager->latest_pending_read()->is_game(multiplayer_session_reference()));
-        DestructManager(xboxLiveContext);
+        RemoveStaleUsersFromRemoteSession(gameSessionResponseDiffXuid, gameSessionResponseDiffXuidJson().GetObject());
     }
 
     DEFINE_TEST_CASE(TestErrorHandling)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestErrorHandling);
-        InitializeManager();
-        auto mpInstance = MultiplayerManager::SingletonInstance;
+        MPMTestEnvironment env{};
+        XTaskQueueHandle queue{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        XblMultiplayerManagerInitialize(LOBBY_TEMPLATE_NAME, queue);
 
-        VERIFY_NO_THROW(
-            mpInstance->DoWork()
-            );
-
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            mpInstance->LobbySession->AddLocalUser(nullptr),
-            E_INVALIDARG
-            );
+        size_t eventsCount{};
+        const XblMultiplayerEvent* events{};
+        VERIFY_SUCCEEDED(XblMultiplayerManagerDoWork(&events, &eventsCount));
 
 #pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            mpInstance->LobbySession->RemoveLocalUser(nullptr),
-            E_INVALIDARG
-            );
-
-        VERIFY_THROWS_HR_CX(
-            mpInstance->LobbySession->RemoveLocalUser(xboxLiveContext->User),
-            E_UNEXPECTED
+        VERIFY_ARE_EQUAL_INT(
+            E_INVALIDARG,
+            XblMultiplayerManagerLobbySessionAddLocalUser(nullptr)
             );
 
 #pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            mpInstance->LobbySession->SetLocalMemberProperties(nullptr, L"Health", L"89", (Platform::Object^) 1),
-            E_INVALIDARG
+        VERIFY_ARE_EQUAL_INT(
+            E_INVALIDARG,
+            XblMultiplayerManagerLobbySessionRemoveLocalUser(nullptr)
             );
 
-        VERIFY_THROWS_HR_CX(
-            mpInstance->LobbySession->SetLocalMemberProperties(xboxLiveContext->User, L"", L"89", (Platform::Object^) 2),
-            E_UNEXPECTED
+        XblUserHandle userHandle = xboxLiveContext->User().Handle();
+        VERIFY_ARE_EQUAL_INT(
+            E_UNEXPECTED,
+            XblMultiplayerManagerLobbySessionRemoveLocalUser(userHandle)
+            );
+
+        uint32_t contextIds[2]{ 1,2 };
+#pragma warning(suppress: 6387)
+        VERIFY_ARE_EQUAL_INT(
+            E_INVALIDARG,
+            XblMultiplayerManagerLobbySessionSetLocalMemberProperties(nullptr, "Health", "89", &contextIds[0])
+            );
+
+        VERIFY_ARE_EQUAL_INT(
+            E_UNEXPECTED,
+            XblMultiplayerManagerLobbySessionSetLocalMemberProperties(userHandle, "", "89", &contextIds[1])
             );
 
 #pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            mpInstance->LobbySession->DeleteLocalMemberProperties(nullptr, L"Health", (Platform::Object^) 1),
-            E_INVALIDARG
+        VERIFY_ARE_EQUAL_INT(
+            E_INVALIDARG,
+            XblMultiplayerManagerLobbySessionDeleteLocalMemberProperties(nullptr, "Health", &contextIds[0])
             );
 
-        VERIFY_THROWS_HR_CX(
-            mpInstance->LobbySession->DeleteLocalMemberProperties(xboxLiveContext->User, L"", (Platform::Object^) 1),
-            E_UNEXPECTED
-            );
-
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            mpInstance->LobbySession->SetLocalMemberConnectionAddress(nullptr, L"AQAI1Fy6", (Platform::Object^) 1),
-            E_INVALIDARG
-            );
-
-        VERIFY_THROWS_HR_CX(
-            mpInstance->LobbySession->SetLocalMemberConnectionAddress(xboxLiveContext->User, L"AQAI1Fy6", (Platform::Object^) 1),
-            E_UNEXPECTED
-            );
-
-        VERIFY_THROWS_HR_CX(
-            mpInstance->LobbySession->SetProperties(L"", L"89", (Platform::Object^) 1),
-            E_UNEXPECTED
-            );
-
-        VERIFY_THROWS_HR_CX(
-            mpInstance->LobbySession->SetSynchronizedProperties(L"", L"89", (Platform::Object^) 1),
-            E_UNEXPECTED
+        VERIFY_ARE_EQUAL_INT(
+            E_UNEXPECTED,
+            XblMultiplayerManagerLobbySessionDeleteLocalMemberProperties(userHandle, "", &contextIds[0])
             );
 
 #pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            mpInstance->LobbySession->SetSynchronizedHost(nullptr, (Platform::Object^) 1),
-            E_INVALIDARG
+        VERIFY_ARE_EQUAL_INT(
+            E_INVALIDARG,
+            XblMultiplayerManagerLobbySessionSetLocalMemberConnectionAddress(nullptr, "AQAI1Fy6", &contextIds[0])
+            );
+
+        VERIFY_ARE_EQUAL_INT(
+            E_UNEXPECTED,
+            XblMultiplayerManagerLobbySessionSetLocalMemberConnectionAddress(userHandle, "AQAI1Fy6", &contextIds[0])
+            );
+
+        VERIFY_ARE_EQUAL_INT(
+            E_INVALIDARG,
+            XblMultiplayerManagerLobbySessionSetProperties("", "89", &contextIds[0])
+            );
+
+        VERIFY_ARE_EQUAL_INT(
+            E_UNEXPECTED,
+            XblMultiplayerManagerLobbySessionSetSynchronizedProperties("name", "89", &contextIds[0])
+            );
+
+#pragma warning(suppress: 6387)
+        VERIFY_ARE_EQUAL_INT(
+            E_INVALIDARG,
+            XblMultiplayerManagerLobbySessionSetSynchronizedHost(nullptr, &contextIds[0])
             );
 
 #pragma warning(suppress: 4973)
-        VERIFY_THROWS_HR_CX(
-            mpInstance->JoinGame(ref new Platform::String(L""), GAME_SESSION_TEMPLATE_NAME),
-            E_INVALIDARG
+        VERIFY_ARE_EQUAL_INT(
+            E_INVALIDARG,
+            XblMultiplayerManagerJoinGame("", GAME_TEMPLATE_NAME, nullptr, 0)
             );
 
 #pragma warning(suppress: 4973)
-        VERIFY_THROWS_HR_CX(
-            mpInstance->JoinGame(ref new Platform::String(L"TestSessionName"), GAME_SESSION_TEMPLATE_NAME),
-            E_UNEXPECTED
+        VERIFY_ARE_EQUAL_INT(
+            E_UNEXPECTED,
+            XblMultiplayerManagerJoinGame("TestSessionName", GAME_TEMPLATE_NAME, nullptr, 0)
             );
 
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        const string_t badResponse = testResponseJsonFromFile[L"badResponse"].serialize();
-        auto jsonResponse = web::json::value::parse(badResponse);
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(jsonResponse, 400);
-        mpInstance->LobbySession->AddLocalUser(xboxLiveContext->User);
+        VERIFY_SUCCEEDED(XblRealTimeActivityActivate(xboxLiveContext.get()));
 
-        VERIFY_THROWS_HR_CX(
-            mpInstance->LobbySession->AddLocalUser(xboxLiveContext->User),
-            E_UNEXPECTED
+        HttpMock mock(POST, defaultMpsdUri, 400);
+        mock.SetResponseBody(badResponse);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+
+        VERIFY_SUCCEEDED(XblMultiplayerManagerLobbySessionAddLocalUser(userHandle));
+
+        VERIFY_ARE_EQUAL_INT(
+            E_UNEXPECTED,
+            XblMultiplayerManagerLobbySessionAddLocalUser(userHandle)
             );  // User already added
 
-        bool isDone = false;
+        int count{ 0 };
+        bool isDone{ false };
         while (!isDone)
         {
-            auto events = mpInstance->DoWork();
-            for (auto ev : events)
+            if (++count > 500) break;
+
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::UserAdded)
+                if (events[i].EventType == XblMultiplayerEventType::UserAdded)
                 {
-                    VERIFY_IS_TRUE(ev->ErrorCode == HTTP_E_STATUS_BAD_REQUEST);
+                    VERIFY_ARE_EQUAL_INT(HTTP_E_STATUS_BAD_REQUEST, events[i].Result);
                     isDone = true;
                 }
             }
+
+            Sleep(10);
         }
 
-        DestructManager(xboxLiveContext, true);
+        VERIFY_IS_TRUE(isDone);
     }
 
     /*
@@ -3675,63 +5884,72 @@ public:
 
     void FindMatchNoQoSHelper(MatchCallingPatternType matchCallingPattern)
     {
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext, lobbyWithNoTransferHandleResponse);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        AddLocalUserHelper(xboxLiveContext.get(), lobbyWithNoTransferHandleResponse);
 
         // Set up initial http responses
-        std::shared_ptr<HttpResponseStruct> matchTicketResponseStruct = std::make_shared<HttpResponseStruct>();
-        matchTicketResponseStruct->responseList = { matchTicketResponse };
+        std::vector<const char*> lobbyResponses{ lobbyMatchStatusSearching };
+        std::vector<const char*> gameResponses{ matchSessionJoin_1 };
 
-        std::shared_ptr<HttpResponseStruct> transferHandleResponseStruct = std::make_shared<HttpResponseStruct>();
-        transferHandleResponseStruct->responseList = { transferHandleResponse };
+        if (matchCallingPattern == MatchCallingPatternType::ExpiredByNextTimer || 
+            matchCallingPattern == MatchCallingPatternType::ExpiredByService)
+        {
+            lobbyResponses.push_back(lobbyMatchStatusExpiredByService);
+        }
+        else
+        {
+            lobbyResponses.push_back(lobbyMatchStatusFound);
+            lobbyResponses.push_back(lobbyMatchStatusFoundWithTransHandle);
+        }
 
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
         if (matchCallingPattern == MatchCallingPatternType::Completed)
         {
-            gameResponseStruct->responseList = { matchJoin_1_Response, matchJoin_2_Response };
+            gameResponses.push_back(matchSessionJoin_2);
         }
         else if (matchCallingPattern == MatchCallingPatternType::RemoteClientFailedToJoin)
         {
-            gameResponseStruct->responseList = { matchJoin_1_Response, matchRemoteClientFailedToJoin_Response };
+            gameResponses.push_back(matchSessionRemoteClientFailedToJoin);
         }
-        else
+
+        uint32_t lobbyMockCount{ 0 };
+        HttpMock lobbyMock(GET, defaultMpsdUri, 200);
+        lobbyMock.SetResponseBody(lobbyResponses[0]);
+        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
         {
-            // Forcing the timer to expire, and then do a get
-            gameResponseStruct->responseList = { matchJoin_1_Response };
-        }
+            if (lobbyMockCount < lobbyResponses.size())
+            {
+                matchedMock->SetResponseBody(lobbyResponses[lobbyMockCount]);
+                ++lobbyMockCount;
+            }
+        });
 
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        if (matchCallingPattern == MatchCallingPatternType::ExpiredByNextTimer || matchCallingPattern == MatchCallingPatternType::ExpiredByService)
+        uint32_t gameMockCount{ 0 };
+        HttpMock gameMock(GET, defaultGameUri, 200);
+        gameMock.SetResponseBody(gameResponses[0]);
+        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
+        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
         {
-            lobbyResponseStruct->responseList = { matchStatusSearchingResponse, matchStatusExpiredByServiceResponse };
-        }
-        else
-        {
-            lobbyResponseStruct->responseList = { matchStatusSearchingResponse, matchStatusFoundResponse, matchStatusFoundWithTransHandleResponse };
-        }
+            if (gameMockCount < gameResponses.size())
+            {
+                matchedMock->SetResponseBody(gameResponses[gameMockCount]);
+                ++gameMockCount;
+            }
+        });
 
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> matchResponses;
-        matchResponses[xbox_live_api::create_match_ticket] = matchTicketResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(matchResponses);
+        HttpMock matchMock("PUT", matchTicketUri, 201);
+        matchMock.SetResponseBody(matchTicketResponse);
 
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> transferHandleResponses;
-        transferHandleResponses[xbox_live_api::set_transfer_handle] = transferHandleResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(transferHandleResponses, false);
+        HttpMock transferMock("PUT", transferHandleUri, 201);
+        transferMock.SetResponseBody(transferHandleResponse);
 
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[defaultGameHttpHeaderUri] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        auto mpmInstance = GlobalState::Get()->MultiplayerManager();
+        auto clientManager = mpmInstance->GetMultiplayerClientManager();
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto mpsdLobbySession = clientManager->latest_pending_read()->lobby_client()->session();
-        auto lobbySessionWriter = clientManager->latest_pending_read()->lobby_client()->session_writer();
-
-        auto timeSpan = Windows::Foundation::TimeSpan();
-        timeSpan.Duration = 1 * TICKS_PER_SECOND;
-        mpInstance->FindMatch(HOPPER_NAME_NO_QOS, ref new Platform::String(), timeSpan);
+        JsonDocument doc{};
+        mpmInstance->FindMatch(HOPPER_NAME_NO_QOS, doc, std::chrono::seconds{ TICKS_PER_SECOND });
+        clientManager->MatchClient()->DisableNextTimer(true);
 
         // Match ticket response
         // LB: Shoulder tap with a Get: status to searching
@@ -3741,140 +5959,177 @@ public:
         // Create Transfer handle
         // LB: PUT Transfer handle
 
-        clientManager->match_client()->disable_next_timer(true); // force the timer to avoid getting into expiry state.
+        auto session = GetSession(false);
+        auto sessionWriter = GetSessionWriter(false);
 
-        auto propertyJson = web::json::value::parse(propertiesJson);
-        auto customPropertyJson = propertyJson[L"properties"];
+        int count{ 0 };
+        auto customProps = JsonUtils::SerializeJson(classPropertiesJson()["properties"]["custom"]);
         bool matchFound = false, isAdvertisingGameDone = false, searchingTapTriggered = false, foundTapTriggered = false, waitingForClientsTapTriggered = false;
         while (!matchFound || !isAdvertisingGameDone)
         {
-            auto events = mpInstance->DoWork();
-            if (mpInstance->MatchStatus == MatchStatus::Searching && !searchingTapTriggered)
+            if (++count > 500) break;
+
+            if (!searchingTapTriggered && XblMultiplayerManagerMatchStatus() == XblMultiplayerMatchStatus::Searching)
             {
                 searchingTapTriggered = true;
-                auto matchTicketeJson = web::json::value::parse(matchTicket);
-                VERIFY_ARE_EQUAL_TIMESPAN_TO_SECONDS( mpInstance->EstimatedMatchWaitTime, matchTicketeJson[_T("waitTime")].as_number().to_uint64() );
+                VERIFY_ARE_EQUAL_INT(mpmInstance->EstimatedMatchWaitTime().count(), matchTicketJson()["waitTime"].GetUint64() );
 
-                auto eventArgs = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", 4);
-                lobbySessionWriter->on_session_changed(eventArgs);
+                sessionWriter->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ session->SessionReference(), "", 4 });
             }
 
-            if (!foundTapTriggered && mpInstance->LobbySession->GetCppObj()->_Change_number() == 4)
+            if (!foundTapTriggered && GlobalState::Get()->MultiplayerManager()->LobbySession()->ChangeNumber() == 4)
             {
                 foundTapTriggered = true;
                 if (matchCallingPattern == MatchCallingPatternType::ExpiredByNextTimer)
                 {
-                    TEST_LOG(L"FindMatchNoQoSHelper - setting next timer to false.");
-                    clientManager->match_client()->disable_next_timer(false);
+                    clientManager->MatchClient()->DisableNextTimer(false);
                 }
-                else
-                {
-                    // Session upgraded to searching. Force a tap to change match status == found or expired (ExpiredByService)
-                    auto eventArgs = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", 6);
-                    lobbySessionWriter->on_session_changed(eventArgs);
-                }
+
+                // Session upgraded to searching. Force a tap to change match status == found or expired (ExpiredByService)
+                sessionWriter->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ session->SessionReference(), "", 6 });
             }
 
-            if (!waitingForClientsTapTriggered && mpInstance->MatchStatus == MatchStatus::WaitingForRemoteClientsToJoin)
+            if (!waitingForClientsTapTriggered && XblMultiplayerManagerMatchStatus() == XblMultiplayerMatchStatus::WaitingForRemoteClientsToJoin)
             {
                 waitingForClientsTapTriggered = true;
                 if (matchCallingPattern == MatchCallingPatternType::RemoteClientFailedToJoin)
                 {
-                    clientManager->match_client()->disable_next_timer(false);
+                    clientManager->MatchClient()->DisableNextTimer(false);
                 }
                 else if (matchCallingPattern == MatchCallingPatternType::Completed)
                 {
                     // Force a tap to simulate 2nd user joining.
-                    auto eventArgs = multiplayer_session_change_event_args(clientManager->match_client()->session()->session_reference(), L"", 3);
-                    clientManager->on_session_changed(eventArgs);
+                    clientManager->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ clientManager->MatchClient()->Session()->SessionReference(), "", 3 });
                 }
             }
 
-            for (auto ev : events)
-            {
-                if (ev->EventType == MultiplayerEventType::FindMatchCompleted)
-                {
-                    matchFound = true;
-                    auto findMatchCompleted = static_cast<FindMatchCompletedEventArgs^>(ev->EventArgs);
-                    LOGS_DEBUG << " [MPM] MatchStatus: " << findMatchCompleted->MatchStatus.ToString()->Data();
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
 
-                    if (matchCallingPattern == MatchCallingPatternType::Completed)
-                        VERIFY_IS_TRUE(findMatchCompleted->MatchStatus == MatchStatus::Completed);
-                    else if (matchCallingPattern == MatchCallingPatternType::RemoteClientFailedToJoin)
-                        VERIFY_IS_TRUE(findMatchCompleted->MatchStatus == MatchStatus::Failed);
-                    else if (matchCallingPattern == MatchCallingPatternType::ExpiredByNextTimer)
-                        VERIFY_IS_TRUE(findMatchCompleted->MatchStatus == MatchStatus::Expired);
-                    else if (matchCallingPattern == MatchCallingPatternType::ExpiredByService)
-                        VERIFY_IS_TRUE(findMatchCompleted->MatchStatus == MatchStatus::Expired);
+            for (uint32_t i = 0; i < eventsCount; ++i)
+            {
+                if (events[i].EventType == XblMultiplayerEventType::FindMatchCompleted)
+                {
+                    matchFound = true; 
+                    XblMultiplayerMatchStatus matchStatus{};
+                    VERIFY_SUCCEEDED(XblMultiplayerEventArgsFindMatchCompleted(events[i].EventArgsHandle, &matchStatus, nullptr));
+
+                    switch (matchCallingPattern)
+                    {
+                        case MatchCallingPatternType::Completed:
+                        {
+                            VERIFY_ARE_EQUAL_UINT(XblMultiplayerMatchStatus::Completed, matchStatus);
+                            sessionWriter->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ session->SessionReference(), "", 7 });
+                            break;
+                        }
+                        case MatchCallingPatternType::RemoteClientFailedToJoin:
+                        {
+                            VERIFY_ARE_EQUAL_UINT(XblMultiplayerMatchStatus::Failed, matchStatus);
+                            break;
+                        }
+                        case MatchCallingPatternType::ExpiredByNextTimer:
+                        case MatchCallingPatternType::ExpiredByService:
+                        {
+                            VERIFY_ARE_EQUAL_UINT(XblMultiplayerMatchStatus::Expired, matchStatus);
+                            break;
+                        }
+                    }
+
                 }
             }
 
             if (matchFound)
             {
-                if (matchCallingPattern == MatchCallingPatternType::Completed)
+                if (matchCallingPattern != MatchCallingPatternType::Completed)
                 {
-                    if (utils::str_icmp(mpInstance->LobbySession->Properties->Data(), customPropertyJson[L"custom"].serialize()) == 0)
+                    isAdvertisingGameDone = true;
+                }
+                else
+                {
+                    auto props{ XblMultiplayerManagerLobbySessionPropertiesJson() };
+                    if (props != nullptr &&
+                        utils::str_icmp(props, customProps.c_str()) == 0)
                     {
                         isAdvertisingGameDone = true;
                     }
                 }
-                else
-                {
-                    isAdvertisingGameDone = true;
-                }
             }
+
+            Sleep(10);
         }
 
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_FALSE(!matchFound || !isAdvertisingGameDone);
     }
 
     void FindMatchWithQoSHelper(MatchCallingPatternType callingPattern)
     {
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext, lobbyWithNoTransferHandleResponse);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        AddLocalUserHelper(xboxLiveContext.get(), lobbyWithNoTransferHandleResponse);
 
         // Set up initial http responses
-        std::shared_ptr<HttpResponseStruct> matchTicketResponseStruct = std::make_shared<HttpResponseStruct>();
-        matchTicketResponseStruct->responseList = { matchTicketResponse };
+        std::vector<const char*> lobbyResponses
+        {
+            lobbyMatchStatusSearching,
+            lobbyMatchStatusFound,
+            lobbyMatchStatusFoundWithTransHandle
+        };
 
-        std::shared_ptr<HttpResponseStruct> transferHandleResponseStruct = std::make_shared<HttpResponseStruct>();
-        transferHandleResponseStruct->responseList = { transferHandleResponse };
+        std::vector<const char*> gameResponses
+        { 
+            matchSessionJoin_1,
+            matchSessionMeasuring,
+            matchSessionMeasuringWithQoS
+        };
 
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
         if (callingPattern == MatchCallingPatternType::RemoteClientFailedToUploadQoS)
         {
-            gameResponseStruct->responseList = { matchJoin_1_Response, matchMeasuringResponse, matchMeasuringWithQoSResponse, matchRemoteClientFailedToUploadQoSResponse };
+            gameResponses.push_back(matchRemoteClientFailedToUploadQoS);
         }
         else if(callingPattern == MatchCallingPatternType::Completed)
         {
-            gameResponseStruct->responseList = { matchJoin_1_Response, matchMeasuringResponse, matchMeasuringWithQoSResponse, matchMeasuringWithQoSCompleteResponse };
+            gameResponses.push_back(matchSessionMeasuringWithQoSComplete);
         }
 
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList = { matchStatusSearchingResponse, matchStatusFoundResponse, matchStatusFoundWithTransHandleResponse };
+        uint32_t lobbyMockCount{ 0 };
+        HttpMock lobbyMock(GET, defaultMpsdUri, 200);
+        lobbyMock.SetResponseBody(lobbyResponses[0]);
+        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        {
+            if (lobbyMockCount < lobbyResponses.size())
+            {
+                matchedMock->SetResponseBody(lobbyResponses[lobbyMockCount]);
+                ++lobbyMockCount;
+            }
+        });
 
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> matchResponses;
-        matchResponses[xbox_live_api::create_match_ticket] = matchTicketResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(matchResponses);
+        uint32_t gameMockCount{ 0 };
+        HttpMock gameMock(GET, defaultGameUri, 200);
+        gameMock.SetResponseBody(gameResponses[0]);
+        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
+        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        {
+            if (gameMockCount < gameResponses.size())
+            {
+                matchedMock->SetResponseBody(gameResponses[gameMockCount]);
+                ++gameMockCount;
+            }
+        });
 
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> transferHandleResponses;
-        transferHandleResponses[xbox_live_api::set_transfer_handle] = transferHandleResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(transferHandleResponses, false);
+        HttpMock matchMock("PUT", matchTicketUri, 201);
+        matchMock.SetResponseBody(matchTicketResponse);
 
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[defaultGameHttpHeaderUri] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        HttpMock transferMock("PUT", transferHandleUri, 201);
+        transferMock.SetResponseBody(transferHandleResponse);
+        
+        auto mpmInstance = GlobalState::Get()->MultiplayerManager();
+        auto clientManager = mpmInstance->GetMultiplayerClientManager();
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto mpsdLobbySession = clientManager->latest_pending_read()->lobby_client()->session();
-        auto lobbySessionWriter = clientManager->latest_pending_read()->lobby_client()->session_writer();
-
-        auto timeSpan = Windows::Foundation::TimeSpan();
-        timeSpan.Duration = 1 * TICKS_PER_SECOND;
-        mpInstance->FindMatch(HOPPER_NAME_NO_QOS, ref new Platform::String(), timeSpan);
+        JsonDocument doc{};
+        mpmInstance->FindMatch(HOPPER_NAME_NO_QOS, doc, std::chrono::seconds{ TICKS_PER_SECOND });
+        clientManager->MatchClient()->DisableNextTimer(true);
 
         // Match ticket response
         // LB: Shoulder tap with a Get: status to searching
@@ -3887,173 +6142,192 @@ public:
         // Create Transfer handle
         // LB: PUT Transfer handle
 
-        clientManager->match_client()->disable_next_timer(true); // force the timer to avoid getting into expiry state.
+        auto lobbySession = GetSession(false);
+        auto lobbySessionWriter = GetSessionWriter(false);
+        auto gameSession = GetSession(true);
+        auto gameSessionWriter = GetSessionWriter(true);
 
-        auto propertyJson = web::json::value::parse(propertiesJson);
-        auto customPropertyJson = propertyJson[L"properties"];
-        bool matchFound = false, isAdvertisingGameDone = false, searchingTapTriggered = false, foundTapTriggered = false, waitingForClientsToJoinTapTriggered = false, waitingForClientsToUploadQoSTapTriggered = false;
+        int count{ 0 };
+        auto customProps = JsonUtils::SerializeJson(classPropertiesJson()["properties"]["custom"]);
+        bool matchFound{ false };
+        bool isAdvertisingGameDone{ false };
+        bool searchingTapTriggered{ false };
+        bool foundTapTriggered{ false };
+        bool waitingForClientsToJoinTapTriggered{ false };
+        bool waitingForClientsToUploadQoSTapTriggered{ false };
         while (!matchFound || !isAdvertisingGameDone)
         {
-            auto events = mpInstance->DoWork();
-            if (mpInstance->MatchStatus == MatchStatus::Searching && !searchingTapTriggered)
+            if (++count > 500) break;
+
+            if (!searchingTapTriggered && XblMultiplayerManagerMatchStatus() == XblMultiplayerMatchStatus::Searching)
             {
                 searchingTapTriggered = true;
-                auto matchTicketeJson = web::json::value::parse(matchTicket);
-                VERIFY_ARE_EQUAL_TIMESPAN_TO_SECONDS(mpInstance->EstimatedMatchWaitTime, matchTicketeJson[_T("waitTime")].as_number().to_uint64());
+                VERIFY_ARE_EQUAL_UINT(mpmInstance->EstimatedMatchWaitTime().count(), matchTicketJson()["waitTime"].GetUint64());
 
-                auto eventArgs = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", 4);
-                lobbySessionWriter->on_session_changed(eventArgs);
+                lobbySessionWriter->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ lobbySession->SessionReference(), "", 4 });
             }
 
-            if (!foundTapTriggered && mpInstance->LobbySession->GetCppObj()->_Change_number() == 4)
+            if (!foundTapTriggered && GlobalState::Get()->MultiplayerManager()->LobbySession()->ChangeNumber() == 4)
             {
                 foundTapTriggered = true;
 
                 // Session upgraded to searching. Force a tap to change match status == found or expired (ExpiredByService)
-                auto eventArgs = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", 6);
-                lobbySessionWriter->on_session_changed(eventArgs);
+                lobbySessionWriter->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ lobbySession->SessionReference(), "", 6 });
             }
 
-            if (mpInstance->MatchStatus == MatchStatus::WaitingForRemoteClientsToJoin && !waitingForClientsToJoinTapTriggered)
+            if (!waitingForClientsToJoinTapTriggered && XblMultiplayerManagerMatchStatus() == XblMultiplayerMatchStatus::WaitingForRemoteClientsToJoin)
             {
                 waitingForClientsToJoinTapTriggered = true;
 
                 // Force a tap to simulate 2nd user joining.
-                auto eventArgs = multiplayer_session_change_event_args(clientManager->match_client()->session()->session_reference(), L"", 3);
-                clientManager->on_session_changed(eventArgs);
+                clientManager->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ clientManager->MatchClient()->Session()->SessionReference(), "", 3 });
             }
 
-            if (mpInstance->MatchStatus == MatchStatus::WaitingForRemoteClientsToUploadQos && !waitingForClientsToUploadQoSTapTriggered)
+            if (!waitingForClientsToUploadQoSTapTriggered && XblMultiplayerManagerMatchStatus() == XblMultiplayerMatchStatus::WaitingForRemoteClientsToUploadQos)
             {
                 waitingForClientsToUploadQoSTapTriggered = true;
                 if (callingPattern == MatchCallingPatternType::RemoteClientFailedToUploadQoS)
                 {
-                    clientManager->match_client()->disable_next_timer(false);
+                    clientManager->MatchClient()->DisableNextTimer(false);
                 }
                 else
                 {
                     // Force a tap to simulate 2nd user uploading QoS.
-                    auto eventArgs = multiplayer_session_change_event_args(clientManager->match_client()->session()->session_reference(), L"", 6);
-                    clientManager->on_session_changed(eventArgs);
+                    clientManager->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ clientManager->MatchClient()->Session()->SessionReference(), "", 6 });
                 }
             }
 
-            for (auto ev : events)
-            {
-                if (ev->EventType == MultiplayerEventType::PerformQosMeasurements)
-                {
-                    auto measurments = ref new Vector<MultiplayerQualityOfServiceMeasurements^>();
-                    mpInstance->SetQualityOfServiceMeasurements(measurments->GetView());
-                }
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
 
-                if (ev->EventType == MultiplayerEventType::FindMatchCompleted)
+            for (uint32_t i = 0; i < eventsCount; ++i)
+            {
+                if (events[i].EventType == XblMultiplayerEventType::PerformQosMeasurements)
+                {
+                    VERIFY_SUCCEEDED(XblMultiplayerManagerSetQosMeasurements("{}"));
+                }
+                else if (events[i].EventType == XblMultiplayerEventType::FindMatchCompleted)
                 {
                     matchFound = true;
-                    auto findMatchCompleted = static_cast<FindMatchCompletedEventArgs^>(ev->EventArgs);
-                    LOGS_DEBUG << " [MPM] MatchStatus: " << findMatchCompleted->MatchStatus.ToString()->Data();
+                    XblMultiplayerMatchStatus matchStatuss{};
+                    VERIFY_SUCCEEDED(XblMultiplayerEventArgsFindMatchCompleted(events[i].EventArgsHandle, &matchStatuss, nullptr));
 
                     if (callingPattern == MatchCallingPatternType::Completed)
                     {
-                        VERIFY_IS_TRUE(findMatchCompleted->MatchStatus == MatchStatus::Completed);
+                        VERIFY_ARE_EQUAL_UINT(XblMultiplayerMatchStatus::Completed, matchStatuss);
                     }
                     else if (callingPattern == MatchCallingPatternType::RemoteClientFailedToUploadQoS)
                     {
-                        VERIFY_IS_TRUE(findMatchCompleted->MatchStatus == MatchStatus::Failed);
+                        VERIFY_ARE_EQUAL_UINT(XblMultiplayerMatchStatus::Failed, matchStatuss);
                     }
+
+                    lobbySessionWriter->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ lobbySession->SessionReference(), "", 7 });
                 }
             }
 
             if (matchFound)
             {
-                if (callingPattern == MatchCallingPatternType::Completed)
+                if (callingPattern != MatchCallingPatternType::Completed)
                 {
-                    if (utils::str_icmp(mpInstance->LobbySession->Properties->Data(), customPropertyJson[L"custom"].serialize()) == 0)
+                    isAdvertisingGameDone = true;
+                }
+                else
+                {
+                    auto props{ XblMultiplayerManagerLobbySessionPropertiesJson() };
+                    if (props != nullptr &&
+                        utils::str_icmp(props, customProps.c_str()) == 0)
                     {
                         isAdvertisingGameDone = true;
                     }
                 }
-                else
-                {
-                    isAdvertisingGameDone = true;
-                }
             }
+
+            Sleep(10);
         }
 
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_FALSE(!matchFound || !isAdvertisingGameDone);
     }
 
     DEFINE_TEST_CASE(TestFindMatchNoQoSCompleted)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestFindMatchNoQoSCompleted);
         FindMatchNoQoSHelper(MatchCallingPatternType::Completed);
     }
 
     DEFINE_TEST_CASE(TestFindMatchNoQoSRemoteClientFailedToJoin)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestFindMatchNoQoSRemoteClientFailedToJoin);
         FindMatchNoQoSHelper(MatchCallingPatternType::RemoteClientFailedToJoin);
     }
 
     DEFINE_TEST_CASE(TestFindMatchNoQoSExpiredByNextTimer)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestFindMatchNoQoSExpiredByNextTimer);
         FindMatchNoQoSHelper(MatchCallingPatternType::ExpiredByNextTimer);
     }
 
     DEFINE_TEST_CASE(TestFindMatchNoQoSExpiredByService)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestFindMatchNoQoSExpiredByService);
         FindMatchNoQoSHelper(MatchCallingPatternType::ExpiredByService);
     }
 
     DEFINE_TEST_CASE(TestFindMatchWithQoSCompleted)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestFindMatchWithQoSCompleted);
         FindMatchWithQoSHelper(MatchCallingPatternType::Completed);
     }
 
     DEFINE_TEST_CASE(TestFindMatchWithQoSRemoteClientFailedToUploadQoS)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestFindMatchWithQoSRemoteClientFailedToUploadQoS);
         FindMatchWithQoSHelper(MatchCallingPatternType::RemoteClientFailedToUploadQoS);
     }
 
     void FindMatchNoQoSRemoteClientJoiningMatchSessionHelper()
     {
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext, lobbyWithNoTransferHandleResponse);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        AddLocalUserHelper(xboxLiveContext.get(), lobbyWithNoTransferHandleResponse);
 
         // Set up initial http responses
-        std::shared_ptr<HttpResponseStruct> matchTicketResponseStruct = std::make_shared<HttpResponseStruct>();
-        matchTicketResponseStruct->responseList = { matchTicketResponse };
+        std::vector<const char*> lobbyResponses
+        {
+            lobbyMatchStatusSearching,
+            lobbyMatchStatusFound,
+            lobbyMatchStatusFoundWithTransHandle
+        };
 
-        std::shared_ptr<HttpResponseStruct> transferHandleResponseStruct = std::make_shared<HttpResponseStruct>();
-        transferHandleResponseStruct->responseList = { transferHandleResponse };
+        std::vector<const char*> gameResponses
+        {
+            matchSessionJoin_1,
+            matchSessionJoin_2
+        };
 
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList = { matchJoin_1_Response, matchJoin_2_Response };
+        uint32_t lobbyMockCount{ 0 };
+        HttpMock lobbyMock(GET, defaultMpsdUri, 200);
+        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        {
+            if (lobbyMockCount < lobbyResponses.size())
+            {
+                matchedMock->SetResponseBody(lobbyResponses[lobbyMockCount]);
+                ++lobbyMockCount;
+            }
+        });
 
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
-        lobbyResponseStruct->responseList = { matchStatusSearchingResponse, matchStatusFoundResponse, matchStatusFoundWithTransHandleResponse };
+        uint32_t gameMockCount{ 0 };
+        HttpMock gameMock(GET, defaultGameUri, 200);
+        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
+        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        {
+            if (gameMockCount < gameResponses.size())
+            {
+                matchedMock->SetResponseBody(gameResponses[gameMockCount]);
+                ++gameMockCount;
+            }
+        });
 
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> matchResponses;
-        matchResponses[xbox_live_api::create_match_ticket] = matchTicketResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(matchResponses);
+        HttpMock matchMock("PUT", matchTicketUri, 201);
+        matchMock.SetResponseBody(matchTicketResponse);
 
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> transferHandleResponses;
-        transferHandleResponses[xbox_live_api::set_transfer_handle] = transferHandleResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(transferHandleResponses, false);
-
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[defaultGameHttpHeaderUri] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
-
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto mpsdLobbySession = clientManager->latest_pending_read()->lobby_client()->session();
-        auto lobbySessionWriter = clientManager->latest_pending_read()->lobby_client()->session_writer();
+        HttpMock transferMock("PUT", transferHandleUri, 201);
+        transferMock.SetResponseBody(transferHandleResponse);
 
         // LB: Shoulder tap with a Get: status to searching
         // LB: Shoulder tap with a Get: status to found
@@ -4062,192 +6336,250 @@ public:
         // Create Transfer handle
         // LB: PUT Transfer handle
 
-        auto propertyJson = web::json::value::parse(propertiesJson);
-        auto customPropertyJson = propertyJson[L"properties"];
-        bool matchFound = false, isAdvertisingGameDone = false, searchingTapTriggered = false, foundTapTriggered = false, waitingForClientsTapTriggered = false;
+        auto session = GetSession(false);
+        auto sessionWriter = GetSessionWriter(false);
+        auto mpmInstance = GlobalState::Get()->MultiplayerManager();
+        auto clientManager = mpmInstance->GetMultiplayerClientManager();
+
+        clientManager->MatchClient()->DisableNextTimer(true);
+
+        int count{ 0 };
+        auto customProps = JsonUtils::SerializeJson(classPropertiesJson()["properties"]["custom"]);
+        bool matchFound{ false };
+        bool isAdvertisingGameDone{ false };
+        bool searchingTapTriggered{ false };
+        bool foundTapTriggered{ false };
+        bool waitingForClientsTapTriggered{ false };
         while (!matchFound || !isAdvertisingGameDone)
         {
-            auto events = mpInstance->DoWork();
+            if (++count > 500) break;
+
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
             if (!searchingTapTriggered)
             {
                 searchingTapTriggered = true;
-                auto eventArgs = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", 4);
-                lobbySessionWriter->on_session_changed(eventArgs);
+                sessionWriter->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ session->SessionReference(), "", 4 });
             }
 
-            if (!foundTapTriggered && mpInstance->LobbySession->GetCppObj()->_Change_number() == 4)
+            if (!foundTapTriggered && mpmInstance->LobbySession()->ChangeNumber() == 4)
             {
                 foundTapTriggered = true;
-                clientManager->match_client()->disable_next_timer(true); // force the timer to avoid getting into expiry state.
-
+                
                 // Session upgraded to searching. Force a tap to change match status == found or expired (ExpiredByService)
-                auto eventArgs = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", 6);
-                lobbySessionWriter->on_session_changed(eventArgs);
+                sessionWriter->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ session->SessionReference(), "", 6 });
             }
 
-            if (!waitingForClientsTapTriggered && mpInstance->MatchStatus == MatchStatus::WaitingForRemoteClientsToJoin)
+            if (!waitingForClientsTapTriggered && XblMultiplayerManagerMatchStatus() == XblMultiplayerMatchStatus::WaitingForRemoteClientsToJoin)
             {
                 waitingForClientsTapTriggered = true;
 
                 // Force a tap to simulate 2nd user joining.
-                auto eventArgs = multiplayer_session_change_event_args(clientManager->match_client()->session()->session_reference(), L"", 3);
-                clientManager->on_session_changed(eventArgs);
+                clientManager->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ clientManager->MatchClient()->Session()->SessionReference(), "", 3 });
             }
 
-            for (auto ev : events)
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::FindMatchCompleted)
+                if (events[i].EventType == XblMultiplayerEventType::FindMatchCompleted)
                 {
                     matchFound = true;
-                    auto findMatchCompleted = static_cast<FindMatchCompletedEventArgs^>(ev->EventArgs);
-                    LOGS_DEBUG << " [MPM] MatchStatus: " << findMatchCompleted->MatchStatus.ToString()->Data();
+                    XblMultiplayerMatchStatus matchStatus{};
+                    VERIFY_SUCCEEDED(XblMultiplayerEventArgsFindMatchCompleted(events[i].EventArgsHandle, &matchStatus, nullptr));
+                    VERIFY_ARE_EQUAL_UINT(XblMultiplayerMatchStatus::Completed, matchStatus);
 
-                    VERIFY_IS_TRUE(findMatchCompleted->MatchStatus == MatchStatus::Completed);
+                    sessionWriter->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ session->SessionReference(), "", 7 });
                 }
             }
 
-            if (matchFound && utils::str_icmp(mpInstance->LobbySession->Properties->Data(), customPropertyJson[L"custom"].serialize()) == 0)
+            auto props{ XblMultiplayerManagerLobbySessionPropertiesJson() };
+            if (matchFound &&
+                props != nullptr &&
+                utils::str_icmp(props, customProps.c_str()) == 0)
             {
                 isAdvertisingGameDone = true;
             }
+
+            Sleep(10);
         }
 
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_FALSE(!matchFound || !isAdvertisingGameDone);
     }
 
     DEFINE_TEST_CASE(TestFindMatchNoQoSRemoteClientJoiningMatchSession)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestFindMatchNoQoSRemoteClientJoiningMatchSession);
         FindMatchNoQoSRemoteClientJoiningMatchSessionHelper();
     }
 
     DEFINE_TEST_CASE(TestFindMatchNoQoSInvalidArg)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestFindMatchNoQoSInvalidArg);
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        AddLocalUserHelper(xboxLiveContext.get());
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto timeSpan = Windows::Foundation::TimeSpan();
-        timeSpan.Duration = 1 * TICKS_PER_SECOND;
-        VERIFY_THROWS_HR_CX(mpInstance->FindMatch(HOPPER_NAME_NO_QOS, ref new Platform::String(), timeSpan), E_UNEXPECTED);
-
-        DestructManager(xboxLiveContext);
+        uint32_t timeout = 100 * TICKS_PER_SECOND;
+        VERIFY_ARE_EQUAL_INT(E_INVALIDARG, XblMultiplayerManagerFindMatch(nullptr, "", timeout));
+        VERIFY_ARE_EQUAL_INT(E_INVALIDARG, XblMultiplayerManagerFindMatch(HOPPER_NAME_NO_QOS, "json", timeout));
     }
 
     void CancelMatchHelper(MatchCallingPatternType callingPattern)
     {
-        InitializeManager();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        AddLocalUserHelper(xboxLiveContext, lobbyWithNoTransferHandleResponse);
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+        AddLocalUserHelper(xboxLiveContext.get(), lobbyWithNoTransferHandleResponse);
 
         // Set up initial http responses
-        std::shared_ptr<HttpResponseStruct> matchTicketResponseStruct = std::make_shared<HttpResponseStruct>();
-        matchTicketResponseStruct->responseList = { matchTicketResponse };
+        std::vector<const char*> lobbyResponses{ lobbyMatchStatusSearching };
 
-        std::shared_ptr<HttpResponseStruct> transferHandleResponseStruct = std::make_shared<HttpResponseStruct>();
-        transferHandleResponseStruct->responseList = { transferHandleResponse };
+        std::vector<const char*> gameResponses
+        {
+            matchSessionJoin_1,
+            matchSessionJoin_2
+        };
 
-        std::shared_ptr<HttpResponseStruct> gameResponseStruct = std::make_shared<HttpResponseStruct>();
-        gameResponseStruct->responseList = { matchJoin_1_Response, matchJoin_2_Response };
-
-        std::shared_ptr<HttpResponseStruct> lobbyResponseStruct = std::make_shared<HttpResponseStruct>();
         if (callingPattern == MatchCallingPatternType::CanceledByService)
         {
-            lobbyResponseStruct->responseList = { matchStatusSearchingResponse, matchStatusCanceledByServiceResponse};
+            lobbyResponses.push_back(lobbyMatchStatusCanceledByService);
         }
         else
         {
-            lobbyResponseStruct->responseList = { matchStatusSearchingResponse, matchStatusFoundResponse, matchStatusCanceledByServiceResponse };
+            lobbyResponses.push_back(lobbyMatchStatusFound);
+            lobbyResponses.push_back(lobbyMatchStatusCanceledByService);
         }
 
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> matchResponses;
-        matchResponses[xbox_live_api::create_match_ticket] = matchTicketResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(matchResponses);
+        uint32_t lobbyMockCount{ 0 };
+        HttpMock lobbyMock(GET, defaultMpsdUri, 200);
+        lobbyMock.SetResponseBody(lobbyResponses[0]);
+        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        {
+            if (lobbyMockCount < lobbyResponses.size())
+            {
+                matchedMock->SetResponseBody(lobbyResponses[lobbyMockCount]);
+                ++lobbyMockCount;
+            }
+        });
 
-        std::unordered_map<xbox_live_api, std::shared_ptr<HttpResponseStruct>> transferHandleResponses;
-        transferHandleResponses[xbox_live_api::set_transfer_handle] = transferHandleResponseStruct;
-        m_mockXboxSystemFactory->add_http_api_state_response(transferHandleResponses, false);
+        uint32_t gameMockCount{ 0 };
+        HttpMock gameMock(GET, defaultGameUri, 200);
+        gameMock.SetResponseBody(gameResponses[0]);
+        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
+        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        {
+            if (gameMockCount < gameResponses.size())
+            {
+                matchedMock->SetResponseBody(gameResponses[gameMockCount]);
+                ++gameMockCount;
+            }
+        });
 
-        std::unordered_map<string_t, std::shared_ptr<HttpResponseStruct>> responses;
-        responses[defaultGameHttpHeaderUri] = gameResponseStruct;
-        responses[defaultMpsdUri] = lobbyResponseStruct;
-        m_mockXboxSystemFactory->add_http_state_response(responses);
+        HttpMock matchMock("PUT", matchTicketUri, 201);
+        matchMock.SetResponseBody(matchTicketResponse);
 
-        auto mpInstance = MultiplayerManager::SingletonInstance;
-        auto clientManager = mpInstance->GetCppObj()->_Get_multiplayer_client_manager();
-        auto mpsdLobbySession = clientManager->latest_pending_read()->lobby_client()->session();
-        auto lobbySessionWriter = clientManager->latest_pending_read()->lobby_client()->session_writer();
+        HttpMock transferMock("PUT", transferHandleUri, 201);
+        transferMock.SetResponseBody(transferHandleResponse);
 
-        auto timeSpan = Windows::Foundation::TimeSpan();
-        timeSpan.Duration = 1 * TICKS_PER_SECOND;
-        mpInstance->FindMatch(HOPPER_NAME_NO_QOS, ref new Platform::String(), timeSpan);
+        auto session = GetSession(false);
+        auto sessionWriter = GetSessionWriter(false);
+        auto mpmInstance = GlobalState::Get()->MultiplayerManager();
+        auto clientManager = mpmInstance->GetMultiplayerClientManager();
 
-        clientManager->match_client()->disable_next_timer(true); // force the timer to avoid getting into expiry state.
+        JsonDocument doc{};
+        mpmInstance->FindMatch(HOPPER_NAME_NO_QOS, doc, std::chrono::seconds{ TICKS_PER_SECOND });
+        clientManager->MatchClient()->DisableNextTimer(true);
 
-        bool matchFound = false, searchingTapTriggered = false, foundTapTriggered = false, waitingForClientsTapTriggered = false;
+        int count{ 0 };
+        auto customProps = JsonUtils::SerializeJson(classPropertiesJson()["properties"]["custom"]);
+        bool matchFound{ false };
+        bool searchingTapTriggered{ false };
+        bool foundTapTriggered{ false };
+        bool waitingForClientsTapTriggered{ false };
         while (!matchFound)
         {
-            auto events = mpInstance->DoWork();
-            if (mpInstance->MatchStatus == MatchStatus::Searching && !searchingTapTriggered)
+            if (++count > 500) break;
+
+            if (!searchingTapTriggered && XblMultiplayerManagerMatchStatus() == XblMultiplayerMatchStatus::Searching)
             {
                 searchingTapTriggered = true;
-                auto matchTicketeJson = web::json::value::parse(matchTicket);
-                VERIFY_ARE_EQUAL_TIMESPAN_TO_SECONDS(mpInstance->EstimatedMatchWaitTime, matchTicketeJson[_T("waitTime")].as_number().to_uint64());
 
-                auto eventArgs = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", 4);
-                lobbySessionWriter->on_session_changed(eventArgs);
+                auto matchTicketeJson = matchTicketJson();
+                VERIFY_ARE_EQUAL_UINT(mpmInstance->EstimatedMatchWaitTime().count(), matchTicketeJson["waitTime"].GetUint64());
+
+                sessionWriter->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ session->SessionReference(), "", 4 });
             }
 
-            if (!foundTapTriggered && mpInstance->LobbySession->GetCppObj()->_Change_number() == 4)
+            if (!foundTapTriggered && mpmInstance->LobbySession()->ChangeNumber() == 4)
             {
                 foundTapTriggered = true;
 
                 // For CanceledByService, this will cause a get with status = canceled.
-                auto eventArgs = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", 6);
-                lobbySessionWriter->on_session_changed(eventArgs);
+                sessionWriter->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ session->SessionReference(), "", 6 });
             }
 
-            if (!waitingForClientsTapTriggered && mpInstance->MatchStatus == MatchStatus::WaitingForRemoteClientsToJoin)
+            if (!waitingForClientsTapTriggered && XblMultiplayerManagerMatchStatus() == XblMultiplayerMatchStatus::WaitingForRemoteClientsToJoin)
             {
                 waitingForClientsTapTriggered = true;
                 if (callingPattern == MatchCallingPatternType::Canceled)
                 {
-                    mpInstance->CancelMatch();
+                    mpmInstance->CancelMatch();
 
                     // This will trigger a shoulder tap with canceled as the status from the service after deleting the match ticket.
-                    auto eventArgs = multiplayer_session_change_event_args(mpsdLobbySession->session_reference(), L"", 8);
-                    lobbySessionWriter->on_session_changed(eventArgs);
+                    sessionWriter->OnSessionChanged(XblMultiplayerSessionChangeEventArgs{ session->SessionReference(), "", 8 });
                 }
             }
 
-            for (auto ev : events)
+            size_t eventsCount{};
+            const XblMultiplayerEvent* events{};
+            XblMultiplayerManagerDoWork(&events, &eventsCount);
+
+            for (uint32_t i = 0; i < eventsCount; ++i)
             {
-                if (ev->EventType == MultiplayerEventType::FindMatchCompleted)
+                if (events[i].EventType == XblMultiplayerEventType::FindMatchCompleted)
                 {
                     matchFound = true;
-                    auto findMatchCompleted = static_cast<FindMatchCompletedEventArgs^>(ev->EventArgs);
-                    LOGS_DEBUG << " [MPM] MatchStatus: " << findMatchCompleted->MatchStatus.ToString()->Data();
-
-                    VERIFY_IS_TRUE(findMatchCompleted->MatchStatus == MatchStatus::Canceled);
+                    XblMultiplayerMatchStatus matchStatus{};
+                    VERIFY_SUCCEEDED(XblMultiplayerEventArgsFindMatchCompleted(events[i].EventArgsHandle, &matchStatus, nullptr));
+                    VERIFY_ARE_EQUAL_UINT(XblMultiplayerMatchStatus::Canceled, matchStatus);
                 }
             }
+
+            Sleep(10);
         }
 
-        DestructManager(xboxLiveContext);
+        VERIFY_IS_TRUE(matchFound);
     }
 
     DEFINE_TEST_CASE(TestCancelMatch)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestCancelMatch);
         CancelMatchHelper(MatchCallingPatternType::Canceled);
     }
 
     DEFINE_TEST_CASE(TestCancelMatchByService)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TestCancelMatchByService);
         CancelMatchHelper(MatchCallingPatternType::CanceledByService);
+    }
+
+    DEFINE_TEST_CASE(TestRtaResync)
+    {
+        MPMTestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
+
+        AddLocalUserHelper(xboxLiveContext.get());
+
+        HttpMock mock("GET", defaultMpsdUri, 201);
+        mock.SetResponseBody(defaultLobbySessionResponse);
+        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+
+        // Wait for MPM to refresh the lobby
+        Event e;
+        mock.SetMockMatchedCallback([&](HttpMock*, std::string, std::string)
+        {
+            e.Set();
+        });
+
+        env.MockRtaService().RaiseResync();
+        e.Wait();
     }
 };
 

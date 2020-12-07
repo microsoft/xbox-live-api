@@ -2,26 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#define TEST_CLASS_OWNER L"jasonsa"
-#define TEST_CLASS_AREA L"TitleStorage"
 #include "UnitTestIncludes.h"
-
-#include "TitleStorageService_WinRT.h"
-
-using namespace Microsoft::Xbox::Services;
-using namespace Microsoft::Xbox::Services::TitleStorage;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-const web::json::value queryJson = web::json::value::parse(LR"(
+const char quotaResponse[] = R"(
 {
     "quotaInfo": {
         "usedBytes": 777,
         "quotaBytes": 268435456
     }
-})");
+})";
 
-const web::json::value blobMetadataJson = web::json::value::parse(LR"(
+const char blobMetadataPage1[] = R"(
 {
     "blobs": [
         {
@@ -34,750 +27,815 @@ const web::json::value blobMetadataJson = web::json::value::parse(LR"(
         "totalItems": 2,
         "continuationToken": "gF1nbDcy7loA_BWANNku1Go-6lM1~qH499VFFeHwow0UUKyXpSETnrEY1"
     }
-})");
+})";
 
-const string_t downloadJson = LR"(
+const char blobMetadataPage2[] = R"(
+{
+    "blobs": [
+        {
+            "fileName": "test/sample.json,json",
+            "etag": "\"0x8D1C76581F12853\"",
+            "size": 67
+        }
+    ],
+    "pagingInfo": {
+        "totalItems": 2
+    }
+})";
+
+const char jsonBlob[] = R"(
 {
     "isThisJson": 1,
     "monstersKilled": 10,
     "playerClass": "warrior"
 })";
 
-const web::json::value largeUploadJson = web::json::value::parse(LR"(
-{"continuationToken":"257e3886-cf73-4b52-8e89-2d7088d60bab-1"})");
-
-const std::vector<unsigned char> downloadBinary = { 
+const uint8_t binaryBlob[] = { 
     10, 255, 101, 0, 1, 29, 50, 55, 100, 10, 255, 101, 0, 1, 29, 50, 55, 100, 10, 255, 101, 0, 1, 29, 50, 55, 100, 10, 255, 101, 
     0, 1, 29, 50, 55, 100, 10, 255, 101, 0, 1, 29, 50, 55, 100, 10, 255, 101, 0, 1, 29, 50, 55, 100, 10, 255, 101, 0, 1, 29, 50, 
     55, 100, 10, 255, 101, 0, 1, 29, 50, 55, 100, 10, 255, 101, 0, 1, 29, 50, 55, 100, 10, 255, 101, 0, 1, 29, 50, 55, 100 
-    };
+};
+
+const char continuationTokenJson[] = R"(
+{
+    "continuationToken":"257e3886-cf73-4b52-8e89-2d7088d60bab-1"
+})";
 
 DEFINE_TEST_CLASS(TitleStorageTests)
 {
 public:
     DEFINE_TEST_CLASS_PROPS(TitleStorageTests)
 
-    void VerifyTitleStorageBlobMetadata(TitleStorageBlobMetadata^ metadata, web::json::value expected)
+    // RAII wrapper for XblTitleStorageBlobMetadataResultHandle 
+    class BlobMetadataResult
     {
-        auto fileName = expected[L"fileName"].as_string();
-        auto nPos = fileName.find(',');
-        auto blobType = fileName.substr(nPos + 1);
-        VERIFY_IS_TRUE(utils::str_icmp(metadata->BlobType.ToString()->Data(), blobType) == 0);
-        fileName.resize(nPos);
-        VERIFY_ARE_EQUAL(metadata->BlobPath->ToString()->Data(), fileName);
-        VERIFY_ARE_EQUAL(metadata->ETag->ToString()->Data(), expected[L"etag"].as_string());
+    public:
+        explicit BlobMetadataResult(XblTitleStorageBlobMetadataResultHandle h) noexcept : handle{ h }
+        {
+            assert(handle);
+        }
+
+        BlobMetadataResult(const BlobMetadataResult& other) noexcept
+        {
+            auto hr = XblTitleStorageBlobMetadataResultDuplicateHandle(other.handle, &handle);
+            VERIFY_SUCCEEDED(hr);
+        }
+
+        BlobMetadataResult& operator=(BlobMetadataResult other)
+        {
+            std::swap(other.handle, handle);
+            return *this;
+        }
+
+        ~BlobMetadataResult() noexcept
+        {
+            XblTitleStorageBlobMetadataResultCloseHandle(handle);
+        }
+
+        std::vector<XblTitleStorageBlobMetadata> Items() const noexcept
+        {
+            const XblTitleStorageBlobMetadata* items{ nullptr };
+            size_t count{ 0 };
+            VERIFY_SUCCEEDED(XblTitleStorageBlobMetadataResultGetItems(handle, &items, &count));
+
+            return std::vector<XblTitleStorageBlobMetadata>(items, items + count);
+        }
+
+        bool HasNext() const noexcept
+        {
+            bool hasNext{ false };
+            VERIFY_SUCCEEDED(XblTitleStorageBlobMetadataResultHasNext(handle, &hasNext));
+            return hasNext;
+        }
+
+        void GetNext() noexcept
+        {
+            XAsyncBlock async{};
+            VERIFY_SUCCEEDED(XblTitleStorageBlobMetadataResultGetNextAsync(handle, 0, &async));
+            VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+
+            XblTitleStorageBlobMetadataResultCloseHandle(handle);
+            VERIFY_SUCCEEDED(XblTitleStorageBlobMetadataResultGetNextResult(&async, &handle));
+        }
+
+    private:
+        XblTitleStorageBlobMetadataResultHandle handle{ nullptr };
+    };
+
+    void VerifyBlobMetadata(const XblTitleStorageBlobMetadata& actual, JsonValue& expected)
+    {
+        VERIFY_IS_TRUE(expected.IsObject());
+
+        String filename = expected["fileName"].GetString();
+        auto tokens{ utils::string_split(filename, ',') };
+        VERIFY_ARE_EQUAL_UINT(2, tokens.size());
+        VERIFY_ARE_EQUAL_STR(tokens[0].data(), actual.blobPath);
+
+        switch (actual.blobType)
+        {
+        case XblTitleStorageBlobType::Binary:
+        {
+            VERIFY_ARE_EQUAL_STR_IGNORE_CASE(tokens[1].data(), "binary");
+            break;
+        }
+        case XblTitleStorageBlobType::Json:
+        {
+            VERIFY_ARE_EQUAL_STR_IGNORE_CASE(tokens[1].data(), "json");
+            break;
+        }
+        case XblTitleStorageBlobType::Config: // Unsupported?
+        case XblTitleStorageBlobType::Unknown:
+        default:
+        {
+            VERIFY_FAIL();
+        }
+        }
+
+        VERIFY_ARE_EQUAL_STR_IGNORE_CASE(expected["etag"].GetString(), actual.eTag);
     }
 
-    void VerifyTitleStorageBlobMetadataResult(TitleStorageBlobMetadataResult^ metadata, web::json::value expected)
+    void VerifyBlobMetadataResult(const BlobMetadataResult& actual, JsonValue& expected)
     {
-        web::json::array blobs = expected[L"blobs"].as_array();
-        VERIFY_ARE_EQUAL_INT(metadata->Items->Size, blobs.size());
+        auto actualBlobs{ actual.Items() };
+        auto expectedBlobs{ expected["blobs"].GetArray() };
+        VERIFY_ARE_EQUAL_UINT(expectedBlobs.Size(), actualBlobs.size());
 
-        uint32_t counter = 0;
-        for (auto blob : blobs)
+        for (uint32_t i = 0; i < actualBlobs.size(); ++i)
         {
-            VerifyTitleStorageBlobMetadata(metadata->Items->GetAt(counter), blob);
-            ++counter;
+            VerifyBlobMetadata(actualBlobs[i], expectedBlobs[i]);
         }
     }
 
-    void VerifyTitleStorageQuota(TitleStorageQuota^ quota, web::json::value expected)
+    std::string ExpectedUriPath(
+        XblTitleStorageType storageType,
+        uint64_t xuid,
+        const std::string& scid = MOCK_SCID
+    )
     {
-        auto quotaInfoJson = expected[L"quotaInfo"];
-        VERIFY_ARE_EQUAL_UINT(quota->UsedBytes, quotaInfoJson[L"usedBytes"].as_number().to_uint64());
-        VERIFY_ARE_EQUAL_UINT(quota->QuotaBytes, quotaInfoJson[L"quotaBytes"].as_number().to_uint64());
-    }
-    
-    void UploadBlobHelper(TitleStorageType type, TitleStorageBlobType blobType, const string_t& uri, std::vector<unsigned char> uploadData)
-    {
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-
-        Windows::Foundation::DateTime dt;
-        dt.UniversalTime = 1000;
-        auto blobMetadata = ref new TitleStorageBlobMetadata(
-            _T("123456789"),
-            type,
-            _T("blobPath"),
-            blobType,
-            _T("TestXboxUserId"),
-            _T("Name"),
-            _T("0x52345234e3"),
-            dt
-            );
-
-        auto writer = ref new Windows::Storage::Streams::DataWriter();
-        writer->WriteBytes(Platform::ArrayReference<unsigned char>(&(uploadData.at(0)), static_cast<uint32_t>(uploadData.size())));
-        auto buffer = writer->DetachBuffer();
-
-        auto result = create_task(xboxLiveContext->TitleStorageService->UploadBlobAsync(
-            blobMetadata,
-            buffer,
-            TitleStorageETagMatchCondition::NotUsed,
-            1000
-            )).get();
-
-        stringstream_t uriPath;
-        uriPath << uri;
-
-        uriPath << _T("?clientFileTime=Mon,%2001%20Jan%201601%2000:00:00%20GMT&displayName=Name");
-        if (blobType == TitleStorageBlobType::Binary)
+        std::stringstream ss;
+        switch (storageType)
         {
-            uriPath << _T("&finalBlock=true");
+        case XblTitleStorageType::GlobalStorage:
+        {
+            ss << "/global";
+            break;
+        }
+        case XblTitleStorageType::Universal:
+        {
+            ss << "/universalplatform/users/xuid(" << xuid << ")";
+            break;
+        }
+        case XblTitleStorageType::TrustedPlatformStorage:
+        {
+            ss << "/trustedplatform/users/xuid(" << xuid << ")";
+            break;
+        }
+        }
+        ss << "/scids/" << scid;
+
+        return ss.str();
+    }
+
+    std::string ExpectedUriPath(
+        XblTitleStorageType storageType,
+        uint64_t xuid,
+        XblTitleStorageBlobType blobType,
+        const std::string& blobPath = "blobPath",
+        const std::string& scid = MOCK_SCID
+    )
+    {
+        std::stringstream ss;
+        ss << ExpectedUriPath(storageType, xuid, scid);
+        ss << "/data/" << blobPath << ",";
+
+        switch (blobType)
+        {
+        case XblTitleStorageBlobType::Binary:
+        {
+            ss << "binary";
+            break;
+        }
+        case XblTitleStorageBlobType::Json:
+        {
+            ss << "json";
+            break;
+        }
+        case XblTitleStorageBlobType::Config: // Unsupported?
+        case XblTitleStorageBlobType::Unknown:
+        default:
+        {
+            assert(false);
+            break;
+        }
+        }
+        return ss.str();
+    }
+
+    void UploadBlob(
+        XblContextHandle xboxLiveContext,
+        XblTitleStorageType storageType,
+        XblTitleStorageBlobType blobType,
+        const uint8_t* uploadData,
+        size_t uploadDataSize,
+        uint32_t bufferSizeMultiplier
+    )
+    {
+        XblTitleStorageBlobMetadata metadata
+        {
+            "blobPath",
+            blobType,
+            storageType,
+            "Name",
+            "0x52345234e3",
+            1, // Use a non-zero client time so that we don't ignore it
+            0,
+            MOCK_SCID,
+            xboxLiveContext->Xuid()
+        };
+
+        HttpMock mock{ "PUT", "https://titlestorage.xboxlive.com" };
+
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                UNREFERENCED_PARAMETER(mock);
+                requestWellFormed &= !requestBody.empty();
+
+                auto queryParams = xbox::services::uri::split_query(xbox::services::uri{ Utils::StringTFromUtf8(requestUrl.data()) }.query());
+
+                requestWellFormed &= queryParams[_T("clientFileTime")] == _T("Thu,%2001%20Jan%201970%2000:00:01%20GMT");
+                requestWellFormed &= queryParams[_T("displayName")] == Utils::StringTFromUtf8(metadata.displayName);
+                if (blobType == XblTitleStorageBlobType::Binary)
+                {
+                    requestWellFormed &= queryParams[_T("finalBlock")] == _T("true");
+                }
+            }
+        );
+
+        std::vector<uint8_t> buffer(uploadDataSize * bufferSizeMultiplier);
+        memcpy(buffer.data(), uploadData, uploadDataSize);
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblTitleStorageUploadBlobAsync(
+            xboxLiveContext,
+            metadata,
+            buffer.data(),
+            uploadDataSize * bufferSizeMultiplier,
+            XblTitleStorageETagMatchCondition::NotUsed,
+            1000,
+            &async
+        ));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+
+        VERIFY_SUCCEEDED(XblTitleStorageUploadBlobResult(&async, &metadata));
+    }
+
+    void DownloadBlob(
+        XblContextHandle xboxLiveContext,
+        XblTitleStorageType storageType,
+        XblTitleStorageBlobType blobType,
+        uint32_t bufferSizeMultiplier
+    )
+    {
+        HttpMock mock{ "GET", "https://titlestorage.xboxlive.com" };
+        const uint8_t* responseBody{ nullptr };
+        size_t responseBodySize{ 0 };
+        bool requestWellFormed{ true };
+
+        mock.SetMockMatchedCallback(
+            [&](HttpMock* mock, std::string requestUrl, std::string requestBody)
+        {
+            requestWellFormed &= requestBody.empty();
+            requestWellFormed &= (HttpMock::GetUriPath(requestUrl) == ExpectedUriPath(storageType, xboxLiveContext->Xuid(), blobType));
+
+            switch (blobType)
+            {
+            case XblTitleStorageBlobType::Binary:
+            {
+                responseBody = binaryBlob;
+                responseBodySize = sizeof(binaryBlob);
+                break;
+            }
+            case XblTitleStorageBlobType::Json:
+            {
+                responseBody = reinterpret_cast<const uint8_t*>(jsonBlob);
+                responseBodySize = sizeof(jsonBlob);
+                break;
+            }
+            case XblTitleStorageBlobType::Config: // Unsupported?
+            case XblTitleStorageBlobType::Unknown:
+            default:
+            {
+                assert(false);
+                break;
+            }
+            }
+
+            mock->SetResponseBody(responseBody, responseBodySize);
+        }
+        );
+
+        size_t blobSize{ 0 };
+        switch (blobType)
+        {
+        case XblTitleStorageBlobType::Binary:
+        {
+            blobSize = sizeof(binaryBlob);
+            break;
+        }
+        case XblTitleStorageBlobType::Json:
+        {
+            blobSize = sizeof(jsonBlob);
+            break;
+        }
+        case XblTitleStorageBlobType::Config: // Unsupported?
+        case XblTitleStorageBlobType::Unknown:
+        default:
+        {
+            assert(false);
+            break;
+        }
         }
 
-        VERIFY_ARE_EQUAL_STR(L"PUT", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://titlestorage.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL(uriPath.str(), httpCall->PathQueryFragment.to_string());
-    }
-
-    void DownloadBlobHelper(TitleStorageType type, TitleStorageBlobType blobType, const string_t& uri, std::vector<unsigned char> blobResult)
-    {
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(blobResult);
-        Windows::Foundation::DateTime dt;
-        dt.UniversalTime = 1000;
-        auto blobMetadata = ref new TitleStorageBlobMetadata(
-            _T("123456789"),
-            type,
-            _T("blobPath"),
-            blobType,
-            _T("TestXboxUserId"),
-            _T("Name"),
-            _T("0x52345234e3"),
-            dt
-            );
-
-        Windows::Storage::Streams::IBuffer^ buffer = ref new Windows::Storage::Streams::Buffer(0);
-        auto result = create_task(xboxLiveContext->TitleStorageService->DownloadBlobAsync(
-            blobMetadata,
-            buffer,
-            TitleStorageETagMatchCondition::NotUsed,
-            _T("")
-            )).get();
-
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://titlestorage.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL(uri, httpCall->PathQueryFragment.to_string());
-        VERIFY_ARE_EQUAL_INT(result->BlobBuffer->Length, blobResult.size());
-
-        auto reader = Windows::Storage::Streams::DataReader::FromBuffer(result->BlobBuffer);
-        std::vector<unsigned char> actualBlobBuffer = std::vector<unsigned char>(reader->UnconsumedBufferLength);
-
-        reader->ReadBytes(Platform::ArrayReference<unsigned char>(&(actualBlobBuffer.at(0)), static_cast<uint32_t>(blobResult.size())));
-
-        VERIFY_ARE_EQUAL_INT(actualBlobBuffer.size(), blobResult.size());
-    }
-
-    void DeleteBlobHelper(TitleStorageType type, TitleStorageBlobType blobType, const string_t& uri)
-    {
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-
-        Windows::Foundation::DateTime dt;
-        dt.UniversalTime = 1000;
-
-        auto blobMetadata = ref new TitleStorageBlobMetadata(
-            _T("123456789"),
-            type,
-            _T("blobPath"),
-            blobType,
-            _T("TestXboxUserId"),
-            _T("Name"),
-            _T("0x52345234e3"),
-            dt
-            );
-
-        create_task(xboxLiveContext->TitleStorageService->DeleteBlobAsync(
-            blobMetadata,
-            true
-            )).get();
-
-        VERIFY_ARE_EQUAL_STR(L"DELETE", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://titlestorage.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL(uri, httpCall->PathQueryFragment.to_string());
-    }
-
-    void GetBlobMetadataHelper(TitleStorageType type, const string_t& uriPath)
-    {
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(blobMetadataJson);
-
-        Platform::String^ xboxUserId = nullptr;
-        if (type != TitleStorageType::GlobalStorage)
+        XblTitleStorageBlobMetadata metadata
         {
-            xboxUserId = L"TestXboxUserId";
-        }
-        auto result = create_task(xboxLiveContext->TitleStorageService->GetBlobMetadataAsync(
-            L"123456789",
-            type,
-            L"blobPath",
-            xboxUserId,
-            1,
-            10
-            )).get();
+            "blobPath",
+            blobType,
+            storageType,
+            "Name",
+            "0x52345234e3",
+            0,
+            blobSize,
+            MOCK_SCID,
+            xboxLiveContext->Xuid()
+        };
 
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://titlestorage.mockenv.xboxlive.com", httpCall->ServerName);
+        std::vector<uint8_t> retreivedBlob(blobSize * bufferSizeMultiplier);
 
-        stringstream_t uri;
-        uri << uriPath;
-        uri << _T("/scids/123456789/data/blobPath?maxItems=10&skipItems=1");
-        VERIFY_ARE_EQUAL(uri.str(), httpCall->PathQueryFragment.to_string());
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblTitleStorageDownloadBlobAsync(
+            xboxLiveContext,
+            metadata,
+            retreivedBlob.data(),
+            retreivedBlob.size(),
+            XblTitleStorageETagMatchCondition::NotUsed,
+            nullptr,
+            0,
+            &async
+        ));
 
-        VERIFY_IS_TRUE(result->HasNext);
-        VerifyTitleStorageBlobMetadataResult(result, blobMetadataJson);
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
 
-        stringstream_t continuationUri;
-        continuationUri << uriPath;
-        continuationUri << _T("/scids/123456789/data/blobPath?maxItems=10&continuationToken=gF1nbDcy7loA_BWANNku1Go-6lM1~qH499VFFeHwow0UUKyXpSETnrEY1");
-        result = create_task(result->GetNextAsync(10)).get();
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://titlestorage.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(continuationUri.str(), httpCall->PathQueryFragment.to_string());
-        VerifyTitleStorageBlobMetadataResult(result, blobMetadataJson);
+        VERIFY_SUCCEEDED(XblTitleStorageDownloadBlobResult(&async, &metadata));
+        VERIFY_ARE_EQUAL_UINT(responseBodySize, metadata.length);
+        VERIFY_IS_TRUE(memcmp(responseBody, retreivedBlob.data(), retreivedBlob.size() / bufferSizeMultiplier) == 0);
     }
 
-    void GetQuotaHelper(TitleStorageType type, const string_t& uriPath)
+    void DeleteBlob(
+        XblContextHandle xboxLiveContext,
+        XblTitleStorageType storageType,
+        XblTitleStorageBlobType blobType
+    )
     {
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(queryJson);
-        auto result = create_task(xboxLiveContext->TitleStorageService->GetQuotaAsync(
-            _T("123456789"),
-            type
-            )).get();
+        HttpMock mock{ "DELETE", "https://titlestorage.xboxlive.com" };
 
-        stringstream_t uri;
-        uri << uriPath;
-        uri << _T("/scids/123456789");
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://titlestorage.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL(uri.str(), httpCall->PathQueryFragment.to_string());
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                UNREFERENCED_PARAMETER(mock);
+                requestWellFormed &= requestBody.empty();
+                requestWellFormed &= (HttpMock::GetUriPath(requestUrl) == ExpectedUriPath(storageType, xboxLiveContext->Xuid(), blobType));
+            }
+        );
 
-        VerifyTitleStorageQuota(result, queryJson);
+        XblTitleStorageBlobMetadata metadata
+        {
+            "blobPath",
+            blobType,
+            storageType,
+            "Name",
+            "0x52345234e3",
+            0,
+            0,
+            MOCK_SCID,
+            xboxLiveContext->Xuid()
+        };
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblTitleStorageDeleteBlobAsync(
+            xboxLiveContext,
+            metadata,
+            true,
+            &async
+        ));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+    }
+
+    void GetBlobMetadata(
+        XblContextHandle xboxLiveContext,
+        XblTitleStorageType type
+    )
+    {
+        HttpMock mock{ "GET", "https://titlestorage.xboxlive.com" };
+        JsonDocument responseJson;
+
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                requestWellFormed &= requestBody.empty();
+
+                std::string expectedPath{ ExpectedUriPath(type, xboxLiveContext->Xuid()) };
+                expectedPath += "/data/blobPath";
+
+                requestWellFormed &= (HttpMock::GetUriPath(requestUrl) == expectedPath);
+
+                if (HttpMock::GetUriQuery(requestUrl).find("continuationToken") != string_t::npos)
+                {
+                    responseJson.Parse(blobMetadataPage2);
+                }
+                else
+                {
+                    responseJson.Parse(blobMetadataPage1);
+                }
+                mock->SetResponseBody(responseJson);
+            }
+        );
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblTitleStorageGetBlobMetadataAsync(
+            xboxLiveContext,
+            MOCK_SCID,
+            type,
+            "blobPath",
+            xboxLiveContext->Xuid(),
+            0,
+            0,
+            &async
+        ));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+
+        XblTitleStorageBlobMetadataResultHandle handle{ nullptr };
+        VERIFY_SUCCEEDED(XblTitleStorageGetBlobMetadataResult(&async, &handle));
+
+        BlobMetadataResult result{ handle };
+        VerifyBlobMetadataResult(result, responseJson);
+
+        while (result.HasNext())
+        {
+            result.GetNext();
+            VERIFY_IS_TRUE(requestWellFormed);
+            VerifyBlobMetadataResult(result, responseJson);
+        }
+    }
+
+    void GetQuota(
+        XblContextHandle xboxLiveContext,
+        XblTitleStorageType type
+    )
+    {
+        HttpMock mock{ "GET", "https://titlestorage.xboxlive.com" };
+        mock.SetResponseBody(quotaResponse);
+
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                UNREFERENCED_PARAMETER(mock);
+                requestWellFormed &= requestBody.empty();
+                requestWellFormed &= (HttpMock::GetUriPath(requestUrl) == ExpectedUriPath(type, xboxLiveContext->Xuid()));
+            }
+        );
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblTitleStorageGetQuotaAsync(xboxLiveContext, MOCK_SCID, type, &async));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+
+        size_t usedBytes{ 0 };
+        size_t quotaBytes{ 0 };
+        VERIFY_SUCCEEDED(XblTitleStorageGetQuotaResult(&async, &usedBytes, &quotaBytes));
+
+        JsonDocument quotaJson;
+        quotaJson.Parse(quotaResponse);
+        VERIFY_ARE_EQUAL_UINT(quotaJson["quotaInfo"]["usedBytes"].GetUint64(), usedBytes);
+        VERIFY_ARE_EQUAL_UINT(quotaJson["quotaInfo"]["quotaBytes"].GetUint64(), quotaBytes);
     }
 
     DEFINE_TEST_CASE(GetQuotaTest)
     {
-        DEFINE_TEST_CASE_PROPERTIES(GetQuotaTest);
-        GetQuotaHelper(TitleStorageType::GlobalStorage, _T("/global"));
-        GetQuotaHelper(TitleStorageType::JsonStorage, _T("/json/users/xuid(TestXboxUserId)"));
-        GetQuotaHelper(TitleStorageType::TrustedPlatformStorage, _T("/trustedplatform/users/xuid(TestXboxUserId)"));
-        GetQuotaHelper(TitleStorageType::UntrustedPlatformStorage, _T("/untrustedplatform/users/xuid(TestXboxUserId)"));
-        GetQuotaHelper(TitleStorageType::Universal, _T("/universalplatform/users/xuid(TestXboxUserId)"));
-    }
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-    DEFINE_TEST_CASE(GetQuotaForSessionStorageTest)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(GetQuotaForSessionStorageTest);
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(queryJson);
-#pragma warning(suppress: 4973)
-        auto result = create_task(xboxLiveContext->TitleStorageService->GetQuotaForSessionStorageAsync(
-            _T("123456789"),
-            _T("TestTemplate"),
-            _T("TestSession")
-            )).get();
-
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://titlestorage.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/sessions/TestTemplate~TestSession/scids/123456789", httpCall->PathQueryFragment.to_string());
-
-        VerifyTitleStorageQuota(result, queryJson);
+        GetQuota(xboxLiveContext.get(), XblTitleStorageType::GlobalStorage);
+        GetQuota(xboxLiveContext.get(), XblTitleStorageType::TrustedPlatformStorage);
+        GetQuota(xboxLiveContext.get(), XblTitleStorageType::Universal);
     }
 
     DEFINE_TEST_CASE(GetBlobMetadataTest)
     {
-        DEFINE_TEST_CASE_PROPERTIES(GetBlobMetadataTest);
-        GetBlobMetadataHelper(TitleStorageType::JsonStorage, _T("/json/users/xuid(TestXboxUserId)"));
-        GetBlobMetadataHelper(TitleStorageType::GlobalStorage, _T("/global"));
-        GetBlobMetadataHelper(TitleStorageType::TrustedPlatformStorage, _T("/trustedplatform/users/xuid(TestXboxUserId)"));
-        GetBlobMetadataHelper(TitleStorageType::UntrustedPlatformStorage, _T("/untrustedplatform/users/xuid(TestXboxUserId)"));
-        GetBlobMetadataHelper(TitleStorageType::Universal, _T("/universalplatform/users/xuid(TestXboxUserId)"));
-    }
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-    DEFINE_TEST_CASE(GetBlobMetadataForSessionStorageTest)
-    {
-        DEFINE_TEST_CASE_PROPERTIES(GetBlobMetadataForSessionStorageTest);
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(blobMetadataJson);
-#pragma warning(suppress: 4973)        
-        auto result = create_task(xboxLiveContext->TitleStorageService->GetBlobMetadataForSessionStorageAsync(
-            _T("123456789"),
-            _T("blobPath"),
-            _T("TestTemplate"),
-            _T("TestSession"),
-            1,
-            10
-            )).get();
-
-        VERIFY_ARE_EQUAL_STR(L"GET", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://titlestorage.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL_STR(L"/sessions/TestTemplate~TestSession/scids/123456789/data/blobPath?maxItems=10&skipItems=1", httpCall->PathQueryFragment.to_string());
-        
-        VerifyTitleStorageBlobMetadataResult(result, blobMetadataJson);
+        GetBlobMetadata(xboxLiveContext.get(), XblTitleStorageType::GlobalStorage);
+        GetBlobMetadata(xboxLiveContext.get(), XblTitleStorageType::TrustedPlatformStorage);
+        GetBlobMetadata(xboxLiveContext.get(), XblTitleStorageType::Universal);
     }
 
     DEFINE_TEST_CASE(DeleteBlobTest)
     {
-        DEFINE_TEST_CASE_PROPERTIES(DeleteBlobTest);
-        DeleteBlobHelper(TitleStorageType::JsonStorage, TitleStorageBlobType::Json, L"/json/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json");
-        DeleteBlobHelper(TitleStorageType::SessionStorage, TitleStorageBlobType::Json, L"/sessions/~/scids/123456789/data/blobPath,json");
-        DeleteBlobHelper(TitleStorageType::SessionStorage, TitleStorageBlobType::Binary, L"/sessions/~/scids/123456789/data/blobPath,binary");
-        DeleteBlobHelper(TitleStorageType::TrustedPlatformStorage, TitleStorageBlobType::Json, L"/trustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json");
-        DeleteBlobHelper(TitleStorageType::TrustedPlatformStorage, TitleStorageBlobType::Binary, L"/trustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary");
-        DeleteBlobHelper(TitleStorageType::UntrustedPlatformStorage, TitleStorageBlobType::Json, L"/untrustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json");
-        DeleteBlobHelper(TitleStorageType::UntrustedPlatformStorage, TitleStorageBlobType::Binary, L"/untrustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary");
-        DeleteBlobHelper(TitleStorageType::Universal, TitleStorageBlobType::Json, L"/universalplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json");
-        DeleteBlobHelper(TitleStorageType::Universal, TitleStorageBlobType::Binary, L"/universalplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary");
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        DeleteBlob(xboxLiveContext.get(), XblTitleStorageType::TrustedPlatformStorage, XblTitleStorageBlobType::Json);
+        DeleteBlob(xboxLiveContext.get(), XblTitleStorageType::TrustedPlatformStorage, XblTitleStorageBlobType::Binary);
+        DeleteBlob(xboxLiveContext.get(), XblTitleStorageType::Universal, XblTitleStorageBlobType::Json);
+        DeleteBlob(xboxLiveContext.get(), XblTitleStorageType::Universal, XblTitleStorageBlobType::Binary);
     }
 
     DEFINE_TEST_CASE(DownloadBlobTest)
     {
-        DEFINE_TEST_CASE_PROPERTIES(DownloadBlobTest);
-#pragma warning(suppress: 6260)
-        std::vector<unsigned char> jsonResultBuffer(sizeof(downloadJson) * 2);
-        memcpy(&jsonResultBuffer[0], &downloadJson, sizeof(downloadJson));
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-#pragma warning(suppress: 6260)
-        std::vector<unsigned char> binaryResultBuffer(sizeof(downloadBinary) * 2);
-        memcpy(&binaryResultBuffer[0], &downloadBinary, sizeof(downloadBinary));
+        DownloadBlob(xboxLiveContext.get(), XblTitleStorageType::GlobalStorage, XblTitleStorageBlobType::Json, 1);
+        DownloadBlob(xboxLiveContext.get(), XblTitleStorageType::GlobalStorage, XblTitleStorageBlobType::Binary, 1);
+        //DownloadBlob(xboxLiveContext.get(), XblTitleStorageType::GlobalStorage, XblTitleStorageBlobType::Config, 1); Unsupported?
+        DownloadBlob(xboxLiveContext.get(), XblTitleStorageType::TrustedPlatformStorage, XblTitleStorageBlobType::Json, 1);
+        DownloadBlob(xboxLiveContext.get(), XblTitleStorageType::TrustedPlatformStorage, XblTitleStorageBlobType::Binary, 1);
+        DownloadBlob(xboxLiveContext.get(), XblTitleStorageType::Universal, XblTitleStorageBlobType::Json, 1);
+        DownloadBlob(xboxLiveContext.get(), XblTitleStorageType::Universal, XblTitleStorageBlobType::Binary, 1);
+    }
 
-        DownloadBlobHelper(
-            TitleStorageType::JsonStorage, 
-            TitleStorageBlobType::Json, 
-            L"/json/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json", 
-            jsonResultBuffer
-            );
+    DEFINE_TEST_CASE(DownloadBlobWithLargeBufferTest)
+    {
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        DownloadBlobHelper(
-            TitleStorageType::GlobalStorage,
-            TitleStorageBlobType::Json,
-            L"/global/scids/123456789/data/blobPath,json",
-            jsonResultBuffer
-            );
-
-        DownloadBlobHelper(
-            TitleStorageType::GlobalStorage,
-            TitleStorageBlobType::Binary,
-            L"/global/scids/123456789/data/blobPath,binary",
-            binaryResultBuffer
-            );
-
-        DownloadBlobHelper(
-            TitleStorageType::GlobalStorage,
-            TitleStorageBlobType::Config,
-            L"/global/scids/123456789/data/blobPath,config",
-            jsonResultBuffer
-            );
-
-        DownloadBlobHelper(
-            TitleStorageType::TrustedPlatformStorage,
-            TitleStorageBlobType::Json,
-            L"/trustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json",
-            jsonResultBuffer
-            );
-
-        DownloadBlobHelper(
-            TitleStorageType::TrustedPlatformStorage,
-            TitleStorageBlobType::Binary,
-            L"/trustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary",
-            binaryResultBuffer
-            );
-
-        DownloadBlobHelper(
-            TitleStorageType::UntrustedPlatformStorage,
-            TitleStorageBlobType::Json,
-            L"/untrustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json",
-            jsonResultBuffer
-            );
-
-        DownloadBlobHelper(
-            TitleStorageType::UntrustedPlatformStorage,
-            TitleStorageBlobType::Binary,
-            L"/untrustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary",
-            binaryResultBuffer
-            );
-
-        DownloadBlobHelper(
-            TitleStorageType::Universal,
-            TitleStorageBlobType::Json,
-            L"/universalplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json",
-            jsonResultBuffer
-            );
-
-        DownloadBlobHelper(
-            TitleStorageType::Universal,
-            TitleStorageBlobType::Binary,
-            L"/universalplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary",
-            binaryResultBuffer
-            );
-
-        DownloadBlobHelper(
-            TitleStorageType::SessionStorage,
-            TitleStorageBlobType::Json,
-            L"/sessions/~/scids/123456789/data/blobPath,json",
-            jsonResultBuffer
-            );
-
-        DownloadBlobHelper(
-            TitleStorageType::SessionStorage,
-            TitleStorageBlobType::Binary,
-            L"/sessions/~/scids/123456789/data/blobPath,binary",
-            binaryResultBuffer
-            );
+        DownloadBlob(xboxLiveContext.get(), XblTitleStorageType::GlobalStorage, XblTitleStorageBlobType::Json, 2);
+        DownloadBlob(xboxLiveContext.get(), XblTitleStorageType::GlobalStorage, XblTitleStorageBlobType::Binary, 2);
+        //DownloadBlob(xboxLiveContext.get(), XblTitleStorageType::GlobalStorage, XblTitleStorageBlobType::Config, 2); Unsupported?
+        DownloadBlob(xboxLiveContext.get(), XblTitleStorageType::TrustedPlatformStorage, XblTitleStorageBlobType::Json, 2);
+        DownloadBlob(xboxLiveContext.get(), XblTitleStorageType::TrustedPlatformStorage, XblTitleStorageBlobType::Binary, 2);
+        DownloadBlob(xboxLiveContext.get(), XblTitleStorageType::Universal, XblTitleStorageBlobType::Json, 2);
+        DownloadBlob(xboxLiveContext.get(), XblTitleStorageType::Universal, XblTitleStorageBlobType::Binary, 2);
     }
 
     DEFINE_TEST_CASE(UploadBlobTest)
     {
-        DEFINE_TEST_CASE_PROPERTIES(UploadBlobTest);
-#pragma warning(suppress: 6260)
-        std::vector<unsigned char> jsonUploadBuffer(sizeof(downloadJson) * 2);
-        memcpy(&jsonUploadBuffer[0], &downloadJson, sizeof(downloadJson));
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-#pragma warning(suppress: 6260)
-        std::vector<unsigned char> binaryUploadBuffer(sizeof(downloadBinary) * 2);
-        memcpy(&binaryUploadBuffer[0], &downloadBinary, sizeof(downloadBinary));
+        UploadBlob(
+            xboxLiveContext.get(),
+            XblTitleStorageType::TrustedPlatformStorage,
+            XblTitleStorageBlobType::Json,
+            reinterpret_cast<const uint8_t*>(jsonBlob),
+            sizeof(jsonBlob),
+            1
+        );
 
-        UploadBlobHelper(
-            TitleStorageType::JsonStorage,
-            TitleStorageBlobType::Json,
-            L"/json/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json",
-            jsonUploadBuffer
-            );
+        UploadBlob(
+            xboxLiveContext.get(),
+            XblTitleStorageType::TrustedPlatformStorage,
+            XblTitleStorageBlobType::Binary,
+            binaryBlob,
+            sizeof(binaryBlob),
+            1
+        );
 
-        UploadBlobHelper(
-            TitleStorageType::TrustedPlatformStorage,
-            TitleStorageBlobType::Json,
-            L"/trustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json",
-            jsonUploadBuffer
-            );
+        UploadBlob(
+            xboxLiveContext.get(),
+            XblTitleStorageType::Universal,
+            XblTitleStorageBlobType::Json,
+            reinterpret_cast<const uint8_t*>(jsonBlob),
+            sizeof(jsonBlob),
+            1
+        );
 
-        UploadBlobHelper(
-            TitleStorageType::TrustedPlatformStorage,
-            TitleStorageBlobType::Binary,
-            L"/trustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary",
-            binaryUploadBuffer
-            );
-
-        UploadBlobHelper(
-            TitleStorageType::UntrustedPlatformStorage,
-            TitleStorageBlobType::Json,
-            L"/untrustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json",
-            jsonUploadBuffer
-            );
-
-        UploadBlobHelper(
-            TitleStorageType::UntrustedPlatformStorage,
-            TitleStorageBlobType::Binary,
-            L"/untrustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary",
-            binaryUploadBuffer
-            );
-
-        UploadBlobHelper(
-            TitleStorageType::Universal,
-            TitleStorageBlobType::Json,
-            L"/universalplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,json",
-            jsonUploadBuffer
-            );
-
-        UploadBlobHelper(
-            TitleStorageType::Universal,
-            TitleStorageBlobType::Binary,
-            L"/universalplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary",
-            binaryUploadBuffer
-            );
-
-        UploadBlobHelper(
-            TitleStorageType::SessionStorage,
-            TitleStorageBlobType::Json,
-            L"/sessions/~/scids/123456789/data/blobPath,json",
-            jsonUploadBuffer
-            );
-
-        UploadBlobHelper(
-            TitleStorageType::SessionStorage,
-            TitleStorageBlobType::Binary,
-            L"/sessions/~/scids/123456789/data/blobPath,binary",
-            binaryUploadBuffer
-            );
+        UploadBlob(
+            xboxLiveContext.get(),
+            XblTitleStorageType::Universal,
+            XblTitleStorageBlobType::Binary,
+            binaryBlob,
+            sizeof(binaryBlob),
+            1
+        );
     }
 
-#pragma warning(suppress: 6262)
-    DEFINE_TEST_CASE(UploadLargeUntrustedBlob)
+    DEFINE_TEST_CASE(UploadBlobWithLargeBufferTest)
     {
-       DEFINE_TEST_CASE_PROPERTIES(UploadLargeUntrustedBlob);
-       const uint32 DEFAULT_UPLOAD_BLOCK_SIZE = 256 * 1024;
-       Windows::Storage::Streams::DataWriter^ dataWriter = ref new Windows::Storage::Streams::DataWriter();
-       unsigned char randChars[DEFAULT_UPLOAD_BLOCK_SIZE];
-       for (uint32 i = 0; i < DEFAULT_UPLOAD_BLOCK_SIZE; ++i)
-       {
-           unsigned char randChar = rand() % UCHAR_MAX;
-           randChars[i] = randChar;
-           dataWriter->WriteByte(randChar);
-       }
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-       auto blobMetadata = ref new TitleStorageBlobMetadata(
-           _T("123456789"),
-           TitleStorageType::UntrustedPlatformStorage,
-           _T("blobPath"),
-           TitleStorageBlobType::Binary,
-           _T("TestXboxUserId")
-           );
+        UploadBlob(
+            xboxLiveContext.get(),
+            XblTitleStorageType::TrustedPlatformStorage,
+            XblTitleStorageBlobType::Json,
+            reinterpret_cast<const uint8_t*>(jsonBlob),
+            sizeof(jsonBlob),
+            2
+        );
 
-       auto buffer = dataWriter->DetachBuffer();
-       auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-       auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-       httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(largeUploadJson);
+        UploadBlob(
+            xboxLiveContext.get(),
+            XblTitleStorageType::TrustedPlatformStorage,
+            XblTitleStorageBlobType::Binary,
+            binaryBlob,
+            sizeof(binaryBlob),
+            2
+        );
 
-       auto result = create_task(xboxLiveContext->TitleStorageService->UploadBlobAsync(
-           blobMetadata,
-           buffer,
-           TitleStorageETagMatchCondition::NotUsed,
-           0
-           )).get();
+        UploadBlob(
+            xboxLiveContext.get(),
+            XblTitleStorageType::Universal,
+            XblTitleStorageBlobType::Json,
+            reinterpret_cast<const uint8_t*>(jsonBlob),
+            sizeof(jsonBlob),
+            2
+        );
 
-       VERIFY_ARE_EQUAL_STR(L"PUT", httpCall->HttpMethod);
-       VERIFY_ARE_EQUAL_STR(L"https://titlestorage.mockenv.xboxlive.com", httpCall->ServerName);
-       VERIFY_ARE_EQUAL(
-           L"/untrustedplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary?continuationToken=257e3886-cf73-4b52-8e89-2d7088d60bab-1&finalBlock=true", 
-           httpCall->PathQueryFragment.to_string()
-           );
+        UploadBlob(
+            xboxLiveContext.get(),
+            XblTitleStorageType::Universal,
+            XblTitleStorageBlobType::Binary,
+            binaryBlob,
+            sizeof(binaryBlob),
+            2
+        );
     }
 
-#pragma warning(suppress: 6262)
-    DEFINE_TEST_CASE(UploadLargeUniversalBlob)
+    DEFINE_TEST_CASE(UploadBlobMultipleChunksTest)
     {
-        DEFINE_TEST_CASE_PROPERTIES(UploadLargeUniversalBlob);
-        const uint32 DEFAULT_UPLOAD_BLOCK_SIZE = 256 * 1024;
-        Windows::Storage::Streams::DataWriter^ dataWriter = ref new Windows::Storage::Streams::DataWriter();
-        unsigned char randChars[DEFAULT_UPLOAD_BLOCK_SIZE];
-        for (uint32 i = 0; i < DEFAULT_UPLOAD_BLOCK_SIZE; ++i)
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        const size_t blockSize{ 256 * 1024 };
+        uint8_t data[blockSize + 1]; // ensure there are two chunks
+        for (uint32_t i = 0; i < _countof(data); ++i)
         {
-            unsigned char randChar = rand() % UCHAR_MAX;
-            randChars[i] = randChar;
-            dataWriter->WriteByte(randChar);
+            data[i] = rand() % UCHAR_MAX;
         }
 
-        auto blobMetadata = ref new TitleStorageBlobMetadata(
-            _T("123456789"),
-            TitleStorageType::Universal,
-            _T("blobPath"),
-            TitleStorageBlobType::Binary,
-            _T("TestXboxUserId")
-            );
+        XblTitleStorageBlobMetadata metadata
+        {
+            "blobPath",
+            XblTitleStorageBlobType::Binary,
+            XblTitleStorageType::Universal,
+            "Name",
+            "0x52345234e3",
+            0,
+            0,
+            MOCK_SCID,
+            xboxLiveContext->Xuid()
+        };
 
-        auto buffer = dataWriter->DetachBuffer();
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-        auto httpCall = m_mockXboxSystemFactory->GetMockHttpCall();
-        httpCall->ResultValue = StockMocks::CreateMockHttpCallResponse(largeUploadJson);
+        // This should result in multiple Http calls (1 per chunk), but intermediate results should not be
+        // propagated to the client
+        HttpMock mock{ "PUT", "https://titlestorage.xboxlive.com" };
 
-        auto result = create_task(xboxLiveContext->TitleStorageService->UploadBlobAsync(
-            blobMetadata,
-            buffer,
-            TitleStorageETagMatchCondition::NotUsed,
-            0
-            )).get();
+        uint32_t requestCount{ 0 };
+        bool requestWellFormed{ true };
+        mock.SetMockMatchedCallback(
+            [&](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            {
+                UNREFERENCED_PARAMETER(requestBody);
 
-        VERIFY_ARE_EQUAL_STR(L"PUT", httpCall->HttpMethod);
-        VERIFY_ARE_EQUAL_STR(L"https://titlestorage.mockenv.xboxlive.com", httpCall->ServerName);
-        VERIFY_ARE_EQUAL(
-            L"/universalplatform/users/xuid(TestXboxUserId)/scids/123456789/data/blobPath,binary?continuationToken=257e3886-cf73-4b52-8e89-2d7088d60bab-1&finalBlock=true",
-            httpCall->PathQueryFragment.to_string()
-            );
+                auto queryParams = xbox::services::uri::split_query(xbox::services::uri{ Utils::StringTFromUtf8(requestUrl.data()) }.query());
+                if (queryParams[_T("finalBlock")] == _T("true"))
+                {
+                    // Validate that we supplied the continuation token
+                    JsonDocument d;
+                    d.Parse(continuationTokenJson);
+
+                    requestWellFormed &= d["continuationToken"].GetString() == Utils::StringFromStringT(queryParams[_T("continuationToken")]);
+                    
+                    // no response body in this case
+                    mock->ClearReponseBody();
+                }
+                else if (queryParams[_T("finalBlock")] == _T("false"))
+                {
+                    mock->SetResponseBody(continuationTokenJson);
+                }
+                else
+                {
+                    assert(false);
+                }
+                requestCount++;
+            }
+        );
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblTitleStorageUploadBlobAsync(
+            xboxLiveContext.get(),
+            metadata,
+            data,
+            sizeof(data),
+            XblTitleStorageETagMatchCondition::NotUsed,
+            blockSize,
+            &async
+        ));
+
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+        VERIFY_IS_TRUE(requestWellFormed);
+        VERIFY_ARE_EQUAL_UINT(2, requestCount);
+
+        VERIFY_SUCCEEDED(XblTitleStorageUploadBlobResult(&async, &metadata));
     }
 
     DEFINE_TEST_CASE(TitleStorageInvalidArgsTest)
     {
-        DEFINE_TEST_CASE_PROPERTIES(TitleStorageInvalidArgsTest);
-        auto xboxLiveContext = GetMockXboxLiveContext_WinRT();
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->TitleStorageService->DeleteBlobAsync(nullptr, false)).get(),
-            E_INVALIDARG
-            );
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->TitleStorageService->DownloadBlobAsync(
-                nullptr,
-                nullptr,
-                TitleStorageETagMatchCondition::NotUsed,
-                nullptr
-                )).get(),
+        XAsyncBlock async{};
+        VERIFY_ARE_EQUAL_INT(
+            XblTitleStorageDeleteBlobAsync(xboxLiveContext.get(), XblTitleStorageBlobMetadata{}, true, &async), 
             E_INVALIDARG
-            );
+        );
 
-        auto blobMetadata = ref new TitleStorageBlobMetadata(
-            L"123456", 
-            TitleStorageType::GlobalStorage, 
-            L"test", 
-            TitleStorageBlobType::Json, 
-            L"TestUser"
-            );
+        XblTitleStorageBlobMetadata metadata
+        {
+            "blobPath",
+            XblTitleStorageBlobType::Json,
+            XblTitleStorageType::GlobalStorage,
+            "Name",
+            "0x52345234e3",
+            0,
+            0,
+            MOCK_SCID,
+            xboxLiveContext->Xuid()
+        };
 
-        auto blobBuffer = ref new Windows::Storage::Streams::Buffer(0);
+        std::vector<uint8_t> buffer(10);
 
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->TitleStorageService->DownloadBlobAsync(
-                blobMetadata,
-                nullptr,
-                TitleStorageETagMatchCondition::NotUsed,
-                nullptr
-                )).get(),
-            E_INVALIDARG
-            );
+        VERIFY_ARE_EQUAL_INT(XblTitleStorageDownloadBlobAsync(
+            xboxLiveContext.get(),
+            XblTitleStorageBlobMetadata{},
+            buffer.data(),
+            buffer.size(),
+            XblTitleStorageETagMatchCondition::NotUsed,
+            nullptr,
+            0,
+            &async
+        ), E_INVALIDARG);
 
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->TitleStorageService->UploadBlobAsync(
-                nullptr,
-                blobBuffer,
-                TitleStorageETagMatchCondition::NotUsed,
-                0
-                )).get(),
-            E_INVALIDARG
-            );
+        VERIFY_ARE_EQUAL_INT(XblTitleStorageDownloadBlobAsync(
+            xboxLiveContext.get(),
+            metadata,
+            nullptr,
+            0,
+            XblTitleStorageETagMatchCondition::NotUsed,
+            nullptr,
+            0,
+            &async
+        ), E_INVALIDARG);
 
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->TitleStorageService->UploadBlobAsync(
-                blobMetadata,
-                nullptr,
-                TitleStorageETagMatchCondition::NotUsed,
-                0
-                )).get(),
-            E_INVALIDARG
-            );
+        VERIFY_ARE_EQUAL_INT(XblTitleStorageUploadBlobAsync(
+            xboxLiveContext.get(),
+            XblTitleStorageBlobMetadata{},
+            buffer.data(),
+            buffer.size(),
+            XblTitleStorageETagMatchCondition::NotUsed,
+            0,
+            &async
+        ), E_INVALIDARG);
 
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->TitleStorageService->GetBlobMetadataAsync(
-                nullptr,
-                TitleStorageType::GlobalStorage,
-                nullptr,
-                nullptr,
-                0,
-                0
-                )).get(),
-            E_INVALIDARG
-            );
+        VERIFY_ARE_EQUAL_INT(XblTitleStorageUploadBlobAsync(
+            xboxLiveContext.get(),
+            metadata,
+            nullptr,
+            0,
+            XblTitleStorageETagMatchCondition::NotUsed,
+            0,
+            &async
+        ), E_INVALIDARG);
 
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->TitleStorageService->GetBlobMetadataAsync(
-                L"scid",
-                static_cast<TitleStorageType>((int)(TitleStorageType::TrustedPlatformStorage) - 1),
-                nullptr,
-                nullptr,
-                0,
-                0
-                )).get(),
-            E_INVALIDARG
-            );
+        VERIFY_ARE_EQUAL_INT(XblTitleStorageGetBlobMetadataAsync(
+            xboxLiveContext.get(),
+            nullptr,
+            XblTitleStorageType::GlobalStorage,
+            nullptr,
+            0,
+            0,
+            0,
+            &async
+        ), E_INVALIDARG);
 
-#pragma warning(suppress: 6387 4973)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->TitleStorageService->GetBlobMetadataForSessionStorageAsync(
-                nullptr,
-                nullptr, 
-                _T("name"), 
-                _T("name"), 
-                0, 
-                0
-                )).get(),
-            E_INVALIDARG
-            );
-
-#pragma warning(suppress: 6387 4973)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->TitleStorageService->GetBlobMetadataForSessionStorageAsync(
-                _T("1234567"),
-                nullptr,
-                nullptr,
-                _T("name"),
-                0,
-                0
-                )).get(),
-            E_INVALIDARG
-            );
-
-#pragma warning(suppress: 6387 4973)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->TitleStorageService->GetBlobMetadataForSessionStorageAsync(
-                _T("1234567"),
-                nullptr,
-                _T("name"),
-                nullptr,
-                0,
-                0
-                )).get(),
-            E_INVALIDARG
-            );
-
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->TitleStorageService->GetQuotaAsync(
-                nullptr, 
-                TitleStorageType::GlobalStorage
-                )).get(),
-            E_INVALIDARG
-            );
-
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->TitleStorageService->GetQuotaAsync(
-                _T("12345"), 
-                static_cast<TitleStorageType>((int)(TitleStorageType::TrustedPlatformStorage) - 1)
-                )).get(),
-            E_INVALIDARG
-            );
-
-#pragma warning(suppress: 6387 4973)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->TitleStorageService->GetQuotaForSessionStorageAsync(
-                nullptr, 
-                _T("name"), 
-                _T("name")
-                )).get(),
-            E_INVALIDARG
-            );
- 
-#pragma warning(suppress: 6387 4973)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->TitleStorageService->GetQuotaForSessionStorageAsync(
-                _T("1234567"), 
-                nullptr, 
-                _T("name")
-                )).get(),
-            E_INVALIDARG
-            );
-
-#pragma warning(suppress: 6387 4973)
-        VERIFY_THROWS_HR_CX(
-            create_task(xboxLiveContext->TitleStorageService->GetQuotaForSessionStorageAsync(
-                _T("1234567"), 
-                _T("name"), 
-                nullptr
-                )).get(),
-            E_INVALIDARG
-            );
-
-#pragma warning(suppress: 6387)
-        VERIFY_THROWS_HR_CX(
-            ref new TitleStorageBlobMetadata(
-                nullptr, 
-                TitleStorageType::GlobalStorage, 
-                _T("path"), 
-                TitleStorageBlobType::Json, 
-                nullptr
-                ),
-            E_INVALIDARG
-            );
+        VERIFY_ARE_EQUAL_INT(XblTitleStorageGetQuotaAsync(
+            xboxLiveContext.get(),
+            nullptr,
+            XblTitleStorageType::GlobalStorage,
+            &async
+        ), E_INVALIDARG);
     }
 };
 

@@ -2,146 +2,161 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/system.h"
 #include "local_config.h"
 #include "xbox_system_factory.h"
-#include "Utils.h"
+#include "xsapi_utils.h"
 
 using namespace std;
-#if UWP_API || TV_API || UNIT_TEST_SERVICES
+#if __cplusplus_winrt
 using namespace Platform;
 using namespace Windows::Storage;
 using namespace Windows::Foundation;
 #endif
 using namespace xbox::services;
+using namespace xbox::services::legacy;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-#if !TV_API
-xbox_live_result<void> local_config::read()
+#if !(HC_PLATFORM == HC_PLATFORM_XDK)
+xbl_result<void> local_config::read()
 {
-#if UWP_API
+#if HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM == HC_PLATFORM_UWP
     std::lock_guard<std::mutex> guard(m_jsonConfigLock);
-    if (m_jsonConfig.size() > 0)
+    if (!m_jsonConfig.IsNull())
     {
-        return xbox_live_result<void>();
+        return xbl_result<void>();
     }
 
+#if HC_PLATFORM == HC_PLATFORM_UWP
     Windows::ApplicationModel::Package^ package = Windows::ApplicationModel::Package::Current;
     Windows::Storage::StorageFolder^ installedLocation = package->InstalledLocation;
     string_t configPath = string_t(installedLocation->Path->Data()) + _T("\\xboxservices.config");
+#elif HC_PLATFORM == HC_PLATFORM_WIN32
+    // Don't rely on the current directory to be set correctly.
+    // Instead assume xboxservices.config is next to the exe
+    WCHAR processPath[MAX_PATH + 1];
+    GetModuleFileName(NULL, processPath, MAX_PATH + 1);
+    WCHAR* lastSlash = wcsrchr(processPath, L'\\');
+    if (lastSlash)
+    {
+        *lastSlash = L'\0';
+    }
+
+    stringstream_t path;
+    path << processPath << _T("\\xboxservices.config");
+    string_t configPath = path.str();
+#endif
 
     string_t fileData = utils::read_file_to_string(configPath);
     if( !fileData.empty() )
     {
-        std::error_code err;
-        m_jsonConfig = web::json::value::parse(fileData, err);
-        if (!err)
+        m_jsonConfig.Parse(utils::internal_string_from_string_t(fileData).c_str());
+        if (!m_jsonConfig.HasParseError())
         {
-            return xbox_live_result<void>();
+            return xbl_result<void>();
         }
         else
         {
-            return xbox_live_result<void>(
-                std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
+            return xbl_result<void>(
+                make_error_code(xbl_error_code::invalid_config),
                 "Invalid config file"
                 );
         }
     }
     else
     {
-        return xbox_live_result<void>(
-            std::make_error_code(xbox::services::xbox_live_error_code::invalid_config),
+        return xbl_result<void>(
+            make_error_code(xbl_error_code::invalid_config),
             "ERROR: Could not find xboxservices.config"
             );
     }
 #else 
-    return xbox_live_result<void>();
+    return xbl_result<void>();
 #endif
 }
 
-string_t local_config::get_value_from_local_storage(
-    _In_ const string_t& name
+xsapi_internal_string local_config::get_value_from_local_storage(
+    _In_ const xsapi_internal_string& name
     )
 {
-#if UWP_API
+#if HC_PLATFORM == HC_PLATFORM_UWP
     try
     {
         ApplicationDataContainer^ localSettings = ApplicationData::Current->LocalSettings;
 
         auto values = localSettings->Values;
-        String^ key = ref new String(name.c_str());
-        String^ value = nullptr;
+        Platform::String^ key = ref new Platform::String(utils::string_t_from_internal_string(name).data());
+        Platform::String^ value = nullptr;
         
         if (values->HasKey(key))
         {
-            value = safe_cast<String^>(key);
+            value = safe_cast<Platform::String^>(key);
         }
          
         if (!value)
         {
-            return L"";
+            return "";
         }
         else
         {
-            return value->Data();
+            return xsapi_internal_string(utils::internal_string_from_utf16(value->Data()));
         }
     }
-    catch (Exception^ ex)
+    catch (Platform::Exception^ ex)
     {
-        return L"";
+        return "";
     }
 #else 
     UNREFERENCED_PARAMETER(name);
-    return L"";
+    return "";
 #endif
 }
 
-xbox_live_result<void> local_config::write_value_to_local_storage(_In_ const string_t& name, _In_ const string_t& value)
+xbl_result<void> local_config::write_value_to_local_storage(_In_ const xsapi_internal_string& name, _In_ const xsapi_internal_string& value)
 {
-#if UWP_API
+#if HC_PLATFORM == HC_PLATFORM_UWP
     try
     {
         ApplicationDataContainer^ localSettings = ApplicationData::Current->LocalSettings;
 
         auto values = localSettings->Values;
         values->Insert(
-            ref new Platform::String(name.c_str()),
-            dynamic_cast<PropertyValue^>(PropertyValue::CreateString(ref new Platform::String(value.c_str())))
+            ref new Platform::String(utils::string_t_from_internal_string(name).c_str()),
+            dynamic_cast<PropertyValue^>(PropertyValue::CreateString(ref new Platform::String(utils::string_t_from_internal_string(value).c_str())))
             );
-        return xbox_live_result<void>();
+        return xbl_result<void>();
     }
-    catch (Exception^ ex)
+    catch (Platform::Exception^ ex)
     {
-        xbox_live_error_code err = utils::convert_exception_to_xbox_live_error_code();
-        return xbox_live_result<void>(err, "write_value_to_local_storage exception");
+        xbl_error_code err = utils::convert_exception_to_xbox_live_error_code();
+        return xbl_result<void>(err, "write_value_to_local_storage exception");
     }
 #else 
     UNREFERENCED_PARAMETER(name);
     UNREFERENCED_PARAMETER(value);
-    return xbox_live_result<void>();
+    return xbl_result<void>();
 #endif
 }
 
-xbox_live_result<void> local_config::delete_value_from_local_storage(
-    _In_ const string_t& name
+xbl_result<void> local_config::delete_value_from_local_storage(
+    _In_ const xsapi_internal_string& name
     )
 {
-#if UWP_API
+#if HC_PLATFORM == HC_PLATFORM_UWP
     try
     {
         ApplicationDataContainer^ localSettings = ApplicationData::Current->LocalSettings;
-        localSettings->Values->Remove(ref new Platform::String(name.c_str()));
-        return xbox_live_result<void>();
+        localSettings->Values->Remove(ref new Platform::String(utils::string_t_from_internal_string(name).c_str()));
+        return xbl_result<void>();
     }
-    catch (Exception^ ex)
+    catch (Platform::Exception^ ex)
     {
-        xbox_live_error_code err = utils::convert_exception_to_xbox_live_error_code();
-        return xbox_live_result<void>(err, "delete_value_from_local_storage exception");
+        xbl_error_code err = utils::convert_exception_to_xbox_live_error_code();
+        return xbl_result<void>(err, "delete_value_from_local_storage exception");
     }
 #else
     UNREFERENCED_PARAMETER(name);
-    return xbox_live_result<void>();
+    return xbl_result<void>();
 #endif
 }
 #endif

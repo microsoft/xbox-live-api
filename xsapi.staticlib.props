@@ -1,18 +1,248 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
   <PropertyGroup>
     <XsapiRoot>$(MSBuildThisFileDirectory)</XsapiRoot>
-    <XsapiInclde>$(XsapiRoot)include\</XsapiInclde>
-    <CasablancaInclde>$(XsapiRoot)External\cpprestsdk\release\include\</CasablancaInclde>
-    <PackagesRoot>$(XsapiRoot)External\Packages\</PackagesRoot>
+    <XsapiInclude>$(XsapiRoot)include\</XsapiInclude>
   </PropertyGroup>
+
+  <!--Reuse libHttpClient platform detection logic-->  
+  <Import Project="$(XsapiRoot)External\xal\External\libHttpClient\platform_select.props" />
+  <PropertyGroup>
+    <XsapiPlatform>$(HCPlatform)</XsapiPlatform>
+  </PropertyGroup>
+
+  <!--If the platform wasn't manually set and libHttpClient logic did not infer it, set here-->
+  <PropertyGroup Condition="'$(XsapiPlatform)' == ''">
+    <XsapiPlatform Condition="'$(ApplicationType)'=='Windows Store'">UWP</XsapiPlatform>
+    <XsapiPlatform Condition="'$(ApplicationType)'=='' AND '$(Platform)'!='Durango'">Win32</XsapiPlatform>
+    <XsapiPlatform Condition="'$(ApplicationType)'=='' AND '$(Platform)'=='Durango'">XDK</XsapiPlatform>
+    <XsapiPlatform Condition="'$(ApplicationType)'=='Android'">Android</XsapiPlatform>
+  </PropertyGroup>
+
+  <!--Set toolset and project name-->
+  <PropertyGroup>
+    <XsapiProjectName Condition="'$(XsapiProjectName)'=='GSDK' OR '$(XsapiProjectName)'=='GXDK'">GDK</XsapiProjectName> <!-- Back compat reasons -->
+    <XsapiToolset Condition="'$(PlatformToolset)'=='v140'">140</XsapiToolset>
+    <XsapiToolset Condition="'$(PlatformToolset)'=='v141'">141</XsapiToolset>
+    <XsapiToolset Condition="'$(PlatformToolset)'=='v142'">142</XsapiToolset>
+    <XsapiToolset Condition="'$(XsapiToolset)'==''">141</XsapiToolset>
+    <XsapiProjectName Condition="'$(XsapiPlatform)' != 'Android'">Microsoft.Xbox.Services.$(XsapiToolset).$(XsapiPlatform).Cpp</XsapiProjectName>
+    <XsapiProjectName Condition="'$(XsapiPlatform)' == 'Android'">Microsoft.Xbox.Services.$(XsapiToolset).$(XsapiPlatform)</XsapiProjectName>
+    <XsapiProjectName Condition="'$(XsapiPlatform)' == 'GDK'">Microsoft.Xbox.Services.$(XsapiToolset).GDK.C</XsapiProjectName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(XsapiBuildFromSource)' == ''">
+    <XsapiBuildFromSource>true</XsapiBuildFromSource>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(XsapiAddProjectReference)' == ''">
+    <XsapiAddProjectReference>true</XsapiAddProjectReference>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(XsapiPlatform)' == 'Win32'">
+    <XsapiXalRefs>true</XsapiXalRefs>
+    <XsapiXalHeaders>true</XsapiXalHeaders>
+    <UseCasablanaLite>true</UseCasablanaLite>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(XsapiPlatform)' == 'Win32' AND '$(XsapiUnitTests)'!='true'">
+    <XsapiCllRefs>true</XsapiCllRefs>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(XsapiPlatform)' == 'Android'">
+    <XsapiXalRefs>true</XsapiXalRefs>
+    <XsapiXalHeaders>true</XsapiXalHeaders>
+    <UseCasablanaLite>true</UseCasablanaLite>
+    <XsapiCllRefs>true</XsapiCllRefs>
+    <XsapiTCUIHeaders>true</XsapiTCUIHeaders>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(XsapiPlatform)' == 'UWP'">
+    <XsapiXalRefs>true</XsapiXalRefs>
+    <XsapiXalHeaders>true</XsapiXalHeaders>
+    <XsapiTCUIHeaders>true</XsapiTCUIHeaders>
+    <UseCasablanaLite>true</UseCasablanaLite>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(XsapiPlatform)' == 'XDK'">
+    <XsapiXalRefs>true</XsapiXalRefs>
+    <XsapiXalHeaders>true</XsapiXalHeaders>
+    <UseCasablanaLite>true</UseCasablanaLite>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(XsapiPlatform)' == 'GDK'">
+    <XsapiXalHeaders>true</XsapiXalHeaders>
+    <UseCasablanaLite>true</UseCasablanaLite>
+  </PropertyGroup>
+  
   <ItemDefinitionGroup>
+    <!-- If you're updating here, check to see if you also need to update Utilities/GDK/Xbox.Services.API.C.props -->
     <ClCompile>
-      <PreprocessorDefinitions>XSAPI_CPP=1;_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(XsapiInclde);$(CasablancaInclde);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XBL_API_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(XsapiPlatform)' == 'GDK'">HC_WINHTTP_WEBSOCKETS;HC_PLATFORM_IS_MICROSOFT=1;HC_PLATFORM_GDK=4;HC_PLATFORM=HC_PLATFORM_GDK;HC_DATAMODEL=HC_DATAMODEL_LLP64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(XsapiPlatform)' == 'Android'">__STDC_WANT_LIB_EXT1__=1;ASIO_STANDALONE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(XsapiBuildFromSource)' != ''">XSAPI_BUILT_FROM_SOURCE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>;$(XsapiInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies Condition="'$(Platform)'!='Durango'">crypt32.lib;Winhttp.lib;Bcrypt.lib;pathcch.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(XsapiPlatform)'!='XDK' AND '$(XsapiPlatform)'!='Android'">Appnotify.lib;crypt32.lib;Winhttp.lib;Bcrypt.lib;pathcch.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+
+  <ItemGroup Condition="'$(XsapiAddProjectReference)' == 'true' AND '$(XsapiImpl)' != 'true' AND '$(ConfigurationType)'!='StaticLibrary'">
+    <ProjectReference Include="$(XsapiRoot)Build\$(XsapiProjectName)\$(XsapiProjectName).vcxproj">
+      <Project Condition="'$(XsapiPlatform)' == 'UWP'">{8F96710E-5169-4917-8874-7DE248F4D243}</Project>
+	  <Project Condition="'$(XsapiPlatform)' == 'Win32' AND '$(XsapiToolset)' == '142'">{4F107DE4-98B1-42B7-8767-0B5102C88E4F}</Project>
+      <Project Condition="'$(XsapiPlatform)' == 'Win32' AND '$(XsapiToolset)' == '141'">{4F107DE4-98B1-42B7-8767-0B5102C88E4F}</Project>
+      <Project Condition="'$(XsapiPlatform)' == 'Win32' AND '$(XsapiToolset)' == '140'">{AB77D282-496D-413F-9A51-F78DF740A82A}</Project>
+	  <Project Condition="'$(XsapiPlatform)' == 'XDK'">{8A112040-CDA1-4490-B518-62DFCC451FA7}</Project>
+      <Project Condition="'$(XsapiPlatform)' == 'GDK'">{60139f62-bf37-4f11-bd93-5fbf4e92100c}</Project>
+      <Project Condition="'$(XsapiPlatform)' == 'Android'">{5fa18992-3e85-4090-b21e-6ef7fb613a44}</Project>
+      <Project Condition="'$(XsapiPlatform)' == 'DesktopBridge' AND '$(XsapiToolset)' == '141'">{B0D02E4C-DB36-416C-8F1E-8666B3FAF876}</Project>
+    </ProjectReference>
+  </ItemGroup>
+
+  <!--Casablanca dependency-->
+  <PropertyGroup Condition="'$(UseCasablanaLite)' == 'true'">
+    <CppRestSdkInclude>$(XsapiRoot)Include\cpprestinclude\</CppRestSdkInclude>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UseCasablanaLite)' != 'true'">
+    <CppRestSdkRoot>$(XsapiRoot)External\cpprestsdk\</CppRestSdkRoot>
+    <CppRestSdkInclude>$(CppRestSdkRoot)release\include\</CppRestSdkInclude>
+    <VisualStudioMajorVersion Condition="'$(VisualStudioVersion)' == '14.0'">14</VisualStudioMajorVersion>
+    <VisualStudioMajorVersion Condition="'$(VisualStudioVersion)' == '15.0'">15</VisualStudioMajorVersion>
+    <VisualStudioMajorVersion Condition="'$(VisualStudioVersion)' == '16.0'">15</VisualStudioMajorVersion>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(CppRestSdkInclude)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <ItemGroup Condition="'$(XsapiAddProjectReference)' == 'true' AND '$(UseCasablanaLite)' != 'true' AND '$(ConfigurationType)'!='StaticLibrary'">
+    <ProjectReference Condition="'$(XsapiPlatform)' == 'UWP' OR '$(XsapiPlatform)' == 'DesktopBridge'" Include="$(CppRestSdkRoot)release\src\build\vs$(VisualStudioMajorVersion).uwp\cpprestsdk$(XsapiToolset).uwp.static.vcxproj">
+      <Project>{9AD285A2-301E-47A0-A299-14AD5D4F2758}</Project>
+    </ProjectReference>
+    <ProjectReference Condition="'$(XsapiPlatform)' == 'XDK'" Include="$(CppRestSdkRoot)release\src\build\vs$(VisualStudioMajorVersion).xbox\casablanca$(XsapiToolset).xbox.vcxproj">
+      <Project>{e621c269-d177-4c1b-80ea-c0a274b7a151}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  
+  <!--RapidJSON dependency-->
+  
+  <PropertyGroup>
+    <RapidJSONSdkRoot>$(XsapiRoot)External\rapidjson\</RapidJSONSdkRoot>
+    <RapidJSONSdkInclude>$(RapidJSONSdkRoot)include\</RapidJSONSdkInclude>
+  </PropertyGroup>
+  
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(RapidJSONSdkInclude)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>RAPIDJSON_NO_INT64DEFINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <!--LibHttpClient dependency-->
+  <PropertyGroup>
+    <HCPlatform Condition="'$(XsapiPlatform)' == 'DesktopBridge'">HC_PLATFORM_WIN32</HCPlatform>
+  </PropertyGroup>
+  <Import Project="$(XsapiRoot)External\xal\External\libHttpClient\libHttpClient.props" />
+
+  <!--CompactCoreCLL dependency-->
+  <PropertyGroup Condition="'$(XsapiCllRefs)' == 'true'">
+    <XalRoot>$(XsapiRoot)External\xal\</XalRoot>
+    <CoreCLLInclude>$(XalRoot)External\CompactCoreCLL\</CoreCLLInclude>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup Condition="'$(XsapiCllRefs)' == 'true'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(CoreCLLInclude)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <ItemGroup Condition="'$(XsapiAddProjectReference)' == 'true' AND '$(ConfigurationType)'!='StaticLibrary' AND '$(XsapiCllRefs)' == 'true'">
+    <ProjectReference Include="$(XalRoot)External\CompactCoreCLL\CompactCoreCLL.$(XsapiPlatform).vcxproj">
+      <Project Condition="'$(XsapiPlatform)' == 'Win32'">{F321E346-9F67-4291-9A71-D219F892BDEC}</Project>
+      <Project Condition="'$(XsapiPlatform)' == 'Android'">{2f1f7c6a-1fda-4cce-935d-0e9324d5db92}</Project>
+    </ProjectReference>
+  </ItemGroup>
+
+  <!--Xal dependency-->
+  <PropertyGroup Condition="'$(XsapiXalHeaders)' == 'true'">
+    <XalRoot>$(XsapiRoot)External\xal\</XalRoot>
+    <XalPlatform>$(HCLibPlatformType)</XalPlatform>
+    <XalInclude>$(XalRoot)source\Xal\include\</XalInclude>
+    <XalExtraInclude>$(XalRoot)source\XalExtra\include\</XalExtraInclude>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup Condition="'$(XsapiXalHeaders)' == 'true'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(XalInclude);$(XalExtraInclude)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+    
+  <ItemGroup Condition="'$(XsapiAddProjectReference)' == 'true' AND '$(XsapiXalRefs)' == 'true' AND '$(ConfigurationType)'!='StaticLibrary' AND '$(XsapiUnitTests)'!='true'">
+    <ProjectReference Include="$(XalRoot)Source\Xal\Xal.$(XalPlatform).vcxproj">
+      <Project Condition="'$(XalPlatform)' == 'Win32'">{7333335C-CD75-4802-8F56-702C0BE2563F}</Project>
+      <Project Condition="'$(XalPlatform)' == 'UWP'">{7326b85d-b8df-4a59-a2c7-c721a7a1b8cb}</Project>
+      <Project Condition="'$(XalPlatform)' == 'Android'">{554cba60-e373-40c9-9284-b93e0fc27362}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(XalRoot)External\CompactCoreCLL\CompactCoreCLL.$(XalPlatform).vcxproj">
+      <Project Condition="'$(XalPlatform)' == 'Win32'">{F321E346-9F67-4291-9A71-D219F892BDEC}</Project>
+      <Project Condition="'$(XalPlatform)' == 'UWP'">{9E8E68BA-6CBE-408E-8738-320474546551}</Project>
+      <Project Condition="'$(XalPlatform)' == 'Android'">{2f1f7c6a-1fda-4cce-935d-0e9324d5db92}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  
+  <!--TCUI dependency-->
+  <!--<PropertyGroup Condition="'$(XsapiTCUIHeaders)' == 'true'">
+    <TCUIRoot>$(XsapiRoot)External\tcui\</TCUIRoot>
+    <TCUIPlatform>$(HCLibPlatformType)</TCUIPlatform>
+    <TCUIInclude>$(TCUIRoot)Include\</TCUIInclude>
+  </PropertyGroup>-->
+
+  <Target Name="XblBuildDebug" BeforeTargets="InitializeBuildStatus" Condition="'$(XblTraceBuildInfo)' == 'true'">
+    <Message Importance="High" Text="XblBuildDebug" />
+    <Message Importance="High" Text="    ProjectName                  = '$(ProjectName)'" />
+    <Message Importance="High" Text="    Configuration                = '$(Configuration)'" />
+    <Message Importance="High" Text="    Platform                     = '$(Platform)'" />
+    <Message Importance="High" Text="    ConfigurationType            = '$(ConfigurationType)'" />
+    <Message Importance="High" Text="    PlatformToolset              = '$(PlatformToolset)'" />
+    <Message Importance="High" Text=" " />
+    <Message Importance="High" Text="    XsapiPlatform                = '$(XsapiPlatform)'" />
+    <Message Importance="High" Text="    XsapiToolset                 = '$(XsapiToolset)'" />
+    <Message Importance="High" Text="    XsapiProjectName             = '$(XsapiProjectName)'" />
+    <Message Importance="High" Text="    XsapiRoot                    = '$(XsapiRoot)'" />
+    <Message Importance="High" Text="    XsapiInclude                 = '$(XsapiInclude)'" />
+    <Message Importance="High" Text="    XsapiXalRefs                 = '$(XsapiXalRefs)'" />
+    <Message Importance="High" Text="    XsapiXalHeaders              = '$(XsapiXalHeaders)'" />
+    <Message Importance="High" Text="    UseCasablanaLite             = '$(UseCasablanaLite)'" />
+    <Message Importance="High" Text="    CppRestSdkInclude            = '$(CppRestSdkInclude)'" />
+    <Message Importance="High" Text="    CppRestSdkRoot               = '$(CppRestSdkRoot)'" />
+    <Message Importance="High" Text="    VisualStudioMajorVersion     = '$(VisualStudioMajorVersion)'" />
+    <Message Importance="High" Text="    HCLibPlatformType            = '$(HCLibPlatformType)'" />
+    <Message Importance="High" Text="    XalRoot                      = '$(XalRoot)'" />
+    <Message Importance="High" Text="    XalPlatform                  = '$(XalPlatform)'" />
+    <Message Importance="High" Text="    XalInclude                   = '$(XalInclude)'" />
+    <Message Importance="High" Text="    TCUIRoot                      = '$(TCUIRoot)'" />
+    <Message Importance="High" Text="    TCUIPlatform                  = '$(TCUIPlatform)'" />
+    <Message Importance="High" Text="    TCUIInclude                   = '$(TCUIInclude)'" />
+	<Message Importance="High" Text="    CoreCLLInclude               = '$(CoreCLLInclude)'" />
+    <Message Importance="High" Text=" " />
+    <Message Importance="High" Text="    HCImportLibPath              = '$(HCImportLibPath)'" />
+    <Message Importance="High" Text="    HCDllPath                    = '$(HCImportLibPath)'" />
+    <Message Importance="High" Text="    HCBuildRoot                  = '$(HCBuildRoot)'" />
+    <Message Importance="High" Text="    HCLibToolset                 = '$(HCLibToolset)'" />
+    <Message Importance="High" Text="    HCProjectName                = '$(HCProjectName)'" />
+    <Message Importance="High" Text=" " />
+    <Message Importance="High" Text="    IntDir                       = '$(IntDir)'" />
+    <Message Importance="High" Text="    OutDir                       = '$(OutDir)'" />
+    <Message Importance="High" Text="    LibPath                      = '$(LibPath)'" />
+    <Message Importance="High" Text="    IntermediateOutputPath       = '$(IntermediateOutputPath)'" />
+    <Message Importance="High" Text="    OutputPath                   = '$(OutputPath)'" />
+    <Message Importance="High" Text=" " />
+  </Target>
 </Project>

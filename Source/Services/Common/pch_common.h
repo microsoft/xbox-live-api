@@ -3,11 +3,30 @@
 
 #pragma once
 
+#include "httpClient/config.h"
+
+#if HC_PLATFORM == HC_PLATFORM_ANDROID || HC_PLATFORM_IS_APPLE
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#pragma clang diagnostic ignored "-Wc++14-extensions"
+#pragma clang diagnostic ignored "-Wreorder"
+#endif
+
+#if HC_PLATFORM_IS_MICROSOFT
+#pragma warning(disable : 4355 4628 4266 4555 4263 4264 4868 4062 4826 4244 4654)
+#pragma warning(disable : 4619 4616 4350 4351 4472 4640 5038 4471)
+#pragma warning(disable : 4061 4265 4365 4571 4623 4625 4626 4668 4710 4711 4746 4774 4820 4987 4996 5026 5027 5031 5032 5039 5037 5045)
+
 #pragma warning(disable: 4503) // C4503: decorated name length exceeded, name was truncated  
 #pragma warning(disable: 4242) 
 #pragma warning(disable: 4634) // C4634: Discarding XML document comment for invalid target.
+#pragma warning(disable: 26812)  // enum instead of enum class
 
-#ifdef _WIN32
+#if _DEBUG && XSAPI_UNIT_TESTS
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
 // If you wish to build your application for a previous Windows platform, include WinSDKVer.h and
 // set the _WIN32_WINNT macro to the platform you wish to support before including SDKDDKVer.h.
 #include <SDKDDKVer.h>
@@ -17,20 +36,28 @@
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 #endif
 #include <windows.h>
-//#include <winapifamily.h>
-#else
+
+#else // HC_PLATFORM_IS_MICROSOFT
+
+#ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS
+#endif
 #include <stdint.h>
 
-#include <boost/uuid/uuid.hpp>
-#endif
-#if XSAPI_A
+#endif // HC_PLATFORM_IS_MICROSOFT
+
+#if HC_PLATFORM == HC_PLATFORM_ANDROID || HC_PLATFORM_IS_APPLE
 #define _NOEXCEPT noexcept
 #endif
 
 // STL includes
 #include <string>
 #include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <deque>
+#include <queue>
 #include <vector>
 #include <memory>
 #include <stdint.h>
@@ -38,33 +65,55 @@
 #include <mutex>
 #include <atomic>
 #include <cstdint>
+#include <limits>
+#include <list>
+#include <assert.h>
+#include <array>
 
-#include "xsapi/types.h"
+#include "httpClient/pal.h"
+#include "httpClient/httpClient.h"
+#include "XAsync.h"
+#include "XAsyncProvider.h"
+#include "XTaskQueue.h"
 
-#include <cpprest/http_client.h>
-#include <cpprest/filestream.h>
-#include <cpprest/http_listener.h>              // HTTP server
-#include <cpprest/json.h>                       // JSON library
-#include <cpprest/uri.h>                        // URI library
+#include "xsapi-c/types_c.h"
+#include "internal_types.h"
+#include "xsapi-c/pal.h"
+#include "internal_mem.h"
+
+#include <Xal/xal.h>
+#include "http_headers.h"
+#include "cpprest/http_msg.h"
+#include "http_utils.h"
+
+#include "rapidjson/document.h"
+
+#include "async_helpers.h"
+#include "xsapi_utils.h"
+#include "xsapi_json_utils.h"
+#include "public_utils_legacy.h"
+#include "ref_counter.h"
+#include "internal_errors.h"
+#include "Logger/log.h"
+#include "telemetry.h"
+#include "xbox_live_app_config_internal.h"
+#include "user.h"
+#include "http_call_wrapper_internal.h"
+#include "global_state.h"
+#include "enum_traits.h"
+#include "xsapi-c/xbox_live_context_c.h"
 
 #include "shared_macros.h"
-#if UWP_API
+#if HC_PLATFORM == HC_PLATFORM_UWP
 #include <collection.h>
-#endif
-
-#include "xsapi/errors.h"
-#include "utils.h"
-#include "Logger/Log.h"
-
-
-#ifndef _WIN32
-#define UNREFERENCED_PARAMETER(args)
-#endif
-
-#ifndef max
-#define max(x,y) std::max(x,y)
 #endif
 
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(x) sizeof(x) / sizeof(x[0])
+#endif
+
+#if HC_PLATFORM_IS_MICROSOFT
+    #define SPRINTF(buffer, size, format, ...) sprintf_s(buffer, size, format, __VA_ARGS__)
+#else
+    #define SPRINTF(buffer, size, format, ...) sprintf(buffer, format, __VA_ARGS__)
 #endif

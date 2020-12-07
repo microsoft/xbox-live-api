@@ -2,116 +2,119 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xsapi/multiplayer.h"
+#include "multiplayer_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_BEGIN
 
-multiplayer_search_handle_request::multiplayer_search_handle_request(
-    _In_ multiplayer_session_reference sessionReference
-    ) :
+MultiplayerSearchHandleRequest::MultiplayerSearchHandleRequest(
+    _In_ XblMultiplayerSessionReference sessionReference
+) :
     m_sessionReference(std::move(sessionReference))
 {
 }
 
-const multiplayer_session_reference&
-multiplayer_search_handle_request::session_reference() const
+const XblMultiplayerSessionReference&
+MultiplayerSearchHandleRequest::SessionReference() const
 {
     return m_sessionReference;
 }
 
-const std::vector<string_t>&
-multiplayer_search_handle_request::tags() const
+const xsapi_internal_vector<XblMultiplayerSessionTag>&
+MultiplayerSearchHandleRequest::Tags() const
 {
     return m_tags;
 }
 
 void
-multiplayer_search_handle_request::set_tags(
-    _In_ const std::vector<string_t>& value
+MultiplayerSearchHandleRequest::SetTags(
+    _In_ xsapi_internal_vector<XblMultiplayerSessionTag>&& value
 )
 {
-    m_tags = std::move(value);
+    m_tags = value;
 }
 
-const std::unordered_map<string_t, double>&
-multiplayer_search_handle_request::numbers_metadata() const
+const xsapi_internal_vector<XblMultiplayerSessionNumberAttribute>&
+MultiplayerSearchHandleRequest::NumberAttributes() const
 {
-    return m_numbersMetadata;
+    return m_numberAttributes;
 }
 
 void
-multiplayer_search_handle_request::set_numbers_metadata(
-    _In_ const std::unordered_map<string_t, double>& metadata
+MultiplayerSearchHandleRequest::SetNumberAttributes(
+    _In_ xsapi_internal_vector<XblMultiplayerSessionNumberAttribute>&& attributes
 )
 {
-    m_numbersMetadata = std::move(metadata);
+    m_numberAttributes = attributes;
 }
 
-const std::unordered_map<string_t, string_t>&
-multiplayer_search_handle_request::strings_metadata() const
+const xsapi_internal_vector<XblMultiplayerSessionStringAttribute>&
+MultiplayerSearchHandleRequest::StringAttributes() const
 {
-    return m_stringsMetadata;
+    return m_stringAttributes;
 }
 
 void
-multiplayer_search_handle_request::set_strings_metadata(
-    _In_ const std::unordered_map<string_t, string_t>& metadata
+MultiplayerSearchHandleRequest::SetStringAttributes(
+    _In_ xsapi_internal_vector<XblMultiplayerSessionStringAttribute>&& attributes
 )
 {
-    m_stringsMetadata = std::move(metadata);
+    m_stringAttributes = attributes;
 }
 
 void
-multiplayer_search_handle_request::_Set_version(_In_ uint32_t version)
+MultiplayerSearchHandleRequest::Serialize(_Out_ JsonValue& json, _In_ JsonDocument::AllocatorType& allocator) const
 {
-    m_version = version;
-}
+    json.SetObject();
 
-web::json::value
-multiplayer_search_handle_request::_Serialize() const
-{
-    web::json::value serializedObject;
+    json.AddMember("type", "search", allocator);
+    json.AddMember("version", m_version, allocator);
+    JsonValue sessionRefJson;
+    Serializers::SerializeSessionReference(m_sessionReference, sessionRefJson, allocator);
+    json.AddMember("sessionRef", sessionRefJson, allocator);
 
-    serializedObject[_T("type")] = web::json::value::string(_T("search"));
-    serializedObject[_T("version")] = web::json::value(m_version);
-    serializedObject[_T("sessionRef")] = m_sessionReference._Serialize();
-    
-    web::json::value searchAttributesJson;
+    JsonValue searchAttributesJson(rapidjson::kObjectType);
     bool setSearchAttributes = false;
     if (!m_tags.empty())
     {
         setSearchAttributes = true;
-        searchAttributesJson[_T("tags")] = utils::serialize_vector<string_t>(utils::json_string_serializer, m_tags);
+        JsonValue tagsJson(rapidjson::kArrayType);
+        JsonUtils::SerializeVector<XblMultiplayerSessionTag>(
+            [](XblMultiplayerSessionTag tag, JsonValue& j, JsonDocument::AllocatorType& a)
+            {
+                j.SetString(tag.value, a);
+            },
+            m_tags,
+            tagsJson,
+            allocator);
+        searchAttributesJson.AddMember("tags", tagsJson, allocator);
     }
 
-    if (m_numbersMetadata.size() > 0)
+    if (!m_numberAttributes.empty())
     {
         setSearchAttributes = true;
-        web::json::value numbersPropertiesJson;
-        for (const auto& metadata: m_numbersMetadata)
+        JsonValue numberAttributesJson(rapidjson::kObjectType);
+        for (auto& attr : m_numberAttributes)
         {
-            numbersPropertiesJson[metadata.first] = web::json::value::number(static_cast<double>(metadata.second));
+            numberAttributesJson.AddMember(JsonValue(attr.name, allocator).Move(), attr.value, allocator);
         }
-        searchAttributesJson[_T("numbers")] = numbersPropertiesJson;
+        searchAttributesJson.AddMember("numbers", numberAttributesJson, allocator);
     }
 
-    if (m_stringsMetadata.size() > 0)
+    if (!m_stringAttributes.empty())
     {
         setSearchAttributes = true;
-        web::json::value stringsPropertiesJson;
-        for (const auto& metadata : m_stringsMetadata)
+        JsonValue stringAttributesJson(rapidjson::kObjectType);
+        for (auto& attr : m_stringAttributes)
         {
-            stringsPropertiesJson[metadata.first] = web::json::value::string(metadata.second);
+            stringAttributesJson.AddMember(JsonValue(attr.name, allocator).Move(), JsonValue(attr.value, allocator).Move(), allocator);
         }
-        searchAttributesJson[_T("strings")] = stringsPropertiesJson;
+        searchAttributesJson.AddMember("strings", stringAttributesJson, allocator);
     }
 
     if (setSearchAttributes)
     {
-        serializedObject[_T("searchAttributes")] = searchAttributesJson;
+        json.AddMember("searchAttributes", searchAttributesJson, allocator);
     }
-
-    return serializedObject;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_END

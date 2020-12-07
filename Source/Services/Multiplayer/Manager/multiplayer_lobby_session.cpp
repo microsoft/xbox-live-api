@@ -3,203 +3,190 @@
 
 
 #include "pch.h"
-#include "xsapi/multiplayer_manager.h"
 #include "multiplayer_manager_internal.h"
-
-using namespace xbox::services::multiplayer;
-using namespace xbox::services::tournaments;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 
-multiplayer_lobby_session::multiplayer_lobby_session(
-    _In_ std::shared_ptr<multiplayer_client_manager> multiplayerClientManagerInstance
+MultiplayerLobbySession::MultiplayerLobbySession(
+    _In_ std::shared_ptr<MultiplayerClientManager> multiplayerClientManagerInstance
     ):
     m_multiplayerClientManager(std::move(multiplayerClientManagerInstance)),
-    m_changeNumber(0)
+    m_changeNumber(0),
+    m_sessionReference{},
+    m_sessionConstants{},
+    m_memberInitialization{}
 {
 }
 
-multiplayer_lobby_session::multiplayer_lobby_session():
-    m_changeNumber(0)
+MultiplayerLobbySession::MultiplayerLobbySession():
+    m_changeNumber(0),
+    m_sessionReference{},
+    m_sessionConstants{},
+    m_memberInitialization{}
 {
 }
 
-multiplayer_lobby_session::multiplayer_lobby_session(
-    _In_ std::shared_ptr<multiplayer_session> session,
-    _In_ std::shared_ptr<multiplayer_member> host,
-    _In_ std::vector<std::shared_ptr<multiplayer_member>> members,
-    _In_ std::vector<std::shared_ptr<multiplayer_member>> localMembers
+MultiplayerLobbySession::MultiplayerLobbySession(_In_ const MultiplayerLobbySession& other):
+    m_multiplayerClientManager(other.m_multiplayerClientManager),
+    m_correlationId(other.m_correlationId),
+    m_changeNumber(other.m_changeNumber),
+    m_sessionReference(other.m_sessionReference),
+    m_host(other.m_host),
+    m_members(other.m_members),
+    m_localMembers(other.m_localMembers),
+    m_customPropertiesJson(other.m_customPropertiesJson)
+{
+    DeepCopyConstants(other.m_sessionConstants);
+}
+
+MultiplayerLobbySession::MultiplayerLobbySession(
+    _In_ std::shared_ptr<XblMultiplayerSession> session,
+    _In_ std::shared_ptr<MultiplayerMember> host,
+    _In_ const xsapi_internal_vector<std::shared_ptr<MultiplayerMember>>& members,
+    _In_ const xsapi_internal_vector<std::shared_ptr<MultiplayerMember>>& localMembers
     ) :
-    m_sessionReference(session->session_reference()),
+    m_correlationId(session->SessionInfo().CorrelationId),
+    m_changeNumber(session->SessionInfo().ChangeNumber),
+    m_sessionReference(session->SessionReference()),
     m_host(std::move(host)),
-    m_correlationId(session->multiplayer_correlation_id()),
-    m_changeNumber(session->change_number()),
-    m_members(std::move(members)),
-    m_localMembers(std::move(localMembers)),
-    m_properties(session->session_properties()->session_custom_properties_json()),
-    m_sessionConstants(session->session_constants()),
-    m_lastTournamentTeamResult(session->tournaments_server().last_team_result())
+    m_members(members),
+    m_localMembers(localMembers)
+{
+    XblMultiplayerSessionReadLockGuard sessionSafe(session);
+    m_customPropertiesJson = sessionSafe.SessionProperties().SessionCustomPropertiesJson;
+    m_sessionConstants = sessionSafe.SessionConstants();
+    DeepCopyConstants(sessionSafe.SessionConstants());
+}
+
+MultiplayerLobbySession::~MultiplayerLobbySession()
 {
 }
 
-std::shared_ptr<multiplayer_lobby_session> multiplayer_lobby_session::_Create_deep_copy()
-{
-    auto copy = std::make_shared<multiplayer_lobby_session>();
-    copy->deep_copy_from(*this);
-    return copy;
-}
-
-void multiplayer_lobby_session::deep_copy_from(
-    _In_ const multiplayer_lobby_session& other
-    )
-{
-    m_sessionReference = other.m_sessionReference;
-    m_host = other.m_host;
-    m_correlationId = other.m_correlationId;
-    m_changeNumber = other.m_changeNumber;
-    m_members = other.m_members;
-    m_localMembers = other.m_localMembers;
-    m_properties = other.m_properties;
-    m_sessionConstants = other.m_sessionConstants;
-    m_lastTournamentTeamResult = other.m_lastTournamentTeamResult;
-    m_multiplayerClientManager = other.m_multiplayerClientManager;
-}
-
-xbox_live_result<void>
-multiplayer_lobby_session::add_local_user(
+HRESULT
+MultiplayerLobbySession::AddLocalUser(
     _In_ xbox_live_user_t user
     )
 {
-    if (m_multiplayerClientManager->latest_pending_read() == nullptr)
+    if (m_multiplayerClientManager->LatestPendingRead() == nullptr)
     {
-        m_multiplayerClientManager->initialize();
+        m_multiplayerClientManager->Initialize();
     }
-
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->lobby_client()->add_local_user(
-        user,
-        multiplayer_local_user_lobby_state::add
-        ), void);
+    return m_multiplayerClientManager->LobbyClient()->AddLocalUser(user, MultiplayerLocalUserLobbyState::Add);
 }
 
-xbox_live_result<void>
-multiplayer_lobby_session::remove_local_user(
+HRESULT
+MultiplayerLobbySession::RemoveLocalUser(
     _In_ xbox_live_user_t user
     )
 {
-    RETURN_CPP_IF(m_multiplayerClientManager->latest_pending_read() == nullptr, void, xbox_live_error_code::logic_error, "No user added. Call add_local_user() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->lobby_client()->remove_local_user(user), void);
+    RETURN_HR_IF_LOG_DEBUG(m_multiplayerClientManager->LatestPendingRead() == nullptr, E_UNEXPECTED, "No user added. Call add_local_user() first.");
+    return m_multiplayerClientManager->LobbyClient()->RemoveLocalUser(user);
 }
 
-xbox_live_result<void>
-multiplayer_lobby_session::set_local_member_properties(
+HRESULT
+MultiplayerLobbySession::SetLocalMemberProperties(
     _In_ xbox_live_user_t user,
-    _In_ const string_t& name,
-    _In_ const web::json::value& valueJson,
+    _In_ const xsapi_internal_string& name,
+    _In_ const JsonValue& valueJson,
     _In_opt_ context_t context
     )
 {
-    RETURN_CPP_IF(m_multiplayerClientManager->latest_pending_read() == nullptr, void, xbox_live_error_code::logic_error, "No user added. Call add_local_user() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->lobby_client()->set_local_member_properties(user, std::move(name), std::move(valueJson), context), void);
+    RETURN_HR_IF_LOG_DEBUG(m_multiplayerClientManager->LatestPendingRead() == nullptr, E_UNEXPECTED, "No user added. Call add_local_user() first.");
+    return m_multiplayerClientManager->LobbyClient()->SetLocalMemberProperties(user, name, valueJson, context);
 }
 
-xbox_live_result<void>
-multiplayer_lobby_session::delete_local_member_properties(
+HRESULT
+MultiplayerLobbySession::DeleteLocalMemberProperties(
     _In_ xbox_live_user_t user,
-    _In_ const string_t& name,
+    _In_ const xsapi_internal_string& name,
     _In_opt_ context_t context
     )
 {
-    RETURN_CPP_IF(m_multiplayerClientManager->latest_pending_read() == nullptr, void, xbox_live_error_code::logic_error, "No user added. Call add_local_user() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->lobby_client()->delete_local_member_properties(user, name, context), void);
+    RETURN_HR_IF_LOG_DEBUG(m_multiplayerClientManager->LatestPendingRead() == nullptr, E_UNEXPECTED, "No user added. Call add_local_user() first.");
+    return m_multiplayerClientManager->LobbyClient()->DeleteLocalMemberProperties(user, name, context);
 }
 
-xbox_live_result<void>
-multiplayer_lobby_session::set_local_member_connection_address(
+HRESULT
+MultiplayerLobbySession::SetLocalMemberConnectionAddress(
     _In_ xbox_live_user_t user,
-    _In_ const string_t& connectionAddress,
+    _In_ const xsapi_internal_string& connectionAddress,
     _In_opt_ context_t context
     )
 {
-    RETURN_CPP_IF(m_multiplayerClientManager->latest_pending_read() == nullptr, void, xbox_live_error_code::logic_error, "No user added. Call add_local_user() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->lobby_client()->set_local_member_connection_address(user, connectionAddress, context), void);
+    RETURN_HR_IF_LOG_DEBUG(m_multiplayerClientManager->LatestPendingRead() == nullptr, E_UNEXPECTED, "No user added. Call add_local_user() first.");
+    return m_multiplayerClientManager->LobbyClient()->SetLocalMemberConnectionAddress(user, connectionAddress, context);
 }
 
-const multiplayer_session_reference&
-multiplayer_lobby_session::session_reference() const
+const XblMultiplayerSessionReference&
+MultiplayerLobbySession::SessionReference() const
 {
     return m_sessionReference;
 }
 
-const string_t&
-multiplayer_lobby_session::correlation_id() const
+const xsapi_internal_string&
+MultiplayerLobbySession::CorrelationId() const
 {
     return m_correlationId;
 }
 
 uint64_t
-multiplayer_lobby_session::_Change_number() const
+MultiplayerLobbySession::ChangeNumber() const
 {
     return m_changeNumber;
 }
 
-std::shared_ptr<multiplayer_member>
-multiplayer_lobby_session::host() const
+std::shared_ptr<MultiplayerMember>
+MultiplayerLobbySession::Host() const
 {
     return m_host;
 }
 
 void
-multiplayer_lobby_session::_Set_host(
-    _In_ std::shared_ptr<multiplayer_member> hostMember
+MultiplayerLobbySession::SetHost(
+    _In_ std::shared_ptr<MultiplayerMember> hostMember
     )
 {
     m_host = hostMember;
 }
 
-const std::vector<std::shared_ptr<multiplayer_member>>&
-multiplayer_lobby_session::members() const
+const xsapi_internal_vector<std::shared_ptr<MultiplayerMember>>&
+MultiplayerLobbySession::Members() const
 {
     return m_members;
 }
 
-std::shared_ptr<multiplayer_session_constants>
-multiplayer_lobby_session::session_constants() const
+const XblMultiplayerSessionConstants&
+MultiplayerLobbySession::SessionConstants() const
 {
     return m_sessionConstants;
 }
 
-const tournament_team_result&
-multiplayer_lobby_session::last_tournament_team_result() const
-{
-    return m_lastTournamentTeamResult;
-}
-
-const std::vector<std::shared_ptr<multiplayer_member>>&
-multiplayer_lobby_session::local_members() const
+const xsapi_internal_vector<std::shared_ptr<MultiplayerMember>>&
+MultiplayerLobbySession::LocalMembers() const
 {
     return m_localMembers;
 }
 
-const web::json::value&
-multiplayer_lobby_session::properties() const
+const xsapi_internal_string&
+MultiplayerLobbySession::CustomPropertiesJson() const
 {
-    return m_properties;
+    return m_customPropertiesJson;
 }
 
-xbox_live_result<void>
-multiplayer_lobby_session::set_properties(
-    _In_ const string_t& name,
-    _In_ const web::json::value& valueJson,
+HRESULT
+MultiplayerLobbySession::SetProperties(
+    _In_ const xsapi_internal_string& name,
+    _In_ const JsonValue& valueJson,
     _In_opt_ context_t context
     )
 {
-    RETURN_CPP_IF(m_multiplayerClientManager->latest_pending_read() == nullptr, void, xbox_live_error_code::logic_error, "No user added. Call add_local_user() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->set_properties(m_sessionReference, name, valueJson, context), void);
+    RETURN_HR_IF_LOG_DEBUG(m_multiplayerClientManager->LatestPendingRead() == nullptr, E_UNEXPECTED, "No user added. Call add_local_user() first.");
+    return m_multiplayerClientManager->SetProperties(m_sessionReference, name, valueJson, context);
 }
 
 bool
-multiplayer_lobby_session::is_host(
-    _In_ const string_t& xboxUserId
+MultiplayerLobbySession::IsHost(
+    _In_ uint64_t xuid
     )
 {
     if (m_host == nullptr || m_members.size() == 0)
@@ -207,63 +194,88 @@ multiplayer_lobby_session::is_host(
         return false;
     }
 
-    return utils::str_icmp(xboxUserId, m_host->xbox_user_id()) == 0;
+    return xuid == m_host->Xuid();
 }
 
-xbox_live_result<void>
-multiplayer_lobby_session::set_synchronized_host(
-    _In_ std::shared_ptr<multiplayer_member> gameHost,
+HRESULT
+MultiplayerLobbySession::SetSynchronizedHost(
+    _In_ const xsapi_internal_string& hostDeviceToken,
     _In_opt_ context_t context
     )
 {
-    RETURN_CPP_IF(gameHost == nullptr, void, xbox_live_error_code::invalid_argument, "GameHost was null.");
-
-    RETURN_CPP_IF(m_multiplayerClientManager->latest_pending_read() == nullptr, void, xbox_live_error_code::logic_error, "No user added. Call add_local_user() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->set_synchronized_host(m_sessionReference, gameHost->_Device_token(), context), void);
+    RETURN_HR_IF_LOG_DEBUG(m_multiplayerClientManager->LatestPendingRead() == nullptr, E_UNEXPECTED, "No user added. Call add_local_user() first.");
+    return m_multiplayerClientManager->SetSynchronizedHost(m_sessionReference, hostDeviceToken, context);
 }
 
-xbox_live_result<void>
-multiplayer_lobby_session::set_synchronized_properties(
-    _In_ const string_t& name,
-    _In_ const web::json::value& valueJson,
+HRESULT
+MultiplayerLobbySession::SetSynchronizedProperties(
+    _In_ const xsapi_internal_string& name,
+    _In_ const JsonValue& valueJson,
     _In_opt_ context_t context
     )
 {
-    RETURN_CPP_IF(m_multiplayerClientManager->latest_pending_read() == nullptr, void, xbox_live_error_code::logic_error, "No user added. Call add_local_user() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->set_synchronized_properties(m_sessionReference, name, valueJson, context), void);
+    RETURN_HR_IF_LOG_DEBUG(m_multiplayerClientManager->LatestPendingRead() == nullptr, E_UNEXPECTED, "No user added. Call add_local_user() first.");
+    return m_multiplayerClientManager->SetSynchronizedProperties(m_sessionReference, name, valueJson, context);
 }
 
 void
-multiplayer_lobby_session::_Set_multiplayer_client_manager(
-    _In_ std::shared_ptr<multiplayer_client_manager> clientManager
+MultiplayerLobbySession::SetMultiplayerClientManager(
+    _In_ std::shared_ptr<MultiplayerClientManager> clientManager
     )
 {
     m_multiplayerClientManager = clientManager;
 }
 
-#if !XSAPI_U
-xbox_live_result<void>
-multiplayer_lobby_session::invite_friends(
+#if HC_PLATFORM_IS_MICROSOFT
+HRESULT
+MultiplayerLobbySession::InviteFriends(
     _In_ xbox_live_user_t user,
-    _In_ const string_t& contextStringId,
-    _In_ const string_t& customActivationContext
+    _In_ const xsapi_internal_string& contextStringId,
+    _In_ const xsapi_internal_string& customActivationContext
     )
 {
-    RETURN_CPP_IF(m_multiplayerClientManager->latest_pending_read() == nullptr, void, xbox_live_error_code::logic_error, "No user added. Call add_local_user() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->invite_friends(user, contextStringId, customActivationContext), void);
+    RETURN_HR_IF_LOG_DEBUG(m_multiplayerClientManager->LatestPendingRead() == nullptr, E_UNEXPECTED, "No user added. Call add_local_user() first.");
+    return m_multiplayerClientManager->InviteFriends(user, contextStringId, customActivationContext);
 }
 #endif
 
-xbox_live_result<void>
-multiplayer_lobby_session::invite_users(
+HRESULT
+MultiplayerLobbySession::InviteUsers(
     _In_ xbox_live_user_t user,
-    _In_ const std::vector<string_t>& xboxUserIds,
-    _In_ const string_t& contextStringId,
-    _In_ const string_t& customActivationContext
+    _In_ const xsapi_internal_vector<uint64_t>& xboxUserIds,
+    _In_ const xsapi_internal_string& contextStringId,
+    _In_ const xsapi_internal_string& customActivationContext
     )
 {
-    RETURN_CPP_IF(m_multiplayerClientManager->latest_pending_read() == nullptr, void, xbox_live_error_code::logic_error, "No user added. Call add_local_user() first.");
-    RETURN_EXCEPTION_FREE_XBOX_LIVE_RESULT(m_multiplayerClientManager->invite_users(user, xboxUserIds, contextStringId, customActivationContext), void);
+    RETURN_HR_IF_LOG_DEBUG(m_multiplayerClientManager->LatestPendingRead() == nullptr, E_UNEXPECTED, "No user added. Call add_local_user() first.");
+    return m_multiplayerClientManager->InviteUsers(user, xboxUserIds, contextStringId, customActivationContext);
+}
+
+void MultiplayerLobbySession::DeepCopyConstants(const XblMultiplayerSessionConstants& other)
+{
+    m_sessionConstants = other;
+    m_initiatorXuids = xsapi_internal_vector<uint64_t>(other.InitiatorXuids, other.InitiatorXuids + other.InitiatorXuidsCount);
+    m_sessionConstants.InitiatorXuids = m_initiatorXuids.data();
+    if (m_sessionConstants.MemberInitialization)
+    {
+        m_memberInitialization = *m_sessionConstants.MemberInitialization;
+        m_sessionConstants.MemberInitialization = &m_memberInitialization;
+    }
+    if (m_sessionConstants.CustomJson)
+    {
+        m_constantsCustomJson = m_sessionConstants.CustomJson;
+        m_sessionConstants.CustomJson = m_constantsCustomJson.data();
+    }
+    if (m_sessionConstants.SessionCloudComputePackageConstantsJson)
+    {
+        m_constantsCloudComputePackageJson = m_sessionConstants.SessionCloudComputePackageConstantsJson;
+        m_sessionConstants.SessionCloudComputePackageConstantsJson = m_constantsCloudComputePackageJson.data();
+    }
+    if (m_sessionConstants.MeasurementServerAddressesJson)
+    {
+        m_constantsMeasurementServerAddressesJson = m_sessionConstants.MeasurementServerAddressesJson;
+        m_sessionConstants.MeasurementServerAddressesJson = m_constantsMeasurementServerAddressesJson.data();
+    }
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_END

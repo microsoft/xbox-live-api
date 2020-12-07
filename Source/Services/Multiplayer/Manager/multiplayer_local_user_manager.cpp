@@ -4,61 +4,54 @@
 
 #include "pch.h"
 #include "multiplayer_manager_internal.h"
-#include "xsapi/services.h"
-#include "user_context.h"
+#include "real_time_activity_manager.h"
 
 using namespace xbox::services;
 using namespace xbox::services::multiplayer;
-using namespace xbox::services::real_time_activity;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 
-multiplayer_local_user_manager::multiplayer_local_user_manager() :
-    m_multiplayerSubscriptionLostEventHandlerCounter(0),
+MultiplayerLocalUserManager::MultiplayerLocalUserManager() :
     m_sessionChangeEventHandlerCounter(0),
+    m_multiplayerSubscriptionLostEventHandlerCounter(0),
     m_rtaResyncEventHandlerCounter(0)
 {
 }
 
-multiplayer_local_user_manager::~multiplayer_local_user_manager()
+MultiplayerLocalUserManager::~MultiplayerLocalUserManager()
 {
-    change_all_local_user_lobby_state(multiplayer_local_user_lobby_state::remove);
-    remove_stale_local_users_from_map();
+    ChangeAllLocalUserLobbyState(MultiplayerLocalUserLobbyState::Remove);
+    RemoveStaleLocalUsersFromMap();
 
     m_sessionChangeEventHandler.clear();
     m_multiplayerSubscriptionLostEventHandler.clear();
     m_rtaResyncEventHandler.clear();
 }
 
-std::map<string_t, std::shared_ptr<multiplayer_local_user>>
-multiplayer_local_user_manager::get_local_user_map()
+const xsapi_internal_map<uint64_t, std::shared_ptr<MultiplayerLocalUser>>&
+MultiplayerLocalUserManager::GetLocalUserMap()
 {
-    std::lock_guard<std::mutex> lock(m_lock.get());
+    std::lock_guard<std::mutex> lock(m_lock);
     return m_localUserRequestMap;
 }
 
-std::shared_ptr<xbox_live_context_impl>
-multiplayer_local_user_manager::get_context(
-    _In_ const string_t& xboxUserId
-    )
+std::shared_ptr<XblContext>
+MultiplayerLocalUserManager::GetContext(
+    _In_ uint64_t xboxUserId
+)
 {
-    if (xboxUserId.empty())
-    {
-        return nullptr;
-    }
-
-    std::lock_guard<std::mutex> lock(m_lock.get());
+    std::lock_guard<std::mutex> lock(m_lock);
 
     auto iter = m_localUserRequestMap.find(xboxUserId);
     if (iter != m_localUserRequestMap.end())
     {
-        return iter->second->context();
+        return iter->second->Context();
     }
     return nullptr;
 }
 
-std::shared_ptr<multiplayer_local_user>
-multiplayer_local_user_manager::get_local_user(
+std::shared_ptr<MultiplayerLocalUser>
+MultiplayerLocalUserManager::GetLocalUser(
     _In_ xbox_live_user_t user
     )
 {
@@ -67,44 +60,39 @@ multiplayer_local_user_manager::get_local_user(
         return nullptr;
     }
 
-    std::lock_guard<std::mutex> lock(m_lock.get());
-    return get_local_user_helper(user);
+    std::lock_guard<std::mutex> lock(m_lock);
+    return GetLocalUserHelper(user);
 }
 
-std::shared_ptr<multiplayer_local_user>
-multiplayer_local_user_manager::get_local_user(
-    _In_ const string_t& xboxUserId
+std::shared_ptr<MultiplayerLocalUser>
+MultiplayerLocalUserManager::GetLocalUser(
+    _In_ uint64_t xuid
     )
 {
-    std::lock_guard<std::mutex> lock(m_lock.get());
-    return get_local_user_helper(xboxUserId);
+    std::lock_guard<std::mutex> lock(m_lock);
+    return GetLocalUserHelper(xuid);
 }
 
-std::shared_ptr<multiplayer_local_user>
-multiplayer_local_user_manager::get_local_user_helper(
+std::shared_ptr<MultiplayerLocalUser>
+MultiplayerLocalUserManager::GetLocalUserHelper(
     _In_ xbox_live_user_t user
     )
 {
-    if (user == nullptr)
+    auto wrapUserResult{ User::WrapHandle(user) };
+    if (Failed(wrapUserResult))
     {
         return nullptr;
     }
 
-    string_t xboxUserId = multiplayer_manager_utils::get_local_user_xbox_user_id(user);
-    return get_local_user_helper(xboxUserId);
+    return GetLocalUserHelper(wrapUserResult.Payload().Xuid());
 }
 
-std::shared_ptr<multiplayer_local_user>
-multiplayer_local_user_manager::get_local_user_helper(
-    _In_ const string_t& xboxUserId
+std::shared_ptr<MultiplayerLocalUser>
+MultiplayerLocalUserManager::GetLocalUserHelper(
+    _In_ uint64_t xuid
     )
 {
-    if (xboxUserId.empty())
-    {
-        return nullptr;
-    }
-
-    auto iter = m_localUserRequestMap.find(xboxUserId);
+    auto iter = m_localUserRequestMap.find(xuid);
     if (iter != m_localUserRequestMap.end())
     {
         return iter->second;
@@ -112,58 +100,58 @@ multiplayer_local_user_manager::get_local_user_helper(
     return nullptr;
 }
 
-std::shared_ptr<xbox_live_context_impl>
-multiplayer_local_user_manager::get_primary_context()
+std::shared_ptr<XblContext>
+MultiplayerLocalUserManager::GetPrimaryContext()
 {
-    std::lock_guard<std::mutex> lock(m_lock.get());
+    std::lock_guard<std::mutex> lock(m_lock);
     return m_primaryXboxLiveContext;
 }
 
 void
-multiplayer_local_user_manager::change_all_local_user_lobby_state(
-    _In_ multiplayer_local_user_lobby_state state
+MultiplayerLocalUserManager::ChangeAllLocalUserLobbyState(
+    _In_ MultiplayerLocalUserLobbyState state
     )
 {
-    std::lock_guard<std::mutex> lock(m_lock.get());
+    std::lock_guard<std::mutex> lock(m_lock);
 
     for(const auto& user : m_localUserRequestMap)
     {
         const auto& localUser =  user.second;
         if (localUser != nullptr)
         {
-            localUser->set_lobby_state(state);
+            localUser->SetLobbyState(state);
         }
     }
 }
 
 void
-multiplayer_local_user_manager::change_all_local_user_game_state(
-    _In_ multiplayer_local_user_game_state state
+MultiplayerLocalUserManager::ChangeAllLocalUserGameState(
+    _In_ MultiplayerLocalUserGameState state
     )
 {
-    std::lock_guard<std::mutex> lock(m_lock.get());
+    std::lock_guard<std::mutex> lock(m_lock);
 
     for(const auto& user : m_localUserRequestMap)
     {
         const auto& localUser =  user.second;
         if (localUser != nullptr)
         {
-            localUser->set_game_state(state);
+            localUser->SetGameState(state);
         }
     }
 }
 
 bool
-multiplayer_local_user_manager::is_local_user_game_state(
-    _In_ multiplayer_local_user_game_state state
+MultiplayerLocalUserManager::IsLocalUserGameState(
+    _In_ MultiplayerLocalUserGameState state
     )
 {
-    std::lock_guard<std::mutex> lock(m_lock.get());
+    std::lock_guard<std::mutex> lock(m_lock);
 
     for(const auto& user : m_localUserRequestMap)
     {
         const auto& localUser =  user.second;
-        if (localUser != nullptr && localUser->game_state() != state)
+        if (localUser != nullptr && localUser->GameState() != state)
         {
             return false;
         }
@@ -172,56 +160,66 @@ multiplayer_local_user_manager::is_local_user_game_state(
     return true;
 }
 
-const std::shared_ptr<multiplayer_local_user>&
-multiplayer_local_user_manager::add_user_to_xbox_live_context_to_map(
+Result<const std::shared_ptr<MultiplayerLocalUser>>
+MultiplayerLocalUserManager::AddUserToXboxLiveContextToMap(
     _In_ xbox_live_user_t user
     )
 {
-    XSAPI_ASSERT(user != nullptr);
+    auto wrapUserResult{ User::WrapHandle(user) };
+    if (Failed(wrapUserResult))
+    {
+        return wrapUserResult.Hresult();
+    }
 
-    string_t xboxUserId = user_context::get_user_id(user);
+    uint64_t xboxUserId = wrapUserResult.Payload().Xuid();
 
     bool isPrimary = m_localUserRequestMap.size() == 0 ? true : false;
 
     auto iter = m_localUserRequestMap.find(xboxUserId);
     if (iter == m_localUserRequestMap.end())
     {
-        auto localUser = std::make_shared<multiplayer_local_user>(
-            user,
+        auto innerWrapUserResult{ User::WrapHandle(user) };
+        if (Failed(innerWrapUserResult))
+        {
+            return innerWrapUserResult.Hresult();
+        }
+
+        auto localUser = std::make_shared<MultiplayerLocalUser>(
+            innerWrapUserResult.ExtractPayload(),
             xboxUserId,
             isPrimary
             );
 
-        auto ret = m_localUserRequestMap.insert(std::pair<string_t, std::shared_ptr<multiplayer_local_user>>(xboxUserId, localUser));
+        auto ret = m_localUserRequestMap.insert(std::pair<uint64_t, std::shared_ptr<MultiplayerLocalUser>>(xboxUserId, localUser));
         iter = ret.first;
 
         if (isPrimary)
         {
-            m_primaryXboxLiveContext = localUser->context();
+            m_primaryXboxLiveContext = localUser->Context();
         }
 
         // Activate events only for all users
-        activate_multiplayer_events(localUser);
+        ActivateMultiplayerEvents(localUser);
     }
 
     return iter->second;
 }
 
 void
-multiplayer_local_user_manager::remove_stale_local_users_from_map()
+MultiplayerLocalUserManager::RemoveStaleLocalUsersFromMap()
 {
-    std::lock_guard<std::mutex> lock(m_lock.get());
+    std::lock_guard<std::mutex> lock(m_lock);
 
     bool swtichPrimaryXboxLiveContext = false;
     for(auto iter = m_localUserRequestMap.begin(); iter != m_localUserRequestMap.end(); )
     {
         const auto& localUser =  iter->second;
-        if (localUser != nullptr && localUser->lobby_state() == multiplayer_local_user_lobby_state::remove)
+        if (localUser != nullptr && localUser->LobbyState() == MultiplayerLocalUserLobbyState::Remove)
         {
             // De-activate rta events for the old user.
-            deactivate_multiplayer_events(localUser);
+            DeactivateMultiplayerEvents(localUser);
 
-            swtichPrimaryXboxLiveContext = localUser->is_primary_xbox_live_context();
+            swtichPrimaryXboxLiveContext = localUser->IsPrimaryXboxLiveContext();
             m_localUserRequestMap.erase(iter++);
         }
         else
@@ -239,114 +237,118 @@ multiplayer_local_user_manager::remove_stale_local_users_from_map()
     if (swtichPrimaryXboxLiveContext)
     {
         // Assign the first guy in the map to be the primary user.
-        std::shared_ptr<multiplayer_local_user> user = m_localUserRequestMap.begin()->second;
+        std::shared_ptr<MultiplayerLocalUser> user = m_localUserRequestMap.begin()->second;
         if (user != nullptr)
         {
-            user->set_is_primary_xbox_live_context(true);
-            m_primaryXboxLiveContext = user->context();
+            user->SetIsPrimaryXboxLiveContext(true);
+            m_primaryXboxLiveContext = user->Context();
         }
     }
 }
 
 void
-multiplayer_local_user_manager::activate_multiplayer_events(
-    _In_ const std::shared_ptr<multiplayer_local_user>& localUser
+MultiplayerLocalUserManager::ActivateMultiplayerEvents(
+    _In_ const std::shared_ptr<MultiplayerLocalUser>& localUser
     )
 {
     XSAPI_ASSERT(localUser != nullptr);
     if (localUser == nullptr) return;
 
-    std::weak_ptr<multiplayer_local_user_manager> thisWeakPtr = shared_from_this();
+    std::weak_ptr<MultiplayerLocalUserManager> weakThis = shared_from_this();
+    auto xboxUserId = localUser->Xuid();
 
-    auto xboxUserId = localUser->xbox_user_id();
-    localUser->context()->real_time_activity_service()->activate();
-    function_context rtaStateChanged = localUser->context()->real_time_activity_service()->add_connection_state_change_handler([thisWeakPtr, xboxUserId](_In_ real_time_activity_connection_state state)
+    if (auto globalState{ GlobalState::Get() })
     {
-        std::shared_ptr<multiplayer_local_user_manager> pThis(thisWeakPtr.lock());
-        if (pThis != nullptr)
-        {
-            pThis->on_connection_state_changed(xboxUserId, state);
-        }
-    });
-    localUser->set_rta_state_changed_context(rtaStateChanged);
+        globalState->RTAManager()->Activate(localUser->Context()->User());
 
-    function_context rtaResyncContext = localUser->context()->real_time_activity_service()->add_resync_handler([thisWeakPtr]()
-    {
-        std::shared_ptr<multiplayer_local_user_manager> pThis(thisWeakPtr.lock());
-        if (pThis != nullptr)
+        XblFunctionContext rtaResyncContext = globalState->RTAManager()->AddResyncHandler(localUser->Context()->User(), 
+            [weakThis]
         {
-            pThis->on_resync_message_received();
-        }
-    });
-    localUser->set_rta_resync_context(rtaResyncContext);
-
-    if (!localUser->context()->multiplayer_service().subscriptions_enabled())
-    {
-        localUser->context()->multiplayer_service().enable_multiplayer_subscriptions();
-        function_context sessionChangedContext = localUser->context()->multiplayer_service().add_multiplayer_session_changed_handler([thisWeakPtr](_In_ const multiplayer_session_change_event_args& args)
-        {
-            std::shared_ptr<multiplayer_local_user_manager> pThis(thisWeakPtr.lock());
+            std::shared_ptr<MultiplayerLocalUserManager> pThis(weakThis.lock());
             if (pThis != nullptr)
             {
-                pThis->on_session_changed(args);
+                pThis->OnResyncMessageReceived();
             }
         });
-        localUser->set_session_changed_context(sessionChangedContext);
+        localUser->SetRtaResyncContext(rtaResyncContext);
+    }
 
-        function_context subscriptionLostContext = localUser->context()->multiplayer_service().add_multiplayer_subscription_lost_handler([thisWeakPtr, xboxUserId](void)
+    if (!localUser->Context()->MultiplayerService()->SubscriptionsEnabled())
+    {
+        localUser->Context()->MultiplayerService()->EnableMultiplayerSubscriptions();
+        XblFunctionContext sessionChangedContext = localUser->Context()->MultiplayerService()->AddMultiplayerSessionChangedHandler([weakThis](_In_ XblMultiplayerSessionChangeEventArgs args)
         {
-            std::shared_ptr<multiplayer_local_user_manager> pThis(thisWeakPtr.lock());
+            std::shared_ptr<MultiplayerLocalUserManager> pThis(weakThis.lock());
             if (pThis != nullptr)
             {
-                pThis->on_subscriptions_lost(xboxUserId);
+                pThis->OnSessionChanged(args);
             }
         });
-        localUser->set_subscription_lost_context(subscriptionLostContext);
+        localUser->SetSessionChangedContext(sessionChangedContext);
+
+        XblFunctionContext connectionIdChangedContext = localUser->Context()->MultiplayerService()->AddMultiplayerConnectionIdChangedHandler([weakThis](const String&)
+        {
+            std::shared_ptr<MultiplayerLocalUserManager> pThis(weakThis.lock());
+            if (pThis != nullptr)
+            {
+                pThis->OnConnectionIdChanged();
+            }
+        });
+        localUser->SetConnectionIdChangedContext(connectionIdChangedContext);
+
+        XblFunctionContext subscriptionLostContext = localUser->Context()->MultiplayerService()->AddMultiplayerSubscriptionLostHandler([weakThis, xboxUserId](void)
+        {
+            std::shared_ptr<MultiplayerLocalUserManager> pThis(weakThis.lock());
+            if (pThis != nullptr)
+            {
+                pThis->OnSubscriptionsLost(xboxUserId);
+            }
+        });
+        localUser->SetSubscriptionLostContext(subscriptionLostContext);
     }
 }
 
-void
-multiplayer_local_user_manager::deactivate_multiplayer_events(
-    _In_ const std::shared_ptr<multiplayer_local_user>& localUser
-    )
+void MultiplayerLocalUserManager::DeactivateMultiplayerEvents(
+    _In_ const std::shared_ptr<MultiplayerLocalUser>& localUser
+)
 {
     XSAPI_ASSERT(localUser != nullptr);
-    if (localUser == nullptr) return;
-
-    pplx::create_task([localUser]()
+    if (localUser == nullptr)
     {
-        if (localUser->context()->multiplayer_service().subscriptions_enabled())
+        return;
+    }
+
+    // TODO allow setting queue
+    HRESULT hr = m_queue.RunWork([localUser = std::shared_ptr<MultiplayerLocalUser>{ localUser }]
+    {
+        if (localUser->Context()->MultiplayerService()->SubscriptionsEnabled())
         {
-            localUser->context()->multiplayer_service().remove_multiplayer_session_changed_handler(localUser->session_changed_context());
-            localUser->context()->multiplayer_service().disable_multiplayer_subscriptions();
+            localUser->Context()->MultiplayerService()->RemoveMultiplayerSessionChangedHandler(localUser->SessionChangedContext());
+            localUser->Context()->MultiplayerService()->DisableMultiplayerSubscriptions();
+            localUser->Context()->MultiplayerService()->RemoveMultiplayerConnectionIdChangedHandler(localUser->ConnectionIdChangedContext());
         }
-
-        localUser->context()->real_time_activity_service()->remove_connection_state_change_handler(localUser->rta_state_changed_context());
-        localUser->context()->real_time_activity_service()->remove_resync_handler(localUser->rta_resync_context());
-        localUser->context()->real_time_activity_service()->deactivate();
+        auto globalState{ GlobalState::Get() };
+        if (globalState != nullptr)
+        {
+            globalState->RTAManager()->RemoveResyncHandler(localUser->Context()->User(), localUser->RtaResyncContext());
+            globalState->RTAManager()->Deactivate(localUser->Context()->User());
+        }
     });
-}
 
-void
-multiplayer_local_user_manager::on_connection_state_changed(
-    _In_ const string_t& xboxUserId,
-    _In_ real_time_activity_connection_state state
-    )
-{
-    if (state == real_time_activity_connection_state::disconnected)
+    if (FAILED(hr))
     {
-        on_subscriptions_lost(xboxUserId);
+        LOGS_INFO << __FUNCTION__ << " RunAsync failed with hr=" << hr;
     }
 }
 
-function_context
-multiplayer_local_user_manager::add_multiplayer_session_changed_handler(
-    _In_ std::function<void(const multiplayer_session_change_event_args&)> handler
+XblFunctionContext
+MultiplayerLocalUserManager::AddMultiplayerSessionChangedHandler(
+    _In_ Callback<XblMultiplayerSessionChangeEventArgs> handler
     )
 {
-    std::lock_guard<std::mutex> lock(m_subscriptionLock.get());
+    std::lock_guard<std::mutex> lock(m_subscriptionLock);
 
-    function_context context = -1;
+    XblFunctionContext context = -1;
     if (handler != nullptr)
     {
         context = ++m_sessionChangeEventHandlerCounter;
@@ -357,22 +359,22 @@ multiplayer_local_user_manager::add_multiplayer_session_changed_handler(
 }
 
 void
-multiplayer_local_user_manager::remove_multiplayer_session_changed_handler(
-    _In_ function_context context
+MultiplayerLocalUserManager::RemoveMultiplayerSessionChangedHandler(
+    _In_ XblFunctionContext context
     )
 {
-    std::lock_guard<std::mutex> lock(m_subscriptionLock.get());
+    std::lock_guard<std::mutex> lock(m_subscriptionLock);
     m_sessionChangeEventHandler.erase(context);
 }
 
 void
-multiplayer_local_user_manager::on_session_changed(
-    _In_ const multiplayer_session_change_event_args& args
+MultiplayerLocalUserManager::OnSessionChanged(
+    _In_ const XblMultiplayerSessionChangeEventArgs& args
     )
 {
-    std::unordered_map<uint32_t, std::function<void(const multiplayer_session_change_event_args&)>> sessionChangeEventHandlerCopy;
+    xsapi_internal_unordered_map<uint32_t, Callback<XblMultiplayerSessionChangeEventArgs>> sessionChangeEventHandlerCopy;
     {
-        std::lock_guard<std::mutex> lock(m_subscriptionLock.get());
+        std::lock_guard<std::mutex> lock(m_subscriptionLock);
         sessionChangeEventHandlerCopy = m_sessionChangeEventHandler;
     }
 
@@ -387,20 +389,73 @@ multiplayer_local_user_manager::on_session_changed(
             }
             catch (...)
             {
-                LOG_ERROR("multiplayer_local_user_manager::on_session_changed call threw an exception");
+                LOG_ERROR("MultiplayerLocalUserManager::on_session_changed call threw an exception");
             }
         }
     }
 }
 
-function_context
-multiplayer_local_user_manager::add_multiplayer_subscription_lost_handler(
-    _In_ std::function<void()> handler
+XblFunctionContext
+MultiplayerLocalUserManager::AddMultiplayerConnectionIdChangedHandler(
+    _In_ Function<void()> handler
+)
+{
+    std::lock_guard<std::mutex> lock(m_subscriptionLock);
+
+    XblFunctionContext context = -1;
+    if (handler != nullptr)
+    {
+        context = ++m_multiplayerConnectionIdChangedEventHandlerCounter;
+        m_multiplayerConnectionIdChangedEventHandler[m_multiplayerConnectionIdChangedEventHandlerCounter] = std::move(handler);
+    }
+
+    return context;
+}
+
+void
+MultiplayerLocalUserManager::RemoveMultiplayerConnectionIdChangedHandler(
+    _In_ XblFunctionContext context
+)
+{
+    std::lock_guard<std::mutex> lock(m_subscriptionLock);
+    m_multiplayerConnectionIdChangedEventHandler.erase(context);
+}
+
+void
+MultiplayerLocalUserManager::OnConnectionIdChanged(
+)
+{
+    xsapi_internal_unordered_map<uint32_t, Function<void()>> multiplayerConnectionIdChangedEventHandlerCopy;
+    {
+        std::lock_guard<std::mutex> lock(m_subscriptionLock);
+        multiplayerConnectionIdChangedEventHandlerCopy = m_multiplayerConnectionIdChangedEventHandler;
+    }
+
+    for (auto& handler : multiplayerConnectionIdChangedEventHandlerCopy)
+    {
+        XSAPI_ASSERT(handler.second != nullptr);
+        if (handler.second != nullptr)
+        {
+            try
+            {
+                handler.second();
+            }
+            catch (...)
+            {
+                LOG_ERROR("MultiplayerLocalUserManager::on_connection_id_changed call threw an exception");
+            }
+        }
+    }
+}
+
+XblFunctionContext
+MultiplayerLocalUserManager::AddMultiplayerSubscriptionLostHandler(
+    _In_ Function<void()> handler
     )
 {
-    std::lock_guard<std::mutex> lock(m_subscriptionLock.get());
+    std::lock_guard<std::mutex> lock(m_subscriptionLock);
 
-    function_context context = -1;
+    XblFunctionContext context = -1;
     if (handler != nullptr)
     {
         context = ++m_multiplayerSubscriptionLostEventHandlerCounter;
@@ -411,33 +466,33 @@ multiplayer_local_user_manager::add_multiplayer_subscription_lost_handler(
 }
 
 void
-multiplayer_local_user_manager::remove_multiplayer_subscription_lost_handler(
-    _In_ function_context context
+MultiplayerLocalUserManager::RemoveMultiplayerSubscriptionLostHandler(
+    _In_ XblFunctionContext context
     )
 {
-    std::lock_guard<std::mutex> lock(m_subscriptionLock.get());
+    std::lock_guard<std::mutex> lock(m_subscriptionLock);
     m_multiplayerSubscriptionLostEventHandler.erase(context);
 }
 
 void
-multiplayer_local_user_manager::on_subscriptions_lost(
-    _In_ const string_t& xboxUserId
+MultiplayerLocalUserManager::OnSubscriptionsLost(
+    _In_ uint64_t xuid
     )
 {
     {
         // Only fire this for the last user.
         // Note: This will be fired from the previous user's deactivation.
-        std::lock_guard<std::mutex> lock(m_lock.get());
-        auto user = get_local_user_helper(xboxUserId);
+        std::lock_guard<std::mutex> lock(m_lock);
+        auto user = GetLocalUserHelper(xuid);
         if (user == nullptr && m_localUserRequestMap.size() > 0)
         {
             return;
         }
     }
 
-    std::unordered_map<uint32_t, std::function<void()>> multiplayerSubscriptionLostEventHandlerCopy;
+    xsapi_internal_unordered_map<uint32_t, Function<void()>> multiplayerSubscriptionLostEventHandlerCopy;
     {
-        std::lock_guard<std::mutex> lock(m_subscriptionLock.get());
+        std::lock_guard<std::mutex> lock(m_subscriptionLock);
         multiplayerSubscriptionLostEventHandlerCopy = m_multiplayerSubscriptionLostEventHandler;
     }
 
@@ -452,20 +507,20 @@ multiplayer_local_user_manager::on_subscriptions_lost(
             }
             catch (...)
             {
-                LOG_ERROR("multiplayer_local_user_manager::on_subscriptions_lost call threw an exception");
+                LOG_ERROR("MultiplayerLocalUserManager::on_subscriptions_lost call threw an exception");
             }
         }
     }
 }
 
-function_context
-multiplayer_local_user_manager::add_rta_resync_handler(
-    _In_ std::function<void()> handler
+XblFunctionContext
+MultiplayerLocalUserManager::AddRtaResyncHandler(
+    _In_ Function<void()> handler
     )
 {
-    std::lock_guard<std::mutex> lock(m_subscriptionLock.get());
+    std::lock_guard<std::mutex> lock(m_subscriptionLock);
 
-    function_context context = -1;
+    XblFunctionContext context = -1;
     if (handler != nullptr)
     {
         context = ++m_rtaResyncEventHandlerCounter;
@@ -476,20 +531,20 @@ multiplayer_local_user_manager::add_rta_resync_handler(
 }
 
 void
-multiplayer_local_user_manager::remove_rta_resync_handler(
-    _In_ function_context context
+MultiplayerLocalUserManager::RemoveRtaResyncHandler(
+    _In_ XblFunctionContext context
     )
 {
-    std::lock_guard<std::mutex> lock(m_subscriptionLock.get());
+    std::lock_guard<std::mutex> lock(m_subscriptionLock);
     m_rtaResyncEventHandler.erase(context);
 }
 
 void
-multiplayer_local_user_manager::on_resync_message_received()
+MultiplayerLocalUserManager::OnResyncMessageReceived()
 {
-    std::unordered_map<uint32_t, std::function<void()>> rtaResyncEventHandlerCopy;
+    xsapi_internal_unordered_map<uint32_t, Function<void()>> rtaResyncEventHandlerCopy;
     {
-        std::lock_guard<std::mutex> lock(m_subscriptionLock.get());
+        std::lock_guard<std::mutex> lock(m_subscriptionLock);
         rtaResyncEventHandlerCopy = m_rtaResyncEventHandler;
     }
 
@@ -504,7 +559,7 @@ multiplayer_local_user_manager::on_resync_message_received()
             }
             catch (...)
             {
-                LOG_ERROR("multiplayer_local_user_manager::on_resync_message_received call threw an exception");
+                LOG_ERROR("MultiplayerLocalUserManager::on_resync_message_received call threw an exception");
             }
         }
     }

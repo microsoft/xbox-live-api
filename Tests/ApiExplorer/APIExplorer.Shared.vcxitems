@@ -1,0 +1,544 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{CBC0BEC4-131D-4868-9345-71813557FB39}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_docs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_grts_gameinvite.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_libhttp.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_achievements_manager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_achievements_progress_notification.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_achievement_unlock_notification.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_events.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_gameinvite_notifications.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_grts.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_leaderboard.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_multiplayer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_multiplayer_manager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_presence.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_privacy.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_profile.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_real_time_activity.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_social.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_social_manager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_statistics.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_stats2017.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_stringVerify.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_title_storage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_xblhttp.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\api_xblc_multiplayer_activity.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_achievements.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_leaderboard.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_profile.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_privacy.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_stringverify.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_title_storage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_events.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_social.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_social_manager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_presence.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_real_time_activity.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_statistics.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_cpp_multiplayer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lapi.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lauxlib.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lbaselib.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lbitlib.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lcode.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lcorolib.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lctype.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\ldblib.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\ldebug.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\ldo.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\ldump.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lfunc.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lgc.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\linit.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\liolib.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\llex.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lmathlib.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lmem.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\loadlib.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lobject.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lopcodes.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\loslib.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lparser.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lstate.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lstring.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lstrlib.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\ltable.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\ltablib.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\ltm.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lundump.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lutf8lib.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lvm.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua\src\lzio.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\log.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\lua-include.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\multidevice.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\pch_common.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)APIs\apis.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Include\api_explorer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Include\multidevice.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Include\runner.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lapi.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lauxlib.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lcode.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lctype.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\ldebug.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\ldo.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lfunc.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lgc.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\llex.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\llimits.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lmem.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lobject.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lopcodes.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lparser.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lprefix.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lstate.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lstring.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\ltable.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\ltm.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lua.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lua.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\luaconf.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lualib.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lundump.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lvm.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lzio.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shared\apirunnercloudfns.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shared\pal.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\pch_common.h">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shared\utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_achievements.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_async.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xal.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\commands.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\pch_apicommon.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\utils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Shared\xboxservices.config">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements_manager.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements_manager_performance_test.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements_manager_update_achievements.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements_progress_notification.lua" />
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\PerformanceTestMockResponse.json">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\update-achievements-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\update-achievements.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\cmds.json">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\events\events.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\events\offline.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\events\offline2.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\gdk-gameinvite\game-invite-listen.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\gdk-gameinvite\game-invite-send.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\leaderboard\leaderboard-2017.lua" />
+    <None Include="$(MSBuildThisFileDirectory)Tests\leaderboard\leaderboard-bvt.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\leaderboard\leaderboard.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\leaderboard\leaderboard-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\httpHandle.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\httpPerform.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\websocket_closehandle_while_connected.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\websocket_disconnect_while_connecting.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\websocket_send.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\misc\global_state.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\misc\simpletest.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\misc\xbox_live_context.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\matchmaking_single_device.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\matchmaking_single_device-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\MP_JoinLobbyViaActivity.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_partial_invite_flow.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_search-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_search.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_transfer-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_transfer.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\MultiplayerActivity\receive_invite_gsdk.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\MultiplayerActivity\receive_invite_win32.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\MultiplayerActivity\send_invite.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\MultiplayerActivity\set_activity.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\MultiplayerActivity\update_activity.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\MultiplayerActivity\update_recent_players.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\multiplayerManager\MPM_Invite.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\multiplayerManager\MPM_InviteUI.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\multiplayerManager\MPM_JoinFixedGameSession.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\multiplayerManager\MPM_JoinLobbyViaActivity.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\multiplayerManager\MPM_Match.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\notification\achievement_unlock_notification.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\multiplayerManager\MPM_SingleDevice_JoinLeaveGame.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\multiplayerManager\MPM_SingleDevice_SyncHostWrite.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\notification\gameinvitenotifications.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\presence\presence-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\presence\presence.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\presence\presence_rta.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\privacy\privacy-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\privacy\privacy.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfile-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfile.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfiles-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfiles.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfilesForSocialGroup-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfilesForSocialGroupAsync.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\rta\RTA_activation.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\rta\RTA_MP_SM.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\rta\simpleRTA-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\rta\simpleRTA.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\rta\simpleRTA_legacy.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\reputation-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\reputation.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_1-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_1.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_2-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_2.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_filter-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_filter.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_list-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_list.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_remove_realloc-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_remove_realloc.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_relationship_changed.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stats2017\stats2017-test429.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stats2017\stats2017.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stats\stats-bvt.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stats\stats-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stats\stats.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stats\stats_legacy.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stringVerify\stringVerify-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\stringVerify\stringVerify.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\tests.root">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\titleStorage\title_storage-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\titleStorage\title_storage.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\xal\addfirst.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\xal\signOut.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\xblHttp\XBLHttpCall.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\xblHttp\XBLHttpCallPerform.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\_luasetup_\u-test\u-test.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\_luasetup_\xal\common.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\_luasetup_\xal\setup.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+  </ItemGroup>
+  <Target Name="XblBuildDebug" BeforeTargets="InitializeBuildStatus">
+    <Message Importance="High" Text="APIExplorerBuild" />
+    <Message Importance="High" Text="    OutputPath                   = '$(OutputPath)'" />
+  </Target>
+</Project>

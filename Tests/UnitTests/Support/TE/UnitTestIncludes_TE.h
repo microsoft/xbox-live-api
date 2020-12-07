@@ -2,61 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
-#include "UnitTestHelpers.h"
+#include "UnitTestHelpers_TE.h"
 #include "CppUnitTest.h"
 #include <strsafe.h>
-#include "StockMocks.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace pplx;
-
-#define DEFINE_TEST_CASE(TestCaseMethodName)  \
-    BEGIN_TEST_METHOD_ATTRIBUTE(TestCaseMethodName) \
-        TEST_OWNER(TEST_CLASS_OWNER) \
-        TEST_METHOD_ATTRIBUTE(L"Area", TEST_CLASS_AREA) \
-    END_TEST_METHOD_ATTRIBUTE() \
-    TEST_METHOD(TestCaseMethodName)
-
-#define DEFINE_TEST_CASE_PROPERTIES_TE() \
-    UnitTestHelpers::SetupFactoryHelper(m_mockXboxSystemFactory);
-
-#define DEFINE_TEST_CASE_OWNER2(TestCaseMethodName)  \
-    BEGIN_TEST_METHOD_ATTRIBUTE(TestCaseMethodName) \
-        TEST_OWNER(TEST_CLASS_OWNER_2) \
-        TEST_METHOD_ATTRIBUTE(L"Area", TEST_CLASS_AREA) \
-    END_TEST_METHOD_ATTRIBUTE() \
-    TEST_METHOD(TestCaseMethodName)
-
-#define DEFINE_TEST_CLASS_SETUP() \
-    TEST_CLASS_SETUP(TestClassSetup) { UnitTestBase::StartResponseLogging(); return true; } \
-    TEST_CLASS_CLEANUP(TestClassCleanup) { UnitTestBase::RemoveResponseLogging(); return true; }  \
-
-#define DEFINE_MOCK_FACTORY() \
-    TEST_METHOD_SETUP(SetupFactory) \
-    {  \
-        return SetupFactoryHelper(); \
-    }\
-    TEST_METHOD_CLEANUP(CleanupTest) \
-    { \
-        return true; \
-    }
-
-#define DEFINE_MOCK_STATE_FACTORY() \
-    TEST_METHOD_SETUP(SetupStateFactory) \
-    {  \
-        return SetupStateFactoryHelper(); \
-    }\
-    TEST_METHOD_CLEANUP(CleanupTest) \
-    { \
-        return true; \
-    }
 
 class AssertHelper
 {
 public:
     static void AreEqual(const wchar_t* expected, const wchar_t* actual)
     {
-        Assert::AreEqual(expected, actual, false, nullptr, LINE_INFO());
+        Assert::AreEqual(expected, actual, false, nullptr, nullptr);
     }
 
     static void AreEqual(std::wstring expected, const wchar_t* actual)
@@ -74,11 +32,6 @@ public:
         Assert::AreEqual(expected.c_str(), actual.c_str());
     }
 
-    static void AreEqual(Platform::String^ expected, Platform::String^ actual)
-    {
-        Assert::AreEqual(expected->Data(), actual->Data());
-    }
-
     static void AreEqual(bool expected, bool actual)
     {
         Assert::AreEqual(expected, actual);
@@ -93,6 +46,26 @@ public:
     {
         Assert::IsTrue(expected == actual);
     }
+
+    static void AreEqual(xsapi_internal_string expected, xsapi_internal_string actual)
+    {
+        Assert::AreEqual(expected.data(), actual.data(), false, nullptr, nullptr);
+    }
+
+    static void AreEqual(const std::string& expected, const std::string& actual)
+    {
+        Assert::AreEqual(expected.data(), actual.data(), false, nullptr, nullptr);
+    }
+
+    static void AreEqual(size_t expected, size_t actual)
+    {
+        Assert::IsTrue(expected == actual);
+    }
+
+    static void AreEqual(HRESULT expected, HRESULT actual)
+    {
+        Assert::IsTrue(expected == actual);
+    }
 };
 
 #define VERIFY_ARE_EQUAL_UINT(expected, actual) \
@@ -100,6 +73,9 @@ public:
 
 #define VERIFY_ARE_EQUAL_INT(expected, actual) \
     Assert::IsTrue(static_cast<int64_t>(expected) == static_cast<int64_t>(actual))
+
+#define VERIFY_ARE_EQUAL_DOUBLE(expected, actual) \
+    Assert::IsTrue(static_cast<double>(expected) == static_cast<double>(actual))
 
 #define VERIFY_ARE_EQUAL(expected,actual) \
     AssertHelper::AreEqual(expected,actual)
@@ -121,6 +97,18 @@ public:
 
 #define VERIFY_IS_NOT_NULL(x) \
     Assert::IsNotNull(x)
+
+#define VERIFY_SUCCEEDED(x) \
+    Assert::IsTrue(SUCCEEDED(x))
+
+#define VERIFY_FAILED(x) \
+    Assert::IsTrue(FAILED(x))
+
+#define VERIFY_FAIL() \
+    Assert::Fail()
+
+#define VERIFY_INVALIDARG(x) \
+    Assert::AreEqual(E_INVALIDARG, x)
 
 #define VERIFY_ARE_EQUAL_TIMESPAN_TO_SECONDS(__timespan, __seconds) VERIFY_ARE_EQUAL(Microsoft::Xbox::Services::System::timeSpanTicks(__timespan.Duration), std::chrono::seconds(__seconds))
 #define VERIFY_ARE_EQUAL_TIMESPAN_TO_MILLISECONDS(__timespan, __seconds) VERIFY_ARE_EQUAL(Microsoft::Xbox::Services::System::timeSpanTicks(__timespan.Duration), std::chrono::milliseconds(__seconds))
@@ -190,31 +178,40 @@ public:
     }                                                                                                                                \
 }        
 
-inline void VERIFY_IS_EQUAL_JSON_RECURSION_HELPER(web::json::value expected, web::json::value actual, bool& jsonMatches)
+inline void VERIFY_IS_EQUAL_JSON_RECURSION_HELPER(const JsonValue& expected, const JsonValue& actual, bool& jsonMatches)
 {
-    if (expected.is_object())
+    if (expected.IsObject())
     {
-        for (auto jsonValue : expected.as_object())
+        for (auto& jsonValue : expected.GetObject())
         {
-            web::json::value actualValue = actual[jsonValue.first];
-            if (actualValue.is_null() && !jsonValue.second.is_null())
+            if (actual.IsObject() && actual.HasMember(jsonValue.name.GetString()))
+            {
+                const JsonValue& actualValue = actual[jsonValue.name.GetString()];
+                if (actualValue.IsNull() && !jsonValue.value.IsNull())
+                {
+                    jsonMatches = false;
+                    Assert::Fail(FormatString(L"JSON Key Not Present %s", jsonValue.name.GetString()).c_str());
+                    return;
+                }
+
+                Logger::WriteMessage(FormatString(L"Testing JSON Key %s", jsonValue.name.GetString()).c_str());
+                VERIFY_IS_EQUAL_JSON_RECURSION_HELPER(jsonValue.value, actualValue, jsonMatches);
+            }
+            else
             {
                 jsonMatches = false;
-                Assert::Fail(FormatString(L"JSON Key Not Present %s", jsonValue.first.c_str()).c_str());
+                Assert::Fail(FormatString(L"JSON Key Not Present %s", jsonValue.name.GetString()).c_str());
                 return;
             }
-
-            Logger::WriteMessage(FormatString(L"Testing JSON Key %s", jsonValue.first.c_str()).c_str());
-            VERIFY_IS_EQUAL_JSON_RECURSION_HELPER(jsonValue.second, actualValue, jsonMatches);
         }
     }
     else
     {
-        VERIFY_ARE_EQUAL(expected.serialize().c_str(), actual.serialize());
+        VERIFY_ARE_EQUAL(JsonUtils::SerializeJson(expected).c_str() , JsonUtils::SerializeJson(actual).c_str());
     }
 }
 
-inline void VERIFY_IS_EQUAL_JSON_HELPER(web::json::value expected, web::json::value actual, const wchar_t* pszParamName)
+inline void VERIFY_IS_EQUAL_JSON_HELPER(const JsonValue& expected, const JsonValue& actual, const wchar_t* pszParamName)
 {
     bool jsonMatches1 = true;
     bool jsonMatches2 = true;
@@ -223,26 +220,42 @@ inline void VERIFY_IS_EQUAL_JSON_HELPER(web::json::value expected, web::json::va
 
     if (jsonMatches1 && jsonMatches2)
     {
-        Logger::WriteMessage(FormatString(L"Verify: AreEqual(%s,\"%s\")", expected.serialize().c_str(), actual.serialize().c_str()).c_str());
+        Logger::WriteMessage(FormatString(L"Verify: AreEqual(%s,\"%s\")", JsonUtils::SerializeJson(expected).c_str(), JsonUtils::SerializeJson(actual).c_str()).c_str());
     }
     else
     {
-        Assert::Fail(FormatString(L"EXPECTED: %s = \"%s\"", pszParamName, expected.serialize().c_str()).c_str());
-        Assert::Fail(FormatString(L"ACTUAL: %s = \"%s\"", pszParamName, actual.serialize().c_str()).c_str());
+        Assert::Fail(FormatString(L"EXPECTED: %s = \"%s\"", pszParamName, JsonUtils::SerializeJson(expected).c_str()).c_str());
+        Assert::Fail(FormatString(L"ACTUAL: %s = \"%s\"", pszParamName, JsonUtils::SerializeJson(actual).c_str()).c_str());
     }
 }
 
 inline void VERIFY_IS_EQUAL_JSON_HELPER_FROM_STRINGS(std::wstring expected, std::wstring actual, const wchar_t* pszParamName)
 {
-    web::json::value expectedJson = web::json::value::parse(expected);
-    web::json::value actualJson = web::json::value::parse(actual);
+    JsonDocument expectedJson;
+    expectedJson.Parse(utils::internal_string_from_string_t(expected).c_str());
+    JsonDocument actualJson;
+    actualJson.Parse(utils::internal_string_from_string_t(actual).c_str());
+    return VERIFY_IS_EQUAL_JSON_HELPER(expectedJson, actualJson, pszParamName);
+}
+
+inline void VERIFY_IS_EQUAL_JSON_HELPER_FROM_STRINGS(std::wstring expected, xsapi_internal_string actual, const wchar_t* pszParamName)
+{
+    JsonDocument expectedJson;
+    expectedJson.Parse(utils::internal_string_from_string_t(expected).c_str());
+    JsonDocument actualJson;
+    actualJson.Parse(actual.c_str());
+    return VERIFY_IS_EQUAL_JSON_HELPER(expectedJson, actualJson, pszParamName);
+}
+
+inline void VERIFY_IS_EQUAL_JSON_HELPER_FROM_STRINGS(std::string expected, std::string actual, const wchar_t* pszParamName)
+{
+    JsonDocument expectedJson;
+    expectedJson.Parse(expected.c_str());
+    JsonDocument actualJson;
+    actualJson.Parse(actual.c_str());
     return VERIFY_IS_EQUAL_JSON_HELPER(expectedJson, actualJson, pszParamName);
 }
 
 #define VERIFY_IS_EQUAL_JSON_FROM_STRINGS(__expected, __actual, ...) VERIFY_IS_EQUAL_JSON_HELPER_FROM_STRINGS((__expected), (__actual), (L#__actual))
 
 #define VERIFY_IS_EQUAL_JSON(__expected, __actual, ...) VERIFY_IS_EQUAL_JSON_HELPER((__expected), (__actual), (L#__actual))
-
-using namespace Platform::Collections;
-using namespace Windows::Foundation;
-using namespace Windows::Foundation::Collections;

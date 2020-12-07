@@ -1,0 +1,3 @@
+```cpp
+HRESULT hr = XblMultiplayerManagerLeaveGame();
+```

@@ -56,10 +56,11 @@
        "servers":{},
        "members":{  
           "0":{  
+             "next":1,
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -103,11 +104,12 @@
        },
        "servers":{},
        "members":{  
-          "0":{  
+          "0":{ 
+             "next":1,
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -129,7 +131,7 @@
     "defaultMultipleLocalUsersLobbyResponse" : {  
        "membersInfo":{  
           "first":0,
-          "next":1,
+          "next":2,
           "count":2
        },
        "constants":{  
@@ -153,7 +155,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -176,7 +178,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId_2",
+                   "xuid":"2345",
                    "index":1
                 },
                 "custom":{}
@@ -201,7 +203,7 @@
     "multipleLocalUsersLobbyResponse" : {  
        "membersInfo":{  
           "first":0,
-          "next":1,
+          "next":2,
           "count":2
        },
        "constants":{  
@@ -225,7 +227,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -248,7 +250,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId_3",
+                   "xuid":"3456",
                    "index":1
                 },
                 "custom":{}
@@ -296,7 +298,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -344,7 +346,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -369,7 +371,7 @@
     "updatedMultipleLocalUsersLobbyWithNoTransferHandleResponse" : {  
        "membersInfo":{  
           "first":0,
-          "next":1,
+          "next":2,
           "count":2
        },
        "constants":{  
@@ -392,7 +394,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -415,7 +417,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId_2",
+                   "xuid":"2345",
                    "index":1
                 },
                 "custom":{}
@@ -434,7 +436,7 @@
              "deviceToken":"e7c221cbe5228043c39865281047b178"
           }
        },
-       "correlationId":"updated-multiple-local-users-lobby-no-trans-handle-corrId",
+       "correlationId":"no-trans-handle",
        "changeNumber":4
     },
     "lobbyWithPendingTransferHandleResponse" : {  
@@ -454,7 +456,7 @@
           "custom":{  
              "Map":"Helmand Valley",
              "GameMode":"Team Battle",
-             "GameSessionTransferHandle":"pending~TestXboxUserId"
+             "GameSessionTransferHandle":"pending~1234"
           }
        },
        "servers":{},
@@ -464,7 +466,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -513,7 +515,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -556,7 +558,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -587,8 +589,8 @@
           "system":{
             "initiators": [
                 "TestXboxUserId_1",
-                "TestXboxUserId_2",
-                "TestXboxUserId_3"
+                "2345",
+                "3456"
             ],
             "version": 1
           },
@@ -605,7 +607,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -626,7 +628,7 @@
              "next":2,
              "constants":{  
                 "system":{  
-                   "xuid":"TestXboxUserId_2",
+                   "xuid":"2345",
                    "index":1
                 },
                 "custom":{}
@@ -641,7 +643,7 @@
              "next":3,
              "constants":{  
                 "system":{  
-                   "xuid":"TestXboxUserId_3",
+                   "xuid":"3456",
                    "index":2
                 },
                 "custom":{}
@@ -659,8 +661,8 @@
     "defaultMultipleLocalUsersGameResponse" : {
        "membersInfo":{  
           "first":0,
-          "next":1,
-          "count":1
+          "next":2,
+          "count":2
        },
        "constants":{  
           "system":{},
@@ -677,7 +679,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -699,7 +701,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId_2",
+                   "xuid":"2345",
                    "index":1
                 },
                 "custom":{}
@@ -742,7 +744,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId_2",
+                   "xuid":"2345",
                    "index":0
                 },
                 "custom":{}
@@ -764,6 +766,11 @@
        "changeNumber":2
     },
     "sessionChangeNum2" : {  
+        "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
        "constants":{  
           "system":{},
           "custom":{}
@@ -784,7 +791,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -799,6 +806,7 @@
                    "Skill":17
                 }
              },
+             "next":1,
              "gamertag":"2 Dev 246876529",
              "deviceToken":"e7c221cbe5228043c39865281047b178"
           }
@@ -807,6 +815,11 @@
        "changeNumber":2
     },
     "sessionChangeNum3" : {  
+        "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
        "constants":{  
           "system":{},
           "custom":{}
@@ -827,7 +840,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -842,6 +855,7 @@
                    "Skill":17
                 }
              },
+             "next":1,
              "gamertag":"2 Dev 246876529",
              "deviceToken":"e7c221cbe5228043c39865281047b178"
           }
@@ -875,7 +889,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -891,7 +905,8 @@
                 }
              },
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"TestHostDeviceToken"
+             "deviceToken":"TestHostDeviceToken",
+             "next":1
           }
        },
        "correlationId":"sessionChangeNum4-session-corrId",
@@ -923,7 +938,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -938,6 +953,7 @@
                    "Skill":17
                 }
              },
+             "next":1,
              "gamertag":"2 Dev 246876529",
              "deviceToken":"e7c221cbe5228043c39865281047b178"
           }
@@ -946,6 +962,11 @@
        "changeNumber":5
     },
     "sessionChangeNum6" : {  
+        "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
        "constants":{  
           "system":{},
           "custom":{}
@@ -966,7 +987,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -981,6 +1002,7 @@
                    "Skill":17
                 }
              },
+             "next":1,
              "gamertag":"2 Dev 246876529",
              "deviceToken":"e7c221cbe5228043c39865281047b178"
           }
@@ -989,6 +1011,11 @@
        "changeNumber":6
     },
     "sessionChangeNum8" : {  
+        "membersInfo":{  
+          "first":0,
+          "next":1,
+          "count":1
+       },
        "constants":{  
           "system":{},
           "custom":{}
@@ -1009,7 +1036,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -1024,6 +1051,7 @@
                    "Skill":17
                 }
              },
+             "next":1,
              "gamertag":"2 Dev 246876529",
              "deviceToken":"e7c221cbe5228043c39865281047b178"
           }
@@ -1091,7 +1119,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -1155,7 +1183,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -1224,7 +1252,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -1239,6 +1267,7 @@
                    "Skill":17
                 }
              },
+             "next":1,
              "gamertag":"2 Dev 246876529",
              "deviceToken":"e7c221cbe5228043c39865281047b178"
           }
@@ -1292,7 +1321,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}
@@ -1307,11 +1336,12 @@
                    "Skill":17
                 }
              },
+             "next":1,
              "gamertag":"2 Dev 246876529",
              "deviceToken":"e7c221cbe5228043c39865281047b178"
           }
        },
-       "correlationId":"lobbyMatchStatusFoundWithTransHandle_corrId",
+       "correlationId":"lobbyMatchStatusFoundWithTransHandle",
        "changeNumber":7
     },
     "matchSessionJoin_1" : {  
@@ -1348,7 +1378,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{
@@ -1381,7 +1411,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId_2",
+                   "xuid":"2345",
                    "index":1
                 },
                 "custom":{
@@ -1433,7 +1463,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{
@@ -1464,7 +1494,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId_2",
+                   "xuid":"2345",
                    "index":1
                 },
                 "custom":{
@@ -1497,7 +1527,7 @@
     "matchSessionRemoteClientFailedToJoin" : {  
        "membersInfo":{  
           "first":0,
-          "next":2,
+          "next":1,
           "count":1,
           "accepted":1,
           "active":1
@@ -1528,7 +1558,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{
@@ -1592,7 +1622,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{
@@ -1623,7 +1653,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId_2",
+                   "xuid":"2345",
                    "index":1
                 },
                 "custom":{
@@ -1687,7 +1717,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{
@@ -1728,7 +1758,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId_2",
+                   "xuid":"2345",
                    "index":1
                 },
                 "custom":{
@@ -1787,7 +1817,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{
@@ -1828,7 +1858,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId_2",
+                   "xuid":"2345",
                    "index":1
                 },
                 "custom":{
@@ -1865,7 +1895,7 @@
              "deviceToken":"e7c221cbe5228043c39865281047b178"
           }
        },
-       "correlationId":"matchSessionMeasuringWithQoSComplete_corrId",
+       "correlationId":"matchSessionMeasuringWithQoSComplete",
        "changeNumber":6
     },
     "matchRemoteClientFailedToUploadQoS" : {  
@@ -1902,7 +1932,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{
@@ -1943,7 +1973,7 @@
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId_2",
+                   "xuid":"2345",
                    "index":1
                 },
                 "custom":{
@@ -2012,10 +2042,11 @@
        },
        "members":{  
           "0":{  
+             "next":1,
              "constants":{  
                 "system":{  
                    "initialize":true,
-                   "xuid":"TestXboxUserId",
+                   "xuid":"1234",
                    "index":0
                 },
                 "custom":{}

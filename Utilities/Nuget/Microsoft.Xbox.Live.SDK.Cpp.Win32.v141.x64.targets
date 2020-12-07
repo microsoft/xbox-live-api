@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <XsapiLibsDir Condition="'$(Configuration)' == 'Debug'">lib\$(Platform)\$(PlatformToolset)\$(Configuration)\</XsapiLibsDir>
+    <XsapiLibsDir Condition="'$(Configuration)' != 'Debug'">lib\$(Platform)\$(PlatformToolset)\Release\</XsapiLibsDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)' == 'Debug' AND '$(PlatformToolset)' == 'v141' AND '$(Platform)' == 'x64'">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)$(XsapiLibsDir)CompactCoreCLL.Win32-DbgWI64D.lib;$(MSBuildThisFileDirectory)$(XsapiLibsDir)libHttpClient.141.Win32.C.lib;$(MSBuildThisFileDirectory)$(XsapiLibsDir)libssl.141.Win32.lib;$(MSBuildThisFileDirectory)$(XsapiLibsDir)libcrypto.141.Win32.lib;$(MSBuildThisFileDirectory)$(XsapiLibsDir)Microsoft.Xbox.Services.141.Win32.Cpp.lib;$(MSBuildThisFileDirectory)$(XsapiLibsDir)Xal.Win32-DbgWI64D.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)' != 'Debug' AND '$(PlatformToolset)' == 'v141' AND '$(Platform)' == 'x64'">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)$(XsapiLibsDir)CompactCoreCLL.Win32-RelWI64.lib;$(MSBuildThisFileDirectory)$(XsapiLibsDir)libHttpClient.141.Win32.C.lib;$(MSBuildThisFileDirectory)$(XsapiLibsDir)libssl.141.Win32.lib;$(MSBuildThisFileDirectory)$(XsapiLibsDir)libcrypto.141.Win32.lib;$(MSBuildThisFileDirectory)$(XsapiLibsDir)Microsoft.Xbox.Services.141.Win32.Cpp.lib;$(MSBuildThisFileDirectory)$(XsapiLibsDir)Xal.Win32-RelWI64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>
