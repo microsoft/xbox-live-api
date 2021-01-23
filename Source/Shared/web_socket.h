@@ -18,7 +18,7 @@ class IWebsocket
 {
 public:
     static std::shared_ptr<IWebsocket> Make(
-        User user,
+        User&& user,
         TaskQueue queue
     ) noexcept;
 
@@ -53,7 +53,7 @@ class Websocket : public IWebsocket, public RefCounter, public std::enable_share
 {
 public:
     Websocket(
-        _In_ User user,
+        _In_ User&& user,
         _In_ TaskQueue queue
     ) noexcept;
 
@@ -69,6 +69,7 @@ public:
     HRESULT Disconnect() noexcept override;
 
 private:
+
     // RefCounter
     std::shared_ptr<RefCounter> GetSharedThis() override;
 

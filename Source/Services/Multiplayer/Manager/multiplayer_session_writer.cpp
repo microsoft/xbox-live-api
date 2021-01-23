@@ -34,6 +34,7 @@ MultiplayerSessionWriter::MultiplayerSessionWriter(
 void
 MultiplayerSessionWriter::Destroy()
 {
+    m_id++;
     m_session = nullptr;
     m_isTapReceived = false;
     m_numOfWritesInProgress = 0;
@@ -44,6 +45,12 @@ std::shared_ptr<XblContext>
 MultiplayerSessionWriter::GetPrimaryContext()
 {
     return m_multiplayerLocalUserManager->GetPrimaryContext();
+}
+
+uint64_t
+MultiplayerSessionWriter::Id() const
+{
+    return m_id;
 }
 
 const std::shared_ptr<XblMultiplayerSession>&
@@ -280,6 +287,7 @@ HRESULT MultiplayerSessionWriter::WriteSession(
         AsyncContext<Result<std::shared_ptr<XblMultiplayerSession>>>{ m_queue,
         [
             weakThis = std::weak_ptr<MultiplayerSessionWriter>{ shared_from_this() },
+            sessionWriterId = m_id,
             updateLatest,
             callback
         ]
@@ -287,7 +295,14 @@ HRESULT MultiplayerSessionWriter::WriteSession(
     {
         if (auto sharedThis{ weakThis.lock() })
         {
-            sharedThis->HandleWriteSessionResult(sessionResult, updateLatest, callback);
+            if (sharedThis->Id() != sessionWriterId)
+            {
+                callback({ E_FAIL, "Session writer has been reset" });
+            }
+            else
+            {
+                sharedThis->HandleWriteSessionResult(sessionResult, updateLatest, callback);
+            }
         }
         else
         {
@@ -321,6 +336,7 @@ HRESULT MultiplayerSessionWriter::WriteSessionByHandle(
         AsyncContext<Result<std::shared_ptr<XblMultiplayerSession>>>{ m_queue,
         [
             weakThis = std::weak_ptr<MultiplayerSessionWriter>{ shared_from_this() },
+            sessionWriterId = m_id,
             updateLatest,
             callback
         ]
@@ -328,7 +344,14 @@ HRESULT MultiplayerSessionWriter::WriteSessionByHandle(
     {
         if (auto sharedThis{ weakThis.lock() })
         {
-            sharedThis->HandleWriteSessionResult(sessionResult, updateLatest, callback);
+            if (sharedThis->Id() != sessionWriterId)
+            {
+                callback({ E_FAIL, "Session writer has been reset" });
+            }
+            else
+            {
+                sharedThis->HandleWriteSessionResult(sessionResult, updateLatest, callback);
+            }
         }
         else
         {
@@ -484,10 +507,12 @@ HRESULT MultiplayerSessionWriter::LeaveRemoteSession(
         LeaveSessionOperation(
             std::shared_ptr<MultiplayerSessionWriter> sessionWriter,
             const XblMultiplayerSessionReference& sessionRefToLeave,
+            TaskQueue& queue,
             MultiplayerSessionCallback&& callback
         ) noexcept :
             m_sessionWriter{ std::move(sessionWriter) },
             m_sessionToLeaveRef{ sessionRefToLeave },
+            m_queue{ queue },
             m_localUsers{ m_sessionWriter->m_multiplayerLocalUserManager->GetLocalUserMap() },
             m_callback{ std::move(callback) }
         {
@@ -519,11 +544,11 @@ HRESULT MultiplayerSessionWriter::LeaveRemoteSession(
             RETURN_HR_IF_FAILED(sessionToCommit->Leave());
 
             // Never update latest copy upon leaving.
-            return m_sessionWriter->WriteSession(
-                userContext,
+
+            return userContext->MultiplayerService()->WriteSession(
                 sessionToCommit,
                 XblMultiplayerSessionWriteMode::UpdateExisting,
-                false,
+                AsyncContext<Result<std::shared_ptr<XblMultiplayerSession>>>{ m_queue,
                 [
                     sharedThis{ shared_from_this() }, this
                 ]
@@ -538,11 +563,12 @@ HRESULT MultiplayerSessionWriter::LeaveRemoteSession(
                     m_latestSession = writeSessionResult.ExtractPayload();
                     sharedThis->Run();
                 }
-            });
+            }});
         }
 
         std::shared_ptr<MultiplayerSessionWriter> m_sessionWriter;
         XblMultiplayerSessionReference m_sessionToLeaveRef;
+        TaskQueue m_queue;
         Map<uint64_t, std::shared_ptr<MultiplayerLocalUser>> m_localUsers;
         std::shared_ptr<XblMultiplayerSession> m_latestSession{ nullptr };
         MultiplayerSessionCallback m_callback;
@@ -551,6 +577,7 @@ HRESULT MultiplayerSessionWriter::LeaveRemoteSession(
     auto operation = MakeShared<LeaveSessionOperation>(
         shared_from_this(),
         session->SessionReference(),
+        m_queue,
         std::move(callback)
     );
 

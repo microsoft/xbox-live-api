@@ -74,7 +74,7 @@ HRESULT ConvertRTAErrorCode(ErrorCode rtaErrorCode) noexcept
 }
 
 Connection::Connection(
-    User user,
+    User&& user,
     const TaskQueue& queue,
     ConnectionStateChangedHandler stateChangedHandler,
     real_time_activity::ResyncHandler resyncHandler
@@ -101,8 +101,8 @@ Connection::~Connection() noexcept
 #endif
 }
 
-std::shared_ptr<Connection> Connection::Make(
-    User user,
+Result<std::shared_ptr<Connection>> Connection::Make(
+    User&& user,
     const TaskQueue& queue,
     ConnectionStateChangedHandler stateChangedHandler,
     real_time_activity::ResyncHandler resyncHandler
@@ -119,7 +119,12 @@ std::shared_ptr<Connection> Connection::Make(
         Deleter<Connection>()
     );
 
-    rtaConnection->InitializeWebsocket();
+    auto hr = rtaConnection->InitializeWebsocket();
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
     rtaConnection->m_stateChangedHandler(rtaConnection->m_state);
     rtaConnection->m_websocket->Connect(s_rtaUri, s_rtaSubprotocol);
 
@@ -625,7 +630,11 @@ void Connection::ConnectCompleteHandler(WebsocketResult result) noexcept
 
         //libHttpClient websocket does not support connecting
         // the same websocket handle multiple times, so create a new one.
-        InitializeWebsocket();
+        auto hr = InitializeWebsocket();
+        if (FAILED(hr))
+        {
+            return;
+        }
 
         // Backoff and attempt to connect again. 
         m_connectAttempt++;
@@ -658,7 +667,11 @@ void Connection::Reconnect() noexcept
 
     // Immediately attempt to reconnect. libHttpClient websocket does not support connecting 
     // the same websocket handle multiple times, so create a new one.
-    InitializeWebsocket();
+    auto hr = InitializeWebsocket();
+    if (FAILED(hr))
+    {
+        return;
+    }
 
     m_connectAttempt = 0;
     m_state = XblRealTimeActivityConnectionState::Connecting;
@@ -805,7 +818,7 @@ void Connection::WebsocketMessageReceived(const String& message) noexcept
     }
 }
 
-void Connection::InitializeWebsocket() noexcept
+HRESULT Connection::InitializeWebsocket() noexcept
 {
     if (m_websocket)
     {
@@ -814,7 +827,10 @@ void Connection::InitializeWebsocket() noexcept
         m_websocket->SetReceiveHandler([](String) {});
     }
 
-    m_websocket = IWebsocket::Make(m_user, m_queue);
+    auto copyUserResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(copyUserResult.Hresult());
+
+    m_websocket = IWebsocket::Make(copyUserResult.ExtractPayload(), m_queue);
 
     std::weak_ptr<Connection> thisWeakPtr{ shared_from_this() };
 
@@ -844,6 +860,8 @@ void Connection::InitializeWebsocket() noexcept
             sharedThis->WebsocketMessageReceived(message);
         }
     });
+
+    return S_OK;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_END

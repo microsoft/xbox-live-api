@@ -72,7 +72,6 @@ del "%githubPath%Microsoft.Xbox.Services.Android.*"
 del "%githubPath%Microsoft.Xbox.Services.Win32.*"
 del "%githubPath%Microsoft.Xbox.Services.XDK.*"
 del "%githubPath%Microsoft.Xbox.Services.GDK.Bin.*"
-del "%githubPath%LINKTOSOURCE.md"
 del "%githubPath%tcui.*.props"
 
 :: Copy build directory and selectively delete non-GDK and UnitTests projects

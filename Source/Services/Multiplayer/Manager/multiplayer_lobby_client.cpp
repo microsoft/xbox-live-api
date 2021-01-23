@@ -327,7 +327,10 @@ MultiplayerLobbyClient::AddLocalUser(
 
     if (localUser == nullptr)
     {
-        localUser = m_multiplayerLocalUserManager->AddUserToXboxLiveContextToMap(user);
+        auto localUserResult = m_multiplayerLocalUserManager->AddUserToXboxLiveContextToMap(user);
+        RETURN_HR_IF_FAILED(localUserResult.Hresult());
+
+        localUser = localUserResult.ExtractPayload();
     }
 
     auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();

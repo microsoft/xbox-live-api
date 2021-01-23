@@ -542,7 +542,7 @@ STDAPI XblMultiplayerEventArgsMembers(
 /// </summary>
 /// <param name="argsHandle">The event args handle from the XblMultiplayerEvent.</param>
 /// <param name="member">Passes back a given member for the following event results:
-/// XblMultiplayerEventType::HostChanged - The new host member.  If an existing host leaves, argsHandle will be nullptr.  
+/// XblMultiplayerEventType::HostChanged - The new host member.  If an existing host leaves, there won't be a member to pass back so this function will return HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND).
 /// XblMultiplayerEventType::MemberPropertyChanged - The member whose property changed.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMultiplayerEventArgsMember(

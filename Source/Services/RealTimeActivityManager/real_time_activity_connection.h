@@ -11,8 +11,8 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_BEGIN
 class Connection : public std::enable_shared_from_this<Connection>
 {
 public:
-    static std::shared_ptr<Connection> Make(
-        User user,
+    static Result<std::shared_ptr<Connection>> Make(
+        User&& user,
         const TaskQueue& queue,
         ConnectionStateChangedHandler stateChangedHandler,
         ResyncHandler resyncHandler
@@ -43,7 +43,7 @@ public:
 
 private:
     Connection(
-        User user,
+        User&& user,
         const TaskQueue& queue,
         ConnectionStateChangedHandler stateChangedHandler,
         ResyncHandler resyncHandler
@@ -67,7 +67,7 @@ private:
     void ConnectCompleteHandler(WebsocketResult result) noexcept;
     void DisconnectHandler(WebSocketCloseStatus result) noexcept;
     void WebsocketMessageReceived(const String& message) noexcept;
-    void InitializeWebsocket() noexcept;
+    HRESULT InitializeWebsocket() noexcept;
     void Reconnect() noexcept;
 
     User m_user;

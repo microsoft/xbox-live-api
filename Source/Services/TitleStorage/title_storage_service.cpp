@@ -16,7 +16,7 @@ const char E_TAG_INVALID_VALUE[] = "InvalidETagValue";
 const char RANGE_HEADER_NAME[] = "Range";
  
 TitleStorageService::TitleStorageService(
-    _In_ User user,
+    _In_ User&& user,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings
 ) :
     m_user{ std::move(user) },
@@ -36,7 +36,10 @@ TitleStorageService::GetQuota(
     auto subpath = TitleStorageQuotaSubpath(storageType, scid, m_user.Xuid());
     RETURN_HR_INVALIDARGUMENT_IF(!Succeeded(subpath));
 
-    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     HRESULT hr = httpCall->Init(
         m_xboxLiveContextSettings,
         "GET",
@@ -138,7 +141,10 @@ TitleStorageService::GetBlobMetadata(
 
     RETURN_HR_INVALIDARGUMENT_IF(!Succeeded(subpath));
 
-    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     HRESULT hr = httpCall->Init(
         m_xboxLiveContextSettings,
         "GET",
@@ -200,7 +206,10 @@ TitleStorageService::DeleteBlob(
         XblTitleStorageETagMatchCondition::IfMatch :
         XblTitleStorageETagMatchCondition::NotUsed;
 
-    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     HRESULT hr = httpCall->Init(
         m_xboxLiveContextSettings,
         "DELETE",
@@ -287,7 +296,10 @@ HRESULT TitleStorageService::DownloadBlobHelper(
 
     RETURN_HR_INVALIDARGUMENT_IF(!Succeeded(subpath));
 
-    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     HRESULT hr = httpCall->Init(
         m_xboxLiveContextSettings,
         "GET",
@@ -438,7 +450,10 @@ TitleStorageService::UploadBlobHelper(
     Result<xsapi_internal_string> subpath = TitleStorageUploadBlobSubpath(args->blobMetadata, continuationToken, finalBlock);
     RETURN_HR_INVALIDARGUMENT_IF(!Succeeded(subpath));
 
-    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     HRESULT hr = httpCall->Init(
         m_xboxLiveContextSettings,
         "PUT",

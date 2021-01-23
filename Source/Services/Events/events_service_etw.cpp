@@ -31,10 +31,8 @@ DEFINE_GUID(GUID_LOGGING_CHANNEL,
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_EVENTS_CPP_BEGIN
 
-EventsService::EventsService(
-    _In_ User user
-) :
-    m_user{ std::move(user) }
+EventsService::EventsService(_In_ User&& user)
+    : m_user{ std::move(user) }
 {
     m_playSession = utils::create_guid(true);
 }
@@ -49,8 +47,10 @@ EventsService::~EventsService()
 #endif
 }
 
-HRESULT EventsService::Initialize()
+HRESULT EventsService::Initialize(
+)
 {
+
 #if HC_PLATFORM != HC_PLATFORM_UWP
     m_hrCoIncrementMTAUsage = CoIncrementMTAUsage(&m_mtaUsageCookie);
     if (FAILED(m_hrCoIncrementMTAUsage))

@@ -31,7 +31,7 @@ class MultiplayerActivityService : public std::enable_shared_from_this<Multiplay
 {
 public:
     MultiplayerActivityService(
-        _In_ User user,
+        _In_ User&& user,
         _In_ const TaskQueue& queue,
         _In_ std::shared_ptr<XboxLiveContextSettings> settings
     ) noexcept;
@@ -44,7 +44,7 @@ public:
     ) noexcept;
 
     HRESULT FlushRecentPlayers(
-        _In_ AsyncContext<HRESULT> async
+        _In_ AsyncContext<Result<void>>&& async
     ) noexcept;
 
     HRESULT SetActivity(

@@ -11,7 +11,7 @@ class PeoplehubService
 {
 public:
     PeoplehubService(
-        _In_ User user,
+        _In_ User&& user,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> httpCallSettings,
         _In_ uint32_t titleId
     ) noexcept;

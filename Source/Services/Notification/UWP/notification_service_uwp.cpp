@@ -9,10 +9,10 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_BEGIN
 
 UWPNotificationService::UWPNotificationService(
-    _In_ User user,
+    _In_ User&& user,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings
 ) noexcept :
-    NotificationService(user, contextSettings)
+    NotificationService(std::move(user), contextSettings)
 {
 }
 
@@ -37,7 +37,7 @@ HRESULT UWPNotificationService::RegisterWithNotificationService(
             {
                 auto channel = asyncOp->GetResults();
                 channel->PushNotificationReceived += ref new Windows::Foundation::TypedEventHandler<Windows::Networking::PushNotifications::PushNotificationChannel ^, Windows::Networking::PushNotifications::PushNotificationReceivedEventArgs ^>(
-                    [thisWeak](Windows::Networking::PushNotifications::PushNotificationChannel ^ channel, Windows::Networking::PushNotifications::PushNotificationReceivedEventArgs^ args)
+                    [thisWeak, async](Windows::Networking::PushNotifications::PushNotificationChannel ^ channel, Windows::Networking::PushNotifications::PushNotificationReceivedEventArgs^ args)
                 {
                     try
                     {
@@ -91,19 +91,18 @@ HRESULT UWPNotificationService::RegisterWithNotificationService(
                         notificationFilterList,
                         {
                             async.Queue(),
-                            [thisWeak](HRESULT hr)
+                            [thisWeak, async](HRESULT hr)
                             {
                                if (auto pThis{ thisWeak.lock() })
                                {
-
-                                  auto derivedPtr = dynamic_cast<UWPNotificationService*>(pThis.get());
                                   if (SUCCEEDED(hr))
                                   {
-                                    derivedPtr->m_registrationAsync.Complete(hr);
+                                      async.Complete(hr);
                                   }
                                   else
                                   {
-                                    derivedPtr->m_registrationAsync.Complete(E_XBL_RUNTIME_ERROR);
+                                      LOG_ERROR("Failed to successfully register with notification service");
+                                      async.Complete(E_XBL_RUNTIME_ERROR);
                                   }
                                }
                             }

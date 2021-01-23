@@ -7,38 +7,40 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 User::User(XblUserHandle userHandle) noexcept
-{
-    auto hr = XalUserDuplicateHandle(userHandle, &m_handle);
-    if (FAILED(hr))
-    {
-        m_handle = nullptr;
-        m_constructorHR = hr;
-        LOGS_ERROR << "User being used is currently unavailable. Probably because the title is still in suspended mode. Try again later";
-    }
-}
-
-User::User(const User& other) noexcept
-{
-    auto hr = XalUserDuplicateHandle(other.m_handle, &m_handle);
-    if (FAILED(hr))
-    {
-        m_handle = nullptr;
-        m_constructorHR = hr;
-        LOGS_ERROR << "User being used is currently unavailable. Probably because the title is still in suspended mode. Try again later";
-    }
-}
+    : m_handle(userHandle)
+{}
 
 User::User(User&& other) noexcept
-    : m_handle{ other.m_handle }
+    : m_handle{ other.m_handle }, m_localId { std::move(other.m_localId) }, m_xuid {other.m_xuid }
 {
+    Map<XalGamertagComponent, String>::iterator it = other.m_gamertags.begin();
+
+    while(it != other.m_gamertags.end())
+    {
+        m_gamertags[it->first] = std::move(it->second);
+        it++;
+    }
+
+    other.m_gamertags.clear();
     other.m_handle = nullptr;
-    m_constructorHR = other.m_constructorHR;
 }
 
-User& User::operator=(User other) noexcept
+User& User::operator=(User&& other) noexcept
 {
     std::swap(other.m_handle, m_handle);
-    m_constructorHR = other.m_constructorHR;
+
+    m_localId = std::move(other.m_localId);
+    m_xuid = other.m_xuid;
+
+    Map<XalGamertagComponent, String>::iterator it = other.m_gamertags.begin();
+
+    while (it != other.m_gamertags.end())
+    {
+        m_gamertags[it->first] = std::move(it->second);
+        it++;
+    }
+
+    other.m_gamertags.clear();
     return *this;
 }
 
@@ -50,17 +52,111 @@ User::~User() noexcept
     }
 }
 
-uint64_t User::Xuid() const noexcept
+/*static*/ Result<User> User::WrapHandle(XblUserHandle userHandle) noexcept
 {
-
-    uint64_t xuid{ 0 };
-    if (m_handle != nullptr) 
+    if (userHandle == nullptr)
     {
-        auto hr = XalUserGetId(m_handle, &xuid);
-        UNREFERENCED_PARAMETER(hr);
+        return Result<User>{ User(nullptr), E_INVALIDARG };
     }
 
-    return xuid;
+    XalUserHandle copiedHandle;
+    auto hr = XalUserDuplicateHandle(userHandle, &copiedHandle);
+    if (FAILED(hr))
+    {
+        LOGS_ERROR << "Copying user failed: User failed to duplicate.";
+        return Result<User>{ User(nullptr), hr };
+    }
+    else
+    {
+        User user{ copiedHandle };
+        hr = user.InitializeUser();
+
+        if (FAILED(hr))
+        {
+            LOGS_ERROR << "Copying user failed: User failed to duplicate.";
+            return Result<User>{ User(nullptr), hr };
+        }
+
+        return Result<User>{ std::move(user) , S_OK };
+    }
+
+}
+
+HRESULT User::InitializeUser() noexcept
+{
+    auto hr = XalUserGetId(m_handle, &m_xuid);
+    if (FAILED(hr))
+    {
+        LOGS_ERROR << "Failed to get User ID with HRESULT: " << hr;
+        return hr;
+    }
+
+    hr = XalUserGetLocalId(m_handle, &m_localId);
+    if (FAILED(hr))
+    {
+        LOGS_ERROR << "Failed to get User LocalID with HRESULT: " << hr;
+        return hr;
+    }
+
+    auto gamertagComponentResult = GetGamertagComponent(XalGamertagComponent_Classic);
+    if (FAILED(gamertagComponentResult.Hresult()))
+    {
+        LOGS_ERROR << "Failed to get Gamertag Component" << XalGamertagComponent_Classic << " with HRESULT: " << hr;
+        return hr;
+    }
+
+    m_gamertags[XalGamertagComponent_Classic] = gamertagComponentResult.ExtractPayload();
+
+    gamertagComponentResult = GetGamertagComponent(XalGamertagComponent_Modern);
+    if (FAILED(gamertagComponentResult.Hresult()))
+    {
+        LOGS_ERROR << "Failed to get Gamertag Component" << XalGamertagComponent_Modern << " with HRESULT: " << hr;
+        return hr;
+    }
+
+    m_gamertags[XalGamertagComponent_Modern] = gamertagComponentResult.ExtractPayload();
+
+    gamertagComponentResult = GetGamertagComponent(XalGamertagComponent_ModernSuffix);
+    if (FAILED(gamertagComponentResult.Hresult()))
+    {
+        LOGS_ERROR << "Failed to get Gamertag Component" << XalGamertagComponent_ModernSuffix << " with HRESULT: " << hr;
+        return hr;
+    }
+
+    m_gamertags[XalGamertagComponent_ModernSuffix] = gamertagComponentResult.ExtractPayload();
+
+    gamertagComponentResult = GetGamertagComponent(XalGamertagComponent_UniqueModern);
+    if (FAILED(gamertagComponentResult.Hresult()))
+    {
+        LOGS_ERROR << "Failed to get Gamertag Component" << XalGamertagComponent_UniqueModern << " with HRESULT: " << hr;
+        return hr;
+    }
+
+    m_gamertags[XalGamertagComponent_UniqueModern] = gamertagComponentResult.ExtractPayload();
+
+    return S_OK;
+}
+
+Result<User> User::Copy() const noexcept
+{
+    XalUserHandle copiedHandle;
+    auto hr = XalUserDuplicateHandle(this->m_handle, &copiedHandle);
+    if (FAILED(hr))
+    {
+        LOGS_ERROR << "Copying user failed: User failed to duplicate.";
+        return Result<User>{ User(nullptr), hr};
+    }
+    else
+    {
+        User copiedUser{ copiedHandle };
+        hr = copiedUser.InitializeUser();
+        return Result<User>{std::move(copiedUser), hr};
+    }
+}
+
+uint64_t User::Xuid() const noexcept
+{
+    return m_xuid;
 }
 
 uint64_t User::LocalId() const noexcept
@@ -69,46 +165,77 @@ uint64_t User::LocalId() const noexcept
     if (m_handle != nullptr)
     {
         auto hr = XalUserGetLocalId(m_handle, &localId);
-        UNREFERENCED_PARAMETER(hr);
+        if (SUCCEEDED(hr))
+        {
+            m_localId = localId;
+        }
     }
-    return localId.value;
+
+    return m_localId.value;
 }
 
 xsapi_internal_string User::Gamertag() const noexcept
 {
-    return GetGamertagComponent(XalGamertagComponent_Classic);
+    auto result = GetGamertagComponent(XalGamertagComponent_Classic);
+    if (Failed(result))
+    {
+        return m_gamertags[XalGamertagComponent_Classic];
+    }
+    else
+    {
+        return result.ExtractPayload();
+    }
 }
 
 xsapi_internal_string User::ModernGamertag() const noexcept
 {
-    return GetGamertagComponent(XalGamertagComponent_Modern);
+    auto result = GetGamertagComponent(XalGamertagComponent_Modern);
+    if (Failed(result))
+    {
+        return m_gamertags[XalGamertagComponent_Modern];
+    }
+    else
+    {
+        return result.ExtractPayload();
+    }
 }
 
 xsapi_internal_string User::ModernGamertagSuffix() const noexcept
 {
-    return GetGamertagComponent(XalGamertagComponent_ModernSuffix);
+    auto result = GetGamertagComponent(XalGamertagComponent_ModernSuffix);
+    if (Failed(result))
+    {
+        return m_gamertags[XalGamertagComponent_ModernSuffix];
+    }
+    else
+    {
+        return result.ExtractPayload();
+    }
 }
 
 xsapi_internal_string User::UniqueModernGamertag() const noexcept
 {
-    return GetGamertagComponent(XalGamertagComponent_UniqueModern);
+    auto result = GetGamertagComponent(XalGamertagComponent_UniqueModern);
+    if (Failed(result))
+    {
+        return m_gamertags[XalGamertagComponent_UniqueModern];
+    }
+    else
+    {
+        return result.ExtractPayload();
+    }
 }
 
 HRESULT User::GetTokenAndSignature(
-    const xsapi_internal_string& httpMethod,
-    const xsapi_internal_string& url,
+    const String& httpMethod,
+    const String& url,
     const HttpHeaders& headers,
     const uint8_t* requestBody,
     size_t requestBodySize,
     bool allUsers,
-    AsyncContext<Result<TokenAndSignature>> async
+    AsyncContext<Result<TokenAndSignature>>&& async
 ) noexcept
 {
-    if (!m_handle)
-    {
-        return m_constructorHR;
-    }
-
     bool forceRefresh{ false };
 
     auto state{ GlobalState::Get() };
@@ -131,7 +258,7 @@ HRESULT User::GetTokenAndSignature(
         allUsers
     };
 
-    xsapi_internal_vector<XalHttpHeader> xalHttpHeaders{};
+    Vector<XalHttpHeader> xalHttpHeaders{};
     if (headers.size() > 0)
     {
         xalHttpHeaders.reserve(tokenAndSigArgs.headerCount);
@@ -161,10 +288,11 @@ HRESULT User::GetTokenAndSignature(
             XalUserGetTokenAndSignatureData* xalTokenSignatureData{ nullptr };
 
             hr = XalUserGetTokenAndSignatureSilentlyResult(asyncBlock, bufferSize, buffer, &xalTokenSignatureData, nullptr);
-            assert(SUCCEEDED(hr));
-
-            payload.token = xsapi_internal_string{ xalTokenSignatureData->token, xalTokenSignatureData->tokenSize };
-            payload.signature = xsapi_internal_string{ xalTokenSignatureData->signature, xalTokenSignatureData->signatureSize };
+            if (SUCCEEDED(hr))
+            {
+                payload.token = String{ xalTokenSignatureData->token, xalTokenSignatureData->tokenSize };
+                payload.signature = String{ xalTokenSignatureData->signature, xalTokenSignatureData->signatureSize };
+            }
 
             DeleteArray(buffer, bufferSize);
         }
@@ -187,11 +315,6 @@ HRESULT User::GetTokenAndSignature(
     );
 }
 
-HRESULT User::GetConstructorHR() const noexcept
-{
-    return m_constructorHR;
-}
-
 XalUserHandle User::Handle() const noexcept
 {
     return m_handle;
@@ -204,7 +327,7 @@ void User::SetTokenExpired(uint64_t xuid) noexcept
     {
         state->InsertUserExpiredToken(xuid);
     }
-    
+
 }
 
 Result<XblFunctionContext> User::RegisterChangeEventHandler(
@@ -220,7 +343,7 @@ Result<XblFunctionContext> User::RegisterChangeEventHandler(
         [](void* context, UserLocalId userId, UserChangeType change)
         {
             auto handler{ static_cast<UserChangeEventHandler*>(context) };
-            (*handler)(userId, static_cast<UserChangeType>(change));
+            (*handler)(std::move(userId), std::move(static_cast<UserChangeType>(change)));
         },
         &token
     );
@@ -248,7 +371,7 @@ void User::UnregisterChangeEventHandle(
     }
 }
 
-xsapi_internal_string User::GetGamertagComponent(
+Result<String> User::GetGamertagComponent(
     XalGamertagComponent component
 ) const noexcept
 {
@@ -258,19 +381,19 @@ xsapi_internal_string User::GetGamertagComponent(
 
         std::vector<char> gamertagComponent(size, char{});
         auto hr = XalUserGetGamertag(m_handle, component, size, &gamertagComponent[0], nullptr);
-        if (FAILED(hr)) 
+        if (SUCCEEDED(hr))
         {
-            return "";
+            m_gamertags[component] = gamertagComponent.data();
         }
-        else
+        else 
         {
-            return gamertagComponent.data();
+            LOGS_ERROR << "Getting Gamertag failed with HR: "<< hr ;
         }
+
+        return Result<String>{m_gamertags[component], hr };
     }
-    else 
-    {
-        return "";
-    }
+
+    return  E_UNEXPECTED;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

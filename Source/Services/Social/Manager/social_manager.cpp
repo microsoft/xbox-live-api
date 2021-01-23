@@ -18,27 +18,24 @@ SocialManager::SocialManager() noexcept
 }
 
 HRESULT SocialManager::AddLocalUser(
-    const User& user,
+    User&& user,
     XblSocialManagerExtraDetailLevel detailLevel,
     TaskQueue&& queue
 ) noexcept
 {
     std::lock_guard<std::mutex> lock{ m_mutex };
 
-    auto xuid = user.Xuid();
-    if (xuid == 0)
-    {
-        LOGS_ERROR << "User being added is currently unavailable. Probably due to the title still being in suspended state. Try again later";
-        return user.GetConstructorHR();
-    }
-
+    auto xuid{ user.Xuid() };
     if (m_graphs.find(xuid) != m_graphs.end())
     {
         LOGS_ERROR << "User " << xuid << " already added to SocialManager";
         return E_UNEXPECTED;
     }
 
-    m_graphs[xuid] = SocialGraph::Make(user, detailLevel, queue, GlobalState::Get()->RTAManager());
+    auto socialGraph = SocialGraph::Make(std::move(user), detailLevel, queue, GlobalState::Get()->RTAManager());
+    RETURN_HR_IF_FAILED(socialGraph.Hresult());
+
+    m_graphs[xuid] = socialGraph.ExtractPayload();
     return S_OK;
 }
 
@@ -51,12 +48,6 @@ HRESULT SocialManager::RemoveLocalUser(
     std::lock_guard<std::mutex> lock{ m_mutex };
 
     auto xuid = user.Xuid();
-    if (xuid == 0)
-    {
-        LOGS_ERROR << "User being removed is currently unavailable. Probably due to the title still being in suspended state. Try again later";
-        return user.GetConstructorHR();
-    }
-
     auto graphIter{ m_graphs.find(xuid) };
     if (graphIter == m_graphs.end())
     {
@@ -110,12 +101,6 @@ Result<std::shared_ptr<XblSocialManagerUserGroup>> SocialManager::CreateUserGrou
     Vector<uint64_t>&& trackedUsers
 ) noexcept
 {
-    if (user.Handle() == nullptr)
-    {
-        LOGS_ERROR << "User being added is currently unavailable. Probably because the title is still in suspended mode. Try again later";
-        return user.GetConstructorHR();
-    }
-
     std::lock_guard<std::mutex> lock{ m_mutex };
 
     auto graphIter = m_graphs.find(user.Xuid());

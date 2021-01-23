@@ -43,7 +43,7 @@ public:
     } m_registrationStatus;
 
     NotificationService(
-        _In_ User user,
+        _In_ User&& user,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings);
     virtual ~NotificationService() = default;
 
@@ -57,7 +57,6 @@ public:
         _In_ AsyncContext<HRESULT> async);
 
 protected:
-
     AsyncContext<HRESULT> m_registrationAsync;
     AsyncContext<HRESULT> m_unregistrationAsync;
 
@@ -89,7 +88,7 @@ class MobileNotificationService : public NotificationService
 {
 public:
     MobileNotificationService(
-        _In_ User user,
+        _In_ User&& user,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings);
 
     HRESULT RegisterWithNotificationService(
@@ -169,7 +168,7 @@ class RTANotificationService : public NotificationService
 {
 public:
     RTANotificationService(
-        _In_ User user,
+        _In_ User&& user,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings,
         _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaManager
     ) noexcept;
@@ -238,7 +237,7 @@ class UWPNotificationService : public NotificationService
 {
 public:
     UWPNotificationService(
-        _In_ User user,
+        _In_ User&& user,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings
     ) noexcept;
 
