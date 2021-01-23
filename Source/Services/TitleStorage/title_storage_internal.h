@@ -56,7 +56,7 @@ class TitleStorageService : public std::enable_shared_from_this<TitleStorageServ
 {
 public:
     TitleStorageService(
-        _In_ User user,
+        _In_ User&& user,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings
     );
 

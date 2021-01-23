@@ -7,7 +7,7 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_USERSTATISTICS_CPP_BEGIN
 
 TitleManagedStatisticsService::TitleManagedStatisticsService(
-    _In_ User user,
+    _In_ User&& user,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings
 ) noexcept :
     m_user{ std::move(user) },
@@ -30,7 +30,10 @@ HRESULT TitleManagedStatisticsService::WriteTitleManagedStatisticsAsync(
     request.AddMember("revision", GetRevisionFromClock(), allocator);
     request.AddMember("timestamp", JsonValue(utils::internal_string_from_string_t(xbox::services::datetime::utc_now().to_string(xbox::services::datetime::date_format::ISO_8601)).c_str(), allocator).Move(), allocator);
 
-    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "POST",
@@ -58,7 +61,10 @@ HRESULT TitleManagedStatisticsService::UpdateTitleManagedStatistics(
     _In_ AsyncContext<HRESULT> async
 ) const noexcept
 {
-    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "PATCH",

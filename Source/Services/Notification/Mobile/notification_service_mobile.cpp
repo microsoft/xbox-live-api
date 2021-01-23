@@ -4,9 +4,9 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_BEGIN
 #if HC_PLATFORM == HC_PLATFORM_IOS || HC_PLATFORM == HC_PLATFORM_ANDROID
 MobileNotificationService::MobileNotificationService(
-    _In_ User user,
+    _In_ User&& user,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings
-) : NotificationService(user, contextSettings)
+) : NotificationService(std::move(user), contextSettings)
 {}
 
 HRESULT MobileNotificationService::RegisterWithNotificationService(

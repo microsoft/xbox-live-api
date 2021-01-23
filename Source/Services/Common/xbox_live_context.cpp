@@ -20,9 +20,17 @@
 using namespace xbox::services;
 using namespace xbox::services::system;
 
-XblContext::XblContext(_In_ xbox::services::User user) noexcept
-    : m_user{ std::move(user) }
+/*static*/ std::shared_ptr<XblContext> XblContext::Make(
+    _In_ xbox::services::User&&  user
+) noexcept
 {
+    auto xblContext = std::shared_ptr<XblContext>(
+        new (Alloc(sizeof(XblContext))) XblContext
+        {
+            std::move(user)
+        }
+        );
+    return xblContext;
 }
 
 const xbox::services::User& XblContext::User() const noexcept
@@ -51,43 +59,119 @@ HRESULT XblContext::Initialize(
 
     std::weak_ptr<XblContext> thisWeakPtr = shared_from_this();
 
-    m_achievementService = MakeShared<xbox::services::achievements::AchievementsService>(m_user, m_xboxLiveContextSettings, AppConfig::Instance(), thisWeakPtr, rtaManager);
-    m_profileService = MakeShared<xbox::services::social::ProfileService>(m_user, m_xboxLiveContextSettings, AppConfig::Instance());
-    m_reputationServiceImpl = MakeShared<xbox::services::social::ReputationService>(m_user, m_xboxLiveContextSettings);
-    m_presenceService = MakeShared<xbox::services::presence::PresenceService>(m_user, m_xboxLiveContextSettings, rtaManager);
-    m_socialService = MakeShared<xbox::services::social::SocialService>(m_user, m_xboxLiveContextSettings, rtaManager);
-    m_stringService = MakeShared<xbox::services::system::StringService>(m_user, m_xboxLiveContextSettings);
-    m_multiplayerService = MakeShared<xbox::services::multiplayer::MultiplayerService>(m_user, m_xboxLiveContextSettings, AppConfig::Instance(), rtaManager);
-    m_privacyService = MakeShared<privacy::PrivacyService>(m_user, m_xboxLiveContextSettings);
-    m_titleManagedStatisticsService = MakeShared<xbox::services::user_statistics::TitleManagedStatisticsService>(m_user, m_xboxLiveContextSettings);
-    m_userStatisticsService = MakeShared<xbox::services::user_statistics::UserStatisticsService>(m_user, m_xboxLiveContextSettings, rtaManager);
-    m_leaderboardService = MakeShared<xbox::services::leaderboard::LeaderboardService>(m_user, m_xboxLiveContextSettings, AppConfig::Instance());
-    m_matchmakingService = MakeShared<xbox::services::matchmaking::MatchmakingService>(m_user, m_xboxLiveContextSettings);
-    m_titleStorageService = MakeShared<xbox::services::title_storage::TitleStorageService>(m_user, m_xboxLiveContextSettings);
-    m_multiplayerActivityService = MakeShared<multiplayer_activity::MultiplayerActivityService>(m_user, get_xsapi_singleton_async_queue(), m_xboxLiveContextSettings);
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+        m_achievementService = MakeShared<xbox::services::achievements::AchievementsService>(userResult.ExtractPayload(), m_xboxLiveContextSettings, AppConfig::Instance(), thisWeakPtr, rtaManager);
+    }
 
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+        m_profileService = MakeShared<xbox::services::social::ProfileService>(userResult.ExtractPayload(), m_xboxLiveContextSettings, AppConfig::Instance());
+    }
+
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+        m_reputationServiceImpl = MakeShared<xbox::services::social::ReputationService>(userResult.ExtractPayload(), m_xboxLiveContextSettings);
+    }
+
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+        m_presenceService = MakeShared<xbox::services::presence::PresenceService>(userResult.ExtractPayload(), m_xboxLiveContextSettings, rtaManager);
+    }
+
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+        m_socialService = MakeShared<xbox::services::social::SocialService>(userResult.ExtractPayload(), m_xboxLiveContextSettings, rtaManager);
+    }
+
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+        m_stringService = MakeShared<xbox::services::system::StringService>(userResult.ExtractPayload(), m_xboxLiveContextSettings);
+    }
+
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+        m_multiplayerService = MakeShared<xbox::services::multiplayer::MultiplayerService>(userResult.ExtractPayload(), m_xboxLiveContextSettings, AppConfig::Instance(), rtaManager);
+    }
+
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+        m_privacyService = MakeShared<privacy::PrivacyService>(userResult.ExtractPayload(), m_xboxLiveContextSettings);
+    }
+
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+        m_titleManagedStatisticsService = MakeShared<xbox::services::user_statistics::TitleManagedStatisticsService>(userResult.ExtractPayload(), m_xboxLiveContextSettings);
+    }
+
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+        m_userStatisticsService = MakeShared<xbox::services::user_statistics::UserStatisticsService>(userResult.ExtractPayload(), m_xboxLiveContextSettings, rtaManager);
+    }
+
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+        m_leaderboardService = MakeShared<xbox::services::leaderboard::LeaderboardService>(userResult.ExtractPayload(), m_xboxLiveContextSettings, AppConfig::Instance());
+    }
+
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+        m_matchmakingService = MakeShared<xbox::services::matchmaking::MatchmakingService>(userResult.ExtractPayload(), m_xboxLiveContextSettings);
+    }
+
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+        m_titleStorageService = MakeShared<xbox::services::title_storage::TitleStorageService>(userResult.ExtractPayload(), m_xboxLiveContextSettings);
+    }
+
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+        m_multiplayerActivityService = MakeShared<multiplayer_activity::MultiplayerActivityService>(userResult.ExtractPayload(), get_xsapi_singleton_async_queue(), m_xboxLiveContextSettings);
+    }
+    
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
 #if XSAPI_EVENTS_SERVICE
-    m_eventsService = MakeShared<events::EventsService>(
-        m_user
+        m_eventsService = MakeShared<events::EventsService>(
+            userResult.ExtractPayload()
 #if XSAPI_INTERNAL_EVENTS_SERVICE
-        , get_xsapi_singleton_async_queue()
+            , get_xsapi_singleton_async_queue()
 #endif
-    );
-    HRESULT hr = m_eventsService->Initialize();
-    RETURN_HR_IF_FAILED(hr);
+            );
+        RETURN_HR_IF_FAILED(m_eventsService->Initialize());
 #endif
+    }
 
+    {
+        Result<xbox::services::User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
 #if XSAPI_NOTIFICATION_SERVICE
 #if !XSAPI_UNIT_TESTS && (HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM_IS_EXTERNAL)
-	m_notificationService = MakeShared<xbox::services::notification::RTANotificationService>(m_user, m_xboxLiveContextSettings, rtaManager);
-    m_notificationService->RegisterForSpopNotificationEvents();
+        m_notificationService = MakeShared<xbox::services::notification::RTANotificationService>(userResult.ExtractPayload(), m_xboxLiveContextSettings, rtaManager);
+        m_notificationService->RegisterForSpopNotificationEvents();
 #elif HC_PLATFORM == HC_PLATFORM_ANDROID || HC_PLATFORM == HC_PLATFORM_IOS
-	m_notificationService = MakeShared<xbox::services::notification::MobileNotificationService>(m_user, m_xboxLiveContextSettings);
+        m_notificationService = MakeShared<xbox::services::notification::MobileNotificationService>(userResult.ExtractPayload(), m_xboxLiveContextSettings);
 #elif HC_PLATFORM == HC_PLATFORM_UWP
-	m_notificationService = MakeShared<xbox::services::notification::UWPNotificationService>(m_user, m_xboxLiveContextSettings);
-	m_notificationService->RegisterWithNotificationService(AsyncContext<HRESULT>{TaskQueue{ get_xsapi_singleton_async_queue() }});
+        m_notificationService = MakeShared<xbox::services::notification::UWPNotificationService>(userResult.ExtractPayload(), m_xboxLiveContextSettings);
+        m_notificationService->RegisterWithNotificationService(AsyncContext<HRESULT>{TaskQueue{ get_xsapi_singleton_async_queue() }});
 #endif
 #endif
+    }
 
     auto userChangedRegistrationResult = User::RegisterChangeEventHandler(
         [

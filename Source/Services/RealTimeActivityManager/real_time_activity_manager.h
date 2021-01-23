@@ -62,7 +62,7 @@ public:
     ) noexcept;
 
 private:
-    std::shared_ptr<class Connection> GetConnection(
+    Result<std::shared_ptr<class Connection>> GetConnection(
         const User& user
     ) noexcept;
 

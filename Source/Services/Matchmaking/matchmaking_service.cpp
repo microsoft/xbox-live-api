@@ -13,8 +13,8 @@ using namespace xbox::services::legacy;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MATCHMAKING_CPP_BEGIN
 
-MatchmakingService::MatchmakingService (
-    _In_ User user,
+MatchmakingService::MatchmakingService(
+    _In_ User&& user,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings
 ) :
     m_user{ std::move(user) },
@@ -291,7 +291,10 @@ HRESULT MatchmakingService::CreateMatchTicket(
     {
         if (op == XAsyncOp::DoWork)
         {
-            auto httpCall = MakeShared<XblHttpCall>(sharedThis->m_user);
+            Result<User> userResult = sharedThis->m_user.Copy();
+            RETURN_HR_IF_FAILED(userResult.Hresult());
+
+            auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
             HRESULT hr = httpCall->Init(
                 sharedThis->m_contextSettings,
                 "POST",
@@ -355,7 +358,10 @@ HRESULT MatchmakingService::DeleteMatchTicketAsync(
     {
         if (op == XAsyncOp::DoWork)
         {
-            auto httpCall = MakeShared<XblHttpCall>(sharedThis->m_user);
+            Result<User> userResult = sharedThis->m_user.Copy();
+            RETURN_HR_IF_FAILED(userResult.Hresult());
+
+            auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
             HRESULT hr = httpCall->Init(
                 sharedThis->m_contextSettings,
                 "DELETE",
@@ -407,7 +413,10 @@ HRESULT MatchmakingService::GetMatchTicketDetailsAsync(
     {
         if (op == XAsyncOp::DoWork)
         {
-            auto httpCall = MakeShared<XblHttpCall>(sharedThis->m_user);
+            Result<User> userResult = sharedThis->m_user.Copy();
+            RETURN_HR_IF_FAILED(userResult.Hresult());
+
+            auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
             HRESULT hr = httpCall->Init(
                 sharedThis->m_contextSettings,
                 "GET",
@@ -495,7 +504,10 @@ HRESULT MatchmakingService::GetHopperStatistics(
     {
         if (op == XAsyncOp::DoWork)
         {
-            auto httpCall = MakeShared<XblHttpCall>(sharedThis->m_user);
+            Result<User> userResult = sharedThis->m_user.Copy();
+            RETURN_HR_IF_FAILED(userResult.Hresult());
+
+            auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
             HRESULT hr = httpCall->Init(
                 sharedThis->m_contextSettings,
                 "GET",

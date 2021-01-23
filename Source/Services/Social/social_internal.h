@@ -76,7 +76,7 @@ class SocialService : public std::enable_shared_from_this<SocialService>
 {
 public:
     SocialService(
-        _In_ User user,
+        _In_ User&& user,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
         _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaManager
     ) noexcept;
@@ -147,7 +147,7 @@ class ReputationService : public std::enable_shared_from_this<ReputationService>
 {
 public:
     ReputationService(
-        _In_ User user,
+        _In_ User&& user,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings
     ) noexcept;
 

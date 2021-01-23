@@ -17,10 +17,10 @@ static const int32_t NUM_RETRY_TIMES = 10;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_BEGIN
 NotificationService::NotificationService(
-    _In_ User user,
+    _In_ User&& user,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings
 ) :
-    m_user(user),
+    m_user(std::move(user)),
     m_contextSettings(contextSettings)
 {}
 
@@ -69,7 +69,10 @@ HRESULT NotificationService::UnregisterFromNotificationHelper(
 {
     auto subpath = "/system/notifications/endpoints/" + endpointId;
 
-    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     HRESULT hr = httpCall->Init(
         m_contextSettings,
         "DELETE",
@@ -156,6 +159,7 @@ HRESULT NotificationService::RegisterForNotificationsHelper(
     }
     default:
     {
+        m_registrationAsync = AsyncContext<HRESULT>::Collapse({ std::move(m_registrationAsync), std::move(async) });
         m_registrationStatus = RegistrationStatus::Registering;
 
         xsapi_internal_stringstream str;
@@ -198,7 +202,10 @@ HRESULT NotificationService::RegisterForNotificationsHelper(
         }
 
         payload.AddMember("filters", filterJson, allocator);
-        auto httpCall = MakeShared<XblHttpCall>(m_user);
+        Result<User> userResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+
+        auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
         RETURN_HR_IF_FAILED(httpCall->Init(
             m_contextSettings,
             "POST",
@@ -236,7 +243,7 @@ HRESULT NotificationService::RegisterForNotificationsHelper(
                         case RegistrationStatus::Registering:
                         {
                             pThis->m_registrationStatus = RegistrationStatus::Registered;
-                            async.Complete(hr);
+                            pThis->m_registrationAsync.Complete(hr);
                             break;
                         }
                         default:
@@ -250,7 +257,7 @@ HRESULT NotificationService::RegisterForNotificationsHelper(
                     {
                         // Registration failed for some reason
                         pThis->m_registrationStatus = RegistrationStatus::Unregistered;
-                        async.Complete(E_XBL_RUNTIME_ERROR);
+                        pThis->m_registrationAsync.Complete(E_XBL_RUNTIME_ERROR);
                     }
                 }
             }

@@ -8,7 +8,7 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_BEGIN
 
 SocialService::SocialService(
-    _In_ User user,
+    _In_ User&& user,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
     _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaManager
 ) noexcept :
@@ -97,7 +97,10 @@ HRESULT SocialService::GetSocialRelationships(
         nextDelimiter = "&";
     }
 
-    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "GET",

@@ -12,7 +12,7 @@ using namespace xbox::services::real_time_activity;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
 
 PresenceService::PresenceService(
-    _In_ User user,
+    _In_ User&& user,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
     _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaManager
 ) noexcept
@@ -268,10 +268,14 @@ HRESULT PresenceService::SetPresence(
     _In_ AsyncContext<HRESULT> async
 ) const noexcept
 {
+
     Stringstream subpath;
     subpath << "/users/xuid(" << m_user.Xuid() << ")/devices/current/titles/current";
 
-    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "POST",
@@ -324,7 +328,10 @@ HRESULT PresenceService::GetPresence(
     Stringstream subpath;
     subpath << "/users/xuid(" << xuid << ")?level=all";
 
-    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "GET",
@@ -355,7 +362,10 @@ HRESULT PresenceService::GetBatchPresence(
     _In_ AsyncContext<Result<xsapi_internal_vector<std::shared_ptr<XblPresenceRecord>>>> async
 ) const noexcept
 {
-    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "POST",

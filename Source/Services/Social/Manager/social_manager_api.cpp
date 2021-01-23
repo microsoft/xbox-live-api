@@ -191,7 +191,10 @@ try
     return ApiImpl([&](SocialManager& socialManager)
         {
             RETURN_HR_INVALIDARGUMENT_IF(user == nullptr);
-            return socialManager.AddLocalUser(user, extraLevelDetail, TaskQueue::DeriveWorkerQueue(queue));
+            auto wrapUserResult{ User::WrapHandle(user) };
+            RETURN_HR_IF_FAILED(wrapUserResult.Hresult());
+
+            return socialManager.AddLocalUser(wrapUserResult.ExtractPayload(), extraLevelDetail, TaskQueue::DeriveWorkerQueue(queue));
         });
 }
 CATCH_RETURN()
@@ -204,7 +207,10 @@ try
     return ApiImpl([&](SocialManager& socialManager)
         {
             RETURN_HR_INVALIDARGUMENT_IF_NULL(user);
-            return socialManager.RemoveLocalUser(user);
+            auto wrapUserResult{ User::WrapHandle(user) };
+            RETURN_HR_IF_FAILED(wrapUserResult.Hresult());
+
+            return socialManager.RemoveLocalUser(wrapUserResult.Payload());
         });
 }
 CATCH_RETURN()
@@ -243,8 +249,10 @@ try
     return ApiImpl([&](SocialManager& socialManager)
         {
             RETURN_HR_INVALIDARGUMENT_IF(user == nullptr || group == nullptr);
+            auto wrapUserResult{ User::WrapHandle(user) };
+            RETURN_HR_IF_FAILED(wrapUserResult.Hresult());
 
-            auto result = socialManager.CreateUserGroup(user, presenceFilter, relationshipFilter);
+            auto result = socialManager.CreateUserGroup(wrapUserResult.Payload(), presenceFilter, relationshipFilter);
             if (Succeeded(result))
             {
                 *group = result.ExtractPayload().get();
@@ -267,8 +275,10 @@ try
     return ApiImpl([&](SocialManager& socialManager)
         {
             RETURN_HR_INVALIDARGUMENT_IF(user == nullptr || xuids == nullptr || xuidsCount <= 0 || xuidsCount > XBL_SOCIAL_MANAGER_MAX_USERS_FROM_LIST || group == nullptr);
-
-            auto result = socialManager.CreateUserGroup(user, xsapi_internal_vector<uint64_t>(xuids, xuids + xuidsCount));
+            auto wrapUserResult{ User::WrapHandle(user) };
+            RETURN_HR_IF_FAILED(wrapUserResult.Hresult());
+            
+            auto result = socialManager.CreateUserGroup(wrapUserResult.Payload(), Vector<uint64_t>(xuids, xuids + xuidsCount));
             if (Succeeded(result))
             {
                 *group = result.ExtractPayload().get();
@@ -334,8 +344,9 @@ try
 {
     return ApiImpl([&](SocialManager& socialManager)
         {
-            RETURN_HR_INVALIDARGUMENT_IF_NULL(user);
-            return socialManager.SetRichPresencePolling(user, shouldEnablePolling);
+            auto wrapUserResult{ User::WrapHandle(user) };
+            RETURN_HR_IF_FAILED(wrapUserResult.Hresult());
+            return socialManager.SetRichPresencePolling(wrapUserResult.Payload(), shouldEnablePolling);
         });
 }
 CATCH_RETURN()

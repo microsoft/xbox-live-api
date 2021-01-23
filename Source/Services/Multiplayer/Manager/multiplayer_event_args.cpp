@@ -109,11 +109,25 @@ STDAPI XblMultiplayerEventArgsMember(
 
     if (hostChangedArgs != nullptr)
     {
-        *member = hostChangedArgs->HostMember->GetReference();
+        if (hostChangedArgs->HostMember != nullptr)
+        {
+            *member = hostChangedArgs->HostMember->GetReference();
+        }
+        else
+        {
+            return __HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND);
+        }
     }
     else if (memberPropertyChangedArgs != nullptr)
     {
-        *member = memberPropertyChangedArgs->Member->GetReference();
+        if (memberPropertyChangedArgs->Member != nullptr)
+        {
+            *member = memberPropertyChangedArgs->Member->GetReference();
+        }
+        else
+        {
+            return __HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND);
+        }
     }
     else
     {

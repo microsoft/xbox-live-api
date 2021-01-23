@@ -86,6 +86,7 @@ public:
         _In_ uint64_t xboxUserId,
         _In_ double percentile,
         _In_ uint32_t rank,
+        _In_ uint32_t globalRank,
         _In_ xsapi_internal_vector<xsapi_internal_string> columnValues,
         _In_ xsapi_internal_string metadata
     );
@@ -107,6 +108,7 @@ public:
     uint64_t XboxUserId() const;
     double Percentile() const;
     uint32_t Rank() const;
+    uint32_t GlobalRank() const;
     const xsapi_internal_vector<xsapi_internal_string>& ColumnValues() const;
 
 private:
@@ -114,9 +116,10 @@ private:
     xsapi_internal_string m_modernGamertag;
     xsapi_internal_string m_modernGamertagSuffix;
     xsapi_internal_string m_uniqueModernGamertag;
-    uint64_t m_xuid;
-    double m_percentile;
-    uint32_t m_rank;
+    uint64_t m_xuid{ 0 };
+    double m_percentile{ 0 };
+    uint32_t m_rank{ 0 };
+    uint32_t m_globalRank{ 0 };
     xsapi_internal_vector<xsapi_internal_string> m_columnValues;
     xsapi_internal_vector<const char*> m_columnValuesC;
     JsonDocument m_metadata;
@@ -167,7 +170,7 @@ class LeaderboardService : public std::enable_shared_from_this<LeaderboardServic
 {
 public:
     LeaderboardService(
-        _In_ User user,
+        _In_ User&& user,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
         _In_ std::shared_ptr<xbox::services::AppConfig> appConfig
     );

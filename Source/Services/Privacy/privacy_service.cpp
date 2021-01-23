@@ -14,7 +14,7 @@ constexpr auto XblPermissionName = EnumName<XblPermission, 1000, 1025>;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRIVACY_CPP_BEGIN
 
 PrivacyService::PrivacyService(
-    _In_ User user,
+    _In_ User&& user,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings
 ) noexcept :
     m_user{ std::move(user) },
@@ -44,7 +44,10 @@ HRESULT PrivacyService::GetUserList(
     xsapi_internal_stringstream path;
     path << "/users/xuid(" << m_user.Xuid() << ")/people/" << (listType == PrivacyListType::Mute ? "mute" : "avoid");
 
-    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_contextSettings,
         "GET",
@@ -126,7 +129,10 @@ HRESULT PrivacyService::CheckPermission(
     subPathBuilder.append_query(_T("setting"), StringTFromUtf8(XblPermissionName(permission).data()));
     subPathBuilder.append_query(_T("target"), StringTFromUtf8(targetQuery.data()));
 
-    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_contextSettings,
         "GET",
@@ -208,7 +214,10 @@ HRESULT PrivacyService::BatchCheckPermission(
 
     requestBody.AddMember("permissions", permissionsJson, allocator);
 
-    auto httpCall = MakeShared<XblHttpCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_contextSettings,
         "POST",

@@ -27,7 +27,7 @@ public:
     using ClearOperation = ClientOperation<HRESULT>;
 
     HRESULT WriteAsync(
-        User user,
+        const User& user,
         XblLocalStorageWriteMode mode,
         String key,
         Vector<uint8_t> data,
@@ -35,13 +35,13 @@ public:
     ) noexcept;
 
     HRESULT ReadAsync(
-        User user,
+        const User& user,
         String key,
         Callback<Result<Vector<uint8_t>>> callback
     ) noexcept;
 
     HRESULT ClearAsync(
-        User user,
+        const User& user,
         String key,
         Callback<HRESULT> callback
     ) noexcept;
