@@ -521,7 +521,7 @@ void XblHttpCall::SetLongHttpCall(_In_ bool longHttpCall)
     m_longHttpCall = longHttpCall;
 }
 
-XblHttpCall::XblHttpCall(User user)
+XblHttpCall::XblHttpCall(_In_ User&& user)
     : m_user{ std::move(user) }
 {
 }

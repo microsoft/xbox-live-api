@@ -13,7 +13,7 @@ using namespace xbox::services::legacy;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_EVENTS_CPP_BEGIN
 
 EventUploadPayload::EventUploadPayload(
-    _In_ User user,
+    _In_ User&& user,
     _In_ std::shared_ptr<cll::CllTenantSettings> tenantSettings
 ) :
     m_user{ std::move(user) },

@@ -18,7 +18,7 @@ namespace multiplayer_activity
 constexpr auto PlatformName = EnumName<XblMultiplayerActivityPlatform, 0, static_cast<uint32_t>(XblMultiplayerActivityPlatform::All)>;
 
 MultiplayerActivityService::MultiplayerActivityService(
-    _In_ User user,
+    _In_ User&& user,
     _In_ const TaskQueue& queue,
     _In_ std::shared_ptr<XboxLiveContextSettings> settings
 ) noexcept
@@ -62,7 +62,7 @@ HRESULT MultiplayerActivityService::UpdateRecentPlayers(
 }
 
 HRESULT MultiplayerActivityService::FlushRecentPlayers(
-    _In_ AsyncContext<HRESULT> async
+    _In_ AsyncContext<Result<void>>&& async
 ) noexcept
 {
     std::lock_guard<std::mutex> lock{ m_mutex };
@@ -77,7 +77,8 @@ HRESULT MultiplayerActivityService::FlushRecentPlayers(
     class ServiceCall : public XblHttpCall
     {
     public:
-        ServiceCall(User user) noexcept : XblHttpCall{ std::move(user) }
+        ServiceCall(User&& user) noexcept
+            : XblHttpCall{ std::move(user) }
         {
         }
 
@@ -104,23 +105,29 @@ HRESULT MultiplayerActivityService::FlushRecentPlayers(
             );
         }
 
-        HRESULT Perform(
-            AsyncContext<HttpResult> async,
-            bool forceRefresh = false
-        ) override
+        HRESULT PerformWithRetry(
+            AsyncContext<xbox::services::Result<void>>&& async
+        )
         {
-            m_async = std::move(async);
-            return XblHttpCall::Perform({ async.Queue().DeriveWorkerQueue(), IntermediateCallback }, forceRefresh);
+            return XblHttpCall::Perform(AsyncContext<HttpResult>{ async.Queue().DeriveWorkerQueue(),
+                [async](HttpResult httpResult) mutable
+                {
+                    HandleHttpResult(std::move(httpResult), std::move(async));
+                }
+            });
         }
 
     private:
-        static void IntermediateCallback(HttpResult result) noexcept
+        static void HandleHttpResult(
+            HttpResult result,
+            AsyncContext<xbox::services::Result<void>>&& async
+        ) noexcept
         {
             auto sharedThis{ std::dynamic_pointer_cast<ServiceCall>(result.Payload()) };
 
             if (Failed(result))
             {
-                return sharedThis->m_async.Complete(result);
+                return async.Complete(result);
             }
 
             auto httpResult{ result.Payload()->Result() };
@@ -133,29 +140,46 @@ HRESULT MultiplayerActivityService::FlushRecentPlayers(
                 // XblHttpCall already retries 401 so don't do it again here.
             case S_OK:
             {
-                return sharedThis->m_async.Complete(result);
+                return async.Complete(S_OK);
             }
             default:
             {
                 // For other failures, backoff and retry
                 auto backoff{ __min(std::pow(2, ++sharedThis->m_iteration), 60) * 1000 };
 
-                sharedThis->m_async.Queue().RunWork([ sharedThis ]
+                async.Queue().RunWork([ sharedThis, async ]
                 {
-                    sharedThis->ResetAndCopyForRetry();
-                    sharedThis->XblHttpCall::Perform({ sharedThis->m_async.Queue().DeriveWorkerQueue(), IntermediateCallback });
+                    HRESULT hr = sharedThis->ResetAndCopyForRetry();
+                    if (FAILED(hr))
+                    {
+                        return async.Complete(hr);
+                    }
+
+                    hr = sharedThis->XblHttpCall::Perform(AsyncContext<HttpResult>{ async.Queue().DeriveWorkerQueue(),
+                        [async](HttpResult httpResult) mutable
+                        {
+                            HandleHttpResult(std::move(httpResult), std::move(async));
+                        }
+                    });
+
+                    if (FAILED(hr))
+                    {
+                        return async.Complete(hr);
+                    }
                 },
                 backoff);
             }
             }
         }
 
-        AsyncContext<HttpResult> m_async;
         uint32_t m_iteration{ 0 };
         std::shared_ptr<GlobalState> m_globalState{ nullptr };
     };
 
-    auto serviceCall = MakeShared<ServiceCall>(m_user);
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto serviceCall = MakeShared<ServiceCall>(userResult.ExtractPayload());
     RETURN_HR_IF_FAILED(serviceCall->Init(m_xboxLiveContextSettings, m_titleId));
 
     JsonDocument requestBody{ rapidjson::kObjectType };
@@ -174,18 +198,7 @@ HRESULT MultiplayerActivityService::FlushRecentPlayers(
     requestBody.AddMember("recentPlayers", recentPlayers.Move(), a);
 
     RETURN_HR_IF_FAILED(serviceCall->SetRequestBody(requestBody));
-
-    RETURN_HR_IF_FAILED(serviceCall->Perform({
-        async.Queue().DeriveWorkerQueue(),
-        [
-            async
-        ]
-    (HttpResult httpResult)
-        {
-            HRESULT hr{ Failed(httpResult) ? httpResult.Hresult() : httpResult.Payload()->Result() };
-            async.Complete(hr);
-        }
-        }));
+    RETURN_HR_IF_FAILED(serviceCall->PerformWithRetry(std::move(async)));
 
     m_pendingRecentPlayerUpdates.clear();
     return S_OK;
@@ -223,7 +236,10 @@ HRESULT MultiplayerActivityService::SetActivity(
         requestBody.AddMember("platform", JsonValue{ PlatformName(GetLocalPlatform()).data(), a }, a);
     }
 
-    auto httpCall{ MakeShared<XblHttpCall>(m_user) };
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "PUT",
@@ -261,7 +277,10 @@ HRESULT MultiplayerActivityService::GetActivity(
     JsonUtils::SerializeVector(JsonUtils::JsonXuidSerializer, xuids, userList, a);
     requestBody.AddMember("users", userList.Move(), a);
 
-    auto httpCall{ MakeShared<XblHttpCall>(m_user) };
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "POST",
@@ -301,7 +320,10 @@ HRESULT MultiplayerActivityService::DeleteActivity(
 
     requestBody.AddMember("sequenceNumber", static_cast<int64_t>(time(nullptr)), a);
 
-    auto httpCall{ MakeShared<XblHttpCall>(m_user) };
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "DELETE",
@@ -353,7 +375,10 @@ HRESULT MultiplayerActivityService::SendInvites(
     }
     requestBody.AddMember("invitedUsers", invitedUsersArray.Move(), a);
 
-    auto httpCall{ MakeShared<XblHttpCall>(m_user) };
+    Result<User> userResult = m_user.Copy();
+    RETURN_HR_IF_FAILED(userResult.Hresult());
+
+    auto httpCall = MakeShared<XblHttpCall>(userResult.ExtractPayload());
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_xboxLiveContextSettings,
         "POST",
@@ -383,13 +408,13 @@ void MultiplayerActivityService::ScheduleRecentPlayersUpdate() noexcept
             auto pThis{ weakThis.lock() };
             if (pThis)
             {
-                pThis->FlushRecentPlayers({ pThis->m_queue, [ pThis ] (HRESULT hr)
+                pThis->FlushRecentPlayers({ pThis->m_queue, [ pThis ] (Result<void> result)
                 {
                     // FlushRecentPlayers already has retry logic. If we get to this point, just log the error
                     // and schedule the next upload.
-                    if (FAILED(hr))
+                    if (Failed(result))
                     {
-                        LOGS_ERROR << "MultiplayerActivity::FlushRecentPlayers failed with HRESULT " << hr;
+                        LOGS_ERROR << "MultiplayerActivity::FlushRecentPlayers failed with HRESULT " << result.Hresult();
                     }
                     pThis->ScheduleRecentPlayersUpdate();
                 } });

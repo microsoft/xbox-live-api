@@ -209,7 +209,7 @@ using namespace xbox::services;
 struct XblHttpCall : public HttpCall
 {
 public:
-    XblHttpCall(User user);
+    XblHttpCall(User&& user);
 
     virtual HRESULT Init(
         _In_ std::shared_ptr<XboxLiveContextSettings> contextSettings,

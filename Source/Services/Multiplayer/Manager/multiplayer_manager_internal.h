@@ -722,6 +722,8 @@ public:
         _In_ std::shared_ptr<MultiplayerLocalUserManager> localUserManager
     ) noexcept;
 
+    uint64_t Id() const;
+
     const std::shared_ptr<XblMultiplayerSession>& Session() const;
     void UpdateSession(_In_ const std::shared_ptr<XblMultiplayerSession>& updatedSession);
 
@@ -824,6 +826,7 @@ private:
     XblFunctionContext m_sessionUpdateEventHandlerCounter{ 0 };
     UnorderedMap<uint32_t, Callback<const std::shared_ptr<XblMultiplayerSession>>> m_sessionUpdateEventHandler;
 
+    uint64_t m_id{ 0 }; // used to ignore calls made before resetting the state via destory()
     std::mutex m_synchronizeWriteWithTapLock;
     uint64_t m_tapChangeNumber{ 0 };
     bool m_isTapReceived{ false };
@@ -1226,7 +1229,7 @@ class MultiplayerLocalUser
 public:
 
     MultiplayerLocalUser(
-        _In_ xbox_live_user_t user,
+        _In_ User&& user,
         _In_ uint64_t xboxUserId,
         _In_ bool isPrimary
         );
@@ -1298,7 +1301,7 @@ public:
         _In_ xbox_live_user_t user
     );
 
-    const std::shared_ptr<MultiplayerLocalUser>& AddUserToXboxLiveContextToMap(_In_ xbox_live_user_t user);
+    Result<const std::shared_ptr<MultiplayerLocalUser>> AddUserToXboxLiveContextToMap(_In_ xbox_live_user_t user);
     void RemoveStaleLocalUsersFromMap();
 
     void ActivateMultiplayerEvents(_In_ const std::shared_ptr<xbox::services::multiplayer::manager::MultiplayerLocalUser>& localuser);
@@ -1474,7 +1477,7 @@ private:
 
     void Destroy();
 
-    std::shared_ptr<xbox::services::multiplayer::MultiplayerService> GetMultiplayerService(
+    Result<std::shared_ptr<xbox::services::multiplayer::MultiplayerService>> GetMultiplayerService(
         _In_ xbox_live_user_t user
         );
 
@@ -1650,7 +1653,7 @@ private:
     mutable std::mutex m_multiplayerEventQueueLock;
     MultiplayerEventQueue m_multiplayerEventQueue;
     XblCreateMatchTicketResponse m_matchTicketResponse{};
-    XblMultiplayerSessionReference m_matchTicketSessionRef;
+    XblMultiplayerSessionReference m_matchTicketSessionRef{};
     std::shared_ptr<XblMultiplayerSession> m_matchSession;
     std::shared_ptr<MultiplayerLocalUserManager> m_multiplayerLocalUserManager;
 

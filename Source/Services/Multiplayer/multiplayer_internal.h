@@ -377,7 +377,7 @@ class MultiplayerService : public std::enable_shared_from_this<MultiplayerServic
 {
 public:
     MultiplayerService(
-        _In_ User user,
+        _In_ User&& user,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
         _In_ std::shared_ptr<xbox::services::AppConfig> appConfig,
         _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaService

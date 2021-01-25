@@ -52,7 +52,7 @@ class EventUploadPayload : public std::enable_shared_from_this<EventUploadPayloa
 {
 public:
     EventUploadPayload(
-        _In_ User user,
+        _In_ User&& user,
         _In_ std::shared_ptr<cll::CllTenantSettings> tenantSettings
     );
 
@@ -96,7 +96,7 @@ class EventQueue : public std::enable_shared_from_this<EventQueue>
 {
 public:
     EventQueue(
-        User user,
+        User&& user,
         std::shared_ptr<cll::CllTenantSettings> tenantSettings
     );
 

@@ -20,6 +20,12 @@ xbox_live_context::xbox_live_context(_In_ XblUserHandle user)
     HRESULT hr = XblContextCreateHandle(user, &m_handle);
     if (FAILED(hr)) throw std::runtime_error("XblContextCreateHandle failed");
     XblSetApiType(XblApiType::XblCPPApi);
+
+    // Unlike the rest of the services, notification_service needs to maintain state
+    // That is because of the differences between C-APIs for subscribing for RTA events
+    // and the C++ subscribe_to_notifications call
+    m_notificationService = std::make_shared<notification::notification_service>(m_handle);
+
 }
 
 xbox_live_context::xbox_live_context(_In_ XblContextHandle xboxLiveContextHandle)

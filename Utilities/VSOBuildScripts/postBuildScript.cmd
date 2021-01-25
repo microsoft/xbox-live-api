@@ -241,6 +241,15 @@ set BUILD_INFO_BODY="%TFS_DROPLOCATION%    https://microsoft.visualstudio.com/Xb
 del %BUILD_INFO_PATH%
 echo %BUILD_INFO_BODY% > %BUILD_INFO_PATH%
 
+rem setup folders for GDK docs
+set PATH_GDK_DOCS=%TFS_DropLocation%\gdk-docs
+set PATH_GDK_DOCS_DROP=%PATH_GDK_DOCS%\docs
+mkdir %PATH_GDK_DOCS%
+mkdir %PATH_GDK_DOCS_DROP%
+call %BUILD_TOOLS%\Noggin\GenerateReferenceDocs.cmd %TFS_DropLocation%\include %PATH_GDK_DOCS_DROP%
+copy %BUILD_TOOLS%\Noggin\CopyReferenceDocsToDocsRepo.cmd %PATH_GDK_DOCS%
+
+
 rem create unity package
 REM set UNITY_ASSET_DEST=%TFS_DropLocation%\unity
 REM set UNITY_ASSET_SRC=%TFS_SourcesDirectory%\Utilities\IDXboxUnityAssetLayout

@@ -16,7 +16,7 @@ AchievementProgressChangeSubscription::AchievementProgressChangeSubscription(
     : m_userId(xuid)
 {
     Stringstream uri;
-    uri << "https://achievements.xboxlive.com/users/xuid(" << m_userId << ")/achievements/" << scid;
+    uri << "https://achievements.xboxlive.com/users/xuid(" << m_userId << ")/achievements/" << utils::ToLower(scid);
     m_resourceUri = uri.str();
 }
 

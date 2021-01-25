@@ -45,17 +45,20 @@ LocalStorage::LocalStorage(
 }
 
 HRESULT LocalStorage::WriteAsync(
-    User user,
+    const User& user,
     XblLocalStorageWriteMode mode,
     String key,
     Vector<uint8_t> data,
     Callback<Result<size_t>> callback
 ) noexcept
 {
-    WriteOperation::OperationLauncher launcher {
+    auto copyUserResult{ user.Copy() };
+    RETURN_HR_IF_FAILED(copyUserResult.Hresult());
+
+    WriteOperation::OperationLauncher launcher{
         [
             sharedThis{ shared_from_this() },
-            user{ std::move(user) },
+            user = MakeShared<User>(copyUserResult.ExtractPayload()),
             mode,
             key{ std::move(key) },
             data{ std::move(data) }
@@ -65,7 +68,7 @@ HRESULT LocalStorage::WriteAsync(
         sharedThis->m_writeHandler(
             sharedThis->m_context,
             op,
-            user.Handle(),
+            user->Handle(),
             mode,
             key.data(),
             data.size(),
@@ -93,20 +96,23 @@ HRESULT LocalStorage::WriteAsync(
 }
 
 HRESULT LocalStorage::ReadAsync(
-    User user,
+    const User& user,
     String key,
     Callback<Result<Vector<uint8_t>>> callback
 ) noexcept
 {
+    auto copyUserResult{ user.Copy() };
+    RETURN_HR_IF_FAILED(copyUserResult.Hresult());
+
     ReadOperation::OperationLauncher launcher{
         [
             sharedThis{ shared_from_this() },
-            user{ std::move(user) },
+            user = MakeShared<User>(copyUserResult.ExtractPayload()),
             key{ std::move(key) }
         ]
     (XblClientOperationHandle op)
     {
-        sharedThis->m_readHandler(sharedThis->m_context, op, user.Handle(), key.data());
+        sharedThis->m_readHandler(sharedThis->m_context, op, user->Handle(), key.data());
     }};
 
     auto op = MakeShared<ReadOperation>(
@@ -129,20 +135,23 @@ HRESULT LocalStorage::ReadAsync(
 }
 
 HRESULT LocalStorage::ClearAsync(
-    User user,
+    const User& user,
     String key,
     Callback<HRESULT> callback
 ) noexcept
 {
+    auto copyUserResult{ user.Copy() };
+    RETURN_HR_IF_FAILED(copyUserResult.Hresult());
+
     ClearOperation::OperationLauncher launcher {
         [
             sharedThis{ shared_from_this() },
-            user{ std::move(user) },
+            user = MakeShared<User>(copyUserResult.ExtractPayload()),
             key{ std::move(key) }
         ]
     (XblClientOperationHandle op)
     {
-        sharedThis->m_clearHandler(sharedThis->m_context, op, user.Handle(), key.data());
+        sharedThis->m_clearHandler(sharedThis->m_context, op, user->Handle(), key.data());
     }};
 
     auto op = MakeShared<ClearOperation>(

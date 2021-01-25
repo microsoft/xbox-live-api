@@ -13,7 +13,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 using namespace xbox::services::system;
 
 Websocket::Websocket(
-    _In_ User user,
+    _In_ User&& user,
     _In_ TaskQueue queue
 ) noexcept :
     m_user{ std::move(user) },
@@ -180,15 +180,18 @@ void Websocket::CloseHandler(
 }
 
 std::shared_ptr<IWebsocket> IWebsocket::Make(
-    User user,
+    User&& user,
     TaskQueue queue
 ) noexcept
 {
+
 #if XSAPI_UNIT_TESTS
-    return MakeShared<MockWebsocket>(std::move(user), std::move(queue));
+    auto webSocket = MakeShared<MockWebsocket>(std::move(user), std::move(queue));
 #else
-    return MakeShared<Websocket>(std::move(user), std::move(queue));
+    auto webSocket = MakeShared<Websocket>(std::move(user), std::move(queue));
 #endif
+
+    return webSocket;
 }
 
 void IWebsocket::SetConnectCompleteHandler(_In_ Callback<WebsocketResult> connectCompleteHandler) noexcept

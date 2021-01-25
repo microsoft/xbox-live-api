@@ -273,7 +273,9 @@ MultiplayerClientManager::JoinLobby(
     int invitedUserIndex = 0;
     for (auto& user: users)
     {
-        if (invitedXuid == User{ user }.Xuid())
+        auto userResult = User::WrapHandle(user);
+        RETURN_HR_IF_FAILED(userResult.Hresult());
+        if (invitedXuid == userResult.ExtractPayload().Xuid())
         {
             invitedUserFound = true;
             break;
@@ -458,10 +460,15 @@ MultiplayerClientManager::GetActivitiesForSocialGroup(
     )
 {
     RETURN_HR_INVALIDARGUMENT_IF(user == nullptr);
+    auto wrapUserResult{ User::WrapHandle(user) };
+    RETURN_HR_IF_FAILED(wrapUserResult.Hresult());
 
-    return GetMultiplayerService(user)->GetActivitiesForSocialGroup(
+    auto serviceResult = GetMultiplayerService(user);
+    RETURN_HR_IF_FAILED(serviceResult.Hresult());
+
+    return serviceResult.ExtractPayload()->GetActivitiesForSocialGroup(
         AppConfig::Instance()->OverrideScid(),
-        User{ user }.Xuid(),
+        wrapUserResult.Payload().Xuid(),
         socialGroup,
         AsyncContext<Result<Vector<XblMultiplayerActivityDetails>>>{ queue, std::move(callback) }
         );
@@ -604,7 +611,10 @@ MultiplayerClientManager::InviteUsers(
 
     std::weak_ptr<MultiplayerClientManager> weakSessionWriter = shared_from_this();
 
-    return GetMultiplayerService(user)->SendInvites(
+    auto serviceResult = GetMultiplayerService(user);
+    RETURN_HR_IF_FAILED(serviceResult.Hresult());
+
+    return serviceResult.ExtractPayload()->SendInvites(
         latestPendingRead->LobbyClient()->Session()->SessionReference(),
         xboxUserIds,
         AppConfig::Instance()->OverrideTitleId(),
@@ -628,7 +638,7 @@ MultiplayerClientManager::InviteUsers(
     });
 }
 
-std::shared_ptr<MultiplayerService>
+Result<std::shared_ptr<MultiplayerService>>
 MultiplayerClientManager::GetMultiplayerService(
     _In_ xbox_live_user_t user
     )
@@ -642,7 +652,11 @@ MultiplayerClientManager::GetMultiplayerService(
     {
         std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings = MakeShared<xbox::services::XboxLiveContextSettings>();
         std::shared_ptr<AppConfig> appConfig = xbox::services::AppConfig::Instance();
-        return MakeShared<MultiplayerService>(user, xboxLiveContextSettings, appConfig, nullptr);
+        auto wrapUserResult{ User::WrapHandle(user) };
+        RETURN_HR_IF_FAILED(wrapUserResult.Hresult());
+
+        auto multiplayerService = MakeShared<MultiplayerService>(wrapUserResult.ExtractPayload(), xboxLiveContextSettings, appConfig, nullptr);
+        return multiplayerService;
     }
 }
 

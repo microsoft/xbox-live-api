@@ -8,7 +8,7 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_EVENTS_CPP_BEGIN
 
 EventQueue::EventQueue(
-    User user,
+    User&& user,
     std::shared_ptr<cll::CllTenantSettings> tenantSettings
 ) :
     m_user{ std::move(user) },
@@ -82,7 +82,9 @@ HRESULT EventQueue::AddEvents(xsapi_internal_vector<Event>&& events)
     std::shared_ptr<EventUploadPayload> payload;
     if (m_queue.empty())
     {
-        payload = MakeShared<EventUploadPayload>(m_user, m_tenantSettings);
+        auto copyUserResult = m_user.Copy();
+        RETURN_HR_IF_FAILED(copyUserResult.Hresult());
+        payload = MakeShared<EventUploadPayload>(copyUserResult.ExtractPayload(), m_tenantSettings);
         m_queue.push_back(payload);
     }
     else
@@ -95,7 +97,9 @@ HRESULT EventQueue::AddEvents(xsapi_internal_vector<Event>&& events)
         auto hr = payload->AddEvent(event);
         if (FAILED(hr))
         {
-            payload = MakeShared<EventUploadPayload>(m_user, m_tenantSettings);
+            auto copyUserResult = m_user.Copy();
+            RETURN_HR_IF_FAILED(copyUserResult.Hresult());
+            payload = MakeShared<EventUploadPayload>(copyUserResult.ExtractPayload(), m_tenantSettings);
             m_queue.push_back(payload);
             hr = payload->AddEvent(event);
             RETURN_HR_IF_FAILED(hr);
@@ -198,7 +202,12 @@ HRESULT EventQueue::Populate()
                     sharedThis->WriteDirectoryFile();
                 }
 
-                sharedThis->m_localStorage->ClearAsync(sharedThis->m_user.Handle(), metadata.first, nullptr);
+                auto clearAsyncHR = sharedThis->m_localStorage->ClearAsync(sharedThis->m_user, metadata.first, nullptr);
+                if (FAILED(clearAsyncHR))
+                {
+                    // Log failure but don't let when failure prevent populating the rest of the files.
+                    LOGS_WARN << "Failed to read events file due to user being available. HR = " << clearAsyncHR;
+                }
             }
         });
 
@@ -208,6 +217,7 @@ HRESULT EventQueue::Populate()
             LOGS_WARN << "Failed to read events file " << metadata.first << " that appeared in " << m_directoryFilename;
         }
     }
+
     return S_OK;
 }
 
@@ -297,8 +307,17 @@ HRESULT EventQueue::Flush()
 
                 auto metadataToDelete{ sharedThis->m_fileMetadata.begin() };
                 sharedThis->m_totalFilesSize -= metadataToDelete->second;
-                sharedThis->m_localStorage->ClearAsync(sharedThis->m_user.Handle(), metadataToDelete->first, nullptr);
-                sharedThis->m_fileMetadata.erase(metadataToDelete);
+                
+                auto clearAsyncHR = sharedThis->m_localStorage->ClearAsync(sharedThis->m_user, metadataToDelete->first, nullptr);
+                if (SUCCEEDED(clearAsyncHR))
+                {
+                    sharedThis->m_fileMetadata.erase(metadataToDelete);
+                }
+                else 
+                {
+                    LOGS_INFO << "The user is currently unavailable. Failed to clear oldest event.";
+                    return; //todo: What's the proper handling here?
+                }
             }
 
             sharedThis->WriteDirectoryFile();
