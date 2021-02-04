@@ -11,7 +11,7 @@ User::User(XblUserHandle userHandle) noexcept
 {}
 
 User::User(User&& other) noexcept
-    : m_handle{ other.m_handle }, m_localId { std::move(other.m_localId) }, m_xuid {other.m_xuid }
+    : m_handle{ other.m_handle }, m_xuid{ other.m_xuid }, m_localId { std::move(other.m_localId) }
 {
     Map<XalGamertagComponent, String>::iterator it = other.m_gamertags.begin();
 

@@ -25,10 +25,9 @@ using namespace xbox::services::system;
 ) noexcept
 {
     auto xblContext = std::shared_ptr<XblContext>(
-        new (Alloc(sizeof(XblContext))) XblContext
-        {
-            std::move(user)
-        }
+        new (Alloc(sizeof(XblContext))) XblContext{ std::move(user) },
+        Deleter<XblContext>(),
+        Allocator<XblContext>()
         );
     return xblContext;
 }

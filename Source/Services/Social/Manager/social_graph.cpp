@@ -145,7 +145,11 @@ Result<std::shared_ptr<SocialGraph>> SocialGraph::Make(
         return userResult.Hresult();
     }
 
-    auto graph = std::shared_ptr<SocialGraph>(new (Alloc(sizeof(SocialGraph))) SocialGraph{ userResult.ExtractPayload(), queue, rtaManager });
+    auto graph = std::shared_ptr<SocialGraph>(
+        new (Alloc(sizeof(SocialGraph))) SocialGraph{ userResult.ExtractPayload(), queue, rtaManager },
+        Deleter<SocialGraph>(),
+        Allocator<SocialGraph>()
+    );
     auto hr = graph->Initialize();
     if (FAILED(hr))
     {

@@ -74,10 +74,10 @@ AchievementsService::AchievementsService(
     _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaManager
 ) :
     m_user{ std::move(user) },
-    m_xboxLiveContextSettings(std::move(xboxLiveContextSettings)),
-    m_appConfig(std::move(appConfig)),
-    m_xboxLiveContextImpl(std::move(xboxLiveContextImpl)),
-    m_rtaManager{ std::move(rtaManager) }
+    m_xboxLiveContextSettings{ std::move(xboxLiveContextSettings) },
+    m_appConfig{ std::move(appConfig) },
+    m_rtaManager{ std::move(rtaManager) },
+    m_xboxLiveContextImpl{ std::move(xboxLiveContextImpl) }
 {
 }
 
