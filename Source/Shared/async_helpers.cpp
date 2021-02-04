@@ -169,7 +169,11 @@ std::shared_ptr<PeriodicTask> PeriodicTask::MakeAndRun(
     std::function<void()> task
 ) noexcept
 {
-    auto periodicTask = std::shared_ptr<PeriodicTask>(new (Alloc(sizeof(PeriodicTask))) PeriodicTask{ queue, interval, std::move(task) });
+    auto periodicTask = std::shared_ptr<PeriodicTask>(
+        new (Alloc(sizeof(PeriodicTask))) PeriodicTask{ queue, interval, std::move(task) },
+        Deleter<PeriodicTask>(),
+        Allocator<PeriodicTask>()
+        );
 
     periodicTask->m_queue.RunWork([weakThis = std::weak_ptr<PeriodicTask>{ periodicTask }]
         {

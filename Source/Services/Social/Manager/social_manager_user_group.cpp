@@ -26,10 +26,10 @@ XblSocialManagerUserGroup::XblSocialManagerUserGroup(
     Vector<uint64_t>&& trackedUsers
 ) noexcept :
     type{ XblSocialUserGroupType::UserListType },
-    m_trackedUsersView{ std::move(trackedUsers) },
-    m_trackedUsers{ m_trackedUsersView.begin(), m_trackedUsersView.end() },
     m_localUser{ socialGraph->LocalUser() },
-    m_graph{ socialGraph }
+    m_graph{ socialGraph },
+    m_trackedUsersView{ std::move(trackedUsers) },
+    m_trackedUsers{ m_trackedUsersView.begin(), m_trackedUsersView.end() }
 {
     m_usersView.reserve(m_trackedUsersView.size());
     socialGraph->TrackUsers(m_trackedUsersView);
@@ -50,8 +50,11 @@ std::shared_ptr<XblSocialManagerUserGroup> XblSocialManagerUserGroup::Make(
     XblRelationshipFilter relationshipFilter
 ) noexcept
 {
-    auto buffer = Alloc(sizeof(XblSocialManagerUserGroup));
-    auto group = std::shared_ptr<XblSocialManagerUserGroup>(new (buffer) XblSocialManagerUserGroup{ socialGraph, presenceFilter, relationshipFilter });
+    auto group = std::shared_ptr<XblSocialManagerUserGroup>(
+        new (Alloc(sizeof(XblSocialManagerUserGroup))) XblSocialManagerUserGroup{ socialGraph, presenceFilter, relationshipFilter },
+        Deleter<XblSocialManagerUserGroup>(),
+        Allocator<XblSocialManagerUserGroup>()
+        );
     socialGraph->RegisterGroup(group);
     return group;
 }
@@ -61,8 +64,11 @@ std::shared_ptr<XblSocialManagerUserGroup> XblSocialManagerUserGroup::Make(
     Vector<uint64_t>&& trackedUsers
 ) noexcept
 {
-    auto buffer = Alloc(sizeof(XblSocialManagerUserGroup));
-    auto group = std::shared_ptr<XblSocialManagerUserGroup>(new (buffer) XblSocialManagerUserGroup{ socialGraph, std::move(trackedUsers) });
+    auto group = std::shared_ptr<XblSocialManagerUserGroup>(
+        new (Alloc(sizeof(XblSocialManagerUserGroup))) XblSocialManagerUserGroup{ socialGraph, std::move(trackedUsers) },
+        Deleter<XblSocialManagerUserGroup>(),
+        Allocator<XblSocialManagerUserGroup>()
+        );
     socialGraph->RegisterGroup(group);
     return group;
 }
