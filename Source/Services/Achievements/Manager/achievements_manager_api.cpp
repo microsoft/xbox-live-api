@@ -156,12 +156,12 @@ STDAPI XblAchievementsManagerGetAchievement(
     _Outptr_result_maybenull_ XblAchievementsManagerResultHandle* achievementResult
 ) XBL_NOEXCEPT
 {
+    RETURN_HR_INVALIDARGUMENT_IF(achievementId == nullptr || achievementResult == nullptr);
+    RETURN_HR_INVALIDARGUMENT_IF_EMPTY_STRING(achievementId);
+    *achievementResult = nullptr;
+
     return ApiImpl([&](AchievementsManager& achievementsManager)
         {
-            RETURN_HR_INVALIDARGUMENT_IF(achievementId == nullptr || achievementResult == nullptr);
-            RETURN_HR_INVALIDARGUMENT_IF_EMPTY_STRING(achievementId);
-            *achievementResult = nullptr;
-
             auto achievement = achievementsManager.GetAchievement(xboxUserId, achievementId);
             if (Failed(achievement))
             {

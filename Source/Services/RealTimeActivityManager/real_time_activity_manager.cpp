@@ -147,7 +147,7 @@ void RealTimeActivityManager::Activate(
     if (titleActivation)
     {
         m_titleActivated = true;
-        GetConnection(user);
+        (void)GetConnection(user); 
     }
 }
 

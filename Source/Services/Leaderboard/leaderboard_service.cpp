@@ -2,9 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "shared_macros.h"
-#include "xbox_system_factory.h"
-#include "xsapi_utils.h"
 #include "xbox_live_context_internal.h"
 #include "leaderboard_internal.h"
 
@@ -59,33 +56,33 @@ CreateLeaderboardUrl(
 
     xsapi_internal_stringstream path;
     path << "/scids/";
-    path << utils::internal_string_from_string_t(xbox::services::uri::encode_uri(utils::string_t_from_internal_string(scid), xbox::services::uri::components::path));
+    path << xbox::services::uri::encode_uri(scid, xbox::services::uri::components::path);
     if (isTitleManaged)
     {
         path << "/leaderboards/stat(";
-        path << utils::internal_string_from_string_t(xbox::services::uri::encode_uri(utils::string_t_from_internal_string(name), xbox::services::uri::components::path));
+        path << xbox::services::uri::encode_uri(name, xbox::services::uri::components::path);
         path << ")";
     }
     else
     {
         path << "/leaderboards/";
-        path << utils::internal_string_from_string_t(xbox::services::uri::encode_uri(utils::string_t_from_internal_string(name), xbox::services::uri::components::path));
+        path << xbox::services::uri::encode_uri(name, xbox::services::uri::components::path);
     }
-    builder.set_path(utils::string_t_from_internal_string(path.str()));
+    builder.set_path(path.str());
 
     if (metadata)
     {
-        builder.append_query(_T("include"), _T("valuemetadata"));
+        builder.append_query("include", "valuemetadata");
     }
 
     if (!xuid.empty())
     {
-        builder.append_query(_T("xuid"), utils::string_t_from_internal_string(xuid));
+        builder.append_query("xuid", xuid);
     }
 
     if (maxItems > 0)
     {
-        builder.append_query(_T("maxItems"), maxItems);
+        builder.append_query("maxItems", maxItems);
     }
 
     if (!skipToXuid.empty())
@@ -95,27 +92,27 @@ CreateLeaderboardUrl(
             return xbl_result<xsapi_internal_string>(xbl_error_code::invalid_argument, "Cannot skip to XUID and rank");
         }
 
-        builder.append_query(_T("skipToUser"), utils::string_t_from_internal_string(skipToXuid));
+        builder.append_query("skipToUser", skipToXuid);
     }
     else
     {
         if (!continuationToken.empty())
         {
-            builder.append_query(_T("continuationToken"), utils::string_t_from_internal_string(continuationToken));
+            builder.append_query("continuationToken", continuationToken);
         }
         else if (skipToRank > 0)
         {
-            builder.append_query(_T("skipToRank"), skipToRank);
+            builder.append_query("skipToRank", skipToRank);
         }
     }
 
     if (!socialGroup.empty())
     {
-        builder.append_query(_T("view"), _T("People"));
-        builder.append_query(_T("viewTarget"), utils::string_t_from_internal_string(socialGroup));
+        builder.append_query("view", "People");
+        builder.append_query("viewTarget", socialGroup);
     }
 
-    return xbl_result<xsapi_internal_string>(utils::internal_string_from_string_t(builder.to_string()));
+    return xbl_result<xsapi_internal_string>(builder.to_string());
 }
 
 HRESULT
@@ -151,7 +148,7 @@ LeaderboardService::GetLeaderboard(
 
     if (url.err()) return utils::convert_xbox_live_error_code_to_hresult(url.err());
 
-    std::shared_ptr<LeaderboardGlobalQuery> query = std::make_shared<LeaderboardGlobalQuery>();
+    std::shared_ptr<LeaderboardGlobalQuery> query = MakeShared<LeaderboardGlobalQuery>();
     query->scid = scid;
     query->name = name;
     query->xuid = xuid;
@@ -267,42 +264,42 @@ CreateLeaderboardForSocialGroupUrl(
     
     xsapi_internal_stringstream path;
     path << "/users/xuid(";
-    path << utils::internal_string_from_string_t(xbox::services::uri::encode_uri(utils::string_t_from_internal_string(xuid), xbox::services::uri::components::path));
+    path << xbox::services::uri::encode_uri(xuid, xbox::services::uri::components::path);
     path << ")/scids/";
-    path << utils::internal_string_from_string_t(xbox::services::uri::encode_uri(utils::string_t_from_internal_string(scid), xbox::services::uri::components::path));
+    path << xbox::services::uri::encode_uri(scid, xbox::services::uri::components::path);
     path << "/stats/";
-    path << utils::internal_string_from_string_t(xbox::services::uri::encode_uri(utils::string_t_from_internal_string(statName), xbox::services::uri::components::path));
+    path << xbox::services::uri::encode_uri(statName, xbox::services::uri::components::path);
     path << "/people/";
-    path << utils::internal_string_from_string_t(xbox::services::uri::encode_uri(utils::string_t_from_internal_string(socialGroup), xbox::services::uri::components::path));
-    builder.set_path(utils::string_t_from_internal_string(path.str()));
+    path << xbox::services::uri::encode_uri(socialGroup, xbox::services::uri::components::path);
+    builder.set_path(path.str());
 
     if (!sortOrder.empty())
     {
-        builder.append_query(_T("sort"), utils::string_t_from_internal_string(sortOrder));
+        builder.append_query("sort", sortOrder);
     }
 
     if (maxItems > 0)
     {
-        builder.append_query(_T("maxItems"), maxItems);
+        builder.append_query("maxItems", maxItems);
     }
 
     if (!skipToXuid.empty())
     {
-        builder.append_query(_T("skipToUser"), utils::string_t_from_internal_string(skipToXuid));
+        builder.append_query("skipToUser", skipToXuid);
     }
     else
     {
         if (!continuationToken.empty())
         {
-            builder.append_query(_T("continuationToken"), utils::string_t_from_internal_string(continuationToken));
+            builder.append_query("continuationToken", continuationToken);
         }
         else if (skipToRank > 0)
         {
-            builder.append_query(_T("skipToRank"), skipToRank);
+            builder.append_query("skipToRank", skipToRank);
         }
     }
 
-    return xbl_result<xsapi_internal_string>(utils::internal_string_from_string_t(builder.to_string()));
+    return xbl_result<xsapi_internal_string>(builder.to_string());
 }
 
 HRESULT 
@@ -345,7 +342,7 @@ LeaderboardService::GetLeaderboardForSocialGroup(
 
     if (url.err()) return utils::convert_xbox_live_error_code_to_hresult(url.err());
 
-    auto query = std::make_shared<LeaderboardSocialQuery>();
+    auto query = MakeShared<LeaderboardSocialQuery>();
     query->xuid = xuid;
     query->scid = scid;
     query->statName = statName;
@@ -460,11 +457,11 @@ STDAPI XblLeaderboardGetLeaderboardAsync(
     xsapi_internal_string socialGroup("");
     if (leaderboardQuery.socialGroup == XblSocialGroupType::People)
     {
-        socialGroup = utils::internal_string_from_string_t(xbox::services::social::legacy::social_group_constants::people());
+        socialGroup = xbox::services::social::legacy::social_group_constants::people();
     }
     else if (leaderboardQuery.socialGroup == XblSocialGroupType::Favorites)
     {
-        socialGroup = utils::internal_string_from_string_t(xbox::services::social::legacy::social_group_constants::favorite());
+        socialGroup = xbox::services::social::legacy::social_group_constants::favorite();
     }
 
     if ((leaderboardQuery.queryType == XblLeaderboardQueryType::UserStatBacked && leaderboardQuery.leaderboardName) || 
@@ -505,7 +502,7 @@ STDAPI XblLeaderboardGetLeaderboardAsync(
     {
         if (socialGroup.empty())
         {
-            socialGroup = utils::internal_string_from_string_t(xbox::services::social::legacy::social_group_constants::people());
+            socialGroup = xbox::services::social::legacy::social_group_constants::people();
         }
 
         xsapi_internal_string statName("");

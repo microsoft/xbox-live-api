@@ -147,8 +147,8 @@ public:
     ) noexcept;
 
 protected:
-    void OnSubscribe(const JsonValue& data) noexcept override;
-    void OnEvent(const JsonValue& data) noexcept override;
+    void OnSubscribe(_In_ const JsonValue& data) noexcept override;
+    void OnEvent(_In_ const JsonValue& data) noexcept override;
     void OnResync() noexcept override;
 
 private:

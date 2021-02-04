@@ -113,35 +113,35 @@ void DeviceResources::CreateDeviceResources()
     // Enable the debug layer (requires the Graphics Tools "optional feature").
     //
     // NOTE: Enabling the debug layer after device creation will invalidate the active device.
-    {
-        ComPtr<ID3D12Debug> debugController;
-        if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(debugController.GetAddressOf()))))
-        {
-            debugController->EnableDebugLayer();
-        }
-        else
-        {
-            OutputDebugStringA("WARNING: Direct3D Debug Device is not available\n");
-        }
+    //{
+    //    ComPtr<ID3D12Debug> debugController;
+    //    if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(debugController.GetAddressOf()))))
+    //    {
+    //        debugController->EnableDebugLayer();
+    //    }
+    //    else
+    //    {
+    //        OutputDebugStringA("WARNING: Direct3D Debug Device is not available\n");
+    //    }
 
-        ComPtr<IDXGIInfoQueue> dxgiInfoQueue;
-        if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(dxgiInfoQueue.GetAddressOf()))))
-        {
-            dxgiFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
+    //    ComPtr<IDXGIInfoQueue> dxgiInfoQueue;
+    //    if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(dxgiInfoQueue.GetAddressOf()))))
+    //    {
+    //        dxgiFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 
-            dxgiInfoQueue->SetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_ERROR, true);
-            dxgiInfoQueue->SetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION, true);
+    //        dxgiInfoQueue->SetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_ERROR, true);
+    //        dxgiInfoQueue->SetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION, true);
 
-            DXGI_INFO_QUEUE_MESSAGE_ID hide[] =
-            {
-                80 /* IDXGISwapChain::GetContainingOutput: The swapchain's adapter does not control the output on which the swapchain's window resides. */,
-            };
-            DXGI_INFO_QUEUE_FILTER filter = {};
-            filter.DenyList.NumIDs = _countof(hide);
-            filter.DenyList.pIDList = hide;
-            dxgiInfoQueue->AddStorageFilterEntries(DXGI_DEBUG_DXGI, &filter);
-        }
-    }
+    //        DXGI_INFO_QUEUE_MESSAGE_ID hide[] =
+    //        {
+    //            80 /* IDXGISwapChain::GetContainingOutput: The swapchain's adapter does not control the output on which the swapchain's window resides. */,
+    //        };
+    //        DXGI_INFO_QUEUE_FILTER filter = {};
+    //        filter.DenyList.NumIDs = _countof(hide);
+    //        filter.DenyList.pIDList = hide;
+    //        dxgiInfoQueue->AddStorageFilterEntries(DXGI_DEBUG_DXGI, &filter);
+    //    }
+    //}
 #endif
 
     ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(m_dxgiFactory.ReleaseAndGetAddressOf())));

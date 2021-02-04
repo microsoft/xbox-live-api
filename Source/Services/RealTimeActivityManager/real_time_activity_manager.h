@@ -77,7 +77,7 @@ private:
 
     // Legacy API support
     Map<uint64_t, size_t> m_legacyActivations;
-    bool m_titleActivated;
+    bool m_titleActivated{ false };
 
     mutable std::recursive_mutex m_lock;
 };

@@ -117,7 +117,7 @@ private:
     xsapi_internal_vector<const char*> m_encounters; // TODO these never get deserialized
     xsapi_internal_vector<uint32_t> m_membersInGroupIds;
 
-    XblMultiplayerSessionChangeTypes m_subscribedChangeTypes;
+    XblMultiplayerSessionChangeTypes m_subscribedChangeTypes{ XblMultiplayerSessionChangeTypes::None };
     xsapi_internal_string m_matchmakingResultServerMeasurementsJson;
     xsapi_internal_string m_serverMeasurementsJson;
     xsapi_internal_string m_qosMeasurementsJson;
@@ -571,78 +571,6 @@ public:
 private:
     Vector<XblMultiplayerRoleType> m_values{};
 };
-
-#if !XSAPI_NO_PPL
-namespace legacy
-{
-    /// <summary>
-    /// Represents a reference to a multiplayer session.
-    /// </summary>
-    class multiplayer_session_reference
-    {
-    public:
-        /// <summary>
-        /// Constructs a null MultiplayerSession object.
-        /// </summary>
-        multiplayer_session_reference();
-
-        /// <summary>
-        /// Constructs the MultiplayerSession object with data about the session.
-        /// </summary>
-        /// <param name="serviceConfigurationId">A service configuration ID appropriate for the title.</param>
-        /// <param name="sessionTemplateName">The name of the template for the session to be based on.</param>
-        /// <param name="sessionName">A unique name for the session.</param>
-        multiplayer_session_reference(
-            _In_ const string_t& serviceConfigurationId,
-            _In_ const string_t& sessionTemplateName,
-            _In_ const string_t& sessionName
-        );
-
-        /// <summary>
-        /// The service configuration ID specific to the title.
-        /// </summary>
-        string_t service_configuration_id() const;
-
-        /// <summary>
-        /// The name of the template for the session.
-        /// </summary>
-        string_t session_template_name() const;
-
-        /// <summary>
-        /// The name of the session.
-        /// </summary>
-        string_t session_name() const;
-
-        /// <summary>
-        /// Whether this object has been properly constructed
-        /// </summary>
-        bool is_null() const;
-
-        /// <summary>
-        /// Returns a URI path representation of the session reference.
-        /// </summary>
-        string_t to_uri_path() const;
-
-        /// <summary>
-        /// Returns the session reference parsed from URI.
-        /// </summary>
-        static multiplayer_session_reference parse_from_uri_path(_In_ const string_t& path);
-
-        /// <summary>
-        /// Internal function
-        /// </summary>
-        multiplayer_session_reference(_In_ const XblMultiplayerSessionReference& reference);
-
-    private:
-        mutable XblMultiplayerSessionReference m_reference;
-        //friend class multiplayer_session;
-        //friend class multiplayer_service;
-        //friend class multiplayer_search_handle_request;
-        //friend class social::reputation_service;
-    };
-
-}
-#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_END
 

@@ -65,8 +65,8 @@ public:
     // Appends XblSocialManagerEvents describing the updates to 'events' list. Appends all affected users to the list of affected users.
     // This is used to maintain their lifetime since the events reference them.
     void DoWork(
-        _Out_ Vector<XblSocialManagerEvent>& events,
-        _Out_ Vector<std::shared_ptr<XblSocialManagerUser>>& affectedUsers
+        _Inout_ Vector<XblSocialManagerEvent>& events,
+        _Inout_ Vector<std::shared_ptr<XblSocialManagerUser>>& affectedUsers
     ) noexcept;
 
     // Registers/Unregisters an XblSocialManagerUserGroup backed by this graph. Registered groups
@@ -126,8 +126,8 @@ private:
 
     // Applies all pending updates to local graph. Updates events and affected users
     void ApplyGraphUpdates(
-        _Out_ Vector<XblSocialManagerEvent>& events,
-        _Out_ Vector<std::shared_ptr<XblSocialManagerUser>>& affectedUsers
+        _Inout_ Vector<XblSocialManagerEvent>& events,
+        _Inout_ Vector<std::shared_ptr<XblSocialManagerUser>>& affectedUsers
     ) noexcept;
 
     static ProfileChanges CompareProfiles(

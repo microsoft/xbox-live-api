@@ -3,7 +3,6 @@
 
 #include "pch.h"
 #include "xbox_live_context_internal.h"
-#include "xbox_system_factory.h"
 #include "xbox_live_app_config_internal.h"
 
 #if HC_PLATFORM == HC_PLATFORM_ANDROID

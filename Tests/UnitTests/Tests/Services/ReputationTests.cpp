@@ -56,7 +56,7 @@ public:
 
         bool requestWellFormed{ true };
         reputationMock.SetMockMatchedCallback(
-            [&](HttpMock*, std::string url, std::string requestBody)
+            [&](HttpMock*, xsapi_internal_string url, xsapi_internal_string requestBody)
             {
                 requestWellFormed &= url == "https://reputation.xboxlive.com/users/xuid(1)/feedback";
 
@@ -108,7 +108,7 @@ public:
         bool requestWellFormed{ true };
 
         reputationMock.SetMockMatchedCallback(
-            [&](HttpMock*, std::string url, std::string requestBody)
+            [&](HttpMock*, xsapi_internal_string url, xsapi_internal_string requestBody)
             {
                 requestWellFormed &= url == "https://reputation.xboxlive.com/users/xuid(1)/feedback";
 
@@ -148,7 +148,7 @@ public:
 
         bool requestWellFormed{ true };
         reputationMock.SetMockMatchedCallback(
-            [&](HttpMock*, std::string url, std::string requestBody)
+            [&](HttpMock*, xsapi_internal_string url, xsapi_internal_string requestBody)
             {
                 requestWellFormed &= url == "https://reputation.xboxlive.com/users/batchtitlefeedback";
                 JsonDocument expectedBodyJson;
@@ -198,7 +198,7 @@ public:
 
         bool requestWellFormed{ true };
         reputationMock.SetMockMatchedCallback(
-            [&](HttpMock*, std::string url, std::string requestBody)
+            [&](HttpMock*, xsapi_internal_string url, xsapi_internal_string requestBody)
             {
                 requestWellFormed &= url == "https://reputation.xboxlive.com/users/batchtitlefeedback";
                 JsonDocument expectedBodyJson;

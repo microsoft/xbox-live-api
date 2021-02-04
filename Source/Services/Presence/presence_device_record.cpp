@@ -125,7 +125,7 @@ Result<XblPresenceTitleRecord> DeviceRecord::DeserializeTitleRecord(_In_ const J
         }
     }
 
-    if (!errc)
+    if (SUCCEEDED(errc))
     {
         titleRecord.titleName = Make(titleName);
         titleRecord.richPresenceString = Make(richPresenceString);
@@ -154,7 +154,7 @@ Result<XblPresenceBroadcastRecord> DeviceRecord::DeserializeBroadcastRecord(_In_
     xsapi_internal_string broadcastId;
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "id", broadcastId));
 
-    if (!errc)
+    if (SUCCEEDED(errc))
     {
         broadcastRecord.broadcastId = Make(broadcastId);
     }

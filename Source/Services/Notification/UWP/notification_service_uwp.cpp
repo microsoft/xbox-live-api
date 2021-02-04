@@ -149,15 +149,6 @@ void UWPNotificationService::OnPushNotificationReceived(
         {
             LOGS_INFO << "Received WNS notification, type: " << notificationTypeString << ", xuid: " << xuid;
 
-            auto xsapiSingleton = get_xsapi_singleton();
-            if (!xsapiSingleton)
-            {
-
-                LOGS_ERROR << "Receiving WNS notification error: xsapi_singleton is null.";
-            }
-
-            xsapiSingleton->m_xboxServiceSettingsSingleton->_Raise_wns_event(utils::string_t_from_internal_string(xuid), utils::string_t_from_internal_string(notificationTypeString), content);
-
             if (utils::str_icmp(notificationTypeString.c_str(), "spop") == 0)
             {
                 User::SetTokenExpired(utils::internal_string_to_uint64(xuid));

@@ -19,13 +19,13 @@ public:
     public:
         TestLogOutput() = default;
 
-        void write(_In_ HCTraceLevel level, _In_ const std::string& msg) override
+        void write(_In_ HCTraceLevel level, _In_ const xsapi_internal_string& msg) override
         {
             UNREFERENCED_PARAMETER(level);
             m_logOutput.push_back(msg);
         }
 
-        std::vector<std::string> m_logOutput;
+        std::vector<xsapi_internal_string> m_logOutput;
     };
 
     DEFINE_TEST_CASE(WriteLog)
@@ -57,9 +57,9 @@ public:
 
         VERIFY_ARE_EQUAL_INT(4, testOutput->m_logOutput.size());
         VERIFY_ARE_EQUAL_STR(testLogText, testOutput->m_logOutput[0]);
-        VERIFY_ARE_EQUAL_STR(std::string{ testLogText } +"1", testOutput->m_logOutput[1]);
-        VERIFY_ARE_EQUAL_STR(std::string{ testLogText } +testLogText, testOutput->m_logOutput[2]);
-        VERIFY_ARE_EQUAL_STR(std::string{ testLogText } +veryverylong, testOutput->m_logOutput[3]);
+        VERIFY_ARE_EQUAL_STR(xsapi_internal_string{ testLogText } +"1", testOutput->m_logOutput[1]);
+        VERIFY_ARE_EQUAL_STR(xsapi_internal_string{ testLogText } +testLogText, testOutput->m_logOutput[2]);
+        VERIFY_ARE_EQUAL_STR(xsapi_internal_string{ testLogText } +veryverylong, testOutput->m_logOutput[3]);
     }
 
     DEFINE_TEST_CASE(WriteLogStream)
@@ -77,7 +77,7 @@ public:
 
         VERIFY_ARE_EQUAL_INT(2, testOutput->m_logOutput.size());
         VERIFY_ARE_EQUAL_STR(testLogText, testOutput->m_logOutput[0]);
-        VERIFY_ARE_EQUAL_STR(std::string{ testLogText } +"1", testOutput->m_logOutput[1]);
+        VERIFY_ARE_EQUAL_STR(xsapi_internal_string{ testLogText } +"1", testOutput->m_logOutput[1]);
     }
 
     DEFINE_TEST_CASE(WriteLogConcurrent)
@@ -90,7 +90,7 @@ public:
 
         struct LogTask
         {
-            LogTask(std::shared_ptr<logger> logger, std::string message, size_t loopCount) noexcept
+            LogTask(std::shared_ptr<logger> logger, xsapi_internal_string message, size_t loopCount) noexcept
                 : m_logger{ logger },
                 m_message{ std::move(message) },
                 m_loopCount{ loopCount }
@@ -114,7 +114,7 @@ public:
         private:
             XAsyncBlock m_async{ nullptr, this };
             std::shared_ptr<logger> m_logger;
-            std::string m_message;
+            xsapi_internal_string m_message;
             size_t m_loopCount;
         };
 

@@ -354,7 +354,7 @@ STDAPI XblPrivacyBatchCheckPermissionResult(
     RETURN_HR_INVALIDARGUMENT_IF(results == nullptr || resultsCount == nullptr);
 
     // bufferUsed is needed to calculate resultsCount
-    auto bufferUsedPtr = std::make_unique<size_t>();
+    auto bufferUsedPtr = MakeUnique<size_t>();
     if (bufferUsed == nullptr)
     {
         bufferUsed = bufferUsedPtr.get();

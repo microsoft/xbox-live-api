@@ -10,6 +10,7 @@ User::User(XblUserHandle userHandle) noexcept
     : m_handle(userHandle)
 {}
 
+
 User::User(User&& other) noexcept
     : m_handle{ other.m_handle }, m_localId { std::move(other.m_localId) }, m_xuid {other.m_xuid }
 {
@@ -54,6 +55,12 @@ User::~User() noexcept
 
 /*static*/ Result<User> User::WrapHandle(XblUserHandle userHandle) noexcept
 {
+    if (XblShouldFaultInject(INJECTION_FEATURE_USER))
+    {
+        LOGS_ERROR << "FAULT INJECTION: User::WrapHandle ID:" << XblGetFaultCounter();
+        return Result<User>{ User(nullptr), E_FAIL };
+    }
+
     if (userHandle == nullptr)
     {
         return Result<User>{ User(nullptr), E_INVALIDARG };
@@ -139,6 +146,12 @@ HRESULT User::InitializeUser() noexcept
 
 Result<User> User::Copy() const noexcept
 {
+    if (XblShouldFaultInject(INJECTION_FEATURE_USER))
+    {
+        LOGS_ERROR << "FAULT INJECTION: User::Copy ID:" << XblGetFaultCounter();
+        return Result<User>{ User(nullptr), E_FAIL };
+    }
+
     XalUserHandle copiedHandle;
     auto hr = XalUserDuplicateHandle(this->m_handle, &copiedHandle);
     if (FAILED(hr))
@@ -162,7 +175,7 @@ uint64_t User::Xuid() const noexcept
 uint64_t User::LocalId() const noexcept
 {
     XalUserLocalId localId{ 0 };
-    if (m_handle != nullptr)
+    if (m_handle != nullptr && !XblShouldFaultInject(INJECTION_FEATURE_USER))
     {
         auto hr = XalUserGetLocalId(m_handle, &localId);
         if (SUCCEEDED(hr))
@@ -236,6 +249,12 @@ HRESULT User::GetTokenAndSignature(
     AsyncContext<Result<TokenAndSignature>>&& async
 ) noexcept
 {
+    if (XblShouldFaultInject(INJECTION_FEATURE_USER))
+    {
+        LOGS_ERROR << "FAULT INJECTION: User::GetTokenAndSignature ID:" << XblGetFaultCounter();
+        return E_FAIL;
+    }
+
     bool forceRefresh{ false };
 
     auto state{ GlobalState::Get() };
@@ -337,16 +356,24 @@ Result<XblFunctionContext> User::RegisterChangeEventHandler(
     XalRegistrationToken token{};
     auto context{ MakeShared<UserChangeEventHandler>(std::move(handler)) };
 
-    auto hr = XalUserRegisterChangeEventHandler(
-        TaskQueue().GetHandle(),
-        context.get(),
-        [](void* context, UserLocalId userId, UserChangeType change)
-        {
-            auto handler{ static_cast<UserChangeEventHandler*>(context) };
-            (*handler)(std::move(userId), std::move(static_cast<UserChangeType>(change)));
-        },
-        &token
-    );
+    auto hr = E_FAIL;
+    if (!XblShouldFaultInject(INJECTION_FEATURE_USER))
+    {
+        hr = XalUserRegisterChangeEventHandler(
+            TaskQueue().GetHandle(),
+            context.get(),
+            [](void* context, UserLocalId userId, UserChangeType change)
+            {
+                auto handler{ static_cast<UserChangeEventHandler*>(context) };
+                (*handler)(std::move(userId), std::move(static_cast<UserChangeType>(change)));
+            },
+            &token
+        ); 
+    }
+    else
+    {
+        LOGS_ERROR << "FAULT INJECTION: User::RegisterChangeEventHandler ID:" << XblGetFaultCounter();
+    }
 
     if (SUCCEEDED(hr))
     {

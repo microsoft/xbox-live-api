@@ -158,7 +158,7 @@ DWORD WINAPI ApiRunnerDoWork(LPVOID )
 
 void Sample::StartRunTests()
 {
-    if (!m_bRunningTests)
+    if (!m_bRunningTests && m_log)
     {
         m_bRunningTests = true;
         m_log->Clear();
@@ -474,8 +474,6 @@ void Sample::OnDeviceRestored()
 }
 #pragma endregion
 
-
-
 void LogToScreen(_Printf_format_string_ char const* format, ...)
 {
     char message[8000] = {};
@@ -498,4 +496,3 @@ void LogToScreen(_Printf_format_string_ char const* format, ...)
 
     LogToFile(message);
 }
-    

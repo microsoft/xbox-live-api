@@ -1510,7 +1510,7 @@ private:
         {
             auto& mockRtaService{ MockRealTimeActivityService::Instance() };
             mockRtaService.SetSubscribeHandler(
-                [&](uint32_t n, std::string)
+                [&](uint32_t n, xsapi_internal_string)
                 {
                     mockRtaService.CompleteSubscribeHandshake(n);
                 }
@@ -1537,10 +1537,10 @@ private:
         mock.SetResponseBody(defaultAchievementResponse); // mock the response of Get Achievements
 
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };
-        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
             {
-                if (uri.find(defaultAchievementsUri) != std::string::npos
-                    || uri.find(defaultNotificationUri) != std::string::npos)
+                if (uri.find(defaultAchievementsUri) != xsapi_internal_string::npos
+                    || uri.find(defaultNotificationUri) != xsapi_internal_string::npos)
                 {
                     mockRtaService.CompleteSubscribeHandshake(n);
                 }
@@ -1557,10 +1557,10 @@ private:
         mock.SetResponseBody(response); // mock the response of Get Achievements
 
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };
-        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
             {
-                if (uri.find(defaultAchievementsUri) != std::string::npos
-                    || uri.find(defaultNotificationUri) != std::string::npos)
+                if (uri.find(defaultAchievementsUri) != xsapi_internal_string::npos
+                    || uri.find(defaultNotificationUri) != xsapi_internal_string::npos)
                 {
                     mockRtaService.CompleteSubscribeHandshake(n);
                 }
@@ -1775,14 +1775,15 @@ private:
                 xuid,
                 willUnlock
             ]
-        (HttpMock* mock, std::string requestUrl, std::string requestBody)
+        (HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(requestBody);
                 UNREFERENCED_PARAMETER(requestUrl);
 
-                std::stringstream uri;
-                uri << "https://achievements.xboxlive.com/users/xuid(" << xuid << ")/achievements/" << AppConfig::Instance()->Scid();
+                xsapi_internal_stringstream uri;
+                uri << "https://achievements.xboxlive.com/users/xuid(" << xuid << ")/achievements/" << utils::ToLower(AppConfig::Instance()->Scid());
+                
                 auto& mockRtaService{ MockRealTimeActivityService::Instance() };
                 mockRtaService.RaiseEvent(uri.str(), progressPayload.c_str());
             });
@@ -1872,7 +1873,7 @@ private:
             100
         );
         VERIFY_IS_TRUE(
-            utils::TimeTFromDatetime(datetime::from_string(utils::string_t_from_internal_string(achievementUnlockTime), datetime::date_format::ISO_8601))
+            utils::TimeTFromDatetime(datetime::from_string(achievementUnlockTime, datetime::date_format::ISO_8601))
             == achievement->progression.timeUnlocked
         );
         XblAchievementsManagerResultCloseHandle(resultHandle);
@@ -2841,7 +2842,7 @@ public:
             100
         );
         VERIFY_IS_TRUE(
-            utils::TimeTFromDatetime(datetime::from_string(utils::string_t_from_internal_string(achievementUnlockTime), datetime::date_format::ISO_8601))
+            utils::TimeTFromDatetime(datetime::from_string(achievementUnlockTime, datetime::date_format::ISO_8601))
             == achievement->progression.timeUnlocked
         );
         XblAchievementsManagerResultCloseHandle(resultHandle);
@@ -3017,7 +3018,7 @@ public:
             );
         }
         VERIFY_IS_TRUE(
-            utils::TimeTFromDatetime(datetime::from_string(utils::string_t_from_internal_string(achievementUnlockTime), datetime::date_format::ISO_8601))
+            utils::TimeTFromDatetime(datetime::from_string(achievementUnlockTime, datetime::date_format::ISO_8601))
             == achievement->progression.timeUnlocked
         );
         XblAchievementsManagerResultCloseHandle(resultHandle);

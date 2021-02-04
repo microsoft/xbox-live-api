@@ -9,7 +9,11 @@
 #include "multiplayer_manager_internal.h"
 #include "multiplayer_internal.h"
 #include "xbox_live_app_config_internal.h"
+
+#if HC_PLATFORM != HC_PLATFORM_WIN32 && !XSAPI_NO_PPL
 #include "xsapi-cpp/title_callable_ui.h"
+#endif
+
 
 #if HC_PLATFORM == HC_PLATFORM_GDK
 #include "XGameUI.h"
@@ -97,16 +101,17 @@ MultiplayerClientManager::Initialize()
 {
     if (m_multiplayerLocalUserManager == nullptr)
     {
-        m_multiplayerLocalUserManager = std::make_shared<MultiplayerLocalUserManager>();
+        m_multiplayerLocalUserManager = MakeShared<MultiplayerLocalUserManager>();
         RegisterLocalUserManagerEvents();
     }
 
-    m_latestPendingRead = std::make_shared<MultiplayerClientPendingReader>(
+    m_latestPendingRead = MakeShared<MultiplayerClientPendingReader>(
+        m_queue,
         m_lobbySessionTemplateName, 
         m_multiplayerLocalUserManager
         );
 
-    m_lastPendingRead = std::make_shared<MultiplayerClientPendingReader>();
+    m_lastPendingRead = MakeShared<MultiplayerClientPendingReader>(m_queue);
     m_subscriptionsLostFired.store(false);
     m_latestPendingRead->SetAutoFillMembersDuringMatchmaking(m_autoFillMembers);
 }
@@ -286,7 +291,7 @@ MultiplayerClientManager::JoinLobby(
     if (!invitedUserFound)
     {
         // The invited user hasn't been added.
-        std::shared_ptr<JoinLobbyCompletedEventArgs> joinLobbyEventArgs = std::make_shared<JoinLobbyCompletedEventArgs>(invitedXuid);
+        std::shared_ptr<JoinLobbyCompletedEventArgs> joinLobbyEventArgs = MakeShared<JoinLobbyCompletedEventArgs>(invitedXuid);
 
         // Since m_latestPendingRead hasn't been initialized yet, this will ensure 
         // the event is still returned correctly through multiplayer_manager::do_work();
@@ -376,7 +381,7 @@ MultiplayerClientManager::JoinGame(
         initArgs.InitiatorXuids = xboxUserIds.data();
         initArgs.InitiatorXuidsCount = static_cast<uint32_t>(xboxUserIds.size());
 
-        auto gameSession = std::make_shared<XblMultiplayerSession>(
+        auto gameSession = MakeShared<XblMultiplayerSession>(
             primaryContext->Xuid(),
             &gameSessionRef,
             &initArgs
@@ -537,8 +542,8 @@ MultiplayerClientManager::InviteFriends(
 
 #elif HC_PLATFORM == HC_PLATFORM_GDK
 
-    XAsyncBlock* asyncBlock = utils::MakeAsyncBlock();
-    asyncBlock->queue = get_xsapi_singleton_async_queue();
+    XAsyncBlock* asyncBlock = Make<XAsyncBlock>();
+    asyncBlock->queue = m_queue.GetHandle();
     asyncBlock->context = utils::store_shared_ptr(shared_from_this());
     asyncBlock->callback = [](_In_ XAsyncBlock* asyncBlock)
     {
@@ -778,7 +783,7 @@ MultiplayerClientManager::OnMultiplayerConnectionIdChanged()
     if (lobbySession && lobbyClientSessionSafe.CurrentUser() && lobbyClientSessionSafe.CurrentUser()->Status == XblMultiplayerSessionMemberStatus::Active)
     {
         MultiplayerSessionMember::Get(lobbyClientSessionSafe.CurrentUser())->SetStatus(lobbyClientSessionSafe.CurrentUser()->Status);
-        auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+        auto pendingRequest = MakeShared<MultiplayerClientPendingRequest>();
         lobbyClient->AddToPendingQueue(pendingRequest);
     }
 
@@ -788,7 +793,7 @@ MultiplayerClientManager::OnMultiplayerConnectionIdChanged()
     if (gameSession && gameClientSessionSafe.CurrentUser() && gameClientSessionSafe.CurrentUser()->Status == XblMultiplayerSessionMemberStatus::Active)
     {
         MultiplayerSessionMember::Get(gameClientSessionSafe.CurrentUser())->SetStatus(gameClientSessionSafe.CurrentUser()->Status);
-        auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+        auto pendingRequest = MakeShared<MultiplayerClientPendingRequest>();
         gameClient->AddToPendingQueue(pendingRequest);
     }
 }
@@ -1030,7 +1035,7 @@ MultiplayerClientManager::HandleMemberListChanged(
                 gameMembers.push_back(latestPendingRead->ConvertToGameMember(member));
             }
 
-            std::shared_ptr<MemberJoinedEventArgs> memberJoinedEventArgs = std::make_shared<MemberJoinedEventArgs>(gameMembers);
+            std::shared_ptr<MemberJoinedEventArgs> memberJoinedEventArgs = MakeShared<MemberJoinedEventArgs>(gameMembers);
 
             AddToLatestPendingReadEventQueue(
                 XblMultiplayerEventType::MemberJoined,
@@ -1047,7 +1052,7 @@ MultiplayerClientManager::HandleMemberListChanged(
                 gameMembers.push_back(latestPendingRead->ConvertToGameMember(member));
             }
 
-            std::shared_ptr<MemberLeftEventArgs> memberLeftEventArgs = std::make_shared<MemberLeftEventArgs>(
+            std::shared_ptr<MemberLeftEventArgs> memberLeftEventArgs = MakeShared<MemberLeftEventArgs>(
                 gameMembers
                 );
 
@@ -1107,7 +1112,7 @@ MultiplayerClientManager::HandleMemberPropertiesChanged(
             {
                 continue;
             }
-            std::shared_ptr<MemberPropertyChangedEventArgs> memberPropertiesChangedArgs = std::make_shared<MemberPropertyChangedEventArgs>(
+            std::shared_ptr<MemberPropertyChangedEventArgs> memberPropertiesChangedArgs = MakeShared<MemberPropertyChangedEventArgs>(
                 latestPendingRead->ConvertToGameMember(member),
                 member->CustomPropertiesJson
                 );
@@ -1157,7 +1162,7 @@ MultiplayerClientManager::HandleSessionPropertiesChanged(
     }
 
     XblMultiplayerSessionReadLockGuard currentSessionSafe(currentSession);
-    auto gamePropertiesChangedArgs = std::make_shared<SessionPropertyChangedEventArgs>(
+    auto gamePropertiesChangedArgs = MakeShared<SessionPropertyChangedEventArgs>(
         currentSessionSafe.SessionProperties().SessionCustomPropertiesJson
     );
 
@@ -1186,7 +1191,7 @@ MultiplayerClientManager::HandleHostChanged(
         }
     }
 
-    std::shared_ptr<HostChangedEventArgs> hostChangedEventArgs = std::make_shared<HostChangedEventArgs>(
+    std::shared_ptr<HostChangedEventArgs> hostChangedEventArgs = MakeShared<HostChangedEventArgs>(
         hostMember
         );
 

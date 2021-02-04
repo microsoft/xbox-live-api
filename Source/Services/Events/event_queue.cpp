@@ -36,7 +36,7 @@ void EventQueue::Initialize()
         if (sharedThis && Succeeded(result))
         {
             auto& bytes = result.Payload();
-            auto fileMetadata = utils::string_split(xsapi_internal_string{ bytes.begin(), bytes.end() }, '\n');
+            auto fileMetadata = utils::string_split_internal(xsapi_internal_string{ bytes.begin(), bytes.end() }, '\n');
 
             std::lock_guard<std::mutex> lock{ sharedThis->m_mutex };
             for (auto& metadata : fileMetadata)
@@ -184,7 +184,7 @@ HRESULT EventQueue::Populate()
             if (sharedThis && Succeeded(readResult) && sharedThis->m_mode == Mode::Normal)
             {
                 auto& bytes = readResult.Payload();
-                auto serializedEvents = utils::string_split(xsapi_internal_string{ bytes.begin(), bytes.end() }, '\n');
+                auto serializedEvents = utils::string_split_internal(xsapi_internal_string{ bytes.begin(), bytes.end() }, '\n');
 
                 for (const auto& serializedEvent : serializedEvents)
                 {

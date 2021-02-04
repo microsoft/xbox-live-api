@@ -2,9 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-
-#include "xbox_system_factory.h"
-#include "xsapi_utils.h"
 #include "multiplayer_internal.h"
 
 using namespace xbox::services;
@@ -61,7 +58,7 @@ XblMultiplayerSession::XblMultiplayerSession(
     m_writeConstants(false),
     m_memberRequestIndex(0)
 {
-    auto sessionDatetime = xbox::services::datetime::from_string(utils::string_t_from_internal_string(responseDate), xbox::services::datetime::date_format::RFC_1123);
+    auto sessionDatetime = xbox::services::datetime::from_string(responseDate, xbox::services::datetime::date_format::RFC_1123);
     m_sessionRetrievedTime = utils::time_t_from_datetime(sessionDatetime);
     Initialize();
     Deserialize(json);
@@ -1466,7 +1463,7 @@ HRESULT XblMultiplayerSession::Deserialize(
         {
             return Result<XblDeviceToken>(WEB_E_INVALID_JSON_STRING);
         }
-        XblDeviceToken token;
+        XblDeviceToken token{};
         utils::strcpy(token.Value, sizeof(token.Value), json.GetString());
         return Result<XblDeviceToken>(token);
     }, json, "hostCandidates", m_hostCandidates, false));
@@ -1991,21 +1988,32 @@ bool XblMultiplayerSession::HasSessionPropertyChanged(
         return false;
     }
 
-    auto propertyName = utils::string_t_from_internal_string(_propertyName);
+    auto propertyName = _propertyName;
 
-    auto customProp1 = ParseJson(session1->m_sessionCustomPropertiesJson.data());
-    auto customProp2 = ParseJson(session2->m_sessionCustomPropertiesJson.data());
-    if ((customProp1.has_field(propertyName) && !customProp2.has_field(propertyName)) ||
-        (!customProp1.has_field(propertyName) && customProp2.has_field(propertyName)))
-    {
-        return true;
-    }
+    JsonDocument customProp1;
+    JsonDocument customProp2;
+    customProp1.Parse(session1->m_sessionCustomPropertiesJson.data());
+    customProp2.Parse(session2->m_sessionCustomPropertiesJson.data());
 
-    if (customProp1.has_field(propertyName) && customProp2.has_field(propertyName))
+    if (!customProp1.HasParseError() &&
+        !customProp2.HasParseError())
     {
-        const auto& prop1 = customProp1.at(propertyName).as_string();
-        const auto& prop2 = customProp2.at(propertyName).as_string();
-        return utils::str_icmp(prop1, prop2) != 0;
+        xsapi_internal_string prop1;
+        xsapi_internal_string prop2;
+
+        bool isInProp1 = SUCCEEDED(JsonUtils::ExtractJsonString(customProp1, propertyName, prop1, true));
+        bool isInProp2 = SUCCEEDED(JsonUtils::ExtractJsonString(customProp2, propertyName, prop2, true));
+
+        if ((isInProp1 && !isInProp2) ||
+            (!isInProp1 && isInProp2))
+        {
+            return true;
+        }
+
+        if (isInProp1 && isInProp2)
+        {
+            return utils::str_icmp(prop1.c_str(), prop2.c_str()) != 0;
+        }
     }
 
     return false;
@@ -3113,7 +3121,7 @@ STDAPI XblMultiplayerSessionCurrentUserSetSecureDeviceAddressBase64(
 #if HC_PLATFORM != HC_PLATFORM_XDK && HC_PLATFORM != HC_PLATFORM_UWP
 STDAPI XblFormatSecureDeviceAddress(
     _In_ const char* deviceId,
-    _Out_ XblFormattedSecureDeviceAddress* address
+    _Inout_ XblFormattedSecureDeviceAddress* address
 ) XBL_NOEXCEPT
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(address);

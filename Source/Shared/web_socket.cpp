@@ -35,11 +35,18 @@ HRESULT Websocket::Connect(
     _In_ const String& subProtocol
 ) noexcept
 {
+    auto state = GlobalState::Get();
+    if (!state)
+    {
+        return E_XBL_NOT_INITIALIZED;
+    }
+
     m_user.GetTokenAndSignature("GET", uri, HttpHeaders{}, nullptr, 0, false, AsyncContext<Result<TokenAndSignature>>{
         m_queue.GetHandle(),
         [
             uri = String{ uri },
             subProtocol = String{ subProtocol },
+            locales = state->Locales(),
             weakThis{ std::weak_ptr<Websocket>{ shared_from_this() } }
         ]
         (Result<TokenAndSignature> authResult)
@@ -61,7 +68,7 @@ HRESULT Websocket::Connect(
 
             HCWebSocketSetHeader(sharedThis->m_hcWebsocket, "Authorization", authPayload.token.data());
             HCWebSocketSetHeader(sharedThis->m_hcWebsocket, "Signature", authPayload.signature.data());
-            HCWebSocketSetHeader(sharedThis->m_hcWebsocket, "Accept-Language", utils::get_locales().data());
+            HCWebSocketSetHeader(sharedThis->m_hcWebsocket, "Accept-Language", locales.data());
 
             xsapi_internal_string userAgent = DEFAULT_USER_AGENT;
             HCWebSocketSetHeader(sharedThis->m_hcWebsocket, "User-Agent", userAgent.data());

@@ -117,7 +117,7 @@ public:
 
         bool requestWellFormed { true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock* mock, std::string uri, std::string body)
+            [&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(uri);
@@ -173,7 +173,7 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock* mock, std::string uri, std::string body)
+            [&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(uri);

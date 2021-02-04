@@ -1,9 +1,6 @@
 #include "pch.h"
 #include "xsapi_json_utils.h"
 
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
-
 using namespace xbox::services::legacy;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
@@ -35,7 +32,7 @@ HRESULT JsonUtils::ExtractJsonFieldAsString(
  HRESULT JsonUtils::ExtractJsonStringVector(
     _In_ const JsonValue& json,
     _In_ const xsapi_internal_string& name,
-    _Inout_ std::vector<xsapi_internal_string>& outVector,
+    _Inout_ xsapi_internal_vector<xsapi_internal_string>& outVector,
     _In_ bool required
 )
 {
@@ -50,21 +47,21 @@ HRESULT JsonUtils::ExtractJsonFieldAsString(
         }
         else if (!required)
         {
-            outVector = std::vector<xsapi_internal_string>();
+            outVector = xsapi_internal_vector<xsapi_internal_string>();
             return S_OK;
         }
     }
 
-    outVector = std::vector<xsapi_internal_string>();
+    outVector = xsapi_internal_vector<xsapi_internal_string>();
     return WEB_E_INVALID_JSON_STRING;
 }
 
  HRESULT JsonUtils::ExtractJsonStringVector(
      _In_ const JsonValue& json,
-     _Inout_ std::vector<xsapi_internal_string>& outVector
+     _Inout_ xsapi_internal_vector<xsapi_internal_string>& outVector
  )
  {
-     outVector = std::vector<xsapi_internal_string>();
+     outVector = xsapi_internal_vector<xsapi_internal_string>();
      if (!json.IsArray())
      {
          return WEB_E_INVALID_JSON_STRING;
@@ -80,58 +77,6 @@ HRESULT JsonUtils::ExtractJsonFieldAsString(
      }
 
      return S_OK;
- }
-
-HRESULT JsonUtils::ExtractJsonStringTVector(
-    _In_ const JsonValue& json,
-    _In_ const xsapi_internal_string& name,
-    _Inout_ std::vector<string_t>& outVector,
-    _In_ bool required
-)
-{
-    outVector = std::vector<string_t>();
-    if (json.IsObject())
-    {
-        if (json.HasMember(name.c_str()))
-        {
-            return ExtractJsonStringTVector(
-                json[name.c_str()],
-                outVector
-            );
-        }
-        else if (!required)
-        {
-            return S_OK;
-        }
-    }
-
-    return WEB_E_INVALID_JSON_STRING;
-}
-
-
-
-HRESULT JsonUtils::ExtractJsonStringTVector(
-    _In_ const JsonValue& json,
-    _Inout_ std::vector<string_t>& outVector
-)
-{
-    outVector = std::vector<string_t>();
-
-    if (!json.IsArray())
-    {
-        return WEB_E_INVALID_JSON_STRING;
-    }
-
-    for (const auto& string : json.GetArray())
-    {
-        if (!string.IsString())
-        {
-            return WEB_E_INVALID_JSON_STRING;
-        }
-        outVector.push_back(utils::string_t_from_internal_string(string.GetString()));
-    }
-
-    return S_OK;
 }
 
 Result<xsapi_internal_string> JsonUtils::JsonStringExtractor(_In_ const JsonValue& json)
@@ -141,15 +86,6 @@ Result<xsapi_internal_string> JsonUtils::JsonStringExtractor(_In_ const JsonValu
         return Result<xsapi_internal_string>(WEB_E_INVALID_JSON_STRING);
     }
     return Result<xsapi_internal_string>(json.GetString());
-}
-
-Result<string_t> JsonUtils::JsonStringTExtractor(_In_ const JsonValue& json)
-{
-    if (!json.IsString())
-    {
-        return Result<string_t>(WEB_E_INVALID_JSON_STRING);
-    }
-    return Result<string_t>(utils::string_t_from_internal_string(json.GetString()));
 }
 
 void JsonUtils::JsonStringSerializer(_In_ const xsapi_internal_string& value, _Out_ JsonValue& json, JsonDocument::AllocatorType& allocator)
@@ -244,45 +180,6 @@ HRESULT JsonUtils::ExtractJsonString(
     }
 
     return WEB_E_INVALID_JSON_STRING;
-}
-
-HRESULT JsonUtils::ExtractJsonString(
-    _In_ const JsonValue& jsonValue,
-    _In_ const xsapi_internal_string& stringName,
-    _Inout_ string_t& outString,
-    _In_ bool required
-)
-{
-    xsapi_internal_string internalString;
-    RETURN_HR_IF_FAILED(ExtractJsonString(jsonValue, stringName, internalString, required));
-    outString = utils::string_t_from_internal_string(internalString);
-    return S_OK;
-}
-
-HRESULT
-JsonUtils::ExtractJsonStringToCharTArray(
-    _In_ const JsonValue& jsonValue,
-    _In_ const xsapi_internal_string& stringName,
-    _In_reads_bytes_(size) char_t* charArr,
-    _In_ size_t size
-)
-{
-    string_t jsonStr;
-    RETURN_HR_IF_FAILED(ExtractJsonString(jsonValue, stringName, jsonStr));
-    uint32_t errorCode = 0;
-
-#if HC_PLATFORM_IS_MICROSOFT
-    auto strSize = __min(size - 1, jsonStr.size());
-    wcsncpy_s(&charArr[0], size, jsonStr.c_str(), strSize);
-#else
-    strncpy(&charArr[0], jsonStr.c_str(), size);
-#endif
-    if (errorCode)
-    {
-        return WEB_E_INVALID_JSON_STRING;
-    }
-
-    return S_OK;
 }
 
 HRESULT JsonUtils::ExtractJsonStringToCharArray(
@@ -558,7 +455,7 @@ HRESULT JsonUtils::ExtractJsonUInt64(
             {
                 //convert to wstring for use with xbox::services::datetime
                 //xbox::services::datetime is still part of cpprestsdk
-                outTime = xbox::services::datetime::from_string(utils::string_t_from_internal_string(field.GetString()), xbox::services::datetime::date_format::ISO_8601);
+                outTime = xbox::services::datetime::from_string(field.GetString(), xbox::services::datetime::date_format::ISO_8601);
                 return S_OK;
             }
         }
@@ -647,7 +544,7 @@ HRESULT JsonUtils::ExtractJsonDouble(
 void
 JsonUtils::SerializeUInt52ToJson(
     _In_ uint64_t integer,
-    _Out_ JsonValue& json
+    _Inout_ JsonValue& json
 )
 {
     if ((integer & 0xFFF0000000000000) != 0)
@@ -664,7 +561,7 @@ JsonValue JsonUtils::SerializeTime(
     _In_ JsonDocument::AllocatorType& a
 ) noexcept
 {
-    auto timestampString = StringFromStringT(DatetimeFromTimeT(time).to_string(utility::datetime::ISO_8601));
+    auto timestampString = DatetimeFromTimeT(time).to_string_internal(xbox::services::cppresturi::utility::datetime::ISO_8601);
     return JsonValue{ timestampString.data(), a };
 }
 

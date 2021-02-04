@@ -281,7 +281,10 @@ STDAPI XblMultiplayerManagerLobbySessionLocalMembers(
             RETURN_HR_INVALIDARGUMENT_IF(localMembers == nullptr && localMembersCount > 0);
             for (size_t i = 0; i < localMembersVector.size(); ++i)
             {
+                DISABLE_WARNING_PUSH;
+                SUPPRESS_WARNING_NULL_PTR_DEREFERENCE; // null pointer deref
                 localMembers[i] = localMembersVector[i]->GetReference();
+                DISABLE_WARNING_POP;
             }
             return S_OK;
         });
@@ -649,7 +652,10 @@ STDAPI XblMultiplayerManagerGameSessionMembers(
             RETURN_HR_INVALIDARGUMENT_IF(members == nullptr && membersCount > 0);
             for (size_t i = 0; i < membersVector.size(); ++i)
             {
+                DISABLE_WARNING_PUSH;
+                SUPPRESS_WARNING_NULL_PTR_DEREFERENCE;
                 members[i] = membersVector[i]->GetReference();
+                DISABLE_WARNING_POP;
             }
             return S_OK;
         });

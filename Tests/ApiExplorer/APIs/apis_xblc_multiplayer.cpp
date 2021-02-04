@@ -170,7 +170,6 @@ int XblMultiplayerWriteSessionAsync_Lua(lua_State *L)
         else
         {
             LogToFile("XblMultiplayerWriteSessionResult: hr=%s", ConvertHR(hr).c_str()); // CODE SNIP SKIP
-            hr = S_OK;
         }
 
         CallLuaFunctionWithHr(hr, "OnXblMultiplayerWriteSessionAsync"); // CODE SNIP SKIP
@@ -1055,17 +1054,21 @@ int XblMultiplayerSessionSetServerConnectionStringCandidates_Lua(lua_State *L)
     std::string candidate1 = GetStringFromLua(L, 1, "Candidate1");
     std::string candidate2 = GetStringFromLua(L, 2, "Candidate1");
     auto sessionHandle = GetSessionHandleFromArg(L, 3);
-    // CODE SNIPPET START: XblMultiplayerSessionSetServerConnectionStringCandidates
-    const char* serverConnectionStringCandidates[2] = {};
-    serverConnectionStringCandidates[0] = candidate1.c_str();
-    serverConnectionStringCandidates[1] = candidate2.c_str();
-    size_t serverConnectionStringCandidatesCount = 2;
+    HRESULT hr = S_OK;
+    if (sessionHandle != nullptr) // might be null if previous call fails
+    {
+        // CODE SNIPPET START: XblMultiplayerSessionSetServerConnectionStringCandidates
+        const char* serverConnectionStringCandidates[2] = {};
+        serverConnectionStringCandidates[0] = candidate1.c_str();
+        serverConnectionStringCandidates[1] = candidate2.c_str();
+        size_t serverConnectionStringCandidatesCount = 2;
 
-    HRESULT hr = XblMultiplayerSessionSetServerConnectionStringCandidates(
-        sessionHandle,
-        serverConnectionStringCandidates,
-        serverConnectionStringCandidatesCount);
-    // CODE SNIPPET END
+        hr = XblMultiplayerSessionSetServerConnectionStringCandidates(
+            sessionHandle,
+            serverConnectionStringCandidates,
+            serverConnectionStringCandidatesCount);
+        // CODE SNIPPET END
+    }
 
     LogToFile("XblMultiplayerSessionSetServerConnectionStringCandidates: hr=%s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);
@@ -1132,10 +1135,10 @@ int XblMultiplayerSessionCurrentUserSetSecureDeviceAddressBase64_Lua(lua_State *
 
 int XblFormatSecureDeviceAddress_Lua(lua_State *L)
 {
+#if HC_PLATFORM != HC_PLATFORM_XDK && HC_PLATFORM != HC_PLATFORM_UWP
     std::string deviceIdStr = GetStringFromLua(L, 1, "ExampleDeviceAddress");
     auto deviceId = deviceIdStr.c_str();
 
-#if HC_PLATFORM != HC_PLATFORM_XDK && HC_PLATFORM != HC_PLATFORM_UWP
     // CODE SNIPPET START: XblFormatSecureDeviceAddress
     XblFormattedSecureDeviceAddress address{ };
     HRESULT hr = XblFormatSecureDeviceAddress(deviceId, &address);
@@ -1307,11 +1310,15 @@ int XblMultiplayerSessionSetMatchmakingTargetSessionConstantsJson_Lua(lua_State 
     std::string consts = GetStringFromLua(L, 1, "{}");
     auto sessionHandle = GetSessionHandleFromArg(L, 2);
 
-    // CODE SNIPPET START: XblMultiplayerSessionSetMatchmakingTargetSessionConstantsJson
-    HRESULT hr = XblMultiplayerSessionSetMatchmakingTargetSessionConstantsJson(
-        sessionHandle,
-        consts.c_str());
-    // CODE SNIPPET END
+    HRESULT hr = S_OK;
+    if (sessionHandle != nullptr) // might be null if previous call fails
+    {
+        // CODE SNIPPET START: XblMultiplayerSessionSetMatchmakingTargetSessionConstantsJson
+        hr = XblMultiplayerSessionSetMatchmakingTargetSessionConstantsJson(
+            sessionHandle,
+            consts.c_str());
+        // CODE SNIPPET END
+    }
 
     LogToFile("XblMultiplayerSessionSetMatchmakingTargetSessionConstantsJson: hr=%s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);

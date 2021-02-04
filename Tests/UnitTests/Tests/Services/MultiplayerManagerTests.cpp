@@ -2864,9 +2864,9 @@ public:
             MPMTestEnvironment() noexcept
             {
                 auto& mockRtaService{ MockRealTimeActivityService::Instance() };
-                mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+                mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
                 {
-                    if (uri.find("sessiondirectory") != std::string::npos)
+                    if (uri.find("sessiondirectory") != xsapi_internal_string::npos)
                     {
                         mockRtaService.CompleteSubscribeHandshake(n, rtaConnectionId);
                     }
@@ -5137,7 +5137,7 @@ public:
         mock.SetResponseBody(getResponses[0]);
         mock.SetResponseHttpStatus(getStatuses[0]);
         mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        mock.SetMockMatchedCallback([getResponses, getStatuses, &mockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        mock.SetMockMatchedCallback([getResponses, getStatuses, &mockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (mockCount < getResponses.size())
             {
@@ -5307,7 +5307,7 @@ public:
         HttpMock mock(POST, defaultMpsdUri, 201);
         mock.SetResponseBody(writeResponses[0]);
         mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        mock.SetMockMatchedCallback([writeResponses, &mockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        mock.SetMockMatchedCallback([writeResponses, &mockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (mockCount < writeResponses.size())
             {
@@ -5916,7 +5916,7 @@ public:
         HttpMock lobbyMock(GET, defaultMpsdUri, 200);
         lobbyMock.SetResponseBody(lobbyResponses[0]);
         lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (lobbyMockCount < lobbyResponses.size())
             {
@@ -5929,7 +5929,7 @@ public:
         HttpMock gameMock(GET, defaultGameUri, 200);
         gameMock.SetResponseBody(gameResponses[0]);
         gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
-        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (gameMockCount < gameResponses.size())
             {
@@ -6096,7 +6096,7 @@ public:
         HttpMock lobbyMock(GET, defaultMpsdUri, 200);
         lobbyMock.SetResponseBody(lobbyResponses[0]);
         lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (lobbyMockCount < lobbyResponses.size())
             {
@@ -6109,7 +6109,7 @@ public:
         HttpMock gameMock(GET, defaultGameUri, 200);
         gameMock.SetResponseBody(gameResponses[0]);
         gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
-        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (gameMockCount < gameResponses.size())
             {
@@ -6302,7 +6302,7 @@ public:
         uint32_t lobbyMockCount{ 0 };
         HttpMock lobbyMock(GET, defaultMpsdUri, 200);
         lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (lobbyMockCount < lobbyResponses.size())
             {
@@ -6314,7 +6314,7 @@ public:
         uint32_t gameMockCount{ 0 };
         HttpMock gameMock(GET, defaultGameUri, 200);
         gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
-        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (gameMockCount < gameResponses.size())
             {
@@ -6452,7 +6452,7 @@ public:
         HttpMock lobbyMock(GET, defaultMpsdUri, 200);
         lobbyMock.SetResponseBody(lobbyResponses[0]);
         lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (lobbyMockCount < lobbyResponses.size())
             {
@@ -6465,7 +6465,7 @@ public:
         HttpMock gameMock(GET, defaultGameUri, 200);
         gameMock.SetResponseBody(gameResponses[0]);
         gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
-        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, std::string actualRequestUrl, std::string requestBody)
+        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (gameMockCount < gameResponses.size())
             {
@@ -6573,7 +6573,7 @@ public:
 
         // Wait for MPM to refresh the lobby
         Event e;
-        mock.SetMockMatchedCallback([&](HttpMock*, std::string, std::string)
+        mock.SetMockMatchedCallback([&](HttpMock*, xsapi_internal_string, xsapi_internal_string)
         {
             e.Set();
         });

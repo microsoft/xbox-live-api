@@ -33,7 +33,7 @@ struct TitleManagedStatistic
         String = static_cast<uint32_t>(XblTitleManagedStatType::String),
         Null
     } type;
-    double numberValue;
+    double numberValue{ 0.0 };
     String stringValue;
 };
 

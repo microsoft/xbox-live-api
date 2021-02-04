@@ -1258,8 +1258,8 @@ class xbl_result
     public:
     xbl_result();
     xbl_result(_In_ T payload);
-    xbl_result(_In_ std::error_code errorCode, _In_ std::string errorMessage = std::string());
-    xbl_result(_In_ T payload, _In_ std::error_code errorCode, _In_ std::string errorMessage = std::string());
+    xbl_result(_In_ std::error_code errorCode, _In_ xsapi_internal_string errorMessage = xsapi_internal_string());
+    xbl_result(_In_ T payload, _In_ std::error_code errorCode, _In_ xsapi_internal_string errorMessage = xsapi_internal_string());
 
     xbl_result(_In_ const xbl_result&);
     xbl_result& operator=(_In_ const xbl_result&);
@@ -1303,18 +1303,18 @@ class xbl_result
     /// Returns call specific debug information.  
     /// It is not localized, so only use for debugging purposes.
     /// </summary>
-    const std::string& err_message() const;
+    const xsapi_internal_string& err_message() const;
 
     /// <summary>
     /// Sets error code debug information.  
     /// It is not localized, so only use for debugging purposes.
     /// </summary>
-    void _Set_err_message(std::string errMessage);
+    void _Set_err_message(xsapi_internal_string errMessage);
 
     private:
     T m_payload{};
     std::error_code m_errorCode{};
-    std::string m_errorMessage;
+    xsapi_internal_string m_errorMessage;
 };
 
 template<>
@@ -1408,7 +1408,7 @@ class xbl_result <void>
 
 template<typename T>
 xbl_result<T>::xbl_result() :
-    m_errorMessage(std::string())
+    m_errorMessage(xsapi_internal_string())
 {
     m_errorCode = make_error_code(xbl_error_code::no_error);
 }
@@ -1416,7 +1416,7 @@ xbl_result<T>::xbl_result() :
 template<typename T>
 xbl_result<T>::xbl_result(_In_ T payload) :
     m_payload(std::move(payload)),
-    m_errorMessage(std::string())
+    m_errorMessage(xsapi_internal_string())
 {
     m_errorCode = make_error_code(xbl_error_code::no_error);
 }
@@ -1424,7 +1424,7 @@ xbl_result<T>::xbl_result(_In_ T payload) :
 template<typename T>
 xbl_result<T>::xbl_result(
     _In_ std::error_code errorCode,
-    _In_ std::string errorMessage
+    _In_ xsapi_internal_string errorMessage
 ) :
     m_errorCode(std::move(errorCode)),
     m_errorMessage(std::move(errorMessage))
@@ -1435,7 +1435,7 @@ template<typename T>
 xbl_result<T>::xbl_result(
     _In_ T payload,
     _In_ std::error_code errorCode,
-    _In_ std::string errorMessage
+    _In_ xsapi_internal_string errorMessage
 ) :
     m_payload(std::move(payload)),
     m_errorCode(std::move(errorCode)),
@@ -1474,13 +1474,13 @@ void xbl_result<T>::_Set_err(std::error_code errCode)
 }
 
 template<typename T>
-const std::string& xbl_result<T>::err_message() const
+const xsapi_internal_string& xbl_result<T>::err_message() const
 {
     return m_errorMessage;
 }
 
 template<typename T>
-void xbl_result<T>::_Set_err_message(std::string errorMsg)
+void xbl_result<T>::_Set_err_message(xsapi_internal_string errorMsg)
 {
     m_errorMessage = std::move(errorMsg);
 }

@@ -62,8 +62,8 @@ namespace services
 {
 namespace detail
 {
-    string_t _to_base64(const unsigned char *ptr, size_t size);
-    std::vector<unsigned char> _from_base64(const string_t& str);
+    xsapi_internal_string _to_base64(const unsigned char *ptr, size_t size);
+    std::vector<unsigned char> _from_base64(const xsapi_internal_string& str);
 
     struct _triple_byte
     {
@@ -86,9 +86,9 @@ namespace detail
        255,  26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,  39,  40,
         41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51, 255, 255, 255, 255, 255 } };
 
-    string_t _to_base64(const unsigned char *ptr, size_t size)
+    xsapi_internal_string _to_base64(const unsigned char *ptr, size_t size)
     {
-        string_t result;
+        xsapi_internal_string result;
 
         for (; size >= 3; )
         {
@@ -97,10 +97,10 @@ namespace detail
             unsigned char idx1 = (record->_1_1 << 4) | record->_1_2;
             unsigned char idx2 = (record->_2_1 << 2) | record->_2_2;
             unsigned char idx3 = record->_3;
-            result.push_back(char_t(_base64_enctbl[idx0]));
-            result.push_back(char_t(_base64_enctbl[idx1]));
-            result.push_back(char_t(_base64_enctbl[idx2]));
-            result.push_back(char_t(_base64_enctbl[idx3]));
+            result.push_back(char(_base64_enctbl[idx0]));
+            result.push_back(char(_base64_enctbl[idx1]));
+            result.push_back(char(_base64_enctbl[idx2]));
+            result.push_back(char(_base64_enctbl[idx3]));
             size -= 3;
             ptr += 3;
         }
@@ -111,8 +111,8 @@ namespace detail
             const _triple_byte* record = reinterpret_cast<const _triple_byte*>(ptr);
             unsigned char idx0 = record->_0;
             unsigned char idx1 = (record->_1_1 << 4);
-            result.push_back(char_t(_base64_enctbl[idx0]));
-            result.push_back(char_t(_base64_enctbl[idx1]));
+            result.push_back(char(_base64_enctbl[idx0]));
+            result.push_back(char(_base64_enctbl[idx1]));
             result.push_back('=');
             result.push_back('=');
             break;
@@ -123,9 +123,9 @@ namespace detail
             unsigned char idx0 = record->_0;
             unsigned char idx1 = (record->_1_1 << 4) | record->_1_2;
             unsigned char idx2 = (record->_2_1 << 2);
-            result.push_back(char_t(_base64_enctbl[idx0]));
-            result.push_back(char_t(_base64_enctbl[idx1]));
-            result.push_back(char_t(_base64_enctbl[idx2]));
+            result.push_back(char(_base64_enctbl[idx0]));
+            result.push_back(char(_base64_enctbl[idx1]));
+            result.push_back(char(_base64_enctbl[idx2]));
             result.push_back('=');
             break;
         }
@@ -145,7 +145,7 @@ namespace detail
 // gcc is concerned about the bitfield uses in the code, something we simply need to ignore.
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif
-    std::vector<unsigned char> _from_base64(const string_t& input)
+    std::vector<unsigned char> _from_base64(const xsapi_internal_string& input)
     {
         std::vector<unsigned char> result;
 
@@ -192,7 +192,7 @@ namespace detail
 
 
         auto size = input.size();
-        const char_t* ptr = &input[0];
+        const char* ptr = &input[0];
 
         auto outsz = (size / 4) * 3;
         outsz -= padding;
@@ -235,7 +235,10 @@ namespace detail
             memset(target, 0, sizeof(target));
             _triple_byte* record = reinterpret_cast<_triple_byte*>(target);
 
+            DISABLE_WARNING_PUSH;
+            SUPPRESS_WARNING_EXPRESSION_NOT_TRUE;
             unsigned char val0 = _base64_dectbl[ptr[0]];
+            DISABLE_WARNING_POP;
             unsigned char val1 = _base64_dectbl[ptr[1]];
             unsigned char val2 = _base64_dectbl[ptr[2]];
             unsigned char val3 = _base64_dectbl[ptr[3]];
@@ -292,7 +295,7 @@ namespace detail
     }
 #endif
 
-    static bool is_digit(char_t c) { return c >= _XPLATSTR('0') && c <= _XPLATSTR('9'); }
+    static bool is_digit(char c) { return c >= '0' && c <= '9'; }
 
     datetime datetime::utc_now()
     {
@@ -312,7 +315,7 @@ namespace detail
 #endif
     }
 
-    string_t datetime::to_string(date_format format) const
+    xsapi_internal_string datetime::to_string(date_format format) const
     {
 #ifdef _WIN32
         int status;
@@ -330,7 +333,7 @@ namespace detail
             throw details::create_system_error(GetLastError());
         }
 
-        std::wostringstream outStream;
+        xsapi_internal_wostringstream outStream;
         outStream.imbue(std::locale::classic());
 
         if (format == RFC_1123)
@@ -403,7 +406,8 @@ namespace detail
             outStream << "Z";
         }
 
-        return outStream.str();
+        auto result = convert::utf16_to_utf8_internal(outStream.str());
+        return result;
 #else //LINUX
         uint64_t input = m_interval;
         uint64_t frac_sec = input % _secondTicks;
@@ -437,7 +441,7 @@ namespace detail
                 &datetime);
         }
 
-        return std::string(output);
+        return xsapi_internal_string(output);
 #endif
     }
 
@@ -459,7 +463,7 @@ namespace detail
         return ufrac_second;
     }
 
-    void extract_fractional_second(const string_t& dateString, string_t& resultString, uint64_t& ufrac_second)
+    void extract_fractional_second(const xsapi_internal_string& dateString, xsapi_internal_string& resultString, uint64_t& ufrac_second)
     {
         resultString = dateString;
         // First, the string must be strictly longer than 2 characters, and the trailing character must be 'Z'
@@ -505,7 +509,7 @@ namespace detail
     }
 #endif
 
-    datetime datetime::from_string(const string_t& dateString, date_format format)
+    datetime datetime::from_string(const xsapi_internal_string& dateString, date_format format)
     {
         // avoid floating point math to preserve precision
         uint64_t ufrac_second = 0;
@@ -516,11 +520,11 @@ namespace detail
         {
             SYSTEMTIME sysTime = { 0 };
 
-            std::wstring month(3, L'\0');
-            std::wstring unused(3, L'\0');
+            xsapi_internal_string month(3, '\0');
+            xsapi_internal_string unused(3, '\0');
 
-            const wchar_t* formatString = L"%3c, %2d %3c %4d %2d:%2d:%2d %3c";
-            auto n = swscanf_s(dateString.c_str(), formatString,
+            const char* formatString = "%3c, %2d %3c %4d %2d:%2d:%2d %3c";
+            auto n = sscanf_s(dateString.c_str(), formatString,
                 unused.data(), unused.size(),
                 &sysTime.wDay,
                 month.data(), month.size(),
@@ -532,8 +536,8 @@ namespace detail
 
             if (n == 8)
             {
-                std::wstring monthnames[12] = { L"Jan", L"Feb", L"Mar", L"Apr", L"May", L"Jun", L"Jul", L"Aug", L"Sep", L"Oct", L"Nov", L"Dec" };
-                auto loc = std::find_if(monthnames, monthnames + 12, [&month](const std::wstring& m) { return m == month; });
+                xsapi_internal_string monthnames[12] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+                auto loc = std::find_if(monthnames, monthnames + 12, [&month](const xsapi_internal_string& m) { return m == month; });
 
                 if (loc != monthnames + 12)
                 {
@@ -551,12 +555,12 @@ namespace detail
             // increments. Therefore, start with seconds and milliseconds set to 0, then add them separately
 
             // Try to extract the fractional second from the timestamp
-            string_t input;
+            xsapi_internal_string input;
             extract_fractional_second(dateString, input, ufrac_second);
             {
                 SYSTEMTIME sysTime = { 0 };
-                const wchar_t* formatString = L"%4d-%2d-%2dT%2d:%2d:%2dZ";
-                auto n = swscanf_s(input.c_str(), formatString,
+                const char* formatString = "%4d-%2d-%2dT%2d:%2d:%2dZ";
+                auto n = sscanf_s(input.c_str(), formatString,
                     &sysTime.wYear,
                     &sysTime.wMonth,
                     &sysTime.wDay,
@@ -576,8 +580,8 @@ namespace detail
                 SYSTEMTIME sysTime = { 0 };
                 DWORD date = 0;
 
-                const wchar_t* formatString = L"%8dT%2d:%2d:%2dZ";
-                auto n = swscanf_s(input.c_str(), formatString,
+                const char* formatString = "%8dT%2d:%2d:%2dZ";
+                auto n = sscanf_s(input.c_str(), formatString,
                     &date,
                     &sysTime.wHour,
                     &sysTime.wMinute,
@@ -603,8 +607,8 @@ namespace detail
                 sysTime.wSecond = 0;
                 sysTime.wMilliseconds = 0;
 
-                const wchar_t* formatString = L"%2d:%2d:%2dZ";
-                auto n = swscanf_s(input.c_str(), formatString,
+                const char* formatString = "%2d:%2d:%2dZ";
+                auto n = sscanf_s(input.c_str(), formatString,
                     &sysTime.wHour,
                     &sysTime.wMinute,
                     &sysTime.wSecond);
@@ -621,7 +625,7 @@ namespace detail
 
         return datetime();
 #else
-        std::string input(dateString);
+        xsapi_internal_string input(dateString);
 
         struct tm output = tm();
 
@@ -632,7 +636,7 @@ namespace detail
         else
         {
             // Try to extract the fractional second from the timestamp
-            string_t input;
+            xsapi_internal_string input;
             extract_fractional_second(dateString, input, ufrac_second);
 
             auto result = strptime(input.data(), "%Y-%m-%dT%H:%M:%SZ", &output);
@@ -680,7 +684,7 @@ namespace detail
         static std::mutex env_var_lock;
         {
             std::lock_guard<std::mutex> lock(env_var_lock);
-            std::string prev_env;
+            xsapi_internal_string prev_env;
             auto prev_env_cstr = getenv("TZ");
             if (prev_env_cstr != nullptr)
             {
@@ -728,13 +732,13 @@ namespace detail
 #define H_SURROGATE_END 0xDBFF
 #define SURROGATE_PAIR_START 0x10000
 
-    utf16string convert::utf8_to_utf16(const std::string &s)
+    xsapi_internal_wstring convert::utf8_to_utf16(const xsapi_internal_string &s)
     {
 #if defined(CPPREST_STDLIB_UNICODE_CONVERSIONS)
         std::wstring_convert<std::codecvt_utf8_utf16<utf16char>, utf16char> conversion;
         return conversion.from_bytes(s);
 #else
-        utf16string dest;
+        xsapi_internal_wstring dest;
         // Save repeated heap allocations, use less than source string size assuming some
         // of the characters are not just ASCII and collapse.
         dest.reserve(static_cast<size_t>(static_cast<double>(s.size()) * .70));
@@ -743,7 +747,7 @@ namespace detail
         {
             if ((*src & BIT8) == 0) // single byte character, 0x0 to 0x7F
             {
-                dest.push_back(utf16string::value_type(*src));
+                dest.push_back(xsapi_internal_wstring::value_type(*src));
             }
             else
             {
@@ -794,15 +798,15 @@ namespace detail
                     //  - high surrogate is 0xD800 added to the top ten bits
                     //  - low surrogate is 0xDC00 added to the low ten bits
                     codePoint -= SURROGATE_PAIR_START;
-                    dest.push_back(utf16string::value_type((codePoint >> 10) | H_SURROGATE_START));
-                    dest.push_back(utf16string::value_type((codePoint & 0x3FF) | L_SURROGATE_START));
+                    dest.push_back(xsapi_internal_wstring::value_type((codePoint >> 10) | H_SURROGATE_START));
+                    dest.push_back(xsapi_internal_wstring::value_type((codePoint & 0x3FF) | L_SURROGATE_START));
                 }
                 else
                 {
                     // In UTF-16 U+0000 to U+D7FF and U+E000 to U+FFFF are represented exactly as the Unicode code point value.
                     // U+D800 to U+DFFF are not valid characters, for simplicity we assume they are not present but will encode
                     // them if encountered.
-                    dest.push_back(utf16string::value_type(codePoint));
+                    dest.push_back(xsapi_internal_wstring::value_type(codePoint));
                 }
             }
         }
@@ -810,11 +814,11 @@ namespace detail
 #endif
     }
 
-    std::string convert::to_utf8string(std::string value) { return value; }
+    xsapi_internal_string convert::to_utf8string(xsapi_internal_string value) { return value; }
 
-    std::string convert::to_utf8string(const utf16string &value) { return utf16_to_utf8(value); }
+    xsapi_internal_string convert::to_utf8string(const xsapi_internal_wstring &value) { return utf16_to_utf8_internal(value); }
 
-    std::string convert::utf16_to_utf8(const utf16string &w)
+    std::string convert::utf16_to_utf8(const std::wstring &w)
     {
 #if defined(CPPREST_STDLIB_UNICODE_CONVERSIONS)
         std::wstring_convert<std::codecvt_utf8_utf16<utf16char>, utf16char> conversion;
@@ -878,16 +882,71 @@ namespace detail
 #endif
     }
 
-    string_t convert::to_string_t(const std::string &s)
+    xsapi_internal_string convert::utf16_to_utf8_internal(const xsapi_internal_wstring &w)
     {
-#ifdef _UTF16_STRINGS
-        return utf8_to_utf16(s);
+#if defined(CPPREST_STDLIB_UNICODE_CONVERSIONS)
+        std::wstring_convert<std::codecvt_utf8_utf16<utf16char>, utf16char> conversion;
+        return conversion.to_bytes(w);
 #else
-        return s;
+        xsapi_internal_string dest;
+        dest.reserve(w.size());
+        for (auto src = w.begin(); src != w.end(); ++src)
+        {
+            // Check for high surrogate.
+            if (*src >= H_SURROGATE_START && *src <= H_SURROGATE_END)
+            {
+                const auto highSurrogate = *src++;
+                if (src == w.end())
+                {
+                    throw std::range_error("UTF-16 string is missing low surrogate");
+                }
+                const auto lowSurrogate = *src;
+                if (lowSurrogate < L_SURROGATE_START || lowSurrogate > L_SURROGATE_END)
+                {
+                    throw std::range_error("UTF-16 string has invalid low surrogate");
+                }
+
+                // To get from surrogate pair to Unicode code point:
+                // - subract 0xD800 from high surrogate, this forms top ten bits
+                // - subract 0xDC00 from low surrogate, this forms low ten bits
+                // - add 0x10000
+                // Leaves a code point in U+10000 to U+10FFFF range.
+                uint32_t codePoint = highSurrogate - H_SURROGATE_START;
+                codePoint <<= 10;
+                codePoint |= lowSurrogate - L_SURROGATE_START;
+                codePoint += SURROGATE_PAIR_START;
+
+                // 4 bytes need using 21 bits
+                dest.push_back(char((codePoint >> 18) | 0xF0));                 // leading 3 bits
+                dest.push_back(char(((codePoint >> 12) & LOW_6BITS) | BIT8));   // next 6 bits
+                dest.push_back(char(((codePoint >> 6) & LOW_6BITS) | BIT8));    // next 6 bits
+                dest.push_back(char((codePoint & LOW_6BITS) | BIT8));           // trailing 6 bits
+            }
+            else
+            {
+                if (*src <= 0x7F) // single byte character
+                {
+                    dest.push_back(static_cast<char>(*src));
+                }
+                else if (*src <= 0x7FF) // 2 bytes needed (11 bits used)
+                {
+                    dest.push_back(char((*src >> 6) | 0xC0));               // leading 5 bits
+                    dest.push_back(char((*src & LOW_6BITS) | BIT8));        // trailing 6 bits
+                }
+                else // 3 bytes needed (16 bits used)
+                {
+                    dest.push_back(char((*src >> 12) | 0xE0));              // leading 4 bits
+                    dest.push_back(char(((*src >> 6) & LOW_6BITS) | BIT8)); // middle 6 bits
+                    dest.push_back(char((*src & LOW_6BITS) | BIT8));        // trailing 6 bits
+                }
+            }
+        }
+
+        return dest;
 #endif
     }
 
-    String convert::to_base64(const Vector<unsigned char>& input)
+    xsapi_internal_string convert::to_base64(const Vector<unsigned char>& input)
     {
         if (input.size() == 0)
         {
@@ -895,10 +954,10 @@ namespace detail
             return String();
         }
 
-        return utils::internal_string_from_string_t(detail::_to_base64(&input[0], input.size()));
+        return detail::_to_base64(&input[0], input.size());
     }
 
-    std::vector<unsigned char> convert::from_base64(const string_t& str)
+    std::vector<unsigned char> convert::from_base64(const xsapi_internal_string& str)
     {
         return detail::_from_base64(str);
     }
@@ -931,6 +990,7 @@ namespace detail
 
         std::string windows_category_impl::message(int errorCode) const CPPREST_NOEXCEPT
         {
+#if 0 // this returns a non-mem hooked string which can't be changed so commenting it out since its not really needed
             const size_t buffer_size = 4096;
             DWORD dwFlags = FORMAT_MESSAGE_FROM_SYSTEM;
             LPCVOID lpSource = NULL;
@@ -960,8 +1020,11 @@ namespace detail
                 os << "Unable to get an error message for error code: " << errorCode << ".";
                 return os.str();
             }
-
             return convert::to_utf8string(buffer);
+#else
+            UNREFERENCED_PARAMETER(errorCode);
+            return std::string();
+#endif
         }
 
         std::error_condition windows_category_impl::default_error_condition(int errorCode) const CPPREST_NOEXCEPT
@@ -1023,61 +1086,63 @@ namespace services
 {
     namespace details
     {
-        string_t uri_components::join()
+        xsapi_internal_string uri_components::join()
         {
             // canonicalize components first
 
             // convert scheme to lowercase
-            std::transform(m_scheme.begin(), m_scheme.end(), m_scheme.begin(), [](char_t c) {
-                return (char_t)tolower(c);
+            std::transform(m_scheme.begin(), m_scheme.end(), m_scheme.begin(), [](char c) {
+                return (char)tolower(c);
                 });
 
             // convert host to lowercase
-            std::transform(m_host.begin(), m_host.end(), m_host.begin(), [](char_t c) {
-                return (char_t)tolower(c);
+            std::transform(m_host.begin(), m_host.end(), m_host.begin(), [](char c) {
+                return (char)tolower(c);
                 });
 
             // canonicalize the path to have a leading slash if it's a full uri
             if (!m_host.empty() && m_path.empty())
             {
-                m_path = _XPLATSTR("/");
+                m_path = "/";
             }
-            else if (!m_host.empty() && m_path[0] != _XPLATSTR('/'))
+            else if (!m_host.empty() && m_path[0] != '/')
             {
-                m_path.insert(m_path.begin(), 1, _XPLATSTR('/'));
+                m_path.insert(m_path.begin(), 1, '/');
             }
 
-            string_t ret;
+            xsapi_internal_string ret;
 
 #if (defined(_MSC_VER) && (_MSC_VER >= 1800))
             if (!m_scheme.empty())
             {
-                ret.append(m_scheme).append({ _XPLATSTR(':') });
+                ret.append(m_scheme).append({ ':' });
             }
 
             if (!m_host.empty())
             {
-                ret.append(_XPLATSTR("//"));
+                ret.append("//");
 
                 if (!m_user_info.empty())
                 {
-                    ret.append(m_user_info).append({ _XPLATSTR('@') });
+                    ret.append(m_user_info).append({ '@' });
                 }
 
                 ret.append(m_host);
 
                 if (m_port > 0)
                 {
-                    ret.append({ _XPLATSTR(':') }).append(convert::print_string(m_port, std::locale::classic()));
+                    char buf[16] = { 0 };
+                    sprintf_s(buf, sizeof(buf), ":%d", m_port);
+                    ret.append(buf);
                 }
             }
 
             if (!m_path.empty())
             {
                 // only add the leading slash when the host is present
-                if (!m_host.empty() && m_path.front() != _XPLATSTR('/'))
+                if (!m_host.empty() && m_path.front() != '/')
                 {
-                    ret.append({ _XPLATSTR('/') });
+                    ret.append({ '/' });
                 }
 
                 ret.append(m_path);
@@ -1085,59 +1150,59 @@ namespace services
 
             if (!m_query.empty())
             {
-                ret.append({ _XPLATSTR('?') }).append(m_query);
+                ret.append({ '?' }).append(m_query);
             }
 
             if (!m_fragment.empty())
             {
-                ret.append({ _XPLATSTR('#') }).append(m_fragment);
+                ret.append({ '#' }).append(m_fragment);
             }
 
             return ret;
 #else
-            ostringstream_t os;
+            xsapi_internal_ostringstream_t os;
             os.imbue(std::locale::classic());
 
             if (!m_scheme.empty())
             {
-                os << m_scheme << _XPLATSTR(':');
+                os << m_scheme << ':';
             }
 
             if (!m_host.empty())
             {
-                os << _XPLATSTR("//");
+                os << "//";
 
                 if (!m_user_info.empty())
                 {
-                    os << m_user_info << _XPLATSTR('@');
+                    os << m_user_info << '@';
                 }
 
                 os << m_host;
 
                 if (m_port > 0)
                 {
-                    os << _XPLATSTR(':') << m_port;
+                    os << ':' << m_port;
                 }
             }
 
             if (!m_path.empty())
             {
                 // only add the leading slash when the host is present
-                if (!m_host.empty() && m_path.front() != _XPLATSTR('/'))
+                if (!m_host.empty() && m_path.front() != '/')
                 {
-                    os << _XPLATSTR('/');
+                    os << '/';
                 }
                 os << m_path;
             }
 
             if (!m_query.empty())
             {
-                os << _XPLATSTR('?') << m_query;
+                os << '?' << m_query;
             }
 
             if (!m_fragment.empty())
             {
-                os << _XPLATSTR('#') << m_fragment;
+                os << '#' << m_fragment;
             }
 
             return os.str();
@@ -1147,21 +1212,21 @@ namespace services
         namespace uri_parser
         {
 
-            bool validate(const string_t& encoded_string)
+            bool validate(const xsapi_internal_string& encoded_string)
             {
-                const char_t* scheme_begin = nullptr;
-                const char_t* scheme_end = nullptr;
-                const char_t* uinfo_begin = nullptr;
-                const char_t* uinfo_end = nullptr;
-                const char_t* host_begin = nullptr;
-                const char_t* host_end = nullptr;
+                const char* scheme_begin = nullptr;
+                const char* scheme_end = nullptr;
+                const char* uinfo_begin = nullptr;
+                const char* uinfo_end = nullptr;
+                const char* host_begin = nullptr;
+                const char* host_end = nullptr;
                 int port_ptr = 0;
-                const char_t* path_begin = nullptr;
-                const char_t* path_end = nullptr;
-                const char_t* query_begin = nullptr;
-                const char_t* query_end = nullptr;
-                const char_t* fragment_begin = nullptr;
-                const char_t* fragment_end = nullptr;
+                const char* path_begin = nullptr;
+                const char* path_end = nullptr;
+                const char* query_begin = nullptr;
+                const char* query_end = nullptr;
+                const char* fragment_begin = nullptr;
+                const char* fragment_end = nullptr;
 
                 // perform a parse, but don't copy out the data
                 return inner_parse(
@@ -1181,21 +1246,21 @@ namespace services
                     &fragment_end);
             }
 
-            bool parse(const string_t& encoded_string, uri_components& components)
+            bool parse(const xsapi_internal_string& encoded_string, uri_components& components)
             {
-                const char_t* scheme_begin = nullptr;
-                const char_t* scheme_end = nullptr;
-                const char_t* host_begin = nullptr;
-                const char_t* host_end = nullptr;
-                const char_t* uinfo_begin = nullptr;
-                const char_t* uinfo_end = nullptr;
+                const char* scheme_begin = nullptr;
+                const char* scheme_end = nullptr;
+                const char* host_begin = nullptr;
+                const char* host_end = nullptr;
+                const char* uinfo_begin = nullptr;
+                const char* uinfo_end = nullptr;
                 int port_ptr = 0;
-                const char_t* path_begin = nullptr;
-                const char_t* path_end = nullptr;
-                const char_t* query_begin = nullptr;
-                const char_t* query_end = nullptr;
-                const char_t* fragment_begin = nullptr;
-                const char_t* fragment_end = nullptr;
+                const char* path_begin = nullptr;
+                const char* path_end = nullptr;
+                const char* query_begin = nullptr;
+                const char* query_end = nullptr;
+                const char* fragment_begin = nullptr;
+                const char* fragment_end = nullptr;
 
                 if (inner_parse(
                     encoded_string.c_str(),
@@ -1218,8 +1283,8 @@ namespace services
                         components.m_scheme.assign(scheme_begin, scheme_end);
 
                         // convert scheme to lowercase
-                        std::transform(components.m_scheme.begin(), components.m_scheme.end(), components.m_scheme.begin(), [](char_t c) {
-                            return (char_t)tolower(c);
+                        std::transform(components.m_scheme.begin(), components.m_scheme.end(), components.m_scheme.begin(), [](char c) {
+                            return (char)tolower(c);
                             });
                     }
                     else
@@ -1237,8 +1302,8 @@ namespace services
                         components.m_host.assign(host_begin, host_end);
 
                         // convert host to lowercase
-                        std::transform(components.m_host.begin(), components.m_host.end(), components.m_host.begin(), [](char_t c) {
-                            return (char_t)tolower(c);
+                        std::transform(components.m_host.begin(), components.m_host.end(), components.m_host.begin(), [](char c) {
+                            return (char)tolower(c);
                             });
                     }
                     else
@@ -1262,7 +1327,7 @@ namespace services
                     else
                     {
                         // default path to begin with a slash for easy comparison
-                        components.m_path = _XPLATSTR("/");
+                        components.m_path = "/";
                     }
 
                     if (query_begin)
@@ -1292,14 +1357,14 @@ namespace services
             }
 
             bool inner_parse(
-                const char_t* encoded,
-                const char_t** scheme_begin, const char_t** scheme_end,
-                const char_t** uinfo_begin, const char_t** uinfo_end,
-                const char_t** host_begin, const char_t** host_end,
+                const char* encoded,
+                const char** scheme_begin, const char** scheme_end,
+                const char** uinfo_begin, const char** uinfo_end,
+                const char** host_begin, const char** host_end,
                 _Out_ int* port,
-                const char_t** path_begin, const char_t** path_end,
-                const char_t** query_begin, const char_t** query_end,
-                const char_t** fragment_begin, const char_t** fragment_end)
+                const char** path_begin, const char** path_end,
+                const char** query_begin, const char** query_end,
+                const char** fragment_begin, const char** fragment_end)
             {
                 *scheme_begin = nullptr;
                 *scheme_end = nullptr;
@@ -1315,7 +1380,7 @@ namespace services
                 *fragment_begin = nullptr;
                 *fragment_end = nullptr;
 
-                const char_t* p = encoded;
+                const char* p = encoded;
 
                 // IMPORTANT -- A uri may either be an absolute uri, or an relative-reference
                 // Absolute: 'http://host.com'
@@ -1323,10 +1388,10 @@ namespace services
                 // A Relative-Reference can be disambiguated by parsing for a ':' before the first slash
 
                 bool is_relative_reference = true;
-                const char_t* p2 = p;
-                for (; *p2 != _XPLATSTR('/') && *p2 != _XPLATSTR('\0'); p2++)
+                const char* p2 = p;
+                for (; *p2 != '/' && *p2 != '\0'; p2++)
                 {
-                    if (*p2 == _XPLATSTR(':'))
+                    if (*p2 == ':')
                     {
                         // found a colon, the first portion is a scheme
                         is_relative_reference = false;
@@ -1359,9 +1424,9 @@ namespace services
 
                 // if we see two slashes next, then we're going to parse the authority portion
                 // later on we'll break up the authority into the port and host
-                const char_t* authority_begin = nullptr;
-                const char_t* authority_end = nullptr;
-                if (*p == _XPLATSTR('/') && p[1] == _XPLATSTR('/'))
+                const char* authority_begin = nullptr;
+                const char* authority_end = nullptr;
+                if (*p == '/' && p[1] == '/')
                 {
                     // skip over the slashes
                     p += 2;
@@ -1369,7 +1434,7 @@ namespace services
 
                     // the authority is delimited by a slash (resource), question-mark (query) or octothorpe (fragment)
                     // or by EOS. The authority could be empty ('file:///C:\file_name.txt')
-                    for (; *p != _XPLATSTR('/') && *p != _XPLATSTR('?') && *p != _XPLATSTR('#') && *p != _XPLATSTR('\0'); p++)
+                    for (; *p != '/' && *p != '?' && *p != '#' && *p != '\0'; p++)
                     {
                         // We're NOT currently supporting IPv6, IPvFuture or username/password in authority
                         if (!is_authority_character(*p))
@@ -1383,12 +1448,12 @@ namespace services
                     if (authority_begin != authority_end)
                     {
                         // the port is made up of all digits
-                        const char_t* port_begin = authority_end - 1;
+                        const char* port_begin = authority_end - 1;
                         for (; isdigit(*port_begin) && port_begin != authority_begin; port_begin--)
                         {
                         }
 
-                        if (*port_begin == _XPLATSTR(':'))
+                        if (*port_begin == ':')
                         {
                             // has a port
                             *host_begin = authority_begin;
@@ -1397,7 +1462,7 @@ namespace services
                             //skip the colon
                             port_begin++;
 
-                            *port = convert::scan_string<int>(string_t(port_begin, authority_end), std::locale::classic());
+                            *port = convert::scan_string<int>(xsapi_internal_string(port_begin, authority_end), std::locale::classic());
                         }
                         else
                         {
@@ -1407,12 +1472,12 @@ namespace services
                         }
 
                         // look for a user_info component
-                        const char_t* u_end = *host_begin;
+                        const char* u_end = *host_begin;
                         for (; is_user_info_character(*u_end) && u_end != *host_end; u_end++)
                         {
                         }
 
-                        if (*u_end == _XPLATSTR('@'))
+                        if (*u_end == '@')
                         {
                             *host_begin = u_end + 1;
                             *uinfo_begin = authority_begin;
@@ -1427,12 +1492,12 @@ namespace services
 
                 // if we see a path character or a slash, then the
                 // if we see a slash, or any other legal path character, parse the path next
-                if (*p == _XPLATSTR('/') || is_path_character(*p))
+                if (*p == '/' || is_path_character(*p))
                 {
                     *path_begin = p;
 
                     // the path is delimited by a question-mark (query) or octothorpe (fragment) or by EOS
-                    for (; *p != _XPLATSTR('?') && *p != _XPLATSTR('#') && *p != _XPLATSTR('\0'); p++)
+                    for (; *p != '?' && *p != '#' && *p != '\0'; p++)
                     {
                         if (!is_path_character(*p))
                         {
@@ -1443,14 +1508,14 @@ namespace services
                 }
 
                 // if we see a ?, then the query is next
-                if (*p == _XPLATSTR('?'))
+                if (*p == '?')
                 {
                     // skip over the question mark
                     p++;
                     *query_begin = p;
 
                     // the query is delimited by a '#' (fragment) or EOS
-                    for (; *p != _XPLATSTR('#') && *p != _XPLATSTR('\0'); p++)
+                    for (; *p != '#' && *p != '\0'; p++)
                     {
                         if (!is_query_character(*p))
                         {
@@ -1461,14 +1526,14 @@ namespace services
                 }
 
                 // if we see a #, then the fragment is next
-                if (*p == _XPLATSTR('#'))
+                if (*p == '#')
                 {
                     // skip over the hash mark
                     p++;
                     *fragment_begin = p;
 
                     // the fragment is delimited by EOS
-                    for (; *p != _XPLATSTR('\0'); p++)
+                    for (; *p != '\0'; p++)
                     {
                         if (!is_fragment_character(*p))
                         {
@@ -1497,7 +1562,7 @@ namespace services
         }
     }
 
-    uri::uri(const string_t& uri_string)
+    uri::uri(const xsapi_internal_string& uri_string)
     {
         if (!details::uri_parser::parse(uri_string, m_components))
         {
@@ -1506,7 +1571,7 @@ namespace services
         m_uri = m_components.join();
     }
 
-    uri::uri(const char_t* uri_string) : m_uri(uri_string)
+    uri::uri(const char* uri_string) : m_uri(uri_string)
     {
         if (!details::uri_parser::parse(uri_string, m_components))
         {
@@ -1515,11 +1580,10 @@ namespace services
         m_uri = m_components.join();
     }
 
-    string_t uri::encode_impl(const string_t& raw, const std::function<bool(int)>& should_encode)
+    xsapi_internal_string uri::encode_impl(const xsapi_internal_string& utf8raw, const std::function<bool(int)>& should_encode)
     {
-        const char_t* const hex = _XPLATSTR("0123456789ABCDEF");
-        string_t encoded;
-        std::string utf8raw = convert::to_utf8string(raw);
+        const char* const hex = "0123456789ABCDEF";
+        xsapi_internal_string encoded;
         for (auto iter = utf8raw.begin(); iter != utf8raw.end(); ++iter)
         {
             // for utf8 encoded string, char ASCII can be greater than 127.
@@ -1527,14 +1591,14 @@ namespace services
             // ch should be same under both utf8 and utf16.
             if (should_encode(ch))
             {
-                encoded.push_back(_XPLATSTR('%'));
+                encoded.push_back('%');
                 encoded.push_back(hex[(ch >> 4) & 0xF]);
                 encoded.push_back(hex[ch & 0xF]);
             }
             else
             {
                 // ASCII don't need to be encoded, which should be same on both utf8 and utf16.
-                encoded.push_back((char_t)ch);
+                encoded.push_back((char)ch);
             }
         }
         return encoded;
@@ -1544,7 +1608,7 @@ namespace services
     /// Encodes a string by converting all characters except for RFC 3986 unreserved characters to their
     /// hexadecimal representation.
     /// </summary>
-    string_t uri::encode_data_string(const string_t& raw)
+    xsapi_internal_string uri::encode_data_string(const xsapi_internal_string& raw)
     {
         return uri::encode_impl(raw, [](int ch) -> bool
             {
@@ -1552,7 +1616,7 @@ namespace services
             });
     }
 
-    string_t uri::encode_uri(const string_t& raw, uri::components::component component)
+    xsapi_internal_string uri::encode_uri(const xsapi_internal_string& raw, uri::components::component component)
     {
         // Note: we also encode the '+' character because some non-standard implementations
         // encode the space character as a '+' instead of %20. To better interoperate we encode
@@ -1624,12 +1688,12 @@ namespace services
         return decimal;
     }
 
-    string_t uri::decode(const string_t& encoded)
+    xsapi_internal_string uri::decode(const xsapi_internal_string& encoded)
     {
-        std::string utf8raw;
+        xsapi_internal_string utf8raw;
         for (auto iter = encoded.begin(); iter != encoded.end(); ++iter)
         {
-            if (*iter == _XPLATSTR('%'))
+            if (*iter == '%')
             {
                 if (++iter == encoded.end())
                 {
@@ -1650,17 +1714,17 @@ namespace services
                 utf8raw.push_back(reinterpret_cast<const char&>(*iter));
             }
         }
-        return convert::to_string_t(utf8raw);
+        return utf8raw;
     }
 
-    std::vector<string_t> uri::split_path(const string_t& path)
+    std::vector<xsapi_internal_string> uri::split_path(const xsapi_internal_string& path)
     {
-        std::vector<string_t> results;
-        istringstream_t iss(path);
+        std::vector<xsapi_internal_string> results;
+        xsapi_internal_istringstream iss(path);
         iss.imbue(std::locale::classic());
-        string_t s;
+        xsapi_internal_string s;
 
-        while (std::getline(iss, s, _XPLATSTR('/')))
+        while (std::getline(iss, s, '/'))
         {
             if (!s.empty())
             {
@@ -1671,37 +1735,37 @@ namespace services
         return results;
     }
 
-    std::map<string_t, string_t> uri::split_query(const string_t& query)
+    std::map<xsapi_internal_string, xsapi_internal_string> uri::split_query(const xsapi_internal_string& query)
     {
-        std::map<string_t, string_t> results;
+        std::map<xsapi_internal_string, xsapi_internal_string> results;
 
         // Split into key value pairs separated by '&'.
         size_t prev_amp_index = 0;
-        while (prev_amp_index != string_t::npos)
+        while (prev_amp_index != xsapi_internal_string::npos)
         {
-            size_t amp_index = query.find_first_of(_XPLATSTR('&'), prev_amp_index);
-            if (amp_index == string_t::npos)
-                amp_index = query.find_first_of(_XPLATSTR(';'), prev_amp_index);
+            size_t amp_index = query.find_first_of('&', prev_amp_index);
+            if (amp_index == xsapi_internal_string::npos)
+                amp_index = query.find_first_of(';', prev_amp_index);
 
-            string_t key_value_pair = query.substr(
+            xsapi_internal_string key_value_pair = query.substr(
                 prev_amp_index,
-                amp_index == string_t::npos ? query.size() - prev_amp_index : amp_index - prev_amp_index);
-            prev_amp_index = amp_index == string_t::npos ? string_t::npos : amp_index + 1;
+                amp_index == xsapi_internal_string::npos ? query.size() - prev_amp_index : amp_index - prev_amp_index);
+            prev_amp_index = amp_index == xsapi_internal_string::npos ? xsapi_internal_string::npos : amp_index + 1;
 
-            size_t equals_index = key_value_pair.find_first_of(_XPLATSTR('='));
-            if (equals_index == string_t::npos)
+            size_t equals_index = key_value_pair.find_first_of('=');
+            if (equals_index == xsapi_internal_string::npos)
             {
                 continue;
             }
             else if (equals_index == 0)
             {
-                string_t value(key_value_pair.begin() + equals_index + 1, key_value_pair.end());
-                results[_XPLATSTR("")] = value;
+                xsapi_internal_string value(key_value_pair.begin() + equals_index + 1, key_value_pair.end());
+                results[""] = value;
             }
             else
             {
-                string_t key(key_value_pair.begin(), key_value_pair.begin() + equals_index);
-                string_t value(key_value_pair.begin() + equals_index + 1, key_value_pair.end());
+                xsapi_internal_string key(key_value_pair.begin(), key_value_pair.begin() + equals_index);
+                xsapi_internal_string value(key_value_pair.begin() + equals_index + 1, key_value_pair.end());
                 results[key] = value;
             }
         }
@@ -1709,7 +1773,7 @@ namespace services
         return results;
     }
 
-    bool uri::validate(const string_t& uri_string)
+    bool uri::validate(const xsapi_internal_string& uri_string)
     {
         return uri_parser::validate(uri_string);
     }
@@ -1772,34 +1836,34 @@ namespace services
     }
 
 
-    uri_builder& uri_builder::append_path(const string_t& path, bool is_encode)
+    uri_builder& uri_builder::append_path(const xsapi_internal_string& path, bool is_encode)
     {
-        if (path.empty() || path == _XPLATSTR("/"))
+        if (path.empty() || path == "/")
         {
             return *this;
         }
 
         auto encoded_path = is_encode ? uri::encode_uri(path, uri::components::path) : path;
         auto thisPath = this->path();
-        if (thisPath.empty() || thisPath == _XPLATSTR("/"))
+        if (thisPath.empty() || thisPath == "/")
         {
-            if (encoded_path.front() != _XPLATSTR('/'))
+            if (encoded_path.front() != '/')
             {
-                set_path(_XPLATSTR("/") + encoded_path);
+                set_path("/" + encoded_path);
             }
             else
             {
                 set_path(encoded_path);
             }
         }
-        else if (thisPath.back() == _XPLATSTR('/') && encoded_path.front() == _XPLATSTR('/'))
+        else if (thisPath.back() == '/' && encoded_path.front() == '/')
         {
             thisPath.pop_back();
             set_path(thisPath + encoded_path);
         }
-        else if (thisPath.back() != _XPLATSTR('/') && encoded_path.front() != _XPLATSTR('/'))
+        else if (thisPath.back() != '/' && encoded_path.front() != '/')
         {
-            set_path(thisPath + _XPLATSTR("/") + encoded_path);
+            set_path(thisPath + "/" + encoded_path);
         }
         else
         {
@@ -1809,7 +1873,7 @@ namespace services
         return *this;
     }
 
-    uri_builder& uri_builder::append_query(const string_t& query, bool is_encode)
+    uri_builder& uri_builder::append_query(const xsapi_internal_string& query, bool is_encode)
     {
         if (query.empty())
         {
@@ -1822,14 +1886,14 @@ namespace services
         {
             this->set_query(encoded_query);
         }
-        else if (thisQuery.back() == _XPLATSTR('&') && encoded_query.front() == _XPLATSTR('&'))
+        else if (thisQuery.back() == '&' && encoded_query.front() == '&')
         {
             thisQuery.pop_back();
             this->set_query(thisQuery + encoded_query);
         }
-        else if (thisQuery.back() != _XPLATSTR('&') && encoded_query.front() != _XPLATSTR('&'))
+        else if (thisQuery.back() != '&' && encoded_query.front() != '&')
         {
-            this->set_query(thisQuery + _XPLATSTR("&") + encoded_query);
+            this->set_query(thisQuery + "&" + encoded_query);
         }
         else
         {
@@ -1847,7 +1911,7 @@ namespace services
         return *this;
     }
 
-    string_t uri_builder::to_string()
+    xsapi_internal_string uri_builder::to_string()
     {
         return to_uri().to_string();
     }

@@ -76,7 +76,7 @@ private:
     User(XblUserHandle userHandle) noexcept;
 
     HRESULT InitializeUser() noexcept;
-    Result<String> GetGamertagComponent(XalGamertagComponent component) const noexcept;
+    Result<String> GetGamertagComponent(XalGamertagComponent component) const noexcept;	
     XblUserHandle m_handle{ nullptr };
     mutable uint64_t m_xuid;
     mutable XalUserLocalId m_localId;

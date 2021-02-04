@@ -34,50 +34,50 @@ private:
             [
                 &people
             ]
-        (HttpMock* mock, std::string requestUrl, std::string requestBody)
+        (HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 assert(requestBody.empty());
 
-                xbox::services::uri url(Utils::StringTFromUtf8(requestUrl.data()).data());
+                xbox::services::uri url(requestUrl.data());
                 auto queryParams = url.split_query(url.query());
 
                 size_t startIndex{ 0 };
                 size_t maxItems{ people.size() };
-                std::wstring view{ L"All" };
+                xsapi_internal_string view{ "All" };
 
-                if (queryParams.find(L"startIndex") != queryParams.end())
+                if (queryParams.find("startIndex") != queryParams.end())
                 {
-                    startIndex = Utils::Uint64FromStringT(queryParams[L"startIndex"]);
+                    startIndex = _atoi64(queryParams["startIndex"].c_str());
                 }
-                if (queryParams.find(L"maxItems") != queryParams.end())
+                if (queryParams.find("maxItems") != queryParams.end())
                 {
-                    maxItems = Utils::Uint64FromStringT(queryParams[L"maxItems"]);
+                    maxItems = _atoi64(queryParams["maxItems"].c_str());
                 }
-                if (queryParams.find(L"view") != queryParams.end())
+                if (queryParams.find("view") != queryParams.end())
                 {
-                    view = queryParams[L"view"];
+                    view = queryParams["view"];
                 }
 
                 std::vector<SocialRelationship> filteredPeople;
                 std::copy_if(people.begin(), people.end(), std::back_inserter(filteredPeople),
                     [&](const SocialRelationship& person)
                     {
-                        if (Utils::Stricmp(L"favorite", view) == 0)
+                        if (_stricmp("favorite", view.c_str()) == 0)
                         {
                             return person.isFavorite;
                         }
-                        else if (Utils::Stricmp(L"LegacyXboxLiveFriends", view) == 0)
+                        else if (_stricmp("LegacyXboxLiveFriends", view.c_str()) == 0)
                         {
                             auto iter = std::find_if(person.socialNetworks.begin(), person.socialNetworks.end(),
                                 [](const std::wstring& s)
                                 {
-                                    return Utils::Stricmp(s, L"LegacyXboxLive") == 0;
+                                    return _stricmp(convert::utf16_to_utf8(s).c_str(), "LegacyXboxLive") == 0;
                                 });
                             return iter != person.socialNetworks.end();
                         }
                         else
                         {
-                            assert(Utils::Stricmp(L"All", view) == 0);
+                            assert(_stricmp("All", view.c_str()) == 0);
                             return true;
                         }
                     });
@@ -298,9 +298,9 @@ private:
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };
 
-        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
         {
-            std::stringstream expectedUri;
+            xsapi_internal_stringstream expectedUri;
             expectedUri << "http://social.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/friends";
             VERIFY_ARE_EQUAL_STR(uri, expectedUri.str());
 
@@ -393,7 +393,7 @@ private:
 
         xboxLiveContext->real_time_activity_service()->activate();
 
-        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
         {
             mockRtaService.CompleteSubscribeHandshake(n);
 

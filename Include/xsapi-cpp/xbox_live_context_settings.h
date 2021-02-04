@@ -111,13 +111,13 @@ public:
     /// <summary>
     /// Gets the HTTP retry delay in seconds.
     ///
-    /// Retries are delayed using a exponential back off.  By default, it will delay 2 seconds then the 
+    /// Retries are delayed using an exponential back off.  By default, it will delay 2 seconds then the 
     /// next retry will delay 4 seconds, then 8 seconds, and so on up to a max of 1 min until either
     /// the call succeeds or the http_timeout_window is reached, at which point the call will fail.
     /// The delay is also jittered between the current and next delay to spread out service load.
     /// The default for http_timeout_window is 20 seconds and can be changed using set_http_timeout_window()
     /// 
-    /// If the service returns an an HTTP error with a "Retry-After" header, then all future calls to that API 
+    /// If the service returns an HTTP error with a "Retry-After" header, then all future calls to that API 
     /// will immediately fail with the original error without contacting the service until the "Retry-After" 
     /// time has been reached.
     ///
@@ -134,13 +134,13 @@ public:
     /// <summary>
     /// Sets the HTTP retry delay in seconds. The default and minimum delay is 2 seconds.
     /// 
-    /// Retries are delayed using a exponential back off.  By default, it will delay 2 seconds then the 
+    /// Retries are delayed using an exponential back off.  By default, it will delay 2 seconds then the 
     /// next retry will delay 4 seconds, then 8 seconds, and so on up to a max of 1 min until either
     /// the call succeeds or the http_timeout_window is reached, at which point the call will fail.
     /// The delay is also jittered between the current and next delay to spread out service load.
     /// The default for http_timeout_window is 20 seconds and can be changed using set_http_timeout_window()
     /// 
-    /// If the service returns an an HTTP error with a "Retry-After" header, then all future calls to that API 
+    /// If the service returns an HTTP error with a "Retry-After" header, then all future calls to that API 
     /// will immediately fail with the original error without contacting the service until the "Retry-After" 
     /// time has been reached.
     ///
@@ -211,7 +211,7 @@ public:
 
     /// <summary>
     /// Disables asserts for Xbox Live throttling in dev sandboxes.
-    /// The asserts will not fire in RETAIL sandbox, and this setting has has no affect in RETAIL sandboxes.
+    /// The asserts will not fire in RETAIL sandbox, and this setting has no affect in RETAIL sandboxes.
     /// It is best practice to not call this API, and instead adjust the calling pattern but this is provided
     /// as a temporary way to get unblocked while in early stages of game development.
     /// </summary>

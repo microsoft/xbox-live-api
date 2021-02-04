@@ -14,13 +14,20 @@
         "rem rt multiplayerManager\\MPM_Invite.lua",
         "rem rt multiplayerManager\\MPM_InviteUI.lua",
 
-        // single-device examples
+        // fault injection
+        "rem faultinjection options 1 7 1", // faultinjection options failFreq freqChangeSpeed freqChangeAmount
+        "rem faultinjection user", // "faultinjection" enables specific fault injection on specific features
+        "rem faultinjection http", // "faultinjection" enables specific fault injection on specific features
+
+        // mem hook tracking
+        "rem memtrack true", // result logged after runtests or rt command ends
+
+        // single-device command examples
+        "rem runbarescript misc\\global_state.lua", // "runbarescript" will run the script without any XBL/XAL initializtion for special test needs
         "rem rt achievements\\achievements_progress_notification.lua",
         "rem rt achievements\\achievements_manager_performance_test.lua",
         "rem rt achievements\\achievements_manager_update_achievements.lua",
         "rem rt gdk-gameinvite\\game-invite.lua", // rt will run a single test
-        "rem rt rta\\2HourTimeout.lua",
-        "rem rs misc\\global_state.lua", // "rs" will run the script without any initializtion for special test needs
         "rem repeat social\\social_manager_2.lua", // "repeat" will repeat this single test without cleanup forever
         "rem loop", // "loop" will loop the entire cmds.json file including cleanup, forever
         "runtests" // "runtests" will run all the single-device tests

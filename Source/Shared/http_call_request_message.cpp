@@ -19,16 +19,16 @@ http_call_request_message::http_call_request_message(
     ) :
     m_httpRequestMessageType(internalObj->get_http_request_message_type())
 {
-    m_requestMessageString = utils::string_t_from_internal_string(internalObj->request_message_string());
-    m_requestMessageVector = utils::std_vector_from_internal_vector<unsigned char>(internalObj->request_message_vector());
+    m_requestMessageString = internalObj->request_message_string();
+    m_requestMessageVector = internalObj->request_message_vector();
 }
 
-const string_t& http_call_request_message::request_message_string() const
+const xsapi_internal_string& http_call_request_message::request_message_string() const
 {
     return m_requestMessageString;
 }
 
-const std::vector<unsigned char>& http_call_request_message::request_message_vector() const
+const xsapi_internal_vector<unsigned char>& http_call_request_message::request_message_vector() const
 {
     return m_requestMessageVector;
 }

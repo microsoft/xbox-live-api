@@ -28,7 +28,7 @@ HRESULT TitleManagedStatisticsService::WriteTitleManagedStatisticsAsync(
     request.AddMember("$schema", "http://stats.xboxlive.com/2017-1/schema#", allocator);
     request.AddMember("previousRevision", 0, allocator);
     request.AddMember("revision", GetRevisionFromClock(), allocator);
-    request.AddMember("timestamp", JsonValue(utils::internal_string_from_string_t(xbox::services::datetime::utc_now().to_string(xbox::services::datetime::date_format::ISO_8601)).c_str(), allocator).Move(), allocator);
+    request.AddMember("timestamp", JsonValue(xbox::services::datetime::utc_now().to_string(xbox::services::datetime::date_format::ISO_8601).c_str(), allocator).Move(), allocator);
 
     Result<User> userResult = m_user.Copy();
     RETURN_HR_IF_FAILED(userResult.Hresult());

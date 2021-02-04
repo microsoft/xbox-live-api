@@ -16,9 +16,8 @@
 
 #include <gamingtcui.h>
 #include <windows.system.h>
-#include "auth_config.h"
-#include "xbox_system_factory.h"
 #include "xsapi-cpp/title_callable_ui.h"
+#include "local_config.h"
 
 #define XBOX_APP_PFN _T("Microsoft.XboxApp_8wekyb3d8bbwe")
 #define XBOX_DEEPLINK_FRIEND_FINDER _T("xbox-friendfinder:facebook")
@@ -126,7 +125,7 @@ pplx::task <xbox_live_result<T>> create_exception_free_task(
             catch (Platform::Exception^ e)
             {
                 xbox_live_error_code errc = static_cast<xbox_live_error_code>(e->HResult);
-                return xbox_live_result<T>(errc, xbox::services::convert::to_utf8string(e->Message->Data()));
+                return xbox_live_result<T>(errc, xbox::services::convert::utf16_to_utf8(e->Message->Data()));
             }
 #endif
         });
@@ -599,17 +598,19 @@ void title_callable_ui::_Get_gaming_privilege_scope_policy(
     )
 {
     auto localConfig{ AppConfig::Instance()->LocalConfig() };
-    auth_config authConfig(
-        localConfig->sandbox(),
-        localConfig->environment_prefix(),
-        localConfig->environment(),
-        localConfig->use_first_party_token(),
-        localConfig->is_creators_title(),
-        localConfig->scope()
-        );
 
-    scope = PLATFORM_STRING_FROM_INTERNAL_STRING(authConfig.rps_ticket_service());
-    policy = PLATFORM_STRING_FROM_INTERNAL_STRING(authConfig.rps_ticket_policy());
+    String rpsTicketService{ localConfig->scope() };
+    if (!localConfig->is_creators_title() && localConfig->use_first_party_token())
+    {
+        Stringstream ss;
+        ss << "open-user.auth" << localConfig->environment() << ".xboxlive.com";
+        rpsTicketService = ss.str();
+    }
+
+    String rpsTicketPolicy{ localConfig->use_first_party_token() ? "MBI_SSL" : "DELEGATION" };
+
+    scope = PLATFORM_STRING_FROM_INTERNAL_STRING(rpsTicketService);
+    policy = PLATFORM_STRING_FROM_INTERNAL_STRING(rpsTicketPolicy);
 }
 
 xbox::services::xbox_live_result<bool> title_callable_ui::check_gaming_privilege_silently(

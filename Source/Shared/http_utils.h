@@ -2,6 +2,7 @@
 
 #include <string>
 #include <sstream>
+#include <functional>
 
 #ifndef _WIN32
 # define __STDC_LIMIT_MACROS
@@ -64,7 +65,7 @@ namespace services
 
     typedef char utf8char;
     typedef std::string utf8string;
-    typedef std::stringstream utf8stringstream;
+    typedef xsapi_internal_stringstream utf8stringstream;
     typedef std::ostringstream utf8ostringstream;
     typedef std::ostream utf8ostream;
     typedef std::istream utf8istream;
@@ -72,16 +73,12 @@ namespace services
 
 #ifdef _UTF16_STRINGS
     typedef wchar_t utf16char;
-    typedef std::wstring utf16string;
-    typedef std::wstringstream utf16stringstream;
     typedef std::wostringstream utf16ostringstream;
     typedef std::wostream utf16ostream;
     typedef std::wistream utf16istream;
     typedef std::wistringstream utf16istringstream;
 #else
     typedef char16_t utf16char;
-    typedef std::u16string utf16string;
-    typedef std::basic_stringstream<utf16char> utf16stringstream;
     typedef std::basic_ostringstream<utf16char> utf16ostringstream;
     typedef std::basic_ostream<utf16char> utf16ostream;
     typedef std::basic_istream<utf16char> utf16istream;
@@ -133,12 +130,12 @@ namespace services
         /// Creates <c>datetime</c> from a string representing time in UTC in RFC 1123 format.
         /// </summary>
         /// <returns>Returns a <c>datetime</c> of zero if not successful.</returns>
-        static datetime from_string(const string_t& timestring, date_format format = RFC_1123);
+        static datetime from_string(const xsapi_internal_string& timestring, date_format format = RFC_1123);
 
         /// <summary>
         /// Returns a string representation of the <c>datetime</c>.
         /// </summary>
-        string_t to_string(date_format format = RFC_1123) const;
+        xsapi_internal_string to_string(date_format format = RFC_1123) const;
 
         /// <summary>
         /// Returns the integral time value.
@@ -243,35 +240,36 @@ namespace services
         /// </summary>
         /// <param name="w">A two byte character UTF-16 string.</param>
         /// <returns>A single byte character UTF-8 string.</returns>
-        std::string utf16_to_utf8(const utf16string &w);
+        xsapi_internal_string utf16_to_utf8_internal(const xsapi_internal_wstring &w);
+        std::string utf16_to_utf8(const std::wstring &w);
 
         /// <summary>
         /// Converts a UTF-8 string to a UTF-16
         /// </summary>
         /// <param name="s">A single byte character UTF-8 string.</param>
         /// <returns>A two byte character UTF-16 string.</returns>
-        utf16string utf8_to_utf16(const std::string &s);
+        xsapi_internal_wstring utf8_to_utf16(const xsapi_internal_string &s);
 
         /// <summary>
         /// Converts to a UTF-8 string.
         /// </summary>
         /// <param name="value">A single byte character UTF-8 string.</param>
         /// <returns>A single byte character UTF-8 string.</returns>
-        std::string to_utf8string(std::string value);
+        xsapi_internal_string to_utf8string(xsapi_internal_string value);
 
         /// <summary>
         /// Converts to a UTF-8 string.
         /// </summary>
         /// <param name="value">A two byte character UTF-16 string.</param>
         /// <returns>A single byte character UTF-8 string.</returns>
-        std::string to_utf8string(const utf16string &value);
+        xsapi_internal_string to_utf8string(const xsapi_internal_wstring &value);
 
         /// <summary>
         /// Converts to a platform dependent Unicode string type.
         /// </summary>
         /// <param name="s">A single byte character UTF-8 string.</param>
         /// <returns>A platform dependent string type.</returns>
-        string_t to_string_t(const std::string &s);
+        string_t to_string_t(const xsapi_internal_string_t &s);
 
         /// <summary>
         /// Encode the given byte array into a base64 string
@@ -281,13 +279,13 @@ namespace services
         /// <summary>
         /// Decode the given base64 string to a byte array
         /// </summary>
-        std::vector<unsigned char> from_base64(const string_t& str);
+        std::vector<unsigned char> from_base64(const xsapi_internal_string& str);
 
         template <typename Source>
-        string_t print_string(const Source& val, const std::locale& loc)
+        xsapi_internal_string print_string(const Source& val, const std::locale& loc)
         {
-            ostringstream_t oss;
-            oss.imbue(loc);
+            xsapi_internal_ostringstream oss;
+            (void) oss.imbue(loc);
             oss << val;
             if (oss.bad())
             {
@@ -297,11 +295,11 @@ namespace services
         }
 
         template <typename Target>
-        Target scan_string(const string_t& str, const std::locale& loc)
+        Target scan_string(const xsapi_internal_string& str, const std::locale& loc)
         {
             Target t;
-            istringstream_t iss(str);
-            iss.imbue(loc);
+            xsapi_internal_istringstream iss(str);
+            (void) iss.imbue(loc);
             iss >> t;
             if (iss.bad())
             {
@@ -380,7 +378,7 @@ namespace services
     {
         struct uri_components
         {
-            uri_components() : m_path(_XPLATSTR("/")), m_port(-1)
+            uri_components() : m_path("/"), m_port(-1)
             {}
 
             uri_components(const uri_components& other) :
@@ -433,14 +431,14 @@ namespace services
                 return *this;
             }
 
-            string_t join();
+            xsapi_internal_string join();
 
-            string_t m_scheme;
-            string_t m_host;
-            string_t m_user_info;
-            string_t m_path;
-            string_t m_query;
-            string_t m_fragment;
+            xsapi_internal_string m_scheme;
+            xsapi_internal_string m_host;
+            xsapi_internal_string m_user_info;
+            xsapi_internal_string m_path;
+            xsapi_internal_string m_query;
+            xsapi_internal_string m_fragment;
             int m_port;
         };
 
@@ -452,7 +450,7 @@ namespace services
             ///
             /// This function accepts both uris ('http://msn.com') and uri relative-references ('path1/path2?query')
             /// </summary>
-            bool validate(const string_t& encoded_string);
+            bool validate(const xsapi_internal_string& encoded_string);
 
             /// <summary>
             /// Parses the uri, setting each provided string to the value of that component. Components
@@ -461,7 +459,7 @@ namespace services
             ///
             /// This function accepts both uris ('http://msn.com') and uri relative-references ('path1/path2?query')
             /// </summary>
-            bool parse(const string_t& encoded_string, uri_components& components);
+            bool parse(const xsapi_internal_string& encoded_string, uri_components& components);
 
             /// <summary>
             /// Unreserved characters are those that are allowed in a URI but do not have a reserved purpose. They include:
@@ -618,14 +616,14 @@ namespace services
             /// 'encoded' is expected to point to an encoded zero-terminated string containing a uri
             /// </summary>
             bool inner_parse(
-                const char_t* encoded,
-                const char_t** scheme_begin, const char_t** scheme_end,
-                const char_t** uinfo_begin, const char_t** uinfo_end,
-                const char_t** host_begin, const char_t** host_end,
+                const char* encoded,
+                const char** scheme_begin, const char** scheme_end,
+                const char** uinfo_begin, const char** uinfo_end,
+                const char** host_begin, const char** host_end,
                 _Out_ int* port,
-                const char_t** path_begin, const char_t** path_end,
-                const char_t** query_begin, const char_t** query_end,
-                const char_t** fragment_begin, const char_t** fragment_end);
+                const char** path_begin, const char** path_end,
+                const char** query_begin, const char** query_end,
+                const char** fragment_begin, const char** fragment_end);
         }
     }
 
@@ -636,7 +634,7 @@ namespace services
     {
     public:
 
-        uri_exception(std::string msg) : m_msg(std::move(msg)) {}
+        uri_exception(xsapi_internal_string msg) : m_msg(std::move(msg)) {}
 
         ~uri_exception() noexcept {}
 
@@ -646,7 +644,7 @@ namespace services
         }
 
     private:
-        std::string m_msg;
+        xsapi_internal_string m_msg;
     };
 
     /// <summary>
@@ -705,7 +703,7 @@ namespace services
         /// </summary>
         /// <param name="raw">The URI as a string.</param>
         /// <returns>The encoded string.</returns>
-        static string_t encode_uri(const string_t& raw, uri::components::component = components::full_uri);
+        static xsapi_internal_string encode_uri(const xsapi_internal_string& raw, uri::components::component = components::full_uri);
 
         /// <summary>
         /// Encodes a string by converting all characters except for RFC 3986 unreserved characters to their
@@ -713,40 +711,40 @@ namespace services
         /// </summary>
         /// <param name="utf8data">The UTF-8 string data.</param>
         /// <returns>The encoded string.</returns>
-        static string_t encode_data_string(const string_t& utf8data);
+        static xsapi_internal_string encode_data_string(const xsapi_internal_string& utf8data);
 
         /// <summary>
         /// Decodes an encoded string.
         /// </summary>
         /// <param name="encoded">The URI as a string.</param>
         /// <returns>The decoded string.</returns>
-        static string_t decode(const string_t& encoded);
+        static xsapi_internal_string decode(const xsapi_internal_string& encoded);
 
         /// <summary>
         /// Splits a path into its hierarchical components.
         /// </summary>
         /// <param name="path">The path as a string</param>
-        /// <returns>A <c>std::vector&lt;string_t&gt;</c> containing the segments in the path.</returns>
-        static std::vector<string_t> split_path(const string_t& path);
+        /// <returns>A <c>std::vector&lt;xsapi_internal_string&gt;</c> containing the segments in the path.</returns>
+        static std::vector<xsapi_internal_string> split_path(const xsapi_internal_string& path);
 
         /// <summary>
         /// Splits a query into its key-value components.
         /// </summary>
         /// <param name="query">The query string</param>
-        /// <returns>A <c>std::map&lt;string_t, string_t&gt;</c> containing the key-value components of the query.</returns>
-        static std::map<string_t, string_t> split_query(const string_t& query);
+        /// <returns>A <c>std::map&lt;xsapi_internal_string, xsapi_internal_string&gt;</c> containing the key-value components of the query.</returns>
+        static std::map<xsapi_internal_string, xsapi_internal_string> split_query(const xsapi_internal_string& query);
 
         /// <summary>
         /// Validates a string as a URI.
         /// </summary>
         /// <param name="uri_string">The URI string to be validated.</param>
         /// <returns><c>true</c> if the given string represents a valid URI, <c>false</c> otherwise.</returns>
-        static bool validate(const string_t& uri_string);
+        static bool validate(const xsapi_internal_string& uri_string);
 
         /// <summary>
         /// Creates an empty uri
         /// </summary>
-        uri() { m_uri = _XPLATSTR("/"); };
+        uri() { m_uri = "/"; };
 
         /// <summary>
         /// Creates a URI from the given URI components.
@@ -759,14 +757,14 @@ namespace services
         /// does not contain a valid URI. Use uri::validate if processing user-input.
         /// </summary>
         /// <param name="uri_string">A pointer to an encoded string to create the URI instance.</param>
-        uri(const char_t* uri_string);
+        uri(const char* uri_string);
 
         /// <summary>
         /// Creates a URI from the given encoded string. This will throw an exception if the string
         /// does not contain a valid URI. Use uri::validate if processing user-input.
         /// </summary>
         /// <param name="uri_string">An encoded URI string to create the URI instance.</param>
-        uri(const string_t& uri_string);
+        uri(const xsapi_internal_string& uri_string);
 
         /// <summary>
         /// Copy constructor.
@@ -814,19 +812,19 @@ namespace services
         /// Get the scheme component of the URI as an encoded string.
         /// </summary>
         /// <returns>The URI scheme as a string.</returns>
-        const string_t& scheme() const { return m_components.m_scheme; }
+        const xsapi_internal_string& scheme() const { return m_components.m_scheme; }
 
         /// <summary>
         /// Get the user information component of the URI as an encoded string.
         /// </summary>
         /// <returns>The URI user information as a string.</returns>
-        const string_t& user_info() const { return m_components.m_user_info; }
+        const xsapi_internal_string& user_info() const { return m_components.m_user_info; }
 
         /// <summary>
         /// Get the host component of the URI as an encoded string.
         /// </summary>
         /// <returns>The URI host as a string.</returns>
-        const string_t& host() const { return m_components.m_host; }
+        const xsapi_internal_string& host() const { return m_components.m_host; }
 
         /// <summary>
         /// Get the port component of the URI. Returns -1 if no port is specified.
@@ -838,19 +836,19 @@ namespace services
         /// Get the path component of the URI as an encoded string.
         /// </summary>
         /// <returns>The URI path as a string.</returns>
-        const string_t& path() const { return m_components.m_path; }
+        const xsapi_internal_string& path() const { return m_components.m_path; }
 
         /// <summary>
         /// Get the query component of the URI as an encoded string.
         /// </summary>
         /// <returns>The URI query as a string.</returns>
-        const string_t& query() const { return m_components.m_query; }
+        const xsapi_internal_string& query() const { return m_components.m_query; }
 
         /// <summary>
         /// Get the fragment component of the URI as an encoded string.
         /// </summary>
         /// <returns>The URI fragment as a string.</returns>
-        const string_t& fragment() const { return m_components.m_fragment; }
+        const xsapi_internal_string& fragment() const { return m_components.m_fragment; }
 
         /// <summary>
         /// Creates a new uri object with the same authority portion as this one, omitting the resource and query portions.
@@ -869,7 +867,7 @@ namespace services
         /// </summary>
         bool is_empty() const
         {
-            return this->m_uri.empty() || this->m_uri == _XPLATSTR("/");
+            return this->m_uri.empty() || this->m_uri == "/";
         }
 
         /// <summary>
@@ -881,7 +879,7 @@ namespace services
         /// <returns><c>true</c> if this URI references the local host, <c>false</c> otherwise.</returns>
         bool is_host_loopback() const
         {
-            return !is_empty() && ((host() == _XPLATSTR("localhost")) || (host().size() > 4 && host().substr(0, 4) == _XPLATSTR("127.")));
+            return !is_empty() && ((host() == "localhost") || (host().size() > 4 && host().substr(0, 4) == "127."));
         }
 
         /// <summary>
@@ -892,7 +890,7 @@ namespace services
         /// </example>
         bool is_host_wildcard() const
         {
-            return !is_empty() && (this->host() == _XPLATSTR("*") || this->host() == _XPLATSTR("+"));
+            return !is_empty() && (this->host() == "*" || this->host() == "+");
         }
 
         /// <summary>
@@ -944,14 +942,14 @@ namespace services
         /// <returns><c>true</c> if the path portion of this URI is empty, <c>false</c> otherwise.</returns>
         bool is_path_empty() const
         {
-            return path().empty() || path() == _XPLATSTR("/");
+            return path().empty() || path() == "/";
         }
 
         /// <summary>
         /// Returns the full (encoded) URI as a string.
         /// </summary>
          /// <returns>The full encoded URI string.</returns>
-        string_t to_string() const
+        xsapi_internal_string to_string() const
         {
             return m_uri;
         }
@@ -972,9 +970,9 @@ namespace services
         friend class uri_builder;
 
         // Encodes all characters not in given set determined by given function.
-        static string_t encode_impl(const string_t& raw, const std::function<bool __cdecl(int)>& should_encode);
+        static xsapi_internal_string encode_impl(const xsapi_internal_string& raw, const std::function<bool __cdecl(int)>& should_encode);
 
-        string_t m_uri;
+        xsapi_internal_string m_uri;
         details::uri_components m_components;
     };
 
@@ -1000,19 +998,19 @@ namespace services
         /// Get the scheme component of the URI as an encoded string.
         /// </summary>
         /// <returns>The URI scheme as a string.</returns>
-        const string_t& scheme() const { return m_uri.m_scheme; }
+        const xsapi_internal_string& scheme() const { return m_uri.m_scheme; }
 
         /// <summary>
         /// Get the user information component of the URI as an encoded string.
         /// </summary>
         /// <returns>The URI user information as a string.</returns>
-        const string_t& user_info() const { return m_uri.m_user_info; }
+        const xsapi_internal_string& user_info() const { return m_uri.m_user_info; }
 
         /// <summary>
         /// Get the host component of the URI as an encoded string.
         /// </summary>
         /// <returns>The URI host as a string.</returns>
-        const string_t& host() const { return m_uri.m_host; }
+        const xsapi_internal_string& host() const { return m_uri.m_host; }
 
         /// <summary>
         /// Get the port component of the URI. Returns -1 if no port is specified.
@@ -1024,26 +1022,26 @@ namespace services
         /// Get the path component of the URI as an encoded string.
         /// </summary>
         /// <returns>The URI path as a string.</returns>
-        const string_t& path() const { return m_uri.m_path; }
+        const xsapi_internal_string& path() const { return m_uri.m_path; }
 
         /// <summary>
         /// Get the query component of the URI as an encoded string.
         /// </summary>
         /// <returns>The URI query as a string.</returns>
-        const string_t& query() const { return m_uri.m_query; }
+        const xsapi_internal_string& query() const { return m_uri.m_query; }
 
         /// <summary>
         /// Get the fragment component of the URI as an encoded string.
         /// </summary>
         /// <returns>The URI fragment as a string.</returns>
-        const string_t& fragment() const { return m_uri.m_fragment; }
+        const xsapi_internal_string& fragment() const { return m_uri.m_fragment; }
 
         /// <summary>
         /// Set the scheme of the URI.
         /// </summary>
         /// <param name="scheme">Uri scheme.</param>
         /// <returns>A reference to this <c>uri_builder</c> to support chaining.</returns>
-        uri_builder& set_scheme(const string_t& scheme)
+        uri_builder& set_scheme(const xsapi_internal_string& scheme)
         {
             m_uri.m_scheme = scheme;
             return *this;
@@ -1055,7 +1053,7 @@ namespace services
         /// <param name="user_info">User info as a decoded string.</param>
         /// <param name="do_encoding">Specify whether to apply URI encoding to the given string.</param>
         /// <returns>A reference to this <c>uri_builder</c> to support chaining.</returns>
-        uri_builder& set_user_info(const string_t& user_info, bool do_encoding = false)
+        uri_builder& set_user_info(const xsapi_internal_string& user_info, bool do_encoding = false)
         {
             m_uri.m_user_info = do_encoding ? uri::encode_uri(user_info, uri::components::user_info) : user_info;
             return *this;
@@ -1067,7 +1065,7 @@ namespace services
         /// <param name="host">Host as a decoded string.</param>
         /// <param name="do_encoding">Specify whether to apply URI encoding to the given string.</param>
         /// <returns>A reference to this <c>uri_builder</c> to support chaining.</returns>
-        uri_builder& set_host(const string_t& host, bool do_encoding = false)
+        uri_builder& set_host(const xsapi_internal_string& host, bool do_encoding = false)
         {
             m_uri.m_host = do_encoding ? uri::encode_uri(host, uri::components::host) : host;
             return *this;
@@ -1090,9 +1088,9 @@ namespace services
         /// <param name="port">Port as a string.</param>
         /// <returns>A reference to this <c>uri_builder</c> to support chaining.</returns>
         /// <remarks>When string can't be converted to an integer the port is left unchanged.</remarks>
-        uri_builder& set_port(const string_t& port)
+        uri_builder& set_port(const xsapi_internal_string& port)
         {
-            istringstream_t portStream(port);
+            xsapi_internal_istringstream portStream(port);
             int port_tmp;
             portStream >> port_tmp;
             if (portStream.fail() || portStream.bad())
@@ -1109,7 +1107,7 @@ namespace services
         /// <param name="path">Path as a decoded string.</param>
         /// <param name="do_encoding">Specify whether to apply URI encoding to the given string.</param>
         /// <returns>A reference to this <c>uri_builder</c> to support chaining.</returns>
-        uri_builder& set_path(const string_t& path, bool do_encoding = false)
+        uri_builder& set_path(const xsapi_internal_string& path, bool do_encoding = false)
         {
             m_uri.m_path = do_encoding ? uri::encode_uri(path, uri::components::path) : path;
             return *this;
@@ -1122,7 +1120,7 @@ namespace services
         /// <param name="query">Query as a decoded string.</param>
         /// <param name="do_encoding">Specify whether apply URI encoding to the given string.</param>
         /// <returns>A reference to this <c>uri_builder</c> to support chaining.</returns>
-        uri_builder& set_query(const string_t& query, bool do_encoding = false)
+        uri_builder& set_query(const xsapi_internal_string& query, bool do_encoding = false)
         {
             m_uri.m_query = do_encoding ? uri::encode_uri(query, uri::components::query) : query;
             return *this;
@@ -1134,7 +1132,7 @@ namespace services
         /// <param name="fragment">Fragment as a decoded string.</param>
         /// <param name="do_encoding">Specify whether to apply URI encoding to the given string.</param>
         /// <returns>A reference to this <c>uri_builder</c> to support chaining.</returns>
-        uri_builder& set_fragment(const string_t& fragment, bool do_encoding = false)
+        uri_builder& set_fragment(const xsapi_internal_string& fragment, bool do_encoding = false)
         {
             m_uri.m_fragment = do_encoding ? uri::encode_uri(fragment, uri::components::fragment) : fragment;
             return *this;
@@ -1154,7 +1152,7 @@ namespace services
         /// <param name="path">Path to append as a already encoded string.</param>
         /// <param name="do_encoding">Specify whether to apply URI encoding to the given string.</param>
         /// <returns>A reference to this uri_builder to support chaining.</returns>
-        uri_builder& append_path(const string_t& path, bool do_encoding = false);
+        uri_builder& append_path(const xsapi_internal_string& path, bool do_encoding = false);
 
         /// <summary>
         /// Appends another query to the query of this uri_builder.
@@ -1162,7 +1160,7 @@ namespace services
         /// <param name="query">Query to append as a decoded string.</param>
         /// <param name="do_encoding">Specify whether to apply URI encoding to the given string.</param>
         /// <returns>A reference to this uri_builder to support chaining.</returns>
-        uri_builder& append_query(const string_t& query, bool do_encoding = false);
+        uri_builder& append_query(const xsapi_internal_string& query, bool do_encoding = false);
 
         /// <summary>
         /// Appends an relative uri (Path, Query and fragment) at the end of the current uri.
@@ -1179,7 +1177,7 @@ namespace services
         /// <param name="value">The value portion of the query string</param>
         /// <returns>A reference to this uri_builder to support chaining.</returns>
         template<typename T>
-        uri_builder& append_query(const string_t& name, const T& value, bool do_encoding = true)
+        uri_builder& append_query(const xsapi_internal_string& name, const T& value, bool do_encoding = true)
         {
             auto encodedName = name;
             auto encodedValue = ::xbox::services::convert::print_string(value, std::locale::classic());
@@ -1207,7 +1205,7 @@ namespace services
             }
 
             auto encodedQuery = encodedName;
-            encodedQuery.append(_XPLATSTR("="));
+            encodedQuery.append("=");
             encodedQuery.append(encodedValue);
             // The query key value pair was already encoded by us or the user separately.
             return append_query(encodedQuery, false);
@@ -1217,7 +1215,7 @@ namespace services
         /// Combine and validate the URI components into a encoded string. An exception will be thrown if the URI is invalid.
         /// </summary>
         /// <returns>The created URI as a string.</returns>
-        string_t to_string();
+        xsapi_internal_string to_string();
 
         /// <summary>
         /// Combine and validate the URI components into a URI class instance. An exception will be thrown if the URI is invalid.

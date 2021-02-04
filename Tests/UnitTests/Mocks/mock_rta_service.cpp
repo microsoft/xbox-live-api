@@ -153,7 +153,7 @@ void MockRealTimeActivityService::CompleteSubscribeHandshake(
 }
 
 void MockRealTimeActivityService::RaiseEvent(
-    const std::string& uri,
+    const xsapi_internal_string& uri,
     const rapidjson::Value& payload
 ) noexcept
 {
@@ -189,7 +189,7 @@ void MockRealTimeActivityService::RaiseEvent(
 }
 
 void MockRealTimeActivityService::RaiseEvent(
-    const std::string& uri,
+    const xsapi_internal_string& uri,
     const char* payload
 ) noexcept
 {

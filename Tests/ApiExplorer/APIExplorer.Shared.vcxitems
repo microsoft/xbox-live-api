@@ -182,6 +182,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Shared\lua-include.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\mem_hook.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Shared\multidevice.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Shared\pch_common.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)APIs\apis.h" />
@@ -215,6 +216,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lvm.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)lua\src\lzio.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Shared\apirunnercloudfns.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shared\mem_hook.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Shared\pal.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Shared\pch_common.h">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -510,6 +512,9 @@
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\titleStorage\title_storage-cpp.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+	<None Include="$(MSBuildThisFileDirectory)Tests\titleStorage\title_storage-restCalls.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\titleStorage\title_storage.lua">

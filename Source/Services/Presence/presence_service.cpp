@@ -309,12 +309,6 @@ HRESULT PresenceService::SetPresence(
             {
                 heartbeatDelayInMins = 5;
             }
-
-            auto xsapiSingleton = get_xsapi_singleton();
-            if (xsapiSingleton && xsapiSingleton->m_onSetPresenceFinish)
-            {
-                xsapiSingleton->m_onSetPresenceFinish(heartbeatDelayInMins);
-            }
         }
         async.Complete(hr);
     } });

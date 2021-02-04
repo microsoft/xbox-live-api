@@ -663,7 +663,7 @@ STDAPI_XBL_DEPRECATED XblPresenceUnsubscribeFromDevicePresenceChange(
 /// <summary>
 /// Subscribes to title presence change notifications.
 /// DEPRECATED. This API will be removed in a future release. Individual RTA subscription will be managed automatically by XSAPI as
-/// titles are tracked with <see cref="XblPresenceTrackTitles"/>.
+/// titles are tracked with <see cref="XblPresenceTrackAdditionalTitles"/>.
 /// </summary>
 /// <param name="xblContextHandle">Xbox live context for the local user.</param>
 /// <param name="xuid">The Xbox User ID of the person of the subscription.</param>
@@ -750,7 +750,7 @@ typedef void CALLBACK XblPresenceTitlePresenceChangedHandler(
 
 /// <summary>
 /// Registers an event handler for title presence change notifications. Notifications will
-/// only be received for the Users and Titles configured with <see cref="XblPresenceTrackUsers"/> and <see cref="XblPresenceTrackTitles"/>
+/// only be received for the Users and Titles configured with <see cref="XblPresenceTrackUsers"/> and <see cref="XblPresenceTrackAdditionalTitles"/>
 /// respectively.
 /// </summary>
 /// <param name="xblContextHandle">Xbox live context for the local user.</param>

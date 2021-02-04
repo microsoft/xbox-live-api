@@ -102,12 +102,12 @@ void CALLBACK AchievementUnlockHandler(const XblAchievementUnlockEvent* args, vo
 {
     UNREFERENCED_PARAMETER(context);
     LogToScreen("Achievement Unlock Notification");
-    LogToScreen("titleId: %s", args->titleId);
+    LogToScreen("titleId: %u", args->titleId);
     LogToScreen("achievementName: %s", args->achievementName);
     LogToScreen("achievementIcon: %s", args->achievementIcon);
     LogToScreen("gamerscore: %u", args->gamerscore);
     LogToScreen("rarityPercentage: %f", args->rarityPercentage);
-    LogToScreen("rarityCategory: %s", args->rarityCategory);
+    LogToScreen("rarityCategory: %u", static_cast<uint32_t>(args->rarityCategory));
 
     errorCode = status::OK;
 }

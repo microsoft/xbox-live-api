@@ -54,7 +54,7 @@ MultiplayerActivityQueryPostRequest::SocialGroupXuid() const
 }
 
 void
-MultiplayerActivityQueryPostRequest::Serialize(_Out_ JsonValue& json, JsonDocument::AllocatorType& allocator)
+MultiplayerActivityQueryPostRequest::Serialize(_Out_ JsonValue& json, _In_ JsonDocument::AllocatorType& allocator)
 {
     XSAPI_ASSERT(m_socialGroup.empty() || m_xuids.empty());
     XSAPI_ASSERT(!m_socialGroup.empty() || !m_xuids.empty());

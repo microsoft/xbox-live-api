@@ -95,7 +95,7 @@ Result<PermissionCheckResult> PermissionCheckResult::Deserialize(
     result.reasons = result.m_reasons.data();
     result.reasonsCount = result.m_reasons.size();
 
-    if (errc)
+    if (FAILED(errc))
     {
         return WEB_E_INVALID_JSON_STRING;
     }

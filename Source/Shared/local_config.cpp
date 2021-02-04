@@ -4,7 +4,6 @@
 #include "pch.h"
 #include <Pathcch.h>
 #include "local_config.h"
-#include "xbox_system_factory.h"
 #include "xsapi_utils.h"
 
 using namespace std;

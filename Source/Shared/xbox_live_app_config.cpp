@@ -6,7 +6,6 @@
 #include "xbox_live_app_config_internal.h"
 #if HC_PLATFORM == HC_PLATFORM_UWP
 #include "local_config.h"
-#include "xbox_system_factory.h"
 #endif
 
 using namespace xbox::services;
@@ -15,15 +14,12 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 std::shared_ptr<AppConfig> AppConfig::Instance()
 {
-    auto xsapiSingleton{ xbox::services::get_xsapi_singleton() };
-    if (xsapiSingleton)
+    auto state = GlobalState::Get();
+    if (state)
     {
-        return xsapiSingleton->m_appConfigSingleton;
+        return state->AppConfig();
     }
-    else
-    {
-        return nullptr;
-    }
+    return nullptr;
 }
 
 #if HC_PLATFORM == HC_PLATFORM_UWP 

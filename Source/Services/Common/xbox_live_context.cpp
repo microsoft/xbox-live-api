@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "shared_macros.h"
-#include "xbox_system_factory.h"
 #include "xbox_live_context_internal.h"
 #include "presence_internal.h"
 
@@ -25,10 +23,9 @@ using namespace xbox::services::system;
 ) noexcept
 {
     auto xblContext = std::shared_ptr<XblContext>(
-        new (Alloc(sizeof(XblContext))) XblContext
-        {
-            std::move(user)
-        }
+        new (Alloc(sizeof(XblContext))) XblContext{ std::move(user) },
+        Deleter<XblContext>(),
+        Allocator<XblContext>()
         );
     return xblContext;
 }
@@ -58,6 +55,14 @@ HRESULT XblContext::Initialize(
     m_xboxLiveContextSettings = MakeShared<xbox::services::XboxLiveContextSettings>();
 
     std::weak_ptr<XblContext> thisWeakPtr = shared_from_this();
+    TaskQueue globalQueue;
+    {
+        auto state = GlobalState::Get();
+        if (state)
+        {
+            globalQueue = state->Queue();
+        }
+    }
 
     {
         Result<xbox::services::User> userResult = m_user.Copy();
@@ -140,7 +145,7 @@ HRESULT XblContext::Initialize(
     {
         Result<xbox::services::User> userResult = m_user.Copy();
         RETURN_HR_IF_FAILED(userResult.Hresult());
-        m_multiplayerActivityService = MakeShared<multiplayer_activity::MultiplayerActivityService>(userResult.ExtractPayload(), get_xsapi_singleton_async_queue(), m_xboxLiveContextSettings);
+        m_multiplayerActivityService = MakeShared<multiplayer_activity::MultiplayerActivityService>(userResult.ExtractPayload(), globalQueue, m_xboxLiveContextSettings);
     }
     
     {
@@ -150,7 +155,7 @@ HRESULT XblContext::Initialize(
         m_eventsService = MakeShared<events::EventsService>(
             userResult.ExtractPayload()
 #if XSAPI_INTERNAL_EVENTS_SERVICE
-            , get_xsapi_singleton_async_queue()
+            , globalQueue
 #endif
             );
         RETURN_HR_IF_FAILED(m_eventsService->Initialize());
@@ -168,14 +173,16 @@ HRESULT XblContext::Initialize(
         m_notificationService = MakeShared<xbox::services::notification::MobileNotificationService>(userResult.ExtractPayload(), m_xboxLiveContextSettings);
 #elif HC_PLATFORM == HC_PLATFORM_UWP
         m_notificationService = MakeShared<xbox::services::notification::UWPNotificationService>(userResult.ExtractPayload(), m_xboxLiveContextSettings);
-        m_notificationService->RegisterWithNotificationService(AsyncContext<HRESULT>{TaskQueue{ get_xsapi_singleton_async_queue() }});
+        m_notificationService->RegisterWithNotificationService(AsyncContext<HRESULT>{ globalQueue });
 #endif
 #endif
     }
 
+#if XSAPI_NOTIFICATION_SERVICE
     auto userChangedRegistrationResult = User::RegisterChangeEventHandler(
         [
-            thisWeakPtr
+            thisWeakPtr,
+            queue{ globalQueue.DeriveWorkerQueue() }
         ]
     (UserLocalId localId, UserChangeType changeType)
     {
@@ -184,18 +191,16 @@ HRESULT XblContext::Initialize(
         {
             if (sharedThis->m_user.LocalId() == localId.value && changeType == XalUserChange_SignedOut)
             {
-#if XSAPI_NOTIFICATION_SERVICE
-                sharedThis->NotificationService()->UnregisterFromNotificationService(
-                    AsyncContext<HRESULT> 
-                    { 
-                        TaskQueue{ get_xsapi_singleton_async_queue() }
-                    });
-#endif
+                sharedThis->NotificationService()->UnregisterFromNotificationService(AsyncContext<HRESULT>{ queue });
             }
         }
     });
 
-    return userChangedRegistrationResult.Hresult();
+    RETURN_HR_IF_FAILED(userChangedRegistrationResult.Hresult());
+    m_userChangeEventToken = userChangedRegistrationResult.Payload();
+#endif
+
+    return S_OK;
 }
 
 uint64_t XblContext::Xuid() const

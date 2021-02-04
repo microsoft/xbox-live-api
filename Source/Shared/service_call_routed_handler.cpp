@@ -25,7 +25,7 @@ ServiceCallRoutedHandler::~ServiceCallRoutedHandler() noexcept
 
 void ServiceCallRoutedHandler::HCCallRoutedHandler(
     _In_ HCCallHandle call,
-    _In_opt_ void* context
+    _In_ void* context
 )
 {
     auto pThis{ static_cast<ServiceCallRoutedHandler*>(context) };

@@ -15,36 +15,6 @@
 
 HC_DECLARE_TRACE_AREA(XSAPI);
 
-NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
-    class xbox_live_services_settings;
-    class xbox_system_factory;
-NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END
-
-NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_BEGIN
-    class stats_manager;
-NAMESPACE_MICROSOFT_XBOX_SERVICES_STAT_MANAGER_CPP_END
-
-NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_BEGIN
-    class NotificationService;
-NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_END
-
-NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
-    class MultiplayerManager;
-NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_END
-
-NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_BEGIN
-    class RealTimeActivityServiceFactory;
-NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_END
-
-NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-    class service_call_logging_config;
-    class service_call_logger_protocol;
-    class service_call_logger;
-    class logger;
-    class xsapi_telemetry;
-    class AppConfig;
-NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 #ifndef __min
@@ -60,90 +30,6 @@ inline bool operator<(const xbox::services::datetime& lhs, const xbox::services:
     return lhs.to_interval() < rhs.to_interval();
 }
 
-struct xsapi_singleton
-{
-    xsapi_singleton() = default;
-    ~xsapi_singleton();
-
-    HRESULT Initialize(_In_ const XblInitArgs* args);
-
-    std::mutex m_rtaActivationCounterLock;
-    xsapi_internal_unordered_map<uint64_t, uint32_t> m_rtaActiveSocketCountPerUser;
-
-    std::mutex m_singletonLock;
-    std::mutex m_serviceSettingsLock;
-    std::mutex m_telemetryLock;
-    std::shared_ptr<xbox::services::system::xbox_live_services_settings> m_xboxServiceSettingsSingleton;
-
-#if HC_PLATFORM == HC_PLATFORM_XDK || XSAPI_UNIT_TESTS
-    std::mutex m_achievementServiceInitLock;
-    bool m_bHasAchievementServiceInitialized{ false };
-    std::string m_eventProviderName;
-    GUID m_eventPlayerSessionId{};
-#endif
-
-    // from Shared\xbox_live_app_config.cpp
-    std::shared_ptr<AppConfig> m_appConfigSingleton;
-
-    // from Misc\notification_service.cpp
-    std::shared_ptr<xbox::services::notification::NotificationService> m_notificationSingleton;
-
-    // from Shared\service_call_logging_config.cpp
-    std::shared_ptr<service_call_logging_config> m_serviceLoggingConfigSingleton;
-
-    // from Shared\xbox_live_app_config.cpp
-    std::mutex m_serviceLoggerProtocolSingletonLock;
-    std::shared_ptr<service_call_logger_protocol> m_serviceLoggerProtocolSingleton;
-
-    // from Shared\utils_locales.cpp
-    xsapi_internal_string m_locales{ "en-US" };
-    std::mutex m_locale_lock;
-    bool m_custom_locale_override{ false };
-
-    // from Shared\service_call_logger_data.cpp
-    uint32_t m_loggerId{ 0 };
-
-    // from Shared\service_call_logger.cpp
-    std::shared_ptr<service_call_logger> m_serviceLoggerSingleton;
-
-    // from Services\RealTimeActivity\real_time_activity_service_factory.cpp
-    std::shared_ptr<real_time_activity::RealTimeActivityServiceFactory> m_rtaFactoryInstance;
-
-    // from Services\Presence\presence_service_internal.cpp
-    std::function<void(int heartBeatDelayInMins)> m_onSetPresenceFinish;
-
-    // from Shared\Logger\log.cpp
-    std::shared_ptr<logger> m_logger;
-
-    // from Shared\xbox_system_factory.cpp
-    std::shared_ptr<system::xbox_system_factory> m_factoryInstance;
-
-#if XSAPI_DESKTOP_BRIDGE
-    // from System\user_impl_idp.cpp
-    uint64_t m_build = 0;
-    bool m_supportsGetTokenSilently;
-#endif
-
-#if HC_PLATFORM == HC_PLATFORM_ANDROID
-    // TODO This is a temporary workaround for TCUI. XSAPI C++ TCUI API's accept a xal_user_handle, from which we extract
-    // XUID and privileges and call into Java code. Java code then calls back into XSAPI to make an HTTP call, but it does not pass and user
-    // context or xal_user_handle but it most likely should. Previously we just remembered the last signed in user, so we can 
-    // emulate that behavior again for now.
-    std::atomic<XalUserHandle> m_lastSignedInUser{ nullptr };
-#endif
-
-    // from Shared\telemetry.cpp
-    std::shared_ptr<xsapi_telemetry> m_telemetrySingleton;
-
-    // from Services\Multiplayer\Manager\multiplayer_client_pending_request.cpp
-    String m_deviceId;
-
-    XblApiType m_apiType{ XblApiType::XblCApi };
-};
-
-std::shared_ptr<xsapi_singleton> get_xsapi_singleton();
-XTaskQueueHandle get_xsapi_singleton_async_queue();
-
 #ifndef _In_reads_bytes_
 #define _In_reads_bytes_(s)
 #endif
@@ -157,8 +43,6 @@ public:
     static xsapi_internal_string encode_uri(_In_ const xsapi_internal_string& data, _In_ xbox::services::uri::components::component component = xbox::services::uri::components::full_uri);
 
     static xsapi_internal_string headers_to_string(_In_ const xsapi_internal_http_headers& headers);
-
-    static web::http::http_headers string_to_headers(_In_ const string_t& headers);
 
     static xsapi_internal_string get_query_from_params(_In_ const xsapi_internal_vector<xsapi_internal_string>& params);
 
@@ -244,12 +128,12 @@ public:
     static std::vector<string_t> string_split(
         _In_ const string_t& string,
         _In_ string_t::value_type seperator
-    );
+        );
 
-    static xsapi_internal_vector<xsapi_internal_string> string_split(
+    static xsapi_internal_vector<xsapi_internal_string> string_split_internal(
         _In_ const xsapi_internal_string& string,
         _In_ xsapi_internal_string::value_type seperator
-    );
+        );
 
     static xbl_error_code convert_exception_to_xbox_live_error_code();
 
@@ -258,7 +142,7 @@ public:
         _In_ string_t::value_type seperator
     );
 
-    static xsapi_internal_string vector_join(
+    static xsapi_internal_string vector_join_internal(
         _In_ const std::vector<xsapi_internal_string>& vector,
         _In_ xsapi_internal_string::value_type seperator
     );
@@ -280,12 +164,6 @@ public:
     static HRESULT convert_http_status_to_hresult(_In_ uint32_t httpStatusCode);
     static xbl_error_code convert_http_status_to_xbox_live_error_code(_In_ uint32_t statusCode);
 
-    static xsapi_internal_string create_xboxlive_endpoint(
-        _In_ const xsapi_internal_string& subpath,
-        _In_ const std::shared_ptr<AppConfig>& appConfig,
-        _In_ const xsapi_internal_string& protocol = "https"
-    );
-
 #if HC_PLATFORM_IS_MICROSOFT
     static xsapi_internal_string internal_string_from_utf16(_In_z_ const wchar_t* utf16);
 #endif
@@ -306,110 +184,9 @@ public:
     static int utf8_from_char_t(_In_z_ const char_t* inArray, _Out_writes_z_(cchOutArray) char* outArray, _In_ int cchOutArray);
     static int char_t_from_utf8(_In_z_ const char* inArray, _Out_writes_z_(cchOutArray) char_t* outArray, _In_ int cchOutArray);
 
-    static void generate_locales();
-    static xsapi_internal_string get_locales();
-
-    static void set_locales(_In_ const xsapi_internal_string& locale);
-
-#if !XSAPI_NO_PPL
-
-    template<typename T>
-    static pplx::task <xbl_result<T>> create_exception_free_task(
-        _In_ const pplx::task <xbl_result<T>>& t
-    )
-    {
-        return t.then([](pplx::task <xbox::services::xbl_result<T>> result)
-        {
-            try
-            {
-                return result.get();
-            }
-            catch (const std::exception& e)
-            {
-                xbl_error_code err = xbox::services::utils::convert_exception_to_xbox_live_error_code();
-                return xbl_result<T>(err, e.what());
-            }
-#ifdef __cplusplus_winrt
-            catch (Platform::Exception^ e)
-            {
-                xbl_error_code errc = static_cast<xbl_error_code>(e->HResult);
-                return xbl_result<T>(errc, xbox::services::convert::to_utf8string(e->Message->Data()));
-            }
-#endif
-        });
-    }
-#endif // !XSAPI_NO_PPL
-
-    static xsapi_internal_vector<xsapi_internal_string> internal_string_vector_from_std_string_vector(
-        _In_ const std::vector<string_t>& stdVector
-    )
-    {
-        auto size = stdVector.size();
-        xsapi_internal_vector<xsapi_internal_string> internalVector(size);
-        for (size_t i = 0; i < size; ++i)
-        {
-            internalVector[i] = utils::internal_string_from_string_t(stdVector[i]);
-        }
-        return internalVector;
-    }
-
-    static xsapi_internal_vector<xsapi_internal_string> internal_string_vector_from_utf8_array(
-        _In_ const char** utf8array,
-        _In_ uint32_t arraySize
-    )
-    {
-        xsapi_internal_vector<xsapi_internal_string> internalVector(arraySize);
-        for (uint32_t i = 0; i < arraySize; ++i)
-        {
-            internalVector[i] = utf8array[i];
-        }
-        return internalVector;
-    }
-
-    static std::vector<string_t> std_string_vector_from_internal_string_vector(
-        _In_ const xsapi_internal_vector<xsapi_internal_string>& internalVector
-        )
-    {
-        auto size = internalVector.size();
-        std::vector<string_t> vector(size);
-        for (size_t i = 0; i < size; ++i)
-        {
-            vector[i] = utils::string_t_from_internal_string(internalVector[i]);
-        }
-        return vector;
-    }
-
-    template<typename T>
-    static std::vector<T> std_vector_from_internal_vector(
-        _In_ const xsapi_internal_vector<T>& internalVector
-    )
-    {
-        return std::vector<T>(internalVector.begin(), internalVector.end());
-    }
-
-    template<typename External, typename Internal>
-    static std::vector<External> std_vector_external_from_internal_vector(
-        _In_ const xsapi_internal_vector<Internal>& internalVector
-        )
-    {
-        return std::vector<External>(internalVector.begin(), internalVector.end());
-    }
-
-    template<typename T>
-    static xsapi_internal_vector<T> internal_vector_from_std_vector(
-        _In_ const std::vector<T>& vector
-        )
-    {
-        return xsapi_internal_vector<T>(vector.begin(), vector.end());
-    }
-
-    template<typename Internal, typename External> 
-    static xsapi_internal_vector<Internal> internal_vector_from_std_vector(
-        _In_ const std::vector<External>& vector
-        )
-    {
-        return xsapi_internal_vector<Internal>(vector.begin(), vector.end());
-    }
+    static String generate_locales();
+    // Helper function to get locales from GlobalState. Fallback to "en-us" if GlobalState is not initialized
+    static String get_locales();
 
     static string_t replace_sub_string(
         _In_ const string_t& source,
@@ -417,8 +194,8 @@ public:
         _In_ const string_t& replacement
     );
 
-    static string_t read_file_to_string(
-        _In_ const string_t& filePath
+    static xsapi_internal_string_t read_file_to_string(
+        _In_ const xsapi_internal_string_t& filePath
     );
 
     inline static uint32_t string_t_to_uint32(
@@ -556,6 +333,8 @@ public:
         size_t intArrayCount
         );
 
+    static bool EnsureLessThanMaxLength(const char* str, size_t maxLength);
+
     // date and time constants
     static constexpr uint64_t TICKS_PER_MS = 10000;
     static constexpr uint64_t TICKS_PER_SEC = (1000 * TICKS_PER_MS);
@@ -631,9 +410,9 @@ public:
     static time_t time_t_from_datetime(const xbox::services::datetime& datetime);
 
     // Creates an asyncBlock that clean itself up in the completion callback
-    static XAsyncBlock* MakeDefaultAsyncBlock(XTaskQueueHandle queue = get_xsapi_singleton_async_queue());
+    static XAsyncBlock* MakeDefaultAsyncBlock(XTaskQueueHandle queue);
 
-    static XAsyncBlock* MakeAsyncBlock(XTaskQueueHandle queue = get_xsapi_singleton_async_queue(), void* context = nullptr, XAsyncCompletionRoutine* callback = nullptr);
+    static XAsyncBlock* MakeAsyncBlock(XTaskQueueHandle queue, void* context, XAsyncCompletionRoutine* callback);
 
 private:
     static xsapi_internal_vector<xsapi_internal_string> get_locale_list();
@@ -641,57 +420,6 @@ private:
     utils();
     utils(const utils&);
     utils& operator=(const utils&);
-};
-
-template<typename K, typename V>
-class bimap
-{
-public:
-    typename xsapi_internal_unordered_map<K, V>::iterator find(const K& key)
-    {
-        return m_map.find(key);
-    }
-
-    typename xsapi_internal_unordered_map<K, V>::iterator begin()
-    {
-        return m_map.begin();
-    }
-
-    typename xsapi_internal_unordered_map<K, V>::iterator end()
-    {
-        return m_map.end();
-    }
-
-    typename xsapi_internal_unordered_map<V, K>::iterator reverse_find(const V& value)
-    {
-        return m_reverseMap.find(value);
-    }
-
-    typename xsapi_internal_unordered_map<V, K>::iterator reverse_begin()
-    {
-        return m_reverseMap.begin();
-    }
-
-    typename xsapi_internal_unordered_map<V, K>::iterator reverse_end()
-    {
-        return m_reverseMap.end();
-    }
-
-    void insert(const K& key, const V& value)
-    {
-        m_map[key] = value;
-        m_reverseMap[value] = key;
-    }
-
-    void erase(typename xsapi_internal_unordered_map<K, V>::iterator iterator)
-    {
-        m_reverseMap.erase(iterator->second);
-        m_map.erase(iterator);
-    }
-
-private:
-    xsapi_internal_unordered_map<K, V> m_map;
-    xsapi_internal_unordered_map<V, K> m_reverseMap;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

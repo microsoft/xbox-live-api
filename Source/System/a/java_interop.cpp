@@ -6,7 +6,6 @@
 #include "a/jni_utils.h"
 #include "a/java_interop.h"
 #include "TCUI/Android/title_callable_ui_jni.h"
-#include "xbox_system_factory.h"
 
 using namespace xbox::services::system;
 
@@ -174,7 +173,6 @@ xbl_result<void> java_interop::finish_initialization(JNIEnv* env, jobject clsLoa
     if (http_call_register_natives(env, clsLoader, loadClass)
         && xbox_live_app_config_register_natives(env, clsLoader, loadClass)
         && (!useTcui || title_callable_ui_register_natives(env, clsLoader, loadClass))
-        && xsapi_telemetry::register_natives(env, clsLoader, loadClass)
         )
     {
         m_initialized = true;
@@ -450,6 +448,24 @@ String java_interop::StringFromJString(JNIEnv* env, jstring jStr)
     env->ReleaseStringUTFChars(jStr, charPtr);
 
     return string;
+}
+
+void java_interop::StoreUser(User&& user)
+{
+    std::lock_guard<std::mutex> lock{ m_storedUserMutex };
+    m_storedUser = std::make_shared<User>(std::move(user));
+}
+
+std::shared_ptr<User> java_interop::GetStoredUser()
+{
+    std::lock_guard<std::mutex> lock{ m_storedUserMutex };
+    return m_storedUser;
+}
+
+std::shared_ptr<User> java_interop::ExtractStoredUser()
+{
+    std::lock_guard<std::mutex> lock{ m_storedUserMutex };
+    return std::move(m_storedUser);
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

@@ -18,7 +18,7 @@ using namespace Windows::Xbox::Networking;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 
 MultiplayerMatchClient::MultiplayerMatchClient(
-    const TaskQueue& queue,
+    _In_ const TaskQueue& queue,
     _In_ std::shared_ptr<MultiplayerLocalUserManager> localUserManager
 ) noexcept :
     m_queue{ queue.DeriveWorkerQueue() },
@@ -164,14 +164,14 @@ MultiplayerMatchClient::CheckNextTimer()
 void
 MultiplayerMatchClient::HandleQosMeasurements()
 {
-    std::shared_ptr<PerformQosMeasurementsEventArgs> performQosEventArgs = std::make_shared<PerformQosMeasurementsEventArgs>();
+    std::shared_ptr<PerformQosMeasurementsEventArgs> performQosEventArgs = MakeShared<PerformQosMeasurementsEventArgs>();
 
     XblMultiplayerSessionReadLockGuard sessionSafe(Session());
     for (const auto& member : sessionSafe.Members())
     {
         if (!member.IsCurrentUser)
         {
-            std::vector<unsigned char> base64ConnectionAddress(xbox::services::convert::from_base64(utils::string_t_from_internal_string(member.SecureDeviceBaseAddress64)));
+            std::vector<unsigned char> base64ConnectionAddress(xbox::services::convert::from_base64(member.SecureDeviceBaseAddress64));
             const xsapi_internal_string& secureDeviceAddress = xsapi_internal_string(base64ConnectionAddress.begin(), base64ConnectionAddress.end());
             if (!secureDeviceAddress.empty())
             {
@@ -215,7 +215,7 @@ MultiplayerMatchClient::HandleFindMatchCompleted(
         failure = matchSessionSafe.CurrentUser()->InitializationFailureCause;
     }
 
-    std::shared_ptr<FindMatchCompletedEventArgs> findMatchEventArgs = std::make_shared<FindMatchCompletedEventArgs>(
+    std::shared_ptr<FindMatchCompletedEventArgs> findMatchEventArgs = MakeShared<FindMatchCompletedEventArgs>(
         m_matchStatus,
         failure
         );
@@ -564,7 +564,7 @@ void MultiplayerMatchClient::HandleMatchFound(
 
     m_matchStatus = XblMultiplayerMatchStatus::Found;
     auto& targetSessionRef = currentSession->MatchmakingServer()->TargetSessionRef;
-    auto targetGameSession = std::make_shared<XblMultiplayerSession>(
+    auto targetGameSession = MakeShared<XblMultiplayerSession>(
         primaryXboxLiveContext->Xuid(),
         &targetSessionRef,
         nullptr

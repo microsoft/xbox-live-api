@@ -5,7 +5,6 @@
 #include "xsapi-c/events_c.h"
 #include "events_service_xsapi.h"
 #include "xbox_live_context_internal.h"
-#include "xbox_system_factory.h"
 #include <cll/Windows7PartA.h>
 
 using namespace xbox::services;

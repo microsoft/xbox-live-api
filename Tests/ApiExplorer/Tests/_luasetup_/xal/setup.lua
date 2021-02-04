@@ -3,8 +3,8 @@ test = require 'u-test'
 common = require 'common'
 
 function SetupTest_Handler()
-    local hr = GetLastError()
     print("SetupTest_Handler")
+    local hr = GetLastError()
     SetCheckHR(1)
     if hr ~= 0 then
         print("Calling XalAddUserWithUiAsync")

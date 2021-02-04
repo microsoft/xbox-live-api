@@ -46,7 +46,7 @@ private:
 
     void AddValuePair(
         _Inout_ Microsoft::WRL::ComPtr<ABI::Windows::Foundation::Diagnostics::ILoggingFields> fields,
-        _In_ const std::pair<string_t, JsonDocument>& pair
+        _In_ const std::pair<xsapi_internal_string, JsonDocument>& pair
     );
 
     Microsoft::WRL::ComPtr<ABI::Windows::Foundation::Diagnostics::ILoggingFields> CreateLoggingFields(

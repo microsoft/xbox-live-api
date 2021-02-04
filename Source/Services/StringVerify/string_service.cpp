@@ -2,10 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "shared_macros.h"
-#include "xbox_system_factory.h"
 #include "string_service_internal.h"
-#include "xbox_live_app_config_internal.h"
 #include "xbox_live_context_internal.h"
 
 using namespace xbox::services;

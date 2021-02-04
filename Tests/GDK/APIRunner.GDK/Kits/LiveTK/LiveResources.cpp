@@ -74,11 +74,6 @@ LiveResources::LiveResources(XTaskQueueHandle queue, bool autoManageUser, bool i
 
     char scidBuffer[64] = {};
     sprintf_s(scidBuffer, "00000000-0000-0000-0000-0000%08x", m_titleId);
- 
-    XblInitArgs xblInit = { m_asyncQueue, scidBuffer };
-    hr = XblInitialize(&xblInit);
-    DX::ThrowIfFailed(hr);
-
     m_scid = scidBuffer;
 
 #ifdef _GAMING_XBOX

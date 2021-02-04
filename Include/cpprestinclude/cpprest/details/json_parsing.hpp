@@ -18,7 +18,10 @@
 
 #if defined(_MSC_VER)
 #pragma warning(disable : 4127) // allow expressions like while(true) pass
+#pragma warning( disable : 4365 )  
+#pragma warning( disable : 4061 )  
 #endif
+
 using namespace web;
 using namespace web::json;
 using namespace utility::conversions;

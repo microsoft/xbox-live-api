@@ -65,12 +65,12 @@ XblMultiplayerJoinability MultiplayerManagerUtils::GetJoinability(
     )
 {
     xsapi_internal_string joinableStr;
-    auto customPropertiesjson = ParseJson(sessionProperties.SessionCustomPropertiesJson);
-    auto propertyName = utils::string_t_from_internal_string(MultiplayerLobbyClient_JoinabilityPropertyName);
+    JsonDocument jsonDoc;
+    jsonDoc.Parse(sessionProperties.SessionCustomPropertiesJson);
 
-    if (customPropertiesjson.has_field(propertyName))
+    if (!jsonDoc.HasParseError())
     {
-        joinableStr = utils::internal_string_from_string_t(customPropertiesjson.at(propertyName).as_string());
+        JsonUtils::ExtractJsonString(jsonDoc, MultiplayerLobbyClient_JoinabilityPropertyName, joinableStr, false);
     }
 
     return ConvertStringToJoinability(joinableStr);

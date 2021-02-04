@@ -44,13 +44,14 @@ void MultiplayerClientPendingReader::deep_copy_if_updated(
     }
 }
 
-MultiplayerClientPendingReader::MultiplayerClientPendingReader() :
+MultiplayerClientPendingReader::MultiplayerClientPendingReader(const TaskQueue& queue) :
+    m_queue{ queue.DeriveWorkerQueue() },
     m_autoFillMembers(false)
 {
-    m_multiplayerLocalUserManager = std::make_shared<MultiplayerLocalUserManager>();
-    m_lobbyClient = std::make_shared<MultiplayerLobbyClient>(get_xsapi_singleton_async_queue());
-    m_gameClient = std::make_shared<MultiplayerGameClient>(get_xsapi_singleton_async_queue());
-    m_matchClient = std::make_shared<manager::MultiplayerMatchClient>(get_xsapi_singleton_async_queue(), m_multiplayerLocalUserManager);
+    m_multiplayerLocalUserManager = MakeShared<MultiplayerLocalUserManager>();
+    m_lobbyClient = MakeShared<MultiplayerLobbyClient>(m_queue);
+    m_gameClient = MakeShared<MultiplayerGameClient>(m_queue);
+    m_matchClient = MakeShared<manager::MultiplayerMatchClient>(m_queue, m_multiplayerLocalUserManager);
 }
 
 MultiplayerClientPendingReader::~MultiplayerClientPendingReader()
@@ -62,15 +63,17 @@ MultiplayerClientPendingReader::~MultiplayerClientPendingReader()
 }
 
 MultiplayerClientPendingReader::MultiplayerClientPendingReader(
+    _In_ const TaskQueue& queue,
     _In_ const xsapi_internal_string& lobbySessionTemplateName,
     _In_ std::shared_ptr<MultiplayerLocalUserManager> localUserManager
     ) :
+    m_queue{ queue.DeriveWorkerQueue() },
     m_autoFillMembers(false),
     m_multiplayerLocalUserManager(localUserManager)
 {
-    m_lobbyClient = std::make_shared<MultiplayerLobbyClient>(get_xsapi_singleton_async_queue(), lobbySessionTemplateName, m_multiplayerLocalUserManager);
-    m_gameClient = std::make_shared<MultiplayerGameClient>(get_xsapi_singleton_async_queue(), m_multiplayerLocalUserManager);
-    m_matchClient = std::make_shared<manager::MultiplayerMatchClient>(get_xsapi_singleton_async_queue(), m_multiplayerLocalUserManager);
+    m_lobbyClient = MakeShared<MultiplayerLobbyClient>(m_queue, lobbySessionTemplateName, m_multiplayerLocalUserManager);
+    m_gameClient = MakeShared<MultiplayerGameClient>(m_queue, m_multiplayerLocalUserManager);
+    m_matchClient = MakeShared<manager::MultiplayerMatchClient>(m_queue, m_multiplayerLocalUserManager);
     m_lobbyClient->Initialize();
     m_gameClient->Initialize();
 }
@@ -291,7 +294,7 @@ MultiplayerClientPendingReader::SetProperties(
     _In_opt_ context_t context
     )
 {
-    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    auto pendingRequest = MakeShared<MultiplayerClientPendingRequest>();
     pendingRequest->SetSessionProperties(name, valueJson, context);
     AddToPendingQueue(sessionRef, pendingRequest);
     return S_OK;
@@ -304,7 +307,7 @@ MultiplayerClientPendingReader::SetSynchronizedHost(
     _In_opt_ context_t context
     )
 {
-    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    auto pendingRequest = MakeShared<MultiplayerClientPendingRequest>();
     pendingRequest->SetSynchronizedHostDeviceToken(hostDeviceToken, context);
     AddToPendingQueue(sessionRef, pendingRequest);
     return S_OK;
@@ -318,7 +321,7 @@ MultiplayerClientPendingReader::SetSynchronizedProperties(
     _In_opt_ context_t context
     )
 {
-    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    auto pendingRequest = MakeShared<MultiplayerClientPendingRequest>();
     pendingRequest->SetSynchronizedSessionProperties(name, valueJson, context);
     AddToPendingQueue(sessionRef, pendingRequest);
     return S_OK;

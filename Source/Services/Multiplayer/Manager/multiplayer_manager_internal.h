@@ -311,9 +311,9 @@ private:
     xsapi_internal_vector<std::shared_ptr<MultiplayerMember>> m_localMembers;
     xsapi_internal_string m_customPropertiesJson;
 
-    XblMultiplayerSessionConstants m_sessionConstants;
+    XblMultiplayerSessionConstants m_sessionConstants{};
     xsapi_internal_vector<uint64_t> m_initiatorXuids;
-    XblMultiplayerMemberInitialization m_memberInitialization;
+    XblMultiplayerMemberInitialization m_memberInitialization{};
     xsapi_internal_string m_constantsCustomJson;
     xsapi_internal_string m_constantsCloudComputePackageJson;
     xsapi_internal_string m_constantsMeasurementServerAddressesJson;
@@ -1133,9 +1133,10 @@ private:
 class MultiplayerClientPendingReader : public std::enable_shared_from_this<MultiplayerClientPendingReader>
 {
 public:
-    MultiplayerClientPendingReader();
+    MultiplayerClientPendingReader(const TaskQueue& queue);
     ~MultiplayerClientPendingReader();
     MultiplayerClientPendingReader(
+        _In_ const TaskQueue& queue,
         _In_ const xsapi_internal_string& lobbySessionTemplateName,
         _In_ std::shared_ptr<MultiplayerLocalUserManager> localUserManager
         );
@@ -1215,6 +1216,7 @@ private:
 
     static bool IsLocal(_In_ uint64_t xuid, _In_ const xsapi_internal_map<uint64_t, std::shared_ptr<MultiplayerLocalUser>>& xboxLiveContextMap);
 
+    TaskQueue m_queue;
     bool m_autoFillMembers;
     MultiplayerEventQueue m_multiplayerEventQueue;
     mutable std::mutex m_clientRequestLock;
@@ -1544,12 +1546,12 @@ private:
     std::mutex m_synchronizeWriteWithTapLock;
     std::atomic<bool> m_subscriptionsLostFired;
 
-    bool m_autoFillMembers;
+    bool m_autoFillMembers{ false };
     xsapi_internal_string m_lobbySessionTemplateName;
-    XblFunctionContext m_sessionChangedContext;
-    XblFunctionContext m_connectionIdChangedContext;
-    XblFunctionContext m_subscriptionLostContext;
-    XblFunctionContext m_rtaResyncContext;
+    XblFunctionContext m_sessionChangedContext{ 0 };
+    XblFunctionContext m_connectionIdChangedContext{ 0 };
+    XblFunctionContext m_subscriptionLostContext{ 0 };
+    XblFunctionContext m_rtaResyncContext{ 0 };
 
     MultiplayerEventQueue m_multiplayerEventQueue;
     std::shared_ptr<XblContext> m_primaryXboxLiveContext;

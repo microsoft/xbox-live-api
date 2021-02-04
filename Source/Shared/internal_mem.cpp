@@ -58,7 +58,10 @@ void STDAPIVCALLTYPE Free(
     assert(g_pMemFreeHook);
     try
     {
+        DISABLE_WARNING_PUSH;
+        SUPPRESS_WARNING_UNINITIALIZED_MEMORY;
         g_pMemFreeHook(pointer, memoryType);
+        DISABLE_WARNING_POP;
     }
     catch (...)
     {

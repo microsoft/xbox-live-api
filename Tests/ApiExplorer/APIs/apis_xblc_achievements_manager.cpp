@@ -138,17 +138,27 @@ int SetupAchievementsManagerPerformanceTestMock_Lua(lua_State *L)
 int XblAchievementsManagerResultGetAchievements_Lua(lua_State *L)
 {
     auto resultHandle{ reinterpret_cast<XblAchievementsManagerResultHandle>(GetUint64FromLua(L, 1, reinterpret_cast<uint64_t>(achievementsState.achievementsResultHandle))) };
-    // CODE SNIPPET START: XblAchievementsManagerResultGetAchievements_C
-    const XblAchievement* achievements = nullptr;
-    uint64_t achievementsCount = 0;
-    HRESULT hr = XblAchievementsManagerResultGetAchievements(resultHandle, &achievements, &achievementsCount);
+    if (resultHandle != nullptr) // might be null if original call fails
+    {
+        // CODE SNIPPET START: XblAchievementsManagerResultGetAchievements_C
+        const XblAchievement* achievements = nullptr;
+        uint64_t achievementsCount = 0;
+        HRESULT hr = XblAchievementsManagerResultGetAchievements(resultHandle, &achievements, &achievementsCount);
 
-    LogToScreen("Got %u Achievements:", achievementsCount);
-    // CODE SNIPPET END
-    lua_pushinteger(L, static_cast<lua_Integer>(achievementsCount));
+        LogToScreen("Got %u Achievements:", achievementsCount);
+        // CODE SNIPPET END
+        lua_pushinteger(L, static_cast<lua_Integer>(achievementsCount));
+        LogToScreen("XblAchievementsManagerResultGetAchievements: hr=%s", ConvertHR(hr).c_str());
+        return LuaReturnHR(L, hr, 1);
+    }
+    else
+    {
+        HRESULT hr = S_OK;
+        lua_pushinteger(L, static_cast<lua_Integer>(0));
+        LogToScreen("XblAchievementsManagerResultGetAchievements: hr=%s", ConvertHR(hr).c_str());
+        return LuaReturnHR(L, hr, 1);
+    }
 
-    LogToScreen("XblAchievementsManagerResultGetAchievements: hr=%s", ConvertHR(hr).c_str());
-    return LuaReturnHR(L, hr, 1);
 }
 
 int XblAchievementsManagerResultDuplicateHandle_Lua(lua_State *L)

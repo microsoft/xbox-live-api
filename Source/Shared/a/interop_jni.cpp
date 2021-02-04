@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "a/java_interop.h"
+#include <rapidjson/allocators.hpp>
+#include "uri_impl.h"
 
 #ifdef __cplusplus
 extern "C" {

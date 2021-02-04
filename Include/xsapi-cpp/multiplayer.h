@@ -252,7 +252,7 @@ enum class multiplayer_session_member_status
     /// <summary>
     /// The member is inactive in the current title.  
     /// The member may be active in another title as specified by ActiveTitleId.
-    /// If a inactive member doesn't mark themselves as Active within the MemberInactiveTimeout they will be removed from the session.
+    /// If an inactive member doesn't mark themselves as Active within the MemberInactiveTimeout they will be removed from the session.
     /// </summary>
     inactive,
 
@@ -741,7 +741,7 @@ public:
     inline std::chrono::milliseconds member_reserved_time_out() const;
     
     /// <summary>
-    /// If a inactive member reservation does not become active within this timeout, then inactive member is removed from the session.
+    /// If an inactive member reservation does not become active within this timeout, then the inactive member is removed from the session.
     /// </summary>
     inline std::chrono::milliseconds member_inactive_timeout() const;
     
@@ -1689,7 +1689,7 @@ public:
     inline utility::datetime start_time() const;
 
     /// <summary>
-    /// If any timeouts are in progress, this is the date when the the next timer will fire.
+    /// If any timeouts are in progress, this is the date when the next timer will fire.
     /// </summary>
     inline utility::datetime date_of_next_timer() const;
     
@@ -1727,7 +1727,7 @@ public:
     inline multiplayer_session_change_types subscribed_change_types() const;
 
     /// <summary>
-    /// Host candidates are a ordered list of device tokens, ordered by preference as specified by MultiplayerSessionConstants::PeerToHostRequirements::HostSelectionMetric.
+    /// Host candidates are an ordered list of device tokens, ordered by preference as specified by MultiplayerSessionConstants::PeerToHostRequirements::HostSelectionMetric.
     /// </summary>
     inline std::vector<string_t> host_candidates() const;
     
@@ -2085,7 +2085,7 @@ public:
     /// Call multiplayer_service::write_session after this to write batched local changes to the service. 
     /// If this is called without multiplayer_service::write_session, this will only change the local session object but does not commit it to the service.
     /// Set the current user to active or inactive.  
-    /// You cannot set the the user to reserved or ready in this manner.  
+    /// You cannot set the user to reserved or ready in this manner.  
     /// Use AddMemberReservation() to add a member reservation.
     /// The member must first be joined to the session.
     /// </summary>

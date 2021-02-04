@@ -2,8 +2,20 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
+#if HC_PLATFORM_IS_MICROSOFT
+#pragma warning( push )
+#pragma warning( disable : 4365 )
+#pragma warning( disable : 4061 )
+#pragma warning( disable : 4996 )
+#endif
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
+#include "rapidjson/document.h"
+#if HC_PLATFORM_IS_MICROSOFT
+#pragma warning( pop )
+#endif
+
+using namespace utility;
 
 struct StatsValueDocument
 {
@@ -31,6 +43,7 @@ public:
         return *this;
     }
 
+    StatsValueDocument() noexcept = default;
     ~StatsValueDocument() noexcept = default;
 
     bool operator==(const StatsValueDocument& other) const noexcept
@@ -107,7 +120,7 @@ private:
 
 static std::unique_ptr<StatsValueDocument> s_svd{ nullptr };
 
-StatsValueDocument GetStatsValueDocument(uint64_t xuid)
+StatsValueDocument GetStatsValueDocument(uint64_t xuid, HRESULT* resultHr)
 {
     XblHttpCallHandle call{};
 
@@ -122,28 +135,44 @@ StatsValueDocument GetStatsValueDocument(uint64_t xuid)
     assert(SUCCEEDED(hr));
 
     hr = XAsyncGetStatus(&async, true);
-    assert(SUCCEEDED(hr));
+    if (SUCCEEDED(hr))
+    {
+        assert(SUCCEEDED(hr));
 
-    const char* responseString{ nullptr };
-    hr = XblHttpCallGetResponseString(call, &responseString);
-    assert(SUCCEEDED(hr));
+        const char* responseString{ nullptr };
+        hr = XblHttpCallGetResponseString(call, &responseString);
+        assert(SUCCEEDED(hr));
 
-    rapidjson::Document svd{};
-    svd.Parse(responseString);
-    assert(!svd.HasParseError());
+        rapidjson::Document svd{};
+        svd.Parse(responseString);
+        assert(!svd.HasParseError());
 
-    return StatsValueDocument{ std::move(svd) };
+        *resultHr = S_OK;
+        return StatsValueDocument{ std::move(svd) };
+    }
+    else
+    {
+        *resultHr = E_FAIL;
+        return StatsValueDocument();
+    }
 }
 
 int XblTitleManagedStatsWriteAsyncWithSVD_Lua(lua_State *L)
 {
     if (!s_svd)
     {
-        s_svd = std::make_unique<StatsValueDocument>(GetStatsValueDocument(Data()->xboxUserId));
+        HRESULT hr = S_OK;
+        s_svd = std::make_unique<StatsValueDocument>(GetStatsValueDocument(Data()->xboxUserId, &hr));
+        if (FAILED(hr))
+        {
+            LogToFile("XblTitleManagedStatsWriteAsyncWithSVD: hr = %s", ConvertHR(hr).data());
+            s_svd = nullptr;
+            return LuaReturnHR(L, hr);
+        }
     }
 
-    auto now = utility::datetime::utc_now();
-    auto timeString = utility::conversions::to_utf8string(now.to_string(utility::datetime::date_format::ISO_8601));
+    auto now = datetime::utc_now();
+    auto timeString = conversions::to_utf8string(now.to_string(datetime::date_format::ISO_8601));
 
     s_svd->SetStat("TimeString", timeString.data());
     s_svd->SetStat("NumericStat", 100.0);
@@ -235,10 +264,17 @@ int XblTitleManagedStatsUpdateStatsAsync_Lua(lua_State* L)
 {
     if (!s_svd)
     {
-        s_svd = std::make_unique<StatsValueDocument>(GetStatsValueDocument(Data()->xboxUserId));
+        HRESULT hr = S_OK;
+        s_svd = std::make_unique<StatsValueDocument>(GetStatsValueDocument(Data()->xboxUserId, &hr));
+        if (FAILED(hr))
+        {
+            LogToFile("XblTitleManagedStatsWriteAsyncWithSVD: hr = %s", ConvertHR(hr).data());
+            s_svd = nullptr;
+            return LuaReturnHR(L, hr);
+        }
     }
 
-    auto timeString = utility::conversions::to_utf8string(utility::datetime::utc_now().to_string(utility::datetime::date_format::ISO_8601));
+    auto timeString = conversions::to_utf8string(datetime::utc_now().to_string(datetime::date_format::ISO_8601));
     s_svd->SetStat("AddedStat",timeString.data());
     s_svd->SetStat("NumericStat", 85.0);
 
@@ -287,7 +323,14 @@ int XblTitleManagedStatsDeleteStatsAsync_Lua(lua_State* L)
 {
     if (!s_svd)
     {
-        s_svd = std::make_unique<StatsValueDocument>(GetStatsValueDocument(Data()->xboxUserId));
+        HRESULT hr = S_OK;
+        s_svd = std::make_unique<StatsValueDocument>(GetStatsValueDocument(Data()->xboxUserId, &hr));
+        if (FAILED(hr))
+        {
+            LogToFile("XblTitleManagedStatsWriteAsyncWithSVD: hr = %s", ConvertHR(hr).data());
+            s_svd = nullptr;
+            return LuaReturnHR(L, hr);
+        }
     }
 
     // CODE SNIPPET START: XblTitleManagedStatsDeleteStats
@@ -330,7 +373,14 @@ int ValidateSVD_Lua(lua_State* L)
     // update. Just make sure we are in sync once at the end of the test.
     if (s_svd)
     {
-        auto updatedSVD{ GetStatsValueDocument(Data()->xboxUserId) };
+
+        HRESULT hr = S_OK;
+        auto updatedSVD{ GetStatsValueDocument(Data()->xboxUserId, &hr) };
+        if (FAILED(hr))
+        {
+            return 0;
+        }
+
         LogToFile("Service SVD: %s", updatedSVD.Serialize().data());
         LogToFile("Local SVD: %s", s_svd->Serialize().data());
         assert(*s_svd == updatedSVD);
@@ -345,7 +395,14 @@ int ClearSVD_Lua(lua_State* L)
 
     if (!s_svd)
     {
-        s_svd = std::make_unique<StatsValueDocument>(GetStatsValueDocument(Data()->xboxUserId));
+        HRESULT hr = S_OK;
+        s_svd = std::make_unique<StatsValueDocument>(GetStatsValueDocument(Data()->xboxUserId, &hr));
+        if (FAILED(hr))
+        {
+            LogToFile("XblTitleManagedStatsWriteAsyncWithSVD: hr = %s", ConvertHR(hr).data());
+            s_svd = nullptr;
+            return LuaReturnHR(L, hr);
+        }
     }
     s_svd->ClearStats();
     return 0;

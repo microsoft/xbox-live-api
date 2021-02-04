@@ -225,11 +225,11 @@ LeaderboardResult::ParseSocialGroup(xsapi_internal_string socialGroupStr)
 {
     XblSocialGroupType socialGroup = XblSocialGroupType::None;
 
-    if (utils::str_icmp_internal(socialGroupStr, utils::internal_string_from_string_t(xbox::services::social::legacy::social_group_constants::people())) == 0)
+    if (utils::str_icmp_internal(socialGroupStr, xbox::services::social::legacy::social_group_constants::people()) == 0)
     {
         socialGroup = XblSocialGroupType::People;
     }
-    else if (utils::str_icmp_internal(socialGroupStr, utils::internal_string_from_string_t(xbox::services::social::legacy::social_group_constants::favorite())) == 0)
+    else if (utils::str_icmp_internal(socialGroupStr, xbox::services::social::legacy::social_group_constants::favorite()) == 0)
     {
         socialGroup = XblSocialGroupType::Favorites;
     }
