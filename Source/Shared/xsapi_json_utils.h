@@ -33,21 +33,7 @@ public:
         _Inout_ xsapi_internal_string& outString,
         _In_ bool required = false
     );
-
-    static HRESULT ExtractJsonString(
-        _In_ const JsonValue& jsonValue,
-        _In_ const xsapi_internal_string& stringName,
-        _Inout_ string_t& outString,
-        _In_ bool required = false
-    );
-
-    static HRESULT ExtractJsonStringToCharTArray(
-        _In_ const JsonValue& jsonValue,
-        _In_ const xsapi_internal_string& stringName,
-        _In_reads_bytes_(size) char_t* charArr,
-        _In_ size_t size
-    );
-
+    
     static HRESULT ExtractJsonStringToCharArray(
         _In_ const JsonValue& jsonValue,
         _In_ const xsapi_internal_string& stringName,
@@ -160,25 +146,13 @@ public:
     static HRESULT ExtractJsonStringVector(
         _In_ const JsonValue& json,
         _In_ const xsapi_internal_string& name,
-        _Inout_ std::vector<xsapi_internal_string>& outVector,
+        _Inout_ xsapi_internal_vector<xsapi_internal_string>& outVector,
         _In_ bool required
     );
 
     static HRESULT ExtractJsonStringVector(
         _In_ const JsonValue& json,
-        _Inout_ std::vector<xsapi_internal_string>& outVector
-    );
-
-    static HRESULT ExtractJsonStringTVector(
-        _In_ const JsonValue& json,
-        _In_ const xsapi_internal_string& name,
-        _Inout_ std::vector<string_t>& outVector,
-        _In_ bool required
-    );
-
-    static HRESULT ExtractJsonStringTVector(
-        _In_ const JsonValue& json,
-        _Inout_ std::vector<string_t>& outVector
+        _Inout_ xsapi_internal_vector<xsapi_internal_string>& outVector
     );
 
     template<typename T, typename F>
@@ -201,7 +175,7 @@ public:
                     for (auto it = field.Begin(); it != field.End(); ++it)
                     {
                         auto obj = deserialize(*it);
-                        if (obj.Hresult())
+                        if (Failed(obj))
                         {
                             return obj.Hresult();
                             break;
@@ -235,7 +209,7 @@ public:
         for (auto it = json.Begin(); it != json.End(); ++it)
         {
             auto obj = deserialize(*it);
-            if (obj.Hresult())
+            if (Failed(obj))
             {
                 return obj.Hresult();
                 break;
@@ -247,8 +221,6 @@ public:
     }
 
     static Result<xsapi_internal_string> JsonStringExtractor(_In_ const JsonValue& json);
-
-    static Result<string_t> JsonStringTExtractor(_In_ const JsonValue& json);
 
     static void JsonStringSerializer(_In_ const xsapi_internal_string& value, _Out_ JsonValue& json, _In_ JsonDocument::AllocatorType& allocator);
 
@@ -268,24 +240,6 @@ public:
     template<typename T, typename F>
     static void SerializeVector(
         _In_ F serializer,
-        _In_ std::vector<T> inputVector,
-        _Out_ JsonValue& jsonArray,
-        _In_ JsonDocument::AllocatorType& allocator
-    )
-    {
-        jsonArray.SetArray();
-
-        for (auto& s : inputVector)
-        {
-            JsonValue val;
-            serializer(s, val, allocator);
-            jsonArray.PushBack(val, allocator);
-        }
-    }
-
-    template<typename T, typename F>
-    static void SerializeVector(
-        _In_ F serializer,
         _In_ xsapi_internal_vector<T> inputVector,
         _Out_ JsonValue& jsonArray,
         _In_ JsonDocument::AllocatorType& allocator
@@ -301,7 +255,7 @@ public:
         }
     }
 
-    static void SerializeUInt52ToJson(_In_ uint64_t integer, _Out_ JsonValue& json);
+    static void SerializeUInt52ToJson(_In_ uint64_t integer, _Inout_ JsonValue& json);
 
     static JsonValue SerializeTime(
         _In_ time_t time,

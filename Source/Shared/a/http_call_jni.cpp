@@ -1,12 +1,10 @@
 #include "pch.h"
 #include "http_call_jni.h"
 #include <string>
-#include "xbox_system_factory.h"
-#include "xsapi_utils.h"
 #include <android/log.h>
 #include "jni_utils.h"
-#include "Logger/log.h"
 #include "http_call_legacy.h"
+#include "a\java_interop.h"
 
 #define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, "HttpCall", __VA_ARGS__))
 #define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "HttpCall", __VA_ARGS__))
@@ -312,19 +310,50 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_xbox_idp_util_HttpCall_create
     jstring_t strMethod(env, method);
     jstring_t strEndpoint(env, endpoint);
     jstring_t strPathAndQuery(env, pathAndQuery);
-    std::shared_ptr<xbox::services::XboxLiveContextSettings> ctx(new xbox::services::XboxLiveContextSettings());
 
     LOGD("Create HttpCall with uri %s", strEndpoint.get());
 
-    std::shared_ptr<xbox::services::legacy::http_call>* http_call = new std::shared_ptr<xbox::services::legacy::http_call>(
-        xbox::services::system::xbox_system_factory::get_factory()->create_http_call(
-            ctx,
-            strMethod,
-            strEndpoint,
-            strPathAndQuery,
-            xbox::services::xbox_live_api::unspecified));
-    (*http_call)->set_add_default_headers(addDefaultHeaders);
-    return reinterpret_cast<jlong>(http_call);
+    std::shared_ptr<xbox::services::legacy::http_call>* legacyHttpCallPtr{ nullptr };
+
+    auto user = java_interop::get_java_interop_singleton()->GetStoredUser();
+    if (user)
+    {
+        auto userCopyResult = user->Copy();
+        if (Succeeded(userCopyResult))
+        {
+            String fullUrl{ strEndpoint.get() };
+            xbox::services::uri path{ strPathAndQuery.get() };
+
+            if (!path.is_empty())
+            {
+                fullUrl += path.to_string();
+            }
+
+            auto httpCall = MakeShared<XblHttpCall>(userCopyResult.ExtractPayload());
+            HRESULT hr = httpCall->Init(
+                std::shared_ptr<XboxLiveContextSettings>{ new xbox::services::XboxLiveContextSettings },
+                strMethod.get(),
+                fullUrl,
+                xbox::services::xbox_live_api::unspecified
+            );
+
+            if (SUCCEEDED(hr))
+            {
+                // legacy http_call doesn't duplicate the provided XblHttpCall handle so do it before passing.
+                // This seems like a poor design, but keeping behavior same for now
+                httpCall->AddRef();
+
+                web::uri_builder uriBuilder;
+                uriBuilder.append(strPathAndQuery.get());
+                auto legacyHttpCall = std::make_shared<legacy::http_call>(httpCall.get(), strMethod.get(), strEndpoint.get(), uriBuilder.to_uri());
+                legacyHttpCallPtr = new std::shared_ptr<xbox::services::legacy::http_call>(std::move(legacyHttpCall));
+
+                (*legacyHttpCallPtr)->set_add_default_headers(addDefaultHeaders);
+            }
+        }
+    }
+
+    return reinterpret_cast<jlong>(legacyHttpCallPtr);
 }
 
 /*

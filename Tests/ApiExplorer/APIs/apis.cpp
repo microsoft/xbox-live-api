@@ -8,6 +8,12 @@ int SetCheckHR_Lua(lua_State *L)
     return 0;
 }
 
+int GetCheckHR_Lua(lua_State *L)
+{
+    lua_pushboolean(L, Data()->m_checkHR);
+    return 1;
+}
+
 int Sleep_Lua(lua_State *L)
 {
     DWORD time = (DWORD)GetUint32FromLua(L, 1, 0);
@@ -188,6 +194,34 @@ int MultiDeviceGetRemoteXuid_Lua(lua_State *L)
     return 1;
 }
 
+int APIRunner_AssertOnAllocOfId_Lua(lua_State *L)
+{
+    auto id = GetUint64FromLua(L, 1, 0);
+    auto memHook = GetApiRunnerMemHook();
+    memHook->AssertOnAllocOfId(id);
+    return LuaReturnHR(L, S_OK);
+}
+
+int APIRunner_MemStartTracking_Lua(lua_State *L)
+{
+    auto memHook = GetApiRunnerMemHook();
+    memHook->StartMemTracking();
+    return LuaReturnHR(L, S_OK);
+}
+
+int APIRunner_LogStats_Lua(lua_State *L)
+{
+    auto memHook = GetApiRunnerMemHook();
+    memHook->LogStats("MemCheck");
+    return LuaReturnHR(L, S_OK);
+}
+
+int APIRunner_MemLogUnhookedStats_Lua(lua_State *L)
+{
+    auto memHook = GetApiRunnerMemHook();
+    memHook->LogUnhookedStats();
+    return LuaReturnHR(L, S_OK);
+}
 
 void RegisterLuaAPIs()
 {
@@ -239,6 +273,7 @@ void RegisterLuaAPIs()
     SetupAPIs_GRTS();
 
     lua_register(Data()->L, "SetCheckHR", SetCheckHR_Lua);
+    lua_register(Data()->L, "GetCheckHR", GetCheckHR_Lua);
     lua_register(Data()->L, "StopTestFile", StopTestFile_Lua);
     lua_register(Data()->L, "Sleep", Sleep_Lua);
     lua_register(Data()->L, "LogToScreen", LogToScreen_Lua);
@@ -256,6 +291,11 @@ void RegisterLuaAPIs()
     lua_register(Data()->L, "MultiDeviceIsHost", MultiDeviceIsHost_Lua);
     lua_register(Data()->L, "MultiDeviceGetRemoteXuid", MultiDeviceGetRemoteXuid_Lua);
     lua_register(Data()->L, "MultiDeviceWaitTillRemoteState", MultiDeviceWaitTillRemoteState_Lua);
+
+    lua_register(Data()->L, "APIRunner_MemStartTracking", APIRunner_MemStartTracking_Lua);
+    lua_register(Data()->L, "APIRunner_LogStats", APIRunner_LogStats_Lua);
+    lua_register(Data()->L, "APIRunner_AssertOnAllocOfId", APIRunner_AssertOnAllocOfId_Lua);
+    lua_register(Data()->L, "APIRunner_MemLogUnhookedStats", APIRunner_MemLogUnhookedStats_Lua);
 }
 
 void SetupAPIS_Platform()

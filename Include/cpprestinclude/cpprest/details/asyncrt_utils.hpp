@@ -44,6 +44,7 @@
 #pragma warning( disable : 26444 ) // ignore various unnamed objects
 #pragma warning( disable : 26498 ) // ignore eof warning 
 #pragma warning( disable : 26812 )  // enum instead of enum class
+#pragma warning( disable : 4365 )  
 #endif
 
 // Could use C++ standard library if not __GLIBCXX__,
@@ -697,12 +698,12 @@ template<typename StringIterator>
 uint64_t timeticks_from_second(StringIterator begin, StringIterator end)
 {
     int size = (int)(end - begin);
-    _ASSERTE(begin[0] == U('.'));
+    _ASSERTE(begin[0] == _T('.'));
     uint64_t ufrac_second = 0;
     for (int i = 1; i <= 7; ++i)
     {
         ufrac_second *= 10;
-        int add = i < size ? begin[i] - U('0') : 0;
+        int add = i < size ? begin[i] - _T('0') : 0;
         ufrac_second += add;
     }
     return ufrac_second;
@@ -712,7 +713,7 @@ void extract_fractional_second(const utility::string_t& dateString, utility::str
 {
     resultString = dateString;
     // First, the string must be strictly longer than 2 characters, and the trailing character must be 'Z'
-    if (resultString.size() > 2 && resultString[resultString.size() - 1] == U('Z'))
+    if (resultString.size() > 2 && resultString[resultString.size() - 1] == _T('Z'))
     {
         // Second, find the last non-digit by scanning the string backwards
         auto last_non_digit = std::find_if_not(resultString.rbegin() + 1, resultString.rend(), is_digit);
@@ -720,7 +721,7 @@ void extract_fractional_second(const utility::string_t& dateString, utility::str
         {
             // Finally, make sure the last non-digit is a dot:
             auto last_dot = last_non_digit.base() - 1;
-            if (*last_dot == U('.'))
+            if (*last_dot == _T('.'))
             {
                 // Got it! Now extract the fractional second
                 auto last_before_Z = std::end(resultString) - 1;

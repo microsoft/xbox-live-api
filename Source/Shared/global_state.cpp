@@ -7,24 +7,37 @@
 #include "multiplayer_manager_internal.h"
 #include "social_manager_internal.h"
 #include "real_time_activity_manager.h"
+#include "Logger/log_hc_output.h"
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+#include "a/utils_a.h"
+#include "a/java_interop.h"
+#endif
+
+HC_DEFINE_TRACE_AREA(XSAPI, HCTraceLevel::Verbose);
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-// Local Storage in Android is dependent on the JNI Initialization done in xsapi_singleton->Initialize
+// Local Storage in Android is dependent on the JNI Initialization done in GlobalState::Create
 // Only on Android the initialization of m_localStorage is done outside of the constructor.
 GlobalState::GlobalState(
     _In_ const XblInitArgs* args
 ) :
-    singleton{ MakeShared<xsapi_singleton>() },
     m_taskQueue{ args ? TaskQueue::DeriveWorkerQueue(args->queue) : nullptr },
-    m_achievementsManager{ MakeShared<achievements::manager::AchievementsManager>() }, 
+    m_achievementsManager{ MakeShared<achievements::manager::AchievementsManager>() },
     m_multiplayerManager{ MakeShared<multiplayer::manager::MultiplayerManager>() },
     m_socialManager{ MakeShared<social::manager::SocialManager>() },
-    m_rtaManager{ MakeShared<real_time_activity::RealTimeActivityManager>(m_taskQueue) }
+    m_rtaManager{ MakeShared<real_time_activity::RealTimeActivityManager>(m_taskQueue) },
 #if HC_PLATFORM != HC_PLATFORM_ANDROID
-    , m_localStorage{ MakeShared<system::LocalStorage>(m_taskQueue) }
+    m_localStorage{ MakeShared<system::LocalStorage>(m_taskQueue) },
 #endif
+    m_appConfig{ MakeShared<xbox::services::AppConfig>() },
+    m_logger{ MakeShared<logger>() }
 {
+    m_logger->add_log_output(MakeShared<log_hc_output>());
+
+#if _DEBUG && XSAPI_UNIT_TESTS && XSAPI_PROFILE
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
 }
 
 HRESULT GlobalState::Create(
@@ -55,21 +68,74 @@ HRESULT GlobalState::Create(
 
     auto state = std::shared_ptr<GlobalState>(
         new (Alloc(sizeof(GlobalState))) GlobalState(args),
-        Deleter<GlobalState>()
+        Deleter<GlobalState>(),
+        Allocator<GlobalState>()
     );
 
-    RETURN_HR_IF_FAILED(state->singleton->Initialize(args));
-
-    // Local Storage in Android is dependent on the JNI Initialization done in xsapi_singleton->Initialize
-    // Only on Android the initialization of m_localStorage is done outside of the constructor.
 #if HC_PLATFORM == HC_PLATFORM_ANDROID
+    // TODO Should make the java interop singleton a member of GlobalState rather than a separate static
+    auto javaInteropInitResult = xbox::services::java_interop::get_java_interop_singleton()->initialize(
+        args->javaVM,
+        args->applicationContext
+    );
+    if (javaInteropInitResult.err())
+    {
+        return utils::convert_xbox_live_error_code_to_hresult(javaInteropInitResult.err());
+    }
+#endif
+
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+    // Local Storage in Android is dependent on the JNI Initialization so create LocalStorage now.
     state->m_localStorage = MakeShared<system::LocalStorage>(state->m_taskQueue);
 #endif
 
 #if HC_PLATFORM == HC_PLATFORM_WIN32
+    // On Win32, set Local Storage path using init args
     RETURN_HR_IF_FAILED(state->m_localStorage->SetStoragePath(args->localStoragePath));
 #endif
 
+#if HC_PLATFORM != HC_PLATFORM_XDK && HC_PLATFORM != HC_PLATFORM_UWP
+    RETURN_HR_INVALIDARGUMENT_IF_NULL(args->scid);
+    RETURN_HR_IF_FAILED(state->m_appConfig->Initialize(args->scid));
+#else
+    RETURN_HR_IF_FAILED(state->m_appConfig->Initialize());
+#endif
+
+#if HC_PLATFORM_IS_EXTERNAL
+    state->m_appConfig->SetAppId(args->appId);
+    state->m_appConfig->SetAppVer(args->appVer);
+    state->m_appConfig->SetOsName(args->osName);
+    state->m_appConfig->SetOsVersion(args->osVersion);
+    state->m_appConfig->SetOsLocale(args->osLocale);
+    state->m_appConfig->SetDeviceClass(args->deviceClass);
+    state->m_appConfig->SetDeviceId(args->deviceId);
+#endif
+
+#if HC_PLATFORM == HC_PLATFORM_IOS
+    if (args->apnsEnvironment)
+    {
+        state->m_appConfig->SetAPNSEnvironment(args->apnsEnvironment);
+    }
+#endif
+
+#if HC_PLATFORM == HC_PLATFORM_XDK
+    // Initialize achievements provider properties
+    RETURN_HR_IF_FAILED(CoCreateGuid(&state->m_achievementsSessionId));
+
+    CHAR strTitleId[16] = "";
+    sprintf_s(strTitleId, "%0.8X", state->m_appConfig->TitleId());
+
+    Stringstream achievementsProviderName;
+    achievementsProviderName << "XSAPI_" << strTitleId;
+    state->m_achivementsEventProviderName = achievementsProviderName.str();
+#endif
+
+#if HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM == HC_PLATFORM_XDK || HC_PLATFORM == HC_PLATFORM_GDK
+    // Generate locales
+    state->m_locales = utils::generate_locales();
+#endif
+
+    // GlobalState object has been created and initialized successfully at this point so store it.
     (void)AccessHelper(AccessMode::SET, state);
 
 #if HC_PLATFORM == HC_PLATFORM_GDK
@@ -287,7 +353,6 @@ size_t GlobalState::EraseUserChangeHandler(uint64_t token) noexcept
     return m_userChangeHandlers.erase(token);
 }
 
-
 size_t GlobalState::EraseUserExpiredToken(uint64_t xuid) noexcept
 {
     std::lock_guard<std::mutex> lock{ m_mutex };
@@ -324,6 +389,16 @@ std::shared_ptr<system::LocalStorage> GlobalState::LocalStorage() const noexcept
     return m_localStorage;
 }
 
+std::shared_ptr<xbox::services::AppConfig> GlobalState::AppConfig() const noexcept
+{
+    return m_appConfig;
+}
+
+std::shared_ptr<logger> GlobalState::Logger() const noexcept
+{
+    return m_logger;
+}
+
 std::shared_ptr<RefCounter> GlobalState::GetSharedThis()
 {
     return shared_from_this();
@@ -332,7 +407,8 @@ std::shared_ptr<RefCounter> GlobalState::GetSharedThis()
 #if HC_PLATFORM == HC_PLATFORM_GDK
 
 XblFunctionContext GlobalState::AddAppChangeNotificationHandler(
-    _In_ AppChangeNotificationHandler appChangeNotificationHandler)
+    _In_ AppChangeNotificationHandler appChangeNotificationHandler
+) noexcept
 {
     std::lock_guard<std::mutex> lock{ m_mutex };
     m_appChangeNotificationHandlers.emplace(m_nextAppChangeHandlerToken, appChangeNotificationHandler);
@@ -370,6 +446,29 @@ void GlobalState::RemoveAppChangeNotificationHandler(
     std::lock_guard<std::mutex> lock{ m_mutex };
     m_appChangeNotificationHandlers.erase(token);
 }
+
 #endif
+
+#if HC_PLATFORM == HC_PLATFORM_XDK
+const String& GlobalState::AchievementsProviderName() const noexcept
+{
+    return m_achivementsEventProviderName;
+}
+
+const GUID& GlobalState::AchievementsSessionId() const noexcept
+{
+    return m_achievementsSessionId;
+}
+#endif
+
+const String& GlobalState::Locales() const noexcept
+{
+    return m_locales;
+}
+
+void GlobalState::OverrideLocales(String&& locales) noexcept
+{
+    m_locales = std::move(locales);
+}
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

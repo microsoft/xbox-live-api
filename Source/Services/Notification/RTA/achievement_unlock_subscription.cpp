@@ -70,7 +70,7 @@ AchievementUnlockSubscription::OnResync() noexcept
     LOGS_ERROR << __FUNCTION__ << ": Achievement Unlock event may have been discarded by RTA service";
 }
 
-AchievementUnlockEvent::AchievementUnlockEvent( AchievementUnlockEvent&& event ) :
+AchievementUnlockEvent::AchievementUnlockEvent( AchievementUnlockEvent&& event ) noexcept:
     m_achievementId(std::move(event.m_achievementId)),
     m_achievementName(std::move(event.m_achievementName)),
     m_achievementDescription(std::move(event.m_achievementDescription)),
@@ -126,7 +126,7 @@ Result<AchievementUnlockEvent> AchievementUnlockEvent::Deserialize( _In_ const J
 
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "achievementId", result.m_achievementId, true));
 
-    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "achievementDescription", result.m_achievementDescription, true));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "achievementDescription", result.m_achievementDescription, false));
 
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "achievementName", result.m_achievementName, true));
 
@@ -136,15 +136,16 @@ Result<AchievementUnlockEvent> AchievementUnlockEvent::Deserialize( _In_ const J
         
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonUInt64( json, "gamerscore", result.gamerscore, true));
 
-    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonInt(json, "xuid", result.xboxUserId, true));
-        
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonXuid(json, "xuid", result.xboxUserId, true));
+
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "extendedInfoUrl", result.m_deepLink, true));
 
-    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonDouble( json, "rarityPercentage", rarityPercentage, true));
-        
-    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString( json, "rarityCategory", rarityCategory, true));
-    
-    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonTimeT( json, "unlockTime", result.timeUnlocked));
+    // RarityPercentage and rarityCategory are only in payload version 2 so make them optional
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonDouble(json, "rarityPercentage", rarityPercentage, false));
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "rarityCategory", rarityCategory, false));
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonTimeT(json, "unlockTime", result.timeUnlocked));
 
     result.titleId = static_cast<uint32_t>(titleId);
     result.rarityPercentage = static_cast<float>(rarityPercentage);
@@ -153,7 +154,10 @@ Result<AchievementUnlockEvent> AchievementUnlockEvent::Deserialize( _In_ const J
     // strings for the C API
     result.achievementId = result.m_achievementId.c_str();
     result.achievementName = result.m_achievementName.c_str();
-    result.achievementDescription = result.m_achievementDescription.c_str();
+    if (!result.m_achievementDescription.empty())
+    {
+        result.achievementDescription = result.m_achievementDescription.c_str();
+    }
     result.achievementIcon = result.m_achievementIconUri.c_str();
     result.m_deepLink = result.m_deepLink.c_str();
 

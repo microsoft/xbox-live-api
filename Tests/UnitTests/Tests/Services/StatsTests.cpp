@@ -306,7 +306,7 @@ public:
         
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&requestWellFormed, xuids, scid, statNames](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&requestWellFormed, xuids, scid, statNames](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(requestUrl);
@@ -374,7 +374,7 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&requestWellFormed, xuids, scid, statNames](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&requestWellFormed, xuids, scid, statNames](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
         {
             UNREFERENCED_PARAMETER(mock);
             UNREFERENCED_PARAMETER(requestUrl);
@@ -449,7 +449,7 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&requestWellFormed, xuids, requestedStats](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&requestWellFormed, xuids, requestedStats](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(requestUrl);
@@ -527,7 +527,7 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&requestWellFormed, xuids, requestedStats](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&requestWellFormed, xuids, requestedStats](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
         {
             UNREFERENCED_PARAMETER(mock);
             UNREFERENCED_PARAMETER(requestUrl);
@@ -594,10 +594,10 @@ public:
 
         const uint32_t subId{ 321 };
         const char* statName{ "Stat" };
-        std::stringstream statsRtaUri;
+        xsapi_internal_stringstream statsRtaUri;
         statsRtaUri << statsServer << "/users/xuid(" << xuid << ")/scids/" << rtaScid << "/stats/" << statName;
 
-        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
         {
             if (uri == statsRtaUri.str())
             {

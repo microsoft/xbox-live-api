@@ -3,6 +3,11 @@
 #include "pch.h"
 #include "utils.h"
 #include "cpprest/json.h"
+#include "mem_hook.h"
+
+#include <iostream>
+#include <string>
+
 
 #if HC_PLATFORM == HC_PLATFORM_IOS
 #define E_NOT_VALID_STATE E_FAIL
@@ -205,6 +210,20 @@ void OnCmdHost(const std::vector<std::string>& cmdLineTokens)
     }
 }
 
+void OnCmdMemTrack(const std::vector<std::string>& cmdLineTokens)
+{
+    if (cmdLineTokens.size() < 2)
+    {
+        LogToScreen("Try: memtrack bool.  eg memtrack true");
+        return;
+    }
+
+    std::string enabledStr = cmdLineTokens[1];
+    bool enabled = (enabledStr == "true");
+    Data()->m_trackUnhookedMemory = enabled;
+    LogToScreen("TrackUnhookedMemory: %d", enabled);
+}
+
 void OnCmdJoin(const std::vector<std::string>& cmdLineTokens)
 {
     if (cmdLineTokens.size() < 2)
@@ -245,7 +264,7 @@ void OnCmdJoin(const std::vector<std::string>& cmdLineTokens)
     }
 }
 
-bool LoadFile(std::string fileNameInput)
+bool LoadFile(const std::string& fileNameInput)
 {
     std::string strFilePath = pal::FindFile(fileNameInput);
     if (strFilePath.empty())
@@ -304,6 +323,46 @@ void WaitForXalCleanup()
     }
 }
 
+void APIRunner_CleanupLeakCheck()
+{
+    auto memHook = GetApiRunnerMemHook();
+    memHook->LogStats("CleanupLeakCheck");
+    if (Data()->xboxLiveContext)
+    {
+        XblContextCloseHandle(Data()->xboxLiveContext);
+        Data()->xboxLiveContext = nullptr;
+    }
+    memHook->LogStats("CleanupLeakCheck post-XblContextCloseHandle");
+    if (Data()->xalUser)
+    {
+        XalUserCloseHandle(Data()->xalUser);
+        Data()->xalUser = nullptr;
+    }
+    memHook->LogStats("CleanupLeakCheck post-XalUserCloseHandle");
+
+    XAsyncBlock block{};
+    HRESULT hr = XblCleanupAsync(&block);
+    if (SUCCEEDED(hr))
+    {
+        hr = XAsyncGetStatus(&block, true);
+    }
+    memHook->LogStats("CleanupLeakCheck post-XblCleanupAsync");
+
+    hr = XalCleanupAsync(&block);
+    if (SUCCEEDED(hr))
+    {
+        hr = XAsyncGetStatus(&block, true);
+    }
+
+    if (Data()->queue != nullptr)
+    {
+        XTaskQueueCloseHandle(Data()->queue);
+        Data()->queue = nullptr;
+    }
+    memHook->LogStats("CleanupLeakCheck post-XalCleanupAsync");
+    memHook->LogLeaks();
+}
+
 HRESULT RunTestWithoutCleanup(const std::string& scriptName)
 {
     assert(!scriptName.empty());
@@ -335,7 +394,6 @@ HRESULT RunTestInternal(std::string testName, bool overrideSkip)
         {
             CallLuaString("api = require 'u-test'; api.skipOverride = false;");
         }
-
 
         RunTestWithoutCleanup(testName);
     }
@@ -409,6 +467,27 @@ void EnableTestSet(TestSet set)
     }
 }
 
+void OnCmdFaultInjection(const std::vector<std::string>& cmdLineTokens)
+{
+    assert(cmdLineTokens.size() >= 2);
+    if (pal::stricmp(cmdLineTokens[1].c_str(), "user") == 0)
+    {
+        XblEnableFaultInjection(INJECTION_FEATURE_USER);
+    }
+    if (pal::stricmp(cmdLineTokens[1].c_str(), "http") == 0)
+    {
+        XblEnableFaultInjection(INJECTION_FEATURE_HTTP);
+    }
+    if (pal::stricmp(cmdLineTokens[1].c_str(), "options") == 0)
+    {
+        assert(cmdLineTokens.size() == 5);
+        int64_t failFreq = static_cast<int64_t>(atoi(cmdLineTokens[2].c_str()));
+        uint64_t freqChangeSpeed = static_cast<uint64_t>(atoi(cmdLineTokens[3].c_str()));
+        int64_t freqChangeAmount = static_cast<int64_t>(atoi(cmdLineTokens[4].c_str()));
+        XblSetFaultInjectOptions(failFreq, freqChangeSpeed, freqChangeAmount);
+    }
+}
+
 void OnCmdRunScript(const std::vector<std::string>& cmdLineTokens)
 {
     assert(cmdLineTokens.size() == 2);
@@ -451,6 +530,11 @@ HRESULT RunTestsHelper(TestSet set)
     SetupLua();
 
     LogToScreen("Signing in silent if possible");
+    if (Data()->m_trackUnhookedMemory)
+    {
+        auto memHook = GetApiRunnerMemHook();
+        memHook->StartMemTracking();
+    }
 
     HRESULT hr = RunSetupScript();
     if (FAILED(hr))
@@ -489,7 +573,7 @@ HRESULT RunTestsHelper(TestSet set)
                 continue;
         }
 
-        if (Data()->m_minFileNumber > 0 && Data()->m_maxFileNumber > 0)
+        if (Data()->m_minFileNumber > 0 || Data()->m_maxFileNumber > 0)
         {
             // Skip files outside range
             if (iFileNumber < Data()->m_minFileNumber ||
@@ -533,6 +617,12 @@ HRESULT RunTestsHelper(TestSet set)
         }
 #endif
         Data()->m_wasTestSkipped = false;
+    }
+
+    if (Data()->m_trackUnhookedMemory)
+    {
+        auto memHook = GetApiRunnerMemHook();
+        memHook->LogUnhookedStats();
     }
 
     CallLuaString("test.summary()");
@@ -803,6 +893,12 @@ HRESULT ApiRunnerRunTestWithSetup(std::string testName, bool repeat)
         return E_UNEXPECTED;
     }
 
+    if (Data()->m_trackUnhookedMemory)
+    {
+        auto memHook = GetApiRunnerMemHook();
+        memHook->StartMemTracking();
+    }
+
     Data()->m_runningTests = true;
     SetupLua();
     HRESULT hr = RunSetupScript();
@@ -829,6 +925,13 @@ HRESULT ApiRunnerRunTestWithSetup(std::string testName, bool repeat)
             hr = RunTestInternal(testName, true);
         }
     }
+
+    if (Data()->m_trackUnhookedMemory)
+    {
+        auto memHook = GetApiRunnerMemHook();
+        memHook->LogUnhookedStats();
+    }
+
     CleanupLua();
     Data()->m_runningTests = false;
 
@@ -865,12 +968,27 @@ bool IsFailHr(HRESULT hr)
     return true;
 }
 
+void OutputDebugStackTrace(std::vector<std::string> stackTrace)
+{   
+    LogToScreen("----------- BEGIN STACK TRACE -----------");
+    for (std::string stack_string : stackTrace)
+    {
+        LogToScreen(stack_string.c_str());
+    }
+    LogToScreen("----------- END STACK TRACE -----------");
+}
+
 void LuaStopTestIfFailed(HRESULT hr)
 {
     Data()->m_lastError = hr;
     if (FAILED(hr) && Data()->m_checkHR)
     {
         char text[1024];
+
+        auto memHook = GetApiRunnerMemHook();
+        std::vector<std::string> stackTrace = memHook->GetStackLogLine();
+        OutputDebugStackTrace(stackTrace);
+
         sprintf_s(text, "local hr = 0x%0.8x; test.equal_no_log(hr, 0); test.stopTest();", hr);
         std::lock_guard<std::recursive_mutex> lock(Data()->m_luaLock);
         if (Data()->L != nullptr)
@@ -1043,12 +1161,13 @@ void SetupCommands()
     Data()->m_commands.push_back({ "rts", OnCmdRunTests, true });
     Data()->m_commands.push_back({ "run", OnCmdRunTests, true });
     Data()->m_commands.push_back({ "runbvts", OnCmdRunBvts, false });
-    Data()->m_commands.push_back({ "runscript", OnCmdRunScript, true });
-    Data()->m_commands.push_back({ "rs", OnCmdRunScript, true });
+    Data()->m_commands.push_back({ "runbarescript", OnCmdRunScript, true });
+    Data()->m_commands.push_back({ "faultinjection", OnCmdFaultInjection, true });
 
     Data()->m_commands.push_back({ "host", OnCmdHost, true });
     Data()->m_commands.push_back({ "join", OnCmdJoin, true });
     Data()->m_commands.push_back({ "runmultidevicetests", OnCmdMultiDeviceTests, true });
+    Data()->m_commands.push_back({ "memtrack", OnCmdMemTrack, true });
 }
 
 bool ApiRunnerIsRunningTests()

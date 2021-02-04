@@ -3,6 +3,15 @@
 #include "pch.h"
 #include <atomic>
 
+#if HC_PLATFORM_IS_MICROSOFT
+#pragma warning( push )
+#pragma warning( disable : 4365 )
+#pragma warning( disable : 4061 )
+#pragma warning( disable : 4996 )
+#endif
+
+#include "rapidjson/document.h"
+
 static std::thread s_doWorkThread{};
 static std::atomic<bool> s_doWork{ false };
 
@@ -168,17 +177,15 @@ HRESULT MultiplayerManagerDoWork()
                 auto h = events[i].Result;
                 if (SUCCEEDED(h))
                 {
-                    h = S_OK;
-                }
+                    // Handle UserAdded
+                    uint64_t xuid = 0;
+                    hr = XblMultiplayerEventArgsXuid(events[i].EventArgsHandle, &xuid);
+                    assert(SUCCEEDED(hr));
 
-                // Handle UserAdded
-                uint64_t xuid = 0;
-                hr = XblMultiplayerEventArgsXuid(events[i].EventArgsHandle, &xuid);
-                assert(SUCCEEDED(hr));
-            
-                CheckMemberFound(events[i].SessionType, xuid);
-            
-                LogToScreen("XblMultiplayerManagerDoWork event XblMultiplayerEventType::UserAdded. XUID: %llu", static_cast<unsigned long long>(xuid)); // CODE SNIP SKIP
+                    CheckMemberFound(events[i].SessionType, xuid);
+                    LogToScreen("XblMultiplayerManagerDoWork event XblMultiplayerEventType::UserAdded. XUID: %llu", static_cast<unsigned long long>(xuid)); // CODE SNIP SKIP
+                }
+           
                 CallLuaFunctionWithHr(events[i].Result, "OnXblMultiplayerEventType_UserAdded"); // CODE SNIP SKIP
                 break;
             }
@@ -212,10 +219,13 @@ HRESULT MultiplayerManagerDoWork()
                 hr = XblMultiplayerEventArgsXuid(events[i].EventArgsHandle, &xuid);
                 assert(SUCCEEDED(hr));
 
-                CheckMemberFound(events[i].SessionType, xuid);
+                if (SUCCEEDED(events[i].Result))
+                {
+                    CheckMemberFound(events[i].SessionType, xuid);
 
-                hr = events[i].Result == __HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND) ? S_OK : events[i].Result;
-                LogToScreen("XblMultiplayerManagerDoWork event XblMultiplayerEventType::JoinLobbyCompleted"); // CODE SNIP SKIP
+                    hr = events[i].Result == __HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND) ? S_OK : events[i].Result;
+                    LogToScreen("XblMultiplayerManagerDoWork event XblMultiplayerEventType::JoinLobbyCompleted"); // CODE SNIP SKIP
+                }
                 CallLuaFunctionWithHr(hr, "OnXblMultiplayerEventType_JoinLobbyCompleted"); // CODE SNIP SKIP
                 break;
             }
@@ -433,6 +443,9 @@ HRESULT MultiplayerManagerDoWork()
                 break;
             }
 
+            case XblMultiplayerEventType::TournamentRegistrationStateChanged:
+            case XblMultiplayerEventType::TournamentGameSessionReady:
+            case XblMultiplayerEventType::ArbitrationComplete:
             default:
             {
                 LogToScreen("Received MPM event of type %u, hr=%s", events[i].EventType, ConvertHR(events[i].Result).data()); // CODE SNIP SKIP
@@ -1323,3 +1336,6 @@ void SetupAPIs_XblMultiplayerManager()
     lua_register(Data()->L, "VerifyMPMLobbySessionProperites", VerifyMPMLobbySessionProperites_Lua);
 }
 
+#if HC_PLATFORM_IS_MICROSOFT
+#pragma warning( pop )
+#endif

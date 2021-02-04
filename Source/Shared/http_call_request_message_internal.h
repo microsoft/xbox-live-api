@@ -69,12 +69,12 @@ public:
     /// <summary>
     /// The http request message if it is a string type.
     /// </summary>
-    inline _XSAPIIMP const string_t& request_message_string() const;
+    inline _XSAPIIMP const xsapi_internal_string& request_message_string() const;
 
     /// <summary>
     /// The http request message if it is a buffer.
     /// </summary>
-    inline _XSAPIIMP const std::vector<unsigned char>& request_message_vector() const;
+    inline _XSAPIIMP const xsapi_internal_vector<unsigned char>& request_message_vector() const;
 
     /// <summary>
     /// The type of message.
@@ -82,8 +82,8 @@ public:
     inline _XSAPIIMP http_request_message_type get_http_request_message_type() const;
 
 private:
-    std::vector<unsigned char> m_requestMessageVector;
-    string_t m_requestMessageString;
+    xsapi_internal_vector<unsigned char> m_requestMessageVector;
+    xsapi_internal_string m_requestMessageString;
     http_request_message_type m_httpRequestMessageType;
 };
 

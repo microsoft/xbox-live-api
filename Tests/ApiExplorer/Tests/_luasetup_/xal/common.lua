@@ -20,11 +20,28 @@ end
 function common.OnXalTryAddFirstUserSilentlyAsync()
     local hr = GetLastError()
     if hr == 0 then
-        XblContextCreateHandle()
-        XalUserGetGamertag()
-        XalUserGetId()
+        print("SignInSilently Succeeded. Creating XblContext")
+        hr = XblContextCreateHandle()
+        if hr == 0 then
+            XalUserGetGamertag()
+            XalUserGetId()
+        else
+            if GetCheckHR() == true then 
+                test.stopTest();
+            else
+                SetCheckHR(1)
+            end
+        end
+        common.functionAddFirstAsync()
+    else 
+        print("SignInSilently Failed")
+        if GetCheckHR() == true then 
+            test.stopTest();
+        else
+            SetCheckHR(1)
+            common.functionAddFirstAsync()
+        end
     end
-    common.functionAddFirstAsync()
 end
 
 return common

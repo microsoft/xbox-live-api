@@ -5,6 +5,11 @@
 #include <Xal/xal.h>
 #endif
 
+// internal test-only APIs
+#define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN                     namespace xbox { namespace services {
+#define NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END                       }}
+#include "../Source/Shared/fault_injection.h"
+
 #define VERIFY_IS_TRUE(x, y) if (SUCCEEDED(hr)) { hr = VerifyIsTrue(x, y); }
 #define ENSURE_IS_TRUE(x, y) if (FAILED(VerifyIsTrue(x, y))) return LuaReturnHR(L, E_ABORT);
 

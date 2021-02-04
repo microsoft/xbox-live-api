@@ -109,7 +109,7 @@ private:
     web::json::value m_responseBodyJson;
     std::vector<unsigned char> m_responseBodyVector;
     web::http::http_headers m_responseHeaders;
-    uint32_t m_httpStatus;
+    uint32_t m_httpStatus{ 0 };
     std::error_code m_errorCode;
     std::string m_errMessage;
 
@@ -242,8 +242,8 @@ private:
     string_t m_httpMethod;
     string_t m_serverName;
     web::uri m_pathQueryFragment;
-    bool m_longHttpCall;
-    bool m_retryAllowed;
+    bool m_longHttpCall{ false };
+    bool m_retryAllowed{ false };
 };
 
 }

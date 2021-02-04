@@ -28,6 +28,7 @@ using namespace utility;
 #if HC_PLATFORM_IS_MICROSOFT
 #pragma warning( push )
 #pragma warning( disable : 28020 ) // ignore expression validation
+#pragma warning( disable : 4365 )  
 #endif
 
 std::vector<unsigned char> _from_base64(const utility::string_t& str);

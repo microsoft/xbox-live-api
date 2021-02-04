@@ -5,6 +5,7 @@
 
 #include "service_call_routed_handler.h"
 #include "local_storage.h"
+#include "fault_injection.h"
 
 #if HC_PLATFORM == HC_PLATFORM_GDK
 #include <appnotify.h>
@@ -15,37 +16,24 @@
 // for UnitTests, but it can be enabled for debugging in other situations as well.
 #define TRACK_ASYNC XSAPI_UNIT_TESTS
 
-NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
-
 // Forward declarations
-namespace achievements
-{
-    namespace manager
-    {
-        class AchievementsManager;
-    }
-}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_ACHIEVEMENTS_MANAGER_CPP_BEGIN
+    class AchievementsManager;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_ACHIEVEMENTS_MANAGER_CPP_END
 
-namespace multiplayer 
-{
-    namespace manager
-    {
-        class MultiplayerManager;
-    }
-}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
+    class MultiplayerManager;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_END
 
-namespace social
-{
-    namespace manager
-    {
-        class SocialManager;
-    }
-}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
+    class SocialManager;
+NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_END
 
-namespace real_time_activity
-{
+NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_BEGIN
     class RealTimeActivityManager;
-}
+NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_END
+
+NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 #if HC_PLATFORM == HC_PLATFORM_GDK
 typedef Function<void(bool isSuspended)> AppChangeNotificationHandler;
@@ -84,24 +72,33 @@ public:
 
     std::shared_ptr<system::LocalStorage> LocalStorage() const noexcept;
 
+    std::shared_ptr<AppConfig> AppConfig() const noexcept;
+
+    std::shared_ptr<logger> Logger() const noexcept;
+ 
 #if HC_PLATFORM == HC_PLATFORM_GDK
     XblFunctionContext AddAppChangeNotificationHandler(
-        _In_ AppChangeNotificationHandler routine);
-
-    static void AppStateChangeNotificationReceived(
-        BOOLEAN quiesced,
-        PVOID context
-    );
+        _In_ AppChangeNotificationHandler routine
+    ) noexcept;
 
     void RemoveAppChangeNotificationHandler(
         _In_ XblFunctionContext token
     ) noexcept;
 #endif
 
-    // TODO making this a wrapper of xsapi_singleton for now. It properly manages the lifetime of the global state
-    // and enables asyncronous cleanup. Goal is to eventually move the necessary state from xsapi_singleton into this class
-    // and get rid of xsapi_singleton altogether.
-    std::shared_ptr<struct xsapi_singleton> singleton;
+#if HC_PLATFORM == HC_PLATFORM_XDK
+    // On XDK, offline achievements are driven by ETX. 
+    // The AchievementsService will create one ETX provider per XSAPI session (when needed) using these properties.
+    const String& AchievementsProviderName() const noexcept;
+    const GUID& AchievementsSessionId() const noexcept;
+#endif
+
+    const String& Locales() const noexcept;
+    void OverrideLocales(String&& locales) noexcept;
+
+    // API Type to be used in HTTP requests so they are identifiable in traces.
+    // TODO consider configuring this with XblInitArgs
+    XblApiType ApiType{ XblApiType::XblCApi };
 
 #if TRACK_ASYNC
     std::mutex asyncBlocksMutex{};
@@ -121,9 +118,23 @@ private:
     std::shared_ptr<real_time_activity::RealTimeActivityManager> m_rtaManager;
     std::shared_ptr<system::LocalStorage> m_localStorage;
     Set<uint64_t> m_userExpiredTokens;
+
     UnorderedMap<uint64_t, std::shared_ptr<UserChangeEventHandler>> m_userChangeHandlers;
     XblFunctionContext m_nextHandlerToken{ 0 };
-    xsapi_internal_unordered_map<XblFunctionContext, std::shared_ptr<ServiceCallRoutedHandler>> m_callRoutedHandlers;
+    UnorderedMap<XblFunctionContext, std::shared_ptr<ServiceCallRoutedHandler>> m_callRoutedHandlers;
+
+    String m_locales{ "en-US" };
+
+    // from Shared\xbox_live_app_config.cpp
+    const std::shared_ptr<xbox::services::AppConfig> m_appConfig;
+
+    // from Shared\Logger\log.cpp
+    const std::shared_ptr<logger> m_logger;
+
+#if HC_PLATFORM == HC_PLATFORM_XDK
+    String m_achivementsEventProviderName;
+    GUID m_achievementsSessionId{};
+#endif
 
 #if HC_PLATFORM == HC_PLATFORM_GDK
     XblFunctionContext m_nextAppChangeHandlerToken{ 0 };
@@ -147,7 +158,12 @@ private:
 
 #if HC_PLATFORM == HC_PLATFORM_GDK
     // Holds the registration ID for receiving App State Notifications (aka Quick Resume)
-     PAPPSTATE_REGISTRATION m_registrationID;
+    PAPPSTATE_REGISTRATION m_registrationID;
+
+    static void AppStateChangeNotificationReceived(
+        BOOLEAN quiesced,
+        PVOID context
+    );
 #endif
 };
 

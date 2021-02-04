@@ -15,6 +15,7 @@ class AppConfig : public std::enable_shared_from_this<AppConfig>
 public:
     AppConfig() = default;
 
+    // TODO Remove. Unsafe method - returns null if GlobalState doesn't exist and is unchecked by callers
     static std::shared_ptr<AppConfig> Instance();
 
 #if HC_PLATFORM == HC_PLATFORM_UWP || HC_PLATFORM == HC_PLATFORM_XDK

@@ -6,8 +6,6 @@
 #if XSAPI_WRL_EVENTS_SERVICE
 
 #include "events_service_etw.h"
-#include "service_call_logger_data.h"
-#include "service_call_logger.h"
 
 #include <initguid.h>
 #include <wrl.h>
@@ -160,23 +158,6 @@ HRESULT EventsService::WriteInGameEventHelper(
 {
     try
     {
-        //Log service call
-        if (xbox::services::service_call_logger::get_singleton_instance()->is_enabled())
-        {
-            std::shared_ptr<service_call_logger> tracker = service_call_logger::get_singleton_instance();
-
-            service_call_logger_data logData(
-                m_user.Xuid(),
-                eventName,
-                m_playSession,
-                JsonUtils::SerializeJson(dimensions),
-                JsonUtils::SerializeJson(measurements),
-                chrono_clock_t::now()
-            );
-
-            tracker->log(logData.to_string());
-        }
-
         auto fields = CreateLoggingFields(eventName, dimensions, measurements);
 
         //m_loggingChannel->loge
@@ -225,8 +206,8 @@ ComPtr<ILoggingFields> EventsService::CreateLoggingFields(
         fields->BeginStruct(HStringReference(L"properties").Get());
         for (const auto& jsonPair : dimensions.GetObject())
         {
-            std::pair<string_t, JsonDocument> pair;
-            pair.first = utils::string_t_from_internal_string(jsonPair.name.GetString());
+            std::pair<xsapi_internal_string, JsonDocument> pair;
+            pair.first = jsonPair.name.GetString();
             JsonUtils::CopyFrom(pair.second, jsonPair.value);
             AddValuePair(fields, pair);
         }
@@ -239,8 +220,8 @@ ComPtr<ILoggingFields> EventsService::CreateLoggingFields(
         fields->BeginStruct(HStringReference(L"measurements").Get());
         for (const auto& jsonPair : measurements.GetObject())
         {
-            std::pair<string_t, JsonDocument> pair;
-            pair.first = utils::string_t_from_internal_string(jsonPair.name.GetString());
+            std::pair<xsapi_internal_string, JsonDocument> pair;
+            pair.first = jsonPair.name.GetString();
             JsonUtils::CopyFrom(pair.second, jsonPair.value);
             AddValuePair(fields, pair);
         }
@@ -254,21 +235,22 @@ ComPtr<ILoggingFields> EventsService::CreateLoggingFields(
 
 void EventsService::AddValuePair(
     _Inout_ Microsoft::WRL::ComPtr<ABI::Windows::Foundation::Diagnostics::ILoggingFields> fields,
-    _In_ const std::pair<string_t, JsonDocument>& pair
+    _In_ const std::pair<xsapi_internal_string, JsonDocument>& pair
 )
 {
     // check property name.
     const auto& name = pair.first;
     THROW_CPP_INVALIDARGUMENT_IF_STRING_EMPTY(name);
 
-    regex_t regex(L"[A-Za-z]+[A-Za-z0-9]*");
+    std::regex regex("[A-Za-z]+[A-Za-z0-9]*");
     bool matchFound = std::regex_match(name, regex);
     if (!matchFound)
     {
         throw std::invalid_argument("Invalid properties or measurements name");
     }
 
-    HStringReference propertyName{ name.data() };
+    auto s = utility::conversions::utf8_to_utf16(name.data());
+    HStringReference propertyName{ s.c_str() };
 
     const auto& value = pair.second;
     switch (value.GetType())

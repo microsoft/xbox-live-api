@@ -48,7 +48,7 @@ struct ServiceCallManager : public std::enable_shared_from_this<ServiceCallManag
 
     // Get PeopleHub profiles for all followed users. Non-batched, but service failures will be retried
     // automatically. Result delivered via 'handler' arg
-    HRESULT PeopleHubGetFollwedUsers(PeopleHubResultHandler handler) const noexcept;
+    HRESULT PeopleHubGetFollowedUsers(PeopleHubResultHandler handler) const noexcept;
 
 private:
     HRESULT PollPresenceServiceCall(std::unique_lock<std::mutex> lock) noexcept;
@@ -145,7 +145,11 @@ Result<std::shared_ptr<SocialGraph>> SocialGraph::Make(
         return userResult.Hresult();
     }
 
-    auto graph = std::shared_ptr<SocialGraph>(new (Alloc(sizeof(SocialGraph))) SocialGraph{ userResult.ExtractPayload(), queue, rtaManager });
+    auto graph = std::shared_ptr<SocialGraph>(
+        new (Alloc(sizeof(SocialGraph))) SocialGraph{ userResult.ExtractPayload(), queue, rtaManager },
+        Deleter<SocialGraph>(),
+        Allocator<SocialGraph>()
+    );
     auto hr = graph->Initialize();
     if (FAILED(hr))
     {
@@ -188,7 +192,7 @@ Result<std::shared_ptr<SocialGraph>> SocialGraph::Make(
     {
         if (auto graph{ weakGraph.lock() })
         {
-            graph->m_serviceCallManager->PeopleHubGetFollwedUsers([weakGraph](Vector<XblSocialManagerUser>&& profiles)
+            graph->m_serviceCallManager->PeopleHubGetFollowedUsers([weakGraph](Vector<XblSocialManagerUser>&& profiles)
             {
                 if (auto graph{ weakGraph.lock() })
                 {
@@ -299,8 +303,8 @@ std::shared_ptr<User> SocialGraph::LocalUser() const noexcept
 }
 
 void SocialGraph::DoWork(
-    _Out_ Vector<XblSocialManagerEvent>& events,
-    _Out_ Vector<std::shared_ptr<XblSocialManagerUser>>& affectedUsers
+    _Inout_ Vector<XblSocialManagerEvent>& events,
+    _Inout_ Vector<std::shared_ptr<XblSocialManagerUser>>& affectedUsers
 ) noexcept
 {
     PERF_START();
@@ -621,8 +625,8 @@ void SocialGraph::AddOrUpdateEvent(
 }
 
 void SocialGraph::ApplyGraphUpdates(
-    _Out_ Vector<XblSocialManagerEvent>& events,
-    _Out_ Vector<std::shared_ptr<XblSocialManagerUser>>& affectedUsers
+    _Inout_ Vector<XblSocialManagerEvent>& events,
+    _Inout_ Vector<std::shared_ptr<XblSocialManagerUser>>& affectedUsers
 ) noexcept
 {
     PERF_START();
@@ -828,7 +832,7 @@ HRESULT ServiceCallManager::PollPeopleHub(const Vector<uint64_t>& xuids) noexcep
     return S_OK;
 }
 
-HRESULT ServiceCallManager::PeopleHubGetFollwedUsers(PeopleHubResultHandler handler) const noexcept
+HRESULT ServiceCallManager::PeopleHubGetFollowedUsers(PeopleHubResultHandler handler) const noexcept
 {
     return m_peoplehubService->GetSocialGraph(m_localUserXuid, m_peoplehubDetailLevel, { m_queue,
         [
@@ -844,7 +848,7 @@ HRESULT ServiceCallManager::PeopleHubGetFollwedUsers(PeopleHubResultHandler hand
             {
                 if (auto sharedThis{ weakThis.lock() })
                 {
-                    PeopleHubGetFollwedUsers(handler);
+                    PeopleHubGetFollowedUsers(handler);
                 }
             }, c_failureRetryIntervalMs);
         }

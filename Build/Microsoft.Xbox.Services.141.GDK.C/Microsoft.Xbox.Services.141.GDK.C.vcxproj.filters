@@ -295,13 +295,13 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\errors.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\fault_injection.cpp">
+      <Filter>C++ Source\Shared</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\global_state.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_api.cpp">
-      <Filter>C++ Source\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_legacy.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_request_message.cpp">
@@ -334,19 +334,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\ref_counter.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger.cpp">
-      <Filter>C++ Source\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_data.cpp">
-      <Filter>C++ Source\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logging_config.cpp">
-      <Filter>C++ Source\Shared</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_routed_handler.cpp">
-      <Filter>C++ Source\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user.cpp">
@@ -364,20 +352,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_app_config.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_services_settings.cpp">
-      <Filter>C++ Source\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.cpp">
-      <Filter>C++ Source\Shared</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xsapi_json_utils.cpp">
       <Filter>C++ Source\Shared</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xsapi_utils.cpp">
       <Filter>C++ Source\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\auth_config.cpp">
-      <Filter>C++ Source\System</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\local_storage.cpp">
       <Filter>C++ Source\System</Filter>
@@ -651,10 +630,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\errors_legacy.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\global_state.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\fault_injection.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_legacy.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\global_state.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\http_call_request_message_internal.h">
@@ -693,18 +672,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\ref_counter.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger.h">
-      <Filter>C++ Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_data.h">
-      <Filter>C++ Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logger_protocol.h">
-      <Filter>C++ Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_logging_config.h">
-      <Filter>C++ Source\Shared</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\service_call_routed_handler.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
@@ -712,9 +679,6 @@
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\string_array.h">
-      <Filter>C++ Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\telemetry.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\user.h">
@@ -726,28 +690,16 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_app_config_internal.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_live_services_settings.h">
-      <Filter>C++ Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xbox_system_factory.h">
-      <Filter>C++ Source\Shared</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xsapi_json_utils.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Shared\xsapi_utils.h">
       <Filter>C++ Source\Shared</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\auth_config.h">
-      <Filter>C++ Source\System</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\client_operation.h">
       <Filter>C++ Source\System</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\local_storage.h">
-      <Filter>C++ Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\System\ppltasks_extra.h">
       <Filter>C++ Source\System</Filter>
     </ClInclude>
   </ItemGroup>

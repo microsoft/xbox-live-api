@@ -6,6 +6,16 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
+std::shared_ptr<logger> logger::get_logger()
+{
+    auto state = GlobalState::Get();
+    if (state)
+    {
+        return state->Logger();
+    }
+    return nullptr;
+}
+
 void logger::add_log_output(std::shared_ptr<log_output> output)
 {
     m_log_outputs.emplace_back(output); 

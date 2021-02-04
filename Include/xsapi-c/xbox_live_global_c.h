@@ -90,7 +90,7 @@ STDAPI XblMemSetFunctions(
 /// </summary>
 /// <param name="memAllocFunc">Set to the current allocation callback.  
 /// Returns the default routine if not previously set.</param>
-/// <param name="memFreeFunc">Set to the to the current memory free callback.  
+/// <param name="memFreeFunc">Set to the current memory free callback.  
 /// Returns the default routine if not previously set.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
@@ -120,7 +120,9 @@ typedef struct XblInitArgs
 #if !(HC_PLATFORM == HC_PLATFORM_XDK || HC_PLATFORM == HC_PLATFORM_UWP)
 
     /// <summary>
-    /// The service configuration Id for the app.
+    /// The Service Configuration ID (SCID) for the app.
+    /// You can find it on Partner Center in the Game Setup page under Identity details.
+    /// This string is considered case sensitive so paste it directly from the Partner Center
     /// </summary>
     _Field_z_ const char* scid;
 
@@ -270,7 +272,7 @@ enum class XblConfigSetting : uint32_t
 /// <param name="setting">The config settings value to be passed down.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// The asserts will not fire in RETAIL sandbox, and this setting has has no affect in RETAIL sandboxes.  
+/// The asserts will not fire in RETAIL sandbox, and this setting has no affect in RETAIL sandboxes.  
 /// It is best practice to not call this API, and instead adjust the calling pattern but this is provided 
 /// as a temporary way to get unblocked while in early stages of game development.
 /// </remarks>
@@ -279,9 +281,9 @@ STDAPI_(void) XblDisableAssertsForXboxLiveThrottlingInDevSandboxes(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// For advanced scenarios where a common scid and title Id are needed for cross platform experiences.
+/// For advanced scenarios where a common Service Configuration ID (SCID) and title Id are needed for cross platform experiences.
 /// </summary>
-/// <param name="overrideScid">Override scid to be used by multiplayer manager.</param>
+/// <param name="overrideScid">Override Service Configuration ID (SCID) to be used by multiplayer manager. This SCID is considered case sensitive so paste it directly from the Partner Center</param>
 /// <param name="overrideTitleId">Override title Id to be used by multiplayer manager.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>

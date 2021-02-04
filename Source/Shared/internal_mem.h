@@ -113,6 +113,16 @@ using BasicStringsteam = std::basic_stringstream<C, TRAITS, Allocator<C>>;
 using Stringstream = BasicStringsteam<char>;
 using WStringstream = BasicStringsteam<wchar_t>;
 
+template<class C, class TRAITS = std::char_traits<C>>
+using BasicIStringsteam = std::basic_istringstream<C, TRAITS, Allocator<C>>;
+using IStringstream = BasicIStringsteam<char>;
+using WIStringstream = BasicIStringsteam<wchar_t>;
+
+template<class C, class TRAITS = std::char_traits<C>>
+using BasicOStringsteam = std::basic_ostringstream<C, TRAITS, Allocator<C>>;
+using OStringstream = BasicOStringsteam<char>;
+using WOStringstream = BasicOStringsteam<wchar_t>;
+
 template<class T>
 using Deque = std::deque<T, Allocator<T>>;
 
@@ -226,7 +236,7 @@ inline void DeleteArray(T* arrayPtr, size_t elementCount)
     {
         arrayPtr[i].~T();
     }
-    Free(arrayPtr);
+    Free(arrayPtr, 0);
 }
 
 inline char** MakeArray(const Vector<String>& vector)
@@ -282,6 +292,25 @@ using xsapi_internal_wstring = xbox::services::WString;
 
 using xsapi_internal_stringstream = xbox::services::Stringstream;
 using xsapi_internal_wstringstream = xbox::services::WStringstream;
+
+using xsapi_internal_istringstream = xbox::services::IStringstream;
+using xsapi_internal_wistringstream = xbox::services::WIStringstream;
+
+using xsapi_internal_ostringstream = xbox::services::OStringstream;
+using xsapi_internal_wostringstream = xbox::services::WOStringstream;
+
+#ifdef _WIN32
+using xsapi_internal_string_t = xbox::services::WString;
+using xsapi_internal_stringstream_t = xbox::services::WStringstream;
+using xsapi_internal_istringstream_t = xbox::services::WIStringstream;
+using xsapi_internal_ostringstream_t = xbox::services::WOStringstream;
+#else
+using xsapi_internal_string_t = xbox::services::String;
+using xsapi_internal_stringstream_t = xbox::services::Stringstream;
+using xsapi_internal_istringstream_t = xbox::services::IStringstream;
+using xsapi_internal_ostringstream_t = xbox::services::OStringstream;
+#endif
+
 
 template<class T>
 using xsapi_internal_dequeue = xbox::services::Deque<T>;

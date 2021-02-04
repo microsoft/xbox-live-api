@@ -240,7 +240,7 @@ MultiplayerLobbyClient::ConvertToMultiplayerLobby(
         gameMembers.push_back(gameMember);
     }
 
-    return std::make_shared<MultiplayerLobbySession>(
+    return MakeShared<MultiplayerLobbySession>(
         sessionToConvert,
         hostMember,
         gameMembers,
@@ -333,7 +333,7 @@ MultiplayerLobbyClient::AddLocalUser(
         localUser = localUserResult.ExtractPayload();
     }
 
-    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    auto pendingRequest = MakeShared<MultiplayerClientPendingRequest>();
     pendingRequest->SetLocalUser(localUser);
     pendingRequest->SetLobbyState(userState);
     if (userState == MultiplayerLocalUserLobbyState::Join)
@@ -383,7 +383,7 @@ MultiplayerLobbyClient::RemoveLocalUser(
     auto localUser = m_multiplayerLocalUserManager->GetLocalUserHelper(user);
     RETURN_HR_IF_LOG_DEBUG(localUser == nullptr || localUser->Context() == nullptr, E_UNEXPECTED, "Call add_local_user() first.");
 
-    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    auto pendingRequest = MakeShared<MultiplayerClientPendingRequest>();
     pendingRequest->SetLocalUser(localUser);
     pendingRequest->SetLobbyState(MultiplayerLocalUserLobbyState::Leave);
     AddToPendingQueue(pendingRequest);
@@ -404,7 +404,7 @@ MultiplayerLobbyClient::RemoveAllLocalUsers()
             const auto& localUser = xboxLiveContext.second;
             if (localUser != nullptr)
             {
-                auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+                auto pendingRequest = MakeShared<MultiplayerClientPendingRequest>();
                 pendingRequest->SetLocalUser(localUser);
                 pendingRequest->SetLobbyState(MultiplayerLocalUserLobbyState::Leave);
                 AddToPendingQueue(pendingRequest);
@@ -427,7 +427,7 @@ MultiplayerLobbyClient::SetLocalMemberProperties(
     auto localUser = m_multiplayerLocalUserManager->GetLocalUserHelper(user);
     RETURN_HR_IF_LOG_DEBUG(localUser == nullptr || localUser->Context() == nullptr, E_UNEXPECTED, "Call add_local_user() before setting local member properties.");
 
-    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    auto pendingRequest = MakeShared<MultiplayerClientPendingRequest>();
     pendingRequest->SetLocalUserProperties(localUser, name, valueJson, context);
     AddToPendingQueue(pendingRequest);
 
@@ -447,7 +447,7 @@ MultiplayerLobbyClient::DeleteLocalMemberProperties(
     auto localUser = m_multiplayerLocalUserManager->GetLocalUserHelper(user);
     RETURN_HR_IF_LOG_DEBUG(localUser == nullptr || localUser->Context() == nullptr, E_UNEXPECTED, "Call add_local_user() before deleting local member properties.");
 
-    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    auto pendingRequest = MakeShared<MultiplayerClientPendingRequest>();
     pendingRequest->SetLocalUserProperties(localUser, name, JsonValue(), context);
     AddToPendingQueue(pendingRequest);
 
@@ -467,7 +467,7 @@ MultiplayerLobbyClient::SetLocalMemberConnectionAddress(
     auto localUser = m_multiplayerLocalUserManager->GetLocalUserHelper(user);
     RETURN_HR_IF_LOG_DEBUG(localUser == nullptr || localUser->Context() == nullptr, E_UNEXPECTED, "Call add_local_user() before setting local member connection address.");
 
-    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    auto pendingRequest = MakeShared<MultiplayerClientPendingRequest>();
     pendingRequest->SetLocalUserConnectionAddress(localUser, address, context);
     AddToPendingQueue(pendingRequest);
 
@@ -481,7 +481,7 @@ HRESULT MultiplayerLobbyClient::SetJoinability(
 {
     RETURN_HR_INVALIDARGUMENT_IF(value < XblMultiplayerJoinability::JoinableByFriends || value > XblMultiplayerJoinability::Closed);
 
-    auto pendingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    auto pendingRequest = MakeShared<MultiplayerClientPendingRequest>();
     pendingRequest->SetJoinability(value, context);
     AddToPendingQueue(pendingRequest);
 
@@ -1358,7 +1358,7 @@ void MultiplayerLobbyClient::AdvertiseGameSession() noexcept
 
         void CreateTransferHandle(std::shared_ptr<XblMultiplayerSession> lobbySession) noexcept
         {
-            rapidjson::Document lobbyProperties;
+            JsonDocument lobbyProperties;
             {
                 XblMultiplayerSessionReadLockGuard lobbySessionSafe(lobbySession);
                 lobbyProperties.Parse(lobbySessionSafe.SessionProperties().SessionCustomPropertiesJson);
@@ -1533,18 +1533,22 @@ MultiplayerLobbyClient::IsTransferHandleState(
     }
 
     XblMultiplayerSessionReadLockGuard lobbySessionSafe(lobbySession);
-    auto lobbyProperties = ParseJson(lobbySessionSafe.SessionProperties().SessionCustomPropertiesJson);
-    auto propertyName = utils::string_t_from_internal_string(MultiplayerLobbyClient_TransferHandlePropertyName);
 
-    if (lobbyProperties.has_field(propertyName))
+    JsonDocument jsonDoc;
+    jsonDoc.Parse(lobbySessionSafe.SessionProperties().SessionCustomPropertiesJson);
+
+    if (!jsonDoc.HasParseError())
     {
-        auto transferHandleProp = utils::internal_string_from_string_t(lobbyProperties.at(propertyName).as_string());
-        xsapi_internal_vector<xsapi_internal_string> transferHandleSplit = utils::string_split(transferHandleProp, '~');
-
-        if (transferHandleSplit.size() > 0 &&
-            utils::str_icmp_internal(transferHandleSplit[0], state) == 0)
+        xsapi_internal_string transferHandleProp;
+        if (SUCCEEDED(JsonUtils::ExtractJsonString(jsonDoc, MultiplayerLobbyClient_TransferHandlePropertyName, transferHandleProp, true)))
         {
-            return true;
+            xsapi_internal_vector<xsapi_internal_string> transferHandleSplit = utils::string_split_internal(transferHandleProp, '~');
+
+            if (transferHandleSplit.size() > 0 &&
+                utils::str_icmp_internal(transferHandleSplit[0], state) == 0)
+            {
+                return true;
+            }
         }
     }
 
@@ -1561,22 +1565,26 @@ MultiplayerLobbyClient::GetTransferHandle()
     }
 
     XblMultiplayerSessionReadLockGuard lobbySessionSafe(lobbySession);
-    auto lobbyProperties = ParseJson(lobbySessionSafe.SessionProperties().SessionCustomPropertiesJson);
-    auto propertyName = utils::string_t_from_internal_string(MultiplayerLobbyClient_TransferHandlePropertyName);
+    JsonDocument jsonDoc;
+    jsonDoc.Parse(lobbySessionSafe.SessionProperties().SessionCustomPropertiesJson);
 
-    if (lobbyProperties.has_field(propertyName))
+    if (!jsonDoc.HasParseError())
     {
-        auto transferHandleProp = utils::internal_string_from_string_t(lobbyProperties.at(propertyName).as_string());
-        xsapi_internal_vector<xsapi_internal_string> transferHandleSplit = utils::string_split(transferHandleProp, '~');
-
-        if (transferHandleSplit.size() == 2)
+        xsapi_internal_string transferHandleProp;
+        if (SUCCEEDED(JsonUtils::ExtractJsonString(jsonDoc, MultiplayerLobbyClient_TransferHandlePropertyName, transferHandleProp, true)))
         {
-            return transferHandleSplit[1];
+            xsapi_internal_vector<xsapi_internal_string> transferHandleSplit = utils::string_split_internal(transferHandleProp, '~');
+
+            if (transferHandleSplit.size() == 2)
+            {
+                return transferHandleSplit[1];
+            }
         }
     }
 
     return xsapi_internal_string();
 }
+
 void
 MultiplayerLobbyClient::LeaveRemoteSession(
     _In_ std::shared_ptr<XblMultiplayerSession> session
@@ -1731,22 +1739,28 @@ MultiplayerLobbyClient::HandleJoinLobbyCompleted(
 
         // Join game via the transfer handle.
         XblMultiplayerSessionReadLockGuard lobbySessionSafe(lobbySession);
-        auto lobbyProperties = ParseJson(lobbySessionSafe.SessionProperties().SessionCustomPropertiesJson);
-        if (lobbyProperties.size() > 0)
+
+        JsonDocument lobbyProperties;
+        lobbyProperties.Parse(lobbySessionSafe.SessionProperties().SessionCustomPropertiesJson);
+
+        if (!lobbyProperties.HasParseError())
         {
-            xsapi_internal_string transferHandle;
-
-            if (IsTransferHandleState("completed"))
+            if (lobbyProperties.IsObject() && lobbyProperties.MemberCount() > 0)
             {
-                transferHandle = GetTransferHandle();
-            }
-            else
-            {
-                // No existing game session
-                return;
-            }
+                xsapi_internal_string transferHandle;
 
-            gameClient->JoinGameByHandle(transferHandle, false, nullptr);
+                if (IsTransferHandleState("completed"))
+                {
+                    transferHandle = GetTransferHandle();
+                }
+                else
+                {
+                    // No existing game session
+                    return;
+                }
+
+                gameClient->JoinGameByHandle(transferHandle, false, nullptr);
+            }
         }
     }
 }
@@ -1757,7 +1771,7 @@ MultiplayerLobbyClient::JoinLobbyCompleted(
     _In_ uint64_t invitedXboxUserId
     )
 {
-    std::shared_ptr<JoinLobbyCompletedEventArgs> joinLobbyEventArgs = std::make_shared<JoinLobbyCompletedEventArgs>(
+    std::shared_ptr<JoinLobbyCompletedEventArgs> joinLobbyEventArgs = MakeShared<JoinLobbyCompletedEventArgs>(
         invitedXboxUserId
         );
 

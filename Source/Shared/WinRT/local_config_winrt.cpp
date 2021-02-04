@@ -3,7 +3,6 @@
 
 #include "pch.h"
 #include "local_config.h"
-#include "xbox_system_factory.h"
 #include "xsapi_utils.h"
 
 using namespace std;
@@ -30,7 +29,7 @@ xbl_result<void> local_config::read()
 #if HC_PLATFORM == HC_PLATFORM_UWP
     Windows::ApplicationModel::Package^ package = Windows::ApplicationModel::Package::Current;
     Windows::Storage::StorageFolder^ installedLocation = package->InstalledLocation;
-    string_t configPath = string_t(installedLocation->Path->Data()) + _T("\\xboxservices.config");
+    xsapi_internal_string_t configPath = xsapi_internal_string_t(installedLocation->Path->Data()) + L"\\xboxservices.config";
 #elif HC_PLATFORM == HC_PLATFORM_WIN32
     // Don't rely on the current directory to be set correctly.
     // Instead assume xboxservices.config is next to the exe
@@ -42,15 +41,15 @@ xbl_result<void> local_config::read()
         *lastSlash = L'\0';
     }
 
-    stringstream_t path;
+    xsapi_internal_stringstream_t path;
     path << processPath << _T("\\xboxservices.config");
-    string_t configPath = path.str();
+    xsapi_internal_string_t configPath = path.str();
 #endif
 
-    string_t fileData = utils::read_file_to_string(configPath);
+    xsapi_internal_string_t fileData = utils::read_file_to_string(configPath);
     if( !fileData.empty() )
     {
-        m_jsonConfig.Parse(utils::internal_string_from_string_t(fileData).c_str());
+        m_jsonConfig.Parse(xbox::services::convert::to_utf8string(fileData).c_str());
         if (!m_jsonConfig.HasParseError())
         {
             return xbl_result<void>();

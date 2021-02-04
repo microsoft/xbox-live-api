@@ -25,6 +25,11 @@ using namespace web;
 using namespace web::json;
 using namespace utility::conversions;
 
+#if HC_PLATFORM_IS_MICROSOFT
+#pragma warning( push )
+#pragma warning( disable : 4365 )  
+#endif
+
 //
 // JSON Serialization
 //
@@ -261,3 +266,7 @@ utility::string_t json::value::serialize() const
 #endif
     return m_value->to_string();
 }
+
+#if HC_PLATFORM_IS_MICROSOFT
+#pragma warning( pop )
+#endif

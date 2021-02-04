@@ -19,7 +19,7 @@ STDAPI XblMultiplayerSessionReferenceParseFromUriPath(
     //   /      0       /  1   /      2        /           3           /    4    /    5
     //  /serviceconfigs/{scid}/sessiontemplates/{session-template-name}/sessions/{session-name}
 
-    xsapi_internal_vector<xsapi_internal_string> pathComponents = utils::string_split(xsapi_internal_string(path), '/');
+    xsapi_internal_vector<xsapi_internal_string> pathComponents = utils::string_split_internal(xsapi_internal_string(path), '/');
     if (pathComponents.size() < 6)
     {
         return E_INVALIDARG;
@@ -102,69 +102,5 @@ bool operator==(const XblMultiplayerSessionReference& lhs, const XblMultiplayerS
            utils::str_icmp(lhs.SessionName, rhs.SessionName) == 0 &&
            utils::str_icmp(lhs.SessionTemplateName, rhs.SessionTemplateName) == 0;
 }
-
-#if !XSAPI_NO_PPL
-namespace legacy
-{
-    multiplayer_session_reference::multiplayer_session_reference() : m_reference{}
-    {
-    }
-
-    multiplayer_session_reference::multiplayer_session_reference(
-        _In_ const string_t& serviceConfigurationId,
-        _In_ const string_t& sessionTemplateName,
-        _In_ const string_t& sessionName
-    )
-    {
-        Utf8FromCharT(serviceConfigurationId.data(), m_reference.Scid, sizeof(m_reference.Scid));
-        Utf8FromCharT(sessionTemplateName.data(), m_reference.SessionTemplateName, sizeof(m_reference.SessionTemplateName));
-        Utf8FromCharT(sessionName.data(), m_reference.SessionName, sizeof(m_reference.SessionName));
-    }
-
-    multiplayer_session_reference::multiplayer_session_reference(
-        _In_ const XblMultiplayerSessionReference& reference
-    )
-        : m_reference(reference)
-    {
-    }
-
-    string_t multiplayer_session_reference::service_configuration_id() const
-    {
-        return StringTFromUtf8(m_reference.Scid);
-    }
-
-    string_t multiplayer_session_reference::session_template_name() const
-    {
-        return StringTFromUtf8(m_reference.SessionTemplateName);
-    }
-
-    string_t multiplayer_session_reference::session_name() const
-    {
-        return StringTFromUtf8(m_reference.SessionName);
-    }
-
-    bool multiplayer_session_reference::is_null() const
-    {
-        return m_reference.Scid[0] == 0 ||
-            m_reference.SessionName[0] == 0 ||
-            m_reference.SessionTemplateName[0] == 0;
-    }
-
-    string_t multiplayer_session_reference::to_uri_path() const
-    {
-        XblMultiplayerSessionReferenceUri uri{};
-        XblMultiplayerSessionReferenceToUriPath(&m_reference, &uri);
-
-        return StringTFromUtf8(uri.value);
-    }
-
-    multiplayer_session_reference multiplayer_session_reference::parse_from_uri_path(_In_ const string_t& path)
-    {
-        XblMultiplayerSessionReference reference;
-        XblMultiplayerSessionReferenceParseFromUriPath(StringFromStringT(path).data(), &reference);
-        return multiplayer_session_reference(reference);
-    }
-}
-#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_END

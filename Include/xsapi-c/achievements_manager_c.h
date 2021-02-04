@@ -217,8 +217,8 @@ STDAPI XblAchievementsManagerGetAchievement(
 /// the result is no longer needed.
 /// </param>
 /// <remarks>
-/// Passing in <see cref="XblAchievementOrderBy::TitleId"/> for sortField yields the same results 
-/// as passing in <see cref="XblAchievementOrderBy::DefaultOrder"/> since all achievements tracked 
+/// Passing in XblAchievementOrderBy::TitleId for sortField yields the same results 
+/// as passing in XblAchievementOrderBy::DefaultOrder since all achievements tracked 
 /// by achievement manager will have the same TitleId.
 /// </remarks>
 /// <returns>HRESULT return code for this API operation.</returns>

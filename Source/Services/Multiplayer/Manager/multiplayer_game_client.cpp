@@ -202,7 +202,7 @@ MultiplayerGameClient::ConvertToMultiplayerGame(
         gameMembers.push_back(gameMember);
     }
 
-    return std::make_shared<MultiplayerGameSession>(
+    return MakeShared<MultiplayerGameSession>(
         sessionToConvert,
         hostMember,
         gameMembers
@@ -500,7 +500,7 @@ MultiplayerGameClient::RemoveStaleUsersFromRemoteSession()
             {
                 std::weak_ptr<MultiplayerGameClient> weakSessionWriter = shared_from_this();
 
-                auto sessionToCommit = std::make_shared<XblMultiplayerSession>(localUser->Xuid(), &gameSession->SessionReference(), nullptr);
+                auto sessionToCommit = MakeShared<XblMultiplayerSession>(localUser->Xuid(), &gameSession->SessionReference(), nullptr);
                 sessionToCommit->Leave();
                 m_sessionWriter->WriteSession(localUser->Context(), sessionToCommit, XblMultiplayerSessionWriteMode::UpdateExisting, true,
                 [weakSessionWriter](Result<std::shared_ptr<XblMultiplayerSession>> result)
@@ -716,7 +716,7 @@ HRESULT MultiplayerGameClient::JoinGameForAllLocalMembers(
                 if (joinResult.Hresult() == HTTP_E_STATUS_NOT_FOUND && !m_handleIdToJoin.empty())
                 {
                     // We tried to join an existing session but it didn't exist. Create a new game session
-                    // from the lobby and clear the the existing handleId since it must be invalid.
+                    // from the lobby and clear the existing handleId since it must be invalid.
                     if (m_createGameIfFailedToJoin)
                     {
                         m_callback(lobbyClient->CreateGameFromLobby());
@@ -780,8 +780,16 @@ HRESULT MultiplayerGameClient::JoinGameFromLobbyHelper(
 
     // Check if the lobby has a game session associated with it to join.
     XblMultiplayerSessionReadLockGuard lobbySessionSafe(lobbySession);
-    auto lobbyProperties = ParseJson(lobbySessionSafe.SessionProperties().SessionCustomPropertiesJson);
-    if (!lobbyProperties.has_field(utils::string_t_from_internal_string(MultiplayerLobbyClient_TransferHandlePropertyName)))
+
+    JsonDocument jsonDoc;
+    jsonDoc.Parse(lobbySessionSafe.SessionProperties().SessionCustomPropertiesJson);
+
+    xsapi_internal_string transferHandle;
+    if (!jsonDoc.HasParseError())
+    {
+        JsonUtils::ExtractJsonString(jsonDoc, MultiplayerLobbyClient_TransferHandlePropertyName, transferHandle, false);
+    }
+    if (transferHandle.empty()) // aka the field isn't there
     {
         return lobbyClient->CreateGameFromLobby();
     }
@@ -806,7 +814,7 @@ void MultiplayerGameClient::LeaveRemoteSession(
     _In_ bool triggerCompletionEvent
 ) noexcept
 {
-    auto processingRequest = std::make_shared<MultiplayerClientPendingRequest>();
+    auto processingRequest = MakeShared<MultiplayerClientPendingRequest>();
     m_processingQueue.push_back(processingRequest);
 
     m_sessionWriter->LeaveRemoteSession(session,

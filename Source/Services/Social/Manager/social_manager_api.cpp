@@ -131,19 +131,19 @@ CATCH_RETURN()
 
 STDAPI XblSocialManagerUserGroupGetUsers(
     _In_ XblSocialManagerUserGroupHandle groupHandle,
-    _Outptr_ XblSocialManagerUserPtrArray* users,
+    _Outptr_result_maybenull_ XblSocialManagerUserPtrArray* users,
     _Out_ size_t* usersCount
 ) XBL_NOEXCEPT
 try
 {
+    RETURN_HR_INVALIDARGUMENT_IF(groupHandle == nullptr || users == nullptr || usersCount == nullptr);
+    *users = nullptr;
+    
     return ApiImpl([&](SocialManager& socialManager)
     {
-        RETURN_HR_INVALIDARGUMENT_IF(groupHandle == nullptr || users == nullptr || usersCount == nullptr);
-
         auto group{ socialManager.GetUserGroup(groupHandle) };
         if (!group)
         {
-            *users = nullptr;
             *usersCount = 0;
             return E_UNEXPECTED;
         }
@@ -157,19 +157,19 @@ CATCH_RETURN()
 
 STDAPI XblSocialManagerUserGroupGetUsersTrackedByGroup(
     _In_ XblSocialManagerUserGroupHandle groupHandle,
-    _Outptr_ const uint64_t** trackedUsers,
+    _Outptr_result_maybenull_ const uint64_t** trackedUsers,
     _Out_ size_t* trackedUsersCount
 ) XBL_NOEXCEPT
 try
 {
+    RETURN_HR_INVALIDARGUMENT_IF(groupHandle == nullptr || trackedUsers == nullptr || trackedUsersCount == nullptr);
+    *trackedUsers = nullptr;
+    
     return ApiImpl([&](SocialManager& socialManager)
     {
-        RETURN_HR_INVALIDARGUMENT_IF(groupHandle == nullptr || trackedUsers == nullptr || trackedUsersCount == nullptr);
-
         auto group{ socialManager.GetUserGroup(groupHandle) };
         if (!group)
         {
-            *trackedUsers = nullptr;
             *trackedUsersCount = 0;
             return E_UNEXPECTED;
         }

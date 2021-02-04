@@ -215,14 +215,14 @@ public:
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
         xsapi_internal_stringstream url;
-        url << "https://achievements.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/achievements/MockScid/update";
+        url << "https://achievements.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/achievements/mockscid/update";
         HttpMock mock("POST", url.str(), 304 );
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback([&requestWellFormed](HttpMock* mock, std::string requestUrl, std::string requestBody)
+        mock.SetMockMatchedCallback([&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(requestUrl);
-                auto expectedRequest = R"({"action":"progressUpdate","serviceConfigId":"MockScid","titleId":1234,"userId":"101010101010","achievements":[{"id":"1","percentComplete":100}]})";
+                auto expectedRequest = R"({"action":"progressUpdate","serviceConfigId":"mockscid","titleId":1234,"userId":"101010101010","achievements":[{"id":"1","percentComplete":100}]})";
                 requestWellFormed &= (requestBody == expectedRequest);
             });
 
@@ -249,7 +249,7 @@ public:
         responseJson.Parse(defaultAchievementResponse);
 
         xsapi_internal_stringstream url;
-        url << "https://achievements.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/achievements/serviceConfigurationId/achievementId";
+        url << "https://achievements.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/achievements/serviceconfigurationid/achievementId";
         HttpMock mock("POST", url.str(), 200, responseJson);
 
         JsonValue& achievementToVerify = responseJson["achievements"][0];
@@ -272,7 +272,7 @@ public:
         responseJson.Parse(defaultAchievementResponse);
 
         xsapi_internal_stringstream url;
-        url << "https://achievements.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/achievements/serviceConfigurationId/achievementId";
+        url << "https://achievements.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/achievements/serviceconfigurationid/achievementId";
         HttpMock mock("POST", url.str(), 404);
 
         JsonValue& achievementToVerify = responseJson["achievements"][0];
@@ -296,7 +296,7 @@ public:
         url << "https://achievements.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/achievements?titleId=1234&maxItems=100";
         HttpMock mock("GET", url.str(), 200, responseJson);
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback([&requestWellFormed](HttpMock* mock, std::string requestUrl, std::string requestBody)
+        mock.SetMockMatchedCallback([&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(requestUrl);
@@ -337,7 +337,7 @@ public:
         url << "https://achievements.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/achievements?titleId=1234&maxItems=100";
         HttpMock mock("GET", url.str(), 200, responseJson);
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback([&requestWellFormed](HttpMock* mock, std::string requestUrl, std::string requestBody)
+        mock.SetMockMatchedCallback([&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(requestUrl);
@@ -490,11 +490,11 @@ public:
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };
 
-        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
         {
-            std::stringstream expectedUri;
+            xsapi_internal_stringstream expectedUri;
             expectedUri << "https://achievements.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/achievements/" << AppConfig::Instance()->Scid();
-            VERIFY_ARE_EQUAL_STR(uri, expectedUri.str());
+            VERIFY_ARE_EQUAL_STR_IGNORE_CASE(uri.data(), expectedUri.str().data());
 
             mockRtaService.CompleteSubscribeHandshake(n);
 

@@ -130,7 +130,7 @@ typedef struct XblStatisticChangeEventArgs
 /// </summary>
 /// <param name="xblContextHandle">Xbox live context for the local user.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player to get statistics for.</param>
-/// <param name="serviceConfigurationId">The service configuration ID (SCID) of the title.</param>
+/// <param name="serviceConfigurationId">The Service Configuration ID (SCID) for the title. The SCID is considered case sensitive so paste it directly from the Partner Center.</param>
 /// <param name="statisticName">The name of the statistic to return.</param>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
@@ -182,7 +182,7 @@ STDAPI XblUserStatisticsGetSingleUserStatisticResult(
 /// </summary>
 /// <param name="xblContextHandle">Xbox live context for the local user.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player to get statistics for.</param>
-/// <param name="serviceConfigurationId">The service configuration ID (SCID) of the title.</param>
+/// <param name="serviceConfigurationId">The Service Configuration ID (SCID) for the title. The SCID is considered case sensitive so paste it directly from the Partner Center.</param>
 /// <param name="statisticNames">A collection of statistic names to lookup.</param>
 /// <param name="statisticNamesCount">The number of statistic names.</param>
 /// <param name="async">The AsyncBlock for this operation.</param>
@@ -239,7 +239,7 @@ STDAPI XblUserStatisticsGetSingleUserStatisticsResult(
 /// <param name="xblContextHandle">Xbox live context for the local user.</param>
 /// <param name="xboxUserIds">A list of the user Xbox user IDs to get stats for.</param>
 /// <param name="xboxUserIdsCount">The number of Xbox user IDs.</param>
-/// <param name="serviceConfigurationId">The service configuration ID (SCID) of the title.</param>
+/// <param name="serviceConfigurationId">The Service Configuration ID (SCID) for the title. The SCID is considered case sensitive so paste it directly from the Partner Center.</param>
 /// <param name="statisticNames">A collection of statistic names to lookup.</param>
 /// <param name="statisticNamesCount">The number of statistic names.</param>
 /// <param name="async">The AsyncBlock for this operation.</param>
@@ -361,7 +361,7 @@ STDAPI XblUserStatisticsGetMultipleUserStatisticsForMultipleServiceConfiguration
 /// </summary>
 /// <param name="xblContextHandle">Xbox live context for the local user.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player requesting the subscription.</param>
-/// <param name="serviceConfigurationId">The service configuration ID (SCID) of the title.</param>
+/// <param name="serviceConfigurationId">The Service Configuration ID (SCID) for the title. The SCID is considered case sensitive so paste it directly from the Partner Center.</param>
 /// <param name="statisticName">The name of the statistic to subscribe to.</param>
 /// <param name="subscriptionHandle">Passes back an XblRealTimeActivitySubscriptionHandle object that contains the state of the subscription.  
 /// You can register an event handler for statistic changes by calling XblUserStatisticsAddStatisticChangedHandler().</param>
@@ -432,7 +432,7 @@ STDAPI_(void) XblUserStatisticsRemoveStatisticChangedHandler(
 /// <param name="xblContextHandle">Xbox live context for the local user.</param>
 /// <param name="xboxUserIds">Array of XboxUserIDs for whom to track the provided stats.</param>
 /// <param name="xboxUserIdsCount">Length of xboxUserIds array.</param>
-/// <param name="serviceConfigurationId">The service configuration ID (SCID) of the title.</param>
+/// <param name="serviceConfigurationId">The Service Configuration ID (SCID) for the title. The SCID is considered case sensitive so paste it directly from the Partner Center.</param>
 /// <param name="statisticNames">Array of statistic names for which real-time updates will be received.</param>
 /// <param name="statisticNamesCount">Length of statisticNames array.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
@@ -456,7 +456,7 @@ STDAPI XblUserStatisticsTrackStatistics(
 /// <param name="xblContextHandle">Xbox live context for the local user.</param>
 /// <param name="xboxUserIds">Array of XboxUserIDs for whom to stop tracking the provided stats.</param>
 /// <param name="xboxUserIdsCount">Length of xboxUserIds array.</param>
-/// <param name="serviceConfigurationId">The service configuration ID (SCID) of the title.</param>
+/// <param name="serviceConfigurationId">The Service Configuration ID (SCID) for the title. The SCID is considered case sensitive so paste it directly from the Partner Center.</param>
 /// <param name="statisticNames">Array of statistic names for which real-time updates are no longer needed.</param>
 /// <param name="statisticNamesCount">Length of statisticNames array.</param>
 /// <returns>HRESULT return code for this API operation.</returns>

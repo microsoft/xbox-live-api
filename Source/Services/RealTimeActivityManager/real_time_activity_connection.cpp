@@ -116,7 +116,8 @@ Result<std::shared_ptr<Connection>> Connection::Make(
             std::move(stateChangedHandler),
             std::move(resyncHandler)
         },
-        Deleter<Connection>()
+        Deleter<Connection>(),
+        Allocator<Connection>()
     );
 
     auto hr = rtaConnection->InitializeWebsocket();

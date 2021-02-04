@@ -88,10 +88,10 @@ XblGetAsyncQueue() XBL_NOEXCEPT
 try
 {
     XTaskQueueHandle duplicatedHandle{ nullptr };
-    auto queue{ get_xsapi_singleton_async_queue() };
-    if (queue)
+    auto state = GlobalState::Get();
+    if (state && state->Queue().GetHandle())
     {
-        XTaskQueueDuplicateHandle(queue, &duplicatedHandle);
+        XTaskQueueDuplicateHandle(state->Queue().GetHandle(), &duplicatedHandle);
     }
     return duplicatedHandle;
 }
@@ -217,3 +217,4 @@ STDAPI_(void) XblRemoveServiceCallRoutedHandler(
         state->RemoveServiceCallRoutedHandler(token);
     }
 }
+

@@ -9,10 +9,10 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 class UTF8StringArray
 {
 public:
-    UTF8StringArray(const xsapi_internal_vector<string_t>& vector)
+    UTF8StringArray(const xsapi_internal_vector<xsapi_internal_string>& vector)
     {
         std::transform(vector.begin(), vector.end(), std::back_inserter(m_strings), 
-            [](const string_t& in)
+            [](const xsapi_internal_string& in)
             {
                 return Make(in);
             });

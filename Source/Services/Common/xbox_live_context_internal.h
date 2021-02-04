@@ -95,13 +95,6 @@ public:
     /// </summary>
     std::shared_ptr<xbox::services::leaderboard::LeaderboardService> LeaderboardService();
 
-#if !XSAPI_NO_PPL
-    /// <summary>
-    /// A service for managing matchmaking sessions.
-    /// </summary>
-    xbox::services::matchmaking::legacy::matchmaking_service& matchmaking_service();
-#endif // !XSAPI_NO_PPL
-
     /// <summary>
     /// A service for managing Rich Presence.
     /// </summary>

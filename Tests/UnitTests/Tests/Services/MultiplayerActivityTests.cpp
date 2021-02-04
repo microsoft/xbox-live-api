@@ -69,7 +69,7 @@ public:
 
         HttpMock mock{ "POST", url.str(), 204 };
         mock.SetMockMatchedCallback(
-            [&](HttpMock* /*mock*/, std::string /*uri*/, std::string body)
+            [&](HttpMock* /*mock*/, xsapi_internal_string /*uri*/, xsapi_internal_string body)
         {
             rapidjson::Document d;
             d.Parse(body.data());
@@ -108,7 +108,7 @@ public:
 
         HttpMock mock{ "POST", url.str(), 204 };
         mock.SetMockMatchedCallback(
-            [&](HttpMock* /*mock*/, std::string /*uri*/, std::string body)
+            [&](HttpMock* /*mock*/, xsapi_internal_string /*uri*/, xsapi_internal_string body)
         {
             httpRequestCount++;
 
@@ -185,7 +185,7 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock* /*mock*/, std::string /*uri*/, std::string body)
+            [&](HttpMock* /*mock*/, xsapi_internal_string /*uri*/, xsapi_internal_string body)
             {
                 JsonDocument d;
                 d.Parse(body.data());
@@ -272,7 +272,7 @@ public:
         uint64_t xuids[] = { 1, 2 };
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock* /*mock*/, std::string /*uri*/, std::string body)
+            [&](HttpMock* /*mock*/, xsapi_internal_string /*uri*/, xsapi_internal_string body)
             {
                 JsonDocument b;
                 b.Parse(body.data());
@@ -320,7 +320,7 @@ public:
         uint64_t xuids[] = { 1, 2 };
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock* /*mock*/, std::string /*uri*/, std::string body)
+            [&](HttpMock* /*mock*/, xsapi_internal_string /*uri*/, xsapi_internal_string body)
         {
             JsonDocument b;
             b.Parse(body.data());
@@ -397,7 +397,7 @@ public:
 
         bool requestWellFormed{ false };
         mock.SetMockMatchedCallback(
-            [&](HttpMock* /*mock*/, std::string /*url*/, std::string body)
+            [&](HttpMock* /*mock*/, xsapi_internal_string /*url*/, xsapi_internal_string body)
             {
                 requestWellFormed = VerifyJson(expectedRequestBody, body.data());
             });

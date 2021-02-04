@@ -56,7 +56,9 @@ void SetupXalNsalMock()
     if (hr == E_HC_NOT_INITIALISED)
     {
         // This happens on GDK where XAL is just a wrapper around XUser
+        LogToScreen("Calling HCInitialize()");
         hr = HCInitialize(nullptr);
+        LogToScreen("HCInitialize done");
         assert(SUCCEEDED(hr));
         Data()->libHttpClientInit = true;
         hr = HCMockCallCreate(&(Data()->nsalMockCall));

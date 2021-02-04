@@ -1,6 +1,74 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #include "pch.h"
+#include "rapidjson/document.h"
+
+#define CHECKHR(hr) if (FAILED(hr)) goto Cleanup;
+// <summary>
+/// Metadata about a blob.
+/// </summary>
+typedef struct JsonStorageBlobMetadata
+{
+    /// <summary>
+    /// Blob path is a unique string that conforms to a SubPath\file format (example: "foo\bar\blob.txt").
+    /// </summary>
+    std::string blobPath;
+
+    /// <summary>
+    /// [optional] Friendly display name to show in app UI.
+    /// </summary>
+    std::string displayName;
+
+    /// <summary>
+    /// Gets the number of bytes of the blob data.
+    /// </summary>
+    size_t length;
+
+    /// <summary>
+    /// Gets the position in the list of blob metadata
+    /// </summary>
+    size_t positionInList;
+
+} JsonStorageBlobMetadata;
+
+
+struct JsonBlobMetadataResult : public std::enable_shared_from_this<JsonBlobMetadataResult>
+{
+    std::string m_scid;
+    uint64_t m_xuid;
+    std::string m_blobPath;
+
+    std::vector<JsonStorageBlobMetadata> m_items;
+    std::string m_continuationToken;
+};
+
+JsonBlobMetadataResult DeserializeResult(std::string blobPathRoot, std::string json)
+{
+    rapidjson::Document document;
+    document.Parse(json.c_str());
+
+    JsonBlobMetadataResult result;
+
+    // Deserialize blobs
+    std::vector<JsonStorageBlobMetadata> metadataList;
+
+    size_t index = 0;
+    for (const auto& blobJson : document["blobs"].GetArray())
+    {
+        JsonStorageBlobMetadata metadata;
+        metadata.blobPath = blobPathRoot + blobJson["fileName"].GetString();
+        if (blobJson.HasMember("displayName"))
+        {
+            metadata.displayName = blobJson["displayName"].GetString();
+        }
+        metadata.length = blobJson["size"].GetInt();
+        metadata.positionInList = index;
+        index++;
+        result.m_items.push_back(metadata);
+    }
+    
+    return result;
+}
 
 XblTitleStorageType ConvertStringToXblTitleStorageType(const char* str)
 {
@@ -521,8 +589,129 @@ int XblTitleStorageUploadBinaryBlobAsync_Lua(lua_State *L)
     return LuaReturnHR(L, hr);
 }
 
+int RestCallForEachBlob_Lua(lua_State *L)
+{
+    CreateQueueIfNeeded();
+    auto response = Data()->responseString;
+    HRESULT hr = S_OK;
+
+    auto result = DeserializeResult("https://titlestorage.xboxlive.com/universalplatform/users/xuid(2814654044759996)/scids/00000000-0000-0000-0000-000076029b4d/data/", response);
+    for (const auto& blobMetadata : result.m_items)
+    {
+        // Download the blob
+        XblHttpCallHandle output;
+        hr = XblHttpCallCreate(Data()->xboxLiveContext, "GET", blobMetadata.blobPath.c_str(), &output);
+        XblHttpCallRequestSetHeader(output, "Content-Type", "application/json; charset=utf-8", true);
+        XblHttpCallRequestSetHeader(output, "Accept-Language", "en-US,en", true);
+        XblHttpCallRequestSetHeader(output, "x-xbl-contract-version", "2", true);
+        Data()->downloadHttpCalls.push_back(output);
+
+        auto asyncBlock = std::make_unique<XAsyncBlock>();
+        asyncBlock->queue = Data()->queue;
+        asyncBlock->context = Data()->downloadHttpCalls[blobMetadata.positionInList];
+        asyncBlock->callback = [](XAsyncBlock* asyncBlock)
+        {
+            std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock }; // Take over ownership of the XAsyncBlock*
+            HRESULT hr = XAsyncGetStatus(asyncBlock, false);
+
+            if (SUCCEEDED(hr))
+            {
+                auto httpCall = static_cast<XblHttpCallHandle>(asyncBlock->context);
+
+                const char* responseString;
+                hr = XblHttpCallGetResponseString(httpCall, &responseString);
+
+                LogToScreen("Response String: length %d, hr=%s", strlen(responseString), ConvertHR(hr).c_str());
+                CHECKHR(hr);
+
+                uint32_t statusCode;
+                hr = XblHttpCallGetStatusCode(httpCall, &statusCode);
+                LogToScreen("Status Code: %d, hr=%s", statusCode, ConvertHR(hr).c_str());
+                CHECKHR(hr);
+            }
+
+        Cleanup:
+            Data()->completedDownloads++;
+            if (Data()->completedDownloads == Data()->downloadHttpCalls.size())
+            {
+                CallLuaFunctionWithHr(hr, "OnRestCallForEachBlob");
+            }
+
+            LogToScreen("XblHttpCallPerformAsync Completion: hr=%s", ConvertHR(hr).c_str());
+        };
+
+        LogToScreen("Downloading %s", blobMetadata.blobPath.c_str());
+        hr = XblHttpCallPerformAsync(output, XblHttpCallResponseBodyType::String, asyncBlock.get());
+        if (SUCCEEDED(hr))
+        {
+            // The call succeeded, so release the std::unique_ptr ownership of XAsyncBlock* since the callback will take over ownership.
+            // If the call fails, the std::unique_ptr will keep ownership and delete the XAsyncBlock*
+            asyncBlock.release();
+        }
+
+    }
+
+    return LuaReturnHR(L, hr);
+}
+
+int RestCallForTMSMetadata_Lua(lua_State *L)
+{
+    CreateQueueIfNeeded();
+    std::string methodName = GetStringFromLua(L, 1, "GET");
+    char url[300];
+    sprintf_s(url, "https://titlestorage.xboxlive.com/universalplatform/users/xuid(%" PRIu64 ")/scids/00000000-0000-0000-0000-000076029b4d/data?maxItems=100", Data()->xboxUserId);
+
+    XblHttpCallHandle output;
+    HRESULT hr = XblHttpCallCreate(Data()->xboxLiveContext, methodName.c_str(), url, &output);
+    XblHttpCallRequestSetHeader(output, "Content-Type", "application/json; charset=utf-8", true);
+    XblHttpCallRequestSetHeader(output, "Accept-Language", "en-US,en", true);
+    XblHttpCallRequestSetHeader(output, "x-xbl-contract-version", "2", true);
+    Data()->xblHttpCall = output;
+
+    auto asyncBlock = std::make_unique<XAsyncBlock>();
+    asyncBlock->queue = Data()->queue;
+    asyncBlock->context = Data()->xblHttpCall;
+    asyncBlock->callback = [](XAsyncBlock* asyncBlock)
+    {
+        std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock }; // Take over ownership of the XAsyncBlock*
+        HRESULT hr = XAsyncGetStatus(asyncBlock, false);
+        LogToScreen("XblHttpCallPerformAsync result: hr=%s", ConvertHR(hr).c_str());
+
+        if (SUCCEEDED(hr))
+        {
+            const char* responseString;
+            hr = XblHttpCallGetResponseString(Data()->xblHttpCall, &responseString);
+            Data()->responseString = responseString;
+
+            LogToScreen("XblHttpCallResponseGetResponseString: length %d, hr=%s", strlen(responseString), ConvertHR(hr).c_str());
+            CHECKHR(hr);
+
+            uint32_t statusCode;
+            hr = XblHttpCallGetStatusCode(Data()->xblHttpCall, &statusCode);
+            LogToScreen("XblHttpCallResponseGetStatusCode: %d, hr=%s", statusCode, ConvertHR(hr).c_str());
+            CHECKHR(hr);
+        }
+
+    Cleanup:
+        LogToScreen("XblHttpCallPerformAsync Completion: hr=%s", ConvertHR(hr).c_str());
+        CallLuaFunctionWithHr(hr, "OnXblTitleStorageRestTMSMetadata");
+    };
+
+    hr = XblHttpCallPerformAsync(Data()->xblHttpCall, XblHttpCallResponseBodyType::String, asyncBlock.get());
+    if (SUCCEEDED(hr))
+    {
+        // The call succeeded, so release the std::unique_ptr ownership of XAsyncBlock* since the callback will take over ownership.
+        // If the call fails, the std::unique_ptr will keep ownership and delete the XAsyncBlock*
+        asyncBlock.release();
+    }
+
+    return LuaReturnHR(L, hr);
+}
+
 void SetupAPIs_XblTitleStorage()
 {
+    lua_register(Data()->L, "RestCallForTMSMetadata", RestCallForTMSMetadata_Lua);
+    lua_register(Data()->L, "RestCallForEachBlob", RestCallForEachBlob_Lua);
     lua_register(Data()->L, "XblTitleStorageBlobMetadataResultGetItems", XblTitleStorageBlobMetadataResultGetItems_Lua);
     lua_register(Data()->L, "XblTitleStorageBlobMetadataResultHasNext", XblTitleStorageBlobMetadataResultHasNext_Lua);
     lua_register(Data()->L, "XblTitleStorageBlobMetadataResultGetNextAsync", XblTitleStorageBlobMetadataResultGetNextAsync_Lua);

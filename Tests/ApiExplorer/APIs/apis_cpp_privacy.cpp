@@ -39,8 +39,10 @@ string_t ConvertXblPermissionToStringT(XblPermission permissionType)
         return xbox::services::privacy::permission_id_constants::view_target_video_history();
     case XblPermission::ViewTargetVideoStatus:
         return xbox::services::privacy::permission_id_constants::view_target_video_status();
-    //case XblPermission::WriteComment:
-        //unsupported
+    case XblPermission::WriteComment:
+    case XblPermission::ShareItem:
+    case XblPermission::ShareTargetContentToExternalNetworks:
+    case XblPermission::Unknown:
     default:
         return _T("Unknown");
     }

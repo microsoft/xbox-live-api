@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #include "pch.h"
 
+using namespace utility;
+
 #if CPP_TESTS_ENABLED
 struct MultiplayerStateCpp
 {
@@ -27,7 +29,7 @@ struct MultiplayerStateCpp
 
         static uint64_t runId{ largeInt.QuadPart };
 #else
-        static uint64_t runId{ utility::datetime::utc_now().to_interval() };
+        static uint64_t runId{ datetime::utc_now().to_interval() };
 #endif
 
         std::stringstream ss;
@@ -179,7 +181,7 @@ int MultiplayerSessionTimeOfSessionCpp_Lua(lua_State *L)
 {
     auto sessionHandle = GetSessionHandleFromArgCpp(L, 1);
 
-    utility::datetime timeOfSession = sessionHandle->date_of_session();
+    datetime timeOfSession = sessionHandle->date_of_session();
 
     LogToFile("MultiplayerSessionStartTime timeOfSession:%s", xbox::services::Utils::StringFromStringT(timeOfSession.to_string()).c_str());
     return LuaReturnHR(L, S_OK);
@@ -190,7 +192,7 @@ int MultiplayerSessionGetInitializationInfoCpp_Lua(lua_State *L)
     auto sessionHandle = GetSessionHandleFromArgCpp(L, 1);
 
     xbox::services::multiplayer::multiplayer_initialization_stage stage = sessionHandle->initialization_stage();
-    utility::datetime stageStartTime = sessionHandle->initializing_stage_start_time();
+    datetime stageStartTime = sessionHandle->initializing_stage_start_time();
     uint32_t episode = sessionHandle->intializing_episode();
 
     LogToFile("MultiplayerSessionGetInitializationInfoCpp");
@@ -1532,6 +1534,11 @@ int MultiplayerSearchHandleDetailsSessionOwnerXuids_Lua(lua_State *L)
 
 int MultiplayerSearchHandleDetailsTags_Lua(lua_State *L)
 {
+    if (MPStateCpp()->searchHandleDetails == nullptr)
+    {
+        return LuaReturnHR(L, S_OK);
+    }
+
     std::vector<string_t> tags = MPStateCpp()->searchHandleDetails->tags();
     
     LogToFile("MultiplayerSearchHandleDetailsTags");
@@ -1546,6 +1553,11 @@ int MultiplayerSearchHandleDetailsTags_Lua(lua_State *L)
 
 int MultiplayerSearchHandleDetailsStringsMetadata_Lua(lua_State *L)
 {
+    if (MPStateCpp()->searchHandleDetails == nullptr)
+    {
+        return LuaReturnHR(L, S_OK);
+    }
+
     auto stringsMetadata = MPStateCpp()->searchHandleDetails->strings_metadata();
 
     LogToFile("MultiplayerSearchHandleDetailsStringsMetadata");
@@ -1560,6 +1572,11 @@ int MultiplayerSearchHandleDetailsStringsMetadata_Lua(lua_State *L)
 
 int MultiplayerSearchHandleDetailsNumbersMetadata_Lua(lua_State *L)
 {
+    if (MPStateCpp()->searchHandleDetails == nullptr)
+    {
+        return LuaReturnHR(L, S_OK);
+    }
+
     auto numbersMetadata = MPStateCpp()->searchHandleDetails->numbers_metadata();
 
     LogToFile("MultiplayerSearchHandleDetailsNumbersMetadata");
@@ -1574,6 +1591,11 @@ int MultiplayerSearchHandleDetailsNumbersMetadata_Lua(lua_State *L)
 
 int MultiplayerSearchHandleDetailsVisibility_Lua(lua_State *L)
 {
+    if (MPStateCpp()->searchHandleDetails == nullptr)
+    {
+        return LuaReturnHR(L, S_OK);
+    }
+
     xbox::services::multiplayer::multiplayer_session_visibility sessionVisibility = MPStateCpp()->searchHandleDetails->visibility();
 
     LogToFile("MultiplayerSearchHandleDetailsVisibility: visibility=%u", sessionVisibility);
@@ -1582,6 +1604,11 @@ int MultiplayerSearchHandleDetailsVisibility_Lua(lua_State *L)
 
 int MultiplayerSearchHandleDetailsJoinRestriction_Lua(lua_State *L)
 {
+    if (MPStateCpp()->searchHandleDetails == nullptr)
+    {
+        return LuaReturnHR(L, S_OK);
+    }
+
     xbox::services::multiplayer::multiplayer_session_restriction joinRestriction = MPStateCpp()->searchHandleDetails->join_restriction();
 
     LogToFile("MultiplayerSearchHandleDetailsJoinRestriction: restriction=%u", joinRestriction);
@@ -1590,6 +1617,11 @@ int MultiplayerSearchHandleDetailsJoinRestriction_Lua(lua_State *L)
 
 int MultiplayerSearchHandleDetailsClosed_Lua(lua_State *L)
 {
+    if (MPStateCpp()->searchHandleDetails == nullptr)
+    {
+        return LuaReturnHR(L, S_OK);
+    }
+
     bool sessionClosed = MPStateCpp()->searchHandleDetails->closed();
 
     LogToFile("MultiplayerSearchHandleDetailsClosed: closed=%d", sessionClosed);
@@ -1598,6 +1630,11 @@ int MultiplayerSearchHandleDetailsClosed_Lua(lua_State *L)
 
 int MultiplayerSearchHandleDetailsMemberCounts_Lua(lua_State *L)
 {
+    if (MPStateCpp()->searchHandleDetails == nullptr)
+    {
+        return LuaReturnHR(L, S_OK);
+    }
+
     uint32_t membersCount = MPStateCpp()->searchHandleDetails->members_count();
     uint32_t maxMembersCount = MPStateCpp()->searchHandleDetails->max_members_count();
 
@@ -1607,6 +1644,11 @@ int MultiplayerSearchHandleDetailsMemberCounts_Lua(lua_State *L)
 
 int MultiplayerSearchHandleDetailsHandleCreationTime_Lua(lua_State *L)
 {
+    if (MPStateCpp()->searchHandleDetails == nullptr)
+    {
+        return LuaReturnHR(L, S_OK);
+    }
+
     auto creationTime = MPStateCpp()->searchHandleDetails->handle_creation_time();
 
     LogToFile("MultiplayerSearchHandleDetailsHandleCreationTime: creation time=%s", xbox::services::Utils::StringFromStringT(creationTime.to_string()).c_str());
@@ -1615,6 +1657,11 @@ int MultiplayerSearchHandleDetailsHandleCreationTime_Lua(lua_State *L)
 
 int MultiplayerSearchHandleDetailsCustomSessionPropertiesJson_Lua(lua_State *L)
 {
+    if (MPStateCpp()->searchHandleDetails == nullptr)
+    {
+        return LuaReturnHR(L, S_OK);
+    }
+
     string_t customPropertiesJsonStr = MPStateCpp()->searchHandleDetails->custom_session_properties_json().serialize();
 
     LogToFile("MultiplayerSearchHandleDetailsCustomSessionPropertiesJson: properties=%s", xbox::services::Utils::StringFromStringT(customPropertiesJsonStr).c_str());
@@ -1670,6 +1717,11 @@ int MatchmakingServiceGetMatchTicketDetails_Lua(lua_State* L)
     if (ticketId.empty())
     {
         ticketId = Data()->matchTicketResponseCpp.match_ticket_id();
+    }
+
+    if (Data()->xalUser == nullptr)
+    {
+        return LuaReturnHR(L, E_UNEXPECTED);
     }
 
     std::shared_ptr<xbox::services::xbox_live_context> xblc = std::make_shared<xbox::services::xbox_live_context>(Data()->xboxLiveContext);

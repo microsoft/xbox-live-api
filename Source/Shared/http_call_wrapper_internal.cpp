@@ -3,7 +3,6 @@
 
 #include "pch.h"
 #include "xbox_live_context_internal.h"
-#include "xbox_system_factory.h"
 #include <httpClient/httpProvider.h>
 
 using namespace xbox::services;
@@ -117,7 +116,17 @@ HRESULT HttpCall::Perform(
     {
         m_performAlreadyCalled = true;
         m_step = Step::Running;
-        hr = HCHttpCallPerformAsync(m_callHandle, &m_asyncBlock);
+
+        if (XblShouldFaultInject(INJECTION_FEATURE_HTTP))
+        {
+            LOGS_ERROR << "FAULT INJECTION: HttpCall::Perform ID:" << XblGetFaultCounter();
+            hr = E_FAIL;
+        }
+        else
+        {
+            hr = HCHttpCallPerformAsync(m_callHandle, &m_asyncBlock);
+        }
+
         if (SUCCEEDED(hr))
         {
             AddRef(); // Keep HttpCall object alive until call completes
@@ -290,6 +299,13 @@ HRESULT HttpCall::Result() const
     uint32_t platformNetworkResult{ 0 };
   
     RETURN_HR_IF_FAILED(HCHttpCallResponseGetNetworkErrorCode(m_callHandle, &hrNetworkError, &platformNetworkResult));
+
+    if (XblShouldFaultInject(INJECTION_FEATURE_HTTP))
+    {
+        LOGS_ERROR << "FAULT INJECTION: HttpCall::Result" << XblGetFaultCounter();
+        hrNetworkError = E_FAIL;
+    }
+
     if (SUCCEEDED(hrNetworkError))
     {
         HRESULT hrHttpStatus = ConvertHttpStatusToHRESULT(HttpStatus());
@@ -555,11 +571,11 @@ HRESULT XblHttpCall::Init(
 
     XblApiType apiType{ XblApiType::XblCApi };
     {
-        auto singleton{ get_xsapi_singleton() };
+        auto state{ GlobalState::Get() };
 
-        if (singleton)
+        if (state)
         {
-            apiType = singleton->m_apiType;
+            apiType = state->ApiType;
         }
     }
 

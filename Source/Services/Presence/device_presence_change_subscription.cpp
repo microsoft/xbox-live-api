@@ -49,7 +49,7 @@ void DevicePresenceChangeSubscription::OnEvent(
     auto presenceService{ m_presenceService.lock() };
     if (presenceService && data.IsString())
     {
-        auto devicePresenceValues = utils::string_split(String{ data.GetString() }, ':');
+        auto devicePresenceValues = utils::string_split_internal(String{ data.GetString() }, ':');
         if (devicePresenceValues.size() == 2)
         {
             presenceService->HandleDevicePresenceChanged(

@@ -237,7 +237,7 @@ STDAPI_(void) XblTitleStorageBlobMetadataResultCloseHandle(
 /// Gets title storage quota information for the specified service configuration and storage type.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
-/// <param name="serviceConfigurationId">The service configuration ID (SCID) of the title.</param>
+/// <param name="serviceConfigurationId">The Service Configuration ID (SCID) for the title. The SCID is considered case sensitive so paste it directly from the Partner Center.</param>
 /// <param name="storageType">The storage type to get quota information for.</param>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
@@ -275,7 +275,7 @@ STDAPI XblTitleStorageGetQuotaResult(
 /// Gets a list of blob metadata objects under a given path for the specified service configuration, storage type and storage ID.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
-/// <param name="serviceConfigurationId">The service configuration ID (SCID) of the title.</param>
+/// <param name="serviceConfigurationId">The Service Configuration ID (SCID) for the title. The SCID is considered case sensitive so paste it directly from the Partner Center.</param>
 /// <param name="storageType">The storage type to get blob metadata objects for.</param>
 /// <param name="blobPath">The root path to enumerate.  Results will be for blobs contained in this path and all subpaths. (Optional)</param>
 /// <param name="xboxUserId">The Xbox User ID of the title storage to enumerate. Ignored when enumerating GlobalStorage, so passing 0 is acceptable. (Optional)</param>

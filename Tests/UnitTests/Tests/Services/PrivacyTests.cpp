@@ -85,7 +85,7 @@ public:
             [
                 &xuids
             ]
-        (HttpMock* mock, std::string requestUrl, std::string requestBody)
+        (HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(requestUrl);
                 VERIFY_IS_TRUE(requestBody.empty());

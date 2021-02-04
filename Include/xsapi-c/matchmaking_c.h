@@ -191,7 +191,7 @@ STDAPI XblMatchmakingCreateMatchTicketResult(
 /// Deletes a the match ticket on the server.
 /// </summary>
 /// <param name="xboxLiveContext">Xbox live context for the local user.</param>
-/// <param name="serviceConfigurationId">The service config id that is specific for the title.</param>
+/// <param name="serviceConfigurationId">The Service Configuration ID (SCID) for the title. The SCID is considered case sensitive so paste it directly from the Partner Center.</param>
 /// <param name="hopperName">The name of the hopper where the match ticket is located.</param>
 /// <param name="ticketId">The id of the ticket to delete on the server.</param>
 /// <param name="asyncBlock">The AsyncBlock for this operation.</param>
@@ -209,7 +209,7 @@ STDAPI XblMatchmakingDeleteMatchTicketAsync(
 /// Retrieves the properties of a match ticket from the server.
 /// </summary>
 /// <param name="xboxLiveContext">Xbox live context for the local user.</param>
-/// <param name="serviceConfigurationId">The service config id that is specific for the title.</param>
+/// <param name="serviceConfigurationId">The Service Configuration ID (SCID) for the title. The SCID is considered case sensitive so paste it directly from the Partner Center.</param>
 /// <param name="hopperName">The name of the hopper where the match ticket is located.</param>
 /// <param name="ticketId">The ticket id of the match ticket to retrieve.</param>
 /// <param name="asyncBlock">The AsyncBlock for this operation.</param>
@@ -257,7 +257,7 @@ STDAPI XblMatchmakingGetMatchTicketDetailsResult(
 /// Gets statistics about a hopper such as how many players are in it.
 /// </summary>
 /// <param name="xboxLiveContext">Xbox live context for the local user.</param>
-/// <param name="serviceConfigurationId">The service config id that is specific for the title.</param>
+/// <param name="serviceConfigurationId">The Service Configuration ID (SCID) for the title. The SCID is considered case sensitive so paste it directly from the Partner Center.</param>
 /// <param name="hopperName">The name of the hopper to query stats for.</param>
 /// <param name="asyncBlock">The AsyncBlock for this operation.</param>
 /// <returns>HRESULT return code for this API operation.</returns>

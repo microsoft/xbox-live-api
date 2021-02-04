@@ -6,7 +6,7 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-void log_hc_output::write(_In_ HCTraceLevel level, _In_ const std::string& msg)
+void log_hc_output::write(_In_ HCTraceLevel level, _In_ const xsapi_internal_string& msg)
 {
     HC_TRACE_MESSAGE(XSAPI, level, msg.c_str());
 }

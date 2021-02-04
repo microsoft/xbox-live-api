@@ -21,7 +21,7 @@ MultiplayerActivityHandlePostRequest::SessionReference() const
 }
 
 void
-MultiplayerActivityHandlePostRequest::Serialize(_Out_ JsonValue& json, JsonDocument::AllocatorType& allocator) const
+MultiplayerActivityHandlePostRequest::Serialize(_Out_ JsonValue& json, _In_ JsonDocument::AllocatorType& allocator) const
 {
     json.SetObject();
 

@@ -518,7 +518,7 @@ enum class XblMultiplayerSessionMemberStatus : uint32_t
     /// <summary>
     /// The member is inactive in the current title.  
     /// The member may be active in another title as specified by ActiveTitleId.  
-    /// If a inactive member doesn't mark themselves as Active within the MemberInactiveTimeout they will be removed from the session.
+    /// If an inactive member doesn't mark themselves as Active within the MemberInactiveTimeout they will be removed from the session.
     /// </summary>
     Inactive,
 
@@ -966,7 +966,7 @@ typedef struct XblMultiplayerSessionConstants
     uint64_t MemberReservedTimeout;
 
     /// <summary>
-    /// If a inactive member reservation does not become active within this timeout, then inactive member is removed from the session.
+    /// If an inactive member reservation does not become active within this timeout, then the inactive member is removed from the session.
     /// </summary>
     uint64_t MemberInactiveTimeout;
 
@@ -1110,7 +1110,7 @@ typedef struct XblMultiplayerSessionReferenceUri
 /// <summary>
 /// Creates an XblMultiplayerSessionReference from a scid, session template name, and session name.
 /// </summary>
-/// <param name="scid">The service configuration id that the session is a part of.</param>
+/// <param name="scid">The Service Configuration ID (SCID) that the session is a part of. The SCID is considered case sensitive so paste it directly from the Partner Center</param>
 /// <param name="sessionTemplateName">The session template name.</param>
 /// <param name="sessionName">The session name.</param>
 /// <returns>A reference to the multiplayer session that was created.</returns>
@@ -1792,7 +1792,7 @@ typedef struct XblMultiplayerSessionInfo
     time_t StartTime;
 
     /// <summary>
-    /// If any timeouts are in progress, this is the date when the the next timer will fire.
+    /// If any timeouts are in progress, this is the date when the next timer will fire.
     /// </summary>
     time_t NextTimer;
 
@@ -2002,13 +2002,14 @@ typedef struct XblMultiplayerSessionStringAttribute
 } XblMultiplayerSessionStringAttribute;
 
 /// <summary>
-/// An associative attribute that can be attached to a multiplayer session search handle when it is created.  
+/// An associative attribute that can be attached to a multiplayer session search handle when it is created.
 /// Attribute names be lower-case alphanumeric, and start with a letter.
 /// </summary>
 typedef struct XblMultiplayerSessionNumberAttribute
 {
     /// <summary>
     /// Name of the attribute.
+    /// Attribute names be lower-case alphanumeric, and start with a letter.
     /// </summary>
     char name[XBL_MULTIPLAYER_SEARCH_HANDLE_MAX_FIELD_LENGTH];
 
@@ -2141,7 +2142,7 @@ STDAPI_(XblMultiplayerSessionChangeTypes) XblMultiplayerSessionSubscribedChangeT
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Host candidates are a ordered list of device tokens, ordered by preference as specified by XblMultiplayerMetrics
+/// Host candidates are an ordered list of device tokens, ordered by preference as specified by XblMultiplayerMetrics
 /// in the session constants.
 /// </summary>
 /// <param name="handle">Handle to the multiplayer session.</param>
@@ -2784,7 +2785,7 @@ STDAPI XblMultiplayerSessionLeave(
 /// <param name="status">Indicates the current user status.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// You cannot set the the user to reserved or ready in this manner.  
+/// You cannot set the user to reserved or ready in this manner.  
 /// Use <see cref="XblMultiplayerSessionAddMemberReservation"/> to add a member reservation.
 /// </remarks>
 STDAPI XblMultiplayerSessionCurrentUserSetStatus(
@@ -2838,7 +2839,7 @@ typedef struct XblFormattedSecureDeviceAddress
 /// </remarks>
 STDAPI XblFormatSecureDeviceAddress(
     _In_ const char* deviceId,
-    _Out_ XblFormattedSecureDeviceAddress* address
+    _Inout_ XblFormattedSecureDeviceAddress* address
 ) XBL_NOEXCEPT;
 #endif
 
@@ -3194,8 +3195,10 @@ STDAPI XblMultiplayerSearchHandleGetCustomSessionPropertiesJson(
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// Call XblMultiplayerWriteSessionResult() to get the result.  
-/// Call XblMultiplayerSessionWriteStatus() to get the write status.
+/// In the async callback, call XblMultiplayerWriteSessionResult() to get a XblMultiplayerSessionHandle handle.
+/// Use that handle to call XblMultiplayerSessionWriteStatus() to get the write status.
+/// The call to XblMultiplayerWriteSessionAsync() will only fail if the args passed to it are invalid or in very rare 
+/// cases where it could not start the async task.
 /// </remarks>
 /// <rest>Calls V105 PUT /serviceconfigs/{serviceConfigurationId}/sessionTemplates/{sessiontemplateName}/sessions/{sessionName}</rest>
 STDAPI XblMultiplayerWriteSessionAsync(
@@ -3209,14 +3212,21 @@ STDAPI XblMultiplayerWriteSessionAsync(
 /// Gets the result of a XblMultiplayerWriteSessionAsync operation.
 /// </summary>
 /// <param name="async">The AsyncBlock for this operation.</param>
-/// <param name="handle">Passes back a handle to a new instance of a local multiplayer session object.  
-/// It must be release by the caller with <see cref="XblMultiplayerSessionCloseHandle"/>.  
+/// <param name="handle">Passes back a handle to a new instance of a local multiplayer session object.
+/// The XblMultiplayerSessionHandle must be released by the caller by calling <see cref="XblMultiplayerSessionCloseHandle"/>.
+/// Use XblMultiplayerSession* APIs to get session data from the handle.
 /// If the updated session object is not needed, passing nullptr will cause the new multiplayer
-/// session object to be cleaned up immediately.</param>
-/// <returns>HRESULT return code for this API operation.</returns>
+/// session object to be cleaned up immediately.
+/// </param>
+/// <returns>HRESULT return code for this API operation.  
+/// It will be a failure HRESULT if there was a network error or failure HTTP status code unless its a 412 (Precondition Failed).
+/// A 412 returns success since the service also returns latest session state, so you must call XblMultiplayerSessionWriteStatus() to get the 
+/// write status and call XblMultiplayerSession* APIs to get session data from the handle.
+/// </returns>
 /// <remarks>
-/// Note that if you leave a session that you are the the last member of and the sessionEmptyTimeout 
+/// Note that if you leave a session that you are the last member of and the sessionEmptyTimeout 
 /// is equal to 0, then the session will be deleted immediately.
+/// Call XblMultiplayerSessionWriteStatus() to get the write status.
 /// </remarks>
 STDAPI XblMultiplayerWriteSessionResult(
     _Inout_ XAsyncBlock* async,
@@ -3257,7 +3267,7 @@ STDAPI XblMultiplayerWriteSessionByHandleAsync(
 /// If the updated session object is not needed, passing nullptr will cause the new multiplayer session object to be cleaned up immediately.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// Note that if you leave a session that you are the the last member of and the sessionEmptyTimeout
+/// Note that if you leave a session that you are the last member of and the sessionEmptyTimeout
 /// is equal to 0, then the session will be deleted immediately and a nullptr will be returned.
 /// </remarks>
 STDAPI XblMultiplayerWriteSessionByHandleResult(
@@ -3379,7 +3389,7 @@ STDAPI XblMultiplayerSetActivityAsync(
 /// Clears the user's current activity session for the specified serviceConfigurationId.
 /// </summary>
 /// <param name="xblContext">Xbox live context for the local user.</param>
-/// <param name="scid">A string containing the serviceConfigurationId in which to clear activity.</param>
+/// <param name="scid">The Service Configuration ID (SCID) in which to clear activity. The SCID is considered case sensitive so paste it directly from the Partner Center</param>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMultiplayerClearActivityAsync(
@@ -3483,7 +3493,7 @@ STDAPI XblMultiplayerDeleteSearchHandleAsync(
 /// Search for sessions by their associated search handles.
 /// </summary>
 /// <param name="xblContext">Xbox live context for the local user.</param>
-/// <param name="scid">The scid within which to query for search handles.</param>
+/// <param name="scid">The Service Configuration ID (SCID) within which to query for search handles. The SCID is considered case sensitive so paste it directly from the Partner Center</param>
 /// <param name="sessionTemplateName">The name of the template to query for search handles.</param>
 /// <param name="orderByAttribute">This specifies the attribute to sort the search handles by. Pass empty string to default to ordering by 'Timestamp asc'.</param>
 /// <param name="orderAscending">Pass true to order ascending, false to order descending.</param>
@@ -3595,7 +3605,7 @@ STDAPI XblMultiplayerSendInvitesAsync(
 /// </summary>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <param name="handlesCount">The number of handles in the handles array. Size should be equal to the number of invites requested.</param>
-/// <param name="handles">A caller allocated array to pass back the invite handle results  
+/// <param name="handles">A caller allocated array to pass back the invite handle results.
 /// The handle ID strings corresponding to the invites that have been sent.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMultiplayerSendInvitesResult(
@@ -3609,7 +3619,7 @@ STDAPI XblMultiplayerSendInvitesResult(
 /// Queries for the current activity for a socialgroup of users associated with a particular "owner" user.  
 /// </summary>
 /// <param name="xboxLiveContext">Xbox live context for the local user.</param>
-/// <param name="scid">The scid within which to query for activities.</param>
+/// <param name="scid">The Service Configuration ID (SCID) within which to query for activities. The SCID is considered case sensitive so paste it directly from the Partner Center</param>
 /// <param name="socialGroupOwnerXuid">The person whose social group will be used for the query.</param>
 /// <param name="socialGroup">The social group to use in order to get the list of users. (e.g. "people" or "favorites")</param>
 /// <param name="async">The AsyncBlock for this operation.</param>
@@ -3629,7 +3639,7 @@ STDAPI XblMultiplayerGetActivitiesForSocialGroupAsync(
 /// Queries for the current activity for a socialgroup of users associated with a particular "owner" user.  
 /// </summary>
 /// <param name="xboxLiveContext">Xbox live context for the local user.</param>
-/// <param name="scid">The scid within which to query for activities.</param>
+/// <param name="scid">The Service Configuration ID (SCID) within which to query for activities. The SCID is considered case sensitive so paste it directly from the Partner Center</param>
 /// <param name="socialGroupOwnerXuid">The person whose social group will be used for the query.</param>
 /// <param name="socialGroup">The social group to use in order to get the list of users. (e.g. "people" or "favorites")</param>
 /// <param name="async">The AsyncBlock for this operation.</param>
@@ -3705,7 +3715,7 @@ STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResult(
 /// Queries for the current activity for a set of users specified by xuid.  
 /// </summary>
 /// <param name="xblContext">Xbox live context for the local user.</param>
-/// <param name="scid">The scid within which to query for activities.</param>
+/// <param name="scid">The Service Configuration ID (SCID) within which to query for activities. The SCID is considered case sensitive so paste it directly from the Partner Center</param>
 /// <param name="xuids">The list of user ids to find activities for.</param>
 /// <param name="xuidsCount">The size of the xuids array.</param>
 /// <param name="async">The AsyncBlock for this operation.</param>
@@ -3725,7 +3735,7 @@ STDAPI XblMultiplayerGetActivitiesForUsersAsync(
 /// Queries for the current activity for a set of users specified by xuid.  
 /// </summary>
 /// <param name="xblContext">Xbox live context for the local user.</param>
-/// <param name="scid">The scid within which to query for activities.</param>
+/// <param name="scid">The Service Configuration ID (SCID) within which to query for activities. The SCID is considered case sensitive so paste it directly from the Partner Center</param>
 /// <param name="xuids">The list of user ids to find activities for.</param>
 /// <param name="xuidsCount">The size of the xuids array.</param>
 /// <param name="async">The AsyncBlock for this operation.</param>
@@ -3838,7 +3848,7 @@ typedef void CALLBACK XblMultiplayerSessionChangedHandler(
 
 /// <summary>
 /// Registers an event handler for notifications when a multiplayer session changes. If the RTA subscription has not
-/// been explicitly enabled with <see cref="XblMultiplayerSetSubscriptionsEnabled">, adding session changed handlers will
+/// been explicitly enabled with <see cref="XblMultiplayerSetSubscriptionsEnabled" />, adding session changed handlers will
 /// enable it automatically. Use the returned XblFunctionContext to unregister the handler.
 /// </summary>
 /// <param name="xblContext">Xbox live context for the local user.</param>

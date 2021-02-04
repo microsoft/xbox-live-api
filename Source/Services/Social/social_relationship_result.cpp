@@ -41,8 +41,8 @@ Result<std::shared_ptr<XblSocialRelationshipResult>> XblSocialRelationshipResult
                     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(person, "isFavorite", relationship.isFavorite));
                     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(person, "isFollowingCaller", relationship.isFollowingCaller));
 
-                    xsapi_internal_vector<string_t> socialNetworksInternalVector;
-                    JsonUtils::ExtractJsonVector<string_t>(JsonUtils::JsonStringTExtractor, person, "socialNetworks", socialNetworksInternalVector, false);
+                    xsapi_internal_vector<xsapi_internal_string> socialNetworksInternalVector;
+                    JsonUtils::ExtractJsonVector<xsapi_internal_string>(JsonUtils::JsonStringExtractor, person, "socialNetworks", socialNetworksInternalVector, false);
                     UTF8StringArray socialNetworks(socialNetworksInternalVector);
                     relationship.socialNetworks = socialNetworks.Data();
                     relationship.socialNetworksCount = socialNetworks.Size();

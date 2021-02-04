@@ -376,7 +376,7 @@ typedef struct XblAchievement
     _Field_z_ const char* id;
 
     /// <summary>
-    /// The UTF-8 encoded ID of the service configuration set associated with the achievement.
+    /// The Service Configuration ID (SCID) that is associated with the achievement. The SCID is considered case sensitive so paste it directly from the Partner Center
     /// </summary>
     _Field_z_ const char* serviceConfigurationId;
 
@@ -467,7 +467,7 @@ typedef struct XblAchievement
     XblAchievementReward* rewards;
 
     /// <summary>
-    /// The size of **rewards**>.
+    /// The size of **rewards**.
     /// </summary>
     size_t rewardsCount;
 
@@ -535,12 +535,12 @@ typedef struct XblAchievementUnlockEvent
     _Field_z_ const char* deepLink;
 
     /// <summary>
-    /// The ratio of the count of users who have unlocked the achievement / the total number unique users of that title expressed as a float value >= 0.0 and <= 100.0 rounded to 2 decimal places.
+    /// The ratio of the count of users who have unlocked the achievement / the total number unique users of that title expressed as a fractional value &gt;= 0.0 and &lt;= 1.0 rounded to 2 decimal places.
     /// </summary>
     float rarityPercentage;
 
     /// <summary>
-    /// "Rare" or "Common" - where Rare achievements are those with a rarityPercentage < 10% and "Common" is everything else. (This string is not localized).
+    /// "Rare" or "Common" - where Rare achievements are those with a rarityPercentage &lt;= 9% (or 0.9) and "Common" is everything else. (This string is not localized).
     /// </summary>
     XblAchievementRarityCategory rarityCategory;
 
@@ -557,7 +557,7 @@ typedef struct XblAchievementUnlockEvent
 /// </summary>
 /// <remarks>
 /// This handle is used by other APIs to get the achievement objects and to get the 
-/// next page of achievements from the service if there is is one.  
+/// next page of achievements from the service if there is one.  
 /// The handle must be closed using <see cref="XblAchievementsResultCloseHandle"/> 
 /// when the result is no longer needed.
 /// </remarks>
@@ -594,7 +594,7 @@ STDAPI XblAchievementsResultGetAchievements(
 /// Checks if there are more pages of achievements to retrieve from the service.
 /// </summary>
 /// <param name="resultHandle">Achievement result handle.</param>
-/// <param name="hasNext">Passes back True if there are more results to retrieve, false otherwise.</param>
+/// <param name="hasNext">Passes back true if there are more results to retrieve, false otherwise.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblAchievementsResultHasNext(
     _In_ XblAchievementsResultHandle resultHandle,
@@ -716,7 +716,7 @@ STDAPI XblAchievementsUpdateAchievementAsync(
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>
 /// <param name="titleId">The title ID.</param>
-/// <param name="serviceConfigurationId">The UTF-8 encoded service configuration ID (SCID) for the title.</param>
+/// <param name="serviceConfigurationId">The Service Configuration ID (SCID) for the title. The SCID is considered case sensitive so paste it directly from the Partner Center.</param>
 /// <param name="achievementId">The UTF-8 encoded achievement ID as defined by XDP or Dev Center.</param>
 /// <param name="percentComplete">The completion percentage of the achievement to indicate progress.  
 /// Valid values are from 1 to 100. Set to 100 to unlock the achievement.  
@@ -746,7 +746,7 @@ STDAPI XblAchievementsUpdateAchievementForTitleIdAsync(
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>
-/// <param name="serviceConfigurationId">The UTF-8 encoded service configuration ID (SCID) for the title.</param>
+/// <param name="serviceConfigurationId">The Service Configuration ID (SCID) for the title. The SCID is considered case sensitive so paste it directly from the Partner Center.</param>
 /// <param name="achievementId">The UTF-8 encoded unique identifier of the Achievement as defined by XDP or Dev Center.</param>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
@@ -769,7 +769,7 @@ STDAPI XblAchievementsGetAchievementAsync(
 /// <param name="async">The same AsyncBlock that passed to XblAchievementsGetAchievementAsync.</param>
 /// <param name="result">The achievement result handle.  
 /// This handle is used by other APIs to get the achievement objects 
-/// and to get the next page of achievements from the service if there is is one.  
+/// and to get the next page of achievements from the service if there is one.  
 /// The handle must be closed using <see cref="XblAchievementsResultCloseHandle"/> when the result is no longer needed.
 /// </param>
 /// <returns>HRESULT return code for this API operation.</returns>

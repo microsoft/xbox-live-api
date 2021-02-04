@@ -164,8 +164,8 @@ public:
 
     // Validate that a batch request is well formed
     bool VerifyBatchRequest(
-        _In_ const std::string& requestUri,
-        _In_ const std::string& requestBody,
+        _In_ const xsapi_internal_string& requestUri,
+        _In_ const xsapi_internal_string& requestBody,
         _In_ const std::vector<uint64_t>& requestedXuids
     )
     {
@@ -201,7 +201,7 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock*, std::string requestUrl, std::string requestBody)
+            [&](HttpMock*, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 // XblProfileGetUserProfileResult just makes a batch request with 1 xuid
                 requestWellFormed = VerifyBatchRequest(requestUrl, requestBody, std::vector<uint64_t>{ expectedProfile.xuid });
@@ -235,7 +235,7 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock*, std::string requestUrl, std::string requestBody)
+            [&](HttpMock*, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 requestWellFormed = VerifyBatchRequest(requestUrl, requestBody, xuids);
             }
@@ -277,9 +277,9 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock*, std::string requestUri, std::string requestBody)
+            [&](HttpMock*, xsapi_internal_string requestUri, xsapi_internal_string requestBody)
             {
-                std::stringstream expectedUri;
+                xsapi_internal_stringstream expectedUri;
                 expectedUri << "https://profile.xboxlive.com/users/me/profile/settings/people/";
                 expectedUri << socialGroup;
                 expectedUri << "?settings=AppDisplayName,AppDisplayPicRaw,GameDisplayName,GameDisplayPicRaw,Gamerscore,Gamertag,ModernGamertag,ModernGamertagSuffix,UniqueModernGamertag";

@@ -154,14 +154,14 @@ private:
                 RTASubResponder(size_t followeeCount)
                 {
                     auto& rtaService{ system::MockRealTimeActivityService::Instance() };
-                    rtaService.SetSubscribeHandler([=](uint32_t n, std::string uri)
+                    rtaService.SetSubscribeHandler([=](uint32_t n, xsapi_internal_string uri)
                     {
                         SMTestEnvironment::RTASubscribeHandler(n, uri);
-                        if (uri.find("https://userpresence.xboxlive.com") != std::string::npos)
+                        if (uri.find("https://userpresence.xboxlive.com") != xsapi_internal_string::npos)
                         {
                             ++presenceSubsComplete;
                         }
-                        else if (uri.find("http://social.xboxlive.com") != std::string::npos)
+                        else if (uri.find("http://social.xboxlive.com") != xsapi_internal_string::npos)
                         {
                             socialRelationshipSubComplete = true;
                         }
@@ -274,7 +274,7 @@ private:
                     isFavorite,
                     isFollowedByCaller
                 ]
-            (HttpMock* mock, std::string requestUrl, std::string requestBody)
+            (HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
                 {
                     std::vector<uint64_t> xuids;
 
@@ -326,7 +326,7 @@ private:
                     offlineXuids = std::unordered_set<uint64_t>{ offlineXuids.begin(), offlineXuids.end() },
                     titleId
                 ]
-            (HttpMock* mock, std::string requestUrl, std::string requestBody) mutable
+            (HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody) mutable
                 {
                     SetPresenceResponse(mock, requestUrl, requestBody, std::move(offlineXuids), titleId);
                 });
@@ -339,7 +339,7 @@ private:
         {
             for (auto xuid : userList)
             {
-                std::stringstream uri;
+                xsapi_internal_stringstream uri;
                 uri << "https://userpresence.xboxlive.com/users/xuid(" << xuid << ")/devices";
 
                 MockRealTimeActivityService::Instance().RaiseEvent(uri.str(), online ? R"("PC:true")" : R"("PC:false")");
@@ -353,7 +353,7 @@ private:
         {
             for (auto xuid : userList)
             {
-                std::stringstream uri;
+                xsapi_internal_stringstream uri;
                 uri << "https://userpresence.xboxlive.com/users/xuid(" << xuid << ")/titles/1234";
 
                 MockRealTimeActivityService::Instance().RaiseEvent(uri.str(), ended ? R"("ended")" : R"("started")");
@@ -366,7 +366,7 @@ private:
             uint64_t affectedXuid
         ) const noexcept
         {
-            std::stringstream uri;
+            xsapi_internal_stringstream uri;
             uri << "http://social.xboxlive.com/users/xuid(" << localUser.Xuid() << ")/friends";
 
             rapidjson::Document eventData{ rapidjson::kObjectType };
@@ -384,14 +384,14 @@ private:
         std::vector<uint64_t> FollowedXuids;
 
     private:
-        static void RTASubscribeHandler(uint32_t n, std::string uri)
+        static void RTASubscribeHandler(uint32_t n, xsapi_internal_string uri)
         {
             auto& rtaService{ system::MockRealTimeActivityService::Instance() };
-            if (uri.find("https://userpresence.xboxlive.com") != std::string::npos)
+            if (uri.find("https://userpresence.xboxlive.com") != xsapi_internal_string::npos)
             {
                 rtaService.CompleteSubscribeHandshake(n, presenceOnlineRtaMessageSubscribeComplete);
             }
-            else if (uri.find("http://social.xboxlive.com") != std::string::npos)
+            else if (uri.find("http://social.xboxlive.com") != xsapi_internal_string::npos)
             {
                 rtaService.CompleteSubscribeHandshake(n);
             }
@@ -399,14 +399,14 @@ private:
 
         static size_t SetPresenceResponse(
             HttpMock* mock,
-            const std::string& requestUrl,
-            const std::string& requestBody,
+            const xsapi_internal_string& requestUrl,
+            const xsapi_internal_string& requestBody,
             std::unordered_set<uint64_t>&& offlineXuids = {},
             uint32_t titleId = MOCK_TITLEID
         )
         {
             JsonDocument userArr{};
-            if (requestUrl.find("batch") != std::string::npos)
+            if (requestUrl.find("batch") != xsapi_internal_string::npos)
             {
                 // for batch requests the user list is in the request body
                 JsonDocument jsonRequest{ rapidjson::kObjectType };
@@ -452,7 +452,7 @@ private:
             const std::vector<const XblSocialManagerEvent*>& events
         ) const noexcept
         {
-            static std::unordered_map<XblSocialManagerEventType, std::string> eventTypesMap
+            static std::unordered_map<XblSocialManagerEventType, xsapi_internal_string> eventTypesMap
             {
                 { XblSocialManagerEventType::UsersAddedToSocialGraph, "UsersAddedToSocialGraph" },
                 { XblSocialManagerEventType::UsersRemovedFromSocialGraph, "UsersRemovedFromSocialGraph" },
@@ -467,7 +467,7 @@ private:
 
             for (auto& event : events)
             {
-                std::stringstream ss;
+                xsapi_internal_stringstream ss;
                 ss << "SocialManager Event: " << eventTypesMap[event->eventType] << std::endl;
                 for (uint32_t i = 0; i < XBL_SOCIAL_MANAGER_MAX_AFFECTED_USERS_PER_EVENT; i++)
                 {
@@ -2013,7 +2013,7 @@ public:
 
             // title history tests
             VERIFY_IS_TRUE(user->title_history().has_user_played());
-            VERIFY_IS_TRUE(Utils::TimeTFromDatetime(user->title_history().last_time_user_played()) == utils::TimeTFromDatetime(xbox::services::datetime::from_string(_T("2015-01-26T22:54:54.6630Z"), xbox::services::datetime::date_format::ISO_8601)));
+            VERIFY_IS_TRUE(Utils::TimeTFromDatetime(user->title_history().last_time_user_played()) == utils::TimeTFromDatetime(xbox::services::datetime::from_string("2015-01-26T22:54:54.6630Z", xbox::services::datetime::date_format::ISO_8601)));
         }
 
         auto destroyGroupResult = socialManager->destroy_social_user_group(group);

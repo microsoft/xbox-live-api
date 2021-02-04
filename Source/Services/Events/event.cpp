@@ -91,7 +91,7 @@ Result<Event> Event::Deserialize(
     // tab-separated (0x0A)
     // xuid | event name | timestamp | dimensions json | measurements json
 
-    auto parts = utils::string_split(inputData, '\t');
+    auto parts = utils::string_split_internal(inputData, '\t');
 
     if (parts.size() < 5)
     {
@@ -100,7 +100,7 @@ Result<Event> Event::Deserialize(
 
     auto xuid = utils::internal_string_to_uint64(parts[0]);
     auto& eventName = parts[1];
-    auto timestamp = xbox::services::datetime::from_string(utils::string_t_from_internal_string(parts[2]), xbox::services::datetime::ISO_8601);
+    auto timestamp = xbox::services::datetime::from_string(parts[2], xbox::services::datetime::ISO_8601);
 
     JsonDocument dimensionsJson;
     dimensionsJson.Parse(parts[3].data());
@@ -158,7 +158,7 @@ xsapi_internal_string Event::Serialize() const
 
     ss << m_xuid << seperator;
     ss << m_eventName << seperator;
-    ss << utils::internal_string_from_string_t(m_timestamp.to_string(xbox::services::datetime::ISO_8601)) << seperator;
+    ss << m_timestamp.to_string(xbox::services::datetime::ISO_8601) << seperator;
     ss << JsonUtils::SerializeJson(m_dimensions) << seperator;
     ss << JsonUtils::SerializeJson(m_measurements);
 

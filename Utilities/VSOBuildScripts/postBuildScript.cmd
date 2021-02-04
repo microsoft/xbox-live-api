@@ -307,6 +307,9 @@ if "%skipNuget%" == "1" goto skipNuget
 if "%1" == "local" goto skipNuget
 rem :skipCopy
 
+rem Nuget packages currently not needed by any partner. Always skip generation until we have a need for these
+goto skipNuget
+
 rem create Cpp.Win32 nuget package
 rmdir /s /q %TFS_DropLocation%\include\winrt
 rmdir /s /q %TFS_DropLocation%\include\cppwinrt
