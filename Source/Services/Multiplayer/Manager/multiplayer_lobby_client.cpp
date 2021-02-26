@@ -606,7 +606,10 @@ MultiplayerLobbyClient::DoWork()
                         // than the join fails for the whole list of users.
                         for (auto pendingRequest : processingQueue)
                         {
-                            xuidsInOrder.push_back(pendingRequest->LocalUser()->Xuid());
+                            if (pendingRequest->LocalUser())
+                            {
+                                xuidsInOrder.push_back(pendingRequest->LocalUser()->Xuid());
+                            }
                         }
                     }
 

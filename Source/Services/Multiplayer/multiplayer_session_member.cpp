@@ -705,8 +705,10 @@ void MultiplayerSessionMember::SetExternalMemberPointer(XblMultiplayerSessionMem
     auto internalMember = Get(&member);
     internalMember->m_member = &member;
 
+    member.InitialTeam = internalMember->m_initialTeam.empty() ? nullptr : internalMember->m_initialTeam.data();
     member.CustomConstantsJson = internalMember->m_customConstantsJson.empty() ? nullptr :internalMember->m_customConstantsJson.data();
     member.SecureDeviceBaseAddress64 = internalMember->m_secureDeviceAddressBase64.empty() ? nullptr : internalMember->m_secureDeviceAddressBase64.data();
+    member.Roles = internalMember->m_roles.empty() ? nullptr : internalMember->m_roles.data();
     member.CustomPropertiesJson = internalMember->m_customPropertiesString.empty() ? nullptr : internalMember->m_customPropertiesString.data();
     member.MatchmakingResultServerMeasurementsJson = internalMember->m_matchmakingResultServerMeasurementsJson.empty() ? nullptr : internalMember->m_matchmakingResultServerMeasurementsJson.data();
     member.ServerMeasurementsJson = internalMember->m_serverMeasurementsJson.empty() ? nullptr : internalMember->m_serverMeasurementsJson.data();
@@ -714,7 +716,6 @@ void MultiplayerSessionMember::SetExternalMemberPointer(XblMultiplayerSessionMem
     member.QosMeasurementsJson = internalMember->m_qosMeasurementsJson.empty() ? nullptr : internalMember->m_qosMeasurementsJson.data();
     member.Groups = internalMember->m_groups.empty() ? nullptr : internalMember->m_groups.data();
     member.Encounters = internalMember->m_encounters.empty() ? nullptr : internalMember->m_encounters.data();
-    member.Roles = internalMember->m_roles.empty() ? nullptr : internalMember->m_roles.data();
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_END
