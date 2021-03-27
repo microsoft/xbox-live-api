@@ -647,7 +647,7 @@ HRESULT MultiplayerService::DeleteSearchHandle(
         m_xboxLiveContextSettings,
         "DELETE",
         XblHttpCall::BuildUrl("sessiondirectory", handleStr),
-        xbox_live_api::set_activity
+        xbox_live_api::delete_search_handle
     ));
 
     RETURN_HR_IF_FAILED(httpCall->SetXblServiceContractVersion(MULTIPLAYER_SERVICE_CONTRACT_VERSION));

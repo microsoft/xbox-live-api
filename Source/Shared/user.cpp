@@ -406,7 +406,7 @@ Result<String> User::GetGamertagComponent(
     {
         size_t size = XalUserGetGamertagSize(m_handle, component);
 
-        std::vector<char> gamertagComponent(size, char{});
+        Vector<char> gamertagComponent(size, char{});
         auto hr = XalUserGetGamertag(m_handle, component, size, &gamertagComponent[0], nullptr);
         if (SUCCEEDED(hr))
         {

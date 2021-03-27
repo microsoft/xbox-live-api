@@ -11,9 +11,7 @@
     </Otherwise>
   </Choose>
 
-  <PropertyGroup Label="Version">
-    <VersionMajor>1</VersionMajor>
-    <VersionMinor>0</VersionMinor>
+  <PropertyGroup>
     <VS_AndroidHome Condition="'$(VS_AndroidHome)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Android SDK Tools@Path)</VS_AndroidHome>
     <VS_AndroidHome Condition="'$(VS_AndroidHome)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Android SDK Tools@Path)</VS_AndroidHome>
   </PropertyGroup>

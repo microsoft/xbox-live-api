@@ -253,7 +253,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_achievements_progress_notification.cpp">
       <Filter>APIs</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\mem_hook.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\mem_hook.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shared">

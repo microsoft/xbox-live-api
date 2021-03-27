@@ -172,12 +172,15 @@ void Connection::Cleanup()
     m_unsubscribeAsyncContexts.clear();
     lock.unlock();
 
-    m_queue.Terminate(true);
-
-    for (auto& async : pendingAsyncContexts)
-    {
-        async.Complete(E_ABORT);
-    }
+    m_queue.Terminate(
+        false,
+        [pendingAsyncContexts = std::move(pendingAsyncContexts)]() {
+            for (auto& async : pendingAsyncContexts)
+            {
+                async.Complete(E_ABORT);
+            }
+        }
+    );
 }
 
 #if HC_PLATFORM == HC_PLATFORM_GDK

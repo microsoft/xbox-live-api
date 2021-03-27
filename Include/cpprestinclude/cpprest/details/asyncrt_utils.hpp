@@ -1047,11 +1047,11 @@ utility::seconds __cdecl timespan::xml_duration_to_seconds(const utility::string
     return utility::seconds(numSecs);
 }
 
-const utility::string_t nonce_generator::c_allowed_chars(_XPLATSTR("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"));
+const utility::char_t * nonce_generator::c_allowed_chars = _XPLATSTR("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
 
 utility::string_t nonce_generator::generate()
 {
-    std::uniform_int_distribution<> distr(0, static_cast<int>(c_allowed_chars.length() - 1));
+    std::uniform_int_distribution<> distr(0, static_cast<int>(ustrlen(c_allowed_chars) - 1));
     utility::string_t result;
     result.reserve(length());
     std::generate_n(std::back_inserter(result), length(), [&]() { return c_allowed_chars[distr(m_random)]; } );

@@ -51,7 +51,7 @@ size_t GameInviteSubscription::RemoveHandler(
     std::lock_guard<std::mutex> lock{ m_mutex };
     m_mpaInviteHandlers.erase(token);
     m_mpsdInviteHandlers.erase(token);
-    return m_mpaInviteHandlers.size() + m_mpaInviteHandlers.size();
+    return m_mpaInviteHandlers.size() + m_mpsdInviteHandlers.size();
 }
 
 void GameInviteSubscription::OnEvent(

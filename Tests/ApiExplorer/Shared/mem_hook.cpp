@@ -117,7 +117,7 @@ std::vector<std::string> ApiRunerMemHook::GetStackLogLine()
     GetStackTrace(stackInfo);
 
     std::vector<std::string> logs;
-    logs.reserve(stackInfo.stackSize);
+    logs.reserve(static_cast<size_t>(stackInfo.stackSize));
     for (int i = 0; i < stackInfo.stackSize; i++)
     {
         char sz[1024];
@@ -403,6 +403,12 @@ bool ApiRunerMemHook::IsStackInXSAPI(StackInfo& stackInfo)
             return false;
         }
 
+        bool foundTestCodeFirst = IsStackFramesInsideTestCode(&stackInfo);
+        if (foundTestCodeFirst)
+        {
+            return false;
+        }
+
         return true;
     }
 #else
@@ -414,7 +420,7 @@ bool ApiRunerMemHook::IsStackInXSAPI(StackInfo& stackInfo)
 
 void ApiRunerMemHook::GetStackTrace(StackInfo &stackInfo)
 {
-#if HC_PLATFORM == HC_PLATFORM_WIN32 || (HC_PLATFORM == HC_PLATFORM_GDK && !WINAPI_PARTITION_GAMES)
+#if HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM == HC_PLATFORM_GDK
     void* stack[TRACE_MAX_STACK_FRAMES] = { 0 };
     WORD numberOfFrames = CaptureStackBackTrace(0, TRACE_MAX_STACK_FRAMES, stack, NULL);
     stackInfo.stackSize = numberOfFrames < 64 ? numberOfFrames : 64;
@@ -454,6 +460,20 @@ void ApiRunerMemHook::GetStackTrace(StackInfo &stackInfo)
 }
 
 #if HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM == HC_PLATFORM_GDK
+bool ApiRunerMemHook::IsStackFramesInsideTestCode(StackInfo* pStackInfo)
+{
+    for (int i = 0; i < pStackInfo->stackSize; i++)
+    {
+        if (pStackInfo->isInXsapi[i])
+            return false;
+
+        const char* found = stristr(pStackInfo->szFileNames[i], "\\apiexplorer\\");
+        if (found != nullptr)
+            return true;
+    }
+    return false;
+}
+
 bool ApiRunerMemHook::IsStackFramesInsideCallback(StackInfo* pStackInfo)
 {
     for (int i = 0; i < pStackInfo->stackSize; i++)

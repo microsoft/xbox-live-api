@@ -22,11 +22,15 @@
 #include "Logger/log_hc_output.h"
 #include "global_state.h"
 
+#ifndef _XTIME_TICKS_PER_TIME_T
+#define _XTIME_TICKS_PER_TIME_T 10000000LL
+#endif
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 #define MAKE_HTTP_HRESULT(code) MAKE_HRESULT(1, 0x019, code)
 
-static const std::string _sdaPrefix = "AAAAAAAA";
+static char const * _sdaPrefix = "AAAAAAAA";
 
 static const uint64_t _msTicks = static_cast<uint64_t>(10000);
 static const uint64_t _secondTicks = 1000*_msTicks;
@@ -825,7 +829,7 @@ utils::format_secure_device_address(String deviceAddress)
     // MPSD will base64 decode a non-valid SDA and the hashed value will be used
     // as the device token. The SDA can then be parsed by the title while 
     // deserializing the MPSD session to retrieve the connectionAddress.
-    formattedDeviceAddress = _sdaPrefix.c_str() + deviceAddress;
+    formattedDeviceAddress = _sdaPrefix + deviceAddress;
 #endif
 
     Vector<unsigned char> input(formattedDeviceAddress.c_str(), formattedDeviceAddress.c_str() + formattedDeviceAddress.size());
@@ -852,9 +856,9 @@ utils::parse_secure_device_address(String secureDeviceAddress)
 
     String deviceAddress = formattedDeviceAddress;
 #if !(HC_PLATFORM == HC_PLATFORM_XDK || HC_PLATFORM == HC_PLATFORM_UWP)
-    if (deviceAddress.find(_sdaPrefix.c_str()) == 0)
+    if (deviceAddress.find(_sdaPrefix) == 0)
     {
-        deviceAddress = deviceAddress.substr(_sdaPrefix.length());
+        deviceAddress = deviceAddress.substr(strlen(_sdaPrefix));
     }
 #endif
 
