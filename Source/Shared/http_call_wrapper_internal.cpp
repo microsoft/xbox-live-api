@@ -45,7 +45,7 @@ HRESULT HttpCall::SetHeader(
     return HCHttpCallRequestSetHeader(m_callHandle, key.data(), value.data(), allowTracing);
 }
 
-HRESULT HttpCall::SetRequestBody(xsapi_internal_vector<uint8_t>&& bytes)
+HRESULT HttpCall::SetRequestBody(const xsapi_internal_vector<uint8_t>& bytes)
 {
     assert(m_step == Step::Pending);
     return HCHttpCallRequestSetRequestBodyBytes(m_callHandle, bytes.data(), static_cast<uint32_t>(bytes.size()));
@@ -626,7 +626,7 @@ HRESULT XblHttpCall::SetHeader(
     return HttpCall::SetHeader(key, value, allowTracing);
 }
 
-HRESULT XblHttpCall::SetRequestBody(xsapi_internal_vector<uint8_t>&& bytes)
+HRESULT XblHttpCall::SetRequestBody(const xsapi_internal_vector<uint8_t>& bytes)
 {
     m_requestBody = bytes;
     return HttpCall::SetRequestBody(xsapi_internal_vector<uint8_t>{ bytes });
@@ -646,7 +646,8 @@ HRESULT XblHttpCall::SetRequestBody(_In_z_ const char* requestBodyString)
 
 HRESULT XblHttpCall::SetRequestBody(const xsapi_internal_string& bodyString)
 {
-    return SetRequestBody(xsapi_internal_vector<uint8_t>{ bodyString.begin(), bodyString.end() });
+    m_requestBody = xsapi_internal_vector<uint8_t>{ bodyString.begin(), bodyString.end() };
+    return HttpCall::SetRequestBody(bodyString);
 }
 
 HRESULT XblHttpCall::SetRequestBody(const JsonValue& bodyJson)

@@ -63,6 +63,7 @@ extern "C"
 #define E_XAL_NODEFAULTUSER                 MAKE_E_HC(0x5111L) // 0x89235111
 #define E_XAL_FAILEDTORESOLVE               MAKE_E_HC(0x5112L) // 0x89235112
 #define E_XAL_NOACCOUNTPROVIDER             MAKE_E_HC(0x5113L) // 0x89235113
+#define E_XAL_MISMATCHEDTITLEANDCLIENTIDS   MAKE_E_HC(0x5114L) // 0x89235114
 
 // E_XAL_INTERNAL_* values should never be returned to callers of XAL.
 #define E_XAL_INTERNAL_SWITCHUSER           MAKE_E_HC(0x5171L) // 0x89235171

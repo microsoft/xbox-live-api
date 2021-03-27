@@ -40,6 +40,7 @@ public:
     void GetStackTrace(StackInfo &stackInfo);
 
 #if HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM == HC_PLATFORM_GDK
+    bool IsStackFramesInsideTestCode(StackInfo* pStackInfo);
     bool IsStackFramesInsideCallback(StackInfo* pStackInfo);
 #endif
 

@@ -177,10 +177,11 @@ HRESULT NotificationService::RegisterForNotificationsHelper(
         payload.AddMember("transportPath", JsonValue(AppConfig::Instance()->APNSEnvironment().c_str(), allocator).Move(), allocator);
 #elif HC_PLATFORM == HC_PLATFORM_ANDROID
         payload.AddMember("transport", "FCM", allocator);
-#elif HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM == HC_PLATFORM_GDK
+#elif HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM_IS_EXTERNAL
         payload.AddMember("transport", "RTA", allocator);
 #endif
-        payload.AddMember("locale", JsonValue(utils::get_locales().data(), allocator).Move(), allocator);
+        xsapi_internal_string locale = utils::get_locales();
+        payload.AddMember("locale", JsonValue(locale.c_str(), allocator).Move(), allocator);
         payload.AddMember("titleId", JsonValue(titleId.c_str(), allocator).Move(), allocator);
 
         if (!deviceName.empty())

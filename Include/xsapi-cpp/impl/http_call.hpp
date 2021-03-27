@@ -307,12 +307,14 @@ void http_call::set_request_body(
     _In_ const string_t& value
 )
 {
-    XblHttpCallRequestSetRequestBodyString(m_callHandle, Utils::StringFromStringT(value).c_str());
+    auto convertedValue = Utils::StringFromStringT(value);
+    XblHttpCallRequestSetRequestBodyString(m_callHandle, convertedValue.c_str());
 }
 
 void http_call::set_request_body( _In_ const web::json::value& value )
 {
-    XblHttpCallRequestSetRequestBodyString(m_callHandle, Utils::StringFromStringT(value.serialize()).c_str());
+    auto convertedValue = Utils::StringFromStringT(value.serialize());
+    XblHttpCallRequestSetRequestBodyString(m_callHandle, convertedValue.c_str());
 }
 
 void http_call::set_request_body(
@@ -331,10 +333,13 @@ void http_call::set_custom_header(
     _In_ const string_t& Value
 )
 {
+    const auto headerName = Utils::StringFromStringT(Name);
+    const auto headerValue = Utils::StringFromStringT(Value);
+
     XblHttpCallRequestSetHeader(
         m_callHandle, 
-        Utils::StringFromStringT(Name).c_str(), 
-        Utils::StringFromStringT(Value).c_str(), 
+        headerName.c_str(),
+        headerValue.c_str(),
         false
     );
 }

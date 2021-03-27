@@ -81,6 +81,7 @@ HRESULT RealTimeActivityManager::RemoveSubscription(
             if (iter != sharedThis->m_rtaConnections.end() && iter->second->SubscriptionCount() == 0 && sharedThis->m_legacyActivations[xuid] == 0)
             {
                 LOGS_DEBUG << __FUNCTION__ << ": No remaining activations or subscriptions, tearing down connection";
+                iter->second->Cleanup();
                 sharedThis->m_rtaConnections.erase(iter);
 
                 // Maintain legacy behavior and raise Disconnected event even on intentional shutdown
@@ -173,7 +174,8 @@ void RealTimeActivityManager::Deactivate(
         if (m_titleActivated || connectionIter->second->SubscriptionCount() == 0)
         {
             LOGS_DEBUG << __FUNCTION__ << ": No remaining activations tearing down connection";
-            m_rtaConnections.erase(user.Xuid());
+            connectionIter->second->Cleanup();
+            m_rtaConnections.erase(connectionIter);
 
             // Maintain legacy behavior and raise Disconnected event even on intentional shutdown
             auto handlers{ m_stateChangedHandlers[user.Xuid()] };
