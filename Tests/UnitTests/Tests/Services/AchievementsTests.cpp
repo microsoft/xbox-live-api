@@ -512,6 +512,11 @@ public:
                 xbox::services::Vector<XblAchievementRequirement> requirements;
             };
             xbox::services::Vector<Entry> entries;
+            
+            // To keep the strings alive outside the handler for this test
+            xbox::services::String idContainer{};
+            xbox::services::String currentProgressContainer{};
+            xbox::services::String targetProgressContainer{};
         } context;
 
         auto handlerToken = XblAchievementsAddAchievementProgressChangeHandler(xboxLiveContext.get(),
@@ -524,10 +529,13 @@ public:
                     const XblAchievementProgressChangeEntry& updateEntry = args->updatedAchievementEntries[entryIndex];
                     entry.achievementId = updateEntry.achievementId;
                     entry.progressState = updateEntry.progressState;
-                    entry.requirements = xbox::services::Vector<XblAchievementRequirement>(
-                        updateEntry.progression.requirements,
-                        updateEntry.progression.requirements + updateEntry.progression.requirementsCount
-                    );
+                    entry.requirements = xbox::services::Vector<XblAchievementRequirement>(updateEntry.progression.requirementsCount);
+
+                    c->idContainer = updateEntry.progression.requirements[0].id;
+                    c->currentProgressContainer = updateEntry.progression.requirements[0].currentProgressValue;
+                    c->targetProgressContainer = updateEntry.progression.requirements[0].targetProgressValue;
+                    entry.requirements[0] = { c->idContainer.c_str(), c->currentProgressContainer.c_str(), c->targetProgressContainer.c_str() };
+
                     c->entries.push_back(entry);
                 }
 

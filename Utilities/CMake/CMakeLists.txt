@@ -367,11 +367,8 @@ if ( PCWIN32 )
     list(APPEND
         Notification_Source_Files
         ../../Source/Services/Notification/RTA/notification_service_rta.cpp
-        ../../Source/Services/Notification/RTA/game_invite_subscription.cpp
-        ../../Source/Services/Notification/RTA/achievement_unlock_subscription.h
-        ../../Source/Services/Notification/RTA/achievement_unlock_subscription.cpp
-        ../../Source/Services/Notification/RTA/spop_kick_subscription.h
-        ../../Source/Services/Notification/RTA/spop_kick_subscription.cpp
+        ../../Source/Services/Notification/RTA/notification_subscription.h
+        ../../Source/Services/Notification/RTA/notification_subscription.cpp
         )
 endif()
 

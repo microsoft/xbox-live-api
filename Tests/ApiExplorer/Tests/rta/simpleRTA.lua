@@ -11,6 +11,7 @@ end
 function OnXblRealTimeActivityAddConnectionStateChangeHandler_Connected()
     print("RTA connection connected");
     XblSocialRemoveSocialRelationshipChangedHandler();
+    XblContextCloseHandle();
 end
 
 function OnXblRealTimeActivityAddConnectionStateChangeHandler_Disconnected()

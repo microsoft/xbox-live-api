@@ -130,24 +130,33 @@ void UnsetHandler(XblFunctionContext id)
 
 namespace lua
 {
+    int XblAchievementUnlockAddNotificationHandler(lua_State *L)
+    {
+        auto id = SetHandler();
+        lua_pushinteger(L, id);
+        LuaReturnHR(L, S_OK, 1);
+        return 0;
+    }
+
+    int XblAchievementUnlockRemoveNotificationHandler(lua_State *L)
+    {
+        uint32_t id = GetUint32FromLua(L, 1, 0);
+        UnsetHandler(id);
+        return 0;
+    }
 
     int RunAchievementUnlock(lua_State *L)
     {
         std::string achievementId = luaL_checkstring(L, 1);
-        
+
         HRESULT hr = 0;
-        XblFunctionContext id;
         errorCode = status::ERROR_NO_MSG;
 
-        id = SetHandler();
-        
         Sleep(1000);
-        
-        hr = UnlockAchievement(achievementId);
-        
-        lua_pushinteger(L, id);
 
-        return LuaReturnHR(L, hr, 1);
+        hr = UnlockAchievement(achievementId);
+
+        return LuaReturnHR(L, hr);
     }
 
 
@@ -191,6 +200,8 @@ void SetupAPIs_XblAchievementUnlockNotification()
     lua_register(Data()->L, "Cleanup", xbl::apirunner::lua::Cleanup);
     lua_register(Data()->L, "CheckStatus", xbl::apirunner::lua::CheckStatus);
     lua_register(Data()->L, "IsAchievementLocked", xbl::apirunner::lua::IsAchievementLocked);
+    lua_register(Data()->L, "XblAchievementUnlockAddNotificationHandler", xbl::apirunner::lua::XblAchievementUnlockAddNotificationHandler);
+    lua_register(Data()->L, "XblAchievementUnlockRemoveNotificationHandler", xbl::apirunner::lua::XblAchievementUnlockRemoveNotificationHandler);
 }
 
 #endif

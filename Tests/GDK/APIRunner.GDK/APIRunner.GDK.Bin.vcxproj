@@ -50,7 +50,7 @@
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <Import Condition="Exists($(ATGBuildProps))" Project="$(ATGBuildProps)" />
-  <Import Project="$(MSBuildThisFileDirectory)..\..\..\Build\xsapi.gdk.bwoi.props" />  
+  <Import Project="$(MSBuildThisFileDirectory)..\..\..\Build\xsapi.gdk.bwoi.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Gaming.Xbox.XboxOne.x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -383,7 +383,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Gaming.Xbox.Scarlett.x64'">
     <Link>
-      <AdditionalDependencies>uuid.lib;$(Console_Libs);%(XboxExtensionsDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>uuid.lib;$(Console_Libs);%(XboxExtensionsDependencies);dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
@@ -514,7 +514,6 @@
   <ItemGroup>
     <MGCCompile Include="MicrosoftGame.Config" />
   </ItemGroup>
-
   <ItemGroup>
     <None Include="Media\Fonts\SegoeUI_18.spritefont">
       <Link>%(Filename)%(Extension)</Link>
@@ -552,8 +551,6 @@
     <None Include="Media\Fonts\XboxOneControllerLegendSmall.spritefont">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="MicrosoftGame.Config" />
-
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Kits\DirectXTK12\DirectXTK12_GDK_2017.vcxproj">

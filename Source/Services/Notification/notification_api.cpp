@@ -3,7 +3,6 @@
 
 
 #include "pch.h"
-#include "RTA/achievement_unlock_subscription.h"
 #include "notification_internal.h"
 #include "multiplayer_internal.h"
 #include "xbox_live_context_internal.h"
@@ -200,22 +199,10 @@ STDAPI XblGameInviteRegisterForEventAsync(
     {
         switch (op)
         {
-        case XAsyncOp::DoWork:
+        case XAsyncOp::Begin:
         {
-            auto rtaNotificationService = std::dynamic_pointer_cast<RTANotificationService>(xblContext->NotificationService());
-            RETURN_HR_IF_FAILED(rtaNotificationService->RegisterForGameInviteEvents({ data->async->queue,
-                [
-                    asyncBlock{ data->async }
-                ]
-            (Result<void> result)
-            {
-                // We want to return a dummy subscription handle to maintain legacy behavior, so make sure to
-                // indicate that there is a result payload
-                XAsyncComplete(asyncBlock, result.Hresult(), sizeof(XblRealTimeActivitySubscriptionHandle));
-            }
-            }));
-// Do we need E-PENDING
-            return E_PENDING;
+            XAsyncComplete(data->async, S_OK, sizeof(XblRealTimeActivitySubscriptionHandle));
+            return S_OK;
         }
         case XAsyncOp::GetResult:
         {
@@ -269,13 +256,11 @@ STDAPI XblGameInviteUnregisterForEventAsync(
     {
         switch (op)
         {
-        case XAsyncOp::DoWork:
+        case XAsyncOp::Begin:
         {
-
-            auto rtaNotificationService = std::dynamic_pointer_cast<RTANotificationService>(xblContext->NotificationService());
-            RETURN_HR_IF_FAILED(rtaNotificationService->UnregisterForGameInviteEvents(data->async));
             Delete(subscriptionHandle);
-            return E_PENDING;
+            XAsyncComplete(data->async, S_OK, 0);
+            return S_OK;
         }
         default: return S_OK;
         }
@@ -295,7 +280,7 @@ STDAPI_(XblFunctionContext) XblGameInviteAddNotificationHandler(
     }
 
     auto rtaNotificationService = std::dynamic_pointer_cast<RTANotificationService>(xblContextHandle->NotificationService());
-    return rtaNotificationService->AddGameInviteHandler(GameInviteSubscription::MPSDInviteHandler{
+    return rtaNotificationService->AddGameInviteHandler(NotificationSubscription::MPSDInviteHandler{
         [
             handler, context
         ]
@@ -321,7 +306,7 @@ STDAPI_(void) XblGameInviteRemoveNotificationHandler(
     if (xblContextHandle)
     {
         auto rtaNotificationService = std::dynamic_pointer_cast<RTANotificationService>(xblContextHandle->NotificationService());
-        rtaNotificationService->RemoveGameInviteHandler(token);
+        rtaNotificationService->RemoveNotificationHandler(token);
     }
 }
 
@@ -361,7 +346,7 @@ STDAPI_(void) XblAchievementUnlockRemoveNotificationHandler(
 ) XBL_NOEXCEPT
 {
     auto rtaNotificationService = std::dynamic_pointer_cast<RTANotificationService>(xblContextHandle->NotificationService());
-    rtaNotificationService->RemoveAchievementUnlockNotificationHandler(functionContext);
+    rtaNotificationService->RemoveNotificationHandler(functionContext);
 }
 
 

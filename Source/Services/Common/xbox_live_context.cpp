@@ -167,8 +167,8 @@ HRESULT XblContext::Initialize(
         RETURN_HR_IF_FAILED(userResult.Hresult());
 #if XSAPI_NOTIFICATION_SERVICE
 #if !XSAPI_UNIT_TESTS && (HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM_IS_EXTERNAL)
-        m_notificationService = MakeShared<xbox::services::notification::RTANotificationService>(userResult.ExtractPayload(), m_xboxLiveContextSettings, rtaManager);
-        m_notificationService->RegisterForSpopNotificationEvents();
+        m_notificationService = MakeShared<xbox::services::notification::RTANotificationService>(userResult.ExtractPayload(), globalQueue, m_xboxLiveContextSettings, rtaManager);
+        RETURN_HR_IF_FAILED(m_notificationService->Initialize());
 #elif HC_PLATFORM == HC_PLATFORM_ANDROID || HC_PLATFORM == HC_PLATFORM_IOS
         m_notificationService = MakeShared<xbox::services::notification::MobileNotificationService>(userResult.ExtractPayload(), m_xboxLiveContextSettings);
 #elif HC_PLATFORM == HC_PLATFORM_UWP

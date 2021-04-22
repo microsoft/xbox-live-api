@@ -63,11 +63,17 @@ enum class XblPresenceFilter : uint32_t
     /// <summary>
     /// Has played this title and is offline.
     /// </summary>
+    /// <remarks>
+    /// This filter option requires <see cref="XblSocialManagerExtraDetailLevel"/>::TitleHistoryLevel to be set in <see cref="XblSocialManagerAddLocalUser"/>
+    /// </remarks>
     TitleOffline,
 
     /// <summary>
     /// Has played this title, is online but not currently playing this title.
     /// </summary>
+    /// <remarks>
+    /// This filter option requires <see cref="XblSocialManagerExtraDetailLevel"/>::TitleHistoryLevel to be set in <see cref="XblSocialManagerAddLocalUser"/>
+    /// </remarks>
     TitleOnlineOutsideTitle,
 
     /// <summary>
@@ -83,6 +89,9 @@ enum class XblPresenceFilter : uint32_t
     /// <summary>
     /// Everyone who has played or is playing the title.
     /// </summary>
+    /// <remarks>
+    /// This filter option requires <see cref="XblSocialManagerExtraDetailLevel"/>::TitleHistoryLevel to be set in <see cref="XblSocialManagerAddLocalUser"/>
+    /// </remarks>
     AllTitle,
 
     /// <summary>
