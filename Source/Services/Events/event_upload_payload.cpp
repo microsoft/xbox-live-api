@@ -66,7 +66,7 @@ HRESULT EventUploadPayload::GetRequestData(
                     EventsService::IKey(),
                     event.FullEventName(),
                     event.Data(),
-                    StringFromStringT(event.Timestamp().to_string(xbox::services::datetime::date_format::ISO_8601)),
+                    event.Timestamp().to_string(xbox::services::datetime::date_format::ISO_8601).c_str(),
                     cll::LatencyNormal,
                     cll::PersistenceUnspecified,
                     cll::SensitivityUnspecified,

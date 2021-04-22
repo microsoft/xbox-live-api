@@ -295,7 +295,7 @@ struct Utils
         {
             if (jsonString)
             {
-                return web::json::value::parse(StringTFromUtf8(jsonString));
+                return web::json::value::parse(Utils::StringTFromUtf8(jsonString));
             }
         }
         catch (web::json::json_exception)

@@ -12,7 +12,7 @@
 #include "a/java_interop.h"
 #include "a/jni_utils.h"
 #include "TCUI/Android/title_callable_ui_jni.h"
-#include "xbox_system_factory.h"
+
 using namespace pplx;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
@@ -80,8 +80,7 @@ title_callable_ui::show_profile_card_ui(
     .then([](int32_t errorCode)
     {
         title_callable_ui_internal::s_isTcuiRunning = false;
-        auto user = get_xsapi_singleton()->m_lastSignedInUser.exchange(nullptr);
-        XalUserCloseHandle(user);
+        (void) java_interop::get_java_interop_singleton()->ExtractStoredUser();
         return xbox_live_result<void>(xbox_live_result<void>());
     });
 
@@ -96,11 +95,10 @@ title_callable_ui::show_profile_card_ui(
     JNI_ATTACH_THREAD(jvm, jniEnv);
 
     jmethodID showProfileCardUIMethodId = jniEnv->GetStaticMethodID(interopTcuiClass, "ShowProfileCardUI", "(Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
-    if (showProfileCardUIMethodId != NULL && user != nullptr)
+    auto wrapUserResult = User::WrapHandle(user);
+    if (showProfileCardUIMethodId != NULL && Succeeded(wrapUserResult))
     {
-        xbox_live_user_t userCopy = nullptr;
-        XalUserDuplicateHandle(user, &userCopy);
-        get_xsapi_singleton()->m_lastSignedInUser.store(userCopy);
+        java_interop::get_java_interop_singleton()->StoreUser(wrapUserResult.ExtractPayload());
         title_callable_ui_internal::s_isTcuiRunning = true;
 
         uint64_t xuid;
@@ -122,7 +120,6 @@ title_callable_ui::show_profile_card_ui(
             privilegesSS << " " << XalPrivilege::XalPrivilege_AddFriends;
         }
 
-        xbox_system_factory::set_http_call_user(user);
         auto currentUserIdString = jniEnv->NewStringUTF(xuidSS.str().data());
         auto targetUserIdString = jniEnv->NewStringUTF(targetXboxUserId.c_str());
         auto currentUserPrivileges = jniEnv->NewStringUTF(privilegesSS.str().data());

@@ -22,8 +22,8 @@ struct XblAchievementsManagerResult : public xbox::services::RefCounter, public 
 {
 public: 
     XblAchievementsManagerResult(_In_ const XblAchievement& achievement);
-    XblAchievementsManagerResult(_In_ Vector<XblAchievement>& achievements, bool explicitCleanup = false);
-    XblAchievementsManagerResult(_In_ XblAchievement* achievements, _In_ size_t achievementCount, bool explicitCleanup = false);
+    XblAchievementsManagerResult(_In_ Vector<XblAchievement>& achievements, _In_ bool explicitCleanup = false);
+    XblAchievementsManagerResult(_In_ XblAchievement* achievements, _In_ size_t achievementCount, _In_ bool explicitCleanup = false);
     virtual ~XblAchievementsManagerResult();
 
     const Vector<XblAchievement>& Achievements() const;
@@ -151,17 +151,17 @@ private:
     bool m_isInitialized = false;
 
     Map<String, XblAchievement*> m_userAchievements;
-    XblAchievement* m_achievementCache;
-    uint64_t m_xuid;
+    XblAchievement* m_achievementCache{ nullptr };
+    uint64_t m_xuid{ 0 };
    
     Vector<XblAchievementsManagerEvent> m_eventsToProcess;
     Vector<XblAchievementsManagerEvent> m_generatedEvents;
 
     std::shared_ptr<XblContext> m_xblContext;
     
-    XblFunctionContext m_achievementProgressToken;
-    XblFunctionContext m_rtaResyncToken;
-    XblFunctionContext m_rtaConnectionToken;
+    XblFunctionContext m_achievementProgressToken{ 0 };
+    XblFunctionContext m_rtaResyncToken{ 0 };
+    XblFunctionContext m_rtaConnectionToken{ 0 };
     
     std::shared_ptr<real_time_activity::RealTimeActivityManager> m_rtaManager;
     

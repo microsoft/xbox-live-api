@@ -122,12 +122,12 @@ HRESULT PrivacyService::CheckPermission(
 {
     // users/xuid({xuid})/permission/validate?setting={setting}&target={target})
     xbox::services::uri_builder subPathBuilder;
-    stringstream_t path;
-    path << _T("/users/xuid(") << m_user.Xuid() << _T(")/permission/validate");
+    xsapi_internal_stringstream path;
+    path << "/users/xuid(" << m_user.Xuid() << ")/permission/validate";
 
     subPathBuilder.append_path(path.str());
-    subPathBuilder.append_query(_T("setting"), StringTFromUtf8(XblPermissionName(permission).data()));
-    subPathBuilder.append_query(_T("target"), StringTFromUtf8(targetQuery.data()));
+    subPathBuilder.append_query("setting", XblPermissionName(permission).data());
+    subPathBuilder.append_query("target", targetQuery);
 
     Result<User> userResult = m_user.Copy();
     RETURN_HR_IF_FAILED(userResult.Hresult());
@@ -136,7 +136,7 @@ HRESULT PrivacyService::CheckPermission(
     RETURN_HR_IF_FAILED(httpCall->Init(
         m_contextSettings,
         "GET",
-        XblHttpCall::BuildUrl("privacy", utils::internal_string_from_string_t(subPathBuilder.to_string())),
+        XblHttpCall::BuildUrl("privacy", subPathBuilder.to_string()),
         xbox_live_api::check_permission_with_target_user
     ));
 
@@ -261,7 +261,7 @@ Result<xsapi_internal_vector<uint64_t>> PrivacyService::DeserializeUserList(
 
             uint64_t xuid = 0;
             HRESULT tempErr = JsonUtils::ExtractJsonXuid(json, "xuid", xuid, true);
-            if (tempErr)
+            if (FAILED(tempErr))
             {
                 errc = tempErr;
             }
@@ -271,7 +271,7 @@ Result<xsapi_internal_vector<uint64_t>> PrivacyService::DeserializeUserList(
         json, ("users"), xuids, true
         ));
 
-    if (errc)
+    if (FAILED(errc))
     {
         return WEB_E_INVALID_JSON_STRING;
     }

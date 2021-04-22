@@ -116,7 +116,8 @@ Result<std::shared_ptr<Connection>> Connection::Make(
             std::move(stateChangedHandler),
             std::move(resyncHandler)
         },
-        Deleter<Connection>()
+        Deleter<Connection>(),
+        Allocator<Connection>()
     );
 
     auto hr = rtaConnection->InitializeWebsocket();
@@ -171,12 +172,15 @@ void Connection::Cleanup()
     m_unsubscribeAsyncContexts.clear();
     lock.unlock();
 
-    m_queue.Terminate(true);
-
-    for (auto& async : pendingAsyncContexts)
-    {
-        async.Complete(E_ABORT);
-    }
+    m_queue.Terminate(
+        false,
+        [pendingAsyncContexts = std::move(pendingAsyncContexts)]() {
+            for (auto& async : pendingAsyncContexts)
+            {
+                async.Complete(E_ABORT);
+            }
+        }
+    );
 }
 
 #if HC_PLATFORM == HC_PLATFORM_GDK

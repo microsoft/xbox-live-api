@@ -14,10 +14,10 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_BEGIN
         public:
 
         AchievementUnlockEvent() = default;
-        AchievementUnlockEvent( AchievementUnlockEvent&& event);
+        AchievementUnlockEvent( AchievementUnlockEvent&& event) noexcept;
         AchievementUnlockEvent(const AchievementUnlockEvent& event);
 
-        static Result<AchievementUnlockEvent> Deserialize( const JsonValue& json ) noexcept;
+        static Result<AchievementUnlockEvent> Deserialize(_In_ const JsonValue& json ) noexcept;
 
         private:
 

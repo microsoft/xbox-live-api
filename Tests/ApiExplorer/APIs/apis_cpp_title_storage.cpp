@@ -233,7 +233,7 @@ int TitleStorageServiceUploadBlob_Lua(lua_State* L)
     char zero = '0';
     for (size_t i = 0; i < blobBufferSize; i++)
     {
-        (*blobBuffer)[i] = (char)(zero + i % 10);
+        (*blobBuffer)[i] = static_cast<unsigned char>(zero + i % 10);
     }
 
     std::shared_ptr<xbox::services::xbox_live_context> xblc = std::make_shared<xbox::services::xbox_live_context>(Data()->xalUser);

@@ -53,7 +53,7 @@ STDAPI XblContextSettingsSetLongHttpTimeout(
 /// The default for http_timeout_window is 20 seconds and can be changed using XblContextSettingsSetHttpTimeoutWindow.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// If the service returns an an HTTP error with a "Retry-After" header, then all future calls to that API will 
+/// If the service returns an HTTP error with a "Retry-After" header, then all future calls to that API will 
 /// immediately fail with the original error without contacting the service until the "Retry-After" time has been reached.  
 /// <br/>
 /// Idempotent service calls are retried when a network error occurs or the server responds with one of these HTTP status codes:<br/>
@@ -74,7 +74,7 @@ STDAPI XblContextSettingsGetHttpRetryDelay(
 /// </summary>
 /// <param name="context">Xbox live context that the settings are associated with.</param>
 /// <param name="delayInSeconds">The retry delay in seconds.  
-/// Retries are delayed using a exponential back off.  
+/// Retries are delayed using an exponential back off.  
 /// By default, it will delay 2 seconds then the next retry will delay 4 seconds, then 8 seconds, 
 /// and so on up to a max of 1 min until either the call succeeds or the http_timeout_window 
 /// is reached, at which point the call will fail.  
@@ -82,7 +82,7 @@ STDAPI XblContextSettingsGetHttpRetryDelay(
 /// The default for http_timeout_window is 20 seconds and can be changed using XblContextSettingsSetHttpTimeoutWindow.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// If the service returns an an HTTP error with a "Retry-After" header, then all future calls to that API will 
+/// If the service returns an HTTP error with a "Retry-After" header, then all future calls to that API will 
 /// immediately fail with the original error without contacting the service until the "Retry-After" time has been reached.  
 /// <br/>
 /// Idempotent service calls are retried when a network error occurs or the server responds with one of these HTTP status codes:<br/>

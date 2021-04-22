@@ -121,33 +121,33 @@ void HttpMock::SetMockMatchedCallback(MockMatchedCallback mockMatched) noexcept
             UNREFERENCED_PARAMETER(method);
 
             auto thisPtr{ static_cast<HttpMock*>(context) };
-            thisPtr->m_matchedCallback(thisPtr, url, std::string{ requestBodyBytes, requestBodyBytes + requestBodySize });
+            thisPtr->m_matchedCallback(thisPtr, url, xsapi_internal_string{ requestBodyBytes, requestBodyBytes + requestBodySize });
         },
         this
     );
 }
 
-std::string HttpMock::GetUriPath(const std::string& uriString) noexcept
+xsapi_internal_string HttpMock::GetUriPath(const xsapi_internal_string& uriString) noexcept
 {
-    xbox::services::uri uri{ Utils::StringTFromUtf8(uriString.data()) };
-    return Utils::StringFromStringT(uri.path());
+    xbox::services::uri uri{ uriString.data() };
+    return uri.path();
 }
 
-std::string HttpMock::GetUriQuery(const std::string& uriString) noexcept
+xsapi_internal_string HttpMock::GetUriQuery(const xsapi_internal_string& uriString) noexcept
 {
-    xbox::services::uri uri{ Utils::StringTFromUtf8(uriString.data()) };
-    return Utils::StringFromStringT(uri.query());
+    xbox::services::uri uri{ uriString.data() };
+    return uri.query();
 }
 
-std::map<std::string, std::string> HttpMock::GetQueryParams(const std::string& uriString) noexcept
+std::map<xsapi_internal_string, xsapi_internal_string> HttpMock::GetQueryParams(const xsapi_internal_string& uriString) noexcept
 {
-    web::uri uri{ Utils::StringTFromUtf8(uriString.data()) };
-    auto params = web::uri::split_query(uri.query());
+    xbox::services::uri uri{ uriString.data() };
+    auto params = xbox::services::uri::split_query(uri.query());
 
-    std::map<std::string, std::string> out;
+    std::map<xsapi_internal_string, xsapi_internal_string> out;
     for (auto& param : params)
     {
-        out[Utils::StringFromStringT(param.first)] = Utils::StringFromStringT(param.second);
+        out[param.first.c_str()] = param.second.c_str();
     }
     return out;
 }

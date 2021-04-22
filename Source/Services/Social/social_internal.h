@@ -42,12 +42,12 @@ namespace legacy
         /// <summary>
         /// Returns Favorites constant string
         /// </summary>
-        static const string_t favorite() { return _T("Favorites"); }
+        static const char* favorite() { return "Favorites"; }
 
         /// <summary>
         /// Returns People constant string
         /// </summary>
-        static const string_t people() { return _T("People"); }
+        static const char* people() { return "People"; }
     };
 }
 

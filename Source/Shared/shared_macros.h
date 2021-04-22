@@ -163,12 +163,6 @@
         return m_internalObj->methodName(); \
     }
 
-#define DEFINE_GET_STRING_VECTOR(className, methodName) \
-    std::vector<string_t> className::methodName() const \
-    { \
-        return utils::std_string_vector_from_internal_string_vector(m_internalObj->methodName()); \
-    }
-
 #define DEFINE_GET_ENUM_TYPE(className, enumType, methodName) \
     enumType className::methodName() const \
     { \
@@ -205,3 +199,66 @@
         return m_internalObj->methodName(); \
     }
 
+
+// Disable Warning macros
+
+// if msvc
+#if defined (_MSC_VER)
+
+#define DISABLE_WARNING_PUSH                    __pragma(warning(push))
+#define DISABLE_WARNING_POP                     __pragma(warning(pop))
+#define DISABLE_WARNING(warningCode)            __pragma(warning(disable:warningCode))  // expects numeric code for msvc
+#define SUPPRESS_ANALYSIS_WARNING(warningCode)  __pragma(warning(suppress:warningCode))
+
+#define SUPPRESS_WARNING_NULL_PTR_DEREFERENCE   SUPPRESS_ANALYSIS_WARNING(6011)
+#define SUPPRESS_WARNING_UNINITIALIZED_MEMORY   SUPPRESS_ANALYSIS_WARNING(6001)
+#define SUPPRESS_WARNING_EXPRESSION_NOT_TRUE    SUPPRESS_ANALYSIS_WARNING(28020)
+#define SUPPRESS_WARNING_UNINITIALIZED_MEMBER   SUPPRESS_ANALYSIS_WARNING(26495)
+#define SUPPRESS_WARNING_UNNAMED_CUSTOM_OBJ     SUPPRESS_ANALYSIS_WARNING(26444)
+
+
+#elif defined(__GNUC__)
+
+#define DO_PRAGMA(X)                            _Pragma(#X)
+#define DISABLE_WARNING_PUSH                    DO_PRAGMA(GCC diagnostic push)
+#define DISABLE_WARNING_POP                     DO_PRAGMA(GCC diagnostic pop)
+#define DISABLE_WARNING(warningCode)            DO_PRAGMA(GCC diagnostic ignored #warningCode)  // expects arg name for clang and gnu compilers
+#define SUPPRESS_ANALYSIS_WARNING(warningCode)  // gnu doesn't support per-instance static analyzer warning suppression
+
+#define SUPPRESS_WARNING_NULL_PTR_DEREFERENCE
+#define SUPPRESS_WARNING_UNINITIALIZED_MEMORY
+#define SUPPRESS_WARNING_EXPRESSION_NOT_TRUE 
+#define SUPPRESS_WARNING_UNINITIALIZED_MEMBER
+#define SUPPRESS_WARNING_UNNAMED_CUSTOM_OBJ  
+
+
+#elif defined(__clang__)
+
+#define DO_PRAGMA(X)                            _Pragma(#X)
+#define DISABLE_WARNING_PUSH                    DO_PRAGMA(GCC diagnostic push)
+#define DISABLE_WARNING_POP                     DO_PRAGMA(GCC diagnostic pop)
+#define DISABLE_WARNING(warningCode)            DO_PRAGMA(GCC diagnostic ignored #warningCode)  // expects arg name for clang and gnu compilers
+#define SUPPRESS_ANALYSIS_WARNING(warningCode)  // clang doesn't support per-instance static analyzer warning suppression
+
+#define SUPPRESS_WARNING_NULL_PTR_DEREFERENCE
+#define SUPPRESS_WARNING_UNINITIALIZED_MEMORY
+#define SUPPRESS_WARNING_EXPRESSION_NOT_TRUE 
+#define SUPPRESS_WARNING_UNINITIALIZED_MEMBER
+#define SUPPRESS_WARNING_UNNAMED_CUSTOM_OBJ  
+
+
+// default for non-defined platforms
+#else
+
+#define DISABLE_WARNING_PUSH
+#define DISABLE_WARNING_POP
+#define DISABLE_WARNING(warningCode)
+
+#define SUPPRESS_WARNING_NULL_PTR_DEREFERENCE
+#define SUPPRESS_WARNING_UNINITIALIZED_MEMORY
+#define SUPPRESS_WARNING_EXPRESSION_NOT_TRUE 
+#define SUPPRESS_WARNING_UNINITIALIZED_MEMBER
+#define SUPPRESS_WARNING_UNNAMED_CUSTOM_OBJ  
+
+
+#endif

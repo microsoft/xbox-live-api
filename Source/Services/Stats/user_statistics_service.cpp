@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xbox_system_factory.h"
-#include "xsapi_utils.h"
 #include "user_statistics_internal.h"
 #include "xbox_live_context_internal.h"
 #include "real_time_activity_manager.h"

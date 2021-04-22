@@ -69,6 +69,9 @@
 #include <list>
 #include <assert.h>
 #include <array>
+#if HC_PLATFORM_IS_MICROSOFT
+#include <objbase.h>
+#endif
 
 #include "httpClient/pal.h"
 #include "httpClient/httpClient.h"
@@ -83,10 +86,23 @@
 
 #include <Xal/xal.h>
 #include "http_headers.h"
+#if HC_PLATFORM != HC_PLATFORM_GDK
 #include "cpprest/http_msg.h"
+#endif
 #include "http_utils.h"
+#if HC_PLATFORM == HC_PLATFORM_GDK
+#include "HookedUri/uri.h"
+#endif
 
+#undef max // needed for the version of RapidJson we're using to avoid warnings
+#undef min
+
+#define RAPIDJSON_NAMESPACE xbox::services::rapidjson
+#define RAPIDJSON_NAMESPACE_BEGIN namespace xbox { namespace services { namespace rapidjson {
+#define RAPIDJSON_NAMESPACE_END } } }
 #include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
 
 #include "async_helpers.h"
 #include "xsapi_utils.h"
@@ -95,7 +111,6 @@
 #include "ref_counter.h"
 #include "internal_errors.h"
 #include "Logger/log.h"
-#include "telemetry.h"
 #include "xbox_live_app_config_internal.h"
 #include "user.h"
 #include "http_call_wrapper_internal.h"

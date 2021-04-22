@@ -24,6 +24,7 @@ namespace legacy
 
     std::string xbox_services_error_code_category_impl::message(_In_ int errorCode) const _NOEXCEPT
     {
+#if 0 // this returns a non-mem hooked string which can't be changed so commenting it out since its not really needed
         xbl_error_code code = static_cast<xbl_error_code>(errorCode);
         switch (code)
         {
@@ -173,10 +174,15 @@ namespace legacy
                     return msg.str();
                 }
         }
+#else
+        UNREFERENCED_PARAMETER(errorCode);
+        return std::string();
+#endif
     }
 
     std::string xbox_services_error_condition_category_impl::message(_In_ int errorCode) const _NOEXCEPT
     {
+#if 0 // this returns a non-mem hooked string which can't be changed so commenting it out since its not really needed
         xbl_error_condition code = static_cast<xbl_error_condition>(errorCode);
 
         switch (code)
@@ -200,6 +206,10 @@ namespace legacy
                     return msg.str();
                 }
         }
+#else
+        UNREFERENCED_PARAMETER(errorCode);
+        return std::string();
+#endif
     }
 
     bool xbox_services_error_condition_category_impl::equivalent(

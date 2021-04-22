@@ -1,6 +1,16 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #include "pch.h"
+#if HC_PLATFORM_IS_MICROSOFT
+#pragma warning( push )
+#pragma warning( disable : 4365 )
+#pragma warning( disable : 4061 )
+#pragma warning( disable : 4996 )
+#endif
+#include "rapidjson/document.h"
+#if HC_PLATFORM_IS_MICROSOFT
+#pragma warning( pop )
+#endif
 
 #if __has_include("apirunnercloudfns.h")
 #include "apirunnercloudfns.h"
@@ -19,6 +29,8 @@
 #else
     #define SPRINTF_XPLAT sprintf
 #endif
+
+using namespace utility;
 
 static std::thread s_watchThread{};
 
@@ -54,12 +66,12 @@ HRESULT ApiRunnerMultiDeviceManager::JoinOpenSession(
     _In_ std::function<void(HRESULT hr)> handler)
 {
     auto manager = Data()->m_multiDeviceManager;
-    manager->m_nextCallTime = utility::datetime::utc_now() - utility::datetime::from_seconds(1);
+    manager->m_nextCallTime = datetime::utc_now() - datetime::from_seconds(1);
     manager->m_callGetJoinable = true;
     LogToScreen("MultiDevice: Looking for test session to join...");
     while (!manager->Joined())
     {
-        int64_t delta = static_cast<int64_t>(manager->m_nextCallTime.to_interval()) - static_cast<int64_t>(utility::datetime::utc_now().to_interval());
+        int64_t delta = static_cast<int64_t>(manager->m_nextCallTime.to_interval()) - static_cast<int64_t>(datetime::utc_now().to_interval());
         if (delta < 0 && manager->m_callGetJoinable)
         {
             manager->m_callGetJoinable = false;
@@ -82,14 +94,14 @@ HRESULT ApiRunnerMultiDeviceManager::JoinOpenSession(
                                 else
                                 {
                                     auto manager = Data()->m_multiDeviceManager;
-                                    manager->m_nextCallTime = utility::datetime::utc_now() + utility::datetime::from_seconds(1);
+                                    manager->m_nextCallTime = datetime::utc_now() + datetime::from_seconds(1);
                                     manager->m_callGetJoinable = true;
                                 }
                             });
                     }
                     else
                     {
-                        manager->m_nextCallTime = utility::datetime::utc_now() + utility::datetime::from_seconds(1);
+                        manager->m_nextCallTime = datetime::utc_now() + datetime::from_seconds(1);
                         manager->m_callGetJoinable = true;
                     }
                 });
@@ -167,17 +179,17 @@ HRESULT ApiRunnerMultiDeviceManager::Init(
 HRESULT ApiRunnerMultiDeviceManager::WaitTillPeerConnects()
 {
     auto manager = Data()->m_multiDeviceManager;
-    manager->m_nextCallTime = utility::datetime::utc_now() - utility::datetime::from_seconds(1);
+    manager->m_nextCallTime = datetime::utc_now() - datetime::from_seconds(1);
     manager->m_callGetJoinable = true;
     std::string curSessionId = manager->m_sessionId;
     std::string name = manager->m_sessionName;
     LogToScreen("MultiDevice: Waiting for peer to connect to test session...");
     while (!manager->Joined())
     {
-        int64_t delta = static_cast<int64_t>(manager->m_nextCallTime.to_interval()) - static_cast<int64_t>(utility::datetime::utc_now().to_interval());
+        int64_t delta = static_cast<int64_t>(manager->m_nextCallTime.to_interval()) - static_cast<int64_t>(datetime::utc_now().to_interval());
         if (delta < 0)
         {
-            manager->m_nextCallTime = utility::datetime::utc_now() + utility::datetime::from_seconds(1);
+            manager->m_nextCallTime = datetime::utc_now() + datetime::from_seconds(1);
             std::string state = manager->GetSessionStateString();
             if (state.length() > 0)
             {
@@ -427,8 +439,12 @@ HRESULT ApiRunnerMultiDeviceManager::StopSessionStateChangePolling()
     return S_OK;
 }
 
-void ApiRunnerMultiDeviceManager::ParseState(const rapidjson::Document& jsonDoc)
+
+void ApiRunnerMultiDeviceManager::ParseState(const std::string& responseString)
 {
+    rapidjson::Document jsonDoc;
+    jsonDoc.Parse(responseString.c_str());
+
     ServerState oldState;
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -491,7 +507,7 @@ HRESULT ApiRunnerMultiDeviceManager::RefreshSessionState()
                     }
                     if(oldState != responseString)
                     {
-                        manager->ParseState(jsonDoc);
+                        manager->ParseState(responseString);
                     }
                 }
             }

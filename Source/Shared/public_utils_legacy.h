@@ -3,6 +3,10 @@
 
 #pragma once
 
+#include "HookedUri/uri.h"
+#include "HookedUri/uri_builder.h"
+#include "HookedUri/asyncrt_utils.h"
+
 #ifndef MAKE_HTTP_HRESULT
 #define MAKE_HTTP_HRESULT(code) MAKE_HRESULT(1, 0x019, code)
 #endif
@@ -13,9 +17,6 @@ xbl_error_code ConvertHrToXblErrorCode(HRESULT hr);
 
 namespace legacy
 {
-    int CharTFromUft8( const char*, char_t*, int );
-    int Utf8FromCharT( const char_t*, char*, int );
-
     string_t StringTFromUtf8( _In_z_ const char* utf8 );
 
     std::string StringFromStringT(_In_ const string_t& stringt);
@@ -42,27 +43,13 @@ namespace legacy
 
     int Stricmp(const string_t& left, const string_t& right);
     
-    web::json::value ParseJson(const char* jsonString);
-
     std::string SerializeJson(const rapidjson::Value& json);
-
-    rapidjson::Document RapidJsonFromWebJson(_In_ const web::json::value& json);
-
-    web::json::value WebJsonFromRapidJson(_In_ const rapidjson::Value& json);
 
     const rapidjson::Value& ExtractJsonField(
         _In_ const rapidjson::Value& json,
         _In_ const std::string& name,
         _In_ bool required
     );
-
-    std::string ExtractJsonString(
-        _In_ const rapidjson::Value& jsonValue,
-        _In_ const std::string& stringName,
-        _In_ bool required = false,
-        _In_ const std::string& defaultValue = std::string()
-    );
-
 
     uint64_t ExtractJsonUint64(
         _In_ const rapidjson::Value& jsonValue,
@@ -106,9 +93,9 @@ namespace legacy
 
     std::vector<string_t> StringTVectorFromCStringArray(const char** stringArray, size_t arrayCount);
 
-    utility::datetime DatetimeFromTimeT(time_t time);
+    xbox::services::cppresturi::utility::datetime DatetimeFromTimeT(time_t time);
 
-    time_t TimeTFromDatetime(const utility::datetime& datetime);
+    time_t TimeTFromDatetime(const xbox::services::cppresturi::utility::datetime& datetime);
 
     char_t ToLower(char_t c);
 

@@ -169,7 +169,11 @@ std::shared_ptr<PeriodicTask> PeriodicTask::MakeAndRun(
     std::function<void()> task
 ) noexcept
 {
-    auto periodicTask = std::shared_ptr<PeriodicTask>(new (Alloc(sizeof(PeriodicTask))) PeriodicTask{ queue, interval, std::move(task) });
+    auto periodicTask = std::shared_ptr<PeriodicTask>(
+        new (Alloc(sizeof(PeriodicTask))) PeriodicTask{ queue, interval, std::move(task) },
+        Deleter<PeriodicTask>(),
+        Allocator<PeriodicTask>()
+        );
 
     periodicTask->m_queue.RunWork([weakThis = std::weak_ptr<PeriodicTask>{ periodicTask }]
         {
@@ -295,7 +299,10 @@ HRESULT RunAsync(
             }
             catch (...)
             {
+                DISABLE_WARNING_PUSH;
+                SUPPRESS_WARNING_UNNAMED_CUSTOM_OBJ;
                 LOGS_ERROR << "Unexpected exception in " << __FUNCTION__ << ", completing XAsyncOperation.";
+                DISABLE_WARNING_POP;
                 return E_UNEXPECTED;
             }
         // For DoWork, GetResult, and Cancel, we have nothing to do. Invoke provider and handle any exceptions.

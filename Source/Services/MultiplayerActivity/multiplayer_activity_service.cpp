@@ -244,7 +244,7 @@ HRESULT MultiplayerActivityService::SetActivity(
         m_xboxLiveContextSettings,
         "PUT",
         XblHttpCall::BuildUrl(MPA_SERVICE_NAME, path.str()),
-        xbox_live_api::update_activity
+        xbox_live_api::set_activity
     ));
 
     RETURN_HR_IF_FAILED(httpCall->SetRequestBody(requestBody));

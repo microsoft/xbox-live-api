@@ -73,6 +73,7 @@ struct ApiExplorerData
     std::string m_onTaskQueueTerminateWithAsyncWait;
     bool m_repeatJsonCmds{ false };
     bool m_wasTestSkipped{ false };
+    bool m_trackUnhookedMemory{ false };
 
     std::mutex m_catMessageLock;
     std::string m_catMessage;
@@ -141,6 +142,12 @@ struct ApiExplorerData
     xbox::services::title_storage::title_storage_blob_metadata_result blobMetadataResultCpp{};
     xbox::services::title_storage::title_storage_blob_metadata blobMetadataCpp{};
 #endif
+
+    // Title Storage Rest API Calls Data
+    std::string responseString;
+    std::vector<XblHttpCallHandle> downloadHttpCalls;
+    size_t completedDownloads = 0;
+    size_t filesToDownload = 0;
 
     // MP
     std::string inviteHandle;

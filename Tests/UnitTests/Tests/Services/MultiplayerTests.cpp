@@ -11,6 +11,13 @@
 
 using xbox::services::multiplayer::Serializers;
 
+static xsapi_internal_string StringFromUint64Internal(_In_ uint64_t val)
+{
+    xsapi_internal_stringstream ss;
+    ss << val;
+    return ss.str();
+}
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
 #define MPSD_URI "https://sessiondirectory.xboxlive.com"
@@ -97,7 +104,7 @@ public:
         MPTestEnv() noexcept : m_baseMock{ "", "" } 
         {
             m_baseMock.SetMockMatchedCallback(
-                [](HttpMock* /*mock*/, std::string uri, std::string /*body*/)
+                [](HttpMock* /*mock*/, xsapi_internal_string uri, xsapi_internal_string /*body*/)
                 {
                     LOGS_DEBUG << "Unmocked HttpCall, uri=" << uri;
                     assert(false);
@@ -183,7 +190,7 @@ public:
 
         static MultiplayerSession Get(
             XblContextHandle xboxLiveContext,
-            const std::string& handleId,
+            const xsapi_internal_string& handleId,
             const JsonValue& response = MultiplayerTests::defaultSessionJson
         ) noexcept
         {
@@ -228,7 +235,7 @@ public:
 
             bool requestWellFormed{ true };
             mock.SetMockMatchedCallback(
-                [&](HttpMock* /*mock*/, std::string /*uri*/, std::string body)
+                [&](HttpMock* /*mock*/, xsapi_internal_string /*uri*/, xsapi_internal_string body)
                 {
                     requestWellFormed &= VerifyJson(expectedRequestBody, body.data());
                 }
@@ -416,7 +423,7 @@ public:
                 const auto& mutableSettingsArray{ roleTypeJson["mutableRoleSettings"].GetArray() };
                 for (auto& setting : mutableSettingsArray)
                 {
-                    std::string settingString{ setting.GetString() };
+                    xsapi_internal_string settingString{ setting.GetString() };
                     if (settingString == "max")
                     {
                         expectedMutableSettings |= XblMutableRoleSettings::Max;
@@ -535,7 +542,7 @@ public:
 
             if (p.KeywordCount)
             {
-                std::unordered_set<std::string> actualKeywords(p.Keywords, p.Keywords + p.KeywordCount);
+                std::unordered_set<xsapi_internal_string> actualKeywords(p.Keywords, p.Keywords + p.KeywordCount);
                 const auto& expectedKeywords = systemJson["keywords"].GetArray();
                 VERIFY_ARE_EQUAL_UINT(expectedKeywords.Size(), actualKeywords.size());
                 for (auto& keyword : expectedKeywords)
@@ -573,7 +580,7 @@ public:
 
             if (p.ServerConnectionStringCandidatesCount)
             {
-                std::unordered_set<std::string> actualServerCandidates(p.ServerConnectionStringCandidates, p.ServerConnectionStringCandidates + p.ServerConnectionStringCandidatesCount);
+                std::unordered_set<xsapi_internal_string> actualServerCandidates(p.ServerConnectionStringCandidates, p.ServerConnectionStringCandidates + p.ServerConnectionStringCandidatesCount);
                 const auto& expectedServerCandidates{ systemJson["serverConnectionStringCandidates"].GetArray() };
                 VERIFY_ARE_EQUAL_UINT(expectedServerCandidates.Size(), actualServerCandidates.size());
                 for (auto& candidate : expectedServerCandidates)
@@ -636,7 +643,7 @@ public:
 
             for (auto iter = json.MemberBegin(); iter != json.MemberEnd(); ++iter)
             {
-                if (std::string{ iter->name.GetString() } == "me")
+                if (xsapi_internal_string{ iter->name.GetString() } == "me")
                 {
                     VERIFY_ARE_EQUAL_UINT(1u, members.size());
                     VerifyMember(*members.begin()->second, iter->value);
@@ -800,7 +807,7 @@ public:
 
             bool requestWellFormed{ true };
             mock.SetMockMatchedCallback(
-                [&](HttpMock* mock, std::string uri, std::string requestBody)
+                [&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string requestBody)
                 {
                     UNREFERENCED_PARAMETER(mock);
                     UNREFERENCED_PARAMETER(uri);
@@ -849,7 +856,7 @@ public:
 
             bool requestWellFormed{ true };
             mock.SetMockMatchedCallback(
-                [&](HttpMock* mock, std::string uri, std::string body)
+                [&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
                 {
                     UNREFERENCED_PARAMETER(mock);
                     UNREFERENCED_PARAMETER(uri);
@@ -1039,12 +1046,12 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock* mock, std::string uri, std::string body)
+            [&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
             {
                 UNREFERENCED_PARAMETER(mock);
                 bool batch{ query->XuidFiltersCount > 1 };
 
-                std::stringstream expectedPath;
+                xsapi_internal_stringstream expectedPath;
                 expectedPath << "/serviceconfigs/" << query->Scid << "/sessiontemplates/" << query->SessionTemplateNameFilter;
                 if (batch)
                 {
@@ -1079,7 +1086,7 @@ public:
                 }
                 if (query->ContractVersionFilter)
                 {
-                    requestWellFormed &= queryParams["version"] == Utils::StringFromUint64(query->ContractVersionFilter);
+                    requestWellFormed &= queryParams["version"] == StringFromUint64Internal(query->ContractVersionFilter);
                 }
                 switch (query->VisibilityFilter)
                 {
@@ -1133,7 +1140,7 @@ public:
                     requestWellFormed &= body.empty();
                     if (query->XuidFiltersCount == 1)
                     {
-                        requestWellFormed &= queryParams["xuid"] == Utils::StringFromUint64(query->XuidFilters[0]);
+                        requestWellFormed &= queryParams["xuid"] == StringFromUint64Internal(query->XuidFilters[0]);
                     }
                 }
             }
@@ -1865,16 +1872,16 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
         auto roles{ session.RoleTypes() };
         for (const auto& roleType : roles)
         {
-            if (std::string{ roleType->Name } == "lfg")
+            if (xsapi_internal_string{ roleType->Name } == "lfg")
             {
                 for (size_t i = 0; i < roleType->RoleCount; ++i)
                 {
-                    if (std::string{ roleType->Roles[i].Name } == "friend")
+                    if (xsapi_internal_string{ roleType->Roles[i].Name } == "friend")
                     {
                         VERIFY_ARE_EQUAL_UINT(max, roleType->Roles[i].MaxMemberCount);
                         VERIFY_ARE_EQUAL_UINT(target, roleType->Roles[i].TargetCount);
                     }
-                    else if (std::string{ roleType->Roles[i].Name } == "other")
+                    else if (xsapi_internal_string{ roleType->Roles[i].Name } == "other")
                     {
                         VERIFY_ARE_EQUAL_UINT(max, roleType->Roles[i].MaxMemberCount);
                     }
@@ -1892,7 +1899,7 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock*, std::string, std::string body)
+            [&](HttpMock*, xsapi_internal_string, xsapi_internal_string body)
             {
                 requestWellFormed &= VerifyJson(testJson["activityJson"], body.data());
             });
@@ -1936,7 +1943,7 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock*, std::string, std::string body)
+            [&](HttpMock*, xsapi_internal_string, xsapi_internal_string body)
             {
                 requestWellFormed &= VerifyJson(testJson["transferHandleJson"], body.data());
             });
@@ -2042,32 +2049,31 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
         size_t requestCount{ 0 };
         bool requestsWellFormed{ true };
         const char* responseIds[] = { "B8704EC5-95CD-408B-BD41-BAA7A2761CC2", "9D74C42E-87DE-47BA-B489-D3A264C9F994" };
-        const auto& expectedRequestBodyTemplate{ testJson["inviteRequestJson"] };
-        const auto& responseBodyTemplate{ testJson["inviteResponseJson"] };
+        JsonDocument testResponses{ GetTestResponses("TestResponses\\Multiplayer.json") };
+        auto inviteRequestJson = JsonUtils::SerializeJson(testResponses["inviteRequestJson"]);
+        auto inviteResponseJson = JsonUtils::SerializeJson(testResponses["inviteResponseJson"]);
+        JsonDocument expectedRequestBodyJson;
+        JsonDocument responseBodyJson;
+        expectedRequestBodyJson.Parse(inviteRequestJson.c_str());
+        responseBodyJson.Parse(inviteResponseJson.c_str());
 
         mock.SetMockMatchedCallback(
-            [&](HttpMock* mock, std::string uri, std::string body)
+            [&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
             {
                 UNREFERENCED_PARAMETER(uri);
 
                 if (requestCount < xuids.size())
                 {
                     {
-                        JsonDocument expectedRequest;
-                        auto& a{ expectedRequest.GetAllocator() };
-                        expectedRequest.CopyFrom(expectedRequestBodyTemplate, a, false);
-                        JsonUtils::SetMember(expectedRequest, "invitedXuid", JsonValue{ Utils::StringFromUint64(xuids[requestCount]).data(), a });
-
-                        requestsWellFormed &= VerifyJson(expectedRequest, body.data());
+                        auto& a{ expectedRequestBodyJson.GetAllocator() };
+                        JsonUtils::SetMember(expectedRequestBodyJson, "invitedXuid", JsonValue{ StringFromUint64Internal(xuids[requestCount]).data(), a });
+                        requestsWellFormed &= VerifyJson(expectedRequestBodyJson, body.data());
                     }
                     {
-                        JsonDocument response;
-                        auto& a{ response.GetAllocator() };
-                        response.CopyFrom(responseBodyTemplate, a, false);
-                        JsonUtils::SetMember(response, "invitedXuid", JsonValue{ Utils::StringFromUint64(xuids[requestCount]).data(), a });
-                        JsonUtils::SetMember(response, "id", JsonValue{ responseIds[requestCount], a });
-
-                        mock->SetResponseBody(response);
+                        auto& a{ responseBodyJson.GetAllocator() };
+                        JsonUtils::SetMember(responseBodyJson, "invitedXuid", JsonValue{ StringFromUint64Internal(xuids[requestCount]).data(), a });
+                        JsonUtils::SetMember(responseBodyJson, "id", JsonValue{ responseIds[requestCount], a });
+                        mock->SetResponseBody(responseBodyJson);
                     }
                 }
                 requestCount++;
@@ -2112,7 +2118,7 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
         mock.SetResponseBody(testJson["activitiesForUserResponseJson"]);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback([&](HttpMock* mock, std::string uri, std::string body)
+        mock.SetMockMatchedCallback([&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
         {
             UNREFERENCED_PARAMETER(mock);
             UNREFERENCED_PARAMETER(uri);
@@ -2186,7 +2192,7 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
         mock.SetResponseBody(testJson["activitiesForSocialGroupResponseJson"]);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback([&](HttpMock* mock, std::string uri, std::string body)
+        mock.SetMockMatchedCallback([&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
         {
             UNREFERENCED_PARAMETER(mock);
             UNREFERENCED_PARAMETER(uri);
@@ -2371,7 +2377,7 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
         MPTestEnv env{};
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };
         
-        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
         {
             if (uri == MPSD_RTA_URI)
             {
@@ -2406,7 +2412,7 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
             [&](const XblMultiplayerSessionChangeEventArgs& args)
         {
             const auto& tap{ rtaUpdateJson["shoulderTaps"].GetArray()[0] };
-            auto resourceSplit{ utils::string_split(tap["resource"].GetString(), '~') };
+            auto resourceSplit{ utils::string_split_internal(tap["resource"].GetString(), '~') };
 
             VERIFY_ARE_EQUAL_STR(resourceSplit[0], args.SessionReference.Scid);
             VERIFY_ARE_EQUAL_STR(resourceSplit[1], args.SessionReference.SessionTemplateName);
@@ -2437,7 +2443,7 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
         // Auto confirm subscriptions
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };
-        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
         {
             if (uri == MPSD_RTA_URI)
             {
@@ -2486,7 +2492,7 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock* /*mock*/, std::string /*uri*/, std::string body)
+            [&](HttpMock* /*mock*/, xsapi_internal_string /*uri*/, xsapi_internal_string body)
             {
                 // Skip verification of the subId since its a random GUID
                 JsonDocument bodyJson;
@@ -2553,16 +2559,7 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
             VERIFY_SUCCEEDED(XblMultiplayerGetSessionAsync(env.XboxLiveContext(), &ref, &async));
 
             auto hr = XAsyncGetStatus(&async, true);
-            VERIFY_ARE_EQUAL(S_OK, hr);
-
-            XblMultiplayerSessionHandle sessionHandle{ nullptr };
-            XblMultiplayerGetSessionResult(&async, &sessionHandle);
-            VERIFY_ARE_EQUAL(S_OK, hr);
-
-            if (sessionHandle)
-            {
-                XblMultiplayerSessionCloseHandle(sessionHandle);
-            }
+            VERIFY_ARE_EQUAL(__HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND), hr);
         }
     }
 

@@ -324,6 +324,10 @@ void http_call::set_request_body(
     uint8_t* buffer{ nullptr };
     auto neededSize = value.size();
     std::copy(value.begin(), value.end(), buffer);
+    if (buffer == nullptr)
+    {
+        return;
+    }
     XblHttpCallRequestSetRequestBodyBytes(m_callHandle, buffer, static_cast<uint32_t>(neededSize));
 }
 

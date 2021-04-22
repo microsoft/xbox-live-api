@@ -40,10 +40,18 @@
 
 #include "pal.h"
 #include "utils.h"
+#include "mem_hook.h"
 
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
+
+#if XSAPI_BUILT_FROM_SOURCE
+#undef RAPIDJSON_NAMESPACE
+#undef RAPIDJSON_NAMESPACE_BEGIN
+#undef RAPIDJSON_NAMESPACE_END
+#endif
+#include "../External/rapidjson/include/rapidjson/document.h"
 
 #include "../Include/multidevice.h"
 #include "../Include/api_explorer.h"

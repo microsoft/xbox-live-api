@@ -253,6 +253,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)APIs\apis_xblc_achievements_progress_notification.cpp">
       <Filter>APIs</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shared\mem_hook.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shared">
@@ -444,6 +447,9 @@
       <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Shared\apirunnercloudfns.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shared\mem_hook.h">
       <Filter>Shared</Filter>
     </ClInclude>
   </ItemGroup>
@@ -779,6 +785,9 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\multiplayerManager\MPM_SingleDevice_SyncHostWrite.lua">
       <Filter>Tests\multiplayerManager</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\titleStorage\title_storage-restCalls.lua">
+      <Filter>Tests\titleStorage</Filter>
     </None>
   </ItemGroup>
 </Project>

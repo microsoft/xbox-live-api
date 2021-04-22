@@ -62,6 +62,7 @@ enum class xbox_live_api
     get_quota,
     get_quota_for_session_storage,
     get_search_handles,
+    delete_search_handle,
     get_session_host_allocation_status,
     get_sessions,
     get_single_user_statistics,
@@ -100,7 +101,6 @@ enum class xbox_live_api
     xbox_one_pins_contains_item,
     xbox_one_pins_remove_item,
     post_recent_players,
-    update_activity,
     get_activity_batch,
     delete_activity,
     mpa_send_invites
@@ -128,7 +128,7 @@ public:
     );
 
     virtual HRESULT SetTracing(bool traceCall);
-    virtual HRESULT SetRequestBody(xsapi_internal_vector<uint8_t>&& bytes);
+    virtual HRESULT SetRequestBody(const xsapi_internal_vector<uint8_t>& bytes);
     virtual HRESULT SetRequestBody(_In_reads_bytes_(requestBodySize) const uint8_t* requestBodyBytes, _In_ uint32_t requestBodySize);
     virtual HRESULT SetRequestBody(const xsapi_internal_string& bodyString);
     virtual HRESULT SetRequestBody(const JsonValue& bodyJson);
@@ -228,7 +228,7 @@ public:
     void SetLongHttpCall(_In_ bool longHttpCall);
     HRESULT SetXblServiceContractVersion(uint32_t contractVersion);
 
-    HRESULT SetRequestBody(xsapi_internal_vector<uint8_t>&& bytes) override;
+    HRESULT SetRequestBody(const xsapi_internal_vector<uint8_t>& bytes) override;
     HRESULT SetRequestBody(_In_reads_bytes_(requestBodySize) const uint8_t* requestBodyBytes, _In_ uint32_t requestBodySize) override;
     HRESULT SetRequestBody(const xsapi_internal_string& bodyString) override;
     HRESULT SetRequestBody(const JsonValue& bodyJson) override;

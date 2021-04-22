@@ -181,7 +181,7 @@ public:
     void VerifyBroadcastRecord(XblPresenceBroadcastRecord* broadcastRecord, JsonValue resultToVerify)
     {
         const char* provider = broadcastRecord->provider == XblPresenceBroadcastProvider::Twitch ? "twitch" : "unknown";
-        xbox::services::string_t resultStr = Utils::StringTFromUtf8(resultToVerify["started"].GetString());
+        xsapi_internal_string resultStr = resultToVerify["started"].GetString();
         xbox::services::datetime resultDatetime = xbox::services::datetime::from_string(resultStr, xbox::services::datetime::date_format::ISO_8601);
 
         VERIFY_ARE_EQUAL_STR(provider, resultToVerify["provider"].GetString());
@@ -193,9 +193,9 @@ public:
 
     void VerifyPresenceTitleRecord(XblPresenceTitleRecord* record, JsonValue resultToVerify)
     {
-        xbox::services::string_t resultStr = Utils::StringTFromUtf8(resultToVerify["lastModified"].GetString());
+        xsapi_internal_string resultStr = resultToVerify["lastModified"].GetString();
         xbox::services::datetime resultDatetime = xbox::services::datetime::from_string(resultStr, xbox::services::datetime::date_format::ISO_8601);
-        string_t expectedStr = utils::DatetimeFromTimeT(record->lastModified).to_string(xbox::services::datetime::date_format::ISO_8601);
+        xsapi_internal_string expectedStr = utils::DatetimeFromTimeT(record->lastModified).to_string(xbox::services::datetime::date_format::ISO_8601);
         UNREFERENCED_PARAMETER(expectedStr);
         VERIFY_ARE_EQUAL_INT(record->titleId, std::stoi(resultToVerify["id"].GetString()));
         VERIFY_ARE_EQUAL_STR(record->titleName, resultToVerify["name"].GetString());
@@ -328,13 +328,13 @@ public:
     }
 
     std::shared_ptr<HttpMock> CreatePresenceMock(
-        std::string titleId
+        xsapi_internal_string titleId
     )
     {
         auto presenceMock = std::make_shared<HttpMock>("GET", "https://userpresence.xboxlive.com");
 
         presenceMock->SetMockMatchedCallback(
-            [titleId](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [titleId](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(requestUrl);
 
@@ -371,7 +371,7 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&requestWellFormed](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(requestUrl);
@@ -428,7 +428,7 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&requestWellFormed](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(requestUrl);
@@ -474,7 +474,7 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&requestWellFormed](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(requestUrl);
@@ -543,7 +543,7 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&requestWellFormed](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(requestUrl);
@@ -613,7 +613,7 @@ public:
         const uint32_t titleId = 1563044810;
         const char titlePresenceUri[]{ "https://userpresence.xboxlive.com/users/xuid(1234)/titles/1563044810" };
 
-        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
         {
             if (uri == titlePresenceUri)
             {
@@ -676,9 +676,9 @@ public:
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };
 
         const uint64_t xuid = 1234;
-        const std::string devicePresenceUri{ "https://userpresence.xboxlive.com/users/xuid(1234)/devices" };
+        const xsapi_internal_string devicePresenceUri{ "https://userpresence.xboxlive.com/users/xuid(1234)/devices" };
 
-        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
         {
             if (uri == devicePresenceUri)
             {
@@ -698,7 +698,7 @@ public:
         JsonDocument deviceResponseJson{};
         deviceResponseJson.Parse(devicePresenceResponse);
 
-        auto response = utils::string_split(deviceResponseJson.GetString(), ':');
+        auto response = utils::string_split_internal(deviceResponseJson.GetString(), ':');
         VERIFY_ARE_EQUAL_INT(xuid, handler.xuid);
         VERIFY_IS_TRUE(xbox::services::presence::DeviceRecord::DeviceTypeFromString(response[0]) == handler.deviceType);
         VERIFY_ARE_EQUAL(response[1] == "true", handler.isUserLoggedOnDevice);
@@ -715,7 +715,7 @@ public:
         const uint64_t xuid2{ 2 };
         std::map<uint64_t, Event> subAddedEvents;
 
-        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
         {
             mockRtaService.CompleteSubscribeHandshake(n, defaultPresenceResponse);
 
@@ -753,7 +753,7 @@ public:
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };
 
         uint32_t subCount{ 0 };
-        mockRtaService.SetSubscribeHandler([&](uint32_t n, std::string uri)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
         {
             mockRtaService.CompleteSubscribeHandshake(n, defaultPresenceResponse);
             subCount++;

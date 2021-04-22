@@ -5,6 +5,8 @@
 #include "xsapi-cpp/system.h"
 #include "xbox_live_app_config_internal.h"
 #import "XBLiOSGlobalState.h"
+#include <rapidjson/allocators.hpp>
+#include "uri_impl.h"	
 
 using namespace xbox::services;
 

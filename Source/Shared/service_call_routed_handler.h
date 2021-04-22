@@ -20,7 +20,7 @@ public:
 private:
     static void HCCallRoutedHandler(
         _In_ HCCallHandle call,
-        _In_opt_ void* context
+        _In_ void* context
     );
 
     String GetFormattedResponse(

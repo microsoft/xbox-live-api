@@ -3,8 +3,6 @@
 
 #include "pch.h"
 #include "title_storage_internal.h"
-#include "xbox_system_factory.h"
-#include "xsapi_utils.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_TITLE_STORAGE_CPP_BEGIN
 
@@ -101,7 +99,7 @@ TitleStorageService::DeserializeTitleStorageQuota(
         }
     }
 
-    if (errc)
+    if (FAILED(errc))
     {
         return E_FAIL;
     }
@@ -662,7 +660,7 @@ TitleStorageService::TitleStorageBlobMetadataSubpath(
         continuationToken
         );
 
-    xsapi_internal_string paramPath = utils::internal_string_from_string_t(params.query());
+    xsapi_internal_string paramPath = params.query();
     if (paramPath.size() > 1)
     {
         path << "?" << paramPath;

@@ -32,6 +32,7 @@ int XblInitialize_Lua(lua_State *L)
     HRESULT hr = XblInitialize(&args);
     // CODE SNIPPET END
     XblDisableAssertsForXboxLiveThrottlingInDevSandboxes(XblConfigSetting::ThisCodeNeedsToBeChanged);
+
     LogToFile("XblInitialize: %s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);
 }
@@ -117,8 +118,13 @@ int XblCleanupAsync_Lua(lua_State *L)
         hr = XAsyncGetStatus(asyncBlock.get(), true);
     }
     // CODE SNIPPET END
-
     LogToFile("XblCleanup: hr=%s", ConvertHR(hr).data());
+
+    // Ignore not init'd error
+    if (hr == E_XBL_NOT_INITIALIZED)
+    {
+        hr = S_OK;
+    }
     return LuaReturnHR(L, S_OK);
 }
 

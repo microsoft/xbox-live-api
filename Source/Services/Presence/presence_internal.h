@@ -91,7 +91,7 @@ public:
 
 protected:
     void OnSubscribe(const JsonValue& data) noexcept override;
-    void OnEvent(const JsonValue& event) noexcept override;
+    void OnEvent(_In_ const JsonValue& event) noexcept override;
     void OnResync() noexcept override;
 
 private:

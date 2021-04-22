@@ -127,7 +127,7 @@ public:
         VERIFY_IS_TRUE(expected.IsObject());
 
         String filename = expected["fileName"].GetString();
-        auto tokens{ utils::string_split(filename, ',') };
+        auto tokens{ utils::string_split_internal(filename, ',') };
         VERIFY_ARE_EQUAL_UINT(2, tokens.size());
         VERIFY_ARE_EQUAL_STR(tokens[0].data(), actual.blobPath);
 
@@ -166,13 +166,13 @@ public:
         }
     }
 
-    std::string ExpectedUriPath(
+    xsapi_internal_string ExpectedUriPath(
         XblTitleStorageType storageType,
         uint64_t xuid,
-        const std::string& scid = MOCK_SCID
+        const xsapi_internal_string& scid = MOCK_SCID
     )
     {
-        std::stringstream ss;
+        xsapi_internal_stringstream ss;
         switch (storageType)
         {
         case XblTitleStorageType::GlobalStorage:
@@ -196,15 +196,15 @@ public:
         return ss.str();
     }
 
-    std::string ExpectedUriPath(
+    xsapi_internal_string ExpectedUriPath(
         XblTitleStorageType storageType,
         uint64_t xuid,
         XblTitleStorageBlobType blobType,
-        const std::string& blobPath = "blobPath",
-        const std::string& scid = MOCK_SCID
+        const xsapi_internal_string& blobPath = "blobPath",
+        const xsapi_internal_string& scid = MOCK_SCID
     )
     {
-        std::stringstream ss;
+        xsapi_internal_stringstream ss;
         ss << ExpectedUriPath(storageType, xuid, scid);
         ss << "/data/" << blobPath << ",";
 
@@ -257,18 +257,18 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 requestWellFormed &= !requestBody.empty();
 
-                auto queryParams = xbox::services::uri::split_query(xbox::services::uri{ Utils::StringTFromUtf8(requestUrl.data()) }.query());
+                auto queryParams = xbox::services::uri::split_query(xbox::services::uri{ requestUrl.data() }.query());
 
-                requestWellFormed &= queryParams[_T("clientFileTime")] == _T("Thu,%2001%20Jan%201970%2000:00:01%20GMT");
-                requestWellFormed &= queryParams[_T("displayName")] == Utils::StringTFromUtf8(metadata.displayName);
+                requestWellFormed &= queryParams["clientFileTime"] == "Thu,%2001%20Jan%201970%2000:00:01%20GMT";
+                requestWellFormed &= queryParams["displayName"] == metadata.displayName;
                 if (blobType == XblTitleStorageBlobType::Binary)
                 {
-                    requestWellFormed &= queryParams[_T("finalBlock")] == _T("true");
+                    requestWellFormed &= queryParams["finalBlock"] == "true";
                 }
             }
         );
@@ -305,7 +305,7 @@ public:
         bool requestWellFormed{ true };
 
         mock.SetMockMatchedCallback(
-            [&](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
         {
             requestWellFormed &= requestBody.empty();
             requestWellFormed &= (HttpMock::GetUriPath(requestUrl) == ExpectedUriPath(storageType, xboxLiveContext->Xuid(), blobType));
@@ -404,7 +404,7 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 requestWellFormed &= requestBody.empty();
@@ -447,11 +447,11 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 requestWellFormed &= requestBody.empty();
 
-                std::string expectedPath{ ExpectedUriPath(type, xboxLiveContext->Xuid()) };
+                xsapi_internal_string expectedPath{ ExpectedUriPath(type, xboxLiveContext->Xuid()) };
                 expectedPath += "/data/blobPath";
 
                 requestWellFormed &= (HttpMock::GetUriPath(requestUrl) == expectedPath);
@@ -507,7 +507,7 @@ public:
 
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 requestWellFormed &= requestBody.empty();
@@ -705,23 +705,23 @@ public:
         uint32_t requestCount{ 0 };
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(requestBody);
 
-                auto queryParams = xbox::services::uri::split_query(xbox::services::uri{ Utils::StringTFromUtf8(requestUrl.data()) }.query());
-                if (queryParams[_T("finalBlock")] == _T("true"))
+                auto queryParams = xbox::services::uri::split_query(xbox::services::uri{ requestUrl.data() }.query());
+                if (queryParams["finalBlock"] == "true")
                 {
                     // Validate that we supplied the continuation token
                     JsonDocument d;
                     d.Parse(continuationTokenJson);
 
-                    requestWellFormed &= d["continuationToken"].GetString() == Utils::StringFromStringT(queryParams[_T("continuationToken")]);
+                    requestWellFormed &= d["continuationToken"].GetString() == queryParams["continuationToken"];
                     
                     // no response body in this case
                     mock->ClearReponseBody();
                 }
-                else if (queryParams[_T("finalBlock")] == _T("false"))
+                else if (queryParams["finalBlock"] == "false")
                 {
                     mock->SetResponseBody(continuationTokenJson);
                 }

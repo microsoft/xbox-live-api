@@ -72,7 +72,7 @@ STDAPI_(XblFunctionContext) XblRealTimeActivityAddConnectionStateChangeHandler(
         {
             try
             {
-                handler(context, state);
+                handler(context, state); 
             }
             catch (...)
             {

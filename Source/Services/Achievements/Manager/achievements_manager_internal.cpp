@@ -8,7 +8,7 @@
 
 using namespace xbox::services;
 
-XblAchievementsManagerResult::XblAchievementsManagerResult(const XblAchievement & achievement)
+XblAchievementsManagerResult::XblAchievementsManagerResult(_In_ const XblAchievement & achievement)
     : m_achievements({ achievement }),
     m_explicitCleanup(false),
     m_achievementsData(nullptr),
@@ -16,7 +16,7 @@ XblAchievementsManagerResult::XblAchievementsManagerResult(const XblAchievement 
 {
 }
 
-XblAchievementsManagerResult::XblAchievementsManagerResult(Vector<XblAchievement>& achievements, bool explicitCleanup)
+XblAchievementsManagerResult::XblAchievementsManagerResult(_In_ Vector<XblAchievement>& achievements, _In_ bool explicitCleanup)
     : m_achievements(std::move(achievements)),
     m_achievementsData(m_achievements.data()),
     m_achievementsCount(m_achievements.size()),
@@ -24,7 +24,7 @@ XblAchievementsManagerResult::XblAchievementsManagerResult(Vector<XblAchievement
 {
 }
 
-XblAchievementsManagerResult::XblAchievementsManagerResult(XblAchievement* achievements, size_t achievementCount, bool explicitCleanup)
+XblAchievementsManagerResult::XblAchievementsManagerResult(_In_ XblAchievement* achievements, _In_ size_t achievementCount, _In_ bool explicitCleanup)
     : m_achievements(achievements, achievements + achievementCount),
     m_achievementsData(achievements),
     m_achievementsCount(achievementCount),
@@ -256,7 +256,7 @@ uint64_t AchievementsManagerUser::Xuid() const
     return m_xuid;
 }
 
-Result<XblAchievement> AchievementsManagerUser::GetAchievement(const String & id)
+Result<XblAchievement> AchievementsManagerUser::GetAchievement(_In_ const String & id)
 {
     if (m_userAchievements.find(id) == m_userAchievements.end())
     {
@@ -346,7 +346,7 @@ uint64_t AchievementsManagerUser::GetAchievementCount() const
     return m_userAchievements.size();
 }
 
-Result<void> AchievementsManagerUser::CanUpdateAchievement(const String & achievementId, uint8_t progress)
+Result<void> AchievementsManagerUser::CanUpdateAchievement(_In_ const String & achievementId, _In_ uint8_t progress)
 {
     if (m_userAchievements.find(achievementId) == m_userAchievements.end())
     {
@@ -386,10 +386,10 @@ Result<void> AchievementsManagerUser::CanUpdateAchievement(const String & achiev
         );
         return { E_INVALIDARG, errorMsg };
     }
-    return true;
+    return S_OK;
 }
 
-Result<void> AchievementsManagerUser::UpdateAchievement(const String& achievementId, uint8_t percent)
+Result<void> AchievementsManagerUser::UpdateAchievement(_In_ const String& achievementId, _In_ uint8_t percent)
 {
     return m_xblContext->AchievementsService()->UpdateAchievement(
         m_xuid,
@@ -422,21 +422,21 @@ ProgressValueType IsNumber(const char* str)
 {
     char* p = nullptr;
     
-    strtoul(str, &p, 0);
+    (void)strtoul(str, &p, 0);
     if (p == nullptr)
     {
         return ProgressValueType::UnsignedLong;
     }
 
     // If it couldn't be represented as an unsigned long, check to see if it can be signed next.
-    strtol(str, &p, 0);
+    (void)strtol(str, &p, 0);
     if (p == nullptr)
     {
         return ProgressValueType::SignedLong;
     }
     
     // If neither of those, then either it is a floating point number, or it is non-numeric.
-    strtod(str, &p);
+    (void)strtod(str, &p);
     if (p == nullptr)
     {
         return ProgressValueType::FloatingPoint;
@@ -789,7 +789,7 @@ Vector<XblAchievementsManagerEvent> GenerateEventFromAchievementDiff(uint64_t xu
     return generatedEvents;
 }
 
-HRESULT AchievementsManagerUser::FetchAchievements(AsyncContext<HRESULT> async)
+HRESULT AchievementsManagerUser::FetchAchievements(_In_ AsyncContext<HRESULT> async)
 {
     constexpr uint32_t achievementsPerFetch = 100;
 
@@ -818,10 +818,10 @@ HRESULT AchievementsManagerUser::FetchAchievements(AsyncContext<HRESULT> async)
 }
 
 HRESULT AchievementsManagerUser::HandleAchievementsResults(
-    Result<std::shared_ptr<XblAchievementsResult>> result,
-    uint32_t achievementsPerFetch,
-    AsyncContext<HRESULT> async,
-    Vector<XblAchievement> fetchedAchievements
+    _In_ Result<std::shared_ptr<XblAchievementsResult>> result,
+    _In_ uint32_t achievementsPerFetch,
+    _In_ AsyncContext<HRESULT> async,
+    _In_ Vector<XblAchievement> fetchedAchievements
 )
 {
     if (Succeeded(result))
@@ -1015,7 +1015,7 @@ HRESULT AchievementsManager::CleanUpAchievementCopyForResult(XblAchievement& ach
     return S_OK;
 }
 
-XblAchievement AchievementsManager::DeepCopyAchievement(const XblAchievement & other)
+XblAchievement AchievementsManager::DeepCopyAchievement(_In_ const XblAchievement & other)
 {
     XblAchievement copy
     {
@@ -1144,7 +1144,7 @@ Vector<XblAchievement> AchievementsManager::DeepCopyAchievements(const Vector<Xb
     return achievementsCopy;
 }
 
-HRESULT AchievementsManager::CleanUpDeepCopyAchievement(XblAchievement& achievement)
+HRESULT AchievementsManager::CleanUpDeepCopyAchievement(_In_ XblAchievement& achievement)
 {
     Delete(achievement.id);
     Delete(achievement.serviceConfigurationId);
@@ -1258,7 +1258,7 @@ HRESULT AchievementsManager::AddLocalUser(
 }
 
 HRESULT AchievementsManager::RemoveLocalUser(
-    const User& user
+    _In_ const User & user
 ) noexcept
 {
     std::lock_guard<std::mutex> lock{ m_mutex };
@@ -1321,7 +1321,7 @@ Result<XblAchievement> AchievementsManager::GetAchievement(
     return m_localUsers[xuid]->GetAchievement(achievementId);
 }
 
-Result<std::pair<XblAchievement*, size_t>> AchievementsManager::GetAchievements(uint64_t xuid)
+Result<std::pair<XblAchievement*, size_t>> AchievementsManager::GetAchievements(_In_ uint64_t xuid)
 {
     if (m_localUsers.find(xuid) == m_localUsers.end())
     {
@@ -1390,17 +1390,17 @@ Result<void> AchievementsManager::UpdateAchievement(
     return localUser->UpdateAchievement(achievementId, progress);
 }
 
-bool AchievementsManager::HasUser(uint64_t xuid) const
+bool AchievementsManager::HasUser(_In_ uint64_t xuid) const
 {
     return m_localUsers.find(xuid) != m_localUsers.end();
 }
 
-bool AchievementsManager::IsUserInitialized(uint64_t xuid) 
+bool AchievementsManager::IsUserInitialized(_In_ uint64_t xuid)
 {
     return m_localUsers[xuid]->IsInitialized();
 }
 
-uint64_t AchievementsManager::GetUserAchievementCount(uint64_t xuid)
+uint64_t AchievementsManager::GetUserAchievementCount(_In_ uint64_t xuid)
 {
     return m_localUsers[xuid]->GetAchievementCount();
 }

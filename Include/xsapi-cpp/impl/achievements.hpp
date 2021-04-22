@@ -298,12 +298,18 @@ bool achievement::is_revoked() const
 
 achievements_result::achievements_result(XblAchievementsResultHandle handle)
 {
-    XblAchievementsResultDuplicateHandle(handle, &m_handle);
+    if (handle != nullptr)
+    {
+        XblAchievementsResultDuplicateHandle(handle, &m_handle);
+    }
 }
 
 achievements_result::achievements_result(const achievements_result& other)
 {
-    XblAchievementsResultDuplicateHandle(other.m_handle, &m_handle);
+    if (other.m_handle != nullptr)
+    {
+        XblAchievementsResultDuplicateHandle(other.m_handle, &m_handle);
+    }
 }
 
 achievements_result& achievements_result::operator=(achievements_result other)

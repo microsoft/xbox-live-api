@@ -6,20 +6,20 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
-log_entry::log_entry(HCTraceLevel level, std::string category) :
+log_entry::log_entry(HCTraceLevel level, xsapi_internal_string category) :
     m_logLevel(level),
     m_category(std::move(category))
 {
 }
 
-log_entry::log_entry(HCTraceLevel level, std::string category, std::string msg) :
+log_entry::log_entry(HCTraceLevel level, xsapi_internal_string category, xsapi_internal_string msg) :
     m_logLevel(level),
     m_category(std::move(category))
 {
     m_message << msg;
 }
 
-std::string log_entry::level_to_string() const 
+xsapi_internal_string log_entry::level_to_string() const
 {
     switch (m_logLevel)
     {

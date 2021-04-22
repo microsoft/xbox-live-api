@@ -51,27 +51,27 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 class log_entry
 {
 public:
-    log_entry(HCTraceLevel level, std::string category);
+    log_entry(HCTraceLevel level, xsapi_internal_string category);
 
-    log_entry(HCTraceLevel level, std::string category, std::string msg);
+    log_entry(HCTraceLevel level, xsapi_internal_string category, xsapi_internal_string msg);
 
-    std::string level_to_string() const;
+    xsapi_internal_string level_to_string() const;
 
-    const std::stringstream& msg_stream() const { return m_message; }
+    const xsapi_internal_stringstream& msg_stream() const { return m_message; }
 
-    const std::string& category() const { return m_category; }
+    const xsapi_internal_string& category() const { return m_category; }
 
     HCTraceLevel get_log_level() const { return m_logLevel; }
 
     log_entry& operator<<(const char* data)
     {
-        m_message << xbox::services::convert::to_utf8string(data);
+        m_message << data;
         return *this;
     }
 
-    log_entry& operator<<(const std::string& data)
+    log_entry& operator<<(const xsapi_internal_string& data)
     {
-        m_message << xbox::services::convert::to_utf8string(data);
+        m_message << data;
         return *this;
     }
 
@@ -82,7 +82,7 @@ public:
         return *this;
     }
 
-    log_entry& operator<<(const std::wstring& data)
+    log_entry& operator<<(const xsapi_internal_wstring& data)
     {
         m_message << xbox::services::convert::to_utf8string(data);
         return *this;
@@ -98,8 +98,8 @@ public:
 
 private:
     HCTraceLevel m_logLevel;
-    std::string m_category;
-    std::stringstream m_message;
+    xsapi_internal_string m_category;
+    xsapi_internal_stringstream m_message;
 };
 
 class log_output
@@ -122,9 +122,9 @@ public:
 
 protected:
     // This function is to write the string to the final output, don't need to be thread safe.
-    virtual void write(_In_ HCTraceLevel level, _In_ const std::string& msg);
+    virtual void write(_In_ HCTraceLevel level, _In_ const xsapi_internal_string& msg);
 
-    virtual std::string format_log(_In_ const log_entry& entry);
+    virtual xsapi_internal_string format_log(_In_ const log_entry& entry);
 
 private:
     mutable std::mutex m_mutex;
@@ -135,14 +135,7 @@ class logger
 public:
     logger() {}
 
-    static std::shared_ptr<logger> get_logger()
-    { 
-        auto singleton = get_xsapi_singleton();
-        if (singleton) 
-            return singleton->m_logger;
-        else
-            return nullptr;
-    }
+    static std::shared_ptr<logger> get_logger();
 
     void set_log_level(HCTraceLevel level);
     void add_log_output(std::shared_ptr<log_output> output);
@@ -152,7 +145,7 @@ public:
     void operator+=(const log_entry& record);
 
 private:
-    std::vector<std::shared_ptr<log_output>> m_log_outputs;
+    Vector<std::shared_ptr<log_output>> m_log_outputs;
 };
 
 class logger_raii

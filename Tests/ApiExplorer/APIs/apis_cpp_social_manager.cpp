@@ -77,6 +77,10 @@ HRESULT SocialManagerDoWorkCpp()
             LogToFile("social_manager::do_work: local_user_added event");
             CallLuaFunctionWithHr(S_OK, "OnSocialManagerDoWorkCpp_LocalUserAddedEvent");
             break;
+        case xbox::services::social::manager::social_event_type::local_user_removed:
+            LogToFile("social_manager::do_work: local_user_removed event");
+            CallLuaFunctionWithHr(S_OK, "OnSocialManagerDoWorkCpp_LocalUserRemovedEvent");
+            break;
         case xbox::services::social::manager::social_event_type::social_user_group_loaded:
             LogToFile("social_manager::do_work: social_user_group_loaded event");
             CallLuaFunctionWithHr(S_OK, "OnSocialManagerDoWorkCpp_SocialUserGroupLoadedEvent");

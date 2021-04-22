@@ -31,7 +31,7 @@ public:
         ServiceUnavailable = 1002
     };
 
-    using SubscribeHandler = std::function<void(uint32_t subId, std::string uri)>;
+    using SubscribeHandler = std::function<void(uint32_t subId, xsapi_internal_string uri)>;
     void SetSubscribeHandler(
         SubscribeHandler handler
     ) noexcept;
@@ -49,12 +49,12 @@ public:
     ) noexcept;
 
     void RaiseEvent(
-        const std::string& uri,
+        const xsapi_internal_string& uri,
         const rapidjson::Value& payload
     ) noexcept;
 
     void RaiseEvent(
-        const std::string& uri,
+        const xsapi_internal_string& uri,
         const char* payload
     ) noexcept;
 
@@ -72,7 +72,7 @@ private:
 
     struct Subscription
     {
-        std::string uri;
+        xsapi_internal_string uri;
         uint32_t clientSequenceNumber{ 0 };
         bool active{ false };
     };

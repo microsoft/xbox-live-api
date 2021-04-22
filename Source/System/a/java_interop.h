@@ -57,6 +57,14 @@ public:
 
     jclass GetLocalStorageClass() const { return m_localStorageClass; }
 
+    // TODO This is a temporary workaround for TCUI. XSAPI C++ TCUI API's accept a xal_user_handle, from which we extract
+    // XUID and privileges and call into Java code. Java code then calls back into XSAPI to make an HTTP call, but it does not pass and user
+    // context or xal_user_handle but it most likely should. Previously we just remembered the last signed in user, so we can 
+    // emulate that behavior again for now.
+    void StoreUser(User&& user);
+    std::shared_ptr<User> GetStoredUser();
+    std::shared_ptr<User> ExtractStoredUser();
+
 private:
 
     JavaVM* m_javaVM;
@@ -75,6 +83,9 @@ private:
     std::mutex m_localStoragePathLock;
 
     xbl_result<void> finish_initialization(JNIEnv* env, jobject clsLoader, jmethodID loadClass, bool useTcui);
+
+    std::shared_ptr<User> m_storedUser{ nullptr };
+    std::mutex m_storedUserMutex;
 };
 
 }}

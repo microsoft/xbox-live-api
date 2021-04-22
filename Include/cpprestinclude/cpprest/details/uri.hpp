@@ -31,6 +31,7 @@ using namespace utility::conversions;
 #pragma warning( push )
 #pragma warning( disable : 26444 ) // ignore various unnamed objects
 #pragma warning( disable : 26812 )  // enum instead of enum class
+#pragma warning( disable : 4365 )  
 #endif
 
 namespace web { namespace details

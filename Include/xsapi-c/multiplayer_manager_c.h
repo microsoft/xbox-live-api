@@ -977,7 +977,7 @@ STDAPI_(const char*) XblMultiplayerManagerGameSessionCorrelationId() XBL_NOEXCEP
 /// Object containing identifying information for the session.  
 /// Returns null if a game session has not yet been established.
 /// </summary>
-/// <returns>A pointer to the the multiplayer session reference.  
+/// <returns>A pointer to the multiplayer session reference.  
 /// The memory for the returned string pointer remains valid until the next call to XblMultiplayerManagerDoWork.</returns>
 STDAPI_(const XblMultiplayerSessionReference*) XblMultiplayerManagerGameSessionSessionReference() XBL_NOEXCEPT;
 

@@ -34,14 +34,6 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
     /// </summary>
     namespace system {
 
-    // Forward declaration
-    class sign_out_completed_event_args;
-    class user_impl;
-    class token_and_signature_result_internal;
-    class user_factory;
-    class xbox_live_server_impl;
-    class auth_config;
-
     class xbox_live_wns_event_args
     {
     public:
@@ -85,15 +77,12 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
         /// <summary>
         /// Gets the singleton instance
         /// </summary>
-        static std::shared_ptr<xbox_live_services_settings> get_singleton_instance(_In_ bool createIfRequired = true);
+        inline static std::shared_ptr<xbox_live_services_settings> get_singleton_instance(_In_ bool createIfRequired = true);
 
         /// <summary>
         /// Used by titles to register memory allocation hooks that are used by XSAPI when it 
         /// needs to allocate a large block of memory such as SocialManager which uses a large block 
         /// of memory to keep track of the friends list.  
-        /// 
-        /// Note that not all memory that XSAPI uses goes through this allocator (for example std::string),
-        /// but these allocations are typically small and transient.
         /// </summary>
         /// <param name="memAllocHandler">The title's allocation function.  Input is size of memory block that's being requested.  Return is pointer to the allocated memory block</param>
         /// <param name="memFreeHandler">The title's memory free function. Input is address of memory to free</param>
@@ -103,86 +92,48 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
         /// It is important to provide an implementation for both memAllocHandler and memFreeHandler if you hook them;
         /// hooking only one of them will be considered an error.
         /// </remarks>
-        static void set_memory_allocation_hooks(
+        inline static void set_memory_allocation_hooks(
             _In_ const std::function<_Ret_maybenull_ _Post_writable_byte_size_(dwSize) void*(_In_ size_t dwSize)>& memAllocHandler,
             _In_ const std::function<void(_In_ void* pAddress)>& memFreeHandler
         );
 
         /// <summary>
-        /// Registers to receive logging messages for levels that are enabled.  Event handlers will receive the level, category, and content of the message.
+        /// Deprecated. XSAPI is using libHttpClient logging. A logging handler can be added using HCTraceSetClientCallback.
         /// </summary>
-        /// <param name="handler">The event handler function to call.</param>
-        /// <returns>
-        /// A function_context object that can be used to unregister the event handler.
-        /// </returns>
-        function_context add_logging_handler(_In_ std::function<void(xbox_services_diagnostics_trace_level, const std::string&, const std::string&)> handler);
+        _XSAPICPP_DEPRECATED inline function_context add_logging_handler(_In_ std::function<void(xbox_services_diagnostics_trace_level, const std::string&, const std::string&)> handler);
 
         /// <summary>
-        /// Unregisters from receiving logging messages.
+        /// Deprecated. See above.
         /// </summary>
-        /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
-        void remove_logging_handler(_In_ function_context context);
+        _XSAPICPP_DEPRECATED inline void remove_logging_handler(_In_ function_context context);
 
         /// <summary>
         /// Indicates the level of debug messages to send to the debugger's Output window.
         /// </summary>
-        xbox_services_diagnostics_trace_level diagnostics_trace_level() const;
+        inline xbox_services_diagnostics_trace_level diagnostics_trace_level() const;
 
         /// <summary>
         /// Sets the level of debug messages to send to the debugger's Output window.
         /// </summary>
-        void set_diagnostics_trace_level(_In_ xbox_services_diagnostics_trace_level value);
+        inline void set_diagnostics_trace_level(_In_ xbox_services_diagnostics_trace_level value);
 
         /// <summary>
-        /// Registers to receive Windows Push Notification Service(WNS) events.  Event handlers will receive the xbox user id and notification type.
+        /// Deprecated. Registering WNS callbacks though XSAPI is no longer supported.
         /// </summary>
-        /// <param name="handler">The event handler function to call.</param>
-        /// <returns>
-        /// A function_context object that can be used to unregister the event handler.
-        /// </returns>
-        function_context add_wns_handler(_In_ const std::function<void(const xbox_live_wns_event_args&)>& handler);
+        _XSAPICPP_DEPRECATED inline function_context add_wns_handler(_In_ const std::function<void(const xbox_live_wns_event_args&)>& handler);
 
         /// <summary>
-        /// Unregisters from receiving Windows Push Notification Service(WNS) events.
+        /// Deprecated. Registering WNS callbacks though XSAPI is no longer supported.
         /// </summary>
-        /// <param name="context">The function_context object that was returned when the event handler was registered. </param>
-        void remove_wns_handler(_In_ function_context context);
-
-        /// <summary>
-        /// Internal function
-        /// </summary>
-        void _Raise_logging_event(_In_ xbox_services_diagnostics_trace_level level, _In_ const std::string& category, _In_ const std::string& message);
-
-        /// <summary>
-        /// Internal function
-        /// </summary>
-        void _Raise_wns_event(_In_ const string_t& xbox_user_id, _In_ const string_t& nofitication_type, _In_ const string_t& content);
-
-        /// <summary>
-        /// Internal function
-        /// </summary>
-        bool _Is_at_diagnostics_trace_level(_In_ xbox_services_diagnostics_trace_level level);
+        _XSAPICPP_DEPRECATED inline void remove_wns_handler(_In_ function_context context);
 
     private:
-        xbox_live_services_settings();
-
-        void set_log_level_from_diagnostics_trace_level();
-
-        xbox_services_diagnostics_trace_level m_traceLevel;
-        std::mutex m_loggingWriteLock;
-        std::unordered_map<uint32_t, std::function<void(xbox_services_diagnostics_trace_level, const std::string&, const std::string&)>> m_loggingHandlers;
-        uint32_t m_loggingHandlersCounter{ 1 };
-
-        std::mutex m_wnsEventLock;
-        std::unordered_map<uint32_t, std::function<void(const xbox_live_wns_event_args&)>> m_wnsHandlers;
-        uint32_t m_wnsHandlersCounter{ 1 };
-
-        friend class xsapi_memory;
-        friend void *custom_mem_alloc_wrapper(_In_ size_t size, _In_ uint32_t memoryType);
-        friend void custom_mem_free_wrapper(_In_ void *pointer, _In_ uint32_t memoryType);
+        xbox_live_services_settings() = default;
     };
 } // namespace system
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
 
-
+#if !XSAPI_NO_PPL
+#include "impl/system.hpp"
+#endif

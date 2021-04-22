@@ -305,7 +305,7 @@ int HCHttpCallResponseGetHeaderAtIndex_Lua(lua_State *L)
     return LuaReturnHR(L, hr);
 }
 
-void CALLBACK WebsocketMessageReceived(
+void CALLBACK ExampleWebsocketMessageReceived(
     _In_ HCWebsocketHandle websocket,
     _In_z_ const char* incomingBodyString,
     _In_ void* functionContext
@@ -317,7 +317,7 @@ void CALLBACK WebsocketMessageReceived(
     CallLuaFunction("OnHCWebsocketMessageReceived");
 }
 
-void CALLBACK WebsocketClosed(
+void CALLBACK ExampleWebsocketClosed(
     _In_ HCWebsocketHandle websocket,
     _In_ HCWebSocketCloseStatus closeStatus,
     _In_ void* functionContext
@@ -333,7 +333,7 @@ int HCWebSocketCreate_Lua(lua_State *L)
 {
     // CODE SNIPPET START: HCWebSocketCreate
     HCWebsocketHandle websocket = nullptr;
-    HRESULT hr = HCWebSocketCreate(&websocket, WebsocketMessageReceived, nullptr, WebsocketClosed, nullptr);
+    HRESULT hr = HCWebSocketCreate(&websocket, ExampleWebsocketMessageReceived, nullptr, ExampleWebsocketClosed, nullptr);
     // CODE SNIPPET END
 
     Data()->websocket = websocket;
@@ -460,6 +460,7 @@ int HCTraceSetTraceToDebugger_Lua(lua_State *L)
 {
     // CODE SNIPPET START: HCTraceSetTraceToDebugger
     HCSettingsSetTraceLevel(HCTraceLevel::Verbose); // See HCTraceLevel enum for various levels
+    // TODO: jasonsa - confirm works
     HCTraceSetTraceToDebugger(true);
     // CODE SNIPPET END
 

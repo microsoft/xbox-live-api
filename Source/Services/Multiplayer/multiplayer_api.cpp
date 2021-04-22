@@ -198,6 +198,31 @@ STDAPI XblMultiplayerCreateSearchHandleAsync(
     RETURN_HR_INVALIDARGUMENT_IF(numberAttributesCount > 0 && numberAttributes == nullptr);
     RETURN_HR_INVALIDARGUMENT_IF(stringAttributesCount > 0 && stringAttributes == nullptr);
 
+    //ensure all attributes are properly terminated, otherwise we'll write a property 
+    //longer than is allowed into the json, which will crash eventually on deserialization
+    if (tagsCount > 0)
+    {
+        for (size_t i = 0; i < tagsCount; i++)
+        {
+            RETURN_HR_INVALIDARGUMENT_IF(utils::EnsureLessThanMaxLength(tags[i].value, XBL_MULTIPLAYER_SEARCH_HANDLE_MAX_FIELD_LENGTH) == false);
+        }
+    }
+    if (numberAttributesCount > 0)
+    {
+        for (size_t i = 0; i < numberAttributesCount; i++)
+        {
+            RETURN_HR_INVALIDARGUMENT_IF(utils::EnsureLessThanMaxLength(numberAttributes[i].name, XBL_MULTIPLAYER_SEARCH_HANDLE_MAX_FIELD_LENGTH) == false);
+        }
+    }
+    if (stringAttributesCount > 0)
+    {
+        for (size_t i = 0; i < stringAttributesCount; i++)
+        {
+            RETURN_HR_INVALIDARGUMENT_IF(utils::EnsureLessThanMaxLength(stringAttributes[i].name, XBL_MULTIPLAYER_SEARCH_HANDLE_MAX_FIELD_LENGTH) == false);
+            RETURN_HR_INVALIDARGUMENT_IF(utils::EnsureLessThanMaxLength(stringAttributes[i].value, XBL_MULTIPLAYER_SEARCH_HANDLE_MAX_FIELD_LENGTH) == false);
+        }
+    }
+
     MultiplayerSearchHandleRequest request{ *sessionRef };
     if (tagsCount > 0)
     {

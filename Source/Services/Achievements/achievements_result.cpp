@@ -43,7 +43,7 @@ Result<std::shared_ptr<XblAchievementsResult>> XblAchievementsResult::Deserializ
         }
     }
 
-    if (errCode)
+    if (FAILED(errCode))
     {
         return Result<std::shared_ptr<XblAchievementsResult>>{ errCode };
     }

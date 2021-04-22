@@ -42,7 +42,7 @@ public:
         auto requestStr = "xboxUserId";
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&requestWellFormed, requestStr](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&requestWellFormed, requestStr](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(requestUrl);
@@ -81,7 +81,7 @@ public:
         auto requestStr = "xboxUserId";
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&requestWellFormed, requestStr](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&requestWellFormed, requestStr](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
         {
             UNREFERENCED_PARAMETER(mock);
             UNREFERENCED_PARAMETER(requestUrl);
@@ -123,7 +123,7 @@ public:
         const char* requestStrs[requestStrsCount]{ "asdf", "asdfasdf" };
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&requestWellFormed, requestStrs, requestStrsCount](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&requestWellFormed, requestStrs, requestStrsCount](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(requestUrl);
@@ -175,7 +175,7 @@ public:
         const char* requestStrs[requestStrsCount]{ "asdf", "asdfasdf" };
         bool requestWellFormed{ true };
         mock.SetMockMatchedCallback(
-            [&requestWellFormed, requestStrs, requestStrsCount](HttpMock* mock, std::string requestUrl, std::string requestBody)
+            [&requestWellFormed, requestStrs, requestStrsCount](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
         {
             UNREFERENCED_PARAMETER(mock);
             UNREFERENCED_PARAMETER(requestUrl);

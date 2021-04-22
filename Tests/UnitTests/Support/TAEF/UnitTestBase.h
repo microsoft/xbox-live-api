@@ -207,6 +207,6 @@ inline void VERIFY_IS_EQUAL_JSON_HELPER_FROM_STRINGS(xsapi_internal_string expec
 
 inline bool VerifyTime(time_t time, std::string timeString)
 {
-    auto datetime = xbox::services::datetime::from_string(xbox::services::utils::string_t_from_utf8(timeString.data()), xbox::services::datetime::date_format::ISO_8601);
+    auto datetime = xbox::services::datetime::from_string(timeString.data(), xbox::services::datetime::date_format::ISO_8601);
     return xbox::services::utils::time_t_from_datetime(datetime) == time;
 }

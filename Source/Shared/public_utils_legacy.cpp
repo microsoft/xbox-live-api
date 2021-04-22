@@ -1,13 +1,12 @@
 #include "pch.h"
 
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/writer.h"
-
 #define MS_TICKS        (10000)
 #define SECOND_TICKS    (1000 * MS_TICKS)
 #define MINUTE_TICKS    (60 * SECOND_TICKS)
 #define HOUR_TICKS      (60 * MINUTE_TICKS)
 #define DAY_TICKS       (24 * HOUR_TICKS)
+
+using namespace xbox::services::cppresturi::utility;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -278,22 +277,6 @@ namespace legacy
 #endif 
     }
 
-    web::json::value ParseJson(const char* jsonString)
-    {
-        try
-        {
-            if (jsonString)
-            {
-                return web::json::value::parse(StringTFromUtf8(jsonString));
-            }
-        }
-        catch (web::json::json_exception)
-        {
-        }
-
-        return web::json::value::null();
-    }
-
     std::string SerializeJson(const rapidjson::Value& json)
     {
         rapidjson::StringBuffer buffer;
@@ -301,18 +284,6 @@ namespace legacy
         json.Accept(writer);
 
         return buffer.GetString();
-    }
-
-    rapidjson::Document RapidJsonFromWebJson(_In_ const web::json::value& json)
-    {
-        rapidjson::Document doc;
-        doc.Parse(StringFromStringT(json.serialize()).c_str());
-        return doc;
-    }
-
-    web::json::value WebJsonFromRapidJson(_In_ const rapidjson::Value& json)
-    {
-        return web::json::value::parse(StringTFromUtf8(SerializeJson(json).c_str()));
     }
 
     const rapidjson::Value& ExtractJsonField(
@@ -336,21 +307,6 @@ namespace legacy
         }
 
         return json;
-    }
-
-    std::string ExtractJsonString(
-        _In_ const rapidjson::Value& jsonValue,
-        _In_ const std::string& stringName,
-        _In_ bool required,
-        _In_ const std::string& defaultValue
-    )
-    {
-        const rapidjson::Value& field(ExtractJsonField(jsonValue, stringName, required));
-        if ((!field.IsString() && !required) || field.IsNull())
-        {
-            return defaultValue;
-        }
-        return field.GetString();
     }
 
     uint64_t ExtractJsonUint64(
@@ -383,15 +339,15 @@ namespace legacy
         return Transform<string_t>(stringArray, arrayCount, StringTFromUtf8);
     }
 
-    utility::datetime DatetimeFromTimeT(time_t time)
+    xbox::services::cppresturi::utility::datetime DatetimeFromTimeT(time_t time)
     {
         const uint64_t epoch_offset = 11644473600LL;
         uint64_t result = epoch_offset + time;
         result *= SECOND_TICKS; // convert to 10e-7
-        return utility::datetime() + result;
+        return xbox::services::cppresturi::utility::datetime() + result;
     }
 
-    time_t TimeTFromDatetime(const utility::datetime& datetime)
+    time_t TimeTFromDatetime(const xbox::services::cppresturi::utility::datetime& datetime)
     {
         const uint64_t epoch_offset = 11644473600LL;
         uint64_t seconds = datetime.to_interval() / SECOND_TICKS;

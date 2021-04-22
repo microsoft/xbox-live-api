@@ -261,7 +261,7 @@ typedef struct XblSocialManagerPresenceTitleRecord
     XblPresenceDeviceType deviceType;
 
     /// <summary>
-    /// Whether or not this is the primary primary presence record.
+    /// Whether or not this is the primary presence record.
     /// </summary>
     bool isPrimary;
 } XblSocialManagerPresenceTitleRecord;
@@ -515,7 +515,7 @@ typedef const XblSocialManagerUser* const* XblSocialManagerUserPtrArray;
 /// </remarks>
 STDAPI XblSocialManagerUserGroupGetUsers(
     _In_ XblSocialManagerUserGroupHandle group,
-    _Outptr_ XblSocialManagerUserPtrArray* users,
+    _Outptr_result_maybenull_ XblSocialManagerUserPtrArray* users,
     _Out_ size_t* usersCount
 ) XBL_NOEXCEPT;
 
@@ -537,7 +537,7 @@ STDAPI XblSocialManagerUserGroupGetUsers(
 /// </remarks>
 STDAPI XblSocialManagerUserGroupGetUsersTrackedByGroup(
     _In_ XblSocialManagerUserGroupHandle group,
-    _Outptr_ const uint64_t** trackedUsers,
+    _Outptr_result_maybenull_ const uint64_t** trackedUsers,
     _Out_ size_t* trackedUsersCount
 ) XBL_NOEXCEPT;
 

@@ -626,7 +626,7 @@ MultiplayerSessionWriter::HandleEvents(
             eventQueue.AddEvent(
                 XblMultiplayerEventType::SynchronizedHostWriteCompleted,
                 sessionType,
-                std::make_shared<XblMultiplayerEventArgs>(),
+                MakeShared<XblMultiplayerEventArgs>(),
                 error,
                 request->Context()
             );

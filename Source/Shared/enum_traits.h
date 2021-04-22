@@ -16,10 +16,13 @@ template<size_t n>
 class StaticString
 {
 public:
+    DISABLE_WARNING_PUSH;
+    SUPPRESS_WARNING_UNINITIALIZED_MEMBER;
     constexpr StaticString(const char* name) noexcept
         : StaticString{ name, std::make_index_sequence<n>{} }
     {
     }
+    DISABLE_WARNING_POP;
 
     constexpr operator const char*() const noexcept
     {

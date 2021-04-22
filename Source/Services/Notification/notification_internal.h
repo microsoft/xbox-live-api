@@ -40,7 +40,7 @@ public:
         PendingUnregistration,
         Registered,
         Registering
-    } m_registrationStatus;
+    } m_registrationStatus{ RegistrationStatus::Unregistered };
 
     NotificationService(
         _In_ User&& user,
@@ -78,7 +78,7 @@ protected:
     std::shared_ptr<xbox::services::XboxLiveContextSettings> m_contextSettings;
 
     String m_endpointId;
-    bool m_isInitialized;
+    bool m_isInitialized{ false };
 
     std::recursive_mutex m_mutex;
 };
@@ -108,7 +108,7 @@ public:
     GameInviteNotificationEventArgs& operator=(GameInviteNotificationEventArgs other) noexcept = delete;
 
     static Result<GameInviteNotificationEventArgs> Deserialize(
-        const JsonValue& json
+        _In_ const JsonValue& json
     ) noexcept;
 
 private:

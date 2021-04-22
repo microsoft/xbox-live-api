@@ -49,7 +49,7 @@ void MultiplayerManager::Initialize(
     m_multiplayerClientManager = MakeShared<MultiplayerClientManager>(lobbySessionTemplateName, m_queue);
 
     m_multiplayerClientManager->RegisterLocalUserManagerEvents();
-    m_multiplayerLobbySession = std::make_shared<MultiplayerLobbySession>(m_multiplayerClientManager);
+    m_multiplayerLobbySession = MakeShared<MultiplayerLobbySession>(m_multiplayerClientManager);
 }
 
 bool MultiplayerManager::IsDirty()
@@ -153,7 +153,7 @@ MultiplayerManager::SetMultiplayerLobbySession(
         }
 
         // Don't set the lobby to null so that the title can add local users whenever it chooses.
-        m_multiplayerLobbySession = std::make_shared<MultiplayerLobbySession>(m_multiplayerClientManager);
+        m_multiplayerLobbySession = MakeShared<MultiplayerLobbySession>(m_multiplayerClientManager);
     }
     else
     {

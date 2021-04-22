@@ -1,7 +1,14 @@
 #pragma once
 
+#if HC_PLATFORM_IS_MICROSOFT
+#pragma warning( push )
+#pragma warning( disable : 4365 )
+#pragma warning( disable : 4266 )
+#endif
 #include "cpprest/http_msg.h"
-#include "rapidjson/document.h"
+#if HC_PLATFORM_IS_MICROSOFT
+#pragma warning( pop )
+#endif
 
 struct ServerState 
 {
@@ -82,7 +89,7 @@ public:
     std::string GetSessionStateString() { return m_sessionState; }
     std::string GetStateValueFromKey(std::string key);
     bool IsDoPoll() { return m_doPoll; }
-    void ParseState(const rapidjson::Document& jsonDoc);
+    void ParseState(const std::string& responseString);
 
     HRESULT MakeCall(
         _In_ const std::string& method,

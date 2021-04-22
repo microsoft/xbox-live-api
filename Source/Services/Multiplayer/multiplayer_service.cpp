@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
-#include "xbox_system_factory.h"
 #include "multiplayer_internal.h"
 #include "xbox_live_context_internal.h"
 #include "real_time_activity_manager.h"
@@ -260,7 +259,7 @@ String SessionQuery::PathAndQuery() const noexcept
     {
         Stringstream param;
         param << "xuid=";
-        param << utils::internal_string_from_string_t(xbox::services::uri::encode_uri(utils::uint64_to_string_t(XuidFilters[0])));
+        param << xbox::services::uri::encode_uri(utils::uint64_to_internal_string(XuidFilters[0]));
         params.push_back(param.str());
     }
 
@@ -268,7 +267,7 @@ String SessionQuery::PathAndQuery() const noexcept
     {
         Stringstream param;
         param << "keyword=";
-        param << utils::internal_string_from_string_t(xbox::services::uri::encode_uri(utils::string_t_from_utf8(KeywordFilter)));
+        param << xbox::services::uri::encode_uri(KeywordFilter);
         params.push_back(param.str());
     }
 
@@ -276,7 +275,7 @@ String SessionQuery::PathAndQuery() const noexcept
     {
         Stringstream param;
         param << "visibility=";
-        param << utils::internal_string_from_string_t(xbox::services::uri::encode_uri(utils::string_t_from_internal_string(Serializers::StringFromMultiplayerSessionVisibility(VisibilityFilter))));
+        param << xbox::services::uri::encode_uri(Serializers::StringFromMultiplayerSessionVisibility(VisibilityFilter));
         params.push_back(param.str());
     }
 
@@ -486,7 +485,7 @@ HRESULT MultiplayerService::SetTransferHandle(
         auto result = Serializers::DeserializeMultiplayerInvite(httpResult.Payload()->GetResponseBodyJson());
         auto multiplayerInvite = result.Payload();
 
-        if (result.Hresult())
+        if (Failed(result))
         {
             return async.Complete(result.Hresult());
         }
@@ -648,7 +647,7 @@ HRESULT MultiplayerService::DeleteSearchHandle(
         m_xboxLiveContextSettings,
         "DELETE",
         XblHttpCall::BuildUrl("sessiondirectory", handleStr),
-        xbox_live_api::set_activity
+        xbox_live_api::delete_search_handle
     ));
 
     RETURN_HR_IF_FAILED(httpCall->SetXblServiceContractVersion(MULTIPLAYER_SERVICE_CONTRACT_VERSION));
@@ -1077,7 +1076,8 @@ HRESULT MultiplayerService::WriteSessionUsingSubpath(
             }
             else if (statusCode == 204)
             {
-                return async.Complete({ xbl_error_code::no_error });
+                // Consistent with XDK behavior, return success on 204 when writing session
+                return async.Complete(S_OK);
             }
 
             auto responseJson = httpResult.Payload()->GetResponseBodyJson();
@@ -1110,7 +1110,7 @@ HRESULT MultiplayerService::WriteSessionUsingSubpath(
                 httpResult.Payload()->GetResponseBodyJson()
                 );
 
-            if (session->DeserializationError() && SUCCEEDED(hr))
+            if (FAILED(session->DeserializationError()) && SUCCEEDED(hr))
             {
                 // WriteSession failed due to deserialization error
                 hr = session->DeserializationError();
@@ -1316,7 +1316,7 @@ void MultiplayerService::RemoveMultiplayerSubscriptionLostHandler(
 }
 
 XblFunctionContext MultiplayerService::AddMultiplayerConnectionIdChangedHandler(
-    MultiplayerSubscription::ConnectionIdChangedHandler handler
+    _In_ MultiplayerSubscription::ConnectionIdChangedHandler handler
 ) noexcept
 {
     std::lock_guard<std::mutex> lock{ m_mutexMultiplayerService };

@@ -123,6 +123,49 @@ void CodeSnippets()
             UNREFERENCED_PARAMETER(statisticChangedFunctionContext);
             UNREFERENCED_PARAMETER(hr);
         }
+
+        {
+            // CODE SNIPPET START: DocsAddConnectionIdChangedHandler
+            void* context{ nullptr };
+            XblFunctionContext connectionIdChangedFunctionContext = XblMultiplayerAddConnectionIdChangedHandler(
+                xblContextHandle,
+                [](void* context) {
+                    UNREFERENCED_PARAMETER(context); // CODE SNIP SKIP
+                    XTaskQueueHandle queue{ nullptr }; // CODE SNIP SKIP
+                    auto xblContextHandle = Data()->xboxLiveContext; // CODE SNIP SKIP
+                    XblMultiplayerSessionHandle sessionHandle; // Retrieve the MPSD session to update
+                    sessionHandle = nullptr; // CODE SNIP SKIP
+                    XblMultiplayerSessionCurrentUserSetStatus(sessionHandle, XblMultiplayerSessionMemberStatus::Active);
+
+                    auto asyncBlock = std::make_unique<XAsyncBlock>();
+                    asyncBlock->queue = queue;
+                    asyncBlock->context = nullptr;
+                    asyncBlock->callback = [](XAsyncBlock* asyncBlock)
+                    {
+                        std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock };
+
+                        XblMultiplayerSessionHandle sessionHandle;
+                        HRESULT hr = XblMultiplayerWriteSessionResult(asyncBlock, &sessionHandle);
+                        if (SUCCEEDED(hr))
+                        {
+                            // If the write call succeeds, the connection id has been updated and no further action is needed.
+                        }
+                        else
+                        {
+                            // If the write call fails, it is likely the user has been removed from the session.
+                        }
+                    };
+
+                    auto hr = XblMultiplayerWriteSessionAsync(xblContextHandle, sessionHandle, XblMultiplayerSessionWriteMode::UpdateExisting, asyncBlock.get());
+                    if (SUCCEEDED(hr))
+                    {
+                        asyncBlock.release();
+                    }
+                }, 
+                context);
+            // CODE SNIPPET END
+            UNREFERENCED_PARAMETER(connectionIdChangedFunctionContext);
+        }
     }
 }
 

@@ -196,7 +196,7 @@ xsapi_internal_vector<xsapi_internal_string> utils::get_locale_list()
 
 #endif
 
-void utils::generate_locales()
+String utils::generate_locales()
 {
     xsapi_internal_vector<xsapi_internal_string> localeList = get_locale_list();
     xsapi_internal_vector<xsapi_internal_string> localeFallbackList;
@@ -216,61 +216,27 @@ void utils::generate_locales()
             nPos = locale.rfind("-", nPos - 1);
         }
     }
-    auto xsapiSingleton = xbox::services::get_xsapi_singleton();
-    if (xsapiSingleton != nullptr)
+
+    String locales{};
+    for (auto& locale : localeFallbackList)
     {
-        xsapiSingleton->m_locales.clear();
-        for (auto& locale : localeFallbackList)
-        {
-            xsapiSingleton->m_locales += locale;
-            xsapiSingleton->m_locales += ',';
-        }
-        // erase the last ','
-        xsapiSingleton->m_locales.pop_back();
+        locales += locale;
+        locales += ',';
     }
+    // erase the last ','
+    locales.pop_back();
+
+    return locales;
 }
 
-xsapi_internal_string utils::get_locales()
+String utils::get_locales()
 {
-    auto xsapiSingleton = xbox::services::get_xsapi_singleton();
-    if (!xsapiSingleton)
+    auto state = GlobalState::Get();
+    if (state)
     {
-        LOGS_DEBUG << "utils::get_locales called while global state is not initalized";
-
-        // Fallback to English only
-        return xsapi_internal_string{ "en-US" };
+        return state->Locales().data();
     }
-
-    std::lock_guard<std::mutex> guard(xsapiSingleton->m_locale_lock);
-    if (xsapiSingleton->m_custom_locale_override)
-    {
-        return xsapiSingleton->m_locales;
-    }
-    // For WinRT app, locale can only be get from STA, thus we generate locale in UI dispatcher assignment.
-    // For desktop and xbox, we generate locale on the first call.
-#if HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM == HC_PLATFORM_XDK || HC_PLATFORM == HC_PLATFORM_GDK
-    static bool s_localeGenerated = false;
-    if (!s_localeGenerated)
-    {
-        generate_locales();
-        s_localeGenerated = true;
-    }
-#endif
-
-    return xsapiSingleton->m_locales;
-}
-
-
-void utils::set_locales(
-    _In_ const xsapi_internal_string& locale
-    )
-{
-    auto xsapiSingleton = xbox::services::get_xsapi_singleton();
-    if (xsapiSingleton != nullptr)
-    {
-        xsapiSingleton->m_locales = locale;
-        xsapiSingleton->m_custom_locale_override = true;
-    }
+    return String{ "en-US" };
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

@@ -13,20 +13,20 @@ log_output::log_output()
 
 void log_output::add_log(_In_ const log_entry& entry)
 {
-    std::string msg = format_log(entry);
+    xsapi_internal_string msg = format_log(entry);
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         write(entry.get_log_level(), msg);
     }
 }
 
-void log_output::write(_In_ HCTraceLevel level, _In_ const std::string& msg)
+void log_output::write(_In_ HCTraceLevel level, _In_ const xsapi_internal_string& msg)
 {
     UNREFERENCED_PARAMETER(level);
     UNREFERENCED_PARAMETER(msg);
 }
 
-std::string 
+xsapi_internal_string
 log_output::format_log(_In_ const log_entry& entry)
 {
     return entry.msg_stream().str();

@@ -89,9 +89,9 @@ void XblSetApiType(
     _In_ XblApiType apiType
 ) XBL_NOEXCEPT
 {
-    auto singleton = get_xsapi_singleton();
-    if (singleton)
+    auto state = GlobalState::Get();
+    if (state)
     {
-        singleton->m_apiType = apiType;
+        state->ApiType = apiType;
     }
 }

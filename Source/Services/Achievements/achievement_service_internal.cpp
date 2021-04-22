@@ -117,20 +117,14 @@ HRESULT AchievementsService::UpdateAchievement(
 
 #if HC_PLATFORM == HC_PLATFORM_XDK
     {
-        auto xsapiSingleton = get_xsapi_singleton();
-        if (!xsapiSingleton)
+        auto state = GlobalState::Get();
+        if (!state)
         {
-            return utils::convert_xbox_live_error_code_to_hresult(xbl_error_code::runtime_error);
+            return E_XBL_NOT_INITIALIZED;
         }
-        std::lock_guard<std::mutex> lock(xsapiSingleton->m_achievementServiceInitLock);
-        if (!xsapiSingleton->m_bHasAchievementServiceInitialized)
+        // Register ETX provider if it hasn't been registered yet
+        if (XSAPI_Update_Achievement_Handle == 0)
         {
-            HRESULT hr = CoCreateGuid(&xsapiSingleton->m_eventPlayerSessionId);
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-            
             string_t wScid = utils::string_t_from_internal_string(lowercaseScid);
             std::error_code errC = utils::guid_from_string(wScid, const_cast<GUID*>(&XSAPI_Update_Achievement_Provider.Guid), false);
             if (errC)
@@ -138,23 +132,10 @@ HRESULT AchievementsService::UpdateAchievement(
                 return utils::convert_xbox_live_error_code_to_hresult(errC);
             }
 
-            CHAR strTitleId[16] = "";
-            sprintf_s(strTitleId, "%0.8X", titleId);
-
-            std::stringstream ss;
-            ss << "XSAPI_";
-            ss << strTitleId;
-            xsapiSingleton->m_eventProviderName = ss.str();
-            XSAPI_Update_Achievement_Provider.Name = xsapiSingleton->m_eventProviderName.c_str();
+            XSAPI_Update_Achievement_Provider.Name = state->AchievementsProviderName().data();
 
             ULONG errorCode = EtxRegister(&XSAPI_Update_Achievement_Provider, &XSAPI_Update_Achievement_Handle);
-            hr = HRESULT_FROM_WIN32(errorCode);
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-
-            xsapiSingleton->m_bHasAchievementServiceInitialized = true;
+            RETURN_HR_IF_FAILED(HRESULT_FROM_WIN32(errorCode));
         }
     }
 #endif
@@ -277,7 +258,7 @@ ULONG AchievementsService::EventWriteAchievementUpdate(
     EtxFillCommonFields_v7(&eventData[0], scratch, EventWriteAchievementUpdate_ScratchSize);
 
     EventDataDescCreate(&eventData[1], userId, (ULONG)((wcslen(userId) + 1) * sizeof(WCHAR)));
-    EventDataDescCreate(&eventData[2], &get_xsapi_singleton()->m_eventPlayerSessionId, sizeof(GUID));
+    EventDataDescCreate(&eventData[2], &GlobalState::Get()->AchievementsSessionId(), sizeof(GUID));
     EventDataDescCreate(&eventData[3], achievementId, (ULONG)((wcslen(achievementId) + 1) * sizeof(WCHAR)));
     EventDataDescCreate(&eventData[4], &percentComplete, sizeof(percentComplete));
 
@@ -299,7 +280,7 @@ AchievementsService::WriteOfflineUpdateAchievement(
 {
     ULONG errorCode = EventWriteAchievementUpdate(
         utils::uint64_to_string_t(xboxLiveContextImpl->Xuid()).c_str(),
-        utils::string_t_from_internal_string(achievementId).c_str(),
+        convert::utf8_to_utf16(achievementId).c_str(),
         percentComplete
     );
     HRESULT hr = HRESULT_FROM_WIN32(errorCode);
@@ -559,7 +540,7 @@ String AchievementsService::GetAchievementsSubpath(
     path << xboxUserId;
     path << (")/achievements");
 
-    subPathBuilder.append_path(utils::string_t_from_internal_string(path.str()));
+    subPathBuilder.append_path(path.str());
 
     Stringstream titleQuery;
     auto &last = titleIds.back();
@@ -571,28 +552,28 @@ String AchievementsService::GetAchievementsSubpath(
             titleQuery << (",");
         }
     }
-    subPathBuilder.append_query(_T("titleId"), utils::string_t_from_internal_string(titleQuery.str()));
+    subPathBuilder.append_query("titleId", titleQuery.str());
 
     if (type != XblAchievementType::All)
     {
-        subPathBuilder.append_query(_T("types"), utils::string_t_from_internal_string(EnumName(type)));
+        subPathBuilder.append_query("types", EnumName(type));
     }
 
     if (unlockedOnly)
     {
-        subPathBuilder.append_query(_T("unlockedOnly=true"));
+        subPathBuilder.append_query("unlockedOnly=true");
     }
 
     switch (orderBy)
     {
     case XblAchievementOrderBy::TitleId:
     {
-        subPathBuilder.append_query(_T("orderBy"), _T("title"));
+        subPathBuilder.append_query("orderBy", "title");
         break;
     }
     case XblAchievementOrderBy::UnlockTime:
     {
-        subPathBuilder.append_query(_T("orderBy"), _T("unlocktime"));
+        subPathBuilder.append_query("orderBy", "unlocktime");
         break;
     }
     default: break;
@@ -605,7 +586,7 @@ String AchievementsService::GetAchievementsSubpath(
         continuationToken
     );
 
-    return utils::internal_string_from_string_t(subPathBuilder.to_string());
+    return subPathBuilder.to_string();
 }
 
 void AchievementsService::CleanupAchievement(XblAchievement& a)
@@ -874,7 +855,7 @@ Result<XblAchievementReward> AchievementsService::DeserializeReward(
         auto mediaAssetResult = DeserializeMediaAsset(json["mediaAsset"]);
         reward.mediaAsset = Make<XblAchievementMediaAsset>(mediaAssetResult.ExtractPayload());
 
-        if (Failed(mediaAssetResult) || errc)
+        if (Failed(mediaAssetResult) || FAILED(errc))
         {
             return Result<XblAchievementReward>{ reward, E_FAIL };
         }
@@ -971,7 +952,7 @@ Result<XblAchievement> AchievementsService::DeserializeAchievement(
     a.rewards = MakeArray(rewardsVector);
     a.rewardsCount = rewardsVector.size();
 
-    std::chrono::seconds seconds;
+    std::chrono::seconds seconds{};
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringTimespanInSeconds(json, "estimatedTime", seconds, true));
     a.estimatedUnlockTime = seconds.count(); 
     xsapi_internal_string deeplink;
@@ -992,7 +973,7 @@ Result<XblAchievement> AchievementsService::DeserializeAchievement(
     }
     a.progression = progressionResult.ExtractPayload();
 
-    if (Failed(progressionResult) || Failed(timeWindowResult) || errCode)
+    if (Failed(progressionResult) || Failed(timeWindowResult) || FAILED(errCode))
     {
         CleanupAchievement(a);
         return Result<XblAchievement>{ E_FAIL };

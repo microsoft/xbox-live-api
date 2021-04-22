@@ -11,7 +11,7 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
-typedef Callback<class HttpMock* /*matchedMock*/, std::string /*actualRequestUrl*/, std::string /*requestBody*/> MockMatchedCallback;
+typedef Callback<class HttpMock* /*matchedMock*/, xsapi_internal_string /*actualRequestUrl*/, xsapi_internal_string /*requestBody*/> MockMatchedCallback;
 
 // RAII wrapper around HCMockCallHandle
 class HttpMock
@@ -41,9 +41,9 @@ public:
     void SetMockMatchedCallback(MockMatchedCallback callback) noexcept;
 
     // Helper methods for parsing URI
-    static std::string GetUriPath(const std::string& uri) noexcept;
-    static std::string GetUriQuery(const std::string& uri) noexcept;
-    static std::map<std::string, std::string> GetQueryParams(const std::string& uri) noexcept;
+    static xsapi_internal_string GetUriPath(const xsapi_internal_string& uri) noexcept;
+    static xsapi_internal_string GetUriQuery(const xsapi_internal_string& uri) noexcept;
+    static std::map<xsapi_internal_string, xsapi_internal_string> GetQueryParams(const xsapi_internal_string& uriString) noexcept;
 
 private:
     HCMockCallHandle m_handle{ nullptr };

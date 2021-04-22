@@ -95,7 +95,7 @@ void MultiplayerSubscription::OnEvent(
         {
             String resourceName;
             JsonUtils::ExtractJsonString(tapValue, "resource", resourceName, true);
-            Vector<String> nameComponents = utils::string_split(resourceName, '~');
+            Vector<String> nameComponents = utils::string_split_internal(resourceName, '~');
 
             if (nameComponents.size() != 3)
             {

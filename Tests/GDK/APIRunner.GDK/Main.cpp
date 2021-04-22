@@ -14,6 +14,17 @@
 #include <XGameRuntimeInit.h>
 #include <XGameErr.h>
 
+#if HC_PLATFORM_IS_MICROSOFT
+#pragma warning( push )
+#pragma warning( disable : 4365 )
+#pragma warning( disable : 4061 )
+#pragma warning( disable : 4996 )
+#endif
+#include <rapidjson/document.h>
+#if HC_PLATFORM_IS_MICROSOFT
+#pragma warning( pop )
+#endif
+
 #ifdef ATG_ENABLE_TELEMETRY
 #include "ATGTelemetry.h"
 #endif

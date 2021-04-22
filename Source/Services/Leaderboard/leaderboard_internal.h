@@ -37,7 +37,7 @@ struct LeaderboardGlobalQuery
     xsapi_internal_string xuid;
     xsapi_internal_string socialGroup;
     xsapi_internal_vector<xsapi_internal_string> columns;
-    bool isTitleManaged;
+    bool isTitleManaged{ false };
 };
 
 struct LeaderboardSocialQuery
@@ -47,7 +47,7 @@ struct LeaderboardSocialQuery
     xsapi_internal_string statName;
     xsapi_internal_string socialGroup;
     xsapi_internal_string sortOrder;
-    bool isTitleManaged;
+    bool isTitleManaged{ false };
 };
 
 class LeaderboardColumn
@@ -117,7 +117,7 @@ private:
     xsapi_internal_string m_modernGamertagSuffix;
     xsapi_internal_string m_uniqueModernGamertag;
     uint64_t m_xuid{ 0 };
-    double m_percentile{ 0 };
+    double m_percentile{ 0.0 };
     uint32_t m_rank{ 0 };
     uint32_t m_globalRank{ 0 };
     xsapi_internal_vector<xsapi_internal_string> m_columnValues;

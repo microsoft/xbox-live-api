@@ -203,19 +203,10 @@ else()
 endif()
 
 set(System_Source_Files
-    ../../Source/System/ppltasks_extra.h
     ../../Source/System/client_operation.h
     ../../Source/System/local_storage.h
     ../../Source/System/local_storage.cpp
     )
-
-if ( UNITTEST OR UWP OR PCWIN32 OR GDK )
-    list(APPEND
-        System_Source_Files
-        ../../Source/System/auth_config.cpp
-        ../../Source/System/auth_config.h
-        )
-endif()
 
 if( UNITTEST OR PCWIN32 OR ANDROID )
     list(APPEND
@@ -252,36 +243,25 @@ set(Shared_Logger_Source_Files
 set(Shared_Source_Files
     ../../Source/Shared/xsapi_utils.cpp
     ../../Source/Shared/xsapi_json_utils.cpp
+    ../../Source/Shared/fault_injection.h
+    ../../Source/Shared/fault_injection.cpp
     ../../Source/Shared/service_call_routed_handler.h
     ../../Source/Shared/service_call_routed_handler.cpp
     ../../Source/Shared/errors_legacy.h
     ../../Source/Shared/errors.cpp
     ../../Source/Shared/http_call_request_message.cpp
     ../../Source/Shared/build_version.h
-    ../../Source/Shared/service_call_logger.cpp
-    ../../Source/Shared/service_call_logger_data.cpp
-    ../../Source/Shared/service_call_logging_config.h
-    ../../Source/Shared/service_call_logging_config.cpp
     ../../Source/Shared/utils_locales.cpp
     ../../Source/Shared/web_socket.cpp
     ../../Source/Shared/xbox_live_app_config_internal.h
     ../../Source/Shared/xbox_live_app_config.cpp
-    ../../Source/Shared/xbox_live_services_settings.h
-    ../../Source/Shared/xbox_live_services_settings.cpp
-    ../../Source/Shared/xbox_system_factory.cpp
     ../../Source/Shared/Shared_macros.h
     ../../Source/Shared/xsapi_utils.h
     ../../Source/Shared/xsapi_json_utils.h
     ../../Source/Shared/perf_tester.h
-    ../../Source/Shared/service_call_logger.h
-    ../../Source/Shared/service_call_logger_data.h
-    ../../Source/Shared/service_call_logger_protocol.h
     ../../Source/Shared/web_socket.h  
-    ../../Source/Shared/xbox_system_factory.h
     ../../Source/Shared/http_headers.h
     ../../Source/Shared/http_call_request_message_internal.h
-    ../../Source/Shared/telemetry.h
-    ../../Source/Shared/telemetry.cpp
     ../../Source/Shared/internal_mem.h
     ../../Source/Shared/internal_mem.cpp
     ../../Source/Shared/async_helpers.h
@@ -301,8 +281,6 @@ set(Shared_Source_Files
     ../../Source/Shared/http_utils.h
     ../../Source/Shared/http_utils.cpp
     ../../Source/Shared/internal_types.h
-    ../../Source/Shared/http_call_legacy.h
-    ../../Source/Shared/http_call_legacy.cpp
     ../../Source/Shared/public_utils_legacy.h
     ../../Source/Shared/public_utils_legacy.cpp
     )
@@ -319,13 +297,6 @@ if( UWP )
         Shared_Source_Files
         ../../Source/Shared/local_config.h
         ../../Source/Shared/local_config.cpp
-        )
-endif()
-
-if ( UWP OR XDK OR UNITTEST )
-    list(APPEND
-        Shared_Source_Files
-        ../../Source/Shared/service_call_logger_protocol.cpp
         )
 endif()
 
@@ -349,7 +320,8 @@ if ( ANDROID )
         ../../Source/Shared/a/utils_a.cpp
         ../../Source/Shared/a/xbox_live_app_config_jni.cpp
         ../../Source/Shared/a/xbox_live_app_config_static_glue.h
-        ../../Source/Shared/a/telemetry_a.cpp
+        ../../Source/Shared/http_call_legacy.h
+        ../../Source/Shared/http_call_legacy.cpp
         )
 endif()
 
@@ -782,7 +754,6 @@ set(UnitTests_Source_Files_Tests
     ../../Tests/UnitTests/Tests/Shared/HttpCallTests.cpp
     ../../Tests/UnitTests/Tests/Shared/HttpCallSettingsTests.cpp
     ../../Tests/UnitTests/Tests/Shared/LogTests.cpp
-    ../../Tests/UnitTests/Tests/Shared/ServiceCallLoggerTests.cpp
     ../../Tests/UnitTests/Tests/Shared/XboxLiveContextTests.cpp
     ../../Tests/UnitTests/Tests/Shared/XboxLiveCallbackTests.cpp
     ../../Tests/UnitTests/Tests/Shared/GlobalTests.cpp

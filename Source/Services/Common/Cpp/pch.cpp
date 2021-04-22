@@ -3,6 +3,8 @@
 
 #include "pch.h"
 
-#ifndef _LINK_WITH_CPPRESTSDK
+#if !_LINK_WITH_CPPRESTSDK && HC_PLATFORM != HC_PLATFORM_GDK
 #include "cpprestsdk_impl.h"
 #endif
+#include <rapidjson/allocators.hpp>
+#include "uri_impl.h"

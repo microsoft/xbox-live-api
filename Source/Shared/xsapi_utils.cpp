@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <chrono>
 #include <time.h>
+#include <string>
 #if !HC_PLATFORM_IS_MICROSOFT
 #include "xbl_guid.h"
 #elif defined(_WIN32)
@@ -19,147 +20,27 @@
 #include "presence_internal.h"
 #include "httpClient/httpClient.h"
 #include "Logger/log_hc_output.h"
-#include "xbox_system_factory.h"
 #include "global_state.h"
 
-HC_DEFINE_TRACE_AREA(XSAPI, HCTraceLevel::Verbose);
+#ifndef _XTIME_TICKS_PER_TIME_T
+#define _XTIME_TICKS_PER_TIME_T 10000000LL
+#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 #define MAKE_HTTP_HRESULT(code) MAKE_HRESULT(1, 0x019, code)
 
-static const std::string _sdaPrefix = "AAAAAAAA";
+static char const * _sdaPrefix = "AAAAAAAA";
 
 static const uint64_t _msTicks = static_cast<uint64_t>(10000);
 static const uint64_t _secondTicks = 1000*_msTicks;
-
-static std::recursive_mutex s_xsapiSingletonLock;
-static std::shared_ptr<xsapi_singleton> s_xsapiSingleton;
-
-void CALLBACK XSAPI_HCTraceCallback(
-    _In_z_ const char* areaName,
-    _In_ HCTraceLevel level,
-    _In_ uint64_t threadId,
-    _In_ uint64_t timestamp,
-    _In_z_ const char* message
-    )
-{
-    UNREFERENCED_PARAMETER(timestamp);
-    UNREFERENCED_PARAMETER(threadId);
-    UNREFERENCED_PARAMETER(areaName);
-    switch (level)
-    {
-        case HCTraceLevel::Error: LOG_ERROR(message); break;
-        case HCTraceLevel::Warning: LOG_WARN(message); break;
-        case HCTraceLevel::Important: LOG_WARN(message); break;
-        case HCTraceLevel::Information: LOG_INFO(message); break;
-        case HCTraceLevel::Verbose: LOG_DEBUG(message); break;
-        default: break;
-    }
-}
-
-HRESULT xsapi_singleton::Initialize(_In_ const XblInitArgs* args)
-{
-    RETURN_HR_INVALIDARGUMENT_IF_NULL(args);
-
-#if HC_PLATFORM == HC_PLATFORM_UWP
-#ifdef _WINRT_DLL
-    m_userEventBind = std::make_shared<Microsoft::Xbox::Services::System::UserEventBind>();
-#endif
-#endif
-
-#if _DEBUG && XSAPI_UNIT_TESTS && XSAPI_PROFILE
-    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif
-
-    // Configure logging
-#if defined(_WIN32_WINNT) && _WIN32_WINNT >= _WIN32_WINNT_WIN10
-    // Create telemetry provider
-    TraceLoggingRegister(g_hTraceLoggingProvider);
-#endif
-    m_logger = MakeShared<logger>();
-    m_logger->add_log_output(std::make_shared<log_hc_output>());
-
-    m_deviceId = utils::create_guid(true);
-
-    m_factoryInstance = MakeShared<system::xbox_system_factory>();
-
-#if HC_PLATFORM == HC_PLATFORM_ANDROID
-    auto javaInteropInitResult = xbox::services::java_interop::get_java_interop_singleton()->initialize(
-        args->javaVM,
-        args->applicationContext
-    );
-    if (javaInteropInitResult.err())
-    {
-        return utils::convert_xbox_live_error_code_to_hresult(javaInteropInitResult.err());
-    }
-#endif
-
-    m_appConfigSingleton = MakeShared<AppConfig>();
-
-#if HC_PLATFORM != HC_PLATFORM_XDK && HC_PLATFORM != HC_PLATFORM_UWP
-    RETURN_HR_INVALIDARGUMENT_IF_NULL(args->scid);
-    RETURN_HR_IF_FAILED(m_appConfigSingleton->Initialize(args->scid));
-#else
-    RETURN_HR_IF_FAILED(m_appConfigSingleton->Initialize());
-#endif
-
-#if HC_PLATFORM_IS_EXTERNAL
-    m_appConfigSingleton->SetAppId(args->appId);
-    m_appConfigSingleton->SetAppVer(args->appVer);
-    m_appConfigSingleton->SetOsName(args->osName);
-    m_appConfigSingleton->SetOsVersion(args->osVersion);
-    m_appConfigSingleton->SetOsLocale(args->osLocale);
-    m_appConfigSingleton->SetDeviceClass(args->deviceClass);
-    m_appConfigSingleton->SetDeviceId(args->deviceId);
-#endif
-
-#if HC_PLATFORM == HC_PLATFORM_IOS
-    if(args->apnsEnvironment)
-    {
-        m_appConfigSingleton->SetAPNSEnvironment(args->apnsEnvironment);
-    }
-#endif
-
-    return S_OK;
-}
-
-xsapi_singleton::~xsapi_singleton()
-{
-#if defined(_WIN32_WINNT) && _WIN32_WINNT >= _WIN32_WINNT_WIN10
-    // Unregister telemetry provider
-    TraceLoggingUnregister(g_hTraceLoggingProvider);
-#endif
-
-    HCTraceSetClientCallback(nullptr);
-}
-
-XTaskQueueHandle get_xsapi_singleton_async_queue()
-{
-    auto state{ GlobalState::Get() };
-    if (state)
-    {
-        return state->Queue().GetHandle();
-    }
-    return nullptr;
-}
-
-std::shared_ptr<xsapi_singleton> get_xsapi_singleton()
-{
-    auto state{ GlobalState::Get() };
-    if (state)
-    {
-        return state->singleton;
-    }
-    return nullptr;
-}
 
 xsapi_internal_string utils::encode_uri(
     _In_ const xsapi_internal_string& data, 
     _In_ xbox::services::uri::components::component component
     )
 {
-    return utils::internal_string_from_string_t(xbox::services::uri::encode_uri(utils::string_t_from_internal_string(data), component));
+    return xbox::services::uri::encode_uri(data, component);
 }
 
 xsapi_internal_string utils::headers_to_string(
@@ -174,34 +55,6 @@ xsapi_internal_string utils::headers_to_string(
     }
 
     return ss.str();
-}
-
-web::http::http_headers utils::string_to_headers(
-    _In_ const string_t& headers
-    )
-{
-    web::http::http_headers headerMap;
-    std::vector<string_t> lines = utils::string_split(headers, '\n');
-
-    for (const auto& line : lines)
-    {
-        static regex_t headerLineRegex(_T("\\s*(\\S+):\\s*(.*\\S)\\s*"));
-        smatch_t match;
-        bool succeeded = std::regex_match(line, match, headerLineRegex);
-        if (succeeded)
-        {
-            // match[0] is the full matched string
-            // match[1] is the header name
-            // match[2] is the header value
-            headerMap[match[1]] = match[2];
-        }
-        else if (!line.empty())
-        {
-            LOGS_ERROR << "Parsing string to headers failed" << line;
-        }
-    }
-
-    return headerMap;
 }
 
 xsapi_internal_string 
@@ -240,7 +93,7 @@ void utils::append_paging_info(
     // add maxItem parameter
     if (maxItems > 0)
     {
-        uriBuilder.append_query(_T("maxItems"), maxItems);
+        uriBuilder.append_query("maxItems", maxItems);
     }
 
     if (continuationToken.empty())
@@ -248,12 +101,12 @@ void utils::append_paging_info(
         // use skip items value if continuation token is empty
         if (skipItems > 0)
         {
-            uriBuilder.append_query(_T("skipItems"), skipItems);
+            uriBuilder.append_query("skipItems", skipItems);
         }
     }
     else
     {
-        uriBuilder.append_query(_T("continuationToken"), utils::string_t_from_internal_string(continuationToken));
+        uriBuilder.append_query("continuationToken", continuationToken);
     }
 }
 
@@ -976,7 +829,7 @@ utils::format_secure_device_address(String deviceAddress)
     // MPSD will base64 decode a non-valid SDA and the hashed value will be used
     // as the device token. The SDA can then be parsed by the title while 
     // deserializing the MPSD session to retrieve the connectionAddress.
-    formattedDeviceAddress = _sdaPrefix.c_str() + deviceAddress;
+    formattedDeviceAddress = _sdaPrefix + deviceAddress;
 #endif
 
     Vector<unsigned char> input(formattedDeviceAddress.c_str(), formattedDeviceAddress.c_str() + formattedDeviceAddress.size());
@@ -998,14 +851,14 @@ utils::parse_secure_device_address(String secureDeviceAddress)
     // a session host and the connection address which is used by the title
     // to connect to the title.
 
-    std::vector<unsigned char> base64ConnectionAddress(xbox::services::convert::from_base64(utils::string_t_from_utf8(secureDeviceAddress.c_str())));
+    std::vector<unsigned char> base64ConnectionAddress(xbox::services::convert::from_base64(secureDeviceAddress.c_str()));
     auto formattedDeviceAddress = String(base64ConnectionAddress.begin(), base64ConnectionAddress.end());
 
     String deviceAddress = formattedDeviceAddress;
 #if !(HC_PLATFORM == HC_PLATFORM_XDK || HC_PLATFORM == HC_PLATFORM_UWP)
-    if (deviceAddress.find(_sdaPrefix.c_str()) == 0)
+    if (deviceAddress.find(_sdaPrefix) == 0)
     {
-        deviceAddress = deviceAddress.substr(_sdaPrefix.length());
+        deviceAddress = deviceAddress.substr(strlen(_sdaPrefix));
     }
 #endif
 
@@ -1045,7 +898,7 @@ utils::string_split(
     return vSubStrings;
 }
 
-xsapi_internal_vector<xsapi_internal_string> utils::string_split(
+xsapi_internal_vector<xsapi_internal_string> utils::string_split_internal(
     _In_ const xsapi_internal_string& string,
     _In_ xsapi_internal_string::value_type seperator
     )
@@ -1094,7 +947,7 @@ string_t utils::vector_join(
     return ss.str();
 }
 
-xsapi_internal_string utils::vector_join(
+xsapi_internal_string utils::vector_join_internal(
     _In_ const std::vector<xsapi_internal_string>& vector,
     _In_ xsapi_internal_string::value_type seperator
 )
@@ -1109,21 +962,6 @@ xsapi_internal_string utils::vector_join(
     }
 
     return ss.str();
-}
-
-xsapi_internal_string utils::create_xboxlive_endpoint(
-    _In_ const xsapi_internal_string& subpath,
-    _In_ const std::shared_ptr<AppConfig>& appConfig,
-    _In_ const xsapi_internal_string& protocol
-    )
-{
-    UNREFERENCED_PARAMETER(appConfig);
-    xsapi_internal_stringstream source;
-    source << protocol; // eg. https or wss
-    source << "://";
-    source << subpath; // eg. "achievements"
-    source << ".xboxlive.com";
-    return source.str();
 }
 
 string_t
@@ -1154,11 +992,11 @@ utils::replace_sub_string(
     return result;
 }
 
-string_t utils::read_file_to_string(
-    _In_ const string_t& filePath
+xsapi_internal_string_t utils::read_file_to_string(
+    _In_ const xsapi_internal_string_t& filePath
     )
 {
-    std::ifstream in(filePath, std::ios::in | std::ios::binary);
+    std::ifstream in(filePath.c_str(), std::ios::in | std::ios::binary);
     if (in)
     {
         std::vector<char> fileData;
@@ -1183,20 +1021,20 @@ string_t utils::read_file_to_string(
                  static_cast<unsigned char>(fileData[1]) == 0xBB && 
                  static_cast<unsigned char>(fileData[2]) == 0xBF); // check for UTF-8 BOM
 
-            string_t fileDataString;
+            xsapi_internal_string_t fileDataString;
 #ifdef WIN32            
             // Convert file data to UTF16 string
             if (isUtf16LE)
             {
                 uint32_t byteOrderMarkSizeInBytes = 2;
                 uint32_t strLength = (fileSizeInBytes - byteOrderMarkSizeInBytes) / sizeof(WCHAR);
-                fileDataString = std::wstring(reinterpret_cast<WCHAR*>(fileData.data() + byteOrderMarkSizeInBytes), strLength);
+                fileDataString = xsapi_internal_string_t(reinterpret_cast<WCHAR*>(fileData.data() + byteOrderMarkSizeInBytes), strLength);
             }
             else
             {
                 int byteOrderMarkSizeInBytes = (isUtf8) ? 3 : 0;
                 uint32_t strLength = fileSizeInBytes - byteOrderMarkSizeInBytes;
-                std::string utf8FileData = std::string(fileData.data() + byteOrderMarkSizeInBytes, strLength);
+                xsapi_internal_string utf8FileData = xsapi_internal_string(fileData.data() + byteOrderMarkSizeInBytes, strLength);
                 fileDataString = xbox::services::convert::utf8_to_utf16(utf8FileData);
             }
 #else
@@ -1205,21 +1043,21 @@ string_t utils::read_file_to_string(
             {
                 int byteOrderMarkSizeInBytes = 2;
                 uint32_t strLength = (fileSizeInBytes - byteOrderMarkSizeInBytes) / sizeof(wchar_t);
-                string_t utf16FileData = string_t(fileData.data(), strLength);
-                fileDataString = utf16FileData = xbox::services::convert::to_string_t(utf16FileData);
+                xsapi_internal_string_t utf16FileData = xsapi_internal_string_t(fileData.data(), strLength);
+                fileDataString = utf16FileData;
             }
             else
             {
                 int byteOrderMarkSizeInBytes = (isUtf8) ? 3 : 0;
                 uint32_t strLength = fileSizeInBytes - byteOrderMarkSizeInBytes;
-                fileDataString = std::string(fileData.data(), strLength);
+                fileDataString = xsapi_internal_string(fileData.data(), strLength);
             }
 #endif
             return fileDataString;
         }
     }
 
-    return string_t();
+    return xsapi_internal_string_t();
 }
 
 int utils::interlocked_increment(volatile long& incrementNum)
@@ -1293,6 +1131,25 @@ xsapi_internal_vector<uint32_t> utils::uint32_array_to_internal_vector(
         vector.push_back(intArray[i]);
     }
     return vector;
+}
+
+bool utils::EnsureLessThanMaxLength(const char* str, size_t maxLength)
+{
+    size_t i = 0;
+    while (true)
+    {
+        if (i >= maxLength)
+        {
+            return false;
+        }
+        if (str[i] == '\0')
+        {
+            return true;
+        }
+        i++;
+    }
+
+    return false;
 }
 
 String utils::ToLower(String str) noexcept

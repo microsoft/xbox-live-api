@@ -7,7 +7,6 @@
 #include <Objbase.h>
 #if USING_TAEF
 #include "WexTestClass.h"
-#include "telemetry.h"
 #include <TraceLoggingProvider.h>
 #else 
 #include <CppUnitTestLogger.h>
@@ -74,8 +73,6 @@ std::wstring FormatString(LPCWSTR strMsg, ...)
 /// <param name="strMsg">The message to log</param>
 void LogFormatString(LPCWSTR strMsg, ...)
 {
-    TraceLoggingWrite(g_hUnitTestTraceLoggingProvider, "UnitTest", TraceLoggingWideString(strMsg, "test_log"));
-
 #ifdef USING_TAEF
 #if ENABLE_SCREEN_LOGGING
     WEX::Logging::Log::Comment(strMsg);
