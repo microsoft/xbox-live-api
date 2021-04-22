@@ -12,7 +12,7 @@ User::User(XblUserHandle userHandle) noexcept
 
 
 User::User(User&& other) noexcept
-    : m_handle{ other.m_handle }, m_localId { std::move(other.m_localId) }, m_xuid {other.m_xuid }
+    : m_handle{ other.m_handle }, m_xuid{ other.m_xuid }, m_localId { std::move(other.m_localId) }
 {
     Map<XalGamertagComponent, String>::iterator it = other.m_gamertags.begin();
 
@@ -349,7 +349,7 @@ void User::SetTokenExpired(uint64_t xuid) noexcept
 
 }
 
-Result<XblFunctionContext> User::RegisterChangeEventHandler(
+Result<uint64_t> User::RegisterChangeEventHandler(
     UserChangeEventHandler handler
 ) noexcept
 {
@@ -383,14 +383,14 @@ Result<XblFunctionContext> User::RegisterChangeEventHandler(
             state->SetUserChangeHandler(token.token, context);
         }
     }
-    return Result<XblFunctionContext>{ static_cast<XblFunctionContext>(token.token), hr };
+    return Result<uint64_t>{token.token, hr };
 }
 
 void User::UnregisterChangeEventHandle(
-    XblFunctionContext token
+    uint64_t token
 ) noexcept
 {
-    XalUserUnregisterChangeEventHandler(XalRegistrationToken{ static_cast<uint64_t>(token) });
+    XalUserUnregisterChangeEventHandler(XalRegistrationToken{ token });
     auto state{ GlobalState::Get() };
     if (state)
     {

@@ -10,9 +10,9 @@ using namespace xbox::services;
 
 XblAchievementsManagerResult::XblAchievementsManagerResult(_In_ const XblAchievement & achievement)
     : m_achievements({ achievement }),
-    m_explicitCleanup(false),
     m_achievementsData(nullptr),
-    m_achievementsCount()
+    m_achievementsCount(),
+    m_explicitCleanup(false)
 {
 }
 
@@ -63,9 +63,9 @@ AchievementsManagerUser::AchievementsManagerUser(
     _In_ User&& localUser,
     _In_ const TaskQueue& queue
 ) noexcept :
-    m_queue{ queue.DeriveWorkerQueue() },
     m_xuid{ localUser.Xuid() },
-    m_rtaManager{ GlobalState::Get()->RTAManager() }
+    m_rtaManager{ GlobalState::Get()->RTAManager() },
+    m_queue{ queue.DeriveWorkerQueue() }
 {
     // Maintain legacy RTA activation count.
     m_rtaManager->Activate(localUser);

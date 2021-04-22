@@ -14,9 +14,17 @@ function OnXblTitleManagedStatsDeleteStatsAsync()
     test.stopTest()
 end
 
+function OnXblTitleManagedStatsUnableToGetTokenAndSignature()
+    print("OnXblTitleManagedStatsUnableToGetTokenAndSignature")
+    test.stopTest()
+end
+
 function TitleManagedStats_Handler()
-    ClearSVD()
-    XblTitleManagedStatsWriteAsyncWithSVD()
+    if ClearSVD() == 1 then
+        OnXblTitleManagedStatsUnableToGetTokenAndSignature()
+    else
+        XblTitleManagedStatsWriteAsyncWithSVD()
+    end
 end
 
 test.TitleManagedStats = function()

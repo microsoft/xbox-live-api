@@ -68,36 +68,39 @@ LeaderboardResult::ParseAdditionalColumns(const xsapi_internal_vector<xsapi_inte
         {
             const xsapi_internal_string& columnName = additionalColumnNames[i];
             auto stat = stats.find(columnName);
-            const JsonValue& val = row.m_metadata[columnName.c_str()];
-            if (stat == stats.end() || stat->second == legacy::leaderboard_stat_type::stat_other)
+            if (row.m_metadata.IsObject() && row.m_metadata.HasMember(columnName.data()))
             {
-                if(val.IsBool())
+                const JsonValue& val = row.m_metadata[columnName.c_str()];
+                if (stat == stats.end() || stat->second == legacy::leaderboard_stat_type::stat_other)
                 {
-                    stats[columnName] = legacy::leaderboard_stat_type::stat_boolean;
+                    if (val.IsBool())
+                    {
+                        stats[columnName] = legacy::leaderboard_stat_type::stat_boolean;
+                    }
+                    else if (val.IsNumber())
+                    {
+                        stats[columnName] = legacy::leaderboard_stat_type::stat_double;
+                    }
+                    else if (val.IsString())
+                    {
+                        stats[columnName] = legacy::leaderboard_stat_type::stat_string;
+                    }
+                    else
+                    {
+                        stats[columnName] = legacy::leaderboard_stat_type::stat_other;
+                    }
+
                 }
-                else if (val.IsNumber())
+
+                auto columnValues = JsonUtils::SerializeJson(val);
+                if (i >= row.m_columnValues.size() - 1)
                 {
-                    stats[columnName] = legacy::leaderboard_stat_type::stat_double;
-                }
-                else if (val.IsString())
-                {
-                    stats[columnName] = legacy::leaderboard_stat_type::stat_string;
+                    row.m_columnValues.push_back(columnValues);
                 }
                 else
                 {
-                    stats[columnName] = legacy::leaderboard_stat_type::stat_other;
+                    row.m_columnValues[i] = columnValues;
                 }
-
-            }
-
-            auto columnValues = JsonUtils::SerializeJson(val);
-            if (i >= row.m_columnValues.size() - 1)
-            {
-                row.m_columnValues.push_back(columnValues);
-            }
-            else
-            {
-                row.m_columnValues[i] = columnValues;
             }
         }
     }

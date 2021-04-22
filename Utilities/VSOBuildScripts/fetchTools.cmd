@@ -7,6 +7,7 @@ set buildToolsBranchArg=%4
 cd /D %BUILD_STAGINGDIRECTORY%
 call git clone https://anything:%patArg%@microsoft.visualstudio.com/DefaultCollection/Xbox.Services/_git/sdk.buildtools
 cd sdk.buildtools
+git reset --hard HEAD
 if "%buildToolsBranchArg%" NEQ "" call git checkout %buildToolsBranchArg%
 cd /D %BUILD_STAGINGDIRECTORY%
 dir "%BUILD_STAGINGDIRECTORY%\sdk.buildtools\buildMachine
@@ -17,6 +18,7 @@ goto skipExt
 cd /D %BUILD_STAGINGDIRECTORY%
 call git clone https://anything:%patArg%@microsoft.visualstudio.com/Xbox.Services/_git/sdk.external
 cd sdk.external
+git reset --hard HEAD
 if "%externalBranchArg%" NEQ "" call git checkout %externalBranchArg%
 cd /D %BUILD_STAGINGDIRECTORY%
 dir "%BUILD_STAGINGDIRECTORY%\sdk.external\ExtractedGDK\"

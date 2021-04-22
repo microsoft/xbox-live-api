@@ -22,8 +22,12 @@ function achievement_unlock_notification_test()
 		return;
 	end
 
-	-- register handler and unlock achievement, returns handler id
-	local id = RunAchievementUnlock(achievementId);
+    -- register achievement unlock handler invite handler
+    local id = XblAchievementUnlockAddNotificationHandler()
+    XblGameInviteAddNotificationHandler()
+
+	-- unlock achievement
+	RunAchievementUnlock(achievementId);
 	
 	local status;
 
@@ -38,8 +42,9 @@ function achievement_unlock_notification_test()
 	-- anything other than 0 is an error
 	test.equal(status,0);
 	
-	-- unregister handler
-	Cleanup(id);
+	-- unregister handlers
+	XblAchievementUnlockRemoveNotificationHandler(id);
+    XblGameInviteRemoveNotificationHandler()
 
 	test.stopTest();
 end

@@ -169,7 +169,7 @@ private:
     std::shared_ptr<xbox::services::events::IEventsService> m_eventsService;
 #endif
 
-    XblFunctionContext m_userChangeEventToken{ 0 };
+    uint64_t m_userChangeEventToken{ 0 };
     uint64_t m_xuid{ 0 };
 
     xbox::services::User m_user;

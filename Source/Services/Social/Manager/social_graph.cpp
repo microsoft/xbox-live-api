@@ -50,6 +50,9 @@ struct ServiceCallManager : public std::enable_shared_from_this<ServiceCallManag
     // automatically. Result delivered via 'handler' arg
     HRESULT PeopleHubGetFollowedUsers(PeopleHubResultHandler handler) const noexcept;
 
+    // Needed to check compatibility between determined detail level and XblPresenceFilter for a social group
+    XblSocialManagerExtraDetailLevel GetDetailLevel() const noexcept;
+
 private:
     HRESULT PollPresenceServiceCall(std::unique_lock<std::mutex> lock) noexcept;
     HRESULT PollPeopleHubServiceCall(std::unique_lock<std::mutex> lock) noexcept;
@@ -367,6 +370,15 @@ void SocialGraph::RegisterGroup(std::shared_ptr<XblSocialManagerUserGroup> group
     if (iter == m_groups.end() || iter->second == GroupInitializationStage::Complete)
     {
         m_groups[group] = GroupInitializationStage::Pending;
+
+        // Check if the filter is one that relies on title history but TitleHistoryLevel is not set
+        if ((group->presenceFilter == XblPresenceFilter::TitleOffline || 
+             group->presenceFilter == XblPresenceFilter::TitleOnlineOutsideTitle || 
+             group->presenceFilter == XblPresenceFilter::AllTitle) && 
+            (m_serviceCallManager->GetDetailLevel() & XblSocialManagerExtraDetailLevel::TitleHistoryLevel) != XblSocialManagerExtraDetailLevel::TitleHistoryLevel)
+        {
+            LOGS_DEBUG << "TitleOffline, TitleOnlineOutsideTitle, and AllTitle filters require XblSocialManagerExtraDetailLevel::TitleHistoryLevel to be set for this user";
+        }
     }
 }
 
@@ -980,6 +992,11 @@ HRESULT ServiceCallManager::PollPeopleHubServiceCall(std::unique_lock<std::mutex
     m_usersPendingPeoplehub.clear();
 
     return hr;
+}
+
+XblSocialManagerExtraDetailLevel ServiceCallManager::GetDetailLevel() const noexcept
+{
+    return m_peoplehubDetailLevel;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_END

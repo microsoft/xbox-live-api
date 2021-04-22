@@ -51,7 +51,7 @@
 #undef RAPIDJSON_NAMESPACE_BEGIN
 #undef RAPIDJSON_NAMESPACE_END
 #endif
-#include "../External/rapidjson/include/rapidjson/document.h"
+#include "../../../External/rapidjson/include/rapidjson/document.h"
 
 #include "../Include/multidevice.h"
 #include "../Include/api_explorer.h"

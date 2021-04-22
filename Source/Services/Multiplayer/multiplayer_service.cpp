@@ -2025,7 +2025,7 @@ STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResult(
 
         size_t count{ 0 };
         size_t verifiedSize{ 0 };
-        for (; verifiedSize < *bufferUsed - XBL_ALIGN_SIZE; ++count)
+        for (; *bufferUsed > 0 && verifiedSize < *bufferUsed - XBL_ALIGN_SIZE; ++count)
         {
             verifiedSize += sizeof(XblMultiplayerActivityDetails);
             verifiedSize += strlen((*ptrToBuffer)[count].CustomSessionPropertiesJson) + 1;
