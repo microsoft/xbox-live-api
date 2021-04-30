@@ -63,12 +63,12 @@ public:
 
     static void SetTokenExpired(uint64_t xuid) noexcept;
 
-    static Result<XblFunctionContext> RegisterChangeEventHandler(
+    static Result<uint64_t> RegisterChangeEventHandler(
         UserChangeEventHandler handler
     ) noexcept;
 
     static void UnregisterChangeEventHandle(
-        XblFunctionContext token
+        uint64_t token
     ) noexcept;
 
 private:
@@ -90,7 +90,7 @@ class Result<User>
 {
 public:
     Result(User&& user) : m_payload{ std::move(user) } {}
-    Result(User&& user, HRESULT error) : m_payload{ std::move(user) }, m_result{ error } {}
+    Result(User&& user, HRESULT error) : m_result{ error }, m_payload{ std::move(user) } {}
     Result(Result&& other) = default;
     Result(const Result& other) = delete;
 

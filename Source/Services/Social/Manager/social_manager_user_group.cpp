@@ -26,10 +26,10 @@ XblSocialManagerUserGroup::XblSocialManagerUserGroup(
     Vector<uint64_t>&& trackedUsers
 ) noexcept :
     type{ XblSocialUserGroupType::UserListType },
-    m_trackedUsersView{ std::move(trackedUsers) },
-    m_trackedUsers{ m_trackedUsersView.begin(), m_trackedUsersView.end() },
     m_localUser{ socialGraph->LocalUser() },
-    m_graph{ socialGraph }
+    m_graph{ socialGraph },
+    m_trackedUsersView{ std::move(trackedUsers) },
+    m_trackedUsers{ m_trackedUsersView.begin(), m_trackedUsersView.end() }
 {
     m_usersView.reserve(m_trackedUsersView.size());
     socialGraph->TrackUsers(m_trackedUsersView);

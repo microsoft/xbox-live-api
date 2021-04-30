@@ -560,7 +560,6 @@
     <None Include="Media\Fonts\XboxOneControllerLegendSmall.spritefont">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="MicrosoftGame.Config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Kits\DirectXTK12\DirectXTK12_GDK_2017.vcxproj">

@@ -514,7 +514,7 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\titleStorage\title_storage-cpp.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
-	<None Include="$(MSBuildThisFileDirectory)Tests\titleStorage\title_storage-restCalls.lua">
+    <None Include="$(MSBuildThisFileDirectory)Tests\titleStorage\title_storage-restCalls.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\titleStorage\title_storage.lua">

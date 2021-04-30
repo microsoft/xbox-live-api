@@ -3293,9 +3293,13 @@ STDAPI XblMultiplayerGetSessionAsync(
 /// Gets the result of an XblMultiplayerGetSessionResult call.
 /// </summary>
 /// <param name="async">The AsyncBlock for this operation.</param>
-/// <param name="handle">Passes back a handle to a new instance of a local multiplayer session object.  
+/// <param name="handle">Passes back a handle to a new instance of a local multiplayer session object.
 /// It must be release by the caller with <see cref="XblMultiplayerSessionCloseHandle"/>.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>
+/// If the session does not exist, this API will return __HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND) and a null
+/// XblMultiplayerSessionHandle.
+/// </remarks>
 STDAPI XblMultiplayerGetSessionResult(
     _In_ XAsyncBlock* async,
     _Out_ XblMultiplayerSessionHandle* handle
@@ -3326,6 +3330,10 @@ STDAPI XblMultiplayerGetSessionByHandleAsync(
 /// <param name="handle">Passes back a handle to a new instance of a local multiplayer session object.  
 /// It must be release by the caller with <see cref="XblMultiplayerSessionCloseHandle"/>.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>
+/// If the session does not exist, this API will return __HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND) and a null
+/// XblMultiplayerSessionHandle.
+/// </remarks>
 STDAPI XblMultiplayerGetSessionByHandleResult(
     _In_ XAsyncBlock* async,
     _Out_ XblMultiplayerSessionHandle* handle

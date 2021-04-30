@@ -144,9 +144,10 @@ struct ApiExplorerData
 #endif
 
     // Title Storage Rest API Calls Data
-    std::string responseString;
-    std::vector<XblHttpCallHandle> downloadHttpCalls;
-    size_t completedDownloads = 0;
+    std::vector<std::string> blobResponseStrings;
+    std::string metadataResponseString;
+    std::vector<XblHttpCallHandle> titleStorageHttpCalls;
+    size_t titleStorageCompletedHttpCalls = 0;
     size_t filesToDownload = 0;
 
     // MP

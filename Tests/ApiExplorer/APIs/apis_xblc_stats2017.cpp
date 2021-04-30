@@ -167,7 +167,8 @@ int XblTitleManagedStatsWriteAsyncWithSVD_Lua(lua_State *L)
         {
             LogToFile("XblTitleManagedStatsWriteAsyncWithSVD: hr = %s", ConvertHR(hr).data());
             s_svd = nullptr;
-            return LuaReturnHR(L, hr);
+            CallLuaFunction("OnXblTitleManagedStatsUnableToGetTokenAndSignature");
+            return LuaReturnHR(L, S_OK);
         }
     }
 
@@ -186,6 +187,13 @@ int XblTitleManagedStatsWriteAsyncWithSVD_Lua(lua_State *L)
     {
         std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock }; // Take over ownership of the XAsyncBlock*
         HRESULT hr = XAsyncGetStatus(asyncBlock, false);
+
+        if (hr == E_FAIL)
+        {
+            CallLuaFunction("OnXblTitleManagedStatsUnableToGetTokenAndSignature");
+            return;
+        }
+
         CallLuaFunctionWithHr(hr, "OnXblTitleManagedStatsWriteAsyncWithSVD"); // CODE SNIP SKIP
     };
 
@@ -238,6 +246,13 @@ int XblTitleManagedStatsWriteAsync_Lua(lua_State *L)
         {
             LogToScreen("XblTitleManagedStatsWriteAsync: 0x%0.8x", hr);
         }
+
+        if (hr == E_FAIL)
+        {
+            CallLuaFunction("OnXblTitleManagedStatsUnableToGetTokenAndSignature");
+            return;
+        }
+
         CallLuaFunctionWithHr(hr, "OnXblTitleManagedStatsWriteAsync"); // CODE SNIP SKIP
     };
 
@@ -270,7 +285,8 @@ int XblTitleManagedStatsUpdateStatsAsync_Lua(lua_State* L)
         {
             LogToFile("XblTitleManagedStatsWriteAsyncWithSVD: hr = %s", ConvertHR(hr).data());
             s_svd = nullptr;
-            return LuaReturnHR(L, hr);
+            CallLuaFunction("OnXblTitleManagedStatsUnableToGetTokenAndSignature");
+            return LuaReturnHR(L, S_OK);
         }
     }
 
@@ -297,6 +313,13 @@ int XblTitleManagedStatsUpdateStatsAsync_Lua(lua_State* L)
     {
         std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock }; // Take over ownership of the XAsyncBlock*
         HRESULT hr = XAsyncGetStatus(asyncBlock, false);
+
+        if (hr == E_FAIL)
+        {
+            CallLuaFunction("OnXblTitleManagedStatsUnableToGetTokenAndSignature");
+            return;
+        }
+
         CallLuaFunctionWithHr(hr, "OnXblTitleManagedStatsUpdateStatsAsync"); // CODE SNIP SKIP
     };
 
@@ -329,7 +352,8 @@ int XblTitleManagedStatsDeleteStatsAsync_Lua(lua_State* L)
         {
             LogToFile("XblTitleManagedStatsWriteAsyncWithSVD: hr = %s", ConvertHR(hr).data());
             s_svd = nullptr;
-            return LuaReturnHR(L, hr);
+            CallLuaFunction("OnXblTitleManagedStatsUnableToGetTokenAndSignature");
+            return LuaReturnHR(L, S_OK);
         }
     }
 
@@ -343,6 +367,13 @@ int XblTitleManagedStatsDeleteStatsAsync_Lua(lua_State* L)
     {
         std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock }; // Take over ownership of the XAsyncBlock*
         HRESULT hr = XAsyncGetStatus(asyncBlock, false);
+
+        if (hr == E_FAIL)
+        {
+            CallLuaFunction("OnXblTitleManagedStatsUnableToGetTokenAndSignature");
+            return;
+        }
+
         CallLuaFunctionWithHr(hr, "OnXblTitleManagedStatsDeleteStatsAsync"); // CODE SNIP SKIP
     };
 
@@ -401,7 +432,8 @@ int ClearSVD_Lua(lua_State* L)
         {
             LogToFile("XblTitleManagedStatsWriteAsyncWithSVD: hr = %s", ConvertHR(hr).data());
             s_svd = nullptr;
-            return LuaReturnHR(L, hr);
+            lua_pushnumber(L, 1);
+            return 1;
         }
     }
     s_svd->ClearStats();

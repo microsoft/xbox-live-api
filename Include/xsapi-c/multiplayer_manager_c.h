@@ -754,6 +754,7 @@ XBL_WARNING_POP
 /// Changes are batched and written to the service on the next XblMultiplayerManagerDoWork().  
 /// All session properties and members contain updated response returned from the server 
 /// upon calling XblMultiplayerManagerDoWork().
+/// When attempting to join a session, the service will return HTTP_E_STATUS_BAD_REQUEST (HTTP status 400) in the event the server is full.
 /// </remarks>
 STDAPI XblMultiplayerManagerLobbySessionAddLocalUser(
     _In_ XblUserHandle user
@@ -1112,6 +1113,7 @@ STDAPI XblMultiplayerManagerGameSessionSetSynchronizedHost(
 /// After joining, you can set the host via XblMultiplayerManagerLobbySessionSetSynchronizedHost() if one doesn't exist.  
 /// Instead, if you don't need a lobby session, and if you haven't added the local users through 
 /// XblMultiplayerManagerLobbySessionAddLocalUser(), you can pass in the list of users via the XblMultiplayerManagerJoinGame() API.
+/// When attempting to join a session, the service will return HTTP_E_STATUS_BAD_REQUEST (HTTP status 400) in the event the server is full.
 /// </remarks>
 STDAPI XblMultiplayerManagerJoinLobby(
     _In_z_ const char* handleId,
@@ -1129,6 +1131,7 @@ STDAPI XblMultiplayerManagerJoinLobby(
 /// through XblMultiplayerManagerDoWork().  
 /// This does not migrate existing lobby session properties over to the game session.  
 /// After joining, you can set the properties or the host via XblMultiplayerManagerGameSessionSetSynchronized APIs.
+/// When attempting to join a session, the service will return HTTP_E_STATUS_BAD_REQUEST (HTTP status 400) in the event the server is full.
 /// </remarks>
 STDAPI XblMultiplayerManagerJoinGameFromLobby(
     _In_z_ const char* sessionTemplateName
@@ -1147,6 +1150,7 @@ STDAPI XblMultiplayerManagerJoinGameFromLobby(
 /// <remarks>
 /// The result is delivered via an event of type XblMultiplayerEventType::JoinGameCompleted through XblMultiplayerManagerDoWork().  
 /// After joining, you can set the properties or the host via XblMultiplayerManagerGameSessionSetSynchronized APIs.
+/// When attempting to join a session, the service will return HTTP_E_STATUS_BAD_REQUEST (HTTP status 400) in the event the server is full.
 /// </remarks>
 STDAPI XblMultiplayerManagerJoinGame(
     _In_z_ const char* sessionName,

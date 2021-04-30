@@ -1,9 +1,5 @@
-// Copyright (c) Microsoft Corporation
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-
 #include "pch.h"
-#include "notification_internal.h"
+#include "notification_subscription.h"
 #include "real_time_activity_manager.h"
 #include "multiplayer_internal.h"
 
@@ -11,55 +7,63 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_BEGIN
 
-GameInviteSubscription::GameInviteSubscription(
-    _In_ uint64_t xuid,
+NotificationSubscription::NotificationSubscription(
+    _In_ User&& user,
+    _In_ TaskQueue queue,
     _In_ uint32_t titleId
-) noexcept
+) noexcept :
+    m_user{ std::move(user) },
+    m_queue{ std::move(queue) }
 {
     Stringstream ss;
-    ss << "https://notify.xboxlive.com/users/xuid(" << xuid << ")/deviceId/current/titleId/" << titleId;
+    ss << "https://notify.xboxlive.com/users/xuid(" << m_user.Xuid() << ")/deviceId/current/titleId/" << titleId;
     m_resourceUri = ss.str();
 }
 
-const String& GameInviteSubscription::ResourceUri() const noexcept
+const String& NotificationSubscription::ResourceUri() const noexcept
 {
     return m_resourceUri;
 }
 
-XblFunctionContext GameInviteSubscription::AddHandler(
-    MPSDInviteHandler handler
-) noexcept
+XblFunctionContext NotificationSubscription::AddHandler(MPSDInviteHandler&& handler) noexcept
 {
     std::lock_guard<std::mutex> lock{ m_mutex };
     m_mpsdInviteHandlers[m_nextToken] = std::move(handler);
     return m_nextToken++;
 }
 
-XblFunctionContext GameInviteSubscription::AddHandler(
-    MultiplayerActivityInviteHandler handler
-) noexcept
+XblFunctionContext NotificationSubscription::AddHandler(MultiplayerActivityInviteHandler&& handler) noexcept
 {
     std::lock_guard<std::mutex> lock{ m_mutex };
     m_mpaInviteHandlers[m_nextToken] = std::move(handler);
     return m_nextToken++;
 }
 
-size_t GameInviteSubscription::RemoveHandler(
-    XblFunctionContext token
-) noexcept
+XblFunctionContext NotificationSubscription::AddHandler(AchievementUnlockHandler&& handler) noexcept
 {
     std::lock_guard<std::mutex> lock{ m_mutex };
-    m_mpaInviteHandlers.erase(token);
-    m_mpsdInviteHandlers.erase(token);
-    return m_mpaInviteHandlers.size() + m_mpsdInviteHandlers.size();
+    m_achievementUnlockHandlers[m_nextToken] = std::move(handler);
+    return m_nextToken++;
 }
 
-void GameInviteSubscription::OnEvent(
+size_t NotificationSubscription::RemoveHandler(XblFunctionContext token) noexcept
+{
+    std::lock_guard<std::mutex> lock{ m_mutex };
+    
+    m_mpaInviteHandlers.erase(token);
+    m_mpsdInviteHandlers.erase(token);
+    m_achievementUnlockHandlers.erase(token);
+
+    // return the total number of handlers remaining
+    return m_mpaInviteHandlers.size() + m_mpsdInviteHandlers.size() + m_achievementUnlockHandlers.size();
+}
+
+void NotificationSubscription::OnEvent(
     _In_ const JsonValue& data
 ) noexcept
 {
-    // MPSD Invites and MPA invites are both delivered via the same RTA subscription, but the payloads for each
-    // are slightly different. We examine the json here to distinguish between the two.
+    // Notifications from several services are delivered via the same RTA subscription. Examine the payload to 
+    // distinguish between them.
 
     if (!data.IsObject())
     {
@@ -102,10 +106,71 @@ void GameInviteSubscription::OnEvent(
             }
         }
     }
+    else if (data.HasMember("KickNotification"))
+    {
+        XalUserGetTokenAndSignatureArgs args;
+        args.forceRefresh = true;
+        args.url = "https://xboxlive.com/";
+        args.method = "GET";
+
+        auto async = MakeUnique<XAsyncBlock>();
+        async->queue = m_queue.GetHandle();
+        async->callback = [](XAsyncBlock* async)
+        {
+            // Take ownership of async block
+            UniquePtr<XAsyncBlock> asyncUnique{ async };
+
+            // Get the result even though we aren't using it so Xal can release it
+            size_t bufferSize{};
+            HRESULT hr = XalUserGetTokenAndSignatureSilentlyResultSize(async, &bufferSize);
+
+            if (SUCCEEDED(hr))
+            {
+                Vector<uint8_t> buffer(bufferSize);
+                XalUserGetTokenAndSignatureData* xalTokenSignatureData{ nullptr };
+
+                hr = XalUserGetTokenAndSignatureSilentlyResult(async, bufferSize, buffer.data(), &xalTokenSignatureData, nullptr);
+                UNREFERENCED_PARAMETER(hr);
+            }
+        };
+
+        if (SUCCEEDED(XalUserGetTokenAndSignatureSilentlyAsync(m_user.Handle(), &args, async.get())))
+        {
+            async.release();
+        }
+    }
+    else if (data.HasMember("service"))
+    {
+        String originatingService;
+        JsonUtils::ExtractJsonString(data, "service", originatingService);
+
+        if (originatingService == "achievements")
+        {
+            // Deserialize and send invite notification
+            auto deserializationResult = AchievementUnlockEvent::Deserialize(data);
+            if (Succeeded(deserializationResult))
+            {
+                std::unique_lock<std::mutex> lock{ m_mutex };
+                auto handlers{ m_achievementUnlockHandlers };
+                lock.unlock();
+
+                for (auto& handler : handlers)
+                {
+                    handler.second(deserializationResult.Payload());
+                }
+            }
+        }
+    }
     else
     {
         LOGS_ERROR << __FUNCTION__ << ": Ignoring unrecognized payload";
     }
+}
+
+void NotificationSubscription::OnResync() noexcept
+{
+    // Don't think there is much we can do here - just log an error 
+    LOGS_ERROR << __FUNCTION__ << ": Notification service events may have been missed";
 }
 
 GameInviteNotificationEventArgs::GameInviteNotificationEventArgs(
@@ -230,11 +295,100 @@ Result<MultiplayerActivityInviteData> MultiplayerActivityInviteData::Deserialize
     return data;
 }
 
-void GameInviteSubscription::OnResync() noexcept
+AchievementUnlockEvent::AchievementUnlockEvent(AchievementUnlockEvent&& event) noexcept :
+    m_achievementId(std::move(event.m_achievementId)),
+    m_achievementName(std::move(event.m_achievementName)),
+    m_achievementDescription(std::move(event.m_achievementDescription)),
+    m_achievementIconUri(std::move(event.m_achievementIconUri)),
+    m_deepLink(event.m_deepLink)
 {
-    // Don't think there is much we can do here - just log an error 
-    LOGS_ERROR << __FUNCTION__ << ": Game invites may have been discarded by RTA service";
+    // strings for the C API
+    achievementId = m_achievementId.c_str();
+    achievementName = m_achievementName.c_str();
+    achievementDescription = m_achievementDescription.c_str();
+    achievementIcon = m_achievementIconUri.c_str();
+    titleId = event.titleId;
+    gamerscore = event.gamerscore;
+    rarityPercentage = event.rarityPercentage;
+    rarityCategory = event.rarityCategory;
+    timeUnlocked = event.timeUnlocked;
+    xboxUserId = event.xboxUserId;
+}
+
+AchievementUnlockEvent::AchievementUnlockEvent(const AchievementUnlockEvent& event) :
+    m_achievementId(event.m_achievementId),
+    m_achievementName(event.m_achievementName),
+    m_achievementDescription(event.m_achievementDescription),
+    m_achievementIconUri(event.m_achievementIconUri),
+    m_deepLink(event.m_deepLink)
+{
+    // strings for the C API
+    achievementId = m_achievementId.c_str();
+    achievementName = m_achievementName.c_str();
+    achievementDescription = m_achievementDescription.c_str();
+    achievementIcon = m_achievementIconUri.c_str();
+
+    titleId = event.titleId;
+    gamerscore = event.gamerscore;
+    rarityPercentage = event.rarityPercentage;
+    rarityCategory = event.rarityCategory;
+    timeUnlocked = event.timeUnlocked;
+    xboxUserId = event.xboxUserId;
+}
+
+
+Result<AchievementUnlockEvent> AchievementUnlockEvent::Deserialize(_In_ const JsonValue& json) noexcept
+{
+    AchievementUnlockEvent result{};
+    if (!json.IsObject())
+    {
+        return result;
+    }
+
+    double rarityPercentage = 0.0; // We are guaranteed that rarityPercentage is only float, but can only extract as double.
+    uint64_t titleId = 0; // We are guaranteed that titleId is only uint32, but can only extract as uint64.
+    String rarityCategory; // Will be converted into an enum value after extraction
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "achievementId", result.m_achievementId, true));
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "achievementDescription", result.m_achievementDescription, false));
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "achievementName", result.m_achievementName, true));
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "achievementIcon", result.m_achievementIconUri, true));
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToUInt64(json, "titleId", titleId, true));
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonUInt64(json, "gamerscore", result.gamerscore, true));
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonXuid(json, "xuid", result.xboxUserId, true));
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "extendedInfoUrl", result.m_deepLink, true));
+
+    // RarityPercentage and rarityCategory are only in payload version 2 so make them optional
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonDouble(json, "rarityPercentage", rarityPercentage, false));
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "rarityCategory", rarityCategory, false));
+
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonTimeT(json, "unlockTime", result.timeUnlocked));
+
+    result.titleId = static_cast<uint32_t>(titleId);
+    result.rarityPercentage = static_cast<float>(rarityPercentage);
+    result.rarityCategory = EnumValue<XblAchievementRarityCategory>(rarityCategory.c_str());
+
+    // strings for the C API
+    result.achievementId = result.m_achievementId.c_str();
+    result.achievementName = result.m_achievementName.c_str();
+    if (!result.m_achievementDescription.empty())
+    {
+        result.achievementDescription = result.m_achievementDescription.c_str();
+    }
+    result.achievementIcon = result.m_achievementIconUri.c_str();
+    result.m_deepLink = result.m_deepLink.c_str();
+
+    return result;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_END
+
 #endif

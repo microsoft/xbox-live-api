@@ -3,20 +3,26 @@ common = require 'common'
 
 function TitleStorageRestAPI()
     print("TitleStorage");
-    RestCallForTMSMetadata();
+    RestCallToUploadJsonBlob(
+        "{\"difficulty\":1,\"level\":[{\"number\":\"1\",\"quest\":\"swords\"},{\"number\":\"2\",\"quest\":\"iron\"},{\"number\":\"3\",\"quest\":\"gold\"}],\"weapon\":{\"name\":\"poison\",\"timeleft\":\"2mins\"}}"
+    );
 end
 
-function OnXblTitleStorageRestTMSMetadata()
-    print('Calling RestCallForEachBlob')
-    RestCallForEachBlob();
+function OnXblTitleStorageRestUpload()
+    print('Calling RestCallToUploadJsonBlob')
+    RestCallForJsonMetadata();
 end
 
-function OnRestCallForEachBlob()
-    print('OnRestCallForEachBlob')
+function OnDownloadMetadataBlobs()
+    print('OnUploadBlobs')
+    RestCallToDownloadJsonBlob();
+end
+
+function OnDownloadBlobs()
+    print('OnDownloadBlobs')
     test.stopTest();
 end
 
-test.skip = true
 test.TitleStorageRestAPI = function()
     common.init(TitleStorageRestAPI)
 end

@@ -102,6 +102,7 @@ rmdir "%githubPath%Tests\ApiExplorer\UWP" /s /q
 rmdir "%githubPath%Tests\ApiExplorer\Win" /s /q
 rmdir "%githubPath%Tests\ApiExplorer\Win32" /s /q
 rmdir "%githubPath%Tests\ApiExplorer\XDK" /s /q
+del   "%githubPath%Tests\APIExplorer\Shared\apirunnercloudfns.h"
 robocopy "%adoPath%Tests\GDK" "%githubPath%Tests\GDK" /s
 robocopy "%adoPath%Tests\UnitTests" "%githubPath%Tests\UnitTests" /s
 

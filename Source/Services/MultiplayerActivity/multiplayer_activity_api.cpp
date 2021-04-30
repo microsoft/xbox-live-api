@@ -291,7 +291,7 @@ STDAPI_(XblFunctionContext) XblMultiplayerActivityAddInviteHandler(
     }
 
     auto rtaNotificationService = std::dynamic_pointer_cast<RTANotificationService>(xblContext->NotificationService());
-    return rtaNotificationService->AddGameInviteHandler(GameInviteSubscription::MultiplayerActivityInviteHandler{
+    return rtaNotificationService->AddGameInviteHandler(NotificationSubscription::MultiplayerActivityInviteHandler{
         [
             handler, context
         ]
@@ -316,7 +316,7 @@ STDAPI XblMultiplayerActivityRemoveInviteHandler(
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xblContext);
     auto rtaNotificationService = std::dynamic_pointer_cast<RTANotificationService>(xblContext->NotificationService());
-    rtaNotificationService->RemoveGameInviteHandler(token);
+    rtaNotificationService->RemoveNotificationHandler(token);
     return S_OK;
 }
 #endif
