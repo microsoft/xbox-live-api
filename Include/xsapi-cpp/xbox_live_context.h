@@ -17,7 +17,9 @@
 #include "xsapi-cpp/matchmaking.h"
 #include "xsapi-cpp/user_statistics.h"
 #include "xsapi-cpp/string_verify.h"
+#if XSAPI_NOTIFICATION_SERVICE
 #include "xsapi-cpp/notification_service.h"
+#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
@@ -44,6 +46,14 @@ public:
     /// Returns the associated system User.
     /// </summary>
     inline XblUserHandle user();
+
+    /// <summary>
+    /// Returns a copy of the associated Xbox Live context handle.
+    /// </summary>
+    /// <remarks>
+    /// It is the caller's responsibility to close the returned handle.
+    /// </remarks>
+    inline XblContextHandle handle();
 
     /// <summary>
     /// Returns the current user's Xbox Live User ID.
@@ -126,7 +136,7 @@ public:
     /// </summary>
     inline presence::presence_service presence_service();
 
-#if HC_PLATFORM == HC_PLATFORM_WIN32
+#if XSAPI_NOTIFICATION_SERVICE
     /// <summary>
     /// A service for receiving notifications.
     /// </summary>
@@ -151,7 +161,9 @@ public:
 private:
     XblContextHandle m_handle = nullptr;
 
+#if XSAPI_NOTIFICATION_SERVICE
     std::shared_ptr <notification::notification_service> m_notificationService;
+#endif
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

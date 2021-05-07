@@ -18,7 +18,9 @@
 #include "string_service_internal.h"
 #include "social_internal.h"
 #include "multiplayer_activity_internal.h"
+#if XSAPI_NOTIFICATION_SERVICE
 #include "notification_internal.h"
+#endif
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MATCHMAKING_CPP_BEGIN
 namespace legacy
@@ -100,10 +102,12 @@ public:
     /// </summary>
     std::shared_ptr<xbox::services::presence::PresenceService> PresenceService();
 
+#if XSAPI_NOTIFICATION_SERVICE
     /// <summary>
     /// A service used for delivering notifications.
     /// </summary>
     std::shared_ptr<xbox::services::notification::NotificationService> NotificationService();
+#endif
 
     /// <summary>
     /// A service for storing data in the cloud.
@@ -161,7 +165,7 @@ private:
     std::shared_ptr<xbox::services::notification::UWPNotificationService> m_notificationService;
 #elif HC_PLATFORM == HC_PLATFORM_ANDROID || HC_PLATFORM == HC_PLATFORM_IOS
     std::shared_ptr<xbox::services::notification::MobileNotificationService> m_notificationService;
-#else
+#elif XSAPI_NOTIFICATION_SERVICE
     std::shared_ptr<xbox::services::notification::NotificationService> m_notificationService;
 #endif
 

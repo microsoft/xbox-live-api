@@ -166,12 +166,12 @@ typedef struct XblLeaderboardRow
     uint32_t rank;
 
     /// <summary>
-    /// The global rank of the player.
+    /// The global rank of the player. If globalrank is 0, then the user has no global rank.
     /// </summary>
     uint32_t globalRank;
 
     /// <summary>
-    /// UTF-8 encoded values for each column in the leaderboard row for the player.
+    /// UTF-8 encoded JSON values for each column in the leaderboard row for the player.
     /// </summary>
     _Field_z_ const char** columnValues;
 

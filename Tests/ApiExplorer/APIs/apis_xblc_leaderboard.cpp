@@ -96,6 +96,7 @@ int XblLeaderboardGetLeaderboardAsync_Lua(lua_State *L)
 
                     for (auto column = 0u; column < leaderboard->rows[row].columnValuesCount; ++column)
                     {
+                        // Each column value is in JSON format
                         rowText << leaderboard->rows[row].columnValues[column] << "\t";
                     }
                     LogToFile(rowText.str().data()); // CODE SNIP SKIP

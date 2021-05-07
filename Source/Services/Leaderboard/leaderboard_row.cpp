@@ -136,7 +136,10 @@ const xsapi_internal_vector<xsapi_internal_string>& LeaderboardRow::ColumnValues
     int rank = 0;
     int globalRank = 0;
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonInt(json, "rank", rank, true));
-    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonInt(json, "globalrank", globalRank, false));
+    if (json.IsObject() && json.HasMember("globalrank") && !json["globalrank"].IsNull())
+    {
+        RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonInt(json, "globalrank", globalRank, false));
+    }
     xsapi_internal_vector<xsapi_internal_string> values;
     if (json.IsObject() && json.HasMember("value") && !json["value"].IsNull())
     {

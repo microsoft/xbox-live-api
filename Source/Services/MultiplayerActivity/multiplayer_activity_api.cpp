@@ -4,10 +4,15 @@
 #include "pch.h"
 #include "xbox_live_context_internal.h"
 #include "multiplayer_activity_internal.h"
+#if XSAPI_NOTIFICATION_SERVICE
 #include "notification_internal.h"
+#endif
 
 using namespace xbox::services::multiplayer_activity;
+
+#if XSAPI_NOTIFICATION_SERVICE
 using namespace xbox::services::notification;
+#endif
 
 STDAPI XblMultiplayerActivityUpdateRecentPlayers(
     _In_ XblContextHandle xblContextHandle,

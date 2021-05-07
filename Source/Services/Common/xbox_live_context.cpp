@@ -13,7 +13,9 @@
 #include "xbox_live_app_config_internal.h"
 #include "xbox_live_context_settings_internal.h"
 #include "title_storage_internal.h"
+#if XSAPI_NOTIFICATION_SERVICE
 #include "notification_internal.h"
+#endif
 
 using namespace xbox::services;
 using namespace xbox::services::system;
@@ -280,10 +282,12 @@ std::shared_ptr<presence::PresenceService> XblContext::PresenceService()
     return m_presenceService;
 }
 
+#if XSAPI_NOTIFICATION_SERVICE
 std::shared_ptr<notification::NotificationService> XblContext::NotificationService()
 {
     return m_notificationService;
 }
+#endif
 
 std::shared_ptr<multiplayer_activity::MultiplayerActivityService> XblContext::MultiplayerActivityService() noexcept
 {

@@ -620,8 +620,10 @@ void Connection::ConnectCompleteHandler(WebsocketResult result) noexcept
                     std::unique_lock<std::mutex> lock{ sharedThis->m_lock };
                     if ((std::chrono::system_clock::now() - sharedThis->m_connectTime).count() >= CONNECTION_TIMEOUT_MS)
                     {
+                        auto socket = sharedThis->m_websocket;
+                        lock.unlock();
                         // Disconnect so that auto-reconnect logic kicks in
-                        sharedThis->m_websocket->Disconnect();
+                        socket->Disconnect();
                     }
                 }
             },
