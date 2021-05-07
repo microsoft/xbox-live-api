@@ -16,12 +16,12 @@ class xbox_live_context;
 class invite_notification_event_args
 {
 public:
-    inline const string_t& invited_xbox_user_id() const;
-    inline const string_t& sender_xbox_user_id() const;
-    inline const string_t& sender_gamertag() const;
-    inline const string_t& invite_handle_id() const;
-    inline const string_t& invite_protocol() const;
-    inline const utility::datetime& expiration() const;
+    inline string_t invited_xbox_user_id() const;
+    inline string_t sender_xbox_user_id() const;
+    inline string_t sender_gamertag() const;
+    inline string_t invite_handle_id() const;
+    inline string_t invite_protocol() const;
+    inline utility::datetime expiration() const;
     inline const multiplayer::multiplayer_session_reference session_reference() const;
 
     /// <summary>
@@ -36,14 +36,14 @@ public:
 class achievement_unlocked_notification_event_args
 {
 public:
-    inline const string_t& name() const;
-    inline const string_t id() const;
-    inline const string_t& description() const;
-    inline const string_t& icon_url() const;
-    inline const uint64_t gamerscore() const;
-    inline const string_t& deeplink() const;
-    inline const string_t& xbox_user_id() const;
-    inline const utility::datetime& unlockTime() const;
+    inline string_t name() const;
+    inline string_t id() const;
+    inline string_t description() const;
+    inline string_t icon_url() const;
+    inline uint64_t gamerscore() const;
+    inline string_t deeplink() const;
+    inline string_t xbox_user_id() const;
+    inline utility::datetime unlockTime() const;
 
     achievement_unlocked_notification_event_args(_In_ const XblAchievementUnlockEvent& achievementUnlockEvent);
 
