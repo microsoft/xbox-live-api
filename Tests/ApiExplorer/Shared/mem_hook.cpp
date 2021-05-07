@@ -5,7 +5,7 @@
 
 #define TRACK_UNHOOKED_ALLOCS 1
 
-#if HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM == HC_PLATFORM_GDK
+#if HC_PLATFORM == HC_PLATFORM_WIN32 || (HC_PLATFORM == HC_PLATFORM_GDK && !_GAMING_XBOX)
 #include <process.h>
 #include <iostream>
 #include <Windows.h>
@@ -382,7 +382,7 @@ void ApiRunerMemHook::LogUnhookedStats()
 
 bool ApiRunerMemHook::IsStackInXSAPI(StackInfo& stackInfo)
 {
-#if HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM == HC_PLATFORM_GDK
+#if HC_PLATFORM == HC_PLATFORM_WIN32 || (HC_PLATFORM == HC_PLATFORM_GDK && !_GAMING_XBOX)
     GetStackTrace(stackInfo);
 
     bool foundInXsapi = false;
@@ -420,7 +420,7 @@ bool ApiRunerMemHook::IsStackInXSAPI(StackInfo& stackInfo)
 
 void ApiRunerMemHook::GetStackTrace(StackInfo &stackInfo)
 {
-#if HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM == HC_PLATFORM_GDK
+#if HC_PLATFORM == HC_PLATFORM_WIN32 || (HC_PLATFORM == HC_PLATFORM_GDK && !_GAMING_XBOX)
     void* stack[TRACE_MAX_STACK_FRAMES] = { 0 };
     WORD numberOfFrames = CaptureStackBackTrace(0, TRACE_MAX_STACK_FRAMES, stack, NULL);
     stackInfo.stackSize = numberOfFrames < 64 ? numberOfFrames : 64;
@@ -459,7 +459,7 @@ void ApiRunerMemHook::GetStackTrace(StackInfo &stackInfo)
 #endif
 }
 
-#if HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM == HC_PLATFORM_GDK
+#if HC_PLATFORM == HC_PLATFORM_WIN32 || (HC_PLATFORM == HC_PLATFORM_GDK && !_GAMING_XBOX)
 bool ApiRunerMemHook::IsStackFramesInsideTestCode(StackInfo* pStackInfo)
 {
     for (int i = 0; i < pStackInfo->stackSize; i++)

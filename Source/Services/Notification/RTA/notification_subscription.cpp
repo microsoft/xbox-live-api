@@ -108,7 +108,7 @@ void NotificationSubscription::OnEvent(
     }
     else if (data.HasMember("KickNotification"))
     {
-        XalUserGetTokenAndSignatureArgs args;
+        XalUserGetTokenAndSignatureArgs args{};
         args.forceRefresh = true;
         args.url = "https://xboxlive.com/";
         args.method = "GET";
