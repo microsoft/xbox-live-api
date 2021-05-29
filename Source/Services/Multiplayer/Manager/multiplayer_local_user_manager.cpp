@@ -184,7 +184,7 @@ MultiplayerLocalUserManager::AddUserToXboxLiveContextToMap(
             return innerWrapUserResult.Hresult();
         }
 
-        auto localUser = std::make_shared<MultiplayerLocalUser>(
+        auto localUser = MakeShared<MultiplayerLocalUser>(
             innerWrapUserResult.ExtractPayload(),
             xboxUserId,
             isPrimary

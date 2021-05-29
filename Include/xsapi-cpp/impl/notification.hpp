@@ -191,7 +191,7 @@ pplx::task<xbox_live_result<void>> notification_service::unsubscribe_from_notifi
 
     return asyncWrapper->Task(hr);
 }
-#elif HC_PLATFORM == HC_PLATFORM_WIN32 && !XSAPI_UNIT_TESTS
+#elif (HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM_IS_EXTERNAL) && !XSAPI_UNIT_TESTS
 pplx::task<xbox_live_result<void>> notification_service::unsubscribe_from_notifications()
 {
     auto xblContext = m_xblContext;
