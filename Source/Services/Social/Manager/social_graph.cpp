@@ -89,7 +89,7 @@ SocialGraph::SocialGraph(
     _In_ const TaskQueue& queue,
     _In_ std::shared_ptr<real_time_activity::RealTimeActivityManager> rtaManager
 ) noexcept : 
-    m_user{ std::make_shared<User>(std::move(localUser))},
+    m_user{ MakeShared<User>(std::move(localUser))},
     m_queue{ queue.DeriveWorkerQueue() },
     m_rtaManager{ std::move(rtaManager) }
 {
