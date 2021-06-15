@@ -1,4 +1,6 @@
 #include "android_utils.h"
+#include <assert.h>
+#include "Logger/log.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 JString::JString(JNIEnv* env, jstring string) noexcept :

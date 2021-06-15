@@ -20,7 +20,7 @@ extern "C"
 /// Returns the size of the buffer needed to store the web account ID string.
 /// </summary>
 /// <param name="user">The user object.</param>
-size_t XalUserGetWebAccountIdSize(
+STDAPI_(size_t) XalUserGetWebAccountIdSize(
     _In_ XalUserHandle user
 ) noexcept;
 
@@ -34,7 +34,7 @@ size_t XalUserGetWebAccountIdSize(
 /// </param>
 /// <param name="webAccountIdUsed">The number of bytes used in the buffer
 /// including the null terminator.</param>
-HRESULT XalUserGetWebAccountId(
+STDAPI XalUserGetWebAccountId(
     _In_ XalUserHandle user,
     _In_ size_t webAccountIdSize,
     _Out_writes_(webAccountIdSize) char* webAccountId,
@@ -97,7 +97,7 @@ typedef struct XalUserGetWebAccountTokenArgs
 /// <param name="args">The requested token details.</param>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <see cref="XalUserGetWebAccountTokenArgs" />.
-HRESULT XalUserGetWebAccountTokenSilentlyAsync(
+STDAPI XalUserGetWebAccountTokenSilentlyAsync(
     _In_ XalUserHandle user,
     _In_ XalUserGetWebAccountTokenArgs const* args,
     _In_ XAsyncBlock* async
@@ -108,7 +108,7 @@ HRESULT XalUserGetWebAccountTokenSilentlyAsync(
 /// </summary>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <param name="bufferSize">The size in bytes for the result buffer.</param>
-HRESULT XalUserGetWebAccountTokenSilentlyResultSize(
+STDAPI XalUserGetWebAccountTokenSilentlyResultSize(
     _In_ XAsyncBlock* async,
     _Out_ size_t* bufferSize
 ) noexcept;
@@ -120,7 +120,7 @@ HRESULT XalUserGetWebAccountTokenSilentlyResultSize(
 /// <param name="bufferSize">The size of the buffer for the result object.
 /// </param>
 /// <param name="result">The result token.</param>
-HRESULT XalUserGetWebAccountTokenSilentlyResult(
+STDAPI XalUserGetWebAccountTokenSilentlyResult(
     _In_ XAsyncBlock* async,
     _In_ size_t bufferSize,
     _Out_writes_z_(bufferSize) char* result
@@ -133,7 +133,7 @@ HRESULT XalUserGetWebAccountTokenSilentlyResult(
 /// <param name="args">The requested token details.</param>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <see cref="XalUserGetWebAccountTokenArgs" />.
-HRESULT XalUserGetWebAccountTokenWithUiAsync(
+STDAPI XalUserGetWebAccountTokenWithUiAsync(
     _In_ XalUserHandle user,
     _In_ XalUserGetWebAccountTokenArgs const* args,
     _In_ XAsyncBlock* async
@@ -144,7 +144,7 @@ HRESULT XalUserGetWebAccountTokenWithUiAsync(
 /// </summary>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <param name="bufferSize">The size in bytes for the result buffer.</param>
-HRESULT XalUserGetWebAccountTokenWithUiResultSize(
+STDAPI XalUserGetWebAccountTokenWithUiResultSize(
     _In_ XAsyncBlock* async,
     _Out_ size_t* bufferSize
 ) noexcept;
@@ -156,7 +156,7 @@ HRESULT XalUserGetWebAccountTokenWithUiResultSize(
 /// <param name="bufferSize">The size of the buffer for the result object.
 /// </param>
 /// <param name="result">The result token.</param>
-HRESULT XalUserGetWebAccountTokenWithUiResult(
+STDAPI XalUserGetWebAccountTokenWithUiResult(
     _In_ XAsyncBlock* async,
     _In_ size_t bufferSize,
     _Out_writes_z_(bufferSize) char* result

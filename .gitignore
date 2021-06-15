@@ -129,6 +129,8 @@ Binaries/
 Debug/
 Release/
 ARM/
+Built/
+Bins/
 
 # Allow files in our /Build folder
 !/Build
@@ -158,3 +160,9 @@ Tests/APIExplorer/XDK/Kits/DirectXTK/Src/Shaders/Compiled/*
 Microsoft.Xbox.Services.*.sln.log
 Microsoft.Xbox.Services.*.sln.out
 **/apirunner-log.txt
+
+# Android Studio generated files
+**/.idea
+**/*.iml
+**/local.properties
+**/.cxx

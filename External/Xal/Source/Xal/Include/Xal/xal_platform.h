@@ -38,7 +38,7 @@ extern "C"
 /// <param name="memFreeFunc">A pointer to the custom freeing callback to use,
 /// or a null pointer to restore the default.</param>
 /// <returns>Result code for this API operation.</returns>
-HRESULT XalMemSetFunctions(
+STDAPI XalMemSetFunctions(
     _In_opt_ XalMemAllocFunc* memAllocFunc,
     _In_opt_ XalMemFreeFunc* memFreeFunc
 ) noexcept;
@@ -54,7 +54,7 @@ HRESULT XalMemSetFunctions(
 /// <param name="memFreeFunc">Set to the to the current memory free callback.
 /// Returns the default routine if not previously set.</param>
 /// <returns>Result code for this API operation.</returns>
-HRESULT XalMemGetFunctions(
+STDAPI XalMemGetFunctions(
     _Out_ XalMemAllocFunc** memAllocFunc,
     _Out_ XalMemFreeFunc** memFreeFunc
 ) noexcept;
@@ -75,7 +75,7 @@ HRESULT XalMemGetFunctions(
 /// <remarks>
 /// Must be called before XalInitialize.
 /// </remarks>
-HRESULT XalPlatformWebSetEventHandler(
+STDAPI XalPlatformWebSetEventHandler(
     _In_opt_ XTaskQueueHandle queue,
     _In_opt_ void* context,
     _In_ XalPlatformWebShowUrlEventHandler2* handler
@@ -94,7 +94,7 @@ HRESULT XalPlatformWebSetEventHandler(
 /// cannot be completed.
 /// <see cref="XalPlatformWebShowUrlEventHandler"/>
 /// </remarks>
-HRESULT XalPlatformWebShowUrlComplete(
+STDAPI XalPlatformWebShowUrlComplete(
     _In_ XalPlatformOperation operation,
     _In_ XalPlatformOperationResult result,
     _In_opt_z_ char const* url
@@ -114,7 +114,7 @@ HRESULT XalPlatformWebShowUrlComplete(
 /// <remarks>
 /// Must be called before XalInitialize.
 /// </remarks>
-HRESULT XalPlatformStorageSetEventHandlers(
+STDAPI XalPlatformStorageSetEventHandlers(
     _In_opt_ XTaskQueueHandle queue,
     _In_ XalPlatformStorageEventHandlers2* handlers
 ) noexcept;
@@ -130,7 +130,7 @@ HRESULT XalPlatformStorageSetEventHandlers(
 /// the write is completed or if an error occurs and the operation cannot be
 /// completed <see cref="XalPlatformStorageWriteEventHandler"/>.
 /// </remarks>
-HRESULT XalPlatformStorageWriteComplete(
+STDAPI XalPlatformStorageWriteComplete(
     _In_ XalPlatformOperation operation,
     _In_ XalPlatformOperationResult result
 ) noexcept;
@@ -151,7 +151,7 @@ HRESULT XalPlatformStorageWriteComplete(
 /// If the requested key cannot be found, the operation should be completed
 /// with XalClientOperationResult_Success, data = nullptr and dataSize = 0.
 /// </remarks>
-HRESULT XalPlatformStorageReadComplete(
+STDAPI XalPlatformStorageReadComplete(
     _In_ XalPlatformOperation operation,
     _In_ XalPlatformOperationResult result,
     _In_ size_t dataSize,
@@ -169,7 +169,7 @@ HRESULT XalPlatformStorageReadComplete(
 /// the data is cleared or if an error occurs and the operation cannot be
 /// completed <see cref="XalPlatformStorageClearEventHandler"/>.
 /// </remarks>
-HRESULT XalPlatformStorageClearComplete(
+STDAPI XalPlatformStorageClearComplete(
     _In_ XalPlatformOperation operation,
     _In_ XalPlatformOperationResult result
 ) noexcept;
@@ -188,7 +188,7 @@ HRESULT XalPlatformStorageClearComplete(
 /// <remarks>
 /// Must be called before XalInitialize.
 /// </remarks>
-HRESULT XalPlatformRemoteConnectSetEventHandlers(
+STDAPI XalPlatformRemoteConnectSetEventHandlers(
     _In_opt_ XTaskQueueHandle queue,
     _In_ XalPlatformRemoteConnectEventHandlers2* handlers
 ) noexcept;
@@ -205,7 +205,7 @@ HRESULT XalPlatformRemoteConnectSetEventHandlers(
 /// E_ABORT. The XalPlatformRemoteConnectClosePromptEventHandler will be called
 /// as normal.
 /// </remarks>
-HRESULT XalPlatformRemoteConnectCancelPrompt(
+STDAPI XalPlatformRemoteConnectCancelPrompt(
     _In_ XalPlatformOperation operation
 ) noexcept;
 
@@ -221,7 +221,7 @@ HRESULT XalPlatformRemoteConnectCancelPrompt(
 /// <remarks>
 /// Must be called before XalInitialize.
 /// </remarks>
-HRESULT XalPlatformCryptoSetCallbacks(
+STDAPI XalPlatformCryptoSetCallbacks(
     _In_ XalPlatformCryptoCallbacks* callbacks
 ) noexcept;
 
@@ -237,7 +237,7 @@ HRESULT XalPlatformCryptoSetCallbacks(
 /// <remarks>
 /// Must be called before XalInitialize.
 /// </remarks>
-HRESULT XalPlatformDateTimeSetCallbacks(
+STDAPI XalPlatformDateTimeSetCallbacks(
     _In_ XalPlatformDateTimeCallbacks* callbacks
 ) noexcept;
 

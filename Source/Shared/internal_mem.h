@@ -1,9 +1,15 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+#pragma once
 
 #include "xsapi-c/xbox_live_global_c.h"
-
-#pragma once
+#include <list>
+#include <map>
+#include <set>
+#include <sstream>
+#include <queue>
+#include <unordered_map>
+#include <unordered_set>
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 

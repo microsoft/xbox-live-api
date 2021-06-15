@@ -593,7 +593,7 @@ public:
     void set_length(int length) { m_length = length; }
 
 private:
-    static const utility::string_t c_allowed_chars;
+    static const utility::char_t* c_allowed_chars;
     std::mt19937 m_random;
     int m_length;
 };

@@ -11,6 +11,8 @@
 #pragma warning(disable: 4062)
 #endif
 
+#include <XAsync.h>
+
 extern "C"
 {
 

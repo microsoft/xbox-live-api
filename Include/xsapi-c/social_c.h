@@ -422,7 +422,7 @@ STDAPI_(void) XblSocialRelationshipResultCloseHandle(
 /// <summary>
 /// Subscribes to the social service for people changed events.
 /// DEPRECATED. Calling this API is no longer required and it will be removed in a future release. RTA subscription will be managed 
-/// automatically by XSAPI as <see cref="XblSocialRelationshipChangedHandler"/> are added and removed.
+/// automatically by XSAPI as `XblSocialRelationshipChangedHandler` are added and removed.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="xboxUserId">The Xbox User ID of the player requesting the subscription.</param>
@@ -440,7 +440,7 @@ STDAPI_XBL_DEPRECATED XblSocialSubscribeToSocialRelationshipChange(
 /// <summary>
 /// Un-subscribes a previously created social relationship change subscription.
 /// DEPRECATED. Calling this API is no longer required and it will be removed in a future release. RTA subscription will be managed 
-/// automatically by XSAPI as <see cref="XblSocialRelationshipChangedHandler"/> are added and removed.
+/// automatically by XSAPI as `XblSocialRelationshipChangedHandler` are added and removed.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="subscriptionHandle">The subscription handle to unsubscribe.</param>
@@ -470,13 +470,16 @@ typedef void
 );
 
 /// <summary>
-/// Registers an event handler for social relationship change notifications.
+/// Registers an event handler for notifications of social relationship changes caused by the registering user.
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="handler">The callback function that receives notifications.</param>
 /// <param name="handlerContext">Client context pointer to be passed back to the handler.</param>
 /// <returns>A XblFunctionContext used to remove the handler.</returns>
 /// <remarks>
+/// This handler triggers only if the user changes the relationship with another user.
+/// This handler does not trigger if another user changes the relationship with the user.
+///
 /// Call <see cref="XblSocialRemoveSocialRelationshipChangedHandler"/> to un-register event handler.
 /// </remarks>
 STDAPI_(XblFunctionContext) XblSocialAddSocialRelationshipChangedHandler(

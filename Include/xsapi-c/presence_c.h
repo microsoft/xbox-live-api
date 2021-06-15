@@ -680,7 +680,7 @@ STDAPI_XBL_DEPRECATED XblPresenceSubscribeToTitlePresenceChange(
 /// <summary>
 /// Unsubscribes a previously created title presence change subscription.
 /// DEPRECATED. This API will be removed in a future release. Individual RTA subscription will be managed automatically by XSAPI as
-/// titles are untracked with <see cref="XblPresenceStopTrackingTitles"/>.
+/// titles are untracked with <see cref="XblPresenceStopTrackingAdditionalTitles"/>.
 /// </summary>
 /// <param name="xblContextHandle">Xbox live context for the local user.</param>
 /// <param name="subscriptionHandle">Handle for the subscription created with <see cref="XblPresenceSubscribeToTitlePresenceChange"/>.  
@@ -812,7 +812,7 @@ STDAPI XblPresenceStopTrackingUsers(
 /// <param name="xblContextHandle">Xbox live context for the local user.</param>
 /// <param name="titleIds">Array of title IDs to append to the existing list of tracked titles. Note that
 /// the current title will be tracked by default.</param>
-/// <param name="titlesIdsCount">Length of the titleIds array.</param>
+/// <param name="titleIdsCount">Length of the titleIds array.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
 /// Updates will be delivered via XblPresenceTitlePresenceChangedHandlers.
@@ -830,7 +830,7 @@ STDAPI XblPresenceTrackAdditionalTitles(
 /// </summary>
 /// <param name="xblContextHandle">Xbox live context for the local user.</param>
 /// <param name="titleIds">Array of title IDs to remove from the list of tracked titles.</param>
-/// <param name="titlesIdsCount">Length of the titleIds array.</param>
+/// <param name="titleIdsCount">Length of the titleIds array.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblPresenceStopTrackingAdditionalTitles(
     _In_ XblContextHandle xblContextHandle,

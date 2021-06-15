@@ -4,7 +4,7 @@
 #include <android/log.h>
 #include "jni_utils.h"
 #include "http_call_legacy.h"
-#include "a\java_interop.h"
+#include "a/java_interop.h"
 
 #define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, "HttpCall", __VA_ARGS__))
 #define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "HttpCall", __VA_ARGS__))

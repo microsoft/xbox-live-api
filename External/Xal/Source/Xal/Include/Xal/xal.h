@@ -33,7 +33,7 @@ extern "C"
 ///
 /// It is never an error to set a platform event handler that is not required.
 /// </remarks>
-HRESULT XalInitialize(
+STDAPI XalInitialize(
     _In_ XalInitArgs const* args,
     _In_opt_ XTaskQueueHandle internalWorkQueue
 ) noexcept;
@@ -48,7 +48,7 @@ HRESULT XalInitialize(
 /// This functions should only be called when all user handles have been closed
 /// and there are no outstanding asynchronous operations.
 /// </remarks>
-HRESULT XalCleanupAsync(
+STDAPI XalCleanupAsync(
     _In_ XAsyncBlock* async
 ) noexcept;
 
@@ -57,7 +57,7 @@ HRESULT XalCleanupAsync(
 /// </summary>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <returns>Result code for this API operation.</returns>
-HRESULT XalCleanupResult(
+STDAPI XalCleanupResult(
     _In_ XAsyncBlock* async
 ) noexcept;
 
@@ -67,7 +67,7 @@ HRESULT XalCleanupResult(
 /// </summary>
 /// <param name="maxUsers">The maximum number of concurrent users.</param>
 /// <returns>Result code for this API operation.  Possible values are S_OK, E_XAL_NOTINITIALIZED, or E_FAIL.</returns>
-HRESULT XalGetMaxUsers(
+STDAPI XalGetMaxUsers(
     _Out_ uint32_t* maxUsers
 ) noexcept;
 
@@ -77,7 +77,7 @@ HRESULT XalGetMaxUsers(
 /// </summary>
 /// <param name="titleId">The Xbox Live title ID.</param>
 /// <returns>Result code for this API operation.  Possible values are S_OK, E_XAL_NOTINITIALIZED, or E_FAIL.</returns>
-HRESULT XalGetTitleId(
+STDAPI XalGetTitleId(
     _Out_ uint32_t* titleId
 ) noexcept;
 
@@ -85,7 +85,7 @@ HRESULT XalGetTitleId(
 /// Get the size of the buffer needed to store the Xbox Live sandbox string.
 /// </summary>
 /// <returns>The size of the sandbox string including the null terminator.</returns>
-size_t XalGetSandboxSize() noexcept;
+STDAPI_(size_t) XalGetSandboxSize() noexcept;
 
 /// <summary>
 /// Get the Xbox Live sandbox that Xal was initialized with. Must be called after
@@ -97,7 +97,7 @@ size_t XalGetSandboxSize() noexcept;
 /// <param name="sandboxUsed">The number of bytes used in the buffer including
 /// the null terminator.</param>
 /// <returns>Result code for this API operation.  Possible values are S_OK, E_XAL_NOTINITIALIZED, or E_FAIL.</returns>
-HRESULT XalGetSandbox(
+STDAPI XalGetSandbox(
     _In_ size_t sandboxSize,
     _Out_writes_(sandboxSize) char* sandbox,
     _Out_opt_ size_t* sandboxUsed
@@ -114,7 +114,7 @@ HRESULT XalGetSandbox(
 /// userIdentifier will be stored in the user and passed to all XalPlatform*
 /// callbacks related to this user.
 /// </remarks>
-HRESULT XalTryAddDefaultUserSilentlyAsync(
+STDAPI XalTryAddDefaultUserSilentlyAsync(
     _In_ uint32_t userIdentifier,
     _In_ XAsyncBlock* async
 ) noexcept;
@@ -127,7 +127,7 @@ HRESULT XalTryAddDefaultUserSilentlyAsync(
 /// <remarks>
 /// If the operations failed, newUser will be NULL.
 /// </remarks>
-HRESULT XalTryAddDefaultUserSilentlyResult(
+STDAPI XalTryAddDefaultUserSilentlyResult(
     _In_ XAsyncBlock* async,
     _Out_ XalUserHandle* newUser
 ) noexcept;
@@ -146,7 +146,7 @@ HRESULT XalTryAddDefaultUserSilentlyResult(
 /// userIdentifier will be stored in the user and passed to all XalPlatform*
 /// callbacks related to this user.
 /// </remarks>
-HRESULT XalTryAddUserByIdAsync(
+STDAPI XalTryAddUserByIdAsync(
     _In_ uint32_t userIdentifier,
     _In_ uint64_t xboxUserId,
     _In_ XAsyncBlock* async
@@ -161,7 +161,7 @@ HRESULT XalTryAddUserByIdAsync(
 /// <remarks>
 /// If the operations failed, newUser will be NULL.
 /// </remarks>
-HRESULT XalTryAddUserByIdResult(
+STDAPI XalTryAddUserByIdResult(
     _In_ XAsyncBlock* async,
     _Out_ XalUserHandle* newUser
 ) noexcept;
@@ -179,7 +179,7 @@ HRESULT XalTryAddUserByIdResult(
 /// userIdentifier will be stored in the user and passed to all XalPlatform*
 /// callbacks related to this user.
 /// </remarks>
-HRESULT XalAddUserWithUiAsync(
+STDAPI XalAddUserWithUiAsync(
     _In_ uint32_t userIdentifier,
     _In_ XAsyncBlock* async
 ) noexcept;
@@ -193,7 +193,7 @@ HRESULT XalAddUserWithUiAsync(
 /// <remarks>
 /// If the operations failed, newUser will be NULL.
 /// </remarks>
-HRESULT XalAddUserWithUiResult(
+STDAPI XalAddUserWithUiResult(
     _In_ XAsyncBlock* async,
     _Out_ XalUserHandle* newUser
 ) noexcept;
@@ -202,7 +202,7 @@ HRESULT XalAddUserWithUiResult(
 /// Checks if the current platform supports retrieving a device user handle.
 /// </summary>
 /// <returns>True if device user present, false if not.</returns>
-bool XalGetDeviceUserIsPresent() noexcept;
+STDAPI_(bool) XalGetDeviceUserIsPresent() noexcept;
 
 /// <summary>
 /// Returns a user which represents the device itself.
@@ -213,7 +213,7 @@ bool XalGetDeviceUserIsPresent() noexcept;
 /// This user handle will have had XalUserDuplicateHandle called on it. Be sure
 /// to call XalUserCloseHandle once it is no longer needed.
 /// </remarks>
-HRESULT XalGetDeviceUser(
+STDAPI XalGetDeviceUser(
     _Out_ XalUserHandle* deviceUser
 ) noexcept;
 
@@ -221,7 +221,7 @@ HRESULT XalGetDeviceUser(
 /// Checks if the user can be signed out on the current platform.
 /// </summary>
 /// <returns>True if user can be signed out, false if user can't.</returns>
-bool XalSignOutUserAsyncIsPresent() noexcept;
+STDAPI_(bool) XalSignOutUserAsyncIsPresent() noexcept;
 
 /// <summary>
 /// Signs out a user from the device.
@@ -242,7 +242,7 @@ bool XalSignOutUserAsyncIsPresent() noexcept;
 /// (see <see cref="XalPlatformWebShowUrlEventHandler"/>) this function will
 /// invoke the hook.
 /// </remarks>
-HRESULT XalSignOutUserAsync(
+STDAPI XalSignOutUserAsync(
     _In_ XalUserHandle user,
     _In_ XAsyncBlock* async
 ) noexcept;
@@ -252,7 +252,7 @@ HRESULT XalSignOutUserAsync(
 /// </summary>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <returns>Result code for this API operation.</returns>
-HRESULT XalSignOutUserResult(
+STDAPI XalSignOutUserResult(
     _In_ XAsyncBlock* async
 ) noexcept;
 
@@ -265,7 +265,7 @@ HRESULT XalSignOutUserResult(
 /// <remarks>
 /// If no user can be found matching the local id, E_XAL_USERNOTFOUND is returned.
 /// </remarks>
-HRESULT XalFindUserByLocalId(
+STDAPI XalFindUserByLocalId(
     _In_ XalUserLocalId localId,
     _Out_ XalUserHandle* user
 ) noexcept;

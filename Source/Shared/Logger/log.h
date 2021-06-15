@@ -2,8 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #pragma once
+#include "internal_mem.h"
 
- 
+#if XSAPI_ANDROID_STUDIO
+#include "trace.h"
+#endif
 
 #define DEFAULT_LOGGER xbox::services::logger::get_logger()
 

@@ -116,7 +116,7 @@ typedef struct XalTelemetryTicket
 /// <param name="persistence">The cll persistence for this event.</param>
 /// <param name="sensitivity">The cll sensitivity for this event.</param>
 /// <param name="sampleRate">The cll sampleRate for this event.</param>
-HRESULT XalTelemetryWriteEvent(
+STDAPI XalTelemetryWriteEvent(
     _In_ XalUserHandle user,
     _In_z_ char const* iKey,
     _In_z_ char const* eventNameWithProvider,

@@ -157,7 +157,7 @@ STDAPI XblAchievementsManagerRemoveLocalUser(
 /// <summary>
 /// Checks whether a specific user has had its initial state synced.
 /// </summary>
-/// <param name="user">Xbox Live User to check.</param>
+/// <param name="xboxUserId">Xbox Live User to check.</param>
 /// <returns>HRESULT return code for this API operation. If the user is not 
 /// initialized, this function will return E_FAIL.</returns>
 STDAPI XblAchievementsManagerIsUserInitialized(
@@ -260,7 +260,7 @@ STDAPI XblAchievementsManagerGetAchievementsByState(
 /// </summary>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>
 /// <param name="achievementId">The UTF-8 encoded achievement ID as defined by Dev Center.</param>
-/// <param name="percentComplete">The completion percentage of the achievement to indicate progress.  
+/// <param name="currentProgess">The completion percentage of the achievement to indicate progress.  
 /// Valid values are from 1 to 100. Set to 100 to unlock the achievement.  
 /// Progress will be set by the server to the highest value sent</param>
 /// <returns>HRESULT return code for this API operation.</returns>
