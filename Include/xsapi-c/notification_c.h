@@ -34,7 +34,6 @@ STDAPI XblNotificationSubscribeToNotificationsAsync(
 ) XBL_NOEXCEPT;
 #endif
 
-#if HC_PLATFORM == HC_PLATFORM_IOS || HC_PLATFORM == HC_PLATFORM_ANDROID || HC_PLATFORM == HC_PLATFORM_UWP
 /// <summary>
 /// Unsubscribes the title from push notifications.
 /// </summary>
@@ -45,6 +44,4 @@ STDAPI XblNotificationUnsubscribeFromNotificationsAsync(
     _In_ XblContextHandle xboxLiveContext,
     _In_ XAsyncBlock* asyncBlock
 ) XBL_NOEXCEPT;
-#endif
-
 }

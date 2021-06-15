@@ -13,7 +13,7 @@ extern "C"
 //------------------------------------------------------------------------------
 // Uwp user functions
 //------------------------------------------------------------------------------
-HRESULT XalUserGetPlatformWebAccount(
+STDAPI XalUserGetPlatformWebAccount(
     _In_ XalUserHandle user,
     _Out_ Windows::Security::Credentials::WebAccount^* webAccount
 ) noexcept;
@@ -24,7 +24,7 @@ HRESULT XalUserGetPlatformWebAccount(
 /// <param name="user">The system user.</param>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <returns>Result code for this API operation.</returns>
-HRESULT XalAddUwpSystemUserSilentAsync(
+STDAPI XalAddUwpSystemUserSilentAsync(
     _In_ Windows::System::User^ user,
     _In_ XAsyncBlock* async
 ) noexcept;

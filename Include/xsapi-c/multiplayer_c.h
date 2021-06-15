@@ -12,9 +12,10 @@ extern "C"
 {
 
 /// <summary>
-/// Defines values used to indicate the state of a tournament game.
-/// DEPRECATED. It will be removed in a future release
+/// Defines values that indicate the state of a tournament game.
+/// DEPRECATED. This enumeration will be removed in a future release.
 /// </summary>
+/// <memof><see cref="XblTournamentGameResultWithRank"/></memof>
 enum class XblTournamentGameResult : uint32_t
 {
     /// <summary>
@@ -49,13 +50,14 @@ enum class XblTournamentGameResult : uint32_t
 };
 
 /// <summary>
-/// Defines values used to indicate the arbitration state of a tournament game.
-/// DEPRECATED. It will be removed in a future release
+/// Defines values that indicate the arbitration state of a tournament game.
+/// DEPRECATED. This enumeration will be removed in a future release.
 /// </summary>
+/// <memof><see cref="XblMultiplayerArbitrationServer"/></memof>
 enum class XblTournamentArbitrationState : uint32_t
 {
     /// <summary>
-    /// No arbitration state set.
+    /// No arbitration state is set.
     /// </summary>
     None,
 
@@ -65,25 +67,27 @@ enum class XblTournamentArbitrationState : uint32_t
     Completed,
 
     /// <summary>
-    /// The match was canceled, for example in the case of forfeiting.
+    /// The match was canceled, such as in the case of forfeiting.
     /// </summary>
     Canceled,
 
     /// <summary>
-    /// The match begun, but no players or servers reported results in time before the arbitration deadline.
+    /// The match began, but no players or servers reported results before the arbitration deadline.
     /// </summary>
     NoResults,
 
     /// <summary>
-    /// Some results were received, and results were compiled based on this incomplete data.
+    /// Some results were received, and results were compiled based on the incomplete data.
     /// </summary>
     PartialResults
 };
 
 /// <summary>
-/// Defines values used to indicate the source for a tournament game state.
-/// DEPRECATED. It will be removed in a future release
+/// Defines values that indicate the source for a tournament game state.
+/// DEPRECATED. This enumeration will be removed in a future release.
 /// </summary>
+/// <memof><see cref="XblMultiplayerArbitrationServer"/></memof>
+/// <memof><see cref="XblMultiplayerTournamentsServer"/></memof>
 enum class XblTournamentGameResultSource : uint32_t
 {
     /// <summary>
@@ -92,7 +96,7 @@ enum class XblTournamentGameResultSource : uint32_t
     None,
 
     /// <summary>
-    /// Game result source is from client arbitration submit.
+    /// Game result is determined by client arbitration.
     /// </summary>
     Arbitration,
 
@@ -108,47 +112,52 @@ enum class XblTournamentGameResultSource : uint32_t
 };
 
 /// <summary>
-/// Defines values used to indicate the status of a tournament game result.
-/// DEPRECATED. It will be removed in a future release
+/// Defines values that indicate the status of a tournament game result.
+/// DEPRECATED. This enumeration will be removed in a future release.
 /// </summary>
+/// <memof><see cref="XblMultiplayerSessionMember"/></memof>
+/// <seealso cref="XblMultiplayerSessionConstants"/>
 enum class XblTournamentArbitrationStatus : uint32_t
 {
     /// <summary>
-    /// Occurs before arbitrationStartTime.
+    /// The system time is before the arbitration start time (`ArbitrationStartTime`), which is also the start time for the match.
     /// </summary>
     Waiting,
 
     /// <summary>
-    /// Occurs after arbitrationStartTime and at least one user has gone active.
+    /// The system time is after the arbitration start time (`ArbitrationStartTime`), and at least one player has become active.
     /// </summary>
     InProgress,
 
     /// <summary>
-    /// The user has reported results and his role in the arbitration process is now done.  
-    /// Occurs either after (arbitrationForfeitTime and no players have joined), (arbitration succeeded), or (arbitrationFinishTime).
+    /// The player reported results, so the player's role in the arbitration process is now done.  
+    /// Occurs when arbitration succeeds, after the arbitration forfeit time (`ArbitrationStartTime` 
+    /// plus the `ForfeitTimeout` delta) if no players have joined, or after arbitration time-out 
+    /// (`ArbitrationStartTime` plus the `ArbitrationTimeout` delta).
     /// </summary>
     Complete,
 
     /// <summary>
-    /// The user has gone active at least once and is now participating in the match.
+    /// The player has become active at least once and is now participating in the match.
     /// </summary>
     Playing,
 
     /// <summary>
-    /// The user was not able to upload results before the arbitrationTimeout deadline.
+    /// The player was not able to upload results before arbitration time-out (`ArbitrationStartTime` plus the `ArbitrationTimeout` delta).
     /// </summary>
     Incomplete,
 
     /// <summary>
-    /// The status is "Joining" until both the XblTournamentArbitrationStatus is "InProgress" and the member is active.
+    /// The system time is after the arbitration start time (`ArbitrationStartTime`), but the player is not yet active.
     /// </summary>
     Joining
 };
 
 /// <summary>
-/// Defines values used to indicate the team session registration state for a tournament.
-/// DEPRECATED. It will be removed in a future release
+/// Defines values that indicate the team session registration state for a tournament.
+/// DEPRECATED. This enumeration will be removed in a future release.
 /// </summary>
+/// <memof><see cref="XblMultiplayerTournamentsServer"/></memof>
 enum class XblTournamentRegistrationState : uint32_t
 {
     /// <summary>
@@ -177,34 +186,35 @@ enum class XblTournamentRegistrationState : uint32_t
     Registered,
 
     /// <summary>
-    /// The team has completed its participation in the Tournament.
+    /// The team completed its participation in the tournament.
     /// </summary>
     Completed
 };
 
 /// <summary>
-/// Defines values used to indicate the reason why the team in under selected tournament registration state.
+/// Defines values that indicate reasons why the team is under selected tournament registration state.
 /// DEPRECATED. It will be removed in a future release
 /// </summary>
+/// <memof><see cref="XblMultiplayerTournamentsServer"/></memof>
 enum class XblTournamentRegistrationReason : uint32_t
 {
     /// <summary>
-    /// The team registration reason is unknown.
+    /// The reason is unknown.
     /// </summary>
     Unknown,
 
     /// <summary>
-    /// The registration for this tournament has been closed.
+    /// The registration for this tournament is closed.
     /// </summary>
     RegistrationClosed,
 
     /// <summary>
-    /// One of the team members have already been registered for this tournament.
+    /// One of the team members is already registered for this tournament.
     /// </summary>
     MemberAlreadyRegistered,
 
     /// <summary>
-    /// The tournament has reached its max team registration limit and is now full.
+    /// The tournament has reached its team registration limit.
     /// </summary>
     TournamentFull,
 
@@ -214,41 +224,55 @@ enum class XblTournamentRegistrationReason : uint32_t
     TeamEliminated,
 
     /// <summary>
-    /// The tournament has been completed.
+    /// The tournament is completed.
     /// </summary>
     TournamentCompleted
 };
 
 /// <summary>
-/// Defines values used to indicate status for visibility or accessibility of a session.
+/// Defines values that indicate the visibility or accessibility of a session.
 /// </summary>
+/// <memof><see cref="XblMultiplayerActivityDetails"/></memof>
+/// <memof><see cref="XblMultiplayerSessionConstants"/></memof>
+/// <memof><see cref="XblMultiplayerSessionInitArgs"/></memof>
+/// <memof><see cref="XblMultiplayerSessionQuery"/></memof>
+/// <memof><see cref="XblMultiplayerSessionQueryResult"/></memof>
+/// <argof><see cref="XblMultiplayerSearchHandleGetVisibility"/></argof>
+/// <argof><see cref="XblMultiplayerSessionConstantsSetVisibility"/></argof>
+/// <remarks>
+/// For more information,
+/// see <see href="live-game-session-visibility-joinability.md">Game session visibility and joinability</see>
+/// and the <see href="live-mpsd-details.md#visibility-and-joinability">Visibility and joinability</see> section 
+/// of <see href="live-mpsd-details.md">Multiplayer Session advanced topics</see>.
+/// </remarks> 
 enum class XblMultiplayerSessionVisibility : uint32_t
 {
     /// <summary>
-    /// Unknown.
+    /// The status is unknown.
     /// </summary>
     Unknown,
 
     /// <summary>
-    /// Ignore the SessionVisibility filter.
+    /// Ignore the session visibility filter.
     /// </summary>
     Any,
 
     /// <summary>
-    /// The session is private and it's not visible to other users who aren't in the session.  
-    /// Joining a visible or private session is a HTTP_E_STATUS_FORBIDDEN (403).
+    /// The session is private and is not visible to players who aren't in the session.  
+    /// Attempting to join causes the service to return HTTP_E_STATUS_FORBIDDEN (403).
     /// </summary>
     PrivateSession,
 
     /// <summary>
-    /// The session is visible to other users who aren't in the session, but the session is read-only to them and they can't join.  
-    /// Joining an visible causes the service to return HTTP_E_STATUS_BAD_REQUEST (400).
+    /// The session is visible to players who aren't in the session, but the session is 
+    /// read-only to them and they can't join.  
+    /// Attempting to join causes the service to return HTTP_E_STATUS_BAD_REQUEST (400).
     /// </summary>
     Visible,
 
     /// <summary>
     /// The session is full and cannot be joined by anyone.  
-    /// Joining an open but full session causes the service to return HTTP_E_STATUS_BAD_REQUEST (400).
+    /// Attempting to join causes the service to return HTTP_E_STATUS_BAD_REQUEST (400).
     /// </summary>
     Full,
 
@@ -259,9 +283,59 @@ enum class XblMultiplayerSessionVisibility : uint32_t
 };
 
 /// <summary>
-/// Defines values used to indicate status for the initialization stage of a session during managed initialization.
+/// Defines values that indicate the initialization stage of a session during managed initialization.
 /// </summary>
+/// <memof><see cref="XblMultiplayerSessionInitializationInfo"/></memof>
+/// <remarks>
+/// For more information about managed initialization, see the "Managed initialization" section 
+/// of <see href="live-matchmaking-target-session.md">Target session initialization and QoS</see>.
+/// </remarks>
 enum class XblMultiplayerInitializationStage : uint32_t
+{
+    /// <summary>
+    /// Stage not known.
+    /// </summary>
+    Unknown,
+
+    /// <summary>
+    /// Stage not set.
+    /// </summary>
+    None,
+
+    /// <summary> 
+    /// Joining stage. Typically, matchmaking creates a session and adds users to the session.
+    /// The client has until the joining timeout to join the session during this stage.
+    /// </summary>
+    Joining,
+
+    /// <summary>
+    /// Measuring stage. Quality of Service (QoS) measurement happens during this stage.
+    /// If the title is manually managing QoS, the title handles this stage.
+    /// Otherwise, the {% term xbox-live-party %} system handles this stage
+    /// when calling `RegisterGameSession` or `RegisterMatchSession`.
+    /// </summary>
+    Measuring,
+
+    /// <summary>
+    /// Evaluating stage. If `externalEvaluation` is false, this stage is skipped.
+    /// Otherwise, the title does its own evaluation.
+    /// </summary>
+    Evaluating,
+
+    /// <summary>
+    /// Failed stage. If the first initilization episode didn't succeed, the session can't be initialized.
+    /// </summary>
+    Failed
+};
+
+/// <summary>
+/// Defines values that indicate the type of metric used to measure matchmaking Quality of Service (QoS) for a session.
+/// </summary>
+/// <memof><see cref="XblMultiplayerPeerToHostRequirements"/></memof>
+/// <remarks>
+/// For more information, see <see href="live-matchmaking-target-session.md">Target session initialization and QoS</see>.
+/// </remarks>
+enum class XblMultiplayerMetrics : uint32_t
 {
     /// <summary>
     /// Unknown.
@@ -269,73 +343,31 @@ enum class XblMultiplayerInitializationStage : uint32_t
     Unknown,
 
     /// <summary>
-    /// Initialization stage not set.
-    /// </summary>
-    None,
-
-    /// <summary> 
-    /// Joining initialization stage.  
-    /// Typically matchmaking creates session and puts users into it.  
-    /// SPC has up to the joining timeout to join the session during this phase. 
-    /// </summary>
-    Joining,
-
-    /// <summary>
-    /// Measuring initialization stage.  Stage where QoS measurement happens.  
-    /// If the title is manually managing QoS, then title will do this stage.  
-    /// Otherwise the Party system will do this when calling RegisterGameSession or RegisterMatchSession.
-    /// </summary>
-    Measuring,
-
-    /// <summary>
-    /// Evaluating initialization stage.  
-    /// If auto evaluate is true, then this stage is skipped.  
-    /// Otherwise the title will do its own evaluation.  
-    /// This stage is applied even with the SPC is managing QoS.
-    /// </summary>
-    Evaluating,
-
-    /// <summary>
-    /// Failed initialization stage.  
-    /// If episode 1 didn't succeed, then goes into failed permanently.
-    /// </summary>
-    Failed
-};
-
-/// <summary>
-/// Defines values used to indicate the type of metric used to measure matchmaking QoS for a session.
-/// </summary>
-enum class XblMultiplayerMetrics : uint32_t
-{
-    /// <summary>
-    /// Unknown metric.
-    /// </summary>
-    Unknown,
-
-    /// <summary>
-    /// Bandwidth host selection metric.
+    /// Upstream (peer-to-host) bandwidth.
     /// </summary>
     BandwidthUp,
 
     /// <summary>
-    /// Bandwidth down host selection metric.
+    /// Downstream (host-to-peer) bandwidth.
     /// </summary>
     BandwidthDown,
 
     /// <summary>
-    /// Bandwidth host selection metric.
+    /// Combined bandwidth.
     /// </summary>
     Bandwidth,
 
     /// <summary>
-    /// Latency host selection metric.
+    /// Upstream (peer-to-host) latency.
     /// </summary>
     Latency
 };
 
 /// <summary>
-/// Defines values used to indicate the current network address translation (NAT) settings for a console connecting to Xbox Live.
+/// Defines values that indicate the current network address translation (NAT) settings for
+/// a console connecting to {% term xbox-live %}.
 /// </summary>
+/// <memof><see cref="XblMultiplayerSessionMember"/></memof>
 enum class XblNetworkAddressTranslationSetting : uint32_t
 {
     /// <summary>
@@ -344,24 +376,29 @@ enum class XblNetworkAddressTranslationSetting : uint32_t
     Unknown,
 
     /// <summary>
-    /// Can connect with any other consoles regardless of their NAT setting.
+    /// Can connect with any consoles regardless of their NAT settings.
     /// </summary>
     Open,
 
     /// <summary>
-    /// Consoles using Moderate NAT settings can only connect with other consoles using Moderate or Open settings.
+    /// Can connect only with consoles that use Moderate or Open settings.
     /// </summary>
     Moderate,
 
     /// <summary>
-    /// Consoles using Strict NAT settings can only connect with other consoles using Open NAT settings.
+    /// Can connect only with consoles that use Open NAT settings.
     /// </summary>
     Strict
 };
 
 /// <summary>
-/// Defines values used to indicate types measurement failures for a session member on the network.
+/// Defines values that indicate why Quality of Service (QoS) measurement failed during session initialization.
 /// </summary>
+/// <memof><see cref="XblMultiplayerSessionMember"/></memof>
+/// <argof><see cref="XblMultiplayerEventArgsFindMatchCompleted"/></argof>
+/// <remarks>
+/// For more information, see <see href="live-matchmaking-target-session.md">Target session initialization and QoS</see>.
+/// </remarks>
 enum class XblMultiplayerMeasurementFailure : uint32_t
 {
     /// <summary>
@@ -370,50 +407,56 @@ enum class XblMultiplayerMeasurementFailure : uint32_t
     Unknown,
 
     /// <summary>
-    /// This player has no measurement failure.
+    /// No measurement failure.
     /// </summary>
     None,
 
     /// <summary>
-    /// This player failed because timeout measurement test failed.
+    /// Measurement timed out.
     /// </summary>
     Timeout,
 
     /// <summary>
-    /// This player failed because latency measurement test failed.
+    /// Measurement of latency failed.
     /// </summary>
     Latency,
 
     /// <summary>
-    /// This player failed because bandwidth up measurement test failed.
+    /// Measurement of upstream (peer-to-host) bandwidth failed.
     /// </summary>
     BandwidthUp,
 
     /// <summary>
-    /// This player failed because bandwidth down measurement test failed.
+    /// Measurement of downstream (host-to-peer) bandwidth failed.
     /// </summary>
     BandwidthDown,
 
     /// <summary>
-    /// This player failed cause someone failed in their group failed.
+    /// Measurement failed for this player failed because measurement failed for another player in the group.
     /// </summary>
     Group,
 
     /// <summary>
-    /// This player failed due to a network error such as the user was unreachable.
+    /// Measurement failed due to a network error; for example, the player was unreachable.
     /// </summary>
     Network,
 
     /// <summary>
-    /// This player failed because your episode failed.  
-    /// This likely happened because there wasn't enough users in the session.
+    /// Measurement failed because the initialization episode failed.
+    /// This likely happened because not enough users were in the session.
     /// </summary>
     Episode
 };
 
 /// <summary>
-/// Defines values used to indicate current status values for a session.
+/// Defines values that indicate the current status of a session.
 /// </summary>
+/// <memof><see cref="XblMultiplayerSessionQueryResult"/></memof>
+/// <remarks>
+/// For more information, see
+/// the <see href="live-mpsd-details.md#session-user-states">Session user states</see> section 
+/// of <see href="live-mpsd-details.md">Multiplayer Session advanced topics</see>.
+/// </remarks>
 enum class XblMultiplayerSessionStatus : uint32_t
 {
     /// <summary>
@@ -422,53 +465,53 @@ enum class XblMultiplayerSessionStatus : uint32_t
     Unknown,
 
     /// <summary>
-    /// The session is active and there is at least one user.
+    /// At least one player is active in the session.
     /// </summary>
     Active,
 
     /// <summary>
-    /// The session is inactive.  
-    /// This means no users in the session are active or all users left the session.
+    /// No players are active in the session or all players left the session.
     /// </summary>
     Inactive,
 
     /// <summary>
-    /// The session is reserved.  
-    /// This means one for more users have not accepted the session invite.
+    /// One or more players have not accepted the session invite.
     /// </summary>
     Reserved
 };
 
 /// <summary>
-/// Defines values used to indicate restrictions on the users who can join a session.
+/// Defines values that indicate restrictions on the users who can join a session.
 /// </summary>
 enum class XblMultiplayerSessionRestriction : uint32_t
 {
     /// <summary>
-    /// The unrecognized restriction type.
+    /// Unknown restriction type.
     /// </summary>
     Unknown,
 
     /// <summary>
-    /// Default value, no restriction.
+    /// No restrictions.
     /// </summary>
     None,
 
     /// <summary>
-    /// If "local", only users whose token's DeviceId matches someone else already in the session and "active": true.
+    /// Only players whose token `DeviceId` values match the `DeviceId` of a player 
+    /// who is already in the session and active.
     /// </summary>
     Local,
 
     /// <summary>
-    /// If "followed", only local users (as defined above) and users who are followed by an 
+    /// Only local players (as defined for `Local`) and players who are followed by an 
     /// existing (not reserved) member of the session can join without a reservation.
     /// </summary>
     Followed
 };
 
 /// <summary>
-/// Defines values used to indicate status for a matchmaking request for a session.
+/// Defines values that indicate the status of a matchmaking request for a session.
 /// </summary>
+/// <memof><see cref="XblMultiplayerMatchmakingServer"/></memof>
 enum class XblMatchmakingStatus : uint32_t
 {
     /// <summary>
@@ -477,54 +520,61 @@ enum class XblMatchmakingStatus : uint32_t
     Unknown,
 
     /// <summary>
-    /// Indicates the matchmaking search is not specified.  
-    /// This status is optional and requires the clientMatchmaking capability.
+    /// The matchmaking search is not specified.  
+    /// This status is optional and requires the `clientMatchmaking` capability.
     /// </summary>
     None,
 
     /// <summary>
-    /// Indicates the matchmaking search is still searching.
+    /// The matchmaking search is still searching.
     /// </summary>
     Searching,
 
     /// <summary>
-    /// Indicates the matchmaking search has expired.
+    /// The matchmaking search has expired.
     /// </summary>
     Expired,
 
     /// <summary>
-    /// Indicates the matchmaking search has found a session.
+    /// The matchmaking search found a session.
     /// </summary>
     Found,
 
     /// <summary>
-    /// Indicates the matchmaking search has been canceled.
+    /// The matchmaking search was canceled.
     /// </summary>
     Canceled
 };
 
 /// <summary>
-/// Defines values used to indicate status for member of a session.
+/// Defines values that indicate the status of a member of a session.
 /// </summary>
+/// <memof><see cref="XblMultiplayerManagerMember"/></memof>
+/// <memof><see cref="XblMultiplayerSessionMember"/></memof>
+/// <argof><see cref="XblMultiplayerSessionCurrentUserSetStatus"/></argof>
 enum class XblMultiplayerSessionMemberStatus : uint32_t
 {
     /// <summary>
-    /// Member is reserved for a specific Xbox User ID.  
-    /// This specific member must join the session to fill the reservation.  
-    /// If a reserved member doesn't join before the JoinTimeout they will be removed.
+    /// The member is reserved for a specific Xbox user ID.  
+    /// The specified member must join the session to fill the reservation.  
+    /// If a reserved member doesn't join before the end of `JoinTimeout` (in 
+    /// the <see cref="XblMultiplayerMemberInitialization"/> structure), the member is removed from the session.
     /// </summary>
     Reserved,
 
     /// <summary>
     /// The member is inactive in the current title.  
-    /// The member may be active in another title as specified by ActiveTitleId.  
-    /// If an inactive member doesn't mark themselves as Active within the MemberInactiveTimeout they will be removed from the session.
+    /// The member may be active in another title, as specified by `ActiveTitleId` in 
+    /// the <see cref="XblMultiplayerSessionMember"/> structure.  
+    /// If an inactive member doesn't mark themselves as active before the end of `MemberInactiveTimeout` 
+    /// (in the <see cref="XblMultiplayerSessionConstants"/> structure), the member is removed from the session.
     /// </summary>
     Inactive,
 
     /// <summary>
     /// When the shell launches the title to start a multiplayer game, the member is marked as ready.  
-    /// If a ready member doesn't mark themselves as Active within the MemberReadyTimeout they will be marked as inactive.
+    /// If a ready member doesn't mark themselves as active before the end of `MemberReadyTimeout` (in 
+    /// the <see cref="XblMultiplayerSessionConstants"/> structure), the member is marked as inactive.
     /// </summary>
     Ready,
 
@@ -535,18 +585,20 @@ enum class XblMultiplayerSessionMemberStatus : uint32_t
 };
 
 /// <summary>
-/// Defines values used to indicate the mode used when creating or writing to a new Multiplayer service session.
+/// Defines values that indicate the mode used when creating or writing to a multiplayer session.
 /// </summary>
+/// <argof><see cref="XblMultiplayerWriteSessionAsync"/></argof>
+/// <argof><see cref="XblMultiplayerWriteSessionByHandleAsync"/></argof>
 enum class XblMultiplayerSessionWriteMode : uint32_t
 {
     /// <summary>
-    /// Create a new multiplayer session.  
+    /// Create a multiplayer session.  
     /// Fails if the session already exists.
     /// </summary>
     CreateNew,
 
     /// <summary>
-    /// Either update or create a new session.  
+    /// Either update or create a session.  
     /// Doesn't care whether the session exists.
     /// </summary>
     UpdateOrCreateNew,
@@ -559,14 +611,14 @@ enum class XblMultiplayerSessionWriteMode : uint32_t
 
     /// <summary>
     /// Updates an existing multiplayer session.  
-    /// Fails with HTTP_E_STATUS_PRECOND_FAILED (HTTP status 412) if eTag on local session doesn't match eTag on server.  
+    /// Fails with HTTP_E_STATUS_PRECOND_FAILED (HTTP status 412) if the ETag on the local session doesn't match the ETag on the server.  
     /// Fails if the session does not exist.
     /// </summary>
     SynchronizedUpdate,
 };
 
 /// <summary>
-/// Defines values used to indicate the write status of a Multiplayer session.
+/// Defines values that indicate the write status of a multiplayer session.
 /// </summary>
 enum class XblWriteSessionStatus : uint32_t
 {
@@ -576,44 +628,45 @@ enum class XblWriteSessionStatus : uint32_t
     Unknown,
 
     /// <summary>
-    /// HTTP Result 403- User does not have proper permission to write a session.
+    /// User does not have permission to write to the session (HTTP status 403).
     /// </summary>
     AccessDenied,
 
     /// <summary>
-    /// HTTP Result 201- Write created session successfully.
+    /// The write operation created the session (HTTP status 201).
     /// </summary>
     Created,
 
     /// <summary>
-    /// HTTP Result 409- Conflict occurred during write about session document.
+    /// A conflict occurred during the write operation (HTTP status 409).
     /// </summary>
     Conflict,
 
     /// <summary>
-    /// HTTP Result 404- Session not found.
+    /// The session was not found (HTTP status 404).
     /// </summary>
     HandleNotFound,
 
     /// <summary>
-    /// HTTP Result 412- Session document is not the most recent.
+    /// The session was updated by another user (HTTP status 412).
     /// </summary>
     OutOfSync,
 
     /// <summary>
-    /// HTTP Result 204- Session deleted successfully.
+    /// The session was deleted successfully (HTTP status 204).
     /// </summary>
     SessionDeleted,
 
     /// <summary>
-    /// HTTP Result 200- Session updated successfully.
+    /// The session was updated successfully (HTTP status 200).
     /// </summary>
     Updated
 };
 
 /// <summary>
-/// Defines values used to indicate change types for a multiplayer session.
+/// Defines values that indicate change types for a multiplayer session.
 /// </summary>
+/// <argof><see cref="XblMultiplayerSessionSetSessionChangeSubscription"/></argof>
 enum class XblMultiplayerSessionChangeTypes : uint32_t
 {
     /// <summary>
@@ -632,12 +685,12 @@ enum class XblMultiplayerSessionChangeTypes : uint32_t
     HostDeviceTokenChange = 0x0002,
 
     /// <summary>
-    /// Changes to the stage of initialization has changed.
+    /// Changes to the stage of initialization.
     /// </summary>
     InitializationStateChange = 0x0004,
 
     /// <summary>
-    /// Changes to the matchmaking status (e.g. match found or expired).
+    /// Changes to the matchmaking status, such as match found or match expired.
     /// </summary>
     MatchmakingStatusChange = 0x0008,
 
@@ -652,29 +705,29 @@ enum class XblMultiplayerSessionChangeTypes : uint32_t
     MemberStatusChange = 0x0020,
 
     /// <summary>
-    /// Changes to the XblMultiplayerJoinability of the session.
+    /// Changes to the joinability (<see cref="XblMultiplayerJoinability"/>) of the session.
     /// </summary>
     SessionJoinabilityChange = 0x0040,
 
     /// <summary>
-    /// Changes within properties/custom.
+    /// Changes in the custom properties of the session.
     /// </summary>
     CustomPropertyChange = 0x0080,
 
     /// <summary>
-    /// Changes within member/properties/custom, for any of the members.
+    /// Changes in the custom properties of any of the members.
     /// </summary>
     MemberCustomPropertyChange = 0x0100,
 
     /// <summary>
-    /// Changes within tournament server properties. Such as next game, last game, or registration.
-    /// DEPRECATED. It will be removed in a future release
+    /// Changes in tournament server properties, such as next game, last game, or registration.
+    /// DEPRECATED. This value will be removed in a future release.
     /// </summary>
     TournamentPropertyChange = 0x0200,
 
     /// <summary>
-    /// Changes within arbitration server properties. Such as game results.
-    /// DEPRECATED. It will be removed in a future release
+    /// Changes in arbitration server properties, such as game results.
+    /// DEPRECATED. This value will be removed in a future release.
     /// </summary>
     ArbitrationPropertyChange = 0x0400
 };
@@ -682,11 +735,13 @@ enum class XblMultiplayerSessionChangeTypes : uint32_t
 DEFINE_ENUM_FLAG_OPERATORS(XblMultiplayerSessionChangeTypes);
 
 /// <summary>
-/// Defines values used to indicate mutable_role_setting types for a multiplayer role.
+/// Defines values that indicate which multiplayer role settings are mutable.
 /// </summary>
+/// <memof><see cref="XblMultiplayerRoleType"/></memof>
 /// <remarks>
-/// Only the session owner can modify role settings and only those that are set in XblMultiplayerRoleType::MutableRoleSettings.  
-/// The XblMutableRoleSettings can be set in the session template.
+/// Only the session owner can modify role settings and only those that are set 
+/// in `XblMultiplayerRoleType::MutableRoleSettings`.  
+/// You can set `XblMutableRoleSettings` in the session template.
 /// </remarks>
 enum class XblMutableRoleSettings : uint32_t
 {
@@ -696,12 +751,12 @@ enum class XblMutableRoleSettings : uint32_t
     None = 0x0,
 
     /// <summary>
-    /// Allows you to set a max count for the multiplayer role.
+    /// Allows you to set the maximum number of players that can fill the role.
     /// </summary>
     Max = 0x1,
 
     /// <summary>
-    /// Allows you to set a target count for the multiplayer role.
+    /// Allows you to set the target number of players that should fill the role.
     /// </summary>
     Target = 0x2
 };
@@ -713,8 +768,9 @@ DEFINE_ENUM_FLAG_OPERATORS(XblMutableRoleSettings);
 
 /// <summary>
 /// Represents a reference to a tournament reference.
-/// DEPRECATED. It will be removed in a future release
+/// DEPRECATED. This structure will be removed in a future release.
 /// </summary>
+/// <memof><see cref="XblMultiplayerTournamentsServer"/></memof>
 typedef struct XBL_DEPRECATED XblTournamentReference 
 {
     /// <summary>
@@ -728,7 +784,7 @@ typedef struct XBL_DEPRECATED XblTournamentReference
     _Null_terminated_ char TournamentId[XBL_GUID_LENGTH];
 
     /// <summary>
-    /// The organizer name of the tournament.
+    /// The name of the tournament organizer.
     /// </summary>
     _Null_terminated_ char Organizer[XBL_TOURNAMENT_REFERENCE_ORGANIZER_LENGTH];
 
@@ -740,8 +796,8 @@ typedef struct XBL_DEPRECATED XblTournamentReference
 
 
 /// <summary>
-/// The result of a multiplayer game.
-/// DEPRECATED. It will be removed in a future release
+/// Represents the result of a multiplayer game.
+/// DEPRECATED. This structure will be removed in a future release.
 /// </summary>
 typedef struct XBL_DEPRECATED XblTournamentGameResultWithRank
 {
@@ -751,19 +807,19 @@ typedef struct XBL_DEPRECATED XblTournamentGameResultWithRank
     XblTournamentGameResult Result;
 
     /// <summary>
-    /// The ranking of the result. Only applies when result is XblTournamentGameResult::Rank.
+    /// The ranking of the result. Applies only when `Result` is `XblTournamentGameResult::Rank`.
     /// </summary>
     uint64_t Ranking;
 } XblTournamentGameResultWithRank;
 
 /// <summary>
-/// A team's result for a multiplayer game.
-/// DEPRECATED. It will be removed in a future release
+/// Represents a team result for a multiplayer game.
+/// DEPRECATED. This structure will be removed in a future release.
 /// </summary>
 typedef struct XBL_DEPRECATED XblTournamentTeamResult
 {
     /// <summary>
-    /// Name of the team that the result is for.
+    /// Name of the team.
     /// </summary>
     const char* Team;
 
@@ -778,27 +834,32 @@ typedef struct XBL_DEPRECATED XblTournamentTeamResult
 } XblTournamentTeamResult;
 
 /// <summary>
-/// Represents requirements that apply to each connection between a host candidate and session members.
+/// Represents requirements for each connection between a host candidate and session members.
 /// </summary>
+/// <memof><see cref="XblMultiplayerSessionConstants"/></memof>
+/// <argof><see cref="XblMultiplayerSessionConstantsSetPeerToHostRequirements"/></argof>
+/// <remarks>
+/// For more information, see <see href="live-matchmaking-target-session.md">Target session initialization and QoS</see>.
+/// </remarks>
 typedef struct XblMultiplayerPeerToHostRequirements
 {
     /// <summary>
-    /// The maximum latency, in milliseconds, for the peer to host connection.
+    /// The maximum latency, in milliseconds, of the upstream (peer-to-host) connection.
     /// </summary>
     uint64_t LatencyMaximum;
 
     /// <summary>
-    /// The minimum bandwidth down in kilobits per second for the peer to host connection.
+    /// The minimum bandwidth, in kilobits per second, of the downstream (host-to-peer) connection.
     /// </summary>
     uint64_t BandwidthDownMinimumInKbps;
 
     /// <summary>
-    /// The minimum bandwidth up in kilobits per second for the peer to host connection.
+    /// The minimum bandwidth, in kilobits per second, of the upstream (peer-to-host) connection.
     /// </summary>
     uint64_t BandwidthUpMinimumInKbps;
 
     /// <summary>
-    /// Indicates which metric was used to select the host.
+    /// The metric used to select the host.
     /// </summary>
     XblMultiplayerMetrics HostSelectionMetric;
 } XblMultiplayerPeerToHostRequirements;
@@ -806,234 +867,258 @@ typedef struct XblMultiplayerPeerToHostRequirements
 /// <summary>
 /// Represents requirements for a connection between session members.
 /// </summary>
+/// <memof><see cref="XblMultiplayerSessionConstants"/></memof>
+/// <argof><see cref="XblMultiplayerSessionConstantsSetPeerToPeerRequirements"/></argof>
 typedef struct XblMultiplayerPeerToPeerRequirements
 {
     /// <summary>
-    /// The maximum latency, in milliseconds, for the peer to peer connection.
+    /// The maximum latency, in milliseconds, for the peer-to-peer connection.
     /// </summary>
     uint64_t LatencyMaximum;
 
     /// <summary>
-    /// The minimum bandwidth in kilobits per second for the peer to peer connection.
+    /// The minimum bandwidth, in kilobits per second, for the peer-to-peer connection.
     /// </summary>
     uint64_t BandwidthMinimumInKbps;
 } XblMultiplayerPeerToPeerRequirements;
 
 /// <summary>
-/// Used to configure requirements and initialize a new Multiplayer session.
+/// Represents requirements for a new Multiplayer service session.
 /// </summary>
+/// <memof><see cref="XblMultiplayerSessionConstants"/></memof>
+/// <argof><see cref="XblMultiplayerSessionConstantsSetMemberInitialization"/></argof>
 typedef struct XblMultiplayerMemberInitialization
 {
     /// <summary>
-    /// Timeout in milliseconds for the first stage of the QoS process which is the joining stage.
+    /// Maximum time, in milliseconds, for the joining stage of the Quality of Service (QoS) process.
     /// </summary>
     uint64_t JoinTimeout;
 
     /// <summary>
-    /// Timeout in milliseconds for the measurement stage of the QoS process.
+    /// Maximum time, in milliseconds, for the measurement stage of the QoS process.
     /// </summary>
     uint64_t MeasurementTimeout;
 
     /// <summary>
-    /// Timeout in milliseconds for the evaluation stage of the QoS process.
+    /// Maximum time, in milliseconds, for the evaluation stage of the QoS process.
     /// </summary>
     uint64_t EvaluationTimeout;
 
     /// <summary>
-    /// This is an optional evaluate stage for title. The title can do evaluation when set to true.
+    /// When set to true, indicates that the title performs the evaluation stage.
     /// </summary>
     bool ExternalEvaluation;
 
     /// <summary>
-    /// Defaults to 2. Must be between 1 and maxMemberCount. Only applies to initialization episode zero.
+    /// Minimum number of members for the session. Defaults to 2. Must be between 1 and `maxMemberCount`.  
+    /// Applies only to the joining stage.
     /// </summary>
     uint32_t MembersNeededToStart;
 } XblMultiplayerMemberInitialization;
 
 /// <summary>
-/// Represents the capabilities of a multiplayer session.
+/// Represents the capabilities of a Multiplayer service session.
 /// </summary>
+/// <memof><see cref="XblMultiplayerSessionConstants"/></memof>
+/// <argof><see cref="XblMultiplayerSessionConstantsSetCapabilities"/></argof>
 /// <remarks>
-/// Session capabilities are boolean values that are optionally set in the session template.  
-/// If no capabilities are needed, an empty SessionCapabilities object should be in the template 
-/// to prevent capabilities from being specified on session creation, unless the title 
-/// requires dynamic session capabilities.
+/// Session capabilities are optional Boolean values that are set in the session template.  
+/// If no capabilities are needed, an empty `SessionCapabilities` object should be in the template 
+/// to prevent capabilities from being specified at session creation, unless the title 
+/// requires dynamic session capabilities.<br/><br/>
+/// For more information, see the <see href="live-mpsd-details.md#session-capabilities">Session capabilities</see> 
+/// section of <see href="live-mpsd-details.md">Multiplayer Session advanced topics</see>.
 /// </remarks>
 typedef struct XblMultiplayerSessionCapabilities
 {
     /// <summary>
-    /// If false, the session can't enable any metrics and the session members can not set their SecureDeviceAddress.
+    /// Indicates whether a session can enable metrics and session members can set `secureDeviceAddress`.
+    /// If false, the session can't enable any metrics, and session members can't set `secureDeviceAddress`.
     /// </summary>
     bool Connectivity;
 
     /// <summary>
-    /// True if team capability is set on the session for a tournament.
-    /// DEPRECATED. It will be removed in a future release
+    /// If true, team capability is set on the session for a tournament.
+    /// DEPRECATED. This member will be removed in a future release.
     /// </summary>
     XBL_DEPRECATED bool Team;
 
     /// <summary>
-    /// True if arbitration capability is set on the session for a tournament.
-    /// DEPRECATED. It will be removed in a future release
+    /// If true, arbitration capability is set on the session for a tournament.
+    /// DEPRECATED. This member will be removed in a future release.
     /// </summary>
     XBL_DEPRECATED bool Arbitration;
 
     /// <summary>
-    /// By default (if false), active users are required to remain online playing the title, 
-    /// otherwise they get demoted to inactive status.  
-    /// Setting this flag to true disables this check so that members stay active indefinitely.
+    /// If false (the default value), active users are required to remain online playing the title.
+    /// If they don't, they are demoted to inactive status.  
+    /// Set this flag to true to enable session members to stay active indefinitely.
     /// </summary>
     bool SuppressPresenceActivityCheck;
 
     /// <summary>
-    /// Indicates whether the session represents actual gameplay, as opposed to setup/menu time like a lobby or matchmaking.  
-    /// If true, then the session is in gameplay mode.
+    /// Indicates whether the session represents actual gameplay rather than time in setup or 
+    /// a menu, such a lobby or during matchmaking.  
+    /// If true, the session is in gameplay mode.
     /// </summary>
     bool Gameplay;
 
     /// <summary>
-    /// If true, this session can host a large number of users, which has impact on other session properties (see documentation).
+    /// If true, the session can host 101 to 1000 users, which affects other session features.
+    /// If false, the session can host 1 to 100 users. For more information, see 
+    /// the <see href="live-mpsd-details.md#session-size">Session size</see> section 
+    /// of <see href="live-mpsd-details.md">Multiplayer Session advanced topics</see>.
     /// </summary>
     bool Large;
 
     /// <summary>
-    /// If true, this connection is required to have a member be active (see documentation).
+    /// If true, a connection is required for a member to be marked as active. To enable session notifications 
+    /// and detect disconnections, this member must be set to true. For more information, see 
+    /// the <see href="live-mpsd-how-tos.md#sfmscn">Subscribe for MPSD session change notifications</see> section 
+    /// of <see href="live-mpsd-how-tos.md">Multiplayer tasks</see>.
     /// </summary>
     bool ConnectionRequiredForActiveMembers;
 
     /// <summary>
-    /// Session supports calls from platforms without strong title identity.  
+    /// If true, the session supports calls from platforms without strong title identity.  
     /// This capability can't be set on large sessions.
     /// </summary>
     bool UserAuthorizationStyle;
 
     /// <summary>
-    /// Session supports cross play between PC and Xbox.
+    /// If true, the session supports crossplay between {% term platform_windows %} PC and Xbox.
     /// </summary>
     bool Crossplay;
 
     /// <summary>
-    /// True, if the session can be linked to a search handle for searching.
+    /// If true, the session can be linked to a search handle for searching.
     /// </summary>
     bool Searchable;
 
     /// <summary>
-    /// If you have user_authorization_style set, then in order to be searchable, you must have owners set.
+    /// If true, the session has owners. For a session to be searchable when `UserAuthorizationStyle` is 
+    /// true, the session must have owners.
     /// </summary>
     bool HasOwners;
 } XblMultiplayerSessionCapabilities;
 
 /// <summary>
-/// Represents constant values for a multiplayer session.
+/// Represents constants for a multiplayer session.
 /// </summary>
+/// <remarks>
+/// Session constants are set by the creator or by the session template only when a session is created.
+/// </remarks>
 typedef struct XblMultiplayerSessionConstants
 {
     /// <summary>
-    /// The maximum number of members in this session.
+    /// The maximum number of members in the session.
     /// </summary>
     uint32_t MaxMembersInSession;
 
     /// <summary>
-    /// The visibility of this session.
+    /// The visibility of the session.
     /// </summary>
     XblMultiplayerSessionVisibility Visibility;
 
     /// <summary>
-    /// A collection of Xbox User IDs indicating who initiated the session. (Optional)
+    /// A collection of Xbox user IDs indicating who initiated the session. (Optional)
     /// </summary>
     uint64_t* InitiatorXuids;
 
     /// <summary>
-    /// The number of entries in the InitiatorXuids array.
+    /// The number of entries in the `InitiatorXuids` array.
     /// </summary>
     size_t InitiatorXuidsCount;
 
     /// <summary>
-    /// JSON string that specify the custom constants for the session.  
-    /// These can not be changed after the session is created. (Optional)
+    /// Any custom constants for the session, specified in a JSON string.  
+    /// These constants can't be changed after the session is created. (Optional)
     /// </summary>
     const char* CustomJson;
 
     /// <summary>
-    /// JSON string that specify the cloud compute package constants for the session.  
-    /// These can not be changed after the session is created. (Optional)
+    /// The Cloud Compute package constants for the session, specified in a JSON string.  
+    /// These constants can't be changed after the session is created. (Optional)
     /// </summary>
     const char* SessionCloudComputePackageConstantsJson;
 
     /// <summary>
-    /// If a member reservation does not join within this timeout, then reservation is removed.
+    /// Maximum time, in milliseconds, for a member with a reservation to join the session. 
+    /// If the member doesn't join within this time, the reservation is removed.
     /// </summary>
     uint64_t MemberReservedTimeout;
 
     /// <summary>
-    /// If an inactive member reservation does not become active within this timeout, then the inactive member is removed from the session.
+    /// Maximum time, in milliseconds, for an inactive member to become active. 
+    /// If an inactive member doesn't become active within this time, the member is removed from the session.
     /// </summary>
     uint64_t MemberInactiveTimeout;
 
     /// <summary>
-    /// If a member who is marked as ready doesn't mark themselves as active within this timeout, then member becomes inactive.  
+    /// Maximum time, in milliseconds, for a member who is marked as ready to become active. 
     /// When the shell launches the title to start a multiplayer game, the member is marked as ready.
+    /// If a member who is marked as ready doesn't become active within this time, the member becomes inactive.  
     /// </summary>
     uint64_t MemberReadyTimeout;
 
     /// <summary>
-    /// If the session is empty for this timeout, then the session is deleted.
+    /// Maximum time, in milliseconds, that the session can remain empty. 
+    /// If no members join the session within this time, the session is deleted.
     /// </summary>
     uint64_t SessionEmptyTimeout;
 
     /// <summary>
-    /// Delta from start time representing the point at which results are finalized.  
-    /// If no one has reported (client or server) at this point, we declare the match results incomplete.
-    /// DEPRECATED. It will be removed in a future release
+    /// Delta, in milliseconds, from start time that represents the time at which results are finalized.  
+    /// If no one (client or server) has reported at this time, we declare the match results incomplete.
+    /// DEPRECATED. This member will be removed in a future release.
     /// </summary>
     XBL_DEPRECATED uint64_t ArbitrationTimeout;
 
     /// <summary>
-    /// Delta from start time representing the point at which, if the session has no active users, the match is canceled.
-    /// DEPRECATED. It will be removed in a future release
+    /// Delta, in milliseconds, from start time that represents the time at which, if the session has 
+    /// no active users, the match is canceled.
+    /// DEPRECATED. This member will be removed in a future release.
     /// </summary>
     XBL_DEPRECATED uint64_t ForfeitTimeout;
 
     /// <summary>
-    /// Indicates if the title wants latency measured for determining connectivity.  
-    /// Requires CapabilitiesConnectivity capability.
+    /// If true, indicates that the title wants latency measured to help determine connectivity.  
+    /// Requires `capabilities.connectivity` to be true.
     /// </summary>
     bool EnableMetricsLatency;
 
     /// <summary>
-    /// Indicates if the title wants bandwidth down measured for determining connectivity.  
-    /// Requires CapabilitiesConnectivity capability.
+    /// If true, indicates that the title wants downstream (host-to-peer) bandwidth measured to help 
+    /// determine connectivity. Requires `capabilities.connectivity` to be true.
     /// </summary>
     bool EnableMetricsBandwidthDown;
 
     /// <summary>
-    /// Indicates if the title wants bandwidth up measured for determining connectivity.  
-    /// Requires CapabilitiesConnectivity capability.
+    /// If true, indicates that the title wants upstream (peer-to-host) bandwidth measured to help 
+    /// determine connectivity. Requires `capabilities.connectivity` to be true.
     /// </summary>
     bool EnableMetricsBandwidthUp;
 
     /// <summary>
-    /// Indicates if the title wants a custom measurement measured for determining connectivity.  
-    /// Requires CapabilitiesConnectivity capability.
+    /// If true, indicates that the title wants a custom measurement to help determine connectivity.  
+    /// Requires `capabilities.connectivity` to be true.
     /// </summary>
     bool EnableMetricsCustom;
 
     /// <summary>
-    /// If a member_initialization object is set, the session expects the client system or title 
-    /// to perform initialization following session creation.  
-    /// The timeouts and initialization stages are automatically tracked by
-    /// the session, including initial QoS if any metrics are set.  
-    /// Will be null if it is not set.
+    /// If set, the session expects the client system or title to perform initialization after session creation.  
+    /// Timeouts and initialization stages are automatically tracked by the session, including 
+    /// initial Quality of Service (QoS) measurements if any metrics are set.
     /// </summary>
     XblMultiplayerMemberInitialization* MemberInitialization;
 
     /// <summary>
-    /// Peer to peer QoS requirements.
+    /// QoS requirements for a connection between session members.
     /// </summary>
     XblMultiplayerPeerToPeerRequirements PeerToPeerRequirements;
 
     /// <summary>
-    /// Peer to host QoS requirements.
+    /// QoS requirements for a connection between a host candidate and session members.
     /// </summary>
     XblMultiplayerPeerToHostRequirements PeerToHostRequirements;
 
@@ -1058,16 +1143,18 @@ typedef struct XblMultiplayerSessionConstants
 #define XBL_MULTIPLAYER_SESSION_NAME_MAX_LENGTH             XBL_MULTIPLAYER_SESSION_TEMPLATE_NAME_MAX_LENGTH
 
 /// <summary>
-/// MPSD can create various handles which refer to a session.  
-/// They are immutable and can only be created, read, and deleted.
+/// Represents a handle ID of a multiplayer session.
 /// </summary>
+/// <argof><see cref="XblMultiplayerSetTransferHandleResult"/></argof>
 /// <remarks>
+/// Multiplayer Session Directory (MPSD) can create various handles that refer to a session.  
+/// They are immutable and can only be created, read, and deleted.
 /// Note that this handle ID references to a service side object.
 /// </remarks>
 typedef struct XblMultiplayerSessionHandleId
 {
     /// <summary>
-    /// MPSD service generated ID that identifies the handle.
+    /// The ID of the handle that MSPD created.
     /// </summary>
     _Null_terminated_ char value[XBL_GUID_LENGTH];
 } XblMultiplayerSessionHandleId;
@@ -1078,7 +1165,7 @@ typedef struct XblMultiplayerSessionHandleId
 typedef struct XblMultiplayerSessionReference
 {
     /// <summary>
-    /// The service configuration ID specific to the title.
+    /// The service configuration ID (SCID) specific to the title.
     /// </summary>
     _Null_terminated_ char Scid[XBL_SCID_LENGTH];
 
@@ -1097,23 +1184,30 @@ typedef struct XblMultiplayerSessionReference
 
 /// <summary>
 /// Represents a URI path representation of a session reference.  
-/// Format is /serviceconfigs/{scid}/sessiontemplates/{session-template-name}/sessions/{session-name}.
 /// </summary>
+/// <remarks>
+/// The format of the URI path 
+/// is `/serviceconfigs/{scid}/sessiontemplates/{session-template-name}/sessions/{session-name}`, where 
+/// `{scid}` is the service configuration ID specific to the title.
+/// </remarks>
+/// <argof><see cref="XblMultiplayerSessionReferenceToUriPath"/></argof>
 typedef struct XblMultiplayerSessionReferenceUri
 {
     /// <summary>
-    /// The stored URI path.
+    /// The URI path.
     /// </summary>
     _Null_terminated_ char value[XBL_MULTIPLAYER_SESSION_REFERENCE_URI_MAX_LENGTH];
 } XblMultiplayerSessionReferenceUri;
 
 /// <summary>
-/// Creates an XblMultiplayerSessionReference from a scid, session template name, and session name.
+/// Creates an <see cref="XblMultiplayerSessionReference"/> object from a service configuration ID (SCID), session 
+/// template name, and session name.
 /// </summary>
-/// <param name="scid">The Service Configuration ID (SCID) that the session is a part of. The SCID is considered case sensitive so paste it directly from the Partner Center</param>
-/// <param name="sessionTemplateName">The session template name.</param>
-/// <param name="sessionName">The session name.</param>
-/// <returns>A reference to the multiplayer session that was created.</returns>
+/// <param name="scid">The SCID that the session is a part of. The SCID is case-sensitive, so paste it directly 
+/// from Partner Center.</param>
+/// <param name="sessionTemplateName">The name of the session template.</param>
+/// <param name="sessionName">The name of the session.</param>
+/// <returns>A reference to the multiplayer session.</returns>
 STDAPI_(XblMultiplayerSessionReference) XblMultiplayerSessionReferenceCreate(
     _In_z_ const char* scid,
     _In_z_ const char* sessionTemplateName,
@@ -1121,7 +1215,7 @@ STDAPI_(XblMultiplayerSessionReference) XblMultiplayerSessionReferenceCreate(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns the session reference parsed from URI.
+/// Returns the session reference parsed from a URI.
 /// </summary>
 /// <param name="path">The URI path.</param>
 /// <param name="sessionReference">Passes back the session reference.</param>
@@ -1132,9 +1226,9 @@ STDAPI XblMultiplayerSessionReferenceParseFromUriPath(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns a URI path representation of the session reference.
+/// Returns the URI path representation of a session reference.
 /// </summary>
-/// <param name="sessionReference">The session reference.</param>
+/// <param name="sessionReference">A session reference.</param>
 /// <param name="sessionReferenceUri">Passes back the URI representation of the session reference.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMultiplayerSessionReferenceToUriPath(
@@ -1143,49 +1237,52 @@ STDAPI XblMultiplayerSessionReferenceToUriPath(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Checks whether an XblMultiplayerSessionReference is well formed.  
-/// It is considered well formed if none of the fields are empty strings.
+/// Verifies whether an <see cref="XblMultiplayerSessionReference"/> object is well formed.
 /// </summary>
 /// <param name="sessionReference">The session reference.</param>
 /// <returns>Returns true if session is well formed, false if session is not well formed.</returns>
+/// <remarks>
+/// An <see cref="XblMultiplayerSessionReference"/> object is considered to be well formed if none 
+/// of the fields are empty strings.
+/// </remarks>
 STDAPI_(bool) XblMultiplayerSessionReferenceIsValid(
     _In_ const XblMultiplayerSessionReference* sessionReference
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Represents the matchmaking server supporting the multiplayer session.
+/// Represents the matchmaking server that supports a multiplayer session.
 /// </summary>
 typedef struct XblMultiplayerMatchmakingServer
 {
     /// <summary>
-    /// The Matchmaking Status of the Multiplayer Session Server.
+    /// The status of the matchmaking server.
     /// </summary>
     XblMatchmakingStatus Status;
 
     /// <summary>
-    /// The Matchmaking Status Details of the Multiplayer Session Server.
+    /// The status details, if any, of the matchmaking server.
     /// </summary>
     const char* StatusDetails;
 
     /// <summary>
-    /// The Typical Wait of the Multiplayer Session Server.
+    /// The typical wait time, in seconds.
     /// </summary>
     uint32_t TypicalWaitInSeconds;
 
     /// <summary>
-    /// The Target Session Reference of the Multiplayer Session Server.
+    /// A reference to the target session.
     /// </summary>
     XblMultiplayerSessionReference TargetSessionRef;
 } XblMultiplayerMatchmakingServer;
 
 /// <summary>
-/// Represents the arbitration server supporting the multiplayer session.
-/// DEPRECATED. It will be removed in a future release
+/// Represents the arbitration server that supports a multiplayer session.
+/// DEPRECATED. This structure will be removed in a future release.
 /// </summary>
 typedef struct XBL_DEPRECATED XblMultiplayerArbitrationServer
 {
     /// <summary>
-    /// The start time for the match. This is also when the arbitration time starts.
+    /// The start time of the match. This time is also when arbitration starts.
     /// </summary>
     time_t ArbitrationStartTime;
 
@@ -1200,7 +1297,7 @@ typedef struct XBL_DEPRECATED XblMultiplayerArbitrationServer
     XblTournamentGameResultSource ResultSource;
 
     /// <summary>
-    /// A value from 0-100 that indicates the confidence level of this result.
+    /// A value from 0 through 100 that indicates the confidence level of the result.
     /// </summary>
     uint32_t ResultConfidenceLevel;
 
@@ -1220,24 +1317,24 @@ typedef struct XBL_DEPRECATED XblMultiplayerArbitrationServer
 
 /// <summary>
 /// Represents a team in a tournament.
-/// DEPRECATED. It will be removed in a future release
+/// DEPRECATED. This structure will be removed in a future release.
 /// </summary>
 typedef struct XBL_DEPRECATED XblMultiplayerTournamentTeam
 {
     /// <summary>
-    /// Id of the team.
+    /// ID of the team.
     /// </summary>
     const char* TeamId;
 
     /// <summary>
-    /// Session reference for the session the team is in.
+    /// Session reference of the session the team is in.
     /// </summary>
     XblMultiplayerSessionReference TeamSessionReference;
 } XblMultiplayerTournamentTeam;
 
 /// <summary>
-/// Represents the tournament server supporting the multiplayer session.
-/// DEPRECATED. It will be removed in a future release
+/// Represents the tournament server that supports a multiplayer session.
+/// DEPRECATED. This structure will be removed in a future release.
 /// </summary>
 typedef struct XBL_DEPRECATED XblMultiplayerTournamentsServer 
 {
@@ -1263,40 +1360,40 @@ typedef struct XBL_DEPRECATED XblMultiplayerTournamentsServer
     size_t TeamsCount;
 
     /// <summary>
-    /// The tournament registration state of the team.
+    /// The registration state of the team.
     /// </summary>
     XblTournamentRegistrationState RegistrationState;
 
     /// <summary>
-    /// The tournament registration reason for the certain state.
+    /// The reason for the registration state.
     /// </summary>
     XblTournamentRegistrationReason RegistrationReason;
 
     /// <summary>
-    /// Next game's start time for the tournament.
+    /// The start time of the next game in the tournament.
     /// </summary>
     time_t NextGameStartTime;
 
     /// <summary>
-    /// Next game session reference for the tournament.
+    /// The session reference of the next game in the tournament.
     /// </summary>
     XblMultiplayerSessionReference NextGameSessionReference;
 
     /// <summary>
-    /// The last game's end time for the tournament.
+    /// The end time of the last game in the tournament.
     /// </summary>
     time_t LastGameEndTime;
 
     XBL_WARNING_PUSH
     XBL_WARNING_DISABLE_DEPRECATED
     /// <summary>
-    /// The last game's state for the tournament.
+    /// The result of the last game in the tournament.
     /// </summary>
     XblTournamentTeamResult LastTeamResult;
     XBL_WARNING_POP
 
     /// <summary>
-    /// The source for the last game's state of the tournament.
+    /// The source of the result of the last game in the tournament.
     /// </summary>
     XblTournamentGameResultSource LastGameResultSource;
 } XblMultiplayerTournamentsServer;
@@ -1304,6 +1401,11 @@ typedef struct XBL_DEPRECATED XblMultiplayerTournamentsServer
 /// <summary>
 /// Represents a category of roles for a multiplayer session.
 /// </summary>
+/// <memof><see cref="XblMultiplayerRole"/></memof>
+/// <argof><see cref="XblMultiplayerSessionRoleTypes"/></argof>
+/// <remarks>
+/// For more information, see <see href="live-multiplayer-roles.md">Multiplayer roles</see>.
+/// </remarks>
 typedef struct XblMultiplayerRoleType
 {
     /// <summary>
@@ -1317,7 +1419,7 @@ typedef struct XblMultiplayerRoleType
     bool OwnerManaged;
 
     /// <summary>
-    /// Which role settings for roles in this role type can be modified throughout the life of the session.  
+    /// The settings (for roles in this role type) that can be modified throughout the life of the session.  
     /// Exclude role settings to lock them.
     /// </summary>
     XblMutableRoleSettings MutableRoleSettings;
@@ -1328,7 +1430,7 @@ typedef struct XblMultiplayerRoleType
     struct XblMultiplayerRole* Roles;
 
     /// <summary>
-    /// The number of roles in the Roles array.
+    /// The number of roles in the `Roles` array.
     /// </summary>
     size_t RoleCount;
 } XblMultiplayerRoleType;
@@ -3623,17 +3725,19 @@ STDAPI XblMultiplayerSendInvitesResult(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// DEPRECATED - Call XblMultiplayerGetActivitiesWithPropertiesForSocialGroupAsync which also populates CustomSessionProperties in the result.  
-/// Queries for the current activity for a socialgroup of users associated with a particular "owner" user.  
+/// DEPRECATED - Call <see cref="XblMultiplayerGetActivitiesWithPropertiesForSocialGroupAsync"/>, which also 
+/// populates `CustomSessionProperties` in the result.<br/>  
+/// Queries for the current activity for a social group of players associated with a particular "owner" player.  
 /// </summary>
-/// <param name="xboxLiveContext">Xbox live context for the local user.</param>
-/// <param name="scid">The Service Configuration ID (SCID) within which to query for activities. The SCID is considered case sensitive so paste it directly from the Partner Center</param>
-/// <param name="socialGroupOwnerXuid">The person whose social group will be used for the query.</param>
-/// <param name="socialGroup">The social group to use in order to get the list of users. (e.g. "people" or "favorites")</param>
-/// <param name="async">The AsyncBlock for this operation.</param>
+/// <param name="xboxLiveContext">{% term xbox-live %} context for the local player.</param>
+/// <param name="scid">The service configuration identifier (SCID) within which to query for activities. 
+/// The SCID is case-sensitive, so paste it directly from Partner Center.</param>
+/// <param name="socialGroupOwnerXuid">The player whose social group will be used for the query.</param>
+/// <param name="socialGroup">The social group (such as "people" or "favorites") to use to get the list of users.</param>
+/// <param name="async">The `XAsyncBlock` for this operation.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// There is no paging or continuation, and the multiplayer service will limit the number of items returned to 100.
+/// No paging or continuation is available. The Multiplayer service limits the number of items returned to 100.
 /// </remarks>
 STDAPI XblMultiplayerGetActivitiesForSocialGroupAsync(
     _In_ XblContextHandle xboxLiveContext,
@@ -3644,16 +3748,17 @@ STDAPI XblMultiplayerGetActivitiesForSocialGroupAsync(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Queries for the current activity for a socialgroup of users associated with a particular "owner" user.  
+/// Queries for the current activity for a social group of players associated with a particular "owner" player.  
 /// </summary>
-/// <param name="xboxLiveContext">Xbox live context for the local user.</param>
-/// <param name="scid">The Service Configuration ID (SCID) within which to query for activities. The SCID is considered case sensitive so paste it directly from the Partner Center</param>
-/// <param name="socialGroupOwnerXuid">The person whose social group will be used for the query.</param>
-/// <param name="socialGroup">The social group to use in order to get the list of users. (e.g. "people" or "favorites")</param>
-/// <param name="async">The AsyncBlock for this operation.</param>
+/// <param name="xblContext">{% term xbox-live %} context for the local player.</param>
+/// <param name="scid">The service configuration identifier (SCID) within which to query for activities. 
+/// The SCID is case-sensitive, so paste it directly from Partner Center.</param>
+/// <param name="socialGroupOwnerXuid">The player whose social group will be used for the query.</param>
+/// <param name="socialGroup">The social group (such as "people" or "favorites") to use to get the list of users.</param>
+/// <param name="async">The `XAsyncBlock` for this operation.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// There is no paging or continuation, and the multiplayer service will limit the number of items returned to 100.
+/// No paging or continuation is available. The Multiplayer service limits the number of items returned to 100.
 /// </remarks>
 STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupAsync(
     _In_ XblContextHandle xblContext,
@@ -3664,9 +3769,9 @@ STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupAsync(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Gets the number of XblMultiplayerActivityDetails objects returned.
+/// Gets the number of <see cref="XblMultiplayerActivityDetails"/> objects returned.
 /// </summary>
-/// <param name="async">The AsyncBlock for this operation.</param>
+/// <param name="async">The `XAsyncBlock` for this operation.</param>
 /// <param name="activityCount">The number of activity objects returned.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMultiplayerGetActivitiesForSocialGroupResultCount(
@@ -3675,11 +3780,11 @@ STDAPI XblMultiplayerGetActivitiesForSocialGroupResultCount(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Gets the result of a XblMultiplayerGetActivitiesForSocialGroupAsync call.
+/// Gets the result of a call to <see cref="XblMultiplayerGetActivitiesForSocialGroupAsync"/>.
 /// </summary>
-/// <param name="async">The AsyncBlock for this operation.</param>
+/// <param name="async">The `XAsyncBlock` for this operation.</param>
 /// <param name="activityCount">The number of activity objects returned.</param>
-/// <param name="activities">A caller allocated array to pass back the activities object results.</param>
+/// <param name="activities">A caller-allocated array for the activity objects returned.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMultiplayerGetActivitiesForSocialGroupResult(
     _In_ XAsyncBlock* async,
@@ -3688,9 +3793,9 @@ STDAPI XblMultiplayerGetActivitiesForSocialGroupResult(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Gets the number of XblMultiplayerActivityDetails objects returned.
+/// Gets the size of <see cref="XblMultiplayerActivityDetails"/> objects returned.
 /// </summary>
-/// <param name="async">The AsyncBlock for this operation.</param>
+/// <param name="async">The `XAsyncBlock` for this operation.</param>
 /// <param name="resultSizeInBytes">The size in bytes required to store the multiplayer activity details.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResultSize(
@@ -3699,15 +3804,15 @@ STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResultSize(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Gets the result of a XblMultiplayerGetActivitiesForSocialGroupAsync call.
+/// Gets the result of a call to <see cref="XblMultiplayerGetActivitiesWithPropertiesForSocialGroupAsync"/>.
 /// </summary>
-/// <param name="async">The AsyncBlock for this operation.</param>
-/// <param name="bufferSize">The size of the provided buffer.</param>
-/// <param name="buffer">A caller allocated byte buffer to write result into.</param>
-/// <param name="ptrToBuffer">Strongly typed pointer that points into buffer.
-/// Do not free this as its lifecycle is tied to buffer.</param>
-/// <param name="ptrToBufferCount">Number of entries in the ptrToBufferResults array.</param>
-/// <param name="bufferUsed">Number of bytes written to the buffer.</param>
+/// <param name="async">The `XAsyncBlock` for this operation.</param>
+/// <param name="bufferSize">The size of the provided `buffer`.</param>
+/// <param name="buffer">A caller-allocated byte buffer to write results into.</param>
+/// <param name="ptrToBuffer">Strongly typed pointer to `buffer`.
+/// Do not free; its lifecycle is tied to `buffer`.</param>
+/// <param name="ptrToBufferCount">Number of entries in `buffer`.</param>
+/// <param name="bufferUsed">Number of bytes actually written to `buffer`.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResult(
     _In_ XAsyncBlock* async,
@@ -3719,17 +3824,19 @@ STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResult(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// DEPRECATED - Call XblMultiplayerGetActivitiesWithPropertiesForUsersAsync which also populates CustomSessionProperties in the result.  
-/// Queries for the current activity for a set of users specified by xuid.  
+/// DEPRECATED - Call <see cref="XblMultiplayerGetActivitiesWithPropertiesForUsersAsync"/>, which also 
+/// populates `CustomSessionProperties` in the result.<br/>  
+/// Queries for the current activity for a set of players specified by Xbox user ID.  
 /// </summary>
-/// <param name="xblContext">Xbox live context for the local user.</param>
-/// <param name="scid">The Service Configuration ID (SCID) within which to query for activities. The SCID is considered case sensitive so paste it directly from the Partner Center</param>
-/// <param name="xuids">The list of user ids to find activities for.</param>
-/// <param name="xuidsCount">The size of the xuids array.</param>
-/// <param name="async">The AsyncBlock for this operation.</param>
+/// <param name="xblContext">{% term xbox-live %} context for the local user.</param>
+/// <param name="scid">The service configuration identifier (SCID) within which to query for activities. 
+/// The SCID is case-sensitive, so paste it directly from Partner Center.</param>
+/// <param name="xuids">The list of Xbox user IDs to find activities for.</param>
+/// <param name="xuidsCount">The size of the `xuids` array.</param>
+/// <param name="async">The `XAsyncBlock` for this operation.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// There is no paging or continuation, and the multiplayer service will limit the number of items returned to 100.
+/// No paging or continuation is available. The Multiplayer service limits the number of items returned to 100.
 /// </remarks>
 STDAPI XblMultiplayerGetActivitiesForUsersAsync(
     _In_ XblContextHandle xblContext,
@@ -3740,16 +3847,17 @@ STDAPI XblMultiplayerGetActivitiesForUsersAsync(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Queries for the current activity for a set of users specified by xuid.  
+/// Queries for the current activity for a set of players specified by Xbox user ID.  
 /// </summary>
-/// <param name="xblContext">Xbox live context for the local user.</param>
-/// <param name="scid">The Service Configuration ID (SCID) within which to query for activities. The SCID is considered case sensitive so paste it directly from the Partner Center</param>
-/// <param name="xuids">The list of user ids to find activities for.</param>
-/// <param name="xuidsCount">The size of the xuids array.</param>
-/// <param name="async">The AsyncBlock for this operation.</param>
+/// <param name="xblContext">{% term xbox-live %} context for the local user.</param>
+/// <param name="scid">The service configuration identifier (SCID) within which to query for activities. 
+/// The SCID is case-sensitive, so paste it directly from Partner Center.</param>
+/// <param name="xuids">The list of Xbox user IDs to find activities for.</param>
+/// <param name="xuidsCount">The size of the `xuids` array.</param>
+/// <param name="async">The `XAsyncBlock` for this operation.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// There is no paging or continuation, and the multiplayer service will limit the number of items returned to 100.
+/// No paging or continuation is available. The Multiplayer service limits the number of items returned to 100.
 /// </remarks>
 STDAPI XblMultiplayerGetActivitiesWithPropertiesForUsersAsync(
     _In_ XblContextHandle xblContext,
@@ -3760,9 +3868,9 @@ STDAPI XblMultiplayerGetActivitiesWithPropertiesForUsersAsync(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Gets the number of XblMultiplayerActivityDetails objects returned.
+/// Gets the number of <see cref="XblMultiplayerActivityDetails"/> objects returned.
 /// </summary>
-/// <param name="async">The AsyncBlock for this operation.</param>
+/// <param name="async">The `XAsyncBlock` for this operation.</param>
 /// <param name="activityCount">The number of activity objects returned.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMultiplayerGetActivitiesForUsersResultCount(
@@ -3771,11 +3879,11 @@ STDAPI XblMultiplayerGetActivitiesForUsersResultCount(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Gets the result of a XblMultiplayerGetActivitiesForUsersAsync call.
+/// Gets the result of a call to <see cref="XblMultiplayerGetActivitiesForUsersAsync"/>.
 /// </summary>
-/// <param name="async">The AsyncBlock for this operation.</param>
+/// <param name="async">The `XAsyncBlock` for this operation.</param>
 /// <param name="activityCount">The number of activity objects returned.</param>
-/// <param name="activities">A caller allocated array to pass back the activities object results.</param>
+/// <param name="activities">A caller-allocated array for the activity objects returned.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMultiplayerGetActivitiesForUsersResult(
     _In_ XAsyncBlock* async,
@@ -3784,10 +3892,10 @@ STDAPI XblMultiplayerGetActivitiesForUsersResult(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Gets the number of XblMultiplayerActivityDetails objects returned.
+/// Gets the size of <see cref="XblMultiplayerActivityDetails"/> objects returned.
 /// </summary>
-/// <param name="async">The AsyncBlock for this operation.</param>
-/// <param name="activityCount">The number of activity objects returned.</param>
+/// <param name="async">The `XAsyncBlock` for this operation.</param>
+/// <param name="resultSizeInBytes">Returns the size in bytes required to store the result.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMultiplayerGetActivitiesWithPropertiesForUsersResultSize(
     _In_ XAsyncBlock* async,
@@ -3795,15 +3903,15 @@ STDAPI XblMultiplayerGetActivitiesWithPropertiesForUsersResultSize(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Gets the result of a XblMultiplayerGetActivitiesForUsersAsync call.
+/// Gets the result of a call to <see cref="XblMultiplayerGetActivitiesWithPropertiesForUsersAsync"/>.
 /// </summary>
-/// <param name="async">The AsyncBlock for this operation.</param>
-/// <param name="bufferSize">The size of the provided buffer.</param>
-/// <param name="buffer">A caller allocated byte buffer to write result into.</param>
-/// <param name="ptrToBuffer">Strongly typed pointer that points into buffer.
-/// Do not free this as its lifecycle is tied to buffer.</param>
-/// <param name="ptrToBufferCount">Number of entries in the ptrToBufferResults array.</param>
-/// <param name="bufferUsed">Number of bytes written to the buffer.</param>
+/// <param name="async">The `XAsyncBlock` for this operation.</param>
+/// <param name="bufferSize">The size of the provided `buffer`.</param>
+/// <param name="buffer">A caller-allocated byte buffer to write results into.</param>
+/// <param name="ptrToBuffer">Strongly typed pointer to `buffer`.
+/// Do not free; its lifecycle is tied to `buffer`.</param>
+/// <param name="ptrToBufferCount">Number of entries in `buffer`.</param>
+/// <param name="bufferUsed">Number of bytes actually written to `buffer`.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMultiplayerGetActivitiesWithPropertiesForUsersResult(
     _In_ XAsyncBlock* async,

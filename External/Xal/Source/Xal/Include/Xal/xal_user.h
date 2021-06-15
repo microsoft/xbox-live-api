@@ -20,7 +20,7 @@ extern "C"
 /// <param name="user">The user handle.</param>
 /// <param name="duplicatedUser">The new user handle.</param>
 /// <returns>Result code for this API operation.  Possible values are S_OK, E_INVALIDARG, or E_FAIL.</returns>
-HRESULT XalUserDuplicateHandle(
+STDAPI XalUserDuplicateHandle(
     _In_ XalUserHandle user,
     _Out_ XalUserHandle* duplicatedUser
 ) noexcept;
@@ -30,7 +30,7 @@ HRESULT XalUserDuplicateHandle(
 /// </summary>
 /// <param name="user">The user object</param>
 /// <returns></returns>
-void XalUserCloseHandle(
+STDAPI_(void) XalUserCloseHandle(
     _In_ XalUserHandle user
 ) noexcept;
 
@@ -46,7 +46,7 @@ void XalUserCloseHandle(
 /// <remarks>
 /// User identity ordering is arbitrary, but sutiable for sorting.
 /// </remarks>
-int32_t XalCompareUsers(
+STDAPI_(int32_t) XalCompareUsers(
     _In_ XalUserHandle user1,
     _In_ XalUserHandle user2
 ) noexcept;
@@ -60,7 +60,7 @@ int32_t XalCompareUsers(
 /// <param name="user">The user object.</param>
 /// <param name="id">The Xbox Live User ID (XUID) of the user.</param>
 /// <returns>Result code for this API operation.  Possible values are S_OK, E_INVALIDARG, or E_FAIL.</returns>
-HRESULT XalUserGetId( // TODO any valid error scenarios? local users, consent
+STDAPI XalUserGetId( // TODO any valid error scenarios? local users, consent
     _In_ XalUserHandle user,
     _Out_ uint64_t* id
 ) noexcept;
@@ -71,7 +71,7 @@ HRESULT XalUserGetId( // TODO any valid error scenarios? local users, consent
 /// <param name="user">The user object.</param>
 /// <param name="localId">The local id of the user.</param>
 /// <returns>Result code for this API operation.  Possible values are S_OK, E_INVALIDARG, or E_FAIL.</returns>
-HRESULT XalUserGetLocalId(
+STDAPI XalUserGetLocalId(
     _In_ XalUserHandle user,
     _Out_ XalUserLocalId* localId
 ) noexcept;
@@ -81,7 +81,7 @@ HRESULT XalUserGetLocalId(
 /// </summary>
 /// <param name="user">The user object.</param>
 /// <returns></returns>
-bool XalUserIsDevice(
+STDAPI_(bool) XalUserIsDevice(
     _In_ XalUserHandle user
 ) noexcept;
 
@@ -90,7 +90,7 @@ bool XalUserIsDevice(
 /// </summary>
 /// <param name="user">The user object.</param>
 /// <returns></returns>
-bool XalUserIsGuest(
+STDAPI_(bool) XalUserIsGuest(
     _In_ XalUserHandle user
 ) noexcept;
 
@@ -101,7 +101,7 @@ bool XalUserIsGuest(
 /// <param name="state">The sign-in state of the user</param>
 /// <see cref="XalUserState" />.
 /// <returns>Result code for this API operation.</returns>
-HRESULT XalUserGetState(
+STDAPI XalUserGetState(
     _In_ XalUserHandle user,
     _Out_ XalUserState* state
 ) noexcept;
@@ -118,7 +118,7 @@ HRESULT XalUserGetState(
 /// XalGamertagComponent_Classic instead. XalGamertagComponent_Suffix will be
 /// empty if the modern components are unavailable.
 /// </remark>
-size_t XalUserGetGamertagSize(
+STDAPI_(size_t) XalUserGetGamertagSize(
     _In_ XalUserHandle user,
     _In_ XalGamertagComponent component
 ) noexcept;
@@ -140,7 +140,7 @@ size_t XalUserGetGamertagSize(
 /// XalGamertagComponent_Classic instead. XalGamertagComponent_Suffix will be
 /// empty if the modern components are unavailable.
 /// </remark>
-HRESULT XalUserGetGamertag(
+STDAPI XalUserGetGamertag(
     _In_ XalUserHandle user,
     _In_ XalGamertagComponent component,
     _In_ size_t gamertagSize,
@@ -155,7 +155,7 @@ HRESULT XalUserGetGamertag(
 /// <param name="pictureSize">The size wanted.</param>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <returns>Result code for this API operation.  Possible values are S_OK or E_FAIL.</returns>
-HRESULT XalUserGetGamerPictureAsync(
+STDAPI XalUserGetGamerPictureAsync(
     _In_ XalUserHandle user,
     _In_ XalGamerPictureSize pictureSize,
     _In_ XAsyncBlock* async
@@ -167,7 +167,7 @@ HRESULT XalUserGetGamerPictureAsync(
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <param name="bufferSize">The size in bytes for the result buffer.</param>
 /// <returns>Result code for this API operation.</returns>
-HRESULT XalUserGetGamerPictureResultSize(
+STDAPI XalUserGetGamerPictureResultSize(
     _In_ XAsyncBlock* async,
     _Out_ size_t* bufferSize
 ) noexcept;
@@ -179,7 +179,7 @@ HRESULT XalUserGetGamerPictureResultSize(
 /// <param name="bufferSize">The size of the gamer picture buffer.</param>
 /// <param name="buffer">The gamer picture png data.</param>
 /// <returns>Result code for this API operation.</returns>
-HRESULT XalUserGetGamerPictureResult(
+STDAPI XalUserGetGamerPictureResult(
     _In_ XAsyncBlock* async,
     _In_ size_t bufferSize,
     _Out_writes_(bufferSize) void* buffer
@@ -191,7 +191,7 @@ HRESULT XalUserGetGamerPictureResult(
 /// <param name="user">The user object.</param>
 /// <param name="ageGroup">The age group.</param>
 /// <returns>Result code for this API operation.  Possible values are S_OK, E_INVALIDARG, or E_FAIL.</returns>
-HRESULT XalUserGetAgeGroup(
+STDAPI XalUserGetAgeGroup(
     _In_ XalUserHandle user,
     _Out_ XalAgeGroup* ageGroup
 ) noexcept;
@@ -207,7 +207,7 @@ HRESULT XalUserGetAgeGroup(
 /// denied a privilege. If the user has the privilege it will always be
 /// XAL_PRIVILEGE_CHECK_DENY_REASON_NONE.</param>
 /// <returns>Result code for this API operation.  Possible values are S_OK, E_XAL_NOTINITIALIZED, or E_FAIL.</returns>
-HRESULT XalUserCheckPrivilege(
+STDAPI XalUserCheckPrivilege(
     _In_ XalUserHandle user,
     _In_ XalPrivilege privilege,
     _Out_ bool* hasPrivilege,
@@ -218,7 +218,7 @@ HRESULT XalUserCheckPrivilege(
 /// Checks if the current platform supports resolving missing privileges.
 /// </summary>
 /// <returns></returns>
-bool XalUserResolvePrivilegeWithUiIsPresent() noexcept;
+STDAPI_(bool) XalUserResolvePrivilegeWithUiIsPresent() noexcept;
 
 /// <summary>
 /// Shows ui explaining why the user is missing the given privilege and
@@ -228,7 +228,7 @@ bool XalUserResolvePrivilegeWithUiIsPresent() noexcept;
 /// <param name="privilege">The privilege to check.</param>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <returns>Result code for this API operation.</returns>
-HRESULT XalUserResolveUserPrivilegeWithUiAsync(
+STDAPI XalUserResolveUserPrivilegeWithUiAsync(
     _In_ XalUserHandle user,
     _In_ XalPrivilege privilege,
     _In_ XAsyncBlock* async
@@ -239,7 +239,7 @@ HRESULT XalUserResolveUserPrivilegeWithUiAsync(
 /// </summary>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <returns>Result code for this API operation.</returns>
-HRESULT XalUserResolveUserPrivilegeWithUiResult(
+STDAPI XalUserResolveUserPrivilegeWithUiResult(
     _In_ XAsyncBlock* async
 ) noexcept;
 
@@ -254,7 +254,7 @@ HRESULT XalUserResolveUserPrivilegeWithUiResult(
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <see cref="XalUserGetTokenAndSignatureArgs" />.
 /// <returns>Result code for this API operation.</returns>
-HRESULT XalUserGetTokenAndSignatureSilentlyAsync(
+STDAPI XalUserGetTokenAndSignatureSilentlyAsync(
     _In_ XalUserHandle user,
     _In_ XalUserGetTokenAndSignatureArgs const* args,
     _In_ XAsyncBlock* async
@@ -266,7 +266,7 @@ HRESULT XalUserGetTokenAndSignatureSilentlyAsync(
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <param name="bufferSize">The size in bytes for the result buffer.</param>
 /// <returns>Result code for this API operation.</returns>
-HRESULT XalUserGetTokenAndSignatureSilentlyResultSize(
+STDAPI XalUserGetTokenAndSignatureSilentlyResultSize(
     _In_ XAsyncBlock* async,
     _Out_ size_t* bufferSize
 ) noexcept;
@@ -283,7 +283,7 @@ HRESULT XalUserGetTokenAndSignatureSilentlyResultSize(
 /// <remarks>
 /// result is a pointer within buffer and does not need to be freed separately.
 /// </remarks>
-HRESULT XalUserGetTokenAndSignatureSilentlyResult(
+STDAPI XalUserGetTokenAndSignatureSilentlyResult(
     _In_ XAsyncBlock* async,
     _In_ size_t bufferSize,
     _Out_writes_bytes_to_(bufferSize, *bufferUsed) void* buffer,
@@ -303,7 +303,7 @@ HRESULT XalUserGetTokenAndSignatureSilentlyResult(
 /// This function should only be called after a call to
 /// XalUserGetTokenAndSignatureSilentlyAsync fails with E_XAL_UIREQUIRED.
 /// </remarks>
-HRESULT XalUserResolveIssueWithUiAsync(
+STDAPI XalUserResolveIssueWithUiAsync(
     _In_ XalUserHandle user,
     _In_opt_z_ char const* url,
     _In_ XAsyncBlock* async
@@ -314,7 +314,7 @@ HRESULT XalUserResolveIssueWithUiAsync(
 /// </summary>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <returns>Result code for this API operation.</returns>
-HRESULT XalUserResolveIssueWithUiResult(
+STDAPI XalUserResolveIssueWithUiResult(
     _In_ XAsyncBlock* async
 ) noexcept;
 
@@ -329,7 +329,7 @@ HRESULT XalUserResolveIssueWithUiResult(
 /// <param name="handler">The event handler, <see cref="XalUserChangeEventHandler"/>.</param>
 /// <param name="token">The token for unregistering this callback</param>
 /// <returns>Result code for this API operation.  Possible values are S_OK, E_XAL_NOTINITIALIZED, or E_FAIL.</returns>
-HRESULT XalUserRegisterChangeEventHandler(
+STDAPI XalUserRegisterChangeEventHandler(
     _In_opt_ XTaskQueueHandle queue,
     _In_opt_ void* context,
     _In_ XalUserChangeEventHandler* handler,
@@ -342,7 +342,7 @@ HRESULT XalUserRegisterChangeEventHandler(
 /// <param name="token">The token returned from
 /// XalUserRegisterChangeEventHandler.</param>
 /// <returns></returns>
-void XalUserUnregisterChangeEventHandler(
+STDAPI_(void) XalUserUnregisterChangeEventHandler(
     _In_ XalRegistrationToken token
 ) noexcept;
 
@@ -358,7 +358,7 @@ void XalUserUnregisterChangeEventHandler(
 ///
 /// May fail with E_XAL_DEFERRALNOTAVAILABLE.
 /// </remarks>
-HRESULT XalUserGetSignoutDeferral(
+STDAPI XalUserGetSignoutDeferral(
     _Out_ XalSignoutDeferralHandle* deferral
 ) noexcept;
 
@@ -367,7 +367,7 @@ HRESULT XalUserGetSignoutDeferral(
 /// </summary>
 /// <param name="deferral">The deferral handle.</param>
 /// <returns></returns>
-void XalUserCloseSignoutDeferral(
+STDAPI_(void) XalUserCloseSignoutDeferral(
     _In_ XalSignoutDeferralHandle deferral
 ) noexcept;
 

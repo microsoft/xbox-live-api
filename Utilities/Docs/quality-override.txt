@@ -1,0 +1,231 @@
+# Expected format for each line is "filename, quality" where filename is the name Noggin generates for the API.
+# In most cases, filename is the same as the API name. Method names are the exception and look like this: classname_methodname.md.
+# Example of a class method:
+# IDxcPdbUtils_GetArg.md, good
+# Example of an enum:
+# xsystemdevicetype.md, good 
+#
+# If the --override-file option is not specified, Noggin looks for this file in C:\Users\<username>\Documents\Headers
+#
+# multiplayer_c
+xblmultiplayerarbitrationserver.md, good, task 31827719
+xblmultiplayergetactivitiesforsocialgroupasync.md, good, task 33100385
+xblmultiplayergetactivitiesforsocialgroupresult.md, good, task 33100385
+xblmultiplayergetactivitiesforsocialgroupresultcount.md, good, task 33100385
+xblmultiplayergetactivitiesforusersasync.md, good, task 33100385
+xblmultiplayergetactivitiesforusersresult.md, good, task 33100385
+xblmultiplayergetactivitiesforusersresultcount.md, good, task 33100385
+xblmultiplayergetactivitieswithpropertiesforsocialgroupasync.md, good, task 33100385
+xblmultiplayergetactivitieswithpropertiesforsocialgroupresult.md, good, task 33100385
+xblmultiplayergetactivitieswithpropertiesforsocialgroupresultsize.md, good, task 33100385
+xblmultiplayergetactivitieswithpropertiesforusersasync.md, good, task 33100385
+xblmultiplayergetactivitieswithpropertiesforusersresult.md, good, task 33100385
+xblmultiplayergetactivitieswithpropertiesforusersresultsize.md, good, task 33100385
+xblmultiplayerinitializationstage.md, good, task 33100385
+xblmultiplayermeasurementfailure.md, good, task 33100385
+xblmultiplayermetrics.md, good, task 33100385
+xblmultiplayersessionrestriction.md, good, task 33100385
+xblmultiplayersessionstatus.md, good, task 33100385
+xblmultiplayertournamentteam.md, good, task 31827719
+xblnetworkaddresstranslationsetting.md, good, task 33100385
+xbltournamentarbitrationstate.md, good, task 31827719
+xbltournamentarbitrationstatus.md, good, task 31827719
+xbltournamentgameresult.md, good, task 31827719
+xbltournamentgameresultsource.md, good, task 31827719
+xbltournamentgameresultwithrank.md, good, task 31827719
+xbltournamentregistrationreason.md, good, task 31827719
+xbltournamentregistrationstate.md, good, task 31827719
+xbltournamentreference.md, good, task 31827719
+xbltournamentteamresult.md, good, task 31827719
+multiplayer_c\enums\xblmultiplayermeasurementfailure.md, good, 5/7 doc review
+multiplayer_c\enums\xblmultiplayermetrics.md, good, 5/7 doc review
+multiplayer_c\enums\xblmultiplayersessionchangetypes.md, good, 5/7 doc review
+multiplayer_c\enums\xblmultiplayersessionvisibility.md, good, 5/7 doc review
+multiplayer_c\enums\xblnetworkaddresstranslationsetting.md, good, 5/7 doc review
+multiplayer_c\enums\xbltournamentarbitrationstate.md, good, 5/7 doc review
+multiplayer_c\enums\xbltournamentarbitrationstatus.md, good, 5/7 doc review
+multiplayer_c\enums\xbltournamentgameresult.md, good, 5/7 doc review
+multiplayer_c\enums\xbltournamentgameresultsource.md, good, 5/7 doc review
+multiplayer_c\enums\xbltournamentregistrationreason.md, good, 5/7 doc review
+multiplayer_c\enums\xbltournamentregistrationstate.md, good, 5/7 doc review
+multiplayer_c\enums\xblwritesessionstatus.md, good, 5/7 doc review
+multiplayer_c\functions\xblmultiplayersessionreferencecreate.md, good, task 33320134
+multiplayer_c\functions\xblmultiplayersessionreferenceisvalid.md, good, task 33320134
+multiplayer_c\functions\xblmultiplayersessionreferenceparsefromuripath.md, good, task 33320134
+multiplayer_c\functions\xblmultiplayersessionreferencetouripath.md, good, task 33320134
+multiplayer_c\structs\xblmultiplayermatchmakingserver.md, good, task 33320134
+multiplayer_c\structs\xblmultiplayersessionconstants.md, good, task 33320134
+multiplayer_c\structs\xblmultiplayertournamentsserver.md, good, task 33320134
+#
+# multiplayer_activity_c
+xblmultiplayeractivityaddinvitehandler.md, good
+xblmultiplayeractivityencountertype.md, good
+xblmultiplayeractivityflushrecentplayersasync.md, good
+xblmultiplayeractivitygetactivityasync.md, good
+xblmultiplayeractivitygetactivityresultsize.md, good
+xblmultiplayeractivityinfo.md, good
+xblmultiplayeractivityinvitedata.md, good
+xblmultiplayeractivityinvitehandler.md, good
+xblmultiplayeractivityjoinrestriction.md, good
+xblmultiplayeractivityplatform.md, good
+xblmultiplayeractivityrecentplayerupdate.md, good
+xblmultiplayeractivityremoveinvitehandler.md, good
+xblmultiplayeractivityupdaterecentplayers.md, good
+multiplayer_activity_c\enums\xblmultiplayeractivityencountertype.md, good, 5/7 doc review
+multiplayer_activity_c\enums\xblmultiplayeractivityjoinrestriction.md, good, 5/7 doc review
+multiplayer_activity_c\enums\xblmultiplayeractivityplatform.md, good, 5/7 doc review
+#
+# multiplayer_manager_c
+multiplayer_manager_c\enums\xblmultiplayerjoinability.md, good, 5/7 doc review
+multiplayer_manager_c\enums\xblmultiplayermatchstatus.md, good, 5/7 doc review
+multiplayer_manager_c\enums\xblmultiplayersessiontype.md, good, 5/7 doc review
+#
+# achievements_c
+achievements_c\enums\xblachievementmediaassettype.md, good, 5/7 doc review
+achievements_c\enums\xblachievementorderby.md, good, 5/7 doc review
+achievements_c\enums\xblachievementparticipationtype.md, good, 5/7 doc review
+achievements_c\enums\xblachievementprogressstate.md, good, 5/7 doc review
+achievements_c\enums\xblachievementraritycategory.md, good, 5/7 doc review
+achievements_c\enums\xblachievementrewardtype.md, good, 5/7 doc review
+achievements_c\enums\xblachievementtype.md, good, 5/7 doc review
+#
+# achievements_manager_c
+achievements_manager_c\enums\xblachievementsmanagereventtype.md, good, 5/7 doc review
+#
+# http_call_c
+http_call_c\enums\xblhttpcallresponsebodytype.md, good, 5/7 doc review
+#
+# leaderboard_c
+leaderboard_c\enums\xblleaderboardsortorder.md, good, 5/7 doc review
+leaderboard_c\enums\xblsocialgrouptype.md, good, 5/7 doc review
+#
+# matchmaking_c
+matchmaking_c\enums\xblpreservesessionmode.md, good, 5/7 doc review
+#
+# platform_c
+platform_c\enums\xblclientoperationresult.md, good, 5/7 doc review
+platform_c\enums\xbllocalstoragewritemode.md, good, 5/7 doc review
+#
+# presence_c
+presence_c\enums\xblpresencebroadcastprovider.md, good, 5/7 doc review
+presence_c\enums\xblpresencedetaillevel.md, good, 5/7 doc review
+presence_c\enums\xblpresencedevicetype.md, good, 5/7 doc review
+presence_c\enums\xblpresencemediaidtype.md, good, 5/7 doc review
+presence_c\enums\xblpresencetitlestate.md, good, 5/7 doc review
+presence_c\enums\xblpresencetitleviewstate.md, good, 5/7 doc review
+presence_c\enums\xblpresenceuserstate.md, good, 5/7 doc review
+
+xblachievementsresulthandle.md,good, TOCDesigner 5/17/2021
+xblachievementsmanagerresulthandle.md,good, TOCDesigner 5/17/2021
+xblhttpcallhandle.md,good, TOCDesigner 5/17/2021
+xblmultiplayersearchhandle.md,good, TOCDesigner 5/17/2021
+xblmultiplayersessionhandle.md,good, TOCDesigner 5/17/2021
+xblmultiplayereventargshandle.md,good, TOCDesigner 5/17/2021
+xblclientoperationhandle.md,good, TOCDesigner 5/17/2021
+xblpresencerecordhandle.md,good, TOCDesigner 5/17/2021
+xblsocialrelationshipresulthandle.md,good, TOCDesigner 5/17/2021
+xblsocialmanagerusergrouphandle.md,good, TOCDesigner 5/17/2021
+xbltitlestorageblobmetadataresulthandle.md,good, TOCDesigner 5/17/2021
+xblcontexthandle.md,good, TOCDesigner 5/17/2021
+xblpermission.md,good, TOCDesigner 5/18/2021
+xblpermissiondenyreason.md,good, TOCDesigner 5/18/2021
+xblprivacysetting.md,good, TOCDesigner 5/18/2021
+xblprivilege.md,good, TOCDesigner 5/18/2021
+xblreputationfeedbacktype.md,good, TOCDesigner 5/18/2021
+xblsocialnotificationtype.md,good, TOCDesigner 5/18/2021
+xblsocialrelationshipfilter.md,good, TOCDesigner 5/18/2021
+xblpresencefilter.md,good, TOCDesigner 5/18/2021
+xblrelationshipfilter.md,good, TOCDesigner 5/18/2021
+xblsocialmanagereventtype.md,good, TOCDesigner 5/18/2021
+xblsocialmanagerextradetaillevel.md,good, TOCDesigner 5/18/2021
+xblsocialusergrouptype.md,good, TOCDesigner 5/18/2021
+xblverifystringresultcode.md,good, TOCDesigner 5/18/2021
+xbltitlemanagedstattype.md,good, TOCDesigner 5/18/2021
+xblapitype.md,good, TOCDesigner 5/18/2021
+xblpermissioncheckresult.md,good, TOCDesigner 5/18/2021
+xblpermissiondenyreasondetails.md,good, TOCDesigner 5/18/2021
+xblachievement.md,good, TOCDesigner 5/18/2021
+xblachievementmediaasset.md,good, TOCDesigner 5/18/2021
+xblachievementprogression.md,good, TOCDesigner 5/18/2021
+xblachievementrequirement.md,good, TOCDesigner 5/18/2021
+xblachievementreward.md,good, TOCDesigner 5/18/2021
+xblachievementtimewindow.md,good, TOCDesigner 5/18/2021
+xblachievementtitleassociation.md,good, TOCDesigner 5/18/2021
+xblleaderboardcolumn.md,good, TOCDesigner 5/18/2021
+xblleaderboardquery.md,good, TOCDesigner 5/18/2021
+xblleaderboardresult.md,good, TOCDesigner 5/18/2021
+xblleaderboardrow.md,good, TOCDesigner 5/18/2021
+xbluserprofile.md,good, TOCDesigner 5/18/2021
+xblreputationfeedbackitem.md,good, TOCDesigner 5/18/2021
+xblsocialrelationship.md,good, TOCDesigner 5/18/2021
+xblpreferredcolor.md,good, TOCDesigner 5/18/2021
+xblsocialmanagerevent.md,good, TOCDesigner 5/18/2021
+xblsocialmanagerpresencerecord.md,good, TOCDesigner 5/18/2021
+xblsocialmanagerpresencetitlerecord.md,good, TOCDesigner 5/18/2021
+xblsocialmanageruser.md,good, TOCDesigner 5/18/2021
+xbltitlehistory.md,good, TOCDesigner 5/18/2021
+xblverifystringresult.md,good, TOCDesigner 5/18/2021
+xbltitlemanagedstatistic.md,good, TOCDesigner 5/18/2021
+xblrequestedstatistics.md,good, TOCDesigner 5/18/2021
+xblserviceconfigurationstatistic.md,good, TOCDesigner 5/18/2021
+xblstatistic.md,good, TOCDesigner 5/18/2021
+xblstatisticchangeeventargs.md,good, TOCDesigner 5/18/2021
+xbluserstatisticsresult.md,good, TOCDesigner 5/18/2021
+xblachievementunlockevent.md,good, TOCDesigner 5/19/2021
+xblachievementprogresschangeentry.md,good, TOCDesigner 5/19/2021
+xblachievementprogresschangeeventargs.md,good, TOCDesigner 5/19/2021
+xblachievementsmanagersortorder.md,good, TOCDesigner 5/19/2021
+xblachievementsmanagerevent.md,good, TOCDesigner 5/19/2021
+xblerrorcondition.md,good, TOCDesigner 5/19/2021
+xblleaderboardstattype.md,good, TOCDesigner 5/19/2021
+xblleaderboardquerytype.md,good, TOCDesigner 5/19/2021
+xblticketstatus.md,good, TOCDesigner 5/19/2021
+xblcreatematchticketresponse.md,good, TOCDesigner 5/19/2021
+xblhopperstatisticsresponse.md,good, TOCDesigner 5/19/2021
+xblmatchticketdetailsresponse.md,good, TOCDesigner 5/19/2021
+xblmatchmakingstatus.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessionmemberstatus.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessionrestriction.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessionwritemode.md,good, TOCDesigner 5/19/2021
+xblmutablerolesettings.md,good, TOCDesigner 5/19/2021
+xbldevicetoken.md,good, TOCDesigner 5/19/2021
+xblformattedsecuredeviceaddress.md,good, TOCDesigner 5/19/2021
+xblmultiplayeractivitydetails.md,good, TOCDesigner 5/19/2021
+xblmultiplayerinvitehandle.md,good, TOCDesigner 5/19/2021
+xblmultiplayermemberinitialization.md,good, TOCDesigner 5/19/2021
+xblmultiplayerpeertohostrequirements.md,good, TOCDesigner 5/19/2021
+xblmultiplayerpeertopeerrequirements.md,good, TOCDesigner 5/19/2021
+xblmultiplayerrole.md,good, TOCDesigner 5/19/2021
+xblmultiplayerroletype.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessioncapabilities.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessionchangeeventargs.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessionhandleid.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessioninitargs.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessionmember.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessionmemberrole.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessionnumberattribute.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessionquery.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessionqueryresult.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessionreference.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessionreferenceuri.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessionstringattribute.md,good, TOCDesigner 5/19/2021
+xblmultiplayersessiontag.md,good, TOCDesigner 5/19/2021
+xblmultiplayertournamentteam.md,good, TOCDesigner 5/19/2021
+xblmultiplayereventtype.md,good, TOCDesigner 5/19/2021
+xblmultiplayerconnectionaddressdevicetokenpair.md,good, TOCDesigner 5/19/2021
+xblmultiplayermanagermember.md,good, TOCDesigner 5/19/2021
+xblmultiplayerperformqosmeasurementsargs.md,good, TOCDesigner 5/19/2021
+xblpresencebroadcastrecord.md,good, TOCDesigner 5/19/2021
+xblpresencedevicerecord.md,good, TOCDesigner 5/19/2021
+xblpresencequeryfilters.md,good, TOCDesigner 5/19/2021
+xblpresencerichpresenceids.md,good, TOCDesigner 5/19/2021
+xblpresencetitlerecord.md,good, TOCDesigner 5/19/2021
+xblanonymoususertype.md,good, TOCDesigner 5/19/2021
+xblrealtimeactivityconnectionstate.md,good, TOCDesigner 5/19/2021
+xblrealtimeactivitysubscriptionstate.md,good, TOCDesigner 5/19/2021
+xblrealtimeactivitysubscriptionhandle.md,good, TOCDesigner 5/19/2021
+xbltitlestorageblobtype.md,good, TOCDesigner 5/19/2021
+xbltitlestorageetagmatchcondition.md,good, TOCDesigner 5/19/2021
+xbltitlestoragetype.md,good, TOCDesigner 5/19/2021
+xbltitlestorageblobmetadata.md,good, TOCDesigner 5/19/2021
+xblguid.md,good, TOCDesigner 5/19/2021

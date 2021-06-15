@@ -44,6 +44,7 @@
 #include <atomic>
 #include <jni.h>
 #include "pplx/pplx.h"
+#include "asio/io_service.hpp"
 #endif
 
 namespace crossplat {

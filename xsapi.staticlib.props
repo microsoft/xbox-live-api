@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <!--Reuse libHttpClient platform detection logic-->  
-  <Import Project="$(XsapiRoot)External\xal\External\libHttpClient\platform_select.props" />
+  <Import Condition="'$(HCPlatform)' == ''" Project="$(XsapiRoot)External\xal\External\libHttpClient\platform_select.props" />
   <PropertyGroup>
     <XsapiPlatform>$(HCPlatform)</XsapiPlatform>
   </PropertyGroup>
@@ -93,10 +93,10 @@
   <ItemGroup Condition="'$(XsapiAddProjectReference)' == 'true' AND '$(XsapiImpl)' != 'true' AND '$(ConfigurationType)'!='StaticLibrary'">
     <ProjectReference Include="$(XsapiRoot)Build\$(XsapiProjectName)\$(XsapiProjectName).vcxproj">
       <Project Condition="'$(XsapiPlatform)' == 'UWP'">{8F96710E-5169-4917-8874-7DE248F4D243}</Project>
-	  <Project Condition="'$(XsapiPlatform)' == 'Win32' AND '$(XsapiToolset)' == '142'">{4F107DE4-98B1-42B7-8767-0B5102C88E4F}</Project>
+      <Project Condition="'$(XsapiPlatform)' == 'Win32' AND '$(XsapiToolset)' == '142'">{4F107DE4-98B1-42B7-8767-0B5102C88E4F}</Project>
       <Project Condition="'$(XsapiPlatform)' == 'Win32' AND '$(XsapiToolset)' == '141'">{4F107DE4-98B1-42B7-8767-0B5102C88E4F}</Project>
       <Project Condition="'$(XsapiPlatform)' == 'Win32' AND '$(XsapiToolset)' == '140'">{AB77D282-496D-413F-9A51-F78DF740A82A}</Project>
-	  <Project Condition="'$(XsapiPlatform)' == 'XDK'">{8A112040-CDA1-4490-B518-62DFCC451FA7}</Project>
+      <Project Condition="'$(XsapiPlatform)' == 'XDK'">{8A112040-CDA1-4490-B518-62DFCC451FA7}</Project>
       <Project Condition="'$(XsapiPlatform)' == 'GDK'">{60139f62-bf37-4f11-bd93-5fbf4e92100c}</Project>
       <Project Condition="'$(XsapiPlatform)' == 'Android'">{5fa18992-3e85-4090-b21e-6ef7fb613a44}</Project>
       <Project Condition="'$(XsapiPlatform)' == 'DesktopBridge' AND '$(XsapiToolset)' == '141'">{B0D02E4C-DB36-416C-8F1E-8666B3FAF876}</Project>

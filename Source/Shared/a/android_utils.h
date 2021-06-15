@@ -2,6 +2,10 @@
 
 #include <jni.h>
 
+#if XSAPI_ANDROID_STUDIO
+#include "types.h"
+#endif
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 /// <summary>

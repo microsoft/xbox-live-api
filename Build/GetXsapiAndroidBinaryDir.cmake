@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.6)
+
+function(GET_XSAPI_ANDROID_BINARY_DIR PATH_TO_ROOT OUT_BINARY_DIR)
+    string(TOLOWER "${CMAKE_BUILD_TYPE}" PATH_FLAVOR)
+    set(${OUT_BINARY_DIR} "${PATH_TO_ROOT}/Built/Android/${ANDROID_ABI}/${PATH_FLAVOR}" PARENT_SCOPE)
+endfunction()
