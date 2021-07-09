@@ -57,6 +57,7 @@ typedef std::wstringstream stringstream_t;
 #define ucout std::wcout
 #define ucin std::wcin
 #define ucerr std::wcerr
+#define ustrlen wcslen
 #else
 //
 // On POSIX platforms, all strings are narrow
@@ -74,6 +75,7 @@ typedef std::stringstream stringstream_t;
 #define ucout std::cout
 #define ucin std::cin
 #define ucerr std::cerr
+#define ustrlen strlen
 #endif // endif _UTF16_STRINGS
 
 #ifndef _TURN_OFF_PLATFORM_STRING
