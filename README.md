@@ -47,7 +47,6 @@ We'd love to get your review score, whether good or bad, but even more than that
 ### Xbox Live GitHub projects
 *   [Xbox Live Service API for C++](https://github.com/Microsoft/xbox-live-api)
 *   [Xbox Live Samples (XDK/UWP)](https://github.com/Microsoft/xbox-live-samples)
-*   [Xbox Live Unity Plugin](https://github.com/Microsoft/xbox-live-unity-plugin)
 *   [Xbox Live Resiliency Fiddler Plugin](https://github.com/Microsoft/xbox-live-resiliency-fiddler-plugin)
 *   [Xbox Live Trace Analyzer](https://github.com/Microsoft/xbox-live-trace-analyzer)
 *   [Xbox Live Developer Tools](https://github.com/Microsoft/xbox-live-developer-tools)
