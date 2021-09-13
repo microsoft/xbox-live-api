@@ -1,3 +1,0 @@
-```cpp
-HCSettingsSetTraceLevel(HCTraceLevel::Verbose);
-```

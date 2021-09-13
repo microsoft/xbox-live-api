@@ -1,3 +1,0 @@
-```cpp
-XblDisableAssertsForXboxLiveThrottlingInDevSandboxes(XblConfigSetting::ThisCodeNeedsToBeChanged);
-```

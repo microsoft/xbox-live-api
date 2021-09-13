@@ -4,7 +4,7 @@
 #include "pch.h"
 #include "UnitTestIncludes.h"
 
-HRESULT XalGetTitleId(
+STDAPI XalGetTitleId(
     _Out_ uint32_t* titleId
 ) noexcept
 {
@@ -13,12 +13,12 @@ HRESULT XalGetTitleId(
     return S_OK;
 }
 
-size_t XalGetSandboxSize() noexcept
+STDAPI_(size_t) XalGetSandboxSize() noexcept
 {
     return strlen(MOCK_SANDBOX) + 1;
 }
 
-HRESULT XalGetSandbox(
+STDAPI XalGetSandbox(
     _In_ size_t sandboxSize,
     _Out_writes_(sandboxSize) char* sandbox,
     _Out_opt_ size_t* sandboxUsed

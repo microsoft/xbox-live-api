@@ -1,3 +1,0 @@
-```cpp
-XblGameInviteUnregisterForEvent(xboxLiveContext, subscriptionHandle);
-```
