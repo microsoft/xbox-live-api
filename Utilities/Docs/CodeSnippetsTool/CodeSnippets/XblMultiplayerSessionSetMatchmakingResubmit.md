@@ -1,3 +1,0 @@
-```cpp
-XblMultiplayerSessionSetMatchmakingResubmit(sessionHandle, matchResubmit);
-```

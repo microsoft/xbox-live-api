@@ -1,3 +1,0 @@
-```cpp
-XblMultiplayerJoinability joinability = XblMultiplayerManagerJoinability();
-```

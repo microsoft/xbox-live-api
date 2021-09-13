@@ -297,8 +297,8 @@ Result<MultiplayerActivityInviteData> MultiplayerActivityInviteData::Deserialize
 
 AchievementUnlockEvent::AchievementUnlockEvent(AchievementUnlockEvent&& event) noexcept :
     m_achievementId(std::move(event.m_achievementId)),
-    m_achievementName(std::move(event.m_achievementName)),
     m_achievementDescription(std::move(event.m_achievementDescription)),
+    m_achievementName(std::move(event.m_achievementName)),
     m_achievementIconUri(std::move(event.m_achievementIconUri)),
     m_deepLink(event.m_deepLink)
 {
@@ -317,8 +317,8 @@ AchievementUnlockEvent::AchievementUnlockEvent(AchievementUnlockEvent&& event) n
 
 AchievementUnlockEvent::AchievementUnlockEvent(const AchievementUnlockEvent& event) :
     m_achievementId(event.m_achievementId),
-    m_achievementName(event.m_achievementName),
     m_achievementDescription(event.m_achievementDescription),
+    m_achievementName(event.m_achievementName),
     m_achievementIconUri(event.m_achievementIconUri),
     m_deepLink(event.m_deepLink)
 {

@@ -13,7 +13,7 @@ notification_service::notification_service(_In_ XblContextHandle contextHandle)
 
 notification_service::~notification_service()
 {
-#if !XSAPI_UNIT_TESTS
+#if !XSAPI_UNIT_TESTS && !HC_PLATFORM_IS_EXTERNAL
     unsubscribe_from_notifications().wait();
 #endif
     XblContextCloseHandle(m_xblContext);

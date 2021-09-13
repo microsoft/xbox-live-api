@@ -193,8 +193,7 @@ void Connection::AppStateChangeNotificationReceived(
 
    if (!this->m_isSuspended && this->m_state == XblRealTimeActivityConnectionState::Disconnected)
    {
-      lock.unlock();
-      Reconnect();
+      Reconnect(std::move(lock));
    }
 }
 #endif
@@ -667,10 +666,8 @@ void Connection::ConnectCompleteHandler(WebsocketResult result) noexcept
     m_stateChangedHandler(m_state);
 }
 
-void Connection::Reconnect() noexcept
+void Connection::Reconnect(std::unique_lock<std::mutex>&& lock) noexcept
 {
-    std::unique_lock<std::mutex> lock{ m_lock };
-
     // Immediately attempt to reconnect. libHttpClient websocket does not support connecting 
     // the same websocket handle multiple times, so create a new one.
     auto hr = InitializeWebsocket();
@@ -751,7 +748,6 @@ void Connection::DisconnectHandler(WebSocketCloseStatus status) noexcept
         subState->serviceStatus = Subscription::State::ServiceStatus::Inactive;
     }
 
-
     m_state = XblRealTimeActivityConnectionState::Disconnected;
 
     // On GDK, if the cause of the disconnection is that the title went into suspended mode
@@ -760,8 +756,7 @@ void Connection::DisconnectHandler(WebSocketCloseStatus status) noexcept
 #if HC_PLATFORM == HC_PLATFORM_GDK
     if (!this->m_isSuspended) {
 #endif
-        lock.unlock();
-        Reconnect();
+        Reconnect(std::move(lock));
 
 #if HC_PLATFORM == HC_PLATFORM_GDK
     }

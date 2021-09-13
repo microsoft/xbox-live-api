@@ -1,3 +1,0 @@
-```cpp
-XblMultiplayerSessionConstantsSetMaxMembersInSession(sessionHandle, maxMembersInSession);
-```

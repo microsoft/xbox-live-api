@@ -1,3 +1,0 @@
-```cpp
-XblMultiplayerRemoveSessionChangedHandler(xboxLiveContext, fnContext);
-```

@@ -34,7 +34,7 @@ User CreateMockUser(
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
 
-HRESULT XalUserDuplicateHandle(
+STDAPI XalUserDuplicateHandle(
     _In_ XalUserHandle user,
     _Out_ XalUserHandle* duplicatedUser
 ) noexcept
@@ -44,14 +44,14 @@ HRESULT XalUserDuplicateHandle(
     return S_OK;
 }
 
-void XalUserCloseHandle(
+STDAPI_(void) XalUserCloseHandle(
     _In_ XalUserHandle user
 ) noexcept
 {
     delete user;
 }
 
-HRESULT XalUserGetId(
+STDAPI XalUserGetId(
     _In_ XalUserHandle user,
     _Out_ uint64_t* id
 ) noexcept
@@ -61,7 +61,7 @@ HRESULT XalUserGetId(
     return S_OK;
 }
 
-HRESULT XalUserGetLocalId(
+STDAPI XalUserGetLocalId(
     _In_ XalUserHandle user,
     _Out_ XalUserLocalId* localId
 ) noexcept
@@ -71,7 +71,7 @@ HRESULT XalUserGetLocalId(
     return S_OK;
 }
 
-size_t XalUserGetGamertagSize(
+STDAPI_(size_t) XalUserGetGamertagSize(
     _In_ XalUserHandle user,
     _In_ XalGamertagComponent component
 ) noexcept
@@ -102,7 +102,7 @@ size_t XalUserGetGamertagSize(
     }
 }
 
-HRESULT XalUserGetGamertag(
+STDAPI XalUserGetGamertag(
     _In_ XalUserHandle user,
     _In_ XalGamertagComponent component,
     _In_ size_t gamertagSize,
@@ -156,7 +156,7 @@ HRESULT XalUserGetGamertag(
     return S_OK;
 }
 
-HRESULT XalUserGetTokenAndSignatureSilentlyAsync(
+STDAPI XalUserGetTokenAndSignatureSilentlyAsync(
     _In_ XalUserHandle user,
     _In_ XalUserGetTokenAndSignatureArgs const* args,
     _In_ XAsyncBlock* async
@@ -199,7 +199,7 @@ HRESULT XalUserGetTokenAndSignatureSilentlyAsync(
         });
 }
 
-HRESULT XalUserGetTokenAndSignatureSilentlyResultSize(
+STDAPI XalUserGetTokenAndSignatureSilentlyResultSize(
     _In_ XAsyncBlock* async,
     _Out_ size_t* bufferSize
 ) noexcept
@@ -207,7 +207,7 @@ HRESULT XalUserGetTokenAndSignatureSilentlyResultSize(
     return XAsyncGetResultSize(async, bufferSize);
 }
 
-HRESULT XalUserGetTokenAndSignatureSilentlyResult(
+STDAPI XalUserGetTokenAndSignatureSilentlyResult(
     _In_ XAsyncBlock* async,
     _In_ size_t bufferSize,
     _Out_writes_bytes_to_(bufferSize, *bufferUsed) void* buffer,
@@ -227,7 +227,7 @@ HRESULT XalUserGetTokenAndSignatureSilentlyResult(
     return hr;
 }
 
-HRESULT XalUserRegisterChangeEventHandler(
+STDAPI XalUserRegisterChangeEventHandler(
     _In_ XTaskQueueHandle queue,
     _In_opt_ void* context,
     _In_ XalUserChangeEventHandler* handler,
@@ -246,7 +246,7 @@ HRESULT XalUserRegisterChangeEventHandler(
     return S_OK;
 }
 
-void XalUserUnregisterChangeEventHandler(
+STDAPI_(void) XalUserUnregisterChangeEventHandler(
     _In_ XalRegistrationToken token
 ) noexcept
 {

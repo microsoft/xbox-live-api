@@ -1,3 +1,0 @@
-```cpp
-XTaskQueueCloseHandle(queue);
-```

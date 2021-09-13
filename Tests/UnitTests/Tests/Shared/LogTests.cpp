@@ -4,6 +4,7 @@
 #include "pch.h"
 #include "UnitTestIncludes.h"
 #include "Logger/log.h"
+#include "Logger/log_hc_output.h"
 
 using namespace xbox::services::system;
 
@@ -132,6 +133,21 @@ public:
         }
 
         VERIFY_ARE_EQUAL_INT(loopCount*loopCount, testOutput->m_logOutput.size());
+    }
+
+    DEFINE_TEST_CASE(HCLogging)
+    {
+        VERIFY_SUCCEEDED(HCInitialize(nullptr));
+        HCTraceSetTraceToDebugger(true);
+
+        auto testLogger = std::make_shared<logger>();
+        auto hcOutput = std::make_shared<log_hc_output>();
+        testLogger->add_log_output(hcOutput);
+
+        constexpr char formatString[]{ "%s%g%s" };
+        testLogger->add_log(log_entry{ HCTraceLevel::Important, "" } << formatString);
+
+        HCCleanup();
     }
 };
 

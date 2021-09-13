@@ -1,3 +1,0 @@
-```cpp
-XblMultiplayerMatchStatus status = XblMultiplayerManagerMatchStatus();
-```
