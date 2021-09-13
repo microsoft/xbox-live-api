@@ -68,7 +68,7 @@ private:
     void DisconnectHandler(WebSocketCloseStatus result) noexcept;
     void WebsocketMessageReceived(const String& message) noexcept;
     HRESULT InitializeWebsocket() noexcept;
-    void Reconnect() noexcept;
+    void Reconnect(std::unique_lock<std::mutex>&& lock) noexcept;
 
     User m_user;
     TaskQueue const m_queue;

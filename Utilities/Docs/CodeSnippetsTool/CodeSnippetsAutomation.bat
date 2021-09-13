@@ -1,2 +1,0 @@
-call CreateCodeSnippets.bat
-call CopyCodeSnippetsToXblDocs.bat
