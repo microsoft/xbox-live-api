@@ -57,7 +57,12 @@ void SetupXalNsalMock()
     {
         // This happens on GDK where XAL is just a wrapper around XUser
         LogToScreen("Calling HCInitialize()");
+
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+        hr = HCInitialize(&(Data()->initArgs));
+#else
         hr = HCInitialize(nullptr);
+#endif
         LogToScreen("HCInitialize done");
         assert(SUCCEEDED(hr));
         Data()->libHttpClientInit = true;
@@ -113,12 +118,29 @@ int XalInitialize_Lua(lua_State *L)
     xalInitArgs.clientId = clientId.c_str();
     xalInitArgs.titleId = titleId;
     xalInitArgs.sandbox = sandbox.c_str();
-#if HC_PLATFORM == HC_PLATFORM_IOS
-    // Extra args on iOS
+#if HC_PLATFORM == HC_PLATFORM_IOS || HC_PLATFORM == HC_PLATFORM_ANDROID
+    // Extra args on Mobile
     std::string redirectUri{ "ms-xal-" + clientId + "://auth" };
     xalInitArgs.redirectUri = redirectUri.data();
-#endif
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+    // Extra args on Android
+    xalInitArgs.disableDiagnosticTelemetry = false;
 
+    JNIEnv* jniEnv = nullptr;
+    jint result = Data()->javaVM->GetEnv(reinterpret_cast<void**>(&jniEnv), JNI_VERSION_1_6);
+    if (result != JNI_OK)
+    {
+        LogToScreen("Failed to retrieve the JNIEnv from the JavaVM.");
+    }
+
+    assert(jniEnv != nullptr);
+
+    jobject res = jniEnv->CallObjectMethod(Data()->m_mainActivityClassInstance, Data()->m_getApplicationContext);
+
+    xalInitArgs.javaVM = Data()->javaVM;
+    xalInitArgs.appContext = res;
+#endif
+#endif
 #endif
 
     HCTraceSetTraceToDebugger(true);
@@ -127,6 +149,8 @@ int XalInitialize_Lua(lua_State *L)
     HRESULT hr = XalInitialize(&xalInitArgs, Data()->queue);
     // CODE SNIPPET END
     Data()->m_isXalInitialized = true;
+
+    LogToScreen("XalInitialize: hr=%s", ConvertHR(hr).c_str());
     LogToFile("XalInitialize: hr=%s", ConvertHR(hr).c_str());
 
     SetupXalNsalMock();
@@ -147,7 +171,9 @@ int XalTryAddFirstUserSilentlyAsync_Lua(lua_State *L)
         std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock }; // Take over ownership of the XAsyncBlock*
         XalUserHandle newUser = nullptr;
         HRESULT hr = XalTryAddDefaultUserSilentlyResult(asyncBlock, &newUser);
+
         // TODO: Store and use newUser
+        LogToScreen("XalTryAddFirstUserSilentlyResult: hr=%s user=0x%0.8x", ConvertHR(hr).c_str(), newUser);
         LogToFile("XalTryAddFirstUserSilentlyResult: hr=%s user=0x%0.8x", ConvertHR(hr).c_str(), newUser); // CODE SNIP SKIP
         if (Data()->xalUser != nullptr)
         {
@@ -171,6 +197,7 @@ int XalTryAddFirstUserSilentlyAsync_Lua(lua_State *L)
         asyncBlock.release();
     }
     // CODE SNIPPET END
+    LogToScreen("XalTryAddFirstUserSilentlyAsync: hr=%s", ConvertHR(hr).c_str());
     LogToFile("XalTryAddFirstUserSilentlyAsync: hr=%s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);
 }
@@ -181,6 +208,8 @@ int XalGetMaxUsers_Lua(lua_State *L)
     uint32_t maxUsers = 0;
     HRESULT hr = XalGetMaxUsers(&maxUsers);
     // CODE SNIPPET END
+
+    LogToScreen("XalGetMaxUsers: hr=%s. result=%d", ConvertHR(hr).c_str(), maxUsers);
     LogToFile("XalGetMaxUsers: hr=%s. result=%d", ConvertHR(hr).c_str(), maxUsers); // CODE SNIP SKIP
     return LuaReturnHR(L, hr);
 }
@@ -198,7 +227,9 @@ int XalAddUserWithUiAsync_Lua(lua_State *L)
         std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock }; // Take over ownership of the XAsyncBlock*
         XalUserHandle newUser = nullptr;
         HRESULT hr = XalAddUserWithUiResult(asyncBlock, &newUser);
+        
         // TODO: Store and use newUser
+        LogToScreen("XalAddUserWithUiResult: hr=%s user=0x%0.8x", ConvertHR(hr).c_str(), newUser);
         LogToFile("XalAddUserWithUiResult: hr=%s user=0x%0.8x", ConvertHR(hr).c_str(), newUser); // CODE SNIP SKIP
         if (Data()->xalUser != nullptr)
         {
@@ -221,6 +252,8 @@ int XalAddUserWithUiAsync_Lua(lua_State *L)
         asyncBlock.release();
     }
     // CODE SNIPPET END
+
+    LogToScreen("XalAddUserWithUiAsync: hr=%s", ConvertHR(hr).c_str());
     LogToFile("XalAddUserWithUiAsync: hr=%s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);
 }
@@ -230,6 +263,8 @@ int XalGetDeviceUserIsPresent_Lua(lua_State *L)
     // CODE SNIPPET START: XalGetDeviceUserIsPresent
     bool result = XalGetDeviceUserIsPresent();
     // CODE SNIPPET END
+
+    LogToScreen("XalGetDeviceUserIsPresent: result=%d", result);
     LogToFile("XalGetDeviceUserIsPresent: result=%d", result);
     return LuaReturnHR(L, S_OK);
 }
@@ -240,6 +275,8 @@ int XalGetDeviceUser_Lua(lua_State *L)
     XalUserHandle deviceUser = nullptr;
     HRESULT hr = XalGetDeviceUser(&deviceUser);
     // CODE SNIPPET END
+
+    LogToScreen("XalGetDeviceUser: hr=%s", ConvertHR(hr).c_str());
     LogToFile("XalGetDeviceUser: hr=%s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);
 }
@@ -249,6 +286,8 @@ int XalSignOutUserAsyncIsPresent_Lua(lua_State *L)
     // CODE SNIPPET START: XalSignOutUserAsyncIsPresent
     bool result = XalSignOutUserAsyncIsPresent();
     // CODE SNIPPET END
+
+    LogToScreen("XalSignOutUserAsyncIsPresent: result=%d", result);
     LogToFile("XalSignOutUserAsyncIsPresent: result=%d", result);
     return LuaReturnHR(L, S_OK);
 }
@@ -265,7 +304,9 @@ int XalSignOutUserAsync_Lua(lua_State *L)
     {
         std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock }; // Take over ownership of the XAsyncBlock*
         HRESULT hr = XAsyncGetStatus(asyncBlock, false);
+
         // TODO: Store and use newUser
+        LogToScreen("OnXalSignOutUserAsync: hr=%s", ConvertHR(hr).c_str());
         LogToFile("OnXalSignOutUserAsync: hr=%s", ConvertHR(hr).c_str()); // CODE SNIP SKIP
         XalUserCloseHandle(Data()->xalUser); // CODE SNIP SKIP
         Data()->xalUser = nullptr; // CODE SNIP SKIP
@@ -280,6 +321,8 @@ int XalSignOutUserAsync_Lua(lua_State *L)
         asyncBlock.release();
     }
     // CODE SNIPPET END
+
+    LogToScreen("XalSignOutUserAsync: hr=%s", ConvertHR(hr).c_str());
     LogToFile("XalSignOutUserAsync: hr=%s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);
 }
@@ -290,6 +333,8 @@ int XalUserDuplicateHandle_Lua(lua_State *L)
     XalUserHandle dupUser = nullptr;
     HRESULT hr = XalUserDuplicateHandle(Data()->xalUser, &dupUser);
     // CODE SNIPPET END
+
+    LogToScreen("XalUserDuplicateHandle: hr=%s", ConvertHR(hr).c_str());
     LogToFile("XalUserDuplicateHandle: hr=%s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);
 }
@@ -304,6 +349,8 @@ int XalUserCloseHandle_Lua(lua_State *L)
         xalUser = nullptr;
         // CODE SNIPPET END
         Data()->xalUser = nullptr;
+
+        LogToScreen("XalUserCloseHandle");
         LogToFile("XalUserCloseHandle");
     }
     return LuaReturnHR(L, S_OK);
@@ -320,6 +367,8 @@ int XalUserGetId_Lua(lua_State *L)
     uint64_t xboxUserId = 0;
     HRESULT hr = XalUserGetId(Data()->xalUser, &xboxUserId);
     // CODE SNIPPET END
+
+    LogToScreen("XalUserGetId: hr=%s xboxUserId=%ul", ConvertHR(hr).c_str(), xboxUserId);
     LogToFile("XalUserGetId: hr=%s xboxUserId=%ul", ConvertHR(hr).c_str(), xboxUserId);
     Data()->xboxUserId = xboxUserId;
     return LuaReturnHR(L, hr);
@@ -330,6 +379,8 @@ int XalUserIsDevice_Lua(lua_State *L)
     // CODE SNIPPET START: XalUserIsDevice
     bool result = XalUserIsDevice(Data()->xalUser);
     // CODE SNIPPET END
+
+    LogToScreen("XalUserIsDevice: result=%d", result);
     LogToFile("XalUserIsDevice: result=%d", result);
     return LuaReturnHR(L, S_OK);
 }
@@ -339,6 +390,8 @@ int XalUserIsGuest_Lua(lua_State *L)
     // CODE SNIPPET START: XalUserIsGuest
     bool result = XalUserIsGuest(Data()->xalUser);
     // CODE SNIPPET END
+
+    LogToScreen("XalUserIsGuest: result=%d", result);
     LogToFile("XalUserIsGuest: result=%d", result);
     return LuaReturnHR(L, S_OK);
 }
@@ -349,6 +402,8 @@ int XalUserGetState_Lua(lua_State *L)
     XalUserState state = {};
     HRESULT hr = XalUserGetState(Data()->xalUser, &state);
     // CODE SNIPPET END
+
+    LogToScreen("XalUserGetState: hr=%s", ConvertHR(hr).c_str());
     LogToFile("XalUserGetState: hr=%s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);
 }
@@ -362,6 +417,8 @@ int XalUserGetGamertag_Lua(lua_State *L)
     size_t bufferUsed;
     HRESULT hr = XalUserGetGamertag(Data()->xalUser, XalGamertagComponent_Classic, gamerTagSize, gamerTag.data(), &bufferUsed);
     // CODE SNIPPET END
+
+    LogToScreen("XalUserGetGamertag %s: hr=%s gamerTag=%s", gamerTag.data(), ConvertHR(hr).c_str(), gamerTag.data());
     LogToFile("XalUserGetGamertag %s: hr=%s gamerTag=%s", gamerTag.data(), ConvertHR(hr).c_str(), gamerTag.data());
 
     Data()->gamertag = std::string(gamerTag.data());
@@ -374,6 +431,8 @@ int XalUserGetAgeGroup_Lua(lua_State *L)
     XalAgeGroup ageGroup = {};
     HRESULT hr = XalUserGetAgeGroup(Data()->xalUser, &ageGroup);
     // CODE SNIPPET END
+
+    LogToScreen("XalUserGetAgeGroup: hr=%s", ConvertHR(hr).c_str());
     LogToFile("XalUserGetAgeGroup: hr=%s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);
 }
@@ -386,6 +445,8 @@ int XalUserCheckPrivilege_Lua(lua_State *L)
     XalPrivilegeCheckDenyReasons reasons = { };
     HRESULT hr = XalUserCheckPrivilege(Data()->xalUser, privilege, &hasPrivilege, &reasons);
     // CODE SNIPPET END
+
+    LogToScreen("XalUserCheckPrivilege: hr=%s", ConvertHR(hr).c_str());
     LogToFile("XalUserCheckPrivilege: hr=%s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);
 }
@@ -403,9 +464,12 @@ int XalUserGetGamerPictureAsync_Lua(lua_State *L)
         std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock }; // Take over ownership of the XAsyncBlock*
         size_t bufferSize;
         HRESULT hr = XalUserGetGamerPictureResultSize(asyncBlock, &bufferSize);
+        LogToScreen("XalUserGetGamerPictureResultSize: hr=%s bufferSize=%d", ConvertHR(hr).c_str(), bufferSize);
         LogToFile("XalUserGetGamerPictureResultSize: hr=%s bufferSize=%d", ConvertHR(hr).c_str(), bufferSize); // CODE SNIP SKIP
+        
         std::vector<byte> buffer(bufferSize);
         hr = XalUserGetGamerPictureResult(asyncBlock, bufferSize, buffer.data());
+        LogToScreen("XalUserGetGamerPictureResult: hr=%s", ConvertHR(hr).c_str());
         LogToFile("XalUserGetGamerPictureResult: hr=%s", ConvertHR(hr).c_str()); // CODE SNIP SKIP
         CallLuaFunctionWithHr(hr, "OnXalUserGetGamerPictureAsync"); // CODE SNIP SKIP
     };
@@ -418,6 +482,8 @@ int XalUserGetGamerPictureAsync_Lua(lua_State *L)
         asyncBlock.release();
     }
     // CODE SNIPPET END
+
+    LogToScreen("XalUserGetGamerPictureAsync: hr=%s", ConvertHR(hr).c_str());
     LogToFile("XalUserGetGamerPictureAsync: hr=%s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);
 }
@@ -438,10 +504,13 @@ int XalUserGetTokenAndSignatureSilentlyAsync_Lua(lua_State *L)
         std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock }; // Take over ownership of the XAsyncBlock*
         size_t bufferSize;
         HRESULT hr = XalUserGetTokenAndSignatureSilentlyResultSize(asyncBlock, &bufferSize);
+        LogToScreen("XalUserGetTokenAndSignatureSilentlyResultSize: hr=%s bufferSize=%d", ConvertHR(hr).c_str(), bufferSize);
         LogToFile("XalUserGetTokenAndSignatureSilentlyResultSize: hr=%s bufferSize=%d", ConvertHR(hr).c_str(), bufferSize); // CODE SNIP SKIP
+        
         std::vector<byte> buffer(bufferSize);
         XalUserGetTokenAndSignatureData* result;
         hr = XalUserGetTokenAndSignatureSilentlyResult(asyncBlock, bufferSize, buffer.data(), &result, nullptr);
+        LogToScreen("XalUserGetTokenAndSignatureSilentlyResult: hr=%s", ConvertHR(hr).c_str());
         LogToFile("XalUserGetTokenAndSignatureSilentlyResult: hr=%s", ConvertHR(hr).c_str()); // CODE SNIP SKIP
         CallLuaFunctionWithHr(hr, "OnXalUserGetTokenAndSignatureSilentlyAsync"); // CODE SNIP SKIP
     };
@@ -458,6 +527,8 @@ int XalUserGetTokenAndSignatureSilentlyAsync_Lua(lua_State *L)
         asyncBlock.release();
     }
     // CODE SNIPPET END
+
+    LogToScreen("XalUserCheckPrivilegesWithUiAsync: hr=%s", ConvertHR(hr).c_str());
     LogToFile("XalUserCheckPrivilegesWithUiAsync: hr=%s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);
 }
@@ -474,6 +545,7 @@ int XalUserResolveIssueWithUiAsync_Lua(lua_State *L)
     {
         std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock }; // Take over ownership of the XAsyncBlock*
         HRESULT hr = XAsyncGetStatus(asyncBlock, false);
+        LogToScreen("XAsyncGetStatus: hr=%s", ConvertHR(hr).c_str());
         LogToFile("XAsyncGetStatus: hr=%s", ConvertHR(hr).c_str()); // CODE SNIP SKIP
         CallLuaFunctionWithHr(hr, "OnXalUserResolveIssueWithUiAsync"); // CODE SNIP SKIP
     };
@@ -486,6 +558,8 @@ int XalUserResolveIssueWithUiAsync_Lua(lua_State *L)
         asyncBlock.release();
     }
     // CODE SNIPPET END
+
+    LogToScreen("XalUserResolveIssueWithUiAsync: hr=%s", ConvertHR(hr).c_str());
     LogToFile("XalUserResolveIssueWithUiAsync: hr=%s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);
 }
@@ -528,6 +602,8 @@ int XalUserRegisterChangeEventHandler_Lua(lua_State *L)
     HRESULT hr = XalUserRegisterChangeEventHandler(Data()->queue, context, OnXalUserChangeEventHandler, &token);
 #endif
     // CODE SNIPPET END
+
+    LogToScreen("XalUserRegisterChangeEventHandler: hr=%s", ConvertHR(hr).c_str());
     LogToFile("XalUserRegisterChangeEventHandler: hr=%s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);
 }
@@ -539,12 +615,14 @@ int XalUserUnregisterChangeEventHandler_Lua(lua_State *L)
     // CODE SNIPPET START: XalUserUnregisterChangeEventHandler
     XalUserUnregisterChangeEventHandler(token);
     // CODE SNIPPET END
+
+    LogToScreen("XalUserUnregisterChangeEventHandler");
     LogToFile("XalUserUnregisterChangeEventHandler");
     return LuaReturnHR(L, S_OK);
 }
 
 
-#if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_IOS || HC_PLATFORM == HC_PLATFORM_UWP || HC_PLATFORM == HC_PLATFORM_XDK
+#if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_IOS || HC_PLATFORM == HC_PLATFORM_UWP || HC_PLATFORM == HC_PLATFORM_XDK || HC_PLATFORM == HC_PLATFORM_ANDROID
 int XalPlatformWebSetEventHandler_Lua(lua_State *L)
 {
      return LuaReturnHR(L, S_OK);
@@ -560,8 +638,10 @@ void SetupAPIs_Xal()
 {
     lua_register(Data()->L, "XalInitialize", XalInitialize_Lua);
     lua_register(Data()->L, "XalCleanupAsync", XalCleanupAsync_Lua);
+
     lua_register(Data()->L, "XalPlatformWebSetEventHandler", XalPlatformWebSetEventHandler_Lua);
     lua_register(Data()->L, "XalPlatformStorageSetEventHandlers", XalPlatformStorageSetEventHandlers_Lua);
+    
     lua_register(Data()->L, "XalGetMaxUsers", XalGetMaxUsers_Lua);
 
     lua_register(Data()->L, "XalTryAddFirstUserSilentlyAsync", XalTryAddFirstUserSilentlyAsync_Lua);
@@ -586,3 +666,4 @@ void SetupAPIs_Xal()
     lua_register(Data()->L, "XalUserRegisterChangeEventHandler", XalUserRegisterChangeEventHandler_Lua);
     lua_register(Data()->L, "XalUserUnregisterChangeEventHandler", XalUserUnregisterChangeEventHandler_Lua);
 }
+                                                          

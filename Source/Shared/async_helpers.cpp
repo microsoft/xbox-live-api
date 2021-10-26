@@ -130,6 +130,13 @@ TaskQueue TaskQueue::DeriveWorkerQueue(XTaskQueueHandle handle) noexcept
     TaskQueue derivedQueue{ nullptr };
     TaskQueue queue{ handle };
 
+    // If handle is null, derive a queue from XSAPI global queue
+    if (!queue.m_handle)
+    {
+        queue = TaskQueue{};
+    }
+
+    // If queue is still null, try to derive from the process default queue
     if (!queue.m_handle)
     {
         TaskQueue processQueue{ nullptr };
@@ -141,7 +148,7 @@ TaskQueue TaskQueue::DeriveWorkerQueue(XTaskQueueHandle handle) noexcept
     }
 
     assert(queue.m_handle);
-    
+
     XTaskQueuePortHandle worker{ nullptr };
     auto hr = XTaskQueueGetPort(queue.m_handle, XTaskQueuePort::Work, &worker);
     assert(SUCCEEDED(hr));

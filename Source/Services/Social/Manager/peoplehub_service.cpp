@@ -96,8 +96,7 @@ HRESULT PeoplehubService::MakeServiceCall(
         m_httpSettings,
         relationshipType == RelationshipType::Batch ? "POST" : "GET",
         XblHttpCall::BuildUrl("peoplehub", subpath.str()),
-        xbox_live_api::get_social_graph,
-        HttpCallAgent::SocialManager
+        xbox_live_api::get_social_graph
     ));
 
     httpCall->SetXblServiceContractVersion(3);

@@ -801,6 +801,7 @@ STDAPI_(void) XblAchievementsResultCloseHandle(
     _In_ XblAchievementsResultHandle handle
 ) XBL_NOEXCEPT;
 
+#if HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM_IS_EXTERNAL
 /// <summary>
 /// Handle for Function handling achievement unlock events.
 /// </summary>
@@ -836,6 +837,7 @@ STDAPI_(void) XblAchievementUnlockRemoveNotificationHandler(
     _In_ XblContextHandle xblContextHandle,
     _In_ XblFunctionContext functionContext
 ) XBL_NOEXCEPT;
+#endif
 
 /// <summary>
 /// A callback invoked when a progress is made on an achievement.

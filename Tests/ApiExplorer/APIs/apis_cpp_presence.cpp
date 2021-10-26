@@ -142,7 +142,7 @@ int PresenceServiceGetPresence_Lua(lua_State *L)
 int PresenceServiceGetPresenceForMultipleUsers_Lua(lua_State* L)
 {
 #if CPP_TESTS_ENABLED
-    std::vector<string_t> xuids{ L"2814639011617876", L"2814641789541994" };
+    std::vector<string_t> xuids{ _T("2814639011617876"), _T("2814641789541994") };
     std::vector<xbox::services::presence::presence_device_type> deviceTypes;
     std::vector<uint32_t> titleIds;
     xbox::services::presence::presence_detail_level detailLevel = xbox::services::presence::presence_detail_level::all;
@@ -206,8 +206,7 @@ int PresenceServiceGetPresenceForSocialGroup_Lua(lua_State *L)
 int PresenceServiceSubscribeToDevicePresenceChange_Lua(lua_State* L)
 {
 #if CPP_TESTS_ENABLED
-    string_t xuid{ L"2814639011617876" };
-
+    string_t xuid{ _T("2814639011617876") };
     std::shared_ptr<xbox::services::xbox_live_context> xblc = std::make_shared<xbox::services::xbox_live_context>(Data()->xboxLiveContext);
     xbox::services::xbox_live_result<std::shared_ptr<xbox::services::presence::device_presence_change_subscription>> result = xblc->presence_service().subscribe_to_device_presence_change(xuid);
 
@@ -249,8 +248,7 @@ int PresenceServiceUnsubscribeFromDevicePresenceChange_Lua(lua_State* L)
 int PresenceServiceSubscribeToTitlePresenceChange_Lua(lua_State* L)
 {
 #if CPP_TESTS_ENABLED
-    string_t xuid{ L"2814639011617876" };
-
+    string_t xuid{ _T("2814639011617876") };
     std::shared_ptr<xbox::services::xbox_live_context> xblc = std::make_shared<xbox::services::xbox_live_context>(Data()->xboxLiveContext);
     xbox::services::xbox_live_result<std::shared_ptr<xbox::services::presence::title_presence_change_subscription>> result = xblc->presence_service().subscribe_to_title_presence_change(xuid, Data()->titleId);
 

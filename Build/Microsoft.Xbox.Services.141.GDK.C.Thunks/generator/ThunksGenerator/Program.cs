@@ -26,7 +26,7 @@ namespace ThunksGenerator
             fns.Sort();
 
             Console.WriteLine($"Writing apis to {thunksDefFile.FullName}");
-            string content = "LIBRARY Microsoft_Xbox_Services_141_GDK_C_Thunks\n";
+            string content = "LIBRARY Microsoft.Xbox.Services.141.GDK.C.Thunks.dll\n";
             content += "EXPORTS\n";
             foreach (string fn in fns)
             {

@@ -3,6 +3,10 @@
 #if HC_PLATFORM == HC_PLATFORM_WIN32 
 #include <shlobj.h>
 #endif
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+#include "pal.h"
+#endif
+
 #include <stdio.h>
 
 std::string g_logFilePath;
@@ -56,7 +60,7 @@ void LogToFile(_Printf_format_string_ char const* format, ...)
 #endif
 }
 
-#if HC_PLATFORM != HC_PLATFORM_UWP && HC_PLATFORM != HC_PLATFORM_WIN32 && HC_PLATFORM != HC_PLATFORM_GDK && HC_PLATFORM != HC_PLATFORM_XDK && HC_PLATFORM != HC_PLATFORM_IOS
+#if HC_PLATFORM != HC_PLATFORM_UWP && HC_PLATFORM != HC_PLATFORM_WIN32 && HC_PLATFORM != HC_PLATFORM_GDK && HC_PLATFORM != HC_PLATFORM_XDK && HC_PLATFORM != HC_PLATFORM_IOS && HC_PLATFORM != HC_PLATFORM_ANDROID
 
 void LogToScreen(_Printf_format_string_ char const* format, ...)
 {

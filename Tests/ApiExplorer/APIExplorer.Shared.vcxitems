@@ -254,7 +254,9 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements_manager_update_achievements.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements_progress_notification.lua" />
+    <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements_progress_notification.lua">
+	      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\achievements\PerformanceTestMockResponse.json">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -282,7 +284,9 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\gdk-gameinvite\game-invite-send.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Tests\leaderboard\leaderboard-2017.lua" />
+    <None Include="$(MSBuildThisFileDirectory)Tests\leaderboard\leaderboard-2017.lua">
+	      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\leaderboard\leaderboard-bvt.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -481,7 +485,13 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_remove_realloc.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_wait.lua" >
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\social\social_relationship_changed.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_sub_unsub.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\stats2017\stats2017-test429.lua">

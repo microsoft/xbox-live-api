@@ -21,18 +21,31 @@ constexpr auto sprintf_s = sprintf;
 
 #endif
 
+
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+typedef unsigned long DWORD, *PDWORD, *LPDWORD;
+#endif
+
+
 namespace pal
 {
     void strcpy(char * dst, size_t size, const char* src);
     int stricmp(const char* left, const char* right);
     int vsprintf(char* message, size_t size,char const* format, va_list varArgs);
     char* strtok(char* str, char const* delimiter, char** context);
-    
+
+    // Due to java not supporting unsigned numeric values, we have to do regular long on Android
+#if HC_PLATFORM != HC_PLATFORM_ANDROID
     void Sleep(unsigned long duration);
-    
+#else
+    void Sleep(long duration);
+#endif
+
     bool FileExists(std::string fileName); // TODO might only be used on win32
     std::vector<std::string> EnumFilesInFolder(std::string folder, std::string spec);
     std::string FindFile(std::string fileName);
-    
     std::string GetLuaPath();
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+    std::string OpenFile(std::string filePath);
+#endif
 }

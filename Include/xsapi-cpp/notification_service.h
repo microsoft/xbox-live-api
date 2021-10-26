@@ -21,6 +21,7 @@ public:
     inline string_t sender_gamertag() const;
     inline string_t invite_handle_id() const;
     inline string_t invite_protocol() const;
+    inline string_t invite_context() const;
     inline utility::datetime expiration() const;
     inline const multiplayer::multiplayer_session_reference session_reference() const;
 
@@ -87,9 +88,7 @@ public:
 #endif
     );
 
-#if !HC_PLATFORM_IS_EXTERNAL
     inline pplx::task<xbox_live_result<void>> unsubscribe_from_notifications();
-#endif
 
 #if HC_PLATFORM == HC_PLATFORM_WIN32 && !XSAPI_UNIT_TESTS
     inline std::function<void(invite_notification_event_args&)>& game_invite_handler();

@@ -10,6 +10,9 @@ void StopSocialManagerDoWorkHelperCpp();
 
 int XblInitialize_Lua(lua_State *L)
 {
+    // Ensure we properly handle a null process queue
+    XTaskQueueSetCurrentProcessTaskQueue(nullptr);
+
     CreateQueueIfNeeded();
 
     // CODE SNIPPET START: XblInitialize
@@ -26,8 +29,9 @@ int XblInitialize_Lua(lua_State *L)
     auto pathString = std::string{ pathArray } + '\\';
     args.localStoragePath = pathString.data();
 #endif
-#if HC_PLATFORM == HC_PLATFORM_IOS
-    
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+    args.applicationContext = Data()->applicationContext;
+    args.javaVM = Data()->javaVM;
 #endif
     HRESULT hr = XblInitialize(&args);
     // CODE SNIPPET END

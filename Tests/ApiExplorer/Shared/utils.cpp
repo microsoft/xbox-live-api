@@ -3,6 +3,12 @@
 #include "pch.h"
 #include "utils.h"
 
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+#include "runner.h"
+#include "pal.h"
+#include "api_explorer.h"
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK
 #include <XGameErr.h>
 #endif
@@ -168,6 +174,7 @@ std::string ConvertHR(HRESULT hr)
 
 std::string ReadFile(std::string fileName)
 {
+
     std::string filePath = pal::FindFile(fileName);
     if (filePath.empty())
     {

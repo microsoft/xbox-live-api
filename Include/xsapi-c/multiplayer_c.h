@@ -2771,6 +2771,8 @@ STDAPI_(void) XblMultiplayerSessionSetInitializationSucceeded(
 /// <returns></returns>
 /// <remarks>
 /// If "peerToHostRequirements" is set and this is set, the measurement stage assumes the given host is the correct host and only measures metrics to that host.
+/// Note that host device tokens are generated from a session member's secure device address, so ensure that the secure device address is set
+/// (see <see cref="XblMultiplayerSessionCurrentUserSetSecureDeviceAddressBase64"/>) for the desired host prior to calling this method.
 /// </remarks>
 STDAPI_(void) XblMultiplayerSessionSetHostDeviceToken(
     _In_ XblMultiplayerSessionHandle handle,
@@ -2904,7 +2906,8 @@ STDAPI XblMultiplayerSessionCurrentUserSetStatus(
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
 /// On platforms that don't have a secure device address, call XblFormatSecureDeviceAddress 
-/// to generate a value that can be used by this function.
+/// to generate a value that can be used by this function. Note that setting a secure device address is required
+/// to manually set a session host.
 /// </remarks>
 STDAPI XblMultiplayerSessionCurrentUserSetSecureDeviceAddressBase64(
     _In_ XblMultiplayerSessionHandle handle,

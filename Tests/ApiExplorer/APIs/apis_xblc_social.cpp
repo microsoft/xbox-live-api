@@ -323,6 +323,105 @@ int profile_service_get_user_profile_Lua(lua_State *L)
     return LuaReturnHR(L, hr);
 }
 
+int UnsubscribeToTitleAndDevicePresenceChangeForFriends_Lua(lua_State *L)
+{
+    HRESULT hr = S_OK;
+
+    for (XblRealTimeActivitySubscriptionHandle subscriptionHandleDevice : Data()->subscriptionHandleDeviceList)
+    {
+        hr = XblPresenceUnsubscribeFromDevicePresenceChange(
+            Data()->xboxLiveContext,
+            subscriptionHandleDevice
+        );
+        LuaStopTestIfFailed(hr);
+        assert(SUCCEEDED(hr));
+    }
+
+    for (XblRealTimeActivitySubscriptionHandle subscriptionHandleTitle : Data()->subscriptionHandleTitleList)
+    {
+        hr = XblPresenceUnsubscribeFromTitlePresenceChange(
+            Data()->xboxLiveContext,
+            subscriptionHandleTitle
+        );
+    }
+
+    Data()->subscriptionHandleTitleList.clear();
+    Data()->subscriptionHandleDeviceList.clear();
+
+    LogToScreen("UnsubscribeToTitleAndDevicePresenceChangeForFriends: hr=%s", ConvertHR(hr).c_str());
+    return LuaReturnHR(L, hr);
+}
+
+int SubscribeToTitleAndDevicePresenceChangeForFriends_Lua(lua_State *L)
+{
+    auto asyncBlock = std::make_unique<XAsyncBlock>();
+    asyncBlock->queue = Data()->queue;
+    asyncBlock->context = nullptr;
+    asyncBlock->callback = [](XAsyncBlock* asyncBlock)
+    {
+        std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock }; // Take over ownership of the XAsyncBlock*
+        HRESULT hr = XblSocialGetSocialRelationshipsResult(asyncBlock, &state.socialResultHandle);
+
+        const XblSocialRelationship* relationships = nullptr;
+        size_t relationshipsCount = 0;
+        hr = XblSocialRelationshipResultGetRelationships(state.socialResultHandle, &relationships, &relationshipsCount);
+
+        Data()->subscriptionHandleTitleList.clear();
+        Data()->subscriptionHandleDeviceList.clear();
+
+        XblRealTimeActivitySubscriptionHandle subscriptionHandleDevice;
+        XblRealTimeActivitySubscriptionHandle subscriptionHandleTitle;
+        LogToScreen("Got %u SocialRelationships:", relationshipsCount);
+        for (size_t i = 0; i < relationshipsCount; ++i)
+        {
+            if (i % 100 == 0)
+            {
+                LogToScreen("Sub'ing to friend %d", i);
+            }
+
+            hr = XblPresenceSubscribeToDevicePresenceChange(
+                Data()->xboxLiveContext,
+                relationships[i].xboxUserId,
+                &subscriptionHandleDevice);
+            LuaStopTestIfFailed(hr);
+            assert(SUCCEEDED(hr));
+
+            hr = XblPresenceSubscribeToTitlePresenceChange(
+                Data()->xboxLiveContext,
+                relationships[i].xboxUserId,
+                Data()->titleId,
+                &subscriptionHandleTitle);
+            LuaStopTestIfFailed(hr);
+            assert(SUCCEEDED(hr));
+
+            Data()->subscriptionHandleDeviceList.push_back(subscriptionHandleDevice);
+            Data()->subscriptionHandleTitleList.push_back(subscriptionHandleTitle);
+        }
+
+        LogToScreen("SubscribeToTitleAndDevicePresenceChangeForFriends: hr=%s", ConvertHR(hr).c_str());
+        CallLuaFunctionWithHr(hr, "OnSubscribeToTitleAndDevicePresenceChangeForFriends"); 
+    };
+
+    HRESULT hr = XblSocialGetSocialRelationshipsAsync(
+        Data()->xboxLiveContext,
+        Data()->xboxUserId,
+        XblSocialRelationshipFilter::All,
+        0,
+        0,
+        asyncBlock.get()
+    );
+
+    if (SUCCEEDED(hr))
+    {
+        // The call succeeded, so release the std::unique_ptr ownership of XAsyncBlock* since the callback will take over ownership.
+        // If the call fails, the std::unique_ptr will keep ownership and delete the XAsyncBlock*
+        asyncBlock.release();
+    }
+
+    LogToFile("SubscribeToTitleAndDevicePresenceChangeForFriends: hr=%s", ConvertHR(hr).c_str());
+    return LuaReturnHR(L, hr);
+}
+
 void SetupAPIs_XblSocial()
 {
     lua_register(Data()->L, "XblSocialGetSocialRelationshipsAsync", XblSocialGetSocialRelationshipsAsync_Lua);
@@ -339,6 +438,9 @@ void SetupAPIs_XblSocial()
 
     lua_register(Data()->L, "XblSocialSubmitReputationFeedbackAsync", XblSocialSubmitReputationFeedbackAsync_Lua);
     lua_register(Data()->L, "XblSocialSubmitBatchReputationFeedbackAsync", XblSocialSubmitBatchReputationFeedbackAsync_Lua);
+
+    lua_register(Data()->L, "SubscribeToTitleAndDevicePresenceChangeForFriends", SubscribeToTitleAndDevicePresenceChangeForFriends_Lua);
+    lua_register(Data()->L, "UnsubscribeToTitleAndDevicePresenceChangeForFriends", UnsubscribeToTitleAndDevicePresenceChangeForFriends_Lua);
 
     lua_register(Data()->L, "profile_service_get_user_profile", profile_service_get_user_profile_Lua);
 }

@@ -14,7 +14,9 @@
 #include "lapi.c"
 #include "lauxlib.c"
 #include "lbaselib.c"
+#if HC_PLATFORM != HC_PLATFORM_ANDROID
 #include "lbitlib.c"
+#endif
 #include "lcode.c"
 #include "lcorolib.c"
 #include "lctype.c"

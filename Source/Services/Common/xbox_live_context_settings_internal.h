@@ -27,6 +27,15 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 #define DEFAULT_RETRY_DELAY_SECONDS (2)
 #define MIN_RETRY_DELAY_SECONDS (2)
 
+enum class HttpCallAgent : uint32_t
+{
+    Title,
+    MultiplayerManager,
+    SocialManager,
+    MultiplayerActivity,
+    AchievementsManager
+};
+
 class XboxLiveContextSettings
 {
 public:
@@ -43,6 +52,9 @@ public:
 
     uint32_t WebsocketTimeoutWindow() const;
     void SetWebsocketTimeoutWindow(_In_ uint32_t timeoutInSeconds);
+
+    HttpCallAgent HttpUserAgent() const;
+    void SetHttpUserAgent(_In_ HttpCallAgent userAgent);
 
 #if XSAPI_WINRT // WinRT only
     bool UseCoreDispatcherForEventRouting() const;
@@ -65,6 +77,7 @@ private:
     uint32_t m_httpRetryDelayInSeconds{ DEFAULT_RETRY_DELAY_SECONDS };
     uint32_t m_httpTimeoutWindowInSeconds{ DEFAULT_HTTP_RETRY_WINDOW_SECONDS };
     uint32_t m_websocketTimeoutWindowInSeconds{ DEFAULT_WEBSOCKET_TIMEOUT_SECONDS };
+    HttpCallAgent m_userAgent{ HttpCallAgent::Title };
 #if XSAPI_WINRT
     bool m_useCoreDispatcherForEventRouting{ false };
 #endif

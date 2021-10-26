@@ -13,7 +13,7 @@ notification_service::notification_service(_In_ XblContextHandle contextHandle)
 
 notification_service::~notification_service()
 {
-#if !XSAPI_UNIT_TESTS && !HC_PLATFORM_IS_EXTERNAL
+#if !XSAPI_UNIT_TESTS
     unsubscribe_from_notifications().wait();
 #endif
     XblContextCloseHandle(m_xblContext);
@@ -75,6 +75,11 @@ string_t invite_notification_event_args::invite_handle_id() const
 string_t invite_notification_event_args::invite_protocol() const
 {
     return Utils::StringTFromUtf8(m_gameInviteArgs.inviteProtocol);
+}
+
+string_t invite_notification_event_args::invite_context() const
+{
+    return Utils::StringTFromUtf8(m_gameInviteArgs.inviteContext);
 }
 
 utility::datetime invite_notification_event_args::expiration() const
@@ -194,13 +199,10 @@ pplx::task<xbox_live_result<void>> notification_service::unsubscribe_from_notifi
 #elif HC_PLATFORM == HC_PLATFORM_WIN32 && !XSAPI_UNIT_TESTS
 pplx::task<xbox_live_result<void>> notification_service::unsubscribe_from_notifications()
 {
-    auto xblContext = m_xblContext;
-    auto asyncWrapper = new AsyncWrapper<void>();
+    XblGameInviteRemoveNotificationHandler(m_xblContext, m_gameinviteFunctionContext);
+    XblAchievementUnlockRemoveNotificationHandler(m_xblContext, m_achievementUnlockFunctionContext);
 
-    XblGameInviteRemoveNotificationHandler(xblContext, m_gameinviteFunctionContext);
-    XblAchievementUnlockRemoveNotificationHandler(xblContext, m_achievementUnlockFunctionContext);
-
-    return asyncWrapper->Task(S_OK);
+    return pplx::task_from_result(xbox::services::xbox_live_result<void>());
 }
 #endif
 #endif

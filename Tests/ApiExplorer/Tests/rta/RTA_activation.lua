@@ -5,9 +5,17 @@ common = require 'common'
 
 function RTAActivation_Handler()
     print("RTAActivation_Handler")
-    StartSocialManagerDoWorkLoop()
-    XblRealTimeActivityAddConnectionStateChangeHandler()
-    XblSocialAddSocialRelationshipChangedHandler()
+
+    -- Test isn't valid on all platforms (i.e. on Win32 we set up a notification service subscription by default so the RTA connection
+    -- won't be torn down just by removing the social relationship changed handler).
+    isGdk = IsGDKPlatform()
+    if isGdk then
+        StartSocialManagerDoWorkLoop()
+        XblRealTimeActivityAddConnectionStateChangeHandler()
+        XblSocialAddSocialRelationshipChangedHandler()
+    else
+        test.stopTest()
+    end
 end
 
 function OnXblRealTimeActivityAddConnectionStateChangeHandler_Connecting()

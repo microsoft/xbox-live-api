@@ -51,6 +51,36 @@ void StatisticChangeSubscription::OnSubscribe(
                 stream << field.GetInt();
                 value = stream.str();
             }
+            else if (field.IsInt64())
+            {
+                Stringstream stream;
+                stream << field.GetInt64();
+                value = stream.str();
+            }
+            else if (field.IsUint())
+            {
+                Stringstream stream;
+                stream << field.GetUint();
+                value = stream.str();
+            }
+            else if (field.IsUint64())
+            {
+                Stringstream stream;
+                stream << field.GetUint64();
+                value = stream.str();
+            }
+            else if (field.IsDouble())
+            {
+                Stringstream stream;
+                stream << field.GetDouble();
+                value = stream.str();
+            }
+            else if (field.IsBool())
+            {
+                Stringstream stream;
+                stream << field.GetBool();
+                value = stream.str();
+            }
             else if (field.IsString())
             {
                 value = field.GetString();
@@ -106,17 +136,18 @@ void StatisticChangeSubscription::OnResync() noexcept
             if (Succeeded(result))
             {
                 auto& payload{ result.Payload() };
-                assert(payload.ServiceConfigurationStatistics().size() == 1);
-                assert(payload.ServiceConfigurationStatistics()[0].Statistics().size() == 1);
-
-                statisticsService->HandleStatisticChanged(StatisticChangeEventArgs
-                    {
-                        sharedThis->m_xuid,
-                        sharedThis->m_scid,
-                        sharedThis->m_statisticName,
-                        sharedThis->m_statisticType,
-                        payload.ServiceConfigurationStatistics()[0].Statistics()[0].Value()
-                    });
+                if (payload.ServiceConfigurationStatistics().size() >= 1 &&
+                    payload.ServiceConfigurationStatistics()[0].Statistics().size() >= 1)
+                {
+                    statisticsService->HandleStatisticChanged(StatisticChangeEventArgs
+                        {
+                            sharedThis->m_xuid,
+                            sharedThis->m_scid,
+                            sharedThis->m_statisticName,
+                            sharedThis->m_statisticType,
+                            payload.ServiceConfigurationStatistics()[0].Statistics()[0].Value()
+                        });
+                }
             }
         }
         });

@@ -264,7 +264,7 @@ enum class XblMultiplayerEventType : uint32_t
     LeaveGameCompleted,
 
     /// <summary>
-    /// Indicates that the XblMultiplayerManagerJoinLobby() operation has completed.  
+    /// Indicates that the <see cref="XblMultiplayerManagerJoinLobby"/> operation has completed.  
     /// Once the join succeeds, the member is now part of the lobby session, 
     /// and can use data in the session to connect to other lobby members.  
     /// You can call XblMultiplayerEventArgsXuid for the xuid.
@@ -414,7 +414,9 @@ typedef struct XblMultiplayerManagerMember
 /// </summary>
 /// <param name="first">The first member.</param>
 /// <param name="second">The second member.</param>
-/// <returns>Returns true if on same device, false if not on same device.</returns>
+/// <returns>Returns true if both members are on the same device, false if both members are not on the same device.</returns>
+/// <remarks>This function compares the device tokens of both members. If the device tokens match, both members are on the same device. 
+/// For more information, see <see cref="XblDeviceToken"/>.</remarks>
 STDAPI_(bool) XblMultiplayerManagerMemberAreMembersOnSameDevice(
     _In_ const XblMultiplayerManagerMember* first,
     _In_ const XblMultiplayerManagerMember* second
@@ -422,12 +424,22 @@ STDAPI_(bool) XblMultiplayerManagerMemberAreMembersOnSameDevice(
 
 
 /// <summary>
-/// A handle to multiplayer event args that can be used to additional information depending on the type of event.
+/// A handle to multiplayer event arguments that can be used to retrieve additional information for a multiplayer event, depending on the type of event.
 /// </summary>
+/// <memof><see cref="XblMultiplayerEvent"/></memof>
+/// <argof><see cref="XblMultiplayerEventArgsXuid"/></argof>
+/// <argof><see cref="XblMultiplayerEventArgsMembersCount"/></argof>
+/// <argof><see cref="XblMultiplayerEventArgsMembers"/></argof>
+/// <argof><see cref="XblMultiplayerEventArgsMember"/></argof>
+/// <argof><see cref="XblMultiplayerEventArgsPropertiesJson"/></argof>
+/// <argof><see cref="XblMultiplayerEventArgsFindMatchCompleted"/></argof>
+/// <argof><see cref="XblMultiplayerEventArgsTournamentRegistrationStateChanged"/></argof>
+/// <argof><see cref="XblMultiplayerEventArgsTournamentGameSessionReady"/></argof>
+/// <argof><see cref="XblMultiplayerEventArgsPerformQoSMeasurements"/></argof>
 typedef struct XblMultiplayerEventArgs* XblMultiplayerEventArgsHandle;
 
 /// <summary>
-/// A multiplayer event that will be returned from XblMultiplayerManagerDoWork().
+/// A multiplayer event that is returned from <see cref="XblMultiplayerManagerDoWork"/>.
 /// </summary>
 typedef struct XblMultiplayerEvent
 {
@@ -437,8 +449,8 @@ typedef struct XblMultiplayerEvent
     HRESULT Result;
 
     /// <summary>
-    /// Returns call specific debug information if join fails.  
-    /// It is not localized, so only use for debugging purposes.
+    /// Call-specific debug information if the API operation fails.  
+    /// The debug information is not localized; use only for debugging purposes.
     /// </summary>
     _Field_z_ const char* ErrorMessage;
 
@@ -448,12 +460,12 @@ typedef struct XblMultiplayerEvent
     void* Context;
 
     /// <summary>
-    /// Type of the event triggered.
+    /// The type of the event triggered.
     /// </summary>
     XblMultiplayerEventType EventType;
 
     /// <summary>
-    /// A handle to the event args.
+    /// A handle to the event arguments for the multiplayer event.
     /// </summary>
     XblMultiplayerEventArgsHandle EventArgsHandle;
 
@@ -481,7 +493,7 @@ typedef struct XblMultiplayerConnectionAddressDeviceTokenPair
 } XblMultiplayerConnectionAddressDeviceTokenPair;
 
 /// <summary>
-/// Event args returned for XblMultiplayerEventType::PerformQosMeasurements events.
+/// Event arguments returned for `XblMultiplayerEventType::PerformQosMeasurements` events.
 /// </summary>
 typedef struct XblMultiplayerPerformQoSMeasurementsArgs
 {
@@ -491,46 +503,89 @@ typedef struct XblMultiplayerPerformQoSMeasurementsArgs
     const XblMultiplayerConnectionAddressDeviceTokenPair* remoteClients;
 
     /// <summary>
-    /// The number of items in the remoteClients array.
+    /// The size of the `remoteClients` array.
     /// </summary>
     size_t remoteClientsSize;
 } XblMultiplayerPerformQoSMeasurementsArgs;
 
 /// <summary>
-/// Retrieves additional information for XblMultiplayerEventType::UserAdded, XblMultiplayerEventType::UserRemoved,
-/// and XblMultiplayerEventType::JoinLobbyCompleted events.
+/// Retrieves additional information for `XblMultiplayerEventType::UserAdded`, `XblMultiplayerEventType::UserRemoved`,
+/// and `XblMultiplayerEventType::JoinLobbyCompleted` events.
 /// </summary>
-/// <param name="argsHandle">The event args handle from the XblMultiplayerEvent.</param>
-/// <param name="xuid">Passes back the Xbox User ID for the following events:  
-/// XblMultiplayerEventType::UserAdded - Xbox User ID of the member that that was added.  
-/// XblMultiplayerEventType::UserRemoved - Xbox User ID of the member that that was removed.  
-/// XblMultiplayerEventType::JoinLobbyCompleted - Xbox User ID of the member that was invited.</param>
+/// <param name="argsHandle">The event arguments handle for the multiplayer event.</param>
+/// <param name="xuid">The applicable Xbox User ID, depending on the multiplayer event:
+/// <para>`XblMultiplayerEventType::UserAdded` - The Xbox User ID of the member that was added.</para>
+/// <para>`XblMultiplayerEventType::UserRemoved` - The Xbox User ID of the member that was removed.</para>
+/// <para>`XblMultiplayerEventType::JoinLobbyCompleted` - The Xbox User ID of the member that was invited.</para>
+/// </param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>Call this function to get more information about multiplayer events returned by <see cref="XblMultiplayerManagerDoWork"/> 
+/// for which the `EventType` member of the <see cref="XblMultiplayerEvent"/> for a multiplayer event is set to either 
+/// `XblMultiplayerEventType::UserAdded`, `XblMultiplayerEventType::UserRemoved`, or `XblMultiplayerEventType::JoinLobbyCompleted`.
+/// <para>The event arguments handle for a multiplayer event can be retrieved from the `EventArgsHandle` member of 
+/// the <see cref="XblMultiplayerEvent"/> structure for that multiplayer event.</para>
+/// <para>For more information about multiplayer events, see 
+/// <see href="live-multiplayer-manager-api-overview.md">Multiplayer Manager API overview</see>.</para></remarks>
+/// <seealso cref="XblMultiplayerEventArgsFindMatchCompleted"/>
+/// <seealso cref="XblMultiplayerEventArgsMember"/>
+/// <seealso cref="XblMultiplayerEventArgsMembers"/>
+/// <seealso cref="XblMultiplayerEventArgsMembersCount"/>
+/// <seealso cref="XblMultiplayerEventArgsPerformQosMeasurements"/>
+/// <seealso cref="XblMultiplayerEventArgsPropertiesJson"/>
+/// <seealso cref="XblMultiplayerEventType"/>
+/// <seealso cref="XblMultiplayerManagerJoinLobby"/>
 STDAPI XblMultiplayerEventArgsXuid(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _Out_ uint64_t* xuid
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Retrieves additional information for XblMultiplayerEventType::MemberJoined and XblMultiplayerEventType::MemberLeft events.
+/// Retrieves additional information for `XblMultiplayerEventType::MemberJoined` and `XblMultiplayerEventType::MemberLeft` events.
 /// </summary>
-/// <param name="argsHandle">The event args handle from the XblMultiplayerEvent.</param>
-/// <param name="memberCount">Passes back the required size of the members array for <see cref="XblMultiplayerEventArgsMembers"/>.</param>
+/// <param name="argsHandle">The event arguments handle for the multiplayer event.</param>
+/// <param name="memberCount">The size of the `members` caller-allocated array for <see cref="XblMultiplayerEventArgsMembers"/>.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>Call this function before you call the <see cref="XblMultiplayerEventArgsMembers"/> function, to return 
+/// the size of the array you must allocate for the `members` parameter of the <see cref="XblMultiplayerEventArgsMembers"/> function. 
+/// <para>The event arguments handle for a multiplayer event can be retrieved from the `EventArgsHandle` member of 
+/// the <see cref="XblMultiplayerEvent"/> structure for that multiplayer event.</para>
+/// <para>For more information about multiplayer events, see 
+/// <see href="live-multiplayer-manager-api-overview.md">Multiplayer Manager API overview</see>.</para></remarks>
+/// <seealso cref="XblMultiplayerEventArgsFindMatchCompleted"/>
+/// <seealso cref="XblMultiplayerEventArgsMember"/>
+/// <seealso cref="XblMultiplayerEventArgsMembers"/>
+/// <seealso cref="XblMultiplayerEventArgsPerformQosMeasurements"/>
+/// <seealso cref="XblMultiplayerEventArgsPropertiesJson"/>
+/// <seealso cref="XblMultiplayerEventArgsXuid"/>
+/// <seealso cref="XblMultiplayerEventType"/>
 STDAPI XblMultiplayerEventArgsMembersCount(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _Out_ size_t* memberCount
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Retrieves additional information for XblMultiplayerEventType::MemberJoined and XblMultiplayerEventType::MemberLeft events.
+/// Retrieves additional information for `XblMultiplayerEventType::MemberJoined` and `XblMultiplayerEventType::MemberLeft` events.
 /// </summary>
-/// <param name="argsHandle">The event args handle from the XblMultiplayerEvent.</param>
-/// <param name="membersCount">The size of the members array.</param>
-/// <param name="members">A caller allocated array to pass back the following event results:  
-/// XblMultiplayerEventType::MemberJoined - A list of members that joined the game.  
-/// XblMultiplayerEventType::MemberLeft - A list of members that left the game.</param>
+/// <param name="argsHandle">The event arguments handle for the multiplayer event.</param>
+/// <param name="membersCount">The size of the `members` array.</param>
+/// <param name="members">A caller-allocated array that passes back a list of members, depending on the multiplayer event:  
+/// <para>`XblMultiplayerEventType::MemberJoined` - A list of members that joined the game.</para>
+/// <para>`XblMultiplayerEventType::MemberLeft` - A list of members that left the game.</para>
+/// </param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>Call the <see cref="XblMultiplayerEventArgsMembersCount"/> function before you call this function, to return 
+/// the size of the array you must allocate for the `members` parameter of this function.
+/// <para>The event arguments handle for a multiplayer event can be retrieved from the `EventArgsHandle` member of 
+/// the <see cref="XblMultiplayerEvent"/> structure for that multiplayer event.</para>
+/// <para>For more information about multiplayer events, see 
+/// <see href="live-multiplayer-manager-api-overview.md">Multiplayer Manager API overview</see>.</para></remarks>
+/// <seealso cref="XblMultiplayerEventArgsFindMatchCompleted"/>
+/// <seealso cref="XblMultiplayerEventArgsMember"/>
+/// <seealso cref="XblMultiplayerEventArgsMembersCount"/>
+/// <seealso cref="XblMultiplayerEventArgsPerformQosMeasurements"/>
+/// <seealso cref="XblMultiplayerEventArgsPropertiesJson"/>
+/// <seealso cref="XblMultiplayerEventArgsXuid"/>
+/// <seealso cref="XblMultiplayerEventType"/>
 STDAPI XblMultiplayerEventArgsMembers(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _In_ size_t membersCount,
@@ -538,42 +593,88 @@ STDAPI XblMultiplayerEventArgsMembers(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Retrieves additional information for XblMultiplayerEventType::HostChanged and XblMultiplayerEventType::MemberPropertyChanged events.
+/// Retrieves additional information for `XblMultiplayerEventType::HostChanged` and `XblMultiplayerEventType::MemberPropertyChanged` events.
 /// </summary>
-/// <param name="argsHandle">The event args handle from the XblMultiplayerEvent.</param>
-/// <param name="member">Passes back a given member for the following event results:
-/// XblMultiplayerEventType::HostChanged - The new host member.  If an existing host leaves, there won't be a member to pass back so this function will return HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND).
-/// XblMultiplayerEventType::MemberPropertyChanged - The member whose property changed.</param>
+/// <param name="argsHandle">The event arguments handle for the multiplayer event.</param>
+/// <param name="member">The applicable member, depending on the multiplayer event:
+/// <para>`XblMultiplayerEventType::HostChanged` - The new host member. If an existing host leaves, there is no new host member to return 
+/// in this parameter. In this case, this function returns `HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND)`.</para>
+/// <para>`XblMultiplayerEventType::MemberPropertyChanged` - The member whose property changed.</para>
+/// </param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>Call this function to get more information about multiplayer events returned by <see cref="XblMultiplayerManagerDoWork"/> 
+/// for which the `EventType` member of the <see cref="XblMultiplayerEvent"/> for a multiplayer event is set to either 
+/// `XblMultiplayerEventType::HostChanged` or `XblMultiplayerEventType::MemberPropertyChanged`.
+/// <para>The event arguments handle for a multiplayer event can be retrieved from the `EventArgsHandle` member of 
+/// the <see cref="XblMultiplayerEvent"/> structure for that multiplayer event.</para>
+/// <para>For more information about multiplayer events, see 
+/// <see href="live-multiplayer-manager-api-overview.md">Multiplayer Manager API overview</see>.</para></remarks>
+/// <seealso cref="XblMultiplayerEventArgsFindMatchCompleted"/>
+/// <seealso cref="XblMultiplayerEventArgsMembers"/>
+/// <seealso cref="XblMultiplayerEventArgsMembersCount"/>
+/// <seealso cref="XblMultiplayerEventArgsPerformQosMeasurements"/>
+/// <seealso cref="XblMultiplayerEventArgsPropertiesJson"/>
+/// <seealso cref="XblMultiplayerEventArgsXuid"/>
+/// <seealso cref="XblMultiplayerEventType"/>
 STDAPI XblMultiplayerEventArgsMember(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _Out_ XblMultiplayerManagerMember* member
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Retrieves additional information for XblMultiplayerEventType::MemberPropertyChanged 
-/// and XblMultiplayerEventType::SessionPropertyChanged events.
+/// Retrieves additional information for `XblMultiplayerEventType::MemberPropertyChanged` 
+/// and `XblMultiplayerEventType::SessionPropertyChanged` events.
 /// </summary>
-/// <param name="argsHandle">The event args handle from the XblMultiplayerEvent.</param>
-/// <param name="properties">Passes back a pointer for the following event results:
-/// XblMultiplayerEventType::MemberPropertyChanged - The JSON of the property that changed.  
-/// XblMultiplayerEventType::SessionPropertyChanged - The JSON of the property that changed.  
-/// The memory for the pointer remains valid for the life of the XblMultiplayerEventArgsHandle object until it is closed.</param>
+/// <param name="argsHandle">The event arguments handle for the multiplayer event.</param>
+/// <param name="properties">A pointer to a JSON string, depending on the multiplayer event:
+/// <para>`XblMultiplayerEventType::MemberPropertyChanged` - The JSON string of the member property that changed.</para>
+/// <para>`XblMultiplayerEventType::SessionPropertyChanged` - The JSON string of the session property that changed.</para>
+/// <para>The memory for the pointer remains valid for the life of the `XblMultiplayerEventArgsHandle` object, until the handle is closed.</para>
+/// </param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>Call this function to get more information about multiplayer events returned by <see cref="XblMultiplayerManagerDoWork"/> 
+/// for which the `EventType` member of the <see cref="XblMultiplayerEvent"/> for a multiplayer event is set to either 
+/// `XblMultiplayerEventType::MemberPropertyChanged` or `XblMultiplayerEventType::SessionPropertyChanged`.
+/// <para>The event arguments handle for a multiplayer event can be retrieved from the `EventArgsHandle` member of 
+/// the <see cref="XblMultiplayerEvent"/> structure for that multiplayer event.</para>
+/// <para>For more information about multiplayer events, see 
+/// <see href="live-multiplayer-manager-api-overview.md">Multiplayer Manager API overview</see>.</para></remarks>
+/// <seealso cref="XblMultiplayerEventArgsFindMatchCompleted"/>
+/// <seealso cref="XblMultiplayerEventArgsMember"/>
+/// <seealso cref="XblMultiplayerEventArgsMembers"/>
+/// <seealso cref="XblMultiplayerEventArgsMembersCount"/>
+/// <seealso cref="XblMultiplayerEventArgsPerformQosMeasurements"/>
+/// <seealso cref="XblMultiplayerEventArgsXuid"/>
+/// <seealso cref="XblMultiplayerEventType"/>
 STDAPI XblMultiplayerEventArgsPropertiesJson(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _Out_ const char** properties
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Retrieves additional information for XblMultiplayerEventType::FindMatchCompleted events.
+/// Retrieves additional information for `XblMultiplayerEventType.FindMatchCompleted` multiplayer events.
 /// </summary>
-/// <param name="argsHandle">The event args handle from the XblMultiplayerEvent.</param>
-/// <param name="matchStatus">A caller allocated struct that passes back the current matchmaking status.</param>
-/// <param name="initializationFailureCause">A caller allocated struct that passes back the cause of why 
-/// the initialization failed, or XblMultiplayerMeasurementFailure::None if there was no failure.  
-/// Set when transitioning out of the "joining" or "measuring" stage if this member doesn't pass.</param>
+/// <param name="argsHandle">The event arguments handle for the multiplayer event.</param>
+/// <param name="matchStatus">A caller-allocated structure that describes the current matchmaking status.</param>
+/// <param name="initializationFailureCause">A caller-allocated structure that passes back the cause of why 
+/// the initialization failed, or `XblMultiplayerMeasurementFailure::None` if there was no failure.   
+/// This value is set when transitioning out of the `XblMultiplayerMatchStatus::Joining` or 
+/// `XblMultiplayerMatchStatus::Measuring` initialization stages, if this member doesn't pass the initializaton stage.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>Call this function to get more information about multiplayer events returned by <see cref="XblMultiplayerManagerDoWork"/> 
+/// for which the `EventType` member of the <see cref="XblMultiplayerEvent"/> for a multiplayer event is set to 
+/// `XblMultiplayerEventType.FindMatchCompleted`.
+/// <para>The event arguments handle for a multiplayer event can be retrieved from the `EventArgsHandle` member of 
+/// the <see cref="XblMultiplayerEvent"/> structure for that multiplayer event.</para>
+/// <para>For more information about multiplayer events, see 
+/// <see href="live-multiplayer-manager-api-overview.md">Multiplayer Manager API overview</see>.</para></remarks>
+/// <seealso cref="XblMultiplayerEventArgsMember"/>
+/// <seealso cref="XblMultiplayerEventArgsMembers"/>
+/// <seealso cref="XblMultiplayerEventArgsMembersCount"/>
+/// <seealso cref="XblMultiplayerEventArgsPerformQosMeasurements"/>
+/// <seealso cref="XblMultiplayerEventArgsPropertiesJson"/>
+/// <seealso cref="XblMultiplayerEventArgsXuid"/>
+/// <seealso cref="XblMultiplayerEventType"/>
 STDAPI XblMultiplayerEventArgsFindMatchCompleted(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _Out_opt_ XblMultiplayerMatchStatus* matchStatus,
@@ -605,46 +706,63 @@ STDAPI_XBL_DEPRECATED XblMultiplayerEventArgsTournamentGameSessionReady(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Retrieves additional information for XblMultiplayerEventType::PerformQosMeasurements events.
+/// Retrieves additional information for `XblMultiplayerEventType::PerformQosMeasurements` events.
 /// </summary>
-/// <param name="argsHandle">The event args handle from the XblMultiplayerEvent.</param>
-/// <param name="performQoSMeasurementsArgs">A caller allocated struct that passes back the 
-/// args containing info about the remote clients for which QoS info is needed.</param>
+/// <param name="argsHandle">The event arguments handle for the multiplayer event.</param>
+/// <param name="performQoSMeasurementsArgs">A caller-allocated structure that passes back the remote clients for which QoS information is needed.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>Call this function to get more information about multiplayer events returned by <see cref="XblMultiplayerManagerDoWork"/> 
+/// for which the `EventType` member of the <see cref="XblMultiplayerEvent"/> for a multiplayer event is set to 
+/// `XblMultiplayerEventType::PerformQosMeasurements`.
+/// <para>The event arguments handle for a multiplayer event can be retrieved from the `EventArgsHandle` member of 
+/// the <see cref="XblMultiplayerEvent"/> structure for that multiplayer event.</para>
+/// <para>For more information about multiplayer events, see 
+/// <see href="live-multiplayer-manager-api-overview.md">Multiplayer Manager API overview</see>.</para></remarks>
+/// <seealso cref="XblMultiplayerEventArgsFindMatchCompleted"/>
+/// <seealso cref="XblMultiplayerEventArgsMember"/>
+/// <seealso cref="XblMultiplayerEventArgsMembers"/>
+/// <seealso cref="XblMultiplayerEventArgsMembersCount"/>
+/// <seealso cref="XblMultiplayerEventArgsPropertiesJson"/>
+/// <seealso cref="XblMultiplayerEventArgsXuid"/>
+/// <seealso cref="XblMultiplayerEventType"/>
 STDAPI XblMultiplayerEventArgsPerformQoSMeasurements(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _Out_ XblMultiplayerPerformQoSMeasurementsArgs* performQoSMeasurementsArgs
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Initializes MultiplayerManager.
+/// Initializes Multiplayer Manager (MPM).
 /// </summary>
-/// <param name="lobbySessionTemplateName">The name of the template for the lobby session to be based on.</param>
-/// <param name="asyncQueue">Queue where all MultiplayerManager work should be scheduled.</param>
+/// <param name="lobbySessionTemplateName">The name of the session template for the lobby session to be based on.</param>
+/// <param name="asyncQueue">The task queue where all Multiplayer Manager work should be scheduled.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// There are two sessions that are maintained when using multiplayer manager.  
-/// One is the "lobby session" which is where friends you invite will join.  
-/// Another is the "game session" which contains people that your lobby has been matched with.
+/// This function initializes the lobby session with which Multiplayer Manager (MPM) interacts, based on a session template configured for the title. 
+/// You must call this function before calling other MPM functions, otherwise errors may occur. For more information about 
+/// configuring session templates, see <see href="live-configure-the-multiplayer-service.md">Configuring the Multiplayer service</see>.
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerDoWork"/>
 STDAPI XblMultiplayerManagerInitialize(
     _In_z_ const char* lobbySessionTemplateName,
     _In_opt_ XTaskQueueHandle asyncQueue
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Ensures proper game state updates are maintained between the title and the Xbox Live Multiplayer Service.  
-/// To ensure best performance, XblMultiplayerManagerDoWork() must be called frequently, such as once per frame.
+/// Maintains game state updates between the title and Multiplayer Manager (MPM).
 /// </summary>
-/// <param name="multiplayerEvents">An array of all events for the game to handle.  
-/// Will be null if no events are triggered during this update.  
-/// The returned events are owned by MultiplayerManager and are valid until XblMultiplayerManagerDoWork is called again.</param>
-/// <param name="multiplayerEventsCount">Passes back the number of events in the multiplayerEvents array.</param>
+/// <param name="multiplayerEvents">An array of multiplayer events for the game to handle. 
+/// This is set to null if no multiplayer events occur during this update.</param>
+/// <param name="multiplayerEventsCount">The size of the `multiplayerEvents` array.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// Title needs to be thread safe when calling XblMultiplayerManagerDoWork() since this is when the state will change.  
-/// For example, if you looping through the list of members on a different thread than your calling 
-/// XblMultiplayerManagerDoWork() on, it may change when XblMultiplayerManagerDoWork() is called.
+/// This function sends and receives game state updates between the title and Multiplayer Manager (MPM), returning an array 
+/// of <see cref="XblMultiplayerEvent"/> structures that represent significant multiplayer events, such as remote players 
+/// joining or leaving. You must call this function on a regular and frequent basis, such as once per frame, so that MPM can 
+/// properly maintain game state. For more information, see <see href="live-multiplayer-manager-overview.md">Multiplayer Manager overview</see>.  
+/// <para>The multiplayer events returned by this function are owned by MPM, and remain valid only until `XblMultiplayerManagerDoWork` is called again. 
+/// In addition, the title must be thread-safe when calling `XblMultiplayerManagerDoWork`, because game state changes at the time this function is called.
+/// For example, if you're iterating through the list of members on a thread other than the one from which you're calling this function,
+/// the list may change when this function is called.</para> 
 /// </remarks>
 STDAPI XblMultiplayerManagerDoWork(
     _Deref_out_opt_ const XblMultiplayerEvent** multiplayerEvents,
@@ -652,83 +770,146 @@ STDAPI XblMultiplayerManagerDoWork(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// A unique ID to the session used to query trace logs for entries that relate to the session.
+/// Retrieves the correlation handle for the lobby session. 
 /// </summary>
-/// <param name="correlationId">Passes back the unique ID given to the session.</param>
+/// <param name="correlationId">Passes back the correlation handle for the lobby session, 
+/// or null if a lobby session doesn't exist. The memory for the returned pointer remains 
+/// valid until the next call to <see cref="XblMultiplayerManagerDoWork"/>.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>
+/// This function retrieves the correlation handle for the lobby session in Multiplayer Manager (MPM). The correlation handle serves as 
+/// an alias for the lobby session, allowing a game to refer to a lobby session by using only the correlation handle. 
+/// The correlation handle can be used to query trace logs for entries that relate to the lobby session.
+/// For more information, see <see href="live-multiplayer-concepts.md">Multiplayer concepts overview</see>.
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerLobbySessionSessionReference"/>
 STDAPI XblMultiplayerManagerLobbySessionCorrelationId(
     _Out_ XblGuid* correlationId
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns identifying information for the lobby session.
+/// Retrieves the session reference for the lobby session.  
 /// </summary>
-/// <param name="sessionReference">Passes back a reference that uniquely identifies the session.</param>
+/// <param name="sessionReference">Passes back a pointer to the session reference for the lobby session, 
+/// or null if a lobby session doesn't exist. The memory for the returned pointer remains valid until 
+/// the next call to <see cref="XblMultiplayerManagerDoWork"/>.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>
+/// This function retrieves a pointer to the session reference for the lobby session, if the lobby session exists in 
+/// Multiplayer Manager. The session reference contains the service configuration ID (SCID),
+/// session template, and session name for the lobby session, and uniquely identifies 
+/// the lobby session in Multiplayer Session Directory (MPSD). For more information about session references, see 
+/// <see href="live-mpsd-details.md">Multiplayer Session advanced topics</see>.
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerLobbySessionCorrelationId"/>
+/// <seealso cref="XblMultiplayerManagerGameSessionSessionReference"/>
 STDAPI XblMultiplayerManagerLobbySessionSessionReference(
     _Out_ XblMultiplayerSessionReference* sessionReference
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// The number of members that are local to the device.
+/// Retrieves the number of local members in the lobby session.  
 /// </summary>
-/// <returns>The local member count for the lobby session.</returns>
+/// <returns>The number of members in the lobby session that are local to the device.</returns>
+/// <seealso cref="XblMultiplayerManagerLobbySessionMembersCount"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionLocalMembers"/>
 STDAPI_(size_t) XblMultiplayerManagerLobbySessionLocalMembersCount() XBL_NOEXCEPT;
 
 /// <summary>
-/// A collection of members that are local to this device.
+/// Retrieves member information for the local members in the lobby session.
 /// </summary>
-/// <param name="localMembersCount">The size of the localMembers array.  
-/// The required size can be obtained with XblMultiplayerLobbySessionLocalMembersCount.</param>
-/// <param name="localMembers">A caller allocated array that passes back the list of local members.</param>
+/// <param name="localMembersCount">The size of the `localMembers` array.  
+/// The required size can be obtained by calling <see cref="XblMultiplayerManagerLobbySessionLocalMembersCount"/>.</param>
+/// <param name="localMembers">A caller-allocated <see cref="XblMultiplayerManagerMember"/> array to write into.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>
+/// This function returns member information for each member in the lobby session that is local to the device.
+/// You can also call the <see cref="XblMultiplayerManagerLobbySessionMembers"/> function to return member 
+/// information for all members in the lobby session.
+/// <para>The member information returned by this function is valid only until <see cref="XblMultiplayerManagerDoWork"/> is called again.</para>
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerLobbySessionMembersCount"/>
 STDAPI XblMultiplayerManagerLobbySessionLocalMembers(
     _In_ size_t localMembersCount,
     _Out_writes_(localMembersCount) XblMultiplayerManagerMember* localMembers
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// A number of members that are in the lobby.  
-/// When a friend accepts a game invite, members will be added to the lobby.
+/// Retrieves the number of members in the lobby session.  
 /// </summary>
 /// <returns>The number of members that are in the lobby session.</returns>
+/// <seealso cref="XblMultiplayerManagerGameSessionMembersCount"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionLocalMembersCount"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionMembers"/>
 STDAPI_(size_t) XblMultiplayerManagerLobbySessionMembersCount() XBL_NOEXCEPT;
 
 /// <summary>
-/// A collection of members that are in the lobby.
+/// Retrieves member information for the members in the lobby session.
 /// </summary>
-/// <param name="membersCount">The size of the members array. 
-/// The required size can be obtained with XblMultiplayerLobbySessionMembersCount.</param>
-/// <param name="members">A caller allocated array that passes back the list of lobby members.</param>
+/// <param name="membersCount">The size of the `members` array.  
+/// The required size can be obtained by calling <see cref="XblMultiplayerManagerLobbySessionMembersCount"/>.</param>
+/// <param name="members">A caller-allocated <see cref="XblMultiplayerManagerMember"/> array to write into.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>
+/// This function returns member information for each member in the lobby session.
+/// You can also call the <see cref="XblMultiplayerManagerLobbySessionLocalMembers"/> function to return member 
+/// information for each member in the lobby session that is local to the device.
+/// <para>The member information returned by this function is valid only until <see cref="XblMultiplayerManagerDoWork"/> is called again.</para>
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerLobbySessionLocalMembersCount"/>
 STDAPI XblMultiplayerManagerLobbySessionMembers(
     _In_ size_t membersCount,
     _Out_writes_(membersCount) XblMultiplayerManagerMember* members
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns the host member for the lobby.  
-/// The host is defined as the user with the lowest index on the host device.
+/// Retrieves member information for the host member in the lobby session.  
 /// </summary>
-/// <param name="hostMember">Passes back the host member.</param>
+/// <param name="hostMember">A caller-allocated structure to be populated with member information for the host member.</param>
 /// <returns>HRESULT return code for this API operation.  
-/// Will return __HRESULT_FROM_WIN32(ERROR_NO_SUCH_USER) if there is no host.</returns>
+/// Returns `__HRESULT_FROM_WIN32(ERROR_NO_SUCH_USER)` if a host member doesn't exist.</returns>
+/// <remarks>
+/// This function retrieves member information about the member that represents the host for a lobby session.
+/// If a lobby session doesn't exist, or if a host member doesn't exist for the lobby session, the function 
+/// returns `__HRESULT_FROM_WIN32(ERROR_NO_SUCH_USER)`. The host member is defined as the user with the lowest
+/// index on the host device. 
+/// <para>The information returned by this function is valid only until <see cref="XblMultiplayerManagerDoWork"/> is called again.</para>
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerLobbySessionIsHost"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionLocalMembers"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionMembers"/>
 STDAPI XblMultiplayerManagerLobbySessionHost(
     _Out_ XblMultiplayerManagerMember* hostMember
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// JSON string that specify the custom properties for the game.
+/// Retrieves the custom properties for the lobby session, as a JSON string.  
 /// </summary>
-/// <returns>The JSON string that specifies the custom properties for the game.  
-/// The memory for the returned string pointer remains valid until the next call to XblMultiplayerManagerDoWork.</returns>
+/// <returns>A JSON string that specifies the custom properties for the lobby session, or null if a lobby session doesn't exist.  
+/// The memory for the returned pointer remains valid until the next call to <see cref="XblMultiplayerManagerDoWork"/>.</returns>
+/// <remarks>
+/// This function retrieves the custom properties for the lobby session, represented as a JSON string. These custom properties 
+/// can be changed at any time. If custom properties are shared between devices, or may be updated by several devices 
+/// at the same time, use the <see cref="XblMultiplayerManagerLobbySessionSetSynchronizedProperties"/> function to change custom properties.
+/// Otherwise, you can use the <see cref="XblMultiplayerManagerLobbySessionSetProperties"/> function to change custom properties.
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerLobbySessionPropertiesJson"/>
 STDAPI_(const char*) XblMultiplayerManagerLobbySessionPropertiesJson() XBL_NOEXCEPT;
 
 /// <summary>
-/// A set of constants associated with this session.  These can only be set through the session template.
+/// Retrieves the session constants associated with the lobby session.
 /// </summary>
-/// <returns>A pointer to the constant values for the multiplayer session.  
-/// The pointer returned remains valid until the next call to XblMultiplayerManagerDoWork.</returns>
+/// <returns>A pointer to the session constants for the lobby session, or null if a lobby session doesn't exist.  
+/// The memory for the returned pointer remains valid until the next call to <see cref="XblMultiplayerManagerDoWork"/>.</returns>
+/// <remarks>
+/// This function retrieves a pointer to the session constants for a lobby session, if the lobby session exists 
+/// in Multiplayer Manager. The session constants contain constants, such as session visibility 
+/// and session capabilities, defined by the session template used for the lobby session. Unlike session properties, 
+/// session constants can only be set through the session template, and are set at the time the lobby session is created.
+/// For more information about session constants, see <see href="concepts/live-mpsd-details.md">Multiplayer Session advanced topics</see>.
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerLobbySessionPropertiesJson"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionSessionReference"/>
 STDAPI_(const XblMultiplayerSessionConstants*) XblMultiplayerManagerLobbySessionConstants() XBL_NOEXCEPT;
 
 XBL_WARNING_PUSH
@@ -743,55 +924,73 @@ STDAPI_XBL_DEPRECATED_(const XblTournamentTeamResult*) XblMultiplayerManagerLobb
 XBL_WARNING_POP
 
 /// <summary>
-/// Hosts a new lobby when the first user is added.  
-/// For all other users, they will be added to the existing lobby as secondary users.  
-/// This API will also advertise the lobby for friends to join.
+/// Joins an Xbox user to the lobby session.  
 /// </summary>
-/// <param name="user">The associated system User.</param>
+/// <param name="user">The user handle of the user joining the lobby session.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// You can send invites, set lobby properties, and access lobby members only once you've added the local user.  
-/// Changes are batched and written to the service on the next XblMultiplayerManagerDoWork().  
-/// All session properties and members contain updated response returned from the server 
-/// upon calling XblMultiplayerManagerDoWork().
-/// When attempting to join a session, the service will return HTTP_E_STATUS_BAD_REQUEST (HTTP status 400) in the event the server is full.
+/// This function creates a new lobby session and adds the Xbox user specified in <paramref name="user"/> to the session.
+/// Subsequent users are added to the newly-hosted lobby session as secondary users. You can send 
+/// invites, set session properties, and access members of the lobby session only after the first 
+/// local user is added to the lobby session. 
+/// <para>The result of this function is delivered as a multiplayer event with an event type set to `XblMultiplayerEventType::JoinLobbyCompleted`. 
+/// You can call <see cref="XblMultiplayerManagerDoWork"/> to retrieve multiplayer events.</para>
+/// <para>When attempting to join a lobby session, the service returns `HTTP_E_STATUS_BAD_REQUEST` if the server is full.</para>
+/// <para>After joining, you can set the properties for the lobby session by calling  
+/// <see cref="XblMultiplayerManagerLobbySessionSetSynchronizedProperties"/>, or you can set the host for the lobby session by
+/// calling <see cref="XblMultiplayerManagerLobbySessionSetSynchronizedHost"/> if the lobby session doesn't already have a host.</para>
+/// <para>You can also send an invite to another user by calling either 
+/// <see cref="XblMultiplayerManagerLobbySessionInviteUsers"/> or <see cref="XblMultiplayerManagerLobbySessionInviteFriends"/>.
+/// If you don't need a lobby session, and if you haven't added local users by calling this function, 
+/// you can instead call <see cref="XblMultiplayerManagerJoinGame"/> and specify the list of users to join the game.</para>
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerJoinability"/>
+/// <seealso cref="XblMultiplayerManagerJoinGameFromLobby"/>
 STDAPI XblMultiplayerManagerLobbySessionAddLocalUser(
     _In_ XblUserHandle user
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Removes the local user from the lobby and game session.  
-/// After this method is called, if no local users are active, title will not be able to perform 
-/// any further multiplayer operations.
+/// Removes the local user from both the lobby session and game session.  
 /// </summary>
-/// <param name="user">The associated system User.</param>
+/// <param name="user">The local user to be removed.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// You can join another game or re-add the local user.  
-/// Changes are batched and written to the service on the next XblMultiplayerManagerDoWork().  
-/// All session properties and members contain updated response returned from the server 
-/// upon calling XblMultiplayerManagerDoWork().
+/// If there are no local users remaining after this function is called, the title cannot 
+/// perform any further multiplayer operations. Changes are batched and written to the service 
+/// when <see cref="XblMultiplayerManagerDoWork"/> is called.
+/// <para>The result of this function is delivered as a multiplayer event with an event type set to 
+/// `XblMultiplayerEventType::UserRemoved`. 
+/// You can call <see cref="XblMultiplayerManagerDoWork"/> to retrieve multiplayer events.</para>
+/// <para>After leaving, you can join a different game by calling either <see cref="XblMultiplayerManagerJoinGame"/> or
+/// <see cref="XblMultiplayerManagerJoinGameFromLobby"/>, or you can re-add the 
+/// local user by calling <see cref="XblMultiplayerManagerLobbySessionAddLocalUser"/>.</para>
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerJoinLobby"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionInviteFriends"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionInviteUsers"/>
 STDAPI XblMultiplayerManagerLobbySessionRemoveLocalUser(
     _In_ XblUserHandle user
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Set a custom property on the local member to the specified JSON string.
+/// Set a custom property for a local member to the specified JSON string.
 /// </summary>
-/// <param name="user">The associated system User you want to set the property for.</param>
+/// <param name="user">The user you want to set the property for.</param>
 /// <param name="name">The name of the property to set.</param>
-/// <param name="valueJson">The JSON value to assign to the property. (Optional)</param>
-/// <param name="context">The application-defined data to correlate the XblMultiplayerEvent to the initiating call. (Optional)</param>
+/// <param name="valueJson">Optional. The JSON value to assign to the property.</param>
+/// <param name="context">Optional. The application-defined data to correlate the <see cref="XblMultiplayerEvent"/> to the initiating call.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// The result is delivered via XblMultiplayerEvent of type LocalMemberPropertyWriteCompleted 
-/// through XblMultiplayerManagerDoWork().  
-/// Changes are batched and written to the service on the next XblMultiplayerManagerDoWork().  
-/// All session properties and members contain updated response returned from the server 
-/// upon calling XblMultiplayerManagerDoWork().
+/// This function sets the value, represented as a JSON string, of a custom property for a local member in 
+/// the lobby session. Custom properties can be changed at any time. Changes are batched and written to the 
+/// service when <see cref="XblMultiplayerManagerDoWork"/> is called.
+/// <para>The result of this function is delivered as a multiplayer event with an event type set 
+/// to `XblMultiplayerEventType::LocalMemberPropertyWriteCompleted`. 
+/// You can call <see cref="XblMultiplayerManagerDoWork"/> to retrieve multiplayer events.</para> 
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerGameSessionSetSynchronizedHost"/>
+/// <seealso cref="XblMultiplayerEvent"/>
 STDAPI XblMultiplayerManagerLobbySessionSetLocalMemberProperties(
     _In_ XblUserHandle user,
     _In_z_ const char* name,
@@ -800,19 +999,21 @@ STDAPI XblMultiplayerManagerLobbySessionSetLocalMemberProperties(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Delete a custom property on the local member.
+/// Deletes a custom property from a local member of the lobby session.
 /// </summary>
-/// <param name="user">The associated system User you want to delete the property for.</param>
-/// <param name="name">The name of the property to delete.</param>
-/// <param name="context">The application-defined data to correlate the XblMultiplayerEvent to the initiating call. (Optional)</param>
+/// <param name="user">The user handle of the local member.</param>
+/// <param name="name">The name of the custom property to delete.</param>
+/// <param name="context">Optional. The application-defined data to correlate the <see cref="XblMultiplayerEvent"/> to the initiating call.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// The result is delivered via XblMultiplayerEvent of type LocalMemberPropertyWriteCompleted 
-/// through XblMultiplayerManagerDoWork().  
-/// Changes are batched and written to the service on the next XblMultiplayerManagerDoWork().  
-/// All session properties and members contain updated response returned from the server 
-/// upon calling XblMultiplayerManagerDoWork().
+/// This function deletes a custom property from a local member of the lobby session. Custom properties 
+/// can be changed at any time. Changes are batched and written to the service when <see cref="XblMultiplayerManagerDoWork"/> is called.
+/// <para>The result of this function is delivered as a multiplayer event with an event type set to 
+/// `XblMultiplayerEventType::LocalMemberPropertyWriteCompleted`. 
+/// You can call <see cref="XblMultiplayerManagerDoWork"/> to retrieve multiplayer events.</para>
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerLobbySessionSetLocalMemberConnectionAddress"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionSetLocalMemberProperties"/>
 STDAPI XblMultiplayerManagerLobbySessionDeleteLocalMemberProperties(
     _In_ XblUserHandle user,
     _In_z_ const char* name,
@@ -820,20 +1021,22 @@ STDAPI XblMultiplayerManagerLobbySessionDeleteLocalMemberProperties(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Set connection address for the local member.  
-/// The address can be used for network and secure socket connection.
+/// Sets the connection address for the local member.  
 /// </summary>
-/// <param name="user">The associated system User you want to set the property for.</param>
+/// <param name="user">The user you want to set the property for.</param>
 /// <param name="connectionAddress">The network connection address to set.</param>
-/// <param name="context">The application-defined data to correlate the XblMultiplayerEvent to the initiating call. (Optional)</param>
+/// <param name="context">Optional. The application-defined data to correlate the <see cref="XblMultiplayerEvent"/> to the initiating call.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// The result is delivered via XblMultiplayerEvent of type XblMultiplayerEventType::LocalMemberConnectionAddressWriteCompleted 
-/// through XblMultiplayerManagerDoWork().  
-/// Changes are batched and written to the service on the next XblMultiplayerManagerDoWork().  
-/// All session properties and members contain updated response returned from the server 
-/// upon calling XblMultiplayerManagerDoWork().
+/// This function sets the network connection address of a local member in the lobby session. You can use 
+/// the connection address for network and secure socket connections to that local member. Changes are batched 
+/// and written to the service when <see cref="XblMultiplayerManagerDoWork"/> is called.
+/// <para>The result of this function is delivered as a multiplayer event with an event type set 
+/// to `XblMultiplayerEventType::LocalMemberConnectionAddressWriteCompleted`. 
+/// You can call <see cref="XblMultiplayerManagerDoWork"/> to retrieve multiplayer events.</para> 
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerLobbySessionSetLocalMemberProperties"/>
+/// <seealso cref="XblMultiplayerEvent"/>
 STDAPI XblMultiplayerManagerLobbySessionSetLocalMemberConnectionAddress(
     _In_ XblUserHandle user,
     _In_z_ const char* connectionAddress,
@@ -841,28 +1044,39 @@ STDAPI XblMultiplayerManagerLobbySessionSetLocalMemberConnectionAddress(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Whether or not the Xbox User ID is the host.
+/// Indicates whether the specified user is the host for the lobby session.
 /// </summary>
-/// <param name="xuid">The Xbox User ID of the user.</param>
-/// <returns>Returns true if Xuid is host, false if Xuid is not host.</returns>
+/// <param name="xuid">The Xbox User ID (XUID) of the user.</param>
+/// <returns>Returns true if the XUID is the host of the lobby session; otherwise, false.</returns>
+/// <remarks>
+/// This function returns false if a lobby session doesn't exist, or if 
+/// the Xbox User ID (XUID) specified in `xuid` isn't the host for the lobby session. You can 
+/// retrieve the host for a lobby session by calling <see cref="XblMultiplayerManagerLobbySessionHost"/>.
+/// For more information, see <see href="live-multiplayer-manager-api-overview.md">Multiplayer Manager API overview</see>.
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerLobbySessionSetSynchronizedHost"/>
 STDAPI_(bool) XblMultiplayerManagerLobbySessionIsHost(
     _In_ uint64_t xuid
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Set a custom game property to the specified JSON string.
+/// Sets the value of a custom property for the lobby session.
 /// </summary>
-/// <param name="name">The name of the property to set.</param>
-/// <param name="valueJson">The JSON value to assign to the property. (Optional)</param>
-/// <param name="context">The application-defined data to correlate the XblMultiplayerEvent to the initiating call. (Optional)</param>
+/// <param name="name">The name of the custom property to set.</param>
+/// <param name="valueJson">The value to assign to the property, as a JSON string.</param>
+/// <param name="context">Optional. The application-defined data to correlate the <see cref="XblMultiplayerEvent"/> to the initiating call.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// The result is delivered via XblMultiplayerEvent of type XblMultiplayerEventType::SessionPropertyWriteCompleted 
-/// through XblMultiplayerManagerDoWork().  
-/// Changes are batched and written to the service on the next XblMultiplayerManagerDoWork().  
-/// All session properties and members contain updated response returned from the server 
-/// upon calling XblMultiplayerManagerDoWork().
+/// This function sets the value, represented as a JSON string, of a custom property for the lobby session. Custom properties 
+/// can be changed at any time. Changes are batched and written to the service when <see cref="XblMultiplayerManagerDoWork"/> is called.
+/// If custom properties are shared between devices, or may be updated by several devices 
+/// at the same time, use the <see cref="XblMultiplayerManagerLobbySessionSetSynchronizedProperties"/> function to change custom properties.
+/// Otherwise, you can use this function to change custom properties.
+/// <para>The result of this function is delivered as a multiplayer event with an event type set to `XblMultiplayerEventType::SessionPropertyWriteCompleted`. 
+/// You can call <see cref="XblMultiplayerManagerDoWork"/> to retrieve multiplayer events.</para> 
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerLobbySessionSetSynchronizedHost"/>
+/// <seealso cref="XblMultiplayerEvent"/>
 STDAPI XblMultiplayerManagerLobbySessionSetProperties(
     _In_z_ const char* name,
     _In_z_ const char* valueJson,
@@ -870,21 +1084,26 @@ STDAPI XblMultiplayerManagerLobbySessionSetProperties(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Sets a custom property to the specified JSON string using XblMultiplayerSessionWriteMode::SynchronizedUpdate.
+/// Sets the value of a custom property for the lobby session, using `XblMultiplayerSessionWriteMode::SynchronizedUpdate`.
 /// </summary>
-/// <param name="name">The name of the property to set.</param>
-/// <param name="valueJson">The JSON value to assign to the property. (Optional)</param>
-/// <param name="context">The application-defined data to correlate the XblMultiplayerEvent to the initiating call. (Optional)</param>
+/// <param name="name">The name of the custom property to set.</param>
+/// <param name="valueJson">The value to assign to the property, as a JSON string.</param>
+/// <param name="context">Optional. The application-defined data to correlate the <see cref="XblMultiplayerEvent"/> to the initiating call.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// Use this method to resolve any conflicts between devices while trying to set properties to a shared portion 
-/// that other devices can also modify.  It ensures that updates to the session are atomic.  
-/// If writing to non-sharable properties, use XblMultiplayerLobbySessionSetProperties() instead.  
-/// The service may reject your request if a race condition occurred (due to a conflict) resulting in HTTP_E_STATUS_PRECOND_FAILED (HTTP status 412).  
-/// To resolve this, evaluate the need to write again and re-submit if needed.  
-/// The result is delivered via XblMultiplayerEvent of type XblMultiplayerEventType::SessionSynchronizedPropertyWriteCompleted
-/// through XblMultiplayerManagerDoWork().
+/// This function sets the value, represented as a JSON string, of a custom property for the lobby session. Custom properties 
+/// can be changed at any time. If custom properties are shared between devices, or may be updated by several devices 
+/// at the same time, use this function to ensure atomicity and resolve any conflicts between devices while changing the values of those cusotm properties. 
+/// If a custom property isn't shared across devices, use the <see cref="XblMultiplayerManagerLobbySessionSetProperties"/> function instead 
+/// to change the value of that custom property.
+/// <para>The service may reject the request to change the custom property if a race condition occurs due to a conflict.
+/// If the request is rejected, the service returns `HTTP_E_STATUS_PRECOND_FAILED`. If a conflict occurs, re-evaluate the need to 
+/// change the custom property and, if needed, call this function again to re-submit the request.</para>
+/// <para>The result of this function is delivered as a multiplayer event with an event type set to `XblMultiplayerEventType::SessionSynchronizedPropertyWriteCompleted`. 
+/// You can call <see cref="XblMultiplayerManagerDoWork"/> to retrieve multiplayer events.</para> 
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerLobbySessionSetSynchronizedHost"/>
+/// <seealso cref="XblMultiplayerEvent"/>
 STDAPI XblMultiplayerManagerLobbySessionSetSynchronizedProperties(
     _In_z_ const char* name,
     _In_z_ const char* valueJson,
@@ -892,19 +1111,25 @@ STDAPI XblMultiplayerManagerLobbySessionSetSynchronizedProperties(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Sets the host for the game using XblMultiplayerSessionWriteMode::SynchronizedUpdate.
+/// Sets the host for the lobby session, using `XblMultiplayerSessionWriteMode::SynchronizedUpdate`.
 /// </summary>
 /// <param name="deviceToken">The device token of the host.</param>
-/// <param name="context">The application-defined data to correlate the XblMultiplayerEvent to the initiating call. (Optional)</param>
+/// <param name="context">Optional. The application-defined data to correlate the <see cref="XblMultiplayerEvent"/> to the initiating call.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// Use this method to resolve any conflicts between devices trying to set the host at the same time.  
-/// It ensures that updates to the session are atomic.  
-/// The service may reject your request if a race condition occurred(due to a conflict) resulting in HTTP_E_STATUS_PRECOND_FAILED (HTTP status 412).  
-/// To resolve this, evaluate the need to write again and re-submit if needed.  
-/// The result is delivered via XblMultiplayerEvent of type XblMultiplayerEventType::SynchronizedHostWriteCompleted 
-/// through XblMultiplayerManagerDoWork().
+/// This function sets the host for the lobby session. Use this function to ensure atomicity and resolve any conflicts between devices 
+/// trying to set the host at the same time. 
+/// <para>The service may reject the request to set the host if a race condition occurs due to a conflict.
+/// If the request is rejected, the service returns `HTTP_E_STATUS_PRECOND_FAILED`. If a conflict occurs, re-evaluate the need to 
+/// change the host and, if needed, call this function again to re-submit the request.</para>
+/// <para>The result of this function is delivered as a multiplayer event with an event type set to `XblMultiplayerEventType::SynchronizedHostWriteCompleted`. 
+/// You can call <see cref="XblMultiplayerManagerDoWork"/> to retrieve multiplayer events.</para>
+/// Note that host device tokens are generated from a session member's secure device address, so ensure that the secure device address is set for the 
+/// desired host prior to calling this method.
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerLobbySessionSetSynchronizedProperties"/>
+/// <seealso cref="XblMultiplayerEvent"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionSetLocalMemberConnectionAddress"/>
 STDAPI XblMultiplayerManagerLobbySessionSetSynchronizedHost(
     _In_ const char* deviceToken,
     _In_opt_ void* context
@@ -912,20 +1137,27 @@ STDAPI XblMultiplayerManagerLobbySessionSetSynchronizedHost(
 
 #if HC_PLATFORM_IS_MICROSOFT
 /// <summary>
-/// Displays the invite UI and allows the user to select people from the user's people list and invite them to join the user's party.  
-/// If a user accepts that notification the title will be notified.
+/// Displays the standard Xbox UI, allowing the user to select friends or recent players and invite them to the game.
 /// </summary>
 /// <param name="requestingUser">The user who is sending the invite.</param>
-/// <param name="contextStringId">The custom context string ID.  
-/// This string ID is defined during Xbox Live ingestion to identify the invitation text that is additional to the standard invitation text.  
-/// The ID string must be prefixed with "///". (Optional)</param>
-/// <param name="customActivationContext">The activation context string.  
-/// A game defined string that is passed to the invited game client and interpreted as desired. (Optional)</param>
+/// <param name="contextStringId">Optional. The custom context string ID, a string that is defined 
+/// during Xbox Live ingestion, to identify the custom invitation text 
+/// that is added to the standard invitation text.  The ID string must be prefixed with 
+/// three slash characters ("///").</param>
+/// <param name="customActivationContext">Optional. The activation context string, a game-defined string 
+/// that is passed to the invited game client and interpreted as desired by the game.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// In the case of GDK based games, the title will be notified via the callback set by XGameInviteRegisterForEvent.  
-/// For other platforms, the title will be activated.
+/// If this function is invoked, Multiplayer Manager sends invites to the selected players when the user 
+/// confirms the player selection in the standard Xbox UI. If a selected player accepts the invite, the title is notified. 
+/// For GDK-based games, the title is notified by invoking the callback function specified 
+/// when the <see cref="XGameInviteRegisterForEvent"/> function was invoked. 
+/// For games based on other platforms, the title is activated.
+/// For more information, see <see href="live-invites-receive.md">Receiving invites</see>.
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerJoinLobby"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionAddLocalUser"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionInviteUsers"/>
 STDAPI XblMultiplayerManagerLobbySessionInviteFriends(
     _In_ XblUserHandle requestingUser,
     _In_opt_z_ const char* contextStringId,
@@ -934,24 +1166,29 @@ STDAPI XblMultiplayerManagerLobbySessionInviteFriends(
 #endif
 
 /// <summary>
-/// Invites the specified users to a game without additional UI.  
-/// This will result in a notification being shown to each invited user using standard invite text.  
-/// If a user accepts that notification the title will be notified.
+/// Invites the specified users to the game without displaying additional UI.  
 /// </summary>
-/// <param name="user">The associated system User.</param>
-/// <param name="xuids">The array of xbox user IDs who will be invited.</param>
-/// <param name="xuidsCount">The size of the xuids array.</param>
-/// <param name="contextStringId">The custom context string ID.  This string ID is defined 
-/// during Xbox Live ingestion to identify the invitation text that is additional to the standard 
-/// invitation text. The ID string must be prefixed with "///". (Optional)</param>
-/// <param name="customActivationContext">The activation context string.  
-/// A game defined string that is passed to the invited game client and interpreted as desired. (Optional)</param>
+/// <param name="user">The user who is sending the invite.</param>
+/// <param name="xuids">The array of Xbox User IDs (XUIDs) to be invited.</param>
+/// <param name="xuidsCount">The size of the `xuids` array.</param>
+/// <param name="contextStringId">Optional. The custom context string ID, a string that is defined 
+/// during Xbox Live ingestion, to identify the custom invitation text 
+/// that is added to the standard invitation text.  The ID string must be prefixed with 
+/// three slash characters ("///").</param>
+/// <param name="customActivationContext">Optional. The activation context string, a game-defined string 
+/// that is passed to the invited game client and interpreted as desired by the game.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// In the case of GDK based games, the title will be notified via the callback 
-/// set by XGameInviteRegisterForEvent.  
-/// For other platforms, the title will be activated.
+/// Multiplayer Manager sends invites to the selected players when this function is invoked. If a selected 
+/// player accepts the invite, the title is notified. 
+/// For GDK-based games, the title is notified by invoking the callback function specified 
+/// when the <see cref="XGameInviteRegisterForEvent"/> function was invoked. 
+/// For games based on other platforms, the title is activated. 
+/// For more information, see <see href="live-invites-receive.md">Receiving invites</see>.
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerJoinLobby"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionAddLocalUser"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionInviteFriends"/>
 STDAPI XblMultiplayerManagerLobbySessionInviteUsers(
     _In_ XblUserHandle user,
     _In_ const uint64_t* xuids,
@@ -961,96 +1198,150 @@ STDAPI XblMultiplayerManagerLobbySessionInviteUsers(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns whether or not there is an active multiplayer manager game session.
+/// Indicates whether there is an active game session.
 /// </summary>
-/// <returns>Returns true if active game session, false if not active game session.</returns>
+/// <returns>Returns true if a game session exists for the lobby session in Multiplayer Manager; otherwise, false.</returns>
+/// <seealso cref="XblMultiplayerManagerGameSessionCorrelationId"/>
+/// <seealso cref="XblMultiplayerManagerGameSessionSessionReference"/>
 STDAPI_(bool) XblMultiplayerManagerGameSessionActive() XBL_NOEXCEPT;
 
 /// <summary>
-/// A unique ID to the session used to query trace logs for entries that relate to the session.  
-/// Returns null if a game session has not yet been established.
+/// Retrieves the correlation handle for the game session. 
 /// </summary>
-/// <returns>The unique ID given to the game session.  
-/// The memory for the returned string pointer remains valid until the next call to XblMultiplayerManagerDoWork.</returns>
+/// <returns>The correlation handle for the game session, or null if a game session doesn't exist.  
+/// The memory for the returned pointer remains valid until the next call to <see cref="XblMultiplayerManagerDoWork"/>.</returns>
+/// <remarks>
+/// This function retrieves the correlation handle for the game session. The correlation handle serves as 
+/// an alias for the game session, allowing a game to refer to a game session by using only the correlation handle. 
+/// The correlation handle can be used to query trace logs for entries that relate to the game session.
+/// For more information, see <see href="live-multiplayer-concepts.md">Multiplayer concepts overview</see>.
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerGameSessionSessionReference"/>
 STDAPI_(const char*) XblMultiplayerManagerGameSessionCorrelationId() XBL_NOEXCEPT;
 
 /// <summary>
-/// Object containing identifying information for the session.  
-/// Returns null if a game session has not yet been established.
+/// Retrieves the session reference for the game session.  
 /// </summary>
-/// <returns>A pointer to the multiplayer session reference.  
-/// The memory for the returned string pointer remains valid until the next call to XblMultiplayerManagerDoWork.</returns>
+/// <returns>A pointer to the session reference for the game session, or null if a game session doesn't exist.  
+/// The memory for the returned pointer remains valid until the next call to <see cref="XblMultiplayerManagerDoWork"/>.</returns>
+/// <remarks>
+/// This function retrieves a pointer to the session reference for a game session, if the game session exists for 
+/// the lobby session in Multiplayer Manager. The session reference contains the service configuration ID (SCID),
+/// session template, and session name for the game session, and uniquely identifies 
+/// the game session in Multiplayer Session Directory (MPSD). For more information about session references, see 
+/// <see href="concepts/live-mpsd-details.md">Multiplayer Session advanced topics</see>.
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerGameSessionCorrelationId"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionSessionReference"/>
 STDAPI_(const XblMultiplayerSessionReference*) XblMultiplayerManagerGameSessionSessionReference() XBL_NOEXCEPT;
 
 /// <summary>
-/// A number of members that are in the game.  
-/// When a friend accepts a game invite, members will be added to the lobby and the game session members list.
+/// Retrieves the number of members in the game session.  
 /// </summary>
-/// <returns>The number of members that are in the game.</returns>
+/// <returns>The number of members that are in the game session.</returns>
+/// <remarks>
+/// When a friend accepts a game invite, the corresponding member is added to the lobby and the game session members list. 
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerLobbySessionMembersCount"/>
+/// <seealso cref="XblMultiplayerManagerGameSessionMembers"/>
 STDAPI_(size_t) XblMultiplayerManagerGameSessionMembersCount() XBL_NOEXCEPT;
 
 /// <summary>
-/// A collection of members that are in the game.
+/// Retrieves member information for the members in the game session.
 /// </summary>
-/// <param name="membersCount">The size of the members array.  
-/// The required size can be obtained with XblMultiplayerManagerGameSessionMembersCount.</param>
-/// <param name="members">A caller allocated array of XblMultiplayerManagerMember to write into.</param>
+/// <param name="membersCount">The size of the `members` array.  
+/// The required size can be obtained by calling <see cref="XblMultiplayerManagerGameSessionMembersCount"/>.</param>
+/// <param name="members">A caller-allocated <see cref="XblMultiplayerManagerMember"/> array to write into.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>
+/// This function returns member information for each member in a game session.
+/// <para>The member information returned by this function is valid only until <see cref="XblMultiplayerManagerDoWork"/> is called again.</para>
+/// </remarks>
 STDAPI XblMultiplayerManagerGameSessionMembers(
     _In_ size_t membersCount,
     _Out_writes_(membersCount) XblMultiplayerManagerMember* members
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Returns the host member for the game.  
-/// The host is defined as the user with the lowest index on the host device.
+/// Retrieves member information for the host member in the game session.  
 /// </summary>
-/// <param name="hostMember">A caller allocated struct to be filled with the host member reference to populate.</param>
+/// <param name="hostMember">A caller-allocated structure to be populated with member information for the host member.</param>
 /// <returns>HRESULT return code for this API operation.  
-/// Will return __HRESULT_FROM_WIN32(ERROR_NO_SUCH_USER) if there is no host.</returns>
+/// Returns `__HRESULT_FROM_WIN32(ERROR_NO_SUCH_USER)` if a host member doesn't exist.</returns>
+/// <remarks>
+/// This function retrieves member information about the member that represents the host for a game session.
+/// If a game session doesn't exist, or if a host member doesn't exist for the game session, the function 
+/// returns `__HRESULT_FROM_WIN32(ERROR_NO_SUCH_USER)`. The host member is defined as the user with the lowest
+/// index on the host device. 
+/// <para>The information returned by this function is valid only until <see cref="XblMultiplayerManagerDoWork"/> is called again.</para>
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerGameSessionMembers"/>
+/// <seealso cref="XblMultiplayerManagerGameSessionIsHost"/>
 STDAPI XblMultiplayerManagerGameSessionHost(
     _Out_ XblMultiplayerManagerMember* hostMember
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// JSON string that specify the custom properties for the game.  
-/// These can be changed anytime.
+/// Retrieves the custom properties for the game session, as a JSON string.  
 /// </summary>
-/// <returns>A JSON string that specifies the custom properties for the game.  
-/// The memory for the returned string pointer remains valid until the next call to XblMultiplayerManagerDoWork.  
-/// Will return null if the game session has not yet been established.</returns>
+/// <returns>A JSON string that specifies the custom properties for the game session, or null if a game session doesn't exist.  
+/// The memory for the returned pointer remains valid until the next call to <see cref="XblMultiplayerManagerDoWork"/>.</returns>
+/// <remarks>
+/// This function retrieves the custom properties for the game session, represented as a JSON string. These custom properties 
+/// can be changed at any time. If custom properties are shared between devices, or may be updated by several devices 
+/// at the same time, use the <see cref="XblMultiplayerManagerGameSessionSetSynchronizedProperties"/> function to change custom properties.
+/// Otherwise, you can use the <see cref="XblMultiplayerManagerGameSessionSetProperties"/> function to change custom properties.
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerLobbySessionPropertiesJson"/>
 STDAPI_(const char*) XblMultiplayerManagerGameSessionPropertiesJson() XBL_NOEXCEPT;
 
 /// <summary>
-/// A set of constants associated with this session.  
-/// These can only be set through the session template.
+/// Retrieves the session constants associated with the game session.
 /// </summary>
-/// <returns>A pointer to the constant values for the multiplayer session.  
-/// The memory for the returned string pointer remains valid until the next call to XblMultiplayerManagerDoWork.  
-/// Will return null if the game session has not yet been established.</returns>
+/// <returns>A pointer to the session constants for the game session, or null if a game session doesn't exist.  
+/// The memory for the returned pointer remains valid until the next call to <see cref="XblMultiplayerManagerDoWork"/>.</returns>
+/// <remarks>
+/// This function retrieves a pointer to the session constants for a game session, if the game session exists for 
+/// the lobby session in Multiplayer Manager. The session constants contain constants, such as session visibility 
+/// and session capabilities, defined by the session template used for the game session. Unlike session properties, 
+/// session constants can only be set through the session template, and are set at the time the game session is created.
+/// For more information about session constants, see <see href="concepts/live-mpsd-details.md">Multiplayer Session advanced topics</see>.
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerGameSessionPropertiesJson"/>
+/// <seealso cref="XblMultiplayerManagerGameSessionSessionReference"/>
 STDAPI_(const XblMultiplayerSessionConstants*) XblMultiplayerManagerGameSessionConstants() XBL_NOEXCEPT;
 
 /// <summary>
-/// Whether or not the Xbox User ID is the host.
+/// Indicates whether the specified user is the host for the game session.
 /// </summary>
-/// <param name="xuid">The Xbox User ID of the user.</param>
-/// <returns>Returns true if Xuid is host, false if Xuid is not host.</returns>
+/// <param name="xuid">The Xbox User ID (XUID) of the user.</param>
+/// <returns>Returns true if the XUID is the host of the game session; otherwise, false.</returns>
+/// <remarks>
+/// This function returns false if a game session doesn't exist for the lobby session, or if 
+/// the Xbox User ID (XUID) specified in `xuid` isn't the host for the game session. You can 
+/// retrieve the host for a game session by calling <see cref="XblMultiplayerManagerGameSessionHost"/>.
+/// For more information, see <see href="live-multiplayer-manager-api-overview.md">Multiplayer Manager API overview</see>.
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerGameSessionSetSynchronizedHost"/>
 STDAPI_(bool) XblMultiplayerManagerGameSessionIsHost(
     _In_ uint64_t xuid
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Set a custom game property to the specified JSON string.
+/// Sets the value of a custom property for the game session.
 /// </summary>
-/// <param name="name">The name of the property to set.</param>
-/// <param name="valueJson">The JSON value to assign to the property. (Optional)</param>
-/// <param name="context">The application-defined data to correlate the XblMultiplayerEvent to the initiating call. (Optional)</param>
+/// <param name="name">The name of the custom property to set.</param>
+/// <param name="valueJson">The value to assign to the property, as a JSON string.</param>
+/// <param name="context">Optional. The application-defined data to correlate the <see cref="XblMultiplayerEvent"/> to the initiating call.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// Changes are batched and written to the service on the next XblMultiplayerManagerDoWork().  
-/// All session properties and members contain updated response returned from the server 
-/// upon calling XblMultiplayerManagerDoWork().
+/// This function sets the value, represented as a JSON string, of a custom property for the game session. Custom properties 
+/// can be changed at any time. Changes are batched and written to the service when <see cref="XblMultiplayerManagerDoWork"/> is called.
+/// If custom properties are shared between devices, or may be updated by several devices 
+/// at the same time, use the <see cref="XblMultiplayerManagerGameSessionSetSynchronizedProperties"/> function to change custom properties.
+/// Otherwise, you can use this function to change custom properties.
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerGameSessionSetSynchronizedHost"/>
 STDAPI XblMultiplayerManagerGameSessionSetProperties(
     _In_z_ const char* name,
     _In_z_ const char* valueJson,
@@ -1058,21 +1349,26 @@ STDAPI XblMultiplayerManagerGameSessionSetProperties(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Sets a custom property to the specified JSON string using XblMultiplayerSessionWriteMode::SynchronizedUpdate.
+/// Sets the value of a custom property for the game session, using `XblMultiplayerSessionWriteMode::SynchronizedUpdate`.
 /// </summary>
-/// <param name="name">The name of the property to set.</param>
-/// <param name="valueJson">The JSON value to assign to the property. (Optional)</param>
-/// <param name="context">The application-defined data to correlate the XblMultiplayerEvent to the initiating call. (Optional)</param>
+/// <param name="name">The name of the custom property to set.</param>
+/// <param name="valueJson">The value to assign to the property, as a JSON string.</param>
+/// <param name="context">Optional. The application-defined data to correlate the <see cref="XblMultiplayerEvent"/> to the initiating call.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// Use this method to resolve any conflicts between devices while trying to set properties to a shared portion that other devices can also modify.  
-/// It ensures that updates to the session are atomic.  
-/// If writing to non-sharable properties, use XblMultiplayerManagerGameSessionSetProperties() instead.  
-/// The service may reject your request if a race condition occurred (due to a conflict) resulting in HTTP_E_STATUS_PRECOND_FAILED (HTTP status 412).  
-/// To resolve this, evaluate the need to write again and re-submit if needed.  
-/// The result is delivered via XblMultiplayerEvent of type XblMultiplayerEventType::SessionSynchronizedPropertyWriteCompleted 
-/// through XblMultiplayerManagerDoWork().
+/// This function sets the value, represented as a JSON string, of a custom property for the game session. Custom properties 
+/// can be changed at any time. If custom properties are shared between devices, or may be updated by several devices 
+/// at the same time, use this function to ensure atomicity and resolve any conflicts between devices while changing the values of those cusotm properties. 
+/// If a custom property isn't shared across devices, use the <see cref="XblMultiplayerManagerGameSessionSetProperties"/> function instead 
+/// to change the value of that custom property.
+/// <para>The service may reject the request to change the custom property if a race condition occurs due to a conflict.
+/// If the request is rejected, the service returns `HTTP_E_STATUS_PRECOND_FAILED`. If a conflict occurs, re-evaluate the need to 
+/// change the custom property and, if needed, call this function again to re-submit the request.</para>
+/// <para>The result of this function is delivered as a multiplayer event with an event type set to `XblMultiplayerEventType::SessionSynchronizedPropertyWriteCompleted`. 
+/// You can call <see cref="XblMultiplayerManagerDoWork"/> to retrieve multiplayer events.</para> 
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerGameSessionSetSynchronizedHost"/>
+/// <seealso cref="XblMultiplayerEvent"/>
 STDAPI XblMultiplayerManagerGameSessionSetSynchronizedProperties(
     _In_z_ const char* name,
     _In_z_ const char* valueJson,
@@ -1080,77 +1376,105 @@ STDAPI XblMultiplayerManagerGameSessionSetSynchronizedProperties(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Sets the host for the game using XblMultiplayerSessionWriteMode::SynchronizedUpdate.
+/// Sets the host for the game session, using `XblMultiplayerSessionWriteMode::SynchronizedUpdate`.
 /// </summary>
 /// <param name="deviceToken">The device token of the host.</param>
-/// <param name="context">The application-defined data to correlate the XblMultiplayerEvent to the initiating call. (Optional)</param>
+/// <param name="context">Optional. The application-defined data to correlate the <see cref="XblMultiplayerEvent"/> to the initiating call.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// Use this method to resolve any conflicts between devices trying to set the host at the same time.  
-/// It ensures that updates to the session are atomic.  
-/// The service may reject your request if a race condition occurred(due to a conflict) resulting in HTTP_E_STATUS_PRECOND_FAILED (HTTP status 412).  
-/// To resolve this, evaluate the need to write again and re-submit if needed.  
-/// The result is delivered via XblMultiplayerEvent of type XblMultiplayerEventType::SynchronizedHostWriteCompleted 
-/// through XblMultiplayerManagerDoWork().
+/// This function sets the host for the game session. Use this function to ensure atomicity and resolve any conflicts between devices 
+/// trying to set the host at the same time. 
+/// <para>The service may reject the request to set the host if a race condition occurs due to a conflict.
+/// If the request is rejected, the service returns `HTTP_E_STATUS_PRECOND_FAILED`. If a conflict occurs, re-evaluate the need to 
+/// change the host and, if needed, call this function again to re-submit the request.</para>
+/// <para>The result of this function is delivered as a multiplayer event with an event type set to `XblMultiplayerEventType::SynchronizedHostWriteCompleted`. 
+/// You can call <see cref="XblMultiplayerManagerDoWork"/> to retrieve multiplayer events.</para>
+/// Note that host device tokens are generated from a session member's secure device address, so ensure that the secure device address is set for the 
+/// desired host prior to calling this method.
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerGameSessionSetSynchronizedProperties"/>
+/// <seealso cref="XblMultiplayerEvent"/>
+/// <seealso cref="XblMultiplayerManagerLobbySessionSetLocalMemberConnectionAddress"/>
 STDAPI XblMultiplayerManagerGameSessionSetSynchronizedHost(
     _In_ const char* deviceToken,
     _In_opt_ void* context
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Joins a lobby session given a session handle ID.  
-/// Callers will usually get the handle ID from another member's XblMultiplayerActivityDetails 
-/// via the XblMultiplayerGetActivitiesForUsersAsync() API, or an invite.
+/// Joins an Xbox user to a lobby session.  
 /// </summary>
-/// <param name="handleId">A multiplayer handle id, which uniquely identifies the game session you want to join.</param>
-/// <param name="user">The system User joining the lobby.</param>
+/// <param name="handleId">The activity handle for the lobby session.</param>
+/// <param name="user">The user handle of the user joining the lobby session.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// You can send an invite to another user via XblMultiplayerManagerLobbySessionInviteUsers or XblMultiplayerManagerLobbySessionInviteFriends.
-/// The result of XblMultiplayerManagerJoinLobby is delivered via an event returned 
-/// from XblMultiplayerManagerDoWork() of the type XblMultiplayerEventType::JoinLobbyCompleted.  
-/// After joining, you can set the host via XblMultiplayerManagerLobbySessionSetSynchronizedHost() if one doesn't exist.  
-/// Instead, if you don't need a lobby session, and if you haven't added the local users through 
-/// XblMultiplayerManagerLobbySessionAddLocalUser(), you can pass in the list of users via the XblMultiplayerManagerJoinGame() API.
-/// When attempting to join a session, the service will return HTTP_E_STATUS_BAD_REQUEST (HTTP status 400) in the event the server is full.
+/// This function joins the Xbox user specified in <em>user</em> to the lobby session specified in <em>handleId</em>. 
+/// The activity handle for the lobby session is typically retrieved either from a game invite or from the `HandleId` value 
+/// of another user's <see cref="XblMultiplayerActivityDetails"/>, by calling <see cref="XblMultiplayerGetActivitiesForUsersAsync"/>. 
+/// For more information about multiplayer activities, see <see href="live-mpa-activities.md">Activities</see>.
+/// <para>The result of this function is delivered as a multiplayer event with an event type set to `XblMultiplayerEventType::JoinLobbyCompleted`. 
+/// You can call <see cref="XblMultiplayerManagerDoWork"/> to retrieve multiplayer events.</para>
+/// <para>When attempting to join a lobby session, the service returns `HTTP_E_STATUS_BAD_REQUEST` if the server is full.</para>
+/// <para>After joining, you can set the properties for the lobby session by calling  
+/// <see cref="XblMultiplayerManagerLobbySessionSetSynchronizedProperties"/>, or you can set the host for the lobby session by
+/// calling <see cref="XblMultiplayerManagerLobbySessionSetSynchronizedHost"/> if the lobby session doesn't already have a host.</para>
+/// <para>You can also send an invite to another user by calling either 
+/// <see cref="XblMultiplayerManagerLobbySessionInviteUsers"/> or <see cref="XblMultiplayerManagerLobbySessionInviteFriends"/>.
+/// If you don't need a lobby session, and if you haven't added local users by calling <see cref="XblMultiplayerManagerLobbySessionAddLocalUser"/>, 
+/// you can instead call <see cref="XblMultiplayerManagerJoinGame"/> and specify the list of users to join the game.</para>
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerJoinability"/>
+/// <seealso cref="XblMultiplayerManagerJoinGameFromLobby"/>
 STDAPI XblMultiplayerManagerJoinLobby(
     _In_z_ const char* handleId,
     _In_ XblUserHandle user
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Join the lobby's game session if one exists and if there is room.  
-/// If the session doesn't exist, it creates a new game session with the existing lobby members.
+/// Creates a new game session for the lobby session, or joins an existing game session if one exists for the lobby session.
 /// </summary>
-/// <param name="sessionTemplateName">The name of the template for the game session to be based on.</param>
+/// <param name="sessionTemplateName">The name of the session template for the game session to be based on.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// The result is delivered via an event of type XblMultiplayerEventType::JoinGameCompleted 
-/// through XblMultiplayerManagerDoWork().  
-/// This does not migrate existing lobby session properties over to the game session.  
-/// After joining, you can set the properties or the host via XblMultiplayerManagerGameSessionSetSynchronized APIs.
-/// When attempting to join a session, the service will return HTTP_E_STATUS_BAD_REQUEST (HTTP status 400) in the event the server is full.
+/// This function creates a new game session and adds the current members of the lobby session to the game session, 
+/// if a game session doesn't already exist. If a new user joins the lobby session after a game session is already 
+/// created, this function finds the existing game session in Multiplayer Session Directory (MPSD) by using a 
+/// transfer handle in the lobby session, and then adds the new user to the game session using that transfer handle.
+/// For more information, see <see href="live-multiplayer-concepts.md">Multiplayer concepts overview</see>.
+/// If a lobby session doesn't exist, likely because <see cref="XblMultiplayerManagerInitialize"/> wasn't called before 
+/// calling this function, an error occurs. An error also occurs if matchmaking is in progress. 
+/// This function does not migrate existing lobby session properties to the game session.  
+/// <para>The result of this function is delivered as a multiplayer event with an event type set to `XblMultiplayerEventType::JoinGameCompleted`. 
+/// You can call <see cref="XblMultiplayerManagerDoWork"/> to retrieve multiplayer events.</para>
+/// <para>When attempting to join a lobby session, the service returns `HTTP_E_STATUS_BAD_REQUEST` if the server is full.</para>
+/// <para>After joining, you can set the properties for the game session by calling  
+/// <see cref="XblMultiplayerManagerGameSessionSetProperties"/> or <see cref="XblMultiplayerManagerGameSessionSetSynchronizedProperties"/>, 
+/// or you can set the host for the game session by calling <see cref="XblMultiplayerManagerGameSessionSetSynchronizedHost"/>.</para>
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerJoinability"/>
+/// <seealso cref="XblMultiplayerManagerJoinGame"/>
+/// <seealso cref="XblMultiplayerManagerJoinLobby"/>
 STDAPI XblMultiplayerManagerJoinGameFromLobby(
     _In_z_ const char* sessionTemplateName
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Joins a game given a globally unique session name.  
-/// Callers can get the unique session name as a result of the title's third party matchmaking.  
-/// Call this on all clients that needs to join this game.
+/// Joins a game session, using the globally unique session name.  
 /// </summary>
-/// <param name="sessionName">A unique name for the session.</param>
-/// <param name="sessionTemplateName">The name of the template for the game session to be based on.</param>
-/// <param name="xuids">Array of xbox user IDs you want to be part of the game.</param>
-/// <param name="xuidsCount">The number of elements in the xuids array.</param>
+/// <param name="sessionName">The globally unique session name for the game session.</param>
+/// <param name="sessionTemplateName">The name of the session template for the game session to be based on.</param>
+/// <param name="xuids">An array of Xbox User IDs (XUIDs) that represents the users you want to be part of the game.</param>
+/// <param name="xuidsCount">The number of elements in the array specified for `xuids`.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// The result is delivered via an event of type XblMultiplayerEventType::JoinGameCompleted through XblMultiplayerManagerDoWork().  
-/// After joining, you can set the properties or the host via XblMultiplayerManagerGameSessionSetSynchronized APIs.
-/// When attempting to join a session, the service will return HTTP_E_STATUS_BAD_REQUEST (HTTP status 400) in the event the server is full.
+/// This function joins a list of Xbox users, specified in `xuids`, to the game session identified by the globally 
+/// unique session name specified in `sessionName.` You can get the globally unique session name from the results of the title's third-party matchmaking, 
+/// and you should call this function for all clients that need to join the game.
+/// <para>The result of this function is delivered as a multiplayer event with an event type set to `XblMultiplayerEventType::JoinGameCompleted`. 
+/// You can call <see cref="XblMultiplayerManagerDoWork"/> to retrieve multiplayer events.</para>
+/// <para>When attempting to join a game session, the service returns `HTTP_E_STATUS_BAD_REQUEST` if the server is full.</para>
+/// <para>After joining, you can set the properties for the game session by calling  
+/// <see cref="XblMultiplayerManagerGameSessionSetProperties"/> or <see cref="XblMultiplayerManagerGameSessionSetSynchronizedProperties"/>, 
+/// or you can set the host for the game session by calling <see cref="XblMultiplayerManagerGameSessionSetSynchronizedHost"/>.</para>
 /// </remarks>
 STDAPI XblMultiplayerManagerJoinGame(
     _In_z_ const char* sessionName,
@@ -1160,25 +1484,40 @@ STDAPI XblMultiplayerManagerJoinGame(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Leaving the game will put you back into the lobby.  
-/// This will remove all local users from the game.
+/// Leaves the game session, returning the Xbox user and all other local users to the lobby session.
 /// </summary>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// The result is delivered via and event of type XblMultiplayerEventType::LeaveGameCompelted through XblMultiplayerManagerDoWork().
+/// This function removes the Xbox user from the game session and returns the user back to the lobby session. The game session is set to null, 
+/// and all local users are also removed from the game session and returned to the lobby session. Any matchmaking request in progress is 
+/// canceled when this function is called.  
+/// <para>The result of this function is delivered as a multiplayer event with an event type set to `XblMultiplayerEventType::LeaveGameCompleted`. 
+/// You can call <see cref="XblMultiplayerManagerDoWork"/> to retrieve multiplayer events.</para>
+/// <para>After leaving, you can join a different game by calling either <see cref="XblMultiplayerManagerJoinGame"/> or
+/// <see cref="XblMultiplayerManagerJoinGameFromLobby"/>.</para>
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerJoinGame"/>
+/// <seealso cref="XblMultiplayerManagerJoinLobby"/>
 STDAPI XblMultiplayerManagerLeaveGame() XBL_NOEXCEPT;
 
 /// <summary>
-/// Sends a matchmaking request to the server.
+/// Submits a matchmaking request to the server.
 /// </summary>
-/// <param name="hopperName">The name of the hopper.</param>
-/// <param name="attributesJson">The ticket attributes for the match. (Optional)</param>
-/// <param name="timeoutInSeconds">The maximum time to wait for members to join the match.</param>
+/// <param name="hopperName">The name of the hopper for this request.</param>
+/// <param name="attributesJson">Optional. The attributes of the match ticket for this request, as a JSON string.</param>
+/// <param name="timeoutInSeconds">The maximum time, in seconds, to wait for users to join the match.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// When a match is found, the manager will join the game and notify the title via an event of type XblMultiplayerEventType::FindMatchCompleted.
+/// This function submits a matchmaking request for the lobby session to Multiplayer Manager (MPM). Before you can use this function, 
+/// you must first configure hoppers in the service configuration for your title. A hopper defines the rules that SmartMatch uses 
+/// to match players. 
+/// For more information about hoppers, see <see href="live-matchmaking-overview.md">Matchmaking overview</see>.
+/// If a lobby session doesn't exist, likely because <see cref="XblMultiplayerManagerInitialize"/> wasn't called, or if local users weren't added
+/// to the lobby session before calling this function, an error occurs. An error also occurs if matchmaking is already in progress. 
+/// <para>The result of this function is delivered as a multiplayer event with an event type set to `XblMultiplayerEventType::FindMatchCompleted`. 
+/// You can call <see cref="XblMultiplayerManagerDoWork"/> to retrieve multiplayer events.</para>
 /// </remarks>
+/// <seealso cref="XblMultiplayerManagerEstimatedMatchWaitTime"/>
 STDAPI XblMultiplayerManagerFindMatch(
     _In_z_ const char* hopperName,
     _In_opt_z_ const char* attributesJson,
@@ -1189,6 +1528,16 @@ STDAPI XblMultiplayerManagerFindMatch(
 /// Cancels the match request on the server, if one exists.
 /// </summary>
 /// <returns></returns>
+/// <remarks>
+/// This function cancels a previously submitted match ticket. This function is ignored if the status of the match ticket 
+/// is set to `XblMultiplayerMatchStatus::None`, `XblMultiplayerMatchStatus::Expired`, `XblMultiplayerMatchStatus::Canceled`, or 
+/// `XblMultiplayerMatchStatus::Failed`, or if a different host submitted the match ticket.
+/// <para>If this function is called, the status of the match ticket is set to `XblMultiplayerMatchStatus::Canceling` until 
+/// the match ticket is canceled on the server.</para> 
+/// <para>For more information about match tickets, see <see href="live-multiplayer-concepts.md">Multiplayer concepts overview</see>.</para>
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerFindMatch"/>
+/// <seealso cref="XblMultiplayerManagerMatchStatus"/>
 STDAPI_(void) XblMultiplayerManagerCancelMatch() XBL_NOEXCEPT;
 
 /// <summary>
@@ -1198,16 +1547,28 @@ STDAPI_(void) XblMultiplayerManagerCancelMatch() XBL_NOEXCEPT;
 STDAPI_(XblMultiplayerMatchStatus) XblMultiplayerManagerMatchStatus() XBL_NOEXCEPT;
 
 /// <summary>
-/// Estimated wait time in seconds for a match request to be matched with other members.  
-/// Only applies after XblMultiplayerManagerFindMatch() has been called.
+/// Retrieves the estimated wait time, in seconds, to complete a matchmaking request in progress.
 /// </summary>
-/// <returns>The wait time in seconds.</returns>
+/// <returns>The estimated wait time, in seconds.</returns>
+/// <remarks>
+/// Call this function only after the <see cref="XblMultiplayerManagerFindMatch"/> function has been called 
+/// to submit a matchmaking request. The matchmaking request uses SmartMatch to find an existing game that has enough open 
+/// player slots for all the members in the lobby session. If a matchmaking request isn't in progress, 
+/// this function returns zero (0) seconds. For more information about finding a multiplayer game, 
+/// see <see href="live-play-multiplayer-with-matchmaking.md">Enable finding a multiplayer game by using SmartMatch using Multiplayer Manager</see>.
+/// </remarks>
+/// <seealso cref="XblMultiplayerManagerFindMatch"/>
 STDAPI_(uint32_t) XblMultiplayerManagerEstimatedMatchWaitTime() XBL_NOEXCEPT;
 
 /// <summary>
-/// Indicates whether the game should auto fill open slots during gameplay.
+/// Indicates whether the game should auto-fill open slots during gameplay.
 /// </summary>
-/// <returns>Returns true if should auto fill, false if should not auto fill.</returns>
+/// <returns>Returns true if the game should auto-fill open slots during gameplay; otherwise, false.</returns>
+/// <remarks>Call the <see cref="XblMultiplayerManagerSetAutoFillMembersDuringMatchmaking"/> function to discover  
+/// whether the game should use matchmaking to auto-fill open slots during gameplay. You can also call 
+/// the <see cref="XblMultiplayerManagerSetAutoFillMembersDuringMatchmaking"/> function to specify whether the game 
+/// should auto-fill open slots during gameplay. For more information about matchmaking, 
+/// see <see href="live-matchmaking-overview.md">Matchmaking overview</see>.</remarks>
 STDAPI_(bool) XblMultiplayerManagerAutoFillMembersDuringMatchmaking() XBL_NOEXCEPT;
 
 /// <summary>
@@ -1242,9 +1603,9 @@ STDAPI XblMultiplayerManagerSetQosMeasurements(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Indicates who can join your game via the lobby.
+/// Indicates which users can join your lobby session.
 /// </summary>
-/// <returns>The joinability settings for your lobby.</returns>
+/// <returns>The joinability setting for your lobby session.</returns>
 STDAPI_(XblMultiplayerJoinability) XblMultiplayerManagerJoinability() XBL_NOEXCEPT;
 
 /// <summary>

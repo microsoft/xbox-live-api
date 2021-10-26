@@ -77,6 +77,14 @@ int StartAchievementsManagerDoWorkLoop_Lua(lua_State* L)
     std::lock_guard<std::recursive_mutex> lock(Data()->m_luaLock);
     achievementsState.doWorkThread = std::thread([]()
         {
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+            JNIEnv* jniEnv = nullptr;
+
+            // This should be a background thread that MUST attach a new java thread.
+            Data()->javaVM->GetEnv(reinterpret_cast<void**>(&jniEnv), JNI_VERSION_1_6);
+            Data()->javaVM->AttachCurrentThread(&jniEnv, nullptr);
+
+#endif
             Data()->m_achievementsDoWorkDone = false;
             while (achievementsState.doWork && !Data()->m_quit)
             {
@@ -88,6 +96,10 @@ int StartAchievementsManagerDoWorkLoop_Lua(lua_State* L)
             }
             Data()->m_achievementsDoWorkDone = true;
             LogToScreen("Exiting do work thread");
+
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+           Data()->javaVM->DetachCurrentThread();
+#endif
         });
     return LuaReturnHR(L, S_OK);
 }
@@ -112,7 +124,11 @@ void StopAchievementsManagerDoWorkHelper()
 
 int SetupAchievementsManagerPerformanceTestMock_Lua(lua_State *L)
 {
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+    std::string addUserMockResponse = ReadFile("PerformanceTestMockResponse.json");
+#else
     std::string addUserMockResponse = ReadFile("achievements\\PerformanceTestMockResponse.json");
+#endif
     assert(!addUserMockResponse.empty());
     
     auto hr = HCMockCallCreate(&achievementsState.mockHandle);
