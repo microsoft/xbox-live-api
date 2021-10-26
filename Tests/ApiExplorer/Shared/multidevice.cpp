@@ -11,7 +11,13 @@
 #if HC_PLATFORM_IS_MICROSOFT
 #pragma warning( pop )
 #endif
-
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+#include <thread>
+#include "multidevice.h"
+#include "api_explorer.h"
+#include "runner.h"
+#include "pal.h"
+#endif
 #if __has_include("apirunnercloudfns.h")
 #include "apirunnercloudfns.h"
 #else
@@ -571,6 +577,13 @@ HRESULT ApiRunnerMultiDeviceManager::MakeCall(
 
     auto asyncBlock = std::make_unique<XAsyncBlock>();
     asyncBlock->context = contextPtr.get();
+    XTaskQueueHandle queue = nullptr;
+    hr = XTaskQueueCreate(
+        XTaskQueueDispatchMode::ThreadPool,
+        XTaskQueueDispatchMode::ThreadPool,
+        &queue);
+    RETURN_HR_IF_FAILED(hr);
+    asyncBlock->queue = queue;
     asyncBlock->callback = [](XAsyncBlock* asyncBlock)
     {
         std::string responseString;

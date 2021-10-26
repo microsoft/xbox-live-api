@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #pragma once
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+#include "multidevice.h"
+#endif
 
 #include "lua.h"
 #include "lualib.h"
@@ -83,6 +86,8 @@ struct ApiExplorerData
     bool gotXalUser{ false };
     XTaskQueueHandle queue{ nullptr };
     XblContextHandle xboxLiveContext{ nullptr };
+    std::vector<XblRealTimeActivitySubscriptionHandle> subscriptionHandleDeviceList;
+    std::vector<XblRealTimeActivitySubscriptionHandle> subscriptionHandleTitleList;
     std::string gamertag;
     uint64_t xboxUserId{ 0 };
     uint32_t titleId{ 0 };
@@ -90,6 +95,18 @@ struct ApiExplorerData
     XblFunctionContext fnAddServiceCallRoutedHandler{ 0 };
     HCMockCallHandle nsalMockCall{ nullptr };
     bool libHttpClientInit{ false };
+
+    // Android Specific Data
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+    JavaVM *javaVM;
+    jobject applicationContext;
+    HCInitArgs initArgs;
+
+    /// <summary>The Java Application Context.</summary>
+    jclass m_mainActivityClass;
+    jobject m_mainActivityClassInstance;
+    jmethodID m_getApplicationContext;
+#endif
 
     // Achievements Data
     XblAchievementsResultHandle achievementsResult{ nullptr };

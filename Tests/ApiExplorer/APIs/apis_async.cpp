@@ -47,7 +47,10 @@ int XTaskQueueCloseHandle_Lua(lua_State *L)
     XTaskQueueHandle queue = Data()->queue;
 
     // CODE SNIPPET START: XTaskQueueCloseHandle
-    XTaskQueueCloseHandle(queue);
+    if (queue != nullptr) 
+    {
+        XTaskQueueCloseHandle(queue);
+    }
     // CODE SNIPPET END
     Data()->queue = nullptr;
 

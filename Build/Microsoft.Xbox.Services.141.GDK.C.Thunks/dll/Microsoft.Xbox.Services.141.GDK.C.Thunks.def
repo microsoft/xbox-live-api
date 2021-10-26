@@ -1,4 +1,4 @@
-LIBRARY Microsoft_Xbox_Services_141_GDK_C_Thunks
+LIBRARY Microsoft.Xbox.Services.141.GDK.C.Thunks.dll
 EXPORTS
     XblAchievementsGetAchievementAsync
     XblAchievementsGetAchievementResult

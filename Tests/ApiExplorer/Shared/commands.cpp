@@ -2,6 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #include "pch.h"
 #include "utils.h"
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+#include "api_explorer.h"
+#include "pal.h"
+#include "runner.h"
+#endif
 #include "cpprest/json.h"
 #include "mem_hook.h"
 
@@ -9,7 +14,7 @@
 #include <string>
 
 
-#if HC_PLATFORM == HC_PLATFORM_IOS
+#if HC_PLATFORM == HC_PLATFORM_IOS || HC_PLATFORM == HC_PLATFORM_ANDROID
 #define E_NOT_VALID_STATE E_FAIL
 #endif
 
@@ -43,8 +48,14 @@ void InitApiExplorerData()
 
     if (g_data->m_testsPath.empty())
     {
+#if HC_PLATFORM != HC_PLATFORM_ANDROID
         auto rootFile = pal::FindFile("tests/tests.root");
+#else
+        auto rootFile = pal::FindFile("tests.root");
+#endif
+        assert(!rootFile.empty());
         g_data->m_testsPath = rootFile.substr(0, rootFile.find_last_of("/"));
+
     }
 }
 
@@ -94,6 +105,7 @@ void Log(_Printf_format_string_ char const* format, ...)
     pal::vsprintf(message, 4096, format, varArgs);
     va_end(varArgs);
 
+    LogToScreen(message);
     LogToFile(message);
 }
 #endif
@@ -296,7 +308,7 @@ bool LoadFile(const std::string& fileNameInput)
     {
         LogToFile("Couldn't find %s", fileNameInput.c_str());
     }
-    
+
     return false;
 }
 
@@ -327,39 +339,6 @@ void APIRunner_CleanupLeakCheck()
 {
     auto memHook = GetApiRunnerMemHook();
     memHook->LogStats("CleanupLeakCheck");
-    if (Data()->xboxLiveContext)
-    {
-        XblContextCloseHandle(Data()->xboxLiveContext);
-        Data()->xboxLiveContext = nullptr;
-    }
-    memHook->LogStats("CleanupLeakCheck post-XblContextCloseHandle");
-    if (Data()->xalUser)
-    {
-        XalUserCloseHandle(Data()->xalUser);
-        Data()->xalUser = nullptr;
-    }
-    memHook->LogStats("CleanupLeakCheck post-XalUserCloseHandle");
-
-    XAsyncBlock block{};
-    HRESULT hr = XblCleanupAsync(&block);
-    if (SUCCEEDED(hr))
-    {
-        hr = XAsyncGetStatus(&block, true);
-    }
-    memHook->LogStats("CleanupLeakCheck post-XblCleanupAsync");
-
-    hr = XalCleanupAsync(&block);
-    if (SUCCEEDED(hr))
-    {
-        hr = XAsyncGetStatus(&block, true);
-    }
-
-    if (Data()->queue != nullptr)
-    {
-        XTaskQueueCloseHandle(Data()->queue);
-        Data()->queue = nullptr;
-    }
-    memHook->LogStats("CleanupLeakCheck post-XalCleanupAsync");
     memHook->LogLeaks();
 }
 
@@ -370,8 +349,11 @@ HRESULT RunTestWithoutCleanup(const std::string& scriptName)
     bool testLoaded = LoadFile(scriptName);
     if (!testLoaded)
     {
+        std::string scriptFailure = "Failed to load " + scriptName;
+        Log(scriptFailure.c_str());
         return E_FAIL;
     }
+
     return WaitForTestResult();
 }
 
@@ -412,10 +394,14 @@ HRESULT ApiRunnerRunTest(std::string testName)
 
 HRESULT RunSetupScript()
 {
-    std::string sharedFolder = "_luasetup_\\xal";
-
     char message[4096] = {};
+#if HC_PLATFORM != HC_PLATFORM_ANDROID
+    std::string sharedFolder = "_luasetup_\\xal";
     sprintf_s(message, "tests\\%s\\setup.lua", sharedFolder.c_str());
+#else
+    std::string sharedFolder = "xal";
+    sprintf_s(message, "%s/setup.lua", sharedFolder.c_str());
+#endif
     std::string strFilePath = pal::FindFile(message);
     if (strFilePath.empty() || strFilePath.length() < 5)
     {
@@ -423,7 +409,7 @@ HRESULT RunSetupScript()
         return E_NOINTERFACE;
     }
 
-    return RunTestInternal(strFilePath, true);
+    return RunTestInternal(message, true);
 }
 
 void OnCmdRepeatRunTest(const std::vector<std::string>& cmdLineTokens)
@@ -539,10 +525,12 @@ HRESULT RunTestsHelper(TestSet set)
     HRESULT hr = RunSetupScript();
     if (FAILED(hr))
     {
+        LogToScreen("RunSetupScript() failed with HR = %s", ConvertHR(hr).c_str());
         return hr;
     }
     if (!Data()->gotXalUser)
     {
+        LogToScreen("Data()->GotXalUser was invalid");
         return E_NOT_VALID_STATE;
     }
 
@@ -623,6 +611,7 @@ HRESULT RunTestsHelper(TestSet set)
     {
         auto memHook = GetApiRunnerMemHook();
         memHook->LogUnhookedStats();
+        APIRunner_CleanupLeakCheck();
     }
 
     CallLuaString("test.summary()");
@@ -800,7 +789,17 @@ web::json::array extract_json_array(
 std::string ApiRunnerReadFile(std::string fileName)
 {
     assert(Data() != nullptr); // call ApiRunnerSetupApiExplorer() first
+
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+    // In Android, the test files are considered assets.
+    // These files are copied from the assets folder into the external storage
+    // when the app is installed and launched on a device.
+    // Searching for the file is then done using the filename and doesn't use paths like other platforms
+    std::string fileNameEdited = fileName.substr(0, fileName.find_last_of("\\"));
+    std::string strFilePath = pal::FindFile(fileNameEdited);
+#else
     std::string strFilePath = pal::FindFile(fileName);
+#endif
     if (strFilePath.empty())
     {
         std::string testPath = "Tests\\" + fileName;
@@ -893,14 +892,14 @@ HRESULT ApiRunnerRunTestWithSetup(std::string testName, bool repeat)
         return E_UNEXPECTED;
     }
 
+
+    Data()->m_runningTests = true;
+    SetupLua();
     if (Data()->m_trackUnhookedMemory)
     {
         auto memHook = GetApiRunnerMemHook();
         memHook->StartMemTracking();
     }
-
-    Data()->m_runningTests = true;
-    SetupLua();
     HRESULT hr = RunSetupScript();
     if (SUCCEEDED(hr))
     {
@@ -930,6 +929,7 @@ HRESULT ApiRunnerRunTestWithSetup(std::string testName, bool repeat)
     {
         auto memHook = GetApiRunnerMemHook();
         memHook->LogUnhookedStats();
+        APIRunner_CleanupLeakCheck();
     }
 
     CleanupLua();
@@ -1265,4 +1265,19 @@ void SetupAPNSRegistrationToken(std::string registrationToken)
 {
     Data()->apnsToken = registrationToken;
 }
+#endif
+
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+void SetupAndroidContext( JavaVM *javaVM, jobject context, jclass mainActivityClass, jobject mainActivityInstance, jmethodID getApplicationContext)
+{
+    Data()->javaVM = javaVM;
+    Data()->m_mainActivityClass = mainActivityClass;
+    Data()->m_getApplicationContext = getApplicationContext;
+    Data()->m_mainActivityClassInstance = mainActivityInstance;
+    Data()->applicationContext = context;
+    Data()->initArgs = {};
+    Data()->initArgs.applicationContext = context;
+    Data()->initArgs.javaVM = javaVM;
+}
+
 #endif

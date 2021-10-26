@@ -789,5 +789,11 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\titleStorage\title_storage-restCalls.lua">
       <Filter>Tests\titleStorage</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_wait.lua">
+      <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_sub_unsub.lua">
+      <Filter>Tests\social</Filter>
+    </None>
   </ItemGroup>
 </Project>

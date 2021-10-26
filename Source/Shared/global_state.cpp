@@ -51,6 +51,13 @@ HRESULT GlobalState::Create(
     RETURN_HR_INVALIDARGUMENT_IF_EMPTY_STRING(args->scid);
 #endif
 
+    XTaskQueueHandle processQueue{ nullptr };
+    bool haveProcessQueue = XTaskQueueGetCurrentProcessTaskQueue(&processQueue);
+    if (!haveProcessQueue && args->queue == nullptr)
+    {
+        return E_NO_TASK_QUEUE;
+    }
+
     if (AccessHelper(AccessMode::GET))
     {
         return E_XBL_ALREADY_INITIALIZED;

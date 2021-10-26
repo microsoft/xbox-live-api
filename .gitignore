@@ -24,7 +24,6 @@ External/Packages/*
 
 #mobile
 External/sdk.mobile
-.gradle/
 
 # Xcode - from github
 ## User settings
@@ -161,8 +160,9 @@ Microsoft.Xbox.Services.*.sln.log
 Microsoft.Xbox.Services.*.sln.out
 **/apirunner-log.txt
 
-# Android Studio generated files
+# Android and Android Studio files
 **/.idea
 **/*.iml
-**/local.properties
 **/.cxx
+**/local.properties
+**/.gradle/*

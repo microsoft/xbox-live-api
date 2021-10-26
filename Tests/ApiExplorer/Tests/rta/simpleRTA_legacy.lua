@@ -5,8 +5,16 @@ common = require 'common'
 
 function SimpleRTALegacy_Handler()
     print("SimpleRTALegacy_Handler");
-    XblRealTimeActivityAddConnectionStateChangeHandler();
-    XblRealTimeActivityActivate();
+
+    -- Test isn't valid on all platforms (i.e. on Win32 we set up a notification service subscription by default so the RTA connection
+    -- won't be torn down just by removing the social relationship changed handler).
+    isGdk = IsGDKPlatform()
+    if isGdk then
+        XblRealTimeActivityAddConnectionStateChangeHandler();
+        XblRealTimeActivityActivate();
+    else
+        test.stopTest()
+    end
 end
 
 function OnXblRealTimeActivityAddConnectionStateChangeHandler_Connected()

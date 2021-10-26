@@ -65,6 +65,13 @@ typedef struct XblGameInviteNotificationEventArgs
     _Field_z_ const char* inviteProtocol;
 
     /// <summary>
+    /// Invite Context.  
+    /// The memory for the returned string pointer only remains valid inside the XblGameInviteHandler,
+    /// so deep copy the string if you need to refer to it outside the handler.
+    /// </summary>
+    _Field_z_ const char* inviteContext;
+
+    /// <summary>
     /// Sender Image URL.  
     /// The memory for the returned string pointer only remains valid inside the XblGameInviteHandler,
     /// so deep copy the string if you need to refer to it outside the handler.

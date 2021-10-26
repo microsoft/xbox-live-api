@@ -179,6 +179,7 @@ GameInviteNotificationEventArgs::GameInviteNotificationEventArgs(
     : XblGameInviteNotificationEventArgs{ other },
     m_inviteHandleId{ other.m_inviteHandleId },
     m_inviteProtocol{ other.m_inviteProtocol },
+    m_inviteContext{ other.m_inviteContext },
     m_senderImageUrl{ other.m_senderImageUrl }
 {
     if (!m_inviteHandleId.empty())
@@ -188,6 +189,10 @@ GameInviteNotificationEventArgs::GameInviteNotificationEventArgs(
     if (!m_inviteProtocol.empty())
     {
         inviteProtocol = m_inviteProtocol.data();
+    }
+    if (!m_inviteContext.empty())
+    {
+        inviteContext = m_inviteContext.data();
     }
     if (!m_senderImageUrl.empty())
     {
@@ -209,6 +214,16 @@ Result<GameInviteNotificationEventArgs> GameInviteNotificationEventArgs::Deseria
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonXuid(inviteHandle, "senderXuid", result.senderXboxUserId, true));
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(inviteHandle, "id", result.m_inviteHandleId, true));
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(inviteHandle, "inviteProtocol", result.m_inviteProtocol, true));
+    if (inviteHandle.IsObject() && inviteHandle.HasMember("inviteAttributes"))
+    {
+        const JsonValue& inviteAttributesValue = inviteHandle["inviteAttributes"];
+
+        if (inviteAttributesValue.HasMember("context"))
+        {
+            RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(inviteAttributesValue, "context", result.m_inviteContext, true));
+        }
+    }
+
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonTimeT(inviteHandle, "expiration", result.expiration, true));
     result.sessionReference = xbox::services::multiplayer::Serializers::DeserializeSessionReference(inviteHandle["sessionRef"]).Payload();
 

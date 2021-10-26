@@ -811,10 +811,10 @@ int MultiplayerSessionSetCurrentUserSecureDeviceAddressBase64Cpp_Lua(lua_State *
 
 int MultiplayerSessionSetCurrentUserRolesCpp_Lua(lua_State *L)
 {
-    string_t roleTypeName1 = L"roleTypeName1";
-    string_t roleName1 = L"roleName1";
-    string_t roleTypeName2 = L"roleTypeName2";
-    string_t roleName2 = L"roleName2";
+    string_t roleTypeName1 = _T("roleTypeName1");
+    string_t roleName1 = _T("roleName1");
+    string_t roleTypeName2 = _T("roleTypeName2");
+    string_t roleName2 = _T("roleName2");
 
     std::unordered_map<string_t, string_t> roleInfo{
         std::pair<string_t, string_t>(roleTypeName1, roleName1),
@@ -1049,7 +1049,7 @@ int MultiplayerServiceGetCurrentSessionByHandle_Lua(lua_State *L)
     auto sessionIndex{ GetUint64FromLua(L, 2, 0) };
     if (handleId.empty())
     {
-        handleId = L"86191619-4002-044f-4846-f8f903c71512";
+        handleId = _T("86191619-4002-044f-4846-f8f903c71512");
     }
 
     LogToFile("handleId: %s", xbox::services::Utils::StringFromStringT(handleId).c_str());
@@ -1400,9 +1400,9 @@ int MultiplayerServiceSetTransferHandle_Lua(lua_State* L)
 
 int MultiplayerServiceSetSearchHandle_Lua(lua_State *L)
 {
-    std::vector<string_t> tags{ L"SessionTag" };
-    std::unordered_map<string_t, double> numbersMetadata{ std::pair<string_t, double>(L"numberattributename", 1.1) };
-    std::unordered_map<string_t, string_t> stringsMetadata{ std::pair<string_t, string_t>(L"stringattributename", L"string attribute value") };
+    std::vector<string_t> tags{ _T("SessionTag") };
+    std::unordered_map<string_t, double> numbersMetadata{ std::pair<string_t, double>(_T("numberattributename"), 1.1) };
+    std::unordered_map<string_t, string_t> stringsMetadata{ std::pair<string_t, string_t>(_T("stringattributename"), _T("string attribute value")) };
 
     xbox::services::multiplayer::multiplayer_session_reference sessionRef = MPStateCpp()->sessionRef;
     xbox::services::multiplayer::multiplayer_search_handle_request searchRequest(sessionRef);
@@ -1447,10 +1447,10 @@ int MultiplayerServiceClearSearchHandle_Lua(lua_State *L)
 int MultiplayerServiceGetSearchHandles_Lua(lua_State *L)
 {
     string_t serviceConfigurationId = xbox::services::Utils::StringTFromUtf8(Data()->scid);
-    string_t sessionTemplateName = L"MinGameSession";
-    string_t orderByAttribute = L"";
     bool orderAscending{ false };
-    string_t searchFilter = L"";
+    string_t sessionTemplateName = _T("MinGameSession");
+    string_t orderByAttribute = _T("");
+    string_t searchFilter = _T("");
 
     std::shared_ptr<xbox::services::xbox_live_context> xblc = std::make_shared<xbox::services::xbox_live_context>(Data()->xboxLiveContext);
     xblc->multiplayer_service().get_search_handles(

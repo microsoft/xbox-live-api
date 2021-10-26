@@ -546,8 +546,7 @@ HRESULT XblHttpCall::Init(
     _In_ std::shared_ptr<XboxLiveContextSettings> contextSettings,
     _In_ const xsapi_internal_string& httpMethod,
     _In_ const xsapi_internal_string& fullUrl,
-    _In_ xbox_live_api xboxLiveApi,
-    _In_ HttpCallAgent agent
+    _In_ xbox_live_api xboxLiveApi
 )
 {
     m_httpMethod = httpMethod;
@@ -562,39 +561,9 @@ HRESULT XblHttpCall::Init(
     RETURN_HR_IF_FAILED(SetHeader(CONTRACT_VERSION_HEADER, "1"));
     RETURN_HR_IF_FAILED(SetHeader(CONTENT_TYPE_HEADER, "application/json; charset=utf-8"));
     RETURN_HR_IF_FAILED(SetHeader(ACCEPT_LANGUAGE_HEADER, utils::get_locales()));
-    
-    xsapi_internal_string userAgent = DEFAULT_USER_AGENT;
-    if (agent != HttpCallAgent::Title)
-    {
-        userAgent += EnumName(agent);
-    }
+    RETURN_HR_IF_FAILED(SetUserAgent(contextSettings->HttpUserAgent()));
 
-    XblApiType apiType{ XblApiType::XblCApi };
-    {
-        auto state{ GlobalState::Get() };
-
-        if (state)
-        {
-            apiType = state->ApiType;
-        }
-    }
-
-    switch (apiType)
-    {
-    case XblApiType::XblCApi:
-    {
-        userAgent += " c";
-        break;
-    }
-
-    case XblApiType::XblCPPApi:
-    {
-        userAgent += " cpp";
-        break;
-    }
-    }
-
-    return SetHeader(USER_AGENT_HEADER, userAgent);
+    return S_OK;
 }
 
 HRESULT XblHttpCall::CalcHttpTimeout()
@@ -624,6 +593,40 @@ HRESULT XblHttpCall::SetHeader(
 {
     m_requestHeaders[key] = value;
     return HttpCall::SetHeader(key, value, allowTracing);
+}
+
+HRESULT XblHttpCall::SetUserAgent(_In_ HttpCallAgent userAgent)
+{
+    String headerValue{ DEFAULT_USER_AGENT };
+    if (userAgent != HttpCallAgent::Title)
+    {
+        headerValue += EnumName(userAgent);
+    }
+
+    XblApiType apiType{ XblApiType::XblCApi };
+    {
+        auto state{ GlobalState::Get() };
+        if (state)
+        {
+            apiType = state->ApiType;
+        }
+    }
+
+    switch (apiType)
+    {
+    case XblApiType::XblCApi:
+    {
+        headerValue += " c";
+        break;
+    }
+    case XblApiType::XblCPPApi:
+    {
+        headerValue += " cpp";
+        break;
+    }
+    }
+
+    return SetHeader(USER_AGENT_HEADER, headerValue);
 }
 
 HRESULT XblHttpCall::SetRequestBody(const xsapi_internal_vector<uint8_t>& bytes)

@@ -17,7 +17,6 @@
     <XsapiPlatform Condition="'$(ApplicationType)'=='Windows Store'">UWP</XsapiPlatform>
     <XsapiPlatform Condition="'$(ApplicationType)'=='' AND '$(Platform)'!='Durango'">Win32</XsapiPlatform>
     <XsapiPlatform Condition="'$(ApplicationType)'=='' AND '$(Platform)'=='Durango'">XDK</XsapiPlatform>
-    <XsapiPlatform Condition="'$(ApplicationType)'=='Android'">Android</XsapiPlatform>
   </PropertyGroup>
 
   <!--Set toolset and project name-->
@@ -28,7 +27,6 @@
     <XsapiToolset Condition="'$(PlatformToolset)'=='v142'">142</XsapiToolset>
     <XsapiToolset Condition="'$(XsapiToolset)'==''">141</XsapiToolset>
     <XsapiProjectName Condition="'$(XsapiPlatform)' != 'Android'">Microsoft.Xbox.Services.$(XsapiToolset).$(XsapiPlatform).Cpp</XsapiProjectName>
-    <XsapiProjectName Condition="'$(XsapiPlatform)' == 'Android'">Microsoft.Xbox.Services.$(XsapiToolset).$(XsapiPlatform)</XsapiProjectName>
     <XsapiProjectName Condition="'$(XsapiPlatform)' == 'GDK'">Microsoft.Xbox.Services.$(XsapiToolset).GDK.C</XsapiProjectName>
   </PropertyGroup>
 
@@ -49,15 +47,7 @@
   <PropertyGroup Condition="'$(XsapiPlatform)' == 'Win32' AND '$(XsapiUnitTests)'!='true'">
     <XsapiCllRefs>true</XsapiCllRefs>
   </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(XsapiPlatform)' == 'Android'">
-    <XsapiXalRefs>true</XsapiXalRefs>
-    <XsapiXalHeaders>true</XsapiXalHeaders>
-    <UseCasablanaLite>true</UseCasablanaLite>
-    <XsapiCllRefs>true</XsapiCllRefs>
-    <XsapiTCUIHeaders>true</XsapiTCUIHeaders>
-  </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(XsapiPlatform)' == 'UWP'">
     <XsapiXalRefs>true</XsapiXalRefs>
     <XsapiXalHeaders>true</XsapiXalHeaders>
@@ -81,7 +71,6 @@
     <ClCompile>
       <PreprocessorDefinitions>_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XBL_API_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(XsapiPlatform)' == 'GDK'">HC_WINHTTP_WEBSOCKETS;HC_PLATFORM_IS_MICROSOFT=1;HC_PLATFORM_GDK=4;HC_PLATFORM=HC_PLATFORM_GDK;HC_DATAMODEL=HC_DATAMODEL_LLP64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(XsapiPlatform)' == 'Android'">__STDC_WANT_LIB_EXT1__=1;ASIO_STANDALONE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(XsapiBuildFromSource)' != ''">XSAPI_BUILT_FROM_SOURCE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>;$(XsapiInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -98,7 +87,6 @@
       <Project Condition="'$(XsapiPlatform)' == 'Win32' AND '$(XsapiToolset)' == '140'">{AB77D282-496D-413F-9A51-F78DF740A82A}</Project>
       <Project Condition="'$(XsapiPlatform)' == 'XDK'">{8A112040-CDA1-4490-B518-62DFCC451FA7}</Project>
       <Project Condition="'$(XsapiPlatform)' == 'GDK'">{60139f62-bf37-4f11-bd93-5fbf4e92100c}</Project>
-      <Project Condition="'$(XsapiPlatform)' == 'Android'">{5fa18992-3e85-4090-b21e-6ef7fb613a44}</Project>
       <Project Condition="'$(XsapiPlatform)' == 'DesktopBridge' AND '$(XsapiToolset)' == '141'">{B0D02E4C-DB36-416C-8F1E-8666B3FAF876}</Project>
     </ProjectReference>
   </ItemGroup>
@@ -188,12 +176,10 @@
     <ProjectReference Include="$(XalRoot)Source\Xal\Xal.$(XalPlatform).vcxproj">
       <Project Condition="'$(XalPlatform)' == 'Win32'">{7333335C-CD75-4802-8F56-702C0BE2563F}</Project>
       <Project Condition="'$(XalPlatform)' == 'UWP'">{7326b85d-b8df-4a59-a2c7-c721a7a1b8cb}</Project>
-      <Project Condition="'$(XalPlatform)' == 'Android'">{554cba60-e373-40c9-9284-b93e0fc27362}</Project>
     </ProjectReference>
     <ProjectReference Include="$(XalRoot)External\CompactCoreCLL\CompactCoreCLL.$(XalPlatform).vcxproj">
       <Project Condition="'$(XalPlatform)' == 'Win32'">{F321E346-9F67-4291-9A71-D219F892BDEC}</Project>
       <Project Condition="'$(XalPlatform)' == 'UWP'">{9E8E68BA-6CBE-408E-8738-320474546551}</Project>
-      <Project Condition="'$(XalPlatform)' == 'Android'">{2f1f7c6a-1fda-4cce-935d-0e9324d5db92}</Project>
     </ProjectReference>
   </ItemGroup>
   

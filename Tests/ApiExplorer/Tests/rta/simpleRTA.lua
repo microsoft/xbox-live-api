@@ -3,9 +3,17 @@ common = require 'common'
 
 function SimpleRTA_Handler()
     print("SimpleRTA");
-    XblRealTimeActivityAddConnectionStateChangeHandler();
-    -- Add a real-time handler to force RTA connection
-    XblSocialAddSocialRelationshipChangedHandler();
+
+    -- Test isn't valid on all platforms (i.e. on Win32 we set up a notification service subscription by default so the RTA connection
+    -- won't be torn down just by removing the social relationship changed handler).
+    isGdk = IsGDKPlatform()
+    if isGdk then
+        XblRealTimeActivityAddConnectionStateChangeHandler();
+        -- Add a real-time handler to force RTA connection
+        XblSocialAddSocialRelationshipChangedHandler();
+    else
+        test.stopTest()
+    end
 end
 
 function OnXblRealTimeActivityAddConnectionStateChangeHandler_Connected()

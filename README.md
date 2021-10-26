@@ -1,8 +1,8 @@
 ## Welcome!
 
-The Microsoft Xbox Live Service API (XSAPI) enables game developers to access Xbox Live. To get access to the Xbox Live service, you can join the Xbox Live Creators Program at https://aka.ms/xblcp, or apply to the ID@Xbox program at: http://www.xbox.com/en-us/Developers/id
+The Microsoft Xbox Live Service API (XSAPI) enables game developers to access Xbox Live. To get access to the Xbox Live service, you can join the Xbox Live Creators Program at https://aka.ms/xblcp, or apply to the ID@Xbox program at http://www.xbox.com/en-us/Developers/id
 
-To learn more about these programs, please refer to the [developer program overview](https://docs.microsoft.com/en-us/windows/uwp/xbox-live/developer-program-overview).
+To learn more about these programs, please refer to the [developer program overview](https://docs.microsoft.com/en-us/windows/uwp/xbox-live/developer-program-overview)
 
 ## What's in the API:
 
@@ -47,6 +47,7 @@ We'd love to get your review score, whether good or bad, but even more than that
 ### Xbox Live GitHub projects
 *   [Xbox Live Service API for C++](https://github.com/Microsoft/xbox-live-api)
 *   [Xbox Live Samples (XDK/UWP)](https://github.com/Microsoft/xbox-live-samples)
+*   [Xbox Live Unity Plugin](https://github.com/Microsoft/xbox-live-unity-plugin)
 *   [Xbox Live Resiliency Fiddler Plugin](https://github.com/Microsoft/xbox-live-resiliency-fiddler-plugin)
 *   [Xbox Live Trace Analyzer](https://github.com/Microsoft/xbox-live-trace-analyzer)
 *   [Xbox Live Developer Tools](https://github.com/Microsoft/xbox-live-developer-tools)

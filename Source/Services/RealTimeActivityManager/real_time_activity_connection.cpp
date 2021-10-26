@@ -400,7 +400,14 @@ void Connection::SubscribeResponseHandler(_In_ const JsonValue& message) noexcep
         sub->m_state->serviceId = message[3].GetInt();
         const auto& data = message[4];
 
-        m_activeSubs[sub->m_state->serviceId] = sub;
+        if (m_activeSubs.find(sub->m_state->serviceId) == m_activeSubs.end())
+        {
+            m_activeSubs[sub->m_state->serviceId] = { { sub->m_state->clientId, sub } };
+        }
+        else
+        {
+            m_activeSubs[sub->m_state->serviceId][sub->m_state->clientId] = sub;
+        }
 
         switch (sub->m_state->serviceStatus)
         {
@@ -515,7 +522,7 @@ void Connection::UnsubscribeResponseHandler(_In_ const JsonValue& message) noexc
         return;
     }
     auto sub{ subIter->second };
-    m_activeSubs.erase(sub->m_state->serviceId);
+    m_activeSubs[sub->m_state->serviceId].erase(clientId);
 
     LOGS_DEBUG << __FUNCTION__ << ": [" << sub->m_state->clientId <<"] ServiceStatus=" << EnumName(sub->m_state->serviceStatus);
 
@@ -561,11 +568,14 @@ void Connection::EventHandler(_In_ const JsonValue& message) const noexcept
 
     auto subIter{ m_activeSubs.find(serviceId) };
     assert(subIter != m_activeSubs.end());
-    auto sub = subIter->second;
+    auto subs = subIter->second;
 
     lock.unlock();
 
-    sub->OnEvent(data);
+    for (auto& subPair : subs)
+    {
+        subPair.second->OnEvent(data);
+    }
 }
 
 void Connection::ResyncHandler() const noexcept

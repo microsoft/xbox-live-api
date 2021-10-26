@@ -189,15 +189,6 @@ protected:
     HRESULT ResetAndCopyForRetry();
 };
 
-enum class HttpCallAgent : uint32_t
-{
-    Title,
-    MultiplayerManager,
-    SocialManager,
-    StatsManager,
-    MultiplayerActivity
-};
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END
 
 
@@ -215,8 +206,7 @@ public:
         _In_ std::shared_ptr<XboxLiveContextSettings> contextSettings,
         _In_ const xsapi_internal_string& httpMethod,
         _In_ const xsapi_internal_string& fullUrl,
-        _In_ xbox_live_api xboxLiveApi,
-        _In_ HttpCallAgent agent = HttpCallAgent::Title
+        _In_ xbox_live_api xboxLiveApi
     );
 
     HRESULT SetHeader(
@@ -224,6 +214,9 @@ public:
         _In_ const xsapi_internal_string& value,
         _In_ bool allowTracing = true
     ) override;
+
+    // Override the UserAgent that was specified in the contextSettings
+    HRESULT SetUserAgent(_In_ HttpCallAgent userAgent);
 
     void SetLongHttpCall(_In_ bool longHttpCall);
     HRESULT SetXblServiceContractVersion(uint32_t contractVersion);

@@ -594,7 +594,7 @@ int XblMultiplayerManagerLobbySessionSetLocalMemberProperties_Lua(lua_State* L)
 int XblMultiplayerManagerLobbySessionInviteFriends_Lua(lua_State* L)
 {
 #if HC_PLATFORM == HC_PLATFORM_WIN32
-    HRESULT hr = XblMultiplayerManagerLobbySessionInviteFriends(Data()->xalUser, nullptr, "Join my game!");
+    HRESULT hr = XblMultiplayerManagerLobbySessionInviteFriends(Data()->xalUser, nullptr, "//MPSD/custominvitestrings_JoinMyGame");
 #else
     HRESULT hr = S_OK;
 #endif
