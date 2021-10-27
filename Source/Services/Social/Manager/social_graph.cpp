@@ -106,6 +106,7 @@ HRESULT SocialGraph::Initialize() noexcept
 
     m_xblContext = XblContext::Make(copiedUser.ExtractPayload());
     RETURN_HR_IF_FAILED(m_xblContext->Initialize(m_rtaManager));
+    m_xblContext->Settings()->SetHttpUserAgent(HttpCallAgent::SocialManager);
 
     return S_OK;
 }

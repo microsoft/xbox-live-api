@@ -15,6 +15,10 @@
 #define TRACE_MAX_FUNCTION_NAME_LENGTH 1024
 #endif
 
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+#include "runner.h"
+#endif
+
 ApiRunerMemHook* g_mem = new ApiRunerMemHook();
 bool g_rawMemHookInitTracking{ false };
 
@@ -219,21 +223,47 @@ void ApiRunerMemHook::ResetStats()
     m_mapStackLog.clear();
 }
 
+void MemHookLog(_Printf_format_string_ char const* format, ...)
+{
+    // Stock impl that just logs to file
+    // Hook up UI logs for each platform based on platform specific UI display calls
+
+#if HC_PLATFORM_IS_MICROSOFT
+    char message[8000] = {};
+
+    va_list varArgs{};
+    va_start(varArgs, format);
+    pal::vsprintf(message, 4096, format, varArgs);
+    va_end(varArgs);
+
+    OutputDebugStringA(message);
+    OutputDebugStringA("\n");
+#else
+    UNREFERENCED_PARAMETER(format);
+#endif
+}
+
 void ApiRunerMemHook::LogLeaks()
 {
     std::lock_guard<std::recursive_mutex> guard(m_lock);
-    LogToScreen("Leaks: -- START --");
+    LogToScreen("Leaks: %d mem leaks found", m_allocSizeMap.size());
+
+    // Using MemHookLog since long LogToScreen lines can causes mem allocations and thus doesn't work well in this module
+    MemHookLog("Leaks: -- START --");
     for (auto& it : m_allocSizeMap)
     {
         void* ptr = it.first;
         uint64_t size = it.second;
         auto& stackLog = m_mapStackLog[ptr];
         auto& id = m_allocIdMap[ptr];
-        LogToScreen("[%d] %0.8x: %d from %s", id, ptr, size, stackLog[4].c_str());
+        if (stackLog.size() >= 4)
+            MemHookLog("[%d] %0.8x: %d from %s", id, ptr, size, stackLog[4].c_str());
+        else
+            MemHookLog("[%d] %0.8x: %d", id, ptr, size);
     }
-    LogToScreen("Leaks: -- END --");
+    MemHookLog("Leaks: -- END --");
 
-    LogToFile("== Leak CSV Start ==");
+    MemHookLog("== Leak CSV Start ==");
     for (auto& it : m_allocSizeMap)
     {
         void* ptr = it.first;
@@ -244,17 +274,17 @@ void ApiRunerMemHook::LogLeaks()
         for (auto& stackLine : stackLog)
         {
             stackLineId++;
-            LogToFile("%d,%0.8x,%d,%d,%s", id, ptr, size, stackLineId, stackLine.c_str());
+            MemHookLog("%d,%0.8x,%d,%d,%s", id, ptr, size, stackLineId, stackLine.c_str());
         }
     }
-    LogToFile("== Leak CSV End ==");
+    MemHookLog("== Leak CSV End ==");
 
 }
 
 void ApiRunerMemHook::LogStats(const std::string& name)
 {
     std::lock_guard<std::recursive_mutex> guard(m_lock);
-    LogToScreen("%s mem: %u outstanding alloc, (%u total / %u deleted)", name.c_str(), m_allocated - m_allocDeleted, m_allocated, m_allocDeleted);
+    MemHookLog("%s mem: %u outstanding alloc, (%u total / %u deleted)", name.c_str(), m_allocated - m_allocDeleted, m_allocated, m_allocDeleted);
 }
 
 // IsStackInsideCallback() needs non-allocating case insenstive string compare so using manual impl

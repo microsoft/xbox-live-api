@@ -57,6 +57,16 @@ void XboxLiveContextSettings::SetWebsocketTimeoutWindow(_In_ uint32_t timeoutInS
     m_websocketTimeoutWindowInSeconds = timeoutInSeconds;
 }
 
+HttpCallAgent XboxLiveContextSettings::HttpUserAgent() const
+{
+    return m_userAgent;
+}
+
+void XboxLiveContextSettings::SetHttpUserAgent(_In_ HttpCallAgent userAgent)
+{
+    m_userAgent = userAgent;
+}
+
 #if XSAPI_WINRT
 bool XboxLiveContextSettings::UseCoreDispatcherForEventRouting() const
 {

@@ -30,3 +30,8 @@ void LogToScreen(_Printf_format_string_ char const* format, ...);
 #if HC_PLATFORM == HC_PLATFORM_IOS
 void SetupAPNSRegistrationToken(std::string registrationToken);
 #endif
+
+// These functions are specific to APIExplorer on Android
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+void SetupAndroidContext( JavaVM *javaVM, jobject context, jclass mainActivityClass, jobject mainActivityInstance, jmethodID getApplicationContext);
+#endif

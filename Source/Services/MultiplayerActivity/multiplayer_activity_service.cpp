@@ -96,13 +96,15 @@ HRESULT MultiplayerActivityService::FlushRecentPlayers(
             Stringstream path{};
             path << "/titles/" << titleId << "/recentplayers";
 
-            return XblHttpCall::Init(
+            RETURN_HR_IF_FAILED(XblHttpCall::Init(
                 contextSettings,
                 "POST",
                 XblHttpCall::BuildUrl(MPA_SERVICE_NAME, path.str()),
-                xbox_live_api::post_recent_players,
-                HttpCallAgent::MultiplayerActivity
-            );
+                xbox_live_api::post_recent_players
+            ));
+            RETURN_HR_IF_FAILED(XblHttpCall::SetUserAgent(HttpCallAgent::MultiplayerActivity));
+
+            return S_OK;
         }
 
         HRESULT PerformWithRetry(

@@ -27,6 +27,7 @@ public:
 private:
     String m_inviteHandleId;
     String m_inviteProtocol;
+    String m_inviteContext;
     String m_senderImageUrl;
 };
 

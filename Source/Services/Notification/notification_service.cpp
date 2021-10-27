@@ -156,6 +156,7 @@ HRESULT NotificationService::RegisterForNotificationsHelper(
     }
     default:
     {
+        auto workQueue = async.Queue().DeriveWorkerQueue();
         m_registrationAsync = AsyncContext<HRESULT>::Collapse({ std::move(m_registrationAsync), std::move(async) });
         m_registrationStatus = RegistrationStatus::Registering;
 
@@ -213,17 +214,15 @@ HRESULT NotificationService::RegisterForNotificationsHelper(
 
         RETURN_HR_IF_FAILED(httpCall->SetRequestBody(payload));
         return httpCall->Perform(AsyncContext<HttpResult>{
-            async.Queue().DeriveWorkerQueue(),
+            workQueue,
                 [
-                    thisWeakPtr = std::weak_ptr<NotificationService>{ shared_from_this() },
-                    async
+                    thisWeakPtr = std::weak_ptr<NotificationService>{ shared_from_this() }
                 ](HttpResult httpResult)
             {
                 std::shared_ptr<NotificationService> pThis(thisWeakPtr.lock());
 
                 if (pThis == nullptr)
                 {
-                    async.Complete(E_XBL_RUNTIME_ERROR);
                     return;
                 }
 

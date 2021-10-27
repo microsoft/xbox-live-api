@@ -22,6 +22,8 @@ int XblGameInviteAddNotificationHandler_Lua(lua_State *L)
             LogToScreen(args->inviteHandleId);
             LogToScreen("Invite Protocol:");
             LogToScreen(args->inviteProtocol);
+            LogToScreen("Invite Context:");
+            LogToScreen(args->inviteContext);
             LogToScreen("Sender Gamertag:");
             LogToScreen(args->senderGamertag);
             LogToScreen("Modern Gamertag:");

@@ -40,7 +40,7 @@ void TitleRequest::Serialize(_Out_ JsonValue& serializedObject, _In_ JsonDocumen
         {
             JsonValue presenceTokenIDsJson(rapidjson::kArrayType);
             JsonUtils::SerializeVector(JsonUtils::JsonStringSerializer, m_presenceTokenIds, presenceTokenIDsJson, allocator);
-            serializedObject.AddMember("params", presenceTokenIDsJson, allocator);
+            richPresenceJson.AddMember("params", presenceTokenIDsJson, allocator);
         }
 
         serializedObject.AddMember("activity", JsonValue(rapidjson::kObjectType).AddMember("richPresence", richPresenceJson, allocator).Move(), allocator);

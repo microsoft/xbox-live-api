@@ -27,6 +27,7 @@ MultiplayerLocalUser::MultiplayerLocalUser(
     m_xboxLiveContextImpl = XblContext::Make(std::move(user));
 
     m_xboxLiveContextImpl->Initialize(GlobalState::Get()->RTAManager());
+    m_xboxLiveContextImpl->Settings()->SetHttpUserAgent(HttpCallAgent::MultiplayerManager);
 }
 
 MultiplayerLocalUser::~MultiplayerLocalUser()

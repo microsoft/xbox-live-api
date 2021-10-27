@@ -107,6 +107,7 @@ Result<void> AchievementsManagerUser::Initialize(
 {
     assert(!m_isInitialized);
     RETURN_HR_IF_FAILED(m_xblContext->Initialize(m_rtaManager));
+    m_xblContext->Settings()->SetHttpUserAgent(HttpCallAgent::AchievementsManager);
 
     std::weak_ptr<AchievementsManagerUser> weakThis{ shared_from_this() };
     m_achievementProgressToken = m_xblContext->AchievementsService()->AddAchievementProgressChangeHandler(

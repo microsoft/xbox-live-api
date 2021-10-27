@@ -202,11 +202,12 @@ int SocialServiceRemoveSocialRelationshipChangedHandler_Lua(lua_State *L)
 int ReputationServiceSubmitReputationFeedback_Lua(lua_State* L)
 {
 #if CPP_TESTS_ENABLED
-    string_t xuid = L"2814639011617876";
     xbox::services::social::reputation_feedback_type reputationFeedbackType = xbox::services::social::reputation_feedback_type::positive_helpful_player;
-    string_t sessionName = L"";
-    string_t reasonMessage = L"Helpful player";
-    string_t evidenceResourceId = L"";
+
+    string_t xuid = _T("2814639011617876");
+    string_t sessionName = _T("");
+    string_t reasonMessage = _T("Helpful player");
+    string_t evidenceResourceId = _T("");
 
     std::shared_ptr<xbox::services::xbox_live_context> xblc = std::make_shared<xbox::services::xbox_live_context>(Data()->xboxLiveContext);
     xblc->reputation_service().submit_reputation_feedback(
@@ -233,16 +234,17 @@ int ReputationServiceSubmitBatchReputationFeedback_Lua(lua_State *L)
 {
 #if CPP_TESTS_ENABLED
     std::vector<xbox::services::social::reputation_feedback_item> feedbackItems;
+
     feedbackItems.push_back(xbox::services::social::reputation_feedback_item
         {
-            L"2814639011617876",
+            _T("2814639011617876"),
             xbox::services::social::reputation_feedback_type::positive_helpful_player,
             xbox::services::multiplayer::multiplayer_session_reference(),
-            L"Helpful player",
-            L""
+            _T("Helpful player"),
+            _T("")
         });
-    // Add any additional feedback items here
 
+    // Add any additional feedback items here
     std::shared_ptr<xbox::services::xbox_live_context> xblc = std::make_shared<xbox::services::xbox_live_context>(Data()->xboxLiveContext);
     xblc->reputation_service().submit_batch_reputation_feedback(feedbackItems).then(
         [](xbox::services::xbox_live_result<void> result)

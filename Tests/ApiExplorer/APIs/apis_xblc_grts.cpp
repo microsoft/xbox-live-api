@@ -49,7 +49,7 @@ HRESULT XGameUiShowSendGameInviteAsyncHelper(
 
 int XGameUiShowSendGameInviteAsyncToMPMLobby_Lua(lua_State* L)
 {
-    std::string inviteText = GetStringFromLua(L, 1, "Join Me In My Game!");
+    std::string inviteText = GetStringFromLua(L, 1, "//MPSD/custominvitestrings_JoinMyGame");
     std::string customActivationContext = GetStringFromLua(L, 2, "MyCustomActivationContext");
 
     XblMultiplayerSessionReference sessionReference{};

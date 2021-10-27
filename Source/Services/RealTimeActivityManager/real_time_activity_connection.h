@@ -82,7 +82,7 @@ private:
     Map<uint32_t, std::shared_ptr<Subscription>> m_subs;
     Map<uint32_t, AsyncContext<Result<void>>> m_subscribeAsyncContexts;
     Map<uint32_t, AsyncContext<Result<void>>> m_unsubscribeAsyncContexts;
-    Map<uint32_t, std::shared_ptr<Subscription>> m_activeSubs;
+    Map<uint32_t, Map<uint32_t, std::shared_ptr<Subscription>>> m_activeSubs;
 
     uint32_t m_nextSubId{ 1 };
 

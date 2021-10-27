@@ -114,8 +114,8 @@ xbox::services::social::manager::social_manager_extra_detail_level ConvertString
 {
     xbox::services::social::manager::social_manager_extra_detail_level detailLevel = xbox::services::social::manager::social_manager_extra_detail_level::no_extra_detail;
 
-    if (pal::stricmp(str, "social_manager_extra_detail_level::title_history_level") == 0) detailLevel = xbox::services::social::manager::social_manager_extra_detail_level::title_history_level;
-    else if (pal::stricmp(str, "social_manager_extra_detail_level::preferred_color_level") == 0) detailLevel = xbox::services::social::manager::social_manager_extra_detail_level::preferred_color_level;
+    if (pal::stricmp(str, "social_manager_extra_detail_level::title_history_leve_T(") == 0) detailLevel = xbox::services::social::manager::social_manager_extra_detail_level::title_history_level;
+    else if (pal::stricmp(str, "social_manager_extra_detail_level::preferred_color_leve_T(") == 0) detailLevel = xbox::services::social::manager::social_manager_extra_detail_level::preferred_color_level;
 
     return detailLevel;
 }
@@ -132,7 +132,7 @@ xbox::services::social::manager::presence_filter ConvertStringToCppPresenceFilte
     else if (pal::stricmp(str, "presence_filter::all_online") == 0) filter = xbox::services::social::manager::presence_filter::all_online;
     else if (pal::stricmp(str, "presence_filter::all_offline") == 0) filter = xbox::services::social::manager::presence_filter::all_offline;
     else if (pal::stricmp(str, "presence_filter::all_title") == 0) filter = xbox::services::social::manager::presence_filter::all_title;
-    else if (pal::stricmp(str, "presence_filter::all") == 0) filter = xbox::services::social::manager::presence_filter::all;
+    else if (pal::stricmp(str, "presence_filter::al_T(") == 0) filter = xbox::services::social::manager::presence_filter::all;
 
     return filter;
 }
@@ -150,22 +150,20 @@ xbox::services::social::manager::relationship_filter ConvertStringToCppRelations
 // Pool of XDKS.1 xuids to create social groups from
 std::vector<string_t> listXuidStrings
 {
-    L"2814639011617876",L"2814641789541994",L"2814644008675844",L"2814644210052185",L"2814645164579523",L"2814646075485729",L"2814649783195402",L"2814650260879943",
-    L"2814652370182940",L"2814652714045777",L"2814654391560620",L"2814654975417728",L"2814656000993855",L"2814660006763195",L"2814666715930430",L"2814667316080600",
-    L"2814669550092398",L"2814669684179632",L"2814669733667211",L"2814671180786692",L"2814679901432274",L"2814613501048225",L"2814614352529204",L"2814615856126401",
-    L"2814616641363830",L"2814617883586813",L"2814618053453081",L"2814629752527080",L"2814631255161151",L"2814632477267887",L"2814633284389038",L"2814635732495522",
-    L"2814635779785472",L"2814635974475208",L"2814636979708499",L"2814618092438397",L"2814618260480530",L"2814618319551907",L"2814619559360314",L"2814620368929739",
-    L"2814620769042115",L"2814621007349381",L"2814623088399025",L"2814623825448960",L"2814624220291971",L"2814624961587858",L"2814626394212372",L"2814626639518570",
-    L"2814628203722867",L"2814629143923154",L"2814614382301082",L"2814614959737919",L"2814615558140392",L"2814618401629514",L"2814618701087902",L"2814619300882392",
-    L"2814623785189962",L"2814623956387698",L"2814625066090704",L"2814625471782204",L"2814626946705530",L"2814627006318591",L"2814628046127456",L"2814631487749991",
-    L"2814631517599783",L"2814632798310691",L"2814633582140204",L"2814634204785789",L"2814634895412664",L"2814635439049207",L"2814638609354868",L"2814639589885754",
-    L"2814641670947751",L"2814643512602566",L"2814646137630843",L"2814648499394446",L"2814651465227139",L"2814652150012664",L"2814653926747608",L"2814655098938516",
-    L"2814655264861214",L"2814655417678099",L"2814655883565306",L"2814656031821923",L"2814656159501072",L"2814656780954834",L"2814660657970845",L"2814661604435490",
-    L"2814663444319727",L"2814663818015575",L"2814665274839967",L"2814667273133504",L"2814670761542037",L"2814672762886609",L"2814673772488023",L"2814674096344056",
-    L"2814674229538758",L"2814678943953289",L"2814680898042782"
+    _T("2814639011617876"),_T("2814641789541994"),_T("2814644008675844"),_T("2814644210052185"),_T("2814645164579523"),_T("2814646075485729"),_T("2814649783195402"),_T("2814650260879943"),
+    _T("2814652370182940"),_T("2814652714045777"),_T("2814654391560620"),_T("2814654975417728"),_T("2814656000993855"),_T("2814660006763195"),_T("2814666715930430"),_T("2814667316080600"),
+    _T("2814669550092398"),_T("2814669684179632"),_T("2814669733667211"),_T("2814671180786692"),_T("2814679901432274"),_T("2814613501048225"),_T("2814614352529204"),_T("2814615856126401"),
+    _T("2814616641363830"),_T("2814617883586813"),_T("2814618053453081"),_T("2814629752527080"),_T("2814631255161151"),_T("2814632477267887"),_T("2814633284389038"),_T("2814635732495522"),
+    _T("2814635779785472"),_T("2814635974475208"),_T("2814636979708499"),_T("2814618092438397"),_T("2814618260480530"),_T("2814618319551907"),_T("2814619559360314"),_T("2814620368929739"),
+    _T("2814620769042115"),_T("2814621007349381"),_T("2814623088399025"),_T("2814623825448960"),_T("2814624220291971"),_T("2814624961587858"),_T("2814626394212372"),_T("2814626639518570"),
+    _T("2814628203722867"),_T("2814629143923154"),_T("2814614382301082"),_T("2814614959737919"),_T("2814615558140392"),_T("2814618401629514"),_T("2814618701087902"),_T("2814619300882392"),
+    _T("2814623785189962"),_T("2814623956387698"),_T("2814625066090704"),_T("2814625471782204"),_T("2814626946705530"),_T("2814627006318591"),_T("2814628046127456"),_T("2814631487749991"),
+    _T("2814631517599783"),_T("2814632798310691"),_T("2814633582140204"),_T("2814634204785789"),_T("2814634895412664"),_T("2814635439049207"),_T("2814638609354868"),_T("2814639589885754"),
+    _T("2814641670947751"),_T("2814643512602566"),_T("2814646137630843"),_T("2814648499394446"),_T("2814651465227139"),_T("2814652150012664"),_T("2814653926747608"),_T("2814655098938516"),
+    _T("2814655264861214"),_T("2814655417678099"),_T("2814655883565306"),_T("2814656031821923"),_T("2814656159501072"),_T("2814656780954834"),_T("2814660657970845"),_T("2814661604435490"),
+    _T("2814663444319727"),_T("2814663818015575"),_T("2814665274839967"),_T("2814667273133504"),_T("2814670761542037"),_T("2814672762886609"),_T("2814673772488023"),_T("2814674096344056"),
+    _T("2814674229538758"),_T("2814678943953289"),_T("2814680898042782")
 };
-
-
 #endif
 
 //lua commands
@@ -399,7 +397,7 @@ int SocialManagerAddLocalUserCpp_Lua(lua_State *L)
 {
 #if CPP_TESTS_ENABLED
     xbox::services::social::manager::social_manager_extra_detail_level extraDetailLevel = ConvertStringToCppSocialManagerExtraDetailLevel(
-        GetStringFromLua(L, 1, "social_manager_extra_detail_level::no_extra_detail").c_str());
+        GetStringFromLua(L, 1, "social_manager_extra_detail_level::no_extra_detai_T(").c_str());
     LogToFile("SocialManagerAddLocalUserCpp: social_manager_extra_detail_level: %d", extraDetailLevel);
 
     xbox_live_user_t user = Data()->xalUser;
@@ -432,7 +430,7 @@ int SocialManagerCreateSocialUserGroupFromFiltersCpp_Lua(lua_State *L)
 {
 #if CPP_TESTS_ENABLED
     xbox_live_user_t user = Data()->xalUser;
-    xbox::services::social::manager::presence_filter presenceFilter = ConvertStringToCppPresenceFilter(GetStringFromLua(L, 1, "presence_filter::all").c_str());
+    xbox::services::social::manager::presence_filter presenceFilter = ConvertStringToCppPresenceFilter(GetStringFromLua(L, 1, "presence_filter::al_T(").c_str());
     xbox::services::social::manager::relationship_filter relationshipFilter = ConvertStringToCppRelationshipFilter(GetStringFromLua(L, 2, "relationship_filter::friends").c_str());
 
     LogToFile("SocialManagerCreateSocialUserGroupFromFiltersCpp: presence_filter: %d", presenceFilter);

@@ -17,6 +17,7 @@ int GetCheckHR_Lua(lua_State *L)
 int Sleep_Lua(lua_State *L)
 {
     DWORD time = (DWORD)GetUint32FromLua(L, 1, 0);
+    LogToScreen("Sleep(%d)", time);
     pal::Sleep(time);
     return LuaReturnHR(L, S_OK);
 }
@@ -66,7 +67,6 @@ int LogToFile_Lua(lua_State *L)
 
 int LogToScreen_Lua(lua_State *L)
 {
-
     return LogHelper(false, L);
 }
 
@@ -223,6 +223,16 @@ int APIRunner_MemLogUnhookedStats_Lua(lua_State *L)
     return LuaReturnHR(L, S_OK);
 }
 
+int IsGDKPlatform_Lua(lua_State *L)
+{
+#if HC_PLATFORM == HC_PLATFORM_GDK
+    lua_pushboolean(L, true);
+#else 
+    lua_pushboolean(L, false);
+#endif
+    return 1;
+}
+
 void RegisterLuaAPIs()
 {
     SetupAPIs_Xal();
@@ -296,6 +306,7 @@ void RegisterLuaAPIs()
     lua_register(Data()->L, "APIRunner_LogStats", APIRunner_LogStats_Lua);
     lua_register(Data()->L, "APIRunner_AssertOnAllocOfId", APIRunner_AssertOnAllocOfId_Lua);
     lua_register(Data()->L, "APIRunner_MemLogUnhookedStats", APIRunner_MemLogUnhookedStats_Lua);
+    lua_register(Data()->L, "IsGDKPlatform", IsGDKPlatform_Lua);
 }
 
 void SetupAPIS_Platform()

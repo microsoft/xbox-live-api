@@ -15,6 +15,7 @@ function common.cleanup()
     XalUserCloseHandle()
     XblCleanupAsync()
     XalCleanupAsync()
+    XTaskQueueCloseHandle()
 end
 
 function common.OnXalTryAddFirstUserSilentlyAsync()

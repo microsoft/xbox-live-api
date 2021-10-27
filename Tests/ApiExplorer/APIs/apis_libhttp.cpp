@@ -4,10 +4,12 @@
 
 int HCInitialize_Lua(lua_State *L)
 {
-    //HCInitArgs args = {};
-
     // CODE SNIPPET START: HCInitialize
+#if HC_PLATFORM == HC_PLATFORM_ANDROID
+    HRESULT hr = HCInitialize(&(Data()->initArgs));
+#else
     HRESULT hr = HCInitialize(nullptr);
+#endif
     // CODE SNIPPET END
 
     LogToFile("HCInitialize: hr=%s", ConvertHR(hr).c_str()); 
@@ -366,6 +368,7 @@ int HCWebSocketSetHeader_Lua(lua_State *L)
 
 int HCWebSocketConnectAsync_Lua(lua_State *L)
 {
+    //TODO: websocket.org is no longer in service; find a new server
     std::string uri = GetStringFromLua(L, 1, "wss://echo.websocket.org");
     std::string subProtocol = GetStringFromLua(L, 2, "");
 

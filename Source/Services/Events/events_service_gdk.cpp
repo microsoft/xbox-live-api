@@ -43,9 +43,11 @@ HRESULT EventsService::WriteInGameEvent(
             return hr;
         }
 
+        String lowercaseScid = utils::ToLower(scid);
+
         return XGameEventWrite(
             m_user.Handle(),
-            scid,
+            lowercaseScid.c_str(),
             m_playSession.c_str(), 
             eventName, 
             dimensions, 
