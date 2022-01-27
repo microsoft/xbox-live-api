@@ -1,3 +1,0 @@
-```cpp
-bool autoFill = XblMultiplayerManagerAutoFillMembersDuringMatchmaking();
-```

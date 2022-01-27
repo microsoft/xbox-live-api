@@ -1,6 +1,0 @@
-```cpp
-XblMultiplayerSessionPropertiesSetReadRestriction(
-    sessionHandle,
-    readRestriction
-);
-```

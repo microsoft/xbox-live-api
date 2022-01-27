@@ -1,3 +1,0 @@
-```cpp
-XalUserUnregisterChangeEventHandler(token);
-```
