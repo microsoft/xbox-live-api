@@ -47,6 +47,12 @@
 #pragma warning( disable : 26444 ) // ignore various unnamed objects
 #endif
 
+#if HC_PLATFORM == HC_PLATFORM_GDK
+#define HTTPMSG_UTF16(x) L##x // avoids'to_utf16string' identifier not found build error
+#else
+#define HTTPMSG_UTF16(x) utility::conversions::to_utf16string(x)
+#endif    
+
 namespace web
 {
 namespace http
@@ -591,7 +597,7 @@ public:
     /// <remarks>
     /// This will overwrite any previously set body data and "Content-Type" header.
     /// </remarks>
-    void set_body(const utf16string &body_text, utf16string content_type = ::utility::conversions::to_utf16string("text/plain"))
+    void set_body(const utf16string &body_text, utf16string content_type = HTTPMSG_UTF16("text/plain"))
     {
         if (content_type.find(::utility::conversions::to_utf16string("charset=")) != content_type.npos)
         {
@@ -1005,7 +1011,7 @@ public:
     /// <remarks>
     /// This will overwrite any previously set body data and "Content-Type" header.
     /// </remarks>
-    void set_body(const utf16string &body_text, utf16string content_type = ::utility::conversions::to_utf16string("text/plain"))
+    void set_body(const utf16string &body_text, utf16string content_type = HTTPMSG_UTF16("text/plain"))
     {
         if(content_type.find(::utility::conversions::to_utf16string("charset=")) != content_type.npos)
         {
@@ -1243,7 +1249,7 @@ public:
     //  Callers of this function do NOT need to block waiting for the response to be
     /// sent to before the body data is destroyed or goes out of scope.
     /// </remarks>
-    pplx::task<void> reply(http::status_code status, const utf16string &body_data, const utf16string &content_type = ::utility::conversions::to_utf16string("text/plain")) const
+    pplx::task<void> reply(http::status_code status, const utf16string &body_data, const utf16string &content_type = HTTPMSG_UTF16("text/plain")) const
     {
         http_response response(status);
         response.set_body(body_data, content_type);
