@@ -54,6 +54,11 @@ typedef struct XalUwpArgs
     /// launched a sign in request. Otherwise this is unused.
     /// </remarks>
     HWND mainWindow;
+
+    /// <summary>
+    /// Optional Cobrand ID for MSA
+    /// </summary>
+    _Field_z_ char const* cobrandId;
 } XalUwpArgs;
 
 typedef XalUwpArgs XalInitArgs;
