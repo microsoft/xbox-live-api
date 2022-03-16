@@ -212,7 +212,21 @@ typedef struct XblTitleHistory
     /// <summary>
     /// The last time the user had played.
     /// </summary>
+    /// <remarks>
+    /// Do not use both this and lastTimeUserPlayedText.
+    /// For playtime within the past 14 days, this will be accurate for the date and fuzzily accurate for the time. 
+    /// For playtime older than 14 days, this will only be accurate to the year and month, up to a year ago. The date will be returned as the 1st of the month, 
+    /// but the play time could have occurred anywhere within that month.
+    /// </remarks>
     time_t lastTimeUserPlayed;
+
+    /// <summary>
+    /// The last time the user had played in a standardized plaintext format (e.g. "a few minutes ago" or "x hours/days/months ago" or "this/last month").
+    /// </summary>
+    /// <remarks>
+    /// Do not use both this and lastTimeUserPlayed.
+    /// </remarks>
+    char lastTimeUserPlayedText[XBL_LAST_TIME_PLAYED_CHAR_SIZE];
 } XblTitleHistory;
 
 /// <summary>

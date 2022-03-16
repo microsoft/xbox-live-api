@@ -34,9 +34,10 @@ const char defaultPeoplehubTemplate[] = R"(
     "isBroadcasting": false,
     "titleHistory": 
     {
-        "TitleName": "Forza Horizon 2",
-        "TitleId": "1234",
-        "LastTimePlayed": "2015-01-26T22:54:54.6630000Z"
+        "titleName": "Forza Horizon 2",
+        "titleId": "1234",
+        "lastTimePlayed": "2015-01-26T22:54:54.6630000Z",
+        "lastTimePlayedText": "8 months ago"
     },
     "suggestion": null,
     "multiplayerSummary": {
@@ -570,6 +571,7 @@ public:
             // title history tests
             VERIFY_IS_TRUE(user->titleHistory.hasUserPlayed);
             VERIFY_IS_TRUE(VerifyTime(user->titleHistory.lastTimeUserPlayed, "2015-01-26T22:54:54.6630Z"));
+            VERIFY_ARE_EQUAL_STR("8 months ago", user->titleHistory.lastTimeUserPlayedText);
         }
 
         VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(filterGroup));

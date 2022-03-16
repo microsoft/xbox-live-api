@@ -91,13 +91,12 @@ public:
 
 protected:
     void OnEvent(_In_ const JsonValue& event) noexcept override;
-    void OnResync() noexcept override;
 
 private:
     User m_user;
     TaskQueue m_queue;
     std::mutex m_mutex;
-    XblFunctionContext m_nextToken{ 0 };
+    XblFunctionContext m_nextToken{ 1 };
 
     Map<XblFunctionContext, MPSDInviteHandler> m_mpsdInviteHandlers;
     Map<XblFunctionContext, MultiplayerActivityInviteHandler> m_mpaInviteHandlers;

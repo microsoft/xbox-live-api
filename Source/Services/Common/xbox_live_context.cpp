@@ -87,7 +87,7 @@ HRESULT XblContext::Initialize(
     {
         Result<xbox::services::User> userResult = m_user.Copy();
         RETURN_HR_IF_FAILED(userResult.Hresult());
-        m_presenceService = MakeShared<xbox::services::presence::PresenceService>(userResult.ExtractPayload(), m_xboxLiveContextSettings, rtaManager);
+        m_presenceService = MakeShared<xbox::services::presence::PresenceService>(userResult.ExtractPayload(), globalQueue, m_xboxLiveContextSettings, rtaManager);
     }
 
     {
@@ -123,7 +123,7 @@ HRESULT XblContext::Initialize(
     {
         Result<xbox::services::User> userResult = m_user.Copy();
         RETURN_HR_IF_FAILED(userResult.Hresult());
-        m_userStatisticsService = MakeShared<xbox::services::user_statistics::UserStatisticsService>(userResult.ExtractPayload(), m_xboxLiveContextSettings, rtaManager);
+        m_userStatisticsService = MakeShared<xbox::services::user_statistics::UserStatisticsService>(userResult.ExtractPayload(), globalQueue, m_xboxLiveContextSettings, rtaManager);
     }
 
     {

@@ -61,6 +61,9 @@ public:
         const User& user
     ) noexcept;
 
+    // Test Hook
+    void TriggerResync() const noexcept;
+
 private:
     Result<std::shared_ptr<class Connection>> GetConnection(
         const User& user

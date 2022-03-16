@@ -92,13 +92,6 @@ Connection::~Connection() noexcept
     LOGS_DEBUG << __FUNCTION__ << "[" << this << "]";
 
     m_queue.Terminate(false);
-#if HC_PLATFORM == HC_PLATFORM_GDK
-    auto state{ GlobalState::Get() };
-    if (state)
-    {
-        state->RemoveAppChangeNotificationHandler(m_registrationID);
-    }
-#endif
 }
 
 Result<std::shared_ptr<Connection>> Connection::Make(
@@ -120,31 +113,8 @@ Result<std::shared_ptr<Connection>> Connection::Make(
         Allocator<Connection>()
     );
 
-    auto hr = rtaConnection->InitializeWebsocket();
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
     rtaConnection->m_stateChangedHandler(rtaConnection->m_state);
-    rtaConnection->m_websocket->Connect(s_rtaUri, s_rtaSubprotocol);
-
-#if HC_PLATFORM == HC_PLATFORM_GDK
-    auto state{ GlobalState::Get() };
-    if (state)
-    {
-        rtaConnection->m_registrationID = state->AddAppChangeNotificationHandler(
-            [weakThis = std::weak_ptr<Connection>{ rtaConnection }](bool isSuspended)
-        {
-            std::shared_ptr<Connection> connection = weakThis.lock();
-            if (connection)
-            {
-                connection->AppStateChangeNotificationReceived(isSuspended);
-            }
-        }
-        );
-    }
-#endif
+    rtaConnection->ScheduleConnect();
 
     return rtaConnection;
 }
@@ -152,11 +122,13 @@ Result<std::shared_ptr<Connection>> Connection::Make(
 void Connection::Cleanup()
 {
     std::unique_lock<std::mutex> lock{ m_lock };
-    assert(m_websocket);
 
-    // Clear our disconnect handler to disable auto-reconnect logic
-    m_websocket->SetDisconnectHandler(nullptr);
-    m_websocket->Disconnect();
+    if (m_websocket)
+    {
+        // Clear our disconnect handler to disable auto-reconnect logic
+        m_websocket->SetDisconnectHandler(nullptr);
+        m_websocket->Disconnect();
+    }
 
     List<AsyncContext<Result<void>>> pendingAsyncContexts;
     for (auto& pair : m_subscribeAsyncContexts)
@@ -183,21 +155,6 @@ void Connection::Cleanup()
     );
 }
 
-#if HC_PLATFORM == HC_PLATFORM_GDK
-void Connection::AppStateChangeNotificationReceived(
-    bool isSuspended
-) noexcept
-{
-   std::unique_lock<std::mutex> lock{ m_lock };
-   this->m_isSuspended = isSuspended;
-
-   if (!this->m_isSuspended && this->m_state == XblRealTimeActivityConnectionState::Disconnected)
-   {
-      Reconnect(std::move(lock));
-   }
-}
-#endif
-
 HRESULT Connection::AddSubscription(
     std::shared_ptr<Subscription> sub,
     AsyncContext<Result<void>> async
@@ -214,7 +171,7 @@ HRESULT Connection::AddSubscription(
 
     m_subs[sub->m_state->clientId] = sub;
 
-    LOGS_DEBUG << __FUNCTION__ << ": [" << sub->m_state->clientId << "] ServiceStatus=" << EnumName(sub->m_state->serviceStatus);
+    LOGS_DEBUG << __FUNCTION__ << ": [" << sub->m_state->clientId << "] Uri=" << sub->m_resourceUri;
 
     switch (sub->m_state->serviceStatus)
     {
@@ -225,7 +182,7 @@ HRESULT Connection::AddSubscription(
         // If our connection is active, immediately register with RTA service
         if (m_state == XblRealTimeActivityConnectionState::Connected)
         {
-            return SendSubscribeMessage(sub);
+            return SendSubscribeMessage(sub, std::move(lock));
         }
         return S_OK;
     }
@@ -273,7 +230,7 @@ HRESULT Connection::RemoveSubscription(
     assert(iter != m_subs.end());
     (void)(iter); // suppress unused warning
 
-    LOGS_DEBUG << __FUNCTION__ << ": [" << sub->m_state->clientId << "] ServiceStatus=" << EnumName(sub->m_state->serviceStatus);
+    LOGS_DEBUG << __FUNCTION__ << ": [" << sub->m_state->clientId << "] Uri=" << sub->m_resourceUri << ", ServiceStatus=" << EnumName(sub->m_state->serviceStatus);
 
     switch (sub->m_state->serviceStatus)
     {
@@ -292,7 +249,7 @@ HRESULT Connection::RemoveSubscription(
     {
         // Unregister subscription from RTA service
         m_unsubscribeAsyncContexts[sub->m_state->clientId] = std::move(async);
-        return SendUnsubscribeMessage(sub);
+        return SendUnsubscribeMessage(sub, std::move(lock));
     }
     case Subscription::State::ServiceStatus::PendingSubscribe:
     {
@@ -333,9 +290,7 @@ size_t Connection::SubscriptionCount() const noexcept
     return m_subs.size();
 }
 
-HRESULT Connection::SendSubscribeMessage(
-    std::shared_ptr<Subscription> sub
-) const noexcept
+JsonDocument Connection::AssembleSubscribeMessage(std::shared_ptr<Subscription> sub) const noexcept
 {
     // Payload format [<API_ID>, <SEQUENCE_N>, “<RESOURCE_URI>”]
 
@@ -348,6 +303,23 @@ HRESULT Connection::SendSubscribeMessage(
     request.PushBack(sub->m_state->clientId, a);
     request.PushBack(JsonValue{ sub->m_resourceUri.data(), a }, a);
 
+    return request;
+}
+
+HRESULT Connection::SendSubscribeMessage(
+    std::shared_ptr<Subscription> sub,
+    std::unique_lock<std::mutex>&& lock
+) const noexcept
+{
+    JsonDocument request = AssembleSubscribeMessage(sub);
+
+    lock.unlock();
+    
+    return SendAssembledMessage(request);
+}
+
+HRESULT Connection::SendAssembledMessage(_In_ const JsonValue& request) const noexcept
+{
     String requestString{ JsonUtils::SerializeJson(request) };
     LOGS_DEBUG << __FUNCTION__ << "[" << this << "]: " << requestString;
 
@@ -355,7 +327,8 @@ HRESULT Connection::SendSubscribeMessage(
 }
 
 HRESULT Connection::SendUnsubscribeMessage(
-    std::shared_ptr<Subscription> sub
+    std::shared_ptr<Subscription> sub,
+    std::unique_lock<std::mutex>&& lock
 ) const noexcept
 {
     // Payload format [<API_ID>, <SEQUENCE_N>, <SUB_ID>]
@@ -368,6 +341,8 @@ HRESULT Connection::SendUnsubscribeMessage(
     request.PushBack(static_cast<uint32_t>(MessageType::Unsubscribe), a);
     request.PushBack(sub->m_state->clientId, a);
     request.PushBack(sub->m_state->serviceId, a);
+
+    lock.unlock();
 
     String requestString{ JsonUtils::SerializeJson(request) };
     LOGS_DEBUG << __FUNCTION__ << "[" << this << "]: " << requestString;
@@ -409,6 +384,9 @@ void Connection::SubscribeResponseHandler(_In_ const JsonValue& message) noexcep
             m_activeSubs[sub->m_state->serviceId][sub->m_state->clientId] = sub;
         }
 
+        AsyncContext<Result<void>> asyncContext{ std::move(m_subscribeAsyncContexts[sub->m_state->clientId]) };
+        m_subscribeAsyncContexts.erase(sub->m_state->clientId);
+
         switch (sub->m_state->serviceStatus)
         {
         case Subscription::State::ServiceStatus::Subscribing:
@@ -420,7 +398,7 @@ void Connection::SubscribeResponseHandler(_In_ const JsonValue& message) noexcep
         {
             // Client has removed the subscription while subscribe handshake was happening,
             // so immediately begin unsubscribing.
-            SendUnsubscribeMessage(sub);
+            SendUnsubscribeMessage(sub, std::move(lock));
             break;
         }
         default:
@@ -431,10 +409,10 @@ void Connection::SubscribeResponseHandler(_In_ const JsonValue& message) noexcep
         }
         }
 
-        AsyncContext<Result<void>> asyncContext{ std::move(m_subscribeAsyncContexts[sub->m_state->clientId]) };
-        m_subscribeAsyncContexts.erase(sub->m_state->clientId);
-
-        lock.unlock();
+        if (lock)
+        {
+            lock.unlock();
+        }
 
         asyncContext.Complete(ConvertRTAErrorCode(errorCode));
         sub->OnSubscribe(data);
@@ -526,6 +504,9 @@ void Connection::UnsubscribeResponseHandler(_In_ const JsonValue& message) noexc
 
     LOGS_DEBUG << __FUNCTION__ << ": [" << sub->m_state->clientId <<"] ServiceStatus=" << EnumName(sub->m_state->serviceStatus);
 
+    AsyncContext<Result<void>> asyncContext{ std::move(m_unsubscribeAsyncContexts[clientId]) };
+    m_unsubscribeAsyncContexts.erase(clientId);
+
     switch (sub->m_state->serviceStatus)
     {
     case Subscription::State::ServiceStatus::Unsubscribing:
@@ -539,7 +520,7 @@ void Connection::UnsubscribeResponseHandler(_In_ const JsonValue& message) noexc
     {
         // Client has re-added the subscription while unsubscibe handshake was happening,
         // so immediately begin subscribing.
-        SendSubscribeMessage(sub);
+        SendSubscribeMessage(sub, std::move(lock));
         break;
     }
     default:
@@ -549,10 +530,10 @@ void Connection::UnsubscribeResponseHandler(_In_ const JsonValue& message) noexc
     }
     }
 
-    AsyncContext<Result<void>> asyncContext{ std::move(m_unsubscribeAsyncContexts[clientId]) };
-    m_unsubscribeAsyncContexts.erase(clientId);
-
-    lock.unlock();
+    if (lock)
+    {
+        lock.unlock();
+    }
 
     asyncContext.Complete(ConvertRTAErrorCode(errorCode));
 }
@@ -578,27 +559,6 @@ void Connection::EventHandler(_In_ const JsonValue& message) const noexcept
     }
 }
 
-void Connection::ResyncHandler() const noexcept
-{
-    List<std::shared_ptr<Subscription>> subs;
-
-    std::unique_lock<std::mutex> lock{ m_lock };
-    for (auto& pair : m_subs)
-    {
-        subs.push_back(pair.second);
-    }
-    lock.unlock();
-
-    // In some cases, subscriptions have enough context to handle a resync internally. In other cases,
-    // there is some client context required, so we also will raise the resync to the client.
-    for (auto& sub : subs)
-    {
-        sub->OnResync();
-    }
-
-    m_resyncHandler();
-}
-
 void Connection::ConnectCompleteHandler(WebsocketResult result) noexcept
 {
     LOGS_DEBUG << __FUNCTION__ << ": WebsocketResult [" << result.hr << "," << result.platformErrorCode << "]";
@@ -609,12 +569,15 @@ void Connection::ConnectCompleteHandler(WebsocketResult result) noexcept
     {
         m_state = XblRealTimeActivityConnectionState::Connected;
         m_connectTime = std::chrono::system_clock::now();
+        m_connectAttempt = 0;
 
         assert(m_activeSubs.empty());
+
+        List<JsonDocument> subMessages{};
         for (auto& pair : m_subs)
         {
             assert(pair.second->m_state->serviceStatus == Subscription::State::ServiceStatus::Inactive);
-            SendSubscribeMessage(pair.second);
+            subMessages.push_back(AssembleSubscribeMessage(pair.second));
         }
 
         // RTA v2 has a lifetime of 2 hours. After 2 hours RTA service will disconnect the title. On some platforms
@@ -638,61 +601,63 @@ void Connection::ConnectCompleteHandler(WebsocketResult result) noexcept
             },
             CONNECTION_TIMEOUT_MS
         );
+
+        lock.unlock();
+
+        for (auto& request : subMessages)
+        {
+            SendAssembledMessage(request);
+        }
     }
     else
     {
         m_state = XblRealTimeActivityConnectionState::Disconnected;
-
-        //libHttpClient websocket does not support connecting
-        // the same websocket handle multiple times, so create a new one.
-        auto hr = InitializeWebsocket();
-        if (FAILED(hr))
-        {
-            return;
-        }
-
-        // Backoff and attempt to connect again. 
-        m_connectAttempt++;
-        uint64_t backoff = __min(std::pow(m_connectAttempt, 2), 60) * 1000;
-
-        m_queue.RunWork([weakThis = std::weak_ptr<Connection>{ shared_from_this() }]
-            {
-                auto sharedThis{ weakThis.lock() };
-                if (sharedThis)
-                {
-                    {
-                        std::unique_lock<std::mutex> lock{ sharedThis->m_lock };
-                        sharedThis->m_state = XblRealTimeActivityConnectionState::Connecting;
-                    }
-                    sharedThis->m_stateChangedHandler(sharedThis->m_state);
-                    sharedThis->m_websocket->Connect(s_rtaUri, s_rtaSubprotocol);
-                }
-            },
-            backoff
-        );
+        ScheduleConnect();
     }
 
-    lock.unlock();
-    m_stateChangedHandler(m_state);
-}
-
-void Connection::Reconnect(std::unique_lock<std::mutex>&& lock) noexcept
-{
-    // Immediately attempt to reconnect. libHttpClient websocket does not support connecting 
-    // the same websocket handle multiple times, so create a new one.
-    auto hr = InitializeWebsocket();
-    if (FAILED(hr))
+    if (lock)
     {
-        return;
+        lock.unlock();
     }
 
-    m_connectAttempt = 0;
-    m_state = XblRealTimeActivityConnectionState::Connecting;
-    lock.unlock();
-
     m_stateChangedHandler(m_state);
-    m_websocket->Connect(s_rtaUri, s_rtaSubprotocol);
 }
+
+void Connection::ScheduleConnect() noexcept
+{
+    LOGS_DEBUG << __FUNCTION__;
+
+    // Backoff and attempt to connect again. 
+    uint64_t backoff = __min(std::pow(m_connectAttempt++, 2), 60) * 1000;
+
+    m_queue.RunWork([weakThis = std::weak_ptr<Connection>{ shared_from_this() }, this]
+    {
+        auto sharedThis{ weakThis.lock() };
+        if (sharedThis)
+        {
+            std::unique_lock<std::mutex> lock{ m_lock };
+
+            LOGS_DEBUG << "RTA::Connection Initializing WebSocket and attempting connect. Subcount=" << m_subs.size();
+
+            auto hr = InitializeWebsocket();
+            if (FAILED(hr))
+            {
+                ScheduleConnect();
+            }
+            else
+            {
+                m_state = XblRealTimeActivityConnectionState::Connecting;
+                lock.unlock();
+
+                sharedThis->m_stateChangedHandler(sharedThis->m_state);
+                sharedThis->m_websocket->Connect(s_rtaUri, s_rtaSubprotocol); // Do synchronous failures need to be handled here?
+            }
+        }
+    },
+    backoff
+    );
+}
+
 
 void Connection::DisconnectHandler(WebSocketCloseStatus status) noexcept
 {
@@ -759,22 +724,8 @@ void Connection::DisconnectHandler(WebSocketCloseStatus status) noexcept
     }
 
     m_state = XblRealTimeActivityConnectionState::Disconnected;
-
-    // On GDK, if the cause of the disconnection is that the title went into suspended mode
-    // Don't reconnect right away and wait for the title to exit suspended mode first.
-    // Otherwise, attempt to reconnect.
-#if HC_PLATFORM == HC_PLATFORM_GDK
-    if (!this->m_isSuspended) {
-#endif
-        Reconnect(std::move(lock));
-
-#if HC_PLATFORM == HC_PLATFORM_GDK
-    }
-    else 
-    {
-        lock.unlock();
-    }
-#endif
+    ScheduleConnect();
+    lock.unlock();
 
     for (auto& async : unsubscribeAsyncContexts)
     {
@@ -818,7 +769,7 @@ void Connection::WebsocketMessageReceived(const String& message) noexcept
     }
     case MessageType::Resync:
     {
-        ResyncHandler();
+        m_resyncHandler();
         break;
     }
     default:
@@ -831,6 +782,8 @@ void Connection::WebsocketMessageReceived(const String& message) noexcept
 
 HRESULT Connection::InitializeWebsocket() noexcept
 {
+    LOGS_DEBUG << __FUNCTION__;
+
     if (m_websocket)
     {
         m_websocket->SetConnectCompleteHandler([](WebsocketResult) {});

@@ -59,30 +59,4 @@ void TitlePresenceChangeSubscription::OnEvent(
     }
 }
 
-void TitlePresenceChangeSubscription::OnResync() noexcept
-{
-    auto presenceService{ m_presenceService.lock() };
-    if (presenceService)
-    {
-        presenceService->GetPresence(m_xuid, {
-            [
-                sharedThis{ shared_from_this() },
-                presenceService
-            ]
-        (Result<std::shared_ptr<XblPresenceRecord>> result)
-            {
-                if (Succeeded(result))
-                {
-                    bool isPlaying{ result.Payload()->IsUserPlayingTitle(sharedThis->m_titleId) };
-                    presenceService->HandleTitlePresenceChanged(
-                        sharedThis->m_xuid,
-                        sharedThis->m_titleId,
-                        isPlaying ? XblPresenceTitleState::Started : XblPresenceTitleState::Ended
-                    );
-                }
-            }}
-        );
-    }
-}
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_END

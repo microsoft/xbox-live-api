@@ -2335,7 +2335,7 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
         }
 
     private:
-        XblFunctionContext m_token{};
+        XblFunctionContext m_token{ 0 };
         XblContextHandle m_context{ nullptr };
         std::function<void(const XblMultiplayerSessionChangeEventArgs&)> m_handler;
     };
@@ -2367,7 +2367,7 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
         }
 
     private:
-        XblFunctionContext m_token{};
+        XblFunctionContext m_token{ 0 };
         XblContextHandle m_context{ nullptr };
         std::function<void()> m_handler;
     };

@@ -33,7 +33,6 @@ protected:
         assert(data.IsNull());
     };
     virtual void OnEvent(const JsonValue& event) noexcept = 0;
-    virtual void OnResync() noexcept = 0;
 
     String m_resourceUri;
 

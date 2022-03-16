@@ -296,7 +296,6 @@ public:
 protected:
     void OnSubscribe(_In_ const JsonValue& data) noexcept override;
     void OnEvent(_In_ const JsonValue& data) noexcept override;
-    void OnResync() noexcept override;
 
 private:
     String m_connectionId;
@@ -530,7 +529,7 @@ private:
     // RTA state
     std::shared_ptr<MultiplayerSubscription> m_subscription;
 
-    XblFunctionContext m_rtaConnectionStateChangedToken{};
+    XblFunctionContext m_rtaConnectionStateChangedToken{ 0 };
     XblFunctionContext m_nextClientToken{ 1 };
     Map<XblFunctionContext, SubscriptionLostHandler> m_subscriptionLostHandlers;
     Map<XblFunctionContext, MultiplayerSubscription::ConnectionIdChangedHandler> m_connectionIdChangedHandlers;

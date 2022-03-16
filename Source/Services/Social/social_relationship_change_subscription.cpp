@@ -81,11 +81,4 @@ void SocialRelationshipChangeSubscription::OnEvent(
     }
 }
 
-void SocialRelationshipChangeSubscription::OnResync() noexcept
-{
-    // Can't easily tell what might have been missed without keeping track of a full
-    // SocialGraph locally. Log the service error and continue.
-    LOGS_DEBUG << __FUNCTION__ << ": Resync received, relationship changes may have been missed";
-}
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_CPP_END

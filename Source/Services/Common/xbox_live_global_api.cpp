@@ -191,6 +191,26 @@ try
 }
 CATCH_RETURN()
 
+STDAPI XblSetOverrideLocale(
+    _In_ char const* overrideLocale
+) XBL_NOEXCEPT
+try
+{
+    RETURN_HR_INVALIDARGUMENT_IF_NULL(overrideLocale);
+    VERIFY_XBL_INITIALIZED();
+    auto state{ GlobalState::Get() };
+    if (state)
+    {
+        state->OverrideLocale(overrideLocale);
+        return S_OK;
+    }
+    else 
+    {
+        return E_FAIL;
+    }
+}
+CATCH_RETURN()
+
 STDAPI_(XblFunctionContext) XblAddServiceCallRoutedHandler(
     _In_ XblCallRoutedHandler handler,
     _In_opt_ void* context

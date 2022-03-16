@@ -255,7 +255,7 @@
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\achievements\achievements_progress_notification.lua">
-	      <DeploymentContent>true</DeploymentContent>
+      <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\achievements\PerformanceTestMockResponse.json">
       <DeploymentContent>true</DeploymentContent>
@@ -284,8 +284,11 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\gdk-gameinvite\game-invite-send.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\gdk-gameinvite\game-mpainvite-send.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\leaderboard\leaderboard-2017.lua">
-	      <DeploymentContent>true</DeploymentContent>
+      <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\leaderboard\leaderboard-bvt.lua">
       <DeploymentContent>true</DeploymentContent>
@@ -302,6 +305,15 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\httpPerform.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\manualDispatchTest.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\websocket_cleanup_while_connected.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\websocket_cleanup_while_connecting.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\websocket_closehandle_while_connected.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -312,6 +324,12 @@
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\misc\global_state.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\misc\null_task_queue.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\misc\override_locale.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\misc\simpletest.lua">
@@ -428,6 +446,12 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfilesForSocialGroupAsync.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\rta\RTAResync.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\rta\RTASuspendResume.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\rta\RTA_activation.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -485,7 +509,7 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_remove_realloc.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_wait.lua" >
+    <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_wait.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\social\social_relationship_changed.lua">

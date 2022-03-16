@@ -94,7 +94,7 @@ public:
 #endif
 
     const String& Locales() const noexcept;
-    void OverrideLocales(String&& locales) noexcept;
+    void OverrideLocale(const xsapi_internal_string& locales) noexcept;
 
     // API Type to be used in HTTP requests so they are identifiable in traces.
     // TODO consider configuring this with XblInitArgs
@@ -120,7 +120,7 @@ private:
     Set<uint64_t> m_userExpiredTokens;
 
     UnorderedMap<uint64_t, std::shared_ptr<UserChangeEventHandler>> m_userChangeHandlers;
-    XblFunctionContext m_nextHandlerToken{ 0 };
+    XblFunctionContext m_nextHandlerToken{ 1 };
     UnorderedMap<XblFunctionContext, std::shared_ptr<ServiceCallRoutedHandler>> m_callRoutedHandlers;
 
     String m_locales{ "en-US" };
@@ -137,7 +137,7 @@ private:
 #endif
 
 #if HC_PLATFORM == HC_PLATFORM_GDK
-    XblFunctionContext m_nextAppChangeHandlerToken{ 0 };
+    XblFunctionContext m_nextAppChangeHandlerToken{ 1 };
     xsapi_internal_unordered_map<XblFunctionContext, AppChangeNotificationHandler> m_appChangeNotificationHandlers;
 #endif
 

@@ -631,16 +631,15 @@ xsapi_internal_string datetime::to_string_internal(date_format format) const
         throw utility::details::create_system_error(GetLastError());
     }
 
-    xsapi_internal_wostringstream outStream;
-    outStream.imbue(std::locale::classic());
+    constexpr size_t dateTimeMaxLength{ 256 };
+    wchar_t dateTimeBuffer[dateTimeMaxLength]{ 0 };
 
     if (format == RFC_1123)
     {
+        wchar_t dateStr[18] = { 0 };
 #if _WIN32_WINNT < _WIN32_WINNT_VISTA
-        TCHAR dateStr[18] = {0};
-        status = GetDateFormat(LOCALE_INVARIANT, 0, &systemTime, __TEXT("ddd',' dd MMM yyyy"), dateStr, sizeof(dateStr) / sizeof(TCHAR));
+        status = GetDateFormatW(LOCALE_INVARIANT, 0, &systemTime, L"ddd',' dd MMM yyyy", dateStr, sizeof(dateStr) / sizeof(wchar_t));
 #else
-        wchar_t dateStr[18] = {0};
         status = GetDateFormatEx(LOCALE_NAME_INVARIANT, 0, &systemTime, L"ddd',' dd MMM yyyy", dateStr, sizeof(dateStr) / sizeof(wchar_t), NULL);
 #endif // _WIN32_WINNT < _WIN32_WINNT_VISTA
         if (status == 0)
@@ -648,11 +647,10 @@ xsapi_internal_string datetime::to_string_internal(date_format format) const
             throw utility::details::create_system_error(GetLastError());
         }
 
+        wchar_t timeStr[10] = { 0 };
 #if _WIN32_WINNT < _WIN32_WINNT_VISTA
-        TCHAR timeStr[10] = {0};
-        status = GetTimeFormat(LOCALE_INVARIANT, TIME_NOTIMEMARKER | TIME_FORCE24HOURFORMAT, &systemTime, __TEXT("HH':'mm':'ss"), timeStr, sizeof(timeStr) / sizeof(TCHAR));
+        status = GetTimeFormatW(LOCALE_INVARIANT, TIME_NOTIMEMARKER | TIME_FORCE24HOURFORMAT, &systemTime, L"HH':'mm':'ss", timeStr, sizeof(timeStr) / sizeof(wchar_t));
 #else
-        wchar_t timeStr[10] = {0};
         status = GetTimeFormatEx(LOCALE_NAME_INVARIANT, TIME_NOTIMEMARKER | TIME_FORCE24HOURFORMAT, &systemTime, L"HH':'mm':'ss", timeStr, sizeof(timeStr) / sizeof(wchar_t));
 #endif // _WIN32_WINNT < _WIN32_WINNT_VISTA
         if (status == 0)
@@ -660,16 +658,15 @@ xsapi_internal_string datetime::to_string_internal(date_format format) const
             throw utility::details::create_system_error(GetLastError());
         }
 
-        outStream << dateStr << " " << timeStr << " " << "GMT";
+        _snwprintf_s(dateTimeBuffer, sizeof(dateTimeBuffer), L"%s %s GMT", dateStr, timeStr);
     }
     else if (format == ISO_8601)
     {
         const size_t buffSize = 64;
+        wchar_t dateStr[buffSize] = { 0 };
 #if _WIN32_WINNT < _WIN32_WINNT_VISTA
-        TCHAR dateStr[buffSize] = {0};
-        status = GetDateFormat(LOCALE_INVARIANT, 0, &systemTime, __TEXT("yyyy-MM-dd"), dateStr, buffSize);
+        status = GetDateFormatW(LOCALE_INVARIANT, 0, &systemTime, L"yyyy-MM-dd", dateStr, buffSize);
 #else
-        wchar_t dateStr[buffSize] = {0};
         status = GetDateFormatEx(LOCALE_NAME_INVARIANT, 0, &systemTime, L"yyyy-MM-dd", dateStr, buffSize, NULL);
 #endif // _WIN32_WINNT < _WIN32_WINNT_VISTA
         if (status == 0)
@@ -677,11 +674,10 @@ xsapi_internal_string datetime::to_string_internal(date_format format) const
             throw utility::details::create_system_error(GetLastError());
         }
 
+        wchar_t timeStr[buffSize] = { 0 };
 #if _WIN32_WINNT < _WIN32_WINNT_VISTA
-        TCHAR timeStr[buffSize] = {0};
-        status = GetTimeFormat(LOCALE_INVARIANT, TIME_NOTIMEMARKER | TIME_FORCE24HOURFORMAT, &systemTime, __TEXT("HH':'mm':'ss"), timeStr, buffSize);
+        status = GetTimeFormatW(LOCALE_INVARIANT, TIME_NOTIMEMARKER | TIME_FORCE24HOURFORMAT, &systemTime, L"HH':'mm':'ss", timeStr, buffSize);
 #else
-        wchar_t timeStr[buffSize] = {0};
         status = GetTimeFormatEx(LOCALE_NAME_INVARIANT, TIME_NOTIMEMARKER | TIME_FORCE24HOURFORMAT, &systemTime, L"HH':'mm':'ss", timeStr, buffSize);
 #endif // _WIN32_WINNT < _WIN32_WINNT_VISTA
         if (status == 0)
@@ -689,22 +685,21 @@ xsapi_internal_string datetime::to_string_internal(date_format format) const
             throw utility::details::create_system_error(GetLastError());
         }
 
-        outStream << dateStr << "T" << timeStr;
+        wchar_t fracSecBuf[9] = { 0 };
         uint64_t frac_sec = largeInt.QuadPart % _secondTicks;
         if (frac_sec > 0)
         {
             // Append fractional second, which is a 7-digit value with no trailing zeros
             // This way, '1200' becomes '00012'
-            char buf[9] = { 0 };
-            sprintf_s(buf, sizeof(buf), ".%07ld", (long int)frac_sec);
+            _snwprintf_s(fracSecBuf, sizeof(fracSecBuf), L".%07ld", (long int)frac_sec);
             // trim trailing zeros
-            for (int i = 7; buf[i] == '0'; i--) buf[i] = '\0';
-            outStream << buf;
+            for (int i = 7; fracSecBuf[i] == '0'; i--) fracSecBuf[i] = '\0';
         }
-        outStream << "Z";
+
+        _snwprintf_s(dateTimeBuffer, sizeof(dateTimeBuffer), L"%sT%sZ%s", dateStr, timeStr, fracSecBuf);
     }
 
-    return conversions::to_utf8string_internal(outStream.str());
+    return conversions::to_utf8string_internal(dateTimeBuffer);
 #else //LINUX
     uint64_t input = m_interval;
     uint64_t frac_sec = input % _secondTicks;

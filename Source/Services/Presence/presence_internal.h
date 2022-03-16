@@ -73,7 +73,6 @@ public:
 protected:
     void OnSubscribe(const JsonValue& data) noexcept override;
     void OnEvent(const JsonValue& event) noexcept override;
-    void OnResync() noexcept override;
 
 private:
     uint64_t m_xuid;
@@ -92,7 +91,6 @@ public:
 protected:
     void OnSubscribe(const JsonValue& data) noexcept override;
     void OnEvent(_In_ const JsonValue& event) noexcept override;
-    void OnResync() noexcept override;
 
 private:
     uint64_t m_xuid;
@@ -139,6 +137,7 @@ class PresenceService : public std::enable_shared_from_this<PresenceService>
 public:
     PresenceService(
         _In_ User&& user,
+        _In_ const TaskQueue& backgroundQueue,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
         _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaManager
     ) noexcept;
@@ -196,6 +195,7 @@ public:
         _In_ AsyncContext<Result<Vector<std::shared_ptr<XblPresenceRecord>>>> async
     ) const noexcept;
 
+private:
     void HandleDevicePresenceChanged(
         _In_ uint64_t xuid,
         _In_ XblPresenceDeviceType deviceType,
@@ -208,15 +208,18 @@ public:
         _In_ XblPresenceTitleState state
     ) const noexcept;
 
-private:
+    void HandleRTAResync();
+
     static Result<Vector<std::shared_ptr<XblPresenceRecord>>> DeserializeBatchPresenceRecordsResponse(
         const JsonValue& json
     ) noexcept;
 
     User m_user;
+    TaskQueue m_queue;
     std::shared_ptr<xbox::services::XboxLiveContextSettings> m_xboxLiveContextSettings;
     std::shared_ptr<real_time_activity::RealTimeActivityManager> m_rtaManager;
 
+    XblFunctionContext m_resyncHandlerToken{ 0 };
     Map<XblFunctionContext, DevicePresenceChangedHandler> m_devicePresenceChangedHandlers;
     Map<XblFunctionContext, TitlePresenceChangedHandler> m_titlePresenceChangedHandlers;
     XblFunctionContext m_nextHandlerToken{ 1 };
@@ -233,6 +236,9 @@ private:
     uint32_t const m_titleId;
 
     mutable std::mutex m_mutex;
+
+    friend class DevicePresenceChangeSubscription;
+    friend class TitlePresenceChangeSubscription;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_END

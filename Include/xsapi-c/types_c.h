@@ -39,6 +39,7 @@ extern "C"
 #define XBL_REAL_NAME_CHAR_SIZE                 (255 * 3)
 #define XBL_RICH_PRESENCE_CHAR_SIZE             (100 * 3)
 #define XBL_XBOX_USER_ID_CHAR_SIZE              (21 * 3)
+#define XBL_LAST_TIME_PLAYED_CHAR_SIZE          25
 
 #define XBL_GUID_LENGTH                         40
 #define XBL_SCID_LENGTH                         XBL_GUID_LENGTH
@@ -55,6 +56,7 @@ typedef XalUserHandle XblUserHandle;
 /// <summary>
 /// A context token returned when registering a callback/handler to identify the registration.  
 /// This context token is later used to unregister the callback/handler.
+/// A value of 0 indicates and invalid handler token.
 /// </summary>
 typedef int32_t XblFunctionContext;
 

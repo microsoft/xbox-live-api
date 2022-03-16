@@ -823,7 +823,7 @@ private:
     std::mutex m_resyncLock;
 
     std::mutex m_stateLock;
-    XblFunctionContext m_sessionUpdateEventHandlerCounter{ 0 };
+    XblFunctionContext m_sessionUpdateEventHandlerCounter{ 1 };
     UnorderedMap<uint32_t, Callback<const std::shared_ptr<XblMultiplayerSession>>> m_sessionUpdateEventHandler;
 
     uint64_t m_id{ 0 }; // used to ignore calls made before resetting the state via destory()
@@ -1280,7 +1280,7 @@ private:
 class MultiplayerLocalUserManager : public std::enable_shared_from_this<MultiplayerLocalUserManager>
 {
 public:
-    MultiplayerLocalUserManager();
+    MultiplayerLocalUserManager() = default;
     ~MultiplayerLocalUserManager();
 
     std::shared_ptr<XblContext> GetPrimaryContext();
@@ -1343,10 +1343,10 @@ private:
     void OnResyncMessageReceived();
 
     std::mutex m_subscriptionLock;
-    XblFunctionContext m_sessionChangeEventHandlerCounter{};
-    XblFunctionContext m_multiplayerConnectionIdChangedEventHandlerCounter{};
-    XblFunctionContext m_multiplayerSubscriptionLostEventHandlerCounter{};
-    XblFunctionContext m_rtaResyncEventHandlerCounter{};
+	XblFunctionContext m_sessionChangeEventHandlerCounter{ 1 };
+	XblFunctionContext m_multiplayerConnectionIdChangedEventHandlerCounter{ 1 };
+	XblFunctionContext m_multiplayerSubscriptionLostEventHandlerCounter{ 1 };
+	XblFunctionContext m_rtaResyncEventHandlerCounter{ 1 };
     xsapi_internal_unordered_map<uint32_t, Callback<XblMultiplayerSessionChangeEventArgs>> m_sessionChangeEventHandler;
     xsapi_internal_unordered_map<uint32_t, Function<void()>> m_multiplayerConnectionIdChangedEventHandler;
     xsapi_internal_unordered_map<uint32_t, Function<void()>> m_multiplayerSubscriptionLostEventHandler;

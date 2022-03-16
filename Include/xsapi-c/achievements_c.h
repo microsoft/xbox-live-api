@@ -751,6 +751,7 @@ STDAPI XblAchievementsUpdateAchievementForTitleIdAsync(
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
+/// If multiple achievements are required, use the batch API instead: <see cref="XblAchievementsGetAchievementsForTitleIdAsync"/> 
 /// To get the result, call <see cref="XblAchievementsGetAchievementResult"/> inside the AsyncBlock callback 
 /// or after the AsyncBlock is complete.
 /// </remarks>

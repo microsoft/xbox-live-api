@@ -28,7 +28,7 @@ STDAPI XblContextCreateHandle(
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
 /// Use this method rather than creating a new context with the same user 
-/// if the XblContextHandle is needed by multiple threads.
+/// if the XblContextHandle is needed by multiple components with independent lifespans.
 /// </remarks>
 STDAPI XblContextDuplicateHandle(
     _In_ XblContextHandle xboxLiveContextHandle,

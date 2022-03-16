@@ -33,7 +33,8 @@
     <TargetName>Microsoft.Xbox.Services.141.GDK.C.Thunks</TargetName>
     <RootNamespace>Microsoft.Xbox.Services</RootNamespace>
     <XsapiPlatform>GDK</XsapiPlatform>
-    <XsapiBuildFromSource>1</XsapiBuildFromSource>
+    <XsapiLibBuildFromSource>true</XsapiLibBuildFromSource>
+    <LibHttpClientBuildFromSource>true</LibHttpClientBuildFromSource>
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), xsapi.gdk.bwoi.props))\xsapi.gdk.bwoi.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

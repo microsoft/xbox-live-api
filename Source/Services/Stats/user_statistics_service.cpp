@@ -10,10 +10,12 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_USERSTATISTICS_CPP_BEGIN
 
 UserStatisticsService::UserStatisticsService(
     _In_ User&& user,
+    _In_ const TaskQueue& backgroundQueue,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
     _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaManager
 ) noexcept :
     m_user{ std::move(user) },
+    m_queue{ backgroundQueue.DeriveWorkerQueue() },
     m_xboxLiveContextSettings{ std::move(xboxLiveContextSettings) },
     m_rtaManager{ std::move(rtaManager) }
 {
@@ -21,9 +23,14 @@ UserStatisticsService::UserStatisticsService(
 
 UserStatisticsService::~UserStatisticsService() noexcept
 {
+    if (m_resyncHandlerToken)
+    {
+        m_rtaManager->RemoveResyncHandler(m_user, m_resyncHandlerToken);
+    }
+
     if (!m_statisticChangeHandlers.empty())
     {
-        for (auto& userPair : m_trackedStats)
+        for (auto& userPair : m_trackedStatsByUser)
         {
             for (auto& statPair : userPair.second)
             {
@@ -211,13 +218,26 @@ XblFunctionContext UserStatisticsService::AddStatisticChangedHandler(
 {
     std::lock_guard<std::mutex> lock{ m_mutex };
 
+    if (!m_resyncHandlerToken)
+    {
+        m_resyncHandlerToken = m_rtaManager->AddResyncHandler(m_user, [weakThis = std::weak_ptr<UserStatisticsService>{ shared_from_this() }]
+        {
+            auto sharedThis = weakThis.lock();
+            if (sharedThis)
+            {
+                sharedThis->HandleRTAResync();
+            }
+        });
+    }
+
     // Add subs to RTA manager if needed
     if (m_statisticChangeHandlers.empty())
     {
-        for (auto& userPair : m_trackedStats)
+        for (auto& userPair : m_trackedStatsByUser)
         {
             for (auto& statPair : userPair.second)
             {
+                statPair.second.subscription = MakeShared<StatisticChangeSubscription>(userPair.first, statPair.first.first, statPair.first.second, shared_from_this());
                 m_rtaManager->AddSubscription(m_user, statPair.second.subscription);
             }
         }
@@ -238,11 +258,12 @@ void UserStatisticsService::RemoveStatisticChangedHandler(
     // Remove subs if there are no more handlers
     if (removed && m_statisticChangeHandlers.empty())
     {
-        for (auto& userPair : m_trackedStats)
+        for (auto& userPair : m_trackedStatsByUser)
         {
             for (auto& statPair : userPair.second)
             {
                 m_rtaManager->RemoveSubscription(m_user, statPair.second.subscription);
+                statPair.second.subscription.reset();
             }
         }
     }
@@ -258,18 +279,19 @@ HRESULT UserStatisticsService::TrackStatistics(
 
     for (auto& xuid : xuids)
     {
-        auto& userStats{ m_trackedStats[xuid] };
+        auto& userStats{ m_trackedStatsByUser[xuid] };
         for (auto& statName : statNames)
         {
             auto iter{ userStats.find({ scid, statName }) };
             if (iter == userStats.end())
             {
-                auto sub{ MakeShared<StatisticChangeSubscription>(xuid, scid, statName, shared_from_this()) };
-                userStats[{scid, statName}] = SubscriptionHolder{ 1, sub };
+                userStats[{scid, statName}] = SubscriptionHolder{ 1, nullptr };
 
                 // If there are existing handlers, add the new subs to RTA manager
                 if (!m_statisticChangeHandlers.empty())
                 {
+                    auto sub{ MakeShared<StatisticChangeSubscription>(xuid, scid, statName, shared_from_this()) };
+                    userStats[{scid, statName}].subscription = sub;
                     RETURN_HR_IF_FAILED(m_rtaManager->AddSubscription(m_user, sub));
                 }
             }
@@ -292,7 +314,7 @@ HRESULT UserStatisticsService::StopTrackingStatistics(
 
     for (auto& xuid : xuids)
     {
-        auto& userStats{ m_trackedStats[xuid] };
+        auto& userStats{ m_trackedStatsByUser[xuid] };
         for (auto& statName : statNames)
         {
             auto iter{ userStats.find({ scid, statName }) };
@@ -318,7 +340,7 @@ HRESULT UserStatisticsService::StopTrackingUsers(
 
     for (auto& xuid : xuids)
     {
-        auto& userStats{ m_trackedStats[xuid] };
+        auto& userStats{ m_trackedStatsByUser[xuid] };
         for (auto& statPair : userStats)
         {
             if (--(statPair.second.refCount) == 0)
@@ -327,6 +349,7 @@ HRESULT UserStatisticsService::StopTrackingUsers(
                 if (!m_statisticChangeHandlers.empty())
                 {
                     RETURN_HR_IF_FAILED(m_rtaManager->RemoveSubscription(m_user, statPair.second.subscription));
+                    statPair.second.subscription.reset();
                 }
             }
         }
@@ -346,6 +369,75 @@ void UserStatisticsService::HandleStatisticChanged(
     {
         pair.second(args);
     }
+}
+
+void UserStatisticsService::HandleRTAResync()
+{
+    std::unique_lock<std::mutex> lock{ m_mutex };
+
+    // Get all stats tracked stats for all tracked users so that we can resync in a single request.
+    // In the request callback, we will only invoke the stat changed handlers for the tracked users/stats
+    Vector<uint64_t> trackedUsers;
+    Vector<RequestedStatistics> trackedStats;
+
+    for (auto& pair : m_trackedStatsByUser)
+    {
+        trackedUsers.push_back(pair.first);
+    }
+    for (auto& pair : m_trackedStatsByScid)
+    {
+        trackedStats.push_back(RequestedStatistics{ pair.first, pair.second });
+    }
+
+    auto weakThis = std::weak_ptr<UserStatisticsService>{ shared_from_this() };
+    auto getStatsCallback = [weakThis, this](Result<Vector<UserStatisticsResult>> result)
+    {
+        auto sharedThis = weakThis.lock();
+        if (!sharedThis)
+        {
+            return;
+        }
+
+        std::unique_lock<std::mutex> lock{ m_mutex };
+
+        if (Succeeded(result))
+        {
+            Vector<StatisticChangeEventArgs> changeEvents;
+
+            for (auto& userStatsResult : result.Payload())
+            {
+                // Only invoke handler for tracked stats
+                auto trackedUserIter = m_trackedStatsByUser.find(utils::internal_string_to_uint64(userStatsResult.XboxUserId()));
+                if (trackedUserIter != m_trackedStatsByUser.end())
+                {
+                    for (auto& scidStats : userStatsResult.ServiceConfigurationStatistics())
+                    {
+                        for (auto& stat : scidStats.Statistics())
+                        {
+                            auto trackedStatIter = trackedUserIter->second.find({ scidStats.ServiceConfigurationId(), stat.StatisticName() });
+                            if (trackedStatIter != trackedUserIter->second.end())
+                            {
+                                changeEvents.emplace_back(trackedUserIter->first, scidStats.ServiceConfigurationId(), stat.StatisticName(), stat.StatisticType(), stat.Value());
+                            }
+                        }
+                    }
+                }
+            }
+
+            auto statChangedHandlers{ m_statisticChangeHandlers };
+            lock.unlock();
+
+            for (auto& pair : statChangedHandlers)
+            {
+                for (auto& eventArgs : changeEvents)
+                {
+                    pair.second(eventArgs);
+                }
+            }
+        }
+    };
+
+    GetMultipleUserStatisticsForMultipleServiceConfigurations(trackedUsers, trackedStats, AsyncContext<Result<Vector<UserStatisticsResult>>>{ m_queue, std::move(getStatsCallback) });
 }
 
 String UserStatisticsService::UserStatsSubpath(

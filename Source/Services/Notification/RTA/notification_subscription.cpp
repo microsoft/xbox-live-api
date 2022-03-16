@@ -167,12 +167,6 @@ void NotificationSubscription::OnEvent(
     }
 }
 
-void NotificationSubscription::OnResync() noexcept
-{
-    // Don't think there is much we can do here - just log an error 
-    LOGS_ERROR << __FUNCTION__ << ": Notification service events may have been missed";
-}
-
 GameInviteNotificationEventArgs::GameInviteNotificationEventArgs(
     const GameInviteNotificationEventArgs& other
 ) noexcept

@@ -401,25 +401,6 @@ typedef enum XalUserChangeType
 #endif
 
 /// <summary>
-/// User detail change event handler.
-/// </summary>
-/// <param name="context">Optional pointer to data used by the event handler.
-/// </param>
-/// <param name="userId">The local id of the user that changed.</param>
-/// <param name="change">The type of change.</param>
-/// <returns></returns>
-#if !XAL_OS_IMPL
-typedef void (XalUserChangeEventHandler)(
-    _In_opt_ void* context,
-    _In_ XalUserLocalId userId,
-    _In_ XalUserChangeType change
-);
-#else
-// XalUserChangeEventHandler is defined in the platform specific header.
-// That header is included at the top of this file
-#endif
-
-/// <summary>
 /// A token returned when registering a callback to identify the registration. This token
 /// is later used to unregister the callback.
 /// </summary>

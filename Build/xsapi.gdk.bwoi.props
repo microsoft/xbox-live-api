@@ -71,6 +71,41 @@
 
   <!--
   ****************************************************************************************************
+  VCTargetsPath redirection (VS 2022)
+  For VS 2022, we have to copy the contents of 
+  C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v160  
+  to a temp location, then xcopy in the files from 
+  C:\Program Files (x86)\Microsoft GDK\211000\GXDK\VS2019\flatDeployment\MSBuild\Microsoft\VC\v160 
+  and 
+    C:\Program Files (x86)\Microsoft GDK\211000\GRDK\VS2019\flatDeployment\MSBuild\Microsoft\VC\v160
+  and do the same for the v150 for v141 downlevel
+  ****************************************************************************************************
+  -->
+  <PropertyGroup Condition="'$(GDKUseBWOI)' == 'true'">
+    <_AlternativeVCTargetsPath160>$(GDKMSBuildForVS2019)v160\</_AlternativeVCTargetsPath160>
+    <_AlternativeVCTargetsPath150>$(GDKMSBuildForVS2019)v150\</_AlternativeVCTargetsPath150>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GDKUseBWOI)' == 'true' and ('$(Platform)' == 'Gaming.Xbox.XboxOne.x64' and '$(VisualStudioVersion)' == '17.0')">
+    <VCTargetsPath>$(_AlternativeVCTargetsPath160)</VCTargetsPath>
+    <VCTargetsPath15 Condition="'$(_AlternativeVCTargetsPath150)'!=''">$(_AlternativeVCTargetsPath150)</VCTargetsPath15>
+    <VCTargetsPath16>$(_AlternativeVCTargetsPath160)</VCTargetsPath16>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GDKUseBWOI)' == 'true' and ('$(Platform)' == 'Gaming.Xbox.Scarlett.x64' and '$(VisualStudioVersion)' == '17.0')">
+    <VCTargetsPath>$(_AlternativeVCTargetsPath160)</VCTargetsPath>
+    <VCTargetsPath15 Condition="'$(_AlternativeVCTargetsPath150)'!=''">$(_AlternativeVCTargetsPath150)</VCTargetsPath15>
+    <VCTargetsPath16>$(_AlternativeVCTargetsPath160)</VCTargetsPath16>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GDKUseBWOI)' == 'true' and ('$(Platform)' == 'Gaming.Desktop.x64' and '$(VisualStudioVersion)' == '17.0')">
+    <VCTargetsPath>$(_AlternativeVCTargetsPath160)</VCTargetsPath>
+    <VCTargetsPath15 Condition="'$(_AlternativeVCTargetsPath150)'!=''">$(_AlternativeVCTargetsPath150)</VCTargetsPath15>
+    <VCTargetsPath16>$(_AlternativeVCTargetsPath160)</VCTargetsPath16>
+  </PropertyGroup>
+
+  <!--
+  ****************************************************************************************************
   Debugging
    Condition="'$(GDKUseBWOI)' == 'true' and '$(GDKUseBWOIDebug)' == 'true'"
   ****************************************************************************************************

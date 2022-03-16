@@ -95,8 +95,15 @@ int XTaskQueueTerminateWithAsyncWait_Lua(lua_State *L)
 
 int XTaskQueueSetCurrentProcessTaskQueue_Lua(lua_State *L)
 {
+    auto luaHandle = GetUint64FromLua(L, 1, 0);
     // CODE SNIPPET START: XTaskQueueSetCurrentProcessTaskQueue
     XTaskQueueHandle queue = nullptr;
+    // CODE SKIP START
+    if (luaHandle != 0)
+    {
+        queue = reinterpret_cast<XTaskQueueHandle>(luaHandle);
+    }
+    // CODE SKIP END
     XTaskQueueSetCurrentProcessTaskQueue(queue);
     // CODE SNIPPET END
 
@@ -112,6 +119,47 @@ int XTaskQueueGetCurrentProcessTaskQueue_Lua(lua_State *L)
     // CODE SNIPPET END
 
     LogToFile("XTaskQueueGetCurrentProcessTaskQueue 0x%0.8x", queue);
+    lua_pushinteger(L, reinterpret_cast<lua_Integer>(queue));
+    return LuaReturnHR(L, S_OK, 1);
+}
+
+std::thread g_dispatchThread{};
+bool g_dispatch = false;
+
+int StartManualDispatchThread_Lua(lua_State* L)
+{
+    g_dispatch = true;
+    g_dispatchThread = std::thread{ []()
+    {
+        while (g_dispatch)
+        {
+            auto queue = Data()->queue;
+
+            bool workAvailable = true;
+            while (workAvailable)
+            {
+                workAvailable = XTaskQueueDispatch(queue, XTaskQueuePort::Work, 0);
+            }
+
+            workAvailable = true;
+            while (workAvailable)
+            {
+                workAvailable = XTaskQueueDispatch(queue, XTaskQueuePort::Completion, 0);
+            }
+
+            pal::Sleep(10);
+        }
+    }
+    };
+
+    g_dispatchThread.detach();
+
+    return LuaReturnHR(L, S_OK);
+}
+
+int StopManualDispatchThread_Lua(lua_State* L)
+{
+    g_dispatch = false;
     return LuaReturnHR(L, S_OK);
 }
 
@@ -125,7 +173,7 @@ void SetupAPIs_Async()
     lua_register(Data()->L, "XTaskQueueTerminateWithAsyncWait", XTaskQueueTerminateWithAsyncWait_Lua);
     lua_register(Data()->L, "XTaskQueueSetCurrentProcessTaskQueue", XTaskQueueSetCurrentProcessTaskQueue_Lua);
     lua_register(Data()->L, "XTaskQueueGetCurrentProcessTaskQueue", XTaskQueueGetCurrentProcessTaskQueue_Lua);
-
+   
     //lua_register(Data()->L, "XTaskQueueGetPort", XTaskQueueGetPort_Lua);
     //lua_register(Data()->L, "XTaskQueueCreateComposite", XTaskQueueCreateComposite_Lua);
     //lua_register(Data()->L, "XTaskQueueSubmitCallback", XTaskQueueSubmitCallback_Lua);
@@ -134,6 +182,10 @@ void SetupAPIs_Async()
     //lua_register(Data()->L, "XTaskQueueUnregisterWaiter", XTaskQueueUnregisterWaiter_Lua);
     //lua_register(Data()->L, "XTaskQueueRegisterMonitor", XTaskQueueRegisterMonitor_Lua);
     //lua_register(Data()->L, "XTaskQueueUnregisterMonitor", XTaskQueueUnregisterMonitor_Lua);
+
+    // Helper methods
+    lua_register(Data()->L, "StartManualDispatchThread", StartManualDispatchThread_Lua);
+    lua_register(Data()->L, "StopManualDispatchThread", StopManualDispatchThread_Lua);
 }
 
 

@@ -74,8 +74,37 @@ int XGameUiShowSendGameInviteAsync_Lua(lua_State* L)
     return LuaReturnHR(L, hr);
 }
 
+int XGameUiShowMultiplayerActivityGameInviteAsync_Lua(lua_State* L)
+{
+#if HC_PLATFORM == HC_PLATFORM_GDK
+    auto asyncBlock = std::make_unique<XAsyncBlock>();
+    asyncBlock->queue = Data()->queue;
+    asyncBlock->context = nullptr;
+    asyncBlock->callback = [](XAsyncBlock* asyncBlock)
+    {
+        std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock }; // Take over ownership of the XAsyncBlock*
+        //HRESULT hr = XGameUiShowMultiplayerActivityGameInviteResult(asyncBlock);
+        HRESULT hr = E_NOTIMPL; // requires GDK 2203+
+        CallLuaFunctionWithHr(hr, "OnXGameUiShowMultiplayerActivityGameInviteAsync");
+    };
+
+    //HRESULT hr = XGameUiShowMultiplayerActivityGameInviteAsync(asyncBlock.get(), Data()->xalUser);
+    HRESULT hr = E_NOTIMPL; // requires GDK 2203+
+    if (SUCCEEDED(hr))
+    {
+        // The call succeeded, so release the std::unique_ptr ownership of XAsyncBlock* since the callback will take over ownership.
+        // If the call fails, the std::unique_ptr will keep ownership and delete the XAsyncBlock*
+        asyncBlock.release();
+    }
+#else 
+    HRESULT hr = S_OK;
+#endif
+    return LuaReturnHR(L, hr);
+}
+
 void SetupAPIs_GRTS()
 {
+    lua_register(Data()->L, "XGameUiShowMultiplayerActivityGameInviteAsync", XGameUiShowMultiplayerActivityGameInviteAsync_Lua);
     lua_register(Data()->L, "XGameUiShowSendGameInviteAsync", XGameUiShowSendGameInviteAsync_Lua);
     lua_register(Data()->L, "XGameUiShowSendGameInviteAsyncToMPMLobby", XGameUiShowSendGameInviteAsyncToMPMLobby_Lua);
 }

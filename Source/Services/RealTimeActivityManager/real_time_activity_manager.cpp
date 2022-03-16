@@ -189,6 +189,21 @@ void RealTimeActivityManager::Deactivate(
     }
 }
 
+void RealTimeActivityManager::TriggerResync() const noexcept
+{
+    std::unique_lock<std::recursive_mutex> lock{ m_lock };
+    auto handlers{ m_resyncHandlers };
+    lock.unlock();
+
+    for (auto& userPair : handlers)
+    {
+        for (auto& handlerPair : userPair.second)
+        {
+            handlerPair.second();
+        }
+    }
+}
+
 Result<std::shared_ptr<Connection>> RealTimeActivityManager::GetConnection(
     const User& user
 ) noexcept
@@ -262,3 +277,16 @@ Result<std::shared_ptr<Connection>> RealTimeActivityManager::GetConnection(
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_END
+
+// Test Hook
+HRESULT XblTestHooksTriggerRTAResync()
+{
+    auto state = GlobalState::Get();
+    if (!state)
+    {
+        return E_XBL_NOT_INITIALIZED;
+    }
+    state->RTAManager()->TriggerResync();
+
+    return S_OK;
+}

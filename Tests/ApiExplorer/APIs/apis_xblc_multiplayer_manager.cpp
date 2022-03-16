@@ -299,12 +299,15 @@ HRESULT MultiplayerManagerDoWork()
 
             case XblMultiplayerEventType::HostChanged:
             {
-                XblMultiplayerManagerMember member;
+                XblMultiplayerManagerMember member{};
                 hr = XblMultiplayerEventArgsMember(events[i].EventArgsHandle, &member);
-                assert(SUCCEEDED(hr));
 
                 XblMultiplayerManagerMember host{};
-                XblMultiplayerManagerLobbySessionHost(&host);
+                HRESULT hr2 = XblMultiplayerManagerLobbySessionHost(&host);
+                (void)(hr2); //suppress unused warning
+                //If a host leaves and there is no new host, XblMultiplayerEventArgsMember returns 0x80070714 HRESULT_FROM_WIN32(ERROR_RESOURCE_DATA_NOT_FOUND)
+                //Likewise, since there is no host, XblMultiplayerManagerLobbySessionHost returns 0x80070525 HRESULT_FROM_WIN32(ERROR_NO_SUCH_USER)
+                assert((SUCCEEDED(hr) && SUCCEEDED(hr2)) || (hr == 0x80070714 && hr2 == 0x80070525));
 
                 assert(member.Xuid == host.Xuid);
 

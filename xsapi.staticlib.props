@@ -25,13 +25,25 @@
     <XsapiToolset Condition="'$(PlatformToolset)'=='v140'">140</XsapiToolset>
     <XsapiToolset Condition="'$(PlatformToolset)'=='v141'">141</XsapiToolset>
     <XsapiToolset Condition="'$(PlatformToolset)'=='v142'">142</XsapiToolset>
+    <XsapiToolset Condition="'$(PlatformToolset)'=='v143'">142</XsapiToolset>
     <XsapiToolset Condition="'$(XsapiToolset)'==''">141</XsapiToolset>
     <XsapiProjectName Condition="'$(XsapiPlatform)' != 'Android'">Microsoft.Xbox.Services.$(XsapiToolset).$(XsapiPlatform).Cpp</XsapiProjectName>
     <XsapiProjectName Condition="'$(XsapiPlatform)' == 'GDK'">Microsoft.Xbox.Services.$(XsapiToolset).GDK.C</XsapiProjectName>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(XsapiBuildFromSource)' == ''">
-    <XsapiBuildFromSource>true</XsapiBuildFromSource>
+  <!--Support for older XsapiBuildFromSource prop name that controlled both XSAPI & libHttpClient -->
+  <PropertyGroup Condition="'$(XsapiBuildFromSource)' != ''">
+    <XsapiLibBuildFromSource>$(XsapiBuildFromSource)</XsapiLibBuildFromSource>
+    <LibHttpClientBuildFromSource>$(XsapiBuildFromSource)</LibHttpClientBuildFromSource>
+  </PropertyGroup>
+
+  <!--Turn build from source on when including this file -->
+  <PropertyGroup Condition="'$(XsapiLibBuildFromSource)' == ''">
+    <XsapiLibBuildFromSource>true</XsapiLibBuildFromSource>
+    <XsapiBuildFromSource>true</XsapiBuildFromSource> <!--Support for older GDKs which still use the XsapiBuildFromSource prop -->
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(LibHttpClientBuildFromSource)' == ''">
+    <LibHttpClientBuildFromSource>true</LibHttpClientBuildFromSource>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(XsapiAddProjectReference)' == ''">
@@ -71,7 +83,7 @@
     <ClCompile>
       <PreprocessorDefinitions>_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XBL_API_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(XsapiPlatform)' == 'GDK'">HC_WINHTTP_WEBSOCKETS;HC_PLATFORM_IS_MICROSOFT=1;HC_PLATFORM_GDK=4;HC_PLATFORM=HC_PLATFORM_GDK;HC_DATAMODEL=HC_DATAMODEL_LLP64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(XsapiBuildFromSource)' != ''">XSAPI_BUILT_FROM_SOURCE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(XsapiLibBuildFromSource)' != ''">XSAPI_BUILT_FROM_SOURCE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>;$(XsapiInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -102,6 +114,7 @@
     <VisualStudioMajorVersion Condition="'$(VisualStudioVersion)' == '14.0'">14</VisualStudioMajorVersion>
     <VisualStudioMajorVersion Condition="'$(VisualStudioVersion)' == '15.0'">15</VisualStudioMajorVersion>
     <VisualStudioMajorVersion Condition="'$(VisualStudioVersion)' == '16.0'">15</VisualStudioMajorVersion>
+    <VisualStudioMajorVersion Condition="'$(VisualStudioVersion)' == '17.0'">15</VisualStudioMajorVersion>
   </PropertyGroup>
 
   <ItemDefinitionGroup>

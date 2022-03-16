@@ -20,6 +20,7 @@ EXPORTS
     HCHttpCallRequestGetHeaderAtIndex
     HCHttpCallRequestGetNumHeaders
     HCHttpCallRequestGetRequestBodyBytes
+    HCHttpCallRequestGetRequestBodyReadFunction
     HCHttpCallRequestGetRequestBodyString
     HCHttpCallRequestGetRetryAllowed
     HCHttpCallRequestGetRetryCacheId
@@ -29,6 +30,7 @@ EXPORTS
     HCHttpCallRequestGetUrl
     HCHttpCallRequestSetHeader
     HCHttpCallRequestSetRequestBodyBytes
+    HCHttpCallRequestSetRequestBodyReadFunction
     HCHttpCallRequestSetRequestBodyString
     HCHttpCallRequestSetRetryAllowed
     HCHttpCallRequestSetRetryCacheId
@@ -45,6 +47,7 @@ EXPORTS
     HCHttpCallResponseGetPlatformNetworkErrorMessage
     HCHttpCallResponseGetResponseBodyBytes
     HCHttpCallResponseGetResponseBodyBytesSize
+    HCHttpCallResponseGetResponseBodyWriteFunction
     HCHttpCallResponseGetResponseString
     HCHttpCallResponseGetStatusCode
     HCHttpCallResponseSetHeader
@@ -52,6 +55,7 @@ EXPORTS
     HCHttpCallResponseSetNetworkErrorCode
     HCHttpCallResponseSetPlatformNetworkErrorMessage
     HCHttpCallResponseSetResponseBodyBytes
+    HCHttpCallResponseSetResponseBodyWriteFunction
     HCHttpCallResponseSetStatusCode
     HCHttpCallSetContext
     HCHttpCallSetTracing
@@ -497,6 +501,7 @@ EXPORTS
     XblRealTimeActivityRemoveResyncHandler
     XblRemoveServiceCallRoutedHandler
     XblSetOverrideConfiguration
+    XblSetOverrideLocale
     XblSocialAddSocialRelationshipChangedHandler
     XblSocialGetSocialRelationshipsAsync
     XblSocialGetSocialRelationshipsResult

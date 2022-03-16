@@ -131,10 +131,4 @@ void MultiplayerSubscription::OnEvent(
     }
 }
 
-void MultiplayerSubscription::OnResync() noexcept
-{
-    // Since clients are manually managing sessions, they will need to resync them
-    LOGS_DEBUG << __FUNCTION__ << ": MPSD Session taps may have been missed";
-}
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_CPP_END

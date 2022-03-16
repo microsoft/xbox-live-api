@@ -184,7 +184,7 @@ public:
     static int utf8_from_char_t(_In_z_ const char_t* inArray, _Out_writes_z_(cchOutArray) char* outArray, _In_ int cchOutArray);
     static int char_t_from_utf8(_In_z_ const char* inArray, _Out_writes_z_(cchOutArray) char_t* outArray, _In_ int cchOutArray);
 
-    static String generate_locales();
+    static String generate_locales(_In_z_ const xsapi_internal_string& locale = "");
     // Helper function to get locales from GlobalState. Fallback to "en-us" if GlobalState is not initialized
     static String get_locales();
 

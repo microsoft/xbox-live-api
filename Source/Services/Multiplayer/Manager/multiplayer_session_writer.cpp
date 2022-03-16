@@ -81,10 +81,10 @@ MultiplayerSessionWriter::AddMultiplayerSessionUpdatedHandler(
 {
     std::lock_guard<std::mutex> lock(m_stateLock);
 
-    XblFunctionContext context = -1;
+    XblFunctionContext context = 0;
     if (handler != nullptr)
     {
-        context = ++m_sessionUpdateEventHandlerCounter;
+		context = m_sessionUpdateEventHandlerCounter++;
         m_sessionUpdateEventHandler[m_sessionUpdateEventHandlerCounter] = std::move(handler);
     }
 
