@@ -56,6 +56,7 @@ XblFunctionContext PresenceService::AddTitlePresenceChangedHandler(
         {
             for (auto& titlePair : xuidPair.second.titlePresenceChangedSubscriptions)
             {
+                titlePair.second = MakeShared<TitlePresenceChangeSubscription>(xuidPair.first, titlePair.first, shared_from_this());
                 m_rtaManager->AddSubscription(m_user, titlePair.second);
             }
         }
@@ -79,6 +80,7 @@ void PresenceService::RemoveTitlePresenceChangedHandler(
             for (auto& titlePair : xuidPair.second.titlePresenceChangedSubscriptions)
             {
                 m_rtaManager->RemoveSubscription(m_user, titlePair.second);
+                titlePair.second.reset();
             }
         }
     }
@@ -95,6 +97,7 @@ XblFunctionContext PresenceService::AddDevicePresenceChangedHandler(
     {
         for (auto& pair : m_trackedXuids)
         {
+            pair.second.devicePresenceChangedSub = MakeShared<DevicePresenceChangeSubscription>(pair.first, shared_from_this());
             m_rtaManager->AddSubscription(m_user, pair.second.devicePresenceChangedSub);
         }
     }
@@ -115,6 +118,7 @@ void PresenceService::RemoveDevicePresenceChangedHandler(
         for (auto& pair : m_trackedXuids)
         {
             m_rtaManager->RemoveSubscription(m_user, pair.second.devicePresenceChangedSub);
+            pair.second.devicePresenceChangedSub.reset();
         }
     }
 }
@@ -133,23 +137,21 @@ HRESULT PresenceService::TrackUsers(
         {
             TrackedXuidSubscriptions newSubs{};
             newSubs.refCount = 1;
-            newSubs.devicePresenceChangedSub = MakeShared<DevicePresenceChangeSubscription>(xuid, shared_from_this());
-            for (auto& pair : m_trackedTitles)
-            {
-                auto& title{ pair.first };
-                newSubs.titlePresenceChangedSubscriptions[title] = MakeShared<TitlePresenceChangeSubscription>(xuid, title, shared_from_this());
-            }
 
             // If there are existing handlers, add the new subs to RTA managers
             if (!m_devicePresenceChangedHandlers.empty())
             {
+                newSubs.devicePresenceChangedSub = MakeShared<DevicePresenceChangeSubscription>(xuid, shared_from_this());
                 RETURN_HR_IF_FAILED(m_rtaManager->AddSubscription(m_user, newSubs.devicePresenceChangedSub));
             }
+
             if (!m_titlePresenceChangedHandlers.empty())
             {
-                for (auto& pair : newSubs.titlePresenceChangedSubscriptions) 
+                for (auto& pair : m_trackedTitles)
                 {
-                    RETURN_HR_IF_FAILED(m_rtaManager->AddSubscription(m_user, pair.second));
+                    auto sub{ MakeShared<TitlePresenceChangeSubscription>(xuid, pair.first, shared_from_this()) };
+                    newSubs.titlePresenceChangedSubscriptions[pair.first] = sub;
+                    RETURN_HR_IF_FAILED(m_rtaManager->AddSubscription(m_user, sub));
                 }
             }
             m_trackedXuids[xuid] = std::move(newSubs);
@@ -207,12 +209,11 @@ HRESULT PresenceService::TrackAdditionalTitles(
             // If its a new title, create the appropriate subscriptions
             for (auto& pair : m_trackedXuids)
             {
-                auto sub{ MakeShared<TitlePresenceChangeSubscription>(pair.first, titleId, shared_from_this()) };
-                pair.second.titlePresenceChangedSubscriptions[titleId] = sub;
-
                 // Add new subs to RTA manager if we have handlers
                 if (!m_titlePresenceChangedHandlers.empty())
                 {
+                    auto sub{ MakeShared<TitlePresenceChangeSubscription>(pair.first, titleId, shared_from_this()) };
+                    pair.second.titlePresenceChangedSubscriptions[titleId] = sub;
                     RETURN_HR_IF_FAILED(m_rtaManager->AddSubscription(m_user, sub));
                 }
             }

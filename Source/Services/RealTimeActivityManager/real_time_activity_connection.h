@@ -49,14 +49,20 @@ private:
         ResyncHandler resyncHandler
     ) noexcept;
 
+    JsonDocument AssembleSubscribeMessage(std::shared_ptr<Subscription> sub) const noexcept;
+
     // RTA protocol implementation
     HRESULT SendSubscribeMessage(
-        std::shared_ptr<Subscription> subscription
+        std::shared_ptr<Subscription> subscription,
+        std::unique_lock<std::mutex>&& lock
     ) const noexcept;
 
     HRESULT SendUnsubscribeMessage(
-        std::shared_ptr<Subscription> subscription
+        std::shared_ptr<Subscription> subscription,
+        std::unique_lock<std::mutex>&& lock
     ) const noexcept;
+
+    HRESULT SendAssembledMessage(_In_ const JsonValue& message) const noexcept;
 
     void SubscribeResponseHandler(_In_ const JsonValue& message) noexcept;
     void UnsubscribeResponseHandler(_In_ const JsonValue& message) noexcept;

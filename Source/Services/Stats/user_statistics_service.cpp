@@ -218,6 +218,7 @@ XblFunctionContext UserStatisticsService::AddStatisticChangedHandler(
         {
             for (auto& statPair : userPair.second)
             {
+                statPair.second.subscription = MakeShared<StatisticChangeSubscription>(userPair.first, statPair.first.first, statPair.first.second, shared_from_this());
                 m_rtaManager->AddSubscription(m_user, statPair.second.subscription);
             }
         }
@@ -243,6 +244,7 @@ void UserStatisticsService::RemoveStatisticChangedHandler(
             for (auto& statPair : userPair.second)
             {
                 m_rtaManager->RemoveSubscription(m_user, statPair.second.subscription);
+                statPair.second.subscription.reset();
             }
         }
     }
@@ -264,12 +266,13 @@ HRESULT UserStatisticsService::TrackStatistics(
             auto iter{ userStats.find({ scid, statName }) };
             if (iter == userStats.end())
             {
-                auto sub{ MakeShared<StatisticChangeSubscription>(xuid, scid, statName, shared_from_this()) };
-                userStats[{scid, statName}] = SubscriptionHolder{ 1, sub };
+                userStats[{scid, statName}] = SubscriptionHolder{ 1, nullptr };
 
                 // If there are existing handlers, add the new subs to RTA manager
                 if (!m_statisticChangeHandlers.empty())
                 {
+                    auto sub{ MakeShared<StatisticChangeSubscription>(xuid, scid, statName, shared_from_this()) };
+                    userStats[{scid, statName}].subscription = sub;
                     RETURN_HR_IF_FAILED(m_rtaManager->AddSubscription(m_user, sub));
                 }
             }
@@ -327,6 +330,7 @@ HRESULT UserStatisticsService::StopTrackingUsers(
                 if (!m_statisticChangeHandlers.empty())
                 {
                     RETURN_HR_IF_FAILED(m_rtaManager->RemoveSubscription(m_user, statPair.second.subscription));
+                    statPair.second.subscription.reset();
                 }
             }
         }
