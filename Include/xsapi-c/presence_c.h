@@ -525,6 +525,9 @@ STDAPI XblPresenceSetPresenceAsync(
 /// <param name="xuid">The Xbox User ID of the user to get presence for.</param>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>
+/// If presence info is needed for multiple users, use the batch API instead: <see cref="XblPresenceGetPresenceForMultipleUsersAsync"/> 
+/// </remarks>
 STDAPI XblPresenceGetPresenceAsync(
     _In_ XblContextHandle xblContextHandle,
     _In_ uint64_t xuid,

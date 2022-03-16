@@ -13,10 +13,12 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_BEGIN
 
 PresenceService::PresenceService(
     _In_ User&& user,
+    _In_ const TaskQueue& queue,
     _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
     _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaManager
 ) noexcept
     : m_user{ std::move(user) },
+    m_queue{ queue.DeriveWorkerQueue() },
     m_xboxLiveContextSettings{ xboxLiveContextSettings },
     m_rtaManager{ rtaManager },
     m_titleId{ AppConfig::Instance()->TitleId() }
@@ -27,6 +29,11 @@ PresenceService::PresenceService(
 
 PresenceService::~PresenceService() noexcept
 {
+    if (m_resyncHandlerToken)
+    {
+        m_rtaManager->RemoveResyncHandler(m_user, m_resyncHandlerToken);
+    }
+
     for (auto& xuidPair : m_trackedXuids)
     {
         if (!m_devicePresenceChangedHandlers.empty())
@@ -56,6 +63,7 @@ XblFunctionContext PresenceService::AddTitlePresenceChangedHandler(
         {
             for (auto& titlePair : xuidPair.second.titlePresenceChangedSubscriptions)
             {
+                titlePair.second = MakeShared<TitlePresenceChangeSubscription>(xuidPair.first, titlePair.first, shared_from_this());
                 m_rtaManager->AddSubscription(m_user, titlePair.second);
             }
         }
@@ -79,6 +87,7 @@ void PresenceService::RemoveTitlePresenceChangedHandler(
             for (auto& titlePair : xuidPair.second.titlePresenceChangedSubscriptions)
             {
                 m_rtaManager->RemoveSubscription(m_user, titlePair.second);
+                titlePair.second.reset();
             }
         }
     }
@@ -95,6 +104,7 @@ XblFunctionContext PresenceService::AddDevicePresenceChangedHandler(
     {
         for (auto& pair : m_trackedXuids)
         {
+            pair.second.devicePresenceChangedSub = MakeShared<DevicePresenceChangeSubscription>(pair.first, shared_from_this());
             m_rtaManager->AddSubscription(m_user, pair.second.devicePresenceChangedSub);
         }
     }
@@ -115,6 +125,7 @@ void PresenceService::RemoveDevicePresenceChangedHandler(
         for (auto& pair : m_trackedXuids)
         {
             m_rtaManager->RemoveSubscription(m_user, pair.second.devicePresenceChangedSub);
+            pair.second.devicePresenceChangedSub.reset();
         }
     }
 }
@@ -125,6 +136,18 @@ HRESULT PresenceService::TrackUsers(
 {
     std::lock_guard<std::mutex> lock{ m_mutex };
 
+    if (!m_resyncHandlerToken)
+    {
+        m_resyncHandlerToken = m_rtaManager->AddResyncHandler(m_user, [weakThis = std::weak_ptr<PresenceService>{ shared_from_this() } ]
+        {
+            auto sharedThis = weakThis.lock();
+            if (sharedThis)
+            {
+                sharedThis->HandleRTAResync();
+            }
+        });
+    }
+
     for (auto& xuid : xuids)
     {
         // If we don't have them already, create RTA subscriptions for the new user
@@ -133,23 +156,21 @@ HRESULT PresenceService::TrackUsers(
         {
             TrackedXuidSubscriptions newSubs{};
             newSubs.refCount = 1;
-            newSubs.devicePresenceChangedSub = MakeShared<DevicePresenceChangeSubscription>(xuid, shared_from_this());
-            for (auto& pair : m_trackedTitles)
-            {
-                auto& title{ pair.first };
-                newSubs.titlePresenceChangedSubscriptions[title] = MakeShared<TitlePresenceChangeSubscription>(xuid, title, shared_from_this());
-            }
 
             // If there are existing handlers, add the new subs to RTA managers
             if (!m_devicePresenceChangedHandlers.empty())
             {
+                newSubs.devicePresenceChangedSub = MakeShared<DevicePresenceChangeSubscription>(xuid, shared_from_this());
                 RETURN_HR_IF_FAILED(m_rtaManager->AddSubscription(m_user, newSubs.devicePresenceChangedSub));
             }
+
             if (!m_titlePresenceChangedHandlers.empty())
             {
-                for (auto& pair : newSubs.titlePresenceChangedSubscriptions) 
+                for (auto& pair : m_trackedTitles)
                 {
-                    RETURN_HR_IF_FAILED(m_rtaManager->AddSubscription(m_user, pair.second));
+                    auto sub{ MakeShared<TitlePresenceChangeSubscription>(xuid, pair.first, shared_from_this()) };
+                    newSubs.titlePresenceChangedSubscriptions[pair.first] = sub;
+                    RETURN_HR_IF_FAILED(m_rtaManager->AddSubscription(m_user, sub));
                 }
             }
             m_trackedXuids[xuid] = std::move(newSubs);
@@ -207,12 +228,11 @@ HRESULT PresenceService::TrackAdditionalTitles(
             // If its a new title, create the appropriate subscriptions
             for (auto& pair : m_trackedXuids)
             {
-                auto sub{ MakeShared<TitlePresenceChangeSubscription>(pair.first, titleId, shared_from_this()) };
-                pair.second.titlePresenceChangedSubscriptions[titleId] = sub;
-
                 // Add new subs to RTA manager if we have handlers
                 if (!m_titlePresenceChangedHandlers.empty())
                 {
+                    auto sub{ MakeShared<TitlePresenceChangeSubscription>(pair.first, titleId, shared_from_this()) };
+                    pair.second.titlePresenceChangedSubscriptions[titleId] = sub;
                     RETURN_HR_IF_FAILED(m_rtaManager->AddSubscription(m_user, sub));
                 }
             }
@@ -417,6 +437,97 @@ void PresenceService::HandleTitlePresenceChanged(
     for (auto& pair : handlers)
     {
         pair.second(xuid, titleId, state);
+    }
+}
+
+void PresenceService::HandleRTAResync()
+{
+    std::unique_lock<std::mutex> lock{ m_mutex };
+
+    LOGS_DEBUG << "Resyncing " << m_trackedXuids.size() << " Presence Subscriptions";
+
+    auto weakThis = std::weak_ptr<PresenceService>{ shared_from_this() };
+    auto handleGetPresenceResult = [weakThis, this](Result<Vector<std::shared_ptr<XblPresenceRecord>>> result)
+    {
+        auto sharedThis = weakThis.lock();
+        if (!sharedThis)
+        {
+            return;
+        }
+
+        std::unique_lock<std::mutex> lock{ m_mutex };
+
+        if(Succeeded(result))
+        {
+            Vector<uint32_t> trackedTitles;
+            for (auto& pair : m_trackedTitles)
+            {
+                trackedTitles.push_back(pair.first);
+            }
+            auto titlePresenceChangedHandlers{ m_titlePresenceChangedHandlers };
+            auto devicePresenceChangedHandlers{ m_devicePresenceChangedHandlers };
+
+            lock.unlock();
+
+            for (auto& presenceRecord : result.Payload())
+            {
+                // Invoke title presence changed subs for tracked titles
+                for (auto titleId : trackedTitles)
+                {
+                    bool isPlaying = presenceRecord->IsUserPlayingTitle(titleId);
+                    for (auto& pair : titlePresenceChangedHandlers)
+                    {
+                        pair.second(presenceRecord->Xuid(), titleId, isPlaying ? XblPresenceTitleState::Started : XblPresenceTitleState::Ended);
+                    }
+                }
+
+                // Invoke device presence changed handlers
+                for (const auto& deviceRecord : presenceRecord->DeviceRecords())
+                {
+                    for (auto& pair : devicePresenceChangedHandlers)
+                    {
+                        pair.second(presenceRecord->Xuid(), deviceRecord.deviceType, true);
+                    }
+                }
+            }
+        }
+    };
+
+    Vector<uint64_t> trackedXuids;
+    for (auto& pair : m_trackedXuids)
+    {
+        trackedXuids.push_back(pair.first);
+    }
+
+    if (trackedXuids.empty())
+    {
+        // nothing to resync
+        return;
+    }
+    else if (trackedXuids.size() > 1)
+    {
+        // Make batch query
+        GetBatchPresence(
+            UserBatchRequest{ trackedXuids.data(), trackedXuids.size(), nullptr },
+            AsyncContext<Result<Vector<std::shared_ptr<XblPresenceRecord>>>>{ m_queue, std::move(handleGetPresenceResult) }
+        );
+    }
+    else
+    {
+        GetPresence(
+            trackedXuids.front(),
+            AsyncContext<Result<std::shared_ptr<XblPresenceRecord>>>{m_queue, [batchResultHandler = std::move(handleGetPresenceResult)](Result<std::shared_ptr<XblPresenceRecord>> result)
+        {
+            if (Succeeded(result))
+            {
+                batchResultHandler(Vector<std::shared_ptr<XblPresenceRecord>>{ result.ExtractPayload() });
+            }
+            else
+            {
+                batchResultHandler(result.Hresult());
+            }
+        }
+        });
     }
 }
 

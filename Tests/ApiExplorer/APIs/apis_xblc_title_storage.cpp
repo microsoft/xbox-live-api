@@ -61,7 +61,7 @@ JsonBlobMetadataResult DeserializeResult(std::string blobPathRoot, std::string j
         {
             metadata.displayName = blobJson["displayName"].GetString();
         }
-        metadata.length = blobJson["size"].GetInt();
+        metadata.length = static_cast<size_t>(blobJson["size"].GetInt());
         metadata.positionInList = index;
         index++;
         result.m_items.push_back(metadata);

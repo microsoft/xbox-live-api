@@ -143,20 +143,19 @@ public:
         _In_ uint64_t xuid,
         _In_ String scid,
         _In_ String statisticName,
-        _In_ std::shared_ptr<class UserStatisticsService const> statisticsService
+        _In_ std::shared_ptr<class UserStatisticsService> statisticsService
     ) noexcept;
 
 protected:
     void OnSubscribe(_In_ const JsonValue& data) noexcept override;
     void OnEvent(_In_ const JsonValue& data) noexcept override;
-    void OnResync() noexcept override;
 
 private:
     const uint64_t m_xuid;
     const String m_scid;
     const String m_statisticName;
     String m_statisticType;
-    const std::weak_ptr<class UserStatisticsService const> m_statisticsService;
+    const std::weak_ptr<class UserStatisticsService> m_statisticsService;
 };
 
 class UserStatisticsService : public std::enable_shared_from_this<UserStatisticsService>
@@ -164,6 +163,7 @@ class UserStatisticsService : public std::enable_shared_from_this<UserStatistics
 public:
     UserStatisticsService(
         _In_ User&& user,
+        _In_ const TaskQueue& backgroundQueue,
         _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> xboxLiveContextSettings,
         _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaManager
     ) noexcept;
@@ -223,11 +223,13 @@ public:
         _In_ const Vector<uint64_t>& xuids
     ) noexcept;
 
+private:
     void HandleStatisticChanged(
         const StatisticChangeEventArgs& args
     ) const noexcept;
 
-private:
+    void HandleRTAResync();
+
     static String UserStatsSubpath(
         _In_ uint64_t xuid,
         _In_ const String& serviceConfigurationId,
@@ -235,9 +237,11 @@ private:
     ) noexcept;
 
     User m_user;
+    TaskQueue m_queue;
     std::shared_ptr<xbox::services::XboxLiveContextSettings> m_xboxLiveContextSettings;
     std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> m_rtaManager;
 
+    XblFunctionContext m_resyncHandlerToken{ 0 };
     Map<XblFunctionContext, StatisticChangeHandler> m_statisticChangeHandlers;
     XblFunctionContext m_nextToken{ 1 };
 
@@ -248,9 +252,14 @@ private:
     };
     // Indexing on Xuid before StatName because the set of tracked Users is probably more
     // likely to change than the set of tracked Stats.
-    Map<uint64_t, Map<std::pair<String, String>, SubscriptionHolder>> m_trackedStats;
+    Map<uint64_t, Map<std::pair<String, String>, SubscriptionHolder>> m_trackedStatsByUser;
+
+    // Tracked stats by scid. Needed to perform RTA resync
+    Map<String, Vector<String>> m_trackedStatsByScid;
 
     mutable std::mutex m_mutex;
+
+    friend class StatisticChangeSubscription;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_USERSTATISTICS_CPP_END

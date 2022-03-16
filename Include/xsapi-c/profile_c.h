@@ -94,6 +94,7 @@ typedef struct XblUserProfile
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
+/// If profiles are needed for multiple users, use the batch API instead: <see cref="XblProfileGetUserProfilesAsync"/> 
 /// To get the result, call <see cref="XblProfileGetUserProfileResult"/> 
 /// inside the AsyncBlock callback or after the AsyncBlock is complete.
 /// </remarks>

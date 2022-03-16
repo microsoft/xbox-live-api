@@ -344,6 +344,7 @@ void APIRunner_CleanupLeakCheck()
 
 HRESULT RunTestWithoutCleanup(const std::string& scriptName)
 {
+    Data()->m_stopTest = false;
     assert(!scriptName.empty());
 
     bool testLoaded = LoadFile(scriptName);

@@ -322,6 +322,25 @@ STDAPI XalUserResolveIssueWithUiResult(
 // Events
 
 /// <summary>
+/// User detail change event handler.
+/// </summary>
+/// <param name="context">Optional pointer to data used by the event handler.
+/// </param>
+/// <param name="userId">The local id of the user that changed.</param>
+/// <param name="change">The type of change.</param>
+/// <returns></returns>
+#if !XAL_OS_IMPL
+typedef void (XalUserChangeEventHandler)(
+    _In_opt_ void* context,
+    _In_ XalUserLocalId userId,
+    _In_ XalUserChangeType change
+);
+#else
+// XalUserChangeEventHandler is defined in the platform specific header.
+// That header is included in xal_types.h
+#endif
+
+/// <summary>
 /// Register the event handler for user detail changes.
 /// </summary>
 /// <param name="queue">The async queue the callback should be invoked on.</param>

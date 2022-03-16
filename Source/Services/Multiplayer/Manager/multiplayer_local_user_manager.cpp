@@ -11,13 +11,6 @@ using namespace xbox::services::multiplayer;
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 
-MultiplayerLocalUserManager::MultiplayerLocalUserManager() :
-    m_sessionChangeEventHandlerCounter(0),
-    m_multiplayerSubscriptionLostEventHandlerCounter(0),
-    m_rtaResyncEventHandlerCounter(0)
-{
-}
-
 MultiplayerLocalUserManager::~MultiplayerLocalUserManager()
 {
     ChangeAllLocalUserLobbyState(MultiplayerLocalUserLobbyState::Remove);
@@ -348,11 +341,11 @@ MultiplayerLocalUserManager::AddMultiplayerSessionChangedHandler(
 {
     std::lock_guard<std::mutex> lock(m_subscriptionLock);
 
-    XblFunctionContext context = -1;
+    XblFunctionContext context = 0;
     if (handler != nullptr)
     {
-        context = ++m_sessionChangeEventHandlerCounter;
-        m_sessionChangeEventHandler[m_sessionChangeEventHandlerCounter] = std::move(handler);
+        context = m_sessionChangeEventHandlerCounter;
+        m_sessionChangeEventHandler[m_sessionChangeEventHandlerCounter++] = std::move(handler);
     }
 
     return context;
@@ -402,11 +395,11 @@ MultiplayerLocalUserManager::AddMultiplayerConnectionIdChangedHandler(
 {
     std::lock_guard<std::mutex> lock(m_subscriptionLock);
 
-    XblFunctionContext context = -1;
+    XblFunctionContext context = 0;
     if (handler != nullptr)
     {
-        context = ++m_multiplayerConnectionIdChangedEventHandlerCounter;
-        m_multiplayerConnectionIdChangedEventHandler[m_multiplayerConnectionIdChangedEventHandlerCounter] = std::move(handler);
+        context = m_multiplayerConnectionIdChangedEventHandlerCounter;
+        m_multiplayerConnectionIdChangedEventHandler[m_multiplayerConnectionIdChangedEventHandlerCounter++] = std::move(handler);
     }
 
     return context;
@@ -455,11 +448,11 @@ MultiplayerLocalUserManager::AddMultiplayerSubscriptionLostHandler(
 {
     std::lock_guard<std::mutex> lock(m_subscriptionLock);
 
-    XblFunctionContext context = -1;
+    XblFunctionContext context = 0;
     if (handler != nullptr)
     {
-        context = ++m_multiplayerSubscriptionLostEventHandlerCounter;
-        m_multiplayerSubscriptionLostEventHandler[m_multiplayerSubscriptionLostEventHandlerCounter] = std::move(handler);
+        context = m_multiplayerSubscriptionLostEventHandlerCounter;
+        m_multiplayerSubscriptionLostEventHandler[m_multiplayerSubscriptionLostEventHandlerCounter++] = std::move(handler);
     }
 
     return context;
@@ -520,11 +513,11 @@ MultiplayerLocalUserManager::AddRtaResyncHandler(
 {
     std::lock_guard<std::mutex> lock(m_subscriptionLock);
 
-    XblFunctionContext context = -1;
+    XblFunctionContext context = 0;
     if (handler != nullptr)
     {
-        context = ++m_rtaResyncEventHandlerCounter;
-        m_rtaResyncEventHandler[m_rtaResyncEventHandlerCounter] = std::move(handler);
+        context = m_rtaResyncEventHandlerCounter;
+        m_rtaResyncEventHandler[m_rtaResyncEventHandlerCounter++] = std::move(handler);
     }
 
     return context;

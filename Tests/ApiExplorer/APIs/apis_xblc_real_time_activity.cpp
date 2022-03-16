@@ -174,6 +174,19 @@ int XblRealTimeActivitySubscriptionGetId_Lua(lua_State *L)
     return LuaReturnHR(L, S_OK);
 }
 
+// Declare test hook
+HRESULT XblTestHooksTriggerRTAResync();
+
+int XblTestHooksTriggerRTAResync_Lua(lua_State *L)
+{
+    HRESULT hr = S_OK;
+#if HC_PLATFORM != HC_PLATFORM_IOS
+    // For some reason XCode complaining about link errors with this test hook. Disabling on iOS until that can be investigated
+    hr = XblTestHooksTriggerRTAResync();
+#endif
+    return LuaReturnHR(L, hr);
+}
+
 #if !XSAPI_NO_PPL && HC_PLATFORM_IS_MICROSOFT && HC_PLATFORM != HC_PLATFORM_GDK
 #include "combaseapi.h"
 #include "xsapi-cpp/services.h"
@@ -298,6 +311,7 @@ void SetupAPIs_XblRta()
     lua_register(Data()->L, "XblRealTimeActivityRemoveResyncHandler", XblRealTimeActivityRemoveResyncHandler_Lua);
     lua_register(Data()->L, "XblRealTimeActivitySubscriptionGetState", XblRealTimeActivitySubscriptionGetState_Lua);
     lua_register(Data()->L, "XblRealTimeActivitySubscriptionGetId", XblRealTimeActivitySubscriptionGetId_Lua);
+    lua_register(Data()->L, "XblTestHooksTriggerRTAResync", XblTestHooksTriggerRTAResync_Lua);
 
 #if !XSAPI_NO_PPL && HC_PLATFORM_IS_MICROSOFT && HC_PLATFORM != HC_PLATFORM_GDK
     lua_register(Data()->L, "XblRtaMultiplayerInit", XblRtaMultiplayerInit_Lua);

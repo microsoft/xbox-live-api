@@ -10,7 +10,7 @@ StatisticChangeSubscription::StatisticChangeSubscription(
     _In_ uint64_t xuid,
     _In_ String scid,
     _In_ String statisticName,
-    _In_ std::shared_ptr<UserStatisticsService const> statisticsService
+    _In_ std::shared_ptr<UserStatisticsService> statisticsService
 ) noexcept :
     m_xuid{ xuid },
     m_scid{ std::move(scid) },
@@ -119,38 +119,6 @@ void StatisticChangeSubscription::OnEvent(
                 m_statisticType,
                 JsonUtils::SerializeJson(data)
             });
-    }
-}
-
-void StatisticChangeSubscription::OnResync() noexcept
-{
-    if (auto statisticsService{ m_statisticsService.lock() })
-    {
-        statisticsService->GetSingleUserStatistic(m_xuid, m_scid, m_statisticName, {
-            [
-                sharedThis{ shared_from_this() },
-                statisticsService
-            ]
-        (Result<UserStatisticsResult> result)
-        {
-            if (Succeeded(result))
-            {
-                auto& payload{ result.Payload() };
-                if (payload.ServiceConfigurationStatistics().size() >= 1 &&
-                    payload.ServiceConfigurationStatistics()[0].Statistics().size() >= 1)
-                {
-                    statisticsService->HandleStatisticChanged(StatisticChangeEventArgs
-                        {
-                            sharedThis->m_xuid,
-                            sharedThis->m_scid,
-                            sharedThis->m_statisticName,
-                            sharedThis->m_statisticType,
-                            payload.ServiceConfigurationStatistics()[0].Statistics()[0].Value()
-                        });
-                }
-            }
-        }
-        });
     }
 }
 

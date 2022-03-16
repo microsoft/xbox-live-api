@@ -171,9 +171,10 @@ R"(
             "isBroadcasting": false,
             "suggestion": null,
             "titleHistory": {
-                "TitleName": "Forza Horizon 2",
-                "TitleId": "446059611",
-                "LastTimePlayed": "2015-01-26T22:54:54.6630000Z"
+                "titleName": "Forza Horizon 2",
+                "titleId": "446059611",
+                "lastTimePlayed": "2015-01-26T22:54:54.6630000Z",
+                "lastTimePlayedText": "8 months ago"
             },
             "multiplayerSummary": {
                 "InMultiplayerSession": 0,
@@ -264,11 +265,18 @@ public:
         }
         else
         {
-            if (response.HasMember("LastTimePlayed") && response["LastTimePlayed"].IsString())
+            if (response.HasMember("lastTimePlayed") && response["lastTimePlayed"].IsString())
             {
                 time_t jsonTime;
-                JsonUtils::ExtractJsonTimeT(response, "LastTimePlayed", jsonTime);
+                JsonUtils::ExtractJsonTimeT(response, "lastTimePlayed", jsonTime);
                 VERIFY_ARE_EQUAL_UINT(titleHistory.lastTimeUserPlayed, jsonTime);
+            }
+
+            if (response.HasMember("lastTimePlayedText") && response["lastTimePlayedText"].IsString())
+            {
+                char jsonTimeStr[XBL_LAST_TIME_PLAYED_CHAR_SIZE];
+                JsonUtils::ExtractJsonStringToCharArray(response, "lastTimePlayedText", jsonTimeStr, XBL_LAST_TIME_PLAYED_CHAR_SIZE);
+                VERIFY_ARE_EQUAL_STR(titleHistory.lastTimeUserPlayedText, jsonTimeStr);
             }
         }
     }
@@ -431,7 +439,7 @@ public:
         jsonResponse.Parse(peoplehubResponse);
 
         JsonValue titleHistory{ rapidjson::kObjectType };
-        titleHistory.AddMember("LastTimePlayed", JsonValue{ rapidjson::kNullType }, jsonResponse.GetAllocator());
+        titleHistory.AddMember("lastTimePlayed", JsonValue{ rapidjson::kNullType }, jsonResponse.GetAllocator());
         jsonResponse["people"][0]["titleHistory"] = titleHistory.Move();
 
         HttpMock peopleHubMock{ "GET", "https://peoplehub.xboxlive.com/", 200, jsonResponse };

@@ -463,6 +463,9 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\misc\xbox_live_context.lua">
       <Filter>Tests\misc</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\misc\null_task_queue.lua">
+      <Filter>Tests\misc</Filter>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\social\social_manager_filter.lua">
       <Filter>Tests\social</Filter>
     </None>
@@ -603,6 +606,9 @@
       <Filter>Tests\libHttp</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\misc\global_state.lua">
+      <Filter>Tests\misc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\misc\override_locale.lua">
       <Filter>Tests\misc</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\notification\gameinvitenotifications.lua">
@@ -794,6 +800,24 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\social\social_sub_unsub.lua">
       <Filter>Tests\social</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\rta\RTAResync.lua">
+      <Filter>Tests\rta</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\rta\RTASuspendResume.lua">
+      <Filter>Tests\rta</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\gdk-gameinvite\game-mpainvite-send.lua">
+      <Filter>Tests\gdk-gameinvite</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\manualDispatchTest.lua">
+      <Filter>Tests\libHttp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\websocket_cleanup_while_connected.lua">
+      <Filter>Tests\libHttp</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\websocket_cleanup_while_connecting.lua">
+      <Filter>Tests\libHttp</Filter>
     </None>
   </ItemGroup>
 </Project>

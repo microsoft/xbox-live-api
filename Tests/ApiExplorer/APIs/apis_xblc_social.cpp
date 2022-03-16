@@ -223,6 +223,7 @@ int XblSocialRemoveSocialRelationshipChangedHandler_Lua(lua_State *L)
 {
     // CODE SNIPPET START: XblSocialRemoveSocialRelationshipChangedHandler_C
     HRESULT hr = XblSocialRemoveSocialRelationshipChangedHandler(Data()->xboxLiveContext, state.socialRelationshipChangedHandlerToken);
+
     state.socialRelationshipChangedHandlerToken = 0;
     // CODE SNIPPET END
 

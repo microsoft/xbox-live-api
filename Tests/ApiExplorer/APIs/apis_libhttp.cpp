@@ -12,6 +12,9 @@ int HCInitialize_Lua(lua_State *L)
 #endif
     // CODE SNIPPET END
 
+    HCSettingsSetTraceLevel(HCTraceLevel::Verbose);
+    HCTraceSetTraceToDebugger(true);
+
     LogToFile("HCInitialize: hr=%s", ConvertHR(hr).c_str()); 
     return LuaReturnHR(L, hr);
 }
@@ -26,6 +29,33 @@ int HCCleanup_Lua(lua_State *L)
     return LuaReturnHR(L, S_OK);
 }
 
+int HCCleanupAsync_Lua(lua_State* L)
+{
+    CreateQueueIfNeeded();
+
+    // CODE SNIPPET START: HCCleanupAsync
+    auto asyncBlock = std::make_unique<XAsyncBlock>();
+    asyncBlock->queue = Data()->queue;
+    asyncBlock->callback = [](XAsyncBlock* asyncBlock)
+    {
+        std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock }; // Take over ownership of the XAsyncBlock*
+        HRESULT hr = XAsyncGetStatus(asyncBlock, false);
+        LogToFile("HCCleanupAsync result: hr=%s", ConvertHR(hr).c_str());
+        CallLuaFunctionWithHr(hr, "OnHCCleanupAsync"); // CODE SNIP SKIP
+    };
+
+    HRESULT hr = HCCleanupAsync(asyncBlock.get());
+    if (SUCCEEDED(hr))
+    {
+        // The call succeeded, so release the std::unique_ptr ownership of XAsyncBlock* since the callback will take over ownership.
+        // If the call fails, the std::unique_ptr will keep ownership and delete the XAsyncBlock*
+        asyncBlock.release();
+    }
+    // CODE SNIPPET END
+
+    LogToFile("HCCleanupAsync: hr=%s", ConvertHR(hr).c_str());
+    return LuaReturnHR(L, hr);
+}
 
 int HCGetLibVersion_Lua(lua_State *L)
 {
@@ -368,8 +398,7 @@ int HCWebSocketSetHeader_Lua(lua_State *L)
 
 int HCWebSocketConnectAsync_Lua(lua_State *L)
 {
-    //TODO: websocket.org is no longer in service; find a new server
-    std::string uri = GetStringFromLua(L, 1, "wss://echo.websocket.org");
+    std::string uri = GetStringFromLua(L, 1, "ws://localhost:9002");
     std::string subProtocol = GetStringFromLua(L, 2, "");
 
     // CODE SNIPPET START: HCWebSocketConnectAsync
@@ -533,6 +562,31 @@ int HCMockResponseSetNetworkErrorCode_Lua(lua_State *L)
     return LuaReturnHR(L, hr);
 }
 
+#if HC_PLATFORM == HC_PLATFORM_GDK
+namespace xbox
+{
+namespace httpclient
+{
+extern void HCWinHttpSuspend();
+extern void HCWinHttpResume();
+}
+}
+
+int HCWinHttpSuspend_lua(lua_State *L)
+{
+    UNREFERENCED_PARAMETER(L);
+    xbox::httpclient::HCWinHttpSuspend();
+    return 0;
+}
+
+int HCWinHttpResume_lua(lua_State *L)
+{
+    UNREFERENCED_PARAMETER(L);
+    xbox::httpclient::HCWinHttpResume();
+    return 0;
+}
+#endif
+
 void SetupAPIs_LibHttp()
 {
     //lua_register(Data()->L, "HCMemSetFunctions", HCMemSetFunctions_Lua);
@@ -540,6 +594,7 @@ void SetupAPIs_LibHttp()
 
     lua_register(Data()->L, "HCInitialize", HCInitialize_Lua);
     lua_register(Data()->L, "HCCleanup", HCCleanup_Lua);
+    lua_register(Data()->L, "HCCleanupAsync", HCCleanupAsync_Lua);
     lua_register(Data()->L, "HCGetLibVersion", HCGetLibVersion_Lua);
     //lua_register(Data()->L, "HCAddCallRoutedHandler", HCAddCallRoutedHandler_Lua);
     //lua_register(Data()->L, "HCRemoveCallRoutedHandler", HCRemoveCallRoutedHandler_Lua);
@@ -586,5 +641,10 @@ void SetupAPIs_LibHttp()
     lua_register(Data()->L, "HCMockAddMock", HCMockAddMock_Lua);
     lua_register(Data()->L, "HCMockClearMocks", HCMockClearMocks_Lua);
     lua_register(Data()->L, "HCMockResponseSetNetworkErrorCode", HCMockResponseSetNetworkErrorCode_Lua);
+
+#if HC_PLATFORM == HC_PLATFORM_GDK
+    lua_register(Data()->L, "HCWinHttpSuspend", HCWinHttpSuspend_lua);
+    lua_register(Data()->L, "HCWinHttpResume", HCWinHttpResume_lua);
+#endif
 }
 

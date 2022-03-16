@@ -203,8 +203,4 @@ void AchievementProgressChangeSubscription::OnEvent(
     }
 }
 
-void AchievementProgressChangeSubscription::OnResync() noexcept
-{
-    LOGS_ERROR << __FUNCTION__ << ": Achievement Progress events may have been missed";
-}
 NAMESPACE_MICROSOFT_XBOX_SERVICES_ACHIEVEMENTS_CPP_END

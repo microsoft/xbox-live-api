@@ -26,7 +26,6 @@ public:
 
 protected:
     void OnEvent(const JsonValue& data) noexcept override;
-    void OnResync() noexcept override;
 
 private:
     Map<XblFunctionContext, AchievementProgressChangeHandler> m_handlers;

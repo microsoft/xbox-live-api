@@ -99,7 +99,7 @@ HRESULT PeoplehubService::MakeServiceCall(
         xbox_live_api::get_social_graph
     ));
 
-    httpCall->SetXblServiceContractVersion(3);
+    httpCall->SetXblServiceContractVersion(5);
 
     if (!bodyJson.IsNull())
     {
@@ -309,9 +309,9 @@ Result<XblTitleHistory> PeoplehubService::DeserializeTitleHistory(
         return titleHistory;
     }
 
-    // If PeopleHub service fails to query TitleHistory, the "LastTimePlayed" field may be null.
+    // If PeopleHub service fails to query TitleHistory, the "lastTimePlayed" field may be null.
     // We don't want to fail deserialization in this case, so just return that the user has not played
-    constexpr const char* lastTimePlayedKey{ "LastTimePlayed" };
+    constexpr const char* lastTimePlayedKey{ "lastTimePlayed" };
     if (json.HasMember(lastTimePlayedKey) && json[lastTimePlayedKey].IsString())
     {
         RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonTimeT(
@@ -319,6 +319,17 @@ Result<XblTitleHistory> PeoplehubService::DeserializeTitleHistory(
             lastTimePlayedKey,
             titleHistory.lastTimeUserPlayed,
             true
+        ));
+    }
+
+    constexpr const char* lastTimePlayedTextKey{ "lastTimePlayedText" };
+    if (json.HasMember(lastTimePlayedTextKey) && json[lastTimePlayedTextKey].IsString())
+    {
+        RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(
+            json,
+            lastTimePlayedTextKey,
+            titleHistory.lastTimeUserPlayedText,
+            XBL_LAST_TIME_PLAYED_CHAR_SIZE
         ));
     }
 

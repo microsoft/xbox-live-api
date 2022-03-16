@@ -61,29 +61,4 @@ void DevicePresenceChangeSubscription::OnEvent(
     }
 }
 
-void DevicePresenceChangeSubscription::OnResync() noexcept
-{
-    auto presenceService{ m_presenceService.lock() };
-    if (presenceService)
-    {
-        presenceService->GetPresence(m_xuid, {
-            [
-                sharedThis{ shared_from_this() },
-                presenceService
-            ]
-        (Result<std::shared_ptr<XblPresenceRecord>> result)
-            {
-                if (Succeeded(result))
-                {
-                    for (const auto& deviceRecord : result.Payload()->DeviceRecords())
-                    {
-                        presenceService->HandleDevicePresenceChanged(sharedThis->m_xuid, deviceRecord.deviceType, true);
-                    }
-                }
-            }
-            }
-        );
-    }
-}
-
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRESENCE_CPP_END

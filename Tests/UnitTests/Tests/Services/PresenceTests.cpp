@@ -600,7 +600,7 @@ public:
         }
     
         std::shared_ptr<XblContext> m_xblContext;
-        XblFunctionContext m_token;
+        XblFunctionContext m_token{ 0 };
     };
 
     DEFINE_TEST_CASE(TestRTATitlePresence)
@@ -666,7 +666,7 @@ public:
         }
 
         std::shared_ptr<XblContext> m_xblContext;
-        XblFunctionContext m_token;
+        XblFunctionContext m_token{ 0 };
     };
 
     DEFINE_TEST_CASE(TestRTADevicePresence)

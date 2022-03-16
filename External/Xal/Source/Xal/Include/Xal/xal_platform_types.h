@@ -42,28 +42,39 @@ typedef enum XalPlatformOperationResult
 /// </summary>
 typedef enum XalShowUrlType
 {
-    /// <summary>The client should show the URL in a shared system browser if
+    /// <summary>
+    /// The client should show the URL in a shared system browser if
     /// one is present, otherwise the client should use an embedded browser.
     /// </summary>
     XalShowUrlType_Normal = 0,
-    /// <summary>The browser is being raised for the purposes of deleting
-    /// cookies. If the client is able clear the user's cookies without showing
-    /// UI the client should. Otherwise the URL should be loaded as normal.
+    /// <summary>
+    /// This case is deprecated and no longer used. Cookie removal is now
+    /// signaled exclusively using
+    /// XalShowUrlType_CookieRemovalSkipIfSharedCredentials.
     /// </summary>
-    XalShowUrlType_CookieRemoval = 1,
-    /// <summary>The browser is being raised for the purposes of deleting
+    /// <remarks>
+    /// Formerly, this value indicated that the browser was being raised for the
+    /// purposes of deleting cookies from both shared and embedded browsers.
+    /// </remarks>
+    XalShowUrlType_CookieRemoval_DEPRECATED = 1,
+    /// <summary>
+    /// The browser is being raised for the purposes of deleting
     /// cookies. If the client is using a shared system browser, this call
     /// should be ignored and the client should immediately call
     /// XalPlatformWebShowUrlComplete passing in success, and forwarding the
     /// received final URL back into Xal. If an embedded browser is being used,
-    /// the URL should be loaded as normal.</summary>
+    /// the cookies should be cleared without showing UI if possible. If silent
+    /// cookie-clearing is impossible, the URL should be loaded as normal.
+    /// </summary>
     XalShowUrlType_CookieRemovalSkipIfSharedCredentials = 2,
-    /// <summary>This is a web flow which does not rely on cookies. The client
+    /// <summary>
+    /// This is a web flow which does not rely on cookies. The client
     /// may use a shared system browser or an embedded browser depending on
     /// whichever browser would give the best user experience. If headers are
     /// required for the web request, this will be the show type asked for. If
     /// this is the case, an embedded browser might be required so those
-    /// request headers can be set.</summary>
+    /// request headers can be set.
+    /// </summary>
     XalShowUrlType_NonAuthFlow = 3,
 } XalShowUrlType;
 

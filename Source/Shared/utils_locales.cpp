@@ -109,7 +109,6 @@ std::map<xsapi_internal_string, xsapi_internal_string> serviceLocales =
 
 #if HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM == HC_PLATFORM_XDK || HC_PLATFORM == HC_PLATFORM_GDK
 // Locale api for desktop and xbox
-
 xsapi_internal_vector<xsapi_internal_string> utils::get_locale_list()
 {
     xsapi_internal_vector<xsapi_internal_string> localeList;
@@ -196,10 +195,24 @@ xsapi_internal_vector<xsapi_internal_string> utils::get_locale_list()
 
 #endif
 
-String utils::generate_locales()
+String utils::generate_locales(_In_z_ const xsapi_internal_string& overrideLocale)
 {
-    xsapi_internal_vector<xsapi_internal_string> localeList = get_locale_list();
+    xsapi_internal_vector<xsapi_internal_string> localeList;
+    
+    // If an overrideLocale is provided, it should be added to the front of the localeList
+    auto osLocaleList = get_locale_list();
+    if (!overrideLocale.empty())
+    {
+        localeList.push_back(overrideLocale);
+        localeList.insert(localeList.end(), osLocaleList.begin(), osLocaleList.end());
+    }
+    else 
+    {
+        localeList = osLocaleList;
+    }
+
     xsapi_internal_vector<xsapi_internal_string> localeFallbackList;
+
 
     for (auto& locale : localeList)
     {

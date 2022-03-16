@@ -135,6 +135,8 @@ typedef struct XblStatisticChangeEventArgs
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
+/// If multiple statistics are required for a single user, use this batch API instead: <see cref="XblUserStatisticsGetSingleUserStatisticsAsync"/>
+/// If statistics are needed for multiple users, use this batch API: <see cref="XblUserStatisticsGetMultipleUserStatisticsAsync"/>
 /// Call <see cref="XblUserStatisticsGetSingleUserStatisticResultSize"/> and <see cref="XblUserStatisticsGetSingleUserStatisticResult"/> 
 /// upon completion to get the result.
 /// </remarks>

@@ -49,26 +49,31 @@ private:
         ResyncHandler resyncHandler
     ) noexcept;
 
+    JsonDocument AssembleSubscribeMessage(std::shared_ptr<Subscription> sub) const noexcept;
+
     // RTA protocol implementation
     HRESULT SendSubscribeMessage(
-        std::shared_ptr<Subscription> subscription
+        std::shared_ptr<Subscription> subscription,
+        std::unique_lock<std::mutex>&& lock
     ) const noexcept;
 
     HRESULT SendUnsubscribeMessage(
-        std::shared_ptr<Subscription> subscription
+        std::shared_ptr<Subscription> subscription,
+        std::unique_lock<std::mutex>&& lock
     ) const noexcept;
+
+    HRESULT SendAssembledMessage(_In_ const JsonValue& message) const noexcept;
 
     void SubscribeResponseHandler(_In_ const JsonValue& message) noexcept;
     void UnsubscribeResponseHandler(_In_ const JsonValue& message) noexcept;
     void EventHandler(_In_ const JsonValue& message) const noexcept;
-    void ResyncHandler() const noexcept;
 
     // IWebsocket handlers
     void ConnectCompleteHandler(WebsocketResult result) noexcept;
     void DisconnectHandler(WebSocketCloseStatus result) noexcept;
     void WebsocketMessageReceived(const String& message) noexcept;
     HRESULT InitializeWebsocket() noexcept;
-    void Reconnect(std::unique_lock<std::mutex>&& lock) noexcept;
+    void ScheduleConnect() noexcept;
 
     User m_user;
     TaskQueue const m_queue;
@@ -85,15 +90,6 @@ private:
     Map<uint32_t, Map<uint32_t, std::shared_ptr<Subscription>>> m_activeSubs;
 
     uint32_t m_nextSubId{ 1 };
-
-#if HC_PLATFORM == HC_PLATFORM_GDK
-    // This flag is used to indicate whether the title is in the middle of being suspended
-    // In that case, the connection won't attempt to reconnect until the title is out of the 'suspended' state
-    bool m_isSuspended = false;
-
-    // Holds the registration ID for receiving App State Notifications (aka Quick Resume)
-    XblFunctionContext m_registrationID;
-#endif
 
     mutable std::mutex m_lock;
 };

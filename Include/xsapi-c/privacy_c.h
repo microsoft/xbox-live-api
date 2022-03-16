@@ -515,6 +515,7 @@ STDAPI XblPrivacyGetAvoidListResult(
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
+/// If multiple permissions and/or target users are needed, use the batch API instead: <see cref="XblPrivacyBatchCheckPermissionAsync"/>
 /// Call <see cref="XblPrivacyCheckPermissionResultSize"/> and <see cref="XblPrivacyCheckPermissionResult"/> 
 /// upon completion to get the result.
 /// </remarks>

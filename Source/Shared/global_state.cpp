@@ -137,10 +137,7 @@ HRESULT GlobalState::Create(
     state->m_achivementsEventProviderName = achievementsProviderName.str();
 #endif
 
-#if HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM == HC_PLATFORM_XDK || HC_PLATFORM == HC_PLATFORM_GDK
-    // Generate locales
     state->m_locales = utils::generate_locales();
-#endif
 
     // GlobalState object has been created and initialized successfully at this point so store it.
     (void)AccessHelper(AccessMode::SET, state);
@@ -473,9 +470,10 @@ const String& GlobalState::Locales() const noexcept
     return m_locales;
 }
 
-void GlobalState::OverrideLocales(String&& locales) noexcept
+void GlobalState::OverrideLocale(const xsapi_internal_string& locale) noexcept
 {
-    m_locales = std::move(locales);
+    m_locales = utils::generate_locales(locale);
 }
+
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_END

@@ -11,7 +11,11 @@
 #pragma warning(disable: 4062)
 #endif
 
+#if (!defined(HC_LINK_STATIC) || HC_LINK_STATIC == 0) && HC_PLATFORM_IS_APPLE
+#include <HttpClient/XAsync.h>
+#else
 #include <XAsync.h>
+#endif
 
 extern "C"
 {
@@ -294,6 +298,15 @@ STDAPI_(void) XblDisableAssertsForXboxLiveThrottlingInDevSandboxes(
 STDAPI XblSetOverrideConfiguration(
     _In_ const char* overrideScid,
     _In_ uint32_t overrideTitleId
+) XBL_NOEXCEPT;
+
+/// <summary>
+/// To override the locale used across XSAPI. If not set, the default is to use the OS locale
+/// </summary>
+/// <param name="overrideLocale">Override locale to be used</param>
+/// <returns>HRESULT return code for this API operation.</returns>
+STDAPI XblSetOverrideLocale(
+    _In_ char const* overrideLocale
 ) XBL_NOEXCEPT;
 
 /// <summary>

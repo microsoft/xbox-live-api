@@ -10,14 +10,21 @@ void StopSocialManagerDoWorkHelperCpp();
 
 int XblInitialize_Lua(lua_State *L)
 {
-    // Ensure we properly handle a null process queue
-    XTaskQueueSetCurrentProcessTaskQueue(nullptr);
-
+    bool bSetQueue = GetBoolFromLua(L, 1, true);
     CreateQueueIfNeeded();
 
     // CODE SNIPPET START: XblInitialize
     XblInitArgs args = { };
     args.queue = Data()->queue;
+
+    // CODE SKIP START
+    if(!bSetQueue)
+    {
+        //Use a default task queue. If the global task queue has been initialized to null,
+        //trying to use a default task queue for XblInitialize will return E_NO_TASK_QUEUE.
+        args.queue = nullptr;
+    }
+    // CODE SKIP END
 #if !(HC_PLATFORM == HC_PLATFORM_XDK || HC_PLATFORM == HC_PLATFORM_UWP)
     args.scid = "00000000-0000-0000-0000-000076029b4d";
     // Alternate SCID for XboxLiveE2E Stats 2017 config
@@ -35,7 +42,11 @@ int XblInitialize_Lua(lua_State *L)
 #endif
     HRESULT hr = XblInitialize(&args);
     // CODE SNIPPET END
-    XblDisableAssertsForXboxLiveThrottlingInDevSandboxes(XblConfigSetting::ThisCodeNeedsToBeChanged);
+
+    if (SUCCEEDED(hr))
+    {
+        XblDisableAssertsForXboxLiveThrottlingInDevSandboxes(XblConfigSetting::ThisCodeNeedsToBeChanged);
+    }
 
     LogToFile("XblInitialize: %s", ConvertHR(hr).c_str());
     return LuaReturnHR(L, hr);
@@ -206,6 +217,16 @@ int XblAddServiceCallRoutedHandler_Lua(lua_State *L)
     return LuaReturnHR(L, S_OK);
 }
 
+int XblSetOverrideLocale_Lua(lua_State *L)
+{
+    // CODE SNIPPET START: XblSetOverrideLocale
+    XblSetOverrideLocale("fr-FR");
+    // CODE SNIPPET END
+
+    LogToFile("XblSetOverrideLocale_Lua");
+    return LuaReturnHR(L, S_OK);
+}
+
 int XblRemoveServiceCallRoutedHandler_Lua(lua_State *L)
 {
     // CODE SNIPPET START: XblContextSettingsRemoveServiceCallRoutedHandler
@@ -341,6 +362,7 @@ void SetupAPIs_Xbl()
     lua_register(Data()->L, "XblDisableAssertsForXboxLiveThrottlingInDevSandboxes", XblDisableAssertsForXboxLiveThrottlingInDevSandboxes_Lua);
     lua_register(Data()->L, "XblAddServiceCallRoutedHandler", XblAddServiceCallRoutedHandler_Lua);
     lua_register(Data()->L, "XblRemoveServiceCallRoutedHandler", XblRemoveServiceCallRoutedHandler_Lua);
+    lua_register(Data()->L, "XblSetOverrideLocale", XblSetOverrideLocale_Lua);
 
     // errors_c.h
     lua_register(Data()->L, "XblGetErrorCondition", XblGetErrorCondition_Lua);
