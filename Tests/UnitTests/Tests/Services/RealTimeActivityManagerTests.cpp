@@ -190,6 +190,7 @@ public:
         for (auto& subscription : subscriptions)
         {
             VERIFY_SUCCEEDED(rtaManager->RemoveSubscription(xboxLiveContext->User(), subscription));
+			subscription = std::make_shared<TestSubscription>(subscription->Uri);
             VERIFY_SUCCEEDED(rtaManager->AddSubscription(xboxLiveContext->User(), subscription));
             VERIFY_SUCCEEDED(rtaManager->RemoveSubscription(xboxLiveContext->User(), subscription));
         }
@@ -221,6 +222,7 @@ public:
         monitor.Connecting.Wait();
 
         VERIFY_SUCCEEDED(rtaManager->RemoveSubscription(xboxLiveContext->User(), subscription));
+		subscription = std::make_shared<TestSubscription>();
 
         websocketConnectCompletion.Set();
 

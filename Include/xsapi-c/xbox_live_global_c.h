@@ -11,7 +11,11 @@
 #pragma warning(disable: 4062)
 #endif
 
+#if (!defined(HC_LINK_STATIC) || HC_LINK_STATIC == 0) && HC_PLATFORM_IS_APPLE
+#include <HttpClient/XAsync.h>
+#else
 #include <XAsync.h>
+#endif
 
 extern "C"
 {
