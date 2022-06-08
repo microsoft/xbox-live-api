@@ -1372,6 +1372,7 @@ STDAPI MultiplayerWriteSessionHelper(
     _In_opt_ const char* handleIdArg,
     _Inout_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || multiplayerSession == nullptr || async == nullptr);
 
@@ -1450,6 +1451,7 @@ STDAPI MultiplayerWriteSessionHelper(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerWriteSessionAsync(
     _In_ XblContextHandle xblContext,
@@ -1457,6 +1459,7 @@ STDAPI XblMultiplayerWriteSessionAsync(
     _In_ XblMultiplayerSessionWriteMode writeMode,
     _Inout_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(multiplayerSession);
 
@@ -1468,11 +1471,13 @@ STDAPI XblMultiplayerWriteSessionAsync(
 
     return MultiplayerWriteSessionHelper(xblContext, multiplayerSession, writeMode, nullptr, async);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerWriteSessionResult(
     _Inout_ XAsyncBlock* async,
     _Out_ XblMultiplayerSessionHandle* handle
 ) XBL_NOEXCEPT
+try
 {
     XblMultiplayerSessionHandle handleCopy = nullptr;
     auto hr = XAsyncGetResult(async, nullptr, sizeof(XblMultiplayerSessionHandle), &handleCopy, nullptr);
@@ -1486,6 +1491,7 @@ STDAPI XblMultiplayerWriteSessionResult(
     }
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerWriteSessionByHandleAsync(
     _In_ XblContextHandle xblContext,
@@ -1494,19 +1500,23 @@ STDAPI XblMultiplayerWriteSessionByHandleAsync(
     _In_ const char* handleId,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(handleId);
 
     return MultiplayerWriteSessionHelper(xblContext, multiplayerSession, writeMode, handleId, async);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerWriteSessionByHandleResult(
     _Inout_ XAsyncBlock* async,
     _Out_ XblMultiplayerSessionHandle* handle
 ) XBL_NOEXCEPT
+try
 {
     return XblMultiplayerWriteSessionResult(async, handle);
 }
+CATCH_RETURN()
 
 STDAPI MultiplayerGetSessionHelper(
     _In_ XblContextHandle xblContextHandle,
@@ -1514,6 +1524,7 @@ STDAPI MultiplayerGetSessionHelper(
     _In_opt_ const char* handleIdArg,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || async == nullptr);
 
@@ -1574,48 +1585,58 @@ STDAPI MultiplayerGetSessionHelper(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetSessionAsync(
     _In_ XblContextHandle xblContext,
     _In_ const XblMultiplayerSessionReference* sessionReference,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(sessionReference);
     return MultiplayerGetSessionHelper(xblContext, sessionReference, nullptr, async);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetSessionResult(
     _In_ XAsyncBlock* async,
     _Out_ XblMultiplayerSessionHandle* handle
 ) XBL_NOEXCEPT
+try
 {
     return XAsyncGetResult(async, nullptr, sizeof(XblMultiplayerSessionHandle), handle, nullptr);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetSessionByHandleAsync(
     _In_ XblContextHandle xblContext,
     _In_ const char* handleId,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(handleId);
     return MultiplayerGetSessionHelper(xblContext, nullptr, handleId, async);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetSessionByHandleResult(
     _In_ XAsyncBlock* async,
     _Out_ XblMultiplayerSessionHandle* handle
 ) XBL_NOEXCEPT
+try
 {
     return XAsyncGetResult(async, nullptr, sizeof(XblMultiplayerSessionHandle), handle, nullptr);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerQuerySessionsAsync(
     _In_ XblContextHandle xblContextHandle,
     _In_ const XblMultiplayerSessionQuery* sessionQuery,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || sessionQuery == nullptr || async == nullptr);
     RETURN_HR_INVALIDARGUMENT_IF_EMPTY_STRING(sessionQuery->Scid);
@@ -1665,11 +1686,13 @@ STDAPI XblMultiplayerQuerySessionsAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerQuerySessionsResultCount(
     _In_ XAsyncBlock* async,
     _Out_ size_t* sessionCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(async == nullptr || sessionCount == nullptr);
 
@@ -1678,22 +1701,26 @@ STDAPI XblMultiplayerQuerySessionsResultCount(
     *sessionCount = sizeInBytes / sizeof(XblMultiplayerSessionQueryResult);
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerQuerySessionsResult(
     _In_ XAsyncBlock* async,
     _In_ size_t sessionCount,
     _Out_writes_(sessionCount) XblMultiplayerSessionQueryResult* sessions
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_IF(sessionCount == 0, S_OK);
     return XAsyncGetResult(async, nullptr, sessionCount * sizeof(XblMultiplayerSessionQueryResult), sessions, nullptr);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSetActivityAsync(
     _In_ XblContextHandle xblContextHandle,
     _In_ const XblMultiplayerSessionReference* sessionReferenceArg,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || sessionReferenceArg == nullptr || async == nullptr);
 
@@ -1718,12 +1745,14 @@ STDAPI XblMultiplayerSetActivityAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerClearActivityAsync(
     _In_ XblContextHandle xblContextHandle,
     _In_z_ const char* scidArg,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || scidArg == nullptr || async == nullptr);
 
@@ -1748,6 +1777,7 @@ STDAPI XblMultiplayerClearActivityAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSendInvitesAsync(
     _In_ XblContextHandle xblContextHandle,
@@ -1759,6 +1789,7 @@ STDAPI XblMultiplayerSendInvitesAsync(
     _In_opt_z_ const char* customActivationContext,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || sessionReference == nullptr || xuids == nullptr || xuidsCount == 0 || async == nullptr);
 
@@ -1817,16 +1848,19 @@ STDAPI XblMultiplayerSendInvitesAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSendInvitesResult(
     _In_ XAsyncBlock* async,
     _In_ size_t handlesCount,
     _Out_writes_(handlesCount) XblMultiplayerInviteHandle* handles
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_IF(handlesCount == 0, S_OK);
     return XAsyncGetResult(async, nullptr, sizeof(XblMultiplayerInviteHandle) * handlesCount, handles, nullptr);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetActivitiesForSocialGroupAsync(
     _In_ XblContextHandle xblContextHandle,
@@ -1835,6 +1869,7 @@ STDAPI XblMultiplayerGetActivitiesForSocialGroupAsync(
     _In_ const char* socialGroupArg,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || scidArg == nullptr || socialGroupOwnerXuid == 0 || socialGroupArg == nullptr || async == nullptr);
 
@@ -1887,6 +1922,7 @@ STDAPI XblMultiplayerGetActivitiesForSocialGroupAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupAsync(
     _In_ XblContextHandle xblContextHandle,
@@ -1895,6 +1931,7 @@ STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupAsync(
     _In_ const char* socialGroupArg,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || scidArg == nullptr || socialGroupOwnerXuid == 0 || socialGroupArg == nullptr || async == nullptr);
 
@@ -1966,11 +2003,13 @@ STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetActivitiesForSocialGroupResultCount(
     _In_ XAsyncBlock* async,
     _Out_ size_t* activityCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(activityCount);
 
@@ -1979,26 +2018,31 @@ STDAPI XblMultiplayerGetActivitiesForSocialGroupResultCount(
     *activityCount = sizeInBytes / sizeof(XblMultiplayerActivityDetails);
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetActivitiesForSocialGroupResult(
     _In_ XAsyncBlock* async,
     _In_ size_t activityCount,
     _Out_writes_(activityCount) XblMultiplayerActivityDetails* activities
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_IF(activityCount == 0, S_OK);
     return XAsyncGetResult(async, nullptr, activityCount * sizeof(XblMultiplayerActivityDetails), activities, nullptr);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResultSize(
     _In_ XAsyncBlock* async,
     _Out_ size_t* resultSizeInBytes
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(resultSizeInBytes);
 
     return XAsyncGetResultSize(async, resultSizeInBytes);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResult(
     _In_ XAsyncBlock* async,
@@ -2008,6 +2052,7 @@ STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResult(
     _Out_ size_t* ptrToBufferCount,
     _Out_opt_ size_t* bufferUsed
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(buffer == nullptr || ptrToBuffer == nullptr || ptrToBufferCount == nullptr);
 
@@ -2037,6 +2082,7 @@ STDAPI XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResult(
 
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetActivitiesForUsersAsync(
     _In_ XblContextHandle xblContextHandle,
@@ -2045,6 +2091,7 @@ STDAPI XblMultiplayerGetActivitiesForUsersAsync(
     _In_ size_t xuidsCount,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || scidArg == nullptr || xuidsArg == nullptr || xuidsCount == 0 || async == nullptr);
 
@@ -2095,6 +2142,7 @@ STDAPI XblMultiplayerGetActivitiesForUsersAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetActivitiesWithPropertiesForUsersAsync(
     _In_ XblContextHandle xblContextHandle,
@@ -2103,6 +2151,7 @@ STDAPI XblMultiplayerGetActivitiesWithPropertiesForUsersAsync(
     _In_ size_t xuidsCount,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || scidArg == nullptr || xuidsArg == nullptr || xuidsCount == 0 || async == nullptr);
 
@@ -2172,31 +2221,38 @@ STDAPI XblMultiplayerGetActivitiesWithPropertiesForUsersAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetActivitiesForUsersResultCount(
     _In_ XAsyncBlock* async,
     _Out_ size_t* activityCount
 ) XBL_NOEXCEPT
+try
 {
     return XblMultiplayerGetActivitiesForSocialGroupResultCount(async, activityCount);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetActivitiesForUsersResult(
     _In_ XAsyncBlock* async,
     _In_ size_t activityCount,
     _Out_writes_(activityCount) XblMultiplayerActivityDetails* activities
 ) XBL_NOEXCEPT
+try
 {
     return XAsyncGetResult(async, nullptr, activityCount * sizeof(XblMultiplayerActivityDetails), activities, nullptr);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetActivitiesWithPropertiesForUsersResultSize(
     _In_ XAsyncBlock* async,
     _Out_ size_t* resultSizeInBytes
 ) XBL_NOEXCEPT
+try
 {
     return XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResultSize(async, resultSizeInBytes);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetActivitiesWithPropertiesForUsersResult(
     _In_ XAsyncBlock* async,
@@ -2206,14 +2262,17 @@ STDAPI XblMultiplayerGetActivitiesWithPropertiesForUsersResult(
     _Out_ size_t* ptrToBufferCount,
     _Out_opt_ size_t* bufferUsed
 ) XBL_NOEXCEPT
+try
 {
     return XblMultiplayerGetActivitiesWithPropertiesForSocialGroupResult(async, bufferSize, buffer, ptrToBuffer, ptrToBufferCount, bufferUsed);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSetSubscriptionsEnabled(
     _In_ XblContextHandle xblContext,
     _In_ bool subscriptionsEnabled
 ) XBL_NOEXCEPT
+try
 {
     if (subscriptionsEnabled)
     {
@@ -2224,19 +2283,23 @@ STDAPI XblMultiplayerSetSubscriptionsEnabled(
         return xblContext->MultiplayerService()->DisableMultiplayerSubscriptions();
     }
 }
+CATCH_RETURN()
 
 STDAPI_(bool) XblMultiplayerSubscriptionsEnabled(
     _In_ XblContextHandle xblContext
 ) XBL_NOEXCEPT
+try
 {
     return xblContext->MultiplayerService()->SubscriptionsEnabled();
 }
+CATCH_RETURN()
 
 STDAPI_(XblFunctionContext) XblMultiplayerAddSessionChangedHandler(
     _In_ XblContextHandle xblContext,
     _In_ XblMultiplayerSessionChangedHandler* handler,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     return xblContext->MultiplayerService()->AddMultiplayerSessionChangedHandler(
         [
@@ -2255,20 +2318,25 @@ STDAPI_(XblFunctionContext) XblMultiplayerAddSessionChangedHandler(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI_(void) XblMultiplayerRemoveSessionChangedHandler(
     _In_ XblContextHandle xblContext,
     _In_ XblFunctionContext token
 ) XBL_NOEXCEPT
+try
 {
     xblContext->MultiplayerService()->RemoveMultiplayerSessionChangedHandler(token);
 }
+CATCH_RETURN_WITH(;)
+
 
 STDAPI_(XblFunctionContext) XblMultiplayerAddSubscriptionLostHandler(
     _In_ XblContextHandle xblContext,
     _In_ XblMultiplayerSessionSubscriptionLostHandler* handler,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     return xblContext->MultiplayerService()->AddMultiplayerSubscriptionLostHandler(
         [
@@ -2286,20 +2354,24 @@ STDAPI_(XblFunctionContext) XblMultiplayerAddSubscriptionLostHandler(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI_(void) XblMultiplayerRemoveSubscriptionLostHandler(
     _In_ XblContextHandle xblContext,
     _In_ XblFunctionContext token
 ) XBL_NOEXCEPT
+try
 {
     xblContext->MultiplayerService()->RemoveMultiplayerSubscriptionLostHandler(token);
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI_(XblFunctionContext) XblMultiplayerAddConnectionIdChangedHandler(
     _In_ XblContextHandle xblContext,
     _In_ XblMultiplayerConnectionIdChangedHandler* handler,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     return xblContext->MultiplayerService()->AddMultiplayerConnectionIdChangedHandler(
         [
@@ -2318,11 +2390,14 @@ STDAPI_(XblFunctionContext) XblMultiplayerAddConnectionIdChangedHandler(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI_(void) XblMultiplayerRemoveConnectionIdChangedHandler(
     _In_ XblContextHandle xblContext,
     _In_ XblFunctionContext token
 ) XBL_NOEXCEPT
+try
 {
     xblContext->MultiplayerService()->RemoveMultiplayerConnectionIdChangedHandler(token);
 }
+CATCH_RETURN_WITH(;)

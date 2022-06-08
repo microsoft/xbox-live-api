@@ -430,6 +430,7 @@ STDAPI XblLeaderboardGetLeaderboardAsync(
     _In_ XblLeaderboardQuery leaderboardQuery,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     VERIFY_XBL_INITIALIZED();
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
@@ -533,14 +534,17 @@ STDAPI XblLeaderboardGetLeaderboardAsync(
         );
     }
 }
+CATCH_RETURN()
 
 STDAPI XblLeaderboardGetLeaderboardResultSize(
     _In_ XAsyncBlock* async,
     _Out_ size_t* resultSizeInBytes
 ) XBL_NOEXCEPT
+try
 {
     return XAsyncGetResultSize(async, resultSizeInBytes);
 }
+CATCH_RETURN()
 
 STDAPI XblLeaderboardGetLeaderboardResult(
     _In_ XAsyncBlock* async,
@@ -549,6 +553,7 @@ STDAPI XblLeaderboardGetLeaderboardResult(
     _Outptr_ XblLeaderboardResult** ptrToBuffer,
     _Out_opt_ size_t* bufferUsed
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(ptrToBuffer);
     auto hr = XAsyncGetResult(async, nullptr, bufferSize, buffer, bufferUsed);
@@ -558,6 +563,7 @@ STDAPI XblLeaderboardGetLeaderboardResult(
     }
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblLeaderboardResultGetNextAsync(
     _In_ XblContextHandle xboxLiveContext,
@@ -565,6 +571,7 @@ STDAPI XblLeaderboardResultGetNextAsync(
     _In_ uint32_t maxItems,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
     RETURN_HR_IF(leaderboardResult->nextQuery.continuationToken == nullptr, E_BOUNDS);
@@ -576,14 +583,17 @@ STDAPI XblLeaderboardResultGetNextAsync(
         async
     );
 }
+CATCH_RETURN()
 
 STDAPI XblLeaderboardResultGetNextResultSize(
     _In_ XAsyncBlock* async,
     _Out_ size_t* resultSizeInBytes
 ) XBL_NOEXCEPT
+try
 {
     return XAsyncGetResultSize(async, resultSizeInBytes);
 }
+CATCH_RETURN()
 
 STDAPI XblLeaderboardResultGetNextResult(
     _In_ XAsyncBlock* async,
@@ -592,6 +602,7 @@ STDAPI XblLeaderboardResultGetNextResult(
     _Outptr_ XblLeaderboardResult** ptrToBuffer,
     _Out_opt_ size_t* bufferUsed
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(ptrToBuffer);
     VERIFY_XBL_INITIALIZED();
@@ -603,3 +614,4 @@ STDAPI XblLeaderboardResultGetNextResult(
     }
     return hr;
 }
+CATCH_RETURN()

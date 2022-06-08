@@ -131,6 +131,7 @@ STDAPI XblAchievementsManagerDoWork(
     _Outptr_result_maybenull_ const XblAchievementsManagerEvent** achievementsEvents,
     _Out_ size_t* achievementsEventsCount
 ) XBL_NOEXCEPT
+try
 {
     INIT_OUT_PTR_PARAM(achievementsEvents);
 
@@ -149,12 +150,14 @@ STDAPI XblAchievementsManagerDoWork(
         }
     );
 }
+CATCH_RETURN()
 
 STDAPI XblAchievementsManagerGetAchievement(
     _In_ uint64_t xboxUserId,
     _In_ const char* achievementId,
     _Outptr_result_maybenull_ XblAchievementsManagerResultHandle* achievementResult
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(achievementId == nullptr || achievementResult == nullptr);
     RETURN_HR_INVALIDARGUMENT_IF_EMPTY_STRING(achievementId);
@@ -176,6 +179,7 @@ STDAPI XblAchievementsManagerGetAchievement(
         }
     );
 }
+CATCH_RETURN()
 
 STDAPI XblAchievementsManagerGetAchievements(
     _In_ uint64_t xboxUserId,
@@ -183,6 +187,7 @@ STDAPI XblAchievementsManagerGetAchievements(
     _In_ XblAchievementsManagerSortOrder sortOrder,
     _Outptr_result_maybenull_ XblAchievementsManagerResultHandle* achievementsResult
 ) XBL_NOEXCEPT
+try
 {
     INIT_OUT_PTR_PARAM(achievementsResult);
     
@@ -229,6 +234,7 @@ STDAPI XblAchievementsManagerGetAchievements(
         }
     );
 }
+CATCH_RETURN()
 
 STDAPI XblAchievementsManagerGetAchievementsByState(
     _In_ uint64_t xboxUserId,
@@ -237,6 +243,7 @@ STDAPI XblAchievementsManagerGetAchievementsByState(
     _In_ XblAchievementProgressState achievementState,
     _Outptr_result_maybenull_ XblAchievementsManagerResultHandle* achievementsResult
 ) XBL_NOEXCEPT
+try
 {
     INIT_OUT_PTR_PARAM(achievementsResult);
 
@@ -291,12 +298,14 @@ STDAPI XblAchievementsManagerGetAchievementsByState(
         }
     );
 }
+CATCH_RETURN()
 
 STDAPI XblAchievementsManagerUpdateAchievement(
     _In_ uint64_t xboxUserId,
     _In_ const char* achievementId,
     _In_ uint8_t currentProgress
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](AchievementsManager& achievementsManager)
         {
@@ -315,3 +324,4 @@ STDAPI XblAchievementsManagerUpdateAchievement(
         }
     );
 }
+CATCH_RETURN()

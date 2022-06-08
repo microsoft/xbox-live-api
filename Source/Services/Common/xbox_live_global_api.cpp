@@ -15,6 +15,7 @@ STDAPI XblMemSetFunctions(
     _In_opt_ XblMemAllocFunction memAllocFunc,
     _In_opt_ XblMemFreeFunction memFreeFunc
 ) XBL_NOEXCEPT
+try
 {
     if (GlobalState::Get())
     {
@@ -47,11 +48,13 @@ STDAPI XblMemSetFunctions(
 
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMemGetFunctions(
     _Out_ XblMemAllocFunction* memAllocFunc,
     _Out_ XblMemFreeFunction* memFreeFunc
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(memAllocFunc == nullptr || memFreeFunc == nullptr);
 
@@ -59,6 +62,7 @@ STDAPI XblMemGetFunctions(
     *memFreeFunc = g_pMemFreeHook;
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblInitialize(
     _In_ const XblInitArgs* args
@@ -112,16 +116,17 @@ CATCH_RETURN();
 
 STDAPI_(XblErrorCondition)
 XblGetErrorCondition(
-    _In_ HRESULT hr
+    _In_ HRESULT inHr
     ) XBL_NOEXCEPT
+try
 {
-    if (SUCCEEDED(hr))
+    if (SUCCEEDED(inHr))
     {
         return XblErrorCondition::NoError;
     }
-    else if (HRESULT_FACILITY(hr) == FACILITY_HTTP)
+    else if (HRESULT_FACILITY(inHr) == FACILITY_HTTP)
     {
-        switch (hr)
+        switch (inHr)
         {
         case HTTP_E_STATUS_NOT_MODIFIED:
             return XblErrorCondition::Http304NotModified;
@@ -139,18 +144,18 @@ XblGetErrorCondition(
             return XblErrorCondition::HttpGeneric;
         }
     }
-    else if (HRESULT_FACILITY(hr) == FACILITY_INTERNET)
+    else if (HRESULT_FACILITY(inHr) == FACILITY_INTERNET)
     {
         return XblErrorCondition::Network;
     }
-    else if ((hr >= (unsigned)xbl_error_code::AM_E_XASD_UNEXPECTED && hr <= (unsigned)xbl_error_code::AM_E_XTITLE_TIMEOUT) ||
-             (hr >= (unsigned)xbl_error_code::XO_E_DEVMODE_NOT_AUTHORIZED && hr <= (unsigned)xbl_error_code::XO_E_CONTENT_NOT_AUTHORIZED))
+    else if ((inHr >= (unsigned)xbl_error_code::AM_E_XASD_UNEXPECTED && inHr <= (unsigned)xbl_error_code::AM_E_XTITLE_TIMEOUT) ||
+             (inHr >= (unsigned)xbl_error_code::XO_E_DEVMODE_NOT_AUTHORIZED && inHr <= (unsigned)xbl_error_code::XO_E_CONTENT_NOT_AUTHORIZED))
     {
         return XblErrorCondition::Auth;
     }
     else
     {
-        switch (hr)
+        switch (inHr)
         {
         case ONL_E_ACTION_REQUIRED:
         case E_XBL_AUTH_UNKNOWN_ERROR:
@@ -166,6 +171,7 @@ XblGetErrorCondition(
         }
     }
 }
+CATCH_RETURN_WITH(XblErrorCondition::GenericError)
 
 STDAPI_(void) XblDisableAssertsForXboxLiveThrottlingInDevSandboxes(
     _In_ XblConfigSetting setting
@@ -195,6 +201,7 @@ STDAPI_(XblFunctionContext) XblAddServiceCallRoutedHandler(
     _In_ XblCallRoutedHandler handler,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     auto state{ GlobalState::Get() };
     if (state && handler)
@@ -206,10 +213,12 @@ STDAPI_(XblFunctionContext) XblAddServiceCallRoutedHandler(
         return XblFunctionContext{ 0 };
     }
 }
+CATCH_RETURN()
 
 STDAPI_(void) XblRemoveServiceCallRoutedHandler(
     _In_ XblFunctionContext token
 ) XBL_NOEXCEPT
+try
 {
     auto state{ GlobalState::Get() };
     if (state)
@@ -217,4 +226,5 @@ STDAPI_(void) XblRemoveServiceCallRoutedHandler(
         state->RemoveServiceCallRoutedHandler(token);
     }
 }
+CATCH_RETURN_WITH(;)
 
