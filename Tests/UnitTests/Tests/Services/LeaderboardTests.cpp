@@ -260,6 +260,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetLeaderboardAsync)
     {
+        TEST_LOG(L"Test starting: TestGetLeaderboardAsync");
+
         TestEnvironment env{};
 
         const char* token = "6";
@@ -337,6 +339,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetLeaderboardWithLargeBufferAsync)
     {
+        TEST_LOG(L"Test starting: TestGetLeaderboardWithLargeBufferAsync");
+
         TestEnvironment env{};
 
         const char* token = "6";
@@ -417,6 +421,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetLeaderboardWitSkipToRankAsync)
     {
+        TEST_LOG(L"Test starting: TestGetLeaderboardWitSkipToRankAsync");
+
         TestEnvironment env{};
 
         const int rank{ 100 };
@@ -448,6 +454,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetLearderboardSkipToUserAsync)
     {
+        TEST_LOG(L"Test starting: TestGetLearderboardSkipToUserAsync");
+
         TestEnvironment env{};
 
         const uint64_t user{ 2533274896500838 };
@@ -479,6 +487,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetLeaderboardForSocialGroupAsync)
     {
+        TEST_LOG(L"Test starting: TestGetLeaderboardForSocialGroupAsync");
+
         TestEnvironment env{};
 
         const uint32_t maxItems{ 20 };
@@ -526,6 +536,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetLeaderboardForSocialGroupWithSortAsync)
     {
+        TEST_LOG(L"Test starting: TestGetLeaderboardForSocialGroupWithSortAsync");
+
         TestEnvironment env{};
 
         const uint32_t maxItems{ 20 };
@@ -547,6 +559,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetLeaderboardForSocialGroupWithSkipToRankAsync)
     {
+        TEST_LOG(L"Test starting: TestGetLeaderboardForSocialGroupWithSkipToRankAsync");
+
         TestEnvironment env{};
 
         const uint32_t rank{ 2 };
@@ -592,6 +606,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetLeaderboardForSocialGroupWithSkipToUserAsync)
     {
+        TEST_LOG(L"Test starting: TestGetLeaderboardForSocialGroupWithSkipToUserAsync");
+
         TestEnvironment env{};
 
         const uint64_t user{ 2533274896500838 };
@@ -642,6 +658,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetLeaderboardAsyncInvalidArgs)
     {
+        TEST_LOG(L"Test starting: TestGetLeaderboardAsyncInvalidArgs");
+
         TestEnvironment env{};
         
         auto xboxLiveContext = env.CreateMockXboxLiveContext();

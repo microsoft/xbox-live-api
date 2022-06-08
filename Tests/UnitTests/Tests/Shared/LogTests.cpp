@@ -31,6 +31,8 @@ public:
 
     DEFINE_TEST_CASE(WriteLog)
     {
+        TEST_LOG(L"Test starting: WriteLog");
+
         VERIFY_SUCCEEDED(HCSettingsSetTraceLevel(HCTraceLevel::Error));
 
         auto testLogger = std::make_shared<logger>();
@@ -65,6 +67,8 @@ public:
 
     DEFINE_TEST_CASE(WriteLogStream)
     {
+        TEST_LOG(L"Test starting: WriteLogStream");
+
         //TestEnvironment env{};
         
         auto testLogger = std::make_shared<logger>();
@@ -83,6 +87,8 @@ public:
 
     DEFINE_TEST_CASE(WriteLogConcurrent)
     {
+        TEST_LOG(L"Test starting: WriteLogConcurrent");
+
         auto testLogger = std::make_shared<logger>();
 
         // Start 20 threads writing 100 logs
@@ -137,6 +143,8 @@ public:
 
     DEFINE_TEST_CASE(HCLogging)
     {
+        TEST_LOG(L"Test starting: HCLogging");
+
         VERIFY_SUCCEEDED(HCInitialize(nullptr));
         HCTraceSetTraceToDebugger(true);
 

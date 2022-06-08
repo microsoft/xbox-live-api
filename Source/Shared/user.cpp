@@ -323,15 +323,21 @@ HRESULT User::GetTokenAndSignature(
 
         async->Complete(Result<TokenAndSignature>{ payload, hr });
 
-        Delete(asyncBlock);
         Delete(async);
+        Delete(asyncBlock);
     };
 
-    return XalUserGetTokenAndSignatureSilentlyAsync(
+    HRESULT hr = XalUserGetTokenAndSignatureSilentlyAsync(
         m_handle,
         &tokenAndSigArgs,
-        asyncBlock
-    );
+        asyncBlock);
+    if (FAILED(hr))
+    {
+        auto asyncPtr{ static_cast<AsyncContext<Result<TokenAndSignature>>*>(asyncBlock->context) };
+        Delete(asyncPtr);
+        Delete(asyncBlock);
+    }
+    return hr;
 }
 
 XalUserHandle User::Handle() const noexcept

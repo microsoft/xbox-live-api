@@ -13,6 +13,8 @@ public:
 
     DEFINE_TEST_CASE(TestHttpCall)
     {
+        TEST_LOG(L"Test starting: TestHttpCall");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -86,6 +88,8 @@ public:
 
     DEFINE_TEST_CASE(CppTestHttpCall)
     {
+        TEST_LOG(L"Test starting: CppTestHttpCall");
+
         TestEnvironment env{};
 
         uint32_t httpStatus{ 200 };

@@ -1754,22 +1754,22 @@ private:
         }       
     }
 
-    void SetupRtaResponseForUser(uint64_t xuid, String method, String progressPayload, Vector<HttpMock>& mocks)
+    void SetupRtaResponseForUser(uint64_t xuid, String method, String progressPayload, Vector<std::shared_ptr<HttpMock>>& mocks)
     {
         Stringstream uri;
         uri << "https://achievements.xboxlive.com/users/xuid(";
         uri << xuid;
         uri << ")/achievements";
 
-        HttpMock mock(method.c_str(), uri.str());
+        std::shared_ptr<HttpMock> mock = std::make_shared<HttpMock>(method.c_str(), uri.str());
         mocks.emplace_back(std::move(mock));
-        mocks.back().SetResponseBody(progressPayload.c_str());
+        mocks.back()->SetResponseBody(progressPayload.c_str());
     }
 
-    void SetUpUpdateAchievementRtaResponse(uint64_t xuid, String progressPayload, bool willUnlock, Vector<HttpMock>& mocks)
+    void SetUpUpdateAchievementRtaResponse(uint64_t xuid, String progressPayload, bool willUnlock, Vector<std::shared_ptr<HttpMock>>& mocks)
     {
         SetupRtaResponseForUser(xuid, "POST", progressPayload, mocks);
-        mocks.back().SetMockMatchedCallback(
+        mocks.back()->SetMockMatchedCallback(
             [
                 progressPayload, 
                 xuid,
@@ -1791,7 +1791,7 @@ private:
 
     bool UpdateAchievementHelper(uint64_t xuid, String achievementId, uint8_t progress, bool setUpMocks = true, bool willUnlock = false, String progressPayload = rtaAchievementProgressChangedPayload)
     {
-        Vector<HttpMock> mocks;
+        Vector<std::shared_ptr<HttpMock>> mocks;
         if (setUpMocks)
         {
             SetUpUpdateAchievementRtaResponse(xuid, progressPayload, willUnlock, mocks);
@@ -1883,6 +1883,7 @@ public:
 
     DEFINE_TEST_CASE(AddLocalUser_InitializesWithLocalAchievementsCached_Success)
     {
+        TEST_LOG(L"Test starting: AddLocalUser_InitializesWithLocalAchievementsCached_Success");
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -1895,6 +1896,8 @@ public:
 
     DEFINE_TEST_CASE(AddLocalUser_SingleUserMultiplePages_InitializesAfterAllPagesCached)
     {
+        TEST_LOG(L"Test starting: AddLocalUser_SingleUserMultiplePages_InitializesAfterAllPagesCached");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
         
@@ -1906,6 +1909,8 @@ public:
 
     DEFINE_TEST_CASE(AddLocalUser_MultipleUser_InitializesWithLocalAchievementsCached_Success)
     {
+        TEST_LOG(L"Test starting: AddLocalUser_MultipleUser_InitializesWithLocalAchievementsCached_Success");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
         
@@ -1923,6 +1928,8 @@ public:
 
     DEFINE_TEST_CASE(RemoveLocalUser_SingleUser_ExpectUserRemoved)
     {
+        TEST_LOG(L"Test starting: RemoveLocalUser_SingleUser_ExpectUserRemoved");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -1945,6 +1952,8 @@ public:
 
     DEFINE_TEST_CASE(RemoveLocalUser_MultipleUsers_ExpectCorrectUserRemoved)
     {
+        TEST_LOG(L"Test starting: RemoveLocalUser_MultipleUsers_ExpectCorrectUserRemoved");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -1975,6 +1984,8 @@ public:
 
     DEFINE_TEST_CASE(RemoveLocalUser_UserNotInList_ExpectError)
     {
+        TEST_LOG(L"Test starting: RemoveLocalUser_UserNotInList_ExpectError");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -1992,6 +2003,8 @@ public:
 
     DEFINE_TEST_CASE(IsLocalUserInitialized_UserNotInList_ExpectInvalidArg)
     {
+        TEST_LOG(L"Test starting: IsLocalUserInitialized_UserNotInList_ExpectInvalidArg");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2005,6 +2018,8 @@ public:
     
     DEFINE_TEST_CASE(IsLocalUserInitialized_UserNotInitialized_ExpectEFail)
     {
+        TEST_LOG(L"Test starting: IsLocalUserInitialized_UserNotInitialized_ExpectEFail");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2019,6 +2034,8 @@ public:
 
     DEFINE_TEST_CASE(IsLocalUserInitialized_UserInitialized_ExpectSuccess)
     {
+        TEST_LOG(L"Test starting: IsLocalUserInitialized_UserInitialized_ExpectSuccess");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2032,6 +2049,8 @@ public:
 
     DEFINE_TEST_CASE(GetAchievementForUser_SingleUser_Success)
     {
+        TEST_LOG(L"Test starting: GetAchievementForUser_SingleUser_Success");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2063,6 +2082,8 @@ public:
 
     DEFINE_TEST_CASE(GetAchievementForUser_DuplicateHandleOneDuplicate_SuccessfulDataDeletedAfterBothClosed)
     {
+        TEST_LOG(L"Test starting: GetAchievementForUser_DuplicateHandleOneDuplicate_SuccessfulDataDeletedAfterBothClosed");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2120,6 +2141,8 @@ public:
 
     DEFINE_TEST_CASE(GetAchievementForUser_SingleUser_ExpectAchievementNonExistent)
     {
+        TEST_LOG(L"Test starting: GetAchievementForUser_SingleUser_ExpectAchievementNonExistent");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2142,6 +2165,8 @@ public:
 
     DEFINE_TEST_CASE(GetAchievementForUser_SingleUser_ExpectFailureInvalidArgs)
     {
+        TEST_LOG(L"Test starting: GetAchievementForUser_SingleUser_ExpectFailureInvalidArgs");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2203,6 +2228,8 @@ public:
     
     DEFINE_TEST_CASE(GetAchievementForUser_UserDoesNotExist_ExpectFailure)
     {
+        TEST_LOG(L"Test starting: GetAchievementForUser_UserDoesNotExist_ExpectFailure");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2223,6 +2250,8 @@ public:
     
     DEFINE_TEST_CASE(GetAchievementForUser_UserNotInitialized_ExpectFailure)
     {
+        TEST_LOG(L"Test starting: GetAchievementForUser_UserNotInitialized_ExpectFailure");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2250,6 +2279,8 @@ public:
 
     DEFINE_TEST_CASE(GetAchievementForUser_MultipleUsers_Success)
     {
+        TEST_LOG(L"Test starting: GetAchievementForUser_MultipleUsers_Success");
+
         AMTestEnvironment env{};
 
         Map<std::shared_ptr<XblContext>, const char*> responseMap;
@@ -2331,6 +2362,8 @@ public:
 
     DEFINE_TEST_CASE(GetAchievementsForUser_DefaultOptions_AllAchievementsReturned)
     {
+        TEST_LOG(L"Test starting: GetAchievementsForUser_DefaultOptions_AllAchievementsReturned");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2374,6 +2407,8 @@ public:
 
     DEFINE_TEST_CASE(GetAchievementsForUser_SortFieldSpecifiedDefaultOrder_ExpectInvalidArg)
     {
+        TEST_LOG(L"Test starting: GetAchievementsForUser_SortFieldSpecifiedDefaultOrder_ExpectInvalidArg");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2397,6 +2432,8 @@ public:
     
     DEFINE_TEST_CASE(GetAchievementsForUser_SortByUnlockTimeAscending_ExpectSortedAchievements)
     {
+        TEST_LOG(L"Test starting: GetAchievementsForUser_SortByUnlockTimeAscending_ExpectSortedAchievements");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2422,6 +2459,8 @@ public:
 
     DEFINE_TEST_CASE(GetAchievementsForUserByState_UnlockedSortFieldSpecifiedDefaultOrder_ExpectInvalidArg)
     {
+        TEST_LOG(L"Test starting: GetAchievementsForUserByState_UnlockedSortFieldSpecifiedDefaultOrder_ExpectInvalidArg");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2446,6 +2485,8 @@ public:
 
     DEFINE_TEST_CASE(GetAchievementsForUserByState_UnlockedOnlyDefaultSort_ExpectTwoResults)
     {
+        TEST_LOG(L"Test starting: GetAchievementsForUserByState_UnlockedOnlyDefaultSort_ExpectTwoResults");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2481,6 +2522,8 @@ public:
 
     DEFINE_TEST_CASE(GetAchievementsForUserByState_UnlockedOnlySortUnlockTimeAscending_ExpectTwoResults)
     {
+        TEST_LOG(L"Test starting: GetAchievementsForUserByState_UnlockedOnlySortUnlockTimeAscending_ExpectTwoResults");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2516,6 +2559,8 @@ public:
 
     DEFINE_TEST_CASE(GetAchievementsForUserByState_UnlockedOnlySortUnlockTimeDescending_ExpectTwoResults)
     {
+        TEST_LOG(L"Test starting: GetAchievementsForUserByState_UnlockedOnlySortUnlockTimeDescending_ExpectTwoResults");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2551,6 +2596,8 @@ public:
 
     DEFINE_TEST_CASE(UpdateAchievement_HigherProgressValue_ExpectProgressNotification)
     {
+        TEST_LOG(L"Test starting: UpdateAchievement_HigherProgressValue_ExpectProgressNotification");
+
         AMTestEnvironment env{};
         constexpr uint8_t newProgress = 20;
         constexpr uint64_t xuid = 1234;
@@ -2595,6 +2642,8 @@ public:
 
     DEFINE_TEST_CASE(UpdateAchievement_ExpectFailureInvalidArgs)
     {
+        TEST_LOG(L"Test starting: UpdateAchievement_ExpectFailureInvalidArgs");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2612,6 +2661,8 @@ public:
 
     DEFINE_TEST_CASE(UpdateAchievement_UserDoesNotExist_ExpectFailureInvalidArgs)
     {
+        TEST_LOG(L"Test starting: UpdateAchievement_UserDoesNotExist_ExpectFailureInvalidArgs");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2629,6 +2680,8 @@ public:
 
     DEFINE_TEST_CASE(UpdateAchievement_UserNotInitialized_ExpectFailure)
     {
+        TEST_LOG(L"Test starting: UpdateAchievement_UserNotInitialized_ExpectFailure");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2655,6 +2708,8 @@ public:
 
     DEFINE_TEST_CASE(UpdateAchievement_AchievementDoesNotExist_ExpectFailureInvalidArgs)
     {
+        TEST_LOG(L"Test starting: UpdateAchievement_AchievementDoesNotExist_ExpectFailureInvalidArgs");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2674,6 +2729,8 @@ public:
 
     DEFINE_TEST_CASE(UpdateAchievement_Is2013AchievementMultipleRequirements_ExpectFailure)
     {
+        TEST_LOG(L"Test starting: UpdateAchievement_Is2013AchievementMultipleRequirements_ExpectFailure");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2693,6 +2750,8 @@ public:
     
     DEFINE_TEST_CASE(UpdateAchievement_Is2013AchievementSingleRequirements_ExpectFailure)
     {
+        TEST_LOG(L"Test starting: UpdateAchievement_Is2013AchievementSingleRequirements_ExpectFailure");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2711,6 +2770,8 @@ public:
 
     DEFINE_TEST_CASE(UpdateAchievement_LowerProgressValue_ExpectFailure)
     {
+        TEST_LOG(L"Test starting: UpdateAchievement_LowerProgressValue_ExpectFailure");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
         constexpr uint8_t updateProgress = 10;
@@ -2733,6 +2794,8 @@ public:
 
     DEFINE_TEST_CASE(UpdateAchievement_SameProgressValue_ExpectFailure)
     {
+        TEST_LOG(L"Test starting: UpdateAchievement_SameProgressValue_ExpectFailure");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2752,6 +2815,8 @@ public:
 
     DEFINE_TEST_CASE(UpdateAchievement_AchievementAlreadyUnlocked_ExpectFailure)
     {
+        TEST_LOG(L"Test starting: UpdateAchievement_AchievementAlreadyUnlocked_ExpectFailure");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2771,11 +2836,17 @@ public:
 
     DEFINE_TEST_CASE(UnlockAchievement_CompleteProgressWithDeducedUnlockNotification_ExpectProgressAndUnlockNotifications)
     {
+        TEST_LOG(L"Test starting: UnlockAchievement_CompleteProgressWithDeducedUnlockNotification_ExpectProgressAndUnlockNotifications");
+
         UpdateAchievementSuccessHelper();
     }
 
     DEFINE_TEST_CASE(UnlockAchievement_MultipleUsersBothInProgressCompleteOne_ExpectBothNotifications)
     {
+        TEST_LOG(L"Test starting: UnlockAchievement_MultipleUsersBothInProgressCompleteOne_ExpectBothNotifications");
+
+        DEFINE_TEST_CASE_PROPERTIES_FOCUS();
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2789,19 +2860,34 @@ public:
 
         // add local users
         AddMultipleLocalUsersHelper(responseMap);
-        
-        Vector<HttpMock> mocks;
-        SetUpUpdateAchievementRtaResponse(xuid, rtaAchievementProgressChangedCompletePayload, true, mocks);
-        SetUpUpdateAchievementRtaResponse(2345, rtaAchievementProgressChangedCompletePayload, true, mocks);
 
-        bool completedBeforeTimeout = UpdateAchievementHelper(2345, achievementId2017InProgress, 100, false, true);
-        VERIFY_SUCCEEDED(completedBeforeTimeout);
-        
         XblAchievementsManagerResultHandle resultHandle;
         const XblAchievement* achievement;
         uint64_t size;
         HRESULT hr;
 
+        VERIFY_SUCCEEDED(hr = XblAchievementsManagerGetAchievement(
+            xuid,
+            achievementId2017InProgress,
+            &resultHandle
+        ));
+        VERIFY_SUCCEEDED(XblAchievementsManagerResultGetAchievements(
+            resultHandle,
+            &achievement,
+            &size
+        ));
+        VERIFY_IS_TRUE(achievement->progressState == XblAchievementProgressState::InProgress);
+        VERIFY_IS_TRUE(
+            utils::internal_string_to_uint32(achievement->progression.requirements[0].currentProgressValue)
+            == achievementInProgressStartProgress
+        );
+        
+        Vector<std::shared_ptr<HttpMock>> mocks;
+        SetUpUpdateAchievementRtaResponse(2345, rtaAchievementProgressChangedCompletePayload, true, mocks);
+
+        bool completedBeforeTimeout = UpdateAchievementHelper(2345, achievementId2017InProgress, 100, false, true);
+        VERIFY_SUCCEEDED(completedBeforeTimeout);
+        
         // make sure user 1234 doesn't show any changes from the event.
         VERIFY_SUCCEEDED(hr = XblAchievementsManagerGetAchievement(
             xuid,
@@ -2850,6 +2936,8 @@ public:
     
     DEFINE_TEST_CASE(AchievementsManagerResync_SingleUserNoAchievementsChanged_GeneratesNoEvents)
     {
+        TEST_LOG(L"Test starting: AchievementsManagerResync_SingleUserNoAchievementsChanged_GeneratesNoEvents");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2871,6 +2959,8 @@ public:
     
     DEFINE_TEST_CASE(AchievementsManagerResync_SingleUserOneAchievementChanged_SuccessfullyUpdatedAndGeneratesEvent)
     {
+        TEST_LOG(L"Test starting: AchievementsManagerResync_SingleUserOneAchievementChanged_SuccessfullyUpdatedAndGeneratesEvent");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2908,6 +2998,8 @@ public:
 
     DEFINE_TEST_CASE(AchievementsManagerResync_MultipleUsersOneAchievementChanged_SuccessfullyUpdatedAndGeneratesEventPerUser)
     {
+        TEST_LOG(L"Test starting: AchievementsManagerResync_MultipleUsersOneAchievementChanged_SuccessfullyUpdatedAndGeneratesEventPerUser");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -2922,7 +3014,7 @@ public:
         // add local users
         AddMultipleLocalUsersHelper(responseMap);
 
-        Vector<HttpMock> mocks;
+        Vector<std::shared_ptr<HttpMock>> mocks;
         SetupRtaResponseForUser(xuid, "GET", firstUserResyncFinishedResponse, mocks);
         SetupRtaResponseForUser(2345, "GET", secondUserGetAchievementsResponse, mocks);
 
@@ -3026,6 +3118,8 @@ public:
 
     /*DEFINE_TEST_CASE(AchievementsManagerResync_SingleUserOneUpdateAlreadyReceivedDifferentValues_SuccessfullyUpdatedOnlyGeneratesOneEvent)
     {
+        TEST_LOG(L"Test starting: AchievementsManagerResync_SingleUserOneUpdateAlreadyReceivedDifferentValues_SuccessfullyUpdatedOnlyGeneratesOneEvent");
+
         // want to see what happens when one achievement is larger than another... could
         // generate two events, but without guarantee that value can be cast to an int,
         // cant really assume it will be larager to allow us to be able to discard it.
@@ -3033,6 +3127,8 @@ public:
     
     DEFINE_TEST_CASE(AchievementsManagerResync_SingleUserOneUpdateAlreadyReceivedSameValues_SuccessfullyUpdatedOnlyGeneratesOneEvent)
     {
+        TEST_LOG(L"Test starting: AchievementsManagerResync_SingleUserOneUpdateAlreadyReceivedSameValues_SuccessfullyUpdatedOnlyGeneratesOneEvent");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 
@@ -3069,6 +3165,8 @@ public:
 
     DEFINE_TEST_CASE(RtaConnectionDropped_OneAchievementChanged_StateResyncedCorrectly)
     {
+        TEST_LOG(L"Test starting: RtaConnectionDropped_OneAchievementChanged_StateResyncedCorrectly");
+
         AMTestEnvironment env{};
         constexpr uint64_t xuid = 1234;
 

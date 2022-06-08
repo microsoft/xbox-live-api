@@ -191,16 +191,18 @@ public:
 
     DEFINE_TEST_CASE(TestGetUserProfileAsync)
     {
+        TEST_LOG(L"Test starting: TestGetUserProfileAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
         UserProfile expectedProfile{ 1 };
 
-        HttpMock mock{ "", "https://profile.xboxlive.com" };
-        mock.SetResponseBody(UserProfile::Serialize({ expectedProfile }));
+        auto mock = std::make_shared<HttpMock>( "", "https://profile.xboxlive.com" );
+        mock->SetResponseBody(UserProfile::Serialize({ expectedProfile }));
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock*, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 // XblProfileGetUserProfileResult just makes a batch request with 1 xuid
@@ -220,6 +222,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetUserProfilesAsync)
     {
+        TEST_LOG(L"Test starting: TestGetUserProfilesAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -230,11 +234,11 @@ public:
             expectedProfiles.push_back(UserProfile{ xuid });
         }
 
-        HttpMock mock{ "", "https://profile.xboxlive.com" };
-        mock.SetResponseBody(UserProfile::Serialize(expectedProfiles));
+        auto mock = std::make_shared<HttpMock>( "", "https://profile.xboxlive.com" );
+        mock->SetResponseBody(UserProfile::Serialize(expectedProfiles));
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock*, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 requestWellFormed = VerifyBatchRequest(requestUrl, requestBody, xuids);
@@ -261,6 +265,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetUserProfilesForSocialGroupAsync)
     {
+        TEST_LOG(L"Test starting: TestGetUserProfilesForSocialGroupAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -272,11 +278,11 @@ public:
             expectedProfiles.push_back(UserProfile{ xuid });
         }
 
-        HttpMock mock{ "", "https://profile.xboxlive.com" };
-        mock.SetResponseBody(UserProfile::Serialize(expectedProfiles));
+        auto mock = std::make_shared<HttpMock>( "", "https://profile.xboxlive.com" );
+        mock->SetResponseBody(UserProfile::Serialize(expectedProfiles));
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock*, xsapi_internal_string requestUri, xsapi_internal_string requestBody)
             {
                 xsapi_internal_stringstream expectedUri;
@@ -309,6 +315,8 @@ public:
 
     DEFINE_TEST_CASE(TestProfileServiceInvalidArgs)
     {
+        TEST_LOG(L"Test starting: TestProfileServiceInvalidArgs");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 

@@ -6,6 +6,13 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
+struct HttpMockContext
+{
+    std::weak_ptr<HttpMock> pWeakThis;
+};
+
+std::vector< std::shared_ptr<HttpMockContext> > g_httpMockContextList;
+
 HttpMock::HttpMock(
     _In_ const xsapi_internal_string& method,
     _In_ const xsapi_internal_string& url,
@@ -108,6 +115,13 @@ void HttpMock::SetMockMatchedCallback(MockMatchedCallback mockMatched) noexcept
 {
     m_matchedCallback = std::move(mockMatched);
 
+    // m_sharedFromThis will be destroyed when HttpMock is destroyed.  
+    // pass a weak version of it via context and check if its still around inside callback
+    // g_httpMockContextList will be cleaned up during shutdown
+    auto contextBlock = std::make_shared<HttpMockContext>();
+    g_httpMockContextList.push_back(contextBlock);
+    contextBlock->pWeakThis = shared_from_this();
+
     HCMockSetMockMatchedCallback(m_handle,
         [](HCMockCallHandle matchedMock,
             const char* method,
@@ -120,10 +134,14 @@ void HttpMock::SetMockMatchedCallback(MockMatchedCallback mockMatched) noexcept
             UNREFERENCED_PARAMETER(matchedMock);
             UNREFERENCED_PARAMETER(method);
 
-            auto thisPtr{ static_cast<HttpMock*>(context) };
-            thisPtr->m_matchedCallback(thisPtr, url, xsapi_internal_string{ requestBodyBytes, requestBodyBytes + requestBodySize });
+            HttpMockContext* contextBlockPtr{ static_cast<HttpMockContext*>(context) };
+            std::shared_ptr<HttpMock> sharedFromThis{ contextBlockPtr->pWeakThis.lock() };
+            if (sharedFromThis != nullptr)
+            {
+                sharedFromThis->m_matchedCallback(sharedFromThis.get(), url, xsapi_internal_string{ requestBodyBytes, requestBodyBytes + requestBodySize });
+            }
         },
-        this
+        contextBlock.get()
     );
 }
 

@@ -18,6 +18,8 @@ public:
 
     DEFINE_TEST_CASE(BasicCallback)
     {
+        TEST_LOG(L"Test starting: BasicCallback");
+
         int value = 1;
         xbox_live_callback<int> lambda = [value](int _value)
         {
@@ -29,6 +31,8 @@ public:
 
     DEFINE_TEST_CASE(NestedCallbacks)
     {
+        TEST_LOG(L"Test starting: NestedCallbacks");
+
         int firstValue = 1;
         int secondValue = 2;
 
@@ -48,6 +52,8 @@ public:
 
     DEFINE_TEST_CASE(TestXAsyncProviderException)
     {
+        TEST_LOG(L"Test starting: TestXAsyncProviderException");
+
         TestEnvironment testEnv{};
         Event callbackInvoked;
 

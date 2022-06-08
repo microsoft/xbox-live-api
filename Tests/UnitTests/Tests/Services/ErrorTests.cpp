@@ -13,6 +13,8 @@ public:
 
     DEFINE_TEST_CASE(TestHttpErrors)
     {
+        TEST_LOG(L"Test starting: TestHttpErrors");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 

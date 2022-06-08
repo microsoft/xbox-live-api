@@ -59,6 +59,8 @@ public:
     
     DEFINE_TEST_CASE(TestEnabledStates)
     {
+        TEST_LOG("Test starting: AddLocalUser_InitializesWithLocalAchievementsCached_Success");
+
         std::shared_ptr<xbox::services::service_call_logger> logger = xbox::services::service_call_logger::get_singleton_instance();
         VERIFY_IS_NOT_NULL(logger.get());
         VERIFY_NO_THROW(
@@ -85,6 +87,8 @@ public:
 
     DEFINE_TEST_CASE(TestLogging)
     {
+        TEST_LOG("Test starting: AddLocalUser_InitializesWithLocalAchievementsCached_Success");
+
         std::shared_ptr<xbox::services::service_call_logger> logger = xbox::services::service_call_logger::get_singleton_instance();
         VERIFY_IS_NOT_NULL(logger.get());
 

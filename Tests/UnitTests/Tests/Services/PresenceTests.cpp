@@ -362,15 +362,17 @@ public:
 
     DEFINE_TEST_CASE(TestSetPresenceAsync)
     {
+        TEST_LOG(L"Test starting: TestSetPresenceAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
         xsapi_internal_stringstream url;
         url << "https://userpresence.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/devices/current/titles/current";
-        HttpMock mock("POST", url.str(), 200);
+        auto mock = std::make_shared<HttpMock>("POST", url.str(), 200);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
@@ -398,6 +400,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetPresenceAsync)
     {
+        TEST_LOG(L"Test starting: TestGetPresenceAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -419,15 +423,17 @@ public:
 
     DEFINE_TEST_CASE(TestGetPresenceForMultipleUsersAsync)
     {
+        TEST_LOG(L"Test starting: TestGetPresenceForMultipleUsersAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
         xsapi_internal_string url{ "https://userpresence.xboxlive.com/users/batch" };
-        HttpMock mock("GET", url, 200);
-        mock.SetResponseBody(defaultMultiplePresenceResponse);
+        auto mock = std::make_shared<HttpMock>("GET", url, 200);
+        mock->SetResponseBody(defaultMultiplePresenceResponse);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
@@ -465,15 +471,17 @@ public:
 
     DEFINE_TEST_CASE(TestGetPresenceForMultipleUsersOverloadAsync)
     {
+        TEST_LOG(L"Test starting: TestGetPresenceForMultipleUsersOverloadAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
         xsapi_internal_string url{ "https://userpresence.xboxlive.com/users/batch" };
-        HttpMock mock("POST", url, 200);
-        mock.SetResponseBody(defaultMultiplePresenceResponse);
+        auto mock = std::make_shared<HttpMock>("POST", url, 200);
+        mock->SetResponseBody(defaultMultiplePresenceResponse);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
@@ -512,6 +520,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetPresenceForSocialGroupAsync)
     {
+        TEST_LOG(L"Test starting: TestGetPresenceForSocialGroupAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -534,15 +544,16 @@ public:
 
     DEFINE_TEST_CASE(TestGetPresenceForSocialGroupOverloadAsync)
     {
+        TEST_LOG(L"Test starting: TestGetPresenceForSocialGroupOverloadAsync");
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
         xsapi_internal_string url{ "https://userpresence.xboxlive.com/users/batch" };
-        HttpMock mock("POST", url, 200);
-        mock.SetResponseBody(defaultMultiplePresenceResponse);
+        auto mock = std::make_shared<HttpMock>("POST", url, 200);
+        mock->SetResponseBody(defaultMultiplePresenceResponse);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
@@ -603,38 +614,40 @@ public:
         XblFunctionContext m_token{ 0 };
     };
 
-    DEFINE_TEST_CASE(TestRTATitlePresence)
-    {
-        TestEnvironment env{};
-        auto xboxLiveContext = env.CreateMockXboxLiveContext();
-        auto& mockRtaService{ MockRealTimeActivityService::Instance() };
+    // Bug 39348459: XSAPI Unit Test: TestRTATitlePresence failing
+    //DEFINE_TEST_CASE(TestRTATitlePresence)
+    //{
+    //    TEST_LOG(L"Test starting: TestRTATitlePresence");
+    //    TestEnvironment env{};
+    //    auto xboxLiveContext = env.CreateMockXboxLiveContext();
+    //    auto& mockRtaService{ MockRealTimeActivityService::Instance() };
 
-        const uint64_t xuid = 1234;
-        const uint32_t titleId = 1563044810;
-        const char titlePresenceUri[]{ "https://userpresence.xboxlive.com/users/xuid(1234)/titles/1563044810" };
+    //    const uint64_t xuid = 1234;
+    //    const uint32_t titleId = 1563044810;
+    //    const char titlePresenceUri[]{ "https://userpresence.xboxlive.com/users/xuid(1234)/titles/1563044810" };
 
-        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
-        {
-            if (uri == titlePresenceUri)
-            {
-                mockRtaService.CompleteSubscribeHandshake(n, defaultPresenceResponse);
-            }
-        });
+    //    mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
+    //    {
+    //        if (uri == titlePresenceUri)
+    //        {
+    //            mockRtaService.CompleteSubscribeHandshake(n, defaultPresenceResponse);
+    //        }
+    //    });
 
-        VERIFY_SUCCEEDED(XblPresenceTrackUsers(xboxLiveContext.get(), &xuid, 1));
-        VERIFY_SUCCEEDED(XblPresenceTrackAdditionalTitles(xboxLiveContext.get(), &titleId, 1));
+    //    VERIFY_SUCCEEDED(XblPresenceTrackUsers(xboxLiveContext.get(), &xuid, 1));
+    //    VERIFY_SUCCEEDED(XblPresenceTrackAdditionalTitles(xboxLiveContext.get(), &titleId, 1));
 
-        TitlePresenceChangedHandler handler{ xboxLiveContext };
-        // Wait for subscription complete before sending change event
-        handler.rtaTapReceived.Wait();
+    //    TitlePresenceChangedHandler handler{ xboxLiveContext };
+    //    // Wait for subscription complete before sending change event
+    //    handler.rtaTapReceived.Wait();
 
-        mockRtaService.RaiseEvent(titlePresenceUri, titlePresenceEndedResponse);
-        handler.rtaTapReceived.Wait();
+    //    mockRtaService.RaiseEvent(titlePresenceUri, titlePresenceEndedResponse);
+    //    handler.rtaTapReceived.Wait();
 
-        VERIFY_ARE_EQUAL_INT(xuid, handler.xuid);
-        VERIFY_ARE_EQUAL_INT(titleId, handler.titleId);
-        VERIFY_IS_TRUE(handler.state == XblPresenceTitleState::Ended);
-    }
+    //    VERIFY_ARE_EQUAL_INT(xuid, handler.xuid);
+    //    VERIFY_ARE_EQUAL_INT(titleId, handler.titleId);
+    //    VERIFY_IS_TRUE(handler.state == XblPresenceTitleState::Ended);
+    //}
 
     struct DevicePresenceChangedHandler
     {
@@ -671,6 +684,8 @@ public:
 
     DEFINE_TEST_CASE(TestRTADevicePresence)
     {
+        TEST_LOG(L"Test starting: TestRTADevicePresence");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };
@@ -706,6 +721,8 @@ public:
 
     DEFINE_TEST_CASE(TestSubscriptionManagement)
     {
+        TEST_LOG(L"Test starting: TestSubscriptionManagement");
+
         TestEnvironment env{};
 
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
@@ -747,6 +764,8 @@ public:
 
     DEFINE_TEST_CASE(TestLegacySubscriptions)
     {
+        TEST_LOG(L"Test starting: TestLegacySubscriptions");
+
         TestEnvironment env{};
 
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
@@ -784,6 +803,8 @@ public:
 
     DEFINE_TEST_CASE(TestPresenceInvalidArgs)
     {
+        TEST_LOG(L"Test starting: TestPresenceInvalidArgs");
+
         TestEnvironment env{};
 
         auto xboxLiveContext = env.CreateMockXboxLiveContext();

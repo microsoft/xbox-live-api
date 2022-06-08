@@ -155,7 +155,7 @@
   <!--CompactCoreCLL dependency-->
   <PropertyGroup Condition="'$(XsapiCllRefs)' == 'true'">
     <XalRoot>$(XsapiRoot)External\xal\</XalRoot>
-    <CoreCLLInclude>$(XalRoot)External\CompactCoreCLL\</CoreCLLInclude>
+    <CoreCLLInclude>$(XsapiRoot)External\CompactCoreCLL\</CoreCLLInclude>
   </PropertyGroup>
 
   <ItemDefinitionGroup Condition="'$(XsapiCllRefs)' == 'true'">
@@ -165,8 +165,9 @@
   </ItemDefinitionGroup>
 
   <ItemGroup Condition="'$(XsapiAddProjectReference)' == 'true' AND '$(ConfigurationType)'!='StaticLibrary' AND '$(XsapiCllRefs)' == 'true'">
-    <ProjectReference Include="$(XalRoot)External\CompactCoreCLL\CompactCoreCLL.$(XsapiPlatform).vcxproj">
-      <Project Condition="'$(XsapiPlatform)' == 'Win32'">{F321E346-9F67-4291-9A71-D219F892BDEC}</Project>
+    <ProjectReference Include="$(XsapiRoot)External\CompactCoreCLL\CompactCoreCLL.$(XsapiPlatform).vcxproj">
+      <Project Condition="'$(XsapiPlatform)' == 'Win32'">{54ebecdc-a7fd-4e3f-bb1a-40d15f0b6792}</Project>
+      <Project Condition="'$(XsapiPlatform)' == 'XDK'">{0B3ED0FC-2866-4D05-A92E-411031596103}</Project>
       <Project Condition="'$(XsapiPlatform)' == 'Android'">{2f1f7c6a-1fda-4cce-935d-0e9324d5db92}</Project>
     </ProjectReference>
   </ItemGroup>
@@ -184,18 +185,26 @@
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(XalInclude);$(XalExtraInclude)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
-    
+
   <ItemGroup Condition="'$(XsapiAddProjectReference)' == 'true' AND '$(XsapiXalRefs)' == 'true' AND '$(ConfigurationType)'!='StaticLibrary' AND '$(XsapiUnitTests)'!='true'">
     <ProjectReference Include="$(XalRoot)Source\Xal\Xal.$(XalPlatform).vcxproj">
       <Project Condition="'$(XalPlatform)' == 'Win32'">{7333335C-CD75-4802-8F56-702C0BE2563F}</Project>
       <Project Condition="'$(XalPlatform)' == 'UWP'">{7326b85d-b8df-4a59-a2c7-c721a7a1b8cb}</Project>
     </ProjectReference>
-    <ProjectReference Include="$(XalRoot)External\CompactCoreCLL\CompactCoreCLL.$(XalPlatform).vcxproj">
-      <Project Condition="'$(XalPlatform)' == 'Win32'">{F321E346-9F67-4291-9A71-D219F892BDEC}</Project>
-      <Project Condition="'$(XalPlatform)' == 'UWP'">{9E8E68BA-6CBE-408E-8738-320474546551}</Project>
+    <ProjectReference Include="$(XsapiRoot)External\CompactCoreCLL\CompactCoreCLL.$(XsapiPlatform).vcxproj">
+      <Project Condition="'$(XsapiPlatform)' == 'Win32'">{54ebecdc-a7fd-4e3f-bb1a-40d15f0b6792}</Project>
+      <Project Condition="'$(XsapiPlatform)' == 'UWP'">{82cfe4ee-7a03-4bc4-810d-293806b4dab1}</Project>
+    </ProjectReference>
+    <ProjectReference Condition="'$(XsapiPlatform)' != 'XDK'" Include="$(XalRoot)External\OneDSBuildFiles\Telemetry.$(XalPlatform).vcxproj">
+      <Project Condition="'$(XalPlatform)' == 'Win32'">{0656b0fd-2f77-4840-aa4f-b9622bb9d39f}</Project>
+      <Project Condition="'$(XalPlatform)' == 'UWP'">{B4EB5355-7230-456D-97F8-624AA9F78606}</Project>
+    </ProjectReference>
+    <ProjectReference Condition="'$(XsapiPlatform)' != 'XDK'" Include="$(XalRoot)External\OneDSBuildFiles\Telemetry.Zlib.$(XalPlatform).vcxproj">
+      <Project Condition="'$(XalPlatform)' == 'Win32'">{517489c9-dd6f-4a0f-893c-a55bbd7dfbe6}</Project>
+      <Project Condition="'$(XalPlatform)' == 'UWP'">{4B32FD42-904F-4E50-B244-869D8C6D6F56}</Project>
     </ProjectReference>
   </ItemGroup>
-  
+
   <!--TCUI dependency-->
   <!--<PropertyGroup Condition="'$(XsapiTCUIHeaders)' == 'true'">
     <TCUIRoot>$(XsapiRoot)External\tcui\</TCUIRoot>

@@ -211,14 +211,16 @@ public:
 
     DEFINE_TEST_CASE(TestXblAchievementsUpdateAchievementAsync)
     {
+        TEST_LOG(L"Test starting: TestXblAchievementsUpdateAchievementAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
         xsapi_internal_stringstream url;
         url << "https://achievements.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/achievements/mockscid/update";
-        HttpMock mock("POST", url.str(), 304 );
+        auto mock = std::make_shared<HttpMock>("POST", url.str(), 304 );
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback([&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
+        mock->SetMockMatchedCallback([&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(requestUrl);
@@ -243,6 +245,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetAchievement)
     {
+        TEST_LOG(L"Test starting: TestGetAchievement");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         JsonDocument responseJson;
@@ -266,6 +270,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetAchievementBadData)
     {
+        TEST_LOG(L"Test starting: TestGetAchievementBadData");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         JsonDocument responseJson;
@@ -287,6 +293,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetAchievements)
     {
+        TEST_LOG(L"Test starting: TestGetAchievements");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         JsonDocument responseJson; 
@@ -294,9 +302,9 @@ public:
 
         xsapi_internal_stringstream url;
         url << "https://achievements.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/achievements?titleId=1234&maxItems=100";
-        HttpMock mock("GET", url.str(), 200, responseJson);
+        auto mock = std::make_shared<HttpMock>("GET", url.str(), 200, responseJson);
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback([&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
+        mock->SetMockMatchedCallback([&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(requestUrl);
@@ -328,6 +336,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetAchievementsEmptyResult)
     {
+        TEST_LOG(L"Test starting: TestGetAchievementsEmptyResult");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         JsonDocument responseJson;
@@ -335,9 +345,9 @@ public:
 
         xsapi_internal_stringstream url;
         url << "https://achievements.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/achievements?titleId=1234&maxItems=100";
-        HttpMock mock("GET", url.str(), 200, responseJson);
+        auto mock = std::make_shared<HttpMock>("GET", url.str(), 200, responseJson);
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback([&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
+        mock->SetMockMatchedCallback([&requestWellFormed](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
                 UNREFERENCED_PARAMETER(requestUrl);
@@ -370,6 +380,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetAchievementsInvalidArgs)
     {
+        TEST_LOG(L"Test starting: TestGetAchievementsInvalidArgs");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         JsonDocument responseJson;
@@ -406,6 +418,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetAchievementInvalidArgs)
     {
+        TEST_LOG(L"Test starting: TestGetAchievementInvalidArgs");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         JsonDocument responseJson;
@@ -448,6 +462,8 @@ public:
 
     DEFINE_TEST_CASE(TestUpdateAchievementInvalidArgs)
     {
+        TEST_LOG(L"Test starting: TestUpdateAchievementInvalidArgs");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         JsonDocument responseJson;
@@ -486,6 +502,7 @@ public:
 
     DEFINE_TEST_CASE(TestRTAAchievementProgressChange)
     {
+        TEST_LOG(L"Test starting: TestRTAAchievementProgressChange");
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };

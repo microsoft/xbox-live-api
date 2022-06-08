@@ -49,13 +49,15 @@ public:
 
     DEFINE_TEST_CASE(TestSubmitReputationFeedbackAsync)
     {
+        TEST_LOG(L"Test starting: TestSubmitReputationFeedbackAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        HttpMock reputationMock{ "POST", "https://reputation.xboxlive.com", 202 };
+        auto reputationMock = std::make_shared<HttpMock>( "POST", "https://reputation.xboxlive.com", 202 );
 
         bool requestWellFormed{ true };
-        reputationMock.SetMockMatchedCallback(
+        reputationMock->SetMockMatchedCallback(
             [&](HttpMock*, xsapi_internal_string url, xsapi_internal_string requestBody)
             {
                 requestWellFormed &= url == "https://reputation.xboxlive.com/users/xuid(1)/feedback";
@@ -100,14 +102,16 @@ public:
 
     DEFINE_TEST_CASE(CppTestSubmitReputationFeedback)
     {
+        TEST_LOG(L"Test starting: CppTestSubmitReputationFeedback");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
 
-        HttpMock reputationMock{ "POST", "https://reputation.xboxlive.com", 202 };
+        auto reputationMock = std::make_shared<HttpMock>( "POST", "https://reputation.xboxlive.com", 202 );
 
         bool requestWellFormed{ true };
 
-        reputationMock.SetMockMatchedCallback(
+        reputationMock->SetMockMatchedCallback(
             [&](HttpMock*, xsapi_internal_string url, xsapi_internal_string requestBody)
             {
                 requestWellFormed &= url == "https://reputation.xboxlive.com/users/xuid(1)/feedback";
@@ -141,13 +145,15 @@ public:
 
     DEFINE_TEST_CASE(TestSubmitBatchReputationFeedbackAsync)
     {
+        TEST_LOG(L"Test starting: TestSubmitBatchReputationFeedbackAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        HttpMock reputationMock{ "POST", "https://reputation.xboxlive.com", 202 };
+        auto reputationMock = std::make_shared<HttpMock>("POST", "https://reputation.xboxlive.com", 202 );
 
         bool requestWellFormed{ true };
-        reputationMock.SetMockMatchedCallback(
+        reputationMock->SetMockMatchedCallback(
             [&](HttpMock*, xsapi_internal_string url, xsapi_internal_string requestBody)
             {
                 requestWellFormed &= url == "https://reputation.xboxlive.com/users/batchtitlefeedback";
@@ -191,13 +197,15 @@ public:
 
     DEFINE_TEST_CASE(CppTestSubmitBatchReputationFeedback)
     {
+        TEST_LOG(L"Test starting: CppTestSubmitBatchReputationFeedback");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
 
-        HttpMock reputationMock{ "POST", "https://reputation.xboxlive.com", 202 };
+        auto reputationMock = std::make_shared<HttpMock>("POST", "https://reputation.xboxlive.com", 202 );
 
         bool requestWellFormed{ true };
-        reputationMock.SetMockMatchedCallback(
+        reputationMock->SetMockMatchedCallback(
             [&](HttpMock*, xsapi_internal_string url, xsapi_internal_string requestBody)
             {
                 requestWellFormed &= url == "https://reputation.xboxlive.com/users/batchtitlefeedback";
@@ -233,6 +241,8 @@ public:
 
     DEFINE_TEST_CASE(TestSubmitReputationFeedbackAsyncInvalidArgs)
     {
+        TEST_LOG(L"Test starting: TestSubmitReputationFeedbackAsyncInvalidArgs");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 

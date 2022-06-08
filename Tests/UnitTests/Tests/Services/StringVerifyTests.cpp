@@ -33,15 +33,17 @@ public:
 
     DEFINE_TEST_CASE(TestVerifyString)
     {
+        TEST_LOG(L"Test starting: TestVerifyString");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        HttpMock mock("POST", url, 200);
-        mock.SetResponseBody(defaultStringVerifyResult);
+        auto mock = std::make_shared<HttpMock>("POST", url, 200);
+        mock->SetResponseBody(defaultStringVerifyResult);
 
         auto requestStr = "xboxUserId";
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&requestWellFormed, requestStr](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
@@ -72,15 +74,17 @@ public:
 
     DEFINE_TEST_CASE(TestVerifyStringWithLargeBuffer)
     {
+        TEST_LOG(L"Test starting: TestVerifyStringWithLargeBuffer");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        HttpMock mock("POST", url, 200);
-        mock.SetResponseBody(defaultStringVerifyResult);
+        auto mock = std::make_shared<HttpMock>("POST", url, 200);
+        mock->SetResponseBody(defaultStringVerifyResult);
 
         auto requestStr = "xboxUserId";
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&requestWellFormed, requestStr](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
         {
             UNREFERENCED_PARAMETER(mock);
@@ -113,16 +117,18 @@ public:
 
     DEFINE_TEST_CASE(TestVerifyStrings)
     {
+        TEST_LOG(L"Test starting: TestVerifyStrings");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        HttpMock mock("POST", url, 200);
-        mock.SetResponseBody(defaultStringVerifyResult);
+        auto mock = std::make_shared<HttpMock>("POST", url, 200);
+        mock->SetResponseBody(defaultStringVerifyResult);
 
         const size_t requestStrsCount{ 2 };
         const char* requestStrs[requestStrsCount]{ "asdf", "asdfasdf" };
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&requestWellFormed, requestStrs, requestStrsCount](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
@@ -165,16 +171,18 @@ public:
 
     DEFINE_TEST_CASE(TestVerifyStringsWithLargeBuffer)
     {
+        TEST_LOG(L"Test starting: TestVerifyStringsWithLargeBuffer");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        HttpMock mock("POST", url, 200);
-        mock.SetResponseBody(defaultStringVerifyResult);
+        auto mock = std::make_shared<HttpMock>("POST", url, 200);
+        mock->SetResponseBody(defaultStringVerifyResult);
 
         const size_t requestStrsCount{ 2 };
         const char* requestStrs[requestStrsCount]{ "asdf", "asdfasdf" };
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&requestWellFormed, requestStrs, requestStrsCount](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
         {
             UNREFERENCED_PARAMETER(mock);
