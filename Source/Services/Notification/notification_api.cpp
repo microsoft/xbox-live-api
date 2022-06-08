@@ -15,6 +15,7 @@ STDAPI XblNotificationSubscribeToNotificationsAsync(
     _In_ XAsyncBlock* asyncBlock,
     _In_ const char* registrationToken
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(registrationToken == nullptr || strlen(registrationToken) <= 1);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
@@ -54,6 +55,7 @@ STDAPI XblNotificationSubscribeToNotificationsAsync(
         }
     });
 }
+CATCH_RETURN()
 
 /// <summary>
 /// Unsubscribes title from push notifications.
@@ -62,6 +64,7 @@ STDAPI XblNotificationUnsubscribeFromNotificationsAsync(
     _In_ XblContextHandle xboxLiveContext,
     _In_ XAsyncBlock* asyncBlock
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(asyncBlock);
@@ -98,11 +101,15 @@ STDAPI XblNotificationUnsubscribeFromNotificationsAsync(
         }
     });
 }
+CATCH_RETURN()
+
 #elif HC_PLATFORM == HC_PLATFORM_UWP
+
 STDAPI XblNotificationSubscribeToNotificationsAsync(
     _In_ XblContextHandle xboxLiveContext,
     _In_ XAsyncBlock* asyncBlock
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(asyncBlock);
@@ -138,6 +145,7 @@ STDAPI XblNotificationSubscribeToNotificationsAsync(
         }
     });
 }
+CATCH_RETURN()
 
 /// <summary>
 /// Ubsubscribes title from push notifications.
@@ -146,6 +154,7 @@ STDAPI XblNotificationUnsubscribeFromNotificationsAsync(
     _In_ XblContextHandle xboxLiveContext,
     _In_ XAsyncBlock* asyncBlock
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(asyncBlock);
@@ -182,11 +191,15 @@ STDAPI XblNotificationUnsubscribeFromNotificationsAsync(
         }
     });
 }
+CATCH_RETURN()
+
 #elif HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM_IS_EXTERNAL
+
 STDAPI XblGameInviteRegisterForEventAsync(
     _In_ XblContextHandle xboxLiveContext,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(async);
@@ -215,11 +228,13 @@ STDAPI XblGameInviteRegisterForEventAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblGameInviteRegisterForEventResult(
     _In_ XAsyncBlock* async,
     _Out_ XblRealTimeActivitySubscriptionHandle* handle
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(async);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(handle);
@@ -238,12 +253,14 @@ STDAPI XblGameInviteRegisterForEventResult(
 
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblGameInviteUnregisterForEventAsync(
     _In_ XblContextHandle xblContextHandle,
     _In_ XblRealTimeActivitySubscriptionHandle subscriptionHandle,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || subscriptionHandle == nullptr);
 
@@ -266,12 +283,14 @@ STDAPI XblGameInviteUnregisterForEventAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI_(XblFunctionContext) XblGameInviteAddNotificationHandler(
     _In_ XblContextHandle xblContextHandle,
     _In_ XblGameInviteHandler* handler,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     // TODO really should be returning HRESULT E_INVALIDARG here
     if (xblContextHandle == nullptr || handler == nullptr)
@@ -297,11 +316,13 @@ STDAPI_(XblFunctionContext) XblGameInviteAddNotificationHandler(
     }
     });
 }
+CATCH_RETURN()
 
 STDAPI_(void) XblGameInviteRemoveNotificationHandler(
     _In_ XblContextHandle xblContextHandle,
     _In_ XblFunctionContext token
 ) XBL_NOEXCEPT
+try
 {
     if (xblContextHandle)
     {
@@ -309,13 +330,14 @@ STDAPI_(void) XblGameInviteRemoveNotificationHandler(
         rtaNotificationService->RemoveNotificationHandler(token);
     }
 }
-
+CATCH_RETURN_WITH(;)
 
 STDAPI_(XblFunctionContext) XblAchievementUnlockAddNotificationHandler(
     _In_ XblContextHandle xblContextHandle,
     _In_ XblAchievementUnlockHandler* handler,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     // TODO really should be returning HRESULT E_INVALIDARG here
     if (xblContextHandle == nullptr || handler == nullptr)
@@ -338,16 +360,17 @@ STDAPI_(XblFunctionContext) XblAchievementUnlockAddNotificationHandler(
             }
         });
 }
-
+CATCH_RETURN()
 
 STDAPI_(void) XblAchievementUnlockRemoveNotificationHandler(
     _In_ XblContextHandle xblContextHandle,
     _In_ XblFunctionContext functionContext
 ) XBL_NOEXCEPT
+try
 {
     auto rtaNotificationService = std::dynamic_pointer_cast<RTANotificationService>(xblContextHandle->NotificationService());
     rtaNotificationService->RemoveNotificationHandler(functionContext);
 }
-
+CATCH_RETURN_WITH(;)
 
 #endif

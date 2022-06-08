@@ -12,6 +12,7 @@ STDAPI XblPrivacyGetAvoidListAsync(
     _In_ XblContextHandle xblContextHandle,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xblContextHandle);
 
@@ -56,11 +57,13 @@ STDAPI XblPrivacyGetAvoidListAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblPrivacyGetAvoidListResultCount(
     _In_ XAsyncBlock* async,
     _Out_ size_t* xuidCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(async == nullptr || xuidCount == nullptr);
 
@@ -70,21 +73,25 @@ STDAPI XblPrivacyGetAvoidListResultCount(
 
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblPrivacyGetAvoidListResult(
     _In_ XAsyncBlock* async,
     _In_ size_t xuidCount,
     _Out_writes_(xuidCount) uint64_t* xuids
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_IF(xuidCount == 0, S_OK);
     return XAsyncGetResult(async, nullptr, xuidCount * sizeof(uint64_t), xuids, nullptr);
 }
+CATCH_RETURN()
 
 HRESULT CopyPermissionCheckResult(
     const PermissionCheckResult& result,
     void* buffer
 ) noexcept
+try
 {
     auto resultPtr = static_cast<XblPermissionCheckResult*>(buffer);
     auto reasonsPtr = reinterpret_cast<XblPermissionDenyReasonDetails*>(resultPtr + 1);
@@ -102,6 +109,7 @@ HRESULT CopyPermissionCheckResult(
 
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblPrivacyCheckPermissionAsync(
     _In_ XblContextHandle xblContextHandle,
@@ -109,6 +117,7 @@ STDAPI XblPrivacyCheckPermissionAsync(
     _In_ uint64_t targetXuid,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xblContextHandle);
 
@@ -153,14 +162,17 @@ STDAPI XblPrivacyCheckPermissionAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblPrivacyCheckPermissionResultSize(
     _In_ XAsyncBlock* async,
     _Out_ size_t* resultSizeInBytes
 ) XBL_NOEXCEPT
+try
 {
     return XAsyncGetResultSize(async, resultSizeInBytes);
 }
+CATCH_RETURN()
 
 STDAPI XblPrivacyCheckPermissionResult(
     _In_ XAsyncBlock* async,
@@ -169,6 +181,7 @@ STDAPI XblPrivacyCheckPermissionResult(
     _Outptr_ XblPermissionCheckResult** result,
     _Out_opt_ size_t* bufferUsed
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(result);
     auto hr = XAsyncGetResult(async, nullptr, bufferSize, buffer, bufferUsed);
@@ -178,6 +191,7 @@ STDAPI XblPrivacyCheckPermissionResult(
     }
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblPrivacyCheckPermissionForAnonymousUserAsync(
     _In_ XblContextHandle xblContextHandle,
@@ -185,6 +199,7 @@ STDAPI XblPrivacyCheckPermissionForAnonymousUserAsync(
     _In_ XblAnonymousUserType userType,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xblContextHandle);
 
@@ -229,14 +244,17 @@ STDAPI XblPrivacyCheckPermissionForAnonymousUserAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblPrivacyCheckPermissionForAnonymousUserResultSize(
     _In_ XAsyncBlock* async,
     _Out_ size_t* resultSizeInBytes
 ) XBL_NOEXCEPT
+try
 {
     return XAsyncGetResultSize(async, resultSizeInBytes);
 }
+CATCH_RETURN()
 
 STDAPI XblPrivacyCheckPermissionForAnonymousUserResult(
     _In_ XAsyncBlock* async,
@@ -245,9 +263,11 @@ STDAPI XblPrivacyCheckPermissionForAnonymousUserResult(
     _Outptr_ XblPermissionCheckResult** result,
     _Out_opt_ size_t* bufferUsed
 ) XBL_NOEXCEPT
+try
 {
     return XblPrivacyCheckPermissionResult(async, bufferSize, buffer, result, bufferUsed);
 }
+CATCH_RETURN()
 
 STDAPI XblPrivacyBatchCheckPermissionAsync(
     _In_ XblContextHandle xblContextHandle,
@@ -259,6 +279,7 @@ STDAPI XblPrivacyBatchCheckPermissionAsync(
     _In_ size_t userTypesCount,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xblContextHandle);
     RETURN_HR_INVALIDARGUMENT_IF(permissionsToCheck == nullptr || permissionsCount == 0);
@@ -333,14 +354,17 @@ STDAPI XblPrivacyBatchCheckPermissionAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblPrivacyBatchCheckPermissionResultSize(
     _In_ XAsyncBlock* async,
     _Out_ size_t* resultSizeInBytes
 ) XBL_NOEXCEPT
+try
 {
     return XAsyncGetResultSize(async, resultSizeInBytes);
 }
+CATCH_RETURN()
 
 STDAPI XblPrivacyBatchCheckPermissionResult(
     _In_ XAsyncBlock* async,
@@ -350,6 +374,7 @@ STDAPI XblPrivacyBatchCheckPermissionResult(
     _Out_ size_t* resultsCount,
     _Out_opt_ size_t* bufferUsed
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(results == nullptr || resultsCount == nullptr);
 
@@ -378,11 +403,13 @@ STDAPI XblPrivacyBatchCheckPermissionResult(
     }
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblPrivacyGetMuteListAsync(
     _In_ XblContextHandle xblContextHandle,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xblContextHandle);
 
@@ -427,11 +454,13 @@ STDAPI XblPrivacyGetMuteListAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblPrivacyGetMuteListResultCount(
     _In_ XAsyncBlock* async,
     _Out_ size_t* xuidCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(async == nullptr || xuidCount == nullptr);
 
@@ -441,13 +470,16 @@ STDAPI XblPrivacyGetMuteListResultCount(
 
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblPrivacyGetMuteListResult(
     _In_ XAsyncBlock* async,
     _In_ size_t xuidCount,
     _Out_writes_(xuidCount) uint64_t* xuids
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_IF(xuidCount == 0, S_OK);
     return XAsyncGetResult(async, nullptr, xuidCount * sizeof(uint64_t), xuids, nullptr);
 }
+CATCH_RETURN()

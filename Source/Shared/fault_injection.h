@@ -8,9 +8,9 @@
 extern "C"
 {
 STDAPI_(void) XblEnableFaultInjection(_In_ uint64_t featureId) XBL_NOEXCEPT;
-STDAPI_(bool) XblShouldFaultInject(_In_ uint64_t featureId);
-STDAPI_(uint64_t) XblGetFaultCounter();
-STDAPI_(void) XblSetFaultInjectOptions(int64_t failFreq, uint64_t freqChangeSpeed, int64_t freqChangeAmount);
+STDAPI_(bool) XblShouldFaultInject(_In_ uint64_t featureId) XBL_NOEXCEPT;
+STDAPI_(uint64_t) XblGetFaultCounter() XBL_NOEXCEPT;
+STDAPI_(void) XblSetFaultInjectOptions(int64_t failFreq, uint64_t freqChangeSpeed, int64_t freqChangeAmount) XBL_NOEXCEPT;
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN

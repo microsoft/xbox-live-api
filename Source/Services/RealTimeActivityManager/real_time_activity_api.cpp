@@ -12,25 +12,30 @@ STDAPI XblRealTimeActivitySubscriptionGetState(
     _In_ XblRealTimeActivitySubscriptionHandle subscriptionHandle,
     _Out_ XblRealTimeActivitySubscriptionState* state
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(subscriptionHandle == nullptr || state == nullptr);
     *state = subscriptionHandle->state;
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblRealTimeActivitySubscriptionGetId(
     _In_ XblRealTimeActivitySubscriptionHandle subscriptionHandle,
     _Out_ uint32_t* id
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(subscriptionHandle == nullptr || id == nullptr);
     *id = subscriptionHandle->id;
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblRealTimeActivityActivate(
     _In_ XblContextHandle xboxLiveContext
 ) XBL_NOEXCEPT
+try
 {
     LOGS_DEBUG << __FUNCTION__;
     if (auto state{ GlobalState::Get() })
@@ -39,10 +44,12 @@ STDAPI XblRealTimeActivityActivate(
     }
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblRealTimeActivityDeactivate(
     _In_ XblContextHandle xboxLiveContext
 ) XBL_NOEXCEPT
+try
 {
     LOGS_DEBUG << __FUNCTION__;
     if (auto state{ GlobalState::Get() })
@@ -51,12 +58,14 @@ STDAPI XblRealTimeActivityDeactivate(
     }
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI_(XblFunctionContext) XblRealTimeActivityAddConnectionStateChangeHandler(
     _In_ XblContextHandle xboxLiveContext,
     _In_ XblRealTimeActivityConnectionStateChangeHandler* handler,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     LOGS_DEBUG << __FUNCTION__;
     RETURN_HR_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || handler == nullptr);
@@ -85,11 +94,13 @@ STDAPI_(XblFunctionContext) XblRealTimeActivityAddConnectionStateChangeHandler(
         return E_XBL_NOT_INITIALIZED;
     }
 }
+CATCH_RETURN()
 
 STDAPI XblRealTimeActivityRemoveConnectionStateChangeHandler(
     _In_ XblContextHandle xboxLiveContext,
     _In_ XblFunctionContext token
 ) XBL_NOEXCEPT
+try
 {
     LOGS_DEBUG << __FUNCTION__;
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
@@ -104,12 +115,14 @@ STDAPI XblRealTimeActivityRemoveConnectionStateChangeHandler(
         return E_XBL_NOT_INITIALIZED;
     }
 }
+CATCH_RETURN()
 
 STDAPI_(XblFunctionContext) XblRealTimeActivityAddSubscriptionErrorHandler(
     _In_ XblContextHandle xboxLiveContext,
     _In_ XblRealTimeActivitySubscriptionErrorHandler* handler,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     LOGS_DEBUG << __FUNCTION__ << ": DEPRECATED, No action taken by XSAPI.";
     UNREFERENCED_PARAMETER(xboxLiveContext);
@@ -117,23 +130,27 @@ STDAPI_(XblFunctionContext) XblRealTimeActivityAddSubscriptionErrorHandler(
     UNREFERENCED_PARAMETER(context);
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblRealTimeActivityRemoveSubscriptionErrorHandler(
     _In_ XblContextHandle xboxLiveContext,
     _In_ XblFunctionContext token
 ) XBL_NOEXCEPT
+try
 {
     LOGS_DEBUG << __FUNCTION__ << ": DEPRECATED, No action taken by XSAPI.";
     UNREFERENCED_PARAMETER(xboxLiveContext);
     UNREFERENCED_PARAMETER(token);
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI_(XblFunctionContext) XblRealTimeActivityAddResyncHandler(
     _In_ XblContextHandle xboxLiveContext,
     _In_ XblRealTimeActivityResyncHandler* handler,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     LOGS_DEBUG << __FUNCTION__;
     RETURN_HR_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || handler == nullptr);
@@ -161,11 +178,13 @@ STDAPI_(XblFunctionContext) XblRealTimeActivityAddResyncHandler(
         return E_XBL_NOT_INITIALIZED;
     }
 }
+CATCH_RETURN()
 
 STDAPI XblRealTimeActivityRemoveResyncHandler(
     _In_ XblContextHandle xboxLiveContext,
     _In_ XblFunctionContext token
 ) XBL_NOEXCEPT
+try
 {
     LOGS_DEBUG << __FUNCTION__;
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
@@ -180,3 +199,4 @@ STDAPI XblRealTimeActivityRemoveResyncHandler(
         return E_XBL_NOT_INITIALIZED;
     }
 }
+CATCH_RETURN()
